@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# test runner script for FlexibleSUSY
+# Author: Ulrik Guenther
+
+num_cores=2
+math_cmd=""
+
+if [ -z "$NUM_CORES" ]; then
+    if [ `uname -s` = "Darwin" ] ; then
+        num_cores=`sysctl hw.ncpu | awk '{print $2}'`
+    else
+        num_cores=`grep -c ^processor /proc/cpuinfo`
+    fi
+else
+    num_cores=$NUM_CORES
+fi
+
+echo "Will use ${num_cores} for compilation and tests"
+
+./createmodel --name=MSSM --force
+./createmodel --name=NMSSM --force
+./createmodel --name=SMSSM --force
+./createmodel --name=lowMSSM --sarah-model=MSSM --force
+
+if [ -z "$MATH" ]; then
+    math_cmd=""
+else
+    echo $MATH
+    math_cmd="--with-math-cmd=$MATH"
+fi
+
+echo $math_cmd
+
+./configure --with-models=all ${math_cmd}
+
+make -j${num_cores}
+make all-test -j${num_cores}
+make execute-tests
