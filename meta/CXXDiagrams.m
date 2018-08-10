@@ -243,19 +243,6 @@ ParticleTypeAsString[part_] := Module[
    Message[ParticleTypeAsString::argx, part]; Abort[];
 ];
 
-(* todo: shouldn't there be an anti-triplet? *)
-ParticleColorRepAsString::argx = "Unknown color representation `1` for particle `2`. Supported representations are singlet, (anti-)triplet and octet.";
-ParticleColorRepAsString[part_] :=
-   Module[{rep = TreeMasses`GetColorRepresentation[part]},
-      Switch[rep,
-         S, "singlet",
-         T, "triplet",
-         -T, "anti_triplet",
-         O, "octet",
-         _, Message[ParticleColorRepAsString::argx, rep, part]; Abort[];
-      ]
-   ];
-
 (** \brief Creates c++ code that makes all fields and their properties
  * available as c++ types. Also creates two using declarations for
  * the following fields:
@@ -270,6 +257,18 @@ ParticleColorRepAsString[part_] :=
  * - ghosts
  * \returns the corresponding c++ code.
  **)
+ParticleColorRepAsString::argx = "Unknown color representation `1` for particle `2`. Supported representations are singlet, (anti-)triplet and octet.";
+ParticleColorRepAsString[part_] :=
+   Module[{rep = TreeMasses`GetColorRepresentation[part]},
+      Switch[rep,
+         S, "singlet",
+         T, "triplet",
+         -T, "anti_triplet",
+         O, "octet",
+         _, Message[ParticleColorRepAsString::argx, rep, part]; Abort[];
+      ]
+   ];
+
 CreateFields[] :=
   Module[{fields, scalars, fermions, vectors, ghosts},
        fields = TreeMasses`GetParticles[];
@@ -281,6 +280,9 @@ CreateFields[] :=
        StringJoin @ Riffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
+              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto massless = " <> If[TreeMasses`IsMassless[field], "true", "false"] <> ";" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
                    StringJoin[", " <> ToString[#] & /@

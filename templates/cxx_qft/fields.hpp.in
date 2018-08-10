@@ -120,12 +120,19 @@ enum class ParticleColorRep {
    sextet,
    octet
 };
+template<typename Field> struct is_singlet {
+   static constexpr bool value =
+      Field::color_rep == ParticleColorRep::singlet;
+};
 template<typename Field> struct is_triplet {
    static constexpr bool value = Field::color_rep == ParticleColorRep::triplet;
 };
 template<typename Field> struct is_anti_triplet {
    static constexpr bool value =
       Field::color_rep == ParticleColorRep::anti_triplet;
+};
+template<typename Field> struct is_octet {
+   static constexpr bool value = Field::color_rep == ParticleColorRep::octet;
 };
 template<typename Field>
 constexpr typename std::enable_if<
@@ -148,29 +155,36 @@ constexpr typename std::enable_if<
 color_conj() {
    return Field::color_rep;
 }
-   template <class Field>
-   struct bar {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
 
-      using type = bar<Field>;
-   };
+template<class Field>
+struct bar {
+   using index_bounds = typename Field::index_bounds;
+   using sm_flags = typename Field::sm_flags;
+   using lorentz_conjugate = Field;
+   using type = bar<Field>;
 
-   template <class Field>
-   struct conj {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
+   static constexpr int numberOfGenerations = Field::numberOfGenerations;
+   static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+   static constexpr double electric_charge = Field::electric_charge;
+   static constexpr auto particle_type = Field::particle_type;
+   static constexpr auto color_rep = color_conj<Field>();
+   static constexpr auto massless = Field::massless;
+};
 
-      using type = conj<Field>;
-   };
+template<class Field>
+struct conj {
+   using index_bounds = typename Field::index_bounds;
+   using sm_flags = typename Field::sm_flags;
+   using lorentz_conjugate = Field;
+   using type = conj<Field>;
+
+   static constexpr int numberOfGenerations = Field::numberOfGenerations;
+   static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+   static constexpr double electric_charge = Field::electric_charge;
+   static constexpr auto particle_type = Field::particle_type;
+   static constexpr auto color_rep = color_conj<Field>();
+   static constexpr auto massless = Field::massless;
+};
 
    // Double Lorentz conjugation
    template <class Field>
