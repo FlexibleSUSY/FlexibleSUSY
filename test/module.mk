@@ -289,6 +289,11 @@ TEST_SRC += \
 		$(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.cpp
 endif
 
+ifeq ($(WITH_munuSSM), yes)
+TEST_SRC += \
+		$(DIR)/test_munuSSM_gmm2.cpp
+endif
+
 ifeq ($(WITH_munuSSM) $(WITH_munuSSMSemiAnalytic), yes yes)
 TEST_SH += \
 		$(DIR)/test_munuSSMSemiAnalytic_spectrum.sh
@@ -955,6 +960,8 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_ewsb.x: $(LIBlowNUHMSSMSemiAnalytic)
 $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSemiAnalytic)
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
+
+$(DIR)/test_munuSSM_gmm2.x: $(LIBmunuSSM)
 
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 

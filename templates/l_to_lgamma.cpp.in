@@ -44,6 +44,7 @@ using namespace @ModelName@_FFV_form_factors;
 namespace flexiblesusy {
 namespace @ModelName@_l_to_lgamma {
 
+   /*
 template <typename T1, typename T2>
 double lepton_total_decay_width(
       T1 const& indices1, T2 const& indices2, 
@@ -66,6 +67,7 @@ double lepton_total_decay_width(
       // higher order correction
       //* (1.0 + 0.5 * Alpha * (6.25-Sqr(Pi))/Pi)
 }
+*/
 
 @LToLGamma_InterfaceDefinitions@
 }
