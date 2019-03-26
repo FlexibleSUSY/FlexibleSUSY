@@ -1365,7 +1365,7 @@ around $30\unit{MeV}$.
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.5\textwidth]{doc/plots/HSSUSY/HSSUSY_thresholds}
+  \includegraphics[width=0.5\textwidth]{plots/HSSUSY/HSSUSY_thresholds}
   \caption{Effect of different SM corrections on the Higgs
     pole mass in the pure EFT calculation of \HSSUSY for
     $\tan\beta = 5$ and $X_t = \sqrt{6}\MS$ as a function of the SUSY
@@ -1749,10 +1749,10 @@ handle = FS<model>OpenHandle[
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/Himalaya/scan_Mh_MS_TB-5_Xt-0}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/Himalaya/scan_Mh_MS_TB-5_Xt-0_delta_alpha}\\
-  \includegraphics[width=0.49\textwidth]{doc/plots/Himalaya/scan_Mh_Xt_TB-5_MS-2000}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/Himalaya/scan_Mh_Xt_TB-5_MS-2000_delta_alpha}
+  \includegraphics[width=0.49\textwidth]{plots/Himalaya/scan_Mh_MS_TB-5_Xt-0}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/Himalaya/scan_Mh_MS_TB-5_Xt-0_delta_alpha}\\
+  \includegraphics[width=0.49\textwidth]{plots/Himalaya/scan_Mh_Xt_TB-5_MS-2000}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/Himalaya/scan_Mh_Xt_TB-5_MS-2000_delta_alpha}
   \caption{Comparison of different 2-loop and 3-loop calculations of
     the lightest \CP-even Higgs mass in the MSSM with different \fs
     spectrum generators for $\tan\beta = 5$.  In the top row we set
@@ -1933,8 +1933,8 @@ contributions of $O(\at \as^2 + \ab \as^2)$ from
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/MSSMMuBMu/scan_MSSMMuBMu_Mh_MS_TB-5_Xt-0}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/MSSMMuBMu/scan_MSSMMuBMu_Mh_Xt_TB-5_MS-2000}
+  \includegraphics[width=0.49\textwidth]{plots/MSSMMuBMu/scan_MSSMMuBMu_Mh_MS_TB-5_Xt-0}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/MSSMMuBMu/scan_MSSMMuBMu_Mh_Xt_TB-5_MS-2000}
   \caption{Effect of the 3-loop RGEs for all MSSM parameters (red),
     2-loop \SQCD contributions to $y_b$ and $y_t$ (blue) and 2-loop
     \SQCD contributions to $\as$ (green) on the lightest \CP-even
@@ -2641,8 +2641,8 @@ distributed with the \fs package under the name \modelname{THDMIIMSSMBC}.
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/THDMIIMSSMBC/THDMIIMSSMBC_Mh_MS_TB_MA-200_Xt-0}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/THDMIIMSSMBC/THDMIIMSSMBC_Mh_MS_TB_MA-200_Xt-sqrt6}
+  \includegraphics[width=0.49\textwidth]{plots/THDMIIMSSMBC/THDMIIMSSMBC_Mh_MS_TB_MA-200_Xt-0}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/THDMIIMSSMBC/THDMIIMSSMBC_Mh_MS_TB_MA-200_Xt-sqrt6}
   \caption{Lightest \CP-even Higgs pole mass calculated at the 1-loop
     level in the effective \THDM setup as a function of $\tan\beta$ and
     $\MS$ for $m_A(M_t) = 200\unit{GeV}$, $A_t = \mu/\tan\beta +
@@ -2746,7 +2746,7 @@ calculation in the full MSSM as well as to \feft.  The following
 Examples \ref{ex:HSSUSY_parallel}--\ref{ex:HSSUSY_EFT_uncertainty}
 show how \HSSUSY can be run and how different sources of uncertainty
 can be estimated.\footnote{The example scripts can be found in the
-  \code{doc/examples-2.0/} sub-directory of the \fs package.}
+  \code{examples-2.0/} sub-directory of the \fs package.}
 %
 \begin{example}[label=ex:HSSUSY_parallel]
   For illustration, we show in this example the Higgs mass prediction
@@ -2810,7 +2810,7 @@ data = {
 When plotting this data, the following figure results:
 %
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{doc/plots/HSSUSY/Mh_Xt}
+  \includegraphics[width=0.5\textwidth]{plots/HSSUSY/Mh_Xt}
 \end{center}
 \end{example}
 
@@ -2912,7 +2912,7 @@ combined linearly.  When drawing the uncertainty $\Delta
 M_h^{\SM}$, estimated in this way, around the central value as $M_h
 \pm \Delta M_h^{\SM}$, the following figure results:
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{doc/plots/HSSUSY/Mh_Xt_uncertainty}
+  \includegraphics[width=0.5\textwidth]{plots/HSSUSY/Mh_Xt_uncertainty}
 \end{center}
 %
 We find that the uncertainty $\Delta
@@ -3009,7 +3009,7 @@ uncertainty estimated in this way symmetrically around the central
 value, the following figure results:
 %
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{doc/plots/HSSUSY/Mh_MS_EFT_uncertainty}
+  \includegraphics[width=0.5\textwidth]{plots/HSSUSY/Mh_MS_EFT_uncertainty}
 \end{center}
 %
 As expected, we find that the ``EFT uncertainty'' decreases as
@@ -3076,12 +3076,12 @@ diagram types that are taken into account are shown in
 \begin{figure}[tbh]
   \centering
   \subfloat[Type FFS]{
-    \includegraphics{doc/Feynman/amuFFS}
+    \includegraphics{feynman/amuFFS}
     \label{fig:amu_diagram_I}
   }
   \qquad
   \subfloat[Type SSF]{
-    \includegraphics{doc/Feynman/amuFSS}
+    \includegraphics{feynman/amuFSS}
     \label{fig:amu_diagram_II}
   }
   \caption{Generic diagram types implemented in \fs to calculate the
@@ -3513,8 +3513,8 @@ ExtraSLHAOutputBlocks = {
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/MSSMCPV/contour_de_PhiMuM12}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/MSSMCPV/contour_de_PhiMuTe}
+  \includegraphics[width=0.49\textwidth]{plots/MSSMCPV/contour_de_PhiMuM12}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/MSSMCPV/contour_de_PhiMuTe}
   \caption{Left panel: contours of the electron EDM in the
     \CP-violating MSSM at the 1-loop level as a function of
     the phases of $\mhalf = M_1 = M_2$ and $\mu$,
@@ -3579,8 +3579,8 @@ Refs.~\cite{Staub:2015aea,ThomasKwasnitza:2016yqj}.
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/CMSSMCPV/scan_Mh_PhiMu_m0-500_M12-500_TB-10_A0-0}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/CMSSMCPV/scan_TYu33_Q_m0-500_M12-500_TB-10_A0-500_PhiMu-0_PhiA0-Pi4}
+  \includegraphics[width=0.49\textwidth]{plots/CMSSMCPV/scan_Mh_PhiMu_m0-500_M12-500_TB-10_A0-0}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/CMSSMCPV/scan_TYu33_Q_m0-500_M12-500_TB-10_A0-500_PhiMu-0_PhiA0-Pi4}
   \caption{Left panel: lightest Higgs pole mass calculated in the
     \CP-violating CMSSM at the 1-loop level with \fstwo and
     \spheno 4.0.2 as a function of the phase angle of the $\mu$
@@ -3818,16 +3818,16 @@ are not considered outside of $\deltaVB^\SM$.}
 \begin{figure}[tbh]
   \centering
   \subfloat[]{
-  \quad\includegraphics{doc/Feynman/deltaVBWave}\quad
+  \quad\includegraphics{feynman/deltaVBWave}\quad
   \label{fig:delta_VB_wave_diagrams}
   }
   \subfloat[]{
-  \qquad\includegraphics{doc/Feynman/deltaVBVertex1}\quad
-  \includegraphics{doc/Feynman/deltaVBVertex2}\qquad
+  \qquad\includegraphics{feynman/deltaVBVertex1}\quad
+  \includegraphics{feynman/deltaVBVertex2}\qquad
   \label{fig:delta_VB_vertex_diagrams}
   }
   \subfloat[]{
-  \quad\includegraphics{doc/Feynman/deltaVBBox1}\quad
+  \quad\includegraphics{feynman/deltaVBBox1}\quad
   \label{fig:delta_VB_box_diagrams}
   }
   \caption{Generic diagram types implemented in \fs to calculate
@@ -3966,8 +3966,8 @@ $\as^{\SM(5)}(M_t)$ as preferred by Ref.~\cite{Fanchiotti:1992tu}.
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.49\textwidth]{doc/plots/FlexibleMW/scan_MW_M12}\hfill
-  \includegraphics[width=0.49\textwidth]{doc/plots/FlexibleMW/scan_MW_LamTU}
+  \includegraphics[width=0.49\textwidth]{plots/FlexibleMW/scan_MW_M12}\hfill
+  \includegraphics[width=0.49\textwidth]{plots/FlexibleMW/scan_MW_LamTU}
   \caption{Left panel: $W$ pole mass in the CMSSM as a function of
   $\mhalf$ with $\mzero = 1\unit{TeV}$, $\tan\beta = 10$,
   $\sign\mu = +1$ and $\azero = 0$. Right panel: $W$ pole mass in
@@ -4725,7 +4725,7 @@ some exceptional points.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=0.6\textwidth]{%
-    doc/plots/semi_analytic_rel_errs/single_step_errors}
+    plots/semi_analytic_rel_errs/single_step_errors}
   \caption{Percentage changes in the CMSSM \DRbar mass spectrum after
     applying a single step of the semi-analytic solver to points obtained
     using the two-scale solver in a linear scan over $\mhalf \in
@@ -4781,7 +4781,7 @@ coefficients.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=0.5\textwidth]{%
-    doc/plots/semi_analytic_benchmark/i7-4702MQ}
+    plots/semi_analytic_benchmark/i7-4702MQ}
   \caption{Runtime distributions of the CMSSM spectrum generators created with
     \fstwo using the two-scale and semi-analytic BVP solvers, obtained on
     an Intel i7-4702MQ CPU\@.  The distributions are normalized to have integral
@@ -4798,9 +4798,9 @@ solutions found by each solver are plotted in the $\mzero - \mu$ plane.
 \begin{figure}
   \centering
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CMSSM_solution_regions/CMSSM_solution_regions}
+    plots/CMSSM_solution_regions/CMSSM_solution_regions}
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CMSSM_solution_regions/CMSSM_higgs_mass}
+    plots/CMSSM_solution_regions/CMSSM_higgs_mass}
   \caption{Left panel: CMSSM solutions found by the two-scale solver
     (blue diamonds) and the semi-analytic solver (red circles) in the
     $\mzero - \mu$ plane.  For both solvers, $\mhalf \in [0,1]\unit{TeV}$
@@ -4880,7 +4880,7 @@ the two BVP solvers in \fstwo to those found using the modified version of
 \begin{figure}
   \centering
   \includegraphics[width=0.6\textwidth]{%
-    doc/plots/CMSSM_multiple_solutions/CMSSM_multiple_solutions}
+    plots/CMSSM_multiple_solutions/CMSSM_multiple_solutions}
   \caption{Solutions obtained using the two-scale and semi-analytic solvers
     in the CMSSM for fixed $\mhalf = 660$ GeV, $\azero = 0$ GeV and
     $\tan\beta = 40$.  For comparison, we also reproduce the curve shown in
@@ -4940,13 +4940,13 @@ $125.09$ GeV\@.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=0.48\textwidth]{%
-     doc/plots/CNMSSM/cnmssm_4D-m0sqpos-full-m0_m12_sort-A0.pdf}
+    plots/CNMSSM/cnmssm_4D-m0sqpos-full-m0_m12_sort-A0.pdf}
    \includegraphics[width=0.48\textwidth]{%
-     doc/plots/CNMSSM/cnmssm_4D-m0sqpos-full_mhZoom_lam_m12_sort-mh.pdf} \\
+    plots/CNMSSM/cnmssm_4D-m0sqpos-full_mhZoom_lam_m12_sort-mh.pdf} \\
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CNMSSM/cnmssm_4D-full-squark_mass_m0sqgtr0_m0_m12.pdf}
+    plots/CNMSSM/cnmssm_4D-full-squark_mass_m0sqgtr0_m0_m12.pdf}
    \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CNMSSM/cnmssm_4D-m0sqgtr0-full-msu6.pdf}
+    plots/CNMSSM/cnmssm_4D-m0sqgtr0-full-msu6.pdf}
    \caption{CNMSSM solutions obtained using \fstwo and \multinest 3.10
      shown in the $\mzero-\mhalf$ plane with $\azero$ as a color
      contour (top left panel); $\mhalf-\lambda$ plane showing the
@@ -5000,13 +5000,13 @@ lighter than the gluino, which has a mass $\approx 2\, \mhalf$.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=0.48\textwidth]{%
-     doc/plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_ccA0.pdf}
+    plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_ccA0.pdf}
    \includegraphics[width=0.48\textwidth]{%
-     doc/plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_ccmsu1.pdf} \\
+    plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_ccmsu1.pdf} \\
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_cclam.pdf}
+    plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_cclam.pdf}
    \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_cckap.pdf}
+    plots/CE6SSM/ce6ssm_tb10-scan-l-k-vs_combined_m0_m12_cckap.pdf}
    \caption{C\ESSM solutions obtained using \fstwo and \multinest 3.10 shown in
      the $\mzero-\mhalf$ plane with $\azero$, the lightest up-type squark pole mass
      $M_{\tilde{u}_1}$,  $|\lambda|$ and $|\kappa|$ as color contours.}
@@ -5064,9 +5064,9 @@ good agreement with the results obtained using the earlier code.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CSE6SSM/CSE6SSM_m12_Azero_m0}
+    plots/CSE6SSM/CSE6SSM_m12_Azero_m0}
   \includegraphics[width=0.48\textwidth]{%
-    doc/plots/CSE6SSM/CSE6SSM_m12_Azero_m0_handwritten}
+    plots/CSE6SSM/CSE6SSM_m12_Azero_m0_handwritten}
   \caption{CS\ESSM solutions obtained using the spectrum generator
     automatically generated by \fstwo (left panel) and using the prototype
     spectrum generator used in the numerical analysis of
@@ -5376,8 +5376,8 @@ $\MS \approx 1\unit{TeV}$.
 %
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=0.49\textwidth]{{{doc/plots/FlexibleEFTHiggs/scan_Mh_MS_TB-5_Xt-0}}} \hfill
-  \includegraphics[width=0.49\textwidth]{{{doc/plots/FlexibleEFTHiggs/scan_Mh_Xt_TB-5_MS-2000}}}
+  \includegraphics[width=0.49\textwidth]{{{plots/FlexibleEFTHiggs/scan_Mh_MS_TB-5_Xt-0}}} \hfill
+  \includegraphics[width=0.49\textwidth]{{{plots/FlexibleEFTHiggs/scan_Mh_Xt_TB-5_MS-2000}}}
   \caption{Comparison of the predicted lightest \CP-even Higgs pole mass in the
     MSSM using the \feft implementations of \fs 1.7.4 and 2.0 for
     $\tan\beta = 5$.  In the left panel we use $X_t = 0$ and in the
@@ -6571,22 +6571,22 @@ The individual configuration options have the following meaning:
 
 \section{CMSSMCPV model file}
 \label{app:CMSSMCPV}
-\lstinputlisting[language=Mathematica]{model_files/CMSSMCPV/FlexibleSUSY.m.in}
+\lstinputlisting[language=Mathematica]{../../model_files/CMSSMCPV/FlexibleSUSY.m.in}
 
 \section{\THDM model file}
 \label{app:THDMIIMSSMBC}
-\lstinputlisting[language=Mathematica,numbers=left,numberstyle=\tiny\sffamily]{model_files/THDMIIMSSMBC/FlexibleSUSY.m.in}
+\lstinputlisting[language=Mathematica,numbers=left,numberstyle=\tiny\sffamily]{../../model_files/THDMIIMSSMBC/FlexibleSUSY.m.in}
 
 \section{CNMSSM model file}
 \label{app:CNMSSM}
-\lstinputlisting[language=Mathematica]{model_files/CNMSSM/FlexibleSUSY.m.in}
+\lstinputlisting[language=Mathematica]{../../model_files/CNMSSM/FlexibleSUSY.m.in}
 
 \clearpage
 
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
-\bibliographystyle{doc/JHEP}
-\bibliography{doc/flexiblesusy-2.0}
+\bibliographystyle{JHEP}
+\bibliography{flexiblesusy-2.0}
 
 \end{document}

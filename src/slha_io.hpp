@@ -195,14 +195,6 @@ private:
    double read_vector(const std::string&, Eigen::MatrixBase<Derived>&) const;
 };
 
-template<class S>
-struct Set_spectrum {
-   S* slha_io;
-   Set_spectrum(S* slha_io_) : slha_io(slha_io_) {}
-   template<typename T>
-   void operator()(const T& model) const { slha_io->set_spectrum(model); }
-};
-
 template <class Scalar>
 Scalar SLHA_io::convert_to(const std::string& str)
 {

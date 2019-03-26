@@ -42,13 +42,14 @@ namespace {
 constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
 
+constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
 constexpr double sqr(double a) noexcept { return a*a; }
 constexpr double pow3(double a) noexcept { return a*a*a; }
 constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
 
-bool is_zero(double m, double tol) noexcept
+constexpr bool is_zero(double m, double tol) noexcept
 {
-   const double am = std::abs(m);
+   const double am = dabs(m);
    const double mtol = tol * am;
 
    if (mtol == 0.0 && am != 0.0 && tol != 0.0)
@@ -57,12 +58,10 @@ bool is_zero(double m, double tol) noexcept
    return am <= mtol;
 }
 
-bool is_close(double m1, double m2, double tol) noexcept
+constexpr bool is_close(double m1, double m2, double tol) noexcept
 {
-   using std::abs;
-
-   const double mmax = std::max(abs(m1), abs(m2));
-   const double mmin = std::min(abs(m1), abs(m2));
+   const double mmax = std::max(dabs(m1), dabs(m2));
+   const double mmin = std::min(dabs(m1), dabs(m2));
    const double max_tol = tol * mmax;
 
    if (max_tol == 0.0 && mmax != 0.0 && tol != 0.0)
@@ -73,13 +72,14 @@ bool is_close(double m1, double m2, double tol) noexcept
 
 /// returns a/b if a/b is finite, otherwise returns numeric_limits::max()
 template <typename T>
-T divide_finite(T a, T b) noexcept {
+constexpr T divide_finite(T a, T b) noexcept {
    T result = a / b;
    if (!std::isfinite(result))
       result = std::numeric_limits<T>::max();
    return result;
 }
 
+// can be made constexpr in C++20
 double fB(const std::complex<double>& a) noexcept
 {
    using flexiblesusy::fast_log;

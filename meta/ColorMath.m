@@ -5,6 +5,7 @@ BeginPackage["ColorMath`", {"Utils`"}];
 CM$VersionNumber = "1.0";
 CM$VersionDate = "February 12 2013";
 Utils`PrintHeadline["Loading ColorMath package"];
+
 Print["Version: ", CM$VersionNumber, " (" CM$VersionDate, "), for Mathematica 7, 8 and 9."];
 Print["Author: Malin Sjodahl"];
 Print["For suggestions and bug reports contact malin.sjodahl@thep.lu.se."];

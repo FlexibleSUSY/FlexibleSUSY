@@ -144,6 +144,8 @@ Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
+FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -283,8 +285,8 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_, message_String] :=
-	If[assertion =!= True, Print[message]; Quit[1]]
+AssertWithMessage[assertion_?BooleanQ, message_String] :=
+	If[assertion =!= True, Print[message]; Quit[1]];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
@@ -299,6 +301,11 @@ ReadLinesInFile[fileName_String] :=
     Close[fileHandle];
     lines
 	]
+
+FSReIm[z_] := If[$VersionNumber >= 10.1,
+   ReIm[z],
+   {Re[z], Im[z]}
+];
 
 End[];
 

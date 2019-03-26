@@ -1,5 +1,16 @@
-FlexibleSUSY 2.3.1 [not released yet]
+FlexibleSUSY 2.4.0 [not released yet]
 =====================================
+
+Changes
+-------
+
+* The C++ language version has been increased to C++14.  As a result,
+  a C++14-compatible compiler is required to compile FlexibleSUSY.
+  This is the case for
+
+  - g++ >= 5.0.0
+  - clang++ >= 3.8.1
+  - icpc >= 17.0.0
 
 New features
 ------------

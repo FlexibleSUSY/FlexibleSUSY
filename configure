@@ -174,7 +174,7 @@ looptools_lib_dir=""
 looptools_inc_dir=""
 GSLFLAGS=""
 CPPFLAGS=""
-CXXFLAGS="-std=c++11 -O2 -fPIC"
+CXXFLAGS="-std=c++14 -O2 -fPIC"
 FFLAGS="-O2 -fPIC"
 FLIBS=""
 BOOSTTESTLIBS=""
@@ -231,15 +231,9 @@ cxx_compiler_version="unknown"
 
 # required C++ compiler versions
 required_cxx_compiler_version="unknown"
-required_gpp_compiler_version="4.8.4"
+required_gpp_compiler_version="5.0.0"
 required_clang_compiler_version="3.8.1"
-required_icpc_compiler_version="15.0.0"
-
-# C++ compiler versions accepting `-std=c++11'
-std_cxx11_compiler_version="unknown"
-std_cxx11_gpp_version="4.7.0"
-std_cxx11_clang_version="3.0.0"
-std_cxx11_icpc_version="13.0.0"
+required_icpc_compiler_version="17.0.0"
 
 # required boost version
 required_boost_version="1.37.0"
@@ -1693,16 +1687,6 @@ check_cxx() {
 
 #_____________________________________________________________________
 check_cxxflags() {
-    case "$CXXFLAGS" in
-    *-std=c++11*)
-	version_at_least "$cxx_compiler_version" \
-			 "$std_cxx11_compiler_version" || {
-	    message "Replacing \`-std=c++11' by \`-std=c++0x' since $CXX is older than $std_cxx11_compiler_version"
-	    CXXFLAGS=$(
-		printf "%s" "$CXXFLAGS" | sed 's/-std=c++11/-std=c++0x/')
-	}
-    esac
-
     if test "x$enable_compiler_warnings" = "xyes" ; then
         if test "x${cxx_compiler_type}" = "xgnu"; then
             CXXFLAGS="${CXXFLAGS} -Wall -pedantic -Wextra\

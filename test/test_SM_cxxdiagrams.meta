@@ -191,12 +191,12 @@ cxxNonzeroVertexPairs = "boost::mpl::vector<\n" <> TextFormatting`IndentText[
 		}],
 	",\n"]]] <> "\n>";
 
-cxxDiagramsDir = FileNameJoin[{SARAH`SARAH[OutputDirectory],
+cxxDiagramsDir = FileNameJoin[{SARAH`$sarahCurrentOutputMainDir,
 	ToString[FlexibleSUSY`FSEigenstates], "CXXDiagrams"}];
 createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
     
-createdVertices = If[FileExistsQ[cxxDiagramsDir] === True,
-	Get[cxxDiagramsDir], {}];
+createdVertices = If[FileExistsQ[createdVerticesFile] === True,
+	Get[createdVerticesFile], {}];
 
 remainingVertices = Complement[
 	Join[zeroVertices, nonzeroVertexPairs[[All, 1]]], createdVertices];

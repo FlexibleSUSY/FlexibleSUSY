@@ -47,7 +47,7 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++ compiler (g++ >= 4.8.4 or clang++ >= 3.8.1 or icpc >= 15.0.0)
+* C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
 * Mathematica (version 7.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -185,9 +185,9 @@ documentation.
  `NUHMSSMNoFVHimalaya`_   fixed-order MSSM
 ======================== ====================================
 
-.. _`HSSUSY`: doc/HSSUSY.rst
-.. _`MSSMEFTHiggs`: doc/MSSMEFTHiggs.rst
-.. _`NUHMSSMNoFVHimalaya`: doc/NUHMSSMNoFVHimalaya.rst
+.. _`HSSUSY`: doc/models/HSSUSY.rst
+.. _`MSSMEFTHiggs`: doc/models/MSSMEFTHiggs.rst
+.. _`NUHMSSMNoFVHimalaya`: doc/models/NUHMSSMNoFVHimalaya.rst
 
 
 Command line

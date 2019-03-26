@@ -56,7 +56,6 @@ model_files/LRLR                export-ignore
 model_files/lowNUHMSSM          export-ignore
 model_files/lowNUHMSSMSemiAnalytic export-ignore
 model_files/MDM                 export-ignore
-model_files/MRSSM2              export-ignore
 model_files/MSSMNoEWVEVs        export-ignore
 model_files/MSSMNoFVSLHA2       export-ignore
 model_files/minMSSM             export-ignore
@@ -71,6 +70,7 @@ model_files/NUHMSSMNoFVNoMomIt  export-ignore
 model_files/rootMSSM            export-ignore
 model_files/YukawaCMSSM         export-ignore
 model_files/UnbrokenMSSM        export-ignore
+model_files/ScalarLeptoquarks   export-ignore
 model_files/SMEWSBAtMZ          export-ignore
 model_files/SMHighScale         export-ignore
 model_files/SMHighPrecision     export-ignore

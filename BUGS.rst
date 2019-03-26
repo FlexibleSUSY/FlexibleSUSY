@@ -54,8 +54,16 @@ Yukawa matrix is fixed in an approximated form at the low-energy scale
 given the running SM charged lepton masses.
 
 
-Compilation errors when using Eigen versions below 3.3.x
---------------------------------------------------------
+Compilation errors related to ``TensorStorage``
+-----------------------------------------------
+
+The ``Tensor`` module of the Eigen library before version 3.3.5 may
+fail to compile with ``clang++`` due to a bug in Eigen.  The bug has
+been fixed in Eigen 3.3.5.
+
+
+Compilation errors related to complex matrix multiplication
+-----------------------------------------------------------
 
 When models with complex parameters are built using versions of
 Eigen 3.3.0, it may be the case that compilation of the generated

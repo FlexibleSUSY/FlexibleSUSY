@@ -19,6 +19,11 @@ BASE_TEMPLATES := \
 		$(DIR)/decay_amplitudes.cpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
+		$(DIR)/FFV_form_factors.hpp.in \
+		$(DIR)/FFV_form_factors.cpp.in \
+		$(DIR)/l_to_lgamma.hpp.in \
+		$(DIR)/l_to_lgamma.cpp.in \
+		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/ewsb_solver.hpp.in \
 		$(DIR)/ewsb_solver_interface.hpp.in \
 		$(DIR)/effective_couplings.hpp.in \

@@ -20,11 +20,11 @@ SUSYScale = Ms;
 SUSYScaleFirstGuess = Ms;
 
 SUSYScaleInput = {
-    {mq2   , LHInput[mq2]},
-    {mu2   , LHInput[mu2]},
-    {md2   , LHInput[md2]},
-    {ml2   , LHInput[ml2]},
-    {me2   , LHInput[me2]},
+    {mq2   , MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+    {mu2   , MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+    {md2   , MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+    {ml2   , MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+    {me2   , MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
     {mS2   , LHInput[mS2]},
     {mT2   , LHInput[mT2]},
     {moc2  , LHInput[moc2]},
@@ -50,19 +50,27 @@ LowScale = LowEnergyConstant[MZ];
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
-    {Yu, Automatic},
-    {Yd, Automatic},
-    {Ye, Automatic},
+    {Yu, Sqrt[2] MatMul[upQuarksDRbar, CKM] / vu},
+    {Yd, Sqrt[2] downQuarksDRbar / vd},
+    {Ye, Sqrt[2] downLeptonsDRbar / vd},
     {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
     {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
 };
 
 InitialGuessAtSUSYScale = {
+(*
     {mq2   , LHInput[mq2]},
     {mu2   , LHInput[mu2]},
     {md2   , LHInput[md2]},
     {ml2   , LHInput[ml2]},
     {me2   , LHInput[me2]},
+*)
+
+    {mq2   , MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+    {mu2   , MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+    {md2   , MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+    {ml2   , MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+    {me2   , MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
     {mS2   , LHInput[mS2]},
     {mT2   , LHInput[mT2]},
     {moc2  , LHInput[moc2]},
@@ -88,8 +96,14 @@ InitialGuessAtLowScale = {
 };
 
 ExtraSLHAOutputBlocks = {
-   {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } }
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`aMuon},
+         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]}, 
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+      } 
+   }
 };
 
 DefaultPoleMassPrecision = HighPrecision;
