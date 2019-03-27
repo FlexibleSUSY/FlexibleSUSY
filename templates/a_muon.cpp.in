@@ -326,7 +326,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 
 double muonPhysicalMass(const softsusy::QedQcd& qedqcd)
 {
-   return qedqcd.displayMass(softsusy::mMuon);
+   return qedqcd.displayPoleMmuon();
 }
 
 } // anonymous namespace
