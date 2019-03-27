@@ -106,7 +106,9 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                   "// eq. 51 of arXiv:hep-ph/9510309 (note that we include 'e' in the definition of form_factor)\n" <>
                   "const double partial_width = pow(leptonInMassOS,5)/(16.0*Pi) * (std::norm(form_factors[2]) + std::norm(form_factors[3]));\n" <>
 
-                  "const double total_width = lepton_total_decay_width(indices1, indices2, model, qedqcd);\n" <>
+                  "const double total_width = lepton_total_decay_width<" <>
+                     CXXNameOfField[inFermion] <> ", " <> CXXNameOfField[outFermion] <> 
+                     ">(indices1, indices2, model, qedqcd);\n" <>
                   "\nreturn partial_width/total_width;\n"
                ] <> "}";
 
