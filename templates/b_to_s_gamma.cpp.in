@@ -98,8 +98,8 @@ double calculate_b_to_s_gamma(
     }
     const auto g2 = MODELPARAMETER(g2);
     const auto g3 = MODELPARAMETER(g3);
-    const auto mW = context.mass<fields::@WBoson@>({});
-    const auto mb = context.mass<fields::@DownQuark@>({ 2 });
+    const auto mW = context.mass<@WBoson@>({});
+    const auto mb = context.mass<@DownQuark@>({ b_quark_index });
 
     // choose normalization according to flavio
     const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts));
@@ -121,5 +121,5 @@ double calculate_b_to_s_gamma(
     return Re(C7NP_bs);
 }
 
-}  // namespace @ModelName@_b_to_s_gamma
+} // namespace @ModelName@_b_to_s_gamma
 } // namespace flexiblesusy
