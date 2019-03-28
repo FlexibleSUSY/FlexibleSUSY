@@ -37,6 +37,8 @@
 
 #include "wrappers.hpp"
 
+#include <fstream>
+
 #define MODELPARAMETER(p) context.model.get_##p()
 
 using namespace @ModelName@_cxx_diagrams;
@@ -45,9 +47,40 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace flexiblesusy {
 namespace @ModelName@_b_to_s_gamma {
+
+void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<double>& C7pNP_bs,
+    const std::complex<double>& C8NP_bs, const std::complex<double>& C8pNP_bs,
+    const double& matching_scale)
+{
+    std::ofstream wc_json;
+    wc_json.open ("WC_@ModelName@.json");
+    wc_json << "{\n\"eft\": \"WET\",\n";
+    wc_json << "\t\"basis\": \"flavio\",\n";
+    wc_json << "\t\"scale\": \"" << matching_scale << "\",\n";
+    wc_json << "\t\"values\": { \n";
+    wc_json << "\t\t\"C7_bs\": { \n";
+    wc_json << "\t\t\t\"Re\": " << Re(C7NP_bs) << ",\n";
+    wc_json << "\t\t\t\"Im\": " << Im(C7NP_bs) << "\n";
+    wc_json << "\t\t},\n";
+    wc_json << "\t\t\"C7p_bs\": { \n";
+    wc_json << "\t\t\t\"Re\": " << Re(C7pNP_bs) << ",\n";
+    wc_json << "\t\t\t\"Im\": " << Im(C7pNP_bs) << "\n";
+    wc_json << "\t\t},\n";
+    wc_json << "\t\t\"C8_bs\": { \n";
+    wc_json << "\t\t\t\"Re\": " << Re(C8NP_bs) << ",\n";
+    wc_json << "\t\t\t\"Im\": " << Im(C8NP_bs) << "\n";
+    wc_json << "\t\t},\n";
+    wc_json << "\t\t\"C8p_bs\": { \n";
+    wc_json << "\t\t\t\"Re\": " << Re(C8pNP_bs) << ",\n";
+    wc_json << "\t\t\t\"Im\": " << Im(C8pNP_bs) << "\n";
+    wc_json << "\t\t}\n";
+    wc_json << "\t}\n";
+    wc_json << "}";
+    wc_json.close();
+}
     
 double calculate_b_to_s_gamma(
-        const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
 {
     context_base context { model };
 
@@ -82,6 +115,8 @@ double calculate_b_to_s_gamma(
     const auto C7pNP_bs = normC7 * form_factors_VP[2];
     const auto C8NP_bs = normC8 * form_factors_VG[3];
     const auto C8pNP_bs = normC8 * form_factors_VG[2];
+
+    write_wilsoncoeffs(C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs, model.get_scale());
 
     return Re(C7NP_bs);
 }
