@@ -153,7 +153,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
 
 (* convenient abbreviation *)
 ColorFactorForDiagram[topology_, diagram_] :=
-   N @ FSReIm @ ColourFactorForIndexedDiagramFromGraph[
+   N @ Utils`FSReIm @ ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
    ];
 
