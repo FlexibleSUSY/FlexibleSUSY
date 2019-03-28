@@ -2150,7 +2150,7 @@ WriteFFMassiveVFormFactorsClass[extParticles_List, files_List] :=
       vertices
   ];
 
-WriteLToLGammaClass[decays_List, files_List] :=
+WriteFToFGammaClass[decays_List, files_List] :=
    Module[{interfacePrototypes, interfaceDefinitions},
     
       {interfacePrototypes, interfaceDefinitions} = 
@@ -4368,14 +4368,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            ];
 
            Print["Creating l->l'A class ..."];
-           WriteLToLGammaClass[LToLGammaFields,
+           WriteFToFGammaClass[LToLGammaFields,
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
            Print["Creating b->s'A class ..."];
-           WriteLToLGammaClass[QToQGammaFields,
+           WriteFToFGammaClass[QToQGammaFields,
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
