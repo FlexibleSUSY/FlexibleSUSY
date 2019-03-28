@@ -2163,6 +2163,8 @@ WriteLToLGammaClass[decays_List, files_List] :=
       WriteOut`ReplaceInFiles[files, {
             "@LToLGamma_InterfacePrototypes@"  -> interfacePrototypes,
             "@LToLGamma_InterfaceDefinitions@" -> interfaceDefinitions,
+            "@WBoson@" -> ToString[TreeMasses`GetWBoson[]],
+            "@DownQuark@" -> ToString[SARAH`DownQuark],
             Sequence @@ GeneralReplacementRules[]
          }
       ];
@@ -3569,6 +3571,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, aMuonVertices, edmFields,
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
+            QToQGammaFields = {},
             fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
@@ -4371,6 +4374,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
+           Print["Creating b->s'A class ..."];
+           WriteLToLGammaClass[QToQGammaFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
+
            (* OBSERVABLE: l -> l conversion *)
 
            (*
@@ -4407,6 +4417,11 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
+
+                     (* BR(b -> s gamma) *)
+                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
+                     QToQGammaFields = Join[{SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Photon}},
+                       {SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Gluon}}]],
 
                      (* L -> L conversion in nucleus *)
                      If[LToLConversionFields === {},

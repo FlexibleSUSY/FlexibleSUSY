@@ -523,6 +523,8 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b to s"],
                   _,
                      result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];

@@ -1,0 +1,90 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+/**
+ * @file @ModelName@_b_to_s_gamma.cpp
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include <valarray>
+#include <complex>
+#include <iostream>
+
+#include "@ModelName@_b_to_s_gamma.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+
+#include "cxx_qft/@ModelName@_qft.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
+
+#include "wrappers.hpp"
+
+#define MODELPARAMETER(p) context.model.get_##p()
+
+using namespace @ModelName@_cxx_diagrams;
+using namespace @ModelName@_cxx_diagrams::fields;
+using namespace @ModelName@_FFV_form_factors;
+
+namespace flexiblesusy {
+namespace @ModelName@_b_to_s_gamma {
+    
+double calculate_b_to_s_gamma(
+        const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+{
+    context_base context { model };
+
+    constexpr int b_quark_index = 2;
+    constexpr int s_quark_index = 1;
+
+    const auto complex_CKM = qedqcd.get_complex_ckm();
+    const std::complex<double> Vtb (complex_CKM(2, 2));
+    std::complex<double> Vts;
+    // avoid division by zero
+    if (complex_CKM(2, 1) == std::complex<double>(0, 0)) {
+        Vts = std::complex<double>(-0.0404063888996, -0.00072107415577);
+    } else {
+        Vts = complex_CKM(2, 1);
+    }
+    const auto g2 = MODELPARAMETER(g2);
+    const auto g3 = MODELPARAMETER(g3);
+    const auto mW = context.mass<fields::@WBoson@>({});
+    const auto mb = context.mass<fields::@DownQuark@>({ 2 });
+
+    // choose normalization according to flavio
+    const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts));
+    const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts));
+
+    const auto form_factors_VP =
+        calculate_Fd_Fd_VP_form_factors(b_quark_index, s_quark_index, model);
+        
+    const auto form_factors_VG =
+        calculate_Fd_Fd_VG_form_factors(b_quark_index, s_quark_index, model);
+
+    const auto C7NP_bs = normC7 * form_factors_VP[3];
+    const auto C7pNP_bs = normC7 * form_factors_VP[2];
+    const auto C8NP_bs = normC8 * form_factors_VG[3];
+    const auto C8pNP_bs = normC8 * form_factors_VG[2];
+
+    return Re(C7NP_bs);
+}
+
+}  // namespace @ModelName@_b_to_s_gamma
+} // namespace flexiblesusy
