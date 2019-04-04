@@ -311,7 +311,7 @@ IsSMParticle[sym_List] := And @@ (IsSMParticle /@ sym);
 IsSMParticle[sym_[__]] := IsSMParticle[sym];
 IsSMParticle[sym_] := SARAH`SMQ[sym, Higgs -> True];
 IsSMParticleElementwise[sym_] :=
-   (IsSMParticle[#] || IsSMGoldstone[#])& /@ Table[sym[i], {i, GetDimension[sym]}]
+   (IsSMParticle[#] || IsSMGoldstone[#])& /@ Table[sym[i], {i, GetDimension[sym]}];
 
 IsScalar[Susyno`LieGroups`conj[sym_]] := IsScalar[sym];
 IsScalar[SARAH`bar[sym_]] := IsScalar[sym];
