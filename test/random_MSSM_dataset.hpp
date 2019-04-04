@@ -103,7 +103,7 @@ static MSSM_input_parameters wrap_input_parameters(
 	
 	sfermion_mass_matrix <<
 		sfermion_massSqr, 0, 0,
-		0, sfermion_massSqr, 0,
+		0, sfermion_massSqr, 500*500,
 		0, 0, sfermion_massSqr;
 	
 	input.mq2Input = sfermion_mass_matrix;
@@ -126,7 +126,7 @@ static MSSM_mass_eigenstates calculate_spectrum(
 	
 	MSSM_spectrum_generator<Two_scale> spectrum_generator;
 	spectrum_generator.set_settings( spectrum_generator_settings );
-	spectrum_generator.set_parameter_output_scale( qedqcd.get_scale() );
+	//spectrum_generator.set_parameter_output_scale( qedqcd.get_scale() );
 
 	spectrum_generator.run( qedqcd, input );
 	return spectrum_generator.get_model();

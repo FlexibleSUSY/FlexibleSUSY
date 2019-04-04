@@ -25,7 +25,7 @@
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include <valarray>
+#include <array>
 #include <complex>
 #include <iostream>
 
@@ -79,7 +79,7 @@ void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<
     wc_json.close();
 }
     
-double calculate_b_to_s_gamma(
+std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
     const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
 {
     context_base context { model };
@@ -106,10 +106,10 @@ double calculate_b_to_s_gamma(
     const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts));
 
     const auto form_factors_VP =
-        calculate_Fd_Fd_VP_form_factors(b_quark_index, s_quark_index, model);
+        calculate_@DownQuark@_@DownQuark@_VP_form_factors(b_quark_index, s_quark_index, model);
         
     const auto form_factors_VG =
-        calculate_Fd_Fd_VG_form_factors(b_quark_index, s_quark_index, model);
+        calculate_@DownQuark@_@DownQuark@_VG_form_factors(b_quark_index, s_quark_index, model);
 
     const auto C7NP_bs = normC7 * form_factors_VP[3];
     const auto C7pNP_bs = normC7 * form_factors_VP[2];
@@ -118,7 +118,7 @@ double calculate_b_to_s_gamma(
 
     write_wilsoncoeffs(C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs, model.get_scale());
 
-    return Re(C7NP_bs);
+    return {C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs};
 }
 
 } // namespace @ModelName@_b_to_s_gamma

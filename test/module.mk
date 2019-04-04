@@ -187,10 +187,16 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_database.cpp
 endif
 
+ifeq ($(WITH_MSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSM_b_to_s_gamma.cpp
+endif
+
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
-		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
+		$(DIR)/test_MRSSM2_l_to_lgamma.cpp \
+		$(DIR)/test_MRSSM2_b_to_s_gamma.cpp
 endif
 
 endif # ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -796,6 +802,10 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
+
+$(DIR)/test_MRSSM2_b_to_s_gamma.x: $(LIBMRSSM2)
+
+$(DIR)/test_MSSM_b_to_s_gamma.x: $(LIBMSSM)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 

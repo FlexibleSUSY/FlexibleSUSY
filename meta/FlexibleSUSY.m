@@ -3571,7 +3571,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, aMuonVertices, edmFields,
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
-            QToQGammaFields = {},
             fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
@@ -4420,8 +4419,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
                      (* BR(b -> s gamma) *)
                      If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
-                     QToQGammaFields = Join[{SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Photon}},
-                       {SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Gluon}}]],
+                     Join[{SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Photon}},
+                          {SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Gluon}}],
+                        {}],
 
                      (* L -> L conversion in nucleus *)
                      If[LToLConversionFields === {},
