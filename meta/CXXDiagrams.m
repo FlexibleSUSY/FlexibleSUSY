@@ -222,7 +222,7 @@ CreateFields[] :=
                         If[TreeMasses`GetDimension[#] === 1,
                            CXXBoolValue @ TreeMasses`IsSMParticle[#],
                            StringJoin @ Riffle[CXXBoolValue /@
-                             (TreeMasses`IsSMParticle[#] & /@ Table[#[{k}],{k,TreeMasses`GetDimension[#]}]),
+                             TreeMasses`IsSMParticleWithGoldStone[#],
                                                ", "]] <>
                         ">;\n" <>
                 "static constexpr int numberOfFieldIndices = " <>

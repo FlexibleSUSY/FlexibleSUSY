@@ -235,13 +235,9 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
          if (scalarFieldIndicesIn != scalarIndicesOut) 
             continue;
 
-         // Throw out SM Goldstone, it could crash if SM is used.
-         // if ( std::is_same<S, ChargedHiggsMultiplet>::type::value || 
-               //   std::is_same<S, typename ChargedHiggsMultiplet::lorentz_conjugate>::type::value )
-         // {
-            // if ( scalarFieldIndicesIn[0] == 0 )
-               //  continue;
-         // }
+          if (isSMField<SA>(scalarFieldIndicesIn) && isSMField<F>(fermionFieldIndicesIn)) {
+            continue;
+          }
 
          const auto vertexIn = VertexFBarFjSBar::evaluate(indexIn, context);
          const auto vertexOut = VertexFiBarFS::evaluate(indexOut, context);
@@ -319,12 +315,8 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
          if (scalarFieldIndicesIn != scalarIndicesOut) 
             continue;
 
-         // Throw out SM Goldstone, it could crash if SM is used.
-         if ( std::is_same<S, ChargedHiggsMultiplet>::type::value || 
-                 std::is_same<S, typename ChargedHiggsMultiplet::lorentz_conjugate>::type::value )
-         {
-            if ( fermionFieldIndicesIn[0] == 0 )
-                continue;
+         if (isSMField<S>(scalarFieldIndicesIn) && isSMField<FA>(fermionFieldIndicesIn)) {
+            continue;
          }
 
          const auto vertexIn = VertexFBarFjSBar::evaluate(indexIn, context);
