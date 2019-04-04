@@ -310,10 +310,8 @@ IsOfType[sym_[__], type_Symbol, states_:FlexibleSUSY`FSEigenstates] :=
 IsSMParticle[sym_List] := And @@ (IsSMParticle /@ sym);
 IsSMParticle[sym_[__]] := IsSMParticle[sym];
 IsSMParticle[sym_] := SARAH`SMQ[sym, Higgs -> True];
-IsSMParticleWithGoldStone[sym_] := If[sym === SARAH`ChargedHiggs || sym === SARAH`PseudoScalar,
-    Join[{True}, ConstantArray[SARAH`SMQ[sym, Higgs -> True], GetDimension[sym]-1]],
-    ConstantArray[SARAH`SMQ[sym, Higgs -> True], GetDimension[sym]]
-];
+IsSMParticleWithGoldStone[sym_] :=
+   (IsSMParticle[#] || IsSMGoldstone[#])& /@ Table[sym[i], {i, GetDimension[sym]}]
 
 IsScalar[Susyno`LieGroups`conj[sym_]] := IsScalar[sym];
 IsScalar[SARAH`bar[sym_]] := IsScalar[sym];
