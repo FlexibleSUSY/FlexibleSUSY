@@ -39,7 +39,6 @@ using namespace @ModelName@_cxx_diagrams::fields;
 
 namespace {
 
-using ChargedHiggsMultiplet = @FFVFormFactors_ChargedHiggsMultiplet@;
 static constexpr double oneOver32PiSquared = 1.0/(32.0*Pi*Pi);
 
 /**
