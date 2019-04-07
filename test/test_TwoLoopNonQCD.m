@@ -55,43 +55,18 @@ simp = {
    Convention: h = lambda v^2
  *)
 
-betag3 = (
-    - 7*g3^3*k
-    - 2*g3^3*(13*g3^2 + gt^2)*k^2
-    + (5*g3^3*(13*g3^4 - 16*g3^2*gt^2 + 6*gt^4)*k^3)/2
-    - (g3^3*k^4*(4*g3^4*gt^2*(6709 - 2448*Zeta[3]) + 
-                 36*g3^2*gt^4*(-427 + 96*Zeta[3]) + 2*g3^6*(-63559 + 89896*Zeta[3]) + 
-                 27*(20*gt^4*\[Lambda] - 12*gt^2*\[Lambda]^2 + gt^6*(141 + 8*Zeta[3]))))/36
-) /. simp
+AddLoops[b_List] :=
+    Total @ MapIndexed[#1 k^First[#2]&, b]
 
-betayt = (
-    k*gt*(-8*g3^2 + (9*gt^2)/2)
-    - (gt*k^2*(432*g3^4 - 144*g3^2*gt^2 + 48*gt^4 + 24*gt^2*\[Lambda] - 
-               6*\[Lambda]^2))/4
-    + (gt*k^3*(-6193500*g3^6 + 3637640*g3^4*gt^2 + 
-               586028*gt^6 + 990000*gt^4*\[Lambda] + 9375*gt^2*\[Lambda]^2 - 
-               45000*\[Lambda]^3 - 10000*g3^2*(157*gt^4 - 8*gt^2*\[Lambda])))/10000
-    + k^4 (-(1/81) g3^8 gt (1379027 + 6048 \[Pi]^4 - 2277312 Zeta[3] + 561600 Zeta[5]))
-) /. simp
+betag3 = AddLoops[Get[FileNameJoin[{smDir, "beta_g3.m"}]] /. simp]
 
-betalambda = (
-    + 6*k*(-gt^4 + gt^2*\[Lambda] + \[Lambda]^2)
-    + k^2*(30*gt^6 - (3*gt^4*\[Lambda])/2 - 36*gt^2*\[Lambda]^2 - 39*\[Lambda]^3 - 
-           8*g3^2*(4*gt^4 - 5*gt^2*\[Lambda]))
-    + (k^3*(-1945192*gt^8 - 893528*gt^6*\[Lambda] + 3536520*gt^4*\[Lambda]^2 + 
-            873000*gt^2*\[Lambda]^3 + 3005675*\[Lambda]^4 - 
-            8*g3^4*(50201*gt^4 - 178484*gt^2*\[Lambda]) + 
-            4*g3^2*(500988*gt^6 - 662866*gt^4*\[Lambda] + 80385*gt^2*\[Lambda]^2)))/4000
+betayt = AddLoops[Get[FileNameJoin[{smDir, "beta_gt.m"}]] /. simp]
 
-    + k^4 1/2 16/27 g3^6 gt^4 (13097 + 108 \[Pi]^4 + 44568 Zeta[3] - 47400 Zeta[5])
-) /. simp
+betalambda = AddLoops[Get[FileNameJoin[{smDir, "beta_lambda.m"}]] /. simp]
 
-betav = (
-    -3*gt^2*k*v
-    - (k^2*v*(80*g3^2*gt^2 - 3*(9*gt^4 - 2*\[Lambda]^2)))/4
-) /. simp
+betav = AddLoops[Get[FileNameJoin[{smDir, "beta_v.m"}]] /. simp]
 
-betah = 2v^2 betalambda + 2h/v betav
+betah = v^2 betalambda + 2h/v betav
 
 betat = Sqrt[2t] v betayt + 2t/v betav
 
