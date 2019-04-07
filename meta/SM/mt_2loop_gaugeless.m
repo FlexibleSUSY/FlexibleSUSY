@@ -42,7 +42,11 @@
  Bt0 = B[t,0,t];
  B0h = B[0,h,t];
 
- q = Log[Q^2]
+ q = Log[Q]
+
+ A[x_] := x (ln[x] - 1)
+
+ ln[x_] := Log[x] - 2q
 
  *)
 

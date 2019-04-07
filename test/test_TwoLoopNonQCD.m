@@ -24,7 +24,7 @@ Needs["TestSuite`", "TestSuite.m"];
 
 smDir = FileNameJoin[{Directory[], "meta", "SM"}];
 
-Get[FileNameJoin[{smDir, "mt_4loop_qcd_and_non-qcd.m"}]];
+Get[FileNameJoin[{smDir, "mt_2loop_gaugeless.m"}]];
 
 (* squared top pole mass *)
 s = t + k (g3^2 delta1QCD + delta1Yukawa) + k^2 (g3^4 delta2QCD + g3^2 delta2mixed + delta2Yukawa)
