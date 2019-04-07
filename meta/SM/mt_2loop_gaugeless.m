@@ -32,8 +32,8 @@
  We have defined:
 
  k = 1/(4Pi)^2;
- h = 2 lambda v^2;
- t = 1/2 yt^2 v^2;
+ h = squared MS-bar Higgs mass
+ t = gt^2 v^2/2;
 
  Ah = A[h];
  At = A[t];
@@ -47,6 +47,8 @@
  A[x_] := x (ln[x] - 1)
 
  ln[x_] := Log[x] - 2q
+
+ B[x,y,s] := Eq.(3.6) [hep-ph/0307101], s = squared momentum
 
  *)
 

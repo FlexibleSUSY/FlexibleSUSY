@@ -76,7 +76,7 @@ AddLoops[b_List] :=
 (* Load SM beta functions.
    Convention: h = lambda v^2, v ~ 245 GeV *)
 betag3 = AddLoops[Get[FileNameJoin[{smDir, "beta_g3.m"}]] /. simpBeta];
-betayt = AddLoops[Get[FileNameJoin[{smDir, "beta_gt.m"}]] /. simpBeta];
+betagt = AddLoops[Get[FileNameJoin[{smDir, "beta_gt.m"}]] /. simpBeta];
 betal  = AddLoops[Get[FileNameJoin[{smDir, "beta_lambda.m"}]] /. simpBeta];
 betav  = AddLoops[Get[FileNameJoin[{smDir, "beta_v.m"}]] /. simpBeta];
 
@@ -86,7 +86,7 @@ betah = Dt[\[Lambda] v^2] /. {
 } /. simpBeta
 
 betat = Dt[gt^2 v^2/2] /. {
-    Dt[gt] -> betayt,
+    Dt[gt] -> betagt,
     Dt[v] -> betav
 } /. simpBeta
 
