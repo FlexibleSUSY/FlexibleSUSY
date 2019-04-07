@@ -42,6 +42,8 @@
  Bt0 = B[t,0,t];
  B0h = B[0,h,t];
 
+ q = Log[Q^2]
+
  *)
 
 delta1QCD = t(32/3-8(At/t+1))

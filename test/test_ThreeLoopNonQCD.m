@@ -51,7 +51,9 @@ simp = {
     \[Lambda] -> h/v^2
 }
 
-(* SM beta functions *)
+(* SM beta functions
+   Convention: h = lambda v^2
+ *)
 
 betag3 = (-k 7*g3^3 +k^2 g3^3*((11*g1^2)/10+(9*g2^2)/2-2*(13*g3^2+gb^2+gt^2))+ k^3 (g3^3*(-523*g1^4+g1^2*(-9*g2^2+616*g3^2-303*gt^2)+15*(109*g2^4+3*g2^2*(56*g3^2-31*gt^2)+20*(13*g3^4-16*g3^2*gt^2+6*gt^4))))/120+k^4 (-(1/36) g3^3 (4 g3^4 gt^2 (6709-2448 Zeta[3])+36 g3^2 gt^4 (-427+96 Zeta[3])+2 g3^6 (-63559+89896 Zeta[3])+27 (20 gt^4 \[Lambda]-12 gt^2 \[Lambda]^2+gt^6 (141+8 Zeta[3]))))) /. simp;
 
