@@ -25,9 +25,28 @@ Needs["TestSuite`", "TestSuite.m"];
 smDir = FileNameJoin[{Directory[], "meta", "SM"}];
 
 Get[FileNameJoin[{smDir, "mt_2loop_gaugeless.m"}]];
+Get[FileNameJoin[{smDir, "mt_4loop_qcd.m"}]];
+
+L = At/t+1
+
+dQCD = t Normal[Series[MtOvermt^2, {k,0,4}]];
+
+delta1QCD = Coefficient[dQCD, k, 1]
+
+delta2QCD = Coefficient[dQCD, k, 2]
+
+delta3QCD = Coefficient[dQCD, k, 3]
+
+delta4QCD = Coefficient[dQCD, k, 4]
 
 (* squared top pole mass *)
-s = t + k (g3^2 delta1QCD + delta1Yukawa) + k^2 (g3^4 delta2QCD + g3^2 delta2mixed + delta2Yukawa)
+s = (
+    t
+    + k (delta1QCD + delta1Yukawa)
+    + k^2 (delta2QCD + g3^2 delta2mixed + delta2Yukawa)
+    + k^3 delta3QCD
+    + k^4 delta4QCD
+)
 
 (* Define B and A loop integrals in order to evaluate scale dependance analytically *)
 ln[x_] := Log[x] - 2q
@@ -130,8 +149,14 @@ replDeriv = {
     B00 -> (1-At/t)
 }
 
-ds = Normal[Series[ds //. replDeriv, {k,0,2}]]
+ds = Normal[Series[ds //. replDeriv, {k,0,4}]]
 
-TestEquality[ds, 0];
+TestEquality[Coefficient[ds,k,1], 0];
+
+TestEquality[Coefficient[ds,k,2], 0];
+
+TestEquality[Coefficient[ds,k^3 g3^6] // Cancel // Chop, 0];
+
+TestEquality[Coefficient[ds,k^4 g3^8] // Cancel // Chop // Chop, 0];
 
 PrintTestSummary[];
