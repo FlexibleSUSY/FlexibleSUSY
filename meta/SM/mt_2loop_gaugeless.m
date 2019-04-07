@@ -23,7 +23,8 @@
 (* 
 
  2-loop relation between top quark pole and Standard Model MS-bar mass
- from [1604.01134].
+ from [1604.01134] in the gaugeless limit (g1 = g2 = 0).  Terms of the
+ order O(at*as, at^2, lambda^n*at) are included.
 
  The squared top pole mass s is relatated to the squared MS-bar t as:
 
