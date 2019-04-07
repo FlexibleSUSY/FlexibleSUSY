@@ -1,4 +1,4 @@
-MATH	:= math
+MATH	:= /Applications/Mathematica.app/Contents/MacOS/WolframKernel
 
 META_DIR	:= meta
 TEMPLATES_DIR	:= templates
