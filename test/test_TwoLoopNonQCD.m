@@ -42,7 +42,7 @@ A[x_] := x (ln[x] - 1)
 
 B[x_,y_,s_] := 2 - r[s,x,y] ln[x] - tau[s,y,x] ln[y] + Sqrt[del[s,x,y]]/s Log[tau[x,y,s]]
 
-simp = {
+simpBeta = {
     g1 -> 0,
     g2 -> 0,
     g\[Tau] -> 0,
@@ -51,24 +51,25 @@ simp = {
     \[Lambda] -> h/v^2
 }
 
-(* SM beta functions
-   Convention: h = lambda v^2
- *)
-
 AddLoops[b_List] :=
     Total @ MapIndexed[#1 k^First[#2]&, b]
 
-betag3 = AddLoops[Get[FileNameJoin[{smDir, "beta_g3.m"}]] /. simp]
+(* Load SM beta functions.
+   Convention: h = lambda v^2, v ~ 245 GeV *)
+betag3 = AddLoops[Get[FileNameJoin[{smDir, "beta_g3.m"}]] /. simpBeta];
+betayt = AddLoops[Get[FileNameJoin[{smDir, "beta_gt.m"}]] /. simpBeta];
+betal  = AddLoops[Get[FileNameJoin[{smDir, "beta_lambda.m"}]] /. simpBeta];
+betav  = AddLoops[Get[FileNameJoin[{smDir, "beta_v.m"}]] /. simpBeta];
 
-betayt = AddLoops[Get[FileNameJoin[{smDir, "beta_gt.m"}]] /. simp]
+betah = Dt[\[Lambda] v^2] /. {
+    Dt[\[Lambda]] -> betal,
+    Dt[v] -> betav
+} /. simpBeta
 
-betalambda = AddLoops[Get[FileNameJoin[{smDir, "beta_lambda.m"}]] /. simp]
-
-betav = AddLoops[Get[FileNameJoin[{smDir, "beta_v.m"}]] /. simp]
-
-betah = v^2 betalambda + 2h/v betav
-
-betat = Sqrt[2t] v betayt + 2t/v betav
+betat = Dt[gt^2 v^2/2] /. {
+    Dt[gt] -> betayt,
+    Dt[v] -> betav
+} /. simpBeta
 
 (* total derivative *)
 ds = Dt[s] /. {
