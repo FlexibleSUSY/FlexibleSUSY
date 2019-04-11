@@ -296,7 +296,8 @@ ReadLinesInFile[fileName_String] :=
 			AssertWithMessage[line =!= $Failed,
 				"Utils`ReadLinesInFile[]: Unable to read line from file '" <>
 				fileName <> "'"];
-			AppendTo[lines, line]]
+			AppendTo[lines, line];
+			];
 		
     Close[fileHandle];
     lines
