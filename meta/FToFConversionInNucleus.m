@@ -30,7 +30,7 @@ FToFConversionInNucleusCreateInterface::usage = "";
 
 Begin["Private`"];
 
-FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_, nucleus_] :=
+FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
     Module[{prototype, definition},
 
        Utils`AssertWithMessage[

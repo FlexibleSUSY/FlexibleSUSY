@@ -53,7 +53,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
 		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.cpp \
-		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp.in \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
@@ -86,7 +86,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
 		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.hpp \
-		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp.in \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \

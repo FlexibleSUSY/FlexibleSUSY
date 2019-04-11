@@ -76,6 +76,13 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
          res.Sp = 0.0153 * muon_pole_mass_5o2;
          res.Sn = 0.0163 * muon_pole_mass_5o2;
          return res;
+      case Nucleus::Ti:
+         res.D  = 0. * muon_pole_mass_5o2;
+         res.Vp = 0. * muon_pole_mass_5o2;
+         res.Vn = 0. * muon_pole_mass_5o2;
+         res.Sp = 0. * muon_pole_mass_5o2;
+         res.Sn = 0. * muon_pole_mass_5o2;
+         return res;
       default:
          throw std::invalid_argument("Unknown nucleus");
    } 
@@ -87,6 +94,8 @@ double get_capture_rate (const Nucleus N) {
          return 8.84868e-18;
       case Nucleus::Al:
          return 4.64079e-19;
+      case Nucleus::Ti:
+	 return 0.;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
@@ -96,7 +105,7 @@ template <class FOutBar, class FIn, class VBar>
 std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {
     context_base context {model};
     using vertex = Vertex<FOutBar, FIn, VBar>;
-    std::array<int, 4> indices {0, 0, 0, 0};
+    std::array<int, 2> indices {0, 0};
     const auto value =  vertex::evaluate(indices, context);
     return 0.5*(value.left() + value.right());
 }

@@ -53,6 +53,8 @@ BeginPackage["FlexibleSUSY`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
+              "FFMassiveVFormFactors`",
+              "FToFConversionInNucleus`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -2200,8 +2202,8 @@ WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
          {interfacePrototypes, interfaceDefinitions} =
               StringJoin @@@
             (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
-               DeleteDuplicatesBy[leptonPairs, Drop[#, -1]&]
-            ] )
+               DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]]
+            ] );
       ];
 
       WriteOut`ReplaceInFiles[files,
@@ -4374,7 +4376,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            (* OBSERVABLE: l -> l conversion *)
 
-           (*
            Print["Creating FToFConversionInNucleus class ..."];
            LToLConversionFields =
               DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
@@ -4389,7 +4390,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
-                             *)
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
