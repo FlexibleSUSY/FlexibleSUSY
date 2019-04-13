@@ -22,7 +22,7 @@
 
 BeginPackage["Decays`",
    {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`",
-      "ColorMath`", "ColorMathInterface`"}];
+      "ColorMath`"(*, "ColorMathInterface`"*)}];
 
 FSParticleDecay::usage="head used for storing details of an particle decay,
 in the format
@@ -57,12 +57,7 @@ CreatePartialWidthSpecializations::usage="creates specialized functions for part
 WrapCodeInLoopOverInternalVertices::usage=""; (* @todo remove *)
 Begin["`Private`"];
 
-MyReIm[z_] := If[$VersionNumber >= 10.1,
-   ReIm[z],
-   {Re[z], Im[z]}
-];
-
-StripDiagramColorFactor[fields_, colorFactor_] := 
+StripDiagramColorFactor[fields_, colorFactor_] :=
    Module[{fieldIn = fields[[1]], fieldsOut = Drop[fields, 1], initialStateRep, finalStateReps},
       initialStateRep = TreeMasses`GetColorRepresentation@fieldsIn;
       finalStateReps = TreeMasses`GetColorRepresentation /@ fieldsOut;
@@ -1074,41 +1069,6 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
            _, ""
           ];
 
-EvaluateColorFactor[topology_, diagram_] :=
-   Module[{diagramWithIndices, field1, field2, replacementList, externalParticles},
-      diagramWithIndices =
-         Map[
-            If[ListQ[#], #,
-            If[TreeMasses`ColorChargedQ[#],
-               If[TreeMasses`GetDimension[#] === 1,
-                  #[{Unique["ct"]}],
-                  #[{Unique["gt"], Unique["ct"]}]
-               ], #
-            ]]&, diagram, 2
-         ];
-      (*Utils`PrintHeadline["Diagram"];*)
-      (*Print[diagramWithIndices];*)
-      replacementList = {};
-      For[i = 1, i <= Length[diagram], i++,
-         For[j = i+1, j <= Length[diagram], j++,
-            connectedParticles = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
-            If[connectedParticles === {}, Continue[]];
-            For[k = 1, k <= Length[connectedParticles], k++,
-               If[
-                  TreeMasses`ColorChargedQ[
-                     If[ListQ[diagram[[i]]], diagram[[i, connectedParticles[[k,1]]]], diagram[[i]]]
-                  ],
-                  field1 = If[ListQ[diagram[[i]]], diagramWithIndices[[i, connectedParticles[[k,1]]]], diagramWithIndices[[i]]];
-                  field2 = If[ListQ[diagram[[j]]], diagramWithIndices[[j, connectedParticles[[k,2]]]], diagramWithIndices[[j]]];
-                  AppendTo[replacementList, ColorMathInterface`GetFieldColorIndex[field2] -> ColorMathInterface`GetFieldColorIndex[field1]];
-               ];
-            ]
-         ]
-      ];
-      externalParticles = Select[diagramWithIndices, (Head[#]=!=List)&];
-      {externalParticles, ColorMathInterface`FSCalcColorFactor[Vertex /@ Drop[diagramWithIndices/.replacementList, 3]]}
-   ];
-
 kurwaf2[decay_, topology_, diagram_] :=
    Module[{file, cos2, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
       numberOfVertices = Count[diagram, el_ /; Head[el] === List],
@@ -1229,10 +1189,8 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
          If[cos3 =!= {}, Break[]];
       ];
 
-      "std::complex<double> " <> ToString@N[MyReIm[ColorMathInterface`ColorN[StripDiagramColorFactor@@EvaluateColorFactor[topology, diagram]]],16] <> " * " <>
-      If[cos3 === {}, Print["Topology found, but no diagram for ", diagram];Quit[1],
-                   "calculate_"<>cos3[[1,1]]
-      ] 
+      "std::complex<double> " <> ToString@N[FSReIm[StripDiagramColorFactor[externalParticles, ColorFactorForDiagram[topology, diagram]]],16] <> " * " <>
+         "calculate_"<> cos3[[1,1]]
    ];
 
 WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
@@ -1262,6 +1220,16 @@ EvaluateDecayDiagramWithTopology[decay_, topology_, diagram_] :=
           Print["Error: requested evaluation of unsupported topology."];
           Quit[1];
          ];
+
+(* convenient abbreviation *)
+FSReIm[z_] := If[$VersionNumber >= 10.1,
+   ReIm[z],
+   {Re[z], Im[z]}
+];
+ColorFactorForDiagram[topology_, diagram_] :=
+   ColourFactorForIndexedDiagramFromGraph[
+      CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
+   ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{oneLoopDiags, body = ""},
