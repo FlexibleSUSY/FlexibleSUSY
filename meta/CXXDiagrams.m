@@ -1510,7 +1510,7 @@ NumberOfExternalParticlesInTopology[topology_] :=
    Count[topology, e_ /; Sort[e] === {0, 0, 0, 0, 0, 1}];
 
 NumberOfPropagatorsInTopology[topology_] :=
-   Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology];
+   If[Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology] === 3, 3, 2];
 
 End[];
 EndPackage[];
