@@ -2461,7 +2461,8 @@ WriteAMuonClass[calcAMu_, files_List] :=
                otherwise we assume it's the second particle in the lepton multiplet *)
             muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
-            discardSMcontributions = CConversion`CreateCBoolValue[True]},
+            discardSMcontributions = CConversion`CreateCBoolValue[True],
+            graphs, diagrams, vertices, barZee = ""},
 
       calculation =
          If[calcAMu,
@@ -2476,14 +2477,35 @@ WriteAMuonClass[calcAMu_, files_List] :=
 
       getMSUSY = AMuon`AMuonGetMSUSY[];
 
+      graphs = AMuon`AMuonContributingGraphs[];
+      diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
+
+      vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
+
+      For[i = 1, i <= Length[graphs], i++,
+         For[j = 1, j <= Length[diagrams[[i]]], j++,
+            barZee = barZee <>
+               "valBarZee += std::complex<double> " <> ToString @ N[
+                  Utils`FSReIm @ CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+               CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
+                  graphs[[i]]
+                ], 16] <> " * " <>
+                ToString @ AMuon`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
+                "::value({" <> muonIndex <> "}, context, qedqcd);\n"
+         ];
+      ];
+
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
+         "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
          "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@AMuon_MuonIndex@" -> muonIndex,
+         "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          Sequence @@ GeneralReplacementRules[]
         }];
 
+        vertices
       ];
 
 GetBVPSolverHeaderName[solver_] :=
@@ -4046,7 +4068,7 @@ Options[MakeFlexibleSUSY] :=
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
-            edmVertices, edmFields,
+            aMuonVertices, edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -5010,7 +5032,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                ];
 
            Print["Creating AMuon class ..."];
-           WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+           aMuonVertices = WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
@@ -5037,7 +5059,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMuonVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

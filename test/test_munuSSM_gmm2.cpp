@@ -128,7 +128,7 @@ Block YVIN
 
    munuSSM_slha m = setup_munuSSM(input, qedqcd, settings);
 
-   constexpr double reference_value = 2.1176299646121334e-09;
+   constexpr double reference_value = 2.9031111421887208e-09;
 
    double amu = munuSSM_a_muon::calculate_a_muon(m, qedqcd);
 
