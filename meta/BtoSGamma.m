@@ -27,10 +27,29 @@ BeginPackage["BtoSGamma`",
    {"SARAH`", "TextFormatting`", "TreeMasses`", "CXXDiagrams`", "Utils`"}
 ];
 
-CreateInterfaceBtoSGamma::usage = "";
+CreateInterfaceBtoSGamma::usage = "Creates the c++ interface for b->s gamma";
+GetBottomQuark::usage="Returns bottom quark";
+GetStrangeQuark::usage="Returns strange quark";
 
 Begin["`Private`"];
 
+(** \brief Returns the bottom quark which is either in its own multiplet or
+ * in a larger multiplet
+ **)
+GetBottomQuark[] := If[TreeMasses`GetDimension[TreeMasses`GetSMBottomQuarkMultiplet[]] =!= 1,
+  TreeMasses`GetSMBottomQuarkMultiplet[],
+  Cases[SARAH`ParticleDefinitions[FlexibleSUSY`FSEigenstates],
+    {p_, {Description -> "Bottom Quark", ___}} -> p, 1][[1]]
+];
+
+(** \brief Returns the strange quark which is either in its own multiplet or
+ * in a larger multiplet
+ **)
+GetStrangeQuark[] := If[TreeMasses`GetDimension[TreeMasses`GetSMStrangeQuarkMultiplet[]] =!= 1,
+  TreeMasses`GetSMStrangeQuarkMultiplet[],
+  Cases[SARAH`ParticleDefinitions[FlexibleSUSY`FSEigenstates],
+    {p_, {Description -> "Strange Quark", ___}} -> p, 1][[1]]
+];
 
 (** \brief Creates the code for the b_to_s_gamma.cpp.in template
  * \note We assume that in the quark multiplet the b quark is the 3rd
@@ -38,10 +57,10 @@ Begin["`Private`"];
  **)
 CreateInterfaceBtoSGamma[matchingOn_] :=
   Module[{definition="",
-          inFermion = SARAH`DownQuark,
-          outFermion = SARAH`DownQuark,
-          dimensionInFermion = TreeMasses`GetDimension[inFermion],
-          dimensionOutFermion = TreeMasses`GetDimension[outFermion]},
+          inFermion = GetBottomQuark[],
+          outFermion = GetStrangeQuark[],
+          dimensionInFermion = TreeMasses`GetDimension[TreeMasses`GetSMBottomQuarkMultiplet[]],
+          dimensionOutFermion = TreeMasses`GetDimension[TreeMasses`GetSMStrangeQuarkMultiplet[]]},
     Utils`AssertWithMessage[BooleanQ[matchingOn],
       "BtoSGamma`CreateInterfaceBtoSGamma[]: Error, argument must be either True or False."];
 
@@ -61,12 +80,12 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
           "{0}",
           "{}"] <> ");\n" <>
         "const auto form_factors_VP = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
-        CXXNameOfField[inFermion] <> "_" <> CXXNameOfField[SARAH`Photon] <> "_form_factors(" <>
+        CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
             "b_quark_index, s_quark_index, model);\n",
             "model);\n"] <>
         "const auto form_factors_VG = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
-        CXXNameOfField[inFermion] <> "_" <> CXXNameOfField[SARAH`Gluon] <> "_form_factors(" <>
+        CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetGluon[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
             "b_quark_index, s_quark_index, model);\n\n",
             "model);\n\n"] <>

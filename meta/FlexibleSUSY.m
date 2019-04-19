@@ -2171,7 +2171,7 @@ WriteLToLGammaClass[decays_List, files_List] :=
 WriteBToSGammaClass[decays_List, files_List] :=
    Module[{createInterface = False,
           btosgammaInterfaceDefinitions},
-       If[Length[decays] > 0,
+       If[decays =!= {},
          createInterface = True];
        btosgammaInterfaceDefinitions =
          BtoSGamma`CreateInterfaceBtoSGamma[createInterface];
@@ -4388,8 +4388,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* b -> s gamma *)
            If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
              Print["Creating b->s'A class ..."];
-             QToQGammaFields = Join[{SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Photon}},
-               {SARAH`DownQuark -> {SARAH`DownQuark, SARAH`Gluon}}],
+             QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
+               {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
              QToQGammaFields = {}];
            WriteBToSGammaClass[QToQGammaFields,
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
