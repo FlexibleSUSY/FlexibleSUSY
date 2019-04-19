@@ -48,6 +48,10 @@ using namespace @ModelName@_FFV_form_factors;
 namespace flexiblesusy {
 namespace @ModelName@_b_to_s_gamma {
 
+/**
+ * @brief Writes the Wilson coefficients into a json file to make it usable
+ *        for the wilson and flavio package
+ */
 void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<double>& C7pNP_bs,
    const std::complex<double>& C8NP_bs, const std::complex<double>& C8pNP_bs,
    const double& matching_scale)
@@ -79,6 +83,11 @@ void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<
    wc_json.close();
 }
 
+/**
+ * @brief Calculates the Wilson coefficients C7, C7p, C8 and C8p
+ *        which are required to compute the branching ratio
+ *        BR(B->Xs gamma)
+ */
 std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
 {
