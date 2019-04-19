@@ -71,10 +71,6 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
         If[dimensionOutFermion =!= 1,
         "constexpr int s_quark_index = 1;\n",
         ""] <>
-        "const auto mb = context.mass<" <> CXXNameOfField[inFermion] <> ">(" <>
-        If[dimensionInFermion =!= 1,
-          "{2}",
-          "{}"] <> ");\n" <>
         "const auto mW = context.mass<" <> CXXNameOfField[TreeMasses`GetWBoson[]] <> ">(" <>
         If[TreeMasses`GetDimension[TreeMasses`GetWBoson[]] =!= 1,
           "{0}",
