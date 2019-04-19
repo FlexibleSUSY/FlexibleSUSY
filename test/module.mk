@@ -187,9 +187,9 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_database.cpp
 endif
 
-ifeq ($(WITH_MSSM),yes)
+ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
-		$(DIR)/test_MSSM_b_to_s_gamma.cpp
+		$(DIR)/test_CMSSMCKM_b_to_s_gamma.cpp
 endif
 
 ifeq ($(WITH_MRSSM2),yes)
@@ -805,7 +805,7 @@ $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_b_to_s_gamma.x: $(LIBMRSSM2)
 
-$(DIR)/test_MSSM_b_to_s_gamma.x: $(LIBMSSM)
+$(DIR)/test_CMSSMCKM_b_to_s_gamma.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 

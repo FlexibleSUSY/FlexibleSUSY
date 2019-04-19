@@ -49,76 +49,54 @@ namespace flexiblesusy {
 namespace @ModelName@_b_to_s_gamma {
 
 void write_wilsoncoeffs(const std::complex<double>& C7NP_bs, const std::complex<double>& C7pNP_bs,
-    const std::complex<double>& C8NP_bs, const std::complex<double>& C8pNP_bs,
-    const double& matching_scale)
+   const std::complex<double>& C8NP_bs, const std::complex<double>& C8pNP_bs,
+   const double& matching_scale)
 {
-    std::ofstream wc_json;
-    wc_json.open ("WC_@ModelName@.json");
-    wc_json << "{\n\"eft\": \"WET\",\n";
-    wc_json << "\t\"basis\": \"flavio\",\n";
-    wc_json << "\t\"scale\": \"" << matching_scale << "\",\n";
-    wc_json << "\t\"values\": { \n";
-    wc_json << "\t\t\"C7_bs\": { \n";
-    wc_json << "\t\t\t\"Re\": " << Re(C7NP_bs) << ",\n";
-    wc_json << "\t\t\t\"Im\": " << Im(C7NP_bs) << "\n";
-    wc_json << "\t\t},\n";
-    wc_json << "\t\t\"C7p_bs\": { \n";
-    wc_json << "\t\t\t\"Re\": " << Re(C7pNP_bs) << ",\n";
-    wc_json << "\t\t\t\"Im\": " << Im(C7pNP_bs) << "\n";
-    wc_json << "\t\t},\n";
-    wc_json << "\t\t\"C8_bs\": { \n";
-    wc_json << "\t\t\t\"Re\": " << Re(C8NP_bs) << ",\n";
-    wc_json << "\t\t\t\"Im\": " << Im(C8NP_bs) << "\n";
-    wc_json << "\t\t},\n";
-    wc_json << "\t\t\"C8p_bs\": { \n";
-    wc_json << "\t\t\t\"Re\": " << Re(C8pNP_bs) << ",\n";
-    wc_json << "\t\t\t\"Im\": " << Im(C8pNP_bs) << "\n";
-    wc_json << "\t\t}\n";
-    wc_json << "\t}\n";
-    wc_json << "}";
-    wc_json.close();
+   std::ofstream wc_json;
+   wc_json.open ("WC_@ModelName@.json");
+   wc_json << "{\n\"eft\": \"WET\",\n";
+   wc_json << "\t\"basis\": \"flavio\",\n";
+   wc_json << "\t\"scale\": \"" << matching_scale << "\",\n";
+   wc_json << "\t\"values\": { \n";
+   wc_json << "\t\t\"C7_bs\": { \n";
+   wc_json << "\t\t\t\"Re\": " << Re(C7NP_bs) << ",\n";
+   wc_json << "\t\t\t\"Im\": " << Im(C7NP_bs) << "\n";
+   wc_json << "\t\t},\n";
+   wc_json << "\t\t\"C7p_bs\": { \n";
+   wc_json << "\t\t\t\"Re\": " << Re(C7pNP_bs) << ",\n";
+   wc_json << "\t\t\t\"Im\": " << Im(C7pNP_bs) << "\n";
+   wc_json << "\t\t},\n";
+   wc_json << "\t\t\"C8_bs\": { \n";
+   wc_json << "\t\t\t\"Re\": " << Re(C8NP_bs) << ",\n";
+   wc_json << "\t\t\t\"Im\": " << Im(C8NP_bs) << "\n";
+   wc_json << "\t\t},\n";
+   wc_json << "\t\t\"C8p_bs\": { \n";
+   wc_json << "\t\t\t\"Re\": " << Re(C8pNP_bs) << ",\n";
+   wc_json << "\t\t\t\"Im\": " << Im(C8pNP_bs) << "\n";
+   wc_json << "\t\t}\n";
+   wc_json << "\t}\n";
+   wc_json << "}";
+   wc_json.close();
 }
-    
+
 std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
-    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
 {
-    context_base context { model };
+   context_base context { model };
 
-    constexpr int b_quark_index = 2;
-    constexpr int s_quark_index = 1;
+   const auto complex_CKM = qedqcd.get_complex_ckm();
+   const std::complex<double> Vtb (complex_CKM(2, 2));
+   std::complex<double> Vts;
+   // avoid division by zero
+   if (complex_CKM(2, 1) == std::complex<double>(0, 0)) {
+       Vts = std::complex<double>(-0.0404063888996, -0.00072107415577);
+   } else {
+       Vts = complex_CKM(2, 1);
+   }
+   const auto g2 = MODELPARAMETER(g2);
+   const auto g3 = MODELPARAMETER(g3);
 
-    const auto complex_CKM = qedqcd.get_complex_ckm();
-    const std::complex<double> Vtb (complex_CKM(2, 2));
-    std::complex<double> Vts;
-    // avoid division by zero
-    if (complex_CKM(2, 1) == std::complex<double>(0, 0)) {
-        Vts = std::complex<double>(-0.0404063888996, -0.00072107415577);
-    } else {
-        Vts = complex_CKM(2, 1);
-    }
-    const auto g2 = MODELPARAMETER(g2);
-    const auto g3 = MODELPARAMETER(g3);
-    const auto mW = context.mass<@WBoson@>({});
-    const auto mb = context.mass<@DownQuark@>({ b_quark_index });
-
-    // choose normalization according to flavio
-    const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts));
-    const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts));
-
-    const auto form_factors_VP =
-        calculate_@DownQuark@_@DownQuark@_VP_form_factors(b_quark_index, s_quark_index, model);
-        
-    const auto form_factors_VG =
-        calculate_@DownQuark@_@DownQuark@_VG_form_factors(b_quark_index, s_quark_index, model);
-
-    const auto C7NP_bs = normC7 * form_factors_VP[3];
-    const auto C7pNP_bs = normC7 * form_factors_VP[2];
-    const auto C8NP_bs = normC8 * form_factors_VG[3];
-    const auto C8pNP_bs = normC8 * form_factors_VG[2];
-
-    write_wilsoncoeffs(C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs, model.get_scale());
-
-    return {C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs};
+@BtoSGammaInterface@
 }
 
 } // namespace @ModelName@_b_to_s_gamma

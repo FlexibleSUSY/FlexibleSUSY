@@ -89,5 +89,8 @@ ExtraSLHAOutputBlocks = {
             {4, M[Ah[2]]^2},
             {101, B[\[Mu]]},
             {102, vd},
-            {103, vu} } }
+            {103, vu} } },
+   {FlexibleSUSYLowEnergy,
+   {{27, FlexibleSUSYObservable`bsgamma}}
+   }
 };
