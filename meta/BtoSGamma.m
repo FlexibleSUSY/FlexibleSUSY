@@ -73,6 +73,8 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
         ""] <>
         "const auto mW = context.mass<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetWBoson[]] <> ">(" <>
         If[TreeMasses`GetDimension[TreeMasses`GetWBoson[]] =!= 1,
+          Print["Warning: b->s gamma module does not work reliable with multiple W bosons.\n" <>
+              "We assume the first element is SM W boson"];
           "{0}",
           "{}"] <> ");\n" <>
         "const auto form_factors_VP = calculate_" <> CXXDiagrams`CXXNameOfField[inFermion] <> "_" <>
