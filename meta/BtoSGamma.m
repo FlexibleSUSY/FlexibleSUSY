@@ -65,23 +65,23 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
       "BtoSGamma`CreateInterfaceBtoSGamma[]: Error, argument must be either True or False."];
 
     If[matchingOn,
-      definition = IndentText[If[dimensionInFermion =!= 1,
+      definition = TextFormatting`IndentText[If[dimensionInFermion =!= 1,
         "constexpr int b_quark_index = 2;\n",
         ""] <>
         If[dimensionOutFermion =!= 1,
         "constexpr int s_quark_index = 1;\n",
         ""] <>
-        "const auto mW = context.mass<" <> CXXNameOfField[TreeMasses`GetWBoson[]] <> ">(" <>
+        "const auto mW = context.mass<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetWBoson[]] <> ">(" <>
         If[TreeMasses`GetDimension[TreeMasses`GetWBoson[]] =!= 1,
           "{0}",
           "{}"] <> ");\n" <>
-        "const auto form_factors_VP = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
-        CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
+        "const auto form_factors_VP = calculate_" <> CXXDiagrams`CXXNameOfField[inFermion] <> "_" <>
+        CXXDiagrams`CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
             "b_quark_index, s_quark_index, model);\n",
             "model);\n"] <>
-        "const auto form_factors_VG = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
-        CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetGluon[]] <> "_form_factors(" <>
+        "const auto form_factors_VG = calculate_" <> CXXDiagrams`CXXNameOfField[inFermion] <> "_" <>
+        CXXDiagrams`CXXNameOfField[outFermion] <> "_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetGluon[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
             "b_quark_index, s_quark_index, model);\n\n",
             "model);\n\n"] <>
@@ -95,7 +95,7 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
         "write_wilsoncoeffs(C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs, model.get_scale());\n\n" <>
         "return {C7NP_bs, C7pNP_bs, C8NP_bs, C8pNP_bs};\n"
         ],
-      definition = IndentText["return {0, 0, 0, 0};"]
+      definition = TextFormatting`IndentText["return {0, 0, 0, 0};"]
     ];
 
     definition
