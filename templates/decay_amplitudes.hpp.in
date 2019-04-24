@@ -75,7 +75,15 @@ struct Decay_amplitude_SVV {
    std::complex<double> form_factor_eps{};
 
    double square() const;
-   Decay_amplitude_SVV operator+=(Decay_amplitude_SVV const&);
+   Decay_amplitude_SVV operator+=(Decay_amplitude_SVV const& amp) {
+      form_factor_g += amp.form_factor_g;
+      form_factor_11 += amp.form_factor_11;
+      form_factor_12 += amp.form_factor_12;
+      form_factor_21 += amp.form_factor_21;
+      form_factor_22 += amp.form_factor_22;
+      form_factor_eps += amp.form_factor_eps;
+      return *this;
+   }
 };
 Decay_amplitude_SVV operator*(std::complex<double>, Decay_amplitude_SVV const&);
 
@@ -91,7 +99,11 @@ struct Decay_amplitude_SFF {
    std::complex<double> form_factor_right{};
 
    double square() const;
-   Decay_amplitude_SFF operator+=(Decay_amplitude_SFF const&);
+   Decay_amplitude_SFF operator+=(Decay_amplitude_SFF const& amp) {
+      form_factor_left += amp.form_factor_left;
+      form_factor_right += amp.form_factor_right;
+      return *this;
+   }
 };
 Decay_amplitude_SFF operator*(std::complex<double>, Decay_amplitude_SFF const&);
 
@@ -107,7 +119,11 @@ struct Decay_amplitude_FFS {
    std::complex<double> form_factor_right{};
 
    double square() const;
-   Decay_amplitude_FFS operator+=(Decay_amplitude_FFS const&);
+   Decay_amplitude_FFS operator+=(Decay_amplitude_FFS const& amp) {
+      form_factor_left += amp.form_factor_left;
+      form_factor_right += amp.form_factor_right;
+      return *this;
+   }
 };
 Decay_amplitude_FFS operator*(std::complex<double>, Decay_amplitude_FFS const&);
 
@@ -126,7 +142,13 @@ struct Decay_amplitude_FFV {
    std::complex<double> form_factor_p_2{};
 
    double square() const;
-   Decay_amplitude_FFV operator+=(Decay_amplitude_FFV const&);
+   Decay_amplitude_FFV operator+=(Decay_amplitude_FFV const& amp) {
+      form_factor_gam_left += amp.form_factor_gam_left;
+      form_factor_gam_right += amp.form_factor_gam_right;
+      form_factor_p_1 += amp.form_factor_p_1;
+      form_factor_p_2 += amp.form_factor_p_2;
+      return *this;
+   }
 };
 Decay_amplitude_FFV operator*(std::complex<double>, Decay_amplitude_FFV const&);
 

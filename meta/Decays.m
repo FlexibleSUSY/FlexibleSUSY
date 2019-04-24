@@ -22,7 +22,7 @@
 
 BeginPackage["Decays`",
    {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`",
-      "ColorMath`"(*, "ColorMathInterface`"*)}];
+      "ColorMath`"}];
 
 FSParticleDecay::usage="head used for storing details of an particle decay,
 in the format
@@ -33,7 +33,7 @@ where the topology is encoded as the relevant adjacency matrix.
 IsSupportedDecayParticle::usage="returns True if decays for the given particle are supported.";
 
 CreateCompleteParticleList::usage="";
-GetDecaysForParticle::usage="";
+GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
@@ -449,12 +449,15 @@ GetDecaysForParticle[particle_, {minNumberOfProducts_Integer /; minNumberOfProdu
 GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
     Module[{genericFinalStates, finalStateParticlesClassified,
             isPossibleDecay, concreteFinalStates, decays},
+
            If[exactNumberOfProducts > 2,
               Print["Error: decays with ", exactNumberOfProducts,
                     " final particles are not currently supported."];
               Quit[1];
-             ];
+           ];
+
            genericFinalStates = GetAllowedGenericFinalStates[particle, exactNumberOfProducts];
+
            (* @todo checks on colour and Lorentz structure *)
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
@@ -1069,88 +1072,10 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
            _, ""
           ];
 
-kurwaf2[decay_, topology_, diagram_] :=
-   Module[{file, cos2, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
-      numberOfVertices = Count[diagram, el_ /; Head[el] === List],
-      externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
-      internalParticles},
-
-      Switch[numberOfVertices,
-      (* half-candy diagram *)
-         2,
-         con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-         p1 = diagram[[4, con1[[1,1]]]];
-         p2 = diagram[[4, con1[[2,1]]]];,
-         3,
-         con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-         p1 = diagram[[4, con1[[1,1]]]];
-         con2 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 6, diagram, topology];
-         p2 = diagram[[4, con2[[1,1]]]];
-         con3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[5, 6, diagram, topology];
-         p3 = diagram[[5, con3[[1,1]]]];
-      ];
-      file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"];
-
-      (* select diagrams with given topology *)
-      (* @todo: some topologies are missing, so cos2 might be {} *)
-      cos2 = Select[file, MemberQ[#, topology]&];
-      If[cos2 === {},
-         Print["Can't find topology ", topology, " for diagram ", diagram];
-         Quit[1];
-      ];
-
-      internalParticles = If[numberOfVertices === 2, {p1,p2}, {p1, p2, p3}];
-      particles = Join[externalParticles, internalParticles];
-
-      particles2 = MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ particles];
-
-      cos3 = Select[cos2, MemberQ[#, particles2]&];
-      If[cos3 === {}, Print["cos3 in kurwaf2 empty"];Quit[1]];
-      cos3[[1,-1]]
-   ];
-kurwaf[decay_, topology_, diagram_] :=
-   Module[{file, cos2, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
-      numberOfVertices = Count[diagram, el_ /; Head[el] === List],
-      externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
-      internalParticles},
-
-      Switch[numberOfVertices,
-      (* half-candy diagram *)
-         2,
-         con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-         p1 = diagram[[4, con1[[1,1]]]];
-         p2 = diagram[[4, con1[[2,1]]]];,
-         3,
-         con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-         p1 = diagram[[4, con1[[1,1]]]];
-         con2 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 6, diagram, topology];
-         p2 = diagram[[4, con2[[1,1]]]];
-         con3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[5, 6, diagram, topology];
-         p3 = diagram[[5, con3[[1,1]]]];
-      ];
-      file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"];
-
-      (* select diagrams with given topology *)
-      (* @todo: some topologies are missing, so cos2 might be {} *)
-      cos2 = Select[file, MemberQ[#, topology]&];
-      If[cos2 === {},
-         Print["Can't find topology ", topology, " for diagram ", diagram];
-         Quit[1];
-      ];
-
-      internalParticles = If[numberOfVertices === 2, {p1,p2}, {p1, p2, p3}];
-      particles = Join[externalParticles, internalParticles];
-
-      particles2 = MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ particles];
-
-      Print[cos2];
-      Print[particles2];
-      cos3 = Select[cos2, MemberQ[#, particles2]&];
-      If[cos3 === {}, Print["cos3 in kurwaf empty"];Quit[1]];
-      Length[cos3[[1,5]]]
-   ];
 EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
-    Module[{file, cos2, cos3, particles, particles2, con1, con2, con3, p1, p2, p3, 
+    Module[{
+       file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"],
+       diagramsWithCorrectTopology, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
       numberOfVertices = Count[diagram, el_ /; Head[el] === List],
       externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
       internalParticles, permutedParticles},
@@ -1169,28 +1094,34 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
             con3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[5, 6, diagram, topology];
             p3 = diagram[[5, con3[[1,1]]]];
       ];
-      file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"];
 
-      (* select diagrams with given topology *)
-      (* @todo: some topologies are missing, so cos2 might be {} *)
-      cos2 = Select[file, MemberQ[#, topology]&];
-      If[cos2 === {},
-         Print["Can't find topology ", topology, " for diagram ", diagram];
-         Quit[1];
+      diagramsWithCorrectTopology = Select[file, MemberQ[#, topology]&];
+      Utils`AssertWithMessage[diagramsWithCorrectTopology =!= {},
+         "Can't find topology " <> ToString@topology <> " for diagram " <> ToString@diagram
       ];
 
       internalParticles = If[numberOfVertices === 2, {p1,p2}, {p1, p2, p3}];
       particles = Join[externalParticles, internalParticles];
 
-      particles2 = (MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ #])& /@ permutedParticles;
+      If[GetFeynArtsTypeName /@ particles === {S,V,V,V,S},
+        particles = Join[Drop[particles, -2], {particles[[5]], particles[[4]]}];
+      ];
+      particles2 = MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ particles];
 
-      For[i = 1, i <= Length[particles2], i++,
-         cos3 = Select[cos2, MemberQ[#, particles2[[i]]]&];
-         If[cos3 =!= {}, Break[]];
+      cos3 = Select[diagramsWithCorrectTopology, MemberQ[#, particles2]&];
+      If[cos3 === {},
+         Print["Topology found, but no diagram for ", diagram];
+         Print[particles2];
+         Print[diagramsWithCorrectTopology];
+         Quit[1];
       ];
 
-      "std::complex<double> " <> ToString@N[FSReIm[StripDiagramColorFactor[externalParticles, ColorFactorForDiagram[topology, diagram]]],16] <> " * " <>
-         "calculate_"<> cos3[[1,1]]
+      {"std::complex<double> " <> ToString@N[Utils`FSReIm[StripDiagramColorFactor[externalParticles, ColorFactorForDiagram[topology, diagram]]], 16] <> " * " <>
+         "calculate_" <> cos3[[1, 1]],
+         Length[cos3[[1, 5]]],
+         cos3[[1, -1]]
+      }
+
    ];
 
 WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
@@ -1221,37 +1152,38 @@ EvaluateDecayDiagramWithTopology[decay_, topology_, diagram_] :=
           Quit[1];
          ];
 
-(* convenient abbreviation *)
-FSReIm[z_] := If[$VersionNumber >= 10.1,
-   ReIm[z],
-   {Re[z], Im[z]}
-];
 ColorFactorForDiagram[topology_, diagram_] :=
    ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopDiags, body = ""},
-           oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
+    Module[{oneLoopTopAndInsertion, body = ""},
+
+       (* list of elements like {topology, insertion} *)
+       oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
+
            (
               body = body <>
                  WrapCodeInLoopOverInternalVertices[
                     Sequence @@ #,
-                    "result += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #] <>
+                    "result += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[1]] <>
                        "(result.m_decay, result.m_out_1, result.m_out_2,\n" <>
+                          "// number of internal masses " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] <> "\n" <>
                     StringJoin@@Riffle[Table[ToString@RandomReal[], CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]]], ","] <> ",\n" <>
-                    StringJoin@@Riffle[Table[ToString@RandomReal[],
-                       kurwaf[decay, Sequence @@ #]
 
-                    ], ","] <> ",\n" <>
+                    "// number of couplings " <> ToString@EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]] <> "\n" <>
+                    StringJoin@@Riffle[Table[ToString@RandomReal[], EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]]], ","] <> ",\n" <>
 
                      (* scale *)
-                    "result.m_decay" <>
-                       If[!kurwaf2[decay, Sequence @@ #], ", 1.", ""] <>
+                    "// renormalization scale\n" <>
+                    "result.m_decay\n" <>
+                       (* finite or not *)
+                    "// finite part\n" <>
+                       If[!EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[3]], ", 1.", ""] <>
                      ");"
                   ]
-            )& /@ oneLoopDiags;
+            )& /@ oneLoopTopAndInsertion;
 
            "// 1-loop amplitude(s)\n" <> body
           ];
@@ -1314,25 +1246,33 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
           *)
 
 (* creates `calculate_amplitude` function
-   that returns a total 1-loop amplitude for a given external particles *)
+   that returns a total (sumed over internal insertions) 1-loop amplitude for a given external particles *)
 CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
+            fieldsNamespace = modelName <> "_cxx_diagrams::fields",
             returnVar = "result", paramsStruct = "context", returnType = "",
-            fieldsNamespace, fieldsList, templatePars = "", args = "",
+            externalFieldsList, templatePars = "", args = "",
             body = ""},
 
-         Print["Entry point: creating amplitude for ", initialParticle, " -> ", finalState];
+           Print["Entry point: creating amplitude for ", initialParticle, " -> ", finalState];
+
+           (* Decay_amplitude_XXX *)
            returnType = GetDecayAmplitudeType[decay];
-           fieldsNamespace = modelName <> "_cxx_diagrams::fields";
-           fieldsList = Join[{initialParticle}, finalState];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#, prefixNamespace -> fieldsNamespace]& /@
-                                                               fieldsList, ", "] <> ">";
+
+           (* template arguments *)
+           externalFieldsList = Join[{initialParticle}, finalState];
+           templatePars = "<" <> Utils`StringJoinWithSeparator[
+              CXXDiagrams`CXXNameOfField[#, prefixNamespace -> fieldsNamespace]& /@ externalFieldsList, ", "] <> ">";
+
+           (* function arguments *)
            args = "const " <> modelName <> "_cxx_diagrams::context_base& " <> paramsStruct <> ", " <>
-                  Utils`StringJoinWithSeparator[MapIndexed[("const " <> CreateFieldIndices[#1, fieldsNamespace] <> "& idx_" <> ToString[First[#2]])&, fieldsList], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#, prefixNamespace -> modelName <> "_cxx_diagrams::fields"]& /@
-                                                               fieldsList, ", "] <> ">";
+                  Utils`StringJoinWithSeparator[
+                     MapIndexed[(CreateFieldIndices[#1, fieldsNamespace] <> " const& idx_" <> ToString[First[#2]])&, externalFieldsList], ", "
+                  ];
+
+           (* body *)
            body = returnType <> " " <> returnVar <> ";\n";
-           body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct] <> "\n";
+           body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct] <> "\n"; (* external particle masses *)
            body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar] <> "\n";
            If[IsPossibleTreeLevelDecay[decay, True],
               body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
@@ -1342,9 +1282,12 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
              ];
            body = body <> "return " <> returnVar <> ";\n";
 
-           "template<>\n" <> returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-            TextFormatting`IndentText[body] <> "}\n"
+           "template<>\n" <>
+              returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
+               templatePars <>
+                  "(" <> args <> ") const\n{\n" <>
+                     TextFormatting`IndentText[body] <>
+                  "}\n"
    ];
 
 GetHiggsBosonDecays[particleDecays_List] :=

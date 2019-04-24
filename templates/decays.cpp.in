@@ -185,7 +185,6 @@ double RT(double x) {
    } else if (1-x < 1e-6) {
       return 39*(-1 + x) + (75*std::pow(-1 + x,2))/2. - 6*std::pow(-1 + x,3);
    } else {
-      std::cout << "not zero\n"; 
     return 3.*(1. - 8.*x + 20.*x*x)/std::sqrt(4.*x-1.) * std::acos((3.*x-1.)/(2.*std::pow(x, 3./2.)))
     - (1.-x)/(2.*x) * (2. - 13.*x + 47.*x*x)
     - 3./2. * (1. - 6.*x + 4.*x*x) * std::log(x);
