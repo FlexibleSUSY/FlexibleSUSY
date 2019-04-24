@@ -1045,14 +1045,22 @@ CreateVertices[vertices_List,
 		OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
 	Module[{cxxVertices, vertexPartition},
 		cxxVertices = CreateVertex /@ DeleteDuplicates[vertices];
-		
+
 		(* Mathematica 7 does not support the `UpTo[n]` notation *)
 		vertexPartition = Partition[cxxVertices, OptionValue[MaximumVerticesLimit]];
-		If[vertexPartition === {},
-			vertexPartition = {cxxVertices}];
-		
+		(* Partition splits cxxVertices into lists of length MaximumVerticesLimit.
+		   If the length of cxxVertices is not a multiple of MaximumVerticesLimit,
+		   some vertices will be discarded! *)
+		AppendTo[vertexPartition,
+		   Complement[cxxVertices, Sequence@@vertexPartition]
+		];
+
+		Utils`AssertWithMessage[Sort[cxxVertices] === Sort[Join@@vertexPartition],
+		   "Some vertices lost after splitting of cxxVertices into multiple lists."
+		];
+
 		Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
-	]
+	];
 	
 (** \brief Creates c++ code that makes a function available that
  * numerically evaluates the given vertex.
