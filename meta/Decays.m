@@ -1127,7 +1127,7 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
 WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
    Module[{vertices = Select[diagram, ListQ], indices, cppVertices, loop},
 
-      indices = Table[Unique["Id"], Length@vertices];
+      indices = Table[Unique["Id"], {Length@vertices}];
       cppVertices =
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
             StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n"& @@@ Transpose[{indices, vertices}];
@@ -1136,7 +1136,7 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
 
       cppVertices <>
          loop <>
-            "// " <> ToString@NumberOfPropagatorsInTopology[topology] <> "\n" <>
+            "// " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> "\n" <>
             IndentText@code <>
                "\n" <>
                StringJoin@@ConstantArray["}\n", Length@vertices] <>
@@ -1170,10 +1170,10 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
                     "result += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[1]] <>
                        "(result.m_decay, result.m_out_1, result.m_out_2,\n" <>
                           "// number of internal masses " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] <> "\n" <>
-                    StringJoin@@Riffle[Table[ToString@RandomReal[], CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]]], ","] <> ",\n" <>
+                    StringJoin@@Riffle[Table[ToString@RandomReal[], {CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]]}], ","] <> ",\n" <>
 
                     "// number of couplings " <> ToString@EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]] <> "\n" <>
-                    StringJoin@@Riffle[Table[ToString@RandomReal[], EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]]], ","] <> ",\n" <>
+                    StringJoin@@Riffle[Table[ToString@RandomReal[], {EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]]}], ","] <> ",\n" <>
 
                      (* scale *)
                     "// renormalization scale\n" <>
