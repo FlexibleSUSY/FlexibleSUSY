@@ -1125,7 +1125,8 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
    ];
 
 WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
-   Module[{vertices = Select[diagram, ListQ], indices, cppVertices, loop},
+   Module[{vertices = Select[diagram, ListQ], indices, cppVertices, loop,
+      con = {}, temp, temp2 = "", temp3},
 
       indices = Table[Unique["Id"], {Length@vertices}];
       cppVertices =
@@ -1134,10 +1135,50 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
 
          loop = "for(const auto& index" <> ToString@# <> ": index_range<vertex" <> ToString@# <> ">()) {\n"& /@ indices;
 
+
+
+         For[i = 1, i <= 3, i++,
+            For[j = 4, j <= Length[vertices]+3, j++,
+   temp = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
+If[temp =!= {}, 
+            AppendTo[con, {{i,j}, temp}]
+]
+            ]
+         ];
+temp = "";
+            For[i = 1, i <= Length[con], i++,
+            temp = temp <> "auto externalFieldIndicesIn" <> ToString@i <> "= vertex" <> ToString[indices[[ con[[i,1,2]]-3  ]]] <> "::template indices_of_field<" <> 
+            ToString@(con[[i,2,1,2]]-1) <>
+            ">(index" <> ToString[indices[[con[[i,1,2]]-3]]] <> ");\n"
+
+            ];
+            For[i = 4, i <= Length[vertices]+3, i++,
+            For[j = 4, j <= Length[vertices]+3, j++,
+   temp3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
+If[temp3 =!= {}, 
+   (
+   temp2 = temp2 <>
+   "if(vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> ")" <> 
+      "!=" <>
+      "vertex" <> ToString@indices[[j-3]] <> "::template indices_of_field<" <> ToString@(#2-1) <> ">(index" <> ToString@indices[[j-3]] <> ")" <>
+   ") {\ncontinue;\n}\n"
+   )& @@@ temp3;
+            ]
+            ]
+            ];
+               
       cppVertices <>
          loop <>
             "// " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> "\n" <>
-            IndentText@code <>
+            IndentText[
+
+            temp <> 
+            "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {continue;}\n" <>
+
+            temp2 <>
+
+            code  
+            ] <>
                "\n" <>
                StringJoin@@ConstantArray["}\n", Length@vertices] <>
                   "\n"
@@ -1282,6 +1323,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
              ];
            body = body <> "return " <> returnVar <> ";\n";
 
+            "// " <> ToString@initialParticle <>  " -> " <> ToString@finalState <> "\n" <>
            "template<>\n" <>
               returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
                templatePars <>
