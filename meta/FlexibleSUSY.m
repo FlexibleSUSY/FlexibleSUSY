@@ -200,6 +200,10 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
+ExtraSLHAOutputBlocks::usage = "@unote
+this List is rewritten during the runnig of start.m script
+in the directory FlexibleSUSY/models/@CLASSNAME@ by
+the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
 ExtraSLHAOutputBlocks = {
     {FlexibleSUSYLowEnergy,
         {{1, FlexibleSUSYObservable`aMuon} } },
@@ -2172,7 +2176,7 @@ WriteLToLGammaClass[decays_List, files_List] :=
    ];
 
 (* Write c++ files for the F -> F conversion in nucleus *)
-(* leptonPairs is a list of lists, sth like {{Fe[2] -> Fe[1], Au}, {Fe[2] ->  Fe[1], Al}} etc *)
+(* leptonPairs is a list of lists, sth like {{Fe -> Fe, Au}, {Fe ->  Fe, Al}} etc *)
 WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
    Module[{interfacePrototypes = "", interfaceDefinitions = "",
       massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,

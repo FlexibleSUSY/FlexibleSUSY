@@ -17,7 +17,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   1                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
@@ -90,7 +90,7 @@ Block MSQ2IN
    3   3   1e6   # mq2Input(3,3)
 Block MSL2IN
    1   1   1e6   # ml2Input(1,1)
-   1   2   0     # ml2Input(1,2)
+   1   2   1e3     # ml2Input(1,2)
    1   3   0     # ml2Input(1,3)
    2   1   0     # ml2Input(2,1)
    2   2   1e6   # ml2Input(2,2)

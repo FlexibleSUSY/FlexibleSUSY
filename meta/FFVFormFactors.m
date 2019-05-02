@@ -27,7 +27,12 @@ BeginPackage["FFVFormFactors`",
 ];
 
 FFVFormFactorsCreateInterfaceFunction::usage = "";
-FFVGraphs::usage = "";
+FFVGraphs::usage = "Returns adjacency matrix, which is wrapped in a List 
+for a triangle diagram which can be seen by typing a command:
+AdjacencyGraph[FFVFormFactors`FFVGraphs[][[1]], VertexLabels -> \"Name\"]
+
+@unotesQ: why such a weird numbering? 
+@unotesA: because some Jobst procedure @ufind uses this order for fermion number flow.";
 FFVContributingDiagramsForGraph::usage = "";
 
 Begin["Private`"];
