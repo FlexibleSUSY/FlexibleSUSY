@@ -1078,7 +1078,7 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
        diagramsWithCorrectTopology, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
       numberOfVertices = Count[diagram, el_ /; Head[el] === List],
       externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
-      internalParticles, permutedParticles},
+      internalParticles, permutedParticles, vertices},
 
       Switch[numberOfVertices,
          (* half-candy diagram *)
@@ -1116,17 +1116,42 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
          Quit[1];
       ];
 
+      vertices = cos3[[1, 5]];
+
       {"std::complex<double> " <> ToString@N[Utils`FSReIm[StripDiagramColorFactor[externalParticles, ColorFactorForDiagram[topology, diagram]]], 16] <> " * " <>
          "calculate_" <> cos3[[1, 1]],
          Length[cos3[[1, 5]]],
-         cos3[[1, -1]]
+         cos3[[1, -1]],
+         Drop[cos3[[1, 3]]/. Rule[a_, b_] :> a, 3],
+         vertices
       }
 
    ];
 
-WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String] :=
+ExtractConnections[Cp[particles__][__], topology_, diagram_] := Module[{
+     vertices = Select[diagram, ListQ],
+      connectionsForVertex = {}, res
+      },
+   connectionsForVertex = Sort[List[particles] /. -_[Index[Generic, n_]] :> n /. _[Index[Generic, n_]] :> n];
+
+   res = Position[
+   Sort /@ DeleteCases[Flatten[ 
+      Position[#, el_ /; el =!= 0, {1}, Heads -> False]& /@ topology,
+{3}][[1]], l_ /; Length[l] === 1]
+   ,
+   connectionsForVertex
+   ];
+
+Print["KKK", res, Length[res]===1];
+   Utils`AssertWithMessage[False, "WRONG!"];
+   Utils`AssertWithMessage[True, "WRONG!"];
+
+   res[[1,1]]
+]
+
+WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_String, internalMasses_, verticesTranslation_] :=
    Module[{vertices = Select[diagram, ListQ], indices, cppVertices, loop,
-      con = {}, temp, temp2 = "", temp3},
+      con = {}, temp, temp2 = "", temp3, masses = "", mass = {}, temp9},
 
       indices = Table[Unique["Id"], {Length@vertices}];
       cppVertices =
@@ -1153,30 +1178,42 @@ temp = "";
 
             ];
             For[i = 4, i <= Length[vertices]+3, i++,
-            For[j = 4, j <= Length[vertices]+3, j++,
-   temp3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
-If[temp3 =!= {}, 
-   (
-   temp2 = temp2 <>
-   "if(vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> ")" <> 
-      "!=" <>
-      "vertex" <> ToString@indices[[j-3]] <> "::template indices_of_field<" <> ToString@(#2-1) <> ">(index" <> ToString@indices[[j-3]] <> ")" <>
-   ") {\ncontinue;\n}\n"
-   )& @@@ temp3;
-            ]
+            For[j = i, j <= Length[vertices]+3, j++,
+               temp3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
+               If[temp3 =!= {}, 
+                  (
+                  Print[Position[internalMasses, Sort[{i,j}]][[1]]];
+                  mass = Append[mass, 
+                     "const auto mInternal" <> ToString@(Length[mass]+1) <> " = context.mass<" <> CXXNameOfField[vertices[[i-3, #1]]] <> ">(" <>
+                     "vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> "));\n"
+                  ];
+
+               temp2 = temp2 <>
+                  "if(vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> ")" <> 
+                  " != " <>
+                  "vertex" <> ToString@indices[[j-3]] <> "::template indices_of_field<" <> ToString@(#2-1) <> ">(index" <> ToString@indices[[j-3]] <> ")" <>
+                  ") {\n" <> TextFormatting`IndentText["continue;"] <> "\n}\n"
+               )& @@@ temp3;
+               ]
             ]
             ];
                
+
+      ExtractConnections[#, topology, diagram]& /@ verticesTranslation;
+
+
       cppVertices <>
          loop <>
             "// " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> "\n" <>
-            IndentText[
+            TextFormatting`IndentText[
 
             temp <> 
             "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {continue;}\n" <>
 
             temp2 <>
+mass <>
 
+            masses <>
             code  
             ] <>
                "\n" <>
@@ -1211,7 +1248,7 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
                     "result += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[1]] <>
                        "(result.m_decay, result.m_out_1, result.m_out_2,\n" <>
                           "// number of internal masses " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] <> "\n" <>
-                    StringJoin@@Riffle[Table[ToString@RandomReal[], {CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]]}], ","] <> ",\n" <>
+                           "mInternal1, mInternal2," <> If[CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] === 3, " mInternal3,", ""] <> "\n" <>
 
                     "// number of couplings " <> ToString@EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]] <> "\n" <>
                     StringJoin@@Riffle[Table[ToString@RandomReal[], {EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]]}], ","] <> ",\n" <>
@@ -1222,7 +1259,9 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
                        (* finite or not *)
                     "// finite part\n" <>
                        If[!EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[3]], ", 1.", ""] <>
-                     ");"
+                     ");",
+               EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[4]],
+               EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[5]]
                   ]
             )& /@ oneLoopTopAndInsertion;
 

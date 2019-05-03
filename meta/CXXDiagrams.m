@@ -822,6 +822,11 @@ GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
 GaugeStructureOfVertexLorentzPart[
+	{scalar1__ * SARAH`Delta[cIndex1_, cIndex2_] * SARAH`Delta[cIndex3_, cIndex4_] + scalar2__ * SARAH`Delta[cIndex1_, cIndex4_] * SARAH`Delta[cIndex3_, cIndex2_], lorentzStructure_}] :=
+	{scalar1, KroneckerDeltaColourVertex[cIndex1, cIndex2] * KroneckerDeltaColourVertex[cIndex3, cIndex4], lorentzStructure} /;
+	FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+
+GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
