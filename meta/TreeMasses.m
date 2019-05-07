@@ -181,6 +181,8 @@ IsSMUpQuark::usage="";
 IsSMDownQuark::usage="";
 IsSMQuark::usage="";
 IsSMParticle::usage="";
+IsSMParticleElementwise::usage="Maps a predicate over the multiplet, \
+indicating whether the element belongs to the SM or not";
 IsElectricallyCharged::usage="";
 ContainsGoldstone::usage="";
 
@@ -308,6 +310,8 @@ IsOfType[sym_[__], type_Symbol, states_:FlexibleSUSY`FSEigenstates] :=
 IsSMParticle[sym_List] := And @@ (IsSMParticle /@ sym);
 IsSMParticle[sym_[__]] := IsSMParticle[sym];
 IsSMParticle[sym_] := SARAH`SMQ[sym, Higgs -> True];
+IsSMParticleElementwise[sym_] :=
+   (IsSMParticle[#] || IsSMGoldstone[#])& /@ Table[sym[i], {i, GetDimension[sym]}];
 
 IsScalar[Susyno`LieGroups`conj[sym_]] := IsScalar[sym];
 IsScalar[SARAH`bar[sym_]] := IsScalar[sym];

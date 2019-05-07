@@ -223,8 +223,8 @@ Output::
 
 ------
 
-``meta/SM/mt_4loop_qcd.m`` contains the 4-loop relation between the
-top quark pole mass and the corresponding running
+``meta/SM/mt_4loop_qcd.m`` contains the 4-loop QCD relation between
+the top quark pole mass and the corresponding running
 :math:`\overline{\text{MS}}` mass from [1604.01134]_.
 
 Example::
@@ -242,6 +242,15 @@ Output::
         g3^4*k^2*(131.78498721717762 - 80.66666666666667*Lbar[t] + 22*Lbar[t]^2) +
         g3^6*k^3*(4712.740192659316 - 2031.1382275647934*Lbar[t] + 710*Lbar[t]^2 - 132*Lbar[t]^3) +
         g3^8*k^4*(211681.74421123447 - 104673.38261571848*Lbar[t] + 22162.91142653778*Lbar[t]^2 - 5638*Lbar[t]^3 + 825*Lbar[t]^4))
+
+------
+
+``meta/SM/mt_2loop_gaugeless.m`` contains the 2-loop relation between
+the top quark pole mass and the corresponding running
+:math:`\overline{\text{MS}}` mass from [1604.01134]_ in the gaugeless
+limit.  Contributions of :math:`O(\alpha_s^2, \alpha_s\alpha_t,
+\alpha_t^2, \alpha_t\lambda^n)` are included.  The relation is
+gauge-independent.
 
 
 2HDM

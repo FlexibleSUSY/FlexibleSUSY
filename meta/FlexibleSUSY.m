@@ -49,6 +49,7 @@ BeginPackage["FlexibleSUSY`",
               "Observables`",
               "CXXDiagrams`",
               "NPointFunctions`",
+              "WilsonCoeffs`",
               "AMuon`",
               "EDM`",
               "FFVFormFactors`",
@@ -2108,7 +2109,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
       WriteOut`ReplaceInFiles[files,
          {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
           "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
-          "@FFVFormFactors_ChargedHiggsMultiplet@" -> CXXDiagrams`CXXNameOfField[SARAH`ChargedHiggs],
           "@FFVFormFactors_GluonName@" -> CXXDiagrams`CXXNameOfField[TreeMasses`GetGluon[]],
           "@FFVFormFactors_PhotonName@" -> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]],
           Sequence @@ GeneralReplacementRules[]}
@@ -4466,7 +4466,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]}};
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
+                          };
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];
            cxxQFTVerticesMakefileTemplates = {{FileNameJoin[{cxxQFTTemplateDir, "vertices.mk.in"}],
                            FileNameJoin[{cxxQFTOutputDir, "vertices.mk"}]}};

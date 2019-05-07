@@ -81,15 +81,16 @@ namespace detail
   template<
     class GenericKeys,
     template<typename> class F,
+    class Wilsoncoeffs_Length,
     class StateVector
   > class accumulate_generic_impl
   {
-    std::complex<double> &value;
+    std::array<std::complex<double>, Wilsoncoeffs_Length::value> &value;
     StateVector state;
   
   public:
     template<class ...Args>
-    accumulate_generic_impl( std::complex<double> &v,
+    accumulate_generic_impl( std::array<std::complex<double>, Wilsoncoeffs_Length::value> &v,
         Args && ...args )
     : value( v ), state( std::forward<Args>( args )... )
     {}
@@ -117,25 +118,29 @@ namespace detail
         pairs
       >::type;
     
-      value += colour_factor * combinatorial_factor *
-        boost::fusion::fused<
-          boost::value_factory<F<GenericFieldMap>>
-        >{}( state )();
+      const auto value_boost = boost::fusion::fused<boost::value_factory<F<GenericFieldMap>>
+      >{}( state )();
+      
+      const auto value_length = value.size();
+      for ( std::size_t i=0; i<value_length; i++ ) {
+        value.at(i) += colour_factor * combinatorial_factor * value_boost.at(i);
+      }
     }
   };
 
   template<
     class GenericFieldKeys,
     template<typename> class F,
+    class Wilsoncoeffs_Length,
     class ...Args
   > accumulate_generic_impl<
-    GenericFieldKeys, F,
+    GenericFieldKeys, F, Wilsoncoeffs_Length,
     typename boost::fusion::result_of::make_vector<Args...>::type
-  > make_accumulate_generic_impl( std::complex<double> &v,
+  > make_accumulate_generic_impl( std::array<std::complex<double>, Wilsoncoeffs_Length::value> &v,
       Args &&... args )
   {
     return accumulate_generic_impl<
-      GenericFieldKeys, F,
+      GenericFieldKeys, F, Wilsoncoeffs_Length,
       typename boost::fusion::result_of::make_vector<Args...>::type
     >{ v, std::forward<Args>( args )... };
   }
@@ -308,10 +313,11 @@ template<
   class GenericFieldInsertions,
   class CombinatorialFactors,
   class ColourFactors,
+  class Wilsoncoeffs_Length,
   template<typename> class F,
   class ...Args
 >
-std::complex<double> accumulate_generic( Args &&...args )
+std::array<std::complex<double>, Wilsoncoeffs_Length::value> accumulate_generic( Args &&...args )
 {
   using insertion_data = boost::mpl::zip_view<
     boost::mpl::vector<
@@ -321,11 +327,12 @@ std::complex<double> accumulate_generic( Args &&...args )
     >
   >;
 
-  std::complex<double> value = 0.0;
+  std::array<std::complex<double>, Wilsoncoeffs_Length::value> value;
+  value.fill(0.0);
 
   boost::mpl::for_each<insertion_data>(
     detail::make_accumulate_generic_impl<
-      GenericFieldKeys, F
+      GenericFieldKeys, F, Wilsoncoeffs_Length
     >( value, std::forward<Args>( args )... )
   );
 
@@ -336,4 +343,3 @@ std::complex<double> accumulate_generic( Args &&...args )
 }
 
 #endif
-
