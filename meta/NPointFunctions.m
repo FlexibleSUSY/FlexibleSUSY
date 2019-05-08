@@ -642,7 +642,7 @@ ToCXXPreparationRules[externalIndices_List,
 
     couplingRules = {
       SARAH`Cp[fields___][1] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
@@ -651,7 +651,7 @@ ToCXXPreparationRules[externalIndices_List,
         StringJoin[Riffle[CXXIndicesForField /@ {fields}, ", "]] <> 
       " ) )",
       SARAH`Cp[fields___][SARAH`PL] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
@@ -660,7 +660,7 @@ ToCXXPreparationRules[externalIndices_List,
         StringJoin[Riffle[CXXIndicesForField /@ {fields}, ", "]] <> 
       " ) )",
       SARAH`Cp[fields___][SARAH`PR] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
@@ -669,7 +669,7 @@ ToCXXPreparationRules[externalIndices_List,
         StringJoin[Riffle[CXXIndicesForField /@ {fields}, ", "]] <> 
       " ) )",
       SARAH`Cp[fields___][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
@@ -681,7 +681,7 @@ ToCXXPreparationRules[externalIndices_List,
         StringJoin[Riffle[CXXIndicesForField /@ {fields}, ", "]] <> 
       " ) )",
       SARAH`Cp[fields___][SARAH`g[_,_]] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
@@ -689,9 +689,9 @@ ToCXXPreparationRules[externalIndices_List,
       ">( lorentz_inverse_metric{}, concatenate( " <>
         StringJoin[Riffle[CXXIndicesForField /@ {fields}, ", "]] <> 
       " ) )",
-      SARAH`Cp[fields__][(SARAH`Mom[f2_, _] - SARAH`Mom[f1_, _])SARAH`g[_, _], (SARAH`Mom[f1_, _] - SARAH`Mom[f3_, _])SARAH`g[_, _],
-        (SARAH`Mom[f3_, _] - SARAH`Mom[f2_, _])SARAH`g[_, _]] :>
-      I"context.vertex<" <> StringJoin[Riffle[
+      SARAH`Cp[fields__][(SARAH`Mom[f2_, _] - SARAH`Mom[f1_, _]) * SARAH`g[_, _], (SARAH`Mom[f1_, _] - SARAH`Mom[f3_, _])SARAH`g[_, _],
+        (SARAH`Mom[f3_, _] - SARAH`Mom[f2_, _]) * SARAH`g[_, _]] :>
+      I * "context.vertex<" <> StringJoin[Riffle[
         If[IsGenericField[#], Head[# /. genericRules],
            CXXNameOfField[Vertices`StripFieldIndices[#],
              prefixNamespace -> "fields"]] & /@ {fields},
