@@ -1519,8 +1519,10 @@ StripColourIndices[p_] :=
 			Head[p][remainingIndices]]
 	]
 
+(* Count entries which are up to a permutation equal to {0, ..., 0, 1}.
+	The length of the vector is the length of topology *)
 NumberOfExternalParticlesInTopology[topology_] :=
-   Count[topology, e_ /; Sort[e] === {0, 0, 0, 0, 0, 1}];
+	Count[topology, e_ /; Sort[e] === UnitVector[Length[topology], Length[topology]]];
 
 NumberOfPropagatorsInTopology[topology_] :=
    If[Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology] === 3, 3, 2];

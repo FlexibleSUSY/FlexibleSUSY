@@ -21,8 +21,8 @@
 *)
 
 BeginPackage["Decays`",
-   {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`",
-      "ColorMath`"}];
+   {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`"
+      }];
 
 FSParticleDecay::usage="head used for storing details of an particle decay,
 in the format
@@ -698,7 +698,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> ");";
            loopIndices = Reverse[Select[MapIndexed[With[{idx = First[#2]},
                                                         If[#1 > 1,
-                                                           {"gO" <> ToString[idx], finalStateStarts[[idx]] - 1, #1},
+                                                           {"gO" <> ToString[idx], Utils`MathIndexToCPP@finalStateStarts[[idx]], #1},
                                                            {}
                                                           ]
                                                        ]&, finalStateDims], (# =!= {})&]];
@@ -735,7 +735,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
            body = "auto model_ = model;\n\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
            If[particleDim > 1,
-              body = LoopOverIndexCollection[body, {{"gI1", particleStart - 1, particleDim}}] <> "\n";
+              body = LoopOverIndexCollection[body, {{"gI1", Utils`MathIndexToCPP@particleStart, particleDim}}] <> "\n";
              ];
            "void " <> CreateDecaysCalculationFunctionName[particle, "CLASSNAME"] <>
            "()\n{\n"
@@ -1071,6 +1071,36 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
            "Decay_amplitude_FFV", FillFFVTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
            _, ""
           ];
+Compare[a_, b_] := Module[{},
+
+   For[i = 1, i <= Length[a], i++,
+      If[Select[b, (a[[i,2]] === #[[2]] && Sort[a[[i,1]]] === Sort[#[[1]]])&] === {},
+         Return[False]
+      ]
+   ];
+
+   Return[True];
+];
+
+TranslationForDiagram[topology_, diagram_] := Module[{
+   diagramsWithCorrectTopology,
+   file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"], temp,res
+},
+
+   diagramsWithCorrectTopology = Select[file, MemberQ[#, topology]&];
+   Utils`AssertWithMessage[diagramsWithCorrectTopology =!= {},
+      "Can't find topology " <> ToString@topology <> " for diagram " <> ToString@diagram
+   ];
+   temp = (#[[1]] -> GetFeynArtsTypeName[#[[2]]])& /@ InsertionsOnEdgesForDiagram[topology, diagram];
+
+   res = Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&];
+
+   Utils`AssertWithMessage[Length[res] === 1,
+      "Error! Couldn't find translation for a diagram"
+   ];
+
+   First@res
+];
 
 EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
     Module[{
@@ -1078,8 +1108,9 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
        diagramsWithCorrectTopology, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
       numberOfVertices = Count[diagram, el_ /; Head[el] === List],
       externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
-      internalParticles, permutedParticles, vertices},
+      internalParticles, permutedParticles, vertices, temp},
 
+      temp = (#[[1]] -> GetFeynArtsTypeName[#[[2]]])& /@ InsertionsOnEdgesForDiagram[topology, diagram];
       Switch[numberOfVertices,
          (* half-candy diagram *)
          2, 
@@ -1109,6 +1140,16 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
       particles2 = MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ particles];
 
       cos3 = Select[diagramsWithCorrectTopology, MemberQ[#, particles2]&];
+      If[!(cos3 === Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&]),
+         Print["WHERE???"];
+         Print[cos3];
+         Print[InsertionsOnEdgesForDiagram[topology, diagram]];
+         Print[temp];
+         Print[Select[diagramsWithCorrectTopology, ((#[[3]]/.#[[4]])===temp)&]];
+         Print[Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&]];
+         Quit[1]
+         ];
+      cos3 = Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&];
       If[cos3 === {},
          Print["Topology found, but no diagram for ", diagram];
          Print[particles2];
@@ -1129,118 +1170,275 @@ EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
 
    ];
 
-EdgesToVertices[edges_, list_, topology_] := Module[{temp},
 
-   temp = Select[
-      list,
-      MatchQ[#, Rule[__ , Field[n_]] /; MemberQ[edges, n]] &
+FieldFromDiagram[diagram_, {i_, j_}] :=
+   If[!ListQ[diagram[[i]]],
+      diagram[[i]],
+      diagram[[i,j]]
+   ];
+
+(* Returns a list of particles on edges of a diagram in form of list of elements as
+   {vertex1, vertex2} -> particle connecting vertex1 and 2 *)
+(* @todo: not clear about the conugation of particle *)
+InsertionsOnEdgesForDiagram[topology_, diagram_] := Module[{sortedVertexCombinations},
+
+   sortedVertexCombinations =
+      Select[
+         Tuples[Range[CXXDiagrams`NumberOfExternalParticlesInTopology[topology] + CXXDiagrams`NumberOfPropagatorsInTopology[topology]], 2],
+         (OrderedQ[#] && !SameQ@@#)&
       ];
 
-   temp = First /@ temp;
-
-   temp = Intersection @@ temp;
-
-   Utils`AssertWithMessage[Length[temp]===1, "Could not identify connections for the vertex"];
-
-   First[temp]
+   Print[
+"THIS", diagram, " i? ",
+      Flatten[
+         DeleteCases[
+            Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
+               1, {{#1, #2} -> (Print[{#1, #2, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]}];FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}])},
+               2, {
+               {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}],
+               {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[2,1]]}]
+            },
+               _, {}
+            ]& @@@ sortedVertexCombinations,
+            {}
+         ],
+         1
+      ]
+   ];
+      Flatten[
+         DeleteCases[
+            Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
+               1, {{#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}]},
+               2, {
+                  {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}],
+                  {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[2,1]]}]
+               },
+               _, {}
+            ]& @@@ sortedVertexCombinations,
+            {}
+         ],
+         1
+      ]
 ];
 
-GetLorentz[Cp[__][lor_]] :=
-   (Print[lor];
-   Switch[lor,
-      LorentzProduct[gamma[lt3], PL], "left",
-      LorentzProduct[gamma[lt3], PR], "right",
-      PL, "left",
-      PR, "right",
-      1, "value",
-      _, Print["Unidentifuied lorentz struct ", lor]; "value"
-   ]);
 
-ExtractConnections[Cp[particles__][__], topology_, diagram_, kupa_] := Module[{
-     vertices = Select[diagram, ListQ],
-      connectionsForVertex = {}, res
+(* In generic_loop_decay_diagram_classes.m the couplings are written in terms of edges as
+   Cp[list of fields with edge numbers as arguments of Fields.
+   This function translates vertex given in terms of edges to the list of vertices connected by those edges.
+   The order is preserved. *)
+EdgesToVertexConnections[edges_, list_] := Module[{temp = {}, vertexNumber},
+
+   (* for list of edges {n1, n2,... , nn} find list of pair of vertices that the edges correspond to as
+      {pair of vertices connected by edge n1, pair of vertices connected by edge 2, etc} *)
+   For[i = 1, i <= Length[edges], i++,
+      AppendTo[temp, Select[list, MatchQ[#, {_, _} -> Field[edges[[i]]]]&]];
+   ];
+   Utils`AssertWithMessage[Dimensions[temp] === {Length[edges], 1}, ""];
+
+   First /@ First  /@ temp
+];
+
+ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] := Module[{
+      vertexEdges, res, quit= False, pos
       },
-   connectionsForVertex = Sort[List[particles] /. -_[Index[Generic, n_]] :> n /. _[Index[Generic, n_]] :> n];
 
-   EdgesToVertices[connectionsForVertex, kupa, topology]
+   vertexEdges = (List[particles] /. Index[Generic, n_] :> n /. Index[Generic, n_] :> n);
+   pos = First@First@Position[vertices, vertexEdges];
+   res = Replace[lor,
+      {LorentzProduct[_, PL] :> "left()",
+         LorentzProduct[_, PR] :> "right()",
+         PL :> "left()",
+         PR :> "right()",
+         1 :> "value()",
+         Mom[U[Index[Generic, n_]]] :> (
+            quit=True;
+            "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, U[Index[Generic, n]]][[1,1]]]] <> ")"),
+         Mom[-U[Index[Generic, n_]]] :> (quit=True;
+            "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, -U[Index[Generic, n]]][[1,1]]]] <> ")"),
+         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> "value(1,0)",
+         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> "value(1,0)",
+         g[_, _] :> "value()",
+         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])
+            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+         g[lt1, lt2] (-Mom[V[Index[Generic, 2]]] + Mom[V[Index[Generic, 4]]])
+            + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])
+            + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",
+         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> "value(1,0)",
+         lor :> (Print["Unidentifuied lorentz struct ", lor]; Quit[1])
+      }
+   ];
+
+   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ]
+
+(* Fields for vertex given by connections *)
+pppp[diagram_, topology_, connections_] := Module[{vertexNumber, temp},
+
+   temp = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, diagram, topology]& /@ connections;
+      (
+         If[ ListQ[diagram[[#2[[1]]]]],
+            diagram[[#2[[1]]]][[#1[[1,1]]]], diagram[[#2[[1]]]]
+   ]
+
+      )& @@@ Transpose[{temp, connections}]
+]
+
+(* Returns translation of the form
+   {Field[1] -> hh, Field[2] -> VG, Field[3] -> VG, Field[4] -> Fd, Field[5] -> bar[Fd], Field[6] -> Fd}
+
+   A: {{1, 4} -> hh, {2, 5} -> VP, {3, 5} -> VP, {4, 5} -> Hp,
+
+>    {4, 5} -> conj[Hp]}
+B: {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3],
+
+>    {4, 5} -> Field[4], {4, 5} -> Field[5]}
+{Field[1] -> hh, Field[2] -> VP, Field[3] -> VP, Field[4] -> Hp,
+
+>   Field[5] -> Hp}
+
+*)
+GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_] :=
+   Module[{temp = {}},
+
+      Print[concreteFieldOnEdgeBetweenVertices];
+      Print[fieldNumberOnEdgeBetweenVertices];
+      temp = (Reverse /@ fieldNumberOnEdgeBetweenVertices);
+
+      (* the numbers of vertices in Dylna might be unsorted *)
+      temp = (#1 -> Sort[#2])& @@@ temp;
+      Print[temp];
+
+      For[i = 1, i <= Length[temp], i++,
+         temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVertices[[i]]
+      ];
+
+      Print[temp];
+      temp
+];
 
 WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_, internalMasses_, verticesTranslation_, fromDylan_] :=
-   Module[{vertices = Select[diagram, ListQ], indices, cppVertices, loop,
-      con = {}, temp, temp2 = "", temp3, masses = "", mass = {}, temp9, kupa},
+   Module[{vertices, vertices2, indices, cppVertices, loop,
+      con = {}, temp, temp2 = "", temp3, masses = "", mass = {}, temp9, kupa, fuck, translation, fieldAssociation,
+      externalEdges, internalEdges,
+   externalFieldsLocationsInVertices,
+      internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode
+   },
 
+      translation = TranslationForDiagram[topology, diagram];
+
+      (* {Field[1] -> concrete field, ...} *)
+      fieldAssociation = GetFieldsAssociations[InsertionsOnEdgesForDiagram[topology, diagram], translation[[3]]];
+
+      (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
+      verticesInFieldTypes =
+         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] -> n /. Cp[x___][__] -> Cp[x]]);
+
+      (* vertices in an orientation as required by Cp *)
+      Print["1 ", verticesInFieldTypes];
+(*      Print["1.5", InsertionsOnEdgesForDiagram[topology, diagram]];*)
+(*      Print["1.8 ", fieldAssociation, " ", ((#1 -> #2@@#1)& @@@ translation[[4]])];*)
+(*      Print["2 ", fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])];*)
+      vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+
+      (* set of unique indices used in names of vertices and indices *)
       indices = Table[Unique["Id"], {Length@vertices}];
+
+      (* create using declarations for vertices *)
       cppVertices =
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
-            StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n"& @@@ Transpose[{indices, vertices}];
+            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, vertices}];
 
-         loop = "for(const auto& index" <> ToString@# <> ": index_range<vertex" <> ToString@# <> ">()) {\n"& /@ indices;
+      (* loop over indices *)
+      loop = "for(const auto& index" <> ToString@# <> ": index_range<vertex" <> ToString@# <> ">()) {\n"& /@ indices;
 
-
-
-         For[i = 1, i <= 3, i++,
-            For[j = 4, j <= Length[vertices]+3, j++,
-   temp = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
-If[temp =!= {}, 
-            AppendTo[con, {{i,j}, temp}]
-]
-            ]
-         ];
-temp = "";
-            For[i = 1, i <= Length[con], i++,
-            temp = temp <> "auto externalFieldIndicesIn" <> ToString@i <> "= vertex" <> ToString[indices[[ con[[i,1,2]]-3  ]]] <> "::template indices_of_field<" <> 
-            ToString@(con[[i,2,1,2]]-1) <>
-            ">(index" <> ToString[indices[[con[[i,1,2]]-3]]] <> ");\n"
-
-            ];
-            For[i = 4, i <= Length[vertices]+3, i++,
-            For[j = i, j <= Length[vertices]+3, j++,
-               temp3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[i, j, diagram, topology];
-               If[temp3 =!= {}, 
-                  (
-                  mass = Append[mass,
-                     "const auto mInternal" <> ToString@(Length[mass]+1) <> " = context.mass<" <> CXXNameOfField[vertices[[i-3, #1]]] <> ">(" <>
-                     "vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> "));\n"
-                  ];
-
-               temp2 = temp2 <>
-                  "if(vertex" <> ToString@indices[[i-3]] <> "::template indices_of_field<" <> ToString@(#1-1) <> ">(index" <> ToString@indices[[i-3]] <> ")" <> 
-                  " != " <>
-                  "vertex" <> ToString@indices[[j-3]] <> "::template indices_of_field<" <> ToString@(#2-1) <> ">(index" <> ToString@indices[[j-3]] <> ")" <>
-                  ") {\n" <> TextFormatting`IndentText["continue;"] <> "\n}\n"
-               )& @@@ temp3;
-               ]
-            ]
-            ];
-               
-
-      Print[
-         {GetLorentz[#], ExtractConnections[#, topology, diagram, fromDylan]}& /@ verticesTranslation
+      (* List of {integer, integer} -> Field[integer] *)
+      externalEdges =
+         Select[
+            translation[[3]],
+            (MatchQ[#, ({i_Integer, j_Integer} -> Field[_Integer]) /; (First@Sort[{i,j}] >= 1 && First@Sort[{i,j}] <= 3 && Last@Sort[{i,j}] > 3)])&
          ];
 
-      kupa = {GetLorentz[#], ExtractConnections[#, topology, diagram, fromDylan]}& /@ verticesTranslation;
-      cppVertices <>
-         loop <>
-            "// " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> "\n" <>
-            TextFormatting`IndentText[
+      matchExternalFieldIndicesCode =
+         "auto externalFieldIndicesIn" <> ToString[#] <>
+            " = vertex" <>
+            ToString@indices[[ First@First@Position[verticesInFieldTypes, _[#]] ]] <>
+         "::template indices_of_field<" <>
+            ToString@Utils`MathIndexToCPP@Last@First@Position[verticesInFieldTypes, _[#]] <>
+            ">(index" <>
+            ToString@indices[[ First@First@Position[verticesInFieldTypes, _[#]] ]] <> ");\n" & /@ Range[3];
 
-            temp <> 
-            "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {continue;}\n" <>
+      matchInternalFieldIndicesCode =
+         ("if(vertex" <> ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#1]]   ]] <>
+         "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@First@Position[verticesInFieldTypes, _[#1]] <> ">(index" <>
+         ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#1]]   ]] <> ") != " <>
+      "vertex" <> ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#2]]   ]] <>
+         "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@First@Position[verticesInFieldTypes, _[#2]] <> ">(index" <>
+         ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#2]]   ]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n")&
+      @@@
+      DeleteCases[DeleteDuplicates[Sort /@ Tuples[Range[4, 3+Length[vertices]], 2]], {n_Integer, n_Integer}];
 
-            temp2 <>
-mass <>
+      mass =(
+      "const auto mInternal" <> ToString[#-3] <> " = context.mass<" <>
+         CXXNameOfField[
+            vertices[[  Sequence@@First@Position[verticesInFieldTypes /. -field_ -> field, _[#]]    ]]
+            ] <> ">(" <>
+         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypes/. -field_->field, _[#]]]] <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP[
+         Last@First@Position[verticesInFieldTypes, _[#]]
+         ] <> ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <> "));\n"
+)&/@
+      Range[4, 3+Length@vertices];
 
-            masses <>
-            code[[1]] <>
+      mass = StringJoin@@mass;
 
-               StringJoin@Riffle[("vertex" <> ToString@indices[[#2-3]] <> "::evaluate(index" <> ToString@indices[[#2-3]] <> ", context)." <> ToString[#1] <> "()")& @@@ kupa, ", "] <> ",\n" <>
-                  code[[2]]
+      internalEdges =
+         Select[
+            translation[[3]],
+            (MatchQ[#, ({i_Integer, j_Integer} -> Field[_Integer]) /; (First@Sort[{i,j}] > 3 && Last@Sort[{i,j}] > 3)])&
+         ];
+      internalFieldsLocationsInVertices =
+         {
+            {First@#1, First@First@(Position[translation[[-2, First@#1]] /. Susyno`LieGroups`conj -> Identity, #2])},
+            {Last@#1,  First@First@(Position[translation[[-2, Last@#1 ]] /. Susyno`LieGroups`conj -> Identity, #2])}
 
-            ] <>
+}& @@@ internalEdges;
+
+
+            (* write number of propagators in topology *)
+            "// topology with " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> " propagators\n" <>
+               cppVertices <>
+               loop <> "\n" <>
+               TextFormatting`IndentText[
+
+                  (* skip indices that don't match external indices *)
+                  matchExternalFieldIndicesCode <>
+                     "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {\n" <>
+                     TextFormatting`IndentText["continue;"] <>
+                     "\n}\n\n" <>
+
+                  matchInternalFieldIndicesCode <>
+                  mass <>
+
+                  "result += calculate_" <> translation[[1]] <> "(\n" <>
+                  TextFormatting`IndentText[
+                  "result.m_decay, result.m_out_1, result.m_out_2,\n" <>
+                    StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n"
+                     ] <>
+                     (* couplings *)
+                     StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, verticesInFieldTypes, indices]& /@ translation[[-3]], ", "] <> ",\n" <>
+
+
+
+(*                  translation[[-3]] <>*)
+(*                     StringJoin@Riffle[("vertex" <> ToString@indices[[First[Intersection@@#2]-3]] <> "::evaluate(index" <> ToString@indices[[First[Intersection@@#2]-3]] <> ", context)."
+ <> ToString[#1])& @@@ kupa, ", "] <> ",\n" <>*)
+                    code[[2]]
+
+               ] <>
                "\n" <>
                StringJoin@@ConstantArray["}\n", Length@vertices] <>
-                  "\n"
-
+               "\n"
    ];
 
 EvaluateDecayDiagramWithTopology[decay_, topology_, diagram_] :=
@@ -1257,16 +1455,17 @@ ColorFactorForDiagram[topology_, diagram_] :=
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopTopAndInsertion, body = ""},
+    Module[{oneLoopTopAndInsertion, body = "", temp},
 
-       (* list of elements like {topology, insertion} *)
+       (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
            (
+           temp = TranslationForDiagram[Sequence @@ #];
               body = body <>
                  WrapCodeInLoopOverInternalVertices[
                     Sequence @@ #,
-                    {"result += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[1]] <>
+                    {"result += calculate_" <> temp[[1]] <>
                        "(result.m_decay, result.m_out_1, result.m_out_2,\n" <>
                           "// number of internal masses " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] <> "\n" <>
                            "mInternal1, mInternal2," <> If[CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] === 3, " mInternal3,", ""] <> "\n" <>
@@ -1356,7 +1555,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             externalFieldsList, templatePars = "", args = "",
             body = ""},
 
-           Print["Entry point: creating amplitude for ", initialParticle, " -> ", finalState];
+           Print["Entry point: creating amplitude for ", initialParticle, " -> ", finalState]; (* @todo: remove *)
 
            (* Decay_amplitude_XXX *)
            returnType = GetDecayAmplitudeType[decay];
@@ -1367,10 +1566,12 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
               CXXDiagrams`CXXNameOfField[#, prefixNamespace -> fieldsNamespace]& /@ externalFieldsList, ", "] <> ">";
 
            (* function arguments *)
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& " <> paramsStruct <> ", " <>
-                  Utils`StringJoinWithSeparator[
-                     MapIndexed[(CreateFieldIndices[#1, fieldsNamespace] <> " const& idx_" <> ToString[First[#2]])&, externalFieldsList], ", "
-                  ];
+           args =
+              "const " <> modelName <> "_cxx_diagrams::context_base& " <> paramsStruct <> ", " <>
+                 Utils`StringJoinWithSeparator[
+                     MapIndexed[(CreateFieldIndices[#1, fieldsNamespace] <> " const& idx_" <> ToString[First[#2]])&, externalFieldsList],
+                     ", "
+                 ];
 
            (* body *)
            body = returnType <> " " <> returnVar <> ";\n";

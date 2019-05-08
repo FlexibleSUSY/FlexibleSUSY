@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["Utils`"];
+BeginPackage["Utils`", {"TextFormatting`"}];
 
 AppendOrReplaceInList::usage="Replaces existing element in list,
 or appends it if not already present.";
@@ -145,6 +145,9 @@ as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
+PrintWarningMsg::usage = "";
+PrintErrorMsg::usage = "";
 
 Begin["`Private`"];
 
@@ -285,8 +288,8 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_, message_] :=
-	If[!assertion, Print[message]; Quit[1]];
+AssertWithMessage[assertion_, message_String] :=
+	If[!assertion, PrintErrorMsg[message]; Quit[1]];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
@@ -306,6 +309,38 @@ FSReIm[z_] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
+
+StringInColorForTerminal[s_String, color_] :=
+   Switch[color,
+      Red, "\033[1;31m" <> s <> "\033[1;0m",
+      Blue, "\033[1;34m" <> s <> "\033[1;0m",
+      _, Print["Errror: Unrecognized color ", color];Quit[1]
+   ];
+
+PrintErrorMsg[s_String] :=
+   Print[
+      TextFormatting`WrapText[
+         StringInColorForTerminal["Error: ", Red] <>
+            "" <> s, 79, StringLength["Error: "]
+      ]
+   ];
+
+PrintWarningMsg[s_String] :=
+   Print[
+      TextFormatting`WrapText[
+         StringInColorForTerminal["Warning: ", Blue] <>
+            "" <> s, 79, StringLength["Warning: "]
+      ]
+   ];
+
+MathIndexToCPP[i_Integer/;i>0] := i-1;
+MathIndexToCPP[i_Integer] := (
+   PrintErrorMsg[
+      "Cannot convert index of value '" <>
+            ToString@i <> "'. Index value cannot be smaller than 1."
+   ]; Quit[1]
+);
+MathIndexToCPP[i_] := (PrintErrorMsg["Cannot convert a non integer index '" <> ToString@i <> "'"]; Quit[1]);
 
 End[];
 
