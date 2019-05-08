@@ -2064,7 +2064,7 @@ check_looptools_libs() {
         message "   location of the libooptools library."
         exit 1
     else
-        local LOOPTOOLSLIBS_="-looptools"
+        local LOOPTOOLSLIBS_="-looptools -lquadmath"
         if [ -z "$looptools_lib_dir" ]; then
             # assume that the linker will look in the default paths
             LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"

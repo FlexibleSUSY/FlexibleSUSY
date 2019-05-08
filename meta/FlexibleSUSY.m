@@ -206,13 +206,22 @@ this List is rewritten during the runnig of start.m script
 in the directory FlexibleSUSY/models/@CLASSNAME@ by
 the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
 ExtraSLHAOutputBlocks = {
-    {FlexibleSUSYLowEnergy,
-        {{1, FlexibleSUSYObservable`aMuon} } },
-    {EFFHIGGSCOUPLINGS, NoScale,
-        {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-         {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-         {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-         {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+    {
+    	FlexibleSUSYLowEnergy,
+        {
+        	{1, FlexibleSUSYObservable`aMuon}
+        } 
+    },
+    {
+    	EFFHIGGSCOUPLINGS, 
+    	NoScale,
+        {
+        	{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
+        	{2, FlexibleSUSYObservable`CpHiggsGluonGluon},
+        	{3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
+        	{4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} 
+        } 
+    }
 };
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
@@ -1519,10 +1528,15 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
            init
           ];
 
-WriteModelClass[massMatrices_List, ewsbEquations_List,
-                parametersFixedByEWSB_List, ewsbSubstitutions_List,
-                nPointFunctions_List, vertexRules_List, phases_List,
-                files_List, diagonalizationPrecision_List] :=
+WriteModelClass[massMatrices_List, 
+				ewsbEquations_List,
+                parametersFixedByEWSB_List, 
+                ewsbSubstitutions_List,
+                nPointFunctions_List, (* @unote *no* connection to the NPointFunctions Package! *)
+                vertexRules_List, 
+                phases_List,
+                files_List, 
+                diagonalizationPrecision_List] :=
     Module[{ewsbEquationsTreeLevel, independentEwsbEquationsTreeLevel,
             independentEwsbEquations,
             massGetters = "", k,
@@ -1651,7 +1665,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
-           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
+           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];  (* @unote *no* connection to the NPointFunctions Package! *)
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
            If[Parameters`GetExtraParameters[] =!= {},
@@ -3573,7 +3587,8 @@ Options[MakeFlexibleSUSY] :=
     };
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
-    Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
+    Module[{nPointFunctions,  (* @unote *no* connection to the NPointFunctions Package! *) 
+    	    runInputFile, initialGuesserInputFile,
             edmVertices, aMuonVertices, edmFields,
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
@@ -3631,8 +3646,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            FSCheckFlags[];
            FSCheckLoopCorrections[FSEigenstates];
-           nPointFunctions = EnforceCpColorStructures @ SortCps @
-             Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
+           nPointFunctions = Vertices`EnforceCpColorStructures @ 
+           					 Vertices`SortCps @
+             				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];  (* @unote *no* connection to the NPointFunctions Package! *)
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
@@ -3934,7 +3950,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   effectiveCouplingsFileName];
               extraVertices = EffectiveCouplings`GetNeededVerticesList[effectiveCouplings];
               Put[vertexRules =
-                      Vertices`VertexRules[Join[nPointFunctions, extraVertices, deltaVBwave,
+                      Vertices`VertexRules[Join[nPointFunctions, 
+                      							extraVertices, deltaVBwave,
                                                 deltaVBvertex, deltaVBbox], Lat$massMatrices],
                   vertexRuleFileName],
               vertexRules = Get[vertexRuleFileName];
@@ -3946,8 +3963,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            Utils`PrintHeadline["Creating model"];
            Print["Creating class for model ..."];
-           WriteModelClass[massMatrices, ewsbEquations, FlexibleSUSY`EWSBOutputParameters,
-                           DeleteDuplicates[Flatten[#[[2]]& /@ solverEwsbSubstitutions]], nPointFunctions, vertexRules, Parameters`GetPhases[],
+           WriteModelClass[massMatrices, 
+           				   ewsbEquations, 
+           				   FlexibleSUSY`EWSBOutputParameters,
+                           DeleteDuplicates[Flatten[#[[2]]& /@ solverEwsbSubstitutions]], 
+                           nPointFunctions, 
+                           vertexRules, 
+                           Parameters`GetPhases[],
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates.cpp.in"}],
@@ -4465,8 +4487,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],                           (* @unote *no* connection to the NPointFunctions Package! *)
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},  (* @unote *no* connection to the NPointFunctions Package! *)
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
                           };
