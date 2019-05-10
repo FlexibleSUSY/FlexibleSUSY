@@ -139,6 +139,12 @@ PrintAndReturn::usage = "Print result and return it";
 AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
 If assertion does not evaluate to True, print message and Quit[1].";
 
+TestWithMessage::usage =
+"TestWithMessage[assertion_, message_String, insertions___]:
+If assertion evaluate to True, returns True
+If assertion evaluate to False, print message with sequence of
+insertions and Quit[1].";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -287,6 +293,9 @@ PrintAndReturn[e___] := (Print[e]; e)
 
 AssertWithMessage[assertion_?BooleanQ, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
+
+TestWithMessage[assertion_?BooleanQ, message_String, insertions___] :=
+   If[assertion === True, True , Print@StringForm[message, insertions]; Quit[1]];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
