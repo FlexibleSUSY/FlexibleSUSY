@@ -45,16 +45,18 @@ LoopTools for the evaluation of the loop functions.
 ";
 NPointFunction::errinFields=
 "NPointFunctions`.`NPointFunction[]: Input:  
-The element '`1`' of a inFields is an incorrect one.
+The element '`1`' of inFields is an incorrect one.
 
 inFields should contain only particle names from the list 
-`2`.";
+`2`.
+@unote now only restricted set is supported";
 NPointFunction::erroutFields=
 "NPointFunctions`.`NPointFunction[]: Input: 
-The element '`1`' of a outFields is an incorrect one.
+The element '`1`' of outFields is an incorrect one.
 
 outFields should contain only particle names from the list 
-`2`.";
+`2`.
+@unote now only restricted set is supported";
 NPointFunction::errLoopLevel=
 "NPointFunctions`.`NPointFunction[]: Options: Only loop level 1 is supported";
 NPointFunction::errRegularize=
@@ -222,9 +224,7 @@ Module[
       And @@ TreeMasses`IsScalar /@ Join[inFields, outFields] ||
       And @@ TreeMasses`IsFermion /@ Join[inFields, outFields],
       NPointFunction::errInputFields];
-
-   inFields = Vertices`StripFieldIndices[inFields];
-   outFields = Vertices`StripFieldIndices[outFields];
+      
    nPointMeta = {loopLevel, regularizationScheme, zeroExternalMomenta};
 
    outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
