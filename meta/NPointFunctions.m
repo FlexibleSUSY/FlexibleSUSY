@@ -21,81 +21,163 @@
 *)
 
 BeginPackage["NPointFunctions`",{"FlexibleSUSY`","SARAH`","CXXDiagrams`","Vertices`","Parameters`","Utils`"}];
-
 NPointFunction::usage=
-"@brief Calculate the n-point correlation function for a set of
-incoming and a set of outgoing fields.
-@param inFields a list of incoming fields
-@param outFields a list of outgoing fields
+"@brief Calculate the n-point correlation function for a List of incoming and 
+a List of outgoing fields.
+@param inFields a List of incoming fields
+@param outFields a List of outgoing fields
 @param LoopLevel the loop level at which to perform the calculation
 @param Regularize the regularization scheme to apply
-@param UseCache whether to attempt to read and write the result
-from and to the cache.
-@param ZeroExternalMomenta whether to set the external momenta to
-zero or leave them undetermined.
-@param ExcludedTopologies a list or single symbol of topologies to
-exclude when calculation the n-point correlation function
+@param UseCache whether to attempt to read and write the result from and to 
+the cache.
+@param ZeroExternalMomenta whether to set the external momenta to zero or leave 
+them undetermined.
+@param ExcludedTopologies a list or single symbol of topologies to exclude when 
+calculation the n-point correlation function
 @returns the corresponding n-point correlation function
 @note only a loop level of 1 is currently supported
 @note the recognized regularization schemes are:
-- DimensionalReduction
-- DimensionalRegularization
-@note when not setting the external momenta to zero you should use
-LoopTools for the evaluation of the loop functions.
-";
+ - DimensionalReduction
+ - DimensionalRegularization
+@note when not setting the external momenta to zero you should use LoopTools 
+for the evaluation of the loop functions.";
 NPointFunction::errinFields=
-"NPointFunctions`.`NPointFunction[]: Input:  
+"NPointFunctions`.`NPointFunction[]: inFields:  
 The element '`1`' of inFields is an incorrect one.
 
-inFields should contain only particle names from the list 
-`2`.
+inFields should contain only names from the list of `2` particles
+`3`.
 @unote now only restricted set is supported";
 NPointFunction::erroutFields=
-"NPointFunctions`.`NPointFunction[]: Input: 
+"NPointFunctions`.`NPointFunction[]: outFields: 
 The element '`1`' of outFields is an incorrect one.
 
-outFields should contain only particle names from the list 
-`2`.
+outFields should contain only names from the list of `2` particles
+`3`.
 @unote now only restricted set is supported";
 NPointFunction::errLoopLevel=
-"NPointFunctions`.`NPointFunction[]: Options: Only loop level 1 is supported";
+"NPointFunctions`.`NPointFunction[]: LoopLevel: 
+
+Only loop level 1 is supported";
 NPointFunction::errRegularize=
-"option NPointFunctions`.`NPointFunction[]: Options: Unknown regularization scheme: ";
-NPointFunction::errZeroExternalMomenta=
-"input NPointFunctions`.`NPointFunction[]: Options: ZeroExternalMomenta must be either 
-True or False";
+"NPointFunctions`.`NPointFunction[]: Regularize: 
+Unknown regularization scheme `1`.
+
+Currently DimensionalReduction, DimensionalRegularization are supported.";
 NPointFunction::errUseCache=
-"input NPointFunctions`.`NPointFunctions[]: Options: UseCache must be either 
-True or False.";
+"NPointFunctions`.`NPointFunctions[]: UseCache: 
+
+UseCache must be either True or False.";
+NPointFunction::errZeroExternalMomenta=
+"NPointFunctions`.`NPointFunction[]: ZeroExternalMomenta: 
+
+ZeroExternalMomenta must be either True or False";
 NPointFunction::errOnShellFlag=
-"NPointFunctions`.`NPointFunction[]: Options: OnShellFlag must be either \
-True or False.";
-NPointFunction::errInputFields=
-"NPointFunctions`.`NPointFunction[]: Input: Only external scalars/fermions are \
-supported (@todo FOR NOW).";
-NPointFunction::errCalc=
+"NPointFunctions`.`NPointFunction[]: OnShellFlag: 
+
+OnShellFlag must be either True or False.";
+NPointFunction::errExcludedTopologies=
+"NPointFunctions`.`NPointFunction[]: ExcludedTopologies: 
+
+ExcludedTopologies must be sublist of 
+{OneParticleReducible,ExceptBoxes,ExceptTriangles}.";
+NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
+"NPointFunctions`.`NPointFunction[]: Input:
+
+Only external scalars/fermions are supported (@todo FOR NOW).";
+NPointFunction::errCalc=                                                        (* @utodo one needs to be more specific about problem *)
 "NPointFunctions`.`NPointFunction[]: Calculation failed";
+NPointFunction::errUnknownOptions=
+"NPointFunctions`.`NPointFunction[]: Unknown option(s): 
+`1`.
+
+Currently supported options are:
+`2`.";
+NPointFunction::errUnknownInput=
+"NPointFunctions`.`NPointFunction[]: Unknown input:
+Correct input has the folliwing form:
+NPointFunction[inFields,outFields,options]
+where
+ inFields and outFields are lists containing names of `1` particles 
+  `2`,
+ options have names from list 
+  `3`.";
 (*options for NPointFunction[]*)
-LoopLevel::usage="An option (integer) for NPointFunction[] that encodes the 
-loop level at which to calculate amplitudes.";
-Regularize::usage="An option (DimensionalReduction | DimensionalRegularization) for NPointFunction[] that encodes the 
-regularization scheme to be used.";
-DimensionalReduction::usage="A possible value for the Regularize option";
-DimensionalRegularization::usage="A possible value for the Regularize option";
-ZeroExternalMomenta::usage="An option (boolean) for NPointFunction[] that encodes
-whether to set the external momenta to zero or leave them undetermined.";
-OnShellFlag::usage="Option to use on-shell external fields";
+LoopLevel::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Encodes the loop level at which to calculate amplitudes.
 
-ExcludedTopologies::usage="Option to exclude specific topologies in FeynArts";
-OneParticleReducible::usage="Possible value for ExcludedTopologies.";
-ExceptBoxes::usage="Excude all topologies but box diagrams";
-ExceptTriangles::usage="Exclude all topologies but triangle diagrams";
+0 | 1 | ...";
+Regularize::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Encodes the regularization scheme to be used.
 
-LoopFunctions::usage="Option that controls whether to use FlexibleSUSY or LoopTools for loop functions.";
-UseCache::usage="Option to cache and reuse the expressions generated by FeynArts/FormCalc";
+DimensionalReduction | DimensionalRegularization";
+UseCache::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Cache and reuse the expressions generated by FeynArts/FormCalc.
 
-fermionBasis::usage="Specify the fermion basis used for the matching";
+True | False";
+ZeroExternalMomenta::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Encodes whether to set the external momenta to zero or leave them undetermined.
 
+True | False";
+OnShellFlag::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Use on-shell external fields or not.
+
+True | False";
+ExcludedTopologies::usage=
+"Option for NPointFunctions`.`NPointFunction[].
+Exclude specific topologies in FeynArts
+
+Any sublist of {OneParticleReducible,ExceptBoxes,ExceptTriangles}";
+SetAttributes[
+   {LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
+   ExcludedTopologies},
+   {Protected,Locked}];
+DimensionalReduction::usage=
+"Possible value for the Regularize option
+
+(Technically, a wrapper for FlexibleSUSY`.`DRbar)";
+DimensionalRegularization::usage=
+"Possible value for the Regularize option
+
+(Technically, a wrapper for FlexibleSUSY`.`MSbar)";
+SetAttributes[
+   {DimensionalReduction,DimensionalRegularization},
+   {Protected,Locked}
+];
+OneParticleReducible::usage=
+"Possible value for ExcludedTopologies.
+No tree-level-type propagators, i.e. if the topology is one-particle 
+irreducible.
+
+(Technically, a wrapper for a case when the initialization of FeynArts`.` is 
+not needed. Internally converts further to FeynArts`.`Irreducible.)";
+ExceptBoxes::usage=
+"Possible value for ExcludedTopologies. 
+Exclude all topologies except box diagrams
+
+(Technically, a wrapper for a case when the initialization of FeynArts`.` is 
+not needed. Internally converts further to FeynArts`.`Loops@Except@3.)";
+ExceptTriangles::usage=
+"Possible value for ExcludedTopologies. 
+Exclude all topologies except triangle diagrams
+
+(Technically, a wrapper for a case when the initialization of FeynArts`.` is 
+not needed. Internally converts further to FeynArts`.`Loops@Except@4.)";
+SetAttributes[
+   {OneParticleReducible,ExceptBoxes,ExceptTriangles},
+   {Protected,Locked}
+];
+(*some other stuff*)
+LoopFunctions::usage=
+"Option for CreateCXXFunctions[] that controls whether to use FlexibleSUSY or 
+LoopTools for loop functions.";
+fermionBasis::usage=
+"Specify the fermion basis used for the matching";
 VerticesForNPointFunction::usage="
 @brief Return a list of all vertices needed to calculate a given 
 n-point correlation function.
@@ -161,99 +243,70 @@ GenericIndex::usage="Represent an index of a generic field.";
 LorentzIndex::usage="Represent a Lorentz index of a generic field.";
 
 Begin["`Private`"];
-NPointFunction[
-   inFields:{_?
-      ( Utils`TestWithMessage[
-         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],
-         NPointFunction::errinFields,
-         #,
-         TreeMasses`GetParticles[]
-      ]& )
-   ..},
-   outFields:{_?
-      ( Utils`TestWithMessage[
-         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],
-         NPointFunction::erroutFields,
-         #,
-         TreeMasses`GetParticles[]
-      ]& )
-   ..},
-   OptionsPattern[{
-      LoopLevel -> 1,
-      Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
-         FlexibleSUSY`DRbar, DimensionalReduction,
-         FlexibleSUSY`MSbar, DimensionalRegularization],
-      UseCache -> True, 
-      ZeroExternalMomenta -> False,
-      ExcludedTopologies -> {},
-      OnShellFlag -> False
-   }]
-]:=
+Options[NPointFunction]={
+   LoopLevel -> 1,
+   Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
+      FlexibleSUSY`DRbar, DimensionalReduction,
+      FlexibleSUSY`MSbar, DimensionalRegularization],
+   UseCache -> True, 
+   ZeroExternalMomenta -> False,
+   OnShellFlag -> False,
+   ExcludedTopologies -> {}
+};
+NPointFunction[inFields_,outFields_,opts:OptionsPattern[]]:=
 Module[
    {
       loopLevel = OptionValue[LoopLevel],
       regularizationScheme = OptionValue[Regularize],
       useCache = OptionValue[UseCache],
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
-      excludedTopologies = OptionValue[ExcludedTopologies], (*@todo is not checked yet!*)
+      excludedTopologies = OptionValue[ExcludedTopologies],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
       nPointMeta,
-      sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-      fsMetaDir = $flexiblesusyMetaDir,
       outputDir,
+      nPointFunctionsDir,
+      nPointFunctionFile,
+      fsMetaDir = $flexiblesusyMetaDir,
       currentPath, currentDirectory,
-      feynArtsDir,formCalcDir,nPointFunctionsDir,
+      feynArtsDir,formCalcDir,
       cachedNPointFunction,
       feynArtsModel,substitutionsFile,particleNamesFile,
       inFANames,outFANames,
       subKernels,calculationCommand,particleNamespaceFile,
       fileHandle,nPointFunction
    },
-   Utils`AssertWithMessage[loopLevel === 1, NPointFunction::errLoopLevel];
-   Utils`AssertWithMessage[
-      regularizationScheme === DimensionalReduction ||
-      regularizationScheme === DimensionalRegularization,
-      NPointFunction::errRegularize <> ToString[regularizationScheme]];
-   Utils`AssertWithMessage[BooleanQ[zeroExternalMomenta],
-      NPointFunction::errZeroExternalMomenta];
-   Utils`AssertWithMessage[useCache === True || useCache === False,
-      NPointFunction::errUseCache];
-   Utils`AssertWithMessage[BooleanQ[onShellFlag],
-      NPointFunction::errOnShellFlag];
-   Utils`AssertWithMessage[
-      And @@ TreeMasses`IsScalar /@ Join[inFields, outFields] ||
-      And @@ TreeMasses`IsFermion /@ Join[inFields, outFields],
-      NPointFunction::errInputFields];
-      
    nPointMeta = {loopLevel, regularizationScheme, zeroExternalMomenta};
-
-   outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-
-   nPointFunctionsDir = FileNameJoin[{outputDir, "NPointFunctions"}];
+   
+   outputDir = FileNameJoin@
+      {SARAH`$sarahCurrentOutputMainDir,ToString[FlexibleSUSY`FSEigenstates]};
+      
+   nPointFunctionsDir = FileNameJoin@
+      {outputDir, "NPointFunctions"};
+   
    If[DirectoryQ[nPointFunctionsDir] == False,
       CreateDirectory[nPointFunctionsDir]];
 
    nPointFunctionFile = FileNameJoin[{nPointFunctionsDir, "temp"}];
 
    If[useCache === True,
-      nPointFunction = CachedNPointFunction[
-         inFields, outFields, nPointMeta];
-      If[nPointFunction =!= Null, Return[nPointFunction]]
+      nPointFunction = CachedNPointFunction[inFields, outFields, nPointMeta];
+      If[nPointFunction =!= Null, Return@nPointFunction]
    ];
 
-   feynArtsDir = FileNameJoin[{outputDir, "FeynArts"}];
-   formCalcDir = FileNameJoin[{outputDir, "FormCalc"}];
+   feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
+   formCalcDir = FileNameJoin@{outputDir, "FormCalc"};
 
-   feynArtsModel = FileNameJoin[{feynArtsDir, ClassesModelFileName[]}];
-   particleNamesFile = FileNameJoin[{feynArtsDir, "ParticleNamesFeynArts.dat"}];
-   particleNamespaceFile = FileNameJoin[{feynArtsDir, "ParticleNamespaces.m"}];
-   substitutionsFile = FileNameJoin[{feynArtsDir, SubstitutionsFileName[]}];
+   feynArtsModel = FileNameJoin@{feynArtsDir, ClassesModelFileName[]};
+   particleNamesFile = FileNameJoin@{feynArtsDir, "ParticleNamesFeynArts.dat"};
+   particleNamespaceFile = FileNameJoin@{feynArtsDir, "ParticleNamespaces.m"};
+   substitutionsFile = FileNameJoin@{feynArtsDir, SubstitutionsFileName[]};
 
    subKernels = LaunchKernels[2];
 
    If[FileExistsQ[feynArtsModel <> ".mod"] === False,
       GenerateFAModelFileOnKernel[subKernels[[1]]];
-      WriteParticleNamespaceFile[particleNamespaceFile]];
+      WriteParticleNamespaceFile[particleNamespaceFile]
+   ];
 
    inFANames = FeynArtsNamesForFields[inFields, particleNamesFile];
    outFANames = FeynArtsNamesForFields[outFields, particleNamesFile];
@@ -264,11 +317,11 @@ Module[
    (* Unfortunately, there seems to be no way to restrict
    this to a specific kernel *)
    DistributeDefinitions[currentPath, currentDirectory,
-     fsMetaDir, feynArtsDir, formCalcDir, feynArtsModel,
-     particleNamesFile, substitutionsFile, particleNamespaceFile,
-     inFANames, outFANames,
-     loopLevel, regularizationScheme, zeroExternalMomenta, excludedTopologies,
-     onShellFlag];
+      fsMetaDir, feynArtsDir, formCalcDir, feynArtsModel,
+      particleNamesFile, substitutionsFile, particleNamespaceFile,
+      inFANames, outFANames,
+      loopLevel, regularizationScheme, zeroExternalMomenta, excludedTopologies,
+      onShellFlag];
 
    nPointFunction = ParallelEvaluate[
       $Path = currentPath;
@@ -290,7 +343,7 @@ Module[
          ExcludedTopologies -> excludedTopologies,
          OnShellFlag -> onShellFlag],
          subKernels[[2]]
-      ];
+   ];
 
    CloseKernels[subKernels];
 
@@ -301,7 +354,78 @@ Module[
       CacheNPointFunction[nPointFunction, nPointMeta]];
 
    nPointFunction
-]
+] /; And[
+   MatchQ[inFields,{_?
+      (Utils`TestWithMessage[
+         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
+         NPointFunction::errinFields,
+         #,
+         FlexibleSUSY`FSDefaultSARAHModel,
+         Cases[TreeMasses`GetParticles[], 
+            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
+      ]&)
+   ..}],
+   MatchQ[outFields,{_?
+      ( Utils`TestWithMessage[
+         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
+         NPointFunction::erroutFields,
+         #,
+         FlexibleSUSY`FSDefaultSARAHModel,
+         Cases[TreeMasses`GetParticles[], 
+            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
+      ]& )
+   ..}],
+   Utils`TestWithMessage[
+      FilterRules[{opts},Except@Keys@Options@NPointFunction] === {},
+      NPointFunction::errUnknownOptions,
+      FilterRules[{opts},Except@Keys@Options@NPointFunction],
+      Keys@Options@NPointFunction
+   ],
+   Utils`TestWithMessage[
+      OptionValue@LoopLevel === 1,
+      NPointFunction::errLoopLevel
+   ],
+   Utils`TestWithMessage[
+      OptionValue@Regularize === DimensionalReduction ||
+      OptionValue@Regularize === DimensionalRegularization,
+      NPointFunction::errRegularize,
+      OptionValue@Regularize
+   ],
+   Utils`TestWithMessage[
+      BooleanQ@OptionValue@UseCache,
+      NPointFunction::errUseCache
+   ],
+   Utils`TestWithMessage[
+      BooleanQ@OptionValue@ZeroExternalMomenta,
+      NPointFunction::errZeroExternalMomenta
+   ],
+   Utils`TestWithMessage[
+      BooleanQ@OptionValue@OnShellFlag,
+      NPointFunction::errOnShellFlag
+   ],
+   Utils`TestWithMessage[
+      And@@Map[
+         MemberQ[{OneParticleReducible,ExceptBoxes,ExceptTriangles,Null},#]&,
+         If[Head@#===List,#,{#}]&@OptionValue@ExcludedTopologies
+      ],
+      NPointFunction::errExcludedTopologies
+   ],
+   Utils`TestWithMessage[                                                       (* @todo modify this in future*)
+      And @@ TreeMasses`IsScalar /@ Join[inFields, outFields] ||                (**)
+      And @@ TreeMasses`IsFermion /@ Join[inFields, outFields],                 (**)
+      NPointFunction::errInputFields                                            (**)
+   ]                                                                            (**)
+];
+NPointFunction[___] := Utils`TestWithMessage[
+   False,
+   NPointFunction::errUnknownInput,
+   FlexibleSUSY`FSDefaultSARAHModel,
+   Cases[TreeMasses`GetParticles[], 
+      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector],
+   Keys@Options@NPointFunction
+];
+SetAttributes[NPointFunction, {Protected, Locked}];
+
 VerticesForNPointFunction[nPointFunction_] := 
   Module[{genericVertices, genericSumPositions,
           genericInsertions, vertices},
