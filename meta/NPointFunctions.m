@@ -102,7 +102,7 @@ where
   `2`,
  options have names from list 
   `3`.";
-(*options for NPointFunction[]*)
+
 LoopLevel::usage=
 "Option for NPointFunctions`.`NPointFunction[].
 Encodes the loop level at which to calculate amplitudes.
@@ -133,10 +133,7 @@ ExcludedTopologies::usage=
 Exclude specific topologies in FeynArts
 
 Any sublist of {OneParticleReducible,ExceptBoxes,ExceptTriangles}";
-SetAttributes[
-   {LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
-   ExcludedTopologies},
-   {Protected,Locked}];
+
 DimensionalReduction::usage=
 "Possible value for the Regularize option
 
@@ -145,10 +142,7 @@ DimensionalRegularization::usage=
 "Possible value for the Regularize option
 
 (Technically, a wrapper for FlexibleSUSY`.`MSbar)";
-SetAttributes[
-   {DimensionalReduction,DimensionalRegularization},
-   {Protected,Locked}
-];
+
 OneParticleReducible::usage=
 "Possible value for ExcludedTopologies.
 No tree-level-type propagators, i.e. if the topology is one-particle 
@@ -168,11 +162,7 @@ Exclude all topologies except triangle diagrams
 
 (Technically, a wrapper for a case when the initialization of FeynArts`.` is 
 not needed. Internally converts further to FeynArts`.`Loops@Except@4.)";
-SetAttributes[
-   {OneParticleReducible,ExceptBoxes,ExceptTriangles},
-   {Protected,Locked}
-];
-(*some other stuff*)
+(*what above is done*)
 LoopFunctions::usage=
 "Option for CreateCXXFunctions[] that controls whether to use FlexibleSUSY or 
 LoopTools for loop functions.";
@@ -258,38 +248,27 @@ Module[
    {
       loopLevel = OptionValue[LoopLevel],
       regularizationScheme = OptionValue[Regularize],
-      useCache = OptionValue[UseCache],
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
       excludedTopologies = OptionValue[ExcludedTopologies],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
-      nPointMeta,
-      outputDir,
+      nPointMeta = OptionValue@{LoopLevel,Regularize,ZeroExternalMomenta},
+      outputDir = FileNameJoin@{
+         SARAH`$sarahCurrentOutputMainDir,
+         ToString@FlexibleSUSY`FSEigenstates
+      },
       nPointFunctionsDir,
-      nPointFunctionFile,
-      fsMetaDir = $flexiblesusyMetaDir,
+      fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       currentPath, currentDirectory,
       feynArtsDir,formCalcDir,
-      cachedNPointFunction,
       feynArtsModel,substitutionsFile,particleNamesFile,
       inFANames,outFANames,
-      subKernels,calculationCommand,particleNamespaceFile,
-      fileHandle,nPointFunction
+      subKernels,particleNamespaceFile,
+      nPointFunction
    },
-   nPointMeta = {loopLevel, regularizationScheme, zeroExternalMomenta};
-   
-   outputDir = FileNameJoin@
-      {SARAH`$sarahCurrentOutputMainDir,ToString[FlexibleSUSY`FSEigenstates]};
-      
-   nPointFunctionsDir = FileNameJoin@
-      {outputDir, "NPointFunctions"};
-   
-   If[DirectoryQ[nPointFunctionsDir] == False,
-      CreateDirectory[nPointFunctionsDir]];
-
-   nPointFunctionFile = FileNameJoin[{nPointFunctionsDir, "temp"}];
-
-   If[useCache === True,
-      nPointFunction = CachedNPointFunction[inFields, outFields, nPointMeta];
+   nPointFunctionsDir = FileNameJoin@{outputDir, "NPointFunctions"};            (* @unote cache saving *)
+   If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
+   If[OptionValue@UseCache,
+      nPointFunction = CachedNPointFunction[inFields,outFields,nPointFunctionsDir,nPointMeta];
       If[nPointFunction =!= Null, Return@nPointFunction]
    ];
 
@@ -350,8 +329,8 @@ Module[
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
       NPointFunction::errCalc];
 
-   If[useCache === True,
-      CacheNPointFunction[nPointFunction, nPointMeta]];
+   If[OptionValue@UseCache,
+      CacheNPointFunction[nPointFunction,nPointFunctionsDir,nPointMeta]];
 
    nPointFunction
 ] /; And[
@@ -360,7 +339,7 @@ Module[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::errinFields,
          #,
-         FlexibleSUSY`FSDefaultSARAHModel,
+         SARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]&)
@@ -370,7 +349,7 @@ Module[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::erroutFields,
          #,
-         FlexibleSUSY`FSDefaultSARAHModel,
+         SARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]& )
@@ -419,12 +398,11 @@ Module[
 NPointFunction[___] := Utils`TestWithMessage[
    False,
    NPointFunction::errUnknownInput,
-   FlexibleSUSY`FSDefaultSARAHModel,
+   SARAHModelName[],
    Cases[TreeMasses`GetParticles[], 
       _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector],
    Keys@Options@NPointFunction
 ];
-SetAttributes[NPointFunction, {Protected, Locked}];
 
 VerticesForNPointFunction[nPointFunction_] := 
   Module[{genericVertices, genericSumPositions,
@@ -520,16 +498,88 @@ CreateCXXHeaders[OptionsPattern[{LoopFunctions -> "FlexibleSUSY", UseWilsonCoeff
          _, Print["CreateCXXHeaders[]: error unsupported loop functions library: ",
                   OptionValue[LoopFunctions]]]
 
-SARAHModelName::usage="
-@brief Return the SARAH model name as to be passed to ``SARAH`Start[]``.
-@returns the SARAH model name as to be passed to ``SARAH`Start[]``.
-";
+SARAHModelName::usage=
+"@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
+@returns the SARAH model name as to be passed to SARAH`.`Start[].";
 SARAHModelName[] := 
    If[SARAH`submodeldir =!= False,
       SARAH`modelDir <> "-" <> SARAH`submodeldir,
       SARAH`modelDir
-   ]
+   ];
+
+CacheNameForMeta::usage=
+"@brief Return the name of the cache file for given meta information
+@param nPointMeta the given meta information
+@returns the name of the cache file for given meta information.
+";
+CacheNameForMeta[nPointMeta_List] :=
+   StringJoin["cache_",Riffle[ToString /@ nPointMeta, "_"],".m"]; 
+
+CacheNPointFunction::usage=
+"@brief Write a given n-point correlation function to the cache
+@param nPointFunction the given n-point correlation function
+@param cacheDir the directory to save cache
+@param nPointMeta the meta information about the given n-point correlation 
+function";
+CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta_] := 
+Module[
+   {
+      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
+      fileHandle,
+      nPointFunctions,
+      position
+   },
+   If[FileExistsQ[nPointFunctionsFile],
+      nPointFunctions = Get[nPointFunctionsFile],
+      nPointFunctions = {}
+   ];
    
+   position = FirstPosition[nPointFunctions[[All,1]],nPointFunction[[1]],Null];
+   If[position =!= Null,
+      nPointFunctions[[position]] = nPointFunction,
+      AppendTo[nPointFunctions, nPointFunction]
+   ];
+
+   fileHandle = OpenWrite@nPointFunctionsFile;
+   Write[fileHandle,nPointFunctions];
+   Close@fileHandle;
+];
+
+CachedNPointFunction::usage=
+"@brief Retrieve an n-point correlation function from the cache
+@param inFields the incoming fields of the n-point correlation function
+@param outFields the outgoing fields of the n-point correlation function
+@param cacheDir the directory to save cache
+@param nPointMeta the meta information of the n-point correlation function
+@returns the corresponding n-point correalation function from the
+cache or `Null` if such a function could not be found.
+";
+CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := Module[
+   {
+      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
+      nPointFunctions, 
+      position
+   },
+   If[!FileExistsQ@nPointFunctionsFile,Return@Null];
+   nPointFunctions = Get@nPointFunctionsFile;
+   position = FirstPosition[nPointFunctions[[All,1]],{inFields, outFields}, Null];
+   If[position =!= Null,nPointFunctions[[position]],Null]
+  ];
+  
+SetAttributes[
+   {
+   (*symbols*)
+   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
+   ExcludedTopologies,
+   DimensionalReduction,DimensionalRegularization,
+   OneParticleReducible,ExceptBoxes,ExceptTriangles,
+   (*functions*)
+   NPointFunction,
+   SARAHModelName,
+   CacheNameForMeta,CacheNPointFunction,CachedNPointFunction
+   }, 
+   {Protected, Locked}];
+
 ClassesModelFileName::usage="
 @brief Return the model name that is used by SARAH to name the
 FeynArts model file it creates.
@@ -1188,89 +1238,6 @@ CXXClassNameForNPointFunction[nPointFunction_] :=
       Join[nPointFunction[[1,1]], nPointFunction[[1,2]]]];
     "nPoint" <> StringJoin[ToString /@ Flatten[fields //. a_[b_] :> {a,b}]]
   ]
-
-CacheNPointFunction::usage="
-@brief Write a given n-point correlation function to the cache
-@param nPointFunction the given n-point correlation function
-@param nPointMeta the meta information about the given n-point
-correlation function
-";
-CacheNPointFunction[nPointFunction_, nPointMeta_List] := 
-  Module[{sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-          outputDir, nPointFunctionsDir, cacheName,
-          nPointFunctionsFile,fileHandle,nPointFunctions,
-          position},
-    cacheName = CacheNameForMeta[nPointMeta];
-
-    outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-    nPointFunctionsDir = FileNameJoin[{outputDir, "NPointFunctions"}];
-    nPointFunctionsFile = FileNameJoin[{nPointFunctionsDir, cacheName}];
-
-    If[!FileExistsQ[nPointFunctionsFile],
-       fileHandle = OpenWrite[nPointFunctionsFile];
-       Write[fileHandle,{}];
-       Close[fileHandle]];
-
-    nPointFunctions = Get[nPointFunctionsFile];
-
-    position = Position[nPointFunctions[[All,1]], nPointFunction[[1]]];
-    If[Length[position] =!= 0,
-       nPointFunctions[[position[[1,1]]]] = nPointFunction,
-
-       AppendTo[nPointFunctions, nPointFunction]
-    ];
-
-    fileHandle = OpenWrite[nPointFunctionsFile];
-    Write[fileHandle,nPointFunctions];
-    Close[fileHandle];
-  ]
-
-CachedNPointFunction::usage="
-@brief Retrieve an n-point correlation function from the cache
-@param inFields the incoming fields of the n-point correlation
-function
-@param outFields the outgoing fields of the n-point correlation
-function
-@param nPointMeta the meta information of the n-point correlation
-function
-@returns the corresponding n-point correalation function from the
-cache or `Null` if such a function could not be found.
-";
-CachedNPointFunction[inFields_List, outFields_List, nPointMeta_List] :=
-  Module[{sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-          outputDir, nPointFunctionsDir, cacheName,
-          nPointFunctionsFile, nPointFunctions,
-          unindexedExternalFields, position},
-    cacheName = CacheNameForMeta[nPointMeta];
-
-    outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-    nPointFunctionsDir = FileNameJoin[{outputDir, "NPointFunctions"}];
-    nPointFunctionsFile = FileNameJoin[{nPointFunctionsDir, cacheName}];
-
-    If[!FileExistsQ[nPointFunctionsFile],
-       Return[Null]];
-
-    nPointFunctions = Get[nPointFunctionsFile];
-
-    unindexedExternalFields = {Vertices`StripFieldIndices[#[[1]]],
-                               Vertices`StripFieldIndices[#[[2]]]} & /@
-      nPointFunctions[[All,1]];
-
-    position = Position[unindexedExternalFields,
-      {inFields, outFields}, {1}, Heads -> False];
-    If[Length[position] === 0,
-       Null,
-       nPointFunctions[[position[[1,1]]]]
-    ]
-  ]
-
-CacheNameForMeta::usage="
-@brief Return the name of the cache for given meta information
-@param nPointMeta the given meta information
-@returns the name of the cache file for given meta information.
-";
-CacheNameForMeta[nPointMeta_List] :=
-  "cache_" <> StringJoin[Riffle[ToString /@ nPointMeta, "_"]] <> ".m"
 
 FeynArtsNamesForFields::usage="
 @brief Translate SARAH-style fields to FeynArts-style fields
