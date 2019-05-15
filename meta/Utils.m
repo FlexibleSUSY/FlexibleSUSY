@@ -317,7 +317,7 @@ Module[{Filter},
    ] := 
    (
       Print[StringForm[message, insertions],
-         "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t,
+         "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
          StringForm[System`Dump`str, 
             Sequence@@(ToString /@ System`Dump`args)
          ]
