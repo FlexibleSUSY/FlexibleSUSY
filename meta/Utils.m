@@ -145,6 +145,14 @@ If assertion evaluate to True, returns True
 If assertion evaluate to False, print message with sequence of
 insertions and Quit[1].";
 
+PureEvaluate::usage =
+"PureEvaluate[expression_, message_String, insertions___]:
+Evaluates expression and returns the result if none Message is generated.
+If any Message is generated it stops evaluation, 
+                               prints message with sequence of insertions, 
+                               prints content of Message and 
+                               Quit[1].";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -295,7 +303,30 @@ AssertWithMessage[assertion_?BooleanQ, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
 TestWithMessage[assertion_?BooleanQ, message_String, insertions___] :=
-   If[assertion === True, True , Print@StringForm[message, insertions]; Quit[1]];
+   If[assertion === True, 
+      True , 
+      Print@StringForm[message, insertions]; Quit[1]];
+SetAttributes[TestWithMessage, {Locked,Protected}];
+
+PureEvaluate[expression_, message_String, insertions___] :=
+Module[{Filter},
+   Filter[
+      System`Dump`str_, 
+      Hold[MessageName[System`Dump`s_, System`Dump`t_]], 
+      Hold[Message[_, System`Dump`args___]]
+   ] := 
+   (
+      Print[StringForm[message, insertions],
+         "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t,
+         StringForm[System`Dump`str, 
+            Sequence@@(ToString /@ System`Dump`args)
+         ]
+      ];
+      Quit[1]
+   );
+   Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
+];
+SetAttributes[PureEvaluate, {HoldFirst,Locked,Protected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
