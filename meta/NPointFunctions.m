@@ -102,6 +102,15 @@ where
   `2`,
  options have names from list 
   `3`.";
+NPointFunction::errKernelNum=
+"NPointFunctions`.`NPointFunction[]: Kernel Number:
+Amout of running subkernels doesn't allow to launch another one during
+`1`.";
+NPointFunction::errKernelLaunch=
+"NPointFunctions`.`NPointFunction[]: LaunchKernel:
+Unable to launch subkernel(s) during calculations for
+`1`
+because of error:";
 
 LoopLevel::usage=
 "Option for NPointFunctions`.`NPointFunction[].
@@ -243,7 +252,7 @@ Options[NPointFunction]={
    OnShellFlag -> False,
    ExcludedTopologies -> {}
 };
-NPointFunction[inFields_,outFields_,opts:OptionsPattern[]]:=
+NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
 Module[
    {
       loopLevel = OptionValue[LoopLevel],
@@ -256,57 +265,65 @@ Module[
          SARAH`$sarahCurrentOutputMainDir,
          ToString@FlexibleSUSY`FSEigenstates
       },
-      nPointFunctionsDir,
+      nPointFunctionsDir,feynArtsDir,feynArtsModel,particleNamesFile,
+      particleNamespaceFile,substitutionsFile,formCalcDir,
+      subKernel,
       fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       currentPath, currentDirectory,
-      feynArtsDir,formCalcDir,
-      feynArtsModel,substitutionsFile,particleNamesFile,
       inFANames,outFANames,
-      subKernels,particleNamespaceFile,
       nPointFunction
    },
    nPointFunctionsDir = FileNameJoin@{outputDir, "NPointFunctions"};            (* @unote cache saving *)
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
-      nPointFunction = CachedNPointFunction[inFields,outFields,nPointFunctionsDir,nPointMeta];
+      nPointFunction = CachedNPointFunction[
+         inFields,outFields,nPointFunctionsDir,nPointMeta
+      ];
       If[nPointFunction =!= Null, Return@nPointFunction]
    ];
-
+   
    feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
+   feynArtsModel = FileNameJoin@{feynArtsDir, GetFAClassesModelName[]};
+   particleNamesFile = FileNameJoin@{feynArtsDir, GetFAParticleNamesFileName[]};
+   particleNamespaceFile = FileNameJoin@{feynArtsDir, "ParticleNamespaces.m"};
+   substitutionsFile = FileNameJoin@{feynArtsDir, GetFASubstitutionsFileName[]};
+
    formCalcDir = FileNameJoin@{outputDir, "FormCalc"};
 
-   feynArtsModel = FileNameJoin@{feynArtsDir, ClassesModelFileName[]};
-   particleNamesFile = FileNameJoin@{feynArtsDir, "ParticleNamesFeynArts.dat"};
-   particleNamespaceFile = FileNameJoin@{feynArtsDir, "ParticleNamespaces.m"};
-   substitutionsFile = FileNameJoin@{feynArtsDir, SubstitutionsFileName[]};
-
-   subKernels = LaunchKernels[2];
-
-   If[FileExistsQ[feynArtsModel <> ".mod"] === False,
-      GenerateFAModelFileOnKernel[subKernels[[1]]];
-      WriteParticleNamespaceFile[particleNamespaceFile]
+   If[!FileExistsQ[feynArtsModel <> ".mod"] && 
+      Utils`TestWithMessage[Length@Kernels[] < 8,
+         NPointFunction::errKernelNum,
+         "creation of FeynArts model file"]
+      ,
+      Print["FeynArts model file is absent, creating it ..."];
+      subKernel = Utils`PureEvaluate[LaunchKernels[1][[1]],
+         NPointFunction::errKernelLaunch,
+         "creation of FeynArts model file"];
+      GenerateFAModelFileOnKernel@subKernel;                                    (*generates .dat .mod .m files insiide FeynArts directory*)
+      WriteParticleNamespaceFile@particleNamespaceFile;
+      CloseKernels@subKernel;
    ];
 
-   inFANames = FeynArtsNamesForFields[inFields, particleNamesFile];
-   outFANames = FeynArtsNamesForFields[outFields, particleNamesFile];
+   subKernel = Utils`PureEvaluate[LaunchKernels[1][[1]],
+         NPointFunction::errKernelLaunch,
+         "FormCalc"];
+         
+   inFANames = FANamesForFields[inFields, particleNamesFile];
+   outFANames = FANamesForFields[outFields, particleNamesFile];
 
    currentPath = $Path;
    currentDirectory = Directory[];
-
-   (* Unfortunately, there seems to be no way to restrict
-   this to a specific kernel *)
    DistributeDefinitions[currentPath, currentDirectory,
       fsMetaDir, feynArtsDir, formCalcDir, feynArtsModel,
       particleNamesFile, substitutionsFile, particleNamespaceFile,
-      inFANames, outFANames,
-      loopLevel, regularizationScheme, zeroExternalMomenta, excludedTopologies,
-      onShellFlag];
+      inFANames, outFANames, loopLevel, regularizationScheme,
+      zeroExternalMomenta, excludedTopologies, onShellFlag];
 
    nPointFunction = ParallelEvaluate[
       $Path = currentPath;
-      SetDirectory[currentDirectory];
+      SetDirectory@currentDirectory;
 
-      Get[FileNameJoin[{fsMetaDir, "NPointFunctions", "internal.m"}]];
+      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
       NPointFunctions`SetFAFCPaths[
          feynArtsDir, formCalcDir, feynArtsModel,
@@ -321,10 +338,9 @@ Module[
          ZeroExternalMomenta -> zeroExternalMomenta,
          ExcludedTopologies -> excludedTopologies,
          OnShellFlag -> onShellFlag],
-         subKernels[[2]]
+      subKernel
    ];
-
-   CloseKernels[subKernels];
+   CloseKernels[subKernel];
 
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
       NPointFunction::errCalc];
@@ -334,8 +350,8 @@ Module[
 
    nPointFunction
 ] /; And[
-   MatchQ[inFields,{_?
-      (Utils`TestWithMessage[
+   MatchQ[inFields,
+   {_?(Utils`TestWithMessage[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::errinFields,
          #,
@@ -343,9 +359,10 @@ Module[
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]&)
-   ..}],
-   MatchQ[outFields,{_?
-      ( Utils`TestWithMessage[
+   ..}
+   ],
+   MatchQ[outFields,
+   {_?( Utils`TestWithMessage[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::erroutFields,
          #,
@@ -353,7 +370,8 @@ Module[
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]& )
-   ..}],
+   ..}
+   ],
    Utils`TestWithMessage[
       FilterRules[{opts},Except@Keys@Options@NPointFunction] === {},
       NPointFunction::errUnknownOptions,
@@ -507,12 +525,38 @@ SARAHModelName[] :=
       SARAH`modelDir
    ];
 
+GetFAClassesModelName::usage=
+"@brief Return the model name that is used by SARAH to name the
+FeynArts model file it creates.
+@returns the model name that is used by SARAH to name the
+FeynArts model file it creates.";
+GetFAClassesModelName[] := 
+   SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
+   
+GetFAParticleNamesFileName::usage=
+"@brief Return the file name that is used by SARAH to store 
+FeynArts particle names.
+@returns the file name that is used by SARAH to store 
+FeynArts particle names.";
+GetFAParticleNamesFileName[] := 
+   "ParticleNamesFeynArts.dat";
+
+GetFASubstitutionsFileName::usage=
+"@brief Return the model name that is used by SARAH to name the FeynArts 
+substitution file it creates.
+@returns the model name that is used by SARAH to name the
+FeynArts substitution file it creates.";
+GetFASubstitutionsFileName[] :=
+   StringJoin["Substitutions-",SARAH`ModelName,
+     ToString@FlexibleSUSY`FSEigenstates,".m"
+   ];
+
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
 @param nPointMeta the given meta information
 @returns the name of the cache file for given meta information.
 ";
-CacheNameForMeta[nPointMeta_List] :=
+CacheNameForMeta[nPointMeta_] :=
    StringJoin["cache_",Riffle[ToString /@ nPointMeta, "_"],".m"]; 
 
 CacheNPointFunction::usage=
@@ -554,7 +598,8 @@ CachedNPointFunction::usage=
 @returns the corresponding n-point correalation function from the
 cache or `Null` if such a function could not be found.
 ";
-CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := Module[
+CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := 
+Module[
    {
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
       nPointFunctions, 
@@ -564,8 +609,78 @@ CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := Module[
    nPointFunctions = Get@nPointFunctionsFile;
    position = FirstPosition[nPointFunctions[[All,1]],{inFields, outFields}, Null];
    If[position =!= Null,nPointFunctions[[position]],Null]
-  ];
-  
+];
+
+GenerateFAModelFileOnKernel::usage=
+"@brief Generate the FeynArts model file on a given subkernel.";
+GenerateFAModelFileOnKernel[kernel_] :=
+Module[
+   {
+      currentPath = $Path, 
+      currentDir = Directory[],
+      fsMetaDir = $flexiblesusyMetaDir,
+      sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
+      sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
+      sarahModelName = SARAHModelName[], 
+      eigenstates = FlexibleSUSY`FSEigenstates
+   },
+   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs, 
+      sarahOutputDir, sarahModelName, eigenstates];
+      
+   ParallelEvaluate[
+      $Path = currentPath;
+      SetDirectory@currentDir;
+      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "createFAModelFile.m"};
+      NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
+         sarahModelName, eigenstates];,
+      kernel];
+]
+
+WriteParticleNamespaceFile::usage="
+@brief Write a file containing all field names and the contexts in which they 
+live in Mathematica.
+@note This is necessary because SARAH puts fields into different contexts.";
+WriteParticleNamespaceFile[fileName_String] :=
+Module[{fileHandle = OpenWrite@fileName},
+   Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
+   Close@fileHandle;
+];
+
+FANamesForFields::usage=
+"@brief Translate SARAH-style fields to FeynArts-style fields
+@param fields List of SARAH-style fields
+@param particleNamesFile the path to the SARAH-created FeynArts
+particle names file.
+@returns A list of the FeynArts names (as strings) for the given
+SARAH-style fields.";
+FANamesForFields::errSARAH=
+"NpointFunctions`.`Private`.`FANamesForFields[]: SARAH`.`:
+It seems that SARAH`.` has changed conventions for
+<ParticleNames>.dat file.";
+FANamesForFields[fields_,particleNamesFile_String] :=
+Module[
+   {
+      lines = Utils`ReadLinesInFile@particleNamesFile,
+      uniqueFields = DeleteDuplicates[
+         CXXDiagrams`RemoveLorentzConjugation@# &/@ fields],
+      faFieldNames
+   },
+   faFieldNames = 
+   Flatten[
+      StringCases[lines, 
+         ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
+      ] & /@ uniqueFields
+   ];
+   Utils`AssertWithMessage[Length@faFieldNames > 0, 
+      FANamesForFields::errSARAH];
+      
+   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /. 
+      {
+         SARAH`bar@field_String :> "-" <> field, 
+         Susyno`LieGroups`conj@field_String :> "-" <> field
+      }
+]
+
 SetAttributes[
    {
    (*symbols*)
@@ -576,72 +691,12 @@ SetAttributes[
    (*functions*)
    NPointFunction,
    SARAHModelName,
-   CacheNameForMeta,CacheNPointFunction,CachedNPointFunction
+   GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
+   CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
+   GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
+   FANamesForFields
    }, 
    {Protected, Locked}];
-
-ClassesModelFileName::usage="
-@brief Return the model name that is used by SARAH to name the
-FeynArts model file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts model file it creates.
-";
-ClassesModelFileName[] := SARAH`ModelName <> ToString[FlexibleSUSY`FSEigenstates]
-
-SubstitutionsFileName::usage="
-@brief Return the model name that is used by SARAH to name the
-FeynArts substitution file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts substitution file it creates. 
-";
-SubstitutionsFileName[] :=
-  "Substitutions-" <> SARAH`ModelName <>
-  ToString[FlexibleSUSY`FSEigenstates] <> ".m"
-
-GenerateFAModelFileOnKernel::usage="
-@brief Generate the FeynArts model file on a given subkernel.
-";
-GenerateFAModelFileOnKernel[kernel_] :=
-  Module[{currentPath, currentDirectory,
-          fsMetaDir = $flexiblesusyMetaDir,
-          sarahInputDirectories, sarahOutputDirectory,
-          sarahModelName, eigenstates},
-    currentPath = $Path;
-    currentDirectory = Directory[];
-    sarahInputDirectories = SARAH`SARAH[InputDirectories];
-    sarahOutputDirectory = SARAH`SARAH[OutputDirectory];
-    sarahModelName = SARAHModelName[];
-    eigenstates = FlexibleSUSY`FSEigenstates;
-    
-    (* Unfortunately, there seems to be no way to restrict
-      this to a specific kernel *)
-    DistributeDefinitions[currentPath, currentDirectory,
-      fsMetaDir, sarahInputDirectories, sarahOutputDirectory,
-      sarahModelName, eigenstates];
-    
-    ParallelEvaluate[
-      $Path = currentPath;
-      SetDirectory[currentDirectory];
-      
-      Get[FileNameJoin[{fsMetaDir, "NPointFunctions", "createFAModelFile.m"}]];
-      
-      NPointFunctions`CreateFAModelFile[sarahInputDirectories,
-				sarahOutputDirectory, sarahModelName, eigenstates],
-      kernel];
-  ]
-
-WriteParticleNamespaceFile::usage="
-@brief Write a file containing all field names and the contexts
-in which they live in Mathematica
-@note This is necessary because SARAH puts fields into different
-contexts.
-";
-WriteParticleNamespaceFile[fileName_String] :=
-  Module[{fileHandle = OpenWrite[fileName]},
-    Write[fileHandle, {ToString[#], Context[#]} &
-      /@ TreeMasses`GetParticles[]];
-    Close[fileHandle];
-  ]
 
 UniquelyInstantiateGenericFields::usage="
 @brief given a list of expressions and a list of of generic field
@@ -1237,39 +1292,6 @@ CXXClassNameForNPointFunction[nPointFunction_] :=
     fields = Vertices`StripFieldIndices[
       Join[nPointFunction[[1,1]], nPointFunction[[1,2]]]];
     "nPoint" <> StringJoin[ToString /@ Flatten[fields //. a_[b_] :> {a,b}]]
-  ]
-
-FeynArtsNamesForFields::usage="
-@brief Translate SARAH-style fields to FeynArts-style fields
-@param fields the list of SARAH-style fields
-@param particleNamesFile the path to the SARAH-created FeynArts
-particle names file.
-@returns A list of the FeynArts names (as strings) for the given
-SARAH-style fields.
-";
-FeynArtsNamesForFields[fields_List,particleNamesFile_String] :=
-  Module[{lines, unindexedBaseFields, fieldLines,
-          faFieldNames, faNameRules},
-    lines = Utils`ReadLinesInFile[particleNamesFile];
-    
-    unindexedBaseFields = DeleteDuplicates[CXXDiagrams`AtomHead[
-      CXXDiagrams`RemoveLorentzConjugation[#]] & /@ fields];
-
-    fieldLines = Module[{fieldName = ToString[#]},
-      Select[lines, StringMatchQ[#,___~~fieldName~~":"~~___] &][[1]]] & /@
-        unindexedBaseFields;
-
-    faFieldNames = ("FeynArts`" <> StringSplit[#][[2]]) & /@ fieldLines;
-    
-    faNameRules = Join[
-      Sequence @@ {#[[1]][indices_List] :>
-         StringDrop[#[[2]], -1] <> ", " <> ToString[indices] <> "]",
-       #[[1]] -> #[[2]]} & /@ Transpose[{unindexedBaseFields, faFieldNames}],
-      {SARAH`bar[field_String] :> "-" <> field,
-       Susyno`LieGroups`conj[field_String] :> "-" <> field}
-    ];
-    
-    fields //. faNameRules
   ]
 
 GenericFieldType::usage="
