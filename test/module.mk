@@ -114,6 +114,11 @@ TEST_SRC += \
 		$(DIR)/test_two_scale_running_precision.cpp \
 		$(DIR)/test_two_scale_solver.cpp
 
+ifeq ($(WITH_NUHMSSMNoFVHimalayaEFTHiggs),yes)
+TEST_SRC += \
+		$(DIR)/test_NUHMSSM_top_down_EFTHiggs.cpp
+endif
+
 ifeq ($(WITH_SOFTSUSY),yes)
 TEST_SRC += \
 		$(DIR)/test_betafunction.cpp \
@@ -876,6 +881,8 @@ $(DIR)/test_CMSSMCPV_ewsb.x: $(LIBCMSSMCPV)
 
 $(DIR)/test_CMSSMCPV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMCPV)
 
+$(DIR)/test_NUHMSSM_top_down_EFTHiggs.x: $(LIBNUHMSSMNoFVHimalayaEFTHiggs)
+
 $(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.x: $(LIBMSSMEFTHiggs)
 
 $(DIR)/test_SMEFTHiggsTopDown.x: $(LIBSM) $(LIBSMEFTHiggsTopDown)
@@ -1026,8 +1033,8 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		$(CXX) -o $@ $(call abspathx,$^) \
 		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
-		$(THREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) \
-		$(TSILLIBS)
+		$(THREADLIBS) $(HIMALAYALIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) \
+		$(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
