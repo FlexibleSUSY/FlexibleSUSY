@@ -108,6 +108,153 @@ If[Utils`TestWithMessage[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
       },{Protected, Locked}];
    SetFSConventionRules[];
 ]
+
+SetFSConventionRules::usage=
+"@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY 
+language.";
+SetFSConventionRules::errSARAH=
+"NpointFunctions`.`Private`.`FANamesForFields[]: SARAH`.`:
+It seems that SARAH`.` has changed conventions for
+<ParticleNames>.dat file.";
+SetFSConventionRules[] :=
+Module[
+   {
+      indexRules,
+      ltIndex,
+      fieldsHandle,
+      fieldContents,
+      fieldNames,
+      massRules,
+      couplingRules,
+      generalFCRules,
+      fieldType,
+      diracChainRules
+   },
+
+   fieldNames = 
+   Flatten[
+      StringCases[
+         Utils`ReadLinesInFile@particleNamesFile, 
+         x__ ~~ ": " ~~ y__ ~~ "]" ~~ ___ :> {x, y <> "] "}],                   (*@unote potentially get rid of the space in the end  of "] " - *)
+      1] /. 
+      Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} & /@ Get@particleNamespaceFile, 2];
+   Utils`AssertWithMessage[Length@fieldNames > 0,
+      SetFSConventionRules::errSARAH];
+   massRules = Append[Flatten[Module[
+      {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
+      {
+         ToExpression[MassP <> "@indices_:>" <> P <> 
+         "@{Symbol[SARAH`gt<>StringTake[SymbolName@indices,-1]]}"],
+         ToExpression[MassP <> "@indices__:>" <> P <> "@{indices}"],
+         ToExpression[MassP <> "->" <> P]
+      }
+      ] &/@ fieldNames[[All, 1]] ],
+      FeynArts`Mass[field_, _ : Null] :> SARAH`Mass[field] ];
+
+   couplingRules = 
+   {
+      FeynArts`G[_][0][fields__][1] :> SARAH`Cp[fields][1],
+        FeynArts`G[_][0][fields__][
+            FeynArts`NonCommutative[Global`ChiralityProjector[-1]]] :>
+          SARAH`Cp[fields][SARAH`PL],
+        FeynArts`G[_][0][fields__][
+            FeynArts`NonCommutative[Global`ChiralityProjector[1]]] :>
+          SARAH`Cp[fields][SARAH`PR],
+        FeynArts`G[_][0][fields__][
+            FeynArts`NonCommutative[Global`DiracMatrix[FeynArts`KI1[3]],Global`ChiralityProjector[-1]]] :>
+          SARAH`Cp[fields][SARAH`PL],
+        FeynArts`G[_][0][fields__][
+            FeynArts`NonCommutative[Global`DiracMatrix[FeynArts`KI1[3]],Global`ChiralityProjector[1]]] :>
+          SARAH`Cp[fields][SARAH`PR],
+        FeynArts`G[_][0][fields__][
+            Global`MetricTensor[KI1[i1_Integer],KI1[i2_Integer]]] :>
+          SARAH`Cp[fields][SARAH`g[LorentzIndex[{fields}[[i1]]],
+                                   LorentzIndex[{fields}[[i2]]]]],
+        FeynArts`G[_][0][fields__][
+            FeynArts`Mom[i1_Integer] - FeynArts`Mom[i2_Integer]] :>
+          SARAH`Cp[fields][SARAH`Mom[{fields}[[i1]]] - SARAH`Mom[{fields}[[i2]]]],
+        (*Since FormCalc-9.7*)
+        FeynArts`G[_][0][fields__][Global`FourVector[
+            FeynArts`Mom[i1_Integer] - FeynArts`Mom[i2_Integer], FeynArts`KI1[3]]] :>
+          SARAH`Cp[fields][SARAH`Mom[{fields}[[i1]]] - SARAH`Mom[{fields}[[i2]]]],
+        (*VVV couplings*)
+        FeynArts`G[_][0][fields__][
+             Global`FourVector[-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer], FeynArts`KI1[i3_Integer]]*
+               Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i2_Integer]] +
+              Global`FourVector[FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer], FeynArts`KI1[i2_Integer]]*
+               Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i3_Integer]] +
+              Global`FourVector[-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer], FeynArts`KI1[i1_Integer]]*
+               Global`MetricTensor[FeynArts`KI1[i2_Integer], FeynArts`KI1[i3_Integer]]] :>
+          SARAH`Cp[fields][(SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] - SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
+            SARAH`g[LorentzIndex[{fields}[[i1]]], LorentzIndex[{fields}[[i2]]]], (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] - SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
+            SARAH`g[LorentzIndex[{fields}[[i1]]], LorentzIndex[{fields}[[i3]]]], (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] - SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
+            SARAH`g[LorentzIndex[{fields}[[i2]]], LorentzIndex[{fields}[[i3]]]]
+          ]
+
+    };
+
+    ltIndex = Unique["lt"];
+    generalFCRules = {
+        FormCalc`Finite -> 1,
+        FormCalc`Den[a_,b_] :> 1/(a - b),
+        FormCalc`Pair[a_,b_] :> SARAH`sum[ltIndex, 1, 4,
+          SARAH`g[ltIndex, ltIndex] * Append[a, ltIndex] * Append[b, ltIndex]],
+        Pattern[fieldType,Alternatives[FeynArts`S, FeynArts`F,
+                    FeynArts`V, FeynArts`U, FeynArts`T]][
+          FeynArts`Index[Generic,number_Integer]] :>  
+            fieldType[GenericIndex[number]],
+        FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]
+    };
+
+    (* These index rules are specific to SARAH generated FeynArts
+     * model files. Are these index rules always injective?
+     *)
+    indexRules = {
+      FeynArts`Index[generationName_, index_Integer] :> 
+                Symbol["SARAH`gt" <> ToString[index]] /;
+                StringMatchQ[SymbolName[generationName], "I"~~___~~"Gen"],
+      FeynArts`Index[Global`Colour, index_Integer] :>
+                Symbol["SARAH`ct" <> ToString[index]],
+      FeynArts`Index[Global`Gluon, index_Integer] :> 
+                Symbol["SARAH`ct" <> ToString[index]]
+    };
+
+    fieldNameToFSRules = Join[
+      Rule @@@ Transpose[
+        {Append[#,{indices___}] & /@ (ToExpression /@ fieldNames[[All,2]]),
+         Through[(ToExpression /@ fieldNames[[All,1]])[{indices}]]}],
+      Rule @@@ Transpose[
+        {ToExpression /@ fieldNames[[All,2]], ToExpression /@ fieldNames[[All,1]]}],
+      {FeynArts`S -> GenericS, FeynArts`F -> GenericF, FeynArts`V -> GenericV,
+       FeynArts`U -> GenericU, FeynArts`T -> GenericT},
+      {
+        Times[-1, field_GenericS | field_GenericV] :>
+           Susyno`LieGroups`conj[field],
+        Times[-1, field_GenericF | field_GenericU] :>
+           SARAH`bar[field]
+      },
+      (Times[-1, Pattern[field, # | Blank[#]]] :> 
+           CXXDiagrams`LorentzConjugate[field]) & /@
+         (ToExpression /@ fieldNames[[All,1]]),
+      indexRules
+    ];
+
+    (*These symbols cause an overshadowing with Susyno`LieGroups*)
+    diracChainRules = (Symbol["F" <> ToString[#]] :> Unique[diracChain] & /@ Range[Length[fieldNames]]);
+
+    subexpressionToFSRules = Join[
+      massRules,
+      fieldNameToFSRules,
+      couplingRules,
+      generalFCRules,
+      diracChainRules
+    ];
+    amplitudeToFSRules = Join[
+      subexpressionToFSRules,
+      sumOverRules,
+      {FeynArts`IndexSum -> Sum}
+    ];
+  ]
    
 SetAttributes[
    {
@@ -390,7 +537,6 @@ CalculateAmplitudes[classesAmplitudes_, genericInsertions_List,
     {subexpressions, zeroedRules} = RecursivelyZeroRules[subexpressions, zeroedRules];
 
     calculatedAmplitudes = calculatedAmplitudes /. zeroedRules;
-
     FCAmplitudesToFSConvention[
         {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
@@ -463,139 +609,6 @@ FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
   ]
 
 subexpressionToFSRules = {};
-
-(** \brief Set the translation rules from FeynArts/FormCalc
- * to FlexibleSUSY language
- *)
-SetFSConventionRules[] :=
-  Module[{lines, indexRules, field, ltIndex,
-          fieldsHandle, fieldContents, fieldNames, massRules,
-          fieldNamespaces, couplingRules, generalFCRules, fieldType, diracChainRules},
-    lines = Utils`ReadLinesInFile[particleNamesFile];
-
-    fieldNames = Cases[lines,
-                       line_String /; (Length[StringSplit[line,": "]] == 2) :> 
-                         StringSplit[line,": "]];
-    fieldNamespaces = Get[particleNamespaceFile];
-    
-    fieldNames = 
-      {Cases[fieldNamespaces, {#[[1]], _}][[1,2]] <>
-       #[[1]], #[[2]]} & /@ fieldNames;
-       
-    massRules = Join[
-      (Symbol["Mass" <> ToString[ToSymbol[#]]][indices_] :>
-       SARAH`Mass[ToExpression[#][{Symbol["SARAH`gt" <> StringTake[SymbolName[indices], -1]]}]]) & /@ fieldNames[[All,1]],
-      (Symbol["Mass" <> ToString[ToSymbol[#]]][indices__] :>
-       SARAH`Mass[ToExpression[#][{indices}]]) & /@ fieldNames[[All,1]],
-      (Symbol["Mass" <> ToString[ToSymbol[#]]] ->
-       SARAH`Mass[ToExpression[#]]) & /@ fieldNames[[All,1]],
-      {FeynArts`Mass[field_,faSpec_ : Null] :> SARAH`Mass[field]}
-    ];
-
-    couplingRules = {
-        FeynArts`G[_][0][fields__][1] :> SARAH`Cp[fields][1],
-        FeynArts`G[_][0][fields__][1] :> SARAH`Cp[fields][1],
-        FeynArts`G[_][0][fields__][
-            FeynArts`NonCommutative[Global`ChiralityProjector[-1]]] :>
-          SARAH`Cp[fields][SARAH`PL],
-        FeynArts`G[_][0][fields__][
-            FeynArts`NonCommutative[Global`ChiralityProjector[1]]] :>
-          SARAH`Cp[fields][SARAH`PR],
-        FeynArts`G[_][0][fields__][
-            FeynArts`NonCommutative[Global`DiracMatrix[FeynArts`KI1[3]],Global`ChiralityProjector[-1]]] :>
-          SARAH`Cp[fields][SARAH`PL],
-        FeynArts`G[_][0][fields__][
-            FeynArts`NonCommutative[Global`DiracMatrix[FeynArts`KI1[3]],Global`ChiralityProjector[1]]] :>
-          SARAH`Cp[fields][SARAH`PR],
-        FeynArts`G[_][0][fields__][
-            Global`MetricTensor[KI1[i1_Integer],KI1[i2_Integer]]] :>
-          SARAH`Cp[fields][SARAH`g[LorentzIndex[{fields}[[i1]]],
-                                   LorentzIndex[{fields}[[i2]]]]],
-        FeynArts`G[_][0][fields__][
-            FeynArts`Mom[i1_Integer] - FeynArts`Mom[i2_Integer]] :>
-          SARAH`Cp[fields][SARAH`Mom[{fields}[[i1]]] - SARAH`Mom[{fields}[[i2]]]],
-        (*Since FormCalc-9.7*)
-        FeynArts`G[_][0][fields__][Global`FourVector[
-            FeynArts`Mom[i1_Integer] - FeynArts`Mom[i2_Integer], FeynArts`KI1[3]]] :>
-          SARAH`Cp[fields][SARAH`Mom[{fields}[[i1]]] - SARAH`Mom[{fields}[[i2]]]],
-        (*VVV couplings*)
-        FeynArts`G[_][0][fields__][
-             Global`FourVector[-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer], FeynArts`KI1[i3_Integer]]*
-               Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i2_Integer]] +
-              Global`FourVector[FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer], FeynArts`KI1[i2_Integer]]*
-               Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i3_Integer]] +
-              Global`FourVector[-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer], FeynArts`KI1[i1_Integer]]*
-               Global`MetricTensor[FeynArts`KI1[i2_Integer], FeynArts`KI1[i3_Integer]]] :>
-          SARAH`Cp[fields][(SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] - SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
-            SARAH`g[LorentzIndex[{fields}[[i1]]], LorentzIndex[{fields}[[i2]]]], (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] - SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
-            SARAH`g[LorentzIndex[{fields}[[i1]]], LorentzIndex[{fields}[[i3]]]], (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] - SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
-            SARAH`g[LorentzIndex[{fields}[[i2]]], LorentzIndex[{fields}[[i3]]]]
-          ]
-
-    };
-
-    ltIndex = Unique["lt"];
-    generalFCRules = {
-        FormCalc`Finite -> 1,
-        FormCalc`Den[a_,b_] :> 1/(a - b),
-        FormCalc`Pair[a_,b_] :> SARAH`sum[ltIndex, 1, 4,
-          SARAH`g[ltIndex, ltIndex] * Append[a, ltIndex] * Append[b, ltIndex]],
-        Pattern[fieldType,Alternatives[FeynArts`S, FeynArts`F,
-					FeynArts`V, FeynArts`U, FeynArts`T]][
-          FeynArts`Index[Generic,number_Integer]] :>  
-            fieldType[GenericIndex[number]],
-        FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]
-    };
-
-    (* These index rules are specific to SARAH generated FeynArts
-     * model files. Are these index rules always injective?
-     *)
-    indexRules = {
-      FeynArts`Index[generationName_, index_Integer] :> 
-				Symbol["SARAH`gt" <> ToString[index]] /;
-				StringMatchQ[SymbolName[generationName], "I"~~___~~"Gen"],
-      FeynArts`Index[Global`Colour, index_Integer] :>
-                Symbol["SARAH`ct" <> ToString[index]],
-      FeynArts`Index[Global`Gluon, index_Integer] :> 
-				Symbol["SARAH`ct" <> ToString[index]]
-    };
-
-    fieldNameToFSRules = Join[
-      Rule @@@ Transpose[
-        {Append[#,{indices___}] & /@ (ToExpression /@ fieldNames[[All,2]]),
-         Through[(ToExpression /@ fieldNames[[All,1]])[{indices}]]}],
-      Rule @@@ Transpose[
-        {ToExpression /@ fieldNames[[All,2]], ToExpression /@ fieldNames[[All,1]]}],
-      {FeynArts`S -> GenericS, FeynArts`F -> GenericF, FeynArts`V -> GenericV,
-       FeynArts`U -> GenericU, FeynArts`T -> GenericT},
-      {
-        Times[-1, field_GenericS | field_GenericV] :>
-           Susyno`LieGroups`conj[field],
-        Times[-1, field_GenericF | field_GenericU] :>
-           SARAH`bar[field]
-      },
-      (Times[-1, Pattern[field, # | Blank[#]]] :> 
-           CXXDiagrams`LorentzConjugate[field]) & /@
-         (ToExpression /@ fieldNames[[All,1]]),
-      indexRules
-    ];
-
-    (*These symbols cause an overshadowing with Susyno`LieGroups*)
-    diracChainRules = (Symbol["F" <> ToString[#]] :> Unique[diracChain] & /@ Range[Length[fieldNames]]);
-
-    subexpressionToFSRules = Join[
-      massRules,
-      fieldNameToFSRules,
-      couplingRules,
-      generalFCRules,
-      diracChainRules
-    ];
-    amplitudeToFSRules = Join[
-      subexpressionToFSRules,
-      sumOverRules,
-      {FeynArts`IndexSum -> Sum}
-    ];
-  ]
 
 (** \brief A set of rules that translate FeynArts sums to SARAH sums **)
 sumOverRules = {
