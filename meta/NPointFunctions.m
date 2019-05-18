@@ -102,15 +102,6 @@ where
   `2`,
  options have names from list 
   `3`.";
-NPointFunction::errKernelNum=
-"NPointFunctions`.`NPointFunction[]: Kernel Number:
-Amout of running subkernels doesn't allow to launch another one during
-`1`.";
-NPointFunction::errKernelLaunch=
-"NPointFunctions`.`NPointFunction[]: LaunchKernel:
-Unable to launch subkernel(s) during calculations for
-`1`
-because of error:";
 
 LoopLevel::usage=
 "Option for NPointFunctions`.`NPointFunction[].
@@ -290,23 +281,14 @@ Module[
 
    formCalcDir = FileNameJoin@{outputDir, "FormCalc"};
 
-   If[!FileExistsQ[feynArtsModel <> ".mod"] && 
-      Utils`TestWithMessage[Length@Kernels[] < 8,
-         NPointFunction::errKernelNum,
-         "creation of FeynArts model file"]
-      ,
-      Print["FeynArts model file is absent, creating it ..."];
-      subKernel = Utils`PureEvaluate[LaunchKernels[1][[1]],
-         NPointFunction::errKernelLaunch,
-         "creation of FeynArts model file"];
+   If[!FileExistsQ[feynArtsModel <> ".mod"],
+      subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
       GenerateFAModelFileOnKernel@subKernel;                                    (*generates .dat .mod .m files insiide FeynArts directory*)
       WriteParticleNamespaceFile@particleNamespaceFile;
       CloseKernels@subKernel;
    ];
 
-   subKernel = Utils`PureEvaluate[LaunchKernels[1][[1]],
-         NPointFunction::errKernelLaunch,
-         "FormCalc"];
+   subKernel = LaunchSubkernelFor@"FormCalc code generation";
          
    inFANames = FANamesForFields[inFields, particleNamesFile];
    outFANames = FANamesForFields[outFields, particleNamesFile];
@@ -325,11 +307,8 @@ Module[
 
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
-      NPointFunctions`SetFAFCPaths[
-         feynArtsDir, formCalcDir, feynArtsModel,
-         particleNamesFile, substitutionsFile,
-         particleNamespaceFile
-      ];
+      NPointFunctions`SetFAFCPaths[feynArtsDir, formCalcDir, feynArtsModel,
+         particleNamesFile, substitutionsFile, particleNamespaceFile];
 
       NPointFunctions`NPointFunctionFAFC[
          ToExpression[inFANames], ToExpression[outFANames],
@@ -355,7 +334,7 @@ Module[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::errinFields,
          #,
-         SARAHModelName[],
+         GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]&)
@@ -366,7 +345,7 @@ Module[
          SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
          NPointFunction::erroutFields,
          #,
-         SARAHModelName[],
+         GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
       ]& )
@@ -416,7 +395,7 @@ Module[
 NPointFunction[___] := Utils`TestWithMessage[
    False,
    NPointFunction::errUnknownInput,
-   SARAHModelName[],
+   GetSARAHModelName[],
    Cases[TreeMasses`GetParticles[], 
       _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector],
    Keys@Options@NPointFunction
@@ -516,10 +495,10 @@ CreateCXXHeaders[OptionsPattern[{LoopFunctions -> "FlexibleSUSY", UseWilsonCoeff
          _, Print["CreateCXXHeaders[]: error unsupported loop functions library: ",
                   OptionValue[LoopFunctions]]]
 
-SARAHModelName::usage=
+GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
 @returns the SARAH model name as to be passed to SARAH`.`Start[].";
-SARAHModelName[] := 
+GetSARAHModelName[] := 
    If[SARAH`submodeldir =!= False,
       SARAH`modelDir <> "-" <> SARAH`submodeldir,
       SARAH`modelDir
@@ -550,6 +529,32 @@ GetFASubstitutionsFileName[] :=
    StringJoin["Substitutions-",SARAH`ModelName,
      ToString@FlexibleSUSY`FSEigenstates,".m"
    ];
+
+LaunchSubkernelFor::usage=
+"@brief Tries to launch a subkernel without errors.
+If it fails, tries to explain the reason using message for specifying its
+activity.
+@param message String, which contains description of activity for which this
+subkernel is launched for.
+@returns subkernel name.";
+LaunchSubkernelFor::errKernelNum=
+"NPointFunctions`.`NPointFunction[]: Kernel Number:
+Amout of running subkernels doesn't allow to launch another one during
+`1`.";
+LaunchSubkernelFor::errKernelLaunch=
+"NPointFunctions`.`NPointFunction[]: LaunchKernel:
+Unable to launch subkernel(s) during calculations for
+`1`
+because of error:";
+LaunchSubkernelFor[message_String] :=
+Utils`PureEvaluate[
+   Utils`TestWithMessage[
+      Length@Kernels[] < 8,
+      LaunchSubkernelFor::errKernelNum, message
+   ];
+   LaunchKernels[1][[1]],
+   LaunchSubkernelFor::errKernelLaunch, message
+];
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
@@ -607,13 +612,16 @@ Module[
    },
    If[!FileExistsQ@nPointFunctionsFile,Return@Null];
    nPointFunctions = Get@nPointFunctionsFile;
-   position = FirstPosition[nPointFunctions[[All,1]],{inFields, outFields}, Null];
+   position = FirstPosition[
+      Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
+      {inFields, outFields},
+      Null];
    If[position =!= Null,nPointFunctions[[position]],Null]
 ];
 
 GenerateFAModelFileOnKernel::usage=
 "@brief Generate the FeynArts model file on a given subkernel.";
-GenerateFAModelFileOnKernel[kernel_] :=
+GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
 Module[
    {
       currentPath = $Path, 
@@ -621,23 +629,23 @@ Module[
       fsMetaDir = $flexiblesusyMetaDir,
       sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
       sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
-      sarahModelName = SARAHModelName[], 
+      SARAHModelName = GetSARAHModelName[], 
       eigenstates = FlexibleSUSY`FSEigenstates
    },
    DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs, 
-      sarahOutputDir, sarahModelName, eigenstates];
+      sarahOutputDir, SARAHModelName, eigenstates];
       
    ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDir;
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "createFAModelFile.m"};
       NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
-         sarahModelName, eigenstates];,
+         SARAHModelName, eigenstates];,
       kernel];
 ]
 
-WriteParticleNamespaceFile::usage="
-@brief Write a file containing all field names and the contexts in which they 
+WriteParticleNamespaceFile::usage=
+"@brief Write a file containing all field names and the contexts in which they 
 live in Mathematica.
 @note This is necessary because SARAH puts fields into different contexts.";
 WriteParticleNamespaceFile[fileName_String] :=
@@ -660,14 +668,13 @@ It seems that SARAH`.` has changed conventions for
 FANamesForFields[fields_,particleNamesFile_String] :=
 Module[
    {
-      lines = Utils`ReadLinesInFile@particleNamesFile,
       uniqueFields = DeleteDuplicates[
          CXXDiagrams`RemoveLorentzConjugation@# &/@ fields],
       faFieldNames
    },
    faFieldNames = 
    Flatten[
-      StringCases[lines, 
+      StringCases[Utils`ReadLinesInFile@particleNamesFile, 
          ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
       ] & /@ uniqueFields
    ];
@@ -690,8 +697,9 @@ SetAttributes[
    OneParticleReducible,ExceptBoxes,ExceptTriangles,
    (*functions*)
    NPointFunction,
-   SARAHModelName,
+   GetSARAHModelName,
    GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
+   LaunchSubkernelFor,
    CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
    GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
    FANamesForFields
