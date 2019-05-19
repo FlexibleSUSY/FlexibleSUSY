@@ -583,9 +583,9 @@ Module[
       nPointFunctions = {}
    ];
    
-   position = FirstPosition[nPointFunctions[[All,1]],nPointFunction[[1]],Null];
-   If[position =!= Null,
-      nPointFunctions[[position]] = nPointFunction,
+   position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
+   If[Length@position === 1,
+      nPointFunctions[[position[[1]]]] = nPointFunction,
       AppendTo[nPointFunctions, nPointFunction]
    ];
 
