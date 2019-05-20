@@ -578,8 +578,8 @@ Module[
       nPointFunctions,
       position
    },
-   If[FileExistsQ[nPointFunctionsFile],
-      nPointFunctions = Get[nPointFunctionsFile],
+   If[FileExistsQ@nPointFunctionsFile,
+      nPointFunctions = Get@nPointFunctionsFile,
       nPointFunctions = {}
    ];
    
