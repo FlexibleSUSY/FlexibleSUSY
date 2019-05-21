@@ -405,8 +405,8 @@ Module[
       NPointFunction::errExcludedTopologies
    ],
    Utils`TestWithMessage[                                                       (* @todo modify this in future*)
-      And @@ TreeMasses`IsScalar /@ Join[inFields, outFields] ||                (**)
-      And @@ TreeMasses`IsFermion /@ Join[inFields, outFields],                 (**)
+      And @@ (TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &/@               (**)
+      Join[inFields,outFields] ),                                               (**)
       NPointFunction::errInputFields                                            (**)
    ]                                                                            (**)
 ];
