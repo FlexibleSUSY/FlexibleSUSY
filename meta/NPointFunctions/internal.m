@@ -410,9 +410,10 @@ Module[
             NPointFunctions`ExceptTriangles -> FeynArts`Loops@Except@3,
             NPointFunctions`ExceptBoxes -> FeynArts`Loops@Except@4
          },
-          topologies, diagrams, amplitudes, genericInsertions,
+      topologies, diagrams, amplitudes, 
+         genericInsertions,
           colourFactors, fsFields, fsInFields, fsOutFields,
-          findColourIndex, externalMomentumRules, nPointFunction
+          externalMomentumRules, nPointFunction
    },
 
    If[!DirectoryQ@formCalcDir,CreateDirectory@formCalcDir];
@@ -422,17 +423,17 @@ Module[
       Length@inFields -> Length@outFields,
       ExcludeTopologies -> excludedTopologies];
 
-    diagrams = FeynArts`InsertFields[topologies,
+   diagrams = FeynArts`InsertFields[topologies,
       inFields -> outFields,
       InsertionLevel -> Classes,
       Model -> feynArtsModel];
-    amplitudes = FeynArts`CreateFeynAmp[diagrams];
+   amplitudes = FeynArts`CreateFeynAmp@diagrams;
+   
+   (*Remove colour indices*)
+   amplitudes = Delete[amplitudes,
+      Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];
 
-    (*Remove colour indices*)
-    findColourIndex = Position[amplitudes, FeynArts`Index[Global`Colour, index_Integer]];
-    amplitudes = Delete[amplitudes, findColourIndex];
-
-    genericInsertions = Flatten[
+   genericInsertions = Flatten[
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
     colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
@@ -462,6 +463,11 @@ Module[
     ResetDirectory[];
     nPointFunction
   ]
+
+GenericInsertionsForDiagram[diagram_Rule,
+   OptionsPattern[{KeepFieldNames -> False}]]:=
+  List @@ (FindGenericInsertions[#,
+    KeepFieldNames -> OptionValue[KeepFieldNames]] & /@ (List @@@ diagram[[2]]))
 
 SetAttributes[
    {
@@ -494,11 +500,6 @@ FindGenericInsertions[insertions_List,
       (List @@ genericInsertions) /. toGenericIndexConventionRules
     ]
   ]
-
-GenericInsertionsForDiagram[diagram_Rule,
-    OptionsPattern[{KeepFieldNames -> False}]]:=
-  List @@ (FindGenericInsertions[#,
-    KeepFieldNames -> OptionValue[KeepFieldNames]] & /@ (List @@@ diagram[[2]]))
 
 ColourFactorForDiagram[diagram_Rule]:=
   Module[{numberOfVertices, n, k, externalRules, externalFields,

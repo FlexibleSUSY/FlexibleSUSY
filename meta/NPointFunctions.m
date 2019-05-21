@@ -39,7 +39,7 @@ calculation the n-point correlation function
 @note the recognized regularization schemes are:
  - DimensionalReduction
  - DimensionalRegularization
-@note when not setting the external momenta to zero you should use LoopTools 
+@note when not setting the external momenta to zero one should use LoopTools 
 for the evaluation of the loop functions.";
 NPointFunction::errinFields=
 "NPointFunctions`.`NPointFunction[]: inFields:  
@@ -329,7 +329,7 @@ Module[
          particleNamesFile, substitutionsFile, particleNamespaceFile];
 
       NPointFunctions`NPointFunctionFAFC[
-         ToExpression[inFANames], ToExpression[outFANames],
+         ToExpression@inFANames, ToExpression@outFANames,
          LoopLevel -> loopLevel,
          Regularize -> regularizationScheme,
          ZeroExternalMomenta -> zeroExternalMomenta,
