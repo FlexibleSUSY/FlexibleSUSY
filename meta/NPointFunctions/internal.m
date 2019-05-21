@@ -464,10 +464,30 @@ Module[
     nPointFunction
   ]
 
+GenericInsertionsForDiagram::usage=
+"@todo";
 GenericInsertionsForDiagram[diagram_Rule,
-   OptionsPattern[{KeepFieldNames -> False}]]:=
-  List @@ (FindGenericInsertions[#,
-    KeepFieldNames -> OptionValue[KeepFieldNames]] & /@ (List @@@ diagram[[2]]))
+   Optional[keepFieldNames_?BooleanQ, False]]:=
+List @@ (FindGenericInsertions[#,keepFieldNames] &/@ (List @@@ diagram[[2]]));
+
+FindGenericInsertions[insertions_List,
+   Optional[keepFieldNames_?BooleanQ, False]]:=
+Module[{toGenericIndexConventionRules, genericFields, genericInsertions},
+    toGenericIndexConventionRules =
+      Cases[insertions[[1]], Rule[FeynArts`Field[index_Integer],type_Symbol] :>
+        Rule[FeynArts`Field[index], type[FeynArts`Index[Generic,index]]]];
+
+    genericFields = toGenericIndexConventionRules[[All,1]];
+    genericInsertions = Cases[#, (Rule[genericField_,classesField_] /;
+        MemberQ[genericFields, genericField]) :>
+      Rule[genericField, StripParticleIndices[classesField]]] &
+      /@ insertions[[2]];
+
+    If[keepFieldNames,
+      List @@ genericInsertions,
+      (List @@ genericInsertions) /. toGenericIndexConventionRules
+    ]
+  ];
 
 SetAttributes[
    {
@@ -481,25 +501,6 @@ SetAttributes[
  **)
 StripParticleIndices[Times[-1,field_]] := Times[-1, StripParticleIndices[field]]
 StripParticleIndices[genericType_[classIndex_, ___]] := genericType[classIndex]
-
-FindGenericInsertions[insertions_List,
-    OptionsPattern[{KeepFieldNames -> False}]]:=
-  Module[{toGenericIndexConventionRules, genericFields, genericInsertions},
-    toGenericIndexConventionRules =
-      Cases[insertions[[1]], Rule[FeynArts`Field[index_Integer],type_Symbol] :>
-        Rule[FeynArts`Field[index], type[FeynArts`Index[Generic,index]]]];
-
-    genericFields = toGenericIndexConventionRules[[All,1]];
-    genericInsertions = Cases[#, (Rule[genericField_,classesField_] /;
-        MemberQ[genericFields, genericField]) :>
-      Rule[genericField, StripParticleIndices[classesField]]] &
-      /@ insertions[[2]];
-
-    If[OptionValue[KeepFieldNames],
-      List @@ genericInsertions,
-      (List @@ genericInsertions) /. toGenericIndexConventionRules
-    ]
-  ]
 
 ColourFactorForDiagram[diagram_Rule]:=
   Module[{numberOfVertices, n, k, externalRules, externalFields,
@@ -552,8 +553,7 @@ ColourFactorForDiagram[diagram_Rule]:=
 	    {-#} -> -# & /@ externalFields
 	  ];
     
-    genericInsertions = GenericInsertionsForDiagram[diagram,
-      KeepFieldNames -> True];
+    genericInsertions = GenericInsertionsForDiagram[diagram,True];
     
     Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[
