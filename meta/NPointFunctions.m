@@ -162,7 +162,34 @@ Exclude all topologies except triangle diagrams
 
 (Technically, a wrapper for a case when the initialization of FeynArts`.` is 
 not needed. Internally converts further to FeynArts`.`Loops@Except@4.)";
-(*what above is done*)
+
+GenericS::usage=
+"A symbol that acts as a placeholder for any scalar field.";
+GenericF::usage=
+"A symbol that acts as a placeholder for any fermion field.";
+GenericV::usage=
+"A symbol that acts as a placeholder for any vector field.";
+GenericU::usage=
+"A symbol that acts as a placeholder for any ghost field.";
+GenericT::usage=
+"A symbol that acts as a placeholder for any tensor field.";
+
+GenericIndex::usage=
+"Represent an index of a generic field.";
+LorentzIndex::usage=
+"Represent a Lorentz index of a generic field.";
+
+SetAttributes[
+   {
+   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
+   ExcludedTopologies,
+   DimensionalReduction,DimensionalRegularization,
+   OneParticleReducible,ExceptBoxes,ExceptTriangles,
+   GenericS,GenericF,GenericV,GenericU,GenericT,                                (* @unote also exist in internal.m*)
+   GenericIndex,LorentzIndex                                                    (* @unote also exist in internal.m*)
+   }, 
+   {Protected, Locked}];
+
 LoopFunctions::usage=
 "Option for CreateCXXFunctions[] that controls whether to use FlexibleSUSY or 
 LoopTools for loop functions.";
@@ -221,16 +248,7 @@ dd1::usage="A symbol denoting a part of a D function.";
 dd2::usage="A symbol denoting a part of a D function.";
 dd3::usage="A symbol denoting a part of a D function.";
 
-GenericS::usage="A symbol that acts as a placeholder for any scalar field.";
-GenericF::usage="A symbol that acts as a placeholder for any fermion field.";
-GenericV::usage="A symbol that acts as a placeholder for any vector field.";
-GenericU::usage="A symbol that acts as a placeholder for any ghost field.";
-GenericT::usage="A symbol that acts as a placeholder for any tensor field.";
-
 GenericSum::usage="Represent a sum over a set of generic fields.";
-GenericIndex::usage="Represent an index of a generic field.";
-
-LorentzIndex::usage="Represent a Lorentz index of a generic field.";
 
 Begin["`Private`"];
 Options[NPointFunction]={
@@ -690,12 +708,6 @@ Module[
 
 SetAttributes[
    {
-   (*symbols*)
-   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
-   ExcludedTopologies,
-   DimensionalReduction,DimensionalRegularization,
-   OneParticleReducible,ExceptBoxes,ExceptTriangles,
-   (*functions*)
    NPointFunction,
    GetSARAHModelName,
    GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
