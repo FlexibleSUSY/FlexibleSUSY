@@ -151,8 +151,8 @@ Module[
       massRules,
       couplingRules,
       generalFCRules,
-      (*fieldNameToFSRules,*)
-      diracChainRules
+      diracChainRules,
+      sumOverRules
    },
 
    fieldNames = 
@@ -298,6 +298,19 @@ Module[
       FeynArts`Index[Global`Gluon, index_Integer] :>                            (* @todo Potentially dangerous stuff. Gluon goes from 1 to 8, not from 1 to 3 as Colour*)
       Symbol["SARAH`ct" <> ToString@index]                                      (* *)
    };
+   
+   sumOverRules =
+   {
+      FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
+      Times[expr_,FeynArts`SumOver[index_,max_Integer]] :> 
+         SARAH`sum[index,1,max,expr],
+      Times[expr_,FeynArts`SumOver[index_,{min_Integer,max_Integer}]] :> 
+         SARAH`sum[index,min,max,expr],
+      SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,max2_Integer]] :>            (* @todo check these weird convention rules *)
+         SARAH`sum[index,1,max,max2],                                                       (* *)
+      SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,{min2_Integer,max2_Integer}]](* *)
+    :> SARAH`sum[index,1,max,max2-min2]                                                     (* *)
+};
 
    Unprotect@fieldNameToFSRules;
    fieldNameToFSRules = Join[
@@ -694,20 +707,6 @@ FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
 
     {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
   ]
-
-(** \brief A set of rules that translate FeynArts sums to SARAH sums **)
-sumOverRules = {
-  FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
-  Times[expr_,FeynArts`SumOver[index_,max_Integer]]
-    :> SARAH`sum[index,1,max,expr],
-  Times[expr_,FeynArts`SumOver[index_,{min_Integer,max_Integer}]]
-    :> SARAH`sum[index,min,max,expr],
-  SARAH`sum[index_,min_Integer,max_Integer,FeynArts`SumOver[_,max2_Integer]]
-    :> SARAH`sum[index,1,max,max2],
-  SARAH`sum[index_,min_Integer,max_Integer,
-      FeynArts`SumOver[_,{min2_Integer,max2_Integer}]]
-    :> SARAH`sum[index,1,max,max2-min2]
-};
 
 End[];
 EndPackage[];
