@@ -435,7 +435,7 @@ Module[
 
    genericInsertions = Flatten[
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
-    colourFactors = Flatten[
+   colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
       fieldNameToFSRules;
 
@@ -448,7 +448,7 @@ Module[
 
     externalMomentumRules = {
       If[zeroExternalMomenta,
-         SARAH`Mom[i_Integer, lorentzIndex_] :> 0,
+         SARAH`Mom[_Integer,_] :> 0,
          SARAH`Mom[i_Integer, lorentzIndex_] :> SARAH`Mom[fsFields[[i]], lorentzIndex]]
     };
     
@@ -465,42 +465,65 @@ Module[
   ]
 
 GenericInsertionsForDiagram::usage=
-"@todo";
-GenericInsertionsForDiagram[diagram_Rule,
-   Optional[keepFieldNames_?BooleanQ, False]]:=
-List @@ (FindGenericInsertions[#,keepFieldNames] &/@ (List @@@ diagram[[2]]));
+"@brief applies FindGenericInsertions[] to a set of Topology[_]->_ rules inside
+a list.
+@returns list (for all topologies) of list (for all generic fields) of list 
+(for all class fields) of rules {{{x->y,..},..},..}
+@param 1st argument is of the form Topology[_]->Insertions[Generic][__]
+from FeynArts TopologyList[__][Topology[_]->Insertions[Generic][__],___]
+@param 2nd argument changes the type of output field names
+@note all indices in rhs. of rules are removed";
+GenericInsertionsForDiagram[_->insertGen_, keepFieldNum_:False]:=
+Map[FindGenericInsertions[#,keepFieldNum]&, Apply[List,insertGen,{0,1}]];
 
-FindGenericInsertions[insertions_List,
-   Optional[keepFieldNames_?BooleanQ, False]]:=
-Module[{toGenericIndexConventionRules, genericFields, genericInsertions},
-    toGenericIndexConventionRules =
-      Cases[insertions[[1]], Rule[FeynArts`Field[index_Integer],type_Symbol] :>
-        Rule[FeynArts`Field[index], type[FeynArts`Index[Generic,index]]]];
-
-    genericFields = toGenericIndexConventionRules[[All,1]];
-    genericInsertions = Cases[#, (Rule[genericField_,classesField_] /;
-        MemberQ[genericFields, genericField]) :>
-      Rule[genericField, StripParticleIndices[classesField]]] &
-      /@ insertions[[2]];
-
-    If[keepFieldNames,
+FindGenericInsertions::usage=
+"@brief generic FeynmanGraph has rules Field[num]->particleType, 
+class FeynmanGraph has rules Field[num]->particleClass. 
+This function gives pairs particleType[gen,num]->particleClass, avoiding 
+Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass is given) 
+@param 1st argument is of the form 
+{FeynmanGraph[__][__],Insertions[Classes][__]}
+@param 2nd argument changes the type of output field names
+True gives Field[_] names, False gives particleClass names
+@returns list (for all generic fields) of list (for all class fields) 
+of rules {{x->y,..},..}
+@note this function is called by GenericInsertionsForDiagram[]
+@note this function doesn't look at external particles
+@note all indices in rhs. of rules are removed";
+FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_]:=
+Module[
+   {
+      toGenericIndexConventionRules = Cases[graphGen, 
+         Rule[FeynArts`Field[index_Integer],type_Symbol] :>
+         Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]
+      ], 
+      fieldsGen, genericInsertions
+   },
+   fieldsGen = toGenericIndexConventionRules[[All,1]];
+   genericInsertions = Cases[#, 
+      Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
+      Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
+   If[keepFieldNum,
       List @@ genericInsertions,
-      (List @@ genericInsertions) /. toGenericIndexConventionRules
-    ]
-  ];
+      List @@ genericInsertions /. toGenericIndexConventionRules
+   ]
+];
+
+StripParticleIndices::usage=
+"@brief Remove particle indices from a given (possibley generic) field
+@param field the given field
+@returns the given field with all indices removed";
+StripParticleIndices[Times[-1,field_]] := 
+   Times[-1, StripParticleIndices[field]];
+StripParticleIndices[genericType_[classIndex_, ___]] := 
+   genericType[classIndex];
 
 SetAttributes[
    {
-   SetFAFCPaths,SetFSConventionRules
+   SetFAFCPaths,SetFSConventionRules,
+   GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices
    }, 
    {Protected, Locked}];
-
-(** \brief Remove particle indices from a given (possibley generic) field
- * \param field the given field
- * \returns the given field with all indices removed.
- **)
-StripParticleIndices[Times[-1,field_]] := Times[-1, StripParticleIndices[field]]
-StripParticleIndices[genericType_[classIndex_, ___]] := genericType[classIndex]
 
 ColourFactorForDiagram[diagram_Rule]:=
   Module[{numberOfVertices, n, k, externalRules, externalFields,
@@ -636,7 +659,6 @@ CalculateAmplitudes[classesAmplitudes_, genericInsertions_List,
     {subexpressions, zeroedRules} = RecursivelyZeroRules[subexpressions, zeroedRules];
 
     calculatedAmplitudes = calculatedAmplitudes /. zeroedRules;
-    Print[FullForm@calculatedAmplitudes];
     FCAmplitudesToFSConvention[
         {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
