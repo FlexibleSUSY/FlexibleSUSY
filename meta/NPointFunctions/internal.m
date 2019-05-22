@@ -433,7 +433,6 @@ Module[
    amplitudes = Delete[amplitudes,
       Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];
 
-   Print[(List @@ diagrams)[[1]]];
    genericInsertions = Flatten[
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
    colourFactors = Flatten[
@@ -468,7 +467,7 @@ Module[
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
 (Topology[_]->Insertions[Generic][__]) rule.
-@returns list (for all topologies) of list (for all generic fields) of list 
+@returns list (for a given topology) of list (for all generic fields) of list 
 (for all class fields) of rules {{{x->y,..},..},..}
 @param 1st argument is of the form Topology[_]->Insertions[Generic][__]
 from FeynArts TopologyList[__][Topology[_]->Insertions[Generic][__],___]
@@ -520,62 +519,52 @@ StripParticleIndices[genericType_[classIndex_, ___]] :=
    genericType[classIndex];
 
 ColourFactorForDiagram::usage=
-"@todo
-@brief acts on a (Topology[_]->Insertions[Generic][__]) rule.";
+"@brief acts on a (Topology[_]->Insertions[Generic][__]) rule.
+creates adjacency matrix and field array for this topology and uses this
+information for creation of colour factors for a given topology 
+@param diagram (Topology[_]->Insertions[Generic][__]) rule
+@returns list (for a given topology) of lists (for all generic fields) of 
+(potentially) colour factors
+@note during generation of genericDiagram at 1-loop level the ii-type loop
+propagators have the largest number because of FeynArts
+@note in seqProp numbers of the first vertices inside propagators are sorted
+by FeynArts
+@note external fields always come at first places in adjacency matrix
+@note this function doesn't know anything about CXXDiagrams`.` context";
 ColourFactorForDiagram[
    diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
 Module[
    {
-      numberOfVertices, adjacencyMatrix, k, externalRules, externalFields,
-      genericInsertions, field
+      propPatt,adjacencyMatrix,externalRules,genericDiagram,genericInsertions
    },
-   numberOfVertices = Max@Cases[{seqProp},_[_][n_]:>n,{2}];
+   propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
    
    adjacencyMatrix = Module[
-      {matrix=ConstantArray[0, {numberOfVertices, numberOfVertices}],positions},
-      positions = DeleteDuplicates@Flatten[
-         {seqProp} /. _[_][_[_][i_], _[_][j_], _] :> {{i, j}, {j, i}}, 1];
-      Set[matrix[[Sequence@@#]],1] &/@ positions;
-      matrix];
-   
-   externalRules = Cases[{rulesFields}, HoldPattern[FeynArts`Field[_]->_Symbol[__]]];
-   externalFields = externalRules[[All, 1]];
-   Print[externalFields];
-
-   genericDiagram = 
-   Module[{vIndex1 = #, vertex},
-      vertex = 
-      Module[{vIndex2 = #, propagators},
-         propagators = Cases[{seqProp},
-            FeynArts`Propagator[_][FeynArts`Vertex[_][vIndex1],FeynArts`Vertex[_][vIndex2], _] |
-            FeynArts`Propagator[_][FeynArts`Vertex[_][vIndex2],FeynArts`Vertex[_][vIndex1], _]];
-          
-         Module[{propagator = #, fieldFactor = 1},
-            If[Position[propagator, FeynArts`Vertex[_][vIndex1], {1}] === {{2}},
-               fieldFactor = fieldFactor * -1];
-               If[vIndex1 =!= vIndex2,
-                  fieldFactor * propagator[[3]],
-                  {-fieldFactor * propagator[[3]], propagator[[3]]}
-               ]
-         ] &/@ propagators
-      ] &/@ Table[k, {k, numberOfVertices}];
+      {pos = Flatten[{seqProp}/.propPatt[i_,j_,_]:>{{i,j}->1,{j,i}->1}] },
+      Normal@SparseArray@pos];
       
-      Cases[Flatten[vertex], Except[{}]]
-   ] &/@ Table[k, {k, numberOfVertices}] /. Join[ {#} -> # &/@ externalFields, {-#} -> -# &/@ externalFields];
-   Print[genericDiagram];
-    
-    genericInsertions = GenericInsertionsForDiagram[diagram,True];
-    
-    Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+   externalRules = Cases[{rulesFields}, HoldPattern[_[_]->_Symbol[__]]];
+   
+   genericDiagram = Module[
+      {fld = Flatten[{seqProp}/.propPatt[i_,j_,f_]:>{{j,i,-f},{i,j,f}}, 1] },
+      GatherBy[SortBy[fld,First],First] /. {_Integer, _Integer, f_} :> f
+      ] /. Join[ {#} -> # &/@ externalRules[[All, 1]]];
+      
+   genericInsertions = GenericInsertionsForDiagram[diagram,True];
+   
+   Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[
-        genericDiagram /. externalRules /. #, adjacencyMatrix],
-      adjacencyMatrix] &, genericInsertions, {2}]
-  ]
+         genericDiagram /. externalRules /. #, adjacencyMatrix],
+      adjacencyMatrix] &,
+      genericInsertions,
+      {2}]
+]
 
 SetAttributes[
    {
    SetFAFCPaths,SetFSConventionRules,
-   GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices
+   GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
+   ColourFactorForDiagram
    }, 
    {Protected, Locked}];
 
