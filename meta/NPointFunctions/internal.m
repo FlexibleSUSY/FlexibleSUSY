@@ -113,7 +113,6 @@ SetAttributes[
    ExceptBoxes,ExceptTriangles},
    {Protected,Locked}];
 
-LoopFunctions::usage="Option that controls whether to use FlexibleSUSY or LoopTools for loop functions.";
 GenericSum::usage="Represent a sum over a set of generic fields.";
 
 Begin["`Private`"];
@@ -410,10 +409,8 @@ Module[
             NPointFunctions`ExceptTriangles -> FeynArts`Loops@Except@3,
             NPointFunctions`ExceptBoxes -> FeynArts`Loops@Except@4
          },
-      topologies, diagrams, amplitudes, 
-         genericInsertions,
-          colourFactors, fsFields, fsInFields, fsOutFields,
-          externalMomentumRules, nPointFunction
+      topologies, diagrams, amplitudes, genericInsertions, colourFactors, 
+      fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
 
    If[!DirectoryQ@formCalcDir,CreateDirectory@formCalcDir];
@@ -438,31 +435,28 @@ Module[
    colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
       fieldNameToFSRules;
+   
+   fsInFields = Head[amplitudes][[1,2,1,All,1]] //. fieldNameToFSRules;
+   fsOutFields = Head[amplitudes][[1,2,2,All,1]] //. fieldNameToFSRules;
 
-    fsInFields = (List @@ Head[amplitudes][[1,2,1,All,1]]) //.
-      fieldNameToFSRules;
-    fsOutFields = (List @@ Head[amplitudes][[1,2,2,All,1]]) //.
-      fieldNameToFSRules;
+   fsFields = Join[fsInFields,fsOutFields];
 
-    fsFields = Join[fsInFields,fsOutFields];
-
-    externalMomentumRules = {
+   externalMomentumRules = {
       If[zeroExternalMomenta,
          SARAH`Mom[_Integer,_] :> 0,
-         SARAH`Mom[i_Integer, lorentzIndex_] :> SARAH`Mom[fsFields[[i]], lorentzIndex]]
-    };
-    
-    nPointFunction = {{fsInFields, fsOutFields},
+         SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]]
+   };
+   
+   nPointFunction = {
+      {fsInFields, fsOutFields},
       Insert[
-        CalculateAmplitudes[amplitudes, genericInsertions,
-          regularizationScheme, zeroExternalMomenta, OnShellFlag -> onShellFlag] /. externalMomentumRules,
-        colourFactors,
-        {1, -1}
-      ]};
-    
-    ResetDirectory[];
-    nPointFunction
-  ]
+         CalculateAmplitudes[amplitudes,genericInsertions,regularizationScheme,
+            zeroExternalMomenta,OnShellFlag -> onShellFlag
+         ] /. externalMomentumRules,
+         colourFactors,
+         {1, -1}]
+   }
+]
 
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
@@ -563,6 +557,7 @@ Module[
 SetAttributes[
    {
    SetFAFCPaths,SetFSConventionRules,
+   NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram
    }, 
@@ -575,14 +570,6 @@ CombinatorialFactorsForAmplitudeInsertions[amplitude_FeynAmp]:=
       {FeynArts`SumOver[__] -> 1,
        FeynArts`IndexDelta[__] -> 1} (* FIXME: Can we really remove the IndexDelta? *)
   ]
-
-(** \brief Repeatedly evaluate `Head[]` on the argument until it
- * satisfies `AtomQ[]` and return the result.
- * \param x the given argument
- * \returns the result of repeatedly evaluating `Head[]` on the
- * argument until it satisfies `AtomQ[]` and return the result.
- **)
-AtomHead[x_] := If[AtomQ[x], x, AtomHead[Head[x]]]
 
 (** \brief Calculate a given set of amplitudes.
  * \param classesAmplitudes A set of class level amplitudes as
