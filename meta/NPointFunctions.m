@@ -349,7 +349,8 @@ Module[
 ] /; And[
    MatchQ[inFields,
    {_?(Utils`TestWithMessage[
-         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
+         SARAH`ParticleQ[#/.{SARAH`bar[x_]:>x,Susyno`LieGroups`conj[x_]:>x},
+            FlexibleSUSY`FSEigenstates],
          NPointFunction::errinFields,
          #,
          GetSARAHModelName[],
@@ -360,7 +361,8 @@ Module[
    ],
    MatchQ[outFields,
    {_?( Utils`TestWithMessage[
-         SARAH`ParticleQ[#, FlexibleSUSY`FSEigenstates],                        (*@unote this ParticleQ is defined inside TreeMasses`.` but it is stored inside SARAH`.`*)
+         SARAH`ParticleQ[#/.{SARAH`bar[x_]:>x,Susyno`LieGroups`conj[x_]:>x},
+            FlexibleSUSY`FSEigenstates],
          NPointFunction::erroutFields,
          #,
          GetSARAHModelName[],
