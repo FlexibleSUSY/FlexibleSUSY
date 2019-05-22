@@ -1102,75 +1102,6 @@ TranslationForDiagram[topology_, diagram_] := Module[{
    First@res
 ];
 
-EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay_, topology_, diagram_] :=
-    Module[{
-       file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"],
-       diagramsWithCorrectTopology, cos3, particles, particles2, con1, con2, con3, p1, p2, p3,
-      numberOfVertices = Count[diagram, el_ /; Head[el] === List],
-      externalParticles = Join[{GetInitialState[decay]}, GetFinalState[decay]],
-      internalParticles, permutedParticles, vertices, temp},
-
-      temp = (#[[1]] -> GetFeynArtsTypeName[#[[2]]])& /@ InsertionsOnEdgesForDiagram[topology, diagram];
-      Switch[numberOfVertices,
-         (* half-candy diagram *)
-         2, 
-            con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-            p1 = diagram[[4, con1[[1,1]]]];
-            p2 = diagram[[4, con1[[2,1]]]];,
-         3, 
-            con1 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 5, diagram, topology];
-            p1 = diagram[[4, con1[[1,1]]]];
-            con2 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[4, 6, diagram, topology];
-            p2 = diagram[[4, con2[[1,1]]]];
-            con3 = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[5, 6, diagram, topology];
-            p3 = diagram[[5, con3[[1,1]]]];
-      ];
-
-      diagramsWithCorrectTopology = Select[file, MemberQ[#, topology]&];
-      Utils`AssertWithMessage[diagramsWithCorrectTopology =!= {},
-         "Can't find topology " <> ToString@topology <> " for diagram " <> ToString@diagram
-      ];
-
-      internalParticles = If[numberOfVertices === 2, {p1,p2}, {p1, p2, p3}];
-      particles = Join[externalParticles, internalParticles];
-
-      If[GetFeynArtsTypeName /@ particles === {S,V,V,V,S},
-        particles = Join[Drop[particles, -2], {particles[[5]], particles[[4]]}];
-      ];
-      particles2 = MapIndexed[Field[#2[[1]]] -> #1&, GetFeynArtsTypeName /@ particles];
-
-      cos3 = Select[diagramsWithCorrectTopology, MemberQ[#, particles2]&];
-      If[!(cos3 === Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&]),
-         Print["WHERE???"];
-         Print[cos3];
-         Print[InsertionsOnEdgesForDiagram[topology, diagram]];
-         Print[temp];
-         Print[Select[diagramsWithCorrectTopology, ((#[[3]]/.#[[4]])===temp)&]];
-         Print[Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&]];
-         Quit[1]
-         ];
-      cos3 = Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&];
-      If[cos3 === {},
-         Print["Topology found, but no diagram for ", diagram];
-         Print[particles2];
-         Print[diagramsWithCorrectTopology];
-         Quit[1];
-      ];
-
-      vertices = cos3[[1, 5]];
-
-      {"std::complex<double> " <> ToString@N[Utils`FSReIm[StripDiagramColorFactor[externalParticles, ColorFactorForDiagram[topology, diagram]]], 16] <> " * " <>
-         "calculate_" <> cos3[[1, 1]],
-         Length[cos3[[1, 5]]],
-         cos3[[1, -1]],
-         Drop[cos3[[1, 3]]/. Rule[a_, b_] :> a, 3],
-         vertices,
-         cos3[[1,3]]
-      }
-
-   ];
-
-
 FieldFromDiagram[diagram_, {i_, j_}] :=
    If[!ListQ[diagram[[i]]],
       diagram[[i]],
@@ -1188,23 +1119,6 @@ InsertionsOnEdgesForDiagram[topology_, diagram_] := Module[{sortedVertexCombinat
          (OrderedQ[#] && !SameQ@@#)&
       ];
 
-   Print[
-"THIS", diagram, " i? ",
-      Flatten[
-         DeleteCases[
-            Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
-               1, {{#1, #2} -> (Print[{#1, #2, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]}];FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}])},
-               2, {
-               {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}],
-               {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[2,1]]}]
-            },
-               _, {}
-            ]& @@@ sortedVertexCombinations,
-            {}
-         ],
-         1
-      ]
-   ];
       Flatten[
          DeleteCases[
             Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
@@ -1273,18 +1187,6 @@ ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] := Module[{
    "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ]
 
-(* Fields for vertex given by connections *)
-pppp[diagram_, topology_, connections_] := Module[{vertexNumber, temp},
-
-   temp = CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, diagram, topology]& /@ connections;
-      (
-         If[ ListQ[diagram[[#2[[1]]]]],
-            diagram[[#2[[1]]]][[#1[[1,1]]]], diagram[[#2[[1]]]]
-   ]
-
-      )& @@@ Transpose[{temp, connections}]
-]
-
 (* Returns translation of the form
    {Field[1] -> hh, Field[2] -> VG, Field[3] -> VG, Field[4] -> Fd, Field[5] -> bar[Fd], Field[6] -> Fd}
 
@@ -1302,25 +1204,21 @@ B: {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3],
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_] :=
    Module[{temp = {}},
 
-      Print[concreteFieldOnEdgeBetweenVertices];
-      Print[fieldNumberOnEdgeBetweenVertices];
       temp = (Reverse /@ fieldNumberOnEdgeBetweenVertices);
 
       (* the numbers of vertices in Dylna might be unsorted *)
       temp = (#1 -> Sort[#2])& @@@ temp;
-      Print[temp];
 
       For[i = 1, i <= Length[temp], i++,
          temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVertices[[i]]
       ];
 
-      Print[temp];
       temp
 ];
 
-WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_, internalMasses_, verticesTranslation_, fromDylan_] :=
-   Module[{vertices, vertices2, indices, cppVertices, loop,
-      con = {}, temp, temp2 = "", temp3, masses = "", mass = {}, temp9, kupa, fuck, translation, fieldAssociation,
+WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
+   Module[{vertices, indices, cppVertices, loop,
+      mass = {}, translation, fieldAssociation,
       externalEdges, internalEdges,
    externalFieldsLocationsInVertices,
       internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode
@@ -1336,10 +1234,6 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_, internalMasses_, 
          List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] -> n /. Cp[x___][__] -> Cp[x]]);
 
       (* vertices in an orientation as required by Cp *)
-      Print["1 ", verticesInFieldTypes];
-(*      Print["1.5", InsertionsOnEdgesForDiagram[topology, diagram]];*)
-(*      Print["1.8 ", fieldAssociation, " ", ((#1 -> #2@@#1)& @@@ translation[[4]])];*)
-(*      Print["2 ", fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])];*)
       vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
 
       (* set of unique indices used in names of vertices and indices *)
@@ -1405,49 +1299,44 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_, code_, internalMasses_, 
 }& @@@ internalEdges;
 
 
-            (* write number of propagators in topology *)
-            "// topology with " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[topology] <> " propagators\n" <>
-               cppVertices <>
+      "// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+
+         (* usings for vertices *)
+         "\n" <> cppVertices <>
+
+               "\n// loops over vertices' indices\n" <>
                loop <> "\n" <>
                TextFormatting`IndentText[
 
-                  (* skip indices that don't match external indices *)
+                  "// skip indices that don't match external indices\n" <>
                   matchExternalFieldIndicesCode <>
                      "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {\n" <>
                      TextFormatting`IndentText["continue;"] <>
                      "\n}\n\n" <>
 
+                  "// connect internal particles in vertices\n" <>
                   matchInternalFieldIndicesCode <>
+
+                     "\n// internal masses\n" <>
                   mass <>
 
-                  "result += calculate_" <> translation[[1]] <> "(\n" <>
+                  "\nresult += calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
-                  "result.m_decay, result.m_out_1, result.m_out_2,\n" <>
-                    StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n"
-                     ] <>
-                     (* couplings *)
-                     StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, verticesInFieldTypes, indices]& /@ translation[[-3]], ", "] <> ",\n" <>
-
-
-
-(*                  translation[[-3]] <>*)
-(*                     StringJoin@Riffle[("vertex" <> ToString@indices[[First[Intersection@@#2]-3]] <> "::evaluate(index" <> ToString@indices[[First[Intersection@@#2]-3]] <> ", context)."
- <> ToString[#1])& @@@ kupa, ", "] <> ",\n" <>*)
-                    code[[2]]
-
-               ] <>
-               "\n" <>
-               StringJoin@@ConstantArray["}\n", Length@vertices] <>
-               "\n"
+                     (* external masses *)
+                     "result.m_decay, result.m_out_1, result.m_out_2,\n" <>
+                     (* internal masses *)
+                     StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n" <>
+                  (* couplings *)
+                     TextFormatting`WrapLines[
+                  StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, verticesInFieldTypes, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
+                  (* renormalization scale *)
+                  "result.m_decay" <>
+                  (* if amplitude is UV divergent, take the finite part *)
+                  If[!translation[[3]] === True, ",\n1.", ""] <> ");"
+                  ]
+               ] <> "\n" <>
+               StringJoin@@ConstantArray["}\n", Length@vertices] <> "\n"
    ];
-
-EvaluateDecayDiagramWithTopology[decay_, topology_, diagram_] :=
-    Which[IsOneLoopTwoBodyDecayTopology[topology],
-          EvaluateOneLoopTwoBodyDecayDiagramWithTopology[decay, topology, diagram],
-          True,
-          Print["Error: requested evaluation of unsupported topology."];
-          Quit[1];
-         ];
 
 ColorFactorForDiagram[topology_, diagram_] :=
    ColourFactorForIndexedDiagramFromGraph[
@@ -1455,96 +1344,16 @@ ColorFactorForDiagram[topology_, diagram_] :=
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopTopAndInsertion, body = "", temp},
+    Module[{oneLoopTopAndInsertion, body = ""},
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
-           (
-           temp = TranslationForDiagram[Sequence @@ #];
-              body = body <>
-                 WrapCodeInLoopOverInternalVertices[
-                    Sequence @@ #,
-                    {"result += calculate_" <> temp[[1]] <>
-                       "(result.m_decay, result.m_out_1, result.m_out_2,\n" <>
-                          "// number of internal masses " <> ToString@CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] <> "\n" <>
-                           "mInternal1, mInternal2," <> If[CXXDiagrams`NumberOfPropagatorsInTopology[#[[1]]] === 3, " mInternal3,", ""] <> "\n" <>
+           (body = body <> WrapCodeInLoopOverInternalVertices[Sequence @@ #])& /@ oneLoopTopAndInsertion;
 
-                    "// number of couplings " <> ToString@EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[2]] <> "\n",
-
-                     (* scale *)
-                    "// renormalization scale\n" <>
-                    "result.m_decay\n" <>
-                       (* finite or not *)
-                    "// finite part\n" <>
-                       If[!EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[3]], ", 1.", ""] <>
-                     ");"},
-               EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[4]],
-               EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[5]],
-                    EvaluateDecayDiagramWithTopology[decay, Sequence @@ #][[6]]
-
-                  ]
-            )& /@ oneLoopTopAndInsertion;
-
-           "// 1-loop amplitude(s)\n" <> body
-          ];
-
-(*FillSFFOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-    (*Module[{oneLoopDiags, body = ""},*)
-           (*oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];*)
-           (*(body = body <>*)
-               (*"result.form_factor_left += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #] <> ";\n" <>*)
-               (*"result.form_factor_right += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #] <> ";\n"*)
-            (*)& /@ oneLoopDiags;*)
-           (*"// 1-loop amplitude(s)\n" <> body*)
-          (*];*)
-
-(*FillSSVOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-    (*Module[{oneLoopDiags, body = ""},*)
-           (*oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];*)
-           (*(body = body <>*)
-              (*"result.form_factor += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #] <> ";\n"*)
-            (*)& /@ oneLoopDiags;*)
-           (*"// 1-loop amplitude(s)\n" <> body*)
-          (*];*)
-
-(*FillSVVOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-    (*Module[{oneLoopDiags, body = ""},*)
-           (*oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];*)
-           (*(body = body <> *)
-               (*"result.form_factor_g += " <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #] <> ";\n"*)
-
-            (*)& /@ oneLoopDiags;*)
-           (*"// 1-loop amplitude(s)\n" <> body*)
-          (*];*)
-
-(*FillFFSOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-    (*Module[{oneLoopDiags, body = ""},*)
-           (*oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];*)
-           (*(body = body <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #])& /@ oneLoopDiags;*)
-           (*"// 1-loop amplitude(s)\n" <> body*)
-          (*];*)
-
-(*FillFFVOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-    (*Module[{oneLoopDiags, body = ""},*)
-           (*oneLoopDiags = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];*)
-           (*(body = body <> EvaluateDecayDiagramWithTopology[decay, Sequence @@ #])& /@ oneLoopDiags;*)
-           (*"// 1-loop amplitude(s)\n" <> body*)
-          (*];*)
-
-(*FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=*)
-
-(*
-    Switch[GetDecayAmplitudeType[decay],
-           "Decay_amplitude_SSS", FillSSSOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           "Decay_amplitude_SFF", FillSFFOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           "Decay_amplitude_SSV", FillSSVOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           "Decay_amplitude_SVV", FillSVVOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           "Decay_amplitude_FFS", FillFFSOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           "Decay_amplitude_FFV", FillFFVOneLoopDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
-           _, ""
-          ];
-          *)
+           "// ----------------- 1loop contributions to the amplitude -----------------\n\n" <>
+              body
+    ];
 
 (* creates `calculate_amplitude` function
    that returns a total (sumed over internal insertions) 1-loop amplitude for a given external particles *)
@@ -1557,7 +1366,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            Print["Entry point: creating amplitude for ", initialParticle, " -> ", finalState]; (* @todo: remove *)
 
-           (* Decay_amplitude_XXX *)
+           (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
 
            (* template arguments *)
@@ -1573,10 +1382,18 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                      ", "
                  ];
 
-           (* body *)
-           body = returnType <> " " <> returnVar <> ";\n";
-           body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct] <> "\n"; (* external particle masses *)
+           (* function body *)
+
+           body = "// amplitude type\n";
+           body = body <> returnType <> " " <> returnVar <> ";\n";
+
+           body = body <> "\n// external particles' masses\n";
+           body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
+
+           (* @todo: it might be less verbose to by default initialize amplitude to 0 *)
+           body = body <> "\n// set the initial value of an amplitude to 0\n";
            body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar] <> "\n";
+
            If[IsPossibleTreeLevelDecay[decay, True],
               body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
