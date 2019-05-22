@@ -21,8 +21,8 @@
 *)
 
 BeginPackage["Decays`",
-   {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`"
-      }];
+   {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`"}
+];
 
 FSParticleDecay::usage="head used for storing details of an particle decay,
 in the format
@@ -1071,6 +1071,7 @@ FillTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, struct
            "Decay_amplitude_FFV", FillFFVTreeLevelDecayAmplitudeFormFactors[decay, modelName, structName, paramsStruct],
            _, ""
           ];
+
 Compare[a_, b_] := Module[{},
 
    For[i = 1, i <= Length[a], i++,
@@ -1079,7 +1080,7 @@ Compare[a_, b_] := Module[{},
       ]
    ];
 
-   Return[True];
+   True
 ];
 
 TranslationForDiagram[topology_, diagram_] := Module[{
@@ -1102,6 +1103,8 @@ TranslationForDiagram[topology_, diagram_] := Module[{
    First@res
 ];
 
+(* ContractionsBetweenVerticesForDiagramFromGraph returns indices as array,
+   even for external particles which are in diagrams not a member of array *)
 FieldFromDiagram[diagram_, {i_, j_}] :=
    If[!ListQ[diagram[[i]]],
       diagram[[i]],
@@ -1135,43 +1138,28 @@ InsertionsOnEdgesForDiagram[topology_, diagram_] := Module[{sortedVertexCombinat
       ]
 ];
 
-
-(* In generic_loop_decay_diagram_classes.m the couplings are written in terms of edges as
-   Cp[list of fields with edge numbers as arguments of Fields.
-   This function translates vertex given in terms of edges to the list of vertices connected by those edges.
-   The order is preserved. *)
-EdgesToVertexConnections[edges_, list_] := Module[{temp = {}, vertexNumber},
-
-   (* for list of edges {n1, n2,... , nn} find list of pair of vertices that the edges correspond to as
-      {pair of vertices connected by edge n1, pair of vertices connected by edge 2, etc} *)
-   For[i = 1, i <= Length[edges], i++,
-      AppendTo[temp, Select[list, MatchQ[#, {_, _} -> Field[edges[[i]]]]&]];
-   ];
-   Utils`AssertWithMessage[Dimensions[temp] === {Length[edges], 1}, ""];
-
-   First /@ First  /@ temp
-];
-
-ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] := Module[{
-      vertexEdges, res, quit= False, pos
-      },
+ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] :=
+   Module[{vertexEdges, res, pos},
 
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
-   res = Replace[lor,
-      {LorentzProduct[_, PL] :> "left()",
+   res =
+      Replace[lor, {
+         LorentzProduct[_, PL] :> "left()",
          LorentzProduct[_, PR] :> "right()",
          PL :> "left()",
          PR :> "right()",
          1 :> "value()",
+         g[_, _] :> "value()",
+         (* @todo: rules below need checking! *)
          Mom[U[Index[Generic, n_]]] :> (
-            quit=True;
             "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, U[Index[Generic, n]]][[1,1]]]] <> ")"),
          Mom[-U[Index[Generic, n_]]] :> (quit=True;
             "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, -U[Index[Generic, n]]][[1,1]]]] <> ")"),
-         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> "value(1,0)",
-         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> "value(1,0)",
-         g[_, _] :> "value()",
+         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> ("value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
+         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> ("value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
          g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])
             + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])
             + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
@@ -1179,13 +1167,14 @@ ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] := Module[{
             + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])
             + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
          g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",
-         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> "value(1,0)",
-         lor :> (Print["Unidentifuied lorentz struct ", lor]; Quit[1])
+         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> ("value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
+         lor :> (Print["Error! Unidentified lorentz structure ", lor]; Quit[1])
       }
    ];
 
    "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
-]
+];
 
 (* Returns translation of the form
    {Field[1] -> hh, Field[2] -> VG, Field[3] -> VG, Field[4] -> Fd, Field[5] -> bar[Fd], Field[6] -> Fd}
@@ -1216,12 +1205,31 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
       temp
 ];
 
+WrapCodeInLoop[indices_, code_] :=
+   (
+      "\n// loops over vertices' indices\n" <>
+      StringJoin@@(MapIndexed[
+      Nest[
+         TextFormatting`IndentText,
+         "for(const auto& index" <> ToString@#1 <> ": index_range<vertex" <> ToString@#1 <> ">()) {\n" <>
+            If[First@#2===Length[indices], "\n" <> TextFormatting`IndentText[code], ""],
+         First@#2 -1
+      ]&,
+      indices
+   ]) <>
+     StringJoin@@ (Nest[
+         TextFormatting`IndentText,
+         "}\n",
+         #-1
+         ]& /@ Reverse@Range@Length[indices]));
+
+
 WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
-   Module[{vertices, indices, cppVertices, loop,
+   Module[{vertices, indices, cppVertices,
       mass = {}, translation, fieldAssociation,
       externalEdges, internalEdges,
    externalFieldsLocationsInVertices,
-      internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode
+      internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode, functionBody = ""
    },
 
       translation = TranslationForDiagram[topology, diagram];
@@ -1244,9 +1252,6 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
             (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, vertices}];
 
-      (* loop over indices *)
-      loop = "for(const auto& index" <> ToString@# <> ": index_range<vertex" <> ToString@# <> ">()) {\n"& /@ indices;
-
       (* List of {integer, integer} -> Field[integer] *)
       externalEdges =
          Select[
@@ -1264,25 +1269,34 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
             ToString@indices[[ First@First@Position[verticesInFieldTypes, _[#]] ]] <> ");\n" & /@ Range[3];
 
       matchInternalFieldIndicesCode =
-         ("if(vertex" <> ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#1]]   ]] <>
-         "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@First@Position[verticesInFieldTypes, _[#1]] <> ">(index" <>
-         ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#1]]   ]] <> ") != " <>
-      "vertex" <> ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#2]]   ]] <>
-         "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@First@Position[verticesInFieldTypes, _[#2]] <> ">(index" <>
-         ToString@indices[[  First@First@Position[verticesInFieldTypes, _[#2]]   ]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n")&
-      @@@
-      DeleteCases[DeleteDuplicates[Sort /@ Tuples[Range[4, 3+Length[vertices]], 2]], {n_Integer, n_Integer}];
+         StringJoin@@Map[
+            ("if(vertex" <> ToString@indices[[ First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <>
+            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@Last@First@Position[verticesInFieldTypes/.-field_->field, _[#]] <> ">(index" <>
+            ToString@indices[[  First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <> ") != " <>
+            "vertex" <> ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <>
+            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@Last@Position[verticesInFieldTypes/.-field_->field, _[#]] <> ">(index" <>
+            ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n")&,
+            Range@Length@vertices
+         ];
 
-      mass =(
-      "const auto mInternal" <> ToString[#-3] <> " = context.mass<" <>
+      (* NOTE! Position has a weird feature that
+         Position[{{x}}, x] = {{1, 1}} and
+         Position[{{-x}}, x] = {{1, 1, 2}},
+         hence the -field_->field rule *)
+      mass =
+         Map[
+            ("const auto mInternal" <> ToString[#-3] <> " = context.mass<" <>
          CXXNameOfField[
             vertices[[  Sequence@@First@Position[verticesInFieldTypes /. -field_ -> field, _[#]]    ]]
             ] <> ">(" <>
-         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypes/. -field_->field, _[#]]]] <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP[
-         Last@First@Position[verticesInFieldTypes, _[#]]
-         ] <> ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <> "));\n"
-)&/@
-      Range[4, 3+Length@vertices];
+         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypes/. -field_->field, _[#]]]] <> "::template indices_of_field<" <>
+         ToString@Utils`MathIndexToCPP[
+            Last@First@Position[verticesInFieldTypes/. -field_->field, _[#]]
+         ] <>
+         ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <> "));\n"
+      )&,
+      Range[4, 3+Length@vertices]
+      ];
 
       mass = StringJoin@@mass;
 
@@ -1298,17 +1312,7 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
 
 }& @@@ internalEdges;
 
-
-      "// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
-
-         (* usings for vertices *)
-         "\n" <> cppVertices <>
-
-               "\n// loops over vertices' indices\n" <>
-               loop <> "\n" <>
-               TextFormatting`IndentText[
-
-                  "// skip indices that don't match external indices\n" <>
+functionBody = "// skip indices that don't match external indices\n" <>
                   matchExternalFieldIndicesCode <>
                      "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {\n" <>
                      TextFormatting`IndentText["continue;"] <>
@@ -1332,10 +1336,13 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
                   (* renormalization scale *)
                   "result.m_decay" <>
                   (* if amplitude is UV divergent, take the finite part *)
-                  If[!translation[[3]] === True, ",\n1.", ""] <> ");"
-                  ]
-               ] <> "\n" <>
-               StringJoin@@ConstantArray["}\n", Length@vertices] <> "\n"
+                  If[!Last@translation === True, ",\n1.", ""] <> ");"
+                  ] <> "\n";
+
+         "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+         (* usings for vertices *)
+         "\n" <> cppVertices <>
+         WrapCodeInLoop[indices, functionBody]
    ];
 
 ColorFactorForDiagram[topology_, diagram_] :=
