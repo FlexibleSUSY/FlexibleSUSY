@@ -1842,6 +1842,11 @@ WriteDecaysMakefileModule[sources_List, headers_List, files_List] :=
                     Sequence @@ GeneralReplacementRules[]
                   } ];
           ];
+ApplyAntifield[l_] :=
+Module[{},
+      MapAt[AntiField, l, List/@#]& /@
+   DeleteCases[Subsets[Range@Length[l]], {}]
+];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
     Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices = {}, numberOfDecayParticles = 0,
@@ -1857,7 +1862,11 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
            decaysLists = {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}& /@ decayParticles;
            decaysVertices = DeleteDuplicates[Flatten[Permutations /@ Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1], 1]];
-           decaysVertices = Join[decaysVertices, Map[AntiField, decaysVertices, {2}]];
+           (* @todo: this is just for debugging. Remove it! *)
+           decaysVertices = DeleteDuplicates@Join[
+              decaysVertices,
+              Sequence@@(ApplyAntifield/@decaysVertices)
+];
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];
            enableDecaysCalculationThreads = True;
