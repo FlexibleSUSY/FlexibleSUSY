@@ -148,10 +148,13 @@ insertions and Quit[1].";
 PureEvaluate::usage =
 "PureEvaluate[expression_, message_String, insertions___]:
 Evaluates expression and returns the result if none Message is generated.
-If any Message is generated it stops evaluation, 
-                               prints message with sequence of insertions, 
-                               prints content of Message and 
-                               Quit[1].";
+If any Message is generated it 
+   stops evaluation, 
+   prints message with sequence of insertions, 
+   prints content of Message and 
+   Quit[1].
+@note it seems that function is not working for messages generated in subkernels 
+if they are running inside expression";
 
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
