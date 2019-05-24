@@ -20,6 +20,9 @@
 
 *)
 
+(*@assumptions: 
+1) there is no quartic gluon vertices inside diagrams => one can calculate
+colour factor for diagram separately from Lorentz factor*)
 BeginPackage["NPointFunctions`",{"FlexibleSUSY`","SARAH`","CXXDiagrams`","Vertices`","Parameters`","Utils`"}];
 NPointFunction::usage=
 "@brief Calculate the n-point correlation function for a List of incoming and 
@@ -337,6 +340,7 @@ Module[
          OnShellFlag -> onShellFlag],
       subKernel
    ];
+
    CloseKernels[subKernel];
 
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
