@@ -621,16 +621,7 @@ Module[
         {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
   ]
-
-SetAttributes[
-   {
-   SetFAFCPaths,SetFSConventionRules,
-   NPointFunctionFAFC,
-   GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
-   ColourFactorForDiagram
-   }, 
-   {Protected, Locked}];
-
+  
 CombinatorialFactorsForClasses::usage=
 "@brief takes generic amplitude and finds for a numerical combinatirical factors
 which arise at class level
@@ -643,6 +634,18 @@ Module[{position = Position[rules, FeynArts`RelativeCF]},
    Print[{classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1];
    {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
 ];
+
+SetAttributes[
+   {
+   SetFAFCPaths,SetFSConventionRules,
+   NPointFunctionFAFC,
+   GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
+   ColourFactorForDiagram,
+   CombinatorialFactorsForClasses
+   }, 
+   {Protected, Locked}];
+
+
 
 (** \brief Given a set of rules that map to zero and a set that does
  * not map to zero, apply the zero rules to the non-zero ones
