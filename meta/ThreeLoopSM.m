@@ -52,7 +52,7 @@ BetaSM[gc_] :=
                     Get[FileNameJoin[{subDir, "beta_lambda.m"}]],
                     True, Print["Error: unknown coupling: ", gc]; {0,0,0}
                     ]
-          ] /. ThreeLoopSM`Private`ToSARAHNamingConvention[];
+          ] /. ThreeLoopSM`Private`ToSARAHNamingConvention[] /. Zeta[n_] :> N[Zeta[n]];
 
 (* Note:
    g1, g2, g3, gb are global variables in SARAH.

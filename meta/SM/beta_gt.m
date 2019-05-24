@@ -41,4 +41,4 @@
     https://www.ttp.kit.edu/Progdata/ttp16/ttp16-008/ *)
  -(1/ 81) g3^8 gt (1379027 + 6048 \[Pi]^4 - 2277312 Zeta[3] + 561600
    Zeta[5])
-} /. Zeta[n_] :> N[Zeta[n]]
+}

@@ -547,6 +547,9 @@ CalculateGaugeCouplings[] :=
 
 GetTwoLoopThresholdHeaders[] :=
     Module[{result = ""},
+           If[FlexibleSUSY`UseSMYukawa2Loop === True,
+              result = result <> "#include \"sm_twoloop_mt.hpp\"\n";
+             ];
            If[FlexibleSUSY`UseMSSMYukawa2Loop === True,
               result = "#include \"mssm_twoloop_mb.hpp\"\n" <>
                        "#include \"mssm_twoloop_mt.hpp\"\n" <>

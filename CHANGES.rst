@@ -1,17 +1,6 @@
 FlexibleSUSY 2.4.0 [not released yet]
 =====================================
 
-Changes
--------
-
-* The C++ language version has been increased to C++14.  As a result,
-  a C++14-compatible compiler is required to compile FlexibleSUSY.
-  This is the case for
-
-  - g++ >= 5.0.0
-  - clang++ >= 3.8.1
-  - icpc >= 17.0.0
-
 New features
 ------------
 
@@ -50,6 +39,39 @@ New features
 * Implementation of 3-loop contributions O(αb,ατ) to the Standard
   Model beta functions from [`1604.00853
   <https://arxiv.org/abs/1604.00853>`_].
+
+* Implementation of the 2-loop O(αt αs + αt^2) contributions to the
+  running MS-bar top mass of the Standard Model from [`1604.01134
+  <https://arxiv.org/abs/1604.01134>`_].  The contributions can be
+  enabled in SM-like models by setting the flag::
+
+      UseSMYukawa2Loop = True
+
+  Note that FlexibleSUSY must be configured with TSIL_ to use these
+  corrections, see `README.rst <README.rst>`_.  Furthermore TSIL_ must
+  be compiled with ``-fPIC``, which can be achieved by setting in the
+  TSIL_ ``Makefile``::
+
+      TSIL_OPT = -O3 -funroll-loops -fPIC
+
+Changes
+-------
+
+* The C++ language version has been increased to C++14.  As a result,
+  a C++14-compatible compiler is required to compile FlexibleSUSY.
+  This is the case for
+
+  - g++ >= 5.0.0
+  - clang++ >= 3.8.1
+  - icpc >= 17.0.0
+
+Fixed bugs
+----------
+
+* [commit c47ef34a]: In function ``SLHA_io::read_entry``, if there is
+  more than one entry with the same key in an SLHA block, use the last
+  one.  Note, that ``SLHA_io::read_entry`` has not been used in
+  FlexibleSUSY so far.
 
 
 FlexibleSUSY 2.3.0 [January, 22 2019]
@@ -2035,3 +2057,4 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _LoopTools: http://www.feynarts.de/looptools/
+.. _TSIL: https://www.niu.edu/spmartin/tsil/

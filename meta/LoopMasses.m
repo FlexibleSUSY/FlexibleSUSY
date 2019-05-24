@@ -1263,7 +1263,8 @@ CreateRunningDRbarMassFunction[particle_ /; particle === TreeMasses`GetSMTopQuar
                 ];
               body = body <>
               "const double currentScale = get_scale();\n" <>
-              "double qcd_1l = 0., qcd_2l = 0., qcd_3l = 0., qcd_4l = 0.;\n\n" <>
+              "double qcd_1l = 0., qcd_2l = 0., qcd_3l = 0., qcd_4l = 0.;\n" <>
+              "double atas_S_2l = 0., atas_LR_2l = 0., atat_S_2l = 0., atat_LR_2l = 0.;\n\n" <>
                   If[FlexibleSUSY`UseMSSMYukawa2Loop === True,
                      CreateMSSM1LoopSQCDContributions[],
                      "qcd_1l = " <> CConversion`RValueToCFormString[qcdOneLoop /. FlexibleSUSY`M[particle] -> treeLevelMass] <> ";"
@@ -1275,7 +1276,23 @@ CreateRunningDRbarMassFunction[particle_ /; particle === TreeMasses`GetSMTopQuar
                      CreateMSSM2LoopSQCDContributions[],
                      "const double q_2l = " <> CConversion`RValueToCFormString[qcdTwoLoop /. FlexibleSUSY`M[particle] -> treeLevelMass] <> ";\n\n" <>
                      "qcd_2l = -q_2l + qcd_1l * qcd_1l;"
-                    ]
+                  ] <>
+                  If[FlexibleSUSY`UseSMYukawa2Loop === True,
+                     "
+
+const double gs = " <> CConversion`RValueToCFormString[SARAH`strongCoupling] <> ";
+const double yt = " <> CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`UpYukawa]] <> ";
+const double t = Sqr(" <> CConversion`RValueToCFormString[treeLevelMass] <> ");
+const double h = Sqr(" <> CConversion`RValueToCFormString[TreeMasses`GetMass[SARAH`HiggsBoson]] <> ");
+const double s = Sqr(p);
+const double qq = Sqr(get_scale());
+
+atas_S_2l  = sm_twoloop_mt::delta_mt_2loop_as_at_S_flexiblesusy(gs, yt, t, h, s, qq);
+atas_LR_2l = sm_twoloop_mt::delta_mt_2loop_as_at_LR_flexiblesusy(gs, yt, t, h, s, qq);
+
+atat_S_2l  = sm_twoloop_mt::delta_mt_2loop_at_at_S_flexiblesusy(yt, t, h, s, qq);
+atat_LR_2l = sm_twoloop_mt::delta_mt_2loop_at_at_LR_flexiblesusy(yt, t, h, s, qq);"
+                  , ""]
               ] <> "\n" <>
               "}\n\n" <>
               If[qcdThreeLoop =!= 0,
@@ -1286,8 +1303,8 @@ CreateRunningDRbarMassFunction[particle_ /; particle === TreeMasses`GetSMTopQuar
               "if (get_thresholds() > 3 && threshold_corrections.mt > 3) {\n" <>
                   IndentText["qcd_4l = " <> CConversion`RValueToCFormString[qcdFourLoop /. FlexibleSUSY`M[particle] -> treeLevelMass] <> ";"] <> "\n" <>
               "}\n\n", ""] <>
-              "const double m_susy_drbar = m_pole + self_energy_1 " <>
-              "+ m_pole * (self_energy_PL + self_energy_PR + qcd_1l + qcd_2l + qcd_3l + qcd_4l);\n\n" <>
+              "const double m_susy_drbar = m_pole + self_energy_1 + atas_S_2l + atat_S_2l " <>
+              "+ m_pole * (self_energy_PL + self_energy_PR + qcd_1l + qcd_2l + qcd_3l + qcd_4l + atas_LR_2l + atat_LR_2l);\n\n" <>
               "return m_susy_drbar;\n";
              ];
            Return[result <> IndentText[body] <> "}\n\n"];

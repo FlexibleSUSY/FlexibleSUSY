@@ -102,7 +102,7 @@ $(LIBtest_call_tsil): $(LIBtest_call_tsil_OBJ)
 		$(MODULE_MAKE_LIB_CMD) $@ $^
 
 $(EXEtest_call_tsil_EXE): $(EXEtest_call_tsil_OBJ) $(LIBtest_call_tsil) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(TSILLIBS) $(FLIBS)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(TSILLIBS) $(FLIBS)
 
 ALLDEP += $(LIBtest_call_tsil_DEP) $(EXEtest_call_tsil_DEP)
 ALLSRC += $(LIBtest_call_tsil_SRC) $(EXEtest_call_tsil_SRC)

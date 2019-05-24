@@ -95,7 +95,6 @@ options="                    \
    enable_debug              \
    enable_fflite             \
    enable_himalaya           \
-   enable_lapack             \
    enable_librarylink        \
    enable_looptools          \
    enable_mass_error_check   \
@@ -123,9 +122,7 @@ enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
 enable_himalaya="automatic"
-enable_lapack="automatic"
 enable_librarylink="automatic"
-enable_ilp64mkl_workaround="automatic"
 enable_looptools="no"
 enable_meta="no"
 # BEGIN: NOT EXPORTED ##########################################
@@ -147,9 +144,7 @@ DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
-DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
-DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
 DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
@@ -168,8 +163,6 @@ boost_inc_dir=""
 eigen_inc_dir=""
 BOOSTFLAGS=""
 gsl_config="gsl-config"
-blas_lib_dir=""
-lapack_lib_dir=""
 looptools_lib_dir=""
 looptools_inc_dir=""
 GSLFLAGS=""
@@ -185,8 +178,6 @@ EIGENFLAGS=""
 FC="gfortran"
 GSLLIBS=""
 INSTALL_DIR=""
-BLASLIBS=""
-LAPACKLIBS=""
 MATH="math"
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
@@ -1880,26 +1871,6 @@ check_linking() {
 }
 
 #_____________________________________________________________________
-check_blas_libs_using_options() {
-    check_library "libblas" "$blas_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Warning: could not find libblas, proceeding without it."
-        message "  It can be downloaded from http://www.netlib.org/blas"
-	enable_lapack="no"
-    else
-        local BLASLIBS_=-lblas
-        if [ -z "$blas_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            BLASLIBS="$BLASLIBS_"
-        else
-            BLASLIBS="-L$blas_lib_dir $BLASLIBS_"
-        fi
-	check_symbol ztpsv_ "$found_lib" "$found_dir"
-    fi
-}
-
-#_____________________________________________________________________
 check_himalaya_version() {
     checking_msg "Himalaya version"
 
@@ -1988,60 +1959,41 @@ check_himalaya() {
 }
 
 #_____________________________________________________________________
-# Mathematica 9.0 or newer is shipped with Intel MKL with the ILP64
-# interface whereas LP64 is the standard 64 bit programming model
-# which external LAPACK/BLAS would also follow:
-# http://www.unix.org/version2/whatsnew/lp64_wp.html.  When
-# Mathematica loads a LibraryLink library, calls to LAPACK/BLAS
-# subroutines are bound to the MKL ILP64.  This means that an FS
-# object cannot call an external LAPACK/BLAS subroutine if LibraryLink
-# is enabled.  In this case, FS attempts to circumvent the conflict by
-# calling the LAPACK subroutines from the MKL installed with
-# Mathematica.  This workaround is however possible only when FS
-# executables are dynamically linked since Mathematica does not come
-# with a static MKL.
-check_ilp64mkl_in_math() {
-    [ "$enable_librarylink" = "no" ] && return 0
-    [ "$enable_lapack" = "no" ] && return 0
+check_required_libs() {
+    if [ "$enable_meta" = yes -a -n "${MATH}" ] ; then
+        message "Checking model files for required third party libraries"
 
-    local math_lib_dir="$MATH_INSTDIR/SystemFiles/Libraries/$MATH_SYSTEMID"
+        for m in ${MODELS}; do
+            local model_name=$(echo ${m} | sed -e 's|models/||')
+            local model_file="models/${model_name}/FlexibleSUSY.m"
 
-    check_library "libmkl_intel_ilp64" "$math_lib_dir" "$default_lib_paths"
-    [ -z "$found_lib" ] && return 0
+            mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
+                message "    TSIL is required to build $model_name"
+                enable_tsil=yes
+            }
 
-    enable_ilp64mkl_workaround="yes"
+            mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
+                message "    Himalaya is required to build $model_name";
+                enable_himalaya=yes
+            }
 
-    if [ "$enable_static" = "yes" ]; then
-	if [ "$enable_lapack" = "yes" ]; then
-	    message "Error: --enable-{static,lapack,librarylink} together conflict with the Intel MKL ILP64 linked to this version of Mathematica"
-	    exit 1
-	else
-	    enable_lapack="no"
-	fi
-    else
-	LAPACKLIBS="-L$math_lib_dir -Wl,-rpath,$math_lib_dir -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5"
-	check_symbol ztpsv_ "$found_lib" "$found_dir"
-	check_symbol dgbsv_ "$found_lib" "$found_dir"
-    fi
-}
+            cat <<EOF | "${MATH}" > /dev/null 2>&1
+Get["${model_file}"]
 
-#_____________________________________________________________________
-check_lapack_libs_using_options() {
-    check_library "liblapack" "$lapack_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Warning: could not find liblapack, proceeding without it."
-        message "  It can be downloaded from http://www.netlib.org/lapack"
-	enable_lapack="no"
-    else
-        local LAPACKLIBS_=-llapack
-        if [ -z "$lapack_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            LAPACKLIBS="$LAPACKLIBS_"
-        else
-            LAPACKLIBS="-L$lapack_lib_dir $LAPACKLIBS_"
-        fi
-	check_symbol dgbsv_ "$found_lib" "$found_dir"
+If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
+   FreeQ[SUSYScaleInput, FSHimalayaMh23L] &&
+   FreeQ[LowScaleInput , FSHimalayaMh23L],
+   Quit[1],
+   Quit[0]
+]
+EOF
+
+            [ "x$?" = "x0" ] && {
+                message "    Himalaya is required to build $model_name";
+                enable_himalaya=yes
+            }
+
+        done
     fi
 }
 
@@ -2234,9 +2186,28 @@ check_tsil_incl() {
 }
 
 #_____________________________________________________________________
+check_tsil_size() {
+    local tsil_dir=$([ -n "$tsil_inc_dir" ] && echo "$tsil_inc_dir" || echo "$tsil_lib_dir")
+
+    if [ -f "${tsil_dir}/Makefile" ] ; then
+        local tsil_makefile="${tsil_dir}/Makefile"
+        local tsil_size=$({ echo "first: ; @echo \$(TSIL_SIZE)"
+                            cat "$tsil_makefile"
+                          } | make -f - first
+              )
+        [ -n "$tsil_size" ] && CPPFLAGS="$CPPFLAGS $tsil_size"
+    else
+        message "Warning: Could not determine TSIL floating point type TSIL_SIZE."
+        message "   TSIL's default will be assumed."
+    fi
+
+    return 0
+}
+
+#_____________________________________________________________________
 check_tsil() {
     if test "x$enable_tsil" != "xno" ; then
-        if check_tsil_incl && check_tsil_libs ; then
+        if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
             enable_tsil=yes
         else
             if [ "x$enable_tsil" = xyes ] ; then
@@ -2281,36 +2252,6 @@ find_symbol_using_pkgconfig() {
 	return 1
     done
     return 0
-}
-
-#_____________________________________________________________________
-check_blas_libs() {
-    [ "$enable_lapack" = "no" ] && return 0
-    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
-
-    # user has set BLASLIBS explicitly, no need to search
-    test -n "$BLASLIBS" && return 0
-
-    if find_symbol_using_pkgconfig blas ztpsv_; then
-	BLASLIBS="$linker_flags"
-    else
-	check_blas_libs_using_options
-    fi
-}
-
-#_____________________________________________________________________
-check_lapack_libs() {
-    [ "$enable_lapack" = "no" ] && return 0
-    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
-
-    # user has set LAPACKLIBS explicitly, no need to search
-    test -n "$LAPACKLIBS" && return 0
-
-    if find_symbol_using_pkgconfig lapack dgbsv_; then
-	LAPACKLIBS="$linker_flags"
-    else
-	check_lapack_libs_using_options
-    fi
 }
 
 #_____________________________________________________________________
@@ -2480,6 +2421,18 @@ If[Needs["SARAH\`"] === \$Failed || !ValueQ[\$sarahModelDir],
 WriteString["stderr", \$sarahModelDir];
 EOF
              )
+
+    if [ -z "$SARAH_MODEL_DIR" ] ; then
+        message "Error: Could not determine the SARAH model directory."
+        message "   Please check that Mathematica and SARAH are installed correctly."
+        message "   To do that, you may run \`${MATH}' and then copy and paste:\n"
+        message "\
+If[Needs[\"SARAH\`\"] === \$Failed,
+   Print[\"SARAH could not be loaded.\"]; Quit[1],
+   Print[\"SARAH successfully loaded.\"]; Quit[0]
+  ];"
+        exit 1
+    fi
 }
 
 #_____________________________________________________________________
@@ -2699,6 +2652,7 @@ get_model_specific_corrections() {
     mma_symbol_is "$model_file" "$math_cmd" "UseHiggs4LoopSM" "True"    && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS3Loop" "True"   && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "FlexibleEFTHiggs" "True"   && ho="${ho} SM"
+    mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True"   && ho="${ho} SM_thresholds"
 
     mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
     mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
@@ -2809,17 +2763,6 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
 
-    if test "x$enable_lapack" = "xno" ; then
-        DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
-        message "Disabling LAPACK"
-        logmsg "   ${DEFINE_ENABLE_LAPACK}"
-    else
-        enable_lapack=yes
-        DEFINE_ENABLE_LAPACK="#define ENABLE_LAPACK 1"
-        logmsg "Enabling LAPACK"
-        logmsg "   ${DEFINE_ENABLE_LAPACK}"
-    fi
-
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
         logmsg "Enabling LibraryLink"
@@ -2829,17 +2772,6 @@ enable_defines() {
         DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
         message "Disabling LibraryLink"
         logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
-    fi
-
-    if test "x$enable_ilp64mkl_workaround" = "xyes" ; then
-        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#define ENABLE_ILP64MKL_WORKAROUND 1"
-        message "Enabling MKL ILP64 workaround"
-        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
-    else
-        enable_ilp64mkl_workaround=no
-        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
-        logmsg "Disabling usage of ILP64 MKL"
-        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
     fi
 
     if test "x$enable_looptools" = "xyes" ; then
@@ -2956,7 +2888,6 @@ replace_markers() {
 	-e "s|@ADDONS@|$ADDONS|"           \
 	-e "s|@INSTALL_DIR@|$INSTALL_DIR|" \
 	-e "s|@SOLVERS@|$SOLVERS|"   \
-	-e "s|@BLASLIBS@|$BLASLIBS|"       \
 	-e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"     \
 	-e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"     \
 	-e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"   \
@@ -2971,7 +2902,6 @@ replace_markers() {
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
 	-e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-	-e "s|@LAPACKLIBS@|$LAPACKLIBS|"   \
         -e "s|@LDFLAGS@|$LDFLAGS|"         \
         -e "s|@LDLIBS@|$LDLIBS|"           \
         -e "s|@LLFLAGS@|$LLFLAGS|"         \
@@ -2983,8 +2913,6 @@ replace_markers() {
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
-	-e "s|@ENABLE_ILP64MKL_WORKAROUND@|$enable_ilp64mkl_workaround|" \
-	-e "s|@ENABLE_LAPACK@|$enable_lapack|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
@@ -3037,7 +2965,6 @@ enable/disable options, prefix with either --enable- or --disable-
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
   himalaya          Enable Himalaya (default: $enable_himalaya)
-  lapack            Enable LAPACK (default: $enable_lapack)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
@@ -3062,8 +2989,6 @@ Package directories, compilation settings and model selection
 
   --with-addons=            Comma separated list of addons to be build
                             (default: $ADDONS)
-  --with-blas-libdir=       Path to search for BLAS library
-  --with-blas-libs=         BLAS libraries to be linked
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
   --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
@@ -3078,8 +3003,6 @@ Package directories, compilation settings and model selection
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
   --with-install-dir=       Path to source code installation directory
-  --with-lapack-libdir=     Path to search for LAPACK library
-  --with-lapack-libs=       LAPACK libraries to be linked
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
   --with-looptools-libdir=  Path to search for LoopTools libraries
@@ -3182,8 +3105,6 @@ if test $# -gt 0 ; then
                 ;;
             --with-addons=*)         ADDONS=$optarg ;;
             --with-solvers=*)        SOLVERS=$optarg ;;
-            --with-blas-libdir=*)    blas_lib_dir=$optarg ;;
-            --with-blas-libs=*)      BLASLIBS=$optarg ;;
             --with-boost-libdir=*)   boost_lib_dir=$optarg ;;
             --with-boost-incdir=*)   boost_inc_dir=$optarg ;;
             --with-cppflags=*)       CPPFLAGS=$optarg ;;
@@ -3197,8 +3118,6 @@ if test $# -gt 0 ; then
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
-            --with-lapack-libdir=*)  lapack_lib_dir=$optarg ;;
-            --with-lapack-libs=*)    LAPACKLIBS=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
@@ -3255,7 +3174,15 @@ else
     enable_formcalc=no
 fi
 
+check_models
+check_addons
+check_optional_modules
+# BEGIN: NOT EXPORTED ##########################################
+update_model_makefiles
+# END:   NOT EXPORTED ##########################################
+
 if test "x${enable_compile}" = "xyes"; then
+    check_required_libs
     check_multiarch
     check_cxx
     check_cxx_compiler_type
@@ -3275,9 +3202,6 @@ if test "x${enable_compile}" = "xyes"; then
     check_fortran_libs
     check_gsl_config
     check_himalaya
-    check_ilp64mkl_in_math
-    check_blas_libs
-    check_lapack_libs
     if use_solver "lattice"; then
         check_boost_thread_incl
         check_boost_thread_libs
@@ -3294,13 +3218,6 @@ if test "x${enable_compile}" = "xyes"; then
     check_std_threads
     check_thread_libs
 fi
-
-check_models
-check_addons
-check_optional_modules
-# BEGIN: NOT EXPORTED ##########################################
-update_model_makefiles
-# END:   NOT EXPORTED ##########################################
 
 enable_defines
 
@@ -3332,7 +3249,6 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GM2CALC_VERSION@|$GM2CALC_VERSION|"       \
     -e "s|@HIMALAYA_VERSION@|$HIMALAYA_VERSION|"     \
     -e "s|@PKGNAME@|$PROGRAM_NAME|"                  \
-    -e "s|@BLASLIBS@|$BLASLIBS|"                     \
     -e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"           \
     -e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"       \
     -e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"                 \
@@ -3348,7 +3264,6 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
-    -e "s|@LAPACKLIBS@|$LAPACKLIBS|"                 \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
     -e "s|@LDLIBS@|$LDLIBS|"                         \
     -e "s|@LLFLAGS@|$LLFLAGS|"                        \
@@ -3374,9 +3289,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR@|$DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
-    -e "s|@DEFINE_ENABLE_LAPACK@|$DEFINE_ENABLE_LAPACK|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
-    -e "s|@DEFINE_ENABLE_ILP64MKL_WORKAROUND@|$DEFINE_ENABLE_ILP64MKL_WORKAROUND|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \

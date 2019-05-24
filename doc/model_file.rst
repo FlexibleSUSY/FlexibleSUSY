@@ -1415,6 +1415,7 @@ order :math:`O(\alpha_t\alpha_s^2 + \alpha_t^2\alpha_s + \alpha_t^3)`
           will be set automatically for consistency::
 
               UseHiggs2LoopSM = True;
+              UseSMYukawa2Loop = True;    (* use 2-loop non-QCD corrections to m_t *)
               UseSMAlphaS3Loop = True;    (* use 2- and 3-loop QCD corrections to alpha_s *)
               UseYukawa3LoopQCD = True;   (* use 2- and 3-loop QCD corrections to m_t *)
               UseSM3LoopRGEs = True;      (* use 3-loop RGEs *)
@@ -1430,6 +1431,7 @@ by setting in the model file::
 
            UseHiggs2LoopSM = True;
            UseHiggs3LoopSM = True;
+           UseSMYukawa2Loop = True;    (* use 2-loop non-QCD corrections to m_t *)
            UseSMAlphaS3Loop = True;    (* use 2- and 3-loop QCD corrections to alpha_s *)
            UseYukawa3LoopQCD = True;   (* use 2- and 3-loop QCD corrections to m_t *)
            UseSM3LoopRGEs = True;      (* use 3-loop RGEs *)
@@ -1499,7 +1501,17 @@ The known SM 2- and 3-loop QCD threshold corrections of order
 known by [hep-ph/0004189].  They can be taken into account by setting
 in the model file::
 
-    UseSMAlphaS3Loop = True; (* use 2- and 3- threshold for alpha_s *)
+    UseSMAlphaS3Loop = True; (* use 2- and 3-loop threshold for αs *)
+
+The known SM 2-loop threshold corrections of order :math:`O(\alpha_t
+\alpha_s + \alpha_t^2)` to the running top mass are known by
+[arXiv:1604.01134].  They can be taken into account by setting in the
+model file::
+
+    UseSMYukawa2Loop = True; (* use 2-loop thresholds for mt *)
+
+.. note:: These corrections require FlexibleSUSY to be configured with
+          TSIL_ support.
 
 
 MSSM
@@ -1559,6 +1571,7 @@ References
 
 .. _GM2Calc: https://arxiv.org/abs/1510.08071
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
+.. _TSIL: https://www.niu.edu/spmartin/tsil/
 
 .. _`SLHA input file`: slha_input.rst
 

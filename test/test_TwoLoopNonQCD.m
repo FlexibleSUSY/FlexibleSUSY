@@ -155,8 +155,8 @@ TestEquality[Coefficient[ds,k,1], 0];
 
 TestEquality[Coefficient[ds,k,2], 0];
 
-TestEquality[Coefficient[ds,k^3 g3^6] // Cancel // Chop, 0];
+TestEquality[Coefficient[ds,k^3 g3^6] // Simplify, 0];
 
-TestEquality[Coefficient[ds,k^4 g3^8] // Cancel // Chop // Chop, 0];
+TestEquality[Coefficient[ds,k^4 g3^8] // FullSimplify, 0];
 
 PrintTestSummary[];

@@ -140,11 +140,14 @@ FindMacro::usage="Returns preprocessor macro for parameter";
 WrapPreprocessorMacroAround::usage="Applies preprocessor symbols
 to parameters";
 
-GetDependenceSPhenoSymbols::usage="Returns list of symbols for which a
- DependenceSPheno rule is defined";
+GetDependenceSPhenoSymbols::usage="Returns list of SARAH parameters
+ for which a DependenceSPheno rule is defined";
 
 GetDependenceSPhenoRules::usage="Returns list of replacement rules for
- symbols for which a DependenceSPheno rule is defined";
+ SARAH parameters for which a DependenceSPheno rule is defined";
+
+GetAllDependenceSPhenoRules::usage="Returns list of replacement rules
+ for all DependenceSPheno rules"
 
 GetOutputParameterDependencies::usage="Returns list of output
  parameters which appear in the given expression";
@@ -239,7 +242,7 @@ extraMassDimensions = {};
 
 AddMassDimensionInfo[par_, dim_?IntegerQ] :=
     Module[{massDimensions, pos, known},
-           massDimensions = #[[1]]& /@ extraMassDimensions;
+           massDimensions = First /@ extraMassDimensions;
            If[!MemberQ[massDimensions, dim],
               extraMassDimensions = Utils`ForceJoin[extraMassDimensions, {{dim, {par}}}];,
               pos = Position[massDimensions, dim];
@@ -269,7 +272,7 @@ GuessExtraParameterType[par_] :=
 
 UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, block, type}}];,
               pos = Position[parNames, par, 1];
@@ -284,7 +287,7 @@ UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
 
 UpdateParameterInfo[currentPars_List, {par_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, type}}];,
               pos = Position[parNames, par, 1];
@@ -302,8 +305,8 @@ SetStoredParameterSLHABlock[storedPars_List, par_, block_] :=
            pos = Position[storedPars, {par, __}];
            updated = Extract[storedPars, pos];
            If[MatchQ[block, {_, _}],
-              updated = ({#[[1]], {ToString[block[[1]]], block[[2]]}, #[[3]]})& /@ updated,
-              updated = ({#[[1]], ToString[block], #[[3]]})& /@ updated
+              updated = ({First[#], {ToString[block[[1]]], block[[2]]}, #[[3]]})& /@ updated,
+              updated = ({First[#], ToString[block], #[[3]]})& /@ updated
              ];
            ReplacePart[storedPars, MapThread[Rule, {pos, updated}]]
           ];
@@ -319,7 +322,7 @@ SetStoredParameterDimensions[storedPars_List, par_, dims_] :=
     Module[{pos, updated},
            pos = Position[storedPars, {par, __}];
            updated = Extract[storedPars, pos];
-           updated = ({#[[1]], #[[2]], If[CConversion`IsRealType[#[[3]]],
+           updated = ({First[#], #[[2]], If[CConversion`IsRealType[#[[3]]],
                                           If[CConversion`IsIntegerType[#[[3]]],
                                              GetIntegerTypeFromDimension[dims],
                                              GetRealTypeFromDimension[dims]
@@ -621,7 +624,7 @@ FindAllParametersClassified[expr_, exceptions_:{}] :=
 ReplaceAllRespectingSARAHHeads[expr_, rules_] :=
     Module[{pars, parsWithoutHeads, removeHeadsRules,
             uniqueRules, uniqueExpr, uniqueSubs},
-           pars = Parameters`FindAllParameters[(#[[1]])& /@ rules];
+           pars = Parameters`FindAllParameters[First /@ rules];
            removeHeadsRules = { SARAH`L[p_][__] :> p, SARAH`L[p_] :> p,
                                 SARAH`B[p_][__] :> p, SARAH`B[p_] :> p,
                                 SARAH`T[p_][__] :> p, SARAH`T[p_] :> p,
@@ -822,7 +825,7 @@ IsRealExpression[sum[index_, start_, stop_, expr_]] :=
 IsRealExpression[otherwise_] := False;
 
 HasPhase[particle_] :=
-    MemberQ[#[[1]]& /@ SARAH`ParticlePhases, particle];
+    MemberQ[First /@ SARAH`ParticlePhases, particle];
 
 GetPhase[particle_ /; HasPhase[particle]] :=
     Cases[SARAH`ParticlePhases, {particle, phase_} :> phase][[1]];
@@ -1772,7 +1775,7 @@ GetThirdGeneration[par_] :=
          ];
 
 GetSARAHParameters[] :=
-    (#[[1]])& /@ SARAH`SARAHparameters;
+    First /@ SARAH`SARAHparameters;
 
 GetAllDependenceSPhenoSymbols[] :=
     DeleteDuplicates @ Flatten @
@@ -1790,7 +1793,7 @@ GetDependenceSPhenoSymbols[] :=
 
 GetDependenceSPhenoRules[] :=
     Module[{sarahPars = GetSARAHParameters[]},
-           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,#[[1]]]&]
+           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,First[#]]&]
           ];
 
 GetAllOutputParameterDependencies[expr_] :=

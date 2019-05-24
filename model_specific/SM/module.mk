@@ -82,7 +82,7 @@ endif
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
 else
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
 		$(MODULE_MAKE_LIB_CMD) $@ $^

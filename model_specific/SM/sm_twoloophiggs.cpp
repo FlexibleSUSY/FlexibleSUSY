@@ -32,9 +32,6 @@ namespace sm_twoloophiggs {
  * @note The result contains the 1-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
  *
- * @note The sign of the result is opposite to arxiv:1205.6497,
- * Eq. (16).
- *
  * @warning The result is in Landau gauge (\f$\xi = 0\f$).
  *
  * @warning In the diagram that has a Higgs loop, the momentum has
@@ -49,7 +46,7 @@ namespace sm_twoloophiggs {
  * @param g2 MS-bar SU(2)_L gauge coupling
  * @param lambda MS-bar 4-Higgs coupling
  *
- * @return real part of 1-loop self-energy
+ * @return real part of 1-loop correction
  */
 double delta_mh_1loop_sm(
    double p, double scale, double mt, double yt,
@@ -84,7 +81,7 @@ double delta_mh_1loop_sm(
        +mZ2*(G2-2*lambda*(LogZ-1))
       );
 
-   return - result * oneOver16PiSqr;
+   return result * oneOver16PiSqr;
 }
 
 /**
@@ -94,15 +91,12 @@ double delta_mh_1loop_sm(
  * @note The result contains the 1-loop top quark tadpole diagram.  It
  * is therefore not 1-particle irreducible (1PI).
  *
- * @note The sign of the result is opposite to arxiv:1205.6497,
- * Eq. (16).
- *
  * @param p momentum
  * @param scale renormalization scale
  * @param mt MS-bar top mass
  * @param yt MS-bar Yukawa coupling
  *
- * @return real part of 1-loop self-energy O(alpha_t)
+ * @return real part of 1-loop correction O(alpha_t)
  */
 double delta_mh_1loop_at_sm(
    double p, double scale, double mt, double yt)
@@ -117,7 +111,7 @@ double delta_mh_1loop_at_sm(
    const double result =
       3*yt2*(4.*mt2 - p2)*ReB0(p2,mt2,mt2,Q2);
 
-   return - result * oneOver16PiSqr;
+   return result * oneOver16PiSqr;
 }
 
 /**
