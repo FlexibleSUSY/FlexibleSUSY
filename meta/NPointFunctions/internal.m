@@ -74,8 +74,7 @@ Encodes whether to set the external momenta to zero or leave them undetermined.
 
 True | False";
 OnShellFlag::usage=
-"Inherited option for NPointFunctions`.`NPointFunctionFAFC[] and 
-NPointFunctions`.`CalculateAmplitudes[]
+"Inherited option for NPointFunctions`.`NPointFunctionFAFC[]
 Use on-shell external fields or not.
 
 True | False";
@@ -623,7 +622,7 @@ Module[
   ]
   
 CombinatorialFactorsForClasses::usage=
-"@brief takes generic amplitude and finds for a numerical combinatirical factors
+"@brief takes generic amplitude and finds numerical combinatirical factors
 which arise at class level
 @returns list of combinatorical factors for a given generic amplitude
 @param FeynArts`.`FeynAmp[__]";
@@ -631,7 +630,6 @@ CombinatorialFactorsForClasses[
    FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]
 ]:=
 Module[{position = Position[rules, FeynArts`RelativeCF]},
-   Print[{classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1];
    {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
 ];
 
