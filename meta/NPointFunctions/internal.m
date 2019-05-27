@@ -598,13 +598,15 @@ Module[
          ] & /@ ampsGen
       ) //. FormCalc`GenericList[];
 
-    calculatedAmplitudes = SumOverAllFieldIndices /@ (List @@ calculatedAmplitudes);
+   calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
 
-    pairs = If[zeroExternalMomenta,
+   Print[FormCalc`Abbr[]//FullForm];
+   pairs = If[zeroExternalMomenta,
       Cases[Select[FormCalc`Abbr[],
               StringMatchQ[ToString @ #[[1]], "Pair"~~__] &],
             Rule[_, Pattern[pair, FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]] :> pair],
       {}];
+   Print[pairs];
     zeroedRules = (Rule[#, 0] & /@ pairs);
 
     abbreviations = Complement[FormCalc`Abbr[], pairs] //. FormCalc`GenericList[];
@@ -631,13 +633,30 @@ Module[{position = Position[rules, FeynArts`RelativeCF]},
    {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
 ];
 
+SumOverAllFieldIndices::usage=
+"@brief Given a generic amplitude, determine the generic fields over which it
+needs to be summed and return a corresponding GenericSum[] object.
+@param FormCalc`Amp[_->_][amp_] the given generic amplitude
+@returns {{S|F|V|U|T,number of index}...}.";
+SumOverAllFieldIndices[FormCalc`Amp[_->_][amp_]] :=
+Module[
+   {
+      genericIndices = DeleteDuplicates[Cases[amp,Pattern[fieldType,
+         Alternatives[FeynArts`S, FeynArts`F, FeynArts`V, FeynArts`U,
+            FeynArts`T]][FeynArts`Index[Generic,number_Integer]] 
+         :> {fieldType,number},
+         Infinity]]
+   },
+   GenericSum[amp, genericIndices]
+];
+
 SetAttributes[
    {
    SetFAFCPaths,SetFSConventionRules,
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
-   CombinatorialFactorsForClasses
+   CombinatorialFactorsForClasses,SumOverAllFieldIndices
    }, 
    {Protected, Locked}];
 
@@ -666,29 +685,6 @@ RecursivelyZeroRules[nonzeroRules_List, zeroRules_List] :=
     nextNonzero = Complement[nextNonzero, nextZero];
 
     RecursivelyZeroRules[nextNonzero, nextZero]
-  ]
-
-(** \brief Given a generic amplitude, determine the generic fields
- * over which it needs to be summed and return a corresponding
- * GenericSum[] object.
- * \param genericAmplitude the given generic amplitude
- * \returns `GenericSum[genericAmplitude[[1]], genericIndices]`
- * where `genericindices` is replaced with the appropriate generic
- * indices.
- **)
-SumOverAllFieldIndices[genericAmplitude_] :=
-  Module[{genericIndices, fieldType, genericRules},
-    Utils`AssertWithMessage[Length[genericAmplitude] === 1,
-      "NPointFunctions`SumOverAllFieldIndices[]: \
-Length of generic amplitude != 1 not implemented (incompatible FormCalc change?)"];
-
-    genericIndices = DeleteDuplicates[
-      Cases[List @@ genericAmplitude,
-            Pattern[fieldType,Alternatives[
-							FeynArts`S, FeynArts`F, FeynArts`V, FeynArts`U, FeynArts`T]][
-								FeynArts`Index[Generic,number_Integer]] :> {fieldType,number},
-						Infinity]];
-    GenericSum[genericAmplitude[[1]], genericIndices]
   ]
 
 (** \brief Tranlate a list of FormCalc amplitudes and their
