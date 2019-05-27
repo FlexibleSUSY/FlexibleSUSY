@@ -578,12 +578,13 @@ Module[
    {
       combinatorialFactors = CombinatorialFactorsForClasses /@ {feynAmps},
       ampsGen = FeynArts`PickLevel[Generic][amps],
+      numExtParticles = Plus@@Length/@proc,
       calculatedAmplitudes,
       abbreviations,subexpressions,
       pairs, zeroedRules
    },
    ampsGen = If[zeroExternalMomenta,
-      FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,Plus@@Length/@proc] ],
+      FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
 
    calculatedAmplitudes =
@@ -600,14 +601,12 @@ Module[
 
    calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
 
-   Print[FormCalc`Abbr[]//FullForm];
    pairs = If[zeroExternalMomenta,
-      Cases[Select[FormCalc`Abbr[],
-              StringMatchQ[ToString @ #[[1]], "Pair"~~__] &],
-            Rule[_, Pattern[pair, FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]] :> pair],
+      Cases[FormCalc`Abbr[],
+         Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]:>pair],
       {}];
-   Print[pairs];
-    zeroedRules = (Rule[#, 0] & /@ pairs);
+
+   zeroedRules = (Rule[#, 0] &/@ pairs);
 
     abbreviations = Complement[FormCalc`Abbr[], pairs] //. FormCalc`GenericList[];
     subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
