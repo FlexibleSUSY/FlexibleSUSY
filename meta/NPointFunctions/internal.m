@@ -104,16 +104,15 @@ ExceptTriangles::usage=
 Exclude all topologies except triangle diagrams
 
 (Technically, converts further to FeynArts`.`Loops@Except@4.)";
+GenericSum::usage="Represent a sum over a set of generic fields.";
 
 SetAttributes[
    {LorentzIndex,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,GenericT,
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,ExcludedTopologies,
    DimensionalReduction,DimensionalRegularization,OneParticleReducible,
-   ExceptBoxes,ExceptTriangles},
+   ExceptBoxes,ExceptTriangles,GenericSum},
    {Protected,Locked}];
-
-GenericSum::usage="Represent a sum over a set of generic fields.";
 
 Begin["`Private`"];
 calledPreviouslySetFAFCPaths::usage=
@@ -314,8 +313,8 @@ Module[
          SARAH`sum[uniqueSumIndex, 1, 4, SARAH`g[uniqueSumIndex, uniqueSumIndex] * 
             Append[a, uniqueSumIndex] * Append[b, uniqueSumIndex]]
       ],
-      fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]                                 
-      ] :> fieldType@GenericIndex@number,                                       
+      fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]
+      ] :> fieldType@GenericIndex@number,
       FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]
    };
 
@@ -578,9 +577,8 @@ Module[
       combinatorialFactors = CombinatorialFactorsForClasses /@ {feynAmps},
       ampsGen = FeynArts`PickLevel[Generic][amps],
       numExtParticles = Plus@@Length/@proc,
-      calculatedAmplitudes,
-      abbreviations,subexpressions,
-      pairs, zeroedRules
+      calculatedAmplitudes,abbreviations,subexpressions,
+      zeroedRules
    },
    ampsGen = If[zeroExternalMomenta,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
@@ -599,25 +597,21 @@ Module[
       ) //. FormCalc`GenericList[];
 
    calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
+   abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
+   subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
-   pairs = If[zeroExternalMomenta,
-      Cases[FormCalc`Abbr[],
-         Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]:>pair],
-      {}];
+   If[zeroExternalMomenta,
+      zeroedRules = Cases[FormCalc`Abbr[],
+         Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]
+         :> (pair->0)];
+      {abbreviations, zeroedRules} = ZeroRules[abbreviations, zeroedRules];
+      {subexpressions, zeroedRules} = ZeroRules[subexpressions, zeroedRules];
+      calculatedAmplitudes = calculatedAmplitudes /. zeroedRules;];
 
-   zeroedRules = (Rule[#, 0] &/@ pairs);
-
-    abbreviations = Complement[FormCalc`Abbr[], pairs] //. FormCalc`GenericList[];
-    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
-
-    {abbreviations, zeroedRules} = RecursivelyZeroRules[abbreviations, zeroedRules];
-    {subexpressions, zeroedRules} = RecursivelyZeroRules[subexpressions, zeroedRules];
-
-    calculatedAmplitudes = calculatedAmplitudes /. zeroedRules;
-    FCAmplitudesToFSConvention[
-        {calculatedAmplitudes, genericInsertions, combinatorialFactors},
+   FCAmplitudesToFSConvention[
+      {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
-  ]
+];
 
 CombinatorialFactorsForClasses::usage=
 "@brief takes generic amplitude and finds numerical combinatirical factors
@@ -654,6 +648,45 @@ FAGenericFieldQ::usage=
 FAGenericFieldQ = 
    MemberQ[{FeynArts`S,FeynArts`F,FeynArts`V,FeynArts`U,FeynArts`T},#]&;
 
+ZeroRules::usage=
+"@brief Given a set of rules that map to zero and a set that does
+not map to zero, apply the zero rules to the non-zero ones
+recursively until the non-zero rules do not change anymore.
+@param nonzeroRules the list of nonzero rules
+@param zeroRules the list of zero rules
+@returns a list of rules that map the same expressions as the initial rules.
+The return value is of the form {{Rule[_,_]...},{Rule[_,0]...}}";
+ZeroRules[nonzeroRules:{Rule[_,_]...}, zeroRules:{Rule[_,0]...}] :=
+Module[{newNonzero, newZeroRules},
+   newNonzero = Rule @@@ Transpose[
+      {nonzeroRules[[All,1]], nonzeroRules[[All,2]] /. zeroRules}];
+
+   If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
+
+   newZeroRules = Cases[newNonzero,HoldPattern[_->0]];
+   newNonzero = Complement[newNonzero, newZeroRules];
+
+   ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]
+];
+
+FCAmplitudesToFSConvention::usage=
+"@brief Tranlate a list of FormCalc amplitudes and their abbreviations and
+subexpressions into FlexibleSUSY language.
+@param amplitudes the given list of amplitudes
+@param abbreviations list of abbreviations
+@param aubexpressions list of subexpressions
+@returns a list of the form
+`{fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}`
+where all FlexibleSUSY conventions have been applied.";
+FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
+Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
+   fsAmplitudes = amplitudes //. amplitudeToFSRules;
+   fsAbbreviations = abbreviations //. subexpressionToFSRules;
+   fsSubexpressions = subexpressions //. subexpressionToFSRules;
+
+   {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
+];
+
 SetAttributes[
    {
    SetFAFCPaths,SetFSConventionRules,
@@ -661,54 +694,9 @@ SetAttributes[
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
    CombinatorialFactorsForClasses,SumOverAllFieldIndices,
-   FAGenericFieldQ
+   FAGenericFieldQ,ZeroRules,FCAmplitudesToFSConvention
    }, 
    {Protected, Locked}];
-
-
-
-(** \brief Given a set of rules that map to zero and a set that does
- * not map to zero, apply the zero rules to the non-zero ones
- * recursively until the non-zero rules do not change anymore.
- * \param nonzeroRules the list of nonzero rules
- * \param zeroRules the list of zero rules
- * \returns a list of rules that map the same expressions as the
- * initial rules. The return value is of the form
- * `{nonzeroRules, zeroRules}`
- * where the nonzero rules do not map to zero even if one applies
- * the zero rules to the mapped expressions.
- **)
-RecursivelyZeroRules[nonzeroRules_List, zeroRules_List] :=
-  Module[{nextNonzero, nextZero},
-    nextNonzero = Rule @@@ Transpose[
-      {nonzeroRules[[All,1]], nonzeroRules[[All,2]] /. zeroRules}];
-
-    If[nextNonzero === nonzeroRules,
-       Return[{nonzeroRules, zeroRules}]];
-
-    nextZero = Join[zeroRules, Cases[nextNonzero, HoldPattern[Rule[_, 0]]]];
-    nextNonzero = Complement[nextNonzero, nextZero];
-
-    RecursivelyZeroRules[nextNonzero, nextZero]
-  ]
-
-(** \brief Tranlate a list of FormCalc amplitudes and their
- * abbreviations and subexpressions into FlexibleSUSY language.
- * \param amplitudes the given list of amplitudes
- * \param abbreviations the generated list of abbreviations
- * \param aubexpressions the generated list of subexpressions
- * \returns a list of the form
- * `{fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}`
- * where all FlexibleSUSY conventions have been applied.
- **)
-FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
-  Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
-    fsAmplitudes = amplitudes //. amplitudeToFSRules;
-    fsAbbreviations = abbreviations //. subexpressionToFSRules;
-    fsSubexpressions = subexpressions //. subexpressionToFSRules;
-
-    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
-  ]
 
 End[];
 EndPackage[];
