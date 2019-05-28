@@ -314,8 +314,7 @@ Module[
          SARAH`sum[uniqueSumIndex, 1, 4, SARAH`g[uniqueSumIndex, uniqueSumIndex] * 
             Append[a, uniqueSumIndex] * Append[b, uniqueSumIndex]]
       ],
-      Pattern[fieldType,FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U|FeynArts`T][
-         FeynArts`Index[Generic,number_Integer]                                 
+      fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]                                 
       ] :> fieldType@GenericIndex@number,                                       
       FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]
    };
@@ -619,7 +618,7 @@ Module[
         {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
   ]
-  
+
 CombinatorialFactorsForClasses::usage=
 "@brief takes generic amplitude and finds numerical combinatirical factors
 which arise at class level
@@ -640,14 +639,20 @@ needs to be summed and return a corresponding GenericSum[] object.
 SumOverAllFieldIndices[FormCalc`Amp[_->_][amp_]] :=
 Module[
    {
-      genericIndices = DeleteDuplicates[Cases[amp,Pattern[fieldType,
-         Alternatives[FeynArts`S, FeynArts`F, FeynArts`V, FeynArts`U,
-            FeynArts`T]][FeynArts`Index[Generic,number_Integer]] 
+      genericIndices = DeleteDuplicates[Cases[amp,
+         fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]] 
          :> {fieldType,number},
          Infinity]]
    },
    GenericSum[amp, genericIndices]
 ];
+
+FAGenericFieldQ::usage=
+"@brief checks whether symbol belongs to FeynArts field names or not.
+@param symbol to check
+@returns True if symbol belongs to FeynArts field names, False otherwise.";
+FAGenericFieldQ = 
+   MemberQ[{FeynArts`S,FeynArts`F,FeynArts`V,FeynArts`U,FeynArts`T},#]&;
 
 SetAttributes[
    {
@@ -655,7 +660,8 @@ SetAttributes[
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
-   CombinatorialFactorsForClasses,SumOverAllFieldIndices
+   CombinatorialFactorsForClasses,SumOverAllFieldIndices,
+   FAGenericFieldQ
    }, 
    {Protected, Locked}];
 
