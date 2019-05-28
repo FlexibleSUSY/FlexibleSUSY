@@ -198,13 +198,12 @@ LoopFunctions::usage=
 LoopTools for loop functions.";
 fermionBasis::usage=
 "Specify the fermion basis used for the matching";
-VerticesForNPointFunction::usage="
-@brief Return a list of all vertices needed to calculate a given 
+VerticesForNPointFunction::usage=
+"@brief Return a list of all vertices needed to calculate a given 
 n-point correlation function.
 @param nPointFunction the given n-point correlation function
 @returns a list of all vertices needed to calculate a given 
-n-point correlation function.
-";
+n-point correlation function.temp";
 CreateCXXFunctions::usage="
 @brief Given a list of n-point correllation functions, a list
 of c++ function names and a list of colour factor projections
@@ -426,7 +425,7 @@ NPointFunction[___] := Utils`TestWithMessage[
 ];
 
 VerticesForNPointFunction[nPointFunction_] := 
-  Module[{genericVertices, genericSumPositions,
+Module[{genericVertices, genericSumPositions,
           genericInsertions, vertices},
     genericVertices = DeleteDuplicates[Cases[nPointFunction,
       SARAH`Cp[fields___] :> {fields}, Infinity, Heads -> True]];
@@ -437,8 +436,9 @@ VerticesForNPointFunction[nPointFunction_] :=
 
     vertices = UniquelyInstantiateGenericFields[genericVertices,
       GatherBy[genericInsertions, First]];
-    Map[StripFieldIndices, vertices, {2}]
-  ]
+    Map[Vertices`StripFieldIndices, vertices, {2}]
+];
+
 CreateCXXFunctions[nPointFunctions_List, names_List,
     colourFactorProjections_,
     OptionsPattern[{LoopFunctions -> "FlexibleSUSY", fermionBasis -> {}}]] :=
@@ -636,11 +636,9 @@ Module[
    },
    If[!FileExistsQ@nPointFunctionsFile,Return@Null];
    nPointFunctions = Get@nPointFunctionsFile;
-   position = FirstPosition[
-      Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
-      {inFields, outFields},
-      Null];
-   If[position =!= Null,nPointFunctions[[position]],Null]
+   position = Position[Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
+      {inFields, outFields}];
+   If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
 ];
 
 GenerateFAModelFileOnKernel::usage=
