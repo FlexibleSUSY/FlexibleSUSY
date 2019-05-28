@@ -658,8 +658,8 @@ recursively until the non-zero rules do not change anymore.
 The return value is of the form {{Rule[_,_]...},{Rule[_,0]...}}";
 ZeroRules[nonzeroRules:{Rule[_,_]...}, zeroRules:{Rule[_,0]...}] :=
 Module[{newNonzero, newZeroRules},
-   newNonzero = Rule @@@ Transpose[
-      {nonzeroRules[[All,1]], nonzeroRules[[All,2]] /. zeroRules}];
+   newNonzero = Thread[
+      Rule[nonzeroRules[[All,1]],nonzeroRules[[All,2]] /. zeroRules]];
 
    If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
 
