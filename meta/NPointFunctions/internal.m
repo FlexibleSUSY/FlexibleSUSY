@@ -175,8 +175,7 @@ SetFSConventionRules::usage=
 "@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY 
 language.";
 SetFSConventionRules::errSARAH=
-"NpointFunctions`.`Private`.`FANamesForFields[]: SARAH`.`:
-It seems that SARAH`.` has changed conventions for
+"It seems that SARAH`.` has changed conventions for
 <ParticleNames>.dat file.";
 SetFSConventionRules[] :=
 Module[

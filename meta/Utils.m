@@ -140,13 +140,13 @@ AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
 If assertion does not evaluate to True, print message and Quit[1].";
 
 TestWithMessage::usage =
-"TestWithMessage[assertion_, message_String, insertions___]:
+"TestWithMessage[assertion, MessageName[sym_, tag_], insertions___]:
 If assertion evaluate to True, returns True
 If assertion evaluate to False, print message with sequence of
 insertions and Quit[1].";
 
 PureEvaluate::usage =
-"PureEvaluate[expression_, message_String, insertions___]:
+"PureEvaluate[expression_, MessageName[sym_, tag_], insertions___]:
 Evaluates expression and returns the result if none Message is generated.
 If any Message is generated it 
    stops evaluation, 
@@ -305,13 +305,21 @@ PrintAndReturn[e___] := (Print[e]; e)
 AssertWithMessage[assertion_?BooleanQ, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
-TestWithMessage[assertion_?BooleanQ, message_String, insertions___] :=
-   If[assertion === True, 
-      True , 
-      Print@StringForm[message, insertions]; Quit[1]];
-SetAttributes[TestWithMessage, {Locked,Protected}];
+TestWithMessage[
+   assertion_?BooleanQ,
+   HoldPattern@MessageName[sym_, tag_],
+   insertions___
+] :=
+If[assertion === True, 
+   True ,
+   Print[Context@sym,StringDelete[ToString@sym,__~~"Private`"],": ",tag,":"];
+   Print@StringForm[MessageName[sym, tag], insertions]; Quit[1]];
+SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
 
-PureEvaluate[expression_, message_String, insertions___] :=
+PureEvaluate[
+   expression_,
+   HoldPattern@MessageName[sym_, tag_],
+   insertions___] :=
 Module[{Filter},
    Filter[
       System`Dump`str_, 
@@ -319,7 +327,8 @@ Module[{Filter},
       Hold[Message[_, System`Dump`args___]]
    ] := 
    (
-      Print[StringForm[message, insertions],
+      Print[Context@sym,StringDelete[ToString@sym,__~~"Private`"],": ",tag,":"];
+      Print[StringForm[MessageName[sym, tag], insertions],
          "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
          StringForm[System`Dump`str, 
             Sequence@@(ToString /@ System`Dump`args)
@@ -329,7 +338,7 @@ Module[{Filter},
    );
    Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
 ];
-SetAttributes[PureEvaluate, {HoldFirst,Locked,Protected}];
+SetAttributes[PureEvaluate, {HoldAll,Locked,Protected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
