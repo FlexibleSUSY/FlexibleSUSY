@@ -218,7 +218,7 @@ double OneLoopFunctionF2N(double x)
    return -3.0 / (y * y * y) * (1.0 - x * x + 2.0 * x * std::log(x));
 }
 
-double get_MSUSY(const @ModelName@_mass_eigenstates& model)
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 {
 @AMuon_GetMSUSY@
 }

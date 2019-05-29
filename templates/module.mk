@@ -39,6 +39,9 @@ BASE_TEMPLATES := \
 		$(DIR)/low_scale_constraint.hpp.in \
 		$(DIR)/mass_eigenstates.hpp.in \
 		$(DIR)/mass_eigenstates.cpp.in \
+		$(DIR)/mass_eigenstates_interface.hpp.in \
+		$(DIR)/mass_eigenstates_decoupling_scheme.hpp.in \
+		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
 		$(DIR)/observables.hpp.in \

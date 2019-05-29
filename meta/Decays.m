@@ -55,7 +55,20 @@ CreateTotalAmplitudeSpecializations::usage="creates specialized functions for hi
 CreatePartialWidthSpecializations::usage="creates specialized functions for particular decays.";
 
 WrapCodeInLoopOverInternalVertices::usage=""; (* @todo remove *)
+FieldPositionInVertex::usage = "";
+
 Begin["`Private`"];
+
+FieldPositionInVertex[field_, vertex_] := Module[{pos},
+
+   pos = Position[vertex, field, {1}];
+   Utils`AssertWithMessage[MatchQ[pos, {{_Integer}}],
+      "Error! Could't find the location of field " <> ToString@field <> " in vertex " <> ToString@vertex <>
+         ". Got " <> ToString@pos <> "."
+   ];
+
+   pos /. {{n_}} -> n
+];
 
 StripDiagramColorFactor[fields_, colorFactor_] :=
    Module[{fieldIn = fields[[1]], fieldsOut = Drop[fields, 1], initialStateRep, finalStateReps},
@@ -606,7 +619,7 @@ CreatePartialWidthCalculationPrototype[decay_FSParticleDecay] :=
             initialStateDim, finalStateDims},
            initialStateDim = TreeMasses`GetDimension[GetInitialState[decay]];
            finalStateDims = TreeMasses`GetDimension /@ GetFinalState[decay];
-           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates&" <>
+           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface&" <>
                           If[initialStateDim > 1, ", int", ""] <>
                           StringJoin[If[# > 1, ", int", ""]& /@ finalStateDims];
            functionName = CreatePartialWidthCalculationName[decay];
@@ -620,7 +633,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
             finalState = GetFinalState[decay], finalStateDims, setFieldIndices, body = ""},
            initialStateDim = TreeMasses`GetDimension[GetInitialState[decay]];
            finalStateDims = TreeMasses`GetDimension /@ GetFinalState[decay];
-           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates& model" <>
+           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface& model" <>
                           If[initialStateDim > 1, ", int gI1", ""] <>
                           StringJoin[MapIndexed[If[#1 > 1, ", int gO" <> ToString[First[#2]], ""]&, finalStateDims]];
            functionName = CreatePartialWidthCalculationName[decay, "CLASSNAME"];
@@ -689,7 +702,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            initialStateDim = TreeMasses`GetDimension[initialState];
            finalStateDims = TreeMasses`GetDimension /@ finalState;
            finalStateStarts = TreeMasses`GetDimensionStartSkippingGoldstones /@ finalState;
-           functionArgs = "model_" <> If[initialStateDim > 1, ", gI1", ""] <>
+           functionArgs = "model" <> If[initialStateDim > 1, ", gI1", ""] <>
                           MapIndexed[If[#1 > 1, ", gO" <> ToString[First[#2]], ""]&, finalStateDims];
            pdgsList = MapIndexed[With[{idx = First[#2]},
                                       CallPDGCodeGetter[#1, If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""], FlexibleSUSY`FSModelName <> "_info"]]&,
@@ -725,14 +738,16 @@ CreateDecaysCalculationFunction[decaysList_] :=
             runToScale = "", body = ""},
            particleDim = TreeMasses`GetDimension[particle];
            particleStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
-           runToScale = "const auto& decay_mass = PHYSICAL(" <>
-                        CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <>
-                        ");\nmodel_.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ");\n" <>
-                        "model_.calculate_DRbar_masses();\n";
+           runToScale =
+              "auto decay_mass = PHYSICAL(" <>
+                 CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
+              "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ");\n" <>
+              FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme dec(input);" <>
+              "dec.fill_from(model);\n";
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "auto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
                   "_decays(" <> If[particleDim > 1, "gI1", ""] <> ");\n\n" <> body;
-           body = "auto model_ = model;\n\nif (run_to_decay_particle_scale) {\n" <>
+           body = "\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
            If[particleDim > 1,
               body = LoopOverIndexCollection[body, {{"gI1", Utils`MathIndexToCPP@particleStart, particleDim}}] <> "\n";
@@ -1145,35 +1160,36 @@ ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] :=
    pos = First@First@Position[vertices, vertexEdges];
    res =
       Replace[lor, {
-         LorentzProduct[_, PL] :> "left()",
-         LorentzProduct[_, PR] :> "right()",
-         PL :> "left()",
-         PR :> "right()",
-         1 :> "value()",
-         g[_, _] :> "value()",
+         LorentzProduct[_, PL] -> "left()",
+         LorentzProduct[_, PR] -> "right()",
+         PL -> "left()",
+         PR -> "right()",
+         1 -> "value()",
+         g[_, _] -> "value()",
          (* @todo: rules below need checking! *)
-         Mom[U[Index[Generic, n_]]] :> (
-            "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, U[Index[Generic, n]]][[1,1]]]] <> ")"),
-         Mom[-U[Index[Generic, n_]]] :> (quit=True;
-            "value(" <> ToString[Utils`MathIndexToCPP[Position[{particles}, -U[Index[Generic, n]]][[1,1]]]] <> ")"),
-         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> ("value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
+         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> (
+            "value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, -f[m]]}, ", "] <> ")"),
          Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> ("value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
-         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
-         g[lt1, lt2] (-Mom[V[Index[Generic, 2]]] + Mom[V[Index[Generic, 4]]])
-            + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])
-            + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
-         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",
-         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> ("value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),
-         lor :> (Print["Error! Unidentified lorentz structure ", lor]; Quit[1])
+         StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, f[m]]}, ", "] <> ")"),
+(*         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])*)
+(*            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])*)
+(*            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",*)
+(*         g[lt1, lt2] (-Mom[V[Index[Generic, 2]]] + Mom[V[Index[Generic, 4]]])*)
+(*            + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])*)
+(*            + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",*)
+(*         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",*)
+(*         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> ("value(" <>*)
+(*            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),*)
+(*               Mom[U[Index[Generic, n_]]] :> ( *)
+(*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[U[Index[Generic, n]], {particles}] <> ")"),*)
+(*               Mom[-U[Index[Generic, n_]]] :> ( *)
+(*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}] <> ")"),*)
+         lor :> False (*Print["Error! Unidentified lorentz structure ", lor]; Quit[1]*)
       }
    ];
-
-   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
+   If[res===False, "0.",
+   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res]
 ];
 
 (* Returns translation of the form
@@ -1191,19 +1207,39 @@ B: {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3],
 
 *)
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_] :=
-   Module[{temp = {}},
+   Module[{temp = {}, conjTemp},
 
       temp = (Reverse /@ fieldNumberOnEdgeBetweenVertices);
 
-      (* the numbers of vertices in Dylna might be unsorted *)
-      temp = (#1 -> Sort[#2])& @@@ temp;
-
       For[i = 1, i <= Length[temp], i++,
-         temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVertices[[i]]
+         temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVertices[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVertices[[i,2]]]);
+         temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVertices[[i]];
       ];
 
       temp
 ];
+
+GetFieldsAssociations2[diagram_, diagramDylan_] :=
+   Module[{flattenedDiagram, flattenedDiagramDylan, res = {}},
+
+      flattenedDiagram = Flatten@diagram;
+      flattenedDiagramDylan = Flatten@diagramDylan;
+      For[i = 1, i<= Length[flattenedDiagramDylan], i++,
+         If[FreeQ[res, (flattenedDiagramDylan[[i]] /. Susyno`LieGroups`conj -> Identity)],
+            If[Head[flattenedDiagramDylan[[i]]] === Susyno`LieGroups`conj,
+               AppendTo[res, AntiField[flattenedDiagramDylan[[i]]] -> AntiField[flattenedDiagram[[i]]]],
+               AppendTo[res, flattenedDiagramDylan[[i]] -> flattenedDiagram[[i]]]
+
+            ]
+            ]
+      ];
+      Print["res:"];
+      Print[res];
+      Print["============"];
+      Print[""];
+
+      res
+   ];
 
 WrapCodeInLoop[indices_, code_] :=
    (
@@ -1233,9 +1269,14 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
    },
 
       translation = TranslationForDiagram[topology, diagram];
+      Print["topology:"];
+      Print[topology];
+      Print["diagram:"];
+      Print[diagram];
+      Print[translation];
 
       (* {Field[1] -> concrete field, ...} *)
-      fieldAssociation = GetFieldsAssociations[InsertionsOnEdgesForDiagram[topology, diagram], translation[[3]]];
+      fieldAssociation = GetFieldsAssociations2[diagram, translation[[-2]]];
 
       (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
       verticesInFieldTypes =

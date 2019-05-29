@@ -32,7 +32,10 @@
 
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
+#include "@ModelName@_input_parameters.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
+
 
 #include "@ModelName@_decay_amplitudes.hpp"
 #include "decays_loop_corrections.hpp"
@@ -62,13 +65,15 @@ final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Fie
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
-   @ModelName@_decays(const @ModelName@_mass_eigenstates& model_, softsusy::QedQcd const& qedqcd_)
+   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_)
       : model(model_)
       , qedqcd(qedqcd_)
+      , input(input_)
       {}
-   @ModelName@_decays(const @ModelName@_mass_eigenstates& model_, softsusy::QedQcd const& qedqcd_, bool corrections)
+   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_, bool corrections)
       : model(model_)
       , qedqcd(qedqcd_)
+      , input(input_)
       , include_higher_order_corrections(corrections)
       {}
    @ModelName@_decays(const @ModelName@_decays&) = default;
@@ -93,7 +98,8 @@ public:
 @partialWidthCalculationPrototypes@
 
 private:
-   @ModelName@_mass_eigenstates model{};
+   @ModelName@_mass_eigenstates model;
+   @ModelName@_input_parameters const& input;
    softsusy::QedQcd qedqcd{};
    bool include_higher_order_corrections{true};
    bool run_to_decay_particle_scale{true};

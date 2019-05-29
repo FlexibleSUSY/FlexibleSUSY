@@ -12,7 +12,7 @@
 using namespace flexiblesusy;
 using namespace softsusy;
 
-void ensure_tree_level_ewsb(CMSSM<Two_scale>& m)
+void ensure_tree_level_ewsb(CMSSM_mass_eigenstates& m)
 {
    // ensure that the EWSB eqs. are satisfied (Drees p.222)
    const double vu = m.get_vu();
@@ -84,8 +84,13 @@ void ensure_n_loop_ewsb(MssmSoftsusy& s, int loop_level)
    s.rewsb(signMu, mtrun, pars);
 }
 
+<<<<<<< HEAD
 void setup_CMSSM_const(CMSSM<Two_scale>& m, 
                        const CMSSM_input_parameters& input)
+=======
+
+CMSSM_mass_eigenstates setup_CMSSM(const CMSSM_input_parameters& input)
+>>>>>>> upstream/feature-mass_eigenstates_interface
 {
    const double ALPHASMZ = 0.1176;
    const double ALPHAMZ = 1.0 / 127.918;
@@ -113,6 +118,7 @@ void setup_CMSSM_const(CMSSM<Two_scale>& m,
       Yd(Eigen::Matrix<double,3,3>::Zero()),
       Ye(Eigen::Matrix<double,3,3>::Zero()),
       mm0(Eigen::Matrix<double,3,3>::Zero());
+<<<<<<< HEAD
    Yu(0,0) = 0.002   * root2 / (vev * sinBeta);
    Yu(1,1) = 1.28   * root2 / (vev * sinBeta);
    Yu(2,2) = 165.0   * root2 / (vev * sinBeta);
@@ -124,6 +130,15 @@ void setup_CMSSM_const(CMSSM<Two_scale>& m,
    Ye(2,2) = 1.77699 * root2 / (vev * cosBeta);
    mm0 = Sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
 
+=======
+   Yu(2,2) = 165.0   * root2 / (vev * sinBeta);
+   Yd(2,2) = 2.9     * root2 / (vev * cosBeta);
+   Ye(2,2) = 1.77699 * root2 / (vev * cosBeta);
+   mm0 = Sqr(m0) * Eigen::Matrix<double,3,3>::Identity();
+
+   CMSSM_mass_eigenstates m(input);
+
+>>>>>>> upstream/feature-mass_eigenstates_interface
    m.set_input_parameters(input);
    m.set_scale(scale);
    m.set_loops(1);
@@ -154,8 +169,16 @@ void setup_CMSSM_const(CMSSM<Two_scale>& m,
 
    ensure_tree_level_ewsb(m);
    m.calculate_DRbar_masses();
+<<<<<<< HEAD
 }
 
+=======
+
+   return m;
+}
+
+
+>>>>>>> upstream/feature-mass_eigenstates_interface
 void setup_CMSSM_const(CMSSM<Two_scale>& m, MssmSoftsusy& s,
                        const CMSSM_input_parameters& input)
 {

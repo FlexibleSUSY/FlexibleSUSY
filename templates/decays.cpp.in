@@ -31,7 +31,6 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_info.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
 // @todo: move one_loop_decay_diagrams back to src
 #include "@ModelName@_one_loop_decay_diagrams.hpp"
 

@@ -1,0 +1,146 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+/**
+ * @file @ModelName@_mass_eigenstates_decoupling_scheme.hpp
+ *
+ * @brief Defines model class for Stöckinger/Kotlarski decoupling scheme.
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
+#define @ModelName@_MASS_EIGENSTATES_DECOUPLING_SCHEME_H
+
+#include "@ModelName@_info.hpp"
+#include "@ModelName@_physical.hpp"
+#include "@ModelName@_soft_parameters.hpp"
+#include "@ModelName@_mass_eigenstates_interface.hpp"
+#include "problems.hpp"
+
+#include <iosfwd>
+#include <memory>
+
+#include <Eigen/Core>
+
+#define SUPER(p) @ModelName@_soft_parameters::p
+
+namespace flexiblesusy {
+
+namespace standard_model {
+class Standard_model;
+}
+
+class @ModelName@_mass_eigenstates;
+
+/**
+ * @class @ModelName@_mass_eigenstates_decoupling_scheme
+ *
+ * @brief model class with routines for determing masses and mixings
+ * and EWSB in the Stöckinger/Kotlarski decoupling scheme
+ */
+class @ModelName@_mass_eigenstates_decoupling_scheme
+   : private @ModelName@_soft_parameters
+   , public @ModelName@_mass_eigenstates_interface
+{
+public:
+   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
+   explicit @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates&);
+   @ModelName@_mass_eigenstates_decoupling_scheme(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
+   @ModelName@_mass_eigenstates_decoupling_scheme(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
+   virtual ~@ModelName@_mass_eigenstates_decoupling_scheme() = default;
+   @ModelName@_mass_eigenstates_decoupling_scheme& operator=(const @ModelName@_mass_eigenstates_decoupling_scheme&) = default;
+   @ModelName@_mass_eigenstates_decoupling_scheme& operator=(@ModelName@_mass_eigenstates_decoupling_scheme&&) = default;
+
+   std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
+
+   /// number of EWSB equations
+   static const int number_of_ewsb_equations = @numberOfEWSBEquations@;
+
+   void check_pole_masses_for_tachyons();
+   void do_force_output(bool);
+   bool do_force_output() const;
+   void fill_from(const standard_model::Standard_model&);
+   void fill_from(const @ModelName@_mass_eigenstates&);
+   void reorder_tree_level_masses();
+   void reorder_pole_masses();
+   void print(std::ostream& out = std::cerr) const;
+   void clear();
+
+   // mass_eigenstates_interface functions
+
+   void calculate_tree_level_mass_spectrum() override;
+   void calculate_pole_mass_spectrum() override;
+   void calculate_mass_spectrum() override;
+   int solve_ewsb_equations_tree_level() override;
+   int solve_ewsb_equations() override;
+   Eigen::ArrayXd get_tree_level_masses() const override;
+   Eigen::ArrayXd get_tree_level_masses_and_mixings() const override;
+   Eigen::ArrayXd get_extra_parameters() const override;
+   const @ModelName@_physical& get_physical() const override;
+   @ModelName@_physical& get_physical() override;
+   const Problems& get_problems() const override;
+   Problems& get_problems() override;
+   void set_tree_level_masses(const Eigen::ArrayXd&) override;
+   void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&) override;
+   void set_extra_parameters(const Eigen::ArrayXd&) override;
+   void set_physical(const @ModelName@_physical&) override;
+   void clear_problems() override;
+
+@[override]delegateParameterGetters@
+@[override]delegateParameterSetters@
+@[override]massGetters@
+@[override]higgsMassGetterPrototypes@
+@[override]mixingMatrixGetters@
+@[override]phasesGetterSetters@
+@[override]extraParameterSetters@
+@[override]extraParameterGetters@
+@[override]massCalculationPrototypes@
+@[override]tadpoleEqPrototypes@
+@[override]dependencePrototypes@
+
+private:
+   bool force_output{false};              ///< switch to force output of pole masses
+   @ModelName@_physical physical{}; ///< contains the pole masses and mixings
+   Problems problems{@ModelName@_info::model_name,
+                     &@ModelName@_info::particle_names_getter,
+                     &@ModelName@_info::parameter_names_getter}; ///< problems
+
+   void clear_tree_level_parameters();
+   void copy_tree_level_masses_to_pole_masses();
+
+   // DR-bar masses
+@physicalMassesDef@
+   // DR-bar mixing matrices
+@mixingMatricesDef@
+   // phases
+@phasesDefinition@
+   // extra parameters
+@extraParameterDefs@
+};
+
+std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates_decoupling_scheme&);
+
+} // namespace flexiblesusy
+
+#undef SUPER
+
+#endif

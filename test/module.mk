@@ -406,6 +406,7 @@ TEST_SH += \
 		$(DIR)/test_CMSSM_QedQcd_no_convergence.sh \
 		$(DIR)/test_CMSSM_streams.sh
 TEST_SRC += \
+		$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_CMSSM_slha.cpp \
 		$(DIR)/test_CMSSM_slha_input.cpp \
 		$(DIR)/test_CMSSM_two_loop_spectrum.cpp \
@@ -425,10 +426,13 @@ endif
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
+		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_effective_couplings.cpp \
 		$(DIR)/test_SM_FlexibleDecays.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
+		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
+		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_one_loop_spectrum.cpp \
 		$(DIR)/test_SM_higgs_loop_corrections.cpp \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
@@ -803,6 +807,8 @@ $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
+$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
+
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_info.x: $(LIBCMSSM)
@@ -917,6 +923,10 @@ $(DIR)/test_SM_gmm2.x: $(LIBSM)
 $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
 $(DIR)/test_SM_low_scale_constraint.x: $(LIBSM)
+
+$(DIR)/test_SM_mass_eigenstates_interface.x: $(LIBSM)
+
+$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
 
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
