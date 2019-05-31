@@ -20,42 +20,28 @@
 
 *)
 
-AppendTo[$Path, FileNameJoin[{Directory[], "meta"}]];
-
-Needs["SARAH`"];
-Needs["FlexibleSUSY`", "FlexibleSUSY.m"];
-Needs["TestSuite`", "TestSuite.m"];
-Needs["TreeMasses`", "TreeMasses.m"];
-
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{Directory[], "Output"}];
-SARAH`SARAH[InputDirectories] = {
-    FileNameJoin[{Directory[], "sarah"}],
-    ToFileName[{$sarahDir, "Models"}]
-};
-
+Get["utils/load-FlexibleSUSY.m"];
 Start["MSSM","CPV"];
+Needs["TestSuite`", "TestSuite.m"];
 
-Print["testing IsMassless[] ..."];
+Print["testing IsSMParticleElementwise[] ..."];
 
-TestEquality[TreeMasses`IsMassless[gG], True];
-TestEquality[TreeMasses`IsMassless[VG], True];
-TestEquality[TreeMasses`IsMassless[gP], True];
-TestEquality[TreeMasses`IsMassless[VP], True];
-TestEquality[TreeMasses`IsMassless[gZ], False];
-TestEquality[TreeMasses`IsMassless[VZ], False];
-TestEquality[TreeMasses`IsMassless[gWp], False];
-TestEquality[TreeMasses`IsMassless[VWp], False];
-
-TestEquality[TreeMasses`GetColoredParticles[], {VG, gG, Glu, Sd, Su, Fd, Fu}];
-
-TestEquality[TreeMasses`GetPhoton[], VP];
-TestEquality[TreeMasses`GetGluon[], VG];
-TestEquality[TreeMasses`GetZBoson[], VZ];
-TestEquality[TreeMasses`GetWBoson[], VWm];
-TestEquality[TreeMasses`GetHiggsBoson[], hh];
-TestEquality[TreeMasses`GetChargedHiggsBoson[], Hpm];
-TestEquality[TreeMasses`GetPseudoscalarHiggsBoson[], Null];
-
-TestEquality[TreeMasses`GetVectorBosons[], {VG, VP, VZ, VWm}];
+TestEquality[IsSMParticleElementwise[Fu], {True, True, True}];
+TestEquality[IsSMParticleElementwise[Fd], {True, True, True}];
+TestEquality[IsSMParticleElementwise[Fe], {True, True, True}];
+TestEquality[IsSMParticleElementwise[Fv], {True, True, True}];
+TestEquality[IsSMParticleElementwise[Chi], {False, False, False, False}];
+TestEquality[IsSMParticleElementwise[Cha], {False, False}];
+TestEquality[IsSMParticleElementwise[Glu], {False}];
+TestEquality[IsSMParticleElementwise[VP], {True}];
+TestEquality[IsSMParticleElementwise[VZ], {True}];
+TestEquality[IsSMParticleElementwise[VWm], {True}];
+TestEquality[IsSMParticleElementwise[Su], {False, False, False, False, False, False}];
+TestEquality[IsSMParticleElementwise[Sd], {False, False, False, False, False, False}];
+TestEquality[IsSMParticleElementwise[Se], {False, False, False, False, False, False}];
+TestEquality[IsSMParticleElementwise[Sv], {False, False, False}];
+TestEquality[IsSMParticleElementwise[hh, IncludeHiggs -> True], {True, True, False, False}];
+TestEquality[IsSMParticleElementwise[hh, IncludeHiggs -> False], {True, False, False, False}];
+TestEquality[IsSMParticleElementwise[Hpm], {True, False}];
 
 PrintTestSummary[];

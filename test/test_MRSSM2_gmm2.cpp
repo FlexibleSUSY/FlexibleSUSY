@@ -23,6 +23,7 @@
 
 #include "test_MRSSM2.hpp"
 
+#include "lowe.h"
 #include "wrappers.hpp"
 #include "MRSSM2_a_muon.hpp"
 
@@ -57,15 +58,16 @@ BOOST_AUTO_TEST_CASE( test_amu )
    input.MDWBTInput = 500;
    input.MDGocInput = 1500;
 
-   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input);
+   softsusy::QedQcd qedqcd;
+   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
 
-   auto amu = MRSSM2_a_muon::calculate_a_muon(m);
-   BOOST_CHECK_CLOSE(amu, -8.30e-11, 1.0);
+   auto amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
+   BOOST_CHECK_CLOSE_FRACTION(amu, -8.1729622840653898e-11, 1e-7);
 
    // neutralino dominance
    input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
-   m = setup_MRSSM2(input);
+   m = setup_MRSSM2(input, qedqcd);
 
-   amu = MRSSM2_a_muon::calculate_a_muon(m);
-   BOOST_CHECK_CLOSE(amu, 6.33e-12, 1.0);
+   amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 6.2643225826834355e-12, 1e-7);
 }

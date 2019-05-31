@@ -98,6 +98,7 @@ numerical value of the electrical charge of the electron.";
 
 NumberOfExternalParticlesInTopology::usage = "";
 NumberOfPropagatorsInTopology::usage = "";
+CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
 
 Begin["`Private`"];
 
@@ -291,7 +292,7 @@ CreateFields[] :=
                         If[TreeMasses`GetDimension[#] === 1,
                            CXXBoolValue @ TreeMasses`IsSMParticle[#],
                            StringJoin @ Riffle[CXXBoolValue /@
-                             (TreeMasses`IsSMParticle[#] & /@ Table[#[{k}],{k,TreeMasses`GetDimension[#]}]),
+                             TreeMasses`IsSMParticleElementwise[#],
                                                ", "]] <>
                         ">;\n" <>
                 "static constexpr int numberOfFieldIndices = " <>

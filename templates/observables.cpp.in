@@ -101,7 +101,7 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
       try {
          model_at_scale.run_to(scale);
       } catch (const Error& e) {
-         model.get_problems().flag_thrown(e.what());
+         model.get_problems().flag_thrown(e.what_detailed());
          return @ModelName@_observables();
       }
    }
@@ -118,7 +118,7 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
    try {
 @calculateObservables@
    } catch (const Error& e) {
-      model.get_problems().flag_thrown(e.what());
+      model.get_problems().flag_thrown(e.what_detailed());
    }
 
    return observables;

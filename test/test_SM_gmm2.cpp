@@ -23,6 +23,8 @@
 
 #include "test_SM.hpp"
 
+#include "lowe.h"
+
 #include "SM_two_scale_model.hpp"
 #include "SM_a_muon.hpp"
 
@@ -38,7 +40,9 @@ BOOST_AUTO_TEST_CASE( test_zero )
    setup_SM_const(sm, input);
    sm.calculate_DRbar_masses();
 
-   const double amu = SM_a_muon::calculate_a_muon(sm);
+   softsusy::QedQcd qedqcd;
+
+   const double amu = SM_a_muon::calculate_a_muon(sm, qedqcd);
 
    BOOST_CHECK_SMALL(amu, 1e-15);
 }

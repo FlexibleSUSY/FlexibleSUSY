@@ -288,13 +288,18 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
    auto block = data.find(data.cbegin(), data.cend(), block_name);
    double entry = 0.;
    const SLHAea::Block::key_type keys(1, ToString(key));
-   SLHAea::Block::const_iterator line;
 
    while (block != data.cend()) {
-      line = block->find(keys);
+      SLHAea::Block::const_iterator line = block->find(keys);
 
-      if (line != block->end() && line->is_data_line() && line->size() > 1)
-         entry = convert_to<double>(line->at(1));
+      while (line != block->end()) {
+         if (line->is_data_line() && line->size() > 1) {
+            entry = convert_to<double>(line->at(1));
+         }
+
+         ++line;
+         line = block->find(line, block->end(), keys);
+      }
 
       ++block;
       block = data.find(block, data.cend(), block_name);

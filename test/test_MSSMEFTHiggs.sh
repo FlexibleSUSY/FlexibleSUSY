@@ -240,7 +240,7 @@ set grid
 set xlabel "M_S / TeV"
 set ylabel "M_h / GeV"
 
-data = "$BASEDIR/test_MSSMEFTHiggs.dat"
+data = "$scan_data"
 
 plot [0.1:] \
      data u (\$1/1000):2 t "MSSMEFTHiggs" w lines dt 1 lw 2 lc rgb '#FF0000', \
@@ -271,11 +271,8 @@ CHECK_EQUAL_FRACTION "$MhMSSMEFTHiggs" "$MhHSSUSY" "0.001" || error=$(expr $erro
 MS=10000
 MhMSSMEFTHiggs=$(run_sg "$MODELDIR/MSSMEFTHiggs/run_MSSMEFTHiggs.x" tower)
 MhHSSUSY=$(run_sg "$MODELDIR/HSSUSY/run_HSSUSY.x" fixedOrder)
-CHECK_EQUAL_FRACTION "$MhMSSMEFTHiggs" "$MhHSSUSY" "0.0001" || error=$(expr $error + 1)
-
-MS=100000
-MhMSSMEFTHiggs=$(run_sg "$MODELDIR/MSSMEFTHiggs/run_MSSMEFTHiggs.x" tower)
-MhHSSUSY=$(run_sg "$MODELDIR/HSSUSY/run_HSSUSY.x" fixedOrder)
+# shift -0.05 GeV due to 2-loop O(at*as + at^2) corrections to mt(MZ)
+MhHSSUSY="($MhHSSUSY - 0.05)"
 CHECK_EQUAL_FRACTION "$MhMSSMEFTHiggs" "$MhHSSUSY" "0.0001" || error=$(expr $error + 1)
 
 if [ "x$error" != "x0" ] ; then
@@ -283,5 +280,7 @@ if [ "x$error" != "x0" ] ; then
 else
     echo "All tests passed."
 fi
+
+rm -f "$scan_data"
 
 exit $error
