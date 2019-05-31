@@ -416,15 +416,18 @@ Module[
       OptionValue@Regularize
    ],
    Utils`TestWithMessage[
-      BooleanQ@OptionValue@UseCache,
+      OptionValue@UseCache === True ||
+      OptionValue@UseCache === False,
       NPointFunction::errUseCache
    ],
    Utils`TestWithMessage[
-      BooleanQ@OptionValue@ZeroExternalMomenta,
+      OptionValue@ZeroExternalMomenta === True ||
+      OptionValue@ZeroExternalMomenta === False,
       NPointFunction::errZeroExternalMomenta
    ],
    Utils`TestWithMessage[
-      BooleanQ@OptionValue@OnShellFlag,
+      OptionValue@OnShellFlag === True ||
+      OptionValue@OnShellFlag === False,
       NPointFunction::errOnShellFlag
    ],
    Utils`TestWithMessage[
@@ -499,7 +502,8 @@ Module[
       OptionValue@LoopFunctions
    ],
    Utils`TestWithMessage[
-      BooleanQ@OptionValue@UseWilsonCoeffs,
+      OptionValue@UseWilsonCoeffs === True ||
+      OptionValue@UseWilsonCoeffs === False,
       CreateCXXHeaders::errUseWilsonCoeffs
    ]
 ];
