@@ -329,10 +329,6 @@ Module[
       CloseKernels@subKernel;
    ];
 
-   Utils`TestWithMessage[
-      Length@Kernels[] < 8,
-      LaunchSubkernelFor::errKernelNum, "message"];
-
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
    
    inFANames = FANamesForFields[inFields, particleNamesFile];
@@ -621,21 +617,20 @@ If it fails, tries to explain the reason using message for specifying its
 activity.
 @param message String, which contains description of activity for which this
 subkernel is launched for.
-@returns subkernel name.";
-LaunchSubkernelFor::errKernelNum=
-"Amout of running subkernels doesn't allow to launch another one during
-`1`.";
+@returns subkernel name.
+@note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}";
 LaunchSubkernelFor::errKernelLaunch=
 "Unable to launch subkernel(s) during calculations for
 `1`
 because of error:";
 LaunchSubkernelFor[message_String] :=
-Utils`PureEvaluate[
-   Utils`TestWithMessage[
-      Length@Kernels[] < 8,
-      LaunchSubkernelFor::errKernelNum, message];
-   LaunchKernels[1][[1]],
-   LaunchSubkernelFor::errKernelLaunch, message];
+Module[{kernelName},
+   kernelName = Utils`PureEvaluate[
+      LaunchKernels[1],
+      LaunchSubkernelFor::errKernelLaunch, message];
+   If[Head@kernelName === List, kernelName[[1]], kernelName]
+];
+
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
