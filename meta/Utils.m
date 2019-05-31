@@ -302,17 +302,20 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_?BooleanQ, message_String] :=
+AssertWithMessage[assertion_, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
 TestWithMessage[
-   assertion_?BooleanQ,
+   assertion_?(#===True||#===False&),
    HoldPattern@MessageName[sym_, tag_],
    insertions___
 ] :=
 If[assertion === True, 
    True ,
-   Print[Context@sym,StringDelete[ToString@sym,__~~"Private`"],": ",tag,":"];
+   Print[
+      Context@sym,
+      StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
+      ": ",tag,":"];
    Print@StringForm[MessageName[sym, tag], insertions]; Quit[1]];
 SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
 
@@ -327,7 +330,10 @@ Module[{Filter},
       Hold[Message[_, System`Dump`args___]]
    ] := 
    (
-      Print[Context@sym,StringDelete[ToString@sym,__~~"Private`"],": ",tag,":"];
+      Print[
+         Context@sym,
+         StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
+         ": ",tag,":"];
       Print[StringForm[MessageName[sym, tag], insertions],
          "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
          StringForm[System`Dump`str, 
