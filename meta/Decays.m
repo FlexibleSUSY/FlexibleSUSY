@@ -702,7 +702,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            initialStateDim = TreeMasses`GetDimension[initialState];
            finalStateDims = TreeMasses`GetDimension /@ finalState;
            finalStateStarts = TreeMasses`GetDimensionStartSkippingGoldstones /@ finalState;
-           functionArgs = "model" <> If[initialStateDim > 1, ", gI1", ""] <>
+           functionArgs = "dec" <> If[initialStateDim > 1, ", gI1", ""] <>
                           MapIndexed[If[#1 > 1, ", gO" <> ToString[First[#2]], ""]&, finalStateDims];
            pdgsList = MapIndexed[With[{idx = First[#2]},
                                       CallPDGCodeGetter[#1, If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""], FlexibleSUSY`FSModelName <> "_info"]]&,
@@ -718,7 +718,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            If[loopIndices =!= {},
               body = LoopOverIndexCollection[body, loopIndices];
              ];
-           body <> "\n"
+           "\n" <> body <> "\n"
           ];
 
 CreateDecaysCalculationFunctionName[particle_, scope_:""] :=
@@ -736,17 +736,22 @@ CreateDecaysCalculationFunction[decaysList_] :=
     Module[{particle = First[decaysList], particleDim, particleStart,
             decayChannels = Last[decaysList],
             runToScale = "", body = ""},
+
            particleDim = TreeMasses`GetDimension[particle];
            particleStart = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
+
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
-              "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ");\n" <>
-              FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme dec(input);" <>
-              "dec.fill_from(model);\n";
+              "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ");\n";
+
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
-           body = "auto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
-                  "_decays(" <> If[particleDim > 1, "gI1", ""] <> ");\n\n" <> body;
+           body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
+                  "_decays(" <> If[particleDim > 1, "gI1", ""] <> ");\n" <> body;
+           body =
+              FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme dec(input);\n" <>
+                 "dec.fill_from(model);\n" <> body;
+
            body = "\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
            If[particleDim > 1,
