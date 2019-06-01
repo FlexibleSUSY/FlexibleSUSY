@@ -573,6 +573,74 @@ CreateCXXFunctions[nPointFunctions_List, names_List,
 
     {prototypes, definitions}
   ]
+  
+CreateCXXFunctionsNew[nPointFunctions_List, names_List,
+    colourFactorProjections_,
+    OptionsPattern[{LoopFunctions -> "FlexibleSUSY", fermionBasis -> {}}]] :=
+  Module[{loopFunctionRules, prototypes,
+          definitionHeads, definitionBodies,
+          auxilliaryClasses, definitions,
+          FermionBasis = OptionValue[fermionBasis]},
+    loopFunctionRules = Switch[OptionValue[LoopFunctions],
+      "LoopTools", {},
+      "FlexibleSUSY",
+         Print["Warning: Using FlexibleSUSY loop functions will only remap A0, B0, C0, C00, D0 and D00."];
+         Print["Warning: FlexibleSUSY loop functions C0, D0 and D00 require zero external momenta."];
+         {
+           LoopTools`A0i[LoopTools`aa0, args__] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[args]),
+                                             "context.scale()"],
+           LoopTools`A0[arg_] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[arg]),
+                                             "context.scale()"],
+           LoopTools`B0i[LoopTools`bb0, args__] :> "softsusy::b0"[Sequence @@ ("std::sqrt" /@ List[args]),
+                                             "context.scale()"],
+           LoopTools`B0i[LoopTools`bb1, args__] :> "(-1)*softsusy::b1"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(Mass[x___])^2] :> Mass[x]),
+                                             "context.scale()"],
+           LoopTools`C0i[LoopTools`cc0, 0, 0, 0, args__] :> "softsusy::c0"[Sequence @@ ("std::sqrt" /@ List[args])],
+           LoopTools`C0i[LoopTools`cc00, 0, 0, 0, args__] :> "softsusy::c00"[Sequence @@ ("std::sqrt" /@ List[args]), "context.scale()"],
+           LoopTools`D0i[LoopTools`dd0, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d0"[Sequence @@ ("std::sqrt" /@ List[args])],
+           LoopTools`D0i[LoopTools`dd00, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d27"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(x___)^2] :> x)]
+         },
+       _, Return["Option LoopFunctions must be either LoopTools or FlexibleSUSY"]];
+
+    prototypes = StringJoin[Riffle[
+      "std::complex<double> " <> #[[2]] <>
+        CXXArgStringForNPointFunctionPrototype[#[[1]]] <> ";" & /@
+      Transpose[{nPointFunctions, names}], "\n"]];
+    
+    If[Length[FermionBasis] === 0,
+      definitionHeads = "std::complex<double> " <> #[[2]] <>
+          CXXArgStringForNPointFunctionDefinition[#[[1]]] & /@
+        Transpose[{nPointFunctions, names}],
+      definitionHeads = "std::array<std::complex<double>, " <> ToString[Length[FermionBasis]] <> "> "
+          <> #[[2]] <>
+          CXXArgStringForNPointFunctionDefinition[#[[1]]] & /@
+        Transpose[{nPointFunctions, names}]
+    ];
+      
+    definitionBodies = CXXBodyForNPointFunction /@ nPointFunctions;
+    If[Length[FermionBasis] === 0,
+      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #] & /@
+        Transpose[{
+          nPointFunctions /. loopFunctionRules,
+          If[Head[colourFactorProjections] === List,
+            colourFactorProjections,
+            Table[colourFactorProjections, {Length[names]}]]
+        }],
+      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #, fermionBasis -> FermionBasis] & /@
+        Transpose[{
+          nPointFunctions /. loopFunctionRules,
+          If[Head[colourFactorProjections] === List,
+            colourFactorProjections,
+            Table[colourFactorProjections, {Length[names]}]]
+        }]
+    ];
+
+    definitions = StringJoin[Riffle[auxilliaryClasses,"\n\n"]] <> "\n\n" <>
+      StringJoin[Riffle[#[[1]] <> "\n{\n" <> #[[2]] <> "\n}" & /@
+         Transpose[{definitionHeads, definitionBodies}], "\n\n"]];
+
+    {prototypes, definitions}
+];
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -590,7 +658,7 @@ FeynArts model file it creates.
 FeynArts model file it creates.";
 GetFAClassesModelName[] := 
    SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
-   
+
 GetFAParticleNamesFileName::usage=
 "@brief Return the file name that is used by SARAH to store 
 FeynArts particle names.
@@ -622,7 +690,7 @@ LaunchSubkernelFor::errKernelLaunch=
 "Unable to launch subkernel(s) during calculations for
 `1`
 because of error:";
-LaunchSubkernelFor[message_String] :=
+LaunchSubkernelFor[message_String] /; $VersionNumber === 7.0 :=
 Module[{kernelName},
    Off[Parallel`Preferences`add::shdw,
       Parallel`Preferences`set::shdw,
@@ -639,9 +707,15 @@ Module[{kernelName},
       Parallel`Preferences`tr::shdw,
       Parallel`Protected`processes::shdw,
       SubKernels`Description::shdw];
+   kernelName
+];
+LaunchSubkernelFor[message_String] :=
+Module[{kernelName},
+   kernelName = Utils`PureEvaluate[
+      LaunchKernels[1],
+      LaunchSubkernelFor::errKernelLaunch, message];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
-
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
