@@ -296,7 +296,7 @@ Module[
       outputDir = FileNameJoin@{
          SARAH`$sarahCurrentOutputMainDir,
          ToString@FlexibleSUSY`FSEigenstates
-      },
+         },
       nPointFunctionsDir,feynArtsDir,feynArtsModel,particleNamesFile,
       particleNamespaceFile,substitutionsFile,formCalcDir,
       subKernel,
@@ -309,10 +309,8 @@ Module[
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
-         inFields,outFields,nPointFunctionsDir,nPointMeta
-      ];
-      If[nPointFunction =!= Null, Return@nPointFunction]
-   ];
+         inFields,outFields,nPointFunctionsDir,nPointMeta];
+      If[nPointFunction =!= Null, Return@nPointFunction]];
    
    feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
    feynArtsModel = FileNameJoin@{feynArtsDir, GetFAClassesModelName[]};
@@ -474,16 +472,17 @@ Options[CreateCXXHeaders]={
 CreateCXXHeaders[opts:OptionsPattern[]] :=
 Module[
    {
-      mainHPP = If[OptionValue@UseWilsonCoeffs,
-         "_npointfunctions_wilsoncoeffs.hpp\"",
-         "_npointfunctions.hpp\""],
+      mainHPP = "\"cxx_qft/" <> FlexibleSUSY`FSModelName <>
+         If[OptionValue@UseWilsonCoeffs,
+            "_npointfunctions_wilsoncoeffs.hpp\"",
+            "_npointfunctions.hpp\""],
       loopHPP = Switch[OptionValue@LoopFunctions,
          "LoopTools","<clooptools.h>",
          "FlexibleSUSY","\"numerics.h\""]
    },
-   "#include \"cxx_qft/" <> FlexibleSUSY`FSModelName <> mainHPP <> "\n" <>
-   "#include \"concatenate.hpp\"" <> "\n\n" <>
-   "#include <boost/fusion/include/at_key.hpp>" <> "\n\n" <>
+   "#include " <> mainHPP <> "\n" <>
+   "#include \"concatenate.hpp\"\n" <>
+   "#include <boost/fusion/include/at_key.hpp>" <> "\n" <>
    "#include " <> loopHPP
 ] /; And[
    Utils`TestWithMessage[
@@ -503,7 +502,6 @@ Module[
       CreateCXXHeaders::errUseWilsonCoeffs
    ]
 ];
-
 CreateCXXHeaders[___] := 
 Utils`TestWithMessage[False,CreateCXXHeaders::errUnknownInput,
    Options[CreateCXXHeaders][[All, 1]]];
@@ -618,16 +616,29 @@ activity.
 @param message String, which contains description of activity for which this
 subkernel is launched for.
 @returns subkernel name.
-@note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}";
+@note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}
+@note for Mathematica 7 some functions have the same names as in SARAH`.`";
 LaunchSubkernelFor::errKernelLaunch=
 "Unable to launch subkernel(s) during calculations for
 `1`
 because of error:";
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
+   Off[Parallel`Preferences`add::shdw,
+      Parallel`Preferences`set::shdw,
+      Parallel`Preferences`list::shdw,
+      Parallel`Preferences`tr::shdw,
+      Parallel`Protected`processes::shdw,
+      SubKernels`Description::shdw];
    kernelName = Utils`PureEvaluate[
       LaunchKernels[1],
       LaunchSubkernelFor::errKernelLaunch, message];
+   On[Parallel`Preferences`add::shdw,
+      Parallel`Preferences`set::shdw,
+      Parallel`Preferences`list::shdw,
+      Parallel`Preferences`tr::shdw,
+      Parallel`Protected`processes::shdw,
+      SubKernels`Description::shdw];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
 
