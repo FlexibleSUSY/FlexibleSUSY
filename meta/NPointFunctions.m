@@ -604,23 +604,8 @@ Module[
    loopFunctionRules = Switch[OptionValue@LoopFunctions,
       "LoopTools", {},
       "FlexibleSUSY",
-         Print["Warning: Using FlexibleSUSY loop functions will only remap A0, B0, C0, C00, D0 and D00."];
-         Print["Warning: FlexibleSUSY loop functions C0, D0 and D00 require zero external momenta."];
-         {
-           LoopTools`A0i[LoopTools`aa0, args__] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[args]),
-                                             "context.scale()"],
-           LoopTools`A0[arg_] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[arg]),
-                                             "context.scale()"],
-           LoopTools`B0i[LoopTools`bb0, args__] :> "softsusy::b0"[Sequence @@ ("std::sqrt" /@ List[args]),
-                                             "context.scale()"],
-           LoopTools`B0i[LoopTools`bb1, args__] :> "(-1)*softsusy::b1"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(Mass[x___])^2] :> Mass[x]),
-                                             "context.scale()"],
-           LoopTools`C0i[LoopTools`cc0, 0, 0, 0, args__] :> "softsusy::c0"[Sequence @@ ("std::sqrt" /@ List[args])],
-           LoopTools`C0i[LoopTools`cc00, 0, 0, 0, args__] :> "softsusy::c00"[Sequence @@ ("std::sqrt" /@ List[args]), "context.scale()"],
-           LoopTools`D0i[LoopTools`dd0, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d0"[Sequence @@ ("std::sqrt" /@ List[args])],
-           LoopTools`D0i[LoopTools`dd00, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d27"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(x___)^2] :> x)]
-         },
-       _, Return["Option LoopFunctions must be either LoopTools or FlexibleSUSY"]];
+         
+         GetLTToFSRules[]];
 
     prototypes = StringJoin[Riffle[
       "std::complex<double> " <> #[[2]] <>
@@ -676,6 +661,35 @@ Module[
       OptionValue@LoopFunctions
    ]
    (*@todo check for FermionBasis*)
+];
+
+GetLTToFSRules::usage=
+"@brief returns rules for LoopTools to FlexibleSUSY conventions
+@returns rules for LoopTools to FlexibleSUSY conventions
+@todo add specific rules for std::sqrt(0)
+@todo add specific rules for std::sqrt(Sqr())";
+GetLTToFSRules[] =
+Module[{},
+   Print["Warning: Only remaps of A0, B0, C0, C00, D0 and D00 are implemented"];
+   Print["Warning: FlexibleSUSY C0, D0 and D00 require zero external momenta."];
+   {
+      LoopTools`A0i[LoopTools`aa0, args__] :>
+         "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{args}],"context.scale()"],
+      LoopTools`A0[arg_] :>
+         "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{arg}],"context.scale()"],
+      LoopTools`B0i[LoopTools`bb0, args__] :>
+         "softsusy::b0"[Apply[Sequence,"std::sqrt" /@ {args}],"context.scale()"],
+      LoopTools`B0i[LoopTools`bb1, args__] :>
+         "(-1)*softsusy::b1"[Apply[Sequence,Map[Sqrt, {args}] /. Sqrt[(Mass@x___)^2] :> Mass@x],"context.scale()"],
+      LoopTools`C0i[LoopTools`cc0, 0, 0, 0, args__] :>
+         "softsusy::c0"[Apply[Sequence,"std::sqrt" /@ {args}]],
+      LoopTools`C0i[LoopTools`cc00, 0, 0, 0, args__] :>
+         "softsusy::c00"[Apply[Sequence,"std::sqrt" /@ {args}], "context.scale()"],
+      LoopTools`D0i[LoopTools`dd0, 0, 0, 0, 0, 0, 0, args__] :>
+         "softsusy::d0"[Apply[Sequence,"std::sqrt" /@ {args}]],
+      LoopTools`D0i[LoopTools`dd00, 0, 0, 0, 0, 0, 0, args__] :>
+         "softsusy::d27"[Apply[Sequence,Map[Sqrt, {args}] /. Sqrt[(x___)^2] :> x]]
+   }
 ];
 
 CreateCXXFunctions[___] := 
@@ -897,7 +911,8 @@ SetAttributes[
    GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
    FANamesForFields,
    VerticesForNPointFunction,
-   CreateCXXHeaders
+   CreateCXXHeaders,
+   GetLTToFSRules
    }, 
    {Protected, Locked}];
 
