@@ -1000,7 +1000,7 @@ momenta.
 @returns the c++ arguments that the c++ version of the given
 n-point correlation function shall take with the default value of zero for all
 external momenta.";
-CXXArgStringNPF[nPointFunction:NPointFunctionPattern] :=
+CXXArgStringNPF[nPointFunction:NPointFunctionPattern[]] :=
   Module[{numberOfIndices, numberOfMomenta},
     numberOfIndices = Length@ExternalIndicesNPF@nPointFunction;
     numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
