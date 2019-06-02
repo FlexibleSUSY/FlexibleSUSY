@@ -837,8 +837,7 @@ CreateCXXFunctions[nPointFunctions_List, names_List,
        _, Return["Option LoopFunctions must be either LoopTools or FlexibleSUSY"]];
 
     prototypes = StringJoin[Riffle[
-      "std::complex<double> " <> #[[2]] <>
-        CXXArgStringNPF[#[[1]]] <> ";" & /@
+      "std::complex<double> " <>Part[#,2]<>"("<>CXXArgStringNPF@Part[#,1]<>");" &/@
       Transpose[{nPointFunctions, names}], "\n"]];
     
     If[Length[internalFermionBasis] === 0,
@@ -892,11 +891,10 @@ Module[
       definitions,
       internalFermionBasis = OptionValue[FermionBasis]
    },
-   prototypes = StringJoin[Riffle[
-      "std::complex<double> " <> #[[2]] <> CXXArgStringNPF[#[[1]]] <> ";" &/@
-      Transpose[{nPointFunctions, names}],
-   "\n"]];
-   Print@prototypes;
+   prototypes = StringJoin@Riffle[Map[
+      "std::complex<double> "<>Part[#,1]<>"("<>CXXArgStringNPF@Part[#,2]<>");"&,
+      Transpose@{names,nPointFunctions}
+      ],"\n"];
    
     If[Length[internalFermionBasis] === 0,
       definitionHeads = "std::complex<double> " <> #[[2]] <>
@@ -994,31 +992,38 @@ Module[{},
 
 CXXArgStringNPF::usage=
 "@brief Return the c++ arguments that the c++ version of the given n-point 
-correlation function shall take with the default value of zero for all external
-momenta.
+correlation function shall take. Default value of zero for all external
+momenta is chosen.
 @param nPointFunction the given n-point correlation function
 @returns the c++ arguments that the c++ version of the given
-n-point correlation function shall take with the default value of zero for all
-external momenta.";
+n-point correlation function shall take. Default value of zero for all external
+momenta is chosen.";
+CXXArgStringNPF::errUnknownInput=
+"Input @param should be NPointFunction object";
 CXXArgStringNPF[nPointFunction:NPointFunctionPattern[]] :=
-  Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length@ExternalIndicesNPF@nPointFunction;
-    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
+Module[
+   {
+      numInd = Length@ExternalIndicesNPF@nPointFunction,
+      numMom = Length@ExternalMomentaNPF@nPointFunction,
+      eigenType = FlexibleSUSY`FSModelName<>"_mass_eigenstates",
+      arrayIndType,arrayMomType,momDef
+   },
+   arrayIndType = "std::array<int,"<>ToString@numInd<>">";
+   arrayMomType = "std::array<Eigen::Vector4d,"<>ToString@numMom<>">";
+   momDef = StringJoin@Riffle[Table["Eigen::Vector4d::Zero()",{numMom}],", "];
+   "const "<>eigenType<>" &model, " <>
+   "const "<>arrayIndType<>" &indices, "<>
+   "const "<>arrayMomType<>" &momenta = { "<>momDef<>" }"
+];
+CXXArgStringNPF[___] :=
+   Utils`TestWithMessage[False,CXXArgStringNPF::errUnknownInput];
 
-    "( const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates &model, " <>
-       "const std::array<int, " <>
-      ToString[numberOfIndices] <> "> &indices, const std::array<Eigen::Vector4d, " <>
-      ToString[numberOfMomenta] <> "> &momenta = { " <>
-        StringJoin[Riffle[Table["Eigen::Vector4d::Zero()", {k,numberOfMomenta}],
-                          ", "]] <> " } )"
-  ]
-  
 ExternalIndicesNPF::usage=
 "@brief Return a list of open field indices for a given NPointFunction object.
 @param NPointFunction object
 @returns a list of the open field indices for a given NPointFunction object.";
 ExternalIndicesNPF::errUnknownInput=
-"Input should have form ExternalIndicesNPF[NPointFunction object]";
+   CXXArgStringNPF::errUnknownInput;
 ExternalIndicesNPF[NPointFunctionPattern["Fields"->fields_]] :=
    DeleteDuplicates@Flatten@Level[fields,{4,5}];
 ExternalIndicesNPF[___] :=
@@ -1029,7 +1034,7 @@ ExternalMomentaNPF::usage=
 @param NPointFunction object
 @returns a list of the open field indices for a given NPointFunction object.";
 ExternalMomentaNPF::errUnknownInput=
-   ExternalIndicesNPF::errUnknownInput;
+   CXXArgStringNPF::errUnknownInput;
 ExternalMomentaNPF[NPointFunctionPattern["Sums"->sums_,"Subs"->subs_]] :=
    DeleteDuplicates@
       Cases[{sums,subs},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
