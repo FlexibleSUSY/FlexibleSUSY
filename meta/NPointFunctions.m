@@ -476,10 +476,10 @@ Module[
    ..}
    ],
    Utils`TestWithMessage[
-      FilterRules[{opts},Except[Options[NPointFunction][[All, 1]]]] === {},
+      FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]] === {},
       NPointFunction::errUnknownOptions,
-      FilterRules[{opts},Except[Options[NPointFunction][[All, 1]]]],
-      Options[NPointFunction][[All, 1]]
+      FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
+      Part[Options@NPointFunction,All,1]
    ],
    Utils`TestWithMessage[
       OptionValue@LoopLevel === 1,
@@ -569,10 +569,10 @@ Module[
    "#include " <> loopHPP
 ] /; And[
    Utils`TestWithMessage[
-      FilterRules[{opts},Except[Options[CreateCXXHeaders][[All, 1]]]] === {},
+      FilterRules[{opts},Except@Part[Options@CreateCXXHeaders,All,1]] === {},
       CreateCXXHeaders::errUnknownOptions,
-      FilterRules[{opts},Except[Options[CreateCXXHeaders][[All, 1]]]],
-      Options[CreateCXXHeaders][[All, 1]]
+      FilterRules[{opts},Except@Part[Options@CreateCXXHeaders,All,1]],
+      Part[Options@CreateCXXHeaders,All,1]
    ],
    Utils`TestWithMessage[
       MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
