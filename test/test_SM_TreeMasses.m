@@ -24,6 +24,21 @@ Get["utils/load-FlexibleSUSY.m"];
 Start["SM"];
 Needs["TestSuite`", "TestSuite.m"];
 
+Print["testing GetSMParticles[] ..."];
+
+smParticles = {VG, gG, Hp, Fv, Ah, hh, VP, VZ, gP, gZ, gWp, gWpC, Fd, Fu, Fe, VWp};
+
+TestEquality[TreeMasses`GetSMParticles[], smParticles];
+TestEquality[TreeMasses`GetParticles[]  , smParticles];
+
+Print["testing ParticleQ[] ..."];
+
+TestEquality[TreeMasses`IsParticle /@ smParticles, Array[True&, Length[smParticles]]];
+
+conjSMParticles = AntiField /@ smParticles;
+
+TestEquality[TreeMasses`IsParticle /@ conjSMParticles, Array[True&, Length[conjSMParticles]]];
+
 Print["testing IsSMParticleElementwise[] ..."];
 
 TestEquality[IsSMParticleElementwise[Fu], {True, True, True}];

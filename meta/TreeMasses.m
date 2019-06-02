@@ -113,9 +113,6 @@ GetDimensionStartSkippingSMGoldstones::usage="return first index,
 GetParticleIndices::usage = "returns list of particle indices with
  names";
 
-ParticleQ::usage = "returns True if argument is a particle, False
- otherwise."
-
 FindMixingMatrixSymbolFor::usage="returns the mixing matrix symbol for
 a given field";
 
@@ -161,6 +158,7 @@ FieldInfo::usage="";
 includeLorentzIndices::usage="";
 includeColourIndices::usage="";
 
+IsParticle::usage = "returns True if argument is a particle, False otherwise"
 IsScalar::usage="";
 IsFermion::usage="";
 IsVector::usage="";
@@ -290,8 +288,8 @@ GetSusyParticles[states_:FlexibleSUSY`FSEigenstates] :=
 GetSMParticles[states_:FlexibleSUSY`FSEigenstates] :=
     Select[GetParticles[states], IsSMParticle];
 
-ParticleQ[p_, states_:FlexibleSUSY`FSEigenstates] :=
-    MemberQ[GetParticles[states], p];
+IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
+    MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], AntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
 	includeColourIndices -> False}]] := 
