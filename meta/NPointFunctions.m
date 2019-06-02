@@ -1023,7 +1023,7 @@ function.
 @returns a list of the open field indices for a given n-point correlation 
 function.";
 ExternalIndicesNPF[NPointFunctionPattern["Fields"->fields_]] :=
-DeleteDuplicates@Flatten@@Level[fields,{4,5}];
+DeleteDuplicates@Flatten@Level[fields,{4,5}];
 
 SetAttributes[
    {
