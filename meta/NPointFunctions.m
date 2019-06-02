@@ -1022,17 +1022,8 @@ function.
 @param the given n-point correlation function
 @returns a list of the open field indices for a given n-point correlation 
 function.";
-ExternalIndicesForNPointFunction[
-   nPointFunction:NPointFunctionPattern["Fields"->fields_]
-] :=
-Module[{},
-  Print[fields];
-  Join[Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]],
-            _[indices_List] :> indices]],
-  Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]] /. bar -> Barred,
-            Barred[_[indices_List]] :> indices]]
-  ]
-]
+ExternalIndicesForNPointFunction[NPointFunctionPattern["Fields"->fields_]] :=
+DeleteDuplicates@Level[fields,4];
 
 SetAttributes[
    {
