@@ -1002,7 +1002,7 @@ n-point correlation function shall take with the default value of zero for all
 external momenta.";
 CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
   Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length[NPFExternalIndices[nPointFunction]];
+    numberOfIndices = Length[ExternalIndicesNPF[nPointFunction]];
     Print[numberOfIndices];
     numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
       0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
@@ -1016,14 +1016,14 @@ CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
                           ", "]] <> " } )"
   ]
   
-NPFExternalIndices::usage=
+ExternalIndicesNPF::usage=
 "@brief Return a list of the open field indices for a given n-point correlation 
 function.
 @param the given n-point correlation function
 @returns a list of the open field indices for a given n-point correlation 
 function.";
-NPFExternalIndices[NPointFunctionPattern["Fields"->fields_]] :=
-DeleteDuplicates@Level[fields,4];
+ExternalIndicesNPF[NPointFunctionPattern["Fields"->fields_]] :=
+DeleteDuplicates@Flatten@@Level[fields,{4,5}];
 
 SetAttributes[
    {
@@ -1038,7 +1038,7 @@ SetAttributes[
    CreateCXXHeaders,
    CreateCXXFunctions,
    GetLTToFSRules,
-   CXXArgStringForNPointFunctionPrototype,NPFExternalIndices
+   CXXArgStringForNPointFunctionPrototype,ExternalIndicesNPF
    }, 
    {Protected, Locked}];
 
@@ -1053,7 +1053,7 @@ the arguments.
 ";
 CXXArgStringForNPointFunctionDefinition[nPointFunction_] :=
   Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length[NPFExternalIndices[nPointFunction]];
+    numberOfIndices = Length[ExternalIndicesNPF[nPointFunction]];
     numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
       0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
 
@@ -1093,7 +1093,7 @@ CXXClassForNPointFunction[nPointFunction_, projectColourFactor_,
           genericIndices, genericFields, genericSumNames,
           genericSumCode, preCXXRules, cxxExpr,
           subexpressions, cxxSubexpressions, InitializeSums},
-    externalIndices = NPFExternalIndices[nPointFunction];
+    externalIndices = ExternalIndicesNPF[nPointFunction];
     numberOfIndices = Length[externalIndices];
     numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
       0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
