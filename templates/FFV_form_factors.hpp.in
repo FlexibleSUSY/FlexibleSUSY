@@ -30,14 +30,14 @@
 
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-using namespace flexiblesusy;
-
 namespace flexiblesusy {
+
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_FFV_form_factors {
 @FFVFormFactors_InterfacePrototypes@
 }
+
 } // namespace flexiblesusy
 
 #endif

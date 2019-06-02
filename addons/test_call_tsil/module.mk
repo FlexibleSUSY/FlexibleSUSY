@@ -50,15 +50,15 @@ all-$(MODNAME): $(LIBtest_call_tsil) $(EXEtest_call_tsil_EXE)
 		@true
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIBtest_call_tsil_DEP)
-		-rm -f $(EXEtest_call_tsil_DEP)
+		$(Q)-rm -f $(LIBtest_call_tsil_DEP)
+		$(Q)-rm -f $(EXEtest_call_tsil_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIBtest_call_tsil)
+		$(Q)-rm -f $(LIBtest_call_tsil)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIBtest_call_tsil_OBJ)
-		-rm -f $(EXEtest_call_tsil_OBJ)
+		$(Q)-rm -f $(LIBtest_call_tsil_OBJ)
+		$(Q)-rm -f $(EXEtest_call_tsil_OBJ)
 
 # BEGIN: NOT EXPORTED ##########################################
 # remove generated files
@@ -69,7 +69,7 @@ clean-$(MODNAME): clean-$(MODNAME)-src
 # END:   NOT EXPORTED ##########################################
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(EXEtest_call_tsil_EXE)
+		$(Q)-rm -f $(EXEtest_call_tsil_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 
@@ -81,11 +81,11 @@ distclean::     distclean-$(MODNAME)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIBtest_call_tsil_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBtest_call_tsil_SRC) $(LIBtest_call_tsil_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBtest_call_tsil_HDR) $(LIBtest_call_tsil_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(EXEtest_call_tsil_SRC) $(LIBtest_call_tsil_INSTALL_DIR)
-		$(INSTALL_STRIPPED) $(LIBtest_call_tsil_MK) $(LIBtest_call_tsil_INSTALL_DIR) -m u=rw,g=r,o=r
+		$(Q)install -d $(LIBtest_call_tsil_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBtest_call_tsil_SRC) $(LIBtest_call_tsil_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBtest_call_tsil_HDR) $(LIBtest_call_tsil_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(EXEtest_call_tsil_SRC) $(LIBtest_call_tsil_INSTALL_DIR)
+		$(Q)$(INSTALL_STRIPPED) $(LIBtest_call_tsil_MK) $(LIBtest_call_tsil_INSTALL_DIR) -m u=rw,g=r,o=r
 endif
 
 $(LIBtest_call_tsil_DEP) $(EXEtest_call_tsil_DEP) $(LIBtest_call_tsil_OBJ) $(EXEtest_call_tsil_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS)
@@ -99,10 +99,12 @@ $(LIBtest_call_tsil_DEP) $(EXEtest_call_tsil_DEP) $(LIBtest_call_tsil_OBJ) $(EXE
 endif
 
 $(LIBtest_call_tsil): $(LIBtest_call_tsil_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
 $(EXEtest_call_tsil_EXE): $(EXEtest_call_tsil_OBJ) $(LIBtest_call_tsil) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(TSILLIBS) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(TSILLIBS) $(FLIBS)
 
 ALLDEP += $(LIBtest_call_tsil_DEP) $(EXEtest_call_tsil_DEP)
 ALLSRC += $(LIBtest_call_tsil_SRC) $(EXEtest_call_tsil_SRC)

@@ -824,7 +824,7 @@ try {
    if (pole_mass_loop_order > 2)
    " <> IndentText["self_energy_3l = self_energy_" <> CConversion`ToValidCSymbolString[particle] <> "_3loop();"] <> "
 } catch (const flexiblesusy::Error& e) {
-   WARNING(\"3-loop Higgs mass calculation failed: \" << e.what());
+   WARNING(\"3-loop Higgs mass calculation failed: \" << e.what_detailed());
    problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <> CConversion`ToValidCSymbolString[particle] <> ");
 }
 "

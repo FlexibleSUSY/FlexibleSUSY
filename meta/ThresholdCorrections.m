@@ -467,7 +467,7 @@ try {
 
    MODEL->get_problems().unflag_no_sinThetaW_convergence();
 } catch (const Error& e) {
-   VERBOSE_MSG(e.what());
+   VERBOSE_MSG(e.what_detailed());
    MODEL->get_problems().flag_no_sinThetaW_convergence();
 }"
           ];

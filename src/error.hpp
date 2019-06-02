@@ -19,20 +19,24 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include <cstring>
+#include <stdexcept>
 #include <string>
 
 namespace flexiblesusy {
 
-class Error {
+class Error : public std::runtime_error {
 public:
+   Error(const std::string& msg) : std::runtime_error(msg) {}
+   Error(const char* msg) : std::runtime_error(msg) {}
    virtual ~Error() = default;
-   virtual std::string what() const = 0;
+   virtual std::string what_detailed() const { return what(); }
 };
 
 class FatalError : public Error {
 public:
+   FatalError() : Error("Fatal error") {}
    virtual ~FatalError() = default;
-   virtual std::string what() const override { return "Fatal error."; };
 };
 
 /**
@@ -41,11 +45,8 @@ public:
  */
 class SetupError : public Error {
 public:
-   explicit SetupError(const std::string& message_) : message(message_) {}
+   explicit SetupError(const std::string& msg) : Error(msg) {}
    virtual ~SetupError() = default;
-   virtual std::string what() const override { return message; }
-private:
-   std::string message;
 };
 
 /**
@@ -55,18 +56,20 @@ private:
 class NoConvergenceError : public Error {
 public:
    explicit NoConvergenceError(int number_of_iterations_, const std::string& msg = "")
-      : message(msg), number_of_iterations(number_of_iterations_) {}
+      : Error(msg)
+      , number_of_iterations(number_of_iterations_) {}
    virtual ~NoConvergenceError() = default;
-   virtual std::string what() const override {
-      if (!message.empty())
-         return message;
+   std::string what_detailed() const override {
+      const auto msg = Error::what();
+
+      if (std::strlen(msg) > 0)
+         return msg;
 
       return "NoConvergenceError: no convergence after "
          + std::to_string(number_of_iterations) + " iterations";
    }
    int get_number_of_iterations() const { return number_of_iterations; }
 private:
-   std::string message;
    int number_of_iterations;
 };
 
@@ -78,11 +81,12 @@ class NoSinThetaWConvergenceError : public Error {
 public:
    NoSinThetaWConvergenceError(int number_of_iterations_,
                                double sin_theta_)
-      : number_of_iterations(number_of_iterations_)
+      : Error("Calculation of Weinberg angle did not converge")
+      , number_of_iterations(number_of_iterations_)
       , sin_theta(sin_theta_)
       {}
    virtual ~NoSinThetaWConvergenceError() = default;
-   virtual std::string what() const override {
+   std::string what_detailed() const override {
       return "NoSinThetaWConvergenceError: no convergence after "
          + std::to_string(number_of_iterations) + " iterations (sin(theta)="
          + std::to_string(sin_theta) + ")";
@@ -100,11 +104,9 @@ private:
  */
 class NonPerturbativeSinThetaW : public Error {
 public:
-   NonPerturbativeSinThetaW() {}
+   NonPerturbativeSinThetaW()
+      : Error("NonPerturbativeSinThetaW: sin(theta) non-perturbative") {}
    virtual ~NonPerturbativeSinThetaW() = default;
-   virtual std::string what() const override {
-      return "NonPerturbativeSinThetaW: sin(theta) non-perturbative";
-   }
 };
 
 /**
@@ -124,12 +126,13 @@ public:
     * something is wrong with the target renormalization scale.
     */
    explicit NonPerturbativeRunningError(double scale_, int parameter_index_ = -1, double value_ = 0)
-      : scale(scale_)
+      : Error("Non-perturbative RG running")
+      , scale(scale_)
       , value(value_)
       , parameter_index(parameter_index_)
       {}
    virtual ~NonPerturbativeRunningError() = default;
-   virtual std::string what() const override {
+   std::string what_detailed() const override {
       if (parameter_index == -1)
          return "NonPerturbativeRunningError: scale Q = " + std::to_string(value);
 
@@ -152,13 +155,9 @@ private:
 
 class NonPerturbativeRunningQedQcdError : public Error {
 public:
-   explicit NonPerturbativeRunningQedQcdError(const std::string& msg_)
-      : msg(msg_)
-      {}
+   explicit NonPerturbativeRunningQedQcdError(const std::string& msg)
+      : Error(msg) {}
    virtual ~NonPerturbativeRunningQedQcdError() = default;
-   virtual std::string what() const override { return msg; }
-private:
-   std::string msg;
 };
 
 /**
@@ -167,15 +166,12 @@ private:
  */
 class OutOfMemoryError : public Error {
 public:
-   explicit OutOfMemoryError(const std::string& msg_)
-      : msg(msg_)
-      {}
+   explicit OutOfMemoryError(const std::string& msg)
+      : Error(msg) {}
    virtual ~OutOfMemoryError() = default;
-   virtual std::string what() const override {
-      return std::string("OutOfMemoryError: Not enought memory: ") + msg;
+   virtual std::string what_detailed() const override {
+      return std::string("OutOfMemoryError: Not enought memory: ") + what();
    }
-private:
-   std::string msg;
 };
 
 /**
@@ -184,22 +180,16 @@ private:
  */
 class OutOfBoundsError : public Error {
 public:
-   OutOfBoundsError(const std::string& msg_)
-      : msg(msg_)
-      {}
+   OutOfBoundsError(const std::string& msg)
+      : Error(msg) {}
    virtual ~OutOfBoundsError() = default;
-   virtual std::string what() const override { return msg; }
-private:
-   std::string msg;
 };
 
 class ReadError : public Error {
 public:
-   explicit ReadError(const std::string& message_) : message(message_) {}
+   explicit ReadError(const std::string& msg)
+      : Error(msg) {}
    virtual ~ReadError() = default;
-   virtual std::string what() const override { return message; }
-private:
-   std::string message;
 };
 
 /**
@@ -208,20 +198,16 @@ private:
  */
 class PhysicalError : public Error {
 public:
-   explicit PhysicalError(const std::string& message_) : message(message_) {}
+   explicit PhysicalError(const std::string& msg)
+      : Error(msg) {}
    virtual ~PhysicalError() = default;
-   virtual std::string what() const override { return message; }
-private:
-   std::string message;
 };
 
 class HimalayaError : public Error {
 public:
-   explicit HimalayaError(const std::string& message_) : message(message_) {}
+   explicit HimalayaError(const std::string& msg)
+      : Error(msg) {}
    virtual ~HimalayaError() = default;
-   virtual std::string what() const override { return message; }
-private:
-   std::string message;
 };
 
 } // namespace flexiblesusy

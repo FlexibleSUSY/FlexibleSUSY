@@ -603,8 +603,8 @@ private:
 
    class EEWSBStepFailed : public Error {
    public:
+      EEWSBStepFailed() : Error("Could not perform EWSB step") {}
       virtual ~EEWSBStepFailed() = default;
-      virtual std::string what() const override { return "Could not perform EWSB step."; }
    };
 
    int ewsb_loop_order{4};

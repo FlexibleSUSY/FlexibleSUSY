@@ -35,20 +35,20 @@ all-$(MODNAME): $(LIB_model_specific_NMSSM_higgs)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_SRC) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_HDR) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_MK) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
+		$(Q)install -d $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_SRC) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_HDR) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_NMSSM_higgs_MK) $(LIB_model_specific_NMSSM_higgs_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIB_model_specific_NMSSM_higgs_DEP)
+		$(Q)-rm -f $(LIB_model_specific_NMSSM_higgs_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIB_model_specific_NMSSM_higgs)
+		$(Q)-rm -f $(LIB_model_specific_NMSSM_higgs)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIB_model_specific_NMSSM_higgs_OBJ)
+		$(Q)-rm -f $(LIB_model_specific_NMSSM_higgs_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		@true
@@ -71,10 +71,12 @@ endif
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_NMSSM_higgs): $(LIB_model_specific_NMSSM_higgs_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
 else
 $(LIB_model_specific_NMSSM_higgs): $(LIB_model_specific_NMSSM_higgs_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
 ALLDEP += $(LIB_model_specific_NMSSM_higgs_DEP)

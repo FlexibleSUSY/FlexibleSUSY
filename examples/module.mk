@@ -24,16 +24,16 @@ all-$(MODNAME): $(EXAMPLES_EXE)
 		@true
 
 clean-$(MODNAME)-dep:
-		-rm -f $(EXAMPLES_DEP)
+		$(Q)-rm -f $(EXAMPLES_DEP)
 
 clean-$(MODNAME)-lib:
 		@true
 
 clean-$(MODNAME)-obj:
-		-rm -f $(EXAMPLES_OBJ)
+		$(Q)-rm -f $(EXAMPLES_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(EXAMPLES_EXE)
+		$(Q)-rm -f $(EXAMPLES_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		-@for d in $(STANDALONE_DIR); do \

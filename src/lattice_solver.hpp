@@ -89,47 +89,36 @@ public:
 
     class MemoryError : public Error {
     public:
-	MemoryError(const std::string& message_) : message(message_) {}
+	MemoryError(const std::string& message_) : Error(message_) {}
 	virtual ~MemoryError() = default;
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
     };
 
     class SetupError : public Error {
     public:
-	SetupError(const std::string& message_) : message(message_) {}
+	SetupError(const std::string& message_) : Error(message_) {}
 	virtual ~SetupError() = default;
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
     };
 
     class NonInvertibleMatrixError : public Error {
     public:
 	NonInvertibleMatrixError(const std::string& message_) :
-	    message(message_) {}
+	    Error(message_) {}
 	virtual ~NonInvertibleMatrixError() = default;
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
     };
 
     class DivergenceError : public Error {
     public:
-	DivergenceError(const std::string& message_) : message(message_) {}
+	DivergenceError(const std::string& message_) : Error(message_) {}
 	virtual ~DivergenceError() = default;
-	virtual std::string what() const { return message; }
-    private:
-	std::string message;
     };
 
     class NoConvergenceError : public Error {
     public:
 	NoConvergenceError(size_t number_of_iterations_)
-	    : number_of_iterations(number_of_iterations_) {}
+	    : Error("RGFlow<Lattice>: no convergence")
+            , number_of_iterations(number_of_iterations_) {}
 	virtual ~NoConvergenceError() = default;
-	virtual std::string what() const {
+	std::string what_detailed() const override {
 	    std::stringstream message;
 	    message << "RGFlow<Lattice>::NoConvergenceError: no convergence"
 		    << " after " << number_of_iterations << " iterations";
@@ -142,11 +131,12 @@ public:
     class NonPerturbativeRunningError : public Error {
     public:
 	NonPerturbativeRunningError(Lattice_model* model_, double scale_)
-	    : model(model_)
+	    : Error("non-perturbative RG running")
+            , model(model_)
 	    , scale(scale_)
 	    {}
 	virtual ~NonPerturbativeRunningError() = default;
-	virtual std::string what() const;
+	std::string what_detailed() const override;
     private:
 	Lattice_model* model;
 	double scale;

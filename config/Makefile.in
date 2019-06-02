@@ -79,6 +79,12 @@ THREADLIBS         := @THREADLIBS@
 TSILFLAGS          := @TSILFLAGS@
 TSILLIBS           := @TSILLIBS@
 
+ifeq ($(VERBOSE),1)
+  Q :=
+else
+  Q := @
+endif
+
 # the modules add their dependency files to this variable
 ALLDEP   :=
 # the modules add soucre files to be created to this variable
@@ -101,6 +107,9 @@ SHELL = /bin/sh
 
 # disable built-in rules to improve speed
 MAKEFLAGS += -rR --include-dir=$(CURDIR)
+
+# message printed for each target
+MSG = echo "Building $@"
 
 # flexiblesusy-config script
 FSCONFIG := @FSCONFIG@
@@ -152,12 +161,12 @@ install-src::
 	$(error Installation directory is not set!  To set in please run: ./configure --with-install-dir=/path/to/install/dir)
 else
 install-src::
-	install -d $(INSTALL_DIR)
-	$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
-	$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)install -d $(INSTALL_DIR)
+	$(Q)$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
 
 ifeq ($(ENABLE_META),yes)
 install-src:: allsrc
@@ -205,43 +214,46 @@ allll:    $(ALLLL)
 alltest:  $(ALLTST)
 
 clean-dep:
-	-rm -f $(ALLDEP)
+	$(Q)-rm -f $(ALLDEP)
 
 clean-executables:
-	-rm -f $(ALLEXE)
+	$(Q)-rm -f $(ALLEXE)
 
 clean-lib:
-	-rm -f $(ALLLIB) $(ALLLL)
+	$(Q)-rm -f $(ALLLIB) $(ALLLL)
 
 depend:  clean-dep
 depend:  $(ALLDEP)
 
 %.d: %.cpp | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.c | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.f | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.F | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	@echo "Building $@"
+	$(Q)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.o: %.f
-	$(FC) $(FFLAGS) -c $< -o $@
+	@echo "Building $@"
+	$(Q)$(FC) $(FFLAGS) -c $< -o $@
 
 %.o: %.F
-	$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
+	@echo "Building $@"
+	$(Q)$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 
 distclean::
-	-rm -f Makefile
-	-rm -f $(FSCONFIG)
-	-rm -f $(SARAH_DEP_GEN)
-	-rm -f config.boost config.log config.math config.sarah config.status
+	$(Q)-rm -f Makefile
+	$(Q)-rm -f $(FSCONFIG)
+	$(Q)-rm -f $(SARAH_DEP_GEN)
+	$(Q)-rm -f config.boost config.log config.math config.sarah config.status
 
 librarylink: allll
 	@true

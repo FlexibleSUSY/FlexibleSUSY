@@ -87,6 +87,8 @@ AtomQ[] and return the result.";
 CreateUnitCharge::usage="Creates the c++ code for a function that returns the \
 numerical value of the electrical charge of the electron.";
 
+CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
+
 Begin["`Private`"];
 
 LeftChiralVertex::usage="A left projector part of a vertex";
