@@ -314,7 +314,7 @@ Module[
       ],
       fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]
       ] :> fieldType@GenericIndex@number,
-      FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]
+      FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]                    (* @note rule for external momenta *)
    };
 
    indexRules =                                                                 (*These index rules are specific to SARAH generated FeynArts model files.*) 

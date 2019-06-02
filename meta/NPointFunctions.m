@@ -838,7 +838,7 @@ CreateCXXFunctions[nPointFunctions_List, names_List,
 
     prototypes = StringJoin[Riffle[
       "std::complex<double> " <> #[[2]] <>
-        CXXArgStringForNPointFunctionPrototype[#[[1]]] <> ";" & /@
+        CXXArgStringNPF[#[[1]]] <> ";" & /@
       Transpose[{nPointFunctions, names}], "\n"]];
     
     If[Length[internalFermionBasis] === 0,
@@ -893,7 +893,7 @@ Module[
       internalFermionBasis = OptionValue[FermionBasis]
    },
    prototypes = StringJoin[Riffle[
-      "std::complex<double> " <> #[[2]] <> CXXArgStringForNPointFunctionPrototype[#[[1]]] <> ";" &/@
+      "std::complex<double> " <> #[[2]] <> CXXArgStringNPF[#[[1]]] <> ";" &/@
       Transpose[{nPointFunctions, names}],
    "\n"]];
    Print@prototypes;
@@ -992,7 +992,7 @@ Module[{},
    }
 ];
 
-CXXArgStringForNPointFunctionPrototype::usage=
+CXXArgStringNPF::usage=
 "@brief Return the c++ arguments that the c++ version of the given n-point 
 correlation function shall take with the default value of zero for all external
 momenta.
@@ -1000,13 +1000,10 @@ momenta.
 @returns the c++ arguments that the c++ version of the given
 n-point correlation function shall take with the default value of zero for all
 external momenta.";
-CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
+CXXArgStringNPF[nPointFunction:NPointFunctionPattern] :=
   Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length[ExternalIndicesNPF[nPointFunction]];
-    Print[numberOfIndices];
-    numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
-      0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
-    Print[numberOfMomenta];
+    numberOfIndices = Length@ExternalIndicesNPF@nPointFunction;
+    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
 
     "( const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates &model, " <>
        "const std::array<int, " <>
@@ -1017,13 +1014,27 @@ CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
   ]
   
 ExternalIndicesNPF::usage=
-"@brief Return a list of the open field indices for a given n-point correlation 
-function.
-@param the given n-point correlation function
-@returns a list of the open field indices for a given n-point correlation 
-function.";
+"@brief Return a list of open field indices for a given NPointFunction object.
+@param NPointFunction object
+@returns a list of the open field indices for a given NPointFunction object.";
+ExternalIndicesNPF::errUnknownInput=
+"Input should have form ExternalIndicesNPF[NPointFunction object]";
 ExternalIndicesNPF[NPointFunctionPattern["Fields"->fields_]] :=
-DeleteDuplicates@Flatten@Level[fields,{4,5}];
+   DeleteDuplicates@Flatten@Level[fields,{4,5}];
+ExternalIndicesNPF[___] :=
+   Utils`TestWithMessage[False,ExternalIndicesNPF::errUnknownInput];
+
+ExternalMomentaNPF::usage=
+"@brief Return a list of external momenta for a given NPointFunction object.
+@param NPointFunction object
+@returns a list of the open field indices for a given NPointFunction object.";
+ExternalMomentaNPF::errUnknownInput=
+   ExternalIndicesNPF::errUnknownInput;
+ExternalMomentaNPF[NPointFunctionPattern["Sums"->sums_,"Subs"->subs_]] :=
+   DeleteDuplicates@
+      Cases[{sums,subs},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
+ExternalMomentaNPF[___] :=
+   Utils`TestWithMessage[False,ExternalMomentaNPF::errUnknownInput];
 
 SetAttributes[
    {
@@ -1038,7 +1049,7 @@ SetAttributes[
    CreateCXXHeaders,
    CreateCXXFunctions,
    GetLTToFSRules,
-   CXXArgStringForNPointFunctionPrototype,ExternalIndicesNPF
+   CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF
    }, 
    {Protected, Locked}];
 
@@ -1053,9 +1064,8 @@ the arguments.
 ";
 CXXArgStringForNPointFunctionDefinition[nPointFunction_] :=
   Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length[ExternalIndicesNPF[nPointFunction]];
-    numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
-      0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
+    numberOfIndices = Length@ExternalIndicesNPF@nPointFunction;
+    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
 
     "( const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates &model, const std::array<int, " <>
       ToString[numberOfIndices] <> "> &indices, const std::array<Eigen::Vector4d, " <>
@@ -1093,11 +1103,9 @@ CXXClassForNPointFunction[nPointFunction_, projectColourFactor_,
           genericIndices, genericFields, genericSumNames,
           genericSumCode, preCXXRules, cxxExpr,
           subexpressions, cxxSubexpressions, InitializeSums},
-    externalIndices = ExternalIndicesNPF[nPointFunction];
-    numberOfIndices = Length[externalIndices];
-    numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
-      0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
-
+    externalIndices = ExternalIndicesNPF@nPointFunction;
+    numberOfIndices = Length@externalIndices;
+    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
     genericSumPositions = Position[nPointFunction[[2,1,1]], GenericSum[__]];
     genericIndices = DeleteDuplicates[Flatten[
       Extract[nPointFunction[[2,1,1]], genericSumPositions][[All,2]], 1]];
