@@ -284,6 +284,79 @@ dd2::usage="A symbol denoting a part of a D function.";
 dd3::usage="A symbol denoting a part of a D function.";
 
 Begin["`Private`"];
+Options[NPointFunctionPattern] = {
+   "Fields" -> _,
+   "Sums" -> _,
+   "ClRules" -> _,
+   "CombFac" -> _,
+   "ColFac" -> _,
+   "Abbr" -> _};
+NPointFunctionPattern::usage =
+Module[{Formatted},
+   Formatted[num_Integer]:=
+      StringJoin["\"",Part[#,1],"\" (def. ",ToString@Part[#,2],") "]&@
+      Part[Options@NPointFunctionPattern,num];
+   "@brief Is used to realize pattern check for NPointFunction object in
+   other functions. Provides a nice way to pick required part of this object.
+   Designed in a way which allows Mathematica to highlight the code correctly.
+   @option "<>Formatted@1<>"allows to pick in and out fields
+   @option "<>Formatted@2<>"allows to pick GenericSums
+   @option "<>Formatted@3<>"allows to pick list of class replacements
+   @option "<>Formatted@4<>"allows to pick list of class combinatorical factors
+   @option "<>Formatted@5<>"allows to pick list of class colour factors
+   @option "<>Formatted@6<>"allows to pick abbreviations
+   @note any option should have form symbolName_ or Blank[]
+   @returns Pattern where option specify the stuff to pick in this calculation."
+];
+NPointFunctionPattern::errUnknownOptions = 
+   NPointFunction::errUnknownOptions;
+NPointFunctionPattern::errWrongOptionValue =
+"Any option should have form symbolName_ or Blank[].";
+NPointFunctionPattern::errUnknownInput = 
+"Correct input has the folliwing form:
+NPointFunctionPattern[options]
+where
+ options have names from list
+  `1`.";
+NPointFunctionPattern[opts:OptionsPattern[]] :=
+Module[{Convert},
+   Convert@expr_ := If[OptionValue@expr === _,
+      "",
+      StringDrop[ToString@OptionValue@expr,-1] <> ":"];
+   ToExpression[StringJoin[
+   "{",
+      Convert@"Fields" , "{{__},{__}},",
+      "{",
+         "{",
+            Convert@"Sums" , "{GenericSum[_,{__}]..}," ,
+            Convert@"ClRules","{{{Rule[_,_]..}..}..}," ,
+            Convert@"CombFac" , "{{__Integer}..}," ,
+            Convert@"ColFac" , "{{__}..}" ,
+         "}," ,
+         Convert@"Abbr" , "{Rule[_,_]..}" ,
+      "}" ,
+   "}"]]
+] /; And[
+   Utils`TestWithMessage[
+      FilterRules[{opts},Except@Part[Options@NPointFunctionPattern,All,1]]==={},
+      NPointFunctionPattern::errUnknownOptions, 
+      FilterRules[{opts},Except@Part[Options@NPointFunctionPattern,All,1]], 
+      "\""<>#<>"\""&/@Part[Options@NPointFunctionPattern,All,1]],
+   Utils`TestWithMessage[
+      And@@Map[StringMatchQ[
+         ToString@#,
+         ___?(Symbol === Head@ToExpression@#&) ~~ "_"]&,
+         Map[OptionValue[NPointFunctionPattern,#]&,
+            Part[Options@NPointFunctionPattern,All,1]]],
+      NPointFunctionPattern::errWrongOptionValue]
+];
+NPointFunctionPattern[___] := 
+Utils`TestWithMessage[
+   False,
+   NPointFunctionPattern::errUnknownInput,
+   "\""<>#<>"\""&/@Part[Options@NPointFunctionPattern,All,1]
+];
+
 Options[NPointFunction]={
    LoopLevel -> 1,
    Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
@@ -381,25 +454,23 @@ Module[
 ] /; And[
    MatchQ[inFields,
    {_?(Utils`TestWithMessage[
-         SARAH`ParticleQ[#/.{SARAH`bar[x_]:>x,Susyno`LieGroups`conj[x_]:>x},
-            FlexibleSUSY`FSEigenstates],
+         TreeMasses`IsParticle@#,
          NPointFunction::errinFields,
          #,
          GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
-            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
+            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
       ]&)
    ..}
    ],
    MatchQ[outFields,
    {_?( Utils`TestWithMessage[
-         SARAH`ParticleQ[#/.{SARAH`bar[x_]:>x,Susyno`LieGroups`conj[x_]:>x},
-            FlexibleSUSY`FSEigenstates],
+         TreeMasses`IsParticle@#,
          NPointFunction::erroutFields,
          #,
          GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
-            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector]
+            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
       ]& )
    ..}
    ],
@@ -447,12 +518,13 @@ Module[
       NPointFunction::errInputFields                                            (**)
    ]                                                                            (**)
 ];
-NPointFunction[___] := Utils`TestWithMessage[
+NPointFunction[___] :=
+Utils`TestWithMessage[
    False,
    NPointFunction::errUnknownInput,
    GetSARAHModelName[],
    Cases[TreeMasses`GetParticles[], 
-      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion|_?TreeMasses`IsVector],
+      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                             (*@todo add |_?TreeMasses`IsVector*)
    Options[NPointFunction][[All, 1]]
 ];
 
@@ -593,7 +665,9 @@ Options[CreateCXXFunctionsNew]={
 CreateCXXFunctionsNew[nPointFunctions_List, names_List,colourFactorProjections_, opts:OptionsPattern[]] :=
 Module[
    {
-      loopFunctionRules,
+      loopFunctionRules = Switch[OptionValue@LoopFunctions,
+         "LoopTools", {},
+         "FlexibleSUSY", GetLTToFSRules[]],
       prototypes,
       definitionHeads,
       definitionBodies,
@@ -601,17 +675,12 @@ Module[
       definitions,
       internalFermionBasis = OptionValue[FermionBasis]
    },
-   loopFunctionRules = Switch[OptionValue@LoopFunctions,
-      "LoopTools", {},
-      "FlexibleSUSY",
-         
-         GetLTToFSRules[]];
-
-    prototypes = StringJoin[Riffle[
-      "std::complex<double> " <> #[[2]] <>
-        CXXArgStringForNPointFunctionPrototype[#[[1]]] <> ";" & /@
-      Transpose[{nPointFunctions, names}], "\n"]];
-    
+   prototypes = StringJoin[Riffle[
+      "std::complex<double> " <> #[[2]] <> CXXArgStringForNPointFunctionPrototype[#[[1]]] <> ";" &/@
+      Transpose[{nPointFunctions, names}],
+   "\n"]];
+   Print@prototypes;
+   
     If[Length[internalFermionBasis] === 0,
       definitionHeads = "std::complex<double> " <> #[[2]] <>
           CXXArgStringForNPointFunctionDefinition[#[[1]]] & /@
@@ -662,6 +731,9 @@ Module[
    ]
    (*@todo check for FermionBasis*)
 ];
+CreateCXXFunctions[___] := 
+Utils`TestWithMessage[False,CreateCXXFunctions::errUnknownInput,
+   Options[CreateCXXFunctions][[All, 1]]];
 
 GetLTToFSRules::usage=
 "@brief returns rules for LoopTools to FlexibleSUSY conventions
@@ -691,10 +763,6 @@ Module[{},
          "softsusy::d27"[Apply[Sequence,Map[Sqrt, {args}] /. Sqrt[(x___)^2] :> x]]
    }
 ];
-
-CreateCXXFunctions[___] := 
-Utils`TestWithMessage[False,CreateCXXFunctions::errUnknownInput,
-   Options[CreateCXXFunctions][[All, 1]]];
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -916,15 +984,14 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
-CXXArgStringForNPointFunctionPrototype::usage="
-@brief Return the c++ arguments that the c++ version of the given
+CXXArgStringForNPointFunctionPrototype::usage=
+"@brief Return the c++ arguments that the c++ version of the given
 n-point correlation function shall take with the default value of
 zero for all external momenta.
 @param nPointFunction the given n-point correlation function
 @returns the c++ arguments that the c++ version of the given
 n-point correlation function shall take with the default value of
-zero for all external momenta.
-";
+zero for all external momenta.";
 CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
   Module[{numberOfIndices, numberOfMomenta},
     numberOfIndices = Length[ExternalIndicesForNPointFunction[nPointFunction]];
