@@ -24,6 +24,7 @@
 1) there is no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
+(*@todo add function which cleans GenerisSum[0,{}] correctly*)
 BeginPackage["NPointFunctions`",{"FlexibleSUSY`","SARAH`","CXXDiagrams`","Vertices`","Parameters`","Utils`"}];
 NPointFunction::usage=
 "@brief Calculate the n-point correlation function for a List of incoming and 
@@ -290,7 +291,7 @@ Options[NPointFunctionPattern] = {
    "ClRules" -> _,
    "CombFac" -> _,
    "ColFac" -> _,
-   "Abbr" -> _};
+   "Subs" -> _};
 NPointFunctionPattern::usage =
 Module[{Formatted},
    Formatted[num_Integer]:=
@@ -333,7 +334,7 @@ Module[{names=Part[Options@NPointFunctionPattern,All,1],Convert},
             Convert@4 , "{{__Integer}..}," ,
             Convert@5 , "{{__}..}" ,
          "}," ,
-         Convert@6 , "{Rule[_,_]..}" ,
+         Convert@6 , "{Rule[_,_]...}" ,
       "}" ,
    "}"]]
 ] /; And[
@@ -528,9 +529,9 @@ Utils`TestWithMessage[
    Options[NPointFunction][[All, 1]]
 ];
 
-VerticesForNPointFunction[
-   {_,{{genSums:{GenericSum[_,{__}]..},classRules:{{{Rule[_,_]..}..}..},_,_},
-   substitutions:{Rule[_,_]..}}}] :=
+VerticesForNPointFunction[NPointFunctionPattern[
+   "Sums"->genSums_,"ClRules"->classRules_,"Subs"->substitutions_]
+] :=
 Module[
    {
       positionsOfVertInSubs =
@@ -662,7 +663,7 @@ Options[CreateCXXFunctionsNew]={
    LoopFunctions -> "FlexibleSUSY",
    FermionBasis -> {}
 };
-CreateCXXFunctionsNew[nPointFunctions_List, names_List,colourFactorProjections_, opts:OptionsPattern[]] :=
+CreateCXXFunctionsNew[nPointFunctions:{NPointFunctionPattern[]...}, names_List,colourFactorProjections_, opts:OptionsPattern[]] :=
 Module[
    {
       loopFunctionRules = Switch[OptionValue@LoopFunctions,
@@ -971,7 +972,7 @@ Module[
 
 SetAttributes[
    {
-   NPointFunction,
+   NPointFunctionPattern,NPointFunction,
    GetSARAHModelName,
    GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
    LaunchSubkernelFor,
