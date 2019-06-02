@@ -319,21 +319,21 @@ where
  options have names from list
   `1`.";
 NPointFunctionPattern[opts:OptionsPattern[]] :=
-Module[{Convert},
-   Convert@expr_ := If[OptionValue@expr === _,
+Module[{names=Part[Options@NPointFunctionPattern,All,1],Convert},
+   Convert[num_] := If[OptionValue@Part[names,num] === _,
       "",
-      StringDrop[ToString@OptionValue@expr,-1] <> ":"];
+      StringDrop[ToString@OptionValue@Part[names,num],-1] <> ":"];
    ToExpression[StringJoin[
    "{",
-      Convert@"Fields" , "{{__},{__}},",
+      Convert@1 , "{{__},{__}},",
       "{",
          "{",
-            Convert@"Sums" , "{GenericSum[_,{__}]..}," ,
-            Convert@"ClRules","{{{Rule[_,_]..}..}..}," ,
-            Convert@"CombFac" , "{{__Integer}..}," ,
-            Convert@"ColFac" , "{{__}..}" ,
+            Convert@2 , "{GenericSum[_,{__}]..}," ,
+            Convert@3,"{{{Rule[_,_]..}..}..}," ,
+            Convert@4 , "{{__Integer}..}," ,
+            Convert@5 , "{{__}..}" ,
          "}," ,
-         Convert@"Abbr" , "{Rule[_,_]..}" ,
+         Convert@6 , "{Rule[_,_]..}" ,
       "}" ,
    "}"]]
 ] /; And[
