@@ -536,7 +536,7 @@ Utils`TestWithMessage[
    NPointFunction::errUnknownInput,
    GetSARAHModelName[],
    Cases[TreeMasses`GetParticles[], 
-      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                             (*@todo add |_?TreeMasses`IsVector*)
+      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion],                            (*@todo add |_?TreeMasses`IsVector*)
    Options[NPointFunction][[All, 1]]
 ];
 
@@ -968,7 +968,7 @@ GetLTToFSRules::usage=
 @returns rules for LoopTools to FlexibleSUSY conventions
 @todo add specific rules for std::sqrt(0)
 @todo add specific rules for std::sqrt(Sqr())";
-GetLTToFSRules[] =
+GetLTToFSRules[] :=
 Module[{},
    Print["Warning: Only remaps of A0, B0, C0, C00, D0 and D00 are implemented"];
    Print["Warning: FlexibleSUSY C0, D0 and D00 require zero external momenta."];
@@ -1016,19 +1016,23 @@ CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
                           ", "]] <> " } )"
   ]
   
-ExternalIndicesForNPointFunction::usage="
-@brief Return a list of the open field indices for a given
-n-point correlation function.
+ExternalIndicesForNPointFunction::usage=
+"@brief Return a list of the open field indices for a given n-point correlation 
+function.
 @param the given n-point correlation function
-@returns a list of the open field indices for a given
-n-point correlation function.
-";
-ExternalIndicesForNPointFunction[nPointFunction_] :=
+@returns a list of the open field indices for a given n-point correlation 
+function.";
+ExternalIndicesForNPointFunction[
+   nPointFunction:NPointFunctionPattern["Fields"->fields_]
+] :=
+Module[{},
+  Print[fields];
   Join[Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]],
             _[indices_List] :> indices]],
   Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]] /. bar -> Barred,
             Barred[_[indices_List]] :> indices]]
   ]
+]
 
 SetAttributes[
    {
@@ -1041,7 +1045,7 @@ SetAttributes[
    FANamesForFields,
    VerticesForNPointFunction,
    CreateCXXHeaders,
-   CreateCXXFunctions
+   CreateCXXFunctions,
    GetLTToFSRules,
    CXXArgStringForNPointFunctionPrototype,ExternalIndicesForNPointFunction
    }, 
