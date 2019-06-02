@@ -235,6 +235,17 @@ loop function libraries.
 @returns a list of the form `{prototypes, definitions}` containing
 the corresponding c++ code.
 ";
+CreateCXXFunctions::errnPointFunctions=
+"The element '`1`' of nPointFunctions is an incorrect one.
+
+nPointFunctions should contain only NPointFunction objects
+@note GenericSum should have non-zero first argument";
+CreateCXXFunctions::errnames=
+"The element '`1`' of errnames is an incorrect one.
+
+names should contain only strings for function names";
+CreateCXXFunctions::errUnequalLength=
+"Lengths of nPointFunctions and names should be the same";
 CreateCXXFunctions::errUnknownOptions=
    NPointFunction::errUnknownOptions;
 CreateCXXFunctions::errLoopFunctions=
@@ -363,7 +374,7 @@ Options[NPointFunction]={
    Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
       FlexibleSUSY`DRbar, DimensionalReduction,
       FlexibleSUSY`MSbar, DimensionalRegularization],
-   UseCache -> True, 
+   UseCache -> True,
    ZeroExternalMomenta -> True,
    OnShellFlag -> True,
    ExcludedTopologies -> {}
@@ -663,7 +674,7 @@ Options[CreateCXXFunctionsNew]={
    LoopFunctions -> "FlexibleSUSY",
    FermionBasis -> {}
 };
-CreateCXXFunctionsNew[nPointFunctions:{NPointFunctionPattern[]...}, names_List,colourFactorProjections_, opts:OptionsPattern[]] :=
+CreateCXXFunctionsNew[nPointFunctions_, names_,colourFactorProjections_, opts:OptionsPattern[]] :=
 Module[
    {
       loopFunctionRules = Switch[OptionValue@LoopFunctions,
@@ -716,20 +727,31 @@ Module[
 
     {prototypes, definitions}
 ] /; And[
-   (*@todo check for nPointFunctions*)
-   (*@todo check for names*)
+   MatchQ[nPointFunctions,
+      {_?(Utils`TestWithMessage[
+         MatchQ[#,NPointFunctionPattern[]],
+         CreateCXXFunctions::errnPointFunctions,
+         #]&)
+      ..}],
+   MatchQ[names,
+      {_?(Utils`TestWithMessage[
+         StringQ@#,
+         CreateCXXFunctions::errnames,
+         #]&)
+      ..}],
+   Utils`TestWithMessage[
+      Length@nPointFunctions===Length@names,
+      CreateCXXFunctions::errUnequalLength],
    (*@todo check for colourFactorProjections*)
    Utils`TestWithMessage[
-      FilterRules[{opts},Except[Options[CreateCXXFunctions][[All, 1]]]] === {},
+      FilterRules[{opts},Except@Part[Options@CreateCXXFunctions,All,1]] === {},
       CreateCXXFunctions::errUnknownOptions,
-      FilterRules[{opts},Except[Options[CreateCXXFunctions][[All, 1]]]],
-      Options[CreateCXXFunctions][[All, 1]]
-   ],
+      FilterRules[{opts},Except@Part[Options@CreateCXXFunctions,All,1]],
+      Part[Options@CreateCXXFunctions,All,1]],
    Utils`TestWithMessage[
       MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
       CreateCXXFunctions::errLoopFunctions,
-      OptionValue@LoopFunctions
-   ]
+      OptionValue@LoopFunctions]
    (*@todo check for FermionBasis*)
 ];
 CreateCXXFunctions[___] := 
