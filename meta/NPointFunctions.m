@@ -243,7 +243,7 @@ nPointFunctions should contain only NPointFunction objects
 CreateCXXFunctions::errnames=
 "The element '`1`' of errnames is an incorrect one.
 
-names should contain only strings for function names";
+names should contain only strings for c++ function names";
 CreateCXXFunctions::errUnequalLength=
 "Lengths of nPointFunctions and names should be the same";
 CreateCXXFunctions::errUnknownOptions=
@@ -559,6 +559,211 @@ Module[
 VerticesForNPointFunction[___] :=
 Utils`TestWithMessage[False,VerticesForNPointFunction::errUnknownInput];
 
+GetSARAHModelName::usage=
+"@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
+@returns the SARAH model name as to be passed to SARAH`.`Start[].";
+GetSARAHModelName[] := 
+If[SARAH`submodeldir =!= False,
+      SARAH`modelDir <> "-" <> SARAH`submodeldir,
+      SARAH`modelDir
+];
+
+GetFAClassesModelName::usage=
+"@brief Return the model name that is used by SARAH to name the
+FeynArts model file it creates.
+@returns the model name that is used by SARAH to name the
+FeynArts model file it creates.";
+GetFAClassesModelName[] := 
+   SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
+
+GetFAParticleNamesFileName::usage=
+"@brief Return the file name that is used by SARAH to store 
+FeynArts particle names.
+@returns the file name that is used by SARAH to store 
+FeynArts particle names.";
+GetFAParticleNamesFileName[] := 
+"ParticleNamesFeynArts.dat";
+
+GetFASubstitutionsFileName::usage=
+"@brief Return the model name that is used by SARAH to name the FeynArts 
+substitution file it creates.
+@returns the model name that is used by SARAH to name the
+FeynArts substitution file it creates.";
+GetFASubstitutionsFileName[] :=
+   StringJoin["Substitutions-",SARAH`ModelName,
+     ToString@FlexibleSUSY`FSEigenstates,".m"
+   ];
+
+LaunchSubkernelFor::usage=
+"@brief Tries to launch a subkernel without errors.
+If it fails, tries to explain the reason using message for specifying its
+activity.
+@param message String, which contains description of activity for which this
+subkernel is launched for.
+@returns subkernel name.
+@note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}
+@note for Mathematica 7 some functions have the same names as in SARAH`.`";
+LaunchSubkernelFor::errKernelLaunch=
+"Unable to launch subkernel(s) during calculations for
+`1`
+because of error:";
+LaunchSubkernelFor[message_String] /; $VersionNumber === 7.0 :=
+Module[{kernelName},
+   Off[Parallel`Preferences`add::shdw,
+      Parallel`Preferences`set::shdw,
+      Parallel`Preferences`list::shdw,
+      Parallel`Preferences`tr::shdw,
+      Parallel`Protected`processes::shdw,
+      SubKernels`Description::shdw];
+   kernelName = Utils`PureEvaluate[
+      LaunchKernels[1],
+      LaunchSubkernelFor::errKernelLaunch, message];
+   On[Parallel`Preferences`add::shdw,
+      Parallel`Preferences`set::shdw,
+      Parallel`Preferences`list::shdw,
+      Parallel`Preferences`tr::shdw,
+      Parallel`Protected`processes::shdw,
+      SubKernels`Description::shdw];
+   kernelName
+];
+LaunchSubkernelFor[message_String] :=
+Module[{kernelName},
+   kernelName = Utils`PureEvaluate[
+      LaunchKernels[1],
+      LaunchSubkernelFor::errKernelLaunch, message];
+   If[Head@kernelName === List, kernelName[[1]], kernelName]
+];
+
+CacheNameForMeta::usage=
+"@brief Return the name of the cache file for given meta information
+@param nPointMeta the given meta information
+@returns the name of the cache file for given meta information.
+";
+CacheNameForMeta[nPointMeta_] :=
+   StringJoin["cache_",Riffle[ToString /@ nPointMeta, "_"],".m"]; 
+
+CacheNPointFunction::usage=
+"@brief Write a given n-point correlation function to the cache
+@param nPointFunction the given n-point correlation function
+@param cacheDir the directory to save cache
+@param nPointMeta the meta information about the given n-point correlation 
+function";
+CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta_] := 
+Module[
+   {
+      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
+      fileHandle,
+      nPointFunctions,
+      position
+   },
+   If[FileExistsQ@nPointFunctionsFile,
+      nPointFunctions = Get@nPointFunctionsFile,
+      nPointFunctions = {}
+   ];
+   
+   position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
+   If[Length@position === 1,
+      nPointFunctions[[position[[1]]]] = nPointFunction,
+      AppendTo[nPointFunctions, nPointFunction]
+   ];
+
+   fileHandle = OpenWrite@nPointFunctionsFile;
+   Write[fileHandle,nPointFunctions];
+   Close@fileHandle;
+];
+
+CachedNPointFunction::usage=
+"@brief Retrieve an n-point correlation function from the cache
+@param inFields the incoming fields of the n-point correlation function
+@param outFields the outgoing fields of the n-point correlation function
+@param cacheDir the directory to save cache
+@param nPointMeta the meta information of the n-point correlation function
+@returns the corresponding n-point correalation function from the
+cache or `Null` if such a function could not be found.
+";
+CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := 
+Module[
+   {
+      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
+      nPointFunctions, 
+      position
+   },
+   If[!FileExistsQ@nPointFunctionsFile,Return@Null];
+   nPointFunctions = Get@nPointFunctionsFile;
+   position = Position[Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
+      {inFields, outFields}];
+   If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
+];
+
+GenerateFAModelFileOnKernel::usage=
+"@brief Generate the FeynArts model file on a given subkernel.";
+GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
+Module[
+   {
+      currentPath = $Path, 
+      currentDir = Directory[],
+      fsMetaDir = $flexiblesusyMetaDir,
+      sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
+      sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
+      SARAHModelName = GetSARAHModelName[], 
+      eigenstates = FlexibleSUSY`FSEigenstates
+   },
+   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs, 
+      sarahOutputDir, SARAHModelName, eigenstates];
+      
+   ParallelEvaluate[
+      $Path = currentPath;
+      SetDirectory@currentDir;
+      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "createFAModelFile.m"};
+      NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
+         SARAHModelName, eigenstates];,
+      kernel];
+]
+
+WriteParticleNamespaceFile::usage=
+"@brief Write a file containing all field names and the contexts in which they 
+live in Mathematica.
+@note This is necessary because SARAH puts fields into different contexts.";
+WriteParticleNamespaceFile[fileName_String] :=
+Module[{fileHandle = OpenWrite@fileName},
+   Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
+   Close@fileHandle;
+];
+
+FANamesForFields::usage=
+"@brief Translate SARAH-style fields to FeynArts-style fields
+@param fields List of SARAH-style fields
+@param particleNamesFile the path to the SARAH-created FeynArts
+particle names file.
+@returns A list of the FeynArts names (as strings) for the given
+SARAH-style fields.";
+FANamesForFields::errSARAH=
+"NpointFunctions`.`Private`.`FANamesForFields[]: SARAH`.`:
+It seems that SARAH`.` has changed conventions for
+<ParticleNames>.dat file.";
+FANamesForFields[fields_,particleNamesFile_String] :=
+Module[
+   {
+      uniqueFields = DeleteDuplicates[
+         CXXDiagrams`RemoveLorentzConjugation@# &/@ fields],
+      faFieldNames
+   },
+   faFieldNames = 
+   Flatten[
+      StringCases[Utils`ReadLinesInFile@particleNamesFile, 
+         ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
+      ] & /@ uniqueFields
+   ];
+   Utils`AssertWithMessage[Length@faFieldNames > 0, 
+      FANamesForFields::errSARAH];
+      
+   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /. 
+      {
+         SARAH`bar@field_String :> "-" <> field, 
+         Susyno`LieGroups`conj@field_String :> "-" <> field
+      }
+]
+
 Options[CreateCXXHeaders]={
    LoopFunctions -> "FlexibleSUSY",
    UseWilsonCoeffs -> True
@@ -787,210 +992,43 @@ Module[{},
    }
 ];
 
-GetSARAHModelName::usage=
-"@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
-@returns the SARAH model name as to be passed to SARAH`.`Start[].";
-GetSARAHModelName[] := 
-   If[SARAH`submodeldir =!= False,
-      SARAH`modelDir <> "-" <> SARAH`submodeldir,
-      SARAH`modelDir
-   ];
-
-GetFAClassesModelName::usage=
-"@brief Return the model name that is used by SARAH to name the
-FeynArts model file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts model file it creates.";
-GetFAClassesModelName[] := 
-   SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
-
-GetFAParticleNamesFileName::usage=
-"@brief Return the file name that is used by SARAH to store 
-FeynArts particle names.
-@returns the file name that is used by SARAH to store 
-FeynArts particle names.";
-GetFAParticleNamesFileName[] := 
-   "ParticleNamesFeynArts.dat";
-
-GetFASubstitutionsFileName::usage=
-"@brief Return the model name that is used by SARAH to name the FeynArts 
-substitution file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts substitution file it creates.";
-GetFASubstitutionsFileName[] :=
-   StringJoin["Substitutions-",SARAH`ModelName,
-     ToString@FlexibleSUSY`FSEigenstates,".m"
-   ];
-
-LaunchSubkernelFor::usage=
-"@brief Tries to launch a subkernel without errors.
-If it fails, tries to explain the reason using message for specifying its
-activity.
-@param message String, which contains description of activity for which this
-subkernel is launched for.
-@returns subkernel name.
-@note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}
-@note for Mathematica 7 some functions have the same names as in SARAH`.`";
-LaunchSubkernelFor::errKernelLaunch=
-"Unable to launch subkernel(s) during calculations for
-`1`
-because of error:";
-LaunchSubkernelFor[message_String] /; $VersionNumber === 7.0 :=
-Module[{kernelName},
-   Off[Parallel`Preferences`add::shdw,
-      Parallel`Preferences`set::shdw,
-      Parallel`Preferences`list::shdw,
-      Parallel`Preferences`tr::shdw,
-      Parallel`Protected`processes::shdw,
-      SubKernels`Description::shdw];
-   kernelName = Utils`PureEvaluate[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
-   On[Parallel`Preferences`add::shdw,
-      Parallel`Preferences`set::shdw,
-      Parallel`Preferences`list::shdw,
-      Parallel`Preferences`tr::shdw,
-      Parallel`Protected`processes::shdw,
-      SubKernels`Description::shdw];
-   kernelName
-];
-LaunchSubkernelFor[message_String] :=
-Module[{kernelName},
-   kernelName = Utils`PureEvaluate[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
-   If[Head@kernelName === List, kernelName[[1]], kernelName]
-];
-
-CacheNameForMeta::usage=
-"@brief Return the name of the cache file for given meta information
-@param nPointMeta the given meta information
-@returns the name of the cache file for given meta information.
-";
-CacheNameForMeta[nPointMeta_] :=
-   StringJoin["cache_",Riffle[ToString /@ nPointMeta, "_"],".m"]; 
-
-CacheNPointFunction::usage=
-"@brief Write a given n-point correlation function to the cache
+CXXArgStringForNPointFunctionPrototype::usage=
+"@brief Return the c++ arguments that the c++ version of the given n-point 
+correlation function shall take with the default value of zero for all external
+momenta.
 @param nPointFunction the given n-point correlation function
-@param cacheDir the directory to save cache
-@param nPointMeta the meta information about the given n-point correlation 
-function";
-CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta_] := 
-Module[
-   {
-      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
-      fileHandle,
-      nPointFunctions,
-      position
-   },
-   If[FileExistsQ@nPointFunctionsFile,
-      nPointFunctions = Get@nPointFunctionsFile,
-      nPointFunctions = {}
-   ];
-   
-   position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
-   If[Length@position === 1,
-      nPointFunctions[[position[[1]]]] = nPointFunction,
-      AppendTo[nPointFunctions, nPointFunction]
-   ];
+@returns the c++ arguments that the c++ version of the given
+n-point correlation function shall take with the default value of zero for all
+external momenta.";
+CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
+  Module[{numberOfIndices, numberOfMomenta},
+    numberOfIndices = Length[ExternalIndicesForNPointFunction[nPointFunction]];
+    Print[numberOfIndices];
+    numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
+      0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
+    Print[numberOfMomenta];
 
-   fileHandle = OpenWrite@nPointFunctionsFile;
-   Write[fileHandle,nPointFunctions];
-   Close@fileHandle;
-];
-
-CachedNPointFunction::usage=
-"@brief Retrieve an n-point correlation function from the cache
-@param inFields the incoming fields of the n-point correlation function
-@param outFields the outgoing fields of the n-point correlation function
-@param cacheDir the directory to save cache
-@param nPointMeta the meta information of the n-point correlation function
-@returns the corresponding n-point correalation function from the
-cache or `Null` if such a function could not be found.
+    "( const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates &model, " <>
+       "const std::array<int, " <>
+      ToString[numberOfIndices] <> "> &indices, const std::array<Eigen::Vector4d, " <>
+      ToString[numberOfMomenta] <> "> &momenta = { " <>
+        StringJoin[Riffle[Table["Eigen::Vector4d::Zero()", {k,numberOfMomenta}],
+                          ", "]] <> " } )"
+  ]
+  
+ExternalIndicesForNPointFunction::usage="
+@brief Return a list of the open field indices for a given
+n-point correlation function.
+@param the given n-point correlation function
+@returns a list of the open field indices for a given
+n-point correlation function.
 ";
-CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := 
-Module[
-   {
-      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
-      nPointFunctions, 
-      position
-   },
-   If[!FileExistsQ@nPointFunctionsFile,Return@Null];
-   nPointFunctions = Get@nPointFunctionsFile;
-   position = Position[Vertices`StripFieldIndices[ nPointFunctions[[All,1]] ],
-      {inFields, outFields}];
-   If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
-];
-
-GenerateFAModelFileOnKernel::usage=
-"@brief Generate the FeynArts model file on a given subkernel.";
-GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
-Module[
-   {
-      currentPath = $Path, 
-      currentDir = Directory[],
-      fsMetaDir = $flexiblesusyMetaDir,
-      sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
-      sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
-      SARAHModelName = GetSARAHModelName[], 
-      eigenstates = FlexibleSUSY`FSEigenstates
-   },
-   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs, 
-      sarahOutputDir, SARAHModelName, eigenstates];
-      
-   ParallelEvaluate[
-      $Path = currentPath;
-      SetDirectory@currentDir;
-      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "createFAModelFile.m"};
-      NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
-         SARAHModelName, eigenstates];,
-      kernel];
-]
-
-WriteParticleNamespaceFile::usage=
-"@brief Write a file containing all field names and the contexts in which they 
-live in Mathematica.
-@note This is necessary because SARAH puts fields into different contexts.";
-WriteParticleNamespaceFile[fileName_String] :=
-Module[{fileHandle = OpenWrite@fileName},
-   Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
-   Close@fileHandle;
-];
-
-FANamesForFields::usage=
-"@brief Translate SARAH-style fields to FeynArts-style fields
-@param fields List of SARAH-style fields
-@param particleNamesFile the path to the SARAH-created FeynArts
-particle names file.
-@returns A list of the FeynArts names (as strings) for the given
-SARAH-style fields.";
-FANamesForFields::errSARAH=
-"NpointFunctions`.`Private`.`FANamesForFields[]: SARAH`.`:
-It seems that SARAH`.` has changed conventions for
-<ParticleNames>.dat file.";
-FANamesForFields[fields_,particleNamesFile_String] :=
-Module[
-   {
-      uniqueFields = DeleteDuplicates[
-         CXXDiagrams`RemoveLorentzConjugation@# &/@ fields],
-      faFieldNames
-   },
-   faFieldNames = 
-   Flatten[
-      StringCases[Utils`ReadLinesInFile@particleNamesFile, 
-         ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
-      ] & /@ uniqueFields
-   ];
-   Utils`AssertWithMessage[Length@faFieldNames > 0, 
-      FANamesForFields::errSARAH];
-      
-   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /. 
-      {
-         SARAH`bar@field_String :> "-" <> field, 
-         Susyno`LieGroups`conj@field_String :> "-" <> field
-      }
-]
+ExternalIndicesForNPointFunction[nPointFunction_] :=
+  Join[Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]],
+            _[indices_List] :> indices]],
+  Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]] /. bar -> Barred,
+            Barred[_[indices_List]] :> indices]]
+  ]
 
 SetAttributes[
    {
@@ -1003,31 +1041,11 @@ SetAttributes[
    FANamesForFields,
    VerticesForNPointFunction,
    CreateCXXHeaders,
-   GetLTToFSRules
+   CreateCXXFunctions
+   GetLTToFSRules,
+   CXXArgStringForNPointFunctionPrototype,ExternalIndicesForNPointFunction
    }, 
    {Protected, Locked}];
-
-CXXArgStringForNPointFunctionPrototype::usage=
-"@brief Return the c++ arguments that the c++ version of the given
-n-point correlation function shall take with the default value of
-zero for all external momenta.
-@param nPointFunction the given n-point correlation function
-@returns the c++ arguments that the c++ version of the given
-n-point correlation function shall take with the default value of
-zero for all external momenta.";
-CXXArgStringForNPointFunctionPrototype[nPointFunction_] :=
-  Module[{numberOfIndices, numberOfMomenta},
-    numberOfIndices = Length[ExternalIndicesForNPointFunction[nPointFunction]];
-    numberOfMomenta = If[FreeQ[nPointFunction, SARAH`Mom[_Integer, ___]],
-      0, Length[nPointFunction[[1,1]]] + Length[nPointFunction[[1,2]]]];
-
-    "( const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates &model, " <>
-       "const std::array<int, " <>
-      ToString[numberOfIndices] <> "> &indices, const std::array<Eigen::Vector4d, " <>
-      ToString[numberOfMomenta] <> "> &momenta = { " <>
-        StringJoin[Riffle[Table["Eigen::Vector4d::Zero()", {k,numberOfMomenta}],
-                          ", "]] <> " } )"
-  ]
 
 CXXArgStringForNPointFunctionDefinition::usage="
 @brief Return the c++ arguments that the c++ version of the given
@@ -1492,20 +1510,6 @@ not a number: " <> ToString[#]] & /@ colourFactors;
       "return accumulate_generic<GenericKeys, GenericInsertions,\n" <>
         "combinatorial_factors, colour_factors, "]
       <> functionName <> "_impl>( *this );\n}"
-  ]
-
-ExternalIndicesForNPointFunction::usage="
-@brief Return a list of the open field indices for a given
-n-point correlation function.
-@param the given n-point correlation function
-@returns a list of the open field indices for a given
-n-point correlation function.
-";
-ExternalIndicesForNPointFunction[nPointFunction_] :=
-  Join[Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]],
-            _[indices_List] :> indices]],
-  Flatten[Cases[Join[nPointFunction[[1,1]], nPointFunction[[1,2]]] /. bar -> Barred,
-            Barred[_[indices_List]] :> indices]]
   ]
 
 CXXIndicesForField::usage="
