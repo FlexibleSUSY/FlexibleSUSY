@@ -32,6 +32,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_case_template.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/mpl/pair.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/range_c.hpp>
@@ -527,15 +528,16 @@ typedef boost::mpl::fold<
         boost::mpl::push_front<
           boost::mpl::push_front<
 	      _1,
-	      Test_fs<double, complex<double>, 6> >,
-	    Test_fs<double, double, 6> >,
-	  Test_fs<long double, complex<long double>, 6> >,
-	Test_fs<long double, long double, 6> >
+	      boost::mpl::pair<Test_fs<double, complex<double>, 6>, _2> >,
+	    boost::mpl::pair<Test_fs<double, double, 6>, _2> >,
+	  boost::mpl::pair<Test_fs<long double, complex<long double>, 6>,_2> >,
+	boost::mpl::pair<Test_fs<long double, long double, 6>, _2> >
 >::type fs_diagonalize_hermitian_tests;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE
-(test_fs_diagonalize_hermitian, T, fs_diagonalize_hermitian_tests)
+(test_fs_diagonalize_hermitian, P, fs_diagonalize_hermitian_tests)
 {
+    typedef typename P::first T;
     typedef typename T::R R;
     typedef typename T::S S;
     const size_t N = T::N;
