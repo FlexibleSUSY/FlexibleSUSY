@@ -1173,7 +1173,7 @@ Module[
     ";\n}" <>
     "\n};"
   ];
-  
+
 ToCXXPreparationRules::usage=
 "@brief Generate a list of rules for translating Mathematica expressions of
 n-point correlation functions to c++ counterparts.
@@ -1190,6 +1190,7 @@ Module[
       externalIndexRules = MapThread[Rule,{extIndices,
          Map[StringTemplate@"this->external_indices(`1`)",
             Array[#-1&,Length@extIndices]]}],
+      AuxVertexType,
       genericRules,subexprRules,massRules,couplingRules
    },
    genericRules=Flatten[Thread@Rule[
@@ -1197,72 +1198,58 @@ Module[
       {CXXGenFieldName[Susyno`LieGroups`conj@#][CXXFieldIndices@#],
       CXXGenFieldName[SARAH`bar@#][CXXFieldIndices@#],
       CXXGenFieldName[#][CXXFieldIndices@#]}] &/@ genericFields];
-
+      
+   AuxVertexType[fields__]:= StringRiffle[
+      If[IsGenericField@#,
+         Head[#/.genericRules],
+         CXXExtFieldName@#]&/@{fields},", "];
    couplingRules = {
       SARAH`Cp[fields__][1] :>
-      I * "context.vertex<" <> StringRiffle[
-        If[IsGenericField@#,Head[#/.genericRules],CXXExtFieldName@#] &/@ {fields},
-        ", "] <> ">( lorentz_scalar{}, concatenate( " <>
-     StringRiffle[CXXFieldIndices /@ {fields}, ", "] <> 
-      " ) )",
-      SARAH`Cp[fields___][SARAH`PL] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField[#], Head[# /. genericRules],
-           CXXExtFieldName@#] & /@ {fields},
-        ", "]] <>
-      ">( lorentz_left{}, concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <> 
-      " ) )",
-      SARAH`Cp[fields___][SARAH`PR] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField[#], Head[# /. genericRules],
-           CXXExtFieldName@#] & /@ {fields},
-        ", "]] <>
-      ">( lorentz_right{}, concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <> 
-      " ) )",
+      I*StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
+         AuxVertexType@fields,
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ],
+      SARAH`Cp[fields__][SARAH`PL] :>
+      I*StringTemplate["context.vertex<`1`>(lorentz_left{}, concatenate(`2`))"][
+         AuxVertexType@fields,
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ],
+      SARAH`Cp[fields__][SARAH`PR] :>
+      I*StringTemplate["context.vertex<`1`>(lorentz_right{}, concatenate(`2`))"][
+         AuxVertexType@fields,
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ],
       SARAH`Cp[fields___][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField[#], Head[# /. genericRules],
-           CXXExtFieldName@#] & /@ {fields},
-        ", "]] <>
-      ">( lorentz_momentum_diff{" <>
-            ToString[Position[{fields},f1,{1},Heads->False][[1,1]]-1] <> ", " <>
-            ToString[Position[{fields},f2,{1},Heads->False][[1,1]]-1] <> "}, " <>
-        "concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <> 
-      " ) )",
-      SARAH`Cp[fields___][SARAH`g[_,_]] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField[#], Head[# /. genericRules],
-           CXXExtFieldName@#] & /@ {fields},
-        ", "]] <>
-      ">( lorentz_inverse_metric{}, concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <> 
-      " ) )",
-      SARAH`Cp[fields__][(SARAH`Mom[f2_, _] - SARAH`Mom[f1_, _]) * SARAH`g[_, _], (SARAH`Mom[f1_, _] - SARAH`Mom[f3_, _])SARAH`g[_, _],
-        (SARAH`Mom[f3_, _] - SARAH`Mom[f2_, _]) * SARAH`g[_, _]] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField[#], Head[# /. genericRules],
-           CXXExtFieldName@#] & /@ {fields},
-        ", "]] <>
-        ">( triple_vector{}, concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <>
-      " ) )"
-    };
-    massRules = {SARAH`Mass[field_String[indices_String]] :>
-      "context.mass<" <> field <> ">( " <> indices <> " )",
+      I*StringTemplate["context.vertex<`1`>(lorentz_momentum_diff{`2`,`3`}, concatenate(`4`))"][
+         AuxVertexType@fields,
+         First@@Position[{fields},f1,{1}]-1,                                    (*@note hope that nobody call particle List*)
+         First@@Position[{fields},f2,{1}]-1,                                    (*@note hope that nobody call particle List*)
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ],
+      SARAH`Cp[fields__][SARAH`g[_,_]] :>
+      I*StringTemplate["context.vertex<`1`>(lorentz_inverse_metric{}, concatenate(`2`))"][
+         AuxVertexType@fields,
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ],
+      SARAH`Cp[fields__][(SARAH`Mom[f2_, _]-SARAH`Mom[f1_, _])*SARAH`g[_,_],
+         (SARAH`Mom[f1_,_]-SARAH`Mom[f3_,_])*SARAH`g[_,_],
+         (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>
+      I*StringTemplate["context.vertex<`1`>(triple_vector{}, concatenate(`2`))"][
+         AuxVertexType@fields,
+         StringRiffle[CXXFieldIndices/@{fields},", "]
+         ]
+   };
+   massRules = {
+      SARAH`Mass[field_String[indices_String]] :>
+         StringTemplate["context.mass<`1`>(`2`)"][field,indices],
       SARAH`Mass[field_[{indices__}]] :>
-        "context.mass<" <> "fields::" <> ToString[field] <> ">( " <>
-        "std::array<int, " <> ToString[Length[{indices}]] <> "> " <>
-        ToString[{indices}] <> " )"
-    };
-    subexprRules = Rule[#[[1]], ToString[#[[1]]] <> "_()"] & /@
-      subexpressions;
+      StringTemplate["context.mass<fields::`1`>(std::array<int,`2`> `3`)"][     (*@todo weird rule to be deleted!*)
+         field,Length@{indices},{indices}]                                      (*@todo weird rule to be deleted!*)
+   };
+   subexprRules = Rule[#[[1]], ToString[#[[1]]] <> "_()"] &/@ subexpressions;
 
-    {externalIndexRules, couplingRules,
-     genericRules, massRules, subexprRules}
-  ]
+   {externalIndexRules,couplingRules,genericRules, massRules, subexprRules}
+];
 
 CXXGenFieldName::usage=
 "@brief Given a (possibly conjugated) generic field, return its c++ type.
