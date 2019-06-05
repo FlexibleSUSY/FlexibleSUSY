@@ -809,14 +809,14 @@ CreateCXXFunctions[nPointFunctions_List, names_List,
 
     definitionBodies = CXXBodyNPF /@ nPointFunctions;
     If[Length[fermionBasis] === 0,
-      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #] & /@
+      auxilliaryClasses = CXXClassForNPF[Sequence @@ #] & /@
         Transpose[{
           nPointFunctions /. loopFunctionRules,
           If[Head[colourFactorProjections] === List,
             colourFactorProjections,
             Table[colourFactorProjections, {Length[names]}]]
         }],
-      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #, FermionBasis -> fermionBasis] & /@
+      auxilliaryClasses = CXXClassForNPF[Sequence @@ #, fermionBasis] & /@
         Transpose[{
           nPointFunctions /. loopFunctionRules,
           If[Head[colourFactorProjections] === List,
@@ -887,35 +887,28 @@ Module[
       definitionBodies,
       auxilliaryClasses,
       definitions,
+      noFermionChains = TrueQ[Length@OptionValue@FermionBasis === 0],
       basisLengths = Table[Length@OptionValue@FermionBasis,{Length@names}]
    },
    prototypes = StringRiffle[MapThread[
       StringTemplate@"std::complex<double> `1`(`2`);",
       {names,CXXArgStringNPF[#,"def"]&/@nPointFunctions}],"\n"];
 
-   definitionHeads = MapThread[If[basisLengths[[1]] === 0,
+   definitionHeads = MapThread[If[noFermionChains,
       StringTemplate@"std::complex<double> `2`(`3`)",
       StringTemplate@"std::array<std::complex<double>,`1`> `2`(`3`)"],
       {basisLengths,names,CXXArgStringNPF/@nPointFunctions}];
 
    definitionBodies = CXXBodyNPF/@nPointFunctions;
    
-   If[basisLengths[[1]] === 0,
-      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #] & /@
-        Transpose[{
+   auxilliaryClasses = CXXClassForNPF[Part[#,1],Part[#,2], OptionValue@FermionBasis] &/@
+      Transpose[
+         {
           nPointFunctions /. loopFunctionRules,
           If[Head[colourFactorProjections] === List,
             colourFactorProjections,
             Table[colourFactorProjections, {Length[names]}]]
-        }],
-      auxilliaryClasses = CXXClassForNPointFunction[Sequence @@ #, FermionBasis -> OptionValue[FermionBasis]] & /@
-        Transpose[{
-          nPointFunctions /. loopFunctionRules,
-          If[Head[colourFactorProjections] === List,
-            colourFactorProjections,
-            Table[colourFactorProjections, {Length[names]}]]
-        }]
-    ];
+      }];
 
     definitions = StringJoin[Riffle[auxilliaryClasses,"\n\n"]] <> "\n\n" <>
       StringJoin[Riffle[#[[1]] <> "\n{\n" <> #[[2]] <> "\n}" & /@
@@ -938,6 +931,7 @@ Module[
    Utils`TestWithMessage[
       Length@nPointFunctions===Length@names,
       CreateCXXFunctions::errUnequalLength],
+   
    (*@todo check for colourFactorProjections*)
    Utils`TestWithMessage[
       FilterRules[{opts},Except@Part[Options@CreateCXXFunctions,All,1]] === {},
@@ -1072,6 +1066,113 @@ Module[{fieldNames = Vertices`StripFieldIndices/@Join@@fields},
 CXXClassNameNPF[___] :=
    Utils`TestWithMessage[False,CXXClassNameNPF::errUnknownInput];
 
+CXXClassForNPF::usage=
+"@brief Return the c++ code for the helper class of the c++ version of a given
+n-point correlation function.
+@param nPointFunction the given n-point correlation function
+@param projectColourFactor the colour factor projection to be applied for the
+given n-point correlation function
+@returns the c++ code for the helper class of the c++ version of a given
+n-point correlation function.";
+CXXClassForNPF[nPointFunction_, projectColourFactor_,fermionBasis_:{}] :=
+  Module[{className = CXXClassNameNPF[nPointFunction],
+          externalIndices, cxxCorrelationContext,
+          numberOfIndices, numberOfMomenta, genericSumPositions,
+          genericIndices, genericFields, genericSumNames,
+          genericSumCode, preCXXRules, cxxExpr,
+          subexpressions, cxxSubexpressions, InitializeSums},
+    externalIndices = ExternalIndicesNPF@nPointFunction;
+    numberOfIndices = Length@externalIndices;
+    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
+    genericSumPositions = Position[nPointFunction[[2,1,1]], GenericSum[__]];
+    genericIndices = DeleteDuplicates[Flatten[
+      Extract[nPointFunction[[2,1,1]], genericSumPositions][[All,2]], 1]];
+    genericFields = #[[1]][GenericIndex[#[[2]]]] & /@ genericIndices;
+    genericSumNames = Table["genericSum" <> ToString[k],
+                            {k,Length[genericSumPositions]}];
+    InitializeSums = Table["const auto genericsum" <> ToString[k] <> " = " <>
+      genericSumNames[[k]] <> "();\n", {k, Length[genericSumPositions]}];
+
+
+    subexpressions = nPointFunction[[2,2]];
+    preCXXRules = ToCXXPreparationRules[
+      externalIndices, genericFields, subexpressions];
+
+    cxxSubexpressions = 
+      CXXCodeForSubexpressions[subexpressions, preCXXRules];
+    
+    If[Length@fermionBasis === 0,
+    genericSumCode = StringJoin[Riffle[
+      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules] & /@
+        Transpose[{
+          Extract[nPointFunction[[2,1,1]], genericSumPositions],
+          Extract[nPointFunction[[2,1,2]], genericSumPositions],
+          Extract[nPointFunction[[2,1,3]], genericSumPositions],
+          ExtractColourFactor[#, projectColourFactor]& /@
+            Extract[nPointFunction[[2,1,4]], genericSumPositions],
+          genericSumNames}],
+      "\n\n"]],
+    genericSumCode = StringJoin[Riffle[
+      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules, FermionBasis -> fermionBasis] & /@
+        Transpose[{
+          Extract[nPointFunction[[2,1,1]], genericSumPositions],
+          Extract[nPointFunction[[2,1,2]], genericSumPositions],
+          Extract[nPointFunction[[2,1,3]], genericSumPositions],
+          ExtractColourFactor[#, projectColourFactor]& /@
+            Extract[nPointFunction[[2,1,4]], genericSumPositions],
+          genericSumNames}],
+      "\n\n"]]
+    ];
+    
+    If[Length@fermionBasis === 0,
+      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
+        Rule @@@ Transpose[{genericSumPositions, # <> "()" & /@ genericSumNames}]],
+      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
+        Rule @@@ Transpose[{genericSumPositions, # <> "().at(i)" & /@ genericSumNames}]]
+    ];
+    cxxExpr = Parameters`ExpressionToString[cxxExpr];
+    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
+
+    cxxCorrelationContext = "correlation_function_context<" <>
+       ToString[numberOfIndices] <> ", " <> ToString[numberOfMomenta] <>
+    ">";
+    
+    "class " <> className <> "\n" <>
+    ": public " <> cxxCorrelationContext <> "\n{\n" <>
+    "using generic_sum_base = " <> cxxCorrelationContext <> ";\n" <>
+    "template<class GenericFieldMap> struct subexpression_base\n" <>
+    ": generic_sum_base,\n" <>
+    "  index_map_interface<GenericFieldMap>\n" <>
+    "{\n" <> 
+    "subexpression_base( const subexpression_base & ) = default;\n" <>
+    "subexpression_base( const generic_sum_base &gsb, \n" <>
+    "const typename field_index_map<GenericFieldMap>::type &fim )\n" <>
+    ": generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )\n" <>
+    "{}\n" <>
+    "};\n\n" <>
+
+    StringJoin[Riffle[
+        "struct " <> CXXKeyOfGenericField[#] <> " {};" & /@ genericFields,
+      "\n"]] <> "\n\n" <>
+
+    cxxSubexpressions <> "\n\n" <> 
+    genericSumCode <> "\n\n" <>
+    "public:\n" <>
+    className <> "( "<> CXXArgStringNPF[nPointFunction] <> " )\n" <>
+    ": " <> cxxCorrelationContext <> "{ model, indices, momenta }\n{}\n\n" <>
+    If[Length@fermionBasis === 0, 
+      "std::complex<double> calculate( void )\n{\nreturn " <> cxxExpr,
+
+      "std::array<std::complex<double>, " <> ToString@Length@fermionBasis <> "> " <>
+      "calculate( void )\n{\nstd::array<std::complex<double>, " <> ToString[Length[OptionValue[FermionBasis]]] <> "> " <>
+      "genericSummation;\n" <> "constexpr int coeffsLength = genericSummation.size();\n" <> InitializeSums <>
+      "for ( std::size_t i=0; i<coeffsLength; i++ ) {\n" <>
+      "  genericSummation.at(i) += " <> cxxExpr <> ";\n}\n" <> "return genericSummation"
+    ] <>
+    ";\n}" <>
+    "\n};"
+  ]
+
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
 StringTemplate::usage=
@@ -1120,118 +1221,9 @@ SetAttributes[
    CreateCXXFunctions,
    GetLTToFSRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
-   CXXBodyNPF,CXXClassNameNPF
+   CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF
    }, 
    {Protected, Locked}];
-
-CXXClassForNPointFunction::usage="
-@brief Return the c++ code for the helper class of the c++
-version of a given n-point correlation function.
-@param nPointFunction the given n-point correlation function
-@param projectColourFactor the colour factor projection to be
-applied for the given n-point correlation function
-@returns the c++ code for the helper class of the c++
-version of a given n-point correlation function.
-";
-CXXClassForNPointFunction[nPointFunction_, projectColourFactor_,
-    OptionsPattern[{FermionBasis -> {}}]] :=
-  Module[{className = CXXClassNameNPF[nPointFunction],
-          externalIndices, cxxCorrelationContext,
-          numberOfIndices, numberOfMomenta, genericSumPositions,
-          genericIndices, genericFields, genericSumNames,
-          genericSumCode, preCXXRules, cxxExpr,
-          subexpressions, cxxSubexpressions, InitializeSums},
-    externalIndices = ExternalIndicesNPF@nPointFunction;
-    numberOfIndices = Length@externalIndices;
-    numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction;
-    genericSumPositions = Position[nPointFunction[[2,1,1]], GenericSum[__]];
-    genericIndices = DeleteDuplicates[Flatten[
-      Extract[nPointFunction[[2,1,1]], genericSumPositions][[All,2]], 1]];
-    genericFields = #[[1]][GenericIndex[#[[2]]]] & /@ genericIndices;
-    genericSumNames = Table["genericSum" <> ToString[k],
-                            {k,Length[genericSumPositions]}];
-    InitializeSums = Table["const auto genericsum" <> ToString[k] <> " = " <>
-      genericSumNames[[k]] <> "();\n", {k, Length[genericSumPositions]}];
-
-
-    subexpressions = nPointFunction[[2,2]];
-    preCXXRules = ToCXXPreparationRules[
-      externalIndices, genericFields, subexpressions];
-
-    cxxSubexpressions = 
-      CXXCodeForSubexpressions[subexpressions, preCXXRules];
-    
-    If[Length[OptionValue[FermionBasis]] === 0,
-    genericSumCode = StringJoin[Riffle[
-      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules] & /@
-        Transpose[{
-          Extract[nPointFunction[[2,1,1]], genericSumPositions],
-          Extract[nPointFunction[[2,1,2]], genericSumPositions],
-          Extract[nPointFunction[[2,1,3]], genericSumPositions],
-          ExtractColourFactor[#, projectColourFactor]& /@
-            Extract[nPointFunction[[2,1,4]], genericSumPositions],
-          genericSumNames}],
-      "\n\n"]],
-    genericSumCode = StringJoin[Riffle[
-      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules, FermionBasis -> OptionValue[FermionBasis]] & /@
-        Transpose[{
-          Extract[nPointFunction[[2,1,1]], genericSumPositions],
-          Extract[nPointFunction[[2,1,2]], genericSumPositions],
-          Extract[nPointFunction[[2,1,3]], genericSumPositions],
-          ExtractColourFactor[#, projectColourFactor]& /@
-            Extract[nPointFunction[[2,1,4]], genericSumPositions],
-          genericSumNames}],
-      "\n\n"]]
-    ];
-    
-    If[Length[OptionValue[FermionBasis]] === 0,
-      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
-        Rule @@@ Transpose[{genericSumPositions, # <> "()" & /@ genericSumNames}]],
-      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
-        Rule @@@ Transpose[{genericSumPositions, # <> "().at(i)" & /@ genericSumNames}]]
-    ];
-    cxxExpr = Parameters`ExpressionToString[cxxExpr];
-    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-
-    cxxCorrelationContext = "correlation_function_context<" <>
-       ToString[numberOfIndices] <> ", " <> ToString[numberOfMomenta] <>
-    ">";
-    
-    "class " <> className <> "\n" <>
-    ": public " <> cxxCorrelationContext <> "\n{\n" <>
-    "using generic_sum_base = " <> cxxCorrelationContext <> ";\n" <>
-    "template<class GenericFieldMap> struct subexpression_base\n" <>
-    ": generic_sum_base,\n" <>
-    "  index_map_interface<GenericFieldMap>\n" <>
-    "{\n" <> 
-    "subexpression_base( const subexpression_base & ) = default;\n" <>
-    "subexpression_base( const generic_sum_base &gsb, \n" <>
-    "const typename field_index_map<GenericFieldMap>::type &fim )\n" <>
-    ": generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )\n" <>
-    "{}\n" <>
-    "};\n\n" <>
-
-    StringJoin[Riffle[
-        "struct " <> CXXKeyOfGenericField[#] <> " {};" & /@ genericFields,
-      "\n"]] <> "\n\n" <>
-
-    cxxSubexpressions <> "\n\n" <> 
-    genericSumCode <> "\n\n" <>
-    "public:\n" <>
-    className <> "( "<> CXXArgStringNPF[nPointFunction] <> " )\n" <>
-    ": " <> cxxCorrelationContext <> "{ model, indices, momenta }\n{}\n\n" <>
-    If[Length[OptionValue[FermionBasis]] === 0, 
-      "std::complex<double> calculate( void )\n{\nreturn " <> cxxExpr,
-
-      "std::array<std::complex<double>, " <> ToString[Length[OptionValue[FermionBasis]]] <> "> " <>
-      "calculate( void )\n{\nstd::array<std::complex<double>, " <> ToString[Length[OptionValue[FermionBasis]]] <> "> " <>
-      "genericSummation;\n" <> "constexpr int coeffsLength = genericSummation.size();\n" <> InitializeSums <>
-      "for ( std::size_t i=0; i<coeffsLength; i++ ) {\n" <>
-      "  genericSummation.at(i) += " <> cxxExpr <> ";\n}\n" <> "return genericSummation"
-    ] <>
-    ";\n}" <>
-    "\n};"
-  ]
 
 ToCXXPreparationRules::usage="
 @brief Generate a list of rules for translating Mathematica
