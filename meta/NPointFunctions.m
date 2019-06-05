@@ -1199,15 +1199,11 @@ Module[
       CXXGenFieldName[#][CXXFieldIndices@#]}] &/@ genericFields];
 
    couplingRules = {
-      SARAH`Cp[fields___][1] :>
-      I * "context.vertex<" <> StringJoin[Riffle[
-        If[IsGenericField@#,
-           Head[#/.genericRules],
-           CXXExtFieldName@#
-           ] &/@ {fields},
-        ", "]] <>
-      ">( lorentz_scalar{}, concatenate( " <>
-        StringJoin[Riffle[CXXFieldIndices /@ {fields}, ", "]] <> 
+      SARAH`Cp[fields__][1] :>
+      I * "context.vertex<" <> StringRiffle[
+        If[IsGenericField@#,Head[#/.genericRules],CXXExtFieldName@#] &/@ {fields},
+        ", "] <> ">( lorentz_scalar{}, concatenate( " <>
+     StringRiffle[CXXFieldIndices /@ {fields}, ", "] <> 
       " ) )",
       SARAH`Cp[fields___][SARAH`PL] :>
       I * "context.vertex<" <> StringJoin[Riffle[
@@ -1321,7 +1317,25 @@ CXXFieldIndices[field_] :=
          StringRiffle[ToString/@field[[1]],", "]]];
 CXXFieldIndices[___] :=
    Utils`TestWithMessage[False,CXXFieldIndices::errUnknownInput];
-   
+
+IsGenericField::usage=
+"@brief Determine whether a given field is a generic or not.
+@param field the given field
+@returns `True` if the given field is generic and `False` otherwise.";
+IsGenericField::errUnknownInput=
+"Only one argument is allowed.";
+IsGenericField[field_] :=
+Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
+   Switch[head,
+      GenericS, True, 
+      GenericF, True, 
+      GenericV, True, 
+      GenericU, True, 
+      _, False]
+]; 
+IsGenericField[___] :=
+   Utils`TestWithMessage[False,IsGenericField::errUnknownInput];
+
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
 StringTemplate::usage=
@@ -1383,7 +1397,8 @@ SetAttributes[
    GetLTToFSRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules,CXXGenFieldName,CXXFieldIndices,CXXExtFieldName
+   ToCXXPreparationRules,CXXGenFieldName,CXXFieldIndices,CXXExtFieldName,
+   IsGenericField
    }, 
    {Protected, Locked}];
 
@@ -1603,22 +1618,6 @@ not a number: " <> ToString[#]] & /@ colourFactors;
         "combinatorial_factors, colour_factors, "]
       <> functionName <> "_impl>( *this );\n}"
   ]
-
-IsGenericField::usage="
-@brief Determine whether a given field is a generic or a concrete
-one.
-@param field the given field
-@returns `True` if the given field is generic and `False` otherwise.
-";
-IsGenericField[field_] :=
-  Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
-    Switch[head,
-           GenericS, True, 
-           GenericF, True, 
-           GenericV, True, 
-           GenericU, True, 
-           _, False]
-  ] 
 
 ExtractColourFactor::usage="
 @brief Extracts the colour factor for a given colour structure like 
