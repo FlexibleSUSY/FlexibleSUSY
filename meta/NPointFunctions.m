@@ -1152,7 +1152,7 @@ Module[
     "};\n\n" <>
 
     StringJoin[Riffle[
-        "struct " <> CXXKeyOfGenericField[#] <> " {};" & /@ genFields,
+        "struct " <> CXXGenFieldKey[#] <> " {};" & /@ genFields,
       "\n"]] <> "\n\n" <>
 
     cxxSubexpressions <> "\n\n" <> 
@@ -1270,7 +1270,7 @@ CXXGenFieldName[Susyno`LieGroups`conj[field_]] :=
    StringTemplate["typename conj<`1`>::type"][CXXGenFieldName@field];
 CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
    CXXGenFieldName[head[GenericIndex[index]]] =
-   StringTemplate["`1``2`"][head,index];
+   ToString[head]<>ToString[index];
 CXXGenFieldName[___] :=
    Utils`TestWithMessage[False,CXXGenFieldName::errUnknownInput];
 
@@ -1354,61 +1354,111 @@ CXXCodeForSubexpressions[
    preCXXRules:{{(_Rule|_RuleDelayed)...}...}] :=
 Module[
    {
-      names = ToString/@First/@subexpressions,
+      names = First/@subexpressions,
       exprs = Last/@subexpressions,
-      relevantSubexpressions,
-      relevantGenericFields,
-      needsContexts,
-      cxxExprs
+      relevantSubs,relevantGens,needContexts,cxxExprs,code
    },
-   relevantGenericFields = DeleteDuplicates /@ (Cases[#,_[GenericIndex[_]], Infinity, Heads -> True] &/@ exprs);
-   Print[names];
-   relevantSubexpressions = DeleteDuplicates /@ (Cases[#,subexpr:Apply[Alternatives,First/@subexpressions] :> subexpr, Infinity, Heads -> True] & /@ exprs);
+   relevantSubs = CXXCodeSubsIfSubs/@DeleteDuplicates/@
+      Map[Cases[#,subs:Alternatives@@names:>subs,Infinity,Heads->True]&,exprs];
+   relevantGens = CXXCodeSubsIfGen/@DeleteDuplicates/@
+      Map[Cases[#,_[GenericIndex[_]],Infinity,Heads->True]&,exprs];
+   needContexts = CXXCodeSubsIfContext/@
+      Map[Not[FreeQ[#,SARAH`Cp]&&FreeQ[#,SARAH`Mass]]&,exprs];
+   cxxExprs = StringReplace[#,"\""->""]&@
+      Map[Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&,exprs];
+   code = "template<typename GenericFieldMap>
+      struct `1` : subexpression_base<GenericFieldMap>
+      {
+         // constructor
+         template<typename ...Args>
+         `1`(Args&& ...args) :
+         subexpression_base<GenericFieldMap>(std::forward<Args>(args)...) {}
+         // overloading operator
+         std::complex<double> operator()( void ) const 
+         {
+            `2`
+            `3`
+            `4`
+            return `5`
+         }
+      };";
+   StringRiffle[MapThread[StringTemplate@code,
+      {names,relevantSubs,relevantGens,needContexts,cxxExprs}],"\n\n"]
+];
 
-   needsContexts = !(FreeQ[#,SARAH`Cp] && FreeQ[#,SARAH`Mass]) &/@ exprs;
+CXXGenFieldKey::usage=
+"@brief Given a generic field, determine its key type used in the c++ code to
+uniquely label it.
+@param genericField the given generic field
+@returns its c++ key type.";
+CXXGenFieldKey[head_[GenericIndex[index_Integer]]] :=
+   CXXGenFieldKey[head[GenericIndex[index]]] =
+   ToString[head]<>ToString[index]<>"Key";
 
-   cxxExprs = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]] &/@ exprs;
-   (*cxxExprs = StringReplace[#, "\"" -> ""] & /@ cxxExprs;*)
+CXXCodeSubsIfSubs::usage=
+"@brief Generates required c++ code for subexpression if other subexpressions
+present there.
+@param subs:{...} list of symbols.
+@param str (def. \"\") indent string for a c++ code.
+@returns c++ code for subexpression if other subexpressions present there.";
+CXXCodeSubsIfSubs::errUnknownInput=
+   CXXCodeSubsIfSubs::usage;
+CXXCodeSubsIfSubs[subs:{__Symbol},str_String:""] :=
+   StringRiffle[
+      StringTemplate["`1`<GenericFieldMap> `1`_{ *this };"]/@subs,
+      {str,"\n"<>str,""}];
+CXXCodeSubsIfSubs[subs:{},str_String:""] :=
+   str<>"// additional subexpressions are absent";
+CXXCodeSubsIfSubs[___] :=
+   Utils`TestWithMessage[False,CXXCodeSubsIfSubs::errUnknownInput];
 
-   StringJoin[Riffle[
-   Module[{name = #[[1]], genericFields = #[[2]],subs = #[[3]], needsContext = #[[4]], cxxExpr = #[[5]]},
-    "template<class GenericFieldMap> struct " <> name <> ": public subexpression_base<GenericFieldMap> {\n" <>
-    "   template<class ...Args> " <> name <> "(Args &&...args) : subexpression_base<GenericFieldMap>( std::forward<Args>( args )... )\n{}\n\n" <>
-    "std::complex<double> operator()( void ) const\n{\n" <>
+CXXCodeSubsIfGen::usage =
+"@brief Generates required c++ code for subexpression if generic fields present
+there.
+@param fields:{...} list of presenting generic fields.
+@param str (def. \"\") indent string for a c++ code.
+@returns c++ code for subexpression if generic fields present there.";
+CXXCodeSubsIfGen::errUnknownInput =
+   CXXCodeSubsIfGen::usage;
+CXXCodeSubsIfGen[fields:{__?IsGenericField},str_String:""] :=
+Module[
+   {
+      names = CXXGenFieldName/@fields,
+      keys = CXXGenFieldKey/@fields,
+      indices = CXXFieldIndices/@fields,
+      fLns,iLns,
+      mainCommands = {
+         "using boost::mpl::at;",
+         "using boost::fusion::at_key;",
+         "`1`",
+         "`2`"},
+      fCommand = "using `1` = typename at<GenericFieldMap, `2`>::type;",
+      iCommand = "const auto &`1` = at_key<`2`>(this->index_map());"
+   },
+   fLns=StringRiffle[MapThread[StringTemplate@fCommand,{names,keys}],"\n"<>str];
+   iLns=StringRiffle[MapThread[StringTemplate@iCommand,{names,keys}],"\n"<>str];
+   StringTemplate[StringRiffle[mainCommands,{str,"\n"<>str,""}]][fLns,iLns]
+];
+CXXCodeSubsIfGen[fields:{},str_String:""] =
+   str<>"// generic fields are absent";
+CXXCodeSubsIfGen[___] :=
+   Utils`TestWithMessage[False,CXXCodeSubsIfGen::errUnknownInput];
 
-    If[Length[subs] =!= 0,
-      StringJoin[ToString[#] <> "<GenericFieldMap> " <>
-        ToString[#] <> "_{ *this };\n" & /@
-        subs] <> "\n",
-      ""] <>
-
-    If[Length[genericFields] =!= 0,
-      "using boost::mpl::at;\n" <>
-      "using boost::fusion::at_key;\n\n" <>
-
-      StringJoin[Module[{genericField = #},
-        "using " <> CXXGenFieldName[genericField] <>
-        " = typename at<GenericFieldMap, " <>
-          CXXKeyOfGenericField[genericField] <>
-        ">::type;\n"
-        ] & /@ genericFields] <> "\n" <>
-
-      StringJoin[Module[{genericField = #},
-        "const auto &" <> CXXFieldIndices[genericField] <>
-        " = at_key<" <> CXXKeyOfGenericField[genericField] <>
-          ">( this->index_map() );\n"
-        ] & /@ genericFields] <> "\n",
-      ""] <>
-
-    If[needsContext,
-       "const context_with_vertices &context =  *this;\n\n",
-       ""] <>
-    
-    "return " <> cxxExpr <> ";\n}\n};"] & /@
-      Transpose[{names, relevantGenericFields,
-                 relevantSubexpressions, needsContexts, cxxExprs}],
-    "\n\n"]]
-  ]
+CXXCodeSubsIfContext::usage =
+"@brief Generates required c++ code for subexpression if couplings or masses
+present there.
+@param needsContext answers the question: Are here couplings or masses?.
+@param str (def. \"\") indent string for a c++ code.
+@returns c++ code for subexpression if couplings or masses present there.";
+CXXCodeSubsIfContext::errUnknownInput =
+   CXXCodeSubsIfContext::usage;
+CXXCodeSubsIfContext[
+   needsContext_?(#===True||#===False&),str_String:""] :=
+If[needsContext,
+   str<>"const context_with_vertices &context =  *this;",
+   str<>"// couplings and masses are absent"];
+CXXCodeSubsIfContext[___] :=
+   Utils`TestWithMessage[False,CXXCodeSubsIfContext::errUnknownInput];
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
@@ -1450,6 +1500,8 @@ StringRiffle::usage=
 It works only for [{___String},_String] input.";
 StringRiffle[strs:{___String},sep_String] := 
    StringJoin@Riffle[strs,sep];
+StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
+   in<>StringJoin@Riffle[strs,sep]<>fin;
 StringRiffle[___] :=
    Utils`TestWithMessage[False,StringRiffle::usage];
    
@@ -1471,8 +1523,9 @@ SetAttributes[
    GetLTToFSRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
-   IsGenericField*)
+   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
+   IsGenericField,CXXGenFieldKey*)
+   CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext
    }, 
    {Protected, Locked}];
 
@@ -1548,7 +1601,7 @@ not a number: " <> ToString[#]] & /@ colourFactors;
     StringJoin[
       "using " <> CXXGenFieldName[#] <>
       " = typename at<GenericFieldMap, " <>
-        CXXKeyOfGenericField[#] <>
+        CXXGenFieldKey[#] <>
       ">::type;\n" &
       /@ genericFields] <> "\n" <>
 
@@ -1572,7 +1625,7 @@ not a number: " <> ToString[#]] & /@ colourFactors;
     StringJoin[Riffle[
       "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
         "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
-      "at_key<" <> CXXKeyOfGenericField[#] <> ">( index_map ) = " <>
+      "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
         CXXFieldIndices[#] <> ";" & /@
       genericFields, "\n"]] <> "\n\n" <>
     If[Length[fermionBasis] === 0,
@@ -1592,7 +1645,7 @@ not a number: " <> ToString[#]] & /@ colourFactors;
       "std::array<std::complex<double>, 2>"]
     <> functionName <> "( void )\n{\n" <>
     "using GenericKeys = boost::mpl::vector<\n" <>
-    StringJoin[Riffle[CXXKeyOfGenericField /@ genericFields, ",\n"]] <>
+    StringJoin[Riffle[CXXGenFieldKey /@ genericFields, ",\n"]] <>
     "\n>;\n\n" <>
 
     "using GenericInsertions" <> " = boost::mpl::vector<\n" <>
@@ -1631,15 +1684,6 @@ ExtractColourFactor[colourfactors_List, projection_] :=
     Identity /@ colourfactors,
     Coefficient[#, projection]& /@ colourfactors
   ]
-
-CXXKeyOfGenericField::usage="
-@brief Given a generic field, determine its key type used in the c++
-code to uniquely label it.
-@param genericField the given generic field
-@returns its c++ key type.
-";
-CXXKeyOfGenericField[head_[GenericIndex[index_Integer]]] :=
-  ToString[head] <> ToString[index] <> "Key"
 
 GenericFieldType::usage="
 @brief Determine the generic field type of a given field.
