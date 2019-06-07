@@ -326,7 +326,6 @@ Module[
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
       excludedTopologies = OptionValue[ExcludedTopologies],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
-      nPointMeta = OptionValue@{LoopLevel,Regularize,ZeroExternalMomenta},
       outputDir = FileNameJoin@{
          SARAH`$sarahCurrentOutputMainDir,
          ToString@FlexibleSUSY`FSEigenstates
@@ -343,7 +342,7 @@ Module[
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
-         inFields,outFields,nPointFunctionsDir,nPointMeta];
+         inFields,outFields,nPointFunctionsDir,Options@NPointFunction];
       If[nPointFunction =!= Null, Return@nPointFunction]];
    
    feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
@@ -398,8 +397,8 @@ Module[
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
       NPointFunction::errCalc];
 
-   If[OptionValue@UseCache,
-      CacheNPointFunction[nPointFunction,nPointFunctionsDir,nPointMeta]];
+   If[OptionValue@UseCache,CacheNPointFunction[
+      nPointFunction,nPointFunctionsDir,Options@NPointFunction]];
 
    nPointFunction
 ] /; And[
@@ -578,8 +577,8 @@ CacheNameForMeta::usage=
 @param nPointMeta the given meta information
 @returns the name of the cache file for given meta information.
 ";
-CacheNameForMeta[nPointMeta_] :=
-   StringJoin["cache_",Riffle[ToString /@ nPointMeta, "_"],".m"]; 
+CacheNameForMeta[nPointMeta:{__Rule}] :=
+   StringJoin["cache_",Riffle[ToString/@Flatten[Last/@nPointMeta], "_"],".m"]; 
 
 CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
@@ -587,7 +586,7 @@ CacheNPointFunction::usage=
 @param cacheDir the directory to save cache
 @param nPointMeta the meta information about the given n-point correlation 
 function";
-CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta_] := 
+CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__Rule}] := 
 Module[
    {
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
@@ -620,7 +619,7 @@ CachedNPointFunction::usage=
 @returns the corresponding n-point correalation function from the
 cache or `Null` if such a function could not be found.
 ";
-CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta_] := 
+CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta:{__Rule}] := 
 Module[
    {
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
@@ -1249,9 +1248,9 @@ Module[
          StringTemplate["context.mass<fields::`1`>(std::array<int,0> {})"][     (*@todo here only zero external indices are allowed*)
          extField]                                                              (*@todo *)
    };
-   subexprRules = Rule[#[[1]], ToString[#[[1]]] <> "_()"] &/@ subexpressions;
+   subexprRules = Rule[First@#, ToString@First@# <> "_()"] &/@ subexpressions;
 
-   Join[externalIndexRules,couplingRules,genericRules, massRules, subexprRules]
+   {externalIndexRules,couplingRules,genericRules, massRules, subexprRules}
 ];
 
 CXXGenFieldName::usage=
@@ -1350,7 +1349,9 @@ CXXCodeForSubexpressions::usage=
 @param preCXXRules a list of rules to apply to the subexpressions before
 calling ``Parameters`ExpressionToString[]`` for the c++ translation.
 @returns the c++ code encoding a given set of subexpressions.";
-CXXCodeForSubexpressions[subexpressions:{___Rule}, preCXXRules:{(_Rule|_RuleDelayed)...}] :=
+CXXCodeForSubexpressions[
+   subexpressions:{___Rule},
+   preCXXRules:{{(_Rule|_RuleDelayed)...}...}] :=
 Module[
    {
       names = ToString/@First/@subexpressions,
