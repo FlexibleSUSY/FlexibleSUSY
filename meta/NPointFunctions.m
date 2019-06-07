@@ -1079,10 +1079,10 @@ CXXClassForNPF[nPointFunction:NPFPattern["Sums"->genSums_,"ClRules"->genRules_,"
 Module[
    {
       className = CXXClassNameNPF@nPointFunction,
-      externalIndices = ExternalIndicesNPF@nPointFunction,
+      extIndices = ExternalIndicesNPF@nPointFunction,
       numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
       cxxCorrelationContext,
-      numberOfIndices,
+      numOfIndices,
       genericSumPositions,
       genFields = DeleteDuplicates[Flatten@genRules /. Rule[x_, _] :> x],
       genSumNames = Array[
@@ -1092,17 +1092,17 @@ Module[
          StringTemplate@"const auto genericsum`1` = genericSum`1`();\n",
          Length@genSums],
       genericSumCode, preCXXRules, cxxExpr,
-      cxxSubexpressions
+      cxxSubexpressions,
+      noFermionChains = TrueQ[Length@fermionBasis === 0]
    },
-   numberOfIndices = Length@externalIndices;
+   numOfIndices = Length@extIndices;
    genericSumPositions = Position[genSums, GenericSum[__]];
-   
-   preCXXRules = ToCXXPreparationRules[externalIndices, genFields, subexpressions];
 
-    cxxSubexpressions = 
-      CXXCodeForSubexpressions[subexpressions, preCXXRules];
+   preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
+
+   cxxSubexpressions = CXXCodeForSubexpressions[subexpressions, preCXXRules];
     
-    If[Length@fermionBasis === 0,
+    If[noFermionChains,
     genericSumCode = StringJoin[Riffle[
       CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules] & /@
         Transpose[{
@@ -1125,7 +1125,7 @@ Module[
       "\n\n"]]
     ];
     
-    If[Length@fermionBasis === 0,
+    If[noFermionChains,
       cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
         Rule @@@ Transpose[{genericSumPositions, # <> "()" & /@ genSumNames}]],
       cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
@@ -1135,7 +1135,7 @@ Module[
     cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
 
     cxxCorrelationContext = "correlation_function_context<" <>
-       ToString[numberOfIndices] <> ", " <> ToString[numberOfMomenta] <>
+       ToString[numOfIndices] <> ", " <> ToString[numberOfMomenta] <>
     ">";
     
     "class " <> className <> "\n" <>
@@ -1161,7 +1161,7 @@ Module[
     "public:\n" <>
     className <> "( "<> CXXArgStringNPF[nPointFunction] <> " )\n" <>
     ": " <> cxxCorrelationContext <> "{ model, indices, momenta }\n{}\n\n" <>
-    If[Length@fermionBasis === 0, 
+    If[noFermionChains === 0, 
       "std::complex<double> calculate( void )\n{\nreturn " <> cxxExpr,
 
       "std::array<std::complex<double>, " <> ToString@Length@fermionBasis <> "> " <>
@@ -1202,7 +1202,7 @@ Module[
    AuxVertexType[fields__]:= StringRiffle[
       If[IsGenericField@#,
          Head[#/.genericRules],
-         CXXExtFieldName@#]&/@{fields},", "];
+         CXXFieldName@#]&/@{fields},", "];
    couplingRules = {
       SARAH`Cp[fields__][1] :>
       I*StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
@@ -1240,78 +1240,99 @@ Module[
          ]
    };
    massRules = {
-      SARAH`Mass[field_String[indices_String]] :>
-         StringTemplate["context.mass<`1`>(`2`)"][field,indices],
-      SARAH`Mass[field_[{indices__}]] :>
-      StringTemplate["context.mass<fields::`1`>(std::array<int,`2`> `3`)"][     (*@todo weird rule to be deleted!*)
-         field,Length@{indices},{indices}]                                      (*@todo weird rule to be deleted!*)
+      SARAH`Mass[genField_String[genIndex_String]] :>
+         StringTemplate["context.mass<`1`>(`2`)"][genField,genIndex],
+      SARAH`Mass[extField_Symbol[{extIndex_String}]] :>                         (*@todo field without `conj or `bar*)
+         StringTemplate["context.mass<fields::`1`>(std::array<int,1> {`2`})"][  (*@todo here only one external index is allowed*)
+         extField,extIndex],                                                    (*@todo *)
+      SARAH`Mass[extField_Symbol] :>                                            (*@todo field without `conj or `bar*)
+         StringTemplate["context.mass<fields::`1`>(std::array<int,0> {})"][     (*@todo here only zero external indices are allowed*)
+         extField]                                                              (*@todo *)
    };
    subexprRules = Rule[#[[1]], ToString[#[[1]]] <> "_()"] &/@ subexpressions;
 
-   {externalIndexRules,couplingRules,genericRules, massRules, subexprRules}
+   Join[externalIndexRules,couplingRules,genericRules, massRules, subexprRules]
 ];
 
 CXXGenFieldName::usage=
 "@brief Given a (possibly conjugated) generic field, return its c++ type.
 @param genericField the given generic field
-@returns the name of the c++ type for a (possibly conjugate) field.";
+@returns the name of the c++ type for a (possibly conjugate) field.
+@note functions saves its unique previous calls to improve the speed of
+calculations.";
 CXXGenFieldName::errUnknownInput=
 "Input should be head@Field@GenericIndex@Integer, where head can be
 bar, conj or nothing";
 CXXGenFieldName[SARAH`bar[field_]] :=
+   CXXGenFieldName[SARAH`bar[field]] =
    StringTemplate["typename bar<`1`>::type"][CXXGenFieldName@field];
 CXXGenFieldName[Susyno`LieGroups`conj[field_]] :=
+   CXXGenFieldName[Susyno`LieGroups`conj[field]] =
    StringTemplate["typename conj<`1`>::type"][CXXGenFieldName@field];
 CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
+   CXXGenFieldName[head[GenericIndex[index]]] =
    StringTemplate["`1``2`"][head,index];
 CXXGenFieldName[___] :=
    Utils`TestWithMessage[False,CXXGenFieldName::errUnknownInput];
 
-CXXExtFieldName::usage=
+CXXFieldName::usage=
 "@brief Given a (possibly conjugated) external field, return its c++ type.
 @param the given generic field
-@returns the name of the c++ type for a (possibly conjugate) field.";
-CXXExtFieldName::errUnknownInput=
-"Input should be head@Field[{___}], where head can be bar, conj or nothing";
-CXXExtFieldName[SARAH`bar[head_]] :=
-   StringTemplate["typename bar<`1`>::type"][CXXExtFieldName@head];
-CXXExtFieldName[Susyno`LieGroups`conj[head_]] :=
-   StringTemplate["typename conj<`1`>::type"][CXXExtFieldName@head];
-CXXExtFieldName[head_] :=
+@returns the name of the c++ type for a (possibly conjugate) field.
+@note functions saves its unique previous calls to improve the speed of
+calculations.";
+CXXFieldName::errUnknownInput=
+"Input should be head@Field[{___}], with head bar, conj or nothing";
+CXXFieldName[SARAH`bar[head_]] :=
+   CXXFieldName[SARAH`bar[head]] =
+   StringTemplate["typename bar<`1`>::type"][CXXFieldName@head];
+CXXFieldName[Susyno`LieGroups`conj[head_]] :=
+   CXXFieldName[Susyno`LieGroups`conj[head]] =
+   StringTemplate["typename conj<`1`>::type"][CXXFieldName@head];
+CXXFieldName[head_] :=
+   CXXFieldName[head] =
    CXXDiagrams`CXXNameOfField[Vertices`StripFieldIndices@head,
       CXXDiagrams`Private`prefixNamespace->"fields"];
-CXXExtFieldName[___] :=
-   Utils`TestWithMessage[False,CXXExtFieldName::errUnknownInput];
+CXXFieldName[___] :=
+   Utils`TestWithMessage[False,CXXFieldName::errUnknownInput];
 
 CXXFieldIndices::usage=
 "@brief Return the c++ expression for the container of the indices of a given
 (possibly generic) field.
 @param field the given field
 @returns the c++ expression for the container of the indices of a given
-(possibly generic) field.";
+(possibly generic) field.
+@note functions saves its unique previous calls to improve the speed of
+calculations.";
 CXXFieldIndices::errUnknownInput=
 "Input should be head@Field@GenericIndex@Integer, where head can be
 bar, conj or nothing, OR ExternalField OR ExternalField[{Indices}].";
 CXXFieldIndices[SARAH`bar[field_]] :=
+   CXXFieldIndices[SARAH`bar[field]] =
    CXXFieldIndices@field;
 CXXFieldIndices[Susyno`LieGroups`conj[field_]] :=
+   CXXFieldIndices[Susyno`LieGroups`conj[field]] =
    CXXFieldIndices@field;
 CXXFieldIndices[head_[GenericIndex[index_Integer]]] := 
+   CXXFieldIndices[head[GenericIndex[index]]] =
    StringTemplate["indices`1``2`"][StringTake[SymbolName@head,-1],index];
 CXXFieldIndices[field_] :=
    If[Length@field === 0, "std::array<int,0>()",
       StringTemplate["std::array<int,`1`>{`2`}"][Length@@field,
-         StringRiffle[ToString/@field[[1]],", "]]];
+         StringRiffle[ToString/@First@field,", "]]];
 CXXFieldIndices[___] :=
    Utils`TestWithMessage[False,CXXFieldIndices::errUnknownInput];
 
 IsGenericField::usage=
 "@brief Determine whether a given field is a generic or not.
 @param field the given field
-@returns `True` if the given field is generic and `False` otherwise.";
+@returns `True` if the given field is generic and `False` otherwise.
+@todo no tensor fields.
+@note functions saves its unique previous calls to improve the speed of
+calculations.";
 IsGenericField::errUnknownInput=
 "Only one argument is allowed.";
-IsGenericField[field_] :=
+IsGenericField[field_] := IsGenericField[field] =
 Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
    Switch[head,
       GenericS, True, 
@@ -1322,6 +1343,71 @@ Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
 ]; 
 IsGenericField[___] :=
    Utils`TestWithMessage[False,IsGenericField::errUnknownInput];
+
+CXXCodeForSubexpressions::usage=
+"@brief Create the c++ code encoding a given set of subexpressions.
+@param subexpressions the list of subexpressions
+@param preCXXRules a list of rules to apply to the subexpressions before
+calling ``Parameters`ExpressionToString[]`` for the c++ translation.
+@returns the c++ code encoding a given set of subexpressions.";
+CXXCodeForSubexpressions[subexpressions:{___Rule}, preCXXRules:{(_Rule|_RuleDelayed)...}] :=
+Module[
+   {
+      names = ToString/@First/@subexpressions,
+      exprs = Last/@subexpressions,
+      relevantSubexpressions,
+      relevantGenericFields,
+      needsContexts,
+      cxxExprs
+   },
+   relevantGenericFields = DeleteDuplicates /@ (Cases[#,_[GenericIndex[_]], Infinity, Heads -> True] &/@ exprs);
+   Print[names];
+   relevantSubexpressions = DeleteDuplicates /@ (Cases[#,subexpr:Apply[Alternatives,First/@subexpressions] :> subexpr, Infinity, Heads -> True] & /@ exprs);
+
+   needsContexts = !(FreeQ[#,SARAH`Cp] && FreeQ[#,SARAH`Mass]) &/@ exprs;
+
+   cxxExprs = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]] &/@ exprs;
+   (*cxxExprs = StringReplace[#, "\"" -> ""] & /@ cxxExprs;*)
+
+   StringJoin[Riffle[
+   Module[{name = #[[1]], genericFields = #[[2]],subs = #[[3]], needsContext = #[[4]], cxxExpr = #[[5]]},
+    "template<class GenericFieldMap> struct " <> name <> ": public subexpression_base<GenericFieldMap> {\n" <>
+    "   template<class ...Args> " <> name <> "(Args &&...args) : subexpression_base<GenericFieldMap>( std::forward<Args>( args )... )\n{}\n\n" <>
+    "std::complex<double> operator()( void ) const\n{\n" <>
+
+    If[Length[subs] =!= 0,
+      StringJoin[ToString[#] <> "<GenericFieldMap> " <>
+        ToString[#] <> "_{ *this };\n" & /@
+        subs] <> "\n",
+      ""] <>
+
+    If[Length[genericFields] =!= 0,
+      "using boost::mpl::at;\n" <>
+      "using boost::fusion::at_key;\n\n" <>
+
+      StringJoin[Module[{genericField = #},
+        "using " <> CXXGenFieldName[genericField] <>
+        " = typename at<GenericFieldMap, " <>
+          CXXKeyOfGenericField[genericField] <>
+        ">::type;\n"
+        ] & /@ genericFields] <> "\n" <>
+
+      StringJoin[Module[{genericField = #},
+        "const auto &" <> CXXFieldIndices[genericField] <>
+        " = at_key<" <> CXXKeyOfGenericField[genericField] <>
+          ">( this->index_map() );\n"
+        ] & /@ genericFields] <> "\n",
+      ""] <>
+
+    If[needsContext,
+       "const context_with_vertices &context =  *this;\n\n",
+       ""] <>
+    
+    "return " <> cxxExpr <> ";\n}\n};"] & /@
+      Transpose[{names, relevantGenericFields,
+                 relevantSubexpressions, needsContexts, cxxExprs}],
+    "\n\n"]]
+  ]
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
@@ -1384,81 +1470,10 @@ SetAttributes[
    GetLTToFSRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules,CXXGenFieldName,CXXFieldIndices,CXXExtFieldName,
-   IsGenericField
+   ToCXXPreparationRules(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
+   IsGenericField*)
    }, 
    {Protected, Locked}];
-
-CXXCodeForSubexpressions::usage="
-@brief Create the c++ code encoding a given set of subexpressions.
-@param subexpressions the list of subexpressions
-@param preCXXRules a list of rules to apply to the subexpressions
-before calling ``Parameters`ExpressionToString[]`` for the c++
-translation.
-@returns the c++ code encoding a given set of subexpressions.
-";
-CXXCodeForSubexpressions[subexpressions_List, preCXXRules_List] :=
-  Module[{names = ToString /@ subexpressions[[All,1]],
-          exprs = subexpressions[[All,2]], subexpr,
-          relevantSubexpressions, relevantGenericFields,
-          needsContexts, cxxExprs},
-    relevantGenericFields = DeleteDuplicates /@
-      (Cases[#,_[GenericIndex[_]], Infinity, Heads -> True] & /@ exprs);
-
-    relevantSubexpressions = DeleteDuplicates /@
-      (Cases[#,
-        Pattern[subexpr, Alternatives @@ subexpressions[[All,1]]] :> subexpr,
-          Infinity,
-            Heads -> True] & /@ exprs);
-
-    needsContexts = !(FreeQ[#, SARAH`Cp] && FreeQ[#, SARAH`Mass]) & /@ exprs;
-
-    cxxExprs = Parameters`ExpressionToString[
-      Fold[ReplaceAll, #, preCXXRules]] & /@ exprs;
-    cxxExprs = StringReplace[#, "\"" -> ""] & /@ cxxExprs;
-
-    StringJoin[Riffle[
-    Module[{name = #[[1]], genericFields = #[[2]],
-       subs = #[[3]], needsContext = #[[4]], cxxExpr = #[[5]]},
-    "template<class GenericFieldMap> struct " <> name <>
-    "\n: subexpression_base<GenericFieldMap>\n{\n" <>
-    "template<class ...Args> " <> name <> "( Args &&...args )\n" <>
-    ": subexpression_base<GenericFieldMap>( std::forward<Args>( args )... )\n{}\n\n" <>
-    "std::complex<double> operator()( void ) const\n{\n" <>
-
-    If[Length[subs] =!= 0,
-      StringJoin[ToString[#] <> "<GenericFieldMap> " <>
-        ToString[#] <> "_{ *this };\n" & /@
-        subs] <> "\n",
-      ""] <>
-
-    If[Length[genericFields] =!= 0,
-      "using boost::mpl::at;\n" <>
-      "using boost::fusion::at_key;\n\n" <>
-
-      StringJoin[Module[{genericField = #},
-        "using " <> CXXGenFieldName[genericField] <>
-        " = typename at<GenericFieldMap, " <>
-          CXXKeyOfGenericField[genericField] <>
-        ">::type;\n"
-        ] & /@ genericFields] <> "\n" <>
-
-      StringJoin[Module[{genericField = #},
-        "const auto &" <> CXXFieldIndices[genericField] <>
-        " = at_key<" <> CXXKeyOfGenericField[genericField] <>
-          ">( this->index_map() );\n"
-        ] & /@ genericFields] <> "\n",
-      ""] <>
-
-    If[needsContext,
-       "const context_with_vertices &context =  *this;\n\n",
-       ""] <>
-    
-    "return " <> cxxExpr <> ";\n}\n};"] & /@
-      Transpose[{names, relevantGenericFields,
-                 relevantSubexpressions, needsContexts, cxxExprs}],
-    "\n\n"]]
-  ]
 
 CXXCodeForGenericSum::usage="
 @brief Create the c++ code encoding a given sum over generic fields.
@@ -1582,7 +1597,7 @@ not a number: " <> ToString[#]] & /@ colourFactors;
     "using GenericInsertions" <> " = boost::mpl::vector<\n" <>
     StringJoin[Riffle[
       "boost::mpl::vector<" <> StringJoin[Riffle[
-          CXXExtFieldName@# & /@ #, ", "]] <>
+          CXXFieldName@# & /@ #, ", "]] <>
         ">" & /@ sortedGenericInsertions[[All,All,2]],
       ",\n"]] <> "\n>;\n\n" <>
 
