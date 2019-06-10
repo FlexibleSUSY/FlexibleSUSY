@@ -40,25 +40,25 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    }
 
    softsusy::QedQcd qedqcd;
-   SM_decays decays(m, qedqcd, true);
+   SM_decays decays(m, qedqcd, input, true);
 
    // ------------ tree-level decays ----------------------------------------
 
    // h -> b bbar
    // no QED corrections
-   // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(m, 2, 2),
-                              // 2.6118180765322455E-003, 2e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 2, 2),
+                              2.6118180765322455E-003, 2e-15);
    // QED corrections
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(m, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 2, 2),
                               2.6059181498481999E-003, 5e-15);
    // h -> tau+ tau-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(m, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(&m, 2, 2),
                               2.6800741077127161E-004, 1e-15);
    // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VWpconjVWp(m),
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VWpconjVWp(&m),
                               8.4705126919250480E-004, 1e-14);
    // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(m),
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m),
                               9.4231401208556083E-005, 2e-14);
 
    // ------------ loop-induces decays --------------------------------------

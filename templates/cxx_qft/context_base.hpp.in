@@ -56,6 +56,7 @@ namespace @ModelName@_cxx_diagrams
       }
 
       context_base(@ModelName@_mass_eigenstates_interface const& m) : model(m) {}
+      context_base(@ModelName@_mass_eigenstates_interface const* const m) : model(*m) {}
       context_base(const context_base&) = default;
       context_base(context_base&&) = default;
 

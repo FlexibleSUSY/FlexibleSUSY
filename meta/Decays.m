@@ -619,7 +619,7 @@ CreatePartialWidthCalculationPrototype[decay_FSParticleDecay] :=
             initialStateDim, finalStateDims},
            initialStateDim = TreeMasses`GetDimension[GetInitialState[decay]];
            finalStateDims = TreeMasses`GetDimension /@ GetFinalState[decay];
-           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface&" <>
+           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface*" <>
                           If[initialStateDim > 1, ", int", ""] <>
                           StringJoin[If[# > 1, ", int", ""]& /@ finalStateDims];
            functionName = CreatePartialWidthCalculationName[decay];
@@ -633,7 +633,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
             finalState = GetFinalState[decay], finalStateDims, setFieldIndices, body = ""},
            initialStateDim = TreeMasses`GetDimension[GetInitialState[decay]];
            finalStateDims = TreeMasses`GetDimension /@ GetFinalState[decay];
-           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface& model" <>
+           functionArgs = FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface* model" <>
                           If[initialStateDim > 1, ", int gI1", ""] <>
                           StringJoin[MapIndexed[If[#1 > 1, ", int gO" <> ToString[First[#2]], ""]&, finalStateDims]];
            functionName = CreatePartialWidthCalculationName[decay, "CLASSNAME"];
@@ -702,7 +702,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
            initialStateDim = TreeMasses`GetDimension[initialState];
            finalStateDims = TreeMasses`GetDimension /@ finalState;
            finalStateStarts = TreeMasses`GetDimensionStartSkippingGoldstones /@ finalState;
-           functionArgs = "dec" <> If[initialStateDim > 1, ", gI1", ""] <>
+           functionArgs = "dec_model.get()" <> If[initialStateDim > 1, ", gI1", ""] <>
                           MapIndexed[If[#1 > 1, ", gO" <> ToString[First[#2]], ""]&, finalStateDims];
            pdgsList = MapIndexed[With[{idx = First[#2]},
                                       CallPDGCodeGetter[#1, If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""], FlexibleSUSY`FSModelName <> "_info"]]&,
@@ -749,8 +749,22 @@ CreateDecaysCalculationFunction[decaysList_] :=
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
                   "_decays(" <> If[particleDim > 1, "gI1", ""] <> ");\n" <> body;
            body =
-              FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme dec(input);\n" <>
-                 "dec.fill_from(model);\n" <> body;
+              "std::unique_ptr<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface> dec_model;\n" <>
+               "switch(1) {\n" <> TextFormatting`IndentText[
+                  "case 1:\n" <>
+                  "{\n" <> TextFormatting`IndentText[
+                     "std::unique_ptr<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme> decoupling_model = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(" <>
+               FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme(input));\n" <>
+            "decoupling_model->fill_from(model);\n" <>
+            "dec_model = std::move(decoupling_model);\n" <>
+                  "break;\n"] <> "}\n" <>
+                 "case 2:\n{\n" <>TextFormatting`IndentText[
+                     "dec_model = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
+                        "break;\n"
+                     ] <> "}\n"
+               ] <>
+               "}\n" <>
+               body;
 
            body = "\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
