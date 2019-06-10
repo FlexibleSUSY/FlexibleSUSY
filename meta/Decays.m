@@ -1132,28 +1132,33 @@ FieldFromDiagram[diagram_, {i_, j_}] :=
    ];
 
 (* Returns a list of particles on edges of a diagram in form of list of elements as
-   {vertex1, vertex2} -> particle connecting vertex1 and 2 *)
+   {vertex1, vertex2} -> concrete particle connecting vertex1 and 2 (e.g. Fe) *)
 (* @todo: not clear about the conugation of particle *)
-InsertionsOnEdgesForDiagram[topology_, diagram_] := Module[{sortedVertexCombinations},
+InsertionsOnEdgesForDiagram[topology_, diagram_] :=
+   Module[{sortedVertexCombinations, connectedVertices},
 
-   sortedVertexCombinations =
-      Select[
-         Tuples[Range[CXXDiagrams`NumberOfExternalParticlesInTopology[topology] + CXXDiagrams`NumberOfPropagatorsInTopology[topology]], 2],
-         (OrderedQ[#] && !SameQ@@#)&
+      sortedVertexCombinations =
+         Select[
+            Tuples[Range[CXXDiagrams`NumberOfExternalParticlesInTopology[topology] + CXXDiagrams`NumberOfPropagatorsInTopology[topology]], 2],
+            (OrderedQ[#] && !SameQ@@#)&
+         ];
+      (* remove not connected pairs *)
+      connectedVertices = Select[sortedVertexCombinations,
+         CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, diagram, topology] =!= {}&
       ];
 
       Flatten[
-         DeleteCases[
             Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
+               (* vertices connected by 1 particle *)
                1, {{#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}]},
+               (* vertices connected by 2 particle *)
                2, {
                   {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}],
                   {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[2,1]]}]
                },
-               _, {}
-            ]& @@@ sortedVertexCombinations,
-            {}
-         ],
+               (* error *)
+               _, Utils`PrintErrorMsg["Only 1 or 2 connections between vertices are supported"]; Quit[1];
+            ]& @@@ connectedVertices,
          1
       ]
 ];
