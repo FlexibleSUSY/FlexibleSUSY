@@ -403,26 +403,24 @@ Module[
    nPointFunction
 ] /; And[
    MatchQ[inFields,
-   {_?(Utils`TestWithMessage[
+   {__?(Utils`TestWithMessage[
          TreeMasses`IsParticle@#,
          NPointFunction::errinFields,
          #,
          GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
-      ]&)
-   ..}
+      ]&)}
    ],
    MatchQ[outFields,
-   {_?( Utils`TestWithMessage[
+   {__?( Utils`TestWithMessage[
          TreeMasses`IsParticle@#,
          NPointFunction::erroutFields,
          #,
          GetSARAHModelName[],
          Cases[TreeMasses`GetParticles[], 
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
-      ]& )
-   ..}
+      ]&)}
    ],
    Utils`TestWithMessage[
       FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]] === {},
@@ -1473,6 +1471,8 @@ specific insertions with.
 before calling ``Parameters`ExpressionToString[]`` for the c++
 translation.
 @returns the c++ code encoding the given sum over generic fields.";
+CXXCodeForGenericSum::errColours=
+"Colour factor is not a number after projection: `1`";
 CXXCodeForGenericSum[
    sum_GenericSum,genericInsertions_List,combinatorialFactors_List,
    colourFactors_List,functionName_String,subexpressions_List,preCXXRules_List,
@@ -1483,9 +1483,6 @@ Module[
           subexpr, needsContext, cxxExpr, ReRatioColourFactors, ImRatioColourFactors,
           wilsonCoeffs
    },
-    Utils`AssertWithMessage[NumberQ[#],
-      "CXXDiagrams`CXXCodeForGenericSum[]: Projected colour factor is
-not a number: " <> ToString[#]] &/@ colourFactors;
     ReRatioColourFactors = {Numerator[#], Denominator[#]} & /@ Re[colourFactors];
     ImRatioColourFactors = {Numerator[#], Denominator[#]} & /@ Im[colourFactors];
 
@@ -1602,7 +1599,13 @@ not a number: " <> ToString[#]] &/@ colourFactors;
       "return accumulate_generic<GenericKeys, GenericInsertions,\n" <>
         "combinatorial_factors, colour_factors, "]
       <> functionName <> "_impl>( *this );\n}"
-  ]
+] /; And[
+   MatchQ[colourFactors,
+      {__?(Utils`TestWithMessage[NumberQ@#,
+         CXXCodeForGenericSum::errColours,
+         #]&
+      )}]
+];
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
 StringTemplate::usage=
