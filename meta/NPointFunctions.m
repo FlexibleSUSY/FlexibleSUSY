@@ -1074,7 +1074,15 @@ n-point correlation function.
 given n-point correlation function
 @returns the c++ code for the helper class of the c++ version of a given
 n-point correlation function.";
-CXXClassForNPF[nPointFunction:NPFPattern["Sums"->genSums_,"ClRules"->genRules_,"Subs"->subexpressions_], projectColourFactor_,fermionBasis_:{}] :=
+CXXClassForNPF[
+   nPointFunction:NPFPattern[
+      "Sums"->genSums_,
+      "ClRules"->genRules_,
+      "CombFac"->combFac_,
+      "ColFac"->colFac_,
+      "Subs"->subexpressions_],
+   projCol_,
+   fermionBasis_:{}] :=
 Module[
    {
       className = CXXClassNameNPF@nPointFunction,
@@ -1100,29 +1108,11 @@ Module[
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
 
    cxxSubexpressions = CXXCodeForSubexpressions[subexpressions, preCXXRules];
-    
-    If[noFermionChains,
-    genericSumCode = StringJoin[Riffle[
-      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules] & /@
-        Transpose[{
-          Extract[nPointFunction[[2,1,1]], genericSumPositions],
-          Extract[nPointFunction[[2,1,2]], genericSumPositions],
-          Extract[nPointFunction[[2,1,3]], genericSumPositions],
-          ExtractColourFactor[#, projectColourFactor]& /@
-            Extract[nPointFunction[[2,1,4]], genericSumPositions],
-          genSumNames}],
-      "\n\n"]],
-    genericSumCode = StringJoin[Riffle[
-      CXXCodeForGenericSum[Sequence @@ #, subexpressions, preCXXRules, FermionBasis -> fermionBasis] & /@
-        Transpose[{
-          Extract[nPointFunction[[2,1,1]], genericSumPositions],
-          Extract[nPointFunction[[2,1,2]], genericSumPositions],
-          Extract[nPointFunction[[2,1,3]], genericSumPositions],
-          ExtractColourFactor[#, projectColourFactor]& /@
-            Extract[nPointFunction[[2,1,4]], genericSumPositions],
-          genSumNames}],
-      "\n\n"]]
-    ];
+
+   genericSumCode = StringRiffle[MapThread[
+      CXXCodeForGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
+         {genSums,genRules,combFac,ExtractColourFactor[colFac,projCol],genSumNames}],
+      "\n\n"];
     
     If[noFermionChains,
       cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
@@ -1460,103 +1450,42 @@ If[needsContext,
 CXXCodeSubsIfContext[___] :=
    Utils`TestWithMessage[False,CXXCodeSubsIfContext::errUnknownInput];
 
-(*auxiliary functions with names of newer Mathematica versions*)
-If[TrueQ[$VersionNumber<10],
-StringTemplate::usage=
-"This is not a full replacement of Mathematica's StringTemplate.
-It works correctly only for string, containing `i` insertions with i>0";
-StringTemplate::errFailed=
-"Failed for this input string
-`1`";
-StringTemplate[str_String] :=
-Module[
-   {
-      args = DeleteDuplicates@StringCases[str,
-         HoldPattern["`"~~DigitCharacter..~~"`"]],
-      noControlStrs = DeleteDuplicates@StringSplit[str,
-         "`"~~DigitCharacter~~"`"],
-      argRules,noControlRules,preControl,return
-   },
-   argRules = Rule[#,"<>ToString@#"<>StringDrop[StringDrop[#,1],-1]<>"<>"] &/@
-      args;
-   noControlRules = Rule[#,"\""<>#<>"\""] &/@ noControlStrs;
-   preControl = StringReplace[StringReplace[StringReplace[str,
-      argRules], noControlRules],"<><>"->"<>"];
-   If[StringTake[str,1] === "`",preControl = StringDrop[preControl,2]];
-   If[StringTake[str,-1] === "`",preControl = StringDrop[preControl,-2]];
-   return=ToExpression[preControl <> "&"];
-   If[return===$Failed,
-      Utils`TestWithMessage[False,StringTemplate::errFailed,str],\
-      return]
-];
-StringTemplate[___] :=
-   Utils`TestWithMessage[False,StringTemplate::usage];
-
-SetAttributes[{StringTemplate},{Protected, Locked}]
-];
-If[TrueQ[$VersionNumber<10.1],
-StringRiffle::usage=
-"This is not a full replacement of Mathematica's StringRiffle.
-It works only for [{___String},_String] input.";
-StringRiffle[strs:{___String},sep_String] := 
-   StringJoin@Riffle[strs,sep];
-StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
-   in<>StringJoin@Riffle[strs,sep]<>fin;
-StringRiffle[___] :=
-   Utils`TestWithMessage[False,StringRiffle::usage];
-   
-SetAttributes[{StringRiffle},{Protected, Locked}]
+ExtractColourFactor::usage=                                                     (*@todo modify this to use some enum of proj-s*)
+"@brief Extracts the colour factor for a given colour structure like 
+e.g, Delta[ct1, ct2].";
+ExtractColourFactor[colourfactors:{{__}..}, projection_] :=
+If[projection === Identity,
+   Map[Identity,colourfactors,{2}],
+   Map[Coefficient[#, projection]&,colourfactors,{2}]
 ];
 
-SetAttributes[
-   {
-   NPFPattern,NPointFunction,
-   GetSARAHModelName,
-   GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
-   LaunchSubkernelFor,
-   CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
-   GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
-   FANamesForFields,
-   VerticesForNPointFunction,
-   CreateCXXHeaders,
-   CreateCXXFunctions,
-   GetLTToFSRules,
-   CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
-   CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
-   IsGenericField,CXXGenFieldKey*)
-   CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext
-   }, 
-   {Protected, Locked}];
-
-CXXCodeForGenericSum::usage="
-@brief Create the c++ code encoding a given sum over generic fields.
+CXXCodeForGenericSum::usage=
+"@brief Create the c++ code encoding a given sum over generic fields.
 @param sum the sum over generic fields
-@param genericInsertions the list of field insertions to be summed
-over
-@param combinatorialFactors a list of combinatorial factors
-(~symmetry factors) to multiply the amplitudes of specific insertions
-with.
-@param colourFactors a list of colour factors to multiply the
-amplitudes of specific insertions with.
+@param genericInsertions the list of field insertions to be summed over
+@param combinatorialFactors a list of combinatorial factors (~symmetry factors) 
+to multiply the amplitudes of specific insertions with.
+@param colourFactors a list of colour factors to multiply the amplitudes of
+specific insertions with.
 @param functionName the name of the resulting c++ function
 @param subexpressions the list of subexpressions
 @param preCXXRules a list of rules to apply to the subexpressions
 before calling ``Parameters`ExpressionToString[]`` for the c++
 translation.
-@returns the c++ code encoding the given sum over generic fields.
-";
-CXXCodeForGenericSum[sum_GenericSum, genericInsertions_List,
-    combinatorialFactors_List, colourFactors_List, functionName_String,
-    subexpressions_List, preCXXRules_List,
-    OptionsPattern[{FermionBasis -> {}}]] :=
-  Module[{expr = sum[[1]], indices = sum[[2]], fermionBasis = OptionValue[FermionBasis],
+@returns the c++ code encoding the given sum over generic fields.";
+CXXCodeForGenericSum[
+   sum_GenericSum,genericInsertions_List,combinatorialFactors_List,
+   colourFactors_List,functionName_String,subexpressions_List,preCXXRules_List,
+   fermionBasis_:{}] :=
+Module[
+   {expr = sum[[1]], indices = sum[[2]],
           sortedGenericInsertions, genericFields, relevantSubexpressions,
           subexpr, needsContext, cxxExpr, ReRatioColourFactors, ImRatioColourFactors,
-          wilsonCoeffs},
+          wilsonCoeffs
+   },
     Utils`AssertWithMessage[NumberQ[#],
       "CXXDiagrams`CXXCodeForGenericSum[]: Projected colour factor is
-not a number: " <> ToString[#]] & /@ colourFactors;
+not a number: " <> ToString[#]] &/@ colourFactors;
     ReRatioColourFactors = {Numerator[#], Denominator[#]} & /@ Re[colourFactors];
     ImRatioColourFactors = {Numerator[#], Denominator[#]} & /@ Im[colourFactors];
 
@@ -1635,12 +1564,12 @@ not a number: " <> ToString[#]] & /@ colourFactors;
     StringJoin[Table["}",{k,Length[indices]}]] <> "\n\n" <> 
 
     "return " <>
-    If[Length[OptionValue[FermionBasis]] === 0,
+    If[Length[fermionBasis] === 0,
       "value;",
       ToString[fermionBasis] <> ";"] <>
     "\n}\n};\n\n" <>
 
-    If[Length[OptionValue[FermionBasis]] === 0,
+    If[Length[fermionBasis] === 0,
       "std::complex<double>",
       "std::array<std::complex<double>, 2>"]
     <> functionName <> "( void )\n{\n" <>
@@ -1674,16 +1603,74 @@ not a number: " <> ToString[#]] & /@ colourFactors;
         "combinatorial_factors, colour_factors, "]
       <> functionName <> "_impl>( *this );\n}"
   ]
+(*auxiliary functions with names of newer Mathematica versions*)
+If[TrueQ[$VersionNumber<10],
+StringTemplate::usage=
+"This is not a full replacement of Mathematica's StringTemplate.
+It works correctly only for string, containing `i` insertions with i>0";
+StringTemplate::errFailed=
+"Failed for this input string
+`1`";
+StringTemplate[str_String] :=
+Module[
+   {
+      args = DeleteDuplicates@StringCases[str,
+         HoldPattern["`"~~DigitCharacter..~~"`"]],
+      noControlStrs = DeleteDuplicates@StringSplit[str,
+         "`"~~DigitCharacter~~"`"],
+      argRules,noControlRules,preControl,return
+   },
+   argRules = Rule[#,"<>ToString@#"<>StringDrop[StringDrop[#,1],-1]<>"<>"] &/@
+      args;
+   noControlRules = Rule[#,"\""<>#<>"\""] &/@ noControlStrs;
+   preControl = StringReplace[StringReplace[StringReplace[str,
+      argRules], noControlRules],"<><>"->"<>"];
+   If[StringTake[str,1] === "`",preControl = StringDrop[preControl,2]];
+   If[StringTake[str,-1] === "`",preControl = StringDrop[preControl,-2]];
+   return=ToExpression[preControl <> "&"];
+   If[return===$Failed,
+      Utils`TestWithMessage[False,StringTemplate::errFailed,str],
+      return]
+];
+StringTemplate[___] :=
+   Utils`TestWithMessage[False,StringTemplate::usage];
 
-ExtractColourFactor::usage="
-@brief Extracts the colour factor for a given colour structure like 
-  e.g, Delta[ct1, ct2].
-";
-ExtractColourFactor[colourfactors_List, projection_] :=
-  If[projection === Identity,
-    Identity /@ colourfactors,
-    Coefficient[#, projection]& /@ colourfactors
-  ]
+SetAttributes[{StringTemplate},{Protected, Locked}]
+];
+If[TrueQ[$VersionNumber<10.1],
+StringRiffle::usage=
+"This is not a full replacement of Mathematica's StringRiffle.
+It works only for [{___String},_String] input.";
+StringRiffle[strs:{___String},sep_String] := 
+   StringJoin@Riffle[strs,sep];
+StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
+   in<>StringJoin@Riffle[strs,sep]<>fin;
+StringRiffle[___] :=
+   Utils`TestWithMessage[False,StringRiffle::usage];
+   
+SetAttributes[{StringRiffle},{Protected, Locked}]
+];
+
+SetAttributes[
+   {
+   NPFPattern,NPointFunction,
+   GetSARAHModelName,
+   GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
+   LaunchSubkernelFor,
+   CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
+   GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
+   FANamesForFields,
+   VerticesForNPointFunction,
+   CreateCXXHeaders,
+   CreateCXXFunctions,
+   GetLTToFSRules,
+   CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
+   CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
+   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
+   IsGenericField,CXXGenFieldKey*)
+   CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext
+   }, 
+   {Protected, Locked}];
 
 GenericFieldType::usage="
 @brief Determine the generic field type of a given field.
