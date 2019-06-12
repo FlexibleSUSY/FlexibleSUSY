@@ -901,8 +901,8 @@ Module[
 
    definitionBodies = CXXBodyNPF/@nPointFunctions;
 
-   auxilliaryClasses = CXXClassForNPF[Sequence@@#,OptionValue@FermionBasis] &/@
-      Transpose[{nPointFunctions/.loopFunctionRules,colourProjectorList}];
+   auxilliaryClasses = MapThread[CXXClassForNPF[##,OptionValue@FermionBasis]&,
+      {nPointFunctions/.loopFunctionRules,colourProjectorList}];
 
     definitions = StringJoin[Riffle[auxilliaryClasses,"\n\n"]] <> "\n\n" <>
       StringJoin[Riffle[#[[1]] <> "\n{\n" <> #[[2]] <> "\n}" & /@
@@ -911,17 +911,17 @@ Module[
    {prototypes, definitions}
 ] /; And[
    MatchQ[nPointFunctions,
-      {_?(Utils`TestWithMessage[
+      {__?(Utils`TestWithMessage[
          MatchQ[#,NPFPattern[]],
          CreateCXXFunctions::errnPointFunctions,
          #]&)
-      ..}],
+      }],
    MatchQ[names,
-      {_?(Utils`TestWithMessage[
+      {__?(Utils`TestWithMessage[
          StringQ@#,
          CreateCXXFunctions::errnames,
          #]&)
-      ..}],
+      }],
    Utils`TestWithMessage[
       Length@nPointFunctions===Length@names,
       CreateCXXFunctions::errUnequalLength],
