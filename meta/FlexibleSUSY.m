@@ -1943,7 +1943,9 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
             smParticleAliases},
+
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
+
            decaysLists = {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}& /@ decayParticles;
            decaysVertices = DeleteDuplicates[Flatten[Permutations /@ Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1], 1]];
            (* @todo: this is just for debugging. Remove it! *)

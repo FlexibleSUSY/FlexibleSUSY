@@ -59,8 +59,8 @@ double Decay_amplitude_SSV::square() const
 // @todo check expressions correct
 double Decay_amplitude_SVV::square() const
 {
-   if (m_out_1 <= massless_vector_threshold &&
-       m_out_2 <= massless_vector_threshold) {
+   if (m_vector_1 <= massless_vector_threshold &&
+       m_vector_2 <= massless_vector_threshold) {
       const double m0 = 4. * AbsSqr(form_factor_g);
 
       const double m2 = Sqr(m_decay) * (
@@ -73,11 +73,11 @@ double Decay_amplitude_SVV::square() const
             + AbsSqr(form_factor_eps));
 
       return m0 + m2 + m4;
-   } else if (m_out_1 <= massless_vector_threshold) {
+   } else if (m_vector_1 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
 
       const double m_s_sq = Sqr(m_decay);
-      const double m_vec_sq = Sqr(m_out_2);
+      const double m_vec_sq = Sqr(m_vector_2);
 
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
          2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
@@ -89,11 +89,11 @@ double Decay_amplitude_SVV::square() const
          Re(form_factor_11 * Conj(form_factor_21)) / m_vec_sq;
 
       return m0 + m41 + m42 + m43;
-   } else if (m_out_2 <= massless_vector_threshold) {
+   } else if (m_vector_2 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
 
       const double m_s_sq = Sqr(m_decay);
-      const double m_vec_sq = Sqr(m_out_1);
+      const double m_vec_sq = Sqr(m_vector_1);
 
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
          2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
@@ -109,10 +109,10 @@ double Decay_amplitude_SVV::square() const
 
    const double m_s_sq = Sqr(m_decay);
    const double m_s_4 = Power4(m_decay);
-   const double m_1_sq = Sqr(m_out_1);
-   const double m_1_4 = Power4(m_out_1);
-   const double m_2_sq = Sqr(m_out_2);
-   const double m_2_4 = Power4(m_out_2);
+   const double m_1_sq = Sqr(m_vector_1);
+   const double m_1_4 = Power4(m_vector_1);
+   const double m_2_sq = Sqr(m_vector_2);
+   const double m_2_4 = Power4(m_vector_2);
 
    const double mgg = 0.25 * AbsSqr(form_factor_g) * (
       m_s_4 + m_1_4 + m_2_4 + 10. * m_1_sq * m_2_sq
@@ -137,8 +137,8 @@ double Decay_amplitude_SVV::square() const
 Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV const& amp2) {
    Decay_amplitude_SVV amp;
    amp.m_decay = amp2.m_decay;
-   amp.m_out_1 = amp2.m_out_1;
-   amp.m_out_2 = amp2.m_out_2;
+   amp.m_vector_1 = amp2.m_vector_1;
+   amp.m_vector_2 = amp2.m_vector_2;
    amp.massless_vector_threshold = amp2.massless_vector_threshold;
    amp.form_factor_g = factor * amp2.form_factor_g;
    amp.form_factor_11 = factor * amp2.form_factor_11;
@@ -152,8 +152,8 @@ Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV 
 Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF const& amp2) {
    Decay_amplitude_SFF amp;
    amp.m_decay = amp2.m_decay;
-   amp.m_out_1 = amp2.m_out_1;
-   amp.m_out_2 = amp2.m_out_2;
+   amp.m_fermion_1 = amp2.m_fermion_1;
+   amp.m_fermion_2 = amp2.m_fermion_2;
    amp.form_factor_left = factor * amp2.form_factor_left;
    amp.form_factor_right = factor * amp2.form_factor_right;
    return amp;
@@ -162,12 +162,12 @@ Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF c
 double Decay_amplitude_SFF::square() const
 {
    const double m_in_sq = Sqr(m_decay);
-   const double m_1_sq = Sqr(m_out_1);
-   const double m_2_sq = Sqr(m_out_2);
+   const double m_1_sq = Sqr(m_fermion_1);
+   const double m_2_sq = Sqr(m_fermion_2);
 
    return (m_in_sq - m_1_sq - m_2_sq) *
       (AbsSqr(form_factor_left) + AbsSqr(form_factor_right))
-      - 4. * m_out_1 * m_out_2 * Re(
+      - 4. * m_fermion_1 * m_fermion_2 * Re(
          form_factor_left * Conj(form_factor_right));
 }
 

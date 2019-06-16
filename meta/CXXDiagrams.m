@@ -842,8 +842,9 @@ GaugeStructureOfVertexLorentzPart[
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
+(* @todo uncomment *)
 GaugeStructureOfVertexLorentzPart[vertexPart_] := 
-	(Print["Unknown colour structure in vertex ", vertexPart]; Quit[1])
+	(Print["Unknown colour structure in vertex ", vertexPart](*; Quit[1]*))
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * combine all left and right projector parts to chiral parts.

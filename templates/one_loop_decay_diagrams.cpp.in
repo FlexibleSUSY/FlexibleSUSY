@@ -61,8 +61,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,1)*(2*b0tmp1*(
       CpcF4cF5S1PR*(CpcF6F4S2PR*CpF5F6S3PL*mF4 + CpcF6F4S2PL*CpF5F6S3PR*mF5 +
@@ -130,8 +130,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,-1)*c0tmp1*
       CpS1cS4cS5*CpS2S4cS6*CpS3S5S6);
@@ -167,8 +167,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,1)*c0tmp1*
       CpS1cU4cU5*CpS2cU6U4*CpS3U5U6);
@@ -210,8 +210,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,-1)*CpS1cS4cS5*
       CpS2S4cV6*CpS3S5V6*(b0tmp1 + c1tmp3*Sqr(mext1) + c2tmp4*Sqr(mext1) -
@@ -256,8 +256,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,-1)*CpS1cS4cV5*
       CpS2S4cS6*CpS3S6V5*(b0tmp1 - c2tmp4*Sqr(mext1) - c0tmp2*Sqr(mext2) +
@@ -302,8 +302,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,-1)*CpS1cS5cV4*
       CpS2cS6V4*CpS3S5S6*(b0tmp1 + c1tmp3*Sqr(mext1) + 3*c2tmp4*Sqr(mext1) + 3*
@@ -348,8 +348,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,0.5)*CpS1cS4cV5*
       CpS2S4cV6*CpS3V5V6*(2*b0tmp1 - c1tmp3*Sqr(mext1) - 3*c2tmp4*Sqr(mext1) -
@@ -394,8 +394,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,0.5)*CpS1cS5cV4*
       CpS2V4cV6*CpS3S5V6*(2*b0tmp1 + 4*c1tmp3*Sqr(mext1) + 7*c2tmp4*Sqr(mext1)
@@ -440,8 +440,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,0.5)*CpS1cV4cV5*
       CpS2cS6V4*CpS3S6V5*(2*b0tmp1 - c1tmp3*Sqr(mext1) + 2*c2tmp4*Sqr(mext1) +
@@ -480,8 +480,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(std::complex<double>(0,4)*c0tmp1*
       CpS1cV4cV5*CpS2V4cV6*CpS3V5V6);
@@ -515,8 +515,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(-0.5*b0tmp1*CpS1cS4cS5*CpS2S3S4S5);
 
@@ -549,8 +549,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_VV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(CpS1cV4cV5*CpS2S3V4V5*(-2*b0tmp1 +
       finite));
@@ -584,8 +584,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(-0.5*b0tmp1*CpS1S3S4S5*CpS2cS4cS5);
 
@@ -618,8 +618,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_VV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(CpS1S3V4V5*CpS2cV4cV5*(-2*b0tmp1 +
       finite));
@@ -653,8 +653,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(-0.5*b0tmp1*CpS1S2S4S5*CpS3cS4cS5);
 
@@ -687,8 +687,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
    Decay_amplitude_SSS result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_scalar_1 = mext2;
+   result.m_scalar_2 = mext3;
 
    result.form_factor = oneOver16PiSqr*(CpS1S2V4V5*CpS3cV4cV5*(-2*b0tmp1 +
       finite));
@@ -745,8 +745,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_eps = oneOver16PiSqr*(-2*(c0tmp2*(CpcF4cF5S1PL*
       CpcF6F4V2PL*CpF5F6V3PL - CpcF4cF5S1PR*CpcF6F4V2PR*CpF5F6V3PR)*mF4 +
@@ -893,8 +893,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,4)*c00tmp1*
       CpS1cS4cS5*CpS4cS6V2*CpS5S6V3);
@@ -944,8 +944,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*c00tmp1*
       CpcU6U4V2*CpS1cU4cU5*CpU5U6V3);
@@ -989,8 +989,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*c0tmp1*
       CpS1cS4cS5*CpS4V2cV6*CpS5V3V6);
@@ -1033,8 +1033,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,2)*c00tmp1*
       CpS1cS4cV5*CpS4cS6V2*CpS6V3V5);
@@ -1089,8 +1089,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,2)*c00tmp2*
       CpcS6V2V4*CpS1cS5cV4*CpS5S6V3);
@@ -1153,8 +1153,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpS1cS4cV5*
       CpS4V2cV6*CpV3V5V6*(b0tmp1 - c00tmp3 - c1tmp4*Sqr(mext1) - c2tmp6*Sqr(
@@ -1216,8 +1216,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpS1cS5cV4*
       CpS5V3V6*CpV2V4cV6*(b0tmp1 - c00tmp3 + 2*c0tmp2*Sqr(mext1) + c1tmp4*Sqr(
@@ -1268,8 +1268,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*c0tmp1*
       CpcS6V2V4*CpS1cV4cV5*CpS6V3V5);
@@ -1321,8 +1321,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-0.5)*
       CpS1cV4cV5*CpV2V4cV6*CpV3V5V6*(4*b0tmp1 + 20*c00tmp3 - 4*finite - 4*
@@ -1371,8 +1371,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_SS(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(-0.5*b0tmp1*CpS1cS4cS5*CpS4S5V2V3);
 
@@ -1411,8 +1411,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(-0.5*b0tmp1*CpS1cV4cV5*(4*CpV2V3V4V51
        + CpV2V3V4V52 + CpV2V3V4V53) + CpS1cV4cV5*CpV2V3V4V51*finite);
@@ -1446,8 +1446,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_SV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(b0tmp1*CpcS4V2cV5*CpS1S4V3V5);
 
@@ -1480,8 +1480,8 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n14_SV(
    Decay_amplitude_SVV result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(b0tmp1*CpcS4V3cV5*CpS1S4V2V5);
 
@@ -2075,8 +2075,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,1)*(b0tmp1
       *CpcF4cF5S1PL*CpF2F4cS6PR*CpF5F3S6PR - c0tmp2*CpcF4cF5S1PL*CpF2F4cS6PL*
@@ -2138,8 +2138,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,-1)*
       CpS1cS4cS5*(c1tmp2*CpF2cF6S4PL*CpF6F3S5PR*mext2 + c2tmp3*CpF2cF6S4PR*
@@ -2194,8 +2194,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,2)*(-2*
       b0tmp1*CpcF4cF5S1PR*CpF2F4cV6PL*CpF5F3V6PR + CpcF4cF5S1PL*(c1tmp3*
@@ -2259,8 +2259,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,-1)*
       CpS1cS4cV5*(-(b0tmp1*CpF2cF6S4PR*CpF6F3V5PR) + 2*c2tmp4*CpF2cF6S4PL*
@@ -2320,8 +2320,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,1)*
       CpS1cS5cV4*(-(b0tmp1*CpF2cF6V4PL*CpF6F3S5PR) + 2*c1tmp3*CpF2cF6V4PR*
@@ -2384,8 +2384,8 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
    Decay_amplitude_SFF result;
 
    result.m_decay = mext1;
-   result.m_out_1 = mext2;
-   result.m_out_2 = mext3;
+   result.m_fermion_1 = mext2;
+   result.m_fermion_2 = mext3;
 
    result.form_factor_right = oneOver16PiSqr*(std::complex<double>(0,2)*
       CpS1cV4cV5*(c1tmp2*CpF2cF6V4PR*CpF6F3V5PR*mext2 + c2tmp3*CpF2cF6V4PL*
