@@ -20,6 +20,7 @@
 
 *)
 
+(* @todo: rename diagram to insertion *)
 BeginPackage["Decays`",
    {"SARAH`", "CConversion`", "CXXDiagrams`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`"}
 ];
@@ -371,7 +372,7 @@ IsSupportedDiagram[diagram_] := ContainsOnlySupportedVertices[diagram];
 GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
 
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
-    Module[{externalFields, diagrams},
+   Module[{externalFields, diagrams},
            externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]];
            diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph, externalFields];
            Select[diagrams, IsPossibleNonZeroDiagram]
@@ -463,10 +464,9 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
     Module[{genericFinalStates, finalStateParticlesClassified,
             isPossibleDecay, concreteFinalStates, decays},
 
-           If[exactNumberOfProducts > 2,
-              Print["Error: decays with ", exactNumberOfProducts,
-                    " final particles are not currently supported."];
-              Quit[1];
+           Utils`AssertWithMessage[exactNumberOfProducts === 2,
+              "decays with " <> ToString@exactNumberOfProducts <>
+                    " final particles are not currently supported."
            ];
 
            genericFinalStates = GetAllowedGenericFinalStates[particle, exactNumberOfProducts];
@@ -854,10 +854,10 @@ FillSSSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_1);\n";
-           assignments = assignments <> structName <> ".m_out_1 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_scalar_1 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_2);\n";
-           assignments = assignments <> structName <> ".m_out_2 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_scalar_2 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_3);\n";
            assignments
@@ -869,10 +869,10 @@ FillSFFDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_1);\n";
-           assignments = assignments <> structName <> ".m_out_1 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_fermion_1 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_2);\n";
-           assignments = assignments <> structName <> ".m_out_2 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_fermion_2 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_3);\n";
            assignments
@@ -904,10 +904,10 @@ FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_1);\n";
-           assignments = assignments <> structName <> ".m_out_1 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_vector_1 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_2);\n";
-           assignments = assignments <> structName <> ".m_out_2 = " <> paramsStruct <> ".physical_mass<" <>
+           assignments = assignments <> structName <> ".m_vector_2 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]], prefixNamespace -> fieldsNamespace] <>
                          " >(idx_3);\n";
            assignments
@@ -963,6 +963,16 @@ FillDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsS
            "Decay_amplitude_FFV", FillFFVDecayAmplitudeMasses[decay, modelName, structName, paramsStruct],
            _, ""
           ];
+FillMasses[decay_FSParticleDecay] :=
+   Switch[GetDecayAmplitudeType[decay],
+      "Decay_amplitude_SSS", "result.m_decay, result.m_scalar_1, result.m_scalar_2",
+      "Decay_amplitude_SFF", "result.m_decay, result.m_fermion_1, result.m_fermion_2",
+      "Decay_amplitude_SSV", "result.m_decay, result.m_scalar, result.m_vector",
+      "Decay_amplitude_SVV", "result.m_decay, result.m_vector_1, result.m_vector_2",
+      "Decay_amplitude_FFS", "result.m_decay, result.m_fermion, result.m_scalar",
+      "Decay_amplitude_FFV", "result.m_decay, result.m_fermion, result.m_vector",
+      _, ""
+   ];
 
 ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SSS",
                               structName_] :=
@@ -1117,6 +1127,9 @@ Compare[a_, b_] := Module[{},
    True
 ];
 
+(* returns an element of the list from
+   utils/loop_decays/output/generic_loop_decay_diagram_classes.m
+   corresponding to a given diagram *)
 TranslationForDiagram[topology_, diagram_] := Module[{
    diagramsWithCorrectTopology,
    file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"], temp,res
@@ -1130,8 +1143,9 @@ TranslationForDiagram[topology_, diagram_] := Module[{
 
    res = Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&];
 
+   Print[temp];
    Utils`AssertWithMessage[Length[res] === 1,
-      "Error! Couldn't find translation for a diagram"
+      "Couldn't find the C++ translation for a needed diagram"
    ];
 
    First@res
@@ -1190,12 +1204,12 @@ ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] :=
          PR -> "right()",
          1 -> "value()",
          g[_, _] -> "value()",
-         (* @todo: rules below need checking! *)
-         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> (
-            "value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, -f[m]]}, ", "] <> ")"),
-         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> ("value(" <>
-         StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, f[m]]}, ", "] <> ")"),
+(*          @todo: rules below need checking! *)
+(*         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> ( *)
+(*            "value(" <>*)
+(*            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, -f[m]]}, ", "] <> ")"),*)
+(*         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> ("value(" <>*)
+(*         StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, f[m]]}, ", "] <> ")"),*)
 (*         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])*)
 (*            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])*)
 (*            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",*)
@@ -1257,10 +1271,6 @@ GetFieldsAssociations2[diagram_, diagramDylan_] :=
             ]
             ]
       ];
-      Print["res:"];
-      Print[res];
-      Print["============"];
-      Print[""];
 
       res
    ];
@@ -1282,9 +1292,16 @@ WrapCodeInLoop[indices_, code_] :=
          "}\n",
          #-1
          ]& /@ Reverse@Range@Length[indices]));
+(* some classes of insertions are not present in Dyla's output,
+   here we filter them out *)
+DiagramWithLoopFunctionEvaluatingTo0Q[topology_, diagram_] :=
+   Module[{fieldTypes = GetFeynArtsTypeName /@ (Last /@ InsertionsOnEdgesForDiagram[topology, diagram])},
 
+      fieldTypes === {S,S,V,S,S} ||
+         fieldTypes === {S,S,V,V,V}
+   ];
 
-WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
+WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{vertices, indices, cppVertices,
       mass = {}, translation, fieldAssociation,
       externalEdges, internalEdges,
@@ -1292,12 +1309,13 @@ WrapCodeInLoopOverInternalVertices[topology_, diagram_] :=
       internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode, functionBody = ""
    },
 
+      (* discard diagram that even though exist in principle (have
+         all non zero vertices etc.) evaluate to 0 *)
+      If[DiagramWithLoopFunctionEvaluatingTo0Q[topology, diagram],
+         Return[""];
+      ];
+
       translation = TranslationForDiagram[topology, diagram];
-      Print["topology:"];
-      Print[topology];
-      Print["diagram:"];
-      Print[diagram];
-      Print[translation];
 
       (* {Field[1] -> concrete field, ...} *)
       fieldAssociation = GetFieldsAssociations2[diagram, translation[[-2]]];
@@ -1392,7 +1410,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   "\nresult += calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
-                     "result.m_decay, result.m_out_1, result.m_out_2,\n" <>
+                     FillMasses[decay] <> ",\n" <>
                      (* internal masses *)
                      StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n" <>
                   (* couplings *)
@@ -1421,7 +1439,7 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
-           (body = body <> WrapCodeInLoopOverInternalVertices[Sequence @@ #])& /@ oneLoopTopAndInsertion;
+           (body = body <> WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #])& /@ oneLoopTopAndInsertion;
 
            "// ----------------- 1loop contributions to the amplitude -----------------\n\n" <>
               body
@@ -1469,9 +1487,11 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            If[IsPossibleTreeLevelDecay[decay, True],
               body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
+
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
               body = body <> FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
+
            body = body <> "return " <> returnVar <> ";\n";
 
             "// " <> ToString@initialParticle <>  " -> " <> ToString@finalState <> "\n" <>
@@ -1696,7 +1716,7 @@ CreateHiggsToGluonGluonPartialWidthFunction[decay_FSParticleDecay, modelName_] :
            args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
                   Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
            templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body = 
+           body =
               "const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);\n" <>
               "return amp.square();\n";
            "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>

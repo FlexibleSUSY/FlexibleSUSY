@@ -31,13 +31,16 @@ namespace flexiblesusy {
  * @brief generic amplitude for the decay of a scalar into two scalars
  */
 struct Decay_amplitude_SSS {
-   double m_decay{0.};
-   double m_out_1{0.};
-   double m_out_2{0.};
+   double m_decay {0.};
+   double m_scalar_1 {0.};
+   double m_scalar_2 {0.};
    std::complex<double> form_factor{};
 
    double square() const;
-   Decay_amplitude_SSS operator+=(Decay_amplitude_SSS const&);
+   Decay_amplitude_SSS operator+=(Decay_amplitude_SSS const& amp) {
+      form_factor += amp.form_factor;
+      return *this;
+   }
 };
 Decay_amplitude_SSS operator*(std::complex<double>, Decay_amplitude_SSS const&);
 
@@ -47,14 +50,17 @@ Decay_amplitude_SSS operator*(std::complex<double>, Decay_amplitude_SSS const&);
  * @brief generic amplitude for the decay of a scalar into a scalar and vector
  */
 struct Decay_amplitude_SSV {
-   double m_decay{0.};
-   double m_scalar{0.};
-   double m_vector{0.};
+   double m_decay {0.};
+   double m_scalar {0.};
+   double m_vector {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
    std::complex<double> form_factor{};
 
    double square() const;
-   Decay_amplitude_SSV operator+=(Decay_amplitude_SSV const&);
+   Decay_amplitude_SSV operator+=(Decay_amplitude_SSV const& amp) {
+      form_factor += amp.form_factor;
+      return *this;
+   }
 };
 Decay_amplitude_SSV operator*(std::complex<double>, Decay_amplitude_SSV const&);
 
@@ -63,9 +69,9 @@ Decay_amplitude_SSV operator*(std::complex<double>, Decay_amplitude_SSV const&);
  * @brief generic amplitude for the decay of a scalar into two vectors
  */
 struct Decay_amplitude_SVV {
-   double m_decay{0.};
-   double m_out_1{0.};
-   double m_out_2{0.};
+   double m_decay {0.};
+   double m_vector_1 {0.};
+   double m_vector_2 {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
    std::complex<double> form_factor_g{};
    std::complex<double> form_factor_11{};
@@ -92,9 +98,9 @@ Decay_amplitude_SVV operator*(std::complex<double>, Decay_amplitude_SVV const&);
  * @brief generic amplitude for the decay of a scalar into two fermions
  */
 struct Decay_amplitude_SFF {
-   double m_decay{0.};
-   double m_out_1{0.};
-   double m_out_2{0.};
+   double m_decay {0.};
+   double m_fermion_1 {0.};
+   double m_fermion_2 {0.};
    std::complex<double> form_factor_left{};
    std::complex<double> form_factor_right{};
 
@@ -112,9 +118,9 @@ Decay_amplitude_SFF operator*(std::complex<double>, Decay_amplitude_SFF const&);
  * @brief generic amplitude for the decay of a fermion into a fermion and scalar
  */
 struct Decay_amplitude_FFS {
-   double m_decay{0.};
-   double m_fermion{0.};
-   double m_scalar{0.};
+   double m_decay {0.};
+   double m_fermion {0.};
+   double m_scalar {0.};
    std::complex<double> form_factor_left{};
    std::complex<double> form_factor_right{};
 
@@ -132,9 +138,9 @@ Decay_amplitude_FFS operator*(std::complex<double>, Decay_amplitude_FFS const&);
  * @brief generic amplitude for the decay of a fermion into a fermion and vector
  */
 struct Decay_amplitude_FFV {
-   double m_decay{0.};
-   double m_fermion{0.};
-   double m_vector{0.};
+   double m_decay {0.};
+   double m_fermion {0.};
+   double m_vector {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
    std::complex<double> form_factor_gam_left{};
    std::complex<double> form_factor_gam_right{};
