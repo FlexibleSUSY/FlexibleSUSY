@@ -76,6 +76,22 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
+      If[TreeMasses`IsFermion[photonEmitter] && TreeMasses`IsFermion[photonEmitterAfter] && TreeMasses`IsVector[exchangeParticle],
+	Return[True]
+      ];
+
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
+        Return[True]
+      ];
+
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsScalar[photonEmitterAfter],
+        Return[True]
+      ];
+
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
+        Return[True]
+      ];
+
       Print["Warning: Diagram with internal particles of type ",
          StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]})];
       Print["         is currently not supported."];
