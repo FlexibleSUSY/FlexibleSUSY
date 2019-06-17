@@ -799,7 +799,7 @@ CreateCXXFunctions[nPointFunctions_List, names_List,
           CXXArgStringNPF[#[[1]]] <> ")" & /@
         Transpose[{nPointFunctions, names}],
       definitionHeads = "std::array<std::complex<double>, " <> ToString[Length[fermionBasis]] <> "> "
-          <> #[[2]] <> "("
+          <> #[[2]] <> "(" <>
           CXXArgStringNPF[#[[1]]] <> ")" & /@
         Transpose[{nPointFunctions, names}]
     ];
@@ -1413,7 +1413,6 @@ Module[
    {
       names = CXXGenFieldName/@fields,
       keys = CXXGenFieldKey/@fields,
-      indices = CXXFieldIndices/@fields,
       fLns,iLns,
       mainCommands = {
          "using boost::mpl::at;",
@@ -1482,7 +1481,7 @@ Module[
       expr = First@sum,
       indices = Last@sum,
       names = First/@subexpressions,
-      sortedGenericInsertions,
+      flatGenIns = Part[Map[SortBy[#,First]&,genericInsertions],All,All,2],
       genericFields,
       relevantSubs,
       needsContext, cxxExpr, ReRatioColourFactors, ImRatioColourFactors,
@@ -1510,44 +1509,13 @@ Module[
    ];
    
    genericFields = Sort[#1@GenericIndex@#2]&@@@indices;                         (*@todo normal summation indices for NPF class the remove this here*)
-   sortedGenericInsertions = SortBy[#,First] &/@ genericInsertions;
 
-   operator = If[fermionBasis === {},
-      "std::complex<double>",
-      StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis]];
-   genToSum = StringRiffle[Apply[
-      StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
-      {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genericFields,
-      {1}],"\n"];
-   relSubs = If[relevantSubs === {},"",
-       StringJoin[ToString[#] <> "<GenericFieldMap> " <>
-         ToString[#] <> "_{ *this, index_map };\n" & /@
-         relevantSubs] <> "\n"
-       ];
-   context = If[needsContext,
-       "const context_with_vertices &context = *this;",
-       ""];
-   inits = If[fermionBasis === {},
-      "std::complex<double> value = 0.0;\n\n",
-      StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis         (*fermion basis is supposed to contain strings!*)
-   ];
-   startSum = StringRiffle[
-      "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
-        "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
-      "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
-        CXXFieldIndices[#] <> ";" & /@
-      genericFields, "\n"];
-   changeInits = If[fermionBasis === {},
-      "value += " <> cxxExpr <> ";\n",
-      StringJoin[wilsonCoeffs]];
-   finSum = StringJoin[Array["}"&,Length@indices]];
-   return = If[Length[fermionBasis] === 0,
-      "value;",
-      ToString[fermionBasis] <> ";"];
-   comm="template<typename GenericFieldMap> struct `1`_impl : generic_sum_base
+   StringTemplate[
+      "template<typename GenericFieldMap> struct `1`_impl : generic_sum_base
       {
-         `1`_impl( const generic_sum_base &base ) : generic_sum_base( base ) {}
-         `2` operator()( void )
+         `1`_impl( const generic_sum_base &base ) : generic_sum_base( base )
+         {}
+         `2` operator()( void ) // complex or array *depends
          {
             using boost::mpl::at;
             using boost::fusion::at_key;
@@ -1555,50 +1523,52 @@ Module[
             typename field_index_map<GenericFieldMap>::type index_map;
             `4` // substitutions
             `5` // context
-            `6` // initial value definitions
+            `6` // initial value definitions *depends
             `7` // start for summation over generic fields
                `8` // change initial values
             `9` // close summation brakets
             return `10`
          }
+         `11``1`( void ) // *depends
+         {
+            using GenericKeys = boost::mpl::vector<`12`>;
+            using GenericInsertions = boost::mpl::vector<`13`>;
+            using combinatorial_factors  = boost::mpl::vector<`14`>;
+            using colour_factors = boost::mpl::vector<`15`>;
+            `16`
+            return accumulate_generic<`17`, `1`_impl>( *this );
+         }
       };
-      ";
-   ttt=StringTemplate[comm][genSumName,operator,genToSum,relSubs,context,inits,startSum,changeInits,finSum,return]<>
-    If[Length[fermionBasis] === 0,
-      "std::complex<double>",
-      "std::array<std::complex<double>, 2>"]
-    <> genSumName <> "( void )\n{\n" <>
-    "using GenericKeys = boost::mpl::vector<\n" <>
-    StringJoin[Riffle[CXXGenFieldKey /@ genericFields, ",\n"]] <>
-    "\n>;\n\n" <>
-
-    "using GenericInsertions" <> " = boost::mpl::vector<\n" <>
-    StringJoin[Riffle[
-      "boost::mpl::vector<" <> StringJoin[Riffle[
-          CXXFieldName@# & /@ #, ", "]] <>
-        ">" & /@ sortedGenericInsertions[[All,All,2]],
-      ",\n"]] <> "\n>;\n\n" <>
-
-    "using combinatorial_factors" <> " = boost::mpl::vector<\n" <>
-    StringJoin[Riffle[
-      "boost::mpl::int_<" <> ToString[#] <> ">" & /@ combinatorialFactors,
-      ", "]] <> "\n>;\n" <>
-    "using colour_factors" <> " = boost::mpl::vector<\n" <>
-    StringJoin[Riffle[
+      "][
+      genSumName,
+      If[fermionBasis === {},"std::complex<double>",StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis]],
+      CXXCodeNameKey@genericFields,
+      If[relevantSubs === {},"",StringRiffle[StringTemplate["`1`<GenericFieldMap> `1`_{ *this, index_map };"]/@relevantSubs,"\n"]],
+      If[needsContext,"const context_with_vertices &context = *this;",""],
+      If[fermionBasis === {},"std::complex<double> value = 0.0;",
+         StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis],    (*fermion basis is supposed to contain strings!*)
+      StringRiffle[
+         "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
+         "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
+         "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
+         CXXFieldIndices[#] <> ";" &/@genericFields, "\n"],
+      If[fermionBasis === {},"value += " <> cxxExpr <> ";\n",StringJoin[wilsonCoeffs]],
+      StringJoin[Array["}"&,Length@indices]],
+      If[fermionBasis === {},"value;",ToString[fermionBasis] <> ";"],
+      If[fermionBasis === {},"std::complex<double>","std::array<std::complex<double>, 2>"],
+      StringRiffle[CXXGenFieldKey/@genericFields,", "],
+      StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@# &/@ #, ", "]<>">" &/@ flatGenIns,",\n"],
+      StringRiffle[StringTemplate["boost::mpl::int_<`1`>"]/@combinatorialFactors,", "],
+      StringRiffle[
       StringReplace["detail::complex_helper<detail::ratio_helper<"
         <> ToString[#1] <> ">, detail::ratio_helper<" <> ToString[#2] <> ">>" & @@@
         Transpose[{ReRatioColourFactors, ImRatioColourFactors}], {"{" -> "", "}" -> ""}],
-      ", "]] <> "\n>;\n\n" <>
-
-    If[Length[fermionBasis] =!= 0,
-      "using wilsoncoeffs_length = boost::mpl::int_<" <> ToString[Length[fermionBasis]]  <> ">;" <>
-      "return accumulate_generic<GenericKeys, GenericInsertions,\n" <>
-        "combinatorial_factors, colour_factors, wilsoncoeffs_length, ",
-      "return accumulate_generic<GenericKeys, GenericInsertions,\n" <>
-        "combinatorial_factors, colour_factors, "]
-      <> genSumName <> "_impl>( *this );\n}";
-   Print[ttt];
-   ttt
+      ", "],
+      If[fermionBasis =!= {},StringTemplate["using wilsoncoeffs_length = boost::mpl::int_<`1`>;"][Length@fermionBasis],""],
+      If[fermionBasis =!= {},
+         "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors, wilsoncoeffs_length",
+         "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors"]
+      ];
 ] /; And[
    MatchQ[colourFactors,
       {__?(Utils`TestWithMessage[NumberQ@#,
@@ -1606,6 +1576,23 @@ Module[
          #]&
       )}]
 ];
+
+CXXCodeNameKey::usage =
+"@brief Generates required c++ code for name-key pairs used inside generic sums.
+@param genFields:{...} list of presenting generic fields.
+@returns c++ code for name-key pairs used inside generic sums.";
+CXXCodeNameKey::errUnknownInput =
+   CXXCodeNameKey::usage;
+CXXCodeNameKey[
+   genFields:{__?IsGenericField}
+] :=
+   StringRiffle[Apply[
+      StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
+      {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
+      {1}],"\n"];
+CXXCodeNameKey[___]:=
+   Utils`TestWithMessage[False,CXXCodeNameKey::errUnknownInput];
+
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
 StringTemplate::usage=
@@ -1672,7 +1659,8 @@ SetAttributes[
    ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
    IsGenericField,CXXGenFieldKey*)
    CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext,
-   ExtractColourFactor,CXXCodeForGenericSum
+   ExtractColourFactor,CXXCodeForGenericSum,
+   CXXCodeNameKey
    }, 
    {Protected, Locked}];
 
