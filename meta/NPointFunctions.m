@@ -1485,7 +1485,8 @@ Module[
       genericFields,
       relevantSubs,
       needsContext, cxxExpr, ReRatioColourFactors, ImRatioColourFactors,
-          wilsonCoeffs
+      wilsonCoeffs,
+      fbQ = fermionBasis =!= {}
    },
    ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors;
    ImRatioColourFactors = {Numerator@#,Denominator@#} &/@ Im@colourFactors;
@@ -1515,7 +1516,7 @@ Module[
       {
          `1`_impl( const generic_sum_base &base ) : generic_sum_base( base )
          {}
-         `2` operator()( void ) // complex or array *depends
+         `2` operator()( void ) // complex or array
          {
             using boost::mpl::at;
             using boost::fusion::at_key;
@@ -1523,13 +1524,13 @@ Module[
             typename field_index_map<GenericFieldMap>::type index_map;
             `4` // substitutions
             `5` // context
-            `6` // initial value definitions *depends
+            `6` // initial value definitions
             `7` // start for summation over generic fields
                `8` // change initial values
             `9` // close summation brakets
             return `10`
          }
-         `11``1`( void ) // *depends
+         `11` `1`( void )
          {
             using GenericKeys = boost::mpl::vector<`12`>;
             using GenericInsertions = boost::mpl::vector<`13`>;
@@ -1541,34 +1542,30 @@ Module[
       };
       "][
       genSumName,
-      If[fermionBasis === {},"std::complex<double>",StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis]],
+      If[fbQ,StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis],"std::complex<double>"],
       CXXCodeNameKey@genericFields,
       If[relevantSubs === {},"",StringRiffle[StringTemplate["`1`<GenericFieldMap> `1`_{ *this, index_map };"]/@relevantSubs,"\n"]],
       If[needsContext,"const context_with_vertices &context = *this;",""],
-      If[fermionBasis === {},"std::complex<double> value = 0.0;",
-         StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis],    (*fermion basis is supposed to contain strings!*)
-      StringRiffle[
-         "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
-         "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
-         "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
-         CXXFieldIndices[#] <> ";" &/@genericFields, "\n"],
-      If[fermionBasis === {},"value += " <> cxxExpr <> ";\n",StringJoin[wilsonCoeffs]],
+      If[fbQ,StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis, (*fermion basis is supposed to contain strings!*)
+         "std::complex<double> value = 0.0;"],
+      CXXCodeBeginSum@genericFields,
+      If[fbQ,StringJoin[wilsonCoeffs],"value += " <> cxxExpr <> ";\n"],
       StringJoin[Array["}"&,Length@indices]],
-      If[fermionBasis === {},"value;",ToString[fermionBasis] <> ";"],
-      If[fermionBasis === {},"std::complex<double>","std::array<std::complex<double>, 2>"],
+      If[fbQ,ToString[fermionBasis] <> ";","value;"],
+      If[fbQ,"std::array<std::complex<double>, 2>","std::complex<double>"],
       StringRiffle[CXXGenFieldKey/@genericFields,", "],
-      StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@# &/@ #, ", "]<>">" &/@ flatGenIns,",\n"],
+      StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@flatGenIns,",\n"],
       StringRiffle[StringTemplate["boost::mpl::int_<`1`>"]/@combinatorialFactors,", "],
       StringRiffle[
       StringReplace["detail::complex_helper<detail::ratio_helper<"
         <> ToString[#1] <> ">, detail::ratio_helper<" <> ToString[#2] <> ">>" & @@@
         Transpose[{ReRatioColourFactors, ImRatioColourFactors}], {"{" -> "", "}" -> ""}],
       ", "],
-      If[fermionBasis =!= {},StringTemplate["using wilsoncoeffs_length = boost::mpl::int_<`1`>;"][Length@fermionBasis],""],
-      If[fermionBasis =!= {},
+      If[fbQ,StringTemplate["using wilsoncoeffs_length = boost::mpl::int_<`1`>;"][Length@fermionBasis],""],
+      If[fbQ,
          "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors, wilsoncoeffs_length",
          "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors"]
-      ];
+      ]
 ] /; And[
    MatchQ[colourFactors,
       {__?(Utils`TestWithMessage[NumberQ@#,
@@ -1578,20 +1575,33 @@ Module[
 ];
 
 CXXCodeNameKey::usage =
-"@brief Generates required c++ code for name-key pairs used inside generic sums.
+"@brief Generates c++ code for name-key pairs used inside generic sums.
 @param genFields:{...} list of presenting generic fields.
 @returns c++ code for name-key pairs used inside generic sums.";
 CXXCodeNameKey::errUnknownInput =
    CXXCodeNameKey::usage;
-CXXCodeNameKey[
-   genFields:{__?IsGenericField}
-] :=
+CXXCodeNameKey[genFields:{__?IsGenericField}] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
       {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
       {1}],"\n"];
 CXXCodeNameKey[___]:=
    Utils`TestWithMessage[False,CXXCodeNameKey::errUnknownInput];
+
+CXXCodeBeginSum::usage =
+"@brief Generates c++ code for sum beginning used inside generic sums.
+@param genFields:{...} list of presenting generic fields.
+@returns c++ code for sum beginning used inside generic sums.";
+CXXCodeBeginSum::errUnknownInput =
+   CXXCodeBeginSum::usage;
+CXXCodeBeginSum[genFields:{__?IsGenericField}]:=
+      StringRiffle[
+         "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
+         "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
+         "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
+         CXXFieldIndices[#] <> ";" &/@genFields, "\n"];
+CXXCodeBeginSum[___]:=
+   Utils`TestWithMessage[False,CXXCodeBeginSum::errUnknownInput];
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
@@ -1660,7 +1670,7 @@ SetAttributes[
    IsGenericField,CXXGenFieldKey*)
    CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext,
    ExtractColourFactor,CXXCodeForGenericSum,
-   CXXCodeNameKey
+   CXXCodeNameKey,CXXCodeBeginSum
    }, 
    {Protected, Locked}];
 
