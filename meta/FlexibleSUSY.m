@@ -2816,8 +2816,8 @@ FSCheckFlags[] :=
 
            If[FlexibleSUSY`UseSMAlphaS3Loop || FlexibleSUSY`FlexibleEFTHiggs,
               Print["Adding 3-loop SM QCD threshold corrections to alpha_s ",
-                    "[arxiv:hep-ph/0004189]"];
-              References`AddReference["Chetyrkin:2000yt"];
+                    "[arxiv:hep-ph/9708255]"];
+              References`AddReference["Chetyrkin:1997un"];
              ];
 
            If[FlexibleSUSY`UseMSSMYukawa2Loop,
