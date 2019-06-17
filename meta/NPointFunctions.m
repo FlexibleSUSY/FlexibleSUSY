@@ -1112,15 +1112,8 @@ Module[
          {genSums,genRules,combFac,ExtractColourFactor[colFac,projCol],genSumNames}],
       "\n\n"];
     
-    If[noFermionChains,
-      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
-        Rule @@@ Transpose[{genericSumPositions, # <> "()" & /@ genSumNames}]],
-      cxxExpr = Plus @@ ReplacePart[nPointFunction[[2,1,1]],
-        Rule @@@ Transpose[{genericSumPositions, # <> "().at(i)" & /@ genSumNames}]]
-    ];
-    cxxExpr = Parameters`ExpressionToString[cxxExpr];
-    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-
+   cxxExpr = Apply[Plus,#<>If[noFermionChains,"()","().at(i)"]&/@genSumNames];
+    
     cxxCorrelationContext = "correlation_function_context<" <>
        ToString[numOfIndices] <> ", " <> ToString[numberOfMomenta] <>
     ">";
