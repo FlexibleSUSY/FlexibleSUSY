@@ -153,7 +153,7 @@ struct FFV_FFV {
  * \a Args.
  */
 template <class Fj, class Fi, class P, class V1, class G2, class F>
-struct FFV_VGF {
+struct FFV_VSF {
     static std::valarray<std::complex<double>>
     value(const typename field_indices<Fj>::type& indices_in,
           const typename field_indices<Fi>::type& indices_out,
@@ -178,7 +178,7 @@ struct FFV_VGF {
  * \a Args.
  */
 template <class Fj, class Fi, class P, class G1, class V2, class F>
-struct FFV_GVF {
+struct FFV_SVF {
     static std::valarray<std::complex<double>>
     value(const typename field_indices<Fj>::type& indices_in,
           const typename field_indices<Fi>::type& indices_out,
@@ -660,7 +660,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
 	 // triple gauge boson vertex
 	 // need to check that the sign and function call are correct
-	 std::complex<double> vector_boson_coupling {vertexEmit.even_permutation()};
+	 std::complex<double> vector_boson_coupling {vertexEmit.value( TripleVectorVertex::odd_permutation{} )};
 
 	 const std::complex<double> A1L = -8. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionI(x) + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionH(x) / 18.;
 	 const std::complex<double> A2L = 3. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionK(x) + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionJ(x) / 6.;
@@ -726,7 +726,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
       // ignore contribution if both vector and fermion are SM particles
       if (discard_SM_contributions) {
-         if (isSMField<FA>(vectorFieldIndicesIn) && isSMField<V>(fermionFieldIndicesIn)) {
+         if (isSMField<FA>(fermionFieldIndicesIn) && isSMField<V>(vectorFieldIndicesIn)) {
             continue;
          }
       }
@@ -761,7 +761,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
 // emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class VA, class GB, class F>
-std::valarray<std::complex<double>> FFV_VGF<Fj, Fi, P, VA, GB, F>::value(
+std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
    const typename field_indices<Fi>::type& indices_out,
    context_base const& context,
@@ -800,11 +800,11 @@ std::valarray<std::complex<double>> FFV_VGF<Fj, Fi, P, VA, GB, F>::value(
       if (fermionFieldIndicesIn != fermionFieldIndicesOut)
          continue;
 
-      // match indices of the vector in the loop
+      // cannot match indices if scalar is not would-be-goldstone corresponding to vector
       const auto vectorFieldIndicesIn = VertexFBarFjVBar::template indices_of_field<1>(indexIn);
       const auto goldstoneFieldIndicesOut = VertexFiBarFG::template indices_of_field<1>(indexOut);
-      if (vectorFieldIndicesIn != goldstoneFieldIndicesOut)
-         continue;
+      // if (vectorFieldIndicesIn != goldstoneFieldIndicesOut)
+      //   continue;
 
       // ignore contribution if both vector and fermion are SM particles
       if (discard_SM_contributions) {
@@ -816,7 +816,7 @@ std::valarray<std::complex<double>> FFV_VGF<Fj, Fi, P, VA, GB, F>::value(
       const auto vertexIn = VertexFBarFjVBar::evaluate(indexIn, context);
       const auto vertexOut = VertexFiBarFG::evaluate(indexOut, context);
 
-      const auto indexEmit = concatenate(vectorFieldIndicesIn, vectorFieldIndicesIn);
+      const auto indexEmit = concatenate(vectorFieldIndicesIn, goldstoneFieldIndicesOut);
       const auto vertexEmit = VertexGBarVPBar::evaluate(indexEmit, context);
 
       const auto mV = context.mass<VA>(vectorFieldIndicesIn);
@@ -847,7 +847,7 @@ std::valarray<std::complex<double>> FFV_VGF<Fj, Fi, P, VA, GB, F>::value(
 
 // emit massless vector boson from the internal vector line in a fermion-vector loop
 template <class Fj, class Fi, class P, class GA, class VB, class F>
-std::valarray<std::complex<double>> FFV_GVF<Fj, Fi, P, GA, VB, F>::value(
+std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
    const typename field_indices<Fj>::type& indices_in,
    const typename field_indices<Fi>::type& indices_out,
    context_base const& context,
@@ -886,11 +886,11 @@ std::valarray<std::complex<double>> FFV_GVF<Fj, Fi, P, GA, VB, F>::value(
       if (fermionFieldIndicesIn != fermionFieldIndicesOut)
          continue;
 
-      // match indices of the vector in the loop
+      // cannot match indices if scalar is not would-be-goldstone corresponding to vector
       const auto goldstoneFieldIndicesIn = VertexFBarFjGBar::template indices_of_field<1>(indexIn);
       const auto vectorFieldIndicesOut = VertexFiBarFV::template indices_of_field<1>(indexOut);
-      if (goldstoneFieldIndicesIn != vectorFieldIndicesOut)
-         continue;
+      // if (goldstoneFieldIndicesIn != vectorFieldIndicesOut)
+      //    continue;
 
       // ignore contribution if both vector and fermion are SM particles
       if (discard_SM_contributions) {
@@ -902,7 +902,7 @@ std::valarray<std::complex<double>> FFV_GVF<Fj, Fi, P, GA, VB, F>::value(
       const auto vertexIn = VertexFBarFjGBar::evaluate(indexIn, context);
       const auto vertexOut = VertexFiBarFV::evaluate(indexOut, context);
 
-      const auto indexEmit = concatenate(goldstoneFieldIndicesIn, goldstoneFieldIndicesIn);
+      const auto indexEmit = concatenate(goldstoneFieldIndicesIn, vectorFieldIndicesOut);
       const auto vertexEmit = VertexVBarGPBar::evaluate(indexEmit, context);
 
       const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
