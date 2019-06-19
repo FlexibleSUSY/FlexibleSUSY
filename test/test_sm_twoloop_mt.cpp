@@ -1,9 +1,10 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_SM_higgs_loop_corrections
+#define BOOST_TEST_MODULE test_sm_twoloop_mt
 
 #include <boost/test/unit_test.hpp>
 #include "sm_twoloop_mt.hpp"
 #include <complex>
+#include <cmath>
 
 #ifdef TSIL_SIZE_DOUBLE
 typedef std::complex<double> TSIL_COMPLEXCPP;
@@ -146,4 +147,23 @@ BOOST_AUTO_TEST_CASE( test_fixed_values )
 
       BOOST_CHECK_CLOSE_FRACTION(mt_SP_fixed, mt_SP_num, eps);
    }
+}
+
+BOOST_AUTO_TEST_CASE( test_sm_oneloop_QCD )
+{
+   using namespace flexiblesusy::sm_twoloop_mt;
+   using namespace flexiblesusy;
+
+   const TSIL_REAL PI = 3.1415926535897932384626433832795L;
+   const TSIL_REAL k = 1.0L/4.0L/4.0L/PI/PI;
+   const TSIL_REAL g3 = 1.166;
+   const TSIL_REAL g32 = g3*g3;
+   const TSIL_REAL mt = 164.18L;
+   const TSIL_REAL t = mt*mt;
+   const TSIL_REAL qq = 30046.76L;
+
+   const TSIL_REAL qcd_1l_1 = delta_mt_1loop_as(g3, t, qq);
+   const double    qcd_1l_2 = 4./3.*k*(-4. + 3.*std::log(t/qq))*g32;
+
+   BOOST_CHECK_CLOSE_FRACTION(qcd_1l_1, qcd_1l_2, 1e-15);
 }
