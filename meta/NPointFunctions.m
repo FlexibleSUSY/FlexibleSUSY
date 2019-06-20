@@ -1111,12 +1111,11 @@ Module[
       CXXCodeForGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
          {genSums,genRules,combFac,ExtractColourFactor[colFac,projCol],genSumNames}],
       "\n\n"];
-    
-   cxxExpr = Apply[Plus,#<>If[noFermionChains,"()","().at(i)"]&/@genSumNames];
-    
-    cxxCorrelationContext = "correlation_function_context<" <>
-       ToString[numOfIndices] <> ", " <> ToString[numberOfMomenta] <>
-    ">";
+
+   cxxExpr = StringRiffle[#<>If[noFermionChains,"()","().at(i)"]&/@genSumNames,"+"];
+
+   cxxCorrelationContext = StringTemplate[
+      "correlation_function_context<`1`,`2`>"][numOfIndices,numberOfMomenta];
     
     "class " <> className <> "\n" <>
     ": public " <> cxxCorrelationContext <> "\n{\n" <>
@@ -1462,7 +1461,8 @@ specific insertions with.
 @param preCXXRules a list of rules to apply to the subexpressions
 before calling ``Parameters`ExpressionToString[]`` for the c++
 translation.
-@returns the c++ code encoding the given sum over generic fields.";
+@returns the c++ code encoding the given sum over generic fields.
+@note the most time consuming procedure.";
 CXXCodeForGenericSum::errColours=
 "Colour factor is not a number after projection: `1`";
 CXXCodeForGenericSum[
