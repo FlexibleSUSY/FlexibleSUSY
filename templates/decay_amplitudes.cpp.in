@@ -45,16 +45,6 @@ double Decay_amplitude_SSV::square() const
       * AbsSqr(form_factor) / m_v_sq;
 }
 
-// Decay_amplitude_SSV Decay_amplitude_SSV::operator+(const Decay_amplitude_SSV& s) const {
-//    Decay_amplitude_SSV amp;
-//    amp.m_decay = m_decay;
-//    amp.m_scalar = m_scalar;
-//    amp.m_vector = m_vector;
-//    amp.massless_vector_threshold = massless_vector_threshold;
-//    amp.form_factor = s.form_factor + form_factor;
-//    return amp;
-// } 
-
 // @todo handle massless vectors safely
 // @todo check expressions correct
 double Decay_amplitude_SVV::square() const

@@ -1946,6 +1946,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
+           (* create FSParticleDecay 'object' *)
            decaysLists = {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}& /@ decayParticles;
            decaysVertices = DeleteDuplicates[Flatten[Permutations /@ Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1], 1]];
            (* @todo: this is just for debugging. Remove it! *)
