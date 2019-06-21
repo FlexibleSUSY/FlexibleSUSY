@@ -68,7 +68,7 @@ FieldPositionInVertex[field_, vertex_] := Module[{pos},
          ". Got " <> ToString@pos <> "."
    ];
 
-   pos /. {{n_}} -> n
+   pos /. {{n_}} :> n
 ];
 
 StripDiagramColorFactor[fields_, colorFactor_] :=
@@ -595,7 +595,7 @@ LoopOverIndex[loopBody_String, index_, start_, stop_, type_:CConversion`ScalarTy
    {{idx1, start, stop}, {idx2, start, stop}, ...} with
    the first list entry being the innermost loop *)
 LoopOverIndexCollection[loopBody_String, indices_List] :=
-    Fold[LoopOverIndex[#1, Sequence @@ #2]&, loopBody, indices];
+    "\n" <> Fold[LoopOverIndex[#1, Sequence @@ #2]&, loopBody, indices] <> "\n";
 
 CreateGenericGetPartialWidthFunctionName[] := "get_partial_width";
 
@@ -698,7 +698,7 @@ CallPDGCodeGetter[particle_, idx_String, namespace_] :=
 CallPartialWidthCalculation[decay_FSParticleDecay] :=
     Module[{i, initialState = GetInitialState[decay], initialStateDim,
             finalState = GetFinalState[decay], finalStateDims, functionArgs = "",
-            pdgsList = "", loopIndices, body = ""},
+            pdgsList = "", loopIndices, body = "", finalStateStarts, skip},
            initialStateDim = TreeMasses`GetDimension[initialState];
            finalStateDims = TreeMasses`GetDimension /@ finalState;
            finalStateStarts = TreeMasses`GetDimensionStartSkippingGoldstones /@ finalState;
@@ -708,7 +708,27 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                                       CallPDGCodeGetter[#1, If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""], FlexibleSUSY`FSModelName <> "_info"]]&,
                                  finalState];
            pdgsList = "{" <> Utils`StringJoinWithSeparator[pdgsList, ", "] <> "}";
+
+           (* skip decays of a particle into itself *)
+           skip =
+              MapIndexed[
+                 With[{idx = First[#2]},
+                    If[
+                       initialState === #1, "if(gI1 == gO" <> ToString[idx] <> ") {continue;}", ""]]&, finalState
+              ] <>
+              "if(context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
+               StringJoin @ Riffle[
+                  MapIndexed[
+                     With[{idx = First[#2]},
+                        "context.physical_mass<" <> CXXNameOfField[#1] <> ">(" <>
+                                      "std::array<int, " <> If[finalStateDims[[idx]] > 1, "1", "0"] <> "> {" <> If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""] <> "})"
+                     ]&,
+                     finalState
+                  ], " + "
+              ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n";
+           (* call decay *)
            body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> ");";
+
            loopIndices = Reverse[Select[MapIndexed[With[{idx = First[#2]},
                                                         If[#1 > 1,
                                                            {"gO" <> ToString[idx], Utils`MathIndexToCPP@finalStateStarts[[idx]], #1},
@@ -716,9 +736,19 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                                                           ]
                                                        ]&, finalStateDims], (# =!= {})&]];
            If[loopIndices =!= {},
-              body = LoopOverIndexCollection[body, loopIndices];
-             ];
-           "\n" <> body <> "\n"
+              body = LoopOverIndexCollection[skip <> body, loopIndices],
+              body = "\nif(context.physical_mass<" <> CXXNameOfField[initialState] <>
+                 ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) > " <>
+                 StringJoin @ Riffle[
+                    MapIndexed[
+                       With[{idx = First[#2]},
+                          "context.physical_mass<" <> CXXNameOfField[#1] <> ">(" <>
+                             "std::array<int, " <> If[finalStateDims[[idx]] > 1, "1", "0"] <> "> {" <> If[finalStateDims[[idx]] > 1, "gO" <> ToString[idx], ""] <> "})"
+                       ]&,
+                       finalState
+                    ], " + "
+                 ] <> ") {\n" <> TextFormatting`IndentText[body] <> ";\n}\n"
+             ]
           ];
 
 CreateDecaysCalculationFunctionName[particle_, scope_:""] :=
@@ -764,6 +794,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                      ] <> "}\n"
                ] <>
                "}\n" <>
+              "context_base context {dec_model.get()};\n" <>
                body;
 
            body = "\nif (run_to_decay_particle_scale) {\n" <>
@@ -1129,21 +1160,26 @@ Compare[a_, b_] := Module[{},
 
 (* returns an element of the list from
    utils/loop_decays/output/generic_loop_decay_diagram_classes.m
-   corresponding to a given diagram *)
-TranslationForDiagram[topology_, diagram_] := Module[{
-   diagramsWithCorrectTopology,
-   file = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"], temp,res
+   corresponding to a given insertion of fields *)
+GenericTranslationForInsertion[topology_, insertion_] := Module[{
+   genericDiagramsWithCorrectTopology,
+   translationFile = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"],
+   genericFieldTypesOnEdges,
+   res
 },
 
-   diagramsWithCorrectTopology = Select[file, MemberQ[#, topology]&];
-   Utils`AssertWithMessage[diagramsWithCorrectTopology =!= {},
-      "Can't find topology " <> ToString@topology <> " for diagram " <> ToString@diagram
+   genericDiagramsWithCorrectTopology = Select[translationFile, MemberQ[#, topology]&];
+   Utils`AssertWithMessage[genericDiagramsWithCorrectTopology =!= {},
+      "Can't find topology " <> ToString@topology <> " for insertion " <> ToString@insertion
    ];
-   temp = (#[[1]] -> GetFeynArtsTypeName[#[[2]]])& /@ InsertionsOnEdgesForDiagram[topology, diagram];
 
-   res = Select[diagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], temp]&];
+   genericFieldTypesOnEdges = (#[[1]] -> GetFeynArtsTypeName[#[[2]]])& /@ InsertionsOnEdgesForDiagram[topology, insertion];
 
-   Print[temp];
+   (* find the generic-level diagram in diagramsWithCorrectTopology that corresponds
+      to the given generic insertion *)
+   res = Select[genericDiagramsWithCorrectTopology, Compare[#[[3]]/.#[[4]], genericFieldTypesOnEdges]&];
+
+   (* there should be one-to-one corespondence *)
    Utils`AssertWithMessage[Length[res] === 1,
       "Couldn't find the C++ translation for a needed diagram"
    ];
@@ -1160,29 +1196,34 @@ FieldFromDiagram[diagram_, {i_, j_}] :=
    ];
 
 (* Returns a list of particles on edges of a diagram in form of list of elements as
-   {vertex1, vertex2} -> concrete particle connecting vertex1 and 2 (e.g. Fe) *)
-(* @todo: not clear about the conugation of particle *)
-InsertionsOnEdgesForDiagram[topology_, diagram_] :=
+   {vertex1, vertex2} -> concrete particle connecting vertex1 and 2 (e.g. Fe)
+   This is the core function that allows matching between diagram at mathematica and C++
+   level. *)
+(* @todo: not clear about the conjugation of particle *)
+InsertionsOnEdgesForDiagram[topology_, insertion_] :=
    Module[{sortedVertexCombinations, connectedVertices},
 
       sortedVertexCombinations =
          Select[
-            Tuples[Range[CXXDiagrams`NumberOfExternalParticlesInTopology[topology] + CXXDiagrams`NumberOfPropagatorsInTopology[topology]], 2],
+            Tuples[
+               Range[CXXDiagrams`NumberOfExternalParticlesInTopology[topology] + CXXDiagrams`NumberOfPropagatorsInTopology[topology]],
+               2
+            ],
             (OrderedQ[#] && !SameQ@@#)&
          ];
       (* remove not connected pairs *)
       connectedVertices = Select[sortedVertexCombinations,
-         CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, diagram, topology] =!= {}&
+         CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, insertion, topology] =!= {}&
       ];
 
       Flatten[
-            Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology]],
+            Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology]],
                (* vertices connected by 1 particle *)
-               1, {{#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}]},
+               1, {{#1, #2} -> FieldFromDiagram[insertion, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology][[1,1]]}]},
                (* vertices connected by 2 particle *)
                2, {
-                  {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[1,1]]}],
-                  {#1, #2} -> FieldFromDiagram[diagram, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, diagram, topology][[2,1]]}]
+                  {#1, #2} -> FieldFromDiagram[insertion, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology][[1,1]]}],
+                  {#1, #2} -> FieldFromDiagram[insertion, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology][[2,1]]}]
                },
                (* error *)
                _, Utils`PrintErrorMsg["Only 1 or 2 connections between vertices are supported"]; Quit[1];
@@ -1219,9 +1260,23 @@ ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] :=
 (*         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",*)
 (*         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> ("value(" <>*)
 (*            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),*)
+         (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
+            of bared ghost. This is opposite to Sarah where all such vertices are written using
+            momentum non-bared ghost *)
 (*               Mom[U[Index[Generic, n_]]] :> ( *)
+(*                              Print[particles];*)
+(*                              Print[lor];*)
+(*                              Print[indices];*)
+(*                              Print[Utils`MathIndexToCPP@FieldPositionInVertex[U[Index[Generic, n]], {particles}]];*)
+(*                                             Print["The End"];*)
+(*                @todo: no such vertices; remove in the end *)
 (*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[U[Index[Generic, n]], {particles}] <> ")"),*)
 (*               Mom[-U[Index[Generic, n_]]] :> ( *)
+(*               Print[particles];*)
+(*               Print[lor];*)
+(*               Print[indices];*)
+(*               Print[Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}]];*)
+(*               Print["The End"];*)
 (*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}] <> ")"),*)
          lor :> False (*Print["Error! Unidentified lorentz structure ", lor]; Quit[1]*)
       }
@@ -1315,14 +1370,14 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          Return[""];
       ];
 
-      translation = TranslationForDiagram[topology, diagram];
+      translation = GenericTranslationForInsertion[topology, diagram];
 
       (* {Field[1] -> concrete field, ...} *)
       fieldAssociation = GetFieldsAssociations2[diagram, translation[[-2]]];
 
       (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
       verticesInFieldTypes =
-         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] -> n /. Cp[x___][__] -> Cp[x]]);
+         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] :> n /. Cp[x___][__] :> Cp[x]]);
 
       (* vertices in an orientation as required by Cp *)
       vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
@@ -1353,12 +1408,12 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
 
       matchInternalFieldIndicesCode =
          StringJoin@@Map[
-            ("if(vertex" <> ToString@indices[[ First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <>
-            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@Last@First@Position[verticesInFieldTypes/.-field_->field, _[#]] <> ">(index" <>
-            ToString@indices[[  First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <> ") != " <>
-            "vertex" <> ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <>
-            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@Last@Position[verticesInFieldTypes/.-field_->field, _[#]] <> ">(index" <>
-            ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_->field, _[#]]   ]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n")&,
+            ("if(vertex" <> ToString@indices[[ First@First@Position[verticesInFieldTypes/.-field_:> field, _[#]]]] <>
+            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@Last@First@Position[verticesInFieldTypes/.-field_:>field, _[#]] <> ">(index" <>
+            ToString@indices[[  First@First@Position[verticesInFieldTypes/.-field_:>field, _[#]]   ]] <> ") != " <>
+            "vertex" <> ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_:>field, _[#]]   ]] <>
+            "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@ Last@Last@Position[verticesInFieldTypes/.-field_:>field, _[#]] <> ">(index" <>
+            ToString@indices[[  First@Last@Position[verticesInFieldTypes/.-field_:>field, _[#]]   ]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n")&,
             Range@Length@vertices
          ];
 
@@ -1370,13 +1425,13 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          Map[
             ("const auto mInternal" <> ToString[#-3] <> " = context.mass<" <>
          CXXNameOfField[
-            vertices[[  Sequence@@First@Position[verticesInFieldTypes /. -field_ -> field, _[#]]    ]]
+            vertices[[  Sequence@@First@Position[verticesInFieldTypes /. -field_ :> field, _[#]]    ]]
             ] <> ">(" <>
-         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypes/. -field_->field, _[#]]]] <> "::template indices_of_field<" <>
+         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypes/. -field_:>field, _[#]]]] <> "::template indices_of_field<" <>
          ToString@Utils`MathIndexToCPP[
-            Last@First@Position[verticesInFieldTypes/. -field_->field, _[#]]
+            Last@First@Position[verticesInFieldTypes/. -field_:>field, _[#]]
          ] <>
-         ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypes/.-field_->field, _[#]]]] <> "));\n"
+         ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypes/.-field_:>field, _[#]]]] <> "));\n"
       )&,
       Range[4, 3+Length@vertices]
       ];
@@ -1386,7 +1441,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       internalEdges =
          Select[
             translation[[3]],
-            (MatchQ[#, ({i_Integer, j_Integer} -> Field[_Integer]) /; (First@Sort[{i,j}] > 3 && Last@Sort[{i,j}] > 3)])&
+            (MatchQ[#, ({i_Integer, j_Integer} :> Field[_Integer]) /; (First@Sort[{i,j}] > 3 && Last@Sort[{i,j}] > 3)])&
          ];
       internalFieldsLocationsInVertices =
          {
@@ -1718,7 +1773,10 @@ CreateHiggsToGluonGluonPartialWidthFunction[decay_FSParticleDecay, modelName_] :
            templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
            body =
               "const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);\n" <>
-              "return amp.square();\n";
+              "const double mIn = context.physical_mass<H>(in_idx);\n" <>
+              "constexpr double ps = 1./(8.*Pi);\n" <>
+              "constexpr double ps_symmetry = 1./2.;\n" <>
+              "return  0.5 * ps * ps_symmetry / mIn * amp.square();\n";
            "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
            templatePars <> "(" <> args <> ") const\n{\n" <>
            TextFormatting`IndentText[body] <> "}"
@@ -1734,6 +1792,10 @@ CreateHiggsToPhotonPhotonPartialWidthFunction[decay_FSParticleDecay, modelName_]
            templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
            body = 
               "const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);\n" <>
+               "const double mIn = context.physical_mass<H>(in_idx);\n" <>
+               "constexpr double ps = 1./(8.*Pi);\n" <>
+               "constexpr double ps_symmetry = 1./2.;\n" <>
+               "return  0.5 * ps * ps_symmetry / mIn * amp.square();\n";
               "return amp.square();\n";
            "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
            templatePars <> "(" <> args <> ") const\n{\n" <>
