@@ -1900,7 +1900,8 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToPhotonPhotonPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToZPhotonPartialWidth[higgsDecays, modelName],
+                 (* @todo do we need special code for h > ZA? *)
+(*                                 CreateHiggsToZPhotonPartialWidth[higgsDecays, modelName],*)
                                  CreateHiggsToHiggsHiggsPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
