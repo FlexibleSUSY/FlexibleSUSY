@@ -148,25 +148,6 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
-A0i::usage="A symbol representing an A0 function.";
-B0i::usage="A symbol representing an B0 function.";
-C0i::usage="A symbol representing an C0 function.";
-D0i::usage="A symbol representing an D0 function.";
-
-aa0::usage="A symbol denoting a part of an A function.";
-
-bb0::usage="A symbol denoting a part of a B function.";
-bb1::usage="A symbol denoting a part of a B function.";
-
-cc0::usage="A symbol denoting a part of a C function.";
-cc1::usage="A symbol denoting a part of a C function.";
-cc2::usage="A symbol denoting a part of a C function.";
-
-dd0::usage="A symbol denoting a part of a D function.";
-dd1::usage="A symbol denoting a part of a D function.";
-dd2::usage="A symbol denoting a part of a D function.";
-dd3::usage="A symbol denoting a part of a D function.";
-
 Begin["`Private`"];
 Options[NPFPattern] = {
    "Fields" -> _,
