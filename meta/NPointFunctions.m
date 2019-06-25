@@ -904,10 +904,10 @@ Module[
    auxilliaryClasses = MapThread[CXXClassForNPF[##,OptionValue@FermionBasis]&,
       {nPointFunctions/.loopFunctionRules,colourProjectorList}];
 
-    definitions = StringJoin[Riffle[auxilliaryClasses,"\n\n"]] <> "\n\n" <>
-      StringJoin[Riffle[#[[1]] <> "\n{\n" <> #[[2]] <> "\n}" & /@
-         Transpose[{definitionHeads, definitionBodies}], "\n\n"]];
-
+   definitions =
+      StringRiffle[auxilliaryClasses,"\n\n"] <> "\n\n" <>
+      StringRiffle[MapThread[StringTemplate["`1`\n{\n`2`\n}"],
+         {definitionHeads, definitionBodies}],"\n\n"];
    {prototypes, definitions}
 ] /; And[
    MatchQ[nPointFunctions,
@@ -1072,6 +1072,8 @@ n-point correlation function.
 given n-point correlation function
 @returns the c++ code for the helper class of the c++ version of a given
 n-point correlation function.";
+CXXClassForNPF::errUnknownInput=
+   CXXClassForNPF::usage;
 CXXClassForNPF[
    nPointFunction:NPFPattern[
       "Sums"->genSums_,
@@ -1093,12 +1095,13 @@ Module[
       genSumNames = Array[
          StringTemplate@"genericSum`1`",
          Length@genSums],
-      initializeSums = Array[
-         StringTemplate@"const auto genericsum`1` = genericSum`1`();\n",
-         Length@genSums],
+      initializeSums = StringRiffle[Array[
+         StringTemplate@"const auto genericsum`1` = genericSum`1`();",
+         Length@genSums],"\n"],
       genericSumCode, preCXXRules, cxxExpr,
       cxxSubexpressions,
-      noFermionChains = TrueQ[Length@fermionBasis === 0]
+      noFermionChains = TrueQ[Length@fermionBasis === 0],
+      code
    },
    numOfIndices = Length@extIndices;
    genericSumPositions = Position[genSums, GenericSum[__]];
@@ -1116,42 +1119,39 @@ Module[
 
    cxxCorrelationContext = StringTemplate[
       "correlation_function_context<`1`,`2`>"][numOfIndices,numberOfMomenta];
-    
-    "class " <> className <> "\n" <>
-    ": public " <> cxxCorrelationContext <> "\n{\n" <>
-    "using generic_sum_base = " <> cxxCorrelationContext <> ";\n" <>
-    "template<class GenericFieldMap> struct subexpression_base\n" <>
-    ": generic_sum_base,\n" <>
-    "  index_map_interface<GenericFieldMap>\n" <>
-    "{\n" <> 
-    "subexpression_base( const subexpression_base & ) = default;\n" <>
-    "subexpression_base( const generic_sum_base &gsb, \n" <>
-    "const typename field_index_map<GenericFieldMap>::type &fim )\n" <>
-    ": generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )\n" <>
-    "{}\n" <>
-    "};\n\n" <>
-
-    StringJoin[Riffle[
-        "struct " <> CXXGenFieldKey[#] <> " {};" & /@ genFields,
-      "\n"]] <> "\n\n" <>
-
-    cxxSubexpressions <> "\n\n" <> 
-    genericSumCode <> "\n\n" <>
-    "public:\n" <>
-    className <> "( "<> CXXArgStringNPF[nPointFunction] <> " )\n" <>
-    ": " <> cxxCorrelationContext <> "{ model, indices, momenta }\n{}\n\n" <>
-    If[noFermionChains === 0, 
-      "std::complex<double> calculate( void )\n{\nreturn " <> cxxExpr,
-
-      "std::array<std::complex<double>, " <> ToString@Length@fermionBasis <> "> " <>
-      "calculate( void )\n{\nstd::array<std::complex<double>, " <> ToString[Length[OptionValue[FermionBasis]]] <> "> " <>
-      "genericSummation;\n" <> "constexpr int coeffsLength = genericSummation.size();\n" <> initializeSums <>
-      "for ( std::size_t i=0; i<coeffsLength; i++ ) {\n" <>
-      "  genericSummation.at(i) += " <> cxxExpr <> ";\n}\n" <> "return genericSummation"
-    ] <>
-    ";\n}" <>
-    "\n};"
-  ];
+   
+   code = "class `CLASS_NAME` : public `CONTEXT`
+   {
+      using generic_sum_base = `CONTEXT`;
+      template<class GenericFieldMap> struct subexpression_base :
+      generic_sum_base, index_map_interface<GenericFieldMap>
+      {
+         subexpression_base( const subexpression_base & ) = default;
+         subexpression_base( const generic_sum_base &gsb, 
+            const typename field_index_map<GenericFieldMap>::type &fim ) :
+         generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )  
+         {}
+      };
+      `KEY_STRUCTS`
+      `SUBEXPRESSIONS`
+      `GENERIC_SUMS`
+      public:
+      `CLASS_NAME`(`ARGS`) : `CONTEXT`{ model, indices, momenta }
+      {}
+      `CALCULATE_FUNC`
+   };";
+      
+   StringReplace[code,{
+   "`CLASS_NAME`"->className,
+   "`CONTEXT`"->cxxCorrelationContext,
+   "`KEY_STRUCTS`"->StringRiffle[StringTemplate["struct `1` {};"]/@CXXGenFieldKey/@genFields,"\n"],
+   "`SUBEXPRESSIONS`"->cxxSubexpressions,
+   "`GENERIC_SUMS`"->genericSumCode,
+   "`ARGS`"->CXXArgStringNPF@nPointFunction,
+   "`CALCULATE_FUNC`"->CXXCodeFunCalculate[cxxExpr,initializeSums,Length@fermionBasis]}]
+];
+CXXClassForNPF[___] :=
+   Utils`TestWithMessage[False,CXXClassForNPF::errUnknownInput];
 
 ToCXXPreparationRules::usage=
 "@brief Generate a list of rules for translating Mathematica expressions of
@@ -1596,6 +1596,35 @@ CXXCodeBeginSum[genFields:{__?IsGenericField}]:=
 CXXCodeBeginSum[___]:=
    Utils`TestWithMessage[False,CXXCodeBeginSum::errUnknownInput];
 
+CXXCodeFunCalculate::usage =
+"@brief Generates c++ code for functions which return result of generic sum
+calculation
+@param cxxExpr string with sums of generic sums.
+@param initializeSums string with initializations of
+@param fermionBasisLength integer length of fermion basis
+@returns c++ code for sum beginning used inside generic sums.";
+CXXCodeFunCalculate::errUnknownInput =
+   CXXCodeFunCalculate::usage;
+CXXCodeFunCalculate[
+   cxxExpr_String,initializeSums_String,fermionBasisLength_Integer
+]:=
+If[TrueQ[fermionBasisLength === 0],
+   StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
+   StringTemplate["std::array<std::complex<double>,`3`> calculate( void )
+   {
+      std::array<std::complex<double>,`3`> genericSummation;
+      constexpr int coeffsLength = genericSummation.size();
+      `2`
+      for ( std::size_t i=0; i<coeffsLength; i++ )
+      {
+         genericSummation.at(i) += `1`;
+      }
+      return genericSummation;
+   }"][cxxExpr,initializeSums,fermionBasisLength]
+];
+CXXCodeFunCalculate[___]:=
+   Utils`TestWithMessage[False,CXXCodeFunCalculate::errUnknownInput];
+
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
 StringTemplate::usage=
@@ -1663,7 +1692,7 @@ SetAttributes[
    IsGenericField,CXXGenFieldKey*)
    CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext,
    ExtractColourFactor,CXXCodeForGenericSum,
-   CXXCodeNameKey,CXXCodeBeginSum
+   CXXCodeNameKey,CXXCodeBeginSum,CXXCodeFunCalculate
    }, 
    {Protected, Locked}];
 
