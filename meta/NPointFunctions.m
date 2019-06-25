@@ -1631,26 +1631,5 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
-GenericFieldType::usage="
-@brief Determine the generic field type of a given field.
-@param field the given field
-@returns the generic type of the given generic field.
-";
-GenericFieldType[field_] :=
-  Module[{head = CXXDiagrams`AtomHead[CXXDiagrams`RemoveLorentzConjugation[field]]},
-    Switch[head,
-           GenericS, GenericS,
-           GenericF, GenericF,
-           GenericV, GenericV,
-           GenericU, GenericU,
-           GenericT, GenericT,
-           _, If[TreeMasses`IsScalar[head],GenericS,
-                 If[TreeMasses`IsFermion[head],GenericF,
-                    If[TreeMasses`IsVector[head],GenericV,
-                      If[TreeMasses`IsGhost[head],GenericU,
-                         "unrecognized field type " <> ToString[head]]]]]]
-
-  ]
-  
 End[];
 EndPackage[];
