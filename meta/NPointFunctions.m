@@ -765,73 +765,6 @@ Options[CreateCXXFunctions]={
    LoopFunctions -> "FlexibleSUSY",
    FermionBasis -> {}
 };
-CreateCXXFunctions[nPointFunctions_List, names_List,
-    colourFactorProjections_,OptionsPattern[]] :=
-  Module[{loopFunctionRules, prototypes,
-          definitionHeads, definitionBodies,
-          auxilliaryClasses, definitions,
-          fermionBasis = OptionValue[FermionBasis]},
-    loopFunctionRules = Switch[OptionValue[LoopFunctions],
-      "LoopTools", {},
-      "FlexibleSUSY",
-         Print["Warning: Using FlexibleSUSY loop functions will only remap A0, B0, C0, C00, D0 and D00."];
-         Print["Warning: FlexibleSUSY loop functions C0, D0 and D00 require zero external momenta."];
-         {
-           LoopTools`A0i[LoopTools`aa0, args__] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[args]),
-                                             "context.scale()"],
-           LoopTools`A0[arg_] :> "softsusy::a0"[Sequence @@ ("std::sqrt" /@ List[arg]),
-                                             "context.scale()"],
-           LoopTools`B0i[LoopTools`bb0, args__] :> "softsusy::b0"[Sequence @@ ("std::sqrt" /@ List[args]),
-                                             "context.scale()"],
-           LoopTools`B0i[LoopTools`bb1, args__] :> "(-1)*softsusy::b1"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(Mass[x___])^2] :> Mass[x]),
-                                             "context.scale()"],
-           LoopTools`C0i[LoopTools`cc0, 0, 0, 0, args__] :> "softsusy::c0"[Sequence @@ ("std::sqrt" /@ List[args])],
-           LoopTools`C0i[LoopTools`cc00, 0, 0, 0, args__] :> "softsusy::c00"[Sequence @@ ("std::sqrt" /@ List[args]), "context.scale()"],
-           LoopTools`D0i[LoopTools`dd0, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d0"[Sequence @@ ("std::sqrt" /@ List[args])],
-           LoopTools`D0i[LoopTools`dd00, 0, 0, 0, 0, 0, 0, args__] :> "softsusy::d27"[Sequence @@ (Map[Sqrt, List[args]] /. Sqrt[(x___)^2] :> x)]
-         },
-       _, Return["Option LoopFunctions must be either LoopTools or FlexibleSUSY"]];
-    prototypes = StringJoin[Riffle[
-      "std::complex<double> " <>Part[#,2]<>"("<>CXXArgStringNPF[Part[#,1],"def"]<>");" &/@
-      Transpose[{nPointFunctions, names}], "\n"]];
-    If[Length[fermionBasis] === 0,
-      definitionHeads = "std::complex<double> " <> #[[2]] <> "("<> 
-          CXXArgStringNPF[#[[1]]] <> ")" & /@
-        Transpose[{nPointFunctions, names}],
-      definitionHeads = "std::array<std::complex<double>, " <> ToString[Length[fermionBasis]] <> "> "
-          <> #[[2]] <> "(" <>
-          CXXArgStringNPF[#[[1]]] <> ")" & /@
-        Transpose[{nPointFunctions, names}]
-    ];
-
-    definitionBodies = CXXBodyNPF /@ nPointFunctions;
-    If[Length[fermionBasis] === 0,
-      auxilliaryClasses = CXXClassForNPF[Sequence @@ #] & /@
-        Transpose[{
-          nPointFunctions /. loopFunctionRules,
-          If[Head[colourFactorProjections] === List,
-            colourFactorProjections,
-            Table[colourFactorProjections, {Length[names]}]]
-        }],
-      auxilliaryClasses = CXXClassForNPF[Sequence @@ #, fermionBasis] & /@
-        Transpose[{
-          nPointFunctions /. loopFunctionRules,
-          If[Head[colourFactorProjections] === List,
-            colourFactorProjections,
-            Table[colourFactorProjections, {Length[names]}]]
-        }]
-    ];
-
-    definitions = StringJoin[Riffle[auxilliaryClasses,"\n\n"]] <> "\n\n" <>
-      StringJoin[Riffle[#[[1]] <> "\n{\n" <> #[[2]] <> "\n}" & /@
-         Transpose[{definitionHeads, definitionBodies}], "\n\n"]];
-
-    {prototypes, definitions}
-  ]
-Options[CreateCXXFunctionsNew]={
-   LoopFunctions -> "FlexibleSUSY",
-   FermionBasis -> {}
-};
 CreateCXXFunctions::usage=
 "@brief Given a list of n-point correllation functions, a list
 of c++ function names and a list of colour factor projections
@@ -874,7 +807,9 @@ CreateCXXFunctions::errUnknownInput=
 where
  options have names from list 
   `1`.";
-CreateCXXFunctionsNew[nPointFunctions_,names_,colourProjectors_,opts:OptionsPattern[]] :=
+CreateCXXFunctions[
+   nPointFunctions_,names_,colourProjectors_,opts:OptionsPattern[]
+] :=
 Module[
    {
       loopFunctionRules = Switch[OptionValue@LoopFunctions,
