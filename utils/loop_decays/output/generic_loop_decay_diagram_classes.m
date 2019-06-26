@@ -5,13 +5,13 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> F, Field[5] -> F, Field[6] -> F}, 
-  {Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PR], Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], S[Index[Generic, 3]]][
-    PL], Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], 
-     S[Index[Generic, 2]]][PL], Cp[-F[Index[Generic, 4]], 
+  {DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PR], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], S[Index[Generic, 3]]][
+    PL], DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], 
+     S[Index[Generic, 2]]][PL], DylanCp[-F[Index[Generic, 4]], 
      -F[Index[Generic, 5]], S[Index[Generic, 1]]][PL], 
-   Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], S[Index[Generic, 3]]][PR], 
-   Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][
+   DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], S[Index[Generic, 3]]][PR], 
+   DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][
     PR]}, {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], 
     Field[5]}, {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -21,9 +21,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> S, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
-   Cp[S[Index[Generic, 3]], S[Index[Generic, 5]], S[Index[Generic, 6]]][1]}, 
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
+   DylanCp[S[Index[Generic, 3]], S[Index[Generic, 5]], S[Index[Generic, 6]]][1]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -33,9 +33,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> U, Field[5] -> U, Field[6] -> U}, 
-  {Cp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], -U[Index[Generic, 6]], U[Index[Generic, 4]]][1], 
-   Cp[S[Index[Generic, 3]], U[Index[Generic, 5]], U[Index[Generic, 6]]][1]}, 
+  {DylanCp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], -U[Index[Generic, 6]], U[Index[Generic, 4]]][1], 
+   DylanCp[S[Index[Generic, 3]], U[Index[Generic, 5]], U[Index[Generic, 6]]][1]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -45,10 +45,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> S, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
     Mom[S[Index[Generic, 2]]] - Mom[S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 3]], S[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 3]], S[Index[Generic, 5]], V[Index[Generic, 6]]][
     Mom[S[Index[Generic, 3]]] - Mom[S[Index[Generic, 5]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -59,10 +59,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> S, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
-   Cp[S[Index[Generic, 3]], S[Index[Generic, 6]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
+   DylanCp[S[Index[Generic, 3]], S[Index[Generic, 6]], V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 3]]] - Mom[S[Index[Generic, 6]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -73,11 +73,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> V, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 2]], -S[Index[Generic, 6]], V[Index[Generic, 4]]][
+   DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 6]], V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 2]]] - Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 3]], S[Index[Generic, 5]], S[Index[Generic, 6]]][1]}, 
+   DylanCp[S[Index[Generic, 3]], S[Index[Generic, 5]], S[Index[Generic, 6]]][1]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -87,11 +87,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> S, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
     Mom[S[Index[Generic, 2]]] - Mom[S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -102,10 +102,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> V, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 2]], V[Index[Generic, 4]], -V[Index[Generic, 6]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 3]], S[Index[Generic, 5]], 
+   DylanCp[S[Index[Generic, 2]], V[Index[Generic, 4]], -V[Index[Generic, 6]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 3]], S[Index[Generic, 5]], 
      V[Index[Generic, 6]]][Mom[S[Index[Generic, 3]]] - 
      Mom[S[Index[Generic, 5]]]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
@@ -117,11 +117,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> V, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 2]], -S[Index[Generic, 6]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 6]], 
      V[Index[Generic, 4]]][Mom[S[Index[Generic, 2]]] - 
      Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 3]], S[Index[Generic, 6]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 3]], S[Index[Generic, 6]], V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 3]]] - Mom[S[Index[Generic, 6]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -132,10 +132,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> S, 
    Field[4] -> V, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 2]], V[Index[Generic, 4]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 2]], V[Index[Generic, 4]], 
      -V[Index[Generic, 6]]][g[lt2, lt3]], 
-   Cp[S[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -145,8 +145,8 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3], 
    {4, 5} -> Field[4], {4, 5} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> S, Field[4] -> S, Field[5] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 3]], S[Index[Generic, 4]], 
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 3]], S[Index[Generic, 4]], 
      S[Index[Generic, 5]]][1]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[3]], AntiField[Field[4]], AntiField[Field[5]]}}, True}, 
@@ -155,8 +155,8 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3], 
    {4, 5} -> Field[4], {4, 5} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> S, Field[4] -> V, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 2]], S[Index[Generic, 3]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 2]], S[Index[Generic, 3]], 
      V[Index[Generic, 4]], V[Index[Generic, 5]]][g[lt3, lt4]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[3]], AntiField[Field[4]], 
@@ -165,8 +165,8 @@
    {0, 1, 0, 2, 0}}, {{1, 4} -> Field[1], {2, 5} -> Field[2], 
    {3, 4} -> Field[3], {5, 4} -> Field[4], {5, 4} -> Field[5]}, 
   {Field[1] -> S, Field[2] -> S, Field[3] -> S, Field[4] -> S, 
-   Field[5] -> S}, {Cp[S[Index[Generic, 2]], -S[Index[Generic, 4]], 
-     -S[Index[Generic, 5]]][1], Cp[S[Index[Generic, 1]], 
+   Field[5] -> S}, {DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 4]], 
+     -S[Index[Generic, 5]]][1], DylanCp[S[Index[Generic, 1]], 
      S[Index[Generic, 3]], S[Index[Generic, 4]], S[Index[Generic, 5]]][1]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], AntiField[Field[3]], 
     AntiField[Field[4]], AntiField[Field[5]]}, {AntiField[Field[2]], 
@@ -176,8 +176,8 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 4} -> Field[3], 
    {5, 4} -> Field[4], {5, 4} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> S, Field[4] -> V, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 2]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 1]], S[Index[Generic, 3]], 
+  {DylanCp[S[Index[Generic, 2]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 1]], S[Index[Generic, 3]], 
      V[Index[Generic, 4]], V[Index[Generic, 5]]][g[lt3, lt4]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], AntiField[Field[3]], 
     AntiField[Field[4]], AntiField[Field[5]]}, {AntiField[Field[2]], 
@@ -187,8 +187,8 @@
   {{1, 4} -> Field[1], {2, 4} -> Field[2], {3, 5} -> Field[3], 
    {5, 4} -> Field[4], {5, 4} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> S, Field[4] -> S, Field[5] -> S}, 
-  {Cp[S[Index[Generic, 3]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 1]], S[Index[Generic, 2]], S[Index[Generic, 4]], 
+  {DylanCp[S[Index[Generic, 3]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 1]], S[Index[Generic, 2]], S[Index[Generic, 4]], 
      S[Index[Generic, 5]]][1]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], AntiField[Field[2]], AntiField[Field[4]], 
     AntiField[Field[5]]}, {AntiField[Field[3]], 
@@ -198,8 +198,8 @@
   {{1, 4} -> Field[1], {2, 4} -> Field[2], {3, 5} -> Field[3], 
    {5, 4} -> Field[4], {5, 4} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> S, Field[4] -> V, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 3]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 1]], S[Index[Generic, 2]], 
+  {DylanCp[S[Index[Generic, 3]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 1]], S[Index[Generic, 2]], 
      V[Index[Generic, 4]], V[Index[Generic, 5]]][g[lt3, lt4]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], AntiField[Field[2]], 
     AntiField[Field[4]], AntiField[Field[5]]}, {AntiField[Field[3]], 
@@ -210,15 +210,15 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> F, Field[5] -> F, Field[6] -> F}, 
-  {Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PL], Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
+  {DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PL], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], V[Index[Generic, 2]]][
+   DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], V[Index[Generic, 2]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PR], Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
+   DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PR], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], V[Index[Generic, 2]]][
+   DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], V[Index[Generic, 2]]][
     LorentzProduct[gamma[lt3], PR]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -229,10 +229,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> S, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 4]], -S[Index[Generic, 6]], V[Index[Generic, 2]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 4]], -S[Index[Generic, 6]], V[Index[Generic, 2]]][
     Mom[S[Index[Generic, 4]]] - Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
+   DylanCp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
     Mom[S[Index[Generic, 5]]] - Mom[S[Index[Generic, 6]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -243,9 +243,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> U, Field[5] -> U, Field[6] -> U}, 
-  {Cp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
-   Cp[U[Index[Generic, 5]], U[Index[Generic, 6]], V[Index[Generic, 3]]][
-    Mom[U[Index[Generic, 5]]]], Cp[-U[Index[Generic, 6]], 
+  {DylanCp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
+   DylanCp[U[Index[Generic, 5]], U[Index[Generic, 6]], V[Index[Generic, 3]]][
+    Mom[U[Index[Generic, 5]]]], DylanCp[-U[Index[Generic, 6]], 
      U[Index[Generic, 4]], V[Index[Generic, 2]]][
     Mom[-U[Index[Generic, 6]]]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
@@ -257,9 +257,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> S, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 4]], V[Index[Generic, 2]], -V[Index[Generic, 6]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 5]], V[Index[Generic, 3]], 
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 4]], V[Index[Generic, 2]], -V[Index[Generic, 6]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 5]], V[Index[Generic, 3]], 
      V[Index[Generic, 6]]][g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -270,11 +270,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> S, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 4]], -S[Index[Generic, 6]], V[Index[Generic, 2]]][
+   DylanCp[S[Index[Generic, 4]], -S[Index[Generic, 6]], V[Index[Generic, 2]]][
     Mom[S[Index[Generic, 4]]] - Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -285,11 +285,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> V, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
+   DylanCp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
     Mom[S[Index[Generic, 5]]] - Mom[S[Index[Generic, 6]]]], 
-   Cp[-S[Index[Generic, 6]], V[Index[Generic, 2]], V[Index[Generic, 4]]][
+   DylanCp[-S[Index[Generic, 6]], V[Index[Generic, 2]], V[Index[Generic, 4]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -300,10 +300,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> S, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 4]], V[Index[Generic, 2]], -V[Index[Generic, 6]]][
-    g[lt2, lt3]], Cp[V[Index[Generic, 3]], V[Index[Generic, 5]], 
+   DylanCp[S[Index[Generic, 4]], V[Index[Generic, 2]], -V[Index[Generic, 6]]][
+    g[lt2, lt3]], DylanCp[V[Index[Generic, 3]], V[Index[Generic, 5]], 
      V[Index[Generic, 6]]][g[lt1, lt2]*(-Mom[V[Index[Generic, 3]]] + 
        Mom[V[Index[Generic, 5]]]) + g[lt1, lt3]*(Mom[V[Index[Generic, 3]]] - 
        Mom[V[Index[Generic, 6]]]) + g[lt2, lt3]*(-Mom[V[Index[Generic, 5]]] + 
@@ -317,10 +317,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> V, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 5]], V[Index[Generic, 3]], V[Index[Generic, 6]]][
-    g[lt2, lt3]], Cp[V[Index[Generic, 2]], V[Index[Generic, 4]], 
+   DylanCp[S[Index[Generic, 5]], V[Index[Generic, 3]], V[Index[Generic, 6]]][
+    g[lt2, lt3]], DylanCp[V[Index[Generic, 2]], V[Index[Generic, 4]], 
      -V[Index[Generic, 6]]][g[lt1, lt2]*(-Mom[V[Index[Generic, 2]]] + 
        Mom[V[Index[Generic, 4]]]) + g[lt1, lt3]*(Mom[V[Index[Generic, 2]]] - 
        Mom[-V[Index[Generic, 6]]]) + g[lt2, lt3]*
@@ -334,10 +334,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> V, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[-S[Index[Generic, 6]], V[Index[Generic, 2]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[-S[Index[Generic, 6]], V[Index[Generic, 2]], 
      V[Index[Generic, 4]]][g[lt2, lt3]], 
-   Cp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -348,13 +348,13 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> V, Field[3] -> V, 
    Field[4] -> V, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[V[Index[Generic, 2]], V[Index[Generic, 4]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[V[Index[Generic, 2]], V[Index[Generic, 4]], 
      -V[Index[Generic, 6]]][g[lt1, lt2]*(-Mom[V[Index[Generic, 2]]] + 
        Mom[V[Index[Generic, 4]]]) + g[lt1, lt3]*(Mom[V[Index[Generic, 2]]] - 
        Mom[-V[Index[Generic, 6]]]) + g[lt2, lt3]*
       (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]])], 
-   Cp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
     g[lt1, lt2]*(-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]]) + 
      g[lt1, lt3]*(Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]]) + 
      g[lt2, lt3]*(-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]])]}, 
@@ -366,8 +366,8 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3], 
    {4, 5} -> Field[4], {4, 5} -> Field[5]}, {Field[1] -> S, Field[2] -> V, 
    Field[3] -> V, Field[4] -> S, Field[5] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 4]], S[Index[Generic, 5]], V[Index[Generic, 2]], 
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 4]], S[Index[Generic, 5]], V[Index[Generic, 2]], 
      V[Index[Generic, 3]]][g[lt3, lt4]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[3]], AntiField[Field[4]], AntiField[Field[5]]}}, True}, 
@@ -376,12 +376,12 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3], 
    {4, 5} -> Field[4], {4, 5} -> Field[5]}, {Field[1] -> S, Field[2] -> V, 
    Field[3] -> V, Field[4] -> V, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[V[Index[Generic, 2]], V[Index[Generic, 3]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[V[Index[Generic, 2]], V[Index[Generic, 3]], 
      V[Index[Generic, 4]], V[Index[Generic, 5]]][g[lt1, lt2]*g[lt3, lt4]], 
-   Cp[V[Index[Generic, 2]], V[Index[Generic, 3]], V[Index[Generic, 4]], 
+   DylanCp[V[Index[Generic, 2]], V[Index[Generic, 3]], V[Index[Generic, 4]], 
      V[Index[Generic, 5]]][g[lt1, lt4]*g[lt2, lt3]], 
-   Cp[V[Index[Generic, 2]], V[Index[Generic, 3]], V[Index[Generic, 4]], 
+   DylanCp[V[Index[Generic, 2]], V[Index[Generic, 3]], V[Index[Generic, 4]], 
      V[Index[Generic, 5]]][g[lt1, lt3]*g[lt2, lt4]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[3]], AntiField[Field[4]], 
@@ -390,9 +390,9 @@
    {0, 1, 0, 2, 0}}, {{1, 4} -> Field[1], {2, 5} -> Field[2], 
    {3, 4} -> Field[3], {5, 4} -> Field[4], {5, 4} -> Field[5]}, 
   {Field[1] -> S, Field[2] -> V, Field[3] -> V, Field[4] -> S, 
-   Field[5] -> V}, {Cp[-S[Index[Generic, 4]], V[Index[Generic, 2]], 
+   Field[5] -> V}, {DylanCp[-S[Index[Generic, 4]], V[Index[Generic, 2]], 
      -V[Index[Generic, 5]]][g[lt2, lt3]], 
-   Cp[S[Index[Generic, 1]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
+   DylanCp[S[Index[Generic, 1]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
      V[Index[Generic, 5]]][g[lt3, lt4]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], AntiField[Field[3]], AntiField[Field[4]], 
     AntiField[Field[5]]}, {AntiField[Field[2]], 
@@ -402,8 +402,8 @@
   {{1, 4} -> Field[1], {2, 4} -> Field[2], {3, 5} -> Field[3], 
    {5, 4} -> Field[4], {5, 4} -> Field[5]}, {Field[1] -> S, Field[2] -> V, 
    Field[3] -> V, Field[4] -> S, Field[5] -> V}, 
-  {Cp[-S[Index[Generic, 4]], V[Index[Generic, 3]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 1]], S[Index[Generic, 4]], 
+  {DylanCp[-S[Index[Generic, 4]], V[Index[Generic, 3]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 1]], S[Index[Generic, 4]], 
      V[Index[Generic, 2]], V[Index[Generic, 5]]][g[lt3, lt4]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], AntiField[Field[2]], 
     AntiField[Field[4]], AntiField[Field[5]]}, {AntiField[Field[3]], 
@@ -414,14 +414,14 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> F, Field[5] -> F, Field[6] -> F}, 
-  {Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PL], Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
+  {DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PL], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][PL], 
-   Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PR], Cp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
+   DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][PL], 
+   DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PR], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 6]], V[Index[Generic, 3]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][
+   DylanCp[-F[Index[Generic, 6]], F[Index[Generic, 4]], S[Index[Generic, 2]]][
     PR]}, {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], 
     Field[5]}, {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -431,9 +431,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> S, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
-   Cp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
+   DylanCp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
     Mom[S[Index[Generic, 5]]] - Mom[S[Index[Generic, 6]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -444,9 +444,9 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> U, Field[5] -> U, Field[6] -> U}, 
-  {Cp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], -U[Index[Generic, 6]], U[Index[Generic, 4]]][1], 
-   Cp[U[Index[Generic, 5]], U[Index[Generic, 6]], V[Index[Generic, 3]]][
+  {DylanCp[S[Index[Generic, 1]], -U[Index[Generic, 4]], -U[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], -U[Index[Generic, 6]], U[Index[Generic, 4]]][1], 
+   DylanCp[U[Index[Generic, 5]], U[Index[Generic, 6]], V[Index[Generic, 3]]][
     Mom[U[Index[Generic, 5]]]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -457,10 +457,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> S, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][1], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
     Mom[S[Index[Generic, 2]]] - Mom[S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 5]], V[Index[Generic, 3]], V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 5]], V[Index[Generic, 3]], V[Index[Generic, 6]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -471,10 +471,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> S, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
-   Cp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -S[Index[Generic, 6]]][1], 
+   DylanCp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -485,11 +485,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> V, Field[5] -> S, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 2]], -S[Index[Generic, 6]], V[Index[Generic, 4]]][
+   DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 6]], V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 2]]] - Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
+   DylanCp[S[Index[Generic, 5]], S[Index[Generic, 6]], V[Index[Generic, 3]]][
     Mom[S[Index[Generic, 5]]] - Mom[S[Index[Generic, 6]]]]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
@@ -500,11 +500,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> S, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], -V[Index[Generic, 6]]][
     Mom[S[Index[Generic, 2]]] - Mom[S[Index[Generic, 4]]]], 
-   Cp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
     g[lt1, lt2]*(-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]]) + 
      g[lt1, lt3]*(Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]]) + 
      g[lt2, lt3]*(-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]])]}, 
@@ -517,10 +517,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> V, Field[5] -> S, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 5]]]], 
-   Cp[S[Index[Generic, 2]], V[Index[Generic, 4]], -V[Index[Generic, 6]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 5]], V[Index[Generic, 3]], 
+   DylanCp[S[Index[Generic, 2]], V[Index[Generic, 4]], -V[Index[Generic, 6]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 5]], V[Index[Generic, 3]], 
      V[Index[Generic, 6]]][g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -531,11 +531,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> V, Field[5] -> V, Field[6] -> S}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 2]], -S[Index[Generic, 6]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 6]], 
      V[Index[Generic, 4]]][Mom[S[Index[Generic, 2]]] - 
      Mom[-S[Index[Generic, 6]]]], 
-   Cp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 6]], V[Index[Generic, 3]], V[Index[Generic, 5]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -546,10 +546,10 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> S, Field[3] -> V, 
    Field[4] -> V, Field[5] -> V, Field[6] -> V}, 
-  {Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
-    g[lt2, lt3]], Cp[S[Index[Generic, 2]], V[Index[Generic, 4]], 
+  {DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+    g[lt2, lt3]], DylanCp[S[Index[Generic, 2]], V[Index[Generic, 4]], 
      -V[Index[Generic, 6]]][g[lt2, lt3]], 
-   Cp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
+   DylanCp[V[Index[Generic, 3]], V[Index[Generic, 5]], V[Index[Generic, 6]]][
     g[lt1, lt2]*(-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]]) + 
      g[lt1, lt3]*(Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]]) + 
      g[lt2, lt3]*(-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]])]}, 
@@ -561,9 +561,9 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3], 
    {4, 5} -> Field[4], {4, 5} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> V, Field[4] -> S, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 1]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 2]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
+   DylanCp[S[Index[Generic, 2]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
      V[Index[Generic, 5]]][g[lt3, lt4]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[3]], AntiField[Field[4]], AntiField[Field[5]]}}, True}, 
@@ -572,9 +572,9 @@
   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 4} -> Field[3], 
    {5, 4} -> Field[4], {5, 4} -> Field[5]}, {Field[1] -> S, Field[2] -> S, 
    Field[3] -> V, Field[4] -> S, Field[5] -> V}, 
-  {Cp[S[Index[Generic, 2]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+  {DylanCp[S[Index[Generic, 2]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[Index[Generic, 2]]] - Mom[-S[Index[Generic, 4]]]], 
-   Cp[S[Index[Generic, 1]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
+   DylanCp[S[Index[Generic, 1]], S[Index[Generic, 4]], V[Index[Generic, 3]], 
      V[Index[Generic, 5]]][g[lt3, lt4]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], AntiField[Field[3]], AntiField[Field[4]], 
     AntiField[Field[5]]}, {AntiField[Field[2]], 
@@ -585,13 +585,13 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> F, Field[5] -> F, Field[6] -> S}, 
-  {Cp[F[Index[Generic, 2]], F[Index[Generic, 4]], -S[Index[Generic, 6]]][PR], 
-   Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PR], Cp[F[Index[Generic, 5]], F[Index[Generic, 3]], S[Index[Generic, 6]]][
-    PL], Cp[F[Index[Generic, 2]], F[Index[Generic, 4]], 
-     -S[Index[Generic, 6]]][PL], Cp[-F[Index[Generic, 4]], 
+  {DylanCp[F[Index[Generic, 2]], F[Index[Generic, 4]], -S[Index[Generic, 6]]][PR], 
+   DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PR], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 3]], S[Index[Generic, 6]]][
+    PL], DylanCp[F[Index[Generic, 2]], F[Index[Generic, 4]], 
+     -S[Index[Generic, 6]]][PL], DylanCp[-F[Index[Generic, 4]], 
      -F[Index[Generic, 5]], S[Index[Generic, 1]]][PL], 
-   Cp[F[Index[Generic, 5]], F[Index[Generic, 3]], S[Index[Generic, 6]]][PR]}, 
+   DylanCp[F[Index[Generic, 5]], F[Index[Generic, 3]], S[Index[Generic, 6]]][PR]}, 
   {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], Field[5]}, 
    {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -601,11 +601,11 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> S, Field[5] -> S, Field[6] -> F}, 
-  {Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PR], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PL], 
-   Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PL], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PR], 
-   Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][
+  {DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PR], 
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PL], 
+   DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PL], 
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PR], 
+   DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -S[Index[Generic, 5]]][
     1]}, {Field[1], Field[2], Field[3], {AntiField[Field[1]], Field[4], 
     Field[5]}, {AntiField[Field[2]], AntiField[Field[4]], Field[6]}, 
    {AntiField[Field[3]], AntiField[Field[5]], AntiField[Field[6]]}}, True}, 
@@ -615,15 +615,15 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> F, Field[5] -> F, Field[6] -> V}, 
-  {Cp[F[Index[Generic, 2]], F[Index[Generic, 4]], -V[Index[Generic, 6]]][
+  {DylanCp[F[Index[Generic, 2]], F[Index[Generic, 4]], -V[Index[Generic, 6]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PR], Cp[F[Index[Generic, 2]], F[Index[Generic, 4]], 
+   DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PR], DylanCp[F[Index[Generic, 2]], F[Index[Generic, 4]], 
      -V[Index[Generic, 6]]][LorentzProduct[gamma[lt3], PR]], 
-   Cp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
-    PL], Cp[F[Index[Generic, 5]], F[Index[Generic, 3]], V[Index[Generic, 6]]][
+   DylanCp[-F[Index[Generic, 4]], -F[Index[Generic, 5]], S[Index[Generic, 1]]][
+    PL], DylanCp[F[Index[Generic, 5]], F[Index[Generic, 3]], V[Index[Generic, 6]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[F[Index[Generic, 5]], F[Index[Generic, 3]], V[Index[Generic, 6]]][
+   DylanCp[F[Index[Generic, 5]], F[Index[Generic, 3]], V[Index[Generic, 6]]][
     LorentzProduct[gamma[lt3], PL]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -634,13 +634,13 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> S, Field[5] -> V, Field[6] -> F}, 
-  {Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PR], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
+  {DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PR], 
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PL], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], S[Index[Generic, 4]]][PL], 
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 4]], -V[Index[Generic, 5]]][
     Mom[S[1]] - Mom[-S[Index[Generic, 4]]]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -651,13 +651,13 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> V, Field[5] -> S, Field[6] -> F}, 
-  {Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
+  {DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PL], 
-   Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PL], 
+   DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PR], 
-   Cp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], S[Index[Generic, 5]]][PR], 
+   DylanCp[S[Index[Generic, 1]], -S[Index[Generic, 5]], -V[Index[Generic, 4]]][
     Mom[S[1]] - Mom[-S[Index[Generic, 5]]]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 
@@ -668,15 +668,15 @@
    {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], 
    {5, 6} -> Field[6]}, {Field[1] -> S, Field[2] -> F, Field[3] -> F, 
    Field[4] -> V, Field[5] -> V, Field[6] -> F}, 
-  {Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
+  {DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
     LorentzProduct[gamma[lt3], PR]], 
-   Cp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
+   DylanCp[F[Index[Generic, 2]], -F[Index[Generic, 6]], V[Index[Generic, 4]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
+   DylanCp[F[Index[Generic, 6]], F[Index[Generic, 3]], V[Index[Generic, 5]]][
     LorentzProduct[gamma[lt3], PL]], 
-   Cp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
+   DylanCp[S[Index[Generic, 1]], -V[Index[Generic, 4]], -V[Index[Generic, 5]]][
     g[lt2, lt3]]}, {Field[1], Field[2], Field[3], 
    {AntiField[Field[1]], Field[4], Field[5]}, {AntiField[Field[2]], 
     AntiField[Field[4]], Field[6]}, {AntiField[Field[3]], 

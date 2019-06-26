@@ -5,7 +5,7 @@ Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
     2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
-    3   0                    # calculate SM pole masses
+    3   1                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
     6   2                    # beta-functions loop order
