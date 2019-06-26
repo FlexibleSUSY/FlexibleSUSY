@@ -132,6 +132,8 @@ FermionBasis::usage=
 "Option for NPointFunctions`CreateCXXFunctions[].
 Specify the fermion basis used for the matching.
 
+@note should contain strings with names of fermion chains
+
 def. {} | @todo";
 
 (*functions*)
@@ -144,7 +146,7 @@ SetAttributes[
    OneParticleReducible,ExceptBoxes,ExceptTriangles,
    GenericS,GenericF,GenericV,GenericU,GenericT,                                (* @unote also exist in internal.m*)
    GenericSum,GenericIndex,LorentzIndex,                                        (* @unote also exist in internal.m*)
-   LoopFunctions,UseWilsonCoeffs, FermionBasis
+   LoopFunctions,UseWilsonCoeffs,FermionBasis
    }, 
    {Protected, Locked}];
 
@@ -287,8 +289,8 @@ NPointFunction::errExcludedTopologies=
 {OneParticleReducible,ExceptBoxes,ExceptTriangles}.";
 NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
 "Only external scalars/fermions are supported (@todo FOR NOW).";
-NPointFunction::errCalc=                                                        (* @utodo one needs to be more specific about problem *)
-"Calculation failed";
+NPointFunction::errCalc=
+"FeynArts+FormCalc calculations failed";
 NPointFunction::errUnknownOptions=
    NPFPattern::errUnknownOptions;
 NPointFunction::errUnknownInput=
@@ -354,7 +356,7 @@ Module[
       inFANames, outFANames, loopLevel, regularizationScheme,
       zeroExternalMomenta, excludedTopologies, onShellFlag];
 
-   nPointFunction = ParallelEvaluate[
+   nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDirectory;
 
@@ -680,6 +682,36 @@ Module[
          Susyno`LieGroups`conj@field_String :> "-" <> field
       }
 ]
+
+RemoveEmptyGenSums::usage=
+"@brief Sometimes after FA+FC calculation some generic sums are empty. This
+means that one can simply remove them (as well as corresponding
+colour/combinatoric factors and field substitution rules). This work is done by
+this function.
+@param npfObject NPF object to clean.
+@returns cleaned from empty GenericSums npfObject.";
+RemoveEmptyGenSums::errUnknownInput=
+   RemoveEmptyGenSums::usage
+RemoveEmptyGenSums[npfObject:NPFPattern[]]:=npfObject;
+RemoveEmptyGenSums[
+   {fields:{{__},{__}},
+      {
+         {
+            sums:{GenericSum[_,{___}]..},
+            rules:{{{Rule[_,_]..}..}..},
+            comb:{{__Integer}..},
+            col:{{__}..}
+         },
+         subs:{Rule[_,_]...}
+      }
+   }]:=
+Module[{poss=Position[sums,GenericSum[0,{}]]},
+   Print["Removing zero GenericSum at positions ",
+      StringRiffle[ToString/@Flatten@poss,", "],"."];
+   {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
+];
+RemoveEmptyGenSums[___]:=
+Utils`TestWithMessage[False,RemoveEmptyGenSums::errUnknownInput];
 
 Options[CreateCXXHeaders]={
    LoopFunctions -> "FlexibleSUSY",
@@ -1597,7 +1629,7 @@ SetAttributes[
    LaunchSubkernelFor,
    CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
    GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
-   FANamesForFields,
+   FANamesForFields,RemoveEmptyGenSums,
    VerticesForNPointFunction,
    CreateCXXHeaders,
    CreateCXXFunctions,
