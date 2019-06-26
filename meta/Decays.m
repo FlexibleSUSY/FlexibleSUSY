@@ -595,7 +595,7 @@ LoopOverIndex[loopBody_String, index_, start_, stop_, type_:CConversion`ScalarTy
    {{idx1, start, stop}, {idx2, start, stop}, ...} with
    the first list entry being the innermost loop *)
 LoopOverIndexCollection[loopBody_String, indices_List] :=
-    Fold[LoopOverIndex[#1, Sequence @@ #2]&, loopBody, indices];
+    "\n" <> Fold[LoopOverIndex[#1, Sequence @@ #2]&, loopBody, indices] <> "\n";
 
 CreateGenericGetPartialWidthFunctionName[] := "get_partial_width";
 
@@ -725,7 +725,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                      ]&,
                      finalState
                   ], " + "
-              ] <> ") {continue;}\n";
+              ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n";
            (* call decay *)
            body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> ");";
 
@@ -737,7 +737,8 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                                                        ]&, finalStateDims], (# =!= {})&]];
            If[loopIndices =!= {},
               body = LoopOverIndexCollection[skip <> body, loopIndices],
-              body = "if(context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) > " <>
+              body = "\nif(context.physical_mass<" <> CXXNameOfField[initialState] <>
+                 ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) > " <>
                  StringJoin @ Riffle[
                     MapIndexed[
                        With[{idx = First[#2]},
@@ -746,7 +747,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                        ]&,
                        finalState
                     ], " + "
-                 ] <> ") {\n" <> body <> ";}\n"
+                 ] <> ") {\n" <> TextFormatting`IndentText[body] <> ";\n}\n"
              ]
           ];
 
@@ -1200,7 +1201,7 @@ FieldFromDiagram[diagram_, {i_, j_}] :=
    level. *)
 (* @todo: not clear about the conjugation of particle *)
 InsertionsOnEdgesForDiagram[topology_, insertion_] :=
-   Module[{sortedVertexCombinations, connectedVertices},
+   Module[{sortedVertexCombinations, connectedVertices, res},
 
       sortedVertexCombinations =
          Select[
@@ -1215,7 +1216,7 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
          CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[Sequence@@#, insertion, topology] =!= {}&
       ];
 
-      Flatten[
+      res = Flatten[
             Switch[Length[CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology]],
                (* vertices connected by 1 particle *)
                1, {{#1, #2} -> FieldFromDiagram[insertion, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology][[1,1]]}]},
@@ -1228,54 +1229,56 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
                _, Utils`PrintErrorMsg["Only 1 or 2 connections between vertices are supported"]; Quit[1];
             ]& @@@ connectedVertices,
          1
-      ]
+      ];
+
+      res
 ];
 
-ConvertCouplingToCPP[Cp[particles__][lor_], vertices_, indices_] :=
+ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
    Module[{vertexEdges, res, pos},
 
-   vertexEdges = (List[particles] /. Index[Generic, n_] :> n /. Index[Generic, n_] :> n);
+   vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
    res =
       Replace[lor, {
-         LorentzProduct[_, PL] -> "left()",
-         LorentzProduct[_, PR] -> "right()",
+         1 -> "value()",
          PL -> "left()",
          PR -> "right()",
-         1 -> "value()",
+         LorentzProduct[_, PL] -> "left()",
+         LorentzProduct[_, PR] -> "right()",
+         (* @todo: rules below need checking! *)
+         (* momentum difference vertices *)
+         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> (
+            "value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
+         ),
+         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> (
+            "value(" <>
+            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, f[m]]}, ", "] <> ")"
+         ),
+         Mom[f_[n_]] - Mom[-f_[Index[Generic, m_]]] :> (
+            "value(" <>
+               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, f[m]]}, ", "] <> ")"
+         ),
+         (* metric tensor vertices *)
          g[_, _] -> "value()",
-(*          @todo: rules below need checking! *)
-(*         Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> ( *)
-(*            "value(" <>*)
-(*            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, -f[m]]}, ", "] <> ")"),*)
-(*         Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]] :> ("value(" <>*)
-(*         StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]],Position[vertexEdges, f[m]]}, ", "] <> ")"),*)
-(*         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])*)
-(*            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])*)
-(*            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",*)
-(*         g[lt1, lt2] (-Mom[V[Index[Generic, 2]]] + Mom[V[Index[Generic, 4]]])*)
-(*            + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])*)
-(*            + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",*)
-(*         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",*)
-(*         Mom[S[n_]] - Mom[-S[Index[Generic, m_]]] :> ("value(" <>*)
-(*            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@{n,m}, ", "] <> ")"),*)
+         g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, 3]]] - Mom[V[Index[Generic, 6]]])
+            + g[lt2_, lt3_] (-Mom[V[Index[Generic, 5]]] + Mom[V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+         g[lt1, lt2] (-Mom[V[Index[Generic, 2]]] + Mom[V[Index[Generic, 4]]])
+            + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])
+            + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+         g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",
+         (* momentum vertices *)
          (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             momentum non-bared ghost *)
-(*               Mom[U[Index[Generic, n_]]] :> ( *)
-(*                              Print[particles];*)
-(*                              Print[lor];*)
-(*                              Print[indices];*)
-(*                              Print[Utils`MathIndexToCPP@FieldPositionInVertex[U[Index[Generic, n]], {particles}]];*)
-(*                                             Print["The End"];*)
-(*                @todo: no such vertices; remove in the end *)
-(*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[U[Index[Generic, n]], {particles}] <> ")"),*)
-(*               Mom[-U[Index[Generic, n_]]] :> ( *)
-(*               Print[particles];*)
-(*               Print[lor];*)
-(*               Print[indices];*)
-(*               Print[Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}]];*)
-(*               Print["The End"];*)
+       Mom[f_[Index[Generic, n_]]] :> (
+       Print[particles];
+       Print[lor];
+          Print[ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f_[Index[Generic, n]], {particles}] <> ")"];
+                  "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[f_[Index[Generic, n]], {particles}]+1) <> ")"),
+(*       Mom[-U[Index[Generic, n_]]] :> ( *)
 (*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}] <> ")"),*)
          lor :> False (*Print["Error! Unidentified lorentz structure ", lor]; Quit[1]*)
       }
@@ -1346,7 +1349,7 @@ WrapCodeInLoop[indices_, code_] :=
          "}\n",
          #-1
          ]& /@ Reverse@Range@Length[indices]));
-(* some classes of insertions are not present in Dyla's output,
+(* some classes of insertions are not present in Dylan's output,
    here we filter them out *)
 DiagramWithLoopFunctionEvaluatingTo0Q[topology_, diagram_] :=
    Module[{fieldTypes = GetFeynArtsTypeName /@ (Last /@ InsertionsOnEdgesForDiagram[topology, diagram])},
@@ -1372,11 +1375,21 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       translation = GenericTranslationForInsertion[topology, diagram];
 
       (* {Field[1] -> concrete field, ...} *)
+      (* @todo: fieldAssociation is inconsistent with translation. e.g. translation might say that
+         F[4] is a scalar but fieldAssociation will give F[4]->Wm *)
       fieldAssociation = GetFieldsAssociations2[diagram, translation[[-2]]];
+
+      If[!(translation[[4]] === (#[[1]] -> GetFeynArtsTypeName[#[[2]]]& /@ fieldAssociation)),
+         If[translation[[4]] === (#[[1]] -> GetFeynArtsTypeName[#[[2]]]& /@ Join[Drop[fieldAssociation,-2], {fieldAssociation[[4,1]] -> fieldAssociation[[5,2]]}, {fieldAssociation[[5,1]]->fieldAssociation[[4,2]]}]),
+            fieldAssociation = Join[Drop[fieldAssociation,-2], {fieldAssociation[[4,1]] -> fieldAssociation[[5,2]]}, {fieldAssociation[[5,1]]->fieldAssociation[[4,2]]}];,
+            Print[translation[[4]], " ? ", (#[[1]] -> GetFeynArtsTypeName[#[[2]]]& /@ Join[Drop[fieldAssociation,-2],  {fieldAssociation[[4,1]] -> fieldAssociation[[5,2]]}, {fieldAssociation[[5,1]]->fieldAssociation[[4,2]]}])];
+            Print["Giving Up"];Quit[1]
+      ]
+         ];
 
       (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
       verticesInFieldTypes =
-         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] :> n /. Cp[x___][__] :> Cp[x]]);
+         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] :> n /. Global`DylanCp[x__][__] :> DylanCp[x]]);
 
       (* vertices in an orientation as required by Cp *)
       vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
@@ -1475,6 +1488,15 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   (* if amplitude is UV divergent, take the finite part *)
                   If[!Last@translation === True, ",\n1.", ""] <> ");"
                   ] <> "\n";
+
+      (*
+         If[
+            StringDrop[cppVertices[[1]], 20] === StringDrop["using vertexId690 = Vertex<hh, typename conj<VWm>::type, Hpm>;\n", 20],
+
+            Print[vertices];
+            Print[cppVertices];
+            Quit[1]
+         ];*)
 
          "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
          (* usings for vertices *)
@@ -1899,7 +1921,8 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToPhotonPhotonPartialWidth[higgsDecays, modelName],
-                                 CreateHiggsToZPhotonPartialWidth[higgsDecays, modelName],
+                 (* @todo do we need special code for h > ZA? *)
+(*                                 CreateHiggsToZPhotonPartialWidth[higgsDecays, modelName],*)
                                  CreateHiggsToHiggsHiggsPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],

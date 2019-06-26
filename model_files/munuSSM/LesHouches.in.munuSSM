@@ -4,7 +4,7 @@ Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
     2   0                    # algorithm (0 = all, 1 = two_scale, 2 = semi_analytic)
-    3   0                    # calculate SM pole masses
+    3   1                    # calculate SM pole masses
     4   1                    # pole mass loop order
     5   1                    # EWSB loop order
     6   2                    # beta-functions loop order
@@ -16,7 +16,7 @@ Block FlexibleSUSY
    12   0                    # force output
    13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-16      # beta-function zero threshold
-   15   0                    # calculate observables (a_muon, ...)
+   15   1                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
    17   0                    # pole mass renormalization scale (0 = SUSY scale)
    18   0                    # pole mass renormalization scale in the EFT (0 = min(SUSY scale, Mt))
