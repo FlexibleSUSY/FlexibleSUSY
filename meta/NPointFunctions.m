@@ -904,7 +904,7 @@ GetLTToFSRules::errUnknownInput=
 GetLTToFSRules[] :=
 Module[{warning="\033[1;33mWarning\033[1;0m"},
    WriteString[OutputStream["stdout", 1],
-      warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented\n"];
+      warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented.\n"];
    WriteString[OutputStream["stdout", 1],
       warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta."];
    {
