@@ -310,13 +310,18 @@ TestWithMessage[
    HoldPattern@MessageName[sym_, tag_],
    insertions___
 ] :=
-If[assertion === True, 
-   True ,
+If[assertion === True,
+   True,
+   Print[];
    Print[
       Context@sym,
       StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
       ": ","\033[1;31m",tag,"\033[1;0m",":"];
-   Print@StringForm[MessageName[sym, tag], insertions]; Quit[1]];
+   Print/@StringSplit[ToString@StringForm[
+      StringReplace[MessageName[sym, tag],"\n"->"_n_"],
+      insertions],"_n_"];
+   Print[];
+   Quit[1]];
 SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
 
 PureEvaluate[
@@ -330,16 +335,17 @@ Module[{Filter},
       Hold[Message[_, System`Dump`args___]]
    ] := 
    (
+      Print[];
       Print[
          Context@sym,
          StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
-         ": ",tag,":"];
-      Print[StringForm[MessageName[sym, tag], insertions],
-         "\n"<>ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
-         StringForm[System`Dump`str, 
-            Sequence@@(ToString /@ System`Dump`args)
-         ]
-      ];
+         ": ","\033[1;31m",tag,"\033[1;0m",":"];
+      Print/@StringSplit[ToString@StringForm[
+         StringReplace[MessageName[sym, tag],"\n"->"_n_"],
+         insertions],"_n_"];
+      Print[ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
+         StringForm[System`Dump`str,Sequence@@ToString /@ {System`Dump`args}]];
+      Print[];
       Quit[1]
    );
    Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
