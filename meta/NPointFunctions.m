@@ -1366,7 +1366,7 @@ Module[
    iLns=StringRiffle[MapThread[StringTemplate@iCommand,{names,keys}],"\n"<>str];
    StringTemplate[StringRiffle[mainCommands,{str,"\n"<>str,""}]][fLns,iLns]
 ];
-CXXCodeSubsIfGen[fields:{},str_String:""] =
+CXXCodeSubsIfGen[fields:{},str_String:""] :=
    str<>"// generic fields are absent";
 CXXCodeSubsIfGen[___] :=
    Utils`TestWithMessage[False,CXXCodeSubsIfGen::errUnknownInput];
