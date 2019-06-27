@@ -312,7 +312,7 @@ TestWithMessage[
 ] :=
 If[assertion === True,
    True,
-   Print[];
+   Utils`FSFancyLine["="];
    Print[
       Context@sym,
       StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
@@ -320,7 +320,7 @@ If[assertion === True,
    Print/@StringSplit[ToString@StringForm[
       StringReplace[MessageName[sym, tag],"\n"->"_n_"],
       insertions],"_n_"];
-   Print[];
+   Utils`FSFancyLine["="];
    Quit[1]];
 SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
 
@@ -335,7 +335,7 @@ Module[{Filter},
       Hold[Message[_, System`Dump`args___]]
    ] := 
    (
-      Print[];
+      Utils`FSFancyLine["="];
       Print[
          Context@sym,
          StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
@@ -345,7 +345,7 @@ Module[{Filter},
          insertions],"_n_"];
       Print[ToString@System`Dump`s<>"::"<>System`Dump`t<>" ",
          StringForm[System`Dump`str,Sequence@@ToString /@ {System`Dump`args}]];
-      Print[];
+      Utils`FSFancyLine["="];
       Quit[1]
    );
    Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]

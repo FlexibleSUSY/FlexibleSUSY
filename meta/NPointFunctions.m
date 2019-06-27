@@ -176,7 +176,7 @@ Module[{Formatted},
    @returns Pattern where option specify the stuff to pick in this calculation."
 ];
 NPFPattern::errUnknownOptions = 
-"Unknown option(s): 
+"Unknown option(s):
 `1`.
 
 Currently supported options are:
@@ -903,8 +903,10 @@ GetLTToFSRules::errUnknownInput=
 "Input should have no parameters.";
 GetLTToFSRules[] :=
 Module[{warning="\033[1;33mWarning\033[1;0m"},
-   Print[warning,": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented"];
-   Print[warning,": FlexibleSUSY C0, D0 and D00 require zero external momenta."];
+   WriteString[OutputStream["stdout", 1],
+      warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented\n"];
+   WriteString[OutputStream["stdout", 1],
+      warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta."];
    {
       LoopTools`A0i[LoopTools`aa0, args__] :>
          "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{args}],"context.scale()"],
