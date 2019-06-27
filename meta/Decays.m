@@ -1241,11 +1241,15 @@ ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
    pos = First@First@Position[vertices, vertexEdges];
    res =
       Replace[lor, {
+         (* only scalar vertices *)
          1 -> "value()",
+
+         (* fermion vertices *)
          PL -> "left()",
          PR -> "right()",
          LorentzProduct[_, PL] -> "left()",
          LorentzProduct[_, PR] -> "right()",
+
          (* @todo: rules below need checking! *)
          (* momentum difference vertices *)
          Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]] :> (
@@ -1260,6 +1264,7 @@ ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
             "value(" <>
                StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, f[m]]}, ", "] <> ")"
          ),
+
          (* metric tensor vertices *)
          g[_, _] -> "value()",
          g[lt1_, lt2_] (-Mom[V[Index[Generic, 3]]] + Mom[V[Index[Generic, 5]]])
@@ -1269,22 +1274,26 @@ ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
             + g[lt1, lt3] (Mom[V[Index[Generic, 2]]] - Mom[-V[Index[Generic, 6]]])
             + g[lt2, lt3] (-Mom[V[Index[Generic, 4]]] + Mom[-V[Index[Generic, 6]]]) :> "value(TripleVectorVertex::odd_permutation {})",
          g[lt1_, lt2_] g[lt3_, lt4_] :> "value1()",
+
          (* momentum vertices *)
          (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             momentum non-bared ghost *)
-       Mom[f_[Index[Generic, n_]]] :> (
-       Print[particles];
-       Print[lor];
-          Print[ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f_[Index[Generic, n]], {particles}] <> ")"];
-                  "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[f_[Index[Generic, n]], {particles}]+1) <> ")"),
-(*       Mom[-U[Index[Generic, n_]]] :> ( *)
-(*                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[-U[Index[Generic, n]], {particles}] <> ")"),*)
-         lor :> False (*Print["Error! Unidentified lorentz structure ", lor]; Quit[1]*)
+         (* @todo: cheated with +1. How to solve it? *)
+         Mom[f_[Index[Generic, n_]]] :> (
+            Print[ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f_[Index[Generic, n]], {particles}] <> ")"];
+            "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[f[Index[Generic, n]], {particles}]+1) <> ")"
+         ),
+         Mom[-U[Index[Generic, n_]]] :> (
+            "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[-U[Index[Generic, n]], {particles}]+1) <> ")"
+         ),
+
+         (* error *)
+         lor :> (Utils`PrintErrorMsg["Unhandled lorentz structure ", lor]; Quit[1])
       }
    ];
-   If[res===False, "0.",
-   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res]
+
+   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ];
 
 (* Returns translation of the form
