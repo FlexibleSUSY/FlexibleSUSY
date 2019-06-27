@@ -315,7 +315,7 @@ If[assertion === True,
    Print[
       Context@sym,
       StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
-      ": ",tag,":"];
+      ": ","\033[1;31m",tag,"\033[1;0m",":"];
    Print@StringForm[MessageName[sym, tag], insertions]; Quit[1]];
 SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
 
