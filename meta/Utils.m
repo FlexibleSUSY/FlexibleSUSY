@@ -139,6 +139,33 @@ PrintAndReturn::usage = "Print result and return it";
 AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
 If assertion does not evaluate to True, print message and Quit[1].";
 
+TestWithMessage::usage =
+"TestWithMessage[assertion, sym::tag, insertions...]:
+If assertion evaluate to True, returns True
+If assertion evaluate to False, print message with sequence of insertions
+and Quit[1].
+@note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
+of Private` variables in a quite weird way.
+@note \"\\n->\"dummy_new_line\" because Mathematica's StringForm incorrectly
+parses \\n symbol.";
+
+PureEvaluate::usage =
+"PureEvaluate[expression, sym::tag, insertions...]:
+Evaluates expression and returns the result if Messages aren't generated.
+If any Message is generated it
+   stops evaluation,
+   prints message with sequence of insertions,
+   prints content of Message and
+   Quit[1].
+@note It seems that function is not working for messages generated in subkernels
+if they are running inside expression.
+@note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
+of Private` variables in a quite weird way.
+@note \"\\n->\"dummy_new_line\" because Mathematica's StringForm incorrectly
+parses \\n symbol.
+@note Internal`HandlerBlock is not documented, this is why System`Dump` prefix
+is used for function arguments to avoid any unexpected behavior.";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -285,8 +312,71 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_?BooleanQ, message_String] :=
+AssertWithMessage[assertion_, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
+
+TestWithMessage[
+   assertion_,
+   HoldPattern@MessageName[sym_, tag_],
+   insertions___
+] :=
+Module[
+   {
+      ctrlRed=If[!$Notebooks,"\033[1;31m",""],
+      ctrlBack=If[!$Notebooks,"\033[1;0m",""],
+      WriteOut,WriteColourless
+   },
+   If[assertion === True,Return@True];
+   WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
+   WriteColourless[string__] := WriteOut@TextFormatting`WrapLines[
+      StringJoin@string,70,""];
+   Utils`FSFancyLine[];
+   WriteOut[Context@sym,StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
+      ": ",ctrlRed,tag,ctrlBack,":\n"];
+   WriteColourless[#,"\n"]&/@StringSplit[ToString@StringForm[
+      StringReplace[MessageName[sym, tag],"\n"->"dummy_new_line"],insertions],
+      "dummy_new_line"];
+   WriteOut["Wolfram Language kernel session ",ctrlRed,"terminated",ctrlBack,".\n"];
+   Utils`FSFancyLine[];
+   Quit[1];
+];
+SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
+
+PureEvaluate[
+   expression_,
+   HoldPattern@MessageName[sym_, tag_],
+   insertions___
+] :=
+Module[
+   {
+      ctrlRed=If[!$Notebooks,"\033[1;31m",""],
+      ctrlBack=If[!$Notebooks,"\033[1;0m",""],
+      WriteOut,WriteColourless,Filter
+   },
+   WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
+   WriteColourless[string__] := WriteOut@TextFormatting`WrapLines[
+      StringJoin@string,70,""];
+   Filter[
+      System`Dump`str_,
+      Hold[MessageName[System`Dump`s_, System`Dump`t_]],
+      Hold[Message[_, System`Dump`args___]]
+   ] :=
+   (
+      Utils`FSFancyLine[];
+      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
+         ": ",ctrlRed,tag,ctrlBack,":\n"];
+      WriteColourless[#,"\n"]&/@StringSplit[ToString@StringForm[
+         StringReplace[MessageName[sym, tag],"\n"->"dummy_new_line"],insertions],
+         "dummy_new_line"];
+      WriteColourless[ToString@System`Dump`s,"::",System`Dump`t," ",
+         ToString@StringForm[System`Dump`str,System`Dump`args]];
+      WriteOut["\nWolfram Language kernel session ",ctrlRed,"terminated",ctrlBack,".\n"];
+      Utils`FSFancyLine[];
+      Quit[1]
+   );
+   Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
+];
+SetAttributes[PureEvaluate, {HoldAll,Locked,Protected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
@@ -296,7 +386,8 @@ ReadLinesInFile[fileName_String] :=
 			AssertWithMessage[line =!= $Failed,
 				"Utils`ReadLinesInFile[]: Unable to read line from file '" <>
 				fileName <> "'"];
-			AppendTo[lines, line]]
+			AppendTo[lines, line];
+			];
 		
     Close[fileHandle];
     lines
