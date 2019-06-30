@@ -34,7 +34,7 @@
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
-#include "src/logger.hpp"
+#include "logger.hpp"
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;

@@ -1,7 +1,7 @@
 [requires]
 boost/[>=1.37.0]@conan/stable
 eigen/[>=3.1]@conan/stable
-Himalaya/2.0.1@conan/stable
+Himalaya/[>=2.0.2]@conan/stable
 LoopTools/2.15@conan/stable
 TSIL/1.44@conan/stable
 
