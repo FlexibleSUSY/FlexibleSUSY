@@ -1351,6 +1351,152 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5S5V3V4 coupling Cp[-S[5], S[5], V[3], V[4]][g[lt3, lt4]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
+   double mext1, double mext2, double mext3,
+   double mS5,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>&
+      CpcS5S5V3V4,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mS5*mS5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(0.5*a0tmp1*CpcS5S5V3V4*CpS1V2cV4*Den(
+      Sqr(mext3),Sqr(M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T2G2N12 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpV3V4cV5V51 coupling Cp[V[3], V[4], -V[5], V[5]][g[lt1, lt2] g[
+    lt3, lt4]]
+ * @param[in] CpV3V4cV5V52 coupling Cp[V[3], V[4], -V[5], V[5]][g[lt1, lt4] g[
+    lt2, lt3]]
+ * @param[in] CpV3V4cV5V53 coupling Cp[V[3], V[4], -V[5], V[5]][g[lt1, lt3] g[
+    lt2, lt4]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
+   double mext1, double mext2, double mext3,
+   double mV5,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>&
+      CpV3V4cV5V51, const std::complex<double>& CpV3V4cV5V52, const std::
+      complex<double>& CpV3V4cV5V53,
+   double scale, double finite)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV5*mV5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(-0.5*CpS1V2cV4*Den(Sqr(mext3),Sqr(M(V
+      (Index(Generic,4)),Internal)))*(a0tmp1*(4*CpV3V4cV5V51 + CpV3V4cV5V52 +
+      CpV3V4cV5V53) - 2*CpV3V4cV5V51*finite*Sqr(mV5)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T3G1N13 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5S5V2V4 coupling Cp[-S[5], S[5], V[2], V[4]][g[lt3, lt4]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
+   double mext1, double mext2, double mext3,
+   double mS5,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>&
+      CpcS5S5V2V4,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mS5*mS5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(0.5*a0tmp1*CpcS5S5V2V4*CpS1V3cV4*Den(
+      Sqr(mext2),Sqr(M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T3G2N14 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpV2V4cV5V51 coupling Cp[V[2], V[4], -V[5], V[5]][g[lt1, lt2] g[
+    lt3, lt4]]
+ * @param[in] CpV2V4cV5V52 coupling Cp[V[2], V[4], -V[5], V[5]][g[lt1, lt4] g[
+    lt2, lt3]]
+ * @param[in] CpV2V4cV5V53 coupling Cp[V[2], V[4], -V[5], V[5]][g[lt1, lt3] g[
+    lt2, lt4]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
+   double mext1, double mext2, double mext3,
+   double mV5,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>&
+      CpV2V4cV5V51, const std::complex<double>& CpV2V4cV5V52, const std::
+      complex<double>& CpV2V4cV5V53,
+   double scale, double finite)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV5*mV5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(-0.5*CpS1V3cV4*Den(Sqr(mext2),Sqr(M(V
+      (Index(Generic,4)),Internal)))*(a0tmp1*(4*CpV2V4cV5V51 + CpV2V4cV5V52 +
+      CpV2V4cV5V53) - 2*CpV2V4cV5V51*finite*Sqr(mV5)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T4G1N15 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
  * @param[in] mS4 mass of internal field S[4]
  * @param[in] mS5 mass of internal field S[5]
  * @param[in] CpS1cS4cS5 coupling Cp[S[1], -S[4], -S[5]]
@@ -1358,7 +1504,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_SS(
+Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
    double mext1, double mext2, double mext3,
    double mS4, double mS5,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -1380,7 +1526,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_SS(
 }
 
 /**
- * @brief Evaluates T2G2N12 diagram for process S -> VV
+ * @brief Evaluates T4G2N16 diagram for process S -> VV
  *
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
@@ -1397,7 +1543,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
+Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
    double mext1, double mext2, double mext3,
    double mV4, double mV5,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -1421,7 +1567,73 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
 }
 
 /**
- * @brief Evaluates T3G1N13 diagram for process S -> VV
+ * @brief Evaluates T5G1N17 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS1S4cS5S5 coupling Cp[S[1], S[4], -S[5], S[5]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
+   double mext1, double mext2, double mext3,
+   double mS5,
+   const std::complex<double>& CpcS4V2V3, const std::complex<double>&
+      CpS1S4cS5S5,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mS5*mS5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(-0.5*a0tmp1*CpcS4V2V3*CpS1S4cS5S5*Den
+      (Sqr(mext1),Sqr(M(S(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T5G2N18 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS1S4cV5V5 coupling Cp[S[1], S[4], -V[5], V[5]][g[lt3, lt4]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
+   double mext1, double mext2, double mext3,
+   double mV5,
+   const std::complex<double>& CpcS4V2V3, const std::complex<double>&
+      CpS1S4cV5V5,
+   double scale, double finite)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV5*mV5, scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(CpcS4V2V3*CpS1S4cV5V5*Den(Sqr(mext1),
+      Sqr(M(S(Index(Generic,4)),Internal)))*(2*a0tmp1 - finite*Sqr(mV5)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T6G1N19 diagram for process S -> VV
  *
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
@@ -1433,7 +1645,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_SV(
+Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
    double mext1, double mext2, double mext3,
    double mS4, double mV5,
    const std::complex<double>& CpcS4V2cV5, const std::complex<double>&
@@ -1455,7 +1667,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_SV(
 }
 
 /**
- * @brief Evaluates T4G1N14 diagram for process S -> VV
+ * @brief Evaluates T7G1N20 diagram for process S -> VV
  *
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
@@ -1467,7 +1679,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t4g1n14_SV(
+Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
    double mext1, double mext2, double mext3,
    double mS4, double mV5,
    const std::complex<double>& CpcS4V3cV5, const std::complex<double>&
@@ -1484,6 +1696,830 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n14_SV(
    result.m_vector_2 = mext3;
 
    result.form_factor_g = oneOver16PiSqr*(b0tmp1*CpcS4V3cV5*CpS1S4V2V5);
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G1N21 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mF5 mass of internal field F[5]
+ * @param[in] mF6 mass of internal field F[6]
+ * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PL]]
+ * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PR]]
+ * @param[in] CpcF6cF5V3PL coupling Cp[-F[6], -F[5], V[3]][LorentzProduct[gamma
+    [lt3], PL]]
+ * @param[in] CpcF6cF5V3PR coupling Cp[-F[6], -F[5], V[3]][LorentzProduct[gamma
+    [lt3], PR]]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g1n21_SFF(
+   double mext1, double mext2, double mext3,
+   double mF5, double mF6,
+   const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
+      CpF5F6V4PR, const std::complex<double>& CpcF6cF5V3PL, const std::complex<
+      double>& CpcF6cF5V3PR, const std::complex<double>& CpS1V2cV4,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mF6*mF6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mF5*mF5, mF6*mF6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext3*mext3, mF5*mF5, mF6*mF6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpS1V2cV4*
+      Den(Sqr(mext3),Sqr(M(V(Index(Generic,4)),Internal)))*(a0tmp1*CpcF6cF5V3PL
+      *CpF5F6V4PL + a0tmp1*CpcF6cF5V3PR*CpF5F6V4PR - b0tmp2*CpcF6cF5V3PR*
+      CpF5F6V4PL*mF5*mF6 - b0tmp2*CpcF6cF5V3PL*CpF5F6V4PR*mF5*mF6 - 2*(
+      CpcF6cF5V3PL*CpF5F6V4PL + CpcF6cF5V3PR*CpF5F6V4PR)*B00(Sqr(mext3),Sqr(mF5
+      ),Sqr(mF6)) + b1tmp3*CpcF6cF5V3PL*CpF5F6V4PL*Sqr(mext3) + b1tmp3*
+      CpcF6cF5V3PR*CpF5F6V4PR*Sqr(mext3) + b0tmp2*CpcF6cF5V3PL*CpF5F6V4PL*Sqr(
+      mF5) + b0tmp2*CpcF6cF5V3PR*CpF5F6V4PR*Sqr(mF5)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G2N22 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mS6 mass of internal field S[6]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5cS6V3 coupling Cp[-S[5], -S[6], V[3]][Mom[-S[5]] - Mom[-S[6]
+    ]]
+ * @param[in] CpS5S6V4 coupling Cp[S[5], S[6], V[4]][Mom[S[5]] - Mom[S[6]]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g2n22_SSS(
+   double mext1, double mext2, double mext3,
+   double mS5, double mS6,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>&
+      CpcS5cS6V3, const std::complex<double>& CpS5S6V4,
+   double scale)
+{
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-2)*CpcS5cS6V3
+      *CpS1V2cV4*CpS5S6V4*B00(Sqr(mext3),Sqr(mS5),Sqr(mS6))*Den(Sqr(mext3),Sqr(
+      M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G3N23 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mU5 mass of internal field U[5]
+ * @param[in] mU6 mass of internal field U[6]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpU5U6V4 coupling Cp[U[5], U[6], V[4]][Mom[U[5]]]
+ * @param[in] CpcU6cU5V3 coupling Cp[-U[6], -U[5], V[3]][Mom[-U[6]]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g3n23_SUU(
+   double mext1, double mext2, double mext3,
+   double mU5, double mU6,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>& CpU5U6V4,
+      const std::complex<double>& CpcU6cU5V3,
+   double scale)
+{
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-0.5)*
+      CpcU6cU5V3*CpS1V2cV4*CpU5U6V4*B00(Sqr(mext3),Sqr(mU5),Sqr(mU6))*Den(Sqr(
+      mext3),Sqr(M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G4N24 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5V3cV6 coupling Cp[-S[5], V[3], -V[6]][g[lt2, lt3]]
+ * @param[in] CpS5V4V6 coupling Cp[S[5], V[4], V[6]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g4n24_SSV(
+   double mext1, double mext2, double mext3,
+   double mS5, double mV6,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>&
+      CpcS5V3cV6, const std::complex<double>& CpS5V4V6,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mS5*mS5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*b0tmp1*
+      CpcS5V3cV6*CpS1V2cV4*CpS5V4V6*Den(Sqr(mext3),Sqr(M(V(Index(Generic,4)),
+      Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G5N25 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
+ * @param[in] CpV3cV5cV6 coupling Cp[V[3], -V[5], -V[6]][g[lt1, lt2] (-Mom[V[3]
+    ] + Mom[-V[5]]) + g[lt1, lt3] (Mom[V[3]] - Mom[-V[6]]) + g[lt2, lt3] (-Mom[
+    -V[5]] + Mom[-V[6]])]
+ * @param[in] CpV4V5V6 coupling Cp[V[4], V[5], V[6]][g[lt1, lt2] (-Mom[V[4]] +
+    Mom[V[5]]) + g[lt1, lt3] (Mom[V[4]] - Mom[V[6]]) + g[lt2, lt3] (-Mom[V[5]]
+    + Mom[V[6]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g5n25_SVV(
+   double mext1, double mext2, double mext3,
+   double mV5, double mV6,
+   const std::complex<double>& CpS1V2cV4, const std::complex<double>&
+      CpV3cV5cV6, const std::complex<double>& CpV4V5V6,
+   double scale, double finite)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV6*mV6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mV5*mV5, mV6*mV6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext3*mext3, mV5*mV5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-
+      0.16666666666666666)*CpS1V2cV4*CpV3cV5cV6*CpV4V5V6*(15*b0tmp2 + Den(Sqr(
+      mext3),Sqr(M(V(Index(Generic,4)),Internal)))*(6*a0tmp1 + 30*B00(Sqr(mext3
+      ),Sqr(mV5),Sqr(mV6)) + 6*b1tmp3*Sqr(mext3) + 2*finite*Sqr(mext3) + 6*
+      b0tmp2*Sqr(mV5) - 6*finite*Sqr(mV5) - 6*finite*Sqr(mV6) + 15*b0tmp2*Sqr(M
+      (V(Index(Generic,4)),Internal)))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G6N26 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mF5 mass of internal field F[5]
+ * @param[in] mF6 mass of internal field F[6]
+ * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PL]]
+ * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PR]]
+ * @param[in] CpcF6cF5V2PL coupling Cp[-F[6], -F[5], V[2]][LorentzProduct[gamma
+    [lt3], PL]]
+ * @param[in] CpcF6cF5V2PR coupling Cp[-F[6], -F[5], V[2]][LorentzProduct[gamma
+    [lt3], PR]]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
+   double mext1, double mext2, double mext3,
+   double mF5, double mF6,
+   const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
+      CpF5F6V4PR, const std::complex<double>& CpcF6cF5V2PL, const std::complex<
+      double>& CpcF6cF5V2PR, const std::complex<double>& CpS1V3cV4,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mF6*mF6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mF5*mF5, mF6*mF6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mF5*mF5, mF6*mF6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpS1V3cV4*
+      Den(Sqr(mext2),Sqr(M(V(Index(Generic,4)),Internal)))*(a0tmp1*CpcF6cF5V2PL
+      *CpF5F6V4PL + a0tmp1*CpcF6cF5V2PR*CpF5F6V4PR - b0tmp2*CpcF6cF5V2PR*
+      CpF5F6V4PL*mF5*mF6 - b0tmp2*CpcF6cF5V2PL*CpF5F6V4PR*mF5*mF6 - 2*(
+      CpcF6cF5V2PL*CpF5F6V4PL + CpcF6cF5V2PR*CpF5F6V4PR)*B00(Sqr(mext2),Sqr(mF5
+      ),Sqr(mF6)) + b1tmp3*CpcF6cF5V2PL*CpF5F6V4PL*Sqr(mext2) + b1tmp3*
+      CpcF6cF5V2PR*CpF5F6V4PR*Sqr(mext2) + b0tmp2*CpcF6cF5V2PL*CpF5F6V4PL*Sqr(
+      mF5) + b0tmp2*CpcF6cF5V2PR*CpF5F6V4PR*Sqr(mF5)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G7N27 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mS6 mass of internal field S[6]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5cS6V2 coupling Cp[-S[5], -S[6], V[2]][Mom[-S[5]] - Mom[-S[6]
+    ]]
+ * @param[in] CpS5S6V4 coupling Cp[S[5], S[6], V[4]][Mom[S[5]] - Mom[S[6]]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
+   double mext1, double mext2, double mext3,
+   double mS5, double mS6,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>&
+      CpcS5cS6V2, const std::complex<double>& CpS5S6V4,
+   double scale)
+{
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-2)*CpcS5cS6V2
+      *CpS1V3cV4*CpS5S6V4*B00(Sqr(mext2),Sqr(mS5),Sqr(mS6))*Den(Sqr(mext2),Sqr(
+      M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G8N28 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mU5 mass of internal field U[5]
+ * @param[in] mU6 mass of internal field U[6]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpU5U6V4 coupling Cp[U[5], U[6], V[4]][Mom[U[5]]]
+ * @param[in] CpcU6cU5V2 coupling Cp[-U[6], -U[5], V[2]][Mom[-U[6]]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
+   double mext1, double mext2, double mext3,
+   double mU5, double mU6,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>& CpU5U6V4,
+      const std::complex<double>& CpcU6cU5V2,
+   double scale)
+{
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-0.5)*
+      CpcU6cU5V2*CpS1V3cV4*CpU5U6V4*B00(Sqr(mext2),Sqr(mU5),Sqr(mU6))*Den(Sqr(
+      mext2),Sqr(M(V(Index(Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G9N29 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpcS5V2cV6 coupling Cp[-S[5], V[2], -V[6]][g[lt2, lt3]]
+ * @param[in] CpS5V4V6 coupling Cp[S[5], V[4], V[6]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
+   double mext1, double mext2, double mext3,
+   double mS5, double mV6,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>&
+      CpcS5V2cV6, const std::complex<double>& CpS5V4V6,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mS5*mS5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*b0tmp1*
+      CpcS5V2cV6*CpS1V3cV4*CpS5V4V6*Den(Sqr(mext2),Sqr(M(V(Index(Generic,4)),
+      Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T8G10N30 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
+ * @param[in] CpV2cV5cV6 coupling Cp[V[2], -V[5], -V[6]][g[lt1, lt2] (-Mom[V[2]
+    ] + Mom[-V[5]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[6]]) + g[lt2, lt3] (-Mom[
+    -V[5]] + Mom[-V[6]])]
+ * @param[in] CpV4V5V6 coupling Cp[V[4], V[5], V[6]][g[lt1, lt2] (-Mom[V[4]] +
+    Mom[V[5]]) + g[lt1, lt3] (Mom[V[4]] - Mom[V[6]]) + g[lt2, lt3] (-Mom[V[5]]
+    + Mom[V[6]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
+   double mext1, double mext2, double mext3,
+   double mV5, double mV6,
+   const std::complex<double>& CpS1V3cV4, const std::complex<double>&
+      CpV2cV5cV6, const std::complex<double>& CpV4V5V6,
+   double scale, double finite)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV6*mV6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mV5*mV5, mV6*mV6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mV5*mV5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-
+      0.16666666666666666)*CpS1V3cV4*CpV2cV5cV6*CpV4V5V6*(15*b0tmp2 + Den(Sqr(
+      mext2),Sqr(M(V(Index(Generic,4)),Internal)))*(6*a0tmp1 + 30*B00(Sqr(mext2
+      ),Sqr(mV5),Sqr(mV6)) + 6*b1tmp3*Sqr(mext2) + 2*finite*Sqr(mext2) + 6*
+      b0tmp2*Sqr(mV5) - 6*finite*Sqr(mV5) - 6*finite*Sqr(mV6) + 15*b0tmp2*Sqr(M
+      (V(Index(Generic,4)),Internal)))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G1N31 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mF5 mass of internal field F[5]
+ * @param[in] mF6 mass of internal field F[6]
+ * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
+ * @param[in] CpF5F6S4PR coupling Cp[F[5], F[6], S[4]][PR]
+ * @param[in] CpcF6cF5S1PL coupling Cp[-F[6], -F[5], S[1]][PL]
+ * @param[in] CpcF6cF5S1PR coupling Cp[-F[6], -F[5], S[1]][PR]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g1n31_SFF(
+   double mext1, double mext2, double mext3,
+   double mF5, double mF6,
+   const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
+      CpF5F6S4PR, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
+      double>& CpcF6cF5S1PR, const std::complex<double>& CpcS4V2V3,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mF6*mF6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mF5*mF5, mF6*mF6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mF5*mF5, mF6*mF6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpcS4V2V3*
+      Den(Sqr(mext1),Sqr(M(S(Index(Generic,4)),Internal)))*(b0tmp2*mF5*(
+      CpcF6cF5S1PR*CpF5F6S4PL*mF5 + CpcF6cF5S1PL*CpF5F6S4PR*mF5 + CpcF6cF5S1PL*
+      CpF5F6S4PL*mF6 + CpcF6cF5S1PR*CpF5F6S4PR*mF6) + (CpcF6cF5S1PR*CpF5F6S4PL
+      + CpcF6cF5S1PL*CpF5F6S4PR)*(a0tmp1 + b1tmp3*Sqr(mext1))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G2N32 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mS6 mass of internal field S[6]
+ * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS4S5S6 coupling Cp[S[4], S[5], S[6]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g2n32_SSS(
+   double mext1, double mext2, double mext3,
+   double mS5, double mS6,
+   const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
+      CpcS4V2V3, const std::complex<double>& CpS4S5S6,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mS5*mS5, mS6*mS6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-0.5)*b0tmp1*
+      CpcS4V2V3*CpS1cS5cS6*CpS4S5S6*Den(Sqr(mext1),Sqr(M(S(Index(Generic,4)),
+      Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G3N33 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mU5 mass of internal field U[5]
+ * @param[in] mU6 mass of internal field U[6]
+ * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS4U5U6 coupling Cp[S[4], U[5], U[6]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g3n33_SUU(
+   double mext1, double mext2, double mext3,
+   double mU5, double mU6,
+   const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
+      CpcS4V2V3, const std::complex<double>& CpS4U5U6,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mU5*mU5, mU6*mU6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,0.5)*b0tmp1*
+      CpcS4V2V3*CpS1cU6cU5*CpS4U5U6*Den(Sqr(mext1),Sqr(M(S(Index(Generic,4)),
+      Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G4N34 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
+    ]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS4S5V6 coupling Cp[S[4], S[5], V[6]][Mom[S[4]] - Mom[S[5]]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g4n34_SSV(
+   double mext1, double mext2, double mext3,
+   double mS5, double mV6,
+   const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
+      CpcS4V2V3, const std::complex<double>& CpS4S5V6,
+   double scale)
+{
+   const auto a0tmp1 = passarino_veltman::A0(mV6*mV6, scale*scale);
+   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mS5*mS5, mV6*mV6,
+      scale*scale);
+   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mS5*mS5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*CpcS4V2V3*
+      CpS1cS5cV6*CpS4S5V6*Den(Sqr(mext1),Sqr(M(S(Index(Generic,4)),Internal)))*
+      (a0tmp1 - 2*b1tmp3*Sqr(mext1) + b0tmp2*(Sqr(mext1) + Sqr(mS5))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G5N35 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
+ * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
+ * @param[in] CpS4V5V6 coupling Cp[S[4], V[5], V[6]][g[lt2, lt3]]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g5n35_SVV(
+   double mext1, double mext2, double mext3,
+   double mV5, double mV6,
+   const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
+      CpcS4V2V3, const std::complex<double>& CpS4V5V6,
+   double scale, double finite)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mV5*mV5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1)*CpcS4V2V3*
+      CpS1cV5cV6*CpS4V5V6*(-2*b0tmp1 + finite)*Den(Sqr(mext1),Sqr(M(S(Index(
+      Generic,4)),Internal))));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G6N36 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mF5 mass of internal field F[5]
+ * @param[in] mF6 mass of internal field F[6]
+ * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PR]]
+ * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
+    ], PL]]
+ * @param[in] CpcF6cF5S1PL coupling Cp[-F[6], -F[5], S[1]][PL]
+ * @param[in] CpcF6cF5S1PR coupling Cp[-F[6], -F[5], S[1]][PR]
+ * @param[in] CpV2V3cV4 coupling Cp[V[2], V[3], -V[4]][g[lt1, lt2] (-Mom[V[2]]
+    + Mom[V[3]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[4]]) + g[lt2, lt3] (-Mom[V[3
+    ]] + Mom[-V[4]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
+   double mext1, double mext2, double mext3,
+   double mF5, double mF6,
+   const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
+      CpF5F6V4PL, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
+      double>& CpcF6cF5S1PR, const std::complex<double>& CpV2V3cV4,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mF5*mF5, mF6*mF6,
+      scale*scale);
+   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mF5*mF5, mF6*mF6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*CpV2V3cV4*
+      (b0tmp1*(CpcF6cF5S1PR*CpF5F6V4PL + CpcF6cF5S1PL*CpF5F6V4PR)*mF5 + b1tmp2*
+      (CpcF6cF5S1PR*CpF5F6V4PL*mF5 + CpcF6cF5S1PL*CpF5F6V4PR*mF5 + CpcF6cF5S1PL
+      *CpF5F6V4PL*mF6 + CpcF6cF5S1PR*CpF5F6V4PR*mF6))*Den(Sqr(mext1),Sqr(M(V(
+      Index(Generic,4)),Internal)))*(Sqr(mext2) - Sqr(mext3)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G7N37 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mS6 mass of internal field S[6]
+ * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
+ * @param[in] CpS5S6V4 coupling Cp[S[5], S[6], V[4]][Mom[S[5]] - Mom[S[6]]]
+ * @param[in] CpV2V3cV4 coupling Cp[V[2], V[3], -V[4]][g[lt1, lt2] (-Mom[V[2]]
+    + Mom[V[3]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[4]]) + g[lt2, lt3] (-Mom[V[3
+    ]] + Mom[-V[4]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
+   double mext1, double mext2, double mext3,
+   double mS5, double mS6,
+   const std::complex<double>& CpS1cS5cS6, const std::complex<double>& CpS5S6V4
+      , const std::complex<double>& CpV2V3cV4,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mS5*mS5, mS6*mS6,
+      scale*scale);
+   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mS5*mS5, mS6*mS6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-0.5)*(b0tmp1
+      + 2*b1tmp2)*CpS1cS5cS6*CpS5S6V4*CpV2V3cV4*Den(Sqr(mext1),Sqr(M(V(Index(
+      Generic,4)),Internal)))*(Sqr(mext2) - Sqr(mext3)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G8N38 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mU5 mass of internal field U[5]
+ * @param[in] mU6 mass of internal field U[6]
+ * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
+ * @param[in] CpU5U6V4 coupling Cp[U[5], U[6], V[4]][Mom[U[5]]]
+ * @param[in] CpV2V3cV4 coupling Cp[V[2], V[3], -V[4]][g[lt1, lt2] (-Mom[V[2]]
+    + Mom[V[3]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[4]]) + g[lt2, lt3] (-Mom[V[3
+    ]] + Mom[-V[4]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
+   double mext1, double mext2, double mext3,
+   double mU5, double mU6,
+   const std::complex<double>& CpS1cU6cU5, const std::complex<double>& CpU5U6V4
+      , const std::complex<double>& CpV2V3cV4,
+   double scale)
+{
+   const auto b1tmp1 = passarino_veltman::B1(mext1*mext1, mU5*mU5, mU6*mU6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,0.5)*b1tmp1*
+      CpS1cU6cU5*CpU5U6V4*CpV2V3cV4*Den(Sqr(mext1),Sqr(M(V(Index(Generic,4)),
+      Internal)))*(Sqr(mext2) - Sqr(mext3)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G9N39 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mS5 mass of internal field S[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
+    ]
+ * @param[in] CpS5V4V6 coupling Cp[S[5], V[4], V[6]][g[lt2, lt3]]
+ * @param[in] CpV2V3cV4 coupling Cp[V[2], V[3], -V[4]][g[lt1, lt2] (-Mom[V[2]]
+    + Mom[V[3]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[4]]) + g[lt2, lt3] (-Mom[V[3
+    ]] + Mom[-V[4]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
+   double mext1, double mext2, double mext3,
+   double mS5, double mV6,
+   const std::complex<double>& CpS1cS5cV6, const std::complex<double>& CpS5V4V6
+      , const std::complex<double>& CpV2V3cV4,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mS5*mS5, mV6*mV6,
+      scale*scale);
+   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mS5*mS5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,-1)*(b0tmp1 -
+      b1tmp2)*CpS1cS5cV6*CpS5V4V6*CpV2V3cV4*Den(Sqr(mext1),Sqr(M(V(Index(
+      Generic,4)),Internal)))*(Sqr(mext2) - Sqr(mext3)));
+
+   return result;
+}
+
+/**
+ * @brief Evaluates T9G10N40 diagram for process S -> VV
+ *
+ * @param[in] mext1 mass of external field S[1]
+ * @param[in] mext2 mass of external field V[2]
+ * @param[in] mext3 mass of external field V[3]
+ * @param[in] mV5 mass of internal field V[5]
+ * @param[in] mV6 mass of internal field V[6]
+ * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
+ * @param[in] CpV2V3cV4 coupling Cp[V[2], V[3], -V[4]][g[lt1, lt2] (-Mom[V[2]]
+    + Mom[V[3]]) + g[lt1, lt3] (Mom[V[2]] - Mom[-V[4]]) + g[lt2, lt3] (-Mom[V[3
+    ]] + Mom[-V[4]])]
+ * @param[in] CpV4V5V6 coupling Cp[V[4], V[5], V[6]][g[lt1, lt2] (-Mom[V[4]] +
+    Mom[V[5]]) + g[lt1, lt3] (Mom[V[4]] - Mom[V[6]]) + g[lt2, lt3] (-Mom[V[5]]
+    + Mom[V[6]])]
+ *
+ * @return value of the one-loop diagram
+ */
+Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
+   double mext1, double mext2, double mext3,
+   double mV5, double mV6,
+   const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
+      CpV2V3cV4, const std::complex<double>& CpV4V5V6,
+   double scale)
+{
+   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mV5*mV5, mV6*mV6,
+      scale*scale);
+   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mV5*mV5, mV6*mV6,
+      scale*scale);
+
+   Decay_amplitude_SVV result;
+
+   result.m_decay = mext1;
+   result.m_vector_1 = mext2;
+   result.m_vector_2 = mext3;
+
+   result.form_factor_g = oneOver16PiSqr*(std::complex<double>(0,1.5)*(b0tmp1 +
+      2*b1tmp2)*CpS1cV5cV6*CpV2V3cV4*CpV4V5V6*Den(Sqr(mext1),Sqr(M(V(Index(
+      Generic,4)),Internal)))*(Sqr(mext2) - Sqr(mext3)));
 
    return result;
 }

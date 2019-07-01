@@ -75,7 +75,7 @@ CalculateAmplitudes[amplitudeHead_, amplitudeExpr_] :=
     );
 
 (* Calculate all contributing graphs using FeynArts/FormCalc *)
-topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Internal];
+topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Tadpoles];
 
 process = {S} -> {V, V};
 
@@ -102,6 +102,10 @@ graphIDs = List @@ (GetGraphID /@ amplitudes);
 genericAmplitudes = FeynArts`PickLevel[Generic][amplitudes];
 
 amplitudesExprs = CalculateAmplitudes[Head[genericAmplitudes], #]& /@ genericAmplitudes;
+
+(* delete Amp[_][0] from amplitudesExprs *)
+amplitudesExprs = amplitudesExprs /. FeynAmpList[a___][b___] :> FeynAmpList[a][Sequence@@DeleteCases[{b}, Amp[_ -> _][0]]];
+
 exprsOutputStatus = WriteFormCalcOutputFile[FileNameJoin[{resultsDir, amplitudesExprsOutputFile}], amplitudesExprs];
 If[exprsOutputStatus === $Failed,
    status = 2;

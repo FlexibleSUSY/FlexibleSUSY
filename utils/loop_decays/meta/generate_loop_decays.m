@@ -293,8 +293,8 @@ FillAmplitudeMasses[Rule[{S}, {S, S}], diagram_, struct_:"result"] :=
            outgoingOne = CreateExternalMomentumCString[ExternalMomentumSymbol[First[outgoingIndices]]];
            outgoingTwo = CreateExternalMomentumCString[ExternalMomentumSymbol[Last[outgoingIndices]]];
            struct <> ".m_decay = " <> incomingMass <> ";\n" <>
-           struct <> ".m_out_1 = " <> outgoingOne  <> ";\n"<>
-           struct <> ".m_out_2 = " <> outgoingTwo  <> ";\n"
+           struct <> ".m_scalar_1 = " <> outgoingOne  <> ";\n"<>
+           struct <> ".m_scalar_2 = " <> outgoingTwo  <> ";\n"
           ];
 
 FillAmplitudeMasses[Rule[{S}, {V, V}], diagram_, struct_:"result"] :=
@@ -314,8 +314,8 @@ FillAmplitudeMasses[Rule[{S}, {V, V}], diagram_, struct_:"result"] :=
            outgoingOne = CreateExternalMomentumCString[ExternalMomentumSymbol[First[outgoingIndices]]];
            outgoingTwo = CreateExternalMomentumCString[ExternalMomentumSymbol[Last[outgoingIndices]]];
            struct <> ".m_decay = " <> incomingMass <> ";\n" <>
-           struct <> ".m_out_1 = " <> outgoingOne  <> ";\n"<>
-           struct <> ".m_out_2 = " <> outgoingTwo  <> ";\n"
+           struct <> ".m_vector_1 = " <> outgoingOne  <> ";\n"<>
+           struct <> ".m_vector_2 = " <> outgoingTwo  <> ";\n"
           ];
 
 FillAmplitudeMasses[Rule[{S}, {V, S}], diagram_, struct_:"result"] :=
@@ -363,8 +363,8 @@ FillAmplitudeMasses[Rule[{S}, {F, F}], diagram_, struct_:"result"] :=
            outgoingOne = CreateExternalMomentumCString[ExternalMomentumSymbol[First[outgoingIndices]]];
            outgoingTwo = CreateExternalMomentumCString[ExternalMomentumSymbol[Last[outgoingIndices]]];
            struct <> ".m_decay = " <> incomingMass <> ";\n" <>
-           struct <> ".m_out_1 = " <> outgoingOne  <> ";\n"<>
-           struct <> ".m_out_2 = " <> outgoingTwo  <> ";\n"
+           struct <> ".m_fermion_1 = " <> outgoingOne  <> ";\n"<>
+           struct <> ".m_fermion_2 = " <> outgoingTwo  <> ";\n"
           ];
 
 CreateOneLoopDiagramDocString[process_, diagram_] :=

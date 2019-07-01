@@ -193,6 +193,24 @@ GetPossibleDecayTopologies[2, 1] :=
       {0,0,0,1,0},
       {1,0,1,0,2},
       {0,1,0,2,0}}
+     ,
+     {{0,0,0,1,0},
+      {0,0,0,1,0},
+      {0,0,0,0,1},
+      {1,1,0,0,1},
+      {0,0,1,1,2}}
+     ,
+     {{0,0,0,1,0},
+      {0,0,0,0,1},
+      {0,0,0,1,0},
+      {1,0,1,0,1},
+      {0,1,0,1,2}}
+     ,
+     {{0,0,0,1,0},
+     {0,0,0,0,1},
+     {0,0,0,0,1},
+     {1,0,0,2,1},
+     {0,1,1,1,0}}
     };
 
 IsTreeLevelDecayTopology[t_] := MemberQ[GetPossibleDecayTopologies[2, 0], t];
@@ -1168,6 +1186,8 @@ GenericTranslationForInsertion[topology_, insertion_] := Module[{
    res
 },
 
+   If[translationFile === $Failed, Quit[1]];
+
    genericDiagramsWithCorrectTopology = Select[translationFile, MemberQ[#, topology]&];
    Utils`AssertWithMessage[genericDiagramsWithCorrectTopology =!= {},
       "Can't find topology " <> ToString@topology <> " for insertion " <> ToString@insertion
@@ -1281,7 +1301,6 @@ ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
             momentum non-bared ghost *)
          (* @todo: cheated with +1. How to solve it? *)
          Mom[f_[Index[Generic, n_]]] :> (
-            Print[ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f_[Index[Generic, n]], {particles}] <> ")"];
             "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[f[Index[Generic, n]], {particles}]+1) <> ")"
          ),
          Mom[-U[Index[Generic, n_]]] :> (

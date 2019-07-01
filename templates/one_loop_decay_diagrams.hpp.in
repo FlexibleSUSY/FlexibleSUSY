@@ -131,21 +131,126 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(double, double, double,
    double, double, double, const std::complex<double>&, const std::complex<
    double>&, const std::complex<double>&, double, double);
 
-Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_SS(double, double, double,
+Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, const std
+   ::complex<double>&, const std::complex<double>&, double, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, const std
+   ::complex<double>&, const std::complex<double>&, double, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(double, double, double,
    double, double, const std::complex<double>&, const std::complex<double>&,
    double);
 
-Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(double, double, double,
+Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(double, double, double,
    double, double, const std::complex<double>&, const std::complex<double>&,
    const std::complex<double>&, const std::complex<double>&, double, double);
 
-Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_SV(double, double, double,
+Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(double, double, double,
+   double, const std::complex<double>&, const std::complex<double>&, double,
+   double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(double, double, double,
    double, double, const std::complex<double>&, const std::complex<double>&,
    double);
 
-Decay_amplitude_SVV calculate_diagram_SVV_t4g1n14_SV(double, double, double,
+Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(double, double, double,
    double, double, const std::complex<double>&, const std::complex<double>&,
    double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g1n21_SFF(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, const std::complex<double>&, const std::complex
+   <double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g2n22_SSS(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g3n23_SUU(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g4n24_SSV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g5n25_SVV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, const std::complex<double>&, const std::complex
+   <double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g1n31_SFF(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, const std::complex<double>&, const std::complex
+   <double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g2n32_SSS(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g3n33_SUU(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g4n34_SSV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g5n35_SVV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, const std::complex<double>&, const std::complex
+   <double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
+
+Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(double, double, double,
+   double, double, const std::complex<double>&, const std::complex<double>&,
+   const std::complex<double>&, double);
 
 Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(double, double, double,
    double, double, double, const std::complex<double>&, const std::complex<
