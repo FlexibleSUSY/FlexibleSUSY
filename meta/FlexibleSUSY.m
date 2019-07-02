@@ -4507,10 +4507,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],                           (* @unote *no* connection to the NPointFunctions Package! *)
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},  (* @unote *no* connection to the NPointFunctions Package! *)
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],                                     (* @unote NPF Package! *)
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},            (* @unote NPF Package! *)
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],                        (* @unote NPF Package! *)
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}(* @unote NPF Package! *)
                           };
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];
            cxxQFTVerticesMakefileTemplates = {{FileNameJoin[{cxxQFTTemplateDir, "vertices.mk.in"}],

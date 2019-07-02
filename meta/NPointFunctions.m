@@ -126,7 +126,7 @@ UseWilsonCoeffs::usage=
 "Option for NPointFunctions`CreateCXXHeaders[].
 Controls whether to use Wilson module or not
 
-def. True | False";
+def. False | True";
 
 FermionBasis::usage=
 "Option for NPointFunctions`CreateCXXFunctions[].
@@ -715,7 +715,7 @@ Utils`TestWithMessage[False,RemoveEmptyGenSums::errUnknownInput];
 
 Options[CreateCXXHeaders]={
    LoopFunctions -> "FlexibleSUSY",
-   UseWilsonCoeffs -> True
+   UseWilsonCoeffs -> False
 };
 CreateCXXHeaders::usage=
 "@brief Create the c++ code for the necessary headers for evaluation of n-point
@@ -1473,16 +1473,17 @@ Module[
             `9` // close summation brakets
             return `10`
          }
-         `11` `1`( void )
-         {
-            using GenericKeys = boost::mpl::vector<`12`>;
-            using GenericInsertions = boost::mpl::vector<`13`>;
-            using combinatorial_factors  = boost::mpl::vector<`14`>;
-            using colour_factors = boost::mpl::vector<`15`>;
-            `16`
-            return accumulate_generic<`17`, `1`_impl>( *this );
-         }
       };
+      
+      `11` `1`( void )
+      {
+         using GenericKeys = boost::mpl::vector<`12`>;
+         using GenericInsertions = boost::mpl::vector<`13`>;
+         using combinatorial_factors  = boost::mpl::vector<`14`>;
+         using colour_factors = boost::mpl::vector<`15`>;
+         `16`
+         return accumulate_generic<`17`, `1`_impl>( *this );
+      }
       "][
       genSumName,
       If[fbQ,StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis],"std::complex<double>"],
