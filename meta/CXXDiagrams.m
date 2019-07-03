@@ -974,13 +974,15 @@ GaugeStructureOfVertex[vertex_] :=
  * corresponding c++ code where no sublist contains more than
  * `MaximumVerticesLimit` number of vertices.
  **)
-CreateVertices[vertices_List,
+CreateVertices[vertices:{{__}...},
 		OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
 	Module[{cxxVertices, vertexPartition},
 		cxxVertices = CreateVertex /@ DeleteDuplicates[vertices];
-
+		
 		(* Mathematica 7 does not support the `UpTo[n]` notation *)
 		vertexPartition = Partition[cxxVertices, OptionValue[MaximumVerticesLimit]];
+		If[Part[vertexPartition,1]===cxxVertices,
+		   Return@{Map[StringJoin[Riffle[#,"\n\n"]]&, Transpose@cxxVertices],Transpose[""]}];
 		(* Partition splits cxxVertices into lists of length MaximumVerticesLimit.
 		   If the length of cxxVertices is not a multiple of MaximumVerticesLimit,
 		   some vertices will be discarded! *)
@@ -991,7 +993,7 @@ CreateVertices[vertices_List,
 		Utils`AssertWithMessage[Sort[cxxVertices] === Sort[Join@@vertexPartition],
 		   "Some vertices lost after splitting of cxxVertices into multiple lists."
 		];
-
+		
 		Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
 	];
 	
