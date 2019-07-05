@@ -139,24 +139,43 @@ PrintAndReturn::usage = "Print result and return it";
 AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
 If assertion does not evaluate to True, print message and Quit[1].";
 
-TestWithMessage::usage =
-"TestWithMessage[assertion, sym::tag, insertions...]:
-If assertion evaluate to True, returns True
+AssertOrQuit::usage =
+"@brief AssertOrQuit[assertion, sym::tag, insertions...]:
+If assertion evaluate to True, returns True.
 If assertion evaluate to False, print message with sequence of insertions
 and Quit[1].
-@note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
+@param assertion Some expression which one want to check being True or something
+else.
+@param sym::tag Controlling MessageName String. It is assumed that symbol \"\"
+appears only as controllling one, i.e. in the form \"1\", \"25\" etc.
+@param insertions... None or more expressions which are inserted inside sym::tag
+controlling String. Its length should be equal or more then the maximal
+controlling number in sym::tag.
+@note First check controlling sym::tag.
+@note __~~\"Private\"~~str__:>str is done because Mathematica prints the names
 of Private` variables in a quite weird way.
 @note \"\\n->\"dummy_new_line\" because Mathematica's StringForm incorrectly
-parses \\n symbol.";
+parses \\n symbol.
+@note hard-coded width of output colourless text is 70.";
 
-PureEvaluate::usage =
-"PureEvaluate[expression, sym::tag, insertions...]:
-Evaluates expression and returns the result if Messages aren't generated.
+EvaluateOrQuit::usage =
+"@brief EvaluateOrQuit[expression, sym::tag, insertions...]:
+Evaluates expression and returns the result if Wolfram messages aren't
+generated.
 If any Message is generated it
    stops evaluation,
    prints message with sequence of insertions,
    prints content of Message and
    Quit[1].
+@param expression Some expression which one want to evaluate without Wolfram
+messages.
+@param sym::tag Controlling MessageName String. It is assumed that symbol \"`\"
+appears only as controllling one, i.e. in the form \"`1`\", \"`25`\" etc.
+@param insertions... None or more expressions which are inserted inside sym::tag
+controlling String. Its length should be equal or more then the maximal
+controlling number in sym::tag.
+@note First check controlling sym::tag.
+@note hard-coded width of output colourless text is 70.
 @note It seems that function is not working for messages generated in subkernels
 if they are running inside expression.
 @note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
@@ -315,7 +334,31 @@ PrintAndReturn[e___] := (Print[e]; e)
 AssertWithMessage[assertion_, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
-TestWithMessage[
+AssertOrQuit::errNotDefined =
+"Error message \"`1`\" is not defined it the code.";
+AssertOrQuit::errStrokes =
+"Even number of `.` symbols in sym::tag should be given in:
+\"`1`\"";
+AssertOrQuit::errControl =
+"Only control symbols \"`.`int Number`.`\" and \"`.`.`.`\" are allowed in:
+\"`1`\"";
+AssertOrQuit::errInsertions =
+"The length of insertions
+`1`
+should large or equal to the max control number `2` in:
+\"`3`\"";
+AssertOrQuit::errInput =
+"Input should be of the following form:
+AssertOrQuit[assertion, sym::tag, insertions...] and not
+AssertOrQuit@@`1`.
+
+Read AssertOrQuit::usage for more information.";
+AssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
+   internalAssertOrQuit[assertion,MessageName[sym, tag],insertions] /;
+   internalOrQuitInputCheck[AssertOrQuit,MessageName[sym,tag],insertions];
+AssertOrQuit[x___] :=
+   AssertOrQuit[False,AssertOrQuit::errInput,{x}];
+internalAssertOrQuit[
    assertion_,
    HoldPattern@MessageName[sym_, tag_],
    insertions___
@@ -324,12 +367,13 @@ Module[
    {
       ctrlRed=If[!$Notebooks,"\033[1;31m",""],
       ctrlBack=If[!$Notebooks,"\033[1;0m",""],
+      CutString=If[(!$Notebooks)&&MemberQ[$Packages,"TextFormatting`"],
+         TextFormatting`WrapLines[#,70,""]&,#&],
       WriteOut,WriteColourless
    },
    If[assertion === True,Return@True];
    WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
-   WriteColourless[string__] := WriteOut@TextFormatting`WrapLines[
-      StringJoin@string,70,""];
+   WriteColourless[string__] := WriteOut@CutString@StringJoin@string;
    Utils`FSFancyLine[];
    WriteOut[Context@sym,StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
       ": ",ctrlRed,tag,ctrlBack,":\n"];
@@ -340,9 +384,23 @@ Module[
    Utils`FSFancyLine[];
    Quit[1];
 ];
-SetAttributes[TestWithMessage, {HoldAll,Locked,Protected}];
+SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll,Locked,Protected}];
 
-PureEvaluate[
+EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
+EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;
+EvaluateOrQuit::errControl = AssertOrQuit::errControl;
+EvaluateOrQuit::errInsertions = AssertOrQuit::errInsertions;
+EvaluateOrQuit::errInput =
+"Input should be of the following form:
+EvaluateOrQuit[expression, sym::tag, insertions...] and not
+EvaluateOrQuit@@`1`.
+Read EvaluateOrQuit::usage for more information.";
+EvaluateOrQuit[expression_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
+   internalEvaluateOrQuit[expression,MessageName[sym,tag],insertions] /;
+   internalOrQuitInputCheck[EvaluateOrQuit,MessageName[sym,tag],insertions];
+EvaluateOrQuit[x___] :=
+   AssertOrQuit[False,EvaluateOrQuit::errInput,{x}];
+internalEvaluateOrQuit[
    expression_,
    HoldPattern@MessageName[sym_, tag_],
    insertions___
@@ -351,11 +409,12 @@ Module[
    {
       ctrlRed=If[!$Notebooks,"\033[1;31m",""],
       ctrlBack=If[!$Notebooks,"\033[1;0m",""],
+      CutString=If[(!$Notebooks)&&MemberQ[$Packages,"TextFormatting`"],
+         TextFormatting`WrapLines[#,70,""]&,#&],
       WriteOut,WriteColourless,Filter
    },
    WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
-   WriteColourless[string__] := WriteOut@TextFormatting`WrapLines[
-      StringJoin@string,70,""];
+   WriteColourless[string__] := WriteOut@CutString@StringJoin@string;
    Filter[
       System`Dump`str_,
       Hold[MessageName[System`Dump`s_, System`Dump`t_]],
@@ -375,8 +434,39 @@ Module[
       Quit[1]
    );
    Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
+]
+SetAttributes[{EvaluateOrQuit,internalEvaluateOrQuit}, {HoldAll,Locked,Protected}];
+
+internalOrQuitInputCheck[func_,message_,insertions___] :=
+Module[{nStrokes,control,checkedControl},
+   internalAssertOrQuit[StringQ@message,
+      func::errNotDefined,
+      message];
+   nStrokes = StringCount[message,"`"];
+   internalAssertOrQuit[EvenQ@nStrokes,
+      func::errStrokes,
+      message];
+   control=DeleteDuplicates@StringCases[message,{
+      "`.`",
+      "`" ~~ DigitCharacter .. ~~ "`",
+      "`"~~___~~"`"}];
+   If[control==={},
+      True,
+      checkedControl=StringCases[message,{
+         "`.`" :> 0,
+         "`"~~num:DigitCharacter..~~"`" :> FromDigits@num,
+         "`"~~___~~"`" :> $Failed}];
+      internalAssertOrQuit[!Or@@FailureQ/@checkedControl,
+         func::errControl,
+         message];
+      internalAssertOrQuit[TrueQ[Max@checkedControl<=Length@{insertions}],
+         func::errInsertions,
+         {insertions},
+         Max@checkedControl,
+         message]
+   ]
 ];
-SetAttributes[PureEvaluate, {HoldAll,Locked,Protected}];
+SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
