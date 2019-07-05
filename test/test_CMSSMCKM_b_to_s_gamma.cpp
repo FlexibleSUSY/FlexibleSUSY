@@ -34,7 +34,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_b_to_s_gamma, * boost::unit_test::tolerance(1e-9) )
+BOOST_AUTO_TEST_CASE( test_b_to_s_gamma, * boost::unit_test::tolerance(1e-13) )
 {
    char const * const slha_input = R"(
 Block MODSEL                 # Select model
@@ -117,7 +117,7 @@ Block MSQ2IN
   1  3     0.00000000E+00   # mq2(1,3)
   2  1     0.00000000E+00   # mq2(2,1)
   2  2     15625.0          # mq2(2,2)
-  2  3     1.00000000E+05   # mq2(2,3)
+  2  3     0.00000000E+00   # mq2(2,3)
   3  1     0.00000000E+00   # mq2(3,1)
   3  2     0.00000000E+00   # mq2(3,2)
   3  3     15625.0          # mq2(3,3)
@@ -147,7 +147,7 @@ Block MSU2IN
   1  3     0.00000000E+00   # mu2(1,3)
   2  1     0.00000000E+00   # mu2(2,1)
   2  2     15625.0          # mu2(2,2)
-  2  3     1.00000000E+05   # mu2(2,3)
+  2  3     0.00000000E+00   # mu2(2,3)
   3  1     0.00000000E+00   # mu2(3,1)
   3  2     0.00000000E+00   # mu2(3,2)
   3  3     15625.0          # mu2(3,3)
@@ -157,7 +157,7 @@ Block MSD2IN
   1  3     0.00000000E+00   # md2(1,3)
   2  1     0.00000000E+00   # md2(2,1)
   2  2     15625.0          # md2(2,2)
-  2  3     1.00000000E+05   # md2(2,3)
+  2  3     0.00000000E+00   # md2(2,3)
   3  1     0.00000000E+00   # md2(3,1)
   3  2     0.00000000E+00   # md2(3,2)
   3  3     15625.0          # md2(3,3)
@@ -192,10 +192,10 @@ Block MSOFTIN
    CMSSMCKM_slha<CMSSMCKM<Two_scale>> model = setup_CMSSMCKM(input, qedqcd, settings);
 
    const auto reference_value = CMSSMCKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
-   constexpr std::complex<double> C7NP {0.04190993850796799,-0.01208371566740792};
-   constexpr std::complex<double> C7pNP {0.01099828315516791,-0.00280804624185417};
-   constexpr std::complex<double> C8NP {0.05088497323755304,-0.00843031386895121};
-   constexpr std::complex<double> C8pNP {0.02490887619197397,-0.00617649502698933};
+   constexpr std::complex<double> C7NP  {-0.0053091155274267851,  -9.7020429241147742e-05};
+   constexpr std::complex<double> C7pNP {-0.00012365578890423206, -2.2597263744209638e-06};
+   constexpr std::complex<double> C8NP  {0.016488904850983057,     0.00030117827894080945};
+   constexpr std::complex<double> C8pNP {0.00038596854467358406,   7.0499165244261002e-06};
 
    TEST_COMPLEX_EQUALITY(C7NP, reference_value[0]);
    TEST_COMPLEX_EQUALITY(C7pNP, reference_value[1]);
