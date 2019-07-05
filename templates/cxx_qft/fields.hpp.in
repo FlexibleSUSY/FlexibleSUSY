@@ -98,17 +98,20 @@ namespace @ModelName@_cxx_diagrams {
       };
    } // namespace detail
 
+   /* @brief dsf
+    * @note Is defined by compiler only if the number of generation for a field
+    * is not 1.
+    */
    template <class Field>
    typename std::enable_if<Field::numberOfGenerations != 1, bool>::type
-   isSMField(const typename field_indices<Field>::type& indices)
-   {
+   isSMField(const typename field_indices<Field>::type& indices) {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
-#if BOOST_VERSION >= 105800
+      #if BOOST_VERSION >= 105800
       boost::fusion::move(typename Field::sm_flags(), sm_flags);
-#else
+      #else
       boost::fusion::copy(typename Field::sm_flags(), sm_flags);
-#endif
+      #endif
 
       return sm_flags[indices.front()];
    }
