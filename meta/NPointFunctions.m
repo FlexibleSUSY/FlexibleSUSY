@@ -906,7 +906,7 @@ Module[{warning="\033[1;33mWarning\033[1;0m"},
    WriteString[OutputStream["stdout", 1],
       warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented.\n"];
    WriteString[OutputStream["stdout", 1],
-      warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta."];
+      warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta.\n"];
    {
       LoopTools`A0i[LoopTools`aa0, args__] :>
          "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{args}],"context.scale()"],
@@ -1296,11 +1296,11 @@ Module[
       Map[Not[FreeQ[#,SARAH`Cp]&&FreeQ[#,SARAH`Mass]]&,exprs];
    cxxExprs = StringReplace[#,"\""->""]&@
       Map[Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&,exprs];
-   code = "template<typename GenericFieldMap>
+   code = "template<class GenericFieldMap>
       struct `1` : subexpression_base<GenericFieldMap>
       {
          // constructor
-         template<typename ...Args>
+         template<class ...Args>
          `1`(Args&& ...args) :
          subexpression_base<GenericFieldMap>(std::forward<Args>(args)...) {}
          // overloading operator
@@ -1455,7 +1455,7 @@ Module[
    genericFields = Sort[#1@GenericIndex@#2]&@@@indices;                         (*@todo normal summation indices for NPF class the remove this here*)
 
    StringTemplate[
-      "template<typename GenericFieldMap> struct `1`_impl : generic_sum_base
+      "template<class GenericFieldMap> struct `1`_impl : generic_sum_base
       {
          `1`_impl( const generic_sum_base &base ) : generic_sum_base( base )
          {}
