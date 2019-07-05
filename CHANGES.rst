@@ -54,6 +54,26 @@ New features
 
       TSIL_OPT = -O3 -funroll-loops -fPIC
 
+* The libraries required to build FlexibleSUSY can now be installed
+  via the Conan_ package manager, see the `README.rst <README.rst>`_
+  for more details.
+
+  Example::
+
+      # install Conan (if not already installed)
+      pip install conan
+
+      # add remote repository conan-hep (if not already done)
+      conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
+
+      # install required libraries
+      conan install . --build=missing -s compiler.libcxx=libstdc++11
+
+* The output of ``make`` is now non-verbose by default.  To enable
+  verbose ``make`` output run::
+
+      make VERBOSE=1
+
 Changes
 -------
 

@@ -208,12 +208,12 @@ Module[{names=Part[Options@NPFPattern,All,1],Convert},
       "}" ,
    "}"]]
 ] /; And[
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       FilterRules[{opts},Except@Part[Options@NPFPattern,All,1]]==={},
       NPFPattern::errUnknownOptions, 
       FilterRules[{opts},Except@Part[Options@NPFPattern,All,1]], 
       "\""<>#<>"\""&/@Part[Options@NPFPattern,All,1]],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       And@@Map[StringMatchQ[
          ToString@#,
          ___?(Symbol === Head@ToExpression@#&) ~~ "_"]&,
@@ -222,7 +222,7 @@ Module[{names=Part[Options@NPFPattern,All,1],Convert},
       NPFPattern::errWrongOptionValue]
 ];
 NPFPattern[___] := 
-Utils`TestWithMessage[
+Utils`AssertOrQuit[
    False,
    NPFPattern::errUnknownInput,
    "\""<>#<>"\""&/@Part[Options@NPFPattern,All,1]
@@ -386,7 +386,7 @@ Module[
    nPointFunction
 ] /; And[
    MatchQ[inFields,
-   {__?(Utils`TestWithMessage[
+   {__?(Utils`AssertOrQuit[
          TreeMasses`IsParticle@#,
          NPointFunction::errinFields,
          #,
@@ -396,7 +396,7 @@ Module[
       ]&)}
    ],
    MatchQ[outFields,
-   {__?( Utils`TestWithMessage[
+   {__?( Utils`AssertOrQuit[
          TreeMasses`IsParticle@#,
          NPointFunction::erroutFields,
          #,
@@ -405,52 +405,52 @@ Module[
             _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
       ]&)}
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]] === {},
       NPointFunction::errUnknownOptions,
       FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
       Part[Options@NPointFunction,All,1]
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       OptionValue@LoopLevel === 1,
       NPointFunction::errLoopLevel
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       MemberQ[{DimensionalReduction, DimensionalRegularization}, 
          OptionValue@Regularize],
       NPointFunction::errRegularize,
       OptionValue@Regularize
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       OptionValue@UseCache === True ||
       OptionValue@UseCache === False,
       NPointFunction::errUseCache
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       OptionValue@ZeroExternalMomenta === True ||
       OptionValue@ZeroExternalMomenta === False,
       NPointFunction::errZeroExternalMomenta
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       OptionValue@OnShellFlag === True ||
       OptionValue@OnShellFlag === False,
       NPointFunction::errOnShellFlag
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       And@@Map[
          MemberQ[{OneParticleReducible,ExceptBoxes,ExceptTriangles,Null},#]&,
          If[Head@#===List,#,{#}]&@OptionValue@ExcludedTopologies
       ],
       NPointFunction::errExcludedTopologies
    ],
-   Utils`TestWithMessage[                                                       (* @todo modify this in future*)
+   Utils`AssertOrQuit[                                                       (* @todo modify this in future*)
       And @@ (TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &/@               (**)
       Join[inFields,outFields] ),                                               (**)
       NPointFunction::errInputFields                                            (**)
    ]                                                                            (**)
 ];
 NPointFunction[___] :=
-Utils`TestWithMessage[
+Utils`AssertOrQuit[
    False,
    NPointFunction::errUnknownInput,
    GetSARAHModelName[],
@@ -476,7 +476,7 @@ Module[
       Vertices`StripFieldIndices@Thread[GetVertex[vertsGen, classRules]], 2]
 ];
 VerticesForNPointFunction[___] :=
-Utils`TestWithMessage[False,VerticesForNPointFunction::errUnknownInput];
+Utils`AssertOrQuit[False,VerticesForNPointFunction::errUnknownInput];
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -534,7 +534,7 @@ Module[{kernelName},
       Parallel`Preferences`tr::shdw,
       Parallel`Protected`processes::shdw,
       SubKernels`Description::shdw];
-   kernelName = Utils`PureEvaluate[
+   kernelName = Utils`EvaluateOrQuit[
       LaunchKernels[1],
       LaunchSubkernelFor::errKernelLaunch, message];
    On[Parallel`Preferences`add::shdw,
@@ -547,7 +547,7 @@ Module[{kernelName},
 ];
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
-   kernelName = Utils`PureEvaluate[
+   kernelName = Utils`EvaluateOrQuit[
       LaunchKernels[1],
       LaunchSubkernelFor::errKernelLaunch, message];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
@@ -711,7 +711,7 @@ Module[{poss=Position[sums,GenericSum[0,{}]]},
    {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
 ];
 RemoveEmptyGenSums[___]:=
-Utils`TestWithMessage[False,RemoveEmptyGenSums::errUnknownInput];
+Utils`AssertOrQuit[False,RemoveEmptyGenSums::errUnknownInput];
 
 Options[CreateCXXHeaders]={
    LoopFunctions -> "FlexibleSUSY",
@@ -753,25 +753,25 @@ Module[
    "#include <boost/fusion/include/at_key.hpp>" <> "\n" <>
    "#include " <> loopHPP
 ] /; And[
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       FilterRules[{opts},Except@Part[Options@CreateCXXHeaders,All,1]] === {},
       CreateCXXHeaders::errUnknownOptions,
       FilterRules[{opts},Except@Part[Options@CreateCXXHeaders,All,1]],
       Part[Options@CreateCXXHeaders,All,1]
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
       CreateCXXHeaders::errLoopFunctions,
       OptionValue@LoopFunctions
    ],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       OptionValue@UseWilsonCoeffs === True ||
       OptionValue@UseWilsonCoeffs === False,
       CreateCXXHeaders::errUseWilsonCoeffs
    ]
 ];
 CreateCXXHeaders[___] := 
-Utils`TestWithMessage[False,CreateCXXHeaders::errUnknownInput,
+Utils`AssertOrQuit[False,CreateCXXHeaders::errUnknownInput,
    Options[CreateCXXHeaders][[All, 1]]];
 
 Options[CreateCXXFunctions]={
@@ -859,39 +859,39 @@ Module[
    {prototypes, definitions}
 ] /; And[
    MatchQ[nPointFunctions,
-      {__?(Utils`TestWithMessage[
+      {__?(Utils`AssertOrQuit[
          MatchQ[#,NPFPattern[]],
          CreateCXXFunctions::errnPointFunctions,
          #]&)
       }],
    MatchQ[names,
-      {__?(Utils`TestWithMessage[
+      {__?(Utils`AssertOrQuit[
          StringQ@#,
          CreateCXXFunctions::errnames,
          #]&)
       }],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       Length@nPointFunctions===Length@names,
       CreateCXXFunctions::errUnequalLength],
    If[Head@colourProjectors===List,
-      Utils`TestWithMessage[
+      Utils`AssertOrQuit[
          Length@colourProjectors===Length@names,
          CreateCXXFunctions::errUnequalLength],
       True],
    (*@todo check for colourProjectors*)
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       FilterRules[{opts},Except@Part[Options@CreateCXXFunctions,All,1]] === {},
       CreateCXXFunctions::errUnknownOptions,
       FilterRules[{opts},Except@Part[Options@CreateCXXFunctions,All,1]],
       Part[Options@CreateCXXFunctions,All,1]],
-   Utils`TestWithMessage[
+   Utils`AssertOrQuit[
       MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
       CreateCXXFunctions::errLoopFunctions,
       OptionValue@LoopFunctions]
    (*@todo check for FermionBasis*)
 ];
 CreateCXXFunctions[___] := 
-Utils`TestWithMessage[False,CreateCXXFunctions::errUnknownInput,
+Utils`AssertOrQuit[False,CreateCXXFunctions::errUnknownInput,
    Part[Options@CreateCXXFunctions,All,1]];
 
 GetLTToFSRules::usage=
@@ -927,7 +927,7 @@ Module[{warning="\033[1;33mWarning\033[1;0m"},
    }
 ];
 GetLTToFSRules[__] :=
-   Utils`TestWithMessage[False,GetLTToFSRules::errUnknownInput];
+   Utils`AssertOrQuit[False,GetLTToFSRules::errUnknownInput];
 
 CXXArgStringNPF::usage=
 "@brief Returns the c++ arguments that the c++ version of the given n-point 
@@ -961,7 +961,7 @@ Module[
    StringTemplate[str][eigenType,numInd,numMom,momDef]
 ];
 CXXArgStringNPF[___] :=
-   Utils`TestWithMessage[False,CXXArgStringNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXArgStringNPF::errUnknownInput];
 
 ExternalIndicesNPF::usage=
 "@brief Return a list of open field indices for a given NPointFunction object.
@@ -972,7 +972,7 @@ ExternalIndicesNPF::errUnknownInput=
 ExternalIndicesNPF[NPFPattern["Fields"->fields_]] :=
    DeleteDuplicates@Flatten@Level[fields,{4,5}];
 ExternalIndicesNPF[___] :=
-   Utils`TestWithMessage[False,ExternalIndicesNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,ExternalIndicesNPF::errUnknownInput];
 
 ExternalMomentaNPF::usage=
 "@brief Return a list of external momenta for a given NPointFunction object.
@@ -984,7 +984,7 @@ ExternalMomentaNPF[NPFPattern["Sums"->sums_,"Subs"->subs_]] :=
    DeleteDuplicates@
       Cases[{sums,subs},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
 ExternalMomentaNPF[___] :=
-   Utils`TestWithMessage[False,ExternalMomentaNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,ExternalMomentaNPF::errUnknownInput];
 
 CXXBodyNPF::usage=
 "@brief Return the c++ code for the function body of the c++ version of a given
@@ -997,7 +997,7 @@ CXXBodyNPF[nPointFunction:NPFPattern[]] :=
 StringTemplate["`1` helper{ model, indices, momenta };\nreturn helper.calculate();"][
    CXXClassNameNPF@nPointFunction];
 CXXBodyNPF[___] :=
-   Utils`TestWithMessage[False,CXXBodyNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXBodyNPF::errUnknownInput];
 
 CXXClassNameNPF::usage=
 "@brief Return the c++ name for the helper class of the c++
@@ -1012,7 +1012,7 @@ Module[{fieldNames = Vertices`StripFieldIndices/@Join@@fields},
    "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}]
 ];
 CXXClassNameNPF[___] :=
-   Utils`TestWithMessage[False,CXXClassNameNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXClassNameNPF::errUnknownInput];
 
 CXXClassForNPF::usage=
 "@brief Return the c++ code for the helper class of the c++ version of a given
@@ -1101,7 +1101,7 @@ Module[
    "`CALCULATE_FUNC`"->CXXCodeFunCalculate[cxxExpr,initializeSums,Length@fermionBasis]}]
 ];
 CXXClassForNPF[___] :=
-   Utils`TestWithMessage[False,CXXClassForNPF::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXClassForNPF::errUnknownInput];
 
 ToCXXPreparationRules::usage=
 "@brief Generate a list of rules for translating Mathematica expressions of
@@ -1202,7 +1202,7 @@ CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
    CXXGenFieldName[head[GenericIndex[index]]] =
    ToString[head]<>ToString[index];
 CXXGenFieldName[___] :=
-   Utils`TestWithMessage[False,CXXGenFieldName::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXGenFieldName::errUnknownInput];
 
 CXXFieldName::usage=
 "@brief Given a (possibly conjugated) external field, return its c++ type.
@@ -1223,7 +1223,7 @@ CXXFieldName[head_] :=
    CXXDiagrams`CXXNameOfField[Vertices`StripFieldIndices@head,
       CXXDiagrams`Private`prefixNamespace->"fields"];
 CXXFieldName[___] :=
-   Utils`TestWithMessage[False,CXXFieldName::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXFieldName::errUnknownInput];
 
 CXXFieldIndices::usage=
 "@brief Return the c++ expression for the container of the indices of a given
@@ -1250,7 +1250,7 @@ CXXFieldIndices[field_] :=
       StringTemplate["std::array<int,`1`>{`2`}"][Length@@field,
          StringRiffle[ToString/@First@field,", "]]];
 CXXFieldIndices[___] :=
-   Utils`TestWithMessage[False,CXXFieldIndices::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXFieldIndices::errUnknownInput];
 
 IsGenericField::usage=
 "@brief Determine whether a given field is a generic or not.
@@ -1271,7 +1271,7 @@ Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
       _, False]
 ]; 
 IsGenericField[___] :=
-   Utils`TestWithMessage[False,IsGenericField::errUnknownInput];
+   Utils`AssertOrQuit[False,IsGenericField::errUnknownInput];
 
 CXXCodeForSubexpressions::usage=
 "@brief Create the c++ code encoding a given set of subexpressions.
@@ -1340,7 +1340,7 @@ CXXCodeSubsIfSubs[subs:{__Symbol},str_String:""] :=
 CXXCodeSubsIfSubs[subs:{},str_String:""] :=
    str<>"// additional subexpressions are absent";
 CXXCodeSubsIfSubs[___] :=
-   Utils`TestWithMessage[False,CXXCodeSubsIfSubs::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeSubsIfSubs::errUnknownInput];
 
 CXXCodeSubsIfGen::usage =
 "@brief Generates required c++ code for subexpression if generic fields present
@@ -1371,7 +1371,7 @@ Module[
 CXXCodeSubsIfGen[fields:{},str_String:""] :=
    str<>"// generic fields are absent";
 CXXCodeSubsIfGen[___] :=
-   Utils`TestWithMessage[False,CXXCodeSubsIfGen::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeSubsIfGen::errUnknownInput];
 
 CXXCodeSubsIfContext::usage =
 "@brief Generates required c++ code for subexpression if couplings or masses
@@ -1387,7 +1387,7 @@ If[needsContext,
    str<>"const context_with_vertices &context =  *this;",
    str<>"// couplings and masses are absent"];
 CXXCodeSubsIfContext[___] :=
-   Utils`TestWithMessage[False,CXXCodeSubsIfContext::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeSubsIfContext::errUnknownInput];
 
 ExtractColourFactor::usage=                                                     (*@todo modify this to use some enum of proj-s*)
 "@brief Extracts the colour factor for a given colour structure like 
@@ -1512,7 +1512,7 @@ Module[
       ]
 ] /; And[
    MatchQ[colourFactors,
-      {__?(Utils`TestWithMessage[NumberQ@#,
+      {__?(Utils`AssertOrQuit[NumberQ@#,
          CXXCodeForGenericSum::errColours,
          #]&
       )}]
@@ -1530,7 +1530,7 @@ CXXCodeNameKey[genFields:{__?IsGenericField}] :=
       {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
       {1}],"\n"];
 CXXCodeNameKey[___]:=
-   Utils`TestWithMessage[False,CXXCodeNameKey::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeNameKey::errUnknownInput];
 
 CXXCodeBeginSum::usage =
 "@brief Generates c++ code for sum beginning used inside generic sums.
@@ -1545,7 +1545,7 @@ CXXCodeBeginSum[genFields:{__?IsGenericField}]:=
          "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
          CXXFieldIndices[#] <> ";" &/@genFields, "\n"];
 CXXCodeBeginSum[___]:=
-   Utils`TestWithMessage[False,CXXCodeBeginSum::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeBeginSum::errUnknownInput];
 
 CXXCodeFunCalculate::usage =
 "@brief Generates c++ code for functions which return result of generic sum
@@ -1574,7 +1574,7 @@ If[TrueQ[fermionBasisLength === 0],
    }"][cxxExpr,initializeSums,fermionBasisLength]
 ];
 CXXCodeFunCalculate[___]:=
-   Utils`TestWithMessage[False,CXXCodeFunCalculate::errUnknownInput];
+   Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput];
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
@@ -1602,11 +1602,11 @@ Module[
    If[StringTake[str,-1] === "`",preControl = StringDrop[preControl,-2]];
    return=ToExpression[preControl <> "&"];
    If[return===$Failed,
-      Utils`TestWithMessage[False,StringTemplate::errFailed,str],
+      Utils`AssertOrQuit[False,StringTemplate::errFailed,str],
       return]
 ];
 StringTemplate[___] :=
-   Utils`TestWithMessage[False,StringTemplate::usage];
+   Utils`AssertOrQuit[False,StringTemplate::usage];
 
 SetAttributes[{StringTemplate},{Protected, Locked}]
 ];
@@ -1619,7 +1619,7 @@ StringRiffle[strs:{___String},sep_String] :=
 StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
    in<>StringJoin@Riffle[strs,sep]<>fin;
 StringRiffle[___] :=
-   Utils`TestWithMessage[False,StringRiffle::usage];
+   Utils`AssertOrQuit[False,StringRiffle::usage];
    
 SetAttributes[{StringRiffle},{Protected, Locked}]
 ];

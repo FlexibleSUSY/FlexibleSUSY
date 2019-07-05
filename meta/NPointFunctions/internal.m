@@ -148,7 +148,7 @@ Protect[calledPreviouslySetFAFCPaths,feynArtsDir,formCalcDir,feynArtsModel,
 SetFAFCPaths[FADir_String, FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
-If[Utils`TestWithMessage[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
+If[Utils`AssertOrQuit[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
    ClearAttributes[
       {
          feynArtsDir,formCalcDir,feynArtsModel,

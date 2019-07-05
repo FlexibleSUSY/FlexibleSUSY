@@ -52,16 +52,41 @@ as well as from the :math:`\overline{\text{MS}}` masses
 :math:`m_b^{\text{SM(5)}}(m_b)`, :math:`m_c^{\text{SM(4)}}(m_c)`,
 :math:`m_s(2\,\text{GeV})`, :math:`m_d(2\,\text{GeV})`,
 :math:`m_u(2\,\text{GeV})`.  In addition to these 1-loop corrections,
-the known 2- and 3-loop QCD threshold corrections for
-:math:`\alpha_s(M_Z)` from [hep-ph:9305305]_, [hep-ph:9708255]_,
-[hep-ph:9707474]_, [hep-ph:0004189]_ can be taken into account in
-addition by setting the threshold corrections flag appropriately.  In
-the calculation of the Standard Model :math:`\overline{\text{MS}}` top
-Yukawa coupling, :math:`y_t(M_Z)`, the known 2-loop [hep-ph:9803493]_,
-3-loop [hep-ph:9911434]_ and 4-loop [1604.01134]_ QCD corrections can
-be taken into account.  See the documentation of the `SLHA input
-parameters`_ for a description of the individual flags to
-enable/disable 2- and 3-loop threshold corrections in FlexibleSUSY.
+known 2-, 3- and 4-loop corrections are taken into account, see the
+following table.
+
+=========================== =========================================================
+ Coupling                    Corrections
+=========================== =========================================================
+ :math:`\alpha_{\text{em}}`  1-loop full
+
+ :math:`\sin(\theta_W)`      1-loop full
+
+ :math:`\alpha_{s}`          1-loop full
+
+                             2-loop :math:`O(\alpha_s^2)` [hep-ph:9305305]_ [hep-ph:9707474]_
+
+                             3-loop :math:`O(\alpha_s^3)` [hep-ph:9708255]_
+
+ :math:`m_t`                 1-loop full
+
+                             2-loop :math:`O((\alpha_s + \alpha_t)^2)` [hep-ph:9803493]_ [1604.01134]_
+
+                             3-loop :math:`O(\alpha_s^3)` [hep-ph:9911434]_ [hep-ph:9912391]_
+
+                             4-loop :math:`O(\alpha_s^4)` [1604.01134]_
+
+ :math:`m_b`                 1-loop full
+
+ :math:`m_\tau`              1-loop full
+
+ :math:`v`                   1-loop full
+=========================== =========================================================
+
+See the documentation of the `SLHA input parameters`_ for a
+description of the individual flags to enable/disable higher-order
+threshold corrections in FlexibleSUSY.
+
 
 EWSB scale
 ``````````

@@ -238,15 +238,15 @@ depend:  $(ALLDEP)
 	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.o: %.cpp
-	@echo "Building $@"
+	@$(MSG)
 	$(Q)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.o: %.f
-	@echo "Building $@"
+	@$(MSG)
 	$(Q)$(FC) $(FFLAGS) -c $< -o $@
 
 %.o: %.F
-	@echo "Building $@"
+	@$(MSG)
 	$(Q)$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 
 distclean::
@@ -306,8 +306,8 @@ showbuild:
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_HIMALAYA    = $(ENABLE_HIMALAYA)"
 	@echo "ENABLE_LIBRARYLINK = $(ENABLE_LIBRARYLINK)"
-	@echo "ENABLE_FEYNARTS   = $(ENABLE_FEYNARTS)"
-	@echo "ENABLE_FORMCALC   = $(ENABLE_FORMCALC)"
+	@echo "ENABLE_FEYNARTS    = $(ENABLE_FEYNARTS)"
+	@echo "ENABLE_FORMCALC    = $(ENABLE_FORMCALC)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
 	@echo "ENABLE_META        = $(ENABLE_META)"
 	@echo "ENABLE_SHARED_LIBS = $(ENABLE_SHARED_LIBS)"

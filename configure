@@ -1308,6 +1308,18 @@ check_multiarch() {
 
 #_____________________________________________________________________
 check_boost() {
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f boost.pc ] && \
+    {
+        message -n "Checking boost library using local boost.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost --libs)
+        message "ok"
+        return
+    }
+
     check_header "boost/version.hpp" "$boost_inc_dir" \
 	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
@@ -1320,6 +1332,10 @@ check_boost() {
             BOOSTFLAGS="${BOOSTFLAGS} -I$found_dir"
         fi
     fi
+
+    check_boost_version
+    check_boost_test_incl
+    check_boost_test_libs
 }
 
 #_____________________________________________________________________
@@ -1760,6 +1776,22 @@ int main() {
 }
 
 #_____________________________________________________________________
+check_eigen() {
+    [ -z "$eigen_inc_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f eigen.pc ] && \
+    {
+        message -n "Checking Eigen library using local eigen.pc ... "
+        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config eigen --cflags)
+        message "ok"
+        return
+    }
+
+    check_eigen_incl
+    check_eigen_version
+}
+
+#_____________________________________________________________________
 check_gsl_config() {
     checking_msg "GSL configuration $gsl_config"
     exists_in_path "$gsl_config"
@@ -1950,6 +1982,19 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        [ -z "$himalaya_inc_dir" ] && \
+        [ -z "$himalaya_lib_dir" ] && \
+        type pkg-config > /dev/null && \
+        [ -f Himalaya.pc ] && \
+        {
+            message -n "Checking Himalaya using local Himalaya.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --libs)
+            enable_himalaya=yes
+            message "ok"
+            return
+        }
+
         if check_himalaya_incl && check_himalaya_libs ; then
             enable_himalaya=yes
         else
@@ -2049,6 +2094,27 @@ check_looptools_incl() {
         if [ -n "$looptools_inc_dir" ]; then
             LOOPTOOLSFLAGS="-I$looptools_inc_dir"
         fi
+    fi
+}
+
+#_____________________________________________________________________
+check_looptools() {
+    if [ "x$enable_looptools" = "xyes" ] ; then
+        [ -z "$looptools_inc_dir" ] && \
+        [ -z "$looptools_lib_dir" ] && \
+        type pkg-config > /dev/null && \
+        [ -f LoopTools.pc ] && \
+        {
+            message -n "Checking LoopTools using local LoopTools.pc ... "
+            LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
+            LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+            enable_looptools=yes
+            message "ok"
+            return
+        }
+
+        check_looptools_incl
+        check_looptools_libs
     fi
 }
 
@@ -2206,6 +2272,19 @@ check_tsil_size() {
 
 #_____________________________________________________________________
 check_tsil() {
+    [ -z "$tsil_inc_dir" ] && \
+    [ -z "$tsil_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f TSIL.pc ] && \
+    {
+        message -n "Checking TSIL using local TSIL.pc ... "
+        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config TSIL --cflags)
+        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config TSIL --libs)
+        enable_tsil=yes
+        message "ok"
+        return
+    }
+
     if test "x$enable_tsil" != "xno" ; then
         if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
             enable_tsil=yes
@@ -3194,11 +3273,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_linking
     check_librarylink
     check_boost
-    check_boost_version
-    check_boost_test_incl
-    check_boost_test_libs
-    check_eigen_incl
-    check_eigen_version
+    check_eigen
     check_fortran_libs
     check_gsl_config
     check_himalaya
@@ -3206,8 +3281,7 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
-    check_looptools_incl
-    check_looptools_libs
+    check_looptools
     check_loop_functions
     check_odeint
     check_sqlite

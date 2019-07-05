@@ -158,7 +158,7 @@ FieldInfo::usage="";
 includeLorentzIndices::usage="";
 includeColourIndices::usage="";
 
-IsParticle::usage = "returns True if argument is a particle, False otherwise"
+IsParticle::usage = "returns True if argument is a particle or anti-particle, False otherwise"
 IsScalar::usage="";
 IsFermion::usage="";
 IsVector::usage="";
@@ -171,6 +171,8 @@ IsMajoranaFermion::usage="";
 IsDiracFermion::usage="";
 IsComplexScalar::usage="";
 IsRealScalar::usage="";
+IsComplexVector::usage="";
+IsRealVector::usage="";
 IsMassless::usage="";
 IsUnmixed::usage="";
 IsQuark::usage="";
@@ -189,6 +191,8 @@ fields are always heavier than the SM fields.";
 
 IsElectricallyCharged::usage="";
 ContainsGoldstone::usage="";
+
+FSAntiField::usage = "Returns the anti-field of a given field";
 
 GetSMChargedLeptons::usage="";
 GetSMNeutralLeptons::usage="";
@@ -289,7 +293,7 @@ GetSMParticles[states_:FlexibleSUSY`FSEigenstates] :=
     Select[GetParticles[states], IsSMParticle];
 
 IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
-    MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], AntiField[p]];
+    MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], FSAntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
 	includeColourIndices -> False}]] := 
@@ -312,6 +316,8 @@ IsOfType[sym_[__], type_Symbol, states_:FlexibleSUSY`FSEigenstates] :=
     IsOfType[sym, type, states];
 
 IsSMParticle[sym_List] := And @@ (IsSMParticle /@ sym);
+IsSMParticle[Susyno`LieGroups`conj[sym_]] := IsSMParticle[sym];
+IsSMParticle[SARAH`bar[sym_]] := IsSMParticle[sym];
 IsSMParticle[sym_[__]] := IsSMParticle[sym];
 IsSMParticle[sym_] := SARAH`SMQ[sym, Higgs -> True];
 
@@ -429,6 +435,10 @@ IsRealScalar[sym_Symbol] :=
 IsRealScalar[sym_List] :=
     And[IsScalar[sym], And @@ (Parameters`IsRealParameter /@ sym)];
 
+IsRealVector[p_] := IsVector[p] && Parameters`IsRealParameter[p];
+
+IsComplexVector[p_] := IsVector[p] && Parameters`IsComplexParameter[p];
+
 IsMassless[Susyno`LieGroups`conj[sym_], states_:FlexibleSUSY`FSEigenstates] := IsMassless[sym, states];
 
 IsMassless[SARAH`bar[sym_], states_:FlexibleSUSY`FSEigenstates] := IsMassless[sym, states];
@@ -501,6 +511,13 @@ IsSMQuark[Susyno`LieGroups`conj[sym_]] := IsSMQuark[sym];
 IsSMQuark[SARAH`bar[sym_]] := IsSMQuark[sym];
 IsSMQuark[sym_[__]]         := IsSMQuark[sym];
 IsSMQuark[sym_]             := MemberQ[GetSMQuarks[], sym];
+
+FSAntiField[p_?IsRealScalar] := p;
+FSAntiField[p_?IsComplexScalar] := Susyno`LieGroups`conj[p];
+FSAntiField[p_?IsMajoranaFermion] := p;
+FSAntiField[p_?IsDiracFermion] := SARAH`bar[p];
+FSAntiField[p_?IsVector] := Susyno`LieGroups`conj[p];
+FSAntiField[p_?IsGhost] := Susyno`LieGroups`conj[p];
 
 GetSMChargedLeptons[] :=
     Parameters`GetParticleFromDescription["Leptons", {"Electron","Muon","Tau"}];

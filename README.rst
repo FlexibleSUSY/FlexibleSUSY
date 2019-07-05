@@ -63,6 +63,33 @@ Optional:
 * Himalaya_
 * TSIL_
 
+Installation of required libraries
+----------------------------------
+
+The required libraries Boost_, `Eigen 3`_, LoopTools_, Himalaya_ and
+TSIL_ can be installed using the Conan_ package manager.  If not
+already installed, Conan can be installed with pip::
+
+    pip install conan
+
+If Conan is installed, add `conan-hep`_ to the list of remote package
+repositories::
+
+    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
+
+To install the libraries required by FlexibleSUSY run::
+
+    conan install . --build=missing
+
+The `GNU scientific library`_ can currently not be installed via
+Conan_.  One may use the package manager of the operating system to
+install it.  On Debian/Ubuntu one may run for example::
+
+    sudo apt-get install libgsl-dev
+
+If the required libraries are installed via Conan or the operating
+system's package manager, they will be found automatically by
+FlexibleSUSY's ``configure`` script, see below.
 
 Installation of SARAH
 ---------------------
@@ -87,14 +114,14 @@ script::
 
 See ``./install-sarah --help`` for more options.
 
-Installation of FeynArts/FormCalc/LoopTools
--------------------------------------------
+Installation of FeynArts/FormCalc (optional)
+--------------------------------------------
 
-If you want FlexibleSUSY to use either FeynArts_, FormCalc_ or
-LoopTools_ you will need to install these packages first.  Also — as
-with SARAH — they need to be loadable with the ``Needs[]`` command
-from inside Mathematica.  We recommend using the installation script
-``FeynInstall`` provided on the FeynArts web page. e.g.::
+If you want FlexibleSUSY to use FeynArts_ or FormCalc_ you will need
+to install these packages first.  Also — as with SARAH — they need to
+be loadable with the ``Needs[]`` command from inside Mathematica.  We
+recommend using the installation script ``FeynInstall`` provided on
+the FeynArts web page. e.g.::
 
     cd ~/.local
     wget http://www.feynarts.de/FeynInstall
@@ -150,9 +177,9 @@ Building a FlexibleSUSY model
    Use ``make -j<N>`` to use ``<N>`` CPU cores.  When ``make`` is
    executed, Mathematica is called, which generates the C++ code for
    the specified models.  All C++ source files are written to the
-   directory ``models/<model>/``.  When ``make`` has finished, the C++
-   code is compiled and the following spectrum generators are created
-   for each specified model:
+   directory ``models/<model>/``.  When ``make`` has finished, the
+   following spectrum generator(s) are available for each specified
+   model:
 
    * ``models/<model>/run_<model>.x``: command line spectrum generator
    * ``models/<model>/run_<model>.m``: Mathematica interface
@@ -558,9 +585,11 @@ To use the LoopTools library and header files from a specific
 directory configure via
 ::
 
+    LOOPTOOL_DIR=/path/to/looptools/build
+
     ./configure --enable-looptools \
-       --with-looptools-incdir="/path/to/looptools/build/" \
-       --with-looptools-libdir="/path/to/looptools/build/"
+       --with-looptools-incdir=$LOOPTOOLS_DIR \
+       --with-looptools-libdir=$LOOPTOOLS_DIR
 
 Note: LoopTools 2.8 or higher is required.
 
@@ -568,8 +597,12 @@ Note: LoopTools 2.8 or higher is required.
 TSIL support
 ------------
 
-Some extensions of FlexibleSUSY require TSIL_.  In order to link TSIL_
-to FlexibleSUSY, configure via::
+Some models of FlexibleSUSY require TSIL_, for example HSSUSY.  When
+such models are activated (via ``./configure --with-models=<model>``),
+FlexibleSUSY requires TSIL to be available.  If TSIL is installed in a
+system directory or installed via Conan, FlexibleSUSY will find the
+TSIL automatically.  To use TSIL from a a non-standard directory,
+configure FlexibleSUSY like this::
 
     $TSIL_DIR=/path/to/tsil
 
@@ -577,8 +610,8 @@ to FlexibleSUSY, configure via::
        --with-tsil-incdir=$TSIL_DIR \
        --with-tsil-libdir=$TSIL_DIR
 
-Note also that TSIL_ must be compiled with ``-fPIC``, which can be
-achieved by setting in the TSIL_ ``Makefile``::
+Note also that TSIL must be compiled with ``-fPIC``, which can be
+achieved by setting in the TSIL ``Makefile``::
 
     TSIL_OPT = -O3 -funroll-loops -fPIC
 
@@ -754,6 +787,8 @@ References
 .. _SARAH: http://sarah.hepforge.org
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
+.. _Conan: https://conan.io/
+.. _conan-hep: https://bintray.com/expander/conan-hep
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
