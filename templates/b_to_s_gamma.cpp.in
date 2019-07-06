@@ -97,7 +97,7 @@ std::array<std::complex<double>, 4> calculate_b_to_s_gamma(
    const std::complex<double> Vtb (complex_CKM(2, 2));
    std::complex<double> Vts;
    // avoid division by zero
-   if (complex_CKM(2, 1) == std::complex<double>(0, 0)) {
+   if (is_zero(std::abs(complex_CKM(2, 1)))) {
        Vts = std::complex<double>(-0.0404063888996, -0.00072107415577);
    } else {
        Vts = complex_CKM(2, 1);
