@@ -210,8 +210,8 @@ CalculatePartialWidths[couplings_List] :=
 NonZeroVertexQ[vertex_] := MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]];
 
 (* @todo extend to multiple non-Abelian groups *)
-IsColorOrLorentzIndex[index_] := StringMatchQ[ToString @ index, "ct" ~~ __] ||
-                                 StringMatchQ[ToString @ index, "lt" ~~ __];
+IsColorOrLorentzIndex[index_] := Vertices`SarahColorIndexQ[index] ||
+                                 Vertices`SarahLorentzIndexQ[index];
 StripColorAndLorentzIndices[p_Symbol] := p;
 StripColorAndLorentzIndices[SARAH`bar[p_]] := SARAH`bar[StripColorAndLorentzIndices[p]];
 StripColorAndLorentzIndices[Susyno`LieGroups`conj[p_]] := Susyno`LieGroups`conj[StripColorAndLorentzIndices[p]];

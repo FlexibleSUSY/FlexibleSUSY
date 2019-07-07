@@ -44,15 +44,15 @@ all-$(MODNAME):
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(CONFIG_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(CONFIG_TMPL) $(CONFIG_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(CONFIG_MK) $(CONFIG_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DEPGEN_SRC) $(CONFIG_INSTALL_DIR)
-		install -m u=rwx,g=r,o=r $(MATH_INC_PATHS) $(CONFIG_INSTALL_DIR)
-		$(INSTALL_STRIPPED) $(MAKEFILE_IN) $(CONFIG_INSTALL_DIR) -m u=rw,g=r,o=r
-		$(INSTALL_STRIPPED) $(REMOVE_EXPORT_MARKERS) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
-		$(INSTALL_STRIPPED) $(INSTALL_STRIPPED) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
-		$(INSTALL_STRIPPED) $(CONVERT_DOS_PATHS) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
+		$(Q)install -d $(CONFIG_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(CONFIG_TMPL) $(CONFIG_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(CONFIG_MK) $(CONFIG_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DEPGEN_SRC) $(CONFIG_INSTALL_DIR)
+		$(Q)install -m u=rwx,g=r,o=r $(MATH_INC_PATHS) $(CONFIG_INSTALL_DIR)
+		$(Q)$(INSTALL_STRIPPED) $(MAKEFILE_IN) $(CONFIG_INSTALL_DIR) -m u=rw,g=r,o=r
+		$(Q)$(INSTALL_STRIPPED) $(REMOVE_EXPORT_MARKERS) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
+		$(Q)$(INSTALL_STRIPPED) $(INSTALL_STRIPPED) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
+		$(Q)$(INSTALL_STRIPPED) $(CONVERT_DOS_PATHS) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
 endif
 
 clean-$(MODNAME)-dep:
@@ -62,16 +62,16 @@ clean-$(MODNAME)-lib:
 		@true
 
 clean-$(MODNAME)-obj:
-		-rm -f $(DEPGEN_OBJ)
+		$(Q)-rm -f $(DEPGEN_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(DEPGEN_EXE)
+		$(Q)-rm -f $(DEPGEN_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
-		-rm -f $(CONFIG_HDR)
-		-rm -f $(FLEXIBLESUSY_VERSION_FILE)
-		-rm -f $(FLEXIBLESUSY_GIT_COMMIT_FILE)
-		-rm -f $(REQUIRED_SARAH_VERSION_FILE)
+		$(Q)-rm -f $(CONFIG_HDR)
+		$(Q)-rm -f $(FLEXIBLESUSY_VERSION_FILE)
+		$(Q)-rm -f $(FLEXIBLESUSY_GIT_COMMIT_FILE)
+		$(Q)-rm -f $(REQUIRED_SARAH_VERSION_FILE)
 
 clean-obj::     clean-$(MODNAME)-obj
 
@@ -80,6 +80,7 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 $(DEPGEN_EXE): $(DEPGEN_OBJ)
-		$(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
 
 ALLEXE += $(DEPGEN_EXE)

@@ -10,7 +10,6 @@ packagename="@PKGNAME@"
 version="@FLEXIBLESUSY_VERSION@"
 
 addons="@ADDONS@"
-blaslibs="@BLASLIBS@"
 boostflags="@BOOSTFLAGS@"
 boosttestlibs="@BOOSTTESTLIBS@"
 boostthreadlibs="@BOOSTTHREADLIBS@"
@@ -25,7 +24,6 @@ gslflags="@GSLFLAGS@"
 gsllibs="@GSLLIBS@"
 himalayaflags="@HIMALAYAFLAGS@"
 himalayalibs="@HIMALAYALIBS@"
-lapacklibs="@LAPACKLIBS@"
 ldflags="@LDFLAGS@"
 ldlibs="@LDLIBS@"
 llflags="@LLFLAGS@"
@@ -176,7 +174,7 @@ cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
 cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
 flexiblesusy_libs="$(create_flexiblesusy_libs)"
 compile_cmd="$cxx $cppflags $cxxflags"
-libs="$ldflags $flexiblesusy_libs $(create_gm2calc_libs) $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $lapacklibs $blaslibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
+libs="$ldflags $flexiblesusy_libs $(create_gm2calc_libs) $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
 modules="$(create_module_list)"
 
 help() {
@@ -184,7 +182,6 @@ cat <<EOF
 Usage: `basename $0` [options]
 Options:
   --addons              Print all addons that are build
-  --blaslibs            Print BLAS libraries, BLASLIBS
   --boostflags          Print compiler flags for BOOST, BOOSTFLAGS
   --boosttestlibs       Print BOOST test libraries, BOOSTTESTLIBS
   --boostthreadlibs     Print BOOST thread libraries, BOOSTTHREADLIBS
@@ -203,13 +200,10 @@ Options:
   --enable-debug        Test if debug mode is enabled
   --enable-fflite       Test if FFlite is enabled
   --enable-himalaya     Test if Himalaya is enabled
-  --enable-lapack       Test if LAPACK is enabled
   --enable-librarylink  Test if LibraryLink is enabled
   --enable-looptools    Test if LoopTools is enabled
   --enable-mass-error-check
                         Test if mass error check is enabled
-  --enable-ilp64mkl-workaround
-                        Test if ilp64 MKL workaround is enabled
   --enable-silent       Test if silet mode is enabled
   --enable-shared-libs  Test if shared libraries are build
   --enable-sqlite       Test if SQLite is enabled
@@ -225,7 +219,6 @@ Options:
   --gsllibs             Print GSL libraries, GSLLIBS
   --himalayaflags       Print compiler flags for Himalaya, HIMALAYAFLAGS
   --himalayalibs        Print Himalaya library, HIMALAYALIBS
-  --lapacklibs          Print LAPACK libraries, LAPACKLIBS
   --ldflags             Print flags for optional libraries, LDFLAGS
   --ldlibs              Print optional libraries, LDLIBS
   --libs                Print all libraries linked to an executable
@@ -265,7 +258,6 @@ while test $# -gt 0; do
     case $1 in
         --addons)                out="$out $addons" ;;
         --solvers)               out="$out $solvers" ;;
-        --blaslibs)              out="$out $blaslibs" ;;
         --boostflags)            out="$out $boostflags" ;;
         --boosttestlibs)         out="$out $boosttestlibs" ;;
         --boostthreadlibs)       out="$out $boostthreadlibs" ;;
@@ -283,7 +275,6 @@ while test $# -gt 0; do
         --gsllibs)               out="$out $gsllibs" ;;
         --himalayaflags)         out="$out $himalayaflags" ;;
         --himalayalibs)          out="$out $himalayalibs" ;;
-        --lapacklibs)            out="$out $lapacklibs" ;;
         --ldflags)               out="$out $ldflags" ;;
         --ldlibs)                out="$out $ldlibs" ;;
         --libs)                  out="$out $libs" ;;
@@ -325,11 +316,9 @@ while test $# -gt 0; do
         --enable-debug)               out="$out @ENABLE_DEBUG@" ;;
         --enable-fflite)              out="$out @ENABLE_FFLITE@" ;;
         --enable-himalaya)            out="$out @ENABLE_HIMALAYA@" ;;
-        --enable-lapack)              out="$out @ENABLE_LAPACK@" ;;
         --enable-librarylink)         out="$out @ENABLE_LIBRARYLINK@" ;;
         --enable-looptools)           out="$out @ENABLE_LOOPTOOLS@" ;;
         --enable-mass-error-check)    out="$out @ENABLE_CHECK_EIGENVALUE_ERROR@" ;;
-        --enable-ilp64mkl-workaround) out="$out @ENABLE_ILP64MKL_WORKAROUND@" ;;
         --enable-silent)              out="$out @ENABLE_SILENT@" ;;
         --enable-shared-libs)         out="$out @ENABLE_SHARED_LIBS@" ;;
         --enable-sqlite)              out="$out @ENABLE_SQLITE@" ;;

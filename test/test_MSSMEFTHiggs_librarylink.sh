@@ -210,4 +210,6 @@ else
     echo "All tests passed."
 fi
 
+rm -f "$ll_script"
+
 exit $error

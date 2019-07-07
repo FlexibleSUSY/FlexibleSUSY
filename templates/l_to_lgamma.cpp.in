@@ -27,7 +27,6 @@
 
 #include <valarray>
 #include <complex>
-#include <iostream>
 
 #include "@ModelName@_l_to_lgamma.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
@@ -37,11 +36,12 @@
 
 #include "wrappers.hpp"
 
+namespace flexiblesusy {
+
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace flexiblesusy {
 namespace @ModelName@_l_to_lgamma {
 
 template <typename FIn, typename FOut, typename T1, typename T2>
@@ -68,5 +68,6 @@ double lepton_total_decay_width(
 }
 
 @LToLGamma_InterfaceDefinitions@
+
 }
 } // namespace flexiblesusy
