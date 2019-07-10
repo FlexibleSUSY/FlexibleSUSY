@@ -191,6 +191,7 @@ as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 
 Begin["`Private`"];
 
@@ -487,6 +488,12 @@ FSReIm[z_] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
+
+FSBooleanQ[b_] :=
+   If[$VersionNumber >= 10.0,
+      BooleanQ[b],
+      If[b === True || b === False, True, False]
+   ];
 
 End[];
 

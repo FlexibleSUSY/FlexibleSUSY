@@ -61,7 +61,7 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
           outFermion = GetStrangeQuark[],
           dimensionInFermion = TreeMasses`GetDimension[TreeMasses`GetSMBottomQuarkMultiplet[]],
           dimensionOutFermion = TreeMasses`GetDimension[TreeMasses`GetSMStrangeQuarkMultiplet[]]},
-    Utils`AssertWithMessage[BooleanQ[matchingOn],
+    Utils`AssertWithMessage[Utils`FSBooleanQ[matchingOn],
       "BtoSGamma`CreateInterfaceBtoSGamma[]: Error, argument must be either True or False."];
 
     If[matchingOn,
