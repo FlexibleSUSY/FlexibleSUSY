@@ -77,16 +77,17 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
               "We assume the first element is SM W boson"];
           "{0}",
           "{}"] <> ");\n" <>
+	"constexpr bool discard_SM_contribution = true;\n" <>
         "const auto form_factors_VP = calculate_" <> CXXDiagrams`CXXNameOfField[inFermion] <> "_" <>
         CXXDiagrams`CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
-            "b_quark_index, s_quark_index, model);\n",
-            "model);\n"] <>
+            "b_quark_index, s_quark_index, ", ""
+	    ] <> "model, discard_SM_contribution);\n" <>
         "const auto form_factors_VG = calculate_" <> CXXDiagrams`CXXNameOfField[inFermion] <> "_" <>
         CXXDiagrams`CXXNameOfField[outFermion] <> "_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetGluon[]] <> "_form_factors(" <>
         If[dimensionInFermion =!= 1,
-            "b_quark_index, s_quark_index, model);\n\n",
-            "model);\n\n"] <>
+            "b_quark_index, s_quark_index, ", ""] <>
+	    "model, discard_SM_contribution);\n\n" <>
         "// choose normalization according to flavio\n" <>
         "const auto normC7 = -16*Sqr(Pi)*Sqr(mW)/(unit_charge(context)*Sqr(g2)*Vtb*Conj(Vts));\n" <>
         "const auto normC8 = -16*Sqr(Pi)*Sqr(mW)/(g3*Sqr(g2)*Vtb*Conj(Vts));\n" <>

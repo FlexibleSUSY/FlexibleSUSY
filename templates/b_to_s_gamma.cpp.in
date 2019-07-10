@@ -41,11 +41,12 @@
 
 #define MODELPARAMETER(p) context.model.get_##p()
 
+namespace flexiblesusy {
+
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace flexiblesusy {
 namespace @ModelName@_b_to_s_gamma {
 
 /**
