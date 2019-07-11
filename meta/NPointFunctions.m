@@ -21,11 +21,20 @@
 *)
 
 (*@assumptions: 
-1) there is no quartic gluon vertices inside diagrams => one can calculate
+1) there are no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
 (*@todo add function which cleans GenerisSum[0,{}] correctly*)
-BeginPackage["NPointFunctions`",{"FlexibleSUSY`","SARAH`","CXXDiagrams`","Vertices`","Parameters`","Utils`"}];
+BeginPackage["NPointFunctions`",
+   {
+      "FlexibleSUSY`",
+      "SARAH`",
+      "CXXDiagrams`", (* RemoveLorentzConjugation, *)
+      "Vertices`", (* StripFieldIndices *)
+      "Parameters`", (* ExpressionToString *)
+      "Utils`" (* AssertOrQuit, AssertWithMessage, EvaluateOrQuit *)
+   }
+];
 
 LoopLevel::usage=
 "Option for NPointFunctions`NPointFunction[].
@@ -1214,7 +1223,7 @@ CXXFieldName::errUnknownInput=
 "Input should be head@Field[{___}], with head bar, conj or nothing";
 CXXFieldName[SARAH`bar[head_]] :=
    CXXFieldName[SARAH`bar[head]] =
-   StringTemplate["typename bar<`1`>::type"][CXXFieldName@head];
+   StringJoin["typename bar<",CXXFieldName@head,">::type"];
 CXXFieldName[Susyno`LieGroups`conj[head_]] :=
    CXXFieldName[Susyno`LieGroups`conj[head]] =
    StringTemplate["typename conj<`1`>::type"][CXXFieldName@head];

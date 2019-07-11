@@ -87,7 +87,7 @@ code = StringReplace[templateCode,
    {
    "@NPointFunctions_Selfenergy_hh_1loop@" -> hhSelfenergyCode,
    "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
-   "@CXXDiagrams_VertexProtos@" -> verticesCode[[1]],
+   "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
    "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
    }];
 

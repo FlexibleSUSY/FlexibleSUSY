@@ -98,8 +98,7 @@ namespace @ModelName@_cxx_diagrams {
       };
    } // namespace detail
 
-   /* @brief dsf
-    * @note Is defined by compiler only if the number of generation for a field
+   /* @note Is defined by compiler only if the number of generation for a field
     * is not 1.
     */
    template <class Field>
@@ -108,74 +107,72 @@ namespace @ModelName@_cxx_diagrams {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
       #if BOOST_VERSION >= 105800
-      boost::fusion::move(typename Field::sm_flags(), sm_flags);
+      boost::fusion::move(typename Field::sm_flags(), sm_flags); /**< Making copy of the information from Field to sm_flags */
       #else
       boost::fusion::copy(typename Field::sm_flags(), sm_flags);
       #endif
 
-      return sm_flags[indices.front()];
+      return sm_flags[indices.front()]; /**< front() accesses the first element. Either all are SM indices or none. */
    }
 
    template <class Field>
    typename std::enable_if<Field::numberOfGenerations == 1, bool>::type
-   isSMField(const typename field_indices<Field>::type&)
-   {
+   isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
 
-   namespace fields
-   {
-   template <class Field>
-   struct bar {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
+   namespace fields {
+      template <class Field>
+      struct bar {
+         using index_bounds = typename Field::index_bounds;
+         static constexpr int numberOfGenerations = Field::numberOfGenerations;
+         using sm_flags = typename Field::sm_flags;
+         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+         static constexpr double electric_charge = -Field::electric_charge;
+         using lorentz_conjugate = Field;
 
-      using type = bar<Field>;
-   };
+         using type = bar<Field>;
+       };
 
-   template <class Field>
-   struct conj {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
+      template <class Field>
+      struct conj {
+         using index_bounds = typename Field::index_bounds;
+         static constexpr int numberOfGenerations = Field::numberOfGenerations;
+         using sm_flags = typename Field::sm_flags;
+         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+         static constexpr double electric_charge = -Field::electric_charge;
+         using lorentz_conjugate = Field;
 
-      using type = conj<Field>;
-   };
+         using type = conj<Field>;
+      };
 
-   // Double Lorentz conjugation
-   template <class Field>
-   struct bar<bar<Field>> {
-      using type = Field;
-   };
-   template <class Field>
-   struct conj<conj<Field>> {
-      using type = Field;
-   };
+      // Double Lorentz conjugation
+      template <class Field>
+      struct bar<bar<Field>> {
+         using type = Field;
+      };
+      template <class Field>
+      struct conj<conj<Field>> {
+         using type = Field;
+      };
 
-   // Remove Lorentz conjugation
-   template <class Field>
-   struct remove_lorentz_conjugation {
-      using type = Field;
-   };
+      // Remove Lorentz conjugation
+      template <class Field>
+      struct remove_lorentz_conjugation {
+         using type = Field;
+      };
 
-   template <class Field>
-   struct remove_lorentz_conjugation<bar<Field>> {
-      using type = Field;
-   };
+      template <class Field>
+      struct remove_lorentz_conjugation<bar<Field>> {
+         using type = Field;
+      };
 
-   template <class Field>
-   struct remove_lorentz_conjugation<conj<Field>> {
-      using type = Field;
-   };
+      template <class Field>
+      struct remove_lorentz_conjugation<conj<Field>> {
+         using type = Field;
+      };
 
-   @CXXDiagrams_Fields@
+      @CXXDiagrams_Fields@
    } // namespace fields
 
    using fields::bar;
