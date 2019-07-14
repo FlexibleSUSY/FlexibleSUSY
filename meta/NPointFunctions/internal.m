@@ -423,7 +423,7 @@ Module[
    amplitudes = Delete[amplitudes,
       Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];             (*@unote Remove colour indices following assumption 1*)
    
-   genericInsertions = Flatten[                                                 (*@unote genericInsertions has only generic indices *)
+   genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
    colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
@@ -455,8 +455,8 @@ Module[
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
 (Topology[_]->Insertions[Generic][__]) rule.
-@returns list (for a given topology) of list (for all generic fields) of list 
-(for all class fields) of rules {{{x->y,..},..},..}
+@returns list (for a given topology) of list (for all generic fields)
+of list (for all class fields) of rules {{{x->y,..},..},..}
 @param 1st argument is of the form Topology[_]->Insertions[Generic][__]
 from FeynArts TopologyList[__][Topology[_]->Insertions[Generic][__],___]
 @param 2nd argument changes the type of output field names
@@ -473,7 +473,7 @@ Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass is given)
 {FeynmanGraph[__][__],Insertions[Classes][__]}
 @param 2nd argument changes the type of output field names
 True gives Field[_] names, False gives particleClass names
-@returns list (for all generic fields) of list (for all class fields) 
+@returns list (sorted; for all generic fields) of list (for all class fields) 
 of rules {{x->y,..},..}
 @note this function is called by GenericInsertionsForDiagram[]
 @note this function doesn't look at external particles
@@ -491,7 +491,7 @@ Module[
    genericInsertions = Cases[#, 
       Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
       Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
-   If[keepFieldNum,
+   SortBy[#,First]&/@ If[keepFieldNum,
       List @@ genericInsertions,
       List @@ genericInsertions /. toGenericIndexConventionRules
    ]
@@ -628,16 +628,17 @@ SumOverAllFieldIndices::usage=
 "@brief Given a generic amplitude, determine the generic fields over which it
 needs to be summed and return a corresponding GenericSum[] object.
 @param FormCalc`Amp[_->_][amp_] the given generic amplitude
-@returns {{S|F|V|U|T,number of index}...}.";
+@returns {S|F|V|U|T[GenericIndex[number of index]]...}.";
 SumOverAllFieldIndices[FormCalc`Amp[_->_][amp_]] :=
 Module[
    {
-      genericIndices = DeleteDuplicates[Cases[amp,
-         fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]] 
-         :> {fieldType,number},
-         Infinity]]
+      sortSumFields = Sort@DeleteDuplicates[Cases[amp,
+         _?(FAGenericFieldQ)[FeynArts`Index[Generic,_Integer]],
+         Infinity]],
+      replSumFields
    },
-   GenericSum[amp, genericIndices]
+   replSumFields = sortSumFields /. f_[_[_,i_]]:>f@GenericIndex@i;
+   GenericSum[amp, replSumFields]
 ];
 
 FAGenericFieldQ::usage=
