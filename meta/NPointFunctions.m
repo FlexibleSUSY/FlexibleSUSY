@@ -160,10 +160,11 @@ SetAttributes[
    {Protected, Locked}];
 
 Begin["`Private`"];
+
 Options[NPFPattern] = {
    "Fields" -> _,
    "Sums" -> _,
-   "ClRules" -> _,
+   "ClFields" -> _,
    "CombFac" -> _,
    "ColFac" -> _,
    "Subs" -> _};
@@ -209,7 +210,7 @@ Module[{names=Part[Options@NPFPattern,All,1],Convert},
       "{",
          "{",
             Convert@2 , "{GenericSum[_,{__}]..}," ,
-            Convert@3,"{{{Rule[_,_]..}..}..}," ,
+            Convert@3,"{{{__}..}..}," ,
             Convert@4 , "{{__Integer}..}," ,
             Convert@5 , "{{__}..}" ,
          "}," ,
@@ -468,11 +469,12 @@ Utils`AssertOrQuit[
    Options[NPointFunction][[All, 1]]
 ];
 
-VerticesForNPointFunction[NPFPattern[
-   "Sums"->genSums_,"ClRules"->classRules_,"Subs"->substitutions_]
+VerticesForNPointFunction[obj:NPFPattern[
+   "Sums"->genSums_,"ClFields"->classFields_,"Subs"->substitutions_]
 ] :=
 Module[
    {
+      classRules = GetClassRules@obj, 
       positionsOfVertInSubs =
          DeleteDuplicates[#[[1]] & /@ Position[substitutions, SARAH`Cp[__]]], 
       rulesWithVertices,vertsGen,GetVertex
@@ -486,6 +488,18 @@ Module[
 ];
 VerticesForNPointFunction[___] :=
 Utils`AssertOrQuit[False,VerticesForNPointFunction::errUnknownInput];
+
+GetClassRules::usage=
+"@brief Gives GenericField->SARAHField rules for given NPF object.
+@param NPF object.
+@returns List of GenericField->SARAHField rules for given NPF object";
+GetClassRules::errUnknownInput=
+"Input should be NPF object and not
+`1`.";
+GetClassRules[NPFPattern["Sums"->genSums_,"ClFields"->classFields_]] :=
+MapThread[Function[r,MapThread[Rule,{#1,r}]]/@#2&,{Last/@genSums,classFields}];
+GetClassRules[args___] :=
+Utils`AssertOrQuit[False,GetClassRules::errUnknownInput,{args}];
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -700,7 +714,7 @@ this function.
 @param npfObject NPF object to clean.
 @returns cleaned from empty GenericSums npfObject.";
 RemoveEmptyGenSums::errUnknownInput=
-   RemoveEmptyGenSums::usage
+"Input should be NPF object.";
 RemoveEmptyGenSums[npfObject:NPFPattern[]]:=npfObject;
 RemoveEmptyGenSums[
    {fields:{{__},{__}},
@@ -830,7 +844,10 @@ where
  options have names from list 
   `1`.";
 CreateCXXFunctions[
-   nPointFunctions_,names_,colourProjectors_,opts:OptionsPattern[]
+   nPointFunctions_,
+   names_,
+   colourProjectors_,
+   opts:OptionsPattern[]
 ] :=
 Module[
    {
@@ -1036,8 +1053,8 @@ CXXClassForNPF::errUnknownInput=
 CXXClassForNPF[
    nPointFunction:NPFPattern[
       "Sums"->genSums_,
-      "ClRules"->genRules_,
       "CombFac"->combFac_,
+      "ClFields"->clFields_,
       "ColFac"->colFac_,
       "Subs"->subexpressions_],
    projCol_,
@@ -1048,9 +1065,7 @@ Module[
       extIndices = ExternalIndicesNPF@nPointFunction,
       numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
       cxxCorrelationContext,
-      numOfIndices,
-      genericSumPositions,
-      genFields = DeleteDuplicates[Flatten@genRules /. Rule[x_, _] :> x],
+      genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_, _] :> x],
       genSumNames = Array[
          StringTemplate@"genericSum`1`",
          Length@genSums],
@@ -1062,35 +1077,38 @@ Module[
       noFermionChains = TrueQ[Length@fermionBasis === 0],
       code
    },
-   numOfIndices = Length@extIndices;
-   genericSumPositions = Position[genSums, GenericSum[__]];
 
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
 
    cxxSubexpressions = CXXCodeForSubexpressions[subexpressions, preCXXRules];
 
    genericSumCode = StringRiffle[MapThread[
-      CXXCodeForGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
-         {genSums,genRules,combFac,ExtractColourFactor[colFac,projCol],genSumNames}],
+      CXXGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
+         {
+            genSums,
+            clFields,
+            combFac,
+            ExtractColourFactor[colFac,projCol],
+            genSumNames
+         }],
       "\n\n"];
 
    cxxExpr = StringRiffle[#<>If[noFermionChains,"()","().at(i)"]&/@genSumNames,"+"];
 
    cxxCorrelationContext = StringTemplate[
-      "correlation_function_context<`1`,`2`>"][numOfIndices,numberOfMomenta];
+      "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
    
-   code = "class `CLASS_NAME` : public `CONTEXT`
-   {
+   code = "class `CLASS_NAME` : public `CONTEXT` {
       using generic_sum_base = `CONTEXT`;
-      template<class GenericFieldMap> struct subexpression_base :
-      generic_sum_base, index_map_interface<GenericFieldMap>
-      {
+      template<class GenericFieldMap>
+      struct subexpression_base :
+      generic_sum_base, index_map_interface<GenericFieldMap> {
          subexpression_base( const subexpression_base & ) = default;
          subexpression_base( const generic_sum_base &gsb, 
             const typename field_index_map<GenericFieldMap>::type &fim ) :
          generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )  
          {}
-      };
+      }; // subexpression_base<GenericFieldMap>
       `KEY_STRUCTS`
       `SUBEXPRESSIONS`
       `GENERIC_SUMS`
@@ -1213,26 +1231,22 @@ CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
 CXXGenFieldName[___] :=
    Utils`AssertOrQuit[False,CXXGenFieldName::errUnknownInput];
 
-CXXFieldName::usage=
-"@brief Given a (possibly conjugated) external field, return its c++ type.
-@param the given generic field
-@returns the name of the c++ type for a (possibly conjugate) field.
-@note functions saves its unique previous calls to improve the speed of
-calculations.";
+CXXFieldName::usage = 
+"@brief Given an explicit field (possibly conjugated), returns its c++ representation.
+@param The given generic field
+@returns String Name of the c++ representation for a field (possibly conjugate).";
 CXXFieldName::errUnknownInput=
-"Input should be head@Field[{___}], with head bar, conj or nothing";
+"Input should be either head@fieldName[{___}] or head@fieldName
+with head being \"SARAH`.`bar\", \"Susyno`.`LieGroups`.`conj\" or nothing and not:
+CXXFieldName@@`1`";
 CXXFieldName[SARAH`bar[head_]] :=
-   CXXFieldName[SARAH`bar[head]] =
    StringJoin["typename bar<",CXXFieldName@head,">::type"];
 CXXFieldName[Susyno`LieGroups`conj[head_]] :=
-   CXXFieldName[Susyno`LieGroups`conj[head]] =
-   StringTemplate["typename conj<`1`>::type"][CXXFieldName@head];
-CXXFieldName[head_] :=
-   CXXFieldName[head] =
-   CXXDiagrams`CXXNameOfField[Vertices`StripFieldIndices@head,
-      CXXDiagrams`Private`prefixNamespace->"fields"];
-CXXFieldName[___] :=
-   Utils`AssertOrQuit[False,CXXFieldName::errUnknownInput];
+   StringJoin["typename conj<",CXXFieldName@head,">::type"]
+CXXFieldName[fieldName_Symbol[_?VectorQ] | fieldName_Symbol] :=
+   StringJoin["fields::",SymbolName@fieldName];
+CXXFieldName[x___] :=
+   Utils`AssertOrQuit[False,CXXFieldName::errUnknownInput,{x}];
 
 CXXFieldIndices::usage=
 "@brief Return the c++ expression for the container of the indices of a given
@@ -1328,11 +1342,15 @@ Module[
 CXXGenFieldKey::usage=
 "@brief Given a generic field, determine its key type used in the c++ code to
 uniquely label it.
-@param genericField the given generic field
-@returns its c++ key type.";
+@param genericField given generic field.
+@param {genericField..} given generic fields.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns c++ key type of a generic field(s).";
+CXXGenFieldKey[fields:{__}, ind_String:""] :=
+   StringRiffle[CXXGenFieldKey/@fields,", "];
 CXXGenFieldKey[head_[GenericIndex[index_Integer]]] :=
-   CXXGenFieldKey[head[GenericIndex[index]]] =
-   ToString[head]<>ToString[index]<>"Key";
+   ToString@head<>ToString@index<>"Key";
+SetAttributes[CXXGenFieldKey,{Protected,Locked}]
 
 CXXCodeSubsIfSubs::usage=
 "@brief Generates required c++ code for subexpression if other subexpressions
@@ -1407,7 +1425,7 @@ If[projection === Identity,
    Map[Coefficient[#, projection]&,colourfactors,{2}]
 ];
 
-CXXCodeForGenericSum::usage=
+CXXGenericSum::usage=
 "@brief Create the c++ code encoding a given sum over generic fields.
 @param sum the sum over generic fields
 @param genericInsertions the list of field insertions to be summed over
@@ -1422,33 +1440,75 @@ before calling ``Parameters`ExpressionToString[]`` for the c++
 translation.
 @returns the c++ code encoding the given sum over generic fields.
 @note the most time consuming procedure.";
-CXXCodeForGenericSum::errColours=
+CXXGenericSum::errColours=
 "Colour factor is not a number after projection: `1`";
-CXXCodeForGenericSum[
-   sum_GenericSum,genericInsertions_List,combinatorialFactors_List,
+CXXGenericSum[
+   sum:GenericSum[expr_,genericFields_],
+   genericInsertions_List,combinatorialFactors_List,
    colourFactors_List,genSumName_String,subexpressions_List,preCXXRules_List,
    fermionBasis_:{}] :=
 Module[
    {
-      expr = First@sum,
-      indices = Last@sum,
-      names = First/@subexpressions,
-      flatGenIns = Part[Map[SortBy[#,First]&,genericInsertions],All,All,2],
-      genericFields,
-      relevantSubs,
-      needsContext, cxxExpr, ReRatioColourFactors, ImRatioColourFactors,
-      wilsonCoeffs,
-      fbQ = fermionBasis =!= {}
-   },
-   ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors;
-   ImRatioColourFactors = {Numerator@#,Denominator@#} &/@ Im@colourFactors;
-   
-   relevantSubs = DeleteDuplicates@Cases[expr,Alternatives@@names,Infinity];
-   needsContext = Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]];
+      type = If[fermionBasis =!= {},
+         StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis],
+         "std::complex<double>"],
+      context = If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
+         "const context_with_vertices &context = *this;",
+         "// This GenericSum does not depend on couplings or masses"],
+      storage = If[fermionBasis =!= {},
+         StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis,     (* Fermion basis is supposed to contain strings! S*)
+         "std::complex<double> value = 0.0;"],
+      cxxExpr,wilsonCoeffs,generatedCode,
+      code = "
+      template<class GenericFieldMap>
+      struct @GenericSum_NAME@_impl : generic_sum_base {
+         @GenericSum_NAME@_impl( const generic_sum_base &base ) : 
+         generic_sum_base( base ) {
+         } // End of constructor @GenericSum_NAME@_impl
 
+         @ReturnType@ operator()( void ) {
+            using boost::mpl::at;
+            using boost::fusion::at_key;
+            @GenericFieldShortNames@
+
+            typename field_index_map<GenericFieldMap>::type index_map;
+            @InitializeSubstitutions@
+            @InitializeContext@
+            @InitializeOutputVars@
+
+            // Start of summation over generic fields
+            @StartSumOverGenFields@
+               @ChangeOutputVars@
+            @EndSumOverGenFields@
+
+            return @OutputVars@;
+         } // End of operator()( void )
+      }; // End of struct @GenericSum_NAME@_impl<GenericFieldMap>
+
+      @ReturnType@ @GenericSum_NAME@( void ) {
+         using GenericKeys = boost::mpl::vector< @GenericKeys@ >;
+         using GenericInsertions = boost::mpl::vector<
+            @ClassInsertions@
+            >;
+         using combinatorial_factors = boost::mpl::vector<
+            @CombinatoricalFactors@
+            >;
+         using colour_factors = boost::mpl::vector<
+            @ColorFactors@
+            >;
+         return accumulate_generic<
+            GenericKeys,
+            GenericInsertions,
+            combinatorial_factors,
+            colour_factors,
+            @FermionBasisMETALength@,
+            @GenericSum_NAME@_impl
+            >( *this );
+      } // End of function @GenericSum_NAME@()"
+   },
    If[Length[fermionBasis] =!= 0,
       Utils`AssertWithMessage[Length[fermionBasis] === Length[expr],            (*what about fermion chains inside subexpressions?*)
-        "CXXCodeForGenericSum[]: the length of the provided basis
+        "CXXGenericSum[]: the length of the provided basis
          and the coefficients does not match."                                  (*how could we know a priori the length of the basis for a given amplitude*)
       ];
       cxxExpr = Map[Parameters`ExpressionToString[
@@ -1460,101 +1520,196 @@ Module[
          Parameters`ExpressionToString[Fold[ReplaceAll,expr,preCXXRules]],
          "\""->""];
    ];
-   
-   genericFields = Sort[#1@GenericIndex@#2]&@@@indices;                         (*@todo normal summation indices for NPF class the remove this here*)
-
-   StringTemplate[
-      "template<class GenericFieldMap> struct `1`_impl : generic_sum_base
+   generatedCode = If[fermionBasis =!= {},StringJoin[wilsonCoeffs],"value += " <> cxxExpr<>";"];
+   stringReplaceWithIndent[code,
       {
-         `1`_impl( const generic_sum_base &base ) : generic_sum_base( base )
-         {}
-         `2` operator()( void ) // complex or array
-         {
-            using boost::mpl::at;
-            using boost::fusion::at_key;
-            `3` // name-key expressions
-            typename field_index_map<GenericFieldMap>::type index_map;
-            `4` // substitutions
-            `5` // context
-            `6` // initial value definitions
-            `7` // start for summation over generic fields
-               `8` // change initial values
-            `9` // close summation brakets
-            return `10`
-         }
-      };
-      
-      `11` `1`( void )
-      {
-         using GenericKeys = boost::mpl::vector<`12`>;
-         using GenericInsertions = boost::mpl::vector<`13`>;
-         using combinatorial_factors  = boost::mpl::vector<`14`>;
-         using colour_factors = boost::mpl::vector<`15`>;
-         `16`
-         return accumulate_generic<`17`, `1`_impl>( *this );
+         "@GenericSum_NAME@"->genSumName,
+         "@ReturnType@"->type,
+         "@GenericFieldShortNames@"->CXXCodeNameKey@genericFields,
+         "@InitializeSubstitutions@"->CXXSubsInGenericSum[sum,subexpressions],
+         "@InitializeContext@"->context,
+         "@InitializeOutputVars@"->storage,
+         "@StartSumOverGenFields@"->CXXBeginSum@genericFields,
+         "@ChangeOutputVars@"->stringGeneratedCut[generatedCode,70,","],
+         "@EndSumOverGenFields@"->CXXEndSum@genericFields,
+         "@OutputVars@"->"value" (* @todo If[fbQ,ToString[fermionBasis],"value"] *),
+         "@GenericKeys@"->CXXGenFieldKey@genericFields,
+         "@ClassInsertions@"->CXXClassInsertions@genericInsertions,
+         "@CombinatoricalFactors@"->CXXFactorInsertions@combinatorialFactors,
+         "@ColorFactors@"->CXXColourInsertions@colourFactors,
+         "@FermionBasisMETALength@"->CXXFermionMetaLength@fermionBasis
       }
-      "][
-      genSumName,
-      If[fbQ,StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis],"std::complex<double>"],
-      CXXCodeNameKey@genericFields,
-      If[relevantSubs === {},"",StringRiffle[StringTemplate["`1`<GenericFieldMap> `1`_{ *this, index_map };"]/@relevantSubs,"\n"]],
-      If[needsContext,"const context_with_vertices &context = *this;",""],
-      If[fbQ,StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis, (*fermion basis is supposed to contain strings!*)
-         "std::complex<double> value = 0.0;"],
-      CXXCodeBeginSum@genericFields,
-      If[fbQ,StringJoin[wilsonCoeffs],"value += " <> cxxExpr <> ";\n"],
-      StringJoin[Array["}"&,Length@indices]],
-      If[fbQ,ToString[fermionBasis] <> ";","value;"],
-      If[fbQ,"std::array<std::complex<double>, 2>","std::complex<double>"],
-      StringRiffle[CXXGenFieldKey/@genericFields,", "],
-      StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@flatGenIns,",\n"],
-      StringRiffle[StringTemplate["boost::mpl::int_<`1`>"]/@combinatorialFactors,", "],
-      StringRiffle[
-      StringReplace["detail::complex_helper<detail::ratio_helper<"
-        <> ToString[#1] <> ">, detail::ratio_helper<" <> ToString[#2] <> ">>" & @@@
-        Transpose[{ReRatioColourFactors, ImRatioColourFactors}], {"{" -> "", "}" -> ""}],
-      ", "],
-      If[fbQ,StringTemplate["using wilsoncoeffs_length = boost::mpl::int_<`1`>;"][Length@fermionBasis],""],
-      If[fbQ,
-         "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors, wilsoncoeffs_length",
-         "GenericKeys, GenericInsertions, combinatorial_factors, colour_factors"]
-      ]
+   ]
 ] /; And[
    MatchQ[colourFactors,
       {__?(Utils`AssertOrQuit[NumberQ@#,
-         CXXCodeForGenericSum::errColours,
+         CXXGenericSum::errColours,
          #]&
       )}]
 ];
 
+stringReplaceWithIndent::usage =
+"@brief Function for smart c++ code replacements with indents. If replacement
+rule contain a f[args___], then this function automatically makes it
+f[args___,ind], where ind is responsible for an indent.
+@param str String with tokens of arbitrary form, specified in the second
+argument.
+@param rules List of Rule[String,_] where on the lhs of rule there are tokens.
+@note rules are supposed to return a String.";
+stringReplaceWithIndent[
+   str_?(StringMatchQ[#,"\n"~~__]&),
+   rules:{Rule[_String,_]..}
+] :=
+Module[
+   {
+      tokens = rules[[All,1]],
+      holdRules = Hold/@Unevaluated@rules,
+      evaluatedRules = rules,
+      generalIndent = StringCases[str,"\n"~~" "...,1],
+      lines,now = 1,
+      pmt, (* Potentially multiline token *)
+      currentRule,currentIndent,modifiedRule
+   },
+   lines = StringSplit[str,generalIndent];
+   Do[
+      If[StringMatchQ[lines[[now]],___~~Alternatives@@tokens~~___],             (* Do we have tokens in the current line? *)
+         pmt = StringCases[
+            lines[[now]],
+            StartOfString~~" "...~~tok:Alternatives@@tokens:>tok];
+         If[pmt =!= {},
+            pmt = pmt[[1]];
+            currentRule = holdRules[[ Position[tokens,pmt][[1]] ]];
+            If[MatchQ[currentRule, {Hold@Rule[_, _[___]]}],                     (* Is token multiline? *)
+               currentIndent = StringCases[lines[[now]]," "...,1][[1]];
+               modifiedRule = currentRule /.
+                  Hold@Rule[t_,f_[args___]] :> Rule[t,f[args,currentIndent]];
+               lines[[now]] = StringReplace[lines[[now]],modifiedRule];
+            ];
+         ];
+      lines[[now]] = StringReplace[lines[[now]], evaluatedRules];
+      ];
+      now ++;,
+      Length@lines
+   ];
+   StringRiffle[lines,"\n"]
+];
+SetAttributes[stringReplaceWithIndent,{Protected,Locked,HoldRest}];
+
+stringGeneratedCut::usage =
+"@brief Function for dummy c++ code cut. It cuts string to a maximal possible
+ones with length+ind for a given delSymb symbol and then join them.
+@param string String String to cut.
+@param length Integer Number which approximately corresponds to output width.
+@param del String which corresponds to a symbol to delete.
+@param ind (def. \"\") string which is responsible for an indent of code.";
+stringGeneratedCut[string_String,length_Integer,del_String,ind_String:""] :=
+Module[
+   {
+      strs = StringSplit[string, del],
+      f,initSet,numbers,dirtyStrings,cleanStrings
+   },
+   f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] /; i1+i2<length :=
+      f[{{n1,n2},i1+i2}];
+   f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] :=
+      f[{{n1},i1},{{n2},n2}];
+   f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] /; sum+i2<length :=
+      f[in,{{nums,n2},sum+i2}];
+   f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] := 
+      f[in,{{nums},sum},{{n2},i2}];
+   initSet=Transpose[{Array[#&,Length@strs],StringLength/@strs}];
+   numbers = ReplaceAll[First/@Fold[f,initSet],f->List];
+   dirtyStrings = StringJoin[StringRiffle[strs[[#]],del]] &/@ numbers;
+   cleanStrings = StringReplace[#, StartOfString~~" "...~~x___:>x] &/@ dirtyStrings;
+   StringRiffle[cleanStrings,del<>"\n"<>ind]
+];
+SetAttributes[stringGeneratedCut,{Protected,Locked}];
+
 CXXCodeNameKey::usage =
-"@brief Generates c++ code for name-key pairs used inside generic sums.
-@param genFields:{...} list of presenting generic fields.
-@returns c++ code for name-key pairs used inside generic sums.";
+"@brief Generates c++ code for type abbreviations stored in GenericFieldMap
+(Associative Sequence) at Key positions.
+@param genFields:{..} list of presenting generic fields.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for type abbreviations stored in GenericFieldMap
+(Associative Sequence) at Key positions.";
 CXXCodeNameKey::errUnknownInput =
-   CXXCodeNameKey::usage;
-CXXCodeNameKey[genFields:{__?IsGenericField}] :=
+"Input should be
+CXXCodeNameKey@@{ {<generic Field>..}, <string> }
+and not:
+CXXCodeNameKey@@`1`";
+CXXCodeNameKey[genFields:{__?IsGenericField},ind_String:""] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
       {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
-      {1}],"\n"];
-CXXCodeNameKey[___]:=
-   Utils`AssertOrQuit[False,CXXCodeNameKey::errUnknownInput];
+      {1}],"\n"<>ind];
+CXXCodeNameKey[x___]:=
+   Utils`AssertOrQuit[False,CXXCodeNameKey::errUnknownInput,{x}];
+SetAttributes[CXXCodeNameKey,{Protected,Locked}];
 
-CXXCodeBeginSum::usage =
-"@brief Generates c++ code for sum beginning used inside generic sums.
+CXXSubsInGenericSum::usage =
+"@brief If the give GenericSum depends on some subexpressions, then generates
+code for their initialization.
+@param GenericSum[_,_] GenericSum expression.
+@param subs List of substitution rules for NPF object.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for initialization of subexpressions if they are
+present in given GenericSum.";
+CXXSubsInGenericSum::errUnknownInput =
+"Input should be 
+CXXSubsInGenericSum@@{ GenericSum[_,_], {<rule>..}, <string> }
+and not:
+CXXSubsInGenericSum@@`1`";
+CXXSubsInGenericSum[GenericSum[expr_,_],subs:{Rule[_,_]...},ind_String:""]:=
+Module[
+   {
+      relevantSubs = DeleteDuplicates@Cases[expr,Alternatives@@First/@subs,Infinity]
+   },
+   If[relevantSubs === {},
+      "// This GenericSum does not depend on subexpressions",
+      StringRiffle[StringTemplate[
+         "`1`<GenericFieldMap> `1`_ { *this, index_map };"]/@relevantSubs,
+         "\n"<>ind]]
+];
+CXXSubsInGenericSum[x___]:=
+   Utils`AssertOrQuit[False,CXXSubsInGenericSum::errUnknownInput,{x}];
+SetAttributes[CXXSubsInGenericSum,{Protected,Locked}];
+
+CXXBeginSum::usage =
+"@brief Generates c++ code for sum beginning used inside GenericSum.
 @param genFields:{...} list of presenting generic fields.
-@returns c++ code for sum beginning used inside generic sums.";
-CXXCodeBeginSum::errUnknownInput =
-   CXXCodeBeginSum::usage;
-CXXCodeBeginSum[genFields:{__?IsGenericField}]:=
-      StringRiffle[
-         "for( const auto &" <> CXXFieldIndices[#] <> " : " <>
-         "index_range<" <> CXXGenFieldName[#] <> ">() ) {\n" <>
-         "at_key<" <> CXXGenFieldKey[#] <> ">( index_map ) = " <>
-         CXXFieldIndices[#] <> ";" &/@genFields, "\n"];
-CXXCodeBeginSum[___]:=
-   Utils`AssertOrQuit[False,CXXCodeBeginSum::errUnknownInput];
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for sum beginning used inside generic sums.";
+CXXBeginSum::errUnknownInput =
+"Input should be 
+CXXBeginSum@@{ {<generic_field>..}, <string> }
+and not:
+CXXBeginSum@@`1`";
+CXXBeginSum[genFields:{__?IsGenericField},ind_String:""]:=
+   StringRiffle[StringJoin[
+      "for( const auto &",CXXFieldIndices@#," : ","index_range<",
+      CXXGenFieldName@#,">() ) {","\n",ind,"at_key<",CXXGenFieldKey@#,
+      ">( index_map ) = ",CXXFieldIndices@#,";"] &/@genFields,
+      "\n"<>ind];
+CXXBeginSum[x___]:=
+   Utils`AssertOrQuit[False,CXXBeginSum::errUnknownInput,{x}];
+SetAttributes[CXXBeginSum,{Protected,Locked}];
+
+CXXEndSum::usage =
+"@brief Generates c++ code for end of sum over generic fields inside GenericSum.
+@param genFields:{...} list of presenting generic fields.
+@param ind (def. \"\") dummy string variable.
+@returns String c++ code for end of sum over generic fields inside GenericSum.";
+CXXEndSum::errUnknownInput =
+"Input should be 
+CXXEndSum@@{ {<generic_field>..}, <string> }
+and not:
+CXXEndSum@@`1`";
+CXXEndSum[genFields:{__?IsGenericField},_String:""] :=
+   StringJoin[
+      Array["}"&,Length@genFields],
+      " // End of summation over generic fields"];
+CXXEndSum[x___]:=
+   Utils`AssertOrQuit[False,CXXEndSum::errUnknownInput,{x}];
+SetAttributes[CXXEndSum,{Protected,Locked}];
 
 CXXCodeFunCalculate::usage =
 "@brief Generates c++ code for functions which return result of generic sum
@@ -1562,7 +1717,7 @@ calculation
 @param cxxExpr string with sums of generic sums.
 @param initializeSums string with initializations of
 @param fermionBasisLength integer length of fermion basis
-@returns c++ code for sum beginning used inside generic sums.";
+@returns String c++ code for sum beginning used inside generic sums.";
 CXXCodeFunCalculate::errUnknownInput =
    CXXCodeFunCalculate::usage;
 CXXCodeFunCalculate[
@@ -1584,6 +1739,85 @@ If[TrueQ[fermionBasisLength === 0],
 ];
 CXXCodeFunCalculate[___]:=
    Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput];
+
+CXXClassInsertions::usage =
+"@brief Generates c++ code for class insertions inside GenericSum.
+@param genInsertions list of list with SARAH particle names.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for class insertions inside GenericSum.";
+CXXClassInsertions::errUnknownInput =
+"Input should be 
+CXXClassInsertions@@{ {{<SARAH_field>..}..}, <string> }
+and not:
+CXXClassInsertions@@`1`";
+CXXClassInsertions[genInsertions:{{__}..},ind_String:""] := 
+   StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@genInsertions,",\n"<>ind];
+CXXClassInsertions[x___]:=
+   Utils`AssertOrQuit[False,CXXClassInsertions::errUnknownInput,{x}];
+SetAttributes[CXXClassInsertions,{Protected,Locked}];
+
+CXXFactorInsertions::usage =
+"@brief Generates c++ code for combinatorical factor insertions inside GenericSum.
+@param combinatorialFactors list of integers.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for combinatorical factor insertions inside GenericSum.";
+CXXFactorInsertions::errUnknownInput =
+"Input should be 
+CXXFactorInsertions@@{ {<integer>..}, <string> }
+and not:
+CXXFactorInsertions@@`1`";
+CXXFactorInsertions[combinatorialFactors:{__Integer},ind_String:""] := 
+   StringRiffle["boost::mpl::int_<"<>ToString@#<>">"&/@combinatorialFactors,",\n"<>ind];
+CXXFactorInsertions[x___]:=
+   Utils`AssertOrQuit[False,CXXFactorInsertions::errUnknownInput,{x}];
+SetAttributes[CXXFactorInsertions,{Protected,Locked}];
+
+CXXColourInsertions::usage =
+"@brief Generates c++ code for colour factor insertions inside GenericSum.
+@param colourFactors list of numbers.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for colour factor insertions inside GenericSum.";
+CXXColourInsertions::errUnknownInput =
+"Input should be 
+CXXColourInsertions@@{ {<number>..}, <string> }
+and not:
+CXXColourInsertions@@`1`";
+CXXColourInsertions[colourFactors:{__?NumberQ},ind_String:""] :=
+Module[
+   {
+      ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors,
+      ImRatioColourFactors = {Numerator@#,Denominator@#} &/@ Im@colourFactors
+   },
+   StringRiffle[
+      StringReplace[
+         MapThread[
+            "detail::complex_helper<"<>
+            "detail::ratio_helper<"<>ToString@#1<>">,"<>
+            "detail::ratio_helper<"<>ToString@#2 <> ">>"&,
+            {ReRatioColourFactors, ImRatioColourFactors}],
+         {"{" -> "", "}" -> ""}],
+   ",\n"<>ind]
+];
+CXXColourInsertions[x___]:=
+   Utils`AssertOrQuit[False,CXXColourInsertions::errUnknownInput,{x}];
+SetAttributes[CXXColourInsertions,{Protected,Locked}];
+
+CXXFermionMetaLength::usage =
+"@brief Generates c++ short name for the length of fermion basis.
+@param fermionBasis list of fermion chains.
+@param ind (def. \"\\n\") dummy string.
+@returns String c++ short name for the length of fermion basis.";
+CXXFermionMetaLength::errUnknownInput =
+"Input should be 
+CXXFermionMetaLength@@{ {...}, <string> }
+and not:
+CXXFermionMetaLength@@`1`";
+CXXFermionMetaLength[fermionBasis:{___},ind_String:"\n"] :=
+If[fermionBasis==={},"// There are no fermion chains in this GenericSum: skipping "]<>
+"boost::mpl::int_<"<>ToString@Length@fermionBasis<>">";
+CXXFermionMetaLength[x___]:=
+   Utils`AssertOrQuit[False,CXXFermionMetaLength::errUnknownInput,{x}];
+SetAttributes[CXXFermionMetaLength,{Protected,Locked}];
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],
@@ -1648,11 +1882,11 @@ SetAttributes[
    GetLTToFSRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,CXXFieldName,
-   IsGenericField,CXXGenFieldKey*)
+   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,*)CXXFieldName,(*
+   IsGenericField*)
    CXXCodeSubsIfSubs,CXXCodeSubsIfGen,CXXCodeSubsIfContext,
-   ExtractColourFactor,CXXCodeForGenericSum,
-   CXXCodeNameKey,CXXCodeBeginSum,CXXCodeFunCalculate
+   ExtractColourFactor,CXXGenericSum,
+   CXXCodeFunCalculate
    }, 
    {Protected, Locked}];
 
