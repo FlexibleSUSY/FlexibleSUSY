@@ -1630,6 +1630,7 @@ Module[
       strs = StringSplit[string, del],
       f,initSet,numbers,dirtyStrings,cleanStrings
    },
+   If[Length@strs==1,Return@string];
    f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] /; i1+i2<length :=
       f[{{n1,n2},i1+i2}];
    f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] :=
