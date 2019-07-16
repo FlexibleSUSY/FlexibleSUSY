@@ -222,16 +222,17 @@ Module[
       optionNames=Options[NPFPattern][[All,1]],
       unknownOptions,
       currentOptionValues,
-      CheckValue
+      ConvertValue,CheckValue
    },
    unknownOptions = FilterRules[{opts},Except@optionNames];
    Utils`AssertOrQuit[unknownOptions === {},NPFPattern::errUnknownOptions,
       unknownOptions,"\""<>#<>"\""&/@optionNames];
    currentOptionValues = OptionValue[NPFPattern,#]&/@optionNames;
-   CheckValue[arg_] := If[#==={Null},False,Symbol===Head@ToExpression[#[[1]]]]&@
-      StringCases[ToString@arg,x___~~"_"~~EndOfString:>x];
+   ConvertValue = StringCases[ToString@#,x___~~"_"~~EndOfString:>x]&;
+   CheckValue[{str_String}] := Symbol===Head@ToExpression@str;
+   CheckValue[___] := False;
    Utils`AssertOrQuit[
-      CheckValue@#,
+      CheckValue@ConvertValue@#,
       NPFPattern::errWrongOptionValue,#]&/@currentOptionValues;
    True
 ];
