@@ -25,6 +25,8 @@ Utils`AssertWithMessage[MemberQ[$Packages, "FeynArts`"],
    "NPointFunctions`: Unable to load FeynArts` package"];
 Utils`AssertWithMessage[MemberQ[$Packages, "FormCalc`"],
    "NPointFunctions`: Unable to load FormCalc` package"];
+FeynArts`$FAVerbose = 1;                                                        (* Change this to 2 to see more output (1 - less) *)
+FormCalc`$FCVerbose = 0;                                                        (* Change this to 1,2 or 3 to see more output *)
 
 SetFAFCPaths::usage=                                                            (* functions *)
 "@brief Set the FeynArts and FormCalc paths.
@@ -398,7 +400,7 @@ Module[
    {
       excludedTopologies = OptionValue[ExcludedTopologies] /.
          {
-            OneParticleReducible -> FeynArts`Irreducible,
+            OneParticleReducible -> FeynArts`Reducible,
             ExceptTriangles -> FeynArts`Loops@Except@3,
             ExceptBoxes -> FeynArts`Loops@Except@4
          },
@@ -417,6 +419,11 @@ Module[
       inFields -> outFields,
       InsertionLevel -> Classes,
       Model -> feynArtsModel];
+      
+   Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
+      FeynArts`PaintLevel->{Generic},
+      FeynArts`SheetHeader->"GenericSum",
+      FeynArts`Numbering->FeynArts`Simple]];                                    (* @todo remove *)
       
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
 
@@ -583,17 +590,17 @@ Module[
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
 
-   calculatedAmplitudes =
-      (
-         FormCalc`CalcFeynAmp[Head[ampsGen][#],
-            FormCalc`Dimension -> Switch[regularizationScheme,
-               DimensionalReduction, 4,
-               DimensionalRegularization, D],
-            FormCalc`OnShell -> onShellFlag,
-            FormCalc`FermionChains -> Chiral,
-            FormCalc`Invariants -> False
-         ] & /@ ampsGen
-      ) //. FormCalc`GenericList[];
+   Print["FORM calculation started ..."];
+   calculatedAmplitudes = applyAndPrint[
+      FormCalc`CalcFeynAmp[Head[ampsGen][#],
+         FormCalc`Dimension -> Switch[regularizationScheme,
+            DimensionalReduction, 4,
+            DimensionalRegularization, D],
+         FormCalc`OnShell -> onShellFlag,
+         FormCalc`FermionChains -> Chiral,
+         FormCalc`Invariants -> False]&,
+      ampsGen] //. FormCalc`GenericList[];
+   Print["FORM calculation done."];
 
    calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
@@ -610,6 +617,32 @@ Module[
    FCAmplitudesToFSConvention[
       {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
+];
+
+applyAndPrint[func_,expr_,defLength_Integer:70] :=
+Module[
+   {
+      now = 1,
+      totL = Length@expr,
+      write,
+      percent,
+      numOfEq,
+      restL
+   },
+   restL=defLength-2*IntegerLength@totL-11;
+   write[args__] := WriteLine[OutputStream["stdout", 1],args];
+   Reap[
+      Do[
+      percent = now/totL;
+      numOfEq = If[#<0,0,#]&[ Floor[percent*restL]-1 ];
+      write[StringJoin[
+         "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
+         "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
+      Sow@func[ expr[[now]] ];
+      write@"\033[A\033[K\033[A\033[A\033[K\033[A\033[A\033[A";
+      now++;
+      ,totL]
+   ][[2,1]]
 ];
 
 CombinatorialFactorsForClasses::usage=
