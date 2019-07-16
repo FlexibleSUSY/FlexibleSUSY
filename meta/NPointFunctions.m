@@ -480,16 +480,16 @@ VerticesForNPointFunction[obj:NPFPattern[
 Module[
    {
       classRules = GetClassRules@obj, 
-      positionsOfVertInSubs =
-         DeleteDuplicates[#[[1]] & /@ Position[substitutions, SARAH`Cp[__]]], 
-      rulesWithVertices,vertsGen,GetVertex
+      positionsSubsWithVert =
+         DeleteDuplicates[#[[1]] &/@ Position[substitutions, SARAH`Cp[__]]], 
+      rulesWithVertices,vertsGen,GetVertex,
+      StripIndices = Vertices`StripFieldIndices
    },
-   rulesWithVertices = substitutions[[positionsOfVertInSubs]];
-   GetVertex[vertGen:{{__}..},rules:{{Rule[_,_]..}..}] := vertGen/.# &/@ rules;
+   rulesWithVertices = substitutions[[positionsSubsWithVert]];
+   GetVertex[vertGen_,rules_] := vertGen/.#&/@rules;
    vertsGen = DeleteDuplicates@Cases[#, SARAH`Cp[fields__] :> {fields},
       Infinity,Heads -> True] &/@ (genSums/.rulesWithVertices);
-   DeleteDuplicates@Flatten[
-      Vertices`StripFieldIndices@Thread[GetVertex[vertsGen, classRules]], 2]
+   DeleteDuplicates[StripIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
 VerticesForNPointFunction[___] :=
 Utils`AssertOrQuit[False,VerticesForNPointFunction::errUnknownInput];
@@ -1616,7 +1616,7 @@ Module[
    f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] /; i1+i2<length :=
       f[{{n1,n2},i1+i2}];
    f[{n1_Integer,i1_Integer},{n2_Integer,i2_Integer}] :=
-      f[{{n1},i1},{{n2},n2}];
+      f[{{n1},i1},{{n2},i2}];
    f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] /; sum+i2<length :=
       f[in,{{nums,n2},sum+i2}];
    f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] := 
@@ -1817,7 +1817,7 @@ CXXFermionMetaLength::errUnknownInput =
 CXXFermionMetaLength@@{ {...}, <string> }
 and not:
 CXXFermionMetaLength@@`1`";
-CXXFermionMetaLength[fermionBasis:{___},ind_String:"\n"] :=
+CXXFermionMetaLength[fermionBasis:{___},_String:"\n"] :=
 If[fermionBasis==={},"// There are no fermion chains in this GenericSum: skipping "]<>
 "boost::mpl::int_<"<>ToString@Length@fermionBasis<>">";
 CXXFermionMetaLength[x___]:=
