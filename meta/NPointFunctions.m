@@ -192,13 +192,12 @@ NPFPattern::errUnknownOptions =
 Currently supported options are:
 `2`.";
 NPFPattern::errWrongOptionValue =
-"Any option should have form symbolName_ or Blank[].";
+"Any option should have form symbolName_ or Blank[] and not
+`1`";
 NPFPattern::errUnknownInput = 
 "Correct input has the folliwing form:
-NPFPattern[options]
-where
- options have names from list
-  `1`.";
+NPFPattern[options] where options have names from list
+`1`.";
 NPFPattern[opts:OptionsPattern[]] :=
 Module[{names=Part[Options@NPFPattern,All,1],Convert},
    Convert[num_] := If[OptionValue@Part[names,num] === _,
@@ -217,19 +216,24 @@ Module[{names=Part[Options@NPFPattern,All,1],Convert},
          Convert@6 , "{Rule[_,_]...}" ,
       "}" ,
    "}"]]
-] /; And[
+] /; 
+Module[
+   {
+      optionNames=Options[NPFPattern][[All,1]],
+      unknownOptions,
+      currentOptionValues,
+      CheckValue
+   },
+   unknownOptions = FilterRules[{opts},Except@optionNames];
+   Utils`AssertOrQuit[unknownOptions === {},NPFPattern::errUnknownOptions,
+      unknownOptions,"\""<>#<>"\""&/@optionNames];
+   currentOptionValues = OptionValue[NPFPattern,#]&/@optionNames;
+   CheckValue[arg_] := If[#==={Null},False,Symbol===Head@ToExpression[#[[1]]]]&@
+      StringCases[ToString@arg,x___~~"_"~~EndOfString:>x];
    Utils`AssertOrQuit[
-      FilterRules[{opts},Except@Part[Options@NPFPattern,All,1]]==={},
-      NPFPattern::errUnknownOptions, 
-      FilterRules[{opts},Except@Part[Options@NPFPattern,All,1]], 
-      "\""<>#<>"\""&/@Part[Options@NPFPattern,All,1]],
-   Utils`AssertOrQuit[
-      And@@Map[StringMatchQ[
-         ToString@#,
-         ___?(Symbol === Head@ToExpression@#&) ~~ "_"]&,
-         Map[OptionValue[NPFPattern,#]&,
-            Part[Options@NPFPattern,All,1]]],
-      NPFPattern::errWrongOptionValue]
+      CheckValue@#,
+      NPFPattern::errWrongOptionValue,#]&/@currentOptionValues;
+   True
 ];
 NPFPattern[___] := 
 Utils`AssertOrQuit[
@@ -352,7 +356,7 @@ Module[
       WriteParticleNamespaceFile@particleNamespaceFile;
       CloseKernels@subKernel;
    ];
-
+   
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
    
    inFANames = FANamesForFields[inFields, particleNamesFile];
@@ -360,6 +364,7 @@ Module[
 
    currentPath = $Path;
    currentDirectory = Directory[];
+
    DistributeDefinitions[currentPath, currentDirectory,
       fsMetaDir, feynArtsDir, formCalcDir, feynArtsModel,
       particleNamesFile, substitutionsFile, particleNamespaceFile,
@@ -371,7 +376,7 @@ Module[
       SetDirectory@currentDirectory;
 
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
-
+      
       NPointFunctions`SetFAFCPaths[feynArtsDir, formCalcDir, feynArtsModel,
          particleNamesFile, substitutionsFile, particleNamespaceFile];
 
@@ -384,8 +389,7 @@ Module[
          OnShellFlag -> onShellFlag],
       subKernel
    ];
-
-   CloseKernels[subKernel];
+   CloseKernels@subKernel;
 
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
       NPointFunction::errCalc];
@@ -470,7 +474,7 @@ Utils`AssertOrQuit[
 ];
 
 VerticesForNPointFunction[obj:NPFPattern[
-   "Sums"->genSums_,"ClFields"->classFields_,"Subs"->substitutions_]
+   "Sums"->genSums_,"Subs"->substitutions_]
 ] :=
 Module[
    {
@@ -535,7 +539,7 @@ GetFASubstitutionsFileName[] :=
    StringJoin["Substitutions-",SARAH`ModelName,
      ToString@FlexibleSUSY`FSEigenstates,".m"
    ];
-
+   
 LaunchSubkernelFor::usage=
 "@brief Tries to launch a subkernel without errors.
 If it fails, tries to explain the reason using message for specifying its
@@ -721,7 +725,7 @@ RemoveEmptyGenSums[
       {
          {
             sums:{GenericSum[_,{___}]..},
-            rules:{{{Rule[_,_]..}..}..},
+            rules:{{{__}..}..},
             comb:{{__Integer}..},
             col:{{__}..}
          },
@@ -1346,7 +1350,7 @@ uniquely label it.
 @param {genericField..} given generic fields.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns c++ key type of a generic field(s).";
-CXXGenFieldKey[fields:{__}, ind_String:""] :=
+CXXGenFieldKey[fields:{__}, _String:""] :=
    StringRiffle[CXXGenFieldKey/@fields,", "];
 CXXGenFieldKey[head_[GenericIndex[index_Integer]]] :=
    ToString@head<>ToString@index<>"Key";
@@ -1364,7 +1368,7 @@ CXXCodeSubsIfSubs[subs:{__Symbol},str_String:""] :=
    StringRiffle[
       StringTemplate["`1`<GenericFieldMap> `1`_{ *this };"]/@subs,
       {str,"\n"<>str,""}];
-CXXCodeSubsIfSubs[subs:{},str_String:""] :=
+CXXCodeSubsIfSubs[{},str_String:""] :=
    str<>"// additional subexpressions are absent";
 CXXCodeSubsIfSubs[___] :=
    Utils`AssertOrQuit[False,CXXCodeSubsIfSubs::errUnknownInput];
@@ -1395,7 +1399,7 @@ Module[
    iLns=StringRiffle[MapThread[StringTemplate@iCommand,{names,keys}],"\n"<>str];
    StringTemplate[StringRiffle[mainCommands,{str,"\n"<>str,""}]][fLns,iLns]
 ];
-CXXCodeSubsIfGen[fields:{},str_String:""] :=
+CXXCodeSubsIfGen[{},str_String:""] :=
    str<>"// generic fields are absent";
 CXXCodeSubsIfGen[___] :=
    Utils`AssertOrQuit[False,CXXCodeSubsIfGen::errUnknownInput];
