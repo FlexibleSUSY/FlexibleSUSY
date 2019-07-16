@@ -51,12 +51,14 @@ hhSelfenergy = NPointFunctions`NPointFunction[
    NPointFunctions`ZeroExternalMomenta -> True,
    NPointFunctions`ExcludedTopologies -> NPointFunctions`OneParticleReducible];
 
-nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[];
+nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[
+   NPointFunctions`LoopFunctions->"FlexibleSUSY"];
 
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    {hhSelfenergy},
    {"selfenergy_hh_1loop"},
-   {Identity}][[2]];
+   {Identity},
+   NPointFunctions`LoopFunctions->"FlexibleSUSY"][[2]];
 
 (*VERTICES*********************************************************************)
 (*if some additional vetices exist, then get them*)
