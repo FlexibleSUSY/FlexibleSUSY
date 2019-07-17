@@ -70,16 +70,19 @@ namespace detail {
       };
    };
 
-   template<class GenericKeys, template<typename> class F,class StateVector>
+   template<class GenericKeys, template<typename> class F,class StateVector
+            >
    class accumulate_generic_impl {
       std::complex<double> &value;
       StateVector state;
 
       public:
       template<class ...Args>
-      accumulate_generic_impl( std::complex<double> &v, Args && ...args ) :
+      accumulate_generic_impl(
+         std::complex<double> &v,
+         Args && ...args ) :
       value( v ), state( std::forward<Args>( args )... ){
-      }
+      } // End of constructor
 
       template<class InsertionData>
       void operator()( InsertionData ) {
@@ -111,10 +114,13 @@ namespace detail {
             >
    accumulate_generic_impl<GenericFieldKeys, F,
       typename boost::fusion::result_of::make_vector<Args...>::type>
-   make_accumulate_generic_impl( std::complex<double> &v, Args &&... args ) {
+   make_accumulate_generic_impl(
+      std::complex<double> &v,
+      Args &&... args
+   ) {
       return accumulate_generic_impl<GenericFieldKeys, F,
-      typename boost::fusion::result_of::make_vector<Args...>::type
-      >{ v, std::forward<Args>( args )... };
+         typename boost::fusion::result_of::make_vector<Args...>::type
+         >{ v, std::forward<Args>( args )... };
    } // End of function make_accumulate_generic_impl
 
    template<class GenericFieldKey>
@@ -137,8 +143,8 @@ struct lorentz_scalar {}; // dummy struct
 struct lorentz_left {}; // dummy struct
 struct lorentz_right {}; // dummy struct
 struct lorentz_momentum_diff {
-  int minuend_index;
-  int subtrahend_index;
+   int minuend_index;
+   int subtrahend_index;
 }; // dummy struct
 struct lorentz_inverse_metric {}; // dummy struct
 struct triple_vector {}; // dummy struct
