@@ -1038,7 +1038,7 @@ version of a given n-point correlation function.
 version of a given n-point correlation function.";
 CXXClassNameNPF::errUnknownInput=
    ExternalIndicesNPF::errUnknownInput;
-CXXClassNameNPF[NPFPattern["Fields"->fields_]] :=
+CXXClassNameNPF[NPFPattern["Fields"->fields_],_String:""] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@fields},
    "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}]
 ];
@@ -1066,7 +1066,6 @@ CXXClassForNPF[
    fermionBasis_:{}] :=
 Module[
    {
-      className = CXXClassNameNPF@nPointFunction,
       extIndices = ExternalIndicesNPF@nPointFunction,
       numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
       cxxCorrelationContext,
@@ -1077,17 +1076,43 @@ Module[
       initializeSums = StringRiffle[Array[
          StringTemplate@"const auto genericsum`1` = genericSum`1`();",
          Length@genSums],"\n"],
-      genericSumCode, preCXXRules, cxxExpr,
-      cxxSubexpressions,
+      genericSumsCode, preCXXRules, cxxExpr,
       noFermionChains = TrueQ[Length@fermionBasis === 0],
-      code
+      DummyIndent,
+      code = "
+      class @ClassName@ : public @Context@ {
+         using generic_sum_base = @Context@;
+
+         template<class GenericFieldMap>
+         struct subexpression_base :
+         generic_sum_base, index_map_interface<GenericFieldMap> {
+            subexpression_base( const subexpression_base & ) = default;
+
+            subexpression_base( const generic_sum_base &gsb, 
+               const typename field_index_map<GenericFieldMap>::type &fim ) :
+            generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim ) {
+            }
+         }; // End of subexpression_base<GenericFieldMap>
+
+         @KeyStructsInitialization@
+
+         @Subexpressions@
+
+         @GenericSums@
+
+         public:
+         @ClassName@( @Arguments@ ) :
+         @Context@ { model, indices, momenta } {
+         }
+      
+         @CalculateFunction@
+      }; // End of @ClassName@"
    },
 
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
-
-   cxxSubexpressions = CXXCodeForSubexpressions[subexpressions, preCXXRules];
-
-   genericSumCode = StringRiffle[MapThread[
+   
+   DummyIndent[str_String,ind_String:""] := StringReplace[str,"\n"->"\n"<>ind];
+   genericSumsCode = StringRiffle[MapThread[
       CXXGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
          {
             genSums,
@@ -1102,38 +1127,34 @@ Module[
 
    cxxCorrelationContext = StringTemplate[
       "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
-   
-   code = "class `CLASS_NAME` : public `CONTEXT` {
-      using generic_sum_base = `CONTEXT`;
-      template<class GenericFieldMap>
-      struct subexpression_base :
-      generic_sum_base, index_map_interface<GenericFieldMap> {
-         subexpression_base( const subexpression_base & ) = default;
-         subexpression_base( const generic_sum_base &gsb, 
-            const typename field_index_map<GenericFieldMap>::type &fim ) :
-         generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim )  
-         {}
-      }; // subexpression_base<GenericFieldMap>
-      `KEY_STRUCTS`
-      `SUBEXPRESSIONS`
-      `GENERIC_SUMS`
-      public:
-      `CLASS_NAME`(`ARGS`) : `CONTEXT`{ model, indices, momenta }
-      {}
-      `CALCULATE_FUNC`
-   };";
-      
-   StringReplace[code,{
-   "`CLASS_NAME`"->className,
-   "`CONTEXT`"->cxxCorrelationContext,
-   "`KEY_STRUCTS`"->StringRiffle[StringTemplate["struct `1` {};"]/@CXXGenFieldKey/@genFields,"\n"],
-   "`SUBEXPRESSIONS`"->cxxSubexpressions,
-   "`GENERIC_SUMS`"->genericSumCode,
-   "`ARGS`"->CXXArgStringNPF@nPointFunction,
-   "`CALCULATE_FUNC`"->CXXCodeFunCalculate[cxxExpr,initializeSums,Length@fermionBasis]}]
+
+   stringReplaceWithIndent[code,{
+   "@ClassName@"->CXXClassNameNPF@nPointFunction,
+   "@Context@"->cxxCorrelationContext,
+   "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
+   "@Subexpressions@"->CXXCodeForSubexpressions[subexpressions, preCXXRules],
+   "@GenericSums@"->DummyIndent@genericSumsCode,
+   "@Arguments@"->CXXArgStringNPF@nPointFunction,
+   "@CalculateFunction@"->CXXCodeFunCalculate[cxxExpr,initializeSums,Length@fermionBasis]}]
 ];
 CXXClassForNPF[___] :=
    Utils`AssertOrQuit[False,CXXClassForNPF::errUnknownInput];
+
+CXXInitializeKeyStructs::usage =
+"@brief Generates required c++ code for key structs initialization.
+@param fields:{...} list of presenting generic fields.
+@param ind (def. \"\") indent string for a c++ code.
+@returns c++ code for subexpression if generic fields present there.";
+CXXInitializeKeyStructs::errUnknownInput =
+"Correct input is
+CXXInitializeKeyStructs@@{ {<generic field>...}, <string> }
+and not
+CXXInitializeKeyStructs@@`1`";
+CXXInitializeKeyStructs[fields:{__?IsGenericField},ind_String:""]:=
+StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"<>ind];
+CXXInitializeKeyStructs[x___] :=
+   Utils`AssertOrQuit[False,CXXInitializeKeyStructs::errUnknownInput,{x}];
+SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
 
 ToCXXPreparationRules::usage=
 "@brief Generate a list of rules for translating Mathematica expressions of
@@ -1306,10 +1327,12 @@ CXXCodeForSubexpressions::usage=
 @param subexpressions the list of subexpressions
 @param preCXXRules a list of rules to apply to the subexpressions before
 calling ``Parameters`ExpressionToString[]`` for the c++ translation.
+@param ind (def. \"\") string which is responsible for an indent of code.
 @returns the c++ code encoding a given set of subexpressions.";
 CXXCodeForSubexpressions[
    subexpressions:{___Rule},
-   preCXXRules:{{(_Rule|_RuleDelayed)...}...}] :=
+   preCXXRules:{{(_Rule|_RuleDelayed)...}...},
+   ind_String:""] :=
 Module[
    {
       names = First/@subexpressions,
@@ -1327,6 +1350,7 @@ Module[
             @CodeIfOtherSubexpressionsPresent@
             @CodeIfGenericFieldsPresent@
             @CodeIfMassesOrVerticesPresent@
+            
             @ReturnResult@
          } // End of operator()( void )
       }; // End of struct @SubexpressionName@<GenericFieldMap>
@@ -1348,7 +1372,7 @@ Module[
          "@ReturnResult@"->stringGeneratedCut["return "<>#5<>";",100,","]
       }
    ]&,data];
-   StringRiffle[outStrings,"\n\n"]
+   StringReplace[StringRiffle[outStrings,"\n\n"],"\n"->"\n"<>ind]
 ];
 
 CXXGenFieldKey::usage=
@@ -1432,7 +1456,7 @@ and not
 CXXContextInitialize@@`1`";
 CXXContextInitialize[expr_,_String:""] :=
 If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
-   "const context_with_vertices &context =  *this;",
+   "const context_with_vertices &context = *this;",
    "// Code in this scope does not depend on couplings or masses"
 ];
 CXXContextInitialize[x___] :=
@@ -1744,7 +1768,7 @@ calculation
 CXXCodeFunCalculate::errUnknownInput =
    CXXCodeFunCalculate::usage;
 CXXCodeFunCalculate[
-   cxxExpr_String,initializeSums_String,fermionBasisLength_Integer
+   cxxExpr_String,initializeSums_String,fermionBasisLength_Integer,_String:""
 ]:=
 If[TrueQ[fermionBasisLength === 0],
    StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
@@ -1753,8 +1777,7 @@ If[TrueQ[fermionBasisLength === 0],
       std::array<std::complex<double>,`3`> genericSummation;
       constexpr int coeffsLength = genericSummation.size();
       `2`
-      for ( std::size_t i=0; i<coeffsLength; i++ )
-      {
+      for ( std::size_t i=0; i<coeffsLength; i++ ) {
          genericSummation.at(i) += `1`;
       }
       return genericSummation;
