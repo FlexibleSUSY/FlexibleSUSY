@@ -859,13 +859,13 @@ Module[
       prototype,definitionHead,definitionBody,auxClass,definition
    },
    prototype = If[noBasis,
-      StringTemplate["std::complex<double> `2`(\n`3`);"],
-      StringTemplate["std::array<std::complex<double>,`1`> `2`(\n`3`)"]
+      StringTemplate["std::complex<double> `2`(`3`);"],
+      StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF[NPF,"def"]];
 
    definitionHead = If[noBasis,
-      StringTemplate["std::complex<double> `2`(\n`3`)"],
-      StringTemplate["std::array<std::complex<double>,`1`> `2`(\n`3`)"]
+      StringTemplate["std::complex<double> `2`(`3`)"],
+      StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF@NPF];
    definitionBody = CXXBodyNPF@NPF;
    auxClass = CXXClassForNPF[NPF/.loopFunctionRules,colourProjector,OptionValue@WilsonBasis];
@@ -994,7 +994,7 @@ n-point correlation function.
 CXXBodyNPF::errUnknownInput=
    ExternalIndicesNPF::errUnknownInput;
 CXXBodyNPF[nPointFunction:NPFPattern[]] :=
-StringTemplate["`1` helper{ model, indices, momenta };\nreturn helper.calculate();"][
+StringTemplate["   `1` helper{ model, indices, momenta };\n   return helper.calculate();"][
    CXXClassNameNPF@nPointFunction];
 CXXBodyNPF[___] :=
    Utils`AssertOrQuit[False,CXXBodyNPF::errUnknownInput];
@@ -1032,21 +1032,15 @@ CXXClassForNPF[
       "ColFac"->colFac_,
       "Subs"->subexpressions_],
    projCol_,
-   fermionBasis_:{}] :=
+   wilsonBasis_] :=
 Module[
    {
       extIndices = ExternalIndicesNPF@nPointFunction,
       numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
       cxxCorrelationContext,
       genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_, _] :> x],
-      genSumNames = Array[
-         StringTemplate@"genericSum`1`",
-         Length@genSums],
-      initializeSums = StringRiffle[Array[
-         StringTemplate@"const auto genericsum`1` = genericSum`1`();",
-         Length@genSums],"\n"],
-      genericSumsCode, preCXXRules, cxxExpr,
-      noFermionChains = TrueQ[Length@fermionBasis === 0],
+      genSumNames = Array[StringTemplate@"genericSum`1`",Length@genSums],
+      genericSumsCode, preCXXRules,
       DummyIndent,
       code = "
       class @ClassName@ : public @Context@ {
@@ -1082,7 +1076,7 @@ Module[
    
    DummyIndent[str_String,ind_String:""] := StringReplace[str,"\n"->"\n"<>ind];
    genericSumsCode = StringRiffle[MapThread[
-      CXXGenericSum[##,subexpressions,preCXXRules,fermionBasis]&,
+      CXXGenericSum[##,subexpressions,preCXXRules,wilsonBasis]&,
          {
             genSums,
             clFields,
@@ -1091,8 +1085,6 @@ Module[
             genSumNames
          }],
       "\n\n"];
-
-   cxxExpr = StringRiffle[#<>If[noFermionChains,"()","().at(i)"]&/@genSumNames,"+"];
 
    cxxCorrelationContext = StringTemplate[
       "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
@@ -1104,7 +1096,7 @@ Module[
    "@Subexpressions@"->CXXCodeForSubexpressions[subexpressions, preCXXRules],
    "@GenericSums@"->DummyIndent@genericSumsCode,
    "@Arguments@"->CXXArgStringNPF@nPointFunction,
-   "@CalculateFunction@"->CXXCodeFunCalculate[cxxExpr,initializeSums,Length@fermionBasis]}]
+   "@CalculateFunction@"->CXXCodeFunCalculate[genSumNames,wilsonBasis]}]
 ];
 CXXClassForNPF[___] :=
    Utils`AssertOrQuit[False,CXXClassForNPF::errUnknownInput];
@@ -1486,19 +1478,16 @@ CXXGenericSum[
    sum:GenericSum[expr_,genericFields_],
    genericInsertions_List,combinatorialFactors_List,
    colourFactors_List,genSumName_String,subexpressions_List,preCXXRules_List,
-   fermionBasis_:{}] :=
+   wilsonBasis_] :=
 Module[
    {
-      type = If[fermionBasis =!= {},
-         StringTemplate["std::array<std::complex<double>,`1`>"][Length@fermionBasis],
-         "std::complex<double>"],
+      type = If[wilsonBasis === {},
+         "std::complex<double>",
+         StringTemplate["std::array<std::complex<double>,`1`>"][Length@wilsonBasis]
+         ],
       context = If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
          "const context_with_vertices &context = *this;",
          "// This GenericSum does not depend on couplings or masses"],
-      storage = If[fermionBasis =!= {},
-         StringJoin["std::complex<double>", #, " = 0.0;\n"]&/@fermionBasis,     (* Fermion basis is supposed to contain strings! S*)
-         "std::complex<double> value = 0.0;"],
-      cxxExpr,wilsonCoeffs,generatedCode,
       code = "
       template<class GenericFieldMap>
       struct @GenericSum_NAME@_impl : generic_sum_base {
@@ -1521,7 +1510,7 @@ Module[
                @ChangeOutputVars@
             @EndSumOverGenFields@
 
-            return @OutputVars@;
+            @ReturnOutputVars@
          } // End of operator()( void )
       }; // End of struct @GenericSum_NAME@_impl<GenericFieldMap>
 
@@ -1546,17 +1535,6 @@ Module[
             >( *this );
       } // End of function @GenericSum_NAME@()"
    },
-   If[Length[fermionBasis] =!= 0,
-      cxxExpr = Map[Parameters`ExpressionToString[
-        Fold[ReplaceAll, #, preCXXRules]]&, expr];
-      cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-      wilsonCoeffs = MapThread[StringJoin[#1, " += ", #2, ";\n\n"]&, {fermionBasis, cxxExpr}],
-      (*normal(?) code*)
-      cxxExpr = StringReplace[
-         Parameters`ExpressionToString[Fold[ReplaceAll,expr,preCXXRules]],
-         "\""->""];
-   ];
-   generatedCode = If[fermionBasis =!= {},StringJoin[wilsonCoeffs],"value += " <> cxxExpr<>";"];
    stringReplaceWithIndent[code,
       {
          "@GenericSum_NAME@"->genSumName,
@@ -1564,16 +1542,16 @@ Module[
          "@GenericFieldShortNames@"->CXXCodeNameKey@genericFields,
          "@InitializeSubstitutions@"->CXXSubsInGenericSum[sum,subexpressions],
          "@InitializeContext@"->context,
-         "@InitializeOutputVars@"->storage,
+         "@InitializeOutputVars@"->CXXInitializeOutput@wilsonBasis,
          "@StartSumOverGenFields@"->CXXBeginSum@genericFields,
-         "@ChangeOutputVars@"->stringGeneratedCut[generatedCode,100,","],
+         "@ChangeOutputVars@"->CXXChangeOutput[expr->preCXXRules,wilsonBasis],
          "@EndSumOverGenFields@"->CXXEndSum@genericFields,
-         "@OutputVars@"->"value" (* @todo If[fbQ,ToString[fermionBasis],"value"] *),
+         "@ReturnOutputVars@"->CXXReturnOutput@wilsonBasis,
          "@GenericKeys@"->CXXGenFieldKey@genericFields,
          "@ClassInsertions@"->CXXClassInsertions@genericInsertions,
          "@CombinatoricalFactors@"->CXXFactorInsertions@combinatorialFactors,
          "@ColorFactors@"->CXXColourInsertions@colourFactors,
-         "@FermionBasisMETALength@"->CXXFermionMetaLength@fermionBasis
+         "@FermionBasisMETALength@"->CXXFermionMetaLength@wilsonBasis
       }
    ]
 ] /; And[
@@ -1583,6 +1561,76 @@ Module[
          #]&
       )}]
 ];
+
+CXXInitializeOutput::usage =
+"@brief Generates c++ code for output value initializations inside GenericSum.
+@param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for output value initializations inside GenericSum.";
+CXXInitializeOutput::errUnknownInput =
+"Input should be 
+CXXInitializeOutput@@{ {Rule[<string>,<expression>]...}, <string> }
+and not:
+CXXInitializeOutput@@`1`";
+CXXInitializeOutput[{},_String:""] :=
+"std::complex<double> value = 0.0;";
+CXXInitializeOutput[wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
+StringJoin["std::complex<double> ",#," = 0.0;\n"<>ind]&/@Part[wilsonBasis,All,1];
+CXXInitializeOutput[x___]:=
+   Utils`AssertOrQuit[False,CXXInitializeOutput::errUnknownInput,{x}];
+SetAttributes[CXXInitializeOutput,{Protected,Locked}];
+
+CXXInitializeOutput::usage =
+"@brief Generates c++ code for output value updating inside GenericSum.
+@param expr either single expression or list of expressions to be converted into c++.
+@preCXXRules list of rules to be applied at expr.
+@param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for output value initializations inside GenericSum.";
+CXXInitializeOutput::errUnknownInput =
+"Input should be 
+CXXInitializeOutput@@{ {Rule[<string>,<expression>]...}, <string> }
+and not:
+CXXInitializeOutput@@`1`";
+CXXChangeOutput[expr_->preCXXRules_,{},ind_String:""] :=
+Module[
+   {
+      cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,expr,preCXXRules]]
+   },
+   cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
+   "value += "<>stringGeneratedCut[cxxExpr<>";",100,",",ind<>"   "]
+];
+CXXChangeOutput[expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
+Module[
+   {
+      cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@expr,
+      updatingVars
+   },
+   cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
+   updatingVars = MapThread[#1" += "<>stringGeneratedCut[#2<>";",100,",",ind<>"   "]&, {wilsonBasis[[All,1]], cxxExpr}];
+   StringJoin@updatingVars;
+];
+CXXChangeOutput[x___]:=
+   Utils`AssertOrQuit[False,CXXChangeOutput::errUnknownInput,{x}];
+SetAttributes[CXXChangeOutput,{Protected,Locked}];
+
+CXXReturnOutput::usage =
+"@brief Generates c++ code for output value return inside GenericSum.
+@param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String c++ code for output value initializations inside GenericSum.";
+CXXReturnOutput::errUnknownInput =
+"Input should be 
+CXXReturnOutput@@{ {Rule[<string>,<expression>]...}, <string> }
+and not:
+CXXInitializeOutput@@`1`";
+CXXReturnOutput[{},_String:""] :=
+"return value;"
+CXXReturnOutput[wilsonBasis:{Rule[_String,_]..},_String:""] :=
+"return "<>ToString[ wilsonBasis[[All,1]] ]<>";";
+CXXReturnOutput[x___]:=
+   Utils`AssertOrQuit[False,CXXReturnOutput::errUnknownInput,{x}];
+SetAttributes[CXXReturnOutput,{Protected,Locked}];
 
 stringReplaceWithIndent::usage =
 "@brief Function for smart c++ code replacements with indents. If replacement
@@ -1750,31 +1798,47 @@ SetAttributes[CXXEndSum,{Protected,Locked}];
 
 CXXCodeFunCalculate::usage =
 "@brief Generates c++ code for functions which return result of generic sum
-calculation
-@param cxxExpr string with sums of generic sums.
-@param initializeSums string with initializations of
-@param fermionBasisLength integer length of fermion basis
-@returns String c++ code for sum beginning used inside generic sums.";
+calculation.
+@param genSumNames list of strings with names of generic sums.
+@param wilsonBasis list of rules for a basis.
+@param ind (def. \"\") string which is responsible for an indent of code.
+@returns String Generates c++ code for functions which return result of generic sum
+calculation.";
 CXXCodeFunCalculate::errUnknownInput =
-   CXXCodeFunCalculate::usage;
-CXXCodeFunCalculate[
-   cxxExpr_String,initializeSums_String,fermionBasisLength_Integer,_String:""
-]:=
-If[TrueQ[fermionBasisLength === 0],
-   StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
-   StringTemplate["std::array<std::complex<double>,`3`> calculate( void )
+"Input should be of the form:
+CXXCodeFunCalculate@@{ {<string>..}, {Rule[<string>, <expression>]...}, <string> }
+and not 
+CXXCodeFunCalculate@@{`1`}.";
+CXXCodeFunCalculate[genSumNames:{__String},wilsonBasis:{Rule[_String,_]...},ind_String:""] :=
+Module[
    {
-      std::array<std::complex<double>,`3`> genericSummation;
-      constexpr int coeffsLength = genericSummation.size();
-      `2`
-      for ( std::size_t i=0; i<coeffsLength; i++ ) {
-         genericSummation.at(i) += `1`;
-      }
-      return genericSummation;
-   }"][cxxExpr,initializeSums,fermionBasisLength]
+      cxxExpr = StringRiffle[#<>If[wilsonBasis==={},"()","().at(i)"]&/@genSumNames,"+"],
+      initializeSums = StringRiffle[
+         Array[StringTemplate@"const auto genericsum`1` = genericSum`1`();",Length@genSumNames],
+         "\n"<>ind<>"   "]
+   },
+   If[wilsonBasis==={},
+      StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
+      stringReplaceWithIndent["
+      std::array<std::complex<double>,@BasisLength@> calculate( void ) {
+         std::array<std::complex<double>,@BasisLength@> genericSummation;
+         constexpr int coeffsLength = genericSummation.size();
+         @InitializeSums@
+         for ( std::size_t i=0; i<coeffsLength; i++ ) {
+            genericSummation.at(i) += @SumOfGenSums@;
+         }
+         return genericSummation;
+      }",
+      {
+         "@BasisLength@"->Length@wilsonBasis,
+         "@InitializeSums@"->initializeSums,
+         "@SumOfGenSums@"->cxxExpr
+      }]
+   ]
 ];
-CXXCodeFunCalculate[___]:=
-   Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput];
+CXXCodeFunCalculate[x___]:=
+   Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput,{x}];
+SetAttributes[CXXCodeFunCalculate,{Protected,Locked}];
 
 CXXClassInsertions::usage =
 "@brief Generates c++ code for class insertions inside GenericSum.
@@ -1840,7 +1904,7 @@ SetAttributes[CXXColourInsertions,{Protected,Locked}];
 
 CXXFermionMetaLength::usage =
 "@brief Generates c++ short name for the length of fermion basis.
-@param fermionBasis list of fermion chains.
+@param wilsonBasis list of fermion chains.
 @param ind (def. \"\\n\") dummy string.
 @returns String c++ short name for the length of fermion basis.";
 CXXFermionMetaLength::errUnknownInput =
@@ -1848,9 +1912,9 @@ CXXFermionMetaLength::errUnknownInput =
 CXXFermionMetaLength@@{ {...}, <string> }
 and not:
 CXXFermionMetaLength@@`1`";
-CXXFermionMetaLength[fermionBasis:{___},_String:"\n"] :=
-If[fermionBasis==={},"// There is no basis in this GenericSum: skipping "]<>
-"boost::mpl::int_<"<>ToString@Length@fermionBasis<>">";
+CXXFermionMetaLength[wilsonBasis:{___},_String:"\n"] :=
+If[wilsonBasis==={},"// There is no basis in this GenericSum: skipping "]<>
+"boost::mpl::int_<"<>ToString@Length@wilsonBasis<>">";
 CXXFermionMetaLength[x___]:=
    Utils`AssertOrQuit[False,CXXFermionMetaLength::errUnknownInput,{x}];
 SetAttributes[CXXFermionMetaLength,{Protected,Locked}];
@@ -1921,8 +1985,7 @@ SetAttributes[
    ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,*)CXXFieldName,(*
    IsGenericField*)
    CXXSubsInSub,CXXGenericFieldsInSub,CXXContextInitialize,
-   ExtractColourFactor,CXXGenericSum,
-   CXXCodeFunCalculate
+   ExtractColourFactor,CXXGenericSum
    }, 
    {Protected, Locked}];
 
