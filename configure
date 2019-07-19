@@ -877,6 +877,18 @@ is_empty_dir() {
 }
 
 #_____________________________________________________________________
+is_posix_platform() {
+    case "$operating_system" in
+        *BSD*)     return 0 ;;
+        Darwin)    return 0 ;;
+        DragonFly) return 0 ;;
+        GNU*)      return 0 ;;
+        Linux)     return 0 ;;
+    esac
+    return 1
+}
+
+#_____________________________________________________________________
 check_install() {
     if test -z "${INSTALL_DIR}"; then
         return 0
@@ -1476,22 +1488,20 @@ check_std_threads() {
 
 #_____________________________________________________________________
 check_thread_libs() {
-    # link libpthread only if $enable_threads = yes
-    # I'm assuming here, that no other library we link needs libpthread.
-    if [ "x$enable_threads" = "xyes" -o -n "$pthread_lib_dir" ] ; then
-        check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths"
-        if [ -z "$found_lib" ]; then
-            message "Error: libpthread must be installed to enable multithreading!"
-            exit 1
-        fi
-        THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-        # need to link whole libpthread.a for static linking
-        if [ "x$enable_static" = xyes ] ; then
-            THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
-        fi
-        if [ -n "$pthread_lib_dir" ]; then
-            THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
-        fi
+    is_posix_platform || return
+
+    check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths"
+    if [ -z "$found_lib" ]; then
+        message "Error: libpthread must be installed to enable multithreading!"
+        exit 1
+    fi
+    THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+    # need to link whole libpthread.a for static linking
+    if [ "x$enable_static" = xyes ] ; then
+        THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
+    fi
+    if [ -n "$pthread_lib_dir" ]; then
+        THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
     fi
 }
 
@@ -2013,12 +2023,12 @@ check_required_libs() {
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
-                message "    TSIL is required to build $model_name"
+                message "   TSIL is required to build $model_name"
                 enable_tsil=yes
             }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 
@@ -2034,7 +2044,7 @@ If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
 EOF
 
             [ "x$?" = "x0" ] && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 

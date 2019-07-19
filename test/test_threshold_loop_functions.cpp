@@ -19,6 +19,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE test_wrappers
 
+#include <limits>
 #include <boost/test/unit_test.hpp>
 #include "threshold_loop_functions.hpp"
 #include "numerics.h"
@@ -1153,6 +1154,8 @@ double phixyz(double x, double y, double z)
    }
 
    FATAL("unhandled case in phixyz function!");
+
+   return std::numeric_limits<double>::quiet_NaN();
 }
 } // anonymous namespace
 
