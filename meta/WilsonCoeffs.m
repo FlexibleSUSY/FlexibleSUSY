@@ -22,10 +22,27 @@
 
 BeginPackage["WilsonCoeffs`",{"Utils`"}];
 
-InterfaceToMatching::usage="Calculates the matching conditions of the amplitude \
-for a given basis";
+{InterfaceToMatching};
 
 Begin["`Private`"];
+
+InterfaceToMatching::usage=
+"@brief Calculates the matching conditions of the amplitude for a given basis
+@param NPF NPF object.
+@param operatorBasis list of lists with {string name,fermion chain multiplication}
+pairs.
+@returns Corresponding generic Sum of Wilson coefficients.
+@note the name convention of the chiral basis follows the FormCalc convention.";
+ 
+InterfaceToMatching[NPF_List, operatorBasis_List]:=
+  Module[{findBasis, coefficientsWilson},
+    Utils`AssertWithMessage[NPF =!= {} && operatorBasis =!= {},
+        "WilsonCoeffs`InterfaceToMatching[]: Input can not be an empty list."];
+    findBasis = FindFermionChains[NPF[[2, 2]], operatorBasis];
+    coefficientsWilson = RemoveFermionChains[matchingConditions[NPF, findBasis[[All, 2]]]];
+
+    coefficientsWilson
+  ];
 
 ExtractCoeffs[genericSum_, operator_List] :=
    ReplacePart[
@@ -67,24 +84,6 @@ matchingConditions[npointExpression_List, chiralBasis_List] :=
     mappedNPoint[[2, 1, 1]] = Coeffs;
 
     mappedNPoint
-  ];
-
-(** \brief Calculates the matching conditions of the amplitude for a given basis
- * \param GenericSumAmp an amplitude list from NPointFunctions`NPointFunction[]
- * \param operatorBasis list of operators in chiral basis
- * \returns the corresponding generic Sum of Wilson coefficients to further evaluate
- * in NPointFunctions
- * \note only the ampltiude from NPointFunctions is supported
- * \note the name convention of the chiral basis follows the FormCalc convention
- **)
-InterfaceToMatching[GenericSumAmp_List, operatorBasis_List]:=
-  Module[{findBasis, coefficientsWilson},
-    Utils`AssertWithMessage[GenericSumAmp =!= {} && operatorBasis =!= {},
-        "WilsonCoeffs`InterfaceToMatching[]: Input can not be an empty list."];
-    findBasis = FindFermionChains[GenericSumAmp[[2, 2]], operatorBasis];
-    coefficientsWilson = RemoveFermionChains[matchingConditions[GenericSumAmp, findBasis[[All, 2]]]];
-
-    coefficientsWilson
   ];
 
 End[];

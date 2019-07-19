@@ -55,9 +55,9 @@ nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[
    NPointFunctions`LoopFunctions->"FlexibleSUSY"];
 
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
-   {hhSelfenergy},
-   {"selfenergy_hh_1loop"},
-   {Identity},
+   hhSelfenergy,
+   "selfenergy_hh_1loop",
+   Identity,
    NPointFunctions`LoopFunctions->"FlexibleSUSY"][[2]];
 
 (*VERTICES*********************************************************************)
