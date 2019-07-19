@@ -33,6 +33,9 @@ using namespace boost_test_tools;
 #define DERIVEDPARAMETER(p) context.model.p()
 #define PHASE(p) context.model.get_##p()
 
+#define INCOMING_FERMION_INDEX 2
+#define OUTGOING_FERMION_INDEX 2
+
 namespace flexiblesusy
 {
 namespace SM_cxx_diagrams
@@ -56,7 +59,7 @@ namespace
 static constexpr int number_of_random_samples = 100;
 }
 
-BOOST_AUTO_TEST_SUITE( selfenergy_test_suite, 
+BOOST_AUTO_TEST_SUITE( selfenergy_test_suite,
 	* boost::unit_test::tolerance(1.0e-10) )
 
 BOOST_DATA_TEST_CASE( test_selfenergies,
@@ -66,19 +69,19 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
-	
+
 	auto problems = model.get_problems();
 	BOOST_WARN_MESSAGE( !problems.have_problem(),
 		"There was an error calculating the spectrum: " <<
 		problems << "Skipping data point..." );
-		
+
     if( problems.have_problem() == false )
-	{   
+	{
         //FIXME: Discuss global minus difference
-		auto fs_selfenergy_Fd_1 = (-1) * model.self_energy_Fd_1loop_1(0, 2, 2);
+		auto fs_selfenergy_Fd_1 = (-1) * model.self_energy_Fd_1loop_1(0, INCOMING_FERMION_INDEX, OUTGOING_FERMION_INDEX);
 		auto np_selfenergy_Fd_1 =
 			SM_cxx_diagrams::npointfunctions::selfenergy_Fd_1loop(
-				model, std::array<int, 2>{2, 2},
+				model, std::array<int, 2>{INCOMING_FERMION_INDEX, OUTGOING_FERMION_INDEX},
 				std::array<Eigen::Vector4d, 0>{}
 		);
 

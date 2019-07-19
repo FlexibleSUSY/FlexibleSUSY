@@ -1575,7 +1575,7 @@ CXXInitializeOutput@@`1`";
 CXXInitializeOutput[{},_String:""] :=
 "std::complex<double> value = 0.0;";
 CXXInitializeOutput[wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
-StringJoin["std::complex<double> ",#," = 0.0;\n"<>ind]&/@Part[wilsonBasis,All,1];
+StringRiffle["std::complex<double> "<>#<>" = 0.0;"&/@Part[wilsonBasis,All,1],"\n"<>ind];
 CXXInitializeOutput[x___]:=
    Utils`AssertOrQuit[False,CXXInitializeOutput::errUnknownInput,{x}];
 SetAttributes[CXXInitializeOutput,{Protected,Locked}];
@@ -1607,8 +1607,8 @@ Module[
       updatingVars
    },
    cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
-   updatingVars = MapThread[#1" += "<>stringGeneratedCut[#2<>";",100,",",ind<>"   "]&, {wilsonBasis[[All,1]], cxxExpr}];
-   StringJoin@updatingVars;
+   updatingVars = MapThread[#1<>" += "<>stringGeneratedCut[#2<>";",100,",",ind<>"   "]&, {wilsonBasis[[All,1]], cxxExpr}];
+   StringRiffle[updatingVars,"\n"<>ind]
 ];
 CXXChangeOutput[x___]:=
    Utils`AssertOrQuit[False,CXXChangeOutput::errUnknownInput,{x}];
@@ -1815,26 +1815,29 @@ Module[
       cxxExpr = StringRiffle[#<>If[wilsonBasis==={},"()","().at(i)"]&/@genSumNames,"+"],
       initializeSums = StringRiffle[
          Array[StringTemplate@"const auto genericsum`1` = genericSum`1`();",Length@genSumNames],
-         "\n"<>ind<>"   "]
+         "\n"<>"   "],
+      out
    },
-   If[wilsonBasis==={},
+   out=If[wilsonBasis==={},
       StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
       stringReplaceWithIndent["
       std::array<std::complex<double>,@BasisLength@> calculate( void ) {
          std::array<std::complex<double>,@BasisLength@> genericSummation;
          constexpr int coeffsLength = genericSummation.size();
          @InitializeSums@
+         
          for ( std::size_t i=0; i<coeffsLength; i++ ) {
             genericSummation.at(i) += @SumOfGenSums@;
          }
          return genericSummation;
-      }",
+      } // End of calculate()",
       {
-         "@BasisLength@"->Length@wilsonBasis,
+         "@BasisLength@"->ToString@Length@wilsonBasis,
          "@InitializeSums@"->initializeSums,
          "@SumOfGenSums@"->cxxExpr
       }]
-   ]
+   ];
+   StringReplace[out,"\n"->"\n"<>ind]
 ];
 CXXCodeFunCalculate[x___]:=
    Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput,{x}];
@@ -1913,7 +1916,7 @@ CXXFermionMetaLength@@{ {...}, <string> }
 and not:
 CXXFermionMetaLength@@`1`";
 CXXFermionMetaLength[wilsonBasis:{___},_String:"\n"] :=
-If[wilsonBasis==={},"// There is no basis in this GenericSum: skipping "]<>
+If[wilsonBasis==={},"// There is no basis in this GenericSum: skipping ",""]<>
 "boost::mpl::int_<"<>ToString@Length@wilsonBasis<>">";
 CXXFermionMetaLength[x___]:=
    Utils`AssertOrQuit[False,CXXFermionMetaLength::errUnknownInput,{x}];
