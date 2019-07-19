@@ -106,4 +106,6 @@ else
     echo "Test result: FAIL"
 fi
 
+rm -f "$inputFile1" "$outputFile1" "$outputFile2"
+
 exit $errors

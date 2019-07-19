@@ -51,6 +51,10 @@ MOD@CLASSNAME@_SUBMOD_INC := $(patsubst %,-I%,$(MOD@CLASSNAME@_SUBMOD))
 LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_a_muon.cpp \
 		$(DIR)/@CLASSNAME@_edm.cpp \
+		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
+		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.cpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
+		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
@@ -80,6 +84,10 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_a_muon.hpp \
 		$(DIR)/@CLASSNAME@_convergence_tester.hpp \
 		$(DIR)/@CLASSNAME@_edm.hpp \
+		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
+		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.hpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
+		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver_interface.hpp \
@@ -199,56 +207,56 @@ all-$(MODNAME): $(LIB@CLASSNAME@) $(EXE@CLASSNAME@_EXE)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(@CLASSNAME@_INSTALL_DIR)
-		install -d $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-		install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_HDR) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
-		install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LL@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
-		$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -d $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -d $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_HDR) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
 ifneq ($(@CLASSNAME@_SLHA_INPUT),)
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
 endif
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_REFERENCES) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_GNUPLOT) $(@CLASSNAME@_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIB@CLASSNAME@_DEP)
-		-rm -f $(EXE@CLASSNAME@_DEP)
-		-rm -f $(LL@CLASSNAME@_DEP)
+		$(Q)-rm -f $(LIB@CLASSNAME@_DEP)
+		$(Q)-rm -f $(EXE@CLASSNAME@_DEP)
+		$(Q)-rm -f $(LL@CLASSNAME@_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIB@CLASSNAME@)
-		-rm -f $(LL@CLASSNAME@_LIB)
+		$(Q)-rm -f $(LIB@CLASSNAME@)
+		$(Q)-rm -f $(LL@CLASSNAME@_LIB)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIB@CLASSNAME@_OBJ)
-		-rm -f $(EXE@CLASSNAME@_OBJ)
-		-rm -f $(LL@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(LIB@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(EXE@CLASSNAME@_OBJ)
+		$(Q)-rm -f $(LL@CLASSNAME@_OBJ)
 
 # BEGIN: NOT EXPORTED ##########################################
 clean-$(MODNAME)-src:
-		-rm -f $(LIB@CLASSNAME@_SRC)
-		-rm -f $(LIB@CLASSNAME@_HDR)
-		-rm -f $(LIB@CLASSNAME@_CXXQFT_HDR)
-		-rm -f $(EXE@CLASSNAME@_SRC)
-		-rm -f $(LL@CLASSNAME@_SRC)
-		-rm -f $(LL@CLASSNAME@_MMA)
-		-rm -f $(METACODE_STAMP_@CLASSNAME@)
-		-rm -f $(@CLASSNAME@_INCLUDE_MK)
-		-rm -f $(@CLASSNAME@_SLHA_INPUT)
-		-rm -f $(@CLASSNAME@_REFERENCES)
-		-rm -f $(@CLASSNAME@_GNUPLOT)
+		$(Q)-rm -f $(LIB@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LIB@CLASSNAME@_HDR)
+		$(Q)-rm -f $(LIB@CLASSNAME@_CXXQFT_HDR)
+		$(Q)-rm -f $(EXE@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LL@CLASSNAME@_SRC)
+		$(Q)-rm -f $(LL@CLASSNAME@_MMA)
+		$(Q)-rm -f $(METACODE_STAMP_@CLASSNAME@)
+		$(Q)-rm -f $(@CLASSNAME@_INCLUDE_MK)
+		$(Q)-rm -f $(@CLASSNAME@_SLHA_INPUT)
+		$(Q)-rm -f $(@CLASSNAME@_REFERENCES)
+		$(Q)-rm -f $(@CLASSNAME@_GNUPLOT)
 
 distclean-$(MODNAME): clean-$(MODNAME)-src
 # END:   NOT EXPORTED ##########################################
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(EXE@CLASSNAME@_EXE)
+		$(Q)-rm -f $(EXE@CLASSNAME@_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
@@ -262,7 +270,7 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 pack-$(MODNAME)-src:
-		tar -czf $(@CLASSNAME@_TARBALL) \
+		$(Q)tar -czf $(@CLASSNAME@_TARBALL) \
 		$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) \
 		$(EXE@CLASSNAME@_SRC) \
 		$(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
@@ -279,7 +287,8 @@ run-metacode-$(MODNAME): $(METACODE_STAMP_@CLASSNAME@)
 
 ifeq ($(ENABLE_META),yes)
 $(METACODE_STAMP_@CLASSNAME@): $(DIR)/start.m $(DIR)/FlexibleSUSY.m $(META_SRC) $(TEMPLATES) $(SARAH_MODEL_FILES_@CLASSNAME@)
-		"$(MATH)" -run "Get[\"$<\"]; Quit[]" || (echo "Error: The code generation failed!"; exit 1)
+		@$(MSG)
+		$(Q)"$(MATH)" -run "Get[\"$<\"]; Quit[]" || (echo "Error: The code generation failed!"; exit 1)
 		@touch "$(METACODE_STAMP_@CLASSNAME@)"
 		@echo "Note: to regenerate @CLASSNAME@ source files," \
 		      "please remove the file "
@@ -302,13 +311,16 @@ $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
 	CPPFLAGS += $(LLFLAGS)
 
 $(LIB@CLASSNAME@): $(LIB@CLASSNAME@_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
 $(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
 
 $(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS)
+		@$(MSG)
+		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS)
 
 ALLDEP += $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP)
 ALLSRC += $(LIB@CLASSNAME@_SRC) $(EXE@CLASSNAME@_SRC)

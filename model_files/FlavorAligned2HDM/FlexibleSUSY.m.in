@@ -1,0 +1,197 @@
+
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = "FlavorAligned2HDM";
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+(* input parameters *)
+
+MINPAR = {
+    {1,  Lambda1IN},
+    {2,  Lambda2IN},
+    {3,  Lambda3IN},
+    {4,  Lambda4IN},
+    {5,  Lambda5IN},
+    {6,  Lambda6IN},
+    {7,  Lambda7IN},
+    {8,  M122IN},
+    {10, TanBeta},
+    {11, etaIN},
+    {12, xiEIN},
+    {13, xiDIN},
+    {14, xiUIN}
+};
+
+IMMINPAR = {
+    {1, ImLambda5IN},
+    {2, ImLambda6IN},
+    {3, ImLambda7IN},
+    {4, ImxiEIN},
+    {5, ImxiDIN},
+    {6, ImxiUIN}
+};
+
+EXTPAR = {
+    {0, Qin}
+};
+
+RealParameters = {Lambda1IN, Lambda2IN, Lambda3IN, Lambda4IN, M112, M222};
+
+EWSBOutputParameters = { M112, M222, Im[M122] };
+
+SUSYScale = Qin;
+
+SUSYScaleFirstGuess = Qin;
+
+SUSYScaleInput = {
+    {Lambda1, Lambda1IN},
+    {Lambda2, Lambda2IN},
+    {Lambda3, Lambda3IN},
+    {Lambda4, Lambda4IN},
+    {Lambda5, Lambda5IN + I ImLambda5IN},
+    {Lambda6, Lambda6IN + I ImLambda6IN},
+    {Lambda7, Lambda7IN + I ImLambda7IN},
+    {Re[M122],   M122IN},
+    {eta,         etaIN}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   {v1, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+   {v2, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]},
+
+   {Ye[1,1], ((LowEnergyConstant[yeSM] * LowEnergyConstant[vSM])/(v1 + (xiEIN + I ImxiEIN) * (Exp[- I eta]) * v2))},
+   {Ye[2,2], ((LowEnergyConstant[ymSM] * LowEnergyConstant[vSM])/(v1 + (xiEIN + I ImxiEIN) * (Exp[- I eta]) * v2))},
+   {Ye[3,3], ((LowEnergyConstant[ylSM] * LowEnergyConstant[vSM])/(v1 + (xiEIN + I ImxiEIN) * (Exp[- I eta]) * v2))},
+   {Yd[1,1], ((LowEnergyConstant[ydSM] * LowEnergyConstant[vSM])/(v1 + (xiDIN + I ImxiDIN) * (Exp[- I eta]) * v2))},
+   {Yd[2,2], ((LowEnergyConstant[ysSM] * LowEnergyConstant[vSM])/(v1 + (xiDIN + I ImxiDIN) * (Exp[- I eta]) * v2))},
+   {Yd[3,3], ((LowEnergyConstant[ybSM] * LowEnergyConstant[vSM])/(v1 + (xiDIN + I ImxiDIN) * (Exp[- I eta]) * v2))},
+   {Yu[1,1], ((LowEnergyConstant[yuSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * v1))},
+   {Yu[2,2], ((LowEnergyConstant[ycSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * v1))},
+   {Yu[3,3], ((LowEnergyConstant[ytSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * v1))},
+
+   {epsE[1,1], (xiEIN + I ImxiEIN) * (Exp[- I eta]) * Ye[1,1]},
+   {epsE[2,2], (xiEIN + I ImxiEIN) * (Exp[- I eta]) * Ye[2,2]},
+   {epsE[3,3], (xiEIN + I ImxiEIN) * (Exp[- I eta]) * Ye[3,3]},
+   {epsD[1,1], (xiDIN + I ImxiDIN) * (Exp[- I eta]) * Yd[1,1]},
+   {epsD[2,2], (xiDIN + I ImxiDIN) * (Exp[- I eta]) * Yd[2,2]},
+   {epsD[3,3], (xiDIN + I ImxiDIN) * (Exp[- I eta]) * Yd[3,3]},
+   {epsU[1,1], Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * Yu[1,1]},
+   {epsU[2,2], Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * Yu[2,2]},
+   {epsU[3,3], Conjugate[(xiUIN + I ImxiUIN) * (Exp[- I eta])] * Yu[3,3]}
+};
+
+(* The following did not work
+   
+   {xiE, xiEIN + I ImxiEIN},
+   {Ye[1,1], ((LowEnergyConstant[yeSM] * LowEnergyConstant[vSM])/(v1 + xiE * (Exp[- I eta]) * v2))},
+   {epsE[1,1], xiE * (Exp[- I eta]) * Ye[1,1]}, 
+
+   and so on
+
+*)
+
+(* The following did not work
+
+   FSFindRoot[{Re[Ye[1,1]], Re[epsE[1,1]]},
+              {Re[Ye[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[yeSM])/v1 + epsE[1,1]*v2)/v1], 
+               Re[epsE[1,1] - xiE * (Exp[- I eta]) * Ye[1,1]]}],
+   FSFindRoot[{Im[Ye[1,1]], Im[epsE[1,1]]},
+              {Im[Ye[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[yeSM])/v1 + epsE[1,1]*v2)/v1], 
+               Im[epsE[1,1] - xiE * (Exp[- I eta]) * Ye[1,1]]}],
+   FSFindRoot[{Re[Ye[2,2]], Re[epsE[2,2]]},
+              {Re[Ye[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ymSM])/v1 + epsE[2,2]*v2)/v1], 
+               Re[epsE[2,2] - xiE * (Exp[- I eta]) * Ye[2,2]]}],
+   FSFindRoot[{Im[Ye[2,2]], Im[epsE[2,2]]},
+              {Im[Ye[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ymSM])/v1 + epsE[2,2]*v2)/v1], 
+               Im[epsE[2,2] - xiE * (Exp[- I eta]) * Ye[2,2]]}],
+   FSFindRoot[{Re[Ye[3,3]], Re[epsE[3,3]]},
+              {Re[Ye[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ylSM])/v1 + epsE[3,3]*v2)/v1], 
+               Re[epsE[3,3] - xiE * (Exp[- I eta]) * Ye[3,3]]}],
+   FSFindRoot[{Im[Ye[3,3]], Im[epsE[3,3]]},
+              {Im[Ye[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ylSM])/v1 + epsE[3,3]*v2)/v1], 
+               Im[epsE[3,3] - xiE * (Exp[- I eta]) Ye[3,3]]}],
+
+   FSFindRoot[{Re[Yd[1,1]], Re[epsD[1,1]]},
+              {Re[Yd[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[ydSM])/v1 + epsD[1,1]*v2)/v1], 
+               Re[epsD[1,1] - xiD * (Exp[- I eta]) * Yd[1,1]]}],
+   FSFindRoot[{Im[Yd[1,1]], Im[epsD[1,1]]},
+              {Im[Yd[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[ydSM])/v1 + epsD[1,1]*v2)/v1], 
+               Im[epsD[1,1] - xiD * (Exp[- I eta]) * Yd[1,1]]}],
+   FSFindRoot[{Re[Yd[2,2]], Re[epsD[2,2]]},
+              {Re[Yd[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ysSM])/v1 + epsD[2,2]*v2)/v1], 
+               Re[epsD[2,2] - xiD * (Exp[- I eta]) * Yd[2,2]]}],
+   FSFindRoot[{Im[Yd[2,2]], Im[epsD[2,2]]},
+              {Im[Yd[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ysSM])/v1 + epsD[2,2]*v2)/v1], 
+               Im[epsD[2,2] - xiD * (Exp[- I eta]) * Yd[2,2]]}],
+   FSFindRoot[{Re[Yd[3,3]], Re[epsD[3,3]]},
+              {Re[Yd[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ybSM])/v1 + epsD[3,3]*v2)/v1], 
+               Re[epsD[3,3] - xiD * (Exp[- I eta]) * Yd[3,3]]}],
+   FSFindRoot[{Im[Yd[3,3]], Im[epsD[3,3]]},
+              {Im[Yd[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ybSM])/v1 + epsD[3,3]*v2)/v1], 
+               Im[epsD[3,3] - xiD * (Exp[- I eta]) Yd[3,3]]}],
+
+   FSFindRoot[{Re[Yu[1,1]], Re[epsU[1,1]]},
+              {Re[Yu[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[yuSM])/v2 + epsU[1,1]*v1)/v2], 
+               Re[epsU[1,1] - Conjugate[xiU * (Exp[- I eta])] * Yu[1,1]]}],
+   FSFindRoot[{Im[Yu[1,1]], Im[epsU[1,1]]},
+              {Im[Yu[1,1] - (LowEnergyConstant[vSM]*LowEnergyConstant[yuSM])/v2 + epsU[1,1]*v1)/v2], 
+               Im[epsU[1,1] - Conjugate[xiU * (Exp[- I eta])] * Yu[1,1]]}],
+   FSFindRoot[{Re[Yu[2,2]], Re[epsU[2,2]]},
+              {Re[Yu[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ycSM])/v2 + epsU[2,2]*v1)/v2], 
+               Re[epsU[2,2] - Conjugate[xiU * (Exp[- I eta])] * Yu[2,2]]}],
+   FSFindRoot[{Im[Yu[2,2]], Im[epsU[2,2]]},
+              {Im[Yu[2,2] - (LowEnergyConstant[vSM]*LowEnergyConstant[ycSM])/v2 + epsU[2,2]*v1)/v2], 
+               Im[epsU[2,2] - Conjugate[xiU * (Exp[- I eta])] * Yu[2,2]]}],
+   FSFindRoot[{Re[Yu[3,3]], Re[epsU[3,3]]},
+              {Re[Yu[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ytSM])/v2 + epsU[3,3]*v1)/v2], 
+               Re[epsU[3,3] - Conjugate[xiU * (Exp[- I eta])] * Yu[3,3]]}],
+   FSFindRoot[{Im[Yu[3,3]], Im[epsU[3,3]]},
+              {Im[Yu[3,3] - (LowEnergyConstant[vSM]*LowEnergyConstant[ytSM])/v2 + epsU[3,3]*v1)/v2], 
+               Im[epsU[3,3] - Conjugate[xiU * (Exp[- I eta])] * Yu[3,3]]}] *)
+
+
+(* The following 9 lines worked, but without Alignment parameter xi *)
+
+   (* {Ye[1,1], -((epsE[1,1]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[yeSM])/v1}, *)
+   (* {Ye[2,2], -((epsE[2,2]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[ymSM])/v1}, *)
+   (* {Ye[3,3], -((epsE[3,3]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[ylSM])/v1}, *)
+   (* {Yd[1,1], -((epsD[1,1]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[ydSM])/v1}, *)
+   (* {Yd[2,2], -((epsD[2,2]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[ysSM])/v1}, *)
+   (* {Yd[3,3], -((epsD[3,3]*v2)/v1) + (LowEnergyConstant[vSM]*LowEnergyConstant[ybSM])/v1}, *)
+   (* {Yu[1,1], -((epsU[1,1]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[yuSM])/v2}, *)
+   (* {Yu[2,2], -((epsU[2,2]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[ycSM])/v2}, *)
+   (* {Yu[3,3], -((epsU[3,3]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[ytSM])/v2}  *)
+
+
+InitialGuessAtLowScale = {
+   {v1, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+   {v2, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+   {Ye[1,1], -LowEnergyConstant[yeSM] / Cos[ArcTan[TanBeta]]},
+   {Ye[2,2], -LowEnergyConstant[ymSM] / Cos[ArcTan[TanBeta]]},
+   {Ye[3,3], -LowEnergyConstant[ylSM] / Cos[ArcTan[TanBeta]]},
+   {Yd[1,1], -LowEnergyConstant[ydSM] / Cos[ArcTan[TanBeta]]},
+   {Yd[2,2], -LowEnergyConstant[ysSM] / Cos[ArcTan[TanBeta]]},
+   {Yd[3,3], -LowEnergyConstant[ybSM] / Cos[ArcTan[TanBeta]]},
+   {Yu[1,1], -LowEnergyConstant[yuSM] / Sin[ArcTan[TanBeta]]},
+   {Yu[2,2], -LowEnergyConstant[ycSM] / Sin[ArcTan[TanBeta]]},
+   {Yu[3,3], -LowEnergyConstant[ytSM] / Sin[ArcTan[TanBeta]]}
+};
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hpm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+ExtraSLHAOutputBlocks = {
+   {EFFHIGGSCOUPLINGS, NoScale,
+           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
+            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
+            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
+            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+};

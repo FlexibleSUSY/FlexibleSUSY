@@ -42,13 +42,14 @@ namespace {
 constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
 
+constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
 constexpr double sqr(double a) noexcept { return a*a; }
 constexpr double pow3(double a) noexcept { return a*a*a; }
 constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
 
 constexpr bool is_zero(double m, double tol) noexcept
 {
-   const double am = std::abs(m);
+   const double am = dabs(m);
    const double mtol = tol * am;
 
    if (mtol == 0.0 && am != 0.0 && tol != 0.0)
@@ -59,10 +60,8 @@ constexpr bool is_zero(double m, double tol) noexcept
 
 constexpr bool is_close(double m1, double m2, double tol) noexcept
 {
-   using std::abs;
-
-   const double mmax = std::max(abs(m1), abs(m2));
-   const double mmin = std::min(abs(m1), abs(m2));
+   const double mmax = std::max(dabs(m1), dabs(m2));
+   const double mmin = std::min(dabs(m1), dabs(m2));
    const double max_tol = tol * mmax;
 
    if (max_tol == 0.0 && mmax != 0.0 && tol != 0.0)
@@ -424,6 +423,63 @@ double d1_b0(double /* p2 */, double m2a, double m2b) noexcept
 
    return (m4a - m4b + 2. * m2a * m2b * std::log(m2b/m2a))
       /(2. * pow3(m2a - m2b));
+}
+
+double c00(double m1, double m2, double m3, double q) noexcept
+{  
+  // taken from Package X
+  using std::log;
+  const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3), q2 = sqr(q); 
+   
+  double ans = 0.;
+
+  if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)
+    && is_close(m3, 0., EPSTOL)) {
+      // IR singularity
+     ans =  0.;
+  } else if (is_close(m2, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m12);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m22);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m32);
+  } else if (is_close(m1, 0., EPSTOL)) {
+     if (is_close(m2, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m22);
+     } else {
+        ans = 3./8 - m22*log(m22/m32)/(4*(m22-m32)) + 1./4*log(q2/m32);
+     }
+  } else if (is_close(m2, 0., EPSTOL)) {
+     if (is_close(m1, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m12);
+     } else {
+        ans = 3./8 - m12*log(m12/m32)/(4*(m12-m32)) + 1./4*log(q2/m32);
+     }
+  } else if (is_close(m3, 0., EPSTOL)) {
+     if (is_close(m1, m2, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m12);
+     } else {
+        ans = 3./8 - m22*log(m12/m22)/(4*(m12-m22)) + 1./4*log(q2/m12);
+     }
+  } else if (is_close(m2, m3, EPSTOL)) {
+    if (is_close(m1, m2, EPSTOL)) {
+        ans = 1./4*log(q2/m12);
+    } else {
+        ans = (3*m12-m22)/(8*(m12-m22))
+            - 1./4*(sqr(m12)*log(m12/m22))/sqr(m12-m22) + 1./4*log(q2/m22);
+    }
+  } else if (is_close(m1, m2, EPSTOL)) {
+     ans = (3*m32-m12)/(8*(m32-m12)) - 1./4*(sqr(m32)*log(m32/m12))/sqr(m32-m12)
+         + 1./4*log(q2/m12);
+  } else if (is_close(m1, m3, EPSTOL)) {
+     ans = (3*m22-m12)/(8*(m22-m12)) - 1./4*(sqr(m22)*log(m22/m12))/sqr(m22-m12)
+         + 1./4*log(q2/m12);
+  } else {
+     ans = 3./8 - 1./4*sqr(m12)*log(m12/m32)/((m12-m22)*(m12-m32))
+         - 1./4*sqr(m22)*log(m22/m32)/((m22-m12)*(m22-m32)) + 1./4*log(q2/m32);
+  }
+
+  return ans;
 }
 
 } // namespace softsusy

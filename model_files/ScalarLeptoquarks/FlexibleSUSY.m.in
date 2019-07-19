@@ -1,0 +1,97 @@
+FSModelName = "ScalarLeptoquarks";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = "Leptoquarks/ScalarLeptoquarks";
+FSRGELoopOrder = 0;
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+MINPAR = {
+    {1, vSinput},
+    {2, MPhiinput}
+};
+
+EXTPAR = {
+    {1, Linput},
+    {2, LS3input},
+    {3, LS4input},
+    {4, LPhiinput},
+    {5, gSHinput},
+    {6, gHPinput},
+    {7, gSPinput},
+    {8, KSPinput},
+    {9, KSHinput}
+};
+
+EWSBOutputParameters = {mu2, MS2};
+FSSolveEWSBTreeLevelFor = EWSBOutputParameters;
+
+SUSYScale = LowScale;
+
+SUSYScaleFirstGuess = LowScaleFirstGuess;
+
+SUSYScaleInput = {};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowScale;
+
+
+LowScaleInput = {
+    {v,  2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+    {vS, vSinput},
+    {Ye, Automatic},
+    {Yd, Automatic},
+    {Yu, Automatic},
+    {\[Lambda], Linput},
+    {LS3, LS3input},
+    {LS4, LS4input},
+    {LPhi, LPhiinput},
+    {MPhi2, MPhiinput^2},
+    {gSH, gSHinput},
+    {gHP, gHPinput},
+    {gSP, gSPinput},
+    {KSP, KSPinput},
+    {KSH, KSHinput},
+    {MChi, LHInput[MChi]},
+    {lamL, LHInput[lamL]},
+    {lamR, LHInput[lamR]},
+    {gSC, LHInput[gSC]}
+};
+
+InitialGuessAtLowScale = {
+    {v , LowEnergyConstant[vev]},
+    {Ye, Automatic},
+    {Yd, Automatic},
+    {Yu, Automatic},
+    {vS, vSinput},
+    {\[Lambda], Linput},
+    {LS3, LS3input},
+    {LS4, LS4input},
+    {LPhi, LPhiinput},
+    {MPhi2, MPhiinput^2},
+    {gSH, gSHinput},
+    {gHP, gHPinput},
+    {gSP, gSPinput},
+    {KSP, KSPinput},
+    {KSH, KSHinput},
+    {MChi, LHInput[MChi]},
+    {lamL, LHInput[lamL]},
+    {lamR, LHInput[lamR]},
+    {gSC, LHInput[gSC]}
+};
+
+PotentialLSPParticles = {};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYOutput,
+           {{1, Hold[SUSYScale]},
+            {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy,
+           {{21, FlexibleSUSYObservable`aMuon},
+            {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+            {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]}, 
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+           }
+   } 
+};

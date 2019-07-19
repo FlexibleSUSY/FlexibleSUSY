@@ -68,10 +68,16 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
+		$(DIR)/ColorMathInterface.m \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
+		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
+		$(DIR)/FFVFormFactors.m \
+		$(DIR)/FFMassiveVFormFactors.m \
+		$(DIR)/FToFConversionInNucleus.m \
+		$(DIR)/BrLToLGamma.m \
 		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \

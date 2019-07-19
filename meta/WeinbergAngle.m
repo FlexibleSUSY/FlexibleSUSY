@@ -278,17 +278,13 @@ HiggsTopVertices[higgsName_] :=
 
 (*generalizes Higgs dependent part of (C.5) and (C.6) in hep-ph/9606211 analogous to (C.9) and (C.10)*)
 HiggsContributions2LoopSM[] :=
-    Module[{higgsVEVlist, higgsDep},
-           If[!ValueQ[SARAH`VEVSM],
+    Module[{higgsVEV = TreeMasses`GetSMVEVExpr[Undefined], higgsDep},
+           If[higgsVEV === Undefined,
               MuonDecayWorks = False;
               DebugPrint["Error: SM like Higgs vev does not exist"];
               Return[0]];
-           higgsVEVlist = Cases[Parameters`GetDependenceSPhenoRules[],
-                                RuleDelayed[SARAH`VEVSM, repr_] :> repr];
-           If[higgsVEVlist === {},
-              higgsVEVlist = {SARAH`VEVSM}];
            higgsDep = (Abs[#[[2]]]^2 - Abs[#[[3]]]^2) RHO2[FlexibleSUSY`M[#[[1]]]/MT] &;
-           Simplify[3 (GFERMI MT higgsVEVlist[[1]] / (8 Pi^2 Sqrt[2]))^2 *
+           Simplify[3 (GFERMI MT higgsVEV / (8 Pi^2 Sqrt[2]))^2 *
                     (Plus @@ (higgsDep /@ Join[HiggsTopVertices[SARAH`HiggsBoson],
                                                HiggsTopVertices[SARAH`PseudoScalar]]))]
           ];

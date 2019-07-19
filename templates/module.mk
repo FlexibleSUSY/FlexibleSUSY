@@ -8,10 +8,19 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/vertices_.cpp.in \
 		$(DIR)/cxx_qft/context_base.hpp.in \
 		$(DIR)/cxx_qft/npointfunctions.hpp.in \
+		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
+		$(DIR)/FFV_form_factors.hpp.in \
+		$(DIR)/FFV_form_factors.cpp.in \
+		$(DIR)/FFMassiveV_form_factors.hpp.in \
+		$(DIR)/FFMassiveV_form_factors.cpp.in \
+		$(DIR)/l_to_lgamma.hpp.in \
+		$(DIR)/l_to_lgamma.cpp.in \
+		$(DIR)/f_to_f_conversion.hpp.in \
+		$(DIR)/f_to_f_conversion.cpp.in \
 		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/ewsb_solver.hpp.in \
 		$(DIR)/ewsb_solver_interface.hpp.in \

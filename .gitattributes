@@ -26,6 +26,7 @@ meta/SM/beta_m2_1303.4364.m     export-ignore
 meta/SM/extract_*.m             export-ignore
 
 model_files/BetaSM              export-ignore
+model_files/BLSMlightZp         export-ignore
 model_files/cCMSSM              export-ignore
 model_files/complexMSSM         export-ignore
 model_files/CMSSMSemiAnalyticMW export-ignore
@@ -47,7 +48,7 @@ model_files/CMSSMMassWInput     export-ignore
 model_files/CMSSMConvergenceTester export-ignore
 model_files/CMSSMYt2L           export-ignore
 model_files/cSM                 export-ignore
-model_files/BLSMlightZp         export-ignore
+model_files/FlavorAligned2HDM   export-ignore
 model_files/HSSUSYSQCD          export-ignore
 model_files/HSSUSYNoMomIt       export-ignore
 model_files/InertMSSM           export-ignore
@@ -56,7 +57,6 @@ model_files/LRLR                export-ignore
 model_files/lowNUHMSSM          export-ignore
 model_files/lowNUHMSSMSemiAnalytic export-ignore
 model_files/MDM                 export-ignore
-model_files/MRSSM2              export-ignore
 model_files/MSSMNoEWVEVs        export-ignore
 model_files/MSSMNoFVSLHA2       export-ignore
 model_files/minMSSM             export-ignore
@@ -71,6 +71,7 @@ model_files/NUHMSSMNoFVNoMomIt  export-ignore
 model_files/rootMSSM            export-ignore
 model_files/YukawaCMSSM         export-ignore
 model_files/UnbrokenMSSM        export-ignore
+model_files/ScalarLeptoquarks   export-ignore
 model_files/SMEWSBAtMZ          export-ignore
 model_files/SMHighScale         export-ignore
 model_files/SMHighPrecision     export-ignore
@@ -93,6 +94,7 @@ models/fmssmn                   export-ignore
 release                         export-ignore
 
 sarah/B-L-SM-lightZp            export-ignore
+sarah/FlavorAligned2HDM         export-ignore
 sarah/InertMSSM                 export-ignore
 sarah/MDM                       export-ignore
 sarah/MSSMNoEWVEVs              export-ignore

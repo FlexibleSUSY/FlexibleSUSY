@@ -49,8 +49,13 @@ BeginPackage["FlexibleSUSY`",
               "Observables`",
               "CXXDiagrams`",
               "NPointFunctions`",
+              "WilsonCoeffs`",
               "AMuon`",
               "EDM`",
+              "FFVFormFactors`",
+              "BrLToLGamma`",
+              "FFMassiveVFormFactors`",
+              "FToFConversionInNucleus`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -120,7 +125,7 @@ MediumPrecision::usage="";
 HighPrecision::usage="";
 GUTNormalization::usage="Returns GUT normalization of a given coupling";
 
-BETA::usage = "Head for beta functions"
+BETA::usage = "Head for beta functions";
 FSModelName;
 FSOutputDir = ""; (* directory for generated code *)
 FSLesHouchesList;
@@ -185,6 +190,7 @@ UseSM3LoopRGEs = False;
 UseSM4LoopRGEs = False;
 UseSM5LoopRGEs = False;
 UseSMAlphaS3Loop = False;
+UseSMYukawa2Loop = False;
 UseMSSM3LoopRGEs = False;
 UseMSSMYukawa2Loop = False;
 UseMSSMAlphaS2Loop = False;
@@ -196,14 +202,27 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
+ExtraSLHAOutputBlocks::usage = "@unote
+this List is rewritten during the runnig of start.m script
+in the directory FlexibleSUSY/models/@CLASSNAME@ by
+the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
 ExtraSLHAOutputBlocks = {
-    {FlexibleSUSYLowEnergy,
-        {{1, FlexibleSUSYObservable`aMuon} } },
-    {EFFHIGGSCOUPLINGS, NoScale,
-        {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-         {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-         {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-         {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+    {
+    	FlexibleSUSYLowEnergy,
+        {
+        	{1, FlexibleSUSYObservable`aMuon}
+        } 
+    },
+    {
+    	EFFHIGGSCOUPLINGS, 
+    	NoScale,
+        {
+        	{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
+        	{2, FlexibleSUSYObservable`CpHiggsGluonGluon},
+        	{3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
+        	{4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} 
+        } 
+    }
 };
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
@@ -700,6 +719,9 @@ GeneralReplacementRules[] :=
     { "@UpYukawa@"       -> CConversion`ToValidCSymbolString[SARAH`UpYukawa],
       "@DownYukawa@"     -> CConversion`ToValidCSymbolString[SARAH`DownYukawa],
       "@ElectronYukawa@" -> CConversion`ToValidCSymbolString[SARAH`ElectronYukawa],
+      "@TrilinearUp@"          -> CConversion`ToValidCSymbolString[SARAH`TrilinearUp],
+      "@TrilinearDown@"        -> CConversion`ToValidCSymbolString[SARAH`TrilinearDown],
+      "@TrilinearLepton@"      -> CConversion`ToValidCSymbolString[SARAH`TrilinearLepton],
       "@LeftUpMixingMatrix@"   -> CConversion`ToValidCSymbolString[SARAH`UpMatrixL],
       "@LeftDownMixingMatrix@" -> CConversion`ToValidCSymbolString[SARAH`DownMatrixL],
       "@RightUpMixingMatrix@"  -> CConversion`ToValidCSymbolString[SARAH`UpMatrixR],
@@ -769,7 +791,7 @@ WriteRGEClass[betaFun_List, anomDim_List, files_List,
           display              = BetaFunction`CreateDisplayFunction[betaFun, numberOfBaseClassParameters];
           cCtorParameterList   = BetaFunction`CreateCCtorParameterList[betaFun];
           parameterCopyInit    = BetaFunction`CreateCCtorInitialization[betaFun];
-          betaParameterList    = BetaFunction`CreateParameterList[betaFun, "beta_"];
+          betaParameterList    = BetaFunction`FSCreateParameterList[betaFun, "beta_"];
           clearParameters      = BetaFunction`ClearParameters[betaFun];
           anomDimPrototypes    = AnomalousDimension`CreateAnomDimPrototypes[anomDim];
           anomDimFunctions     = AnomalousDimension`CreateAnomDimFunctions[anomDim];
@@ -1510,10 +1532,15 @@ CreateDefaultEWSBSolverConstructor[solvers_List] :=
            init
           ];
 
-WriteModelClass[massMatrices_List, ewsbEquations_List,
-                parametersFixedByEWSB_List, ewsbSubstitutions_List,
-                nPointFunctions_List, vertexRules_List, phases_List,
-                files_List, diagonalizationPrecision_List] :=
+WriteModelClass[massMatrices_List, 
+				ewsbEquations_List,
+                parametersFixedByEWSB_List, 
+                ewsbSubstitutions_List,
+                nPointFunctions_List, (* @unote *no* connection to the NPointFunctions Package! *)
+                vertexRules_List, 
+                phases_List,
+                files_List, 
+                diagonalizationPrecision_List] :=
     Module[{ewsbEquationsTreeLevel, independentEwsbEquationsTreeLevel,
             independentEwsbEquations,
             massGetters = "", k,
@@ -1642,7 +1669,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
-           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
+           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];  (* @unote *no* connection to the NPointFunctions Package! *)
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
            If[Parameters`GetExtraParameters[] =!= {},
@@ -1682,8 +1709,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            setExtraParameters           = Parameters`CreateExtraParameterArraySetter[Parameters`GetExtraParameters[]];
            mixingMatrices               = Flatten[TreeMasses`GetMixingMatrixSymbol[#]& /@ massMatrices];
            printMixingMatrices          = WriteOut`PrintParameters[mixingMatrices, "ostr"];
-           dependencePrototypes      = TreeMasses`CreateDependencePrototypes[massMatrices];
-           dependenceFunctions       = TreeMasses`CreateDependenceFunctions[massMatrices];
+           dependencePrototypes         = TreeMasses`CreateDependencePrototypes[];
+           dependenceFunctions          = TreeMasses`CreateDependenceFunctions[];
            If[Head[SARAH`ListSoftBreakingScalarMasses] === List,
               softScalarMasses          = DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses];,
               softScalarMasses          = {};
@@ -1992,33 +2019,38 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-  Module[{fields, cxxVerticesParts, massFunctions, unitCharge,
+  Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
           sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
           outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
           cxxQFTVerticesFiles},
-    fields = CXXDiagrams`CreateFields[];
-    cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
-    massFunctions = CXXDiagrams`CreateMassFunctions[];
-    unitCharge = CXXDiagrams`CreateUnitCharge[];
+
+     massFunctions = CXXDiagrams`CreateMassFunctions[];
+     fields = CXXDiagrams`CreateFields[];
+
+     If[vertices =!= {},
+
+        cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
+        unitCharge = CXXDiagrams`CreateUnitCharge[];
     
-    cxxVerticesParts[[1, 2]] = cxxVerticesParts[[1, 2]] <> "\n\n" <>
-      unitCharge;
+        cxxVerticesParts[[1, 2]] = cxxVerticesParts[[1, 2]] <> "\n\n" <>
+           unitCharge;
     
-    (* Document which vertices are created. This is mainly useful for
-       unit testing. See e.g test/test_MSSM_npointfunctions.m *)
-    outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-    cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
-    createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
+       (* Document which vertices are created. This is mainly useful for
+          unit testing. See e.g test/test_MSSM_npointfunctions.m *)
+       outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
+       cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
+       createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
     
-    If[DirectoryQ[cxxDiagramsDir] === False,
-		   CreateDirectory[cxxDiagramsDir]];
+       If[DirectoryQ[cxxDiagramsDir] === False,
+          CreateDirectory[cxxDiagramsDir]];
     
-    (* There is a bug in WriteString[] in older Mathematica versions
-       that causes the files to be left open. *)
-    fileHandle = OpenWrite[createdVerticesFile];
-    Write[fileHandle, vertices];
-    Close[fileHandle];
-    
+       (* There is a bug in WriteString[] in older Mathematica versions
+          that causes the files to be left open. *)
+       fileHandle = OpenWrite[createdVerticesFile];
+       Write[fileHandle, vertices];
+       Close[fileHandle];
+    ];
+
     WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"            -> fields,
                              "@CXXDiagrams_MassFunctions@"     -> massFunctions,
@@ -2052,7 +2084,7 @@ WriteEDMClass[edmFields_List,files_List] :=
           interfacePrototypes,interfaceDefinitions},
     graphs = EDM`EDMContributingGraphs[];
     diagrams = Outer[EDM`EDMContributingDiagramsForFieldAndGraph,edmFields,graphs,1];
-    
+
     vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2],1];
     
     {interfacePrototypes,interfaceDefinitions} = 
@@ -2069,34 +2101,175 @@ WriteEDMClass[edmFields_List,files_List] :=
                             }];
     
     vertices
-  ]
+  ];
+
+(* Write the FFV c++ files *)
+WriteFFVFormFactorsClass[extParticles_List, files_List] :=
+   Module[{
+         interfacePrototypes = "", interfaceDefinitions = "",
+         graphs, diagrams, vertices = {}
+      },
+
+      If[extParticles =!= {},
+
+      	graphs = FFVFormFactors`FFVGraphs[];
+	      diagrams =
+            Outer[FFVFormFactors`FFVContributingDiagramsForGraph, graphs, extParticles, 1];
+
+         (* group things not according to graphs but according to external states *)
+         (* diagrams[[i,j]] will be: i is for a given external state, j for a topology *)
+         diagrams = Transpose @ diagrams;
+
+      	vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2], 1];
+
+         {interfacePrototypes, interfaceDefinitions} =
+            StringJoin /@ (Riffle[#, "\n\n"]& /@ Transpose[
+               FFVFormFactors`FFVFormFactorsCreateInterfaceFunction[#1, graphs, #2]& @@@
+                  Transpose[{extParticles, diagrams}]
+            ]);
+         ];
+
+      WriteOut`ReplaceInFiles[files,
+         {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
+          "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
+          Sequence @@ GeneralReplacementRules[]}
+      ];
+
+      vertices
+   ];
+
+WriteFFMassiveVFormFactorsClass[extParticles_List, files_List] :=
+   Module[{
+         interfacePrototypes = "", interfaceDefinitions = "",
+         insertionsAndVertices, massiveVIndices = "", vertices = {}
+      },
+
+      If[extParticles =!= {},
+
+         massiveVIndices =
+            StringJoin[
+               Riffle[
+                  FFMassiveVFormFactors`MassiveVIndices /@
+                     Select[GetVectorBosons[], !(IsMassless[#] || IsElectricallyCharged[#])&],
+                  "\n"
+               ]
+            ];
+
+         insertionsAndVertices = FlattenAt[#, 1]& /@ Transpose[
+            {extParticles, ff @@@  extParticles}
+         ];
+
+         {interfacePrototypes, interfaceDefinitions} =
+             StringJoin /@ Transpose[
+                FFMassiveVFormFactors`FFMassiveVFormFactorsCreateInterface @@@
+                    insertionsAndVertices
+            ];
+
+         vertices = Flatten[insertionsAndVertices[[All, 3]][[All, All, 2]][[All, All, 2]], 2];
+      ];
+
+      WriteOut`ReplaceInFiles[files,
+         {"@FFMassiveVFormFactors_InterfacePrototypes@"  -> interfacePrototypes,
+          "@FFMassiveVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
+          "@FFMassiveVFormFactors_VIndices@" ->  massiveVIndices,
+          Sequence @@ GeneralReplacementRules[]}
+      ];
+
+      vertices
+  ];
+
+WriteLToLGammaClass[decays_List, files_List] :=
+   Module[{interfacePrototypes, interfaceDefinitions},
+    
+      {interfacePrototypes, interfaceDefinitions} = 
+         If[decays === {},
+            {"",""},
+            StringJoin @@@ 
+               (Riffle[#, "\n\n"]& /@ Transpose[BrLToLGamma`CreateInterfaceFunctionForBrLToLGamma /@ decays])
+         ];
+    
+      WriteOut`ReplaceInFiles[files, {
+            "@LToLGamma_InterfacePrototypes@"  -> interfacePrototypes,
+            "@LToLGamma_InterfaceDefinitions@" -> interfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]
+         }
+      ];
+   ];
+
+(* Write c++ files for the F -> F conversion in nucleus *)
+(* leptonPairs is a list of lists, sth like {{Fe -> Fe, Au}, {Fe ->  Fe, Al}} etc *)
+WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
+   Module[{interfacePrototypes = "", interfaceDefinitions = "",
+      massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
+      vertices = {}
+      },
+
+      If[leptonPairs =!= {},
+
+         (* additional vertices needed for the calculation *)
+         (* coupling of vector bosons to quarks *)
+         massiveNeutralVectorBosons = Select[GetVectorBosons[],
+            !(TreeMasses`IsMassless[#] || TreeMasses`IsElectricallyCharged[#])&
+         ];
+         (* @todo: should we include gluons or not? *)
+         masslessNeutralVectorBosons = Select[GetVectorBosons[],
+            (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])&
+         ];
+         (* drop nucleon, convert rule to list (so {Fe -> Fe, Au} into {Fe,Fe} *)
+         externalFermions = DeleteDuplicates@Flatten[
+            {TreeMasses`GetSMQuarks[], Drop[leptonPairs, None, -1] /. Rule[a_, b_] :> Sequence[a, b]}
+         ];
+         vertices = Flatten /@ Tuples[
+            {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
+            Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}
+         ];
+
+         {interfacePrototypes, interfaceDefinitions} =
+              StringJoin @@@
+            (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
+               DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]]
+            ] );
+      ];
+
+      WriteOut`ReplaceInFiles[files,
+         {"@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
+          "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
+          Sequence @@ GeneralReplacementRules[]}
+      ];
+
+      vertices
+   ];
 
 (* Write the AMuon c++ files *)
-WriteAMuonClass[files_List] :=
-    Module[{graphs,diagrams,vertices,
-            muonPoleMass,
-            muonPhysicalMass,
-            calculation,
-            getMSUSY},
-      graphs = AMuon`AMuonContributingGraphs[];
-      diagrams = AMuon`AMuonContributingDiagramsForGraph /@ graphs;
-      
-      vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,1],1];
-      
-      muonPhysicalMass = AMuon`AMuonCreateMuonPhysicalMass[];
-      calculation = AMuon`AMuonCreateCalculation @ Transpose[{graphs,diagrams}];
+WriteAMuonClass[calcAMu_, files_List] :=
+    Module[{calculation, getMSUSY,
+            (* in models without flavour violation (no FV models) muon does not have an index,
+               otherwise we assume it's the second particle in the lepton multiplet *)
+            muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
+            (* we want to calculate an offset of g-2 compared to the SM *)
+            discardSMcontributions = CXXDiagrams`CXXBoolValue[True]},
+
+      calculation =
+         If[calcAMu,
+            "const auto form_factors = " <>
+            FSModelName <> "_FFV_form_factors::calculate_" <> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "_" <>
+            CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> "_form_factors(" <>
+            muonIndex <> If[muonIndex === "", "", ", "] <>
+            muonIndex <> If[muonIndex === "", "", ", "] <>
+            "model, " <> discardSMcontributions <> ");",
+            "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
+         ];
             
       getMSUSY = AMuon`AMuonGetMSUSY[];
-      
+
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
-         "@AMuon_MuonPhysicalMass@"       -> TextFormatting`IndentText[muonPhysicalMass],
          "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
-         "@AMuon_GetMSUSY@"       -> IndentText[WrapLines[getMSUSY]],
+         "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
+         "@AMuon_MuonIndex@" -> muonIndex,
          Sequence @@ GeneralReplacementRules[]
         }];
-                              
-      vertices
+
       ];
 
 GetBVPSolverHeaderName[solver_] :=
@@ -2620,6 +2793,7 @@ FSCheckFlags[] :=
            If[FlexibleSUSY`UseHiggs3LoopSM === True,
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
              ];
@@ -2628,6 +2802,7 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
@@ -2651,7 +2826,10 @@ FSCheckFlags[] :=
               References`AddReference["Melnikov:2000qh"];
              ];
 
-           If[FlexibleSUSY`UseYukawa4LoopQCD || FlexibleSUSY`FlexibleEFTHiggs,
+           If[FlexibleSUSY`UseSMYukawa2Loop || FlexibleSUSY`UseYukawa4LoopQCD ||
+              FlexibleSUSY`FlexibleEFTHiggs,
+              Print["Adding 2-loop SM O(as^2,at*as,at^2) corrections to yt from ",
+                    "[arXiv:1604.01134]"];
               Print["Adding 4-loop SM QCD corrections to yt from ",
                     "[arxiv:1604.01134]"];
               References`AddReference["Martin:2016xsp"];
@@ -2659,8 +2837,8 @@ FSCheckFlags[] :=
 
            If[FlexibleSUSY`UseSMAlphaS3Loop || FlexibleSUSY`FlexibleEFTHiggs,
               Print["Adding 3-loop SM QCD threshold corrections to alpha_s ",
-                    "[arxiv:hep-ph/0004189]"];
-              References`AddReference["Chetyrkin:2000yt"];
+                    "[arxiv:hep-ph/9708255]"];
+              References`AddReference["Chetyrkin:1997un"];
              ];
 
            If[FlexibleSUSY`UseMSSMYukawa2Loop,
@@ -3066,7 +3244,7 @@ AddUnfixedParameterInfo[par_, inputPar_, blockList_] :=
           ];
 
 AddUnfixedParameterBlockInfo[unfixedParameters_List, blockList_List] :=
-    AddUnfixedParameterInfo[#[[1]], #[[2]], blockList]& /@ unfixedParameters
+    AddUnfixedParameterInfo[#[[1]], #[[2]], blockList]& /@ unfixedParameters;
 
 FindFixedParameters[] :=
     If[FlexibleSUSY`FlexibleEFTHiggs === True,
@@ -3429,8 +3607,11 @@ Options[MakeFlexibleSUSY] :=
     };
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
-    Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
+    Module[{nPointFunctions,  (* @unote *no* connection to the NPointFunctions Package! *) 
+    	    runInputFile, initialGuesserInputFile,
             edmVertices, aMuonVertices, edmFields,
+            LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
+            fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -3485,8 +3666,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            FSCheckFlags[];
            FSCheckLoopCorrections[FSEigenstates];
-           nPointFunctions = EnforceCpColorStructures @ SortCps @
-             Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
+           nPointFunctions = Vertices`EnforceCpColorStructures @ 
+           					 Vertices`SortCps @
+             				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];  (* @unote *no* connection to the NPointFunctions Package! *)
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
@@ -3788,7 +3970,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   effectiveCouplingsFileName];
               extraVertices = EffectiveCouplings`GetNeededVerticesList[effectiveCouplings];
               Put[vertexRules =
-                      Vertices`VertexRules[Join[nPointFunctions, extraVertices, deltaVBwave,
+                      Vertices`VertexRules[Join[nPointFunctions, 
+                      							extraVertices, deltaVBwave,
                                                 deltaVBvertex, deltaVBbox], Lat$massMatrices],
                   vertexRuleFileName],
               vertexRules = Get[vertexRuleFileName];
@@ -3800,8 +3983,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            Utils`PrintHeadline["Creating model"];
            Print["Creating class for model ..."];
-           WriteModelClass[massMatrices, ewsbEquations, FlexibleSUSY`EWSBOutputParameters,
-                           DeleteDuplicates[Flatten[#[[2]]& /@ solverEwsbSubstitutions]], nPointFunctions, vertexRules, Parameters`GetPhases[],
+           WriteModelClass[massMatrices, 
+           				   ewsbEquations, 
+           				   FlexibleSUSY`EWSBOutputParameters,
+                           DeleteDuplicates[Flatten[#[[2]]& /@ solverEwsbSubstitutions]], 
+                           nPointFunctions, 
+                           vertexRules, 
+                           Parameters`GetPhases[],
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_mass_eigenstates.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "mass_eigenstates.cpp.in"}],
@@ -4193,8 +4381,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
                       
-                      
-           Print["Creating EDM class..."];
+           Print["Creating EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
            edmVertices =
@@ -4203,10 +4390,108 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_edm.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "edm.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_edm.cpp"}]}}];
-           
-           Print["Creating AMuon class..."];
-           aMuonVertices = 
-             WriteAMuonClass[{{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
+
+           (* OBSERVABLE: l -> l gamma *)
+
+           LToLGammaFields =
+              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
+                     FlexibleSUSYObservable`BrLToLGamma[
+                        pIn_[_Integer]|pIn_?AtomQ -> {pOut_[_Integer]|pOut_?AtomQ, spectator_}
+                     ] :> (pIn -> {pOut, spectator})
+                  ];
+           Block[{properStates, wrongFields},
+              properStates = Cases[LToLGammaFields,
+                 Rule[a_?IsLepton, {b_?IsLepton, c_ /; c === GetPhoton[]}] -> (a -> {b, c})
+              ];
+              wrongFields = Complement[LToLGammaFields, properStates];
+              If[wrongFields =!= {},
+                 Print[
+                    "Warning: BrLToLGamma function works only for leptons and a photon. Removing requested process(es): " <>
+                     StringJoin@Riffle[ToString /@ wrongFields, ", "]
+                 ];
+                 LToLGammaFields = properStates;
+              ];
+           ];
+
+           Print["Creating l->l'A class ..."];
+           WriteLToLGammaClass[LToLGammaFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
+
+           (* OBSERVABLE: l -> l conversion *)
+
+           Print["Creating FToFConversionInNucleus class ..."];
+           LToLConversionFields =
+              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
+                FlexibleSUSYObservable`FToFConversionInNucleus[
+                   pIn_[_Integer] -> pOut_[_Integer], nucleus_
+                ] :> {pIn -> pOut, nucleus}
+              ];
+
+           conversionVertices =
+              WriteFToFConversionInNucleusClass[LToLConversionFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
+
+           Print["Creating FFMasslessV form factor class for other observables ..."];
+           FFMasslessVVertices =
+               WriteFFVFormFactorsClass[
+                  (* collect external states from observables needing massless triangles *)
+                  DeleteDuplicates @ Join[
+
+                     (* muon g-2 *)
+                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+                           Block[{muon = TreeMasses`GetSMMuonLepton[], muonWithoutIndex},
+                              muonWithoutIndex = If[AtomQ[muon], TreeMasses`GetSMMuonLepton[], Head@muon];
+                              {muonWithoutIndex -> {muonWithoutIndex, TreeMasses`GetPhoton[]}}
+                           ],
+                        {}
+                     ],
+
+                     (* Br(L -> L Gamma) *)
+                     LToLGammaFields,
+
+                     (* L -> L conversion in nucleus *)
+                     If[LToLConversionFields === {},
+                        {},
+                        (#[[1, 1]] -> {#[[1, 2]], TreeMasses`GetPhoton[]})& /@ Transpose[Drop[Transpose[LToLConversionFields],-1]]
+                     ]
+                  ],
+
+                  {{FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.hpp"}]},
+                     {FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
+               ];
+
+            (* internally the F -> F conversion routines require form factors with massive vector bosons *)
+            fieldsForFToFMassiveVFormFactors = {};
+            If[LToLConversionFields =!= {},
+               fieldsForFToFMassiveVFormFactors =
+               DeleteDuplicates @ Join[
+                  fieldsForFToFMassiveVFormFactors,
+                      Flatten /@ Tuples[{Drop[LToLConversionFields,None, -1],
+                        Select[GetVectorBosons[], !(IsMassless[#] || IsElectricallyCharged[#])&]}]
+               ]
+            ];
+
+            Print["Creating FFMassiveV form factor class for other observables ..."];
+            fFFMassiveVFormFactorVertices =
+               WriteFFMassiveVFormFactorsClass[
+                  DeleteDuplicates @ fieldsForFToFMassiveVFormFactors,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "FFMassiveV_form_factors.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFMassiveV_form_factors.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "FFMassiveV_form_factors.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFMassiveV_form_factors.cpp"}]}}
+               ];
+
+           Print["Creating AMuon class ..."];
+           WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+              {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.cpp"}]}}];
@@ -4222,18 +4507,24 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]}};
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],                                     (* @unote NPF Package! *)
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},            (* @unote NPF Package! *)
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],                        (* @unote NPF Package! *)
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}(* @unote NPF Package! *)
+                          };
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];
            cxxQFTVerticesMakefileTemplates = {{FileNameJoin[{cxxQFTTemplateDir, "vertices.mk.in"}],
                            FileNameJoin[{cxxQFTOutputDir, "vertices.mk"}]}};
 
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
-           
-           WriteCXXDiagramClass[Join[edmVertices,aMuonVertices], cxxQFTFiles,
-             cxxQFTVerticesTemplate, cxxQFTOutputDir,
-             cxxQFTVerticesMakefileTemplates];
+
+           WriteCXXDiagramClass[
+              Join[edmVertices, FFMasslessVVertices, fFFMassiveVFormFactorVertices, conversionVertices],
+              cxxQFTFiles,
+              cxxQFTVerticesTemplate, cxxQFTOutputDir,
+              cxxQFTVerticesMakefileTemplates
+           ];
 
            Utils`PrintHeadline["Creating Mathematica interface"];
            Print["Creating LibraryLink ", FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> ".mx"}], " ..."];

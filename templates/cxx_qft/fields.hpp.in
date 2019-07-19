@@ -28,7 +28,7 @@
 #ifndef @ModelName@_CXXQFT_FIELDS_H
 #define @ModelName@_CXXQFT_FIELDS_H
 
-#include <array>
+#include <array> /**< Only for field_indices and isSMField*/
 
 #include <boost/array.hpp>
 #include <boost/version.hpp>
@@ -48,110 +48,131 @@
 #include <boost/fusion/include/copy.hpp>
 #endif
 
-namespace flexiblesusy
-{
-namespace @ModelName@_cxx_diagrams
-{
-   // Declare a type that can hold the field indices for any given field
+namespace flexiblesusy {
+namespace @ModelName@_cxx_diagrams {
+   /** @brief Declare a type that can hold the field indices for any given field.
+    * @todo Field should have nested numberOfFieldIndices.
+    * @returns `::type` evaluates to `std::array<int,int N>`.
+    */
    template <class Field>
    struct field_indices {
+      /** @b using keyword here is type alias 
+       * (see https://en.cppreference.com/w/cpp/language/type_alias).
+       * It allows to use @code{.cpp}typename field_indices<Field>::type@endcode
+       * to get @code{.cpp}std::array<int, Field::numberOfFieldIndices>@endcode
+       * type in the code.
+       */
       using type = std::array<int, Field::numberOfFieldIndices>;
    };
 
-   namespace detail
-   {
-   template <class Field>
-   struct number_of_field_indices {
-      static constexpr int value =
-         std::tuple_size<typename field_indices<Field>::type>::value;
-      using type = boost::mpl::int_<value>;
-   };
-
-   template <class FieldSequence>
-   struct total_number_of_field_indices {
-      using type = typename boost::mpl::fold<
-         FieldSequence, boost::mpl::int_<0>,
-         boost::mpl::plus<boost::mpl::_1,
-                          number_of_field_indices<boost::mpl::_2>>>::type;
-      static constexpr int value = type::value;
-   };
+   namespace detail {
+      /** @brief Declare a metafunction that gives the int value for Field
+       * during compilation time or `int_<int N>` typename of this index. 
+       * @returns `::value` gives compile time integer value.
+       * @returns `::type` gives `int_<int N>` typename.
+       */
+      template <class Field>
+      struct number_of_field_indices {
+         static constexpr int value =
+            std::tuple_size<typename field_indices<Field>::type>::value;
+         using type = boost::mpl::int_<value>;
+      };
+      /*
+       * @param FieldSequence a Forward Sequence, e.g vector<type1,typ2,...>
+       * (see https://www.boost.org/doc/libs/1_69_0/libs/mpl/doc/refmanual/forward-sequence.html).
+       * @returns `::type` which accomodates `mpl::int_<N>` with `int N` being the 
+       * sum of @b number of indices of fields inside FieldSequence.
+       * @returns `::value` which represents `N` where `N` being the `int`
+       * sum of @b number of indices of fields inside FieldSequence
+       */
+      template <class FieldSequence>
+      struct total_number_of_field_indices {
+         using type = typename boost::mpl::fold<
+            FieldSequence,
+            boost::mpl::int_<0>,
+            boost::mpl::plus<boost::mpl::_1,
+                             number_of_field_indices<boost::mpl::_2>
+                            > 
+            >::type;
+         static constexpr int value = type::value;
+      };
    } // namespace detail
 
+   /* @note Is defined by compiler only if the number of generation for a field
+    * is not 1.
+    */
    template <class Field>
    typename std::enable_if<Field::numberOfGenerations != 1, bool>::type
-   isSMField(const typename field_indices<Field>::type& indices)
-   {
+   isSMField(const typename field_indices<Field>::type& indices) {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
-#if BOOST_VERSION >= 105800
-      boost::fusion::move(typename Field::sm_flags(), sm_flags);
-#else
+      #if BOOST_VERSION >= 105800
+      boost::fusion::move(typename Field::sm_flags(), sm_flags); /**< Making copy of the information from Field to sm_flags */
+      #else
       boost::fusion::copy(typename Field::sm_flags(), sm_flags);
-#endif
+      #endif
 
-      return sm_flags[indices.front()];
+      return sm_flags[indices.front()]; /**< front() accesses the first element. Either all are SM indices or none. */
    }
 
    template <class Field>
    typename std::enable_if<Field::numberOfGenerations == 1, bool>::type
-   isSMField(const typename field_indices<Field>::type&)
-   {
+   isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
 
-   namespace fields
-   {
-   template <class Field>
-   struct bar {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
+   namespace fields {
+      template <class Field>
+      struct bar {
+         using index_bounds = typename Field::index_bounds;
+         static constexpr int numberOfGenerations = Field::numberOfGenerations;
+         using sm_flags = typename Field::sm_flags;
+         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+         static constexpr double electric_charge = -Field::electric_charge;
+         using lorentz_conjugate = Field;
 
-      using type = bar<Field>;
-   };
+         using type = bar<Field>;
+       };
 
-   template <class Field>
-   struct conj {
-      using index_bounds = typename Field::index_bounds;
-      static constexpr int numberOfGenerations = Field::numberOfGenerations;
-      using sm_flags = typename Field::sm_flags;
-      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-      static constexpr double electric_charge = -Field::electric_charge;
-      using lorentz_conjugate = Field;
+      template <class Field>
+      struct conj {
+         using index_bounds = typename Field::index_bounds;
+         static constexpr int numberOfGenerations = Field::numberOfGenerations;
+         using sm_flags = typename Field::sm_flags;
+         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+         static constexpr double electric_charge = -Field::electric_charge;
+         using lorentz_conjugate = Field;
 
-      using type = conj<Field>;
-   };
+         using type = conj<Field>;
+      };
 
-   // Double Lorentz conjugation
-   template <class Field>
-   struct bar<bar<Field>> {
-      using type = Field;
-   };
-   template <class Field>
-   struct conj<conj<Field>> {
-      using type = Field;
-   };
+      // Double Lorentz conjugation
+      template <class Field>
+      struct bar<bar<Field>> {
+         using type = Field;
+      };
+      template <class Field>
+      struct conj<conj<Field>> {
+         using type = Field;
+      };
 
-   // Remove Lorentz conjugation
-   template <class Field>
-   struct remove_lorentz_conjugation {
-      using type = Field;
-   };
+      // Remove Lorentz conjugation
+      template <class Field>
+      struct remove_lorentz_conjugation {
+         using type = Field;
+      };
 
-   template <class Field>
-   struct remove_lorentz_conjugation<bar<Field>> {
-      using type = Field;
-   };
+      template <class Field>
+      struct remove_lorentz_conjugation<bar<Field>> {
+         using type = Field;
+      };
 
-   template <class Field>
-   struct remove_lorentz_conjugation<conj<Field>> {
-      using type = Field;
-   };
+      template <class Field>
+      struct remove_lorentz_conjugation<conj<Field>> {
+         using type = Field;
+      };
 
-   @CXXDiagrams_Fields@
+      @CXXDiagrams_Fields@
    } // namespace fields
 
    using fields::bar;

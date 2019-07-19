@@ -120,9 +120,6 @@ TestEquality[Coefficient[deriv, h, 2], 0];
 
 Print["Testing 3L renormalization group invariance of Mh^2 in the SM ..."];
 
-(* rounding uncertainty of 3L beta functions from [1307.3536] *)
-roundingUncertainty = 0.002;
-
 (* Eq.(3.5) of arxiv:1407.4336 *)
 a30 = -3776/9 + 320 Zeta[3] + 704 Pi^4/135 + 256/9 Log[2]^2 (Pi^2 - Log[2]^2) -
     2048/3 PolyLog[4,1/2];
@@ -131,13 +128,10 @@ a31 = 128 Zeta[3] + 2056/3;
 
 TestEquality[N[a30], 248.1215180432007];
 TestEquality[N[a31], 839.1966169377614];
-TestEquality[Coefficient[deriv, h, 3] // N // Chop[#,roundingUncertainty]&, 0];
+TestEquality[Coefficient[deriv, h, 3], 0];
 
 Print["Testing 4L renormalization group invariance of Mh^2 in the SM ..."];
 
-(* rounding uncertainty of 4L beta functions from [1508.00912] *)
-roundingUncertainty = 0.02;
-
-TestEquality[Coefficient[deriv, h, 4] // N // Chop[#,roundingUncertainty]&, 0];
+TestEquality[Coefficient[deriv, h, 4], 0];
 
 PrintTestSummary[];

@@ -71,8 +71,8 @@ private:
 
    class EEWSBStepFailed : public Error {
    public:
+      EEWSBStepFailed() : Error("Could not perform EWSB step") {}
       virtual ~EEWSBStepFailed() {}
-      virtual std::string what() const { return "Could not perform EWSB step."; }
    };
 
    int number_of_iterations{100}; ///< maximum number of iterations

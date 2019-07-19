@@ -467,7 +467,7 @@ try {
 
    MODEL->get_problems().unflag_no_sinThetaW_convergence();
 } catch (const Error& e) {
-   VERBOSE_MSG(e.what());
+   VERBOSE_MSG(e.what_detailed());
    MODEL->get_problems().flag_no_sinThetaW_convergence();
 }"
           ];
@@ -547,6 +547,9 @@ CalculateGaugeCouplings[] :=
 
 GetTwoLoopThresholdHeaders[] :=
     Module[{result = ""},
+           If[FlexibleSUSY`UseSMYukawa2Loop === True,
+              result = result <> "#include \"sm_twoloop_mt.hpp\"\n";
+             ];
            If[FlexibleSUSY`UseMSSMYukawa2Loop === True,
               result = "#include \"mssm_twoloop_mb.hpp\"\n" <>
                        "#include \"mssm_twoloop_mt.hpp\"\n" <>
