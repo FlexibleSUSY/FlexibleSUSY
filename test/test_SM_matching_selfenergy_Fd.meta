@@ -58,9 +58,9 @@ nPointFunctionHeaders = CreateCXXHeaders[
 ChiralBasis =
    {
       "value_right"->
-      FormCalc`DiracChain[FormCalc`Spinor[Mom[1], 0, -1], 6, FormCalc`Spinor[Mom[2], 0, -1]],
+      FormCalc`DiracChain[FormCalc`Spinor[Mom[2], 0, 1], 6, FormCalc`Spinor[Mom[1], 0, 1]],
       "value_left"->
-      FormCalc`DiracChain[FormCalc`Spinor[Mom[1], 0, -1], 7, FormCalc`Spinor[Mom[2], 0, -1]]
+      FormCalc`DiracChain[FormCalc`Spinor[Mom[2], 0, 1], 7, FormCalc`Spinor[Mom[1], 0, 1]]
    };
 
 (*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)

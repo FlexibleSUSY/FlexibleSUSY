@@ -420,10 +420,10 @@ Module[
       InsertionLevel -> Classes,
       Model -> feynArtsModel];
       
-   Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
+   (*Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
       FeynArts`PaintLevel->{Generic},
       FeynArts`SheetHeader->"GenericSum",
-      FeynArts`Numbering->FeynArts`Simple]];                                    (* @todo remove *)
+      FeynArts`Numbering->FeynArts`Simple]];                                     @todo remove *)
       
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
 
@@ -589,7 +589,13 @@ Module[
    ampsGen = If[zeroExternalMomenta,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
+      
+   Print[Head@ampsGen];
 
+   (*@TODO apply Fierz (when the amount of chains is larger than 1) or None only*)
+   
+   
+   
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
       FormCalc`CalcFeynAmp[Head[ampsGen][#],
@@ -598,13 +604,19 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> Chiral,
+         FormCalc`FermionOrder->None,
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
+   
+   (*Print[ Head[ calculatedAmplitudes[[1]] ][[1]] ];*)
+   (*@TODO place to get information about external fermionic fields*)
+   (*Print[ FormCalc`Abbr[] ];*)
 
    calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
+
 
    If[zeroExternalMomenta,
       zeroedRules = Cases[FormCalc`Abbr[],
