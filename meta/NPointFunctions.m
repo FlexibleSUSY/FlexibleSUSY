@@ -268,6 +268,8 @@ NPointFunction::errinFields=
 
 inFields should contain only names from the list of `2` particles
 `3`.
+(SARAH`.`bar for fermions and Susyno`.`LieGroups`.`conj for scalars is
+acceptable as well)
 @unote now only restricted set is supported";
 NPointFunction::erroutFields=
 "The element '`1`' of outFields is an incorrect one.

@@ -28,19 +28,7 @@ Utils`AssertWithMessage[MemberQ[$Packages, "FormCalc`"],
 FeynArts`$FAVerbose = 1;                                                        (* Change this to 2 to see more output (1 - less) *)
 FormCalc`$FCVerbose = 0;                                                        (* Change this to 1,2 or 3 to see more output *)
 
-SetFAFCPaths::usage=                                                            (* functions *)
-"@brief Set the FeynArts and FormCalc paths.
-@param FADirS the directory designated for FeynArts output
-@param FCDirS the directory designated for FormCalc output
-@param FAModelS the name of the FeynArts model file
-@param particleNamesFileS the name of the SARAH-generated particle names file
-@param substitutionsFileS the name of the SARAH-generated substitutions file
-@param particleNamespaceFileS the name of the particle namespace file
-@note allowed to be called only once
-@note effectively Private function";
-SetFAFCPaths::errOnce=
-"NPointFunctions`.`SetFAFCPaths[]: Multiple calls:
-something tries to redefine paths for FeynArts and FormCalc";
+{SetFAFCPaths}
 
 NPointFunctionFAFC::usage=
 "@note effectively Private function, see usage of NPointFunction[]";
@@ -147,6 +135,19 @@ Protect[calledPreviouslySetFAFCPaths,feynArtsDir,formCalcDir,feynArtsModel,
    subexpressionToFSRules,fieldNameToFSRules,amplitudeToFSRules
 ];
 
+SetFAFCPaths::usage=
+"@brief Set the FeynArts and FormCalc paths.
+@param FADirS the directory designated for FeynArts output
+@param FCDirS the directory designated for FormCalc output
+@param FAModelS the name of the FeynArts model file
+@param particleNamesFileS the name of the SARAH-generated particle names file
+@param substitutionsFileS the name of the SARAH-generated substitutions file
+@param particleNamespaceFileS the name of the particle namespace file
+@note allowed to be called only once
+@note effectively Private function";
+SetFAFCPaths::errOnce=
+"NPointFunctions`.`SetFAFCPaths[]: Multiple calls:
+something tries to redefine paths for FeynArts and FormCalc";
 SetFAFCPaths[FADir_String, FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
@@ -172,6 +173,7 @@ If[Utils`AssertOrQuit[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
       },{Protected, Locked}];
    SetFSConventionRules[];
 ];
+SetAttributes[SetFAFCPaths,{Protected,Locked}];
 
 SetFSConventionRules::usage=
 "@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY 
@@ -391,7 +393,7 @@ Module[
 Options[NPointFunctionFAFC]={
    LoopLevel -> 1,
    Regularize -> DimensionalReduction,
-   ZeroExternalMomenta -> False,
+   ZeroExternalMomenta -> True,
    OnShellFlag -> False,
    ExcludedTopologies -> {}
 };
@@ -582,6 +584,7 @@ Module[
    {
       combinatorialFactors = CombinatorialFactorsForClasses /@ {feynAmps},
       ampsGen = FeynArts`PickLevel[Generic][amps],
+      optFermionOrder,
       numExtParticles = Plus@@Length/@proc,
       calculatedAmplitudes,abbreviations,subexpressions,
       zeroedRules
@@ -589,13 +592,11 @@ Module[
    ampsGen = If[zeroExternalMomenta,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
-      
-   Print[Head@ampsGen];
 
-   (*@TODO apply Fierz (when the amount of chains is larger than 1) or None only*)
-   
-   
-   
+   optFermionOrder = Switch[getNumberOfChains@ampsGen,
+      2, FormCalc`Fierz,
+      _, None];
+
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
       FormCalc`CalcFeynAmp[Head[ampsGen][#],
@@ -604,14 +605,10 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> Chiral,
-         FormCalc`FermionOrder->None,
+         FormCalc`FermionOrder->optFermionOrder,
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
-   
-   (*Print[ Head[ calculatedAmplitudes[[1]] ][[1]] ];*)
-   (*@TODO place to get information about external fermionic fields*)
-   (*Print[ FormCalc`Abbr[] ];*)
 
    calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
@@ -630,6 +627,36 @@ Module[
       {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
 ];
+
+getNumberOfChains::usage =
+"@brief Is used to calculate number of opened fermion chains.
+@param FeynArts`FeynAmpList[..][..]
+@returns Number of opened fermion chains.";
+getNumberOfChains::errNumberOfFermions =
+"During evaluation unexpected value of fermions `1` was calculated.";
+getNumberOfChains::errUnknownInput =
+"Input should be
+getNumberOfExternalFermions@@{ FeynArts`FeynAmpList[___][___] }
+and not
+getNumberOfExternalFermions@@`1`";
+getNumberOfChains[
+   FeynArts`FeynAmpList[
+      ___,
+      FeynArts`Process->Rule[in:{{__}..},out:{{__}..}],
+      ___,
+      FeynArts`AmplitudeLevel->{Generic},
+      ___][___]
+] :=
+Module[{numberOfChains = 0},
+   Cases[Join[in[[All,1]],out[[All,1]]],FeynArts`F[__]|-FeynArts`F[__]:>numberOfChains++,{1}];
+   numberOfChains /= 2;
+   If[IntegerQ@numberOfChains && numberOfChains >= 0,
+      numberOfChains,
+      Utils`AssertOrQuit[False,getNumberOfChains::errNumberOfFermions,numberOfChains]
+   ]
+];
+getNumberOfChains[x___] :=
+Utils`AssertOrQuit[False,getNumberOfChains::errUnknownInput,{x}]
 
 applyAndPrint[func_,expr_,defLength_Integer:70] :=
 Module[
@@ -734,7 +761,7 @@ Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
 
 SetAttributes[
    {
-   SetFAFCPaths,SetFSConventionRules,
+   SetFSConventionRules,
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,

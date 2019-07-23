@@ -74,7 +74,6 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 
     if( problems.have_problem() == false )
 	{
-        //FIXME: Discuss global minus difference
 		auto fs_selfenergy_Fd_1 = model.self_energy_Fd_1loop_1(0, 2, 2);
 		auto np_selfenergy_Fd_1 =
 			MSSM_cxx_diagrams::npointfunctions::selfenergy_Fd_1loop(
