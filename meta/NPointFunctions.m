@@ -903,35 +903,42 @@ Utils`AssertOrQuit[False,CreateCXXFunctions::errUnknownInput,
    Part[Options@CreateCXXFunctions,All,1]];
 
 GetLTToFSRules::usage=
-"@brief returns rules for LoopTools to FlexibleSUSY conventions.
-@returns rules for LoopTools to FlexibleSUSY conventions.
+"@brief Returns rules for LoopTools to FlexibleSUSY conventions.
+@returns Rules for LoopTools to FlexibleSUSY conventions.
 @todo add specific rules for std::sqrt(0)
 @todo add specific rules for std::sqrt(Sqr())";
 GetLTToFSRules::errUnknownInput=
 "Input should have no parameters.";
 GetLTToFSRules[] :=
-Module[{warning="\033[1;33mWarning\033[1;0m"},
+Module[
+   {
+      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m","Warning"],
+      SqrtIfNeeded
+   },
+   SqrtIfNeeded[0]=0;
+   SqrtIfNeeded[Power[arg_,2]]:=arg;
+   SqrtIfNeeded[arg_]:="std::sqrt"@arg;
    WriteString[OutputStream["stdout", 1],
       warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented.\n"];
    WriteString[OutputStream["stdout", 1],
       warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta.\n"];
    {
       LoopTools`A0i[LoopTools`aa0, args__] :>
-         "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{args}],"context.scale()"],
+         "softsusy::a0"[Sequence@@SqrtIfNeeded/@{args},"context.scale()"],
       LoopTools`A0[arg_] :>
-         "softsusy::a0"[Apply[Sequence,"std::sqrt"/@{arg}],"context.scale()"],
+         "softsusy::a0"[SqrtIfNeeded@arg,"context.scale()"],
       LoopTools`B0i[LoopTools`bb0, args__] :>
-         "softsusy::b0"[Apply[Sequence,"std::sqrt" /@ {args}],"context.scale()"],
+         "softsusy::b0"[Sequence@@SqrtIfNeeded/@{args},"context.scale()"],
       LoopTools`B0i[LoopTools`bb1, args__] :>
-         "(-1)*softsusy::b1"[Apply[Sequence,Map[Sqrt, {args}] /. Sqrt[(Mass@x___)^2] :> Mass@x],"context.scale()"],
+         "(-1)*softsusy::b1"[Sequence@@SqrtIfNeeded/@{args},"context.scale()"],
       LoopTools`C0i[LoopTools`cc0, 0, 0, 0, args__] :>
-         "softsusy::c0"[Apply[Sequence,"std::sqrt" /@ {args}]],
+         "softsusy::c0"[Sequence@@SqrtIfNeeded/@{args}],
       LoopTools`C0i[LoopTools`cc00, 0, 0, 0, args__] :>
-         "softsusy::c00"[Apply[Sequence,"std::sqrt" /@ {args}], "context.scale()"],
+         "softsusy::c00"[Sequence@@SqrtIfNeeded/@{args}, "context.scale()"],
       LoopTools`D0i[LoopTools`dd0, 0, 0, 0, 0, 0, 0, args__] :>
-         "softsusy::d0"[Apply[Sequence,"std::sqrt" /@ {args}]],
+         "softsusy::d0"[Sequence@@SqrtIfNeeded/@{args}],
       LoopTools`D0i[LoopTools`dd00, 0, 0, 0, 0, 0, 0, args__] :>
-         "softsusy::d27"[Apply[Sequence,Map[Sqrt, {args}] /. Sqrt[(x___)^2] :> x]]
+         "softsusy::d27"[Sequence@@SqrtIfNeeded/@{args}]
    }
 ];
 GetLTToFSRules[__] :=

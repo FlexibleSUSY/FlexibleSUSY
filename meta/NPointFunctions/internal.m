@@ -201,7 +201,7 @@ Module[
       {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
       {
          ToExpression[MassP <> "@indices_:>" <> P <> 
-         "@{Symbol[SARAH`gt<>StringTake[SymbolName@indices,-1]]}"],
+         "@{Symbol[\"SARAH`gt\"<>StringTake[SymbolName@indices,-1]]}"],
          ToExpression[MassP <> "@indices__:>" <> P <> "@{indices}"],
          ToExpression[MassP <> "->" <> P]
       }
@@ -316,7 +316,7 @@ Module[
          SARAH`sum[uniqueSumIndex, 1, 4, SARAH`g[uniqueSumIndex, uniqueSumIndex] * 
             Append[a, uniqueSumIndex] * Append[b, uniqueSumIndex]]
       ],
-      fieldType_?(FAGenericFieldQ)[FeynArts`Index[Generic,number_Integer]
+      fieldType_?(FAFieldQ)[FeynArts`Index[Generic,number_Integer]
       ] :> fieldType@GenericIndex@number,
       FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]                    (* @note rule for external momenta *)
    };
@@ -584,7 +584,6 @@ Module[
    {
       combinatorialFactors = CombinatorialFactorsForClasses /@ {feynAmps},
       ampsGen = FeynArts`PickLevel[Generic][amps],
-      optFermionOrder,
       numExtParticles = Plus@@Length/@proc,
       calculatedAmplitudes,abbreviations,subexpressions,
       zeroedRules
@@ -592,10 +591,6 @@ Module[
    ampsGen = If[zeroExternalMomenta,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
-
-   optFermionOrder = Switch[getNumberOfChains@ampsGen,
-      2, FormCalc`Fierz,
-      _, None];
 
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
@@ -605,15 +600,17 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> Chiral,
-         FormCalc`FermionOrder->optFermionOrder,
+         FormCalc`FermionOrder -> Switch[getNumberOfChains@ampsGen,
+            2, FormCalc`Fierz,
+            _, None],
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
 
-   calculatedAmplitudes = SumOverAllFieldIndices /@ List@@calculatedAmplitudes;
+   calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
+
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
-
 
    If[zeroExternalMomenta,
       zeroedRules = Cases[FormCalc`Abbr[],
@@ -657,6 +654,7 @@ Module[{numberOfChains = 0},
 ];
 getNumberOfChains[x___] :=
 Utils`AssertOrQuit[False,getNumberOfChains::errUnknownInput,{x}]
+SetAttributes[getNumberOfChains,{Protected,Locked}];
 
 applyAndPrint[func_,expr_,defLength_Integer:70] :=
 Module[
@@ -696,29 +694,31 @@ Module[{position = Position[rules, FeynArts`RelativeCF]},
    {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
 ];
 
-SumOverAllFieldIndices::usage=
+ToGenericSum::usage=
 "@brief Given a generic amplitude, determine the generic fields over which it
 needs to be summed and return a corresponding GenericSum[] object.
 @param FormCalc`Amp[_->_][amp_] the given generic amplitude
 @returns {S|F|V|U|T[GenericIndex[number of index]]...}.";
-SumOverAllFieldIndices[FormCalc`Amp[_->_][amp_]] :=
+ToGenericSum[FormCalc`Amp[_->_][amp_]] :=
 Module[
    {
       sortSumFields = Sort@DeleteDuplicates[Cases[amp,
-         _?(FAGenericFieldQ)[FeynArts`Index[Generic,_Integer]],
+         _?(FAFieldQ)[FeynArts`Index[Generic,_Integer]],
          Infinity]],
       replSumFields
    },
    replSumFields = sortSumFields /. f_[_[_,i_]]:>f@GenericIndex@i;
    GenericSum[amp, replSumFields]
 ];
+SetAttributes[ToGenericSum,{Protected,Locked}];
 
-FAGenericFieldQ::usage=
-"@brief checks whether symbol belongs to FeynArts field names or not.
-@param symbol to check
-@returns True if symbol belongs to FeynArts field names, False otherwise.";
-FAGenericFieldQ = 
+FAFieldQ::usage=
+"@brief Checks whether symbol belongs to FeynArts` field names or not.
+@param Symbol to check.
+@returns True if symbol belongs to FeynArts` field names, False otherwise.";
+FAFieldQ = 
    MemberQ[{FeynArts`S,FeynArts`F,FeynArts`V,FeynArts`U,FeynArts`T},#]&;
+SetAttributes[FAFieldQ,{Protected,Locked}];
 
 ZeroRules::usage=
 "@brief Given a set of rules that map to zero and a set that does
@@ -765,8 +765,8 @@ SetAttributes[
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
-   CombinatorialFactorsForClasses,SumOverAllFieldIndices,
-   FAGenericFieldQ,ZeroRules,FCAmplitudesToFSConvention
+   CombinatorialFactorsForClasses,
+   ZeroRules,FCAmplitudesToFSConvention
    }, 
    {Protected, Locked}];
 
