@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE( test_fixed_values )
                       )
             );
 
-      BOOST_CHECK_CLOSE_FRACTION(mt_FS_fixed, mt_FS_num, eps);
+      BOOST_CHECK_CLOSE_FRACTION(mt_FS_fixed, mt_FS_num, 1e-12);
    }
 
    {
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( test_fixed_values )
                       )
             );
 
-      BOOST_CHECK_CLOSE_FRACTION(mt_SP_fixed, mt_SP_num, eps);
+      BOOST_CHECK_CLOSE_FRACTION(mt_SP_fixed, mt_SP_num, 1e-12);
    }
 }
 

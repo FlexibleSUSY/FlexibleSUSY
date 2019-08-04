@@ -1,5 +1,5 @@
-FlexibleSUSY 2.4.0 [not released yet]
-=====================================
+FlexibleSUSY 2.4.0 [August, 04 2019]
+====================================
 
 New features
 ------------
@@ -67,12 +67,17 @@ New features
       conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
 
       # install required libraries
-      conan install . --build=missing -s compiler.libcxx=libstdc++11
+      conan install . --build=missing
 
 * The output of ``make`` is now non-verbose by default.  To enable
   verbose ``make`` output run::
 
       make VERBOSE=1
+
+* New non-SUSY model LeptoSplitMSSM with light 1st and 2nd generation
+  sleptons and light charginos and neutrinos.
+
+  Thanks to Fabian Esser.
 
 Changes
 -------
@@ -84,6 +89,9 @@ Changes
   - g++ >= 5.0.0
   - clang++ >= 3.8.1
   - icpc >= 17.0.0
+
+* The support for BLAS/LAPACK as linear algebra libraries has been
+  dropped.
 
 Fixed bugs
 ----------
@@ -103,6 +111,12 @@ Fixed bugs
 
   Thanks to Emanuele Bagnaschi.
 
+* [commits 01c9471e, e9814ffc] Fix linking problem due to libpthread
+  not linked on some platforms.
+
+* [commit 41e13c3f] Fix compatibility with SARAH 4.14.2.  The issue
+  arose due to a name clash regarding the Mathematica function
+  ``CreateParameterList[]``.
 
 FlexibleSUSY 2.3.0 [January, 22 2019]
 =====================================
