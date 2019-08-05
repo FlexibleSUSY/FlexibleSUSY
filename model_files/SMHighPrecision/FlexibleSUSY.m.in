@@ -53,6 +53,7 @@ UseHiggs2LoopSM = True;
 UseHiggs3LoopSM = True;
 UseHiggs4LoopSM = True;
 UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh};
