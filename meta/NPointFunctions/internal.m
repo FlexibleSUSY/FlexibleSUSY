@@ -591,7 +591,7 @@ Module[
    ampsGen = If[zeroExternalMomenta,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
       ampsGen];
-
+      
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
       FormCalc`CalcFeynAmp[Head[ampsGen][#],
@@ -599,20 +599,20 @@ Module[
             DimensionalReduction, 4,
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
-         FormCalc`FermionChains -> Chiral,
+         FormCalc`FermionChains -> FormCalc`Chiral,
          FormCalc`FermionOrder -> Switch[getNumberOfChains@ampsGen,
             2, FormCalc`Fierz,
             _, None],
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
-
+   
    calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
 
-   abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[];
+   abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
-
    If[zeroExternalMomenta,
+      abbreviations = setZeroExternalMomentaInChains@abbreviations;
       zeroedRules = Cases[FormCalc`Abbr[],
          Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]
          :> (pair->0)];
@@ -625,10 +625,109 @@ Module[
       abbreviations, subexpressions]
 ];
 
+setZeroExternalMomentaInChains::usage =
+"@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
+@param abbreviations list of rules.
+@returns Changed list of rules.";
+setZeroExternalMomentaInChains::errUnknownInput =
+"Input should be
+setZeroExternalMomentaInChains@@{ <list of rules> }
+and not
+setZeroExternalMomentaInChains@@`1`";
+setZeroExternalMomentaInChains[abbreviations:{Rule[_,_]...}] :=
+Module[
+   {
+      replaceMomenta,temp,setZeroChainToZero
+   },
+   replaceMomenta[expr_] := expr/.FormCalc`k[_Integer]:>0;
+   temp = abbreviations/.chain:FormCalc`DiracChain[__] :> replaceMomenta@chain;
+   setZeroChainToZero[FormCalc`DiracChain[__,0,__]] := 0;
+   setZeroChainToZero[chain:FormCalc`DiracChain[__]] := chain;
+   temp/.chain:FormCalc`DiracChain[__] :> setZeroChainToZero@chain
+]; 
+setZeroExternalMomentaInChains[x___] := 
+Utils`AssertOrQuit[False,setZeroExternalMomentaInChains::errUnknownInput,{x}];
+SetAttributes[setZeroExternalMomentaInChains,{Protected,Locked}];
+
+identifySpinors::usage =
+"@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
+@param inp List of abbreviations to modify | FormCalc`DiracChain chain to modify.
+@param ampsGen FeynArts`FeynAmpList with information of process 
+@returns DiracChain with inserted fermion names | Expression with new DiracChains.
+@note DiracChains live only inside FormCalc`Abbr.
+@note Should NOT be used for Automatic FormCalc`FermionOrder.";
+identifySpinors::errUnknownInput =
+"Input should be
+identifySpinors@@{ <list of rules>, <feynamplist> } OR
+identifySpinors@@{ <diracchain>, <feynamplist> }
+and not
+identifySpinors@@`1`";
+identifySpinors[
+   inp:{Rule[_,_]...},
+   ampsGen:FeynArts`FeynAmpList[
+      ___,
+      (FeynArts`Process->Rule[{{__}..},{{__}..}]),
+      ___,
+      FeynArts`AmplitudeLevel->{Generic},
+      ___][___]] := 
+inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch,ampsGen];
+identifySpinors[
+   FormCalc`DiracChain[
+      FormCalc`Spinor[FormCalc`k[fermion1_Integer],mass1_,_Integer],
+      seqOfElems___,
+      FormCalc`Spinor[FormCalc`k[fermion2_Integer],mass2_,_Integer]],
+   FeynArts`FeynAmpList[
+      ___,
+      process:(FeynArts`Process->Rule[{{__}..},{{__}..}]),
+      ___,
+      FeynArts`AmplitudeLevel->{Generic},
+      ___][___]
+] :=
+Module[
+   {
+      identificationRules = getFermionPositionRules@process
+   },
+   FormCalc`DiracChain[
+   FormCalc`Spinor[fermion1/.identificationRules,FormCalc`k[fermion1],mass1],
+   seqOfElems,
+   FormCalc`Spinor[fermion2/.identificationRules,FormCalc`k[fermion2],mass2]]
+];
+identifySpinors[x___] :=
+Utils`AssertOrQuit[False,identifySpinors::errUnknownInput,{x}];
+SetAttributes[identifySpinors,{Protected,Locked}];
+
+getFermionPositionRules::usage =
+"@brief Gives rules of the form number_of_input_field->name_of_fermion.
+@param FeynArts`Process->Rule[_,_].
+@returns Rules of the form number_of_input_field->name_of_fermion.";
+getFermionPositionRules::errUnknownInput =
+"Input should be
+getFermionPositionRules@@{ FeynArts`Process->Rule[_,_] }
+and not
+getFermionPositionRules@@`1`";
+getFermionPositionRules[
+   FeynArts`Process->Rule[in:{{__}..},out:{{__}..}]
+] :=
+Module[
+   {
+      particleList = Join[in[[All,1]],out[[All,1]]],
+      current = 1
+   },
+   Flatten[ Reap[Do[
+      Sow@Cases[{particleList[[current]]},fermion:FeynArts`F[__]:>(current->fermion),{1}];
+      Sow@Cases[{particleList[[current]]},fermion:-FeynArts`F[__]:>(current->SARAH`bar[-fermion]),{1}];
+      current++,
+      Length@particleList]][[2]] ] //. fieldNameToFSRules
+];
+getFermionPositionRules[x___] :=
+Utils`AssertOrQuit[False,getFermionPositionRules::errUnknownInput,{x}]
+SetAttributes[getFermionPositionRules,{Protected,Locked}];
+
 getNumberOfChains::usage =
 "@brief Is used to calculate number of opened fermion chains.
 @param FeynArts`FeynAmpList[..][..]
 @returns Number of opened fermion chains.";
+
 getNumberOfChains::errNumberOfFermions =
 "During evaluation unexpected value of fermions `1` was calculated.";
 getNumberOfChains::errUnknownInput =
