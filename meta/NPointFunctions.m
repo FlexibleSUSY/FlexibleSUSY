@@ -185,7 +185,7 @@ NPFPattern::errWrongOptionValue =
 "Any option should have form symbolName_ or Blank[] and not
 `1`";
 NPFPattern::errUnknownInput = 
-"Correct input has the folliwing form:
+"Correct input has the following form:
 NPFPattern[options] where options have names from list
 `1`.";
 NPFPattern[opts:OptionsPattern[]] :=
@@ -836,7 +836,8 @@ CreateCXXFunctions::errLoopFunctions=
 CreateCXXFunctions::errNPFNoBasis=
 "Basis expressions are absent, but NPF object was converted to be used with some.";
 CreateCXXFunctions::errBasisNoNPF=
-"Basis expressions are given, but NPF object was not converted to be used with them.";
+"Basis expressions are given, but NPF object was not converted to be used with them
+(use WilsonCoeffs`.`InterfaceToMatching on NPF object).";
 CreateCXXFunctions::errNoMatch=
 "Length of basis and the given NPF one does not match."
 CreateCXXFunctions::errUnknownInput=

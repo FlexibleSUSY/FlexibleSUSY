@@ -727,7 +727,6 @@ getNumberOfChains::usage =
 "@brief Is used to calculate number of opened fermion chains.
 @param FeynArts`FeynAmpList[..][..]
 @returns Number of opened fermion chains.";
-
 getNumberOfChains::errNumberOfFermions =
 "During evaluation unexpected value of fermions `1` was calculated.";
 getNumberOfChains::errUnknownInput =
