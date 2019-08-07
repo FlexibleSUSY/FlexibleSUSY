@@ -21,94 +21,30 @@
 *)
 
 BeginPackage["NPointFunctions`",{"FeynArts`","FormCalc`","Utils`"}];
-Utils`AssertWithMessage[MemberQ[$Packages, "FeynArts`"],
-   "NPointFunctions`: Unable to load FeynArts` package"];
-Utils`AssertWithMessage[MemberQ[$Packages, "FormCalc`"],
-   "NPointFunctions`: Unable to load FormCalc` package"];
-FeynArts`$FAVerbose = 1;                                                        (* Change this to 2 to see more output (1 - less) *)
-FormCalc`$FCVerbose = 0;                                                        (* Change this to 1,2 or 3 to see more output *)
+FeynArts`$FAVerbose = 1;(* Change this to 2 to see more output (1 - less) *)
+FormCalc`$FCVerbose = 0;(* Change this to 1,2 or 3 to see more output *)
 
-{SetFAFCPaths}
+{setInitialValues,NPointFunctionFAFC}
 
-NPointFunctionFAFC::usage=
-"@note effectively Private function, see usage of NPointFunction[]";
-
-LorentzIndex::usage=                                                            (* symbols *)
-"Represent a Lorentz index of a generic field.";
-GenericIndex::usage=
-"Represent an index of a generic field.";
-GenericS::usage=
-"A symbol that acts as a placeholder for any scalar field.";
-GenericF::usage=
-"A symbol that acts as a placeholder for any fermion field.";
-GenericV::usage=
-"A symbol that acts as a placeholder for any vector field.";
-GenericU::usage=
-"A symbol that acts as a placeholder for any ghost field.";
-GenericT::usage=
-"A symbol that acts as a placeholder for any tensor field.";
-
-LoopLevel::usage=
-"Inherited option for NPointFunctions`.`NPointFunctionFAFC[].
-Encodes the loop level at which to calculate amplitudes.
-
-0 | 1 | ...";
-Regularize::usage=
-"Inherited option for NPointFunctions`.`NPointFunctionFAFC[].
-Encodes the regularization scheme to be used.
-
-DimensionalReduction | DimensionalRegularization";
-ZeroExternalMomenta::usage=
-"Inherited option for NPointFunctions`.`NPointFunctionFAFC[].
-Encodes whether to set the external momenta to zero or leave them undetermined.
-
-True | False";
-OnShellFlag::usage=
-"Inherited option for NPointFunctions`.`NPointFunctionFAFC[]
-Use on-shell external fields or not.
-
-True | False";
-ExcludedTopologies::usage=
-"Inherited option for NPointFunctions`.`NPointFunction[].
-Exclude specific topologies in FeynArts
-
-Any sublist of {OneParticleReducible,ExceptBoxes,ExceptTriangles}";
-
-DimensionalReduction::usage=
-"Possible value for the Regularize option";
-DimensionalRegularization::usage=
-"Possible value for the Regularize option";
-OneParticleReducible::usage=
-"Possible value for ExcludedTopologies.
-No tree-level-type propagators, i.e. if the topology is one-particle 
-irreducible.
-
-(Technically, converts further to FeynArts`.`Irreducible.)";
-ExceptBoxes::usage=
-"Possible value for ExcludedTopologies. 
-Exclude all topologies except box diagrams
-
-(Technically, converts further to FeynArts`.`Loops@Except@3.)";
-ExceptTriangles::usage=
-"Possible value for ExcludedTopologies. 
-Exclude all topologies except triangle diagrams
-
-(Technically, converts further to FeynArts`.`Loops@Except@4.)";
-GenericSum::usage="Represent a sum over a set of generic fields.";
-
-SetAttributes[
-   {LorentzIndex,GenericIndex,
+(* symbols that are not distributed from main kernel*)
+SetAttributes[#,{Locked,Protected}]&@
+{
+   LorentzIndex,GenericSum,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,GenericT,
-   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,ExcludedTopologies,
-   DimensionalReduction,DimensionalRegularization,OneParticleReducible,
-   ExceptBoxes,ExceptTriangles,GenericSum},
-   {Protected,Locked}];
+   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,ExcludeProcesses
+};
+(* symbols that can be distributed from main kernel*)
+If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
+{
+   DimensionalReduction,DimensionalRegularization,
+   ExceptIrreducible,ExceptBoxes,ExceptTriangles
+};
 
 Begin["`Private`"];
-calledPreviouslySetFAFCPaths::usage=
+calledPreviouslysetInitialValues::usage=
 "@brief is used to prohibid multiple calls of 
-NPointFunctions`.`SetFAFCPaths[].";
-calledPreviouslySetFAFCPaths = False;
+NPointFunctions`.`setInitialValues[].";
+calledPreviouslysetInitialValues = False;
 
 feynArtsDir = "";
 formCalcDir = "";
@@ -130,12 +66,12 @@ amplitudeToFSRules::usage=
 "A set of rules for @todo";
 amplitudeToFSRules= {};
 
-Protect[calledPreviouslySetFAFCPaths,feynArtsDir,formCalcDir,feynArtsModel,
+Protect[calledPreviouslysetInitialValues,feynArtsDir,formCalcDir,feynArtsModel,
    particleNamesFile,substitutionsFile,particleNamespaceFile,
    subexpressionToFSRules,fieldNameToFSRules,amplitudeToFSRules
 ];
 
-SetFAFCPaths::usage=
+setInitialValues::usage=
 "@brief Set the FeynArts and FormCalc paths.
 @param FADirS the directory designated for FeynArts output
 @param FCDirS the directory designated for FormCalc output
@@ -145,18 +81,18 @@ SetFAFCPaths::usage=
 @param particleNamespaceFileS the name of the particle namespace file
 @note allowed to be called only once
 @note effectively Private function";
-SetFAFCPaths::errOnce=
-"NPointFunctions`.`SetFAFCPaths[]: Multiple calls:
+setInitialValues::errOnce=
+"NPointFunctions`.`setInitialValues[]: Multiple calls:
 something tries to redefine paths for FeynArts and FormCalc";
-SetFAFCPaths[FADir_String, FCDir_String, FAModel_String,
+setInitialValues[FADir_String, FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
-If[Utils`AssertOrQuit[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
+If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,setInitialValues::errOnce],
    ClearAttributes[
       {
          feynArtsDir,formCalcDir,feynArtsModel,
          particleNamesFile,substitutionsFile,particleNamespaceFile,
-         calledPreviouslySetFAFCPaths
+         calledPreviouslysetInitialValues
       },{Protected}];
    feynArtsDir = FADir;
    formCalcDir = FCDir;
@@ -164,16 +100,16 @@ If[Utils`AssertOrQuit[!calledPreviouslySetFAFCPaths,SetFAFCPaths::errOnce],
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
    particleNamespaceFile = particleNamespaceFileS;
-   calledPreviouslySetFAFCPaths = True;
+   calledPreviouslysetInitialValues = True;
    SetAttributes[
       {
          feynArtsDir,formCalcDir,feynArtsModel,
          particleNamesFile,substitutionsFile,particleNamespaceFile,
-         calledPreviouslySetFAFCPaths
+         calledPreviouslysetInitialValues
       },{Protected, Locked}];
    SetFSConventionRules[];
 ];
-SetAttributes[SetFAFCPaths,{Protected,Locked}];
+SetAttributes[setInitialValues,{Protected,Locked}];
 
 SetFSConventionRules::usage=
 "@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY 
@@ -395,17 +331,13 @@ Options[NPointFunctionFAFC]={
    Regularize -> DimensionalReduction,
    ZeroExternalMomenta -> True,
    OnShellFlag -> False,
-   ExcludedTopologies -> {}
+   ExcludeProcesses -> {}
 };
+NPointFunctionFAFC::usage=
+"@note effectively Private function, see usage of NPointFunction[]";
 NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
 Module[
    {
-      excludedTopologies = OptionValue[ExcludedTopologies] /.
-         {
-            OneParticleReducible -> FeynArts`Reducible,
-            ExceptTriangles -> FeynArts`Loops@Except@3,
-            ExceptBoxes -> FeynArts`Loops@Except@4
-         },
       topologies, diagrams, amplitudes, genericInsertions, colourFactors, 
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -415,17 +347,18 @@ Module[
 
    topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
-      ExcludeTopologies -> excludedTopologies];
+      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@ExcludeProcesses];
 
    diagrams = FeynArts`InsertFields[topologies,
       inFields -> outFields,
-      InsertionLevel -> Classes,
-      Model -> feynArtsModel];
+      FeynArts`InsertionLevel -> FeynArts`Classes,
+      FeynArts`Model -> feynArtsModel];
       
-   (*Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
+   DeleteFile[FileNames[FileNameJoin@{feynArtsDir, "out*"}]];
+   Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
       FeynArts`PaintLevel->{Generic},
       FeynArts`SheetHeader->"GenericSum",
-      FeynArts`Numbering->FeynArts`Simple]];                                     @todo remove *)
+      FeynArts`Numbering->FeynArts`Simple]];                                    (* @todo remove *)
       
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
 
@@ -459,7 +392,44 @@ Module[
          colourFactors,
          {1, -1}]
    }
-]
+];
+
+topologyReplacements::usage =
+"@brief List of topology replacement rules for a processes to hold.";
+topologyReplacements =
+{
+   ExceptIrreducible -> (FreeQ[#,FeynArts`Internal]&),
+   ExceptTriangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
+   ExceptBoxes -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&)
+};
+SetAttributes[topologyReplacements,{Protected,Locked}];
+
+getExcludedTopologies::usage =
+"@brief Joins names of processes to hold into one functions, creates unique 
+name for it, then registers it for FeynArts` and returns the name.
+@param <{Symbol...} | Symbol> name(s) of processes to hold.
+@returns <Symbol> generated name of topologies to hold.";
+getExcludedTopologies::errUnknownInput =
+"Input should be
+getExcludedTopologies@@{ <{Symbol...} | Symbol> }
+and not
+getExcludedTopologies@@`1`";
+getExcludedTopologies[{}] :=
+{};
+getExcludedTopologies[{sym_Symbol}] :=
+getExcludedTopologies@sym;
+getExcludedTopologies[syms:{__Symbol}] :=
+Module[{excludeTopologyName},
+   FeynArts`$ExcludeTopologies[excludeTopologyName] =
+      (Or @@ Through[(syms/.topologyReplacements)@#])&;
+   excludeTopologyName];
+getExcludedTopologies[sym_Symbol] :=
+Module[{excludeTopologyName},
+   FeynArts`$ExcludeTopologies[excludeTopologyName] = sym/.topologyReplacements;
+   excludeTopologyName];
+getExcludedTopologies[x___] :=
+Utils`AssertOrQuit[False,getExcludedTopologies::errUnknownInput,{x}];
+SetAttributes[getExcludedTopologies,{Protected,Locked}];
 
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
