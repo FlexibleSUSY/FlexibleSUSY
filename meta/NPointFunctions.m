@@ -71,23 +71,22 @@ Exclude specific processes in FeynArts. \"Or\" logic is applied.
 def. {} | Any sublist of {ExceptIrreducible,ExceptBoxes,ExceptTriangles}";
 ExceptIrreducible::usage=
 "Possible value for ExcludeProcesses.
-No tree-level-type propagators, i.e. if the topology is one-particle 
-irreducible.
-
-(Technically, a wrapper for a case when the initialization of FeynArts` is 
-not needed. Internally converts further to FeynArts`Reducible.)";
+Exclude irreducible topologies.";
 ExceptBoxes::usage=
 "Possible value for ExcludeProcesses. 
-Exclude all topologies except box diagrams
-
-(Technically, a wrapper for a case when the initialization of FeynArts` is 
-not needed. Internally converts further to FeynArts`Loops@Except@3.)";
+Exclude all topologies except box diagrams.";
 ExceptTriangles::usage=
 "Possible value for ExcludeProcesses. 
-Exclude all topologies except triangle diagrams
+Exclude all topologies except triangle ones.";
 
-(Technically, a wrapper for a case when the initialization of FeynArts` is 
-not needed. Internally converts further to FeynArts`Loops@Except@4.)";
+ExceptFourFermionScalarPenguins::usage=
+"Possible value for ExcludeProcesses.
+Exclude all processes except 4-fermion penguins with scalar propagating from
+one fermionic chain to another one.
+Keep
+1) triangle-like topologies;
+2) \"self-energy\" diagrams on external fermionic lines
+amplitudes.";
 
 DimensionalReduction::usage=
 "Possible value for the Regularize option
@@ -293,7 +292,12 @@ NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
 NPointFunction::errExcludeProcesses=
 "ExcludeProcesses must be sublist of 
-{ExceptIrreducible,ExceptBoxes,ExceptTriangles}.";
+{
+   ExceptIrreducible,
+   ExceptBoxes,
+   ExceptTriangles,
+   ExceptFourFermionScalarPenguins
+}.";
 NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
 "Only external scalars/fermions are supported (@todo FOR NOW).";
 NPointFunction::errCalc=
@@ -445,7 +449,14 @@ Module[
    ],
    Utils`AssertOrQuit[
       And@@Map[
-         MemberQ[{ExceptIrreducible,ExceptBoxes,ExceptTriangles,Null},#]&,
+         MemberQ[
+            {
+               ExceptIrreducible,
+               ExceptBoxes,
+               ExceptTriangles,
+               ExceptFourFermionScalarPenguins,
+               Null
+            },#]&,
          If[Head@#===List,#,{#}]&@OptionValue@ExcludeProcesses
       ],
       NPointFunction::errExcludeProcesses

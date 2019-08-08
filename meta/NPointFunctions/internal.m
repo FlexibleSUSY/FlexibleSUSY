@@ -37,7 +37,8 @@ SetAttributes[#,{Locked,Protected}]&@
 If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 {
    DimensionalReduction,DimensionalRegularization,
-   ExceptIrreducible,ExceptBoxes,ExceptTriangles
+   (*for further details inspect topologyReplacements*)
+   ExceptIrreducible,ExceptBoxes,ExceptTriangles,ExceptFourFermionScalarPenguins
 };
 
 Begin["`Private`"];
@@ -348,11 +349,12 @@ Module[
    topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@ExcludeProcesses];
-
+   
    diagrams = FeynArts`InsertFields[topologies,
       inFields -> outFields,
       FeynArts`InsertionLevel -> FeynArts`Classes,
       FeynArts`Model -> feynArtsModel];
+   diagrams = getModifiedDiagrams[diagrams,OptionValue@ExcludeProcesses];
       
    DeleteFile[FileNames[FileNameJoin@{feynArtsDir, "out*"}]];
    Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
@@ -400,7 +402,8 @@ topologyReplacements =
 {
    ExceptIrreducible -> (FreeQ[#,FeynArts`Internal]&),
    ExceptTriangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   ExceptBoxes -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&)
+   ExceptBoxes -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
+   ExceptFourFermionScalarPenguins -> (amIPinguin@#&)
 };
 SetAttributes[topologyReplacements,{Protected,Locked}];
 
@@ -430,6 +433,65 @@ Module[{excludeTopologyName},
 getExcludedTopologies[x___] :=
 Utils`AssertOrQuit[False,getExcludedTopologies::errUnknownInput,{x}];
 SetAttributes[getExcludedTopologies,{Protected,Locked}];
+
+amIPinguin::usage =
+"@brief If given topology is pinguin-like (mainly, for CLFV processes), then 
+returns True, False otherwise.
+@param <FeynArts`Topology[_][__]> topology to check.
+@returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then 
+returns True, False otherwise.";
+amIPinguin::errUnknownInput =
+"Input should be
+amIPinguin@@{ <FeynArts`.`Topology[_][__]> }
+and not
+amIPinguin@@`1`";
+amIPinguin[topology:FeynArts`Topology[_][__]] :=
+Module[
+   {
+      (*@note During creation of topologies we have External only.*)
+      extType = FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing,
+      extFields
+   },
+   extFields = Cases[topology, _[extType][__]];
+   If[UnsameQ[Length@extFields, 4],Return@False];
+   If[! FreeQ[extFields, FeynArts`Vertex@4],Return@False];
+   If[FreeQ[FeynArts`ToTree@topology,FeynArts`Centre@Except@3],Return@True];
+   (*@note ,___ in the very end is for the stage when Field can appear.*)
+   SameQ[Length@Cases[FeynArts`ToTree@topology,_[extType][_,FeynArts`Centre[2][_],___]],1]
+];
+amIPinguin[x___] :=
+Utils`AssertOrQuit[False,amIPinguin::errUnknownInput,{x}];
+SetAttributes[amIPinguin,{Protected,Locked}];
+
+getModifiedDiagrams::usage = 
+"@brief Excludes some field insertions according to excudeProcess list.
+@param <TopologyList[_][__]> set of topology-insertion rules to modify.
+@param <List> set of names which specify the process to consider.
+@returns <TopologyList[_][__]> modified set of topologies.";
+getModifiedDiagrams::errUnknownInput =
+"Input should be
+getModifiedDiagrams@@{ <TopologyList[_][__]>, <List> }
+and not
+getModifiedDiagrams@@`1`";
+getModifiedDiagrams[
+   inserted:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   excludeProcesses:{___}] :=
+Module[
+   {
+   },
+   If[MemberQ[excludeProcesses,ExceptFourFermionScalarPenguins],
+      inserted = If[amIPinguin[#[[1]]],
+         (*Delete vector fields on tree-level like propagator.*)
+         #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
+         (*Else do not touch.*)
+         #]&/@ inserted;
+      Print["penguins: stu propagation of vector bosons is excluded"];
+   ];
+   inserted
+];
+getModifiedDiagrams[x___] :=
+Utils`AssertOrQuit[False,getModifiedDiagrams::errUnknownInput,{x}];
+SetAttributes[getModifiedDiagrams,{Protected,Locked}];
 
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
