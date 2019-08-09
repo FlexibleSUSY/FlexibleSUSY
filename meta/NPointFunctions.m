@@ -354,6 +354,7 @@ Module[
       CloseKernels@subKernel;
    ];
    
+   SetSharedFunction@deletePrintFromSubkernel;
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
    
    inFANames = FANamesForFields[inFields, particleNamesFile];
@@ -367,11 +368,11 @@ Module[
       particleNamesFile, substitutionsFile, particleNamespaceFile,
       inFANames, outFANames, loopLevel, regularizationScheme,
       zeroExternalMomenta, excludeProcesses, onShellFlag];
-
+      
    nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDirectory;
-
+      
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
       NPointFunctions`setInitialValues[feynArtsDir, formCalcDir, feynArtsModel,
@@ -387,6 +388,7 @@ Module[
       subKernel
    ];
    CloseKernels@subKernel;
+   UnsetShared@deletePrintFromSubkernel;
 
    Utils`AssertWithMessage[nPointFunction =!= $Failed,
       NPointFunction::errCalc];
@@ -1990,6 +1992,21 @@ StringRiffle[___] :=
    
 SetAttributes[{StringRiffle},{Protected, Locked}]
 ];
+
+deletePrintFromSubkernel::usage =
+"@brief Deletes last generated output of subkernel.
+@note One cannot share Locked symbols.";
+deletePrintFromSubkernel[] := "Redefined later";
+If[$Notebooks,
+   deletePrintFromSubkernel[] :=
+   (
+      SelectionMove[SelectedNotebook[],"Print",GeneratedCell,AutoScroll->False]; 
+      NotebookDelete@Last@SelectedCells@SelectedNotebook[];
+   ),
+   deletePrintFromSubkernel[] :=
+   WriteLine[OutputStream["stdout", 1],"\033[A\033[K\033[A\033[K\033[A\033[K\033[A"];
+];
+SetAttributes[deletePrintFromSubkernel,Protected];
 
 SetAttributes[
    {

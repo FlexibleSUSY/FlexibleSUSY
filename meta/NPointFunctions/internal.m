@@ -475,6 +475,11 @@ and not
 getModifiedDiagrams@@`1`";
 getModifiedDiagrams[
    inserted:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   excludeProcesses_
+] :=
+getModifiedDiagrams[inserted,{excludeProcesses}];
+getModifiedDiagrams[
+   inserted:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
    excludeProcesses:{___}] :=
 Module[
    {
@@ -806,7 +811,7 @@ Module[
          "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
          "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
       Sow@func[ expr[[now]] ];
-      write@"\033[A\033[K\033[A\033[A\033[K\033[A\033[A\033[A";
+      NPointFunctions`Private`deletePrintFromSubkernel[];
       now++;
       ,totL]
    ][[2,1]]
