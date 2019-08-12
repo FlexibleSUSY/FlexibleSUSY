@@ -24,7 +24,7 @@
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
- 
+
 #include "@ModelName@_context_base.hpp"
 #include "@ModelName@_vertices.hpp"
 
@@ -36,13 +36,12 @@
 #define DERIVEDPARAMETER(p) context.model.p()
 #define PHASE(p) context.model.get_##p()
 
-namespace flexiblesusy
-{
-namespace @ModelName@_cxx_diagrams
-{
-namespace detail
-{
+namespace flexiblesusy {
+namespace @ModelName@_cxx_diagrams {
+namespace detail {
+
 @CXXDiagrams_VertexDefinitions@
-}
-}
-}
+
+} // namespace detail
+} // namespace @ModelName@_cxx_diagrams
+} // namespace flexiblesusy

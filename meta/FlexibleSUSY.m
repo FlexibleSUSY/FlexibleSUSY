@@ -190,6 +190,7 @@ UseSM3LoopRGEs = False;
 UseSM4LoopRGEs = False;
 UseSM5LoopRGEs = False;
 UseSMAlphaS3Loop = False;
+UseSMAlphaS4Loop = False;
 UseSMYukawa2Loop = False;
 UseMSSM3LoopRGEs = False;
 UseMSSMYukawa2Loop = False;
@@ -2019,64 +2020,63 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-  Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
-          sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-          outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
-          cxxQFTVerticesFiles},
+    Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
+            sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
+            outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
+            cxxQFTVerticesFiles},
 
-     massFunctions = CXXDiagrams`CreateMassFunctions[];
-     fields = CXXDiagrams`CreateFields[];
+        massFunctions = CXXDiagrams`CreateMassFunctions[];
+        fields = CXXDiagrams`CreateFields[];
 
-     If[vertices =!= {},
+        If[vertices =!= {},
 
-        cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
+            cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
+    
+            (* Document which vertices are created. This is mainly useful for
+               unit testing. See e.g test/test_MSSM_npointfunctions.m *)
+            outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
+            cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
+            createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
+    
+            If[DirectoryQ[cxxDiagramsDir] === False,
+                CreateDirectory[cxxDiagramsDir]];
+    
+            (* There is a bug in WriteString[] in older Mathematica versions
+               that causes the files to be left open. *)
+            fileHandle = OpenWrite[createdVerticesFile];
+            Write[fileHandle, vertices];
+            Close[fileHandle];
+        ];
+
         unitCharge = CXXDiagrams`CreateUnitCharge[];
-    
-        cxxVerticesParts[[1, 2]] = cxxVerticesParts[[1, 2]] <> "\n\n" <>
-           unitCharge;
-    
-       (* Document which vertices are created. This is mainly useful for
-          unit testing. See e.g test/test_MSSM_npointfunctions.m *)
-       outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-       cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
-       createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
-    
-       If[DirectoryQ[cxxDiagramsDir] === False,
-          CreateDirectory[cxxDiagramsDir]];
-    
-       (* There is a bug in WriteString[] in older Mathematica versions
-          that causes the files to be left open. *)
-       fileHandle = OpenWrite[createdVerticesFile];
-       Write[fileHandle, vertices];
-       Close[fileHandle];
-    ];
+        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
 
-    WriteOut`ReplaceInFiles[files,
+        WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"            -> fields,
                              "@CXXDiagrams_MassFunctions@"     -> massFunctions,
                              "@CXXDiagrams_VertexPrototypes@"  ->
-                               StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
+                                StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]
                             }];
-    
-    cxxQFTVerticesFiles = Table[
-        {cxxQFTVerticesTemplate,
-		   FileNameJoin[{cxxQFTVerticesOutputDirectory,
+
+        cxxQFTVerticesFiles = Table[
+            {cxxQFTVerticesTemplate,
+		      FileNameJoin[{cxxQFTVerticesOutputDirectory,
 			   FSModelName <> "_" <> FileNameTake[StringReplace[cxxQFTVerticesTemplate,
 			     {".cpp.in" -> ToString[k] <> ".cpp"}]]}]
-			},
-		  {k, Length[cxxVerticesParts]}];
+			   },
+		      {k, Length[cxxVerticesParts]}];
 	
-    WriteOut`ReplaceInFiles[{#[[1]]},
-      {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
-       Sequence @@ GeneralReplacementRules[]
-      }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
-    WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
-      {"@generatedCXXVerticesFiles@" ->
-         "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
-       Sequence @@ GeneralReplacementRules[]
-      }];
- ]
+        WriteOut`ReplaceInFiles[{#[[1]]},
+            {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
+            Sequence @@ GeneralReplacementRules[]
+            }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
+        WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
+            {"@generatedCXXVerticesFiles@" ->
+                "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
+            Sequence @@ GeneralReplacementRules[]
+            }];
+    ];
 
 (* Write the EDM c++ files *)
 WriteEDMClass[edmFields_List,files_List] :=
@@ -2802,15 +2802,19 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
+              FlexibleSUSY`UseYukawa4LoopQCD = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
+              FlexibleSUSY`UseSM5LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseYukawa4LoopQCD === True,
               FlexibleSUSY`UseYukawa3LoopQCD = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
              ];
@@ -2839,6 +2843,12 @@ FSCheckFlags[] :=
               Print["Adding 3-loop SM QCD threshold corrections to alpha_s ",
                     "[arxiv:hep-ph/9708255]"];
               References`AddReference["Chetyrkin:1997un"];
+             ];
+
+           If[FlexibleSUSY`UseSMAlphaS4Loop || FlexibleSUSY`FlexibleEFTHiggs,
+              Print["Adding 4-loop SM QCD threshold corrections to alpha_s ",
+                    "[arxiv:hep-ph/0512060]"];
+              References`AddReference["Chetyrkin:2005ia"];
              ];
 
            If[FlexibleSUSY`UseMSSMYukawa2Loop,

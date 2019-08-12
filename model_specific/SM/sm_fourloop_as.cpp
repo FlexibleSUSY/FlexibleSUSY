@@ -16,17 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "sm_threeloop_as.hpp"
+#include "sm_fourloop_as.hpp"
 #include <cmath>
 #include <ostream>
 
 namespace flexiblesusy {
-namespace sm_threeloop_as {
+namespace sm_fourloop_as {
 
 namespace {
-   const double Pi = 3.1415926535897932384626433832795;
-   template <typename T> T power2(T x)  { return x*x; }
-   template <typename T> T power3(T x)  { return x*x*x; }
+   constexpr double Pi = 3.1415926535897932384626433832795;
+   template <typename T> constexpr T power2(T x) { return x*x; }
+   template <typename T> constexpr T power3(T x) { return x*x*x; }
+   template <typename T> constexpr T power4(T x) { return x*x*x*x; }
 } // anonymous namespace
 
 /**
@@ -94,6 +95,51 @@ double delta_alpha_s_3loop_as_as_as(const Parameters& pars)
    );
 }
 
+/**
+ * 4-loop O(alpha_s^4) contributions to Delta alpha_s, Eq (38) of
+ * [hep-ph/0512060]
+ *
+ * @param pars parameters
+ *
+ * @return 4-loop Delta alpha_s
+ */
+double delta_alpha_s_4loop_as_as_as_as(const Parameters& pars)
+{
+   const double as = pars.as;
+   const double mt2 = power2(pars.mt);
+   const double Q2 = power2(pars.Q);
+   const double L = std::log(Q2/mt2);
+   const double L2 = power2(L);
+   const double L3 = power3(L);
+   const double L4 = power4(L);
+   const double nl = 5.;
+   const double nl2 = power2(nl);
+   const double zeta3 = 1.202056903159594;
+   const double delta_MS_4 =
+      5.170346990805882 - 1.00993152453019 * nl - 0.0219783748689228 * nl2;
+
+   return power4(as / Pi) * (
+      + 121./1728.
+      - delta_MS_4
+      - 11093717./746496. * L
+      + 3022001./165888. * zeta3 * L
+      + 1837./1152. * L2
+      + 2909./10368. * L3
+      + 1./1296. * L4
+      + nl * (
+         + 141937./373248. * L
+         - 110779./82944. * zeta3 * L
+         + 277./10368. * L2
+         + 271./5184. * L3
+      )
+      + nl2 * (
+         - 6865./186624. * L
+         + 77./20736. * L2
+         - 1./324. * L3
+      )
+   );
+}
+
 std::ostream& operator<<(std::ostream& out, const Parameters& pars)
 {
    out <<
@@ -105,5 +151,5 @@ std::ostream& operator<<(std::ostream& out, const Parameters& pars)
    return out;
 }
 
-} // namespace sm_threeloop_as
+} // namespace sm_fourloop_as
 } // namespace flexiblesusy

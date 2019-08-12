@@ -35,7 +35,6 @@ TEST_SRC := \
 		$(DIR)/test_fixed_point_iterator.cpp \
 		$(DIR)/test_goldstones.cpp \
 		$(DIR)/test_gsl_vector.cpp \
-		$(DIR)/test_linalg2.cpp \
 		$(DIR)/test_minimizer.cpp \
 		$(DIR)/test_namespace_collisions.cpp \
 		$(DIR)/test_mssm_twoloop_mb.cpp \
@@ -48,6 +47,7 @@ TEST_SRC := \
 		$(DIR)/test_raii.cpp \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
+		$(DIR)/test_sm_fourloop_as.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_sum.cpp \
@@ -652,6 +652,18 @@ endif
 TEST_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(TEST_SRC)))
 
+TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
+
+$(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+
+$(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
+	@$(MSG)
+	$(Q)$(CXX) $(CPPFLAGS) -DTEST_LINALG2_PART$* $(CXXFLAGS) -c $< -o $@
+
+$(foreach i, 2 3 4 5 6 7 8, $(eval \
+$(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-1))).o))
+
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
 
@@ -786,11 +798,11 @@ $(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(LIBFFLITE)
 
 $(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBFLEXI)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPTOOLSLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
 $(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(filter-out %pv.o,$(LIBFLEXI_OBJ))
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(SQLITELIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)

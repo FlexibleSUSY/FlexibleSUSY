@@ -68,6 +68,8 @@ following table.
 
                              3-loop :math:`O(\alpha_s^3)` [hep-ph:9708255]_
 
+                             4-loop :math:`O(\alpha_s^4)` [hep-ph:0512060]_
+
  :math:`m_t`                 1-loop full
 
                              2-loop :math:`O((\alpha_s + \alpha_t)^2)` [hep-ph:9803493]_ [1604.01134]_
@@ -113,12 +115,6 @@ the Higgs pole mass of :math:`O(\alpha_t\alpha_s + \alpha_b\alpha_s)`
 + \alpha_t^2\alpha_s + \alpha_t\alpha_s^2)` [1407.4336]_ and 4-loop
 corrections :math:`O(\alpha_t\alpha_s^3)` [1508.00912]_ can be taken
 into account.
-
-.. note:: Note, that the 3-loop contributions :math:`O(\alpha_t^3 +
-          \alpha_t^2\alpha_s)` are incomplete, because the
-          corresponding 2-loop threshold corrections
-          :math:`O(\alpha_t^2 + \alpha_t\alpha_s)` to the running top
-          Yukawa coupling are not implemented yet.
 
 Input parameters
 ----------------
@@ -202,7 +198,7 @@ an SLHA input file we recommend to use::
        21   1            # EFT loop order for downwards matching
        22   0            # EFT index of SM-like Higgs in the BSM model
        23   1            # calculate BSM pole masses
-       24   124111321    # individual threshold correction loop orders
+       24   124111421    # individual threshold correction loop orders
        25   0            # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
        26   1            # Higgs 3-loop corrections O(alpha_t alpha_s^2)
        27   1            # Higgs 3-loop corrections O(alpha_b alpha_s^2)
@@ -237,7 +233,7 @@ In the Mathematica interface we recommend to use::
             eftMatchingLoopOrderDown -> 1,     (* FlexibleSUSY[21] *)
             eftHiggsIndex -> 0,                (* FlexibleSUSY[22] *)
             calculateBSMMasses -> 1,           (* FlexibleSUSY[23] *)
-            thresholdCorrections -> 124111321, (* FlexibleSUSY[24] *)
+            thresholdCorrections -> 124111421, (* FlexibleSUSY[24] *)
             higgs3loopCorrectionRenScheme -> 0,(* FlexibleSUSY[25] *)
             higgs3loopCorrectionAtAsAs -> 1,   (* FlexibleSUSY[26] *)
             higgs3loopCorrectionAbAsAs -> 1,   (* FlexibleSUSY[27] *)
@@ -319,6 +315,7 @@ References
 .. [hep-ph:0308231] `Phys.Lett. B579 (2004) 180-188 <https://inspirehep.net/record/626390>`_ [`arXiv:hep-ph/0308231 <https://arxiv.org/abs/hep-ph/0308231>`_]
 .. [hep-ph:0507139] `Phys.Atom.Nucl. 71 (2008) 343-350 <https://inspirehep.net/record/687205>`_ [`arXiv:hep-ph/0507139 <https://arxiv.org/abs/hep-ph/0507139>`_]
 .. [hep-ph:0509048] `Phys.Rev. D72 (2005) 095009 <https://inspirehep.net/record/691479>`_ [`arXiv:hep-ph/0509048 <https://arxiv.org/abs/hep-ph/0509048>`_]
+.. [hep-ph:0512060] `Nucl.Phys. B744 (2006) 121-135 <https://inspirehep.net/record/699609>`_ [`arXiv:hep-ph/0512060 <https://arxiv.org/abs/hep-ph/0512060>`_]
 .. [0707.0650] `Int.J.Mod.Phys. A22 (2007) 5245-5277 <https://inspirehep.net/record/755029>`_ [`arXiv:0707.0650 <https://arxiv.org/abs/0707.0650>`_]
 .. [0810.5101] `JHEP 0902 (2009) 037 <https://inspirehep.net/record/800842>`_ [`arXiv:0810.5101 <https://arxiv.org/abs/0810.5101>`_]
 .. [0901.2065] `Phys.Rev. D84 (2011) 034030 <https://inspirehep.net/record/811006>`_ [`arXiv:0901.2065 <https://arxiv.org/abs/0901.2065>`_]

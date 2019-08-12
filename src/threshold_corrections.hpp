@@ -43,7 +43,7 @@ struct Threshold_corrections {
 
    int alpha_em{1};
    int sin_theta_w{2};
-   int alpha_s{3};
+   int alpha_s{4};
    int mz{1};
    int mw{1};
    int mh{1};

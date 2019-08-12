@@ -25,7 +25,7 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
-   24   124111321            # individual threshold correction loop orders
+   24   124111421            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR', 1 = MDR', 2 = H3m)
    26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
    27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
