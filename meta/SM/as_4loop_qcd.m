@@ -4,6 +4,12 @@
 
  alphaSPrime = strong coupling in QCD with nl = (nf - 1) flavours
 
+ L = Log[Q^2/mf[Q]^2] see below Eq.(27)
+
+ Q = renormalization scale
+
+ mf[Q] = running heavy quark mass
+
  *)
 
 a4 = PolyLog[4, 1/2]

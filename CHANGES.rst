@@ -1,3 +1,25 @@
+FlexibleSUSY 2.4.1 [not released yet]
+=====================================
+
+New features
+------------
+
+* The 4-loop SM-QCD threshold corrections O(αs^4) to the strong
+  coupling `[hep-ph/0512060] <https://arxiv.org/abs/hep-ph/0512060>`_
+  can be added by setting ::
+
+      UseSMAlphaS4Loop = True
+
+  in the model file.
+
+Fixed bugs
+----------
+
+* [commit c06e57497]: The sign of 2- and 3-loop pure QCD threshold
+  corrections for αs in the Standard Model has been corrected.  The
+  effect is of the order 50 MeV w.r.t. the Higgs pole mass.
+
+
 FlexibleSUSY 2.4.0 [August, 04 2019]
 ====================================
 
@@ -603,7 +625,7 @@ New features
   been extracted from SOFTSUSY 4.0.1.
 
 * The 2- and 3-loop SM-QCD threshold corrections O(αs^2 + αs^3)
-  corrections to the strong coupling
+  to the strong coupling
   `[hep-ph/0004189] <https://arxiv.org/abs/hep-ph/0004189>`_ can be
   added by setting
   ::
