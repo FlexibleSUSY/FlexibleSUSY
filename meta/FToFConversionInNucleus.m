@@ -60,12 +60,13 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
 
                 "// get Fermi constant from Les Houches input file\n" <>
                 "const auto GF = qedqcd.displayFermiConstant();\n" <>
+                "constexpr bool discard_SM_contributions = false;\n" <>
 
                 "const auto photon_penguin = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
                     CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[SARAH`Photon] <> "_form_factors (" <>
                     If[TreeMasses`GetDimension[inFermion] =!= 1, "generationIndex1, ", " "] <>
                     If[TreeMasses`GetDimension[outFermion] =!= 1, " generationIndex2, ", " "] <>
-                    "model);\n" <>
+                    "model, discard_SM_contributions);\n" <>
 
                 "\n// translate from the convention of Hisano, Moroi & Tobe to Kitano, Koike & Okada\n" <>
                 (* TODO: check the statement below *)
