@@ -336,7 +336,8 @@ Module[
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
-         inFields,outFields,nPointFunctionsDir,Options@NPointFunction];
+         inFields,outFields,nPointFunctionsDir,
+         OptionValue[NPointFunction,Options[NPointFunction][[All, 1]]]];
       If[nPointFunction =!= Null, Return@nPointFunction]];
    
    feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
@@ -394,7 +395,8 @@ Module[
       NPointFunction::errCalc];
 
    If[OptionValue@UseCache,CacheNPointFunction[
-      nPointFunction,nPointFunctionsDir,Options@NPointFunction]];
+      nPointFunction,nPointFunctionsDir,
+   OptionValue[NPointFunction,Options[NPointFunction][[All,1]]]]];
 
    nPointFunction
 ] /; And[
@@ -600,8 +602,8 @@ CacheNameForMeta::usage=
 @param nPointMeta the given meta information
 @returns the name of the cache file for given meta information.
 ";
-CacheNameForMeta[nPointMeta:{__Rule}] :=
-   StringJoin["cache_",Riffle[ToString/@Flatten[Last/@nPointMeta], "_"],".m"]; 
+CacheNameForMeta[nPointMeta:{__}] :=
+   StringJoin["cache_",Riffle[ToString/@Flatten@nPointMeta, "_"],".m"];
 
 CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
@@ -609,7 +611,7 @@ CacheNPointFunction::usage=
 @param cacheDir the directory to save cache
 @param nPointMeta the meta information about the given n-point correlation 
 function";
-CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__Rule}] := 
+CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__}] :=
 Module[
    {
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
@@ -642,7 +644,7 @@ CachedNPointFunction::usage=
 @returns the corresponding n-point correalation function from the
 cache or `Null` if such a function could not be found.
 ";
-CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta:{__Rule}] := 
+CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta:{__}] :=
 Module[
    {
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
@@ -884,6 +886,7 @@ Module[
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF@NPF];
    definitionBody = CXXBodyNPF@NPF;
+   Print[NPF];
    auxClass = CXXClassForNPF[NPF/.loopFunctionRules,colourProjector,OptionValue@WilsonBasis];
    definition = auxClass <> "\n\n" <> definitionHead <> "{\n" <> definitionBody <> "\n}";
 
