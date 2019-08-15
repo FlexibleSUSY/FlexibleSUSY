@@ -87,6 +87,14 @@ Keep
 1) triangle-like topologies;
 2) \"self-energy\" diagrams on external fermionic lines
 amplitudes.";
+ExceptFourFermionMassiveVectorPenguins::usage=
+"Possible value for ExcludeProcesses.
+Exclude all processes except 4-fermion penguins with massive vector propagating 
+from one fermionic chain to another one.
+Keep
+1) triangle-like topologies;
+2) \"self-energy\" diagrams on external fermionic lines
+amplitudes.";
 
 DimensionalReduction::usage=
 "Possible value for the Regularize option
@@ -459,6 +467,7 @@ Module[
                ExceptBoxes,
                ExceptTriangles,
                ExceptFourFermionScalarPenguins,
+               ExceptFourFermionMassiveVectorPenguins,
                Null
             },#]&,
          If[Head@#===List,#,{#}]&@OptionValue@ExcludeProcesses
@@ -789,7 +798,7 @@ Module[
             "_npointfunctions_wilsoncoeffs.hpp\"",
             "_npointfunctions.hpp\""],
       loopHPP = Switch[OptionValue@LoopFunctions,
-         "LoopTools","<clooptools.h>",
+         "LoopTools","\"clooptools.h\"",
          "FlexibleSUSY","\"numerics.h\""]
    },
    "#include " <> mainHPP <> "\n" <>
@@ -886,7 +895,7 @@ Module[
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF@NPF];
    definitionBody = CXXBodyNPF@NPF;
-   Print[NPF];
+
    auxClass = CXXClassForNPF[NPF/.loopFunctionRules,colourProjector,OptionValue@WilsonBasis];
    definition = auxClass <> "\n\n" <> definitionHead <> "{\n" <> definitionBody <> "\n}";
 
