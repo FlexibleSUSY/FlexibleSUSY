@@ -358,17 +358,11 @@ Module[
    diagrams = getModifiedDiagrams[diagrams,OptionValue@ExcludeProcesses];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
+   amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(*@unote Remove colour indices following assumption 1*)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@ExcludeProcesses];
 
-   DeleteFile[FileNames[FileNameJoin@{feynArtsDir, "out*"}]];
-   Export[FileNameJoin@{feynArtsDir,"out.jpg"},FeynArts`Paint[diagrams,
-      FeynArts`PaintLevel->{FeynArts`Classes},
-      FeynArts`SheetHeader->"Class",
-      FeynArts`Numbering->FeynArts`Simple]];                                    (* @todo remove *)
+   debugMakePictures[diagrams];
 
-   amplitudes = Delete[amplitudes,
-      Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];             (*@unote Remove colour indices following assumption 1*)
-   
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
    colourFactors = Flatten[
@@ -423,6 +417,7 @@ Module[
       currentClasses
    },
    If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
+      Print["modifying amplitudes: penguins: stu propagation of massless bosons is excluded"];
       daPairs = getDAPairsByTopologyCriterion[diagrams,amIPinguin];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
       (*Get positions of classes to delete.*)
@@ -445,6 +440,7 @@ Module[
          numAmp = Part[numbersOfAmplitudes,i];
          newAmplitudes[[numAmp,4,2]] = amplitudes[[numAmp,4,2]][[numAmp/.rulesForClassesToSave]];
       ,{i,Length@numbersOfAmplitudes}];
+      printAmplitudesInfo[newAmplitudes,"modifying amplitudes"];
       (*Delete class diagrams.*)
       Do[
          If[daPairs[[i,1]]===True,
@@ -453,6 +449,7 @@ Module[
             newDiagrams[[i,2]] = ReplacePart[diagrams[[i,2]],currentClasses];
          ];
       ,{i,Length@daPairs}];
+      printDiagramsInfo[newDiagrams,"modifying amplitudes"];
    ];
    {newDiagrams,newAmplitudes}
 ];
@@ -586,7 +583,8 @@ Module[
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
          (*Else do not touch.*)
          #]&/@ inserted;
-         Print["penguins: stu propagation of vector bosons is excluded"];
+         Print["modifying diagrams: penguins: stu propagation of vector bosons is excluded"];
+         printDiagramsInfo[inserted,"modifying diagrams"];
       ];
       If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
          inserted = If[amIPinguin[#[[1]]],
@@ -594,7 +592,8 @@ Module[
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
          (*Else do not touch.*)
          #]&/@ inserted;
-         Print["penguins: stu propagation of scalars bosons is excluded"];
+         Print["modifying diagrams: penguins: stu propagation of scalars bosons is excluded"];
+         printDiagramsInfo[inserted,"modifying diagrams"];
       ];
    ];
    inserted
@@ -603,11 +602,40 @@ getModifiedDiagrams[x___] :=
 Utils`AssertOrQuit[False,getModifiedDiagrams::errUnknownInput,{x}];
 SetAttributes[getModifiedDiagrams,{Protected,Locked}];
 
-getModifiedAmplitudes::usage=
-"@brief Excludes some field insertions according to excudeProcess list.
-@param <TopologyList[_][__]> set of topology-insertion rules to modify.
-@param <List> set of names which specify the process to consider.
-@returns <TopologyList[_][__]> modified set of topologies.";
+printDiagramsInfo[
+   diagrams:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   where_String:"new"
+] :=
+Module[
+   {
+      nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True],
+      nClasses = Length@Cases[diagrams,FeynArts`Classes==_Integer:>1,Infinity,Heads -> True]
+   },
+   Print[where,": in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];
+];
+printAmplitudesInfo[
+   amplitudes:FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..],
+   where_String:"new"
+] :=
+Module[
+   {
+      nGeneric = Length@amplitudes,
+      nClasses = Plus@@(Length[#[[4,2]]]&/@amplitudes)
+   },
+   Print[where,": in total: ",nGeneric," Generic, ",nClasses," Classes amplitudes"];
+];
+debugMakePictures[
+   diagrams:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   name_String:"classes"
+] :=
+Module[
+   {},
+   DeleteFile[FileNames[FileNameJoin@{feynArtsDir, name<>"*"}]];
+   Export[FileNameJoin@{feynArtsDir,name<>".jpg"},FeynArts`Paint[diagrams,
+      FeynArts`PaintLevel->{FeynArts`Classes},
+      FeynArts`SheetHeader->name,
+      FeynArts`Numbering->FeynArts`Simple]]; 
+];
 
 GenericInsertionsForDiagram::usage=
 "@brief applies FindGenericInsertions[] to a 
