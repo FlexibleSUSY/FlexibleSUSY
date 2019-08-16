@@ -142,7 +142,8 @@ Specify {<string name> -> <basis expression>..} pairs for matching.
 def. {}";
 
 (*functions*)
-{NPointFunction,VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions};
+{NPointFunction,VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions,
+CreateCXXFToFConversionInNucleus};
 
 SetAttributes[
    {
@@ -157,6 +158,78 @@ SetAttributes[
    {Protected, Locked}];
 
 Begin["`Private`"];
+
+CreateCXXFToFConversionInNucleus::usage=
+"@todo";
+CreateCXXFToFConversionInNucleus::errFermion=
+"Input should be
+<fermion> -> <fermion>
+and not
+`1`";
+CreateCXXFToFConversionInNucleus[arg:{{_->_}..}] :=
+Module[
+   {
+      data = CreateCXXFToFConversionInNucleus@@#&/@arg,
+      vertices,header,code
+   },
+   vertices = DeleteDuplicates[Join@@(data[[All,1]])];
+   header = data[[1,2]];
+   code = StringRiffle[data[[All,3]],"\n\n"];
+   {vertices,header,code}
+];
+CreateCXXFToFConversionInNucleus[inF_->outF_] :=
+Module[
+   {
+      header=CreateCXXHeaders[LoopFunctions ->"LoopTools",UseWilsonCoeffs->True],
+      uQ=SARAH`UpQuark,uNPF,
+      dQ=SARAH`DownQuark, dNPF,
+      vectorBasisTemplate,ch=FormCalc`DiracChain,l=FormCalc`Lor,sp0,
+      codeU,codeD
+   },
+   sp0[part_,num_] := FormCalc`Spinor[part[{Symbol["SARAH`gt"<>ToString@num]}],0,0];
+   vectorBasisTemplate[i_,o_,q_] := 
+      {
+         (*@note Q: why names of coeffients are not correct? A: they are 
+          *correct, one just need to commute projectors with Dirac matrices, 
+          *what changes 6 to 7 or 7 to 6.*)
+         "V_LL_down" -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
+         "V_LR_down" -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
+         "V_RL_down" -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
+         "V_RR_down" -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]]
+      };
+   Print["Calculation for ",inF,"->",outF," started ..."];
+   uNPF = NPointFunction[{inF,uQ},{outF,uQ},
+      UseCache -> True,
+      ZeroExternalMomenta -> True, 
+      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
+   dNPF = NPointFunction[{inF,dQ},{outF,dQ},
+      UseCache -> True,
+      ZeroExternalMomenta -> True, 
+      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
+   Print["Calculation for ",inF,"->",outF," done."];
+   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~vectorBasisTemplate[inF,outF,uQ];
+   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~vectorBasisTemplate[inF,outF,dQ];
+   Print["C++ code calculation for ",inF,"->",outF," started ..."];
+   codeU = CreateCXXFunctions[uNPF,
+      "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
+      SARAH`Delta,
+      LoopFunctions -> "LoopTools",
+      WilsonBasis -> vectorBasisTemplate[inF,outF,uQ] ][[2]];
+   codeD = CreateCXXFunctions[dNPF,
+      "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
+      SARAH`Delta,
+      LoopFunctions -> "LoopTools",
+      WilsonBasis -> vectorBasisTemplate[inF,outF,dQ] ][[2]];
+   Print["C++ code calculation for ",inF,"->",outF," done."];
+   {
+      DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
+      header,
+      codeU<>"\n\n"<>codeD
+   }
+] /; Utils`AssertOrQuit[
+   TrueQ@@And/@TreeMasses`IsFermion@{inF,outF},
+   CreateCXXFToFConversionInNucleus::errFermion,
+   inF->outF];
 
 Options[NPFPattern] = {
    "Fields" -> _,
@@ -881,7 +954,7 @@ Module[
       noBasis = OptionValue@WilsonBasis === {},
       basisLength = Length@OptionValue@WilsonBasis,
       loopFunctionRules = Switch[OptionValue@LoopFunctions,
-         "LoopTools", {},
+         "LoopTools",Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
          "FlexibleSUSY", GetLTToFSRules[]],
       prototype,definitionHead,definitionBody,auxClass,definition
    },
@@ -895,7 +968,6 @@ Module[
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF@NPF];
    definitionBody = CXXBodyNPF@NPF;
-
    auxClass = CXXClassForNPF[NPF/.loopFunctionRules,colourProjector,OptionValue@WilsonBasis];
    definition = auxClass <> "\n\n" <> definitionHead <> "{\n" <> definitionBody <> "\n}";
 
