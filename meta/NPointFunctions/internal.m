@@ -212,23 +212,18 @@ Module[
       SARAH`Cp[fields][
          SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
       ],
-      
+
+      (*@note It seems that FA convention is changed by FC.*)
+      (*@note See Lorentz.gen (inside FA) for more information.*)
       (*VVV couplings*)
-      FeynArts`G[_][0][fields__][
-         Global`FourVector[
-            - FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer],
-            FeynArts`KI1[i3_Integer]
-         ]*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]]+
-         Global`FourVector[
-            FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer],
-            FeynArts`KI1[i2_Integer]
-         ]*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i3_Integer]]+
-         Global`FourVector[
-            -FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer],
-            FeynArts`KI1[i1_Integer]
-         ]*
+      FeynArts`G[-1][0][fields__][
+         (-FeynArts`Mom[i1_Integer]+FeynArts`Mom[i2_Integer])*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]]
+         +
+         (+FeynArts`Mom[i1_Integer]-FeynArts`Mom[i3_Integer])*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i3_Integer]]
+         +
+         (-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer])*
          Global`MetricTensor[FeynArts`KI1[i2_Integer],FeynArts`KI1[i3_Integer]]
       ] :>
       SARAH`Cp[fields][
@@ -360,7 +355,6 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(*@unote Remove colour indices following assumption 1*)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@ExcludeProcesses];
-
    debugMakePictures[diagrams];
 
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
@@ -403,6 +397,8 @@ getModifiedDA::errUnknownInput=
 getModifiedDA@@{ {<TopologyList>,<FeynAmpList>}, <List> }
 and not
 getModifiedDA@@`1`";
+getModifiedDA[{diagrams_,amplitudes_},excludeProcesses_] :=
+getModifiedDA[{diagrams,amplitudes},{excludeProcesses}];
 getModifiedDA[
    {
       diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..],
@@ -418,9 +414,9 @@ Module[
    },
    If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
       Print["modifying amplitudes: penguins: stu propagation of massless bosons is excluded"];
-      daPairs = getDAPairsByTopologyCriterion[diagrams,amIPinguin];
+      daPairs = getDAPairsByTopologyCriterion[diagrams,amITPinguin];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
-      (*Get positions of classes to delete.*)
+      (*Get positions of classes to save.*)
       rulesForClassesToSave=Reap[
          Do[
             numAmp = Part[numbersOfAmplitudes,i];
@@ -493,8 +489,8 @@ topologyReplacements =
    ExceptIrreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
    ExceptTriangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
    ExceptBoxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
-   ExceptFourFermionScalarPenguins -> (amIPinguin@#&),
-   ExceptFourFermionMassiveVectorPenguins -> (amIPinguin@#&)
+   ExceptFourFermionScalarPenguins -> (amITPinguin@#&),
+   ExceptFourFermionMassiveVectorPenguins -> (amITPinguin@#&)
 };
 SetAttributes[topologyReplacements,{Protected,Locked}];
 
@@ -525,34 +521,46 @@ getExcludedTopologies[x___] :=
 Utils`AssertOrQuit[False,getExcludedTopologies::errUnknownInput,{x}];
 SetAttributes[getExcludedTopologies,{Protected,Locked}];
 
-amIPinguin::usage =
+amITPinguin::usage =
 "@brief If given topology is pinguin-like (mainly, for CLFV processes), then 
 returns True, False otherwise.
 @param <FeynArts`Topology[_][__]> topology to check.
 @returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then 
 returns True, False otherwise.";
-amIPinguin::errUnknownInput =
+amITPinguin::errUnknownInput =
 "Input should be
-amIPinguin@@{ <FeynArts`.`Topology[_][__]> }
+amITPinguin@@{ <FeynArts`.`Topology[_][__]> }
 and not
-amIPinguin@@`1`";
-amIPinguin[topology:FeynArts`Topology[_][__]] :=
+amITPinguin@@`1`";
+amITPinguin[topology:FeynArts`Topology[_][__]] :=
 Module[
    {
       (*@note During creation of topologies we have External only.*)
-      extType = FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing,
-      extFields
+      ext = FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing,
+      int = FeynArts`Internal,
+      extFields,vert
    },
-   extFields = Cases[topology, _[extType][__]];
-   If[UnsameQ[Length@extFields, 4],Return@False];
-   If[! FreeQ[extFields, FeynArts`Vertex@4],Return@False];
+   extFields = Cases[topology, _[ext][__]];
+   If[UnsameQ[Length@extFields,4],Return@False];
+   If[!FreeQ[extFields,FeynArts`Vertex@4],Return@False];
+   (*Only t-channel.*)
+   If[!MatchQ[SortBy[topology,{Head@First@#&,First@First@#&}],
+         _[_][
+            _,_[ext][_[1][2],vert_,___],
+            _,_[ext][_[1][4],vert_,___],
+            ___,_[int][___,vert_,__],___
+         ]
+      ],
+      Return@False];
+   (*Rule for triangle.*)
    If[FreeQ[FeynArts`ToTree@topology,FeynArts`Centre@Except@3],Return@True];
    (*@note ,___ in the very end is for the stage when Field can appear.*)
-   SameQ[Length@Cases[FeynArts`ToTree@topology,_[extType][_,FeynArts`Centre[2][_],___]],1]
+   (*Rule for SE-like.*)
+   SameQ[Length@Cases[FeynArts`ToTree@topology,_[ext][_,FeynArts`Centre[2][_],___]],1]
 ];
-amIPinguin[x___] :=
-Utils`AssertOrQuit[False,amIPinguin::errUnknownInput,{x}];
-SetAttributes[amIPinguin,{Protected,Locked}];
+amITPinguin[x___] :=
+Utils`AssertOrQuit[False,amITPinguin::errUnknownInput,{x}];
+SetAttributes[amITPinguin,{Protected,Locked}];
 
 getModifiedDiagrams::usage = 
 "@brief Modifies diagrams according to excudeProcess list.
@@ -578,7 +586,7 @@ Module[
    If[Not[MemberQ[excludeProcesses,ExceptFourFermionScalarPenguins]&&
           MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins]],
       If[MemberQ[excludeProcesses,ExceptFourFermionScalarPenguins],
-         inserted = If[amIPinguin[#[[1]]],
+         inserted = If[amITPinguin[#[[1]]],
          (*Delete vector fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
          (*Else do not touch.*)
@@ -587,7 +595,7 @@ Module[
          printDiagramsInfo[inserted,"modifying diagrams"];
       ];
       If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
-         inserted = If[amIPinguin[#[[1]]],
+         inserted = If[amITPinguin[#[[1]]],
          (*Delete scalar fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
          (*Else do not touch.*)
@@ -631,7 +639,7 @@ debugMakePictures[
 Module[
    {},
    DeleteFile[FileNames[FileNameJoin@{feynArtsDir, name<>"*"}]];
-   Export[FileNameJoin@{feynArtsDir,name<>".jpg"},FeynArts`Paint[diagrams,
+   Export[FileNameJoin@{feynArtsDir,name<>".png"},FeynArts`Paint[diagrams,
       FeynArts`PaintLevel->{FeynArts`Classes},
       FeynArts`SheetHeader->name,
       FeynArts`Numbering->FeynArts`Simple]]; 
@@ -782,7 +790,7 @@ Module[
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
-   
+
    calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
 
    abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
