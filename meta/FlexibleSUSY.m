@@ -2201,7 +2201,7 @@ WriteLToLGammaClass[decays_List, files_List] :=
 WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
    Module[{interfacePrototypes = "", interfaceDefinitions = "",
       massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
-      vertices = {}
+      vertices = {},processesUnderInterest,npfVertices,npfHeaders,npfCode
       },
 
       If[leptonPairs =!= {},
@@ -2223,21 +2223,25 @@ WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
             {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
             Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}
          ];
-
+         processesUnderInterest = DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]];
+         {npfVertices,npfHeaders,npfCode} = NPointFunctions`CreateCXXFToFConversionInNucleus@processesUnderInterest;
          {interfacePrototypes, interfaceDefinitions} =
               StringJoin @@@
             (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
-               DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]]
+               processesUnderInterest
             ] );
       ];
 
       WriteOut`ReplaceInFiles[files,
-         {"@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
-          "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
-          Sequence @@ GeneralReplacementRules[]}
+         {
+            "@npf_headers@" -> npfHeaders,
+            "@npf_definitions@" -> npfCode,
+            "@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
+            "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]}
       ];
 
-      vertices
+      DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
 (* Write the AMuon c++ files *)
