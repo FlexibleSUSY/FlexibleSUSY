@@ -2201,7 +2201,7 @@ WriteLToLGammaClass[decays_List, files_List] :=
 WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
    Module[{interfacePrototypes = "", interfaceDefinitions = "",
       massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
-      vertices = {},processesUnderInterest,npfVertices,npfHeaders,npfCode
+      vertices = {},processesUnderInterest,npfVertices = {},npfHeaders = "",npfCode = ""
       },
 
       If[leptonPairs =!= {},
@@ -4532,7 +4532,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
-
            WriteCXXDiagramClass[
               Join[edmVertices, FFMasslessVVertices, fFFMassiveVFormFactorVertices, conversionVertices],
               cxxQFTFiles,
