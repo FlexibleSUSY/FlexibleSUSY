@@ -66,4 +66,31 @@ BOOST_AUTO_TEST_CASE( test_fixed_values_inverse )
    BOOST_CHECK_CLOSE_FRACTION(d2, -0.152778, eps);
    BOOST_CHECK_CLOSE_FRACTION(d3, -0.972057 + 0.0846515*nl, eps);
    BOOST_CHECK_CLOSE_FRACTION(d4, -5.10032 + 1.00993*nl + 0.0219784*nl2, eps);
+
+   const auto as6 = calc_alpha_s(pars, 4);
+
+   BOOST_CHECK_CLOSE_FRACTION(as6, alpha_s_SM5 * (1.0 + d1 + d2 + d3 + d4), eps);
+}
+
+BOOST_AUTO_TEST_CASE( test_alternatives )
+{
+   using namespace flexiblesusy::sm_fourloop_as;
+
+   const double eps = 1e-5;
+   const double pi = 3.1415926535897932384626433832795;
+   const double mt = 173.34;
+   const double alpha_s_SM5 = 0.1187;
+
+   Parameters pars;
+   pars.as = alpha_s_SM5;
+   pars.mt = mt;
+   pars.Q  = mt;
+
+   const auto as6     = calc_alpha_s(pars, 4);
+   const auto as6_alt = calc_alpha_s_alternative(pars, 4);
+
+   BOOST_TEST_MESSAGE("alpha_s       = " << as6);
+   BOOST_TEST_MESSAGE("alpha_s (alt) = " << as6_alt);
+
+   BOOST_CHECK_LT(std::abs(as6 - as6_alt)/as6, 1.0e-7);
 }
