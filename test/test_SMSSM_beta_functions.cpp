@@ -173,8 +173,7 @@ BOOST_AUTO_TEST_CASE( test_SMSSM_beta_functions )
    input.BMSInput = 600.;
    SMSSM<Two_scale> m;
    NmssmSoftsusy s;
-   setup_SMSSM(m, s, input);
-
+   setup_SMSSM_const(m, s, input);
    m.set_loops(2);
    s.setLoops(2);
 
