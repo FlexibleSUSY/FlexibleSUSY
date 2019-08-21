@@ -168,9 +168,9 @@ BOOST_AUTO_TEST_CASE( test_SMSSM_beta_functions )
    input.LambdaInput = 0.1;
    input.KappaInput = 0.2;
    input.LambdaSInput = 100;
-   input.L1Input = 400.;
+   input.L1Input = 400. * 400.;
    input.MSInput = 500.;
-   input.BMSInput = 600.;
+   input.BMSInput = 600. * 600.;
    SMSSM<Two_scale> m;
    NmssmSoftsusy s;
    setup_SMSSM_const(m, s, input);
