@@ -608,8 +608,8 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
                 + lam * kap * hlam * sqr(mupr) + lam * hlam * hkap * mupr )
        - 8.0 * ksq * (mSpsq * (2.0 * hkap + kap * mupr) + hkap * mupr * mupr)
        - 8.0 * kap * (mupr * Mkapsq + sqr(hkap) * mupr + 2.0 * ksq * mupr * mSsq)
-       + 1.2 * gsq(1) * (3.0 * m3sq - 2.0 * smu * mG(1)) * hlam
-       + 1.2 * gsq(1) * lam * (3.0 * m3sq * (mupr - mG(1)) + lam * xiS
+       + 0.5 * gsq(1) * (3.0 * m3sq - 2.0 * smu * mG(1)) * hlam
+       + 0.5 * gsq(1) * lam * (3.0 * m3sq * (mupr - mG(1)) + lam * xiS
                                + 2.0 * smu * (mH1sq + mH2sq - mupr * mG(1)
                                               + 2.0 * msq(1))
                                + 2.0 * xiF * (hlam - lam * mG(1)))
