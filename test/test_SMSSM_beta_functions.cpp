@@ -175,6 +175,9 @@ BOOST_AUTO_TEST_CASE( test_SMSSM_beta_functions )
    NmssmSoftsusy s;
    setup_SMSSM(m, s, input);
 
+   m.set_loops(2);
+   s.setLoops(2);
+
    test_parameter_equality(s, m);
    BOOST_REQUIRE(gErrors == 0);
    if (gErrors) {
