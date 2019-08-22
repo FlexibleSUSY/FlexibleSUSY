@@ -532,7 +532,6 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
                            - 2.0 * mupr * mG(1))
          + 12.0 * gsq(2) * (lsq * mSpsq + 2.0 * mupr * lam * hlam
                            - 2.0 * mupr * mG(2));
-
     } else {
       /// In the mixed case, we need to use the slower full 3-family
       /// expressions
@@ -613,8 +612,8 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
                                + 2.0 * smu * (mH1sq + mH2sq - mupr * mG(1)
                                               + 2.0 * msq(1))
                                + 2.0 * xiF * (hlam - lam * mG(1)))
-       + 3.0 * gsq(2) * (3.0 * m3sq - 2.0 * smu * mG(2)) * hlam
-       + 3.0 * gsq(2) * lam * (3.0 * m3sq * (mupr - mG(2)) + lam * xiS
+       + 6.0 * gsq(2) * (3.0 * m3sq - 2.0 * smu * mG(2)) * hlam
+       + 6.0 * gsq(2) * lam * (3.0 * m3sq * (mupr - mG(2)) + lam * xiS
                                + 2.0 * smu * (mH1sq + mH2sq - mupr * mG(2)
                                               + 2.0 * msq(2))
                                + 2.0 * xiF * (hlam - lam * mG(2)));
