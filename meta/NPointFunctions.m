@@ -163,9 +163,10 @@ CreateCXXFToFConversionInNucleus::usage=
 "@todo";
 CreateCXXFToFConversionInNucleus::errFermion=
 "Input should be
-<fermion> -> <fermion>
+<fermion> -> <fermion> or { { <fermion> -> <fermion> }.. }
 and not
 `1`";
+CreateCXXFToFConversionInNucleus[{{}}] := {{},"",""};
 CreateCXXFToFConversionInNucleus[arg:{{_->_}..}] :=
 Module[
    {
@@ -180,46 +181,60 @@ Module[
 CreateCXXFToFConversionInNucleus[inF_->outF_] :=
 Module[
    {
+      nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
+      nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
+      paveLibrary = "LoopTools" ,
       header=CreateCXXHeaders[LoopFunctions ->"LoopTools",UseWilsonCoeffs->True],
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
-      vectorBasisTemplate,ch=FormCalc`DiracChain,l=FormCalc`Lor,sp0,
+      basisTemplate,ch=FormCalc`DiracChain,l=FormCalc`Lor,sp0,
       codeU,codeD
    },
    sp0[part_,num_] := FormCalc`Spinor[part[{Symbol["SARAH`gt"<>ToString@num]}],0,0];
-   vectorBasisTemplate[i_,o_,q_] := 
+   basisTemplate[i_,o_,q_] :=
       {
+         ("S_LL_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
+         ("S_LR_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],6,sp0[q,2]],
+         ("S_RL_via_"<>ToString@q) -> ch[sp0[o,3],6,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
+         ("S_RR_via_"<>ToString@q) -> ch[sp0[o,3],6,sp0[i,1]] ch[sp0[q,4],6,sp0[q,2]],
          (*@note Q: why names of coeffients are not correct? A: they are 
           *correct, one just need to commute projectors with Dirac matrices, 
           *what changes 6 to 7 or 7 to 6.*)
-         "V_LL_down" -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
-         "V_LR_down" -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
-         "V_RL_down" -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
-         "V_RR_down" -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]]
+         ("V_LL_via_"<>ToString@q) -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
+         ("V_LR_via_"<>ToString@q) -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
+         ("V_RL_via_"<>ToString@q) -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
+         ("V_RR_via_"<>ToString@q) -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
+         (*@note Q: why minus? A: because FormCalc -6,Lor[1],Lor[2] is ours 
+          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when 
+          *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
+          *for FC because it cites [Ni05] for Fierz identities, where our
+          *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
+         ("minus_T_LL_via_"<>ToString@q) -> ch[sp0[q,4],-7,l@1,l@2,sp0[q,2]] ch[sp0[o,3],-7,l@1,l@2,sp0[i,1]],
+         ("minus_T_RR_via_"<>ToString@q) -> ch[sp0[q,4],-6,l@1,l@2,sp0[q,2]] ch[sp0[o,3],-6,l@1,l@2,sp0[i,1]]
       };
    Print["Calculation for ",inF,"->",outF," started ..."];
    uNPF = NPointFunction[{inF,uQ},{outF,uQ},
-      UseCache -> True,
-      ZeroExternalMomenta -> True, 
+      UseCache -> False,
+      ZeroExternalMomenta -> True,
       ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
-      UseCache -> True,
-      ZeroExternalMomenta -> True, 
+      UseCache -> False,
+      ZeroExternalMomenta -> True,
       ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
    Print["Calculation for ",inF,"->",outF," done."];
-   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~vectorBasisTemplate[inF,outF,uQ];
-   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~vectorBasisTemplate[inF,outF,dQ];
+   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~basisTemplate[inF,outF,uQ];
+   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~basisTemplate[inF,outF,dQ];
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
-      "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
+      nameForUpQuarkClass,
       SARAH`Delta,
-      LoopFunctions -> "LoopTools",
-      WilsonBasis -> vectorBasisTemplate[inF,outF,uQ] ][[2]];
+      LoopFunctions -> paveLibrary,
+      WilsonBasis -> basisTemplate[inF,outF,uQ] ][[2]];
    codeD = CreateCXXFunctions[dNPF,
-      "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
+      nameForUpDownClass,
       SARAH`Delta,
-      LoopFunctions -> "LoopTools",
-      WilsonBasis -> vectorBasisTemplate[inF,outF,dQ] ][[2]];
+      LoopFunctions -> paveLibrary,
+      WilsonBasis -> basisTemplate[inF,outF,dQ] ][[2]];
    Print["C++ code calculation for ",inF,"->",outF," done."];
    {
       DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
@@ -1919,32 +1934,40 @@ CXXCodeFunCalculate@@{`1`}.";
 CXXCodeFunCalculate[genSumNames:{__String},wilsonBasis:{Rule[_String,_]...},ind_String:""] :=
 Module[
    {
-      cxxExpr = StringRiffle[#<>If[wilsonBasis==={},"()","().at(i)"]&/@genSumNames,"+"],
-      initializeSums = StringRiffle[
-         Array[StringTemplate@"const auto genericsum`1` = genericSum`1`();",Length@genSumNames],
-         "\n"<>"   "],
-      out
+      varName = "genericsum" (* Feel free to change me to another c++ name *),
+      simpleSum,
+      varNames,initVars,sumOfSums
    },
-   out=If[wilsonBasis==={},
-      StringTemplate["std::complex<double> calculate( void ) { return `1`; }"][cxxExpr],
+   If[wilsonBasis==={},
+      simpleSum = StringRiffle[#<>"()"&/@genSumNames,"+"];
+      stringReplaceWithIndent["
+      std::complex<double> calculate( void ) {
+         return @SumOfSums@;
+      } // End of calculate()",
+      {
+         "@SumOfSums@"->simpleSum
+      }]~StringReplace~("\n"->"\n"<>ind),
+      (*Else*)
+      varNames = Array[varName<>ToString@#&,Length@genSumNames];(*{String..}*)
+      initVars = MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}]~StringRiffle~"\n   ";
+      sumOfSums = StringRiffle[#<>".at(i)"&/@varNames,"+"];
       stringReplaceWithIndent["
       std::array<std::complex<double>,@BasisLength@> calculate( void ) {
          std::array<std::complex<double>,@BasisLength@> genericSummation;
          constexpr int coeffsLength = genericSummation.size();
-         @InitializeSums@
+         @InitializeVariablesWhichStoreGenericSumsOutput@
          
          for ( std::size_t i=0; i<coeffsLength; i++ ) {
-            genericSummation.at(i) += @SumOfGenSums@;
+            genericSummation.at(i) += @SumOfVariables@;
          }
          return genericSummation;
       } // End of calculate()",
       {
          "@BasisLength@"->ToString@Length@wilsonBasis,
-         "@InitializeSums@"->initializeSums,
-         "@SumOfGenSums@"->cxxExpr
-      }]
-   ];
-   StringReplace[out,"\n"->"\n"<>ind]
+         "@InitializeVariablesWhichStoreGenericSumsOutput@"->initVars,
+         "@SumOfVariables@"->sumOfSums
+      }]~StringReplace~("\n"->"\n"<>ind)
+   ]
 ];
 CXXCodeFunCalculate[x___]:=
    Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput,{x}];
