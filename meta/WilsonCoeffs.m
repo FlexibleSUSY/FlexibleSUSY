@@ -56,12 +56,17 @@ findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
 Module[
    {
       (*@note there is F# <-> chain correspondence*)
-      basisPos = Flatten[Position[subs, #]& /@ chiralBasis[[All, 2]], 1],
-      rulePos
+      basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]],
+      i
    },
-   basisPos[[All, 2]] = basisPos[[All, 2]] - 1;
-   rulePos = FormCalc`Mat[Extract[subs, #]]& /@ basisPos;
-   MapThread[Rule,{chiralBasis[[All, 1]], rulePos}]
+   Table[
+      If[basisPos[[i]] === {},
+         Print["Warning: " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
+         chiralBasis[[i,1]]->FormCalc`Mat[],
+         (*else*)
+         chiralBasis[[i,1]]->FormCalc`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
+      ],
+      {i,Length@basisPos}]
 ];
 
 createNewNPF::usage =
