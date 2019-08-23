@@ -183,13 +183,14 @@ Module[
    {
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
-      paveLibrary = "LoopTools" ,
-      header=CreateCXXHeaders[LoopFunctions ->"LoopTools",UseWilsonCoeffs->True],
+      paveLibrary = "FlexibleSUSY" ,
+      header,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
       basisTemplate,ch=FormCalc`DiracChain,l=FormCalc`Lor,sp0,
       codeU,codeD
    },
+   header=CreateCXXHeaders[LoopFunctions ->paveLibrary,UseWilsonCoeffs->True];
    sp0[part_,num_] := FormCalc`Spinor[part[{Symbol["SARAH`gt"<>ToString@num]}],0,0];
    basisTemplate[i_,o_,q_] :=
       {
@@ -968,11 +969,9 @@ Module[
    {
       noBasis = OptionValue@WilsonBasis === {},
       basisLength = Length@OptionValue@WilsonBasis,
-      loopFunctionRules = Switch[OptionValue@LoopFunctions,
-         "LoopTools",Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
-         "FlexibleSUSY", GetLTToFSRules[]],
       prototype,definitionHead,definitionBody,auxClass,definition
    },
+   setLoopLibraryRules[OptionValue@LoopFunctions];
    prototype = If[noBasis,
       StringTemplate["std::complex<double> `2`(`3`);"],
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
@@ -983,7 +982,8 @@ Module[
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF@NPF];
    definitionBody = CXXBodyNPF@NPF;
-   auxClass = CXXClassForNPF[NPF/.loopFunctionRules,colourProjector,OptionValue@WilsonBasis];
+
+   auxClass = CXXClassForNPF[NPF,colourProjector,OptionValue@WilsonBasis];
    definition = auxClass <> "\n\n" <> definitionHead <> "{\n" <> definitionBody <> "\n}";
 
    {prototype, definition}
@@ -1014,6 +1014,21 @@ Module[
 CreateCXXFunctions[___] := 
 Utils`AssertOrQuit[False,CreateCXXFunctions::errUnknownInput,
    Part[Options@CreateCXXFunctions,All,1]];
+
+loopLibrary = {};
+SetAttributes[loopLibrary,Protected];
+setLoopLibraryRules[library_String] :=
+Module[{},
+   ClearAttributes[loopLibrary,Protected];
+   loopLibrary = Switch[library,
+      "LoopTools", Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
+      "FlexibleSUSY", GetLTToFSRules[]
+   ];
+   SetAttributes[loopLibrary,Protected];
+];
+SetAttributes[setLoopLibraryRules,{Locked,Protected}];
+getLoopLibraryRules[] := loopLibrary;
+SetAttributes[getLoopLibraryRules,{Locked,Protected}];
 
 GetLTToFSRules::usage=
 "@brief Returns rules for LoopTools to FlexibleSUSY conventions.
@@ -1109,10 +1124,9 @@ ExternalMomentaNPF[___] :=
    Utils`AssertOrQuit[False,ExternalMomentaNPF::errUnknownInput];
 
 CXXBodyNPF::usage=
-"@brief Return the c++ code for the function body of the c++ version of a given
-n-point correlation function.
-@param nPointFunction NPointFunction object
-@returns the c++ code for the function body of its c++ version.";
+"@brief Rturns the c++ code for the main master-function.
+@param <n> NPointFunction object
+@returns The c++ code for the main master-function.";
 CXXBodyNPF::errUnknownInput=
    ExternalIndicesNPF::errUnknownInput;
 CXXBodyNPF[nPointFunction:NPFPattern[]] :=
@@ -1154,7 +1168,7 @@ CXXClassForNPF[
       "ColFac"->colFac_,
       "Subs"->subexpressions_],
    projCol_,
-   wilsonBasis_] :=
+   wilsonBasis:{Rule[_String,_]...}] :=
 Module[
    {
       extIndices = ExternalIndicesNPF@nPointFunction,
@@ -1195,8 +1209,9 @@ Module[
    },
 
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
-   
+
    DummyIndent[str_String,ind_String:""] := StringReplace[str,"\n"->"\n"<>ind];
+
    genericSumsCode = StringRiffle[MapThread[
       CXXGenericSum[##,subexpressions,preCXXRules,wilsonBasis]&,
          {
@@ -1207,6 +1222,7 @@ Module[
             genSumNames
          }],
       "\n\n"];
+
 
    cxxCorrelationContext = StringTemplate[
       "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
@@ -1627,10 +1643,8 @@ Module[
             @InitializeContext@
             @InitializeOutputVars@
 
-            // Start of summation over generic fields
-            @StartSumOverGenFields@
-               @ChangeOutputVars@
-            @EndSumOverGenFields@
+
+            @SummationOverGenericFields@
 
             @ReturnOutputVars@
          } // End of operator()( void )
@@ -1665,9 +1679,7 @@ Module[
          "@InitializeSubstitutions@"->CXXSubsInGenericSum[sum,subexpressions],
          "@InitializeContext@"->context,
          "@InitializeOutputVars@"->CXXInitializeOutput@wilsonBasis,
-         "@StartSumOverGenFields@"->CXXBeginSum@genericFields,
-         "@ChangeOutputVars@"->CXXChangeOutput[expr->preCXXRules,wilsonBasis],
-         "@EndSumOverGenFields@"->CXXEndSum@genericFields,
+         "@SummationOverGenericFields@"->CXXChangeOutput[genericFields,expr->preCXXRules,wilsonBasis],
          "@ReturnOutputVars@"->CXXReturnOutput@wilsonBasis,
          "@GenericKeys@"->CXXGenFieldKey@genericFields,
          "@ClassInsertions@"->CXXClassInsertions@genericInsertions,
@@ -1702,39 +1714,113 @@ CXXInitializeOutput[x___]:=
    Utils`AssertOrQuit[False,CXXInitializeOutput::errUnknownInput,{x}];
 SetAttributes[CXXInitializeOutput,{Protected,Locked}];
 
-CXXInitializeOutput::usage =
+CXXChangeOutput::usage =
 "@brief Generates c++ code for output value updating inside GenericSum.
+@param genFields:{...} list of presenting generic fields.
 @param expr either single expression or list of expressions to be converted into c++.
 @preCXXRules list of rules to be applied at expr.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
-CXXInitializeOutput::errUnknownInput =
+CXXChangeOutput::errUnknownInput =
 "Input should be 
-CXXInitializeOutput@@{ {Rule[<string>,<expression>]...}, <string> }
+CXXChangeOutput @todo
 and not:
 CXXInitializeOutput@@`1`";
-CXXChangeOutput[expr_->preCXXRules_,{},ind_String:""] :=
+CXXChangeOutput[genFields:{__?IsGenericField},expr_->preCXXRules_,{},ind_String:""] :=
 Module[
    {
-      cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,expr,preCXXRules]]
+      newExpr = expr /. getLoopLibraryRules[],cxxExpr,out
    },
+   cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,newExpr,preCXXRules]];
    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-   "value += "<>stringGeneratedCut[cxxExpr<>";",100,",",ind<>"   "]
+   out="value += "<>stringGeneratedCut[cxxExpr<>";",100,",","   "<>ind<>"   "];
+   CXXBeginSum[genFields,ind]<>"\n"<>ind<>"   "<>out<>"\n"<>ind<>CXXEndSum[genFields,ind]
 ];
-CXXChangeOutput[expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
+CXXChangeOutput[genFields:{__?IsGenericField},expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
 Module[
    {
-      cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@expr,
-      updatingVars
+      code ="
+      // The following definitions are repeated in the GenericSum multiple times.
+      @Masses@
+      @Couplings@
+      @PaVe@
+
+      // Start of summation over generic fields.
+      @BeginSum@
+         @DefineMasses@
+         @DefineCpoulings@
+         @DefinePaVe@
+         @ChangeOutputValues@
+      @EndSum@",
+      modifiedExpr = expr,
+      masses,preMassCode,codeMass,rulesMass,
+      couplings,preCouplingCode,codeCoupling,rulesCoupling,
+      paves,prePaVeCode,codePaVe,rulesPaVe,
+      cxxExpr,updatingVars,
+      out
    },
+   masses = Tally@Cases[modifiedExpr,x_SARAH`Mass:>x,Infinity,Heads->True];
+   {preMassCode,codeMass,rulesMass} = createUniqueDefinitions[masses->preCXXRules,{"double","m"},"   "];
+   modifiedExpr = modifiedExpr /. rulesMass;
+
+   couplings = Tally@Cases[modifiedExpr,x:SARAH`Cp[__][___]:>x,Infinity,Heads->True];
+   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","c"},"   "];
+   modifiedExpr = modifiedExpr /. rulesCoupling;
+
+   paves = Tally@Cases[modifiedExpr,x:Alternatives[_LoopTools`A0i,_LoopTools`B0i,_LoopTools`C0i,
+      _LoopTools`D0i,_LoopTools`E0i,_LoopTools`F0i,_LoopTools`A0,_LoopTools`A00,
+      _LoopTools`B0,_LoopTools`B1,_LoopTools`B00,_LoopTools`B11,_LoopTools`B001,
+      _LoopTools`B111,_LoopTools`DB0,_LoopTools`DB1,_LoopTools`DB00,_LoopTools`DB11,
+      _LoopTools`C0,_LoopTools`D0,_LoopTools`E0,_LoopTools`F0]:>x,Infinity,Heads->True];
+   paves = paves /.getLoopLibraryRules[];
+   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","l"},"   "];
+   modifiedExpr = modifiedExpr /. getLoopLibraryRules[] /. rulesPaVe;
+
+   cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@modifiedExpr;
    cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
-   updatingVars = MapThread[#1<>" += "<>stringGeneratedCut[#2<>";",100,",",ind<>"   "]&, {wilsonBasis[[All,1]], cxxExpr}];
-   StringRiffle[updatingVars,"\n"<>ind]
+   updatingVars = MapThread[#1<>" += "<>#2<>";"&, {wilsonBasis[[All,1]], cxxExpr}];
+   out=StringRiffle[updatingVars,"\n"<>"   "];
+
+   stringReplaceWithIndent[code,
+   {
+   "@Masses@"->preMassCode,
+   "@Couplings@"->preCouplingCode,
+   "@PaVe@"->prePaVeCode,
+   "@BeginSum@"->CXXBeginSum@genFields,
+      "@DefineMasses@"->codeMass,
+      "@DefineCpoulings@"->codeCoupling,
+      "@DefinePaVe@"->codePaVe,
+      "@ChangeOutputValues@"->out,
+   "@EndSum@"->CXXEndSum@genFields
+   }]~StringReplace~("\n"->"\n"<>ind)
 ];
 CXXChangeOutput[x___]:=
    Utils`AssertOrQuit[False,CXXChangeOutput::errUnknownInput,{x}];
 SetAttributes[CXXChangeOutput,{Protected,Locked}];
+
+createUniqueDefinitions[{}->_,{_String,name_String},_String:""] := 
+   {
+      "// No "<>name<>"# present in this expression.",
+      "// Expression "<>name<>"# is not changed because it is absent here.",
+      {}
+   };
+createUniqueDefinitions[expr:{{_,_Integer}..}->preCXXRules_,{type_String,name_String},ind_String:""] :=
+Module[{names,namedExpr,code,rules},
+   namedExpr = Array[
+      {
+         name<>ToString@#,
+         Parameters`ExpressionToString[Fold[ReplaceAll,expr[[#,1]],preCXXRules]],
+         expr[[#,1]],
+         expr[[#,2]]
+      }&,
+      Length@expr
+   ];
+   names = type<>" "<>StringRiffle[namedExpr[[All,1]],", "]<>";";
+   code = StringRiffle[#1<>" = "<>#2<>"; // It is repeated "<>ToString@#4<>" times."&@@@namedExpr,"\n"<>ind];
+   rules = Rule@@@namedExpr[[All,{3,1}]];
+   {names,StringReplace[code,"\""->""],rules}
+];
 
 CXXReturnOutput::usage =
 "@brief Generates c++ code for output value return inside GenericSum.
