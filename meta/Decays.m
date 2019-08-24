@@ -797,23 +797,33 @@ CreateDecaysCalculationFunction[decaysList_] :=
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
                   "_decays(" <> If[particleDim > 1, "gI1", ""] <> ");\n" <> body;
            body =
-              "std::unique_ptr<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface> dec_model;\n" <>
-               "switch(1) {\n" <> TextFormatting`IndentText[
-                  "case 1:\n" <>
-                  "{\n" <> TextFormatting`IndentText[
-                     "std::unique_ptr<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme> decoupling_model = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(" <>
-               FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme(input));\n" <>
-            "decoupling_model->fill_from(model);\n" <>
-            "dec_model = std::move(decoupling_model);\n" <>
-                  "break;\n"] <> "}\n" <>
-                 "case 2:\n{\n" <>TextFormatting`IndentText[
-                     "dec_model = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
-                        "break;\n"
-                     ] <> "}\n"
-               ] <>
-               "}\n" <>
+              "const int flag = 1;\n" <>
+              "auto dec_model = [&] () -> std::unique_ptr<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_interface> {\n" <>
+              TextFormatting`IndentText[
+                 "switch (flag) {\n" <> TextFormatting`IndentText[
+                 "case 1: {\n" <>
+                 TextFormatting`IndentText[
+                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(input);\n" <>
+                    "dm->fill_from(model);\n" <>
+                    "return std::move(dm);\n" <>
+                    "break;\n"
+                 ] <>
+                 "}\n" <>
+                 "case 2:\n" <>
+                 TextFormatting`IndentText[
+                    "return std::move(std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model));\n" <>
+                    "break;\n"
+                  ] <>
+                  "default:\n" <>
+                  TextFormatting`IndentText[
+                     "throw SetupError(\"flag value is not supported\");\n"
+                 ]
+                 ] <>
+                 "}\n"
+                 ] <>
+                 "}();\n" <>
               "context_base context {dec_model.get()};\n" <>
-               body;
+              body;
 
            body = "\nif (run_to_decay_particle_scale) {\n" <>
                   TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
