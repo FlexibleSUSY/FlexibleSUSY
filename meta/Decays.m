@@ -1191,7 +1191,7 @@ Compare[a_, b_] := Module[{},
    corresponding to a given insertion of fields *)
 GenericTranslationForInsertion[topology_, insertion_] := Module[{
    genericDiagramsWithCorrectTopology,
-   translationFile = Get["utils/loop_decays/output/generic_loop_decay_diagram_classes.m"],
+   translationFile = Get["meta/generic_loop_decay_diagram_classes.m"],
    genericFieldTypesOnEdges,
    res
 },

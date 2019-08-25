@@ -620,10 +620,11 @@ For[i = 1, i <= Length[genericProcesses], i++,
    ];
 
 Print["Writing output files ..."];
+resultsDir = FileNameJoin[{ParentDirectory@ParentDirectory[], "templates"}];
 decayAmplitudesFiles = {{FileNameJoin[{templatesDir, "one_loop_decay_diagrams.hpp.in"}],
-                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.hpp"}]},
+                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.hpp.in"}]},
                         {FileNameJoin[{templatesDir, "one_loop_decay_diagrams.cpp.in"}],
-                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.cpp"}]}};
+                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.cpp.in"}]}};
 WriteOut`ReplaceInFiles[decayAmplitudesFiles,
                         { "@genericOneLoopDiagramEvaluatorDecls@" -> TextFormatting`WrapLines[genericOneLoopDiagramEvaluatorDecls],
                           "@genericOneLoopDiagramEvaluatorDefs@"  -> TextFormatting`WrapLines[genericOneLoopDiagramEvaluatorDefs]
@@ -632,7 +633,8 @@ WriteOut`ReplaceInFiles[decayAmplitudesFiles,
 Print["Generating C++ code finished"];
 
 Print["Writing generic graph classes to file ..."];
-propertiesFileName = FileNameJoin[{resultsDir, GetGenericGraphClassesFileName[]}];
+metaDir = FileNameJoin[{ParentDirectory@ParentDirectory[], "meta"}];
+propertiesFileName = FileNameJoin[{metaDir, GetGenericGraphClassesFileName[]}];
 genericOneLoopDiagramClasses = DeleteDuplicates[genericOneLoopDiagramClasses];
 classesOutputStatus = WriteGraphClassesFile[propertiesFileName, genericOneLoopDiagramClasses];
 If[classesOutputStatus === $Failed,

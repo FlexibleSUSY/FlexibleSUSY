@@ -1,4 +1,4 @@
-MATH	:= WolframKernel
+MATH	:= MathKernel
 
 META_DIR	:= meta
 TEMPLATES_DIR	:= templates

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "one_loop_decay_diagrams.hpp"
+#include "@ModelName@_one_loop_decay_diagrams.hpp"
 #include "pv.hpp"
 #include "wrappers.hpp"
 
