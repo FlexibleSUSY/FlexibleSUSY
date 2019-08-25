@@ -616,7 +616,7 @@ For[i = 1, i <= Length[genericProcesses], i++,
                                           If[genericOneLoopDiagramEvaluatorDecls != "", "\n\n", ""] <> decls;
     genericOneLoopDiagramEvaluatorDefs = genericOneLoopDiagramEvaluatorDefs <>
                                          If[genericOneLoopDiagramEvaluatorDefs != "", "\n\n", ""] <> defs;
-    genericOneLoopDiagramClasses = Join[genericOneLoopDiagramClasses, GetGenericDiagramClass[process, #]& /@ diagramExprs];
+    genericOneLoopDiagramClasses = Join[genericOneLoopDiagramClasses, GetGenericDiagramClass[process, #]& /@ diagramExprs]/.Cp->DylanCp;
    ];
 
 Print["Writing output files ..."];
