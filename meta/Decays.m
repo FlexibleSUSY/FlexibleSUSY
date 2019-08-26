@@ -1307,8 +1307,8 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
       temp = (Reverse /@ fieldNumberOnEdgeBetweenVertices);
 
       For[i = 1, i <= Length[temp], i++,
-         temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVertices[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVertices[[i,2]]]);
          temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVertices[[i]];
+         temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVertices[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVertices[[i,2]]]);
       ];
 
       temp
@@ -1324,9 +1324,8 @@ GetFieldsAssociations2[diagram_, diagramDylan_] :=
             If[Head[flattenedDiagramDylan[[i]]] === Susyno`LieGroups`conj,
                AppendTo[res, AntiField[flattenedDiagramDylan[[i]]] -> AntiField[flattenedDiagram[[i]]]],
                AppendTo[res, flattenedDiagramDylan[[i]] -> flattenedDiagram[[i]]]
-
             ]
-            ]
+         ]
       ];
 
       res
