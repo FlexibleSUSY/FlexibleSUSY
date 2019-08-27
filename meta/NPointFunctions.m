@@ -888,7 +888,8 @@ Module[
             "_npointfunctions.hpp\""],
       loopHPP = Switch[OptionValue@LoopFunctions,
          "LoopTools","\"clooptools.h\"",
-         "FlexibleSUSY","\"numerics.h\""]
+         "FlexibleSUSY","\"numerics.h\"",
+         "GenericLibrary","\"loop_libraries/collier.hpp\""]
    },
    "#include " <> mainHPP <> "\n" <>
    "#include \"concatenate.hpp\"\n" <>
@@ -902,7 +903,7 @@ Module[
       Part[Options@CreateCXXHeaders,All,1]
    ],
    Utils`AssertOrQuit[
-      MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
+      MemberQ[{"LoopTools", "FlexibleSUSY","GenericLibrary"}, OptionValue@LoopFunctions],
       CreateCXXHeaders::errLoopFunctions,
       OptionValue@LoopFunctions
    ],
@@ -969,22 +970,20 @@ Module[
    {
       noBasis = OptionValue@WilsonBasis === {},
       basisLength = Length@OptionValue@WilsonBasis,
-      prototype,definitionHead,definitionBody,auxClass,definition
+      prototype,definition
    },
-   setLoopLibraryRules[OptionValue@LoopFunctions];
+   setLoopLibraryRules@OptionValue@LoopFunctions;
    prototype = If[noBasis,
       StringTemplate["std::complex<double> `2`(`3`);"],
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
       ][basisLength,name,CXXArgStringNPF[NPF,"def"]];
 
-   definitionHead = If[noBasis,
+   definition = CXXClassForNPF[NPF,colourProjector,OptionValue@LoopFunctions,OptionValue@WilsonBasis] <> "\n\n" <>
+   If[noBasis,
       StringTemplate["std::complex<double> `2`(`3`)"],
       StringTemplate["std::array<std::complex<double>,`1`> `2`(`3`)"]
-      ][basisLength,name,CXXArgStringNPF@NPF];
-   definitionBody = CXXBodyNPF@NPF;
-
-   auxClass = CXXClassForNPF[NPF,colourProjector,OptionValue@WilsonBasis];
-   definition = auxClass <> "\n\n" <> definitionHead <> "{\n" <> definitionBody <> "\n}";
+      ][basisLength,name,CXXArgStringNPF@NPF] <>
+   "{\n" <> CXXBodyNPF@NPF <> "\n}";
 
    {prototype, definition}
 ] /; Module[
@@ -1007,7 +1006,7 @@ Module[
       Utils`AssertOrQuit[Part[Length/@TakeSums@NPF,1]===Length@OptionValue@WilsonBasis,CreateCXXFunctions::errNoMatch];
       ];
    Utils`AssertOrQuit[
-      MemberQ[{"LoopTools", "FlexibleSUSY"}, OptionValue@LoopFunctions],
+      MemberQ[{"LoopTools","FlexibleSUSY","GenericLibrary"}, OptionValue@LoopFunctions],
       CreateCXXFunctions::errLoopFunctions,
       OptionValue@LoopFunctions]
 ];
@@ -1022,7 +1021,8 @@ Module[{},
    ClearAttributes[loopLibrary,Protected];
    loopLibrary = Switch[library,
       "LoopTools", Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
-      "FlexibleSUSY", GetLTToFSRules[]
+      "FlexibleSUSY", GetLTToFSRules[],
+      "GenericLibrary", {}
    ];
    SetAttributes[loopLibrary,Protected];
 ];
@@ -1159,27 +1159,28 @@ given n-point correlation function
 @returns the c++ code for the helper class of the c++ version of a given
 n-point correlation function.";
 CXXClassForNPF::errUnknownInput=
-   CXXClassForNPF::usage;
+"@TODO make some explanations";
 CXXClassForNPF[
    nPointFunction:NPFPattern[
       "Sums"->genSums_,
-      "CombFac"->combFac_,
-      "ClFields"->clFields_,
-      "ColFac"->colFac_,
       "Subs"->subexpressions_],
    projCol_,
+   loopLibrary_String,
    wilsonBasis:{Rule[_String,_]...}] :=
 Module[
    {
       extIndices = ExternalIndicesNPF@nPointFunction,
       numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
       cxxCorrelationContext,
-      genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_, _] :> x],
-      genSumNames = Array[StringTemplate@"genericSum`1`",Length@genSums],
-      genericSumsCode, preCXXRules,
-      DummyIndent,
+      genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_,_] :> x],
+      genSumNames = Array["genericSum"<>ToString@#&,Length@genSums],
+      preCXXRules,
+      codeGenLib = If[loopLibrary === "GenericLibrary",
+         "std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>(); // The code is generated for Generic library.",
+         "// The code is generated for "<>loopLibrary<>" library."],
       code = "
       class @ClassName@ : public @Context@ {
+         @GenericLibraryDefinition@
          using generic_sum_base = @Context@;
 
          template<class GenericFieldMap>
@@ -1207,32 +1208,17 @@ Module[
          @CalculateFunction@
       }; // End of @ClassName@"
    },
-
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
-
-   DummyIndent[str_String,ind_String:""] := StringReplace[str,"\n"->"\n"<>ind];
-
-   genericSumsCode = StringRiffle[MapThread[
-      CXXGenericSum[##,subexpressions,preCXXRules,wilsonBasis]&,
-         {
-            genSums,
-            clFields,
-            combFac,
-            ExtractColourFactor[colFac,projCol],
-            genSumNames
-         }],
-      "\n\n"];
-
-
    cxxCorrelationContext = StringTemplate[
       "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
 
    stringReplaceWithIndent[code,{
+   "@GenericLibraryDefinition@"->codeGenLib,
    "@ClassName@"->CXXClassNameNPF@nPointFunction,
    "@Context@"->cxxCorrelationContext,
    "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
    "@Subexpressions@"->CXXCodeForSubexpressions[subexpressions, preCXXRules],
-   "@GenericSums@"->DummyIndent@genericSumsCode,
+   "@GenericSums@"->CXXGenericSum[nPointFunction,preCXXRules,projCol,genSumNames,wilsonBasis],
    "@Arguments@"->CXXArgStringNPF@nPointFunction,
    "@CalculateFunction@"->CXXCodeFunCalculate[genSumNames,wilsonBasis]}]
 ];
@@ -1252,7 +1238,7 @@ CXXInitializeKeyStructs@@`1`";
 CXXInitializeKeyStructs[fields:{__?IsGenericField},ind_String:""]:=
 StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"<>ind];
 CXXInitializeKeyStructs[x___] :=
-   Utils`AssertOrQuit[False,CXXInitializeKeyStructs::errUnknownInput,{x}];
+Utils`AssertOrQuit[False,CXXInitializeKeyStructs::errUnknownInput,{x}];
 SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
 
 ToCXXPreparationRules::usage=
@@ -1594,13 +1580,13 @@ Module[
    projectedFactors
 ];
 
-
 CXXGenericSum::usage=
 "@brief Create the c++ code encoding a given sum over generic fields.
 @param sum the sum over generic fields
 @param genericInsertions the list of field insertions to be summed over
 @param combinatorialFactors a list of combinatorial factors (~symmetry factors) 
 to multiply the amplitudes of specific insertions with.
+@todo
 @param colourFactors a list of colour factors to multiply the amplitudes of
 specific insertions with.
 @param functionName the name of the resulting c++ function
@@ -1613,15 +1599,44 @@ translation.
 CXXGenericSum::errColours=
 "Colour factor is not a number after projection: `1`";
 CXXGenericSum[
+   NPFPattern["Sums"->genericSums_,
+              "CombFac"->combinatoricalFactors_,
+              "ClFields"->classFields_,
+              "ColFac"->colourFactors_,
+              "Subs"->subexpressions_],
+   preCXXRules_List,
+   colourProjector_,
+   genSumNames:{__String},
+   basis:{Rule[_String,_]...},
+   ind_String:""
+] :=
+Module[{},
+   StringRiffle[MapThread[
+      CXXGenericSum[##,subexpressions,preCXXRules,basis]&,
+         {
+            genericSums,
+            classFields,
+            combinatoricalFactors,
+            ExtractColourFactor[colourFactors,colourProjector],
+            genSumNames
+         }],
+      "\n\n"]~StringReplace~("\n"->"\n"<>ind)
+];
+CXXGenericSum[
    sum:GenericSum[expr_,genericFields_],
-   genericInsertions_List,combinatorialFactors_List,
-   colourFactors_List,genSumName_String,subexpressions_List,preCXXRules_List,
-   wilsonBasis_] :=
+   genericInsertions_List,
+   combinatorialFactors_List,
+   colourFactors_List,
+   genSumName_String,
+   subexpressions_List,
+   preCXXRules_List,
+   wilsonBasis_
+] :=
 Module[
    {
       type = If[wilsonBasis === {},
          "std::complex<double>",
-         StringTemplate["std::array<std::complex<double>,`1`>"][Length@wilsonBasis]
+         "std::array<std::complex<double>,"<>ToString@Length@wilsonBasis<>">"
          ],
       context = If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
          "const context_with_vertices &context = *this;",
