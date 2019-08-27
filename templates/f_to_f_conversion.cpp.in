@@ -47,11 +47,11 @@ using namespace @ModelName@_FFMassiveV_form_factors;
 namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams::fields;
 
-namespace SM_cxx_diagrams {
+namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 @npf_definitions@
 } // namespace npointfunctions
-} // namespace SM_cxx_diagrams
+} // namespace @ModelName@_cxx_diagrams
 namespace @ModelName@_f_to_f_conversion {
 
 struct overlap_integrals {

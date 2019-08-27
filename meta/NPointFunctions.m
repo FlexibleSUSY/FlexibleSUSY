@@ -183,7 +183,7 @@ Module[
    {
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
-      paveLibrary = "FlexibleSUSY" ,
+      paveLibrary = "GenericLibrary" ,
       header,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
@@ -1021,8 +1021,8 @@ Module[{},
    ClearAttributes[loopLibrary,Protected];
    loopLibrary = Switch[library,
       "LoopTools", Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
-      "FlexibleSUSY", GetLTToFSRules[],
-      "GenericLibrary", {}
+      "FlexibleSUSY", getLoopFlexibleSUSYRules[],
+      "GenericLibrary", getGenericLibraryRules[]
    ];
    SetAttributes[loopLibrary,Protected];
 ];
@@ -1030,14 +1030,14 @@ SetAttributes[setLoopLibraryRules,{Locked,Protected}];
 getLoopLibraryRules[] := loopLibrary;
 SetAttributes[getLoopLibraryRules,{Locked,Protected}];
 
-GetLTToFSRules::usage=
+getLoopFlexibleSUSYRules::usage=
 "@brief Returns rules for LoopTools to FlexibleSUSY conventions.
 @returns Rules for LoopTools to FlexibleSUSY conventions.
 @todo add specific rules for std::sqrt(0)
 @todo add specific rules for std::sqrt(Sqr())";
-GetLTToFSRules::errUnknownInput=
+getLoopFlexibleSUSYRules::errUnknownInput=
 "Input should have no parameters.";
-GetLTToFSRules[] :=
+getLoopFlexibleSUSYRules[] :=
 Module[
    {
       warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m","Warning"],
@@ -1069,8 +1069,22 @@ Module[
          "softsusy::d27"[Sequence@@SqrtIfNeeded/@{args}]
    }
 ];
-GetLTToFSRules[__] :=
-   Utils`AssertOrQuit[False,GetLTToFSRules::errUnknownInput];
+getLoopFlexibleSUSYRules[__] :=
+   Utils`AssertOrQuit[False,getLoopFlexibleSUSYRules::errUnknownInput];
+   
+getGenericLibraryRules[] :=
+Module[
+   {
+      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m","Warning"]
+   },
+   WriteString[OutputStream["stdout", 1],
+      warning<>": Only remaps of B0, C0, C00 are implemented.\n"];
+   {
+      LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc0,args__] :> "lib->C0"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"context.scale()"]
+   }
+];
 
 CXXArgStringNPF::usage=
 "@brief Returns the c++ arguments that the c++ version of the given n-point 
@@ -1175,12 +1189,8 @@ Module[
       genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_,_] :> x],
       genSumNames = Array["genericSum"<>ToString@#&,Length@genSums],
       preCXXRules,
-      codeGenLib = If[loopLibrary === "GenericLibrary",
-         "std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>(); // The code is generated for Generic library.",
-         "// The code is generated for "<>loopLibrary<>" library."],
       code = "
       class @ClassName@ : public @Context@ {
-         @GenericLibraryDefinition@
          using generic_sum_base = @Context@;
 
          template<class GenericFieldMap>
@@ -1213,12 +1223,11 @@ Module[
       "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
 
    stringReplaceWithIndent[code,{
-   "@GenericLibraryDefinition@"->codeGenLib,
    "@ClassName@"->CXXClassNameNPF@nPointFunction,
    "@Context@"->cxxCorrelationContext,
    "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
    "@Subexpressions@"->CXXCodeForSubexpressions[subexpressions, preCXXRules],
-   "@GenericSums@"->CXXGenericSum[nPointFunction,preCXXRules,projCol,genSumNames,wilsonBasis],
+   "@GenericSums@"->CXXGenericSum[nPointFunction,preCXXRules,projCol,genSumNames,loopLibrary,wilsonBasis],
    "@Arguments@"->CXXArgStringNPF@nPointFunction,
    "@CalculateFunction@"->CXXCodeFunCalculate[genSumNames,wilsonBasis]}]
 ];
@@ -1607,12 +1616,13 @@ CXXGenericSum[
    preCXXRules_List,
    colourProjector_,
    genSumNames:{__String},
+   loopLibrary_String,
    basis:{Rule[_String,_]...},
    ind_String:""
 ] :=
 Module[{},
    StringRiffle[MapThread[
-      CXXGenericSum[##,subexpressions,preCXXRules,basis]&,
+      CXXGenericSum[##,subexpressions,preCXXRules,loopLibrary,basis]&,
          {
             genericSums,
             classFields,
@@ -1630,6 +1640,7 @@ CXXGenericSum[
    genSumName_String,
    subexpressions_List,
    preCXXRules_List,
+   loopLibrary_String,
    wilsonBasis_
 ] :=
 Module[
@@ -1641,9 +1652,13 @@ Module[
       context = If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
          "const context_with_vertices &context = *this;",
          "// This GenericSum does not depend on couplings or masses"],
+      hide = If[loopLibrary === "GenericLibrary","","//"],
       code = "
       template<class GenericFieldMap>
       struct @GenericSum_NAME@_impl : generic_sum_base {
+         @Hide@private:
+         @Hide@std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>(); // The code is generated for Generic library.
+         @Hide@public:
          @GenericSum_NAME@_impl( const generic_sum_base &base ) : 
          generic_sum_base( base ) {
          } // End of constructor @GenericSum_NAME@_impl
@@ -1688,6 +1703,7 @@ Module[
    },
    stringReplaceWithIndent[code,
       {
+         "@Hide@"->hide,
          "@GenericSum_NAME@"->genSumName,
          "@ReturnType@"->type,
          "@GenericFieldShortNames@"->CXXCodeNameKey@genericFields,
@@ -2228,7 +2244,7 @@ SetAttributes[
    VerticesForNPointFunction,
    CreateCXXHeaders,
    CreateCXXFunctions,
-   GetLTToFSRules,
+   getLoopFlexibleSUSYRules,
    CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
    ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,*)CXXFieldName,(*

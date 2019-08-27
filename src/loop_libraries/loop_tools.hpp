@@ -3,9 +3,16 @@
 
 class Loop_tools : public Loop_library_interface {
    public:
+      std::complex<double> B0(
+         double p10,
+         double m02, double m12,
+         double scl2) noexcept;
+      std::complex<double> C0(
+         double p10, double p21, double p20,
+         double m02, double m12, double m22,
+         double scl2) noexcept;
       std::complex<double> C00(
          double p10, double p21, double p20,
          double m02, double m12, double m22,
          double scl2) noexcept;
 };
-
