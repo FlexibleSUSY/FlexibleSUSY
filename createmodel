@@ -500,7 +500,7 @@ fi
 
 if test ! -d "$targetdir" ; then
     message -n "  Creating model directory $targetdir ... "
-    mkdir $targetdir
+    mkdir -p $targetdir
     message "done"
 fi
 
