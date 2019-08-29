@@ -324,6 +324,8 @@ PrintErrorMsg[s_String] :=
             "" <> s, 79, StringLength["Error: "]
       ]
    ];
+PrintErrorMsg[arg___] :=
+    (PrintErrorMsg["PrintErrorMsg expects one argument of type string."];Quit[1]);
 
 PrintWarningMsg[s_String] :=
    Print[

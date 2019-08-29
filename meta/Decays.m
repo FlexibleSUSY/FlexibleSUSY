@@ -1280,7 +1280,7 @@ ConvertCouplingToCPP[Global`DylanCp[particles__][lor_], vertices_, indices_] :=
          ),
 
          (* error *)
-         lor :> (Utils`PrintErrorMsg["Unhandled lorentz structure ", lor]; Quit[1])
+         lor :> (Utils`PrintErrorMsg["Unhandled lorentz structure " <> ToString@lor]; Quit[1])
       }
    ];
 
