@@ -773,9 +773,9 @@ Module[
       zeroedRules
    },
    ampsGen = If[zeroExternalMomenta,
-      FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ],
+      FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ], (* Relations Mom[i]^2 = 0 are true now. *)
       ampsGen];
-      
+
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
       FormCalc`CalcFeynAmp[Head[ampsGen][#],
@@ -784,9 +784,7 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> Switch[getNumberOfChains@ampsGen,
-            2, FormCalc`Fierz,
-            _, None],
+         FormCalc`FermionOrder -> None, (* FormCalc`Fierz leads to some bad expressions. *)
          FormCalc`Invariants -> False]&,
       ampsGen] //. FormCalc`GenericList[];
    Print["FORM calculation done."];

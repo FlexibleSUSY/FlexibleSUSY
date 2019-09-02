@@ -15,7 +15,7 @@ contains
       real(C_DOUBLE), intent(in) :: scl2
       complex(C_DOUBLE_COMPLEX) :: res
 
-      call Init_cll(3)
+      call Init_cll(2,2,'')
       call SetMuUV2_cll(scl2)
 
       call B0_cll(res, p10, m02, m12)
@@ -30,7 +30,7 @@ contains
       real(C_DOUBLE), intent(in) :: scl2
       complex(C_DOUBLE_COMPLEX) :: res
 
-      call Init_cll(3)
+      call Init_cll(3,3,'')
       call SetMuUV2_cll(scl2)
 
       call C0_cll(res, p10, p21, p20, m02, m12, m22)
@@ -48,7 +48,7 @@ contains
       complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
       integer, parameter :: rank = 3
 
-      call Init_cll(3)
+      call Init_cll(3,3,'')
       call SetMuUV2_cll(scl2)
 
       allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
