@@ -1219,8 +1219,7 @@ Module[
       }; // End of @ClassName@"
    },
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
-   cxxCorrelationContext = StringTemplate[
-      "correlation_function_context<`1`,`2`>"][Length@extIndices,numberOfMomenta];
+   cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
    stringReplaceWithIndent[code,{
    "@ClassName@"->CXXClassNameNPF@nPointFunction,
@@ -1424,7 +1423,11 @@ calling ``Parameters`ExpressionToString[]`` for the c++ translation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns the c++ code encoding a given set of subexpressions.";
 CXXCodeForSubexpressions[
-   subexpressions:{___Rule},
+   subexpressions:{},
+   preCXXRules:{{(_Rule|_RuleDelayed)...}...},
+   ind_String:""] := "// There is no subexpressions";
+CXXCodeForSubexpressions[
+   subexpressions:{__Rule},
    preCXXRules:{{(_Rule|_RuleDelayed)...}...},
    ind_String:""] :=
 Module[
@@ -1583,9 +1586,8 @@ Module[
          colourfactors/.Rule[uniqueColourStructs[[1]],1]
          ]
       ];
-   Cases[projectedFactors, Except[num_?NumericQ] :>
-      Utils`AssertOrQuit[False,ExtractColourFactor::errNotNumber,num],
-      {2}];
+   Utils`AssertOrQuit[NumericQ@#,ExtractColourFactor::errNotNumber,#]&/@Flatten[projectedFactors,2];
+   
    projectedFactors
 ];
 
@@ -1889,7 +1891,7 @@ Module[
       holdRules = Hold/@Unevaluated@rules,
       evaluatedRules = rules,
       generalIndent = StringCases[str,"\n"~~" "...,1],
-      lines,now = 1,
+      lines,now,
       pmt, (* Potentially multiline token *)
       currentRule,currentIndent,modifiedRule
    },
@@ -1910,9 +1912,8 @@ Module[
             ];
          ];
       lines[[now]] = StringReplace[lines[[now]], evaluatedRules];
-      ];
-      now ++;,
-      Length@lines
+      ];,
+      {now,Length@lines}
    ];
    StringRiffle[lines,"\n"]
 ];
@@ -1941,7 +1942,7 @@ Module[
    f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] := 
       f[in,{{nums},sum},{{n2},i2}];
    initSet=Transpose[{Array[#&,Length@strs],StringLength/@strs}];
-   numbers = ReplaceAll[First/@Fold[f,initSet],f->List];
+   numbers = ReplaceAll[First/@Fold[f,First@initSet,Rest@initSet],f->List];
    dirtyStrings = StringJoin[StringRiffle[strs[[#]],del]] &/@ numbers;
    cleanStrings = StringReplace[#, StartOfString~~" "...~~x___:>x] &/@ dirtyStrings;
    StringRiffle[cleanStrings,del<>"\n"<>ind]
@@ -2207,12 +2208,13 @@ If[TrueQ[$VersionNumber<10.1],
 StringRiffle::usage=
 "This is not a full replacement of Mathematica's StringRiffle.
 It works only for [{___String},_String] input.";
+StringRiffle::err="`1`";
 StringRiffle[strs:{___String},sep_String] := 
    StringJoin@Riffle[strs,sep];
 StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
    in<>StringJoin@Riffle[strs,sep]<>fin;
-StringRiffle[___] :=
-   Utils`AssertOrQuit[False,StringRiffle::usage];
+StringRiffle[x___] :=
+   Utils`AssertOrQuit[False,StringRiffle::err,{x}];
    
 SetAttributes[{StringRiffle},{Protected, Locked}]
 ];
@@ -2222,13 +2224,13 @@ deletePrintFromSubkernel::usage =
 @note One cannot share Locked symbols.";
 deletePrintFromSubkernel[] := "Redefined later";
 If[$Notebooks,
-   deletePrintFromSubkernel[] :=
+   deletePrintFromSubkernel[] := 
    (
       SelectionMove[SelectedNotebook[],"Print",GeneratedCell,AutoScroll->False]; 
-      NotebookDelete@Last@SelectedCells@SelectedNotebook[];
+      (*NotebookDelete@Last@SelectedCells@SelectedNotebook[];*)
    ),
    deletePrintFromSubkernel[] :=
-   WriteLine[OutputStream["stdout", 1],"\033[A\033[K\033[A\033[K\033[A\033[K\033[A"];
+   WriteString[OutputStream["stdout", 1],"\033[A\033[K\033[A\033[K\033[A\033[K\033[A"];
 ];
 SetAttributes[deletePrintFromSubkernel,Protected];
 

@@ -413,7 +413,7 @@ Module[
       currentClasses
    },
    If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
-      Print["modifying amplitudes: penguins: stu propagation of massless bosons is excluded"];
+      Print["MA: penguins: stu propagation of massless bosons is excluded"];
       daPairs = getDAPairsByTopologyCriterion[diagrams,amITPinguin];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
       (*Get positions of classes to save.*)
@@ -591,7 +591,7 @@ Module[
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
          (*Else do not touch.*)
          #]&/@ inserted;
-         Print["modifying diagrams: penguins: stu propagation of vector bosons is excluded"];
+         Print["MD: penguins: stu propagation of vector bosons is excluded"];
          printDiagramsInfo[inserted,"modifying diagrams"];
       ];
       If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
@@ -600,7 +600,7 @@ Module[
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
          (*Else do not touch.*)
          #]&/@ inserted;
-         Print["modifying diagrams: penguins: stu propagation of scalars bosons is excluded"];
+         Print["MD: penguins: stu propagation of scalars bosons is excluded"];
          printDiagramsInfo[inserted,"modifying diagrams"];
       ];
    ];
@@ -790,9 +790,10 @@ Module[
    Print["FORM calculation done."];
 
    calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
-
+   
    abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
+
    If[zeroExternalMomenta,
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       zeroedRules = Cases[FormCalc`Abbr[],
@@ -893,13 +894,12 @@ getFermionPositionRules[
 Module[
    {
       particleList = Join[in[[All,1]],out[[All,1]]],
-      current = 1
+      current
    },
    Flatten[ Reap[Do[
       Sow@Cases[{particleList[[current]]},fermion:FeynArts`F[__]:>(current->fermion),{1}];
-      Sow@Cases[{particleList[[current]]},fermion:-FeynArts`F[__]:>(current->SARAH`bar[-fermion]),{1}];
-      current++,
-      Length@particleList]][[2]] ] //. fieldNameToFSRules
+      Sow@Cases[{particleList[[current]]},fermion:-FeynArts`F[__]:>(current->SARAH`bar[-fermion]),{1}];,
+      {current,Length@particleList}]][[2]] ] //. fieldNameToFSRules
 ];
 getFermionPositionRules[x___] :=
 Utils`AssertOrQuit[False,getFermionPositionRules::errUnknownInput,{x}]
@@ -939,7 +939,7 @@ SetAttributes[getNumberOfChains,{Protected,Locked}];
 applyAndPrint[func_,expr_,defLength_Integer:70] :=
 Module[
    {
-      now = 1,
+      now,
       totL = Length@expr,
       write,
       percent,
@@ -947,7 +947,7 @@ Module[
       restL
    },
    restL=defLength-2*IntegerLength@totL-11;
-   write[args__] := WriteLine[OutputStream["stdout", 1],args];
+   write[args__] := Write[OutputStream["stdout", 1],args];
    Reap[
       Do[
       percent = now/totL;
@@ -956,9 +956,8 @@ Module[
          "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
          "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
       Sow@func[ expr[[now]] ];
-      NPointFunctions`Private`deletePrintFromSubkernel[];
-      now++;
-      ,totL]
+      NPointFunctions`Private`deletePrintFromSubkernel[];,
+      {now,totL}]
    ][[2,1]]
 ];
 
@@ -1035,7 +1034,6 @@ Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
    fsAmplitudes = amplitudes //. amplitudeToFSRules;
    fsAbbreviations = abbreviations //. subexpressionToFSRules;
    fsSubexpressions = subexpressions //. subexpressionToFSRules;
-
    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
 ];
 
