@@ -379,7 +379,7 @@ If[!$Notebooks,
    ];,
    (* Else *)
    internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   Module[{WriteColourless,MultilineToDummy,replacedMessage},
+   Module[{MultilineToDummy,replacedMessage},
       If[assertion === True,Return@True];
 
       MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
