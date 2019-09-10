@@ -503,11 +503,10 @@ ColorMathToSARAHConvention[expr_] :=
  * contracted fields share the same indices.
  **)
 IndexDiagramFromGraph[diagram_, graph_] :=
-	Module[{str,diagramWithUIDs, fields, indexedFields, indexedDiagram,
+	Module[{diagramWithUIDs, fields, indexedFields, indexedDiagram,
 		applyUserIndices, vIndex1, vIndex2, contractIndices},
 		fields = Vertices`StripFieldIndices /@ Flatten[diagram];
-		str = MaxNumberOfGlobalDefinitions[];
-		indexedFields = IndexField[#,str]&/@ fields;
+		indexedFields = IndexField/@ fields;
 		
 		applyUserIndices = Join[
 			Sequence @@ (Rule @@@ Transpose[{
@@ -596,13 +595,6 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 				ColorMath`CSimplify[Times @@ colorMathExpressions]]
 		]
 	]
-(** \brief SARAH` creates symbols in Global context. To create Unique ones one
- * need to find them and to not create the same symbols in othe contexts.*)
-MaxNumberOfGlobalDefinitions[] := Module[{numbers,res},
-   numbers[str_String] := ToExpression/@Flatten@StringCases[Names["Global`"<>str<>"*"],str~~num:DigitCharacter..~~EndOfString:>num];
-   res=ToString@Max[numbers@"ct",numbers@"gt",numbers@"lt"];
-   If[res==="-Infinity","",res]
-];
 (** \brief Returns the index prefix string for an index of a given type **)
 IndexPrefixForType[SARAH`generation] = "gt";
 IndexPrefixForType[SARAH`lorentz] = "lt";
@@ -615,7 +607,7 @@ IndexPrefixForType[indexType_] :=
  * \returns a fully indexed version of the field with indices determined
  * by `Unique[]`.
  **)
-IndexField[field_, num_String:""] :=
+IndexField[field_] :=
 	Module[{indexSpecification, indexTypes, indexNames,
 		conjugation, uniqueNumberString},
 		indexSpecification =
@@ -626,7 +618,7 @@ IndexField[field_, num_String:""] :=
 		indexTypes = First /@ indexSpecification;
 
 		uniqueNumberString = StringDrop[SymbolName[Unique[]], 1];
-		indexNames = "SARAH`" <> ToString[#] <>num<> uniqueNumberString & /@
+		indexNames = "SARAH`" <> ToString[#]<> uniqueNumberString & /@
 			(IndexPrefixForType /@ indexTypes);
 		field[Symbol /@ indexNames] /. {
 			field[{}] -> field,
@@ -646,7 +638,7 @@ IndexField[field_, num_String:""] :=
  * appropriate FlexibleSUSY conventions applied.
  **)
 SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
-	Module[{str,sortedFields, indexedSortedFields, vertexList, vertex, types,
+	Module[{sortedFields, indexedSortedFields, vertexList, vertex, types,
 			similarVertexList, similarVertex, fieldReplacementRules,
 			indexReplacementRules},
     LoadVerticesIfNecessary[];
@@ -666,8 +658,7 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 			Utils`AssertWithMessage[similarVertexList =!= {},
 				"CXXDiagrams`SortedVertex[]: Cannot determine Lorentz structure of " <> ToString[fields] <> " vertex."];
 			similarVertex = similarVertexList[[1]];
-			str = MaxNumberOfGlobalDefinitions[];
-			indexedSortedFields = IndexField[#,str]&/@ sortedFields;
+			indexedSortedFields = IndexField/@ sortedFields;
 			fieldReplacementRules = Rule @@@ Transpose[{similarVertex[[1]], indexedSortedFields}];
 			indexReplacementRules = Rule @@@ Transpose[{
 				LorentzIndexOfField /@ Select[similarVertex[[1]], TreeMasses`IsVector],
