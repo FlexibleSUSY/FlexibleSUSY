@@ -510,38 +510,20 @@ Utils`AssertOrQuit[
       _?TreeMasses`IsScalar|_?TreeMasses`IsFermion],                            (*@todo add |_?TreeMasses`IsVector*)
    Options[NPointFunction][[All,1]]
 ];
-internalNPointFunctionInputCheck[inFields_,outFields_,opts___] :=
+internalNPointFunctionInputCheck[inFields:{__},outFields:{__},opts___] :=
 Module[
    {
-      aoq=Utils`AssertOrQuit,
-      allOptions = Part[Options@NPointFunction,All,1],
+      aoq = Utils`AssertOrQuit,
+      ip = TreeMasses`IsParticle,
+      allowedParticles = Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion],(*@todo add |_?TreeMasses`IsVector*)
+      definedOptions = Part[Options@NPointFunction,All,1],
+      unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
       allProcesses={ExceptIrreducible,ExceptBoxes,ExceptTriangles,ExceptFourFermionScalarPenguins,ExceptFourFermionMassiveVectorPenguins}
    },
-   MatchQ[inFields,
-   {__?(aoq[
-         TreeMasses`IsParticle@#,
-         NPointFunction::errinFields,
-         #,
-         GetSARAHModelName[],
-         Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion](*@todo add |_?TreeMasses`IsVector*)
-      ]&)}
-   ];
-   MatchQ[outFields,
-   {__?(aoq[
-         TreeMasses`IsParticle@#,
-         NPointFunction::erroutFields,
-         #,
-         GetSARAHModelName[],
-         Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion](*@todo add |_?TreeMasses`IsVector*)
-      ]&)}
-   ];
+   aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
+   aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;
    aoq[And@@(TreeMasses`IsScalar@#||TreeMasses`IsFermion@#&/@Join[inFields,outFields]),NPointFunction::errInputFields];(*@todo add vector bosons.*)
-   aoq[
-      FilterRules[{opts},Except@allOptions] === {},
-      NPointFunction::errUnknownOptions,
-      FilterRules[{opts},Except@allOptions],
-      Part[Options@NPointFunction,All,1]
-   ];
+   aoq[unknownOptions === {},NPointFunction::errUnknownOptions,unknownOptions,definedOptions];
    (*Now we know that all options are iside allowed list.*)
    Cases[{opts},Rule[LoopLevel,x_]:>
       aoq[x===1,NPointFunction::errLoopLevel]];
