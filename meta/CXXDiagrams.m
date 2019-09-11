@@ -100,6 +100,8 @@ NumberOfExternalParticlesInTopology::usage = "";
 NumberOfPropagatorsInTopology::usage = "";
 CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
 
+ColorFactorForDiagram::usage = ""
+
 Begin["`Private`"];
 
 LeftChiralVertex::usage="A left projector part of a vertex";
@@ -1528,6 +1530,11 @@ NumberOfExternalParticlesInTopology[topology_] :=
 
 NumberOfPropagatorsInTopology[topology_] :=
    If[Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology] === 3, 3, 2];
+
+ColorFactorForDiagram[topology_, diagram_] :=
+    ColourFactorForIndexedDiagramFromGraph[
+			CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
+		];
 
 End[];
 EndPackage[];

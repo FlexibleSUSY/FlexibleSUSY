@@ -440,6 +440,37 @@ GetDecaysForParticle[particle_, {minNumberOfProducts_Integer /; minNumberOfProdu
            Flatten[GetDecaysForParticle[particle, #, allowedFinalStateParticles]& /@ finalStateSizes, 1]
           ];
 
+(* Deletes diagrams from FSParticleDecay which are 0 because of color algebra.
+   If all diagrams for a given topology are deleted, the topology is also removed *)
+DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay] :=
+    Module[{wrong, topoAndinsertions, emptyTopos = {}},
+
+        topoAndinsertions = GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1];
+
+        For[i=1, i<=Length@topoAndinsertions, i++,
+          wrong = {};
+
+          (* loop over diagrams *)
+          For[j=1, j <= Length[topoAndinsertions[[i,2]]], j++,
+            If[ColorFactorForDiagram[topoAndinsertions[[i,1]], topoAndinsertions[[i,2, j]]] === 0,
+              AppendTo[wrong, {j}];
+            ]
+          ];
+
+          topoAndinsertions[[i,2]] = Delete[topoAndinsertions[[i,2]], wrong];
+          If[Length[topoAndinsertions[[i,2]]]===0, AppendTo[emptyTopos, {i}]];
+      ];
+
+      topoAndinsertions = Delete[topoAndinsertions, emptyTopos];
+
+      FSParticleDecay@@MapAt[
+          (# /. {{1, x_}} :> {{1, topoAndinsertions}})&,
+          List@@(decay),
+          {3}
+      ]
+    ];
+
+(* outputs list of FSParticleDecay objects *)
 GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
     Module[{genericFinalStates, finalStateParticlesClassified,
             isPossibleDecay, concreteFinalStates, decays},
@@ -458,9 +489,13 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                                             !FinalStateContainsInitialState[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
+
            decays = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]]& /@ concreteFinalStates;
-           Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&]
-          ];
+
+           decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
+           DeleteDiagramsVanishingDueToColor /@ decays
+
+    ];
 
 GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
     (
