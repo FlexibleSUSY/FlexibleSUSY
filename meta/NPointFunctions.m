@@ -194,6 +194,7 @@ Module[
    sp0[part_,num_] := FormCalc`Spinor[part[{Symbol["SARAH`gt"<>ToString@num]}],0,0];
    basisTemplate[i_,o_,q_] :=
       {
+         (*@note 6 means PR, 7 means PL.*)
          ("S_LL_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
          ("S_LR_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],6,sp0[q,2]],
          ("S_RL_via_"<>ToString@q) -> ch[sp0[o,3],6,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
@@ -393,7 +394,8 @@ NPointFunction::errExcludeProcesses=
    ExceptIrreducible,
    ExceptBoxes,
    ExceptTriangles,
-   ExceptFourFermionScalarPenguins
+   ExceptFourFermionScalarPenguins,
+   ExceptFourFermionMassiveVectorPenguins
 }.";
 NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
 "Only external scalars/fermions are supported (@todo FOR NOW).";
@@ -402,13 +404,14 @@ NPointFunction::errCalc=
 NPointFunction::errUnknownOptions=
    NPFPattern::errUnknownOptions;
 NPointFunction::errUnknownInput=
-"Correct input has the folliwing form:
+"`1`.
+Correct input has the folliwing form:
 NPointFunction[inFields,outFields,options]
 where
- inFields and outFields are lists containing names of `1` particles 
-  `2`,
+ inFields and outFields are lists containing names of `2` particles
+  `3`,
  options have names from list 
-  `3`.";
+  `4`.";
 NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
 Module[
    {
@@ -496,87 +499,63 @@ Module[
    OptionValue[NPointFunction,Options[NPointFunction][[All,1]]]]];
 
    nPointFunction
-] /; And[
+] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
+NPointFunction[x___] :=
+Utils`AssertOrQuit[
+   False,
+   NPointFunction::errUnknownInput,
+   {x},
+   GetSARAHModelName[],
+   Cases[TreeMasses`GetParticles[],
+      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion],                            (*@todo add |_?TreeMasses`IsVector*)
+   Options[NPointFunction][[All,1]]
+];
+internalNPointFunctionInputCheck[inFields_,outFields_,opts___] :=
+Module[
+   {
+      aoq=Utils`AssertOrQuit,
+      allOptions = Part[Options@NPointFunction,All,1],
+      allProcesses={ExceptIrreducible,ExceptBoxes,ExceptTriangles,ExceptFourFermionScalarPenguins,ExceptFourFermionMassiveVectorPenguins}
+   },
    MatchQ[inFields,
-   {__?(Utils`AssertOrQuit[
+   {__?(aoq[
          TreeMasses`IsParticle@#,
          NPointFunction::errinFields,
          #,
          GetSARAHModelName[],
-         Cases[TreeMasses`GetParticles[], 
-            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
+         Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion](*@todo add |_?TreeMasses`IsVector*)
       ]&)}
-   ],
+   ];
    MatchQ[outFields,
-   {__?( Utils`AssertOrQuit[
+   {__?(aoq[
          TreeMasses`IsParticle@#,
          NPointFunction::erroutFields,
          #,
          GetSARAHModelName[],
-         Cases[TreeMasses`GetParticles[], 
-            _?TreeMasses`IsScalar|_?TreeMasses`IsFermion]                       (*@todo add |_?TreeMasses`IsVector*)
+         Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion](*@todo add |_?TreeMasses`IsVector*)
       ]&)}
-   ],
-   Utils`AssertOrQuit[
-      FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]] === {},
+   ];
+   aoq[And@@(TreeMasses`IsScalar@#||TreeMasses`IsFermion@#&/@Join[inFields,outFields]),NPointFunction::errInputFields];(*@todo add vector bosons.*)
+   aoq[
+      FilterRules[{opts},Except@allOptions] === {},
       NPointFunction::errUnknownOptions,
-      FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
+      FilterRules[{opts},Except@allOptions],
       Part[Options@NPointFunction,All,1]
-   ],
-   Utils`AssertOrQuit[
-      OptionValue@LoopLevel === 1,
-      NPointFunction::errLoopLevel
-   ],
-   Utils`AssertOrQuit[
-      MemberQ[{DimensionalReduction, DimensionalRegularization}, 
-         OptionValue@Regularize],
-      NPointFunction::errRegularize,
-      OptionValue@Regularize
-   ],
-   Utils`AssertOrQuit[
-      OptionValue@UseCache === True ||
-      OptionValue@UseCache === False,
-      NPointFunction::errUseCache
-   ],
-   Utils`AssertOrQuit[
-      OptionValue@ZeroExternalMomenta === True ||
-      OptionValue@ZeroExternalMomenta === False,
-      NPointFunction::errZeroExternalMomenta
-   ],
-   Utils`AssertOrQuit[
-      OptionValue@OnShellFlag === True ||
-      OptionValue@OnShellFlag === False,
-      NPointFunction::errOnShellFlag
-   ],
-   Utils`AssertOrQuit[
-      And@@Map[
-         MemberQ[
-            {
-               ExceptIrreducible,
-               ExceptBoxes,
-               ExceptTriangles,
-               ExceptFourFermionScalarPenguins,
-               ExceptFourFermionMassiveVectorPenguins,
-               Null
-            },#]&,
-         If[Head@#===List,#,{#}]&@OptionValue@ExcludeProcesses
-      ],
-      NPointFunction::errExcludeProcesses
-   ],
-   Utils`AssertOrQuit[                                                       (* @todo modify this in future*)
-      And @@ (TreeMasses`IsScalar@# || TreeMasses`IsFermion@# &/@               (**)
-      Join[inFields,outFields] ),                                               (**)
-      NPointFunction::errInputFields                                            (**)
-   ]                                                                            (**)
-];
-NPointFunction[___] :=
-Utils`AssertOrQuit[
-   False,
-   NPointFunction::errUnknownInput,
-   GetSARAHModelName[],
-   Cases[TreeMasses`GetParticles[], 
-      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion],                            (*@todo add |_?TreeMasses`IsVector*)
-   Options[NPointFunction][[All, 1]]
+   ];
+   (*Now we know that all options are iside allowed list.*)
+   Cases[{opts},Rule[LoopLevel,x_]:>
+      aoq[x===1,NPointFunction::errLoopLevel]];
+   Cases[{opts},Rule[Regularize,x_]:>
+      aoq[MemberQ[{DimensionalReduction,DimensionalRegularization},x],NPointFunction::errRegularize,x]];
+   Cases[{opts},Rule[UseCache,x_]:>
+      aoq[x===True || x===False,NPointFunction::errUseCache]];
+   Cases[{opts},Rule[ZeroExternalMomenta,x_]:>
+      aoq[x===True || x===False,NPointFunction::errZeroExternalMomenta]];
+   Cases[{opts},Rule[OnShellFlag,x_]:>
+      aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
+   Cases[{opts},Rule[ExcludeProcesses,x_]:>
+      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errExcludeProcesses]];
+   True
 ];
 
 VerticesForNPointFunction::usage=
