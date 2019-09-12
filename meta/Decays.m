@@ -452,7 +452,7 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay] :=
 
           (* loop over diagrams *)
           For[j=1, j <= Length[topoAndinsertions[[i,2]]], j++,
-            If[ColorFactorForDiagram[topoAndinsertions[[i,1]], topoAndinsertions[[i,2, j]]] === 0,
+            If[CXXDiagram`ColorFactorForDiagram[topoAndinsertions[[i,1]], topoAndinsertions[[i,2, j]]] === 0,
               AppendTo[wrong, {j}];
             ]
           ];
@@ -1536,11 +1536,6 @@ functionBody = "// skip indices that don't match external indices\n" <>
          (* usings for vertices *)
          "\n" <> cppVertices <>
          WrapCodeInLoop[indices, functionBody]
-   ];
-
-ColorFactorForDiagram[topology_, diagram_] :=
-   ColourFactorForIndexedDiagramFromGraph[
-      CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=

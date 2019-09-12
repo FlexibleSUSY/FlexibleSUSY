@@ -100,7 +100,7 @@ NumberOfExternalParticlesInTopology::usage = "";
 NumberOfPropagatorsInTopology::usage = "";
 CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
 
-ColorFactorForDiagram::usage = ""
+ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
 
 Begin["`Private`"];
 
