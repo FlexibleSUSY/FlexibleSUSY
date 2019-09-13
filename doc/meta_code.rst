@@ -21,6 +21,24 @@ Passarino-Veltman 1-loop functions :math:`A_0`, :math:`B_0`,
 :math:`B_1`, :math:`B_{00}`, :math:`B_{11}`, etc.
 
 
+Passarino-Veltman loop functions for zero external momenta
+``````````````````````````````````````````````````````````
+
+``meta/LoopFunctionsZeroMomentum.m`` contains an implementation of the
+Passarino-Veltman 1-loop functions :math:`A_0`, :math:`B_0`,
+:math:`\frac{\partial B_0}{\partial p^2}`, :math:`C_0`, :math:`D_0`,
+:math:`E_0` and :math:`F_0` for zero external momenta.
+
+Example::
+
+    Get["meta/LoopFunctionsZeroMomentum.m"];
+    F0[x,x,x,x,x,x,q] //. loopFunctionsZeroMomentum
+
+yields::
+
+    1/(20*x^4)
+
+
 Renormalization group equation integrator
 `````````````````````````````````````````
 
