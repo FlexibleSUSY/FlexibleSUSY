@@ -24,7 +24,6 @@
 1) there are no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
-(*@todo add function which cleans GenerisSum[0,{}] correctly*)
 BeginPackage["NPointFunctions`",
    {
       "FlexibleSUSY`",
@@ -57,7 +56,9 @@ ZeroExternalMomenta::usage=
 "Option for NPointFunctions`NPointFunction[].
 Encodes whether to set the external momenta to zero or leave them undetermined.
 
-def. True | False";
+def. True | False | ExceptPaVe";
+ExceptPave::usage=
+"Possible value for ZeroExternalMomenta.";
 OnShellFlag::usage=
 "Option for NPointFunctions`NPointFunction[].
 Use on-shell external fields or not.
@@ -385,7 +386,7 @@ Currently DimensionalReduction, DimensionalRegularization are supported.";
 NPointFunction::errUseCache=
 "UseCache must be either True or False.";
 NPointFunction::errZeroExternalMomenta=
-"ZeroExternalMomenta must be either True or False";
+"ZeroExternalMomenta must be True, False or ExceptPave.";
 NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
 NPointFunction::errExcludeProcesses=
@@ -522,7 +523,7 @@ Module[
    },
    aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
    aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;
-   aoq[And@@(TreeMasses`IsScalar@#||TreeMasses`IsFermion@#&/@Join[inFields,outFields]),NPointFunction::errInputFields];(*@todo add vector bosons.*)
+   aoq[TreeMasses`IsScalar@#||TreeMasses`IsFermion@#,NPointFunction::errInputFields]&/@Join[inFields,outFields];(*@todo add vector bosons.*)
    aoq[unknownOptions === {},NPointFunction::errUnknownOptions,unknownOptions,definedOptions];
    (*Now we know that all options are iside allowed list.*)
    Cases[{opts},Rule[LoopLevel,x_]:>
@@ -532,7 +533,7 @@ Module[
    Cases[{opts},Rule[UseCache,x_]:>
       aoq[x===True || x===False,NPointFunction::errUseCache]];
    Cases[{opts},Rule[ZeroExternalMomenta,x_]:>
-      aoq[x===True || x===False,NPointFunction::errZeroExternalMomenta]];
+      aoq[MemberQ[{True,False,ExceptPave},x],NPointFunction::errZeroExternalMomenta]];
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    Cases[{opts},Rule[ExcludeProcesses,x_]:>

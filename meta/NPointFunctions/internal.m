@@ -21,22 +21,22 @@
 *)
 
 BeginPackage["NPointFunctions`",{"FeynArts`","FormCalc`","Utils`"}];
-FeynArts`$FAVerbose = 1;(* Change this to 2 to see more output (1 - less) *)
-FormCalc`$FCVerbose = 0;(* Change this to 1,2 or 3 to see more output *)
+FeynArts`$FAVerbose = 1;(* Change this to 2 to see more output (if 1 then less). *)
+FormCalc`$FCVerbose = 0;(* Change this to 1,2 or 3 to see more output. *)
 
 {setInitialValues,NPointFunctionFAFC}
 
-(* symbols that are not distributed from main kernel*)
+(* Symbols that are not distributed from main kernel. *)
 SetAttributes[#,{Locked,Protected}]&@
 {
    LorentzIndex,GenericSum,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,GenericT,
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,ExcludeProcesses
 };
-(* symbols that can be distributed from main kernel*)
+(* Symbols that can be distributed from main kernel. *)
 If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 {
-   DimensionalReduction,DimensionalRegularization,
+   DimensionalReduction,DimensionalRegularization,ExceptPaVe,
    (*for further details inspect topologyReplacements*)
    ExceptIrreducible,ExceptBoxes,ExceptTriangles,ExceptFourFermionScalarPenguins,
    ExceptFourFermionMassiveVectorPenguins
@@ -122,6 +122,7 @@ SetFSConventionRules::errSARAH=
 SetFSConventionRules[] :=
 Module[
    {
+      pairSumIndex=Unique@"SARAH`lt",
       fieldNames,indexRules,massRules,couplingRules,generalFCRules,
       diracChainRules,sumOverRules
    },
@@ -241,28 +242,27 @@ Module[
       ]
    };
 
+   (* @note Sec 4.4 of FormCalc manual *)
    generalFCRules =
-   {                                                                            (* @unote sec 4.4 of FormCalc manual *)
+   {
       FormCalc`Finite -> 1,
-      FormCalc`Den[a_,b_] :> 1/(a - b),
-      FormCalc`Pair[a_,b_] :> Module[{uniqueSumIndex=Unique@"SARAH`lt"},
-         SARAH`sum[uniqueSumIndex, 1, 4, SARAH`g[uniqueSumIndex, uniqueSumIndex] * 
-            Append[a, uniqueSumIndex] * Append[b, uniqueSumIndex]]
-      ],
-      fieldType_?(FAFieldQ)[FeynArts`Index[Generic,number_Integer]
-      ] :> fieldType@GenericIndex@number,
-      FormCalc`k[i_Integer, index___] :> SARAH`Mom[i, index]                    (* @note rule for external momenta *)
+      FormCalc`Den[a_,b_] :> 1/(a-b),
+      FormCalc`Pair[a_,b_] :> SARAH`sum[
+         pairSumIndex,1,4,
+         SARAH`g[pairSumIndex,pairSumIndex]*Append[a,pairSumIndex]*Append[b,pairSumIndex]],
+      fieldType_?(FAFieldQ)[FeynArts`Index[Generic,number_Integer]] :> fieldType@GenericIndex@number,
+      FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
    };
 
-   indexRules =                                                                 (*These index rules are specific to SARAH generated FeynArts model files.*) 
-   {                                                                            (*Are these index rules always injective?*)
+   indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*) 
+   {
       FeynArts`Index[generationName_, index_Integer] :> 
       Symbol["SARAH`gt" <> ToString@index] /;
          StringMatchQ[SymbolName@generationName, "I"~~___~~"Gen"],
       FeynArts`Index[Global`Colour, index_Integer] :>
       Symbol["SARAH`ct" <> ToString@index],
       FeynArts`Index[Global`Gluon, index_Integer] :>                            (* @todo Potentially dangerous stuff. Gluon goes from 1 to 8, not from 1 to 3 as Colour*)
-      Symbol["SARAH`ct" <> ToString@index]                                      (* *)
+      Symbol["SARAH`ct" <> ToString@index]
    };
    
    sumOverRules =
@@ -335,6 +335,7 @@ NPointFunctionFAFC::usage=
 NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
 Module[
    {
+      settingsForMomElim,
       topologies, diagrams, amplitudes, genericInsertions, colourFactors, 
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -353,9 +354,11 @@ Module[
    diagrams = getModifiedDiagrams[diagrams,OptionValue@ExcludeProcesses];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
-   amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(*@unote Remove colour indices following assumption 1*)
+   amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@ExcludeProcesses];
    debugMakePictures[diagrams];
+
+   settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
@@ -367,16 +370,14 @@ Module[
    fsOutFields = Head[amplitudes][[1,2,2,All,1]] //. fieldNameToFSRules;
 
    fsFields = Join[fsInFields,fsOutFields];
-
-   externalMomentumRules = {
-      If[OptionValue@ZeroExternalMomenta,
-         SARAH`Mom[_Integer,_] :> 0,
-         SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]]
-   };
+   externalMomentumRules = Switch[OptionValue@ZeroExternalMomenta,
+      True, {SARAH`Mom[_Integer,_] :> 0},
+      False, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]},
+      ExceptPaVe,{}(* @todo Modify. *)];
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
-         CalculateAmplitudes[amplitudes,genericInsertions,
+         CalculateAmplitudes[amplitudes,settingsForMomElim,genericInsertions,
             OptionValue@Regularize,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag
@@ -386,8 +387,44 @@ Module[
    }
 ];
 
+getMomElimForAmplitudesByTopology::usage=
+"@brief Uses internally defined replacement list funMomRules for definition of
+momenta to eliminate in specific topologies.
+@param <FeynArts`TopologyList> diagrams Set of topologies with class insertions.
+@returns {_Integer... | Automatic...} List of option values for FormCalc`MomElim
+for every generic amplitude.";
+getMomElimForAmplitudesByTopology::errUnknownInput=
+"Input should be <FeynArts`.`TopologyList> and not
+`1`";
+getMomElimForAmplitudesByTopology::errOverlap=
+"Some topology rules inside funMomRules overlap. Criteria should be defined in a
+way, which gives unique distinction of topology.";
+getMomElimForAmplitudesByTopology[
+   diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..]
+] :=
+Module[
+   {
+      aoq=Utils`AssertOrQuit,
+      getTAR = getTopologyAmplitudeRulesByTopologyCriterion,
+      funMomRules = {amITPinguin->2},
+      replacements
+   },
+   replacements = (getTAR[diagrams,First@#] /.x_Integer:>Last@#) &/@ funMomRules;
+   replacements = Transpose@replacements;
+   replacements = Switch[ Count[First/@#,True],
+      0,First@#,
+      1,#~Extract~Position[#,True][[1,1]],
+      _,aoq[False,getMomElimForAmplitudesByTopology::errOverlap]
+      ] &/@ replacements;
+   replacements = If[First@#===False,#/.x_Integer:>Automatic,#] &/@ replacements;
+   Flatten[Last/@replacements]
+];
+getMomElimForAmplitudesByTopology[x___] :=
+Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errUnknownInput,{x}];
+SetAttributes[getMomElimForAmplitudesByTopology,{Protected,Locked,ReadProtected}];
+
 getModifiedDA::usage = 
-"@brief Changes amplitudes according to excudeProcess list.
+"@brief Changes amplitudes and diagrams according to excudeProcess list.
 @param {<TopologyList>,<FeynAmpList>} set of topology-insertion and 
 amplitude-insertion rules to modify.
 @param <List> set of names which specify the process to consider.
@@ -414,9 +451,10 @@ Module[
    },
    If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
       Print["MA: penguins: stu propagation of massless bosons is excluded"];
-      daPairs = getDAPairsByTopologyCriterion[diagrams,amITPinguin];
+      (* Step 1: Get positions of topologies and amplitudes to change. *)
+      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,amITPinguin];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
-      (*Get positions of classes to save.*)
+      (* Step 2: Get positions of classes to save. {<amplitude>->{classes to save}..}*)
       rulesForClassesToSave=Reap[
          Do[
             numAmp = Part[numbersOfAmplitudes,i];
@@ -431,13 +469,12 @@ Module[
             ];
          ,{i,Length@numbersOfAmplitudes}]
       ][[2,1]];
-      (*Delete amplitudes.*)
+      (* Step 3: Change amplitudes. *)
       Do[
          numAmp = Part[numbersOfAmplitudes,i];
          newAmplitudes[[numAmp,4,2]] = amplitudes[[numAmp,4,2]][[numAmp/.rulesForClassesToSave]];
       ,{i,Length@numbersOfAmplitudes}];
-      printAmplitudesInfo[newAmplitudes,"modifying amplitudes"];
-      (*Delete class diagrams.*)
+      (* Step 4: Delete class diagrams. *)
       Do[
          If[daPairs[[i,1]]===True,
             currentClasses = daPairs[[i,2]]/.rulesForClassesToSave;
@@ -453,18 +490,28 @@ getModifiedDA[x___] :=
 Utils`AssertOrQuit[False,getModifiedDA::errUnknownInput,{x}];
 SetAttributes[getModifiedDA,{Protected,Locked}];
 
-getDAPairsByTopologyCriterion::usage=
+getTopologyAmplitudeRulesByTopologyCriterion::usage=
 "@brief Gives numbers of amplitudes which are accepted by a criterion on topology.
 @param <TopologyList> diagrams Set of diagrams to select from.
 @param <one argument function> critFunction Function for topology selection. If 
-applying on topology it gives true, then topology is accepted.
-@returns {<Rule>} List of rules of the form <boolean>->{<integer>..}.";
-getDAPairsByTopologyCriterion::errUnknownInput=
+critFunction[<topology>] gives True, then topology is accepted.
+@returns {<Rule>} List of rules of the form <boolean>->{<integer>..}. LHS
+stands for the topology, RHS gives numbers of classes (and the numbers of
+amplitudes the same time).";
+getTopologyAmplitudeRulesByTopologyCriterion::errResult=
+"Output
+`1`
+does not match desired pattern.
+
+Input values
+`2`
+`3`";
+getTopologyAmplitudeRulesByTopologyCriterion::errUnknownInput=
 "Input should be
-getDAPairsByTopologyCriterion@@{ <TopologyList>, <one argument function> }
+getTopologyAmplitudeRulesByTopologyCriterion@@{ <TopologyList>, <one argument function> }
 and not
-getDAPairsByTopologyCriterion@@`1`";
-getDAPairsByTopologyCriterion[
+getTopologyAmplitudeRulesByTopologyCriterion@@`1`";
+getTopologyAmplitudeRulesByTopologyCriterion[
    diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..],
    critFunction_
 ] :=
@@ -472,15 +519,19 @@ Module[
    {
       topologies = List@@First/@diagrams,
       genNums = Length/@(List@@Last/@diagrams),
-      numRegions,takeOrNot
+      numRegions,takeOrNot,res
    },
    numRegions = Array[Range[Plus@@genNums[[1;;#-1]]+1,Plus@@genNums[[1;;#]]]&,Length@genNums];
    takeOrNot = Array[TrueQ@critFunction@Part[topologies,#]&,Length@topologies];
-   MapThread[#1->#2&,{takeOrNot,numRegions}]
+   res = MapThread[#1->#2&,{takeOrNot,numRegions}];
+   If[MatchQ[res, {Rule[_?(# === True || # === False &), {__Integer}] ..}],
+      res,
+      Utils`AssertOrQuit[False,getTopologyAmplitudeRulesByTopologyCriterion::errResult,res,Unevaluated@diagrams,Unevaluated@critFunction];
+   ]
 ];
-getDAPairsByTopologyCriterion[x___] :=
-Utils`AssertOrQuit[False,getDAPairsByTopologyCriterion::errUnknownInput,{x}];
-SetAttributes[getDAPairsByTopologyCriterion,{Protected,Locked}];
+getTopologyAmplitudeRulesByTopologyCriterion[x___] :=
+Utils`AssertOrQuit[False,getTopologyAmplitudeRulesByTopologyCriterion::errUnknownInput,{x}];
+SetAttributes[getTopologyAmplitudeRulesByTopologyCriterion,{Protected,Locked,HoldAll,ReadProtected}];
 
 topologyReplacements::usage =
 "@brief List of topology replacement rules for a processes to hold.";
@@ -751,6 +802,7 @@ FeynAmpList[___][FeynAmp[
    Integral[mom_],
    amp_,
    {whatIsInAmp___}->Insertion[Classes][{howToReplace___}..]]..]
+@param <List> settingsForMomElim Sets up the MomElim option.
 @param genericInsertions the list of generic insertions for the amplitudes
 @param regularizationScheme the regularization scheme for the calculation
 @param zeroExternalMomenta True if external momenta should be set to zero and 
@@ -760,6 +812,7 @@ fsAmplitudes denote the calculated amplitudes and subexpressions denote
 the subexpressions used to simplify the expressions";
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
+   settingsForMomElim_List,
    genericInsertions_List,
    regularizationScheme_,
    zeroExternalMomenta_,
@@ -772,21 +825,21 @@ Module[
       calculatedAmplitudes,abbreviations,subexpressions,
       zeroedRules
    },
-   ampsGen = If[zeroExternalMomenta,
+   ampsGen = If[zeroExternalMomenta===True,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ], (* Relations Mom[i]^2 = 0 are true now. *)
       ampsGen];
-
    Print["FORM calculation started ..."];
    calculatedAmplitudes = applyAndPrint[
-      FormCalc`CalcFeynAmp[Head[ampsGen][#],
+      FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> Switch[regularizationScheme,
             DimensionalReduction, 4,
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> None, (* FormCalc`Fierz leads to some bad expressions. *)
-         FormCalc`Invariants -> False]&,
-      ampsGen] //. FormCalc`GenericList[];
+         FormCalc`FermionOrder -> None, (* FormCalc`Fierz leads to some cumbersome expressions. *)
+         FormCalc`Invariants -> False,
+         FormCalc`MomElim -> #2]&,
+      {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
 
    calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
@@ -936,7 +989,7 @@ getNumberOfChains[x___] :=
 Utils`AssertOrQuit[False,getNumberOfChains::errUnknownInput,{x}]
 SetAttributes[getNumberOfChains,{Protected,Locked}];
 
-applyAndPrint[func_,expr_,defLength_Integer:70] :=
+applyAndPrint[func_,{expr_,opts_List},defLength_Integer:70] :=
 Module[
    {
       now,
@@ -955,7 +1008,7 @@ Module[
       write[StringJoin[
          "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
          "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
-      Sow@func[ expr[[now]] ];
+      Sow@func[ expr[[now]], opts[[now]] ];
       NPointFunctions`Private`deletePrintFromSubkernel[];,
       {now,totL}]
    ][[2,1]]
