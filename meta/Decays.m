@@ -1383,14 +1383,6 @@ WrapCodeInLoop[indices_, code_] :=
          "}\n",
          #-1
          ]& /@ Reverse@Range@Length[indices]));
-(* some classes of insertions are not present in Dylan's output,
-   here we filter them out *)
-DiagramWithLoopFunctionEvaluatingTo0Q[topology_, diagram_] :=
-   Module[{fieldTypes = GetFeynArtsTypeName /@ (Last /@ InsertionsOnEdgesForDiagram[topology, diagram])},
-
-      fieldTypes === {S,S,V,S,S} ||
-         fieldTypes === {S,S,V,V,V}
-   ];
 
 WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{vertices, indices, cppVertices,
@@ -1399,12 +1391,6 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    externalFieldsLocationsInVertices,
       internalFieldsLocationsInVertices, verticesInFieldTypes, matchExternalFieldIndicesCode, matchInternalFieldIndicesCode, functionBody = ""
    },
-
-      (* discard diagram that even though exist in principle (have
-         all non zero vertices etc.) evaluate to 0 *)
-      If[DiagramWithLoopFunctionEvaluatingTo0Q[topology, diagram],
-         Return[""];
-      ];
 
       translation = GenericTranslationForInsertion[topology, diagram];
 
