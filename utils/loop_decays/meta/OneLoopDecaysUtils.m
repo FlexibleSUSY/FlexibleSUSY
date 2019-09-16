@@ -16,8 +16,23 @@ GetAdjacencyMatrix::usage="determines the adjacency matrix from a FeynArts Topol
 
 CollectLorentzStructures::missterms="Missing terms from form factor decomposition: ``";
 ExtractFormFactors::missterms="Could not associate the following terms with a matrix element: ``";
+CheckFormCalcVersion::usage="";
 
 Begin["`Private`"];
+
+CheckFormCalcVersion[fcver_String] :=
+    With[{version = Read[StringToStream[StringSplit[fcver][[2]]], Number]},
+      If[!NumericQ[version],
+        Print["Error: Could not identify the version of FormCalc"];
+        Quit[1]
+      ];
+      If[!MemberQ[{9.5, 9.6}, version],
+        Print["Error: This script only works with FormCalc version 9.5 or 9.6"];
+        Quit[1]
+      ];
+    ];
+CheckFormCalcVersion[___] :=
+    (Print["String expected"]; Quit[1]);
 
 GetGenericFieldSymbol[{field_[indices__], properties__}] := field;
 GetGenericFieldSymbol[{field_, properties__}] := field;

@@ -1,3 +1,5 @@
+<< "meta/OneLoopDecaysUtils.m";
+
 status = 0;
 
 baseDir = DirectoryName[$InputFileName];
@@ -37,6 +39,7 @@ loadFormCalc = Needs["FormCalc`"];
 If[loadFeynArts === $Failed || loadFormCalc === $Failed,
    Quit[1];
   ];
+OneLoopDecaysUtils`CheckFormCalcVersion[$FormCalcVersion];
 
 WriteFeynArtsOutputFile[fileName_, expr_] :=
     Module[{result, commentStr},
