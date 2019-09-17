@@ -22,10 +22,30 @@
 
 BeginPackage["WilsonCoeffs`",{"Utils`","NPointFunctions`"}];
 
-{InterfaceToMatching};
+{InterfaceToMatching,neglectBasisElements};
 
 Begin["`Private`"];
 NPFPattern = NPointFunctions`Private`NPFPattern;
+
+neglectBasisElements::usage= 
+"@brief Deletes specified basis elements with not aanymore used subexpressions.
+@param <npf> npf object to modify.
+@param <{Rule[_String,_]..}> operatorBasis list with
+{string name,fermion chain multiplication} pairs.
+@returns <npf> object";
+neglectBasisElements[npf:NPFPattern["Subs"->subs_], operatorBasis:{Rule[_String,_]..}]:=
+Module[
+   {
+      basis = Last /@ subs~findFermionChains~operatorBasis,
+      npfNew,positionsToDelete,
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(First/@subs),Infinity]&
+   },
+   If[basis === {},Return@npf];
+   npfNew = ReplaceAll[npf,#->0 &/@ basis];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[npfNew,#] &/@ Complement[First/@subs,subsOnly@npfNew[[2,1,1]]];
+   Delete[npfNew,positionsToDelete]
+];
+SetAttributes[neglectBasisElements,{Locked,Protected}];
 
 InterfaceToMatching::usage=
 "@brief Transforms GenericSum accordig to a given basis. 
@@ -55,13 +75,14 @@ findFermionChains::usage =
 findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
 Module[
    {
+      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m",Style["Warning",Yellow]],
       (*@note there is F# <-> chain correspondence*)
       basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]],
       i
    },
    Table[
       If[basisPos[[i]] === {},
-         Print["Warning: " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
+         Print[warning,": " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
          chiralBasis[[i,1]]->FormCalc`Mat[],
          (*else*)
          chiralBasis[[i,1]]->FormCalc`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
