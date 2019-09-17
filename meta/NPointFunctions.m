@@ -184,60 +184,89 @@ Module[
    {
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
-      paveLibrary = "GenericLibrary" ,
+      paveLibrary = "LoopTools" ,
       header,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
-      basisTemplate,ch=FormCalc`DiracChain,l=FormCalc`Lor,sp0,
-      codeU,codeD
+      dimension6Template,dimension7Template,
+      ch=FormCalc`DiracChain,
+      l=FormCalc`Lor,
+      mom = SARAH`Mom,
+      mass = SARAH`Mass,
+      sp,
+      codeU,codeD,
+      upFullBasis,downFullBasis,dressedFermions,assumptionReplacements
    },
-   header=CreateCXXHeaders[LoopFunctions ->paveLibrary,UseWilsonCoeffs->True];
-   sp0[part_,num_] := FormCalc`Spinor[part[{Symbol["SARAH`gt"<>ToString@num]}],0,0];
-   basisTemplate[i_,o_,q_] :=
+   header=CreateCXXHeaders[LoopFunctions->paveLibrary,UseWilsonCoeffs->True];
+   sp[particle_,num_] := FormCalc`Spinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
+
+   Print["Analytical calculation for ",inF,"->",outF," started ..."];
+   uNPF = NPointFunction[{inF,uQ},{outF,uQ},
+      OnShellFlag -> True,
+      UseCache -> False,
+      ZeroExternalMomenta -> False,
+      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
+   dNPF = NPointFunction[{inF,dQ},{outF,dQ},
+      OnShellFlag -> True,
+      UseCache -> False,
+      ZeroExternalMomenta -> False,
+      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
+   (* ASSUMPTION: high virtuality of massive particle in t-channel for penguins q^2=0. *)
+   dressedFermions = {uNPF[[1,1,1]],dNPF[[1,2,1]]};
+   assumptionReplacements =
+     {
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[First@dressedFermions,i_]*mom[Last@dressedFermions,i_]]:>
+        (mass[ First@dressedFermions ]^2+mass[ Last@dressedFermions ]^2) / 2
+     };
+   {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
+   
+   Print["Analytical calculation for ",inF,"->",outF," done."];
+
+   dimension6Template[i_,o_,q_] :=
       {
          (*@note 6 means PR, 7 means PL.*)
-         ("S_LL_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
-         ("S_LR_via_"<>ToString@q) -> ch[sp0[o,3],7,sp0[i,1]] ch[sp0[q,4],6,sp0[q,2]],
-         ("S_RL_via_"<>ToString@q) -> ch[sp0[o,3],6,sp0[i,1]] ch[sp0[q,4],7,sp0[q,2]],
-         ("S_RR_via_"<>ToString@q) -> ch[sp0[o,3],6,sp0[i,1]] ch[sp0[q,4],6,sp0[q,2]],
+         ("S_LL_via_"<>ToString@q) -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,7,q~sp~2],
+         ("S_LR_via_"<>ToString@q) -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,6,q~sp~2],
+         ("S_RL_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,7,q~sp~2],
+         ("S_RR_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,6,q~sp~2],
          (*@note Q: why names of coeffients are not correct? A: they are 
           *correct, one just need to commute projectors with Dirac matrices, 
           *what changes 6 to 7 or 7 to 6.*)
-         ("V_LL_via_"<>ToString@q) -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
-         ("V_LR_via_"<>ToString@q) -> ch[sp0[o,3],6,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
-         ("V_RL_via_"<>ToString@q) -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],6,l@1,sp0[q,2]],
-         ("V_RR_via_"<>ToString@q) -> ch[sp0[o,3],7,l@1,sp0[i,1]] ch[sp0[q,4],7,l@1,sp0[q,2]],
-         (*@note Q: why minus? A: because FormCalc -6,Lor[1],Lor[2] is ours 
+         ("V_LL_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
+         ("V_LR_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
+         ("V_RL_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
+         ("V_RR_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
+         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours 
           *-I*sigma[1,2] (according to FC definition of antisymmetrization), when 
           *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
           *for FC because it cites [Ni05] for Fierz identities, where our
           *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
-         ("minus_T_LL_via_"<>ToString@q) -> ch[sp0[q,4],-7,l@1,l@2,sp0[q,2]] ch[sp0[o,3],-7,l@1,l@2,sp0[i,1]],
-         ("minus_T_RR_via_"<>ToString@q) -> ch[sp0[q,4],-6,l@1,l@2,sp0[q,2]] ch[sp0[o,3],-6,l@1,l@2,sp0[i,1]]
+         ("minus_T_LL_via_"<>ToString@q) -> ch[o~sp~3,-7,l@1,l@2,i~sp~1] ch[q~sp~4,-7,l@1,l@2,q~sp~2],
+         ("minus_T_RR_via_"<>ToString@q) -> ch[o~sp~3,-6,l@1,l@2,i~sp~1] ch[q~sp~4,-6,l@1,l@2,q~sp~2]
       };
-   Print["Calculation for ",inF,"->",outF," started ..."];
-   uNPF = NPointFunction[{inF,uQ},{outF,uQ},
-      UseCache -> False,
-      ZeroExternalMomenta -> True,
-      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
-   dNPF = NPointFunction[{inF,dQ},{outF,dQ},
-      UseCache -> False,
-      ZeroExternalMomenta -> True,
-      ExcludeProcesses -> ExceptFourFermionMassiveVectorPenguins];
-   Print["Calculation for ",inF,"->",outF," done."];
-   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~basisTemplate[inF,outF,uQ];
-   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~basisTemplate[inF,outF,dQ];
+   dimension7Template[i_,o_,q_] :=
+      {
+         "not_used_dummy_1" -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,7,mom@1,q~sp~2],
+         "not_used_dummy_2" -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,6,mom@1,q~sp~2],
+         "not_used_dummy_3" -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,7,mom@1,q~sp~2],
+         "not_used_dummy_4" -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,6,mom@1,q~sp~2]
+      };
+   uNPF = uNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,uQ];
+   dNPF = dNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,dQ];
+   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
+   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
+
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
       nameForUpQuarkClass,
       SARAH`Delta,
       LoopFunctions -> paveLibrary,
-      WilsonBasis -> basisTemplate[inF,outF,uQ] ][[2]];
+      WilsonBasis -> dimension6Template[inF,outF,uQ] ][[2]];
    codeD = CreateCXXFunctions[dNPF,
       nameForUpDownClass,
       SARAH`Delta,
       LoopFunctions -> paveLibrary,
-      WilsonBasis -> basisTemplate[inF,outF,dQ] ][[2]];
+      WilsonBasis -> dimension6Template[inF,outF,dQ] ][[2]];
    Print["C++ code calculation for ",inF,"->",outF," done."];
    {
       DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
@@ -1002,16 +1031,14 @@ getLoopFlexibleSUSYRules::errUnknownInput=
 getLoopFlexibleSUSYRules[] :=
 Module[
    {
-      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m","Warning"],
+      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m",Style["Warning",Yellow]],
       SqrtIfNeeded
    },
    SqrtIfNeeded[0]=0;
    SqrtIfNeeded[Power[arg_,2]]:=arg;
    SqrtIfNeeded[arg_]:="std::sqrt"@arg;
-   WriteString[OutputStream["stdout", 1],
-      warning<>": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented.\n"];
-   WriteString[OutputStream["stdout", 1],
-      warning<>": FlexibleSUSY C0, D0 and D00 require zero external momenta.\n"];
+   Print[warning,": Only remaps of A0, B0, C0, C00, D0 and D00 are implemented."];
+   Print[warning,": FlexibleSUSY C0, D0 and D00 require zero external momenta."];
    {
       LoopTools`A0i[LoopTools`aa0, args__] :>
          "softsusy::a0"[Sequence@@SqrtIfNeeded/@{args},"context.scale()"],
@@ -1769,7 +1796,7 @@ Module[
       _LoopTools`B111,_LoopTools`DB0,_LoopTools`DB1,_LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`C0,_LoopTools`D0,_LoopTools`E0,_LoopTools`F0]:>x,Infinity,Heads->True];
    paves = paves /.getLoopLibraryRules[];
-   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","l"},"   "];
+   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","i"},"   "];
    modifiedExpr = modifiedExpr /. getLoopLibraryRules[] /. rulesPaVe;
 
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@modifiedExpr;
