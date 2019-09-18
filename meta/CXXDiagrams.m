@@ -432,10 +432,10 @@ not symmetric"];
 			unspecifiedEdgesEqual];
 	fieldsToInsert = Table[SARAH`FieldToInsert[k],
 		{k,Length[insertFieldRulesLess] + Length[insertFieldRulesEqual]}];
-	
+
 	unresolvedFieldCouplings = internalFieldCouplings
 		/. insertFieldRulesLess /. insertFieldRulesGreater /. insertFieldRulesEqual;
-	
+
 	resolvedFields = If[fieldsToInsert === {}, {{}},
 		SARAH`InsFields[{C @@@ unresolvedFieldCouplings,
 			fieldsToInsert}][[All,2]]];
@@ -447,7 +447,7 @@ not symmetric"];
 
 	diagrams = Table[k,{k,Length[adjacencyMatrix]}] /. externalFields /. 
 		((Rule @@@ Transpose[{internalVertices,#}]) & /@ resolvedFieldCouplings);
-  
+
 	(* Prevent overcounting of diagrams by removing diagrams that only
 	 * differ by permutations of internal fields within the internal
 	 * vertices. This is automatically performed by SARAH if 

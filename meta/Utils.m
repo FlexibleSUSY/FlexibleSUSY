@@ -288,8 +288,10 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_, message_String] :=
+AssertWithMessage[assertion_/;Element[assertion, Booleans], message_String] :=
 	If[!assertion, PrintErrorMsg[message]; Quit[1]];
+AssertWithMessage[el___] :=
+    (PrintErrorMsg["AssertWithMessage requires boolean and string."]; Quit[1]);
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
@@ -334,8 +336,11 @@ PrintWarningMsg[s_String] :=
             "" <> s, 79, StringLength["Warning: "]
       ]
    ];
+PrintWarningMsg[arg___] :=
+    (PrintErrorMsg["PrintWarningMsg expects one argument of type string."];Quit[1]);
 
-MathIndexToCPP[i_Integer/;i>0] := i-1;
+
+MathIndexToCPP[i_Integer /; i>0] := i-1;
 MathIndexToCPP[i_Integer] := (
    PrintErrorMsg[
       "Cannot convert index of value '" <>
@@ -345,5 +350,4 @@ MathIndexToCPP[i_Integer] := (
 MathIndexToCPP[i_] := (PrintErrorMsg["Cannot convert a non integer index '" <> ToString@i <> "'"]; Quit[1]);
 
 End[];
-
 EndPackage[];

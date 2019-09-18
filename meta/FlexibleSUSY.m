@@ -1933,7 +1933,7 @@ Module[{},
 ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices = {}, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, decaysVertices2 = {}, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -1946,14 +1946,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
-           (* create FSParticleDecay 'object' *)
+           (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
            decaysLists = {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}& /@ decayParticles;
-           decaysVertices = DeleteDuplicates[Flatten[Permutations /@ Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1], 1]];
-           (* @todo: this is just for debugging. Remove it! *)
-           decaysVertices = DeleteDuplicates@Join[
-              decaysVertices,
-              Sequence@@(ApplyAntifield/@decaysVertices)
-];
+
+           (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
+           decaysVertices2 = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
+
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];
            enableDecaysCalculationThreads = True;
@@ -1967,11 +1965,14 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysListGettersFunctions = Decays`CreateDecayTableGetterFunctions[decayParticles, FlexibleSUSY`FSModelName <> "_decay_table"];
            initDecayTable = Decays`CreateDecayTableInitialization[decayParticles];
 
-           {calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
+           {decaysVertices, calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
                = Decays`CreateTotalAmplitudeSpecializations[decaysLists, FlexibleSUSY`FSModelName];
            {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
                = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName];
+           decaysVertices = Join[decaysVertices, decaysVertices2];
+
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
+
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
                             "@callAllDecaysFunctionsInThreads@" -> IndentText[callAllDecaysFunctionsInThreads],

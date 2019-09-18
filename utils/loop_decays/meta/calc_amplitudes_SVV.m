@@ -78,7 +78,7 @@ CalculateAmplitudes[amplitudeHead_, amplitudeExpr_] :=
     );
 
 (* Calculate all contributing graphs using FeynArts/FormCalc *)
-topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Internal (*Tadpoles*)];
+topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Tadpoles];
 
 process = {S} -> {V, V};
 
@@ -104,10 +104,8 @@ graphIDs = List @@ (GetGraphID /@ amplitudes);
 
 genericAmplitudes = FeynArts`PickLevel[Generic][amplitudes];
 
-amplitudesExprs = CalculateAmplitudes[Head[genericAmplitudes], #]& /@ genericAmplitudes;
 
-(* delete Amp[_][0] from amplitudesExprs *)
-amplitudesExprs = amplitudesExprs /. FeynAmpList[a___][b___] :> FeynAmpList[a][Sequence@@DeleteCases[{b}, Amp[_ -> _][0]]];
+amplitudesExprs = CalculateAmplitudes[Head[genericAmplitudes], #]& /@ genericAmplitudes;
 
 exprsOutputStatus = WriteFormCalcOutputFile[FileNameJoin[{resultsDir, amplitudesExprsOutputFile}], amplitudesExprs];
 If[exprsOutputStatus === $Failed,
@@ -123,10 +121,10 @@ If[loadUtils === $Failed,
    momentum conservation *)
 ExpandMomenta[formFactors_List] :=
     Module[{i, numFormFactors, matElem, coeff, expanded, result},
-           numFormFactors = Length[formFactors];
+      numFormFactors = Length[formFactors];
            result = Last[Last[Reap[
-               For[i = 1, i <= numFormFactors, i++,
-                   matElem = formFactors[[i, 1]];
+             For[i = 1, i <= numFormFactors, i++,
+                 matElem = formFactors[[i, 1]];
                    coeff = formFactors[[i, 2]];
                    expanded = Expand[matElem /. k[1] -> k[2] + k[3] /. { Pair[args__] :> Distribute[Pair[args]],
                                                                          Eps[args__] :> Distribute[Eps[args]] }];
@@ -143,6 +141,7 @@ ExpandMomenta[formFactors_List] :=
                           Sow[{#, coeff}];,
                           MatchQ[#, a_Pair b_Pair],
                           Sow[{#, coeff}];,
+                          # === 1, Sow[{#, coeff}];,
                           True, Print["Error: unexpected matrix element: ", matElem]; Quit[1];
                          ])& /@ expanded;
                   ]]]];
@@ -194,7 +193,7 @@ CollectDiagramInfo[ids_, diagrams_, formFactors_] :=
                         insertions = diagrams[[i, 2]];
                         genericInsertions = List @@ insertions;
                         nGenericInsertions = Length[genericInsertions];
-                        genericAmps = List @@ formFactors[[count ;; count + nGenericInsertions - 1]];
+                        genericAmps = (List @@ formFactors[[count ;; count + nGenericInsertions - 1]]) /. SARAH`Cp[x__][y__] :> SARAH`Cp[Sequence@@(List[x] /. f_[u__, Internal]:>f[u])][y];
                         genericIDs = ids[[count ;; count + nGenericInsertions - 1]];
                         count += nGenericInsertions;
                         MapThread[Sow[List[#1, topology, #2, Simplify[#3]]]&, {genericIDs, genericInsertions, genericAmps}];
@@ -203,6 +202,9 @@ CollectDiagramInfo[ids_, diagrams_, formFactors_] :=
           ];
 
 Print["Extracting form factors ..."];
+
+(* delete Amp[_][0] from amplitudesExprs *)
+(*)amplitudesExprs = amplitudesExprs /. FeynAmpList[a___][b___] :> FeynAmpList[a][Sequence@@DeleteCases[{b}, Amp[_ -> _][0]]];*)
 
 formFactors = OneLoopDecaysUtils`ExtractFormFactors /@ amplitudesExprs;
 

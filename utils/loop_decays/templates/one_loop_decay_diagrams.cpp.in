@@ -22,6 +22,10 @@
 
 namespace flexiblesusy {
 
+double Den(double x2, double y2) {
+   return 1.0/(x2-y2);
+}
+
 @genericOneLoopDiagramEvaluatorDefs@
 
 } // namespace flexiblesusy

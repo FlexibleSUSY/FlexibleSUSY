@@ -93,10 +93,16 @@ IsLoopMass[_] := False;
 GetLoopMassCType[msq_] := CConversion`CreateCType[CConversion`ScalarType[realScalarCType]];
 
 CreateLoopMassCString[Mass[field_[Index[Generic, idx_], indices___], Loop]^2] :=
-    "m" <> ToGenericFieldString[field] <> ToString[idx] <> "sq";
+    "mL" <> ToGenericFieldString[field] <> ToString[idx] <> "sq";
 
 CreateLoopMassCString[Mass[field_[Index[Generic, idx_], indices___], Loop]] :=
-    "m" <> ToGenericFieldString[field] <> ToString[idx];
+    "mL" <> ToGenericFieldString[field] <> ToString[idx];
+
+CreateLoopMassCString[Mass[field_[Index[Generic, idx_], indices___], Internal]^2] :=
+    "mI" <> ToGenericFieldString[field] <> ToString[idx] <> "sq";
+
+CreateLoopMassCString[Mass[field_[Index[Generic, idx_], indices___], Internal]] :=
+    "mI" <> ToGenericFieldString[field] <> ToString[idx];
 
 GetCouplingCType[cp_] := "const " <> CConversion`CreateCType[CConversion`ScalarType[complexScalarCType]] <> "&";
 
@@ -165,6 +171,14 @@ GetLoopMasses[process_, diagram_] :=
            SortMassesByGenericIndex[masses]
           ];
 
+GetInternalMasses[process_, diagram_] :=
+    Module[{formFactors, masses},
+      formFactors = Last[diagram];
+      masses = Cases[formFactors, Mass[field_, Internal], {0, Infinity}];
+      masses = DeleteDuplicates[masses];
+      SortMassesByGenericIndex[masses]
+    ];
+
 GroupByFieldContent[couplings_List] :=
     Module[{fieldsGather, result},
            fieldsGather[SARAH`Cp[fields__]] := List[fields];
@@ -225,15 +239,17 @@ CreateDiagramEvaluatorName[process_, diagram_] :=
           ];
 
 CreateOneLoopDiagramDeclaration[process_, diagram_] :=
-    Module[{returnType, externalMomenta, loopMasses, couplings,
+    Module[{returnType, externalMomenta, loopMasses, internalMasses, couplings,
             formFactors, args = ""},
            returnType = GetAmplitudeCType[process];
            externalMomenta = GetExternalMomenta[process, diagram];
            loopMasses = GetLoopMasses[process, diagram];
+           internalMasses = GetInternalMassesVars[process, diagram];
            couplings = Flatten[GetCouplings[process, diagram]];
            formFactors = Last[diagram];
            args = StringJoin[Riffle[Join[GetExternalMomentumCType /@ externalMomenta,
                                          GetLoopMassCType /@ loopMasses,
+                                         GetLoopMassCType /@ internalMasses,
                                          GetCouplingCType /@ couplings], ", "]] <>
                   ", double" <> If[!FreeQ[formFactors, Finite], ", double", ""];
            returnType <> " " <> CreateDiagramEvaluatorName[process, diagram] <> "(" <> args <> ");"
@@ -258,6 +274,14 @@ GetLoopMassesVars[process_, diagram_] :=
            types = GetLoopMassCType /@ loopMasses;
            MapThread[{#1, #2, #3}&, {loopMasses, vars, types}]
           ];
+
+GetInternalMassesVars[process_, diagram_] :=
+    Module[{loopMasses, vars, types},
+      loopMasses = GetInternalMasses[process, diagram];
+      vars = CreateLoopMassCString /@ loopMasses;
+      types = GetLoopMassCType /@ loopMasses;
+      MapThread[{#1, #2, #3}&, {loopMasses, vars, types}]
+    ];
 
 GetCouplingsVars[process_, diagram_] :=
     Module[{couplings, vars, types},
@@ -393,6 +417,7 @@ CreateOneLoopDiagramDocString[process_, diagram_] :=
 IsSARAHLoopFunction[SARAH`A0] := True;
 IsSARAHLoopFunction[SARAH`B0] := True;
 IsSARAHLoopFunction[SARAH`B1] := True;
+IsSARAHLoopFunction[SARAH`B00] := True;
 IsSARAHLoopFunction[SARAH`C0] := True;
 IsSARAHLoopFunction[SARAH`C1] := True;
 IsSARAHLoopFunction[SARAH`C2] := True;
@@ -405,6 +430,7 @@ IsSARAHLoopFunction[f_] := False;
 CreateSavedLoopFunctionName[SARAH`A0[args__]] := "a0tmp";
 CreateSavedLoopFunctionName[SARAH`B0[args__]] := "b0tmp";
 CreateSavedLoopFunctionName[SARAH`B1[args__]] := "b1tmp";
+CreateSavedLoopFunctionName[SARAH`B00[args__]] := "b00tmp";
 CreateSavedLoopFunctionName[SARAH`C0[args__]] := "c0tmp";
 CreateSavedLoopFunctionName[SARAH`C1[args__]] := "c1tmp";
 CreateSavedLoopFunctionName[SARAH`C2[args__]] := "c2tmp";
@@ -443,10 +469,11 @@ SaveLoopIntegrals[diagram_, renScale_String] :=
 CreateOneLoopDiagramDefinition[process_, diagram_] :=
     Module[{returnType, externalMomenta, externalMomentaArgs, externalMomentaSubs,
             externalMassSubs, loopMasses, loopMassesArgs, loopMassesSubs,
+            internalMasses, internalMassesArgs, internalMassesSubs,
             couplings, couplingsArgs, couplingsSubs, argSubs,
             saveLoopIntegrals, loopIntegralSubs,
             formFactorExprs, fillExternalMasses, calculateFormFactors, renScale = "scale",
-            args = "", body = "", docString = ""},
+            args = "", body = "", docString = "", formFactorValues},
            returnType = GetAmplitudeCType[process];
 
            externalMomenta = GetExternalMomentaVars[process, diagram];
@@ -454,13 +481,21 @@ CreateOneLoopDiagramDefinition[process_, diagram_] :=
            externalMomentaSubs = Flatten[{Rule[Pair[#[[1]], #[[1]]], Symbol[#[[2]]]^2], Rule[#[[1]], Symbol[#[[2]]]]}& /@ externalMomenta];
            externalMassSubs = Table[Rule[Mass[Field[i][Index[Generic, i]]],
                                          Symbol[CreateExternalMomentumCString[ExternalMomentumSymbol[i]]]], {i, 1, 3}] /. (List @@ diagram[[3]]);
+
            loopMasses = GetLoopMassesVars[process, diagram];
            loopMassesArgs = (#[[3]] <> " " <> #[[2]])& /@ loopMasses;
            loopMassesSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ loopMasses;
+
+           internalMasses = GetInternalMassesVars[process, diagram];
+           internalMassesArgs = (#[[3]] <> " " <> #[[2]])& /@ internalMasses;
+           internalMassesSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ internalMasses;
+           Print[CreateDiagramEvaluatorName[process, diagram]];
+           Print["Int mass ", internalMasses];
+
            couplings = GetCouplingsVars[process, diagram];
            couplingsArgs = (#[[3]] <> " " <> #[[2]])& /@ couplings;
            couplingsSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ couplings;
-           argSubs = Join[couplingsSubs, loopMassesSubs, externalMomentaSubs];
+           argSubs = Join[couplingsSubs, loopMassesSubs, internalMassesSubs, externalMomentaSubs];
 
            {saveLoopIntegrals, loopIntegralSubs} = SaveLoopIntegrals[diagram, renScale];
 
@@ -476,9 +511,11 @@ CreateOneLoopDiagramDefinition[process_, diagram_] :=
 
            args = StringJoin[Riffle[externalMomentaArgs, ", "]] <> ",\n" <>
                   StringJoin[Riffle[loopMassesArgs, ", "]] <> ",\n" <>
+                  If[Length[internalMassesArgs] > 0, StringJoin[Riffle[internalMassesArgs, ", "]] <>  ",\n", ""] <>
                   StringJoin[Riffle[couplingsArgs, ", "]] <>
                   ",\ndouble " <> renScale <>
                   If[!FreeQ[formFactorExprs, Finite], ", double finite", ""];
+           Print[args];
 
            docString = CreateOneLoopDiagramDocString[process, diagram];
 
@@ -510,10 +547,15 @@ GetDirectedAdjacencyMatrix[topology_] :=
           ];
 
 GetUndirectedAdjacencyMatrix[topology_] :=
-    Module[{directedAdjacencyMatrix},
-           directedAdjacencyMatrix = GetDirectedAdjacencyMatrix[topology];
-           directedAdjacencyMatrix + Transpose[directedAdjacencyMatrix]
-          ];
+    Module[{directedAdjacencyMatrix, m1, m2},
+            directedAdjacencyMatrix = GetDirectedAdjacencyMatrix[topology];
+           m1 = directedAdjacencyMatrix + Transpose[directedAdjacencyMatrix];
+           m2 = m1;
+           For[ii = 1, ii <= Length[m1], ii++,
+             m2[[ii]] = MapAt[(#/2)&, m1[[ii]], ii];
+           ];
+           m2
+           ];
 
 GetEdgeLabels[topology_] :=
     Module[{propagators},
@@ -538,11 +580,12 @@ GetEdgeLists[adjacencyMatrix_List, vertexLabels_List] :=
 GetPropagatorType[Propagator[Incoming][info__]] := Incoming;
 GetPropagatorType[Propagator[Outgoing][info__]] := Outgoing;
 GetPropagatorType[Propagator[Loop[i_]][info__]] := Loop;
+GetPropagatorType[Propagator[Internal][info__]] := Internal;
 
 GetInternalEdgeLists[topology_] :=
     Module[{propagators, internalPropagators, internalEdges},
            propagators = List @@ topology;
-           internalPropagators = Select[propagators, (GetPropagatorType[#] === Loop)&];
+           internalPropagators = Select[propagators, (GetPropagatorType[#] === Loop || GetPropagatorType[#] === Internal)&];
            internalEdges = Cases[internalPropagators, Propagator[type_][Vertex[i_][from_], Vertex[j_][to_], Field[k_]] :> Rule[{from, to}, Field[k]], {0, Infinity}];
            internalEdges = internalEdges /. (Rule[{i_, j_}, f_] /; i > j) :> Rule[{j, i}, SARAH`AntiField[f]];
            Flatten @ (MapIndexed[Rule[{#[[1,1]], #[[1,2]], First[#2]}, #[[2]]]&, #]& /@ Gather[internalEdges, (First[#1] === First[#2])&])
@@ -568,7 +611,7 @@ GetCXXDiagramsDiagram[topology_] :=
           ];
 
 GetGenericDiagramClass[process_, {graphID_, topology_, insertions_, formFactors_}] :=
-    Module[{graphName, adjacencyMatrix, edgeLabels, couplings,
+    Module[{graphName, adjacencyMatrix, edgeLabels, couplings, cxxDiagramsFormat,
             hasLocalTerms = FreeQ[formFactors, Finite]
             },
            graphName = CreateOneLoopDiagramName[process, graphID, insertions];
@@ -609,14 +652,14 @@ For[i = 1, i <= Length[genericProcesses], i++,
     Print["Creating C++ code for process: ", process, " ..."];
     Print["... reading input files"];
     diagramExprs = ReadFormFactorsExprs[process, resultsDir];
-    diagramExprs = Select[diagramExprs, IsNonZeroDiagram];
+(*    diagramExprs = Select[diagramExprs, IsNonZeroDiagram];*)
     Print["... generating evaluation functions"];
-    {decls, defs} = CreateDiagramEvaluators[process, diagramExprs];
+    {decls, defs} = CreateDiagramEvaluators[process, Select[diagramExprs, IsNonZeroDiagram]];
     genericOneLoopDiagramEvaluatorDecls = genericOneLoopDiagramEvaluatorDecls <>
                                           If[genericOneLoopDiagramEvaluatorDecls != "", "\n\n", ""] <> decls;
     genericOneLoopDiagramEvaluatorDefs = genericOneLoopDiagramEvaluatorDefs <>
                                          If[genericOneLoopDiagramEvaluatorDefs != "", "\n\n", ""] <> defs;
-    genericOneLoopDiagramClasses = Join[genericOneLoopDiagramClasses, GetGenericDiagramClass[process, #]& /@ diagramExprs]/.Cp->DylanCp;
+    genericOneLoopDiagramClasses = Join[genericOneLoopDiagramClasses, GetGenericDiagramClass[process, #]& /@ diagramExprs]/.Cp->FACp;
    ];
 
 Print["Writing output files ..."];

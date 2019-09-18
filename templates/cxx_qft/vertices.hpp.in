@@ -111,7 +111,6 @@ public:
 	 **/
 	std::complex<double> value( int i ) const
 	{
-      std::cout << i << ' ' << ind << std::endl;
 		if( i != ind )
 			throw std::invalid_argument(
 				"MomentumVertex: Wrong index specified");

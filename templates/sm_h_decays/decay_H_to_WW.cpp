@@ -11,7 +11,6 @@ double CLASSNAME::get_partial_width<H, W, conj<W>::type>(
    const double mWOS = context.physical_mass<W>(indexOut1);
    const double mW = context.mass<W>(indexOut1);
    const double x = Sqr(mWOS / mHOS);
-   // std::cout << 1./(sqrt(2.)*pow(MODELPARAMETER(v),2)) << ' ' << mWOS << std::endl;
    double res;
    // mH < mW
    // 4-body decay not implemented for a moment

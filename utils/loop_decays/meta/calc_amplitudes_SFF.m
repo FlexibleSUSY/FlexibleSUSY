@@ -80,7 +80,7 @@ CalculateAmplitudes[amplitudeHead_, amplitudeExpr_] :=
     );
 
 (* Calculate all contributing graphs using FeynArts/FormCalc *)
-topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Internal];
+topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Tadpoles];
 
 process = {S[1]} -> {F[4], -F[4]};
 
@@ -275,7 +275,8 @@ CollectDiagramInfo[ids_, diagrams_, formFactors_] :=
                         insertions = diagrams[[i, 2]];
                         genericInsertions = List @@ insertions;
                         nGenericInsertions = Length[genericInsertions];
-                        genericAmps = List @@ formFactors[[count ;; count + nGenericInsertions - 1]];
+                        (*genericAmps = List @@ formFactors[[count ;; count + nGenericInsertions - 1]];*)
+                        genericAmps = (List @@ formFactors[[count ;; count + nGenericInsertions - 1]]) /. SARAH`Cp[x__][y__] :> SARAH`Cp[Sequence@@(List[x] /. f_[u__, Internal]:>f[u])][y];
                         genericIDs = ids[[count ;; count + nGenericInsertions - 1]];
                         count += nGenericInsertions;
                         MapThread[Sow[List[#1, topology, #2, Simplify[#3]]]&, {genericIDs, genericInsertions, genericAmps}];
@@ -301,7 +302,7 @@ Print["Converting form factors ..."];
 
 formFactors = OneLoopDecaysUtils`ToFSConventions /@ formFactors;
 
-externalInsertions = GetExternalLegInsertions[diags];
+externalInsertions = DeleteDuplicates@GetExternalLegInsertions[diags];
 If[Length[externalInsertions] != 1,
    Print["Error: expected only a single topology."];
    Quit[1];

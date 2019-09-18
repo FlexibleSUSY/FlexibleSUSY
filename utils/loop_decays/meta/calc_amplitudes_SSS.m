@@ -78,7 +78,7 @@ CalculateAmplitudes[amplitudeHead_, amplitudeExpr_] :=
     );
 
 (* Calculate all contributing graphs using FeynArts/FormCalc *)
-topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Internal];
+topologies = FeynArts`CreateTopologies[1, 1 -> 2, ExcludeTopologies -> Tadpoles];
 
 process = {S} -> {S, S};
 
