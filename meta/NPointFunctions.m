@@ -195,7 +195,7 @@ Module[
       mass = SARAH`Mass,
       sp,
       codeU,codeD,
-      upFullBasis,downFullBasis,dressedFermions,assumptionReplacements
+      dressedFermions,assumptionReplacements
    },
    header=CreateCXXHeaders[LoopFunctions->paveLibrary,UseWilsonCoeffs->True];
    sp[particle_,num_] := FormCalc`Spinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
