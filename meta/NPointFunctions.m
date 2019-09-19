@@ -606,7 +606,7 @@ GetClassRules::errUnknownInput=
 "Input should be NPF object and not
 `1`.";
 GetClassRules[NPFPattern["Sums"->genSums_,"ClFields"->classFields_]] :=
-MapThread[Function[r,MapThread[Rule,{#1,r}]]/@#2&,{Last/@genSums,classFields}];
+MapThread[Function[r,MapThread[Rule,{#1,r}]]/@#2&,{(First/@Last@#)&/@genSums,classFields}];
 GetClassRules[args___] :=
 Utils`AssertOrQuit[False,GetClassRules::errUnknownInput,{args}];
 SetAttributes[GetClassRules,{Protected,Locked}];
@@ -885,6 +885,7 @@ Module[
    "#include " <> mainHPP <> "\n" <>
    "#include \"concatenate.hpp\"\n" <>
    "#include <boost/fusion/include/at_key.hpp>" <> "\n" <>
+   "#include <boost/core/is_same.hpp>" <> "\n" <>
    "#include " <> loopHPP
 ] /; And[
    Utils`AssertOrQuit[
@@ -1207,6 +1208,7 @@ Module[
          @CalculateFunction@
       }; // End of @ClassName@"
    },
+
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
    cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
@@ -1624,7 +1626,7 @@ Module[{},
       "\n\n"]~StringReplace~("\n"->"\n"<>ind)
 ];
 CXXGenericSum[
-   sum:GenericSum[expr_,genericFields_],
+   sum:GenericSum[expr_,summation:{{_,_}..}],
    genericInsertions_List,
    combinatorialFactors_List,
    colourFactors_List,
@@ -1636,6 +1638,7 @@ CXXGenericSum[
 ] :=
 Module[
    {
+      genericFields = First/@summation,
       type = If[wilsonBasis === {},
          "std::complex<double>",
          "std::array<std::complex<double>,"<>ToString@Length@wilsonBasis<>">"
@@ -1701,7 +1704,7 @@ Module[
          "@InitializeSubstitutions@"->CXXSubsInGenericSum[sum,subexpressions],
          "@InitializeContext@"->context,
          "@InitializeOutputVars@"->CXXInitializeOutput@wilsonBasis,
-         "@SummationOverGenericFields@"->CXXChangeOutput[genericFields,expr->preCXXRules,wilsonBasis],
+         "@SummationOverGenericFields@"->CXXChangeOutput[summation,expr->preCXXRules,wilsonBasis],
          "@ReturnOutputVars@"->CXXReturnOutput@wilsonBasis,
          "@GenericKeys@"->CXXGenFieldKey@genericFields,
          "@ClassInsertions@"->CXXClassInsertions@genericInsertions,
@@ -1738,7 +1741,8 @@ SetAttributes[CXXInitializeOutput,{Protected,Locked}];
 
 CXXChangeOutput::usage =
 "@brief Generates c++ code for output value updating inside GenericSum.
-@param genFields:{...} list of presenting generic fields.
+@param <{{generic field, restriction}..}> summation list of generic index
+restriction rules pares, which, if are true should lead to a skip of summation.
 @param expr either single expression or list of expressions to be converted into c++.
 @preCXXRules list of rules to be applied at expr.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
@@ -1749,17 +1753,18 @@ CXXChangeOutput::errUnknownInput =
 CXXChangeOutput @todo
 and not:
 CXXInitializeOutput@@`1`";
-CXXChangeOutput[genFields:{__?IsGenericField},expr_->preCXXRules_,{},ind_String:""] :=
+CXXChangeOutput[summation:{{_?IsGenericField,_}..},expr_->preCXXRules_,{},ind_String:""] :=
 Module[
    {
+      genFields = First/@summation,
       newExpr = expr /. getLoopLibraryRules[],cxxExpr,out
    },
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,newExpr,preCXXRules]];
    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
    out="value += "<>stringGeneratedCut[cxxExpr<>";",100,",","   "<>ind<>"   "];
-   CXXBeginSum[genFields,ind]<>"\n"<>ind<>"   "<>out<>"\n"<>ind<>CXXEndSum[genFields,ind]
+   CXXBeginSum[summation,preCXXRules,ind]<>"\n"<>ind<>"   "<>out<>"\n"<>ind<>CXXEndSum[genFields,ind]
 ];
-CXXChangeOutput[genFields:{__?IsGenericField},expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
+CXXChangeOutput[summation:{{_?IsGenericField,_}..},expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
 Module[
    {
       code ="
@@ -1775,6 +1780,7 @@ Module[
          @DefinePaVe@
          @ChangeOutputValues@
       @EndSum@",
+      genFields = First/@summation,
       modifiedExpr = expr,
       masses,preMassCode,codeMass,rulesMass,
       couplings,preCouplingCode,codeCoupling,rulesCoupling,
@@ -1809,7 +1815,7 @@ Module[
    "@Masses@"->preMassCode,
    "@Couplings@"->preCouplingCode,
    "@PaVe@"->prePaVeCode,
-   "@BeginSum@"->CXXBeginSum@genFields,
+   "@BeginSum@"->CXXBeginSum[summation,preCXXRules],
       "@DefineMasses@"->codeMass,
       "@DefineCpoulings@"->codeCoupling,
       "@DefinePaVe@"->codePaVe,
@@ -1989,20 +1995,47 @@ SetAttributes[CXXSubsInGenericSum,{Protected,Locked}];
 
 CXXBeginSum::usage =
 "@brief Generates c++ code for sum beginning used inside GenericSum.
-@param genFields:{...} list of presenting generic fields.
+@param <{{generic field, restriction}..}> summation List of generic index
+restriction rules pares, which, if are true should lead to a skip of summation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for sum beginning used inside generic sums.";
 CXXBeginSum::errUnknownInput =
 "Input should be 
-CXXBeginSum@@{ {<generic_field>..}, <string> }
+CXXBeginSum@@{ {{generic field, restriction}..}, <string> }
 and not:
 CXXBeginSum@@`1`";
-CXXBeginSum[genFields:{__?IsGenericField},ind_String:""]:=
-   StringRiffle[StringJoin[
-      "for( const auto &",CXXFieldIndices@#," : ","index_range<",
-      CXXGenFieldName@#,">() ) {","\n",ind,"at_key<",CXXGenFieldKey@#,
-      ">( index_map ) = ",CXXFieldIndices@#,";"] &/@genFields,
-      "\n"<>ind];
+CXXBeginSum[summation:{{_?IsGenericField,_}..},preCXXRules_,ind_String:""]:=
+Module[{beginsOfFor},
+   beginsOfFor =
+      "for( const auto &"<>CXXFieldIndices@#[[1]]<>" : "<>"index_range<"<>CXXGenFieldName@#[[1]]<>">() ) {\n"<>ind<>
+      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>CXXFieldIndices@#[[1]]<>";"<>parseRestrictionRule[#,preCXXRules,ind] &/@summation;
+   StringRiffle[beginsOfFor,"\n"<>ind]
+];
+
+parseRestrictionRule[{genericField_?IsGenericField,rule_},{extIndexRules_List,__},str_String:""] :=
+Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
+   (* @note Here ind (in everywhere's notation) is str. *)
+   getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>(ind/.extIndexRules)<>"}";
+   getIndexOfExternalField[_[{ind_}]] := "std::array<int,1> {"<>(ind/.extIndexRules)<>"}";
+   getIndexOfExternalField[_] := "std::array<int,0> {}";
+   
+   OrTwoDifferent[] := Module[
+      {
+         type1 = CXXFieldName@First@rule,
+         type2 = CXXFieldName@Last@rule,
+         ind = getIndexOfExternalField@First@rule,
+         typeGen = CXXGenFieldName@genericField,
+         indGen = CXXFieldIndices@genericField
+      },
+      "\n"<>str<>"if( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
+   ];
+   
+   Switch[rule,
+      Or[f1_,f2_],OrTwoDifferent[],
+      False,"",
+      _,"@todo This rule is ununderstandable!";Quit[1]]
+];
+
 CXXBeginSum[x___]:=
    Utils`AssertOrQuit[False,CXXBeginSum::errUnknownInput,{x}];
 SetAttributes[CXXBeginSum,{Protected,Locked}];

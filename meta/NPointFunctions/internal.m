@@ -335,7 +335,7 @@ NPointFunctionFAFC::usage=
 NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
 Module[
    {
-      settingsForMomElim,
+      settingsForGenericSums,settingsForMomElim,
       topologies, diagrams, amplitudes, genericInsertions, colourFactors, 
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -356,12 +356,13 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@ExcludeProcesses];
-   debugMakePictures[diagrams];
 
+   settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
       GenericInsertionsForDiagram /@ (List @@ diagrams), 1];
+
    colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
       fieldNameToFSRules;
@@ -377,7 +378,7 @@ Module[
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
-         CalculateAmplitudes[amplitudes,settingsForMomElim,genericInsertions,
+         CalculateAmplitudes[amplitudes,settingsForMomElim,settingsForGenericSums,genericInsertions,
             OptionValue@Regularize,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag
@@ -385,6 +386,60 @@ Module[
          colourFactors,
          {1, -1}]
    }
+];
+
+getRestrictionsOnGenericSumsByTopology[
+   diagrams:FeynArts`TopologyList[___,FeynArts`Process->inProcess:_,___][Rule[FeynArts`Topology[_][__],_]..]
+] :=
+Module[
+   {
+     processParticles = Delete[#,Position[#,FeynArts`Index[Global`Colour,_Integer]]] &/@ Flatten[List@@inProcess],
+     newDiagrams
+   },
+   (* 2to2 self energy of particle 1. *)
+   newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
+                                                               {0,0,0,0,0,1,0,0},
+                                                               {0,0,0,0,0,0,1,0},
+                                                               {0,0,0,0,0,1,0,0},
+                                                               {1,0,0,0,0,0,0,2},
+                                                               {0,1,0,1,0,0,1,0},
+                                                               {0,0,1,0,0,1,0,1},
+                                                               {0,0,0,0,2,0,1,0}},
+      (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
+      Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
+      #] &/@ diagrams;
+   (* 2to2 self energy of particle 3. *)
+   newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
+                                                               {0,0,0,0,0,1,0,0},
+                                                               {0,0,0,0,0,0,1,0},
+                                                               {0,0,0,0,0,1,0,0},
+                                                               {1,0,0,0,0,1,0,1},
+                                                               {0,1,0,1,1,0,0,0},
+                                                               {0,0,1,0,0,0,0,2},
+                                                               {0,0,0,0,1,0,2,0}},
+      (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
+      Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
+      #] &/@ newDiagrams;
+   (*No more rules*)
+   newDiagrams = If[MatchQ[#,Rule[FeynArts`Topology[_Integer][__],_]],
+      (* Empty rules to skip *)
+      Table[{},{Length@Last@#}],
+      #] &/@ newDiagrams;
+   (* Simpler external form. *)
+   newDiagrams = Flatten[List@@newDiagrams,1];
+   If[MatchQ[newDiagrams,{{Rule[_Integer,_]...}..}],newDiagrams,Print@"@todo FAILED";Quit[1]]
+];
+
+getAdjacencyMatrixForTopology[
+   topology:FeynArts`Topology[_Integer][seqProp:FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][ FeynArts`Vertex[_Integer][_Integer],FeynArts`Vertex[_Integer][_Integer],Repeated[FeynArts`Field[_Integer],{0,1}]]..]
+]:=
+Module[
+   {
+      propagatorPattern,adjacencies,adjacencyMatrix
+   },
+   propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
+   adjacencies = Tally[{seqProp}/.propagatorPattern[i_,j_,_]:>{{i,j},{j,i}}];
+   adjacencyMatrix=Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies]
 ];
 
 getMomElimForAmplitudesByTopology::usage=
@@ -803,6 +858,7 @@ FeynAmpList[___][FeynAmp[
    amp_,
    {whatIsInAmp___}->Insertion[Classes][{howToReplace___}..]]..]
 @param <List> settingsForMomElim Sets up the MomElim option.
+@param @todo.
 @param genericInsertions the list of generic insertions for the amplitudes
 @param regularizationScheme the regularization scheme for the calculation
 @param zeroExternalMomenta True if external momenta should be set to zero and 
@@ -813,6 +869,7 @@ the subexpressions used to simplify the expressions";
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
    settingsForMomElim_List,
+   settingsForGenericSums:{{Rule[_Integer,_]...}..},
    genericInsertions_List,
    regularizationScheme_,
    zeroExternalMomenta_,
@@ -842,7 +899,7 @@ Module[
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
 
-   calculatedAmplitudes = ToGenericSum /@ calculatedAmplitudes;
+   calculatedAmplitudes = MapThread[ToGenericSum,{calculatedAmplitudes,settingsForGenericSums}];
    
    abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
@@ -1027,11 +1084,12 @@ Module[{position = Position[rules, FeynArts`RelativeCF]},
 ];
 
 ToGenericSum::usage=
-"@brief Given a generic amplitude, determine the generic fields over which it
+"@todo
+@brief Given a generic amplitude, determine the generic fields over which it
 needs to be summed and return a corresponding GenericSum[] object.
 @param FormCalc`Amp[_->_][amp_] the given generic amplitude
 @returns {S|F|V|U|T[GenericIndex[number of index]]...}.";
-ToGenericSum[FormCalc`Amp[_->_][amp_]] :=
+ToGenericSum[FormCalc`Amp[_->_][amp_],genericSumRestictions:{Rule[_Integer,_]...}] :=
 Module[
    {
       sortSumFields = Sort@DeleteDuplicates[Cases[amp,
@@ -1039,7 +1097,7 @@ Module[
          Infinity]],
       replSumFields
    },
-   replSumFields = sortSumFields /. f_[_[_,i_]]:>f@GenericIndex@i;
+   replSumFields = sortSumFields /. f_[_[_,i_]]:>{f@GenericIndex@i,Replace[i,genericSumRestictions~Join~{_Integer->False}]};
    GenericSum[amp, replSumFields]
 ];
 SetAttributes[ToGenericSum,{Protected,Locked}];
