@@ -1431,11 +1431,11 @@ by setting in the model file::
 
            UseHiggs2LoopSM = True;
            UseHiggs3LoopSM = True;
-           UseSMYukawa2Loop = True;    (* use 2-loop non-QCD corrections to m_t *)
-           UseSMAlphaS3Loop = True;    (* use 2- and 3-loop QCD corrections to alpha_s *)
-           UseYukawa3LoopQCD = True;   (* use 2- and 3-loop QCD corrections to m_t *)
+           UseSMAlphaS4Loop = True;    (* use 2-, 3- and 4-loop QCD corrections to alpha_s *)
+           UseYukawa4LoopQCD = True;   (* use 2-, 3- and 4-loop QCD corrections to m_t *)
            UseSM3LoopRGEs = True;      (* use 3-loop RGEs *)
            UseSM4LoopRGEs = True;      (* use 4-loop RGEs *)
+           UseSM5LoopRGEs = True;      (* use 4-loop RGEs *)
 
 Split-MSSM
 ''''''''''
@@ -1496,12 +1496,12 @@ Two-loop threshold corrections
 Standard Model
 ''''''''''''''
 
-The known SM 2- and 3-loop QCD threshold corrections of order
-:math:`O(\alpha_s^2 + \alpha_s^3)` to the strong coupling constant are
-known by [hep-ph/0004189].  They can be taken into account by setting
-in the model file::
+The known SM 2-, 3- and 4-loop QCD threshold corrections of order
+:math:`O(\alpha_s^2 + \alpha_s^3 + \alpha_s^4)` to the strong coupling
+constant are known by [hep-ph/0004189, hep-ph/0512060].  They can be
+taken into account by setting in the model file::
 
-    UseSMAlphaS3Loop = True; (* use 2- and 3-loop threshold for αs *)
+    UseSMAlphaS4Loop = True; (* use 2-, 3- and 4-loop threshold for αs *)
 
 The known SM 2-loop threshold corrections of order :math:`O(\alpha_t
 \alpha_s + \alpha_t^2)` to the running top mass are known by

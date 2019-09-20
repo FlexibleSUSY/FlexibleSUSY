@@ -64,7 +64,6 @@ model_files/munuSSMSemiAnalytic export-ignore
 model_files/NoInputParameters   export-ignore
 model_files/NoYukawaMSSM        export-ignore
 model_files/NSM                 export-ignore
-model_files/NUHMSSMNoFV         export-ignore
 model_files/NUHMSSMNoFVSQCD     export-ignore
 model_files/NUHMSSMNoFVHimalayaSQCD export-ignore
 model_files/NUHMSSMNoFVNoMomIt  export-ignore

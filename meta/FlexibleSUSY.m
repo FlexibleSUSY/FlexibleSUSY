@@ -189,6 +189,7 @@ UseSM3LoopRGEs = False;
 UseSM4LoopRGEs = False;
 UseSM5LoopRGEs = False;
 UseSMAlphaS3Loop = False;
+UseSMAlphaS4Loop = False;
 UseSMYukawa2Loop = False;
 UseMSSM3LoopRGEs = False;
 UseMSSMYukawa2Loop = False;
@@ -2187,58 +2188,61 @@ WriteCXXDiagramClass[vertices_List, files_List,
      defineFieldTraits = CXXDiagrams`CreateFieldTraitsDefinitions[TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"];
      unitCharge = CXXDiagrams`CreateUnitCharge[];
 
-     If[vertices =!= {},
+        If[vertices =!= {},
 
         cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
     
         cxxVerticesParts[[1, 2]] = cxxVerticesParts[[1, 2]] <> "\n\n" <>
            unitCharge;
     
-       (* Document which vertices are created. This is mainly useful for
-          unit testing. See e.g test/test_MSSM_npointfunctions.m *)
-       outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-       cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
-       createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
+            (* Document which vertices are created. This is mainly useful for
+               unit testing. See e.g test/test_MSSM_npointfunctions.m *)
+            outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
+            cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
+            createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
     
-       If[DirectoryQ[cxxDiagramsDir] === False,
-          CreateDirectory[cxxDiagramsDir]];
+            If[DirectoryQ[cxxDiagramsDir] === False,
+                CreateDirectory[cxxDiagramsDir]];
     
-       (* There is a bug in WriteString[] in older Mathematica versions
-          that causes the files to be left open. *)
-       fileHandle = OpenWrite[createdVerticesFile];
-       Write[fileHandle, vertices];
-       Close[fileHandle];
-    ];
+            (* There is a bug in WriteString[] in older Mathematica versions
+               that causes the files to be left open. *)
+            fileHandle = OpenWrite[createdVerticesFile];
+            Write[fileHandle, vertices];
+            Close[fileHandle];
+        ];
 
-    WriteOut`ReplaceInFiles[files,
+        unitCharge = CXXDiagrams`CreateUnitCharge[];
+        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
+
+        WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"            -> fields,
                              "@CXXDiagrams_MassFunctions@"     -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@CXXDiagrams_UnitCharge@"        -> unitCharge,
                              "@defineFieldTraits@"           -> defineFieldTraits,
                              "@CXXDiagrams_VertexPrototypes@"  ->
-                               StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
+                                StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]
                             }];
-    
-    cxxQFTVerticesFiles = Table[
-        {cxxQFTVerticesTemplate,
-		   FileNameJoin[{cxxQFTVerticesOutputDirectory,
+
+        cxxQFTVerticesFiles = Table[
+            {cxxQFTVerticesTemplate,
+		      FileNameJoin[{cxxQFTVerticesOutputDirectory,
 			   FSModelName <> "_" <> FileNameTake[StringReplace[cxxQFTVerticesTemplate,
 			     {".cpp.in" -> ToString[k] <> ".cpp"}]]}]
-			},
-		  {k, Length[cxxVerticesParts]}];
+			   },
+		      {k, Length[cxxVerticesParts]}];
 	
-    WriteOut`ReplaceInFiles[{#[[1]]},
-      {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
-       Sequence @@ GeneralReplacementRules[]
-      }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
-    WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
-      {"@generatedCXXVerticesFiles@" ->
-         "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
-       Sequence @@ GeneralReplacementRules[]
-      }];
- ]
+        WriteOut`ReplaceInFiles[{#[[1]]},
+            {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
+            Sequence @@ GeneralReplacementRules[]
+            }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
+        WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
+            {"@generatedCXXVerticesFiles@" ->
+                "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
+            Sequence @@ GeneralReplacementRules[]
+            }];
+    ];
 
 (* Write the EDM c++ files *)
 WriteEDMClass[edmFields_List,files_List] :=
@@ -3093,15 +3097,19 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
+              FlexibleSUSY`UseYukawa4LoopQCD = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
+              FlexibleSUSY`UseSM5LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseYukawa4LoopQCD === True,
               FlexibleSUSY`UseYukawa3LoopQCD = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
              ];
@@ -3130,6 +3138,12 @@ FSCheckFlags[] :=
               Print["Adding 3-loop SM QCD threshold corrections to alpha_s ",
                     "[arxiv:hep-ph/9708255]"];
               References`AddReference["Chetyrkin:1997un"];
+             ];
+
+           If[FlexibleSUSY`UseSMAlphaS4Loop || FlexibleSUSY`FlexibleEFTHiggs,
+              Print["Adding 4-loop SM QCD threshold corrections to alpha_s ",
+                    "[arxiv:hep-ph/0512060]"];
+              References`AddReference["Chetyrkin:2005ia"];
              ];
 
            If[FlexibleSUSY`UseMSSMYukawa2Loop,

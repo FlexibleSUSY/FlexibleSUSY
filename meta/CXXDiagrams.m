@@ -1098,7 +1098,7 @@ CreateVertex[fields_List] :=
 				"const context_base& context)"] <> "\n" <>
 		"{\n" <> TextFormatting`IndentText[
 				VertexFunctionBodyForFields[fields] <> "\n"] <>
-		"};"
+		"}"
 		}
   ]
 

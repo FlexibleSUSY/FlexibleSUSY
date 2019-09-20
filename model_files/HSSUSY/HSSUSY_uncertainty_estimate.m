@@ -64,7 +64,7 @@ CalcMh[MS_, TB_, Xtt_] :=
         fsSettings -> {
             precisionGoal -> 1.*^-5,
             thresholdCorrectionsLoopOrder -> 4,
-            thresholdCorrections -> 124111321
+            thresholdCorrections -> 124111421
         },
         fsModelParameters -> {
             TanBeta -> TB,
