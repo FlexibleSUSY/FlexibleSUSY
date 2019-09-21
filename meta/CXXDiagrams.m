@@ -1180,7 +1180,7 @@ VertexFunctionBodyForFields[fields_List] :=
 			"const " <> GetComplexScalarCType[] <> " result = " <>
 			Parameters`ExpressionToString[expr] <> ";\n\n" <>
 			"return {result, " <> 
-				ToString[Position[indexedFields, incomingGhost, {1}][[1,1]] - 1] <>
+				ToString@Utils`MathIndexToCPP[Position[indexedFields, incomingGhost, {1}][[1,1]]] <>
 			"};",
 			
 			_TripleVectorVertex,
@@ -1250,9 +1250,9 @@ VertexFunctionBodyForFields[fields_List] :=
       expr = Vertices`SortCp[SARAH`Cp @@ fields] /. indexFields /. vertexRules;
       
       "int minuend_index = " <> 
-        ToString[Position[indexedFields, incomingScalar, {1}][[1,1]] - 1] <> ";\n" <>
+        ToString@Utils`MathIndexToCPP[Position[indexedFields, incomingScalar, {1}][[1,1]]] <> ";\n" <>
       "int subtrahend_index = " <>
-        ToString[Position[indexedFields, outgoingScalar, {1}][[1,1]] - 1] <> ";\n\n" <>
+        ToString@Utils`MathIndexToCPP[Position[indexedFields, outgoingScalar, {1}][[1,1]]] <> ";\n\n" <>
       DeclareIndices[StripUnbrokenGaugeIndices /@ indexedFields, "indices"] <>
       Parameters`CreateLocalConstRefs[expr] <> "\n" <>
       "const " <> GetComplexScalarCType[] <> " result = " <>
