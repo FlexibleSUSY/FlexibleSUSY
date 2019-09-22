@@ -49,21 +49,6 @@ BOOST_AUTO_TEST_CASE(test_is_equal)
    BOOST_CHECK(is_equal_rel(ull, 0ULL));
 }
 
-BOOST_AUTO_TEST_CASE(test_is_zero_complex)
-{
-   float f = 0.0f;
-   double d = 0.0;
-   long double dl = 0.0L;
-
-   std::complex<float> cf(f, f);
-   std::complex<double> cd(d, d);
-   std::complex<long double> cdl(dl, dl);
-
-   BOOST_CHECK(is_zero(cf));
-   BOOST_CHECK(is_zero(cd));
-   BOOST_CHECK(is_zero(cdl));
-}
-
 template <long N>
 std::array<std::complex<double>, N> make_logs()
 {

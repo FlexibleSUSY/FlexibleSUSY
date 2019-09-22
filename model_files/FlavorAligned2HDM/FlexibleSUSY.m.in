@@ -1,4 +1,5 @@
 
+
 FSModelName = "@CLASSNAME@";
 FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = "FlavorAligned2HDM";
@@ -60,43 +61,6 @@ LowScale = LowEnergyConstant[MZ];
 
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
-<<<<<<< HEAD
-
-(* Yukawa - Proportionality Factors *)
-
-xiE = xiEIN + I ImxiEIN;
-xiD = xiDIN + I ImxiDIN;
-xiU = xiUIN + I ImxiUIN;
-
-
-LowScaleInput = {
-
-   {v1, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
-   {v2, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]},
-
-   {Ye[1,1], ((LowEnergyConstant[yeSM] * LowEnergyConstant[vSM])/(v1 + xiE * (Exp[- I eta]) * v2))},
-   {Ye[2,2], ((LowEnergyConstant[ymSM] * LowEnergyConstant[vSM])/(v1 + xiE * (Exp[- I eta]) * v2))},
-   {Ye[3,3], ((LowEnergyConstant[ylSM] * LowEnergyConstant[vSM])/(v1 + xiE * (Exp[- I eta]) * v2))},
-   {Yd[1,1], ((LowEnergyConstant[ydSM] * LowEnergyConstant[vSM])/(v1 + xiD * (Exp[- I eta]) * v2))},
-   {Yd[2,2], ((LowEnergyConstant[ysSM] * LowEnergyConstant[vSM])/(v1 + xiD * (Exp[- I eta]) * v2))},
-   {Yd[3,3], ((LowEnergyConstant[ybSM] * LowEnergyConstant[vSM])/(v1 + xiD * (Exp[- I eta]) * v2))},
-   {Yu[1,1], ((LowEnergyConstant[yuSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[xiU * (Exp[- I eta])] * v1))},
-   {Yu[2,2], ((LowEnergyConstant[ycSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[xiU * (Exp[- I eta])] * v1))},
-   {Yu[3,3], ((LowEnergyConstant[ytSM] * LowEnergyConstant[vSM])/(v2 + Conjugate[xiU * (Exp[- I eta])] * v1))},
-
-   {epsE[1,1], xiE * (Exp[- I eta]) * Ye[1,1]},
-   {epsE[2,2], xiE * (Exp[- I eta]) * Ye[2,2]},
-   {epsE[3,3], xiE * (Exp[- I eta]) * Ye[3,3]},
-   {epsD[1,1], xiD * (Exp[- I eta]) * Yd[1,1]},
-   {epsD[2,2], xiD * (Exp[- I eta]) * Yd[2,2]},
-   {epsD[3,3], xiD * (Exp[- I eta]) * Yd[3,3]},
-   {epsU[1,1], Conjugate[xiU * (Exp[- I eta])] * Yu[1,1]},
-   {epsU[2,2], Conjugate[xiU * (Exp[- I eta])] * Yu[2,2]},
-   {epsU[3,3], Conjugate[xiU * (Exp[- I eta])] * Yu[3,3]}
-
-};
-
-=======
 LowScaleInput = {
    {v1, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
    {v2, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]},
@@ -203,7 +167,6 @@ LowScaleInput = {
    (* {Yu[1,1], -((epsU[1,1]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[yuSM])/v2}, *)
    (* {Yu[2,2], -((epsU[2,2]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[ycSM])/v2}, *)
    (* {Yu[3,3], -((epsU[3,3]*v1)/v2) + (LowEnergyConstant[vSM]*LowEnergyConstant[ytSM])/v2}  *)
->>>>>>> upstream/development
 
 
 InitialGuessAtLowScale = {

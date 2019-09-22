@@ -41,7 +41,6 @@
 #include "functors.hpp"
 #include "linalg2.hpp"
 #include "logger.hpp"
-#include "memory.hpp"
 #include "numerics2.hpp"
 #include "raii.hpp"
 #include "standard_model.hpp"
@@ -83,7 +82,7 @@ CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
 
 std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
 {
-   return flexiblesusy::make_unique<@ModelName@_mass_eigenstates_decoupling_scheme>(*this);
+   return std::make_unique<@ModelName@_mass_eigenstates_decoupling_scheme>(*this);
 }
 
 void CLASSNAME::do_force_output(bool flag)

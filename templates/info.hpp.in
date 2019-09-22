@@ -22,7 +22,6 @@
 #define @ModelName@_INFO_H
 
 #include "problems.hpp"
-#include "renormalization_scheme.hpp"
 
 #include <array>
 #include <iosfwd>

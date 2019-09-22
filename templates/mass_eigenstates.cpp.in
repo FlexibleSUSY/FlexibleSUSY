@@ -40,7 +40,6 @@
 #include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
-#include "memory.hpp"
 #include "pv.hpp"
 #include "raii.hpp"
 #include "functors.hpp"
@@ -95,7 +94,7 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
 
 std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
 {
-   return flexiblesusy::make_unique<@ModelName@_mass_eigenstates>(*this);
+   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
