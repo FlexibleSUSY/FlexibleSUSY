@@ -124,6 +124,23 @@ double Decay_amplitude_SVV::square() const
    return mgg + m33 + mepseps + mg3;
 }
 
+Decay_amplitude_SSS operator*(std::complex<double> factor, Decay_amplitude_SSS const& amp2) {
+   Decay_amplitude_SSS amp;
+   amp.m_decay = amp2.m_decay;
+   amp.m_scalar_1 = amp2.m_scalar_1;
+   amp.m_scalar_2 = amp2.m_scalar_2;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+Decay_amplitude_SSV operator*(std::complex<double> factor, Decay_amplitude_SSV const& amp2) {
+   Decay_amplitude_SSV amp;
+   amp.m_decay = amp2.m_decay;
+   amp.m_scalar = amp2.m_scalar;
+   amp.m_vector = amp2.m_vector;
+   amp.form_factor = factor * amp2.form_factor;
+   return amp;
+}
+
 Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV const& amp2) {
    Decay_amplitude_SVV amp;
    amp.m_decay = amp2.m_decay;

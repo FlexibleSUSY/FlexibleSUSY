@@ -1538,7 +1538,11 @@ functionBody = "// skip indices that don't match external indices\n" <>
                      "\n// internal masses\n" <>
                   mass <>
 
-                  "\nresult += calculate_" <> translation[[1]] <> "(\n" <>
+                  "\nresult += " <>
+                      ToString[
+                        N[CXXDiagrams`ExtractColourFactor @
+                            CXXDiagrams`ColorFactorForDiagram[topology, diagram], 16]
+                      ] <> " * calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
                      FillMasses[decay] <> ",\n" <>

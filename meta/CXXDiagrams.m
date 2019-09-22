@@ -101,6 +101,7 @@ NumberOfPropagatorsInTopology::usage = "";
 CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
 
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
+ExtractColourFactor::usage = "";
 
 Begin["`Private`"];
 
@@ -559,11 +560,12 @@ ColorMathToSARAHConvention[expr_] :=
 		Subscript[Superscript[CM\[Delta], cIndex1_], cIndex2_] :>
 			SARAH`Delta[cIndex1, cIndex2],
 		Superscript[CM\[Delta], {indices__}] :> SARAH`Delta[indices],
+		Superscript[CM\[CapitalDelta], {indices__}] :> SARAH`Delta[indices],
 		Subscript[Superscript[Superscript[ColorMath`CMt, {cIndex1_}], cIndex2_], cIndex3_] :>
 			1 / 2 * SARAH`Lam[cIndex1, cIndex2, cIndex3],
 		ColorMath`Nc -> 3,
 		ColorMath`TR -> 1/2
-	}
+	};
 
 (** \brief Fully index all fields in a given diagram such that
  * contracted fields share the same indices.
@@ -1532,9 +1534,16 @@ NumberOfPropagatorsInTopology[topology_] :=
    If[Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology] === 3, 3, 2];
 
 ColorFactorForDiagram[topology_, diagram_] :=
-    ColourFactorForIndexedDiagramFromGraph[
-			CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
-		];
+   ColourFactorForIndexedDiagramFromGraph[
+      CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
+   ];
+
+(* TODO: generalize the Extraction *)
+ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2*colourfactor;
+ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
+ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_]] := colourfactor;
+ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
+ExtractColourFactor[colourfactor_] := colourfactor;
 
 End[];
 EndPackage[];
