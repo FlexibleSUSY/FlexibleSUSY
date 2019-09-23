@@ -6,7 +6,6 @@
 #include "test_SM.hpp"
 #include "SM_mass_eigenstates.hpp"
 #include "SM_mass_eigenstates_decoupling_scheme.hpp"
-#include "memory.hpp"
 
 #include <memory>
 #include <utility>
@@ -91,10 +90,10 @@ using Model_ptrs = std::pair<std::unique_ptr<SM_mass_eigenstates>, std::unique_p
 
 Model_ptrs make_model_ptrs(const SM_input_parameters& input)
 {
-   auto me = flexiblesusy::make_unique<SM_mass_eigenstates>();
+   auto me = std::make_unique<SM_mass_eigenstates>();
    setup_SM_const(*me, input);
 
-   auto dec = flexiblesusy::make_unique<SM_mass_eigenstates_decoupling_scheme>();
+   auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>();
    dec->set_g1(me->get_g1());
    dec->set_g2(me->get_g2());
    dec->set_g3(me->get_g3());

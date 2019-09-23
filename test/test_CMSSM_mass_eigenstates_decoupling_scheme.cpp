@@ -7,7 +7,6 @@
 #include "CMSSM_mass_eigenstates.hpp"
 #include "CMSSM_mass_eigenstates_decoupling_scheme.hpp"
 #include "standard_model.hpp"
-#include "memory.hpp"
 
 #include <memory>
 #include <utility>

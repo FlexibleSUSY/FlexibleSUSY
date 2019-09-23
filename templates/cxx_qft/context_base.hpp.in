@@ -46,8 +46,8 @@ namespace @ModelName@_cxx_diagrams {
             typename fields::remove_lorentz_conjugation<Field>::type;
          return mass_impl<CleanField>(indices);
       }
-   template<class Field>
-   double physical_mass(const typename field_indices<Field>::type& indices) const
+      template<class Field>
+      double physical_mass(const typename field_indices<Field>::type& indices) const
       {
          using CleanField = 
             typename fields::remove_lorentz_conjugation<Field>::type;
@@ -56,6 +56,7 @@ namespace @ModelName@_cxx_diagrams {
 
       context_base(@ModelName@_mass_eigenstates_interface const& m) : model(m) {}
       context_base(@ModelName@_mass_eigenstates_interface const* const m) : model(*m) {}
+
       context_base(const context_base&) = default;
       context_base(context_base&&) = default;
 

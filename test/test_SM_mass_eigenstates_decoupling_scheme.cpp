@@ -7,7 +7,6 @@
 #include "SM_mass_eigenstates.hpp"
 #include "SM_mass_eigenstates_decoupling_scheme.hpp"
 #include "standard_model.hpp"
-#include "memory.hpp"
 
 #include <memory>
 #include <utility>
@@ -68,10 +67,10 @@ using Model_ptrs = std::pair<std::unique_ptr<SM_mass_eigenstates>, std::unique_p
 
 Model_ptrs make_model_ptrs(const SM_input_parameters& input)
 {
-   auto me = flexiblesusy::make_unique<SM_mass_eigenstates>();
+   auto me = std::make_unique<SM_mass_eigenstates>();
    setup_SM_const(*me, input);
 
-   auto dec = flexiblesusy::make_unique<SM_mass_eigenstates_decoupling_scheme>();
+   auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>();
    dec->set_g1(me->get_g1());
    dec->set_g2(me->get_g2());
    dec->set_g3(me->get_g3());
@@ -101,7 +100,7 @@ std::unique_ptr<standard_model::Standard_model> make_sm(
    Ye << 0, 0, 0, 0, 0, 0, 0, 0, 0.1;
    Yd << 0, 0, 0, 0, 0, 0, 0, 0, 0.3;
 
-   auto sm = flexiblesusy::make_unique<standard_model::Standard_model>(
+   auto sm = std::make_unique<standard_model::Standard_model>(
       91.           , // scale
       0             , // loops
       0             , // thresholds
@@ -138,7 +137,7 @@ BOOST_AUTO_TEST_CASE( test_SM_mass_eigenstates_conversion )
    model->calculate_tree_level_mass_spectrum();
    model->calculate_pole_mass_spectrum();
 
-   auto dec = flexiblesusy::make_unique<SM_mass_eigenstates_decoupling_scheme>(input);
+   auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>(input);
    dec->fill_from(*model);
 
    // parameters
@@ -207,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_SM_mass_eigenstates_decoupling_scheme_matching )
    input.Qin = 91.0;
    input.QEWSB = 173.34;
 
-   auto dec = flexiblesusy::make_unique<SM_mass_eigenstates_decoupling_scheme>(input);
+   auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>(input);
 
    {
       auto models = make_model_ptrs(input);

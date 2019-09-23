@@ -28,4 +28,5 @@ double Den(double x2, double y2) {
 
 @genericOneLoopDiagramEvaluatorDefs@
 
+
 } // namespace flexiblesusy

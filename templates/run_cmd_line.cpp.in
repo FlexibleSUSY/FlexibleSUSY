@@ -98,7 +98,8 @@ int run_solver(const @ModelName@_input_parameters& input)
 @calculateCmdLineDecays@
 
    // SLHA output
-@writeCmdLineOutput@
+   SLHAea::Coll slhaea(@ModelName@_slha_io::fill_slhaea(
+                          model, qedqcd, scales, observables));
 
    std::cout << slhaea;
 

@@ -20,7 +20,7 @@ using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
 {
-   
+
    SM_input_parameters input;
    input.LambdaIN = 0.285;
    SM<Two_scale> m;

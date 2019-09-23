@@ -430,11 +430,6 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_info.cpp
 endif
 
-ifeq ($(WITH_FlavorAligned2HDM),yes)
-TEST_SRC += \
-		$(DIR)/test_FlavorAligned2HDM_FlexibleDecays.cpp
-endif
-
 ifeq ($(WITH_NMSSM),yes)
 TEST_SH += \
 		$(DIR)/test_NMSSM_profile.sh
@@ -851,9 +846,9 @@ $(DIR)/test_MRSSM2_FlexibleDecays.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
-
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
+
+$(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 
@@ -953,8 +948,6 @@ $(DIR)/test_CMSSM_FlexibleDecays.x: $(LIBCMSSM)
 $(DIR)/test_CMSSMNoFV_two_loop_spectrum.x: $(LIBCMSSMNoFV)
 
 $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
-
-$(DIR)/test_FlavorAligned2HDM_FlexibleDecays.x: $(LIBFlavorAligned2HDM)
 
 $(DIR)/test_gm2calc.x: $(LIBMSSMNoFVSLHA2) $(LIBGM2Calc)
 

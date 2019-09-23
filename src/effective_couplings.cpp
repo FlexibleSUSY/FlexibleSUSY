@@ -63,9 +63,12 @@ std::complex<double> AP12(double tau)
 
 double beta(double sqrtS, double m1, double m2)
 {
-   if(m1 + m2 >= sqrtS) {
-      return 0.0;
+   if(m1 + m2 > sqrtS) {
+      throw std::invalid_argument(
+         "Final state particles energy smaller than incoming"
+      );
    }
+
    return std::sqrt(1.0 - Sqr((m1+m2)/sqrtS)) * (1.0 - Sqr((m1-m2)/sqrtS));
 }
 

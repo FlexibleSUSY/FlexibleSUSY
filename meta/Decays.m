@@ -76,7 +76,7 @@ StripDiagramColorFactor[fields_, colorFactor_] :=
       initialStateRep = TreeMasses`GetColorRepresentation@fieldsIn;
       finalStateReps = TreeMasses`GetColorRepresentation /@ fieldsOut;
       Switch[initialStateRep,
-         S, 
+         S,
             Switch[finalStateReps,
                {S,S}, colorFactor,
                {T,-T}, Coefficient[colorFactor, Superscript[ColorMath`CM\[Delta], ColorMathInterface`GetFieldColorIndex/@fieldsOut]],

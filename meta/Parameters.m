@@ -691,10 +691,6 @@ IsIndex[_] := False;
 IsIndex[indices_List] := And @@ (IsIndex /@ indices);
 IsIndex[indices__] := IsIndex[{indices}];
 
-IsLorentzIndex[index_] := StringMatchQ[ToString @ index, "lt" ~~ __];
-IsColorIndex[index_] := StringMatchQ[ToString @ index, "ct" ~~ __];
-IsGenerationIndex[index_] := StringMatchQ[ToString @ index, "gt" ~~ __];
-
 GetIndices[parameter_[indices__] /; And @@ (IsIndex /@ {indices})] := {indices};
 GetIndices[parameter_] := {};
 

@@ -1722,10 +1722,11 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            printMixingMatrices          = WriteOut`PrintParameters[mixingMatrices, "ostr"];
            dependencePrototypes         = TreeMasses`CreateDependencePrototypes[];
            dependenceFunctions          = TreeMasses`CreateDependenceFunctions[];
-           If[Head[SARAH`ListSoftBreakingScalarMasses] === List,
-              softScalarMasses          = DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses];,
-              softScalarMasses          = {};
-             ];
+           softScalarMasses =
+               If[SARAH`SupersymmetricModel,
+                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
+                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
+                 ];
            (* find soft Higgs masses that appear in tree-level EWSB eqs. *)
            treeLevelEWSBOutputParameters =
                Parameters`DecreaseIndexLiterals @
@@ -2215,11 +2216,11 @@ WriteCXXDiagramClass[vertices_List, files_List,
         AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
 
         WriteOut`ReplaceInFiles[files,
-                            {"@CXXDiagrams_Fields@"            -> fields,
-                             "@CXXDiagrams_MassFunctions@"     -> massFunctions,
+                            {"@CXXDiagrams_Fields@"                -> fields,
+                             "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
-                             "@CXXDiagrams_UnitCharge@"        -> unitCharge,
-                             "@defineFieldTraits@"           -> defineFieldTraits,
+                             "@CXXDiagrams_UnitCharge@"            -> unitCharge,
+                             "@defineFieldTraits@"                 -> defineFieldTraits,
                              "@CXXDiagrams_VertexPrototypes@"  ->
                                 StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]
@@ -4882,8 +4883,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "generic_calculations.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_generic_calculations.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]}};
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];

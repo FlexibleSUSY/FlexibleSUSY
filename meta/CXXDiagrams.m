@@ -124,14 +124,14 @@ VertexTypes[] := {
 	InverseMetricVertex
 };
 
-CreateSelfConjugateFieldDefinition[field_, namespacePrefix_] := ""; 
+CreateSelfConjugateFieldDefinition[field_, namespacePrefix_] := "";
 IsLorentzSelfConjugate[field_] := field === LorentzConjugate[field];
 CreateSelfConjugateFieldDefinition[field_?IsLorentzSelfConjugate, namespacePrefix_] :=
     Module[{fieldName},
            fieldName = TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix];
            "template<> struct " <> FlexibleSUSY`FSModelName <>  "_cxx_diagrams::fields::" <> LorentzConjugateOperation[field] <> "<" <> fieldName <> ">" <>
            " { using type = " <> fieldName <> "; };"
-          ];  
+          ];
 
 CreateSelfConjugateFieldsDefinitions[fields_List, namespacePrefix_:""] :=
     Utils`StringJoinWithSeparator[CreateSelfConjugateFieldDefinition[#, namespacePrefix]& /@ Select[fields, IsLorentzSelfConjugate   ], "\n"] <>

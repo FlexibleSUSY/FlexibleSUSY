@@ -173,17 +173,17 @@ void check_relative_dev(const Eigen::MatrixBase<Derived>& a,
 
 } // namespace flexiblesusy
 
-#define FSTEST_TO_STRING(x) #x
-#define FSTEST_TO_STRING_(x) FSTEST_TO_STRING(x)
-#define FSTEST_TO_STRING__LINE__ FSTEST_TO_STRING_(__LINE__)
+#define S(x) #x
+#define S_(x) S(x)
+#define S__LINE__ S_(__LINE__)
 #define TEST_EQUALITY(a, b) \
-   flexiblesusy::check_equality(a, b, "line " FSTEST_TO_STRING__LINE__ ": " #a " == " #b, max_dev)
+   flexiblesusy::check_equality(a, b, "line " S__LINE__ ": " #a " == " #b, max_dev)
 #define TEST_CLOSE(a, b, dev) \
-   flexiblesusy::check_equality(a, b, "line " FSTEST_TO_STRING__LINE__ ": " #a " == " #b, dev)
+   flexiblesusy::check_equality(a, b, "line " S__LINE__ ": " #a " == " #b, dev)
 #define TEST_GREATER(a, b) \
-   flexiblesusy::check_greater_than(a, b, "line " FSTEST_TO_STRING__LINE__ ": " #a " > " #b)
+   flexiblesusy::check_greater_than(a, b, "line " S__LINE__ ": " #a " > " #b)
 #define TEST_CLOSE_REL(a, b, dev) \
-   flexiblesusy::check_relative_dev(a, b, "line " FSTEST_TO_STRING__LINE__ ": " #a " =r= " #b, dev)
+   flexiblesusy::check_relative_dev(a, b, "line " S__LINE__ ": " #a " =r= " #b, dev)
 #define TEST(condition) \
    flexiblesusy::check_condition(condition, #condition);
 

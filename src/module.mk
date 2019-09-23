@@ -17,7 +17,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/dilog.cpp \
 		$(DIR)/dilogc.f \
 		$(DIR)/effective_couplings.cpp \
-		$(DIR)/generic_vertices.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
@@ -73,7 +72,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/functors.hpp \
-		$(DIR)/generic_vertices.hpp \
 		$(DIR)/global_thread_pool.hpp \
 		$(DIR)/gsl.hpp \
 		$(DIR)/gsl_utils.hpp \
@@ -97,7 +95,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/problems.hpp \
 		$(DIR)/pv.hpp \
 		$(DIR)/raii.hpp \
-		$(DIR)/renormalization_scheme.hpp \
 		$(DIR)/rg_flow.hpp \
 		$(DIR)/rk.hpp \
 		$(DIR)/rkf_integrator.hpp \
