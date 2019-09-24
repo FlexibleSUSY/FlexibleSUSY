@@ -24,7 +24,7 @@ Needs["FlexibleSUSY`"];
 
 Utils`FSFancyLine[];
 WriteString[OutputStream["stdout",1],#]&@
-   "\033[1;34mTest: Comparing hh self-energies in SM (NPointFunctions vs. FlexibleSUSY)\033[1;0m ...\n";
+   "\033[1;34mTest: Comparing Fd self-energies in MSSM (NPointFunctions vs. FlexibleSUSY)\033[1;0m  ...\n";
 
 (*INITIALIZATION***************************************************************)
 workingDirectory = Directory[];
@@ -33,9 +33,9 @@ SARAH`SARAH[InputDirectories] = {
    FileNameJoin[{workingDirectory, "sarah"}],
    ToFileName[{$sarahDir, "Models"}]};
 
-Start["SM"];
+Start["MSSM"];
 
-modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
+modelFile = FileNameJoin[{workingDirectory, "models", "MSSM", "FlexibleSUSY.m"}];
 
 FlexibleSUSY`LoadModelFile[modelFile];
 {susyBetaFunctions, susyBreakingBetaFunctions} = FlexibleSUSY`ReadSARAHBetaFunctions[];
@@ -45,20 +45,32 @@ allParameters = FlexibleSUSY`SetupModelParameters[susyBetaFunctions, susyBreakin
 FlexibleSUSY`SetupOutputParameters[massMatrices];
 
 (*NPF CALCULATION**************************************************************)
-hhSelfenergy = NPointFunctions`NPointFunction[
-   {SARAH`HiggsBoson}, {SARAH`HiggsBoson},
+Selfenergy = NPointFunctions`NPointFunction[
+   {SARAH`DownQuark}, {SARAH`DownQuark},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
    NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
 
-nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[
+nPointFunctionHeaders = CreateCXXHeaders[
+   UseWilsonCoeffs -> True,
    NPointFunctions`LoopFunctions->"FlexibleSUSY"];
 
-hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
-   hhSelfenergy,
-   "selfenergy_hh_1loop",
-   Identity,
-   NPointFunctions`LoopFunctions->"FlexibleSUSY"][[2]];
+ChiralBasis =
+   {
+      "value_right"->
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
+      "value_left"->
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
+   };
+
+(*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)
+FdSelfenergy = WilsonCoeffs`InterfaceToMatching[Selfenergy, ChiralBasis];
+
+FdSelfenergyCode = NPointFunctions`CreateCXXFunctions[
+   FdSelfenergy,
+   "selfenergy_Fd_1loop",
+   SARAH`Delta,
+   WilsonBasis -> ChiralBasis ][[2]];
 
 (*VERTICES*********************************************************************)
 (*if some additional vetices exist, then get them*)
@@ -73,7 +85,7 @@ existedVertices = If[TrueQ@FileExistsQ@existedVerticesFile,
 
 (*get vertices which doesn't exist yet*)
 newVertices = Complement[
-   NPointFunctions`VerticesForNPointFunction@hhSelfenergy,
+   NPointFunctions`VerticesForNPointFunction@Selfenergy,
    existedVertices];
 
 verticesCode = CXXDiagrams`CreateVertices[
@@ -82,18 +94,18 @@ verticesCode = CXXDiagrams`CreateVertices[
 
 (*CODE REPLACEMENTS************************************************************)
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
-   FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp.in"}],
+   FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp.in"}],
    "\n"];
 code = StringReplace[templateCode,
    {
-   "@NPointFunctions_Selfenergy_hh_1loop@" -> hhSelfenergyCode,
-   "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
-   "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
-   "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
-   }];
+      "@NPointFunctions_Selfenergy_Fd_1loop@" -> FdSelfenergyCode,
+      "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
+      "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
+      "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
+}];
 
-fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp"};
+fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp"};
 WriteString[fileHandle, code];
 Close[fileHandle];
-WriteString[OutputStream["stdout",1],"\033[1;34mtest_SM_npointfunctions.meta finished\033[1;0m\n"];
+WriteString[OutputStream["stdout",1],"\033[1;34mtest_MSSM_matching_selfenergy_Fd.meta finished\033[1;0m\n"];
 Utils`FSFancyLine[];
