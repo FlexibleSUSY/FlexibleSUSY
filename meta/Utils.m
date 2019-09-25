@@ -533,5 +533,4 @@ MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJ
 
 End[];
 
-End[];
 EndPackage[];
