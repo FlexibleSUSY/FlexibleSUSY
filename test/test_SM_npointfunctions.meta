@@ -76,9 +76,13 @@ newVertices = Complement[
    NPointFunctions`VerticesForNPointFunction@hhSelfenergy,
    existedVertices];
 
-verticesCode = CXXDiagrams`CreateVertices[
+If[newVertices==={},
+   verticesCode = {"",""},
+   (* else *)
+   verticesCode = CXXDiagrams`CreateVertices[
    newVertices,
-   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]];
+   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]]
+];
 
 (*CODE REPLACEMENTS************************************************************)
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
