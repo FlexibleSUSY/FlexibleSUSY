@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* :Copyright:
 
    ====================================================================
@@ -44,7 +46,7 @@ If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 
 Begin["`Private`"];
 calledPreviouslysetInitialValues::usage=
-"@brief is used to prohibid multiple calls of 
+"@brief is used to prohibid multiple calls of
 NPointFunctions`.`setInitialValues[].";
 calledPreviouslysetInitialValues = False;
 
@@ -114,7 +116,7 @@ If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,setInitialValues::errOnc
 SetAttributes[setInitialValues,{Protected,Locked}];
 
 SetFSConventionRules::usage=
-"@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY 
+"@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
 language.";
 SetFSConventionRules::errSARAH=
 "It seems that SARAH`.` has changed conventions for
@@ -130,16 +132,16 @@ Module[
    fieldNames =
    Flatten[
       StringCases[
-         Utils`ReadLinesInFile@particleNamesFile, 
+         Utils`ReadLinesInFile@particleNamesFile,
          x__ ~~ ": " ~~ y__ ~~ "]" ~~ ___ :> {x,y}],
-      1] /. 
+      1] /.
       Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} & /@ Get@particleNamespaceFile, 2];
    Utils`AssertWithMessage[Length@fieldNames > 0,
       SetFSConventionRules::errSARAH];
    massRules = Append[Flatten[Module[
       {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
       {
-         ToExpression[MassP <> "@indices_:>" <> P <> 
+         ToExpression[MassP <> "@indices_:>" <> P <>
          "@{Symbol[\"SARAH`gt\"<>StringTake[SymbolName@indices,-1]]}"],
          ToExpression[MassP <> "@indices__:>" <> P <> "@{indices}"],
          ToExpression[MassP <> "->" <> P]
@@ -150,23 +152,23 @@ Module[
 
    couplingRules =
    {
-      FeynArts`G[_][0][fields__][1] :> 
+      FeynArts`G[_][0][fields__][1] :>
       SARAH`Cp[fields][1],
-         
+
       FeynArts`G[_][0][fields__][
          FeynArts`NonCommutative[
             Global`ChiralityProjector[-1]
          ]
       ] :>
       SARAH`Cp[fields][SARAH`PL],
-      
+
       FeynArts`G[_][0][fields__][
          FeynArts`NonCommutative[
             Global`ChiralityProjector[1]
          ]
       ] :>
       SARAH`Cp[fields][SARAH`PR],
-      
+
       FeynArts`G[_][0][fields__][
          FeynArts`NonCommutative[
             Global`DiracMatrix@FeynArts`KI1@3,
@@ -174,7 +176,7 @@ Module[
          ]
       ] :>
       SARAH`Cp[fields][SARAH`PL],
-      
+
       FeynArts`G[_][0][fields__][
          FeynArts`NonCommutative[
             Global`DiracMatrix@FeynArts`KI1@3,
@@ -182,7 +184,7 @@ Module[
          ]
       ] :>
       SARAH`Cp[fields][SARAH`PR],
-      
+
       FeynArts`G[_][0][fields__][
          Global`MetricTensor[
             KI1[i1_Integer],
@@ -195,14 +197,14 @@ Module[
             LorentzIndex[ {fields}[[i2]] ]
          ]
       ],
-         
+
       FeynArts`G[_][0][fields__][
          FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ]
       ] :>
       SARAH`Cp[fields][
          SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
       ],
-      
+
       (*Since FormCalc-9.7*)
       FeynArts`G[_][0][fields__][
          Global`FourVector[
@@ -232,10 +234,10 @@ Module[
          SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
          SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i2]] ] ]
          ,
-         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] - 
+         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] -
          SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
          SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i3]] ] ]
-         , 
+         ,
          (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] -
          SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
          SARAH`g[LorentzIndex[ {fields}[[i2]] ],LorentzIndex[ {fields}[[i3]] ] ]
@@ -254,9 +256,9 @@ Module[
       FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
    };
 
-   indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*) 
+   indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*)
    {
-      FeynArts`Index[generationName_, index_Integer] :> 
+      FeynArts`Index[generationName_, index_Integer] :>
       Symbol["SARAH`gt" <> ToString@index] /;
          StringMatchQ[SymbolName@generationName, "I"~~___~~"Gen"],
       FeynArts`Index[Global`Colour, index_Integer] :>
@@ -264,13 +266,13 @@ Module[
       FeynArts`Index[Global`Gluon, index_Integer] :>                            (* @todo Potentially dangerous stuff. Gluon goes from 1 to 8, not from 1 to 3 as Colour*)
       Symbol["SARAH`ct" <> ToString@index]
    };
-   
+
    sumOverRules =
    {
       FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
-      Times[expr_,FeynArts`SumOver[index_,max_Integer]] :> 
+      Times[expr_,FeynArts`SumOver[index_,max_Integer]] :>
          SARAH`sum[index,1,max,expr],
-      Times[expr_,FeynArts`SumOver[index_,{min_Integer,max_Integer}]] :> 
+      Times[expr_,FeynArts`SumOver[index_,{min_Integer,max_Integer}]] :>
          SARAH`sum[index,min,max,expr],
       SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,max2_Integer]] :>            (* @todo check these weird convention rules *)
          SARAH`sum[index,1,max,max2],                                                       (* *)
@@ -280,9 +282,9 @@ Module[
 
    Unprotect@fieldNameToFSRules;
    fieldNameToFSRules = Join[
-      ToExpression[#[[2]] <> "]->" <> #[[1]]] &/@ 
+      ToExpression[#[[2]] <> "]->" <> #[[1]]] &/@
          fieldNames,
-      ToExpression[#[[2]] <> ",{indices___}]:>" <> #[[1]] <> "[{indices}]"] &/@ 
+      ToExpression[#[[2]] <> ",{indices___}]:>" <> #[[1]] <> "[{indices}]"] &/@
          fieldNames,
       {
          FeynArts`S -> GenericS, FeynArts`F -> GenericF, FeynArts`V -> GenericV,
@@ -301,9 +303,9 @@ Module[
    Protect@fieldNameToFSRules;
 
    (*These symbols cause an overshadowing with Susyno`LieGroups @todo what is this*)
-   diracChainRules = Symbol["F" <> ToString@#] :> Unique@"diracChain" &/@ 
+   diracChainRules = Symbol["F" <> ToString@#] :> Unique@"diracChain" &/@
       Range@Length@fieldNames;
-   
+
    Unprotect@subexpressionToFSRules;
    subexpressionToFSRules = Join[
       massRules,
@@ -313,7 +315,7 @@ Module[
       diracChainRules
    ];
    Protect@subexpressionToFSRules;
-   
+
    Unprotect@amplitudeToFSRules;
    amplitudeToFSRules = Join[
       subexpressionToFSRules,
@@ -336,7 +338,7 @@ NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
 Module[
    {
       settingsForGenericSums,settingsForMomElim,
-      topologies, diagrams, amplitudes, genericInsertions, colourFactors, 
+      topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
 
@@ -366,7 +368,7 @@ Module[
    colourFactors = Flatten[
       ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
       fieldNameToFSRules;
-   
+
    fsInFields = Head[amplitudes][[1,2,1,All,1]] //. fieldNameToFSRules;
    fsOutFields = Head[amplitudes][[1,2,2,All,1]] //. fieldNameToFSRules;
 
@@ -478,9 +480,9 @@ getMomElimForAmplitudesByTopology[x___] :=
 Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errUnknownInput,{x}];
 SetAttributes[getMomElimForAmplitudesByTopology,{Protected,Locked,ReadProtected}];
 
-getModifiedDA::usage = 
+getModifiedDA::usage =
 "@brief Changes amplitudes and diagrams according to excudeProcess list.
-@param {<TopologyList>,<FeynAmpList>} set of topology-insertion and 
+@param {<TopologyList>,<FeynAmpList>} set of topology-insertion and
 amplitude-insertion rules to modify.
 @param <List> set of names which specify the process to consider.
 @returns {<TopologyList>,<FeynAmpList>} modified set, which specifies process.";
@@ -548,7 +550,7 @@ SetAttributes[getModifiedDA,{Protected,Locked}];
 getTopologyAmplitudeRulesByTopologyCriterion::usage=
 "@brief Gives numbers of amplitudes which are accepted by a criterion on topology.
 @param <TopologyList> diagrams Set of diagrams to select from.
-@param <one argument function> critFunction Function for topology selection. If 
+@param <one argument function> critFunction Function for topology selection. If
 critFunction[<topology>] gives True, then topology is accepted.
 @returns {<Rule>} List of rules of the form <boolean>->{<integer>..}. LHS
 stands for the topology, RHS gives numbers of classes (and the numbers of
@@ -601,7 +603,7 @@ topologyReplacements =
 SetAttributes[topologyReplacements,{Protected,Locked}];
 
 getExcludedTopologies::usage =
-"@brief Joins names of processes to hold into one functions, creates unique 
+"@brief Joins names of processes to hold into one functions, creates unique
 name for it, then registers it for FeynArts` and returns the name.
 @param <{Symbol...} | Symbol> name(s) of processes to hold.
 @returns <Symbol> generated name of topologies to hold.";
@@ -628,10 +630,10 @@ Utils`AssertOrQuit[False,getExcludedTopologies::errUnknownInput,{x}];
 SetAttributes[getExcludedTopologies,{Protected,Locked}];
 
 amITPinguin::usage =
-"@brief If given topology is pinguin-like (mainly, for CLFV processes), then 
+"@brief If given topology is pinguin-like (mainly, for CLFV processes), then
 returns True, False otherwise.
 @param <FeynArts`Topology[_][__]> topology to check.
-@returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then 
+@returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then
 returns True, False otherwise.";
 amITPinguin::errUnknownInput =
 "Input should be
@@ -668,7 +670,7 @@ amITPinguin[x___] :=
 Utils`AssertOrQuit[False,amITPinguin::errUnknownInput,{x}];
 SetAttributes[amITPinguin,{Protected,Locked}];
 
-getModifiedDiagrams::usage = 
+getModifiedDiagrams::usage =
 "@brief Modifies diagrams according to excudeProcess list.
 @param <TopologyList> set of topology-insertion rules to modify.
 @param <List> set of names which specify the process to consider.
@@ -748,11 +750,11 @@ Module[
    Export[FileNameJoin@{feynArtsDir,name<>".png"},FeynArts`Paint[diagrams,
       FeynArts`PaintLevel->{FeynArts`Classes},
       FeynArts`SheetHeader->name,
-      FeynArts`Numbering->FeynArts`Simple]]; 
+      FeynArts`Numbering->FeynArts`Simple]];
 ];
 
 GenericInsertionsForDiagram::usage=
-"@brief applies FindGenericInsertions[] to a 
+"@brief applies FindGenericInsertions[] to a
 (Topology[_]->Insertions[Generic][__]) rule.
 @returns list (for a given topology) of list (for all generic fields)
 of list (for all class fields) of rules {{{x->y,..},..},..}
@@ -764,15 +766,15 @@ GenericInsertionsForDiagram[_->insertGen_, keepFieldNum_:False]:=
 Map[FindGenericInsertions[#,keepFieldNum]&, Apply[List,insertGen,{0,1}]];
 
 FindGenericInsertions::usage=
-"@brief generic FeynmanGraph has rules Field[num]->particleType, 
-class FeynmanGraph has rules Field[num]->particleClass. 
-This function gives pairs particleType[gen,num]->particleClass, avoiding 
-Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass is given) 
-@param 1st argument is of the form 
+"@brief generic FeynmanGraph has rules Field[num]->particleType,
+class FeynmanGraph has rules Field[num]->particleClass.
+This function gives pairs particleType[gen,num]->particleClass, avoiding
+Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass is given)
+@param 1st argument is of the form
 {FeynmanGraph[__][__],Insertions[Classes][__]}
 @param 2nd argument changes the type of output field names
 True gives Field[_] names, False gives particleClass names
-@returns list (sorted; for all generic fields) of list (for all class fields) 
+@returns list (sorted; for all generic fields) of list (for all class fields)
 of rules {{x->y,..},..}
 @note this function is called by GenericInsertionsForDiagram[]
 @note this function doesn't look at external particles
@@ -780,14 +782,14 @@ of rules {{x->y,..},..}
 FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_]:=
 Module[
    {
-      toGenericIndexConventionRules = Cases[graphGen, 
+      toGenericIndexConventionRules = Cases[graphGen,
          Rule[FeynArts`Field[index_Integer],type_Symbol] :>
          Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]
-      ], 
+      ],
       fieldsGen, genericInsertions
    },
    fieldsGen = toGenericIndexConventionRules[[All,1]];
-   genericInsertions = Cases[#, 
+   genericInsertions = Cases[#,
       Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
       Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
    SortBy[#,First]&/@ If[keepFieldNum,
@@ -800,17 +802,17 @@ StripParticleIndices::usage=
 "@brief Remove particle indices from a given (possibley generic) field
 @param field the given field
 @returns the given field with all indices removed";
-StripParticleIndices[Times[-1,field_]] := 
+StripParticleIndices[Times[-1,field_]] :=
    Times[-1, StripParticleIndices[field]];
-StripParticleIndices[genericType_[classIndex_, ___]] := 
+StripParticleIndices[genericType_[classIndex_, ___]] :=
    genericType[classIndex];
 
 ColourFactorForDiagram::usage=
 "@brief acts on a (Topology[_]->Insertions[Generic][__]) rule.
 creates adjacency matrix and field array for this topology and uses this
-information for creation of colour factors for a given topology 
+information for creation of colour factors for a given topology
 @param diagram (Topology[_]->Insertions[Generic][__]) rule
-@returns list (for a given topology) of lists (for all generic fields) of 
+@returns list (for a given topology) of lists (for all generic fields) of
 (potentially) colour factors
 @note during generation of genericDiagram at 1-loop level the ii-type loop
 propagators have the largest number because of FeynArts
@@ -825,20 +827,20 @@ Module[
       propPatt,adjacencyMatrix,externalRules,genericDiagram,genericInsertions
    },
    propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
-   
+
    adjacencyMatrix = Module[
       {adjs = Tally[{seqProp}/.propPatt[i_,j_,_]:>{{i,j},{j,i}}] },
       Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjs]];
-      
+
    externalRules = Cases[{rulesFields}, HoldPattern[_[_]->_Symbol[__]]];
-   
+
    genericDiagram = Module[
       {fld = Flatten[{seqProp}/.propPatt[i_,j_,f_]:>{{j,i,-f},{i,j,f}}, 1] },
       GatherBy[SortBy[fld,First],First] /. {_Integer, _Integer, f_} :> f
       ] /. Join[ {#} -> # &/@ externalRules[[All, 1]]];
-      
+
    genericInsertions = GenericInsertionsForDiagram[diagram,True];
-   
+
    Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[
          genericDiagram /. externalRules /. #, adjacencyMatrix],
@@ -849,7 +851,7 @@ Module[
 
 CalculateAmplitudes::usage=
 "@brief Calculate a given set of amplitudes.
-@param amps A set of class level amplitudes as generated by 
+@param amps A set of class level amplitudes as generated by
 FeynArts`.`CreateFeynAmp[] (with colour indices removed)
 form:
 FeynAmpList[___][FeynAmp[
@@ -861,10 +863,10 @@ FeynAmpList[___][FeynAmp[
 @param @todo.
 @param genericInsertions the list of generic insertions for the amplitudes
 @param regularizationScheme the regularization scheme for the calculation
-@param zeroExternalMomenta True if external momenta should be set to zero and 
+@param zeroExternalMomenta True if external momenta should be set to zero and
 False otherwise
-@returns a list of the format {fsAmplitudes, subexpressions} where 
-fsAmplitudes denote the calculated amplitudes and subexpressions denote 
+@returns a list of the format {fsAmplitudes, subexpressions} where
+fsAmplitudes denote the calculated amplitudes and subexpressions denote
 the subexpressions used to simplify the expressions";
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
@@ -900,7 +902,7 @@ Module[
    Print["FORM calculation done."];
 
    calculatedAmplitudes = MapThread[ToGenericSum,{calculatedAmplitudes,settingsForGenericSums}];
-   
+
    abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
@@ -937,15 +939,15 @@ Module[
    setZeroChainToZero[FormCalc`DiracChain[__,0,__]] := 0;
    setZeroChainToZero[chain:FormCalc`DiracChain[__]] := chain;
    temp/.chain:FormCalc`DiracChain[__] :> setZeroChainToZero@chain
-]; 
-setZeroExternalMomentaInChains[x___] := 
+];
+setZeroExternalMomentaInChains[x___] :=
 Utils`AssertOrQuit[False,setZeroExternalMomentaInChains::errUnknownInput,{x}];
 SetAttributes[setZeroExternalMomentaInChains,{Protected,Locked}];
 
 identifySpinors::usage =
 "@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
 @param inp List of abbreviations to modify | FormCalc`DiracChain chain to modify.
-@param ampsGen FeynArts`FeynAmpList with information of process 
+@param ampsGen FeynArts`FeynAmpList with information of process
 @returns DiracChain with inserted fermion names | Expression with new DiracChains.
 @note DiracChains live only inside FormCalc`Abbr.
 @note Should NOT be used for Automatic FormCalc`FermionOrder.";
@@ -962,7 +964,7 @@ identifySpinors[
       (FeynArts`Process->Rule[{{__}..},{{__}..}]),
       ___,
       FeynArts`AmplitudeLevel->{Generic},
-      ___][___]] := 
+      ___][___]] :=
 inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch,ampsGen];
 identifySpinors[
    FormCalc`DiracChain[
@@ -1065,8 +1067,7 @@ Module[
       write[StringJoin[
          "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
          "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
-      Sow@func[ expr[[now]], opts[[now]] ];
-      NPointFunctions`Private`deletePrintFromSubkernel[];,
+      Sow@func[ expr[[now]], opts[[now]] ];,
       {now,totL}]
    ][[2,1]]
 ];
@@ -1106,7 +1107,7 @@ FAFieldQ::usage=
 "@brief Checks whether symbol belongs to FeynArts` field names or not.
 @param Symbol to check.
 @returns True if symbol belongs to FeynArts` field names, False otherwise.";
-FAFieldQ = 
+FAFieldQ =
    MemberQ[{FeynArts`S,FeynArts`F,FeynArts`V,FeynArts`U,FeynArts`T},#]&;
 SetAttributes[FAFieldQ,{Protected,Locked}];
 
@@ -1156,7 +1157,7 @@ SetAttributes[
    ColourFactorForDiagram,
    CombinatorialFactorsForClasses,
    ZeroRules,FCAmplitudesToFSConvention
-   }, 
+   },
    {Protected, Locked}];
 
 End[];

@@ -192,6 +192,7 @@ as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 
 Begin["`Private`"];
 
@@ -379,7 +380,7 @@ If[!$Notebooks,
    ];,
    (* Else *)
    internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   Module[{MultilineToDummy,replacedMessage},
+   Module[{WriteColourless,MultilineToDummy,replacedMessage},
       If[assertion === True,Return@True];
 
       MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
@@ -486,6 +487,18 @@ FSReIm[z_] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
+
+(* MathIndexToCPP *)
+
+MathIndexToCPP[i_Integer /; i>0] := i-1;
+
+MathIndexToCPP::wrongInt =
+"Cannot convert index of value \"`1`\". Index value cannot be smaller than \"1\".";
+MathIndexToCPP[i_Integer] := AssertOrQuit[False, MathIndexToCPP::wrongInt, StringJoin@@Riffle[ToString/@{i},", "]];
+
+MathIndexToCPP::nonIntInput =
+"Cannot convert a non integer index \"`1`\".";
+MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJoin@@Riffle[ToString/@{i},", "]];
 
 End[];
 
