@@ -506,13 +506,9 @@ IndexDiagramFromGraph[diagram_, graph_] :=
 	Module[{diagramWithUIDs, fields, indexedFields, indexedDiagram,
 		applyUserIndices, vIndex1, vIndex2, contractIndices},
 		fields = Vertices`StripFieldIndices /@ Flatten[diagram];
-<<<<<<< HEAD
-		indexedFields = IndexField/@ fields;
-		
-=======
+
 		indexedFields = IndexField /@ fields;
 
->>>>>>> upstream/development
 		applyUserIndices = Join[
 			Sequence @@ (Rule @@@ Transpose[{
 				Take[#[[1]], Length[#[[2]]]],
@@ -604,11 +600,7 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 IndexPrefixForType[SARAH`generation] = "gt";
 IndexPrefixForType[SARAH`lorentz] = "lt";
 IndexPrefixForType[SARAH`color] = "ct";
-<<<<<<< HEAD
-IndexPrefixForType[indexType_] := 
-=======
 IndexPrefixForType[indexType_] :=
->>>>>>> upstream/development
 	(Print["Unknown index type: " <> ToString[indexType] <> " encountered."]; Quit[1])
 
 (** \brief Fully index a given field
@@ -667,11 +659,9 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 			Utils`AssertWithMessage[similarVertexList =!= {},
 				"CXXDiagrams`SortedVertex[]: Cannot determine Lorentz structure of " <> ToString[fields] <> " vertex."];
 			similarVertex = similarVertexList[[1]];
-<<<<<<< HEAD
-			indexedSortedFields = IndexField/@ sortedFields;
-=======
+
 			indexedSortedFields = IndexField /@ sortedFields;
->>>>>>> upstream/development
+
 			fieldReplacementRules = Rule @@@ Transpose[{similarVertex[[1]], indexedSortedFields}];
 			indexReplacementRules = Rule @@@ Transpose[{
 				LorentzIndexOfField /@ Select[similarVertex[[1]], TreeMasses`IsVector],
@@ -984,31 +974,6 @@ GaugeStructureOfVertex[vertex_] :=
  * corresponding c++ code where no sublist contains more than
  * `MaximumVerticesLimit` number of vertices.
  **)
-<<<<<<< HEAD
-CreateVertices[vertices:{{__}...},
-		OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
-	Module[{cxxVertices, vertexPartition},
-		cxxVertices = CreateVertex /@ DeleteDuplicates[vertices];
-		
-		(* Mathematica 7 does not support the `UpTo[n]` notation *)
-		vertexPartition = Partition[cxxVertices, OptionValue[MaximumVerticesLimit]];
-		If[Part[vertexPartition,1]===cxxVertices,
-		   Return@{Map[StringJoin[Riffle[#,"\n\n"]]&, Transpose@cxxVertices],Transpose[""]}];
-		(* Partition splits cxxVertices into lists of length MaximumVerticesLimit.
-		   If the length of cxxVertices is not a multiple of MaximumVerticesLimit,
-		   some vertices will be discarded! *)
-		AppendTo[vertexPartition,
-		   Complement[cxxVertices, Sequence@@vertexPartition]
-		];
-
-		Utils`AssertWithMessage[Sort[cxxVertices] === Sort[Join@@vertexPartition],
-		   "Some vertices lost after splitting of cxxVertices into multiple lists."
-		];
-		
-		Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
-	];
-	
-=======
 CreateVertices::errUnknownInput =
 "Input should have the following form:
 CreateVertices[vertices, CXXDiagrams`.`MaximumVerticesLimit -> num], where
@@ -1041,8 +1006,6 @@ Module[{cxxVertices, vertexPartition},
 ] /; Utils`AssertOrQuit[And[IntegerQ@OptionValue@MaximumVerticesLimit, OptionValue@MaximumVerticesLimit>0],CreateVertices::errMaximumVerticesLimit];
 CreateVertices[args___] :=
 Utils`AssertOrQuit[False,CreateVertices::errUnknownInput,StringJoin@@Riffle[ToString/@{args},", "]];
-
->>>>>>> upstream/development
 (** \brief Creates c++ code that makes a function available that
  * numerically evaluates the given vertex.
  * \param fields a vertex given as a list of fields
