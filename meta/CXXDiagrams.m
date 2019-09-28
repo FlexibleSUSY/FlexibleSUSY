@@ -824,44 +824,9 @@ GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
 GaugeStructureOfVertexLorentzPart[
-	vertexPart_ /; MatchQ[
-		Collect[vertexPart, SARAH`Delta[i_, j_]],
-		{scalar1_ * SARAH`Delta[cIndex1_, cIndex2_] * SARAH`Delta[cIndex3_, cIndex4_] + scalar2_ * SARAH`Delta[cIndex1_, cIndex4_] * SARAH`Delta[cIndex3_, cIndex2_], lorentzStructure_}]
-	]:= (
-	Collect[vertexPart, SARAH`Delta[i_, j_]] /. {
-		scalar1_ * SARAH`Delta[cIndex1_, cIndex2_] * SARAH`Delta[cIndex3_, cIndex4_] + scalar2_ * SARAH`Delta[cIndex1_, cIndex4_] * SARAH`Delta[cIndex3_, cIndex2_], lorentzStructure_
-	} :> (Print["1 ", scalar1]; Print["2 ", scalar2];Quit[1];
-	{
-		{
-			{scalar1, SARAH`Delta[cIndex1, cIndex2] * SARAH`Delta[cIndex3, cIndex4]},
-			{scalar2, SARAH`Delta[cIndex1, cIndex4] * SARAH`Delta[cIndex3, cIndex2]}
-		},
-		lorentzStructure
-	}
-	)
-);
-
-GaugeStructureOfVertexLorentzPart[
-	vertexPart_ /; MatchQ[
-		Collect[vertexPart /. SARAH`sum[i_, iStart_, iEnd_, expr_] :> expr, SARAH`Lam[cIndex1_, cIndex2_, cIndex3_]],
-		{scalar1_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_] * SARAH`Lam[cIndex4_, cIndex5_, cIndex2_]
-			+ scalar2_ SARAH`Lam[cIndex1_, cIndex5_, cIndex2_] * SARAH`Lam[cIndex4_, cIndex2_, cIndex3_],
-			lorentzStructure_
-		}
-	]
-]:= (
-	Collect[vertexPart /. SARAH`sum[i_, iStart_, iEnd_, expr_] :> expr, SARAH`Lam[cIndex1_, cIndex2_, cIndex3_]] /.
-		{scalar1_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_] * SARAH`Lam[cIndex4_, cIndex5_, cIndex2_]
-			+ scalar2_ SARAH`Lam[cIndex1_, cIndex5_, cIndex2_] * SARAH`Lam[cIndex4_, cIndex2_, cIndex3_],
-			lorentzStructure_
-		} :> {
-		{
-			{scalar1, SARAH`Lam[cIndex1, cIndex2, cIndex3] * SARAH`Lam[cIndex4, cIndex5, cIndex2]},
-			{scalar2, SARAH`Lam[cIndex1, cIndex5, cIndex2] * SARAH`Lam[cIndex4, cIndex2, cIndex3]}
-		},
-		lorentzStructure
-	}
-) /; FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+	{scalar1__ * SARAH`Delta[cIndex1_, cIndex2_] * SARAH`Delta[cIndex3_, cIndex4_] + scalar2__ * SARAH`Delta[cIndex1_, cIndex4_] * SARAH`Delta[cIndex3_, cIndex2_], lorentzStructure_}] :=
+	{scalar1, KroneckerDeltaColourVertex[cIndex1, cIndex2] * KroneckerDeltaColourVertex[cIndex3, cIndex4], lorentzStructure} /;
+	FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
@@ -880,7 +845,7 @@ GaugeStructureOfVertexLorentzPart[
 
 (* @todo uncomment *)
 GaugeStructureOfVertexLorentzPart[vertexPart_] := 
-	(Print["Unknown colour structure in vertex ", Put[vertexPart, $HomeDirectory<>"/kurwa.txt"]]; Quit[1]);
+	(Print["Unknown colour structure in vertex ", vertexPart](*; Quit[1]*))
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * combine all left and right projector parts to chiral parts.
