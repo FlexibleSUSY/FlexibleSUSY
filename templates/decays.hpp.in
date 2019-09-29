@@ -62,6 +62,9 @@ final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Fie
    return 1.;
 }
 
+enum class HigherOrderSMCorrections {enable, disable};
+
+
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
@@ -70,11 +73,10 @@ public:
       , qedqcd(qedqcd_)
       , input(input_)
       {}
-   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_, bool corrections)
+   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_, HigherOrderSMCorrections enable_corrections)
       : model(model_)
       , qedqcd(qedqcd_)
       , input(input_)
-      , include_higher_order_corrections(corrections)
       {}
    @ModelName@_decays(const @ModelName@_decays&) = default;
    @ModelName@_decays(@ModelName@_decays&&) = default;
@@ -101,8 +103,8 @@ private:
    @ModelName@_mass_eigenstates model;
    @ModelName@_input_parameters const& input;
    softsusy::QedQcd qedqcd{};
-   bool include_higher_order_corrections{true};
-   bool run_to_decay_particle_scale{true};
+   HigherOrderSMCorrections include_higher_order_corrections {HigherOrderSMCorrections::enable};
+   bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    Decays_loop_corrections loop_corrections{};
    Decays_problems problems{};

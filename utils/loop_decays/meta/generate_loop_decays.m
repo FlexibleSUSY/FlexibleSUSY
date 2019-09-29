@@ -156,17 +156,17 @@ GetExternalMomenta[process_, diagram_] :=
 
 SortMassesByGenericIndex[masses_List] :=
     Module[{orderingFn},
-           orderingFn[Mass[field1_[___, Index[Generic, i1_], ___], Loop],
-                      Mass[field2_[___, Index[Generic, i2_], ___], Loop]] := i1 <= i2;
+           orderingFn[Mass[field1_[___, Index[Generic, i1_], ___], Loop|Internal],
+                      Mass[field2_[___, Index[Generic, i2_], ___], Loop|Internal]] := i1 <= i2;
            Sort[masses, orderingFn]
           ];
 
-GetLoopMassField[Mass[field_[___, Index[Generic, i_], ___], Loop]] := field[i];
+GetLoopMassField[Mass[field_[___, Index[Generic, i_], ___], Loop|Internal]] := field[i];
 
 GetLoopMasses[process_, diagram_] :=
     Module[{formFactors, masses},
            formFactors = Last[diagram];
-           masses = Cases[formFactors, Mass[field_, Loop], {0, Infinity}];
+           masses = Cases[formFactors, Mass[field_, Internal|Loop], {0, Infinity}];
            masses = DeleteDuplicates[masses];
            SortMassesByGenericIndex[masses]
           ];
@@ -244,12 +244,12 @@ CreateOneLoopDiagramDeclaration[process_, diagram_] :=
            returnType = GetAmplitudeCType[process];
            externalMomenta = GetExternalMomenta[process, diagram];
            loopMasses = GetLoopMasses[process, diagram];
-           internalMasses = GetInternalMassesVars[process, diagram];
+(*           internalMasses = GetInternalMassesVars[process, diagram];*)
            couplings = Flatten[GetCouplings[process, diagram]];
            formFactors = Last[diagram];
            args = StringJoin[Riffle[Join[GetExternalMomentumCType /@ externalMomenta,
                                          GetLoopMassCType /@ loopMasses,
-                                         GetLoopMassCType /@ internalMasses,
+(*                                         GetLoopMassCType /@ internalMasses,*)
                                          GetCouplingCType /@ couplings], ", "]] <>
                   ", double" <> If[!FreeQ[formFactors, Finite], ", double", ""];
            returnType <> " " <> CreateDiagramEvaluatorName[process, diagram] <> "(" <> args <> ");"
@@ -486,16 +486,14 @@ CreateOneLoopDiagramDefinition[process_, diagram_] :=
            loopMassesArgs = (#[[3]] <> " " <> #[[2]])& /@ loopMasses;
            loopMassesSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ loopMasses;
 
-           internalMasses = GetInternalMassesVars[process, diagram];
-           internalMassesArgs = (#[[3]] <> " " <> #[[2]])& /@ internalMasses;
-           internalMassesSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ internalMasses;
-           Print[CreateDiagramEvaluatorName[process, diagram]];
-           Print["Int mass ", internalMasses];
+(*           internalMasses = GetInternalMassesVars[process, diagram];*)
+(*           internalMassesArgs = (#[[3]] <> " " <> #[[2]])& /@ internalMasses;*)
+(*           internalMassesSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ internalMasses;*)
 
            couplings = GetCouplingsVars[process, diagram];
            couplingsArgs = (#[[3]] <> " " <> #[[2]])& /@ couplings;
            couplingsSubs = Rule[#[[1]], Symbol[#[[2]]]]& /@ couplings;
-           argSubs = Join[couplingsSubs, loopMassesSubs, internalMassesSubs, externalMomentaSubs];
+           argSubs = Join[couplingsSubs, loopMassesSubs, externalMomentaSubs];
 
            {saveLoopIntegrals, loopIntegralSubs} = SaveLoopIntegrals[diagram, renScale];
 
@@ -509,13 +507,12 @@ CreateOneLoopDiagramDefinition[process_, diagram_] :=
                                   StringJoin[("result." <> #[[1]] <> " = " <> #[[2]] <> ";\n")& /@ formFactorValues];
            body = body <> StringReplace[calculateFormFactors, "Finite" -> "finite"] <> "\nreturn result;\n";
 
+           (*                  If[Length[internalMassesArgs] > 0, StringJoin[Riffle[internalMassesArgs, ", "]] <>  ",\n", ""] <>*)
            args = StringJoin[Riffle[externalMomentaArgs, ", "]] <> ",\n" <>
                   StringJoin[Riffle[loopMassesArgs, ", "]] <> ",\n" <>
-                  If[Length[internalMassesArgs] > 0, StringJoin[Riffle[internalMassesArgs, ", "]] <>  ",\n", ""] <>
                   StringJoin[Riffle[couplingsArgs, ", "]] <>
                   ",\ndouble " <> renScale <>
                   If[!FreeQ[formFactorExprs, Finite], ", double finite", ""];
-           Print[args];
 
            docString = CreateOneLoopDiagramDocString[process, diagram];
 
@@ -567,7 +564,8 @@ GetCouplings[expr_] :=
     Module[{allCouplings},
            allCouplings = Join[Cases[expr, SARAH`Cp[fields__], {0, Infinity}],
                                Cases[expr, SARAH`Cp[fields__][lor__], {0, Infinity}]];
-           DeleteDuplicates[allCouplings]
+           allCouplings = DeleteDuplicates[allCouplings];
+           Flatten[SortChiralCouplings /@ GroupByFieldContent[allCouplings]]
           ];
 
 GetEdgeLists[adjacencyMatrix_List, vertexLabels_List] :=

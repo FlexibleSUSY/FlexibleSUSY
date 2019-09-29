@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    }
 
    softsusy::QedQcd qedqcd;
-   SM_decays decays(m, qedqcd, input, true);
+   SM_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 
    // ------------ tree-level decays ----------------------------------------
 
@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ loop-induces decays --------------------------------------
 
    // h -> gluon gluon
-   // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(m), , 1e-15);
+    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m), 3.48799e-4, 1e-15);
    // h -> gamma gamma
-   // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(m), , 1e-15);
-   // h -> Z gamma
-   // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVP(m), , 1e-15);
+    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m), 3.9528744190859022e-06, 1e-15);
+   // h -> gamma Z
+    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m), 8.214254071479881e-05, 1e-15);
 }

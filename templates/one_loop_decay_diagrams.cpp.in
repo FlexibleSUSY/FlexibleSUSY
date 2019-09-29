@@ -500,6 +500,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
  * @param[in] CpS3S4cS5S5 coupling Cp[S[3], S[4], -S[5], S[5]]
@@ -508,8 +509,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3S4cS5S5,
    double scale)
@@ -534,6 +534,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
  * @param[in] CpS3S4cV5V5 coupling Cp[S[3], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -542,8 +543,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3S4cV5V5,
    double scale, double finite)
@@ -568,6 +568,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
  * @param[in] CpS2S4cS5S5 coupling Cp[S[2], S[4], -S[5], S[5]]
@@ -576,8 +577,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2S4cS5S5,
    double scale)
@@ -602,6 +602,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
  * @param[in] CpS2S4cV5V5 coupling Cp[S[2], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -610,8 +611,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2S4cV5V5,
    double scale, double finite)
@@ -705,6 +705,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS2S3cS4 coupling Cp[S[2], S[3], -S[4]]
  * @param[in] CpS1S4cS5S5 coupling Cp[S[1], S[4], -S[5], S[5]]
@@ -713,8 +714,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpS2S3cS4, const std::complex<double>&
       CpS1S4cS5S5,
    double scale)
@@ -739,6 +739,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS2S3cS4 coupling Cp[S[2], S[3], -S[4]]
  * @param[in] CpS1S4cV5V5 coupling Cp[S[1], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -747,8 +748,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpS2S3cS4, const std::complex<double>&
       CpS1S4cV5V5,
    double scale, double finite)
@@ -911,6 +911,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -923,8 +924,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S3PL, const std::complex<
       double>& CpcF6cF5S3PR, const std::complex<double>& CpS1S2cS4,
@@ -957,6 +957,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
@@ -967,8 +968,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -994,6 +994,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
@@ -1004,8 +1005,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -1031,6 +1031,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
@@ -1042,8 +1043,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -1073,6 +1073,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cS4 coupling Cp[S[1], S[2], -S[4]]
@@ -1083,8 +1084,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
       CpS3cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -1110,6 +1110,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -1124,8 +1125,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S3PL, const std::complex<
       double>& CpcF6cF5S3PR, const std::complex<double>& CpS1S2cV4,
@@ -1157,6 +1157,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -1167,8 +1168,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpS3cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -1197,6 +1197,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -1208,8 +1209,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpS3cU6cU5, const std::complex<double>& CpU5U6V41, const std::complex<
       double>& CpU5U6V42,
@@ -1239,6 +1239,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -1250,8 +1251,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpS3cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -1280,6 +1280,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -1292,8 +1293,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpS3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -1322,6 +1322,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -1334,8 +1335,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S2PL, const std::complex<
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1S3cS4,
@@ -1368,6 +1368,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
@@ -1378,8 +1379,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -1405,6 +1405,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
@@ -1415,8 +1416,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -1442,6 +1442,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
@@ -1453,8 +1454,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -1484,6 +1484,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S3cS4 coupling Cp[S[1], S[3], -S[4]]
@@ -1494,8 +1495,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
       CpS2cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -1521,6 +1521,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -1535,8 +1536,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S2PL, const std::complex<
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1S3cV4,
@@ -1568,6 +1568,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1S3cV4 coupling Cp[S[1], S[3], -V[4]][Mom[S[1]] - Mom[S[3]]]
@@ -1578,8 +1579,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
       CpS2cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -1608,6 +1608,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1S3cV4 coupling Cp[S[1], S[3], -V[4]][Mom[S[1]] - Mom[S[3]]]
@@ -1619,8 +1620,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
       CpS2cU6cU5, const std::complex<double>& CpU5U6V41, const std::complex<
       double>& CpU5U6V42,
@@ -1650,6 +1650,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S3cV4 coupling Cp[S[1], S[3], -V[4]][Mom[S[1]] - Mom[S[3]]]
@@ -1661,8 +1662,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
       CpS2cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -1691,6 +1691,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S3cV4 coupling Cp[S[1], S[3], -V[4]][Mom[S[1]] - Mom[S[3]]]
@@ -1703,8 +1704,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
       CpS2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -1733,6 +1733,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -1745,8 +1746,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2S3cS4,
@@ -1779,6 +1779,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -1789,8 +1790,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
       CpS2S3cS4, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -1816,6 +1816,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -1826,8 +1827,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
       CpS2S3cS4, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -1853,6 +1853,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -1864,8 +1865,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
       CpS2S3cS4, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -1895,6 +1895,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -1905,8 +1906,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpS2S3cS4, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -1932,6 +1932,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -1946,8 +1947,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2S3cV4,
@@ -1979,6 +1979,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -1989,8 +1990,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
       CpS2S3cV4, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -2019,6 +2019,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -2030,8 +2031,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
       CpS2S3cV4, const std::complex<double>& CpU5U6V41, const std::complex<
       double>& CpU5U6V42,
@@ -2061,6 +2061,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -2072,8 +2073,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
       CpS2S3cV4, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -2102,6 +2102,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field S[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -2114,8 +2115,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
  */
 Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpS2S3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -2794,6 +2794,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
  * @param[in] CpcS5S5V3V4 coupling Cp[-S[5], S[5], V[3], V[4]][g[lt3, lt4]]
@@ -2802,8 +2803,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIV4,
+   double mIV4, double mLS5,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
       CpcS5S5V3V4,
    double scale)
@@ -2828,6 +2828,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
  * @param[in] CpV3V4cV5V51 coupling Cp[V[3], V[4], -V[5], V[5]][g[lt1, lt2] g[
@@ -2841,8 +2842,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIV4,
+   double mIV4, double mLV5,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
       CpV3V4cV5V51, const std::complex<double>& CpV3V4cV5V52, const std::
       complex<double>& CpV3V4cV5V53,
@@ -2869,6 +2869,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
  * @param[in] CpcS5S5V2V4 coupling Cp[-S[5], S[5], V[2], V[4]][g[lt3, lt4]]
@@ -2877,8 +2878,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIV4,
+   double mIV4, double mLS5,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpcS5S5V2V4,
    double scale)
@@ -2903,6 +2903,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
  * @param[in] CpV2V4cV5V51 coupling Cp[V[2], V[4], -V[5], V[5]][g[lt1, lt2] g[
@@ -2916,8 +2917,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIV4,
+   double mIV4, double mLV5,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpV2V4cV5V51, const std::complex<double>& CpV2V4cV5V52, const std::
       complex<double>& CpV2V4cV5V53,
@@ -3019,6 +3019,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
  * @param[in] CpS1S4cS5S5 coupling Cp[S[1], S[4], -S[5], S[5]]
@@ -3027,8 +3028,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpcS4V2V3, const std::complex<double>&
       CpS1S4cS5S5,
    double scale)
@@ -3053,6 +3053,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpcS4V2V3 coupling Cp[-S[4], V[2], V[3]][g[lt2, lt3]]
  * @param[in] CpS1S4cV5V5 coupling Cp[S[1], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -3061,8 +3062,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpcS4V2V3, const std::complex<double>&
       CpS1S4cV5V5,
    double scale, double finite)
@@ -3155,6 +3155,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -3171,8 +3172,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
       CpF5F6V4PR, const std::complex<double>& CpcF6cF5V3PL, const std::complex<
       double>& CpcF6cF5V3PR, const std::complex<double>& CpS1V2cV4,
@@ -3209,6 +3209,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
@@ -3220,8 +3221,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
       CpcS5cS6V3, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -3247,6 +3247,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
@@ -3257,8 +3258,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>& CpU5U6V4,
       const std::complex<double>& CpcU6cU5V3,
    double scale)
@@ -3284,6 +3284,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
@@ -3294,8 +3295,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
       CpcS5V3cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -3321,6 +3321,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V2cV4 coupling Cp[S[1], V[2], -V[4]][g[lt2, lt3]]
@@ -3335,8 +3336,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
       CpV3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
@@ -3370,6 +3370,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -3386,8 +3387,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
       CpF5F6V4PR, const std::complex<double>& CpcF6cF5V2PL, const std::complex<
       double>& CpcF6cF5V2PR, const std::complex<double>& CpS1V3cV4,
@@ -3424,6 +3424,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -3435,8 +3436,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpcS5cS6V2, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -3462,6 +3462,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -3472,8 +3473,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>& CpU5U6V4,
       const std::complex<double>& CpcU6cU5V2,
    double scale)
@@ -3499,6 +3499,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -3509,8 +3510,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpcS5V2cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -3536,6 +3536,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -3550,8 +3551,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpV2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
@@ -3585,6 +3585,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -3597,8 +3598,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpcS4V2V3,
@@ -3631,6 +3631,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -3641,8 +3642,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
       CpcS4V2V3, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -3668,6 +3668,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -3678,8 +3679,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
       CpcS4V2V3, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -3705,6 +3705,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -3716,8 +3717,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
       CpcS4V2V3, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -3747,6 +3747,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -3757,8 +3758,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpcS4V2V3, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -3784,6 +3784,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -3800,8 +3801,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpV2V3cV4,
@@ -3833,6 +3833,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -3845,8 +3846,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>& CpS5S6V4
       , const std::complex<double>& CpV2V3cV4,
    double scale)
@@ -3875,6 +3875,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -3887,8 +3888,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>& CpU5U6V4
       , const std::complex<double>& CpV2V3cV4,
    double scale)
@@ -3915,6 +3915,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -3928,8 +3929,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>& CpS5V4V6
       , const std::complex<double>& CpV2V3cV4,
    double scale)
@@ -3958,6 +3958,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field V[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -3972,8 +3973,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
  */
 Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpV2V3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -4475,6 +4475,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
  * @param[in] CpcS5S5V3V4 coupling Cp[-S[5], S[5], V[3], V[4]][g[lt3, lt4]]
@@ -4483,8 +4484,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIV4,
+   double mIV4, double mLS5,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpcS5S5V3V4,
    double scale)
@@ -4509,6 +4509,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
  * @param[in] CpV3V4cV5V51 coupling Cp[V[3], V[4], -V[5], V[5]][g[lt1, lt2] g[
@@ -4522,8 +4523,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIV4,
+   double mIV4, double mLV5,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpV3V4cV5V51, const std::complex<double>& CpV3V4cV5V52, const std::
       complex<double>& CpV3V4cV5V53,
@@ -4550,6 +4550,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
  * @param[in] CpS2S4cS5S5 coupling Cp[S[2], S[4], -S[5], S[5]]
@@ -4558,8 +4559,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2S4cS5S5,
    double scale)
@@ -4584,6 +4584,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
  * @param[in] CpS2S4cV5V5 coupling Cp[S[2], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -4592,8 +4593,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2S4cV5V5,
    double scale, double finite)
@@ -4656,6 +4656,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpS2cS4V3 coupling Cp[S[2], -S[4], V[3]][Mom[S[2]] - Mom[-S[4]]]
  * @param[in] CpS1S4cS5S5 coupling Cp[S[1], S[4], -S[5], S[5]]
@@ -4664,8 +4665,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpS2cS4V3, const std::complex<double>&
       CpS1S4cS5S5,
    double scale)
@@ -4690,6 +4690,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpS2cS4V3 coupling Cp[S[2], -S[4], V[3]][Mom[S[2]] - Mom[-S[4]]]
  * @param[in] CpS1S4cV5V5 coupling Cp[S[1], S[4], -V[5], V[5]][g[lt3, lt4]]
@@ -4698,8 +4699,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpS2cS4V3, const std::complex<double>&
       CpS1S4cV5V5,
    double scale, double finite)
@@ -4762,6 +4762,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PL coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -4778,8 +4779,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
       CpF5F6V4PR, const std::complex<double>& CpcF6cF5V3PL, const std::complex<
       double>& CpcF6cF5V3PR, const std::complex<double>& CpS1S2cV4,
@@ -4816,6 +4816,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -4827,8 +4828,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpcS5cS6V3, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -4854,6 +4854,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -4864,8 +4865,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpcS5V3cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -4891,6 +4891,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1S2cV4 coupling Cp[S[1], S[2], -V[4]][Mom[S[1]] - Mom[S[2]]]
@@ -4905,8 +4906,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
       CpV3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
@@ -4940,6 +4940,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -4952,8 +4953,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S2PL, const std::complex<
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1cS4V3,
@@ -4986,6 +4986,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
@@ -4996,8 +4997,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -5023,6 +5023,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
@@ -5033,8 +5034,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -5060,6 +5060,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
@@ -5071,8 +5072,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -5102,6 +5102,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS4V3 coupling Cp[S[1], -S[4], V[3]][Mom[S[1]] - Mom[-S[4]]]
@@ -5112,8 +5113,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
       CpS2cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -5139,6 +5139,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -5153,8 +5154,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S2PL, const std::complex<
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1V3cV4,
@@ -5186,6 +5186,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -5196,8 +5197,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpS2cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -5225,6 +5225,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -5235,8 +5236,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpS2cU6cU5, const std::complex<double>& CpU5U6V4,
    double scale)
@@ -5262,6 +5262,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -5273,8 +5274,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpS2cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -5302,6 +5302,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1V3cV4 coupling Cp[S[1], V[3], -V[4]][g[lt2, lt3]]
@@ -5314,8 +5315,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
       CpS2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -5343,6 +5343,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6S4PL coupling Cp[F[5], F[6], S[4]][PL]
@@ -5355,8 +5356,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
       CpF5F6S4PR, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2cS4V3,
@@ -5389,6 +5389,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -5399,8 +5400,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
       CpS2cS4V3, const std::complex<double>& CpS4S5S6,
    double scale)
@@ -5426,6 +5426,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -5436,8 +5437,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
       CpS2cS4V3, const std::complex<double>& CpS4U5U6,
    double scale)
@@ -5463,6 +5463,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -5474,8 +5475,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
       CpS2cS4V3, const std::complex<double>& CpS4S5V6,
    double scale)
@@ -5505,6 +5505,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -5515,8 +5516,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpS2cS4V3, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
@@ -5542,6 +5542,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF5F6V4PR coupling Cp[F[5], F[6], V[4]][LorentzProduct[gamma[lt3
@@ -5556,8 +5557,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
       CpF5F6V4PL, const std::complex<double>& CpcF6cF5S1PL, const std::complex<
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2V3cV4,
@@ -5589,6 +5589,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpS1cS5cS6 coupling Cp[S[1], -S[5], -S[6]]
@@ -5599,8 +5600,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
       CpS2V3cV4, const std::complex<double>& CpS5S6V4,
    double scale)
@@ -5628,6 +5628,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpS1cU6cU5 coupling Cp[S[1], -U[6], -U[5]]
@@ -5638,8 +5639,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
       CpS2V3cV4, const std::complex<double>& CpU5U6V4,
    double scale)
@@ -5665,6 +5665,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cS5cV6 coupling Cp[S[1], -S[5], -V[6]][Mom[S[1]] - Mom[-S[5]]
@@ -5676,8 +5677,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
       CpS2V3cV4, const std::complex<double>& CpS5V4V6,
    double scale)
@@ -5705,6 +5705,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field S[2]
  * @param[in] mext3 mass of external field V[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpS1cV5cV6 coupling Cp[S[1], -V[5], -V[6]][g[lt2, lt3]]
@@ -5717,8 +5718,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
  */
 Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
       CpS2V3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
@@ -6107,6 +6107,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
  * @param[in] CpF2F3cS4PR coupling Cp[F[2], F[3], -S[4]][PR]
@@ -6116,8 +6117,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
    double mext1, double mext2, double mext3,
-   double mLS5,
-   double mIS4,
+   double mIS4, double mLS5,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1S4cS5S5,
    double scale)
@@ -6144,6 +6144,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
  * @param[in] CpF2F3cS4PR coupling Cp[F[2], F[3], -S[4]][PR]
@@ -6153,8 +6154,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
    double mext1, double mext2, double mext3,
-   double mLV5,
-   double mIS4,
+   double mIS4, double mLV5,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1S4cV5V5,
    double scale, double finite)
@@ -6181,6 +6181,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIF4 mass of internal field F[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpF2cF4S1PL coupling Cp[F[2], -F[4], S[1]][PL]
@@ -6194,8 +6195,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLS6,
-   double mIF4,
+   double mIF4, double mLF5, double mLS6,
    const std::complex<double>& CpF2cF4S1PL, const std::complex<double>&
       CpF2cF4S1PR, const std::complex<double>& CpF4F5S6PL, const std::complex<
       double>& CpF4F5S6PR, const std::complex<double>& CpcF5F3cS6PL, const std
@@ -6231,6 +6231,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIF4 mass of internal field F[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpF2cF4S1PL coupling Cp[F[2], -F[4], S[1]][PL]
@@ -6248,8 +6249,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLV6,
-   double mIF4,
+   double mIF4, double mLF5, double mLV6,
    const std::complex<double>& CpF2cF4S1PL, const std::complex<double>&
       CpF2cF4S1PR, const std::complex<double>& CpF4F5V6PL, const std::complex<
       double>& CpF4F5V6PR, const std::complex<double>& CpcF5F3cV6PL, const std
@@ -6287,6 +6287,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIF4 mass of internal field F[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpcF4F3S1PL coupling Cp[-F[4], F[3], S[1]][PL]
@@ -6300,8 +6301,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLS6,
-   double mIF4,
+   double mIF4, double mLF5, double mLS6,
    const std::complex<double>& CpcF4F3S1PL, const std::complex<double>&
       CpcF4F3S1PR, const std::complex<double>& CpF2cF5cS6PL, const std::complex
       <double>& CpF2cF5cS6PR, const std::complex<double>& CpF5F4S6PL, const std
@@ -6337,6 +6337,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIF4 mass of internal field F[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpcF4F3S1PL coupling Cp[-F[4], F[3], S[1]][PL]
@@ -6354,8 +6355,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLV6,
-   double mIF4,
+   double mIF4, double mLF5, double mLV6,
    const std::complex<double>& CpcF4F3S1PL, const std::complex<double>&
       CpcF4F3S1PR, const std::complex<double>& CpF2cF5cV6PL, const std::complex
       <double>& CpF2cF5cV6PR, const std::complex<double>& CpF5F4V6PL, const std
@@ -6393,6 +6393,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
@@ -6406,8 +6407,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIS4,
+   double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpF5F6S4PL, const std::complex<
       double>& CpF5F6S4PR, const std::complex<double>& CpcF6cF5S1PL, const std
@@ -6446,6 +6446,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
@@ -6457,8 +6458,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIS4,
+   double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1cS5cS6, const std::complex<
       double>& CpS4S5S6,
@@ -6487,6 +6487,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
@@ -6498,8 +6499,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIS4,
+   double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1cU6cU5, const std::complex<
       double>& CpS4U5U6,
@@ -6528,6 +6528,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
@@ -6540,8 +6541,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIS4,
+   double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1cS5cV6, const std::complex<
       double>& CpS4S5V6,
@@ -6575,6 +6575,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIS4 mass of internal field S[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpF2F3cS4PL coupling Cp[F[2], F[3], -S[4]][PL]
@@ -6586,8 +6587,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIS4,
+   double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
       CpF2F3cS4PR, const std::complex<double>& CpS1cV5cV6, const std::complex<
       double>& CpS4V5V6,
@@ -6618,6 +6618,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLF5 mass of internal field F[5]
  * @param[in] mLF6 mass of internal field F[6]
  * @param[in] CpF2F3cV4PL coupling Cp[F[2], F[3], -V[4]][LorentzProduct[gamma[
@@ -6635,8 +6636,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
    double mext1, double mext2, double mext3,
-   double mLF5, double mLF6,
-   double mIV4,
+   double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
       CpF2F3cV4PR, const std::complex<double>& CpF5F6V4PR, const std::complex<
       double>& CpF5F6V4PL, const std::complex<double>& CpcF6cF5S1PL, const std
@@ -6674,6 +6674,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLS6 mass of internal field S[6]
  * @param[in] CpF2F3cV4PL coupling Cp[F[2], F[3], -V[4]][LorentzProduct[gamma[
@@ -6687,8 +6688,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLS6,
-   double mIV4,
+   double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
       CpF2F3cV4PR, const std::complex<double>& CpS1cS5cS6, const std::complex<
       double>& CpS5S6V4,
@@ -6721,6 +6721,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLU5 mass of internal field U[5]
  * @param[in] mLU6 mass of internal field U[6]
  * @param[in] CpF2F3cV4PL coupling Cp[F[2], F[3], -V[4]][LorentzProduct[gamma[
@@ -6734,8 +6735,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
    double mext1, double mext2, double mext3,
-   double mLU5, double mLU6,
-   double mIV4,
+   double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
       CpF2F3cV4PR, const std::complex<double>& CpS1cU6cU5, const std::complex<
       double>& CpU5U6V4,
@@ -6766,6 +6766,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLS5 mass of internal field S[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpF2F3cV4PL coupling Cp[F[2], F[3], -V[4]][LorentzProduct[gamma[
@@ -6780,8 +6781,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
    double mext1, double mext2, double mext3,
-   double mLS5, double mLV6,
-   double mIV4,
+   double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
       CpF2F3cV4PR, const std::complex<double>& CpS1cS5cV6, const std::complex<
       double>& CpS5V4V6,
@@ -6814,6 +6814,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
  * @param[in] mext1 mass of external field S[1]
  * @param[in] mext2 mass of external field F[2]
  * @param[in] mext3 mass of external field F[3]
+ * @param[in] mIV4 mass of internal field V[4]
  * @param[in] mLV5 mass of internal field V[5]
  * @param[in] mLV6 mass of internal field V[6]
  * @param[in] CpF2F3cV4PL coupling Cp[F[2], F[3], -V[4]][LorentzProduct[gamma[
@@ -6829,8 +6830,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
  */
 Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
    double mext1, double mext2, double mext3,
-   double mLV5, double mLV6,
-   double mIV4,
+   double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
       CpF2F3cV4PR, const std::complex<double>& CpS1cV5cV6, const std::complex<
       double>& CpV4V5V6,
@@ -6856,5 +6856,6 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
 
    return result;
 }
+
 
 } // namespace flexiblesusy

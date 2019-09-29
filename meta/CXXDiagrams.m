@@ -824,11 +824,6 @@ GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
 GaugeStructureOfVertexLorentzPart[
-	{scalar1__ * SARAH`Delta[cIndex1_, cIndex2_] * SARAH`Delta[cIndex3_, cIndex4_] + scalar2__ * SARAH`Delta[cIndex1_, cIndex4_] * SARAH`Delta[cIndex3_, cIndex2_], lorentzStructure_}] :=
-	{scalar1, KroneckerDeltaColourVertex[cIndex1, cIndex2] * KroneckerDeltaColourVertex[cIndex3, cIndex4], lorentzStructure} /;
-	FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
-
-GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
@@ -844,8 +839,9 @@ GaugeStructureOfVertexLorentzPart[
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
 
 (* @todo uncomment *)
-GaugeStructureOfVertexLorentzPart[vertexPart_] := 
-	(Print["Unknown colour structure in vertex ", vertexPart](*; Quit[1]*))
+GaugeStructureOfVertexLorentzPart[vertexPart_] :=
+		(Print["Unknown colour structure in vertex ", vertexPart](*; Quit[1])*)
+		);
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * combine all left and right projector parts to chiral parts.
@@ -891,7 +887,7 @@ CombineChiralParts[gaugeParts_List] :=
 		If[Length[allParts] === 0 && Length[gaugeParts] =!= 0,
 			allParts = {{{0, 0}, ZeroColouredVertex, ChiralVertex}}];
 		allParts
-	]
+	];
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * with `TwoMetricVertex[]` parts with the same set of Lorentz indices,

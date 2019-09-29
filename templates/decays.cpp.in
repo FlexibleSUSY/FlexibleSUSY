@@ -42,6 +42,7 @@
 #include "wrappers.hpp"
 
 #include <boost/range/algorithm.hpp>
+#include <boost/math/special_functions/zeta.hpp>
 
 #include <cmath>
 // TODO: remove before release
@@ -57,11 +58,6 @@ using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 using effective_couplings::beta;
 namespace info = @ModelName@_info;
-
-void CLASSNAME::set_include_higher_order_corrections(bool flag)
-{
-   include_higher_order_corrections = flag;
-}
 
 const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
 {
@@ -193,6 +189,79 @@ double RT(double x) {
 } // anonymous namespace
 
 @partialWidthSpecializationDefs@
+
+template <>
+double CLASSNAME::get_partial_width<H, A, A>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<A>::type& out1_idx,
+      const typename field_indices<A>::type& out2_idx) const
+{
+   const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<H>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
+   constexpr double ps_symmetry {1./2.};
+   constexpr double color_gen_sqr {1.0};
+   const double flux = 0.5/mH;
+   return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+}
+
+template <>
+double CLASSNAME::get_partial_width<H, Z, A>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<Z>::type& out1_idx,
+      const typename field_indices<A>::type& out2_idx) const
+{
+   const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<H>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
+   constexpr double ps_symmetry {1.};
+   constexpr double color_gen_sqr {1.0};
+   const double flux = 0.5/mH;
+   return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+}
+
+template <>
+double CLASSNAME::get_partial_width<H, G, G>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<G>::type& out1_idx,
+      const typename field_indices<G>::type& out2_idx) const
+{
+   const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<H>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
+   constexpr double ps_symmetry {1./2.};
+   constexpr double color_gen_sqr {8.0};
+   const double flux = 0.5/mH;
+
+   // higher order QCD corrections
+   constexpr int Nf {5};
+   constexpr double deltaNLO {95./4. - 7./6.*Nf};
+   const double mtpole2 {Sqr(qedqcd.displayPoleMt())};
+
+   using boost::math::zeta;
+   const double deltaNNLO {
+      149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
+            + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
+            + Nf*Nf*(127./108. - zeta(2)/6.)
+   };
+   const double deltaNNNLO {0.};
+
+   const double result = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+
+   const double g3 = MODELPARAMETER(g3);
+   const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
+
+   switch (include_higher_order_corrections) {
+      case HigherOrderSMCorrections::enable:
+         return  flux * color_gen_sqr * ps * ps_symmetry * amp.square()
+            * (1 + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red));
+      case HigherOrderSMCorrections::disable:
+         return result;
+   }
+}
 
 @decaysCalculationFunctions@
 @partialWidthCalculationFunctions@

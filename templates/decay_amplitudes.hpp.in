@@ -34,7 +34,7 @@ struct Decay_amplitude_SSS {
    double m_decay {0.};
    double m_scalar_1 {0.};
    double m_scalar_2 {0.};
-   std::complex<double> form_factor{};
+   std::complex<double> form_factor {0.};
 
    double square() const;
    Decay_amplitude_SSS operator+=(Decay_amplitude_SSS const& amp) {
@@ -54,7 +54,7 @@ struct Decay_amplitude_SSV {
    double m_scalar {0.};
    double m_vector {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
-   std::complex<double> form_factor{};
+   std::complex<double> form_factor {0.};
 
    double square() const;
    Decay_amplitude_SSV operator+=(Decay_amplitude_SSV const& amp) {
@@ -73,12 +73,12 @@ struct Decay_amplitude_SVV {
    double m_vector_1 {0.};
    double m_vector_2 {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
-   std::complex<double> form_factor_g{};
-   std::complex<double> form_factor_11{};
-   std::complex<double> form_factor_12{};
-   std::complex<double> form_factor_21{};
-   std::complex<double> form_factor_22{};
-   std::complex<double> form_factor_eps{};
+   std::complex<double> form_factor_g {0.};
+   std::complex<double> form_factor_11 {0.};
+   std::complex<double> form_factor_12 {0.};
+   std::complex<double> form_factor_21 {0.};
+   std::complex<double> form_factor_22 {0.};
+   std::complex<double> form_factor_eps {0.};
 
    double square() const;
    Decay_amplitude_SVV operator+=(Decay_amplitude_SVV const& amp) {
@@ -101,8 +101,8 @@ struct Decay_amplitude_SFF {
    double m_decay {0.};
    double m_fermion_1 {0.};
    double m_fermion_2 {0.};
-   std::complex<double> form_factor_left{};
-   std::complex<double> form_factor_right{};
+   std::complex<double> form_factor_left {0.};
+   std::complex<double> form_factor_right {0.};
 
    double square() const;
    Decay_amplitude_SFF operator+=(Decay_amplitude_SFF const& amp) {
@@ -121,8 +121,8 @@ struct Decay_amplitude_FFS {
    double m_decay {0.};
    double m_fermion {0.};
    double m_scalar {0.};
-   std::complex<double> form_factor_left{};
-   std::complex<double> form_factor_right{};
+   std::complex<double> form_factor_left {0.};
+   std::complex<double> form_factor_right {0.};
 
    double square() const;
    Decay_amplitude_FFS operator+=(Decay_amplitude_FFS const& amp) {
@@ -142,10 +142,10 @@ struct Decay_amplitude_FFV {
    double m_fermion {0.};
    double m_vector {0.};
    double massless_vector_threshold{std::numeric_limits<double>::epsilon()};
-   std::complex<double> form_factor_gam_left{};
-   std::complex<double> form_factor_gam_right{};
-   std::complex<double> form_factor_p_1{};
-   std::complex<double> form_factor_p_2{};
+   std::complex<double> form_factor_gam_left {0.};
+   std::complex<double> form_factor_gam_right {0.};
+   std::complex<double> form_factor_p_1 {0.};
+   std::complex<double> form_factor_p_2 {0.};
 
    double square() const;
    Decay_amplitude_FFV operator+=(Decay_amplitude_FFV const& amp) {
