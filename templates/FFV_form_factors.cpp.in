@@ -757,13 +757,15 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
 	 std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
-         const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.;
+         const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.
+	    - mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.;
          const std::complex<double> A2L = 
             - 4. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionC(x) / 3. 
             + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3. 
             + vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3.;
 
-         const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.;
+         const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.
+	    - mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.;
          const std::complex<double> A2R = 
             - 4. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionC(x) / 3. 
             + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3. 
