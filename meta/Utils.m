@@ -476,6 +476,10 @@ SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
 
 MakeUnknownInputDefinition[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString},
+   (* Clean existing definitions if they exist for required pattern.. *)
+   Off[Unset::norep];
+   sym[args___] =.;
+   On[Unset::norep];
    (* Maybe some useful definitions already exist*)
    If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
    info = MakeBoxes@Definition@sym;
@@ -489,10 +493,6 @@ Module[{usageString,info,parsedInfo,infoString},
       infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
    ];
    sym::errUnknownInput = "`1``2`Call\n"<>ToString@sym<>"[`3`]\nis not supported.";
-   (* Clean existing definitions if they exist for required pattern.. *)
-   Off[Unset::norep];
-   sym[args___] =.;
-   On[Unset::norep];
    (* Define a new pattern. *)
    sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
 ];
