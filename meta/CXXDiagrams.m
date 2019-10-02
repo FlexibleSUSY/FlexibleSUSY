@@ -974,15 +974,6 @@ GaugeStructureOfVertex[vertex_] :=
  * corresponding c++ code where no sublist contains more than
  * `MaximumVerticesLimit` number of vertices.
  **)
-CreateVertices::errUnknownInput =
-"Input should have the following form:
-CreateVertices[vertices, CXXDiagrams`.`MaximumVerticesLimit -> num], where
-1) vertices is {{__}...}, i.e. List (of possibly zero length) of non-empty Lists;
-2) CXXDiagrams`.`MaximumVerticesLimit is an option which can be omitted (then
-it is set equal to 500), if it is used, then num should be positive Integer.
-
-And not this one
-CreateVertices[`1`].";
 CreateVertices::errLostVertices =
 "Some vertices lost after splitting of cxxVertices into multiple lists.";
 CreateVertices::errMaximumVerticesLimit =
@@ -1004,8 +995,7 @@ Module[{cxxVertices, vertexPartition},
 
    Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
 ] /; Utils`AssertOrQuit[And[IntegerQ@OptionValue@MaximumVerticesLimit, OptionValue@MaximumVerticesLimit>0],CreateVertices::errMaximumVerticesLimit];
-CreateVertices[args___] :=
-Utils`AssertOrQuit[False,CreateVertices::errUnknownInput,StringJoin@@Riffle[ToString/@{args},", "]];
+Utils`MakeUnknownInputDefinition@CreateVertices;
 (** \brief Creates c++ code that makes a function available that
  * numerically evaluates the given vertex.
  * \param fields a vertex given as a list of fields
