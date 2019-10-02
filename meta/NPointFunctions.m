@@ -158,6 +158,23 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
+BeginPackage["`type`"];
+npf =
+{
+   {{__},{__}},
+   {
+      {
+         {NPointFunctions`GenericSum[_,{__}]..},
+         {{{__}..}..},
+         {{__Integer}..},
+         {{__}..}
+      },
+      {Rule[_,_]...}
+   }
+};
+EndPackage[];
+$ContextPath = Rest@$ContextPath;
+
 Begin["`Private`"];
 
 CreateCXXFToFConversionInNucleus::usage=
@@ -277,6 +294,7 @@ Module[
    TrueQ@@And/@TreeMasses`IsFermion@{inF,outF},
    CreateCXXFToFConversionInNucleus::errFermion,
    inF->outF];
+Utils`MakeUnknownInputDefinition@CreateCXXFToFConversionInNucleus;
 
 Options[NPFPattern] = {
    "Fields" -> _,
@@ -311,10 +329,6 @@ Currently supported options are:
 NPFPattern::errWrongOptionValue =
 "Any option should have form symbolName_ or Blank[] and not
 `1`";
-NPFPattern::errUnknownInput = 
-"Correct input has the following form:
-NPFPattern[options] where options have names from list
-`1`.";
 NPFPattern[opts:OptionsPattern[]] :=
 Module[{names=Part[Options@NPFPattern,All,1],Convert},
    Convert[num_] := If[OptionValue@Part[names,num] === _,
@@ -353,12 +367,7 @@ Module[
       NPFPattern::errWrongOptionValue,#]&/@currentOptionValues;
    True
 ];
-NPFPattern[___] := 
-Utils`AssertOrQuit[
-   False,
-   NPFPattern::errUnknownInput,
-   "\""<>#<>"\""&/@Part[Options@NPFPattern,All,1]
-];
+Utils`MakeUnknownInputDefinition@NPFPattern;
 
 Options[NPointFunction]={
    LoopLevel -> 1,
@@ -433,15 +442,6 @@ NPointFunction::errCalc=
 "FeynArts+FormCalc calculations failed";
 NPointFunction::errUnknownOptions=
    NPFPattern::errUnknownOptions;
-NPointFunction::errUnknownInput=
-"`1`.
-Correct input has the folliwing form:
-NPointFunction[inFields,outFields,options]
-where
- inFields and outFields are lists containing names of `2` particles
-  `3`,
- options have names from list 
-  `4`.";
 NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
 Module[
    {
@@ -530,16 +530,7 @@ Module[
 
    nPointFunction
 ] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
-NPointFunction[x___] :=
-Utils`AssertOrQuit[
-   False,
-   NPointFunction::errUnknownInput,
-   {x},
-   GetSARAHModelName[],
-   Cases[TreeMasses`GetParticles[],
-      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion],                            (*@todo add |_?TreeMasses`IsVector*)
-   Options[NPointFunction][[All,1]]
-];
+Utils`MakeUnknownInputDefinition@NPointFunction;
 internalNPointFunctionInputCheck[inFields:{__},outFields:{__},opts___] :=
 Module[
    {
@@ -576,8 +567,6 @@ n-point correlation function.
 @param nPointFunction the given n-point correlation function
 @returns a list of all vertices needed to calculate a given 
 n-point correlation function.temp";
-VerticesForNPointFunction::errUnknownInput=
-"Correct input has to be NPF object.";
 VerticesForNPointFunction[obj:NPFPattern[
    "Sums"->genSums_,"Subs"->substitutions_]
 ] :=
@@ -595,20 +584,15 @@ Module[
       Infinity,Heads -> True] &/@ (genSums/.rulesWithVertices);
    DeleteDuplicates[StripIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
-VerticesForNPointFunction[___] :=
-Utils`AssertOrQuit[False,VerticesForNPointFunction::errUnknownInput];
+Utils`MakeUnknownInputDefinition@VerticesForNPointFunction;
 
 GetClassRules::usage=
 "@brief Gives GenericField->SARAHField rules for given NPF object.
 @param NPF object.
 @returns List of GenericField->SARAHField rules for given NPF object";
-GetClassRules::errUnknownInput=
-"Input should be NPF object and not
-`1`.";
 GetClassRules[NPFPattern["Sums"->genSums_,"ClFields"->classFields_]] :=
 MapThread[Function[r,MapThread[Rule,{#1,r}]]/@#2&,{(First/@Last@#)&/@genSums,classFields}];
-GetClassRules[args___] :=
-Utils`AssertOrQuit[False,GetClassRules::errUnknownInput,{args}];
+Utils`MakeUnknownInputDefinition@GetClassRules;
 SetAttributes[GetClassRules,{Protected,Locked}];
 
 GetSARAHModelName::usage=
@@ -619,6 +603,7 @@ If[SARAH`submodeldir =!= False,
       SARAH`modelDir <> "-" <> SARAH`submodeldir,
       SARAH`modelDir
 ];
+Utils`MakeUnknownInputDefinition@GetSARAHModelName;
 
 GetFAClassesModelName::usage=
 "@brief Return the model name that is used by SARAH to name the
@@ -627,6 +612,7 @@ FeynArts model file it creates.
 FeynArts model file it creates.";
 GetFAClassesModelName[] := 
    SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
+Utils`MakeUnknownInputDefinition@GetFAClassesModelName;
 
 GetFAParticleNamesFileName::usage=
 "@brief Return the file name that is used by SARAH to store 
@@ -635,6 +621,7 @@ FeynArts particle names.
 FeynArts particle names.";
 GetFAParticleNamesFileName[] := 
 "ParticleNamesFeynArts.dat";
+Utils`MakeUnknownInputDefinition@GetFAParticleNamesFileName;
 
 GetFASubstitutionsFileName::usage=
 "@brief Return the model name that is used by SARAH to name the FeynArts 
@@ -645,7 +632,8 @@ GetFASubstitutionsFileName[] :=
    StringJoin["Substitutions-",SARAH`ModelName,
      ToString@FlexibleSUSY`FSEigenstates,".m"
    ];
-   
+Utils`MakeUnknownInputDefinition@GetFASubstitutionsFileName;
+
 LaunchSubkernelFor::usage=
 "@brief Tries to launch a subkernel without errors.
 If it fails, tries to explain the reason using message for specifying its
@@ -685,6 +673,7 @@ Module[{kernelName},
       LaunchSubkernelFor::errKernelLaunch, message];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
+Utils`MakeUnknownInputDefinition@LaunchSubkernelFor;
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
@@ -693,6 +682,7 @@ CacheNameForMeta::usage=
 ";
 CacheNameForMeta[nPointMeta:{__}] :=
    StringJoin["cache_",Riffle[ToString/@Flatten@nPointMeta, "_"],".m"];
+Utils`MakeUnknownInputDefinition@CacheNameForMeta;
 
 CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
@@ -723,6 +713,7 @@ Module[
    Write[fileHandle,nPointFunctions];
    Close@fileHandle;
 ];
+Utils`MakeUnknownInputDefinition@CacheNPointFunction;
 
 CachedNPointFunction::usage=
 "@brief Retrieve an n-point correlation function from the cache
@@ -746,6 +737,7 @@ Module[
       {inFields, outFields}];
    If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
 ];
+Utils`MakeUnknownInputDefinition@CachedNPointFunction;
 
 GenerateFAModelFileOnKernel::usage=
 "@brief Generate the FeynArts model file on a given subkernel.";
@@ -770,7 +762,8 @@ Module[
       NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
          SARAHModelName, eigenstates];,
       kernel];
-]
+];
+Utils`MakeUnknownInputDefinition@GenerateFAModelFileOnKernel;
 
 WriteParticleNamespaceFile::usage=
 "@brief Write a file containing all field names and the contexts in which they 
@@ -781,6 +774,7 @@ Module[{fileHandle = OpenWrite@fileName},
    Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
    Close@fileHandle;
 ];
+Utils`MakeUnknownInputDefinition@WriteParticleNamespaceFile;
 
 FANamesForFields::usage=
 "@brief Translate SARAH-style fields to FeynArts-style fields
@@ -814,7 +808,8 @@ Module[
          SARAH`bar@field_String :> "-" <> field, 
          Susyno`LieGroups`conj@field_String :> "-" <> field
       }
-]
+];
+Utils`MakeUnknownInputDefinition@FANamesForFields;
 
 RemoveEmptyGenSums::usage=
 "@brief Sometimes after FA+FC calculation some generic sums are empty. This
@@ -823,8 +818,6 @@ colour/combinatoric factors and field substitution rules). This work is done by
 this function.
 @param npfObject NPF object to clean.
 @returns cleaned from empty GenericSums npfObject.";
-RemoveEmptyGenSums::errUnknownInput=
-"Input should be NPF object.";
 RemoveEmptyGenSums[npfObject:NPFPattern[]]:=npfObject;
 RemoveEmptyGenSums[
    {fields:{{__},{__}},
@@ -843,8 +836,7 @@ Module[{poss=Position[sums,GenericSum[0,{}]]},
       StringRiffle[ToString/@Flatten@poss,", "],"."];
    {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
 ];
-RemoveEmptyGenSums[___]:=
-Utils`AssertOrQuit[False,RemoveEmptyGenSums::errUnknownInput];
+Utils`MakeUnknownInputDefinition@RemoveEmptyGenSums;
 
 Options[CreateCXXHeaders]={
    LoopFunctions -> "FlexibleSUSY",
@@ -864,12 +856,6 @@ CreateCXXHeaders::errLoopFunctions=
 Currently \"LoopTools\", \"FlexibleSUSY\" are supported.";
 CreateCXXHeaders::errUseWilsonCoeffs=
 "UseWilsonCoeffs must be either True or False.";
-CreateCXXHeaders::errUnknownInput=
-"Correct input has the folliwing form:
-NPointFunction[options]
-where
- options have names from list 
-  `1`.";
 CreateCXXHeaders[opts:OptionsPattern[]] :=
 Module[
    {
@@ -905,9 +891,7 @@ Module[
       CreateCXXHeaders::errUseWilsonCoeffs
    ]
 ];
-CreateCXXHeaders[___] := 
-Utils`AssertOrQuit[False,CreateCXXHeaders::errUnknownInput,
-   Options[CreateCXXHeaders][[All, 1]]];
+Utils`MakeUnknownInputDefinition@CreateCXXHeaders;
 
 Options[CreateCXXFunctions]={
    LoopFunctions -> "FlexibleSUSY",
@@ -946,12 +930,6 @@ CreateCXXFunctions::errBasisNoNPF=
 (use WilsonCoeffs`.`InterfaceToMatching on NPF object).";
 CreateCXXFunctions::errNoMatch=
 "Length of basis and the given NPF one does not match."
-CreateCXXFunctions::errUnknownInput=
-"Correct input has the folliwing form:
-@todo
-where
- options have names from list 
-  `1`.";
 CreateCXXFunctions[
    NPF_,
    name_,
@@ -1002,9 +980,7 @@ Module[
       CreateCXXFunctions::errLoopFunctions,
       OptionValue@LoopFunctions]
 ];
-CreateCXXFunctions[___] := 
-Utils`AssertOrQuit[False,CreateCXXFunctions::errUnknownInput,
-   Part[Options@CreateCXXFunctions,All,1]];
+Utils`MakeUnknownInputDefinition@CreateCXXFunctions;
 
 loopLibrary = {};
 SetAttributes[loopLibrary,Protected];
@@ -1018,8 +994,10 @@ Module[{},
    ];
    SetAttributes[loopLibrary,Protected];
 ];
+Utils`MakeUnknownInputDefinition@setLoopLibraryRules;
 SetAttributes[setLoopLibraryRules,{Locked,Protected}];
 getLoopLibraryRules[] := loopLibrary;
+Utils`MakeUnknownInputDefinition@getLoopLibraryRules;
 SetAttributes[getLoopLibraryRules,{Locked,Protected}];
 
 getLoopFlexibleSUSYRules::usage=
@@ -1027,8 +1005,6 @@ getLoopFlexibleSUSYRules::usage=
 @returns Rules for LoopTools to FlexibleSUSY conventions.
 @todo add specific rules for std::sqrt(0)
 @todo add specific rules for std::sqrt(Sqr())";
-getLoopFlexibleSUSYRules::errUnknownInput=
-"Input should have no parameters.";
 getLoopFlexibleSUSYRules[] :=
 Module[
    {
@@ -1059,8 +1035,7 @@ Module[
          "softsusy::d27"[Sequence@@SqrtIfNeeded/@{args}]
    }
 ];
-getLoopFlexibleSUSYRules[__] :=
-   Utils`AssertOrQuit[False,getLoopFlexibleSUSYRules::errUnknownInput];
+Utils`MakeUnknownInputDefinition@getLoopFlexibleSUSYRules;
    
 getGenericLibraryRules[] :=
 Module[
@@ -1075,6 +1050,7 @@ Module[
       LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"context.scale()"]
    }
 ];
+Utils`MakeUnknownInputDefinition@getGenericLibraryRules;
 
 CXXArgStringNPF::usage=
 "@brief Returns the c++ arguments that the c++ version of the given n-point 
@@ -1085,8 +1061,6 @@ is \"def\".
 @param control String that sets up the type of argument string
 @return the c++ arguments that the c++ version of the given n-point 
 correlation function shall take.";
-CXXArgStringNPF::errUnknownInput=
-"Input should be [NPointFunction object, String string]";
 CXXArgStringNPF[nPointFunction:NPFPattern[],control_String:""] :=
 Module[
    {
@@ -1101,43 +1075,33 @@ Module[
    momDef = StringRiffle[Table["Eigen::Vector4d::Zero()",{numMom}],", "];
    StringTemplate[str][eigenType,numInd,numMom,momDef]
 ];
-CXXArgStringNPF[___] :=
-   Utils`AssertOrQuit[False,CXXArgStringNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@CXXArgStringNPF;
 
 ExternalIndicesNPF::usage=
 "@brief Return a list of open field indices for a given NPointFunction object.
 @param nPointFunction NPointFunction object.
 @returns a list of the open field indices for a given NPointFunction object.";
-ExternalIndicesNPF::errUnknownInput=
-"Input should be [NPointFunction object]";
 ExternalIndicesNPF[NPFPattern["Fields"->fields_]] :=
    DeleteDuplicates@Flatten@Level[fields,{4,5}];
-ExternalIndicesNPF[___] :=
-   Utils`AssertOrQuit[False,ExternalIndicesNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@ExternalIndicesNPF;
 
 ExternalMomentaNPF::usage=
 "@brief Return a list of external momenta for a given NPointFunction object.
 @param nPointFunction NPointFunction object.
 @returns a list of the open field indices for a given NPointFunction object.";
-ExternalMomentaNPF::errUnknownInput=
-   ExternalIndicesNPF::errUnknownInput;
 ExternalMomentaNPF[NPFPattern["Sums"->sums_,"Subs"->subs_]] :=
    DeleteDuplicates@
       Cases[{sums,subs},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
-ExternalMomentaNPF[___] :=
-   Utils`AssertOrQuit[False,ExternalMomentaNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@ExternalMomentaNPF;
 
 CXXBodyNPF::usage=
 "@brief Rturns the c++ code for the main master-function.
 @param <n> NPointFunction object
 @returns The c++ code for the main master-function.";
-CXXBodyNPF::errUnknownInput=
-   ExternalIndicesNPF::errUnknownInput;
 CXXBodyNPF[nPointFunction:NPFPattern[]] :=
 StringTemplate["   `1` helper{ model, indices, momenta };\n   return helper.calculate();"][
    CXXClassNameNPF@nPointFunction];
-CXXBodyNPF[___] :=
-   Utils`AssertOrQuit[False,CXXBodyNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@CXXBodyNPF;
 
 CXXClassNameNPF::usage=
 "@brief Return the c++ name for the helper class of the c++
@@ -1145,14 +1109,11 @@ version of a given n-point correlation function.
 @param NPointFunction object
 @returns the c++ name for the helper class of the c++
 version of a given n-point correlation function.";
-CXXClassNameNPF::errUnknownInput=
-   ExternalIndicesNPF::errUnknownInput;
 CXXClassNameNPF[NPFPattern["Fields"->fields_],_String:""] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@fields},
    "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}]
 ];
-CXXClassNameNPF[___] :=
-   Utils`AssertOrQuit[False,CXXClassNameNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
 
 CXXClassForNPF::usage=
 "@brief Return the c++ code for the helper class of the c++ version of a given
@@ -1162,8 +1123,6 @@ n-point correlation function.
 given n-point correlation function
 @returns the c++ code for the helper class of the c++ version of a given
 n-point correlation function.";
-CXXClassForNPF::errUnknownInput=
-"@TODO make some explanations";
 CXXClassForNPF[
    nPointFunction:NPFPattern[
       "Sums"->genSums_,
@@ -1221,23 +1180,16 @@ Module[
    "@Arguments@"->CXXArgStringNPF@nPointFunction,
    "@CalculateFunction@"->CXXCodeFunCalculate[genSumNames,wilsonBasis]}]
 ];
-CXXClassForNPF[___] :=
-   Utils`AssertOrQuit[False,CXXClassForNPF::errUnknownInput];
+Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
 
 CXXInitializeKeyStructs::usage =
 "@brief Generates required c++ code for key structs initialization.
 @param fields:{...} list of presenting generic fields.
 @param ind (def. \"\") indent string for a c++ code.
 @returns c++ code for subexpression if generic fields present there.";
-CXXInitializeKeyStructs::errUnknownInput =
-"Correct input is
-CXXInitializeKeyStructs@@{ {<generic field>...}, <string> }
-and not
-CXXInitializeKeyStructs@@`1`";
 CXXInitializeKeyStructs[fields:{__?IsGenericField},ind_String:""]:=
 StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"<>ind];
-CXXInitializeKeyStructs[x___] :=
-Utils`AssertOrQuit[False,CXXInitializeKeyStructs::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXInitializeKeyStructs;
 SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
 
 ToCXXPreparationRules::usage=
@@ -1319,6 +1271,7 @@ Module[
 
    {externalIndexRules,couplingRules,genericRules, massRules, subexprRules}
 ];
+Utils`MakeUnknownInputDefinition@ToCXXPreparationRules;
 
 CXXGenFieldName::usage=
 "@brief Given a (possibly conjugated) generic field, return its c++ type.
@@ -1326,9 +1279,6 @@ CXXGenFieldName::usage=
 @returns the name of the c++ type for a (possibly conjugate) field.
 @note functions saves its unique previous calls to improve the speed of
 calculations.";
-CXXGenFieldName::errUnknownInput=
-"Input should be head@Field@GenericIndex@Integer, where head can be
-bar, conj or nothing";
 CXXGenFieldName[SARAH`bar[field_]] :=
    CXXGenFieldName[SARAH`bar[field]] =
    StringTemplate["typename bar<`1`>::type"][CXXGenFieldName@field];
@@ -1338,25 +1288,19 @@ CXXGenFieldName[Susyno`LieGroups`conj[field_]] :=
 CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
    CXXGenFieldName[head[GenericIndex[index]]] =
    ToString[head]<>ToString[index];
-CXXGenFieldName[___] :=
-   Utils`AssertOrQuit[False,CXXGenFieldName::errUnknownInput];
+Utils`MakeUnknownInputDefinition@CXXGenFieldName;
 
 CXXFieldName::usage = 
 "@brief Given an explicit field (possibly conjugated), returns its c++ representation.
 @param The given generic field
 @returns String Name of the c++ representation for a field (possibly conjugate).";
-CXXFieldName::errUnknownInput=
-"Input should be either head@fieldName[{___}] or head@fieldName
-with head being \"SARAH`.`bar\", \"Susyno`.`LieGroups`.`conj\" or nothing and not:
-CXXFieldName@@`1`";
 CXXFieldName[SARAH`bar[head_]] :=
    StringJoin["typename bar<",CXXFieldName@head,">::type"];
 CXXFieldName[Susyno`LieGroups`conj[head_]] :=
    StringJoin["typename conj<",CXXFieldName@head,">::type"]
 CXXFieldName[fieldName_Symbol[_?VectorQ] | fieldName_Symbol] :=
    StringJoin["fields::",SymbolName@fieldName];
-CXXFieldName[x___] :=
-   Utils`AssertOrQuit[False,CXXFieldName::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXFieldName;
 
 CXXFieldIndices::usage=
 "@brief Return the c++ expression for the container of the indices of a given
@@ -1366,24 +1310,18 @@ CXXFieldIndices::usage=
 (possibly generic) field.
 @note functions saves its unique previous calls to improve the speed of
 calculations.";
-CXXFieldIndices::errUnknownInput=
-"Input should be head@Field@GenericIndex@Integer, where head can be
-bar, conj or nothing, OR ExternalField OR ExternalField[{Indices}].";
-CXXFieldIndices[SARAH`bar[field_]] :=
-   CXXFieldIndices[SARAH`bar[field]] =
+CXXFieldIndices[SARAH`bar[field_]] := CXXFieldIndices[SARAH`bar[field]] =
    CXXFieldIndices@field;
-CXXFieldIndices[Susyno`LieGroups`conj[field_]] :=
-   CXXFieldIndices[Susyno`LieGroups`conj[field]] =
+CXXFieldIndices[Susyno`LieGroups`conj[field_]] := CXXFieldIndices[Susyno`LieGroups`conj[field]] =
    CXXFieldIndices@field;
-CXXFieldIndices[head_[GenericIndex[index_Integer]]] := 
-   CXXFieldIndices[head[GenericIndex[index]]] =
-   StringTemplate["indices`1``2`"][StringTake[SymbolName@head,-1],index];
-CXXFieldIndices[field_] :=
-   If[Length@field === 0, "std::array<int,0>()",
-      StringTemplate["std::array<int,`1`>{`2`}"][Length@@field,
-         StringRiffle[ToString/@First@field,", "]]];
-CXXFieldIndices[___] :=
-   Utils`AssertOrQuit[False,CXXFieldIndices::errUnknownInput];
+CXXFieldIndices[head_[GenericIndex[index_Integer]]] := CXXFieldIndices[head[GenericIndex[index]]] =
+   "indices"<>StringTake[SymbolName@head,-1]<>ToString@index;
+CXXFieldIndices[field_] := CXXFieldIndices[field] =
+If[Length@field === 0,
+   "std::array<int,0>()",
+   "std::array<int,"<>ToString[Length@@field]<>">{"<>StringJoin@Riffle[ToString/@First@field,", "]<>"}"
+];
+Utils`MakeUnknownInputDefinition@CXXFieldIndices;
 
 IsGenericField::usage=
 "@brief Determine whether a given field is a generic or not.
@@ -1392,8 +1330,6 @@ IsGenericField::usage=
 @todo no tensor fields.
 @note functions saves its unique previous calls to improve the speed of
 calculations.";
-IsGenericField::errUnknownInput=
-"Only one argument is allowed.";
 IsGenericField[field_] := IsGenericField[field] =
 Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
    Switch[head,
@@ -1403,8 +1339,7 @@ Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
       GenericU, True, 
       _, False]
 ]; 
-IsGenericField[___] :=
-   Utils`AssertOrQuit[False,IsGenericField::errUnknownInput];
+Utils`MakeUnknownInputDefinition@IsGenericField;
 
 CXXCodeForSubexpressions::usage=
 "@brief Create the c++ code encoding a given set of subexpressions.
@@ -1462,6 +1397,7 @@ Module[
    ]&,data];
    StringReplace[StringRiffle[outStrings,"\n\n"],"\n"->"\n"<>ind]
 ];
+Utils`MakeUnknownInputDefinition@CXXCodeForSubexpressions;
 
 CXXGenFieldKey::usage=
 "@brief Given a generic field, determine its key type used in the c++ code to
@@ -1474,6 +1410,7 @@ CXXGenFieldKey[fields:{__}, _String:""] :=
    StringRiffle[CXXGenFieldKey/@fields,", "];
 CXXGenFieldKey[head_[GenericIndex[index_Integer]]] :=
    ToString@head<>ToString@index<>"Key";
+Utils`MakeUnknownInputDefinition@CXXGenFieldKey;
 SetAttributes[CXXGenFieldKey,{Protected,Locked}]
 
 CXXSubsInSub::usage=
@@ -1482,11 +1419,6 @@ present there.
 @param subs:{...} list of symbols.
 @param ind (def. \"\") indent string for a c++ code.
 @returns String c++ code for subexpression if other subexpressions present there.";
-CXXSubsInSub::errUnknownInput=
-"Correct input is
-CXXSubsInSub@@{ {<symbol>...}, <string> }
-and not
-CXXSubsInSub@@`1`";
 CXXSubsInSub[subs:{__Symbol},ind_String:""] :=
 StringRiffle[
    ToString@#<>"<GenericFieldMap> "<>ToString@#<>"_ { *this };"&/@subs,
@@ -1494,8 +1426,7 @@ StringRiffle[
 ];
 CXXSubsInSub[{},_String:""] :=
 "// This subexpression does not depend on other ones";
-CXXSubsInSub[x___] :=
-   Utils`AssertOrQuit[False,CXXSubsInSub::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXSubsInSub;
 
 CXXGenericFieldsInSub::usage =
 "@brief Generates required c++ code for subexpression if generic fields present
@@ -1503,11 +1434,6 @@ there.
 @param fields:{...} list of presenting generic fields.
 @param ind (def. \"\") indent string for a c++ code.
 @returns c++ code for subexpression if generic fields present there.";
-CXXGenericFieldsInSub::errUnknownInput =
-"Correct input is
-CXXGenericFieldsInSub@@{ {<generic field>...}, <string> }
-and not
-CXXGenericFieldsInSub@@`1`";
 CXXGenericFieldsInSub[fields:{__?IsGenericField},ind_String:""] :=
 Module[
    {
@@ -1529,26 +1455,18 @@ Module[
 ];
 CXXGenericFieldsInSub[{},_String:""] :=
 "// This subexpression does not depend on generic fields";
-CXXGenericFieldsInSub[x___] :=
-Utils`AssertOrQuit[False,CXXGenericFieldsInSub::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXGenericFieldsInSub;
 
-CXXContextInitialize::usage =
-"@brief Generates required c++ code if couplings or masses present.
+CXXContextInitialize::usage ="@brief Generates required c++ code if couplings or masses present.
 @param expr Any expression to check for mass of coupling presence.
 @param ind (def. \"\") indent string for a c++ code.
 @returns String c++ code for subexpression if couplings or masses present there.";
-CXXContextInitialize::errUnknownInput =
-"Correct input is
-CXXContextInitialize@@{ <any expression>, <string> }
-and not
-CXXContextInitialize@@`1`";
 CXXContextInitialize[expr_,_String:""] :=
 If[Not[FreeQ[expr,SARAH`Cp]&&FreeQ[expr,SARAH`Mass]],
    "const context_with_vertices &context = *this;",
    "// Code in this scope does not depend on couplings or masses"
 ];
-CXXContextInitialize[x___] :=
-Utils`AssertOrQuit[False,CXXContextInitialize::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXContextInitialize;
 
 ExtractColourFactor::usage=
 "@brief Extracts the colour factor for a given colour structure.";
@@ -1581,6 +1499,7 @@ Module[
    
    projectedFactors
 ];
+Utils`MakeUnknownInputDefinition@ExtractColourFactor;
 
 CXXGenericSum::usage=
 "@brief Create the c++ code encoding a given sum over generic fields.
@@ -1720,23 +1639,18 @@ Module[
          #]&
       )}]
 ];
+Utils`MakeUnknownInputDefinition@CXXGenericSum;
 
 CXXInitializeOutput::usage =
 "@brief Generates c++ code for output value initializations inside GenericSum.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
-CXXInitializeOutput::errUnknownInput =
-"Input should be 
-CXXInitializeOutput@@{ {Rule[<string>,<expression>]...}, <string> }
-and not:
-CXXInitializeOutput@@`1`";
 CXXInitializeOutput[{},_String:""] :=
 "std::complex<double> value = 0.0;";
 CXXInitializeOutput[wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
 StringRiffle["std::complex<double> "<>#<>" = 0.0;"&/@Part[wilsonBasis,All,1],"\n"<>ind];
-CXXInitializeOutput[x___]:=
-   Utils`AssertOrQuit[False,CXXInitializeOutput::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXInitializeOutput;
 SetAttributes[CXXInitializeOutput,{Protected,Locked}];
 
 CXXChangeOutput::usage =
@@ -1748,11 +1662,6 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
-CXXChangeOutput::errUnknownInput =
-"Input should be 
-CXXChangeOutput @todo
-and not:
-CXXInitializeOutput@@`1`";
 CXXChangeOutput[summation:{{_?IsGenericField,_}..},expr_->preCXXRules_,{},ind_String:""] :=
 Module[
    {
@@ -1823,8 +1732,7 @@ Module[
    "@EndSum@"->CXXEndSum@genFields
    }]~StringReplace~("\n"->"\n"<>ind)
 ];
-CXXChangeOutput[x___]:=
-   Utils`AssertOrQuit[False,CXXChangeOutput::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXChangeOutput;
 SetAttributes[CXXChangeOutput,{Protected,Locked}];
 
 createUniqueDefinitions[{}->_,{_String,name_String},_String:""] := 
@@ -1849,23 +1757,18 @@ Module[{names,namedExpr,code,rules},
    rules = Rule@@@namedExpr[[All,{3,1}]];
    {names,StringReplace[code,"\""->""],rules}
 ];
+Utils`MakeUnknownInputDefinition@createUniqueDefinitions;
 
 CXXReturnOutput::usage =
 "@brief Generates c++ code for output value return inside GenericSum.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
-CXXReturnOutput::errUnknownInput =
-"Input should be 
-CXXReturnOutput@@{ {Rule[<string>,<expression>]...}, <string> }
-and not:
-CXXInitializeOutput@@`1`";
 CXXReturnOutput[{},_String:""] :=
 "return value;"
 CXXReturnOutput[wilsonBasis:{Rule[_String,_]..},_String:""] :=
 "return "<>ToString[ wilsonBasis[[All,1]] ]<>";";
-CXXReturnOutput[x___]:=
-   Utils`AssertOrQuit[False,CXXReturnOutput::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXReturnOutput;
 SetAttributes[CXXReturnOutput,{Protected,Locked}];
 
 stringReplaceWithIndent::usage =
@@ -1912,6 +1815,7 @@ Module[
    ];
    StringRiffle[lines,"\n"]
 ];
+Utils`MakeUnknownInputDefinition@stringReplaceWithIndent;
 SetAttributes[stringReplaceWithIndent,{Protected,Locked,HoldRest}];
 
 stringGeneratedCut::usage =
@@ -1942,6 +1846,7 @@ Module[
    cleanStrings = StringReplace[#, StartOfString~~" "...~~x___:>x] &/@ dirtyStrings;
    StringRiffle[cleanStrings,del<>"\n"<>ind]
 ];
+Utils`MakeUnknownInputDefinition@stringGeneratedCut;
 SetAttributes[stringGeneratedCut,{Protected,Locked}];
 
 CXXCodeNameKey::usage =
@@ -1951,18 +1856,12 @@ CXXCodeNameKey::usage =
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for type abbreviations stored in GenericFieldMap
 (Associative Sequence) at Key positions.";
-CXXCodeNameKey::errUnknownInput =
-"Input should be
-CXXCodeNameKey@@{ {<generic Field>..}, <string> }
-and not:
-CXXCodeNameKey@@`1`";
 CXXCodeNameKey[genFields:{__?IsGenericField},ind_String:""] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
       {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
       {1}],"\n"<>ind];
-CXXCodeNameKey[x___]:=
-   Utils`AssertOrQuit[False,CXXCodeNameKey::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXCodeNameKey;
 SetAttributes[CXXCodeNameKey,{Protected,Locked}];
 
 CXXSubsInGenericSum::usage =
@@ -1973,11 +1872,6 @@ code for their initialization.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for initialization of subexpressions if they are
 present in given GenericSum.";
-CXXSubsInGenericSum::errUnknownInput =
-"Input should be 
-CXXSubsInGenericSum@@{ GenericSum[_,_], {<rule>..}, <string> }
-and not:
-CXXSubsInGenericSum@@`1`";
 CXXSubsInGenericSum[GenericSum[expr_,_],subs:{Rule[_,_]...},ind_String:""]:=
 Module[
    {
@@ -1989,8 +1883,7 @@ Module[
          "`1`<GenericFieldMap> `1`_ { *this, index_map };"]/@relevantSubs,
          "\n"<>ind]]
 ];
-CXXSubsInGenericSum[x___]:=
-   Utils`AssertOrQuit[False,CXXSubsInGenericSum::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXSubsInGenericSum;
 SetAttributes[CXXSubsInGenericSum,{Protected,Locked}];
 
 CXXBeginSum::usage =
@@ -1999,11 +1892,6 @@ CXXBeginSum::usage =
 restriction rules pares, which, if are true should lead to a skip of summation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for sum beginning used inside generic sums.";
-CXXBeginSum::errUnknownInput =
-"Input should be 
-CXXBeginSum@@{ {{generic field, restriction}..}, <string> }
-and not:
-CXXBeginSum@@`1`";
 CXXBeginSum[summation:{{_?IsGenericField,_}..},preCXXRules_,ind_String:""]:=
 Module[{beginsOfFor},
    beginsOfFor =
@@ -2011,6 +1899,8 @@ Module[{beginsOfFor},
       "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>CXXFieldIndices@#[[1]]<>";"<>parseRestrictionRule[#,preCXXRules,ind] &/@summation;
    StringRiffle[beginsOfFor,"\n"<>ind]
 ];
+Utils`MakeUnknownInputDefinition@CXXBeginSum;
+SetAttributes[CXXBeginSum,{Protected,Locked}];
 
 parseRestrictionRule[{genericField_?IsGenericField,rule_},{extIndexRules_List,__},str_String:""] :=
 Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
@@ -2035,42 +1925,27 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
       False,"",
       _,"@todo This rule is ununderstandable!";Quit[1]]
 ];
-
-CXXBeginSum[x___]:=
-   Utils`AssertOrQuit[False,CXXBeginSum::errUnknownInput,{x}];
-SetAttributes[CXXBeginSum,{Protected,Locked}];
+Utils`MakeUnknownInputDefinition@parseRestrictionRule;
 
 CXXEndSum::usage =
 "@brief Generates c++ code for end of sum over generic fields inside GenericSum.
 @param genFields:{...} list of presenting generic fields.
 @param ind (def. \"\") dummy string variable.
 @returns String c++ code for end of sum over generic fields inside GenericSum.";
-CXXEndSum::errUnknownInput =
-"Input should be 
-CXXEndSum@@{ {<generic_field>..}, <string> }
-and not:
-CXXEndSum@@`1`";
 CXXEndSum[genFields:{__?IsGenericField},_String:""] :=
    StringJoin[
       Array["}"&,Length@genFields],
       " // End of summation over generic fields"];
-CXXEndSum[x___]:=
-   Utils`AssertOrQuit[False,CXXEndSum::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXEndSum;
 SetAttributes[CXXEndSum,{Protected,Locked}];
 
-CXXCodeFunCalculate::usage =
-"@brief Generates c++ code for functions which return result of generic sum
+CXXCodeFunCalculate::usage ="@brief Generates c++ code for functions which return result of generic sum
 calculation.
 @param genSumNames list of strings with names of generic sums.
 @param wilsonBasis list of rules for a basis.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String Generates c++ code for functions which return result of generic sum
 calculation.";
-CXXCodeFunCalculate::errUnknownInput =
-"Input should be of the form:
-CXXCodeFunCalculate@@{ {<string>..}, {Rule[<string>, <expression>]...}, <string> }
-and not 
-CXXCodeFunCalculate@@{`1`}.";
 CXXCodeFunCalculate[genSumNames:{__String},wilsonBasis:{Rule[_String,_]...},ind_String:""] :=
 Module[
    {
@@ -2109,8 +1984,7 @@ Module[
       }]~StringReplace~("\n"->"\n"<>ind)
    ]
 ];
-CXXCodeFunCalculate[x___]:=
-   Utils`AssertOrQuit[False,CXXCodeFunCalculate::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXCodeFunCalculate;
 SetAttributes[CXXCodeFunCalculate,{Protected,Locked}];
 
 CXXClassInsertions::usage =
@@ -2118,15 +1992,9 @@ CXXClassInsertions::usage =
 @param genInsertions list of list with SARAH particle names.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for class insertions inside GenericSum.";
-CXXClassInsertions::errUnknownInput =
-"Input should be 
-CXXClassInsertions@@{ {{<SARAH_field>..}..}, <string> }
-and not:
-CXXClassInsertions@@`1`";
 CXXClassInsertions[genInsertions:{{__}..},ind_String:""] := 
    StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@genInsertions,",\n"<>ind];
-CXXClassInsertions[x___]:=
-   Utils`AssertOrQuit[False,CXXClassInsertions::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXClassInsertions;
 SetAttributes[CXXClassInsertions,{Protected,Locked}];
 
 CXXFactorInsertions::usage =
@@ -2134,15 +2002,9 @@ CXXFactorInsertions::usage =
 @param combinatorialFactors list of integers.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for combinatorical factor insertions inside GenericSum.";
-CXXFactorInsertions::errUnknownInput =
-"Input should be 
-CXXFactorInsertions@@{ {<integer>..}, <string> }
-and not:
-CXXFactorInsertions@@`1`";
 CXXFactorInsertions[combinatorialFactors:{__Integer},ind_String:""] := 
    StringRiffle["boost::mpl::int_<"<>ToString@#<>">"&/@combinatorialFactors,",\n"<>ind];
-CXXFactorInsertions[x___]:=
-   Utils`AssertOrQuit[False,CXXFactorInsertions::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXFactorInsertions;
 SetAttributes[CXXFactorInsertions,{Protected,Locked}];
 
 CXXColourInsertions::usage =
@@ -2150,11 +2012,6 @@ CXXColourInsertions::usage =
 @param colourFactors list of numbers.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for colour factor insertions inside GenericSum.";
-CXXColourInsertions::errUnknownInput =
-"Input should be 
-CXXColourInsertions@@{ {<number>..}, <string> }
-and not:
-CXXColourInsertions@@`1`";
 CXXColourInsertions[colourFactors:{__?NumberQ},ind_String:""] :=
 Module[
    {
@@ -2171,8 +2028,7 @@ Module[
          {"{" -> "", "}" -> ""}],
    ",\n"<>ind]
 ];
-CXXColourInsertions[x___]:=
-   Utils`AssertOrQuit[False,CXXColourInsertions::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXColourInsertions;
 SetAttributes[CXXColourInsertions,{Protected,Locked}];
 
 CXXFermionMetaLength::usage =
@@ -2180,16 +2036,10 @@ CXXFermionMetaLength::usage =
 @param wilsonBasis list of fermion chains.
 @param ind (def. \"\\n\") dummy string.
 @returns String c++ short name for the length of fermion basis.";
-CXXFermionMetaLength::errUnknownInput =
-"Input should be 
-CXXFermionMetaLength@@{ {...}, <string> }
-and not:
-CXXFermionMetaLength@@`1`";
 CXXFermionMetaLength[wilsonBasis:{___},_String:"\n"] :=
 If[wilsonBasis==={},"// There is no basis in this GenericSum: skipping ",""]<>
 "boost::mpl::int_<"<>ToString@Length@wilsonBasis<>">";
-CXXFermionMetaLength[x___]:=
-   Utils`AssertOrQuit[False,CXXFermionMetaLength::errUnknownInput,{x}];
+Utils`MakeUnknownInputDefinition@CXXFermionMetaLength;
 SetAttributes[CXXFermionMetaLength,{Protected,Locked}];
 
 (*auxiliary functions with names of newer Mathematica versions*)
