@@ -185,6 +185,13 @@ parses \\n symbol.
 @note Internal`HandlerBlock is not documented, this is why System`Dump` prefix
 is used for function arguments to avoid any unexpected behavior.";
 
+MakeUnknownInputDefinition::usage =
+"@brief Creates definition for a given symbol for a case when input is not defined
+explicitly, i.e. creates definition for the pattern symbol[args___].
+@param <Symbol> sym Symbol to make definition for.
+@returns None.
+@note UpValues for symbol[args___] are not cleared.";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -467,17 +474,42 @@ Module[{nStrokes,controlSubstrings},
 ];
 SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
 
+MakeUnknownInputDefinition[sym_Symbol] :=
+Module[{usageString,info,parsedInfo,infoString},
+   (* Maybe some useful definitions already exist*)
+   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+   info = MakeBoxes@Definition@sym;
+   If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
+      infoString="",
+      parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
+      parsedInfo = MapThread[parsedInfo[[##]]&,{Range@Length@#,First/@#}] &@ (Range@(First@#-1) &@ Position[#,"="|":="|"^="|"^:="] &/@ parsedInfo);
+      parsedInfo = DeleteCases[DeleteDuplicates@parsedInfo,{"Options",__}|{"Attributes",__}];
+      parsedInfo = Array[Join[{ToString@#,") "},parsedInfo[[#]]]&,Length@parsedInfo];
+      infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
+      infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
+   ];
+   sym::errUnknownInput = "`1``2`Call\n"<>ToString@sym<>"[`3`]\nis not supported.";
+   (* Clean existing definitions if they exist for required pattern.. *)
+   Off[Unset::norep];
+   sym[args___] =.;
+   On[Unset::norep];
+   (* Define a new pattern. *)
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
+];
+MakeUnknownInputDefinition@MakeUnknownInputDefinition;
+SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
+
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
 		fileHandle = OpenRead[fileName, BinaryFormat -> True];
-		
+
 		While[(line = Read[fileHandle, String]) =!= EndOfFile,
 			AssertWithMessage[line =!= $Failed,
 				"Utils`ReadLinesInFile[]: Unable to read line from file '" <>
 				fileName <> "'"];
 			AppendTo[lines, line];
 			];
-		
+
     Close[fileHandle];
     lines
 	]
