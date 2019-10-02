@@ -474,12 +474,8 @@ Module[{nStrokes,controlSubstrings},
 ];
 SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
 
-MakeUnknownInputDefinition::errNotAFunction =
-"Symbol `1` does not represent a function of desired form.";
 MakeUnknownInputDefinition[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString},
-   (* If after evaluation symbol becomes an expression, then it is not a function. *)
-   AssertOrQuit[MatchQ[sym,_Symbol],MakeUnknownInputDefinition::errNotAFunction,Unevaluated@sym];
    (* Maybe some useful definitions already exist*)
    If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
    info = MakeBoxes@Definition@sym;
@@ -501,7 +497,7 @@ Module[{usageString,info,parsedInfo,infoString},
    sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
-SetAttributes[MakeUnknownInputDefinition,{HoldFirst,Locked,Protected,ReadProtected}];
+SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
