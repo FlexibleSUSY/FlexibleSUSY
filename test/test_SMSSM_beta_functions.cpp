@@ -137,7 +137,7 @@ void test_beta_function_equality(const SoftParsNmssm& a, const SMSSM_soft_parame
 
    TEST_EQUALITY(beta_a.displayMspSquared(), beta_b.get_BMS());
    TEST_EQUALITY(beta_a.displayXiF()       , beta_b.get_L1());
-   TEST_EQUALITY(beta_a.displayXiS()       , beta_b.get_LL1());
+   TEST_CLOSE(beta_a.displayXiS()          , beta_b.get_LL1(), 2.0e-10 );
    TEST_EQUALITY(beta_a.displayMupr()      , beta_b.get_MS());
 
    TEST_EQUALITY(beta_a.displaySusyMu()   , beta_b.get_Mu());
