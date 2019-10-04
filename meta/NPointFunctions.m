@@ -158,25 +158,86 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
-BeginPackage["`type`"];
+BeginNamespace = (BeginPackage@#;Off[General::shdw];)&;
+EndNamespace = (On[General::shdw];EndPackage[];$ContextPath = Rest@$ContextPath;)&;
+
+NPointFunctions`BeginNamespace["`make`"];
+defaultDefinitions[sym_Symbol] :=
+Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToString/@{##},", "]&},
+   (* Clean existing definitions if they exist for required pattern.. *)
+   Off[Unset::norep];
+   sym[args___] =.;
+   On[Unset::norep];
+   (* Maybe some useful definitions already exist*)
+   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+   info = MakeBoxes@Definition@sym;
+   If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
+      infoString="",
+      parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
+      parsedInfo = MapThread[parsedInfo[[##]]&,{Range@Length@#,First/@#}] &@ (Range@(First@#-1) &@ Position[#,"="|":="|"^="|"^:="] &/@ parsedInfo);
+      parsedInfo = DeleteCases[DeleteDuplicates@parsedInfo,{"Options",__}|{"Attributes",__}];
+      parsedInfo = Array[Join[{ToString@#,") "},parsedInfo[[#]]]&,Length@parsedInfo];
+      infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
+      infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
+   ];
+   sym::errUnknownInput = "`1``2`Call\n`3`[`4`"<>ToString@sym<>"[`5`]`6`]\nis not supported.";
+   (* Define new pattern. *)
+   sym /: name_[args1___,sym[args2___],args3___] := Utils`AssertOrQuit[
+      False,
+      sym::errUnknownInput,
+      usageString,
+      infoString,
+      ToString@name,
+      If[#==="","",#<>","]&@toString@args1,
+      toString@args2,
+      If[#==="","",","<>#]&@toString@args3];
+];
+defaultDefinitions // Utils`MakeUnknownInputDefinition;
+defaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+NPointFunctions`EndNamespace[];
+
+NPointFunctions`BeginNamespace["`type`"];
+subexpressions =
+   {Rule[_Symbol,_]...};
 npf =
 {
    {{__},{__}},
    {
       {
-         {NPointFunctions`GenericSum[_,{__}]..},
+         {NPointFunctions`GenericSum[{__},{__}]..},
          {{{__}..}..},
          {{__Integer}..},
          {{__}..}
       },
-      {Rule[_,_]...}
+      subexpressions
    }
 };
-EndPackage[];
-$ContextPath = Rest@$ContextPath;
+NPointFunctions`EndNamespace[];
+
+NPointFunctions`BeginNamespace["`get`"];
+subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[]] := npf[[2,2]];
+subexpressions // NPointFunctions`make`defaultDefinitions;
+subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+sums /: Dot[npf:NPointFunctions`type`npf,sums[]] := npf[[2,1,1]];
+sums // NPointFunctions`make`defaultDefinitions;
+sums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+NPointFunctions`EndNamespace[];
+
+NPointFunctions`BeginNamespace["`set`"];
+subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[newsubs:NPointFunctions`type`subexpressions]] := ReplacePart[npf,{2,2}->newsubs];
+subexpressions // NPointFunctions`make`defaultDefinitions;
+subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+NPointFunctions`EndNamespace[];
+
+NPointFunctions`BeginNamespace["`apply`"];
+subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[]] :=
+ReplacePart[npf,{2,1,1}->ReplaceRepeated[npf.NPointFunctions`get`sums[],npf.NPointFunctions`get`subexpressions[]]].NPointFunctions`set`subexpressions[{}];
+subexpressions // NPointFunctions`make`defaultDefinitions;
+subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+NPointFunctions`EndNamespace[];
 
 Begin["`Private`"];
-
 CreateCXXFToFConversionInNucleus::usage=
 "@todo";
 CreateCXXFToFConversionInNucleus::errFermion=
@@ -272,6 +333,8 @@ Module[
    dNPF = dNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,dQ];
    uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
    dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
+   uNPF = uNPF.NPointFunctions`apply`subexpressions[];
+   dNPF = dNPF.NPointFunctions`apply`subexpressions[];
 
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
@@ -294,7 +357,7 @@ Module[
    TrueQ@@And/@TreeMasses`IsFermion@{inF,outF},
    CreateCXXFToFConversionInNucleus::errFermion,
    inF->outF];
-Utils`MakeUnknownInputDefinition@CreateCXXFToFConversionInNucleus;
+CreateCXXFToFConversionInNucleus // Utils`MakeUnknownInputDefinition;
 
 Options[NPFPattern] = {
    "Fields" -> _,
