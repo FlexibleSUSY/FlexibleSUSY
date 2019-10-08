@@ -148,6 +148,7 @@ lambda1Lbottom = With[{
     Xt = xt,
     gb = Yd[3,3], (* SM Yukawa coupling *)
     gt = Yu[3,3], (* SM Yukawa coupling *)
+    gtau = Ye[3,3], (* SM Yukawa coupling *)
     Q = SCALE,
     Q2 = SCALE^2,
     MA = mAInput,
@@ -157,6 +158,7 @@ lambda1Lbottom = With[{
     Xb = xb,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     k = 1/(4 Pi)^2,
     CF = 4/3
     },
@@ -165,7 +167,7 @@ lambda1Lbottom = With[{
         deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
         deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
         deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-        deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+        deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
         (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
        ];
       k*(6 Xtildeb ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^4 (TCF[1][xQD] - 1/12 Xtildeb TCF[2][xQD])
@@ -845,6 +847,7 @@ lambda2LHSSAlphaTAlphaBAllDegenerate = With[{
     CF = 4/3,
     gt = Yu[3,3], (* SM Yukawa coupling *)
     gb = Yd[3,3],
+    gtau = Ye[3,3],
     Xt = xt,
     Yt = yt,
     Xb = xb,
@@ -860,6 +863,7 @@ lambda2LHSSAlphaTAlphaBAllDegenerate = With[{
     mD3 = Sqrt[msd2[3,3]],
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     Q2 = SCALE^2,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
@@ -870,7 +874,7 @@ lambda2LHSSAlphaTAlphaBAllDegenerate = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
     ];
     k^2*( ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^6*(5*Nc - (14*Nc*Xb^2)/M + ((11*Nc)/(2*M^2) - (2*Nc^2)/(3*M^2))*Xb^4 +
@@ -945,12 +949,14 @@ lambda2LHSSAlphaTAlphaBGeneric = With[{
     Q2 = SCALE^2,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
     MA = mAInput,
     CF = 4/3,
     gt = Yu[3,3], (* SM Yukawa coupling *)
     gb = Yd[3,3],
+    gtau = Ye[3,3],
     A0 = mAInput^2*(1-0.02),
     Xt = xt,
     Yt = yt,
@@ -962,7 +968,7 @@ lambda2LHSSAlphaTAlphaBGeneric = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
       ];
 k^2*(ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^6*(Nc*(5 + 2*Log[mD]^2 + 3*Log[Q]^2 + Log[Q]*(-6 - 6*Log[q2]) + 
@@ -2101,10 +2107,10 @@ lambda2LHSSTau = With[{
     sbe = Sqrt[TanBeta^2/(1+TanBeta^2)],
     cbe = Sqrt[1/(1+TanBeta^2)],
     Nc = 3, (* number of colors *)
-    Q  = msq2[3,3]*(1+0.03),
-    mD = msd2[3,3]*(1-0.03),
-    L  = msl2[3,3]*(1-0.01),
-    R  = mse2[3,3]*(1+0.01),
+    Q3 = msq2[3,3]*(1+0.03),
+    D3 = msd2[3,3]*(1-0.03),
+    L3 = msl2[3,3]*(1-0.01),
+    R3 = mse2[3,3]*(1+0.01),
     mu2 = MuInput^2*(1-0.05),
     q2 = SCALE^2, (* renormalization/matching scale *)
     gt = Yu[3,3], (* SM Yukawa coupling *)
@@ -2125,6 +2131,7 @@ lambda2LHSSTau = With[{
     Q2 = SCALE^2,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
     MA = mAInput,
@@ -2135,286 +2142,342 @@ lambda2LHSSTau = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
     ];
-    k^2*Nc*((ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^4*gtau^2*Xtau*(Xb^3*(-8/(mD - Q)^2 +
-        Log[L]*((8*L)/((mD - Q)^2*(L - R)) + (4*L*(mD + Q)*Log[Q])/
-           ((mD - Q)^3*(L - R))) + (-8/(mD - Q)^2 - (4*(mD + Q)*Log[Q])/
-           (mD - Q)^3)*Log[q2] + (8*R*Log[R])/((mD - Q)^2*(-L + R)) +
-        Log[Q]*((-4*(mD + Q))/(mD - Q)^3 - (4*(mD + Q)*R*Log[R])/
-           ((mD - Q)^3*(L - R))) + Log[mD]*((4*(mD + Q))/(mD - Q)^3 +
-          (4*L*(mD + Q)*Log[L])/((mD - Q)^3*(-L + R)) + (4*(mD + Q)*Log[q2])/
-           (mD - Q)^3 + (4*(mD + Q)*R*Log[R])/((mD - Q)^3*(L - R)))) +
-      Xb*((4*L*Log[L]*Log[Q])/((mD - Q)*(-L + R)) + (4*Log[Q]*Log[q2])/
-         (mD - Q) + Log[Q]*(4/(mD - Q) + (4*R*Log[R])/((mD - Q)*(L - R))) +
-        Log[mD]*(4/(-mD + Q) + (4*L*Log[L])/((mD - Q)*(L - R)) +
-          (4*Log[q2])/(-mD + Q) + (4*R*Log[R])/((mD - Q)*(-L + R))))))/(cbe*sbe) +
-   (ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^2*gtau^4*(Xb*Xtau*(Log[L]*(4/(-L + R) + (4*Q*Log[Q])/
-           ((-mD + Q)*(L - R)) + (4*Log[q2])/(-L + R)) + (4*Log[R])/(L - R) +
-        (4*Q*Log[Q]*Log[R])/((mD - Q)*(L - R)) + (4*Log[q2]*Log[R])/(L - R) +
-        Log[mD]*((4*mD*Log[L])/((mD - Q)*(L - R)) + (4*mD*Log[R])/
-           ((mD - Q)*(-L + R)))) + Xb*Xtau^3*(-8/(L - R)^2 +
-        Log[L]*((4*(L + R))/(L - R)^3 + (4*Q*(L + R)*Log[Q])/
-           ((mD - Q)*(L - R)^3) + (4*(L + R)*Log[q2])/(L - R)^3) -
-        (4*(L + R)*Log[R])/(L - R)^3 + Log[q2]*(-8/(L - R)^2 -
-          (4*(L + R)*Log[R])/(L - R)^3) + Log[mD]*((8*mD)/((mD - Q)*(L - R)^2) -
-          (4*mD*(L + R)*Log[L])/((mD - Q)*(L - R)^3) + (4*mD*(L + R)*Log[R])/
-           ((mD - Q)*(L - R)^3)) + Log[Q]*((8*Q)/((-mD + Q)*(L - R)^2) -
-          (4*Q*(L + R)*Log[R])/((mD - Q)*(L - R)^3)))))/(cbe*sbe)) +
- gtau^6*k^2*(5 + 3*Log[L]^2 + Log[L]*(-6 - 6*Log[q2]) + 5*Log[q2]^2 +
-   Log[q2]*(10 - 4*Log[R]) - 4*Log[R] + 2*Log[R]^2 +
-   (sbe^2*(3/2 - A0/L + Pi^2 - (2*A0)/R + 3*Log[A0]^2 + 3*Log[L]^2 +
-      Log[L]*(-9/2 - 3*Log[q2]) + 2*Log[q2]^2 +
-      Log[A0]*(7 + A0*(L^(-1) + 2/R) - 3*Log[L] - 3*Log[R]) +
-      Log[q2]*(-((A0*(2*L + R))/(L*R)) - Log[R]) - (5*Log[R])/2 +
-      2*Log[R]^2 + ((A0^2 - 7*A0*L - delta[A0, L, L])*phi[A0, L, L])/L^2 +
-      Ytau^2*(-L^(-1) - 2/R +
-        ((((L - R)^4 - A0^3*(L + R) - A0*(L - R)^2*(3*L + 5*R) +
-             A0^2*(3*L^2 + 4*L*R + 5*R^2))*delta[A0, R, L] +
-           delta[A0, L, R]*(-(L*(-A0^2 + (L - R)^2)*R) +
-             (-L^2 + 3*L*R - R^2 + A0*(L + R))*delta[A0, R, L]))*Log[A0])/
-         (2*L*R^2*delta[A0, L, R]*delta[A0, R, L]) +
-        (((A0^3 - (L - R)^3 - 3*A0^2*(L + R) + 3*A0*(L^2 - R^2))*
-            delta[A0, R, L] + delta[A0, L, R]*(-(R*(A0^2 - L^2 - 2*A0*R +
-                R^2)) + (-A0 + L + 2*R)*delta[A0, R, L]))*Log[L])/
-         (2*R^2*delta[A0, L, R]*delta[A0, R, L]) + (-L^(-1) - 2/R)*Log[q2] +
-        (((A0^3 + (L - R)^3 - A0^2*(L + 5*R) - A0*(L^2 + 4*L*R - 5*R^2))*
-            delta[A0, R, L] - delta[A0, L, R]*(2*L*(A0 + L - R)*R +
-             (A0 + L - 3*R)*delta[A0, R, L]))*Log[R])/(2*L*R*delta[A0, L, R]*
-          delta[A0, R, L]) + ((A0^4 + (L - R)^4 - 4*A0^3*(L + R) -
-           4*A0*(L - R)^2*(L + R) + 2*A0^2*(3*L^2 + 2*L*R + R^2) -
-           3*(A0^2 + (L - R)^2 - 2*A0*(L + R))*delta[A0, L, R] +
-           2*delta[A0, L, R]^2)*phi[A0, L, R])/(2*R^3*delta[A0, L, R]) +
-        ((-(A0 + L - R)^2 + delta[A0, R, L])*phi[A0, R, L])/
-         (2*L*delta[A0, R, L])) + ((A0^2 - 6*A0*R - delta[A0, R, R])*
-        phi[A0, R, R])/R^2 + Xtau*Ytau*((6*Log[L]^2)/(L - R) +
-        (12*Log[R])/(L - R) + (12*Log[q2]*Log[R])/(L - R) -
-        (4*Log[R]^2)/(L - R) + Log[A0]*((2*Log[L])/(L - R) -
-          (2*Log[R])/(L - R)) + Log[L]*(-12/(L - R) - (12*Log[q2])/(L - R) -
-          (2*Log[R])/(L - R)) - (2*(-(A0*(A0 - 7*L)) + delta[A0, L, L])*
-          phi[A0, L, L])/(L^2*(L - R)) + (2*(A0 + L - R)*phi[A0, R, L])/
-         (L*(L - R)) + (2*(-(A0*(A0 - 6*R)) + delta[A0, R, R])*phi[A0, R, R])/
-         ((L - R)*R^2)) + Xtau^3*Ytau*(-48/(L - R)^2 +
-        (2*(4*A0 - 5*L - 3*R)*Log[L]^2)/(L - R)^3 - (12*(L + 3*R)*Log[R])/
-         (L - R)^3 + (4*(-A0 + L + R)*Log[R]^2)/(L - R)^3 +
-        Log[A0]*((2*(-6*A0 + L - R)*Log[L])/(L - R)^3 +
-          (2*(6*A0 - L + R)*Log[R])/(L - R)^3) +
-        Log[q2]*(-24/(L - R)^2 - (12*(L + R)*Log[R])/(L - R)^3) +
-        Log[L]*((12*(3*L + R))/(L - R)^3 + (12*(L + R)*Log[q2])/(L - R)^3 +
-          (2*(-2*A0 + 3*L + R)*Log[R])/(L - R)^3) +
-        (2*(A0*(A0 - 7*L)*(L - R) + (-5*L + R)*delta[A0, L, L])*
-          phi[A0, L, L])/(L^2*(L - R)^3) -
-        (2*((L - R)*(A0 + L - R) - 2*delta[A0, R, L])*phi[A0, R, L])/
-         (L*(L - R)^3) + (2*(A0*(A0 - 6*R)*(L - R) - (L - 3*R)*
-            delta[A0, R, R])*phi[A0, R, R])/((L - R)^3*R^2)) +
-      Xtau^2*((4*A0*L - 2*A0*R - 4*L*R)/(L^2*R - L*R^2) +
-        ((A0 + L - 3*R)*Log[L]^2)/(L - R)^2 + ((2*A0 + L - 5*R)*Log[R])/
-         (L - R)^2 - (2*Log[R]^2)/(L - R) +
-        Log[q2]*((4*A0*L - 2*A0*R - 2*L*R)/(L^2*R - L*R^2) +
-          (2*(A0 - L)*Log[R])/(L - R)^2) +
-        Log[L]*((-2*A0 + L + 3*R)/(L - R)^2 - (2*(A0 - L)*Log[q2])/
-           (L - R)^2 + ((-A0 + L + R)*Log[R])/(L - R)^2) +
-        Log[A0]*((2*A0*(-2*L + R))/(L*(L - R)*R) + ((A0 - 5*L + 5*R)*Log[L])/
-           (L - R)^2 - ((A0 - 5*L + 5*R)*Log[R])/(L - R)^2) +
-        ((A0*(A0 - 7*L)*(L - R) + (-2*L + R)*delta[A0, L, L])*phi[A0, L, L])/
-         (L^2*(L - R)^2) + (delta[A0, R, L]*phi[A0, R, L])/(L*(L - R)^2) +
-        ((-(A0*(A0 - 6*R)) + delta[A0, R, R])*phi[A0, R, R])/((L - R)*R^2) +
-        Ytau^2*((4*L - 2*R)/(L^2*R - L*R^2) + (3*Log[L]^2)/(L - R)^2 +
-          ((-((L - R)*((L - R)^2*(2*L - R) + A0^2*(2*L + R) - 4*A0*L*
-                 (L + 2*R))*delta[A0, R, L]) + delta[A0, L, R]*
-              (2*L*(L - R)*(A0 + L - R)*R + (2*L^2 + L*R - R^2)*delta[A0, R,
-                 L]))*Log[R])/(L*(L - R)^2*R*delta[A0, L, R]*
-            delta[A0, R, L]) + (2*Log[R]^2)/(L - R)^2 +
-          Log[L]*(((L - R)*(-A0^3 + L*(L - R)^2 + A0^2*(3*L + 4*R) -
-                A0*(3*L^2 + 2*L*R + 7*R^2))*delta[A0, R, L] +
-              delta[A0, L, R]*(-((L - R)*R*(-A0^2 + L^2 + 2*A0*R - R^2)) +
-                (-L^2 + A0*(L - R) - 2*L*R + R^2)*delta[A0, R, L]))/
-             ((L - R)^2*R^2*delta[A0, L, R]*delta[A0, R, L]) -
-            (2*Log[q2])/(L - R)^2 - (5*Log[R])/(L - R)^2) +
-          Log[A0]*(((A0^3*L - (L - R)^4 + A0*L*(3*L^2 - 2*L*R - R^2) +
-                A0^2*(-3*L^2 - 2*L*R + R^2))*delta[A0, R, L] +
-              delta[A0, L, R]*(L*(-A0^2 + (L - R)^2)*R + (-(A0*L) + L^2 -
-                  3*L*R + R^2)*delta[A0, R, L]))/(L*(L - R)*R^2*
-              delta[A0, L, R]*delta[A0, R, L]) + Log[L]/(L - R)^2 -
-            Log[R]/(L - R)^2) + Log[q2]*((4*L - 2*R)/(L^2*R - L*R^2) +
-            (2*Log[R])/(L - R)^2) + ((A0*(A0 - 7*L) - delta[A0, L, L])*
-            phi[A0, L, L])/(L^2*(L - R)^2) +
-          ((-((L - R)*(A0^4 - 4*A0*L^2*(L - R) + (L - R)^4 - 4*A0^3*(L + R) +
-                A0^2*(6*L^2 + 4*L*R + 6*R^2))) + (A0^2*(3*L - 5*R) +
-               (3*L - 5*R)*(L - R)^2 + A0*(-6*L^2 + 4*L*R + 14*R^2))*
-              delta[A0, L, R] - 2*(L - 2*R)*delta[A0, L, R]^2)*phi[A0, L, R])/
-           ((L - R)^2*R^3*delta[A0, L, R]) +
-          (((L - R)*(A0 + L - R)^2 + A0*delta[A0, R, L])*phi[A0, R, L])/
-           (L*(L - R)^2*delta[A0, R, L]) + ((A0*(A0 - 6*R) - delta[A0, R, R])*
-            phi[A0, R, R])/((L - R)^2*R^2))) +
-      Xtau^4*((3*L*(L - R)*R + A0*(-2*L^2 - 5*L*R + R^2))/(L*(L - R)^3*R) +
-        Log[L]*((3*(4*A0*L - L^2 + R^2))/(2*(L - R)^4) +
-          (3*(2*A0*L - L^2 + R^2)*Log[q2])/(L - R)^4) +
-        (3*(-4*A0*L + L^2 - R^2)*Log[R])/(2*(L - R)^4) +
-        Log[q2]*((6*L*(L - R)*R + A0*(-2*L^2 - 5*L*R + R^2))/
-           (L*(L - R)^3*R) + (3*(-2*A0*L + L^2 - R^2)*Log[R])/(L - R)^4) +
-        Log[A0]*((6*L*R*(-L + R) + A0*(2*L^2 + 5*L*R - R^2))/
-           (L*(L - R)^3*R) + (3*(-2*A0*L + L^2 - R^2)*Log[L])/(L - R)^4 +
-          (3*(2*A0*L - L^2 + R^2)*Log[R])/(L - R)^4) +
-        Ytau^2*((-2*L^2 - 11*L*R + R^2)/(L*(L - R)^3*R) +
-          ((7*A0 - 11*L - 3*R)*Log[L]^2)/(L - R)^4 -
-          (((L - R)^2*(A0^3 - 3*L^3 + 11*L^2*R - 5*L*R^2 - 3*R^3 - A0^2*
-                (5*L + 3*R) + A0*(7*L^2 + 4*L*R + 5*R^2))*delta[A0, R, L] +
-             delta[A0, L, R]*(2*L*(L - R)^2*(A0 + L - R)*R + (3*L^3 -
-                 A0*(L - R)^2 + 7*L^2*R + 13*L*R^2 + R^3)*delta[A0, R, L]))*
-            Log[R])/(2*L*(L - R)^4*R*delta[A0, L, R]*delta[A0, R, L]) -
-          (2*(-2*A0 + L + 3*R)*Log[R]^2)/(L - R)^4 +
-          Log[q2]*((-2*L^2 - 5*L*R + R^2)/(L*(L - R)^3*R) -
-            (6*L*Log[R])/(L - R)^4) + Log[A0]*
-           (((L - R)*(-A0^3 + L^3 - 3*L^2*R - L*R^2 + 3*R^3 + 3*A0^2*
-                 (L + R) - A0*(3*L^2 + 5*R^2))*delta[A0, R, L] +
-              delta[A0, L, R]*(-(L*(-A0^2 + (L - R)^2)*R) +
-                (-L^2 + A0*(L - R) + 3*L*R + 3*R^2)*delta[A0, R, L]))/
-             (2*L*(L - R)^2*R^2*delta[A0, L, R]*delta[A0, R, L]) -
-            (3*(A0 - L + R)*Log[L])/(L - R)^4 + (3*(A0 - L + R)*Log[R])/
-             (L - R)^4) + Log[L]*(((L - R)^2*(A0^3 - L^3 + L^2*R + 9*L*R^2 -
-                9*R^3 - A0^2*(3*L + 5*R) + A0*(3*L^2 + 4*L*R + 9*R^2))*delta[
-                A0, R, L] + delta[A0, L, R]*((L - R)^2*R*(-A0^2 + L^2 +
-                  2*A0*R - R^2) + (L^3 - A0*(L - R)^2 + 2*L^2*R + 17*L*R^2 +
-                  4*R^3)*delta[A0, R, L]))/(2*(L - R)^4*R^2*delta[A0, L, R]*
-              delta[A0, R, L]) + (6*L*Log[q2])/(L - R)^4 +
-            ((-11*A0 + 13*L + 9*R)*Log[R])/(L - R)^4) +
-          ((A0*(A0 - 7*L)*(L - R) + (-8*L + R)*delta[A0, L, L])*
-            phi[A0, L, L])/(L^2*(L - R)^4) +
-          (((L - R)^2*(A0^4 - 4*A0^3*(L + R) - 4*A0*(L - R)^2*(L + R) +
-               (L - R)^2*(L^2 - 2*L*R - 3*R^2) + A0^2*(6*L^2 + 4*L*R +
-                 6*R^2)) - (L - R)*(3*L^3 + 3*A0^2*(L - 3*R) - 15*L^2*R + 29*
-                L*R^2 - 17*R^3 - 6*A0*(L^2 - 2*L*R - 3*R^2))*
-              delta[A0, L, R] + 2*(L^2 - 5*L*R + 12*R^2)*delta[A0, L, R]^2)*
-            phi[A0, L, R])/(2*(L - R)^4*R^3*delta[A0, L, R]) -
-          (((L - R)^2*(A0 + L - R)^2 + (4*A0 + 3*L - 3*R)*(L - R)*
-              delta[A0, R, L] - 6*delta[A0, R, L]^2)*phi[A0, R, L])/
-           (2*L*(L - R)^4*delta[A0, R, L]) +
-          ((A0*(A0 - 6*R)*(-L + R) + (L - 5*R)*delta[A0, R, R])*
-            phi[A0, R, R])/((L - R)^4*R^2)))))/cbe^2 +
-   Xtau^4*((2*(2*L^2 - 27*L*R + R^2))/(L*(L - R)^2*R) +
-     ((-7*L - 9*R)*Log[L]^2)/(L - R)^3 + ((-6*L^2 - 44*L*R + 2*R^2)*Log[R])/
-      (L*(L - R)^3) + ((3*L + 5*R)*Log[R]^2)/(L - R)^3 +
-     Log[L]*((-4*(L^2 - 10*L*R - 3*R^2))/((L - R)^3*R) +
-       (2*(5*L + 7*R)*Log[q2])/(L - R)^3 + (4*(L + R)*Log[R])/(L - R)^3) +
-     Log[q2]*((2*(2*L^2 - 15*L*R + R^2))/(L*(L - R)^2*R) -
-       (2*(5*L + 7*R)*Log[R])/(L - R)^3) - (6*PolyLog[2, 1 - L/R])/
-      (L - R)^2) + Xtau^2*((-2*L^2 - 3*L*R + R^2)/(L*(L - R)*R) +
-     ((7*L - 9*R)*Log[L]^2)/(L - R)^2 + ((16*L^2 - 21*L*R + R^2)*Log[R])/
-      (L*(L - R)^2) - (9*Log[R]^2)/(L - R) +
-     Log[L]*((2*L^2 - 17*L*R + 19*R^2)/((L - R)^2*R) -
-       (2*(8*L - 9*R)*Log[q2])/(L - R)^2 + (2*L*Log[R])/(L - R)^2) +
-     Log[q2]*((-2*L^2 - L*R + R^2)/(L*(L - R)*R) + (2*(8*L - 9*R)*Log[R])/
-        (L - R)^2) - (6*PolyLog[2, 1 - L/R])/(L - R)) +
-   Xtau^6*((-2*L^2 - 11*L*R + R^2)/(L*(L - R)^3*R) +
-     ((-9*L - 5*R)*Log[L]^2)/(L - R)^4 + ((-10*L^2 - 3*L*R + R^2)*Log[R])/
-      (L*(L - R)^4) + ((-3*L - 5*R)*Log[R]^2)/(L - R)^4 +
-     Log[q2]*((-2*L^2 - 5*L*R + R^2)/(L*(L - R)^3*R) -
-       (6*L*Log[R])/(L - R)^4) + Log[L]*((2*L^2 + 13*L*R - 3*R^2)/
-        ((L - R)^4*R) + (6*L*Log[q2])/(L - R)^4 + (2*(6*L + 5*R)*Log[R])/
-        (L - R)^4) - (2*PolyLog[2, 1 - L/R])/(L - R)^3 +
-     (4*PolyLog[2, (L - R)/L])/(L - R)^3) +
-   ((4*mu2^3*(2*L + R) - L*R*(4*L^2 + 3*L*R + 2*R^2) -
-       3*mu2^2*(4*L^2 + 7*L*R + 2*R^2) + mu2*(4*L^3 + 17*L^2*R + 13*L*R^2 +
-         2*R^3))/(2*L*(-L + mu2)*(mu2 - R)*R) - (2*L*(L - 2*mu2)*Log[L]^2)/
-      (L - mu2)^2 + ((4*mu2^4 - 4*mu2^3*R - 2*L^2*R^2 +
-        2*mu2^2*R*(-4*L + R) + 4*L*mu2*R*(L + R))*Log[mu2]^2)/
-      ((L - mu2)^2*(mu2 - R)^2) - 2*Log[q2]^2 +
-     ((-2*mu2*(mu2 - R)^2*R + L^2*(9*mu2^2 - 4*mu2*R + R^2) +
-        L*(-13*mu2^3 + 14*mu2^2*R - 9*mu2*R^2 + 2*R^3))*Log[R])/
-      (2*L*(L - mu2)*(mu2 - R)^2) + ((2*mu2 - R)*R*Log[R]^2)/(mu2 - R)^2 +
-     Log[q2]*(-(((2*L + R)*(L - 2*mu2 + R))/(L*R)) + Log[R]) +
-     Log[mu2]*((mu2*(-2*L^2*R^2*(L + R) - 2*mu2^4*(2*L + R) +
-          L*mu2*R*(3*L^2 + 8*L*R - 2*R^2) + mu2^3*(8*L^2 + L*R + 4*R^2) -
-          2*mu2^2*(2*L^3 + 4*L^2*R - L*R^2 + R^3)))/(L*(L - mu2)^2*
-         (mu2 - R)^2*R) + ((2*L*mu2^3 - 3*mu2^4 - L*mu2^2*(L - 8*R) +
-          2*L^2*R^2 - 4*L*mu2*R*(L + R))*Log[R])/((L - mu2)^2*(mu2 - R)^2)) +
-     Log[L]*((4*L^3*(mu2 - R) + mu2^2*(15*mu2 - 13*R)*R +
-         L^2*(-8*mu2^2 + 15*mu2*R - 5*R^2) + 2*L*mu2*(2*mu2^2 - 7*mu2*R +
-           3*R^2))/(2*(L - mu2)^2*(mu2 - R)*R) +
-       ((-5*mu2^4 - 2*mu2^3*(L - 4*R) + 2*L^2*R^2 - 4*L*mu2*R*(L + R) +
-          mu2^2*(L^2 + 8*L*R - 4*R^2))*Log[mu2])/((L - mu2)^2*(mu2 - R)^2) +
-       3*Log[q2] + ((2*mu2^4 - 2*mu2^3*R - L^2*R^2 + mu2^2*R*(-4*L + R) +
-          2*L*mu2*R*(L + R))*Log[R])/((L - mu2)^2*(mu2 - R)^2)) +
-     (2*(-L^2 + 2*L*mu2 + mu2^2)*PolyLog[2, 1 - L/mu2])/(L - mu2)^2 +
-     (4*mu2^2*PolyLog[2, (-L + mu2)/mu2])/(L - mu2)^2 +
-     (2*(mu2^2 + 2*mu2*R - R^2)*PolyLog[2, 1 - R/mu2])/(mu2 - R)^2 +
-     Xtau^2*((4*L^2 - 8*L*mu2 + 6*L*R + 4*mu2*R - 2*R^2)/(L^2*R - L*R^2) +
-       (2*L*(3*L^2 - 6*L*mu2 + 5*mu2^2 + 2*L*R - 4*mu2*R)*Log[L]^2)/
-        ((L - mu2)^2*(L - R)^2) +
-       ((L^3*(5*mu2 - 11*R) + 2*mu2*(mu2 - R)*R^2 +
-          L^2*(-5*mu2^2 + 16*mu2*R + R^2) + L*(4*mu2^3 - 13*mu2^2*R +
-            mu2*R^2 + 2*R^3))*Log[R])/(L*(L - mu2)*(L - R)^2*(mu2 - R)) +
-       (2*R*(4*mu2^2 - 6*mu2*R + 3*R^2 + L*(-2*mu2 + R))*Log[R]^2)/
-        ((L - R)^2*(mu2 - R)^2) +
-       Log[L]*((-4*L^3*(mu2 - R) + L*R*(5*mu2^2 - 2*mu2*R - 7*R^2) -
-           mu2*R*(4*mu2^2 - 7*mu2*R + R^2) + L^2*(4*mu2^2 - 13*mu2*R +
-             11*R^2))/((L - mu2)*(L - R)^2*(mu2 - R)*R) +
-         (2*(-2*mu2^5 + 2*L^3*R^2 - 2*L^2*mu2*R*(2*L + 3*R) +
-            mu2^4*(3*L + 7*R) - 2*mu2^3*(2*L^2 + 5*L*R + 3*R^2) +
-            mu2^2*(L^3 + 13*L^2*R + 4*L*R^2 + 2*R^3))*Log[mu2])/
-          ((L - mu2)^2*(L - R)^2*(mu2 - R)^2) +
-         ((-8*L + 4*mu2 + 2*R)*Log[q2])/(L - R)^2 +
-         ((-6*L)/(L - R)^2 + (4*L*(L - 2*mu2))/((L - mu2)^2*(L - R)) -
-           (4*R)/(L - R)^2 - (4*(L + R))/(L - R)^2 + (2*R*(-2*mu2 + R))/
-            ((mu2 - R)^2*(-L + R)))*Log[R]) +
-       Log[q2]*((4*L^2 - 8*L*mu2 + 4*L*R + 4*mu2*R - 2*R^2)/(L^2*R - L*R^2) +
-         ((8*L - 2*(2*mu2 + R))*Log[R])/(L - R)^2) +
-       Log[mu2]*((4*mu2*(L^2*(2*mu2 - R) + mu2*(mu2 - R)*R +
-            L*mu2*(-2*mu2 + R)))/(L*(L - mu2)*(L - R)*(mu2 - R)*R) +
-         (2*(2*mu2^5 - 2*L^3*R^2 + 2*L^2*mu2*R*(2*L + 3*R) -
-            mu2^4*(3*L + 7*R) + 2*mu2^3*(2*L^2 + 5*L*R + 3*R^2) -
-            mu2^2*(L^3 + 13*L^2*R + 4*L*R^2 + 2*R^3))*Log[R])/
-          ((L - mu2)^2*(L - R)^2*(mu2 - R)^2)) +
-       (4*(-L + mu2)*PolyLog[2, (-L + mu2)/mu2])/(L - R)^2 +
-       (4*(L - mu2)*PolyLog[2, 1 - R/mu2])/(L - R)^2) +
-     Xtau^4*((-2*L^4*(mu2 - R) + mu2*R^2*(2*mu2^2 - 3*mu2*R + R^2) +
-         L^3*(6*mu2^2 - 36*mu2*R + 32*R^2) - L*R*(16*mu2^3 - 5*mu2^2*R -
-           14*mu2*R^2 + R^3) - L^2*(4*mu2^3 - 46*mu2^2*R + 31*mu2*R^2 +
-           15*R^3))/(L*(L - mu2)*(L - R)^3*(mu2 - R)*R) -
-       (2*L*(5*L^3 + mu2*(5*mu2 - 2*R)*R + 5*L^2*(-2*mu2 + R) +
-          L*(6*mu2^2 - 10*mu2*R + R^2))*Log[L]^2)/((L - mu2)^2*(L - R)^4) +
-       ((-2*mu2*(mu2 - R)^2*R^3 + L^4*(-27*mu2^2 + 64*mu2*R - 33*R^2) +
-          L^3*(47*mu2^3 - 162*mu2^2*R + 153*mu2*R^2 - 50*R^3) +
-          L*R*(-12*mu2^4 - 19*mu2^3*R + 70*mu2^2*R^2 - 45*mu2*R^3 + 2*R^4) +
-          L^2*(-24*mu2^4 + 118*mu2^3*R - 101*mu2^2*R^2 - 26*mu2*R^3 +
-            45*R^4))*Log[R])/(2*L*(L - mu2)*(L - R)^4*(mu2 - R)^2) -
-       (R*(L + R)*(8*mu2^2 - 14*mu2*R + 7*R^2 + L*(-2*mu2 + R))*Log[R]^2)/
-        ((L - R)^4*(mu2 - R)^2) + Log[q2]*
-        ((-2*L^3 + L^2*(4*mu2 - 21*R) + R^2*(-2*mu2 + R) + 10*L*R*(mu2 + R))/
-          (L*(L - R)^3*R) + ((-13*L^2 + 12*L*mu2 - 6*L*R + 7*R^2)*Log[R])/
-          (L - R)^4) + Log[L]*((4*L^5*(mu2 - R) + mu2^2*R^3*
-            (-13*mu2 + 15*R) + L^4*(-8*mu2^2 + 77*mu2*R - 71*R^2) +
-           2*L*mu2*R*(-18*mu2^3 + 4*mu2^2*R + 37*mu2*R^2 - 25*R^3) +
-           2*L^3*(2*mu2^3 - 87*mu2^2*R + 81*mu2*R^2 + 6*R^3) +
-           L^2*R*(145*mu2^3 - 123*mu2^2*R - 49*mu2*R^2 + 27*R^3))/
-          (2*(L - mu2)^2*(L - R)^4*(mu2 - R)*R) +
-         ((12*L*mu2^5 + 2*L^2*R^2*(-2*L^2 - 2*L*R + R^2) -
-            mu2^4*(25*L^2 + 28*L*R + R^2) + 6*L*mu2^3*(3*L^2 + 10*L*R +
-              3*R^2) - L*mu2^2*(3*L^3 + 44*L^2*R + 41*L*R^2 - 4*R^3) +
-            4*L*mu2*R*(2*L^3 + 7*L^2*R + L*R^2 - R^3))*Log[mu2])/
-          ((L - mu2)^2*(L - R)^4*(mu2 - R)^2) +
-         ((13*L^2 - 7*R^2 + 6*L*(-2*mu2 + R))*Log[q2])/(L - R)^4 +
-         ((10*L)/(L - R)^3 - 2/(L - R)^2 + (22*L*R)/(L - R)^4 +
-           (6*R)/(-L + R)^3 - (2*L*(L - 2*mu2)*(L + R))/((L - mu2)^2*
-             (L - R)^3) + ((2*mu2 - R)*R*(L + R))/((mu2 - R)^2*(-L + R)^3) +
-           (4*(L + R)^2)/(L - R)^4)*Log[R]) +
-       Log[mu2]*((-2*mu2*(-(mu2^2*(mu2 - R)^2*R^2) + L*mu2^2*R*
-             (2*mu2^2 - 5*mu2*R + 2*R^2) + L^4*(2*mu2^2 - 3*mu2*R + 2*R^2) +
-            L^3*(-4*mu2^3 + 8*mu2^2*R - 9*mu2*R^2 + 2*R^3) +
-            L^2*(2*mu2^4 - 5*mu2^3*R + 7*mu2^2*R^2 - R^4)))/
-          (L*(L - mu2)^2*(L - R)^3*(mu2 - R)^2*R) +
-         ((-12*L*mu2^5 + 2*L^2*R^2*(2*L^2 + 2*L*R - R^2) +
-            mu2^4*(25*L^2 + 28*L*R + R^2) - 6*L*mu2^3*(3*L^2 + 10*L*R +
-              3*R^2) + L*mu2^2*(3*L^3 + 44*L^2*R + 41*L*R^2 - 4*R^3) -
-            4*L*mu2*R*(2*L^3 + 7*L^2*R + L*R^2 - R^3))*Log[R])/
-          ((L - mu2)^2*(L - R)^4*(mu2 - R)^2)) +
-       ((4*L^2 + 6*mu2^2 - 2*R^2 + 4*L*(-3*mu2 + R))*
-         PolyLog[2, (-L + mu2)/mu2])/(L - R)^4 +
-       (2*(-2*L^2 + 6*L*mu2 - 3*mu2^2 - 2*L*R + R^2)*PolyLog[2, 1 - R/mu2])/
-          (L - R)^4))/cbe^2) /. { delta[x_,y_,z_] :> TDelta[x,y,z], phi[x_,y_,z_] :> TPhi[x,y,z] }
-          ];
+    k^2*(gtau^6*(5 + 3*Log[L3]^2 + Log[L3]*(-6 - 6*Log[q2]) + 5*Log[q2]^2 + 
+    Log[q2]*(10 - 4*Log[R3]) - 4*Log[R3] + 2*Log[R3]^2 + 
+    (sbe^2*(3/2 - A0/L3 + Pi^2 - (2*A0)/R3 + 3*Log[A0]^2 + 3*Log[L3]^2 + 
+       Log[L3]*(-9/2 - 3*Log[q2]) + 2*Log[q2]^2 + 
+       Log[A0]*(7 + A0*(L3^(-1) + 2/R3) - 3*Log[L3] - 3*Log[R3]) + 
+       Log[q2]*(-((A0*(2*L3 + R3))/(L3*R3)) - Log[R3]) - (5*Log[R3])/2 + 
+       2*Log[R3]^2 + ((A0^2 - 7*A0*L3 - delta[A0, L3, L3])*phi[A0, L3, L3])/
+        L3^2 + Ytau^2*(-L3^(-1) - 2/R3 + 
+         ((((L3 - R3)^4 - A0^3*(L3 + R3) - A0*(L3 - R3)^2*(3*L3 + 5*R3) + 
+              A0^2*(3*L3^2 + 4*L3*R3 + 5*R3^2))*delta[A0, R3, L3] + 
+            delta[A0, L3, R3]*(-(L3*(-A0^2 + (L3 - R3)^2)*R3) + 
+              (-L3^2 + 3*L3*R3 - R3^2 + A0*(L3 + R3))*delta[A0, R3, L3]))*
+           Log[A0])/(2*L3*R3^2*delta[A0, L3, R3]*delta[A0, R3, L3]) + 
+         (((A0^3 - (L3 - R3)^3 - 3*A0^2*(L3 + R3) + 3*A0*(L3^2 - R3^2))*
+             delta[A0, R3, L3] + delta[A0, L3, R3]*
+             (-(R3*(A0^2 - L3^2 - 2*A0*R3 + R3^2)) + (-A0 + L3 + 2*R3)*delta[
+                A0, R3, L3]))*Log[L3])/(2*R3^2*delta[A0, L3, R3]*
+           delta[A0, R3, L3]) + (-L3^(-1) - 2/R3)*Log[q2] + 
+         (((A0^3 + (L3 - R3)^3 - A0^2*(L3 + 5*R3) - A0*(L3^2 + 4*L3*R3 - 
+                5*R3^2))*delta[A0, R3, L3] - delta[A0, L3, R3]*
+             (2*L3*(A0 + L3 - R3)*R3 + (A0 + L3 - 3*R3)*delta[A0, R3, L3]))*
+           Log[R3])/(2*L3*R3*delta[A0, L3, R3]*delta[A0, R3, L3]) + 
+         ((A0^4 + (L3 - R3)^4 - 4*A0^3*(L3 + R3) - 4*A0*(L3 - R3)^2*
+             (L3 + R3) + 2*A0^2*(3*L3^2 + 2*L3*R3 + R3^2) - 
+            3*(A0^2 + (L3 - R3)^2 - 2*A0*(L3 + R3))*delta[A0, L3, R3] + 
+            2*delta[A0, L3, R3]^2)*phi[A0, L3, R3])/
+          (2*R3^3*delta[A0, L3, R3]) + 
+         ((-(A0 + L3 - R3)^2 + delta[A0, R3, L3])*phi[A0, R3, L3])/
+          (2*L3*delta[A0, R3, L3])) + ((A0^2 - 6*A0*R3 - delta[A0, R3, R3])*
+         phi[A0, R3, R3])/R3^2 + Xtau*Ytau*((6*Log[L3]^2)/(L3 - R3) + 
+         (12*Log[R3])/(L3 - R3) + (12*Log[q2]*Log[R3])/(L3 - R3) - 
+         (4*Log[R3]^2)/(L3 - R3) + Log[A0]*((2*Log[L3])/(L3 - R3) - 
+           (2*Log[R3])/(L3 - R3)) + Log[L3]*(-12/(L3 - R3) - 
+           (12*Log[q2])/(L3 - R3) - (2*Log[R3])/(L3 - R3)) - 
+         (2*(-(A0*(A0 - 7*L3)) + delta[A0, L3, L3])*phi[A0, L3, L3])/
+          (L3^2*(L3 - R3)) + (2*(A0 + L3 - R3)*phi[A0, R3, L3])/
+          (L3*(L3 - R3)) + (2*(-(A0*(A0 - 6*R3)) + delta[A0, R3, R3])*
+           phi[A0, R3, R3])/((L3 - R3)*R3^2)) + Xtau^3*Ytau*
+        (-48/(L3 - R3)^2 + (2*(4*A0 - 5*L3 - 3*R3)*Log[L3]^2)/(L3 - R3)^3 - 
+         (12*(L3 + 3*R3)*Log[R3])/(L3 - R3)^3 + (4*(-A0 + L3 + R3)*Log[R3]^2)/
+          (L3 - R3)^3 + Log[A0]*((2*(-6*A0 + L3 - R3)*Log[L3])/(L3 - R3)^3 + 
+           (2*(6*A0 - L3 + R3)*Log[R3])/(L3 - R3)^3) + 
+         Log[q2]*(-24/(L3 - R3)^2 - (12*(L3 + R3)*Log[R3])/(L3 - R3)^3) + 
+         Log[L3]*((12*(3*L3 + R3))/(L3 - R3)^3 + (12*(L3 + R3)*Log[q2])/
+            (L3 - R3)^3 + (2*(-2*A0 + 3*L3 + R3)*Log[R3])/(L3 - R3)^3) + 
+         (2*(A0*(A0 - 7*L3)*(L3 - R3) + (-5*L3 + R3)*delta[A0, L3, L3])*
+           phi[A0, L3, L3])/(L3^2*(L3 - R3)^3) - 
+         (2*((L3 - R3)*(A0 + L3 - R3) - 2*delta[A0, R3, L3])*phi[A0, R3, L3])/
+          (L3*(L3 - R3)^3) + (2*(A0*(A0 - 6*R3)*(L3 - R3) - 
+            (L3 - 3*R3)*delta[A0, R3, R3])*phi[A0, R3, R3])/
+          ((L3 - R3)^3*R3^2)) + Xtau^2*((4*A0*L3 - 2*A0*R3 - 4*L3*R3)/
+          (L3^2*R3 - L3*R3^2) + ((A0 + L3 - 3*R3)*Log[L3]^2)/(L3 - R3)^2 + 
+         ((2*A0 + L3 - 5*R3)*Log[R3])/(L3 - R3)^2 - (2*Log[R3]^2)/(L3 - R3) + 
+         Log[q2]*((4*A0*L3 - 2*A0*R3 - 2*L3*R3)/(L3^2*R3 - L3*R3^2) + 
+           (2*(A0 - L3)*Log[R3])/(L3 - R3)^2) + 
+         Log[L3]*((-2*A0 + L3 + 3*R3)/(L3 - R3)^2 - (2*(A0 - L3)*Log[q2])/
+            (L3 - R3)^2 + ((-A0 + L3 + R3)*Log[R3])/(L3 - R3)^2) + 
+         Log[A0]*((2*A0*(-2*L3 + R3))/(L3*(L3 - R3)*R3) + 
+           ((A0 - 5*L3 + 5*R3)*Log[L3])/(L3 - R3)^2 - 
+           ((A0 - 5*L3 + 5*R3)*Log[R3])/(L3 - R3)^2) + 
+         ((A0*(A0 - 7*L3)*(L3 - R3) + (-2*L3 + R3)*delta[A0, L3, L3])*
+           phi[A0, L3, L3])/(L3^2*(L3 - R3)^2) + 
+         (delta[A0, R3, L3]*phi[A0, R3, L3])/(L3*(L3 - R3)^2) + 
+         ((-(A0*(A0 - 6*R3)) + delta[A0, R3, R3])*phi[A0, R3, R3])/
+          ((L3 - R3)*R3^2) + Ytau^2*((4*L3 - 2*R3)/(L3^2*R3 - L3*R3^2) + 
+           (3*Log[L3]^2)/(L3 - R3)^2 + 
+           ((-((L3 - R3)*((L3 - R3)^2*(2*L3 - R3) + A0^2*(2*L3 + R3) - 
+                 4*A0*L3*(L3 + 2*R3))*delta[A0, R3, L3]) + delta[A0, L3, R3]*(
+                2*L3*(L3 - R3)*(A0 + L3 - R3)*R3 + (2*L3^2 + L3*R3 - R3^2)*
+                 delta[A0, R3, L3]))*Log[R3])/(L3*(L3 - R3)^2*R3*
+             delta[A0, L3, R3]*delta[A0, R3, L3]) + (2*Log[R3]^2)/
+            (L3 - R3)^2 + Log[L3]*(((L3 - R3)*(-A0^3 + L3*(L3 - R3)^2 + 
+                 A0^2*(3*L3 + 4*R3) - A0*(3*L3^2 + 2*L3*R3 + 7*R3^2))*
+                delta[A0, R3, L3] + delta[A0, L3, R3]*(-((L3 - R3)*R3*
+                   (-A0^2 + L3^2 + 2*A0*R3 - R3^2)) + (-L3^2 + A0*(L3 - R3) - 
+                   2*L3*R3 + R3^2)*delta[A0, R3, L3]))/((L3 - R3)^2*R3^2*
+               delta[A0, L3, R3]*delta[A0, R3, L3]) - (2*Log[q2])/
+              (L3 - R3)^2 - (5*Log[R3])/(L3 - R3)^2) + 
+           Log[A0]*(((A0^3*L3 - (L3 - R3)^4 + A0*L3*(3*L3^2 - 2*L3*R3 - 
+                   R3^2) + A0^2*(-3*L3^2 - 2*L3*R3 + R3^2))*delta[A0, R3, 
+                 L3] + delta[A0, L3, R3]*(L3*(-A0^2 + (L3 - R3)^2)*R3 + 
+                 (-(A0*L3) + L3^2 - 3*L3*R3 + R3^2)*delta[A0, R3, L3]))/
+              (L3*(L3 - R3)*R3^2*delta[A0, L3, R3]*delta[A0, R3, L3]) + 
+             Log[L3]/(L3 - R3)^2 - Log[R3]/(L3 - R3)^2) + 
+           Log[q2]*((4*L3 - 2*R3)/(L3^2*R3 - L3*R3^2) + (2*Log[R3])/
+              (L3 - R3)^2) + ((A0*(A0 - 7*L3) - delta[A0, L3, L3])*
+             phi[A0, L3, L3])/(L3^2*(L3 - R3)^2) + 
+           ((-((L3 - R3)*(A0^4 - 4*A0*L3^2*(L3 - R3) + (L3 - R3)^4 - 
+                 4*A0^3*(L3 + R3) + A0^2*(6*L3^2 + 4*L3*R3 + 6*R3^2))) + 
+              (A0^2*(3*L3 - 5*R3) + (3*L3 - 5*R3)*(L3 - R3)^2 + 
+                A0*(-6*L3^2 + 4*L3*R3 + 14*R3^2))*delta[A0, L3, R3] - 
+              2*(L3 - 2*R3)*delta[A0, L3, R3]^2)*phi[A0, L3, R3])/
+            ((L3 - R3)^2*R3^3*delta[A0, L3, R3]) + 
+           (((L3 - R3)*(A0 + L3 - R3)^2 + A0*delta[A0, R3, L3])*
+             phi[A0, R3, L3])/(L3*(L3 - R3)^2*delta[A0, R3, L3]) + 
+           ((A0*(A0 - 6*R3) - delta[A0, R3, R3])*phi[A0, R3, R3])/
+            ((L3 - R3)^2*R3^2))) + 
+       Xtau^4*((3*L3*(L3 - R3)*R3 + A0*(-2*L3^2 - 5*L3*R3 + R3^2))/
+          (L3*(L3 - R3)^3*R3) + Log[L3]*((3*(4*A0*L3 - L3^2 + R3^2))/
+            (2*(L3 - R3)^4) + (3*(2*A0*L3 - L3^2 + R3^2)*Log[q2])/
+            (L3 - R3)^4) + (3*(-4*A0*L3 + L3^2 - R3^2)*Log[R3])/
+          (2*(L3 - R3)^4) + Log[q2]*((6*L3*(L3 - R3)*R3 + 
+             A0*(-2*L3^2 - 5*L3*R3 + R3^2))/(L3*(L3 - R3)^3*R3) + 
+           (3*(-2*A0*L3 + L3^2 - R3^2)*Log[R3])/(L3 - R3)^4) + 
+         Log[A0]*((6*L3*R3*(-L3 + R3) + A0*(2*L3^2 + 5*L3*R3 - R3^2))/
+            (L3*(L3 - R3)^3*R3) + (3*(-2*A0*L3 + L3^2 - R3^2)*Log[L3])/
+            (L3 - R3)^4 + (3*(2*A0*L3 - L3^2 + R3^2)*Log[R3])/(L3 - R3)^4) + 
+         Ytau^2*((-2*L3^2 - 11*L3*R3 + R3^2)/(L3*(L3 - R3)^3*R3) + 
+           ((7*A0 - 11*L3 - 3*R3)*Log[L3]^2)/(L3 - R3)^4 - 
+           (((L3 - R3)^2*(A0^3 - 3*L3^3 + 11*L3^2*R3 - 5*L3*R3^2 - 3*R3^3 - 
+                A0^2*(5*L3 + 3*R3) + A0*(7*L3^2 + 4*L3*R3 + 5*R3^2))*delta[
+                A0, R3, L3] + delta[A0, L3, R3]*(2*L3*(L3 - R3)^2*
+                 (A0 + L3 - R3)*R3 + (3*L3^3 - A0*(L3 - R3)^2 + 7*L3^2*R3 + 
+                  13*L3*R3^2 + R3^3)*delta[A0, R3, L3]))*Log[R3])/
+            (2*L3*(L3 - R3)^4*R3*delta[A0, L3, R3]*delta[A0, R3, L3]) - 
+           (2*(-2*A0 + L3 + 3*R3)*Log[R3]^2)/(L3 - R3)^4 + 
+           Log[q2]*((-2*L3^2 - 5*L3*R3 + R3^2)/(L3*(L3 - R3)^3*R3) - 
+             (6*L3*Log[R3])/(L3 - R3)^4) + Log[A0]*
+            (((L3 - R3)*(-A0^3 + L3^3 - 3*L3^2*R3 - L3*R3^2 + 3*R3^3 + 
+                 3*A0^2*(L3 + R3) - A0*(3*L3^2 + 5*R3^2))*delta[A0, R3, L3] + 
+               delta[A0, L3, R3]*(-(L3*(-A0^2 + (L3 - R3)^2)*R3) + 
+                 (-L3^2 + A0*(L3 - R3) + 3*L3*R3 + 3*R3^2)*delta[A0, R3, 
+                   L3]))/(2*L3*(L3 - R3)^2*R3^2*delta[A0, L3, R3]*delta[A0, 
+                R3, L3]) - (3*(A0 - L3 + R3)*Log[L3])/(L3 - R3)^4 + 
+             (3*(A0 - L3 + R3)*Log[R3])/(L3 - R3)^4) + 
+           Log[L3]*(((L3 - R3)^2*(A0^3 - L3^3 + L3^2*R3 + 9*L3*R3^2 - 
+                 9*R3^3 - A0^2*(3*L3 + 5*R3) + A0*(3*L3^2 + 4*L3*R3 + 
+                   9*R3^2))*delta[A0, R3, L3] + delta[A0, L3, R3]*
+                ((L3 - R3)^2*R3*(-A0^2 + L3^2 + 2*A0*R3 - R3^2) + 
+                 (L3^3 - A0*(L3 - R3)^2 + 2*L3^2*R3 + 17*L3*R3^2 + 4*R3^3)*
+                  delta[A0, R3, L3]))/(2*(L3 - R3)^4*R3^2*delta[A0, L3, R3]*
+               delta[A0, R3, L3]) + (6*L3*Log[q2])/(L3 - R3)^4 + 
+             ((-11*A0 + 13*L3 + 9*R3)*Log[R3])/(L3 - R3)^4) + 
+           ((A0*(A0 - 7*L3)*(L3 - R3) + (-8*L3 + R3)*delta[A0, L3, L3])*
+             phi[A0, L3, L3])/(L3^2*(L3 - R3)^4) + 
+           (((L3 - R3)^2*(A0^4 - 4*A0^3*(L3 + R3) - 4*A0*(L3 - R3)^2*
+                 (L3 + R3) + (L3 - R3)^2*(L3^2 - 2*L3*R3 - 3*R3^2) + 
+                A0^2*(6*L3^2 + 4*L3*R3 + 6*R3^2)) - (L3 - R3)*(3*L3^3 + 
+                3*A0^2*(L3 - 3*R3) - 15*L3^2*R3 + 29*L3*R3^2 - 17*R3^3 - 
+                6*A0*(L3^2 - 2*L3*R3 - 3*R3^2))*delta[A0, L3, R3] + 
+              2*(L3^2 - 5*L3*R3 + 12*R3^2)*delta[A0, L3, R3]^2)*
+             phi[A0, L3, R3])/(2*(L3 - R3)^4*R3^3*delta[A0, L3, R3]) - 
+           (((L3 - R3)^2*(A0 + L3 - R3)^2 + (4*A0 + 3*L3 - 3*R3)*(L3 - R3)*
+               delta[A0, R3, L3] - 6*delta[A0, R3, L3]^2)*phi[A0, R3, L3])/
+            (2*L3*(L3 - R3)^4*delta[A0, R3, L3]) + 
+           ((A0*(A0 - 6*R3)*(-L3 + R3) + (L3 - 5*R3)*delta[A0, R3, R3])*
+             phi[A0, R3, R3])/((L3 - R3)^4*R3^2)))))/cbe^2 + 
+    Xtau^4*((2*(2*L3^2 - 27*L3*R3 + R3^2))/(L3*(L3 - R3)^2*R3) + 
+      ((-7*L3 - 9*R3)*Log[L3]^2)/(L3 - R3)^3 + 
+      ((-6*L3^2 - 44*L3*R3 + 2*R3^2)*Log[R3])/(L3*(L3 - R3)^3) + 
+      ((3*L3 + 5*R3)*Log[R3]^2)/(L3 - R3)^3 + 
+      Log[L3]*((-4*(L3^2 - 10*L3*R3 - 3*R3^2))/((L3 - R3)^3*R3) + 
+        (2*(5*L3 + 7*R3)*Log[q2])/(L3 - R3)^3 + (4*(L3 + R3)*Log[R3])/
+         (L3 - R3)^3) + Log[q2]*((2*(2*L3^2 - 15*L3*R3 + R3^2))/
+         (L3*(L3 - R3)^2*R3) - (2*(5*L3 + 7*R3)*Log[R3])/(L3 - R3)^3) - 
+      (6*PolyLog[2, 1 - L3/R3])/(L3 - R3)^2) + 
+    Xtau^2*((-2*L3^2 - 3*L3*R3 + R3^2)/(L3*(L3 - R3)*R3) + 
+      ((7*L3 - 9*R3)*Log[L3]^2)/(L3 - R3)^2 + 
+      ((16*L3^2 - 21*L3*R3 + R3^2)*Log[R3])/(L3*(L3 - R3)^2) - 
+      (9*Log[R3]^2)/(L3 - R3) + Log[L3]*((2*L3^2 - 17*L3*R3 + 19*R3^2)/
+         ((L3 - R3)^2*R3) - (2*(8*L3 - 9*R3)*Log[q2])/(L3 - R3)^2 + 
+        (2*L3*Log[R3])/(L3 - R3)^2) + 
+      Log[q2]*((-2*L3^2 - L3*R3 + R3^2)/(L3*(L3 - R3)*R3) + 
+        (2*(8*L3 - 9*R3)*Log[R3])/(L3 - R3)^2) - (6*PolyLog[2, 1 - L3/R3])/
+       (L3 - R3)) + Xtau^6*((-2*L3^2 - 11*L3*R3 + R3^2)/(L3*(L3 - R3)^3*R3) + 
+      ((-9*L3 - 5*R3)*Log[L3]^2)/(L3 - R3)^4 + 
+      ((-10*L3^2 - 3*L3*R3 + R3^2)*Log[R3])/(L3*(L3 - R3)^4) + 
+      ((-3*L3 - 5*R3)*Log[R3]^2)/(L3 - R3)^4 + 
+      Log[q2]*((-2*L3^2 - 5*L3*R3 + R3^2)/(L3*(L3 - R3)^3*R3) - 
+        (6*L3*Log[R3])/(L3 - R3)^4) + 
+      Log[L3]*((2*L3^2 + 13*L3*R3 - 3*R3^2)/((L3 - R3)^4*R3) + 
+        (6*L3*Log[q2])/(L3 - R3)^4 + (2*(6*L3 + 5*R3)*Log[R3])/(L3 - R3)^4) - 
+      (2*PolyLog[2, 1 - L3/R3])/(L3 - R3)^3 + (4*PolyLog[2, (L3 - R3)/L3])/
+       (L3 - R3)^3) + 
+    ((4*mu2^3*(2*L3 + R3) - L3*R3*(4*L3^2 + 3*L3*R3 + 2*R3^2) - 
+        3*mu2^2*(4*L3^2 + 7*L3*R3 + 2*R3^2) + mu2*(4*L3^3 + 17*L3^2*R3 + 
+          13*L3*R3^2 + 2*R3^3))/(2*L3*(-L3 + mu2)*(mu2 - R3)*R3) - 
+      (2*L3*(L3 - 2*mu2)*Log[L3]^2)/(L3 - mu2)^2 + 
+      ((4*mu2^4 - 4*mu2^3*R3 - 2*L3^2*R3^2 + 2*mu2^2*R3*(-4*L3 + R3) + 
+         4*L3*mu2*R3*(L3 + R3))*Log[mu2]^2)/((L3 - mu2)^2*(mu2 - R3)^2) - 
+      2*Log[q2]^2 + ((-2*mu2*(mu2 - R3)^2*R3 + L3^2*(9*mu2^2 - 4*mu2*R3 + 
+           R3^2) + L3*(-13*mu2^3 + 14*mu2^2*R3 - 9*mu2*R3^2 + 2*R3^3))*
+        Log[R3])/(2*L3*(L3 - mu2)*(mu2 - R3)^2) + ((2*mu2 - R3)*R3*Log[R3]^2)/
+       (mu2 - R3)^2 + Log[q2]*(-(((2*L3 + R3)*(L3 - 2*mu2 + R3))/(L3*R3)) + 
+        Log[R3]) + Log[mu2]*((mu2*(-2*L3^2*R3^2*(L3 + R3) - 
+           2*mu2^4*(2*L3 + R3) + L3*mu2*R3*(3*L3^2 + 8*L3*R3 - 2*R3^2) + 
+           mu2^3*(8*L3^2 + L3*R3 + 4*R3^2) - 2*mu2^2*(2*L3^3 + 4*L3^2*R3 - 
+             L3*R3^2 + R3^3)))/(L3*(L3 - mu2)^2*(mu2 - R3)^2*R3) + 
+        ((2*L3*mu2^3 - 3*mu2^4 - L3*mu2^2*(L3 - 8*R3) + 2*L3^2*R3^2 - 
+           4*L3*mu2*R3*(L3 + R3))*Log[R3])/((L3 - mu2)^2*(mu2 - R3)^2)) + 
+      Log[L3]*((4*L3^3*(mu2 - R3) + mu2^2*(15*mu2 - 13*R3)*R3 + 
+          L3^2*(-8*mu2^2 + 15*mu2*R3 - 5*R3^2) + 2*L3*mu2*
+           (2*mu2^2 - 7*mu2*R3 + 3*R3^2))/(2*(L3 - mu2)^2*(mu2 - R3)*R3) + 
+        ((-5*mu2^4 - 2*mu2^3*(L3 - 4*R3) + 2*L3^2*R3^2 - 
+           4*L3*mu2*R3*(L3 + R3) + mu2^2*(L3^2 + 8*L3*R3 - 4*R3^2))*Log[mu2])/
+         ((L3 - mu2)^2*(mu2 - R3)^2) + 3*Log[q2] + 
+        ((2*mu2^4 - 2*mu2^3*R3 - L3^2*R3^2 + mu2^2*R3*(-4*L3 + R3) + 
+           2*L3*mu2*R3*(L3 + R3))*Log[R3])/((L3 - mu2)^2*(mu2 - R3)^2)) + 
+      (2*(-L3^2 + 2*L3*mu2 + mu2^2)*PolyLog[2, 1 - L3/mu2])/(L3 - mu2)^2 + 
+      (4*mu2^2*PolyLog[2, (-L3 + mu2)/mu2])/(L3 - mu2)^2 + 
+      (2*(mu2^2 + 2*mu2*R3 - R3^2)*PolyLog[2, 1 - R3/mu2])/(mu2 - R3)^2 + 
+      Xtau^2*((4*L3^2 - 8*L3*mu2 + 6*L3*R3 + 4*mu2*R3 - 2*R3^2)/
+         (L3^2*R3 - L3*R3^2) + (2*L3*(3*L3^2 - 6*L3*mu2 + 5*mu2^2 + 2*L3*R3 - 
+           4*mu2*R3)*Log[L3]^2)/((L3 - mu2)^2*(L3 - R3)^2) + 
+        ((L3^3*(5*mu2 - 11*R3) + 2*mu2*(mu2 - R3)*R3^2 + 
+           L3^2*(-5*mu2^2 + 16*mu2*R3 + R3^2) + L3*(4*mu2^3 - 13*mu2^2*R3 + 
+             mu2*R3^2 + 2*R3^3))*Log[R3])/(L3*(L3 - mu2)*(L3 - R3)^2*
+          (mu2 - R3)) + (2*R3*(4*mu2^2 - 6*mu2*R3 + 3*R3^2 + 
+           L3*(-2*mu2 + R3))*Log[R3]^2)/((L3 - R3)^2*(mu2 - R3)^2) + 
+        Log[L3]*((-4*L3^3*(mu2 - R3) + L3*R3*(5*mu2^2 - 2*mu2*R3 - 7*R3^2) - 
+            mu2*R3*(4*mu2^2 - 7*mu2*R3 + R3^2) + L3^2*(4*mu2^2 - 13*mu2*R3 + 
+              11*R3^2))/((L3 - mu2)*(L3 - R3)^2*(mu2 - R3)*R3) + 
+          (2*(-2*mu2^5 + 2*L3^3*R3^2 - 2*L3^2*mu2*R3*(2*L3 + 3*R3) + 
+             mu2^4*(3*L3 + 7*R3) - 2*mu2^3*(2*L3^2 + 5*L3*R3 + 3*R3^2) + 
+             mu2^2*(L3^3 + 13*L3^2*R3 + 4*L3*R3^2 + 2*R3^3))*Log[mu2])/
+           ((L3 - mu2)^2*(L3 - R3)^2*(mu2 - R3)^2) + 
+          ((-8*L3 + 4*mu2 + 2*R3)*Log[q2])/(L3 - R3)^2 + 
+          ((-6*L3)/(L3 - R3)^2 + (4*L3*(L3 - 2*mu2))/((L3 - mu2)^2*
+              (L3 - R3)) - (4*R3)/(L3 - R3)^2 - (4*(L3 + R3))/(L3 - R3)^2 + 
+            (2*R3*(-2*mu2 + R3))/((mu2 - R3)^2*(-L3 + R3)))*Log[R3]) + 
+        Log[q2]*((4*L3^2 - 8*L3*mu2 + 4*L3*R3 + 4*mu2*R3 - 2*R3^2)/
+           (L3^2*R3 - L3*R3^2) + ((8*L3 - 2*(2*mu2 + R3))*Log[R3])/
+           (L3 - R3)^2) + Log[mu2]*((4*mu2*(L3^2*(2*mu2 - R3) + 
+             mu2*(mu2 - R3)*R3 + L3*mu2*(-2*mu2 + R3)))/(L3*(L3 - mu2)*
+            (L3 - R3)*(mu2 - R3)*R3) + (2*(2*mu2^5 - 2*L3^3*R3^2 + 
+             2*L3^2*mu2*R3*(2*L3 + 3*R3) - mu2^4*(3*L3 + 7*R3) + 
+             2*mu2^3*(2*L3^2 + 5*L3*R3 + 3*R3^2) - mu2^2*(L3^3 + 13*L3^2*R3 + 
+               4*L3*R3^2 + 2*R3^3))*Log[R3])/((L3 - mu2)^2*(L3 - R3)^2*
+            (mu2 - R3)^2)) + (4*(-L3 + mu2)*PolyLog[2, (-L3 + mu2)/mu2])/
+         (L3 - R3)^2 + (4*(L3 - mu2)*PolyLog[2, 1 - R3/mu2])/(L3 - R3)^2) + 
+      Xtau^4*((-2*L3^4*(mu2 - R3) + mu2*R3^2*(2*mu2^2 - 3*mu2*R3 + R3^2) + 
+          L3^3*(6*mu2^2 - 36*mu2*R3 + 32*R3^2) - 
+          L3*R3*(16*mu2^3 - 5*mu2^2*R3 - 14*mu2*R3^2 + R3^3) - 
+          L3^2*(4*mu2^3 - 46*mu2^2*R3 + 31*mu2*R3^2 + 15*R3^3))/
+         (L3*(L3 - mu2)*(L3 - R3)^3*(mu2 - R3)*R3) - 
+        (2*L3*(5*L3^3 + mu2*(5*mu2 - 2*R3)*R3 + 5*L3^2*(-2*mu2 + R3) + 
+           L3*(6*mu2^2 - 10*mu2*R3 + R3^2))*Log[L3]^2)/
+         ((L3 - mu2)^2*(L3 - R3)^4) + ((-2*mu2*(mu2 - R3)^2*R3^3 + 
+           L3^4*(-27*mu2^2 + 64*mu2*R3 - 33*R3^2) + 
+           L3^3*(47*mu2^3 - 162*mu2^2*R3 + 153*mu2*R3^2 - 50*R3^3) + 
+           L3*R3*(-12*mu2^4 - 19*mu2^3*R3 + 70*mu2^2*R3^2 - 45*mu2*R3^3 + 
+             2*R3^4) + L3^2*(-24*mu2^4 + 118*mu2^3*R3 - 101*mu2^2*R3^2 - 
+             26*mu2*R3^3 + 45*R3^4))*Log[R3])/(2*L3*(L3 - mu2)*(L3 - R3)^4*
+          (mu2 - R3)^2) - (R3*(L3 + R3)*(8*mu2^2 - 14*mu2*R3 + 7*R3^2 + 
+           L3*(-2*mu2 + R3))*Log[R3]^2)/((L3 - R3)^4*(mu2 - R3)^2) + 
+        Log[q2]*((-2*L3^3 + L3^2*(4*mu2 - 21*R3) + R3^2*(-2*mu2 + R3) + 
+            10*L3*R3*(mu2 + R3))/(L3*(L3 - R3)^3*R3) + 
+          ((-13*L3^2 + 12*L3*mu2 - 6*L3*R3 + 7*R3^2)*Log[R3])/(L3 - R3)^4) + 
+        Log[L3]*((4*L3^5*(mu2 - R3) + mu2^2*R3^3*(-13*mu2 + 15*R3) + 
+            L3^4*(-8*mu2^2 + 77*mu2*R3 - 71*R3^2) + 2*L3*mu2*R3*
+             (-18*mu2^3 + 4*mu2^2*R3 + 37*mu2*R3^2 - 25*R3^3) + 
+            2*L3^3*(2*mu2^3 - 87*mu2^2*R3 + 81*mu2*R3^2 + 6*R3^3) + 
+            L3^2*R3*(145*mu2^3 - 123*mu2^2*R3 - 49*mu2*R3^2 + 27*R3^3))/
+           (2*(L3 - mu2)^2*(L3 - R3)^4*(mu2 - R3)*R3) + 
+          ((12*L3*mu2^5 + 2*L3^2*R3^2*(-2*L3^2 - 2*L3*R3 + R3^2) - 
+             mu2^4*(25*L3^2 + 28*L3*R3 + R3^2) + 6*L3*mu2^3*(3*L3^2 + 10*L3*
+                R3 + 3*R3^2) - L3*mu2^2*(3*L3^3 + 44*L3^2*R3 + 41*L3*R3^2 - 4*
+                R3^3) + 4*L3*mu2*R3*(2*L3^3 + 7*L3^2*R3 + L3*R3^2 - R3^3))*
+            Log[mu2])/((L3 - mu2)^2*(L3 - R3)^4*(mu2 - R3)^2) + 
+          ((13*L3^2 - 7*R3^2 + 6*L3*(-2*mu2 + R3))*Log[q2])/(L3 - R3)^4 + 
+          ((10*L3)/(L3 - R3)^3 - 2/(L3 - R3)^2 + (22*L3*R3)/(L3 - R3)^4 + 
+            (6*R3)/(-L3 + R3)^3 - (2*L3*(L3 - 2*mu2)*(L3 + R3))/
+             ((L3 - mu2)^2*(L3 - R3)^3) + ((2*mu2 - R3)*R3*(L3 + R3))/
+             ((mu2 - R3)^2*(-L3 + R3)^3) + (4*(L3 + R3)^2)/(L3 - R3)^4)*
+           Log[R3]) + Log[mu2]*((-2*mu2*(-(mu2^2*(mu2 - R3)^2*R3^2) + 
+             L3*mu2^2*R3*(2*mu2^2 - 5*mu2*R3 + 2*R3^2) + 
+             L3^4*(2*mu2^2 - 3*mu2*R3 + 2*R3^2) + L3^3*(-4*mu2^3 + 8*mu2^2*
+                R3 - 9*mu2*R3^2 + 2*R3^3) + L3^2*(2*mu2^4 - 5*mu2^3*R3 + 7*
+                mu2^2*R3^2 - R3^4)))/(L3*(L3 - mu2)^2*(L3 - R3)^3*
+            (mu2 - R3)^2*R3) + ((-12*L3*mu2^5 + 2*L3^2*R3^2*(2*L3^2 + 2*L3*
+                R3 - R3^2) + mu2^4*(25*L3^2 + 28*L3*R3 + R3^2) - 
+             6*L3*mu2^3*(3*L3^2 + 10*L3*R3 + 3*R3^2) + L3*mu2^2*
+              (3*L3^3 + 44*L3^2*R3 + 41*L3*R3^2 - 4*R3^3) - 
+             4*L3*mu2*R3*(2*L3^3 + 7*L3^2*R3 + L3*R3^2 - R3^3))*Log[R3])/
+           ((L3 - mu2)^2*(L3 - R3)^4*(mu2 - R3)^2)) + 
+        ((4*L3^2 + 6*mu2^2 - 2*R3^2 + 4*L3*(-3*mu2 + R3))*
+          PolyLog[2, (-L3 + mu2)/mu2])/(L3 - R3)^4 + 
+        (2*(-2*L3^2 + 6*L3*mu2 - 3*mu2^2 - 2*L3*R3 + R3^2)*
+          PolyLog[2, 1 - R3/mu2])/(L3 - R3)^4))/cbe^2) + 
+  (gtau^4*Nc*(Xb*Xtau*(Log[L3]*(4/(-L3 + R3) + (4*Log[q2])/(-L3 + R3) + 
+         (4*Q3*Log[Q3])/((-D3 + Q3)*(L3 - R3))) + (4*Log[R3])/(L3 - R3) + 
+       (4*Log[q2]*Log[R3])/(L3 - R3) + (4*Q3*Log[Q3]*Log[R3])/
+        ((D3 - Q3)*(L3 - R3)) + Log[D3]*
+        ((4*D3*Log[L3])/((D3 - Q3)*(L3 - R3)) + (4*D3*Log[R3])/
+          ((D3 - Q3)*(-L3 + R3)))) + Xb*Xtau^3*(-8/(L3 - R3)^2 + 
+       Log[L3]*((4*(L3 + R3))/(L3 - R3)^3 + (4*(L3 + R3)*Log[q2])/
+          (L3 - R3)^3 + (4*Q3*(L3 + R3)*Log[Q3])/((D3 - Q3)*(L3 - R3)^3)) - 
+       (4*(L3 + R3)*Log[R3])/(L3 - R3)^3 + Log[q2]*(-8/(L3 - R3)^2 - 
+         (4*(L3 + R3)*Log[R3])/(L3 - R3)^3) + 
+       Log[D3]*((8*D3)/((D3 - Q3)*(L3 - R3)^2) - (4*D3*(L3 + R3)*Log[L3])/
+          ((D3 - Q3)*(L3 - R3)^3) + (4*D3*(L3 + R3)*Log[R3])/
+          ((D3 - Q3)*(L3 - R3)^3)) + Log[Q3]*
+        ((8*Q3)/((-D3 + Q3)*(L3 - R3)^2) - (4*Q3*(L3 + R3)*Log[R3])/
+          ((D3 - Q3)*(L3 - R3)^3))))*ybMSSM[mQ3, mU3, mD3, M3, Mu, TanBeta, 
+      Xt, Xb]^2)/cbe^2 + 
+  (gtau^2*(48*k^2*(Nc*Xtau^2*(Log[L3]*((-4*L3*R3*Log[q2])/(L3 - R3)^3 + 
+           (2*L3*R3*Log[Q3])/(L3 - R3)^3) + Log[Q3]*
+          (-((L3 + R3)/(L3 - R3)^2) - (2*L3*R3*Log[R3])/(L3 - R3)^3) + 
+         Log[D3]*(-((L3 + R3)/(L3 - R3)^2) + (2*L3*R3*Log[L3])/(L3 - R3)^3 - 
+           (2*L3*R3*Log[R3])/(L3 - R3)^3) + Log[q2]*
+          ((2*(L3 + R3))/(L3 - R3)^2 + (4*L3*R3*Log[R3])/(L3 - R3)^3)) + 
+       Nc*Xb^2*Xtau^2*((-4*L3*R3*Log[L3]*Log[Q3])/((D3 - Q3)*(L3 - R3)^3) + 
+         Log[D3]*((-2*(L3 + R3))/((D3 - Q3)*(L3 - R3)^2) + 
+           (4*L3*R3*Log[L3])/((D3 - Q3)*(L3 - R3)^3) - (4*L3*R3*Log[R3])/
+            ((D3 - Q3)*(L3 - R3)^3)) + Log[Q3]*
+          ((2*(L3 + R3))/((D3 - Q3)*(L3 - R3)^2) + (4*L3*R3*Log[R3])/
+            ((D3 - Q3)*(L3 - R3)^3))) + Nc*Xb^4*Xtau^2*
+        ((-2*(L3 + R3))/((D3 - Q3)^2*(L3 - R3)^2) + 
+         Log[L3]*((4*L3*R3)/((D3 - Q3)^2*(L3 - R3)^3) + 
+           (2*L3*(D3 + Q3)*R3*Log[Q3])/((D3 - Q3)^3*(L3 - R3)^3)) - 
+         (4*L3*R3*Log[R3])/((D3 - Q3)^2*(L3 - R3)^3) + 
+         Log[Q3]*(-(((D3 + Q3)*(L3 + R3))/((D3 - Q3)^3*(L3 - R3)^2)) - 
+           (2*L3*(D3 + Q3)*R3*Log[R3])/((D3 - Q3)^3*(L3 - R3)^3)) + 
+         Log[D3]*(((D3 + Q3)*(L3 + R3))/((D3 - Q3)^3*(L3 - R3)^2) - 
+           (2*L3*(D3 + Q3)*R3*Log[L3])/((D3 - Q3)^3*(L3 - R3)^3) + 
+           (2*L3*(D3 + Q3)*R3*Log[R3])/((D3 - Q3)^3*(L3 - R3)^3)))) + 
+     (48*k^2*Nc*Xtau*(Xb^3*(-8/(D3 - Q3)^2 + Log[q2]*(-8/(D3 - Q3)^2 - 
+            (4*(D3 + Q3)*Log[Q3])/(D3 - Q3)^3) + 
+          Log[L3]*((8*L3)/((D3 - Q3)^2*(L3 - R3)) + (4*L3*(D3 + Q3)*Log[Q3])/
+             ((D3 - Q3)^3*(L3 - R3))) + (8*R3*Log[R3])/((D3 - Q3)^2*
+            (-L3 + R3)) + Log[Q3]*((-4*(D3 + Q3))/(D3 - Q3)^3 - 
+            (4*(D3 + Q3)*R3*Log[R3])/((D3 - Q3)^3*(L3 - R3))) + 
+          Log[D3]*((4*(D3 + Q3))/(D3 - Q3)^3 + (4*L3*(D3 + Q3)*Log[L3])/
+             ((D3 - Q3)^3*(-L3 + R3)) + (4*(D3 + Q3)*Log[q2])/(D3 - Q3)^3 + 
+            (4*(D3 + Q3)*R3*Log[R3])/((D3 - Q3)^3*(L3 - R3)))) + 
+        Xb*((4*L3*Log[L3]*Log[Q3])/((D3 - Q3)*(-L3 + R3)) + 
+          (4*Log[q2]*Log[Q3])/(D3 - Q3) + Log[Q3]*(4/(D3 - Q3) + 
+            (4*R3*Log[R3])/((D3 - Q3)*(L3 - R3))) + 
+          Log[D3]*(4/(-D3 + Q3) + (4*L3*Log[L3])/((D3 - Q3)*(L3 - R3)) + 
+            (4*Log[q2])/(-D3 + Q3) + (4*R3*Log[R3])/((D3 - Q3)*
+              (-L3 + R3))))))/cbe^2)*ybMSSM[mQ3, mU3, mD3, M3, Mu, TanBeta, 
+      Xt, Xb]^4)/(48*k^2)) /. { delta[x_,y_,z_] :> TDelta[x,y,z], phi[x_,y_,z_] :> TPhi[x,y,z] }
+  ];
 (* Two loop alphas-alphab corrections, computation for general masses *)
 lambda2LPhiHSSAlphaBAlphaSFull = With[{
     k = 1/(4*Pi)^2,
@@ -2430,6 +2493,7 @@ lambda2LPhiHSSAlphaBAlphaSFull = With[{
     sgn = M3Input/Abs[M3Input],
     gt = Yu[3,3], (* SM Yukawa coupling *)
     gb = Yd[3,3],
+    gtau = Ye[3,3],
     Xt = xt,
     Yt = yt,
     Xb = xb,
@@ -2442,6 +2506,7 @@ lambda2LPhiHSSAlphaBAlphaSFull = With[{
     Q2 = SCALE^2,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
     MA = mAInput,
@@ -2452,7 +2517,7 @@ lambda2LPhiHSSAlphaBAlphaSFull = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
     ];
 
@@ -2522,6 +2587,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerate = With[{
     q2 = SCALE^2, (* renormalization/matching scale *)
     MS2 = msq2[3,3],
     gb = Yd[3,3],
+    gtau = Ye[3,3],
     Xb = xb,
     mQ3 = Sqrt[msq2[3,3]],
     mU3 = Sqrt[msu2[3,3]],
@@ -2533,6 +2599,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerate = With[{
     Xt = xt,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
     MA = mAInput,
@@ -2543,7 +2610,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerate = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
     ];
   g3^2*(ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb])^4*k^2*((-32*Xb)/Sqrt[MS2] + (16*Xb^2)/MS2 + (16*Xb^3)/(3*MS2^(3/2)) -
@@ -2562,6 +2629,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerateSquark = With[{
     q2 = SCALE^2, (* renormalization/matching scale *)
     MS2 = msq2[3,3],
     gb = Yd[3,3],
+    gtau = Ye[3,3],
     Xb = xb,      
     mQ3 = Sqrt[msq2[3,3]],
     mU3 = Sqrt[msu2[3,3]],
@@ -2575,6 +2643,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerateSquark = With[{
     Xt = xt,
     Xtildet = xtt,
     Xtildeb = xbb,
+    Xtildetau = xtaut,
     cosb = Cos[ArcTan[TanBeta]],
     sinb = Sin[ArcTan[TanBeta]],
     MA = mAInput,
@@ -2585,7 +2654,7 @@ lambda2LPhiHSSAlphaBAlphaSDegenerateSquark = With[{
           deltagbyL1 = - gb^2/cosb^2*k*(3/4*Log[Mu^2/Q2]+3/8*sinb^2*(2*Log[MA^2/Q2]-1)+TCF[6][mQ3/Mu]+1/2*TCF[6][mD3/Mu]);
           deltagbyL2 = - gt^2/sinb^2*k*(1/4*Log[Mu^2/Q2]+1/8*cosb^2*(2*Log[MA^2/Q2]-1)+sinb^2*(Log[MA^2/Q2]-1));
           deltagbyL3 = - gt^2/sinb^2*k*(1/2*TCF[6][mU3/Mu]+(Xt*TanBeta)/(2*Mu)*TCF[9][mQ3/Mu,mU3/Mu] );
-          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]);
+          deltagbyL4 = - 1/2*(-gt^2*Nc*k*Xtildet/6*TCF[5][xQU]-gb^2*Nc*k*Xtildeb/6*TCF[5][xQD]-gtau^2*k*Xtildetau/6*TCF[5][xLE]);
           (gb/(1-deltagsb-(deltagbyL1+deltagbyL2+deltagbyL3+deltagbyL4)))
       ];
 (-8*g3^2*ybMSSM[mQ3,mU3,mD3,M3,Mu,TanBeta,Xt,Xb]^4*k^2*(6*MS2^3*(3*g^2 - 2*g*MS2 + MS2^2 - 4*g^(3/2)*sgn*Xb)*

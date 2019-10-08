@@ -218,6 +218,7 @@ UseSMYukawa2Loop = True;
 UseYukawa3LoopQCD = True;
 UseYukawa4LoopQCD = True;
 UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 ExtraSLHAOutputBlocks = {
    {EFFHIGGSCOUPLINGS, NoScale,

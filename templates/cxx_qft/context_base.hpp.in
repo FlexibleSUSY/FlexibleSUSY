@@ -35,6 +35,7 @@
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
+
    struct context_base {
       @ModelName@_mass_eigenstates model; ///< The model object.
 

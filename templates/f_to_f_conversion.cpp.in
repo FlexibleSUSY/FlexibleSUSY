@@ -37,6 +37,8 @@
 
 #include "wrappers.hpp"
 
+@npf_headers@
+
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
@@ -44,6 +46,12 @@ using namespace @ModelName@_FFMassiveV_form_factors;
 
 namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams::fields;
+
+namespace @ModelName@_cxx_diagrams {
+namespace npointfunctions {
+@npf_definitions@
+} // namespace npointfunctions
+} // namespace @ModelName@_cxx_diagrams
 namespace @ModelName@_f_to_f_conversion {
 
 struct overlap_integrals {
@@ -55,7 +63,7 @@ struct overlap_integrals {
 };
 
 overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd& qedqcd) {
-   overlap_integrals res; 
+   overlap_integrals res;
 
    // get muon pole mass from input slha file
    const auto muon_pole_mass_5o2 = pow(qedqcd.displayMass(softsusy::mMuon), 5./2.);
@@ -85,7 +93,7 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
          return res;
       default:
          throw std::invalid_argument("Unknown nucleus");
-   } 
+   }
 }
 
 double get_capture_rate (const Nucleus N) {
@@ -113,14 +121,14 @@ std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {
 template <class V, class FormFactor>
 std::valarray<std::complex<double>> create_massive_penguin_amp(
       FormFactor V_exchange,
-      const @ModelName@_mass_eigenstates& model, 
+      const @ModelName@_mass_eigenstates& model,
       const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
 
-   const auto uVectorCurrent = 
+   const auto uVectorCurrent =
       vectorCurrent<typename Fu::lorentz_conjugate, Fu, typename V::lorentz_conjugate>(model);
-   const auto dVectorCurrent = 
+   const auto dVectorCurrent =
       vectorCurrent<typename Fd::lorentz_conjugate, Fd, typename V::lorentz_conjugate>(model);
 
    const auto mVsqr = pow(context.mass<V>({}), 2);

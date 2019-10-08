@@ -60,12 +60,13 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
 
                 "// get Fermi constant from Les Houches input file\n" <>
                 "const auto GF = qedqcd.displayFermiConstant();\n" <>
+                "constexpr bool discard_SM_contributions = false;\n" <>
 
                 "const auto photon_penguin = calculate_" <> CXXNameOfField[inFermion] <> "_" <>
                     CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[SARAH`Photon] <> "_form_factors (" <>
                     If[TreeMasses`GetDimension[inFermion] =!= 1, "generationIndex1, ", " "] <>
                     If[TreeMasses`GetDimension[outFermion] =!= 1, " generationIndex2, ", " "] <>
-                    "model);\n" <>
+                    "model, discard_SM_contributions);\n" <>
 
                 "\n// translate from the convention of Hisano, Moroi & Tobe to Kitano, Koike & Okada\n" <>
                 (* TODO: check the statement below *)
@@ -77,8 +78,8 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
 
                 (* TODO: remove *)
                 "std::cout << std::setprecision(15);\n" <>
-                "std::cout << \"A1 \" << photon_penguin[0] << ' ' << photon_penguin[1] << '\\n';\n" <>
-                "std::cout << \"A2 \" << photon_penguin[2] << ' ' << photon_penguin[3] << '\\n';\n" <>
+                (*"std::cout << \"A1 \" << photon_penguin[0] << ' ' << photon_penguin[1] << '\\n';\n" <>
+                "std::cout << \"A2 \" << photon_penguin[2] << ' ' << photon_penguin[3] << '\\n';\n" <>*)
 
                 "\n// ------ penguins ------\n" <>
                 "// 2 up and 1 down quark in proton (gp couplings)\n" <>
@@ -99,7 +100,7 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                 "auto gpLV = -sqrt(2.0)/GF * photon_penguin[0] * (2.*uEMVectorCurrent + dEMVectorCurrent);\n" <>
                 "auto gpRV = -sqrt(2.0)/GF * photon_penguin[1] * (2.*uEMVectorCurrent + dEMVectorCurrent);\n" <>
                 (* TODO: remove *)
-                "std::cout << \"A 4-fermion \" << -sqrt(2.0)/GF * photon_penguin[0] * uEMVectorCurrent << ' ' << -sqrt(2.0)/GF * photon_penguin[1] * uEMVectorCurrent << '\\n';\n" <>
+                (*"std::cout << \"A 4-fermion \" << -sqrt(2.0)/GF * photon_penguin[0] * uEMVectorCurrent << ' ' << -sqrt(2.0)/GF * photon_penguin[1] * uEMVectorCurrent << '\\n';\n" <>*)
                 "auto gnLV = -sqrt(2.0)/GF * photon_penguin[0] * (uEMVectorCurrent + 2.*dEMVectorCurrent);\n" <>
                 "auto gnRV = -sqrt(2.0)/GF * photon_penguin[1] * (uEMVectorCurrent + 2.*dEMVectorCurrent);\n" <>
 
@@ -117,7 +118,27 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                            "model, qedqcd);\n" <>
 
                         (* TODO" remove *)
-                        "std::cout << \"Z 4-fermion \" << VZ_penguin[0] / (-sqrt(2.0)/GF) * 16*Pi*Pi << ' ' << VZ_penguin[1]/ (-sqrt(2.0)/GF) * 16*Pi*Pi << '\\n';\n" <>
+                        (*"std::cout << \"Z 4-fermion \" << VZ_penguin[0] / (-sqrt(2.0)/GF) * 16*Pi*Pi << ' ' << VZ_penguin[1]/ (-sqrt(2.0)/GF) * 16*Pi*Pi << '\\n';\n" <>*)
+                        "std::cout << \"wkotlarski: gLVu \" << "<>CXXNameOfField[#]<>"_penguin[0] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
+                        "std::cout << \"wkotlarski: gRVu \" << "<>CXXNameOfField[#]<>"_penguin[1] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
+                        "std::cout << \"wkotlarski: gLVd \" << "<>CXXNameOfField[#]<>"_penguin[2] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
+                        "std::cout << \"wkotlarski: gRVd \" << "<>CXXNameOfField[#]<>"_penguin[3] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
+                        (*initialize my stuff*)
+                        "auto "<>FlexibleSUSY`FSModelName<>"_npf_up = "<>FlexibleSUSY`FSModelName<>
+                        "_cxx_diagrams::npointfunctions::zpinguins_u"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
+                        "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
+                        "auto "<>FlexibleSUSY`FSModelName<>"_npf_down = "<>FlexibleSUSY`FSModelName<>
+                        "_cxx_diagrams::npointfunctions::zpinguins_d"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
+                        "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
+                        (*print my stuff*)
+                        "std::cout << \"uukhas:     gLVu \" << ( "<>
+                        FlexibleSUSY`FSModelName<>"_npf_up.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(5) )/2. << \"\\n\";\n" <>
+                        "std::cout << \"uukhas:     gRVu \" << ( "<>
+                        FlexibleSUSY`FSModelName<>"_npf_up.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(7) )/2.<< \"\\n\";\n" <>
+                        "std::cout << \"uukhas:     gLVd \" << ( "<>
+                        FlexibleSUSY`FSModelName<>"_npf_down.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(5) )/2. << \"\\n\";\n" <>
+                        "std::cout << \"uukhas:     gRVd \" << ( "<>
+                        FlexibleSUSY`FSModelName<>"_npf_down.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(7) )/2. << \"\\n\";\n" <>
                         "gpLV += 2.*" <> CXXNameOfField[#] <> "_penguin[0] + "    <> CXXNameOfField[#] <> "_penguin[2];\n" <>
                         "gpRV += 2.*" <> CXXNameOfField[#] <> "_penguin[1] + "    <> CXXNameOfField[#] <> "_penguin[3];\n" <>
                         "gnLV += "    <> CXXNameOfField[#] <> "_penguin[0] + 2.*" <> CXXNameOfField[#] <> "_penguin[2];\n" <>
@@ -196,7 +217,7 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                  "return conversion_rate/capture_rate;\n"
             ] <>
             "}\n";
-    
+
         {prototype <> ";", definition}
     ];
 

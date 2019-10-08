@@ -7,7 +7,7 @@ settings = {
     ewsbLoopOrder -> 4,
     betaFunctionLoopOrder -> 5,
     thresholdCorrectionsLoopOrder -> 3,
-    thresholdCorrections -> 124111321
+    thresholdCorrections -> 124111421
 };
 
 smpars = {

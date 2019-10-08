@@ -177,7 +177,6 @@ controlling number in sym::tag.
 @note First check controlling sym::tag.
 @note hard-coded width of output colourless text is 70.
 @note It seems that function is not working for messages generated in subkernels
->>>>>>> organization/development
 if they are running inside expression.
 @note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
 of Private` variables in a quite weird way.
@@ -186,12 +185,20 @@ parses \\n symbol.
 @note Internal`HandlerBlock is not documented, this is why System`Dump` prefix
 is used for function arguments to avoid any unexpected behavior.";
 
+MakeUnknownInputDefinition::usage =
+"@brief Creates definition for a given symbol for a case when input is not defined
+explicitly, i.e. creates definition for the pattern symbol[args___].
+@param <Symbol> sym Symbol to make definition for.
+@returns None.
+@note UpValues for symbol[args___] are not cleared.";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 
 Begin["`Private`"];
 
@@ -336,7 +343,7 @@ AssertWithMessage[assertion_, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
 AssertOrQuit::errNotDefined =
-"Error message \"`1`\" is not defined it the code.";
+"Error message \"`1`\" is not defined in the code.";
 AssertOrQuit::errStrokes =
 "Even number of `.` symbols in sym::tag should be given in:
 \"`1`\"";
@@ -355,35 +362,42 @@ AssertOrQuit@@`1`.
 
 Read AssertOrQuit::usage for more information.";
 AssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   internalAssertOrQuit[assertion,MessageName[sym, tag],insertions] /;
+   internalAssertOrQuit[assertion,MessageName[sym,tag],insertions] /;
    internalOrQuitInputCheck[AssertOrQuit,MessageName[sym,tag],insertions];
 AssertOrQuit[x___] :=
    AssertOrQuit[False,AssertOrQuit::errInput,{x}];
-internalAssertOrQuit[
-   assertion_,
-   HoldPattern@MessageName[sym_, tag_],
-   insertions___
-] :=
-Module[
-   {
-      ctrlRed=If[!$Notebooks,"\033[1;31m",""],
-      ctrlBack=If[!$Notebooks,"\033[1;0m",""],
-      CutString=If[(!$Notebooks)&&MemberQ[$Packages,"TextFormatting`"],
-         TextFormatting`WrapLines[#,70,""]&,#&],
-      WriteOut,WriteColourless
-   },
-   If[assertion === True,Return@True];
-   WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
-   WriteColourless[string__] := WriteOut@CutString@StringJoin@string;
-   Utils`FSFancyLine[];
-   WriteOut[Context@sym,StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
-      ": ",ctrlRed,tag,ctrlBack,":\n"];
-   WriteColourless[#,"\n"]&/@StringSplit[ToString@StringForm[
-      StringReplace[MessageName[sym, tag],"\n"->"dummy_new_line"],insertions],
-      "dummy_new_line"];
-   WriteOut["Wolfram Language kernel session ",ctrlRed,"terminated",ctrlBack,".\n"];
-   Utils`FSFancyLine[];
-   Quit[1];
+If[!$Notebooks,
+   internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
+   Module[{RedString,WriteOut,MultilineToDummy,replacedMessage},
+      If[assertion === True,Return@True];
+
+      RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";
+      WriteOut[str__] := WriteString["stdout"~OutputStream~1,StringJoin@str];
+      MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
+      replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
+
+      Utils`FSFancyLine[];
+      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],": ",RedString@tag,":\n"];
+      WriteOut@StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"];
+      WriteOut["\nWolfram Language kernel session ",RedString@"terminated",".\n"];
+      Utils`FSFancyLine[];
+
+      Quit[1];
+   ];,
+   (* Else *)
+   internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
+   Module[{WriteColourless,MultilineToDummy,replacedMessage},
+      If[assertion === True,Return@True];
+
+      MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
+      replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
+
+      Print[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],": ",Style[tag,Red],":\n",
+         StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"],
+         "\nWolfram Language kernel session ","terminated"~Style~Red,"."];
+
+      Quit[1];
+   ];
 ];
 SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll,Locked,Protected}];
 
@@ -423,11 +437,11 @@ Module[
    ] :=
    (
       Utils`FSFancyLine[];
-      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"Private`"~~str__:>str],
+      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],
          ": ",ctrlRed,tag,ctrlBack,":\n"];
       WriteColourless[#,"\n"]&/@StringSplit[ToString@StringForm[
-         StringReplace[MessageName[sym, tag],"\n"->"dummy_new_line"],insertions],
-         "dummy_new_line"];
+         StringReplace[MessageName[sym, tag],"\n"->"dummy_n"],insertions],
+         "dummy_n"];
       WriteColourless[ToString@System`Dump`s,"::",System`Dump`t," ",
          ToString@StringForm[System`Dump`str,System`Dump`args]];
       WriteOut["\nWolfram Language kernel session ",ctrlRed,"terminated",ctrlBack,".\n"];
@@ -439,47 +453,63 @@ Module[
 SetAttributes[{EvaluateOrQuit,internalEvaluateOrQuit},{HoldAll,Locked,Protected}];
 
 internalOrQuitInputCheck[func_,message_,insertions___] :=
-Module[{nStrokes,control,checkedControl},
+Module[{nStrokes,controlSubstrings},
    internalAssertOrQuit[StringQ@message,
-      func::errNotDefined,
-      message];
+      func::errNotDefined,message];
    nStrokes = StringCount[message,"`"];
    internalAssertOrQuit[EvenQ@nStrokes,
-      func::errStrokes,
-      message];
-   control=DeleteDuplicates@StringCases[message,{
-      "`.`",
-      "`" ~~ DigitCharacter .. ~~ "`",
-      "`"~~___~~"`"}];
-   If[control==={},
-      True,
-      checkedControl=StringCases[message,{
-         "`.`" :> 0,
-         "`"~~num:DigitCharacter..~~"`" :> FromDigits@num,
-         "`"~~___~~"`" :> $Failed}];
-      internalAssertOrQuit[!Or@@FailureQ/@checkedControl,
-         func::errControl,
-         message];
-      internalAssertOrQuit[TrueQ[Max@checkedControl<=Length@{insertions}],
-         func::errInsertions,
-         {insertions},
-         Max@checkedControl,
-         message]
-   ]
+      func::errStrokes,message];
+
+   If[nStrokes===0,Return@True];
+
+   controlSubstrings=DeleteDuplicates@StringCases[message,{
+      "`.`":>0,(* Ok *)
+      "`"~~num:DigitCharacter..~~"`":>FromDigits@num,(* Ok *)
+      "`"~~___~~"`":>-1(* Something bad *)
+      }];
+   internalAssertOrQuit[FreeQ[controlSubstrings,-1],
+      func::errControl,message];
+   internalAssertOrQuit[TrueQ[Max@controlSubstrings<=Length@{insertions}],
+      func::errInsertions,{insertions},Max@checkedControl,message]
 ];
 SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
+
+MakeUnknownInputDefinition[sym_Symbol] :=
+Module[{usageString,info,parsedInfo,infoString},
+   (* Clean existing definitions if they exist for required pattern.. *)
+   Off[Unset::norep];
+   sym[args___] =.;
+   On[Unset::norep];
+   (* Maybe some useful definitions already exist*)
+   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+   info = MakeBoxes@Definition@sym;
+   If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
+      infoString="",
+      parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
+      parsedInfo = MapThread[parsedInfo[[##]]&,{Range@Length@#,First/@#}] &@ (Range@(First@#-1) &@ Position[#,"="|":="|"^="|"^:="] &/@ parsedInfo);
+      parsedInfo = DeleteCases[DeleteDuplicates@parsedInfo,{"Options",__}|{"Attributes",__}];
+      parsedInfo = Array[Join[{ToString@#,") "},parsedInfo[[#]]]&,Length@parsedInfo];
+      infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
+      infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
+   ];
+   sym::errUnknownInput = "`1``2`Call\n"<>ToString@sym<>"[`3`]\nis not supported.";
+   (* Define a new pattern. *)
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
+];
+MakeUnknownInputDefinition@MakeUnknownInputDefinition;
+SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
 		fileHandle = OpenRead[fileName, BinaryFormat -> True];
-		
+
 		While[(line = Read[fileHandle, String]) =!= EndOfFile,
 			AssertWithMessage[line =!= $Failed,
 				"Utils`ReadLinesInFile[]: Unable to read line from file '" <>
 				fileName <> "'"];
 			AppendTo[lines, line];
 			];
-		
+
     Close[fileHandle];
     lines
 	]
@@ -488,6 +518,18 @@ FSReIm[z_] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
+
+(* MathIndexToCPP *)
+
+MathIndexToCPP[i_Integer /; i>0] := i-1;
+
+MathIndexToCPP::wrongInt =
+"Cannot convert index of value \"`1`\". Index value cannot be smaller than \"1\".";
+MathIndexToCPP[i_Integer] := AssertOrQuit[False, MathIndexToCPP::wrongInt, StringJoin@@Riffle[ToString/@{i},", "]];
+
+MathIndexToCPP::nonIntInput =
+"Cannot convert a non integer index \"`1`\".";
+MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJoin@@Riffle[ToString/@{i},", "]];
 
 End[];
 

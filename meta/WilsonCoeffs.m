@@ -20,71 +20,119 @@
 
 *)
 
-BeginPackage["WilsonCoeffs`",{"Utils`"}];
+BeginPackage["WilsonCoeffs`",{"Utils`","NPointFunctions`"}];
 
-{InterfaceToMatching};
+{InterfaceToMatching,neglectBasisElements};
 
-Begin["`Private`"];
+Begin["`internal`"];
+`type`npf = NPointFunctions`internal`type`npf;
+getGenericSums = NPointFunctions`internal`getGenericSums;
+getSubexpressions = NPointFunctions`internal`getSubexpressions;
+getNames = NPointFunctions`internal`getNames;
+
+neglectBasisElements::usage= 
+"@brief Deletes specified basis elements with not aanymore used subexpressions.
+@param <npf> npf object to modify.
+@param <{Rule[_String,_]..}> operatorBasis list with
+{string name,fermion chain multiplication} pairs.
+@returns <npf> object";
+neglectBasisElements[obj:`type`npf, operatorBasis:{Rule[_String,_]..}]:=
+Module[
+   {
+      basis = Last /@ findFermionChains[obj.getSubexpressions[],operatorBasis],
+      objNew,positionsToDelete,
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(obj.getSubexpressions[].getNames[]),Infinity]&
+   },
+   If[basis === {},Return@obj];
+   objNew = ReplaceAll[obj,#->0 &/@ basis];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[obj.getSubexpressions[].getNames[],subsOnly@objNew[[2,1,1]]];
+   Delete[objNew,positionsToDelete]
+];
+SetAttributes[neglectBasisElements,{Locked,Protected}];
 
 InterfaceToMatching::usage=
-"@brief Calculates the matching conditions of the amplitude for a given basis
+"@brief Transforms GenericSum accordig to a given basis. 
 @param NPF NPF object.
-@param operatorBasis list of lists with {string name,fermion chain multiplication}
-pairs.
-@returns Corresponding generic Sum of Wilson coefficients.
+@param operatorBasis list with {string name,fermion chain multiplication} pairs.
+@returns Corresponding GenericSum which matches to a given basis.
 @note the name convention of the chiral basis follows the FormCalc convention.";
- 
-InterfaceToMatching[NPF_List, operatorBasis_List]:=
-  Module[{findBasis, coefficientsWilson},
-    Utils`AssertWithMessage[NPF =!= {} && operatorBasis =!= {},
-        "WilsonCoeffs`InterfaceToMatching[]: Input can not be an empty list."];
-    findBasis = FindFermionChains[NPF[[2, 2]], operatorBasis];
-    coefficientsWilson = RemoveFermionChains[matchingConditions[NPF, findBasis[[All, 2]]]];
+InterfaceToMatching::errUnknownInput =
+"Correct input has the folliwing form:
+InterfaceToMatching@@{ <npf object>, {<string -> basis expression>..} }
+and not
+InterfaceToMatching@@`1`.";
+InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
+Module[{basis, coefficientsWilson},
+   basis = findFermionChains[obj.getSubexpressions[], operatorBasis];
+   coefficientsWilson = removeFermionChains[createNewNPF[obj, basis]];
+   coefficientsWilson
+];
+InterfaceToMatching[x___] :=
+Utils`AssertOrQuit[False,InterfaceToMatching::errUnknownInput,{x}];
 
-    coefficientsWilson
-  ];
+findFermionChains::usage =
+"@brief Searches the FermionChains in the abbreviations rules.
+@param subs substitution rules of the form {Rule[_,_]..}.
+@param chiralBasis  name basis element rules of the form {Rule[_String,_]..}.
+@returns List of <string chain name>->FormCalc`Mat[F#] pairs.";
+findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
+Module[
+   {
+      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m",Style["Warning",Yellow]],
+      (*@note there is F# <-> chain correspondence*)
+      basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]],
+      i
+   },
+   Table[
+      If[basisPos[[i]] === {},
+         Print[warning,": " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
+         chiralBasis[[i,1]]->FormCalc`Mat[],
+         (*else*)
+         chiralBasis[[i,1]]->FormCalc`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
+      ],
+      {i,Length@basisPos}]
+];
 
-ExtractCoeffs[genericSum_, operator_List] :=
-   ReplacePart[
-     genericSum, {1} -> (Coefficient[genericSum[[1]], #]& /@ operator)
-   ];
+createNewNPF::usage =
+"@brief Extracts the coefficients for a given basis and NPF object.";
+createNewNPF[obj:`type`npf,
+   chiralBasis:{Rule[_String,_FormCalc`Mat]..}
+] :=
+Module[
+   {
+      newSums,
+      newNPF=obj
+   },
+   newSums = extractCoeffs[#,chiralBasis]& /@ (obj.getGenericSums[]);
+   newNPF[[2, 1, 1]] = newSums;
+   newNPF
+];
 
-(**
-* \brief Searches the FermionChains in the abbreviations rules
-**)
-FindFermionChains[npointExpression_List, chiralBasis_List] :=
-  Module[{basisPos, rulePos},
-    Utils`AssertWithMessage[
-      And @@ (MemberQ[npointExpression, #, 2]& /@ chiralBasis[[All, 2]]),
-        "Error: provided basis does not match output of FormCalc"];
+extractCoeffs::errRemainingExpression =
+"Probably missing basis element for fermionic chain. During calculation expression
+`1`
+was not taken into account appropriately.";
+extractCoeffs[
+   NPointFunctions`GenericSum[expr_,sumFields:{__}],
+   operators:{Rule[_String,_FormCalc`Mat]..}
+] :=
+Module[
+   {
+      coefficients = Coefficient[expr, #]& /@ operators[[All,2]],
+      check
+   },
+   check = Expand[expr-coefficients.(operators[[All,2]])];
+   If[check=!=0,Utils`AssertOrQuit[False,extractCoeffs::errRemainingExpression,FullForm@check]];
+   NPointFunctions`GenericSum[coefficients,sumFields]
+];
 
-    basisPos = Flatten[Position[npointExpression, #]& /@ chiralBasis[[All, 2]], 1];
-    basisPos[[All, 2]] = basisPos[[All, 2]] - 1;
-    (*TODO: Is FormCalc`Mat always used in Dirac chains?*)
-    rulePos = FormCalc`Mat[Extract[npointExpression, #]]& /@ basisPos;
-
-    Transpose[{chiralBasis[[All, 1]], rulePos}]
-  ];
-
-(**
-* \brief Removes FermionChains from the abbreviations rules.
-**)
-RemoveFermionChains[npointExpression_List] :=
-  Module[{pos},
-    pos = Take[#, 3]& /@ Position[npointExpression, FormCalc`DiracChain];
-    Delete[npointExpression, pos]
-  ];
-
-(**
-* \brief Extracts the coefficients for a given basis and amplitude from NPointFunctions.
-**)
-matchingConditions[npointExpression_List, chiralBasis_List] :=
-  Module[{Coeffs, mappedNPoint=npointExpression},
-    Coeffs = ExtractCoeffs[#, chiralBasis]& /@ npointExpression[[2, 1, 1]];
-    mappedNPoint[[2, 1, 1]] = Coeffs;
-
-    mappedNPoint
-  ];
+removeFermionChains::usage = 
+"@brief Removes DiracChains from the abbreviations rules.";
+removeFermionChains[npointExpression:`type`npf] :=
+Module[{pos},
+   pos = Take[#, 3]& /@ Position[npointExpression, FormCalc`DiracChain];
+   Delete[npointExpression, pos]
+];
 
 End[];
 EndPackage[];

@@ -12,6 +12,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/ckm.cpp \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
+		$(DIR)/loop_libraries/collier.cpp \
+		$(DIR)/loop_libraries/loop_tools.cpp \
 		$(DIR)/database.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/dilogc.f \
@@ -47,6 +49,9 @@ LIBFLEXI_HDR := \
 		$(DIR)/bvp_solver_problems.hpp \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
+		$(DIR)/loop_libraries/loop_library_interface.hpp \
+		$(DIR)/loop_libraries/collier.hpp \
+		$(DIR)/loop_libraries/loop_tools.hpp \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
 		$(DIR)/compound_constraint.hpp \

@@ -49,7 +49,7 @@ Selfenergy = NPointFunctions`NPointFunction[
    {SARAH`DownQuark}, {SARAH`DownQuark},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`ExcludedTopologies -> NPointFunctions`OneParticleReducible];
+   NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
 
 nPointFunctionHeaders = CreateCXXHeaders[
    UseWilsonCoeffs -> True,
@@ -58,9 +58,9 @@ nPointFunctionHeaders = CreateCXXHeaders[
 ChiralBasis =
    {
       "value_right"->
-      FormCalc`DiracChain[FormCalc`Spinor[Mom[1], 0, -1], 6, FormCalc`Spinor[Mom[2], 0, -1]],
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
       "value_left"->
-      FormCalc`DiracChain[FormCalc`Spinor[Mom[1], 0, -1], 7, FormCalc`Spinor[Mom[2], 0, -1]]
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
    };
 
 (*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)
@@ -88,9 +88,13 @@ newVertices = Complement[
    NPointFunctions`VerticesForNPointFunction@Selfenergy,
    existedVertices];
 
-verticesCode = CXXDiagrams`CreateVertices[
+If[newVertices==={},
+   verticesCode = {"",""},
+   (* else *)
+   verticesCode = CXXDiagrams`CreateVertices[
    newVertices,
-   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]];
+   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]]
+];
 
 (*CODE REPLACEMENTS************************************************************)
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
@@ -107,5 +111,5 @@ code = StringReplace[templateCode,
 fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp"};
 WriteString[fileHandle, code];
 Close[fileHandle];
-WriteString[OutputStream["stdout",1],"\033[1;34mtest_SM_matching_selfenergy_Fd.meta finished\033[1;0m\n"];
+WriteString[OutputStream["stdout",1],"\033[1;34mtest_MSSM_matching_selfenergy_Fd.meta finished\033[1;0m\n"];
 Utils`FSFancyLine[];

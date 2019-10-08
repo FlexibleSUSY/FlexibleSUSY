@@ -104,10 +104,7 @@ models_comma=$(echo $models | tr ' ' ',')
 
 ./configure \
     --with-models=${models_comma} \
-    --with-math-cmd=${MATH} \
-    --enable-himalaya \
-    --with-himalaya-incdir=$HIMALAYA_INC \
-    --with-himalaya-libdir=$HIMALAYA_LIB
+    --with-math-cmd=${MATH}
 
 if test "x$?" != "x0"; then
     exit 1

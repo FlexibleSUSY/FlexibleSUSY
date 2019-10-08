@@ -77,13 +77,17 @@ LowScaleInput = Join[{
    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}},
    Flatten[Table[{WOp[i,j], mv[[i,j]] / (vu/Sqrt[2])^2}, {i,3}, {j,3}], 1]];
 
-InitialGuessAtLowScale = Join[{
-   {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
-   {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+InitialGuessAtLowScale = With[{
+   vdGuess = LowEnergyConstant[vev] Cos[ArcTan[TanBeta]],
+   vuGuess = LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+Join[{
+   {vd, vdGuess},
+   {vu, vuGuess},
    {Yu, Automatic},
    {Yd, Automatic},
    {Ye, Automatic}},
-   Flatten[Table[{WOp[i,j], mv[[i,j]] / (vu/Sqrt[2])^2}, {i,3}, {j,3}], 1]];
+   Flatten[Table[{WOp[i,j], mv[[i,j]] / (vuGuess/Sqrt[2])^2}, {i,3}, {j,3}], 1]]
+];
 
 InitialGuessAtHighScale = {
    {\[Mu]   , 1.0},
