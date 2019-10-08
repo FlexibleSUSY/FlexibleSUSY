@@ -24,8 +24,11 @@ BeginPackage["WilsonCoeffs`",{"Utils`","NPointFunctions`"}];
 
 {InterfaceToMatching,neglectBasisElements};
 
-Begin["`Private`"];
-NPFPattern = NPointFunctions`internal`NPFPattern;
+Begin["`internal`"];
+`type`npf = NPointFunctions`internal`type`npf;
+getGenericSums = NPointFunctions`internal`getGenericSums;
+getSubexpressions = NPointFunctions`internal`getSubexpressions;
+getNames = NPointFunctions`internal`getNames;
 
 neglectBasisElements::usage= 
 "@brief Deletes specified basis elements with not aanymore used subexpressions.
@@ -33,17 +36,17 @@ neglectBasisElements::usage=
 @param <{Rule[_String,_]..}> operatorBasis list with
 {string name,fermion chain multiplication} pairs.
 @returns <npf> object";
-neglectBasisElements[npf:NPFPattern["Subs"->subs_], operatorBasis:{Rule[_String,_]..}]:=
+neglectBasisElements[obj:`type`npf, operatorBasis:{Rule[_String,_]..}]:=
 Module[
    {
-      basis = Last /@ subs~findFermionChains~operatorBasis,
-      npfNew,positionsToDelete,
-      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(First/@subs),Infinity]&
+      basis = Last /@ findFermionChains[obj.getSubexpressions[],operatorBasis],
+      objNew,positionsToDelete,
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(obj.getSubexpressions[].getNames[]),Infinity]&
    },
-   If[basis === {},Return@npf];
-   npfNew = ReplaceAll[npf,#->0 &/@ basis];
-   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[npfNew,#] &/@ Complement[First/@subs,subsOnly@npfNew[[2,1,1]]];
-   Delete[npfNew,positionsToDelete]
+   If[basis === {},Return@obj];
+   objNew = ReplaceAll[obj,#->0 &/@ basis];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[obj.getSubexpressions[].getNames[],subsOnly@objNew[[2,1,1]]];
+   Delete[objNew,positionsToDelete]
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];
 
@@ -58,10 +61,10 @@ InterfaceToMatching::errUnknownInput =
 InterfaceToMatching@@{ <npf object>, {<string -> basis expression>..} }
 and not
 InterfaceToMatching@@`1`.";
-InterfaceToMatching[NPF:NPFPattern["Subs"->subs_], operatorBasis:{Rule[_String,_]..}] :=
+InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis, coefficientsWilson},
-   basis = findFermionChains[subs, operatorBasis];
-   coefficientsWilson = removeFermionChains[createNewNPF[NPF, basis]];
+   basis = findFermionChains[obj.getSubexpressions[], operatorBasis];
+   coefficientsWilson = removeFermionChains[createNewNPF[obj, basis]];
    coefficientsWilson
 ];
 InterfaceToMatching[x___] :=
@@ -92,15 +95,15 @@ Module[
 
 createNewNPF::usage =
 "@brief Extracts the coefficients for a given basis and NPF object.";
-createNewNPF[npf:NPFPattern["Sums"->sums_],
+createNewNPF[obj:`type`npf,
    chiralBasis:{Rule[_String,_FormCalc`Mat]..}
 ] :=
 Module[
    {
       newSums,
-      newNPF=npf
+      newNPF=obj
    },
-   newSums = extractCoeffs[#,chiralBasis]& /@ sums;
+   newSums = extractCoeffs[#,chiralBasis]& /@ (obj.getGenericSums[]);
    newNPF[[2, 1, 1]] = newSums;
    newNPF
 ];
@@ -125,7 +128,7 @@ Module[
 
 removeFermionChains::usage = 
 "@brief Removes DiracChains from the abbreviations rules.";
-removeFermionChains[npointExpression:NPFPattern[]] :=
+removeFermionChains[npointExpression:`type`npf] :=
 Module[{pos},
    pos = Take[#, 3]& /@ Position[npointExpression, FormCalc`DiracChain];
    Delete[npointExpression, pos]

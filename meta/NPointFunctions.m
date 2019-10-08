@@ -163,7 +163,7 @@ Begin["`internal`"];
 $ContextPath = {"NPointFunctions`","System`"};
 
 (* ============================== Type definitions ========================== *)
-`type`fields = {{__},{__}};
+`type`process = {{__},{__}};
 `type`subexpressions = {Rule[_Symbol,_]...};
 `type`genericSum = GenericSum[_,{{_,_}..}] | GenericSum[{__},{{_,_}..}]; (* @todo Remove the second one *)
 `type`classFields = {{__}..};
@@ -171,7 +171,7 @@ $ContextPath = {"NPointFunctions`","System`"};
 `type`classColorFactors = {__};
 `type`npf =
    {
-   `type`fields,
+   `type`process,
    {
       {
          {`type`genericSum..},
@@ -216,20 +216,60 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
 makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
 makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
+getProcess /: Dot[obj:`type`npf,getProcess[]] := obj[[1]];
+getProcess // makeDefaultDefinitions;
+getProcess ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getExternalMomenta /: Dot[obj:`type`npf,getExternalMomenta[]] :=
+DeleteDuplicates@Cases[{obj.getGenericSums[],obj.getSubexpressions[]},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
+getExternalMomenta // makeDefaultDefinitions;
+getExternalMomenta ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getExternalIndices /: Dot[obj:`type`npf,getExternalIndices[]] :=
+DeleteDuplicates@Flatten@Level[obj.getProcess[],{4,5}];
+getExternalIndices // makeDefaultDefinitions;
+getExternalIndices ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getGenericSums /: Dot[obj:`type`npf,getGenericSums[]] := obj[[2,1,1]];
+getGenericSums // makeDefaultDefinitions;
+getGenericSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getClassFields /: Dot[obj:`type`npf,getClassFields[]] := obj[[2,1,2]];
+getClassFields // makeDefaultDefinitions;
+getClassFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getClassCombinatoricalFactors /: Dot[obj:`type`npf,getClassCombinatoricalFactors[]] := obj[[2,1,3]];
+getClassCombinatoricalFactors // makeDefaultDefinitions;
+getClassCombinatoricalFactors ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getClassColorFactors /: Dot[obj:`type`npf,getClassColorFactors[]] := obj[[2,1,4]];
+getClassColorFactors // makeDefaultDefinitions;
+getClassColorFactors ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
 getSubexpressions /: Dot[obj:`type`npf,getSubexpressions[]] := obj[[2,2]];
 getSubexpressions // makeDefaultDefinitions;
 getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-getSums /: Dot[obj:`type`npf,getSums[]] := obj[[2,1,1]];
-getSums // makeDefaultDefinitions;
-getSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getNames /: Dot[obj:`type`subexpressions,getNames[]] := First/@obj;
+getNames // makeDefaultDefinitions;
+getNames ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getGenericFields /: Dot[obj:`type`genericSum,getGenericFields[]] := First/@Last[obj];
+getGenericFields /: Dot[objs:{`type`genericSum..},getGenericFields[]] := (First/@Last@#)&/@objs;
+getGenericFields // makeDefaultDefinitions;
+getGenericFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getClassFieldRules /: Dot[obj:`type`npf,getClassFieldRules[]] :=
+MapThread[Function[fields,MapThread[Rule,{#1,fields}]]/@#2&,{obj.getGenericSums[].getGenericFields[],obj.getClassFields[]}];
+getClassFieldRules // makeDefaultDefinitions;
+getClassFieldRules ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 setSubexpressions /: Dot[obj:`type`npf,setSubexpressions[newsubs:`type`subexpressions]] := ReplacePart[obj,{2,2}->newsubs];
-setSubexpressions // makeDefaultDefinitionss;
+setSubexpressions // makeDefaultDefinitions;
 setSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 applySubexpressions /: Dot[obj:`type`npf,applySubexpressions[]] :=
-ReplacePart[obj,{2,1,1}->ReplaceRepeated[obj.getSums[],obj.getSubexpressions[]]].setSubexpressions[{}];
+ReplacePart[obj,{2,1,1}->ReplaceRepeated[obj.getGenericSums[],obj.getSubexpressions[]]].setSubexpressions[{}];
 applySubexpressions // makeDefaultDefinitions;
 applySubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -355,79 +395,6 @@ Module[
 CreateCXXFToFConversionInNucleus // Utils`MakeUnknownInputDefinition;
 CreateCXXFToFConversionInNucleus ~ SetAttributes ~ {Locked, Protected};
 
-Options[NPFPattern] = {
-   "Fields" -> _,
-   "Sums" -> _,
-   "ClFields" -> _,
-   "CombFac" -> _,
-   "ColFac" -> _,
-   "Subs" -> _};
-NPFPattern::usage =
-Module[{Formatted},
-   Formatted[num_Integer]:=
-      StringJoin["\"",Part[#,1],"\" (def. ",ToString@Part[#,2],") "]&@
-      Part[Options@NPFPattern,num];
-   "@brief Is used to realize pattern check for NPointFunction object in
-   other functions. Provides a nice way to pick required part of this object.
-   Designed in a way which allows Mathematica to highlight the code correctly.
-   @option "<>Formatted@1<>"allows to pick in and out fields
-   @option "<>Formatted@2<>"allows to pick GenericSums
-   @option "<>Formatted@3<>"allows to pick list of class replacements
-   @option "<>Formatted@4<>"allows to pick list of class combinatorical factors
-   @option "<>Formatted@5<>"allows to pick list of class colour factors
-   @option "<>Formatted@6<>"allows to pick abbreviations
-   @note any option should have form symbolName_ or Blank[]
-   @returns Pattern where option specify the stuff to pick in this calculation."
-];
-NPFPattern::errUnknownOptions = 
-"Unknown option(s):
-`1`.
-
-Currently supported options are:
-`2`.";
-NPFPattern::errWrongOptionValue =
-"Any option should have form symbolName_ or Blank[] and not
-`1`";
-NPFPattern[opts:OptionsPattern[]] :=
-Module[{names=Part[Options@NPFPattern,All,1],Convert},
-   Convert[num_] := If[OptionValue@Part[names,num] === _,
-      "",
-      StringDrop[ToString@OptionValue@Part[names,num],-1] <> ":"];
-   ToExpression[StringJoin[
-   "{",
-      Convert@1 , "{{__},{__}},",
-      "{",
-         "{",
-            Convert@2 , "{GenericSum[_,{__}]..}," ,
-            Convert@3,"{{{__}..}..}," ,
-            Convert@4 , "{{__Integer}..}," ,
-            Convert@5 , "{{__}..}" ,
-         "}," ,
-         Convert@6 , "{Rule[_,_]...}" ,
-      "}" ,
-   "}"]]
-] /; 
-Module[
-   {
-      optionNames=Options[NPFPattern][[All,1]],
-      unknownOptions,
-      currentOptionValues,
-      ConvertValue,CheckValue
-   },
-   unknownOptions = FilterRules[{opts},Except@optionNames];
-   Utils`AssertOrQuit[unknownOptions === {},NPFPattern::errUnknownOptions,
-      unknownOptions,"\""<>#<>"\""&/@optionNames];
-   currentOptionValues = OptionValue[NPFPattern,#]&/@optionNames;
-   ConvertValue = StringCases[ToString@#,x___~~"_"~~EndOfString:>x]&;
-   CheckValue[{str_String}] := Symbol===Head@ToExpression@str;
-   CheckValue[___] := False;
-   Utils`AssertOrQuit[
-      CheckValue@ConvertValue@#,
-      NPFPattern::errWrongOptionValue,#]&/@currentOptionValues;
-   True
-];
-Utils`MakeUnknownInputDefinition@NPFPattern;
-
 Options[NPointFunction]={
    LoopLevel -> 1,
    Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
@@ -500,7 +467,11 @@ NPointFunction::errInputFields=                                                 
 NPointFunction::errCalc=
 "FeynArts+FormCalc calculations failed";
 NPointFunction::errUnknownOptions=
-   NPFPattern::errUnknownOptions;
+"Unknown option(s):
+`1`.
+
+Currently supported options are:
+`2`.";
 NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
 Module[
    {
@@ -626,12 +597,12 @@ n-point correlation function.
 @param nPointFunction the given n-point correlation function
 @returns a list of all vertices needed to calculate a given 
 n-point correlation function.temp";
-VerticesForNPointFunction[obj:NPFPattern[
-   "Sums"->genSums_,"Subs"->substitutions_]
-] :=
+VerticesForNPointFunction[obj:`type`npf] :=
 Module[
    {
-      classRules = GetClassRules@obj, 
+      genSums = obj.getGenericSums[],
+      substitutions = obj.getSubexpressions[],
+      classRules = obj.getClassFieldRules[], 
       positionsSubsWithVert =
          DeleteDuplicates[#[[1]] &/@ Position[substitutions, SARAH`Cp[__]]], 
       rulesWithVertices,vertsGen,GetVertex,
@@ -644,15 +615,6 @@ Module[
    DeleteDuplicates[StripIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
 Utils`MakeUnknownInputDefinition@VerticesForNPointFunction;
-
-GetClassRules::usage=
-"@brief Gives GenericField->SARAHField rules for given NPF object.
-@param NPF object.
-@returns List of GenericField->SARAHField rules for given NPF object";
-GetClassRules[NPFPattern["Sums"->genSums_,"ClFields"->classFields_]] :=
-MapThread[Function[r,MapThread[Rule,{#1,r}]]/@#2&,{(First/@Last@#)&/@genSums,classFields}];
-Utils`MakeUnknownInputDefinition@GetClassRules;
-SetAttributes[GetClassRules,{Protected,Locked}];
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -877,7 +839,7 @@ colour/combinatoric factors and field substitution rules). This work is done by
 this function.
 @param npfObject NPF object to clean.
 @returns cleaned from empty GenericSums npfObject.";
-RemoveEmptyGenSums[npfObject:NPFPattern[]]:=npfObject;
+RemoveEmptyGenSums[npfObject:`type`npf]:=npfObject;
 RemoveEmptyGenSums[
    {fields:{{__},{__}},
       {
@@ -971,9 +933,6 @@ correllation function. The result of applying such a projection must be a scalar
 loop function libraries.
 @returns a list of the form `{prototypes, definitions}` containing
 the corresponding c++ code.";
-CreateCXXFunctions::errNPF=
-"NPF should be NPF object.
-@note GenericSum should have non-zero first argument";
 CreateCXXFunctions::errname=
 "name should be string for c++ function name.";
 CreateCXXFunctions::errcolourProjector=
@@ -990,7 +949,7 @@ CreateCXXFunctions::errBasisNoNPF=
 CreateCXXFunctions::errNoMatch=
 "Length of basis and the given NPF one does not match."
 CreateCXXFunctions[
-   NPF_,
+   NPF:`type`npf,
    name_,
    colourProjector_,
    opts:OptionsPattern[]
@@ -1018,10 +977,8 @@ Module[
 ] /; Module[
    {
       optionNames = Part[Options@CreateCXXFunctions,All,1],
-      TakeSums
+      sums = First/@(NPF.getGenericSums[])
    },
-   TakeSums[NPFPattern["Sums"->NPFsums_]] := First/@NPFsums; 
-   Utils`AssertOrQuit[MatchQ[#,NPFPattern[]],CreateCXXFunctions::errNPF,#]&@NPF;
    Utils`AssertOrQuit[MatchQ[#,_?StringQ],CreateCXXFunctions::errname,#]&@name;
    Utils`AssertOrQuit[MatchQ[#,Identity|SARAH`Delta],CreateCXXFunctions::errcolourProjector,#]&@colourProjector;
    Utils`AssertOrQuit[
@@ -1030,9 +987,9 @@ Module[
       FilterRules[{opts},Except@optionNames],
       optionNames];
    If[OptionValue@WilsonBasis === {},
-      Utils`AssertOrQuit[And@@(Head@#=!=List&/@TakeSums@NPF),CreateCXXFunctions::errNPFNoBasis],
-      Utils`AssertOrQuit[And@@(Head@#===List&/@TakeSums@NPF),CreateCXXFunctions::errBasisNoNPF];
-      Utils`AssertOrQuit[Part[Length/@TakeSums@NPF,1]===Length@OptionValue@WilsonBasis,CreateCXXFunctions::errNoMatch];
+      Utils`AssertOrQuit[And@@(Head@#=!=List&/@sums),CreateCXXFunctions::errNPFNoBasis],
+      Utils`AssertOrQuit[And@@(Head@#===List&/@sums),CreateCXXFunctions::errBasisNoNPF];
+      Utils`AssertOrQuit[Part[Length/@sums,1]===Length@OptionValue@WilsonBasis,CreateCXXFunctions::errNoMatch];
       ];
    Utils`AssertOrQuit[
       MemberQ[{"LoopTools","FlexibleSUSY","GenericLibrary"}, OptionValue@LoopFunctions],
@@ -1120,14 +1077,14 @@ is \"def\".
 @param control String that sets up the type of argument string
 @return the c++ arguments that the c++ version of the given n-point 
 correlation function shall take.";
-CXXArgStringNPF[nPointFunction:NPFPattern[],control_String:""] :=
+CXXArgStringNPF[nPointFunction:`type`npf,control_String:""] :=
 Module[
    {
       str = If[control === "def",
          "const `1` &model, const std::array<int,`2`> &indices, const std::array<Eigen::Vector4d,`3`> &momenta = { `4` }",
          "const `1` &model, const std::array<int,`2`> &indices, const std::array<Eigen::Vector4d,`3`> &momenta"],
-      numInd = Length@ExternalIndicesNPF@nPointFunction,
-      numMom = Length@ExternalMomentaNPF@nPointFunction,
+      numInd = Length[nPointFunction.getExternalIndices[]],
+      numMom = Length[nPointFunction.getExternalMomenta[]],
       eigenType = FlexibleSUSY`FSModelName<>"_mass_eigenstates",
       momDef
    },
@@ -1136,28 +1093,11 @@ Module[
 ];
 Utils`MakeUnknownInputDefinition@CXXArgStringNPF;
 
-ExternalIndicesNPF::usage=
-"@brief Return a list of open field indices for a given NPointFunction object.
-@param nPointFunction NPointFunction object.
-@returns a list of the open field indices for a given NPointFunction object.";
-ExternalIndicesNPF[NPFPattern["Fields"->fields_]] :=
-   DeleteDuplicates@Flatten@Level[fields,{4,5}];
-Utils`MakeUnknownInputDefinition@ExternalIndicesNPF;
-
-ExternalMomentaNPF::usage=
-"@brief Return a list of external momenta for a given NPointFunction object.
-@param nPointFunction NPointFunction object.
-@returns a list of the open field indices for a given NPointFunction object.";
-ExternalMomentaNPF[NPFPattern["Sums"->sums_,"Subs"->subs_]] :=
-   DeleteDuplicates@
-      Cases[{sums,subs},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
-Utils`MakeUnknownInputDefinition@ExternalMomentaNPF;
-
 CXXBodyNPF::usage=
 "@brief Rturns the c++ code for the main master-function.
 @param <n> NPointFunction object
 @returns The c++ code for the main master-function.";
-CXXBodyNPF[nPointFunction:NPFPattern[]] :=
+CXXBodyNPF[nPointFunction:`type`npf] :=
 StringTemplate["   `1` helper{ model, indices, momenta };\n   return helper.calculate();"][
    CXXClassNameNPF@nPointFunction];
 Utils`MakeUnknownInputDefinition@CXXBodyNPF;
@@ -1168,8 +1108,8 @@ version of a given n-point correlation function.
 @param NPointFunction object
 @returns the c++ name for the helper class of the c++
 version of a given n-point correlation function.";
-CXXClassNameNPF[NPFPattern["Fields"->fields_],_String:""] :=
-Module[{fieldNames = Vertices`StripFieldIndices/@Join@@fields},
+CXXClassNameNPF[obj:`type`npf,_String:""] :=
+Module[{fieldNames = Vertices`StripFieldIndices/@Join@@(obj.getProcess[])},
    "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}]
 ];
 Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
@@ -1183,19 +1123,19 @@ given n-point correlation function
 @returns the c++ code for the helper class of the c++ version of a given
 n-point correlation function.";
 CXXClassForNPF[
-   nPointFunction:NPFPattern[
-      "Sums"->genSums_,
-      "Subs"->subexpressions_],
+   nPointFunction:`type`npf,
    projCol_,
    loopLibrary_String,
    wilsonBasis:{Rule[_String,_]...}] :=
 Module[
    {
-      extIndices = ExternalIndicesNPF@nPointFunction,
-      numberOfMomenta = Length@ExternalMomentaNPF@nPointFunction,
+      genSums = nPointFunction.getGenericSums[],
+      subexpressions = nPointFunction.getSubexpressions[],
+      extIndices = nPointFunction.getExternalIndices[],
+      numberOfMomenta = Length[nPointFunction.getExternalMomenta[]],
       cxxCorrelationContext,
-      genFields = DeleteDuplicates[Flatten@GetClassRules@nPointFunction /. Rule[x_,_] :> x],
-      genSumNames = Array["genericSum"<>ToString@#&,Length@genSums],
+      genFields = DeleteDuplicates[Flatten[nPointFunction.getClassFieldRules[]] /. Rule[x_,_] :> x],
+      genSumNames,
       preCXXRules,
       code = "
       class @ClassName@ : public @Context@ {
@@ -1226,7 +1166,7 @@ Module[
          @CalculateFunction@
       }; // End of @ClassName@"
    },
-
+   genSumNames = Array["genericSum"<>ToString@#&,Length@genSums];
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
    cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
@@ -1408,9 +1348,9 @@ calling ``Parameters`ExpressionToString[]`` for the c++ translation.
 @param ind (def. \"\") string which is responsible for an indent of code.
 @returns the c++ code encoding a given set of subexpressions.";
 CXXCodeForSubexpressions[
-   subexpressions:{},
-   preCXXRules:{{(_Rule|_RuleDelayed)...}...},
-   ind_String:""] := "// There is no subexpressions";
+   {},
+   {{(_Rule|_RuleDelayed)...}...},
+   _String:""] := "// There is no subexpressions";
 CXXCodeForSubexpressions[
    subexpressions:{__Rule},
    preCXXRules:{{(_Rule|_RuleDelayed)...}...},
@@ -1579,11 +1519,7 @@ translation.
 CXXGenericSum::errColours=
 "Colour factor is not a number after projection: `1`";
 CXXGenericSum[
-   NPFPattern["Sums"->genericSums_,
-              "CombFac"->combinatoricalFactors_,
-              "ClFields"->classFields_,
-              "ColFac"->colourFactors_,
-              "Subs"->subexpressions_],
+   obj:`type`npf,
    preCXXRules_List,
    colourProjector_,
    genSumNames:{__String},
@@ -1593,12 +1529,12 @@ CXXGenericSum[
 ] :=
 Module[{},
    StringRiffle[MapThread[
-      CXXGenericSum[##,subexpressions,preCXXRules,loopLibrary,basis]&,
+      CXXGenericSum[##,obj.getSubexpressions[],preCXXRules,loopLibrary,basis]&,
          {
-            genericSums,
-            classFields,
-            combinatoricalFactors,
-            ExtractColourFactor[colourFactors,colourProjector],
+            obj.getGenericSums[],
+            obj.getClassFields[],
+            obj.getClassCombinatoricalFactors[],
+            ExtractColourFactor[obj.getClassColorFactors[],colourProjector],
             genSumNames
          }],
       "\n\n"]~StringReplace~("\n"->"\n"<>ind)
@@ -2167,7 +2103,7 @@ SetAttributes[deletePrintFromSubkernel,Protected];
 
 SetAttributes[
    {
-   NPFPattern,NPointFunction,
+   NPointFunction,
    GetSARAHModelName,
    GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
    LaunchSubkernelFor,
@@ -2178,7 +2114,7 @@ SetAttributes[
    CreateCXXHeaders,
    CreateCXXFunctions,
    getLoopFlexibleSUSYRules,
-   CXXArgStringNPF,ExternalIndicesNPF,ExternalMomentaNPF,
+   CXXArgStringNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
    ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,*)CXXFieldName,(*
    IsGenericField*)
