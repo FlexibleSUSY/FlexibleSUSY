@@ -158,13 +158,34 @@ SetAttributes[
    }, 
    {Protected, Locked}];
 
-BeginNamespace = (BeginPackage@#;Off[General::shdw];)&;
-EndNamespace = (On[General::shdw];EndPackage[];$ContextPath = Rest@$ContextPath;)&;
+NPointFunctions`internal`contextPath = $ContextPath;
+Begin["`internal`"];
+$ContextPath = {"NPointFunctions`","System`"};
 
-NPointFunctions`BeginNamespace["`make`"];
-defaultDefinitions[sym_Symbol] :=
+(* ============================== Type definitions ========================== *)
+`type`fields = {{__},{__}};
+`type`subexpressions = {Rule[_Symbol,_]...};
+`type`genericSum = GenericSum[_,{{_,_}..}] | GenericSum[{__},{{_,_}..}]; (* @todo Remove the second one *)
+`type`classFields = {{__}..};
+`type`classCombinatoricalFactors = {__Integer};
+`type`classColorFactors = {__};
+`type`npf =
+   {
+   `type`fields,
+   {
+      {
+         {`type`genericSum..},
+         {`type`classFields..},
+         {`type`classCombinatoricalFactors..},
+         {`type`classColorFactors..}
+      },
+      `type`subexpressions
+   }
+};
+
+makeDefaultDefinitions[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToString/@{##},", "]&},
-   (* Clean existing definitions if they exist for required pattern.. *)
+   (* Clean existing definitions if they exist for required pattern. *)
    Off[Unset::norep];
    sym[args___] =.;
    On[Unset::norep];
@@ -192,52 +213,26 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
       toString@args2,
       If[#==="","",","<>#]&@toString@args3];
 ];
-defaultDefinitions // Utils`MakeUnknownInputDefinition;
-defaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-NPointFunctions`EndNamespace[];
+makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
+makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-NPointFunctions`BeginNamespace["`type`"];
-subexpressions =
-   {Rule[_Symbol,_]...};
-npf =
-{
-   {{__},{__}},
-   {
-      {
-         {NPointFunctions`GenericSum[{__},{__}]..},
-         {{{__}..}..},
-         {{__Integer}..},
-         {{__}..}
-      },
-      subexpressions
-   }
-};
-NPointFunctions`EndNamespace[];
+getSubexpressions /: Dot[obj:`type`npf,getSubexpressions[]] := obj[[2,2]];
+getSubexpressions // makeDefaultDefinitions;
+getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-NPointFunctions`BeginNamespace["`get`"];
-subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[]] := npf[[2,2]];
-subexpressions // NPointFunctions`make`defaultDefinitions;
-subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getSums /: Dot[obj:`type`npf,getSums[]] := obj[[2,1,1]];
+getSums // makeDefaultDefinitions;
+getSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-sums /: Dot[npf:NPointFunctions`type`npf,sums[]] := npf[[2,1,1]];
-sums // NPointFunctions`make`defaultDefinitions;
-sums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-NPointFunctions`EndNamespace[];
+setSubexpressions /: Dot[obj:`type`npf,setSubexpressions[newsubs:`type`subexpressions]] := ReplacePart[obj,{2,2}->newsubs];
+setSubexpressions // makeDefaultDefinitionss;
+setSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-NPointFunctions`BeginNamespace["`set`"];
-subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[newsubs:NPointFunctions`type`subexpressions]] := ReplacePart[npf,{2,2}->newsubs];
-subexpressions // NPointFunctions`make`defaultDefinitions;
-subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-NPointFunctions`EndNamespace[];
+applySubexpressions /: Dot[obj:`type`npf,applySubexpressions[]] :=
+ReplacePart[obj,{2,1,1}->ReplaceRepeated[obj.getSums[],obj.getSubexpressions[]]].setSubexpressions[{}];
+applySubexpressions // makeDefaultDefinitions;
+applySubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-NPointFunctions`BeginNamespace["`apply`"];
-subexpressions /: Dot[npf:NPointFunctions`type`npf,subexpressions[]] :=
-ReplacePart[npf,{2,1,1}->ReplaceRepeated[npf.NPointFunctions`get`sums[],npf.NPointFunctions`get`subexpressions[]]].NPointFunctions`set`subexpressions[{}];
-subexpressions // NPointFunctions`make`defaultDefinitions;
-subexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-NPointFunctions`EndNamespace[];
-
-Begin["`Private`"];
 CreateCXXFToFConversionInNucleus::usage=
 "@todo";
 CreateCXXFToFConversionInNucleus::errFermion=
@@ -333,8 +328,8 @@ Module[
    dNPF = dNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,dQ];
    uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
    dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
-   uNPF = uNPF.NPointFunctions`apply`subexpressions[];
-   dNPF = dNPF.NPointFunctions`apply`subexpressions[];
+   uNPF = uNPF.applySubexpressions[];
+   dNPF = dNPF.applySubexpressions[];
 
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
@@ -358,6 +353,7 @@ Module[
    CreateCXXFToFConversionInNucleus::errFermion,
    inF->outF];
 CreateCXXFToFConversionInNucleus // Utils`MakeUnknownInputDefinition;
+CreateCXXFToFConversionInNucleus ~ SetAttributes ~ {Locked, Protected};
 
 Options[NPFPattern] = {
    "Fields" -> _,
@@ -569,7 +565,7 @@ Module[
       
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
-      NPointFunctions`setInitialValues[feynArtsDir, formCalcDir, feynArtsModel,
+      NPointFunctions`SetInitialValues[feynArtsDir, formCalcDir, feynArtsModel,
          particleNamesFile, substitutionsFile, particleNamespaceFile];
 
       NPointFunctions`NPointFunctionFAFC[
@@ -2192,4 +2188,6 @@ SetAttributes[
    {Protected, Locked}];
 
 End[];
+$ContextPath = NPointFunctions`internal`contextPath;
+Clear[NPointFunctions`internal`contextPath];
 EndPackage[];

@@ -25,7 +25,7 @@ BeginPackage["WilsonCoeffs`",{"Utils`","NPointFunctions`"}];
 {InterfaceToMatching,neglectBasisElements};
 
 Begin["`Private`"];
-NPFPattern = NPointFunctions`Private`NPFPattern;
+NPFPattern = NPointFunctions`internal`NPFPattern;
 
 neglectBasisElements::usage= 
 "@brief Deletes specified basis elements with not aanymore used subexpressions.

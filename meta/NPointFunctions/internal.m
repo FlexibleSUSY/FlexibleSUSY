@@ -26,7 +26,7 @@ BeginPackage["NPointFunctions`",{"FeynArts`","FormCalc`","Utils`"}];
 FeynArts`$FAVerbose = 1;(* Change this to 2 to see more output (if 1 then less). *)
 FormCalc`$FCVerbose = 0;(* Change this to 1,2 or 3 to see more output. *)
 
-{setInitialValues,NPointFunctionFAFC}
+{SetInitialValues,NPointFunctionFAFC}
 
 (* Symbols that are not distributed from main kernel. *)
 SetAttributes[#,{Locked,Protected}]&@
@@ -75,7 +75,7 @@ Protect[calledPreviouslysetInitialValues,feynArtsDir,formCalcDir,feynArtsModel,
    subexpressionToFSRules,fieldNameToFSRules,amplitudeToFSRules
 ];
 
-setInitialValues::usage=
+SetInitialValues::usage=
 "@brief Set the FeynArts and FormCalc paths.
 @param FADirS the directory designated for FeynArts output
 @param FCDirS the directory designated for FormCalc output
@@ -85,13 +85,13 @@ setInitialValues::usage=
 @param particleNamespaceFileS the name of the particle namespace file
 @note allowed to be called only once
 @note effectively Private function";
-setInitialValues::errOnce=
-"NPointFunctions`.`setInitialValues[]: Multiple calls:
+SetInitialValues::errOnce=
+"NPointFunctions`.`SetInitialValues[]: Multiple calls:
 something tries to redefine paths for FeynArts and FormCalc";
-setInitialValues[FADir_String, FCDir_String, FAModel_String,
+SetInitialValues[FADir_String, FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
-If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,setInitialValues::errOnce],
+If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,SetInitialValues::errOnce],
    ClearAttributes[
       {
          feynArtsDir,formCalcDir,feynArtsModel,
@@ -113,7 +113,7 @@ If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,setInitialValues::errOnc
       },{Protected, Locked}];
    SetFSConventionRules[];
 ];
-SetAttributes[setInitialValues,{Protected,Locked}];
+SetAttributes[SetInitialValues,{Protected,Locked}];
 
 SetFSConventionRules::usage=
 "@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
