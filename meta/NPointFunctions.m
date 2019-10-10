@@ -184,6 +184,9 @@ $ContextPath = {"NPointFunctions`","System`"};
    }
 };
 
+`type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
+`type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
+
 makeDefaultDefinitions[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToString/@{##},", "]&},
    (* Clean existing definitions if they exist for required pattern. *)
@@ -216,6 +219,21 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
 ];
 makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
 makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getIndent /: Dot[obj:_String,getIndent[]] := First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent /: Dot[obj:{__String},getIndent[]] := First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent // makeDefaultDefinitions;
+getIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+removeIndent /: Dot[obj:_String,removeIndent[]] := StringReplace[obj,StartOfLine~~obj.getIndent[]->""];
+removeIndent // makeDefaultDefinitions;
+removeIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+replaceTokens /: Dot[code:_String,replaceTokens[rules:`type`cxxReplacementRules]] :=
+StringJoin[
+   StringReplace[#,"\n"->StringJoin["\n",#.getIndent[]]] &/@ StringReplace[StringSplit[code.removeIndent[],"\n"],rules]~Riffle~"\n"];
+replaceTokens // makeDefaultDefinitions;
+replaceTokens ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getProcess /: Dot[obj:`type`npf,getProcess[]] := obj[[1]];
 getProcess // makeDefaultDefinitions;
@@ -252,6 +270,7 @@ getSubexpressions // makeDefaultDefinitions;
 getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getNames /: Dot[obj:`type`subexpressions,getNames[]] := First/@obj;
+getNames /: Dot[obj:`type`cxxReplacementRules,getNames[]] := First/@obj;
 getNames // makeDefaultDefinitions;
 getNames ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -607,17 +626,16 @@ Module[
    {
       genSums = obj.getGenericSums[],
       substitutions = obj.getSubexpressions[],
-      classRules = obj.getClassFieldRules[], 
+      classRules = obj.getClassFieldRules[],
       positionsSubsWithVert =
-         DeleteDuplicates[#[[1]] &/@ Position[substitutions, SARAH`Cp[__]]], 
-      rulesWithVertices,vertsGen,GetVertex,
-      StripIndices = Vertices`StripFieldIndices
+         DeleteDuplicates[#[[1]] &/@ Position[obj.getSubexpressions[], SARAH`Cp[__]]],
+      rulesWithVertices,vertsGen,GetVertex
    },
    rulesWithVertices = substitutions[[positionsSubsWithVert]];
    GetVertex[vertGen_,rules_] := vertGen/.#&/@rules;
    vertsGen = DeleteDuplicates@Cases[#, SARAH`Cp[fields__] :> {fields},
       Infinity,Heads -> True] &/@ (genSums/.rulesWithVertices);
-   DeleteDuplicates[StripIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
+   DeleteDuplicates[Vertices`StripFieldIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
 Utils`MakeUnknownInputDefinition@VerticesForNPointFunction;
 
@@ -960,14 +978,14 @@ CreateCXXFunctions[
 Module[
    {
       mainFunction = If[OptionValue@WilsonBasis === {},
-         "std::complex<double> "<>#2<>"("<>#3<>");",
-         "std::array<std::complex<double>,"<>ToString@#1<>"> "<>#2<>"("<>#3<>");"
+         "std::complex<double> "<>#2<>"("<>#3<>")",
+         "std::array<std::complex<double>,"<>ToString@#1<>"> "<>#2<>"("<>#3<>")"
       ]&,
       basisLength = Length@OptionValue@WilsonBasis,
       prototype,definition
    },
    setLoopLibraryRules@OptionValue@LoopFunctions;
-   prototype = mainFunction[basisLength,name,CXXArgStringNPF[NPF,"def"]];
+   prototype = mainFunction[basisLength,name,CXXArgStringNPF[NPF,"def"]]<>";";
 
    definition =
       CXXClassForNPF[NPF,colourProjector,OptionValue@LoopFunctions,OptionValue@WilsonBasis] <> "\n\n" <>
@@ -1170,7 +1188,7 @@ Module[
    preCXXRules = ToCXXPreparationRules[extIndices,genFields,subexpressions];
    cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
-   stringReplaceWithIndent[code,{
+   code.replaceTokens[{
    "@ClassName@"->CXXClassNameNPF@nPointFunction,
    "@Context@"->cxxCorrelationContext,
    "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
@@ -1184,10 +1202,9 @@ Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
 CXXInitializeKeyStructs::usage =
 "@brief Generates required c++ code for key structs initialization.
 @param fields:{...} list of presenting generic fields.
-@param ind (def. \"\") indent string for a c++ code.
 @returns c++ code for subexpression if generic fields present there.";
-CXXInitializeKeyStructs[fields:{__?IsGenericField},ind_String:""]:=
-StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"<>ind];
+CXXInitializeKeyStructs[fields:{__?IsGenericField}]:=
+StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"];
 Utils`MakeUnknownInputDefinition@CXXInitializeKeyStructs;
 SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
 
@@ -1345,16 +1362,13 @@ CXXCodeForSubexpressions::usage=
 @param subexpressions the list of subexpressions
 @param preCXXRules a list of rules to apply to the subexpressions before
 calling ``Parameters`ExpressionToString[]`` for the c++ translation.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns the c++ code encoding a given set of subexpressions.";
 CXXCodeForSubexpressions[
    {},
-   {{(_Rule|_RuleDelayed)...}...},
-   _String:""] := "// There is no subexpressions";
+   {{(_Rule|_RuleDelayed)...}...}] := "// There is no subexpressions";
 CXXCodeForSubexpressions[
    subexpressions:`type`subexpressions,
-   preCXXRules:{{(_Rule|_RuleDelayed)...}...},
-   ind_String:""] :=
+   preCXXRules:{{(_Rule|_RuleDelayed)...}...}] :=
 Module[
    {
       names = First/@subexpressions,
@@ -1385,7 +1399,7 @@ Module[
    cxxExprs = StringReplace[#,"\""->""]&@
       Map[Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&,exprs];
    data = {ToString/@names,relevantSubs,relevantGens,exprs,cxxExprs};
-   outStrings=MapThread[stringReplaceWithIndent[code,
+   outStrings=MapThread[code.replaceTokens[
       {
          "@SubexpressionName@"->#1,
          "@CodeIfOtherSubexpressionsPresent@"->CXXSubsInSub@#2,
@@ -1394,7 +1408,7 @@ Module[
          "@ReturnResult@"->stringGeneratedCut["return "<>#5<>";",100,","]
       }
    ]&,data];
-   StringReplace[StringRiffle[outStrings,"\n\n"],"\n"->"\n"<>ind]
+   StringRiffle[outStrings,"\n\n"]
 ];
 Utils`MakeUnknownInputDefinition@CXXCodeForSubexpressions;
 
@@ -1416,14 +1430,12 @@ CXXSubsInSub::usage=
 "@brief Generates required c++ code for subexpression if other subexpressions
 present there.
 @param subs:{...} list of symbols.
-@param ind (def. \"\") indent string for a c++ code.
 @returns String c++ code for subexpression if other subexpressions present there.";
-CXXSubsInSub[subs:{__Symbol},ind_String:""] :=
+CXXSubsInSub[subs:{__Symbol}] :=
 StringRiffle[
    ToString@#<>"<GenericFieldMap> "<>ToString@#<>"_ { *this };"&/@subs,
-   "\n"<>ind
-];
-CXXSubsInSub[{},_String:""] :=
+   "\n"];
+CXXSubsInSub[{}] :=
 "// This subexpression does not depend on other ones";
 Utils`MakeUnknownInputDefinition@CXXSubsInSub;
 
@@ -1431,9 +1443,8 @@ CXXGenericFieldsInSub::usage =
 "@brief Generates required c++ code for subexpression if generic fields present
 there.
 @param fields:{...} list of presenting generic fields.
-@param ind (def. \"\") indent string for a c++ code.
 @returns c++ code for subexpression if generic fields present there.";
-CXXGenericFieldsInSub[fields:{__?IsGenericField},ind_String:""] :=
+CXXGenericFieldsInSub[fields:{__?IsGenericField}] :=
 Module[
    {
       names = CXXGenFieldName/@fields,
@@ -1448,9 +1459,9 @@ Module[
       fCommand = "using `1` = typename at<GenericFieldMap, `2`>::type;",
       iCommand = "const auto &`1` = at_key<`2`>(this->index_map());"
    },
-   fLns=StringRiffle[MapThread[StringTemplate@fCommand,{names,keys}],"\n"<>ind];
-   iLns=StringRiffle[MapThread[StringTemplate@iCommand,{indices,keys}],"\n"<>ind];
-   StringTemplate[StringRiffle[mainCommands,"\n"<>ind]][fLns,iLns]
+   fLns=StringRiffle[MapThread[StringTemplate@fCommand,{names,keys}],"\n"];
+   iLns=StringRiffle[MapThread[StringTemplate@iCommand,{indices,keys}],"\n"];
+   StringTemplate[StringRiffle[mainCommands,"\n"]][fLns,iLns]
 ];
 CXXGenericFieldsInSub[{},_String:""] :=
 "// This subexpression does not depend on generic fields";
@@ -1524,8 +1535,7 @@ CXXGenericSum[
    colourProjector_,
    genSumNames:{__String},
    loopLibrary_String,
-   basis:{Rule[_String,_]...},
-   ind_String:""
+   basis:{Rule[_String,_]...}
 ] :=
 Module[{},
    StringRiffle[MapThread[
@@ -1537,7 +1547,7 @@ Module[{},
             ExtractColourFactor[obj.getClassColorFactors[],colourProjector],
             genSumNames
          }],
-      "\n\n"]~StringReplace~("\n"->"\n"<>ind)
+      "\n\n"]
 ];
 CXXGenericSum[
    sum:`type`genericSum,
@@ -1608,7 +1618,7 @@ Module[
             >( *this );
       } // End of function @GenericSum_NAME@()"
    },
-   stringReplaceWithIndent[code,
+   code.replaceTokens[
       {
          "@Hide@"->hide,
          "@GenericSum_NAME@"->genSumName,
@@ -1638,12 +1648,11 @@ Utils`MakeUnknownInputDefinition@CXXGenericSum;
 CXXInitializeOutput::usage =
 "@brief Generates c++ code for output value initializations inside GenericSum.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
 CXXInitializeOutput[{},_String:""] :=
 "std::complex<double> value = 0.0;";
-CXXInitializeOutput[wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
-StringRiffle["std::complex<double> "<>#<>" = 0.0;"&/@Part[wilsonBasis,All,1],"\n"<>ind];
+CXXInitializeOutput[wilsonBasis:{Rule[_String,_]..}] :=
+StringRiffle["std::complex<double> "<>#<>" = 0.0;"&/@Part[wilsonBasis,All,1],"\n"];
 Utils`MakeUnknownInputDefinition@CXXInitializeOutput;
 SetAttributes[CXXInitializeOutput,{Protected,Locked}];
 
@@ -1654,19 +1663,18 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 @param expr either single expression or list of expressions to be converted into c++.
 @preCXXRules list of rules to be applied at expr.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for output value initializations inside GenericSum.";
-CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,{},ind_String:""] :=
+CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,{}] :=
 Module[
    {
       newExpr = expr /. getLoopLibraryRules[],cxxExpr,out
    },
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,newExpr,preCXXRules]];
    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-   out="value += "<>stringGeneratedCut[cxxExpr<>";",100,",","   "<>ind<>"   "];
-   CXXBeginSum[summation,preCXXRules,ind]<>"\n"<>ind<>"   "<>out<>"\n"<>ind<>CXXEndSum[summation.getGenericFields[],ind]
+   out="value += "<>stringGeneratedCut[cxxExpr<>";",100,",","   "<>"   "];
+   CXXBeginSum[summation,preCXXRules]<>"\n"<>"   "<>out<>"\n"<>CXXEndSum[summation.getGenericFields[]]
 ];
-CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..},ind_String:""] :=
+CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..}] :=
 Module[
    {
       code ="
@@ -1686,15 +1694,14 @@ Module[
       masses,preMassCode,codeMass,rulesMass,
       couplings,preCouplingCode,codeCoupling,rulesCoupling,
       paves,prePaVeCode,codePaVe,rulesPaVe,
-      cxxExpr,updatingVars,
-      out
+      cxxExpr,updatingVars
    },
    masses = Tally@Cases[modifiedExpr,x_SARAH`Mass:>x,Infinity,Heads->True];
-   {preMassCode,codeMass,rulesMass} = createUniqueDefinitions[masses->preCXXRules,{"double","m"},"   "];
+   {preMassCode,codeMass,rulesMass} = createUniqueDefinitions[masses->preCXXRules,{"double","m"}];
    modifiedExpr = modifiedExpr /. rulesMass;
 
    couplings = Tally@Cases[modifiedExpr,x:SARAH`Cp[__][___]:>x,Infinity,Heads->True];
-   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","c"},"   "];
+   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","c"}];
    modifiedExpr = modifiedExpr /. rulesCoupling;
 
    paves = Tally@Cases[modifiedExpr,x:Alternatives[_LoopTools`A0i,_LoopTools`B0i,_LoopTools`C0i,
@@ -1703,37 +1710,35 @@ Module[
       _LoopTools`B111,_LoopTools`DB0,_LoopTools`DB1,_LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`C0,_LoopTools`D0,_LoopTools`E0,_LoopTools`F0]:>x,Infinity,Heads->True];
    paves = paves /.getLoopLibraryRules[];
-   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","i"},"   "];
+   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","i"}];
    modifiedExpr = modifiedExpr /. getLoopLibraryRules[] /. rulesPaVe;
 
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@modifiedExpr;
    cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {wilsonBasis[[All,1]], cxxExpr}];
-   out=StringRiffle[updatingVars,"\n"<>"   "];
 
-   stringReplaceWithIndent[code,
-   {
-   "@Masses@"->preMassCode,
-   "@Couplings@"->preCouplingCode,
-   "@PaVe@"->prePaVeCode,
-   "@BeginSum@"->CXXBeginSum[summation,preCXXRules],
+   code.replaceTokens[{
+      "@Masses@"->preMassCode,
+      "@Couplings@"->preCouplingCode,
+      "@PaVe@"->prePaVeCode,
+      "@BeginSum@"->CXXBeginSum[summation,preCXXRules],
       "@DefineMasses@"->codeMass,
       "@DefineCpoulings@"->codeCoupling,
       "@DefinePaVe@"->codePaVe,
-      "@ChangeOutputValues@"->out,
-   "@EndSum@"->CXXEndSum[summation.getGenericFields[]]
-   }]~StringReplace~("\n"->"\n"<>ind)
+      "@ChangeOutputValues@"->StringRiffle[updatingVars,"\n"],
+      "@EndSum@"->CXXEndSum[summation.getGenericFields[]]
+   }]
 ];
 Utils`MakeUnknownInputDefinition@CXXChangeOutput;
 SetAttributes[CXXChangeOutput,{Protected,Locked}];
 
-createUniqueDefinitions[{}->_,{_String,name_String},_String:""] := 
+createUniqueDefinitions[{}->_,{_String,name_String}] :=
    {
       "// No "<>name<>"# present in this expression.",
       "// Expression "<>name<>"# is not changed because it is absent here.",
       {}
    };
-createUniqueDefinitions[expr:{{_,_Integer}..}->preCXXRules_,{type_String,name_String},ind_String:""] :=
+createUniqueDefinitions[expr:{{_,_Integer}..}->preCXXRules_,{type_String,name_String}] :=
 Module[{names,namedExpr,code,rules},
    namedExpr = Array[
       {
@@ -1745,7 +1750,7 @@ Module[{names,namedExpr,code,rules},
       Length@expr
    ];
    names = type<>" "<>StringRiffle[namedExpr[[All,1]],", "]<>";";
-   code = StringRiffle[#1<>" = "<>#2<>"; // It is repeated "<>ToString@#4<>" times."&@@@namedExpr,"\n"<>ind];
+   code = StringRiffle[#1<>" = "<>#2<>"; // It is repeated "<>ToString@#4<>" times."&@@@namedExpr,"\n"];
    rules = Rule@@@namedExpr[[All,{3,1}]];
    {names,StringReplace[code,"\""->""],rules}
 ];
@@ -1763,53 +1768,6 @@ CXXReturnOutput[wilsonBasis:{Rule[_String,_]..},_String:""] :=
 Utils`MakeUnknownInputDefinition@CXXReturnOutput;
 SetAttributes[CXXReturnOutput,{Protected,Locked}];
 
-stringReplaceWithIndent::usage =
-"@brief Function for smart c++ code replacements with indents. If replacement
-rule contain a f[args___], then this function automatically makes it
-f[args___,ind], where ind is responsible for an indent.
-@param str String with tokens of arbitrary form, specified in the second
-argument.
-@param rules List of Rule[String,_] where on the lhs of rule there are tokens.
-@note rules are supposed to return a String.";
-stringReplaceWithIndent[
-   str_?(StringMatchQ[#,"\n"~~__]&),
-   rules:{Rule[_String,_]..}
-] :=
-Module[
-   {
-      tokens = rules[[All,1]],
-      holdRules = Hold/@Unevaluated@rules,
-      evaluatedRules = rules,
-      generalIndent = StringCases[str,"\n"~~" "...,1],
-      lines,now,
-      pmt, (* Potentially multiline token *)
-      currentRule,currentIndent,modifiedRule
-   },
-   lines = StringSplit[str,generalIndent];
-   Do[
-      If[StringMatchQ[lines[[now]],___~~Alternatives@@tokens~~___],             (* Do we have tokens in the current line? *)
-         pmt = StringCases[
-            lines[[now]],
-            StartOfString~~" "...~~tok:Alternatives@@tokens:>tok];
-         If[pmt =!= {},
-            pmt = pmt[[1]];
-            currentRule = holdRules[[ Position[tokens,pmt][[1]] ]];
-            If[MatchQ[currentRule, {Hold@Rule[_, _[___]]}],                     (* Is token multiline? *)
-               currentIndent = StringCases[lines[[now]]," "...,1][[1]];
-               modifiedRule = currentRule /.
-                  Hold@Rule[t_,f_[args___]] :> Rule[t,f[args,currentIndent]];
-               lines[[now]] = StringReplace[lines[[now]],modifiedRule];
-            ];
-         ];
-      lines[[now]] = StringReplace[lines[[now]], evaluatedRules];
-      ];,
-      {now,Length@lines}
-   ];
-   StringRiffle[lines,"\n"]
-];
-Utils`MakeUnknownInputDefinition@stringReplaceWithIndent;
-SetAttributes[stringReplaceWithIndent,{Protected,Locked,HoldRest}];
-
 stringGeneratedCut::usage =
 "@brief Function for dummy c++ code cut. It cuts string to a maximal possible
 ones with length+ind for a given delSymb symbol and then join them.
@@ -1817,7 +1775,7 @@ ones with length+ind for a given delSymb symbol and then join them.
 @param length Integer Number which approximately corresponds to output width.
 @param del String which corresponds to a symbol to delete.
 @param ind (def. \"\") string which is responsible for an indent of code.";
-stringGeneratedCut[string_String,length_Integer,del_String,ind_String:""] :=
+stringGeneratedCut[string_String,length_Integer,del_String] :=
 Module[
    {
       strs = StringSplit[string, del],
@@ -1836,7 +1794,7 @@ Module[
    numbers = ReplaceAll[First/@Fold[f,First@initSet,Rest@initSet],f->List];
    dirtyStrings = StringJoin[StringRiffle[strs[[#]],del]] &/@ numbers;
    cleanStrings = StringReplace[#, StartOfString~~" "...~~x___:>x] &/@ dirtyStrings;
-   StringRiffle[cleanStrings,del<>"\n"<>ind]
+   StringRiffle[cleanStrings,del<>"\n"]
 ];
 Utils`MakeUnknownInputDefinition@stringGeneratedCut;
 SetAttributes[stringGeneratedCut,{Protected,Locked}];
@@ -1845,14 +1803,13 @@ CXXCodeNameKey::usage =
 "@brief Generates c++ code for type abbreviations stored in GenericFieldMap
 (Associative Sequence) at Key positions.
 @param genFields:{..} list of presenting generic fields.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for type abbreviations stored in GenericFieldMap
 (Associative Sequence) at Key positions.";
-CXXCodeNameKey[genFields:{__?IsGenericField},ind_String:""] :=
+CXXCodeNameKey[genFields:{__?IsGenericField}] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
       {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
-      {1}],"\n"<>ind];
+      {1}],"\n"];
 Utils`MakeUnknownInputDefinition@CXXCodeNameKey;
 SetAttributes[CXXCodeNameKey,{Protected,Locked}];
 
@@ -1861,10 +1818,9 @@ CXXSubsInGenericSum::usage =
 code for their initialization.
 @param GenericSum[_,_] GenericSum expression.
 @param subs List of substitution rules for NPF object.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for initialization of subexpressions if they are
 present in given GenericSum.";
-CXXSubsInGenericSum[sum:`type`genericSum,subs:`type`subexpressions,ind_String:""]:=
+CXXSubsInGenericSum[sum:`type`genericSum,subs:`type`subexpressions]:=
 Module[
    {
       relevantSubs = DeleteDuplicates@Cases[sum.getExpression[],Alternatives@@(subs.getNames[]),Infinity]
@@ -1873,7 +1829,7 @@ Module[
       "// This GenericSum does not depend on subexpressions",
       StringRiffle[StringTemplate[
          "`1`<GenericFieldMap> `1`_ { *this, index_map };"]/@relevantSubs,
-         "\n"<>ind]]
+         "\n"]]
 ];
 Utils`MakeUnknownInputDefinition@CXXSubsInGenericSum;
 SetAttributes[CXXSubsInGenericSum,{Protected,Locked}];
@@ -1882,14 +1838,13 @@ CXXBeginSum::usage =
 "@brief Generates c++ code for sum beginning used inside GenericSum.
 @param <{{generic field, restriction}..}> summation List of generic index
 restriction rules pares, which, if are true should lead to a skip of summation.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for sum beginning used inside generic sums.";
-CXXBeginSum[summation:`type`summation,preCXXRules_,ind_String:""]:=
+CXXBeginSum[summation:`type`summation,preCXXRules_]:=
 Module[{beginsOfFor},
    beginsOfFor =
-      "for( const auto &"<>CXXFieldIndices@#[[1]]<>" : "<>"index_range<"<>CXXGenFieldName@#[[1]]<>">() ) {\n"<>ind<>
-      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>CXXFieldIndices@#[[1]]<>";"<>parseRestrictionRule[#,preCXXRules,ind] &/@summation;
-   StringRiffle[beginsOfFor,"\n"<>ind]
+      "for( const auto &"<>CXXFieldIndices@#[[1]]<>" : "<>"index_range<"<>CXXGenFieldName@#[[1]]<>">() ) {\n"<>
+      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>CXXFieldIndices@#[[1]]<>";"<>parseRestrictionRule[#,preCXXRules] &/@summation;
+   StringRiffle[beginsOfFor,"\n"]
 ];
 Utils`MakeUnknownInputDefinition@CXXBeginSum;
 SetAttributes[CXXBeginSum,{Protected,Locked}];
@@ -1922,9 +1877,8 @@ Utils`MakeUnknownInputDefinition@parseRestrictionRule;
 CXXEndSum::usage =
 "@brief Generates c++ code for end of sum over generic fields inside GenericSum.
 @param genFields:{...} list of presenting generic fields.
-@param ind (def. \"\") dummy string variable.
 @returns String c++ code for end of sum over generic fields inside GenericSum.";
-CXXEndSum[genFields:{__?IsGenericField},_String:""] :=
+CXXEndSum[genFields:{__?IsGenericField}] :=
    StringJoin[
       Array["}"&,Length@genFields],
       " // End of summation over generic fields"];
@@ -1935,10 +1889,9 @@ CXXCodeFunCalculate::usage ="@brief Generates c++ code for functions which retur
 calculation.
 @param genSumNames list of strings with names of generic sums.
 @param wilsonBasis list of rules for a basis.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String Generates c++ code for functions which return result of generic sum
 calculation.";
-CXXCodeFunCalculate[genSumNames:{__String},wilsonBasis:{Rule[_String,_]...},ind_String:""] :=
+CXXCodeFunCalculate[genSumNames:{__String},wilsonBasis:{Rule[_String,_]...}] :=
 Module[
    {
       varName = "genericsum" (* Feel free to change me to another c++ name *),
@@ -1947,18 +1900,15 @@ Module[
    },
    If[wilsonBasis==={},
       simpleSum = StringRiffle[#<>"()"&/@genSumNames,"+"];
-      stringReplaceWithIndent["
+      "
       std::complex<double> calculate( void ) {
          return @SumOfSums@;
-      } // End of calculate()",
-      {
-         "@SumOfSums@"->simpleSum
-      }]~StringReplace~("\n"->"\n"<>ind),
+      } // End of calculate()".replaceTokens[{"@SumOfSums@"->simpleSum}],
       (*Else*)
       varNames = Array[varName<>ToString@#&,Length@genSumNames];(*{String..}*)
       initVars = MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}]~StringRiffle~"\n   ";
       sumOfSums = StringRiffle[#<>".at(i)"&/@varNames,"+"];
-      stringReplaceWithIndent["
+      "
       std::array<std::complex<double>,@BasisLength@> calculate( void ) {
          std::array<std::complex<double>,@BasisLength@> genericSummation;
          constexpr int coeffsLength = genericSummation.size();
@@ -1968,12 +1918,12 @@ Module[
             genericSummation.at(i) += @SumOfVariables@;
          }
          return genericSummation;
-      } // End of calculate()",
+      } // End of calculate()".replaceTokens[
       {
          "@BasisLength@"->ToString@Length@wilsonBasis,
          "@InitializeVariablesWhichStoreGenericSumsOutput@"->initVars,
          "@SumOfVariables@"->sumOfSums
-      }]~StringReplace~("\n"->"\n"<>ind)
+      }]
    ]
 ];
 Utils`MakeUnknownInputDefinition@CXXCodeFunCalculate;
@@ -1982,29 +1932,26 @@ SetAttributes[CXXCodeFunCalculate,{Protected,Locked}];
 CXXClassInsertions::usage =
 "@brief Generates c++ code for class insertions inside GenericSum.
 @param genInsertions list of list with SARAH particle names.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for class insertions inside GenericSum.";
-CXXClassInsertions[genInsertions:`type`classFields,ind_String:""] := 
-   StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@genInsertions,",\n"<>ind];
+CXXClassInsertions[genInsertions:`type`classFields] :=
+   StringRiffle["boost::mpl::vector<"<>StringRiffle[CXXFieldName@#&/@#,", "]<>">"&/@genInsertions,",\n"];
 Utils`MakeUnknownInputDefinition@CXXClassInsertions;
 SetAttributes[CXXClassInsertions,{Protected,Locked}];
 
 CXXFactorInsertions::usage =
 "@brief Generates c++ code for combinatorical factor insertions inside GenericSum.
 @param combinatorialFactors list of integers.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for combinatorical factor insertions inside GenericSum.";
-CXXFactorInsertions[combinatorialFactors:`type`classCombinatoricalFactors,ind_String:""] := 
-   StringRiffle["boost::mpl::int_<"<>ToString@#<>">"&/@combinatorialFactors,",\n"<>ind];
+CXXFactorInsertions[combinatorialFactors:`type`classCombinatoricalFactors] :=
+   StringRiffle["boost::mpl::int_<"<>ToString@#<>">"&/@combinatorialFactors,",\n"];
 Utils`MakeUnknownInputDefinition@CXXFactorInsertions;
 SetAttributes[CXXFactorInsertions,{Protected,Locked}];
 
 CXXColourInsertions::usage =
 "@brief Generates c++ code for colour factor insertions inside GenericSum.
 @param colourFactors list of numbers.
-@param ind (def. \"\") string which is responsible for an indent of code.
 @returns String c++ code for colour factor insertions inside GenericSum.";
-CXXColourInsertions[colourFactors:{__?NumberQ},ind_String:""] :=
+CXXColourInsertions[colourFactors:{__?NumberQ}] :=
 Module[
    {
       ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors,
@@ -2018,7 +1965,7 @@ Module[
             "detail::ratio_helper<"<>ToString@#2 <> ">>"&,
             {ReRatioColourFactors, ImRatioColourFactors}],
          {"{" -> "", "}" -> ""}],
-   ",\n"<>ind]
+   ",\n"]
 ];
 Utils`MakeUnknownInputDefinition@CXXColourInsertions;
 SetAttributes[CXXColourInsertions,{Protected,Locked}];
