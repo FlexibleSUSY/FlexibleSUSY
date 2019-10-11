@@ -492,7 +492,7 @@ Module[{usageString,info,parsedInfo,infoString},
       infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
       infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
    ];
-   sym::errUnknownInput = "`1``2`Call\n"<>ToString@sym<>"[`3`]\nis not supported.";
+   sym::errUnknownInput = "`1``2`Call\n"<>StringReplace[ToString@sym,"`"->"`.`"]<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
    sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
 ];
