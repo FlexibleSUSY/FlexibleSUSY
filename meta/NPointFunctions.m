@@ -163,9 +163,13 @@ Begin["`internal`"];
 $ContextPath = {"NPointFunctions`","System`"};
 
 (* ============================== Type definitions ========================== *)
+`type`genericField =
+   (GenericS | GenericF | GenericV | GenericU)[GenericIndex[_Integer]] |
+   SARAH`bar[(GenericF | GenericU)[GenericIndex[_Integer]]] |
+   Susyno`LieGroups`conj[(GenericS | GenericV)[GenericIndex[_Integer]]];
 `type`process = {{__},{__}};
 `type`subexpressions = {Rule[_Symbol,_]...};
-`type`summation = {{_?IsGenericField,_}..};
+`type`summation = {{`type`genericField,_}..};
 `type`genericSum = GenericSum[_,`type`summation] | GenericSum[{__},`type`summation]; (* @todo Remove the second one *)
 `type`classFields = {{__}..};
 `type`classCombinatoricalFactors = {__Integer};
@@ -205,7 +209,7 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
       infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
       infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
    ];
-   sym::errUnknownInput = "`1``2`Call\n`3`[`4`"<>ToString@sym<>"[`5`]`6`]\nis not supported.";
+   sym::errUnknownInput = "`1``2`Call\n`3`[`4`"<>StringReplace[ToString@sym,"`"->"`.`"]<>"[`5`]`6`]\nis not supported.";
    (* Define new pattern. *)
    sym /: name_[args1___,sym[args2___],args3___] := Utils`AssertOrQuit[
       False,
@@ -224,6 +228,15 @@ getIndent /: Dot[obj:_String,getIndent[]] := First@StringCases[obj,StartOfString
 getIndent /: Dot[obj:{__String},getIndent[]] := First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
 getIndent // makeDefaultDefinitions;
 getIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getConjugated /: Dot[obj:`type`genericField,getConjugated[]] :=
+Switch[Head@obj,
+   SARAH`bar | Susyno`LieGroups`conj, obj[[1]],
+   GenericS | GenericV, Susyno`LieGroups`conj@obj,
+   GenericF | GenericU, SARAH`bar@obj
+];
+getConjugated // makeDefaultDefinitions;
+getConjugated ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 removeIndent /: Dot[obj:_String,removeIndent[]] := StringReplace[obj,StartOfLine~~obj.getIndent[]->""];
 removeIndent // makeDefaultDefinitions;
@@ -273,6 +286,20 @@ getNames /: Dot[obj:`type`subexpressions,getNames[]] := First/@obj;
 getNames /: Dot[obj:`type`cxxReplacementRules,getNames[]] := First/@obj;
 getNames // makeDefaultDefinitions;
 getNames ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+`cxx`getIndex /: Dot[obj:`type`genericField,`cxx`getIndex[] ] :=
+"indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
+`cxx`getIndex // makeDefaultDefinitions;
+`cxx`getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+`cxx`getName /: Dot[obj:`type`genericField,`cxx`getName[]] :=
+Switch[Head@obj,
+   SARAH`bar,"typename bar<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
+   Susyno`LieGroups`conj,"typename conj<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
+   _,ToString[obj[[0]]]<>ToString[obj[[1,1]]]
+];
+`cxx`getName // makeDefaultDefinitions;
+`cxx`getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getGenericFields /: Dot[obj:`type`genericSum,getGenericFields[]] := First/@Last[obj];
 getGenericFields /: Dot[obj:`type`summation,getGenericFields[]] := First/@obj;
@@ -399,6 +426,7 @@ Module[
    dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
    uNPF = uNPF.applySubexpressions[];
    dNPF = dNPF.applySubexpressions[];
+   temp = uNPF;
 
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
@@ -971,7 +999,7 @@ CreateCXXFunctions::errNoMatch=
 "Length of basis and the given NPF one does not match."
 CreateCXXFunctions[
    NPF:`type`npf,
-   name_String,
+   name:_String,
    colourProjector_,
    opts:OptionsPattern[]
 ] :=
@@ -1106,7 +1134,7 @@ Module[
       eigenType = FlexibleSUSY`FSModelName<>"_mass_eigenstates",
       momDef
    },
-   momDef = StringRiffle[Table["Eigen::Vector4d::Zero()",{numMom}],", "];
+   momDef = StringJoin@Riffle[Table["Eigen::Vector4d::Zero()",{numMom}],", "];
    StringTemplate[str][eigenType,numInd,numMom,momDef]
 ];
 Utils`MakeUnknownInputDefinition@CXXArgStringNPF;
@@ -1203,7 +1231,7 @@ CXXInitializeKeyStructs::usage =
 "@brief Generates required c++ code for key structs initialization.
 @param fields:{...} list of presenting generic fields.
 @returns c++ code for subexpression if generic fields present there.";
-CXXInitializeKeyStructs[fields:{__?IsGenericField}]:=
+CXXInitializeKeyStructs[fields:{`type`genericField..}]:=
 StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"];
 Utils`MakeUnknownInputDefinition@CXXInitializeKeyStructs;
 SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
@@ -1228,14 +1256,15 @@ Module[
       genericRules,subexprRules,massRules,couplingRules
    },
    genericRules=Flatten[Thread@Rule[
-      {Susyno`LieGroups`conj@#, SARAH`bar@#, #},
-      {CXXGenFieldName[Susyno`LieGroups`conj@#][CXXFieldIndices@#],
-      CXXGenFieldName[SARAH`bar@#][CXXFieldIndices@#],
-      CXXGenFieldName[#][CXXFieldIndices@#]}] &/@ genericFields];
-      
+      {#.getConjugated[],#},
+      {
+         (#.getConjugated[].`cxx`getName[])[#.`cxx`getIndex[]],
+         (#.`cxx`getName[])[#.`cxx`getIndex[]]
+      }] &/@ genericFields];
+
    AuxVertexType[fields__]:= StringRiffle[
-      If[IsGenericField@#,
-         Head[#/.genericRules],
+      If[MatchQ[#,`type`genericField],
+         #.`cxx`getName[],
          CXXFieldName@#]&/@{fields},", "];
    couplingRules = {
       SARAH`Cp[fields__][1] :>
@@ -1289,23 +1318,6 @@ Module[
 ];
 Utils`MakeUnknownInputDefinition@ToCXXPreparationRules;
 
-CXXGenFieldName::usage=
-"@brief Given a (possibly conjugated) generic field, return its c++ type.
-@param genericField the given generic field
-@returns the name of the c++ type for a (possibly conjugate) field.
-@note functions saves its unique previous calls to improve the speed of
-calculations.";
-CXXGenFieldName[SARAH`bar[field_]] :=
-   CXXGenFieldName[SARAH`bar[field]] =
-   StringTemplate["typename bar<`1`>::type"][CXXGenFieldName@field];
-CXXGenFieldName[Susyno`LieGroups`conj[field_]] :=
-   CXXGenFieldName[Susyno`LieGroups`conj[field]] =
-   StringTemplate["typename conj<`1`>::type"][CXXGenFieldName@field];
-CXXGenFieldName[head_[GenericIndex[index_Integer]]] :=
-   CXXGenFieldName[head[GenericIndex[index]]] =
-   ToString[head]<>ToString[index];
-Utils`MakeUnknownInputDefinition@CXXGenFieldName;
-
 CXXFieldName::usage = 
 "@brief Given an explicit field (possibly conjugated), returns its c++ representation.
 @param The given generic field
@@ -1338,24 +1350,6 @@ If[Length@field === 0,
    "std::array<int,"<>ToString[Length@@field]<>">{"<>StringJoin@Riffle[ToString/@First@field,", "]<>"}"
 ];
 Utils`MakeUnknownInputDefinition@CXXFieldIndices;
-
-IsGenericField::usage=
-"@brief Determine whether a given field is a generic or not.
-@param field the given field
-@returns `True` if the given field is generic and `False` otherwise.
-@todo no tensor fields.
-@note functions saves its unique previous calls to improve the speed of
-calculations.";
-IsGenericField[field_] := IsGenericField[field] =
-Module[{head = Head[CXXDiagrams`RemoveLorentzConjugation[field]]},
-   Switch[head,
-      GenericS, True, 
-      GenericF, True, 
-      GenericV, True, 
-      GenericU, True, 
-      _, False]
-]; 
-Utils`MakeUnknownInputDefinition@IsGenericField;
 
 CXXCodeForSubexpressions::usage=
 "@brief Create the c++ code encoding a given set of subexpressions.
@@ -1444,11 +1438,11 @@ CXXGenericFieldsInSub::usage =
 there.
 @param fields:{...} list of presenting generic fields.
 @returns c++ code for subexpression if generic fields present there.";
-CXXGenericFieldsInSub[fields:{__?IsGenericField}] :=
+CXXGenericFieldsInSub[fields:{`type`genericField..}] :=
 Module[
    {
-      names = CXXGenFieldName/@fields,
-      indices = CXXFieldIndices/@fields,
+      names = (#.`cxx`getName[])&/@fields,
+      indices = (#.`cxx`getIndex[])&/@fields,
       keys = CXXGenFieldKey/@fields,
       fLns,iLns,
       mainCommands = {
@@ -1805,10 +1799,10 @@ CXXCodeNameKey::usage =
 @param genFields:{..} list of presenting generic fields.
 @returns String c++ code for type abbreviations stored in GenericFieldMap
 (Associative Sequence) at Key positions.";
-CXXCodeNameKey[genFields:{__?IsGenericField}] :=
+CXXCodeNameKey[genFields:{`type`genericField..}] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
-      {CXXGenFieldName@#,CXXGenFieldKey@#}&/@genFields,
+      {#.`cxx`getName[],CXXGenFieldKey@#}&/@genFields,
       {1}],"\n"];
 Utils`MakeUnknownInputDefinition@CXXCodeNameKey;
 SetAttributes[CXXCodeNameKey,{Protected,Locked}];
@@ -1842,14 +1836,14 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 CXXBeginSum[summation:`type`summation,preCXXRules_]:=
 Module[{beginsOfFor},
    beginsOfFor =
-      "for( const auto &"<>CXXFieldIndices@#[[1]]<>" : "<>"index_range<"<>CXXGenFieldName@#[[1]]<>">() ) {\n"<>
-      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>CXXFieldIndices@#[[1]]<>";"<>parseRestrictionRule[#,preCXXRules] &/@summation;
+      "for( const auto &"<>(#[[1]].`cxx`getIndex[])<>" : "<>"index_range<"<>(#[[1]].`cxx`getName[])<>">() ) {\n"<>
+      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>(#[[1]].`cxx`getIndex[])<>";"<>parseRestrictionRule[#,preCXXRules] &/@summation;
    StringRiffle[beginsOfFor,"\n"]
 ];
 Utils`MakeUnknownInputDefinition@CXXBeginSum;
 SetAttributes[CXXBeginSum,{Protected,Locked}];
 
-parseRestrictionRule[{genericField_?IsGenericField,rule_},{extIndexRules_List,__},str_String:""] :=
+parseRestrictionRule[{genericField:`type`genericField,rule_},{extIndexRules_List,__},str_String:""] :=
 Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
    (* @note Here ind (in everywhere's notation) is str. *)
    getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>(ind/.extIndexRules)<>"}";
@@ -1861,8 +1855,8 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
          type1 = CXXFieldName@First@rule,
          type2 = CXXFieldName@Last@rule,
          ind = getIndexOfExternalField@First@rule,
-         typeGen = CXXGenFieldName@genericField,
-         indGen = CXXFieldIndices@genericField
+         typeGen = genericField.`cxx`getName[],
+         indGen = genericField.`cxx`getIndex[]
       },
       "\n"<>str<>"if( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
    ];
@@ -1878,7 +1872,7 @@ CXXEndSum::usage =
 "@brief Generates c++ code for end of sum over generic fields inside GenericSum.
 @param genFields:{...} list of presenting generic fields.
 @returns String c++ code for end of sum over generic fields inside GenericSum.";
-CXXEndSum[genFields:{__?IsGenericField}] :=
+CXXEndSum[genFields:{`type`genericField..}] :=
    StringJoin[
       Array["}"&,Length@genFields],
       " // End of summation over generic fields"];
@@ -2060,8 +2054,7 @@ SetAttributes[
    getLoopFlexibleSUSYRules,
    CXXArgStringNPF,
    CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
-   ToCXXPreparationRules,(*,CXXGenFieldName,CXXFieldIndices,*)CXXFieldName,(*
-   IsGenericField*)
+   ToCXXPreparationRules,(*,CXXFieldIndices,*)CXXFieldName,
    CXXSubsInSub,CXXGenericFieldsInSub,CXXContextInitialize,
    ExtractColourFactor,CXXGenericSum
    }, 
