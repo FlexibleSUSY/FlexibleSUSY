@@ -45,8 +45,9 @@ MakeOverride[str_String] :=
     Module[{ws = Whitespace ...},
            StringReplace[str,
                          {
-                             ws ~~ p : Shortest["{" ~~ ___ ~~ "}"] :> " override " <> p, 
-                             ws ~~ ")" ~~ ws ~~ ";" ~~ ws ~~ EndOfLine -> ") override;"
+                             ws ~~ p : Shortest["{" ~~ ___ ~~ "}"] :> " override " <> p,
+                             ")" ~~ ws ~~ "const;" -> ") const override;",
+                             ");" -> ") override;"
                          }]
           ];
 

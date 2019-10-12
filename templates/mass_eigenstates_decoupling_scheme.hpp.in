@@ -82,8 +82,8 @@ public:
    void fill_from(const @ModelName@_mass_eigenstates&);
    void reorder_tree_level_masses();
    void reorder_pole_masses();
-   void print(std::ostream& out = std::cerr) const;
-   void clear();
+   void print(std::ostream& out = std::cerr) const override;
+   void clear() override;
 
    // mass_eigenstates_interface functions
 
