@@ -28,10 +28,10 @@ Begin["`internal`"];
 `type`npf = NPointFunctions`internal`type`npf;
 getGenericSums = NPointFunctions`internal`getGenericSums;
 getSubexpressions = NPointFunctions`internal`getSubexpressions;
-getNames = NPointFunctions`internal`getNames;
+getName = NPointFunctions`internal`getName;
 
 neglectBasisElements::usage= 
-"@brief Deletes specified basis elements with not aanymore used subexpressions.
+"@brief Deletes specified basis elements with not anymore used subexpressions.
 @param <npf> npf object to modify.
 @param <{Rule[_String,_]..}> operatorBasis list with
 {string name,fermion chain multiplication} pairs.
@@ -41,11 +41,11 @@ Module[
    {
       basis = Last /@ findFermionChains[obj.getSubexpressions[],operatorBasis],
       objNew,positionsToDelete,
-      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(obj.getSubexpressions[].getNames[]),Infinity]&
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(obj.getSubexpressions[].getName[]),Infinity]&
    },
    If[basis === {},Return@obj];
    objNew = ReplaceAll[obj,#->0 &/@ basis];
-   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[obj.getSubexpressions[].getNames[],subsOnly@objNew[[2,1,1]]];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[obj.getSubexpressions[].getName[],subsOnly@objNew[[2,1,1]]];
    Delete[objNew,positionsToDelete]
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];

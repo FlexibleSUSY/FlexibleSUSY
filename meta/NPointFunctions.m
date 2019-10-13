@@ -114,8 +114,6 @@ GenericV::usage=
 "A symbol that acts as a placeholder for any vector field.";
 GenericU::usage=
 "A symbol that acts as a placeholder for any ghost field.";
-GenericT::usage=
-"A symbol that acts as a placeholder for any tensor field.";
 
 GenericSum::usage=
 "Represent a sum over a set of generic fields.";
@@ -191,6 +189,9 @@ $ContextPath = {"NPointFunctions`","System`"};
 `type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
 
+cxx ~ SetAttributes ~ {Locked,Protected};
+output ~ SetAttributes ~ {Locked,Protected};
+
 makeDefaultDefinitions[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToString/@{##},", "]&},
    (* Clean existing definitions if they exist for required pattern. *)
@@ -223,6 +224,30 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
 ];
 makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
 makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getDirectory /: Dot[output,getDirectory[]] :=
+FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates};
+getDirectory /: Dot[output,getDirectory@"Meta"] :=
+FlexibleSUSY`$flexiblesusyMetaDir;
+getDirectory /: Dot[output,getDirectory@"FormCalc"] :=
+FileNameJoin@{output.getDirectory[],"FormCalc"};
+getDirectory /: Dot[output,getDirectory@"FeynArts"] :=
+FileNameJoin@{output.getDirectory[],"FeynArts"};
+getDirectory /: Dot[output,getDirectory@"NPointFunctions"] :=
+FileNameJoin@{output.getDirectory[],"NPointFunctions"};
+getDirectory /: Dot[output,getDirectory@"FeynArts_model"] :=
+FileNameJoin@{output.getDirectory@"FeynArts", SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates};
+getDirectory // makeDefaultDefinitions;
+getDirectory ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getFileName /: Dot[output,getFileName@"Particles"] :=
+FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamesFeynArts.dat"};
+getFileName /: Dot[output,getFileName@"Namespaces"] :=
+FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamespaces.m"};
+getFileName /: Dot[output,getFileName@"Substitutions"] :=
+FileNameJoin@{output.getDirectory@"FeynArts", StringJoin["Substitutions-",SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]};
+getFileName // makeDefaultDefinitions;
+getFileName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getIndent /: Dot[obj:_String,getIndent[]] := First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
 getIndent /: Dot[obj:{__String},getIndent[]] := First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
@@ -282,24 +307,21 @@ getSubexpressions /: Dot[obj:`type`npf,getSubexpressions[]] := obj[[2,2]];
 getSubexpressions // makeDefaultDefinitions;
 getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-getNames /: Dot[obj:`type`subexpressions,getNames[]] := First/@obj;
-getNames /: Dot[obj:`type`cxxReplacementRules,getNames[]] := First/@obj;
-getNames // makeDefaultDefinitions;
-getNames ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-
-`cxx`getIndex /: Dot[obj:`type`genericField,`cxx`getIndex[] ] :=
-"indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
-`cxx`getIndex // makeDefaultDefinitions;
-`cxx`getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-
-`cxx`getName /: Dot[obj:`type`genericField,`cxx`getName[]] :=
+getName /: Dot[obj:`type`subexpressions,getName[]] := First/@obj;
+getName /: Dot[obj:`type`cxxReplacementRules,getName[]] := First/@obj;
+getName /: Dot[obj:`type`genericField,getName[cxx]] :=
 Switch[Head@obj,
    SARAH`bar,"typename bar<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
    Susyno`LieGroups`conj,"typename conj<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
    _,ToString[obj[[0]]]<>ToString[obj[[1,1]]]
 ];
-`cxx`getName // makeDefaultDefinitions;
-`cxx`getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getName // makeDefaultDefinitions;
+getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getIndex /: Dot[obj:`type`genericField,getIndex[cxx] ] :=
+"indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
+getIndex // makeDefaultDefinitions;
+getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getGenericFields /: Dot[obj:`type`genericSum,getGenericFields[]] := First/@Last[obj];
 getGenericFields /: Dot[obj:`type`summation,getGenericFields[]] := First/@obj;
@@ -535,33 +557,26 @@ Module[
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
       excludeProcesses = OptionValue[ExcludeProcesses],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
-      outputDir = FileNameJoin@{
-         SARAH`$sarahCurrentOutputMainDir,
-         ToString@FlexibleSUSY`FSEigenstates
-         },
-      nPointFunctionsDir,feynArtsDir,feynArtsModel,particleNamesFile,
-      particleNamespaceFile,substitutionsFile,formCalcDir,
+      nPointFunctionsDir = output.getDirectory["NPointFunctions"],
+      feynArtsDir = output.getDirectory["FeynArts"],
+      feynArtsModel = output.getDirectory["FeynArts_model"],
+      particleNamesFile = output.getFileName["Particles"],
+      particleNamespaceFile = output.getFileName["Namespaces"],
+      substitutionsFile = output.getFileName["Substitutions"],
+      formCalcDir = output.getDirectory["FormCalc"],
+      fsMetaDir = output.getDirectory["Meta"],
       subKernel,
-      fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       currentPath, currentDirectory,
       inFANames,outFANames,
       nPointFunction
    },
-   nPointFunctionsDir = FileNameJoin@{outputDir, "NPointFunctions"};            (* @unote cache saving *)
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
          inFields,outFields,nPointFunctionsDir,
          OptionValue[NPointFunction,Options[NPointFunction][[All, 1]]]];
-      If[nPointFunction =!= Null, Return@nPointFunction]];
-   
-   feynArtsDir = FileNameJoin@{outputDir, "FeynArts"};
-   feynArtsModel = FileNameJoin@{feynArtsDir, GetFAClassesModelName[]};
-   particleNamesFile = FileNameJoin@{feynArtsDir, GetFAParticleNamesFileName[]};
-   particleNamespaceFile = FileNameJoin@{feynArtsDir, "ParticleNamespaces.m"};
-   substitutionsFile = FileNameJoin@{feynArtsDir, GetFASubstitutionsFileName[]};
-
-   formCalcDir = FileNameJoin@{outputDir, "FormCalc"};
+      If[nPointFunction =!= Null, Return@nPointFunction]
+   ];
 
    If[!FileExistsQ[feynArtsModel <> ".mod"],
       subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
@@ -677,35 +692,6 @@ If[SARAH`submodeldir =!= False,
 ];
 Utils`MakeUnknownInputDefinition@GetSARAHModelName;
 
-GetFAClassesModelName::usage=
-"@brief Return the model name that is used by SARAH to name the
-FeynArts model file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts model file it creates.";
-GetFAClassesModelName[] := 
-   SARAH`ModelName <> ToString@FlexibleSUSY`FSEigenstates;
-Utils`MakeUnknownInputDefinition@GetFAClassesModelName;
-
-GetFAParticleNamesFileName::usage=
-"@brief Return the file name that is used by SARAH to store 
-FeynArts particle names.
-@returns the file name that is used by SARAH to store 
-FeynArts particle names.";
-GetFAParticleNamesFileName[] := 
-"ParticleNamesFeynArts.dat";
-Utils`MakeUnknownInputDefinition@GetFAParticleNamesFileName;
-
-GetFASubstitutionsFileName::usage=
-"@brief Return the model name that is used by SARAH to name the FeynArts 
-substitution file it creates.
-@returns the model name that is used by SARAH to name the
-FeynArts substitution file it creates.";
-GetFASubstitutionsFileName[] :=
-   StringJoin["Substitutions-",SARAH`ModelName,
-     ToString@FlexibleSUSY`FSEigenstates,".m"
-   ];
-Utils`MakeUnknownInputDefinition@GetFASubstitutionsFileName;
-
 LaunchSubkernelFor::usage=
 "@brief Tries to launch a subkernel without errors.
 If it fails, tries to explain the reason using message for specifying its
@@ -818,7 +804,7 @@ Module[
    {
       currentPath = $Path, 
       currentDir = Directory[],
-      fsMetaDir = $flexiblesusyMetaDir,
+      fsMetaDir = output.getDirectory["Meta"],
       sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
       sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
       SARAHModelName = GetSARAHModelName[], 
@@ -1258,13 +1244,13 @@ Module[
    genericRules=Flatten[Thread@Rule[
       {#.getConjugated[],#},
       {
-         (#.getConjugated[].`cxx`getName[])[#.`cxx`getIndex[]],
-         (#.`cxx`getName[])[#.`cxx`getIndex[]]
+         (#.getConjugated[].getName[cxx])[#.getIndex[cxx]],
+         (#.getName[cxx])[#.getIndex[cxx]]
       }] &/@ genericFields];
 
    AuxVertexType[fields__]:= StringRiffle[
       If[MatchQ[#,`type`genericField],
-         #.`cxx`getName[],
+         #.getName[cxx],
          CXXFieldName@#]&/@{fields},", "];
    couplingRules = {
       SARAH`Cp[fields__][1] :>
@@ -1441,8 +1427,8 @@ there.
 CXXGenericFieldsInSub[fields:{`type`genericField..}] :=
 Module[
    {
-      names = (#.`cxx`getName[])&/@fields,
-      indices = (#.`cxx`getIndex[])&/@fields,
+      names = (#.getName[cxx])&/@fields,
+      indices = (#.getIndex[cxx])&/@fields,
       keys = CXXGenFieldKey/@fields,
       fLns,iLns,
       mainCommands = {
@@ -1802,7 +1788,7 @@ CXXCodeNameKey::usage =
 CXXCodeNameKey[genFields:{`type`genericField..}] :=
    StringRiffle[Apply[
       StringTemplate["using `1` = typename at<GenericFieldMap,`2`>::type;"],
-      {#.`cxx`getName[],CXXGenFieldKey@#}&/@genFields,
+      {#.getName[cxx],CXXGenFieldKey@#}&/@genFields,
       {1}],"\n"];
 Utils`MakeUnknownInputDefinition@CXXCodeNameKey;
 SetAttributes[CXXCodeNameKey,{Protected,Locked}];
@@ -1817,7 +1803,7 @@ present in given GenericSum.";
 CXXSubsInGenericSum[sum:`type`genericSum,subs:`type`subexpressions]:=
 Module[
    {
-      relevantSubs = DeleteDuplicates@Cases[sum.getExpression[],Alternatives@@(subs.getNames[]),Infinity]
+      relevantSubs = DeleteDuplicates@Cases[sum.getExpression[],Alternatives@@(subs.getName[]),Infinity]
    },
    If[relevantSubs === {},
       "// This GenericSum does not depend on subexpressions",
@@ -1836,8 +1822,8 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 CXXBeginSum[summation:`type`summation,preCXXRules_]:=
 Module[{beginsOfFor},
    beginsOfFor =
-      "for( const auto &"<>(#[[1]].`cxx`getIndex[])<>" : "<>"index_range<"<>(#[[1]].`cxx`getName[])<>">() ) {\n"<>
-      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>(#[[1]].`cxx`getIndex[])<>";"<>parseRestrictionRule[#,preCXXRules] &/@summation;
+      "for( const auto &"<>(#[[1]].getIndex[cxx])<>" : "<>"index_range<"<>(#[[1]].getName[cxx])<>">() ) {\n"<>
+      "at_key<"<>CXXGenFieldKey@#[[1]]<>">( index_map ) = "<>(#[[1]].getIndex[cxx])<>";"<>parseRestrictionRule[#,preCXXRules] &/@summation;
    StringRiffle[beginsOfFor,"\n"]
 ];
 Utils`MakeUnknownInputDefinition@CXXBeginSum;
@@ -1855,8 +1841,8 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
          type1 = CXXFieldName@First@rule,
          type2 = CXXFieldName@Last@rule,
          ind = getIndexOfExternalField@First@rule,
-         typeGen = genericField.`cxx`getName[],
-         indGen = genericField.`cxx`getIndex[]
+         typeGen = genericField.getName[cxx],
+         indGen = genericField.getIndex[cxx]
       },
       "\n"<>str<>"if( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
    ];
@@ -2043,7 +2029,6 @@ SetAttributes[
    {
    NPointFunction,
    GetSARAHModelName,
-   GetFAClassesModelName, GetFAParticleNamesFileName, GetFASubstitutionsFileName,
    LaunchSubkernelFor,
    CacheNameForMeta,CacheNPointFunction,CachedNPointFunction,
    GenerateFAModelFileOnKernel,WriteParticleNamespaceFile,
