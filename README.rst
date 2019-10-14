@@ -121,7 +121,7 @@ FlexibleSUSY requires SARAH to be installed and to be loadable with
 the ``Needs["SARAH`"]`` command from inside Mathematica.  We recommend
 the following setup::
 
-    SARAH_VERSION=4.14.1
+    SARAH_VERSION=4.14.3
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
