@@ -25,6 +25,7 @@
 #include "cxx_qft/SM_qft.hpp"
 
 #include "test_complex_equality.hpp"
+#include "SM_mass_eigenstates.hpp"
 
 namespace flexiblesusy
 {
