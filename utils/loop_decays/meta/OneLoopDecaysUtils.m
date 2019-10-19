@@ -231,9 +231,7 @@ GetAdjacencyMatrix[edgeList_List, undirected_:True] :=
                                                e1[[2]] == e2[[1]] && e1[[1]] == e2[[2]]]],
                          Function[{e1, e2}, e1[[1]] == e2[[1]] && e1[[2]] == e2[[2]]]
                         ];
-           (* Use convention in which self-edges contribute 2 to the diagonal entries
-              for undirected graphs *)
-           edgeCount = Tally[edgeList, edgeTest] /. If[undirected, {{{i_, i_}, c_} :> {{i, i}, 2 c}}, {}];
+           edgeCount = Tally[edgeList, edgeTest];
            If[undirected,
               edgeCount = DeleteDuplicates[Join[edgeCount, {Reverse[#[[1]]], #[[2]]}& /@ edgeCount]];
              ];

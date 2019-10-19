@@ -55,12 +55,12 @@ double Decay_amplitude_SVV::square() const
       const double m0 = 4. * AbsSqr(form_factor_g);
 
       const double m2 = Sqr(m_decay) * (
-         Re(form_factor_g * Conj(form_factor_12))
-         + Re(form_factor_g * Conj(form_factor_21)));
+         //Re(form_factor_g * Conj(form_factor_12))
+          Re(form_factor_g * Conj(form_factor_21)));
 
-      const double m4 = Power4(m_decay) * (
+      const double m4 = 0.5 * Power4(m_decay) * (
             //Re(form_factor_11 * Conj(form_factor_22))
-            + Re(form_factor_12 * Conj(form_factor_21))
+            // + Re(form_factor_12 * Conj(form_factor_21))
             + AbsSqr(form_factor_eps));
 
       return m0 + m2 + m4;

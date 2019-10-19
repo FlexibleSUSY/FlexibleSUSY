@@ -545,13 +545,7 @@ GetDirectedAdjacencyMatrix[topology_] :=
 
 GetUndirectedAdjacencyMatrix[topology_] :=
     Module[{directedAdjacencyMatrix, m1, m2},
-            directedAdjacencyMatrix = GetDirectedAdjacencyMatrix[topology];
-           m1 = directedAdjacencyMatrix + Transpose[directedAdjacencyMatrix];
-           m2 = m1;
-           For[ii = 1, ii <= Length[m1], ii++,
-             m2[[ii]] = MapAt[(#/2)&, m1[[ii]], ii];
-           ];
-           m2
+            directedAdjacencyMatrix = GetDirectedAdjacencyMatrix[topology]
            ];
 
 GetEdgeLabels[topology_] :=

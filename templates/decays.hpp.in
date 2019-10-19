@@ -67,7 +67,6 @@ enum class HigherOrderSMCorrections {enable, disable};
 
 class @ModelName@_decays {
 public:
-   @ModelName@_decays() = default;
    @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_)
       : model(model_)
       , qedqcd(qedqcd_)

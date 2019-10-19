@@ -351,7 +351,7 @@ GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
    Module[{externalFields, diagrams},
            externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]];
-           diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph, externalFields];
+           diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph, externalFields, True];
            Select[diagrams, IsPossibleNonZeroDiagram]
           ];
 
@@ -1281,8 +1281,12 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
 ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
    Module[{vertexEdges, res, pos},
 
+Print["START"];
+Print["1 ", particles, lor, fieldAssociation, vertices, indices];
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
+   Print["2 ", vertexEdges];
    pos = First@First@Position[vertices, vertexEdges];
+   Print["3 ", pos];
    res =
       Replace[lor, {
          (* pure only scalar vertices *)
@@ -1315,8 +1319,22 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
 
         (* metric tensor vertices *)
         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])
-          + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])
-          + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])
+            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :>
+                          If[ Signature@FindPermutation[vertexEdges /. _[n_] :> n /. -_[n_] :> n, {n3, n2, n4}] == 1,
+                            "value(TripleVectorVertex::odd_permutation {})",
+                            "value(TripleVectorVertex::odd_permutation {})",
+                            Quit[1];
+                            ];
+(*                "value(TripleVectorVertex::odd_permutation {})",*)
+(*        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])*)
+(*          + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])*)
+(*          + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :>*)
+(*              If[ Signature@FindPermutation[vertexEdges /. _[n_] :> n /. -_[n_] :> n, {n3, n2, n4}] == 1,*)
+(*                "value(TripleVectorVertex::odd_permutation {})",*)
+(*                "value(TripleVectorVertex::odd_permutation {})",*)
+(*                Quit[1];*)
+(*                ];*)
         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])
             + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n4_]]])
             + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[V[Index[Generic, n4_]]]) :> "value(TripleVectorVertex::odd_permutation {})",
@@ -1347,10 +1365,18 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
              ], {particles}] <> ")"
         ),
         Mom[-f_[Index[Generic, n_]]] :> (
+           Print["SHIT2", Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] ,  Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],         If[
+              Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
+              Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&],
+              -f[Index[Generic, n]]
+              ]];
           "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[
             If[
               Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
-              First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&],
+              If[Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&] === {},
+                  Last@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],
+First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
+              ],
               -f[Index[Generic, n]]
               ], {particles}]) <> ")"
         ),

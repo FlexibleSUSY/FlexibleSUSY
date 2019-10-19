@@ -402,7 +402,7 @@ ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
  * a reordering of fields in internal vertices and thus any appearing
  * duplicate diagrams are removed.
  **)
-FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List] :=
+FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientations_:False] :=
 	Module[{externalVertices = externalFields[[All,1]],
 			internalVertices,externalRules, internalFieldCouplings,
 			unspecifiedEdgesLess,unspecifiedEdgesEqual,
@@ -437,6 +437,7 @@ not symmetric"];
 	unresolvedFieldCouplings = internalFieldCouplings
 		/. insertFieldRulesLess /. insertFieldRulesGreater /. insertFieldRulesEqual;
 
+   If[bothLoopOrientations && !MemberQ[adjacencyMatrix, el_ /; el > 1, 2], SA`CheckSameVertices = False];
 	resolvedFields = If[fieldsToInsert === {}, {{}},
 		SARAH`InsFields[{C @@@ unresolvedFieldCouplings,
 			fieldsToInsert}][[All,2]]];
@@ -454,10 +455,14 @@ not symmetric"];
 	 * vertices. This is automatically performed by SARAH if
 	 * SA`CheckSameVertices === True, but it is better to not depend on
 	 * some internal SARAH state. *)
-	DeleteDuplicates[diagrams,
-		(And @@ ((Sort[#[[1]]] === Sort[#[[2]]] &) /@
-			Cases[Transpose[{#1, #2}],{{___},{___}}] (* Only check internal vertices *)
-		) &)]
+
+   If[bothLoopOrientations && !MemberQ[adjacencyMatrix, el_ /; el > 1, 2],
+      diagrams,
+	   DeleteDuplicates[diagrams,
+		   (And @@ ((Sort[#[[1]]] === Sort[#[[2]]] &) /@
+			   Cases[Transpose[{#1, #2}],{{___},{___}}] (* Only check internal vertices *)
+		   ) &)]
+   ]
   ]
 
 (** \brief Returns a list of all vertices present in a diagram.
