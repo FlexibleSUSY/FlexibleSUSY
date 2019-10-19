@@ -17,11 +17,6 @@
 
 using namespace softsusy;
 
-template <class T>
-double calculate_delta_alpha_em(T& model)
-{
-}
-
 BOOST_AUTO_TEST_CASE( test_delta_alpha )
 {
    CMSSM<Two_scale> mssm;
