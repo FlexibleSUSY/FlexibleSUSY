@@ -80,7 +80,7 @@ Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF
 
-"$MATH" -run "<< \"$inputFile1\"; Quit[]"
+printf "%s" "<< \"$inputFile1\"; Quit[]" | "$MATH"
 
 "${MODELDIR}/CMSSM/run_CMSSM.x" \
     --slha-input-file="$inputFile2" \
