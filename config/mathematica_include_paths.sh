@@ -7,10 +7,10 @@
 math_cmd=math
 
 find_math_dirs() {
-    eval `"${math_cmd}" -run '
-       Print["sysid=\"", $SystemID, "\""];
-       Print["topdir=\"", $TopDirectory, "\""];
-       Exit[]' < /dev/null | tr '\r' ' ' | tail -2`
+    eval `printf "%s" '
+       Print @ OutputForm["sysid=\""  <> ToString[$SystemID    ] <> "\""];
+       Print @ OutputForm["topdir=\"" <> ToString[$TopDirectory] <> "\""];
+       Exit[]' | "${math_cmd}" -noprompt | tr '\r' ' ' | tail -2`
 
     # check whether Cygwin's dlltool can handle 64-bit DLLs
     test "$sysid" = Windows-x86-64 && {

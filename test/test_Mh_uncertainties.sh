@@ -4,7 +4,7 @@ BASEDIR="$(dirname $0)"
 FSCONFIG="${BASEDIR}/../flexiblesusy-config"
 MATH=$(${FSCONFIG} --math-cmd)
 
-echo "<< \"${BASEDIR}/test_Mh_uncertainties.m\"; Quit[];" | $MATH -run
+printf "%s" "<< \"${BASEDIR}/test_Mh_uncertainties.m\"; Quit[]" | "$MATH"
 error="$?"
 
 [ "x${error}" != x0 ] && {
