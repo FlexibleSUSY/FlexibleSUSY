@@ -1279,14 +1279,12 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
 ];
 
 ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
-   Module[{vertexEdges, res, pos},
+   Module[{vertexEdges, res, pos, kk, globalMinus = 1},
 
-Print["START"];
-Print["1 ", particles, lor, fieldAssociation, vertices, indices];
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
-   Print["2 ", vertexEdges];
    pos = First@First@Position[vertices, vertexEdges];
-   Print["3 ", pos];
+   kk = vertexEdges /. -_[n_] :> n /. _[n_] :> n ;
+(*   Print["particles ", particles];*)
    res =
       Replace[lor, {
          (* pure only scalar vertices *)
@@ -1313,48 +1311,52 @@ Print["1 ", particles, lor, fieldAssociation, vertices, indices];
                StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
          ),
         (Mom[-f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]]) :> (
-          "value(" <>
+           "value(" <>
               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, -f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
         ),
 
         (* metric tensor vertices *)
-        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :>
-                          If[ Signature@FindPermutation[vertexEdges /. _[n_] :> n /. -_[n_] :> n, {n3, n2, n4}] == 1,
-                            "value(TripleVectorVertex::odd_permutation {})",
-                            "value(TripleVectorVertex::odd_permutation {})",
-                            Quit[1];
-                            ];
-(*                "value(TripleVectorVertex::odd_permutation {})",*)
-(*        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])*)
-(*          + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])*)
-(*          + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :>*)
-(*              If[ Signature@FindPermutation[vertexEdges /. _[n_] :> n /. -_[n_] :> n, {n3, n2, n4}] == 1,*)
-(*                "value(TripleVectorVertex::odd_permutation {})",*)
-(*                "value(TripleVectorVertex::odd_permutation {})",*)
-(*                Quit[1];*)
-(*                ];*)
-        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n3_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n4_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n3_]]] + Mom[V[Index[Generic, n4_]]]) :> "value(TripleVectorVertex::odd_permutation {})",
-        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[-V[Index[Generic, n3_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n4_]]])
-            + g[lt2_, lt3_] (-Mom[-V[Index[Generic, n3_]]] + Mom[-V[Index[Generic, n4_]]]) :> "value(TripleVectorVertex::odd_permutation {})",
+        (* there's a global - sign in those expression, that's why permutaion with even
+           signature is replaced with odd_permutaion *)
+        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n3_]]])
+            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[V[Index[Generic, n3_]]]) :>
+               If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
+                  "value(TripleVectorVertex::odd_permutation {})",
+                  "value(TripleVectorVertex::even_permutation {})",
+                  Quit[1];
+               ],
+         (* copy of the above expression but with -V[5] and -V[6] *)
+         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[-V[Index[Generic, n1_]]])
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
+            + g[lt2_, lt3_] (-Mom[-V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
+            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
+               "value(TripleVectorVertex::odd_permutation {})",
+               "value(TripleVectorVertex::even_permutation {})",
+               Quit[1];
+            ],
+         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
+            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
+            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
+            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
+               "value(TripleVectorVertex::odd_permutation {})",
+               "value(TripleVectorVertex::even_permutation {})",
+               Quit[1];
+            ],
 
+         g[lt1_, lt2_] g[lt3_, lt4_] -> "value1()",
 
-        g[lt1_, lt2_] g[lt3_, lt4_] -> "value1()",
+         g[lt1_, lt2_] -> "value()",
 
-        g[lt1_, lt2_] -> "value()",
-
-        (* momentum vertices *)
-        (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
-           of bared ghost. This is opposite to Sarah where all such vertices are written using
+         (* momentum vertices *)
+         (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
+            of bared ghost. This is opposite to Sarah where all such vertices are written using
             the momentum of non-bared ghost *)
-        Mom[f_[Index[Generic, n_]]] :> (
+         Mom[f_[Index[Generic, n_]]] :> (
            "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[
              If[
                Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] === SARAH`bar,
+               globalMinus = -1;
                If[Length@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&] === 0,
                  First@Select[{particles}, MatchQ[#, f[Index[Generic, m_/; m =!= n]]]&],
 
@@ -1363,20 +1365,16 @@ Print["1 ", particles, lor, fieldAssociation, vertices, indices];
                ],
                f[Index[Generic, n]]
              ], {particles}] <> ")"
-        ),
-        Mom[-f_[Index[Generic, n_]]] :> (
-           Print["SHIT2", Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] ,  Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],         If[
-              Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
-              Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&],
-              -f[Index[Generic, n]]
-              ]];
+         ),
+         Mom[-f_[Index[Generic, n_]]] :> (
           "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[
             If[
               Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
               If[Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&] === {},
                   Last@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],
-First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
+                  First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
               ],
+               globalMinus = -1;
               -f[Index[Generic, n]]
               ], {particles}]) <> ")"
         ),
@@ -1386,6 +1384,7 @@ First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
       }
    ];
 
+   If[globalMinus === -1, "- ", ""] <>
    "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ];
 
