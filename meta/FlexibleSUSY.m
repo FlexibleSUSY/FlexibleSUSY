@@ -1929,11 +1929,6 @@ WriteDecaysMakefileModule[sources_List, headers_List, files_List] :=
                     Sequence @@ GeneralReplacementRules[]
                   } ];
           ];
-ApplyAntifield[l_] :=
-Module[{},
-      MapAt[AntiField, l, List/@#]& /@
-   DeleteCases[Subsets[Range@Length[l]], {}]
-];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
     Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, decaysVertices2 = {}, numberOfDecayParticles = 0,

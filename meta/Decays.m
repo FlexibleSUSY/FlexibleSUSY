@@ -1284,7 +1284,6 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
    kk = vertexEdges /. -_[n_] :> n /. _[n_] :> n ;
-(*   Print["particles ", particles];*)
    res =
       Replace[lor, {
          (* pure only scalar vertices *)
@@ -1344,7 +1343,13 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
                Quit[1];
             ],
 
-         g[lt1_, lt2_] g[lt3_, lt4_] -> "value1()",
+         g[l1_, l2_] g[l3_, l4_] :>
+            Switch[{l1, l2, l3, l4},
+               {lt1, lt2, lt3, lt4}, "value1()",
+               {lt1, lt3, lt2, lt4}, "value2()",
+               {lt1, lt4, lt2, lt3}, "value3()",
+               _, (Utils`PrintErrorMsg["Unknown lorentz index combination " <> ToString@{l1, l2, l3, l4} <> " in 4-vector vertex."]; Quit[1])
+            ],
 
          g[lt1_, lt2_] -> "value()",
 
