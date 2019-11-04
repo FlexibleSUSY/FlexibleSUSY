@@ -157,9 +157,8 @@ SetAttributes[
    {Protected, Locked}];
 
 NPointFunctions`internal`contextPath = $ContextPath;
-Begin["`internal`"];
 $ContextPath = {"NPointFunctions`","System`"};
-
+Begin["`internal`"];
 (* ============================== Type definitions ========================== *)
 `type`genericField =
    (GenericS | GenericF | GenericV | GenericU)[GenericIndex[_Integer]] |
@@ -225,17 +224,25 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
 makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
 makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
+getDirectory::errNotAString =
+"getDirectory[`1`] doesn't have a String type.";
 getDirectory /: Dot[output,getDirectory[]] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,""]]&@
 FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates};
 getDirectory /: Dot[output,getDirectory@"Meta"] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"Meta"]]&@
 FlexibleSUSY`$flexiblesusyMetaDir;
 getDirectory /: Dot[output,getDirectory@"FormCalc"] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FormCalc"]]&@
 FileNameJoin@{output.getDirectory[],"FormCalc"};
 getDirectory /: Dot[output,getDirectory@"FeynArts"] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FeynArts"]]&@
 FileNameJoin@{output.getDirectory[],"FeynArts"};
 getDirectory /: Dot[output,getDirectory@"NPointFunctions"] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"NPointFunctions"]]&@
 FileNameJoin@{output.getDirectory[],"NPointFunctions"};
 getDirectory /: Dot[output,getDirectory@"FeynArts_model"] :=
+If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FeynArts_model"]]&@
 FileNameJoin@{output.getDirectory@"FeynArts", SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates};
 getDirectory // makeDefaultDefinitions;
 getDirectory ~ SetAttributes ~ {Locked,Protected,ReadProtected};
