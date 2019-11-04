@@ -252,7 +252,7 @@ FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamesFeynArts.dat"};
 getFileName /: Dot[output,getFileName@"Namespaces"] :=
 FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamespaces.m"};
 getFileName /: Dot[output,getFileName@"Substitutions"] :=
-FileNameJoin@{output.getDirectory@"FeynArts", StringJoin["Substitutions-",SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]};
+FileNameJoin@{output.getDirectory@"FeynArts", StringJoin["Substitutions-",ToString@SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]};
 getFileName // makeDefaultDefinitions;
 getFileName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
