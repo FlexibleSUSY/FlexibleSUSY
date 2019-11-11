@@ -1658,7 +1658,7 @@ Module[
    },
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,newExpr,preCXXRules]];
    cxxExpr = StringReplace[cxxExpr, "\"" -> ""];
-   out="value += "<>stringGeneratedCut[cxxExpr<>";",100,",","   "<>"   "];
+   out="value += "<>stringGeneratedCut[cxxExpr<>";",100,","];
    CXXBeginSum[summation,preCXXRules]<>"\n"<>"   "<>out<>"\n"<>CXXEndSum[summation.getGenericFields[]]
 ];
 CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,wilsonBasis:{Rule[_String,_]..}] :=
