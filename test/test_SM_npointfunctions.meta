@@ -19,12 +19,12 @@
    ====================================================================
 
 *)
+Needs["Utils`"];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_SM_npointfunctions.meta started ...\n"];
+Utils`FSFancyLine[":"];
 
 Needs["FlexibleSUSY`"];
-
-Utils`FSFancyLine[];
-WriteString[OutputStream["stdout",1],#]&@
-   "\033[1;34mTest: Comparing hh self-energies in SM (NPointFunctions vs. FlexibleSUSY)\033[1;0m ...\n";
 
 (*INITIALIZATION***************************************************************)
 workingDirectory = Directory[];
@@ -38,8 +38,8 @@ Start["SM"];
 modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
 
 FlexibleSUSY`LoadModelFile[modelFile];
-{susyBetaFunctions, susyBreakingBetaFunctions} = FlexibleSUSY`ReadSARAHBetaFunctions[];
-allParameters = FlexibleSUSY`SetupModelParameters[susyBetaFunctions, susyBreakingBetaFunctions];
+FlexibleSUSY`Private`PrepareUnrotatedParticles[FSEigenstates];
+allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFunctions[];
 
 {massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices[allParameters];
 FlexibleSUSY`SetupOutputParameters[massMatrices];
@@ -99,5 +99,6 @@ code = StringReplace[templateCode,
 fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp"};
 WriteString[fileHandle, code];
 Close[fileHandle];
-WriteString[OutputStream["stdout",1],"\033[1;34mtest_SM_npointfunctions.meta finished\033[1;0m\n"];
-Utils`FSFancyLine[];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_SM_npointfunctions.meta done\n"];
+Utils`FSFancyLine[":"];
