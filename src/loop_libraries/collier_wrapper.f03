@@ -21,10 +21,31 @@ contains
       call B0_cll(res, p10, m02, m12)
    end
 
+   function B1_dummy(p10, m02, m12, scl2) result(res) bind(C, name='B1_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Bcoeff(0:rank/2, 0:rank))
+      allocate(Bcoeffuv(0:rank/2, 0:rank))
+
+      call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, rank)
+
+      res = Bcoeff(0,1)
+
+      deallocate(Bcoeff, Bcoeffuv)
+   end
+
    function C0_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C0_impl')
 
-      ! inputs and output from this function
-      ! we use the c++ equivalent type names from the iso_c_binding module
       complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
       real(C_DOUBLE), intent(in) :: scl2
@@ -36,10 +57,54 @@ contains
       call C0_cll(res, p10, p21, p20, m02, m12, m22)
    end
 
+   function C1_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C1_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
+      allocate(Ccoeffuv(0:rank/2, 0:rank, 0:rank))
+
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
+
+      res = Ccoeff(0,1,0)
+
+      deallocate(Ccoeff, Ccoeffuv)
+   end
+
+   function C2_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C2_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
+      allocate(Ccoeffuv(0:rank/2, 0:rank, 0:rank))
+
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
+
+      res = Ccoeff(0,0,1)
+
+      deallocate(Ccoeff, Ccoeffuv)
+   end
+
    function C00_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C00_impl')
 
-      ! inputs and output from this function
-      ! we use the c++ equivalent type names from the iso_c_binding module
       complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
       real(C_DOUBLE), intent(in) :: scl2
@@ -57,6 +122,75 @@ contains
       call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
 
       res = Ccoeff(1,0,0)
+
+      deallocate(Ccoeff, Ccoeffuv)
+   end
+
+   function C11_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C11_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
+      allocate(Ccoeffuv(0:rank/2, 0:rank, 0:rank))
+
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
+
+      res = Ccoeff(0,2,0)
+
+      deallocate(Ccoeff, Ccoeffuv)
+   end
+
+   function C12_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C12_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
+      allocate(Ccoeffuv(0:rank/2, 0:rank, 0:rank))
+
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
+
+      res = Ccoeff(0,1,1)
+
+      deallocate(Ccoeff, Ccoeffuv)
+   end
+
+   function C22_dummy(p10, p21, p20, m02, m12, m22, scl2) result(res) bind(C, name='C22_impl')
+
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      real(C_DOUBLE), intent(in) :: scl2
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+      integer, parameter :: rank = 3
+
+      call Init_cll(3,3,'')
+      call SetMuUV2_cll(scl2)
+
+      allocate(Ccoeff(0:rank/2, 0:rank, 0:rank))
+      allocate(Ccoeffuv(0:rank/2, 0:rank, 0:rank))
+
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, rank)
+
+      res = Ccoeff(0,0,2)
 
       deallocate(Ccoeff, Ccoeffuv)
    end

@@ -1,4 +1,14 @@
 #include <complex>
+#define two_point_virtual(NAME)\
+   virtual std::complex<double> NAME(\
+      std::complex<double> p10,\
+      std::complex<double> m02, std::complex<double> m12,\
+      double scl2) = 0;
+#define three_point_virtual(NAME)\
+   virtual std::complex<double> NAME(\
+      std::complex<double> p10, std::complex<double> p21, std::complex<double> p20,\
+      std::complex<double> m02, std::complex<double> m12, std::complex<double> m22,\
+      double scl2) = 0;
 
 enum class Loop_library {
    LoopTools,
@@ -17,16 +27,14 @@ class Loop_library_interface {
          }
       }
       */
-      virtual std::complex<double> B0(
-         std::complex<double> p10,
-         std::complex<double> m02, std::complex<double> m12,
-         double scl2) = 0;
-      virtual std::complex<double> C0(
-         std::complex<double> p10, std::complex<double> p21, std::complex<double> m20,
-         std::complex<double> m02, std::complex<double> m12, std::complex<double> m22,
-         double scl2) = 0;
-      virtual std::complex<double> C00(
-         std::complex<double> p10, std::complex<double> p21, std::complex<double> m20,
-         std::complex<double> m02, std::complex<double> m12, std::complex<double> m22,
-         double scl2) = 0;
+      two_point_virtual(B0)
+      two_point_virtual(B1)
+
+      three_point_virtual(C0)
+      three_point_virtual(C1)
+      three_point_virtual(C2)
+      three_point_virtual(C00)
+      three_point_virtual(C11)
+      three_point_virtual(C12)
+      three_point_virtual(C22)
 };

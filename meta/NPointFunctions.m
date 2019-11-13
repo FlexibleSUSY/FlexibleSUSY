@@ -382,7 +382,7 @@ Module[
    {
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
-      paveLibrary = "LoopTools" ,
+      paveLibrary = "GenericLibrary" ,
       header,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
@@ -1101,8 +1101,14 @@ Module[
       warning<>": Only remaps of B0, C0, C00 are implemented.\n"];
    {
       LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"context.scale()"],
+      LoopTools`B0i[LoopTools`bb1,args__] :> "lib->B1"[args,"context.scale()"],
       LoopTools`C0i[LoopTools`cc0,args__] :> "lib->C0"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"context.scale()"]
+      LoopTools`C0i[LoopTools`cc1,args__] :> "lib->C1"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc2,args__] :> "lib->C2"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc11,args__] :> "lib->C11"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc12,args__] :> "lib->C12"[args,"context.scale()"],
+      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"context.scale()"]
    }
 ];
 Utils`MakeUnknownInputDefinition@getGenericLibraryRules;
