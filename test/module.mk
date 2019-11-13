@@ -61,7 +61,8 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
-		$(DIR)/test_space_dir.sh
+		$(DIR)/test_space_dir.sh \
+		$(DIR)/test_wolframscript.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -767,8 +768,8 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
+		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -819,16 +820,16 @@ $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM)
 
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM)
 
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM)
 
 $(DIR)/test_MSSM_npointfunctions.cpp : \
@@ -836,7 +837,7 @@ $(DIR)/test_MSSM_npointfunctions.cpp : \
 		$(DIR)/test_MSSM_npointfunctions.cpp.in \
 		$(META_SRC) $(METACODE_STAMP_MSSM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM)
 
 $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
@@ -844,7 +845,7 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
 		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in \
 		$(META_SRC) $(METACODE_STAMP_MSSM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)

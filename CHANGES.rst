@@ -1,4 +1,4 @@
-FlexibleSUSY 2.4.1 [not released yet]
+FlexibleSUSY 2.4.1 [October, 16 2019]
 =====================================
 
 New features
@@ -12,12 +12,22 @@ New features
 
   in the model file.
 
+* New module ``meta/SM/as_4loop_qcd.m`` with 4-loop SM-QCD threshold
+  corrections O(αs^4) to the strong coupling `[hep-ph/0512060]
+  <https://arxiv.org/abs/hep-ph/0512060>`_.
+
+* New module ``meta/LoopFunctionsZeroMomentum.m`` with
+  Passarino-Veltman 1-loop functions for vanishing external momenta.
+
 Fixed bugs
 ----------
 
 * [commit c06e57497]: The sign of 2- and 3-loop pure QCD threshold
   corrections for αs in the Standard Model has been corrected.  The
   effect is of the order 50 MeV w.r.t. the Higgs pole mass.
+
+* [commit bedc5b83f]: ``./createmodel`` returned an error when the
+  ``models`` directory was empty.
 
 
 FlexibleSUSY 2.4.0 [August, 04 2019]
