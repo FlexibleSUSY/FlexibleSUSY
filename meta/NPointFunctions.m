@@ -20,7 +20,7 @@
 
 *)
 
-(*@assumptions: 
+(*@assumptions:
 1) there are no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
@@ -74,10 +74,10 @@ ExceptIrreducible::usage=
 "Possible value for ExcludeProcesses.
 Exclude irreducible topologies.";
 ExceptBoxes::usage=
-"Possible value for ExcludeProcesses. 
+"Possible value for ExcludeProcesses.
 Exclude all topologies except box diagrams.";
 ExceptTriangles::usage=
-"Possible value for ExcludeProcesses. 
+"Possible value for ExcludeProcesses.
 Exclude all topologies except triangle ones.";
 
 ExceptFourFermionScalarPenguins::usage=
@@ -90,7 +90,7 @@ Keep
 amplitudes.";
 ExceptFourFermionMassiveVectorPenguins::usage=
 "Possible value for ExcludeProcesses.
-Exclude all processes except 4-fermion penguins with massive vector propagating 
+Exclude all processes except 4-fermion penguins with massive vector propagating
 from one fermionic chain to another one.
 Keep
 1) triangle-like topologies;
@@ -123,7 +123,7 @@ LorentzIndex::usage=
 "Represent a Lorentz index of a generic field.";
 
 LoopFunctions::usage=
-"Option for NPointFunctions`CreateCXXHeaders[] and 
+"Option for NPointFunctions`CreateCXXHeaders[] and
 NPointFunctions`CreateCXXFunctions[]
 Controls whether to use FlexibleSUSY or LoopTools for loop functions.
 
@@ -153,7 +153,7 @@ SetAttributes[
    GenericS,GenericF,GenericV,GenericU,GenericT,                                (* @unote also exist in internal.m*)
    GenericSum,GenericIndex,LorentzIndex,                                        (* @unote also exist in internal.m*)
    LoopFunctions,UseWilsonCoeffs,WilsonBasis
-   }, 
+   },
    {Protected, Locked}];
 
 NPointFunctions`internal`contextPath = $ContextPath;
@@ -224,59 +224,49 @@ Module[{usageString,info,parsedInfo,infoString,toString=StringJoin@@Riffle[ToStr
 makeDefaultDefinitions // Utils`MakeUnknownInputDefinition;
 makeDefaultDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-getDirectory::errNotAString =
-"getDirectory[`1`] doesn't have a String type.";
-getDirectory /: Dot[output,getDirectory[]] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,""]]&@
-FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates};
-getDirectory /: Dot[output,getDirectory@"Meta"] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"Meta"]]&@
-FlexibleSUSY`$flexiblesusyMetaDir;
-getDirectory /: Dot[output,getDirectory@"FormCalc"] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FormCalc"]]&@
-FileNameJoin@{output.getDirectory[],"FormCalc"};
-getDirectory /: Dot[output,getDirectory@"FeynArts"] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FeynArts"]]&@
-FileNameJoin@{output.getDirectory[],"FeynArts"};
-getDirectory /: Dot[output,getDirectory@"NPointFunctions"] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"NPointFunctions"]]&@
-FileNameJoin@{output.getDirectory[],"NPointFunctions"};
-getDirectory /: Dot[output,getDirectory@"FeynArts_model"] :=
-If[MatchQ[#,_String],#,Utils`AssertOrQuit[False,getDirectory::errNotAString,"FeynArts_model"]]&@
-FileNameJoin@{output.getDirectory@"FeynArts", SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates};
-getDirectory // makeDefaultDefinitions;
-getDirectory ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getDirectories[] :=
+Module[{},
+   {
+      {
+         #1,
+         #2,
+         #3,
+         FlexibleSUSY`$flexiblesusyMetaDir
+      },
+      {
+         FileNameJoin@{#2,SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates},
+         FileNameJoin@{#2,"ParticleNamesFeynArts.dat"},
+         FileNameJoin@{#2,"ParticleNamespaces.m"},
+         FileNameJoin@{#2,StringJoin["Substitutions-",SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]}
+      }
+   }&@@({FileNameJoin@{#,"NPointFunctions"},FileNameJoin@{#,"FeynArts"},FileNameJoin@{#,"FormCalc"}}&[FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates}])
+];
+getDirectories // Utils`MakeUnknownInputDefinition;
+getDirectories ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-getFileName /: Dot[output,getFileName@"Particles"] :=
-FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamesFeynArts.dat"};
-getFileName /: Dot[output,getFileName@"Namespaces"] :=
-FileNameJoin@{output.getDirectory@"FeynArts", "ParticleNamespaces.m"};
-getFileName /: Dot[output,getFileName@"Substitutions"] :=
-FileNameJoin@{output.getDirectory@"FeynArts", StringJoin["Substitutions-",ToString@SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]};
-getFileName // makeDefaultDefinitions;
-getFileName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
-
-getIndent /: Dot[obj:_String,getIndent[]] := First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
-getIndent /: Dot[obj:{__String},getIndent[]] := First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
-getIndent // makeDefaultDefinitions;
+getIndent[obj:_String] :=
+First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent[obj:{__String}] :=
+First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent // Utils`MakeUnknownInputDefinition;
 getIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-getConjugated /: Dot[obj:`type`genericField,getConjugated[]] :=
+getConjugated[obj:`type`genericField] :=
 Switch[Head@obj,
    SARAH`bar | Susyno`LieGroups`conj, obj[[1]],
    GenericS | GenericV, Susyno`LieGroups`conj@obj,
    GenericF | GenericU, SARAH`bar@obj
 ];
-getConjugated // makeDefaultDefinitions;
+getConjugated // Utils`MakeUnknownInputDefinition;
 getConjugated ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-removeIndent /: Dot[obj:_String,removeIndent[]] := StringReplace[obj,StartOfLine~~obj.getIndent[]->""];
+removeIndent /: Dot[obj:_String,removeIndent[]] := StringReplace[obj,StartOfLine~~getIndent[obj]->""];
 removeIndent // makeDefaultDefinitions;
 removeIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 replaceTokens /: Dot[code:_String,replaceTokens[rules:`type`cxxReplacementRules]] :=
 StringJoin[
-   StringReplace[#,"\n"->StringJoin["\n",#.getIndent[]]] &/@ StringReplace[StringSplit[code.removeIndent[],"\n"],rules]~Riffle~"\n"];
+   StringReplace[#,"\n"->StringJoin["\n",getIndent@#]] &/@ StringReplace[StringSplit[code.removeIndent[],"\n"],rules]~Riffle~"\n"];
 replaceTokens // makeDefaultDefinitions;
 replaceTokens ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -294,9 +284,41 @@ DeleteDuplicates@Flatten@Level[obj.getProcess[],{4,5}];
 getExternalIndices // makeDefaultDefinitions;
 getExternalIndices ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
+getGenericSums::errSimpleOnly =
+"Only the case without subexpressions is supported.";
+getGenericSums::errBadIndex =
+"Specified index(es) `1` is (are) outside the allowed region `2`.";
 getGenericSums /: Dot[obj:`type`npf,getGenericSums[]] := obj[[2,1,1]];
+getGenericSums /: Dot[obj:`type`npf,getGenericSums[int:{__Integer}]] :=
+Module[{unique = DeleteDuplicates@int},
+   {
+      obj.getProcess[],
+      {
+         {
+            Part[obj.getGenericSums[],unique],
+            Part[obj.getClassFields[],unique],
+            Part[obj.getClassCombinatoricalFactors[],unique],
+            Part[obj.getClassColorFactors[],unique]
+         },
+         obj.getSubexpressions[]
+      }
+   }
+] /; And[
+   Utils`AssertOrQuit[obj.getSubexpressions[] == {},getGenericSums::errSimpleOnly],
+   Utils`AssertOrQuit[#.containsQ[int],getGenericSums::errBadIndex,int,#]&[obj.getClassCombinatoricalFactors[].getIndexRange[]]
+];
+
 getGenericSums // makeDefaultDefinitions;
 getGenericSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getIndexRange /: Dot[obj:{___},getIndexRange[]] := {1, Length@obj};
+getIndexRange // makeDefaultDefinitions;
+getIndexRange ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+containsQ /: Dot[obj:{_Integer,_Integer},containsQ[int:_Integer]] := IntervalMemberQ[Interval@obj,int];
+containsQ /: Dot[obj:{_Integer,_Integer},containsQ[int:{__Integer}]] := And@@(obj.containsQ[#]&/@int);
+containsQ // makeDefaultDefinitions;
+containsQ ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getClassFields /: Dot[obj:`type`npf,getClassFields[]] := obj[[2,1,2]];
 getClassFields // makeDefaultDefinitions;
@@ -417,7 +439,7 @@ Module[
         (mass[ First@dressedFermions ]^2+mass[ Last@dressedFermions ]^2) / 2
      };
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
-   
+
    Print["Analytical calculation for ",inF,"->",outF," done."];
 
    dimension6Template[i_,o_,q_] :=
@@ -427,15 +449,15 @@ Module[
          ("S_LR_via_"<>ToString@q) -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,6,q~sp~2],
          ("S_RL_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,7,q~sp~2],
          ("S_RR_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,6,q~sp~2],
-         (*@note Q: why names of coeffients are not correct? A: they are 
-          *correct, one just need to commute projectors with Dirac matrices, 
+         (*@note Q: why names of coeffients are not correct? A: they are
+          *correct, one just need to commute projectors with Dirac matrices,
           *what changes 6 to 7 or 7 to 6.*)
          ("V_LL_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
          ("V_LR_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
          ("V_RL_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
          ("V_RR_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
-         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours 
-          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when 
+         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours
+          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
           *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
           *for FC because it cites [Ni05] for Fierz identities, where our
           *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
@@ -453,9 +475,10 @@ Module[
    dNPF = dNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,dQ];
    uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
    dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
-   uNPF = uNPF.applySubexpressions[];
-   dNPF = dNPF.applySubexpressions[];
-   temp = uNPF;
+   (*@TODO remove*)
+   uNPF = uNPF.applySubexpressions[].getGenericSums[{1,2,7,9}];
+   dNPF = dNPF.applySubexpressions[].getGenericSums[{1,2,7,9}];
+   (*@TODO remove*)
 
    Print["C++ code calculation for ",inF,"->",outF," started ..."];
    codeU = CreateCXXFunctions[uNPF,
@@ -492,24 +515,24 @@ Options[NPointFunction]={
    ExcludeProcesses -> {}
 };
 NPointFunction::usage=
-"@brief Calculate the n-point correlation function for a List of incoming and 
+"@brief Calculate the n-point correlation function for a List of incoming and
 a List of outgoing fields.
 @param inFields a List of incoming fields
 @param outFields a List of outgoing fields
 @param LoopLevel the loop level at which to perform the calculation
 @param Regularize the regularization scheme to apply
-@param UseCache whether to attempt to read and write the result from and to 
+@param UseCache whether to attempt to read and write the result from and to
 the cache.
-@param ZeroExternalMomenta whether to set the external momenta to zero or leave 
+@param ZeroExternalMomenta whether to set the external momenta to zero or leave
 them undetermined.
-@param ExcludeProcesses a list or single symbol of topologies to exclude when 
+@param ExcludeProcesses a list or single symbol of topologies to exclude when
 calculation the n-point correlation function
 @returns the corresponding n-point correlation function
 @note only a loop level of 1 is currently supported
 @note the recognized regularization schemes are:
  - DimensionalReduction
  - DimensionalRegularization
-@note when not setting the external momenta to zero one should use LoopTools 
+@note when not setting the external momenta to zero one should use LoopTools
 for the evaluation of the loop functions.";
 NPointFunction::errinFields=
 "The element '`1`' of inFields is an incorrect one.
@@ -540,7 +563,7 @@ NPointFunction::errZeroExternalMomenta=
 NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
 NPointFunction::errExcludeProcesses=
-"ExcludeProcesses must be sublist of 
+"ExcludeProcesses must be sublist of
 {
    ExceptIrreducible,
    ExceptBoxes,
@@ -564,19 +587,18 @@ Module[
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
       excludeProcesses = OptionValue[ExcludeProcesses],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
-      nPointFunctionsDir = output.getDirectory["NPointFunctions"],
-      feynArtsDir = output.getDirectory["FeynArts"],
-      feynArtsModel = output.getDirectory["FeynArts_model"],
-      particleNamesFile = output.getFileName["Particles"],
-      particleNamespaceFile = output.getFileName["Namespaces"],
-      substitutionsFile = output.getFileName["Substitutions"],
-      formCalcDir = output.getDirectory["FormCalc"],
-      fsMetaDir = output.getDirectory["Meta"],
+      nPointFunctionsDir,feynArtsDir,feynArtsModel,particleNamesFile,
+      particleNamespaceFile,substitutionsFile,formCalcDir,fsMetaDir,
       subKernel,
       currentPath, currentDirectory,
       inFANames,outFANames,
       nPointFunction
    },
+   {
+      {nPointFunctionsDir,feynArtsDir,formCalcDir,fsMetaDir},
+      {feynArtsModel,particleNamesFile,particleNamespaceFile,substitutionsFile}
+   } = getDirectories[];
+
    If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
@@ -591,10 +613,10 @@ Module[
       WriteParticleNamespaceFile@particleNamespaceFile;
       CloseKernels@subKernel;
    ];
-   
+
    SetSharedFunction@deletePrintFromSubkernel;
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
-   
+
    inFANames = FANamesForFields[inFields, particleNamesFile];
    outFANames = FANamesForFields[outFields, particleNamesFile];
 
@@ -606,11 +628,11 @@ Module[
       particleNamesFile, substitutionsFile, particleNamespaceFile,
       inFANames, outFANames, loopLevel, regularizationScheme,
       zeroExternalMomenta, excludeProcesses, onShellFlag];
-      
+
    nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDirectory;
-      
+
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
       NPointFunctions`SetInitialValues[feynArtsDir, formCalcDir, feynArtsModel,
@@ -666,10 +688,10 @@ Module[
 ];
 
 VerticesForNPointFunction::usage=
-"@brief Return a list of all vertices needed to calculate a given 
+"@brief Return a list of all vertices needed to calculate a given
 n-point correlation function.
 @param nPointFunction the given n-point correlation function
-@returns a list of all vertices needed to calculate a given 
+@returns a list of all vertices needed to calculate a given
 n-point correlation function.temp";
 VerticesForNPointFunction[obj:`type`npf] :=
 Module[
@@ -692,7 +714,7 @@ Utils`MakeUnknownInputDefinition@VerticesForNPointFunction;
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
 @returns the SARAH model name as to be passed to SARAH`.`Start[].";
-GetSARAHModelName[] := 
+GetSARAHModelName[] :=
 If[SARAH`submodeldir =!= False,
       SARAH`modelDir <> "-" <> SARAH`submodeldir,
       SARAH`modelDir
@@ -753,7 +775,7 @@ CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
 @param nPointFunction the given n-point correlation function
 @param cacheDir the directory to save cache
-@param nPointMeta the meta information about the given n-point correlation 
+@param nPointMeta the meta information about the given n-point correlation
 function";
 CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__}] :=
 Module[
@@ -767,7 +789,7 @@ Module[
       nPointFunctions = Get@nPointFunctionsFile,
       nPointFunctions = {}
    ];
-   
+
    position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
    If[Length@position === 1,
       nPointFunctions[[position[[1]]]] = nPointFunction,
@@ -792,8 +814,8 @@ cache or `Null` if such a function could not be found.
 CachedNPointFunction[inFields_,outFields_,cacheDir_,nPointMeta:{__}] :=
 Module[
    {
-      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta}, 
-      nPointFunctions, 
+      nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
+      nPointFunctions,
       position
    },
    If[!FileExistsQ@nPointFunctionsFile,Return@Null];
@@ -809,17 +831,17 @@ GenerateFAModelFileOnKernel::usage=
 GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
 Module[
    {
-      currentPath = $Path, 
+      currentPath = $Path,
       currentDir = Directory[],
-      fsMetaDir = output.getDirectory["Meta"],
+      fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
       sarahInputDirs = SARAH`SARAH@SARAH`InputDirectories,
       sarahOutputDir = SARAH`SARAH@SARAH`OutputDirectory,
-      SARAHModelName = GetSARAHModelName[], 
+      SARAHModelName = GetSARAHModelName[],
       eigenstates = FlexibleSUSY`FSEigenstates
    },
-   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs, 
+   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs,
       sarahOutputDir, SARAHModelName, eigenstates];
-      
+
    ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDir;
@@ -831,7 +853,7 @@ Module[
 Utils`MakeUnknownInputDefinition@GenerateFAModelFileOnKernel;
 
 WriteParticleNamespaceFile::usage=
-"@brief Write a file containing all field names and the contexts in which they 
+"@brief Write a file containing all field names and the contexts in which they
 live in Mathematica.
 @note This is necessary because SARAH puts fields into different contexts.";
 WriteParticleNamespaceFile[fileName_String] :=
@@ -859,18 +881,18 @@ Module[
          CXXDiagrams`RemoveLorentzConjugation@# &/@ fields],
       faFieldNames
    },
-   faFieldNames = 
+   faFieldNames =
    Flatten[
-      StringCases[Utils`ReadLinesInFile@particleNamesFile, 
+      StringCases[Utils`ReadLinesInFile@particleNamesFile,
          ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"
       ] & /@ uniqueFields
    ];
-   Utils`AssertWithMessage[Length@faFieldNames > 0, 
+   Utils`AssertWithMessage[Length@faFieldNames > 0,
       FANamesForFields::errSARAH];
-      
-   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /. 
+
+   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /.
       {
-         SARAH`bar@field_String :> "-" <> field, 
+         SARAH`bar@field_String :> "-" <> field,
          Susyno`LieGroups`conj@field_String :> "-" <> field
       }
 ];
@@ -1091,7 +1113,7 @@ Module[
    }
 ];
 Utils`MakeUnknownInputDefinition@getLoopFlexibleSUSYRules;
-   
+
 getGenericLibraryRules[] :=
 Module[
    {
@@ -1100,27 +1122,27 @@ Module[
    WriteString[OutputStream["stdout", 1],
       warning<>": Only remaps of B0, C0, C00 are implemented.\n"];
    {
-      LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"context.scale()"],
-      LoopTools`B0i[LoopTools`bb1,args__] :> "lib->B1"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc0,args__] :> "lib->C0"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc1,args__] :> "lib->C1"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc2,args__] :> "lib->C2"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc11,args__] :> "lib->C11"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc12,args__] :> "lib->C12"[args,"context.scale()"],
-      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"context.scale()"]
+      LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"Sqr(context.scale())"],
+      LoopTools`B0i[LoopTools`bb1,args__] :> "lib->B1"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc0,args__] :> "lib->C0"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc1,args__] :> "lib->C1"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc2,args__] :> "lib->C2"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc11,args__] :> "lib->C11"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc12,args__] :> "lib->C12"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"Sqr(context.scale())"]
    }
 ];
 Utils`MakeUnknownInputDefinition@getGenericLibraryRules;
 
 CXXArgStringNPF::usage=
-"@brief Returns the c++ arguments that the c++ version of the given n-point 
+"@brief Returns the c++ arguments that the c++ version of the given n-point
 correlation function shall take.
 Default value of zero for all external momenta is chosen if the second parameter
 is \"def\".
 @param nPointFunction the given n-point correlation function
 @param control String that sets up the type of argument string
-@return the c++ arguments that the c++ version of the given n-point 
+@return the c++ arguments that the c++ version of the given n-point
 correlation function shall take.";
 CXXArgStringNPF[nPointFunction:`type`npf,control_String:""] :=
 Module[
@@ -1191,7 +1213,7 @@ Module[
          generic_sum_base, index_map_interface<GenericFieldMap> {
             subexpression_base( const subexpression_base & ) = default;
 
-            subexpression_base( const generic_sum_base &gsb, 
+            subexpression_base( const generic_sum_base &gsb,
                const typename field_index_map<GenericFieldMap>::type &fim ) :
             generic_sum_base( gsb ), index_map_interface<GenericFieldMap>( fim ) {
             }
@@ -1207,7 +1229,7 @@ Module[
          @ClassName@( @Arguments@ ) :
          @Context@ { model, indices, momenta } {
          }
-      
+
          @CalculateFunction@
       }; // End of @ClassName@"
    },
@@ -1255,9 +1277,9 @@ Module[
       genericRules,subexprRules,massRules,couplingRules
    },
    genericRules=Flatten[Thread@Rule[
-      {#.getConjugated[],#},
+      {getConjugated[#],#},
       {
-         (#.getConjugated[].getName[cxx])[#.getIndex[cxx]],
+         (getConjugated[#].getName[cxx])[#.getIndex[cxx]],
          (#.getName[cxx])[#.getIndex[cxx]]
       }] &/@ genericFields];
 
@@ -1317,7 +1339,7 @@ Module[
 ];
 Utils`MakeUnknownInputDefinition@ToCXXPreparationRules;
 
-CXXFieldName::usage = 
+CXXFieldName::usage =
 "@brief Given an explicit field (possibly conjugated), returns its c++ representation.
 @param The given generic field
 @returns String Name of the c++ representation for a field (possibly conjugate).";
@@ -1379,7 +1401,7 @@ Module[
             @CodeIfOtherSubexpressionsPresent@
             @CodeIfGenericFieldsPresent@
             @CodeIfMassesOrVerticesPresent@
-            
+
             @ReturnResult@
          } // End of operator()( void )
       }; // End of struct @SubexpressionName@<GenericFieldMap>
@@ -1499,7 +1521,7 @@ Module[
          ]
       ];
    Utils`AssertOrQuit[NumericQ@#,ExtractColourFactor::errNotNumber,#]&/@Flatten[projectedFactors,2];
-   
+
    projectedFactors
 ];
 Utils`MakeUnknownInputDefinition@ExtractColourFactor;
@@ -1508,7 +1530,7 @@ CXXGenericSum::usage=
 "@brief Create the c++ code encoding a given sum over generic fields.
 @param sum the sum over generic fields
 @param genericInsertions the list of field insertions to be summed over
-@param combinatorialFactors a list of combinatorial factors (~symmetry factors) 
+@param combinatorialFactors a list of combinatorial factors (~symmetry factors)
 to multiply the amplitudes of specific insertions with.
 @todo
 @param colourFactors a list of colour factors to multiply the amplitudes of
@@ -1569,7 +1591,7 @@ Module[
          @Hide@private:
          @Hide@std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>(); // The code is generated for Generic library.
          @Hide@public:
-         @GenericSum_NAME@_impl( const generic_sum_base &base ) : 
+         @GenericSum_NAME@_impl( const generic_sum_base &base ) :
          generic_sum_base( base ) {
          } // End of constructor @GenericSum_NAME@_impl
 
@@ -1781,7 +1803,7 @@ Module[
       f[{{n1},i1},{{n2},i2}];
    f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] /; sum+i2<length :=
       f[in,{{nums,n2},sum+i2}];
-   f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] := 
+   f[f[in___List,{{nums__},sum_}],{n2_Integer,i2_Integer}] :=
       f[in,{{nums},sum},{{n2},i2}];
    initSet=Transpose[{Array[#&,Length@strs],StringLength/@strs}];
    numbers = ReplaceAll[First/@Fold[f,First@initSet,Rest@initSet],f->List];
@@ -1848,7 +1870,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
    getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>(ind/.extIndexRules)<>"}";
    getIndexOfExternalField[_[{ind_}]] := "std::array<int,1> {"<>(ind/.extIndexRules)<>"}";
    getIndexOfExternalField[_] := "std::array<int,0> {}";
-   
+
    OrTwoDifferent[] := Module[
       {
          type1 = CXXFieldName@First@rule,
@@ -1859,7 +1881,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
       },
       "\n"<>str<>"if( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
    ];
-   
+
    Switch[rule,
       Or[f1_,f2_],OrTwoDifferent[],
       False,"",
@@ -1899,14 +1921,14 @@ Module[
       } // End of calculate()".replaceTokens[{"@SumOfSums@"->simpleSum}],
       (*Else*)
       varNames = Array[varName<>ToString@#&,Length@genSumNames];(*{String..}*)
-      initVars = MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}]~StringRiffle~"\n   ";
+      initVars = MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}]~StringRiffle~"\n";
       sumOfSums = StringRiffle[#<>".at(i)"&/@varNames,"+"];
       "
       std::array<std::complex<double>,@BasisLength@> calculate( void ) {
          std::array<std::complex<double>,@BasisLength@> genericSummation;
          constexpr int coeffsLength = genericSummation.size();
          @InitializeVariablesWhichStoreGenericSumsOutput@
-         
+
          for ( std::size_t i=0; i<coeffsLength; i++ ) {
             genericSummation.at(i) += @SumOfVariables@;
          }
@@ -2013,13 +2035,13 @@ StringRiffle::usage=
 "This is not a full replacement of Mathematica's StringRiffle.
 It works only for [{___String},_String] input.";
 StringRiffle::err="`1`";
-StringRiffle[strs:{___String},sep_String] := 
+StringRiffle[strs:{___String},sep_String] :=
    StringJoin@Riffle[strs,sep];
-StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] := 
+StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] :=
    in<>StringJoin@Riffle[strs,sep]<>fin;
 StringRiffle[x___] :=
    Utils`AssertOrQuit[False,StringRiffle::err,{x}];
-   
+
 SetAttributes[{StringRiffle},{Protected, Locked}]
 ];
 
@@ -2028,9 +2050,9 @@ deletePrintFromSubkernel::usage =
 @note One cannot share Locked symbols.";
 deletePrintFromSubkernel[] := "Redefined later";
 If[$Notebooks,
-   deletePrintFromSubkernel[] := 
+   deletePrintFromSubkernel[] :=
    (
-      SelectionMove[SelectedNotebook[],"Print",GeneratedCell,AutoScroll->False]; 
+      SelectionMove[SelectedNotebook[],"Print",GeneratedCell,AutoScroll->False];
       (*NotebookDelete@Last@SelectedCells@SelectedNotebook[];*)
    ),
    deletePrintFromSubkernel[] :=
@@ -2055,7 +2077,7 @@ SetAttributes[
    ToCXXPreparationRules,(*,CXXFieldIndices,*)CXXFieldName,
    CXXSubsInSub,CXXGenericFieldsInSub,CXXContextInitialize,
    ExtractColourFactor,CXXGenericSum
-   }, 
+   },
    {Protected, Locked}];
 
 End[];
