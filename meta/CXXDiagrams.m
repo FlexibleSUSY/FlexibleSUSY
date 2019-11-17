@@ -1429,7 +1429,7 @@ CreateStrongCoupling[] :=
          downquark = AtomHead @ TreeMasses`GetSMDownQuark[];
          gluon = SARAH`Gluon;
          vertex = {gluon, downquark, SARAH`bar[downquark]};
-         vertexBody = Vertices`VertexFunctionBodyForFields[vertex];
+         vertexBody = VertexFunctionBodyForFields[vertex];
          numberOfdownquarkIndices = NumberOfFieldIndices[downquark];
          numberOfgluonIndices = NumberOfFieldIndices[gluon];
 
