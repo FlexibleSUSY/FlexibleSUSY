@@ -39,13 +39,13 @@ neglectBasisElements::usage=
 neglectBasisElements[obj:`type`npf, operatorBasis:{Rule[_String,_]..}]:=
 Module[
    {
-      basis = Last /@ findFermionChains[obj.getSubexpressions[],operatorBasis],
+      basis = Last /@ findFermionChains[getSubexpressions[obj],operatorBasis],
       objNew,positionsToDelete,
-      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(obj.getSubexpressions[].getName[]),Infinity]&
+      subsOnly = DeleteDuplicates@Cases[#,Alternatives@@(getName@getSubexpressions@obj),Infinity]&
    },
    If[basis === {},Return@obj];
    objNew = ReplaceAll[obj,#->0 &/@ basis];
-   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[obj.getSubexpressions[].getName[],subsOnly@objNew[[2,1,1]]];
+   positionsToDelete = If[Length@#===1,#[[1]]~Take~3,##&[]] &@ Position[objNew,#] &/@ Complement[getName@getSubexpressions@obj,subsOnly@objNew[[2,1,1]]];
    Delete[objNew,positionsToDelete]
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];
@@ -63,7 +63,7 @@ and not
 InterfaceToMatching@@`1`.";
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis, coefficientsWilson},
-   basis = findFermionChains[obj.getSubexpressions[], operatorBasis];
+   basis = findFermionChains[getSubexpressions@obj, operatorBasis];
    coefficientsWilson = removeFermionChains[createNewNPF[obj, basis]];
    coefficientsWilson
 ];
@@ -103,7 +103,7 @@ Module[
       newSums,
       newNPF=obj
    },
-   newSums = extractCoeffs[#,chiralBasis]& /@ (obj.getGenericSums[]);
+   newSums = extractCoeffs[#,chiralBasis]& /@ getGenericSums[obj];
    newNPF[[2, 1, 1]] = newSums;
    newNPF
 ];
