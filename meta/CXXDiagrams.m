@@ -719,7 +719,7 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 			similarVertexList, similarVertex, fieldReplacementRules,
 			indexReplacementRules},
     LoadVerticesIfNecessary[];
-		sortedFields = Vertices`SortFieldsInCp[fields];
+	 sortedFields = Vertices`SortFieldsInCp[fields];
 
     vertexList = Switch[Length[fields],
 			3, SARAH`VertexList3,
@@ -1218,7 +1218,7 @@ VertexFunctionBodyForFields[fields_List] :=
 
 			_QuadrupleVectorVertex,
 			{lIndex1, lIndex2, lIndex3, lIndex4} = LorentzIndexOfField /@
-				sortedIndexedFields;
+				indexedFields;
 
       vertexRules = {
 				(SARAH`Cp @@ sortedIndexedFields)[
@@ -1235,15 +1235,12 @@ VertexFunctionBodyForFields[fields_List] :=
 					lIndex1, lIndex4, lIndex2, lIndex3]]]
 			};
 
-      expr1 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]] /.
-						indexFields /. vertexRules;
-      expr2 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex3] * SARAH`g[lIndex2, lIndex4]]] /.
-						indexFields /. vertexRules;
-      expr3 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex4] * SARAH`g[lIndex2, lIndex3]]] /. indexFields
-						/. vertexRules;
+			expr1 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]] /. vertexRules;
+			expr2 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex3] * SARAH`g[lIndex2, lIndex4]]] /. vertexRules;
+			expr3 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex4] * SARAH`g[lIndex2, lIndex3]]] /. vertexRules;
 
 			DeclareIndices[StripUnbrokenGaugeIndices /@ indexedFields, "indices"] <>
       Parameters`CreateLocalConstRefs[{expr1, expr2, expr3}] <> "\n" <>

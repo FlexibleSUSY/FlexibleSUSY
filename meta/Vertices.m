@@ -143,29 +143,12 @@ SortCp[SARAH`Cp[fields__]] :=
 SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
 
 (* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
-SortCp[cp : SARAH`Cp[vectors__][lor_Integer]] /; CpType[cp] === VVVV :=
+SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
 Module[{
-	vs = StripExtraFieldIndices[{vectors}],
-	svs, lors,
-	sortedVectors,
-	ssvs, sortedLors,
-	map
+	sortedVectors
     },
-    sortedVectors = SortFieldsInCp[vs];
-    svs  = StripFieldIndices[vs];
-    ssvs = StripFieldIndices[sortedVectors];
-    lors = {
-	SARAH`g[ svs[[1]],  svs[[2]]] SARAH`g[ svs[[3]],  svs[[4]]],
-	SARAH`g[ svs[[1]],  svs[[3]]] SARAH`g[ svs[[2]],  svs[[4]]],
-	SARAH`g[ svs[[1]],  svs[[4]]] SARAH`g[ svs[[2]],  svs[[3]]]
-    };
-    sortedLors = {
-	SARAH`g[ssvs[[1]], ssvs[[2]]] SARAH`g[ssvs[[3]], ssvs[[4]]],
-	SARAH`g[ssvs[[1]], ssvs[[3]]] SARAH`g[ssvs[[2]], ssvs[[4]]],
-	SARAH`g[ssvs[[1]], ssvs[[4]]] SARAH`g[ssvs[[2]], ssvs[[3]]]
-    };
-    map = Ordering[sortedLors, 3, OrderedQ[First@Position[lors, #]& /@ {##}]&];
-    (SARAH`Cp @@ sortedVectors)[map[[lor]]]
+    sortedVectors = SortFieldsInCp[{vectors}];
+	(SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]
 ];
 
 (* see WriteFermionProp[] in SARAH/Package/SPheno/SPhenoLoopMasses *)
