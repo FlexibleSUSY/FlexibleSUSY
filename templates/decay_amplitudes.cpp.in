@@ -63,6 +63,8 @@ double Decay_amplitude_SVV::square() const
             // + Re(form_factor_12 * Conj(form_factor_21))
             + AbsSqr(form_factor_eps));
 
+      // check Ward identity
+      std::cout << m_decay << ' ' << - form_factor_g/ pow(m_decay, 2) * 2. / form_factor_21 << '\n';
       return m0 + m2 + m4;
    } else if (m_vector_1 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);

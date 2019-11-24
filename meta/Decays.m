@@ -1451,7 +1451,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       mass = {}, translation, fieldAssociation,
       externalEdges,
      (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = Unique["colorFac"]
+     verticesInFieldTypesForFACp, verticesForFACp, colorFac = Unique["colorFac"], symmetryFac = Unique["symmetryFac"]
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
@@ -1558,7 +1558,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
                      "\n// internal masses\n" <>
                   mass <>
 
-                  "\nresult += " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
+                  "\nresult += " <> ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
                      FillMasses[decay] <> ",\n" <>
@@ -1576,6 +1576,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
       {verticesForFACp, "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
          (* usings for vertices *)
          "\n" <> cppVertices <>
+          "\nconstexpr double " <> ToString@symmetryFac <> " {1.};\n" <>
           "\nconstexpr double " <> ToString@colorFac <> " {" <>
           ToString[
             N[CXXDiagrams`ExtractColourFactor @
