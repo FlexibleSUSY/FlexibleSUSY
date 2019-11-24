@@ -32,7 +32,7 @@ handle = FS@ModelName@OpenHandle[
         higgs3loopCorrectionAtAtAs -> 1,   (* FlexibleSUSY[28] *)
         higgs3loopCorrectionAtAtAt -> 1,   (* FlexibleSUSY[29] *)
         higgs4loopCorrectionAtAsAsAs -> 1, (* FlexibleSUSY[30] *)
-	calculateDecays -> 1,              (* FlexibleSUSY[31] *)
+        calculateDecays -> 1,              (* FlexibleSUSY[31] *)
         parameterOutputScale -> 0          (* MODSEL[12] *)
     },
     fsSMParameters -> {

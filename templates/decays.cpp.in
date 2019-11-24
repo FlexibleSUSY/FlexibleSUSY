@@ -58,6 +58,7 @@ using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 using effective_couplings::beta;
 namespace info = @ModelName@_info;
+using namespace std::complex_literals;
 
 const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
 {

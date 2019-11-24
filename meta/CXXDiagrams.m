@@ -517,6 +517,12 @@ ConvertColourStructureToColorMathConvention[fields_List,
 	2 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3]
 
 ConvertColourStructureToColorMathConvention[fields_List,
+	GellMannVertex[cIndex1_, cIndex2_, cIndex3_] GellMannVertex[cIndex4_, cIndex5_, cIndex6_] +
+			GellMannVertex[cIndex7_, cIndex8_, cIndex9_] GellMannVertex[cIndex10_, cIndex11_, cIndex12_]] :=
+       (4 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3] ColorMath`CMt[{cIndex4}, cIndex5, cIndex6] +
+				4 ColorMath`CMt[{cIndex7}, cIndex8, cIndex9] ColorMath`CMt[{cIndex10}, cIndex11, cIndex12]);
+
+ConvertColourStructureToColorMathConvention[fields_List,
 	AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]] :=
 	ColorMath`CMf[cIndex1, cIndex2, cIndex3]
 
@@ -842,6 +848,17 @@ GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`fSU3[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Expand @ fullExpr,
+	scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+     scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+		scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] :>
+{scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 (* @todo uncomment *)
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
