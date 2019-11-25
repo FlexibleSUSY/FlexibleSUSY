@@ -130,14 +130,14 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                         "auto "<>FlexibleSUSY`FSModelName<>"_npf_down = "<>FlexibleSUSY`FSModelName<>
                         "_cxx_diagrams::npointfunctions::zpinguins_d"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
                         "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
-                        (*print my stuff*)
-                        "std::cout << \"uukhas:     gLVu \" << ( "<>
+                        (*print my stuff MINUS BECAUSE OF DESCENDING ORDER OF FC*)
+                        "std::cout << \"uukhas:     gLVu \" << -( "<>
                         FlexibleSUSY`FSModelName<>"_npf_up.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(5) )/2. << \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gRVu \" << ( "<>
+                        "std::cout << \"uukhas:     gRVu \" << -( "<>
                         FlexibleSUSY`FSModelName<>"_npf_up.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(7) )/2.<< \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gLVd \" << ( "<>
+                        "std::cout << \"uukhas:     gLVd \" << -( "<>
                         FlexibleSUSY`FSModelName<>"_npf_down.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(5) )/2. << \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gRVd \" << ( "<>
+                        "std::cout << \"uukhas:     gRVd \" << -( "<>
                         FlexibleSUSY`FSModelName<>"_npf_down.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(7) )/2. << \"\\n\";\n" <>
                         "gpLV += 2.*" <> CXXNameOfField[#] <> "_penguin[0] + "    <> CXXNameOfField[#] <> "_penguin[2];\n" <>
                         "gpRV += 2.*" <> CXXNameOfField[#] <> "_penguin[1] + "    <> CXXNameOfField[#] <> "_penguin[3];\n" <>
