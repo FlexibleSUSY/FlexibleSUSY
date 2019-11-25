@@ -49,7 +49,7 @@ Selfenergy = NPointFunctions`NPointFunction[
    {SARAH`DownQuark}, {SARAH`DownQuark},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
+   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
 
 nPointFunctionHeaders = CreateCXXHeaders[
    UseWilsonCoeffs -> True,

@@ -49,7 +49,7 @@ hhSelfenergy = NPointFunctions`NPointFunction[
    {SARAH`HiggsBoson}, {SARAH`HiggsBoson},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
+   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
 
 nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[
    NPointFunctions`LoopFunctions->"FlexibleSUSY"];

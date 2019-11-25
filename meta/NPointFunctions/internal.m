@@ -33,22 +33,20 @@ SetAttributes[#,{Locked,Protected}]&@
 {
    LorentzIndex,GenericSum,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,GenericT,
-   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,ExcludeProcesses
+   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses
 };
 (* Symbols that can be distributed from main kernel. *)
 If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 {
    DimensionalReduction,DimensionalRegularization,ExceptPaVe,
    (*for further details inspect topologyReplacements*)
-   ExceptIrreducible,ExceptBoxes,ExceptTriangles,ExceptFourFermionScalarPenguins,
-   ExceptFourFermionMassiveVectorPenguins
+   Irreducible,Boxes,Triangles,FourFermionScalarPenguins,
+   FourFermionMassiveVectorPenguins
 };
 
+NPointFunctions`internal`contextPath = $ContextPath;
+$ContextPath = {"NPointFunctions`","System`"};
 Begin["`Private`"];
-calledPreviouslysetInitialValues::usage=
-"@brief is used to prohibid multiple calls of
-NPointFunctions`.`setInitialValues[].";
-calledPreviouslysetInitialValues = False;
 
 feynArtsDir = "";
 formCalcDir = "";
@@ -70,57 +68,46 @@ amplitudeToFSRules::usage=
 "A set of rules for @todo";
 amplitudeToFSRules= {};
 
-Protect[calledPreviouslysetInitialValues,feynArtsDir,formCalcDir,feynArtsModel,
+Protect[feynArtsDir,formCalcDir,feynArtsModel,
    particleNamesFile,substitutionsFile,particleNamespaceFile,
    subexpressionToFSRules,fieldNameToFSRules,amplitudeToFSRules
 ];
 
 SetInitialValues::usage=
-"@brief Set the FeynArts and FormCalc paths.
+"@brief Set the FeynArts and FormCalc paths, creates required directories.
 @param FADirS the directory designated for FeynArts output
 @param FCDirS the directory designated for FormCalc output
 @param FAModelS the name of the FeynArts model file
 @param particleNamesFileS the name of the SARAH-generated particle names file
 @param substitutionsFileS the name of the SARAH-generated substitutions file
 @param particleNamespaceFileS the name of the particle namespace file
-@note allowed to be called only once
-@note effectively Private function";
+@note Allowed to be called only once";
 SetInitialValues::errOnce=
-"NPointFunctions`.`SetInitialValues[]: Multiple calls:
-something tries to redefine paths for FeynArts and FormCalc";
+"Paths for FeynArts and FormCalc have been defined already.";
 SetInitialValues[FADir_String, FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
-If[Utils`AssertOrQuit[!calledPreviouslysetInitialValues,SetInitialValues::errOnce],
-   ClearAttributes[
-      {
-         feynArtsDir,formCalcDir,feynArtsModel,
-         particleNamesFile,substitutionsFile,particleNamespaceFile,
-         calledPreviouslysetInitialValues
-      },{Protected}];
+Module[{},
+   {feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    feynArtsDir = FADir;
    formCalcDir = FCDir;
    feynArtsModel = FAModel;
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
    particleNamespaceFile = particleNamespaceFileS;
-   calledPreviouslysetInitialValues = True;
-   SetAttributes[
-      {
-         feynArtsDir,formCalcDir,feynArtsModel,
-         particleNamesFile,substitutionsFile,particleNamespaceFile,
-         calledPreviouslysetInitialValues
-      },{Protected, Locked}];
+   {feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}~SetAttributes~{Protected, Locked};
+   If[!DirectoryQ@formCalcDir,CreateDirectory@formCalcDir];
+   SetDirectory@formCalcDir;
    SetFSConventionRules[];
-];
-SetAttributes[SetInitialValues,{Protected,Locked}];
+] /; Utils`AssertOrQuit[
+   And@@(TrueQ[#=={Protected}] &/@ Attributes@{feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}),
+   SetInitialValues::errOnce];
+SetInitialValues // Utils`MakeUnknownInputDefinition;
+SetInitialValues ~ SetAttributes ~ {Protected,Locked};
 
 SetFSConventionRules::usage=
 "@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
 language.";
-SetFSConventionRules::errSARAH=
-"It seems that SARAH`.` has changed conventions for
-<ParticleNames>.dat file.";
 SetFSConventionRules[] :=
 Module[
    {
@@ -136,8 +123,6 @@ Module[
          x__ ~~ ": " ~~ y__ ~~ "]" ~~ ___ :> {x,y}],
       1] /.
       Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} & /@ Get@particleNamespaceFile, 2];
-   Utils`AssertWithMessage[Length@fieldNames > 0,
-      SetFSConventionRules::errSARAH];
    massRules = Append[Flatten[Module[
       {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
       {
@@ -324,16 +309,18 @@ Module[
    ];
    Protect@amplitudeToFSRules;
 ];
+SetFSConventionRules // Utils`MakeUnknownInputDefinition;
+SetFSConventionRules ~ SetAttributes ~ {Protected,Locked};
 
 Options[NPointFunctionFAFC]={
    LoopLevel -> 1,
    Regularize -> DimensionalReduction,
    ZeroExternalMomenta -> True,
    OnShellFlag -> False,
-   ExcludeProcesses -> {}
+   KeepProcesses -> {}
 };
 NPointFunctionFAFC::usage=
-"@note effectively Private function, see usage of NPointFunction[]";
+"@todo";
 NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
 Module[
    {
@@ -342,22 +329,19 @@ Module[
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
 
-   If[!DirectoryQ@formCalcDir,CreateDirectory@formCalcDir];
-   SetDirectory@formCalcDir;
-
    topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
-      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@ExcludeProcesses];
+      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
 
    diagrams = FeynArts`InsertFields[topologies,
       inFields -> outFields,
       FeynArts`InsertionLevel -> FeynArts`Classes,
       FeynArts`Model -> feynArtsModel];
-   diagrams = getModifiedDiagrams[diagrams,OptionValue@ExcludeProcesses];
+   diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
-   {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@ExcludeProcesses];
+   {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
@@ -506,7 +490,7 @@ Module[
       rulesForClassesToSave, newDiagrams = diagrams, newAmplitudes = amplitudes,
       currentClasses
    },
-   If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
+   If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
       Print["MA: penguins: stu propagation of massless bosons is excluded"];
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,amITPinguin];
@@ -591,31 +575,25 @@ Utils`AssertOrQuit[False,getTopologyAmplitudeRulesByTopologyCriterion::errUnknow
 SetAttributes[getTopologyAmplitudeRulesByTopologyCriterion,{Protected,Locked,HoldAll,ReadProtected}];
 
 topologyReplacements::usage =
-"@brief List of topology replacement rules for a processes to hold.";
+"@brief List of topology replacement rules for a processes to keep.";
 topologyReplacements =
 {
-   ExceptIrreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
-   ExceptTriangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   ExceptBoxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
-   ExceptFourFermionScalarPenguins -> (amITPinguin@#&),
-   ExceptFourFermionMassiveVectorPenguins -> (amITPinguin@#&)
+   Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
+   Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
+   Boxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
+   FourFermionScalarPenguins -> (amITPinguin@#&),
+   FourFermionMassiveVectorPenguins -> (amITPinguin@#&)
 };
-SetAttributes[topologyReplacements,{Protected,Locked}];
+topologyReplacements ~ SetAttributes ~ {Protected,Locked};
 
 getExcludedTopologies::usage =
-"@brief Joins names of processes to hold into one functions, creates unique
-name for it, then registers it for FeynArts` and returns the name.
-@param <{Symbol...} | Symbol> name(s) of processes to hold.
-@returns <Symbol> generated name of topologies to hold.";
-getExcludedTopologies::errUnknownInput =
-"Input should be
-getExcludedTopologies@@{ <{Symbol...} | Symbol> }
-and not
-getExcludedTopologies@@`1`";
-getExcludedTopologies[{}] :=
-{};
-getExcludedTopologies[{sym_Symbol}] :=
-getExcludedTopologies@sym;
+"@brief Registers and returns a function, whose outcome - True or everything 
+else - determines whether the topology is kept or discarded (see FeynArts 
+manual).
+@param {} or _Symbol or {_Symbol} or {__Symbol} Name(s) of processes to hold.
+@returns _Symbol Generated name of topologies to hold.";
+getExcludedTopologies[{}] := {};
+getExcludedTopologies[{sym_Symbol}] := getExcludedTopologies@sym;
 getExcludedTopologies[syms:{__Symbol}] :=
 Module[{excludeTopologyName},
    FeynArts`$ExcludeTopologies[excludeTopologyName] =
@@ -625,9 +603,8 @@ getExcludedTopologies[sym_Symbol] :=
 Module[{excludeTopologyName},
    FeynArts`$ExcludeTopologies[excludeTopologyName] = sym/.topologyReplacements;
    excludeTopologyName];
-getExcludedTopologies[x___] :=
-Utils`AssertOrQuit[False,getExcludedTopologies::errUnknownInput,{x}];
-SetAttributes[getExcludedTopologies,{Protected,Locked}];
+getExcludedTopologies // Utils`MakeUnknownInputDefinition;
+getExcludedTopologies ~ SetAttributes ~ {Protected,Locked};
 
 amITPinguin::usage =
 "@brief If given topology is pinguin-like (mainly, for CLFV processes), then
@@ -691,9 +668,9 @@ getModifiedDiagrams[
 Module[
    {
    },
-   If[Not[MemberQ[excludeProcesses,ExceptFourFermionScalarPenguins]&&
-          MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins]],
-      If[MemberQ[excludeProcesses,ExceptFourFermionScalarPenguins],
+   If[Not[MemberQ[excludeProcesses,FourFermionScalarPenguins]&&
+          MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins]],
+      If[MemberQ[excludeProcesses,FourFermionScalarPenguins],
          inserted = If[amITPinguin[#[[1]]],
          (*Delete vector fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
@@ -702,7 +679,7 @@ Module[
          Print["MD: penguins: stu propagation of vector bosons is excluded"];
          printDiagramsInfo[inserted,"modifying diagrams"];
       ];
-      If[MemberQ[excludeProcesses,ExceptFourFermionMassiveVectorPenguins],
+      If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
          inserted = If[amITPinguin[#[[1]]],
          (*Delete scalar fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
@@ -740,6 +717,7 @@ Module[
    },
    Print[where,": in total: ",nGeneric," Generic, ",nClasses," Classes amplitudes"];
 ];
+
 debugMakePictures[
    diagrams:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
    name_String:"classes"
@@ -1151,7 +1129,6 @@ Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
 
 SetAttributes[
    {
-   SetFSConventionRules,
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
@@ -1161,4 +1138,6 @@ SetAttributes[
    {Protected, Locked}];
 
 End[];
+$ContextPath = NPointFunctions`internal`contextPath;
+Clear[NPointFunctions`internal`contextPath];
 EndPackage[];
