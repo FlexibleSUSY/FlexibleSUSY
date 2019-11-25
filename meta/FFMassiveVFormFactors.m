@@ -102,9 +102,6 @@ FFMassiveVFormFactorsCreateInterface[inFermion_ -> outFermion_, spectator_, loop
 
                "std::valarray<std::complex<double>> val {0.0, 0.0};\n\n" <>
 
-                  (* TODO: For testing, remove in the end *)
-               "setmudim(1e+6);\n" <>
-
                StringJoin[
                   ("val += std::complex<double> " <> (ToString @ N[MyReIm@ColorN[#[[2,1]]], 16]) <> " * FFMassiveVVertexCorrectionFS<" <>
                    StringJoin @ Riffle[CXXDiagrams`CXXNameOfField /@ {inFermion, outFermion, spectator, #[[1,1]], #[[1,2]]}, ","]  <>
