@@ -5,6 +5,8 @@
 *.d
 *.x
 
+src/loop_libraries/collier_wrapper.mod
+
 config/config.h
 config/version
 config/git_commit
