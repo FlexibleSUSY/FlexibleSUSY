@@ -126,7 +126,6 @@ Module[
       fieldNames,indexRules,massRules,couplingRules,generalFCRules,
       diracChainRules,sumOverRules
    },
-
    fieldNames =
    Flatten[
       StringCases[
@@ -181,18 +180,8 @@ Module[
       ] :>
       SARAH`Cp[fields][SARAH`PR],
 
-      FeynArts`G[_][0][fields__][
-         Global`MetricTensor[
-            KI1[i1_Integer],
-            KI1[i2_Integer]
-         ]
-      ] :>
-      SARAH`Cp[fields][
-         SARAH`g[
-            LorentzIndex[ {fields}[[i1]] ],
-            LorentzIndex[ {fields}[[i2]] ]
-         ]
-      ],
+      FeynArts`G[1][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :> (*checked*)
+      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],                 (*checked*)
 
       FeynArts`G[_][0][fields__][
          FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ]

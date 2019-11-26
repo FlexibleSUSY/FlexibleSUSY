@@ -391,12 +391,12 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> FourFermionMassiveVectorPenguins];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> FourFermionMassiveVectorPenguins];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins}];
    (* ASSUMPTION: high virtuality of massive particle in t-channel for penguins q^2=0. *)
    dressedFermions = {uNPF[[1,1,1]],dNPF[[1,2,1]]};
    assumptionReplacements =
@@ -992,13 +992,14 @@ Module[
       basisLength = Length@OptionValue@WilsonBasis,
       prototype,definition
    },
+   setHelperClassName@NPF;
    setLoopLibraryRules@OptionValue@LoopFunctions;
    prototype = mainFunction[basisLength,name,CXXArgStringNPF[NPF,"def"]]<>";";
 
    definition =
       CXXClassForNPF[NPF,colourProjector,OptionValue@LoopFunctions,OptionValue@WilsonBasis] <> "\n\n" <>
       mainFunction[basisLength,name,CXXArgStringNPF@NPF] <>
-      "{\n" <> CXXBodyNPF@NPF <> "\n}";
+      "{\n" <> CXXBodyNPF[] <> "\n}";
 
    {prototype, definition}
 ] /; Module[
@@ -1126,25 +1127,31 @@ Module[
 Utils`MakeUnknownInputDefinition@CXXArgStringNPF;
 
 CXXBodyNPF::usage=
-"@brief Rturns the c++ code for the main master-function.
-@param <n> NPointFunction object
+"@brief Generates the c++ code for the main master-function.
 @returns The c++ code for the main master-function.";
-CXXBodyNPF[nPointFunction:`type`npf] :=
-StringTemplate["   `1` helper{ model, indices, momenta };\n   return helper.calculate();"][
-   CXXClassNameNPF@nPointFunction];
-Utils`MakeUnknownInputDefinition@CXXBodyNPF;
+CXXBodyNPF[] :=
+"   "<>`global`cxxClassNameNPF<>" helper{ model, indices, momenta };\n   return helper.calculate();";
+CXXBodyNPF // Utils`MakeUnknownInputDefinition;
+CXXBodyNPF ~ SetAttributes ~ {Protected,ReadProtected,Locked};
 
-CXXClassNameNPF::usage=
-"@brief Return the c++ name for the helper class of the c++
+`global`cxxClassNameNPF = "";
+`global`cxxClassNameNPF ~ SetAttributes ~ {Protected,ReadProtected};
+
+setHelperClassName::usage=
+"@brief Sets the c++ name for the helper class of the c++
 version of a given n-point correlation function.
 @param NPointFunction object
 @returns the c++ name for the helper class of the c++
 version of a given n-point correlation function.";
-CXXClassNameNPF[obj:`type`npf,_String:""] :=
+setHelperClassName[obj:`type`npf] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@getProcess[obj]},
-   "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}]
+   Unprotect@`global`cxxClassNameNPF;
+   `global`cxxClassNameNPF = "nPoint" <> StringJoin@Map[ToString,fieldNames/.a_[b_]:>Sequence@@{a,b}] <> "_" <> ToString@Ceiling[10^6*AbsoluteTime[]];
+   Protect@`global`cxxClassNameNPF;
 ];
-Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
+setHelperClassName // Utils`MakeUnknownInputDefinition;
+setHelperClassName ~ SetAttributes ~ {Protected,Locked};
+
 
 CXXClassForNPF::usage=
 "@brief Return the c++ code for the helper class of the c++ version of a given
@@ -1203,7 +1210,7 @@ Module[
    cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
    replaceTokens[code,{
-   "@ClassName@"->CXXClassNameNPF@nPointFunction,
+   "@ClassName@"->`global`cxxClassNameNPF,
    "@Context@"->cxxCorrelationContext,
    "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
    "@Subexpressions@"->CXXCodeForSubexpressions[subexpressions, preCXXRules],
@@ -1211,7 +1218,7 @@ Module[
    "@Arguments@"->CXXArgStringNPF@nPointFunction,
    "@CalculateFunction@"->CXXCodeFunCalculate[genSumNames,wilsonBasis]}]
 ];
-Utils`MakeUnknownInputDefinition@CXXClassNameNPF;
+CXXClassForNPF // Utils`MakeUnknownInputDefinition;
 
 CXXInitializeKeyStructs::usage =
 "@brief Generates required c++ code for key structs initialization.
@@ -1219,7 +1226,7 @@ CXXInitializeKeyStructs::usage =
 @returns c++ code for subexpression if generic fields present there.";
 CXXInitializeKeyStructs[fields:{`type`genericField..}]:=
 StringRiffle["struct "<>#<>" {};"&/@CXXGenFieldKey/@fields,"\n"];
-Utils`MakeUnknownInputDefinition@CXXInitializeKeyStructs;
+CXXInitializeKeyStructs // Utils`MakeUnknownInputDefinition;
 SetAttributes[CXXInitializeKeyStructs,{Protected,Locked}];
 
 ToCXXPreparationRules::usage=
@@ -2038,7 +2045,7 @@ SetAttributes[
    CreateCXXFunctions,
    getLoopFlexibleSUSYRules,
    CXXArgStringNPF,
-   CXXBodyNPF,CXXClassNameNPF,CXXClassForNPF,
+   CXXClassForNPF,
    ToCXXPreparationRules,(*,CXXFieldIndices,*)CXXFieldName,
    CXXSubsInSub,CXXGenericFieldsInSub,CXXContextInitialize,
    ExtractColourFactor,CXXGenericSum
