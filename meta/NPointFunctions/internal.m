@@ -46,7 +46,18 @@ If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 
 NPointFunctions`internal`contextPath = $ContextPath;
 $ContextPath = {"NPointFunctions`","System`"};
-Begin["`Private`"];
+Begin["`internal`"];
+
+`type`vertex = FeynArts`Vertex[_Integer][_Integer];
+`type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][`type`vertex,`type`vertex,Repeated[FeynArts`Field[_Integer],{0,1}]];
+`type`topology = FeynArts`Topology[_Integer][`type`propagator..];
+`type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
+
+getProcess[diagrams:`type`diagramSet] := Cases[Head@diagrams, (FeynArts`Process->x_) :> x][[1]];
+getProcess // Utils`MakeUnknownInputDefinition;
+getProcess ~ SetAttributes ~ {Protected,Locked};
+
+`type`amplitudeSet = FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..];
 
 feynArtsDir = "";
 formCalcDir = "";
@@ -341,9 +352,11 @@ Module[
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
+
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
+
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
@@ -374,13 +387,11 @@ Module[
    }
 ];
 
-getRestrictionsOnGenericSumsByTopology[
-   diagrams:FeynArts`TopologyList[___,FeynArts`Process->inProcess:_,___][Rule[FeynArts`Topology[_][__],_]..]
-] :=
+getRestrictionsOnGenericSumsByTopology[diagrams:`type`diagramSet] :=
 Module[
    {
-     processParticles = Delete[#,Position[#,FeynArts`Index[Global`Colour,_Integer]]] &/@ Flatten[List@@inProcess],
-     newDiagrams
+     processParticles = Delete[#,Position[#,FeynArts`Index[Global`Colour,_Integer]]] &/@ Flatten[List@@(getProcess@diagrams)],
+     newDiagrams = diagrams
    },
    (* 2to2 self energy of particle 1. *)
    newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
@@ -391,9 +402,10 @@ Module[
                                                                {0,1,0,1,0,0,1,0},
                                                                {0,0,1,0,0,1,0,1},
                                                                {0,0,0,0,2,0,1,0}},
-      (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
-      Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
+      (* Skip sum if FeynArts`Field@6 is the same as external particle 1 *)
+      First@# -> Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
       #] &/@ diagrams;
+
    (* 2to2 self energy of particle 3. *)
    newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
                                                                {0,0,0,0,0,1,0,0},
@@ -404,29 +416,34 @@ Module[
                                                                {0,0,1,0,0,0,0,2},
                                                                {0,0,0,0,1,0,2,0}},
       (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
-      Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
+      First@# -> Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
       #] &/@ newDiagrams;
+
    (*No more rules*)
-   newDiagrams = If[MatchQ[#,Rule[FeynArts`Topology[_Integer][__],_]],
+   newDiagrams = If[MatchQ[#,Rule[`type`topology,{__}]],
+      #,
       (* Empty rules to skip *)
-      Table[{},{Length@Last@#}],
-      #] &/@ newDiagrams;
+      First@#->Table[{},{Length@Last@#}]
+      ] &/@ newDiagrams;
    (* Simpler external form. *)
+   newDiagrams = Last /@ newDiagrams;
    newDiagrams = Flatten[List@@newDiagrams,1];
    If[MatchQ[newDiagrams,{{Rule[_Integer,_]...}..}],newDiagrams,Print@"@todo FAILED";Quit[1]]
 ];
+getRestrictionsOnGenericSumsByTopology // Utils`MakeUnknownInputDefinition;
+getRestrictionsOnGenericSumsByTopology ~ SetAttributes ~ {Protected,Locked};
 
-getAdjacencyMatrixForTopology[
-   topology:FeynArts`Topology[_Integer][seqProp:FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][ FeynArts`Vertex[_Integer][_Integer],FeynArts`Vertex[_Integer][_Integer],Repeated[FeynArts`Field[_Integer],{0,1}]]..]
-]:=
+getAdjacencyMatrixForTopology[topology:`type`topology] :=
 Module[
    {
       propagatorPattern,adjacencies,adjacencyMatrix
    },
    propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
-   adjacencies = Tally[{seqProp}/.propagatorPattern[i_,j_,_]:>{{i,j},{j,i}}];
+   adjacencies = Tally[(List@@topology)/.propagatorPattern[i_,j_,_]:>{{i,j},{j,i}}];
    adjacencyMatrix=Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies]
 ];
+getAdjacencyMatrixForTopology // Utils`MakeUnknownInputDefinition;
+getAdjacencyMatrixForTopology ~ SetAttributes ~ {Protected,Locked};
 
 getMomElimForAmplitudesByTopology::usage=
 "@brief Uses internally defined replacement list funMomRules for definition of
@@ -434,35 +451,30 @@ momenta to eliminate in specific topologies.
 @param <FeynArts`TopologyList> diagrams Set of topologies with class insertions.
 @returns {_Integer... | Automatic...} List of option values for FormCalc`MomElim
 for every generic amplitude.";
-getMomElimForAmplitudesByTopology::errUnknownInput=
-"Input should be <FeynArts`.`TopologyList> and not
-`1`";
 getMomElimForAmplitudesByTopology::errOverlap=
 "Some topology rules inside funMomRules overlap. Criteria should be defined in a
 way, which gives unique distinction of topology.";
 getMomElimForAmplitudesByTopology[
-   diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..]
+   diagrams:`type`diagramSet
 ] :=
 Module[
    {
-      aoq=Utils`AssertOrQuit,
       getTAR = getTopologyAmplitudeRulesByTopologyCriterion,
       funMomRules = {amITPinguin->2},
       replacements
    },
-   replacements = (getTAR[diagrams,First@#] /.x_Integer:>Last@#) &/@ funMomRules;
+   replacements = (getTAR[diagrams,First@#]/.x_Integer:>Last@#) &/@ funMomRules;
    replacements = Transpose@replacements;
    replacements = Switch[ Count[First/@#,True],
       0,First@#,
       1,#~Extract~Position[#,True][[1,1]],
-      _,aoq[False,getMomElimForAmplitudesByTopology::errOverlap]
+      _,Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errOverlap]
       ] &/@ replacements;
    replacements = If[First@#===False,#/.x_Integer:>Automatic,#] &/@ replacements;
    Flatten[Last/@replacements]
 ];
-getMomElimForAmplitudesByTopology[x___] :=
-Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errUnknownInput,{x}];
-SetAttributes[getMomElimForAmplitudesByTopology,{Protected,Locked,ReadProtected}];
+getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
+getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked,ReadProtected};
 
 getModifiedDA::usage =
 "@brief Changes amplitudes and diagrams according to excudeProcess list.
@@ -470,17 +482,11 @@ getModifiedDA::usage =
 amplitude-insertion rules to modify.
 @param <List> set of names which specify the process to consider.
 @returns {<TopologyList>,<FeynAmpList>} modified set, which specifies process.";
-getModifiedDA::errUnknownInput=
-"Input should be
-getModifiedDA@@{ {<TopologyList>,<FeynAmpList>}, <List> }
-and not
-getModifiedDA@@`1`";
-getModifiedDA[{diagrams_,amplitudes_},excludeProcesses_] :=
-getModifiedDA[{diagrams,amplitudes},{excludeProcesses}];
+getModifiedDA[{diagrams:`type`diagramSet,amplitudes:`type`amplitudeSet},excludeProcesses_] := getModifiedDA[{diagrams,amplitudes},{excludeProcesses}];
 getModifiedDA[
    {
-      diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..],
-      amplitudes:FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..]
+      diagrams:`type`diagramSet,
+      amplitudes:`type`amplitudeSet
    },
    excludeProcesses:{___}
 ] :=
@@ -491,7 +497,7 @@ Module[
       currentClasses
    },
    If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-      Print["MA: penguins: stu propagation of massless bosons is excluded"];
+      Print["t-pinguins: tree-like massless vector bosons are excluded"];
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,amITPinguin];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
@@ -523,13 +529,12 @@ Module[
             newDiagrams[[i,2]] = ReplacePart[diagrams[[i,2]],currentClasses];
          ];
       ,{i,Length@daPairs}];
-      printDiagramsInfo[newDiagrams,"modifying amplitudes"];
+      printDiagramsInfo[newDiagrams,"modifying A"];
    ];
    {newDiagrams,newAmplitudes}
 ];
-getModifiedDA[x___] :=
-Utils`AssertOrQuit[False,getModifiedDA::errUnknownInput,{x}];
-SetAttributes[getModifiedDA,{Protected,Locked}];
+getModifiedDA // Utils`MakeUnknownInputDefinition;
+getModifiedDA ~ SetAttributes ~ {Protected,Locked};
 
 getTopologyAmplitudeRulesByTopologyCriterion::usage=
 "@brief Gives numbers of amplitudes which are accepted by a criterion on topology.
@@ -547,13 +552,8 @@ does not match desired pattern.
 Input values
 `2`
 `3`";
-getTopologyAmplitudeRulesByTopologyCriterion::errUnknownInput=
-"Input should be
-getTopologyAmplitudeRulesByTopologyCriterion@@{ <TopologyList>, <one argument function> }
-and not
-getTopologyAmplitudeRulesByTopologyCriterion@@`1`";
 getTopologyAmplitudeRulesByTopologyCriterion[
-   diagrams:FeynArts`TopologyList[__][Rule[FeynArts`Topology[_][__],_]..],
+   diagrams:`type`diagramSet,
    critFunction_
 ] :=
 Module[
@@ -570,12 +570,12 @@ Module[
       Utils`AssertOrQuit[False,getTopologyAmplitudeRulesByTopologyCriterion::errResult,res,Unevaluated@diagrams,Unevaluated@critFunction];
    ]
 ];
-getTopologyAmplitudeRulesByTopologyCriterion[x___] :=
-Utils`AssertOrQuit[False,getTopologyAmplitudeRulesByTopologyCriterion::errUnknownInput,{x}];
-SetAttributes[getTopologyAmplitudeRulesByTopologyCriterion,{Protected,Locked,HoldAll,ReadProtected}];
+getTopologyAmplitudeRulesByTopologyCriterion // Utils`MakeUnknownInputDefinition;
+getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,HoldAll,Locked,ReadProtected};
 
 topologyReplacements::usage =
-"@brief List of topology replacement rules for a processes to keep.";
+"@brief List of topology replacement rules for a processes to keep.
+@note R.h.s. should be pure functions of one argument.";
 topologyReplacements =
 {
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
@@ -596,8 +596,7 @@ getExcludedTopologies[{}] := {};
 getExcludedTopologies[{sym_Symbol}] := getExcludedTopologies@sym;
 getExcludedTopologies[syms:{__Symbol}] :=
 Module[{excludeTopologyName},
-   FeynArts`$ExcludeTopologies[excludeTopologyName] =
-      (Or @@ Through[(syms/.topologyReplacements)@#])&;
+   FeynArts`$ExcludeTopologies[excludeTopologyName] = (Or @@ Through[(syms/.topologyReplacements)@#])&;
    excludeTopologyName];
 getExcludedTopologies[sym_Symbol] :=
 Module[{excludeTopologyName},
@@ -612,12 +611,7 @@ returns True, False otherwise.
 @param <FeynArts`Topology[_][__]> topology to check.
 @returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then
 returns True, False otherwise.";
-amITPinguin::errUnknownInput =
-"Input should be
-amITPinguin@@{ <FeynArts`.`Topology[_][__]> }
-and not
-amITPinguin@@`1`";
-amITPinguin[topology:FeynArts`Topology[_][__]] :=
+amITPinguin[topology:`type`topology] :=
 Module[
    {
       (*@note During creation of topologies we have External only.*)
@@ -643,60 +637,54 @@ Module[
    (*Rule for SE-like.*)
    SameQ[Length@Cases[FeynArts`ToTree@topology,_[ext][_,FeynArts`Centre[2][_],___]],1]
 ];
-amITPinguin[x___] :=
-Utils`AssertOrQuit[False,amITPinguin::errUnknownInput,{x}];
-SetAttributes[amITPinguin,{Protected,Locked}];
+amITPinguin // Utils`MakeUnknownInputDefinition;
+amITPinguin ~ SetAttributes ~ {Protected,Locked};
 
 getModifiedDiagrams::usage =
 "@brief Modifies diagrams according to excudeProcess list.
 @param <TopologyList> set of topology-insertion rules to modify.
 @param <List> set of names which specify the process to consider.
 @returns <TopologyList> modified set of diagrams.";
-getModifiedDiagrams::errUnknownInput =
-"Input should be
-getModifiedDiagrams@@{ <TopologyList>, <List> }
-and not
-getModifiedDiagrams@@`1`";
 getModifiedDiagrams[
-   inserted:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   inserted:`type`diagramSet,
    excludeProcesses_
 ] :=
 getModifiedDiagrams[inserted,{excludeProcesses}];
 getModifiedDiagrams[
-   inserted:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   inserted:`type`diagramSet,
    excludeProcesses:{___}] :=
 Module[
    {
+      newInserted = inserted
    },
    If[Not[MemberQ[excludeProcesses,FourFermionScalarPenguins]&&
           MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins]],
       If[MemberQ[excludeProcesses,FourFermionScalarPenguins],
-         inserted = If[amITPinguin[#[[1]]],
+         newInserted = If[amITPinguin[#[[1]]],
          (*Delete vector fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
          (*Else do not touch.*)
-         #]&/@ inserted;
-         Print["MD: penguins: stu propagation of vector bosons is excluded"];
-         printDiagramsInfo[inserted,"modifying diagrams"];
+         #] &/@ inserted;
+         Print["t-penguins: tree-like vector bosons are excluded"];
+         printDiagramsInfo[newInserted,"modifying D"];
       ];
       If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-         inserted = If[amITPinguin[#[[1]]],
+         newInserted = If[amITPinguin[#[[1]]],
          (*Delete scalar fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
          (*Else do not touch.*)
-         #]&/@ inserted;
-         Print["MD: penguins: stu propagation of scalars bosons is excluded"];
-         printDiagramsInfo[inserted,"modifying diagrams"];
+         #] &/@ inserted;
+         Print["t-penguins: tree-like scalar bosons are excluded"];
+         printDiagramsInfo[newInserted,"modifying D"];
       ];
    ];
-   inserted
+   newInserted
 ];
-getModifiedDiagrams[x___] :=
-Utils`AssertOrQuit[False,getModifiedDiagrams::errUnknownInput,{x}];
-SetAttributes[getModifiedDiagrams,{Protected,Locked}];
+getModifiedDiagrams // Utils`MakeUnknownInputDefinition;
+getModifiedDiagrams ~ SetAttributes ~ {Protected,Locked};
 
 printDiagramsInfo[
-   diagrams:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   diagrams:`type`diagramSet,
    where_String:"new"
 ] :=
 Module[
@@ -719,7 +707,7 @@ Module[
 ];
 
 debugMakePictures[
-   diagrams:FeynArts`TopologyList[_][Rule[FeynArts`Topology[_][__],FeynArts`Insertions[Generic][__]]..],
+   diagrams:`type`diagramSet,
    name_String:"classes"
 ] :=
 Module[
