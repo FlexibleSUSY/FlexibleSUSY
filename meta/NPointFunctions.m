@@ -1025,23 +1025,25 @@ Module[
 ];
 Utils`MakeUnknownInputDefinition@CreateCXXFunctions;
 
-loopLibrary = {};
-SetAttributes[loopLibrary,Protected];
+`global`loopLibrary = {};
+`global`loopLibrary ~ SetAttributes ~ {Protected,ReadProtected};
+
 setLoopLibraryRules[library_String] :=
 Module[{},
-   ClearAttributes[loopLibrary,Protected];
-   loopLibrary = Switch[library,
+   Unprotect@`global`loopLibrary;
+   `global`loopLibrary = Switch[library,
       "LoopTools", Rule[Symbol@#,StringDrop[ToString@#,10]]&/@Names@"LoopTools`*",
       "FlexibleSUSY", getLoopFlexibleSUSYRules[],
       "GenericLibrary", getGenericLibraryRules[]
    ];
-   SetAttributes[loopLibrary,Protected];
+   Protect@`global`loopLibrary;
 ];
-Utils`MakeUnknownInputDefinition@setLoopLibraryRules;
-SetAttributes[setLoopLibraryRules,{Locked,Protected}];
-getLoopLibraryRules[] := loopLibrary;
-Utils`MakeUnknownInputDefinition@getLoopLibraryRules;
-SetAttributes[getLoopLibraryRules,{Locked,Protected}];
+setLoopLibraryRules // Utils`MakeUnknownInputDefinition;
+setLoopLibraryRules ~ SetAttributes ~ {Locked,Protected};
+
+getLoopLibraryRules[] := `global`loopLibrary;
+getLoopLibraryRules // Utils`MakeUnknownInputDefinition;
+getLoopLibraryRules ~ SetAttributes ~ {Locked,Protected};
 
 getLoopFlexibleSUSYRules::usage=
 "@brief Returns rules for LoopTools to FlexibleSUSY conventions.
@@ -1086,7 +1088,7 @@ Module[
       warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m","Warning"]
    },
    WriteString[OutputStream["stdout", 1],
-      warning<>": Only B0,B1,C0,C1,C2,C00,C11,C12,C22 are implemented.\n"];
+      warning<>": Only B0,B1,C and D are implemented.\n"];
    {
       LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"Sqr(context.scale())"],
       LoopTools`B0i[LoopTools`bb1,args__] :> "lib->B1"[args,"Sqr(context.scale())"],
@@ -1096,7 +1098,18 @@ Module[
       LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"Sqr(context.scale())"],
       LoopTools`C0i[LoopTools`cc11,args__] :> "lib->C11"[args,"Sqr(context.scale())"],
       LoopTools`C0i[LoopTools`cc12,args__] :> "lib->C12"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"Sqr(context.scale())"]
+      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd0,args__] :> "lib->D0"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd00,args__] :> "lib->D00"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd1,args__] :> "lib->D1"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd11,args__] :> "lib->D11"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd12,args__] :> "lib->D12"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd13,args__] :> "lib->D13"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd2,args__] :> "lib->D2"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd22,args__] :> "lib->D22"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd23,args__] :> "lib->D23"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd3,args__] :> "lib->D3"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd33,args__] :> "lib->D33"[args,"Sqr(context.scale())"]
    }
 ];
 Utils`MakeUnknownInputDefinition@getGenericLibraryRules;
