@@ -384,7 +384,7 @@ Module[
      newDiagrams = diagrams
    },
    (* 2to2 self energy of particle 1. *)
-   newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
+   newDiagrams = If[getAdjacencyMatrix@First@# === {{0,0,0,0,1,0,0,0},
                                                                {0,0,0,0,0,1,0,0},
                                                                {0,0,0,0,0,0,1,0},
                                                                {0,0,0,0,0,1,0,0},
@@ -397,7 +397,7 @@ Module[
       #] &/@ diagrams;
 
    (* 2to2 self energy of particle 3. *)
-   newDiagrams = If[getAdjacencyMatrixForTopology@First@# === {{0,0,0,0,1,0,0,0},
+   newDiagrams = If[getAdjacencyMatrix@First@# === {{0,0,0,0,1,0,0,0},
                                                                {0,0,0,0,0,1,0,0},
                                                                {0,0,0,0,0,0,1,0},
                                                                {0,0,0,0,0,1,0,0},
@@ -423,17 +423,18 @@ Module[
 getRestrictionsOnGenericSumsByTopology // Utils`MakeUnknownInputDefinition;
 getRestrictionsOnGenericSumsByTopology ~ SetAttributes ~ {Protected,Locked};
 
-getAdjacencyMatrixForTopology[topology:`type`topology] :=
+getAdjacencyMatrix[topology:`type`topology] :=
 Module[
    {
-      propagatorPattern,adjacencies,adjacencyMatrix
+      propagatorPattern,needNewNumbers,adjacencies,adjacencyMatrix
    },
    propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
-   adjacencies = Tally[(List@@topology)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}];
+   needNewNumbers = And[Max@@(topology/.propagatorPattern[i_,j_,___]:>Sequence[i,j])>100,MatchQ[List@@topology,{propagatorPattern[_,_]..}]];
+   adjacencies = Tally[(List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}] &@ If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
    adjacencyMatrix=Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies]
 ];
-getAdjacencyMatrixForTopology // Utils`MakeUnknownInputDefinition;
-getAdjacencyMatrixForTopology ~ SetAttributes ~ {Protected,Locked};
+getAdjacencyMatrix // Utils`MakeUnknownInputDefinition;
+getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
 
 getMomElimForAmplitudesByTopology::usage=
 "@brief Uses internally defined replacement list funMomRules for definition of
@@ -570,7 +571,7 @@ topologyReplacements =
 {
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
    Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   Boxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
+   Boxes -> (*(FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&)*)(`topologyQ`boxS@#&),
    FourFermionScalarPenguins -> (amITPinguin@#&),
    FourFermionMassiveVectorPenguins -> (amITPinguin@#&)
 };
@@ -594,6 +595,21 @@ Module[{excludeTopologyName},
    excludeTopologyName];
 getExcludedTopologies // Utils`MakeUnknownInputDefinition;
 getExcludedTopologies ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`boxS[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,1,1,0},{0,1,0,0,1,0,0,1},{0,0,1,0,1,0,0,1},{0,0,0,1,0,1,1,0}};
+`topologyQ`boxS // Utils`MakeUnknownInputDefinition;
+`topologyQ`boxS ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`boxT[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,1},{0,1,0,0,1,0,1,0},{0,0,1,0,0,1,0,1},{0,0,0,1,1,0,1,0}};
+`topologyQ`boxT // Utils`MakeUnknownInputDefinition;
+`topologyQ`boxT ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`boxU[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,0,1,1},{0,1,0,0,0,0,1,1},{0,0,1,0,1,1,0,0},{0,0,0,1,1,1,0,0}};
+`topologyQ`boxU // Utils`MakeUnknownInputDefinition;
+`topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
 
 amITPinguin::usage =
 "@brief If given topology is pinguin-like (mainly, for CLFV processes), then
