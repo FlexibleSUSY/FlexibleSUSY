@@ -343,6 +343,7 @@ Module[
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
 
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
+   debugMakePictures[diagrams,"class"];
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
 
@@ -428,7 +429,7 @@ Module[
       propagatorPattern,adjacencies,adjacencyMatrix
    },
    propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
-   adjacencies = Tally[(List@@topology)/.propagatorPattern[i_,j_,_]:>{{i,j},{j,i}}];
+   adjacencies = Tally[(List@@topology)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}];
    adjacencyMatrix=Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies]
 ];
 getAdjacencyMatrixForTopology // Utils`MakeUnknownInputDefinition;
