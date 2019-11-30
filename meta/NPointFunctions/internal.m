@@ -384,27 +384,13 @@ Module[
      newDiagrams = diagrams
    },
    (* 2to2 self energy of particle 1. *)
-   newDiagrams = If[getAdjacencyMatrix@First@# === {{0,0,0,0,1,0,0,0},
-                                                               {0,0,0,0,0,1,0,0},
-                                                               {0,0,0,0,0,0,1,0},
-                                                               {0,0,0,0,0,1,0,0},
-                                                               {1,0,0,0,0,0,0,2},
-                                                               {0,1,0,1,0,0,1,0},
-                                                               {0,0,1,0,0,1,0,1},
-                                                               {0,0,0,0,2,0,1,0}},
+   newDiagrams = If[`topologyQ`self1pinguinT@First@#,
       (* Skip sum if FeynArts`Field@6 is the same as external particle 1 *)
       First@# -> Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
       #] &/@ diagrams;
 
    (* 2to2 self energy of particle 3. *)
-   newDiagrams = If[getAdjacencyMatrix@First@# === {{0,0,0,0,1,0,0,0},
-                                                               {0,0,0,0,0,1,0,0},
-                                                               {0,0,0,0,0,0,1,0},
-                                                               {0,0,0,0,0,1,0,0},
-                                                               {1,0,0,0,0,1,0,1},
-                                                               {0,1,0,1,1,0,0,0},
-                                                               {0,0,1,0,0,0,0,2},
-                                                               {0,0,0,0,1,0,2,0}},
+   newDiagrams = If[`topologyQ`self3pinguinT@First@#,
       (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
       First@# -> Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
       #] &/@ newDiagrams;
@@ -451,7 +437,7 @@ getMomElimForAmplitudesByTopology[
 Module[
    {
       getTAR = getTopologyAmplitudeRulesByTopologyCriterion,
-      funMomRules = {amITPinguin->2},
+      funMomRules = {`topologyQ`pinguinT->2},
       replacements
    },
    replacements = (getTAR[diagrams,First@#]/.x_Integer:>Last@#) &/@ funMomRules;
@@ -490,7 +476,7 @@ Module[
    If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
       Print["t-pinguins: tree-like massless vector bosons are excluded"];
       (* Step 1: Get positions of topologies and amplitudes to change. *)
-      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,amITPinguin];
+      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,`topologyQ`pinguinT];
       numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
       (* Step 2: Get positions of classes to save. {<amplitude>->{classes to save}..}*)
       rulesForClassesToSave=Reap[
@@ -572,8 +558,8 @@ topologyReplacements =
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
    Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
    Boxes -> (*(FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&)*)(`topologyQ`boxS@#&),
-   FourFermionScalarPenguins -> (amITPinguin@#&),
-   FourFermionMassiveVectorPenguins -> (amITPinguin@#&)
+   FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
+   FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
 };
 topologyReplacements ~ SetAttributes ~ {Protected,Locked};
 
@@ -596,6 +582,30 @@ Module[{excludeTopologyName},
 getExcludedTopologies // Utils`MakeUnknownInputDefinition;
 getExcludedTopologies ~ SetAttributes ~ {Protected,Locked};
 
+`topologyQ`pinguinT[topology:`type`topology] :=
+Or[
+   `topologyQ`trianglepinguinT@topology,
+   `topologyQ`self1pinguinT@topology,
+   `topologyQ`self3pinguinT@topology
+];
+`topologyQ`pinguinT // Utils`MakeUnknownInputDefinition;
+`topologyQ`pinguinT ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`trianglepinguinT[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,0,1,1},{0,1,0,1,0,0,0,1},{0,0,1,0,1,0,0,1},{0,0,0,0,1,1,1,0}};
+`topologyQ`trianglepinguinT // Utils`MakeUnknownInputDefinition;
+`topologyQ`trianglepinguinT ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`self1pinguinT[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,0,0,2},{0,1,0,1,0,0,1,0},{0,0,1,0,0,1,0,1},{0,0,0,0,2,0,1,0}};
+`topologyQ`self1pinguinT // Utils`MakeUnknownInputDefinition;
+`topologyQ`self1pinguinT ~ SetAttributes ~ {Protected,Locked};
+
+`topologyQ`self3pinguinT[topology:`type`topology] :=
+getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,1,0,1},{0,1,0,1,1,0,0,0},{0,0,1,0,0,0,0,2},{0,0,0,0,1,0,2,0}};
+`topologyQ`self3pinguinT // Utils`MakeUnknownInputDefinition;
+`topologyQ`self3pinguinT ~ SetAttributes ~ {Protected,Locked};
+
 `topologyQ`boxS[topology:`type`topology] :=
 getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,1,1,0},{0,1,0,0,1,0,0,1},{0,0,1,0,1,0,0,1},{0,0,0,1,0,1,1,0}};
 `topologyQ`boxS // Utils`MakeUnknownInputDefinition;
@@ -610,41 +620,6 @@ getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,
 getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,0,1,1},{0,1,0,0,0,0,1,1},{0,0,1,0,1,1,0,0},{0,0,0,1,1,1,0,0}};
 `topologyQ`boxU // Utils`MakeUnknownInputDefinition;
 `topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
-
-amITPinguin::usage =
-"@brief If given topology is pinguin-like (mainly, for CLFV processes), then
-returns True, False otherwise.
-@param <FeynArts`Topology[_][__]> topology to check.
-@returns <boolean> If given topology is pinguin-like (mainly, for CLFV processes), then
-returns True, False otherwise.";
-amITPinguin[topology:`type`topology] :=
-Module[
-   {
-      (*@note During creation of topologies we have External only.*)
-      ext = FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing,
-      int = FeynArts`Internal,
-      extFields,vert
-   },
-   extFields = Cases[topology, _[ext][__]];
-   If[UnsameQ[Length@extFields,4],Return@False];
-   If[!FreeQ[extFields,FeynArts`Vertex@4],Return@False];
-   (*Only t-channel.*)
-   If[!MatchQ[SortBy[topology,{Head@First@#&,First@First@#&}],
-         _[_][
-            _,_[ext][_[1][2],vert_,___],
-            _,_[ext][_[1][4],vert_,___],
-            ___,_[int][___,vert_,__],___
-         ]
-      ],
-      Return@False];
-   (*Rule for triangle.*)
-   If[FreeQ[FeynArts`ToTree@topology,FeynArts`Centre@Except@3],Return@True];
-   (*@note ,___ in the very end is for the stage when Field can appear.*)
-   (*Rule for SE-like.*)
-   SameQ[Length@Cases[FeynArts`ToTree@topology,_[ext][_,FeynArts`Centre[2][_],___]],1]
-];
-amITPinguin // Utils`MakeUnknownInputDefinition;
-amITPinguin ~ SetAttributes ~ {Protected,Locked};
 
 getModifiedDiagrams::usage =
 "@brief Modifies diagrams according to excudeProcess list.
@@ -666,7 +641,7 @@ Module[
    If[Not[MemberQ[excludeProcesses,FourFermionScalarPenguins]&&
           MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins]],
       If[MemberQ[excludeProcesses,FourFermionScalarPenguins],
-         newInserted = If[amITPinguin[#[[1]]],
+         newInserted = If[`topologyQ`pinguinT[#[[1]]],
          (*Delete vector fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
          (*Else do not touch.*)
@@ -675,7 +650,7 @@ Module[
          printDiagramsInfo[newInserted,"modifying D"];
       ];
       If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-         newInserted = If[amITPinguin[#[[1]]],
+         newInserted = If[`topologyQ`pinguinT[#[[1]]],
          (*Delete scalar fields on tree-level like propagator.*)
          #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
          (*Else do not touch.*)
