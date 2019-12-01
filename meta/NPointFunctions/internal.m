@@ -328,15 +328,17 @@ Module[
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
-
    topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
+   If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
 
    diagrams = FeynArts`InsertFields[topologies,
       inFields -> outFields,
       FeynArts`InsertionLevel -> FeynArts`Classes,
       FeynArts`Model -> feynArtsModel];
+   If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
+
    diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
@@ -437,7 +439,7 @@ getMomElimForAmplitudesByTopology[
 Module[
    {
       getTAR = getTopologyAmplitudeRulesByTopologyCriterion,
-      funMomRules = {`topologyQ`pinguinT->2},
+      funMomRules = {`topologyQ`pinguinT->2,`topologyQ`boxS->2},
       replacements
    },
    replacements = (getTAR[diagrams,First@#]/.x_Integer:>Last@#) &/@ funMomRules;
@@ -842,7 +844,7 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> None, (* FormCalc`Fierz leads to some cumbersome expressions. *)
+         FormCalc`FermionOrder -> {4,2,3,1}, (* FormCalc`Fierz leads to some cumbersome expressions. *)
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];

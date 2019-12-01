@@ -188,6 +188,15 @@ Begin["`internal`"];
 `type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
 
+`subkernel`message::errNoTopologies =
+"No topologies are generated for a given set of options.";
+`subkernel`message::errNoDiagrams =
+"No diagrams are generated for a given set of options.";
+
+`subkernel`error[o___] := Utils`AssertOrQuit[False,o];
+`subkernel`error // Utils`MakeUnknownInputDefinition;
+`subkernel`error ~ SetAttributes ~ {Locked,Protected,ReadProtected,HoldFirst};
+
 getDirectories[] :=
 Module[{},
    {
@@ -391,12 +400,12 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,Boxes}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,Boxes}];
    (* ASSUMPTION: high virtuality of massive particle in t-channel for penguins q^2=0. *)
    dressedFermions = {uNPF[[1,1,1]],dNPF[[1,2,1]]};
    assumptionReplacements =
