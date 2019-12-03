@@ -22,12 +22,22 @@
 
 *)
 
-BeginPackage["NPointFunctions`",{"FeynArts`","FormCalc`","Utils`"}];
-FeynArts`$FAVerbose = 1;(* Change this to 2 to see more output (if 1 then less). *)
-FormCalc`$FCVerbose = 0;(* Change this to 1,2 or 3 to see more output. *)
+(* There is a problem with Global`args which comes from mathematica paclets.*)
+Quiet[Needs["FeynArts`"],{FeynArts`args::shdw}];
+(* Change this to 2 to see more output (if 1 then less). *)
+FeynArts`$FAVerbose = 1;
+
+Needs["FormCalc`"];
+(* Change this to 1,2 or 3 to see more output. *)
+FormCalc`$FCVerbose = 0;
+(* Next Format makes some pattern generate mistakes. *)
+Format[FormCalc`DiracChain[FormCalc`Private`s1_FormCalc`Spinor,FormCalc`Private`om_,FormCalc`Private`g___,FormCalc`Private`s2_FormCalc`Spinor]] =.;
+
+Needs["Utils`"];
+
+BeginPackage["NPointFunctions`"];
 
 {SetInitialValues,NPointFunctionFAFC}
-
 (* Symbols that are not distributed from main kernel. *)
 SetAttributes[#,{Locked,Protected}]&@
 {
@@ -35,7 +45,9 @@ SetAttributes[#,{Locked,Protected}]&@
    GenericS,GenericF,GenericV,GenericU,GenericT,
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses
 };
+
 (* Symbols that can be distributed from main kernel. *)
+Off[General::shdw];
 If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
 {
    DimensionalReduction,DimensionalRegularization,ExceptPaVe,
@@ -43,9 +55,8 @@ If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
    Irreducible,Boxes,Triangles,FourFermionScalarPenguins,
    FourFermionMassiveVectorPenguins
 };
+On[General::shdw];
 
-NPointFunctions`internal`contextPath = $ContextPath;
-$ContextPath = {"NPointFunctions`","System`"};
 Begin["`internal`"];
 
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
@@ -338,17 +349,14 @@ Module[
       FeynArts`InsertionLevel -> FeynArts`Classes,
       FeynArts`Model -> feynArtsModel];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
-
    diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
-
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
    debugMakePictures[diagrams,"class"];
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
-
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
    genericInsertions = Map[Last,#,{3}] &@ Flatten[                              (* Everything is sorted already, so we need only field-replacement names *)
@@ -366,6 +374,7 @@ Module[
       True, {SARAH`Mom[_Integer,_] :> 0},
       False, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]},
       ExceptPaVe,{}(* @todo Modify. *)];
+
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
@@ -424,6 +433,19 @@ Module[
 getAdjacencyMatrix // Utils`MakeUnknownInputDefinition;
 getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
 
+`restrictions`momenta =
+{
+   {
+      `topologyQ`pinguinT->2,
+      `topologyQ`boxS->2,
+      `topologyQ`boxU->2
+   },
+   Default->Automatic
+};
+
+(*`type`momentaRules = {{Rule[_,#]..},Rule[Default,#]} & [_Integer|Automatic|False] ;*)
+(*`type`diracRules = {Rule[_,{__Integer}|None|FormCalc`Fierz|Automatic]..};*)
+
 getMomElimForAmplitudesByTopology::usage=
 "@brief Uses internally defined replacement list funMomRules for definition of
 momenta to eliminate in specific topologies.
@@ -438,18 +460,16 @@ getMomElimForAmplitudesByTopology[
 ] :=
 Module[
    {
-      getTAR = getTopologyAmplitudeRulesByTopologyCriterion,
-      funMomRules = {`topologyQ`pinguinT->2,`topologyQ`boxS->2},
       replacements
    },
-   replacements = (getTAR[diagrams,First@#]/.x_Integer:>Last@#) &/@ funMomRules;
+   replacements = (getTopologyAmplitudeRulesByTopologyCriterion[diagrams,First@#]/.x_Integer:>Last@#) &/@ `restrictions`momenta[[1]];
    replacements = Transpose@replacements;
    replacements = Switch[ Count[First/@#,True],
       0,First@#,
       1,#~Extract~Position[#,True][[1,1]],
       _,Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errOverlap]
       ] &/@ replacements;
-   replacements = If[First@#===False,#/.x_Integer:>Automatic,#] &/@ replacements;
+   replacements = If[First@#===False,#/.x_Integer:>`restrictions`momenta[[2,2]],#] &/@ replacements;
    Flatten[Last/@replacements]
 ];
 getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
@@ -851,7 +871,6 @@ Module[
    Print["FORM calculation done."];
 
    calculatedAmplitudes = MapThread[ToGenericSum,{calculatedAmplitudes,settingsForGenericSums}];
-
    abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
@@ -900,12 +919,6 @@ identifySpinors::usage =
 @returns DiracChain with inserted fermion names | Expression with new DiracChains.
 @note DiracChains live only inside FormCalc`Abbr.
 @note Should NOT be used for Automatic FormCalc`FermionOrder.";
-identifySpinors::errUnknownInput =
-"Input should be
-identifySpinors@@{ <list of rules>, <feynamplist> } OR
-identifySpinors@@{ <diracchain>, <feynamplist> }
-and not
-identifySpinors@@`1`";
 identifySpinors[
    inp:{Rule[_,_]...},
    ampsGen:FeynArts`FeynAmpList[
@@ -917,9 +930,9 @@ identifySpinors[
 inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch,ampsGen];
 identifySpinors[
    FormCalc`DiracChain[
-      FormCalc`Spinor[FormCalc`k[fermion1_Integer],mass1_,_Integer],
+      FormCalc`Spinor[FormCalc`k[fermion1_Integer],mass1_,1|-1],
       seqOfElems___,
-      FormCalc`Spinor[FormCalc`k[fermion2_Integer],mass2_,_Integer]],
+      FormCalc`Spinor[FormCalc`k[fermion2_Integer],mass2_,1|-1]],
    FeynArts`FeynAmpList[
       ___,
       process:(FeynArts`Process->Rule[{{__}..},{{__}..}]),
@@ -936,9 +949,8 @@ Module[
    seqOfElems,
    FormCalc`Spinor[fermion2/.identificationRules,FormCalc`k[fermion2],mass2]]
 ];
-identifySpinors[x___] :=
-Utils`AssertOrQuit[False,identifySpinors::errUnknownInput,{x}];
-SetAttributes[identifySpinors,{Protected,Locked}];
+identifySpinors // Utils`MakeUnknownInputDefinition;
+identifySpinors ~ SetAttributes ~ {Protected,Locked};
 
 getFermionPositionRules::usage =
 "@brief Gives rules of the form number_of_input_field->name_of_fermion.
@@ -1109,6 +1121,4 @@ SetAttributes[
    {Protected, Locked}];
 
 End[];
-$ContextPath = NPointFunctions`internal`contextPath;
-Clear[NPointFunctions`internal`contextPath];
 EndPackage[];
