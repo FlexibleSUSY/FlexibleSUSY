@@ -202,7 +202,6 @@ Module[{},
    {
       {
          #1,
-         #2,
          #3,
          FlexibleSUSY`$flexiblesusyMetaDir
       },
@@ -400,18 +399,16 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,Boxes}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,Boxes*)}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,Boxes}];
-   (* ASSUMPTION: high virtuality of massive particle in t-channel for penguins q^2=0. *)
+      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,Boxes*)}];
    dressedFermions = {uNPF[[1,1,1]],dNPF[[1,2,1]]};
    assumptionReplacements =
      {
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[First@dressedFermions,i_]*mom[Last@dressedFermions,i_]]:>
-        (2*mass[First@dressedFermions ]^2+mass[ Last@dressedFermions ]^2) / 2
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[First@dressedFermions,i_]*mom[Last@dressedFermions,i_]] :> mass[First@dressedFermions ]^2
      };
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
 
@@ -561,7 +558,7 @@ Module[
       zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
       excludeProcesses = OptionValue[KeepProcesses],                     (*@todo is not checked yet!*)
       onShellFlag = OptionValue[OnShellFlag],
-      nPointFunctionsDir,feynArtsDir,feynArtsModel,particleNamesFile,
+      nPointFunctionsDir,feynArtsModel,particleNamesFile,
       particleNamespaceFile,substitutionsFile,formCalcDir,fsMetaDir,
       subKernel,
       currentPath, currentDirectory,
@@ -569,7 +566,7 @@ Module[
       nPointFunction
    },
    {
-      {nPointFunctionsDir,feynArtsDir,formCalcDir,fsMetaDir},
+      {nPointFunctionsDir,formCalcDir,fsMetaDir},
       {feynArtsModel,particleNamesFile,particleNamespaceFile,substitutionsFile}
    } = getDirectories[];
 
@@ -598,7 +595,7 @@ Module[
    currentDirectory = Directory[];
 
    DistributeDefinitions[currentPath, currentDirectory,
-      fsMetaDir, feynArtsDir, formCalcDir, feynArtsModel,
+      fsMetaDir, formCalcDir, feynArtsModel,
       particleNamesFile, substitutionsFile, particleNamespaceFile,
       inFANames, outFANames, loopLevel, regularizationScheme,
       zeroExternalMomenta, excludeProcesses, onShellFlag];
@@ -609,7 +606,7 @@ Module[
 
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
-      NPointFunctions`SetInitialValues[feynArtsDir, formCalcDir, feynArtsModel,
+      NPointFunctions`SetInitialValues[formCalcDir, feynArtsModel,
          particleNamesFile, substitutionsFile, particleNamespaceFile];
 
       NPointFunctions`NPointFunctionFAFC[

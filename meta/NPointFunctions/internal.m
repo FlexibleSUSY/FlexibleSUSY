@@ -32,7 +32,6 @@ Needs["FormCalc`"];
 FormCalc`$FCVerbose = 0;
 (* Next Format makes some pattern generate mistakes. *)
 Format[FormCalc`DiracChain[FormCalc`Private`s1_FormCalc`Spinor,FormCalc`Private`om_,FormCalc`Private`g___,FormCalc`Private`s2_FormCalc`Spinor]] =.;
-
 Needs["Utils`"];
 
 BeginPackage["NPointFunctions`"];
@@ -42,7 +41,7 @@ BeginPackage["NPointFunctions`"];
 SetAttributes[#,{Locked,Protected}]&@
 {
    LorentzIndex,GenericSum,GenericIndex,
-   GenericS,GenericF,GenericV,GenericU,GenericT,
+   GenericS,GenericF,GenericV,GenericU,
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses
 };
 
@@ -64,15 +63,20 @@ Begin["`internal`"];
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
 
+`type`indexCol = FeynArts`Index[Global`Colour,_Integer];
+`type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
+`type`indexGeneric = FeynArts`Index[Generic,_Integer];
+
+`type`fieldFA = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
+
+`type`FAfieldGeneric = `type`fieldFA[`type`indexGeneric];
+
 getProcess[diagrams:`type`diagramSet] := Cases[Head@diagrams, (FeynArts`Process->x_) :> x][[1]];
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
 `type`amplitudeSet = FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..];
 
-feynArtsDir = "";
-formCalcDir = "";
-feynArtsModel = "";
 particleNamesFile = "";
 substitutionsFile = "";
 particleNamespaceFile = "";
@@ -90,14 +94,12 @@ amplitudeToFSRules::usage=
 "A set of rules for @todo";
 amplitudeToFSRules= {};
 
-Protect[feynArtsDir,formCalcDir,feynArtsModel,
-   particleNamesFile,substitutionsFile,particleNamespaceFile,
+Protect[particleNamesFile,substitutionsFile,particleNamespaceFile,
    subexpressionToFSRules,fieldNameToFSRules,amplitudeToFSRules
 ];
 
 SetInitialValues::usage=
 "@brief Set the FeynArts and FormCalc paths, creates required directories.
-@param FADirS the directory designated for FeynArts output
 @param FCDirS the directory designated for FormCalc output
 @param FAModelS the name of the FeynArts model file
 @param particleNamesFileS the name of the SARAH-generated particle names file
@@ -106,23 +108,28 @@ SetInitialValues::usage=
 @note Allowed to be called only once";
 SetInitialValues::errOnce=
 "Paths for FeynArts and FormCalc have been defined already.";
-SetInitialValues[FADir_String, FCDir_String, FAModel_String,
+SetInitialValues[FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
 Module[{},
-   {feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
-   feynArtsDir = FADir;
-   formCalcDir = FCDir;
-   feynArtsModel = FAModel;
+   If[!DirectoryQ@FCDir,CreateDirectory@FCDir];
+   SetDirectory@FCDir;
+
+   FeynArts`InitializeModel@FAModel;
+   SetOptions[FeynArts`InsertFields,FeynArts`Model->FAModel,FeynArts`InsertionLevel->FeynArts`Classes];
+
+   (*Which index types do we load with the model?*)
+   `type`indexGen = FeynArts`Index[Or@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer]; 
+
+   {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
    particleNamespaceFile = particleNamespaceFileS;
-   {feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}~SetAttributes~{Protected, Locked};
-   If[!DirectoryQ@formCalcDir,CreateDirectory@formCalcDir];
-   SetDirectory@formCalcDir;
+   {particleNamesFile,substitutionsFile,particleNamespaceFile}~SetAttributes~{Protected, Locked};
+
    SetFSConventionRules[];
 ] /; Utils`AssertOrQuit[
-   And@@(TrueQ[#=={Protected}] &/@ Attributes@{feynArtsDir,formCalcDir,feynArtsModel,particleNamesFile,substitutionsFile,particleNamespaceFile}),
+   And@@(TrueQ[#=={Protected}] &/@ Attributes@{particleNamesFile,substitutionsFile,particleNamespaceFile}),
    SetInitialValues::errOnce];
 SetInitialValues // Utils`MakeUnknownInputDefinition;
 SetInitialValues ~ SetAttributes ~ {Protected,Locked};
@@ -135,15 +142,15 @@ Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
       fieldNames,indexRules,massRules,couplingRules,generalFCRules,
-      diracChainRules,sumOverRules
+      sumOverRules,diracChainRules
    },
    fieldNames =
    Flatten[
       StringCases[
          Utils`ReadLinesInFile@particleNamesFile,
-         x__ ~~ ": " ~~ y__ ~~ "]" ~~ ___ :> {x,y}],
+         x__ ~~ ": " ~~ y:"S"|"V"|"U"|"F" ~~ "[" ~~ int__ ~~ "]" ~~ ___ :> {x,y,int}],
       1] /.
-      Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} & /@ Get@particleNamespaceFile, 2];
+      Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} &/@ Get@particleNamespaceFile, 2];
    massRules = Append[Flatten[Module[
       {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
       {
@@ -255,12 +262,11 @@ Module[
    indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*)
    {
       FeynArts`Index[generationName_, index_Integer] :>
-      Symbol["SARAH`gt" <> ToString@index] /;
-         StringMatchQ[SymbolName@generationName, "I"~~___~~"Gen"],
+      Symbol["SARAH`gt" <> ToString@index] /; StringMatchQ[SymbolName@generationName, "I"~~___~~"Gen"],
       FeynArts`Index[Global`Colour, index_Integer] :>
       Symbol["SARAH`ct" <> ToString@index],
       FeynArts`Index[Global`Gluon, index_Integer] :>                            (* @todo Potentially dangerous stuff. Gluon goes from 1 to 8, not from 1 to 3 as Colour*)
-      Symbol["SARAH`ct" <> ToString@index]
+      (Print["Warning: check line 263 of internal.m"];Symbol["SARAH`ct" <> ToString@index])
    };
 
    sumOverRules =
@@ -278,29 +284,29 @@ Module[
 
    Unprotect@fieldNameToFSRules;
    fieldNameToFSRules = Join[
-      ToExpression[#[[2]] <> "]->" <> #[[1]]] &/@
-         fieldNames,
-      ToExpression[#[[2]] <> ",{indices___}]:>" <> #[[1]] <> "[{indices}]"] &/@
-         fieldNames,
+      Map[ToExpression,fieldNames,2] /. {name_,type_,number_}:>Rule[type@number,name],
+      Map[ToExpression,fieldNames,2] /. {name_,type_,number_}:>RuleDelayed[type[number,{indices__}],name@{indices}],
+      Map[ToExpression,fieldNames,2] /.
       {
-         FeynArts`S -> GenericS, FeynArts`F -> GenericF, FeynArts`V -> GenericV,
-         FeynArts`U -> GenericU, FeynArts`T -> GenericT
+         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name],Susyno`LieGroups`conj@name],
+         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name],SARAH`bar@name]
       },
+      Map[ToExpression,fieldNames,2] /.
       {
-         Times[-1, field_GenericS | field_GenericV] :>
-         Susyno`LieGroups`conj@field,
-         Times[-1, field_GenericF | field_GenericU] :>
-         SARAH`bar@field
+         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name@{indices__}],Susyno`LieGroups`conj@name@{indices}],
+         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
       },
-      (Times[-1, field: # | Blank@#] :> CXXDiagrams`LorentzConjugate@field) &/@ (* @todo for what is this? *)
-         (ToExpression /@ fieldNames[[All,1]]),                                 (* *)
-      indexRules
+      indexRules,
+      {FeynArts`S->GenericS,FeynArts`F->GenericF,FeynArts`V->GenericV,FeynArts`U->GenericU},
+      {
+         Times[-1,field:_GenericS|_GenericV]:>Susyno`LieGroups`conj@field,
+         Times[-1,field:_GenericF|_GenericU]:>SARAH`bar@field
+      }
    ];
    Protect@fieldNameToFSRules;
-
-   (*These symbols cause an overshadowing with Susyno`LieGroups @todo what is this*)
-   diracChainRules = Symbol["F" <> ToString@#] :> Unique@"diracChain" &/@
-      Range@Length@fieldNames;
+   (*Symbols F1, F2, ... - names of fermionic chains cause an overshadowing*)
+   diracChainRules = Symbol["F"<>ToString@#] :> Unique@"diracChain" &/@ Range@Length@fieldNames;
+   diracChainRules = {};
 
    Unprotect@subexpressionToFSRules;
    subexpressionToFSRules = Join[
@@ -344,10 +350,7 @@ Module[
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
 
-   diagrams = FeynArts`InsertFields[topologies,
-      inFields -> outFields,
-      FeynArts`InsertionLevel -> FeynArts`Classes,
-      FeynArts`Model -> feynArtsModel];
+   diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
    diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
 
@@ -394,13 +397,11 @@ Module[
      processParticles = Delete[#,Position[#,FeynArts`Index[Global`Colour,_Integer]]] &/@ Flatten[List@@(getProcess@diagrams)],
      newDiagrams = diagrams
    },
-   (* 2to2 self energy of particle 1. *)
    newDiagrams = If[`topologyQ`self1pinguinT@First@#,
       (* Skip sum if FeynArts`Field@6 is the same as external particle 1 *)
       First@# -> Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
       #] &/@ diagrams;
 
-   (* 2to2 self energy of particle 3. *)
    newDiagrams = If[`topologyQ`self3pinguinT@First@#,
       (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
       First@# -> Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
@@ -714,9 +715,11 @@ debugMakePictures[
    name_String:"classes"
 ] :=
 Module[
-   {},
-   DeleteFile[FileNames[FileNameJoin@{feynArtsDir, name<>"*"}]];
-   Export[FileNameJoin@{feynArtsDir,name<>".png"},FeynArts`Paint[diagrams,
+   {
+      directory = FileNameJoin[Most[FileNameSplit@@FeynArts`$Model]]
+   },
+   DeleteFile[FileNames[FileNameJoin@{directory, name<>"*"}]];
+   Export[FileNameJoin@{directory,name<>".png"},FeynArts`Paint[diagrams,
       FeynArts`PaintLevel->{FeynArts`Classes},
       FeynArts`SheetHeader->name,
       FeynArts`Numbering->FeynArts`Simple]];
@@ -888,6 +891,8 @@ Module[
       abbreviations, subexpressions]
 ];
 
+simplifySimpleChains[_FormCalc`DiracChain]
+
 setZeroExternalMomentaInChains::usage =
 "@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
 @param abbreviations list of rules.
@@ -911,6 +916,9 @@ Module[
 setZeroExternalMomentaInChains[x___] :=
 Utils`AssertOrQuit[False,setZeroExternalMomentaInChains::errUnknownInput,{x}];
 SetAttributes[setZeroExternalMomentaInChains,{Protected,Locked}];
+
+`type`FAindexIGen = _(?FAFieldQ)[_Integer,{FeynArts`Index[_Symbol,_Integer]}]
+`type`diracSpinor = FormCalc`Spinor[FormCalc`k[_Integer],_FeynArts`Mass[],1|-1]
 
 identifySpinors::usage =
 "@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
@@ -942,7 +950,7 @@ identifySpinors[
 ] :=
 Module[
    {
-      identificationRules = getFermionPositionRules@process
+      identificationRules = getFieldPositionRules@process
    },
    FormCalc`DiracChain[
    FormCalc`Spinor[fermion1/.identificationRules,FormCalc`k[fermion1],mass1],
@@ -952,31 +960,16 @@ Module[
 identifySpinors // Utils`MakeUnknownInputDefinition;
 identifySpinors ~ SetAttributes ~ {Protected,Locked};
 
-getFermionPositionRules::usage =
+getFieldPositionRules::usage =
 "@brief Gives rules of the form number_of_input_field->name_of_fermion.
 @param FeynArts`Process->Rule[_,_].
 @returns Rules of the form number_of_input_field->name_of_fermion.";
-getFermionPositionRules::errUnknownInput =
-"Input should be
-getFermionPositionRules@@{ FeynArts`Process->Rule[_,_] }
-and not
-getFermionPositionRules@@`1`";
-getFermionPositionRules[
+getFieldPositionRules[
    FeynArts`Process->Rule[in:{{__}..},out:{{__}..}]
 ] :=
-Module[
-   {
-      particleList = Join[in[[All,1]],out[[All,1]]],
-      current
-   },
-   Flatten[ Reap[Do[
-      Sow@Cases[{particleList[[current]]},fermion:FeynArts`F[__]:>(current->fermion),{1}];
-      Sow@Cases[{particleList[[current]]},fermion:-FeynArts`F[__]:>(current->SARAH`bar[-fermion]),{1}];,
-      {current,Length@particleList}]][[2]] ] //. fieldNameToFSRules
-];
-getFermionPositionRules[x___] :=
-Utils`AssertOrQuit[False,getFermionPositionRules::errUnknownInput,{x}]
-SetAttributes[getFermionPositionRules,{Protected,Locked}];
+MapThread[Rule,{Range@Length@#,#//.fieldNameToFSRules}] & [Part[in,All,1]~Join~Part[out,All,1]];
+getFieldPositionRules // Utils`MakeUnknownInputDefinition;
+getFieldPositionRules ~ SetAttributes ~ {Protected,Locked};
 
 getNumberOfChains::usage =
 "@brief Is used to calculate number of opened fermion chains.
@@ -1054,9 +1047,7 @@ needs to be summed and return a corresponding GenericSum[] object.
 ToGenericSum[FormCalc`Amp[_->_][amp_],genericSumRestictions:{Rule[_Integer,_]...}] :=
 Module[
    {
-      sortSumFields = Sort@DeleteDuplicates[Cases[amp,
-         _?(FAFieldQ)[FeynArts`Index[Generic,_Integer]],
-         Infinity]],
+      sortSumFields = Sort@DeleteDuplicates[Cases[amp,`type`FAfieldGeneric,Infinity]],
       replSumFields
    },
    replSumFields = sortSumFields /. f_[_[_,i_]]:>{f@GenericIndex@i,Replace[i,genericSumRestictions~Join~{_Integer->False}]};
@@ -1068,8 +1059,7 @@ FAFieldQ::usage=
 "@brief Checks whether symbol belongs to FeynArts` field names or not.
 @param Symbol to check.
 @returns True if symbol belongs to FeynArts` field names, False otherwise.";
-FAFieldQ =
-   MemberQ[{FeynArts`S,FeynArts`F,FeynArts`V,FeynArts`U,FeynArts`T},#]&;
+FAFieldQ = MatchQ[#,`type`fieldFA]&;
 SetAttributes[FAFieldQ,{Protected,Locked}];
 
 ZeroRules::usage=
@@ -1105,6 +1095,7 @@ where all FlexibleSUSY conventions have been applied.";
 FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
 Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
    fsAmplitudes = amplitudes //. amplitudeToFSRules;
+
    fsAbbreviations = abbreviations //. subexpressionToFSRules;
    fsSubexpressions = subexpressions //. subexpressionToFSRules;
    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
