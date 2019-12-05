@@ -56,7 +56,7 @@ ZeroExternalMomenta::usage=
 "Option for NPointFunctions`NPointFunction[].
 Encodes whether to set the external momenta to zero or leave them undetermined.
 
-def. True | False | ExceptPaVe";
+def. True | False | OperatorsOnly";
 ExceptPave::usage=
 "Possible value for ZeroExternalMomenta.";
 OnShellFlag::usage=
@@ -73,9 +73,6 @@ def. {} | Any sublist of @todo";
 Irreducible::usage=
 "Possible value for KeepProcesses.
 Exclude irreducible topologies.";
-Boxes::usage=
-"Possible value for KeepProcesses.
-Exclude all topologies except box diagrams.";
 Triangles::usage=
 "Possible value for KeepProcesses.
 Exclude all topologies except triangle ones.";
@@ -146,10 +143,10 @@ CreateCXXFToFConversionInNucleus};
 
 SetAttributes[
    {
-   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,
+   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,
    KeepProcesses,
    DimensionalReduction,DimensionalRegularization,
-   Irreducible,Boxes,Triangles,
+   Irreducible,Triangles,
    GenericS,GenericF,GenericV,GenericU,GenericT,                                (* @unote also exist in internal.m*)
    GenericSum,GenericIndex,LorentzIndex,                                        (* @unote also exist in internal.m*)
    LoopFunctions,UseWilsonCoeffs,WilsonBasis
@@ -350,7 +347,13 @@ setSubexpressions // Utils`MakeUnknownInputDefinition;
 setSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 applySubexpressions[obj:`type`npf] :=
-ReplacePart[obj,{2,1,1}->ReplaceRepeated[getGenericSums@obj,getSubexpressions@obj]]~setSubexpressions~{};
+Module[{result},
+   WriteString["stdout"~OutputStream~1,"Applying subexpressions ... "];
+   result = ReplacePart[obj,{2,1,1}->ReplaceRepeated[getGenericSums@obj,getSubexpressions@obj]]~setSubexpressions~{};
+   WriteString["stdout"~OutputStream~1,"done\n"];
+   result
+];
+
 applySubexpressions // Utils`MakeUnknownInputDefinition;
 applySubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -382,69 +385,65 @@ Module[
       header,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
-      dimension6Template,dimension7Template,
-      ch=FormCalc`DiracChain,
-      l=FormCalc`Lor,
+      dimension6Template,
+      l=SARAH`Lorentz,
       mom = SARAH`Mom,
       mass = SARAH`Mass,
       sp,
       codeU,codeD,
-      dressedFermions,assumptionReplacements
+      dressedU,dressedD,assumptionReplacements
    },
    header=CreateCXXHeaders[LoopFunctions->paveLibrary,UseWilsonCoeffs->True];
-   sp[particle_,num_] := FormCalc`Spinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
+   sp[particle_,num_] := SARAH`DiracSpinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    Print["Analytical calculation for ",inF,"->",outF," started ..."];
    uNPF = NPointFunction[{inF,uQ},{outF,uQ},
       OnShellFlag -> True,
       UseCache -> False,
-      ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,Boxes*)}];
+      ZeroExternalMomenta -> OperatorsOnly,
+      KeepProcesses -> {(*FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,*)Boxes}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
-      ZeroExternalMomenta -> False,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,Boxes*)}];
-   dressedFermions = {uNPF[[1,1,1]],dNPF[[1,2,1]]};
+      ZeroExternalMomenta -> OperatorsOnly,
+      KeepProcesses -> {(*FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,*)Boxes}];
+   dressedU = Flatten@getProcess@uNPF;
+   dressedD = Flatten@getProcess@dNPF;
    assumptionReplacements =
      {
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[First@dressedFermions,i_]*mom[Last@dressedFermions,i_]] :> mass[First@dressedFermions ]^2
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[1]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2,
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+0],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+0],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+0],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+0],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+0],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+0]
      };
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
 
    Print["Analytical calculation for ",inF,"->",outF," done."];
-
    dimension6Template[i_,o_,q_] :=
       {
          (*@note 6 means PR, 7 means PL.*)
-         ("S_LL_via_"<>ToString@q) -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,7,q~sp~2],
-         ("S_LR_via_"<>ToString@q) -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,6,q~sp~2],
-         ("S_RL_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,7,q~sp~2],
-         ("S_RR_via_"<>ToString@q) -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,6,q~sp~2],
+         ("S_LL_via_"<>ToString@q) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
+         ("S_LR_via_"<>ToString@q) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
+         ("S_RL_via_"<>ToString@q) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
+         ("S_RR_via_"<>ToString@q) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
          (*@note Q: why names of coeffients are not correct? A: they are
           *correct, one just need to commute projectors with Dirac matrices,
           *what changes 6 to 7 or 7 to 6.*)
-         ("V_LL_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
-         ("V_LR_via_"<>ToString@q) -> ch[o~sp~3,6,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
-         ("V_RL_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,6,l@1,q~sp~2],
-         ("V_RR_via_"<>ToString@q) -> ch[o~sp~3,7,l@1,i~sp~1] ch[q~sp~4,7,l@1,q~sp~2],
+         ("V_LL_via_"<>ToString@q) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
+         ("V_LR_via_"<>ToString@q) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
+         ("V_RL_via_"<>ToString@q) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
+         ("V_RR_via_"<>ToString@q) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
          (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours
           *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
           *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
           *for FC because it cites [Ni05] for Fierz identities, where our
           *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
-         ("minus_T_LL_via_"<>ToString@q) -> ch[o~sp~3,-7,l@1,l@2,i~sp~1] ch[q~sp~4,-7,l@1,l@2,q~sp~2],
-         ("minus_T_RR_via_"<>ToString@q) -> ch[o~sp~3,-6,l@1,l@2,i~sp~1] ch[q~sp~4,-6,l@1,l@2,q~sp~2]
+         ("minus_T_LL_via_"<>ToString@q) -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
+         ("minus_T_RR_via_"<>ToString@q) -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
       };
-   dimension7Template[i_,o_,q_] :=
-      {
-         "not_used_dummy_1" -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,7,mom@1,q~sp~2],
-         "not_used_dummy_2" -> ch[o~sp~3,7,i~sp~1] ch[q~sp~4,6,mom@1,q~sp~2],
-         "not_used_dummy_3" -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,7,mom@1,q~sp~2],
-         "not_used_dummy_4" -> ch[o~sp~3,6,i~sp~1] ch[q~sp~4,6,mom@1,q~sp~2]
-      };
-   uNPF = uNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,uQ];
-   dNPF = dNPF~WilsonCoeffs`neglectBasisElements~dimension7Template[inF,outF,dQ];
    uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
    dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
 
@@ -603,7 +602,6 @@ Module[
    nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDirectory;
-
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
       NPointFunctions`SetInitialValues[formCalcDir, feynArtsModel,
@@ -650,7 +648,7 @@ Module[
    Cases[{opts},Rule[UseCache,x_]:>
       aoq[x===True || x===False,NPointFunction::errUseCache]];
    Cases[{opts},Rule[ZeroExternalMomenta,x_]:>
-      aoq[MemberQ[{True,False,ExceptPave},x],NPointFunction::errZeroExternalMomenta]];
+      aoq[MemberQ[{True,False,OperatorsOnly},x],NPointFunction::errZeroExternalMomenta]];
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    Cases[{opts},Rule[KeepProcesses,x_]:>

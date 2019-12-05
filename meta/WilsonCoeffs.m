@@ -74,7 +74,7 @@ findFermionChains::usage =
 "@brief Searches the FermionChains in the abbreviations rules.
 @param subs substitution rules of the form {Rule[_,_]..}.
 @param chiralBasis  name basis element rules of the form {Rule[_String,_]..}.
-@returns List of <string chain name>->FormCalc`Mat[F#] pairs.";
+@returns List of <string chain name>->NPointFunctions`internal`mat[F#] pairs.";
 findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
 Module[
    {
@@ -86,9 +86,9 @@ Module[
    Table[
       If[basisPos[[i]] === {},
          Print[warning,": " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
-         chiralBasis[[i,1]]->FormCalc`Mat[],
+         chiralBasis[[i,1]]->NPointFunctions`internal`mat[],
          (*else*)
-         chiralBasis[[i,1]]->FormCalc`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
+         chiralBasis[[i,1]]->NPointFunctions`internal`mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
       ],
       {i,Length@basisPos}]
 ];
@@ -96,7 +96,7 @@ Module[
 createNewNPF::usage =
 "@brief Extracts the coefficients for a given basis and NPF object.";
 createNewNPF[obj:`type`npf,
-   chiralBasis:{Rule[_String,_FormCalc`Mat]..}
+   chiralBasis:{Rule[_String,_NPointFunctions`internal`mat]..}
 ] :=
 Module[
    {
@@ -114,7 +114,7 @@ extractCoeffs::errRemainingExpression =
 was not taken into account appropriately.";
 extractCoeffs[
    NPointFunctions`GenericSum[expr_,sumFields:{__}],
-   operators:{Rule[_String,_FormCalc`Mat]..}
+   operators:{Rule[_String,_NPointFunctions`internal`mat]..}
 ] :=
 Module[
    {

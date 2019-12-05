@@ -37,24 +37,20 @@ Needs["Utils`"];
 BeginPackage["NPointFunctions`"];
 
 {SetInitialValues,NPointFunctionFAFC}
-(* Symbols that are not distributed from main kernel. *)
-SetAttributes[#,{Locked,Protected}]&@
+
+Off[General::shdw]
 {
    LorentzIndex,GenericSum,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,
-   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses
-};
-
-(* Symbols that can be distributed from main kernel. *)
-Off[General::shdw];
-If[Attributes[#]=!={Locked,Protected},SetAttributes[#,{Locked,Protected}]]&/@
-{
-   DimensionalReduction,DimensionalRegularization,ExceptPaVe,
+   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses,
+   
+   
+   DimensionalReduction,DimensionalRegularization,OperatorsOnly,
    (*for further details inspect topologyReplacements*)
-   Irreducible,Boxes,Triangles,FourFermionScalarPenguins,
+   Irreducible,Triangles,FourFermionScalarPenguins,
    FourFermionMassiveVectorPenguins
-};
-On[General::shdw];
+} ~ SetAttributes ~ {Locked,Protected};
+On[General::shdw]
 
 Begin["`internal`"];
 
@@ -119,8 +115,7 @@ Module[{},
    SetOptions[FeynArts`InsertFields,FeynArts`Model->FAModel,FeynArts`InsertionLevel->FeynArts`Classes];
 
    (*Which index types do we load with the model?*)
-   `type`indexGen = FeynArts`Index[Or@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer]; 
-
+   `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer]; 
    {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
@@ -142,7 +137,7 @@ Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
       fieldNames,indexRules,massRules,couplingRules,generalFCRules,
-      sumOverRules,diracChainRules
+      sumOverRules
    },
    fieldNames =
    Flatten[
@@ -261,12 +256,9 @@ Module[
 
    indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*)
    {
-      FeynArts`Index[generationName_, index_Integer] :>
-      Symbol["SARAH`gt" <> ToString@index] /; StringMatchQ[SymbolName@generationName, "I"~~___~~"Gen"],
-      FeynArts`Index[Global`Colour, index_Integer] :>
-      Symbol["SARAH`ct" <> ToString@index],
-      FeynArts`Index[Global`Gluon, index_Integer] :>                            (* @todo Potentially dangerous stuff. Gluon goes from 1 to 8, not from 1 to 3 as Colour*)
-      (Print["Warning: check line 263 of internal.m"];Symbol["SARAH`ct" <> ToString@index])
+      index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
+      index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
+      index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
    };
 
    sumOverRules =
@@ -304,17 +296,16 @@ Module[
       }
    ];
    Protect@fieldNameToFSRules;
-   (*Symbols F1, F2, ... - names of fermionic chains cause an overshadowing*)
-   diracChainRules = Symbol["F"<>ToString@#] :> Unique@"diracChain" &/@ Range@Length@fieldNames;
-   diracChainRules = {};
+
+   (*Reserving F1, F2, ... - names of fermionic chains - because they lead to an overshadowing*)
+   Array[Symbol["Global`F"<>ToString@#]&,Length@fieldNames];
 
    Unprotect@subexpressionToFSRules;
    subexpressionToFSRules = Join[
       massRules,
       fieldNameToFSRules,
       couplingRules,
-      generalFCRules,
-      diracChainRules
+      generalFCRules
    ];
    Protect@subexpressionToFSRules;
 
@@ -375,8 +366,7 @@ Module[
    fsFields = Join[fsInFields,fsOutFields];
    externalMomentumRules = Switch[OptionValue@ZeroExternalMomenta,
       True, {SARAH`Mom[_Integer,_] :> 0},
-      False, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]},
-      ExceptPaVe,{}(* @todo Modify. *)];
+      False|OperatorsOnly, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}];
 
    nPointFunction = {
       {fsInFields, fsOutFields},
@@ -439,13 +429,11 @@ getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
    {
       `topologyQ`pinguinT->2,
       `topologyQ`boxS->2,
+      `topologyQ`boxT->2,
       `topologyQ`boxU->2
    },
    Default->Automatic
 };
-
-(*`type`momentaRules = {{Rule[_,#]..},Rule[Default,#]} & [_Integer|Automatic|False] ;*)
-(*`type`diracRules = {Rule[_,{__Integer}|None|FormCalc`Fierz|Automatic]..};*)
 
 getMomElimForAmplitudesByTopology::usage=
 "@brief Uses internally defined replacement list funMomRules for definition of
@@ -580,7 +568,7 @@ topologyReplacements =
 {
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
    Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   Boxes -> (*(FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&)*)(`topologyQ`boxS@#&),
+   System`Boxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
    FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
    FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
 };
@@ -867,14 +855,19 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> {4,2,3,1}, (* FormCalc`Fierz leads to some cumbersome expressions. *)
+         FormCalc`FermionOrder -> Switch[numExtParticles,4,{4,2,3,1},_,None],
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
    Print["FORM calculation done."];
 
-   calculatedAmplitudes = MapThread[ToGenericSum,{calculatedAmplitudes,settingsForGenericSums}];
-   abbreviations = identifySpinors[FormCalc`Abbr[] //. FormCalc`GenericList[],ampsGen];
+   calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
+
+   abbreviations=FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
+   If[zeroExternalMomenta === OperatorsOnly, abbreviations = abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> nullifyMomentaChains@ch];
+   {calculatedAmplitudes,abbreviations} = uniqueChains[calculatedAmplitudes,abbreviations];
+   
+   abbreviations = identifySpinors[abbreviations,ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[zeroExternalMomenta,
@@ -891,7 +884,64 @@ Module[
       abbreviations, subexpressions]
 ];
 
-simplifySimpleChains[_FormCalc`DiracChain]
+(*@Todo think how to implement this in an elegant way.*)
+uniqueChains[calculatedAmplitudes_,rules:{Rule[_Symbol,_]..}] :=
+Module[{chainRules,otherRules,zeroChainRules,uniqueChains,amplitudeRules},
+   chainRules = Cases[rules,chain:Rule[_?(StringMatchQ[ToString@#,RegularExpression@"[F][1-9][\\d]*"]&),_]:>chain];
+   otherRules = rules ~ Complement ~ chainRules;
+   zeroChainRules = Cases[chainRules,chain:Rule[_,0]:>chain];
+   chainRules = chainRules ~ Complement ~ zeroChainRules;
+   uniqueChains = DeleteDuplicates@Cases[chainRules,FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__],Infinity];
+   If[uniqueChains === {},uniqueChains = DeleteDuplicates@Cases[chainRules,FormCalc`DiracChain[__],Infinity]];
+   uniqueChains = MapThread[Rule[Symbol["NPointFunctions`internal`dc"<>ToString@#1],#2]&,{Range@Length@#,#}] & [uniqueChains];
+   amplitudeRules = Rule[FormCalc`Mat@First@#,Last@#] &/@ (chainRules/.(uniqueChains/.Rule[x_,y_]:>Rule[y,NPointFunctions`internal`mat@x]));
+   {calculatedAmplitudes/.zeroChainRules/.amplitudeRules,Join[uniqueChains,otherRules]}
+];
+
+(*@Todo think how to implement this in an elegant way.*)
+simplifySimpleChain[chain_FormCalc`DiracChain,numExtParticles_Integer] :=
+Module[
+   {
+      ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,result
+   },
+   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[FormCalc`k[mom],mass,type];
+   flip@7 = 6;
+   flip@6 = 7;
+   result = If[numExtParticles === 4,
+      chain /. ch[s1:spinor[3],proj:6|7,k@2,s2:spinor[1]] :> ch[s1,proj,k@1,s2]+ch[s1,proj,k@4,s2]-ch[s1,proj,k@3,s2],
+      chain
+      ];
+   result //.
+   {
+         ch[s1:spinor[],proj:6|7,k[number_],s2:spinor[number_,mass_]] :> Last[s2]*mass*ch[s1,proj,s2],
+         ch[s1:spinor[number_,mass_],proj:6|7,k[number_],s2:spinor[]] :> Last[s2]*mass*ch[s1,flip@proj,s2]
+   }
+];
+
+(*@Todo think how to implement this in an elegant way.*)
+nullifyMomentaChains[Times[chain1_FormCalc`DiracChain,chain2_FormCalc`DiracChain]] :=
+Module[
+   {
+      ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,l=FormCalc`Lor
+   },
+   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[FormCalc`k[mom],mass,type];
+   flip@7 = 6;
+   flip@6 = 7;
+   chain1*chain2 /.
+   {
+      ch[spinor[3],6|7,k@4,spinor[1]] -> 0,
+      ch[spinor[4],6|7,k@1,spinor[2]] -> 0,
+      ch[spinor[3],-6|-7,k@1,k@4,spinor[1]] -> 0,
+      ch[spinor[4],-6|-7,k@1,k@4,spinor[2]] -> 0,
+      ch[spinor[3],6|7,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
+      ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],6|7,l@1,spinor[2]] -> 0,
+      ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
+      ch[spinor[3],-6|-7,k@4,l@1,l@2,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,l@2,spinor[2]] -> 0,
+
+      ch[spinor[3],-6|-7,k@1,k@4,l@1,spinor[1]]*ch[spinor[4],6|7,l@1,spinor[2]] -> 0,
+      ch[spinor[3],6|7,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,k@4,l@1,spinor[2]] -> 0
+   }
+];
 
 setZeroExternalMomentaInChains::usage =
 "@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
@@ -916,9 +966,6 @@ Module[
 setZeroExternalMomentaInChains[x___] :=
 Utils`AssertOrQuit[False,setZeroExternalMomentaInChains::errUnknownInput,{x}];
 SetAttributes[setZeroExternalMomentaInChains,{Protected,Locked}];
-
-`type`FAindexIGen = _(?FAFieldQ)[_Integer,{FeynArts`Index[_Symbol,_Integer]}]
-`type`diracSpinor = FormCalc`Spinor[FormCalc`k[_Integer],_FeynArts`Mass[],1|-1]
 
 identifySpinors::usage =
 "@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
@@ -1095,8 +1142,7 @@ where all FlexibleSUSY conventions have been applied.";
 FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
 Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
    fsAmplitudes = amplitudes //. amplitudeToFSRules;
-
-   fsAbbreviations = abbreviations //. subexpressionToFSRules;
+   fsAbbreviations = abbreviations //. subexpressionToFSRules //. {FormCalc`DiracChain->NPointFunctions`internal`dc,FormCalc`Spinor->SARAH`DiracSpinor,FormCalc`Lor->SARAH`Lorentz};
    fsSubexpressions = subexpressions //. subexpressionToFSRules;
    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
 ];
