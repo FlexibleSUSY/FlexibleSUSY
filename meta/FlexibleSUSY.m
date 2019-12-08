@@ -2649,7 +2649,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               decaysData = FlexibleSUSY`FSModelName <> "_decays decays{};              ///< decays";
               getDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysGetterInterface[FlexibleSUSY`FSModelName];
               getSpectrumDecays = CreateSpectrumDecaysGetter[FlexibleSUSY`FSModelName];
-              calculateDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysInterface[];
+              calculateDecaysVirtualFunc = FSMathLink`CreateSpectrumDecaysInterface[FlexibleSUSY`FSModelName];
               {calculateSpectrumDecaysPrototype, calculateSpectrumDecaysFunction} =
                   FSMathLink`CreateSpectrumDecaysCalculation[FlexibleSUSY`FSModelName];
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =

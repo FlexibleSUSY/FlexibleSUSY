@@ -67,11 +67,12 @@ enum class HigherOrderSMCorrections {enable, disable};
 
 class @ModelName@_decays {
 public:
+   @ModelName@_decays() = default;
    @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_,
          HigherOrderSMCorrections enable_corrections = HigherOrderSMCorrections::enable)
       : model(model_)
-      , qedqcd(qedqcd_)
       , input(input_)
+      , qedqcd(qedqcd_)
       , include_higher_order_corrections(enable_corrections)
       {}
    @ModelName@_decays(const @ModelName@_decays&) = default;
@@ -80,7 +81,6 @@ public:
    @ModelName@_decays& operator=(const @ModelName@_decays&) = default;
    @ModelName@_decays& operator=(@ModelName@_decays&&) = default;
 
-   void set_include_higher_order_corrections(bool);
    void set_loop_corrections(const Decays_loop_corrections&);
    const Decays_loop_corrections& get_loop_corrections() const;
    const @ModelName@_decay_table& get_decay_table() const;
@@ -96,10 +96,10 @@ public:
 @partialWidthCalculationPrototypes@
 
 private:
-   @ModelName@_mass_eigenstates model;
-   @ModelName@_input_parameters const& input;
+   @ModelName@_mass_eigenstates model{};
+   @ModelName@_input_parameters input{};
    softsusy::QedQcd qedqcd{};
-   HigherOrderSMCorrections const include_higher_order_corrections;
+   HigherOrderSMCorrections include_higher_order_corrections{HigherOrderSMCorrections::enable};
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    Decays_loop_corrections loop_corrections{};
