@@ -43,8 +43,8 @@ Off[General::shdw]
    LorentzIndex,GenericSum,GenericIndex,
    GenericS,GenericF,GenericV,GenericU,
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses,
-   
-   
+
+
    DimensionalReduction,DimensionalRegularization,OperatorsOnly,
    (*for further details inspect topologyReplacements*)
    Irreducible,Triangles,FourFermionScalarPenguins,
@@ -296,9 +296,6 @@ Module[
       }
    ];
    Protect@fieldNameToFSRules;
-
-   (*Reserving F1, F2, ... - names of fermionic chains - because they lead to an overshadowing*)
-   Array[Symbol["Global`F"<>ToString@#]&,Length@fieldNames];
 
    Unprotect@subexpressionToFSRules;
    subexpressionToFSRules = Join[
@@ -855,7 +852,7 @@ Module[
             DimensionalRegularization, D],
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> Switch[numExtParticles,4,{4,2,3,1},_,None],
+         FormCalc`FermionOrder -> Switch[numExtParticles,4,{4,2,3,1},2,{2,1},_,None],
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
@@ -864,9 +861,9 @@ Module[
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
 
    abbreviations=FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
-   If[zeroExternalMomenta === OperatorsOnly, abbreviations = abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> nullifyMomentaChains@ch];
+   If[zeroExternalMomenta === OperatorsOnly, abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> nullifyMomentaChains@ch];
    {calculatedAmplitudes,abbreviations} = uniqueChains[calculatedAmplitudes,abbreviations];
-   
+
    abbreviations = identifySpinors[abbreviations,ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
@@ -904,11 +901,16 @@ Module[
    {
       ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,result
    },
-   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[FormCalc`k[mom],mass,type];
+   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[k[mom],mass,type];
    flip@7 = 6;
    flip@6 = 7;
    result = If[numExtParticles === 4,
-      chain /. ch[s1:spinor[3],proj:6|7,k@2,s2:spinor[1]] :> ch[s1,proj,k@1,s2]+ch[s1,proj,k@4,s2]-ch[s1,proj,k@3,s2],
+      chain //.
+      {
+         ch[s1:spinor[3],proj:6|7,k@2,s2:spinor[1]] :> ch[s1,proj,k@1,s2]+ch[s1,proj,k@4,s2]-ch[s1,proj,k@3,s2],
+         ch[s1:spinor[3],proj:-6|-7,k@1,k@4,s2:spinor[1,mass_]] :> FormCalc`Pair[k@4,k@1]*ch[s1,-proj,s2]-Last[s2]*mass*ch[s1,-proj,k@4,s2],
+         ch[s1:spinor[4,mass_],proj:-6|-7,k@1,k@4,s2:spinor[2]] :> FormCalc`Pair[k@4,k@1]*ch[s1,-proj,s2]-Last[s1]*mass*ch[s1,flip[-proj],k@1,s2]
+      },
       chain
       ];
    result //.
@@ -924,15 +926,13 @@ Module[
    {
       ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,l=FormCalc`Lor
    },
-   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[FormCalc`k[mom],mass,type];
+   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[k[mom],mass,type];
    flip@7 = 6;
    flip@6 = 7;
    chain1*chain2 /.
    {
       ch[spinor[3],6|7,k@4,spinor[1]] -> 0,
       ch[spinor[4],6|7,k@1,spinor[2]] -> 0,
-      ch[spinor[3],-6|-7,k@1,k@4,spinor[1]] -> 0,
-      ch[spinor[4],-6|-7,k@1,k@4,spinor[2]] -> 0,
       ch[spinor[3],6|7,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
       ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],6|7,l@1,spinor[2]] -> 0,
       ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
