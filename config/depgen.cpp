@@ -32,6 +32,16 @@
 namespace flexiblesusy {
 namespace depgen {
 
+struct Config {
+   std::string file_name;
+   std::string target_name;
+   std::string output_file;
+   std::vector<std::string> search_paths;
+   bool include_non_existing{false};      ///< -MG
+   bool ignore_non_existing{false};       ///< -MI
+   bool add_empty_phony_targets{false};   ///< -MP
+};
+
 /// returns directory from file name
 std::string directory(const std::string& file_name)
 {
@@ -221,10 +231,12 @@ std::vector<std::string> get_included_files(const std::string& file_name)
 std::vector<std::string> prepend(const std::string& str,
                                  const std::vector<std::string>& strings)
 {
-   auto result = strings;
+   std::vector<std::string> result;
+   result.reserve(strings.size());
 
-   for (auto& s: result)
-      s = str + s;
+   for (auto& s: strings) {
+      result.push_back(str + s);
+   }
 
    return result;
 }
@@ -301,62 +313,58 @@ std::string concat(const std::vector<std::string>& strings, const T& separator)
 
 /// search recursively for include statments in `file_name'
 /// taking into account only directories given in `paths'
-void search_includes(const std::string& file_name,
-                     const std::vector<std::string>& paths,
+void search_includes(const Config& config,
                      std::vector<std::string>& result,
-                     bool include_non_existing,
-                     bool ignore_non_existing,
                      int max_depth)
 {
    if (max_depth <= 0) {
       throw std::runtime_error(
          "Error: #include nested too deeply (maximum depth: "
-         + std::to_string(max_depth) + "): " + file_name);
+         + std::to_string(max_depth) + "): " + config.file_name);
    }
 
    // find included files from #include statements, that are not
    // already in result
-   const auto includes = complement(get_included_files(file_name), filenames(result));
+   const auto includes =
+      complement(get_included_files(config.file_name), filenames(result));
 
    // select only files that exist in paths
    std::vector<std::string> existing;
-   for (const auto& p: paths) {
+   for (const auto& p: config.search_paths) {
       const auto existing_in_path = filter_files(p, includes, file_exists);
       existing.insert(existing.end(), existing_in_path.cbegin(), existing_in_path.cend());
       result.insert(result.end(), existing_in_path.cbegin(), existing_in_path.cend());
    }
 
    // search recursively for included files in existing headers
-   for (const auto& f: existing)
-      search_includes(f, paths, result, include_non_existing,
-                      ignore_non_existing, max_depth - 1);
-
-   // search for non-existing headers
-   const auto non_existing = complement(filenames(includes), filenames(existing));
-
-   if (!ignore_non_existing && !include_non_existing && !non_existing.empty()) {
-      throw std::runtime_error(
-         "Error: cannot find the following header file(s): "
-         + concat(non_existing, ' '));
+   for (const auto& f: existing) {
+      auto cfg = config;
+      cfg.file_name = f;
+      search_includes(cfg, result, max_depth - 1);
    }
 
-   if (include_non_existing)
-      result.insert(result.end(), non_existing.cbegin(), non_existing.cend());
+   // search for non-existing headers
+   const auto non_existing =
+      complement(filenames(includes), filenames(existing));
 
-   return;
+   if (!config.ignore_non_existing && !config.include_non_existing &&
+       !non_existing.empty()) {
+      throw std::runtime_error(
+         "Error: cannot find the following header file(s): " +
+         concat(non_existing, ' '));
+   }
+
+   if (config.include_non_existing)
+      result.insert(result.end(), non_existing.cbegin(), non_existing.cend());
 }
 
 /// search recursively for include statments in `file_name'
 /// taking into account only directories given in `paths'
-std::vector<std::string> search_includes(const std::string& file_name,
-                                         const std::vector<std::string>& paths,
-                                         bool include_non_existing,
-                                         bool ignore_non_existing,
+std::vector<std::string> search_includes(const Config& config,
                                          int max_depth = 100)
 {
    std::vector<std::string> result;
-   search_includes(file_name, paths, result, include_non_existing,
-                   ignore_non_existing, max_depth);
+   search_includes(config, result, max_depth);
    return result;
 }
 
@@ -373,12 +381,7 @@ int main(int argc, char* argv[])
       return EXIT_FAILURE;
    }
 
-   // include paths
-   std::vector<std::string> paths;
-   std::string file_name, target_name, output_file;
-   bool include_non_existing = false; // -MG
-   bool ignore_non_existing = false; // -MI
-   bool add_empty_phony_targets = false; // -MP
+   Config config;
 
    for (int i = 1; i < argc; i++) {
       const std::string arg(argv[i]);
@@ -386,15 +389,15 @@ int main(int argc, char* argv[])
          continue;
       }
       if (starts_with(arg, "-I") && arg.length() > 2) {
-         paths.push_back(arg.substr(std::strlen("-I")));
+         config.search_paths.push_back(arg.substr(std::strlen("-I")));
          continue;
       }
       if (arg == "-MG") {
-         include_non_existing = true;
+         config.include_non_existing = true;
          continue;
       }
       if (arg == "-MI") {
-         ignore_non_existing = true;
+         config.ignore_non_existing = true;
          continue;
       }
       if (arg == "-MM") {
@@ -411,15 +414,15 @@ int main(int argc, char* argv[])
          continue;
       }
       if (arg == "-MP") {
-         add_empty_phony_targets = true;
+         config.add_empty_phony_targets = true;
          continue;
       }
       if (arg == "-MT" && i + 1 < argc) {
-         target_name = argv[++i];
+         config.target_name = argv[++i];
          continue;
       }
       if ((arg == "-MF" || arg == "-MMD" || arg == "-o") && i + 1 < argc) {
-         output_file = argv[++i];
+         config.output_file = argv[++i];
          continue;
       }
       if (arg == "--help" || arg == "-h") {
@@ -428,9 +431,9 @@ int main(int argc, char* argv[])
       }
       // interpret last argument as file name
       if (i + 1 == argc) {
-         file_name = arg;
-         if (!file_exists(file_name)) {
-            std::cerr << "Error: file does not exist: " << file_name << '\n';
+         config.file_name = arg;
+         if (!file_exists(config.file_name)) {
+            std::cerr << "Error: file does not exist: " << config.file_name << '\n';
             return EXIT_FAILURE;
          }
          continue;
@@ -442,38 +445,41 @@ int main(int argc, char* argv[])
    }
 
    // select output stream
-   std::ofstream fstr(output_file);
+   std::ofstream fstr(config.output_file);
    std::ostream* ostr = &std::cout;
 
-   if (!output_file.empty()) {
+   if (!config.output_file.empty()) {
       if (!fstr.good()) {
-         std::cerr << "Error: cannot write to file " << output_file << '\n';
+         std::cerr << "Error: cannot write to file " << config.output_file << '\n';
          return EXIT_FAILURE;
       }
       ostr = &fstr;
    }
 
    // include paths
-   paths = insert_at_front(paths, directory(file_name));
-   paths.emplace_back(".");
-   paths = delete_duplicates(paths);
+   config.search_paths = insert_at_front(config.search_paths, directory(config.file_name));
+   config.search_paths.emplace_back(".");
+   config.search_paths = delete_duplicates(config.search_paths);
 
    try {
       // search for header inclusions in file
       const auto dependencies
          = delete_duplicates(
-            search_includes(file_name, paths, include_non_existing,
-                            ignore_non_existing),
+            search_includes(config),
             Is_not_duplicate_ignore_path());
 
-      if (target_name.empty())
-         target_name = replace_extension(filename(file_name), "o");
+      if (config.target_name.empty()) {
+         config.target_name =
+            replace_extension(filename(config.file_name), "o");
+      }
 
       // output
-      print_dependencies(*ostr, target_name, insert_at_front(dependencies, file_name));
+      print_dependencies(*ostr, config.target_name,
+                         insert_at_front(dependencies, config.file_name));
 
-      if (add_empty_phony_targets)
+      if (config.add_empty_phony_targets) {
          print_empty_phony_targets(*ostr, dependencies);
+      }
    } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';
       return EXIT_FAILURE;
