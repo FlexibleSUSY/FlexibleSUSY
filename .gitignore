@@ -6,6 +6,7 @@
 *.x
 
 src/loop_libraries/collier_wrapper.mod
+src/loop_libraries/collier_wrapper.f03
 
 config/config.h
 config/version

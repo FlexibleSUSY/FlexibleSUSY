@@ -1,26 +1,57 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#ifndef GLOBAL_COLLIER
+#define GLOBAL_COLLIER
+
 #include <complex>
 #include "loop_library_interface.hpp"
 
 #define two_point(NAME)\
    std::complex<double> NAME(\
-      std::complex<double> p10,\
-      std::complex<double> m02, std::complex<double> m12,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
       double scl2) noexcept;
 #define three_point(NAME)\
    std::complex<double> NAME(\
-      std::complex<double> p10, std::complex<double> p21, std::complex<double> p20,\
-      std::complex<double> m02, std::complex<double> m12, std::complex<double> m22,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
       double scl2) noexcept;
-
 #define four_point(NAME)\
    std::complex<double> NAME(\
-      std::complex<double> p10, std::complex<double> p21, std::complex<double> p32,\
-      std::complex<double> p30, std::complex<double> p20, std::complex<double> p31,\
-      std::complex<double> m02, std::complex<double> m12, std::complex<double> m22, std::complex<double> m32,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
       double scl2) noexcept;
 
-class Collier : public Loop_library_interface {
+namespace flexiblesusy {
+
+class Collier : public Loop_library_interface
+{
+   private:
+      double current_mu2_uv;
+      void initialize() noexcept;
+      void set_mu2_uv(double) noexcept;
+
    public:
+      Collier() : current_mu2_uv(1.0) {
+         initialize();
+      }
+
       two_point(B0)
       two_point(B1)
 
@@ -44,3 +75,7 @@ class Collier : public Loop_library_interface {
       four_point(D3)
       four_point(D33)
 };
+
+} // namespace flexiblesusy
+
+#endif

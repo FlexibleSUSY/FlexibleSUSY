@@ -47,8 +47,10 @@ using namespace @ModelName@_FFMassiveV_form_factors;
 namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams::fields;
 
-namespace @ModelName@_cxx_diagrams {
-namespace npointfunctions {
+namespace @ModelName@_cxx_diagrams
+{
+namespace npointfunctions
+{
 @npf_definitions@
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams

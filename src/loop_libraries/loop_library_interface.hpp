@@ -1,39 +1,49 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#ifndef LOOP_LIBRARY_INTERFACE
+#define LOOP_LIBRARY_INTERFACE
+
 #include <complex>
+
 #define two_point_virtual(NAME)\
    virtual std::complex<double> NAME(\
-      std::complex<double> p10,\
-      std::complex<double> m02, std::complex<double> m12,\
-      double scl2) = 0;
+      std::complex<double>,\
+      std::complex<double>, std::complex<double>,\
+      double) = 0;
 #define three_point_virtual(NAME)\
    virtual std::complex<double> NAME(\
-      std::complex<double> p10, std::complex<double> p21, std::complex<double> p20,\
-      std::complex<double> m02, std::complex<double> m12, std::complex<double> m22,\
-      double scl2) = 0;
-
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      double) = 0;
 #define four_point_virtual(NAME)\
    virtual std::complex<double> NAME(\
-      std::complex<double> p10, std::complex<double> p21, std::complex<double> p32,\
-      std::complex<double> p30, std::complex<double> p20, std::complex<double> p31,\
-      std::complex<double> m02, std::complex<double> m12, std::complex<double> m22, std::complex<double> m32,\
-      double scl2) = 0;
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
+      double) = 0;
 
-enum class Loop_library {
-   LoopTools,
-   Collier
-};
+namespace flexiblesusy
+{
 
-class Loop_library_interface {
+class Loop_library_interface
+{
    public:
-      /*
-      static std::unique_ptr<LoopLibraryInterface> get_library(LoopLibrary type) {
-         switch (type) {
-            case LoopLibrary::Collier:
-               return std::make_unique<Collier>();
-            case LoopLibrary::LoopTools:
-               return std::make_unique<LoopTools>();
-         }
-      }
-      */
       two_point_virtual(B0)
       two_point_virtual(B1)
 
@@ -57,3 +67,7 @@ class Loop_library_interface {
       four_point_virtual(D3)
       four_point_virtual(D33)
 };
+
+} // namespace flexiblesusy
+
+#endif

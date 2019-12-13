@@ -103,109 +103,90 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                 (*"std::cout << \"A 4-fermion \" << -sqrt(2.0)/GF * photon_penguin[0] * uEMVectorCurrent << ' ' << -sqrt(2.0)/GF * photon_penguin[1] * uEMVectorCurrent << '\\n';\n" <>*)
                 "auto gnLV = -sqrt(2.0)/GF * photon_penguin[0] * (uEMVectorCurrent + 2.*dEMVectorCurrent);\n" <>
                 "auto gnRV = -sqrt(2.0)/GF * photon_penguin[1] * (uEMVectorCurrent + 2.*dEMVectorCurrent);\n" <>
+(*massive*)
+                "\n// all contributions\n" <>
+                (*initialize my stuff*)
+                "auto "<>FlexibleSUSY`FSModelName<>"_npf_up = "<>FlexibleSUSY`FSModelName<>
+                "_cxx_diagrams::npointfunctions::zpinguins_u"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
+                "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
 
-                "\n// mediator: massive vector\n" <>
-                StringJoin @ Map[
-                    ("\n// " <> CXXNameOfField[#] <> "\n" <>
+                "auto "<>FlexibleSUSY`FSModelName<>"_npf_down = "<>FlexibleSUSY`FSModelName<>
+                "_cxx_diagrams::npointfunctions::zpinguins_d"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
+                "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
 
-                        "const auto " <> CXXNameOfField[#] <> "_FF = " <>
-                           "calculate_" <> CXXNameOfField[inFermion] <> "_" <> CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[#] <>
-                           "_form_factors (generationIndex1,  generationIndex2, model);\n" <>
-
-                        "const auto " <> CXXNameOfField[#] <> "_penguin = " <>
-                           "create_massive_penguin_amp<" <> CXXNameOfField[#] <> ">(" <>
-                           CXXNameOfField[#] <> "_FF, " <>
-                           "model, qedqcd);\n" <>
-
-                        (* TODO" remove *)
-                        (*"std::cout << \"Z 4-fermion \" << VZ_penguin[0] / (-sqrt(2.0)/GF) * 16*Pi*Pi << ' ' << VZ_penguin[1]/ (-sqrt(2.0)/GF) * 16*Pi*Pi << '\\n';\n" <>*)
-                        "std::cout << \"wkotlarski: gLVu \" << "<>CXXNameOfField[#]<>"_penguin[0] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
-                        "std::cout << \"wkotlarski: gRVu \" << "<>CXXNameOfField[#]<>"_penguin[1] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
-                        "std::cout << \"wkotlarski: gLVd \" << "<>CXXNameOfField[#]<>"_penguin[2] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
-                        "std::cout << \"wkotlarski: gRVd \" << "<>CXXNameOfField[#]<>"_penguin[3] / (-sqrt(2.0)/GF) << \"\\n\";\n" <>
-                        (*initialize my stuff*)
-                        "auto "<>FlexibleSUSY`FSModelName<>"_npf_up = "<>FlexibleSUSY`FSModelName<>
-                        "_cxx_diagrams::npointfunctions::zpinguins_u"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
-                        "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
-                        "auto "<>FlexibleSUSY`FSModelName<>"_npf_down = "<>FlexibleSUSY`FSModelName<>
-                        "_cxx_diagrams::npointfunctions::zpinguins_d"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
-                        "model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});\n"<>
-                        (*print my stuff MINUS BECAUSE OF DESCENDING ORDER OF FC*)
-                        "std::cout << \"uukhas:     gLVu \" << -( "<>
-                        FlexibleSUSY`FSModelName<>"_npf_up.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(5) )/2. << \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gRVu \" << -( "<>
-                        FlexibleSUSY`FSModelName<>"_npf_up.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(7) )/2.<< \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gLVd \" << -( "<>
-                        FlexibleSUSY`FSModelName<>"_npf_down.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(5) )/2. << \"\\n\";\n" <>
-                        "std::cout << \"uukhas:     gRVd \" << -( "<>
-                        FlexibleSUSY`FSModelName<>"_npf_down.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(7) )/2. << \"\\n\";\n" <>
-                        "gpLV += 2.*" <> CXXNameOfField[#] <> "_penguin[0] + "    <> CXXNameOfField[#] <> "_penguin[2];\n" <>
-                        "gpRV += 2.*" <> CXXNameOfField[#] <> "_penguin[1] + "    <> CXXNameOfField[#] <> "_penguin[3];\n" <>
-                        "gnLV += "    <> CXXNameOfField[#] <> "_penguin[0] + 2.*" <> CXXNameOfField[#] <> "_penguin[2];\n" <>
-                        "gnRV += "    <> CXXNameOfField[#] <> "_penguin[1] + 2.*" <> CXXNameOfField[#] <> "_penguin[3];\n")&,
-
-                    (* create a list of massive, electrically neutral gauge bosons *)
-                    Select[GetVectorBosons[],
-                       !(IsMassless[#] || IsElectricallyCharged[#] || ColorChargedQ[#])&
-                    ]
-                ] <>
-
-                (* TODO: add contributions from scalar penguins *)
-                "\n// mediator: massive scalar\n" <>
-
-                "std::complex<double> gpLS {0.0};\n" <>
-                "std::complex<double> gpRS {0.0};\n" <>
-                "std::complex<double> gnLS {0.0};\n" <>
-                "std::complex<double> gnRS {0.0};\n" <>
-
-                    StringJoin @ Map[
-                      ("\n// " <> CXXNameOfField[#] <> "\n")& (*<>
-
-                          "const auto " <> CXXNameOfField[#] <> "_FF = " <>
-                          "calculate_" <> CXXNameOfField[inFermion] <> "_" <> CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[#] <>
-                          "_form_factors (generationIndex1,  generationIndex2, model);\n" <>
-
-                          "const auto " <> CXXNameOfField[#] <> "_penguin = " <>
-                          "create_massive_penguin_amp<" <> CXXNameOfField[#] <> ">(" <>
-                          CXXNameOfField[#] <> "_FF, " <>
-                          "model, qedqcd);\n" <>
-
-                          "gpLV += 2.*" <> CXXNameOfField[#] <> "_penguin[0] + "    <> CXXNameOfField[#] <> "_penguin[2];\n" <>
-                          "gpRV += 2.*" <> CXXNameOfField[#] <> "_penguin[1] + "    <> CXXNameOfField[#] <> "_penguin[3];\n" <>
-                          "gnLV += "    <> CXXNameOfField[#] <> "_penguin[0] + 2.*" <> CXXNameOfField[#] <> "_penguin[2];\n" <>
-                          "gnRV += "    <> CXXNameOfField[#] <> "_penguin[1] + 2.*" <> CXXNameOfField[#] <> "_penguin[3];\n")&*),
-
-                      (* create a list of massive, electrically neutral scalars *)
-                      Select[GetParticles[],
-                         (IsScalar[#] && !IsMassless[#] && !IsElectricallyCharged[#] && !ColorChargedQ[#])&
-                      ]
-                    ] <>
-
-                "\n// ------ boxes ------\n\n" <>
-
-                "gpLV += 0.;\n" <>
-                "gpRV += 0.;\n" <>
-                "gnLV += 0.;\n" <>
-                "gnRV += 0.;\n" <>
-
+                "auto "<>FlexibleSUSY`FSModelName<>"_npf_strange = "<>FlexibleSUSY`FSModelName<>
+                "_cxx_diagrams::npointfunctions::zpinguins_d"<>ToString@inFermion<>ToString@outFermion<>"_1loop("<>
+                "model, std::array<int, 4>{generationIndex1, 1, generationIndex2, 1}, std::array<Eigen::Vector4d, 0>{});\n"<>
+                "\n"<>
+                "// PDG 2018 data\n"<>
+                "double m_p = 0.938272081, m_n = 0.939565413;\n"<>
+                "//data from my notes\n"<>
+                "double m_init = context.mass<"<>ToString@inFermion<>">({generationIndex1});\n"<>
+                "double m_u = context.mass<"<>ToString@SARAH`UpQuark<>">({0});\n"<>
+                "double m_d = context.mass<"<>ToString@SARAH`DownQuark<>">({0});\n"<>
+                "double m_s = context.mass<"<>ToString@SARAH`DownQuark<>">({1});\n"<>
+                "\n"<>
+                "double GSpu = 0.021*m_p/m_u, GSpd = 0.041*m_p/m_d, GSps = 0.043*m_p/m_s;\n"<>
+                "double GSnu = 0.019*m_n/m_u, GSnd = 0.045*m_n/m_d, GSns = 0.043*m_n/m_s;\n"<>
+                "\n"<>
+                "double GVpu = 2.,            GVpd = 1.;\n"<>
+                "double GVnu = 1.,            GVnd = 2.;\n"<>
+                "\n"<>
+                "double GTpu = 0.77,          GTpd = -0.23,         GTps = 0.008;\n"<>
+                "double GTnu = 0.77,          GTnd = -0.23,         GTns = 0.008;\n"<>
+                "\n"<>
+                "//minus because of descending order in FormCalc spinor chains\n"<>
+                "std::complex<double> CSLu = -( "<>FlexibleSUSY`FSModelName<>"_npf_up.at(0)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(1) )/2.;\n"<>
+                "std::complex<double> CSRu = -( "<>FlexibleSUSY`FSModelName<>"_npf_up.at(2)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(3) )/2.;\n"<>
+                "std::complex<double> CSLd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(0)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(1) )/2.;\n"<>
+                "std::complex<double> CSRd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(2)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(3) )/2.;\n"<>
+                "std::complex<double> CSLs = -( "<>FlexibleSUSY`FSModelName<>"_npf_strange.at(0)+"<>FlexibleSUSY`FSModelName<>"_npf_strange.at(1) )/2.;\n"<>
+                "std::complex<double> CSRs = -( "<>FlexibleSUSY`FSModelName<>"_npf_strange.at(2)+"<>FlexibleSUSY`FSModelName<>"_npf_strange.at(3) )/2.;\n"<>
+                "\n"<>
+                "//minus because of descending order in FormCalc spinor chains\n"<>
+                "std::complex<double> CVLu = -( "<>FlexibleSUSY`FSModelName<>"_npf_up.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(5) )/2.;\n"<>
+                "std::complex<double> CVRu = -( "<>FlexibleSUSY`FSModelName<>"_npf_up.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_up.at(7) )/2.;\n"<>
+                "std::complex<double> CVLd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(5) )/2.;\n"<>
+                "std::complex<double> CVRd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(7) )/2.;\n"<>
+                "\n"<>
+                "//plus because of descending order in FormCalc spinor chains and definition of tensor operators\n"<>
+                "std::complex<double> CTLu = +"<>FlexibleSUSY`FSModelName<>"_npf_up.at(8);\n"<>
+                "std::complex<double> CTRu = +"<>FlexibleSUSY`FSModelName<>"_npf_up.at(9);\n"<>
+                "std::complex<double> CTLd = +"<>FlexibleSUSY`FSModelName<>"_npf_down.at(8);\n"<>
+                "std::complex<double> CTRd = +"<>FlexibleSUSY`FSModelName<>"_npf_down.at(8);\n"<>
+                "std::complex<double> CTLs = +"<>FlexibleSUSY`FSModelName<>"_npf_strange.at(8);\n"<>
+                "std::complex<double> CTRs = +"<>FlexibleSUSY`FSModelName<>"_npf_strange.at(8);\n"<>
+                "\n"<>
+                "gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );\n" <>
+                "gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );\n" <>
+                "gnLV += (-sqrt(2.0)/GF)*( GVnu*CVLu + GVnd*CVLd );\n" <>
+                "gnRV += (-sqrt(2.0)/GF)*( GVnu*CVRu + GVnd*CVRd );\n" <>
+                "\n//scalar contribution from scalar coefficients\n"<>
+                "std::complex<double> gpLS = (-sqrt(2.0)/GF)*( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );\n" <>
+                "std::complex<double> gpRS = (-sqrt(2.0)/GF)*( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );\n" <>
+                "std::complex<double> gnLS = (-sqrt(2.0)/GF)*( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );\n" <>
+                "std::complex<double> gnRS = (-sqrt(2.0)/GF)*( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );\n" <>
+                "\n//scalar contribution from tensor coefficients\n"<>
+                "gpLS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTLu + GTpd*CTLd + GTps*CTLs );\n" <>
+                "gpRS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTRu + GTpd*CTRd + GTps*CTRs );\n" <>
+                "gnLS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTLu + GTnd*CTLd + GTns*CTLs );\n" <>
+                "gnRS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTRu + GTnd*CTRd + GTns*CTRs );\n" <>
                 "\nconst auto nuclear_form_factors =\n" <>
-                   IndentText[
-                      "get_overlap_integrals(nucleus, qedqcd);\n"
-                   ] <>
+                   IndentText@"get_overlap_integrals(nucleus, qedqcd);\n"<>
 
                 "\nconst auto left =\n" <> IndentText[
                    "A2R*nuclear_form_factors.D\n" <>
-                      "+ gpLV*nuclear_form_factors.Vp\n" <>
-                      "+ gnLV*nuclear_form_factors.Vn\n" <>
-                      "+ gpLS*nuclear_form_factors.Sp\n" <>
-                      "+ gnLS*nuclear_form_factors.Sn"
+                   "+ gpLV*nuclear_form_factors.Vp\n" <>
+                   "+ gnLV*nuclear_form_factors.Vn\n" <>
+                   "+ gpLS*nuclear_form_factors.Sp\n" <>
+                   "+ gnLS*nuclear_form_factors.Sn"
                 ] <> ";\n" <>
                 "\nconst auto right =\n" <> IndentText[
                    "A2L*nuclear_form_factors.D\n" <>
-                      "+ gpRV*nuclear_form_factors.Vp\n" <>
-                      "+ gnRV*nuclear_form_factors.Vn\n" <>
-                      "+ gpRS*nuclear_form_factors.Sp\n" <>
-                      "+ gnRS*nuclear_form_factors.Sn"
+                   "+ gpRV*nuclear_form_factors.Vp\n" <>
+                   "+ gnRV*nuclear_form_factors.Vn\n" <>
+                   "+ gpRS*nuclear_form_factors.Sp\n" <>
+                   "+ gnRS*nuclear_form_factors.Sn"
                 ] <> ";\n" <>
 
                 "\n// eq. 14 of Kitano, Koike and Okada\n" <>

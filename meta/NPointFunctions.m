@@ -94,6 +94,10 @@ Keep
 2) \"self-energy\" diagrams on external fermionic lines
 amplitudes.";
 
+FourFermionFlavourChangingBoxes::usage=
+"Possible value for KeepProcesses.
+Exclude all processes except 4-fermion boxes with massive vector bosons.";
+
 DimensionalReduction::usage=
 "Possible value for the Regularize option
 
@@ -185,12 +189,14 @@ Begin["`internal`"];
 `type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
 
+`type`loopLibrary = Alternatives["LoopTools","FlexibleSUSY","GenericLibrary"];
+
 `subkernel`message::errNoTopologies =
 "No topologies are generated for a given set of options.";
 `subkernel`message::errNoDiagrams =
 "No diagrams are generated for a given set of options.";
 
-`subkernel`error[o___] := Utils`AssertOrQuit[False,o];
+`subkernel`error[message_] := Utils`AssertOrQuit[False,message];
 `subkernel`error // Utils`MakeUnknownInputDefinition;
 `subkernel`error ~ SetAttributes ~ {Locked,Protected,ReadProtected,HoldFirst};
 
@@ -401,12 +407,12 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {(*FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,*)Boxes}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {(*FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,*)Boxes}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
    dressedU = Flatten@getProcess@uNPF;
    dressedD = Flatten@getProcess@dNPF;
    assumptionReplacements =
@@ -535,11 +541,7 @@ NPointFunction::errOnShellFlag=
 NPointFunction::errKeepProcesses=
 "KeepProcesses must be sublist of
 {
-   Irreducible,
-   Boxes,
-   Triangles,
-   FourFermionScalarPenguins,
-   FourFermionMassiveVectorPenguins
+   `1`
 }.";
 NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
 "Only external scalars/fermions are supported (@todo FOR NOW).";
@@ -634,7 +636,7 @@ Module[
       allowedParticles = Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion],(*@todo add |_?TreeMasses`IsVector*)
       definedOptions = Part[Options@NPointFunction,All,1],
       unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
-      allProcesses={Irreducible,Boxes,Triangles,FourFermionScalarPenguins,FourFermionMassiveVectorPenguins}
+      allProcesses={Irreducible,FourFermionFlavourChangingBoxes,Triangles,FourFermionScalarPenguins,FourFermionMassiveVectorPenguins,FourFermionFlavourChangingBoxes}
    },
    aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
    aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;
@@ -652,7 +654,7 @@ Module[
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    Cases[{opts},Rule[KeepProcesses,x_]:>
-      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errKeepProcesses]];
+      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errKeepProcesses,StringJoin@Riffle[ToString/@allProcesses,",\n   "]]];
    True
 ];
 
@@ -922,7 +924,7 @@ Module[
       loopHPP = Switch[OptionValue@LoopFunctions,
          "LoopTools","\"clooptools.h\"",
          "FlexibleSUSY","\"numerics.h\"",
-         "GenericLibrary","\"loop_libraries/collier.hpp\""]
+         "GenericLibrary","\"loop_libraries/global_loopfunction_lib.hpp\""]
    },
    "#include " <> mainHPP <> "\n" <>
    "#include \"concatenate.hpp\"\n" <>
@@ -1002,6 +1004,7 @@ Module[
 
    definition =
       CXXClassForNPF[NPF,colourProjector,OptionValue@LoopFunctions,OptionValue@WilsonBasis] <> "\n\n" <>
+      `cxx`staticDefinitions[OptionValue@LoopFunctions]<>"\n\n"<>
       mainFunction[basisLength,name,CXXArgStringNPF@NPF] <>
       "{\n" <> CXXBodyNPF[] <> "\n}";
 
@@ -1028,6 +1031,11 @@ Module[
       OptionValue@LoopFunctions]
 ];
 Utils`MakeUnknownInputDefinition@CreateCXXFunctions;
+
+`cxx`staticDefinitions[loopLibrary:`type`loopLibrary] :=
+Switch[loopLibrary,
+"GenericLibrary","Loop_library_interface& "<>`global`cxxClassNameNPF<>"::lib = global_loopfunction_lib(); // The code is generated for Generic library.",
+_,""];
 
 `global`loopLibrary = {};
 `global`loopLibrary ~ SetAttributes ~ {Protected,ReadProtected};
@@ -1094,26 +1102,26 @@ Module[
    WriteString[OutputStream["stdout", 1],
       warning<>": Only B0,B1,C and D are implemented.\n"];
    {
-      LoopTools`B0i[LoopTools`bb0,args__] :> "lib->B0"[args,"Sqr(context.scale())"],
-      LoopTools`B0i[LoopTools`bb1,args__] :> "lib->B1"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc0,args__] :> "lib->C0"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc1,args__] :> "lib->C1"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc2,args__] :> "lib->C2"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc00,args__] :> "lib->C00"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc11,args__] :> "lib->C11"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc12,args__] :> "lib->C12"[args,"Sqr(context.scale())"],
-      LoopTools`C0i[LoopTools`cc22,args__] :> "lib->C22"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd0,args__] :> "lib->D0"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd00,args__] :> "lib->D00"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd1,args__] :> "lib->D1"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd11,args__] :> "lib->D11"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd12,args__] :> "lib->D12"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd13,args__] :> "lib->D13"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd2,args__] :> "lib->D2"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd22,args__] :> "lib->D22"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd23,args__] :> "lib->D23"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd3,args__] :> "lib->D3"[args,"Sqr(context.scale())"],
-      LoopTools`D0i[LoopTools`dd33,args__] :> "lib->D33"[args,"Sqr(context.scale())"]
+      LoopTools`B0i[LoopTools`bb0,args__] :> "lib.B0"[args,"Sqr(context.scale())"],
+      LoopTools`B0i[LoopTools`bb1,args__] :> "lib.B1"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc0,args__] :> "lib.C0"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc1,args__] :> "lib.C1"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc2,args__] :> "lib.C2"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc00,args__] :> "lib.C00"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc11,args__] :> "lib.C11"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc12,args__] :> "lib.C12"[args,"Sqr(context.scale())"],
+      LoopTools`C0i[LoopTools`cc22,args__] :> "lib.C22"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd0,args__] :> "lib.D0"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd00,args__] :> "lib.D00"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd1,args__] :> "lib.D1"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd11,args__] :> "lib.D11"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd12,args__] :> "lib.D12"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd13,args__] :> "lib.D13"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd2,args__] :> "lib.D2"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd22,args__] :> "lib.D22"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd23,args__] :> "lib.D23"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd3,args__] :> "lib.D3"[args,"Sqr(context.scale())"],
+      LoopTools`D0i[LoopTools`dd33,args__] :> "lib.D33"[args,"Sqr(context.scale())"]
    }
 ];
 Utils`MakeUnknownInputDefinition@getGenericLibraryRules;
@@ -1193,9 +1201,11 @@ Module[
       genFields = DeleteDuplicates[Flatten@getClassFieldRules@nPointFunction /. Rule[x_,_] :> x],
       genSumNames,
       preCXXRules,
+      hide = If[loopLibrary === "GenericLibrary","","//"],
       code = "
       class @ClassName@ : public @Context@ {
          using generic_sum_base = @Context@;
+         @HIDE@static Loop_library_interface& lib; // The code is generated for Generic library.
 
          template<class GenericFieldMap>
          struct subexpression_base :
@@ -1216,8 +1226,8 @@ Module[
 
          public:
          @ClassName@( @Arguments@ ) :
-         @Context@ { model, indices, momenta } {
-         }
+         @Context@ { model, indices, momenta }
+         {}
 
          @CalculateFunction@
       }; // End of @ClassName@"
@@ -1227,6 +1237,7 @@ Module[
    cxxCorrelationContext = "correlation_function_context<"<>ToString@Length@extIndices<>","<>ToString@numberOfMomenta<>">";
 
    replaceTokens[code,{
+   "@HIDE@"->hide,
    "@ClassName@"->`global`cxxClassNameNPF,
    "@Context@"->cxxCorrelationContext,
    "@KeyStructsInitialization@"->CXXInitializeKeyStructs@genFields,
@@ -1573,13 +1584,9 @@ Module[
       context = If[Not[FreeQ[getExpression@sum,SARAH`Cp]&&FreeQ[getExpression@sum,SARAH`Mass]],
          "const context_with_vertices &context = *this;",
          "// This GenericSum does not depend on couplings or masses"],
-      hide = If[loopLibrary === "GenericLibrary","","//"],
       code = "
       template<class GenericFieldMap>
       struct @GenericSum_NAME@_impl : generic_sum_base {
-         @Hide@private:
-         @Hide@std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>(); // The code is generated for Generic library.
-         @Hide@public:
          @GenericSum_NAME@_impl( const generic_sum_base &base ) :
          generic_sum_base( base ) {
          } // End of constructor @GenericSum_NAME@_impl
@@ -1624,7 +1631,6 @@ Module[
    },
    replaceTokens[code,
       {
-         "@Hide@"->hide,
          "@GenericSum_NAME@"->genSumName,
          "@ReturnType@"->type,
          "@GenericFieldShortNames@"->CXXCodeNameKey@getGenericFields@sum,

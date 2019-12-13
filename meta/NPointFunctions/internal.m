@@ -48,7 +48,7 @@ Off[General::shdw]
    DimensionalReduction,DimensionalRegularization,OperatorsOnly,
    (*for further details inspect topologyReplacements*)
    Irreducible,Triangles,FourFermionScalarPenguins,
-   FourFermionMassiveVectorPenguins
+   FourFermionMassiveVectorPenguins,FourFermionFlavourChangingBoxes
 } ~ SetAttributes ~ {Locked,Protected};
 On[General::shdw]
 
@@ -65,13 +65,24 @@ Begin["`internal`"];
 
 `type`fieldFA = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 
+(*sec 6.1 of manual*)
+`type`amplitude = FeynArts`FeynAmp[
+   FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],(*name of the amplitude*)
+   Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]],(*momentum of integration*)
+   _,(*generic analytic expression of the amplitude*)
+   {__}->FeynArts`Insertions[FeynArts`Classes][{__}..](*replacement rules to obtain the class level*)
+];
+
 `type`FAfieldGeneric = `type`fieldFA[`type`indexGeneric];
 
 getProcess[diagrams:`type`diagramSet] := Cases[Head@diagrams, (FeynArts`Process->x_) :> x][[1]];
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
-`type`amplitudeSet = FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..];
+`type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
+
+`type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
+`type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 
 particleNamesFile = "";
 substitutionsFile = "";
@@ -337,15 +348,17 @@ Module[
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
-
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
+
    diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
+   If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
    debugMakePictures[diagrams,"class"];
+
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
@@ -478,48 +491,79 @@ getModifiedDA[
 Module[
    {
       i,numAmp,daPairs,numbersOfAmplitudes,massesOfVector,currentAmplitude,massPosition,
-      rulesForClassesToSave, newDiagrams = diagrams, newAmplitudes = amplitudes,
-      currentClasses
+      rulesForClassesToSave, newDiagrams = diagrams, newAmplitudes = amplitudes
    },
    If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
       Print["t-pinguins: tree-like massless vector bosons are excluded"];
       (* Step 1: Get positions of topologies and amplitudes to change. *)
-      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[diagrams,`topologyQ`pinguinT];
-      numbersOfAmplitudes = Flatten[If[#[[1]]===True,#[[2]],(##&)[]]&/@daPairs];
+      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`pinguinT];
+      numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
       (* Step 2: Get positions of classes to save. {<amplitude>->{classes to save}..}*)
       rulesForClassesToSave=Reap[
          Do[
             numAmp = Part[numbersOfAmplitudes,i];
-            currentAmplitude = amplitudes[[numAmp]];
+            currentAmplitude = newAmplitudes[[numAmp]];
             massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,5]]]];
             If[massPosition=!={},
-               (*Get numbers of zero mass vector boson.*)
-               massesOfVector = Flatten[List@@currentAmplitude[[4,2,All,Part[massPosition,1]]]];
-               Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]]=!=0,#,(##&)[]]&,Length@massesOfVector]];,
-               (*Else zero replacement rule.*)
+               massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
+               Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
                Sow[numbersOfAmplitudes[[i]]->All];
             ];
          ,{i,Length@numbersOfAmplitudes}]
       ][[2,1]];
-      (* Step 3: Change amplitudes. *)
-      Do[
-         numAmp = Part[numbersOfAmplitudes,i];
-         newAmplitudes[[numAmp,4,2]] = amplitudes[[numAmp,4,2]][[numAmp/.rulesForClassesToSave]];
-      ,{i,Length@numbersOfAmplitudes}];
-      (* Step 4: Delete class diagrams. *)
-      Do[
-         If[daPairs[[i,1]]===True,
-            currentClasses = daPairs[[i,2]]/.rulesForClassesToSave;
-            currentClasses = Array[Rule[{#,2},newDiagrams[[i,2,#,2]][[Part[currentClasses,#]]]]&,Length@currentClasses];
-            newDiagrams[[i,2]] = ReplacePart[diagrams[[i,2]],currentClasses];
-         ];
-      ,{i,Length@daPairs}];
-      printDiagramsInfo[newDiagrams,"modifying A"];
+      newAmplitudes = deleteClasses[newAmplitudes,daPairs,rulesForClassesToSave];
+      newDiagrams = deleteClasses[newDiagrams,daPairs,rulesForClassesToSave];
+      printDiagramsInfo@newDiagrams;
+   ];
+   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
+      Print["boxes: massless vector bosons are excluded"];
+      (* Step 1: Get positions of topologies and amplitudes to change. *)
+      daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`box];
+      numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
+      (* Step 2: Get positions of classes to save. {<amplitude>->{classes to save}..}*)
+      rulesForClassesToSave=Reap[
+         Do[
+            numAmp = numbersOfAmplitudes[[i]];
+            currentAmplitude = newAmplitudes[[numAmp]];
+            massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,_]]]];
+            If[massPosition=!={},
+               massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
+               Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
+               Sow[numbersOfAmplitudes[[i]]->All];
+            ];
+         ,{i,Length@numbersOfAmplitudes}]
+      ][[2,1]];
+      newAmplitudes = deleteClasses[newAmplitudes,daPairs,rulesForClassesToSave];
+      newDiagrams = deleteClasses[newDiagrams,daPairs,rulesForClassesToSave];
+      printDiagramsInfo@newDiagrams;
    ];
    {newDiagrams,newAmplitudes}
 ];
 getModifiedDA // Utils`MakeUnknownInputDefinition;
 getModifiedDA ~ SetAttributes ~ {Protected,Locked};
+
+deleteClasses[amplitudes:`type`amplitudeSet,topoAmpList:`type`pickTopoAmp,classesToSave:`type`saveAmpClass] :=
+Module[{i,numbersOfAmplitudes,numAmp,result = amplitudes},
+   numbersOfAmplitudes = Flatten@Cases[topoAmpList,Rule[True,nums_]:>nums];
+   Do[
+      numAmp = Part[numbersOfAmplitudes,i];
+      result[[numAmp,4,2]] = result[[numAmp,4,2]][[numAmp/.classesToSave]];
+   ,{i,Length@numbersOfAmplitudes}];
+   result
+];
+deleteClasses[diagrams:`type`diagramSet,topoAmpList:`type`pickTopoAmp,classesToSave:`type`saveAmpClass] :=
+Module[{i,currentClasses,result = diagrams},
+   Do[
+      If[topoAmpList[[i,1]]===True,
+         currentClasses = topoAmpList[[i,2]]/.classesToSave;
+         currentClasses = Array[Rule[{#,2},result[[i,2,#,2]][[Part[currentClasses,#]]]]&,Length@currentClasses];
+         result[[i,2]] = ReplacePart[result[[i,2]],currentClasses];
+      ];
+   ,{i,Length@topoAmpList}];
+   result
+];
+deleteClasses // Utils`MakeUnknownInputDefinition;
+deleteClasses ~ SetAttributes ~ {Protected,Locked};
 
 getTopologyAmplitudeRulesByTopologyCriterion::usage=
 "@brief Gives numbers of amplitudes which are accepted by a criterion on topology.
@@ -556,7 +600,7 @@ Module[
    ]
 ];
 getTopologyAmplitudeRulesByTopologyCriterion // Utils`MakeUnknownInputDefinition;
-getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,HoldAll,Locked,ReadProtected};
+getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,Locked,ReadProtected};
 
 topologyReplacements::usage =
 "@brief List of topology replacement rules for a processes to keep.
@@ -565,7 +609,7 @@ topologyReplacements =
 {
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
    Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   System`Boxes -> (FreeQ[#,FeynArts`Vertex@4]&&FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@4]&),
+   FourFermionFlavourChangingBoxes -> (`topologyQ`box@#&),
    FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
    FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
 };
@@ -629,6 +673,11 @@ getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,
 `topologyQ`boxU // Utils`MakeUnknownInputDefinition;
 `topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
 
+`topologyQ`box[topology:`type`topology] :=
+Or[`topologyQ`boxS@topology,`topologyQ`boxT@topology,`topologyQ`boxU@topology];
+`topologyQ`box // Utils`MakeUnknownInputDefinition;
+`topologyQ`box ~ SetAttributes ~ {Protected,Locked};
+
 getModifiedDiagrams::usage =
 "@brief Modifies diagrams according to excudeProcess list.
 @param <TopologyList> set of topology-insertion rules to modify.
@@ -644,44 +693,88 @@ getModifiedDiagrams[
    excludeProcesses:{___}] :=
 Module[
    {
-      newInserted = inserted
+      newInserted = inserted,initialLeptonPattern
    },
    If[Not[MemberQ[excludeProcesses,FourFermionScalarPenguins]&&
           MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins]],
       If[MemberQ[excludeProcesses,FourFermionScalarPenguins],
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
-         (*Delete vector fields on tree-level like propagator.*)
-         #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
-         (*Else do not touch.*)
-         #] &/@ inserted;
+            #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
+            #] &/@ newInserted;
+         newInserted = newInserted /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
          Print["t-penguins: tree-like vector bosons are excluded"];
-         printDiagramsInfo[newInserted,"modifying D"];
+         printDiagramsInfo@newInserted;
       ];
       If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
-         (*Delete scalar fields on tree-level like propagator.*)
-         #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
-         (*Else do not touch.*)
-         #] &/@ inserted;
+            #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
+            #] &/@ newInserted;
+         newInserted = newInserted /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
          Print["t-penguins: tree-like scalar bosons are excluded"];
-         printDiagramsInfo[newInserted,"modifying D"];
+         printDiagramsInfo@newInserted;
       ];
+   ];
+   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
+         initialLeptonPattern = getProcess[newInserted][[1,1]]/.index:`type`indexGen:>Blank[];
+         newInserted = If[`topologyQ`boxS[#[[1]]],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@6->initialLeptonPattern],
+            #] &/@ newInserted;
+         newInserted = newInserted /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
+         Print["s-boxes: loops with initial lepton are removed"];
+         printDiagramsInfo@newInserted;
+   ];
+   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
+         newInserted = If[`topologyQ`boxT[#[[1]]],
+            Print["Warning: t-boxes are non-zero: @todo implement rules"];#,
+            #] &/@ newInserted;
+   ];
+   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
+         initialLeptonPattern = getProcess[newInserted][[1,1]]/.index:`type`indexGen:>Blank[];
+         newInserted = If[`topologyQ`boxU[#[[1]]],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@5->initialLeptonPattern],
+            #] &/@ newInserted;
+         newInserted = newInserted /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
+         Print["u-boxes: loops with initial lepton are removed"];
+         printDiagramsInfo@newInserted;
    ];
    newInserted
 ];
 getModifiedDiagrams // Utils`MakeUnknownInputDefinition;
 getModifiedDiagrams ~ SetAttributes ~ {Protected,Locked};
 
+removeClassInsertionsBy[classInsertions:FeynArts`Insertions[FeynArts`Classes][__],pattern___] :=
+Module[{i,classList},
+   classList = Cases[classInsertions,Except[FeynArts`FeynmanGraph[_Integer,FeynArts`Classes==_Integer][___,Sequence@@{pattern},___]]];
+   If[classList=!={},
+      classList=Table[classList[[i]]/.Equal[FeynArts`Classes,x_Integer]:>FeynArts`Classes==i,{i,Length@classList}]
+   ];
+   Head[classInsertions]@@classList
+];
+removeClassInsertionsBy // Utils`MakeUnknownInputDefinition;
+removeClassInsertionsBy ~ SetAttributes ~ {Protected,Locked};
+
+removeGenericInsertionsBy[genericInsertions:FeynArts`Insertions[Generic][__],pattern___] :=
+Module[{i,genericList},
+   genericList = Rule[#[[1]],removeClassInsertionsBy[#[[2]],pattern]] &/@ genericInsertions;
+   genericList = genericList /. Rule[FeynArts`FeynmanGraph[_Integer,Generic==_Integer][__],FeynArts`Insertions[FeynArts`Classes][]] :> (##&[]);
+   If[genericList=!=FeynArts`Insertions[Generic][],
+      genericList = Table[genericList[[i]]/.Equal[Generic,x_Integer]:>Generic==i,{i,Length@genericList}]
+   ];
+   Head[genericInsertions]@@genericList
+];
+removeGenericInsertionsBy // Utils`MakeUnknownInputDefinition;
+removeGenericInsertionsBy ~ SetAttributes ~ {Protected,Locked};
+
 printDiagramsInfo[
    diagrams:`type`diagramSet,
-   where_String:"new"
+   where_String:" "
 ] :=
 Module[
    {
       nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True],
       nClasses = Length@Cases[diagrams,FeynArts`Classes==_Integer:>1,Infinity,Heads -> True]
    },
-   Print[where,": in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];
+   Print[where,"in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];
 ];
 printAmplitudesInfo[
    amplitudes:FeynArts`FeynAmpList[__][FeynArts`FeynAmp[__,{__}->FeynArts`Insertions[FeynArts`Classes][{__}..]]..],
