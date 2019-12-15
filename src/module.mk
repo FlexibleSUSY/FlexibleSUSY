@@ -153,13 +153,16 @@ LIBFLEXI_SRC += $(LOOP_SRC)
 $(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
 
 $(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o
-	ar crv $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
+	@echo Building collier wrapper library
+	@ar cr $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
 
 $(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f03
-	gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f03 -I /home/ul/.local/COLLIER-1.2.4/modules/ -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
+	@echo Building collier_wrapper.o
+	@gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f03 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
 
 $(LOOP_DIR)/collier_wrapper.f03 : $(LOOP_DIR)/collier_wrapper.F03
-	gfortran -E $(LOOP_DIR)/collier_wrapper.F03 | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $(LOOP_DIR)/collier_wrapper.f03
+	@echo Generating collier_wrapper.f03
+	@gfortran -E $(LOOP_DIR)/collier_wrapper.F03 | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $(LOOP_DIR)/collier_wrapper.f03
 # generic loop library #########################################################
 
 LIBFLEXI_OBJ := \
