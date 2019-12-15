@@ -42,6 +42,6 @@ echo "done"
 
 cd $collier_dir/build
 echo -n "Generation of COLLIER library started ... "
-cmake -Dstatic=ON ..
+cmake .. #cmake -Dstatic=ON ..
 make
 echo "done"
