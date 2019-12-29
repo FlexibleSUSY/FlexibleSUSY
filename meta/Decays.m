@@ -1361,7 +1361,7 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
            "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[
              If[
                Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] === SARAH`bar,
-               globalMinus = -1;
+               globalMinus = 1;
                If[Length@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&] === 0,
                  First@Select[{particles}, MatchQ[#, f[Index[Generic, m_/; m =!= n]]]&],
 
@@ -1379,7 +1379,7 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
                   Last@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],
                   First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
               ],
-               globalMinus = -1;
+               globalMinus = 1;
               -f[Index[Generic, n]]
               ], {particles}]) <> ")"
         ),
@@ -1427,6 +1427,31 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
 
       temp
 ];
+
+FeynArtsTopologyName[topology_] :=
+    Switch[topology,
+      {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}, {1, 0, 0,
+        0, 1, 1}, {0, 1, 0, 1, 0, 1}, {0, 0, 1, 1, 1, 0}}, "T1",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {1, 1, 0, 0,
+        1}, {0, 0, 1, 1, 1}}, "T2",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {0, 0, 0, 1, 0}, {1, 0, 1, 0,
+        1}, {0, 1, 0, 1, 1}}, "T3",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {0, 0, 0, 0, 1}, {1, 0, 0, 0,
+        2}, {0, 1, 1, 2, 0}}, "T4",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {0, 0, 0, 0, 1}, {1, 0, 0, 1,
+        1}, {0, 1, 1, 1, 0}}, "T5",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {0, 0, 0, 1, 0}, {1, 0, 1, 0,
+        2}, {0, 1, 0, 2, 0}}, "T6",
+      {{0, 0, 0, 1, 0}, {0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {1, 1, 0, 0,
+        2}, {0, 0, 1, 2, 0}}, "T7",
+      {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {1, 1, 0,
+        0, 0, 1}, {0, 0, 1, 0, 0, 2}, {0, 0, 0, 1, 2, 0}}, "T8",
+      {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 1, 0, 0}, {1, 0, 1,
+        0, 0, 1}, {0, 1, 0, 0, 0, 2}, {0, 0, 0, 1, 2, 0}}, "T9",
+      {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 1, 0}, {1, 0, 0,
+        0, 0, 2}, {0, 1, 1, 0, 0, 1}, {0, 0, 0, 2, 1, 0}}, "T10",
+      _, Quit[1]
+    ];
 
 WrapCodeInLoop[indices_, code_] :=
    (
@@ -1573,10 +1598,16 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   If[!Last@translation === True, ",\n1.", ""] <> ");"
                   ] <> "\n";
 
-      {verticesForFACp, "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+      {verticesForFACp, "\n// topology " <> FeynArtsTopologyName[topology] <> "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
          (* usings for vertices *)
          "\n" <> cppVertices <>
-          "\nconstexpr double " <> ToString@symmetryFac <> " {1.};\n" <>
+          "\nconstexpr double " <> ToString@symmetryFac <> " {" <>
+            ToString @ If[MemberQ[{"T4", "T2", "T3",  "T5", "T8", "T9","T10"}, FeynArtsTopologyName[topology]], 2.0, 1.0] <>
+          (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
+          With[{topo=FeynArtsTopologyName[topology]},
+                      If[topo === "T2" || topo === "T3" || topo === "T5", " * 0.5", ""]
+                    ] <>
+         "};\n" <>
           "\nconstexpr double " <> ToString@colorFac <> " {" <>
           ToString[
             N[CXXDiagrams`ExtractColourFactor @

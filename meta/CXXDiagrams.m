@@ -513,8 +513,8 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	GellMannVertex[cIndex1_, cIndex2_, cIndex3_]] :=
-(* FIXME: Factor of two? *)
-	2 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3]
+	(* FIXME: Factor of two? *)
+	2 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3];
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	GellMannVertex[cIndex1_, cIndex2_, cIndex3_] GellMannVertex[cIndex4_, cIndex5_, cIndex6_] +

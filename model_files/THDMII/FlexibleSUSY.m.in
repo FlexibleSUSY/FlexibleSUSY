@@ -70,5 +70,12 @@ ExtraSLHAOutputBlocks = {
            {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
             {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
             {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`aMuon},
+         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]}
+      }
+   }
 };

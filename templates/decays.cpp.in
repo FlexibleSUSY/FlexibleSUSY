@@ -114,7 +114,12 @@ double get_alpha(context_base const&  context)
    return pow(e, 2)/(4.*Pi);
 }
 
-// 1-loop BSM amplitudes
+/* 1-loop BSM amplitudes
+ *
+ * Notes:
+ *    - Since FS removes a factor of i from every vertex we reintroduce it
+ *      calls to one loop amplitudes
+ */
 
 @calcAmplitudeSpecializationDefs@
 

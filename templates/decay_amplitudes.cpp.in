@@ -22,6 +22,7 @@
 
 #include "@ModelName@_decay_amplitudes.hpp"
 #include "wrappers.hpp"
+#include <iomanip>
 
 namespace flexiblesusy {
 
@@ -64,8 +65,9 @@ double Decay_amplitude_SVV::square() const
             + AbsSqr(form_factor_eps));
 
       // check Ward identity
-      std::cout << "mass: " << m_decay << ", re: " << - std::real(form_factor_g)/pow(m_decay, 2) * 2. / std::real(form_factor_21) <<
-       ", im: " << - std::imag(form_factor_g)/pow(m_decay, 2) * 2. / std::imag(form_factor_21) << '\n';
+      std::cout <<  m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' << 
+         "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) << 
+         ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
       return m0 + m2 + m4;
    } else if (m_vector_1 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
