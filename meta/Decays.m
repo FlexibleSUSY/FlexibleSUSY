@@ -1316,7 +1316,7 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
 
         (* metric tensor vertices *)
         (* there's a global - sign in those expression, that's why permutaion with even
-           signature is replaced with odd_permutaion *)
+           signature is replaced with odd_permutation *)
         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
             + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n3_]]])
             + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[V[Index[Generic, n3_]]]) :>
@@ -1595,7 +1595,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   (* renormalization scale *)
                   "result.m_decay" <>
                   (* if amplitude is UV divergent, take the finite part *)
-                  If[!Last@translation === True, ",\n1.", ""] <> ");"
+                  If[!Last@translation === True, ",\nFinite", ""] <> ");"
                   ] <> "\n";
 
       {verticesForFACp, "\n// topology " <> FeynArtsTopologyName[topology] <> "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
@@ -1631,7 +1631,7 @@ FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structNa
        vertices = Flatten[vertices, 1];
 
        {vertices,
-         "// ----------------- 1loop contributions to the amplitude -----------------\n\n" <>
+         "\n// ----------------- 1-loop contributions to the amplitude -----------------\n" <>
              body
        }
     ];
@@ -1673,7 +1673,10 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            (* @todo: it might be less verbose to by default initialize amplitude to 0 *)
            body = body <> "\n// set the initial value of an amplitude to 0\n";
-           body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar] <> "\n";
+           body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar];
+
+           body = body <> "\n// FormCalc's Finite variable\n";
+           body = body <>"constexpr double Finite {1.};\n";
 
            If[IsPossibleTreeLevelDecay[decay, True],
               body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
