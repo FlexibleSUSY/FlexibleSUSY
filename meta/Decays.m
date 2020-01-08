@@ -807,7 +807,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
-              "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> ");\n";
+                 "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
+                 "model.solve_ewsb();\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
