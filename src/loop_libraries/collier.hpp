@@ -25,18 +25,18 @@
 #define two_point(NAME)\
    std::complex<double> NAME(\
       std::complex<double>, std::complex<double>, std::complex<double>,\
-      double scl2) noexcept;
+      double) noexcept;
 #define three_point(NAME)\
    std::complex<double> NAME(\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>,\
-      double scl2) noexcept;
+      double) noexcept;
 #define four_point(NAME)\
    std::complex<double> NAME(\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
-      double scl2) noexcept;
+      double) noexcept;
 
 namespace flexiblesusy {
 
@@ -74,6 +74,22 @@ class Collier : public Loop_library_interface
       four_point(D23)
       four_point(D3)
       four_point(D33)
+
+      void get_T2(
+         std::complex<double> (&)[2],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         double) noexcept;
+      void get_T3(
+         std::complex<double> (&)[7],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         double) noexcept;
+      void get_T4(
+         std::complex<double> (&)[11],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,
+         double) noexcept;
 };
 
 } // namespace flexiblesusy

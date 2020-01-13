@@ -66,6 +66,22 @@ class Loop_library_interface
       four_point_virtual(D23)
       four_point_virtual(D3)
       four_point_virtual(D33)
+
+      virtual void get_T2(
+         std::complex<double> (&)[2],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         double) = 0;
+      virtual void get_T3(
+         std::complex<double> (&)[7],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         double) = 0;
+      virtual void get_T4(
+         std::complex<double> (&)[11],
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>,
+         std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,
+         double) = 0;
 };
 
 } // namespace flexiblesusy
