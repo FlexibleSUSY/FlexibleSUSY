@@ -264,7 +264,7 @@ getGenericSums::errSimpleOnly =
 getGenericSums::errBadIndex =
 "Specified index(es) `1` is (are) outside the allowed region `2`.";
 getGenericSums[obj:`type`npf] := obj[[2,1,1]];
-getGenericSums[obj:`type`npf, int:{__Integer}] := 
+getGenericSums[obj:`type`npf, int:{__Integer}] :=
 Module[{unique = DeleteDuplicates@int},
    {
       getProcess@obj,
@@ -315,7 +315,7 @@ getName[obj:`type`cxxReplacementRules] := First/@obj;
 getName // Utils`MakeUnknownInputDefinition;
 getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
-cxxName[obj:`type`genericField] := 
+cxxName[obj:`type`genericField] :=
 Switch[Head@obj,
    SARAH`bar,"typename bar<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
    Susyno`LieGroups`conj,"typename conj<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
@@ -407,12 +407,12 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes*)}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes*)}];
    dressedU = Flatten@getProcess@uNPF;
    dressedD = Flatten@getProcess@dNPF;
    assumptionReplacements =
