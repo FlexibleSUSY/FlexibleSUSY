@@ -149,6 +149,26 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                 "std::complex<double> CVLd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(4)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(5) )/2.;\n"<>
                 "std::complex<double> CVRd = -( "<>FlexibleSUSY`FSModelName<>"_npf_down.at(6)+"<>FlexibleSUSY`FSModelName<>"_npf_down.at(7) )/2.;\n"<>
                 "\n"<>
+                "std::cout << \"photon    : gpLV \" << gpLV  << \"\\n\";\n"<>
+                "std::cout << \"photon    : gpRV \" << gpRV  << \"\\n\";\n"<>
+                "std::cout << \"photon    : gnLV \" << gnLV  << \"\\n\";\n"<>
+                "std::cout << \"photon    : gnRV \" << gnRV  << \"\\n\\n\";\n"<>
+                "\n"<>
+                "const auto VZ_FF = calculate_"<>ToString@inFermion<>"_"<>ToString@outFermion<>"_VZ_form_factors (generationIndex1,  generationIndex2, model);\n"<>
+                "const auto VZ_penguin = create_massive_penguin_amp<VZ>(VZ_FF, model, qedqcd);\n"<>
+                "\n"<>
+                "std::cout << \"wkotlarski: gLVu \" << VZ_penguin[0]  << \"\\n\";\n"<>
+                "std::cout << \"me        : cLVu \" << -sqrt(2.0)/GF*CVLu << \"\\n\";\n"<>
+                "\n"<>
+                "std::cout << \"wkotlarski: gLVd \" << VZ_penguin[2]  << \"\\n\";\n"<>
+                "std::cout << \"me        : cLVd \" << -sqrt(2.0)/GF*CVLd << \"\\n\";\n"<>
+                "\n"<>
+                "std::cout << \"wkotlarski: gRVu \" << VZ_penguin[1]  << \"\\n\";\n"<>
+                "std::cout << \"me        : cRVu \" << -sqrt(2.0)/GF*CVRu << \"\\n\";\n"<>
+                "\n"<>
+                "std::cout << \"wkotlarski: gRVd \" << VZ_penguin[3]  << \"\\n\\n\";\n"<>
+                "std::cout << \"me        : cRVd \" << -sqrt(2.0)/GF*CVRd << \"\\n\";\n"<>
+                "\n"<>
                 "//plus because of descending order in FormCalc spinor chains and definition of tensor operators\n"<>
                 "std::complex<double> CTLu = +"<>FlexibleSUSY`FSModelName<>"_npf_up.at(8);\n"<>
                 "std::complex<double> CTRu = +"<>FlexibleSUSY`FSModelName<>"_npf_up.at(9);\n"<>
