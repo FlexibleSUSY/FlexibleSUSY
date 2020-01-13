@@ -58,7 +58,6 @@ module Collier_wrapper
 
 contains
    subroutine initialize_collier_dummy() bind(C, name='initialize_collier_impl')
-      real(C_DOUBLE) :: mu2
       call Init_cll(4,2,'')
    end
 
