@@ -2159,7 +2159,7 @@ check_generic_loops_libs() {
             # assume that the linker will look in the default paths
             COLLIERLIBS=" $COLLIERLIBS_ "
         else
-            COLLIERLIBS="src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
+            COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
         fi
     fi
 }
