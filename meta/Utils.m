@@ -48,6 +48,9 @@ Out[]= 2
 
 StringJoinWithSeparator::usage = "Joins a list of strings with a given separator string";
 
+StringJoinWithReplacement::usage =
+"Joins a list of strings with a given separator string, making string replacement afterwards";
+
 Zip::usage = "Combines two lists to a list of touples.
 Example:
 
@@ -495,10 +498,20 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
    sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
+
+StringJoinWithReplacement[
+   list_List,
+   separator:_String:", ",
+   replacement:Rule[_String,_String]:Rule["`","`.`"],
+   transformer_:ToString
+] :=
+StringReplace[StringJoinWithSeparator[list,separator,transformer],replacement];
+StringJoinWithReplacement // MakeUnknownInputDefinition;
+StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
