@@ -158,15 +158,15 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                 "const auto VZ_penguin = create_massive_penguin_amp<VZ>(VZ_FF, model, qedqcd);\n"<>
                 "\n"<>
                 "std::cout << \"wkotlarski: gLVu \" << VZ_penguin[0]  << \"\\n\";\n"<>
-                "std::cout << \"me        : cLVu \" << -sqrt(2.0)/GF*CVLu << \"\\n\";\n"<>
+                "std::cout << \"me        : cLVu \" << -sqrt(2.0)/GF*CVLu << \"\\n\\n\";\n"<>
                 "\n"<>
                 "std::cout << \"wkotlarski: gLVd \" << VZ_penguin[2]  << \"\\n\";\n"<>
-                "std::cout << \"me        : cLVd \" << -sqrt(2.0)/GF*CVLd << \"\\n\";\n"<>
+                "std::cout << \"me        : cLVd \" << -sqrt(2.0)/GF*CVLd << \"\\n\\n\";\n"<>
                 "\n"<>
                 "std::cout << \"wkotlarski: gRVu \" << VZ_penguin[1]  << \"\\n\";\n"<>
-                "std::cout << \"me        : cRVu \" << -sqrt(2.0)/GF*CVRu << \"\\n\";\n"<>
+                "std::cout << \"me        : cRVu \" << -sqrt(2.0)/GF*CVRu << \"\\n\\n\";\n"<>
                 "\n"<>
-                "std::cout << \"wkotlarski: gRVd \" << VZ_penguin[3]  << \"\\n\\n\";\n"<>
+                "std::cout << \"wkotlarski: gRVd \" << VZ_penguin[3]  << \"\\n\";\n"<>
                 "std::cout << \"me        : cRVd \" << -sqrt(2.0)/GF*CVRd << \"\\n\";\n"<>
                 "\n"<>
                 "//plus because of descending order in FormCalc spinor chains and definition of tensor operators\n"<>
