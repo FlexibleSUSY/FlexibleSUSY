@@ -1716,6 +1716,10 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 @preCXXRules list of rules to be applied at expr.
 @param wilsonBasis:{Rule[_,_]...} list of basis for calculation.
 @returns String c++ code for output value initializations inside GenericSum.";
+CXXChangeOutput::errUnimplementedLoops =
+"Unsupported loop functions
+`1`
+were detected.";
 CXXChangeOutput[summation:`type`summation,expr_->preCXXRules_,{}] :=
 Module[
    {
@@ -1745,7 +1749,7 @@ Module[
       modifiedExpr = expr,
       masses,preMassCode,codeMass,rulesMass,
       couplings,preCouplingCode,codeCoupling,rulesCoupling,
-      paves,prePaVeCode,codePaVe,rulesPaVe,
+      loopArrayDefine,loopArraySet,
       cxxExpr,updatingVars
    },
    masses = Tally@Cases[modifiedExpr,_SARAH`Mass,Infinity,Heads->True];
@@ -1753,17 +1757,10 @@ Module[
    modifiedExpr = modifiedExpr /. rulesMass;
 
    couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
-   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","c"}];
+   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","g"}];
    modifiedExpr = modifiedExpr /. rulesCoupling;
 
-   paves = Tally@Cases[modifiedExpr,x:Alternatives[_LoopTools`A0i,_LoopTools`B0i,_LoopTools`C0i,
-      _LoopTools`D0i,_LoopTools`E0i,_LoopTools`F0i,_LoopTools`A0,_LoopTools`A00,
-      _LoopTools`B0,_LoopTools`B1,_LoopTools`B00,_LoopTools`B11,_LoopTools`B001,
-      _LoopTools`B111,_LoopTools`DB0,_LoopTools`DB1,_LoopTools`DB00,_LoopTools`DB11,
-      _LoopTools`C0,_LoopTools`D0,_LoopTools`E0,_LoopTools`F0]:>x,Infinity,Heads->True];
-   paves = paves /.getLoopLibraryRules[];
-   {prePaVeCode,codePaVe,rulesPaVe} = createUniqueDefinitions[paves->preCXXRules,{"std::complex<double>","i"}];
-   modifiedExpr = modifiedExpr /. getLoopLibraryRules[] /. rulesPaVe;
+   {loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions[modifiedExpr->preCXXRules];
 
    cxxExpr = Parameters`ExpressionToString[Fold[ReplaceAll,#,preCXXRules]]&/@modifiedExpr;
    cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
@@ -1772,17 +1769,136 @@ Module[
    replaceTokens[code,{
       "@defineMasses@"->preMassCode,
       "@defineCouplings@"->preCouplingCode,
-      "@defineLoopFunctions@"->prePaVeCode,
+      "@defineLoopFunctions@"->loopArrayDefine,
       "@BeginSum@"->CXXBeginSum[summation,preCXXRules],
       "@setMasses@"->codeMass,
       "@setCouplings@"->codeCoupling,
-      "@setLoopFunctions@"->codePaVe,
+      "@setLoopFunctions@"->loopArraySet,
       "@ChangeOutputValues@"->StringRiffle[updatingVars,"\n"],
       "@EndSum@"->CXXEndSum@getGenericFields@summation
    }]
 ];
 Utils`MakeUnknownInputDefinition@CXXChangeOutput;
 SetAttributes[CXXChangeOutput,{Protected,Locked}];
+
+createLoopFunctions[Rule[modifiedExpr_List,preCXXRules_List]] :=
+Module[
+   {
+      twoPoint,
+      twoPointTemplate =
+         {
+            LoopTools`B0@@#2 -> "b"<>#1<>"[0]",
+            LoopTools`B1@@#2 -> "b"<>#1<>"[1]",
+            LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",
+            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>"[1]"
+         }&,
+      twoPointRules,
+
+      threePoint,
+      threePointTemplate =
+         {
+            LoopTools`C0@@#2 -> "c"<>#1<>"[0]",
+            LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>"[0]",
+            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>"[1]",
+            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>"[2]",
+            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>"[3]",
+            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>"[4]",
+            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>"[5]",
+            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>"[6]"
+         }&,
+      threePointRules,
+
+      fourPoint,
+      fourPointTemplate =
+         {
+            LoopTools`D0@@#2 -> "d"<>#1<>"[0]",
+            LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>"[0]",
+            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>"[1]",
+            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>"[2]",
+            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>"[3]",
+            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>"[4]",
+            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>"[5]",
+            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>"[6]",
+            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>"[7]",
+            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>"[8]",
+            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>"[9]",
+            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"
+         }&,
+      fourPointRules,
+
+      loopArrayDefine = {},
+      loopArraySet = {}
+   },
+   Utils`AssertOrQuit[#==={},CXXChangeOutput::errUnimplementedLoops,Utils`StringJoinWithSeparator[#,", "]] &@
+      DeleteDuplicates@Cases[modifiedExpr,Alternatives[
+      _LoopTools`A0i,_LoopTools`A0,_LoopTools`A00,
+      _LoopTools`B00,_LoopTools`B11,_LoopTools`B001,_LoopTools`B111,
+      _LoopTools`DB0,_LoopTools`DB1,
+      _LoopTools`DB00,_LoopTools`DB11,
+      _LoopTools`E0i,_LoopTools`E0,
+      _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
+   twoPoint = Tally@Join[
+      Cases[modifiedExpr,LoopTools`B0i[_,args:__]:>{args},Infinity],
+      Cases[modifiedExpr,(LoopTools`B0|LoopTools`B0)[args:__]:>{args},Infinity]
+   ];
+   twoPointRules = If[twoPoint=!={},
+      AppendTo[loopArrayDefine,Array[
+         "b"<>ToString@#<>"[2] = {}"&,
+         Length@twoPoint]
+      ];
+      AppendTo[loopArraySet,Array[
+         Parameters`ExpressionToString["lib.get_T2"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
+         "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
+         Length@twoPoint]
+      ];
+      Join@@twoPointTemplate@@@Array[{ToString@#,twoPoint[[#,1]]}&,Length@twoPoint],
+      {}
+   ];
+
+   threePoint = Tally@Join[
+      Cases[modifiedExpr,LoopTools`C0i[_,args:__]:>{args},Infinity],
+      Cases[modifiedExpr,(LoopTools`C0)[args:__]:>{args},Infinity]
+   ];
+   threePointRules = If[threePoint=!={},
+      AppendTo[loopArrayDefine,Array[
+         "c"<>ToString@#<>"[7] = {}"&,
+         Length@threePoint]
+      ];
+      AppendTo[loopArraySet,Array[
+         Parameters`ExpressionToString["lib.get_T3"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         "; // It is repeated "<>ToString@threePoint[[#,2]]<>" times."&,
+         Length@threePoint]
+      ];
+      Join@@threePointTemplate@@@Array[{ToString@#,threePoint[[#,1]]}&,Length@threePoint]
+      ,
+      {}
+   ];
+
+   fourPoint = Tally@Join[
+      Cases[modifiedExpr,LoopTools`D0i[_,args:__]:>{args},Infinity],
+      Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]
+   ];
+   fourPointRules = If[fourPoint=!={},
+      AppendTo[loopArrayDefine,Array[
+         "d"<>ToString@#<>"[11] = {}"&,
+         Length@fourPoint]
+      ];
+      AppendTo[loopArraySet,Array[
+         Parameters`ExpressionToString["lib.get_T4"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         "; // It is repeated "<>ToString@fourPoint[[#,2]]<>" times."&,
+         Length@fourPoint]
+      ];
+      Join@@fourPointTemplate@@@Array[{ToString@#,fourPoint[[#,1]]}&,Length@fourPoint],
+      {}
+   ];
+
+   loopArrayDefine = "std::complex<double> "<>Utils`StringJoinWithSeparator[Join@@loopArrayDefine,", "]<>";";
+   loopArraySet = Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""];
+
+   {loopArrayDefine,loopArraySet,modifiedExpr/.twoPointRules/.threePointRules/.fourPointRules}
+];
+createLoopFunctions // Utils`MakeUnknownInputDefinition;
+createLoopFunctions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 `cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
 `cxx`getVariableName[SARAH`Mass[obj]] =
