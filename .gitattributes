@@ -140,3 +140,9 @@ templates/lattice_susy_scale_constraint.cpp.in           export-ignore
 templates/lattice_susy_scale_constraint.hpp.in           export-ignore
 
 test                            export-ignore
+
+# reclassify language of some files
+*.m linguist-language=Mathematica
+*.cpp.in linguist-language=C++
+*.hpp.in linguist-language=C++
+*.spc linguist-detectable=false

@@ -1,0 +1,65 @@
+name: Unit tests
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        CXXCOMPILER: [g++, clang++]
+        LOOPLIBRAY: [internal, looptools]
+      max-parallel: 2
+    steps:
+      # action checks-out our repository under $GITHUB_WORKSPACE
+      - name: Checkout 
+        uses: actions/checkout@v2
+      - name: Pull the docker image
+        run: docker pull navir/opensuseleap-for-flexiblesusy:0.2.0
+      - name: Run the image
+        # mount $GITHUB_WORKSPACE as /FlexibleSUSY on the container
+        run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/FlexibleSUSY navir/opensuseleap-for-flexiblesusy:0.2.0
+      - name: Copy Wolfram Engine license to the image
+        run: |
+          docker exec builder bash -c "mkdir /root/.WolframEngine && mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
+          docker exec builder bash -c 'printf "Checking is Wolfram Engine workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+        env:
+          MATHPASS: ${{ secrets.MATHPASS }}  
+      - name: Install SARAH and FeynArts
+        run: |
+          docker exec builder bash -c 'wget -qO- https://sarah.hepforge.org/downloads/SARAH-4.14.3.tar.gz | tar xzf -'
+          docker exec builder bash -c "mkdir /root/.WolframEngine/Kernel && echo 'AppendTo[\$Path, \"/SARAH-4.14.3\"];' > /root/.WolframEngine/Kernel/init.m"
+          docker exec builder bash -c 'wget -qO- http://www.feynarts.de/FeynArts-3.11.tar.gz | tar xzf -'
+          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FeynArts-3.11\"];' >> /root/.WolframEngine/Kernel/init.m"
+      - name: Install FormCalc
+        run: |
+          docker exec builder bash -c 'wget -qO- http://www.feynarts.de/formcalc/FormCalc-9.9.tar.gz | tar xzf -'
+          docker exec builder bash -c "cd FormCalc-9.9 && PATH=/usr/local/Wolfram/WolframEngine/12.0/Executables:\$PATH ./compile"
+          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-9.9\"];' >> /root/.WolframEngine/Kernel/init.m"
+        env:
+          CXX:  ${{ matrix.CXXCOMPILER }}
+          CC:   ${{ matrix.CXXCOMPILER }}
+      - name: Install LoopTools
+        run: |
+          docker exec builder bash -c 'cd /tmp && wget -qO- http://www.feynarts.de/looptools/LoopTools-2.15.tar.gz | tar xzf -'
+          docker exec builder bash -c "cd /tmp/LoopTools-2.15 && if [ "$CXX" = "g++" ]; then export CC=gcc; export CXX=g++; fi && FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-2.15 && make install"
+        env:
+          CXX:  ${{ matrix.CXXCOMPILER }}
+        if: matrix.LOOPLIBRAY == 'looptools'
+      - name: Create models
+        run: docker exec builder bash -c 'cd FlexibleSUSY && for m in SM MSSM MSSMCPV MSSMNoFV MRSSM2 ScalarLeptoquarks munuSSM LRLR THDMII; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --name=$m; done'
+      - name: Configure
+        run: docker exec builder bash -c "models=SM; for m in MSSM MSSMCPV MSSMNoFV MRSSM2 ScalarLeptoquarks munuSSM LRLR THDMII; do models=\$models,\$m; done && cd FlexibleSUSY && if [ "$LOOPLIBRAY" = "looptools" ]; then export FL=\"--enable-looptools --with-looptools-libdir=/LoopTools-2.15/lib64 --with-looptools-incdir=/LoopTools-2.15/include\"; fi &&./configure --with-cxx=$CXXCOMPILER --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --with-optional-modules=test --with-models=\$models \$FL"
+        env:   
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          LOOPLIBRAY: ${{ matrix.LOOPLIBRAY }} 
+      - name: Make
+        run: docker exec builder bash -c "cd FlexibleSUSY && VERBOSE=1 make"
+      - name: Make and run tests
+        run: docker exec builder bash -c 'cd FlexibleSUSY && make -j2 all-test'

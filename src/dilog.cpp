@@ -32,6 +32,10 @@ namespace {
  * @param x real argument
  * @note Implementation translated by R.Brun from CERNLIB DILOG function C332
  * @return \f$\mathrm{Li}_2(z)\f$
+ *
+ * Implemented as a truncated series expansion in terms of Chebyshev
+ * polynomials, see [Yudell L. Luke: Mathematical functions and their
+ * approximations, Academic Press Inc., New York 1975, p.67].
  */
 double dilog(double x) noexcept {
    const double PI = M_PI;
@@ -102,15 +106,83 @@ double dilog(double x) noexcept {
 }
 
 /**
- * @brief Real dilogarithm \f$\mathrm{Li}_2(z)\f$
+ * @brief Real dilogarithm \f$\mathrm{Li}_2(z)\f$ with long double precision
  * @param x real argument
  * @note Implementation translated by R.Brun from CERNLIB DILOG function C332
  * @return \f$\mathrm{Li}_2(z)\f$
  *
- * @note not full long double precision yet!
+ * Implemented as a truncated series expansion in terms of Chebyshev
+ * polynomials, see [Yudell L. Luke: Mathematical functions and their
+ * approximations, Academic Press Inc., New York 1975, p.67].
  */
 long double dilog(long double x) noexcept {
-   return dilog(static_cast<double>(x));
+   const long double PI  = 3.141592653589793238463l;
+   const long double HF  = 0.5l;
+   const long double PI2 = PI*PI;
+   const long double PI3 = PI2/3;
+   const long double PI6 = PI2/6;
+   const long double PI12 = PI2/12;
+   const long double C[24] = { 0.42996693560813697204l, 0.40975987533077105847l,
+     -0.01858843665014591965l, 0.00145751084062267855l,-0.00014304184442340049l,
+      0.00001588415541879553l,-0.00000190784959386583l, 0.00000024195180854165l,
+     -0.00000003193341274252l, 0.00000000434545062677l,-0.00000000060578480118l,
+      0.00000000008612097799l,-0.00000000001244331660l, 0.00000000000182255696l,
+     -0.00000000000027006766l, 0.00000000000004042209l,-0.00000000000000610325l,
+      0.00000000000000092863l,-0.00000000000000014226l, 0.00000000000000002193l,
+      0.00000000000000000340l, 0.00000000000000000053l, 0.00000000000000000008l,
+      0.00000000000000000001l};
+
+   long double T,H,Y,S,A,ALFA,B1,B2,B0;
+
+   if (x == 1) {
+       H = PI6;
+   } else if (x == -1) {
+       H = -PI12;
+   } else {
+       T = -x;
+       if (T <= -2) {
+           Y = -1/(1+T);
+           S = 1;
+           B1= log(-T);
+           B2= log(1+1/T);
+           A = -PI3+HF*(B1*B1-B2*B2);
+       } else if (T < -1) {
+           Y = -1-T;
+           S = -1;
+           A = log(-T);
+           A = -PI6+A*(A+log(1+1/T));
+       } else if (T <= -0.5l) {
+           Y = -(1+T)/T;
+           S = 1;
+           A = log(-T);
+           A = -PI6+A*(-HF*A+log(1+T));
+       } else if (T < 0) {
+           Y = -T/(1+T);
+           S = -1;
+           B1= log(1+T);
+           A = HF*B1*B1;
+       } else if (T <= 1) {
+           Y = T;
+           S = 1;
+           A = 0;
+       } else {
+           Y = 1/T;
+           S = -1;
+           B1= log(T);
+           A = PI6+HF*B1*B1;
+       }
+       H    = Y+Y-1;
+       ALFA = H+H;
+       B1   = 0;
+       B2   = 0;
+       for (int i = 23; i >= 0; i--) {
+          B0 = C[i] + ALFA*B1-B2;
+          B2 = B1;
+          B1 = B0;
+       }
+       H = -(S*(B0-H*B2)+A);
+    }
+    return H;
 }
 
 /**
@@ -137,7 +209,7 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
 
    const long double rz = std::real(z);
    const long double iz = std::imag(z);
-   const long double az = std::abs(z);
+   const long double nz = sqr(rz) + sqr(iz);
 
    // special cases
    if (iz == 0.l) {
@@ -145,7 +217,7 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
          return std::complex<long double>(dilog(rz), 0.l);
       if (rz > 1.l)
          return std::complex<long double>(dilog(rz), -PI*std::log(rz));
-   } else if (az < std::numeric_limits<long double>::epsilon()) {
+   } else if (nz < std::numeric_limits<long double>::epsilon()) {
       return z;
    }
 
@@ -154,24 +226,24 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
 
    // transformation to |z|<1, Re(z)<=0.5
    if (rz <= 0.5l) {
-      if (az > 1.l) {
+      if (nz > 1.l) {
          cy = -0.5l * sqr(std::log(-z));
          cz = -std::log(1.l - 1.l / z);
          jsgn = -1;
          ipi12 = -2;
-      } else { // (az <= 1.)
+      } else { // nz <= 1.l
          cy = 0;
          cz = -std::log(1.l - z);
          jsgn = 1;
          ipi12 = 0;
       }
    } else { // rz > 0.5
-      if (az <= std::sqrt(2*rz)) {
+      if (nz <= 2*rz) {
          cz = -std::log(z);
          cy = cz * std::log(1.l - z);
          jsgn = -1;
          ipi12 = 2;
-      } else { // (az > sqrt(2*rz))
+      } else { // nz > 2*rz
          cy = -0.5l * sqr(std::log(-z));
          cz = -std::log(1.l - 1.l / z);
          jsgn = -1;
@@ -227,7 +299,7 @@ std::complex<double> dilog(const std::complex<double>& z) noexcept
 
    const double rz = std::real(z);
    const double iz = std::imag(z);
-   const double az = std::abs(z);
+   const double nz = sqr(rz) + sqr(iz);
 
    // special cases
    if (iz == 0.) {
@@ -235,7 +307,7 @@ std::complex<double> dilog(const std::complex<double>& z) noexcept
          return {dilog(rz), 0.};
       else // (rz > 1.)
          return {dilog(rz), -PI*std::log(rz)};
-   } else if (az < std::numeric_limits<double>::epsilon()) {
+   } else if (nz < std::numeric_limits<double>::epsilon()) {
       return z;
    }
 
@@ -244,24 +316,24 @@ std::complex<double> dilog(const std::complex<double>& z) noexcept
 
    // transformation to |z|<1, Re(z)<=0.5
    if (rz <= 0.5) {
-      if (az > 1.) {
+      if (nz > 1.) {
          cy = -0.5 * sqr(std::log(-z));
          cz = -std::log(1. - 1. / z);
          jsgn = -1;
          ipi12 = -2;
-      } else { // (az <= 1.)
+      } else { // nz <= 1.
          cy = 0;
          cz = -std::log(1. - z);
          jsgn = 1;
          ipi12 = 0;
       }
    } else { // rz > 0.5
-      if (az <= std::sqrt(2*rz)) {
+      if (nz <= 2*rz) {
          cz = -std::log(z);
          cy = cz * std::log(1. - z);
          jsgn = -1;
          ipi12 = 2;
-      } else { // (az > sqrt(2*rz))
+      } else { // nz > 2*rz
          cy = -0.5 * sqr(std::log(-z));
          cz = -std::log(1. - 1. / z);
          jsgn = -1;

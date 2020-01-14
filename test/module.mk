@@ -76,6 +76,7 @@ TEST_META := \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MRSSM_TreeMasses.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
@@ -697,7 +698,7 @@ endif
 		execute-shell-tests
 
 all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
-		@true
+		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
 		$(Q)-rm -f $(TEST_DEP)
@@ -729,16 +730,21 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 execute-tests:  $(TEST_XML)
+		@printf "%s\n" "All tests passed."
 
 ifeq ($(ENABLE_META),yes)
 execute-meta-tests: $(TEST_META_XML)
+		@printf "%s\n" "All meta tests passed."
 else
 execute-meta-tests:
+		@printf "%s\n" "All meta tests passed."
 endif
 
 execute-compiled-tests: $(TEST_EXE_XML)
+		@printf "%s\n" "All compiled tests passed."
 
 execute-shell-tests: $(TEST_SH_XML)
+		@printf "%s\n" "All shell script tests passed."
 
 # creates .xml file with test result
 PTR = write_test_result_file() { \
@@ -754,7 +760,8 @@ PTR = write_test_result_file() { \
 		printf "%-66s %4s\n" "$$2" "OK"; \
 	else \
 		printf "%-66s %4s\n" "$$2" "FAILED"; \
-	fi \
+	fi; \
+	return $$1; \
 }
 
 $(DIR)/%.x.xml: $(DIR)/%.x

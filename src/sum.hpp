@@ -92,7 +92,7 @@ auto sum(Idx ini, Idx fin, Function f) -> decltype(EvalEigenXpr<Idx>(ini, f))
 {
     using Evaled = decltype(EvalEigenXpr<Idx>(ini, f));
     using Acc = typename std::remove_cv<Evaled>::type;
-    Acc s = create_zero<Acc, is_eigen_type<Evaled>::value>::zero();
+    Acc s = create_zero<Acc, is_eigen_type<Acc>::value>::zero();
     for (Idx i = ini; i <= fin; i++) s += f(i);
     return s;
 }

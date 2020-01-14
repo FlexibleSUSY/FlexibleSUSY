@@ -19,7 +19,6 @@
 #include "threshold_corrections.hpp"
 #include "error.hpp"
 #include "logger.hpp"
-#include <cmath>
 #include <string>
 #include <iostream>
 
@@ -35,7 +34,13 @@ int get_digit(Threshold_corrections::Flags_t flags, int pos)
          "get_digit: position ( " + std::to_string(pos) + ") must be positive");
    }
 
-   return static_cast<Threshold_corrections::Flags_t>(std::abs(flags) * std::pow(10.l, -pos)) % 10;
+   int num = std::abs(static_cast<int>(flags));
+
+   while (--pos >= 0) {
+      num /= 10;
+   }
+
+   return static_cast<Threshold_corrections::Flags_t>(num % 10);
 }
 
 /// sets digit [0-9] in flags at position pos
@@ -59,7 +64,13 @@ void set_digit(Threshold_corrections::Flags_t& flags, int pos, int digit)
 
    const auto old_digit = get_digit(flags, pos);
 
-   flags += (digit - old_digit) * std::pow(10.l,pos);
+   int dig = digit - old_digit;
+
+   while (--pos >= 0) {
+      dig *= 10;
+   }
+
+   flags += dig;
 }
 
 } // anonymous namespace
