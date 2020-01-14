@@ -24,15 +24,11 @@
 1) there are no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
-BeginPackage["NPointFunctions`",
-   {
-      "FlexibleSUSY`",
-      "SARAH`",
-      "CXXDiagrams`", (* RemoveLorentzConjugation, *)
-      "Vertices`", (* StripFieldIndices *)
-      "Parameters`", (* ExpressionToString *)
-      "Utils`" (* AssertOrQuit, AssertWithMessage, EvaluateOrQuit *)
-   }
+BeginPackage@"NPointFunctions`";
+
+If[!ValueQ[Model`Name],
+   Print["Error: Model`Name is not defined. Did you call SARAH`Start[\"Model\"]?"];
+   Quit[1];
 ];
 
 LoopLevel::usage=
@@ -151,7 +147,7 @@ SetAttributes[
    KeepProcesses,
    DimensionalReduction,DimensionalRegularization,
    Irreducible,Triangles,
-   GenericS,GenericF,GenericV,GenericU,GenericT,                                (* @unote also exist in internal.m*)
+   GenericS,GenericF,GenericV,GenericU,                                (* @unote also exist in internal.m*)
    GenericSum,GenericIndex,LorentzIndex,                                        (* @unote also exist in internal.m*)
    LoopFunctions,UseWilsonCoeffs,WilsonBasis
    },
@@ -161,6 +157,30 @@ NPointFunctions`internal`contextPath = $ContextPath;
 $ContextPath = {"NPointFunctions`","System`"};
 Begin["`internal`"];
 (* ============================== Type definitions ========================== *)
+Module[
+   {
+      allParticles = TreeMasses`GetParticles[],
+      dimensionfullConverter = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &,
+      conjConverter = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &,
+      barConverter = Through[Sequence[SARAH`bar,#&][#]] &,
+      scalarList,fermionList,vectorList
+   },
+   scalarList = Join[
+      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealScalar],
+      conjConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsComplexScalar]
+   ];
+   fermionList = Join[
+      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsMajoranaFermion],
+      barConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsDiracFermion]
+   ];
+   vectorList = Join[
+      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealVector],
+      conjConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsComplexVector]
+   ];
+   `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList];
+   `type`physicalField ~ SetAttributes ~ {Protected,Locked};
+];
+
 `type`genericField =
    (GenericS | GenericF | GenericV | GenericU)[GenericIndex[_Integer]] |
    SARAH`bar[(GenericF | GenericU)[GenericIndex[_Integer]]] |
@@ -234,6 +254,11 @@ Switch[Head@obj,
 ];
 getConjugated // Utils`MakeUnknownInputDefinition;
 getConjugated ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+getIndex[obj:`type`genericField] :=
+(obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity})[[1,1]];
+getIndex // Utils`MakeUnknownInputDefinition;
+getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 removeIndent[obj:_String] := StringReplace[obj,StartOfLine~~getIndent[obj]->""];
 removeIndent // Utils`MakeUnknownInputDefinition;
@@ -312,6 +337,14 @@ getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 getName[obj:`type`subexpressions] := First/@obj
 getName[obj:`type`cxxReplacementRules] := First/@obj;
+getName[obj:`type`physicalField] :=
+Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
+   Switch[nakedField,
+   _Symbol,nakedField,
+   (_Symbol)[{_Symbol}],Head@nakedField]
+];
+getName[obj:`type`genericField] :=
+Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
 getName // Utils`MakeUnknownInputDefinition;
 getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -323,6 +356,15 @@ Switch[Head@obj,
 ];
 cxxName // Utils`MakeUnknownInputDefinition;
 cxxName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+`cxx`getIndex[obj:`type`physicalField] :=
+Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
+   Switch[nakedField,
+   _Symbol,"",
+   (_Symbol)[{_Symbol}],StringDrop[ToString[nakedField[[1, 1]]],2]]
+];
+`cxx`getIndex // Utils`MakeUnknownInputDefinition;
+`cxx`getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 cxxIndex[obj:`type`genericField] :=
 "indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
@@ -1706,11 +1748,11 @@ Module[
       paves,prePaVeCode,codePaVe,rulesPaVe,
       cxxExpr,updatingVars
    },
-   masses = Tally@Cases[modifiedExpr,x_SARAH`Mass:>x,Infinity,Heads->True];
+   masses = Tally@Cases[modifiedExpr,_SARAH`Mass,Infinity,Heads->True];
    {preMassCode,codeMass,rulesMass} = createUniqueDefinitions[masses->preCXXRules,{"double","m"}];
    modifiedExpr = modifiedExpr /. rulesMass;
 
-   couplings = Tally@Cases[modifiedExpr,x:SARAH`Cp[__][___]:>x,Infinity,Heads->True];
+   couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
    {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings->preCXXRules,{"std::complex<double>","c"}];
    modifiedExpr = modifiedExpr /. rulesCoupling;
 
@@ -1741,6 +1783,13 @@ Module[
 ];
 Utils`MakeUnknownInputDefinition@CXXChangeOutput;
 SetAttributes[CXXChangeOutput,{Protected,Locked}];
+
+`cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
+`cxx`getVariableName[SARAH`Mass[obj]] =
+Switch[getName@obj,GenericS,"mS",GenericF,"mF",GenericV,"mV",GenericU,"mU"]<>ToString@getIndex@obj;
+`cxx`getVariableName[SARAH`Mass[obj:`type`physicalField]] :=
+`cxx`getVariableName[SARAH`Mass[obj]] =
+"m"<>ToString@getName@obj<>`cxx`getIndex@obj;
 
 createUniqueDefinitions[{}->_,{_String,name_String}] :=
    {

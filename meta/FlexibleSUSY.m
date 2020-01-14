@@ -48,8 +48,6 @@ BeginPackage["FlexibleSUSY`",
               "ThreeLoopMSSM`",
               "Observables`",
               "CXXDiagrams`",
-              "NPointFunctions`",
-              "WilsonCoeffs`",
               "AMuon`",
               "EDM`",
               "FFVFormFactors`",
@@ -3659,6 +3657,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               Print["Error: Model`Name is not defined.  Did you call SARAH`Start[\"Model\"]?"];
               Quit[1];
              ];
+           Needs@"NPointFunctions`";
+           Needs@"WilsonCoeffs`";
            FSDebugOutput = OptionValue[DebugOutput];
            FSOutputDir = OptionValue[OutputDirectory];
            If[!DirectoryQ[FSOutputDir],

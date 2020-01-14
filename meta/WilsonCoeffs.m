@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["WilsonCoeffs`",{"Utils`","NPointFunctions`"}];
+BeginPackage@"WilsonCoeffs`";
 
 {InterfaceToMatching,neglectBasisElements};
 
@@ -30,7 +30,7 @@ getGenericSums = NPointFunctions`internal`getGenericSums;
 getSubexpressions = NPointFunctions`internal`getSubexpressions;
 getName = NPointFunctions`internal`getName;
 
-neglectBasisElements::usage= 
+neglectBasisElements::usage=
 "@brief Deletes specified basis elements with not anymore used subexpressions.
 @param <npf> npf object to modify.
 @param <{Rule[_String,_]..}> operatorBasis list with
@@ -51,7 +51,7 @@ Module[
 SetAttributes[neglectBasisElements,{Locked,Protected}];
 
 InterfaceToMatching::usage=
-"@brief Transforms GenericSum accordig to a given basis. 
+"@brief Transforms GenericSum accordig to a given basis.
 @param NPF NPF object.
 @param operatorBasis list with {string name,fermion chain multiplication} pairs.
 @returns Corresponding GenericSum which matches to a given basis.
@@ -126,7 +126,7 @@ Module[
    NPointFunctions`GenericSum[coefficients,sumFields]
 ];
 
-removeFermionChains::usage = 
+removeFermionChains::usage =
 "@brief Removes DiracChains from the abbreviations rules.";
 removeFermionChains[npointExpression:`type`npf] :=
 Module[{pos},
