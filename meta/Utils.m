@@ -498,7 +498,7 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
    sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithReplacement@{args}];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
