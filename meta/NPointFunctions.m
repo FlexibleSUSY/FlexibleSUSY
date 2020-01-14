@@ -1689,15 +1689,15 @@ Module[
    {
       code ="
       // The following definitions are repeated in the GenericSum multiple times.
-      @Masses@
-      @Couplings@
-      @PaVe@
+      @defineMasses@
+      @defineCouplings@
+      @defineLoopFunctions@
 
       // Start of summation over generic fields.
       @BeginSum@
-         @DefineMasses@
-         @DefineCpoulings@
-         @DefinePaVe@
+         @setMasses@
+         @setCouplings@
+         @setLoopFunctions@
          @ChangeOutputValues@
       @EndSum@",
       modifiedExpr = expr,
@@ -1728,13 +1728,13 @@ Module[
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {wilsonBasis[[All,1]], cxxExpr}];
 
    replaceTokens[code,{
-      "@Masses@"->preMassCode,
-      "@Couplings@"->preCouplingCode,
-      "@PaVe@"->prePaVeCode,
+      "@defineMasses@"->preMassCode,
+      "@defineCouplings@"->preCouplingCode,
+      "@defineLoopFunctions@"->prePaVeCode,
       "@BeginSum@"->CXXBeginSum[summation,preCXXRules],
-      "@DefineMasses@"->codeMass,
-      "@DefineCpoulings@"->codeCoupling,
-      "@DefinePaVe@"->codePaVe,
+      "@setMasses@"->codeMass,
+      "@setCouplings@"->codeCoupling,
+      "@setLoopFunctions@"->codePaVe,
       "@ChangeOutputValues@"->StringRiffle[updatingVars,"\n"],
       "@EndSum@"->CXXEndSum@getGenericFields@summation
    }]
