@@ -164,7 +164,7 @@ Module[
       1] /.
       Apply[Rule, {#[[1]], #[[2]] <> #[[1]]} &/@ Get@particleNamespaceFile, 2];
    massRules = Append[Flatten[Module[
-      {P="SARAH`Mass@"<>#,MassP="Mass"<>ToString@Symbol@#},
+      {P="SARAH`Mass@"<>#,MassP=StringReplace[#,__~~"`"->"Global`Mass"]},
       {
          ToExpression[MassP <> "@indices_:>" <> P <>
          "@{Symbol[\"SARAH`gt\"<>StringTake[SymbolName@indices,-1]]}"],
@@ -1009,6 +1009,8 @@ Module[
 ];
 
 (*@Todo think how to implement this in an elegant way.*)
+uniqueChains[calculatedAmplitudes_,rules:{}] :=
+{calculatedAmplitudes,rules};
 uniqueChains[calculatedAmplitudes_,rules:{Rule[_Symbol,_]..}] :=
 Module[{chainRules,otherRules,zeroChainRules,uniqueChains,amplitudeRules},
    chainRules = Cases[rules,chain:Rule[_?(StringMatchQ[ToString@#,RegularExpression@"[F][1-9][\\d]*"]&),_]:>chain];
