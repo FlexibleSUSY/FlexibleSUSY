@@ -130,7 +130,7 @@ removeFermionChains::usage =
 "@brief Removes DiracChains from the abbreviations rules.";
 removeFermionChains[npointExpression:`type`npf] :=
 Module[{pos},
-   pos = Take[#, 3]& /@ Position[npointExpression, FormCalc`DiracChain];
+   pos = Take[#, 3]& /@ Position[npointExpression, NPointFunctions`internal`dc];
    Delete[npointExpression, pos]
 ];
 
