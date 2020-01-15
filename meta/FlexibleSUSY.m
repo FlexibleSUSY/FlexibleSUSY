@@ -4521,8 +4521,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
                           };

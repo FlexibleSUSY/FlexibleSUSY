@@ -19,7 +19,7 @@
 // File generated at @DateAndTime@
 
 /**
- * @file cxx_qft/@ModelName@_npointfunctions.hpp
+ * @file cxx_qft/@ModelName@_npointfunctions_wilsoncoeffs.hpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .

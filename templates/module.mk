@@ -7,7 +7,6 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/vertices.hpp.in \
 		$(DIR)/cxx_qft/vertices_.cpp.in \
 		$(DIR)/cxx_qft/context_base.hpp.in \
-		$(DIR)/cxx_qft/npointfunctions.hpp.in \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
