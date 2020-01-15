@@ -198,15 +198,15 @@ FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
                    "A2R*nuclear_form_factors.D\n" <>
                    "+ gpLV*nuclear_form_factors.Vp\n" <>
                    "+ gnLV*nuclear_form_factors.Vn\n" <>
-                   "+ gpLS*nuclear_form_factors.Sp\n" <>
-                   "+ gnLS*nuclear_form_factors.Sn"
+                   "+ gpRS*nuclear_form_factors.Sp\n" <>
+                   "+ gnRS*nuclear_form_factors.Sn"
                 ] <> ";\n" <>
                 "\nconst auto right =\n" <> IndentText[
                    "A2L*nuclear_form_factors.D\n" <>
                    "+ gpRV*nuclear_form_factors.Vp\n" <>
                    "+ gnRV*nuclear_form_factors.Vn\n" <>
-                   "+ gpRS*nuclear_form_factors.Sp\n" <>
-                   "+ gnRS*nuclear_form_factors.Sn"
+                   "+ gpLS*nuclear_form_factors.Sp\n" <>
+                   "+ gnLS*nuclear_form_factors.Sn"
                 ] <> ";\n" <>
 
                 "\n// eq. 14 of Kitano, Koike and Okada\n" <>
