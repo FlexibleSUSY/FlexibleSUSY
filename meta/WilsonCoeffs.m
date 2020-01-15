@@ -61,6 +61,7 @@ InterfaceToMatching::errUnknownInput =
 InterfaceToMatching@@{ <npf object>, {<string -> basis expression>..} }
 and not
 InterfaceToMatching@@`1`.";
+InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]}] := obj;
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
 Module[{basis, coefficientsWilson},
    basis = findFermionChains[getSubexpressions@obj, operatorBasis];
@@ -113,7 +114,7 @@ extractCoeffs::errRemainingExpression =
 `1`
 was not taken into account appropriately.";
 extractCoeffs[
-   NPointFunctions`GenericSum[expr_,sumFields:{__}],
+   NPointFunctions`GenericSum[{expr_},sumFields:{__}],
    operators:{Rule[_String,_NPointFunctions`internal`mat]..}
 ] :=
 Module[

@@ -1227,7 +1227,7 @@ Module[
       replSumFields
    },
    replSumFields = sortSumFields /. f_[_[_,i_]]:>{f@GenericIndex@i,Replace[i,genericSumRestictions~Join~{_Integer->False}]};
-   GenericSum[amp, replSumFields]
+   GenericSum[{amp}, replSumFields]
 ];
 SetAttributes[ToGenericSum,{Protected,Locked}];
 
