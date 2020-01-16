@@ -2151,8 +2151,7 @@ check_generic_loop_library_libs() {
     check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
     if test "x$found_lib" = "x" ; then
         message "Error: libcollier must be present if you want"
-        message "   to use Generic Loop Library, tp install COLLIER you can use"
-        message "   install-collier script."
+        message "   to use Generic Loop Library"
         message "   You can use the --with-collier-libdir= option to specify the"
         message "   location of the libcollier library."
         exit 1
@@ -2180,8 +2179,7 @@ check_generic_loop_library_incl() {
     check_header "collier.mod" "$collier_inc_dir"	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
         message "Error: collier.mod must be present at least if you want"
-        message "   to use Generic Loop Library, to install COLLIER you can use"
-        message "   install-collier script."
+        message "   to use Generic Loop Library"
         message "   You can use the --with-collier-incdir= option to specify the"
         message "   location of the collier.mod file."
         exit 1
