@@ -935,7 +935,7 @@ correlation functions.
 @returns The c++ code for the necessary headers for evaluation
 of n-point correlation functions.";
 CreateCXXHeaders[opts:OptionsPattern[]] :=
-"#include \"loop_libraries/global_loopfunction_lib.hpp\"\n"<>
+"#include \"loop_libraries/generic_loop_library.hpp\"\n"<>
 "#include \"cxx_qft/"<>FlexibleSUSY`FSModelName<>"_npointfunctions_wilsoncoeffs.hpp\"\n" <>
 "#include \"concatenate.hpp\"\n" <>
 "#include <boost/fusion/include/at_key.hpp>\n" <>
@@ -975,7 +975,6 @@ Module[
 
    definition =
       `cxx`npfClass[applySubexpressions@npf,colourProjector] <> "\n\n" <>
-      "Loop_library_interface& "<>`current`helperClassName<>"::lib = global_loopfunction_lib();\n\n"<>
       mainFunction@`cxx`arguments@npf <>
       "{\n   "<>`current`helperClassName<>" helper{ model, indices, momenta };\n   return helper.calculate();\n}";
 
@@ -1057,7 +1056,6 @@ Module[
       class @ClassName@ : public @Context@
       {
          using generic_sum_base = @Context@;
-         static Loop_library_interface& lib;
 
          template<class GenericFieldMap>
          struct subexpression_base :
@@ -1494,7 +1492,7 @@ Module[
          Length@twoPoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["lib.get_T2"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Generic_loop::library().get_T2"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
          Length@twoPoint]
       ];
@@ -1512,7 +1510,7 @@ Module[
          Length@threePoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["lib.get_T3"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Generic_loop::library().get_T3"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@threePoint[[#,2]]<>" times."&,
          Length@threePoint]
       ];
@@ -1531,7 +1529,7 @@ Module[
          Length@fourPoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["lib.get_T4"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Generic_loop::library().get_T4"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@fourPoint[[#,2]]<>" times."&,
          Length@fourPoint]
       ];

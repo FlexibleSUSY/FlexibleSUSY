@@ -16,23 +16,31 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GLOBAL_LOOPFUNCTION_LIB
-#define GLOBAL_LOOPFUNCTION_LIB
+#include "config.h"
+#ifdef ENABLE_GENERIC_LOOP_LIBRARY
 
-#include <memory>
+#ifndef GENERIC_LOOP
+#define GENERIC_LOOP
+
 #include "loop_library_interface.hpp"
-#include "global_loopfunction_lib.hpp"
-#include "collier.hpp"
 
 namespace flexiblesusy {
 
-Loop_library_interface& global_loopfunction_lib()
-{
-   static std::unique_ptr<Loop_library_interface> lib = std::make_unique<Collier>();
+class Generic_loop {
+public:
+   static void setLibrary(int);
+   static Loop_library_interface& library();
 
-   return *lib;
-}
+private:
+   static int type_;
+   static std::unique_ptr<Loop_library_interface> lib_;
+
+   Generic_loop() {}
+   Generic_loop(Generic_loop const&);
+   void operator=(Generic_loop const&);
+};
 
 } // namespace flexiblesusy
 
-#endif
+#endif // GENERIC_LOOP
+#endif // ENABLE_GENERIC_LOOP_LIBRARY

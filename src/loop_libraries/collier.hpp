@@ -16,9 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GLOBAL_COLLIER
-#define GLOBAL_COLLIER
-
 #include <complex>
 #include "loop_library_interface.hpp"
 
@@ -93,5 +90,3 @@ class Collier : public Loop_library_interface
 };
 
 } // namespace flexiblesusy
-
-#endif

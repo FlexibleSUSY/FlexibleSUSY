@@ -94,9 +94,10 @@ options="                    \
    enable_compiler_warnings  \
    enable_debug              \
    enable_fflite             \
-   enable_generic_loops\
+   enable_generic_loop_library \
    enable_himalaya           \
    enable_librarylink        \
+   enable_collier            \
    enable_looptools          \
    enable_mass_error_check   \
    enable_shared_libs        \
@@ -125,7 +126,8 @@ enable_fflite="no"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
 enable_looptools="no"
-enable_generic_loops="no"
+enable_collier="no"
+enable_generic_loop_library="no"
 enable_meta="no"
 # BEGIN: NOT EXPORTED ##########################################
 enable_meta="yes"
@@ -148,7 +150,8 @@ DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
-DEFINE_ENABLE_GENERIC_LOOPS="#undef ENABLE_GENERIC_LOOPS"
+DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
+DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#undef ENABLE_GENERIC_LOOP_LIBRARY"
 DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
 DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
@@ -2136,11 +2139,11 @@ check_looptools() {
 }
 
 #_____________________________________________________________________
-check_generic_loops_libs() {
-    if [ "x$enable_generic_loops" != "xyes" ] ; then
+check_generic_loop_library_libs() {
+    if [ "x$enable_generic_loop_library" != "xyes" ] ; then
         if [ -n "$collier_lib_dir" ] ; then
             message "Warning: --with-collier-libdir= has been set, but"
-            message "   GenericLoopLibrary has not been enabled via --enable-generic_loops."
+            message "   Generic Loop Library has not been enabled via --enable-generic_loop_library."
         fi
         return
     fi
@@ -2148,7 +2151,7 @@ check_generic_loops_libs() {
     check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
     if test "x$found_lib" = "x" ; then
         message "Error: libcollier must be present if you want"
-        message "   to use GenericLoopLibrary, tp install COLLIER you can use"
+        message "   to use Generic Loop Library, tp install COLLIER you can use"
         message "   install-collier script."
         message "   You can use the --with-collier-libdir= option to specify the"
         message "   location of the libcollier library."
@@ -2165,11 +2168,11 @@ check_generic_loops_libs() {
 }
 
 #_____________________________________________________________________
-check_generic_loops_incl() {
-    if [ "x$enable_generic_loops" != "xyes" ] ; then
+check_generic_loop_library_incl() {
+    if [ "x$enable_generic_loop_library" != "xyes" ] ; then
         if [ -n "$collier_inc_dir" ] ; then
           message "Warning: --with-collier-incdir= has been set, but"
-          message "   GenericLoopLibrary has not been enabled via --enable-generic_loops."
+          message "   Generic Loop Library has not been enabled via --enable-generic_loop_library."
         fi
         return
     fi
@@ -2177,7 +2180,7 @@ check_generic_loops_incl() {
     check_header "collier.mod" "$collier_inc_dir"	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
         message "Error: collier.mod must be present at least if you want"
-        message "   to use GenericLoopLibrary, to install COLLIER you can use"
+        message "   to use Generic Loop Library, to install COLLIER you can use"
         message "   install-collier script."
         message "   You can use the --with-collier-incdir= option to specify the"
         message "   location of the collier.mod file."
@@ -2190,22 +2193,22 @@ check_generic_loops_incl() {
 }
 
 #_____________________________________________________________________
-check_generic_loops() {
-    if [ "x$enable_generic_loops" = "xyes" ] ; then
+check_generic_loop_library() {
+    if [ "x$enable_generic_loop_library" = "xyes" ] ; then
         [ -z "$collier_inc_dir" ] && \
         [ -z "$collier_lib_dir" ] && \
         type pkg-config > /dev/null && \
         [ -f GenericLoopLibrary.pc ] && \
         {
-            message -n "Checking GenericLoopLibrary using local GenericLoopLibrary.pc ... "
+            message -n "Checking Generic Loop Library using local GenericLoopLibrary.pc ... "
             COLLIERLIBS=$(PKG_CONFIG_PATH=. pkg-config Collier --libs)
-            enable_generic_loops=yes
+            enable_generic_loop_library=yes
             message "ok"
             return
         }
 
-        check_generic_loops_incl
-        check_generic_loops_libs
+        check_generic_loop_library_incl
+        check_generic_loop_library_libs
     fi
 }
 
@@ -2232,7 +2235,7 @@ check_loop_functions() {
         LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
     fi
 
-    if [ "$enable_generic_loops" = "yes" ] ; then
+    if [ "$enable_generic_loop_library" = "yes" ] ; then
         LOOPFUNCLIBS="${LOOPFUNCLIBS} ${COLLIERLIBS}"
     fi
 }
@@ -2949,6 +2952,16 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
     fi
 
+    if test "x$enable_generic_loop_library" = "xyes" ; then
+        DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#define ENABLE_GENERIC_LOOP_LIBRARY 1"
+        message "Enabling usage of Generic Loop Library"
+        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOP_LIBRARY}"
+    else
+        DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#undef ENABLE_GENERIC_LOOP_LIBRARY"
+        logmsg "Disabling usage of Generic Loop Library"
+        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOP_LIBRARY}"
+    fi
+
     if test "x$enable_looptools" = "xyes" ; then
         DEFINE_ENABLE_LOOPTOOLS="#define ENABLE_LOOPTOOLS 1"
         message "Enabling usage of LoopTools"
@@ -2959,14 +2972,14 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
     fi
 
-    if test "x$enable_generic_loops" = "xyes" ; then
-        DEFINE_ENABLE_GENERIC_LOOPS="#define ENABLE_GENERIC_LOOPS 1"
-        message "Enabling usage of GenericLoopLibrary"
-        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOPS}"
+    if test "x$enable_collier" = "xyes" ; then
+        DEFINE_ENABLE_COLLIER="#define ENABLE_COLLIER 1"
+        message "Enabling usage of COLLIER"
+        logmsg "   ${DEFINE_ENABLE_COLLIER}"
     else
-        DEFINE_ENABLE_GENERIC_LOOPS="#undef ENABLE_GENERIC_LOOPS"
-        logmsg "Disabling usage of GenericLoopLibrary"
-        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOPS}"
+        DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
+        logmsg "Disabling usage of COLLIER"
+        logmsg "   ${DEFINE_ENABLE_COLLIER}"
     fi
 
     if test "x$enable_silent" = "xyes" ; then
@@ -3104,7 +3117,7 @@ replace_markers() {
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
-	-e "s|@ENABLE_GENERIC_LOOPS@|$enable_generic_loops|" \
+	-e "s|@ENABLE_GENERIC_LOOP_LIBRARY@|$enable_generic_loop_library|" \
 	-e "s|@ENABLE_META@|$enable_meta|" \
 	-e "s|@ENABLE_SILENT@|$enable_silent|"    \
 	-e "s|@ENABLE_SQLITE@|$enable_sqlite|"    \
@@ -3155,7 +3168,8 @@ enable/disable options, prefix with either --enable- or --disable-
   himalaya          Enable Himalaya (default: $enable_himalaya)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
-  generic_loops     Use GenericLoopLibrary to compute the loop functions (default: $enable_generic_loops)
+  collier           Use COLLIER to compute the loop functions (default: $enable_collier)
+  generic_loop_library     Use Generic Loop Library to compute the loop functions (default: $enable_generic_loop_library)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
 EOF
 # BEGIN: NOT EXPORTED ##########################################
@@ -3346,7 +3360,7 @@ check_solvers
 check_install
 check_install_dir
 
-# check for Mathematic if meta code generation is enabled or we
+# check for Mathematica if meta code generation is enabled or we
 # compile with LibraryLink
 if [ "$enable_meta" = yes -o \( "$enable_compile" = yes -a "$enable_librarylink" != no \) ]; then
     check_math_cmd
@@ -3396,7 +3410,7 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_libs
     fi
     check_looptools
-    check_generic_loops
+    check_generic_loop_library
     check_loop_functions
     check_odeint
     check_sqlite
@@ -3482,7 +3496,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
-    -e "s|@DEFINE_ENABLE_GENERIC_LOOPS@|$DEFINE_ENABLE_GENERIC_LOOPS|" \
+    -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
+    -e "s|@DEFINE_ENABLE_GENERIC_LOOP_LIBRARY@|$DEFINE_ENABLE_GENERIC_LOOP_LIBRARY|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \
     -e "s|@DEFINE_ENABLE_ODEINT@|$DEFINE_ENABLE_ODEINT|"       \

@@ -35,6 +35,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "loop_libraries/generic_loop_library.hpp"
+
 /**
  * @brief Runs the spectrum generator of type \a solver_type
  * @tparam solver_type solver type
@@ -84,6 +86,10 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
    scales.SUSYScale = spectrum_generator.get_susy_scale();
    scales.LowScale  = spectrum_generator.get_low_scale();
    scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
+
+#ifdef ENABLE_GENERIC_LOOP_LIBRARY
+   Generic_loop::setLibrary(spectrum_generator_settings.get(Spectrum_generator_settings::generic_loop_library_type));
+#endif
 
    @ModelName@_observables observables;
    if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables))

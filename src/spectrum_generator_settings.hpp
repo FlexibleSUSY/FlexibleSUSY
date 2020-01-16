@@ -70,6 +70,7 @@ public:
       higgs_3loop_correction_at2_as, ///< [28] Higgs 3-loop correction O(alpha_t^2 alpha_s)
       higgs_3loop_correction_at3,    ///< [29] Higgs 3-loop correction O(alpha_t^3)
       higgs_4loop_correction_at_as3, ///< [30] Higgs 4-loop correction O(alpha_t alpha_s^3)
+      generic_loop_library_type, ///< [31] Generic loop library type (0 = SOFTSUSY)
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 

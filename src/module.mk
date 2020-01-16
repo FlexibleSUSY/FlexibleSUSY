@@ -6,6 +6,7 @@ LIBFLEXI_MK  := \
 		$(DIR)/module.mk
 
 LIBFLEXI_SRC := \
+		$(DIR)/loop_libraries/loop_tools.cpp \
 		$(DIR)/betafunction.cpp \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
@@ -40,6 +41,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/wrappers.cpp
 
 LIBFLEXI_HDR := \
+		$(DIR)/loop_libraries/loop_tools.hpp \
 		$(DIR)/array_view.hpp \
 		$(DIR)/basic_rk_integrator.hpp \
 		$(DIR)/betafunction.hpp \
@@ -140,12 +142,12 @@ LOOP_DIR := $(DIR)/loop_libraries
 
 LOOP_HDR := \
 		$(LOOP_DIR)/collier.hpp \
-		$(LOOP_DIR)/global_loopfunction_lib.hpp \
+		$(LOOP_DIR)/generic_loop_library.hpp \
 		$(LOOP_DIR)/loop_library_interface.hpp
 
 LOOP_SRC := \
 		$(LOOP_DIR)/collier.cpp \
-		$(LOOP_DIR)/global_loopfunction_lib.cpp
+		$(LOOP_DIR)/generic_loop_library.cpp
 
 LIBFLEXI_HDR += $(LOOP_HDR)
 LIBFLEXI_SRC += $(LOOP_SRC)

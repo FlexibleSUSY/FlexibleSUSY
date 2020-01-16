@@ -34,6 +34,8 @@
 #include <iostream>
 #include <cstring>
 
+#include "loop_libraries/generic_loop_library.hpp"
+
 namespace flexiblesusy {
 
 void print_usage()
@@ -44,13 +46,16 @@ void print_usage()
 @printCommandLineOptions@
       "  --solver-type=<value>             an integer corresponding\n"
       "                                    to the solver type to use\n"
+      "  --generic-loop-library=<value>    an integer corresponding\n"
+      "                                    to the type of generic loop library\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
 void set_command_line_parameters(const Dynamic_array_view<char*>& args,
                                  @ModelName@_input_parameters& input,
-                                 int& solver_type)
+                                 int& solver_type,
+                                 int& generic_loop_library)
 {
    for (int i = 1; i < args.size(); ++i) {
       const auto option = args[i];
@@ -58,6 +63,10 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
 @parseCmdLineOptions@
       if (Command_line_options::get_parameter_value(
              option, "--solver-type=", solver_type))
+         continue;
+
+      if (Command_line_options::get_parameter_value(
+             option, "--generic-loop-library", generic_loop_library))
          continue;
 
       if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
@@ -71,7 +80,7 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
 }
 
 template<class solver_type>
-int run_solver(const @ModelName@_input_parameters& input)
+int run_solver(int generic_loop_library,const @ModelName@_input_parameters& input)
 {
    Physical_input physical_input;
    softsusy::QedQcd qedqcd;
@@ -91,6 +100,9 @@ int run_solver(const @ModelName@_input_parameters& input)
    scales.LowScale  = spectrum_generator.get_low_scale();
    scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
 
+#ifdef ENABLE_GENERIC_LOOPS
+   Generic_loop_library::set(generic_loop_library);
+#endif
    const auto observables = calculate_observables(
       model, qedqcd, physical_input, scales.pole_mass_scale);
 
@@ -103,7 +115,7 @@ int run_solver(const @ModelName@_input_parameters& input)
    return spectrum_generator.get_exit_code();
 }
 
-int run(int solver_type, const @ModelName@_input_parameters& input)
+int run(int solver_type, int generic_loop_library, const @ModelName@_input_parameters& input)
 {
    int exit_code = 0;
 
@@ -130,10 +142,11 @@ int main(int argc, char* argv[])
 
    @ModelName@_input_parameters input;
    int solver_type = 0;
+   int generic_loop_library = 0;
    set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
-                               solver_type);
+                               solver_type,generic_loop_library);
 
-   const int exit_code = run(solver_type, input);
+   const int exit_code = run(solver_type,generic_loop_library,input);
 
    return exit_code;
 }
