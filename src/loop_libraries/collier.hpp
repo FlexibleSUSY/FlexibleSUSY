@@ -35,9 +35,9 @@
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
       double) noexcept;
 
-namespace flexiblesusy {
+namespace looplibrary {
 
-class Collier : public Loop_library_interface
+class Collier : public flexiblesusy::Loop_library_interface
 {
    private:
       double current_mu2_uv;
@@ -89,4 +89,4 @@ class Collier : public Loop_library_interface
          double) noexcept;
 };
 
-} // namespace flexiblesusy
+} // namespace looplibrary

@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include <complex>
 #include "loop_library_interface.hpp"
 
 #define two_point(NAME)\
@@ -35,9 +34,9 @@
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
       double) noexcept;
 
-namespace flexiblesusy {
+namespace looplibrary {
 
-class Softsusy : public Loop_library_interface
+class Softsusy : public flexiblesusy::Loop_library_interface
 {
    public:
       two_point(B0)
@@ -80,4 +79,4 @@ class Softsusy : public Loop_library_interface
          double) noexcept;
 };
 
-}
+} // namespace looplibrary

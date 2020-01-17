@@ -16,58 +16,124 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#include <limits>
 #include "softsusy.hpp"
+#include "numerics.h"
 
-#define two_point_lt(NAME)\
-   std::complex<double> Softsusy::NAME(\
-      std::complex<double> p10_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in,\
-      double scl2_in) noexcept\
-{\
-   return 0.; \
-} // @ToDo
-#define three_point_lt(NAME)\
+#define UNDEFINED_C(NAME)\
    std::complex<double> Softsusy::NAME(\
       std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,\
       std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,\
       double scl2_in) noexcept\
 {\
-   return 0.; \
-} // @ToDo
-#define four_point_lt(NAME)\
+   return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()}; \
+}
+#define UNDEFINED_D(NAME)\
    std::complex<double> Softsusy::NAME(\
       std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,\
       std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,\
       std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,\
       double scl2_in) noexcept\
 {\
-   return 0.; \
-} // @ToDo
+   return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()}; \
+}
 
-namespace flexiblesusy {
+namespace looplibrary {
 
-two_point_lt(B0)
-two_point_lt(B1)
+std::complex<double> Softsusy::B0(
+   std::complex<double> p10_in,
+   std::complex<double> m02_in, std::complex<double> m12_in,
+   double scl2_in) noexcept
+{
+   double p = std::sqrt(p10_in.real());
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double q = std::sqrt(scl2_in);
 
-three_point_lt(C0)
-three_point_lt(C1)
-three_point_lt(C2)
-three_point_lt(C00)
-three_point_lt(C11)
-three_point_lt(C12)
-three_point_lt(C22)
+   return {softsusy::b0(p, m1, m2, q), 0.0};
+}
 
-four_point_lt(D0)
-four_point_lt(D00)
-four_point_lt(D1)
-four_point_lt(D11)
-four_point_lt(D12)
-four_point_lt(D13)
-four_point_lt(D2)
-four_point_lt(D22)
-four_point_lt(D23)
-four_point_lt(D3)
-four_point_lt(D33)
+std::complex<double> Softsusy::B1(
+         std::complex<double> p10_in,
+         std::complex<double> m02_in, std::complex<double> m12_in,
+   double scl2_in) noexcept
+{
+   double p = std::sqrt(p10_in.real());
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double q = std::sqrt(scl2_in);
+
+   return {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
+}
+
+std::complex<double> Softsusy::C0(
+   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
+   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
+   double scl2_in) noexcept
+{
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+
+   return {softsusy::c0(m1, m2, m3), 0.0};
+}
+
+std::complex<double> Softsusy::C00(
+   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
+   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
+   double scl2_in) noexcept
+{
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+   double q = std::sqrt(scl2_in);
+
+   return {softsusy::c00(m1, m2, m3, q), 0.0};
+}
+
+UNDEFINED_C(C1)
+UNDEFINED_C(C2)
+UNDEFINED_C(C11)
+UNDEFINED_C(C12)
+UNDEFINED_C(C22)
+
+std::complex<double> Softsusy::D0(
+      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
+      std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,
+      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,
+   double scl2_in) noexcept
+{
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+   double m4 = std::sqrt(m32_in.real());
+
+   return {softsusy::d0(m1, m2, m3, m4), 0.0};
+}
+
+std::complex<double> Softsusy::D00(
+      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
+      std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,
+      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,
+      double scl2_in) noexcept
+{
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+   double m4 = std::sqrt(m32_in.real());
+
+   return {softsusy::d27(m1, m2, m3, m4), 0.0};
+}
+
+UNDEFINED_D(D1)
+UNDEFINED_D(D11)
+UNDEFINED_D(D12)
+UNDEFINED_D(D13)
+UNDEFINED_D(D2)
+UNDEFINED_D(D22)
+UNDEFINED_D(D23)
+UNDEFINED_D(D3)
+UNDEFINED_D(D33)
 
 void Softsusy::get_B(
    std::complex<double> (&b)[2],
@@ -75,10 +141,13 @@ void Softsusy::get_B(
    std::complex<double> m02_in, std::complex<double> m12_in,
    double scl2_in) noexcept
 {
-   // @ToDo
-   for (int i = 0; i < 2; i++) {
-      b[i] = 0.;
-   }
+   double p = std::sqrt(p10_in.real());
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double q = std::sqrt(scl2_in);
+
+   b[0] = {softsusy::b0(p, m1, m2, q), 0.0};
+   b[1] = {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
 }
 
 void Softsusy::get_C(
@@ -87,10 +156,20 @@ void Softsusy::get_C(
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
    double scl2_in) noexcept
 {
-   // @ToDo
-   for (int i = 0; i < 7; i++) {
-      c[i] = 0.;
-   }
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+   double q = std::sqrt(scl2_in);
+   std::complex<double> undefined = {std::numeric_limits<double>::quiet_NaN(),
+                                   std::numeric_limits<double>::quiet_NaN()};
+
+   c[0] = {softsusy::c0(m1, m2, m3), 0.0};
+   c[1] = undefined;
+   c[2] = undefined;
+   c[3] = {softsusy::c00(m1, m2, m3, q), 0.0};
+   c[4] = undefined;
+   c[5] = undefined;
+   c[6] = undefined;
 }
 
 void Softsusy::get_D(
@@ -100,10 +179,24 @@ void Softsusy::get_D(
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,
    double scl2_in) noexcept
 {
-   // @ToDo
-   for (int i = 0; i < 11; i++) {
-      d[i] = 0.;
-   }
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double m3 = std::sqrt(m22_in.real());
+   double m4 = std::sqrt(m32_in.real());
+   std::complex<double> undefined = {std::numeric_limits<double>::quiet_NaN(),
+                                   std::numeric_limits<double>::quiet_NaN()};
+
+   d[0] = {softsusy::d0(m1, m2, m3, m4), 0.0};
+   d[1] = undefined;
+   d[2] = undefined;
+   d[3] = undefined;
+   d[4] = {softsusy::d27(m1, m2, m3, m4), 0.0};
+   d[5] = undefined;
+   d[6] = undefined;
+   d[7] = undefined;
+   d[8] = undefined;
+   d[9] = undefined;
+   d[10] = undefined;
 }
 
-}
+} // namespace looplibrary

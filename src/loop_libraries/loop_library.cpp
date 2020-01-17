@@ -26,11 +26,20 @@
 
 #ifdef ENABLE_COLLIER
 #include "collier.hpp"
+#define COLLIER_INFO ", 1 (=Collier)"
+#else
+#define COLLIER_INFO
 #endif // ENABLE_COLLIER
 
 #ifdef ENABLE_LOOPTOOLS
 #include "looptools.hpp"
+#define LOOPTOOLS_INFO ", 2 (=LoopTools)"
+#else
+#define LOOPTOOLS_INFO
 #endif // ENABLE_LOOPTOOLS
+
+#define STRINGIFY(X) #X
+#define TOSTR(MACROS) STRINGIFY(MACROS)
 
 namespace flexiblesusy {
 
@@ -40,20 +49,20 @@ std::unique_ptr<Loop_library_interface> Loop::lib_;
 void Loop::setLibrary(int new_type) {
    if( Loop::type_ == -1) {
       switch(new_type) {
-         case 0 : Loop::lib_ = std::make_unique<Softsusy>();
+         case 0 : Loop::lib_ = std::make_unique<looplibrary::Softsusy>();
                   Loop::type_ = 0;
                   break;
 #ifdef ENABLE_COLLIER
-         case 1 : Loop::lib_ = std::make_unique<Collier>();
+         case 1 : Loop::lib_ = std::make_unique<looplibrary::Collier>();
                   Loop::type_ = 1;
                   break;
 #endif // ENABLE_COLLIER
 #ifdef ENABLE_LOOPTOOLS
-         case 2 : Loop::lib_ = std::make_unique<Looptools>();
+         case 2 : Loop::lib_ = std::make_unique<looplibrary::Looptools>();
                   Loop::type_ = 2;
                   break;
 #endif // ENABLE_LOOPTOOLS
-         default: throw std::invalid_argument("Unrecognized loop library realization (check table inside FlexibleSUSY/src/spectrum_generator_settings.cpp)");
+         default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO ".");
                   break;
       }
    }
@@ -61,7 +70,7 @@ void Loop::setLibrary(int new_type) {
 
 Loop_library_interface& Loop::library() {
    if( Loop::type_ == -1) {
-      Loop::lib_ = std::make_unique<Softsusy>();
+      Loop::lib_ = std::make_unique<looplibrary::Softsusy>();
       Loop::type_ = 0;
    }
    return *Loop::lib_;

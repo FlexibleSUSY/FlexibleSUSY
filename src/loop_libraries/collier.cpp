@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "collier.hpp"
 #include <limits>
+#include "collier.hpp"
 
 #define two_point_impl(NAME)\
    std::complex<double> NAME##_impl(\
@@ -128,7 +128,7 @@ extern "C" {
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
 }
 
-namespace flexiblesusy {
+namespace looplibrary {
 
 void Collier::initialize() noexcept
 {
@@ -221,4 +221,4 @@ void Collier::get_D(
    get_D_impl(d, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
 }
 
-}
+} // namespace looplibrary

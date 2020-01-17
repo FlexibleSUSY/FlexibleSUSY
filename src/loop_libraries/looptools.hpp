@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include <complex>
 #include "loop_library_interface.hpp"
 
 #define two_point(NAME)\
@@ -35,11 +34,17 @@
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
       double) noexcept;
 
-namespace flexiblesusy {
+namespace looplibrary {
 
-class Looptools : public Loop_library_interface
+class Looptools : public flexiblesusy::Loop_library_interface
 {
+   private:
+      double current_mu2_uv;
+      void set_mu2_uv(double) noexcept;
+
    public:
+      Looptools() : current_mu2_uv(1.0) {}
+
       two_point(B0)
       two_point(B1)
 
@@ -80,4 +85,4 @@ class Looptools : public Loop_library_interface
          double) noexcept;
 };
 
-}
+} // namespace looplibrary
