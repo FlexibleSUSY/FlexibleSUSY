@@ -29,11 +29,11 @@ namespace flexiblesusy {
 class Loop {
 public:
    static void setLibrary(int);
-   static Loop_library_interface& library();
+   static looplibrary::Loop_library_interface& library();
 
 private:
    static int type_;
-   static std::unique_ptr<Loop_library_interface> lib_;
+   static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
 
    Loop() {}
    Loop(Loop const&);

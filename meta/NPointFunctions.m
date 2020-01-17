@@ -1429,6 +1429,14 @@ Module[
 createLoopFunctions[modifiedExpr:{__}] :=
 Module[
    {
+      onePoint,
+      onePointTemplate =
+         {
+            LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
+            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"
+         }&,
+      onePointRules,
+      
       twoPoint,
       twoPointTemplate =
          {
@@ -1476,12 +1484,30 @@ Module[
    },
    Utils`AssertOrQuit[#==={},`cxx`changeGenericExpressions::errUnimplementedLoops,Utils`StringJoinWithSeparator[#,", "]] &@
       DeleteDuplicates@Cases[modifiedExpr,Alternatives[
-      _LoopTools`A0i,_LoopTools`A0,_LoopTools`A00,
+      _LoopTools`A00,
       _LoopTools`B00,_LoopTools`B11,_LoopTools`B001,_LoopTools`B111,
       _LoopTools`DB0,_LoopTools`DB1,
       _LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`E0i,_LoopTools`E0,
       _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
+   onePoint = Tally@Join[
+      Cases[modifiedExpr,LoopTools`A0i[_,args:__]:>{args},Infinity],
+      Cases[modifiedExpr,LoopTools`A0[args:__]:>{args},Infinity]
+   ];
+   onePointRules = If[onePoint=!={},
+      AppendTo[loopArrayDefine,Array[
+         "a"<>ToString@#<>"[1] = {}"&,
+         Length@onePoint]
+      ];
+      AppendTo[loopArraySet,Array[
+         Parameters`ExpressionToString["Loop::library().get_A"["a"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
+         "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
+         Length@onePoint]
+      ];
+      Join@@onePointTemplate@@@Array[{ToString@#,onePoint[[#,1]]}&,Length@onePoint],
+      {}
+   ];
+
    twoPoint = Tally@Join[
       Cases[modifiedExpr,LoopTools`B0i[_,args:__]:>{args},Infinity],
       Cases[modifiedExpr,(LoopTools`B0|LoopTools`B0)[args:__]:>{args},Infinity]

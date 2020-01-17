@@ -36,7 +36,7 @@
 
 namespace looplibrary {
 
-class Looptools : public flexiblesusy::Loop_library_interface
+class Looptools : public Loop_library_interface
 {
    private:
       double current_mu2_uv;
@@ -44,6 +44,8 @@ class Looptools : public flexiblesusy::Loop_library_interface
 
    public:
       Looptools() : current_mu2_uv(1.0) {}
+
+      std::complex<double> A0(std::complex<double>, double) noexcept;
 
       two_point(B0)
       two_point(B1)
@@ -68,6 +70,10 @@ class Looptools : public flexiblesusy::Loop_library_interface
       four_point(D3)
       four_point(D33)
 
+      void get_A(
+         std::complex<double> (&)[1],
+         std::complex<double>,
+         double) noexcept;
       void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,

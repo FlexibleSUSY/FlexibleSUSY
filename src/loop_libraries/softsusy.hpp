@@ -36,9 +36,12 @@
 
 namespace looplibrary {
 
-class Softsusy : public flexiblesusy::Loop_library_interface
+class Softsusy : public Loop_library_interface
 {
    public:
+
+      std::complex<double> A0(std::complex<double>, double) noexcept;
+
       two_point(B0)
       two_point(B1)
 
@@ -62,6 +65,10 @@ class Softsusy : public flexiblesusy::Loop_library_interface
       four_point(D3)
       four_point(D33)
 
+      void get_A(
+         std::complex<double> (&)[1],
+         std::complex<double>,
+         double) noexcept;
       void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,

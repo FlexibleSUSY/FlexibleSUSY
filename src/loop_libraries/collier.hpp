@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include <complex>
 #include "loop_library_interface.hpp"
 
 #define two_point(NAME)\
@@ -37,7 +36,7 @@
 
 namespace looplibrary {
 
-class Collier : public flexiblesusy::Loop_library_interface
+class Collier : public Loop_library_interface
 {
    private:
       double current_mu2_uv;
@@ -48,6 +47,8 @@ class Collier : public flexiblesusy::Loop_library_interface
       Collier() : current_mu2_uv(1.0) {
          initialize();
       }
+
+      std::complex<double> A0(std::complex<double>, double) noexcept;
 
       two_point(B0)
       two_point(B1)
@@ -72,6 +73,10 @@ class Collier : public flexiblesusy::Loop_library_interface
       four_point(D3)
       four_point(D33)
 
+      void get_A(
+         std::complex<double> (&)[1],
+         std::complex<double>,
+         double) noexcept;
       void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,

@@ -44,7 +44,7 @@
 namespace flexiblesusy {
 
 int Loop::type_ = -1;
-std::unique_ptr<Loop_library_interface> Loop::lib_;
+std::unique_ptr<looplibrary::Loop_library_interface> Loop::lib_;
 
 void Loop::setLibrary(int new_type) {
    if( Loop::type_ == -1) {
@@ -68,8 +68,8 @@ void Loop::setLibrary(int new_type) {
    }
 }
 
-Loop_library_interface& Loop::library() {
-   if( Loop::type_ == -1) {
+looplibrary::Loop_library_interface& Loop::library() {
+   if(Loop::type_ == -1) {
       Loop::lib_ = std::make_unique<looplibrary::Softsusy>();
       Loop::type_ = 0;
    }

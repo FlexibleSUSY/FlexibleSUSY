@@ -40,6 +40,16 @@
 
 namespace looplibrary {
 
+std::complex<double> Softsusy::A0(
+   std::complex<double> m02_in,
+   double scl2_in) noexcept
+{
+   double m = std::sqrt(m02_in.real());
+   double q = std::sqrt(scl2_in);
+
+   return {softsusy::a0(m, q), 0.0};
+}
+
 std::complex<double> Softsusy::B0(
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -134,6 +144,17 @@ UNDEFINED_D(D22)
 UNDEFINED_D(D23)
 UNDEFINED_D(D3)
 UNDEFINED_D(D33)
+
+void Softsusy::get_A(
+   std::complex<double> (&a)[1],
+   std::complex<double> m02_in,
+   double scl2_in) noexcept
+{
+   double m = std::sqrt(m02_in.real());
+   double q = std::sqrt(scl2_in);
+
+   a[0] = {softsusy::a0(m, q), 0.0};
+}
 
 void Softsusy::get_B(
    std::complex<double> (&b)[2],

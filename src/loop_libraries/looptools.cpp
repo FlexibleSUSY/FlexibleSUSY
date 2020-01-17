@@ -62,6 +62,14 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
    }
 }
 
+std::complex<double> Looptools::A0(
+   std::complex<double> m02_in,
+   double scl2_in) noexcept
+{
+   set_mu2_uv(scl2_in);
+   return A0i(aa0, m02_in.real());
+}
+
 LOOPTOOLS_B(B0,bb0)
 LOOPTOOLS_B(B1,bb1)
 
@@ -84,6 +92,15 @@ LOOPTOOLS_D(D13,dd13)
 LOOPTOOLS_D(D22,dd22)
 LOOPTOOLS_D(D23,dd23)
 LOOPTOOLS_D(D33,dd33)
+
+void Looptools::get_A(
+   std::complex<double> (&a)[1],
+   std::complex<double> m02_in,
+   double scl2_in) noexcept
+{
+   set_mu2_uv(scl2_in);
+   a[0] = A0i(aa0, m02_in.real());
+}
 
 void Looptools::get_B(
    std::complex<double> (&b)[2],

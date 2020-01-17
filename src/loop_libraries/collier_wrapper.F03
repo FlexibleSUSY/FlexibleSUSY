@@ -66,6 +66,21 @@ contains
       call SetMuUV2_cll(scl2)
    end
 
+   function A0_dummy(m02) result(res) bind(C, name='A0_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02
+      complex(C_DOUBLE_COMPLEX) :: res
+      complex(REAL64), allocatable :: Acoeff(:), Acoeffuv(:)
+
+      allocate(Acoeff(0:0))
+      allocate(Acoeffuv(0:0))
+
+      call A_cll(Acoeff,Acoeffuv,m02,0)
+
+      res = Acoeff(0)
+
+      deallocate(Acoeff, Acoeffuv)
+   end
+
    two_point(B0,0,0)
    two_point(B1,0,1)
 
@@ -89,61 +104,72 @@ contains
    four_point(D3,0,0,0,1)
    four_point(D33,0,0,0,2)
 
-! B_cll is ~20% faster than TN_cll
-subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_B_impl')
-   complex(C_DOUBLE_COMPLEX), intent(in) :: p10
-   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
-   complex(C_DOUBLE_COMPLEX), intent(out), dimension(2) :: b
-   complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:)
+   subroutine get_T1_dummy(a,m02) bind(C, name='get_A_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02
+      complex(C_DOUBLE_COMPLEX), intent(out), dimension(1) :: a
+      complex(REAL64), allocatable :: Acoeff(:), Acoeffuv(:)
 
-   allocate(Bcoeff(0:0,0:1))
-   allocate(Bcoeffuv(0:0,0:1))
+      allocate(Acoeff(0:0))
+      allocate(Acoeffuv(0:0))
 
-   call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 1)
-   b(1) = Bcoeff(0,0)
-   b(2) = Bcoeff(0,1)
+      call A_cll(Acoeff,Acoeffuv,m02,0)
+      a(1) = Acoeff(0)
 
-   deallocate(Bcoeff,Bcoeffuv)
-end
+      deallocate(Acoeff,Acoeffuv)
+   end
 
-! C_cll is ~20% faster than TN_cll
-subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_C_impl')
-   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
-   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
-   complex(C_DOUBLE_COMPLEX), intent(out), dimension(7) :: c
-   complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
+   subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_B_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX), intent(out), dimension(2) :: b
+      complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:)
 
-   allocate(Ccoeff(0:1,0:2,0:2))
-   allocate(Ccoeffuv(0:1,0:2,0:2))
+      allocate(Bcoeff(0:0,0:1))
+      allocate(Bcoeffuv(0:0,0:1))
+      ! B_cll is ~20% faster than TN_cll
+      call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 1)
+      b(1) = Bcoeff(0,0)
+      b(2) = Bcoeff(0,1)
 
-   call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, 2)
-   c(1) = Ccoeff(0,0,0)
-   c(2) = Ccoeff(0,1,0)
-   c(3) = Ccoeff(0,0,1)
-   c(4) = Ccoeff(1,0,0)
-   c(5) = Ccoeff(0,2,0)
-   c(6) = Ccoeff(0,1,1)
-   c(7) = Ccoeff(0,0,2)
+      deallocate(Bcoeff,Bcoeffuv)
+   end
 
-   deallocate(Ccoeff,Ccoeffuv)
-end
+   subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_C_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
+      complex(C_DOUBLE_COMPLEX), intent(out), dimension(7) :: c
+      complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:)
 
-! D_cll and TN_cll are evaluated almost with the same speed
-subroutine get_T4_dummy(d,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name='get_D_impl')
-  complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31
-  complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32
-  complex(C_DOUBLE_COMPLEX), intent(out), dimension(11) :: d
-  complex(REAL64), allocatable :: TNcoeff(:),TNcoeffuv(:)
-  integer :: i
-  allocate(TNcoeff(11))
-  allocate(TNcoeffuv(11))
+      allocate(Ccoeff(0:1,0:2,0:2))
+      allocate(Ccoeffuv(0:1,0:2,0:2))
+      ! C_cll is ~20% faster than TN_cll
+      call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, 2)
+      c(1) = Ccoeff(0,0,0)
+      c(2) = Ccoeff(0,1,0)
+      c(3) = Ccoeff(0,0,1)
+      c(4) = Ccoeff(1,0,0)
+      c(5) = Ccoeff(0,2,0)
+      c(6) = Ccoeff(0,1,1)
+      c(7) = Ccoeff(0,0,2)
 
-  call TN_cll(TNcoeff,TNcoeffuv,[ p10,p21,p32,p30,p20,p31 ],[ m02,m12,m22,m32 ],4,2)
-  do i = 1, 11
-     d(i) = TNcoeff(i)
-  end do
+      deallocate(Ccoeff,Ccoeffuv)
+   end
 
-  deallocate(TNcoeff,TNcoeffuv)
-end
+   subroutine get_T4_dummy(d,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name='get_D_impl')
+     complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31
+     complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32
+     complex(C_DOUBLE_COMPLEX), intent(out), dimension(11) :: d
+     complex(REAL64), allocatable :: TNcoeff(:),TNcoeffuv(:)
+     integer :: i
+     allocate(TNcoeff(11))
+     allocate(TNcoeffuv(11))
+
+     call TN_cll(TNcoeff,TNcoeffuv,[ p10,p21,p32,p30,p20,p31 ],[ m02,m12,m22,m32 ],4,2)
+     do i = 1, 11
+        d(i) = TNcoeff(i)
+     end do
+
+     deallocate(TNcoeff,TNcoeffuv)
+   end
 
 end module

@@ -38,12 +38,14 @@
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
       double) = 0;
 
-namespace flexiblesusy
+namespace looplibrary
 {
 
 class Loop_library_interface
 {
    public:
+      virtual std::complex<double> A0(std::complex<double>, double) = 0;
+
       two_point_virtual(B0)
       two_point_virtual(B1)
 
@@ -67,6 +69,10 @@ class Loop_library_interface
       four_point_virtual(D3)
       four_point_virtual(D33)
 
+      virtual void get_A(
+         std::complex<double> (&)[1],
+         std::complex<double>,
+         double) = 0;
       virtual void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,
@@ -84,6 +90,6 @@ class Loop_library_interface
          double) = 0;
 };
 
-} // namespace flexiblesusy
+} // namespace looplibrary
 
 #endif

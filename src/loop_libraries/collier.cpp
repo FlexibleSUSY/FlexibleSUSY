@@ -91,6 +91,8 @@ extern "C" {
    void initialize_collier_impl();
    void set_mu2_uv_impl(double*);
 
+   std::complex<double> A0_impl(const std::complex<double>*);
+
    two_point_impl(B0)
    two_point_impl(B1)
 
@@ -114,6 +116,9 @@ extern "C" {
    four_point_impl(D3)
    four_point_impl(D33)
 
+   void get_A_impl(
+      const std::complex<double> [1],
+      const std::complex<double>*);
    void get_B_impl(
       const std::complex<double> [2],
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
@@ -145,6 +150,14 @@ void Collier::set_mu2_uv(double scl2_in) noexcept
    }
 }
 
+std::complex<double> Collier::A0(std::complex<double> m02_in, double scl2_in) noexcept
+{
+   const std::complex<double> m02 = m02_in;
+
+   set_mu2_uv(scl2_in);
+   return A0_impl(&m02);
+}
+
 two_point_collier(B0)
 two_point_collier(B1)
 
@@ -167,6 +180,17 @@ four_point_collier(D22)
 four_point_collier(D23)
 four_point_collier(D3)
 four_point_collier(D33)
+
+void Collier::get_A(
+   std::complex<double> (&a)[1],
+   std::complex<double> m02_in,
+   double scl2_in) noexcept
+{
+   const std::complex<double> m02 = m02_in;
+
+   set_mu2_uv(scl2_in);
+   get_A_impl(a, &m02);
+}
 
 void Collier::get_B(
    std::complex<double> (&b)[2],
