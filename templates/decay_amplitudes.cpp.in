@@ -78,13 +78,15 @@ double Decay_amplitude_SVV::square() const
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
          2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
 
+      /*
       const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *
          Re(form_factor_g * Conj(form_factor_11)) / m_vec_sq;
 
       const double m43 = -0.25 * Power3(m_s_sq - m_vec_sq) *
          Re(form_factor_11 * Conj(form_factor_21)) / m_vec_sq;
+     */
 
-      return m0 + m41 + m42 + m43;
+      return m0 + m41/* + m42 + m43*/;
    } else if (m_vector_2 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
 
@@ -160,7 +162,7 @@ Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV 
    amp.form_factor_22 = factor * amp2.form_factor_22;
    amp.form_factor_eps = factor * amp2.form_factor_eps;
    return amp;
-} 
+}
 
 Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF const& amp2) {
    Decay_amplitude_SFF amp;

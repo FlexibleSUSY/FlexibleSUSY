@@ -27,7 +27,9 @@ BeginPackage["Vertices`", {
     "SelfEnergies`",
     "Parameters`",
     "TreeMasses`",
-    "LatticeUtils`"}]
+    "LatticeUtils`",
+    "Utils`"}
+]
 
 VertexRules::usage;
 ToCpPattern::usage="ToCpPattern[cp] converts field indices inside cp to patterns, e.g. ToCpPattern[Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL]] === Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL].";
@@ -141,6 +143,11 @@ SortCp[SARAH`Cp[fields__]] :=
     SARAH`Cp @@ SortFieldsInCp @ StripExtraFieldIndices[{fields}];
 
 SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
+
+SortCp[SARAH`Cp[vectors__]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
+	{sortedVectors = SortFieldsInCp[{vectors}]},
+	Utils`FSPermutationSignature[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
+];
 
 (* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
 SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
