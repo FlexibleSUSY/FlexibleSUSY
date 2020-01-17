@@ -930,16 +930,20 @@ RemoveEmptyGenSums // Utils`MakeUnknownInputDefinition;
 RemoveEmptyGenSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 CreateCXXHeaders::usage=
-"@brief Create the c++ code for the necessary headers for evaluation of n-point
-correlation functions.
-@returns The c++ code for the necessary headers for evaluation
-of n-point correlation functions.";
-CreateCXXHeaders[opts:OptionsPattern[]] :=
-"#include \"loop_libraries/loop_library.hpp\"\n"<>
-"#include \"cxx_qft/"<>FlexibleSUSY`FSModelName<>"_npointfunctions_wilsoncoeffs.hpp\"\n" <>
-"#include \"concatenate.hpp\"\n" <>
-"#include <boost/fusion/include/at_key.hpp>\n" <>
-"#include <boost/core/is_same.hpp>";
+"@brief Create the c++ code for the necessary headers.
+@returns The c++ code for the necessary headers.";
+CreateCXXHeaders[] :=
+replaceTokens["
+   #include \"loop_libraries/loop_library.hpp\"
+   #include \"cxx_qft/@ModelName@_npointfunctions_wilsoncoeffs.hpp\"
+   #include \"concatenate.hpp\"
+   #include <limits>
+   #include <boost/fusion/include/at_key.hpp>
+   #include <boost/core/is_same.hpp>",
+   {
+      "@ModelName@"->FlexibleSUSY`FSModelName
+   }
+];
 CreateCXXHeaders // Utils`MakeUnknownInputDefinition;
 CreateCXXHeaders ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
@@ -1388,36 +1392,38 @@ Module[
       @BeginSum@
          @setMasses@
          @setCouplings@
+         @skipZeroAmplitude@
          @setLoopFunctions@
          @ChangeOutputValues@
       @EndSum@",
       modifiedExpr = expr,
-      masses,preMassCode,codeMass,rulesMass,
-      couplings,preCouplingCode,codeCoupling,rulesCoupling,
-      loopArrayDefine,loopArraySet,
+      masses,massDefine,codeMass,massRules,
+      couplings,couplingDefile,codeCoupling,couplingRules,
+      loopRules,loopArrayDefine,loopArraySet,
       cxxExpr,updatingVars
    },
    masses = Tally@Cases[modifiedExpr,_SARAH`Mass,Infinity,Heads->True];
-   {preMassCode,codeMass,rulesMass} = createUniqueDefinitions[masses,{"double","m"}];
-   modifiedExpr = modifiedExpr /. rulesMass;
+   {massDefine,codeMass,massRules} = createUniqueDefinitions[masses,{"double","m"}];
+   modifiedExpr = modifiedExpr /. massRules;
 
    couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
-   {preCouplingCode,codeCoupling,rulesCoupling} = createUniqueDefinitions[couplings,{"std::complex<double>","g"}];
-   modifiedExpr = modifiedExpr /. rulesCoupling;
+   {couplingDefile,codeCoupling,couplingRules} = createUniqueDefinitions[couplings,{"std::complex<double>","g"}];
+   modifiedExpr = modifiedExpr /. couplingRules;
 
-   {loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions@modifiedExpr;
+   {loopRules,loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions@modifiedExpr;
 
    cxxExpr = `current`applyCxxRules/@modifiedExpr;
    cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@`current`wilsonBasis, cxxExpr}];
 
    replaceTokens[code,{
-      "@defineMasses@"->preMassCode,
-      "@defineCouplings@"->preCouplingCode,
+      "@defineMasses@"->massDefine,
+      "@defineCouplings@"->couplingDefile,
       "@defineLoopFunctions@"->loopArrayDefine,
       "@BeginSum@"->`cxx`beginSum@summation,
       "@setMasses@"->codeMass,
       "@setCouplings@"->codeCoupling,
+      "@skipZeroAmplitude@"->`cxx`skipZeroAmplitude[modifiedExpr,loopRules,massRules],
       "@setLoopFunctions@"->loopArraySet,
       "@ChangeOutputValues@"->StringRiffle[updatingVars,"\n"],
       "@EndSum@"->`cxx`endSum@getGenericFields@summation
@@ -1435,7 +1441,6 @@ Module[
             LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
             LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"
          }&,
-      onePointRules,
       
       twoPoint,
       twoPointTemplate =
@@ -1445,7 +1450,6 @@ Module[
             LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",
             LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>"[1]"
          }&,
-      twoPointRules,
 
       threePoint,
       threePointTemplate =
@@ -1459,7 +1463,6 @@ Module[
             LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>"[5]",
             LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>"[6]"
          }&,
-      threePointRules,
 
       fourPoint,
       fourPointTemplate =
@@ -1477,8 +1480,9 @@ Module[
             LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>"[9]",
             LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"
          }&,
-      fourPointRules,
 
+      append,
+      loopRules = {},
       loopArrayDefine = {},
       loopArraySet = {}
    },
@@ -1490,86 +1494,68 @@ Module[
       _LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`E0i,_LoopTools`E0,
       _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
+   append[loopFunctions_List,function_,functionName_String,arrayName_String[arraySize_Integer]] := If[loopFunctions=!={},
+      AppendTo[loopArrayDefine,Array[
+         arrayName<>ToString@#<>"["<>ToString@arraySize<>"] = {}"&,
+         Length@loopFunctions]
+      ];
+      AppendTo[loopArraySet,Array[
+         Parameters`ExpressionToString[StringJoin["Loop::library().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
+         "; // It is repeated "<>ToString@loopFunctions[[#,2]]<>" times."&,
+         Length@loopFunctions]
+      ];
+      AppendTo[loopRules,Join@@function@@@Array[{ToString@#,loopFunctions[[#,1]]}&,Length@loopFunctions]];
+   ];
+
    onePoint = Tally@Join[
       Cases[modifiedExpr,LoopTools`A0i[_,args:__]:>{args},Infinity],
       Cases[modifiedExpr,LoopTools`A0[args:__]:>{args},Infinity]
-   ];
-   onePointRules = If[onePoint=!={},
-      AppendTo[loopArrayDefine,Array[
-         "a"<>ToString@#<>"[1] = {}"&,
-         Length@onePoint]
-      ];
-      AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Loop::library().get_A"["a"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
-         "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
-         Length@onePoint]
-      ];
-      Join@@onePointTemplate@@@Array[{ToString@#,onePoint[[#,1]]}&,Length@onePoint],
-      {}
    ];
 
    twoPoint = Tally@Join[
       Cases[modifiedExpr,LoopTools`B0i[_,args:__]:>{args},Infinity],
       Cases[modifiedExpr,(LoopTools`B0|LoopTools`B0)[args:__]:>{args},Infinity]
    ];
-   twoPointRules = If[twoPoint=!={},
-      AppendTo[loopArrayDefine,Array[
-         "b"<>ToString@#<>"[2] = {}"&,
-         Length@twoPoint]
-      ];
-      AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Loop::library().get_B"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
-         "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
-         Length@twoPoint]
-      ];
-      Join@@twoPointTemplate@@@Array[{ToString@#,twoPoint[[#,1]]}&,Length@twoPoint],
-      {}
-   ];
 
    threePoint = Tally@Join[
       Cases[modifiedExpr,LoopTools`C0i[_,args:__]:>{args},Infinity],
       Cases[modifiedExpr,(LoopTools`C0)[args:__]:>{args},Infinity]
-   ];
-   threePointRules = If[threePoint=!={},
-      AppendTo[loopArrayDefine,Array[
-         "c"<>ToString@#<>"[7] = {}"&,
-         Length@threePoint]
-      ];
-      AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Loop::library().get_C"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
-         "; // It is repeated "<>ToString@threePoint[[#,2]]<>" times."&,
-         Length@threePoint]
-      ];
-      Join@@threePointTemplate@@@Array[{ToString@#,threePoint[[#,1]]}&,Length@threePoint]
-      ,
-      {}
    ];
 
    fourPoint = Tally@Join[
       Cases[modifiedExpr,LoopTools`D0i[_,args:__]:>{args},Infinity],
       Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]
    ];
-   fourPointRules = If[fourPoint=!={},
-      AppendTo[loopArrayDefine,Array[
-         "d"<>ToString@#<>"[11] = {}"&,
-         Length@fourPoint]
-      ];
-      AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Loop::library().get_D"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
-         "; // It is repeated "<>ToString@fourPoint[[#,2]]<>" times."&,
-         Length@fourPoint]
-      ];
-      Join@@fourPointTemplate@@@Array[{ToString@#,fourPoint[[#,1]]}&,Length@fourPoint],
-      {}
-   ];
 
-   loopArrayDefine = "std::complex<double> "<>Utils`StringJoinWithSeparator[Join@@loopArrayDefine,", "]<>";";
-   loopArraySet = Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""];
+   append[onePoint,onePointTemplate,"get_A","a"[1]];
+   append[twoPoint,twoPointTemplate,"get_B","b"[2]];
+   append[threePoint,threePointTemplate,"get_C","c"[7]];
+   append[fourPoint,fourPointTemplate,"get_D","d"[11]];
 
-   {loopArrayDefine,loopArraySet,modifiedExpr/.twoPointRules/.threePointRules/.fourPointRules}
+   {
+      Flatten@loopRules,
+      "std::complex<double> "<>Utils`StringJoinWithSeparator[Join@@loopArrayDefine,", "]<>";",
+      Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""],
+      modifiedExpr/.Flatten@loopRules
+   }
 ];
 createLoopFunctions // Utils`MakeUnknownInputDefinition;
 createLoopFunctions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+`cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},massRules:{Rule[_,_]..}] :=
+Module[
+   {
+      numbersToOne = {_Integer->1,_Rational->1,Pi->1},
+      massesToOne = Rule[#,1] & /@ massRules[[All,2]],
+      loopsToOne = Rule[#,1] & /@ loopRules[[All,2]],
+      result
+   },
+   result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
+   result=Plus@@DeleteCases[DeleteDuplicates@Flatten@result,1];
+   "if( std::abs("<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>") < std::numeric_limits<double>::epsilon() ) continue;"
+];
+`cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
+`cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 `cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
 `cxx`getVariableName[SARAH`Mass[obj]] =
