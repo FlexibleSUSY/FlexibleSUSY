@@ -16,74 +16,68 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_INTERFACE
-#define LOOP_LIBRARY_INTERFACE
-
 #include <complex>
+#include "loop_library_interface.hpp"
 
-#define two_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
-      std::complex<double>,\
-      std::complex<double>, std::complex<double>,\
-      double) = 0;
-#define three_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
+#define two_point(NAME)\
+   std::complex<double> NAME(\
+      std::complex<double>, std::complex<double>, std::complex<double>,\
+      double) noexcept;
+#define three_point(NAME)\
+   std::complex<double> NAME(\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) = 0;
-#define four_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
+      double) noexcept;
+#define four_point(NAME)\
+   std::complex<double> NAME(\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>,\
       std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) = 0;
+      double) noexcept;
 
-namespace flexiblesusy
-{
+namespace flexiblesusy {
 
-class Loop_library_interface
+class Looptools : public Loop_library_interface
 {
    public:
-      two_point_virtual(B0)
-      two_point_virtual(B1)
+      two_point(B0)
+      two_point(B1)
 
-      three_point_virtual(C0)
-      three_point_virtual(C1)
-      three_point_virtual(C2)
-      three_point_virtual(C00)
-      three_point_virtual(C11)
-      three_point_virtual(C12)
-      three_point_virtual(C22)
+      three_point(C0)
+      three_point(C1)
+      three_point(C2)
+      three_point(C00)
+      three_point(C11)
+      three_point(C12)
+      three_point(C22)
 
-      four_point_virtual(D0)
-      four_point_virtual(D00)
-      four_point_virtual(D1)
-      four_point_virtual(D11)
-      four_point_virtual(D12)
-      four_point_virtual(D13)
-      four_point_virtual(D2)
-      four_point_virtual(D22)
-      four_point_virtual(D23)
-      four_point_virtual(D3)
-      four_point_virtual(D33)
+      four_point(D0)
+      four_point(D00)
+      four_point(D1)
+      four_point(D11)
+      four_point(D12)
+      four_point(D13)
+      four_point(D2)
+      four_point(D22)
+      four_point(D23)
+      four_point(D3)
+      four_point(D33)
 
-      virtual void get_B(
+      void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
-      virtual void get_C(
+         double) noexcept;
+      void get_C(
          std::complex<double> (&)[7],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
-      virtual void get_D(
+         double) noexcept;
+      void get_D(
          std::complex<double> (&)[11],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
+         double) noexcept;
 };
 
-} // namespace flexiblesusy
-
-#endif
+}

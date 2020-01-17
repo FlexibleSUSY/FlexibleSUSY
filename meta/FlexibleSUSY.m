@@ -2336,7 +2336,7 @@ ScanEnabledSpectrumGenerator[solver_] :=
     Module[{key = "", class = "", macro = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
-           body = "result = run_parameter_point<" <> class <> ">(qedqcd, input);\n"
+           body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
                   <> "if (!result.problems.have_problem() || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[IndentText[result]]] <> "\n"
@@ -2346,7 +2346,7 @@ RunCmdLineEnabledSpectrumGenerator[solver_] :=
     Module[{key = "", class = "", macro = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
-           body = "exit_code = run_solver<" <> class <> ">(generic_loop_library,input);\n"
+           body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
                   <> "if (!exit_code || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"

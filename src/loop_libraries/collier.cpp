@@ -114,14 +114,14 @@ extern "C" {
    four_point_impl(D3)
    four_point_impl(D33)
 
-   void get_T2_impl(
+   void get_B_impl(
       const std::complex<double> [2],
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
-   void get_T3_impl(
+   void get_C_impl(
       const std::complex<double> [7],
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
-   void get_T4_impl(
+   void get_D_impl(
       const std::complex<double> [11],
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
       const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
@@ -168,7 +168,7 @@ four_point_collier(D23)
 four_point_collier(D3)
 four_point_collier(D33)
 
-void Collier::get_T2(
+void Collier::get_B(
    std::complex<double> (&b)[2],
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -179,10 +179,10 @@ void Collier::get_T2(
    const std::complex<double> m12 = m12_in;
 
    set_mu2_uv(scl2_in);
-   get_T2_impl(b, &p10, &m02, &m12);
+   get_B_impl(b, &p10, &m02, &m12);
 }
 
-void Collier::get_T3(
+void Collier::get_C(
    std::complex<double> (&c)[7],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
@@ -196,10 +196,10 @@ void Collier::get_T3(
    const std::complex<double> m22 = m22_in;
 
    set_mu2_uv(scl2_in);
-   get_T3_impl(c, &p10, &p21, &p20, &m02, &m12, &m22);
+   get_C_impl(c, &p10, &p21, &p20, &m02, &m12, &m22);
 }
 
-void Collier::get_T4(
+void Collier::get_D(
    std::complex<double> (&d)[11],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
    std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,
@@ -218,7 +218,7 @@ void Collier::get_T4(
    const std::complex<double> m32 = m32_in;
 
    set_mu2_uv(scl2_in);\
-   get_T4_impl(d, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
+   get_D_impl(d, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
 }
 
 }

@@ -55,7 +55,7 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_t^2 alpha_s)",
    "Higgs 3-loop corrections O(alpha_t^3)",
    "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
-   "generic loop library type (0 = SOFTSUSY)"
+   "loop library type (0 = Softsusy)"
 };
 } // anonymous namespace
 
@@ -132,7 +132,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
- * | generic_loop_library_type        | 0 (SOFTSUSY), 1 (COLLIER), 2 (LOOPTOOLS)        | 0 (= SOFTSUSY)  |
+ * | loop_library                     | 0 (Softsusy), 1 (Collier), 2 (Looptools)        | 0 (= Softsusy)  |
  */
 void Spectrum_generator_settings::reset()
 {
@@ -168,7 +168,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at2_as]    = 1.;
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
-   values[generic_loop_library_type]        = 0.; // 0 = (Softsusy)
+   values[loop_library]                     = 0.; // 0 = (Softsusy)
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

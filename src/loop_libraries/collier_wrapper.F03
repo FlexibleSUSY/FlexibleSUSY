@@ -90,7 +90,7 @@ contains
    four_point(D33,0,0,0,2)
 
 ! B_cll is ~20% faster than TN_cll
-subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_T2_impl')
+subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_B_impl')
    complex(C_DOUBLE_COMPLEX), intent(in) :: p10
    complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
    complex(C_DOUBLE_COMPLEX), intent(out), dimension(2) :: b
@@ -107,7 +107,7 @@ subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_T2_impl')
 end
 
 ! C_cll is ~20% faster than TN_cll
-subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_T3_impl')
+subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_C_impl')
    complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20
    complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22
    complex(C_DOUBLE_COMPLEX), intent(out), dimension(7) :: c
@@ -129,7 +129,7 @@ subroutine get_T3_dummy(c,p10,p21,p20,m02,m12,m22) bind(C, name='get_T3_impl')
 end
 
 ! D_cll and TN_cll are evaluated almost with the same speed
-subroutine get_T4_dummy(d,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name='get_T4_impl')
+subroutine get_T4_dummy(d,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name='get_D_impl')
   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31
   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32
   complex(C_DOUBLE_COMPLEX), intent(out), dimension(11) :: d

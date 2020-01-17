@@ -94,7 +94,7 @@ options="                    \
    enable_compiler_warnings  \
    enable_debug              \
    enable_fflite             \
-   enable_generic_loop_library \
+   enable_loop_library       \
    enable_himalaya           \
    enable_librarylink        \
    enable_collier            \
@@ -127,7 +127,7 @@ enable_himalaya="automatic"
 enable_librarylink="automatic"
 enable_looptools="no"
 enable_collier="no"
-enable_generic_loop_library="no"
+enable_loop_library="no"
 enable_meta="no"
 # BEGIN: NOT EXPORTED ##########################################
 enable_meta="yes"
@@ -151,7 +151,7 @@ DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
 DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
-DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#undef ENABLE_GENERIC_LOOP_LIBRARY"
+DEFINE_ENABLE_LOOP_LIBRARY="#undef ENABLE_LOOP_LIBRARY"
 DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
 DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
@@ -2139,11 +2139,11 @@ check_looptools() {
 }
 
 #_____________________________________________________________________
-check_generic_loop_library_libs() {
-    if [ "x$enable_generic_loop_library" != "xyes" ] ; then
+check_collier_libs() {
+    if [ "x$enable_collier" != "xyes" ] ; then
         if [ -n "$collier_lib_dir" ] ; then
             message "Warning: --with-collier-libdir= has been set, but"
-            message "   Generic Loop Library has not been enabled via --enable-generic_loop_library."
+            message "   COLLIER has not been enabled via --enable-collier."
         fi
         return
     fi
@@ -2151,7 +2151,7 @@ check_generic_loop_library_libs() {
     check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
     if test "x$found_lib" = "x" ; then
         message "Error: libcollier must be present if you want"
-        message "   to use Generic Loop Library"
+        message "   to use COLLIER, see https://collier.hepforge.org/"
         message "   You can use the --with-collier-libdir= option to specify the"
         message "   location of the libcollier library."
         exit 1
@@ -2167,19 +2167,19 @@ check_generic_loop_library_libs() {
 }
 
 #_____________________________________________________________________
-check_generic_loop_library_incl() {
-    if [ "x$enable_generic_loop_library" != "xyes" ] ; then
+check_collier_incl() {
+    if [ "x$enable_collier" != "xyes" ] ; then
         if [ -n "$collier_inc_dir" ] ; then
           message "Warning: --with-collier-incdir= has been set, but"
-          message "   Generic Loop Library has not been enabled via --enable-generic_loop_library."
+          message "   COLLIER has not been enabled via --enable-collier."
         fi
         return
     fi
 
     check_header "collier.mod" "$collier_inc_dir"	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
-        message "Error: collier.mod must be present at least if you want"
-        message "   to use Generic Loop Library"
+        message "Error: at least collier.mod must be present if you want"
+        message "   to use COLLIER, see https://collier.hepforge.org/"
         message "   You can use the --with-collier-incdir= option to specify the"
         message "   location of the collier.mod file."
         exit 1
@@ -2191,22 +2191,22 @@ check_generic_loop_library_incl() {
 }
 
 #_____________________________________________________________________
-check_generic_loop_library() {
-    if [ "x$enable_generic_loop_library" = "xyes" ] ; then
+check_collier() {
+    if [ "x$enable_collier" = "xyes" ] ; then
         [ -z "$collier_inc_dir" ] && \
         [ -z "$collier_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f GenericLoopLibrary.pc ] && \
+        [ -f Collier.pc ] && \
         {
-            message -n "Checking Generic Loop Library using local GenericLoopLibrary.pc ... "
+            message -n "Checking COLLIER using local Collier.pc ... "
             COLLIERLIBS=$(PKG_CONFIG_PATH=. pkg-config Collier --libs)
-            enable_generic_loop_library=yes
+            enable_collier=yes
             message "ok"
             return
         }
 
-        check_generic_loop_library_incl
-        check_generic_loop_library_libs
+        check_collier_incl
+        check_collier_libs
     fi
 }
 
@@ -2214,6 +2214,13 @@ check_generic_loop_library() {
 check_loop_functions() {
     if test "$enable_fflite" = "yes" -a "$enable_looptools" = "yes"; then
 	message "Error: do not \`--enable-fflite' and \`--enable-looptools' at the same time"
+	exit 1
+    fi
+
+    if test "$enable_collier" = "yes" -a "$enable_loop_library" = "no"; then
+	message "Error: do not \`--enable-collier' without \`--enable-loop-library'"
+  message "   at the same time. Currently COLLIER is accessible only via loop"
+  message "   library interface."
 	exit 1
     fi
 
@@ -2233,7 +2240,7 @@ check_loop_functions() {
         LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
     fi
 
-    if [ "$enable_generic_loop_library" = "yes" ] ; then
+    if [ "$enable_loop_library" = "yes" ] ; then
         LOOPFUNCLIBS="${LOOPFUNCLIBS} ${COLLIERLIBS}"
     fi
 }
@@ -2950,14 +2957,14 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
     fi
 
-    if test "x$enable_generic_loop_library" = "xyes" ; then
-        DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#define ENABLE_GENERIC_LOOP_LIBRARY 1"
-        message "Enabling usage of Generic Loop Library"
-        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOP_LIBRARY}"
+    if test "x$enable_loop_library" = "xyes" ; then
+        DEFINE_ENABLE_LOOP_LIBRARY="#define ENABLE_LOOP_LIBRARY 1"
+        message "Enabling usage of loop library interface"
+        logmsg "   ${DEFINE_ENABLE_LOOP_LIBRARY}"
     else
-        DEFINE_ENABLE_GENERIC_LOOP_LIBRARY="#undef ENABLE_GENERIC_LOOP_LIBRARY"
-        logmsg "Disabling usage of Generic Loop Library"
-        logmsg "   ${DEFINE_ENABLE_GENERIC_LOOP_LIBRARY}"
+        DEFINE_ENABLE_LOOP_LIBRARY="#undef ENABLE_LOOP_LIBRARY"
+        logmsg "Disabling usage of loop library interface"
+        logmsg "   ${DEFINE_ENABLE_LOOP_LIBRARY}"
     fi
 
     if test "x$enable_looptools" = "xyes" ; then
@@ -3115,7 +3122,7 @@ replace_markers() {
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
-	-e "s|@ENABLE_GENERIC_LOOP_LIBRARY@|$enable_generic_loop_library|" \
+	-e "s|@ENABLE_LOOP_LIBRARY@|$enable_loop_library|" \
 	-e "s|@ENABLE_META@|$enable_meta|" \
 	-e "s|@ENABLE_SILENT@|$enable_silent|"    \
 	-e "s|@ENABLE_SQLITE@|$enable_sqlite|"    \
@@ -3167,7 +3174,7 @@ enable/disable options, prefix with either --enable- or --disable-
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
   collier           Use COLLIER to compute the loop functions (default: $enable_collier)
-  generic_loop_library     Use Generic Loop Library to compute the loop functions (default: $enable_generic_loop_library)
+  loop-library      Use loop library interface to access the loop functions (default: $enable_loop_library)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
 EOF
 # BEGIN: NOT EXPORTED ##########################################
@@ -3408,7 +3415,7 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_libs
     fi
     check_looptools
-    check_generic_loop_library
+    check_collier
     check_loop_functions
     check_odeint
     check_sqlite
@@ -3495,7 +3502,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
-    -e "s|@DEFINE_ENABLE_GENERIC_LOOP_LIBRARY@|$DEFINE_ENABLE_GENERIC_LOOP_LIBRARY|" \
+    -e "s|@DEFINE_ENABLE_LOOP_LIBRARY@|$DEFINE_ENABLE_LOOP_LIBRARY|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \
     -e "s|@DEFINE_ENABLE_ODEINT@|$DEFINE_ENABLE_ODEINT|"       \

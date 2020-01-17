@@ -935,7 +935,7 @@ correlation functions.
 @returns The c++ code for the necessary headers for evaluation
 of n-point correlation functions.";
 CreateCXXHeaders[opts:OptionsPattern[]] :=
-"#include \"loop_libraries/generic_loop_library.hpp\"\n"<>
+"#include \"loop_libraries/loop_library.hpp\"\n"<>
 "#include \"cxx_qft/"<>FlexibleSUSY`FSModelName<>"_npointfunctions_wilsoncoeffs.hpp\"\n" <>
 "#include \"concatenate.hpp\"\n" <>
 "#include <boost/fusion/include/at_key.hpp>\n" <>
@@ -1492,7 +1492,7 @@ Module[
          Length@twoPoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Generic_loop::library().get_T2"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Loop::library().get_B"["b"<>ToString@#,Sequence@@twoPoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@twoPoint[[#,2]]<>" times."&,
          Length@twoPoint]
       ];
@@ -1510,7 +1510,7 @@ Module[
          Length@threePoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Generic_loop::library().get_T3"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Loop::library().get_C"["c"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@threePoint[[#,2]]<>" times."&,
          Length@threePoint]
       ];
@@ -1529,7 +1529,7 @@ Module[
          Length@fourPoint]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString["Generic_loop::library().get_T4"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString["Loop::library().get_D"["d"<>ToString@#,Sequence@@threePoint[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@fourPoint[[#,2]]<>" times."&,
          Length@fourPoint]
       ];

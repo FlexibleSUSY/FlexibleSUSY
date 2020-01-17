@@ -72,16 +72,16 @@ class Collier : public Loop_library_interface
       four_point(D3)
       four_point(D33)
 
-      void get_T2(
+      void get_B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,
          double) noexcept;
-      void get_T3(
+      void get_C(
          std::complex<double> (&)[7],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,
          double) noexcept;
-      void get_T4(
+      void get_D(
          std::complex<double> (&)[11],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,

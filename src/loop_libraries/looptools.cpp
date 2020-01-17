@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "loop_tools.hpp"
+#include "looptools.hpp"
 
 #define two_point_lt(NAME)\
    std::complex<double> Looptools::NAME(\
@@ -69,7 +69,7 @@ four_point_lt(D23)
 four_point_lt(D3)
 four_point_lt(D33)
 
-void Looptools::get_T2(
+void Looptools::get_B(
    std::complex<double> (&b)[2],
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -81,7 +81,7 @@ void Looptools::get_T2(
    }
 }
 
-void Looptools::get_T3(
+void Looptools::get_C(
    std::complex<double> (&c)[7],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
@@ -93,7 +93,7 @@ void Looptools::get_T3(
    }
 }
 
-void Looptools::get_T4(
+void Looptools::get_D(
    std::complex<double> (&d)[11],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
    std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,

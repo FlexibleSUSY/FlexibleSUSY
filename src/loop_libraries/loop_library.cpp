@@ -19,45 +19,52 @@
 #include <memory>
 
 #include "config.h"
-#include "generic_loop_library.hpp"
+#include "loop_library.hpp"
 #include "loop_library_interface.hpp"
+
+#include "softsusy.hpp"
+
+#ifdef ENABLE_COLLIER
 #include "collier.hpp"
-#include "loop_tools.hpp"
+#endif // ENABLE_COLLIER
+
+#ifdef ENABLE_LOOPTOOLS
+#include "looptools.hpp"
+#endif // ENABLE_LOOPTOOLS
 
 namespace flexiblesusy {
 
-int Generic_loop::type_ = -1;
-std::unique_ptr<Loop_library_interface> Generic_loop::lib_;
+int Loop::type_ = -1;
+std::unique_ptr<Loop_library_interface> Loop::lib_;
 
-void Generic_loop::setLibrary(int new_type) {
-   if( Generic_loop::type_ == -1) {
+void Loop::setLibrary(int new_type) {
+   if( Loop::type_ == -1) {
       switch(new_type) {
-         case 0 : Generic_loop::lib_ = std::make_unique<Collier>(); // @ToDo add SoftSUSY
-                  Generic_loop::type_ = 0;
+         case 0 : Loop::lib_ = std::make_unique<Softsusy>();
+                  Loop::type_ = 0;
                   break;
 #ifdef ENABLE_COLLIER
-         case 1 : Generic_loop::lib_ = std::make_unique<Collier>();
-                  Generic_loop::type_ = 1;
+         case 1 : Loop::lib_ = std::make_unique<Collier>();
+                  Loop::type_ = 1;
                   break;
 #endif // ENABLE_COLLIER
 #ifdef ENABLE_LOOPTOOLS
-         case 2 : Generic_loop::lib_ = std::make_unique<Looptools>();
-                  Generic_loop::type_ = 2;
+         case 2 : Loop::lib_ = std::make_unique<Looptools>();
+                  Loop::type_ = 2;
                   break;
 #endif // ENABLE_LOOPTOOLS
-         default: throw std::invalid_argument("Unrecognized Generic Loop Library (check table inside FlexibleSUSY/src/spectrum_generator_settings.cpp)");
+         default: throw std::invalid_argument("Unrecognized loop library realization (check table inside FlexibleSUSY/src/spectrum_generator_settings.cpp)");
                   break;
       }
-      Generic_loop::type_ = 1;
    }
 }
 
-Loop_library_interface& Generic_loop::library() {
-   if( Generic_loop::type_ == -1) {
-      Generic_loop::lib_ = std::make_unique<Collier>(); // @ToDo add SoftSUSY
-      Generic_loop::type_ = 0;
+Loop_library_interface& Loop::library() {
+   if( Loop::type_ == -1) {
+      Loop::lib_ = std::make_unique<Softsusy>();
+      Loop::type_ = 0;
    }
-   return *Generic_loop::lib_;
+   return *Loop::lib_;
 }
 
 } // namespace flexiblesusy

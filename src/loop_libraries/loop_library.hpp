@@ -17,16 +17,16 @@
 // ====================================================================
 
 #include "config.h"
-#ifdef ENABLE_GENERIC_LOOP_LIBRARY
+#ifdef ENABLE_LOOP_LIBRARY
 
-#ifndef GENERIC_LOOP
-#define GENERIC_LOOP
+#ifndef LOOP
+#define LOOP
 
 #include "loop_library_interface.hpp"
 
 namespace flexiblesusy {
 
-class Generic_loop {
+class Loop {
 public:
    static void setLibrary(int);
    static Loop_library_interface& library();
@@ -35,12 +35,12 @@ private:
    static int type_;
    static std::unique_ptr<Loop_library_interface> lib_;
 
-   Generic_loop() {}
-   Generic_loop(Generic_loop const&);
-   void operator=(Generic_loop const&);
+   Loop() {}
+   Loop(Loop const&);
+   void operator=(Loop const&);
 };
 
 } // namespace flexiblesusy
 
-#endif // GENERIC_LOOP
-#endif // ENABLE_GENERIC_LOOP_LIBRARY
+#endif // LOOP
+#endif // ENABLE_LOOP_LIBRARY
