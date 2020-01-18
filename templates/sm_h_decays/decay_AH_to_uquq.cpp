@@ -61,7 +61,7 @@ double CLASSNAME::get_partial_width<AH,uq,bar<uq>::type>(
    const double xt = qedqcd.displayFermiConstant()*Sqr(mtpole)/(8*Sqrt(2.0)*Sqr(Pi));
 
    const double flux = 1./(2.*mAH);
-   const double phase_space = 1./(8.*Pi) * beta(mAH, muq, muq);
+   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(mAH*mAH, muq*muq, muq*muq))/(mAH*mAH);
    const double color_factor = 3;
 
    return flux * phase_space * color_factor *

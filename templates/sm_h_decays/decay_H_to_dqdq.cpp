@@ -61,8 +61,8 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
 
    const double flux = 1./(2.*mHOS);
    const double color_factor = 3;
-   const double phase_spaceDR = 1./(8.*Pi) * beta(mHOS, mdqDR, mdqDR);
-   const double phase_spaceOS = 1./(8.*Pi) * beta(mHOS, mdqOS, mdqOS);
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mdqDR*mdqDR, mdqDR*mdqDR))/(mHOS*mHOS);
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mdqOS*mdqOS, mdqOS*mdqOS))/(mHOS*mHOS);
    
    // get HBBbar vertex
    //we don't use amplitude_squared here because we need both this vertex 

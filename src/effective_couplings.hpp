@@ -49,13 +49,10 @@ std::complex<double> quadratic_interpolation(
 std::map<double,std::complex<double> > get_scalar_fermion_loop_data();
 std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data();
 
-/**
- * @fn beta(double sqrtS, double m1, double m2)
- * @brief For \f$m_1 = m_2\f$ returns a velocity \f$\beta = \sqrt{1 - \frac{4 m_1^2}{S}}\f$ of particles. 
- *        Hence the name of the function.
- *        For \f$m_1 \neq m_2\f$, however, has no obvious interpratation.
- */
-double beta(double, double, double);
+template<typename T>
+T KallenLambda(T x, T y, T z) {
+   return std::pow(x-y-z, 2) - 4*y*z;
+}
 
 } // namespace effective_couplings
 

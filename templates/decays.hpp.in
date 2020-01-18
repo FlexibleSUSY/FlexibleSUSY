@@ -151,7 +151,7 @@ double @ModelName@_decays::get_partial_width(
    typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
    ) const
 {
-   using effective_couplings::beta;
+   using effective_couplings::KallenLambda;
 
    // onshell masses
    const double mIn = context.physical_mass<FieldIn>(indexIn);
@@ -159,7 +159,7 @@ double @ModelName@_decays::get_partial_width(
    const double mOut2 = context.physical_mass<FieldOut2>(indexOut2);
 
    // phase space without symmetry factor
-   const double ps = 1./(8.*Pi) * beta(mIn, mOut1, mOut2);
+   const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(mIn*mIn, mOut1*mOut1, mOut2*mOut2))/(mIn*mIn);
 
    // phase space symmetry factor
    const double ps_symmetry =

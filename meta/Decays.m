@@ -1942,6 +1942,7 @@ CreateHiggsToWWPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            {declaration, function}
           ];
 
+(*
 CreateHiggsToGluonGluonPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             fieldsList, args, templatePars, body = ""},
@@ -1993,17 +1994,18 @@ CreateHiggsToPhotonZPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
                   Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
            templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
            body =
-              "const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);\n" <>
-               "const double mH = context.physical_mass<H>(in_idx);\n" <>
-               "constexpr double ps {1./(8.*Pi)};\n" <>
-               "constexpr double ps_symmetry {1.};\n" <>
-               "constexpr double color_gen_sqr {1.0};\n" <>
-               "const double flux = 0.5/mH;\n" <>
-               "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
+              "const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out2_idx, out1_idx);\n" <>
+              "const double mH = context.physical_mass<H>(in_idx);\n" <>
+              "constexpr double ps {1./(8.*Pi) * beta(mIn, mOut1, mOut2)};\n" <>
+              "constexpr double ps_symmetry {1.};\n" <>
+              "constexpr double color_gen_sqr {1.0};\n" <>
+              "const double flux = 0.5/mH;\n" <>
+              "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
            "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
            templatePars <> "(" <> args <> ") const\n{\n" <>
            TextFormatting`IndentText[body] <> "}"
           ];
+*)
 
 CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},

@@ -61,17 +61,6 @@ std::complex<double> AP12(double tau)
    return scaling_function(tau) / tau;
 }
 
-double beta(double sqrtS, double m1, double m2)
-{
-   if(m1 + m2 > sqrtS) {
-      throw std::invalid_argument(
-         "Final state particles energy smaller than incoming"
-      );
-   }
-
-   return std::sqrt(1.0 - Sqr((m1+m2)/sqrtS)) * (1.0 - Sqr((m1-m2)/sqrtS));
-}
-
 std::complex<double> scalar_diphoton_fermion_loop(
    double m_decay, double m_loop)
 {

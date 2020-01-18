@@ -56,7 +56,7 @@ namespace flexiblesusy {
 
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
-using effective_couplings::beta;
+using effective_couplings::KallenLambda;
 namespace info = @ModelName@_info;
 using namespace std::complex_literals;
 
@@ -213,15 +213,17 @@ double CLASSNAME::get_partial_width<H, A, A>(
 }
 
 template <>
-double CLASSNAME::get_partial_width<H, Z, A>(
+double CLASSNAME::get_partial_width<H, A, Z>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
-      const typename field_indices<Z>::type& out1_idx,
-      const typename field_indices<A>::type& out2_idx) const
+      const typename field_indices<A>::type& out1_idx,
+      const typename field_indices<Z>::type& out2_idx) const
 {
    const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
+   const double mA = context.physical_mass<A>(out1_idx);
+   const double mZ = context.physical_mass<Z>(out2_idx);
+   const double ps {1./(8.*Pi) * sqrt(KallenLambda(mH*mH, mA*mA, mZ*mZ))/(mH*mH)};
    constexpr double ps_symmetry {1.};
    constexpr double color_gen_sqr {1.0};
    const double flux = 0.5/mH;

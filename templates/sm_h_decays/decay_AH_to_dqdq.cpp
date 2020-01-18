@@ -39,7 +39,7 @@ double CLASSNAME::get_partial_width<AH,dq,bar<dq>::type>(
    const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
 
    const double flux = 1./(2.*mAH);
-   const double phase_space = 1./(8.*Pi) * beta(mAH, mdq, mdq);
+   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(mAH*mAH, mdq*mdq, mdq*mdq))/(mAH*mAH);
    const double color_factor = 3;
 
    return flux * phase_space * color_factor *

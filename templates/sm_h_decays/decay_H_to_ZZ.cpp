@@ -38,7 +38,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * beta(mHOS, mZOS, mZOS);
+      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mZOS*mZOS, mZOS*mZOS))/(mHOS*mHOS);
 
       // phase space symmetry factor
       const double ps_symmetry = 1. / 2.;

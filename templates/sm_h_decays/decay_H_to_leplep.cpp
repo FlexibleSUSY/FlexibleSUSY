@@ -7,7 +7,6 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    typename field_indices<bar<lep>::type>::type const& indexOut1,
    typename field_indices<lep>::type const& indexOut2) const
 {
-   using effective_couplings::beta;
 
    // std::cout << get_alphas(context) << std::endl;
    // onshell masses
@@ -17,7 +16,7 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    const double mL2OS = context.physical_mass<lep>(indexOut2);
 
    // phase space without symmetry factor
-   const double ps = 1. / (8. * Pi) * beta(mHOS, mL1OS, mL2OS);
+   const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mL1OS*mL1OS, mL2OS*mL2OS))/(mHOS*mHOS);
 
    // matrix element squared
    const auto xOS = std::pow(mL1OS / mHOS, 2);
