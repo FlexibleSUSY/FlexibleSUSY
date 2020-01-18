@@ -19,11 +19,10 @@
    ====================================================================
 
 *)
-Needs["Utils`"];
-Utils`FSFancyLine[":"];
-WriteString[OutputStream["stdout",1],"::test:: test_MSSM_matching_selfenergy_Fd.meta started...\n"];
-Utils`FSFancyLine[":"];
 
+WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
+Global`time = AbsoluteTime[];
+Off[Susyno`LieGroups`dims];(*hide complainiggs from Susyno`LieGroups`dims*)
 Needs["FlexibleSUSY`"];
 
 (*INITIALIZATION***************************************************************)
@@ -33,16 +32,19 @@ SARAH`SARAH[InputDirectories] = {
    FileNameJoin[{workingDirectory, "sarah"}],
    ToFileName[{$sarahDir, "Models"}]};
 
-Start["MSSM"];
+Start@"MSSM";
 
-modelFile = FileNameJoin[{workingDirectory, "models", "MSSM", "FlexibleSUSY.m"}];
+modelFile = FileNameJoin@{workingDirectory, "models", "MSSM", "FlexibleSUSY.m"};
 
-FlexibleSUSY`LoadModelFile[modelFile];
-FlexibleSUSY`Private`PrepareUnrotatedParticles[FSEigenstates];
+FlexibleSUSY`LoadModelFile@modelFile;
+FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
 allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFunctions[];
 
-{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices[allParameters];
-FlexibleSUSY`SetupOutputParameters[massMatrices];
+{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices@allParameters;
+FlexibleSUSY`SetupOutputParameters@massMatrices;
+
+Needs@"NPointFunctions`";
+Needs@"WilsonCoeffs`";
 
 (*NPF CALCULATION**************************************************************)
 Selfenergy = NPointFunctions`NPointFunction[
@@ -51,16 +53,12 @@ Selfenergy = NPointFunctions`NPointFunction[
    NPointFunctions`ZeroExternalMomenta -> True,
    NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
 
-nPointFunctionHeaders = CreateCXXHeaders[
-   UseWilsonCoeffs -> True,
-   NPointFunctions`LoopFunctions->"FlexibleSUSY"];
-
 ChiralBasis =
    {
       "value_right"->
-      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
+      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
       "value_left"->
-      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
+      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
    };
 
 (*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)
@@ -70,7 +68,7 @@ FdSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    FdSelfenergy,
    "selfenergy_Fd_1loop",
    SARAH`Delta,
-   WilsonBasis -> ChiralBasis ][[2]];
+   ChiralBasis ][[2]];
 
 (*VERTICES*********************************************************************)
 (*if some additional vetices exist, then get them*)
@@ -103,14 +101,16 @@ templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
 code = StringReplace[templateCode,
    {
       "@NPointFunctions_Selfenergy_Fd_1loop@" -> FdSelfenergyCode,
-      "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
+      "@NPointFunctions_Headers@" -> CreateCXXHeaders[],
       "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
       "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
 }];
 
 fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp"};
-WriteString[fileHandle, code];
-Close[fileHandle];
-Utils`FSFancyLine[":"];
-WriteString[OutputStream["stdout",1],"::test:: test_MSSM_matching_selfenergy_Fd.meta done\n"];
-Utils`FSFancyLine[":"];
+fileHandle ~ WriteString ~ code;
+Close@fileHandle;
+WriteString[OutputStream["stdout",1],#]&@StringJoin[
+   "\033[1;36m>>test>>\033[1;0m test_MSSM_matching_selfenergy_Fd.meta \033[1;32mdone\033[1;0m in ",
+   ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}],
+   " seconds.\n\n"
+];
