@@ -771,9 +771,7 @@ Module[
 getModifiedDiagrams // Utils`MakeUnknownInputDefinition;
 getModifiedDiagrams ~ SetAttributes ~ {Protected,Locked};
 
-type`diagramSetNull = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]..];
-
-removeTopologiesWithoutInsertions[diagrams:`type`diagramSetNull] :=
+removeTopologiesWithoutInsertions[diagrams:`type`diagramSet] :=
    diagrams /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
 removeTopologiesWithoutInsertions // Utils`MakeUnknownInputDefinition;
 removeTopologiesWithoutInsertions ~ SetAttributes ~ {Protected,Locked};

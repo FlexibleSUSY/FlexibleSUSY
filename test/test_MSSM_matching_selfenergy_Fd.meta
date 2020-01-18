@@ -112,5 +112,5 @@ Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[
    "\033[1;36m>>test>>\033[1;0m test_MSSM_matching_selfenergy_Fd.meta \033[1;32mdone\033[1;0m in ",
    ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}],
-   " seconds.\n\n"
+   " seconds.\n"
 ];
