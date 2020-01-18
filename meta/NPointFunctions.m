@@ -1441,7 +1441,7 @@ Module[
             LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
             LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"
          }&,
-      
+
       twoPoint,
       twoPointTemplate =
          {
@@ -1545,14 +1545,14 @@ createLoopFunctions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 `cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},massRules:{Rule[_,_]..}] :=
 Module[
    {
-      numbersToOne = {_Integer->1,_Rational->1,Pi->1},
+      numbersToOne = {_Integer->1,_Rational->1,_Complex->1,Pi->1},
       massesToOne = Rule[#,1] & /@ massRules[[All,2]],
       loopsToOne = Rule[#,1] & /@ loopRules[[All,2]],
       result
    },
    result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
-   result=Plus@@DeleteCases[DeleteDuplicates@Flatten@result,1];
-   "if( std::abs("<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>") < std::numeric_limits<double>::epsilon() ) continue;"
+   result=Plus@@("std::abs"[#]&/@DeleteCases[DeleteDuplicates@Flatten@result,1]);
+   "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" < std::numeric_limits<double>::epsilon() ) continue;"
 ];
 `cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
 `cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected,ReadProtected};
