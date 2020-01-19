@@ -22,7 +22,7 @@
 
 WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
 Global`time = AbsoluteTime[];
-Off[Susyno`LieGroups`dims];(*hide complainiggs from Susyno`LieGroups`dims*)
+Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
 Needs["FlexibleSUSY`"];
 
 (*INITIALIZATION***************************************************************)

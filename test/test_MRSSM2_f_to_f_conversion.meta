@@ -1,0 +1,219 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
+WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
+Global`time = AbsoluteTime[];
+Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
+Needs["FlexibleSUSY`"];
+
+(*INITIALIZATION***************************************************************)
+workingDirectory = Directory[];
+SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
+SARAH`SARAH[InputDirectories] =
+{
+   FileNameJoin@{workingDirectory, "sarah"},
+   ToFileName@{$sarahDir, "Models"}
+};
+
+Start@"MRSSM";
+
+modelFile = FileNameJoin@{workingDirectory, "models", "MRSSM2", "FlexibleSUSY.m"};
+
+FlexibleSUSY`LoadModelFile@modelFile;
+FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
+allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFunctions[];
+
+{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices@allParameters;
+FlexibleSUSY`SetupOutputParameters@massMatrices;
+
+(*FFMassiveVFormFactors********************************************************)
+Needs["FFMassiveVFormFactors`",FileNameJoin@{workingDirectory,"test","FFMassiveVFormFactors.meta"}];
+
+WriteString[OutputStream["stdout",1],"Calculation of V indices started ..."];
+massiveVIndices = Utils`StringJoinWithSeparator[FFMassiveVFormFactors`MassiveVIndices /@
+   Select[GetVectorBosons[], !(IsMassless[#] || IsElectricallyCharged[#])&],"\n"];
+Print[" done"];
+
+extParticles = {{Fe -> Fe, VZ}};
+WriteString[OutputStream["stdout",1],"Calculation of vertices started ..."];
+insertionsAndVertices = FlattenAt[#,1]&/@Transpose[{extParticles,SARAH`ff@@@extParticles}];
+Print[" done"];
+
+verticesMassive = Flatten[insertionsAndVertices[[All, 3]][[All, All, 2]][[All, All, 2]], 2];
+
+WriteString[OutputStream["stdout",1],"Calculation of interface started ..."];
+{prototypesMassive, definitionsMassive} =
+   StringJoin/@Transpose[FFMassiveVFormFactors`FFMassiveVFormFactorsCreateInterface@@@insertionsAndVertices];
+Print[" done"];
+
+(*WriteFToFConversionInNucleusClass********************************************)
+leptonPairs = {{Fe -> Fe, Au}};
+
+massiveNeutralVectorBosons =
+   Select[GetVectorBosons[], !(TreeMasses`IsMassless[#] || TreeMasses`IsElectricallyCharged[#])& ];
+masslessNeutralVectorBosons =
+   Select[GetVectorBosons[], (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])& ];
+(* drop nucleon, convert rule to list (so {Fe -> Fe, Au} into {Fe,Fe} *)
+externalFermions = DeleteDuplicates@Flatten[
+   {TreeMasses`GetSMQuarks[], Drop[leptonPairs, None, -1] /. Rule[a_, b_] :> Sequence[a, b]} ];
+verticesConversion = Flatten /@ Tuples[
+   {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
+   Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}];
+
+processesUnderInterest = DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]];
+
+Needs@"NPointFunctions`";
+Needs@"WilsonCoeffs`";
+
+{npfVertices,npfHeaders,npfCode} = Module[
+   {
+      nameForUpQuarkClass = "zpinguins_uFeFe_1loop",
+      nameForDownQuarkClass  = "zpinguins_dFeFe_1loop",
+      header,uNPF,dNPF,
+      dimension6Template,
+      l=SARAH`Lorentz,
+      mom = SARAH`Mom,
+      mass = SARAH`Mass,
+      sp,
+      codeU,codeD,
+      dressedU,dressedD,assumptionReplacements
+   },
+   header=CreateCXXHeaders[];
+   sp[particle_,num_] := SARAH`DiracSpinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
+
+   Print["Analytical calculation for Fe->Fe started ..."];
+   uNPF = NPointFunction[{Fe,Fu},{Fe,Fu},
+      OnShellFlag -> True,
+      UseCache -> False,
+      ZeroExternalMomenta -> OperatorsOnly,
+      KeepProcesses -> {FourFermionMassiveVectorPenguins}];
+   dNPF = NPointFunction[{Fe,Fd},{Fe,Fd},
+      OnShellFlag -> True,
+      UseCache -> False,
+      ZeroExternalMomenta -> OperatorsOnly,
+      KeepProcesses -> {FourFermionMassiveVectorPenguins}];
+   dressedU = Flatten@NPointFunctions`internal`getProcess@uNPF;
+   dressedD = Flatten@NPointFunctions`internal`getProcess@dNPF;
+   assumptionReplacements =
+     {
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[1]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2,
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2]
+     };
+   {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
+
+   Print["Analytical calculation for Fe->Fe done."];
+   dimension6Template[i_,o_,q_] :=
+      {
+         (*@note 6 means PR, 7 means PL.*)
+         ("S_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,q~sp~2],
+         ("S_LR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,q~sp~2],
+         ("S_RL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,q~sp~2],
+         ("S_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,q~sp~2],
+         (*@note Q: why names of coeffients are not correct? A: they are
+          *correct, one just need to commute projectors with Dirac matrices,
+          *what changes 6 to 7 or 7 to 6.*)
+         ("V_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,l@1,q~sp~2],
+         ("V_LR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,l@1,q~sp~2],
+         ("V_RL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,l@1,q~sp~2],
+         ("V_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,l@1,q~sp~2],
+         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours
+          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
+          *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
+          *for FC because it cites [Ni05] for Fierz identities, where our
+          *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
+         ("minus_T_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,-7,l@1,l@2,i~sp~1] NPointFunctions`internal`dc[q~sp~4,-7,l@1,l@2,q~sp~2],
+         ("minus_T_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,-6,l@1,l@2,i~sp~1] NPointFunctions`internal`dc[q~sp~4,-6,l@1,l@2,q~sp~2]
+      };
+   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[Fe,Fe,Fu];
+   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[Fe,Fe,Fd];
+
+   Print["C++ code calculation for Fe->Fe started ..."];
+   codeU = CreateCXXFunctions[uNPF,
+      nameForUpQuarkClass,
+      SARAH`Delta,
+      dimension6Template[Fe,Fe,Fu] ][[2]];
+   codeD = CreateCXXFunctions[dNPF,
+      nameForDownQuarkClass,
+      SARAH`Delta,
+      dimension6Template[Fe,Fe,Fd] ][[2]];
+   Print["C++ code calculation for Fe->Fe done."];
+   {
+      DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
+      header,
+      codeU<>"\n\n"<>codeD
+   }
+];
+
+(*VERTICES*********************************************************************)
+(*if some additional vetices exist, then get them*)
+existedVerticesFile = FileNameJoin@{
+   SARAH`$sarahCurrentOutputMainDir,
+   ToString@FlexibleSUSY`FSEigenstates,
+   "CXXDiagrams",
+   "CreatedVertices.m"};
+
+existedVertices = If[TrueQ@FileExistsQ@existedVerticesFile,
+   Get@existedVerticesFile, {}];
+
+(*get vertices which doesn't exist yet*)
+newVertices = Complement[
+   DeleteDuplicates@Join[verticesMassive,verticesConversion,npfVertices],
+   existedVertices];
+
+If[newVertices==={},
+   verticesCode = {"",""},
+   (* else *)
+   verticesCode = CXXDiagrams`CreateVertices[
+   newVertices,
+   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]]
+];
+
+(*CODE REPLACEMENTS************************************************************)
+templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
+   FileNameJoin@{workingDirectory, "test", "test_MRSSM2_f_to_f_conversion.cpp.in"}],
+   "\n"];
+code = StringReplace[templateCode,
+   {
+      "@npf_headers@" -> npfHeaders,
+      "@npf_definitions@" -> npfCode,
+      "@FFMassiveVFormFactors_InterfacePrototypes@" -> prototypesMassive,
+      "@FFMassiveVFormFactors_InterfaceDefinitions@" -> definitionsMassive,
+      "@FFMassiveVFormFactors_VIndices@" ->  massiveVIndices,
+      "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
+      "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]],
+      "@ModelName@" -> FlexibleSUSY`FSModelName
+   }
+];
+
+fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MRSSM2_f_to_f_conversion.cpp"};
+fileHandle ~ WriteString ~ code;
+Close@fileHandle;
+WriteString[OutputStream["stdout",1],#]&@StringJoin[
+   "\033[1;36m>>test>>\033[1;0m test_MRSSM2_f_to_f_conversion.meta \033[1;32mdone\033[1;0m in ",
+   ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}],
+   " seconds.\n"
+];
