@@ -20,45 +20,45 @@
 
 *)
 
+WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
+Global`time = AbsoluteTime[];
+Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
 Needs["FlexibleSUSY`"];
-
-Utils`FSFancyLine[];
-WriteString[OutputStream["stdout",1],#]&@
-   "\033[1;34mTest: Comparing hh self-energies in SM (NPointFunctions vs. FlexibleSUSY)\033[1;0m ...\n";
 
 (*INITIALIZATION***************************************************************)
 workingDirectory = Directory[];
 SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
-SARAH`SARAH[InputDirectories] = {
-   FileNameJoin[{workingDirectory, "sarah"}],
-   ToFileName[{$sarahDir, "Models"}]};
+SARAH`SARAH[InputDirectories] =
+{
+   FileNameJoin@{workingDirectory, "sarah"},
+   ToFileName@{$sarahDir, "Models"}
+};
 
-Start["SM"];
+Start@"SM";
 
-modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
+modelFile = FileNameJoin@{workingDirectory, "models", "SM", "FlexibleSUSY.m"};
 
-FlexibleSUSY`LoadModelFile[modelFile];
-{susyBetaFunctions, susyBreakingBetaFunctions} = FlexibleSUSY`ReadSARAHBetaFunctions[];
-allParameters = FlexibleSUSY`SetupModelParameters[susyBetaFunctions, susyBreakingBetaFunctions];
+FlexibleSUSY`LoadModelFile@modelFile;
+FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
+allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFunctions[];
 
-{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices[allParameters];
-FlexibleSUSY`SetupOutputParameters[massMatrices];
+{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices@allParameters;
+FlexibleSUSY`SetupOutputParameters@massMatrices;
+
+Needs@"NPointFunctions`";
+Needs@"WilsonCoeffs`";
 
 (*NPF CALCULATION**************************************************************)
 hhSelfenergy = NPointFunctions`NPointFunction[
    {SARAH`HiggsBoson}, {SARAH`HiggsBoson},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
-
-nPointFunctionHeaders = NPointFunctions`CreateCXXHeaders[
-   NPointFunctions`LoopFunctions->"FlexibleSUSY"];
+   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
 
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    hhSelfenergy,
    "selfenergy_hh_1loop",
-   Identity,
-   NPointFunctions`LoopFunctions->"FlexibleSUSY"][[2]];
+   Identity][[2]];
 
 (*VERTICES*********************************************************************)
 (*if some additional vetices exist, then get them*)
@@ -91,13 +91,16 @@ templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
 code = StringReplace[templateCode,
    {
    "@NPointFunctions_Selfenergy_hh_1loop@" -> hhSelfenergyCode,
-   "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
+   "@NPointFunctions_Headers@" -> NPointFunctions`CreateCXXHeaders[],
    "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
    "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
    }];
 
 fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_SM_npointfunctions.cpp"};
-WriteString[fileHandle, code];
-Close[fileHandle];
-WriteString[OutputStream["stdout",1],"\033[1;34mtest_SM_npointfunctions.meta finished\033[1;0m\n"];
-Utils`FSFancyLine[];
+fileHandle ~ WriteString ~ code;
+Close@fileHandle;
+WriteString[OutputStream["stdout",1],#]&@StringJoin[
+   "\033[1;36m>>test>>\033[1;0m test_SM_npointfunctions.meta \033[1;32mdone\033[1;0m in ",
+   ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}],
+   " seconds.\n"
+];

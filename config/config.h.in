@@ -46,6 +46,8 @@
 #define LDLIBS                "@LDLIBS@"
 #define LLFLAGS               "@LLFLAGS@"
 #define LLLIBS                "@LLLIBS@"
+#define COLLIERFLAGS	        "@COLLIERFLAGS@"
+#define COLLIERLIBS	          "@COLLIERLIBS@"
 #define LOOPFUNCFLAGS         "@LOOPFUNCFLAGS@"
 #define LOOPFUNCLIBS          "@LOOPFUNCLIBS@"
 #define SQLITELIBS            "@SQLITELIBS@"
@@ -80,8 +82,14 @@
 /* Enable LibraryLink */
 @DEFINE_ENABLE_LIBRARYLINK@
 
+/* Enable Generic Loop Library */
+@DEFINE_ENABLE_LOOP_LIBRARY@
+
 /* Enable LoopTools */
 @DEFINE_ENABLE_LOOPTOOLS@
+
+/* Enable COLLIER */
+@DEFINE_ENABLE_COLLIER@
 
 /* Enable odeint */
 @DEFINE_ENABLE_ODEINT@

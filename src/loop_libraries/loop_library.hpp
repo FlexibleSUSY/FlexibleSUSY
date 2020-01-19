@@ -16,25 +16,31 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-/**
- * @file @ModelName@_FFV_form_factors.hpp
- *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
-*/
+#include "config.h"
+#ifdef ENABLE_LOOP_LIBRARY
 
-#ifndef @ModelName@_FFMassiveVFormFactors_H
-#define @ModelName@_FFMassiveVFormFactors_H
+#ifndef LOOP
+#define LOOP
 
-using namespace flexiblesusy;
+#include "loop_library_interface.hpp"
 
 namespace flexiblesusy {
-class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_FFMassiveV_form_factors {
-@FFMassiveVFormFactors_InterfacePrototypes@
-}
+class Loop {
+public:
+   static void setLibrary(int);
+   static looplibrary::Loop_library_interface& library();
+
+private:
+   static int type_;
+   static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
+
+   Loop() {}
+   Loop(Loop const&);
+   void operator=(Loop const&);
+};
+
 } // namespace flexiblesusy
 
-#endif
-
+#endif // LOOP
+#endif // ENABLE_LOOP_LIBRARY

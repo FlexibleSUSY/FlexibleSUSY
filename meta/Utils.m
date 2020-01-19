@@ -48,6 +48,9 @@ Out[]= 2
 
 StringJoinWithSeparator::usage = "Joins a list of strings with a given separator string";
 
+StringJoinWithReplacement::usage =
+"Joins a list of strings with a given separator string, making string replacement afterwards";
+
 Zip::usage = "Combines two lists to a list of touples.
 Example:
 
@@ -381,7 +384,6 @@ If[!$Notebooks,
       WriteOut@StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"];
       WriteOut["\nWolfram Language kernel session ",RedString@"terminated",".\n"];
       Utils`FSFancyLine[];
-
       Quit[1];
    ];,
    (* Else *)
@@ -395,7 +397,6 @@ If[!$Notebooks,
       Print[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],": ",Style[tag,Red],":\n",
          StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"],
          "\nWolfram Language kernel session ","terminated"~Style~Red,"."];
-
       Quit[1];
    ];
 ];
@@ -475,14 +476,16 @@ Module[{nStrokes,controlSubstrings},
 SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
 
 MakeUnknownInputDefinition[sym_Symbol] :=
-Module[{usageString,info,parsedInfo,infoString},
+Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    (* Clean existing definitions if they exist for required pattern.. *)
    Off[Unset::norep];
    sym[args___] =.;
    On[Unset::norep];
    (* Maybe some useful definitions already exist*)
    If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+
    info = MakeBoxes@Definition@sym;
+
    If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
       infoString="",
       parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
@@ -492,12 +495,23 @@ Module[{usageString,info,parsedInfo,infoString},
       infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
       infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
    ];
-   sym::errUnknownInput = "`1``2`Call\n"<>ToString@sym<>"[`3`]\nis not supported.";
+   symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
+   sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoin@@Riffle[ToString/@{args},", "]];
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
+
+StringJoinWithReplacement[
+   list_List,
+   separator:_String:", ",
+   replacement:Rule[_String,_String]:Rule["`","`.`"],
+   transformer_:ToString
+] :=
+StringReplace[StringJoinWithSeparator[list,separator,transformer],replacement];
+StringJoinWithReplacement // MakeUnknownInputDefinition;
+StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected,ReadProtected};
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},

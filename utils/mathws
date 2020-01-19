@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Wrapper around wolframscript to load Kernel/init.m .
+# Accepts Wolfram source code via stdin.
+# Returns exit code of Wolfram source code.
+
+command -v wolframscript > /dev/null 2>&1 || {
+    printf "%s\n" "Error: wolframscript not found."
+    exit 1
+}
+
+input="\
+Get[FileNameJoin[{\$UserBaseDirectory, \"Kernel\", \"init.m\"}]];
+$(cat -)
+"
+
+wolframscript -code "$input"

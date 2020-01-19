@@ -12,8 +12,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/ckm.cpp \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
-		$(DIR)/loop_libraries/collier.cpp \
-		$(DIR)/loop_libraries/loop_tools.cpp \
 		$(DIR)/database.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/dilogc.f \
@@ -22,6 +20,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
 		$(DIR)/logger.cpp \
+		$(DIR)/loop_libraries/looptools.cpp \
+		$(DIR)/loop_libraries/softsusy.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/numerics.cpp \
@@ -49,9 +49,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/bvp_solver_problems.hpp \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
-		$(DIR)/loop_libraries/loop_library_interface.hpp \
-		$(DIR)/loop_libraries/collier.hpp \
-		$(DIR)/loop_libraries/loop_tools.hpp \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
 		$(DIR)/compound_constraint.hpp \
@@ -82,6 +79,8 @@ LIBFLEXI_HDR := \
 		$(DIR)/linalg2.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
+		$(DIR)/loop_libraries/looptools.cpp \
+		$(DIR)/loop_libraries/softsusy.cpp \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
 		$(DIR)/model.hpp \
@@ -139,6 +138,41 @@ endif
 # remove duplicates in case multiple solvers are used
 LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))
 LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
+
+# loop library #########################################################
+LOOP_DIR := $(DIR)/loop_libraries
+
+LOOP_HDR := \
+		$(LOOP_DIR)/collier.hpp \
+		$(LOOP_DIR)/loop_library.hpp \
+		$(LOOP_DIR)/loop_library_interface.hpp
+
+LOOP_SRC := \
+		$(LOOP_DIR)/collier.cpp \
+		$(LOOP_DIR)/loop_library.cpp
+
+LIBFLEXI_HDR += $(LOOP_HDR)
+LIBFLEXI_SRC += $(LOOP_SRC)
+
+$(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
+
+$(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o
+	@echo Building collier wrapper library
+	@ar cr $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
+
+$(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f03
+ifeq ($(FC),gfortran)
+	@echo Building collier_wrapper.o
+	@gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f03 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
+else ifeq ($(FC),ifort)
+	@echo Building collier_wrapper.o
+	@ifort -std08 -c $(LOOP_DIR)/collier_wrapper.f03 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
+endif
+
+$(LOOP_DIR)/collier_wrapper.f03 : $(LOOP_DIR)/collier_wrapper.F03
+	@echo Generating collier_wrapper.f03
+	@$(FC) -E $(LOOP_DIR)/collier_wrapper.F03 | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $(LOOP_DIR)/collier_wrapper.f03
+# loop library #########################################################
 
 LIBFLEXI_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBFLEXI_SRC))) \

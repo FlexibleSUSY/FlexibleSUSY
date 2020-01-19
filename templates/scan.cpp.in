@@ -45,13 +45,16 @@ void print_usage()
 @printCommandLineOptions@
       "  --solver-type=<value>             an integer corresponding\n"
       "                                    to the solver type to use\n"
+      "  --loop-library=<value>            an integer corresponding to the used\n"
+      "                                    realization of loop library\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
 void set_command_line_parameters(const Dynamic_array_view<char*>& args,
                                  @ModelName@_input_parameters& input,
-                                 int& solver_type)
+                                 int& solver_type,
+                                 int& loop_library)
 {
    for (int i = 1; i < args.size(); ++i) {
       const auto option = args[i];
@@ -59,6 +62,10 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
 @parseCmdLineOptions@
       if (Command_line_options::get_parameter_value(
              option, "--solver-type=", solver_type))
+         continue;
+
+      if (Command_line_options::get_parameter_value(
+             option, "--loop-library=", loop_library))
          continue;
 
       if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
@@ -77,11 +84,12 @@ struct @ModelName@_scan_result {
 };
 
 template <class solver_type>
-@ModelName@_scan_result run_parameter_point(const softsusy::QedQcd& qedqcd,
+@ModelName@_scan_result run_parameter_point(int loop_library, const softsusy::QedQcd& qedqcd,
    @ModelName@_input_parameters& input)
 {
    Spectrum_generator_settings settings;
    settings.set(Spectrum_generator_settings::precision, 1.0e-4);
+   settings.set(Spectrum_generator_settings::loop_library, loop_library);
 
    @ModelName@_spectrum_generator<solver_type> spectrum_generator;
    spectrum_generator.set_settings(settings);
@@ -97,7 +105,7 @@ template <class solver_type>
    return result;
 }
 
-void scan(int solver_type, @ModelName@_input_parameters& input,
+void scan(int solver_type, int loop_library, @ModelName@_input_parameters& input,
           const std::vector<double>& range)
 {
    softsusy::QedQcd qedqcd;
@@ -136,8 +144,9 @@ int main(int argc, char* argv[])
 
    @ModelName@_input_parameters input;
    int solver_type = @defaultSolverType@;
+   int loop_library = 0;
    set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
-                               solver_type);
+                               solver_type, loop_library);
 
    std::cout << "# "
              << std::setw(12) << std::left << "@InputParameter_1@" << ' '
@@ -147,7 +156,7 @@ int main(int argc, char* argv[])
 
    const std::vector<double> range(float_range(0., 100., 10));
 
-   scan(solver_type, input, range);
+   scan(solver_type, loop_library, input, range);
 
    return 0;
 }

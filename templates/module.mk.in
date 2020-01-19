@@ -52,7 +52,6 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_a_muon.cpp \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
-		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.cpp \
 		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
@@ -85,7 +84,6 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_convergence_tester.hpp \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
-		$(DIR)/@CLASSNAME@_FFMassiveV_form_factors.hpp \
 		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
@@ -115,7 +113,7 @@ LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
-		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions.hpp
+		$(DIR)/cxx_qft/@CLASSNAME@npointfunctions_wilsoncoeffs.hpp
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 -include $(DIR)/two_scale.mk
@@ -288,7 +286,7 @@ run-metacode-$(MODNAME): $(METACODE_STAMP_@CLASSNAME@)
 ifeq ($(ENABLE_META),yes)
 $(METACODE_STAMP_@CLASSNAME@): $(DIR)/start.m $(DIR)/FlexibleSUSY.m $(META_SRC) $(TEMPLATES) $(SARAH_MODEL_FILES_@CLASSNAME@)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "Get[\"$<\"]; Quit[]" || (echo "Error: The code generation failed!"; exit 1)
+		$(Q)printf "%s" "Get[\"$<\"]; Quit[]" | "$(MATH)" || (echo "Error: The code generation failed!"; exit 1)
 		@touch "$(METACODE_STAMP_@CLASSNAME@)"
 		@echo "Note: to regenerate @CLASSNAME@ source files," \
 		      "please remove the file "

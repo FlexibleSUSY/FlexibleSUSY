@@ -7,7 +7,6 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/vertices.hpp.in \
 		$(DIR)/cxx_qft/vertices_.cpp.in \
 		$(DIR)/cxx_qft/context_base.hpp.in \
-		$(DIR)/cxx_qft/npointfunctions.hpp.in \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
@@ -15,8 +14,6 @@ BASE_TEMPLATES := \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
 		$(DIR)/FFV_form_factors.cpp.in \
-		$(DIR)/FFMassiveV_form_factors.hpp.in \
-		$(DIR)/FFMassiveV_form_factors.cpp.in \
 		$(DIR)/l_to_lgamma.hpp.in \
 		$(DIR)/l_to_lgamma.cpp.in \
 		$(DIR)/f_to_f_conversion.hpp.in \
