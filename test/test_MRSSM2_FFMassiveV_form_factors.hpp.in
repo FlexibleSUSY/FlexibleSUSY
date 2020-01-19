@@ -16,38 +16,22 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-/**
- * @file @ModelName@_FFMassiveV_form_factors.cpp
- *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
- */
-
 #include <valarray>
 #include <complex>
-#include <iostream>
 
 #include "@ModelName@_mass_eigenstates.hpp"
-
 #include "cxx_qft/@ModelName@_qft.hpp"
-#include "cxx_qft/@ModelName@_vertices.hpp"
 #include "concatenate.hpp"
-
 #include "wrappers.hpp"
-
-#include "@ModelName@_FFMassiveV_form_factors.hpp"
+#include "loop_libraries/loop_library.hpp"
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
 
 #define MU_2 250000.0
-#define P2 -mj2
-#include "loop_libraries/loop_library.hpp"
 
 namespace {
-
-#include "clooptools.h"
 
 /**
  * @class MuEGammaVertexCorrectionFS
@@ -126,21 +110,12 @@ std::valarray<std::complex<double>> FFMassiveVVertexCorrectionFS<Fj, Fi, V, F, S
       const typename field_indices<Fi>::type& indices_out,
       context_base const& context) {
 
-   // using VertexFiBarFjVBar = Vertex<typename Fi::lorentz_conjugate, Fj, typename V::lorentz_conjugate>;
-
-   // auto spectator_indices = default_indices_for_spectator<V>();
-   // const auto indexFiBarFjVBar = flexiblesusy::cxx_diagrams::impl::concatenate(
-      // flexiblesusy::cxx_diagrams::impl::concatenate( indices_out, indices_in),
-      // spectator_indices);
-   // const auto FiBarFjVBar = VertexFiBarFjVBar::evaluate(indexFiBarFjVBar, context);
    std::valarray<std::complex<double>> res {0.0, 0.0};
 
-   //if(is_zero(abs(FiBarFjVBar.left())) &&  is_zero(abs(FiBarFjVBar.right()))) {
-      res += FFVEmitterFj<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
-      res += FFVEmitterFi<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
-      res += FFVEmitterF<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
-      res += FFVEmitterS<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
-   //}
+   res += FFVEmitterFj<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
+   res += FFVEmitterFi<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
+   res += FFVEmitterF<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
+   res += FFVEmitterS<Fj, Fi, V, F, S>::value(indices_in, indices_out, context);
 
    return res;
 }
@@ -161,11 +136,6 @@ std::valarray<std::complex<double>> FFVEmitterFj<Fj, Fi, V, F, S>::value(
    const auto mj2 = mj*mj;
    const auto mi = context.mass<Fi>(indices_out);
    const auto mi2 = mi*mi;
-   //#include "/Users/Navir/masses.txt"
-   //const auto mj = mFe[indices_in[0]];
-   //const auto mj2 = mj*mj;
-   //const auto mi = mFe[indices_out[0]];
-   //const auto mi2 = mi*mi;
 
    std::valarray<std::complex<double>> res {0.0, 0.0};
    // loop over all possible particle "generations" attached to both vertices
@@ -200,10 +170,8 @@ std::valarray<std::complex<double>> FFVEmitterFj<Fj, Fi, V, F, S>::value(
          const auto FjBarFjVBarR = FjBarFjVBar.right();
 
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         // const auto mF = mChi[fermionFieldIndicesIn[0]];
          const auto mF2 = mF * mF;
          const auto mS = context.mass<S>(scalarFieldIndicesIn);
-         // const auto mS = mSe[scalarFieldIndicesIn[0]];
          const auto mS2 = mS*mS;
 
          const auto FBarFjSBar = VertexFBarFjSBar::evaluate(indexIn, context);
@@ -245,11 +213,6 @@ std::valarray<std::complex<double>> FFVEmitterFi<Fj, Fi, V, F, S>::value(
    const auto mj2 = mj*mj;
    const auto mi = context.mass<Fi>(indices_out);
    const auto mi2 = mi*mi;
-   //#include "/Users/Navir/masses.txt"
-   //const auto mj = mFe[indices_in[0]];
-   //const auto mj2 = mj*mj;
-   //const auto mi = mFe[indices_out[0]];
-   //const auto mi2 = mi*mi;
 
    std::valarray<std::complex<double>> res {0.0, 0.0};
    // loop over all possible particle "generations" attached to both vertices
@@ -283,10 +246,8 @@ std::valarray<std::complex<double>> FFVEmitterFi<Fj, Fi, V, F, S>::value(
          const auto FiBarFiVBarR = FiBarFiVBar.right();
 
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         // const auto mF = mChi[fermionFieldIndicesIn[0]];
          const auto mF2 = mF * mF;
          const auto mS = context.mass<S>(scalarFieldIndicesIn);
-         // const auto mS = mSe[scalarFieldIndicesIn[0]];
          const auto mS2 = mS*mS;
 
          const auto FBarFjSBar = VertexFBarFjSBar::evaluate(indexIn, context);
@@ -330,7 +291,6 @@ std::valarray<std::complex<double>> FFVEmitterF<Fj, Fi, V, F, S>::value(
 
    auto spectator_indices = default_indices_for_spectator<V>();
 
-   //#include "/Users/Navir/masses.txt"
    std::valarray<std::complex<double>> res {0.0, 0.0};
    // loop over all possible particle "generations" attached to both vertices
    for (const auto& indexIn: index_range<VertexFBarFjSBar>()) {
@@ -360,13 +320,10 @@ std::valarray<std::complex<double>> FFVEmitterF<Fj, Fi, V, F, S>::value(
          const auto FBarFVBarR = FBarFVBar.right();
 
          const auto mFB = context.mass<F>(fermionFieldIndicesIn);
-         // const auto mFB = mChi[fermionFieldIndicesIn[0]];
          const auto mFB2 = mFB*mFB;
          const auto mFA = context.mass<F>(fermionFieldIndicesOut);
-         // const auto mFA = mChi[fermionFieldIndicesOut[0]];
          const auto mFA2 = mFA*mFA;
          const auto mS = context.mass<S>(scalarFieldIndicesIn);
-         // const auto mS = mSe[scalarFieldIndicesIn[0]];
          const auto mS2 = mS*mS;
 
          const auto FBarFjSBar  = VertexFBarFjSBar::evaluate(indexIn, context);
@@ -378,32 +335,32 @@ std::valarray<std::complex<double>> FFVEmitterF<Fj, Fi, V, F, S>::value(
          const auto FiBarFSR = FiBarFS.right();
 
          const std::complex<double> A1L =
-         -(-(FBarFjSBarL*FBarFVBarR*FiBarFSR*lib.B0(P2,mFB2,mFA2,MU_2)) +
+         -(-(FBarFjSBarL*FBarFVBarR*FiBarFSR*lib.B0(-mj2,mFB2,mFA2,MU_2)) +
       FBarFjSBarL*FiBarFSR*(FBarFVBarL*mFA*mFB + FBarFVBarR*mj2 - FBarFVBarR*mS2)*
-       lib.C0(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) + 2*FBarFjSBarL*FBarFVBarR*FiBarFSR*lib.C00(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi2*lib.C1(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C1(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi2*lib.C12(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C12(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarL*FBarFVBarL*FiBarFSL*mFB*mi*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarR*FBarFVBarL*FiBarFSR*mFA*mj*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      2*FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi*mj*lib.C22(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C22(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2))/(16.*Power(Pi,2));
+       lib.C0(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) + 2*FBarFjSBarL*FBarFVBarR*FiBarFSR*lib.C00(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi2*lib.C1(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C1(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi2*lib.C12(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C12(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarL*FBarFVBarL*FiBarFSL*mFB*mi*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarR*FBarFVBarL*FiBarFSR*mFA*mj*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      2*FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi*mj*lib.C22(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mj2*lib.C22(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2))/(16.*Power(Pi,2));
 
         const std::complex<double> A1R =
-        -(-(FBarFjSBarR*FBarFVBarL*FiBarFSL*lib.B0(P2,mFB2,mFA2,MU_2)) +
+        -(-(FBarFjSBarR*FBarFVBarL*FiBarFSL*lib.B0(-mj2,mFB2,mFA2,MU_2)) +
       FBarFjSBarR*FiBarFSL*(FBarFVBarR*mFA*mFB + FBarFVBarL*mj2 - FBarFVBarL*mS2)*
-       lib.C0(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) + 2*FBarFjSBarR*FBarFVBarL*FiBarFSL*lib.C00(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi2*lib.C1(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C1(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi2*lib.C12(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C12(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarR*FBarFVBarR*FiBarFSR*mFB*mi*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
-      FBarFjSBarL*FBarFVBarR*FiBarFSL*mFA*mj*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      2*FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C2(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi*mj*lib.C22(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
-      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C22(P2,mi2,mj2,mFB2,mFA2,mS2,MU_2))/(16.*Power(Pi,2));
+       lib.C0(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) + 2*FBarFjSBarR*FBarFVBarL*FiBarFSL*lib.C00(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi2*lib.C1(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C1(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mi2*lib.C12(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C12(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarR*FBarFVBarR*FiBarFSR*mFB*mi*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) -
+      FBarFjSBarL*FBarFVBarR*FiBarFSL*mFA*mj*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      2*FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C2(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarL*FBarFVBarR*FiBarFSR*mi*mj*lib.C22(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2) +
+      FBarFjSBarR*FBarFVBarL*FiBarFSL*mj2*lib.C22(-mj2,mi2,mj2,mFB2,mFA2,mS2,MU_2))/(16.*Power(Pi,2));
 
          res += std::valarray<std::complex<double>> {A1L, A1R};
       }
@@ -430,7 +387,6 @@ std::valarray<std::complex<double>> FFVEmitterS<Fj, Fi, V, F, S>::value(
    const auto mi = context.mass<Fi>(indices_out);
    const auto mi2 = mi*mi;
 
-   //#include "/Users/Navir/masses.txt"
    std::valarray<std::complex<double>> res {0.0, 0.0};
    // loop over all possible particle "generations" attached to both vertices
    for (const auto& indexIn: index_range<VertexFBarFjSBar>()) {
@@ -459,13 +415,10 @@ std::valarray<std::complex<double>> FFVEmitterS<Fj, Fi, V, F, S>::value(
          const auto SBarSVBar = VertexSBarSVBar::evaluate(indexSBarSVBar, context).value(0,1);
 
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         // const auto mF = mChi[fermionFieldIndicesIn[0]];
          const auto mF2 = mF*mF;
          const auto mSB = context.mass<S>(scalarFieldIndicesIn);
-         // const auto mSB = mSe[scalarFieldIndicesIn[0]];
          const auto mSB2 = mSB*mSB;
          const auto mSA = context.mass<S>(scalarFieldIndicesOut);
-         // const auto mSA = mSe[scalarFieldIndicesOut[0]];
          const auto mSA2 = mSA * mSA;
 
          const auto FBarFjSBar  = VertexFBarFjSBar::evaluate(indexIn, context);
@@ -477,43 +430,42 @@ std::valarray<std::complex<double>> FFVEmitterS<Fj, Fi, V, F, S>::value(
          const auto FiBarFSR = FiBarFS.right();
 
          const std::complex<double> A1L =
-         // -(FBarFjSBarL*FiBarFSR*SBarSVBar*MyC00(mF,mSA,mSB))/(8.*Power(Pi,2));
-         (SBarSVBar*(mF*(FBarFjSBarL*FiBarFSL*mi + FBarFjSBarR*FiBarFSR*mj)*lib.C0(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                2*FBarFjSBarL*FiBarFSR*lib.C00(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarL*FiBarFSL*mF*mi*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi2*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarR*FiBarFSR*mF*mj*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi*mj*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi2*lib.C11(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi*mj*lib.C11(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi2*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                2*FBarFjSBarR*FiBarFSL*mi*mj*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mj2*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarL*FiBarFSL*mF*mi*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarR*FiBarFSR*mF*mj*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi*mj*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mj2*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi*mj*lib.C22(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mj2*lib.C22(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2)))/(16.*Power(Pi,2));
+         (SBarSVBar*(mF*(FBarFjSBarL*FiBarFSL*mi + FBarFjSBarR*FiBarFSR*mj)*lib.C0(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                2*FBarFjSBarL*FiBarFSR*lib.C00(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarL*FiBarFSL*mF*mi*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi2*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarR*FiBarFSR*mF*mj*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi*mj*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi2*lib.C11(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi*mj*lib.C11(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi2*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                2*FBarFjSBarR*FiBarFSL*mi*mj*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mj2*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarL*FiBarFSL*mF*mi*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarR*FiBarFSR*mF*mj*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi*mj*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mj2*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi*mj*lib.C22(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mj2*lib.C22(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2)))/(16.*Power(Pi,2));
 
                   const std::complex<double> A1R =
-                  (SBarSVBar*(mF*(FBarFjSBarR*FiBarFSR*mi + FBarFjSBarL*FiBarFSL*mj)*lib.C0(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                2*FBarFjSBarR*FiBarFSL*lib.C00(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarR*FiBarFSR*mF*mi*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi2*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarL*FiBarFSL*mF*mj*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi*mj*lib.C1(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi2*lib.C11(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi*mj*lib.C11(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mi2*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                2*FBarFjSBarL*FiBarFSR*mi*mj*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mj2*lib.C12(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarR*FiBarFSR*mF*mi*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) +
-                FBarFjSBarL*FiBarFSL*mF*mj*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi*mj*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mj2*lib.C2(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarL*FiBarFSR*mi*mj*lib.C22(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2) -
-                FBarFjSBarR*FiBarFSL*mj2*lib.C22(mi2,P2,mj2,mF2,mSA2,mSB2,MU_2)))/(16.*Power(Pi,2));
+                  (SBarSVBar*(mF*(FBarFjSBarR*FiBarFSR*mi + FBarFjSBarL*FiBarFSL*mj)*lib.C0(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                2*FBarFjSBarR*FiBarFSL*lib.C00(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarR*FiBarFSR*mF*mi*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi2*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarL*FiBarFSL*mF*mj*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi*mj*lib.C1(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi2*lib.C11(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi*mj*lib.C11(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mi2*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                2*FBarFjSBarL*FiBarFSR*mi*mj*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mj2*lib.C12(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarR*FiBarFSR*mF*mi*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) +
+                FBarFjSBarL*FiBarFSL*mF*mj*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi*mj*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mj2*lib.C2(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarL*FiBarFSR*mi*mj*lib.C22(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2) -
+                FBarFjSBarR*FiBarFSL*mj2*lib.C22(mi2,-mj2,mj2,mF2,mSA2,mSB2,MU_2)))/(16.*Power(Pi,2));
 
          res += std::valarray<std::complex<double>> {A1L, A1R};
       }

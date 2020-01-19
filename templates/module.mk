@@ -14,8 +14,6 @@ BASE_TEMPLATES := \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
 		$(DIR)/FFV_form_factors.cpp.in \
-		$(DIR)/FFMassiveV_form_factors.hpp.in \
-		$(DIR)/FFMassiveV_form_factors.cpp.in \
 		$(DIR)/l_to_lgamma.hpp.in \
 		$(DIR)/l_to_lgamma.cpp.in \
 		$(DIR)/f_to_f_conversion.hpp.in \

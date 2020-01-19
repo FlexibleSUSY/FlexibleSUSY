@@ -33,7 +33,6 @@
 
 #include "@ModelName@_f_to_f_conversion.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
-#include "@ModelName@_FFMassiveV_form_factors.hpp"
 
 #include "wrappers.hpp"
 
@@ -42,7 +41,6 @@
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
-using namespace @ModelName@_FFMassiveV_form_factors;
 
 namespace flexiblesusy {
 using namespace @ModelName@_cxx_diagrams::fields;
@@ -118,37 +116,6 @@ std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {
     std::array<int, 2> indices {0, 0};
     const auto value =  vertex::evaluate(indices, context);
     return 0.5*(value.left() + value.right());
-}
-
-template <class V, class FormFactor>
-std::valarray<std::complex<double>> create_massive_penguin_amp(
-      FormFactor V_exchange,
-      const @ModelName@_mass_eigenstates& model,
-      const softsusy::QedQcd& qedqcd) {
-
-   context_base context {model};
-
-   const auto uVectorCurrent =
-      vectorCurrent<typename Fu::lorentz_conjugate, Fu, typename V::lorentz_conjugate>(model);
-   const auto dVectorCurrent =
-      vectorCurrent<typename Fd::lorentz_conjugate, Fd, typename V::lorentz_conjugate>(model);
-
-   const auto mVsqr = pow(context.mass<V>({}), 2);
-   const auto GF = qedqcd.displayFermiConstant();
-
-   /* The vector-q-q and effective vertex have factor I removed from them.
-      Therefore we miss I^2 = -1 from verices and -I from the numerator
-      of vector propagator which in total gives +I. This 'I' will be used for
-      converting back from amplitude to term in the lagrangian.
-      In our convention, the effective 4-fermion operator is defined as
-         L = - GF/sqrt2 * O
-   */
-   std::complex<double> guLV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[0] * uVectorCurrent;
-   std::complex<double> guRV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[1] * uVectorCurrent;
-   std::complex<double> gdLV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[0] * dVectorCurrent;
-   std::complex<double> gdRV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[1] * dVectorCurrent;
-
-   return {guLV, guRV, gdLV, gdRV};
 }
 
 @FToFConversion_InterfaceDefinitions@

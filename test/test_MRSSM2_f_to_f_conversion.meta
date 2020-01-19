@@ -193,6 +193,21 @@ If[newVertices==={},
 ];
 
 (*CODE REPLACEMENTS************************************************************)
+WriteOut`ReplaceInFiles[
+   {
+      {
+         FileNameJoin@{workingDirectory, "test", "test_MRSSM2_FFMassiveV_form_factors.hpp.in"},
+         FileNameJoin@{workingDirectory, "test", "test_MRSSM2_FFMassiveV_form_factors.hpp"}
+      }
+   },
+   {
+      "@FFMassiveVFormFactors_InterfacePrototypes@" -> prototypesMassive,
+      "@FFMassiveVFormFactors_InterfaceDefinitions@" -> definitionsMassive,
+      "@FFMassiveVFormFactors_VIndices@" ->  massiveVIndices,
+      "@ModelName@" -> FlexibleSUSY`FSModelName
+   }
+];
+
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
    FileNameJoin@{workingDirectory, "test", "test_MRSSM2_f_to_f_conversion.cpp.in"}],
    "\n"];
@@ -200,12 +215,8 @@ code = StringReplace[templateCode,
    {
       "@npf_headers@" -> npfHeaders,
       "@npf_definitions@" -> npfCode,
-      "@FFMassiveVFormFactors_InterfacePrototypes@" -> prototypesMassive,
-      "@FFMassiveVFormFactors_InterfaceDefinitions@" -> definitionsMassive,
-      "@FFMassiveVFormFactors_VIndices@" ->  massiveVIndices,
       "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
-      "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]],
-      "@ModelName@" -> FlexibleSUSY`FSModelName
+      "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
    }
 ];
 
