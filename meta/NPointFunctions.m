@@ -621,6 +621,7 @@ Module[
       inFANames, outFANames, loopLevel, regularizationScheme,
       zeroExternalMomenta, excludeProcesses, onShellFlag];
 
+   SetSharedFunction[subWrite,Print];
    nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDirectory;
@@ -639,6 +640,7 @@ Module[
       subKernel
    ];
    CloseKernels@subKernel;
+   UnsetShared[subWrite,Print];
 
    If[OptionValue@UseCache,CacheNPointFunction[
       nPointFunction,nPointFunctionsDir,
@@ -648,6 +650,13 @@ Module[
 ] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
 NPointFunction // Utils`MakeUnknownInputDefinition;
 NPointFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+subWrite::usage =
+"@brief Prints a string.
+@note SetSharedFunction is not working with Locked or ReadProtected attributes.
+@note SetSharedFunction does not cause names leaking.";
+subWrite[str_String] := WriteString["stdout"~OutputStream~1,str];
+subWrite ~ SetAttributes ~ {Protected};
 
 internalNPointFunctionInputCheck[inFields:{__},outFields:{__},opts___] :=
 Module[

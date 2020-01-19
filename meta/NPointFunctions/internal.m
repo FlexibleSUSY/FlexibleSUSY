@@ -25,11 +25,12 @@
 (* There is a problem with Global`args which comes from mathematica paclets.*)
 Quiet[Needs["FeynArts`"],{FeynArts`args::shdw}];
 (* Change this to 2 to see more output (if 1 then less). *)
-FeynArts`$FAVerbose = 1;
+FeynArts`$FAVerbose = 0;
 
 Needs["FormCalc`"];
 (* Change this to 1,2 or 3 to see more output. *)
 FormCalc`$FCVerbose = 0;
+
 (* Next Format makes some pattern generate mistakes. *)
 Format[FormCalc`DiracChain[FormCalc`Private`s1_FormCalc`Spinor,FormCalc`Private`om_,FormCalc`Private`g___,FormCalc`Private`s2_FormCalc`Spinor]] =.;
 Needs["Utils`"];
@@ -971,7 +972,9 @@ Module[
    ampsGen = If[zeroExternalMomenta===True,
       FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ], (* Relations Mom[i]^2 = 0 are true now. *)
       ampsGen];
-   Print["FORM calculation started ..."];
+
+   subWrite["\nAmplitude calculation started ...\n"];
+   `time`set[];
    calculatedAmplitudes = applyAndPrint[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> Switch[regularizationScheme,
@@ -983,7 +986,7 @@ Module[
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
-   Print["FORM calculation done."];
+   subWrite["Amplitude calculation started ... done in "<>`time`get[]<>" seconds.\n"];
 
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
 
@@ -1007,6 +1010,23 @@ Module[
       {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
 ];
+
+`time`time = AbsoluteTime[];
+`time`time ~ SetAttributes ~ {Protected,ReadProtected};
+
+`time`set[] := (
+   Unprotect@`time`time;
+   `time`time = AbsoluteTime[];
+   Protect@`time`time;
+);
+`time`set // Utils`MakeUnknownInputDefinition;
+`time`set ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
+`time`get[] :=
+   ToString@N[AbsoluteTime[]-`time`time,{Infinity,3}];
+`time`get // Utils`MakeUnknownInputDefinition;
+`time`get ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+
 
 (*@Todo think how to implement this in an elegant way.*)
 uniqueChains[calculatedAmplitudes_,rules:{}] :=
@@ -1186,20 +1206,22 @@ Module[
       write,
       percent,
       numOfEq,
-      restL
+      restL,
+      result
    },
    restL=defLength-2*IntegerLength@totL-11;
-   write[args__] := Write[OutputStream["stdout", 1],args];
-   Reap[
+   result=Reap[
       Do[
       percent = now/totL;
       numOfEq = If[#<0,0,#]&[ Floor[percent*restL]-1 ];
-      write[StringJoin[
+      subWrite@StringJoin[
          "[",StringJoin@@Array[" "&,IntegerLength@totL-IntegerLength@now],ToString@now,"/",ToString@totL,"]"," ",
-         "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%"]];
+         "[",StringJoin@@Array["="&,numOfEq],">",StringJoin@@Array[" "&,restL-numOfEq-1],"] ",ToString@Floor[100*percent],"%\r"];
       Sow@func[ expr[[now]], opts[[now]] ];,
       {now,totL}]
-   ][[2,1]]
+   ][[2,1]];
+   subWrite@"\033[K\033[A";
+   result
 ];
 
 CombinatorialFactorsForClasses::usage=
