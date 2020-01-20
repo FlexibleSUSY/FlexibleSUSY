@@ -1394,31 +1394,37 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
    "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ];
 
-(* Returns translation of the form
-   {Field[1] -> hh, Field[2] -> VG, Field[3] -> VG, Field[4] -> Fd, Field[5] -> bar[Fd], Field[6] -> Fd}
+(*
+   GetFieldsAssociations is the core function that matches concrete Feynman diagram generated
+   by FS onto a generic diagram from FeynArts/FormCalc.
 
-   A: {{1, 4} -> hh, {2, 5} -> VP, {3, 5} -> VP, {4, 5} -> Hp,
+   concrete fields on edges, e.g.
+   {{1, 4} -> hh, {2, 5} -> SRdp, {3, 6} -> VWm, {4, 5} -> SRdp, {4, 6} -> Hpm, {5, 6} -> VZ}
+   come from FS
 
->    {4, 5} -> conj[Hp]}
-B: {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 5} -> Field[3],
+   fieldNumberOnEdgeBetweenVertices, e.g.
+   {{1, 4} -> Field[1], {2, 5} -> Field[2], {3, 6} -> Field[3], {4, 5} -> Field[4], {4, 6} -> Field[5], {5, 6} -> Field[6]}
+   come from FeynArts/FormCalc translation files
 
->    {4, 5} -> Field[4], {4, 5} -> Field[5]}
-{Field[1] -> hh, Field[2] -> VP, Field[3] -> VP, Field[4] -> Hp,
+   fieldTypes, e. g.
+   {Field[1] -> S, Field[2] -> S, Field[3] -> V, Field[4] -> S, Field[5] -> S, Field[6] -> V}
 
->   Field[5] -> Hp}
+   GetFieldsAssociations returns translation in the form
+   {Field[1] -> hh, Field[2] -> SRdp, Field[3] -> VWm, Field[4] -> SRdp, Field[5] -> Hpm, Field[6] -> VZ}
 
+   @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
 *)
-GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldType_] :=
-   Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
+GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
+   Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal, verticesForFACp, temp2},
 
       concreteFieldOnEdgeBetweenVerticesLocal = concreteFieldOnEdgeBetweenVertices;
       temp = SortBy[Reverse /@ fieldNumberOnEdgeBetweenVertices, Last];
 
       For[i = 1, i <= Length[temp], i++,
 
-         If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldType),
+         If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldTypes),
 
-            temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVerticesLocal[[i]];
+            temp[[i]] = temp[[i]] /. If[i==2 || i ==3, concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]], concreteFieldOnEdgeBetweenVerticesLocal[[i]]];
             temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
 
             concreteFieldOnEdgeBetweenVerticesLocal[[{i, i+1}]] = concreteFieldOnEdgeBetweenVerticesLocal[[{i+1, i}]];
@@ -1484,21 +1490,25 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       If[Length[translation]===7 && translation[[-3]] === {},
         Return[{{}, ""}]
       ];
+      Print[translation];
+
+      (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
+      (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
+      (*      verticesInFieldTypes =*)
+      (*          Select[translation[[-2]], ListQ] /. Susyno`LieGroups`conj[f_] :> -f /. Field[n_] :> (Field[n]/.translation[[4]])[n];*)
+      verticesInFieldTypesForFACp =
+         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] :> n /. Global`FACp[x__][__] :> FACp[x]]);
 
       (* {Field[1] -> concrete field, ...} *)
       fieldAssociation =
           GetFieldsAssociations[
             InsertionsOnEdgesForDiagram[topology, diagram],
             translation[[3]],
-            translation[[4]]
+            translation[[4]],
+            diagram,
+             verticesInFieldTypesForFACp
           ];
 
-      (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
-      (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
-(*      verticesInFieldTypes =*)
-(*          Select[translation[[-2]], ListQ] /. Susyno`LieGroups`conj[f_] :> -f /. Field[n_] :> (Field[n]/.translation[[4]])[n];*)
-      verticesInFieldTypesForFACp =
-         List @@@ (DeleteDuplicates[translation[[-3]] /. Index[Generic, n_Integer] :> n /. Global`FACp[x__][__] :> FACp[x]]);
 
       (* vertices in an orientation as required by Cp *)
 (*      vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];*)
