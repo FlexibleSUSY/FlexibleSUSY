@@ -433,23 +433,23 @@ Module[
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes*)}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins(*,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes*)}];
+      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
    dressedU = Flatten@getProcess@uNPF;
    dressedD = Flatten@getProcess@dNPF;
    assumptionReplacements =
      {
         SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[1]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2,
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+100*mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+100*mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+100*mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+100*mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+100*mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+100*mass[dressedU[[1]]]^2]
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
+        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2]
      };
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
 
