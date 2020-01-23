@@ -206,8 +206,12 @@ endif
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
-		$(DIR)/test_MRSSM2_l_to_lgamma.cpp \
-		$(DIR)/test_MRSSM2_b_to_s_gamma.cpp
+		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
+endif
+
+ifeq ($(WITH_MRSSM2CKM),yes)
+TEST_SRC += \
+		$(DIR)/test_MRSSM2CKM_b_to_s_gamma.cpp
 endif
 
 endif # ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -873,7 +877,7 @@ $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_b_to_s_gamma.x: $(LIBMRSSM2)
+$(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma.x: $(LIBCMSSMCKM)
 

@@ -1,4 +1,4 @@
-FSModelName = "MRSSM2";
+FSModelName = "MRSSM2CKM";
 FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = MRSSM;
 
@@ -58,11 +58,11 @@ LowScaleInput = {
 };
 
 InitialGuessAtSUSYScale = {
-    {mq2   , LHInput[mq2]},
-    {mu2   , LHInput[mu2]},
-    {md2   , LHInput[md2]},
-    {ml2   , LHInput[ml2]},
-    {me2   , LHInput[me2]},
+    {mq2   , MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+    {mu2   , MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+    {md2   , MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+    {ml2   , MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+    {me2   , MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
     {mS2   , LHInput[mS2]},
     {mT2   , LHInput[mT2]},
     {moc2  , LHInput[moc2]},
@@ -93,7 +93,8 @@ ExtraSLHAOutputBlocks = {
          {23, FlexibleSUSYObservable`EDM[Fe[1]]},
          {24, FlexibleSUSYObservable`EDM[Fe[2]]},
          {25, FlexibleSUSYObservable`EDM[Fe[3]]},
-         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {27, FlexibleSUSYObservable`bsgamma}
       }
    }
 };

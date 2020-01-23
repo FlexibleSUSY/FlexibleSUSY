@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MRSSM2_b_to_s_gamma
+#define BOOST_TEST_MODULE test_MRSSM2CKM_b_to_s_gamma
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
@@ -26,15 +26,15 @@
 #include "lowe.h"
 #include "test_complex_equality.hpp"
 
-#include "test_MRSSM2.hpp"
+#include "MRSSM2CKM_two_scale_spectrum_generator.hpp"
 
 #include "wrappers.hpp"
-#include "MRSSM2_b_to_s_gamma.hpp"
-#include "MRSSM2_slha_io.hpp"
+#include "MRSSM2CKM_b_to_s_gamma.hpp"
+#include "MRSSM2CKM_slha_io.hpp"
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_b_to_s_gamma, * boost::unit_test::tolerance(1e-9) )
+BOOST_AUTO_TEST_CASE( test_MRSSM2CKM_b_to_s_gamma, * boost::unit_test::tolerance(1e-6) )
 {
    char const * const slha_input = R"(
 Block MODSEL                 # Select model
@@ -173,12 +173,12 @@ Block MSOFTIN
 
    std::stringstream istr(slha_input);
 
-   MRSSM2_slha_io slha_io;
+   MRSSM2CKM_slha_io slha_io;
    slha_io.read_from_stream(istr);
 
    // extract the input parameters
    softsusy::QedQcd qedqcd;
-   MRSSM2_input_parameters input;
+   MRSSM2CKM_input_parameters input;
    Spectrum_generator_settings settings;
 
    try {
@@ -192,10 +192,13 @@ Block MSOFTIN
 
    settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
    settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
+   MRSSM2CKM_spectrum_generator<Two_scale> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
 
-   MRSSM2_slha<MRSSM2<Two_scale>> model = setup_MRSSM2(input, qedqcd, settings);
+   auto model = std::get<0>(spectrum_generator.get_models_slha());
 
-   const auto reference_value = MRSSM2_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
+   const auto reference_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
    constexpr std::complex<double> C7NP {-0.20234454161004062, -0.00369650084326421};
    constexpr std::complex<double> C7pNP {-0.00435452005573289, -0.00007954989509452};
    constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
