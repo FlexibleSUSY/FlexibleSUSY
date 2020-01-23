@@ -20,7 +20,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
 		$(DIR)/logger.cpp \
-		$(DIR)/loop_libraries/looptools.cpp \
 		$(DIR)/loop_libraries/softsusy.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
@@ -79,7 +78,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/linalg2.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
-		$(DIR)/loop_libraries/looptools.cpp \
 		$(DIR)/loop_libraries/softsusy.cpp \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
@@ -112,6 +110,13 @@ LIBFLEXI_HDR := \
 		$(DIR)/weinberg_angle.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp
+
+ifeq ($(ENABLE_LOOPTOOLS),yes)
+LIBFLEXI_SRC += \
+		$(DIR)/loop_libraries/looptools.cpp
+LIBFLEXI_HDR += \
+		$(DIR)/loop_libraries/looptools.hpp
+endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 LIBFLEXI_SRC += \
