@@ -4,7 +4,10 @@
 FlexibleSUSY
 ============
 
-.. image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/Unit%20tests/badge.svg?branch=development
+|release| |tests|
+
+.. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
 
 .. image:: doc/images/FS-logo.png
