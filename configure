@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=3
-FLEXIBLESUSY_PATCH=0
+FLEXIBLESUSY_MINOR=4
+FLEXIBLESUSY_PATCH=1
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -877,6 +877,18 @@ is_empty_dir() {
 }
 
 #_____________________________________________________________________
+is_posix_platform() {
+    case "$operating_system" in
+        *BSD*)     return 0 ;;
+        Darwin)    return 0 ;;
+        DragonFly) return 0 ;;
+        GNU*)      return 0 ;;
+        Linux)     return 0 ;;
+    esac
+    return 1
+}
+
+#_____________________________________________________________________
 check_install() {
     if test -z "${INSTALL_DIR}"; then
         return 0
@@ -1476,22 +1488,29 @@ check_std_threads() {
 
 #_____________________________________________________________________
 check_thread_libs() {
-    # link libpthread only if $enable_threads = yes
-    # I'm assuming here, that no other library we link needs libpthread.
-    if [ "x$enable_threads" = "xyes" -o -n "$pthread_lib_dir" ] ; then
-        check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths"
-        if [ -z "$found_lib" ]; then
-            message "Error: libpthread must be installed to enable multithreading!"
-            exit 1
-        fi
-        THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
-        # need to link whole libpthread.a for static linking
-        if [ "x$enable_static" = xyes ] ; then
-            THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
-        fi
-        if [ -n "$pthread_lib_dir" ]; then
-            THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
-        fi
+    is_posix_platform || return
+
+    # additional search paths by the compiler
+    local cc_lib_search_paths=""
+
+    case "$cxx_compiler_type" in
+	gnu|clang)
+	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    ;;
+    esac
+
+    check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths:$cc_lib_search_paths"
+    if [ -z "$found_lib" ]; then
+        message "Error: libpthread must be installed to enable multithreading!"
+        exit 1
+    fi
+    THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+    # need to link whole libpthread.a for static linking
+    if [ "x$enable_static" = xyes ] ; then
+        THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
+    fi
+    if [ -n "$pthread_lib_dir" ]; then
+        THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
     fi
 }
 
@@ -1728,6 +1747,22 @@ check_cxxflags() {
 
 #_____________________________________________________________________
 check_eigen_incl() {
+    local eigen_name=""
+
+    [ -f eigen.pc ] && eigen_name="eigen"
+    [ -f eigen3.pc ] && eigen_name="eigen3"
+
+    [ -z "$eigen_inc_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -n ${eigen_name} ] && \
+    [ -f ${eigen_name}.pc ] && \
+    {
+        message -n "Checking for Eigen library using local ${eigen_name}.pc ... "
+        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${eigen_name} --cflags)
+        message "ok"
+        return
+    }
+
     # Eigen headers are usually in the `eigen3` subdirectory of the include paths.
     eigen_inc_paths=""
     IFS=":"
@@ -2013,12 +2048,12 @@ check_required_libs() {
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
-                message "    TSIL is required to build $model_name"
+                message "   TSIL is required to build $model_name"
                 enable_tsil=yes
             }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 
@@ -2034,7 +2069,7 @@ If[FreeQ[HighScaleInput, FSHimalayaMh23L] &&
 EOF
 
             [ "x$?" = "x0" ] && {
-                message "    Himalaya is required to build $model_name";
+                message "   Himalaya is required to build $model_name";
                 enable_himalaya=yes
             }
 
@@ -2730,6 +2765,7 @@ get_model_specific_corrections() {
     mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSM" "True"    && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "UseHiggs4LoopSM" "True"    && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS3Loop" "True"   && ho="${ho} SM"
+    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS4Loop" "True"   && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "FlexibleEFTHiggs" "True"   && ho="${ho} SM"
     mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True"   && ho="${ho} SM_thresholds"
 

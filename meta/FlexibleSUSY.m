@@ -49,6 +49,7 @@ BeginPackage["FlexibleSUSY`",
               "Observables`",
               "CXXDiagrams`",
               "NPointFunctions`",
+              "WilsonCoeffs`",
               "AMuon`",
               "EDM`",
               "FFVFormFactors`",
@@ -188,6 +189,7 @@ UseSM3LoopRGEs = False;
 UseSM4LoopRGEs = False;
 UseSM5LoopRGEs = False;
 UseSMAlphaS3Loop = False;
+UseSMAlphaS4Loop = False;
 UseSMYukawa2Loop = False;
 UseMSSM3LoopRGEs = False;
 UseMSSMYukawa2Loop = False;
@@ -1994,69 +1996,68 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
                                        Sequence @@ GeneralReplacementRules[]
                                    } ];
            ];
-           
+
 (* Write the CXXDiagrams c++ files *)
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-  Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
-          sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-          outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
-          cxxQFTVerticesFiles},
+    Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
+            sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
+            outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
+            cxxQFTVerticesFiles},
 
-     massFunctions = CXXDiagrams`CreateMassFunctions[];
-     fields = CXXDiagrams`CreateFields[];
+        massFunctions = CXXDiagrams`CreateMassFunctions[];
+        fields = CXXDiagrams`CreateFields[];
 
-     If[vertices =!= {},
+        If[vertices =!= {},
 
-        cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
+            cxxVerticesParts = CXXDiagrams`CreateVertices[vertices];
+
+            (* Document which vertices are created. This is mainly useful for
+               unit testing. See e.g test/test_MSSM_npointfunctions.m *)
+            outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
+            cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
+            createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
+
+            If[DirectoryQ[cxxDiagramsDir] === False,
+                CreateDirectory[cxxDiagramsDir]];
+
+            (* There is a bug in WriteString[] in older Mathematica versions
+               that causes the files to be left open. *)
+            fileHandle = OpenWrite[createdVerticesFile];
+            Write[fileHandle, vertices];
+            Close[fileHandle];
+        ];
+
         unitCharge = CXXDiagrams`CreateUnitCharge[];
-    
-        cxxVerticesParts[[1, 2]] = cxxVerticesParts[[1, 2]] <> "\n\n" <>
-           unitCharge;
-    
-       (* Document which vertices are created. This is mainly useful for
-          unit testing. See e.g test/test_MSSM_npointfunctions.m *)
-       outputDir = FileNameJoin[{sarahOutputDir, ToString[FlexibleSUSY`FSEigenstates]}];
-       cxxDiagramsDir = FileNameJoin[{outputDir, "CXXDiagrams"}];
-       createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
-    
-       If[DirectoryQ[cxxDiagramsDir] === False,
-          CreateDirectory[cxxDiagramsDir]];
-    
-       (* There is a bug in WriteString[] in older Mathematica versions
-          that causes the files to be left open. *)
-       fileHandle = OpenWrite[createdVerticesFile];
-       Write[fileHandle, vertices];
-       Close[fileHandle];
-    ];
+        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
 
-    WriteOut`ReplaceInFiles[files,
+        WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"            -> fields,
                              "@CXXDiagrams_MassFunctions@"     -> massFunctions,
                              "@CXXDiagrams_VertexPrototypes@"  ->
-                               StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
+                                StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]
                             }];
-    
-    cxxQFTVerticesFiles = Table[
-        {cxxQFTVerticesTemplate,
-		   FileNameJoin[{cxxQFTVerticesOutputDirectory,
+
+        cxxQFTVerticesFiles = Table[
+            {cxxQFTVerticesTemplate,
+		      FileNameJoin[{cxxQFTVerticesOutputDirectory,
 			   FSModelName <> "_" <> FileNameTake[StringReplace[cxxQFTVerticesTemplate,
 			     {".cpp.in" -> ToString[k] <> ".cpp"}]]}]
-			},
-		  {k, Length[cxxVerticesParts]}];
-	
-    WriteOut`ReplaceInFiles[{#[[1]]},
-      {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
-       Sequence @@ GeneralReplacementRules[]
-      }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
-    WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
-      {"@generatedCXXVerticesFiles@" ->
-         "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
-       Sequence @@ GeneralReplacementRules[]
-      }];
- ]
+			   },
+		      {k, Length[cxxVerticesParts]}];
+
+        WriteOut`ReplaceInFiles[{#[[1]]},
+            {"@CXXDiagrams_VertexDefinitions@" -> #[[2, 2]],
+            Sequence @@ GeneralReplacementRules[]
+            }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
+        WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
+            {"@generatedCXXVerticesFiles@" ->
+                "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
+            Sequence @@ GeneralReplacementRules[]
+            }];
+    ];
 
 (* Write the EDM c++ files *)
 WriteEDMClass[edmFields_List,files_List] :=
@@ -2066,20 +2067,20 @@ WriteEDMClass[edmFields_List,files_List] :=
     diagrams = Outer[EDM`EDMContributingDiagramsForFieldAndGraph,edmFields,graphs,1];
 
     vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams,2],1];
-    
-    {interfacePrototypes,interfaceDefinitions} = 
+
+    {interfacePrototypes,interfaceDefinitions} =
       If[diagrams === {},
          {"",""},
-         StringJoin @@@ 
-          (Riffle[#, "\n\n"] & /@ Transpose[EDM`EDMCreateInterfaceFunctionForField @@@ 
+         StringJoin @@@
+          (Riffle[#, "\n\n"] & /@ Transpose[EDM`EDMCreateInterfaceFunctionForField @@@
             Transpose[{edmFields,Transpose[{graphs,#}] & /@ diagrams}]])];
-    
+
     WriteOut`ReplaceInFiles[files,
                             {"@EDM_InterfacePrototypes@"       -> interfacePrototypes,
                              "@EDM_InterfaceDefinitions@"      -> interfaceDefinitions,
                              Sequence @@ GeneralReplacementRules[]
                             }];
-    
+
     vertices
   ];
 
@@ -2159,11 +2160,11 @@ WriteFFMassiveVFormFactorsClass[extParticles_List, files_List] :=
 
 WriteLToLGammaClass[decays_List, files_List] :=
    Module[{interfacePrototypes, interfaceDefinitions},
-    
-      {interfacePrototypes, interfaceDefinitions} = 
+
+      {interfacePrototypes, interfaceDefinitions} =
          If[decays === {},
             {"",""},
-            StringJoin @@@ 
+            StringJoin @@@
                (Riffle[#, "\n\n"]& /@ Transpose[BrLToLGamma`CreateInterfaceFunctionForBrLToLGamma /@ decays])
          ];
 
@@ -2251,7 +2252,7 @@ WriteAMuonClass[calcAMu_, files_List] :=
             "model, " <> discardSMcontributions <> ");",
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
-            
+
       getMSUSY = AMuon`AMuonGetMSUSY[];
 
       WriteOut`ReplaceInFiles[files,
@@ -2794,15 +2795,19 @@ FSCheckFlags[] :=
               FlexibleSUSY`UseHiggs2LoopSM = True;
               FlexibleSUSY`UseHiggs3LoopSM = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               (* FlexibleSUSY`UseSMYukawa2Loop = True; *)
               FlexibleSUSY`UseYukawa3LoopQCD = True;
+              FlexibleSUSY`UseYukawa4LoopQCD = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
+              FlexibleSUSY`UseSM5LoopRGEs = True;
              ];
 
            If[FlexibleSUSY`UseYukawa4LoopQCD === True,
               FlexibleSUSY`UseYukawa3LoopQCD = True;
               FlexibleSUSY`UseSMAlphaS3Loop = True;
+              FlexibleSUSY`UseSMAlphaS4Loop = True;
               FlexibleSUSY`UseSM3LoopRGEs = True;
               FlexibleSUSY`UseSM4LoopRGEs = True;
              ];
@@ -2831,6 +2836,12 @@ FSCheckFlags[] :=
               Print["Adding 3-loop SM QCD threshold corrections to alpha_s ",
                     "[arxiv:hep-ph/9708255]"];
               References`AddReference["Chetyrkin:1997un"];
+             ];
+
+           If[FlexibleSUSY`UseSMAlphaS4Loop || FlexibleSUSY`FlexibleEFTHiggs,
+              Print["Adding 4-loop SM QCD threshold corrections to alpha_s ",
+                    "[arxiv:hep-ph/0512060]"];
+              References`AddReference["Chetyrkin:2005ia"];
              ];
 
            If[FlexibleSUSY`UseMSSMYukawa2Loop,
@@ -3449,7 +3460,7 @@ ReadSARAHBetaFunctions[] :=
            SARAH`Xi = 1;
            SARAH`Xip = 1;
            SARAH`rMS = SelectRenormalizationScheme[FlexibleSUSY`FSRenormalizationScheme];
-           
+
            If[FlexibleSUSY`UseSM3LoopRGEs,
               AddSM3LoopRGEs[];
              ];
@@ -3504,7 +3515,7 @@ ReadSARAHBetaFunctions[] :=
 
            susyBetaFunctions         = DeleteBuggyBetaFunctions @ (Join @@ susyBetaFunctions);
            susyBreakingBetaFunctions = DeleteBuggyBetaFunctions @ (Join @@ susyBreakingBetaFunctions);
-           
+
            {susyBetaFunctions, susyBreakingBetaFunctions}
     ]
 
@@ -3514,7 +3525,7 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
            If[Head[SARAH`RealParameters] === List,
               Parameters`AddRealParameter[SARAH`RealParameters];
              ];
-           
+
            (* store all model parameters *)
            allParameters = StripSARAHIndices[((#[[1]])& /@ Join[susyBetaFunctions, susyBreakingBetaFunctions])];
            Parameters`SetModelParameters[allParameters];
@@ -3525,10 +3536,10 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
                ConvertSarahPhases[SARAH`ParticlePhases],
                Exp[I #]& /@ GetVEVPhases[FlexibleSUSY`FSEigenstates]];
            Parameters`SetPhases[phases];
-           
+
            allParameters
     ]
-    
+
 ConvertBetaFunctions[susyBetaFunctionsSARAH_, susyBreakingBetaFunctionsSARAH_] :=
     Module[{susyBetaFunctions, susyBreakingBetaFunctions,
 	    numberOfSusyParameters, numberOfSusyBreakingParameters},
@@ -3557,25 +3568,25 @@ SetupMassMatrices[allParameters_] :=
              Global`downQuarksDRbar[i_,j_] :> Global`downQuarksDRbar[i-1,j-1],
              Global`downLeptonsDRbar[i_,j_] :> Global`downLeptonsDRbar[i-1,j-1]}
 		       ];
-		       
+
 		       Lat$massMatrices = TreeMasses`ConvertSarahMassMatrices[] /.
 		         Parameters`ApplyGUTNormalization[] //.
 		         { SARAH`sum[j_, start_, end_, expr_] :> (Sum[expr, {j,start,end}]) };
-		       
+
 		       massMatrices = Lat$massMatrices /. allIndexReplacementRules;
 		       Lat$massMatrices = LatticeUtils`FixDiagonalization[Lat$massMatrices];
-		       
+
 		       allIntermediateOutputParameters =
 		         Parameters`GetIntermediateOutputParameterDependencies[
 		           TreeMasses`GetMassMatrix /@ massMatrices];
 		       DebugPrint["intermediate output parameters = ", allIntermediateOutputParameters];
-           
+
 		       (* decrease index literals of intermediate output parameters in mass matrices *)
 		       allIntermediateOutputParameterIndexReplacementRules =
 		         Parameters`CreateIndexReplacementRules[allIntermediateOutputParameters];
-		       
+
 		       massMatrices = massMatrices /. allIntermediateOutputParameterIndexReplacementRules;
-		       
+
 		       {massMatrices, Lat$massMatrices}
 		]
 
@@ -3589,7 +3600,7 @@ SetupOutputParameters[massMatrices_] :=
            Parameters`SetOutputParameters[allOutputParameters];
            DebugPrint["output parameters = ", allOutputParameters];
     ]
-           
+
 
 Options[MakeFlexibleSUSY] :=
     {
@@ -3650,10 +3661,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["  Model: ", Style[FlexibleSUSY`FSModelName, FSColor]];
            Print["  Model file: ", OptionValue[InputFile]];
            Print["  Model output directory: ", FSOutputDir];
-           
+
            Utils`PrintHeadline["Reading SARAH output files"];
            PrepareFSRules[];
-           
+
            {susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH} = ReadSARAHBetaFunctions[];
 
            FSCheckFlags[];
@@ -3663,13 +3674,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
-           
+
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
 	       ConvertBetaFunctions[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
-					    
+
            Print["Converting SARAH anomalous dimensions ..."];
            anomDim = AnomalousDimension`ConvertSarahAnomDim[SARAH`Gij];
 
@@ -3755,7 +3766,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            DebugPrint["input parameters: ", Parameters`GetInputParameters[]];
            DebugPrint["auxiliary parameters: ", Parameters`GetExtraParameters[]];
-           
+
            On[Assert];
 
            {massMatrices, Lat$massMatrices} = SetupMassMatrices[allParameters];
@@ -3767,7 +3778,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            allExtraParameterIndexReplacementRules = Parameters`CreateIndexReplacementRules[
                Parameters`GetExtraParameters[]
             ];
-           
+
            SetupOutputParameters[massMatrices];
 
            (* backwards compatibility replacements in constraints *)
@@ -4365,7 +4376,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
                              {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
-                      
+
            Print["Creating EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
@@ -4512,7 +4523,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]}};
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},
+                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
+                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
+                          };
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];
            cxxQFTVerticesMakefileTemplates = {{FileNameJoin[{cxxQFTTemplateDir, "vertices.mk.in"}],
                            FileNameJoin[{cxxQFTOutputDir, "vertices.mk"}]}};

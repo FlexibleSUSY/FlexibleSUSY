@@ -4,6 +4,12 @@
 FlexibleSUSY
 ============
 
+|release| |tests|
+
+.. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
+   :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
+
 .. image:: doc/images/FS-logo.png
    :align: right
 
@@ -25,7 +31,8 @@ modification, extension and reuse.
   cite [1609.00371]_ and [1710.03760]_.
 
   If you use **FlexibleSUSY+Himalaya** or Himalaya_ in your work,
-  please cite [1005.5709]_, [1708.05720]_ and [1807.03509]_.
+  please cite [1005.5709]_, [1708.05720]_, [1807.03509]_ and
+  [1910.03595]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -39,6 +46,29 @@ modification, extension and reuse.
 
 .. contents:: Table of Contents
    :depth: 2
+
+
+Quick start
+===========
+
+Install required libraries and packages (if not already done)::
+
+    pip install conan
+    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
+    conan install . --build=missing
+    sudo apt-get install libgsl-dev
+    ./install-sarah
+
+Build a spectrum generator (here: HSSUSY [1710.03760]_
+[1804.09410]_)::
+
+    ./createmodel --name=HSSUSY
+    ./configure --with-models=HSSUSY
+    make -j4
+
+Run the spectrum generator::
+
+    ./models/HSSUSY/run_HSSUSY.x --slha-input-file=model_files/HSSUSY/LesHouches.in.HSSUSY
 
 
 Building FlexibleSUSY
@@ -98,7 +128,7 @@ FlexibleSUSY requires SARAH to be installed and to be loadable with
 the ``Needs["SARAH`"]`` command from inside Mathematica.  We recommend
 the following setup::
 
-    SARAH_VERSION=4.14.1
+    SARAH_VERSION=4.14.3
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -813,4 +843,6 @@ References
 .. [1609.00371] `JHEP 1701 (2017) 079 <https://inspirehep.net/record/1484857>`_ [`arxiv:1609.00371 <https://arxiv.org/abs/1609.00371>`_]
 .. [1708.05720] `Eur.Phys.J. C77 (2017) no.12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
+.. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
+.. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]

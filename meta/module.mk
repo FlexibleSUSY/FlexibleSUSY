@@ -85,6 +85,7 @@ META_SRC     := \
 		$(DIR)/Himalaya.m \
 		$(DIR)/LatticeUtils.m \
 		$(DIR)/LoopFunctions.m \
+		$(DIR)/LoopFunctionsZeroMomentum.m \
 		$(DIR)/LoopMasses.m \
 		$(DIR)/Observables.m \
 		$(DIR)/Parameters.m \

@@ -37,7 +37,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        21   1         # EFT loop order for downwards matching (BSM -> SM)
        22   0         # EFT index of SM-like Higgs in the BSM model (0 = lightest Higgs)
        23   1         # calculate BSM pole masses
-       24   124111321 # individual threshold correction loop orders
+       24   124111421 # individual threshold correction loop orders
        25   0         # ren. scheme for Higgs 3L corrections (0 = DR', 1 = MDR', 2 = H3m)
        26   1         # Higgs 3-loop corrections O(alpha_t alpha_s^2)
        27   1         # Higgs 3-loop corrections O(alpha_b alpha_s^2)
@@ -79,7 +79,7 @@ or the loop order of the pole mass calculation can be selected.
  21      EFT loop order for downwards matching    0, 1                                          1 (= 1-loop)                           
  22      EFT Higgs index                          any integer >= 0                              0 (= lightest)                         
  23      calculate pole masses of BSM particles   0 (no) or 1 (yes)                             1 (= yes)                              
- 24      individual threshold corrections         positive integer                              124111321                              
+ 24      individual threshold corrections         positive integer                              124111421                              
  25      ren. scheme for higgs 3L corrections     0 (DR'), 1 (MDR'), 2 (H3m)                    0 (= DR')                              
  26      higgs 3-loop correction O(at as^2)       0, 1                                          1 (= enabled)                          
  27      higgs 3-loop correction O(ab as^2)       0, 1                                          1 (= enabled)                          
@@ -468,11 +468,11 @@ digit is associated with which parameter.
 ========================== =========================================== ===========================
  0                          1 (1-loop)                                  :math:`\alpha_{\text{em}}`
  1                          2 (2-loop)                                  :math:`\sin\theta_W`
- 2                          3 (3-loop)                                  :math:`\alpha_{s}`
+ 2                          4 (4-loop)                                  :math:`\alpha_{s}`
  3                          1 (1-loop)                                  :math:`m_Z`
  4                          1 (1-loop)                                  :math:`m_W`
  5                          1 (1-loop)                                  :math:`m_h`
- 6                          3 (3-loop)                                  :math:`m_t`
+ 6                          4 (4-loop)                                  :math:`m_t`
  7                          2 (2-loop)                                  :math:`m_b`
  8                          1 (1-loop)                                  :math:`m_{\tau}`
 ========================== =========================================== ===========================

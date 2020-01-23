@@ -35,7 +35,6 @@ TEST_SRC := \
 		$(DIR)/test_fixed_point_iterator.cpp \
 		$(DIR)/test_goldstones.cpp \
 		$(DIR)/test_gsl_vector.cpp \
-		$(DIR)/test_linalg2.cpp \
 		$(DIR)/test_minimizer.cpp \
 		$(DIR)/test_namespace_collisions.cpp \
 		$(DIR)/test_mssm_twoloop_mb.cpp \
@@ -48,6 +47,7 @@ TEST_SRC := \
 		$(DIR)/test_raii.cpp \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
+		$(DIR)/test_sm_fourloop_as.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_sum.cpp \
@@ -61,7 +61,8 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
-		$(DIR)/test_space_dir.sh
+		$(DIR)/test_space_dir.sh \
+		$(DIR)/test_wolframscript.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -75,11 +76,13 @@ TEST_META := \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MRSSM_TreeMasses.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
 		$(DIR)/test_SelfEnergies.m \
 		$(DIR)/test_SemiAnalytic.m \
+		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
 		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
 		$(DIR)/test_TextFormatting.m \
@@ -453,11 +456,13 @@ endif
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
-		$(DIR)/test_SM_npointfunctions.cpp
+		$(DIR)/test_SM_npointfunctions.cpp \
+		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
 ifeq ($(WITH_MSSM),yes)
 TEST_SRC += \
-		$(DIR)/test_MSSM_npointfunctions.cpp
+		$(DIR)/test_MSSM_npointfunctions.cpp \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
 endif
 endif
 
@@ -656,6 +661,18 @@ endif
 TEST_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(TEST_SRC)))
 
+TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
+
+$(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+
+$(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
+	@$(MSG)
+	$(Q)$(CXX) $(CPPFLAGS) -DTEST_LINALG2_PART$* $(CXXFLAGS) -c $< -o $@
+
+$(foreach i, 2 3 4 5 6 7 8, $(eval \
+$(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-1))).o))
+
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
 
@@ -681,6 +698,8 @@ $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_L
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
 endif
 
+$(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj \
@@ -688,7 +707,7 @@ endif
 		execute-shell-tests
 
 all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
-		@true
+		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
 		$(Q)-rm -f $(TEST_DEP)
@@ -720,16 +739,21 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 execute-tests:  $(TEST_XML)
+		@printf "%s\n" "All tests passed."
 
 ifeq ($(ENABLE_META),yes)
 execute-meta-tests: $(TEST_META_XML)
+		@printf "%s\n" "All meta tests passed."
 else
 execute-meta-tests:
+		@printf "%s\n" "All meta tests passed."
 endif
 
 execute-compiled-tests: $(TEST_EXE_XML)
+		@printf "%s\n" "All compiled tests passed."
 
 execute-shell-tests: $(TEST_SH_XML)
+		@printf "%s\n" "All shell script tests passed."
 
 # creates .xml file with test result
 PTR = write_test_result_file() { \
@@ -745,7 +769,8 @@ PTR = write_test_result_file() { \
 		printf "%-66s %4s\n" "$$2" "OK"; \
 	else \
 		printf "%-66s %4s\n" "$$2" "FAILED"; \
-	fi \
+	fi; \
+	return $$1; \
 }
 
 $(DIR)/%.x.xml: $(DIR)/%.x
@@ -758,8 +783,8 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
+		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -777,6 +802,8 @@ $(TEST_XML): $(TEST_ALL_XML)
 $$(for f in $^ ; do echo "\t<test filename=\"$$(basename $$f)\"/>"; done)\n\
 </tests>" > $@
 
+$(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
+
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
@@ -790,11 +817,11 @@ $(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(LIBFFLITE)
 
 $(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBFLEXI)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPTOOLSLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
 $(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(filter-out %pv.o,$(LIBFLEXI_OBJ))
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(SQLITELIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)
@@ -810,18 +837,33 @@ $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM)
 
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM)
 
-$(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
+$(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM)
+
+$(DIR)/test_MSSM_npointfunctions.cpp : \
+		$(DIR)/test_MSSM_npointfunctions.meta \
+		$(DIR)/test_MSSM_npointfunctions.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM)
+
+$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.meta \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
