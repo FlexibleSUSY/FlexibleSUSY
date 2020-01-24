@@ -9,6 +9,8 @@ exists_in_path () {
   return 0
 }
 
+[[ -d "$HOME/.local" ]] || { echo "Error: \"$HOME/.local\" doesn't exists!"; return 1; }
+
 echo -n "Checking the presence of required executables ... "
 declare -a required_executables
 required_executables=("wget" "tar" "rm" "cmake" "make" "sed")
