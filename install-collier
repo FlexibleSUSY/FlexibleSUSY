@@ -11,7 +11,7 @@ exists_in_path () {
 
 echo -n "Checking the presence of required executables ... "
 declare -a required_executables
-required_executables=("wget" "tar" "rm" "cmake" "make" "gfortran")
+required_executables=("wget" "tar" "rm" "cmake" "make" "sed")
 for EXE in ${required_executables[*]}
 do
   exists_in_path $EXE || exit 1
@@ -42,6 +42,8 @@ echo "done"
 
 cd $collier_dir/build
 echo -n "Generation of COLLIER library started ... "
-cmake .. #cmake -Dstatic=ON ..
+cmake -Dstatic=ON ..
+make_setup="$collier_dir/build/CMakeFiles/collier.dir/flags.make"
+sed -i "s#Fortran_FLAGS = #Fortran_FLAGS = -fPIC #g" $make_setup
 make
 echo "done"
