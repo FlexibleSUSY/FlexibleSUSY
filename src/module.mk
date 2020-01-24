@@ -171,7 +171,7 @@ ifeq ($(FC),gfortran)
 	@gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
 else ifeq ($(FC),ifort)
 	@echo Building collier_wrapper.o
-	@ifort -std08 -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
+	@ifort -std08 -c $(LOOP_DIR)/collier_wrapper.f90 -fPIC $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
 endif
 
 $(LOOP_DIR)/collier_wrapper.f90 : $(LOOP_DIR)/collier_wrapper.F90
