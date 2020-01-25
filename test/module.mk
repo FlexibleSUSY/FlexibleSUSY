@@ -256,6 +256,11 @@ TEST_SRC += \
 		$(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
+ifeq ($(WITH_THDMII), yes)
+TEST_SRC += \
+		$(DIR)/test_THDMII_FlexibleDecays.cpp
+endif
+
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
 TEST_SRC += \
 		$(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.cpp \
@@ -1059,6 +1064,8 @@ $(DIR)/test_SSMSemiAnalytic_ewsb.x: $(LIBSSMSemiAnalytic)
 $(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.x: $(LIBSSMSemiAnalytic)
 
 $(DIR)/test_SSMSemiAnalytic_consistent_solutions.x: $(LIBSSMSemiAnalytic) $(LIBSSM)
+
+$(DIR)/test_THDMII_FlexibleDecays.x: $(LIBTHDMII)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 

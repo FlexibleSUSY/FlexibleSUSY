@@ -2183,7 +2183,6 @@ WriteCXXDiagramClass[vertices_List, files_List,
      physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[fieldsNamespace];
      fields = CXXDiagrams`CreateFields[];
      defineFieldTraits = CXXDiagrams`CreateFieldTraitsDefinitions[TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"];
-     unitCharge = CXXDiagrams`CreateUnitCharge[];
 
         If[vertices =!= {},
 
@@ -2206,7 +2205,6 @@ WriteCXXDiagramClass[vertices_List, files_List,
         ];
 
         unitCharge = CXXDiagrams`CreateUnitCharge[];
-        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
 
         WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"                -> fields,

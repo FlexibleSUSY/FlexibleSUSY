@@ -1390,8 +1390,8 @@ ConvertCouplingToCPP[Global`FACp[particles__][lor_], fieldAssociation_, vertices
       }
    ];
 
-   If[globalMinus === -1, "- ", ""] <>
-   "vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
+   If[globalMinus === -1, "-", ""] <>
+   "1.0i*vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
 ];
 
 (*
@@ -1435,6 +1435,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
       temp
 ];
 
+(* map topology to FeynArts name *)
 FeynArtsTopologyName[topology_] :=
     Switch[topology,
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}, {1, 0, 0,
@@ -1457,7 +1458,7 @@ FeynArtsTopologyName[topology_] :=
         0, 0, 1}, {0, 1, 0, 0, 0, 2}, {0, 0, 0, 1, 2, 0}}, "T9",
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 1, 0}, {1, 0, 0,
         0, 0, 2}, {0, 1, 1, 0, 0, 1}, {0, 0, 0, 2, 1, 0}}, "T10",
-      _, Quit[1]
+      _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
     ];
 
 WrapCodeInLoop[indices_, code_] :=
@@ -1602,7 +1603,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
                      StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n" <>
                   (* couplings *)
                          TextFormatting`WrapLines[
-                  StringJoin @@ Riffle["1.0i*" <> ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
+                  StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
                   (* renormalization scale *)
                   "result.m_decay" <>
                   (* if amplitude is UV divergent, take the finite part *)

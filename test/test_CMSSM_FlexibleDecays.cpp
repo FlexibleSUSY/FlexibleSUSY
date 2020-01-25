@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_FlexibleDecays )
    spectrum_generator_settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, 1.);
    spectrum_generator_settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, 1.);
    spectrum_generator_settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, 1.);
-   
+
 
    CMSSM_spectrum_generator<Two_scale> spectrum_generator;
    /*
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_FlexibleDecays )
       );
       */
    spectrum_generator.set_settings(spectrum_generator_settings);
-   
+
    // solve BVP
    spectrum_generator.run(qedqcd, input);
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_FlexibleDecays )
    m.set_pole_mass_loop_order(1);
 
    */
-   CMSSM_decays decays(m, qedqcd, true);
+   CMSSM_decays decays(m, qedqcd, input);
 
    // check consistency of model parameters with the ones injected into HDECAY
    BOOST_CHECK_CLOSE_FRACTION(m.get_physical().MFe[2], 1.763858808146417,

@@ -219,14 +219,17 @@ double CLASSNAME::get_partial_width<H, A, Z>(
       const typename field_indices<A>::type& out1_idx,
       const typename field_indices<Z>::type& out2_idx) const
 {
-   const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
    const double mA = context.physical_mass<A>(out1_idx);
    const double mZ = context.physical_mass<Z>(out2_idx);
-   const double ps {1./(8.*Pi) * sqrt(KallenLambda(mH*mH, mA*mA, mZ*mZ))/(mH*mH)};
+
+   const double ps {1./(8.*Pi) * sqrt(KallenLambda(1., Sqr(mA/mH), Sqr(mZ/mH)))};
    constexpr double ps_symmetry {1.};
    constexpr double color_gen_sqr {1.0};
    const double flux = 0.5/mH;
+
+   const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
+
    return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
 }
 
@@ -246,16 +249,19 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
    // higher order QCD corrections
    constexpr int Nf {5};
+   // eq. 4.18 from Adam's thesis
    constexpr double deltaNLO {95./4. - 7./6.*Nf};
-   const double mtpole2 {Sqr(qedqcd.displayPoleMt())};
 
+   const double mtpole2 {Sqr(qedqcd.displayPoleMt())};
    using boost::math::zeta;
+   // eq. 4.19 from Adam's thesis
    const double deltaNNLO {
       149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
             + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
             + Nf*Nf*(127./108. - zeta(2)/6.)
    };
-   const double deltaNNNLO {0.};
+   // eq. 4.20 from Adam's thesis
+   const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
 
    double result = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
 

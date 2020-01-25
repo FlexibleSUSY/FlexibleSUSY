@@ -40,33 +40,64 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    }
 
    softsusy::QedQcd qedqcd;
-   SM_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 
-   // ------------ tree-level decays ----------------------------------------
+   // -----------------------------------------------------
+   // decays with higher-order SM corrections
+
+   SM_decays decays_HO = SM_decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
+
+   // ------------ tree-level decays ------------
 
    // h -> b bbar
    // no QED corrections
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              2.6118180765322455E-003, 2e-15);
-   // QED corrections
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              2.6059181498481999E-003, 5e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
+                              0.0026142076883103791, 2e-15);
    // h -> tau+ tau-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(&m, 2, 2),
-                              2.6800741077127161E-004, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
+                              0.00026800741537194096, 1e-15);
    // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VWpconjVWp(&m),
-                              8.4705126919250480E-004, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VWpconjVWp(&m),
+                              0.00079339041396827832, 1e-14);
    // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m),
-                              9.4231401208556083E-005, 2e-14);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
+                              9.4231400598120973e-05, 2e-14);
 
-   // ------------ loop-induces decays --------------------------------------
+   // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m), 3.7654261348795521e-4, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00038065195151794183, 1e-15);
    // h -> gamma gamma
-    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m), 3.9528744190859022e-06, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 1e-15);
    // h -> gamma Z
-    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m), 8.214254071479881e-05, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 3.4253278486524609e-06, 1e-15);
+
+   // -----------------------------------------------------
+   // decays without higher-order SM corrections
+
+   SM_decays decays_no_HO = SM_decays(m, qedqcd, input, HigherOrderSMCorrections::disable);
+
+   // ------------ tree-level decays ------------
+
+   // h -> b bbar
+   // no QED corrections
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
+                              0.0026142076883103791, 2e-15);
+   // h -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
+                              0.00026800741537194096, 1e-15);
+   // h -> W+ W-
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VWpconjVWp(&m),
+                              0.00079339041396827832, 1e-14);
+   // h -> Z Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VZVZ(&m),
+                              9.4231400598120973e-05, 2e-14);
+
+   // ------------ loop-induces decays_HO ------------
+
+   // h -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VGVG(&m), 0.00019973935357968308, 1e-15);
+   // h -> gamma gamma
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 1e-15);
+   // h -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 3.4253278486524609e-06, 1e-15);
 }
