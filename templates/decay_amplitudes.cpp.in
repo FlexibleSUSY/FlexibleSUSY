@@ -65,8 +65,8 @@ double Decay_amplitude_SVV::square() const
             + AbsSqr(form_factor_eps));
 
       // check Ward identity
-      std::cout <<  m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' << 
-         "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) << 
+      std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
+         "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) <<
          ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
       return m0 + m2 + m4;
    } else if (m_vector_1 <= massless_vector_threshold) {
@@ -86,6 +86,9 @@ double Decay_amplitude_SVV::square() const
          Re(form_factor_11 * Conj(form_factor_21)) / m_vec_sq;
      */
 
+      std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)) << ' ' << form_factor_21 << ' ' <<
+         "real: " << std::real(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::real(form_factor_21) <<
+         ", imag: " << std::imag(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::imag(form_factor_21) << '\n';
       return m0 + m41/* + m42 + m43*/;
    } else if (m_vector_2 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
@@ -96,13 +99,15 @@ double Decay_amplitude_SVV::square() const
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
          2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
 
+      /*
       const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *
          Re(form_factor_g * Conj(form_factor_22)) / m_vec_sq;
 
       const double m43 = -0.25 * Power3(m_s_sq - m_vec_sq) *
          Re(form_factor_22 * Conj(form_factor_21)) / m_vec_sq;
+         */
 
-      return m0 + m41 + m42 + m43;
+      return m0 + m41/* + m42 + m43*/;
    }
 
    const double m_s_sq = Sqr(m_decay);

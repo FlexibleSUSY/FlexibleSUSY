@@ -1610,23 +1610,35 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   If[!Last@translation === True, ",\nFinite", ""] <> ");"
                   ] <> "\n";
 
-      {verticesForFACp, "\n// topology " <> FeynArtsTopologyName[topology] <> "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+      {verticesForFACp,
+
+         (* diagram information *)
+         "\n// topology " <> FeynArtsTopologyName[topology] <>
+            "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+
          (* usings for vertices *)
          "\n" <> cppVertices <>
+
+         (* diagram symmetry factor *)
           "\nconstexpr double " <> ToString@symmetryFac <> " {" <>
-            ToString @ If[MemberQ[{"T4", "T2", "T3",  "T5", "T8", "T9","T10"}, FeynArtsTopologyName[topology]], 2.0, 1.0] <>
-          (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
-          With[{topo=FeynArtsTopologyName[topology]},
-                      If[topo === "T2" || topo === "T3" || topo === "T5", " * 0.5", ""]
-                    ] <>
+             ToString @
+               N[With[{topoName = FeynArtsTopologyName[topology]},
+
+                If[MemberQ[{"T4", "T2", "T3", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
+                (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
+                If[topoName === "T2" || topoName === "T3" || topoName === "T5", 1/2, 1]
+               ],16] <>
          "};\n" <>
+
+         (* color factor *)
           "\nconstexpr double " <> ToString@colorFac <> " {" <>
           ToString[
             N[CXXDiagrams`ExtractColourFactor @
                 CXXDiagrams`ColorFactorForDiagram[topology, diagram], 16]
           ] <> "};\n" <>
+
          WrapCodeInLoop[indices, functionBody]
-}
+      }
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=

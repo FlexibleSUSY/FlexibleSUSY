@@ -2173,11 +2173,11 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-  Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
+  Module[{fields = "", cxxVerticesParts = {}, massFunctions,
           sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
           outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
           defineFieldTraits,
-          cxxQFTVerticesFiles},
+          cxxQFTVerticesFiles, physicalMassFunctions},
 
      massFunctions = CXXDiagrams`CreateMassFunctions[];
      physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[fieldsNamespace];
@@ -2204,13 +2204,12 @@ WriteCXXDiagramClass[vertices_List, files_List,
             Close[fileHandle];
         ];
 
-        unitCharge = CXXDiagrams`CreateUnitCharge[];
+        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
 
         WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"                -> fields,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
-                             "@CXXDiagrams_UnitCharge@"            -> unitCharge,
                              "@defineFieldTraits@"                 -> defineFieldTraits,
                              "@CXXDiagrams_VertexPrototypes@"  ->
                                 StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
