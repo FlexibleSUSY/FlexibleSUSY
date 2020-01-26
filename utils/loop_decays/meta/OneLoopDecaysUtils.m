@@ -146,7 +146,6 @@ CouplingToSARAHCpRules[] :=
      RuleDelayed[FeynArts`G[_][0][fields__][FormCalc`Private`ga[6]], SARAH`Cp[fields][SARAH`PR]],
      RuleDelayed[FeynArts`G[_][0][fields__][FormCalc`Private`ga[7]], SARAH`Cp[fields][SARAH`PL]],
      RuleDelayed[FeynArts`G[_][0][fields__][Global`MetricTensor[FeynArts`KI1[i1_], FeynArts`KI1[i2_]]], SARAH`Cp[fields][SARAH`g[SARAHLorentzIndex[i1], SARAHLorentzIndex[i2]]]],
-       (*
      RuleDelayed[FeynArts`G[_][0][fields__][
        Global`MetricTensor[FeynArts`KI1[i1_], FeynArts`KI1[i2_]] (-FeynArts`Mom[i1_] + FeynArts`Mom[i2_]) +
            Global`MetricTensor[FeynArts`KI1[i1_], FeynArts`KI1[i3_]] (FeynArts`Mom[i1_] - FeynArts`Mom[i3_]) +
@@ -158,7 +157,6 @@ CouplingToSARAHCpRules[] :=
          SARAH`g[SARAHLorentzIndex[i2], SARAHLorentzIndex[i3]] (-SARAH`Mom[{fields}[[i2]]] + SARAH`Mom[{fields}[[i3]]])
       ]
       ],
-      *)
      RuleDelayed[
        FeynArts`G[_][0][fields__][
          Global`MetricTensor[FeynArts`KI1[i1_], FeynArts`KI1[i2_]]
