@@ -1626,7 +1626,11 @@ functionBody = "// skip indices that don't match external indices\n" <>
 
                 If[MemberQ[{"T4", "T2", "T3", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
                 (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
-                If[topoName === "T2" || topoName === "T3" || topoName === "T5", 1/2, 1]
+                If[topoName === "T2" || topoName === "T3" || topoName === "T5", 1/2, 1] *
+                   If[topoName === "T9",
+                     If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
+                     1
+                   ]
                ],16] <>
          "};\n" <>
 
