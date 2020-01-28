@@ -431,22 +431,42 @@ double CLASSNAME::B00(double p, double m1, double m2) const noexcept
 
 double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 {
-   return Loop::library().B22(p, m1, m2, Sqr(get_scale())).real();
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop::library().B00(p, m1, m2, scl2) -
+      Loop::library().A0(m1, scl2)/4.0 -
+      Loop::library().A0(m2, scl2)/4.0
+   ).real();
 }
 
 double CLASSNAME::H0(double p, double m1, double m2) const noexcept
 {
-   return Loop::library().H0(p, m1, m2, Sqr(get_scale())).real();
+   const double scl2 = Sqr(get_scale());
+   return (
+      4.0*Loop::library().B00(p, m1, m2, scl2) +
+      // @note if you change the following code then change G0
+      (p - m1 - m2) * Loop::library().B0(p, m1, m2, scl2)
+      - Loop::library().A0(m1, scl2) - Loop::library().A0(m2, scl2)
+   ).real();
 }
 
 double CLASSNAME::F0(double p, double m1, double m2) const noexcept
 {
-   return Loop::library().F0(p, m1, m2, Sqr(get_scale())).real();
+   const double scl2 = Sqr(get_scale());
+   return (
+      Loop::library().A0(m1, scl2) - 2.0*Loop::library().A0(m2, scl2)
+      - (2.0*p + 2.0*m1 - m2) * Loop::library().B0(p, m1, m2, scl2)
+   ).real();
 }
 
 double CLASSNAME::G0(double p, double m1, double m2) const noexcept
 {
-   return Loop::library().G0(p, m1, m2, Sqr(get_scale())).real();
+   const double scl2 = Sqr(get_scale());
+   // @note if you change the following code then change H0
+   return (
+      (p - m1 - m2) * Loop::library().B0(p, m1, m2, scl2)
+      - Loop::library().A0(m1, scl2) - Loop::library().A0(m2, scl2)
+   ).real();
 }
 
 /**
