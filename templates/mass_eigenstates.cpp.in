@@ -40,7 +40,7 @@
 #include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 #include "raii.hpp"
 #include "functors.hpp"
 
@@ -411,42 +411,42 @@ void CLASSNAME::print(std::ostream& ostr) const
 
 double CLASSNAME::A0(double m) const noexcept
 {
-   return passarino_veltman::ReA0(m, Sqr(get_scale()));
+   return Loop::library().A0(m, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB0(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().B0(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B1(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB1(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().B1(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B00(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB00(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().B00(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReB22(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().B22(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::H0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReH0(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().H0(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::F0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReF0(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().F0(p, m1, m2, Sqr(get_scale())).real();
 }
 
 double CLASSNAME::G0(double p, double m1, double m2) const noexcept
 {
-   return passarino_veltman::ReG0(p, m1, m2, Sqr(get_scale()));
+   return Loop::library().G0(p, m1, m2, Sqr(get_scale())).real();
 }
 
 /**
