@@ -22,6 +22,7 @@
 #ifndef LOOP
 #define LOOP
 
+#include <memory>
 #include "loop_library_interface.hpp"
 
 namespace flexiblesusy {
