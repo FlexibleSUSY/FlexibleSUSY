@@ -1491,7 +1491,6 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       If[Length[translation]===7 && translation[[-3]] === {},
         Return[{{}, ""}]
       ];
-      Print[translation];
 
       (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
       (* vertex in terms of field types (S,V,F,...) and indices 1, 2 *)
@@ -1673,7 +1672,8 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             externalFieldsList, templatePars = "", args = "",
             body = "", vertices = {}},
 
-           WriteString["stdout", "    - Creating amplitude for ", initialParticle, " -> ", finalState, "... "];
+           (* @todo StringPadRigh was introduced only in 10.1 *)
+           WriteString["stdout", StringPadRight["    - Creating amplitude for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
@@ -1719,7 +1719,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            body = body <> "return " <> returnVar <> ";\n";
 
-           Print["Done."];
+           Print[" Done."];
            vertices = Flatten[vertices, 1];
 
            {vertices,
