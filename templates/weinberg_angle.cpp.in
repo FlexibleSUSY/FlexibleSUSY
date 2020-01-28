@@ -436,7 +436,8 @@ double CLASSNAME::B0(double p2, double m12, double m22) const noexcept
 
 double CLASSNAME::B1(double p2, double m12, double m22) const noexcept
 {
-   return Loop::library().B1(p2, m12, m22, Sqr(model->get_scale())).real();
+   // @note this minus sign is very confusing
+   return -1. * Loop::library().B1(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 double CLASSNAME::C0(double m12, double m22, double m32) const noexcept
