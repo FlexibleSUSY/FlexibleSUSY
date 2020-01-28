@@ -433,8 +433,7 @@ double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 {
    const double scl2 = Sqr(get_scale());
    return (
-      Loop::library().B00(p, m1, m2, scl2) -
-      Loop::library().A0(m1, scl2)/4.0 -
+      Loop::library().B00(p, m1, m2, scl2) - Loop::library().A0(m1, scl2)/4.0 -
       Loop::library().A0(m2, scl2)/4.0
    ).real();
 }
@@ -442,12 +441,7 @@ double CLASSNAME::B22(double p, double m1, double m2) const noexcept
 double CLASSNAME::H0(double p, double m1, double m2) const noexcept
 {
    const double scl2 = Sqr(get_scale());
-   return (
-      4.0*Loop::library().B00(p, m1, m2, scl2) +
-      // @note if you change the following code then change G0
-      (p - m1 - m2) * Loop::library().B0(p, m1, m2, scl2)
-      - Loop::library().A0(m1, scl2) - Loop::library().A0(m2, scl2)
-   ).real();
+   return 4.0*Loop::library().B00(p, m1, m2, scl2).real() + CLASSNAME::G0(p, m1, m2);
 }
 
 double CLASSNAME::F0(double p, double m1, double m2) const noexcept
@@ -462,7 +456,6 @@ double CLASSNAME::F0(double p, double m1, double m2) const noexcept
 double CLASSNAME::G0(double p, double m1, double m2) const noexcept
 {
    const double scl2 = Sqr(get_scale());
-   // @note if you change the following code then change H0
    return (
       (p - m1 - m2) * Loop::library().B0(p, m1, m2, scl2)
       - Loop::library().A0(m1, scl2) - Loop::library().A0(m2, scl2)
