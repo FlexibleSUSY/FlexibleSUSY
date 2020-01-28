@@ -921,8 +921,7 @@ BOOST_AUTO_TEST_CASE(test_f5_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   // @todo increase test precision
-   test_2("f5", [] (double x, double y) { return f5(x, y); }, 1e-8);
+   test_2("f5", [] (double x, double y) { return f5(x, y); }, 3e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f6)
@@ -999,11 +998,10 @@ BOOST_AUTO_TEST_CASE(test_f6_data)
    using namespace flexiblesusy::threshold_loop_functions;
 
    auto filter_small = [](double x, double y, double f) {
-      return std::abs(f) > 1e-6;
+      return std::abs(f) > 1e-9;
    };
 
-   // @todo increase test precision
-   test_2("f6", [] (double x, double y) { return f6(x, y); }, 1e-7, filter_small);
+   test_2("f6", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f7)
@@ -1079,12 +1077,7 @@ BOOST_AUTO_TEST_CASE(test_f7_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   auto filter_small = [](double x, double y, double f) {
-      return std::abs(f) > 1e-6;
-   };
-
-   // @todo increase test precision
-   test_2("f7", [] (double x, double y) { return f7(x, y); }, 1e-8, filter_small);
+   test_2("f7", [] (double x, double y) { return f7(x, y); }, 5e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f8)
@@ -1161,11 +1154,10 @@ BOOST_AUTO_TEST_CASE(test_f8_data)
    using namespace flexiblesusy::threshold_loop_functions;
 
    auto filter_small = [](double x, double y, double f) {
-      return std::abs(f) > 1e-6;
+      return std::abs(f) > 1e-10;
    };
 
-   // @todo increase test precision
-   test_2("f8", [] (double x, double y) { return f8(x, y); }, 1e-8, filter_small);
+   test_2("f8", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
 }
 
 namespace {
