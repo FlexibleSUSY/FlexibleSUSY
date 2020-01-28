@@ -18,7 +18,7 @@
 
 #include "threshold_loop_functions.hpp"
 #include "dilog.hpp"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 #include "logger.hpp"
 #include "numerics.h"
 
@@ -1837,7 +1837,7 @@ double phi_xyz(double x, double y, double z) noexcept
  */
 double B0(double m1, double m2, double scale) noexcept
 {
-   return passarino_veltman::ReB0(0, m1*m1, m2*m2, scale*scale);
+   return Loop::library.B0(0, m1*m1, m2*m2, scale*scale).real();
 }
 
 /**
