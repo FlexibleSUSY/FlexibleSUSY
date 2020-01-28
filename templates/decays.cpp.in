@@ -105,13 +105,9 @@ double get_alphas(context_base const&  context)
    return pow(context.model.get_@gs_name@(), 2)/(4.*Pi);
 }
 
-// @todo generate names for g1, g2 based on SARAH model
 double get_alpha(context_base const&  context)
 {
-   const double g1 = std::sqrt(3./5.)*context.model.get_g1();
-   const double g2 = context.model.get_g2();
-   const double e = g1*g2/std::sqrt(g1*g1+g2*g2);
-   return pow(e, 2)/(4.*Pi);
+   return pow(unit_charge(context), 2)/(4.*Pi);
 }
 
 /* 1-loop BSM amplitudes
