@@ -18,7 +18,7 @@
 
 #include "sm_twoloophiggs.hpp"
 #include "wrappers.hpp"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 
 #include <cmath>
 
@@ -52,8 +52,6 @@ double delta_mh_1loop_sm(
    double p, double scale, double mt, double yt,
    double v, double gY, double g2, double lambda)
 {
-   using namespace passarino_veltman;
-
    const double yt2 = Sqr(yt);
    const double mt2 = Sqr(mt);
    const double p2 = Sqr(p);
@@ -73,10 +71,10 @@ double delta_mh_1loop_sm(
    const double LogH = FiniteLog(mH2 / Q2);
 
    const double result =
-      (+3*yt2*(4*mt2 - p2)*ReB0(p2,mt2,mt2,Q2)
+      (+3*yt2*(4*mt2 - p2)*Loop::library().B0(p2,mt2,mt2,Q2).real()
        +6*lambda2*v2*(3*LogH-6+Pi*Sqrt(3))
-       -v2/4.*(3*g24-8*lambda*g22+16*lambda2)*ReB0(p2,mW2,mW2,Q2)
-       -v2/8.*(3*G4-8*lambda*G2+16*lambda2)*ReB0(p2,mZ2,mZ2,Q2)
+       -v2/4.*(3*g24-8*lambda*g22+16*lambda2)*Loop::library().B0(p2,mW2,mW2,Q2).real()
+       -v2/8.*(3*G4-8*lambda*G2+16*lambda2)*Loop::library().B0(p2,mZ2,mZ2,Q2).real()
        +2*mW2*(g22-2*lambda*(LogW-1))
        +mZ2*(G2-2*lambda*(LogZ-1))
       );
@@ -101,15 +99,13 @@ double delta_mh_1loop_sm(
 double delta_mh_1loop_at_sm(
    double p, double scale, double mt, double yt)
 {
-   using namespace passarino_veltman;
-
    const double yt2 = Sqr(yt);
    const double mt2 = Sqr(mt);
    const double p2 = Sqr(p);
    const double Q2 = Sqr(scale);
 
    const double result =
-      3*yt2*(4.*mt2 - p2)*ReB0(p2,mt2,mt2,Q2);
+      3*yt2*(4.*mt2 - p2)*Loop::library().B0(p2,mt2,mt2,Q2).real();
 
    return result * oneOver16PiSqr;
 }
@@ -361,13 +357,11 @@ double delta_mh_2loop_atau_atau_sm(
 namespace {
 
 double QA0(double m, double Q) {
-   using namespace flexiblesusy::passarino_veltman;
-   return ReA0(m*m, Q*Q);
+   return flexiblesusy::Loop::library().A0(m*m, Q*Q).real();
 }
 
 double QB0(double p, double m1, double m2, double Q) {
-   using namespace flexiblesusy::passarino_veltman;
-   return ReB0(p*p, m1*m1, m2*m2, Q*Q);
+   return flexiblesusy::Loop::library().B0(p*p, m1*m1, m2*m2, Q*Q).real();
 }
 
 } // anonymous namespace
