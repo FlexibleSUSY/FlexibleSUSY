@@ -9,9 +9,9 @@ _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
 _NL_   complex(C_DOUBLE_COMPLEX) :: res \
 _NL_   complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:) \
 _NL_\
-_NL_   allocate(Bcoeff(0:0, 0:1)) \
-_NL_   allocate(Bcoeffuv(0:0, 0:1)) \
-_NL_   call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 1) \
+_NL_   allocate(Bcoeff(0:1, 0:2)) \
+_NL_   allocate(Bcoeffuv(0:1, 0:2)) \
+_NL_   call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 2) \
 _NL_\
 _NL_   res = Bcoeff(N1,N2) \
 _NL_\
@@ -83,6 +83,7 @@ contains
 
    two_point(B0,0,0)
    two_point(B1,0,1)
+   two_point(B00,1,0)
 
    three_point(C0,0,0,0)
    three_point(C00,1,0,0)

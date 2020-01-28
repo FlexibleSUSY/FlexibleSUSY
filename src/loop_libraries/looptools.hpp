@@ -49,6 +49,7 @@ class Looptools : public Loop_library_interface
 
       two_point(B0)
       two_point(B1)
+      two_point(B00)
 
       three_point(C0)
       three_point(C1)

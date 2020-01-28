@@ -76,6 +76,19 @@ std::complex<double> Softsusy::B1(
    return {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
 }
 
+std::complex<double> Softsusy::B00(
+         std::complex<double> p10_in,
+         std::complex<double> m02_in, std::complex<double> m12_in,
+   double scl2_in) noexcept
+{
+   double p = std::sqrt(p10_in.real());
+   double m1 = std::sqrt(m02_in.real());
+   double m2 = std::sqrt(m12_in.real());
+   double q = std::sqrt(scl2_in);
+
+   return {softsusy::b22(p, m1, m2, q), 0.0};
+}
+
 std::complex<double> Softsusy::C0(
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,

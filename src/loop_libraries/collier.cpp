@@ -95,6 +95,7 @@ extern "C" {
 
    two_point_impl(B0)
    two_point_impl(B1)
+   two_point_impl(B00)
 
    three_point_impl(C0)
    three_point_impl(C1)
@@ -160,6 +161,7 @@ std::complex<double> Collier::A0(std::complex<double> m02_in, double scl2_in) no
 
 two_point_collier(B0)
 two_point_collier(B1)
+two_point_collier(B00)
 
 three_point_collier(C0)
 three_point_collier(C1)

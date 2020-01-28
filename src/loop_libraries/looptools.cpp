@@ -57,7 +57,7 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
    if( std::abs(scl2_in - this->current_mu2_uv) > std::numeric_limits<double>::epsilon() )
    {
-      //setmudim(scl2_in);
+      setmudim(scl2_in);
       this->current_mu2_uv = scl2_in;
    }
 }
@@ -72,6 +72,7 @@ std::complex<double> Looptools::A0(
 
 LOOPTOOLS_B(B0,bb0)
 LOOPTOOLS_B(B1,bb1)
+LOOPTOOLS_B(B00,bb00)
 
 LOOPTOOLS_C(C0,cc0)
 LOOPTOOLS_C(C1,cc1)

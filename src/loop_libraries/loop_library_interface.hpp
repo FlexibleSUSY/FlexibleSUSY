@@ -48,6 +48,7 @@ class Loop_library_interface
 
       two_point_virtual(B0)
       two_point_virtual(B1)
+      two_point_virtual(B00)
 
       three_point_virtual(C0)
       three_point_virtual(C1)
