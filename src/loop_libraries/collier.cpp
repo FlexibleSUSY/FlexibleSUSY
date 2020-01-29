@@ -17,42 +17,27 @@
 // ====================================================================
 
 #include <limits>
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
 #include "collier.hpp"
 
-#define two_point_impl(NAME)\
-   std::complex<double> NAME##_impl(\
-      const std::complex<double>*,\
-      const std::complex<double>*, const std::complex<double>*);
-#define three_point_impl(NAME)\
-   std::complex<double> NAME##_impl(\
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,\
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
-#define four_point_impl(NAME)\
-   std::complex<double> NAME##_impl(\
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,\
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,\
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
+#define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
+#define COLLIER_ARGS(N) BOOST_PP_REPEAT(N,COLLIER_TYPE,) const std::complex<double>*
+
+#define IMPL(R,ARGS,NAME) std::complex<double> BOOST_PP_CAT(NAME,_impl)(COLLIER_ARGS(ARGS));
 
 /* Non-vanishing imaginary parts of momentum invariants are not yet
 * suppoted by the current version (1.2.4) of COLLIER. */
-#define two_point_collier(NAME)\
-   std::complex<double> Collier::NAME(\
-      std::complex<double> p10_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in,\
-      double scl2_in) noexcept\
+#define COLLIER_B(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> m02 = m02_in;\
    const std::complex<double> m12 = m12_in;\
 \
    set_mu2_uv(scl2_in);\
-   return NAME##_impl(&p10, &m02, &m12);\
+   return BOOST_PP_CAT(NAME,_impl)(&p10, &m02, &m12);\
 }
-#define three_point_collier(NAME)\
-   std::complex<double> Collier::NAME(\
-      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,\
-      double scl2_in) noexcept\
+#define COLLIER_C(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> p21 (p21_in.real(), 0.);\
@@ -62,14 +47,9 @@
    const std::complex<double> m22 = m22_in;\
 \
    set_mu2_uv(scl2_in);\
-   return NAME##_impl(&p10, &p21, &p20, &m02, &m12, &m22);\
+   return BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p20, &m02, &m12, &m22);\
 }
-#define four_point_collier(NAME)\
-   std::complex<double> Collier::NAME(\
-      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,\
-      std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,\
-      double scl2_in) noexcept\
+#define COLLIER_D(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> p21 (p21_in.real(), 0.);\
@@ -83,7 +63,7 @@
    const std::complex<double> m32 = m32_in;\
 \
    set_mu2_uv(scl2_in);\
-   return NAME##_impl(&p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);\
+   return BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);\
 }
 
 // Fortran wrapper routines
@@ -91,50 +71,19 @@ extern "C" {
    void initialize_collier_impl();
    void set_mu2_uv_impl(double*);
 
-   std::complex<double> A0_impl(const std::complex<double>*);
+   BOOST_PP_SEQ_FOR_EACH(IMPL,0,A_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(IMPL,2,B_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(IMPL,5,C_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(IMPL,9,D_SEQ)
 
-   two_point_impl(B0)
-   two_point_impl(B1)
-   two_point_impl(B00)
-
-   three_point_impl(C0)
-   three_point_impl(C1)
-   three_point_impl(C2)
-   three_point_impl(C00)
-   three_point_impl(C11)
-   three_point_impl(C12)
-   three_point_impl(C22)
-
-   four_point_impl(D0)
-   four_point_impl(D00)
-   four_point_impl(D1)
-   four_point_impl(D11)
-   four_point_impl(D12)
-   four_point_impl(D13)
-   four_point_impl(D2)
-   four_point_impl(D22)
-   four_point_impl(D23)
-   four_point_impl(D3)
-   four_point_impl(D33)
-
-   void get_A_impl(
-      const std::complex<double> [1],
-      const std::complex<double>*);
-   void get_B_impl(
-      const std::complex<double> [2],
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
-   void get_C_impl(
-      const std::complex<double> [7],
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
-   void get_D_impl(
-      const std::complex<double> [11],
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*,
-      const std::complex<double>*, const std::complex<double>*, const std::complex<double>*, const std::complex<double>*);
+   void get_A_impl(const std::complex<double> [1], COLLIER_ARGS(0));
+   void get_B_impl(const std::complex<double> [2], COLLIER_ARGS(2));
+   void get_C_impl(const std::complex<double> [7], COLLIER_ARGS(5));
+   void get_D_impl(const std::complex<double> [11], COLLIER_ARGS(9));
 }
 
-namespace looplibrary {
+namespace looplibrary
+{
 
 void Collier::initialize() noexcept
 {
@@ -151,7 +100,7 @@ void Collier::set_mu2_uv(double scl2_in) noexcept
    }
 }
 
-std::complex<double> Collier::A0(std::complex<double> m02_in, double scl2_in) noexcept
+std::complex<double> Collier::A0(A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
 
@@ -159,34 +108,11 @@ std::complex<double> Collier::A0(std::complex<double> m02_in, double scl2_in) no
    return A0_impl(&m02);
 }
 
-two_point_collier(B0)
-two_point_collier(B1)
-two_point_collier(B00)
+BOOST_PP_SEQ_FOR_EACH(COLLIER_B,(B_ARGS),B_SEQ)
+BOOST_PP_SEQ_FOR_EACH(COLLIER_C,(C_ARGS),C_SEQ)
+BOOST_PP_SEQ_FOR_EACH(COLLIER_D,(D_ARGS),D_SEQ)
 
-three_point_collier(C0)
-three_point_collier(C1)
-three_point_collier(C2)
-three_point_collier(C00)
-three_point_collier(C11)
-three_point_collier(C12)
-three_point_collier(C22)
-
-four_point_collier(D0)
-four_point_collier(D00)
-four_point_collier(D1)
-four_point_collier(D11)
-four_point_collier(D12)
-four_point_collier(D13)
-four_point_collier(D2)
-four_point_collier(D22)
-four_point_collier(D23)
-four_point_collier(D3)
-four_point_collier(D33)
-
-void Collier::A(
-   std::complex<double> (&a)[1],
-   std::complex<double> m02_in,
-   double scl2_in) noexcept
+void Collier::A(std::complex<double> (&a)[1], A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
 
@@ -194,11 +120,7 @@ void Collier::A(
    get_A_impl(a, &m02);
 }
 
-void Collier::B(
-   std::complex<double> (&b)[2],
-   std::complex<double> p10_in,
-   std::complex<double> m02_in, std::complex<double> m12_in,
-   double scl2_in) noexcept
+void Collier::B(std::complex<double> (&b)[2], B_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
@@ -209,10 +131,7 @@ void Collier::B(
 }
 
 void Collier::C(
-   std::complex<double> (&c)[7],
-   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
-   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
-   double scl2_in) noexcept
+   std::complex<double> (&c)[7], C_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> p21 (p21_in.real(), 0.);
@@ -226,11 +145,7 @@ void Collier::C(
 }
 
 void Collier::D(
-   std::complex<double> (&d)[11],
-   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
-   std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,
-   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,
-   double scl2_in) noexcept
+   std::complex<double> (&d)[11], D_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> p21 (p21_in.real(), 0.);

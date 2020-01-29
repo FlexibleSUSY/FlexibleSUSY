@@ -20,77 +20,41 @@
 #define LOOP_LIBRARY_INTERFACE
 
 #include <complex>
+#include <boost/preprocessor/punctuation/remove_parens.hpp>
+#include <boost/preprocessor/seq/for_each.hpp>
 
-#define two_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
-      std::complex<double>,\
-      std::complex<double>, std::complex<double>,\
-      double) = 0;
-#define three_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) = 0;
-#define four_point_virtual(NAME)\
-   virtual std::complex<double> NAME(\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) = 0;
+#define ARGS_TYPE(R,COMMA,ELEM) std::complex<double> ELEM,
+#define VIRTUAL(R,ARGS,NAME) virtual std::complex<double> NAME(BOOST_PP_REMOVE_PARENS(ARGS)) = 0;
+
+#define A_ARGS_SEQ (m02_in)
+#define B_ARGS_SEQ (p10_in)(m02_in)(m12_in)
+#define C_ARGS_SEQ (p10_in)(p21_in)(p20_in)(m02_in)(m12_in)(m22_in)
+#define D_ARGS_SEQ (p10_in)(p21_in)(p32_in)(p30_in)(p20_in)(p31_in)(m02_in)(m12_in)(m22_in)(m32_in)
+
+#define A_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,A_ARGS_SEQ) double scl2_in
+#define B_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,B_ARGS_SEQ) double scl2_in
+#define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,C_ARGS_SEQ) double scl2_in
+#define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,D_ARGS_SEQ) double scl2_in
+
+#define A_SEQ (A0)
+#define B_SEQ (B0)(B1)(B00)
+#define C_SEQ (C0)(C1)(C2)(C00)(C11)(C12)(C22)
+#define D_SEQ (D0)(D00)(D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33)
 
 namespace looplibrary
 {
-
 class Loop_library_interface
 {
    public:
-      virtual std::complex<double> A0(std::complex<double>, double) = 0;
-
-      two_point_virtual(B0)
-      two_point_virtual(B1)
-      two_point_virtual(B00)
-
-      three_point_virtual(C0)
-      three_point_virtual(C1)
-      three_point_virtual(C2)
-      three_point_virtual(C00)
-      three_point_virtual(C11)
-      three_point_virtual(C12)
-      three_point_virtual(C22)
-
-      four_point_virtual(D0)
-      four_point_virtual(D00)
-      four_point_virtual(D1)
-      four_point_virtual(D11)
-      four_point_virtual(D12)
-      four_point_virtual(D13)
-      four_point_virtual(D2)
-      four_point_virtual(D22)
-      four_point_virtual(D23)
-      four_point_virtual(D3)
-      four_point_virtual(D33)
-
-      virtual void A(
-         std::complex<double> (&)[1],
-         std::complex<double>,
-         double) = 0;
-      virtual void B(
-         std::complex<double> (&)[2],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
-      virtual void C(
-         std::complex<double> (&)[7],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
-      virtual void D(
-         std::complex<double> (&)[11],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,
-         double) = 0;
+      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(A_ARGS),A_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(B_ARGS),B_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(C_ARGS),C_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(D_ARGS),D_SEQ)
+      virtual void A(std::complex<double> (&)[1], A_ARGS) = 0;
+      virtual void B(std::complex<double> (&)[2], B_ARGS) = 0;
+      virtual void C(std::complex<double> (&)[7], C_ARGS) = 0;
+      virtual void D(std::complex<double> (&)[11], D_ARGS) = 0;
 };
-
 } // namespace looplibrary
 
-#endif
+#endif // LOOP_LIBRARY_INTERFACE

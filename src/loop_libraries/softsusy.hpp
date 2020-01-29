@@ -16,75 +16,27 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#ifndef LOOP_LIBRARY_SOFTSUSY
+#define LOOP_LIBRARY_SOFTSUSY
+
 #include "loop_library_interface.hpp"
 
-#define two_point(NAME)\
-   std::complex<double> NAME(\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) noexcept;
-#define three_point(NAME)\
-   std::complex<double> NAME(\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) noexcept;
-#define four_point(NAME)\
-   std::complex<double> NAME(\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>,\
-      std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,\
-      double) noexcept;
+#define REDEFINE(R,ARGS,NAME) std::complex<double> NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept;
 
-namespace looplibrary {
-
+namespace looplibrary
+{
 class Softsusy : public Loop_library_interface
 {
    public:
-
-      std::complex<double> A0(std::complex<double>, double) noexcept;
-
-      two_point(B0)
-      two_point(B1)
-      two_point(B00)
-
-      three_point(C0)
-      three_point(C1)
-      three_point(C2)
-      three_point(C00)
-      three_point(C11)
-      three_point(C12)
-      three_point(C22)
-
-      four_point(D0)
-      four_point(D00)
-      four_point(D1)
-      four_point(D11)
-      four_point(D12)
-      four_point(D13)
-      four_point(D2)
-      four_point(D22)
-      four_point(D23)
-      four_point(D3)
-      four_point(D33)
-
-      void A(
-         std::complex<double> (&)[1],
-         std::complex<double>,
-         double) noexcept;
-      void B(
-         std::complex<double> (&)[2],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         double) noexcept;
-      void C(
-         std::complex<double> (&)[7],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         double) noexcept;
-      void D(
-         std::complex<double> (&)[11],
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>,
-         std::complex<double>, std::complex<double>, std::complex<double>, std::complex<double>,
-         double) noexcept;
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(A_ARGS),A_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(B_ARGS),B_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(C_ARGS),C_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(D_ARGS),D_SEQ)
+      void A(std::complex<double> (&)[1], A_ARGS) noexcept;
+      void B(std::complex<double> (&)[2], B_ARGS) noexcept;
+      void C(std::complex<double> (&)[7], C_ARGS) noexcept;
+      void D(std::complex<double> (&)[11], D_ARGS) noexcept;
 };
-
 } // namespace looplibrary
+
+#endif // LOOP_LIBRARY_SOFTSUSY

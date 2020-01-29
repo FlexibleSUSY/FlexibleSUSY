@@ -20,30 +20,17 @@
 #include "looptools.hpp"
 #include "clooptools.h"
 
-#define LOOPTOOLS_B(NAME,INDEX)\
-   std::complex<double> Looptools::NAME(\
-      std::complex<double> p10_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in,\
-      double scl2_in) noexcept\
+#define LOOPTOOLS_B(NAME,INDEX) std::complex<double> Looptools::NAME(B_ARGS) noexcept\
 {\
    set_mu2_uv(scl2_in);\
    return B0i(INDEX, p10_in.real(), m02_in.real(), m12_in.real()); \
 }
-#define LOOPTOOLS_C(NAME,INDEX)\
-   std::complex<double> Looptools::NAME(\
-      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,\
-      double scl2_in) noexcept\
+#define LOOPTOOLS_C(NAME,INDEX) std::complex<double> Looptools::NAME(C_ARGS) noexcept\
 {\
    set_mu2_uv(scl2_in);\
    return C0i(INDEX, p10_in.real(), p21_in.real(), p20_in.real(), m02_in.real(), m12_in.real(), m22_in.real()); \
 }
-#define LOOPTOOLS_D(NAME,INDEX)\
-   std::complex<double> Looptools::NAME(\
-      std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,\
-      std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,\
-      std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,\
-      double scl2_in) noexcept\
+#define LOOPTOOLS_D(NAME,INDEX) std::complex<double> Looptools::NAME(D_ARGS) noexcept\
 {\
    set_mu2_uv(scl2_in);\
    return D0i(INDEX, p10_in.real(), p21_in.real(), p32_in.real(), p30_in.real(),\
@@ -51,7 +38,8 @@
                      m22_in.real(), m32_in.real());\
 }
 
-namespace looplibrary {
+namespace looplibrary
+{
 
 Looptools::Looptools() : current_mu2_uv(1.0)
 {
@@ -67,9 +55,7 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
    }
 }
 
-std::complex<double> Looptools::A0(
-   std::complex<double> m02_in,
-   double scl2_in) noexcept
+std::complex<double> Looptools::A0(A_ARGS) noexcept
 {
    set_mu2_uv(scl2_in);
    return A0i(aa0, m02_in.real());
@@ -99,20 +85,13 @@ LOOPTOOLS_D(D22,dd22)
 LOOPTOOLS_D(D23,dd23)
 LOOPTOOLS_D(D33,dd33)
 
-void Looptools::A(
-   std::complex<double> (&a)[1],
-   std::complex<double> m02_in,
-   double scl2_in) noexcept
+void Looptools::A(std::complex<double> (&a)[1], A_ARGS) noexcept
 {
    set_mu2_uv(scl2_in);
    a[0] = A0i(aa0, m02_in.real());
 }
 
-void Looptools::B(
-   std::complex<double> (&b)[2],
-   std::complex<double> p10_in,
-   std::complex<double> m02_in, std::complex<double> m12_in,
-   double scl2_in) noexcept
+void Looptools::B(std::complex<double> (&b)[2], B_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double m02 = m02_in.real();
@@ -123,10 +102,7 @@ void Looptools::B(
 }
 
 void Looptools::C(
-   std::complex<double> (&c)[7],
-   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
-   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
-   double scl2_in) noexcept
+   std::complex<double> (&c)[7], C_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double p21 = p21_in.real();
@@ -145,11 +121,7 @@ void Looptools::C(
 }
 
 void Looptools::D(
-   std::complex<double> (&d)[11],
-   std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
-   std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,
-   std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in, std::complex<double> m32_in,
-   double scl2_in) noexcept
+   std::complex<double> (&d)[11], D_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double p21 = p21_in.real();
