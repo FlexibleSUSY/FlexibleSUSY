@@ -11,12 +11,9 @@ addons:
   homebrew:
     packages:
       - gsl
-      - python
     update: true
-python:
-  - "3.6"
-  - "pypy3"
 install:
+  - brew link python3
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
   - conan install . --build=missing
