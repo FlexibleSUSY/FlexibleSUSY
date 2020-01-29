@@ -10,9 +10,9 @@ python:
   - "pypy3"
 install:
   - pip install --user conan
-script:
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
   - conan install . --build=missing
+script:
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
   - make
   - make all-test
