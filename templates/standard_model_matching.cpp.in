@@ -591,10 +591,10 @@ double calculate_MZ_DRbar_1loop(
    auto sm = sm_1l;
 
    model.calculate_DRbar_masses();
-   model.solve_ewsb();
+   model.solve_ewsb_one_loop();
 
    sm.calculate_DRbar_masses();
-   sm.solve_ewsb();
+   sm.solve_ewsb_one_loop();
 
    const double alpha_em = Sqr(sm_0l.get_g1() * sm_0l.get_g2() * standard_model_info::normalization_g1 * standard_model_info::normalization_g2)
             /(4. * Pi * (Sqr(sm_0l.get_g1()*standard_model_info::normalization_g1) + Sqr(sm_0l.get_g2()*standard_model_info::normalization_g2)));

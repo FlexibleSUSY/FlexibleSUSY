@@ -3,7 +3,7 @@ include test/SOFTSUSY/module.mk
 DIR      := test
 MODNAME  := test
 WITH_$(MODNAME) := yes
-MODtest_MOD := SM SplitMSSM MSSM_higgs MSSM_thresholds NMSSM_higgs
+MODtest_MOD := SM SM_thresholds SplitMSSM MSSM_higgs MSSM_thresholds NMSSM_higgs
 MODtest_DEP := $(patsubst %,model_specific/%,$(MODtest_MOD))
 MODtest_INC := $(patsubst %,-Imodel_specific/%,$(MODtest_MOD))
 MODtest_LIB := $(foreach M,$(MODtest_MOD),model_specific/$M/libmodel_specific_$M$(MODULE_LIBEXT))
@@ -31,10 +31,10 @@ TEST_SRC := \
 		$(DIR)/test_effective_couplings.cpp \
 		$(DIR)/test_eigen_utils.cpp \
 		$(DIR)/test_ewsb_solver.cpp \
+		$(DIR)/test_error.cpp \
 		$(DIR)/test_fixed_point_iterator.cpp \
 		$(DIR)/test_goldstones.cpp \
 		$(DIR)/test_gsl_vector.cpp \
-		$(DIR)/test_linalg2.cpp \
 		$(DIR)/test_minimizer.cpp \
 		$(DIR)/test_namespace_collisions.cpp \
 		$(DIR)/test_mssm_twoloop_mb.cpp \
@@ -47,6 +47,7 @@ TEST_SRC := \
 		$(DIR)/test_raii.cpp \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
+		$(DIR)/test_sm_fourloop_as.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_sum.cpp \
@@ -60,7 +61,8 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
-		$(DIR)/test_space_dir.sh
+		$(DIR)/test_space_dir.sh \
+		$(DIR)/test_wolframscript.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -74,18 +76,22 @@ TEST_META := \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MRSSM_TreeMasses.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
 		$(DIR)/test_SelfEnergies.m \
 		$(DIR)/test_SemiAnalytic.m \
+		$(DIR)/test_SM_4loop_as.m \
 		$(DIR)/test_SM_higgs_loop_corrections.m \
+		$(DIR)/test_SM_higgs_loop_corrections_atab.m \
 		$(DIR)/test_TextFormatting.m \
 		$(DIR)/test_THDM_threshold_corrections.m \
 		$(DIR)/test_THDM_threshold_corrections_gauge.m \
 		$(DIR)/test_ThreeLoopQCD.m \
 		$(DIR)/test_ThresholdCorrections.m \
 		$(DIR)/test_TreeMasses.m \
+		$(DIR)/test_TwoLoopNonQCD.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
@@ -94,6 +100,11 @@ TEST_META := \
 ifeq ($(ENABLE_THREADS),yes)
 TEST_SRC += \
 		$(DIR)/test_thread_pool.cpp
+endif
+
+ifeq ($(ENABLE_TSIL),yes)
+TEST_SRC += \
+		$(DIR)/test_sm_twoloop_mt.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -290,6 +301,14 @@ TEST_SRC += \
 		$(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.cpp
 endif
 
+ifeq ($(WITH_munuSSM), yes)
+TEST_META += \
+		$(DIR)/test_munuSSM_TreeMasses.m
+
+TEST_SRC += \
+		$(DIR)/test_munuSSM_gmm2.cpp
+endif
+
 ifeq ($(WITH_munuSSM) $(WITH_munuSSMSemiAnalytic), yes yes)
 TEST_SH += \
 		$(DIR)/test_munuSSMSemiAnalytic_spectrum.sh
@@ -433,11 +452,13 @@ endif
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
-		$(DIR)/test_SM_npointfunctions.cpp
+		$(DIR)/test_SM_npointfunctions.cpp \
+		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
 ifeq ($(WITH_MSSM),yes)
 TEST_SRC += \
-		$(DIR)/test_MSSM_npointfunctions.cpp
+		$(DIR)/test_MSSM_npointfunctions.cpp \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
 endif
 endif
 
@@ -485,6 +506,16 @@ TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_tree_level_spectrum.cpp
 TEST_SH += \
 		$(DIR)/test_CMSSMCPV_spectrum.sh
+endif
+
+ifeq ($(WITH_MSSMNoFV),yes)
+TEST_META += \
+		$(DIR)/test_MSSMNoFV_TreeMasses.m
+endif
+
+ifeq ($(WITH_MSSMCPV),yes)
+TEST_META += \
+		$(DIR)/test_MSSMCPV_TreeMasses.m
 endif
 
 ifeq ($(WITH_NMSSMCPV),yes)
@@ -605,7 +636,8 @@ endif
 
 ifeq ($(WITH_SM),yes)
 TEST_META += \
-		$(DIR)/test_SM_3loop_beta.m
+		$(DIR)/test_SM_3loop_beta.m \
+		$(DIR)/test_SM_TreeMasses.m
 endif
 
 ifeq ($(WITH_SMnoGUT),yes)
@@ -624,6 +656,18 @@ endif
 
 TEST_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(TEST_SRC)))
+
+TEST_OBJ +=	$(foreach i, 1 2 3 4 5 6 7 8, $(DIR)/test_linalg2_part$(i).o)
+
+$(DIR)/test_linalg2_part%.d: $(DIR)/test_linalg2.cpp | $(DEPGEN)
+	$(Q)$(DEPGEN) $(CPPFLAGS) -DTEST_LINALG2_PART$* -MM -MI -o '$@' -MT '$*.o' $^
+
+$(DIR)/test_linalg2_part%.o: $(DIR)/test_linalg2.cpp
+	@$(MSG)
+	$(Q)$(CXX) $(CPPFLAGS) -DTEST_LINALG2_PART$* $(CXXFLAGS) -c $< -o $@
+
+$(foreach i, 2 3 4 5 6 7 8, $(eval \
+$(DIR)/test_linalg2_part$(i).o: | $(DIR)/test_linalg2_part$(shell echo $$(($(i)-1))).o))
 
 TEST_DEP := \
 		$(TEST_OBJ:.o=.d)
@@ -650,6 +694,8 @@ $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_L
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
 endif
 
+$(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj \
@@ -657,27 +703,27 @@ endif
 		execute-shell-tests
 
 all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
-		@true
+		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
-		-rm -f $(TEST_DEP)
-		-rm -f $(LIBTEST_DEP)
+		$(Q)-rm -f $(TEST_DEP)
+		$(Q)-rm -f $(LIBTEST_DEP)
 
 clean-$(MODNAME)-lib: clean-SOFTSUSY-lib
-		-rm -f $(LIBTEST)
+		$(Q)-rm -f $(LIBTEST)
 
 clean-$(MODNAME)-obj: clean-SOFTSUSY-obj
-		-rm -f $(TEST_OBJ)
-		-rm -f $(LIBTEST_OBJ)
+		$(Q)-rm -f $(TEST_OBJ)
+		$(Q)-rm -f $(LIBTEST_OBJ)
 
 clean-$(MODNAME)-log:
-		-rm -f $(TEST_XML)
-		-rm -f $(TEST_ALL_XML)
-		-rm -f $(TEST_ALL_LOG)
+		$(Q)-rm -f $(TEST_XML)
+		$(Q)-rm -f $(TEST_ALL_XML)
+		$(Q)-rm -f $(TEST_ALL_LOG)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-obj \
                   clean-$(MODNAME)-lib clean-$(MODNAME)-log
-		-rm -f $(TEST_EXE)
+		$(Q)-rm -f $(TEST_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
@@ -689,16 +735,21 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 execute-tests:  $(TEST_XML)
+		@printf "%s\n" "All tests passed."
 
 ifeq ($(ENABLE_META),yes)
 execute-meta-tests: $(TEST_META_XML)
+		@printf "%s\n" "All meta tests passed."
 else
 execute-meta-tests:
+		@printf "%s\n" "All meta tests passed."
 endif
 
 execute-compiled-tests: $(TEST_EXE_XML)
+		@printf "%s\n" "All compiled tests passed."
 
 execute-shell-tests: $(TEST_SH_XML)
+		@printf "%s\n" "All shell script tests passed."
 
 # creates .xml file with test result
 PTR = write_test_result_file() { \
@@ -714,7 +765,8 @@ PTR = write_test_result_file() { \
 		printf "%-66s %4s\n" "$$2" "OK"; \
 	else \
 		printf "%-66s %4s\n" "$$2" "FAILED"; \
-	fi \
+	fi; \
+	return $$1; \
 }
 
 $(DIR)/%.x.xml: $(DIR)/%.x
@@ -727,8 +779,8 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
+		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -746,6 +798,8 @@ $(TEST_XML): $(TEST_ALL_XML)
 $$(for f in $^ ; do echo "\t<test filename=\"$$(basename $$f)\"/>"; done)\n\
 </tests>" > $@
 
+$(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
+
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
@@ -754,13 +808,16 @@ $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
 $(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(LIBFFLITE)
-		$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
 $(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBFLEXI)
-		$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPTOOLSLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
 $(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(filter-out %pv.o,$(LIBFLEXI_OBJ))
-		$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(SQLITELIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)
@@ -775,16 +832,34 @@ $(DIR)/test_loopfunctions.x: $(LIBCMSSM)
 $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM)
 
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM)
 
-$(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+$(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM)
+
+$(DIR)/test_MSSM_npointfunctions.cpp : \
+		$(DIR)/test_MSSM_npointfunctions.meta \
+		$(DIR)/test_MSSM_npointfunctions.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM)
+
+$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.meta \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
@@ -965,6 +1040,8 @@ $(DIR)/test_lowNUHMSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBlowNUHMSSMSem
 
 $(DIR)/test_lowNUHMSSMSemiAnalytic_consistent_solutions.x: $(LIBlowNUHMSSMSemiAnalytic) $(LIBlowNUHMSSM)
 
+$(DIR)/test_munuSSM_gmm2.x: $(LIBmunuSSM)
+
 $(DIR)/test_munuSSMSemiAnalytic_ewsb.x: $(LIBmunuSSMSemiAnalytic)
 
 $(DIR)/test_munuSSMSemiAnalytic_semi_analytic_solutions.x: $(LIBmunuSSMSemiAnalytic)
@@ -992,20 +1069,22 @@ $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -
 
 # general test rule
 $(DIR)/test_%.x: $(DIR)/test_%.o
-		$(CXX) -o $@ $(call abspathx,$^) \
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
 		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
-		$(THREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS)
+		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
-$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBTEST): $(LIBTEST_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(THREADLIBS) \
-		$(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
 else
 $(LIBTEST): $(LIBTEST_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
 ALLDEP += $(LIBTEST_DEP) $(TEST_DEP)

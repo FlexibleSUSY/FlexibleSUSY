@@ -80,7 +80,7 @@ Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF
 
-"$MATH" -run "<< \"$inputFile1\"; Quit[]"
+printf "%s" "<< \"$inputFile1\"; Quit[]" | "$MATH"
 
 "${MODELDIR}/CMSSM/run_CMSSM.x" \
     --slha-input-file="$inputFile2" \
@@ -105,5 +105,7 @@ if [ $errors = 0 ] ; then
 else
     echo "Test result: FAIL"
 fi
+
+rm -f "$inputFile1" "$outputFile1" "$outputFile2"
 
 exit $errors

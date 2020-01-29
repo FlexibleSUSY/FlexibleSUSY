@@ -35,7 +35,7 @@ CreateGetters::usage="";
 CreateParameterDefinitions::usage="";
 CreateCCtorInitialization::usage="";
 CreateCCtorParameterList::usage="";
-CreateParameterList::usage="";
+FSCreateParameterList::usage="";
 ClearParameters::usage="";
 
 CreateParameterEnum::usage="";
@@ -511,11 +511,11 @@ CreateCCtorParameterList[betaFunctions_List] :=
     StringJoin[CreateCCtorParameterList /@ betaFunctions];
 
 (* create parameter list *)
-CreateParameterList[betaFunction_BetaFunction, prefix_] :=
+FSCreateParameterList[betaFunction_BetaFunction, prefix_] :=
     prefix <> ToValidCSymbolString[GetName[betaFunction]];
 
-CreateParameterList[betaFunctions_List, prefix_:""] :=
-    Utils`StringJoinWithSeparator[CreateParameterList[#, prefix]& /@ betaFunctions, ", "];
+FSCreateParameterList[betaFunctions_List, prefix_:""] :=
+    Utils`StringJoinWithSeparator[FSCreateParameterList[#, prefix]& /@ betaFunctions, ", "];
 
 ClearParameter[betaFunction_BetaFunction] :=
     CConversion`SetToDefault[ToValidCSymbolString[GetName[betaFunction]],

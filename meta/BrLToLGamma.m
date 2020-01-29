@@ -34,7 +34,9 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
     Module[{prototype, definition,
             numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[inFermion],
             numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[outFermion],
-            numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[spectator]},
+            numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[spectator],
+            (* don't remove potential SM contributions to l -> l gamma *)
+            discardSMcontributions = CXXDiagrams`CXXBoolValue[False]},
 
         prototype =
             "double calculate_" <> CXXNameOfField[inFermion] <> "_to_" <>
@@ -91,7 +93,7 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                          If[TreeMasses`GetDimension[outFermion] =!= 1,
                             "generationIndex2, ",
                             ""] <>
-                  "model);\n" <>
+                  "model, " <> discardSMcontributions <> ");\n" <>
                   (* Dominik suggest that the phase space prefactor should use pole masses  so we get them from the input file *)
                   "double leptonInMassOS;\n" <>
                   "switch (generationIndex1) {\n" <> 
@@ -106,7 +108,9 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                   "// eq. 51 of arXiv:hep-ph/9510309 (note that we include 'e' in the definition of form_factor)\n" <>
                   "const double partial_width = pow(leptonInMassOS,5)/(16.0*Pi) * (std::norm(form_factors[2]) + std::norm(form_factors[3]));\n" <>
 
-                  "const double total_width = lepton_total_decay_width(indices1, indices2, model, qedqcd);\n" <>
+                  "const double total_width = lepton_total_decay_width<" <>
+                     CXXNameOfField[inFermion] <> ", " <> CXXNameOfField[outFermion] <> 
+                     ">(indices1, indices2, model, qedqcd);\n" <>
                   "\nreturn partial_width/total_width;\n"
                ] <> "}";
 

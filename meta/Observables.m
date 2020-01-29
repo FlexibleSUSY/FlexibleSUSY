@@ -265,10 +265,10 @@ CreateClearObservablesFunction[observables_List] :=
           ];
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuon, structName_String] :=
-    structName <> ".AMU = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL);";
+    structName <> ".AMU = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, structName_String] :=
-    structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL);";
+    structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
     "#ifdef ENABLE_GM2Calc\n" <>

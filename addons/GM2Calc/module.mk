@@ -77,18 +77,18 @@ all-$(MODNAME): $(LIBGM2Calc) $(EXEGM2Calc_EXE)
 		@true
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIBGM2Calc_DEP)
-		-rm -f $(EXEGM2Calc_DEP)
+		$(Q)-rm -f $(LIBGM2Calc_DEP)
+		$(Q)-rm -f $(EXEGM2Calc_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIBGM2Calc)
+		$(Q)-rm -f $(LIBGM2Calc)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIBGM2Calc_OBJ)
-		-rm -f $(EXEGM2Calc_OBJ)
+		$(Q)-rm -f $(LIBGM2Calc_OBJ)
+		$(Q)-rm -f $(EXEGM2Calc_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
-		-rm -f $(EXEGM2Calc_EXE)
+		$(Q)-rm -f $(EXEGM2Calc_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 
@@ -100,20 +100,22 @@ distclean::     distclean-$(MODNAME)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIBGM2Calc_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBGM2Calc_SRC) $(LIBGM2Calc_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBGM2Calc_HDR) $(LIBGM2Calc_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(EXEGM2Calc_SRC) $(LIBGM2Calc_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBGM2Calc_MK) $(LIBGM2Calc_INSTALL_DIR)
+		$(Q)install -d $(LIBGM2Calc_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBGM2Calc_SRC) $(LIBGM2Calc_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBGM2Calc_HDR) $(LIBGM2Calc_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(EXEGM2Calc_SRC) $(LIBGM2Calc_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBGM2Calc_MK) $(LIBGM2Calc_INSTALL_DIR)
 endif
 
 $(LIBGM2Calc_DEP) $(EXEGM2Calc_DEP) $(LIBGM2Calc_OBJ) $(EXEGM2Calc_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS)
 
 $(LIBGM2Calc): $(LIBGM2Calc_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
 $(DIR)/%.x: $(DIR)/%.o $(LIBGM2Calc) $(LIBFLEXI)
-		$(CXX) -o $@ $(call abspathx,$^)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^)
 
 ALLDEP += $(LIBGM2Calc_DEP) $(EXEGM2Calc_DEP)
 ALLSRC += $(LIBGM2Calc_SRC) $(EXEGM2Calc_SRC)

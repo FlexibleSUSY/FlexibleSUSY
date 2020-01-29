@@ -44,19 +44,19 @@ all-$(MODNAME): doc-html doc-man doc-pdf
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_TMPL) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MK) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOXYFILE) $(DOC_INSTALL_DIR)
-		install -d $(INSTALL_DIR)/$(IMAGE_DIR)
-		install -m u=rw,g=r,o=r $(IMAGES) $(INSTALL_DIR)/$(IMAGE_DIR)
+		$(Q)install -d $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_TMPL) $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MK) $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOXYFILE) $(DOC_INSTALL_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(IMAGE_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(IMAGES) $(INSTALL_DIR)/$(IMAGE_DIR)
 endif
 
 clean-$(MODNAME): clean-doc-manuals
 
 distclean-$(MODNAME): clean-$(MODNAME) distclean-doc-manuals
-		-rm -rf $(HTML_OUTPUT_DIR)
-		-rm -f $(DOXYGEN_MAINPAGE)
+		$(Q)-rm -rf $(HTML_OUTPUT_DIR)
+		$(Q)-rm -f $(DOXYGEN_MAINPAGE)
 
 clean::         clean-$(MODNAME)
 

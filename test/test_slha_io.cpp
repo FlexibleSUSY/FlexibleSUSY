@@ -19,7 +19,8 @@ BOOST_AUTO_TEST_CASE( test_read_entry )
 
    const std::string str = "Block A\n"
       "   1   1.2      # comment 1\n"
-      "   2   2.3E+2   # comment 2";
+      "   2   1.3E+2   # comment 2\n"
+      "   2   2.3E+2   # comment 3";
 
    block.str(str);
    coll.push_back(block);

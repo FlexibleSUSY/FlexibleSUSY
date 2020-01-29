@@ -101,4 +101,4 @@
  (* from Chetyrkin, Zoller [JHEP 1606 (2016) 175] [arXiv:1604.00853]
     https://www.ttp.kit.edu/Progdata/ttp16/ttp16-008/ *)
  16/27 g3^6 gt^4 (13097 + 108 \[Pi]^4 + 44568 Zeta[3] - 47400 Zeta[5])
-} /. Zeta[n_] :> N[Zeta[n]]
+}

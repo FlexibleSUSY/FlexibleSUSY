@@ -28,7 +28,6 @@
 #define KERNEL_VERSION        "@KERNEL_VERSION@"
 
 /* Build variables */
-#define BLASLIBS              "@BLASLIBS@"
 #define BOOSTFLAGS            "@BOOSTFLAGS@"
 #define BOOSTTESTLIBS         "@BOOSTTESTLIBS@"
 #define BOOSTTHREADLIBS       "@BOOSTTHREADLIBS@"
@@ -43,7 +42,6 @@
 #define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
 #define GSLLIBS               "@GSLLIBS@"
-#define LAPACKLIBS            "@LAPACKLIBS@"
 #define LDFLAGS               "@LDFLAGS@"
 #define LDLIBS                "@LDLIBS@"
 #define LLFLAGS               "@LLFLAGS@"
@@ -79,14 +77,8 @@
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@
 
-/* Enable LAPACK */
-@DEFINE_ENABLE_LAPACK@
-
 /* Enable LibraryLink */
 @DEFINE_ENABLE_LIBRARYLINK@
-
-/* Enable MKL ILP64 workaround */
-@DEFINE_ENABLE_ILP64MKL_WORKAROUND@
 
 /* Enable LoopTools */
 @DEFINE_ENABLE_LOOPTOOLS@

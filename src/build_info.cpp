@@ -82,7 +82,6 @@ void print_build_info(std::ostream& ostr)
       "Fortran compiler (FC):                  " FC "\n"
       "Fortran compiler flags (FFLAGS):        " FFLAGS "\n"
       "Fortran libraries (FLIBS):              " FLIBS "\n"
-      "BLAS library (BLASLIBS):                " BLASLIBS "\n"
       "Boost flags (BOOSTFLAGS):               " BOOSTFLAGS "\n"
       "Boost libraries:                        " BOOSTTESTLIBS " " BOOSTTHREADLIBS "\n"
       "Eigen flags (EIGENFLAGS):               " EIGENFLAGS "\n"
@@ -90,7 +89,6 @@ void print_build_info(std::ostream& ostr)
       "Himalaya libraries (HIMALAYALIBS):      " HIMALAYALIBS "\n"
       "GSL flags (GSLFLAGS):                   " GSLFLAGS "\n"
       "GSL libraries (GSLLIBS):                " GSLLIBS "\n"
-      "LAPACK library (LAPACKLIBS):            " LAPACKLIBS "\n"
       "LibraryLink flags (LLFLAGS):            " LLFLAGS "\n"
       "LibraryLink library (LLLIBS):           " LLLIBS "\n"
       "Loop function flags (LOOPFUNCFLAGS):    " LOOPFUNCFLAGS "\n"
@@ -173,13 +171,6 @@ void print_build_info(std::ostream& ostr)
       "no"
 #endif
       "\n"
-      "Use LAPACK:                             "
-#ifdef ENABLE_LAPACK
-      "yes"
-#else
-      "no"
-#endif
-      "\n"
       "Use LibraryLink:                        "
 #ifdef ENABLE_LIBRARYLINK
       "yes"
@@ -189,13 +180,6 @@ void print_build_info(std::ostream& ostr)
       "\n"
       "Use LoopTools:                          "
 #ifdef ENABLE_LOOPTOOLS
-      "yes"
-#else
-      "no"
-#endif
-      "\n"
-      "Use MKL ILP64 workaround:               "
-#ifdef ENABLE_ILP64MKL_WORKAROUND
       "yes"
 #else
       "no"

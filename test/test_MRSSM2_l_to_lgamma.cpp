@@ -24,6 +24,7 @@
 #include "test_MRSSM2.hpp"
 
 #include "wrappers.hpp"
+#include "cxx_qft/MRSSM2_qft.hpp"
 #include "MRSSM2_l_to_lgamma.hpp"
 
 using namespace flexiblesusy;
@@ -57,20 +58,16 @@ BOOST_AUTO_TEST_CASE( test_l_to_lgamma )
    input.MDWBTInput = 500;
    input.MDGocInput = 1500;
 
-   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input);
-
    softsusy::QedQcd qedqcd;
+
+   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
+
+   using MRSSM2_cxx_diagrams::fields::Fe;
+   auto width = MRSSM2_l_to_lgamma::lepton_total_decay_width<Fe,Fe>(std::array<int,1> {1}, std::array<int,1> {0}, m, qedqcd);
+
    Physical_input physical_inputs;
 
-   auto width = MRSSM2_l_to_lgamma::lepton_total_decay_width(std::array<int,1> {1}, std::array<int,1> {0}, m, qedqcd);
-
    auto brMuEGamma = MRSSM2_l_to_lgamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);
-   //auto amu = MRSSM2_a_muon::calculate_a_muon(m);
-   //BOOST_CHECK_CLOSE(amu, -8.30e-11, 1.0);
-
-   // neutralino dominance
-   input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
-   m = setup_MRSSM2(input);
 
    BOOST_CHECK_CLOSE_FRACTION(brMuEGamma, 1.3147385103144814e-15, 1e-4);
 }

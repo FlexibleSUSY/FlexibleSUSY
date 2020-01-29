@@ -14,7 +14,6 @@ INSTALL_DIR        := @INSTALL_DIR@
 ENABLE_COMPILE     := @ENABLE_COMPILE@
 ENABLE_FFLITE      := @ENABLE_FFLITE@
 ENABLE_HIMALAYA    := @ENABLE_HIMALAYA@
-ENABLE_LAPACK      := @ENABLE_LAPACK@
 ENABLE_LIBRARYLINK := @ENABLE_LIBRARYLINK@
 ENABLE_LOOPTOOLS   := @ENABLE_LOOPTOOLS@
 ENABLE_META        := @ENABLE_META@
@@ -30,7 +29,6 @@ ENABLE_FORMCALC    := @ENABLE_FORMCALC@
 ENABLE_COLORS         := @ENABLE_COLORS@
 ENABLE_DEBUG          := @ENABLE_DEBUG@
 ENABLE_CHECK_EIGENVALUE_ERROR := @ENABLE_CHECK_EIGENVALUE_ERROR@
-ENABLE_ILP64MKL_WORKAROUND := @ENABLE_ILP64MKL_WORKAROUND@
 ENABLE_SILENT         := @ENABLE_SILENT@
 ENABLE_VERBOSE        := @ENABLE_VERBOSE@
 
@@ -65,14 +63,12 @@ LIBLNK_LIBEXT      := @LIBLNK_LIBEXT@
 LIBLNK_MAKE_LIB_CMD:= @LIBLNK_MAKE_LIB_CMD@
 LLFLAGS            := @LLFLAGS@
 LLLIBS             := @LLLIBS@
-BLASLIBS           := @BLASLIBS@
 BOOSTTESTLIBS      := @BOOSTTESTLIBS@
 BOOSTTHREADLIBS    := @BOOSTTHREADLIBS@
 BOOSTFLAGS         := @BOOSTFLAGS@
 EIGENFLAGS         := @EIGENFLAGS@
 GSLLIBS            := @GSLLIBS@
 GSLFLAGS           := @GSLFLAGS@
-LAPACKLIBS         := @LAPACKLIBS@
 LOOPFUNCFLAGS      := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS       := @LOOPFUNCLIBS@
 HIMALAYAFLAGS      := @HIMALAYAFLAGS@
@@ -82,6 +78,12 @@ SQLITELIBS         := @SQLITELIBS@
 THREADLIBS         := @THREADLIBS@
 TSILFLAGS          := @TSILFLAGS@
 TSILLIBS           := @TSILLIBS@
+
+ifeq ($(VERBOSE),1)
+  Q :=
+else
+  Q := @
+endif
 
 # the modules add their dependency files to this variable
 ALLDEP   :=
@@ -105,6 +107,9 @@ SHELL = /bin/sh
 
 # disable built-in rules to improve speed
 MAKEFLAGS += -rR --include-dir=$(CURDIR)
+
+# message printed for each target
+MSG = echo "Building $@"
 
 # flexiblesusy-config script
 FSCONFIG := @FSCONFIG@
@@ -156,12 +161,12 @@ install-src::
 	$(error Installation directory is not set!  To set in please run: ./configure --with-install-dir=/path/to/install/dir)
 else
 install-src::
-	install -d $(INSTALL_DIR)
-	$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
-	$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
-	$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)install -d $(INSTALL_DIR)
+	$(Q)$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(Q)$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
 
 ifeq ($(ENABLE_META),yes)
 install-src:: allsrc
@@ -209,43 +214,46 @@ allll:    $(ALLLL)
 alltest:  $(ALLTST)
 
 clean-dep:
-	-rm -f $(ALLDEP)
+	$(Q)-rm -f $(ALLDEP)
 
 clean-executables:
-	-rm -f $(ALLEXE)
+	$(Q)-rm -f $(ALLEXE)
 
 clean-lib:
-	-rm -f $(ALLLIB) $(ALLLL)
+	$(Q)-rm -f $(ALLLIB) $(ALLLL)
 
 depend:  clean-dep
 depend:  $(ALLDEP)
 
 %.d: %.cpp | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.c | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.f | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.d: %.F | $(DEPGEN)
-	$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
+	$(Q)$(DEPGEN) $(CPPFLAGS) -MM -MI -o '$@' -MT '$*.o' $^
 
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	@$(MSG)
+	$(Q)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.o: %.f
-	$(FC) $(FFLAGS) -c $< -o $@
+	@$(MSG)
+	$(Q)$(FC) $(FFLAGS) -c $< -o $@
 
 %.o: %.F
-	$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
+	@$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(CPPFLAGS) -c $< -o $@
 
 distclean::
-	-rm -f Makefile
-	-rm -f $(FSCONFIG)
-	-rm -f $(SARAH_DEP_GEN)
-	-rm -f config.boost config.log config.math config.sarah config.status
+	$(Q)-rm -f Makefile
+	$(Q)-rm -f $(FSCONFIG)
+	$(Q)-rm -f $(SARAH_DEP_GEN)
+	$(Q)-rm -f config.boost config.log config.math config.sarah config.status
 
 librarylink: allll
 	@true
@@ -271,7 +279,6 @@ showbuild:
 	@echo "LDLIBS             = $(LDLIBS)"
 	@echo "LLFLAGS            = $(LLFLAGS)"
 	@echo "LLLIBS             = $(LLLIBS)"
-	@echo "BLASLIBS           = $(BLASLIBS)"
 	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
 	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
@@ -280,7 +287,6 @@ showbuild:
 	@echo "GSLFLAGS           = $(GSLFLAGS)"
 	@echo "HIMALAYAFLAGS      = $(HIMALAYAFLAGS)"
 	@echo "HIMALAYALIBS       = $(HIMALAYALIBS)"
-	@echo "LAPACKLIBS         = $(LAPACKLIBS)"
 	@echo "LIBLNK_MAKE_LIB_CMD= $(LIBLNK_MAKE_LIB_CMD)"
 	@echo "LIBLNK_LIBEXT      = $(LIBLNK_LIBEXT)"
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
@@ -299,11 +305,9 @@ showbuild:
 	@echo "ENABLE_CHECK_EIGENVALUE_ERROR = $(ENABLE_CHECK_EIGENVALUE_ERROR)"
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_HIMALAYA    = $(ENABLE_HIMALAYA)"
-	@echo "ENABLE_LAPACK      = $(ENABLE_LAPACK)"
 	@echo "ENABLE_LIBRARYLINK = $(ENABLE_LIBRARYLINK)"
-	@echo "ENABLE_ILP64MKL_WORKAROUND = $(ENABLE_ILP64MKL_WORKAROUND)"
-	@echo "ENABLE_FEYNARTS   = $(ENABLE_FEYNARTS)"
-	@echo "ENABLE_FORMCALC   = $(ENABLE_FORMCALC)"
+	@echo "ENABLE_FEYNARTS    = $(ENABLE_FEYNARTS)"
+	@echo "ENABLE_FORMCALC    = $(ENABLE_FORMCALC)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
 	@echo "ENABLE_META        = $(ENABLE_META)"
 	@echo "ENABLE_SHARED_LIBS = $(ENABLE_SHARED_LIBS)"

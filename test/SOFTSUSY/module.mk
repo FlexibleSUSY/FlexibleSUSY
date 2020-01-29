@@ -82,22 +82,22 @@ RUN_SOFTPOINT_EXE := $(RUN_SOFTPOINT_OBJ:.o=.x)
 all-$(MODNAME): $(LIBSOFTSUSY)
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIBSOFTSUSY_DEP)
-		-rm -f $(RUN_SOFTSUSY_DEP)
-		-rm -f $(RUN_SOFTPOINT_DEP)
+		$(Q)-rm -f $(LIBSOFTSUSY_DEP)
+		$(Q)-rm -f $(RUN_SOFTSUSY_DEP)
+		$(Q)-rm -f $(RUN_SOFTPOINT_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIBSOFTSUSY)
+		$(Q)-rm -f $(LIBSOFTSUSY)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIBSOFTSUSY_OBJ)
-		-rm -f $(RUN_SOFTSUSY_OBJ)
-		-rm -f $(RUN_SOFTPOINT_OBJ)
+		$(Q)-rm -f $(LIBSOFTSUSY_OBJ)
+		$(Q)-rm -f $(RUN_SOFTSUSY_OBJ)
+		$(Q)-rm -f $(RUN_SOFTPOINT_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-obj
-		-rm -f $(LIBSOFTSUSY)
-		-rm -f $(RUN_SOFTSUSY_EXE)
-		-rm -f $(RUN_SOFTPOINT_EXE)
+		$(Q)-rm -f $(LIBSOFTSUSY)
+		$(Q)-rm -f $(RUN_SOFTSUSY_EXE)
+		$(Q)-rm -f $(RUN_SOFTPOINT_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 
@@ -110,13 +110,16 @@ $(LIBSOFTSUSY_OBJ) $(RUN_SOFTSUSY_OBJ) $(RUN_SOFTPOINT_OBJ): \
 	CPPFLAGS += $(MODSOFTSUSY_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 
 $(LIBSOFTSUSY): $(LIBSOFTSUSY_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
 $(RUN_SOFTSUSY_EXE): $(RUN_SOFTSUSY_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
 
 $(RUN_SOFTPOINT_EXE): $(RUN_SOFTPOINT_OBJ) $(LIBSOFTSUSY) $(MODSOFTSUSY_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(FLIBS)
 
 ALLDEP += $(LIBSOFTSUSY_DEP) $(RUN_SOFTSUSY_DEP) $(RUN_SOFTPOINT_DEP)
 ALLLIB += $(LIBSOFTSUSY)

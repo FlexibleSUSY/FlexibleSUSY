@@ -35,7 +35,7 @@ namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
 namespace @ModelName@_l_to_lgamma {
-template <typename T1, typename T2>
+template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
       T1 const&, T2 const&, 
       const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&);

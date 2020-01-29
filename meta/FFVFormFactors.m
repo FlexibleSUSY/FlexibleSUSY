@@ -110,7 +110,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                   "int generationIndex2,\n",
                   " "
                ] <>
-               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model)"
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, bool discard_SM_contributions)"
             ];
                  
       definition =
@@ -161,7 +161,7 @@ CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
    "val += std::complex<double> " <> ToString @ ColorFactorForDiagram[topology, diagram] <> " * FFV_" <>
       StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}) <> "<" <>
          StringJoin @ Riffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V, EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ","]  <>
-                     ">::value(indices1, indices2, context);\n";
+                     ">::value(indices1, indices2, context, discard_SM_contributions);\n";
 
 End[];
 EndPackage[];

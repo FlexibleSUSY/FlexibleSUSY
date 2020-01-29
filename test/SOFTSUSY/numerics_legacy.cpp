@@ -16,15 +16,9 @@ namespace flexiblesusy {
 
 class SoftsusyNumericsError : public Error {
 public:
-   explicit SoftsusyNumericsError(std::string msg_)
-      : msg(msg_)
-      {}
+   explicit SoftsusyNumericsError(std::string msg)
+      : Error(msg) {}
    virtual ~SoftsusyNumericsError() {}
-   virtual std::string what() const {
-      return msg;
-   }
-private:
-   std::string msg;
 };
 
 } // namespace flexiblesusy

@@ -3,11 +3,11 @@ Get["model_files/HSSUSY/HSSUSY_uncertainty_estimate.m"];
 
 settings = {
     precisionGoal -> 1.*^-5,
-    poleMassLoopOrder -> 3,
-    ewsbLoopOrder -> 3,
-    betaFunctionLoopOrder -> 3,
+    poleMassLoopOrder -> 4,
+    ewsbLoopOrder -> 4,
+    betaFunctionLoopOrder -> 5,
     thresholdCorrectionsLoopOrder -> 3,
-    thresholdCorrections -> 123111321
+    thresholdCorrections -> 124111421
 };
 
 smpars = {
@@ -63,12 +63,13 @@ HSSUSYCalcMh[MS_, TB_, Xtt_] :=
             msd2 -> MS^2 IdentityMatrix[3],
             msl2 -> MS^2 IdentityMatrix[3],
             mse2 -> MS^2 IdentityMatrix[3],
-            LambdaLoopOrder -> 2,
+            LambdaLoopOrder -> 3,
             TwoLoopAtAs -> 1,
             TwoLoopAbAs -> 1,
             TwoLoopAtAb -> 1,
             TwoLoopAtauAtau -> 1,
-            TwoLoopAtAt -> 1
+            TwoLoopAtAt -> 1,
+            ThreeLoopAtAsAs -> 1
         }
    ];
 
@@ -76,7 +77,7 @@ LinearRange[start_, stop_, steps_] :=
     Range[start, stop, (stop - start)/steps];
 
 Xtt = Sqrt[6];
-TB  = 5;
+TB  = 20;
 
 data = ParallelMap[
     { N[#], Sequence @@ HSSUSYCalcMh[#, TB, Xtt] }&,
@@ -101,7 +102,7 @@ plot1 = ListLinePlot[{dataMhMax, dataMhMin},
 
 plot = Show[{plot1, plot2},
             BaseStyle -> {FontSize -> 16, FontFamily -> "Helvetica"},
-            PlotLabel -> Style["\*SubscriptBox[X, t] = 2.44949 \*SubscriptBox[M, S], tan\[Beta] = 5"],
+            PlotLabel -> Style["\*SubscriptBox[X, t] = 2.44949 \*SubscriptBox[M, S], tan\[Beta] = 20"],
             PlotRange -> Automatic,
             Axes -> False, Frame -> True,
             FrameLabel -> {Style["\*SubscriptBox[M, S] / GeV"],
