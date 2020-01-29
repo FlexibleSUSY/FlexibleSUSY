@@ -14,7 +14,7 @@ addons:
       - gsl
     update: true
 install:
-  - pip3 install --user conan
+  - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
   - conan install . --build=missing
 script:
