@@ -9,7 +9,9 @@ addons:
   apt:
     packages: libgsl0-dev
   homebrew:
-    packages: gsl
+    packages:
+      - gsl
+      - python
     update: true
 python:
   - "3.6"
