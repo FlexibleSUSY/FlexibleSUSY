@@ -4,7 +4,7 @@
 FlexibleSUSY
 ============
 
-|release| |tests|
+|release| |tests| |travis|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
