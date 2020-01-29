@@ -7,6 +7,7 @@ compiler:
   - gcc
 python:
   - "3.6"
+  - "pypy3"
 script:
   - pip install conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
