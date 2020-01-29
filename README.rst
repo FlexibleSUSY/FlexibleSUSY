@@ -9,6 +9,8 @@ FlexibleSUSY
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
+.. |travis| image:: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY.svg?branch=development
+   :target: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY
 
 .. image:: doc/images/FS-logo.png
    :align: right
