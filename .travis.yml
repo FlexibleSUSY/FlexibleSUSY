@@ -7,13 +7,14 @@ compiler:
   - gcc
 addons:
   apt:
-    packages: libgsl0-dev
+    packages:
+      - libgsl0-dev
   homebrew:
     packages:
       - gsl
     update: true
 install:
-  - pip install --user conan
+  - pip3 install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
   - conan install . --build=missing
 script:
