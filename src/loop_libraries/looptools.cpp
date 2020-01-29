@@ -53,6 +53,11 @@
 
 namespace looplibrary {
 
+Looptools::Looptools() : current_mu2_uv(1.0)
+{
+   ltini();
+}
+
 void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
    if( std::abs(scl2_in - this->current_mu2_uv) > std::numeric_limits<double>::epsilon() )

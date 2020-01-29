@@ -43,7 +43,7 @@ class Looptools : public Loop_library_interface
       void set_mu2_uv(double) noexcept;
 
    public:
-      Looptools() : current_mu2_uv(1.0) {}
+      Looptools();
 
       std::complex<double> A0(std::complex<double>, double) noexcept;
 
