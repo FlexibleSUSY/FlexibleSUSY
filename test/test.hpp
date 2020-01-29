@@ -173,17 +173,18 @@ void check_relative_dev(const Eigen::MatrixBase<Derived>& a,
 
 } // namespace flexiblesusy
 
-#define S(x) #x
-#define S_(x) S(x)
-#define S__LINE__ S_(__LINE__)
+#define FS_STRINGIFY(x) #x
+#define FS_STRINGIFY_(x) FS_STRINGIFY(x)
+#define FS_STRINGIFY__LINE__ FS_STRINGIFY_(__LINE__)
+
 #define TEST_EQUALITY(a, b) \
-   flexiblesusy::check_equality(a, b, "line " S__LINE__ ": " #a " == " #b, max_dev)
+   flexiblesusy::check_equality(a, b, "line " FS_STRINGIFY__LINE__ ": " #a " == " #b, max_dev)
 #define TEST_CLOSE(a, b, dev) \
-   flexiblesusy::check_equality(a, b, "line " S__LINE__ ": " #a " == " #b, dev)
+   flexiblesusy::check_equality(a, b, "line " FS_STRINGIFY__LINE__ ": " #a " == " #b, dev)
 #define TEST_GREATER(a, b) \
-   flexiblesusy::check_greater_than(a, b, "line " S__LINE__ ": " #a " > " #b)
+   flexiblesusy::check_greater_than(a, b, "line " FS_STRINGIFY__LINE__ ": " #a " > " #b)
 #define TEST_CLOSE_REL(a, b, dev) \
-   flexiblesusy::check_relative_dev(a, b, "line " S__LINE__ ": " #a " =r= " #b, dev)
+   flexiblesusy::check_relative_dev(a, b, "line " FS_STRINGIFY__LINE__ ": " #a " =r= " #b, dev)
 #define TEST(condition) \
    flexiblesusy::check_condition(condition, #condition);
 

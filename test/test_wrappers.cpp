@@ -20,6 +20,7 @@
 #define BOOST_TEST_MODULE test_wrappers
 
 #include <complex>
+#include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 #include "wrappers.hpp"
 #include "stopwatch.hpp"
@@ -531,9 +532,19 @@ DEF_FUN(Power6)
 DEF_FUN(Power7)
 DEF_FUN(Power8)
 
+std::string format_line(int exponent, double t1, double t2)
+{
+   const double diff = MaxRelDiff(t1, t2) * 100;
+
+   auto fmt = boost::format("%|8| | %|23.10| | %|14.10| | %|+8.3|%%")
+              % exponent % t1 % t2 % diff;
+
+   return fmt.str();
+}
+
 BOOST_AUTO_TEST_CASE(test_Power_benchmark)
 {
-   const std::size_t N = 100000000;
+   const std::size_t N = 1000000000;
 
    const double timed_Power_3 = time_Power(N, 3., 3);
    const double timed_Power_4 = time_Power(N, 3., 4);
@@ -548,25 +559,14 @@ BOOST_AUTO_TEST_CASE(test_Power_benchmark)
    const double timed_Power7  = time_Power7(N, 3.);
    const double timed_Power8  = time_Power8(N, 3.);
 
-   BOOST_TEST_MESSAGE("Power(double,3): " << timed_Power_3 << " s");
-   BOOST_TEST_MESSAGE("Cube(double)   : " << timed_Cube << " s");
-   BOOST_TEST_MESSAGE("Power(double,4): " << timed_Power_4 << " s");
-   BOOST_TEST_MESSAGE("Quad(double)   : " << timed_Quad << " s");
-   BOOST_TEST_MESSAGE("Power(double,5): " << timed_Power_5 << " s");
-   BOOST_TEST_MESSAGE("Power5(double) : " << timed_Power5 << " s");
-   BOOST_TEST_MESSAGE("Power(double,6): " << timed_Power_6 << " s");
-   BOOST_TEST_MESSAGE("Power6(double) : " << timed_Power6 << " s");
-   BOOST_TEST_MESSAGE("Power(double,7): " << timed_Power_7 << " s");
-   BOOST_TEST_MESSAGE("Power7(double) : " << timed_Power7 << " s");
-   BOOST_TEST_MESSAGE("Power(double,8): " << timed_Power_8 << " s");
-   BOOST_TEST_MESSAGE("Power8(double) : " << timed_Power8 << " s");
-
-   BOOST_CHECK_LT(timed_Cube, timed_Power_3);
-   BOOST_CHECK_LT(timed_Quad, timed_Power_4);
-   BOOST_CHECK_LT(timed_Power5, timed_Power_5);
-   BOOST_CHECK_LT(timed_Power6, timed_Power_6);
-   BOOST_CHECK_LT(timed_Power7, timed_Power_7);
-   BOOST_CHECK_LT(timed_Power8, timed_Power_8);
+   BOOST_TEST_MESSAGE("exponent | time/s (multiplication) | time/s (pow()) | rel. diff");
+   BOOST_TEST_MESSAGE("---------------------------------------------------------------");
+   BOOST_TEST_MESSAGE(format_line(3, timed_Cube  , timed_Power_3));
+   BOOST_TEST_MESSAGE(format_line(4, timed_Quad  , timed_Power_4));
+   BOOST_TEST_MESSAGE(format_line(5, timed_Power5, timed_Power_5));
+   BOOST_TEST_MESSAGE(format_line(6, timed_Power6, timed_Power_6));
+   BOOST_TEST_MESSAGE(format_line(7, timed_Power7, timed_Power_7));
+   BOOST_TEST_MESSAGE(format_line(8, timed_Power8, timed_Power_8));
 }
 
 BOOST_AUTO_TEST_CASE(test_Min)

@@ -1,0 +1,105 @@
+name: tests
+
+on:
+
+  push:
+    branches:
+      - development
+    paths-ignore:
+      - '*.rst'
+      - 'AUTHORS'
+      - 'COPYING'
+      - 'doc/**'
+
+# currently there's now way to share secrets with pull request
+# so tests on pull request always fail because of missing Wolfram Engine licence
+#  pull_request:
+#    branches:
+#      - development
+#    paths-ignore:
+#      - '*.rst'
+#      - 'AUTHORS'
+#      - 'COPYING'
+#      - 'doc/**'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        CXXCOMPILER: [g++, clang++]
+        LOOPLIBRARY: [internal]
+
+    env:
+      IMAGE_VERSION: '0.2.3'
+      SARAH_VERSION: '4.14.3'
+      FEYNARTS_VERSION: '3.11'
+      FORMCALC_VERSION: '9.9'
+      LOOPTOOLS_VERSION: '2.15'
+      MODELS: 'SM THDMII MSSM MRSSM2 MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
+
+    steps:
+
+      # action checks-out our repository directly under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Pull the docker image
+        run: docker pull navir/opensuseleap-for-flexiblesusy:$IMAGE_VERSION
+
+      - name: Run the image
+        # mount $GITHUB_WORKSPACE as /FlexibleSUSY on the container
+        run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/FlexibleSUSY navir/opensuseleap-for-flexiblesusy:$IMAGE_VERSION
+
+      - name: Copy Wolfram Engine license to the image
+        run: |
+          docker exec builder bash -c "mkdir /root/.WolframEngine && mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
+          docker exec builder bash -c 'printf "Checking is Wolfram Engine workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+        env:
+          MATHPASS: ${{ secrets.MATHPASS }}
+
+      - name: Install SARAH and FeynArts
+        run: |
+          docker exec builder bash -c "wget -q -O - https://sarah.hepforge.org/downloads/SARAH-$SARAH_VERSION.tar.gz | tar xzf -"
+          docker exec builder bash -c "mkdir /root/.WolframEngine/Kernel && echo 'AppendTo[\$Path, \"/SARAH-$SARAH_VERSION\"];' > /root/.WolframEngine/Kernel/init.m"
+          docker exec builder bash -c "wget -q -O - http://www.feynarts.de/FeynArts-$FEYNARTS_VERSION.tar.gz | tar xzf -"
+          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FeynArts-$FEYNARTS_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
+
+      - name: Install FormCalc
+        run: |
+          docker exec builder bash -c "wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -"
+          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.0/Executables:\$PATH ./compile"
+          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
+
+      - name: (Optional) Install LoopTools
+        run: |
+          docker exec builder bash -c "cd /tmp && wget -qO- http://www.feynarts.de/looptools/LoopTools-$LOOPTOOLS_VERSION.tar.gz | tar xzf -"
+          docker exec builder bash -c "cd /tmp/LoopTools-$LOOPTOOLS_VERSION && if [ \"$CXX\" = "g++" ]; then export CC=gcc; export CXX=g++; fi && FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-$LOOPTOOLS_VERSION && make install"
+        env:
+          CXX:  ${{ matrix.CXXCOMPILER }}
+        if: matrix.LOOPLIBRARY == 'looptools'
+
+      - name: Create models
+        run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --name=\$m; done"
+
+      - name: Configure
+        run: docker exec builder bash -c "cd FlexibleSUSY && if [ \"$LOOPLIBRARY\" = \"looptools\" ]; then export FL=\"--enable-looptools --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include\"; fi && ./configure --with-cxx=$CXXCOMPILER --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --with-optional-modules=test --with-models=\$(echo $MODELS| tr ' ' ',') \$FL"
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          LOOPLIBRARY: ${{ matrix.LOOPLIBRARY }}
+
+      - name: Make
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
+
+      - name: Make and run tests
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          path: 'test'

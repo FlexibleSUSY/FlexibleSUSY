@@ -1,3 +1,25 @@
+FlexibleSUSY 2.4.2 [not released yet]
+=====================================
+
+Changes
+-------
+
+* Improved performance of ``flexiblesusy-config`` script.
+
+* ``make all-test`` returns early and with a non-zero exit code when a
+  test fails.  Use ``make -k all-test`` to force running of all tests.
+
+* When installing the dependencies with Conan_, the `Eigen 3`_ library
+  from the Conan repository is preferred over the one installed in the
+  system directories.
+
+Fixed bugs
+----------
+
+* [commit de7091b0d]: Fixed setting of threshold correction flags with
+  clang++ 7.0.
+
+
 FlexibleSUSY 2.4.1 [October, 16 2019]
 =====================================
 
@@ -2128,6 +2150,8 @@ FlexibleSUSY-0.5 [November 18, 2013]
 * Store particle masses as Eigen::Array and mixing matrices as
   ``Eigen::Matrix``.
 
+.. _Conan: https://conan.io/
+.. _Eigen 3: http://eigen.tuxfamily.org
 .. _GM2Calc: https://arxiv.org/abs/1510.08071
 .. _MhEFT: https://gabrlee.com/code/
 .. _FeynArts: http://www.feynarts.de
