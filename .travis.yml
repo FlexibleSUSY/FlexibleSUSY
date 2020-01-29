@@ -5,6 +5,12 @@ os:
 compiler:
   - clang
   - gcc
+addons:
+  apt:
+    packages: libgsl0-dev
+  homebrew:
+    packages: gsl
+    update: true
 python:
   - "3.6"
   - "pypy3"
