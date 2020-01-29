@@ -5,6 +5,8 @@ os:
 compiler:
   - clang
   - gcc
+python:
+  - "3.6"
 script:
   - pip install conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
