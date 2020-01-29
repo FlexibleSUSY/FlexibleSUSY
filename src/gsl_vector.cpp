@@ -28,15 +28,17 @@ namespace flexiblesusy {
 
 GSL_vector::GSL_vector(std::size_t size)
 {
-   if (!size)
+   if (size == 0u) {
       return;
+   }
 
    vec = gsl_vector_calloc(size);
 
-   if (!vec)
+   if (vec == nullptr) {
       throw OutOfMemoryError(
          "Allocation of GSL_vector of size " + std::to_string(size)
          + " failed.");
+   }
 }
 
 /**
@@ -54,10 +56,11 @@ GSL_vector::GSL_vector(const GSL_vector& other)
 {
    vec = gsl_vector_alloc(other.size());
 
-   if (!vec)
+   if (vec == nullptr) {
       throw OutOfMemoryError(
          "Allocation of GSL_vector of size " + std::to_string(other.size())
          + " failed.");
+   }
 
    gsl_vector_memcpy(vec, other.vec);
 }
@@ -69,15 +72,17 @@ GSL_vector::GSL_vector(GSL_vector&& other) noexcept
 
 GSL_vector::GSL_vector(std::initializer_list<double> list)
 {
-   if (list.size() == 0)
+   if (list.size() == 0) {
       return;
+   }
 
    vec = gsl_vector_alloc(list.size());
 
-   if (!vec)
+   if (vec == nullptr) {
       throw OutOfMemoryError(
          "Allocation of GSL_vector of size " + std::to_string(list.size())
          + " failed.");
+   }
 
    std::copy(list.begin(), list.end(), gsl_vector_ptr(vec, 0));
 }
@@ -94,7 +99,7 @@ GSL_vector::~GSL_vector() noexcept
  */
 void GSL_vector::assign(const gsl_vector* other)
 {
-   if (!other) {
+   if (other == nullptr) {
       gsl_vector_free(vec);
       vec = nullptr;
       return;
@@ -105,10 +110,11 @@ void GSL_vector::assign(const gsl_vector* other)
       gsl_vector_free(vec);
       vec = gsl_vector_alloc(other->size);
 
-      if (!vec)
+      if (vec == nullptr) {
          throw OutOfMemoryError(
             "Allocation of GSL_vector of size " + std::to_string(other->size)
             + " failed.");
+      }
    }
 
    gsl_vector_memcpy(vec, other);
@@ -119,10 +125,11 @@ bool GSL_vector::empty() const noexcept
    return size() == 0;
 }
 
-const GSL_vector& GSL_vector::operator=(const GSL_vector& rhs)
+GSL_vector& GSL_vector::operator=(const GSL_vector& rhs)
 {
-   if (this != &rhs)
+   if (this != &rhs) {
       assign(rhs.vec);
+   }
 
    return *this;
 }
@@ -161,7 +168,9 @@ double GSL_vector::operator()(std::size_t n) const
 
 std::size_t GSL_vector::size() const noexcept
 {
-   if (!vec) return 0;
+   if (vec == nullptr) {
+      return 0;
+   }
    return vec->size;
 }
 
@@ -191,8 +200,9 @@ gsl_vector* GSL_vector::raw() noexcept
 
 void GSL_vector::set_all(double value) noexcept
 {
-   if (vec)
+   if (vec != nullptr) {
       gsl_vector_set_all(vec, value);
+   }
 }
 
 std::ostream& operator<<(std::ostream& ostr, const GSL_vector& vec)
@@ -201,8 +211,9 @@ std::ostream& operator<<(std::ostream& ostr, const GSL_vector& vec)
 
    for (std::size_t i = 0; i < vec.size(); i++) {
       ostr << vec[i];
-      if (i < vec.size() - 1)
+      if (i < vec.size() - 1) {
          ostr << ", ";
+      }
    }
 
    ostr << ")";
@@ -218,28 +229,31 @@ void GSL_vector::move_assign(GSL_vector&& other) noexcept
 
 void GSL_vector::range_check(std::size_t n) const
 {
-   if (!vec)
+   if (vec == nullptr) {
       throw OutOfBoundsError(
          "GSL_vector::operator[]: index " + std::to_string(n)
          + " out of range for vector of size 0.");
+   }
 
-   if (n >= size())
+   if (n >= size()) {
       throw OutOfBoundsError(
          "GSL_vector::operator[]: index " + std::to_string(n)
          + " out of range for vector of size " + std::to_string(size()) + ".");
+   }
 }
 
 double* begin(GSL_vector& v)
 {
-   if (v.size())
+   if (!v.empty()) {
       return gsl_vector_ptr(v.raw(), 0);
+   }
 
    return nullptr;
 }
 
 double* end(GSL_vector& v)
 {
-   if (v.size()) {
+   if (!v.empty()) {
       double* last = gsl_vector_ptr(v.raw(), v.size() - 1);
       return ++last;
    }
@@ -249,15 +263,16 @@ double* end(GSL_vector& v)
 
 const double* cbegin(const GSL_vector& v)
 {
-   if (v.size())
+   if (!v.empty()) {
       return gsl_vector_const_ptr(v.raw(), 0);
+   }
 
    return nullptr;
 }
 
 const double* cend(const GSL_vector& v)
 {
-   if (v.size()) {
+   if (!v.empty()) {
       const double* last = gsl_vector_const_ptr(v.raw(), v.size() - 1);
       return ++last;
    }
