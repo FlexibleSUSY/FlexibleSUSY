@@ -518,45 +518,45 @@ void Standard_model::print(std::ostream& ostr) const
 
 double Standard_model::A0(double m) const
 {
-   return Loop::library().A0(m*m, Sqr(get_scale())).real();
+   return Looplibrary::get().A0(m*m, Sqr(get_scale())).real();
 }
 
 double Standard_model::B0(double p, double m1, double m2) const
 {
-   return Loop::library().B0(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
+   return Looplibrary::get().B0(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
 }
 
 double Standard_model::B1(double p, double m1, double m2) const
 {
-   return Loop::library().B1(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
+   return Looplibrary::get().B1(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
 }
 
 double Standard_model::B00(double p, double m1, double m2) const
 {
-   return Loop::library().B00(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
+   return Looplibrary::get().B00(p*p, m1*m1, m2*m2, Sqr(get_scale())).real();
 }
 
 double Standard_model::B22(double p, double m1, double m2) const
 {
    const double scl2 = Sqr(get_scale());
    return (
-      Loop::library().B00(p*p, m1*m1, m2*m2, scl2) - Loop::library().A0(m1*m1, scl2)/4.0 -
-      Loop::library().A0(m2*m2, scl2)/4.0
+      Looplibrary::get().B00(p*p, m1*m1, m2*m2, scl2) - Looplibrary::get().A0(m1*m1, scl2)/4.0 -
+      Looplibrary::get().A0(m2*m2, scl2)/4.0
    ).real();
 }
 
 double Standard_model::H0(double p, double m1, double m2) const
 {
    const double scl2 = Sqr(get_scale());
-   return 4.0*Loop::library().B00(p*p, m1*m1, m2*m2, scl2).real() + Standard_model::G0(p, m1, m2);
+   return 4.0*Looplibrary::get().B00(p*p, m1*m1, m2*m2, scl2).real() + Standard_model::G0(p, m1, m2);
 }
 
 double Standard_model::F0(double p, double m1, double m2) const
 {
    const double scl2 = Sqr(get_scale());
    return (
-      Loop::library().A0(m1*m1, scl2) - 2.0*Loop::library().A0(m2*m2, scl2)
-      - (2.0*p*p + 2.0*m1*m1 - m2*m2) * Loop::library().B0(p*p, m1*m1, m2*m2, scl2)
+      Looplibrary::get().A0(m1*m1, scl2) - 2.0*Looplibrary::get().A0(m2*m2, scl2)
+      - (2.0*p*p + 2.0*m1*m1 - m2*m2) * Looplibrary::get().B0(p*p, m1*m1, m2*m2, scl2)
    ).real();
 }
 
@@ -564,8 +564,8 @@ double Standard_model::G0(double p, double m1, double m2) const
 {
    const double scl2 = Sqr(get_scale());
    return (
-      (p*p - m1*m1 - m2*m2) * Loop::library().B0(p*p, m1*m1, m2*m2, scl2)
-      - Loop::library().A0(m1*m1, scl2) - Loop::library().A0(m2*m2, scl2)
+      (p*p - m1*m1 - m2*m2) * Looplibrary::get().B0(p*p, m1*m1, m2*m2, scl2)
+      - Looplibrary::get().A0(m1*m1, scl2) - Looplibrary::get().A0(m2*m2, scl2)
    ).real();
 }
 

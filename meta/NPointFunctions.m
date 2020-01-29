@@ -1509,7 +1509,7 @@ Module[
          Length@loopFunctions]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString[StringJoin["Loop::library().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString[StringJoin["Looplibrary::get().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@loopFunctions[[#,2]]<>" times."&,
          Length@loopFunctions]
       ];
@@ -1536,10 +1536,10 @@ Module[
       Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]
    ];
 
-   append[onePoint,onePointTemplate,"get_A","a"[1]];
-   append[twoPoint,twoPointTemplate,"get_B","b"[2]];
-   append[threePoint,threePointTemplate,"get_C","c"[7]];
-   append[fourPoint,fourPointTemplate,"get_D","d"[11]];
+   append[onePoint,onePointTemplate,"A","a"[1]];
+   append[twoPoint,twoPointTemplate,"B","b"[2]];
+   append[threePoint,threePointTemplate,"C","c"[7]];
+   append[fourPoint,fourPointTemplate,"D","d"[11]];
 
    {
       Flatten@loopRules,

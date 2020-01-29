@@ -71,10 +71,10 @@ double delta_mh_1loop_sm(
    const double LogH = FiniteLog(mH2 / Q2);
 
    const double result =
-      (+3*yt2*(4*mt2 - p2)*Loop::library().B0(p2,mt2,mt2,Q2).real()
+      (+3*yt2*(4*mt2 - p2)*Looplibrary::get().B0(p2,mt2,mt2,Q2).real()
        +6*lambda2*v2*(3*LogH-6+Pi*Sqrt(3))
-       -v2/4.*(3*g24-8*lambda*g22+16*lambda2)*Loop::library().B0(p2,mW2,mW2,Q2).real()
-       -v2/8.*(3*G4-8*lambda*G2+16*lambda2)*Loop::library().B0(p2,mZ2,mZ2,Q2).real()
+       -v2/4.*(3*g24-8*lambda*g22+16*lambda2)*Looplibrary::get().B0(p2,mW2,mW2,Q2).real()
+       -v2/8.*(3*G4-8*lambda*G2+16*lambda2)*Looplibrary::get().B0(p2,mZ2,mZ2,Q2).real()
        +2*mW2*(g22-2*lambda*(LogW-1))
        +mZ2*(G2-2*lambda*(LogZ-1))
       );
@@ -105,7 +105,7 @@ double delta_mh_1loop_at_sm(
    const double Q2 = Sqr(scale);
 
    const double result =
-      3*yt2*(4.*mt2 - p2)*Loop::library().B0(p2,mt2,mt2,Q2).real();
+      3*yt2*(4.*mt2 - p2)*Looplibrary::get().B0(p2,mt2,mt2,Q2).real();
 
    return result * oneOver16PiSqr;
 }
@@ -357,11 +357,11 @@ double delta_mh_2loop_atau_atau_sm(
 namespace {
 
 double QA0(double m, double Q) {
-   return flexiblesusy::Loop::library().A0(m*m, Q*Q).real();
+   return flexiblesusy::Looplibrary::get().A0(m*m, Q*Q).real();
 }
 
 double QB0(double p, double m1, double m2, double Q) {
-   return flexiblesusy::Loop::library().B0(p*p, m1*m1, m2*m2, Q*Q).real();
+   return flexiblesusy::Looplibrary::get().B0(p*p, m1*m1, m2*m2, Q*Q).real();
 }
 
 } // anonymous namespace

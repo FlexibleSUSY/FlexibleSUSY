@@ -43,23 +43,23 @@
 
 namespace flexiblesusy {
 
-int Loop::type_ = -1;
-std::unique_ptr<looplibrary::Loop_library_interface> Loop::lib_;
+int Looplibrary::type_ = -1;
+std::unique_ptr<looplibrary::Loop_library_interface> Looplibrary::lib_;
 
-void Loop::setLibrary(int new_type) {
-   if( Loop::type_ == -1) {
+void Looplibrary::set(int new_type) {
+   if( Looplibrary::type_ == -1) {
       switch(new_type) {
-         case 0 : Loop::lib_ = std::make_unique<looplibrary::Softsusy>();
-                  Loop::type_ = 0;
+         case 0 : Looplibrary::lib_ = std::make_unique<looplibrary::Softsusy>();
+                  Looplibrary::type_ = 0;
                   break;
 #ifdef ENABLE_COLLIER
-         case 1 : Loop::lib_ = std::make_unique<looplibrary::Collier>();
-                  Loop::type_ = 1;
+         case 1 : Looplibrary::lib_ = std::make_unique<looplibrary::Collier>();
+                  Looplibrary::type_ = 1;
                   break;
 #endif // ENABLE_COLLIER
 #ifdef ENABLE_LOOPTOOLS
-         case 2 : Loop::lib_ = std::make_unique<looplibrary::Looptools>();
-                  Loop::type_ = 2;
+         case 2 : Looplibrary::lib_ = std::make_unique<looplibrary::Looptools>();
+                  Looplibrary::type_ = 2;
                   break;
 #endif // ENABLE_LOOPTOOLS
          default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO ".");
@@ -68,12 +68,9 @@ void Loop::setLibrary(int new_type) {
    }
 }
 
-looplibrary::Loop_library_interface& Loop::library() {
-   if(Loop::type_ == -1) {
-      Loop::lib_ = std::make_unique<looplibrary::Softsusy>();
-      Loop::type_ = 0;
-   }
-   return *Loop::lib_;
+looplibrary::Loop_library_interface& Looplibrary::get() {
+   if(Looplibrary::type_ == -1) throw std::logic_error("Loop library should be initialized before first usage.");
+   return *Looplibrary::lib_;
 }
 
 } // namespace flexiblesusy

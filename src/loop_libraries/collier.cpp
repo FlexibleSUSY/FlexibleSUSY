@@ -183,7 +183,7 @@ four_point_collier(D23)
 four_point_collier(D3)
 four_point_collier(D33)
 
-void Collier::get_A(
+void Collier::A(
    std::complex<double> (&a)[1],
    std::complex<double> m02_in,
    double scl2_in) noexcept
@@ -194,7 +194,7 @@ void Collier::get_A(
    get_A_impl(a, &m02);
 }
 
-void Collier::get_B(
+void Collier::B(
    std::complex<double> (&b)[2],
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -208,7 +208,7 @@ void Collier::get_B(
    get_B_impl(b, &p10, &m02, &m12);
 }
 
-void Collier::get_C(
+void Collier::C(
    std::complex<double> (&c)[7],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
@@ -225,7 +225,7 @@ void Collier::get_C(
    get_C_impl(c, &p10, &p21, &p20, &m02, &m12, &m22);
 }
 
-void Collier::get_D(
+void Collier::D(
    std::complex<double> (&d)[11],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
    std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,

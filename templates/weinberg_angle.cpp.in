@@ -431,13 +431,13 @@ double CLASSNAME::calculate_delta_vb_bsm(double sinThetaW) const
 
 double CLASSNAME::B0(double p2, double m12, double m22) const noexcept
 {
-   return Loop::library().B0(p2, m12, m22, Sqr(model->get_scale())).real();
+   return Looplibrary::get().B0(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 double CLASSNAME::B1(double p2, double m12, double m22) const noexcept
 {
    // @note this minus sign is very confusing
-   return -1. * Loop::library().B1(p2, m12, m22, Sqr(model->get_scale())).real();
+   return -1. * Looplibrary::get().B1(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 double CLASSNAME::C0(double m12, double m22, double m32) const noexcept

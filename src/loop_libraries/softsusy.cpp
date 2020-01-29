@@ -158,7 +158,7 @@ UNDEFINED_D(D23)
 UNDEFINED_D(D3)
 UNDEFINED_D(D33)
 
-void Softsusy::get_A(
+void Softsusy::A(
    std::complex<double> (&a)[1],
    std::complex<double> m02_in,
    double scl2_in) noexcept
@@ -169,7 +169,7 @@ void Softsusy::get_A(
    a[0] = {softsusy::a0(m, q), 0.0};
 }
 
-void Softsusy::get_B(
+void Softsusy::B(
    std::complex<double> (&b)[2],
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -184,7 +184,7 @@ void Softsusy::get_B(
    b[1] = {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
 }
 
-void Softsusy::get_C(
+void Softsusy::C(
    std::complex<double> (&c)[7],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
@@ -206,7 +206,7 @@ void Softsusy::get_C(
    c[6] = undefined;
 }
 
-void Softsusy::get_D(
+void Softsusy::D(
    std::complex<double> (&d)[11],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
    std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,

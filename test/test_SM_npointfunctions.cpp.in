@@ -63,7 +63,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_SM_dataset( number_of_random_samples ),
   index, FS_TEST_SM_PARAMETER_SEQUENCE )
 {
-	Loop::setLibrary(0); // Change integer for the check of other loop library. Can be omitted, then 0 is chosen. 
+	Looplibrary::set(0);
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );

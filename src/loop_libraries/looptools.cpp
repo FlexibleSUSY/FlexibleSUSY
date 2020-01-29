@@ -99,7 +99,7 @@ LOOPTOOLS_D(D22,dd22)
 LOOPTOOLS_D(D23,dd23)
 LOOPTOOLS_D(D33,dd33)
 
-void Looptools::get_A(
+void Looptools::A(
    std::complex<double> (&a)[1],
    std::complex<double> m02_in,
    double scl2_in) noexcept
@@ -108,7 +108,7 @@ void Looptools::get_A(
    a[0] = A0i(aa0, m02_in.real());
 }
 
-void Looptools::get_B(
+void Looptools::B(
    std::complex<double> (&b)[2],
    std::complex<double> p10_in,
    std::complex<double> m02_in, std::complex<double> m12_in,
@@ -122,7 +122,7 @@ void Looptools::get_B(
    b[1] = B0i(bb1, p10, m02, m12);
 }
 
-void Looptools::get_C(
+void Looptools::C(
    std::complex<double> (&c)[7],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p20_in,
    std::complex<double> m02_in, std::complex<double> m12_in, std::complex<double> m22_in,
@@ -144,7 +144,7 @@ void Looptools::get_C(
    c[6] = C0i(cc22, p10, p21, p20, m02, m12, m22);
 }
 
-void Looptools::get_D(
+void Looptools::D(
    std::complex<double> (&d)[11],
    std::complex<double> p10_in, std::complex<double> p21_in, std::complex<double> p32_in,
    std::complex<double> p30_in, std::complex<double> p20_in, std::complex<double> p31_in,

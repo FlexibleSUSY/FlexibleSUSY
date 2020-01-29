@@ -66,20 +66,20 @@ class Softsusy : public Loop_library_interface
       four_point(D3)
       four_point(D33)
 
-      void get_A(
+      void A(
          std::complex<double> (&)[1],
          std::complex<double>,
          double) noexcept;
-      void get_B(
+      void B(
          std::complex<double> (&)[2],
          std::complex<double>, std::complex<double>, std::complex<double>,
          double) noexcept;
-      void get_C(
+      void C(
          std::complex<double> (&)[7],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,
          double) noexcept;
-      void get_D(
+      void D(
          std::complex<double> (&)[11],
          std::complex<double>, std::complex<double>, std::complex<double>,
          std::complex<double>, std::complex<double>, std::complex<double>,
