@@ -2272,7 +2272,7 @@ check_looplibrary() {
    if [ "$enable_looptools" = "yes" ]; then
       check_looptools
       LOOPFUNCFLAGS="$LOOPFUNCFLAGS $LOOPTOOLSFLAGS"
-      LOOPFUNCLIBS="$LOOPTOOLSLIBS"
+      LOOPFUNCLIBS="$LOOPFUNCLIBS $LOOPTOOLSLIBS"
    fi
 }
 
