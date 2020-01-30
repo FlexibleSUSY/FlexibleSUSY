@@ -94,10 +94,8 @@ options="                    \
    enable_compiler_warnings  \
    enable_debug              \
    enable_fflite             \
-   enable_loop_library       \
    enable_himalaya           \
    enable_librarylink        \
-   enable_collier            \
    enable_looptools          \
    enable_mass_error_check   \
    enable_shared_libs        \
@@ -127,7 +125,6 @@ enable_himalaya="automatic"
 enable_librarylink="automatic"
 enable_looptools="no"
 enable_collier="no"
-enable_loop_library="no"
 enable_meta="no"
 # BEGIN: NOT EXPORTED ##########################################
 enable_meta="yes"
@@ -151,7 +148,6 @@ DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
 DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
-DEFINE_ENABLE_LOOP_LIBRARY="#undef ENABLE_LOOP_LIBRARY"
 DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
 DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
@@ -225,6 +221,9 @@ MODELS=""
 # END:   NOT EXPORTED ##########################################
 # addons that will be compiled
 ADDONS=""
+
+#loop libraries that will be enabled additionally
+LOOP_LIBRARIES=""
 
 # C++ compiler type and version
 cxx_compiler_type="unknown"
@@ -2089,185 +2088,192 @@ EOF
 
 #_____________________________________________________________________
 check_looptools_libs() {
-    if test "x$enable_looptools" != "xyes"; then
-        if [ -n "$looptools_lib_dir" ] ; then
-            message "Warning: --with-looptools-libdir= has been set, but"
-            message "   LoopTools has not been enabled via --enable-looptools."
-        fi
-        return
-    fi
+# defines LOOPTOOLSLIBS variable
+   if [ -z "$looptools_lib_dir" ]; then
+      message "Warning: --with-looptools-libdir= has not been set, but"
+      message "         LoopTools has been enabled via --enable-looptools or"
+      message "         by --with-loop-libraries=looptools."
+   fi
 
-    check_library "libooptools" "$looptools_lib_dir" \
-	"$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Error: libooptools must be installed if you want"
-        message "   to use LoopTools, see http://www.feynarts.de/looptools/"
-        message "   You can use the --with-looptools-libdir= option to specify the"
-        message "   location of the libooptools library."
-        exit 1
-    else
-        local LOOPTOOLSLIBS_="-looptools -lquadmath"
-        if [ -z "$looptools_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
-        else
-            LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
-        fi
-    fi
+   check_library "libooptools" "$looptools_lib_dir" "$default_lib_paths"
+   if [ "x$found_lib" = "x" ]; then
+      message "Error: libooptools must be installed if you want"
+      message "       to use LoopTools, see http://www.feynarts.de/looptools/"
+      message "       You can use the --with-looptools-libdir= option to specify"
+      message "       the location of the libooptools library."
+      exit 1
+   else
+      local LOOPTOOLSLIBS_="-looptools -lquadmath"
+      if [ -z "$looptools_lib_dir" ]; then
+         # assume that the linker will look in the default paths
+         LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
+      else
+         LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
+      fi
+   fi
 }
 
 #_____________________________________________________________________
 check_looptools_incl() {
-    if test "x$enable_looptools" != "xyes"; then
-        if [ -n "$looptools_inc_dir" ] ; then
-            message "Warning: --with-looptools-incdir= has been set, but"
-            message "   LoopTools has not been enabled via --enable-looptools."
-        fi
-        return
-    fi
+# defines LOOPTOOLSFLAGS variable
+   if [ -z "$looptools_inc_dir" ]; then
+      message "Warning: --with-looptools-incdir= has not been set, but"
+      message "         LoopTools has been enabled via --enable-looptools or"
+      message "         by --with-loop-libraries=looptools."
+   fi
 
-    check_header "clooptools.h" "$looptools_inc_dir" \
-	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: clooptools.h must be installed if you want"
-        message "   to use LoopTools, see http://www.feynarts.de/looptools/"
-        message "   You can use the --with-looptools-incdir= option to specify the"
-        message "   location of the clooptools.h header."
-        exit 1
-    else
-        # assume that the compiler will look in the default paths
-        if [ -n "$looptools_inc_dir" ]; then
-            LOOPTOOLSFLAGS="-I$looptools_inc_dir"
-        fi
-    fi
+   check_header "clooptools.h" "$looptools_inc_dir" "$default_inc_paths"
+   if [ "x$found_hdr" = "x" ]; then
+      message "Error: clooptools.h must be installed if you want"
+      message "       to use LoopTools, see http://www.feynarts.de/looptools/"
+      message "       You can use the --with-looptools-incdir= option to specify"
+      message "       the location of the clooptools.h header."
+      exit 1
+   else
+      if [ -n "$looptools_inc_dir" ]; then
+         LOOPTOOLSFLAGS="-I$looptools_inc_dir"
+      fi
+   fi
 }
 
 #_____________________________________________________________________
 check_looptools() {
-    if [ "x$enable_looptools" = "xyes" ] ; then
-        [ -z "$looptools_inc_dir" ] && \
-        [ -z "$looptools_lib_dir" ] && \
-        type pkg-config > /dev/null && \
-        [ -f LoopTools.pc ] && \
-        {
-            message -n "Checking LoopTools using local LoopTools.pc ... "
-            LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-            LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
-            enable_looptools=yes
-            message "ok"
-            return
-        }
+   [ -z "$looptools_inc_dir" ] && [ -z "$looptools_lib_dir" ] && \
+   type pkg-config > /dev/null && [ -f LoopTools.pc ] && \
+   {
+      message -n "Checking LoopTools using local LoopTools.pc ... "
+      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+      enable_looptools=yes
+      message "ok"
+      return
+   }
 
-        check_looptools_incl
-        check_looptools_libs
-    fi
+   check_looptools_incl
+   check_looptools_libs
 }
 
 #_____________________________________________________________________
 check_collier_libs() {
-    if [ "x$enable_collier" != "xyes" ] ; then
-        if [ -n "$collier_lib_dir" ] ; then
-            message "Warning: --with-collier-libdir= has been set, but"
-            message "   COLLIER has not been enabled via --enable-collier."
-        fi
-        return
-    fi
+# defines COLLIERLIBS variable
+   if [ -z "$collier_lib_dir" ]; then
+      message "Warning: --with-collier-libdir= has not been set, but COLLIER"
+      message "         has been enabled via --with-loop-libraries=."
+   fi
 
-    check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
-    if test "x$found_lib" = "x" ; then
-        message "Error: libcollier must be present if you want"
-        message "   to use COLLIER, see https://collier.hepforge.org/"
-        message "   You can use the --with-collier-libdir= option to specify the"
-        message "   location of the libcollier library."
-        exit 1
-    else
-        local COLLIERLIBS_="-lcollier"
-        if [ -z "$collier_lib_dir" ]; then
-            # assume that the linker will look in the default paths
-            COLLIERLIBS=" $COLLIERLIBS_ "
-        else
-            COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
-        fi
-    fi
+   check_library "libcollier" "$collier_lib_dir" "$default_lib_paths"
+   if [ "x$found_lib" = "x" ]; then
+      message "Error: libcollier must be present if you want"
+      message "       to use COLLIER, see https://collier.hepforge.org/"
+      message "       You can use the --with-collier-libdir= option to specify"
+      message "       the location of the libcollier library."
+      exit 1
+   else
+      local COLLIERLIBS_="-lcollier"
+      if [ -z "$collier_lib_dir" ]; then
+         # assume that the linker will look in the default paths
+         COLLIERLIBS=" $COLLIERLIBS_ "
+      else
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
+      fi
+   fi
 }
 
 #_____________________________________________________________________
 check_collier_incl() {
-    if [ "x$enable_collier" != "xyes" ] ; then
-        if [ -n "$collier_inc_dir" ] ; then
-          message "Warning: --with-collier-incdir= has been set, but"
-          message "   COLLIER has not been enabled via --enable-collier."
-        fi
-        return
-    fi
+# defines COLLIERFLAGS variable
+   if [ -z "$collier_inc_dir" ] ; then
+      message "Warning: --with-collier-incdir= has not been set, but COLLIER"
+      message "         has been enabled by --with-loop-libraries=collier."
+   fi
 
-    check_header "collier.mod" "$collier_inc_dir"	"$default_inc_paths"
-    if test "x$found_hdr" = "x" ; then
-        message "Error: at least collier.mod must be present if you want"
-        message "   to use COLLIER, see https://collier.hepforge.org/"
-        message "   You can use the --with-collier-incdir= option to specify the"
-        message "   location of the collier.mod file."
-        exit 1
-    else
-        if [ -n "$collier_inc_dir" ]; then
-            COLLIERFLAGS="-I$collier_inc_dir"
-        fi
-    fi
+   check_header "collier.mod" "$collier_inc_dir" "$default_inc_paths"
+   if [ "x$found_hdr" = "x" ]; then
+      message "Error: at least collier.mod must be present if you want"
+      message "       to use COLLIER, see https://collier.hepforge.org/"
+      message "       You can use the --with-collier-incdir= option to specify"
+      message "       the location of the collier.mod file."
+      exit 1
+   else
+      if [ -n "$collier_inc_dir" ]; then
+         COLLIERFLAGS="-I$collier_inc_dir"
+      fi
+   fi
 }
 
 #_____________________________________________________________________
 check_collier() {
-    if [ "x$enable_collier" = "xyes" ] ; then
-        [ -z "$collier_inc_dir" ] && \
-        [ -z "$collier_lib_dir" ] && \
-        type pkg-config > /dev/null && \
-        [ -f Collier.pc ] && \
-        {
-            message -n "Checking COLLIER using local Collier.pc ... "
-            COLLIERLIBS=$(PKG_CONFIG_PATH=. pkg-config Collier --libs)
-            enable_collier=yes
-            message "ok"
-            return
-        }
+   [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
+   type pkg-config > /dev/null && [ -f Collier.pc ] && \
+   {
+      message -n "Checking COLLIER using local Collier.pc ... "
+      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config Collier --cflags)
+      COLLIERLIBS=$(PKG_CONFIG_PATH=. pkg-config Collier --libs)
+      enable_collier=yes
+      message "ok"
+      return
+   }
 
-        check_collier_incl
-        check_collier_libs
-    fi
+   check_collier_incl
+   check_collier_libs
 }
 
 #_____________________________________________________________________
-check_loop_functions() {
-    if test "$enable_fflite" = "yes" -a "$enable_looptools" = "yes"; then
-	message "Error: do not \`--enable-fflite' and \`--enable-looptools' at the same time"
-	exit 1
-    fi
+check_looplibrary() {
+   # applying "or" logic to old options
+   # "no" by default, only --enable-looptools could make it "yes"
+   if [ "$enable_looptools" = "yes" ]; then
+      logmsg "Enabling LoopTools because of --enable-looptools flag."
+   fi
+   # "no" by default, only --enable-fflite could make it "yes"
+   if [ "$enable_fflite" = "yes" ]; then
+      logmsg "Enabling fflite because of --enable-fflite flag."
+   fi
 
-    if test "$enable_collier" = "yes" -a "$enable_loop_library" = "no"; then
-	message "Error: do not \`--enable-collier' without \`--enable-loop-library'"
-  message "   at the same time. Currently COLLIER is accessible only via loop"
-  message "   library interface."
-	exit 1
-    fi
+   LOOP_LIBRARIES="$(echo $LOOP_LIBRARIES | tr ',' ' ')"
 
-    if test "$enable_looptools" = "yes" ; then
-        LOOPFUNCFLAGS="$LOOPTOOLSFLAGS"
-        LOOPFUNCLIBS="$LOOPTOOLSLIBS"
+   if contains "$LOOP_LIBRARIES" "looptools"; then enable_looptools="yes"; fi
+   if contains "$LOOP_LIBRARIES" "collier"; then enable_collier="yes"; fi
+   if contains "$LOOP_LIBRARIES" "fflite"; then enable_fflite="yes"; fi
 
-        message "Note: LoopTools is thread-unsafe since it accepts the renormalization scale"
-        message "   via a global variable.  This might lead to a race condition if different"
-        message "   RGE solvers run in multiple threads.  For such an application, consider the"
-        message "   alternative \`--enable-fflite'.  For now, multi-threading is disabled."
-        enable_threads=no
-    fi
+   # interference of libraries can be destructive
+   if [ "$enable_fflite" = "yes" ] && [ "$enable_looptools" = "yes" ]; then
+      message "Error: Do not use fflite and LoopTools at the same time."
+      exit 1
+   fi
+   if [ "$enable_fflite" = "yes" ] && [ "$enable_collier" = "yes" ]; then
+      message "Error: Do not use fflite and COLLIER at the same time."
+      exit 1
+   fi
 
-    if test "$enable_fflite" = "yes" ; then
-        LOOPFUNCFLAGS=""
-        LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
-    fi
+   local info_=""
+   if [ "$enable_collier" = "yes" ]; then info_="COLLIER"
+      if [ "$enable_looptools" = "yes" ]; then info_="$info_ and LoopTools"; fi
+   elif [ "$enable_looptools" = "yes" ]; then info_="LoopTools"
+   fi
+   if [ "$enable_collier" = "yes" ] || [ "$enable_looptools" = "yes" ]; then
+      message "Note: $info_ are thread-unsafe since they accept"
+      message "      the renormalization scale via a global variable. This might"
+      message "      lead to a race condition if different RGE solvers run in"
+      message "      multiple threads. For such an application, consider usage of"
+      message "      fflite. For now, multi-threading is disabled."
+      enable_threads=no
+   fi
 
-    if [ "$enable_loop_library" = "yes" ] ; then
-        LOOPFUNCLIBS="${LOOPFUNCLIBS} ${COLLIERLIBS}"
-    fi
+   # now rules for libraries themselves
+   if [ "$enable_collier" = "yes" ]; then
+      check_collier
+      LOOPFUNCFLAGS="$LOOPFUNCFLAGS $COLLIERFLAGS"
+      LOOPFUNCLIBS="$LOOPFUNCLIBS $COLLIERLIBS"
+   fi
+   if [ "$enable_fflite" = "yes" ]; then
+      LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
+   fi
+   if [ "$enable_looptools" = "yes" ]; then
+      check_looptools
+      LOOPFUNCFLAGS="$LOOPFUNCFLAGS $LOOPTOOLSFLAGS"
+      LOOPFUNCLIBS="$LOOPTOOLSLIBS"
+   fi
 }
 
 #_____________________________________________________________________
@@ -2982,35 +2988,29 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
     fi
 
-    if test "x$enable_loop_library" = "xyes" ; then
-        DEFINE_ENABLE_LOOP_LIBRARY="#define ENABLE_LOOP_LIBRARY 1"
-        message "Enabling usage of loop library interface"
-        logmsg "   ${DEFINE_ENABLE_LOOP_LIBRARY}"
-    else
-        DEFINE_ENABLE_LOOP_LIBRARY="#undef ENABLE_LOOP_LIBRARY"
-        logmsg "Disabling usage of loop library interface"
-        logmsg "   ${DEFINE_ENABLE_LOOP_LIBRARY}"
-    fi
-
     if test "x$enable_looptools" = "xyes" ; then
         DEFINE_ENABLE_LOOPTOOLS="#define ENABLE_LOOPTOOLS 1"
         message "Enabling usage of LoopTools"
         logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
     else
+        enable_looptools="no"
         DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
         logmsg "Disabling usage of LoopTools"
         logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
     fi
+    logmsg "   ${DEFINE_ENABLE_LOOPTOOLS}"
 
     if test "x$enable_collier" = "xyes" ; then
         DEFINE_ENABLE_COLLIER="#define ENABLE_COLLIER 1"
         message "Enabling usage of COLLIER"
         logmsg "   ${DEFINE_ENABLE_COLLIER}"
     else
+        enable_collier="no"
         DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
         logmsg "Disabling usage of COLLIER"
         logmsg "   ${DEFINE_ENABLE_COLLIER}"
     fi
+    logmsg "   ${DEFINE_ENABLE_COLLIER}"
 
     if test "x$enable_silent" = "xyes" ; then
         DEFINE_ENABLE_SILENT="#define ENABLE_SILENT 1"
@@ -3105,12 +3105,12 @@ enable_defines() {
 
 #_____________________________________________________________________
 replace_markers() {
-    sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
+	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
 	-e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
 	-e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
 	-e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-        -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
+   -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
 	-e "s|@PKGNAME@|$PROGRAM_NAME|"    \
 	-e "s|@ABSBASEDIR@|$ABSBASEDIR|"   \
 	-e "s|@ADDONS@|$ADDONS|"           \
@@ -3120,8 +3120,9 @@ replace_markers() {
 	-e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"     \
 	-e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"   \
 	-e "s|@THREADLIBS@|$THREADLIBS|"   \
-  -e "s|@COLLIERFLAGS@|$COLLIERFLAGS|" \
-  -e "s|@COLLIERLIBS@|$COLLIERLIBS|" \
+	-e "s|@ENABLE_COLLIER@|$enable_collier|" \
+	-e "s|@COLLIERFLAGS@|$COLLIERFLAGS|" \
+	-e "s|@COLLIERLIBS@|$COLLIERLIBS|" \
 	-e "s|@CPPFLAGS@|$CPPFLAGS|"       \
 	-e "s|@CXXFLAGS@|$CXXFLAGS|"       \
 	-e "s|@CXX@|$CXX|"                 \
@@ -3132,10 +3133,10 @@ replace_markers() {
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
 	-e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-        -e "s|@LDFLAGS@|$LDFLAGS|"         \
-        -e "s|@LDLIBS@|$LDLIBS|"           \
-        -e "s|@LLFLAGS@|$LLFLAGS|"         \
-        -e "s|@LLLIBS@|$LLLIBS|"           \
+		-e "s|@LDFLAGS@|$LDFLAGS|"         \
+		-e "s|@LDLIBS@|$LDLIBS|"           \
+		-e "s|@LLFLAGS@|$LLFLAGS|"         \
+		-e "s|@LLLIBS@|$LLLIBS|"           \
 	-e "s|@ENABLE_COLORS@|$enable_colors|" \
 	-e "s|@ENABLE_COMPILE@|$enable_compile|" \
 	-e "s|@ENABLE_COMPILER_WARNINGS@|$enable_compiler_warnings|" \
@@ -3146,8 +3147,6 @@ replace_markers() {
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
-	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
-	-e "s|@ENABLE_LOOP_LIBRARY@|$enable_loop_library|" \
 	-e "s|@ENABLE_META@|$enable_meta|" \
 	-e "s|@ENABLE_SILENT@|$enable_silent|"    \
 	-e "s|@ENABLE_SQLITE@|$enable_sqlite|"    \
@@ -3158,6 +3157,7 @@ replace_markers() {
         -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
+	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
@@ -3198,8 +3198,6 @@ enable/disable options, prefix with either --enable- or --disable-
   himalaya          Enable Himalaya (default: $enable_himalaya)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
-  collier           Use COLLIER to compute the loop functions (default: $enable_collier)
-  loop-library      Use loop library interface to access the loop functions (default: $enable_loop_library)
   mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
 EOF
 # BEGIN: NOT EXPORTED ##########################################
@@ -3238,6 +3236,8 @@ Package directories, compilation settings and model selection
   --with-install-dir=       Path to source code installation directory
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
+  --with-loop-libraries=    Comma separated list of loop libraries to be enabled
+                            (for example \`collier', \`looptools', \`fflite')
   --with-looptools-libdir=  Path to search for LoopTools libraries
   --with-looptools-incdir=  Path to search for LoopTools headers
   --with-collier-libdir=    Path to search for COLLIER libraries
@@ -3357,6 +3357,7 @@ if test $# -gt 0 ; then
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
             --with-llflags=*)        LLFLAGS=$optarg ;;
             --with-lllibs=*)         LLLIBS=$optarg ;;
+            --with-loop-libraries=*) LOOP_LIBRARIES=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
             --with-math-cmd=*)       MATH=$optarg ;;
@@ -3439,9 +3440,7 @@ if test "x${enable_compile}" = "xyes"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
-    check_looptools
-    check_collier
-    check_loop_functions
+    check_looplibrary
     check_odeint
     check_sqlite
     check_tsil
@@ -3486,8 +3485,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"       \
     -e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"                 \
     -e "s|@THREADLIBS@|$THREADLIBS|"                 \
-    -e "s|@COLLIERFLAGS@|$COLLIERFLAGS|" \
-    -e "s|@COLLIERLIBS@|$COLLIERLIBS|" \
+    -e "s|@COLLIERFLAGS@|$COLLIERFLAGS|"             \
+    -e "s|@COLLIERLIBS@|$COLLIERLIBS|"               \
     -e "s|@CPPFLAGS@|$CPPFLAGS|"                     \
     -e "s|@CXX@|$CXX|"                               \
     -e "s|@CXXFLAGS@|$CXXFLAGS|"                     \
@@ -3501,7 +3500,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
     -e "s|@LDLIBS@|$LDLIBS|"                         \
-    -e "s|@LLFLAGS@|$LLFLAGS|"                        \
+    -e "s|@LLFLAGS@|$LLFLAGS|"                       \
     -e "s|@LLLIBS@|$LLLIBS|"                         \
     -e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"             \
     -e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"           \
@@ -3527,7 +3526,6 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
-    -e "s|@DEFINE_ENABLE_LOOP_LIBRARY@|$DEFINE_ENABLE_LOOP_LIBRARY|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \
     -e "s|@DEFINE_ENABLE_ODEINT@|$DEFINE_ENABLE_ODEINT|"       \
