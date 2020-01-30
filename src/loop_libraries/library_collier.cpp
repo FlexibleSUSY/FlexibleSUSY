@@ -19,7 +19,7 @@
 #include <limits>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
-#include "collier.hpp"
+#include "library_collier.hpp"
 
 #define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
 #define COLLIER_ARGS(N) BOOST_PP_REPEAT(N,COLLIER_TYPE,) const std::complex<double>*
@@ -28,7 +28,7 @@
 
 /* Non-vanishing imaginary parts of momentum invariants are not yet
 * suppoted by the current version (1.2.4) of COLLIER. */
-#define COLLIER_B(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
+#define COLLIER_B(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> m02 = m02_in;\
@@ -37,7 +37,7 @@
    set_mu2_uv(scl2_in);\
    return BOOST_PP_CAT(NAME,_impl)(&p10, &m02, &m12);\
 }
-#define COLLIER_C(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
+#define COLLIER_C(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> p21 (p21_in.real(), 0.);\
@@ -49,7 +49,7 @@
    set_mu2_uv(scl2_in);\
    return BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p20, &m02, &m12, &m22);\
 }
-#define COLLIER_D(R,ARGS,NAME) std::complex<double> Collier::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
+#define COLLIER_D(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> p21 (p21_in.real(), 0.);\

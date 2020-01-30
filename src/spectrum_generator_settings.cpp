@@ -132,7 +132,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
- * | loop_library                     | 0 (Softsusy), 1 (Collier), 2 (Looptools)        | 0 (= Softsusy)  |
+ * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
  */
 void Spectrum_generator_settings::reset()
 {

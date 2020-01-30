@@ -22,21 +22,28 @@
 #include "loop_library.hpp"
 #include "loop_library_interface.hpp"
 
-#include "softsusy.hpp"
+#include "library_softsusy.hpp"
 
 #ifdef ENABLE_COLLIER
-#include "collier.hpp"
-#define COLLIER_INFO ", 1 (=Collier)"
+#include "library_collier.hpp"
+#define COLLIER_INFO ", 1 (=COLLIER)"
 #else
 #define COLLIER_INFO
 #endif // ENABLE_COLLIER
 
 #ifdef ENABLE_LOOPTOOLS
-#include "looptools.hpp"
+#include "library_looptools.hpp"
 #define LOOPTOOLS_INFO ", 2 (=LoopTools)"
 #else
 #define LOOPTOOLS_INFO
 #endif // ENABLE_LOOPTOOLS
+
+#ifdef ENABLE_FFLITE
+#include "library_fflite.hpp"
+#define FFLITE_INFO ", 3 (=fflite)"
+#else
+#define FFLITE_INFO
+#endif // ENABLE_FFLITE
 
 #define STRINGIFY(X) #X
 #define TOSTR(MACROS) STRINGIFY(MACROS)
@@ -62,7 +69,12 @@ void Looplibrary::set(int new_type) {
                   Looplibrary::type_ = 2;
                   break;
 #endif // ENABLE_LOOPTOOLS
-         default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO ".");
+#ifdef ENABLE_FFLITE
+         case 3 : Looplibrary::lib_ = std::make_unique<looplibrary::Fflite>();
+                  Looplibrary::type_ = 3;
+                  break;
+#endif // ENABLE_FFLITE
+         default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO".");
                   break;
       }
    }

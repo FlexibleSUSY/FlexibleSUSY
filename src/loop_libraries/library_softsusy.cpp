@@ -17,11 +17,11 @@
 // ====================================================================
 
 #include <limits>
-#include "softsusy.hpp"
+#include "library_softsusy.hpp"
 #include "numerics.h"
 
 #define NAN_Q std::numeric_limits<double>::quiet_NaN()
-#define UNDEFINED(R,ARGS,NAME) std::complex<double> Softsusy::NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept\
+#define UNDEFINED(R,ARGS,NAME) std::complex<double> Softsusy::NAME ARGS noexcept\
 {\
    return {NAN_Q, NAN_Q}; \
 }

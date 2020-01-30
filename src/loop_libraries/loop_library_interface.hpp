@@ -20,11 +20,10 @@
 #define LOOP_LIBRARY_INTERFACE
 
 #include <complex>
-#include <boost/preprocessor/punctuation/remove_parens.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 
 #define ARGS_TYPE(R,COMMA,ELEM) std::complex<double> ELEM,
-#define VIRTUAL(R,ARGS,NAME) virtual std::complex<double> NAME(BOOST_PP_REMOVE_PARENS(ARGS)) = 0;
+#define VIRTUAL(R,ARGS,NAME) virtual std::complex<double> NAME ARGS = 0;
 
 #define A_ARGS_SEQ (m02_in)
 #define B_ARGS_SEQ (p10_in)(m02_in)(m12_in)

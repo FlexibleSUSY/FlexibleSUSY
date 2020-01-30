@@ -17,7 +17,7 @@
 // ====================================================================
 
 #include <limits>
-#include "looptools.hpp"
+#include "library_looptools.hpp"
 #include "clooptools.h"
 
 #define LOOPTOOLS_B(NAME,INDEX) std::complex<double> Looptools::NAME(B_ARGS) noexcept\

@@ -16,23 +16,22 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_COLLIER
-#define LOOP_LIBRARY_COLLIER
+#ifndef LOOP_LIBRARY_LOOPTOOLS
+#define LOOP_LIBRARY_LOOPTOOLS
 
 #include "loop_library_interface.hpp"
 
-#define REDEFINE(R,ARGS,NAME) std::complex<double> NAME(BOOST_PP_REMOVE_PARENS(ARGS)) noexcept;
+#define REDEFINE(R,ARGS,NAME) std::complex<double> NAME ARGS noexcept;
 
 namespace looplibrary
 {
-class Collier : public Loop_library_interface
+class Looptools : public Loop_library_interface
 {
    private:
       double current_mu2_uv;
-      void initialize() noexcept;
       void set_mu2_uv(double) noexcept;
    public:
-      Collier() : current_mu2_uv(1.0) { initialize(); }
+      Looptools();
       BOOST_PP_SEQ_FOR_EACH(REDEFINE,(A_ARGS),A_SEQ)
       BOOST_PP_SEQ_FOR_EACH(REDEFINE,(B_ARGS),B_SEQ)
       BOOST_PP_SEQ_FOR_EACH(REDEFINE,(C_ARGS),C_SEQ)
@@ -44,4 +43,4 @@ class Collier : public Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_COLLIER
+#endif // LOOP_LIBRARY_LOOPTOOLS

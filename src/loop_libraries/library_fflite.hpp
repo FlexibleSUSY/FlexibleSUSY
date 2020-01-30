@@ -1,0 +1,43 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#ifndef LOOP_LIBRARY_FFLITE
+#define LOOP_LIBRARY_FFLITE
+
+#include "loop_library_interface.hpp"
+
+#define REDEFINE(R,ARGS,NAME) std::complex<double> NAME ARGS noexcept;
+
+namespace looplibrary
+{
+class Fflite : public Loop_library_interface
+{
+   public:
+      Fflite();
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(A_ARGS),A_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(B_ARGS),B_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(C_ARGS),C_SEQ)
+      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(D_ARGS),D_SEQ)
+      void A(std::complex<double> (&)[1], A_ARGS) noexcept;
+      void B(std::complex<double> (&)[2], B_ARGS) noexcept;
+      void C(std::complex<double> (&)[7], C_ARGS) noexcept;
+      void D(std::complex<double> (&)[11], D_ARGS) noexcept;
+};
+} // namespace looplibrary
+
+#endif // LOOP_LIBRARY_FFLITE
