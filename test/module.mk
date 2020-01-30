@@ -92,6 +92,7 @@ TEST_META := \
 		$(DIR)/test_ThresholdCorrections.m \
 		$(DIR)/test_TreeMasses.m \
 		$(DIR)/test_TwoLoopNonQCD.m \
+		$(DIR)/test_Utils.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
