@@ -84,7 +84,7 @@ getField[diagrams:`type`diagramSet,number:_Integer] :=
    Cases[diagrams[[1,2,1,2,1]],Rule[FeynArts`Field@number,x_] :> x][[1]] /;
    0<number<=Plus@@(Length/@getProcess@diagrams);
 getField // Utils`MakeUnknownInputDefinition;
-getField ~ SetAttributes ~ {Protected,ReadProtected,Locked};
+getField ~ SetAttributes ~ {Protected,Locked};
 
 `type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
 
@@ -479,7 +479,7 @@ Module[
    Flatten[Last/@replacements]
 ];
 getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
-getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked,ReadProtected};
+getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked};
 
 getModifiedDA::usage =
 "@brief Changes amplitudes and diagrams according to excudeProcess list.
@@ -607,7 +607,7 @@ Module[
    ]
 ];
 getTopologyAmplitudeRulesByTopologyCriterion // Utils`MakeUnknownInputDefinition;
-getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,Locked,ReadProtected};
+getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,Locked};
 
 topologyReplacements::usage =
 "@brief List of topology replacement rules for a processes to keep.
@@ -1012,7 +1012,7 @@ Module[
 ];
 
 `time`time = AbsoluteTime[];
-`time`time ~ SetAttributes ~ {Protected,ReadProtected};
+`time`time ~ SetAttributes ~ {Protected};
 
 `time`set[] := (
    Unprotect@`time`time;
@@ -1020,12 +1020,12 @@ Module[
    Protect@`time`time;
 );
 `time`set // Utils`MakeUnknownInputDefinition;
-`time`set ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`time`set ~ SetAttributes ~ {Locked,Protected};
 
 `time`get[] :=
    ToString@N[AbsoluteTime[]-`time`time,{Infinity,3}];
 `time`get // Utils`MakeUnknownInputDefinition;
-`time`get ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`time`get ~ SetAttributes ~ {Locked,Protected};
 
 
 (*@Todo think how to implement this in an elegant way.*)

@@ -128,7 +128,7 @@ SetAttributes[
    GenericS,GenericF,GenericV,GenericU,
    GenericSum,GenericIndex,LorentzIndex
    },
-   {Locked,Protected,ReadProtected}];
+   {Locked,Protected}];
 
 NPointFunctions`internal`contextPath = $ContextPath;
 $ContextPath = {"NPointFunctions`","System`"};
@@ -158,7 +158,7 @@ Module[
    `type`fermionField = Alternatives @@ fermionList;
    `type`vectorField = Alternatives @@ vectorList;
    `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList];
-   {`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField} ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+   {`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField} ~ SetAttributes ~ {Locked,Protected};
 ];
 
 `type`wilsonBasis = {Rule[_String,_]..};
@@ -199,11 +199,11 @@ Module[
 
 `subkernel`error[message_] := Utils`AssertOrQuit[False,message];
 `subkernel`error // Utils`MakeUnknownInputDefinition;
-`subkernel`error ~ SetAttributes ~ {Locked,Protected,ReadProtected,HoldFirst};
+`subkernel`error ~ SetAttributes ~ {Locked,Protected,HoldFirst};
 
 `cxx`getLength[obj:`type`wilsonBasis] := ToString@Length@obj;
 `cxx`getLength // Utils`MakeUnknownInputDefinition;
-`cxx`getLength ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`getLength ~ SetAttributes ~ {Locked,Protected};
 
 getDirectories[] :=
 Module[{},
@@ -222,14 +222,14 @@ Module[{},
    }&@@({FileNameJoin@{#,"NPointFunctions"},FileNameJoin@{#,"FeynArts"},FileNameJoin@{#,"FormCalc"}}&[FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates}])
 ];
 getDirectories // Utils`MakeUnknownInputDefinition;
-getDirectories ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getDirectories ~ SetAttributes ~ {Locked,Protected};
 
 getIndent[obj:_String] :=
 First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
 getIndent[obj:{__String}] :=
 First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
 getIndent // Utils`MakeUnknownInputDefinition;
-getIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getIndent ~ SetAttributes ~ {Locked,Protected};
 
 getConjugated[obj:`type`genericField] := Switch[Head@obj,
    SARAH`bar | Susyno`LieGroups`conj, obj[[1]],
@@ -241,36 +241,36 @@ getConjugated[obj:`type`scalarField|`type`vectorField] :=
 getConjugated[obj:`type`fermionField] :=
    SARAH`bar@obj;
 getConjugated // Utils`MakeUnknownInputDefinition;
-getConjugated ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getConjugated ~ SetAttributes ~ {Locked,Protected};
 
 getIndex[obj:`type`genericField] :=
 (obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity})[[1,1]];
 getIndex // Utils`MakeUnknownInputDefinition;
-getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getIndex ~ SetAttributes ~ {Locked,Protected};
 
 removeIndent[obj:_String] := StringReplace[obj,StartOfLine~~getIndent[obj]->""];
 removeIndent // Utils`MakeUnknownInputDefinition;
-removeIndent ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+removeIndent ~ SetAttributes ~ {Locked,Protected};
 
 replaceTokens[code:_String, rules:`type`cxxReplacementRules] :=
 StringJoin[
    StringReplace[#,"\n"->StringJoin["\n",getIndent@#]] &/@ StringReplace[StringSplit[removeIndent@code,"\n"],rules]~Riffle~"\n"];
 replaceTokens // Utils`MakeUnknownInputDefinition;
-replaceTokens ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+replaceTokens ~ SetAttributes ~ {Locked,Protected};
 
 getProcess[obj:`type`npf] := obj[[1]];
 getProcess // Utils`MakeUnknownInputDefinition;
-getProcess ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getProcess ~ SetAttributes ~ {Locked,Protected};
 
 getExternalMomenta[obj:`type`npf] :=
 DeleteDuplicates@Cases[{getGenericSums@obj,getSubexpressions@obj},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
 getExternalMomenta // Utils`MakeUnknownInputDefinition;
-getExternalMomenta ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getExternalMomenta ~ SetAttributes ~ {Locked,Protected};
 
 getExternalIndices[obj:`type`npf] :=
 DeleteDuplicates@Flatten@Level[getProcess@obj,{4,5}];
 getExternalIndices // Utils`MakeUnknownInputDefinition;
-getExternalIndices ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getExternalIndices ~ SetAttributes ~ {Locked,Protected};
 
 getGenericSums::errSimpleOnly =
 "Only the case without subexpressions is supported.";
@@ -296,32 +296,32 @@ Module[{unique = DeleteDuplicates@int},
    Utils`AssertOrQuit[containsQ[#,int],getGenericSums::errBadIndex,int,#]&[getIndexRange[getClassCombinatoricalFactors@obj]]
 ];
 getGenericSums // Utils`MakeUnknownInputDefinition;
-getGenericSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getGenericSums ~ SetAttributes ~ {Locked,Protected};
 
 getIndexRange[obj:{___}] := {1, Length@obj};
 getIndexRange // Utils`MakeUnknownInputDefinition;
-getIndexRange ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getIndexRange ~ SetAttributes ~ {Locked,Protected};
 
 containsQ[obj:{_Integer,_Integer}, int:_Integer] := IntervalMemberQ[Interval@obj,int];
 containsQ[obj:{_Integer,_Integer}, int:{__Integer}] := And@@(containsQ[obj,#]&/@int);
 containsQ // Utils`MakeUnknownInputDefinition;
-containsQ ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+containsQ ~ SetAttributes ~ {Locked,Protected};
 
 getClassFields[obj:`type`npf] := obj[[2,1,2]];
 getClassFields // Utils`MakeUnknownInputDefinition;
-getClassFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getClassFields ~ SetAttributes ~ {Locked,Protected};
 
 getClassCombinatoricalFactors[obj:`type`npf] := obj[[2,1,3]];
 getClassCombinatoricalFactors // Utils`MakeUnknownInputDefinition;
-getClassCombinatoricalFactors ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getClassCombinatoricalFactors ~ SetAttributes ~ {Locked,Protected};
 
 getClassColorFactors[obj:`type`npf] := obj[[2,1,4]];
 getClassColorFactors // Utils`MakeUnknownInputDefinition;
-getClassColorFactors ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getClassColorFactors ~ SetAttributes ~ {Locked,Protected};
 
 getSubexpressions[obj:`type`npf] := obj[[2,2]];
 getSubexpressions // Utils`MakeUnknownInputDefinition;
-getSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getSubexpressions ~ SetAttributes ~ {Locked,Protected};
 
 getName[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
@@ -332,7 +332,7 @@ Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}}
 getName[obj:`type`genericField] :=
 Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
 getName // Utils`MakeUnknownInputDefinition;
-getName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getName ~ SetAttributes ~ {Locked,Protected};
 
 cxxName[obj:`type`genericField] :=
 Switch[Head@obj,
@@ -341,7 +341,7 @@ Switch[Head@obj,
    _,ToString[obj[[0]]]<>ToString[obj[[1,1]]]
 ];
 cxxName // Utils`MakeUnknownInputDefinition;
-cxxName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+cxxName ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`getIndex[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
@@ -350,35 +350,35 @@ Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}}
    (_Symbol)[{_Symbol}],StringDrop[ToString[nakedField[[1, 1]]],2]]
 ];
 `cxx`getIndex // Utils`MakeUnknownInputDefinition;
-`cxx`getIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`getIndex ~ SetAttributes ~ {Locked,Protected};
 
 cxxIndex[obj:`type`genericField] :=
 "indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
 cxxIndex // Utils`MakeUnknownInputDefinition;
-cxxIndex ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+cxxIndex ~ SetAttributes ~ {Locked,Protected};
 
 getGenericFields[obj:`type`genericSum] := First/@Last[obj];
 getGenericFields[obj:`type`summation] := First/@obj;
 getGenericFields[objs:{`type`genericSum..}] := (First/@Last@#)&/@objs;
 getGenericFields // Utils`MakeUnknownInputDefinition;
-getGenericFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getGenericFields ~ SetAttributes ~ {Locked,Protected};
 
 getExpression[obj:`type`genericSum] := First@obj;
 getExpression // Utils`MakeUnknownInputDefinition;
-getExpression ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getExpression ~ SetAttributes ~ {Locked,Protected};
 
 getSummationData[obj:`type`genericSum] := Last@obj;
 getSummationData // Utils`MakeUnknownInputDefinition;
-getSummationData ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getSummationData ~ SetAttributes ~ {Locked,Protected};
 
 getClassFieldRules[obj:`type`npf] :=
 MapThread[Function[fields,MapThread[Rule,{#1,fields}]]/@#2&,{getGenericFields@getGenericSums@obj,getClassFields@obj}];
 getClassFieldRules // Utils`MakeUnknownInputDefinition;
-getClassFieldRules ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getClassFieldRules ~ SetAttributes ~ {Locked,Protected};
 
 setSubexpressions[obj:`type`npf, newsubs:`type`subexpressions] := ReplacePart[obj,{2,2}->newsubs];
 setSubexpressions // Utils`MakeUnknownInputDefinition;
-setSubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+setSubexpressions ~ SetAttributes ~ {Locked,Protected};
 
 applySubexpressions[obj:`type`npf] :=
 Module[{result},
@@ -388,7 +388,7 @@ Module[{result},
    result
 ];
 applySubexpressions // Utils`MakeUnknownInputDefinition;
-applySubexpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+applySubexpressions ~ SetAttributes ~ {Locked,Protected};
 
 CreateCXXFToFConversionInNucleus::usage=
 "@todo";
@@ -499,7 +499,7 @@ Module[
    CreateCXXFToFConversionInNucleus::errFermion,
    inF->outF];
 CreateCXXFToFConversionInNucleus // Utils`MakeUnknownInputDefinition;
-CreateCXXFToFConversionInNucleus ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CreateCXXFToFConversionInNucleus ~ SetAttributes ~ {Locked,Protected};
 
 Options[NPointFunction]={
    LoopLevel -> 1,
@@ -649,7 +649,7 @@ Module[
    nPointFunction
 ] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
 NPointFunction // Utils`MakeUnknownInputDefinition;
-NPointFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+NPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 subWrite::usage =
 "@brief Prints a string.
@@ -688,7 +688,7 @@ Module[
    True
 ];
 internalNPointFunctionInputCheck // Utils`MakeUnknownInputDefinition;
-internalNPointFunctionInputCheck ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+internalNPointFunctionInputCheck ~ SetAttributes ~ {Locked,Protected};
 
 VerticesForNPointFunction::usage=
 "@brief Return a list of all vertices needed to calculate a given
@@ -713,7 +713,7 @@ Module[
    DeleteDuplicates[Vertices`StripFieldIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
 VerticesForNPointFunction // Utils`MakeUnknownInputDefinition;
-VerticesForNPointFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+VerticesForNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -724,7 +724,7 @@ If[SARAH`submodeldir =!= False,
       SARAH`modelDir
 ];
 GetSARAHModelName // Utils`MakeUnknownInputDefinition;
-GetSARAHModelName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+GetSARAHModelName ~ SetAttributes ~ {Locked,Protected};
 
 LaunchSubkernelFor::usage=
 "@brief Tries to launch a subkernel without errors.
@@ -766,7 +766,7 @@ Module[{kernelName},
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
 LaunchSubkernelFor // Utils`MakeUnknownInputDefinition;
-LaunchSubkernelFor ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+LaunchSubkernelFor ~ SetAttributes ~ {Locked,Protected};
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
@@ -776,7 +776,7 @@ CacheNameForMeta::usage=
 CacheNameForMeta[nPointMeta:{__}] :=
    StringJoin["cache_",Riffle[ToString/@Flatten@nPointMeta, "_"],".m"];
 CacheNameForMeta // Utils`MakeUnknownInputDefinition;
-CacheNameForMeta ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CacheNameForMeta ~ SetAttributes ~ {Locked,Protected};
 
 CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
@@ -808,7 +808,7 @@ Module[
    Close@fileHandle;
 ];
 CacheNPointFunction // Utils`MakeUnknownInputDefinition;
-CacheNPointFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CacheNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 CachedNPointFunction::usage=
 "@brief Retrieve an n-point correlation function from the cache
@@ -833,7 +833,7 @@ Module[
    If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
 ];
 CachedNPointFunction // Utils`MakeUnknownInputDefinition;
-CachedNPointFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 GenerateFAModelFileOnKernel::usage=
 "@brief Generate the FeynArts model file on a given subkernel.";
@@ -860,7 +860,7 @@ Module[
       kernel];
 ];
 GenerateFAModelFileOnKernel // Utils`MakeUnknownInputDefinition;
-GenerateFAModelFileOnKernel ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+GenerateFAModelFileOnKernel ~ SetAttributes ~ {Locked,Protected};
 
 WriteParticleNamespaceFile::usage=
 "@brief Write a file containing all field names and the contexts in which they
@@ -872,7 +872,7 @@ Module[{fileHandle = OpenWrite@fileName},
    Close@fileHandle;
 ];
 WriteParticleNamespaceFile // Utils`MakeUnknownInputDefinition;
-WriteParticleNamespaceFile ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+WriteParticleNamespaceFile ~ SetAttributes ~ {Locked,Protected};
 
 FANamesForFields::usage=
 "@brief Translate SARAH-style fields to FeynArts-style fields
@@ -908,7 +908,7 @@ Module[
       }
 ];
 FANamesForFields // Utils`MakeUnknownInputDefinition;
-FANamesForFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+FANamesForFields ~ SetAttributes ~ {Locked,Protected};
 
 RemoveEmptyGenSums::usage=
 "@brief Sometimes after FA+FC calculation some generic sums are empty. This
@@ -936,7 +936,7 @@ Module[{poss=Position[sums,GenericSum[{0},{}]]},
    {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
 ];
 RemoveEmptyGenSums // Utils`MakeUnknownInputDefinition;
-RemoveEmptyGenSums ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+RemoveEmptyGenSums ~ SetAttributes ~ {Locked,Protected};
 
 CreateCXXHeaders::usage=
 "@brief Create the c++ code for the necessary headers.
@@ -954,7 +954,7 @@ replaceTokens["
    }
 ];
 CreateCXXHeaders // Utils`MakeUnknownInputDefinition;
-CreateCXXHeaders ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CreateCXXHeaders ~ SetAttributes ~ {Locked,Protected};
 
 CreateCXXFunctions::usage=
 "@brief Given a list of n-point correllation functions, a list
@@ -995,7 +995,7 @@ Module[
 ] /;
 And@@(Utils`AssertOrQuit[Length@wilsonBasis === Length@#,CreateCXXFunctions::errNoMatch]&/@getExpression/@getGenericSums@npf);
 CreateCXXFunctions // Utils`MakeUnknownInputDefinition;
-CreateCXXFunctions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+CreateCXXFunctions ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`arguments::usage=
 "@brief Returns the c++ arguments that the c++ version of the given n-point
@@ -1017,10 +1017,10 @@ correlation function shall take.";
       Utils`StringJoinWithReplacement@Array["Eigen::Vector4d::Zero()",#]
    ] &@ Length@getExternalMomenta@npf;
 `cxx`arguments // Utils`MakeUnknownInputDefinition;
-`cxx`arguments ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`arguments ~ SetAttributes ~ {Locked,Protected};
 
 `current`wilsonBasis = {"value"->"dummy string"};
-`current`wilsonBasis ~ SetAttributes ~ {Protected,ReadProtected};
+`current`wilsonBasis ~ SetAttributes ~ {Protected};
 
 `current`setWilsonBasis[obj:`type`wilsonBasis] :=
 (
@@ -1029,10 +1029,10 @@ correlation function shall take.";
    Protect[`current`wilsonBasis];
 );
 `current`setWilsonBasis // Utils`MakeUnknownInputDefinition;
-`current`setWilsonBasis ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`current`setWilsonBasis ~ SetAttributes ~ {Locked,Protected};
 
 `current`helperClassName = "";
-`current`helperClassName ~ SetAttributes ~ {Protected,ReadProtected};
+`current`helperClassName ~ SetAttributes ~ {Protected};
 
 `current`setHelperClassName::usage=
 "@brief Sets the c++ name for the helper class of the c++
@@ -1047,7 +1047,7 @@ Module[{fieldNames = Vertices`StripFieldIndices/@Join@@getProcess[obj]},
    Protect@`current`helperClassName;
 ];
 `current`setHelperClassName // Utils`MakeUnknownInputDefinition;
-`current`setHelperClassName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`current`setHelperClassName ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`npfClass::usage=
 "@brief Return the c++ code for the helper class of the c++ version of a given
@@ -1106,7 +1106,7 @@ Module[
    "@CalculateFunction@"->`cxx`calculateFunction@genSumNames}]
 ];
 `cxx`npfClass // Utils`MakeUnknownInputDefinition;
-`cxx`npfClass ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`npfClass ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`initializeKeyStructs::usage =
 "@brief Generates required c++ code for key structs initialization.
@@ -1115,10 +1115,10 @@ Module[
 `cxx`initializeKeyStructs[fields:{`type`genericField..}]:=
    StringRiffle["struct "<>#<>" {};"&/@`cxx`genericFieldKey/@fields,"\n"];
 `cxx`initializeKeyStructs // Utils`MakeUnknownInputDefinition;
-`cxx`initializeKeyStructs ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`initializeKeyStructs ~ SetAttributes ~ {Locked,Protected};
 
 `current`cxxRules = {{}};
-`current`cxxRules ~ SetAttributes ~ {Protected,ReadProtected};
+`current`cxxRules ~ SetAttributes ~ {Protected};
 
 `current`setCxxRules::usage=
 "@brief Generate a list of rules for translating Mathematica expressions of
@@ -1199,12 +1199,12 @@ Module[
    Protect@`current`cxxRules;
 ];
 `current`setCxxRules // Utils`MakeUnknownInputDefinition;
-`current`setCxxRules ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`current`setCxxRules ~ SetAttributes ~ {Locked,Protected};
 
 `current`applyCxxRules[obj_] :=
 Parameters`ExpressionToString[Fold[ReplaceAll,obj,`current`cxxRules]];
 `current`applyCxxRules // Utils`MakeUnknownInputDefinition;
-`current`applyCxxRules ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`current`applyCxxRules ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`fieldName::usage =
 "@brief Given an explicit field (possibly conjugated), returns its c++ representation.
@@ -1217,7 +1217,7 @@ Parameters`ExpressionToString[Fold[ReplaceAll,obj,`current`cxxRules]];
 `cxx`fieldName[fieldName_Symbol[_?VectorQ] | fieldName_Symbol] :=
    StringJoin["fields::",SymbolName@fieldName];
 `cxx`fieldName // Utils`MakeUnknownInputDefinition;
-`cxx`fieldName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`fieldName ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`fieldIndices::usage=
 "@brief Return the c++ expression for the given field.
@@ -1236,7 +1236,7 @@ If[Length@field === 0,
    "std::array<int,1>{"<>ToString@First@field<>"}"
 ];
 `cxx`fieldIndices // Utils`MakeUnknownInputDefinition;
-`cxx`fieldIndices ~ SetAttributes ~ {Locked,ReadProtected};
+`cxx`fieldIndices ~ SetAttributes ~ {Locked};
 
 `cxx`genericFieldKey::usage=
 "@brief Given a generic field(s), determine its key type used in the c++ code to
@@ -1249,7 +1249,7 @@ uniquely label it.
 `cxx`genericFieldKey[head_[GenericIndex[index_Integer]]] :=
    ToString@head<>ToString@index<>"Key";
 `cxx`genericFieldKey // Utils`MakeUnknownInputDefinition;
-`cxx`genericFieldKey ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`genericFieldKey ~ SetAttributes ~ {Locked,Protected};
 
 getColourFactor::usage=
 "@brief Extracts the colour factor for a given colour structure.";
@@ -1283,7 +1283,7 @@ Module[
    projectedFactors
 ];
 getColourFactor // Utils`MakeUnknownInputDefinition;
-getColourFactor ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+getColourFactor ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`genericSum::usage=
 "@brief Create the c++ code form of a generic sums.
@@ -1377,7 +1377,7 @@ Module[
    ]
 ];
 `cxx`genericSum // Utils`MakeUnknownInputDefinition;
-`cxx`genericSum ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`genericSum ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`changeGenericExpressions::usage =
 "@brief Generates c++ code for output value updating inside generic sum.
@@ -1439,7 +1439,7 @@ Module[
    }]
 ];
 `cxx`changeGenericExpressions // Utils`MakeUnknownInputDefinition;
-`cxx`changeGenericExpressions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`changeGenericExpressions ~ SetAttributes ~ {Locked,Protected};
 
 createLoopFunctions[modifiedExpr:{__}] :=
 Module[
@@ -1549,7 +1549,7 @@ Module[
    }
 ];
 createLoopFunctions // Utils`MakeUnknownInputDefinition;
-createLoopFunctions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+createLoopFunctions ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},massRules:{Rule[_,_]..}] :=
 Module[
@@ -1564,7 +1564,7 @@ Module[
    "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" < std::numeric_limits<double>::epsilon() ) continue;"
 ];
 `cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
-`cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
 `cxx`getVariableName[SARAH`Mass[obj]] =
@@ -1573,7 +1573,7 @@ Switch[getName@obj,GenericS,"mS",GenericF,"mF",GenericV,"mV",GenericU,"mU"]<>ToS
 `cxx`getVariableName[SARAH`Mass[obj]] =
 "m"<>ToString@getName@obj<>`cxx`getIndex@obj;
 `cxx`getVariableName // Utils`MakeUnknownInputDefinition;
-`cxx`getVariableName ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`getVariableName ~ SetAttributes ~ {Locked,Protected};
 
 createUniqueDefinitions[expr:{{_,_Integer}..},{type_String,name_String}] :=
 Module[{names,namedExpr,code,rules},
@@ -1592,7 +1592,7 @@ Module[{names,namedExpr,code,rules},
    {names,StringReplace[code,"\""->""],rules}
 ];
 createUniqueDefinitions // Utils`MakeUnknownInputDefinition;
-createUniqueDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+createUniqueDefinitions ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`shortNames::usage =
 "@brief Generates c++ code for type abbreviations stored in GenericFieldMap
@@ -1606,7 +1606,7 @@ createUniqueDefinitions ~ SetAttributes ~ {Locked,Protected,ReadProtected};
       {cxxName@#,`cxx`genericFieldKey@#}&/@genFields,
       {1}],"\n"];
 `cxx`shortNames // Utils`MakeUnknownInputDefinition;
-`cxx`shortNames ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`shortNames ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`beginSum::usage =
 "@brief Generates c++ code for sum beginning used inside GenericSum.
@@ -1621,7 +1621,7 @@ Module[{beginsOfFor},
    StringRiffle[beginsOfFor,"\n"]
 ];
 `cxx`beginSum // Utils`MakeUnknownInputDefinition;
-`cxx`beginSum ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`beginSum ~ SetAttributes ~ {Locked,Protected};
 
 parseRestrictionRule[{genericField:`type`genericField,rule_}] :=
 Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
@@ -1646,7 +1646,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
       _,"@todo This rule is ununderstandable!";Quit[1]]
 ];
 parseRestrictionRule // Utils`MakeUnknownInputDefinition;
-parseRestrictionRule ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+parseRestrictionRule ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`endSum::usage =
 "@brief Generates c++ code for end of sum over generic fields inside GenericSum.
@@ -1657,7 +1657,7 @@ parseRestrictionRule ~ SetAttributes ~ {Locked,Protected,ReadProtected};
       Array["}"&,Length@genFields],
       " // End of summation over generic fields"];
 `cxx`endSum // Utils`MakeUnknownInputDefinition;
-`cxx`endSum ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`endSum ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`calculateFunction::usage =
 "@brief Generates c++ code for functions which return result of generic sum
@@ -1692,7 +1692,7 @@ Module[
    }]
 ];
 `cxx`calculateFunction // Utils`MakeUnknownInputDefinition;
-`cxx`calculateFunction ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`calculateFunction ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`insertFields::usage =
 "@brief Generates c++ code for class insertions inside GenericSum.
@@ -1701,7 +1701,7 @@ Module[
 `cxx`insertFields[genInsertions:`type`classFields] :=
    StringRiffle["boost::mpl::vector<"<>StringRiffle[`cxx`fieldName@#&/@#,", "]<>">"&/@genInsertions,",\n"];
 `cxx`insertFields // Utils`MakeUnknownInputDefinition;
-`cxx`insertFields ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`insertFields ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`insertFactors::usage =
 "@brief Generates c++ code for combinatorical factor insertions inside GenericSum.
@@ -1710,7 +1710,7 @@ Module[
 `cxx`insertFactors[combinatorialFactors:`type`classCombinatoricalFactors] :=
    StringRiffle["boost::mpl::int_<"<>ToString@#<>">"&/@combinatorialFactors,",\n"];
 `cxx`insertFactors // Utils`MakeUnknownInputDefinition;
-`cxx`insertFactors ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`insertFactors ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`insertColours::usage =
 "@brief Generates c++ code for colour factor insertions inside GenericSum.
@@ -1733,7 +1733,7 @@ Module[
    ",\n"]
 ];
 `cxx`insertColours // Utils`MakeUnknownInputDefinition;
-`cxx`insertColours ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+`cxx`insertColours ~ SetAttributes ~ {Locked,Protected};
 
 (*auxiliary functions with names of newer Mathematica versions*)
 If[TrueQ[$VersionNumber<10],

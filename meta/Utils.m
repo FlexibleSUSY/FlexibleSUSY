@@ -501,7 +501,7 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
-SetAttributes[MakeUnknownInputDefinition,{Locked,Protected,ReadProtected}];
+SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
 
 StringJoinWithReplacement[
    list_List,
@@ -511,7 +511,7 @@ StringJoinWithReplacement[
 ] :=
 StringReplace[StringJoinWithSeparator[list,separator,transformer],replacement];
 StringJoinWithReplacement // MakeUnknownInputDefinition;
-StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected,ReadProtected};
+StringJoinWithReplacement ~ SetAttributes ~ {Locked,Protected};
 
 ReadLinesInFile[fileName_String] :=
 	Module[{fileHandle, lines = {}, line},
