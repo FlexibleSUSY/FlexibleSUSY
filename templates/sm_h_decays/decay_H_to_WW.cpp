@@ -1,7 +1,7 @@
 // special case for H -> W+ W-
 // TODO: implement higher order corrections
 template <>
-double CLASSNAME::get_partial_width<H, W, conj<W>::type>(
+double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
    typename field_indices<conj<W>::type>::type const& indexOut1,
    typename field_indices<W>::type const& indexOut2) const
@@ -35,7 +35,7 @@ double CLASSNAME::get_partial_width<H, W, conj<W>::type>(
       const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mWOS*mWOS, mWOS*mWOS))/(mHOS*mHOS);
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<H, W, conj<W>::type>(
+      const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(
          context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq =mat_elem.square();
 

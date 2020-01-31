@@ -385,7 +385,12 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                     orderedFinalState = Reverse[orderedFinalState];
                    ];
                 ];
-             ];
+              If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
+                 If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
+                    orderedFinalState = Reverse[orderedFinalState];
+                 ];
+              ];
+           ];
             orderedFinalState
           ];
 
