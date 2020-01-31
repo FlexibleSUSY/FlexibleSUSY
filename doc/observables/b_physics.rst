@@ -24,19 +24,12 @@ As an example, below is the corresponding part from ``MRSSM2CKM``
     };
 
 By default, calculation of b-physics observables is enabled only for models with a non-trivial CKM matrix.
-Currently, these are: CMSSMCKM and MRSSM2CKM (by convention all such model names have suffix ``CKM``)
-
-
+Currently, these are: CMSSMCKM and MRSSM2CKM (by convention all such model names have suffix ``CKM``).
 After a normal ``FlexibleSUSY`` run you'll find in the run directory a file called ``WC_MODELNAME.json``.
 This is an input to the flavio_ package by D. Straub.
-To use it, first, install ``flavio`` as
-
-.. code-block:: bash
-
-    pip install --user flavio
-
+To use it, first, install ``flavio`` as expained here_.
 In the ``utils`` directory of ``FlexibleSUSY`` there's a script ``calc_b_to_s_gamma.py``.
-Call it from the directory where the `json` file is located
+Call it from the directory where the ``.json`` file is located
 
 .. code-block:: bash
 
@@ -50,3 +43,5 @@ This will result in an output like
 
 
 .. _flavio: https://flav-io.github.io/
+
+.. _here: https://flav-io.github.io/docs/installation.html
