@@ -188,6 +188,16 @@ is used for function arguments to avoid any unexpected behavior.";
 MakeUnknownInputDefinition::usage =
 "@brief Creates definition for a given symbol for a case when input is not defined
 explicitly, i.e. creates definition for the pattern symbol[args___].
+@example Step 1) Make all desired definitions for a function (here: foo), like
+foo[a_Integer] := Module[{<...>},<...>];
+foo[c:{__Integer}] := Module[{<...>},<...>];
+Step 2) Secure the usage of foo for specified above cases simply by writing
+foo // Utils`MakeUnknownInputDefinition;
+or
+Utils`MakeUnknownInputDefinition[foo];
+or
+Utils`MakeUnknownInputDefinition@foo;
+somewhere in the scope of the package, where foo is defined.
 @param <Symbol> sym Symbol to make definition for.
 @returns None.
 @note UpValues for symbol[args___] are not cleared.";
