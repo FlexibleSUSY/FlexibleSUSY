@@ -90,9 +90,9 @@ Block MSQ2IN
    3   3   1e6   # mq2Input(3,3)
 Block MSL2IN
    1   1   1e6   # ml2Input(1,1)
-   1   2   1e3     # ml2Input(1,2)
+   1   2   1e3   # ml2Input(1,2)
    1   3   0     # ml2Input(1,3)
-   2   1   0     # ml2Input(2,1)
+   2   1   1e3   # ml2Input(2,1)
    2   2   1e6   # ml2Input(2,2)
    2   3   0     # ml2Input(2,3)
    3   1   0     # ml2Input(3,1)
