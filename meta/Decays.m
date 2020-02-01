@@ -303,6 +303,10 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
            result
           ];
 
+(* don't generate decays like Fe3 -> Fe1 VP *)
+IsSelfDecay[initialParticle_, finalState_List] :=
+   (MemberQ[finalState, initialParticle] && (MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]]));
+
 FinalStateContainsInitialState[initialParticle_, finalState_List] :=
     Module[{containsInitialMultiplet, dim},
            containsInitialMultiplet = !FreeQ[finalState, initialParticle];
@@ -393,6 +397,23 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
            ];
             orderedFinalState
           ];
+
+OrderFinalState[initialParticle_?TreeMasses`IsFermion, finalParticles_List] :=
+   Module[{orderedFinalState},
+      orderedFinalState = First[Vertices`SortCp[SARAH`Cp[Join[{initialParticle}, finalParticles]]]];
+      orderedFinalState = Drop[orderedFinalState, First[Position[orderedFinalState, initialParticle]]];
+      If[Length[orderedFinalState] === 2,
+         (* re-order to FFV *)
+         If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsFermion[orderedFinalState[[2]]],
+            orderedFinalState = Reverse[orderedFinalState]
+         ];
+         (* re-order to FFS *)
+         If[TreeMasses`IsScalar[orderedFinalState[[1]]] && TreeMasses`IsFermion[orderedFinalState[[2]]],
+            orderedFinalState = Reverse[orderedFinalState]
+         ];
+      ];
+      orderedFinalState
+   ];
 
 OrderFinalState[initialParticle_, finalParticles_List] :=
     Module[{orderedFinalState},
@@ -490,7 +511,8 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState]);
+                                            !FinalStateContainsInitialState[particle, finalState] &&
+                                               !IsSelfDecay[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
@@ -812,8 +834,10 @@ CreateDecaysCalculationFunction[decaysList_] :=
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
+                 "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > 100.) {\n" <>
                  "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
-                 "model.solve_ewsb();\n";
+                 "model.solve_ewsb();\n" <>
+                    "}\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
@@ -896,9 +920,9 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsScalar, finalState_List] :=
 GetDecayAmplitudeType[initialParticle_?TreeMasses`IsFermion, finalState_List] :=
     Module[{vertexType},
            vertexType = CXXDiagrams`VertexTypeForFields[Join[{initialParticle}, finalState]];
-           Switch[vertexType,
-                  ChiralVertex, "Decay_amplitude_FFS",
-                  ChiralVertex, "Decay_amplitude_FFV",
+           Switch[{vertexType, GetFeynArtsTypeName@Last@finalState},
+                  {ChiralVertex, S}, "Decay_amplitude_FFS",
+                  {ChiralVertex, V}, "Decay_amplitude_FFV",
                   _, Print["Warning: decay ", initialParticle, " -> ", finalState, " is not supported."];
                      "Unknown_amplitude_type"
                  ]
@@ -1678,7 +1702,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             body = "", vertices = {}},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
-           WriteString["stdout", StringPadRight["    - Creating amplitude for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
+           WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
@@ -2175,32 +2199,33 @@ CreateDecayTableEntryGetterName[particle_] :=
 
 CreateDecayTableEntryGetterPrototype[particle_] :=
     Module[{dim},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[particle];
+           dim = TreeMasses`GetDimension[particle];
            "Decays_list& " <> CreateDecayTableEntryGetterName[particle] <> "(" <>
            If[dim > 1, "int", ""] <> ");"
           ];
 
 CreateDecayTableEntryConstGetterPrototype[particle_] :=
     Module[{dim},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[particle];
+           dim = TreeMasses`GetDimension[particle];
            "const Decays_list& " <> CreateDecayTableEntryGetterName[particle] <> "(" <>
            If[dim > 1, "int", ""] <> ") const;"
           ];
 
 CreateDecayTableEntryGetterFunctionBody[particle_, rows_List] :=
-    Module[{i, dim, idxName = "gI1", errMsg = "", body = ""},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[particle];
-           If[dim != Length[rows],
+    Module[{i, dimWithoutGoldstones, dimWithGoldstones, idxName = "gI1", errMsg = "", body = ""},
+           dimWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones[particle];
+           dimWithGoldstones = TreeMasses`GetDimension[particle];
+           If[dimWithoutGoldstones != Length[rows],
               Print["Error: number of rows (", Length[rows], ") does not match size of"];
               Print["    ", particle, " multiplet."];
               Quit[1];
              ];
-           If[dim == 1,
+           If[dimWithGoldstones == 1,
               body = "return decay_table[" <> ToString[rows[[1]]] <> "];\n";
               ,
               body = "switch (" <> idxName <> ") {\n";
-              For[i = 0, i < dim, i++,
-                  body = body <> "case " <> ToString[i] <> ": return decay_table[" <> ToString[rows[[i + 1]]] <> "]; break;\n";
+              For[i = dimWithGoldstones - dimWithoutGoldstones, i < dimWithGoldstones, i++,
+                  body = body <> "case " <> ToString[i] <> ": return decay_table[" <> ToString[rows[[i+1 - (dimWithGoldstones - dimWithoutGoldstones)]]] <> "]; break;\n";
                  ];
               body = body <> "}\n\n";
               errMsg = "std::ostringstream sstr;\n" <>
@@ -2213,7 +2238,7 @@ CreateDecayTableEntryGetterFunctionBody[particle_, rows_List] :=
 
 CreateDecayTableEntryGetterFunction[particle_, rows_List, scope_:"CLASSNAME"] :=
     Module[{dim, body},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[particle];
+           dim = TreeMasses`GetDimension[particle];
            body = CreateDecayTableEntryGetterFunctionBody[particle, rows];
            "Decays_list& " <> scope <> If[scope != "", "::", ""] <>
            CreateDecayTableEntryGetterName[particle] <> "(" <>
@@ -2223,7 +2248,7 @@ CreateDecayTableEntryGetterFunction[particle_, rows_List, scope_:"CLASSNAME"] :=
 
 CreateDecayTableEntryConstGetterFunction[particle_, rows_List, scope_:"CLASSNAME"] :=
     Module[{dim, body},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[particle];
+           dim = TreeMasses`GetDimension[particle];
            body = CreateDecayTableEntryGetterFunctionBody[particle, rows];
            "const Decays_list& " <> scope <> If[scope != "", "::", ""] <>
            CreateDecayTableEntryGetterName[particle] <> "(" <>

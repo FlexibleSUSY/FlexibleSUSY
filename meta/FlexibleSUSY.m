@@ -4258,7 +4258,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* prepare decays calculation *)
            If[FlexibleSUSY`FSCalculateDecays,
               If[FlexibleSUSY`DecayParticles === Automatic,
-                 FlexibleSUSY`DecayParticles = { TreeMasses`GetHiggsBoson[] }; (* or, e.g., TreeMasses`GetParticles[] *);
+                 (*FlexibleSUSY`DecayParticles = Select[TreeMasses`GetParticles[], !TreeMasses`ColorChargedQ[#]&]; (* or, e.g., TreeMasses`GetParticles[] *);*)
+                 FlexibleSUSY`DecayParticles = {TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}; ; (* or, e.g., TreeMasses`GetParticles[] *);
                 ];
 
               FlexibleSUSY`DecayParticles = Select[FlexibleSUSY`DecayParticles, Decays`IsSupportedDecayParticle];
@@ -4690,12 +4691,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  decaysSources = Join[decaysSources, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decays.cpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_amplitudes.cpp"}]}
-                                                   
+
                                                       ];
                  decaysHeaders = Join[decaysHeaders, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.hpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decays.hpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
-                                                      
+
                                                       ];
                  decaysVertices = WriteDecaysClass[FlexibleSUSY`DecayParticles, decaysFinalStateParticles,
                                                    {{FileNameJoin[{$flexiblesusyTemplateDir, "decay_table.hpp.in"}],
