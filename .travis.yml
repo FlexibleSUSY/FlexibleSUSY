@@ -21,4 +21,4 @@ install:
 script:
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
   - make
-  - make all-test
+  - make -k all-test
