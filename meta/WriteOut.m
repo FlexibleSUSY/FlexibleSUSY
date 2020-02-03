@@ -493,7 +493,7 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
           ];
 
 WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] :=
-    Module[{i, dim, scalarPDG, vectorPDG, result = ""},
+    Module[{result = ""},
            Switch[par,
                   FlexibleSUSYObservable`aMuon,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
@@ -523,6 +523,8 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
                   _,
                      result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];

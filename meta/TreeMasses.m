@@ -228,6 +228,7 @@ GetPseudoscalarHiggsBoson::usage = "";
 GetChargedHiggsBoson::usage = "";
 
 GetSMTopQuarkMultiplet::usage    = "Returns multiplet containing the top quark, Fu or Ft";
+GetSMStrangeQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fs";
 GetSMBottomQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fb";
 GetSMElectronLeptonMultiplet::usage = "Returns multiplet containing the electron, Fe";
 GetSMMuonLeptonMultiplet::usage     = "Returns multiplet containing the muon, Fe or Fm";
@@ -589,6 +590,7 @@ GetSMNeutrino2[]      := GetUpLepton[2];
 GetSMNeutrino3[]      := GetUpLepton[3];
 
 GetSMTopQuarkMultiplet[]       := GetUpQuark[3]    /. head_[_] :> head;
+GetSMStrangeQuarkMultiplet[]    := GetDownQuark[2]  /. head_[_] :> head;
 GetSMBottomQuarkMultiplet[]    := GetDownQuark[3]  /. head_[_] :> head;
 GetSMElectronLeptonMultiplet[] := GetDownLepton[1] /. head_[_] :> head;
 GetSMMuonLeptonMultiplet[]     := GetDownLepton[2] /. head_[_] :> head;

@@ -4,6 +4,7 @@
 *.so
 *.d
 *.x
+*.json
 
 config/config.h
 config/version

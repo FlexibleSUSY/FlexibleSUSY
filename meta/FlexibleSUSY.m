@@ -54,6 +54,7 @@ BeginPackage["FlexibleSUSY`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
+              "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -2108,7 +2109,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
                   Transpose[{extParticles, diagrams}]
             ]);
          ];
-
       WriteOut`ReplaceInFiles[files,
          {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
           "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
@@ -2174,6 +2174,19 @@ WriteLToLGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]
          }
       ];
+   ];
+
+WriteBToSGammaClass[decays_List, files_List] :=
+   Module[{createInterface = False,
+          btosgammaInterfaceDefinitions},
+       If[decays =!= {},
+         createInterface = True];
+       btosgammaInterfaceDefinitions =
+         BtoSGamma`CreateInterfaceBtoSGamma[createInterface];
+
+       WriteOut`ReplaceInFiles[files, {
+            "@BtoSGammaInterface@" -> btosgammaInterfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]}];
    ];
 
 (* Write c++ files for the F -> F conversion in nucleus *)
@@ -3599,6 +3612,7 @@ Options[MakeFlexibleSUSY] :=
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, edmFields,
+            QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -4402,6 +4416,18 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
+           (* b -> s gamma *)
+           If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
+             Print["Creating b->s'A class ..."];
+             QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
+               {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
+             QToQGammaFields = {}];
+           WriteBToSGammaClass[QToQGammaFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
+
            (* OBSERVABLE: l -> l conversion *)
 
            (*
@@ -4438,6 +4464,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
+
+                     (* b -> s gamma *)
+                     QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
                      If[LToLConversionFields === {},

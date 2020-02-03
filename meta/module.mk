@@ -74,6 +74,7 @@ META_SRC     := \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
 		$(DIR)/BrLToLGamma.m \
+		$(DIR)/BtoSGamma.m \
 		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \

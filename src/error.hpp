@@ -27,8 +27,8 @@ namespace flexiblesusy {
 
 class Error : public std::runtime_error {
 public:
-   Error(const std::string& msg) : std::runtime_error(msg) {}
-   Error(const char* msg) : std::runtime_error(msg) {}
+   explicit Error(const std::string& msg) : std::runtime_error(msg) {}
+   explicit Error(const char* msg) : std::runtime_error(msg) {}
    virtual ~Error() = default;
    virtual std::string what_detailed() const { return what(); }
 };
@@ -62,8 +62,9 @@ public:
    std::string what_detailed() const override {
       const auto msg = Error::what();
 
-      if (std::strlen(msg) > 0)
+      if (std::strlen(msg) > 0) {
          return msg;
+      }
 
       return "NoConvergenceError: no convergence after "
          + std::to_string(number_of_iterations) + " iterations";
@@ -133,13 +134,14 @@ public:
       {}
    virtual ~NonPerturbativeRunningError() = default;
    std::string what_detailed() const override {
-      if (parameter_index == -1)
+      if (parameter_index == -1) {
          return "NonPerturbativeRunningError: scale Q = " + std::to_string(value);
+      }
 
       return "NonPerturbativeRunningError: non-perturbative running of parameter "
          + std::to_string(parameter_index) + " to scale " + std::to_string(scale);
    }
-   std::string what(const std::string& parameter_name) const {
+   std::string what_parameter(const std::string& parameter_name) const {
       return "NonPerturbativeRunningError: non-perturbative running"
          " of " + parameter_name + " = " + std::to_string(value)
          + " to scale " + std::to_string(scale);
@@ -180,7 +182,7 @@ public:
  */
 class OutOfBoundsError : public Error {
 public:
-   OutOfBoundsError(const std::string& msg)
+   explicit OutOfBoundsError(const std::string& msg)
       : Error(msg) {}
    virtual ~OutOfBoundsError() = default;
 };

@@ -4,6 +4,11 @@ FlexibleSUSY 2.4.2 [not released yet]
 Changes
 -------
 
+* Added calculation of :math:`$b \to s \gamma$`.
+  Currently only diagrams with scalars and fermions in the loop are supported.
+
+  Thanks to Kien Dang Tran.
+
 * Improved performance of ``flexiblesusy-config`` script.
 
 * ``make all-test`` returns early and with a non-zero exit code when a
