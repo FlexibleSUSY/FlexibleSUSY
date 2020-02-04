@@ -1702,7 +1702,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             body = "", vertices = {}},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
-           WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
+           WriteString["stdout", StringPadRight["   - Creating C++ code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];

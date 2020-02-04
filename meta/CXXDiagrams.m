@@ -565,6 +565,10 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
 		]
 	]
 
+ConvertColourStructureToColorMathConvention[fields_List,
+   AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
+   ColorMath`CMf[cIndex1, cIndex2, cIndex3] * 2 ColorMath`CMt[{cIndex3}, cIndex4, cIndex5];
+
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=
 	expr /. {
@@ -828,26 +832,32 @@ LabelLorentzPart[vertexPart_] :=
 
 (** \brief Turn SARAH-style colour structures into CXXDiagrams ones. **)
 GaugeStructureOfVertexLorentzPart[{0, lorentzStructure_}] :=
-	{0, ZeroColouredVertex, lorentzStructure}
+	{0, ZeroColouredVertex, lorentzStructure};
 
 GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	{scalar, UncolouredVertex, lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, GellMannVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`fSU3[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{scalar_ * sum[j_, 1, 8, SARAH`fSU3[cIndex1_, cIndex3_, j_] SARAH`Lam[j_, cIndex4_, cIndex2_]], lorentzStructure_}
+   ] /; Vertices`SarahDummyIndexQ[j] :=
+	{scalar, AdjointlyColouredVertex[cIndex1, cIndex3, cIndex5]  GellMannVertex[cIndex5, cIndex4, cIndex2], lorentzStructure} /;
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
@@ -860,10 +870,26 @@ GaugeStructureOfVertexLorentzPart[
 {scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
-(* @todo uncomment *)
+(* @todo:
+      This case catches vertices with sum of products of 2 Kronecker deltas.
+      Currently, if scalar1 and scalar2 coefficients would be equal in principle
+      we could handle this vertex. The case of scalar1 != scalar2 we cannot.
+      For the moment therefore we only print a warning message, similar to
+      the generic catch all case *)
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+      Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
+  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}],
+	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
+     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] ] :=
+Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
+  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
+	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
+     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
+Print["Vertices with sum of 2 deltas are currently not supported"];
+
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
-		(Print["Unknown colour structure in vertex ", vertexPart](*; Quit[1])*)
-		);
+		(Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * combine all left and right projector parts to chiral parts.

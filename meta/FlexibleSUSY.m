@@ -4726,7 +4726,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                        ];
              ]; (* If[FSCalculateDecays] *)
 
-           Utils`PrintHeadline["Creating observables"];
+           Utils`PrintHeadline["Creating other observables"];
            Print["Creating class for effective couplings ..."];
            (* @note separating this out for now for simplicity *)
            (* @todo maybe implement a flag (like for addons) to turn on/off? *)

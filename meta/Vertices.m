@@ -52,8 +52,9 @@ IsNonZeroVertex::usage="Checks if a vertex may be non-zero.";
 SetCachedVertices::usage="";
 GetCachedVertices::usage="";
 ClearCachedVertices::usage="";
-SarahColorIndexQ::usage="Checks if an index is a color index. Returns True for indices starting with ct and followed by a number."
-SarahLorentzIndexQ::usage="Checks if an index is a Lorentz index. Returns True for indices starting with lt and followed by a number."
+SarahColorIndexQ::usage="Checks if an index is a color index. Returns True for indices starting with ct and followed by a number.";
+SarahLorentzIndexQ::usage="Checks if an index is a Lorentz index. Returns True for indices starting with lt and followed by a number.";
+SarahDummyIndexQ::usage="Checks if an index is a dummy index. Returns True for indices starting with j and followed by a number.";
 
 SortFieldsInCp::usage="";
 
@@ -676,6 +677,9 @@ SarahColorIndexQ[index_Symbol] :=
 
 SarahLorentzIndexQ[index_Symbol] :=
     StringMatchQ[ToString[index], RegularExpression["lt[[:digit:]]+"]];
+
+SarahDummyIndexQ[index_Symbol] :=
+    StringMatchQ[ToString[index], RegularExpression["j[[:digit:]]+"]];
 
 GetLorentzStructure[SARAH`Cp[__]] := 1;
 
