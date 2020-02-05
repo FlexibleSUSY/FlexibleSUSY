@@ -1146,7 +1146,8 @@ WriteConvergenceTesterClass[parameters_, files_List] :=
           ];
 
 WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List] :=
-   Module[{deltaVBprototypes = "", deltaVBfunctions = "", deltaVBcalculation = ""},
+   Module[{deltaVBprototypes = "", deltaVBfunctions = "", deltaVBcalculation = "",
+           scheme = GetRenormalizationScheme[]},
           {deltaVBprototypes, deltaVBfunctions} =
              WeinbergAngle`CreateDeltaVBContributions[deltaVBcontributions, vertexRules];
           deltaVBcalculation = WeinbergAngle`CreateDeltaVBCalculation[deltaVBcontributions];
@@ -1164,6 +1165,9 @@ WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List]
                    "@DeltaVBprototypes@"  -> IndentText[deltaVBprototypes],
                    "@DeltaVBfunctions@"   -> deltaVBfunctions,
                    "@DeltaVBcalculation@" -> IndentText[deltaVBcalculation],
+                   "@YukawaMatching@"     -> IndentText[WeinbergAngle`YukawaMatching[]],
+                   "@DefVZVWSelfEnergies@" -> IndentText[WeinbergAngle`DefVZVWSelfEnergies[]],
+                   "@DeltaAlphaHatBSM@"   -> IndentText[WrapLines[WeinbergAngle`DeltaAlphaHatBSM[scheme]]],
                    Sequence @@ GeneralReplacementRules[]
                  } ];
           ];

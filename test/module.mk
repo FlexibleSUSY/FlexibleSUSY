@@ -201,6 +201,7 @@ ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_FlexibleDecays.cpp \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
+		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
 
@@ -433,7 +434,8 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_slha.cpp \
 		$(DIR)/test_CMSSM_slha_input.cpp \
 		$(DIR)/test_CMSSM_two_loop_spectrum.cpp \
-		$(DIR)/test_CMSSM_info.cpp
+		$(DIR)/test_CMSSM_info.cpp \
+		$(DIR)/test_CMSSM_mw_calculation.cpp
 endif
 
 ifeq ($(WITH_NMSSM),yes)
@@ -456,6 +458,7 @@ TEST_SRC += \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
+		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 
@@ -871,6 +874,12 @@ $(DIR)/test_MRSSM2_FlexibleDecays.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
+$(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
+
+$(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
+
+$(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
+
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
@@ -880,6 +889,8 @@ $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 $(DIR)/test_CMSSM_info.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_two_loop_spectrum.x: $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_mw_calculation.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_beta_function_benchmark.x: $(LIBCMSSM)
 
@@ -999,6 +1010,8 @@ $(DIR)/test_SM_one_loop_spectrum.x: $(LIBSM)
 $(DIR)/test_SM_three_loop_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
+
+$(DIR)/test_SM_mw_calculation.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 
