@@ -886,7 +886,7 @@ Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
   SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
 	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
      scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
-Print["Vertices with sum of 2 deltas are currently not supported"];
+Parameters`DebugPrint["Vertices with sum of 2 deltas are currently not supported"];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
 		(Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);

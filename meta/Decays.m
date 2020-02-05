@@ -497,7 +497,7 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay/; GetDecayTopologiesAndD
 (* outputs list of FSParticleDecay objects *)
 GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
     Module[{genericFinalStates,
-            isPossibleDecay, concreteFinalStates, decays},
+            isPossibleDecay, concreteFinalStates, decays, temp},
 
            Utils`AssertWithMessage[exactNumberOfProducts === 2,
               "decays with " <> ToString@exactNumberOfProducts <>
@@ -516,7 +516,15 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
-           decays = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]]& /@ concreteFinalStates;
+           Print[""];
+           Print["Creating amplitudes for ", particle, " decays..."];
+           decays = (
+               (* @todo StringPadRigh was introduced only in 10.1 *)
+               WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+               temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
+               Print[" Done."];
+               temp
+              )& /@ concreteFinalStates;
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
@@ -1702,7 +1710,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             body = "", vertices = {}},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
-           WriteString["stdout", StringPadRight["   - Creating C++ code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
+           WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
@@ -1763,7 +1771,9 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
    ];
 
 GetHiggsBosonDecays[particleDecays_List] :=
-    If[TreeMasses`GetHiggsBoson =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetHiggsBoson[])&], {}];
+    If[TreeMasses`GetHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetHiggsBoson[])&], {}];
+GetPseudoscalarHiggsBosonDecays[particleDecays_List] :=
+    If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetPseudoscalarHiggsBoson[])&], {}];
 
 SelectDecayByFinalState[finalState_List, decays_List] :=
     Select[decays, (Sort[GetFinalState[#]] === Sort[finalState])&];
@@ -1946,8 +1956,11 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
           ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
-    Module[{specializations, vertices = {}},
-           specializations = Flatten[(CreateTotalAmplitudeSpecialization[#, modelName]& /@ Last[#])& /@ particleDecays, 1];
+    Module[{specializations, vertices = {}, listing = {}},
+           specializations = Flatten[(
+              (If[!MemberQ[listing, GetInitialState[#]], Print[""];Print["Creating C++ code for ", GetInitialState[#], " decays..."]; AppendTo[listing, GetInitialState[#]]];
+              CreateTotalAmplitudeSpecialization[#, modelName])& /@ Last[#]
+              )& /@ particleDecays, 1];
            vertices = Flatten[First@Transpose[specializations], 1];
            specializations = Transpose[Drop[Transpose[specializations], 1]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
@@ -2133,8 +2146,26 @@ CreateHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_]
              ];
            {declaration, function}
           ];
+CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectUpQuarkUpQuarkFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
 
 CreateHiggsToDownQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectDownQuarkDownQuarkFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
+CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectDownQuarkDownQuarkFinalState[decaysList];
            If[decay =!= {},
@@ -2171,12 +2202,26 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
              ];
            specializations
           ];
+CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
+    Module[{pseudoscalarHiggsDecays, specializations = {}},
+           pseudoscalarHiggsDecays = GetPseudoscalarHiggsBosonDecays[particleDecays];
+           If[pseudoscalarHiggsDecayshiggsDecays =!= {},
+              pseudoscalarHiggsDecays = First[pseudoscalarHiggsDecays];
+              specializations =
+                 {
+                     CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName]
+                 }
+              ];
+           specializations
+          ];
 
 CreatePartialWidthSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations},
            specializations = CreateHiggsDecayPartialWidthSpecializations[particleDecays, modelName];
+           specializations = Join[specializations, CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays, modelName]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
-           Utils`StringJoinWithSeparator[#, "\n\n"]& /@ Transpose[specializations]
+           Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
           ];
 
 CreateDecaysGetterFunctionName[particle_] :=

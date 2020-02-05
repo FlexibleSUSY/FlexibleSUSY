@@ -4687,7 +4687,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               DebugPrint["allowed final state particles: ", decaysFinalStateParticles];
 
               If[FlexibleSUSY`DecayParticles =!= {},
-                 Print["Creating class for decays ..."];
                  decaysSources = Join[decaysSources, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decays.cpp"}],
                                                       FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_amplitudes.cpp"}]}

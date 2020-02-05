@@ -1,9 +1,9 @@
 
-// specialization for the H -> Fd Fd case
+// specialization for the AH -> Fd Fd case
 
 // TODO: we need to distinguish between scalar and scalar-pseudoscalar-mixture Higgses
 template<>
-double CLASSNAME::get_partial_width<AH,dq,bar<dq>::type>(
+double CLASSNAME::get_partial_width<AH,bar<dq>::type, dq>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<dq>::type const& indexOut1,
@@ -18,8 +18,8 @@ double CLASSNAME::get_partial_width<AH,dq,bar<dq>::type>(
       // "Template specialization for H -> Fd1 bar[Fd2] is only valid for Fd1 = Fd2"
 //    );
 
-   const double mAH = context.mass<AH>(indexIn);
-   const double mdq = context.mass<dq>(indexOut1);
+   const double mAH = context.physical_mass<AH>(indexIn);
+   const double mdq = context.physical_mass<dq>(indexOut1);
 
    // TODO: add off-shell decays?
    if (mAH < 2.*mdq) {
@@ -39,10 +39,10 @@ double CLASSNAME::get_partial_width<AH,dq,bar<dq>::type>(
    const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
 
    const double flux = 1./(2.*mAH);
-   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(mAH*mAH, mdq*mdq, mdq*mdq))/(mAH*mAH);
+   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdq/mAH), Sqr(mdq/mAH)));
    const double color_factor = 3;
 
    return flux * phase_space * color_factor *
       amplitude_squared<AH, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2) *
-      (1. + 0.*deltaqq);
+      (1. + deltaqq);
 }

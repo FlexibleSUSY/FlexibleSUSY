@@ -1,6 +1,6 @@
 // special case for H -> Fu Fu
 template<>
-double CLASSNAME::get_partial_width<AH,uq,bar<uq>::type>(
+double CLASSNAME::get_partial_width<AH,bar<uq>::type,uq>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<uq>::type const& indexOut1,
