@@ -28,7 +28,6 @@
 #define BOOST_TEST_MODULE test_pv
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 #include "numerics2.hpp"
 #include "rk.hpp"
 #include <Eigen/Dense>
