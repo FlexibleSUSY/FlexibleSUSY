@@ -34,7 +34,9 @@ double Decay_amplitude_SSS::square() const
 double Decay_amplitude_SSV::square() const
 {
    if (m_vector <= massless_vector_threshold) {
-      return -2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
+      // original from Dylan and  eq. B36
+      // return -2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
+      return 2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
    }
 
    const double m_in_sq = Sqr(m_decay);
