@@ -43,6 +43,7 @@
 #include "effective_couplings.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
+#include "error.hpp"
 
 namespace flexiblesusy {
 
@@ -165,13 +166,39 @@ double @ModelName@_decays::get_partial_width(
    const double ps_symmetry =
       final_state_symmetry_factor<FieldOut1, FieldOut2>(indexOut1, indexOut2);
 
+   // color factor
+   double color_factor {-1.};
+
+   if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value) {
+      // singlet to single singlet
+      if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) {
+         color_factor = 1.;
+      }
+      // singlet to triplet and anti-triplet
+      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
+            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
+         color_factor = 3.;
+      }
+      // singlet to octet octet
+      else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
+         color_factor = 8.;
+      }
+      // singlet to unhandlet color combination
+      else {
+         throw Error("Decay of color singlet to unhandled color combination");
+      }
+   // decays of color charged particles are currently not supported
+   } else {
+      throw Error("Color factors for decays of color charged particles are not supported");
+   }
+
    // matrix element squared
    const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
       context, indexIn, indexOut1, indexOut2);
    const auto mat_elem_sq = mat_elem.square();
 
-   // flux * phase space factor * symmetry factor * matrix element^2
-   return 0.5 * ps * ps_symmetry * mat_elem_sq / mIn;
+   // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
+   return 0.5 * ps * ps_symmetry * color_factor * mat_elem_sq / mIn;
 }
 
 @partialWidthSpecializationDecls@
