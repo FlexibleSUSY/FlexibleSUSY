@@ -1565,7 +1565,7 @@ Module[
       result
    },
    result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
-   result=Plus@@("std::abs"[#]&/@DeleteCases[DeleteDuplicates@Flatten@result,1]);
+   result=Plus@@(DeleteDuplicates[Flatten@DeleteCases[result,1]]/.HoldPattern[Times[x__]]:>Times@@("std::abs"@#&/@{x}));
    "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" < std::numeric_limits<double>::epsilon() ) continue;"
 ];
 `cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
