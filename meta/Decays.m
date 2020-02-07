@@ -865,7 +865,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "}\n" <>
                  "case 2:\n" <>
                  TextFormatting`IndentText[
-                    "return std::move(std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model));\n" <>
+                    "return std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates>(model);\n" <>
                     "break;\n"
                   ] <>
                   "default:\n" <>
@@ -1740,9 +1740,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            body = body <> "\n// set the initial value of an amplitude to 0\n";
            body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar];
 
-           body = body <> "\n// FormCalc's Finite variable\n";
-           body = body <>"constexpr double Finite {1.};\n";
-
            If[IsPossibleTreeLevelDecay[decay, True],
               body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
@@ -1750,6 +1747,8 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 AppendTo[vertices, First@res];
+                body = body <> "\n// FormCalc's Finite variable\n";
+                body = body <>"constexpr double Finite {1.};\n";
                 body = body <> Last@res <> "\n";
              ]
              ];
