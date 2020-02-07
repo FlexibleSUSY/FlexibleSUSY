@@ -415,43 +415,48 @@ Module[
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
       header,
+      fiG, foG, uiG, uoG, (* particle | incoming/outgoing | with generation *),
+      regulator,
+      inner = SARAH`sum[i_,1,4,SARAH`g[i_,i_]*SARAH`Mom[#1,i_]*SARAH`Mom[#2,i_]]&,
       uQ=SARAH`UpQuark,uNPF,
       dQ=SARAH`DownQuark, dNPF,
       dimension6Template,
-      l=SARAH`Lorentz,
-      mom = SARAH`Mom,
-      mass = SARAH`Mass,
+      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
       sp,
       codeU,codeD,
       dressedU,dressedD,assumptionReplacements
    },
    header=CreateCXXHeaders[];
-   sp[particle_,num_] := SARAH`DiracSpinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
+   sp[particle_,num_] := SARAH`DiracSpinor[#,p@num,m@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    Print["Analytical calculation for ",inF,"->",outF," started ..."];
    uNPF = NPointFunction[{inF,uQ},{outF,uQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
+      KeepProcesses ->
+   {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
    dNPF = NPointFunction[{inF,dQ},{outF,dQ},
       OnShellFlag -> True,
       UseCache -> False,
       ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
-   dressedU = Flatten@getProcess@uNPF;
-   dressedD = Flatten@getProcess@dNPF;
+      KeepProcesses ->
+   {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
+
+   { fiG, uiG, foG, uoG } = Flatten@getProcess@uNPF;
+   { fiG, diG, foG, doG } = Flatten@getProcess@dNPF;
+   regulator = m@fiG^2;
    assumptionReplacements =
-     {
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[1]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2,
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2]
-     };
-   {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
+      {
+         inner[fiG,foG] :> m@fiG^2,
+         inner[uiG,fiG] :> m@fiG*Sqrt[m@uiG^2+regulator],
+         inner[uoG,fiG] :> inner[uiG,fiG],
+         inner[uoG,foG] :> m@fiG^2/2+inner[uiG,fiG],
+         inner[diG,fiG] :> m@fiG*Sqrt[m@diG^2+regulator],
+         inner[doG,fiG] :> inner[diG,fiG],
+         inner[doG,foG] :> m@fiG^2/2+inner[diG,fiG]
+      };
+   {uNPF,dNPF} = {uNPF,dNPF} //. assumptionReplacements;
 
    Print["Analytical calculation for ",inF,"->",outF," done."];
    dimension6Template[i_,o_,q_] :=
