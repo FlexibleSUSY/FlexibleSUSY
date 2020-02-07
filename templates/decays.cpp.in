@@ -203,7 +203,7 @@ double CLASSNAME::get_partial_width<H, A, A>(
    const double mH = context.physical_mass<H>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
-   constexpr double color_gen_sqr {1.0};
+   const double color_gen_sqr = squared_color_generator<H, A, A>();
    const double flux = 0.5/mH;
    return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
 }
@@ -221,7 +221,7 @@ double CLASSNAME::get_partial_width<H, A, Z>(
 
    const double ps {1./(8.*Pi) * sqrt(KallenLambda(1., Sqr(mA/mH), Sqr(mZ/mH)))};
    constexpr double ps_symmetry {1.};
-   constexpr double color_gen_sqr {1.0};
+   const double color_gen_sqr = squared_color_generator<H, A, Z>();
    const double flux = 0.5/mH;
 
    const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
@@ -240,7 +240,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
    const double mH = context.physical_mass<H>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
-   constexpr double color_gen_sqr {8.0};
+   const double color_fact = squared_color_generator<H, G, G>();
    const double flux = 0.5/mH;
 
    // higher order QCD corrections

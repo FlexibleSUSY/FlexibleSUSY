@@ -143,6 +143,41 @@ double
    return mat_elem.square();
 }
 
+// returns a squared color generator for 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
+// the generator is guessed from color representations of FieldIn, FieldOut1 and FieldOut2
+// This is not a bulletproof solution and might fail in general but is enough for
+// decays of color singlets
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+double squared_color_generator() {
+
+   double color_factor;
+
+   if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value) {
+      // singlet to single singlet
+      if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) {
+         color_factor = 1.;
+      }
+      // singlet to triplet and anti-triplet
+      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
+            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
+         color_factor = 3.;
+      }
+      // singlet to octet octet
+      else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
+         color_factor = 8.;
+      }
+      // singlet to unhandlet color combination
+      else {
+         throw Error("Decay of color singlet to unhandled color combination");
+      }
+   // decays of color charged particles are currently not supported
+   } else {
+      throw Error("Color factors for decays of color charged particles are not supported");
+   }
+
+   return color_factor;
+}
+
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 double @ModelName@_decays::get_partial_width(
@@ -167,30 +202,7 @@ double @ModelName@_decays::get_partial_width(
       final_state_symmetry_factor<FieldOut1, FieldOut2>(indexOut1, indexOut2);
 
    // color factor
-   double color_factor {-1.};
-
-   if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value) {
-      // singlet to single singlet
-      if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) {
-         color_factor = 1.;
-      }
-      // singlet to triplet and anti-triplet
-      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
-            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
-         color_factor = 3.;
-      }
-      // singlet to octet octet
-      else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
-         color_factor = 8.;
-      }
-      // singlet to unhandlet color combination
-      else {
-         throw Error("Decay of color singlet to unhandled color combination");
-      }
-   // decays of color charged particles are currently not supported
-   } else {
-      throw Error("Color factors for decays of color charged particles are not supported");
-   }
+   const double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
    // matrix element squared
    const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
