@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<H, H, H>(
    }
 
    const double flux = 1. / (2. * mHIn);
-   const double ps = std::sqrt(KallenLambda(mHIn*mHIn, mH1*mH1, mH2*mH2))/(mHIn*mHIn) / (8. * Pi);
+   const double ps = std::sqrt(KallenLambda(1., Sqr(mH1/mHIn), Sqr(mH2/mHIn))) / (8. * Pi);
    const auto ps_symmetry =
       final_state_symmetry_factor<H, H>(indexOut1, indexOut2);
 

@@ -1989,6 +1989,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@numberOfDecayParticles@" -> ToString[numberOfDecayParticles],
                             "@create_SM_particle_usings@" -> smParticleAliases,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
+                            "@CPViolationInHiggsSector@" -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 

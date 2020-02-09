@@ -243,30 +243,50 @@ double CLASSNAME::get_partial_width<H, G, G>(
    const double color_fact = squared_color_generator<H, G, G>();
    const double flux = 0.5/mH;
 
-   // higher order QCD corrections
-   constexpr int Nf {5};
-   // eq. 4.18 from Adam's thesis
-   constexpr double deltaNLO {95./4. - 7./6.*Nf};
+   double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
-   const double mtpole2 {Sqr(qedqcd.displayPoleMt())};
-   using boost::math::zeta;
-   // eq. 4.19 from Adam's thesis
-   const double deltaNNLO {
-      149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
-            + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
-            + Nf*Nf*(127./108. - zeta(2)/6.)
-   };
-   // eq. 4.20 from Adam's thesis
-   const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
+   constexpr bool CPViolationInHiggsSector {@CPViolationInHiggsSector@};
 
-   double result = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+   // higher order corrections to CP-even Higgs
+   if (!CPViolationInHiggsSector) {
+      // higher order QCD corrections
 
-   const double g3 = MODELPARAMETER(g3);
-   const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
+      // number of active light flavours
+      unsigned int Nf;
+      const double mtpole {qedqcd.displayPoleMt()};
+      if (mH > 5 && mH < mtpole) {
+         Nf = 5;
+      } else if (mH > mtpole) {
+         Nf = 6;
+      } else {
+         throw;
+      }
 
-   switch (include_higher_order_corrections) {
-      case HigherOrderSMCorrections::enable:
-         result *= 1 + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+      // NLO, NNLO - eq. 11 of hep-ph/9705240
+      const double deltaNLO {95./4. - 7./6.*Nf};
+
+      const double mtpole2 {Sqr(mtpole)};
+      using boost::math::zeta;
+      const double deltaNNLO {
+         149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
+               + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
+               + Nf*Nf*(127./108. - zeta(2)/6.)
+      };
+      // eq. 4.20 from Adam's thesis
+      const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
+
+
+      const double g3 = MODELPARAMETER(g3);
+      const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
+
+      switch (include_higher_order_corrections) {
+         case HigherOrderSMCorrections::enable:
+            result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+         case HigherOrderSMCorrections::disable:
+            result *= 1.;
+         default:
+            break;
+      }
    }
 
    return result;

@@ -38,20 +38,20 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const double alpha_red = alpha/Pi;
    const double mtpole = qedqcd.displayPoleMt();
 
-   const double deltaqqOS = 
+   const double deltaqqOS =
       4./3. * alpha_s_red * calc_DeltaH(betaOS);
-   const double deltaqqDR = 
+   const double deltaqqDR =
       2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
       4./3. * alpha_s_red * calc_DeltaH(betaDR) +
       calc_deltaqq(alpha_s_red, Nf);
 
    const double deltaqqDRQED =
-      17./4. * alpha_red * pow(dq::electric_charge, 2); 
-   const double deltaqqOSQED = 
+      17./4. * alpha_red * pow(dq::electric_charge, 2);
+   const double deltaqqOSQED =
       alpha_red * pow(dq::electric_charge, 2) * calc_DeltaH(betaOS);
 
    // chiral breaking correctios
-   // TODO: probably shouldn't be applied in case of CP-breaking 
+   // TODO: probably shouldn't be applied in case of CP-breaking
    double deltaH2 = 0.;
    if(!info::CPViolationInHiggsSector) {
       const double lt = std::log(Sqr(mHOS/mtpole));
@@ -61,11 +61,11 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
 
    const double flux = 1./(2.*mHOS);
    const double color_factor = 3;
-   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mdqDR*mdqDR, mdqDR*mdqDR))/(mHOS*mHOS);
-   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mdqOS*mdqOS, mdqOS*mdqOS))/(mHOS*mHOS);
-   
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdqDR/mHOS), Sqr(mdqDR/mHOS)));
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdqOS/mHOS), Sqr(mdqOS/mHOS)));
+
    // get HBBbar vertex
-   //we don't use amplitude_squared here because we need both this vertex 
+   //we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexIn, indexOut1, indexOut2);
    const auto HBBbarVertexDR = Vertex<H, bar<dq>::type, dq>::evaluate(indices, context);

@@ -1663,7 +1663,7 @@ functionBody = "// skip indices that don't match external indices\n" <>
                 If[MemberQ[{"T4", "T2", "T3", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
                 (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
                 If[topoName === "T2" || topoName === "T3" || topoName === "T5", 1/2, 1] *
-                   If[topoName === "T9",
+                   If[topoName === "T9" || topoName === "T8",
                      If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
                      1
                    ]
@@ -2085,6 +2085,15 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
              ];
            {declaration, function}
           ];
+CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectGluonGluonFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
 
 CreateHiggsToPhotonPhotonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
@@ -2204,12 +2213,13 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
 CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{pseudoscalarHiggsDecays, specializations = {}},
            pseudoscalarHiggsDecays = GetPseudoscalarHiggsBosonDecays[particleDecays];
-           If[pseudoscalarHiggsDecayshiggsDecays =!= {},
+           If[pseudoscalarHiggsDecays =!= {},
               pseudoscalarHiggsDecays = First[pseudoscalarHiggsDecays];
               specializations =
                  {
                      CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName]
+                     CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName]
                  }
               ];
            specializations
