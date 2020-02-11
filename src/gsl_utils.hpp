@@ -19,11 +19,11 @@
 #ifndef GSL_UTILS_H
 #define GSL_UTILS_H
 
+#include "error.hpp"
 #include "gsl_vector.hpp"
 
 #include <gsl/gsl_vector.h>
 #include <Eigen/Core>
-#include <cassert>
 
 namespace flexiblesusy {
 
@@ -43,8 +43,9 @@ GSL_vector to_GSL_vector(const Eigen::DenseBase<Derived>& v)
    using Index_t = typename Derived::Index;
    GSL_vector v2(v.rows());
 
-   for (Index_t i = 0; i < v.rows(); i++)
+   for (Index_t i = 0; i < v.rows(); i++) {
       v2[i] = v(i);
+   }
 
    return v2;
 }
@@ -52,14 +53,17 @@ GSL_vector to_GSL_vector(const Eigen::DenseBase<Derived>& v)
 template <int Size>
 Eigen::Matrix<double,Size,1> to_eigen_vector_fixed(const gsl_vector* v)
 {
-   assert(Size == v->size);
+   if (Size != v->size) {
+      throw OutOfBoundsError("Size of GSL_vector does not match size of Eigen vector.");
+   }
 
    using Result_t = Eigen::Matrix<double,Size,1>;
    using Index_t = typename Result_t::Index;
    Result_t result;
 
-   for (Index_t i = 0; i < Size; i++)
+   for (Index_t i = 0; i < Size; i++) {
       result(i) = gsl_vector_get(v, i);
+   }
 
    return result;
 }
@@ -67,14 +71,18 @@ Eigen::Matrix<double,Size,1> to_eigen_vector_fixed(const gsl_vector* v)
 template <int Size>
 Eigen::Matrix<double,Size,1> to_eigen_vector_fixed(const GSL_vector& v)
 {
-   assert(Size == v.size());
+   if (Size != v.size()) {
+      throw OutOfBoundsError(
+         "Size of GSL_vector does not match size of Eigen vector.");
+   }
 
    using Result_t = Eigen::Matrix<double,Size,1>;
    using Index_t = typename Result_t::Index;
    Result_t result;
 
-   for (Index_t i = 0; i < Size; i++)
+   for (Index_t i = 0; i < Size; i++) {
       result(i) = v[i];
+   }
 
    return result;
 }
@@ -91,11 +99,18 @@ void copy(const Eigen::DenseBase<Derived>& src, gsl_vector* dst)
    using Index_t = typename Derived::Index;
    const auto dim = src.rows();
 
-   assert(dst);
-   assert(dim == dst->size);
+   if (dst == nullptr) {
+      throw SetupError("Destination GSL_vector is Null.");
+   }
 
-   for (Index_t i = 0; i < dim; i++)
+   if (static_cast<decltype(dst->size)>(dim) != dst->size) {
+      throw OutOfBoundsError("Size of destination GSL_vector does not match "
+                             "size of source Eigen vector.");
+   }
+
+   for (Index_t i = 0; i < dim; i++) {
       gsl_vector_set(dst, i, src(i));
+   }
 }
 
 } // namespace flexiblesusy

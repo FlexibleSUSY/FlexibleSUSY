@@ -113,10 +113,11 @@ private:
    Index_t len{0};
 
    void check_range(Index_t idx) const {
-      if (idx < 0 || idx >= len)
+      if (idx < 0 || idx >= len) {
          throw OutOfBoundsError(
             "Dynamic_array_view index " + std::to_string(idx)
             + " out of range [0, " + std::to_string(len) + ").");
+      }
    }
 };
 
@@ -141,15 +142,17 @@ constexpr Dynamic_array_view<ElementType> make_dynamic_array_view(ElementType (&
 template <typename ElementType>
 std::ostream& operator<<(std::ostream& ostr, const Dynamic_array_view<ElementType>& av)
 {
-   if (av.empty())
+   if (av.empty()) {
       return ostr;
+   }
 
    ostr << "[";
 
    for (typename Dynamic_array_view<ElementType>::Index_t i = 0; i < av.size(); i++) {
       ostr << av[i];
-      if (i < av.size() - 1)
+      if (i < av.size() - 1) {
          ostr << ", ";
+      }
    }
 
    ostr << "]";

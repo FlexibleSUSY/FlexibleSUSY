@@ -28,6 +28,8 @@
 #include "numerics.h"
 #include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
+#include "standard_model.hpp"
+#include "ew_input.hpp"
 
 #include <limits>
 #include <cmath>
@@ -209,15 +211,7 @@ std::pair<double,double> CLASSNAME::calculate(double sinThetaW_start)
    if (not_converged)
       throw NoSinThetaWConvergenceError(number_of_iterations, sinThetaW_new);
 
-   const double deltaRhoHat = calculate_delta_rho_hat(sinThetaW_new);
-
-   if (Abs(deltaRhoHat) >= 1.0)
-      throw NonPerturbativeSinThetaW();
-
-   const double rhohat_ratio_final =
-      1.0 / (1.0 - deltaRhoHat);
-   const double mw_pole =
-      Sqrt(Sqr(mz) * rhohat_tree * rhohat_ratio_final * (1 - Sqr(sinThetaW_new)));
+   const double mw_pole = calculate_mw_pole(sinThetaW_new);
 
    return std::make_pair(sinThetaW_new, mw_pole);
 }
@@ -593,6 +587,94 @@ double CLASSNAME::calculate_self_energy_@VectorW@_top(double p, double mt) const
       0.5 * Nc * softsusy::hfn(p, mt, mb, q) * Sqr(g2) * oneOver16PiSqr;
 
    return self_energy_w_top;
+}
+
+double CLASSNAME::calculate_mw_pole() const
+{
+   @DefSMhyperCoupling@
+   @DefSMleftCoupling@
+   const double sinThetaW = gY / Sqrt(Sqr(gY) + Sqr(g2));
+
+   return calculate_mw_pole(sinThetaW);
+}
+
+/**
+ * Calculates W boson pole mass from SM value and BSM contributions
+ * taken into account strictly on 1-loop level
+ *
+ * @param sinThetaW sin(theta_W)
+ *
+ * @return W boson pole mass
+ */
+double CLASSNAME::calculate_mw_pole(double sinThetaW) const
+{
+   @DefSMhyperCoupling@
+   @DefSMleftCoupling@
+   const double eDRbar     = gY * g2 / Sqrt(Sqr(gY) + Sqr(g2));
+   const double alphaDRbar = Sqr(eDRbar) / (4.0 * Pi);
+   const double sinThetaW2 = Sqr(sinThetaW);
+   const double cosThetaW2 = 1.0 - sinThetaW2;
+
+   const double mz = model->get_M@VectorZ(0)@;
+   const double mw = model->get_M@VectorW(0)@;
+   const int higgs_idx = sm_parameters.higgs_index;
+
+   standard_model::Standard_model sm;
+   sm.set_scale(model->get_scale());
+
+   const double SMvev = 2.0 * mw / g2;
+
+   sm.set_g1(gY / standard_model_info::normalization_g1);
+   sm.set_g2(g2 / standard_model_info::normalization_g2);
+   sm.set_g3(model->get_@strongCoupling@() * @ModelName@_info::normalization_@strongCoupling@ /
+             standard_model_info::normalization_g3);
+   sm.set_v(SMvev);
+   sm.set_Lambdax(Sqr(model->get_M@HiggsBoson(higgs_idx)@ / SMvev));
+
+@YukawaMatching@
+
+   sm.calculate_DRbar_masses();
+
+   const double sigma_Z_MZ_SM = Re(sm.self_energy_VZ_1loop(mz));
+   const double sigma_W_MW_SM = Re(sm.self_energy_VWp_1loop(mw));
+   const double sigma_W_0_SM  = Re(sm.self_energy_VWp_1loop(0.));
+@DefVZVWSelfEnergies@
+
+   const double deltaVbBSM = include_dvb_bsm ?
+      calculate_delta_vb_bsm(sinThetaW) : 0.;
+
+   const double delta_rho_hat_BSM  =
+      (sigma_Z_MZ_Model - sigma_Z_MZ_SM) / Sqr(mz) -
+      (sigma_W_MW_Model - sigma_W_MW_SM) / Sqr(mw);
+   const double delta_rw_hat_BSM   =
+      (sigma_W_0_Model - sigma_W_0_SM -
+       sigma_W_MW_Model + sigma_W_MW_SM) / Sqr(mw) + deltaVbBSM;
+   const double delta_alpha_hat_BSM =
+      calculate_delta_alpha_hat_bsm(alphaDRbar);
+   const double delta_rho_hat_tree = calculate_rho_hat_tree() - 1.0;
+
+   const double mwSM = Electroweak_constants::MWSM;
+
+   return mwSM * Sqrt(1.0 + sinThetaW2 / (cosThetaW2 - sinThetaW2) *
+                    (cosThetaW2 / sinThetaW2 *
+                     (delta_rho_hat_BSM + delta_rho_hat_tree)
+                     - delta_rw_hat_BSM - delta_alpha_hat_BSM));
+}
+
+/**
+ * Calculates BSM threshold corrections to alpha_em
+ *
+ * @param alpha_em
+ *
+ * @return BSM threshold corrections to alpha_em
+ */
+double CLASSNAME::calculate_delta_alpha_hat_bsm(double alpha_em) const
+{
+   const double currentScale = model->get_scale();
+   double delta_alpha_hat_bsm = 0.;
+
+@DeltaAlphaHatBSM@
+   return delta_alpha_hat_bsm;
 }
 
 } // namespace flexiblesusy

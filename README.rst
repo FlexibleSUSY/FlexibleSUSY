@@ -4,11 +4,13 @@
 FlexibleSUSY
 ============
 
-|release| |tests|
+|release| |tests| |travis|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
+.. |travis| image:: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY.svg?branch=development
+   :target: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY
 
 .. image:: doc/images/FS-logo.png
    :align: right
@@ -622,6 +624,11 @@ directory configure via
        --with-looptools-libdir=$LOOPTOOLS_DIR
 
 Note: LoopTools 2.8 or higher is required.
+Also, if FlexibleSUSY is compiled with LibraryLink (default) then LoopTools has to be compiled with ``-fPIC`` option.
+This is achieved by setting the ``FFLAGS`` variable during LoopTools configuration as
+::
+
+    FFLAGS=-fPIC ./configure
 
 
 TSIL support
@@ -807,6 +814,7 @@ Further reading
 * `LibraryLink documentation`_
 * `meta code documentation`_
 * `SLHA input parameters`_
+* `Observables`_
 
 
 References
@@ -831,6 +839,7 @@ References
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
 .. _`meta code documentation`: doc/meta_code.rst
 .. _`SLHA input parameters`: doc/slha_input.rst
+.. _`Observables`: doc/observables.rst
 
 .. [hep-ph:0104145] `CPC 143 (2002) 305-331 <https://inspirehep.net/record/555481>`_ [`arxiv:hep-ph/0104145 <http://arxiv.org/abs/hep-ph/0104145>`_]
 .. [0909.2863] `CPC 181 (2010) 1077-1086 <https://inspirehep.net/record/831371>`_ [`arxiv:0909.2863 <http://arxiv.org/abs/0909.2863>`_]

@@ -158,9 +158,16 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
 
 (* convenient abbreviation *)
 ColorFactorForDiagram[topology_, diagram_] :=
-   N @ FSReIm @ ColourFactorForIndexedDiagramFromGraph[
+   N @ Utils`FSReIm @ ExtractColourFactor @ ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
    ];
+
+(* TODO: generalize the Extraction *)
+ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2*colourfactor
+ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2
+ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_]] := colourfactor
+ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1
+ExtractColourFactor[colourfactor_] := colourfactor
 
 CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
    "val += std::complex<double> " <> ToString @ ColorFactorForDiagram[topology, diagram] <> " * FFV_" <>

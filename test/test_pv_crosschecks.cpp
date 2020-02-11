@@ -32,7 +32,6 @@
 #define BOOST_TEST_MODULE test_pv_crosschecks
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 using namespace boost::unit_test;
 
 using namespace std;

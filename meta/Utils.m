@@ -191,6 +191,16 @@ is used for function arguments to avoid any unexpected behavior.";
 MakeUnknownInputDefinition::usage =
 "@brief Creates definition for a given symbol for a case when input is not defined
 explicitly, i.e. creates definition for the pattern symbol[args___].
+@example Step 1) Make all desired definitions for a function (here: foo), like
+foo[a_Integer] := Module[{<...>},<...>];
+foo[c:{__Integer}] := Module[{<...>},<...>];
+Step 2) Secure the usage of foo for specified above cases simply by writing
+foo // Utils`MakeUnknownInputDefinition;
+or
+Utils`MakeUnknownInputDefinition[foo];
+or
+Utils`MakeUnknownInputDefinition@foo;
+somewhere in the scope of the package, where foo is defined.
 @param <Symbol> sym Symbol to make definition for.
 @returns None.
 @note UpValues for symbol[args___] are not cleared.";
@@ -201,6 +211,7 @@ as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
+FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 
 Begin["`Private`"];
@@ -483,9 +494,7 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    On[Unset::norep];
    (* Maybe some useful definitions already exist*)
    If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
-
    info = MakeBoxes@Definition@sym;
-
    If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
       infoString="",
       parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
@@ -532,6 +541,12 @@ FSReIm[z_] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
+
+FSBooleanQ[b_] :=
+   If[$VersionNumber >= 10.0,
+      BooleanQ[b],
+      If[b === True || b === False, True, False]
+   ];
 
 (* MathIndexToCPP *)
 

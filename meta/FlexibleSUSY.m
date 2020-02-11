@@ -53,6 +53,7 @@ BeginPackage["FlexibleSUSY`",
               "FFVFormFactors`",
               "BrLToLGamma`",
               "FToFConversionInNucleus`",
+              "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -1141,7 +1142,8 @@ WriteConvergenceTesterClass[parameters_, files_List] :=
           ];
 
 WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List] :=
-   Module[{deltaVBprototypes = "", deltaVBfunctions = "", deltaVBcalculation = ""},
+   Module[{deltaVBprototypes = "", deltaVBfunctions = "", deltaVBcalculation = "",
+           scheme = GetRenormalizationScheme[]},
           {deltaVBprototypes, deltaVBfunctions} =
              WeinbergAngle`CreateDeltaVBContributions[deltaVBcontributions, vertexRules];
           deltaVBcalculation = WeinbergAngle`CreateDeltaVBCalculation[deltaVBcontributions];
@@ -1159,6 +1161,9 @@ WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List]
                    "@DeltaVBprototypes@"  -> IndentText[deltaVBprototypes],
                    "@DeltaVBfunctions@"   -> deltaVBfunctions,
                    "@DeltaVBcalculation@" -> IndentText[deltaVBcalculation],
+                   "@YukawaMatching@"     -> IndentText[WeinbergAngle`YukawaMatching[]],
+                   "@DefVZVWSelfEnergies@" -> IndentText[WeinbergAngle`DefVZVWSelfEnergies[]],
+                   "@DeltaAlphaHatBSM@"   -> IndentText[WrapLines[WeinbergAngle`DeltaAlphaHatBSM[scheme]]],
                    Sequence @@ GeneralReplacementRules[]
                  } ];
           ];
@@ -2125,7 +2130,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
                   Transpose[{extParticles, diagrams}]
             ]);
          ];
-
       WriteOut`ReplaceInFiles[files,
          {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
           "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
@@ -2151,6 +2155,19 @@ WriteLToLGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]
          }
       ];
+   ];
+
+WriteBToSGammaClass[decays_List, files_List] :=
+   Module[{createInterface = False,
+          btosgammaInterfaceDefinitions},
+       If[decays =!= {},
+         createInterface = True];
+       btosgammaInterfaceDefinitions =
+         BtoSGamma`CreateInterfaceBtoSGamma[createInterface];
+
+       WriteOut`ReplaceInFiles[files, {
+            "@BtoSGammaInterface@" -> btosgammaInterfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]}];
    ];
 
 (* Write c++ files for the F -> F conversion in nucleus *)
@@ -3578,9 +3595,9 @@ Options[MakeFlexibleSUSY] :=
     };
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
-    Module[{nPointFunctions,  (* @unote *no* connection to the NPointFunctions Package! *)
-    	    runInputFile, initialGuesserInputFile,
-            edmVertices, aMuonVertices, edmFields,
+    Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
+            edmVertices, edmFields,
+            QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
@@ -4392,6 +4409,18 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
+           (* b -> s gamma *)
+           If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
+             Print["Creating b->s'A class ..."];
+             QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
+               {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
+             QToQGammaFields = {}];
+           WriteBToSGammaClass[QToQGammaFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
+
            (* OBSERVABLE: l -> l conversion *)
 
            Print["Creating FToFConversionInNucleus class ..."];
@@ -4426,6 +4455,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
+
+                     (* b -> s gamma *)
+                     QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
                      If[LToLConversionFields === {},

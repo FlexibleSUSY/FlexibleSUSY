@@ -4,6 +4,7 @@
 *.so
 *.d
 *.x
+*.json
 
 src/loop_libraries/collier_wrapper.mod
 src/loop_libraries/collier_wrapper.f90

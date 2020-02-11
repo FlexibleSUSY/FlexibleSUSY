@@ -18,6 +18,8 @@ BASE_TEMPLATES := \
 		$(DIR)/l_to_lgamma.cpp.in \
 		$(DIR)/f_to_f_conversion.hpp.in \
 		$(DIR)/f_to_f_conversion.cpp.in \
+		$(DIR)/b_to_s_gamma.cpp.in \
+		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/ewsb_solver.hpp.in \
 		$(DIR)/ewsb_solver_interface.hpp.in \
