@@ -2249,13 +2249,13 @@ check_looplibrary() {
    local info_=""
    if [ "$enable_collier" = "yes" ]; then info_="COLLIER"
       if [ "$enable_looptools" = "yes" ]; then info_="$info_ and LoopTools are"
-      else info_="$info_ is"   
+      else info_="$info_ is"
       fi
    elif [ "$enable_looptools" = "yes" ]; then info_="LoopTools is"
    fi
    if [ "$enable_collier" = "yes" ] || [ "$enable_looptools" = "yes" ]; then
       message "Note: $info_ thread-unsafe since there the renormalization"
-      message "      scale is set via a global variable. This migh"
+      message "      scale is set via a global variable. This might"
       message "      lead to a race condition if different RGE solvers run in"
       message "      multiple threads. For such an application, consider usage of"
       message "      fflite. For now, multi-threading is disabled."
