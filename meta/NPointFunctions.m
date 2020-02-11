@@ -415,7 +415,7 @@ Module[
       nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
       nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
       header,
-      fiG, foG, uiG, uoG, (* particle | incoming/outgoing | with generation *),
+      fiG, foG, uiG, uoG, (* particle | incoming/outgoing | with generation *)
       regulator,
       inner = SARAH`sum[i_,1,4,SARAH`g[i_,i_]*SARAH`Mom[#1,i_]*SARAH`Mom[#2,i_]]&,
       uQ=SARAH`UpQuark,uNPF,
@@ -1565,7 +1565,11 @@ Module[
       result
    },
    result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
-   result=Plus@@(DeleteDuplicates[Flatten@DeleteCases[result,1]]/.HoldPattern[Times[x__]]:>Times@@("std::abs"@#&/@{x}));
+   result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
+   If[ 1 === Length@result,
+      result = "std::abs"@@result,
+      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@("std::abs"@#&/@{x}))
+   ];
    "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" < std::numeric_limits<double>::epsilon() ) continue;"
 ];
 `cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
