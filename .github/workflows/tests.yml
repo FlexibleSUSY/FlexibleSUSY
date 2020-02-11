@@ -26,12 +26,15 @@ jobs:
 
   build:
 
-#   if: github.repository == 'FlexibleSUSY/FlexibleSUSY'
+#   if: ${${COS%*/FlexibleSUSY}##*/} github.repository == 'FlexibleSUSY/FlexibleSUSY'
+#    if: ${${github.event.pull_request.head.repo.url%*/FlexibleSUSY}##*/} == 'FlexbleSUSY'
+#    if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
+    if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
     runs-on: ubuntu-18.04
 
     strategy:
       matrix:
-        CXXCOMPILER: [g++, clang++]
+        CXXCOMPILER: [g++]
         LOOPLIBRARY: [internal]
 
     env:
@@ -62,5 +65,6 @@ jobs:
           docker exec builder bash -c 'printf "Checking is Wolfram Engine workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
         env:
           MATHPASS: ${{ secrets.MATHPASS }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.repo.url }}
+
 
