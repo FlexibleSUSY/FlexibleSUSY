@@ -50,30 +50,30 @@
 
 namespace flexiblesusy {
 
-int Loop_library::type_ = -1;
+Loop_library::Library Loop_library::type_ = Loop_library::Library::Undefined;
 std::unique_ptr<looplibrary::Loop_library_interface> Loop_library::lib_;
 
 void Loop_library::set(int new_type) {
-   if( Loop_library::type_ == -1) {
+   if( Loop_library::type_ == Loop_library::Library::Undefined) {
       switch(new_type) {
          case 0 : Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
-                  Loop_library::type_ = 0;
+                  Loop_library::type_ = Loop_library::Library::Softsusy;
                   break;
-#ifdef ENABLE_COLLIER
+         #ifdef ENABLE_COLLIER
          case 1 : Loop_library::lib_ = std::make_unique<looplibrary::Collier>();
-                  Loop_library::type_ = 1;
+                  Loop_library::type_ = Loop_library::Library::Collier;
                   break;
-#endif // ENABLE_COLLIER
-#ifdef ENABLE_LOOPTOOLS
+         #endif // ENABLE_COLLIER
+         #ifdef ENABLE_LOOPTOOLS
          case 2 : Loop_library::lib_ = std::make_unique<looplibrary::Looptools>();
-                  Loop_library::type_ = 2;
+                  Loop_library::type_ = Loop_library::Library::Looptools;
                   break;
-#endif // ENABLE_LOOPTOOLS
-#ifdef ENABLE_FFLITE
+         #endif // ENABLE_LOOPTOOLS
+         #ifdef ENABLE_FFLITE
          case 3 : Loop_library::lib_ = std::make_unique<looplibrary::Fflite>();
-                  Loop_library::type_ = 3;
+                  Loop_library::type_ = Loop_library::Library::Fflite;
                   break;
-#endif // ENABLE_FFLITE
+         #endif // ENABLE_FFLITE
          default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO".");
                   break;
       }
@@ -81,7 +81,7 @@ void Loop_library::set(int new_type) {
 }
 
 looplibrary::Loop_library_interface& Loop_library::get() {
-   if(Loop_library::type_ == -1) throw std::logic_error("Loop library should be initialized before first usage.");
+   if(Loop_library::type_ == Loop_library::Library::Undefined) throw std::logic_error("Loop library should be initialized before first usage.");
    return *Loop_library::lib_;
 }
 

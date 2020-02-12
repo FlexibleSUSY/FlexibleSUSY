@@ -26,11 +26,18 @@ namespace flexiblesusy {
 
 class Loop_library {
 public:
+   enum class Library {
+      Undefined,
+      Softsusy,
+      Collier,
+      Looptools,
+      Fflite
+   };
    static void set(int);
    static looplibrary::Loop_library_interface& get();
 
 private:
-   static int type_;
+   static Library type_;
    static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
 
    Loop_library() {}
