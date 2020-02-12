@@ -173,15 +173,15 @@ LIBFLEXI_HDR += \
 
 $(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
 
-$(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o
+$(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o $(LOOP_DIR)/collier_wrapper.mod
 	@echo Building collier wrapper library
 	@ar cr $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
 
 $(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f90
-ifeq ($(FC),gfortran)
+ifneq ($(findstring gfortran,$(FC)),)
 	@echo Building collier_wrapper.o
 	@gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
-else ifeq ($(FC),ifort)
+else ifneq ($(findstring gfortran,$(FC)),)
 	@echo Building collier_wrapper.o
 	@ifort -std08 -c $(LOOP_DIR)/collier_wrapper.f90 -fPIC $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
 endif
