@@ -180,10 +180,10 @@ $(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o $(LOOP_DIR)/col
 $(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f90
 ifneq ($(findstring gfortran,$(FC)),)
 	@echo Building collier_wrapper.o
-	@gfortran -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
+	@$(FC) -std=f2008 -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -J $(LOOP_DIR)
 else ifneq ($(findstring ifort,$(FC)),)
 	@echo Building collier_wrapper.o
-	@ifort -std08 -c $(LOOP_DIR)/collier_wrapper.f90 -fPIC $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
+	@$(FC) -std08 -c $(LOOP_DIR)/collier_wrapper.f90 -fPIC $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o -module $(LOOP_DIR)
 endif
 
 $(LOOP_DIR)/collier_wrapper.f90 : $(LOOP_DIR)/collier_wrapper.F90
