@@ -141,7 +141,6 @@ LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
 LOOP_DIR := $(DIR)/loop_libraries
 
 LOOP_SRC := \
-		$(LOOP_DIR)/library_collier.cpp \
 		$(LOOP_DIR)/loop_library.cpp
 
 LOOP_HDR := \
@@ -167,9 +166,9 @@ endif
 
 ifeq ($(ENABLE_COLLIER),yes)
 LIBFLEXI_SRC += \
-		$(DIR)/loop_libraries/library_collier.cpp
+		$(LOOP_DIR)/library_collier.cpp
 LIBFLEXI_HDR += \
-		$(DIR)/loop_libraries/library_collier.hpp
+		$(LOOP_DIR)/library_collier.hpp
 
 $(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
 
