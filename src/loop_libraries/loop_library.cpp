@@ -50,28 +50,28 @@
 
 namespace flexiblesusy {
 
-int Looplibrary::type_ = -1;
-std::unique_ptr<looplibrary::Loop_library_interface> Looplibrary::lib_;
+int Loop_library::type_ = -1;
+std::unique_ptr<looplibrary::Loop_library_interface> Loop_library::lib_;
 
-void Looplibrary::set(int new_type) {
-   if( Looplibrary::type_ == -1) {
+void Loop_library::set(int new_type) {
+   if( Loop_library::type_ == -1) {
       switch(new_type) {
-         case 0 : Looplibrary::lib_ = std::make_unique<looplibrary::Softsusy>();
-                  Looplibrary::type_ = 0;
+         case 0 : Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
+                  Loop_library::type_ = 0;
                   break;
 #ifdef ENABLE_COLLIER
-         case 1 : Looplibrary::lib_ = std::make_unique<looplibrary::Collier>();
-                  Looplibrary::type_ = 1;
+         case 1 : Loop_library::lib_ = std::make_unique<looplibrary::Collier>();
+                  Loop_library::type_ = 1;
                   break;
 #endif // ENABLE_COLLIER
 #ifdef ENABLE_LOOPTOOLS
-         case 2 : Looplibrary::lib_ = std::make_unique<looplibrary::Looptools>();
-                  Looplibrary::type_ = 2;
+         case 2 : Loop_library::lib_ = std::make_unique<looplibrary::Looptools>();
+                  Loop_library::type_ = 2;
                   break;
 #endif // ENABLE_LOOPTOOLS
 #ifdef ENABLE_FFLITE
-         case 3 : Looplibrary::lib_ = std::make_unique<looplibrary::Fflite>();
-                  Looplibrary::type_ = 3;
+         case 3 : Loop_library::lib_ = std::make_unique<looplibrary::Fflite>();
+                  Loop_library::type_ = 3;
                   break;
 #endif // ENABLE_FFLITE
          default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO".");
@@ -80,9 +80,9 @@ void Looplibrary::set(int new_type) {
    }
 }
 
-looplibrary::Loop_library_interface& Looplibrary::get() {
-   if(Looplibrary::type_ == -1) throw std::logic_error("Loop library should be initialized before first usage.");
-   return *Looplibrary::lib_;
+looplibrary::Loop_library_interface& Loop_library::get() {
+   if(Loop_library::type_ == -1) throw std::logic_error("Loop library should be initialized before first usage.");
+   return *Loop_library::lib_;
 }
 
 } // namespace flexiblesusy

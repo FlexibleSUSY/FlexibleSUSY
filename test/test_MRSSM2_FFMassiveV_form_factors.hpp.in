@@ -126,7 +126,7 @@ std::valarray<std::complex<double>> FFVEmitterFj<Fj, Fi, V, F, S>::value(
       const typename field_indices<Fj>::type& indices_in,
       const typename field_indices<Fi>::type& indices_out,
       context_base const& context) {
-   auto& lib = Looplibrary::get();
+   auto& lib = Loop_library::get();
    using VertexFjBarFjVBar = Vertex<typename Fj::lorentz_conjugate, Fj, typename V::lorentz_conjugate>;
    using VertexFBarFjSBar  = Vertex<typename F::lorentz_conjugate, Fj, typename S::lorentz_conjugate>;
    using VertexFiBarFS     = Vertex<typename Fi::lorentz_conjugate, F, S>;
@@ -203,7 +203,7 @@ std::valarray<std::complex<double>> FFVEmitterFi<Fj, Fi, V, F, S>::value(
       const typename field_indices<Fj>::type& indices_in,
       const typename field_indices<Fi>::type& indices_out,
       context_base const& context) {
-   auto& lib = Looplibrary::get();
+   auto& lib = Loop_library::get();
    using VertexFiBarFiVBar = Vertex<typename Fi::lorentz_conjugate, Fi, typename V::lorentz_conjugate>;
    using VertexFBarFjSBar  = Vertex<typename F::lorentz_conjugate, Fj, typename S::lorentz_conjugate>;
    using VertexFiBarFS     = Vertex<typename Fi::lorentz_conjugate, F, S>;
@@ -278,7 +278,7 @@ std::valarray<std::complex<double>> FFVEmitterF<Fj, Fi, V, F, S>::value(
       const typename field_indices<Fj>::type& indices_in,
       const typename field_indices<Fi>::type& indices_out,
       context_base const& context) {
-   auto& lib = Looplibrary::get();
+   auto& lib = Loop_library::get();
    using VertexFBarFVBar  = Vertex<typename F::lorentz_conjugate, F, typename V::lorentz_conjugate>;
    using VertexFBarFjSBar = Vertex<typename F::lorentz_conjugate, Fj, typename S::lorentz_conjugate>;
    using VertexFiBarFS    = Vertex<typename Fi::lorentz_conjugate, F, S>;
@@ -374,7 +374,7 @@ std::valarray<std::complex<double>> FFVEmitterS<Fj, Fi, V, F, S>::value(
    const typename field_indices<Fj>::type& indices_in,
    const typename field_indices<Fi>::type& indices_out,
    context_base const& context) {
-   auto& lib = Looplibrary::get();
+   auto& lib = Loop_library::get();
    using VertexSBarSVBar  = Vertex<typename S::lorentz_conjugate, S, typename V::lorentz_conjugate>;
    using VertexFBarFjSBar    = Vertex<typename F::lorentz_conjugate, Fj, typename S::lorentz_conjugate>;
    using VertexFiBarFS = Vertex<typename Fi::lorentz_conjugate, F, S>;

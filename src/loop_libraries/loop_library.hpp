@@ -24,7 +24,7 @@
 
 namespace flexiblesusy {
 
-class Looplibrary {
+class Loop_library {
 public:
    static void set(int);
    static looplibrary::Loop_library_interface& get();
@@ -33,9 +33,9 @@ private:
    static int type_;
    static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
 
-   Looplibrary() {}
-   Looplibrary(Looplibrary const&);
-   void operator=(Looplibrary const&);
+   Loop_library() {}
+   Loop_library(Loop_library const&);
+   void operator=(Loop_library const&);
 };
 
 } // namespace flexiblesusy

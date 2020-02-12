@@ -2021,7 +2021,7 @@ double phi_xyz(double x, double y, double z) noexcept
  */
 double B0(double m1, double m2, double scale) noexcept
 {
-   return Looplibrary::get().B0(0, m1*m1, m2*m2, scale*scale).real();
+   return Loop_library::get().B0(0, m1*m1, m2*m2, scale*scale).real();
 }
 
 /**

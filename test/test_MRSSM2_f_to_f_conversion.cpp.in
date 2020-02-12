@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( test_MRSSM2_f_to_f_conversion )
    input.MDGocInput = 1500;
 
    softsusy::QedQcd qedqcd;
-   Looplibrary::set(1);
+   Loop_library::set(1);
    MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
 
    auto point = MRSSM2_f_to_f_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);

@@ -1514,7 +1514,7 @@ Module[
          Length@loopFunctions]
       ];
       AppendTo[loopArraySet,Array[
-         Parameters`ExpressionToString[StringJoin["Looplibrary::get().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
+         Parameters`ExpressionToString[StringJoin["Loop_library::get().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
          "; // It is repeated "<>ToString@loopFunctions[[#,2]]<>" times."&,
          Length@loopFunctions]
       ];

@@ -92,7 +92,7 @@ void @ModelName@_spectrum_generator_interface<T>::set_settings(
    const Spectrum_generator_settings& settings_)
 {
    settings = settings_;
-   Looplibrary::set(settings.get(Spectrum_generator_settings::loop_library));
+   Loop_library::set(settings.get(Spectrum_generator_settings::loop_library));
 
    model.set_pole_mass_loop_order(settings.get(Spectrum_generator_settings::pole_mass_loop_order));
    model.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
