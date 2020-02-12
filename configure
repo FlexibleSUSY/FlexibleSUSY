@@ -1914,7 +1914,7 @@ check_fortran_libs() {
             fi ;;
         g77|f77)
             FLIBS="-lg2c -lm" ;;
-        ifort)
+        ifort*)
             FLIBS="-lifcore -lifport -limf -ldl -lintlc -lsvml" ;;
     esac
 }
