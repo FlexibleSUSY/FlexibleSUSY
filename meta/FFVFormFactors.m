@@ -27,12 +27,12 @@ BeginPackage["FFVFormFactors`",
 ];
 
 FFVFormFactorsCreateInterfaceFunction::usage = "";
-FFVGraphs::usage = "Returns adjacency matrix, which is wrapped in a List 
+FFVGraphs::usage = "Returns adjacency matrix, which is wrapped in a List
 for a triangle diagram which can be seen by typing a command:
 AdjacencyGraph[FFVFormFactors`FFVGraphs[][[1]], VertexLabels -> \"Name\"]
 
-@unotesQ: why such a weird numbering? 
-@unotesA: because some Jobst procedure @ufind uses this order for fermion number flow.";
+why such a weird numbering?
+because some procedure uses this order for fermion number flow.";
 FFVContributingDiagramsForGraph::usage = "";
 
 Begin["Private`"];
@@ -117,7 +117,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                ] <>
                "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, bool discard_SM_contributions)"
             ];
-                 
+
       definition =
          prototype <> " {\n\n" <>
             IndentText[
