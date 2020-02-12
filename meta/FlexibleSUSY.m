@@ -4260,7 +4260,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[FlexibleSUSY`FSCalculateDecays,
               If[FlexibleSUSY`DecayParticles === Automatic,
                  (*FlexibleSUSY`DecayParticles = Select[TreeMasses`GetParticles[], !TreeMasses`ColorChargedQ[#]&]; (* or, e.g., TreeMasses`GetParticles[] *);*)
-                 FlexibleSUSY`DecayParticles = {TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}; ; (* or, e.g., TreeMasses`GetParticles[] *);
+                 FlexibleSUSY`DecayParticles = DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null]; ; (* or, e.g., TreeMasses`GetParticles[] *);
                 ];
 
               FlexibleSUSY`DecayParticles = Select[FlexibleSUSY`DecayParticles, Decays`IsSupportedDecayParticle];
@@ -4684,8 +4684,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               PrintHeadline["Creating particle decays"];
 
               decaysFinalStateParticles = Decays`CreateCompleteParticleList[Select[TreeMasses`GetParticles[], !TreeMasses`IsGhost[#]&]];
-              DebugPrint["calculating decays for particles: ", FlexibleSUSY`DecayParticles];
-              DebugPrint["allowed final state particles: ", decaysFinalStateParticles];
 
               If[FlexibleSUSY`DecayParticles =!= {},
                  decaysSources = Join[decaysSources, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],

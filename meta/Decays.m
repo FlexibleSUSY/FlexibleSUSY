@@ -1956,6 +1956,8 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {}},
+           Print[""];
+           FSFancyLine[];
            specializations = Flatten[(
               (If[!MemberQ[listing, GetInitialState[#]], Print[""];Print["Creating C++ code for ", GetInitialState[#], " decays..."]; AppendTo[listing, GetInitialState[#]]];
               CreateTotalAmplitudeSpecialization[#, modelName])& /@ Last[#]

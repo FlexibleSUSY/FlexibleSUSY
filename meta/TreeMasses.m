@@ -2264,9 +2264,11 @@ CreateMixingArraySetter[masses_List, array_String] :=
            Return[set];
           ];
 
-(* Once Dominik wanted to have functions identifying SM particles.
-   This might be non-trivial in some models.
-   For now, we just have wrappers that return SM particles using SARAH symbols *)
+(* 1. Once Dominik wanted to have functions identifying SM particles.
+      This might be non-trivial in some models.
+      For now, we just have wrappers that return SM particles using SARAH symbols
+   2. If the getter fails (for example because a given particle doesn't exist)
+      we return Null and it's up to the caller to decide what to do. *)
 
 GetPhoton[] :=
    If[ValueQ[SARAH`Photon],
