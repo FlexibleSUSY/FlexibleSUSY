@@ -1303,6 +1303,13 @@ check_platform() {
 }
 
 #_____________________________________________________________________
+check_default_static_linker_cmd() {
+   if [ is_posix_platform ] && [ "${STATIC_LIB_CMD}" = "ar cru" ]; then
+      STATIC_LIB_CMD="ar cruU"
+   fi
+}
+
+#_____________________________________________________________________
 check_multiarch() {
     local linuxdist=""
     debmultiarch=""
@@ -3413,6 +3420,7 @@ fi
 log_package_information
 guess_machine_word_size
 check_platform
+check_default_static_linker_cmd
 check_solvers
 check_install
 check_install_dir
