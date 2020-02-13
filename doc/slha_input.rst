@@ -577,10 +577,10 @@ Currently the following set is available for usage:
 ======= =========== =========== ============== =================================
  index   name        library     thread-safety   commentary
 ======= =========== =========== ============== =================================
-  0      softsusy    softsusy    yes            default value, always enabled
-  1      collier     COLLIER_    no             see *specific* below
-  2      looptools   LoopTools_  no             see *specific* below
-  3      fflite      fflite      yes            -
+  0      softsusy    softsusy    yes            default value; always enabled
+  1      collier     COLLIER_    no             optional; see **specific** below
+  2      looptools   LoopTools_  no             optional; see **specific** below
+  3      fflite      fflite      yes            optional; build in; see **specific** below
 ======= =========== =========== ============== =================================
 
 **COLLIER specific**:
@@ -600,6 +600,16 @@ To use the LoopTools_ library and header files from a specific directory configu
     ./configure --with-loop-libraries=looptools \
                 --with-looptools-incdir=$LOOPTOOLS_DIR \
                 --with-looptools-libdir=$LOOPTOOLS_DIR
+
+As a replacement of ``--with-loop-libraries=<libraries and looptools>`` one can use::
+
+   ./configure --with-loop-libraries=<libraries> --enable-looptools
+
+**fflite specific**:
+To use fflite library one can also (as a replacement of ``--with-loop-libraries=<libraries and fflite>``) use::
+
+    ./configure --with-loop-libraries=<libraries> --enable-fflite
+
 
 Additional physical input parameters (FlexibleSUSYInput)
 --------------------------------------------------------
