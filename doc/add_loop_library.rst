@@ -47,19 +47,19 @@ about this is stored inside ``src/loop_libraries/loop_library.{hpp,cpp}`` files.
   the following::
 
     #ifdef ENABLE_<NEWLIBRARY>
-     #include "library_<newlibrary>.hpp"
-     #define <NEWLIBRARY>_INFO ", <N> (=<newlibrary>)"
-     #else
-     #define <NEWLIBRARY>_INFO
-     #endif // ENABLE_<NEWLIBRARY>
+    #include "library_<newlibrary>.hpp"
+    #define <NEWLIBRARY>_INFO ", <N> (=<newlibrary>)"
+    #else
+    #define <NEWLIBRARY>_INFO
+    #endif // ENABLE_<NEWLIBRARY>
 
   Add a new entry to a switch statement right before ``default:``::
 
     #ifdef ENABLE_<NEWLIBRARY>
-     case <N> : Loop_library::lib_ = std::make_unique<looplibrary::<Newlibrary>>();
-                Loop_library::type_ = Loop_library::Library::<Newlibrary>;
-                break;
-     #endif // ENABLE_<NEWLIBRARY>
+    case <N> : Loop_library::lib_ = std::make_unique<looplibrary::<Newlibrary>>();
+             Loop_library::type_ = Loop_library::Library::<Newlibrary>;
+             break;
+    #endif // ENABLE_<NEWLIBRARY>
 
   Add ``<NEWLIBRARY>_INFO`` to ``invalid_argument()`` function.
 
@@ -84,11 +84,11 @@ let ``FlexibleSUSY`` to know how to be compiled with this library.
   lines::
 
     ifeq ($(ENABLE_<NEWLIBRARY>),yes)
-     LIBFLEXI_SRC += \
-           $(DIR)/loop_libraries/library_<newlibrary>.cpp
-     LIBFLEXI_HDR += \
-           $(DIR)/loop_libraries/library_<newlibrary>.hpp
-     endif
+    LIBFLEXI_SRC += \
+        $(DIR)/loop_libraries/library_<newlibrary>.cpp
+    LIBFLEXI_HDR += \
+        $(DIR)/loop_libraries/library_<newlibrary>.hpp
+    endif
 
   One can look here at the implementation of additional commands for COLLIER library
   to get an idea of how to add some additional dependencies here.
@@ -111,7 +111,7 @@ Open ``configure`` file and there do the following steps:
   and after these DEFINE statements add::
 
     <newlibrary>_lib_dir=""
-     <newlibrary>_inc_dir=""
+    <newlibrary>_inc_dir=""
 
 * Inside function ``enable_defines()`` add::
 
@@ -119,21 +119,21 @@ Open ``configure`` file and there do the following steps:
        DEFINE_ENABLE_<NEWLIBRARY>="#define ENABLE_<NEWLIBRARY> 1"
        message "Enabling usage of <newlibrary>"
        logmsg "   ${DEFINE_ENABLE_<NEWLIBRARY>}"
-     else
+    else
        enable_<newlibrary>="no"
        DEFINE_ENABLE_<NEWLIBRARY>="#undef ENABLE_<NEWLIBRARY>"
        logmsg "Disabling usage of <newlibrary>"
        logmsg "   ${DEFINE_ENABLE_<NEWLIBRARY>}"
-     fi
-     logmsg "   ${DEFINE_ENABLE_<NEWLIBRARY>}"
+    fi
+    logmsg "   ${DEFINE_ENABLE_<NEWLIBRARY>}"
 
   This variables will go to ``config/config.h.in`` afterwards.
 
 * Add inside ``replace_markers()``::
 
     -e "s|@ENABLE_<NEWLIBRARY>@|$enable_<newlibrary>|" \
-     -e "s|@<NEWLIBRARY>LIBS@|$<NEWLIBRARY>LIBS|"       \
-     -e "s|@<NEWLIBRARY>FLAGS@|$<NEWLIBRARY>FLAGS|"     \
+    -e "s|@<NEWLIBRARY>LIBS@|$<NEWLIBRARY>LIBS|"       \
+    -e "s|@<NEWLIBRARY>FLAGS@|$<NEWLIBRARY>FLAGS|"     \
 
   This will go to (inside ``config/`` subdirectory) ``flexiblesusy-config.in``
   (``Makefile.standalone.in``, ``Makefile.customized-betas.in``,
@@ -143,13 +143,13 @@ Open ``configure`` file and there do the following steps:
 * Add before ``< $CONFIGHDR_TMPL > $CONFIGHDR``::
 
     -e "s|@DEFINE_ENABLE_<NEWLIBRARY>@|$DEFINE_ENABLE_<NEWLIBRARY>|" \
-     -e "s|@<NEWLIBRARY>FLAGS@|$<NEWLIBRARY>FLAGS|"                   \
-     -e "s|@<NEWLIBRARY>LIBS@|$<NEWLIBRARY>LIBS|"                     \
+    -e "s|@<NEWLIBRARY>FLAGS@|$<NEWLIBRARY>FLAGS|"                   \
+    -e "s|@<NEWLIBRARY>LIBS@|$<NEWLIBRARY>LIBS|"                     \
 
 * Add to the part of the code which checks cmd arguments (``if test $# -gt 0 ; then``)::
 
     --with-<newlibrary>-libdir=*) <newlibrary>_lib_dir=$optarg ;;
-     --with-<newlibrary>-incdir=*) <newlibrary>_inc_dir=$optarg ;;
+    --with-<newlibrary>-incdir=*) <newlibrary>_inc_dir=$optarg ;;
 
 * Add ``check_<newlibrary>()``, ``check_<newlibrary>_incl()``,
   ``check_<newlibrary>_libs()``
@@ -176,17 +176,17 @@ itself more directly.
   add after ``# Variables for compilation``::
 
     <NEWLIBRARY>FLAGS := @<NEWLIBRARY>FLAGS@
-     <NEWLIBRARY>LIBS  := @<NEWLIBRARY>LIBS@
+    <NEWLIBRARY>LIBS  := @<NEWLIBRARY>LIBS@
 
 * Open file ``config/config.h.in`` and add after ``/* Build variables */``::
 
     #define <NEWLIBRARY>FLAGS   "@<NEWLIBRARY>FLAGS@"
-     #define <NEWLIBRARY>LIBS    "@<NEWLIBRARY>LIBS@"
+    #define <NEWLIBRARY>LIBS    "@<NEWLIBRARY>LIBS@"
 
   add after ``/* Switches */``::
 
     /* Enable <newlibrary> */
-     @DEFINE_ENABLE_<NEWLIBRARY>@
+    @DEFINE_ENABLE_<NEWLIBRARY>@
 
 * Open file ``config/Makefile.standalone.in`` and add after ``# Switches``::
 
@@ -212,7 +212,7 @@ Modify documentation
 * Inside ``configure`` change ``help()`` by adding::
 
    --with-<newlibrary>-libdir=    Path to search for <NEWLIBRARY> libraries
-    --with-<newlibrary>-incdir=    Path to search for <NEWLIBRARY> modules
+   --with-<newlibrary>-incdir=    Path to search for <NEWLIBRARY> modules
 
   and modifying sentence after::
 
