@@ -1303,8 +1303,9 @@ check_platform() {
 }
 
 #_____________________________________________________________________
-check_default_static_linker_cmd() {
-   if [ is_posix_platform ] && [ "${STATIC_LIB_CMD}" = "ar cru" ]; then
+reset_default_static_linker_cmd() {
+   local os_=$( (uname -s) 2>/dev/null || echo unknown)
+   if [ "$(case "$os_" in Linux) echo 'true' ;; esac )" = 'true' ]; then
       STATIC_LIB_CMD="ar cruU"
    fi
 }
@@ -3322,6 +3323,7 @@ trap "exit 1" INT QUIT TERM
 
 rm -f $logfile
 write_configure_parameters "$*"
+reset_default_static_linker_cmd
 
 if test $# -gt 0 ; then
     while test ! "x$1" = "x" ; do
@@ -3420,7 +3422,6 @@ fi
 log_package_information
 guess_machine_word_size
 check_platform
-check_default_static_linker_cmd
 check_solvers
 check_install
 check_install_dir
