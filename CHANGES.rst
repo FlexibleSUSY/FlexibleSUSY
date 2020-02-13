@@ -1,15 +1,29 @@
 FlexibleSUSY 2.4.2 [not released yet]
 =====================================
 
-Changes
--------
+New features
+------------
 
-* Added calculation of :math:`$b \to s \gamma$`.
-  Currently only diagrams with scalars and fermions in the loop are supported.
+* Added calculation of :math:`$b \to s \gamma$`.  Currently only
+  diagrams with scalars and fermions in the loop are supported.  See
+  `doc/observables/b_physics.rst <doc/observables/b_physics.rst>`_ for
+  further details.
 
   Thanks to Kien Dang Tran.
 
+* New calculation of the W boson pole mass with decoupling behaviour
+  for large BSM masses.
+
+  Thanks to Markus Bach.
+
+Changes
+-------
+
 * Improved performance of ``flexiblesusy-config`` script.
+
+* Improved performance of 1-loop threshold functions from
+  `[arXiv:1407.4081] <https://arxiv.org/abs/1407.4081>`_, used in
+  HSSUSY.
 
 * ``make all-test`` returns early and with a non-zero exit code when a
   test fails.  Use ``make -k all-test`` to force running of all tests.

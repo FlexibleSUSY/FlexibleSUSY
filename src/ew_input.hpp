@@ -41,6 +41,7 @@ namespace Electroweak_constants {
       constexpr double MZ = 91.1876;
       constexpr double Error_MZ = 0.0021; ///< uncertainty on MZ from PDG
       constexpr double MW = 80.385;
+      constexpr double MWSM = 80.357; ///< SM prediction from arXiv:1411.7040
       constexpr double MH = 125.09; ///< Higgs mass from PDG (CMS and ATLAS combination)
       constexpr double Error_MH = 0.24; ///< uncertainty on MH from PDG - 0.11 (sys) and 0.21 stat combined in quadrature.
       constexpr double MUP = 2.4e-3; ///< default running quark mass from PDG
