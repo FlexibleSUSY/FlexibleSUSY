@@ -44,6 +44,7 @@ FlexibleSUSY configuration block (FlexibleSUSY)
        28   1         # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
        29   1         # Higgs 3-loop corrections O(alpha_t^3)
        30   1         # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+       31   0         # Loop library to use (0 = softsusy, 1 = COLLIER, 2 = LoopTools, 3 = fflite)
 
 **Description**:
 
@@ -52,41 +53,42 @@ calculation at run-time.  For example, in the ``FlexibleSUSY`` block the
 renormalization group running precsision, the beta function loop order
 or the loop order of the pole mass calculation can be selected.
 
-======= ======================================== ============================================= ======================================
- index   description                              possible values                               default value                        
-======= ======================================== ============================================= ======================================
-  0      precision goal                           any positive double                           1.0e-4                                 
-  1      max. number of iterations                any positive double                           0 (= automatic)                        
-  2      BC solver                                0 (all), 1 (two-scale) or 2 (semi-analytic)   0 (= all)                              
-  3      calculate SM pole masses                 0 (no) or 1 (yes)                             0 (= no)                               
-  4      pole mass loop order                     0, 1, 2, 3, 4                                 4 (= 4-loop)                           
-  5      EWSB loop order                          0, 1, 2, 3, 4                                 4 (= 4-loop)                           
-  6      beta function loop order                 0, 1, 2, 3, 4, 5                              4 (= 4-loop)                           
-  7      threshold corrections loop order         0, 1, 2, 3, 4                                 4 (= 4-loop)                           
-  8      higgs 2-loop correction O(at as)         0, 1                                          1 (= enabled)                          
-  9      higgs 2-loop correction O(ab as)         0, 1                                          1 (= enabled)                          
- 10      higgs 2-loop correction O(at at)         0, 1                                          1 (= enabled)                          
- 11      higgs 2-loop correction O(atau atau)     0, 1                                          1 (= enabled)                          
- 12      force output                             0 (no) or 1 (yes)                             0 (= no)                               
- 13      top quark pole QCD corrections           0 (1L), 1 (2L), 2 (3L), 3 (4L)                3 (= 4L QCD)                           
- 14      beta function zero threshold             any positive double                           1.0e-11                                
- 15      calculate observables                    0 (no) or 1 (yes)                             0 (= no)                               
- 16      force positive Majorana masses           0 (no) or 1 (yes)                             0 (= no)                               
- 17      pole mass scale                          any positive double                           0 (= SUSY scale)                       
- 18      EFT pole mass scale                      any positive double                           0 (= minimum of {Mt, SUSY scale})      
- 19      EFT matching scale                       any positive double                           0 (= SUSY scale)                       
- 20      EFT loop order for upwards matching      0, 1, 2                                       2 (= 2-loop)                           
- 21      EFT loop order for downwards matching    0, 1                                          1 (= 1-loop)                           
- 22      EFT Higgs index                          any integer >= 0                              0 (= lightest)                         
- 23      calculate pole masses of BSM particles   0 (no) or 1 (yes)                             1 (= yes)                              
- 24      individual threshold corrections         positive integer                              124111421                              
- 25      ren. scheme for higgs 3L corrections     0 (DR'), 1 (MDR'), 2 (H3m)                    0 (= DR')                              
- 26      higgs 3-loop correction O(at as^2)       0, 1                                          1 (= enabled)                          
- 27      higgs 3-loop correction O(ab as^2)       0, 1                                          1 (= enabled)                          
- 28      higgs 3-loop correction O(at^2 as)       0, 1                                          1 (= enabled)                          
- 29      higgs 3-loop correction O(at^3)          0, 1                                          1 (= enabled)                          
- 30      higgs 4-loop correction O(at as^3)       0, 1                                          1 (= enabled)                          
-======= ======================================== ============================================= ======================================
+======= ======================================== ===================================================== ======================================
+ index   description                              possible values                                       default value
+======= ======================================== ===================================================== ======================================
+  0      precision goal                           any positive double                                   1.0e-4
+  1      max. number of iterations                any positive double                                   0 (= automatic)
+  2      BC solver                                0 (all), 1 (two-scale) or 2 (semi-analytic)           0 (= all)
+  3      calculate SM pole masses                 0 (no) or 1 (yes)                                     0 (= no)
+  4      pole mass loop order                     0, 1, 2, 3, 4                                         4 (= 4-loop)
+  5      EWSB loop order                          0, 1, 2, 3, 4                                         4 (= 4-loop)
+  6      beta function loop order                 0, 1, 2, 3, 4, 5                                      4 (= 4-loop)
+  7      threshold corrections loop order         0, 1, 2, 3, 4                                         4 (= 4-loop)
+  8      higgs 2-loop correction O(at as)         0, 1                                                  1 (= enabled)
+  9      higgs 2-loop correction O(ab as)         0, 1                                                  1 (= enabled)
+ 10      higgs 2-loop correction O(at at)         0, 1                                                  1 (= enabled)
+ 11      higgs 2-loop correction O(atau atau)     0, 1                                                  1 (= enabled)
+ 12      force output                             0 (no) or 1 (yes)                                     0 (= no)
+ 13      top quark pole QCD corrections           0 (1L), 1 (2L), 2 (3L), 3 (4L)                        3 (= 4L QCD)
+ 14      beta function zero threshold             any positive double                                   1.0e-11
+ 15      calculate observables                    0 (no) or 1 (yes)                                     0 (= no)
+ 16      force positive Majorana masses           0 (no) or 1 (yes)                                     0 (= no)
+ 17      pole mass scale                          any positive double                                   0 (= SUSY scale)
+ 18      EFT pole mass scale                      any positive double                                   0 (= minimum of {Mt, SUSY scale})
+ 19      EFT matching scale                       any positive double                                   0 (= SUSY scale)
+ 20      EFT loop order for upwards matching      0, 1, 2                                               2 (= 2-loop)
+ 21      EFT loop order for downwards matching    0, 1                                                  1 (= 1-loop)
+ 22      EFT Higgs index                          any integer >= 0                                      0 (= lightest)
+ 23      calculate pole masses of BSM particles   0 (no) or 1 (yes)                                     1 (= yes)
+ 24      individual threshold corrections         positive integer                                      124111421
+ 25      ren. scheme for higgs 3L corrections     0 (DR'), 1 (MDR'), 2 (H3m)                            0 (= DR')
+ 26      higgs 3-loop correction O(at as^2)       0, 1                                                  1 (= enabled)
+ 27      higgs 3-loop correction O(ab as^2)       0, 1                                                  1 (= enabled)
+ 28      higgs 3-loop correction O(at^2 as)       0, 1                                                  1 (= enabled)
+ 29      higgs 3-loop correction O(at^3)          0, 1                                                  1 (= enabled)
+ 30      higgs 4-loop correction O(at as^3)       0, 1                                                  1 (= enabled)
+ 31      Loop library to use                      0 (softsusy), 1 (COLLIER), 2 (LoopTools), 3 (fflite)  0 (= softsusy)
+======= ======================================== ===================================================== ======================================
 
 Precision goal (``FlexibleSUSY[0]``)
 ````````````````````````````````````
@@ -561,6 +563,44 @@ be used::
           clarity, because they would correspond to a partial 4-loop
           contribution to the light CP-even Higgs pole mass.
 
+Loop library to use (``FlexibleSUSY[31]``)
+``````````````````````````````````````````
+
+One can configure ``FlexibleSUSY`` with multiple libraries for one
+loop Passarino-Veltman integrals via the following command::
+
+   ./configure --with-loop-libraries=<desired libraries>
+
+Where ``<desired libraries>`` is a list of comma separated names for desired libraries.
+Currently the following set is available for usage:
+
+======= =========== =========== ============== =================================
+ index   name        library     thread-safety   commentary
+======= =========== =========== ============== =================================
+  0      softsusy    softsusy    yes            default value, always enabled
+  1      collier     COLLIER_    no             see *specific* below
+  2      looptools   LoopTools_  no             see *specific* below
+  3      fflite      fflite      yes            -
+======= =========== =========== ============== =================================
+
+**COLLIER specific**:
+To use the COLLIER_ library and header files from a specific directory configure via::
+
+    COLLIER_DIR=/path/to/COLLIER-x.y.z
+
+     ./configure --with-loop-libraries=collier \
+                 --with-collier-incdir=$COLLIER_DIR/modules \
+                 --with-collier-libdir=$COLLIER_DIR
+
+**LoopTools specific**:
+To use the LoopTools_ library and header files from a specific directory configure via::
+
+    LOOPTOOL_DIR=/path/to/looptools/build
+
+    ./configure --with-loop-libraries=looptools \
+                --with-looptools-incdir=$LOOPTOOLS_DIR \
+                --with-looptools-libdir=$LOOPTOOLS_DIR
+
 Additional physical input parameters (FlexibleSUSYInput)
 --------------------------------------------------------
 
@@ -622,6 +662,8 @@ References
 ----------
 
 .. _`FlexibleSUSY model file`: model_file.rst
+.. _LoopTools: http://www.feynarts.de/looptools/
+.. _COLLIER: https://collier.hepforge.org/
 
 .. [1708.05720] `Eur.Phys.J. C77 (2017) no.12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1005.5709] `JHEP 1008 (2010) 104 <https://inspirehep.net/record/856612>`_ [`arxiv:1005.5709 <https://arxiv.org/abs/1005.5709>`_]
