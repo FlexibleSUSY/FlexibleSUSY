@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOPLIBRARY_HPP
-#define LOOPLIBRARY_HPP
+#ifndef LOOP_LIBRARY_HPP
+#define LOOP_LIBRARY_HPP
 
 #include <memory>
 #include "loop_library_interface.hpp"
@@ -47,4 +47,4 @@ private:
 
 } // namespace flexiblesusy
 
-#endif // LOOPLIBRARY_HPP
+#endif // LOOP_LIBRARY_HPP
