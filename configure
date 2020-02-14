@@ -2224,20 +2224,6 @@ check_collier_incl() {
 
 #_____________________________________________________________________
 check_collier() {
-   [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
-   type pkg-config > /dev/null && [ -f Collier.pc ] && \
-   {
-      message -n "Checking COLLIER using local Collier.pc ... "
-      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config Collier --cflags)
-      COLLIERLIBS=$(PKG_CONFIG_PATH=. pkg-config Collier --libs)
-      enable_collier=yes
-      message "ok"
-      return
-   }
-
-   check_collier_incl
-   check_collier_libs
-
    case "${FC}" in
       gfortran*)
          COLLIERSTD='-std=f2008'
@@ -2246,6 +2232,20 @@ check_collier() {
          COLLIERSTD='-std08'
          ;;
    esac
+
+   [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
+   type pkg-config > /dev/null && [ -f COLLIER.pc ] && \
+   {
+      message -n "Checking COLLIER using local COLLIER.pc ... "
+      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config COLLIER --cflags)
+      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config COLLIER --libs)"
+      enable_collier=yes
+      message "ok"
+      return
+   }
+
+   check_collier_incl
+   check_collier_libs
 }
 
 #_____________________________________________________________________
