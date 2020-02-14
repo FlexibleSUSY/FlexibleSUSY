@@ -95,9 +95,11 @@ test/test_MRSSM2_f_to_f_conversion.cpp
 conanbuildinfo.mak
 conanbuildinfo.txt
 conaninfo.txt
+conan.lock
 graph_info.json
 boost.pc
 eigen.pc
+eigen3.pc
 Himalaya.pc
 LoopTools.pc
 TSIL.pc
