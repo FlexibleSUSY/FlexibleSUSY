@@ -173,15 +173,15 @@ LIBFLEXI_HDR += \
 $(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
 
 $(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o $(LOOP_DIR)/collier_wrapper.mod
-	@echo Building collier wrapper library
-	@ar cr $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
+	@$(MSG)
+	@$(MODULE_MAKE_LIB_CMD) $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
 
 $(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f90
-	@echo Building collier_wrapper.o
+	@$(MSG)
 	@$(FC) $(FFLAGS) $(COLLIERSTD) -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o $(FMOD) $(LOOP_DIR)
 
 $(LOOP_DIR)/collier_wrapper.f90 : $(LOOP_DIR)/collier_wrapper.F90
-	@echo Generating collier_wrapper.f90
+	@$(MSG)
 	@$(FC) -E $(LOOP_DIR)/collier_wrapper.F90 | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $(LOOP_DIR)/collier_wrapper.f90
 endif
 
