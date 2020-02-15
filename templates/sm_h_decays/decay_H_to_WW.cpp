@@ -20,10 +20,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    // mW < mH < 2mW
    // three-body decays
    if (4 * x > 1.0) {
-      // const auto vd = MODELPARAMETER(vd);
-      // const auto vu = MODELPARAMETER(vu);
-      // TODO: specify the vev correctly
-      const auto vev = 246.0; // sqrt(Sqr(vd) + Sqr(vu));
+      const auto vev = context.model.VEV();
 
       res = 3.0 / (128 * std::pow(Pi, 3)) * mHOS / Sqr(vev) * RT(x);
    // mH > 2mZ

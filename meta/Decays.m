@@ -859,7 +859,22 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  TextFormatting`IndentText[
                     "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(input);\n" <>
                     "dm->fill_from(model);\n" <>
-                    "return std::move(dm);\n" <>
+                    "standard_model::Standard_model sm{};\n" <>
+                    "sm.initialise_from_input(qedqcd);\n" <>
+                    "if (run_to_decay_particle_scale) {\n" <>
+                    TextFormatting`IndentText[
+                       "auto decay_mass = PHYSICAL(" <>
+                          CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
+                       "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
+                       TextFormatting`IndentText[
+                          "sm.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
+                       ] <> "}\n"
+                    ] <>
+                    "}\n" <>
+                    "sm.solve_ewsb_tree_level();\n" <>
+                    "sm.calculate_DRbar_masses();\n" <>
+                    "dm->fill_from(sm);\n" <>
+                    "return dm;\n" <>
                     "break;\n"
                  ] <>
                  "}\n" <>

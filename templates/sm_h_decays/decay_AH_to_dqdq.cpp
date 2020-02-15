@@ -26,7 +26,7 @@ double CLASSNAME::get_partial_width<AH,bar<dq>::type, dq>(
       return 0.;
    }
 
-   const double g3 = MODELPARAMETER(g3);
+   const double g3 = context.model.get_g3();
    const double Nf = number_of_active_flavours(mAH);
    const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
    const double mtpole = qedqcd.displayPoleMt();

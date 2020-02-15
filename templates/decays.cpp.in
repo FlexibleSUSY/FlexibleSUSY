@@ -47,6 +47,7 @@
 #include <cmath>
 // TODO: remove before release
 #include <iomanip>
+#include "standard_model.hpp"
 
 namespace flexiblesusy {
 

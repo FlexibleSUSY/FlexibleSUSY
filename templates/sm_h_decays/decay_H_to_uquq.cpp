@@ -27,7 +27,7 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
    // SM expression + pure BSM 1L corrections
 //    return amplitude_squared<H, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2);
 
-   const double g3 = MODELPARAMETER(g3);
+   const double g3 = context.model.get_g3();
    const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
    const double Nf = number_of_active_flavours(mHOS);
    const double mtpole = qedqcd.displayPoleMt();
