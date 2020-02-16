@@ -317,18 +317,22 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
  */
 double SLHA_io::read_scale(const std::string& block_name) const
 {
-   if (!block_exists(block_name))
-      return 0.;
-
    double scale = 0.;
+   auto block = data.find(data.cbegin(), data.cend(), block_name);
 
-   for (const auto& line: data.at(block_name)) {
-      if (!line.is_data_line()) {
-         if (line.size() > 3 &&
-             to_lower(line[0]) == "block" && line[2] == "Q=")
-            scale = convert_to<double>(line[3]);
-         break;
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         if (!line.is_data_line()) {
+            // read scale from block definition
+            if (line.size() > 3 &&
+                to_lower(line[0]) == "block" && line[2] == "Q=") {
+               scale = convert_to<double>(line[3]);
+            }
+         }
       }
+
+      ++block;
+      block = data.find(block, data.cend(), block_name);
    }
 
    return scale;
