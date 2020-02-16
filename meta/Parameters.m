@@ -169,22 +169,22 @@ expression.";
 
 FillInputParametersFromTuples::usage="";
 
-DecreaseIndexLiterals::usage="@unote
+DecreaseIndexLiterals::usage="@note
 Definetly safe calls:
 	f[ { Head1[Int1] , Head2[Int2], ... } ]
 	f[ { Head1[Int1] , Head2[Int2], ... }, { HeadI1, HeadI2, ...} ]
-Possible calls: 
-	1. f[ exprD ] 
+Possible calls:
+	1. f[ exprD ]
 	2. f[ exprD, listH ]
-where 
+where
 	#1 exprD is @usomething which probably contains subexpressions (at @any level) of the form HeadOfExpression[SomeInteger]
-	#2 listH is List which has subexpressions (only at @lowest level) of the form	HeadOfExpression 
+	#2 listH is List which has subexpressions (only at @lowest level) of the form	HeadOfExpression
 Output:
-	1. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) of all InputParameters, ExtraParameters, allModelParameters, allOutputParameters and changes 
+	1. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) of all InputParameters, ExtraParameters, allModelParameters, allOutputParameters and changes
 	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
-	2. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) in listH and changes 
+	2. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) in listH and changes
 	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
-Issues: 
+Issues:
 	1. Do not work if HeadOfExpression1@HeadOfExpression2@SomeInteger exist in exprD
 ";
 IncreaseIndexLiterals::usage="";

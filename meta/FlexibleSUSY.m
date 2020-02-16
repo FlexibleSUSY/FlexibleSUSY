@@ -201,7 +201,7 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
-ExtraSLHAOutputBlocks::usage = "@unote
+ExtraSLHAOutputBlocks::usage = "@note
 this List is rewritten during the runnig of start.m script
 in the directory FlexibleSUSY/models/@CLASSNAME@ by
 the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
@@ -1539,7 +1539,7 @@ WriteModelClass[massMatrices_List,
 				ewsbEquations_List,
                 parametersFixedByEWSB_List,
                 ewsbSubstitutions_List,
-                nPointFunctions_List, (* @unote *no* connection to the NPointFunctions Package! *)
+                nPointFunctions_List,
                 vertexRules_List,
                 phases_List,
                 files_List,
@@ -1672,7 +1672,7 @@ WriteModelClass[massMatrices_List,
               {secondGenerationHelperPrototypes, secondGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[2];
               {thirdGenerationHelperPrototypes, thirdGenerationHelperFunctions} = TreeMasses`CreateGenerationHelpers[3];
              ];
-           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];  (* @unote *no* connection to the NPointFunctions Package! *)
+           {selfEnergyPrototypes, selfEnergyFunctions} = SelfEnergies`CreateNPointFunctions[nPointFunctions, vertexRules];
            phasesDefinition             = Phases`CreatePhasesDefinition[phases];
            phasesGetterSetters          = Phases`CreatePhasesGetterSetters[phases];
            If[Parameters`GetExtraParameters[] =!= {},
@@ -3657,7 +3657,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            FSCheckLoopCorrections[FSEigenstates];
            nPointFunctions = Vertices`EnforceCpColorStructures @
            					 Vertices`SortCps @
-             				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];  (* @unote *no* connection to the NPointFunctions Package! *)
+             				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
