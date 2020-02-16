@@ -12,19 +12,24 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const double mW = context.mass<W>(indexOut1);
    const double x = Sqr(mWOS / mHOS);
    double res;
-   // mH < mW
-   // 4-body decay not implemented for a moment
+
+   // 4-body decay for mH < mW not implemented for a moment
    if (x > 1.0) {
       return 0.0;
    }
-   // mW < mH < 2mW
-   // three-body decays
-   if (4 * x > 1.0) {
+
+   // three-body decays form mW < mH < w mW
+   else if (4 * x > 1.0) {
       const auto vev = context.model.VEV();
 
       res = 3.0 / (128 * std::pow(Pi, 3)) * mHOS / Sqr(vev) * RT(x);
-   // mH > 2mZ
-   // two-body decay
+
+      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto ghWW =
+         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value() * std::pow(mWOS/mW, 2);
+      return res * std::norm(ghWW);
+
+   // two-body decay for mH > 2 mW
    } else {
 
       const double flux = 1. / (2 * mHOS);
@@ -39,8 +44,4 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       // flux * phase space factor * matrix element squared
       return flux * ps * mat_elem_sq;
    }
-   const auto indices = concatenate(indexOut2, indexOut1, indexIn);
-   const auto ghWW =
-      Vertex<conj<W>::type, W, H>::evaluate(indices, context).value() * std::pow(mWOS/mW, 2);
-   return res * std::norm(ghWW);
 }

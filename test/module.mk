@@ -354,7 +354,6 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSM_FlexibleDecays.cpp \
 		$(DIR)/test_CMSSM_effective_couplings.cpp
 endif
 
@@ -862,6 +861,8 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
 		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
 
+$(DIR)/test_MSSM_FlexibleDecays.x: $(LIBMSSM)
+
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
@@ -966,8 +967,6 @@ $(DIR)/test_NUTNMSSM_spectrum.x: $(LIBNUTNMSSM)
 $(DIR)/test_CMSSMNoFV_beta_functions.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_CMSSMNoFV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
-
-$(DIR)/test_CMSSM_FlexibleDecays.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSMNoFV_two_loop_spectrum.x: $(LIBCMSSMNoFV)
 

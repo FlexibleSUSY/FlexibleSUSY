@@ -842,7 +842,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
-                 "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > 100.) {\n" <>
+                 "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                  "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
                  "model.solve_ewsb();\n" <>
                     "}\n";
@@ -858,6 +858,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
                     "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(input);\n" <>
+                    "// fill_from BSM model has to be called before fill_from SM\n" <>
+                    "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>
                     "standard_model::Standard_model sm{};\n" <>
                     "sm.initialise_from_input(qedqcd);\n" <>
