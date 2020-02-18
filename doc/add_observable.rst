@@ -113,7 +113,7 @@ Open file ``meta/FlexibleSUSY.m``
    A little bit further add ``<returnedVertices>`` to a ``Join`` of first argument of
    ``WriteCXXDiagramClass``.
 
-Create ``meta/<NewMetaFile>``
+Create ``meta/<NewMetaFile>.m``
 
 1) It should make some model specific calculation of an observable.
 
@@ -156,6 +156,11 @@ to a ``LIB@CLASSNAME@_SRC`` variable. Also add::
 
 to a ``LIB@CLASSNAME@_HDR`` variable.
 
+Open file ``meta/module.mk`` and add::
+
+   $(DIR)/<NewMetaFile>.m \
+
+to ``META_SRC`` variable.
 
 Documentation part
 ``````````````````
