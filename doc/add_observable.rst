@@ -98,14 +98,14 @@ Open file ``meta/FlexibleSUSY.m``
            <main input>,
            {
               {
-                 FileNameJoin@{$flexiblesusyTemplateDir, "<new_observable>.hpp.in"},
-                 FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName <> "<new_observable>.hpp"}
+                 FileNameJoin@{$flexiblesusyTemplateDir, #<>".hpp.in"},
+                 FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".hpp"}
               },
               {
-               FileNameJoin@{$flexiblesusyTemplateDir, "<new_observable>.cpp.in"},
-               FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName <> "<new_observable>.cpp"}
+                 FileNameJoin@{$flexiblesusyTemplateDir, #<>".cpp.in"},
+                 FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".cpp"}
               }
-           }
+           } & ["<new_observable>"]
      ];
 
    to the place where other classes are created.
