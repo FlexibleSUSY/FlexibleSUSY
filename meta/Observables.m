@@ -27,7 +27,8 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma };
+                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma,
+                  FToFConversionInNucleusWilson };
 End[];
 
 GetRequestedObservables::usage="";
@@ -43,6 +44,12 @@ GetObservableDescription::usage="returns description of observable.";
 IsObservable::usage = "Returns true if given symbol is an observable.";
 
 Begin["`Private`"];
+
+`args`FToFConversionInNucleusWilson = Sequence[
+   lepton_[idxIn:_Integer] -> lepton_[idxOut:_Integer],
+   nucleus:_,
+   CoefficientList -> True
+];
 
 IsObservable[sym_] :=
     MemberQ[FlexibleSUSYObservable`FSObservables, sym] || \
@@ -100,6 +107,15 @@ GetObservableName[FlexibleSUSYObservable`EDM[p_]]       := "edm_" <> CConversion
 GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_[_] -> {pOut_[_], spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
 GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
 GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_in_" <> ToString@nucleus;
+
+GetObservableName@
+FlexibleSUSYObservable`FToFConversionInNucleusWilson@
+`args`FToFConversionInNucleusWilson :=
+   CConversion`ToValidCSymbolString@lepton <> "_" <>
+   CConversion`ToValidCSymbolString@idxIn  <> "_to_" <>
+   CConversion`ToValidCSymbolString@idxOut <> "_in_" <>
+   ToString@nucleus <> "_coefficients";
+
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "b_to_s_gamma";
 
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
@@ -128,6 +144,14 @@ GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idx
    "CR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
    CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> ", " <>
       ToString[nuc] <> ")/capture rate";
+
+GetObservableDescription@
+FlexibleSUSYObservable`FToFConversionInNucleusWilson@
+`args`FToFConversionInNucleusWilson :=
+   "Wilson coefficiens for " <> CConversion`ToValidCSymbolString@lepton <> "(" <>
+   CConversion`ToValidCSymbolString@idxIn  <> "->" <>
+   CConversion`ToValidCSymbolString@idxOut <> ")";
+
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "calculates the Wilson coefficients C7 and C8 for b -> s gamma";
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuon] := CConversion`ScalarType[CConversion`realScalarCType];
@@ -137,6 +161,12 @@ GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty
 GetObservableType[FlexibleSUSYObservable`EDM[p_]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], _]] := CConversion`ScalarType[CConversion`realScalarCType];
+
+GetObservableType@
+FlexibleSUSYObservable`FToFConversionInNucleusWilson@
+`args`FToFConversionInNucleusWilson :=
+   CConversion`ArrayType[CConversion`complexScalarCType, 10];
+
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton] :=
@@ -421,7 +451,7 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
           ];
 
 CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     spec = CConversion`ToValidCSymbolString[spectator]},
            structName <> ".LToLGamma0(" <> pInStr <> ", " <> pOutStr <> ", " <> spec <> ") = " <>
            FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> spec <> "(MODEL, qedqcd, physical_input);"
@@ -439,7 +469,7 @@ CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[id
           ];
 
 CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     nuc = CConversion`ToValidCSymbolString[nucleai]},
            structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
            FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
@@ -455,6 +485,17 @@ CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] 
            structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ", " <> "qedqcd) = " <>
            FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(" <> idxInStr <> ", " <> idxOutStr <> ", "<> FlexibleSUSY`FSModelName <> "_f_to_f_conversion::Nucleus::" <> nucleiStr <> ", MODEL, qedqcd);"
           ];
+
+CalculateObservable[
+   FlexibleSUSYObservable`FToFConversionInNucleusWilson@
+   `args`FToFConversionInNucleusWilson,
+   structName:_String
+] :=
+   structName <> "." <> GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleusWilson[
+      lepton@idxIn->lepton@idxOut, nucleus, CoefficientList->True]] <>
+   " = " <> # <>"::calculate_"<>CConversion`ToValidCSymbolString@lepton<>"_to_"<>
+   CConversion`ToValidCSymbolString@lepton<>"(" <> ToString@idxIn <> ", " <> ToString@idxOut <>
+   ", " <> # <>"::Nucleus::" <> ToString@nucleus <> ", MODEL, qedqcd);" & [FlexibleSUSY`FSModelName<>"_l_to_l_conversion_in_nucleus_wilson"];
 
 (* TODO: move Wilson Coefficients to a different block *)
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_String] :=

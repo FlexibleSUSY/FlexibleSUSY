@@ -162,5 +162,7 @@ Open file ``meta/module.mk`` and add::
 
 to ``META_SRC`` variable.
 
+ Note: this allows correct code building if ``.m`` file was changed.
+
 Documentation part
 ``````````````````
