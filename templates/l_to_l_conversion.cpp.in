@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_l_conversion_in_nucleus_wilson.cpp
+ * @file @ModelName@_l_to_l_conversion.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@

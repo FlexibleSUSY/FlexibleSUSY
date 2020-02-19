@@ -28,35 +28,29 @@ create::usage = "";
 
 Begin["`internal`"];
 
-getPrototype[inFermion_ -> outFermion_] :=
-Module[
-   {
-      inName = CXXDiagrams`CXXNameOfField@inFermion,
-      outName = CXXDiagrams`CXXNameOfField@outFermion
-   },
+getPrototype[lIn_->lOut_,contribution_] :=
    "Eigen::Array<std::complex<double>,10,1>"<>
-   " calculate_"<>inName<>"_to_"<>outName<>"(\n"<>
-      "   int generationIndex1,\n"<>
-      "   int generationIndex2,\n"<>
-      "   const " <> FlexibleSUSY`FSModelName <> "_l_to_l_conversion_in_nucleus_wilson::Nucleus nucleus,\n" <>
-      "   const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)"
-];
-
-getPrototype[list:{Rule[_,_]..}] :=
-   StringJoin@Riffle[ getPrototype /@ list, "\n\n" ];
-
-getPrototype[{}] := "";
+   " calculate_"<>#@lIn<>"_to_"<>#@lOut<>"_for_"<>#@contribution<>"(\n"<>
+   "   int generationIndex1,\n"<>
+   "   int generationIndex2,\n"<>
+   "   const " <> FlexibleSUSY`FSModelName <>
+      "_l_to_l_conversion::Nucleus nucleus,\n" <>
+   "   const " <> FlexibleSUSY`FSModelName <>
+      "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)" &@
+      CConversion`ToValidCSymbolString;
 
 getPrototype // Utils`MakeUnknownInputDefinition;
 
-create[inFermion_ -> outFermion_] :=
+create[
+   FlexibleSUSYObservable`LToLConversion[lIn_[gIn_]->lOut_[gOut_],_,contribution_,_->True]
+] :=
 Module[
    {
-      inName = CXXNameOfField@inFermion,
-      outName = CXXNameOfField@outFermion,
+      inName = CConversion`ToValidCSymbolString@lIn,
+      outName = CConversion`ToValidCSymbolString@lOut,
       npfHeader = "",
       npfDefinition = "",
-      calculatePrototype = getPrototype[inFermion -> outFermion],
+      calculatePrototype = getPrototype[lIn->lOut,contribution],
       calculateDefinition, n=2
    },
    calculateDefinition = calculatePrototype <> " {\n" <>
@@ -70,7 +64,7 @@ Module[
    }
 ];
 
-create[list:{Rule[_,_]..}] :=
+create[list:{__}] :=
    {
       DeleteDuplicates[ Join@@#[[All,1]] ],
       {

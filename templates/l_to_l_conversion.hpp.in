@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_l_conversion_in_nucleus_wilson.hpp
+ * @file @ModelName@_l_to_l_conversion.hpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
@@ -31,7 +31,7 @@
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_l_to_l_conversion_in_nucleus_wilson {
+namespace @ModelName@_l_to_l_conversion {
 
 enum class Nucleus { Au, Al, Ti };
 

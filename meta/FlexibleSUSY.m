@@ -2220,42 +2220,42 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
    ];
 
 WriteLToLConversionClass[
-   leptonPairs:{Rule[_,_]...},
+   extraSLHAOutputBlocks:_List,
    files:{{_?FileExistsQ,_String}..}
 ] :=
 Module[
    {
+      observables, fields = {},
       masslessNeutralVectorBosons,
-      externalFermions,
       vertices = {},
-      processesUnderInterest,
       additionalVertices = {},
       prototypes = "", npfHeaders = "", npfDefinitions = "",
       definitions = ""
    },
    Print["Creating LToLConversion class ..."];
 
-   If[leptonPairs =!= {},
+   observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@extraSLHAOutputBlocks,
+      FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]];
+
+   If[observables =!= {},
+
+      fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the calculation *)
       masslessNeutralVectorBosons = Select[GetVectorBosons[],
          (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])&
       ];
 
-      (* convert rule to list (so {Fe -> Fe, Au, CoefficientList->True} into {Fe,Fe} *)
-      externalFermions = DeleteDuplicates@Flatten[
-         {TreeMasses`GetSMQuarks[], leptonPairs /. Rule[a_, b_] :> Sequence[a, b]}
-      ];
-
       vertices = Flatten /@ Tuples[
-            {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
-            masslessNeutralVectorBosons}
+         {
+            {CXXDiagrams`LorentzConjugate@#,#}&/@Flatten@fields,
+            masslessNeutralVectorBosons
+         }
       ];
 
-      processesUnderInterest = DeleteDuplicates@leptonPairs;
-
-      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} = LToLConversion`create@processesUnderInterest;
    ];
+   {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
+      LToLConversion`create@observables;
 
    WriteOut`ReplaceInFiles[
       files,
@@ -2268,7 +2268,10 @@ Module[
       }
    ];
 
-   DeleteDuplicates@Join[vertices,npfVertices]
+   {
+      fields,
+      DeleteDuplicates@Join[vertices,additionalVertices]
+   }
 ];
 WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
 
@@ -4495,15 +4498,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
 
-         LToLConversionFields =
-            DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-               FlexibleSUSYObservable`LToLConversion[
-                  pIn_[_Integer] -> pIn_[_Integer],_,CoefficientList->True
-               ] :> Rule[pIn,pIn]
-            ];
-
-         LToLConversionVertices =
-            WriteLToLConversionClass[LToLConversionFields,
+         {LToLConversionFields, LToLConversionVertices} =
+            WriteLToLConversionClass[extraSLHAOutputBlocks,
                   {
                      FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
                      FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
@@ -4573,7 +4569,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            cxxQFTVerticesTemplate = FileNameJoin[{cxxQFTTemplateDir, "vertices_.cpp.in"}];
            cxxQFTVerticesMakefileTemplates = {{FileNameJoin[{cxxQFTTemplateDir, "vertices.mk.in"}],
                            FileNameJoin[{cxxQFTOutputDir, "vertices.mk"}]}};
-
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
