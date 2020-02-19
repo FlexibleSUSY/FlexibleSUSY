@@ -22,7 +22,7 @@
 
 *)
 
-BeginPackage@"FToFConversionInNucleusWilson`";
+BeginPackage@"LToLConversion`";
 
 create::usage = "";
 

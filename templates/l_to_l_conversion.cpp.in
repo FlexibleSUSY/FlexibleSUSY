@@ -31,7 +31,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-#include "@ModelName@_l_to_l_conversion_in_nucleus_wilson.hpp"
+#include "@ModelName@_l_to_l_conversion.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
@@ -50,7 +50,7 @@ namespace npointfunctions {
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_l_to_l_conversion_in_nucleus_wilson {
+namespace @ModelName@_l_to_l_conversion {
 
 /*struct overlap_integrals {
    double D;
@@ -118,5 +118,5 @@ std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {
 
 @calculate_definitions@
 
-} // namespace @ModelName@_l_to_l_conversion_in_nucleus_wilson
+} // namespace @ModelName@_l_to_l_conversion
 } // namespace flexiblesusy

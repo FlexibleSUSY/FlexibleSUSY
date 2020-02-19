@@ -53,7 +53,7 @@ BeginPackage["FlexibleSUSY`",
               "FFVFormFactors`",
               "BrLToLGamma`",
               "FToFConversionInNucleus`",
-              "FToFConversionInNucleusWilson`",
+              "LToLConversion`",
               "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
@@ -2219,7 +2219,7 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
       DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
-WriteFToFConversionInNucleusWilsonClass[
+WriteLToLConversionClass[
    leptonPairs:{Rule[_,_]...},
    files:{{_?FileExistsQ,_String}..}
 ] :=
@@ -2233,7 +2233,7 @@ Module[
       prototypes = "", npfHeaders = "", npfDefinitions = "",
       definitions = ""
    },
-   Print["Creating FToFConversionInNucleusWilsonClass class ..."];
+   Print["Creating LToLConversion class ..."];
 
    If[leptonPairs =!= {},
 
@@ -2254,7 +2254,7 @@ Module[
 
       processesUnderInterest = DeleteDuplicates@leptonPairs;
 
-      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} = FToFConversionInNucleusWilson`create@processesUnderInterest;
+      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} = LToLConversion`create@processesUnderInterest;
    ];
 
    WriteOut`ReplaceInFiles[
@@ -2270,7 +2270,7 @@ Module[
 
    DeleteDuplicates@Join[vertices,npfVertices]
 ];
-WriteFToFConversionInNucleusWilsonClass // Utils`MakeUnknownInputDefinition;
+WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
 
 (* Write the AMuon c++ files *)
 WriteAMuonClass[calcAMu_, files_List] :=
@@ -3652,10 +3652,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, edmFields,
             QToQGammaFields = {},
-            LToLGammaFields = {}, LToLConversionFields = {},
-            LToLConversionWilsonFields = {}, FFMasslessVVertices = {},
+            LToLGammaFields = {}, FToFConversionFields = {},
+            LToLConversion = {}, FFMasslessVVertices = {},
             conversionVertices = {},
-            conversionVerticesWilson = {},
+            LToLConversionVertices = {}, LToLConversionFields = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -4481,7 +4481,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* OBSERVABLE: l -> l conversion *)
 
            Print["Creating FToFConversionInNucleus class ..."];
-           LToLConversionFields =
+           FToFConversionFields =
               DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                 FlexibleSUSYObservable`FToFConversionInNucleus[
                    pIn_[_Integer] -> pOut_[_Integer], nucleus_
@@ -4489,31 +4489,25 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
 
            conversionVertices =
-              WriteFToFConversionInNucleusClass[LToLConversionFields,
+              WriteFToFConversionInNucleusClass[FToFConversionFields,
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
 
-         LToLConversionWilsonFields =
+         LToLConversionFields =
             DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-               FlexibleSUSYObservable`FToFConversionInNucleusWilson[
+               FlexibleSUSYObservable`LToLConversion[
                   pIn_[_Integer] -> pIn_[_Integer],_,CoefficientList->True
                ] :> Rule[pIn,pIn]
             ];
 
-         conversionVerticesWilson =
-            WriteFToFConversionInNucleusWilsonClass[LToLConversionWilsonFields,
-               {
+         LToLConversionVertices =
+            WriteLToLConversionClass[LToLConversionFields,
                   {
-                     FileNameJoin@{$flexiblesusyTemplateDir,#<>".hpp.in"},
-                     FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".hpp"}
-                  },
-                  {
-                     FileNameJoin@{$flexiblesusyTemplateDir,#<>".cpp.in"},
-                     FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".cpp"}
-                  }
-               } & ["l_to_l_conversion_in_nucleus_wilson"]
+                     FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
+                     FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
+                  } &/@ ("l_to_l_conversion"<># &/@ {".hpp", ".cpp"})
             ];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
@@ -4538,14 +4532,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
-                     If[LToLConversionFields === {},
+                     If[FToFConversionFields === {},
                         {},
-                        (#[[1, 1]] -> {#[[1, 2]], TreeMasses`GetPhoton[]})& /@ Transpose[Drop[Transpose[LToLConversionFields],-1]]
+                        (#[[1, 1]] -> {#[[1, 2]], TreeMasses`GetPhoton[]})& /@ Transpose[Drop[Transpose[FToFConversionFields],-1]]
                      ],
 
-                     If[LToLConversionWilsonFields === {},
+                     If[LToLConversionFields === {},
                         {},
-                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ LToLConversionWilsonFields
+                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ LToLConversionFields
                      ]
                   ],
 
@@ -4583,7 +4577,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, conversionVertices, conversionVerticesWilson],
+              Join[edmVertices, FFMasslessVVertices, conversionVertices, LToLConversionVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

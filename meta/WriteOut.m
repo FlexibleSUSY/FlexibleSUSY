@@ -524,7 +524,7 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
 
-                  FlexibleSUSYObservable`FToFConversionInNucleusWilson[__],
+                  FlexibleSUSYObservable`LToLConversion[__],
                       result = WriteSLHABlockEntry[
                           blockName,
                           {
