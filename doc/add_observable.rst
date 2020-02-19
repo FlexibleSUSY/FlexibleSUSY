@@ -117,6 +117,26 @@ Create ``meta/<NewMetaFile>.m``
 
 1) It should make some model specific calculation of an observable.
 
+Now FlexibleSUSY knows on meta level how to write ``observables.{hpp,cpp}`` files.
+This is not enough, though. One also need to specify explicitly, how new
+observable should be formatted in ``SHLA`` file.
+
+To do this, open ``meta/WriteOut.m`` file and edit ``WriteSLHABlockEntry``
+function by adding information about new variable.
+
+ Note: there are several overload ``WriteSLHABlockEntry`` functions. In the one
+ which checks for ``?IsObservable`` one adds generic behavior of this function
+ to a specific for an observable.
+
+Type of observable is not supported
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In file ``src/shla_io.hpp`` there are several ``#define FORMAT_<SOMETHING>``
+macros. One can extend them to include some new formatting for not yet
+included types. Or, what is a little bit better, one can use them as building
+blocks to construct some additional, more complex and flexible output.
+
+
 
 C++ part
 ````````
