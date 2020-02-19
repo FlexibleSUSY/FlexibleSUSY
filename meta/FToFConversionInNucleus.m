@@ -28,7 +28,7 @@ BeginPackage["FToFConversionInNucleus`",
 
 FToFConversionInNucleusCreateInterface::usage = "";
 
-Begin["Private`"];
+Begin["`Private`"];
 
 FToFConversionInNucleusCreateInterface[inFermion_ -> outFermion_] :=
 Module[
