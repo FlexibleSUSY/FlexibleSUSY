@@ -37,7 +37,7 @@ enum class Nucleus { Au, Al, Ti };
 
 @calculate_prototypes@
 
-}
+} // namespace @ModelName@_l_to_l_conversion
 
 } // namespace flexiblesusy
 
