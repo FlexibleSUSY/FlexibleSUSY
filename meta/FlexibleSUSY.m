@@ -53,7 +53,6 @@ BeginPackage["FlexibleSUSY`",
               "FFVFormFactors`",
               "BrLToLGamma`",
               "FToFConversionInNucleus`",
-              "LToLConversion`",
               "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
@@ -2225,19 +2224,18 @@ WriteLToLConversionClass[
 ] :=
 Module[
    {
-      observables, fields = {},
-      masslessNeutralVectorBosons,
-      vertices = {},
-      additionalVertices = {},
-      prototypes = "", npfHeaders = "", npfDefinitions = "",
-      definitions = ""
+      observables = DeleteDuplicates@Cases[
+         Observables`GetRequestedObservables@extraSLHAOutputBlocks,
+         FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]
+      ],
+      fields = {}, vertices = {}, additionalVertices = {},
+      prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
+      masslessNeutralVectorBosons
    },
-   Print["Creating LToLConversion class ..."];
-
-   observables = DeleteDuplicates@Cases[Observables`GetRequestedObservables@extraSLHAOutputBlocks,
-      FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]];
 
    If[observables =!= {},
+      Print["Creating LToLConversion class ..."];
+      Needs@"LToLConversion`";
 
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
@@ -2253,9 +2251,9 @@ Module[
          }
       ];
 
+      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
+         LToLConversion`create@observables;
    ];
-   {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
-      LToLConversion`create@observables;
 
    WriteOut`ReplaceInFiles[
       files,
