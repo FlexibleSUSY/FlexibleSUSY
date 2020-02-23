@@ -2246,7 +2246,8 @@ Module[
 
       vertices = Flatten /@ Tuples[
          {
-            {CXXDiagrams`LorentzConjugate@#,#}&/@Flatten@fields,
+            {CXXDiagrams`LorentzConjugate@#,#}&/@Flatten@Join[
+               TreeMasses`GetSMQuarks[],vertices],
             masslessNeutralVectorBosons
          }
       ];
@@ -2265,7 +2266,6 @@ Module[
          Sequence@@GeneralReplacementRules[]
       }
    ];
-
    {
       fields,
       DeleteDuplicates@Join[vertices,additionalVertices]
