@@ -116,7 +116,7 @@ Module[
    "}\n";
 
    {
-      {},
+      npfVertices,
       {npfHeader,npfDefinition},
       {`cxx`prototype <> ";", calculateDefinition}
    }
@@ -193,28 +193,28 @@ Module[
    sp[particle:_,num:_Integer] := SARAH`DiracSpinor[#,p@num,m@#] &@
       particle@{Symbol["SARAH`gt"<>ToString@num]};
 
-   dim6[i_,o_,q_,qn_String] := {
+   dim6[i_,o_,q_] := {
       (*@note 6 means PR, 7 means PL.*)
-      ("S_LL_"<>qn) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      ("S_LR_"<>qn) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
-      ("S_RL_"<>qn) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      ("S_RR_"<>qn) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
+      "S_LL" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
+      "S_LR" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
+      "S_RL" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
+      "S_RR" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
       (*@note names are correct, one just need to commute projectors with
        *Dirac matrices. It changes 6 to 7 or 7 to 6.*)
-      ("V_LL_"<>qn) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      ("V_LR_"<>qn) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-      ("V_RL_"<>qn) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      ("V_RR_"<>qn) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
+      "V_LL" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
+      "V_LR" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
+      "V_RL" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
+      "V_RR" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
       (*@note Minus, because FormCalc`s -6,Lor[1],Lor[2] is ours
        *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
        *taking this twice we get I*I=-1. FC cites [Ni05] for Fierz identities,
        *where our conventions are used, but in FC manual on the page 20
        *weird convention for sigma_munu is shown.*)
-      ("minus_T_LL_"<>qn) -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
-      ("minus_T_RR_"<>qn) -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
+      "minus_T_LL" -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
+      "minus_T_RR" -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
    };
-   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`UpQuark,`cxx`up];
-   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`DownQuark,`cxx`down];
+   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`UpQuark];
+   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`DownQuark];
 
    Print[">>npf>> calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
 
@@ -224,13 +224,13 @@ Module[
       npfU,
       cxxClassU,
       SARAH`Delta,
-      dim6[lIn,lOut,SARAH`UpQuark,`cxx`up]
+      dim6[lIn,lOut,SARAH`UpQuark]
    ][[2]];
    codeD = NPointFunctions`CreateCXXFunctions[
       npfD,
       cxxClassD,
       SARAH`Delta,
-      dim6[lIn,lOut,SARAH`DownQuark,`cxx`down]
+      dim6[lIn,lOut,SARAH`DownQuark]
    ][[2]];
 
    Print[">>npf>> c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
