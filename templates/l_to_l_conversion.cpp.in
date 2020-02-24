@@ -99,12 +99,21 @@ double get_capture_rate (const Nucleus N) {
 }
 
 template <class FOutBar, class FIn, class VBar>
-std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {
+std::complex<double> left(const @ModelName@_mass_eigenstates& model) {
     context_base context {model};
     using vertex = Vertex<FOutBar, FIn, VBar>;
     std::array<int, 2> indices {0, 0};
     const auto value =  vertex::evaluate(indices, context);
-    return 0.5*(value.left() + value.right());
+    return value.left();
+}
+
+template <class FOutBar, class FIn, class VBar>
+std::complex<double> right(const @ModelName@_mass_eigenstates& model) {
+    context_base context {model};
+    using vertex = Vertex<FOutBar, FIn, VBar>;
+    std::array<int, 2> indices {0, 0};
+    const auto value =  vertex::evaluate(indices, context);
+    return value.right();
 }
 
 @calculate_definitions@

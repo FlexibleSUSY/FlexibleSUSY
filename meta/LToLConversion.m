@@ -26,6 +26,15 @@ BeginPackage@"LToLConversion`";
 
 create::usage = "";
 
+getFLHA::usage =
+"@brief Returns information of Wilson coefficients, calculated by this observable
+in the format specified by [arxiv:1008.0762].
+@param Observable.
+@returns List of List of Strings which are: fermions in basis element, operators
+in basis element, orders of perturbative expansion, type of contribution,
+description.
+@note We assume that there is a normal ordering of leptons."
+
 Begin["`internal`"];
 
 `type`lepton = _Symbol?TreeMasses`IsLepton;
@@ -39,10 +48,9 @@ Begin["`internal`"];
 `type`contribution ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`LToLConversion[
-   (lIn:`type`lepton)[_Integer]->(lOut:`type`lepton)[_Integer],
+   (lIn:`type`lepton)[iIn:_Integer]->(lOut:`type`lepton)[iOut:_Integer],
    _Symbol,
-   con:`type`contribution,
-   CoefficientList->True
+   con:`type`contribution
 ];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
@@ -103,8 +111,31 @@ setClass[] := (
 setClass // Utils`MakeUnknownInputDefinition;
 setClass ~ SetAttributes ~ {Protected, Locked};
 
+getFLHA[obs:`type`observable] :=
+Module[
+   {
+      rules = {0->"11", 1->"13", 2->"15"}, leptons,
+      quarksU = "0202", quarksD = "0101"
+   },
+   leptons = StringJoin[{iOut, iIn} /. rules];
+   {
+      {#1, "3131", #2, #3, #4, "S_LL"},
+      {#1, "3132", #2, #3, #4, "S_LR"},
+      {#1, "3231", #2, #3, #4, "S_RL"},
+      {#1, "3232", #2, #3, #4, "S_RR"},
+      {#1, "4141", #2, #3, #4, "V_LL"},
+      {#1, "4142", #2, #3, #4, "V_LR"},
+      {#1, "4241", #2, #3, #4, "V_RL"},
+      {#1, "4242", #2, #3, #4, "V_RR"},
+      {#1, "4343", #2, #3, #4, "T_LL"},
+      {#1, "4444", #2, #3, #4, "T_RR"}
+   } & [leptons<>quarksU, "0", "0", "2"]
+];
+getFLHA // Utils`MakeUnknownInputDefinition;
+getFLHA ~ SetAttributes ~ {Protected, Locked};
+
 `cxx`prototype :=
-   "Eigen::Array<std::complex<double>,10,1>"<>
+   "Eigen::Array<std::complex<double>,11,1>"<>
    " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>"(\n"<>
    "   int generationIndex1,\n"<>
    "   int generationIndex2,\n"<>
@@ -158,16 +189,20 @@ Module[
    // i q^2 A1 * (- i gmunu/q^2) * (-i Qq e) = GF/sqrt2 * gpV
    // VP
 
-   const auto vcU = vectorCurrent<
-      typename fields::Fu::lorentz_conjugate,
-      fields::Fu,
-      typename fields::VP
+   const auto uL = left<
+      typename fields::Fu::lorentz_conjugate, fields::Fu, typename fields::VP
    >(model);
-   const auto vcD = vectorCurrent<
-      typename fields::Fd::lorentz_conjugate,
-      fields::Fd,
-      typename fields::VP
+   const auto uR = right<
+      typename fields::Fu::lorentz_conjugate, fields::Fu, typename fields::VP
    >(model);
+   const auto dL = left<
+      typename fields::Fd::lorentz_conjugate, fields::Fd, typename fields::VP
+   >(model);
+   const auto dR = right<
+      typename fields::Fd::lorentz_conjugate, fields::Fd, typename fields::VP
+   >(model);
+   const auto vcU = 0.5 * (uL + uR);
+   const auto vcD = 0.5 * (dL + dR);
 
    // the A1 term if the factor in front of q^2, the photon propagator is -1/q^2, we need only factor -1
    auto gpLV = -sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
@@ -267,10 +302,19 @@ Module[
    // normalize to capture
    const double capture_rate = get_capture_rate(nucleus);
 
-   Eigen::Array<std::complex<double>,10,1> res =
-      Eigen::Array<std::complex<double>,10,1>::Zero();
+   Eigen::Array<std::complex<double>,11,1> res;
 
-   res(0) = conversion_rate/capture_rate;
+   res << conversion_rate/capture_rate,
+          npfU.at(0),
+          npfU.at(1),
+          npfU.at(2),
+          npfU.at(3),
+          npfU.at(4) + photon_penguin[0] * uL,
+          npfU.at(5) + photon_penguin[0] * uR,
+          npfU.at(6) + photon_penguin[1] * uL,
+          npfU.at(7) + photon_penguin[1] * uR,
+         -npfU.at(8),
+         -npfU.at(9);
    return res;
 }
 ",

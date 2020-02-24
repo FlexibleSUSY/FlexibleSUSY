@@ -223,6 +223,9 @@ ExtraSLHAOutputBlocks = {
         }
     }
 };
+FWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
+IMFWCOEF ~ SetAttributes ~ {Protected, Locked}; (*reserved for a Block name*)
+
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
@@ -2235,7 +2238,6 @@ Module[
 
    If[observables =!= {},
       Print["Creating LToLConversion class ..."];
-      Needs@"LToLConversion`";
 
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 

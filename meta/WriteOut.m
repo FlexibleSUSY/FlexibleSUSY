@@ -492,6 +492,12 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
            result
           ];
 
+FlexibleSUSYObservable`LToLConversion::errBlock =
+"Observable can be called from any subset of the following Blocks:
+* FlexibleSUSYLowEnergy,
+* FWCOEF,
+* IMFWCOEF,
+but not from \"`1`\"";
 WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] :=
     Module[{result = ""},
            Switch[par,
@@ -525,15 +531,31 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                                                    Observables`GetObservableDescription[par]],
 
                   FlexibleSUSYObservable`LToLConversion[__],
-                      result = WriteSLHABlockEntry[
-                          blockName,
-                          {
-                              "OBSERVABLES."<>Observables`GetObservableName@par,
-                              idx,
-                              Observables`GetObservableType@par
-                          },
-                          Observables`GetObservableDescription@par
+                      Needs@"LToLConversion`";
+Print[blockName];
+                      result = Switch[blockName,
+                          "FlexibleSUSYLowEnergy",
+                              WriteSLHABlockEntry[
+                                  blockName,
+                                  {
+                                      "Re(OBSERVABLES."<>Observables`GetObservableName@par<>"(0))",
+                                      idx
+                                  },
+                                  Observables`GetObservableDescription@par
+                              ],
+                          "FWCOEF"|"IMFWCOEF",
+                              WriteSLHABlockEntry[
+                                  blockName,
+                                  {
+                                      "OBSERVABLES."<>Observables`GetObservableName@par,
+                                      Observables`GetObservableType@par
+                                  },
+                                  LToLConversion`getFLHA@par
+                              ],
+                          _,
+                          Utils`AssertOrQuit[_,FlexibleSUSYObservable`LToLConversion::errBlock,blockName]
                       ],
+                      (*result = ,*)
 
                   FlexibleSUSYObservable`bsgamma,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
@@ -543,32 +565,27 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
            result
           ];
 
-WriteSLHABlockEntry::errLargeIndex =
-"Index `1` doesn't belong to the range [`2`, `3`].";
-WriteSLHABlockEntry::errLargeArray =
-"Eigen::Array contains `1` element(s), but maximum of `2` is supported.";
+WriteSLHABlockEntry::errDiffLength =
+"Length of Eigen::Array should be equal to Length@description+1";
 WriteSLHABlockEntry[
-   blockName:_,
+   blockName:"FWCOEF"|"IMFWCOEF",
    {
       observable:_String,
-      idx:_Integer,
       CConversion`ArrayType[CConversion`complexScalarCType, num_Integer]
    },
-   description:_String
+   flha:{{Repeated[_String,{6}]}..}
 ] :=
 Module[
    {
-      generate, i
+      type = If[blockName === "FWCOEF","Re","Im"], i
    },
-   Utils`AssertOrQuit[#2<#1<#3,WriteSLHABlockEntry::errLargeIndex,#1,#2,#3]&[idx,0,999];
-   Utils`AssertOrQuit[#1<#2,WriteSLHABlockEntry::errLargeArray,#1,#2]&[num,10000];
+   Utils`AssertOrQuit[Length@flha+1 === num, WriteSLHABlockEntry::errDiffLength];
 
-   generate[int:_Integer, str:_String] := Table["      << FORMAT_MASS(1" <>
-      IntegerString[idx,10,3] <> IntegerString[i,10,4] <> ToString@int <>
-      ", " <> str <> "(" <> observable <> "(" <> ToString@i <> ")), " <>
-      "\"" <> str <> "(" <> description <> ")\")\n", {i, 0, num-1}];
-
-   StringJoin[Riffle[generate[1,"Re"], generate[2,"Im"]]]
+   Table["      << FORMAT_WILSON_COEFFICIENTS(" <> flha[[i,1]] <> ", " <>
+      flha[[i,2]] <> ", " <> flha[[i,3]] <> ", " <> flha[[i,4]] <> ", " <>
+      flha[[i,5]] <> ", " <> type <> "(" <> observable <> "(" <> ToString@i <>
+      ")), " <> "\"" <> flha[[i,6]] <> "\")\n",
+      {i, num-1}]
 ];
 
 WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=

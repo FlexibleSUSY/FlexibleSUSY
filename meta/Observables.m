@@ -50,8 +50,7 @@ Begin["`Private`"];
    nucleus:_,
    contribution:Alternatives[All,NPointFunctions`FourFermionScalarPenguins,
       NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes],
-   CoefficientList -> True
+      NPointFunctions`FourFermionFlavourChangingBoxes]
 ];
 
 IsObservable[sym_] :=
@@ -164,7 +163,7 @@ GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] ->
 
 GetObservableType@FlexibleSUSYObservable`LToLConversion@
 `args`LToLConversion :=
-   CConversion`ArrayType[CConversion`complexScalarCType, 10];
+   CConversion`ArrayType[CConversion`complexScalarCType, 11];
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
 
@@ -492,7 +491,7 @@ CalculateObservable[
 ] :=
    StringJoin[structName,".",
       GetObservableName@FlexibleSUSYObservable`LToLConversion[
-         lIn@gIn->lOut@gOut, nucleus, contribution, CoefficientList->True],
+         lIn@gIn->lOut@gOut, nucleus, contribution],
       " = ",#2,"::calculate_",#1@lIn,"_to_",#1@lOut,"_for_",#1@contribution,"(",
       #1@gIn,", ",#1@gOut,", ",#2,"::Nucleus::",#1@nucleus,", MODEL, qedqcd);"]&[
    CConversion`ToValidCSymbolString,

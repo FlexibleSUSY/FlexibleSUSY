@@ -59,6 +59,8 @@ namespace flexiblesusy {
       const boost::format single_element_formatter(" %5d   %16.8E   # %s\n");
       /// SLHA line formatter for the SPINFO block entries
       const boost::format spinfo_formatter(" %5d   %s\n");
+      /// FLHA line formatter for FWCOEF, IMFCOEF block entries
+      const boost::format wilson_formatter(" %8d %4d   %1d%1d   %1d   %16.8E   # %s\n");
    } // namespace
 
 #define FORMAT_MASS(pdg,mass,name)                                      \
@@ -75,6 +77,8 @@ namespace flexiblesusy {
    boost::format(spinfo_formatter) % (n) % (str)
 #define FORMAT_RANK_THREE_TENSOR(i,j,k,entry,name)                      \
    boost::format(tensor_formatter) % (i) % (j) % (k) % (entry) % (name)
+#define FORMAT_WILSON_COEFFICIENTS(f,m,x,y,ph,entry,name)                \
+   boost::format(wilson_formatter) % (f) % (m) % (x) % (y)  % (ph) % (entry) % (name)
 
 /**
  * @class SLHA_io
