@@ -26,7 +26,6 @@
 #include <valarray>
 #include <complex>
 #include <iostream>
-#include <iomanip> // TODO: remove
 
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
@@ -39,6 +38,7 @@
 @npf_headers@
 
 namespace flexiblesusy {
+
 namespace @ModelName@_cxx_diagrams {
 namespace npointfunctions {
 
@@ -52,15 +52,15 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace @ModelName@_l_to_l_conversion {
 
-/*struct overlap_integrals {
+struct overlap_integrals {
    double D;
    double Vp;
    double Vn;
    double Sp;
    double Sn;
-};*/
+};
 
-/*overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd& qedqcd) {
+overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd& qedqcd) {
    overlap_integrals res;
 
    // get muon pole mass from input slha file
@@ -82,30 +82,21 @@ namespace @ModelName@_l_to_l_conversion {
          res.Sp = 0.0153 * muon_pole_mass_5o2;
          res.Sn = 0.0163 * muon_pole_mass_5o2;
          return res;
-      case Nucleus::Ti:
-         res.D  = 0. * muon_pole_mass_5o2;
-         res.Vp = 0. * muon_pole_mass_5o2;
-         res.Vn = 0. * muon_pole_mass_5o2;
-         res.Sp = 0. * muon_pole_mass_5o2;
-         res.Sn = 0. * muon_pole_mass_5o2;
-         return res;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
-}*/
+}
 
-/*double get_capture_rate (const Nucleus N) {
+double get_capture_rate (const Nucleus N) {
    switch (N) {
       case Nucleus::Au:
          return 8.84868e-18;
       case Nucleus::Al:
          return 4.64079e-19;
-      case Nucleus::Ti:
-	 return 0.;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
-}*/
+}
 
 template <class FOutBar, class FIn, class VBar>
 std::complex<double> vectorCurrent(const @ModelName@_mass_eigenstates& model) {

@@ -130,9 +130,157 @@ Module[
 
    {npfVertices, npfHeader, npfDefinition} = `npf`create[obs];
 
-   calculateDefinition = `cxx`prototype <> " {\n" <>
-   "   return Eigen::Array<std::complex<double>,10,1>::Zero();\n"<>
-   "}\n";
+   calculateDefinition = `cxx`prototype <> StringReplace[" {
+
+   context_base context {model};
+   // get Fermi constant from Les Houches input file
+   const auto GF = qedqcd.displayFermiConstant();
+   constexpr bool discard_SM_contributions = false;
+   const auto photon_penguin = @photon_penguin_name@ (generationIndex1,
+      generationIndex2,
+      model,
+      discard_SM_contributions);
+
+   // translate from the convention of Hisano, Moroi & Tobe to Kitano, Koike & Okada
+   // Hisano defines form factors A2 through a matrix element in eq. 14
+   // Kitano uses a lagrangian with F_munu. There is a factor of 2 from translation
+   // because Fmunu = qeps - eps q
+
+   const auto A2L = -0.5 * photon_penguin[2]/(4.*GF/sqrt(2.));
+   const auto A2R = -0.5 * photon_penguin[3]/(4.*GF/sqrt(2.));
+
+   // penguins
+   // 2 up and 1 down quark in proton (gp couplings)
+   // 1 up and 2 down in neutron (gn couplings)
+
+   // mediator: massless vector
+   // construct 4-fermion operators from A1 form factors
+   // i q^2 A1 * (- i gmunu/q^2) * (-i Qq e) = GF/sqrt2 * gpV
+   // VP
+
+   const auto vcU = vectorCurrent<
+      typename fields::Fu::lorentz_conjugate,
+      fields::Fu,
+      typename fields::VP
+   >(model);
+   const auto vcD = vectorCurrent<
+      typename fields::Fd::lorentz_conjugate,
+      fields::Fd,
+      typename fields::VP
+   >(model);
+
+   // the A1 term if the factor in front of q^2, the photon propagator is -1/q^2, we need only factor -1
+   auto gpLV = -sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
+   auto gpRV = -sqrt(2.0)/GF * photon_penguin[1] * (2.*vcU + vcD);
+   auto gnLV = -sqrt(2.0)/GF * photon_penguin[0] * (vcU + 2.*vcD);
+   auto gnRV = -sqrt(2.0)/GF * photon_penguin[1] * (vcU + 2.*vcD);
+
+   // all contributions
+
+   auto npfU = @namespace_npf@@class_U@(
+      model,
+      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   auto npfD = @namespace_npf@@class_D@(
+      model,
+      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   auto npfS = @namespace_npf@@class_D@(
+      model,
+      std::array<int,4>{generationIndex1, 1, generationIndex2, 1},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   // PDG 2018 data
+   double m_p = 0.938272081, m_n = 0.939565413;
+   //data from my notes
+   double m_init = context.mass<fields::"<>`cxx`in<>">({generationIndex1});
+   double m_u = context.mass<fields::"<>`cxx`up<>">({0});
+   double m_d = context.mass<fields::"<>`cxx`down<>">({0});
+   double m_s = context.mass<fields::"<>`cxx`down<>">({1});
+
+   double GSpu = 0.021*m_p/m_u, GSpd = 0.041*m_p/m_d, GSps = 0.043*m_p/m_s;
+   double GSnu = 0.019*m_n/m_u, GSnd = 0.045*m_n/m_d, GSns = 0.043*m_n/m_s;
+
+   double GVpu = 2.,            GVpd = 1.;
+   double GVnu = 1.,            GVnd = 2.;
+
+   double GTpu = 0.77,          GTpd = -0.23,         GTps = 0.008;
+   double GTnu = 0.77,          GTnd = -0.23,         GTns = 0.008;
+
+   //minus because of descending order in FormCalc spinor chains
+   auto CSLu = -( npfU.at(0)+npfU.at(1) )/2.;
+   auto CSRu = -( npfU.at(2)+npfU.at(3) )/2.;
+   auto CSLd = -( npfD.at(0)+npfD.at(1) )/2.;
+   auto CSRd = -( npfD.at(2)+npfD.at(3) )/2.;
+   auto CSLs = -( npfS.at(0)+npfS.at(1) )/2.;
+   auto CSRs = -( npfS.at(2)+npfS.at(3) )/2.;
+
+   //minus because of descending order in FormCalc spinor chains
+   auto CVLu = -( npfU.at(4)+npfU.at(5) )/2.;
+   auto CVRu = -( npfU.at(6)+npfU.at(7) )/2.;
+   auto CVLd = -( npfD.at(4)+npfD.at(5) )/2.;
+   auto CVRd = -( npfD.at(6)+npfD.at(7) )/2.;
+
+   //plus because of descending order in FormCalc spinor chains and definition of tensor operators
+   auto CTLu = npfU.at(8);
+   auto CTRu = npfU.at(9);
+   auto CTLd = npfD.at(8);
+   auto CTRd = npfD.at(8);
+   auto CTLs = npfS.at(8);
+   auto CTRs = npfS.at(8);
+
+   gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );
+   gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );
+   gnLV += (-sqrt(2.0)/GF)*( GVnu*CVLu + GVnd*CVLd );
+   gnRV += (-sqrt(2.0)/GF)*( GVnu*CVRu + GVnd*CVRd );
+
+   //scalar contribution from scalar coefficients
+   auto gpLS = (-sqrt(2.0)/GF)*( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );
+   auto gpRS = (-sqrt(2.0)/GF)*( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );
+   auto gnLS = (-sqrt(2.0)/GF)*( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );
+   auto gnRS = (-sqrt(2.0)/GF)*( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );
+
+   //scalar contribution from tensor coefficients
+   gpLS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTLu + GTpd*CTLd + GTps*CTLs );
+   gpRS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTRu + GTpd*CTRd + GTps*CTRs );
+   gnLS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTLu + GTnd*CTLd + GTns*CTLs );
+   gnRS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTRu + GTnd*CTRd + GTns*CTRs );
+
+   const auto nuclear_form_factors = get_overlap_integrals(nucleus, qedqcd);
+
+   const auto left = A2R*nuclear_form_factors.D
+      + gpLV*nuclear_form_factors.Vp + gnLV*nuclear_form_factors.Vn
+      + gpRS*nuclear_form_factors.Sp + gnRS*nuclear_form_factors.Sn;
+
+   const auto right = A2L*nuclear_form_factors.D
+      + gpRV*nuclear_form_factors.Vp + gnRV*nuclear_form_factors.Vn
+      + gpLS*nuclear_form_factors.Sp + gnLS*nuclear_form_factors.Sn;
+
+   // eq. 14 of Kitano, Koike and Okada
+   const double conversion_rate = 2.*pow(GF,2)*(std::norm(left) + std::norm(right));
+
+   // normalize to capture
+   const double capture_rate = get_capture_rate(nucleus);
+
+   Eigen::Array<std::complex<double>,10,1> res =
+      Eigen::Array<std::complex<double>,10,1>::Zero();
+
+   res(0) = conversion_rate/capture_rate;
+   return res;
+}
+",
+   {
+      "@photon_penguin_name@"->"calculate_"<>`cxx`in<>"_"<>`cxx`out<>"_"<>
+         CXXDiagrams`CXXNameOfField@SARAH`Photon<>"_form_factors",
+      "@namespace_npf@"->FlexibleSUSY`FSModelName<>"_cxx_diagrams::npointfunctions::",
+      "@class_U@"->`cxx`classU,
+      "@class_D@"->`cxx`classD
+   }];
 
    {
       npfVertices,
