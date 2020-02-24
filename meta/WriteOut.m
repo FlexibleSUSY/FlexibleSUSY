@@ -532,7 +532,6 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
 
                   FlexibleSUSYObservable`LToLConversion[__],
                       Needs@"LToLConversion`";
-Print[blockName];
                       result = Switch[blockName,
                           "FlexibleSUSYLowEnergy",
                               WriteSLHABlockEntry[
@@ -555,7 +554,6 @@ Print[blockName];
                           _,
                           Utils`AssertOrQuit[_,FlexibleSUSYObservable`LToLConversion::errBlock,blockName]
                       ],
-                      (*result = ,*)
 
                   FlexibleSUSYObservable`bsgamma,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
@@ -584,7 +582,7 @@ Module[
    Table["      << FORMAT_WILSON_COEFFICIENTS(" <> flha[[i,1]] <> ", " <>
       flha[[i,2]] <> ", " <> flha[[i,3]] <> ", " <> flha[[i,4]] <> ", " <>
       flha[[i,5]] <> ", " <> type <> "(" <> observable <> "(" <> ToString@i <>
-      ")), " <> "\"" <> flha[[i,6]] <> "\")\n",
+      ")), " <> "\"" <> type <> "(" <> flha[[i,6]] <> ")\")\n",
       {i, num-1}]
 ];
 
