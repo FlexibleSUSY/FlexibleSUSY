@@ -163,7 +163,7 @@ GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] ->
 
 GetObservableType@FlexibleSUSYObservable`LToLConversion@
 `args`LToLConversion :=
-   CConversion`ArrayType[CConversion`complexScalarCType, 11];
+   CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
 

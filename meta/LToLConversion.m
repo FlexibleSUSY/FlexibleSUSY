@@ -119,6 +119,8 @@ Module[
    },
    leptons = StringJoin[{iOut, iIn} /. rules];
    {
+      {leptons, "3122", #2, #3, #4, "D_L"},
+      {leptons, "3122", #2, #3, #4, "D_R"},
       {#1, "3131", #2, #3, #4, "S_LL "<>#5},
       {#1, "3132", #2, #3, #4, "S_LR "<>#5},
       {#1, "3231", #2, #3, #4, "S_RL "<>#5},
@@ -134,16 +136,24 @@ Module[
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
 
-`cxx`prototype :=
-   "Eigen::Array<std::complex<double>,11,1>"<>
-   " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>"(\n"<>
-   "   int generationIndex1,\n"<>
-   "   int generationIndex2,\n"<>
-   "   const " <> FlexibleSUSY`FSModelName <>
-      "_l_to_l_conversion::Nucleus nucleus,\n" <>
-   "   const " <> FlexibleSUSY`FSModelName <>
+`cxx`prototype = "";
+`cxx`prototype // Protect;
+
+setPrototype[obs:`type`observable] := (
+   Unprotect@`cxx`prototype;
+   `cxx`prototype =
+      CConversion`CreateCType@Observables`GetObservableType@obs <>
+      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>"(\n"<>
+      "   int generationIndex1,\n"<>
+      "   int generationIndex2,\n"<>
+      "   const " <> FlexibleSUSY`FSModelName <>
+         "_l_to_l_conversion::Nucleus nucleus,\n" <>
+      "   const " <> FlexibleSUSY`FSModelName <>
       "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)";
-`cxx`prototype ~ SetAttributes ~ {Protected, Locked};
+   Protect@`cxx`prototype;
+);
+setPrototype // Utils`MakeUnknownInputDefinition;
+setPrototype ~ SetAttributes ~ {Protected, Locked};
 
 create::usage =
 "@brief Main entrance point for the canculation.";
@@ -157,6 +167,7 @@ Module[
    setIn@lIn;
    setOut@lOut;
    setCon@con;
+   setPrototype@obs;
    setClass[];
 
    {npfVertices, npfHeader, npfDefinition} = `npf`create[obs];
@@ -177,8 +188,11 @@ Module[
    // Kitano uses a lagrangian with F_munu. There is a factor of 2 from translation
    // because Fmunu = qeps - eps q
 
-   const auto A2L = -0.5 * photon_penguin[2]/(4.*GF/sqrt(2.));
-   const auto A2R = -0.5 * photon_penguin[3]/(4.*GF/sqrt(2.));
+   const auto D_L = -0.5 * photon_penguin[2];
+   const auto D_R = -0.5 * photon_penguin[3];
+
+   const auto A2L = D_L/(4.*GF/sqrt(2.));
+   const auto A2R = D_R/(4.*GF/sqrt(2.));
 
    // penguins
    // 2 up and 1 down quark in proton (gp couplings)
@@ -265,9 +279,9 @@ Module[
    auto CTLu = npfU.at(8);
    auto CTRu = npfU.at(9);
    auto CTLd = npfD.at(8);
-   auto CTRd = npfD.at(8);
+   auto CTRd = npfD.at(9);
    auto CTLs = npfS.at(8);
-   auto CTRs = npfS.at(8);
+   auto CTRs = npfS.at(9);
 
    gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );
    gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );
@@ -302,9 +316,11 @@ Module[
    // normalize to capture
    const double capture_rate = get_capture_rate(nucleus);
 
-   Eigen::Array<std::complex<double>,11,1> res;
+   @return_type@ res;
 
    res << conversion_rate/capture_rate,
+          D_L,
+          D_R,
           npfU.at(0),
           npfU.at(1),
           npfU.at(2),
@@ -323,7 +339,8 @@ Module[
          CXXDiagrams`CXXNameOfField@SARAH`Photon<>"_form_factors",
       "@namespace_npf@"->FlexibleSUSY`FSModelName<>"_cxx_diagrams::npointfunctions::",
       "@class_U@"->`cxx`classU,
-      "@class_D@"->`cxx`classD
+      "@class_D@"->`cxx`classD,
+      "@return_type@"->CConversion`CreateCType@Observables`GetObservableType@obs
    }];
 
    {
