@@ -27,7 +27,7 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma,
+                  EDM, BrLToLGamma, bsgamma,
                   LToLConversion };
 End[];
 
@@ -108,10 +108,8 @@ GetObservableName[FlexibleSUSYObservable`EDM[p_[idx_]]] := GetObservableName[Fle
 GetObservableName[FlexibleSUSYObservable`EDM[p_]]       := "edm_" <> CConversion`ToValidCSymbolString[p];
 GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_[_] -> {pOut_[_], spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
 GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
-GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_in_" <> ToString@nucleus;
 
-GetObservableName@FlexibleSUSYObservable`LToLConversion@
-`args`LToLConversion :=
+GetObservableName@FlexibleSUSYObservable`LToLConversion@`args`LToLConversion :=
    StringJoin[#@lIn,#@gIn,"_to_",#@lOut,#@gOut,"_conversion_in_",#@nucleus,
       "_for_",#@contribution]&@
    CConversion`ToValidCSymbolString;
@@ -136,14 +134,6 @@ GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOu
    "BR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
       CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> " " <>
        CConversion`ToValidCSymbolString[V] <> ")"  ;
-GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nuc_]] :=
-   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> " -> " <>
-      CConversion`ToValidCSymbolString[pOut] <> ", " <>
-      ToString[nuc] <> ")/capture rate";
-GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nuc_]] :=
-   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
-   CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> ", " <>
-      ToString[nuc] <> ")/capture rate";
 
 GetObservableDescription@FlexibleSUSYObservable`LToLConversion@
 `args`LToLConversion :=
@@ -159,10 +149,8 @@ GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := CConve
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`EDM[p_]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] := CConversion`ScalarType[CConversion`realScalarCType];
-GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], _]] := CConversion`ScalarType[CConversion`realScalarCType];
 
-GetObservableType@FlexibleSUSYObservable`LToLConversion@
-`args`LToLConversion :=
+GetObservableType@FlexibleSUSYObservable`LToLConversion@`args`LToLConversion :=
    CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
@@ -466,27 +454,8 @@ CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[id
            FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> specStr <> "(" <> idxInStr <> ", " <> idxOutStr <> ", MODEL, qedqcd, physical_input);"
           ];
 
-CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
-    nuc = CConversion`ToValidCSymbolString[nucleai]},
-           structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
-           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
-          ];
-
-CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn],
-            pOutStr = CConversion`ToValidCSymbolString[pOut],
-            idxInStr = ToString[idxIn],
-            idxOutStr = ToString[idxOut],
-            nucleiStr = ToString[nucleus]
-    },
-           structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ", " <> "qedqcd) = " <>
-           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(" <> idxInStr <> ", " <> idxOutStr <> ", "<> FlexibleSUSY`FSModelName <> "_f_to_f_conversion::Nucleus::" <> nucleiStr <> ", MODEL, qedqcd);"
-          ];
-
 CalculateObservable[
-   FlexibleSUSYObservable`LToLConversion@
-   `args`LToLConversion,
+   FlexibleSUSYObservable`LToLConversion@`args`LToLConversion,
    structName:_String
 ] :=
    StringJoin[structName,".",

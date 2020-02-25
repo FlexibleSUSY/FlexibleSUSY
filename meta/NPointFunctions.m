@@ -116,8 +116,7 @@ LorentzIndex::usage=
 "Represent a Lorentz index of a generic field.";
 
 (*functions*)
-{NPointFunction,VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions,
-CreateCXXFToFConversionInNucleus};
+{NPointFunction,VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions};
 
 SetAttributes[
    {
@@ -389,122 +388,6 @@ Module[{result},
 ];
 applySubexpressions // Utils`MakeUnknownInputDefinition;
 applySubexpressions ~ SetAttributes ~ {Locked,Protected};
-
-CreateCXXFToFConversionInNucleus::usage=
-"@todo";
-CreateCXXFToFConversionInNucleus::errFermion=
-"Input should be
-<fermion> -> <fermion> or { { <fermion> -> <fermion> }.. }
-and not
-`1`";
-CreateCXXFToFConversionInNucleus[{{}}] := {{},"",""};
-CreateCXXFToFConversionInNucleus[arg:{{_->_}..}] :=
-Module[
-   {
-      data = CreateCXXFToFConversionInNucleus@@#&/@arg,
-      vertices,header,code
-   },
-   vertices = DeleteDuplicates[Join@@(data[[All,1]])];
-   header = data[[1,2]];
-   code = StringRiffle[data[[All,3]],"\n\n"];
-   {vertices,header,code}
-];
-CreateCXXFToFConversionInNucleus[inF_->outF_] :=
-Module[
-   {
-      nameForUpQuarkClass = "zpinguins_u"<>ToString@inF<>ToString@outF<>"_1loop",
-      nameForUpDownClass  = "zpinguins_d"<>ToString@inF<>ToString@outF<>"_1loop",
-      header,
-      fiG, foG, uiG, uoG, (* particle | incoming/outgoing | with generation *)
-      regulator,
-      inner = SARAH`sum[i_,1,4,SARAH`g[i_,i_]*SARAH`Mom[#1,i_]*SARAH`Mom[#2,i_]]&,
-      uQ=SARAH`UpQuark,uNPF,
-      dQ=SARAH`DownQuark, dNPF,
-      dimension6Template,
-      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
-      sp,
-      codeU,codeD,
-      dressedU,dressedD,assumptionReplacements
-   },
-   header=CreateCXXHeaders[];
-   sp[particle_,num_] := SARAH`DiracSpinor[#,p@num,m@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
-
-   Print["Analytical calculation for ",inF,"->",outF," started ..."];
-   uNPF = NPointFunction[{inF,uQ},{outF,uQ},
-      OnShellFlag -> True,
-      UseCache -> False,
-      ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses ->
-   {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
-   dNPF = NPointFunction[{inF,dQ},{outF,dQ},
-      OnShellFlag -> True,
-      UseCache -> False,
-      ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses ->
-   {FourFermionMassiveVectorPenguins,FourFermionScalarPenguins,FourFermionFlavourChangingBoxes}];
-
-   { fiG, uiG, foG, uoG } = Flatten@getProcess@uNPF;
-   { fiG, diG, foG, doG } = Flatten@getProcess@dNPF;
-   regulator = m@fiG^2;
-   assumptionReplacements =
-      {
-         inner[fiG,foG] :> m@fiG^2,
-         inner[uiG,fiG] :> m@fiG*Sqrt[m@uiG^2+regulator],
-         inner[uoG,fiG] :> inner[uiG,fiG],
-         inner[uoG,foG] :> m@fiG^2/2+inner[uiG,fiG],
-         inner[diG,fiG] :> m@fiG*Sqrt[m@diG^2+regulator],
-         inner[doG,fiG] :> inner[diG,fiG],
-         inner[doG,foG] :> m@fiG^2/2+inner[diG,fiG]
-      };
-   {uNPF,dNPF} = {uNPF,dNPF} //. assumptionReplacements;
-
-   Print["Analytical calculation for ",inF,"->",outF," done."];
-   dimension6Template[i_,o_,q_] :=
-      {
-         (*@note 6 means PR, 7 means PL.*)
-         ("S_LL_via_"<>ToString@q) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
-         ("S_LR_via_"<>ToString@q) -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
-         ("S_RL_via_"<>ToString@q) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
-         ("S_RR_via_"<>ToString@q) -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
-         (*@note Q: why names of coeffients are not correct? A: they are
-          *correct, one just need to commute projectors with Dirac matrices,
-          *what changes 6 to 7 or 7 to 6.*)
-         ("V_LL_via_"<>ToString@q) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-         ("V_LR_via_"<>ToString@q) -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-         ("V_RL_via_"<>ToString@q) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-         ("V_RR_via_"<>ToString@q) -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours
-          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
-          *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
-          *for FC because it cites [Ni05] for Fierz identities, where our
-          *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
-         ("minus_T_LL_via_"<>ToString@q) -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
-         ("minus_T_RR_via_"<>ToString@q) -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
-      };
-   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,uQ];
-   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[inF,outF,dQ];
-
-   Print["C++ code calculation for ",inF,"->",outF," started ..."];
-   codeU = CreateCXXFunctions[uNPF,
-      nameForUpQuarkClass,
-      SARAH`Delta,
-      dimension6Template[inF,outF,uQ] ][[2]];
-   codeD = CreateCXXFunctions[dNPF,
-      nameForUpDownClass,
-      SARAH`Delta,
-      dimension6Template[inF,outF,dQ] ][[2]];
-   Print["C++ code calculation for ",inF,"->",outF," done."];
-   {
-      DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
-      header,
-      codeU<>"\n\n"<>codeD
-   }
-] /; Utils`AssertOrQuit[
-   TrueQ@@And/@TreeMasses`IsFermion@{inF,outF},
-   CreateCXXFToFConversionInNucleus::errFermion,
-   inF->outF];
-CreateCXXFToFConversionInNucleus // Utils`MakeUnknownInputDefinition;
-CreateCXXFToFConversionInNucleus ~ SetAttributes ~ {Locked,Protected};
 
 Options[NPointFunction]={
    LoopLevel -> 1,

@@ -75,7 +75,6 @@ META_SRC     := \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-		$(DIR)/FToFConversionInNucleus.m \
       $(DIR)/LToLConversion.m \
 		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \

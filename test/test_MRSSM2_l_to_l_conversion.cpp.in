@@ -64,7 +64,7 @@ namespace npointfunctions
 } // namespace npointfunctions
 } // namespace MRSSM2_cxx_diagrams
 
-namespace MRSSM2_f_to_f_conversion {
+namespace MRSSM2_l_to_l_conversion {
 
 template <class FOutBar, class FIn, class VBar>
 std::complex<double> vectorCurrent(const MRSSM2_mass_eigenstates& model) {
@@ -126,13 +126,13 @@ std::array<std::complex<double>, 8> calculate_Fe_to_Fe_in_nucleus (int generatio
    return {VZ_penguin[0],      VZ_penguin[2],      VZ_penguin[1],      VZ_penguin[3],
            -sqrt(2.0)/GF*CVLu, -sqrt(2.0)/GF*CVLd, -sqrt(2.0)/GF*CVRu, -sqrt(2.0)/GF*CVRd};
 }
-} // namespace MRSSM2_f_to_f_conversion
+} // namespace MRSSM2_l_to_l_conversion
 } // namespace flexiblesusy
 
 // test part==========================================================
 BOOST_AUTO_TEST_SUITE(conversion_suite,
 	* boost::unit_test::tolerance(1.2e-5) )
-BOOST_AUTO_TEST_CASE( test_MRSSM2_f_to_f_conversion )
+BOOST_AUTO_TEST_CASE( test_MRSSM2_l_to_l_conversion )
 {
    typedef Eigen::DiagonalMatrix<double, 3> DiagonalMatrix3;
    MRSSM2_input_parameters input;
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( test_MRSSM2_f_to_f_conversion )
    Loop_library::set(1);
    MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
 
-   auto point = MRSSM2_f_to_f_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
+   auto point = MRSSM2_l_to_l_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
 
    TEST_COMPLEX_EQUALITY( point.at(0), point.at(4) );
    TEST_COMPLEX_EQUALITY( point.at(1), point.at(5) );
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( test_MRSSM2_f_to_f_conversion )
    input.ml2Input = DiagonalMatrix3(Sqr( 500), Sqr( 500), Sqr( 500));
    input.me2Input = (Eigen::Matrix3d() << Sqr( 500), 20, 0, 20, Sqr( 500), 0, 0, 0, Sqr( 500)).finished();
    m = setup_MRSSM2(input, qedqcd);
-   point = MRSSM2_f_to_f_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
+   point = MRSSM2_l_to_l_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
 
    TEST_COMPLEX_EQUALITY( point.at(2), point.at(6) );
    TEST_COMPLEX_EQUALITY( point.at(3), point.at(7) );

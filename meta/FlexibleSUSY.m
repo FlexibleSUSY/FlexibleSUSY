@@ -52,7 +52,6 @@ BeginPackage["FlexibleSUSY`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
-              "FToFConversionInNucleus`",
               "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
@@ -2173,54 +2172,6 @@ WriteBToSGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]}];
    ];
 
-(* Write c++ files for the F -> F conversion in nucleus *)
-(* leptonPairs is a list of lists, sth like {{Fe -> Fe, Au}, {Fe ->  Fe, Al}} etc *)
-WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
-   Module[{interfacePrototypes = "", interfaceDefinitions = "",
-      massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
-      vertices = {},processesUnderInterest,npfVertices = {},npfHeaders = "",npfCode = ""
-      },
-
-      If[leptonPairs =!= {},
-
-         (* additional vertices needed for the calculation *)
-         (* coupling of vector bosons to quarks *)
-         massiveNeutralVectorBosons = Select[GetVectorBosons[],
-            !(TreeMasses`IsMassless[#] || TreeMasses`IsElectricallyCharged[#])&
-         ];
-         (* @todo: should we include gluons or not? *)
-         masslessNeutralVectorBosons = Select[GetVectorBosons[],
-            (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])&
-         ];
-         (* drop nucleon, convert rule to list (so {Fe -> Fe, Au} into {Fe,Fe} *)
-         externalFermions = DeleteDuplicates@Flatten[
-            {TreeMasses`GetSMQuarks[], Drop[leptonPairs, None, -1] /. Rule[a_, b_] :> Sequence[a, b]}
-         ];
-         vertices = Flatten /@ Tuples[
-            {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
-            Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}
-         ];
-         processesUnderInterest = DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]];
-         {npfVertices,npfHeaders,npfCode} = NPointFunctions`CreateCXXFToFConversionInNucleus@processesUnderInterest;
-         {interfacePrototypes, interfaceDefinitions} =
-              StringJoin @@@
-            (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
-               processesUnderInterest
-            ] );
-      ];
-
-      WriteOut`ReplaceInFiles[files,
-         {
-            "@npf_headers@" -> npfHeaders,
-            "@npf_definitions@" -> npfCode,
-            "@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
-            "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
-            Sequence @@ GeneralReplacementRules[]}
-      ];
-
-      DeleteDuplicates@Join[vertices,npfVertices]
-   ];
-
 WriteLToLConversionClass[
    extraSLHAOutputBlocks:_List,
    files:{{_?FileExistsQ,_String}..}
@@ -3655,9 +3606,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, edmFields,
             QToQGammaFields = {},
-            LToLGammaFields = {}, FToFConversionFields = {},
+            LToLGammaFields = {},
             LToLConversion = {}, FFMasslessVVertices = {},
-            conversionVertices = {},
+
             LToLConversionVertices = {}, LToLConversionFields = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
@@ -4482,22 +4433,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
            (* OBSERVABLE: l -> l conversion *)
-
-           Print["Creating FToFConversionInNucleus class ..."];
-           FToFConversionFields =
-              DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
-                FlexibleSUSYObservable`FToFConversionInNucleus[
-                   pIn_[_Integer] -> pOut_[_Integer], nucleus_
-                ] :> {pIn -> pOut, nucleus}
-              ];
-
-           conversionVertices =
-              WriteFToFConversionInNucleusClass[FToFConversionFields,
-                           {{FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.hpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
-                            {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
-
          {LToLConversionFields, LToLConversionVertices} =
             WriteLToLConversionClass[extraSLHAOutputBlocks,
                   {
@@ -4528,11 +4463,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
-                     If[FToFConversionFields === {},
-                        {},
-                        (#[[1, 1]] -> {#[[1, 2]], TreeMasses`GetPhoton[]})& /@ Transpose[Drop[Transpose[FToFConversionFields],-1]]
-                     ],
-
                      If[LToLConversionFields === {},
                         {},
                         (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ LToLConversionFields
@@ -4572,7 +4502,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, conversionVertices, LToLConversionVertices],
+              Join[edmVertices, FFMasslessVVertices, LToLConversionVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

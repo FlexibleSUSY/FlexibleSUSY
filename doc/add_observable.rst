@@ -71,7 +71,7 @@ Open file ``meta/FlexibleSUSY.m``
    file to be created later ``meta/<NewMetaFile>.m``.
 
 2) Create somewhere (close to analogous definitions) a new function
-   ``Write<NewObservable>Class>``, which should (usual input give in the next item):
+   ``Write<NewObservable>Class``, which should (usual input give in the next item):
 
 * convert (modified somehow)
   ``Observables`GetRequestedObservables[extraSLHAOutputBlocks]``
@@ -97,15 +97,9 @@ Open file ``meta/FlexibleSUSY.m``
         Write<NewObservable>Class[
            <main input>,
            {
-              {
-                 FileNameJoin@{$flexiblesusyTemplateDir, #<>".hpp.in"},
-                 FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".hpp"}
-              },
-              {
-                 FileNameJoin@{$flexiblesusyTemplateDir, #<>".cpp.in"},
-                 FileNameJoin@{FSOutputDir, FlexibleSUSY`FSModelName<>"_"<>#<>".cpp"}
-              }
-           } & ["<new_observable>"]
+              FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
+              FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
+           } &/@ ("<new_observable>"<># &/@ {".hpp", ".cpp"})
      ];
 
    to the place where other classes are created.
@@ -133,21 +127,19 @@ Type of observable is not supported
 
 In file ``src/shla_io.hpp`` there are several ``#define FORMAT_<SOMETHING>``
 macros. One can extend them to include some new formatting for not yet
-included types. Or, what is a little bit better, one can use them as building
-blocks to construct some additional, more complex and flexible output.
-
+included types.
 
 
 C++ part
 ````````
 
-Open file ``templates/observables.cpp``
+Open file ``templates/observables.cpp.in``
 
 1) Add include preprocessor command for header of your observable::
 
      #include "@ModelName@_<new_observable>.hpp"
 
-2) Add define preprocessor command in the form::
+2) Add define preprocessor command in the form (if you decided before to use it)::
 
      #define  <NameOfObservable><0,1>(<arguments>) <name_of_observable>
 

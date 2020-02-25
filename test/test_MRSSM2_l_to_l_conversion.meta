@@ -65,7 +65,7 @@ WriteString[OutputStream["stdout",1],"Calculation of interface started ..."];
    StringJoin/@Transpose[FFMassiveVFormFactors`FFMassiveVFormFactorsCreateInterface@@@insertionsAndVertices];
 Print[" done"];
 
-(*WriteFToFConversionInNucleusClass********************************************)
+(*WriteLToLConversionClass********************************************)
 leptonPairs = {{Fe -> Fe, Au}};
 
 massiveNeutralVectorBosons =
@@ -209,7 +209,7 @@ WriteOut`ReplaceInFiles[
 ];
 
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
-   FileNameJoin@{workingDirectory, "test", "test_MRSSM2_f_to_f_conversion.cpp.in"}],
+   FileNameJoin@{workingDirectory, "test", "test_MRSSM2_l_to_l_conversion.cpp.in"}],
    "\n"];
 code = StringReplace[templateCode,
    {
@@ -220,11 +220,11 @@ code = StringReplace[templateCode,
    }
 ];
 
-fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MRSSM2_f_to_f_conversion.cpp"};
+fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MRSSM2_l_to_l_conversion.cpp"};
 fileHandle ~ WriteString ~ code;
 Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[
-   "\033[1;36m>>test>>\033[1;0m test_MRSSM2_f_to_f_conversion.meta \033[1;32mdone\033[1;0m in ",
+   "\033[1;36m>>test>>\033[1;0m test_MRSSM2_l_to_l_conversion.meta \033[1;32mdone\033[1;0m in ",
    ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}],
    " seconds.\n"
 ];

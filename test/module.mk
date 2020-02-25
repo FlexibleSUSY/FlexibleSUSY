@@ -208,8 +208,7 @@ ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
-		$(DIR)/test_MRSSM2_l_to_lgamma.cpp \
-		$(DIR)/test_MRSSM2_l_to_l_conversion.cpp
+		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
 
 ifeq ($(WITH_MRSSM2CKM),yes)
@@ -845,9 +844,9 @@ endif
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_MRSSM2),yes)
 
-$(DIR)/test_MRSSM2_f_to_f_conversion.o $(DIR)/test_MRSSM2_f_to_f_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
-$(DIR)/test_MRSSM2_f_to_f_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-$(DIR)/test_MRSSM2_f_to_f_conversion.cpp : $(DIR)/test_MRSSM2_f_to_f_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_f_to_f_conversion.cpp.in $(META_SRC)
+$(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
+$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
 	@$(MSG)
 	@$(TEST_MSG)
 	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
@@ -899,8 +898,6 @@ $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
-
-$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
 

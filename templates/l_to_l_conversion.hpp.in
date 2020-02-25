@@ -23,8 +23,8 @@
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_FToFConversionWilson_H
-#define @ModelName@_FToFConversionWilson_H
+#ifndef @ModelName@_LToLConversion_H
+#define @ModelName@_LToLConversion_H
 
 #include "lowe.h"
 
