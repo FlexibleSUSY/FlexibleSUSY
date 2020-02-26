@@ -527,18 +527,19 @@ Block AEIN
    output result_new_3  = edc_output(slha_input_case3);
    output result_new_4  = edc_output(slha_input_case4);
 
-   output results_old_1 = {0, 0.125340829, 0.,0.,0.,0.,0. };
-   output results_old_2 = {0, 0.125340796, 0.,0.,0.,0.,0. };
-   output results_old_3 = {0, 0.125624141, 0.,0.,0.,0.,0. };
-   output results_old_4 = {0, 0.125624192, 0.,0.,0.,0.,0. };
+   output results_old_1 = {0, 0.125588145, 0.,0.,0.,0.,0. };
+   output results_old_2 = {0, 0.125588071, 0.,0.,0.,0.,0. };
+   output results_old_3 = {0, 0.12558815, 0.,0.,0.,0.,0. };
+   output results_old_4 = {0, 0.125588152, 0.,0.,0.,0.,0. };
 /*
+ * Qmatch=0
    output results_old_1 = {129.019823, 0.125340829, 0.121932257, 0.121935242, 0.122110845, 0.122110863, 0.122059975};
    output results_old_2 = {132.647365, 0.125340796, 0.143703012, 0.144140416, 0.143737263, 0.144171089, 0.142943794};
    output results_old_3 = {128.314932, 0.125624141, 0.122221521, 0.121928918, 0.122570423, 0.122274835, 0.124337878};
    output results_old_4 = {130.666679, 0.125624192, 0.135972316, 0.136131174, 0.136145401, 0.136300573, 0.133688185};
 
 
-OLD:
+OLD: Qmatch=40000
    output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.125883692, 0.125924345, 0.126036364, 0.125789353};
    output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147787693, 0.148054003, 0.14813505, 0.146692272};
    output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.121333083, 0.122014035, 0.121686888, 0.123785999};
@@ -546,9 +547,9 @@ OLD:
 */
 
    for(int i=0; i<7; i++){
-      BOOST_CHECK_CLOSE_FRACTION(result_new_1[i], results_old_1[i], 4e-5);
-      BOOST_CHECK_CLOSE_FRACTION(result_new_2[i], results_old_2[i], 4e-6);
-      BOOST_CHECK_CLOSE_FRACTION(result_new_3[i], results_old_3[i], 1e-6);
-      BOOST_CHECK_CLOSE_FRACTION(result_new_4[i], results_old_4[i], 1e-6);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_1[i], results_old_1[i], 4e-7);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_2[i], results_old_2[i], 4e-7);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_3[i], results_old_3[i], 4e-7);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_4[i], results_old_4[i], 4e-7);
    }
 }
