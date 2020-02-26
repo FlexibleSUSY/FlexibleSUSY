@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MUHMSSM_top_down_EFTHiggs
+#define BOOST_TEST_MODULE test_NUHMSSM_top_down_EFTHiggs
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
@@ -67,7 +67,7 @@ double calc_Mh(
 
 output edc_output( char const* const slha_input)
 {
-   output results;
+   output results = {0.,0.,0.,0.,0.,0.,0.};
 
    std::stringstream istream_case_1(slha_input);
    NUHMSSMNoFVHimalayaEFTHiggs_slha_io slha_io;
@@ -90,7 +90,7 @@ output edc_output( char const* const slha_input)
 
    results[1]=calc_lambda(input, qedqcd, settings);
 
-   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
+/*   settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, 1);
    results[0]=calc_Mh(input, qedqcd, settings);
    results[2]=calc_lambda(input, qedqcd, settings);
 
@@ -117,7 +117,7 @@ output edc_output( char const* const slha_input)
    settings.set(Spectrum_generator_settings::ewsb_loop_order, 3);
    settings.set(Spectrum_generator_settings::beta_loop_order, 4);
    results[6]=calc_lambda(input, qedqcd, settings);
-
+*/
    return results;
 }
 
@@ -162,15 +162,15 @@ Block FlexibleSUSY
    29   0                    # Higgs 3-loop corrections O(alpha_t^3)
    30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
 Block SMINPUTS               # Standard Model inputs
-    1   1.279440000e+02      # alpha^(-1) SM MSbar(MZ)
-    2   1.166370000e-05      # G_Fermi
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
     3   1.184000000e-01      # alpha_s(MZ) SM MSbar
     4   9.118760000e+01      # MZ(pole)
     5   4.180000000e+00      # mb(mb) SM MSbar
     6   1.733400000e+02      # mtop(pole)
-    7   1.777000000e+00      # mtau(pole)
+    7   1.776990000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
-    9   80.404               # MW pole
+    9   80.385               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
    13   1.056583570e-01      # mmuon(pole)
@@ -258,15 +258,15 @@ Block FlexibleSUSY
    29   0                    # Higgs 3-loop corrections O(alpha_t^3)
    30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
 Block SMINPUTS               # Standard Model inputs
-    1   1.279440000e+02      # alpha^(-1) SM MSbar(MZ)
-    2   1.166370000e-05      # G_Fermi
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
     3   1.184000000e-01      # alpha_s(MZ) SM MSbar
     4   9.118760000e+01      # MZ(pole)
     5   4.180000000e+00      # mb(mb) SM MSbar
     6   1.733400000e+02      # mtop(pole)
-    7   1.777000000e+00      # mtau(pole)
+    7   1.776990000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
-    9   80.404               # MW pole
+    9   80.385               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
    13   1.056583570e-01      # mmuon(pole)
@@ -358,15 +358,15 @@ Block FlexibleSUSY
    29   0                    # Higgs 3-loop corrections O(alpha_t^3)
    30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
 Block SMINPUTS               # Standard Model inputs
-    1   1.279440000e+02      # alpha^(-1) SM MSbar(MZ)
-    2   1.166370000e-05      # G_Fermi
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
     3   1.184000000e-01      # alpha_s(MZ) SM MSbar
     4   9.118760000e+01      # MZ(pole)
     5   4.180000000e+00      # mb(mb) SM MSbar
     6   1.733400000e+02      # mtop(pole)
-    7   1.777000000e+00      # mtau(pole)
+    7   1.776990000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
-    9   80.404               # MW pole
+    9   80.385               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
    13   1.056583570e-01      # mmuon(pole)
@@ -457,15 +457,15 @@ Block FlexibleSUSY
    29   0                    # Higgs 3-loop corrections O(alpha_t^3)
    30   0                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
 Block SMINPUTS               # Standard Model inputs
-    1   1.279440000e+02      # alpha^(-1) SM MSbar(MZ)
-    2   1.166370000e-05      # G_Fermi
+    1   1.279160000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
     3   1.184000000e-01      # alpha_s(MZ) SM MSbar
     4   9.118760000e+01      # MZ(pole)
     5   4.180000000e+00      # mb(mb) SM MSbar
     6   1.733400000e+02      # mtop(pole)
-    7   1.777000000e+00      # mtau(pole)
+    7   1.776990000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
-    9   80.404               # MW pole
+    9   80.385               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
    13   1.056583570e-01      # mmuon(pole)
@@ -522,19 +522,32 @@ Block AEIN
    }
 */
 
-   output result_new_1  = edc_output(slha_input_case1);
+   output result_new_1 = edc_output(slha_input_case1);
    output result_new_2  = edc_output(slha_input_case2);
    output result_new_3  = edc_output(slha_input_case3);
    output result_new_4  = edc_output(slha_input_case4);
 
+   output results_old_1 = {0, 0.125340829, 0.,0.,0.,0.,0. };
+   output results_old_2 = {0, 0.125340796, 0.,0.,0.,0.,0. };
+   output results_old_3 = {0, 0.125624141, 0.,0.,0.,0.,0. };
+   output results_old_4 = {0, 0.125624192, 0.,0.,0.,0.,0. };
+/*
+   output results_old_1 = {129.019823, 0.125340829, 0.121932257, 0.121935242, 0.122110845, 0.122110863, 0.122059975};
+   output results_old_2 = {132.647365, 0.125340796, 0.143703012, 0.144140416, 0.143737263, 0.144171089, 0.142943794};
+   output results_old_3 = {128.314932, 0.125624141, 0.122221521, 0.121928918, 0.122570423, 0.122274835, 0.124337878};
+   output results_old_4 = {130.666679, 0.125624192, 0.135972316, 0.136131174, 0.136145401, 0.136300573, 0.133688185};
+
+
+OLD:
    output results_old_1 = {129.024202, 0.125588145, 0.125768663, 0.125883692, 0.125924345, 0.126036364, 0.125789353};
    output results_old_2 = {132.709997, 0.125588071, 0.147703015, 0.147787693, 0.148054003, 0.14813505, 0.146692272};
    output results_old_3 = {128.315047, 0.12558815, 0.121657248, 0.121333083, 0.122014035, 0.121686888, 0.123785999};
    output results_old_4 = {130.665551, 0.125588152, 0.135417609, 0.135614437, 0.135527252, 0.1357204, 0.133147169};
+*/
 
    for(int i=0; i<7; i++){
-      BOOST_CHECK_CLOSE_FRACTION(result_new_1[i], results_old_1[i], 1e-6);
-      BOOST_CHECK_CLOSE_FRACTION(result_new_2[i], results_old_2[i], 1e-6);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_1[i], results_old_1[i], 4e-5);
+      BOOST_CHECK_CLOSE_FRACTION(result_new_2[i], results_old_2[i], 4e-6);
       BOOST_CHECK_CLOSE_FRACTION(result_new_3[i], results_old_3[i], 1e-6);
       BOOST_CHECK_CLOSE_FRACTION(result_new_4[i], results_old_4[i], 1e-6);
    }
