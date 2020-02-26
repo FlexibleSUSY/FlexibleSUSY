@@ -842,10 +842,11 @@ CreateDecaysCalculationFunction[decaysList_] :=
            runToScale =
               "auto decay_mass = PHYSICAL(" <>
                  CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
-                 "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
-                 "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
-                 "model.solve_ewsb();\n" <>
-                    "}\n";
+                 "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
+                 TextFormatting`IndentText[
+                    "model.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n" <>
+                    "model.solve_ewsb();\n"
+                 ] <> "}\n";
 
            body = StringJoin[CallPartialWidthCalculation /@ decayChannels];
            body = "\nauto& decays = decay_table.get_" <> CConversion`ToValidCSymbolString[particle] <>
@@ -867,7 +868,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
                           CConversion`ToValidCSymbolString[TreeMasses`GetMass[particle]] <> ");\n" <>
-                       "if(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
+                       "if (decay_mass" <> If[particleDim > 1, "(gI1)", ""] <> " > qedqcd.displayPoleMZ()) {\n" <>
                        TextFormatting`IndentText[
                           "sm.run_to(decay_mass" <> If[particleDim > 1, "(gI1)", ""] <>  ");\n"
                        ] <> "}\n"
