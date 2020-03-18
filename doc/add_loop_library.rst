@@ -13,7 +13,7 @@ Main steps and definitions
 
 All procedure can be divided into the following set:
 
-* Create c++ code of the library
+* Create C++ code of the library
 * Make ``./configure`` automatically work with new library
 * Modify documentation
 
@@ -24,16 +24,16 @@ The following abbreviations are used:
 ``flexiblesusy::looplibrary::<Newlibrary>``.
 First letter is capital, all others are small.
 
-``<NEWLIBRARY>`` - name of loop library used for c++ preprocessor commands and
+``<NEWLIBRARY>`` - name of loop library used for C++ preprocessor commands and
 ``configure`` script. All letters are capital.
 
 ``<newlibrary>`` - name of loop library used for user input for ``configure``
-script and for part of c++ code names.
+script and for part of C++ code names.
 All letters are small.
 
 ``<N>`` - ``int`` number for a new loop library. Should be unique.
 
-Create c++ code of the library
+Create C++ code of the library
 ``````````````````````````````
 
 We need let ``FlexibleSUSY`` to know that there is a new library. Information
@@ -76,7 +76,7 @@ later in this manual to include this information.
 Make configure routines
 ```````````````````````
 
-In the previous step we created a main c++ code for a new library. Now we need
+In the previous step we created a main C++ code for a new library. Now we need
 let ``FlexibleSUSY`` to know how to be compiled with this library.
 
 * In file ``src/module.mk`` add after analogous definitions for other loop libraries
