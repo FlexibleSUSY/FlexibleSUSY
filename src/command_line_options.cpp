@@ -53,8 +53,6 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
       const std::string option(args[i]);
       if (starts_with(option,"--slha-input-file=")) {
          slha_input_file = option.substr(18);
-         if (slha_input_file.empty())
-            WARNING("no SLHA input file name given");
       } else if (starts_with(option,"--slha-output-file=")) {
          slha_output_file = option.substr(19);
       } else if (starts_with(option,"--spectrum-output-file=")) {

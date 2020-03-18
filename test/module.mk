@@ -135,7 +135,6 @@ TEST_SRC += \
 		$(DIR)/test_loopfunctions.cpp \
 		$(DIR)/test_sfermions.cpp \
 		$(DIR)/test_CMSSM_beta_function_benchmark.cpp \
-		$(DIR)/test_CMSSM_database.cpp \
 		$(DIR)/test_CMSSM_high_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_higgs_iteration.cpp \
 		$(DIR)/test_CMSSM_initial_guesser.cpp \
@@ -200,7 +199,6 @@ endif
 
 ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCKM_b_to_s_gamma.cpp \
 		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
 endif
 
@@ -884,8 +882,6 @@ $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
-
-$(DIR)/test_CMSSMCKM_b_to_s_gamma.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
 

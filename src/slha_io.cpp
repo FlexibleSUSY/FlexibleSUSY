@@ -84,13 +84,6 @@ bool SLHA_io::block_exists(const std::string& block_name) const
    return data.find(block_name) != data.cend();
 }
 
-std::string SLHA_io::to_lower(const std::string& str)
-{
-   std::string lower(str.size(), ' ');
-   std::transform(str.begin(), str.end(), lower.begin(), ::tolower);
-   return lower;
-}
-
 /**
  * @brief reads from source
  *
@@ -227,11 +220,11 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
+         if (line.is_block_def()) {
             // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
+            if (line.size() > 3 && line[2] == "Q=") {
                scale = convert_to<double>(line[3]);
+            }
             continue;
          }
 
@@ -264,11 +257,11 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
+         if (line.is_block_def()) {
             // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
+            if (line.size() > 3 && line[2] == "Q=") {
                scale = convert_to<double>(line[3]);
+            }
             continue;
          }
 
@@ -322,17 +315,16 @@ double SLHA_io::read_scale(const std::string& block_name) const
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=") {
-               scale = convert_to<double>(line[3]);
-            }
+         // read scale from block definition
+         if (line.is_block_def() &&
+             line.size() > 3 &&
+             line[2] == "Q=") {
+            scale = convert_to<double>(line[3]);
          }
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -340,18 +332,21 @@ double SLHA_io::read_scale(const std::string& block_name) const
 
 void SLHA_io::set_block(const std::ostringstream& lines, Position position)
 {
-   SLHAea::Block block;
-   block.str(lines.str());
-   data.erase(block.name());
-   if (position == front)
-      data.push_front(block);
-   else
-      data.push_back(block);
+   set_block(lines.str(), position);
 }
 
 void SLHA_io::set_block(const std::string& lines, Position position)
 {
-   set_block(std::ostringstream(lines), position);
+   SLHAea::Block block;
+   block.str(lines);
+
+   data.erase(block.name());
+
+   if (position == front) {
+      data.push_front(block);
+   } else {
+      data.push_back(block);
+   }
 }
 
 void SLHA_io::set_blocks(const std::vector<std::string>& blocks, Position position)
