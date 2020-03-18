@@ -74,14 +74,23 @@ void Loop_library::set(int new_type) {
                   Loop_library::type_ = Loop_library::Library::Fflite;
                   break;
          #endif // ENABLE_FFLITE
-         default: throw std::invalid_argument("Currently configured values are 0 (=Softsusy)" COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO".");
+         default: throw std::invalid_argument(
+                     "Currently configured values are 0 (=Softsusy)"
+                     COLLIER_INFO
+                     LOOPTOOLS_INFO
+                     FFLITE_INFO
+                     ".");
                   break;
       }
    }
 }
 
 looplibrary::Loop_library_interface& Loop_library::get() {
-   if(Loop_library::type_ == Loop_library::Library::Undefined) throw std::logic_error("Loop library should be initialized before first usage.");
+   if(Loop_library::type_ == Loop_library::Library::Undefined) {
+      throw std::logic_error(
+         "Loop library should be initialized before first usage."
+      );
+   }
    return *Loop_library::lib_;
 }
 
