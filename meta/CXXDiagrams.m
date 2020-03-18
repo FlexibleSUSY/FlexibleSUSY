@@ -275,7 +275,7 @@ LorentzIndexOfField[field_]:=
 ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
 	Module[{colorIndices = Select[Vertices`FieldIndexList[field], Vertices`SarahColorIndexQ]},
 		Utils`AssertWithMessage[Length[colorIndices] === 1,
-			"ColorMathInterface`ColourIndexOfField[]: Argument " <>
+			"CXXDiagrams`ColourIndexOfField[]: Argument " <>
 			ToString[field] <> " does not have exactly one color index."];
     colorIndices[[1]]
   ]
