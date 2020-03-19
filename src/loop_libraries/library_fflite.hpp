@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_FFLITE
-#define LOOP_LIBRARY_FFLITE
+#ifndef LOOP_LIBRARY_FFLITE_H
+#define LOOP_LIBRARY_FFLITE_H
 
 #include "loop_library_interface.hpp"
 
@@ -40,4 +40,4 @@ class Fflite : public Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_FFLITE
+#endif // LOOP_LIBRARY_FFLITE_H

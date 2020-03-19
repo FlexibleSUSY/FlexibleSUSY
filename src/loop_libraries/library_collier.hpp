@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_COLLIER
-#define LOOP_LIBRARY_COLLIER
+#ifndef LOOP_LIBRARY_COLLIER_H
+#define LOOP_LIBRARY_COLLIER_H
 
 #include "loop_library_interface.hpp"
 
@@ -44,4 +44,4 @@ class Collier : public Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_COLLIER
+#endif // LOOP_LIBRARY_COLLIER_H

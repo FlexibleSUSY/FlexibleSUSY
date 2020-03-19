@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_LOOPTOOLS
-#define LOOP_LIBRARY_LOOPTOOLS
+#ifndef LOOP_LIBRARY_LOOPTOOLS_H
+#define LOOP_LIBRARY_LOOPTOOLS_H
 
 #include "loop_library_interface.hpp"
 
@@ -43,4 +43,4 @@ class Looptools : public Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_LOOPTOOLS
+#endif // LOOP_LIBRARY_LOOPTOOLS_H

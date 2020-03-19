@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_SOFTSUSY
-#define LOOP_LIBRARY_SOFTSUSY
+#ifndef LOOP_LIBRARY_SOFTSUSY_H
+#define LOOP_LIBRARY_SOFTSUSY_H
 
 #include "loop_library_interface.hpp"
 
@@ -39,4 +39,4 @@ class Softsusy : public Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_SOFTSUSY
+#endif // LOOP_LIBRARY_SOFTSUSY_H

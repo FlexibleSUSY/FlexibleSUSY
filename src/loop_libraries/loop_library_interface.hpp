@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_INTERFACE
-#define LOOP_LIBRARY_INTERFACE
+#ifndef LOOP_LIBRARY_INTERFACE_H
+#define LOOP_LIBRARY_INTERFACE_H
 
 #include <complex>
 #include <boost/preprocessor/seq/for_each.hpp>
@@ -121,4 +121,4 @@ class Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_INTERFACE
+#endif // LOOP_LIBRARY_INTERFACE_H
