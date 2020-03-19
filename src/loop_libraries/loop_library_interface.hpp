@@ -91,7 +91,7 @@ namespace looplibrary
  * arrays of fixed length (passed by a reference), which equals to 1, 2, 7, 11.
  * They fill given array with values of Passarino-Vertman coefficients (inspect
  * table 3 of [CO]). After the first argument goes T_ARGS sequence, then scl2,
- * which is simply
+ * which is described by the following example:
  *
  * Example 2: C(c, C_ARGS, scl2) means C(c, p10, p21, p20, m02, m12, m22, scl2) with:
  *            c being array of std::complex<double> of fixed length 7 filled
