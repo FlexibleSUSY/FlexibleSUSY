@@ -507,6 +507,8 @@ endif
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_ewsb.cpp
+endif
+ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
 		$(DIR)/test_CMSSMCPV_librarylink.m
 endif
@@ -583,8 +585,11 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.cpp
 TEST_SH += \
-		$(DIR)/test_MSSMEFTHiggs_librarylink.sh \
 		$(DIR)/test_MSSMEFTHiggs_profile.sh
+endif
+ifeq ($(WITH_MSSMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
 endif
 
 ifeq ($(WITH_MSSMEFTHiggs) $(WITH_MSSMNoFVEFTHiggs),yes yes)
@@ -612,7 +617,7 @@ TEST_SH += \
 		$(DIR)/test_SplitMSSMEFTHiggs.sh
 endif
 
-ifeq ($(WITH_SM) $(WITH_SMEFTHiggs),yes yes)
+ifeq ($(WITH_SM) $(WITH_SMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes yes)
 TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
 endif
@@ -657,7 +662,10 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_3loop_beta.m
+endif
+ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_META += \
 		$(DIR)/test_CMSSM_librarylink.m \
 		$(DIR)/test_CMSSM_librarylink_parallel.m
 TEST_SH += \
