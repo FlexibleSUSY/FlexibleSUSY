@@ -622,7 +622,7 @@ TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
 endif
 
-ifeq ($(WITH_SM),yes)
+ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 endif
