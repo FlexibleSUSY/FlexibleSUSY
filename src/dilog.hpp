@@ -40,6 +40,9 @@ std::complex<long double> dilog(const std::complex<long double>&) DILOGATTR;
 /// Clausen function Cl_2(x)
 double clausen_2(double) DILOGATTR;
 
+/// Clausen function Cl_2(x)
+long double clausen_2(long double) DILOGATTR;
+
 } // namespace flexiblesusy
 
 #undef DILOGATTR

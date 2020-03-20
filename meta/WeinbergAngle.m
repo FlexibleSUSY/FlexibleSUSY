@@ -148,15 +148,15 @@ YukawaMatching[] :=
            If[!MuonDecayWorks,
               Return[""]];
            result = Parameters`CreateLocalConstRefs[prefactor] <> "\n";
-           result = result <> "sm.set_Yu(model->get_";
+           result = result <> "sm.set_Yu(Re(model->get_";
            result = result <> CConversion`ToValidCSymbolString[yukawa[[1]]] <> "()*";
-           result = result <> CConversion`RValueToCFormString[prefactor[[1]]/(Global`SMvev/Sqrt[2])] <> ");\n";
-           result = result <> "sm.set_Yd(model->get_";
+           result = result <> CConversion`RValueToCFormString[prefactor[[1]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Yd(Re(model->get_";
            result = result <> CConversion`ToValidCSymbolString[yukawa[[2]]] <> "()*";
-           result = result <> CConversion`RValueToCFormString[prefactor[[2]]/(Global`SMvev/Sqrt[2])] <> ");\n";
-           result = result <> "sm.set_Ye(model->get_";
+           result = result <> CConversion`RValueToCFormString[prefactor[[2]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Ye(Re(model->get_";
            result = result <> CConversion`ToValidCSymbolString[yukawa[[3]]] <> "()*";
-           result <> CConversion`RValueToCFormString[prefactor[[3]]/(Global`SMvev/Sqrt[2])] <> ");"
+           result <> CConversion`RValueToCFormString[prefactor[[3]]/(Global`SMvev/Sqrt[2])] <> "));"
           ];
 
 DefVZVWSelfEnergies[] :=

@@ -37,15 +37,6 @@ BOOST_AUTO_TEST_CASE( test_SM_tree_level_Higgs_masses )
    // check Goldstone boson masses
    BOOST_CHECK_EQUAL(m.get_MHp(), m.get_MVWp());
    BOOST_CHECK_EQUAL(m.get_MAh(), m.get_MVZ());
-
-   // check W boson mass
-   const auto mW = 1. / 2. * m.get_v() * m.get_g2();
-   BOOST_CHECK_CLOSE_FRACTION(m.get_MVWp(), mW, 1e-15);
-
-   // check Z boson mass
-   const auto mZ = 1. / 2. * m.get_v() *
-                   sqrt(3. / 5. * pow(m.get_g1(), 2) + pow(m.get_g2(), 2));
-   BOOST_CHECK_CLOSE_FRACTION(m.get_MVZ(), mZ, 1e-15);
 }
 
 #define CHECK_CLOSE_1(mass,eps)                                         \

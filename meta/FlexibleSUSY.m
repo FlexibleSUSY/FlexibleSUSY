@@ -56,6 +56,7 @@ BeginPackage["FlexibleSUSY`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
+              "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
               "FSMathLink`",
@@ -1727,25 +1728,22 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            printMixingMatrices          = WriteOut`PrintParameters[mixingMatrices, "ostr"];
            dependencePrototypes         = TreeMasses`CreateDependencePrototypes[];
            dependenceFunctions          = TreeMasses`CreateDependenceFunctions[];
-           softScalarMasses =
-               If[SARAH`SupersymmetricModel,
-                  DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses],
-                  Select[Parameters`GetModelParametersWithMassDimension[2], Parameters`IsRealParameter]
-                 ];
+           If[Head[SARAH`ListSoftBreakingScalarMasses] === List,
+              softScalarMasses          = DeleteDuplicates[SARAH`ListSoftBreakingScalarMasses];,
+              softScalarMasses          = {};
+             ];
            (* find soft Higgs masses that appear in tree-level EWSB eqs. *)
-           treeLevelEWSBOutputParameters =
-               Parameters`DecreaseIndexLiterals @
-               Parameters`ExpandExpressions @
-               Parameters`AppendGenerationIndices @
-               If[MatchQ[FlexibleSUSY`FSSolveEWSBTreeLevelFor, {__}],
-                  FlexibleSUSY`FSSolveEWSBTreeLevelFor,
-                  (* each softScalarMasses should appear only in exactly 1 EWSB eq.! *)
-                  Select[softScalarMasses, ParameterAppearsExactlyOnceIn[ewsbEquations, #]&]
-                 ];
-           If[MatchQ[treeLevelEWSBOutputParameters, {__}],
+           If[Head[FlexibleSUSY`FSSolveEWSBTreeLevelFor] =!= List ||
+              FlexibleSUSY`FSSolveEWSBTreeLevelFor === {},
+              treeLevelEWSBOutputParameters = Select[softScalarMasses, (!FreeQ[ewsbEquations, #])&];
+              ,
+              treeLevelEWSBOutputParameters = FlexibleSUSY`FSSolveEWSBTreeLevelFor;
+             ];
+           treeLevelEWSBOutputParameters = Parameters`DecreaseIndexLiterals[Parameters`ExpandExpressions[Parameters`AppendGenerationIndices[treeLevelEWSBOutputParameters]]];
+           If[Head[treeLevelEWSBOutputParameters] === List && Length[treeLevelEWSBOutputParameters] > 0,
               parametersToSave = treeLevelEWSBOutputParameters;
-              solveTreeLevelEWSBviaSoftHiggsMasses = First @ EWSB`FindSolutionAndFreePhases[independentEwsbEquationsTreeLevel,
-                                                                                            treeLevelEWSBOutputParameters];
+              solveTreeLevelEWSBviaSoftHiggsMasses = EWSB`FindSolutionAndFreePhases[independentEwsbEquationsTreeLevel,
+                                                                                    treeLevelEWSBOutputParameters][[1]];
               If[solveTreeLevelEWSBviaSoftHiggsMasses === {},
                  Print["Error: could not find an analytic solution to the tree-level EWSB eqs."];
                  Print["   for the parameters ", treeLevelEWSBOutputParameters];
@@ -2356,6 +2354,19 @@ WriteLToLGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]
          }
       ];
+   ];
+
+WriteBToSGammaClass[decays_List, files_List] :=
+   Module[{createInterface = False,
+          btosgammaInterfaceDefinitions},
+       If[decays =!= {},
+         createInterface = True];
+       btosgammaInterfaceDefinitions =
+         BtoSGamma`CreateInterfaceBtoSGamma[createInterface];
+
+       WriteOut`ReplaceInFiles[files, {
+            "@BtoSGammaInterface@" -> btosgammaInterfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]}];
    ];
 
 (* Write c++ files for the F -> F conversion in nucleus *)
@@ -3910,6 +3921,7 @@ Options[MakeFlexibleSUSY] :=
 MakeFlexibleSUSY[OptionsPattern[]] :=
     Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
             edmVertices, edmFields,
+            QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -4785,6 +4797,18 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.cpp"}]}}];
 
+           (* b -> s gamma *)
+           If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
+             Print["Creating b->s'A class ..."];
+             QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
+               {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
+             QToQGammaFields = {}];
+           WriteBToSGammaClass[QToQGammaFields,
+                           {{FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.hpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.hpp"}]},
+                            {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
+                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
+
            (* OBSERVABLE: l -> l conversion *)
 
            (*
@@ -4821,6 +4845,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
                      (* Br(L -> L Gamma) *)
                      LToLGammaFields,
+
+                     (* b -> s gamma *)
+                     QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
                      If[LToLConversionFields === {},

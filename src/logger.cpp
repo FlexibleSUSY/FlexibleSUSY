@@ -89,7 +89,7 @@ void print_fatal(std::function<void()>&&, const char*, int) {}
 #else
 
 #ifdef ENABLE_VERBOSE
-void print_verbose(std::function<void()>&& f, const char* filename, int line)
+void print_verbose(std::function<void()>&& f, const char* /* filename */, int /* line */ )
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -102,7 +102,7 @@ void print_verbose(std::function<void()>&&, const char*, int) {}
 #endif
 
 #ifdef ENABLE_DEBUG
-void print_debug(std::function<void()>&& f, const char* filename, int line)
+void print_debug(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -114,13 +114,13 @@ void print_debug(std::function<void()>&& f, const char* filename, int line)
 void print_debug(std::function<void()>&&, const char*, int) {}
 #endif
 
-void print_info(std::function<void()>&& f, const char* filename, int line)
+void print_info(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
    f();
 }
 
-void print_warning(std::function<void()>&& f, const char* filename, int line)
+void print_warning(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -129,7 +129,7 @@ void print_warning(std::function<void()>&& f, const char* filename, int line)
    f();
 }
 
-void print_error(std::function<void()>&& f, const char* filename, int line)
+void print_error(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS

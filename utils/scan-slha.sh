@@ -39,8 +39,8 @@ BEGIN {
    }
 }
 {
-   pattern     = "^block[[:blank:]]*" tolower(block) "([^[:graph:]].*)?$";
-   not_pattern = "^block[[:blank:]]*.*$";
+   pattern     = "^block[ \t\n\r\f]*" tolower(block) "([^a-zA-Z0-9_].*)?$";
+   not_pattern = "^block[ \t\n\r\f]*.*$";
 
    if (tolower($0) ~ pattern) {
       is_block = 1

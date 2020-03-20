@@ -3,7 +3,6 @@
 #define BOOST_TEST_MODULE test_effective_couplings
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 
 #include "effective_couplings.hpp"
 #include "wrappers.hpp"

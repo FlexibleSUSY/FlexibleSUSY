@@ -1,3 +1,44 @@
+FlexibleSUSY 2.4.2 [not released yet]
+=====================================
+
+New features
+------------
+
+* Added calculation of :math:`$b \to s \gamma$`.  Currently only
+  diagrams with scalars and fermions in the loop are supported.  See
+  `doc/observables/b_physics.rst <doc/observables/b_physics.rst>`_ for
+  further details.
+
+  Thanks to Kien Dang Tran.
+
+* New calculation of the W boson pole mass with decoupling behaviour
+  for large BSM masses.
+
+  Thanks to Markus Bach.
+
+Changes
+-------
+
+* Improved performance of ``flexiblesusy-config`` script.
+
+* Improved performance of 1-loop threshold functions from
+  `[arXiv:1407.4081] <https://arxiv.org/abs/1407.4081>`_, used in
+  HSSUSY.
+
+* ``make all-test`` returns early and with a non-zero exit code when a
+  test fails.  Use ``make -k all-test`` to force running of all tests.
+
+* When installing the dependencies with Conan_, the `Eigen 3`_ library
+  from the Conan repository is preferred over the one installed in the
+  system directories.
+
+Fixed bugs
+----------
+
+* [commit de7091b0d]: Fixed setting of threshold correction flags with
+  clang++ 7.0.
+
+
 FlexibleSUSY 2.4.1 [October, 16 2019]
 =====================================
 
@@ -2128,6 +2169,8 @@ FlexibleSUSY-0.5 [November 18, 2013]
 * Store particle masses as Eigen::Array and mixing matrices as
   ``Eigen::Matrix``.
 
+.. _Conan: https://conan.io/
+.. _Eigen 3: http://eigen.tuxfamily.org
 .. _GM2Calc: https://arxiv.org/abs/1510.08071
 .. _MhEFT: https://gabrlee.com/code/
 .. _FeynArts: http://www.feynarts.de

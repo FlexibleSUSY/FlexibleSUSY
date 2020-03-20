@@ -4,6 +4,14 @@
 FlexibleSUSY
 ============
 
+|release| |tests| |travis|
+
+.. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
+   :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
+.. |travis| image:: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY.svg?branch=development
+   :target: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY
+
 .. image:: doc/images/FS-logo.png
    :align: right
 
@@ -25,7 +33,8 @@ modification, extension and reuse.
   cite [1609.00371]_ and [1710.03760]_.
 
   If you use **FlexibleSUSY+Himalaya** or Himalaya_ in your work,
-  please cite [1005.5709]_, [1708.05720]_ and [1807.03509]_.
+  please cite [1005.5709]_, [1708.05720]_, [1807.03509]_ and
+  [1910.03595]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -52,7 +61,7 @@ Install required libraries and packages (if not already done)::
     sudo apt-get install libgsl-dev
     ./install-sarah
 
-Build a spectrum generating (here: HSSUSY [1710.03760]_
+Build a spectrum generator (here: HSSUSY [1710.03760]_
 [1804.09410]_)::
 
     ./createmodel --name=HSSUSY
@@ -615,6 +624,11 @@ directory configure via
        --with-looptools-libdir=$LOOPTOOLS_DIR
 
 Note: LoopTools 2.8 or higher is required.
+Also, if FlexibleSUSY is compiled with LibraryLink (default) then LoopTools has to be compiled with ``-fPIC`` option.
+This is achieved by setting the ``FFLAGS`` variable during LoopTools configuration as
+::
+
+    FFLAGS=-fPIC ./configure
 
 
 TSIL support
@@ -800,6 +814,7 @@ Further reading
 * `LibraryLink documentation`_
 * `meta code documentation`_
 * `SLHA input parameters`_
+* `Observables`_
 
 
 References
@@ -824,6 +839,7 @@ References
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
 .. _`meta code documentation`: doc/meta_code.rst
 .. _`SLHA input parameters`: doc/slha_input.rst
+.. _`Observables`: doc/observables.rst
 
 .. [hep-ph:0104145] `CPC 143 (2002) 305-331 <https://inspirehep.net/record/555481>`_ [`arxiv:hep-ph/0104145 <http://arxiv.org/abs/hep-ph/0104145>`_]
 .. [0909.2863] `CPC 181 (2010) 1077-1086 <https://inspirehep.net/record/831371>`_ [`arxiv:0909.2863 <http://arxiv.org/abs/0909.2863>`_]
@@ -838,3 +854,4 @@ References
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
 .. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
+.. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]

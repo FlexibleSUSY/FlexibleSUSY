@@ -200,7 +200,7 @@ WriteSLHAMass[massMatrix_TreeMasses`FSMassMatrix] :=
             pdgList, pdg, dim, i},
            eigenstateName = TreeMasses`GetMassEigenstate[massMatrix];
            dim = TreeMasses`GetDimension[eigenstateName];
-           pdgList = Parameters`GetPDGCodesForParticle[eigenstateName];
+           pdgList = SARAH`getPDGList[eigenstateName];
            If[Length[pdgList] != dim,
               Print["Error: length of PDG number list != dimension of particle ", eigenstateName];
               Print["       PDG number list = ", pdgList];
@@ -214,7 +214,7 @@ WriteSLHAMass[massMatrix_TreeMasses`FSMassMatrix] :=
               If[pdg != 0,
                  eigenstateNameStr = CConversion`RValueToCFormString[eigenstateName];
                  massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`M[eigenstateName]];
-                 result = "<< format_mass(" <> ToString[pdg] <>
+                 result = "<< FORMAT_MASS(" <> ToString[pdg] <>
                           ", LOCALPHYSICAL(" <> massNameStr <> "), \"" <> eigenstateNameStr <> "\")\n";
                 ];
               ,
@@ -223,7 +223,7 @@ WriteSLHAMass[massMatrix_TreeMasses`FSMassMatrix] :=
                   If[pdg != 0,
                      eigenstateNameStr = CConversion`RValueToCFormString[eigenstateName] <> "(" <> ToString[i] <> ")";
                      massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`M[eigenstateName[i-1]]];
-                     result = result <> "<< format_mass(" <> ToString[pdg] <>
+                     result = result <> "<< FORMAT_MASS(" <> ToString[pdg] <>
                               ", LOCALPHYSICAL(" <> massNameStr <> "), \"" <> eigenstateNameStr <> "\")\n";
                     ];
                  ];
@@ -262,7 +262,7 @@ ConvertToRealInputParameter[FlexibleSUSY`Phase[parameter_], struct_String] :=
 WriteParameterTuple[{key_?NumberQ, parameter_}, streamName_String] :=
     Module[{parameterStr},
            parameterStr = CConversion`ToValidCSymbolString[parameter];
-           streamName <> " << format_element(" <> ToString[key] <> ", " <>
+           streamName <> " << FORMAT_ELEMENT(" <> ToString[key] <> ", " <>
            ConvertToRealInputParameter[parameter,"input."] <>
            ", \"" <> parameterStr <> "\");\n"
           ];
@@ -532,6 +532,8 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
                   _,
                      result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];
@@ -547,7 +549,7 @@ WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?Numbe
            idx3Str = ToString[idx3];
            commentStr = If[comment == "", parStr, comment];
            (* result *)
-           "      << format_tensor(" <> idx1Str <> ", " <> idx2Str <> ", "
+           "      << FORMAT_RANK_THREE_TENSOR(" <> idx1Str <> ", " <> idx2Str <> ", "
            <> idx3Str <> ", (" <> parVal <> "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
@@ -559,7 +561,7 @@ WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ}, comment_St
            idx2Str = ToString[idx2];
            commentStr = If[comment == "", parStr, comment];
            (* result *)
-           "      << format_matrix(" <> idx1Str <> ", " <> idx2Str <>
+           "      << FORMAT_MIXING_MATRIX(" <> idx1Str <> ", " <> idx2Str <>
            ", (" <> parVal <> "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
@@ -581,7 +583,7 @@ WriteSLHABlockEntry[blockName_, {par_, pdg_?NumberQ}, comment_String:""] :=
            pdgStr = ToString[pdg];
            commentStr = If[comment == "", parStr, comment];
            (* result *)
-           "      << format_element(" <> pdgStr <> ", (" <> parVal <>
+           "      << FORMAT_ELEMENT(" <> pdgStr <> ", (" <> parVal <>
            "), \"" <> commentStr <> "\")" <> "\n"
           ];
 
@@ -591,7 +593,7 @@ WriteSLHABlockEntry[_, {par_}, comment_String:""] :=
            parVal = CConversion`RValueToCFormString[Parameters`WrapPreprocessorMacroAround[par]];
            commentStr = If[comment == "", parStr, comment];
            (* result *)
-           "      << format_number((" <> parVal <> "), \"" <> commentStr <> "\")\n"
+           "      << FORMAT_NUMBER((" <> parVal <> "), \"" <> commentStr <> "\")\n"
           ];
 
 WriteSLHABlockEntry[tuple___] :=
@@ -608,7 +610,7 @@ WriteSLHABlock[{blockName_, tuples_List}, scale_String:"model.get_scale()"] :=
                "std::ostringstream block;\n" <>
                "block << \"Block " <> blockNameStr <>
                If[scale != "",
-                  " Q= \" << format_scale(" <> scale <> ")",
+                  " Q= \" << FORMAT_SCALE(" <> scale <> ")",
                   "\""
                  ] <>
                " << '\\n'\n" <>
@@ -760,7 +762,7 @@ ReadSLHAPhysicalMass[particle_,struct_String:"PHYSICAL"] :=
            mass = FlexibleSUSY`M[particle];
            massStr = CConversion`ToValidCSymbolString[mass];
            dim = TreeMasses`GetDimension[particle];
-           pdgList = Parameters`GetPDGCodesForParticle[particle];
+           pdgList = SARAH`getPDGList[particle];
            If[Head[pdgList] =!= List || Length[pdgList] < dim,
               Return[""];
              ];
@@ -1284,17 +1286,17 @@ void " <> modelName <> "_slha_io::set_dcinfo(
 {
    std::ostringstream dcinfo;
    dcinfo << \"Block DCINFO\\n\"
-          << format_spinfo(1, PKGNAME)
-          << format_spinfo(2, FLEXIBLESUSY_VERSION);
+          << FORMAT_SPINFO(1, PKGNAME)
+          << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
 
    for (const auto& s: warnings)
-      dcinfo << format_spinfo(3, s);
+      dcinfo << FORMAT_SPINFO(3, s);
 
    for (const auto& s: problems)
-      dcinfo << format_spinfo(4, s);
+      dcinfo << FORMAT_SPINFO(4, s);
 
-   dcinfo << format_spinfo(5, " <> modelName <> "_info::model_name)
-          << format_spinfo(9, SARAH_VERSION);
+   dcinfo << FORMAT_SPINFO(5, " <> modelName <> "_info::model_name)
+          << FORMAT_SPINFO(9, SARAH_VERSION);
 
    slha_io.set_block(dcinfo);
 }";

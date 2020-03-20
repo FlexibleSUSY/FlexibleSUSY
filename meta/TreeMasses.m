@@ -616,6 +616,7 @@ GetSMNeutrino2[]      := GetUpLepton[2];
 GetSMNeutrino3[]      := GetUpLepton[3];
 
 GetSMTopQuarkMultiplet[]       := GetUpQuark[3]    /. head_[_] :> head;
+GetSMStrangeQuarkMultiplet[]    := GetDownQuark[2]  /. head_[_] :> head;
 GetSMBottomQuarkMultiplet[]    := GetDownQuark[3]  /. head_[_] :> head;
 GetSMElectronLeptonMultiplet[] := GetDownLepton[1] /. head_[_] :> head;
 GetSMMuonLeptonMultiplet[]     := GetDownLepton[2] /. head_[_] :> head;
@@ -2264,11 +2265,13 @@ CreateMixingArraySetter[masses_List, array_String] :=
            Return[set];
           ];
 
-(* 1. Once Dominik wanted to have functions identifying SM particles.
+(*
+   1. Once Dominik wanted to have functions identifying SM particles.
       This might be non-trivial in some models.
       For now, we just have wrappers that return SM particles using SARAH symbols
-   2. If the getter fails (for example because a given particle doesn't exist)
-      we return Null and it's up to the caller to decide what to do. *)
+   2. If a particle does not exist in the model, we don't stop.
+      Instead, we return Null and let the calling code decide how to handle it.
+*)
 
 GetPhoton[] :=
    If[ValueQ[SARAH`Photon],

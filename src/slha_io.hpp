@@ -19,21 +19,21 @@
 #ifndef SLHA_IO_H
 #define SLHA_IO_H
 
-#include <string>
-#include <sstream>
-#include <iosfwd>
-#include <vector>
-#include <Eigen/Core>
-#include <boost/function.hpp>
-#include "slhaea.h"
-#include "logger.hpp"
 #include "error.hpp"
 #include "logger.hpp"
 #include "numerics2.hpp"
 #include "pmns.hpp"
-#include "slha_formatting.hpp"
 #include "slhaea.h"
 #include "wrappers.hpp"
+
+#include <iosfwd>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include <Eigen/Core>
+#include <boost/format.hpp>
+#include <boost/function.hpp>
 
 namespace softsusy {
    class QedQcd;
@@ -43,6 +43,57 @@ namespace flexiblesusy {
 
    class Spectrum_generator_settings;
    class Physical_input;
+
+   namespace {
+      /// SLHA line formatter for the MASS block entries
+      const boost::format mass_formatter(" %9d   %16.8E   # %s\n");
+      /// SLHA line formatter for the mixing matrix entries (NMIX, UMIX, VMIX, ...)
+      const boost::format mixing_matrix_formatter(" %2d %2d   %16.8E   # %s\n");
+      /// SLHA line formatter for vector entries
+      const boost::format vector_formatter(" %5d   %16.8E   # %s\n");
+      /// SLHA number formatter
+      const boost::format number_formatter("         %16.8E   # %s\n");
+      /// SLHA line formatter for entries with three indices
+      const boost::format tensor_formatter(" %8d %8d %8d   %16.8E   # %s\n");
+      /// SLHA scale formatter
+      const boost::format scale_formatter("%9.8E");
+      /// SLHA line formatter for the one-element entries (HMIX, GAUGE, MSOFT, ...)
+      const boost::format single_element_formatter(" %5d   %16.8E   # %s\n");
+      /// SLHA line formatter for the SPINFO block entries
+      const boost::format spinfo_formatter(" %5d   %s\n");
+template <typename Container>
+boost::format format_decay(double br, const Container& pids, const std::string& name)
+{
+   const int nda = pids.size();
+
+   boost::format formatted_ids("");
+   for (int i = nda - 1; i >= 0; --i) {
+      formatted_ids = boost::format(" %9d%s") % pids[i] % formatted_ids;
+   }
+
+   return boost::format("   %16.8E  %2d  %s  # %s\n") % br % nda % formatted_ids % name;
+}
+
+inline boost::format format_total_width(int pdg, double width, const std::string& name)
+{
+   return boost::format("%9d   %16.8E   # %s\n") % pdg % width % name;
+}
+   } // namespace
+
+#define FORMAT_MASS(pdg,mass,name)                                      \
+   boost::format(mass_formatter) % (pdg) % (mass) % (name)
+#define FORMAT_MIXING_MATRIX(i,k,entry,name)                            \
+   boost::format(mixing_matrix_formatter) % (i) % (k) % (entry) % (name)
+#define FORMAT_ELEMENT(pdg,value,name)                                  \
+   boost::format(single_element_formatter) % (pdg) % (value) % (name)
+#define FORMAT_SCALE(n)                                                 \
+   boost::format(scale_formatter) % (n)
+#define FORMAT_NUMBER(n,str)                                            \
+   boost::format(number_formatter) % (n) % (str)
+#define FORMAT_SPINFO(n,str)                                            \
+   boost::format(spinfo_formatter) % (n) % (str)
+#define FORMAT_RANK_THREE_TENSOR(i,j,k,entry,name)                      \
+   boost::format(tensor_formatter) % (i) % (j) % (k) % (entry) % (name)
 
 /**
  * @class SLHA_io
@@ -179,15 +230,19 @@ public:
 private:
    SLHAea::Coll data{};        ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
+
    template <class Scalar>
    static Scalar convert_to(const std::string&); ///< convert string
-   static std::string to_lower(const std::string&); ///< string to lower case
+   static std::string block_head(const std::string& name, double scale);
+   static bool read_scale(const SLHAea::Line& line, double& scale);
+
    static void process_sminputs_tuple(softsusy::QedQcd&, int, double);
    static void process_modsel_tuple(Modsel&, int, double);
    static void process_vckmin_tuple(CKM_wolfenstein&, int, double);
    static void process_upmnsin_tuple(PMNS_parameters&, int, double);
    static void process_flexiblesusy_tuple(Spectrum_generator_settings&, int, double);
    static void process_flexiblesusyinput_tuple(Physical_input&, int, double);
+
    void read_modsel();
    template <class Derived>
    double read_matrix(const std::string&, Eigen::MatrixBase<Derived>&) const;
@@ -220,35 +275,30 @@ Scalar SLHA_io::convert_to(const std::string& str)
 template <class Derived>
 double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Derived>& matrix) const
 {
-   if (matrix.cols() <= 1) throw SetupError("Matrix has less than 2 columns");
+   if (matrix.cols() <= 1) {
+      throw SetupError("Matrix has less than 2 columns");
+   }
 
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    const int cols = matrix.cols(), rows = matrix.rows();
    double scale = 0.;
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
+         read_scale(line, scale);
 
-         if (line.size() >= 3) {
+         if (line.is_data_line() && line.size() >= 3) {
             const int i = convert_to<int>(line[0]) - 1;
             const int k = convert_to<int>(line[1]) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
-               const double value = convert_to<double>(line[2]);
-               matrix(i,k) = value;
+               matrix(i,k) = convert_to<double>(line[2]);
             }
          }
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -265,34 +315,29 @@ double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Der
 template <class Derived>
 double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Derived>& vector) const
 {
-   if (vector.cols() != 1) throw SetupError("Vector has more than 1 column");
+   if (vector.cols() != 1) {
+      throw SetupError("Vector has more than 1 column");
+   }
 
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    const int rows = vector.rows();
    double scale = 0.;
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
+         read_scale(line, scale);
 
-         if (line.size() >= 2) {
+         if (line.is_data_line() && line.size() >= 2) {
             const int i = convert_to<int>(line[0]) - 1;
             if (0 <= i && i < rows) {
-               const double value = convert_to<double>(line[1]);
-               vector(i,0) = value;
+               vector(i) = convert_to<double>(line[1]);
             }
          }
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -320,14 +365,11 @@ void SLHA_io::set_block(const std::string& name,
                         const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
-      ss << format_vector(i, Re(matrix(i-1,0)),
-                          "Re(" + symbol + "(" + ToString(i) + "))");
+      ss << boost::format(vector_formatter) % i % Re(matrix(i-1,0))
+         % ("Re(" + symbol + "(" + ToString(i) + "))");
    }
 
    set_block(ss);
@@ -339,16 +381,14 @@ void SLHA_io::set_block(const std::string& name,
                         const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
       for (int k = 1; k <= NCols; ++k) {
-         ss << format_matrix(i, k, Re(matrix(i-1,k-1)),
-                             "Re(" + symbol + "(" + ToString(i) + ","
-                             + ToString(k) + "))");
+         ss << boost::format(mixing_matrix_formatter) % i % k
+            % Re(matrix(i-1,k-1))
+            % ("Re(" + symbol + "(" + ToString(i) + ","
+               + ToString(k) + "))");
       }
    }
 
@@ -361,14 +401,11 @@ void SLHA_io::set_block_imag(const std::string& name,
                              const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
-      ss << format_vector(i, Im(matrix(i-1,0)),
-                          "Im(" + symbol + "(" + ToString(i) + "))");
+      ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
+         % ("Im(" + symbol + "(" + ToString(i) + "))");
    }
 
    set_block(ss);
@@ -380,16 +417,14 @@ void SLHA_io::set_block_imag(const std::string& name,
                              const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
       for (int k = 1; k <= NCols; ++k) {
-         ss << format_matrix(i, k, Im(matrix(i-1,k-1)),
-                             "Im(" + symbol + "(" + ToString(i) + ","
-                             + ToString(k) + "))");
+         ss << boost::format(mixing_matrix_formatter) % i % k
+            % Im(matrix(i-1,k-1))
+            % ("Im(" + symbol + "(" + ToString(i) + ","
+               + ToString(k) + "))");
       }
    }
 
@@ -402,22 +437,18 @@ void SLHA_io::set_block(const std::string& name,
                         const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    const int rows = matrix.rows();
    const int cols = matrix.cols();
    for (int i = 1; i <= rows; ++i) {
       if (cols == 1) {
-         ss << format_vector(i, matrix(i-1,0),
-                             symbol + "(" + ToString(i) + ")");
+         ss << boost::format(vector_formatter) % i % matrix(i-1,0)
+            % (symbol + "(" + ToString(i) + ")");
       } else {
          for (int k = 1; k <= cols; ++k) {
-            ss << format_matrix(i, k, matrix(i-1,k-1),
-                                symbol + "(" + ToString(i) + ","
-                                + ToString(k) + ")");
+            ss << boost::format(mixing_matrix_formatter) % i % k % matrix(i-1,k-1)
+               % (symbol + "(" + ToString(i) + "," + ToString(k) + ")");
          }
       }
    }
@@ -431,22 +462,18 @@ void SLHA_io::set_block_imag(const std::string& name,
                              const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << format_scale(scale);
-   ss << '\n';
+   ss << block_head(name, scale);
 
    const int rows = matrix.rows();
    const int cols = matrix.cols();
    for (int i = 1; i <= rows; ++i) {
       if (cols == 1) {
-         ss << format_vector(i, Im(matrix(i-1,0)),
-                             "Im(" + symbol + "(" + ToString(i) + "))");
+         ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
+            % ("Im(" + symbol + "(" + ToString(i) + "))");
       } else {
          for (int k = 1; k <= cols; ++k) {
-            ss << format_matrix(i, k, Im(matrix(i-1,k-1)),
-                                "Im(" + symbol + "(" + ToString(i) + ","
-                                + ToString(k) + "))");
+            ss << boost::format(mixing_matrix_formatter) % i % k % Im(matrix(i-1,k-1))
+               % ("Im(" + symbol + "(" + ToString(i) + "," + ToString(k) + "))");
          }
       }
    }

@@ -369,23 +369,6 @@ SimplifyEwsbEqs[equations_List, parametersFixedByEWSB_List] :=
 
 FindIndependentSubset[equations_List, {}] := {};
 
-FindIndependentSubset[{}, parameters_List] := {};
-
-FindIndependentSubset[equations_List, parameters_List] /; Length[parameters] > Length[equations] :=
-    Module[{subsets = Subsets[parameters, {Length[equations]}], res},
-           (* find independent subsets for all parameter combinations *)
-           res = Select[FindIndependentSubset[equations, #]& /@ subsets, (# =!= {})&];
-           (* select the largest one *)
-           res = Sort[res, Length[First[#1]] > Length[First[#2]]&];
-           If[res === {}, {}, First[res]]
-          ];
-
-FindIndependentSubset[{eq_}, {par_}] :=
-    If[FreeQ[eq, par],
-       {},
-       {{ {eq}, {par} }}
-      ];
-
 FindIndependentSubset[equations_List, parameters_List] :=
     Module[{equationSubsets, numberOfEquations, parameterSubsets,
             numberOfParameters, e, p, result = {}, isFreeOf},
@@ -456,7 +439,7 @@ TimeConstrainedSolve[eq_, par_] :=
            result
           ];
 
-EliminateOneParameter[{}, _List] := {};
+EliminateOneParameter[{}, {}] := {};
 
 EliminateOneParameter[{eq_}, {p_}] :=
     Block[{},

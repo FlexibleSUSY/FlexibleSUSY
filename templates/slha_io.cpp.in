@@ -190,17 +190,17 @@ void @ModelName@_slha_io::set_spinfo(
 {
    std::ostringstream spinfo;
    spinfo << "Block SPINFO\n"
-          << format_spinfo(1, PKGNAME)
-          << format_spinfo(2, FLEXIBLESUSY_VERSION);
+          << FORMAT_SPINFO(1, PKGNAME)
+          << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
 
    for (const auto& s: warnings)
-      spinfo << format_spinfo(3, s);
+      spinfo << FORMAT_SPINFO(3, s);
 
    for (const auto& s: problems)
-      spinfo << format_spinfo(4, s);
+      spinfo << FORMAT_SPINFO(4, s);
 
-   spinfo << format_spinfo(5, @ModelName@_info::model_name)
-          << format_spinfo(9, SARAH_VERSION);
+   spinfo << FORMAT_SPINFO(5, @ModelName@_info::model_name)
+          << FORMAT_SPINFO(9, SARAH_VERSION);
 
    slha_io.set_block(spinfo, SLHA_io::front);
 }
@@ -253,10 +253,10 @@ void @ModelName@_slha_io::set_model_parameters(const standard_model::Standard_mo
 {
    {
       std::ostringstream block;
-      block << "Block SMGAUGE Q= " << format_scale(model.get_scale()) << '\n'
-            << format_element(1, model.get_g1() * standard_model_info::normalization_g1, "gY")
-            << format_element(2, model.get_g2(), "g2")
-            << format_element(3, model.get_g3(), "g3")
+      block << "Block SMGAUGE Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_g1() * standard_model_info::normalization_g1), "gY")
+            << FORMAT_ELEMENT(2, (model.get_g2()), "g2")
+            << FORMAT_ELEMENT(3, (model.get_g3()), "g3")
       ;
       slha_io.set_block(block);
    }
@@ -265,16 +265,16 @@ void @ModelName@_slha_io::set_model_parameters(const standard_model::Standard_mo
    slha_io.set_block("SMYe", ToMatrix(model.get_Ye()), "Ye", model.get_scale());
    {
       std::ostringstream block;
-      block << "Block SMSM Q= " << format_scale(model.get_scale()) << '\n'
-            << format_element(1, model.get_mu2(), "mu2")
-            << format_element(2, model.get_Lambdax(), "Lambdax")
+      block << "Block SMSM Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_mu2()), "mu2")
+            << FORMAT_ELEMENT(2, (model.get_Lambdax()), "Lambdax")
       ;
       slha_io.set_block(block);
    }
    {
       std::ostringstream block;
-      block << "Block SMHMIX Q= " << format_scale(model.get_scale()) << '\n'
-            << format_element(3, model.get_v(), "v")
+      block << "Block SMHMIX Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(3, (model.get_v()), "v")
       ;
       slha_io.set_block(block);
    }
@@ -285,23 +285,23 @@ void @ModelName@_slha_io::set_mass(const standard_model::Standard_model_physical
    std::ostringstream mass;
 
    mass << "Block SMMASS\n"
-      << format_mass(24, physical.MVWp, "VWp")
-      << format_mass(21, physical.MVG, "VG")
-      << format_mass(12, physical.MFv(0), "Fv(1)")
-      << format_mass(14, physical.MFv(1), "Fv(2)")
-      << format_mass(16, physical.MFv(2), "Fv(3)")
-      << format_mass(25, physical.Mhh, "hh")
-      << format_mass(1, physical.MFd(0), "Fd(1)")
-      << format_mass(3, physical.MFd(1), "Fd(2)")
-      << format_mass(5, physical.MFd(2), "Fd(3)")
-      << format_mass(2, physical.MFu(0), "Fu(1)")
-      << format_mass(4, physical.MFu(1), "Fu(2)")
-      << format_mass(6, physical.MFu(2), "Fu(3)")
-      << format_mass(11, physical.MFe(0), "Fe(1)")
-      << format_mass(13, physical.MFe(1), "Fe(2)")
-      << format_mass(15, physical.MFe(2), "Fe(3)")
-      << format_mass(22, physical.MVP, "VP")
-      << format_mass(23, physical.MVZ, "VZ")
+      << FORMAT_MASS(24, physical.MVWp, "VWp")
+      << FORMAT_MASS(21, physical.MVG, "VG")
+      << FORMAT_MASS(12, physical.MFv(0), "Fv(1)")
+      << FORMAT_MASS(14, physical.MFv(1), "Fv(2)")
+      << FORMAT_MASS(16, physical.MFv(2), "Fv(3)")
+      << FORMAT_MASS(25, physical.Mhh, "hh")
+      << FORMAT_MASS(1, physical.MFd(0), "Fd(1)")
+      << FORMAT_MASS(3, physical.MFd(1), "Fd(2)")
+      << FORMAT_MASS(5, physical.MFd(2), "Fd(3)")
+      << FORMAT_MASS(2, physical.MFu(0), "Fu(1)")
+      << FORMAT_MASS(4, physical.MFu(1), "Fu(2)")
+      << FORMAT_MASS(6, physical.MFu(2), "Fu(3)")
+      << FORMAT_MASS(11, physical.MFe(0), "Fe(1)")
+      << FORMAT_MASS(13, physical.MFe(1), "Fe(2)")
+      << FORMAT_MASS(15, physical.MFe(2), "Fe(3)")
+      << FORMAT_MASS(22, physical.MVP, "VP")
+      << FORMAT_MASS(23, physical.MVZ, "VZ")
       ;
 
    slha_io.set_block(mass);
@@ -395,19 +395,19 @@ void @ModelName@_slha_io::read_from_stream(std::istream& istr)
  */
 void @ModelName@_slha_io::fill(@ModelName@_input_parameters& input) const
 {
-   SLHA_io::Tuple_processor minpar_processor = [&input] (int key, double value) {
+   SLHA_io::Tuple_processor minpar_processor = [&input, this] (int key, double value) {
       return fill_minpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor extpar_processor = [&input] (int key, double value) {
+   SLHA_io::Tuple_processor extpar_processor = [&input, this] (int key, double value) {
       return fill_extpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imminpar_processor = [&input] (int key, double value) {
+   SLHA_io::Tuple_processor imminpar_processor = [&input, this] (int key, double value) {
       return fill_imminpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imextpar_processor = [&input] (int key, double value) {
+   SLHA_io::Tuple_processor imextpar_processor = [&input, this] (int key, double value) {
       return fill_imextpar_tuple(input, key, value);
    };
 
