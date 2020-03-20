@@ -1249,10 +1249,10 @@ CreateParameterEnums[name_, type_] :=
     Utils`StringJoinWithSeparator[CreateEnumName /@ DecomposeParameter[name, type], ", "];
 
 CreateExtraParameterEnum[extraParameters_List] :=
-    Module[{entries},
-           entries = Flatten[Join[CreateParameterEnumEntries[#, GetType[#]]& /@ extraParameters,
-                                  {"NUMBER_OF_EXTRA_PARAMETERS"}]];
-           CConversion`CreateEnum["Extra_parameters", entries, 0]
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[CreateParameterEnums[#, GetType[#]]& /@ extraParameters, ", "];
+           If[Length[extraParameters] > 0, result = result <> ", ";];
+           "enum Extra_parameters : int { " <> result <> "NUMBER_OF_EXTRA_PARAMETERS };\n"
           ];
 
 CreateExtraParameterNames[extraParameters_List] :=
@@ -1263,10 +1263,10 @@ CreateExtraParameterNames[extraParameters_List] :=
           ];
 
 CreateInputParameterEnum[inputParameters_List] :=
-    Module[{entries},
-           entries = Flatten[Join[CreateParameterEnumEntries[#[[1]], #[[3]]]& /@ inputParameters,
-                                  {"NUMBER_OF_INPUT_PARAMETERS"}]];
-           CConversion`CreateEnum["Input_parameters", entries, 0]
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[CreateParameterEnums[#[[1]],#[[3]]]& /@ inputParameters, ", "];
+           If[Length[inputParameters] > 0, result = result <> ", ";];
+           "enum Input_parameters : int { " <> result <> "NUMBER_OF_INPUT_PARAMETERS };\n"
           ];
 
 CreateInputParameterNames[inputParameters_List] :=

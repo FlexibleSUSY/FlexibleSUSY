@@ -20,40 +20,31 @@
 
 *)
 
-AppendTo[$Path, FileNameJoin[{Directory[], "meta"}]];
+Get["utils/load-FlexibleSUSY.m"];
 
-Needs["SARAH`"];
-Needs["FlexibleSUSY`", "FlexibleSUSY.m"];
 Needs["TestSuite`", "TestSuite.m"];
 Needs["TreeMasses`", "TreeMasses.m"];
 
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{Directory[], "Output"}];
-SARAH`SARAH[InputDirectories] = {
-    FileNameJoin[{Directory[], "sarah"}],
-    ToFileName[{$sarahDir, "Models"}]
-};
-
 Start["MRSSM"];
 
-Print["testing IsMassless[] ..."];
+Print[""];
 
-TestEquality[TreeMasses`IsMassless[gG], True];
-TestEquality[TreeMasses`IsMassless[VG], True];
-TestEquality[TreeMasses`IsMassless[gP], True];
-TestEquality[TreeMasses`IsMassless[VP], True];
-TestEquality[TreeMasses`IsMassless[gZ], False];
-TestEquality[TreeMasses`IsMassless[VZ], False];
-TestEquality[TreeMasses`IsMassless[gWp], False];
-TestEquality[TreeMasses`IsMassless[VWp], False];
+Print["Testing getters for particle collection..."];
 
-Print["testing getters for particle collection..."];
+TestEquality[
+   TreeMasses`GetSusyParticles[],
+   {Glu, SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh, Ah, Rh, Hpm, Chi, Cha1, Cha2}];
 
-TestEquality[TreeMasses`GetSusyParticles[], {Glu, SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh,
-   Ah, Rh, SARAH`Hpm, Chi, Cha1, Cha2}];
-TestEquality[TreeMasses`GetColoredParticles[], {VG, gG, Glu, sigmaO, phiO, Sd, Su, Fd, Fu}];
-TestEquality[TreeMasses`GetVectorBosons[], {VG, VP, VZ, VWm}];
+TestEquality[
+   TreeMasses`GetColoredParticles[],
+   {VG, gG, Glu, sigmaO, phiO, Sd, Su, Fd, Fu}
+];
 
-Print["testing getters for specific particles..."];
+TestEquality[
+   TreeMasses`GetVectorBosons[], {VG, VP, VZ, VWm}
+];
+
+Print["Testing getters for individual particles..."];
 
 TestEquality[TreeMasses`GetPhoton[], VP];
 TestEquality[TreeMasses`GetGluon[], VG];
@@ -63,7 +54,26 @@ TestEquality[TreeMasses`GetHiggsBoson[], hh];
 TestEquality[TreeMasses`GetChargedHiggsBoson[], Hpm];
 TestEquality[TreeMasses`GetPseudoscalarHiggsBoson[], Ah];
 
+Print["Testing particle properties..."];
 
-TestEquality[Select[GetParticles[], IsScalar], {SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh, Ah, Rh, Hpm}];
+TestEquality[TreeMasses`IsSMParticle[#], True]& /@ {Fe, Fd, Fu, Fv, gG, VG, gP, VP, VZ, gZ, VWm, gWm, gWmC};
+TestEquality[TreeMasses`IsSMParticle[#], False]& /@ {Glu, SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh, Ah, Rh, Hpm, Chi, Cha1, Cha2};
+
+TestEquality[TreeMasses`IsMassless[#], True]& /@ {Fv, gG, VG, gP, VP};
+TestEquality[TreeMasses`IsMassless[#], False]& /@ {
+   gZ, VZ, gWm, gWmC, VWm, SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh, Ah, Rh, Hpm, Fe, Fd, Fu, Cha1, Cha2, Chi, Glu};
+
+TestEquality[TreeMasses`IsScalar[#], True]& /@ {SRdp, SRum, sigmaO, phiO, Sd, Sv, Su, Se, hh, Ah, Rh, Hpm};
+TestEquality[TreeMasses`IsFermion[#], True]& /@ {Fe, Fd, Fu, Fv, Cha1, Cha2, Chi, Glu};
+TestEquality[TreeMasses`IsVector[#], True]& /@ {VG, VP, VZ, VWm};
+TestEquality[TreeMasses`IsGhost[#], True]& /@ {gWm, gWmC, gP, gZ, gG};
+TestEquality[TreeMasses`IsGoldstone[#], True]& /@ {Ah[{1}], Hpm[{1}]};
+
+TestEquality[TreeMasses`IsElectricallyCharged[#], True]& /@ {SRdp, SRum, Sd, Su, Se, Fe, Fd, Fu, Hpm, Cha1, Cha2, VWm, gWm, gWmC};
+TestEquality[TreeMasses`ColorChargedQ[#], True]& /@ {Fd, Fu, VG, gG, Su, Sd, Glu, sigmaO, phiO};
+
+TestEquality[SA`CPViolationHiggsSector, False];
+
+Print[""];
 
 PrintTestSummary[];

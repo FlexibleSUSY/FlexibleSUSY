@@ -234,6 +234,7 @@ GetPseudoscalarHiggsBoson::usage = "";
 GetChargedHiggsBoson::usage = "";
 
 GetSMTopQuarkMultiplet::usage    = "Returns multiplet containing the top quark, Fu or Ft";
+GetSMStrangeQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fs";
 GetSMBottomQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fb";
 GetSMElectronLeptonMultiplet::usage = "Returns multiplet containing the electron, Fe";
 GetSMMuonLeptonMultiplet::usage     = "Returns multiplet containing the muon, Fe or Fm";

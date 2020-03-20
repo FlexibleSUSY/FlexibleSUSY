@@ -76,6 +76,7 @@ META_SRC     := \
 		$(DIR)/ColorMathInterface.m \
 		$(DIR)/FFVFormFactors.m \
 		$(DIR)/BrLToLGamma.m \
+		$(DIR)/BtoSGamma.m \
 		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
