@@ -158,6 +158,30 @@ Module[{
     sortedVectors = SortFieldsInCp[{vectors}];
 	(SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]
 ];
+SortCp[cp : SARAH`Cp[vectors__][lor_Integer]] /; CpType[cp] === VVVV :=
+Module[{
+	vs = StripExtraFieldIndices[{vectors}],
+	svs, lors,
+	sortedVectors,
+	ssvs, sortedLors,
+	map
+    },
+    sortedVectors = SortFieldsInCp[vs];
+    svs  = StripFieldIndices[vs];
+    ssvs = StripFieldIndices[sortedVectors];
+    lors = {
+	SARAH`g[ svs[[1]],  svs[[2]]] SARAH`g[ svs[[3]],  svs[[4]]],
+	SARAH`g[ svs[[1]],  svs[[3]]] SARAH`g[ svs[[2]],  svs[[4]]],
+	SARAH`g[ svs[[1]],  svs[[4]]] SARAH`g[ svs[[2]],  svs[[3]]]
+    };
+    sortedLors = {
+	SARAH`g[ssvs[[1]], ssvs[[2]]] SARAH`g[ssvs[[3]], ssvs[[4]]],
+	SARAH`g[ssvs[[1]], ssvs[[3]]] SARAH`g[ssvs[[2]], ssvs[[4]]],
+	SARAH`g[ssvs[[1]], ssvs[[4]]] SARAH`g[ssvs[[2]], ssvs[[3]]]
+    };
+    map = Ordering[sortedLors, 3, OrderedQ[First@Position[lors, #]& /@ {##}]&];
+    (SARAH`Cp @@ sortedVectors)[map[[lor]]]
+];
 
 (* see WriteFermionProp[] in SARAH/Package/SPheno/SPhenoLoopMasses *)
 SortCp[cp : SARAH`Cp[fields__][lor:PL|PR]] /; CpType[cp] === FFV := Module[{

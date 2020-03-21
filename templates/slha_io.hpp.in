@@ -157,33 +157,23 @@ void @ModelName@_slha_io::fill(@ModelName@_slha<Model>& model) const
 }
 
 template <class Model>
-void @ModelName@_slha_io::fill_spectrum_generator_data(
-   const @ModelName@_slha<Model>& model,
-   const softsusy::QedQcd& qedqcd, const @ModelName@_scales& scales,
-   const @ModelName@_observables& observables)
-{
-   const @ModelName@_input_parameters& input = model.get_input();
-   const auto& problems = model.get_problems();
-   const bool error = problems.have_problem();
-
-   set_spinfo(problems);
-   set_sminputs(qedqcd);
-   set_input(input);
-   if (!error) {
-      set_spectrum(model);
-      set_extra(model, scales, observables);
-   }
-}
-
-template <class Model>
 void @ModelName@_slha_io::fill_slhaea(
    SLHAea::Coll& slhaea, const @ModelName@_slha<Model>& model,
    const softsusy::QedQcd& qedqcd, const @ModelName@_scales& scales,
    const @ModelName@_observables& observables)
 {
    @ModelName@_slha_io slha_io;
+   const @ModelName@_input_parameters& input = model.get_input();
+   const auto& problems = model.get_problems();
+   const bool error = problems.have_problem();
 
-   slha_io.fill_spectrum_generator_data(model, qedqcd, scales, observables);
+   slha_io.set_spinfo(problems);
+   slha_io.set_sminputs(qedqcd);
+   slha_io.set_input(input);
+   if (!error) {
+      slha_io.set_spectrum(model);
+      slha_io.set_extra(model, scales, observables);
+   }
 
    slhaea = slha_io.get_slha_io().get_data();
 }
