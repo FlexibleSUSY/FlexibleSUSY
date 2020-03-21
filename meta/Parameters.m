@@ -118,6 +118,7 @@ IsLorentzIndex::usage="returns True if given symbol is a Lorentz index";
 IsColorIndex::usage="returns True if given symbol is a color index";
 IsGenerationIndex::usage="returns True if given symbol is a generation index";
 GetIndices::usage="returns list of indices from a given parameter";
+GetFieldColorIndex::usage = "";
 
 AllModelParametersAreReal::usage="returns True if all model parameters
 are real, False otherwise";
@@ -1979,6 +1980,19 @@ SetSMParameter[FlexibleSUSY`MDown2GeVInput     , value_String, struct_String] :=
 SetSMParameter[FlexibleSUSY`MUp2GeVInput       , value_String, struct_String] := struct <> ".setMass(softsusy::mUp, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MStrange2GeVInput  , value_String, struct_String] := struct <> ".setMass(softsusy::mStrange, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MCharmMCharm       , value_String, struct_String] := struct <> ".setMass(softsusy::mCharm, " <> value <> ")";
+
+(*  given a field will return it's indices,
+    e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
+GetFieldIndices[field_] :=
+    field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
+
+GetFieldColorIndex[field_/;TreeMasses`ColorChargedQ[field]]:=
+  Module[{res},
+    res = GetFieldIndices[field];
+    res = Select[res, IsColorIndex];
+    Assert[Length[res] === 1];
+    res[[1]]
+  ];
 
 End[];
 

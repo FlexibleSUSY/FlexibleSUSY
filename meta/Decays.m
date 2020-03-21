@@ -79,8 +79,8 @@ StripDiagramColorFactor[fields_, colorFactor_] :=
          S,
             Switch[finalStateReps,
                {S,S}, colorFactor,
-               {T,-T}, Coefficient[colorFactor, Superscript[ColorMath`CM\[Delta], ColorMathInterface`GetFieldColorIndex/@fieldsOut]],
-               {O,O}, Coefficient[colorFactor, Superscript[ColorMath`CM\[CapitalDelta], ColorMathInterface`GetFieldColorIndex/@fieldsOut]], 
+               {T,-T}, Coefficient[colorFactor, Superscript[ColorMath`CM\[Delta], Parameters`GetFieldColorIndex/@fieldsOut]],
+               {O,O}, Coefficient[colorFactor, Superscript[ColorMath`CM\[CapitalDelta], Parameters`GetFieldColorIndex/@fieldsOut]],
                _, Print["Unhandled final state color representation in ", initialStateRep, " -> ", finalStateReps, " decay"]; Quit[1];
             ],
          _, Print["Unhandled initial state color representation ", initialStateRep, " -> ", finalStateReps, " decay"]; Quit[1];
