@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
                               0.00026800741537194096, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.00079339041396827832, 1e-14);
+                              0.0008470512012646494, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
                               9.4231400598120973e-05, 2e-14);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
                               0.00026800741537194096, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.00079339041396827832, 1e-14);
+                              0.0008470512012646494, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VZVZ(&m),
                               9.4231400598120973e-05, 2e-14);
