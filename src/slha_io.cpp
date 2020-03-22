@@ -17,14 +17,14 @@
 // ====================================================================
 
 #include "slha_io.hpp"
-#include "wrappers.hpp"
-#include "lowe.h"
 #include "ew_input.hpp"
+#include "lowe.h"
 #include "physical_input.hpp"
 #include "spectrum_generator_settings.hpp"
+#include "wrappers.hpp"
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 #include <string>
 
 namespace flexiblesusy {
@@ -35,8 +35,8 @@ void SLHA_io::clear()
    modsel.clear();
 }
 
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double&,
-                                                        Eigen::Matrix<double, 1, 1>&)
+void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double& /*unused*/,
+                                                        Eigen::Matrix<double, 1, 1>& /*unused*/)
 {
 }
 
@@ -61,8 +61,8 @@ void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double& m,
    }
 }
 
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(double&,
-                                                      Eigen::Matrix<double, 1, 1>&)
+void SLHA_io::convert_symmetric_fermion_mixings_to_hk(double& /*unused*/,
+                                                      Eigen::Matrix<double, 1, 1>& /*unused*/)
 {
 }
 
@@ -79,16 +79,24 @@ void SLHA_io::convert_symmetric_fermion_mixings_to_hk(double& m,
    }
 }
 
+std::string SLHA_io::block_head(const std::string& name, double scale)
+{
+   const double eps = std::numeric_limits<double>::epsilon();
+
+   std::string result("Block " + name);
+
+   if (!is_zero(scale, eps)) {
+      result += " Q= " + (FORMAT_SCALE(scale)).str();
+   }
+
+   result += '\n';
+
+   return result;
+}
+
 bool SLHA_io::block_exists(const std::string& block_name) const
 {
    return data.find(block_name) != data.cend();
-}
-
-std::string SLHA_io::to_lower(const std::string& str)
-{
-   std::string lower(str.size(), ' ');
-   std::transform(str.begin(), str.end(), lower.begin(), ::tolower);
-   return lower;
 }
 
 /**
@@ -101,10 +109,11 @@ std::string SLHA_io::to_lower(const std::string& str)
  */
 void SLHA_io::read_from_source(const std::string& source)
 {
-   if (source == "-")
+   if (source == "-") {
       read_from_stream(std::cin);
-   else
+   } else {
       read_from_file(source);
+   }
 }
 
 /**
@@ -130,6 +139,24 @@ void SLHA_io::read_from_stream(std::istream& istr)
    data.clear();
    data.read(istr);
    read_modsel();
+}
+
+/**
+ * Reads the scale from the line, if the line is a block head and
+ * contains a scale definition.  Otherwise, the scale is not read.
+ *
+ * @param line the line
+ * @param scale the scale to write the value to
+ *
+ * @return true if scale has been read; false otherwise
+ */
+bool SLHA_io::read_scale(const SLHAea::Line& line, double& scale)
+{
+   if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
+      scale = convert_to<double>(line[3]);
+      return true;
+   }
+   return false;
 }
 
 void SLHA_io::read_modsel()
@@ -222,20 +249,14 @@ void SLHA_io::fill(Spectrum_generator_settings& settings) const
  */
 double SLHA_io::read_block(const std::string& block_name, const Tuple_processor& processor) const
 {
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
    double scale = 0.;
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
+         read_scale(line, scale);
 
-         if (line.size() >= 2) {
+         if (line.is_data_line() && line.size() >= 2) {
             const auto key = convert_to<int>(line[0]);
             const auto value = convert_to<double>(line[1]);
             processor(key, value);
@@ -243,7 +264,7 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -259,25 +280,20 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
  */
 double SLHA_io::read_block(const std::string& block_name, double& entry) const
 {
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
    double scale = 0.;
 
    while (block != data.cend()) {
       for (const auto& line: *block) {
-         if (!line.is_data_line()) {
-            // read scale from block definition
-            if (line.size() > 3 &&
-                to_lower(line[0]) == "block" && line[2] == "Q=")
-               scale = convert_to<double>(line[3]);
-            continue;
-         }
+         read_scale(line, scale);
 
-         if (line.size() >= 1)
+         if (line.is_data_line()) {
             entry = convert_to<double>(line[0]);
+         }
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -285,12 +301,12 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
 
 double SLHA_io::read_entry(const std::string& block_name, int key) const
 {
-   auto block = data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
    double entry = 0.;
    const SLHAea::Block::key_type keys(1, ToString(key));
 
    while (block != data.cend()) {
-      SLHAea::Block::const_iterator line = block->find(keys);
+      auto line = block->find(keys);
 
       while (line != block->end()) {
          if (line->is_data_line() && line->size() > 1) {
@@ -302,7 +318,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return entry;
@@ -317,18 +333,16 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
  */
 double SLHA_io::read_scale(const std::string& block_name) const
 {
-   if (!block_exists(block_name))
-      return 0.;
-
    double scale = 0.;
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
-   for (const auto& line: data.at(block_name)) {
-      if (!line.is_data_line()) {
-         if (line.size() > 3 &&
-             to_lower(line[0]) == "block" && line[2] == "Q=")
-            scale = convert_to<double>(line[3]);
-         break;
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         read_scale(line, scale);
       }
+
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
@@ -336,24 +350,28 @@ double SLHA_io::read_scale(const std::string& block_name) const
 
 void SLHA_io::set_block(const std::ostringstream& lines, Position position)
 {
-   SLHAea::Block block;
-   block.str(lines.str());
-   data.erase(block.name());
-   if (position == front)
-      data.push_front(block);
-   else
-      data.push_back(block);
+   set_block(lines.str(), position);
 }
 
 void SLHA_io::set_block(const std::string& lines, Position position)
 {
-   set_block(std::ostringstream(lines), position);
+   SLHAea::Block block;
+   block.str(lines);
+
+   data.erase(block.name());
+
+   if (position == front) {
+      data.push_front(block);
+   } else {
+      data.push_back(block);
+   }
 }
 
 void SLHA_io::set_blocks(const std::vector<std::string>& blocks, Position position)
 {
-   for (const auto& block: blocks)
+   for (const auto& block: blocks) {
       set_block(block, position);
+   }
 }
 
 /**
@@ -365,11 +383,8 @@ void SLHA_io::set_block(const std::string& name, double value,
                         const std::string& symbol, double scale)
 {
    std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n'
-      << boost::format(mixing_matrix_formatter) % 1 % 1 % value % symbol;
+   ss << block_head(name, scale);
+   ss << boost::format(mixing_matrix_formatter) % 1 % 1 % value % symbol;
 
    set_block(ss);
 }
@@ -377,11 +392,11 @@ void SLHA_io::set_block(const std::string& name, double value,
 void SLHA_io::set_modsel(const Modsel& modsel_)
 {
    modsel = modsel_;
-   const int qfv = modsel.quark_flavour_violated;
-   const int lfv = 2 * modsel.lepton_flavour_violated;
+   const auto qfv = static_cast<unsigned>(modsel.quark_flavour_violated);
+   const auto lfv = 2u * static_cast<unsigned>(modsel.lepton_flavour_violated);
 
    std::ostringstream ss;
-   ss << "Block MODSEL\n";
+   ss << block_head("MODSEL", 0.0);
    ss << FORMAT_ELEMENT(6 , qfv | lfv, "quark/lepton flavour violation");
    ss << FORMAT_ELEMENT(12, modsel.parameter_output_scale, "running parameter output scale (GeV)");
 
@@ -390,10 +405,10 @@ void SLHA_io::set_modsel(const Modsel& modsel_)
 
 void SLHA_io::set_physical_input(const Physical_input& input)
 {
-   const auto& names = input.get_names();
+   const auto& names = flexiblesusy::Physical_input::get_names();
 
    std::ostringstream ss;
-   ss << "Block FlexibleSUSYInput\n";
+   ss << block_head("FlexibleSUSYInput", 0.0);
 
    for (std::size_t i = 0; i < names.size(); i++) {
       ss << FORMAT_ELEMENT(i, input.get(static_cast<Physical_input::Input>(i)),
@@ -406,7 +421,7 @@ void SLHA_io::set_physical_input(const Physical_input& input)
 void SLHA_io::set_settings(const Spectrum_generator_settings& settings)
 {
    std::ostringstream ss;
-   ss << "Block FlexibleSUSY\n";
+   ss << block_head("FlexibleSUSY", 0.0);
 
    for (int i = 0; i < Spectrum_generator_settings::NUMBER_OF_OPTIONS; i++) {
       ss << FORMAT_ELEMENT(i, settings.get(static_cast<Spectrum_generator_settings::Settings>(i)),
@@ -420,7 +435,7 @@ void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
 {
    std::ostringstream ss;
 
-   ss << "Block SMINPUTS\n";
+   ss << block_head("SMINPUTS", 0.0);
    ss << FORMAT_ELEMENT( 1, 1./qedqcd.displayAlphaEmInput()  , "alpha_em^(-1)(MZ) SM(5) MSbar");
    ss << FORMAT_ELEMENT( 2, qedqcd.displayFermiConstant()    , "G_Fermi");
    ss << FORMAT_ELEMENT( 3, qedqcd.displayAlphaSInput()      , "alpha_s(MZ) SM(5) MSbar");
@@ -450,10 +465,11 @@ void SLHA_io::write_to_file(const std::string& file_name) const
 
 void SLHA_io::write_to_stream(std::ostream& ostr) const
 {
-   if (ostr.good())
+   if (ostr.good()) {
       ostr << data;
-   else
+   } else {
       ERROR("cannot write SLHA file");
+   }
 }
 
 /**
@@ -478,11 +494,13 @@ void SLHA_io::process_modsel_tuple(Modsel& modsel, int key, double value)
    {
       const int ivalue = Round(value);
 
-      if (ivalue < 0 || ivalue > 3)
+      if (ivalue < 0 || ivalue > 3) {
          WARNING("Value " << ivalue << " in MODSEL block entry 6 out of range");
-
-      modsel.quark_flavour_violated = ivalue & 0x1;
-      modsel.lepton_flavour_violated = ivalue & 0x2;
+      } else {
+         const auto uvalue = static_cast<unsigned>(ivalue);
+         modsel.quark_flavour_violated = ((uvalue & 0x1u) != 0);
+         modsel.lepton_flavour_violated = ((uvalue & 0x2u) != 0);
+      }
    }
       break;
    case 12:
@@ -576,7 +594,7 @@ void SLHA_io::process_flexiblesusy_tuple(Spectrum_generator_settings& settings,
                                          int key, double value)
 {
    if (0 <= key && key < static_cast<int>(Spectrum_generator_settings::NUMBER_OF_OPTIONS)) {
-      settings.set((Spectrum_generator_settings::Settings)key, value);
+      settings.set(static_cast<Spectrum_generator_settings::Settings>(key), value);
    } else {
       WARNING("Unrecognized entry in block FlexibleSUSY: " << key);
    }
@@ -587,7 +605,7 @@ void SLHA_io::process_flexiblesusyinput_tuple(
    int key, double value)
 {
    if (0 <= key && key < static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS)) {
-      input.set((Physical_input::Input)key, value);
+      input.set(static_cast<Physical_input::Input>(key), value);
    } else {
       WARNING("Unrecognized entry in block FlexibleSUSYInput: " << key);
    }

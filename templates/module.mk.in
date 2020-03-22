@@ -53,6 +53,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
+		$(DIR)/@CLASSNAME@_b_to_s_gamma.cpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
@@ -85,6 +86,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
+		$(DIR)/@CLASSNAME@_b_to_s_gamma.hpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver_interface.hpp \
@@ -287,7 +289,7 @@ run-metacode-$(MODNAME): $(METACODE_STAMP_@CLASSNAME@)
 ifeq ($(ENABLE_META),yes)
 $(METACODE_STAMP_@CLASSNAME@): $(DIR)/start.m $(DIR)/FlexibleSUSY.m $(META_SRC) $(TEMPLATES) $(SARAH_MODEL_FILES_@CLASSNAME@)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "Get[\"$<\"]; Quit[]" || (echo "Error: The code generation failed!"; exit 1)
+		$(Q)printf "%s" "Get[\"$<\"]; Quit[]" | "$(MATH)" || (echo "Error: The code generation failed!"; exit 1)
 		@touch "$(METACODE_STAMP_@CLASSNAME@)"
 		@echo "Note: to regenerate @CLASSNAME@ source files," \
 		      "please remove the file "

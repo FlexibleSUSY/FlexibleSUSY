@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["TestSuite`"];
+BeginPackage["TestSuite`", {"Utils`"}];
 
 TestEquality::usage="tests equality of two expressions";
 TestCloseRel::usage="tests relative numerical difference."
@@ -48,6 +48,10 @@ TestEquality[val_, expr_, msg_:""] :=
        numberOfPassedTests++;
        Return[True];
       ];
+TestEquality::wrongArgs =
+"Wrong arguments. Received '`1`'.";
+TestEquality[args___] :=
+   Utils`AssertOrQuit[False, TestEquality::wrongArgs, StringJoin@@Riffle[ToString/@{args},", "]];
 
 TestNonEquality[val_, expr_, msg_:""] :=
     If[val === expr,

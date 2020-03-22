@@ -225,8 +225,11 @@ GetGluon::usage            = "returns the gluon";
 GetZBoson::usage           = "returns the Z boson";
 GetWBoson::usage           = "returns the W boson";
 GetHiggsBoson::usage       = "return Higgs boson(s)";
+GetPseudoscalarHiggsBoson::usage = "";
+GetChargedHiggsBoson::usage = "";
 
 GetSMTopQuarkMultiplet::usage    = "Returns multiplet containing the top quark, Fu or Ft";
+GetSMStrangeQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fs";
 GetSMBottomQuarkMultiplet::usage = "Returns multiplet containing the bottom quark, Fd or Fb";
 GetSMElectronLeptonMultiplet::usage = "Returns multiplet containing the electron, Fe";
 GetSMMuonLeptonMultiplet::usage     = "Returns multiplet containing the muon, Fe or Fm";
@@ -588,6 +591,7 @@ GetSMNeutrino2[]      := GetUpLepton[2];
 GetSMNeutrino3[]      := GetUpLepton[3];
 
 GetSMTopQuarkMultiplet[]       := GetUpQuark[3]    /. head_[_] :> head;
+GetSMStrangeQuarkMultiplet[]    := GetDownQuark[2]  /. head_[_] :> head;
 GetSMBottomQuarkMultiplet[]    := GetDownQuark[3]  /. head_[_] :> head;
 GetSMElectronLeptonMultiplet[] := GetDownLepton[1] /. head_[_] :> head;
 GetSMMuonLeptonMultiplet[]     := GetDownLepton[2] /. head_[_] :> head;
@@ -2220,22 +2224,48 @@ CreateMixingArraySetter[masses_List, array_String] :=
            Return[set];
           ];
 
-(* Once Dominik wanted to have functions identifying SM particles.
-   This might be non-trivial in some models.
-   For now, we just have wrappers that return SM particles using SARAH symbols *)
+(*
+   1. Once Dominik wanted to have functions identifying SM particles.
+      This might be non-trivial in some models.
+      For now, we just have wrappers that return SM particles using SARAH symbols
+   2. If a particle does not exist in the model, we don't stop.
+      Instead, we return Null and let the calling code decide how to handle it.
+*)
 
-GetPhoton[] := SARAH`Photon;
-GetGluon[] := SARAH`Gluon;
-GetZBoson[] := SARAH`Zboson;
+GetPhoton[] :=
+   If[ValueQ[SARAH`Photon],
+      SARAH`Photon
+   ];
+
+GetGluon[] :=
+   If[ValueQ[SARAH`Gluon],
+      SARAH`Gluon
+   ];
+
+GetZBoson[] :=
+   If[ValueQ[SARAH`Zboson],
+      SARAH`Zboson
+   ];
+
 GetWBoson[] :=
-   Module[{temp},
-      temp = Select[Unevaluated[{SARAH`Wboson, SARAH`VectorW}], ValueQ];
+   Module[{temp = Select[Unevaluated[{SARAH`Wboson, SARAH`VectorW}], ValueQ]},
       If[Length @ DeleteDuplicates[temp] === 1,
-         temp[[1]],
-         Print["Could not identify the name given to the W-boson"]; Quit[1]
+         temp[[1]]
       ]
    ];
-GetHiggsBoson[] := SARAH`HiggsBoson;
+
+GetHiggsBoson[] :=
+   If[ValueQ[SARAH`HiggsBoson],
+      SARAH`HiggsBoson
+   ];
+
+GetChargedHiggsBoson[] :=
+   If[ValueQ[SARAH`ChargedHiggs],
+      SARAH`ChargedHiggs
+   ];
+
+GetPseudoscalarHiggsBoson[] :=
+   If[ValueQ[SARAH`PseudoScalarBoson], SARAH`PseudoScalarBoson];
 
 End[];
 

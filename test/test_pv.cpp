@@ -28,7 +28,6 @@
 #define BOOST_TEST_MODULE test_pv
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 #include "numerics2.hpp"
 #include "rk.hpp"
 #include <Eigen/Dense>
@@ -127,9 +126,9 @@ BOOST_AUTO_TEST_CASE( test_ReD1B0 )
 {
    BOOST_CHECK_EQUAL(ReD1B0(0., 0., 0.), 0.);
 
-   BOOST_CHECK_CLOSE(ReD1B0(0., p2, 0.), 1./(2.*p2), 1e-4);
+   BOOST_CHECK_CLOSE_FRACTION(ReD1B0(0., p2, 0.), 1./(2.*p2), 2e-6);
    BOOST_CHECK_EQUAL(ReD1B0(0., 0., p2), ReD1B0(0., p2, 0.));
-   BOOST_CHECK_EQUAL(ReD1B0(p2, 0., p2), ReD1B0(p2, p2, 0.));
+   BOOST_CHECK_CLOSE_FRACTION(ReD1B0(p2, 0., p2), ReD1B0(p2, p2, 0.), 1e-12);
 }
 
 BOOST_AUTO_TEST_CASE( test_ReD1B0_numerical )

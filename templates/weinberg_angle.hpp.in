@@ -42,6 +42,7 @@ public:
       double mz_pole{0.};        ///< Z pole mass
       double mt_pole{0.};        ///< top quark pole mass
       double alpha_s{0.};        ///< strong coupling constant
+      int higgs_index{0};        ///< index of SM-like Higgs
    };
 
    @ModelName@_weinberg_angle(const @ModelName@_mass_eigenstates*, const Sm_parameters&);
@@ -56,6 +57,7 @@ public:
 
    /// calculates and returns the sine of the Weinberg angle and the W pole mass
    std::pair<double,double> calculate(double sinThetaW_start = 0.48);
+   double calculate_mw_pole() const;
 
 private:
    int number_of_iterations{20};      ///< maximum number of iterations
@@ -75,6 +77,8 @@ private:
    double calculate_delta_vb_sm(double) const;
    int get_neutrino_index(int) const;
    double calculate_delta_vb_bsm(double) const;
+   double calculate_mw_pole(double) const;
+   double calculate_delta_alpha_hat_bsm(double) const;
 
 @DeltaVBprototypes@
    // Passarino-Veltman loop functions

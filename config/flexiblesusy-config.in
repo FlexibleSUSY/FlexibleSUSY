@@ -167,13 +167,30 @@ create_gm2calc_libs() {
     echo ""
 }
 
+create_cppflags() {
+    [ -z "$incl_external_modules" ] && incl_external_modules="$(create_include_directives_for_external_modules)"
+    cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
+    echo "$cppflags"
+}
+
+create_cppflags_without_modules() {
+    [ -z "$incl_external_modules" ] && incl_external_modules="$(create_include_directives_for_external_modules)"
+    cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
+    echo "$cppflags_without_modules"
+}
+
+create_compile_cmd() {
+    compile_cmd="$cxx $(create_cppflags) $cxxflags"
+    echo "$compile_cmd"
+}
+
 model_specific_modules="$(create_model_specific_modules_list)"
 incl_FS_modules="$(create_include_directives_for_FS_modules)"
-incl_external_modules="$(create_include_directives_for_external_modules)"
-cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
-cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
+incl_external_modules=""
+cppflags_without_modules=""
+cppflags=""
 flexiblesusy_libs="$(create_flexiblesusy_libs)"
-compile_cmd="$cxx $cppflags $cxxflags"
+compile_cmd=""
 libs="$ldflags $flexiblesusy_libs $(create_gm2calc_libs) $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
 modules="$(create_module_list)"
 
@@ -261,9 +278,9 @@ while test $# -gt 0; do
         --boostflags)            out="$out $boostflags" ;;
         --boosttestlibs)         out="$out $boosttestlibs" ;;
         --boostthreadlibs)       out="$out $boostthreadlibs" ;;
-        --compile-cmd)           out="$out $compile_cmd" ;;
-        --cppflags)              out="$out $cppflags" ;;
-        --cppflags-without-modules) out="$out $cppflags_without_modules" ;;
+        --compile-cmd)           out="$out $(create_compile_cmd)" ;;
+        --cppflags)              out="$out $(create_cppflags)" ;;
+        --cppflags-without-modules) out="$out $(create_cppflags_without_modules)" ;;
         --cxx)                   out="$out $cxx" ;;
         --cxxflags)              out="$out $cxxflags" ;;
         --eigenflags)            out="$out $eigenflags" ;;

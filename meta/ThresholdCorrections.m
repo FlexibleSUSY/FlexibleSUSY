@@ -34,6 +34,7 @@ CalculateColorCoupling::usage="";
 CalculateElectromagneticCoupling::usage="";
 SetDRbarYukawaCouplings::usage="";
 GetTwoLoopThresholdHeaders::usage="";
+YukawaToMassPrefactor::usage="";
 
 CalculateGaugeCouplings::MissingRelation = "Warning: Coupling `1` is not\
  releated to `2` via DependenceNum: `1` = `3`"
@@ -378,6 +379,19 @@ InvertMassRelation[fermion_, yukawa_] :=
            InvertRelation[matrixExpression, fermion / prefactor, yukawa]
           ];
 
+YukawaToMassPrefactor[fermion_, yukawa_] :=
+    Module[{massMatrix, polynom},
+           If[TreeMasses`IsUnmixed[fermion],
+              massMatrix = TreeMasses`GetMassOfUnmixedParticle[fermion];
+              massMatrix = TreeMasses`ReplaceDependencies[massMatrix];
+              massMatrix = Vertices`StripGroupStructure[massMatrix, {SARAH`ct1, SARAH`ct2}];
+              ,
+              massMatrix = SARAH`MassMatrix[fermion];
+             ];
+           polynom = Factor[massMatrix /. List -> Plus];
+           GetPrefactor[polynom, yukawa]
+          ];
+
 SetDRbarYukawaCouplingTop[settings_] :=
     SetDRbarYukawaCouplingFermion[TreeMasses`GetSMTopQuarkMultiplet[], SARAH`UpYukawa, Global`upQuarksDRbar, settings];
 
@@ -471,6 +485,7 @@ sm_pars.mw_pole = qedqcd.displayPoleMW();
 sm_pars.mz_pole = qedqcd.displayPoleMZ();
 sm_pars.mt_pole = qedqcd.displayPoleMt();
 sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+sm_pars.higgs_index = higgs_idx;
 
 const int number_of_iterations =
     std::max(20, static_cast<int>(std::abs(-log10(MODEL->get_precision()) * 10)));

@@ -61,7 +61,8 @@ TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
-		$(DIR)/test_space_dir.sh
+		$(DIR)/test_space_dir.sh \
+		$(DIR)/test_wolframscript.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -76,6 +77,7 @@ TEST_META := \
 		$(DIR)/test_MSSM_2L_yt.m \
 		$(DIR)/test_MSSM_2L_yt_loopfunction.m \
 		$(DIR)/test_MSSM_2L_yt_softsusy.m \
+		$(DIR)/test_MRSSM_TreeMasses.m \
 		$(DIR)/test_Parameters.m \
 		$(DIR)/test_ReadSLHA.m \
 		$(DIR)/test_RGIntegrator.m \
@@ -91,6 +93,7 @@ TEST_META := \
 		$(DIR)/test_ThresholdCorrections.m \
 		$(DIR)/test_TreeMasses.m \
 		$(DIR)/test_TwoLoopNonQCD.m \
+		$(DIR)/test_Utils.m \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
@@ -133,7 +136,6 @@ TEST_SRC += \
 		$(DIR)/test_loopfunctions.cpp \
 		$(DIR)/test_sfermions.cpp \
 		$(DIR)/test_CMSSM_beta_function_benchmark.cpp \
-		$(DIR)/test_CMSSM_database.cpp \
 		$(DIR)/test_CMSSM_high_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_higgs_iteration.cpp \
 		$(DIR)/test_CMSSM_initial_guesser.cpp \
@@ -196,10 +198,21 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_database.cpp
 endif
 
+ifeq ($(WITH_CMSSMCKM),yes)
+TEST_SRC += \
+		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
+endif
+
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
+		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
+endif
+
+ifeq ($(WITH_MRSSM2CKM),yes)
+TEST_SRC += \
+		$(DIR)/test_MRSSM2CKM_b_to_s_gamma.cpp
 endif
 
 endif # ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -424,7 +437,8 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_slha.cpp \
 		$(DIR)/test_CMSSM_slha_input.cpp \
 		$(DIR)/test_CMSSM_two_loop_spectrum.cpp \
-		$(DIR)/test_CMSSM_info.cpp
+		$(DIR)/test_CMSSM_info.cpp \
+		$(DIR)/test_CMSSM_mw_calculation.cpp
 endif
 
 ifeq ($(WITH_NMSSM),yes)
@@ -445,17 +459,20 @@ TEST_SRC += \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
+		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
-		$(DIR)/test_SM_npointfunctions.cpp
+		$(DIR)/test_SM_npointfunctions.cpp \
+		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
 ifeq ($(WITH_MSSM),yes)
 TEST_SRC += \
-		$(DIR)/test_MSSM_npointfunctions.cpp
+		$(DIR)/test_MSSM_npointfunctions.cpp \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
 endif
 endif
 
@@ -494,6 +511,8 @@ endif
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_ewsb.cpp
+endif
+ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
 		$(DIR)/test_CMSSMCPV_librarylink.m
 endif
@@ -570,8 +589,11 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.cpp
 TEST_SH += \
-		$(DIR)/test_MSSMEFTHiggs_librarylink.sh \
 		$(DIR)/test_MSSMEFTHiggs_profile.sh
+endif
+ifeq ($(WITH_MSSMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
 endif
 
 ifeq ($(WITH_MSSMEFTHiggs) $(WITH_MSSMNoFVEFTHiggs),yes yes)
@@ -599,12 +621,12 @@ TEST_SH += \
 		$(DIR)/test_SplitMSSMEFTHiggs.sh
 endif
 
-ifeq ($(WITH_SM) $(WITH_SMEFTHiggs),yes yes)
+ifeq ($(WITH_SM) $(WITH_SMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes yes)
 TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
 endif
 
-ifeq ($(WITH_SM),yes)
+ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 endif
@@ -644,7 +666,10 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_3loop_beta.m
+endif
+ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_META += \
 		$(DIR)/test_CMSSM_librarylink.m \
 		$(DIR)/test_CMSSM_librarylink_parallel.m
 TEST_SH += \
@@ -691,6 +716,8 @@ $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_L
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
 endif
 
+$(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
+
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
 		clean-$(MODNAME)-lib clean-$(MODNAME)-obj \
@@ -698,7 +725,7 @@ endif
 		execute-shell-tests
 
 all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
-		@true
+		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
 		$(Q)-rm -f $(TEST_DEP)
@@ -730,16 +757,21 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 execute-tests:  $(TEST_XML)
+		@printf "%s\n" "All tests passed."
 
 ifeq ($(ENABLE_META),yes)
 execute-meta-tests: $(TEST_META_XML)
+		@printf "%s\n" "All meta tests passed."
 else
 execute-meta-tests:
+		@printf "%s\n" "All meta tests passed."
 endif
 
 execute-compiled-tests: $(TEST_EXE_XML)
+		@printf "%s\n" "All compiled tests passed."
 
 execute-shell-tests: $(TEST_SH_XML)
+		@printf "%s\n" "All shell script tests passed."
 
 # creates .xml file with test result
 PTR = write_test_result_file() { \
@@ -755,7 +787,8 @@ PTR = write_test_result_file() { \
 		printf "%-66s %4s\n" "$$2" "OK"; \
 	else \
 		printf "%-66s %4s\n" "$$2" "FAILED"; \
-	fi \
+	fi; \
+	return $$1; \
 }
 
 $(DIR)/%.x.xml: $(DIR)/%.x
@@ -768,8 +801,8 @@ $(DIR)/%.x.xml: $(DIR)/%.x
 $(DIR)/%.m.xml: $(DIR)/%.m $(META_SRC)
 		@rm -f $@ $(@:.xml=.log)
 		@$(PTR); \
-		"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
-		Quit[TestSuite\`GetNumberOfFailedTests[]]" >> $(@:.xml=.log) 2>&1; \
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; \
+		Quit[TestSuite\`GetNumberOfFailedTests[]]" | "$(MATH)" >> $(@:.xml=.log) 2>&1; \
 		write_test_result_file $$? $< $@ $(@:.xml=.log)
 
 $(DIR)/%.sh.xml: $(DIR)/%.sh
@@ -786,6 +819,8 @@ $(TEST_XML): $(TEST_ALL_XML)
 <tests date=\"$$(date)\">\n\
 $$(for f in $^ ; do echo "\t<test filename=\"$$(basename $$f)\"/>"; done)\n\
 </tests>" > $@
+
+$(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
 
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
@@ -820,18 +855,33 @@ $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_cxxdiagrams.x: $(LIBSM)
 
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_SM_npointfunctions.x: $(LIBSM)
 
-$(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
+$(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
+		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM)
+
+$(DIR)/test_MSSM_npointfunctions.cpp : \
+		$(DIR)/test_MSSM_npointfunctions.meta \
+		$(DIR)/test_MSSM_npointfunctions.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
 		@$(MSG)
-		$(Q)"$(MATH)" -run "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0];"
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 $(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM)
+
+$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.meta \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in \
+		$(META_SRC) $(METACODE_STAMP_MSSM)
+		@$(MSG)
+		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+$(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
@@ -841,13 +891,21 @@ $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
+$(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
+
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
+
+$(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
+
+$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSM_model.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_info.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_two_loop_spectrum.x: $(LIBCMSSM)
+
+$(DIR)/test_CMSSM_mw_calculation.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_beta_function_benchmark.x: $(LIBCMSSM)
 
@@ -966,6 +1024,8 @@ $(DIR)/test_SM_three_loop_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_two_loop_spectrum.x: $(LIBSM)
 
+$(DIR)/test_SM_mw_calculation.x: $(LIBSM)
+
 $(DIR)/test_SM_weinberg_angle.x: $(LIBSM)
 
 $(DIR)/test_SM_weinberg_angle_meta.x: $(LIBSM)
@@ -1047,7 +1107,7 @@ $(DIR)/test_%.x: $(DIR)/test_%.o
 		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
-$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
+$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBTEST): $(LIBTEST_OBJ)

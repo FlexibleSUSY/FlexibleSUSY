@@ -1,0 +1,116 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+Needs["Utils`"];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_MSSM_matching_selfenergy_Fd.meta started...\n"];
+Utils`FSFancyLine[":"];
+
+Needs["FlexibleSUSY`"];
+
+(*INITIALIZATION***************************************************************)
+workingDirectory = Directory[];
+SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
+SARAH`SARAH[InputDirectories] = {
+   FileNameJoin[{workingDirectory, "sarah"}],
+   ToFileName[{$sarahDir, "Models"}]};
+
+Start["MSSM"];
+
+modelFile = FileNameJoin[{workingDirectory, "models", "MSSM", "FlexibleSUSY.m"}];
+
+FlexibleSUSY`LoadModelFile[modelFile];
+FlexibleSUSY`Private`PrepareUnrotatedParticles[FSEigenstates];
+allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFunctions[];
+
+{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices[allParameters];
+FlexibleSUSY`SetupOutputParameters[massMatrices];
+
+(*NPF CALCULATION**************************************************************)
+Selfenergy = NPointFunctions`NPointFunction[
+   {SARAH`DownQuark}, {SARAH`DownQuark},
+   NPointFunctions`UseCache -> False,
+   NPointFunctions`ZeroExternalMomenta -> True,
+   NPointFunctions`ExcludeProcesses -> NPointFunctions`ExceptIrreducible];
+
+nPointFunctionHeaders = CreateCXXHeaders[
+   UseWilsonCoeffs -> True,
+   NPointFunctions`LoopFunctions->"FlexibleSUSY"];
+
+ChiralBasis =
+   {
+      "value_right"->
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
+      "value_left"->
+      FormCalc`DiracChain[FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, FormCalc`Spinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
+   };
+
+(*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)
+FdSelfenergy = WilsonCoeffs`InterfaceToMatching[Selfenergy, ChiralBasis];
+
+FdSelfenergyCode = NPointFunctions`CreateCXXFunctions[
+   FdSelfenergy,
+   "selfenergy_Fd_1loop",
+   SARAH`Delta,
+   WilsonBasis -> ChiralBasis ][[2]];
+
+(*VERTICES*********************************************************************)
+(*if some additional vetices exist, then get them*)
+existedVerticesFile = FileNameJoin@{
+   SARAH`$sarahCurrentOutputMainDir,
+   ToString@FlexibleSUSY`FSEigenstates,
+   "CXXDiagrams",
+   "CreatedVertices.m"};
+
+existedVertices = If[TrueQ@FileExistsQ@existedVerticesFile,
+   Get@existedVerticesFile, {}];
+
+(*get vertices which doesn't exist yet*)
+newVertices = Complement[
+   NPointFunctions`VerticesForNPointFunction@Selfenergy,
+   existedVertices];
+
+If[newVertices==={},
+   verticesCode = {"",""},
+   (* else *)
+   verticesCode = CXXDiagrams`CreateVertices[
+   newVertices,
+   CXXdiagrams`MaximumVerticesLimit -> Length@newVertices][[1]]
+];
+
+(*CODE REPLACEMENTS************************************************************)
+templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
+   FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp.in"}],
+   "\n"];
+code = StringReplace[templateCode,
+   {
+      "@NPointFunctions_Selfenergy_Fd_1loop@" -> FdSelfenergyCode,
+      "@NPointFunctions_Headers@" -> nPointFunctionHeaders,
+      "@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
+      "@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
+}];
+
+fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MSSM_matching_selfenergy_Fd.cpp"};
+WriteString[fileHandle, code];
+Close[fileHandle];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_MSSM_matching_selfenergy_Fd.meta done\n"];
+Utils`FSFancyLine[":"];

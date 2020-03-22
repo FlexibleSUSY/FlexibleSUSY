@@ -6,7 +6,7 @@
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
 FLEXIBLESUSY_MINOR=4
-FLEXIBLESUSY_PATCH=0
+FLEXIBLESUSY_PATCH=1
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -1490,7 +1490,16 @@ check_std_threads() {
 check_thread_libs() {
     is_posix_platform || return
 
-    check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths"
+    # additional search paths by the compiler
+    local cc_lib_search_paths=""
+
+    case "$cxx_compiler_type" in
+	gnu|clang)
+	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    ;;
+    esac
+
+    check_library "libpthread" "$pthread_lib_dir" "$default_lib_paths:$cc_lib_search_paths"
     if [ -z "$found_lib" ]; then
         message "Error: libpthread must be installed to enable multithreading!"
         exit 1
@@ -1738,6 +1747,22 @@ check_cxxflags() {
 
 #_____________________________________________________________________
 check_eigen_incl() {
+    local eigen_name=""
+
+    [ -f eigen.pc ] && eigen_name="eigen"
+    [ -f eigen3.pc ] && eigen_name="eigen3"
+
+    [ -z "$eigen_inc_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -n ${eigen_name} ] && \
+    [ -f ${eigen_name}.pc ] && \
+    {
+        message -n "Checking for Eigen library using local ${eigen_name}.pc ... "
+        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${eigen_name} --cflags)
+        message "ok"
+        return
+    }
+
     # Eigen headers are usually in the `eigen3` subdirectory of the include paths.
     eigen_inc_paths=""
     IFS=":"
