@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include <memory>
+#include <iostream>
 
 #include "config.h"
 #include "loop_library.hpp"
@@ -53,11 +54,15 @@ namespace flexiblesusy {
 Loop_library::Library Loop_library::type_ = Loop_library::Library::Undefined;
 std::unique_ptr<looplibrary::Loop_library_interface> Loop_library::lib_;
 
+void Loop_library::set_default(void) {
+   Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
+   Loop_library::type_ = Loop_library::Library::Softsusy;
+}
+
 void Loop_library::set(int new_type) {
    if( Loop_library::type_ == Loop_library::Library::Undefined) {
       switch(new_type) {
-         case 0 : Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
-                  Loop_library::type_ = Loop_library::Library::Softsusy;
+         case 0 : Loop_library::set_default();
                   break;
          #ifdef ENABLE_COLLIER
          case 1 : Loop_library::lib_ = std::make_unique<looplibrary::Collier>();
@@ -74,12 +79,11 @@ void Loop_library::set(int new_type) {
                   Loop_library::type_ = Loop_library::Library::Fflite;
                   break;
          #endif // ENABLE_FFLITE
-         default: throw std::invalid_argument(
-                     "Currently configured values are 0 (=Softsusy)"
-                     COLLIER_INFO
-                     LOOPTOOLS_INFO
-                     FFLITE_INFO
-                     ".");
+         default: std::cerr << "Warning: Check FlexibleSUSY[31]:\n" <<
+                  "Currently configured values are 0 (=Softsusy)"
+                  COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO ".\n"<<
+                  "Setting default library.\n";
+                  Loop_library::set_default();
                   break;
       }
    }
@@ -87,9 +91,9 @@ void Loop_library::set(int new_type) {
 
 looplibrary::Loop_library_interface& Loop_library::get() {
    if(Loop_library::type_ == Loop_library::Library::Undefined) {
-      throw std::logic_error(
-         "Loop library should be initialized before first usage."
-      );
+      std::cerr << "Loop library should be initialized before first usage.\n" <<
+      "Setting default library.\n";
+      Loop_library::set_default();
    }
    return *Loop_library::lib_;
 }

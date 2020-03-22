@@ -39,6 +39,7 @@ public:
 private:
    static Library type_;
    static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
+   static void set_default(void);
 
    Loop_library() {}
    Loop_library(Loop_library const&);
