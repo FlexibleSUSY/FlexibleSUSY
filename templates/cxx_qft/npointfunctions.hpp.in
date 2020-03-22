@@ -193,7 +193,7 @@ struct context_with_vertices : context_base {
       return Vertex<Fields...>::evaluate(indices, model).value();
    }
 
-   double scale(void) const { return model.get_scale(); }
+   double scale(void) const { return dynamic_cast<@ModelName@_mass_eigenstates const&>(model).get_scale(); }
 };
 
 template <int NumberOfExternalIndices, int NumberOfExternalMomenta>
