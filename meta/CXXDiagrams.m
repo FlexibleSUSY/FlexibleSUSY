@@ -26,7 +26,6 @@
 BeginPackage["CXXDiagrams`", {"SARAH`", "TextFormatting`", "TreeMasses`", "Vertices`", "Parameters`", "CConversion`", "ColorMath`", "Utils`"}];
 
 (* our *)
-CreatePhysicalMassFunctions::usage="";
 CreateStrongCoupling::usage="";
 FieldInfo::usage="";
 includeLorentzIndices::usage="";
@@ -50,6 +49,8 @@ NumberOfFieldIndices::usage="Return the number of indices a field has as would b
 determined by inspecting the result of TreeMasses`FieldInfo[].";
 CreateMassFunctions::usage="Creates c++ code that makes functions available that \
 return tree-level masses of given fields.";
+CreatePhysicalMassFunctions::usage="Creates c++ code that makes functions available that \
+return physical masses of given fields.";
 LorentzIndexOfField::usage="Returns the Lorentz index of a given indexed field.";
 ColourIndexOfField::usage="Returns the colour index of a given indexed field.";
 
@@ -98,7 +99,6 @@ numerical value of the electrical charge of the electron.";
 
 NumberOfExternalParticlesInTopology::usage = "";
 NumberOfPropagatorsInTopology::usage = "";
-CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
 
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
 ExtractColourFactor::usage = "";
@@ -191,10 +191,6 @@ CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
 	", "]] <> ">"
 
-(** \brief Returns the c++ keyword corresponding to a boolean value. **)
-CXXBoolValue[True] = "true";
-CXXBoolValue[False] = "false";
-
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
  * \param field the given field
@@ -282,7 +278,7 @@ CreateFields[] :=
             TextFormatting`IndentText[
               "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
               "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
-              "static constexpr auto massless = " <> CConversion`CreateCBoolValue@TreeMasses`IsMassless[#] <> ";\n" <>
+              "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
                    StringJoin[", " <> ToString[#] & /@
@@ -295,8 +291,8 @@ CreateFields[] :=
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
                      "using sm_flags = boost::mpl::vector_c<bool, " <>
                         If[TreeMasses`GetDimension[#] === 1,
-                           CXXBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CXXBoolValue /@
+                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
                              TreeMasses`IsSMParticleElementwise[#],
                                                ", "]] <>
                         ">;\n" <>
@@ -1386,8 +1382,12 @@ CreateMassFunctions[] :=
              "{ return model.get_M" <> CXXNameOfField[# /. ghostMappings] <>
              If[TreeMasses`GetDimension[#] === 1, "()", "(indices[0])"] <> "; }"
             ] & /@ massiveFields, "\n\n"]
-        ]
+        ];
 
+(** \brief Creates c++ code that makes functions available that
+ * return physical masses of given fields.
+ * \returns the corresponding c++ code as a string.
+ **)
 CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
   Module[{massiveFields,
           ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
@@ -1405,7 +1405,7 @@ CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
              "{ return model.get_physical().M" <> CXXNameOfField[# /. ghostMappings] <>
              If[TreeMasses`GetDimension[#] === 1, "", "[indices[0]]"] <> "; }"
             ] & /@ massiveFields, "\n\n"]
-        ]
+        ];
 
 (** \brief Creates the c++ code for a function that returns the
  * numerical value of the electrical charge of the electron.

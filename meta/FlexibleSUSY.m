@@ -2423,7 +2423,7 @@ WriteAMuonClass[calcAMu_, files_List] :=
                otherwise we assume it's the second particle in the lepton multiplet *)
             muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
-            discardSMcontributions = CXXDiagrams`CXXBoolValue[True]},
+            discardSMcontributions = CConversion`CreateCBoolValue[True]},
 
       calculation =
          If[calcAMu,

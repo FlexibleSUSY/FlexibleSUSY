@@ -28,10 +28,8 @@
 #ifndef @ModelName@_CXXQFT_CONTEXT_BASE_H
 #define @ModelName@_CXXQFT_CONTEXT_BASE_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
-
 #include "@ModelName@_fields.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_interface.hpp"
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
@@ -49,7 +47,7 @@ namespace @ModelName@_cxx_diagrams {
       template<class Field>
       double physical_mass(const typename field_indices<Field>::type& indices) const
       {
-         using CleanField = 
+         using CleanField =
             typename fields::remove_lorentz_conjugation<Field>::type;
          return physical_mass_impl<CleanField>(indices);
       }
@@ -60,8 +58,8 @@ namespace @ModelName@_cxx_diagrams {
       context_base(const context_base&) = default;
       context_base(context_base&&) = default;
 
-      //context_base& operator=(const context_base&) = default;
-      //context_base& operator=(context_base&&) = default;
+      context_base& operator=(const context_base&) = default;
+      context_base& operator=(context_base&&) = default;
 
       virtual ~context_base(void) = default;
 
@@ -74,6 +72,7 @@ namespace @ModelName@_cxx_diagrams {
    };
 
 @CXXDiagrams_MassFunctions@
+
 @CXXDiagrams_PhysicalMassFunctions@
 
 } // namespace @ModelName@_cxx_diagrams

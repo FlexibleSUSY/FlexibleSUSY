@@ -243,10 +243,11 @@ CreateCType[CConversion`MatrixType[t_, dim1_, dim2_]] :=
 CreateCType[CConversion`TensorType[t_, dims__]] :=
     EigenTensor[CreateCType[ScalarType[t]], Sequence @@ (ToString /@ {dims})];
 
+(** \brief Returns the c++ keyword corresponding to a boolean value. **)
 CreateCBoolValue[True] := "true";
 CreateCBoolValue[False] := "false";
 CreateCBoolValue[sym_] :=
-    Print["Error: CreateCBoolValue: cannot convert value to Boolean type: ", sym];
+    (PrintErrorMessage["CreateCBoolValue: cannot convert value to Boolean type: ", sym]; Quit[1]);
 
 CastTo[expr_String, toType_ /; toType === None] := expr;
 

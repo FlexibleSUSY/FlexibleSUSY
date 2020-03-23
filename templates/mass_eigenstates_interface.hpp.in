@@ -36,10 +36,11 @@
 
 #include <Eigen/Core>
 
+#include "@ModelName@_physical.hpp"
+
 namespace flexiblesusy {
 
 class Problems;
-class @ModelName@_physical;
 
 /**
  * @class @ModelName@_mass_eigenstates_interface
