@@ -16,31 +16,20 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
-
-#include <iostream>
-#include <utility>
+#include "gm2_numerics.hpp"
 
 namespace gm2calc {
 
-void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
-{
-   ostr << "susy parameters:\n";
-   ostr << "Yd = " << Yd << '\n';
-   ostr << "Ye = " << Ye << '\n';
-   ostr << "Yu = " << Yu << '\n';
-   ostr << "Mu = " << Mu << '\n';
-   ostr << "g1 = " << g1 << '\n';
-   ostr << "g2 = " << g2 << '\n';
-   ostr << "g3 = " << g3 << '\n';
-   ostr << "vd = " << vd << '\n';
-   ostr << "vu = " << vu << '\n';
+double abs_sqrt(double x) {
+   return std::sqrt(std::abs(x));
 }
 
-std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
-{
-   susy_pars.print(ostr);
-   return ostr;
+int sign(double x) noexcept { return x < 0 ? -1 : 1; }
+
+double signed_sqr(double x) { return sign(x) * x * x; }
+
+double signed_abs_sqrt(double x) {
+   return sign(x) * std::sqrt(std::abs(x));
 }
 
 } // namespace gm2calc

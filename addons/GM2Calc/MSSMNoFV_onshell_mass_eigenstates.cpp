@@ -28,79 +28,187 @@
  * 1.2.1 (git commit: v1.2.1-49-gfc4c300) and SARAH 4.5.8 .
  */
 
-#include "MSSMNoFV_onshell_mass_eigenstates.hpp"
-#include "eigen_utils.hpp"
-#include "linalg2.hpp"
+#include "gm2calc/MSSMNoFV_onshell_mass_eigenstates.hpp"
 
+#include "gm2_linalg.hpp"
+
+#include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <algorithm>
+#include <limits>
 
 namespace {
+
+/**
+ * @class RAII_save
+ * @brief Saves value of variable and restores it at destruction
+ */
+template <typename T>
+class RAII_save {
+public:
+   explicit RAII_save(T& var_) noexcept : var(var_), value(var_) {}
+   RAII_save(const RAII_save&) = delete;
+   RAII_save(RAII_save&&) noexcept = default;
+   ~RAII_save() { var = value; }
+   RAII_save& operator=(const RAII_save&) = delete;
+   RAII_save& operator=(RAII_save&& other) noexcept = default;
+
+private:
+   T& var;
+   T value{};
+};
+
+template <typename T>
+constexpr RAII_save<T> make_raii_save(T& var)
+{
+   return RAII_save<T>(var);
+}
+
 template <typename Derived>
-void Symmetrize(Eigen::MatrixBase<Derived>& m)
+void symmetrize(Eigen::MatrixBase<Derived>& m)
 {
    static_assert(Eigen::MatrixBase<Derived>::RowsAtCompileTime ==
                  Eigen::MatrixBase<Derived>::ColsAtCompileTime,
-                 "Symmetrize is only defined for squared matrices");
+                 "symmetrize is only defined for squared matrices");
 
-   for (int i = 0; i < Eigen::MatrixBase<Derived>::RowsAtCompileTime; i++)
-      for (int k = 0; k < i; k++)
+   for (int i = 0; i < Eigen::MatrixBase<Derived>::RowsAtCompileTime; i++) {
+      for (int k = 0; k < i; k++) {
          m(i,k) = m(k,i);
+      }
+   }
 }
 
 template <typename Derived>
-void Hermitianize(Eigen::MatrixBase<Derived>& m)
+void hermitianize(Eigen::MatrixBase<Derived>& m)
 {
-   Symmetrize(m);
+   symmetrize(m);
 }
 
 template <typename T> T sqr(T x) { return x*x; }
+
+template<class Real, int N>
+struct Abs_less {
+    explicit Abs_less(const Eigen::Array<Real, N, 1>& w_) : w(w_) {}
+    bool operator() (int i, int j) { return std::abs(w[i]) < std::abs(w[j]); }
+    const Eigen::Array<Real, N, 1>& w;
+};
+
+template <class T>
+struct Is_not_finite {
+   bool operator()(T x) { return !std::isfinite(x); }
+};
+
+template <typename Derived>
+unsigned closest_index(double mass, const Eigen::ArrayBase<Derived>& v)
+{
+   unsigned pos;
+   typename Derived::PlainObject tmp;
+   tmp.setConstant(mass);
+
+   (v - tmp).abs().minCoeff(&pos);
+
+   return pos;
+}
+
+/**
+ * The element of v, which is closest to mass, is moved to the
+ * position idx.
+ *
+ * @param idx new index of the mass eigenvalue
+ * @param mass mass to compare against
+ * @param v vector of masses
+ * @param z corresponding mixing matrix
+ */
+template <typename DerivedArray, typename DerivedMatrix>
+void move_goldstone_to(int idx, double mass, Eigen::ArrayBase<DerivedArray>& v,
+                       Eigen::MatrixBase<DerivedMatrix>& z)
+{
+   int pos = closest_index(mass, v);
+   if (pos == idx) {
+      return;
+   }
+
+   const int sign = (idx - pos) < 0 ? -1 : 1;
+   int steps = std::abs(idx - pos);
+
+   // now we shuffle the states
+   while (steps--) {
+      const int new_pos = pos + sign;
+      v.row(new_pos).swap(v.row(pos));
+      z.row(new_pos).swap(z.row(pos));
+      pos = new_pos;
+   }
+}
+
+/**
+ * Copies all elements from src to dst which are not close to the
+ * elements in cmp.
+ *
+ * @param src source vector
+ * @param cmp vector with elements to compare against
+ * @param dst destination vector
+ */
+template<class Real, int Nsrc, int Ncmp, int Ndst>
+void remove_if_equal(const Eigen::Array<Real,Nsrc,1>& src,
+                     const Eigen::Array<Real,Ncmp,1>& cmp,
+                     Eigen::Array<Real,Ndst,1>& dst)
+{
+   static_assert(Nsrc == Ncmp + Ndst,
+                 "Error: remove_if_equal: vectors have incompatible length!");
+
+   Eigen::Array<Real,Nsrc,1> non_equal(src);
+
+   for (int i = 0; i < Ncmp; i++) {
+      const int idx = closest_index(cmp(i), non_equal);
+      non_equal(idx) = std::numeric_limits<double>::infinity();
+   }
+
+   std::remove_copy_if(non_equal.data(), non_equal.data() + Nsrc,
+                       dst.data(), Is_not_finite<Real>());
+}
+
+/**
+ * @brief reorders vector v according to ordering in vector v2
+ * @param v vector with elementes to be reordered
+ * @param v2 vector with reference ordering
+ */
+template<class Real, int N>
+void reorder_vector(
+   Eigen::Array<Real,N,1>& v,
+   const Eigen::Array<Real,N,1>& v2)
+{
+   Eigen::PermutationMatrix<N> p;
+   p.setIdentity();
+   std::sort(p.indices().data(), p.indices().data() + p.indices().size(),
+             Abs_less<Real, N>(v2));
+
+#if EIGEN_VERSION_AT_LEAST(3,1,4)
+   v.matrix().transpose() *= p.inverse();
+#else
+   Eigen::Map<Eigen::Matrix<Real,N,1> >(v.data()).transpose() *= p.inverse();
+#endif
+}
+
+/**
+ * @brief reorders vector v according to ordering of diagonal elements in mass_matrix
+ * @param v vector with elementes to be reordered
+ * @param matrix matrix with diagonal elements with reference ordering
+ */
+template<class Derived>
+void reorder_vector(
+   Eigen::Array<double,Eigen::MatrixBase<Derived>::RowsAtCompileTime,1>& v,
+   const Eigen::MatrixBase<Derived>& matrix)
+{
+   reorder_vector(v, matrix.diagonal().array().eval());
+}
 
 } // anonymous namespace
 
 namespace gm2calc {
 
-using namespace flexiblesusy;
-
 #define CLASSNAME MSSMNoFV_onshell_mass_eigenstates
 #define PHYSICAL(parameter) physical.parameter
 #define MODELPARAMETER(parameter) model->get_##parameter()
-
-CLASSNAME::MSSMNoFV_onshell_mass_eigenstates()
-   : MSSMNoFV_onshell_soft_parameters()
-   , force_output(false)
-   , physical()
-   , problems()
-   , MVG(0), MGlu(0), MVP(0), MVZ(0), MFd(0), MFs(0), MFb(0), MFu(0), MFc(0),
-      MFt(0), MFve(0), MFvm(0), MFvt(0), MFe(0), MFm(0), MFtau(0), MSveL(0), MSvmL
-      (0), MSvtL(0), MSd(Eigen::Array<double,2,1>::Zero()), MSu(Eigen::Array<
-      double,2,1>::Zero()), MSe(Eigen::Array<double,2,1>::Zero()), MSm(
-      Eigen::Array<double,2,1>::Zero()), MStau(Eigen::Array<double,2,1>::Zero()),
-      MSs(Eigen::Array<double,2,1>::Zero()), MSc(Eigen::Array<double,2,1>::Zero())
-      , MSb(Eigen::Array<double,2,1>::Zero()), MSt(Eigen::Array<double,2,1>::Zero(
-      )), Mhh(Eigen::Array<double,2,1>::Zero()), MAh(Eigen::Array<double,2,1>
-      ::Zero()), MHpm(Eigen::Array<double,2,1>::Zero()), MChi(Eigen::Array<double,
-      4,1>::Zero()), MCha(Eigen::Array<double,2,1>::Zero()), MVWm(0)
-
-   , ZD(Eigen::Matrix<double,2,2>::Zero()), ZU(Eigen::Matrix<double,2,2>::Zero(
-      )), ZE(Eigen::Matrix<double,2,2>::Zero()), ZM(Eigen::Matrix<double,2,2>
-      ::Zero()), ZTau(Eigen::Matrix<double,2,2>::Zero()), ZS(Eigen::Matrix<double,
-      2,2>::Zero()), ZC(Eigen::Matrix<double,2,2>::Zero()), ZB(Eigen::Matrix<
-      double,2,2>::Zero()), ZT(Eigen::Matrix<double,2,2>::Zero()), ZH(
-      Eigen::Matrix<double,2,2>::Zero()), ZA(Eigen::Matrix<double,2,2>::Zero()),
-      ZP(Eigen::Matrix<double,2,2>::Zero()), ZN(Eigen::Matrix<std::complex<double>
-      ,4,4>::Zero()), UM(Eigen::Matrix<std::complex<double>,2,2>::Zero()), UP(
-      Eigen::Matrix<std::complex<double>,2,2>::Zero())
-
-   , PhaseGlu(1,0)
-
-{
-}
-
-CLASSNAME::~MSSMNoFV_onshell_mass_eigenstates()
-{
-}
 
 void CLASSNAME::do_force_output(bool flag)
 {
@@ -146,23 +254,23 @@ int CLASSNAME::solve_ewsb_tree_level_via_soft_higgs_masses()
 {
    int error = 0;
 
-   const double new_mHd2 = (0.025*(-40*vd*sqr(Mu) + 20*vu*BMu + 20*vu*
+   const double old_mHd2 = mHd2;
+   const double old_mHu2 = mHu2;
+
+   mHd2 = (0.025*(-40*vd*sqr(Mu) + 20*vu*BMu + 20*vu*
       BMu - 3*std::pow(vd,3)*sqr(g1) - 5*std::pow(vd,3)*sqr(g2) + 3*vd*sqr(g1)*sqr
       (vu) + 5*vd*sqr(g2)*sqr(vu)))/vd;
-   const double new_mHu2 = (0.025*(-40*vu*sqr(Mu) + 20*vd*BMu + 20*vd*
+   mHu2 = (0.025*(-40*vu*sqr(Mu) + 20*vd*BMu + 20*vd*
       BMu - 3*std::pow(vu,3)*sqr(g1) - 5*std::pow(vu,3)*sqr(g2) + 3*vu*sqr(g1)*sqr
       (vd) + 5*vu*sqr(g2)*sqr(vd)))/vu;
 
-   if (std::isfinite(new_mHd2))
-      mHd2 = new_mHd2;
-   else
-      error = 1;
+   const bool is_finite = std::isfinite(mHd2) && std::isfinite(mHu2);
 
-   if (std::isfinite(new_mHu2))
-      mHu2 = new_mHu2;
-   else
+   if (!is_finite) {
+      mHd2 = old_mHd2;
+      mHu2 = old_mHu2;
       error = 1;
-
+   }
 
    return error;
 }
@@ -244,8 +352,8 @@ void CLASSNAME::print(std::ostream& ostr) const
  */
 void CLASSNAME::calculate_DRbar_masses()
 {
-   const auto old_mHd2 = mHd2;
-   const auto old_mHu2 = mHu2;
+   const auto save_mHd2_raii = make_raii_save(mHd2);
+   const auto save_mHu2_raii = make_raii_save(mHu2);
 
    solve_ewsb_tree_level_via_soft_higgs_masses();
 
@@ -283,10 +391,6 @@ void CLASSNAME::calculate_DRbar_masses()
    calculate_MHpm();
    calculate_MChi();
    calculate_MCha();
-
-   mHd2 = old_mHd2;
-   mHu2 = old_mHu2;
-
 }
 
 void CLASSNAME::copy_DRbar_masses_to_pole_masses()
@@ -367,89 +471,28 @@ void CLASSNAME::reorder_pole_masses()
    move_goldstone_to(0, MVWm, PHYSICAL(MHpm), PHYSICAL(ZP));
 }
 
-void CLASSNAME::clear_DRbar_parameters()
-{
-   MVG = 0.;
-   MGlu = 0.;
-   MVP = 0.;
-   MVZ = 0.;
-   MFd = 0.;
-   MFs = 0.;
-   MFb = 0.;
-   MFu = 0.;
-   MFc = 0.;
-   MFt = 0.;
-   MFve = 0.;
-   MFvm = 0.;
-   MFvt = 0.;
-   MFe = 0.;
-   MFm = 0.;
-   MFtau = 0.;
-   MSveL = 0.;
-   MSvmL = 0.;
-   MSvtL = 0.;
-   MSd = Eigen::Matrix<double,2,1>::Zero();
-   ZD = Eigen::Matrix<double,2,2>::Zero();
-   MSu = Eigen::Matrix<double,2,1>::Zero();
-   ZU = Eigen::Matrix<double,2,2>::Zero();
-   MSe = Eigen::Matrix<double,2,1>::Zero();
-   ZE = Eigen::Matrix<double,2,2>::Zero();
-   MSm = Eigen::Matrix<double,2,1>::Zero();
-   ZM = Eigen::Matrix<double,2,2>::Zero();
-   MStau = Eigen::Matrix<double,2,1>::Zero();
-   ZTau = Eigen::Matrix<double,2,2>::Zero();
-   MSs = Eigen::Matrix<double,2,1>::Zero();
-   ZS = Eigen::Matrix<double,2,2>::Zero();
-   MSc = Eigen::Matrix<double,2,1>::Zero();
-   ZC = Eigen::Matrix<double,2,2>::Zero();
-   MSb = Eigen::Matrix<double,2,1>::Zero();
-   ZB = Eigen::Matrix<double,2,2>::Zero();
-   MSt = Eigen::Matrix<double,2,1>::Zero();
-   ZT = Eigen::Matrix<double,2,2>::Zero();
-   Mhh = Eigen::Matrix<double,2,1>::Zero();
-   ZH = Eigen::Matrix<double,2,2>::Zero();
-   MAh = Eigen::Matrix<double,2,1>::Zero();
-   ZA = Eigen::Matrix<double,2,2>::Zero();
-   MHpm = Eigen::Matrix<double,2,1>::Zero();
-   ZP = Eigen::Matrix<double,2,2>::Zero();
-   MChi = Eigen::Matrix<double,4,1>::Zero();
-   ZN = Eigen::Matrix<std::complex<double>,4,4>::Zero();
-   MCha = Eigen::Matrix<double,2,1>::Zero();
-   UM = Eigen::Matrix<std::complex<double>,2,2>::Zero();
-   UP = Eigen::Matrix<std::complex<double>,2,2>::Zero();
-   MVWm = 0.;
-
-   PhaseGlu = std::complex<double>(1.,0.);
-
-}
-
-void CLASSNAME::clear()
-{
-   MSSMNoFV_onshell_soft_parameters::clear();
-   clear_DRbar_parameters();
-   physical.clear();
-   problems.clear();
-}
-
-std::string CLASSNAME::name() const
-{
-   return "MSSMNoFV_onshell";
-}
-
 Eigen::Array<double,1,1> CLASSNAME::get_MChargedHiggs() const
 {
+   Eigen::Array<double,1,1> MHpm_ChargedHiggs;
    Eigen::Array<double,1,1> MHpm_goldstone;
+
    MHpm_goldstone(0) = MVWm;
 
-   return remove_if_equal(MHpm, MHpm_goldstone);
+   remove_if_equal(MHpm, MHpm_goldstone, MHpm_ChargedHiggs);
+
+   return MHpm_ChargedHiggs;
 }
 
 Eigen::Array<double,1,1> CLASSNAME::get_MPseudoscalarHiggs() const
 {
+   Eigen::Array<double,1,1> MAh_PseudoscalarHiggs;
    Eigen::Array<double,1,1> MAh_goldstone;
+
    MAh_goldstone(0) = MVZ;
 
-   return remove_if_equal(MAh, MAh_goldstone);
+   remove_if_equal(MAh, MAh_goldstone, MAh_PseudoscalarHiggs);
+
+   return MAh_PseudoscalarHiggs;
 }
 
 
@@ -678,8 +721,9 @@ void CLASSNAME::calculate_MSvmL()
 {
    const auto mass_matrix_SvmL = get_mass_matrix_SvmL();
 
-   if (mass_matrix_SvmL < 0.)
+   if (mass_matrix_SvmL < 0.) {
       problems.flag_tachyon("SvmL");
+   }
 
    MSvmL = std::sqrt(std::abs(mass_matrix_SvmL));
 }
@@ -710,7 +754,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Sd() const
    mass_matrix_Sd(1,1) = md2(0,0) + 0.5*sqr(Yd(0,0))*sqr(vd) - 0.05*
       sqr(g1)*sqr(vd) + 0.05*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Sd);
+   hermitianize(mass_matrix_Sd);
 
    return mass_matrix_Sd;
 }
@@ -734,7 +778,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Su() const
    mass_matrix_Su(1,1) = mu2(0,0) + 0.1*sqr(g1)*sqr(vd) + 0.5*sqr(Yu(0
       ,0))*sqr(vu) - 0.1*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Su);
+   hermitianize(mass_matrix_Su);
 
    return mass_matrix_Su;
 }
@@ -758,7 +802,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Se() const
    mass_matrix_Se(1,1) = me2(0,0) + 0.5*sqr(Ye(0,0))*sqr(vd) - 0.15*
       sqr(g1)*sqr(vd) + 0.15*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Se);
+   hermitianize(mass_matrix_Se);
 
    return mass_matrix_Se;
 }
@@ -782,7 +826,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Sm() const
    mass_matrix_Sm(1,1) = me2(1,1) + 0.5*sqr(Ye(1,1))*sqr(vd) - 0.15*
       sqr(g1)*sqr(vd) + 0.15*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Sm);
+   hermitianize(mass_matrix_Sm);
 
    return mass_matrix_Sm;
 }
@@ -792,8 +836,9 @@ void CLASSNAME::calculate_MSm()
    const auto mass_matrix_Sm(get_mass_matrix_Sm());
    fs_diagonalize_hermitian(mass_matrix_Sm, MSm, ZM);
 
-   if (MSm.minCoeff() < 0.)
+   if (MSm.minCoeff() < 0.) {
       problems.flag_tachyon("Sm");
+   }
 
    MSm = sqrt(MSm.cwiseAbs());
 }
@@ -810,7 +855,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Stau() const
    mass_matrix_Stau(1,1) = me2(2,2) + 0.5*sqr(Ye(2,2))*sqr(vd) - 0.15*
       sqr(g1)*sqr(vd) + 0.15*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Stau);
+   hermitianize(mass_matrix_Stau);
 
    return mass_matrix_Stau;
 }
@@ -820,8 +865,9 @@ void CLASSNAME::calculate_MStau()
    const auto mass_matrix_Stau(get_mass_matrix_Stau());
    fs_diagonalize_hermitian(mass_matrix_Stau, MStau, ZTau);
 
-   if (MStau.minCoeff() < 0.)
+   if (MStau.minCoeff() < 0.) {
       problems.flag_tachyon("Stau");
+   }
 
    MStau = sqrt(MStau.cwiseAbs());
 }
@@ -838,7 +884,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Ss() const
    mass_matrix_Ss(1,1) = md2(1,1) + 0.5*sqr(Yd(1,1))*sqr(vd) - 0.05*
       sqr(g1)*sqr(vd) + 0.05*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Ss);
+   hermitianize(mass_matrix_Ss);
 
    return mass_matrix_Ss;
 }
@@ -862,7 +908,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Sc() const
    mass_matrix_Sc(1,1) = mu2(1,1) + 0.1*sqr(g1)*sqr(vd) + 0.5*sqr(Yu(1
       ,1))*sqr(vu) - 0.1*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Sc);
+   hermitianize(mass_matrix_Sc);
 
    return mass_matrix_Sc;
 }
@@ -886,7 +932,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Sb() const
    mass_matrix_Sb(1,1) = md2(2,2) + 0.5*sqr(Yd(2,2))*sqr(vd) - 0.05*
       sqr(g1)*sqr(vd) + 0.05*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_Sb);
+   hermitianize(mass_matrix_Sb);
 
    return mass_matrix_Sb;
 }
@@ -896,8 +942,9 @@ void CLASSNAME::calculate_MSb()
    const auto mass_matrix_Sb(get_mass_matrix_Sb());
    fs_diagonalize_hermitian(mass_matrix_Sb, MSb, ZB);
 
-   if (MSb.minCoeff() < 0.)
+   if (MSb.minCoeff() < 0.) {
       problems.flag_tachyon("Sb");
+   }
 
    MSb = sqrt(MSb.cwiseAbs());
 }
@@ -914,7 +961,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_St() const
    mass_matrix_St(1,1) = mu2(2,2) + 0.1*sqr(g1)*sqr(vd) + 0.5*sqr(Yu(2
       ,2))*sqr(vu) - 0.1*sqr(g1)*sqr(vu);
 
-   Hermitianize(mass_matrix_St);
+   hermitianize(mass_matrix_St);
 
    return mass_matrix_St;
 }
@@ -924,8 +971,9 @@ void CLASSNAME::calculate_MSt()
    const auto mass_matrix_St(get_mass_matrix_St());
    fs_diagonalize_hermitian(mass_matrix_St, MSt, ZT);
 
-   if (MSt.minCoeff() < 0.)
+   if (MSt.minCoeff() < 0.) {
       problems.flag_tachyon("St");
+   }
 
    MSt = sqrt(MSt.cwiseAbs());
 }
@@ -941,7 +989,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_hh() const
    mass_matrix_hh(1,1) = mHu2 + sqr(Mu) - 0.075*sqr(g1)*sqr(vd) -
       0.125*sqr(g2)*sqr(vd) + 0.225*sqr(g1)*sqr(vu) + 0.375*sqr(g2)*sqr(vu);
 
-   Symmetrize(mass_matrix_hh);
+   symmetrize(mass_matrix_hh);
 
    return mass_matrix_hh;
 }
@@ -951,8 +999,9 @@ void CLASSNAME::calculate_Mhh()
    const auto mass_matrix_hh(get_mass_matrix_hh());
    fs_diagonalize_hermitian(mass_matrix_hh, Mhh, ZH);
 
-   if (Mhh.minCoeff() < 0.)
+   if (Mhh.minCoeff() < 0.) {
       problems.flag_tachyon("hh");
+   }
 
    Mhh = sqrt(Mhh.cwiseAbs());
 }
@@ -973,7 +1022,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Ah() const
       ())*sqr(vu) + 0.075*sqr(g1)*sqr(vu) + 0.125*sqr(g2)*sqr(vu) + 0.25*sqr(g2
       )*sqr(vu)*sqr(std::cos(ThetaW())) + 0.15*sqr(g1)*sqr(vu)*sqr(std::sin(ThetaW()));
 
-   Symmetrize(mass_matrix_Ah);
+   symmetrize(mass_matrix_Ah);
 
    return mass_matrix_Ah;
 }
@@ -983,8 +1032,9 @@ void CLASSNAME::calculate_MAh()
    const auto mass_matrix_Ah(get_mass_matrix_Ah());
    fs_diagonalize_hermitian(mass_matrix_Ah, MAh, ZA);
 
-   if (MAh.minCoeff() < 0.)
+   if (MAh.minCoeff() < 0.) {
       problems.flag_tachyon("Ah");
+   }
 
    MAh = sqrt(MAh.cwiseAbs());
 }
@@ -999,7 +1049,7 @@ Eigen::Matrix<double,2,2> CLASSNAME::get_mass_matrix_Hpm() const
    mass_matrix_Hpm(1,1) = mHu2 + sqr(Mu) - 0.075*sqr(g1)*sqr(vd) +
       0.125*sqr(g2)*sqr(vd) + 0.075*sqr(g1)*sqr(vu) + 0.375*sqr(g2)*sqr(vu);
 
-   Hermitianize(mass_matrix_Hpm);
+   hermitianize(mass_matrix_Hpm);
 
    return mass_matrix_Hpm;
 }
@@ -1009,8 +1059,9 @@ void CLASSNAME::calculate_MHpm()
    const auto mass_matrix_Hpm(get_mass_matrix_Hpm());
    fs_diagonalize_hermitian(mass_matrix_Hpm, MHpm, ZP);
 
-   if (MHpm.minCoeff() < 0.)
+   if (MHpm.minCoeff() < 0.) {
       problems.flag_tachyon("Hpm");
+   }
 
    MHpm = sqrt(MHpm.cwiseAbs());
 }
@@ -1030,7 +1081,7 @@ Eigen::Matrix<double,4,4> CLASSNAME::get_mass_matrix_Chi() const
    mass_matrix_Chi(2,3) = -Mu;
    mass_matrix_Chi(3,3) = 0;
 
-   Symmetrize(mass_matrix_Chi);
+   symmetrize(mass_matrix_Chi);
 
    return mass_matrix_Chi;
 }

@@ -16,31 +16,22 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
-
-#include <iostream>
-#include <utility>
+#ifndef GM2_UNCERTAINTY_HPP
+#define GM2_UNCERTAINTY_HPP
 
 namespace gm2calc {
 
-void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
-{
-   ostr << "susy parameters:\n";
-   ostr << "Yd = " << Yd << '\n';
-   ostr << "Ye = " << Ye << '\n';
-   ostr << "Yu = " << Yu << '\n';
-   ostr << "Mu = " << Mu << '\n';
-   ostr << "g1 = " << g1 << '\n';
-   ostr << "g2 = " << g2 << '\n';
-   ostr << "g3 = " << g3 << '\n';
-   ostr << "vd = " << vd << '\n';
-   ostr << "vu = " << vu << '\n';
-}
+class MSSMNoFV_onshell;
 
-std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
-{
-   susy_pars.print(ostr);
-   return ostr;
-}
+/// calculates uncertainty for amu(0-loop) w/ tan(beta) resummation
+double calculate_uncertainty_amu_0loop(const MSSMNoFV_onshell&);
+
+/// calculates uncertainty for amu(1-loop) w/ tan(beta) resummation
+double calculate_uncertainty_amu_1loop(const MSSMNoFV_onshell&);
+
+/// calculates uncertainty for amu(2-loop)
+double calculate_uncertainty_amu_2loop(const MSSMNoFV_onshell&);
 
 } // namespace gm2calc
+
+#endif

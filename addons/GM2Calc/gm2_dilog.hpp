@@ -16,31 +16,19 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
+#ifndef GM2_DILOG_HPP
+#define GM2_DILOG_HPP
 
-#include <iostream>
-#include <utility>
+#include <complex>
 
 namespace gm2calc {
 
-void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
-{
-   ostr << "susy parameters:\n";
-   ostr << "Yd = " << Yd << '\n';
-   ostr << "Ye = " << Ye << '\n';
-   ostr << "Yu = " << Yu << '\n';
-   ostr << "Mu = " << Mu << '\n';
-   ostr << "g1 = " << g1 << '\n';
-   ostr << "g2 = " << g2 << '\n';
-   ostr << "g3 = " << g3 << '\n';
-   ostr << "vd = " << vd << '\n';
-   ostr << "vu = " << vu << '\n';
-}
+/// real dilogarithm
+double dilog(double);
 
-std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
-{
-   susy_pars.print(ostr);
-   return ostr;
-}
+/// complex dilogarithm
+std::complex<double> dilog(const std::complex<double>&);
 
 } // namespace gm2calc
+
+#endif

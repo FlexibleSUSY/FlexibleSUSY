@@ -16,31 +16,27 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
-
-#include <iostream>
-#include <utility>
+#ifndef GM2_1LOOP_HPP
+#define GM2_1LOOP_HPP
 
 namespace gm2calc {
 
-void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
-{
-   ostr << "susy parameters:\n";
-   ostr << "Yd = " << Yd << '\n';
-   ostr << "Ye = " << Ye << '\n';
-   ostr << "Yu = " << Yu << '\n';
-   ostr << "Mu = " << Mu << '\n';
-   ostr << "g1 = " << g1 << '\n';
-   ostr << "g2 = " << g2 << '\n';
-   ostr << "g3 = " << g3 << '\n';
-   ostr << "vd = " << vd << '\n';
-   ostr << "vu = " << vu << '\n';
-}
+class MSSMNoFV_onshell;
 
-std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
-{
-   susy_pars.print(ostr);
-   return ostr;
-}
+/// calculates full 1-loop SUSY contributions to (g-2) in the MSSM (w/ tan(beta) resummation)
+double calculate_amu_1loop(const MSSMNoFV_onshell&);
+
+/// calculates full 1-loop SUSY contributions to (g-2) in the MSSM (no tan(beta) resummation)
+double calculate_amu_1loop_non_tan_beta_resummed(const MSSMNoFV_onshell&);
+
+// === routines for individual 1-loop contributions ===
+
+/// 1-loop neutralino contribution
+double amu1LChi0(const MSSMNoFV_onshell&);
+
+/// 1-loop chargino contribution
+double amu1LChipm(const MSSMNoFV_onshell&);
 
 } // namespace gm2calc
+
+#endif

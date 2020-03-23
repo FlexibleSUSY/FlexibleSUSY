@@ -16,31 +16,33 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
-
-#include <iostream>
-#include <utility>
+#ifndef GM2_CONFIG_OPTIONS_HPP
+#define GM2_CONFIG_OPTIONS_HPP
 
 namespace gm2calc {
 
-void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
-{
-   ostr << "susy parameters:\n";
-   ostr << "Yd = " << Yd << '\n';
-   ostr << "Ye = " << Ye << '\n';
-   ostr << "Yu = " << Yu << '\n';
-   ostr << "Mu = " << Mu << '\n';
-   ostr << "g1 = " << g1 << '\n';
-   ostr << "g2 = " << g2 << '\n';
-   ostr << "g3 = " << g3 << '\n';
-   ostr << "vd = " << vd << '\n';
-   ostr << "vu = " << vu << '\n';
-}
+/**
+ * @class Config_options
+ * @brief configuration for the calculation of \f$a_\mu\f$
+ */
+struct Config_options {
+   enum E_output_format : unsigned {
+      Minimal = 0,
+      Detailed = 1,
+      NMSSMTools = 2,
+      SPheno = 3,
+      GM2Calc = 4,
+      NUMBER_OF_OUTPUT_FORMATS
+   };
 
-std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
-{
-   susy_pars.print(ostr);
-   return ostr;
-}
+   E_output_format output_format{Minimal}; ///< output format
+   unsigned loop_order{2};                 ///< loop order
+   bool tanb_resummation{true};            ///< tan(beta) resummation
+   bool force_output{false};               ///< print output even if error occured
+   bool verbose_output{false};             ///< print additional information
+   bool calculate_uncertainty{false};      ///< calculate uncertainty
+};
 
 } // namespace gm2calc
+
+#endif
