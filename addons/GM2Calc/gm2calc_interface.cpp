@@ -104,36 +104,16 @@ void GM2Calc_data::initialize()
 {
    const gm2calc::MSSMNoFV_onshell model;
 
+   scale       = model.get_scale();
    alpha_em_MZ = calculate_alpha(model.get_EL());
    alpha_em_0  = calculate_alpha(model.get_EL0());
    alpha_s_MZ  = calculate_alpha(model.get_g3());
-
-   MZ    = model.get_MZ();
-   MW    = model.get_MW();
-   mb_mb = model.get_MBMB();
-   MT    = model.get_MT();
-   MTau  = model.get_ML();
-   MM    = model.get_MM();
-   MA0   = model.get_MA0();
-   MSvm  = model.get_MSvmL();
-   MSm   = model.get_MSm();
-   MCha  = model.get_MCha();
-   MChi  = model.get_MChi();
-
-   scale = model.get_scale();
-   TB    = model.get_TB();
-   Mu    = model.get_Mu();
-   M1    = model.get_MassB();
-   M2    = model.get_MassWB();
-   M3    = model.get_MassG();
-   mq2   = model.get_mq2();
-   mu2   = model.get_mu2();
-   md2   = model.get_md2();
-   ml2   = model.get_ml2();
-   me2   = model.get_me2();
-   Au    = model.get_Au();
-   Ad    = model.get_Ad();
-   Ae    = model.get_Ae();
+   MZ          = model.get_MZ();
+   MW          = model.get_MW();
+   mb_mb       = model.get_MBMB();
+   MT          = model.get_MT();
+   MTau        = model.get_ML();
+   MM          = model.get_MM();
 }
 
 /**
