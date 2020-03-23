@@ -35,6 +35,7 @@
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_physical.hpp"
 #include "@ModelName@_soft_parameters.hpp"
+#include "@ModelName@_mass_eigenstates_interface.hpp"
 #include "loop_corrections.hpp"
 #include "threshold_corrections.hpp"
 #include "problems.hpp"
@@ -45,6 +46,8 @@
 
 #include <Eigen/Core>
 
+#define SUPER(p) @ModelName@_soft_parameters::p
+
 namespace flexiblesusy {
 
 class @ModelName@_ewsb_solver_interface;
@@ -52,7 +55,10 @@ class @ModelName@_ewsb_solver_interface;
  * @class @ModelName@_mass_eigenstates
  * @brief model class with routines for determing masses and mixinga and EWSB
  */
-class @ModelName@_mass_eigenstates : public @ModelName@_soft_parameters {
+class @ModelName@_mass_eigenstates
+   : public @ModelName@_soft_parameters
+   , public @ModelName@_mass_eigenstates_interface
+{
 public:
    explicit @ModelName@_mass_eigenstates(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
    @ModelName@_mass_eigenstates(const @ModelName@_mass_eigenstates&) = default;
@@ -60,6 +66,8 @@ public:
    virtual ~@ModelName@_mass_eigenstates() = default;
    @ModelName@_mass_eigenstates& operator=(const @ModelName@_mass_eigenstates&) = default;
    @ModelName@_mass_eigenstates& operator=(@ModelName@_mass_eigenstates&&) = default;
+
+   std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
    /// number of EWSB equations
    static const int number_of_ewsb_equations = @numberOfEWSBEquations@;
@@ -71,7 +79,6 @@ public:
    void clear_DRbar_parameters();
    Eigen::ArrayXd get_DRbar_masses() const;
    Eigen::ArrayXd get_DRbar_masses_and_mixings() const;
-   Eigen::ArrayXd get_extra_parameters() const;
    void do_calculate_sm_pole_masses(bool);
    bool do_calculate_sm_pole_masses() const;
    void do_calculate_bsm_pole_masses(bool);
@@ -88,38 +95,53 @@ public:
    const Threshold_corrections& get_threshold_corrections() const;
    void set_DRbar_masses(const Eigen::ArrayXd&);
    void set_DRbar_masses_and_mixings(const Eigen::ArrayXd&);
-   void set_extra_parameters(const Eigen::ArrayXd&);
    void set_pole_mass_loop_order(int);
    int get_pole_mass_loop_order() const;
-   void set_physical(const @ModelName@_physical&);
    double get_ewsb_iteration_precision() const;
    double get_ewsb_loop_order() const;
-   const @ModelName@_physical& get_physical() const;
-   @ModelName@_physical& get_physical();
-   const Problems& get_problems() const;
-   Problems& get_problems();
    void set_ewsb_solver(const std::shared_ptr<@ModelName@_ewsb_solver_interface>&);
    int solve_ewsb_tree_level();
    int solve_ewsb_one_loop();
    int solve_ewsb();            ///< solve EWSB at ewsb_loop_order level
 
    void calculate_spectrum();
-   void clear_problems();
    std::string name() const;
    void run_to(double scale, double eps = -1.0) override;
    void print(std::ostream& out = std::cerr) const override;
    void set_precision(double);
    double get_precision() const;
 
+   // mass_eigenstates_interface functions
+
+   void calculate_tree_level_mass_spectrum() override;
+   void calculate_pole_mass_spectrum() override;
+   void calculate_mass_spectrum() override;
+   int solve_ewsb_equations_tree_level() override;
+   int solve_ewsb_equations() override;
+   Eigen::ArrayXd get_tree_level_masses() const override;
+   Eigen::ArrayXd get_tree_level_masses_and_mixings() const override;
+   Eigen::ArrayXd get_extra_parameters() const override;
+   const @ModelName@_physical& get_physical() const override;
+   @ModelName@_physical& get_physical() override;
+   const Problems& get_problems() const override;
+   Problems& get_problems() override;
+   void set_tree_level_masses(const Eigen::ArrayXd&) override;
+   void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&) override;
+   void set_extra_parameters(const Eigen::ArrayXd&) override;
+   void set_physical(const @ModelName@_physical&) override;
+   void clear_problems() override;
+
 @lspGetters@
-@massGetters@
-@higgsMassGetterPrototypes@
-@mixingMatrixGetters@
-@phasesGetterSetters@
-@extraParameterSetters@
-@extraParameterGetters@
-@massCalculationPrototypes@
-@tadpoleEqPrototypes@
+@[override]delegateParameterGetters@
+@[override]delegateParameterSetters@
+@[override]massGetters@
+@[override]higgsMassGetterPrototypes@
+@[override]mixingMatrixGetters@
+@[override]phasesGetterSetters@
+@[override]extraParameterSetters@
+@[override]extraParameterGetters@
+@[override]massCalculationPrototypes@
+@[override]tadpoleEqPrototypes@
 @selfEnergyPrototypes@
 
    /// calculates the tadpoles at current loop order
@@ -137,7 +159,7 @@ public:
 @fourLoopSelfEnergyPrototypes@
 @loopMassesPrototypes@
 @runningDRbarMassesPrototypes@
-@dependencePrototypes@
+@[override]dependencePrototypes@
 
 private:
    int ewsb_loop_order{4};           ///< loop order for EWSB
@@ -183,5 +205,7 @@ private:
 std::ostream& operator<<(std::ostream&, const @ModelName@_mass_eigenstates&);
 
 } // namespace flexiblesusy
+
+#undef SUPER
 
 #endif

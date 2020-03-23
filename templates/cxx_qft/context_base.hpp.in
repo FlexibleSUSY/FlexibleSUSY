@@ -28,16 +28,14 @@
 #ifndef @ModelName@_CXXQFT_CONTEXT_BASE_H
 #define @ModelName@_CXXQFT_CONTEXT_BASE_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
-
 #include "@ModelName@_fields.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_mass_eigenstates_interface.hpp"
 
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
 
    struct context_base {
-      @ModelName@_mass_eigenstates model; ///< The model object.
+      @ModelName@_mass_eigenstates_interface const& model; ///< The model object.
 
       template <class Field>
       double mass(const typename field_indices<Field>::type& indices) const
@@ -47,7 +45,9 @@ namespace @ModelName@_cxx_diagrams {
          return mass_impl<CleanField>(indices);
       }
 
-      context_base(const @ModelName@_mass_eigenstates& m) : model(m) {}
+      context_base(@ModelName@_mass_eigenstates_interface const& m) : model(m) {}
+      context_base(@ModelName@_mass_eigenstates_interface const* const m) : model(*m) {}
+
       context_base(const context_base&) = default;
       context_base(context_base&&) = default;
 

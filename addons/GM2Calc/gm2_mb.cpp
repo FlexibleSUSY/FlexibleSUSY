@@ -17,7 +17,9 @@
 // ====================================================================
 
 #include "gm2_mb.hpp"
-#include "ffunctions.hpp"
+#include "gm2_log.hpp"
+#include "gm2_numerics.hpp"
+
 #include <cmath>
 #include <iostream>
 #include <boost/math/tools/roots.hpp>
@@ -29,18 +31,13 @@
  * scheme.
  */
 
-#define WARNING(message)                                                \
-   do { std::cerr << "Warning: " << message << '\n'; } while (0)
-#define ERROR(message)                                                  \
-   do { std::cerr << "Error: " << message << '\n'; } while (0)
-
 namespace gm2calc {
 
 namespace mb {
 
 namespace {
    const double Pi = 3.14159265358979323846;
-}
+} // anonymous namespace
 
 /**
  * Calculates the strong coupling constant \f$\alpha_s(Q)\f$ in the
@@ -53,12 +50,12 @@ namespace {
  * @return \f$\alpha_s(Q)\f$ MS-bar in the SM w/ 5 active flavours
  */
 double calculate_alpha_s_SM5_at(double scale, double lambda_qcd) {
-   using std::log;
-   const double t = log(sqr(scale/lambda_qcd));
+   const double t = std::log(sqr(scale/lambda_qcd));
+   const double logt = std::log(t);
 
    return 12.*Pi/(23.*t) * (
-      1 - 348./529. * log(t)/t
-      + sqr(348./529.)/sqr(t) * (sqr(log(t) - 0.5) - 78073./242208.)
+      1 - 348./529. * logt/t
+      + sqr(348./529.)/sqr(t) * (sqr(logt - 0.5) - 78073./242208.)
       );
 }
 
@@ -108,8 +105,8 @@ double calculate_lambda_qcd(double alpha, double scale,
 
       lambda_qcd = 0.5 * (root.first + root.second);
    } catch (const std::exception& e) {
-      ERROR("Error: Could not determine lambda_QCD: " << e.what()
-            << ".  Using lambda_QCD = " << lambda_qcd);
+      WARNING("Could not determine lambda_QCD: " << e.what()
+              << ".  Using lambda_QCD = " << lambda_qcd);
    }
 
    if (it >= max_iterations) {
@@ -151,7 +148,7 @@ double conversion_mb_MSbar_to_DRbar(double alpha) {
    return 1. - as/3. - 29./72. * as * as;
 }
 
-} // namespace gm2calc_mb
+} // namespace mb
 
 /**
  * Calculates mb(Q) in the DR-bar scheme in the SM w/ 5 active quark

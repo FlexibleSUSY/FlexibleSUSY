@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_wrappers
+#define BOOST_TEST_MODULE test_threshold_loop_functions
 
 #include <limits>
 #include <boost/test/unit_test.hpp>

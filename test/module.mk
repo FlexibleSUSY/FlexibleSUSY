@@ -70,6 +70,7 @@ TEST_META := \
 		$(DIR)/test_CConversion.m \
 		$(DIR)/test_Constraint.m \
 		$(DIR)/test_EWSB.m \
+		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
 		$(DIR)/test_MSSM_2L_mt.m \
@@ -150,7 +151,6 @@ TEST_SRC += \
 		$(DIR)/test_loopfunctions.cpp \
 		$(DIR)/test_sfermions.cpp \
 		$(DIR)/test_CMSSM_beta_function_benchmark.cpp \
-		$(DIR)/test_CMSSM_database.cpp \
 		$(DIR)/test_CMSSM_high_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_higgs_iteration.cpp \
 		$(DIR)/test_CMSSM_initial_guesser.cpp \
@@ -215,7 +215,6 @@ endif
 
 ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCKM_b_to_s_gamma.cpp \
 		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
 endif
 
@@ -450,6 +449,7 @@ TEST_SH += \
 		$(DIR)/test_CMSSM_QedQcd_no_convergence.sh \
 		$(DIR)/test_CMSSM_streams.sh
 TEST_SRC += \
+		$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_CMSSM_slha.cpp \
 		$(DIR)/test_CMSSM_slha_input.cpp \
 		$(DIR)/test_CMSSM_two_loop_spectrum.cpp \
@@ -468,6 +468,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_effective_couplings.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
+		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
+		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_one_loop_spectrum.cpp \
 		$(DIR)/test_SM_higgs_loop_corrections.cpp \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
@@ -511,6 +513,8 @@ endif
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_ewsb.cpp
+endif
+ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
 		$(DIR)/test_CMSSMCPV_librarylink.m
 endif
@@ -587,8 +591,11 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.cpp
 TEST_SH += \
-		$(DIR)/test_MSSMEFTHiggs_librarylink.sh \
 		$(DIR)/test_MSSMEFTHiggs_profile.sh
+endif
+ifeq ($(WITH_MSSMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
 endif
 
 ifeq ($(WITH_MSSMEFTHiggs) $(WITH_MSSMNoFVEFTHiggs),yes yes)
@@ -616,12 +623,12 @@ TEST_SH += \
 		$(DIR)/test_SplitMSSMEFTHiggs.sh
 endif
 
-ifeq ($(WITH_SM) $(WITH_SMEFTHiggs),yes yes)
+ifeq ($(WITH_SM) $(WITH_SMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes yes)
 TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
 endif
 
-ifeq ($(WITH_SM),yes)
+ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 endif
@@ -661,7 +668,10 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_3loop_beta.m
+endif
+ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_META += \
 		$(DIR)/test_CMSSM_librarylink.m \
 		$(DIR)/test_CMSSM_librarylink_parallel.m
 TEST_SH += \
@@ -937,6 +947,8 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
+$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
+
 $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
@@ -944,8 +956,6 @@ $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 $(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
-
-$(DIR)/test_CMSSMCKM_b_to_s_gamma.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
 
@@ -1062,6 +1072,10 @@ $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
 $(DIR)/test_SM_low_scale_constraint.x: $(LIBSM)
 
+$(DIR)/test_SM_mass_eigenstates_interface.x: $(LIBSM)
+
+$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
+
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_one_loop_spectrum.x: $(LIBSM)
@@ -1153,7 +1167,7 @@ $(DIR)/test_%.x: $(DIR)/test_%.o
 		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
-$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
+$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBTEST): $(LIBTEST_OBJ)

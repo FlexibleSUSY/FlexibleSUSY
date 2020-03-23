@@ -18,8 +18,10 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" == "g++" ]]; then export CXX="g++-9" CC="gcc-9"; fi
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
-  - conan install . --build=missing
+  - conan install . --build=missing --generator virtualrunenv
 script:
+  - source activate_run.sh
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
-  - make
-  - make -k all-test
+  - make showbuild
+  - make VERBOSE=1
+  - make VERBOSE=1 -k all-test

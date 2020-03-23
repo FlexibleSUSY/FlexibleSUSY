@@ -51,6 +51,9 @@ CreateExtraParameterArrayGetter::usage="";
 CreateExtraParameterArraySetter::usage="";
 CreateInputParameterArrayGetter::usage="";
 CreateInputParameterArraySetter::usage="";
+CreateModelParameterGetter::usage="";
+CreateModelParameterSetter::usage="";
+CreateDelegateModelParameterGetter::usage="";
 
 CreateEnumName::usage="Creates enum symbol for given parameter";
 DecomposeParameter::usage="decomposes parameter into its real components";
@@ -1882,6 +1885,21 @@ CreateInputParameterArraySetter[inputParameters_List] :=
                paramCount += nAssignments;
               ];
            Return[set];
+          ];
+
+CreateModelParameterGetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par]]
+          ];
+
+CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par], "", macro]
+          ];
+
+CreateModelParameterSetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par], type = GetType[par]},
+           CConversion`CreateInlineSetters[name, type]
           ];
 
 FindSLHABlock[blockList_List, par_] :=

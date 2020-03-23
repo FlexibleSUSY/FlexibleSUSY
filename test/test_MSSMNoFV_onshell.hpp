@@ -1,5 +1,5 @@
 
-#include "MSSMNoFV_onshell.hpp"
+#include "gm2calc/MSSMNoFV_onshell.hpp"
 #include "gm2_slha_io.hpp"
 #include "error.hpp"
 
@@ -104,7 +104,7 @@ gm2calc::MSSMNoFV_onshell read(char const * const slha_input)
 
    try {
       slha_io.read_from_stream(sstr);
-      fill_slha(slha_io, osmodel);
+      slha_io.fill_slha(osmodel);
    } catch (const Error& error) {
       BOOST_FAIL(error.what());
    }
