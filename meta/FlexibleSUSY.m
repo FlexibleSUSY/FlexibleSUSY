@@ -2086,12 +2086,15 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-    Module[{fields = "", cxxVerticesParts = {}, massFunctions, unitCharge,
+    Module[{fields = "", cxxVerticesParts = {},
+            massFunctions, physicalMassFunctions,
+            unitCharge,
             sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
             outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
             cxxQFTVerticesFiles},
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
+        physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
         fields = CXXDiagrams`CreateFields[];
 
         If[vertices =!= {},
@@ -2115,11 +2118,12 @@ WriteCXXDiagramClass[vertices_List, files_List,
         ];
 
         unitCharge = CXXDiagrams`CreateUnitCharge[];
-        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
+        AppendTo[cxxVerticesParts, {"", unitCharge}];
 
         WriteOut`ReplaceInFiles[files,
-                            {"@CXXDiagrams_Fields@"            -> fields,
-                             "@CXXDiagrams_MassFunctions@"     -> massFunctions,
+                            {"@CXXDiagrams_Fields@"                -> fields,
+                             "@CXXDiagrams_MassFunctions@"         -> massFunctions,
+                             "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@CXXDiagrams_VertexPrototypes@"  ->
                                 StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]

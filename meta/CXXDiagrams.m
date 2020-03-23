@@ -41,6 +41,8 @@ NumberOfFieldIndices::usage="Return the number of indices a field has as would b
 determined by inspecting the result of TreeMasses`FieldInfo[].";
 CreateMassFunctions::usage="Creates c++ code that makes functions available that \
 return tree-level masses of given fields.";
+CreatePhysicalMassFunctions::usage="Creates c++ code that makes functions available that \
+return physical masses of given fields.";
 LorentzIndexOfField::usage="Returns the Lorentz index of a given indexed field.";
 ColourIndexOfField::usage="Returns the colour index of a given indexed field.";
 
@@ -1265,7 +1267,30 @@ CreateMassFunctions[] :=
              "{ return model.get_M" <> CXXNameOfField[# /. ghostMappings] <>
              If[TreeMasses`GetDimension[#] === 1, "()", "(indices[0])"] <> "; }"
             ] & /@ massiveFields, "\n\n"]
-        ]
+        ];
+
+(** \brief Creates c++ code that makes functions available that
+ * return physical masses of given fields.
+ * \returns the corresponding c++ code as a string.
+ **)
+CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
+  Module[{massiveFields,
+          ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
+    massiveFields = TreeMasses`GetParticles[];
+
+    StringJoin @ Riffle[
+      Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
+             numberOfIndices = Length @ fieldInfo[[5]];
+
+             "template<> inline\n" <>
+             "double context_base::physical_mass_impl<" <>
+               CXXNameOfField[#, prefixNamespace -> "fields"] <>
+             ">(const std::array<int, " <> ToString @ numberOfIndices <>
+             ">& indices) const\n" <>
+             "{ return model.get_physical().M" <> CXXNameOfField[# /. ghostMappings] <>
+             If[TreeMasses`GetDimension[#] === 1, "", "[indices[0]]"] <> "; }"
+            ] & /@ massiveFields, "\n\n"]
+        ];
 
 (** \brief Creates the c++ code for a function that returns the
  * numerical value of the electrical charge of the electron.
