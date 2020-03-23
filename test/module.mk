@@ -55,7 +55,8 @@ TEST_SRC := \
 		$(DIR)/test_threshold_loop_functions.cpp \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_which.cpp \
-		$(DIR)/test_wrappers.cpp
+		$(DIR)/test_wrappers.cpp \
+		$(DIR)/test_looplibrary_softsusy.cpp
 
 TEST_SH := \
 		$(DIR)/test_depgen.sh \
@@ -97,7 +98,6 @@ TEST_META := \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
 
-
 ifeq ($(ENABLE_THREADS),yes)
 TEST_SRC += \
 		$(DIR)/test_thread_pool.cpp
@@ -106,6 +106,21 @@ endif
 ifeq ($(ENABLE_TSIL),yes)
 TEST_SRC += \
 		$(DIR)/test_sm_twoloop_mt.cpp
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_looptools.cpp
+endif
+
+ifeq ($(ENABLE_COLLIER), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_collier.cpp
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_fflite.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -829,6 +844,31 @@ $(DIR)/test_compare_ewsb_solvers.x: \
 $(DIR)/test_loopfunctions.x: $(LIBCMSSM)
 
 $(DIR)/test_sfermions.x: $(LIBCMSSM)
+
+$(DIR)/test_looplibrary_softsusy.cpp: $(DIR)/test_looplibrary.cpp.in
+	@sed 's/looplibrary_/looplibrary_softsusy/' \
+		 test/test_looplibrary.cpp.in > test/test_looplibrary_softsusy.cpp
+
+ifeq ($(ENABLE_COLLIER), yes)
+$(DIR)/test_looplibrary_collier.cpp: $(DIR)/test_looplibrary.cpp.in
+	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 1/' \
+		 -e 's/looplibrary_/looplibrary_collier/' \
+		 test/test_looplibrary.cpp.in > test/test_looplibrary_collier.cpp
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+$(DIR)/test_looplibrary_looptools.cpp: $(DIR)/test_looplibrary.cpp.in
+	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 2/' \
+		 -e 's/looplibrary_/looplibrary_looptools/' \
+		 test/test_looplibrary.cpp.in > test/test_looplibrary_looptools.cpp
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+$(DIR)/test_looplibrary_fflite.cpp: $(DIR)/test_looplibrary.cpp.in
+	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 3/' \
+		 -e 's/looplibrary_/looplibrary_fflite/' \
+		 test/test_looplibrary.cpp.in > test/test_looplibrary_fflite.cpp
+endif
 
 TEST_MSG = echo "\033[1;36m<<test<<\033[1;0m $<"
 
