@@ -87,8 +87,6 @@ AtomQ[] and return the result.";
 CreateUnitCharge::usage="Creates the c++ code for a function that returns the \
 numerical value of the electrical charge of the electron.";
 
-CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
-
 Begin["`Private`"];
 
 LeftChiralVertex::usage="A left projector part of a vertex";
@@ -143,10 +141,6 @@ CXXNameOfField[Susyno`LieGroups`conj[p_],
 CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
 	", "]] <> ">"
-
-(** \brief Returns the c++ keyword corresponding to a boolean value. **)
-CXXBoolValue[True] = "true";
-CXXBoolValue[False] = "false";
 
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
@@ -222,8 +216,8 @@ CreateFields[] :=
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
                      "using sm_flags = boost::mpl::vector_c<bool, " <>
                         If[TreeMasses`GetDimension[#] === 1,
-                           CXXBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CXXBoolValue /@
+                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
                              TreeMasses`IsSMParticleElementwise[#],
                                                ", "]] <>
                         ">;\n" <>
