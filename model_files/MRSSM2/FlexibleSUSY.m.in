@@ -92,10 +92,8 @@ ExtraSLHAOutputBlocks = {
          {21, FlexibleSUSYObservable`aMuon},
          {23, FlexibleSUSYObservable`EDM[Fe[1]]},
          {24, FlexibleSUSYObservable`EDM[Fe[2]]},
-         {25, FlexibleSUSYObservable`EDM[Fe[3]]}, 
-         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
-         {27, FlexibleSUSYObservable`FToFConversionInNucleus[Fe[2] -> Fe[1], Au]},
-         {28, FlexibleSUSYObservable`FToFConversionInNucleus[Fe[2] -> Fe[1], Al]}
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
       }
    }
 };
