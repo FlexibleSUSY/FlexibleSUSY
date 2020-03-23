@@ -282,7 +282,7 @@ CreateFields[] :=
             TextFormatting`IndentText[
               "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
               "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
-              "static constexpr auto massless = " <> If[TreeMasses`IsMassless[field], "true", "false"] <> ";" <>
+              "static constexpr auto massless = " <> CConversion`CreateCBoolValue@TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
                    StringJoin[", " <> ToString[#] & /@
