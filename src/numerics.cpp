@@ -109,12 +109,15 @@ double fB(const std::complex<double>& a) noexcept
 
 } // anonymous namespace
 
-double a0(double m, double q) noexcept {
-   using std::fabs;
-   using std::log;
+double a0(double m, double q) noexcept
+{
    constexpr double TOL = 1e-4;
-   if (fabs(m) < TOL) return 0.;
-   return sqr(m) * (1.0 - 2. * log(fabs(m / q)));
+
+   if (std::abs(m) < TOL) {
+      return 0.0;
+   }
+
+   return sqr(m) * (1.0 - 2. * std::log(std::abs(m / q)));
 }
 
 double ffn(double p, double m1, double m2, double q) noexcept {
@@ -141,10 +144,6 @@ double b22bar(double p, double m1, double m2, double q) noexcept {
  */
 double b0(double p, double m1, double m2, double q) noexcept
 {
-   using std::fabs;
-   using std::log;
-   using std::sqrt;
-
 #ifdef USE_LOOPTOOLS
    setmudim(q*q);
    double b0l = B0(p*p, m1*m1, m2*m2).real();
@@ -155,8 +154,8 @@ double b0(double p, double m1, double m2, double q) noexcept
    if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
       return 0.0;
 
-   const double mMin = std::min(fabs(m1), fabs(m2));
-   const double mMax = std::max(fabs(m1), fabs(m2));
+   const double mMin = std::min(std::abs(m1), std::abs(m2));
+   const double mMax = std::max(std::abs(m1), std::abs(m2));
 
    const double pSq = sqr(p), mMinSq = sqr(mMin), mMaxSq = sqr(mMax);
    /// Try to increase the accuracy of s
@@ -173,20 +172,20 @@ double b0(double p, double m1, double m2, double q) noexcept
       const std::complex<double> xPlus  = (s + sign(s)*x) / (2*pSq);
       const std::complex<double> xMinus = imin / (xPlus*pSq);
 
-      return -2.0 * log(p / q) - fB(xPlus) - fB(xMinus);
+      return -2.0 * std::log(p / q) - fB(xPlus) - fB(xMinus);
    }
 
    if (is_close(m1, m2, EPSTOL)) {
-      return - log(sqr(m1 / q));
+      return - std::log(sqr(m1 / q));
    }
 
    const double Mmax2 = mMaxSq, Mmin2 = mMinSq;
 
    if (Mmin2 < 1.e-30) {
-      return 1.0 - log(Mmax2 / sqr(q));
+      return 1.0 - std::log(Mmax2 / sqr(q));
    }
 
-   return 1.0 - log(Mmax2 / sqr(q)) + Mmin2 * log(Mmax2 / Mmin2)
+   return 1.0 - std::log(Mmax2 / sqr(q)) + Mmin2 * std::log(Mmax2 / Mmin2)
       / (Mmin2 - Mmax2);
 }
 
