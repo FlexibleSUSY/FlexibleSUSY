@@ -19,15 +19,18 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE test_threshold_loop_functions
 
-#include <limits>
 #include <boost/test/unit_test.hpp>
+
+#include "config.h"
 #include "threshold_loop_functions.hpp"
 #include "numerics.h"
 #include "dilog.hpp"
 #include "logger.hpp"
 #include "read_data.hpp"
+#include "benchmark.hpp"
 
 #include <cmath>
+#include <limits>
 
 using namespace flexiblesusy;
 
@@ -1385,7 +1388,6 @@ double phixyz(double x, double y, double z)
 } // anonymous namespace
 
 struct XYZ {
-   XYZ(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
    double x{}, y{}, z{};
 };
 
@@ -1395,30 +1397,30 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
    double x = 0., y = 0., z = 0.;
 
    const XYZ xyz[] = {
-      XYZ(1, 2, 3),
-      XYZ(2, 3, 1),
-      XYZ(3, 1, 2),
-      XYZ(2, 1, 3),
-      XYZ(1, 3, 2),
-      XYZ(3, 2, 1),
+      {1, 2, 3},
+      {2, 3, 1},
+      {3, 1, 2},
+      {2, 1, 3},
+      {1, 3, 2},
+      {3, 2, 1},
 
-      XYZ(1, 1, 2),
-      XYZ(1, 2, 1),
-      XYZ(2, 1, 1),
+      {1, 1, 2},
+      {1, 2, 1},
+      {2, 1, 1},
 
-      XYZ(1, 1, 10),
-      XYZ(1, 10, 1),
-      XYZ(10, 1, 1),
+      {1, 1, 10},
+      {1, 10, 1},
+      {10, 1, 1},
 
-      XYZ(1, 10, 20),
-      XYZ(10, 20, 1),
-      XYZ(20, 1, 10),
+      {1, 10, 20},
+      {10, 20, 1},
+      {20, 1, 10},
 
-      XYZ(1, 2, 2),
-      XYZ(2, 2, 1),
-      XYZ(2, 1, 2),
+      {1, 2, 2},
+      {2, 2, 1},
+      {2, 1, 2},
 
-      XYZ(1, 1, 1)
+      {1, 1, 1}
    };
 
    for (const auto s: xyz) {
@@ -1440,3 +1442,52 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
       BOOST_CHECK_CLOSE_FRACTION(phixyz(x,y,z), phi_xyz(x,y,z), prec);
    }
 }
+
+#ifdef ENABLE_RANDOM
+
+template <class T>
+std::vector<XYZ> generate_random_triples(
+   unsigned n, T start, T stop)
+{
+   const auto x = generate_random_data<T>(n, start, stop);
+   const auto y = generate_random_data<T>(n, start, stop);
+   const auto z = generate_random_data<T>(n, start, stop);
+
+   std::vector<XYZ> v(3*n);
+
+   for (int i = 0; i < n; i++) {
+      v[i] = {x[i], y[i], z[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[n + i] = {x[i], x[i], y[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[2*n + i] = {x[i], x[i], x[i]};
+   }
+
+   return v;
+}
+
+BOOST_AUTO_TEST_CASE(bench_phi)
+{
+   const unsigned N = 10000000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   const auto time_phi_fs_in_s = time_in_seconds(phi_fs, triples)/N;
+   const auto time_phi_eb_in_s = time_in_seconds(phi_eb, triples)/N;
+
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [FS]: " << time_phi_fs_in_s << " s");
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [EB]: " << time_phi_eb_in_s << " s");
+}
+
+#endif
