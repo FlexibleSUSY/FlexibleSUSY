@@ -87,6 +87,8 @@ double sign(double x) noexcept
 // can be made constexpr in C++20
 double fB(const std::complex<double>& a) noexcept
 {
+   using flexiblesusy::fast_log;
+
    const double re = std::real(a);
    const double im = std::imag(a);
 
@@ -94,17 +96,7 @@ double fB(const std::complex<double>& a) noexcept
       return -1.0;
    }
 
-   if (std::abs(re) < EPSTOL) {
-      const std::complex<double> i(0.0, 1.0);
-      return std::real(-1.0 + std::log(1.0 - i*im) + (-i*im - re)*std::log((i + im)/im));
-   }
-
-   if (is_close(re, 1.0, EPSTOL)) {
-      const std::complex<double> i(0.0, 1.0);
-      return std::real(-1.0 + std::log(-i*im) + (-i*im - re)*std::log(im/(-i + im)));
-   }
-
-   return std::real(std::log(1. - a) - 1. - a * std::log(1.0 - 1.0 / a));
+   return std::real(-1.0 + fast_log(1.0 - a) - a*fast_log(1.0 - 1.0/a));
 }
 
 } // anonymous namespace
