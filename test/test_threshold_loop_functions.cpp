@@ -1453,7 +1453,7 @@ std::vector<XYZ> generate_random_triples(
    const auto y = generate_random_data<T>(n, start, stop);
    const auto z = generate_random_data<T>(n, start, stop);
 
-   std::vector<XYZ> v(3*n);
+   std::vector<XYZ> v(5*n);
 
    for (int i = 0; i < n; i++) {
       v[i] = {x[i], y[i], z[i]};
@@ -1464,7 +1464,15 @@ std::vector<XYZ> generate_random_triples(
    }
 
    for (int i = 0; i < n; i++) {
-      v[2*n + i] = {x[i], x[i], x[i]};
+      v[2*n + i] = {x[i], y[i], x[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[3*n + i] = {y[i], x[i], x[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[4*n + i] = {x[i], x[i], x[i]};
    }
 
    return v;
@@ -1472,7 +1480,7 @@ std::vector<XYZ> generate_random_triples(
 
 BOOST_AUTO_TEST_CASE(bench_phi)
 {
-   const unsigned N = 10000000;
+   const unsigned N = 1000000;
    const auto triples = generate_random_triples(N, 1.0, 1000.0);
 
    auto phi_fs = [](const XYZ& t) {
