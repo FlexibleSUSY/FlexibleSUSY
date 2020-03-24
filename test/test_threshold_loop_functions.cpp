@@ -68,11 +68,6 @@ namespace {
    template <typename T> T cube(T x) { return x*x*x; }
    template <typename T> T quad(T x) { return x*x*x*x; }
    template <typename T> T pow5(T x) { return x*x*x*x*x; }
-   template <typename T> T pow6(T x) { return x*x*x*x*x*x; }
-   template <typename T> T pow7(T x) { return x*x*x*x*x*x*x; }
-   template <typename T> T pow8(T x) { return x*x*x*x*x*x*x*x; }
-   template <typename T> T pow9(T x) { return x*x*x*x*x*x*x*x*x; }
-   template <typename T> T pow10(T x) { return x*x*x*x*x*x*x*x*x*x; }
 
    const auto pass_all_1 = [] (double, double) -> bool { return true; };
    const auto pass_all_2 = [] (double, double, double) -> bool { return true; };
