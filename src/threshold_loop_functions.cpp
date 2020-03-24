@@ -1964,12 +1964,32 @@ namespace {
               + sqr(Pi)/3.)/lambda;
    }
 
-   /// lambda^2(u,v) < 0
+   /// lambda^2(u,v) < 0, u = 1
+   double phi_neg_1v(double v, double lambda) noexcept
+   {
+      return 2*(+ clausen_2(2*std::acos((2 - v)/2))
+                + 2*clausen_2(2*std::acos(0.5*std::sqrt(v))))/lambda;
+   }
+
+   /// lambda^2(u,v) < 0; note: phi_neg(u,v) = phi_neg(v,u)
    double phi_neg(double u, double v) noexcept
    {
+      const double eps = 1.0e-6;
       const auto lambda = std::sqrt(-lambda_2(u,v));
 
-      if (is_equal(u, v, 1.0e-6)) {
+      if (is_equal(u, 1.0, eps) && is_equal(v, 1.0, eps)) {
+         return 2.343907238689459;
+      }
+
+      if (is_equal(u, 1.0, eps)) {
+         return phi_neg_1v(v, lambda);
+      }
+
+      if (is_equal(v, 1.0, eps)) {
+         return phi_neg_1v(u, lambda);
+      }
+
+      if (is_equal(u, v, eps)) {
          return 2*(2*clausen_2(2*std::acos(1/(2.*std::sqrt(u))))
                    + clausen_2(2*std::acos((-1 + 2*u)/(2.*std::abs(u)))))/lambda;
       }
