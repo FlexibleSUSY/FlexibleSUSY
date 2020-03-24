@@ -1950,6 +1950,13 @@ namespace {
       const double Pi = 3.141592653589793;
       const auto lambda = std::sqrt(lambda_2(u,v));
 
+      if (is_equal(u, v, 1.0e-6)) {
+         return (-(sqr(std::log(u)))
+                 + 2*sqr(std::log((1 - lambda)/2.))
+                 - 4*dilog((1 - lambda)/2.)
+                 + sqr(Pi)/3.)/lambda;
+      }
+
       return (-(std::log(u)*std::log(v))
               + 2*std::log((1 - lambda + u - v)/2.)*std::log((1 - lambda - u + v)/2.)
               - 2*dilog((1 - lambda + u - v)/2.)
@@ -1961,6 +1968,11 @@ namespace {
    double phi_neg(double u, double v) noexcept
    {
       const auto lambda = std::sqrt(-lambda_2(u,v));
+
+      if (is_equal(u, v, 1.0e-6)) {
+         return 2*(2*clausen_2(2*std::acos(1/(2.*std::sqrt(u))))
+                   + clausen_2(2*std::acos((-1 + 2*u)/(2.*std::abs(u)))))/lambda;
+      }
 
       return 2*(+ clausen_2(2*std::acos((1 + u - v)/(2.*std::sqrt(u))))
                 + clausen_2(2*std::acos((1 - u + v)/(2.*std::sqrt(v))))
