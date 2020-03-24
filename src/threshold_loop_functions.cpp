@@ -1944,13 +1944,18 @@ namespace {
       return sqr(1 - u - v) - 4*u*v;
    }
 
-   /// u < 1 && v < 1, lambda^2(u,v) > 0
+   /// u < 1 && v < 1, lambda^2(u,v) > 0; note: phi_pos(u,v) = phi_pos(v,u)
    double phi_pos(double u, double v) noexcept
    {
+      const double eps = 1.0e-6;
       const double Pi = 3.141592653589793;
       const auto lambda = std::sqrt(lambda_2(u,v));
 
-      if (is_equal(u, v, 1.0e-6)) {
+      if (is_equal(u, 1.0, eps) && is_equal(v, 1.0, eps)) {
+         return 2.343907238689459;
+      }
+
+      if (is_equal(u, v, eps)) {
          return (-(sqr(std::log(u)))
                  + 2*sqr(std::log((1 - lambda)/2.))
                  - 4*dilog((1 - lambda)/2.)
