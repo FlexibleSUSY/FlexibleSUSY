@@ -151,14 +151,15 @@ double b0(double p, double m1, double m2, double q) noexcept
 #endif
 
    // protect against infrared divergence
-   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
+   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL)) {
       return 0.0;
+   }
 
-   const double mMin = std::min(std::abs(m1), std::abs(m2));
-   const double mMax = std::max(std::abs(m1), std::abs(m2));
-
-   const double pSq = sqr(p), mMinSq = sqr(mMin), mMaxSq = sqr(mMax);
-   /// Try to increase the accuracy of s
+   const double m12 = sqr(m1);
+   const double m22 = sqr(m2);
+   const double mMinSq = std::min(m12, m22);
+   const double mMaxSq = std::max(m12, m22);
+   const double pSq = sqr(p);
 
    const double pTest = divide_finite(pSq, mMaxSq);
    /// Decides level at which one switches to p=0 limit of calculations
@@ -176,17 +177,17 @@ double b0(double p, double m1, double m2, double q) noexcept
    }
 
    if (is_close(m1, m2, EPSTOL)) {
-      return - std::log(sqr(m1 / q));
+      return -2.0 * std::log(std::abs(m1 / q));
    }
 
-   const double Mmax2 = mMaxSq, Mmin2 = mMinSq;
+   const double qSq = sqr(q);
 
-   if (Mmin2 < 1.e-30) {
-      return 1.0 - std::log(Mmax2 / sqr(q));
+   if (mMinSq < 1.0e-30) {
+      return 1.0 - std::log(mMaxSq / qSq);
    }
 
-   return 1.0 - std::log(Mmax2 / sqr(q)) + Mmin2 * std::log(Mmax2 / Mmin2)
-      / (Mmin2 - Mmax2);
+   return 1.0 - std::log(mMaxSq / qSq) + mMinSq * std::log(mMaxSq / mMinSq)
+      / (mMinSq - mMaxSq);
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
