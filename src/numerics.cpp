@@ -79,19 +79,32 @@ constexpr T divide_finite(T a, T b) noexcept {
    return result;
 }
 
+double sign(double x) noexcept
+{
+   return x >= 0.0 ? 1.0 : -1.0;
+}
+
 // can be made constexpr in C++20
 double fB(const std::complex<double>& a) noexcept
 {
-   using flexiblesusy::fast_log;
-   const double x = a.real();
+   const double re = std::real(a);
+   const double im = std::imag(a);
 
-   if (fabs(x) < EPSTOL)
-      return -1. - x + sqr(x) * 0.5;
+   if ((std::abs(re) == 0.0 || std::abs(re) == 1.0) && im == 0.0) {
+      return -1.0;
+   }
 
-   if (is_close(x, 1., EPSTOL))
-      return -1.;
+   if (std::abs(re) < EPSTOL) {
+      const std::complex<double> i(0.0, 1.0);
+      return std::real(-1.0 + std::log(1.0 - i*im) + (-i*im - re)*std::log((i + im)/im));
+   }
 
-   return std::real(fast_log(1. - a) - 1. - a * fast_log(1.0 - 1.0 / a));
+   if (is_close(re, 1.0, EPSTOL)) {
+      const std::complex<double> i(0.0, 1.0);
+      return std::real(-1.0 + std::log(-i*im) + (-i*im - re)*std::log(im/(-i + im)));
+   }
+
+   return std::real(std::log(1. - a) - 1. - a * std::log(1.0 - 1.0 / a));
 }
 
 } // anonymous namespace
@@ -147,8 +160,6 @@ double b0(double p, double m1, double m2, double q) noexcept
 
    const double pSq = sqr(p), mMinSq = sqr(mMin), mMaxSq = sqr(mMax);
    /// Try to increase the accuracy of s
-   const double dmSq = mMaxSq - mMinSq;
-   const double s = pSq + dmSq;
 
    const double pTest = divide_finite(pSq, mMaxSq);
    /// Decides level at which one switches to p=0 limit of calculations
@@ -156,10 +167,11 @@ double b0(double p, double m1, double m2, double q) noexcept
 
    /// p is not 0
    if (pTest > pTolerance) {
-      const std::complex<double> ieps(0.0, EPSTOL * mMaxSq);
-      const std::complex<double> x = s + sqrt(sqr(s) - 4. * pSq * (mMaxSq - ieps));
-      const std::complex<double> xPlus = x / (2. * pSq);
-      const std::complex<double> xMinus = 2. * (mMaxSq - ieps) / x;
+      const double s = pSq - mMaxSq + mMinSq;
+      const std::complex<double> imin(mMinSq, -EPSTOL);
+      const std::complex<double> x = std::sqrt(sqr(s) - 4.0 * pSq * imin);
+      const std::complex<double> xPlus  = (s + sign(s)*x) / (2*pSq);
+      const std::complex<double> xMinus = imin / (xPlus*pSq);
 
       return -2.0 * log(p / q) - fB(xPlus) - fB(xMinus);
    }
