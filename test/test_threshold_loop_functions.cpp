@@ -1170,8 +1170,12 @@ double phixyz(double x, double y, double z)
    const double u = x/z, v = y/z, m = x/y;
    double fac = 0., my_x = 0., my_y = 0., my_z = 0.;
    const double devu = std::fabs(u-1), devv = std::fabs(v-1), devm = std::fabs(m-1);
-   const double eps = 0.000001;
+   const double eps = 0.0000001;
    const double PI = M_PI;
+
+   if (std::abs(sqr(1 - u - v) - 4*u*v) <= std::numeric_limits<double>::epsilon()) {
+      return 0.0;
+   }
 
    // The defintion that we implement is valid when x/z < 1 and y/z < 1.
    // We have to reshuffle the arguments to obtain the other branches
@@ -1420,6 +1424,16 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
       {2, 2, 1},
       {2, 1, 2},
 
+      {862.132647151542, 862.132267190459, 684.729637476883},
+
+      // lambda = 0
+      {1, 0, 1},
+      {4, 1, 1},
+
+      // lambda ~ 0
+      // {4, 1 + 1e-5, 1},
+      // {200.220790830763, 599.56612604427, 106.834963457636},
+
       {1, 1, 1}
    };
 
@@ -1476,6 +1490,27 @@ std::vector<XYZ> generate_random_triples(
    }
 
    return v;
+}
+
+BOOST_AUTO_TEST_CASE(test_phi_random)
+{
+   const unsigned N = 1000000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   // low testing precision since phi_xyz becomes unstable when lambda ~ 0
+   const double prec = 1e-7;
+
+   for (const auto t: triples) {
+      BOOST_CHECK_CLOSE_FRACTION(phi_fs(t), phi_eb(t), prec);
+   }
 }
 
 BOOST_AUTO_TEST_CASE(bench_phi)

@@ -2014,6 +2014,12 @@ namespace {
    {
       const auto lambda = lambda_2(u,v);
 
+      if (is_zero(lambda, std::numeric_limits<double>::epsilon())) {
+         // phi_uv is always multiplied by lambda.  So, in order to
+         // avoid nans if lambda == 0, we simply return 0
+         return 0.0;
+      }
+
       if (lambda > 0.) {
          if (u <= 1 && v <= 1) {
             return phi_pos(u,v);
