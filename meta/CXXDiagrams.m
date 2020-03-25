@@ -41,6 +41,8 @@ NumberOfFieldIndices::usage="Return the number of indices a field has as would b
 determined by inspecting the result of TreeMasses`FieldInfo[].";
 CreateMassFunctions::usage="Creates c++ code that makes functions available that \
 return tree-level masses of given fields.";
+CreatePhysicalMassFunctions::usage="Creates c++ code that makes functions available that \
+return physical masses of given fields.";
 LorentzIndexOfField::usage="Returns the Lorentz index of a given indexed field.";
 ColourIndexOfField::usage="Returns the colour index of a given indexed field.";
 
@@ -87,7 +89,8 @@ AtomQ[] and return the result.";
 CreateUnitCharge::usage="Creates the c++ code for a function that returns the \
 numerical value of the electrical charge of the electron.";
 
-CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
+ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
+ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
 Begin["`Private`"];
 
@@ -143,10 +146,6 @@ CXXNameOfField[Susyno`LieGroups`conj[p_],
 CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
 	", "]] <> ">"
-
-(** \brief Returns the c++ keyword corresponding to a boolean value. **)
-CXXBoolValue[True] = "true";
-CXXBoolValue[False] = "false";
 
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
@@ -222,8 +221,8 @@ CreateFields[] :=
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
                      "using sm_flags = boost::mpl::vector_c<bool, " <>
                         If[TreeMasses`GetDimension[#] === 1,
-                           CXXBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CXXBoolValue /@
+                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
                              TreeMasses`IsSMParticleElementwise[#],
                                                ", "]] <>
                         ">;\n" <>
@@ -1257,7 +1256,30 @@ CreateMassFunctions[] :=
              "{ return model.get_M" <> CXXNameOfField[# /. ghostMappings] <>
              If[TreeMasses`GetDimension[#] === 1, "()", "(indices[0])"] <> "; }"
             ] & /@ massiveFields, "\n\n"]
-        ]
+        ];
+
+(** \brief Creates c++ code that makes functions available that
+ * return physical masses of given fields.
+ * \returns the corresponding c++ code as a string.
+ **)
+CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
+  Module[{massiveFields,
+          ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
+    massiveFields = TreeMasses`GetParticles[];
+
+    StringJoin @ Riffle[
+      Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
+             numberOfIndices = Length @ fieldInfo[[5]];
+
+             "template<> inline\n" <>
+             "double context_base::physical_mass_impl<" <>
+               CXXNameOfField[#, prefixNamespace -> "fields"] <>
+             ">(const std::array<int, " <> ToString @ numberOfIndices <>
+             ">& indices) const\n" <>
+             "{ return model.get_physical().M" <> CXXNameOfField[# /. ghostMappings] <>
+             If[TreeMasses`GetDimension[#] === 1, "", "[indices[0]]"] <> "; }"
+            ] & /@ massiveFields, "\n\n"]
+        ];
 
 (** \brief Creates the c++ code for a function that returns the
  * numerical value of the electrical charge of the electron.
@@ -1380,6 +1402,20 @@ StripColourIndices[p_] :=
 		If[Length[remainingIndices] === 0, Head[p],
 			Head[p][remainingIndices]]
 	]
+
+ColorFactorForDiagram[topology_, diagram_] :=
+   ColourFactorForIndexedDiagramFromGraph[
+      CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
+   ];
+
+(* TODO: generalize the Extraction *)
+ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_] /; NumericQ[colourfactor]] := 2*colourfactor;
+ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
+ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
+ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
+ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+ExtractColourFactor[args___] :=
+   (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
 End[];
 EndPackage[];

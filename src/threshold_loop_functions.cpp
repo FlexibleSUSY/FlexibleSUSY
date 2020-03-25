@@ -1944,11 +1944,24 @@ namespace {
       return sqr(1 - u - v) - 4*u*v;
    }
 
-   /// u < 1 && v < 1, lambda^2(u,v) > 0
+   /// u < 1 && v < 1, lambda^2(u,v) > 0; note: phi_pos(u,v) = phi_pos(v,u)
    double phi_pos(double u, double v) noexcept
    {
+      const double eps = 1.0e-7;
+
+      if (is_equal(u, 1.0, eps) && is_equal(v, 1.0, eps)) {
+         return 2.343907238689459;
+      }
+
       const double Pi = 3.141592653589793;
       const auto lambda = std::sqrt(lambda_2(u,v));
+
+      if (is_equal(u, v, eps)) {
+         return (-(sqr(std::log(u)))
+                 + 2*sqr(std::log((1 - lambda)/2.))
+                 - 4*dilog((1 - lambda)/2.)
+                 + sqr(Pi)/3.)/lambda;
+      }
 
       return (-(std::log(u)*std::log(v))
               + 2*std::log((1 - lambda + u - v)/2.)*std::log((1 - lambda - u + v)/2.)
@@ -1957,10 +1970,36 @@ namespace {
               + sqr(Pi)/3.)/lambda;
    }
 
-   /// lambda^2(u,v) < 0
+   /// lambda^2(u,v) < 0, u = 1
+   double phi_neg_1v(double v, double lambda) noexcept
+   {
+      return 2*(+ clausen_2(2*std::acos((2 - v)/2))
+                + 2*clausen_2(2*std::acos(0.5*std::sqrt(v))))/lambda;
+   }
+
+   /// lambda^2(u,v) < 0; note: phi_neg(u,v) = phi_neg(v,u)
    double phi_neg(double u, double v) noexcept
    {
+      const double eps = 1.0e-7;
+
+      if (is_equal(u, 1.0, eps) && is_equal(v, 1.0, eps)) {
+         return 2.343907238689459;
+      }
+
       const auto lambda = std::sqrt(-lambda_2(u,v));
+
+      if (is_equal(u, 1.0, eps)) {
+         return phi_neg_1v(v, lambda);
+      }
+
+      if (is_equal(v, 1.0, eps)) {
+         return phi_neg_1v(u, lambda);
+      }
+
+      if (is_equal(u, v, eps)) {
+         return 2*(2*clausen_2(2*std::acos(1/(2.*std::sqrt(u))))
+                   + clausen_2(2*std::acos((-1 + 2*u)/(2.*std::abs(u)))))/lambda;
+      }
 
       return 2*(+ clausen_2(2*std::acos((1 + u - v)/(2.*std::sqrt(u))))
                 + clausen_2(2*std::acos((1 - u + v)/(2.*std::sqrt(v))))
@@ -1976,6 +2015,12 @@ namespace {
    double phi_uv(double u, double v) noexcept
    {
       const auto lambda = lambda_2(u,v);
+
+      if (is_zero(lambda, std::numeric_limits<double>::epsilon())) {
+         // phi_uv is always multiplied by lambda.  So, in order to
+         // avoid nans if lambda == 0, we simply return 0
+         return 0.0;
+      }
 
       if (lambda > 0.) {
          if (u <= 1 && v <= 1) {

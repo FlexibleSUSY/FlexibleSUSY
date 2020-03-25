@@ -73,6 +73,7 @@ CountNumberOfEntries::usage = "returns numbers of entries of a
  given type";
 
 CreateCType::usage="returns string with the C/C++ data type";
+CreateCBoolValue::usage="returns string with C/C++ bool value";
 
 GetElementType::usage="returns type of matrix / vector / array elements";
 
@@ -238,6 +239,12 @@ CreateCType[CConversion`MatrixType[t_, dim1_, dim2_]] :=
 
 CreateCType[CConversion`TensorType[t_, dims__]] :=
     EigenTensor[CreateCType[ScalarType[t]], Sequence @@ (ToString /@ {dims})];
+
+(** \brief Returns the c++ keyword corresponding to a boolean value. **)
+CreateCBoolValue[True] := "true";
+CreateCBoolValue[False] := "false";
+CreateCBoolValue[sym_] :=
+    (Print["Error: CreateCBoolValue cannot convert value to Boolean type: ", sym]; Quit[1]);
 
 CastTo[expr_String, toType_ /; toType === None] := expr;
 
