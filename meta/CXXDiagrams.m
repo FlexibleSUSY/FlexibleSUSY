@@ -25,12 +25,7 @@
 (*** This module generates c++ code capable of representing fields, vertices and diagrams. ***)
 BeginPackage["CXXDiagrams`", {"SARAH`", "TextFormatting`", "TreeMasses`", "Vertices`", "Parameters`", "CConversion`", "ColorMath`", "Utils`"}];
 
-(* our *)
-FieldInfo::usage="";
-includeLorentzIndices::usage="";
 CreateFieldTraitsDefinitions::usage="";
-CreateSelfConjugateFieldsDefinitions::usage="";
-(* end of ours *)
 
 (*** Public interfaces that model fields ***)
 CreateFields::usage="Creates c++ code that makes all fields and their properties \
@@ -131,10 +126,6 @@ CreateSelfConjugateFieldDefinition[field_?IsLorentzSelfConjugate, namespacePrefi
            "template<> struct " <> FlexibleSUSY`FSModelName <>  "_cxx_diagrams::fields::" <> LorentzConjugateOperation[field] <> "<" <> fieldName <> ">" <>
            " { using type = " <> fieldName <> "; };"
           ];
-
-CreateSelfConjugateFieldsDefinitions[fields_List, namespacePrefix_:""] :=
-    Utils`StringJoinWithSeparator[CreateSelfConjugateFieldDefinition[#, namespacePrefix]& /@ Select[fields, IsLorentzSelfConjugate   ], "\n"] <>
- "\n";
 
 CreateFieldTypeTraitDefinition[field_?TreeMasses`IsScalar, namespacePrefix_] :=
     "template<>\nstruct is_scalar<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix] <> " > : public std::true_type {};";
@@ -503,10 +494,10 @@ ContractionsBetweenVerticesForDiagramFromGraph[v1_Integer, v2_Integer,
 
 (** \brief Convert color structures to the ColorMath convention **)
 ConvertColourStructureToColorMathConvention[fields_List,
-	ZeroColouredVertex] := 0
+	ZeroColouredVertex] := 0;
 
 ConvertColourStructureToColorMathConvention[fields_List,
-	UncolouredVertex] := 1
+	UncolouredVertex] := 1;
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	GellMannVertex[cIndex1_, cIndex2_, cIndex3_]] :=
@@ -521,7 +512,7 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]] :=
-	ColorMath`CMf[cIndex1, cIndex2, cIndex3]
+	ColorMath`CMf[cIndex1, cIndex2, cIndex3];
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
@@ -560,7 +551,7 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
 				ToString[{colourRep1, colourRep2}]];
 			Quit[1];
 		]
-	]
+	];
 
 ConvertColourStructureToColorMathConvention[fields_List,
    AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=

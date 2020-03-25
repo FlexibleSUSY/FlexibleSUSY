@@ -74,6 +74,19 @@ TestEquality[TreeMasses`ColorChargedQ[#], True]& /@ {Fd, Fu, VG, gG, Su, Sd, Glu
 
 TestEquality[SA`CPViolationHiggsSector, False];
 
+TestEquality[TreeMasses`GetColorRepresentation[#], O]&
+   /@ {VG, gG, Glu, sigmaO, phiO};
+TestEquality[TreeMasses`GetColorRepresentation[#], T]&
+   /@ {Fd, Fu, Sd, Su};
+TestEquality[TreeMasses`GetColorRepresentation[#], -T]&
+   /@ {SARAH`bar[Fd], SARAH`bar[Fu], Susyno`LieGroups`conj[Sd], Susyno`LieGroups`conj[Su]};
+TestEquality[TreeMasses`GetColorRepresentation[#], S]&
+   /@ {Sv, Se, hh, Ah, Hpm, Rh, Chi, Cha1, Cha2, SRdp, SRum, Fv, Fe, VP, VZ, VWm, gWm, gWmC, gP, gZ};
+TestEquality[TreeMasses`GetColorRepresentation[#], S]&
+   /@ SARAH`bar /@ {Chi, Cha1, Cha2, Fv, Fe, gWm, gWmC, gP, gZ};
+TestEquality[TreeMasses`GetColorRepresentation[#], S]&
+   /@ Susyno`LieGroups`conj /@ {Sv, Se, hh, Ah, Hpm, Rh, SRdp, SRum, VP, VZ, VWm};
+
 Print[""];
 
 PrintTestSummary[];

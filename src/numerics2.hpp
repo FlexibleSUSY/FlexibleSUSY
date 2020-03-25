@@ -26,25 +26,9 @@
 #include <cstddef>
 #include <cstdlib>
 #include <type_traits>
+#include <boost/type_traits/is_complex.hpp>
 
 namespace flexiblesusy {
-
-namespace detail {
-
-template <typename T>
-struct is_complex_helper
-   : public std::false_type { };
-
-template <typename T>
-struct is_complex_helper<std::complex<T> >
-   : public std::true_type { };
-
-} // namespace detail
-
-template <typename T>
-struct is_complex
-   : public detail::is_complex_helper<typename std::remove_cv<T>::type>::type
-{ };
 
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value, bool>::type
@@ -55,14 +39,14 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 
 template <typename T>
 typename std::enable_if<!std::is_unsigned<T>::value &&
-                        !is_complex<T>::value, bool>::type
+                        !boost::is_complex<T>::value, bool>::type
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return std::abs(a) <= prec;
 }
 
 template <typename T>
-typename std::enable_if<is_complex<T>::value, bool>::type
+typename std::enable_if<boost::is_complex<T>::value, bool>::type
 is_zero(T a,
         typename T::value_type prec
         = std::numeric_limits<typename T::value_type>::epsilon()) noexcept

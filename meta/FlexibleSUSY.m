@@ -2179,16 +2179,18 @@ WriteObservables[extraSLHAOutputBlocks_, files_List] :=
 WriteCXXDiagramClass[vertices_List, files_List,
     cxxQFTVerticesTemplate_, cxxQFTVerticesOutputDirectory_,
     cxxQFTVerticesMakefileTemplates_] :=
-  Module[{fields = "", cxxVerticesParts = {}, massFunctions,
-          sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
-          outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
-          defineFieldTraits,
-          cxxQFTVerticesFiles, physicalMassFunctions},
+    Module[{fields = "", cxxVerticesParts = {},
+            massFunctions, physicalMassFunctions,
+            unitCharge,
+            defineFieldTraits,
+            sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
+            outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
+            cxxQFTVerticesFiles},
 
-     massFunctions = CXXDiagrams`CreateMassFunctions[];
-     physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[fieldsNamespace];
-     fields = CXXDiagrams`CreateFields[];
-     defineFieldTraits = CXXDiagrams`CreateFieldTraitsDefinitions[TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"];
+        massFunctions = CXXDiagrams`CreateMassFunctions[];
+        physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
+        fields = CXXDiagrams`CreateFields[];
+        defineFieldTraits = CXXDiagrams`CreateFieldTraitsDefinitions[TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"];
 
         If[vertices =!= {},
 
@@ -2210,7 +2212,8 @@ WriteCXXDiagramClass[vertices_List, files_List,
             Close[fileHandle];
         ];
 
-        AppendTo[cxxVerticesParts, {"", CXXDiagrams`CreateUnitCharge[]}];
+        unitCharge = CXXDiagrams`CreateUnitCharge[];
+        AppendTo[cxxVerticesParts, {"", unitCharge}];
 
         WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"                -> fields,

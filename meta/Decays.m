@@ -71,22 +71,6 @@ FieldPositionInVertex[field_, vertex_] := Module[{pos},
    pos /. {{n_}} :> n
 ];
 
-StripDiagramColorFactor[fields_, colorFactor_] :=
-   Module[{fieldIn = fields[[1]], fieldsOut = Drop[fields, 1], initialStateRep, finalStateReps},
-      initialStateRep = TreeMasses`GetColorRepresentation@fieldIn;
-      finalStateReps = TreeMasses`GetColorRepresentation /@ fieldsOut;
-      Switch[initialStateRep,
-         S,
-            Switch[finalStateReps,
-               {S,S}, colorFactor,
-               {T,-T}, Coefficient[colorFactor, Superscript[ColorMath`CM\[Delta], Parameters`GetFieldColorIndex/@fieldsOut]],
-               {O,O}, Coefficient[colorFactor, Superscript[ColorMath`CM\[CapitalDelta], Parameters`GetFieldColorIndex/@fieldsOut]],
-               _, Print["Unhandled final state color representation in ", initialStateRep, " -> ", finalStateReps, " decay"]; Quit[1];
-            ],
-         _, Print["Unhandled initial state color representation ", initialStateRep, " -> ", finalStateReps, " decay"]; Quit[1];
-      ]
-   ];
-
 GetInitialState[FSParticleDecay[particle_, finalState_List, diagrams_List]] := particle;
 
 GetFinalState[FSParticleDecay[particle_, finalState_List, diagrams_List]] := finalState;

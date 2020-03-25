@@ -107,18 +107,14 @@ IsParameter::usage="returns True if symbol is a model/input/output/phase paramet
 IsModelParameter::usage="returns True if parameter is a model parameter";
 IsInputParameter::usage="returns True if parameter is an input parameter";
 IsOutputParameter::usage="returns True if parameter is a defined output parameter";
+IsIndex::usage="returns True if given symbol is an index";
 IsPhase::usage="returns True if given symbol is a phase";
 IsExtraParameter::usage="return True if parameter is an auxiliary parameter";
 IsGaugeCoupling::usage="returns True if parameter is a gauge coupling.";
 IsYukawaCoupling::usage="returns True if parameter is a Yukawa coupling.";
 IsVEV::usage="returns True if parameter is a VEV.";
 
-IsIndex::usage="returns True if given symbol is an index";
-IsLorentzIndex::usage="returns True if given symbol is a Lorentz index";
-IsColorIndex::usage="returns True if given symbol is a color index";
-IsGenerationIndex::usage="returns True if given symbol is a generation index";
 GetIndices::usage="returns list of indices from a given parameter";
-GetFieldColorIndex::usage = "";
 
 AllModelParametersAreReal::usage="returns True if all model parameters
 are real, False otherwise";
@@ -1985,14 +1981,6 @@ SetSMParameter[FlexibleSUSY`MCharmMCharm       , value_String, struct_String] :=
     e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
 GetFieldIndices[field_] :=
     field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
-
-GetFieldColorIndex[field_/;TreeMasses`ColorChargedQ[field]]:=
-  Module[{res},
-    res = GetFieldIndices[field];
-    res = Select[res, IsColorIndex];
-    Assert[Length[res] === 1];
-    res[[1]]
-  ];
 
 End[];
 
