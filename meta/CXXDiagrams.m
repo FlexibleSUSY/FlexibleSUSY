@@ -1542,11 +1542,13 @@ ColorFactorForDiagram[topology_, diagram_] :=
    ];
 
 (* TODO: generalize the Extraction *)
-ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2*colourfactor;
+ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_] /; NumericQ[colourfactor]] := 2*colourfactor;
 ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
-ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_]] := colourfactor;
+ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
 ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
-ExtractColourFactor[colourfactor_] := colourfactor;
+ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+ExtractColourFactor[args___] :=
+   (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
 End[];
 EndPackage[];

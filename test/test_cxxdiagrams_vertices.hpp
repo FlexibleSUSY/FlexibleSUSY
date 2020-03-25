@@ -23,6 +23,7 @@
 #include <iterator>
 
 #include "cxx_qft/SM_qft.hpp"
+#include "SM_mass_eigenstates.hpp"
 
 #include "test_complex_equality.hpp"
 
