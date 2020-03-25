@@ -2124,6 +2124,7 @@ check_looptools_libs() {
       message "       the location of the libooptools library."
       exit 1
    else
+      # quadmath is always required by linkage of `solveC`
       local LOOPTOOLSLIBS_="-looptools -lquadmath"
       if [ -z "$looptools_lib_dir" ]; then
          # assume that the linker will look in the default paths
