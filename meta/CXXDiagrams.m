@@ -100,7 +100,7 @@ NumberOfExternalParticlesInTopology::usage = "";
 NumberOfPropagatorsInTopology::usage = "";
 
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
-ExtractColourFactor::usage = "";
+ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
 Begin["`Private`"];
 
