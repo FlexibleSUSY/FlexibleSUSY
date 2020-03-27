@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GM2_FFUNCTIONS_H
-#define GM2_FFUNCTIONS_H
+#ifndef GM2_FFUNCTIONS_HPP
+#define GM2_FFUNCTIONS_HPP
 
 namespace gm2calc {
 
@@ -53,17 +53,6 @@ double f_PS(double);
 double f_S(double);
 /// \f$f_{\tilde{f}}(z)\f$, Eq (72) arXiv:hep-ph/0609168
 double f_sferm(double);
-
-/// returns number squared
-template <typename T> T sqr(T x) { return x*x; }
-/// returns square root of absolute of number
-double abs_sqrt(double);
-/// returns sign of real number
-int sign(double);
-/// returns square root of absolute of number, times sign
-double signed_abs_sqrt(double);
-/// returns square of number, times sign
-double signed_sqr(double);
 
 } // namespace gm2calc
 

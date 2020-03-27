@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint_with_flavour_mixing )
    const double fs_new_vev = Sqrt(Sqr(fs_new_vu) + Sqr(fs_new_vd));
 
    BOOST_CHECK_CLOSE_FRACTION(fs_mt, ss_mt, 9.5e-5);
-   BOOST_CHECK_CLOSE_FRACTION(fs_mb, ss_mb, 8.0e-13);
+   BOOST_CHECK_CLOSE_FRACTION(fs_mb, ss_mb, 9.0e-13);
    BOOST_CHECK_CLOSE_FRACTION(fs_me, ss_me, 7.0e-4);
    BOOST_CHECK_CLOSE_FRACTION(fs_MZ, ss_MZ, 5.0e-7);
    BOOST_CHECK_CLOSE_FRACTION(fs_new_vev, ss_new_vev, 5.0e-7);

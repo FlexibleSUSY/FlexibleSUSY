@@ -79,29 +79,37 @@ constexpr T divide_finite(T a, T b) noexcept {
    return result;
 }
 
+double sign(double x) noexcept
+{
+   return x >= 0.0 ? 1.0 : -1.0;
+}
+
 // can be made constexpr in C++20
 double fB(const std::complex<double>& a) noexcept
 {
    using flexiblesusy::fast_log;
-   const double x = a.real();
 
-   if (fabs(x) < EPSTOL)
-      return -1. - x + sqr(x) * 0.5;
+   const double re = std::real(a);
+   const double im = std::imag(a);
 
-   if (is_close(x, 1., EPSTOL))
-      return -1.;
+   if ((std::abs(re) == 0.0 || std::abs(re) == 1.0) && im == 0.0) {
+      return -1.0;
+   }
 
-   return std::real(fast_log(1. - a) - 1. - a * fast_log(1.0 - 1.0 / a));
+   return std::real(-1.0 + fast_log(1.0 - a) - a*fast_log(1.0 - 1.0/a));
 }
 
 } // anonymous namespace
 
-double a0(double m, double q) noexcept {
-   using std::fabs;
-   using std::log;
+double a0(double m, double q) noexcept
+{
    constexpr double TOL = 1e-4;
-   if (fabs(m) < TOL) return 0.;
-   return sqr(m) * (1.0 - 2. * log(fabs(m / q)));
+
+   if (std::abs(m) < TOL) {
+      return 0.0;
+   }
+
+   return sqr(m) * (1.0 - 2. * std::log(std::abs(m / q)));
 }
 
 double ffn(double p, double m1, double m2, double q) noexcept {
@@ -128,10 +136,6 @@ double b22bar(double p, double m1, double m2, double q) noexcept {
  */
 double b0(double p, double m1, double m2, double q) noexcept
 {
-   using std::fabs;
-   using std::log;
-   using std::sqrt;
-
 #ifdef USE_LOOPTOOLS
    setmudim(q*q);
    double b0l = B0(p*p, m1*m1, m2*m2).real();
@@ -139,16 +143,15 @@ double b0(double p, double m1, double m2, double q) noexcept
 #endif
 
    // protect against infrared divergence
-   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
+   if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL)) {
       return 0.0;
+   }
 
-   const double mMin = std::min(fabs(m1), fabs(m2));
-   const double mMax = std::max(fabs(m1), fabs(m2));
-
-   const double pSq = sqr(p), mMinSq = sqr(mMin), mMaxSq = sqr(mMax);
-   /// Try to increase the accuracy of s
-   const double dmSq = mMaxSq - mMinSq;
-   const double s = pSq + dmSq;
+   const double m12 = sqr(m1);
+   const double m22 = sqr(m2);
+   const double mMinSq = std::min(m12, m22);
+   const double mMaxSq = std::max(m12, m22);
+   const double pSq = sqr(p);
 
    const double pTest = divide_finite(pSq, mMaxSq);
    /// Decides level at which one switches to p=0 limit of calculations
@@ -156,26 +159,27 @@ double b0(double p, double m1, double m2, double q) noexcept
 
    /// p is not 0
    if (pTest > pTolerance) {
-      const std::complex<double> ieps(0.0, EPSTOL * mMaxSq);
-      const std::complex<double> x = s + sqrt(sqr(s) - 4. * pSq * (mMaxSq - ieps));
-      const std::complex<double> xPlus = x / (2. * pSq);
-      const std::complex<double> xMinus = 2. * (mMaxSq - ieps) / x;
+      const double s = pSq - mMaxSq + mMinSq;
+      const std::complex<double> imin(mMinSq, -EPSTOL);
+      const std::complex<double> x = std::sqrt(sqr(s) - 4.0 * pSq * imin);
+      const std::complex<double> xPlus  = (s + sign(s)*x) / (2*pSq);
+      const std::complex<double> xMinus = imin / (xPlus*pSq);
 
-      return -2.0 * log(p / q) - fB(xPlus) - fB(xMinus);
+      return -2.0 * std::log(p / q) - fB(xPlus) - fB(xMinus);
    }
 
    if (is_close(m1, m2, EPSTOL)) {
-      return - log(sqr(m1 / q));
+      return -2.0 * std::log(std::abs(m1 / q));
    }
 
-   const double Mmax2 = mMaxSq, Mmin2 = mMinSq;
+   const double qSq = sqr(q);
 
-   if (Mmin2 < 1.e-30) {
-      return 1.0 - log(Mmax2 / sqr(q));
+   if (mMinSq < 1.0e-30) {
+      return 1.0 - std::log(mMaxSq / qSq);
    }
 
-   return 1.0 - log(Mmax2 / sqr(q)) + Mmin2 * log(Mmax2 / Mmin2)
-      / (Mmin2 - Mmax2);
+   return 1.0 - std::log(mMaxSq / qSq) + mMinSq * std::log(mMaxSq / mMinSq)
+      / (mMinSq - mMaxSq);
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!

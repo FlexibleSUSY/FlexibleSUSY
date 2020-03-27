@@ -45,7 +45,7 @@ namespace {
 
 double get_QED_2L(context_base&, const softsusy::QedQcd&);
 
-double get_MSUSY(const @ModelName@_mass_eigenstates& model)
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 {
 @AMuon_GetMSUSY@
 }

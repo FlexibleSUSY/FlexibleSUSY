@@ -16,21 +16,22 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "ffunctions.hpp"
-#include "dilog.hpp"
+#include "gm2_ffunctions.hpp"
+#include "gm2_dilog.hpp"
+#include "gm2_log.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <iostream>
 #include <limits>
 
-#define ERROR(message) std::cerr << "Error: " << message << '\n';
-
 namespace gm2calc {
 
 namespace {
    const double eps = 10.0*std::numeric_limits<double>::epsilon();
+
+   /// returns number squared
+   template <typename T> T sqr(T x) { return x*x; }
 
    /// returns number cubed
    template <typename T> T pow3(T x) { return x*x*x; }
@@ -50,18 +51,6 @@ namespace {
    }
 
 } // anonymous namespace
-
-double abs_sqrt(double x) {
-   return std::sqrt(std::abs(x));
-}
-
-int sign(double x) { return x < 0 ? -1 : 1; }
-
-double signed_sqr(double x) { return sign(x) * x * x; }
-
-double signed_abs_sqrt(double x) {
-   return sign(x) * std::sqrt(std::abs(x));
-}
 
 double F1C(double x) {
    if (is_zero(x, eps)) {
@@ -95,8 +84,6 @@ double F2C(double x) {
 }
 
 double F3C(double x) {
-   using flexiblesusy::dilog;
-
    const double d = x - 1.0;
 
    if (is_equal(x, 1.0, 0.03)) {
@@ -110,18 +97,17 @@ double F3C(double x) {
    }
 
    const double lx = std::log(x);
+   const double x2 = sqr(x);
 
    return 4.0/(141.0*pow4(d)) * (
-      + (1.0 - x) * (151.0 * sqr(x) - 335.0 * x + 592.0)
-      + 6.0 * (21.0 * pow3(x) - 108.0 * sqr(x) - 93.0 * x + 50.0) * lx
-      - 54.0 * x * (sqr(x) - 2.0 * x - 2.0) * sqr(lx)
-      - 108.0 * x * (sqr(x) - 2.0 * x + 12.0) * dilog(1.0 - x)
+      + (1.0 - x) * (151.0 * x2 - 335.0 * x + 592.0)
+      + 6.0 * (21.0 * pow3(x) - 108.0 * x2 - 93.0 * x + 50.0) * lx
+      - 54.0 * x * (x2 - 2.0 * x - 2.0) * sqr(lx)
+      - 108.0 * x * (x2 - 2.0 * x + 12.0) * dilog(1.0 - x)
       );
 }
 
 double F4C(double x) {
-   using flexiblesusy::dilog;
-
    if (is_zero(x, eps)) {
       return 0.0;
    }
@@ -138,12 +124,13 @@ double F4C(double x) {
    }
 
    const double lx = std::log(x);
+   const double x2 = sqr(x);
 
    return -9.0/(122.0 * pow3(1.0 - x)) * (
-      + 8.0 * (sqr(x) - 3.0 * x + 2.0)
-      + (11.0 * sqr(x) - 40.0 * x + 5.0) * lx
-      - 2.0 * (sqr(x) - 2.0 * x - 2.0) * sqr(lx)
-      - 4.0 * (sqr(x) - 2.0 * x + 9.0) * dilog(1.0- x)
+      + 8.0 * (x2 - 3.0 * x + 2.0)
+      + (11.0 * x2 - 40.0 * x + 5.0) * lx
+      - 2.0 * (x2 - 2.0 * x - 2.0) * sqr(lx)
+      - 4.0 * (x2 - 2.0 * x + 9.0) * dilog(1.0 - x)
       );
 }
 
@@ -178,8 +165,6 @@ double F2N(double x) {
 }
 
 double F3N(double x) {
-   using flexiblesusy::dilog;
-
    if (is_zero(x, eps)) {
       return 8.0/105.0;
    }
@@ -191,16 +176,16 @@ double F3N(double x) {
          + d*(-3561/34300.0 + d*(23/294.0 - 4381/73500.0*d)))));
    }
 
+   const double x2 = sqr(x);
+
    return 4.0/(105.0 * pow4(d)) * (
-      + (1.0 - x) * (- 97.0 * sqr(x) - 529.0 * x + 2.0)
-      + 6.0 * sqr(x) * (13.0 * x + 81.0) * std::log(x)
+      + (1.0 - x) * (- 97.0 * x2 - 529.0 * x + 2.0)
+      + 6.0 * x2 * (13.0 * x + 81.0) * std::log(x)
       + 108.0 * x * (7.0 * x + 4.0) * dilog(1.0 - x)
       );
 }
 
 double F4N(double x) {
-   using flexiblesusy::dilog;
-
    const double PI = 3.14159265358979323846;
    const double PI2 = PI * PI;
 
@@ -484,8 +469,6 @@ double Iabc(double a, double b, double c) {
  * Calculates \f$f_{PS}(z)\f$, Eq (70) arXiv:hep-ph/0609168
  */
 double f_PS(double z) {
-   using flexiblesusy::dilog;
-
    double result = 0.0;
 
    if (z < 0.25) {
@@ -505,7 +488,7 @@ double f_PS(double z) {
  */
 double f_S(double z) {
    if (z < 0.0) {
-      ERROR("f_S: z must not be negativ!");
+      ERROR("f_S: z must not be negative!");
    }
 
    return (2.0*z - 1.0)*f_PS(z) - 2.0*z*(2.0 + std::log(z));
@@ -516,7 +499,7 @@ double f_S(double z) {
  */
 double f_sferm(double z) {
    if (z < 0.0) {
-      ERROR("f_sferm: z must not be negativ!");
+      ERROR("f_sferm: z must not be negative!");
    }
 
    return 0.5*z*(2.0 + std::log(z) - f_PS(z));

@@ -58,6 +58,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.cpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/@CLASSNAME@_observables.cpp \
 		$(DIR)/@CLASSNAME@_physical.cpp \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \
@@ -95,6 +96,8 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_input_parameters.hpp \
 		$(DIR)/@CLASSNAME@_low_scale_constraint.hpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.hpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_interface.hpp \
+		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.hpp \
 		$(DIR)/@CLASSNAME@_model.hpp \
 		$(DIR)/@CLASSNAME@_model_slha.hpp \
 		$(DIR)/@CLASSNAME@_observables.hpp \

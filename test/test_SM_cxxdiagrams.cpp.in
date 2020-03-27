@@ -82,8 +82,8 @@ public:
 		
 		return evaluate_impl(
 			boost::fusion::push_front(
-				std::move( boost_indices ),
-				std::cref( context.model )
+            std::move( boost_indices ),
+            dynamic_cast<model_type const&>(context.model)
 			)
 		);
 	}

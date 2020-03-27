@@ -16,34 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GM2_1LOOP_H
-#define GM2_1LOOP_H
+#ifndef GM2_1LOOP_HELPERS_HPP
+#define GM2_1LOOP_HELPERS_HPP
 
-#include <cmath>
 #include <Eigen/Core>
 
 namespace gm2calc {
 
 class MSSMNoFV_onshell;
 
-static const double Pi = 3.14159265358979323846;
-static const double oneOver16PiSqr = 1./(16. * Pi * Pi);
-
-/// calculates full 1-loop SUSY contributions to (g-2) in the MSSM (w/ tan(beta) resummation)
-double calculate_amu_1loop(const MSSMNoFV_onshell&);
-
-/// calculates full 1-loop SUSY contributions to (g-2) in the MSSM (no tan(beta) resummation)
-double calculate_amu_1loop_non_tan_beta_resummed(const MSSMNoFV_onshell&);
-
-// === routines for individual 1-loop contributions ===
-
-/// 1-loop neutralino contribution
-double amuChi0(const MSSMNoFV_onshell&);
-
-/// 1-loop chargino contribution
-double amuChipm(const MSSMNoFV_onshell&);
-
-// === approximations ===
+// === 1-loop approximations ===
 
 // main routines
 
@@ -53,25 +35,26 @@ double amu1Lapprox(const MSSMNoFV_onshell&);
 /// 1-loop leading log approximation w/o explicit tan(beta) resummation
 double amu1Lapprox_non_tan_beta_resummed(const MSSMNoFV_onshell&);
 
-// routines for individual contributions
+// routines for individual 1-loop contributions for approximations
 
 /// 1-loop wino--Higgsino, muon-sneutrino leading log approximation
-double amuWHnu(const MSSMNoFV_onshell&);
+double amu1LWHnu(const MSSMNoFV_onshell&);
 /// 1-loop wino--Higgsino, left-handed smuon leading log approximation
-double amuWHmuL(const MSSMNoFV_onshell&);
+double amu1LWHmuL(const MSSMNoFV_onshell&);
 /// 1-loop bino--Higgsino, left-handed smuon leading log approximation
-double amuBHmuL(const MSSMNoFV_onshell&);
+double amu1LBHmuL(const MSSMNoFV_onshell&);
 /// 1-loop bino--Higgsino, right-handed smuon leading log approximation
-double amuBHmuR(const MSSMNoFV_onshell&);
+double amu1LBHmuR(const MSSMNoFV_onshell&);
 /// 1-loop bino, left-handed smuon--right-handed smuon leading log approximation
-double amuBmuLmuR(const MSSMNoFV_onshell&);
+double amu1LBmuLmuR(const MSSMNoFV_onshell&);
 
 // === resummations ===
 
-double tan_beta_cor(const MSSMNoFV_onshell&);
 double delta_mu_correction(const MSSMNoFV_onshell&);
 double delta_tau_correction(const MSSMNoFV_onshell&);
 double delta_bottom_correction(const MSSMNoFV_onshell&);
+
+double tan_beta_cor(const MSSMNoFV_onshell&);
 
 // === couplings ===
 

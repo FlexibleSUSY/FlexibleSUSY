@@ -16,22 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GM2_UNCERTAINTY_H
-#define GM2_UNCERTAINTY_H
+#ifndef GM2_LOG_HPP
+#define GM2_LOG_HPP
 
-namespace gm2calc {
+#include <iostream>
 
-class MSSMNoFV_onshell;
+#define ERROR(message)                                                  \
+   do { std::cerr << "Error: " << message << std::endl; } while (0)
 
-/// calculates uncertainty for amu(0-loop) w/ tan(beta) resummation
-double calculate_uncertainty_amu_0loop(const MSSMNoFV_onshell&);
+#define VERBOSE(message)                                                \
+   do { std::cerr << message << std::endl; } while (0)
 
-/// calculates uncertainty for amu(1-loop) w/ tan(beta) resummation
-double calculate_uncertainty_amu_1loop(const MSSMNoFV_onshell&);
-
-/// calculates uncertainty for amu(2-loop)
-double calculate_uncertainty_amu_2loop(const MSSMNoFV_onshell&);
-
-} // namespace gm2calc
+#define WARNING(message)                                                \
+   do { std::cerr << "Warning: " << message << std::endl; } while (0)
 
 #endif

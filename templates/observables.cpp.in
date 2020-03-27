@@ -105,6 +105,9 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
       } catch (const Error& e) {
          model.get_problems().flag_thrown(e.what_detailed());
          return @ModelName@_observables();
+      } catch (const std::exception& e) {
+         model.get_problems().flag_thrown(e.what());
+         return @ModelName@_observables();
       }
    }
 
@@ -121,6 +124,8 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
 @calculateObservables@
    } catch (const Error& e) {
       model.get_problems().flag_thrown(e.what_detailed());
+   } catch (const std::exception& e) {
+      model.get_problems().flag_thrown(e.what());
    }
 
    return observables;
