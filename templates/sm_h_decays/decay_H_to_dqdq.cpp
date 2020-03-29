@@ -12,15 +12,16 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    //       or should this never happen and we should crash
    if(!boost::range::equal(indexOut1, indexOut2))
       return 0.;
-//    BOOST_ASSERT_MSG(boost::range::equal(indexOut1, indexOut2), 
+//    BOOST_ASSERT_MSG(boost::range::equal(indexOut1, indexOut2),
       // "Template specialization for H -> Fd1 bar[Fd2] is only valid for Fd1 = Fd2"
 //    );
 
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mdqDR = context.mass<dq>(indexOut1);
    const double mdqOS = context.physical_mass<dq>(indexOut1);
-   BOOST_ASSERT_MSG(!is_zero(mdqDR) && !is_zero(mdqOS),
-                    "Quarks should not be massless");
+   if(is_zero(mdqDR) || is_zero(mdqOS)) {
+      throw std::runtime_error("Error in H->ddbar: down quarks cannot be massless");
+   }
    const auto xOS = std::pow(mdqOS/mHOS, 2);
    const auto xDR = std::pow(mdqDR/mHOS, 2);
    const auto betaOS = sqrt(1. - 4.*xOS);
@@ -65,13 +66,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdqOS/mHOS), Sqr(mdqOS/mHOS)));
 
    // get HBBbar vertex
-   //we don't use amplitude_squared here because we need both this vertex
+   // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexIn, indexOut1, indexOut2);
    const auto HBBbarVertexDR = Vertex<H, bar<dq>::type, dq>::evaluate(indices, context);
-   BOOST_ASSERT_MSG(
-      is_zero(HBBbarVertexDR.left() - HBBbarVertexDR.right()),
-      "Left and right coupling of CP-even Higgs to fermions should be equal");
 
    const auto amp2DR = std::pow(mHOS, 2) * std::pow(betaDR, 2) *
                2.*std::norm(HBBbarVertexDR.left());
