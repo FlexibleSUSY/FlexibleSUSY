@@ -113,7 +113,7 @@ CalculateQCDScalingFactor[] :=
            scalarFactor = scalarFactor <> "const double nlo_qcd = " <> CConversion`RValueToCFormString[nloQCD] <> ";\n";
            scalarFactor = scalarFactor <> "const double nnlo_qcd = " <> CConversion`RValueToCFormString[nnloQCD] <> ";\n";
            scalarFactor = scalarFactor <> "const double nnnlo_qcd = " <> CConversion`RValueToCFormString[nnnloQCD] <> ";\n";
-           scalarFactor = Parameters`CreateLocalConstRefs[nloQCD + nnloQCD + nnnloQCD] <> "\n" <> scalarFactor;
+           scalarFactor = Parameters`CreateLocalConstRefs[{nloQCD, nnloQCD, nnnloQCD}] <> "\n" <> scalarFactor;
            (* NLO, NNLO and NNNLO contributions to pseudoscalar coupling *)
            nloQCD = (97 / 4 - 7 / 6 Symbol["Nf"]) SARAH`strongCoupling^2 / (4 Pi^2);
            nnloQCD = (237311 / 864 - 529 Zeta[2] / 24 - 445 Zeta[3] / 8 + 5 Symbol["l"]);
@@ -125,7 +125,7 @@ CalculateQCDScalingFactor[] :=
                                 <> CConversion`RValueToCFormString[nnloQCD] <> ";\n";
            pseudoscalarFactor = pseudoscalarFactor <> "const double nnnlo_qcd = "
                                 <> CConversion`RValueToCFormString[nnnloQCD] <> ";\n";
-           pseudoscalarFactor = Parameters`CreateLocalConstRefs[nloQCD + nnloQCD + nnnloQCD] <> "\n" <> pseudoscalarFactor;
+           pseudoscalarFactor = Parameters`CreateLocalConstRefs[{nloQCD, nnloQCD, nnnloQCD}] <> "\n" <> pseudoscalarFactor;
            {scalarFactor, pseudoscalarFactor}
           ];
 
@@ -210,8 +210,8 @@ CalculatePartialWidths[couplings_List] :=
 NonZeroVertexQ[vertex_] := MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]];
 
 (* @todo extend to multiple non-Abelian groups *)
-IsColorOrLorentzIndex[index_] := StringMatchQ[ToString @ index, "ct" ~~ __] ||
-                                 StringMatchQ[ToString @ index, "lt" ~~ __];
+IsColorOrLorentzIndex[index_] := Vertices`SarahColorIndexQ[index] ||
+                                 Vertices`SarahLorentzIndexQ[index];
 StripColorAndLorentzIndices[p_Symbol] := p;
 StripColorAndLorentzIndices[SARAH`bar[p_]] := SARAH`bar[StripColorAndLorentzIndices[p]];
 StripColorAndLorentzIndices[Susyno`LieGroups`conj[p_]] := Susyno`LieGroups`conj[StripColorAndLorentzIndices[p]];

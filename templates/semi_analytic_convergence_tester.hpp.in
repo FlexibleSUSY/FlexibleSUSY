@@ -36,7 +36,7 @@ public:
    using Scale_getter = Convergence_tester_DRbar<@ModelName@<Semi_analytic>>::Scale_getter;
 
    @ModelName@_convergence_tester(@ModelName@<Semi_analytic>*, double, const Scale_getter& sg = Scale_getter());
-   virtual ~@ModelName@_convergence_tester();
+   virtual ~@ModelName@_convergence_tester() = default;
 
 protected:
    virtual double max_rel_diff() const;

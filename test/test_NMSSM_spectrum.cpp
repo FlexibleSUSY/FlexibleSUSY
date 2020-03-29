@@ -23,14 +23,29 @@
 #include "NMSSM_two_scale_initial_guesser.hpp"
 #include "test_NMSSM.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 class SoftSusy_error : public Error {
 public:
-   SoftSusy_error(const std::string& msg_)
-      : msg(msg_) {}
+   SoftSusy_error(const std::string& msg)
+      : Error(msg) {}
    virtual ~SoftSusy_error() {}
-   virtual std::string what() const { return msg; }
-private:
-   std::string msg;
 };
 
 class SoftSusy_NoConvergence_error : public SoftSusy_error {
@@ -38,7 +53,6 @@ public:
    SoftSusy_NoConvergence_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NoConvergence_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_NonPerturbative_error : public SoftSusy_error {
@@ -46,7 +60,6 @@ public:
    SoftSusy_NonPerturbative_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NonPerturbative_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_tester {
@@ -59,7 +72,7 @@ public:
    sPhysical get_physical() const { return softSusy.displayPhys(); }
    NmssmSoftsusy get_model() const { return softSusy; }
    void set_loops(int l) { loops = l; }
-   void test(const NMSSM_input_parameters& pp, double mxGuess, const QedQcd& qedqcd = QedQcd()) {
+   void test(const NMSSM_input_parameters& pp, double mxGuess, const QedQcd_legacy& qedqcd = QedQcd_legacy()) {
       // run softsusy
       softsusy::numRewsbLoops = loops;
       softsusy::numHiggsMassLoops = loops;
@@ -125,15 +138,15 @@ public:
    void set_low_scale_constraint(NMSSM_low_scale_constraint<Two_scale>* c) { low_constraint = c; }
    void set_susy_scale_constraint(NMSSM_susy_scale_constraint<Two_scale>* c) { susy_constraint = c; }
    void set_high_scale_constraint(NMSSM_high_scale_constraint<Two_scale>* c) { high_constraint = c; }
-   void setup_default_constaints(const NMSSM_input_parameters&, const QedQcd& qedqcd) {
+   void setup_default_constaints(const NMSSM_input_parameters&, const QedQcd_legacy& qedqcd) {
       if (!high_constraint)
          high_constraint = new NMSSM_high_scale_constraint<Two_scale>(&mssm);
       if (!susy_constraint)
-         susy_constraint = new NMSSM_susy_scale_constraint<Two_scale>(&mssm, qedqcd);
+         susy_constraint = new NMSSM_susy_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
       if (!low_constraint)
-         low_constraint = new NMSSM_low_scale_constraint<Two_scale>(&mssm, qedqcd);
+         low_constraint = new NMSSM_low_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
    }
-   void test(const NMSSM_input_parameters& pp, const QedQcd& qedqcd = QedQcd()) {
+   void test(const NMSSM_input_parameters& pp, const QedQcd_legacy& qedqcd = QedQcd_legacy()) {
       setup_default_constaints(pp, qedqcd);
 
       mssm.clear();
@@ -150,13 +163,13 @@ public:
       high_constraint->set_model(&mssm);
       susy_constraint->set_model(&mssm);
       low_constraint ->set_model(&mssm);
-      low_constraint ->set_sm_parameters(qedqcd);
+      low_constraint ->set_sm_parameters(convert(qedqcd));
       high_constraint->initialize();
       susy_constraint->initialize();
       low_constraint ->initialize();
 
       NMSSM_convergence_tester<Two_scale> convergence_tester(&mssm, 1.0e-4);
-      NMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, qedqcd,
+      NMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, convert(qedqcd),
                                                       *low_constraint,
                                                       *susy_constraint,
                                                       *high_constraint);

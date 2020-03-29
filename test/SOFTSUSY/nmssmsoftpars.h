@@ -138,7 +138,7 @@ public:
 };
 
 /// Formatted ouput of whole object
-ostream & operator <<(ostream &left, const SoftParsNmssm &s);
+std::ostream & operator <<(std::ostream &left, const SoftParsNmssm &s);
 
 inline SoftParsNmssm::SoftParsNmssm()
   : SoftPars<NmssmSusy, nmsBrevity>(), alambda(0.0), akappa(0.0),

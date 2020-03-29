@@ -8,7 +8,7 @@
 Needs["SARAH`"];
 Get["meta/ThreeLoopQCD.m"];
 
-MtOvermt = Collect[
+MfOvermf = Collect[
    GetMTopPoleOverMTopMSbar[{1,h^1,h^2,h^3}, TopQuark, Q, NH, NL] //. {
       FlexibleSUSY`M[Fu] -> mf,
       h -> (4Pi)^2 k,
@@ -18,7 +18,7 @@ MtOvermt = Collect[
    , {k, g3, L}, FullSimplify
 ];
 
-mtOverMt = Collect[
+mfOverMf = Collect[
    GetMTopMSbarOverMTopPole[{1,h^1,h^2,h^3}, TopQuark, Q, NH, NL] //. {
       FlexibleSUSY`M[Fu] -> mf,
       h -> (4Pi)^2 k,
@@ -41,8 +41,8 @@ mtOverMt = Collect[
    NH = number of heavy flavours (usually NH = 1)
  *)
 
-(* ratio Mt / mt *)
-MtOvermt = 1 + g3^2*k*(16/3 - 4*L) + g3^4*k^2*((-242*L)/3 + 22*L^2 + 
+(* ratio Mf / mf *)
+MfOvermf = 1 + g3^2*k*(16/3 - 4*L) + g3^4*k^2*((-242*L)/3 + 22*L^2 + 
    (3049 - 2*NL*(71 + 8*Pi^2) + NH*(-286 + 32*Pi^2) + 32*Pi^2*(2 + Log[2]) - 
      48*Zeta[3])/18) + g3^6*k^3*((-4*L^3*(1231 + 4*(-22 + NL)*NL))/27 + 
    (2*L^2*(17395 + 2*NL*(-911 + 26*NL)))/27 + 
@@ -63,7 +63,7 @@ MtOvermt = 1 + g3^2*k*(16/3 - 4*L) + g3^4*k^2*((-242*L)/3 + 22*L^2 +
 
 (* ratio mt / Mt *)
 (* Eq. (10) of arxiv:hep-ph/9912391 *)
-mtOverMt = 1 + g3^2*k*(-16/3 + 4*L) + g3^4*k^2*(38*L - 6*L^2 + 
+mfOverMf = 1 + g3^2*k*(-16/3 + 4*L) + g3^4*k^2*(38*L - 6*L^2 + 
    (-2537 + NH*(286 - 32*Pi^2) + 2*NL*(71 + 8*Pi^2) - 32*Pi^2*(2 + Log[2]) + 
      48*Zeta[3])/18) + g3^6*k^3*((4*L^3*(475 + 4*(-22 + NL)*NL))/27 - 
    (2*L^2*(8971 + 2*NL*(-911 + 26*NL)))/27 + 

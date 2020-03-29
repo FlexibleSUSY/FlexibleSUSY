@@ -33,6 +33,9 @@ GetBottomMass::usage="";
 GetTopMass::usage="";
 DefVZSelfEnergy::usage="";
 DefVWSelfEnergy::usage="";
+YukawaMatching::usage="";
+DefVZVWSelfEnergies::usage="";
+DeltaAlphaHatBSM::usage="";
 
 DeltaRhoHat2LoopSM::usage="";
 DeltaRHat2LoopSM::usage="";
@@ -57,7 +60,8 @@ DebugPrint[msg___] :=
 CheckMuonDecayInputRequirements[] :=
     Module[{requiredSymbols, availPars, areDefined},
            requiredSymbols = {SARAH`VectorP, SARAH`VectorW, SARAH`VectorZ,
-                              SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling};
+                              SARAH`hyperchargeCoupling, SARAH`leftCoupling, SARAH`strongCoupling,
+                              SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa};
            availPars = Join[TreeMasses`GetParticles[],
                             Parameters`GetInputParameters[],
                             Parameters`GetModelParameters[],
@@ -126,6 +130,51 @@ DefVWSelfEnergy[] :=
            If[!MuonDecayWorks,
               Return[result <> "0.;"]];
            result <> "Re(model->" <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(p));"
+          ];
+
+YukawaMatching[] :=
+    Module[{fermion, yukawa, result},
+           fermion = {TreeMasses`GetSMTopQuarkMultiplet[],
+                      TreeMasses`GetSMBottomQuarkMultiplet[],
+                      TreeMasses`GetSMTauLeptonMultiplet[]};
+           yukawa = {SARAH`UpYukawa, SARAH`DownYukawa, SARAH`ElectronYukawa};
+           If[(Parameters`GetParameterDimensions /@ yukawa) != {{3, 3}, {3, 3}, {3, 3}},
+              MuonDecayWorks = False;
+              DebugPrint["Error: Not all SM Yukawas are 3x3 matrices"];];
+           prefactor = Table[ThresholdCorrections`YukawaToMassPrefactor[fermion[[i]], yukawa[[i]]], {i, 3}];
+           If[!(And @@ Not /@ NumericQ /@ prefactor),
+              MuonDecayWorks = False;
+              DebugPrint["Error: Prefactors of SM Yukawas cannot be determined"];];
+           If[!MuonDecayWorks,
+              Return[""]];
+           result = Parameters`CreateLocalConstRefs[prefactor] <> "\n";
+           result = result <> "sm.set_Yu(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[1]]] <> "()*";
+           result = result <> CConversion`RValueToCFormString[prefactor[[1]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Yd(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[2]]] <> "()*";
+           result = result <> CConversion`RValueToCFormString[prefactor[[2]]/(Global`SMvev/Sqrt[2])] <> "));\n";
+           result = result <> "sm.set_Ye(Re(model->get_";
+           result = result <> CConversion`ToValidCSymbolString[yukawa[[3]]] <> "()*";
+           result <> CConversion`RValueToCFormString[prefactor[[3]]/(Global`SMvev/Sqrt[2])] <> "));"
+          ];
+
+DefVZVWSelfEnergies[] :=
+    Module[{result},
+           result = "const double sigma_Z_MZ_Model = Re(model->";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorZ, 1] <> "(mz));\n";
+           result = result <> "const double sigma_W_MW_Model = Re(model->";
+           result = result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(mw));\n";
+           result = result <> "const double sigma_W_0_Model  = Re(model->";
+           result <> SelfEnergies`CreateSelfEnergyFunctionName[SARAH`VectorW, 1] <> "(0.));"
+          ];
+
+DeltaAlphaHatBSM[scheme_] :=
+    Module[{dahatbsm, result},
+           dahatbsm = ThresholdCorrections`CalculateElectromagneticCoupling[scheme];
+           result = Parameters`CreateLocalConstRefs[dahatbsm] <> "\n";
+           result = result <> "delta_alpha_hat_bsm += alpha_em/(2.*Pi)*(";
+           result <> CConversion`RValueToCFormString[dahatbsm] <> ");"
           ];
 
 FindMassZ2[masses_List] := FindMass2[masses, SARAH`VectorZ];
@@ -278,17 +327,13 @@ HiggsTopVertices[higgsName_] :=
 
 (*generalizes Higgs dependent part of (C.5) and (C.6) in hep-ph/9606211 analogous to (C.9) and (C.10)*)
 HiggsContributions2LoopSM[] :=
-    Module[{higgsVEVlist, higgsDep},
-           If[!ValueQ[SARAH`VEVSM],
+    Module[{higgsVEV = TreeMasses`GetSMVEVExpr[Undefined], higgsDep},
+           If[higgsVEV === Undefined,
               MuonDecayWorks = False;
               DebugPrint["Error: SM like Higgs vev does not exist"];
               Return[0]];
-           higgsVEVlist = Cases[Parameters`GetDependenceSPhenoRules[],
-                                RuleDelayed[SARAH`VEVSM, repr_] :> repr];
-           If[higgsVEVlist === {},
-              higgsVEVlist = {SARAH`VEVSM}];
            higgsDep = (Abs[#[[2]]]^2 - Abs[#[[3]]]^2) RHO2[FlexibleSUSY`M[#[[1]]]/MT] &;
-           Simplify[3 (GFERMI MT higgsVEVlist[[1]] / (8 Pi^2 Sqrt[2]))^2 *
+           Simplify[3 (GFERMI MT higgsVEV / (8 Pi^2 Sqrt[2]))^2 *
                     (Plus @@ (higgsDep /@ Join[HiggsTopVertices[SARAH`HiggsBoson],
                                                HiggsTopVertices[SARAH`PseudoScalar]]))]
           ];

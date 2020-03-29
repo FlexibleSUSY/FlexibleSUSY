@@ -34,10 +34,10 @@ int main() {
  /// Sets format of output: 6 decimal places
   outputCharacteristics(6);
 
-  cerr << "SOFTSUSY" << SOFTSUSY_VERSION 
+  std::cerr << "SOFTSUSY" << SOFTSUSY_VERSION 
        << " test program, Ben Allanach 2002\n";
-  cerr << "If you use SOFTSUSY, please refer to B.C. Allanach,\n";
-  cerr << "Comput. Phys. Commun. 143 (2002) 305, hep-ph/0104145\n";
+  std::cerr << "If you use SOFTSUSY, please refer to B.C. Allanach,\n";
+  std::cerr << "Comput. Phys. Commun. 143 (2002) 305, hep-ph/0104145\n";
 
   /// Parameters used: CMSSM parameters
   double m12 = 500., a0 = 0., mGutGuess = 2.0e16, tanb = 10.0, m0 = 125.;
@@ -48,9 +48,9 @@ int main() {
 
   /// most important Standard Model inputs: you may change these and recompile
   double alphasMZ = 0.1187, mtop = 173.4, mbmb = 4.2;
-  oneset.setAlpha(ALPHAS, alphasMZ);
+  oneset.setAlpha(legacy::ALPHAS, alphasMZ);
   oneset.setPoleMt(mtop);
-  oneset.setMass(mBottom, mbmb);
+  oneset.setMass(legacy::mBottom, mbmb);
 
   oneset.toMz();      ///< Runs SM fermion masses to MZ
 

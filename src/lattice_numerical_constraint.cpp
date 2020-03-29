@@ -35,7 +35,7 @@ void NumericalConstraint::operator()()
 
 double NumericalConstraint::c_wrap(double xj, void *params)
 {
-    NumericalConstraint *self = static_cast<NumericalConstraint *>(params);
+    auto self = static_cast<NumericalConstraint *>(params);
     self->x[self->j] = xj;
     return self->c(&self->x[0]);
 }
@@ -72,7 +72,7 @@ void NumericalMatching::operator()()
 
 double NumericalMatching::c_wrap(double wxj, void *params)
 {
-    NumericalMatching *self = static_cast<NumericalMatching *>(params);
+    auto self = static_cast<NumericalMatching *>(params);
     self->wx(self->j) = wxj;
     return self->c(&self->w[0], &self->x[0]);
 }

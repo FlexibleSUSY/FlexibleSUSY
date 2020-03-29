@@ -33,11 +33,11 @@ BOOST_AUTO_TEST_CASE( test_softsusy_mssm_solver )
    const bool uni = true;
    const double mxGuess = 1.0e16;
 
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    const double alphasMZ = 0.1187, mtop = 173.4, mbmb = 4.2;
-   qedqcd.setAlpha(ALPHAS, alphasMZ);
+   qedqcd.setAlpha(legacy::ALPHAS, alphasMZ);
    qedqcd.setPoleMt(mtop);
-   qedqcd.setMass(mBottom, mbmb);
+   qedqcd.setMass(legacy::mBottom, mbmb);
    qedqcd.toMz();
 
    RGFlow<SoftSusy_t> mssmSolver;
@@ -115,12 +115,9 @@ void test_equality(const sPhysical& a, const sPhysical& b, double tolerance)
 
 class SoftSusy_error : public Error {
 public:
-   SoftSusy_error(const std::string& msg_)
-      : msg(msg_) {}
+   SoftSusy_error(const std::string& msg)
+      : Error(msg) {}
    virtual ~SoftSusy_error() {}
-   virtual std::string what() const { return msg; }
-private:
-   std::string msg;
 };
 
 class SoftSusy_NoConvergence_error : public SoftSusy_error {
@@ -128,7 +125,6 @@ public:
    SoftSusy_NoConvergence_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NoConvergence_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_NonPerturbative_error : public SoftSusy_error {
@@ -136,7 +132,6 @@ public:
    SoftSusy_NonPerturbative_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NonPerturbative_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_tester {
@@ -146,7 +141,7 @@ public:
    ~SoftSusy_tester() {}
    double get_mx() const { return mx; }
    sPhysical get_physical() const { return softSusy.displayPhys(); }
-   void test(const SoftsusyMSSM_parameter_point& pp, const QedQcd& qedqcd) {
+   void test(const SoftsusyMSSM_parameter_point& pp, const QedQcd_legacy& qedqcd) {
       // run softsusy
       softsusy::TOLERANCE = 1.0e-4;
 #ifdef ENABLE_VERBOSE
@@ -182,7 +177,7 @@ public:
    ~Two_scale_tester() {}
    double get_mx() const { return mx; }
    sPhysical get_physical() const { return mssm.displayPhys(); }
-   void test(const SoftsusyMSSM_parameter_point& pp, const QedQcd& qedqcd) {
+   void test(const SoftsusyMSSM_parameter_point& pp, const QedQcd_legacy& qedqcd) {
       softsusy::TOLERANCE = 1.0e-4;
       // setup the MSSM with the two scale method
       SoftsusyMSSM_sugra_constraint mssm_sugra_constraint(pp);
@@ -226,7 +221,7 @@ private:
  */
 void test_point(const SoftsusyMSSM_parameter_point& pp)
 {
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
 
    Two_scale_tester two_scale_tester;
    BOOST_REQUIRE_NO_THROW(two_scale_tester.test(pp, qedqcd));
@@ -265,11 +260,11 @@ BOOST_AUTO_TEST_CASE( test_slow_convergence_point )
    pp.a0 = 0.0;
    pp.m12 = 337.5;
    pp.m0 = 3400.0;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    const double alphasMZ = 0.1187, mtop = 173.5, mbmb = 4.2;
-   qedqcd.setAlpha(ALPHAS, alphasMZ);
+   qedqcd.setAlpha(legacy::ALPHAS, alphasMZ);
    qedqcd.setPoleMt(mtop);
-   qedqcd.setMass(mBottom, mbmb);
+   qedqcd.setMass(legacy::mBottom, mbmb);
    qedqcd.toMz();
 
    BOOST_TEST_MESSAGE("testing slow convergent " << pp);
@@ -298,7 +293,7 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_point )
    pp.a0 = 0.0;
    pp.m12 = 337.5;
    pp.m0 = 3400.0;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    qedqcd.setPoleMt(173.5);
 
    BOOST_TEST_MESSAGE("testing non-perturbative " << pp);

@@ -4,6 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "test_CMSSM.hpp"
+#include "conversion.hpp"
 
 #include "CMSSM_two_scale_model.hpp"
 #include "CMSSM_two_scale_initial_guesser.hpp"
@@ -14,6 +15,24 @@
 #include "SoftsusyMSSM_two_scale_susy_scale_constraint.hpp"
 #include "SoftsusyMSSM_two_scale_low_scale_constraint.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 BOOST_AUTO_TEST_CASE( test_initial_guess )
 {
    CMSSM_input_parameters input;
@@ -22,7 +41,7 @@ BOOST_AUTO_TEST_CASE( test_initial_guess )
    input.TanBeta = 10.;
    input.SignMu = 1;
    input.Azero = 0.;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    softsusy::TOLERANCE = 1.0e-3;
    CMSSM<Two_scale> m(input);
    m.set_loops(2);
@@ -30,11 +49,11 @@ BOOST_AUTO_TEST_CASE( test_initial_guess )
    SoftsusyMSSM<Two_scale> smssm;
 
    // create CMSSM initial guesser
-   CMSSM_low_scale_constraint<Two_scale>  low_constraint(&m, qedqcd);
-   CMSSM_susy_scale_constraint<Two_scale> susy_constraint(&m, qedqcd);
+   CMSSM_low_scale_constraint<Two_scale>  low_constraint(&m, convert(qedqcd));
+   CMSSM_susy_scale_constraint<Two_scale> susy_constraint(&m, convert(qedqcd));
    CMSSM_high_scale_constraint<Two_scale> high_constraint(&m);
 
-   CMSSM_initial_guesser<Two_scale> guesser(&m, qedqcd, low_constraint,
+   CMSSM_initial_guesser<Two_scale> guesser(&m, convert(qedqcd), low_constraint,
                                            susy_constraint, high_constraint);
 
    // create Mssm initial guesser

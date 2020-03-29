@@ -24,6 +24,7 @@
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
+@decaysIncludes@
 
 @solverIncludes@
 #include "command_line_options.hpp"
@@ -93,6 +94,8 @@ int run_solver(const @ModelName@_input_parameters& input)
 
    const auto observables = calculate_observables(
       model, qedqcd, physical_input, scales.pole_mass_scale);
+
+@calculateCmdLineDecays@
 
    // SLHA output
    SLHAea::Coll slhaea(@ModelName@_slha_io::fill_slhaea(

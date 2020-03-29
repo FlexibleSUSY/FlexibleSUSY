@@ -15,6 +15,24 @@
 #include "SoftsusyNMSSM_two_scale_susy_scale_constraint.hpp"
 #include "SoftsusyNMSSM_two_scale_low_scale_constraint.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 BOOST_AUTO_TEST_CASE( test_initial_guess )
 {
    softsusy::TOLERANCE = 1.0e-3;
@@ -32,14 +50,14 @@ BOOST_AUTO_TEST_CASE( test_initial_guess )
    input.Azero = -500.;
    input.LambdaInput = 0.1;
    input.SignvS = 1;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
 
    m.set_input_parameters(input);
-   NMSSM_low_scale_constraint<Two_scale>  low_constraint(&m, qedqcd);
-   NMSSM_susy_scale_constraint<Two_scale> susy_constraint(&m, qedqcd);
+   NMSSM_low_scale_constraint<Two_scale>  low_constraint(&m, convert(qedqcd));
+   NMSSM_susy_scale_constraint<Two_scale> susy_constraint(&m, convert(qedqcd));
    NMSSM_high_scale_constraint<Two_scale> high_constraint(&m);
 
-   NMSSM_initial_guesser<Two_scale> guesser(&m, qedqcd, low_constraint,
+   NMSSM_initial_guesser<Two_scale> guesser(&m, convert(qedqcd), low_constraint,
                                             susy_constraint, high_constraint);
 
    // create SoftsusyNMSSM initial guesser

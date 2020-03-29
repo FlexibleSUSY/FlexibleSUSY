@@ -42,9 +42,9 @@ SoftsusyMSSM_initial_guesser::SoftsusyMSSM_initial_guesser(SoftsusyMSSM<Two_scal
           " cannot be zero");
 
    const double alphasMZ = 0.1187, mtop = 173.4, mbmb = 4.2;
-   oneset.setAlpha(ALPHAS, alphasMZ);
+   oneset.setAlpha(legacy::ALPHAS, alphasMZ);
    oneset.setPoleMt(mtop);
-   oneset.setMass(mBottom, mbmb);
+   oneset.setMass(legacy::mBottom, mbmb);
    oneset.toMz();
 }
 

@@ -200,7 +200,7 @@ public:
 };
 
 /// Formatted output
-ostream & operator <<(ostream &, const MssmSusy &);
+std::ostream & operator <<(std::ostream &, const MssmSusy &);
 
 /// Outputs beta function coefficients for MSSM gauge coupling evolution in
 /// arguments. 
@@ -218,7 +218,7 @@ inline void MssmSusy::setGaugeCoupling(int i, double f) { g(i) = f; }
 
 inline void MssmSusy::setAllGauge(const DoubleVector & v) { 
   if (v.displayStart() != 1 || v.displayEnd() !=3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << 
       "Initialising SUSY params gauge function with vector NOT 1..3\n" <<
       v;

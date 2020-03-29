@@ -178,7 +178,7 @@ typedef SoftPars<MssmSusy, sBrevity> SoftParsMssm;
 
 /// Formatted ouput of whole object
 template<class Susy, class Brevity>
-ostream & operator <<(ostream &left, const SoftPars<Susy, Brevity> &s);
+std::ostream & operator <<(std::ostream &left, const SoftPars<Susy, Brevity> &s);
 
 template<class Susy, class Brevity>
 SoftPars<Susy, Brevity>::SoftPars()

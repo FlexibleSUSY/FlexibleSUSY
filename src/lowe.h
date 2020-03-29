@@ -38,10 +38,10 @@
 namespace softsusy {
 
 /// used to give order of quark masses stored
-enum mass {mUp=1, mCharm, mTop, mDown, mStrange, mBottom, mElectron,
+enum EMass {mUp=1, mCharm, mTop, mDown, mStrange, mBottom, mElectron,
            mMuon, mTau};
 /// order of gauge couplings stored in QedQcd
-enum leGauge {ALPHA=1, ALPHAS};
+enum EGauge {ALPHA=1, ALPHAS};
 
 enum QedQcd_input_parmeters : int {
    alpha_em_MSbar_at_MZ,
@@ -106,12 +106,16 @@ public:
   void setMs2GeV(double ms) { input(ms_2GeV) = ms; } ///< set ms(2 GeV)
   void setPoleMW(double mw) { input(MW_pole) = mw; } ///< set W boson pole mass
   void setPoleMZ(double mz) { input(MZ_pole) = mz; } ///< set Z boson pole mass
+  /// sets running quark masses
+  void setMasses(const Eigen::Array<double,9,1>& m) { mf = m; }
   /// sets a running quark mass
-  void setMass(mass mno, double m) { mf(mno - 1) = m; }
+  void setMass(EMass mno, double m) { mf(mno - 1) = m; }
   /// sets a neutrino pole mass
   void setNeutrinoPoleMass(int i, double m) { input(Mv1_pole + i - 1) = m; }
+  /// sets QED and QCD structure constants
+  void setAlphas(const Eigen::Array<double,2,1>& o) { a = o; }
   /// sets QED or QCD structure constant
-  void setAlpha(leGauge ai, double ap) { a(ai - 1) = ap; }
+  void setAlpha(EGauge ai, double ap) { a(ai - 1) = ap; }
   /// set input value of alpha_em(MZ)
   void setAlphaEmInput(double a) { input(alpha_em_MSbar_at_MZ) = a; }
   /// set input value of alpha_s(MZ)
@@ -144,11 +148,11 @@ public:
   /// Returns a vector of running fermion masses
   auto displayMass() const -> decltype(mf) { return mf; }
   /// Returns a single running mass
-  double displayMass(mass mno) const { return mf(mno - 1); }
+  double displayMass(EMass mno) const { return mf(mno - 1); }
   /// Returns a single neutrino pole mass
   double displayNeutrinoPoleMass(int i) const { return input(Mv1_pole + i - 1); }
   /// Returns a single gauge structure constant
-  double displayAlpha(leGauge ai) const { return a(ai - 1); }
+  double displayAlpha(EGauge ai) const { return a(ai - 1); }
   /// Returns gauge structure constants
   auto displayAlphas() const -> decltype(a) { return a; }
   /// Returns input value alpha_em(MZ)
@@ -187,7 +191,7 @@ public:
   /// Evolves object to MZ
   void toMz();
   /// Evolves object to given scale.
-  void to(double scale, double tol = 1e-5, int max_iterations = 20);
+  void to(double scale, double precision_goal = 1e-5, int max_iterations = 20);
   /// guess coupling constants {alpha_1, alpha_2, alpha_3} in SM(5)
   Eigen::Array<double,3,1> guess_alpha_SM5(double scale) const;
 };

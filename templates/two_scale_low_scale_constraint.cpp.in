@@ -22,6 +22,7 @@
 #include "@ModelName@_two_scale_model.hpp"
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_weinberg_angle.hpp"
+#include "config.h"
 #include "wrappers.hpp"
 #include "logger.hpp"
 #include "error.hpp"

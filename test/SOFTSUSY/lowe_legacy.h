@@ -1,5 +1,5 @@
 
-/** \file lowe.h
+/** \file lowe_legacy.h
    - Project:     SOFTSUSY
    - Author:      Ben Allanach
    - Manual:      hep-ph/0104145, Comp. Phys. Comm. 143 (2002) 305
@@ -12,7 +12,6 @@
 #ifndef LOWE_LEGACY_H
 #define LOWE_LEGACY_H
 
-#include "lowe.h"
 #include "ew_input.hpp"
 #include <iostream>
 #include <fstream>
@@ -28,6 +27,30 @@
 #include <Eigen/Core>
 
 namespace softsusy {
+
+namespace legacy {
+
+/// used to give order of quark masses stored
+enum mass {mUp=1, mCharm, mTop, mDown, mStrange, mBottom, mElectron,
+           mMuon, mTau};
+/// order of gauge couplings stored in QedQcd
+enum leGauge {ALPHA=1, ALPHAS};
+
+enum qedqcd_input_parmeters : int {
+   alpha_em_MSbar_at_MZ,
+   alpha_s_MSbar_at_MZ,
+   GFermi,
+   MZ_pole, MW_pole,
+   Mv1_pole, Mv2_pole, Mv3_pole,
+   Me_pole, Mm_pole, Mtau_pole,
+   mu_2GeV, ms_2GeV, Mt_pole,
+   md_2GeV, mc_mc, mb_mb,
+   CKM_theta_12, CKM_theta_13, CKM_theta_23, CKM_delta,
+   PMNS_theta_12, PMNS_theta_13, PMNS_theta_23, PMNS_delta, PMNS_alpha_1, PMNS_alpha_2,
+   NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
+};
+
+} // namespace legacy
 
 const double MUP = flexiblesusy::Electroweak_constants::MUP; ///< default running quark mass from PDG
 const double MDOWN = flexiblesusy::Electroweak_constants::MDOWN; ///< default running quark mass from PDG
@@ -64,89 +87,94 @@ private:
   void runto_safe(double, double); ///< throws if non-perturbative error occurs
 
 public:
-  QedQcd_legacy(); ///< Initialises with default values defined in lowe.h
+  QedQcd_legacy(); ///< Initialises with default values defined in lowe_legacy.h
   QedQcd_legacy(const QedQcd_legacy &); ///< Initialises object with another
-  QedQcd_legacy(const QedQcd&); ///< Initialises object with another
   const QedQcd_legacy& operator=(const QedQcd_legacy & m); ///< Sets two objects equal
   virtual ~QedQcd_legacy() {};
   
-  void setPoleMt(double mt) { input(Mt_pole) = mt; }; ///< set pole top mass
+  void setPoleMt(double mt) { input(legacy::Mt_pole) = mt; }; ///< set pole top mass
   void setPoleMb(double mb) { mbPole = mb; }; ///< set pole bottom mass
-  void setPoleMtau(double mtau) { input(Mtau_pole) = mtau; }; ///< set pole tau mass
-  void setPoleMmuon(double m) { input(Mm_pole) = m; } ///< set pole muon mass
-  void setPoleMel(double m) { input(Me_pole) = m; } ///< set pole electron mass
-  void setMbMb(double mb)   { input(mb_mb) = mb;   }; ///< set mb(mb)
-  void setMcMc(double mc)   { input(mc_mc) = mc;   }  ///< set mc(mc)
-  void setMu2GeV(double mu) { input(mu_2GeV) = mu; } ///< set mu(2 GeV)
-  void setMd2GeV(double md) { input(md_2GeV) = md; } ///< set md(2 GeV)
-  void setMs2GeV(double ms) { input(ms_2GeV) = ms; } ///< set ms(2 GeV)
-  void setPoleMW(double mw) { input(MW_pole) = mw; } ///< set W boson pole mass
-  void setPoleMZ(double mz) { input(MZ_pole) = mz; } ///< set Z boson pole mass
+  void setPoleMtau(double mtau) { input(legacy::Mtau_pole) = mtau; }; ///< set pole tau mass
+  void setPoleMmuon(double m) { input(legacy::Mm_pole) = m; } ///< set pole muon mass
+  void setPoleMel(double m) { input(legacy::Me_pole) = m; } ///< set pole electron mass
+  void setMbMb(double mb)   { input(legacy::mb_mb) = mb;   }; ///< set mb(mb)
+  void setMcMc(double mc)   { input(legacy::mc_mc) = mc;   }  ///< set mc(mc)
+  void setMu2GeV(double mu) { input(legacy::mu_2GeV) = mu; } ///< set mu(2 GeV)
+  void setMd2GeV(double md) { input(legacy::md_2GeV) = md; } ///< set md(2 GeV)
+  void setMs2GeV(double ms) { input(legacy::ms_2GeV) = ms; } ///< set ms(2 GeV)
+  void setPoleMW(double mw) { input(legacy::MW_pole) = mw; } ///< set W boson pole mass
+  void setPoleMZ(double mz) { input(legacy::MZ_pole) = mz; } ///< set Z boson pole mass
+  /// sets running quark masses
+  void setMasses(const DoubleVector& m) { mf = m; };
   /// sets a running quark mass
-  void setMass(mass mno, double m) { mf(mno) = m; };
+  void setMass(legacy::mass mno, double m) { mf(mno) = m; };
   /// sets a neutrino pole mass
-  void setNeutrinoPoleMass(int i, double m) { input(Mv1_pole + i - 1) = m; }
+  void setNeutrinoPoleMass(int i, double m) { input(legacy::Mv1_pole + i - 1) = m; }
+  /// sets QED and QCD structure constants
+  void setAlphas(const DoubleVector& o) { a = o; }
   /// sets QED or QCD structure constant
-  void setAlpha(leGauge ai, double ap) { a(ai) = ap; }
+  void setAlpha(legacy::leGauge ai, double ap) { a(ai) = ap; }
   /// set input value of alpha_em(MZ)
-  void setAlphaEmInput(double a) { input(alpha_em_MSbar_at_MZ) = a; }
+  void setAlphaEmInput(double a) { input(legacy::alpha_em_MSbar_at_MZ) = a; }
   /// set input value of alpha_s(MZ)
-  void setAlphaSInput(double a) { input(alpha_s_MSbar_at_MZ) = a; }
+  void setAlphaSInput(double a) { input(legacy::alpha_s_MSbar_at_MZ) = a; }
   /// sets CKM parameters (in the MS-bar scheme at MZ)
   void setCKM(const flexiblesusy::CKM_parameters& ckm_) { ckm = ckm_; }
   /// sets PMNS parameters (in the MS-bar scheme at MZ)
   void setPMNS(const flexiblesusy::PMNS_parameters& pmns_) { pmns = pmns_; }
   /// sets Fermi constant
-  void setFermiConstant(double gf) { input(GFermi) = gf; }
+  void setFermiConstant(double gf) { input(legacy::GFermi) = gf; }
   /// For exporting beta functions to Runge-Kutta
   void set(const DoubleVector &);
   /// sets all input parameters
   void set_input(const Eigen::ArrayXd&);
 
   /// Display pole top mass
-  double displayPoleMt() const { return input(Mt_pole); };
+  double displayPoleMt() const { return input(legacy::Mt_pole); };
   /// Display pole tau mass
-  double displayPoleMtau() const { return input(Mtau_pole); };
+  double displayPoleMtau() const { return input(legacy::Mtau_pole); };
   /// Display pole muon mass
-  double displayPoleMmuon() const { return input(Mm_pole); };
+  double displayPoleMmuon() const { return input(legacy::Mm_pole); };
   /// Display pole electron mass
-  double displayPoleMel() const { return input(Me_pole); };
+  double displayPoleMel() const { return input(legacy::Me_pole); };
   /// Returns bottom "pole" mass
   double displayPoleMb() const { return mbPole; };
   /// Returns W boson pole mass
-  double displayPoleMW() const { return input(MW_pole); }
+  double displayPoleMW() const { return input(legacy::MW_pole); }
   /// Returns Z boson pole mass
-  double displayPoleMZ() const { return input(MZ_pole); }
+  double displayPoleMZ() const { return input(legacy::MZ_pole); }
   /// Returns a vector of running fermion masses
   const DoubleVector & displayMass() const { return mf; };
   /// Returns a single running mass
-  double displayMass(mass mno) const { return mf.display(mno); };
+  double displayMass(legacy::mass mno) const { return mf.display(mno); };
   /// Returns a single neutrino pole mass
-  double displayNeutrinoPoleMass(int i) const { return input(Mv1_pole + i - 1); }
+  double displayNeutrinoPoleMass(int i) const { return input(legacy::Mv1_pole + i - 1); }
   /// Returns a single gauge structure constant
-  double displayAlpha(leGauge ai) const { return a.display(ai); };
+  double displayAlpha(legacy::leGauge ai) const { return a.display(ai); };
+  /// Returns all single gauge structure constants
+  const DoubleVector& displayAlphas() const { return a; }
   /// Returns input value alpha_em(MZ)
-  double displayAlphaEmInput() const { return input(alpha_em_MSbar_at_MZ); }
+  double displayAlphaEmInput() const { return input(legacy::alpha_em_MSbar_at_MZ); }
   /// Returns input value alpha_s(MZ)
-  double displayAlphaSInput() const { return input(alpha_s_MSbar_at_MZ); }
+  double displayAlphaSInput() const { return input(legacy::alpha_s_MSbar_at_MZ); }
   /// Returns Fermi constant
-  double displayFermiConstant() const { return input(GFermi); }
+  double displayFermiConstant() const { return input(legacy::GFermi); }
   /// Obgligatory: returns vector of all running parameters
   const DoubleVector display() const;
   /// returns vector of all input parameters
   Eigen::ArrayXd display_input() const;
   /// returns vector of all parameter names
-  static std::array<std::string, NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS> display_input_parameter_names();
+  static std::array<std::string, legacy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS> display_input_parameter_names();
   /// Returns mb(mb) MSbar
-  double displayMbMb() const { return input(mb_mb); }
+  double displayMbMb() const { return input(legacy::mb_mb); }
   /// Returns mc(mc) MSbar
-  double displayMcMc() const { return input(mc_mc); }
+  double displayMcMc() const { return input(legacy::mc_mc); }
   /// Returns mu(2 GeV)
-  double displayMu2GeV() const { return input(mu_2GeV); }
+  double displayMu2GeV() const { return input(legacy::mu_2GeV); }
   /// Returns md(2 GeV)
-  double displayMd2GeV() const { return input(md_2GeV); }
+  double displayMd2GeV() const { return input(legacy::md_2GeV); }
   /// Returns ms(2 GeV)
-  double displayMs2GeV() const { return input(ms_2GeV); }
+  double displayMs2GeV() const { return input(legacy::ms_2GeV); }
   /// returns CKM parameters
   flexiblesusy::CKM_parameters displayCKM() const { return ckm; }
   /// Returns real CKM matrix
@@ -197,9 +225,9 @@ public:
 };
 
 /// Input numbers into the object: by file stream
-ostream & operator <<(ostream &, const QedQcd_legacy &);
+std::ostream & operator <<(std::ostream &, const QedQcd_legacy &);
 /// Formatted output from QedQcd_legacy object
-istream & operator >>(istream &left, QedQcd_legacy &m);
+std::istream & operator >>(std::istream &left, QedQcd_legacy &m);
 
 /// Reads in a QedQed-type object and returns it in oneset.
 /// Call with fname "" if you want it to come from standard input
@@ -222,8 +250,8 @@ inline QedQcd_legacy::QedQcd_legacy(const QedQcd_legacy &m)
 }
 
 /// Returns diagonal fermion mass matrices given input object r
-void massFermions(const QedQcd & r, DoubleMatrix & mDon,
-		  DoubleMatrix & mUpq, DoubleMatrix & mEle);
+// void massFermions(const QedQcd & r, DoubleMatrix & mDon,
+//		  DoubleMatrix & mUpq, DoubleMatrix & mEle);
 
 /// Returns diagonal fermion mass matrices given input object r
 void massFermions(const QedQcd_legacy & r, DoubleMatrix & mDon,

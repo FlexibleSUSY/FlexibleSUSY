@@ -19,51 +19,8 @@
 #ifndef SCAN_HPP
 #define SCAN_HPP
 
-#include "config.h"
 #include <cstddef>
 #include <vector>
-
-#ifdef ENABLE_RANDOM
-
-#include <random>
-
-/**
- * @file scan.hpp
- * @brief contains helper functions and classes for parameter scans
- */
-
-namespace flexiblesusy {
-
-/**
- * @class Uniform
- * @brief real uniform distribution
- *
- * Usage:
- * @code
- * double x = Uniform<>::dice(0., 1.); // uses std::minstd_rand
- * double y = Uniform<std::mt19937>::dice(0., 1.); // uses std::mt19937
- * @endcode
- */
-template <typename Generator = std::minstd_rand, typename RealType = double>
-class Uniform {
-public:
-   /// returns random number between start and stop
-   static RealType dice(RealType start, RealType stop) {
-      static Generator generator;
-      static std::uniform_real_distribution<RealType> distribution(start, stop);
-      return distribution(generator);
-   }
-   /// returns random number between 0. and 1.
-   static RealType dice() {
-      static Generator generator;
-      static std::uniform_real_distribution<RealType> distribution;
-      return distribution(generator);
-   }
-};
-
-} // namespace flexiblesusy
-
-#endif
 
 namespace flexiblesusy {
 

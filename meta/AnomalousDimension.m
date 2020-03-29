@@ -161,7 +161,7 @@ CreateAnomDimFunction[anomDim_AnomalousDimension] :=
                         ";\n}\n";
                 ];
              ];
-           inputParsDecl = Parameters`CreateLocalConstRefsForInputParameters[exprOneLoop + exprTwoLoop];
+           inputParsDecl = Parameters`CreateLocalConstRefsForInputParameters[{exprOneLoop, exprTwoLoop}];
            body = CreateDefaultDefinition["anomDim", type] <> ";\n" <>
                   inputParsDecl <>
                   body <>

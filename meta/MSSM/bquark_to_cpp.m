@@ -188,7 +188,6 @@ namespace {
    double Fin20(double mm1, double mm2, double mmu)
    {
       using std::log;
-      using gm2calc::dilog;
       const double PI = 3.14159265358979323846264338327950288;
 
       return (6*(mm1*log(mm1/mmu) + mm2*log(mm2/mmu)) +
@@ -208,7 +207,6 @@ namespace {
    double ClausenCl2(double x)
    {
       using std::exp;
-      using gm2calc::dilog;
       const std::complex<double> img(0.,1.);
 
       return std::imag(dilog(exp(img*x)));
@@ -217,7 +215,6 @@ namespace {
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
    double PhiPos(double x, double y)
    {
-      using gm2calc::dilog;
       const double lambda = std::sqrt(LambdaSquared(x,y));
 
       return (-(log(x)*log(y))

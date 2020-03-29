@@ -347,12 +347,12 @@ deltaLambda3th2L = With[{
     AtMS = At / MSUSY
     },
     (
-        4 kappa^2 ht^4 g3^2 AtMS muMS^2 (1 - 1/2 AtMS)
+        2 kappa^2 ht^4 g3^2 AtMS muMS^2 (1 - 1/2 AtMS)
     )
 ];
 
 deltaLambda4th2L = deltaLambda3th2L;
-deltaLambda5th2L = deltaLambda3th2L;
+deltaLambda5th2L = 0;
 
 (* arxiv:1508.00576, Eq. (62) *)
 deltaLambda6th2L = With[{

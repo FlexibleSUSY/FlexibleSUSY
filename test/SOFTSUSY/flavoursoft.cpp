@@ -62,7 +62,7 @@ int positionOfSym(int i, int j) {
   else if ((i == 1 && j == 3) || (i == 3 && j == 1)) return 3;
   else if ((i == 2 && j == 3) || (i == 3 && j == 2)) return 5;
   else {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << " # WARNING: can't convert position in 3 by 3 matrix" 
        << i << j << endl; 
     throw ii.str();
@@ -213,7 +213,7 @@ const DoubleMatrix FlavourMssmSoftsusy::displayMns() const {
 			      displayThetaB23(), d);
 }
 
-ostream & operator <<(ostream & left, const FlavourMssmSoftsusy & m) {
+std::ostream & operator <<(std::ostream & left, const FlavourMssmSoftsusy & m) {
   const std::string HR = "----------------------------------------------------------";
   left << m.displayMssmSoft();
   left << "Flavour violating parameters:\n";
@@ -240,12 +240,12 @@ ostream & operator <<(ostream & left, const FlavourMssmSoftsusy & m) {
   return left;
 }
 
-void FlavourMssmSoftsusy::modselSLHA(ostream & out, const char model []) {
+void FlavourMssmSoftsusy::modselSLHA(std::ostream & out, const char model []) {
   MssmSoftsusy::modselSLHA(out, model);
   out << "     6    " << 1 << "   # flavour violating MSSM\n"; 
 }
 
-void FlavourMssmSoftsusy::sminputsSLHA(ostream & out) {
+void FlavourMssmSoftsusy::sminputsSLHA(std::ostream & out) {
   MssmSoftsusy::sminputsSLHA(out);
   /*  out << "     8   "; printRow(out, displayMnuTau()); 
   out << "   # Mnu3(pole)\n";
@@ -270,7 +270,7 @@ void FlavourMssmSoftsusy::sminputsSLHA(ostream & out) {
  
 }
 
-void FlavourMssmSoftsusy::sleptonsSLHA(ostream & out) {
+void FlavourMssmSoftsusy::sleptonsSLHA(std::ostream & out) {
   DoubleVector m(6); int count = 0, i, j;
   for (i=1; i<=2; i++)
     for (j=1; j<=3; j++) {
@@ -293,7 +293,7 @@ void FlavourMssmSoftsusy::sleptonsSLHA(ostream & out) {
   out << "   1000016    "; printRow(out, m(3)); out << "   # ~nu_3\n";
 }
  
-void FlavourMssmSoftsusy::sfermionsSLHA(ostream & out) {
+void FlavourMssmSoftsusy::sfermionsSLHA(std::ostream & out) {
   /// SLHA2 flavour sector defined in increasing order of mass
   sPhysical s(displayPhys());
   int i, j; 
@@ -329,7 +329,7 @@ void FlavourMssmSoftsusy::sfermionsSLHA(ostream & out) {
   out << "   2000006    "; printRow(out, m(6)); out << "   # ~u_6\n";      
 }
 
-void FlavourMssmSoftsusy::selmixSLHA(ostream & out) {
+void FlavourMssmSoftsusy::selmixSLHA(std::ostream & out) {
   out << "Block SELMIX  # super MNS slepton mass^2 matrix\n";
   for (int i=1; i<=6; i++)
     for (int j=1; j<=6; j++) {
@@ -339,7 +339,7 @@ void FlavourMssmSoftsusy::selmixSLHA(ostream & out) {
     }
 }
 
-void FlavourMssmSoftsusy::snumixSLHA(ostream & out) {
+void FlavourMssmSoftsusy::snumixSLHA(std::ostream & out) {
   out << "Block SNUMIX                # super MNS slepton mass^2 matrix\n";
   for (int i=1; i<=3; i++)
     for (int j=1; j<=3; j++) {
@@ -349,7 +349,7 @@ void FlavourMssmSoftsusy::snumixSLHA(ostream & out) {
     }
 }
 
-void FlavourMssmSoftsusy::sfermionmixSLHA(ostream & out) {
+void FlavourMssmSoftsusy::sfermionmixSLHA(std::ostream & out) {
   out << "Block USQMIX  # super CKM squark mass^2 matrix\n";
   int i, j; for (i=1; i<=6; i++)
     for (j=1; j<=6; j++) {
@@ -370,7 +370,7 @@ void FlavourMssmSoftsusy::sfermionmixSLHA(ostream & out) {
   snumixSLHA(out);
 }
 
-void FlavourMssmSoftsusy::vckminSLHA(ostream & out) {
+void FlavourMssmSoftsusy::vckminSLHA(std::ostream & out) {
   /// these come from 2006 PDG
   double s12 = sin(theta12);
   double s23 = sin(theta23);
@@ -395,7 +395,7 @@ void FlavourMssmSoftsusy::vckminSLHA(ostream & out) {
       << "   # etabar (no phases used in SOFTSUSY yet though)\n";    
 }
 
-void FlavourMssmSoftsusy::extparSLHA(ostream & out, 
+void FlavourMssmSoftsusy::extparSLHA(std::ostream & out, 
 				     const DoubleVector & pars, 
 				     bool ewsbBCscale) {
     out << "Block EXTPAR              "
@@ -525,7 +525,7 @@ void FlavourMssmSoftsusy::extparSLHA(ostream & out,
 	  << " was set in addition.\n";
 }
 
-void FlavourMssmSoftsusy::yukawasSLHA(ostream & out) {
+void FlavourMssmSoftsusy::yukawasSLHA(std::ostream & out) {
   /// Find the Yukawa rotation matrices such that the super-CKM basis may be
   /// defined
   DoubleMatrix Ud(3, 3), Vd(3, 3), Uu(3, 3), Vu(3, 3);
@@ -558,7 +558,7 @@ void FlavourMssmSoftsusy::yukawasSLHA(ostream & out) {
   }    
 }
 
-void FlavourMssmSoftsusy::msoftSLHA(ostream & out) {
+void FlavourMssmSoftsusy::msoftSLHA(std::ostream & out) {
     /// Find the Yukawa rotation matrices such that the super-CKM basis may be
     /// defined
     DoubleMatrix Ud(3, 3), Vd(3, 3), Uu(3, 3), Vu(3, 3);
@@ -693,7 +693,7 @@ void FlavourMssmSoftsusy::msoftSLHA(ostream & out) {
     out << "     # mH2^2(Q)" << endl;    
 }
 
-void FlavourMssmSoftsusy::lesHouchesAccordOutput(ostream & out, 
+void FlavourMssmSoftsusy::lesHouchesAccordOutput(std::ostream & out, 
 						 const char model[], 
 						 const DoubleVector & pars, 
 						 int sgnMu, double tanb, 
@@ -724,7 +724,7 @@ void FlavourMssmSoftsusy::lesHouchesAccordOutput(ostream & out,
   out.precision(nn);
 }
 
-void FlavourMssmSoftsusy::minparSLHA(ostream & out, const char model [], 
+void FlavourMssmSoftsusy::minparSLHA(std::ostream & out, const char model [], 
 				     const DoubleVector & pars, double tanb, 
 				     int sgnMu, 
 				     bool ewsbBCscale) {
@@ -774,7 +774,7 @@ void FlavourMssmSoftsusy::minparSLHA(ostream & out, const char model [],
     if (!strcmp(model, "nonUniversal")) 
       extparSLHA(out, pars, ewsbBCscale);
   else {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Attempting to use SUSY Les Houches Accord for model " 
        << model << " - cannot do at present in flavour violating version\n";
     throw ii.str();
@@ -1131,9 +1131,9 @@ void FlavourMssmSoftsusy::doSnu(double /* pizztMS */, int accuracy) {
   DoubleMatrix nuSqMix(3, 3);
   DoubleVector nuSqMasses(3);
   if (mNuSq.diagonaliseSym(nuSqMix, nuSqMasses) > EPSTOL) {
-    ostringstream ii; 
+    std::ostringstream ii; 
     ii << "WARNING:  sneutrino flavour diagonalisation bad accuracy\n";
-    ii.setf(ios::scientific, ios::floatfield);
+    ii.setf(std::ios::scientific, std::ios::floatfield);
     ii.precision(6);
     ii << "mNuSq=" << mNuSq << " on ";
     ii << *this;
@@ -1173,7 +1173,7 @@ const flavourPhysical & flavourPhysical::operator=(const flavourPhysical &s) {
 void FlavourMssmSoftsusy::doQuarkMixing(DoubleMatrix & mDon, 
 					DoubleMatrix & mUpq) {
   if (MIXING < 0 || MIXING > 4) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "In FlavourMssmSoftsusy::sparticleThresholdCorrections(double tb) ";
     ii << "\n MIXING=" << MIXING << " is out of range (0 -> 4)\n";
     throw ii.str();
@@ -1199,7 +1199,7 @@ void FlavourMssmSoftsusy::doQuarkMixing(DoubleMatrix & mDon,
   }    
 }
 
-ostream & operator <<(ostream & left, const flavourPhysical &s) {
+std::ostream & operator <<(std::ostream & left, const flavourPhysical &s) {
   left << "mu: " << s.msU << "uMix: " << s.uSqMix;
   left << "md: " << s.msD << "dMix: " << s.dSqMix;
   left << "me: " << s.msE << "eMix: " << s.eSqMix;

@@ -66,10 +66,10 @@ std::ostream & operator <<(std::ostream & left, const drBarPars &s) {
   left << s.displaysPhysical();
   left << "BPMZ conventions, N" << s.nBpmz << "U" << s.uBpmz << "V" 
        << s.vBpmz;
-  left << "mt: "  << s.mt << " mb: " << s.mb << " mtau: " << s.mtau << endl;
-  left << "ht: "  << s.ht << " hb: " << s.hb << " htau: " << s.htau << endl;
-  left << "Ut: "  << s.ut << " Ub: " << s.ub << " Utau: " << s.utau << endl;
-  left << "mz: "  << s.mz << " mw: " << s.mw << endl;
+  left << "mt: "  << s.mt << " mb: " << s.mb << " mtau: " << s.mtau << std::endl;
+  left << "ht: "  << s.ht << " hb: " << s.hb << " htau: " << s.htau << std::endl;
+  left << "Ut: "  << s.ut << " Ub: " << s.ub << " Utau: " << s.utau << std::endl;
+  left << "mz: "  << s.mz << " mw: " << s.mw << std::endl;
 
   return left;
 }
@@ -92,7 +92,7 @@ std::ostream & operator <<(std::ostream & left, const sPhysical &s) {
   return left;
 }
 
-ostream & operator <<(ostream &st, const sProblem & p) {
+std::ostream & operator <<(std::ostream &st, const sProblem & p) {
   if (!p.test()) return st;
   st << "[ ";
   if (p.mgutOutOfBounds) st << "GUT scale too high or too low ";

@@ -249,7 +249,6 @@ namespace {
    Real Fin20(Real mm1, Real mm2, Real mmu)
    {
       using std::log;
-      using gm2calc::dilog;
 
       return (6*(mm1*log(mm1/mmu) + mm2*log(mm2/mmu)) +
          (-mm1 - mm2)*(7 + power2(Pi)/6.) +
@@ -268,7 +267,6 @@ namespace {
    Real ClausenCl2(Real x)
    {
       using std::exp;
-      using gm2calc::dilog;
       const std::complex<Real> img(0.l,1.l);
 
       return std::imag(dilog(exp(img*x)));
@@ -277,7 +275,6 @@ namespace {
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
    Real PhiPos(Real x, Real y)
    {
-      using gm2calc::dilog;
       const Real lambda = std::sqrt(LambdaSquared(x,y));
 
       return (-(log(x)*log(y))

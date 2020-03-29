@@ -12,6 +12,8 @@
 
 using std::fabs;
 using std::log;
+using std::cout;
+using std::endl;
 
 template<class Susy, class Brevity>
 const SoftPars<Susy, Brevity> & SoftPars<Susy, Brevity>::operator=(const SoftPars<Susy, Brevity> & s) {
@@ -43,7 +45,7 @@ const DoubleMatrix & SoftPars<Susy, Brevity>::displayTrilinear(trilinears k) con
   case DA: return da; break;
   case EA: return ea; break;
   default: 
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "In SoftPars::displayTrilinear, called with illegal argument";
     ii << " " << k << endl;
     throw ii.str();
@@ -59,7 +61,7 @@ double SoftPars<Susy, Brevity>::displayTrilinear(trilinears k, int i, int j)
   case DA: return da.display(i, j); break;
   case EA: return ea.display(i, j); break;
   default: 
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "In SoftPars::displayTrilinear, called with illegal argument";
     ii << " " << k << endl;
     throw ii.str();
@@ -75,7 +77,7 @@ double SoftPars<Susy, Brevity>::displaySoftA(trilinears k, int i, int j) const {
   if (fabs(am) < EPSTOL) return 0.0;
   
   if (fabs(displayYukawaElement(yukawa(k), i, j)) < 1.0e-100) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "WARNING: asking for SoftPars::displaySoftA(" << int(k) << "," 
 	 << i << "," << j << "), where Yukawa coupling is " <<
       fabs(displayYukawaElement(yukawa(k), i, j)) << endl;
@@ -95,7 +97,7 @@ const DoubleMatrix & SoftPars<Susy, Brevity>::displaySoftMassSquared(softMasses 
   case mLl: return mLLsq; break;
   case mEr: return mSEsq; break;
   default: 
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "SoftPars::displaySoftMassSquared with illegal argument ";
     ii << k << endl;
     throw ii.str();
@@ -113,7 +115,7 @@ double SoftPars<Susy, Brevity>::displaySoftMassSquared(softMasses k, int i, int 
   case mLl: return mLLsq.display(i, j); break;
   case mEr: return mSEsq.display(i, j); break;
   default: 
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "SoftPars::displaySoftMassSquared with illegal argument ";
     ii << k << endl;
     throw ii.str();
@@ -194,7 +196,7 @@ void SoftPars<Susy, Brevity>::setTrilinearElement(trilinears k, int i, int j,
 template<class Susy, class Brevity>
 void SoftPars<Susy, Brevity>::setAllGauginos(const DoubleVector & v) { 
   if (v.displayStart() != 1 || v.displayEnd() !=3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Initialising SoftPars::setAllGauginos with vector"
 	 << v;
     throw ii.str();
@@ -3069,7 +3071,7 @@ void SoftPars<Susy, Brevity>::universalTrilinears(double a0)  {
 template<class Susy, class Brevity>
 void SoftPars<Susy, Brevity>::standardSugra(double m0,  double m12, double a0) {
   /*  if (m0 < 0.0) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "m0=" << m0 << " passed to universal boundary" <<
       "conditions illegally negative.";
     throw ii.str();
@@ -3080,7 +3082,7 @@ void SoftPars<Susy, Brevity>::standardSugra(double m0,  double m12, double a0) {
 }
 
 template<class Susy, class Brevity>
-ostream & operator <<(ostream &left, const SoftPars<Susy, Brevity> &s) {
+std::ostream & operator <<(std::ostream &left, const SoftPars<Susy, Brevity> &s) {
   left << "SUSY breaking MSSM parameters at Q: " << s.displayMu() << endl;
   left << " UA" << s.displayTrilinear(UA) 
        << " UD" << s.displayTrilinear(DA) 

@@ -206,6 +206,7 @@ UseHiggs3LoopSM = True;
 UseHiggs4LoopSM = True;
 UseSM3LoopRGEs = True;
 UseSM4LoopRGEs = True;
+UseSM5LoopRGEs = True;
 UseYukawa3LoopQCD = True;
 UseSMAlphaS3Loop = True;
 

@@ -2,11 +2,29 @@ DIR          := templates
 MODNAME      := templates
 
 BASE_TEMPLATES := \
-		$(DIR)/cxx_diagrams.hpp.in \
+		$(DIR)/cxx_qft/qft.hpp.in \
+		$(DIR)/cxx_qft/fields.hpp.in \
+		$(DIR)/cxx_qft/vertices.hpp.in \
+		$(DIR)/cxx_qft/vertices_.cpp.in \
+		$(DIR)/cxx_qft/context_base.hpp.in \
+		$(DIR)/cxx_qft/npointfunctions.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
+		$(DIR)/convergence_tester.hpp.in \
+		$(DIR)/decay_table.hpp.in \
+		$(DIR)/decay_table.cpp.in \
+		$(DIR)/decays.hpp.in \
+		$(DIR)/decays.cpp.in \
+		$(DIR)/decay_amplitudes.hpp.in \
+		$(DIR)/decay_amplitudes.cpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
+		$(DIR)/FFV_form_factors.hpp.in \
+		$(DIR)/FFV_form_factors.cpp.in \
+		$(DIR)/l_to_lgamma.hpp.in \
+		$(DIR)/l_to_lgamma.cpp.in \
+		$(DIR)/b_to_s_gamma.cpp.in \
+		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/ewsb_solver.hpp.in \
 		$(DIR)/ewsb_solver_interface.hpp.in \
@@ -23,10 +41,15 @@ BASE_TEMPLATES := \
 		$(DIR)/low_scale_constraint.hpp.in \
 		$(DIR)/mass_eigenstates.hpp.in \
 		$(DIR)/mass_eigenstates.cpp.in \
+		$(DIR)/mass_eigenstates_interface.hpp.in \
+		$(DIR)/mass_eigenstates_decoupling_scheme.hpp.in \
+		$(DIR)/mass_eigenstates_decoupling_scheme.cpp.in \
 		$(DIR)/model.hpp.in \
 		$(DIR)/model_slha.hpp.in \
 		$(DIR)/observables.hpp.in \
 		$(DIR)/observables.cpp.in \
+		$(DIR)/one_loop_decay_diagrams.hpp.in \
+		$(DIR)/one_loop_decay_diagrams.cpp.in \
 		$(DIR)/physical.hpp.in \
 		$(DIR)/physical.cpp.in \
 		$(DIR)/plot_rgflow.gnuplot.in \
@@ -51,6 +74,12 @@ BASE_TEMPLATES := \
 		$(DIR)/susy_scale_constraint.hpp.in \
 		$(DIR)/utilities.hpp.in \
 		$(DIR)/utilities.cpp.in
+
+MODULE_MK_TEMPLATES := \
+		$(DIR)/FlexibleEFTHiggs.mk.in \
+		$(DIR)/FlexibleDecays.mk.in \
+		$(DIR)/semi_analytic.mk.in \
+		$(DIR)/two_scale.mk.in
 
 TWO_SCALE_TEMPLATES := \
 		$(DIR)/standard_model_two_scale_high_scale_initial_guesser.cpp.in \
@@ -119,7 +148,8 @@ SEMI_ANALYTIC_TEMPLATES := \
 TEMPLATES    := \
 		$(BASE_TEMPLATES) \
 		$(TWO_SCALE_TEMPLATES) \
-		$(SEMI_ANALYTIC_TEMPLATES)
+		$(SEMI_ANALYTIC_TEMPLATES) \
+		$(MODULE_MK_TEMPLATES)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME)
 

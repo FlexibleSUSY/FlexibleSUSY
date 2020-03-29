@@ -13,7 +13,7 @@ double frexp(const softsusy::Complex & c, int * i) {
   int a, b;
   frexp(c.real(), &a);
   frexp(c.imag(), &b);
-  if (fabs(a) > fabs(b)) return *i = a; 
+  if (std::abs(a) > std::abs(b)) return *i = a;
   *i = b;
   return 0.;
 }
@@ -30,12 +30,12 @@ int theta(double a) {
 
 // Just sets precision and format of outputs
 void outputCharacteristics(int n) {
-  cin.setf(ios::scientific, ios::floatfield);
-  cin.precision(n);
-  cout.setf(ios::scientific, ios::floatfield);
-  cout.precision(n);
-  cerr.setf(ios::scientific, ios::floatfield);
-  cerr.precision(n);
+  std::cin.setf(std::ios::scientific, std::ios::floatfield);
+  std::cin.precision(n);
+  std::cout.setf(std::ios::scientific, std::ios::floatfield);
+  std::cout.precision(n);
+  std::cerr.setf(std::ios::scientific, std::ios::floatfield);
+  std::cerr.precision(n);
 }
 
 // Finds fractional difference between |a| and |b|
@@ -51,7 +51,7 @@ double toleranceCheck(double a, double b) {
 
 // Outputs a space if greater than zero, a minus otherwise.
 // Useful for outputting negative numbers in rows
-void printRow(ostream & out, double x) {
+void printRow(std::ostream & out, double x) {
 
   // make it return a character when you've worked out the equivalent of printf
 

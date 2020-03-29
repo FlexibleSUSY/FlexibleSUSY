@@ -49,11 +49,14 @@ public:
    void initialize();
    const softsusy::QedQcd& get_sm_parameters() const;
    void set_sm_parameters(const softsusy::QedQcd&);
+   int get_SM_like_Higgs_index() const { return higgs_idx; }
+   void set_SM_like_Higgs_index(int i) { higgs_idx = i; }
 
 private:
    double scale{0.};
    StandardModel<Two_scale>* model{nullptr};
    softsusy::QedQcd qedqcd{};
+   int higgs_idx{0};
 };
 
 } // namespace standard_model

@@ -49,10 +49,6 @@ namespace flexiblesusy {
 {
 }
 
-@ModelName@_susy_convergence_tester<Semi_analytic>::~@ModelName@_susy_convergence_tester()
-{
-}
-
 double @ModelName@_susy_convergence_tester<Semi_analytic>::max_rel_diff() const
 {
    const @ModelName@<Semi_analytic>& ol = get_last_iteration_model();

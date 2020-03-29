@@ -130,4 +130,22 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
    return beta_@parameterName@;
 }
 
+/**
+ * Calculates the 5-loop beta function of @parameterName@.
+ *
+ * @return 5-loop beta function
+ */
+@parameterType@ @ModelName@_soft_parameters::calc_beta_@parameterName@_5_loop(const Soft_traces& soft_traces) const
+{
+   DEFINE_PROJECTOR(3,3,3,3)
+
+@localDeclFiveLoop@
+
+   @parameterType@ beta_@parameterName@;
+
+@betaFiveLoop@
+
+   return beta_@parameterName@;
+}
+
 } // namespace flexiblesusy

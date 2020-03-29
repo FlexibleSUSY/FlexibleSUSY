@@ -119,7 +119,6 @@ double coeff_as_0_log_1()
 double coeff_as_1_log_0(double mQ32, double mU32, double Xt, double m3, double MR2)
 {
    using std::log;
-   using gm2calc::dilog;
    const double m32 = pow2(m3);
 
    const double result =
@@ -148,7 +147,6 @@ double coeff_as_1_log_2()
 double coeff_as_2_log_0(double mQ32, double mU32, double Xt, double m3, double msq2, double MR2)
 {
    using std::log;
-   using gm2calc::dilog;
    const double m32 = pow2(m3);
    const double dlatas2 = 0.; // 3L threshold correction Δλ^(3L) O(at*as^2)
 
@@ -161,7 +159,6 @@ double coeff_as_2_log_0(double mQ32, double mU32, double Xt, double m3, double m
 double coeff_as_2_log_1(double mQ32, double mU32, double Xt, double m3, double msq2, double MR2)
 {
    using std::log;
-   using gm2calc::dilog;
    const double m32 = pow2(m3);
 
    const double result =

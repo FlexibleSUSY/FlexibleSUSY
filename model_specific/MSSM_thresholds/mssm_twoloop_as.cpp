@@ -82,7 +82,6 @@ namespace {
    Real ClausenCl2(Real x)
    {
       using std::exp;
-      using gm2calc::dilog;
       const std::complex<Real> img(0.l,1.l);
 
       return std::imag(dilog(exp(img*x)));
@@ -91,7 +90,6 @@ namespace {
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
    Real PhiPos(Real x, Real y)
    {
-      using gm2calc::dilog;
       const Real lambda = std::sqrt(LambdaSquared(x,y));
 
       return (-(log(x)*log(y))

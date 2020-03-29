@@ -28,7 +28,7 @@ CalcHSSUSYDMh::usage="\
 The function takes the parameter point as input (same syntax as
 FSHSSUSYOpenHandle[]) and returns the 2-component list { Mh, DMh }
 where Mh is the Higgs mass and DMh is an uncertainty estimate of
-missing 3-loop corrections.
+missing higher-order corrections.
 
 The uncertainty estimate takes three sources into account:
 
@@ -63,8 +63,8 @@ CalcMh[MS_, TB_, Xtt_] :=
     CalcHSSUSYDMh[
         fsSettings -> {
             precisionGoal -> 1.*^-5,
-            thresholdCorrectionsLoopOrder -> 2,
-            thresholdCorrections -> 122111121
+            thresholdCorrectionsLoopOrder -> 4,
+            thresholdCorrections -> 124111421
         },
         fsModelParameters -> {
             TanBeta -> TB,
@@ -125,7 +125,7 @@ CalcHSSUSYMh[ytLoops_?NumericQ, Qpole_?NumericQ, Qm_?NumericQ, eft_?NumericQ, yt
            FSHSSUSYSet[handle,
                fsSettings -> {
                    calculateStandardModelMasses -> 1,
-                   thresholdCorrectionsLoopOrder -> 3,
+                   thresholdCorrectionsLoopOrder -> 4,
                    poleMassScale -> Qpole,
                    thresholdCorrections -> tc
                },
@@ -151,17 +151,17 @@ CalcHSSUSYDMh[args__] :=
             MS = MSUSY /. { args }, Mlow = MEWSB /. { args }},
            Mh0        = CalcHSSUSYMh[-1, 0, 0, 0, 0, args];
            If[Mh0 === $Failed, Return[{$Failed, $Failed}]];
-           Mh         = CalcHSSUSYMh[2, 0, 0, 0, 0, args];
+           Mh         = CalcHSSUSYMh[3, 0, 0, 0, 0, args];
            If[Mh === $Failed, Return[{Mh0, $Failed}]];
-           MhYt3L     = CalcHSSUSYMh[3, 0, 0, 0, 0, args];
+           MhYt3L     = CalcHSSUSYMh[4, 0, 0, 0, 0, args];
            If[MhYt3L === $Failed, Return[{Mh0, $Failed}]];
-           MhEFT      = CalcHSSUSYMh[2, 0, 0, 1, 0, args];
+           MhEFT      = CalcHSSUSYMh[3, 0, 0, 1, 0, args];
            If[MhEFT === $Failed, Return[{Mh0, $Failed}]];
-           MhYtMSSM   = CalcHSSUSYMh[2, 0, 0, 0, 1, args];
+           MhYtMSSM   = CalcHSSUSYMh[3, 0, 0, 0, 1, args];
            If[MhYtMSSM === $Failed, Return[{Mh0, $Failed}]];
-           varyQpole  = CalcHSSUSYMh[2, #, 0, 0, 0, args]& /@
+           varyQpole  = CalcHSSUSYMh[3, #, 0, 0, 0, args]& /@
                         LogRange[Mlow/2, 2 Mlow, 10];
-           varyQmatch = CalcHSSUSYMh[2, 0, #, 0, 0, args]& /@
+           varyQmatch = CalcHSSUSYMh[3, 0, #, 0, 0, args]& /@
                         LogRange[MS/2, 2 MS, 10];
            varyQpole  = Select[varyQpole , NumericQ];
            varyQmatch = Select[varyQmatch, NumericQ];

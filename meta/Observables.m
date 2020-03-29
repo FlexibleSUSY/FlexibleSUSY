@@ -27,7 +27,7 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM };
+                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma };
 End[];
 
 GetRequestedObservables::usage="";
@@ -49,7 +49,7 @@ IsObservable[sym_] :=
     (Or @@ (MatchQ[sym, #[__]]& /@ FlexibleSUSYObservable`FSObservables));
 
 GetRequestedObservables[blocks_] :=
-    Module[{observables, dim},
+    Module[{observables, dim, test},
            observables = DeleteDuplicates[Cases[blocks, a_?IsObservable :> a, {0, Infinity}]];
            If[MemberQ[observables, FlexibleSUSYObservable`CpHiggsPhotonPhoton] ||
               MemberQ[observables, FlexibleSUSYObservable`CpHiggsGluonGluon],
@@ -74,6 +74,16 @@ GetRequestedObservables[blocks_] :=
                                                                a === FlexibleSUSYObservable`CpPseudoScalarGluonGluon)];
                 ];
              ];
+test =       Complement[
+              Cases[observables, _FlexibleSUSYObservable`BrLToLGamma],
+              Cases[observables, FlexibleSUSYObservable`BrLToLGamma[fin_?IsLepton -> {fout_?IsLepton, vout_ /; vout === GetPhoton[]}]]
+                 ];
+           If[test =!= {},
+              Print["Warning: BrLToLGamma function works only for leptons and a photon."];
+              Print["         Removing requested process(es):"];
+              Print["        " <> ToString@test];
+              observables = Complement[observables, test];
+           ];
            observables
           ];
 
@@ -87,6 +97,10 @@ GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPhotonPho
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon] := "eff_cp_pseudoscalar_gluon_gluon";
 GetObservableName[FlexibleSUSYObservable`EDM[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`EDM[p]] <> "_" <> ToString[idx];
 GetObservableName[FlexibleSUSYObservable`EDM[p_]]       := "edm_" <> CConversion`ToValidCSymbolString[p];
+GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_[_] -> {pOut_[_], spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
+GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
+GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_in_" <> ToString@nucleus;
+GetObservableName[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "b_to_s_gamma";
 
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := "uncertainty of a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
@@ -98,12 +112,32 @@ GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPh
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon] := "effective A-Gluon-Gluon coupling";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_[idx_]]] := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> "(" <> ToString[idx] <> ") [1/GeV]";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_]]       := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> " [1/GeV]";
+GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] :=
+   "BR(" <> CConversion`ToValidCSymbolString[pIn] <> " -> " <>
+   CConversion`ToValidCSymbolString[pOut] <> " " <>
+   CConversion`ToValidCSymbolString[V] <> ")"  ;
+GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], V_}]] :=
+   "BR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
+      CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> " " <>
+       CConversion`ToValidCSymbolString[V] <> ")"  ;
+GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nuc_]] :=
+   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> " -> " <>
+      CConversion`ToValidCSymbolString[pOut] <> ", " <>
+      ToString[nuc] <> ")/capture rate";
+GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nuc_]] :=
+   "CR(" <> CConversion`ToValidCSymbolString[pIn] <> ToString[idxIn] <> " -> " <>
+   CConversion`ToValidCSymbolString[pOut] <> ToString[idxOut] <> ", " <>
+      ToString[nuc] <> ")/capture rate";
+GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "calculates the Wilson coefficients C7 and C8 for b -> s gamma";
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuon] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`EDM[p_]] := CConversion`ScalarType[CConversion`realScalarCType];
+GetObservableType[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] := CConversion`ScalarType[CConversion`realScalarCType];
+GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], _]] := CConversion`ScalarType[CConversion`realScalarCType];
+GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
 
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton] :=
     Module[{dim, type},
@@ -234,10 +268,10 @@ CreateClearObservablesFunction[observables_List] :=
           ];
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuon, structName_String] :=
-    structName <> ".AMU = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL);";
+    structName <> ".AMU = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, structName_String] :=
-    structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL);";
+    structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
     "#ifdef ENABLE_GM2Calc\n" <>
@@ -385,6 +419,46 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
            structName <> ".EDM1(" <> pStr <> ", " <> idxStr <> ") = " <>
            FlexibleSUSY`FSModelName <> "_edm::calculate_edm_" <> pStr <> "(" <> idxStr <> ", MODEL);"
           ];
+
+CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    spec = CConversion`ToValidCSymbolString[spectator]},
+           structName <> ".LToLGamma0(" <> pInStr <> ", " <> pOutStr <> ", " <> spec <> ") = " <>
+           FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> spec <> "(MODEL, qedqcd, physical_input);"
+          ];
+
+CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[idxOut_], spectator_}], structName_String] :=
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn],
+            pOutStr = CConversion`ToValidCSymbolString[pOut],
+            idxInStr = ToString[idxIn],
+            idxOutStr = ToString[idxOut],
+            specStr = ToString[spectator]
+    },
+           structName <> ".LToLGamma1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> specStr <> ") = " <>
+           FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> specStr <> "(" <> idxInStr <> ", " <> idxOutStr <> ", MODEL, qedqcd, physical_input);"
+          ];
+
+CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    nuc = CConversion`ToValidCSymbolString[nucleai]},
+           structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
+           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
+          ];
+
+CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_], structName_String] :=
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn],
+            pOutStr = CConversion`ToValidCSymbolString[pOut],
+            idxInStr = ToString[idxIn],
+            idxOutStr = ToString[idxOut],
+            nucleiStr = ToString[nucleus]
+    },
+           structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ") = " <>
+           FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(" <> idxInStr <> ", " <> idxOutStr <> ", "<> FlexibleSUSY`FSModelName <> "_f_to_f_conversion::Nucleus::" <> nucleiStr <> ", MODEL, qedqcd);"
+          ];
+
+(* TODO: move Wilson Coefficients to a different block *)
+CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_String] :=
+    structName <> ".BSGAMMA = Re(" <> FlexibleSUSY`FSModelName <> "_b_to_s_gamma::calculate_b_to_s_gamma(MODEL, qedqcd)[0]);";
 
 FillGM2CalcInterfaceData[struct_String] :=
     Module[{filling, mwStr,

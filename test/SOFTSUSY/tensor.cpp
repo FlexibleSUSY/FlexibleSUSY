@@ -12,8 +12,6 @@
 
 namespace softsusy {
 
-using namespace std;
-
 void Tensor::setTensor(const DoubleMatrix & B1, const DoubleMatrix & B2,
 		      const DoubleMatrix & B3) {
   threecheck(B1, B2, B3);
@@ -42,7 +40,7 @@ double & Tensor::operator() (int i, int j, int k) {
   case 2: return A2(j, k); break;
   case 3: return A3(j, k); break;
   default: 
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Trying to access " << i << j << k << "th element of tensor";
     ii << *this;
     throw ii.str();
@@ -55,7 +53,7 @@ void Tensor::threecheck(const DoubleMatrix &B1, const DoubleMatrix &B2,
   if (B1.displayRows() != 3 || B1.displayCols() != 3 ||
       B2.displayRows() != 3 || B2.displayCols() != 3 ||
       B3.displayRows() != 3 || B3.displayCols() != 3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Incorrect tensor initialisation with \n" << B1 << B2 << B3;
     throw ii.str();
   }
@@ -67,7 +65,7 @@ DoubleMatrix & Tensor::operator() (int i) {
   case 2: return A2; break;
   case 3: return A3; break;
   default:  
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor index out of range: " << i << "\n";
     throw ii.str();
     break;
@@ -80,7 +78,7 @@ const DoubleMatrix & Tensor::display(int i) const {
   case 2: return A2; break;
   case 3: return A3; break;
   default:  
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor index out of range: " << i << "\n";
     throw ii.str();
     break;
@@ -94,7 +92,7 @@ double Tensor::display(int i, int j, int k) const {
   case 2: ans = A2.display(j, k); break;
   case 3: ans = A3.display(j, k); break;
   default:  
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor index out of range: " << i << "\n";
     throw ii.str();
     break;
@@ -108,7 +106,7 @@ void Tensor::set(int i, int j, int k, double f) {
   case 2: A2(j, k) = f; break;
   case 3: A3(j, k) = f; break;
   default:  
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor index out of range: " << i << "\n";
     throw ii.str();
     break;
@@ -133,7 +131,7 @@ DoubleVector Tensor::trace(int l) const {
       case 2: V(k) += display(j, k, j); break;
       case 3: V(k) += display(j, j, k); break;
       default:
-	ostringstream ii;
+	std::ostringstream ii;
 	ii << "Attempting to trace over indices other than " << l << " of " 
 	   << *this << "\n";
 	throw ii.str();
@@ -168,7 +166,7 @@ DoubleMatrix Tensor::dotProd(const DoubleVector & V, int i) const {
 	  result(j, k) += display(j, k, l) * V.display(l); 
 	break;
       default:
-	ostringstream ii;
+	std::ostringstream ii;
 	ii << "sum out of range in dot product " << *this << "*" 
 	   << V << "(" << V.displayStart() << "," << V.displayEnd() << ")"
 	   << " on " << i << "th index.\n"; 
@@ -202,7 +200,7 @@ Tensor Tensor::swap(int i) {
 	case 2: T(j, k, l) = display(l, k, j); break;
 	case 3: T(j, k, l) = display(k, j, l); break;
 	default: 
-	  ostringstream ii;
+	  std::ostringstream ii;
 	  ii << "Trying to swap around " << i << "th element of tensor";
 	  throw ii.str();
 	  break;
@@ -214,7 +212,7 @@ Tensor Tensor::swap(int i) {
 // T^ijk = T^ijl M_lk
 Tensor Tensor::operator*(const DoubleMatrix & M) const {
   if (M.displayRows() != 3 || M.displayCols() !=3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor " << *this << " * matrix" << M << "of wrong size.\n";
     throw ii.str();
   }
@@ -227,7 +225,7 @@ Tensor Tensor::operator*(const DoubleMatrix & M) const {
 // Does T^ijk = T^ljk M_li
 Tensor Tensor::product(const DoubleMatrix & M) const {
   if (M.displayRows() != 3 || M.displayCols() !=3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Tensor " << *this << " * matrix" << M << "of wrong size.\n";
     throw ii.str();
   }
@@ -250,10 +248,10 @@ void Tensor::checkOut(double tol) const {
 
   for (i=1; i<=3; i++)
     if (display(i).sumElements() > tol)
-	cout << "Matrix " << i << display(i);
+	std::cout << "Matrix " << i << display(i);
 }
 
-ostream & operator << (ostream &left, const Tensor &T) {
+std::ostream & operator << (std::ostream &left, const Tensor &T) {
   int i; 
   for (i=1; i<=3; i++)
     left << "Matrix " << i << T.display(i);
@@ -285,7 +283,7 @@ Tensor outerProduct(const DoubleVector &V, const DoubleMatrix & M, int l) {
 	case 2: temp(i, j, k) = V.display(j) * M.display(k, i); break;
 	case 3: temp(i, j, k) = V.display(k) * M.display(i, j); break;
 	default: 
-	  ostringstream ii;
+	  std::ostringstream ii;
 	  ii << "Trying to outer product " << l << "th element of tensor";
 	  throw ii.str();
 	  break;
@@ -334,7 +332,7 @@ Tensor Tensor::raise(const DoubleMatrix & M) const {
 // T^kij = M_il T^klj
 Tensor operator*(const DoubleMatrix &M, const Tensor &T) {
   if (M.displayRows() !=3 || M.displayCols() != 3) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "DoubleMatrix " << M << " * Tensor" << T << "of wrong size\n";
     throw ii.str();
   }

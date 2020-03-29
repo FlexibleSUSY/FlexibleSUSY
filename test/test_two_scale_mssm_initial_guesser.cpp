@@ -24,7 +24,9 @@ using namespace softsusy;
  * @param pp parameter point
  * @param qedqcd low-energy data set
  */
-double softsusy_initial_guess(MssmSoftsusy& mssm, const SoftsusyMSSM_parameter_point& pp, const QedQcd& qedqcd)
+double softsusy_initial_guess(MssmSoftsusy& mssm,
+                              const SoftsusyMSSM_parameter_point& pp,
+                              const QedQcd_legacy& qedqcd)
 {
    double mx = 0.0;
    const double mxGuess = pp.mxGuess;
@@ -60,14 +62,14 @@ double softsusy_initial_guess(MssmSoftsusy& mssm, const SoftsusyMSSM_parameter_p
    if (mxGuess > 0.0)
       mx = mxGuess;
    else {
-      string ii("Trying to use negative mx in MssmSoftsusy::lowOrg.\n");
+      std::string ii("Trying to use negative mx in MssmSoftsusy::lowOrg.\n");
       ii = ii + "Now illegal! Use positive mx for first guess of mx.\n";
       throw ii;
    }
 
-   if (qedqcd.get_scale() != mz) {
+   if (qedqcd.displayMu() != mz) {
       cout << "WARNING: lowOrg in softsusy.cpp called with qedqcd at scale\n"
-	   << qedqcd.get_scale() << "\ninstead of " << mz << endl;
+	   << qedqcd.displayMu() << "\ninstead of " << mz << endl;
    }
 
    MssmSusy t(mssm.guessAtSusyMt(tanb, qedqcd));
@@ -149,7 +151,7 @@ BOOST_AUTO_TEST_CASE( test_softsusy_mssm_initial_guesser )
 {
    SoftsusyMSSM_parameter_point pp;
    pp.tanBeta = 45.1;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    SoftsusyMSSM<Two_scale> mssm;
    SoftsusyMSSM_sugra_constraint mssm_sugra_constraint(pp);
    SoftsusyMSSM_low_scale_constraint mssm_mz_constraint(pp);

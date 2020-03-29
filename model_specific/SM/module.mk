@@ -7,7 +7,7 @@ LIB_model_specific_SM_MK  := \
 
 LIB_model_specific_SM_SRC := \
 		$(DIR)/sm_fourloophiggs.cpp \
-		$(DIR)/sm_threeloop_as.cpp \
+		$(DIR)/sm_fourloop_as.cpp \
 		$(DIR)/sm_threeloophiggs.cpp \
 		$(DIR)/sm_twoloophiggs.cpp \
 		$(DIR)/standard_model.cpp \
@@ -19,7 +19,7 @@ LIB_model_specific_SM_SRC := \
 
 LIB_model_specific_SM_HDR := \
 		$(DIR)/sm_fourloophiggs.hpp \
-		$(DIR)/sm_threeloop_as.hpp \
+		$(DIR)/sm_fourloop_as.hpp \
 		$(DIR)/sm_threeloophiggs.hpp \
 		$(DIR)/sm_twoloophiggs.hpp \
 		$(DIR)/standard_model.hpp \
@@ -48,20 +48,20 @@ all-$(MODNAME): $(LIB_model_specific_SM)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIB_model_specific_SM_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIB_model_specific_SM_DEP)
+		$(Q)-rm -f $(LIB_model_specific_SM_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIB_model_specific_SM)
+		$(Q)-rm -f $(LIB_model_specific_SM)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIB_model_specific_SM_OBJ)
+		$(Q)-rm -f $(LIB_model_specific_SM_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		@true
@@ -82,10 +82,12 @@ endif
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
 else
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
 ALLDEP += $(LIB_model_specific_SM_DEP)

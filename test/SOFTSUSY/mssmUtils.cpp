@@ -382,8 +382,8 @@ double sumTol(const MssmSoftsusy & in, const MssmSoftsusy & out, int numTries) {
 }
 
 /// Prints out what the lsp is
-string recogLsp(int temp, int posj) {
-  string out;
+std::string recogLsp(int temp, int posj) {
+  std::string out;
   switch(temp) {
   case -1: out = "gravitino"; break;
   case 0: out = "neutralino"; break;
@@ -409,14 +409,14 @@ string recogLsp(int temp, int posj) {
   case 5: out = "sneutrino"; break;
   case 6: out = "gluino"; break;
   default:
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Wrong input to lsp printing routine\n";
     throw ii.str(); break;
   }
   return out;
 }
 
-ostream & operator <<(ostream &left, const MssmSoftsusy &s) {
+std::ostream & operator <<(std::ostream &left, const MssmSoftsusy &s) {
   const std::string HR = "----------------------------------------------------------";
   left << HR << endl;
   left << "Gravitino mass M3/2: " << s.displayGravitino() << endl;

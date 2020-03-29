@@ -9,7 +9,8 @@ When releasing FlexibleSUSY, please follow these steps:
       git pull organization development
 
  1. Create a commit where the version number (in configure and
-    ChangeLog) is updated.  This commit should have the commit message
+    CHANGES.rst) is updated.  This commit should have the commit
+    message
 
       version <version>
 
@@ -43,7 +44,7 @@ When releasing FlexibleSUSY, please follow these steps:
     and copy the tarball and the .md5 file to Hepforge
 
       scp FlexibleSUSY-<version>.tar.gz* \
-         USERNAME@login.hepforge.org:/hepforge/home/flexiblesusy/downloads/
+         USERNAME@login.hepforge.org:/hepforge/projects/flexiblesusy/downloads/
 
  7. Pregenerate models:
 
@@ -52,9 +53,16 @@ When releasing FlexibleSUSY, please follow these steps:
          --directory=release/<version>
 
       scp release/<version>/*.tar.gz \
-         USERNAME@login.hepforge.org:/hepforge/home/flexiblesusy/downloads/models/<version>/
+         USERNAME@login.hepforge.org:/hepforge/projects/flexiblesusy/downloads/models/<version>/
 
  8. Generate SLHA output files:
 
       ./release/generate-slha-output.sh \
          --directory=release/<version>-slha
+
+ 9. Generate source code documentation
+
+      ./configure --disable-meta --disable-compile
+      make doc-html
+      scp -r doc/html/* \
+         USERNAME@login.hepforge.org:/hepforge/projects/flexiblesusy/public_html/doc/

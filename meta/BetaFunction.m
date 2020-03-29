@@ -35,7 +35,7 @@ CreateGetters::usage="";
 CreateParameterDefinitions::usage="";
 CreateCCtorInitialization::usage="";
 CreateCCtorParameterList::usage="";
-CreateParameterList::usage="";
+FSCreateParameterList::usage="";
 ClearParameters::usage="";
 
 CreateParameterEnum::usage="";
@@ -53,7 +53,8 @@ GetName[BetaFunction[name_, type_, beta_List]] :=
     name /. Parameters`StripSARAHIndicesRules[1] /.
             Parameters`StripSARAHIndicesRules[2] /.
             Parameters`StripSARAHIndicesRules[3] /.
-            Parameters`StripSARAHIndicesRules[4];
+            Parameters`StripSARAHIndicesRules[4] /.
+            Parameters`StripSARAHIndicesRules[5];
 
 GetType[BetaFunction[name_, type_, beta_List]] := type;
 
@@ -90,15 +91,16 @@ CreateSingleBetaFunctionDecl[betaFun_List] :=
             CreateSingleBetaFunctionDecl[#, 1] <> 
             CreateSingleBetaFunctionDecl[#, 2] <> 
             CreateSingleBetaFunctionDecl[#, 3] <> 
-            CreateSingleBetaFunctionDecl[#, 4]
+            CreateSingleBetaFunctionDecl[#, 4] <>
+            CreateSingleBetaFunctionDecl[#, 5]
         )& /@ betaFun
     ];
 
 CreateSingleBetaFunctionDefs[betaFun_List, templateFile_String, sarahTraces_List] :=
     Module[{b, para, type, paraStr, typeStr, files = {},
             inputFile, outputFile,
-            localDeclOneLoop, localDeclTwoLoop, localDeclThreeLoop, localDeclFourLoop,
-            betaOneLoop, betaTwoLoop, betaThreeLoop, betaFourLoop},
+            localDeclOneLoop, localDeclTwoLoop, localDeclThreeLoop, localDeclFourLoop, localDeclFiveLoop,
+            betaOneLoop, betaTwoLoop, betaThreeLoop, betaFourLoop, betaFiveLoop},
            For[b = 1, b <= Length[betaFun], b++,
                para = GetName[betaFun[[b]]];
                type = GetType[betaFun[[b]]];
@@ -113,6 +115,7 @@ CreateSingleBetaFunctionDefs[betaFun_List, templateFile_String, sarahTraces_List
                {localDeclTwoLoop, betaTwoLoop} = CreateBetaFunction[betaFun[[b]], 2, sarahTraces];
                {localDeclThreeLoop, betaThreeLoop} = CreateBetaFunction[betaFun[[b]], 3, sarahTraces];
                {localDeclFourLoop, betaFourLoop}   = CreateBetaFunction[betaFun[[b]], 4, sarahTraces];
+               {localDeclFiveLoop, betaFiveLoop}   = CreateBetaFunction[betaFun[[b]], 5, sarahTraces];
                WriteOut`ReplaceInFiles[{{inputFile, outputFile}},
                      { "@ModelName@"     -> FlexibleSUSY`FSModelName,
                        "@parameterType@" -> typeStr,
@@ -121,10 +124,12 @@ CreateSingleBetaFunctionDefs[betaFun_List, templateFile_String, sarahTraces_List
                        "@localDeclTwoLoop@" -> WrapLines[IndentText[localDeclTwoLoop]],
                        "@localDeclThreeLoop@" -> WrapLines[IndentText[localDeclThreeLoop]],
                        "@localDeclFourLoop@"  -> WrapLines[IndentText[localDeclFourLoop]],
+                       "@localDeclFiveLoop@"  -> WrapLines[IndentText[localDeclFiveLoop]],
                        "@betaOneLoop@"   -> WrapLines[IndentText[betaOneLoop]],
                        "@betaTwoLoop@"   -> WrapLines[IndentText[betaTwoLoop]],
                        "@betaThreeLoop@" -> WrapLines[IndentText[betaThreeLoop]],
                        "@betaFourLoop@"  -> WrapLines[IndentText[betaFourLoop]],
+                       "@betaFiveLoop@"  -> WrapLines[IndentText[betaFiveLoop]],
                        "@DateAndTime@"   -> DateString[]
                      } ];
                AppendTo[files, outputFile];
@@ -143,7 +148,8 @@ ToList[expr_, head_] :=
 
 FactorOutLoopFactor[expr_] :=
     Module[{i, prefactors = {CConversion`oneOver16PiSqr, CConversion`twoLoop,
-                             CConversion`threeLoop, CConversion`oneOver16PiSqr^4}},
+                             CConversion`threeLoop, CConversion`oneOver16PiSqr^4,
+                             CConversion`oneOver16PiSqr^5}},
            For[i = 1, i <= Length[prefactors], i++,
                If[Coefficient[expr, prefactors[[i]]] =!= 0,
                   Return[TimeConstrainedSimplify[prefactors[[i]] Expand[expr / prefactors[[i]]]]];
@@ -153,7 +159,7 @@ FactorOutLoopFactor[expr_] :=
           ];
 
 TimeConstrainedSimplify[expr_] :=
-    TimeConstrained[Simplify[expr], FlexibleSUSY`FSSimplifyBetaFunctionsTimeConstraint, expr];
+    TimeConstrained[Factor[expr], FlexibleSUSY`FSSimplifyBetaFunctionsTimeConstraint, expr];
 
 CollectMatMul[expr_] :=
     TimeConstrained[Collect[expr, SARAH`MatMul[___], TimeConstrainedSimplify],
@@ -235,7 +241,7 @@ CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_Lis
             beta = loopFactor CollectMatMul[beta / loopFactor];
             (* declare SARAH traces locally *)
             localDecl  = localDecl <> Traces`CreateLocalCopiesOfSARAHTraces[expr, sarahTraces, "TRACE_STRUCT"];
-            If[beta === 0 || PossibleZeroQ[beta],
+            If[beta == 0,
                beta = CConversion`CreateZero[type];
               ];
             beta       = Parameters`DecreaseIndexLiterals[beta];
@@ -305,11 +311,12 @@ CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer, parallel_:False] 
       ];
 
 CreateBetaFunction[betaFunctions_List] :=
-    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta3LParallel, allBeta4L},
+    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta3LParallel, allBeta4L, allBeta5L},
            allBeta1L = CreateBetaFunctionCalls[betaFunctions,1];
            allBeta2L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,2];
            allBeta3L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3];
            allBeta4L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,4];
+           allBeta5L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,5];
            (* only parallelization of 3L betas leads to a speed-up *)
            allBeta3LParallel = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3,True];
            StringJoin[DeclareBetaFunction /@ betaFunctions] <> "\n" <>
@@ -330,6 +337,12 @@ CreateBetaFunction[betaFunctions_List] :=
                    TextFormatting`IndentText[
                        "if (loops > 3) {\n" <>
                        allBeta4L <>
+                       "\n" <>
+                       TextFormatting`IndentText[
+                           "if (loops > 4) {\n" <>
+                           allBeta5L <>
+                           "\n}"
+                       ] <>
                        "\n}"
                    ] <>
                    "\n}"
@@ -380,10 +393,7 @@ CountNumberOfParameters[CConversion`TensorType[CConversion`realScalarCType, dims
 CountNumberOfParameters[CConversion`TensorType[CConversion`complexScalarCType, dims__]] := 2 * Times[dims];
 
 CountNumberOfParameters[betaFunctions_List] :=
-    Module[{num = 0},
-           (num += CountNumberOfParameters[GetType[#]])& /@ betaFunctions;
-           Return[num];
-          ];
+    Total[CountNumberOfParameters[GetType[#]]& /@ betaFunctions];
 
 (* creating set function *)
 CreateSetFunction[betaFunctions_List, parameterNumberOffset_:0] :=
@@ -450,34 +460,26 @@ CreateElementSetter[name_String, type_] :=
     CConversion`CreateInlineElementSetter[name, type];
 
 CreateSetters[betaFunction_BetaFunction] :=
-    Module[{setter = "", name = "", type},
+    Module[{name, type},
            name = ToValidCSymbolString[GetName[betaFunction]];
            type = GetType[betaFunction];
-           setter = setter <> CConversion`CreateInlineSetter[name, type];
-           setter = setter <> CreateElementSetter[name, type];
-           Return[setter];
+           CConversion`CreateInlineSetter[name, type] <>
+           CreateElementSetter[name, type]
           ];
 
 CreateSetters[betaFunctions_List] :=
-    Module[{setter = ""},
-           (setter = setter <> CreateSetters[#])& /@ betaFunctions;
-           Return[setter];
-          ];
+    StringJoin[CreateSetters /@ betaFunctions];
 
 (* create getters *)
 CreateGetters[betaFunction_BetaFunction] :=
-    Module[{getter = "", name = "", type},
+    Module[{name, type},
            name = ToValidCSymbolString[GetName[betaFunction]];
            type = GetType[betaFunction];
-           getter = getter <> CConversion`CreateInlineGetters[name, name, type];
-           Return[getter];
+           CConversion`CreateInlineGetters[name, name, type]
           ];
 
 CreateGetters[betaFunctions_List] :=
-    Module[{getter = ""},
-           (getter = getter <> CreateGetters[#])& /@ betaFunctions;
-           Return[getter];
-          ];
+    StringJoin[CreateGetters /@ betaFunctions];
 
 (* create parameter definition in C++ class *)
 CreateParameterDefinitions[betaFunction_BetaFunction] :=
@@ -488,67 +490,39 @@ CreateParameterDefinitions[betaFunctions_List] :=
 
 (* create copy constructor initialization list *)
 CreateCCtorInitialization[betaFunction_BetaFunction] :=
-    Module[{def = "", name = "", dataType = ""},
+    Module[{name, dataType},
            dataType = CConversion`CreateCType[GetType[betaFunction]];
            name = ToValidCSymbolString[GetName[betaFunction]];
-           def  = def <> ", " <> name <> "(" <> name <> "_)";
-           Return[def];
+           ", " <> name <> "(" <> name <> "_)"
           ];
 
 CreateCCtorInitialization[betaFunctions_List] :=
-    Module[{def = ""},
-           (def = def <> CreateCCtorInitialization[#])& /@ betaFunctions;
-           Return[def];
-          ];
+    StringJoin[CreateCCtorInitialization /@ betaFunctions];
 
 (* create copy constructor initialization list *)
 CreateCCtorParameterList[betaFunction_BetaFunction] :=
-    Module[{def = "", name = "", dataType = ""},
+    Module[{name, dataType},
            dataType = CreateGetterReturnType[GetType[betaFunction]];
            name = ToValidCSymbolString[GetName[betaFunction]];
-           def = def <> ", " <> dataType <> " " <> name <> "_";
-           Return[def];
+           ", " <> dataType <> " " <> name <> "_"
           ];
 
 CreateCCtorParameterList[betaFunctions_List] :=
-    Module[{def = "", i},
-           For[i = 1, i <= Length[betaFunctions], i++,
-               def = def <> CreateCCtorParameterList[betaFunctions[[i]]];
-              ];
-           Return[def];
-          ];
+    StringJoin[CreateCCtorParameterList /@ betaFunctions];
 
 (* create parameter list *)
-CreateParameterList[betaFunction_BetaFunction, prefix_] :=
-    Module[{def = "", name = "", dataType = ""},
-           dataType = CConversion`CreateCType[GetType[betaFunction]];
-           name = ToValidCSymbolString[GetName[betaFunction]];
-           If[def != "", def = def <> ", "];
-           def = def <> prefix <> name;
-           Return[def];
-          ];
+FSCreateParameterList[betaFunction_BetaFunction, prefix_] :=
+    prefix <> ToValidCSymbolString[GetName[betaFunction]];
 
-CreateParameterList[betaFunctions_List, prefix_:""] :=
-    Module[{def = "", i},
-           For[i = 1, i <= Length[betaFunctions], i++,
-               If[def != "", def = def <> ", "];
-               def = def <> CreateParameterList[betaFunctions[[i]], prefix];
-              ];
-           Return[def];
-          ];
+FSCreateParameterList[betaFunctions_List, prefix_:""] :=
+    Utils`StringJoinWithSeparator[FSCreateParameterList[#, prefix]& /@ betaFunctions, ", "];
 
 ClearParameter[betaFunction_BetaFunction] :=
-    Module[{def, type},
-           def = CConversion`SetToDefault[ToValidCSymbolString[GetName[betaFunction]],
-                                          GetType[betaFunction]];
-           Return[def];
-          ];
+    CConversion`SetToDefault[ToValidCSymbolString[GetName[betaFunction]],
+                             GetType[betaFunction]];
 
 ClearParameters[betaFunctions_List] :=
-    Module[{def = ""},
-           (def = def <> ClearParameter[#])& /@ betaFunctions;
-           Return[def];
-          ];
+    StringJoin[ClearParameter /@ betaFunctions];
 
 End[];
 

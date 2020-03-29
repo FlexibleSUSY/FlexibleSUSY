@@ -20,7 +20,6 @@
 #define MINIMIZER_H
 
 #include <iostream>
-#include <cassert>
 #include <utility>
 #include <Eigen/Core>
 #include <gsl/gsl_vector.h>

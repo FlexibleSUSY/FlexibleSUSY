@@ -51,8 +51,13 @@ CreateExtraParameterArrayGetter::usage="";
 CreateExtraParameterArraySetter::usage="";
 CreateInputParameterArrayGetter::usage="";
 CreateInputParameterArraySetter::usage="";
+CreateModelParameterGetter::usage="";
+CreateModelParameterSetter::usage="";
+CreateDelegateModelParameterGetter::usage="";
 
 CreateEnumName::usage="Creates enum symbol for given parameter";
+CreateParameterEnumEntries::usage="Creates a list of enum symbols for
+a given parameter";
 DecomposeParameter::usage="decomposes parameter into its real components";
 
 SetParameter::usage="set model parameter";
@@ -106,6 +111,8 @@ IsIndex::usage="returns True if given symbol is an index";
 IsPhase::usage="returns True if given symbol is a phase";
 IsExtraParameter::usage="return True if parameter is an auxiliary parameter";
 IsGaugeCoupling::usage="returns True if parameter is a gauge coupling.";
+IsYukawaCoupling::usage="returns True if parameter is a Yukawa coupling.";
+IsVEV::usage="returns True if parameter is a VEV.";
 
 GetIndices::usage="returns list of indices from a given parameter";
 
@@ -138,11 +145,14 @@ FindMacro::usage="Returns preprocessor macro for parameter";
 WrapPreprocessorMacroAround::usage="Applies preprocessor symbols
 to parameters";
 
-GetDependenceSPhenoSymbols::usage="Returns list of symbols for which a
- DependenceSPheno rule is defined";
+GetDependenceSPhenoSymbols::usage="Returns list of SARAH parameters
+ for which a DependenceSPheno rule is defined";
 
 GetDependenceSPhenoRules::usage="Returns list of replacement rules for
- symbols for which a DependenceSPheno rule is defined";
+ SARAH parameters for which a DependenceSPheno rule is defined";
+
+GetAllDependenceSPhenoRules::usage="Returns list of replacement rules
+ for all DependenceSPheno rules"
 
 GetOutputParameterDependencies::usage="Returns list of output
  parameters which appear in the given expression";
@@ -180,6 +190,12 @@ given description string.";
 GetParticleFromDescription::usage="Returns particle symbol from a
 given description string.";
 GetPDGCodesForParticle::usage="Returns the PDG codes for a particle."
+CreatePDGCodeFromParticleCases::usage="Create list of switch cases setting PDG code
+for particles with no generation index.";
+CreatePDGCodeFromParticleIndexedCases::usage="Create list of switch cases settings PDG codes
+for particles with generation index.";
+CreateParticleNameFromPDGCases::usage="Create list of switch cases setting particle name
+from integer PDG code.";
 
 NumberOfIndependentEntriesOfSymmetricMatrix::usage="Returns number of
 independent parameters of a real symmetric nxn matrix";
@@ -220,7 +236,7 @@ extraMassDimensions = {};
 
 AddMassDimensionInfo[par_, dim_?IntegerQ] :=
     Module[{massDimensions, pos, known},
-           massDimensions = #[[1]]& /@ extraMassDimensions;
+           massDimensions = First /@ extraMassDimensions;
            If[!MemberQ[massDimensions, dim],
               extraMassDimensions = Utils`ForceJoin[extraMassDimensions, {{dim, {par}}}];,
               pos = Position[massDimensions, dim];
@@ -250,7 +266,7 @@ GuessExtraParameterType[par_] :=
 
 UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, block, type}}];,
               pos = Position[parNames, par, 1];
@@ -265,7 +281,7 @@ UpdateParameterInfo[currentPars_List, {par_, block_, type_}] :=
 
 UpdateParameterInfo[currentPars_List, {par_, type_}] :=
     Module[{parNames, pos, updatedPars},
-           parNames = #[[1]]& /@ currentPars;
+           parNames = First /@ currentPars;
            If[!MemberQ[parNames, par],
               updatedPars = Utils`ForceJoin[currentPars, {{par, type}}];,
               pos = Position[parNames, par, 1];
@@ -283,8 +299,8 @@ SetStoredParameterSLHABlock[storedPars_List, par_, block_] :=
            pos = Position[storedPars, {par, __}];
            updated = Extract[storedPars, pos];
            If[MatchQ[block, {_, _}],
-              updated = ({#[[1]], {ToString[block[[1]]], block[[2]]}, #[[3]]})& /@ updated,
-              updated = ({#[[1]], ToString[block], #[[3]]})& /@ updated
+              updated = ({First[#], {ToString[block[[1]]], block[[2]]}, #[[3]]})& /@ updated,
+              updated = ({First[#], ToString[block], #[[3]]})& /@ updated
              ];
            ReplacePart[storedPars, MapThread[Rule, {pos, updated}]]
           ];
@@ -300,7 +316,7 @@ SetStoredParameterDimensions[storedPars_List, par_, dims_] :=
     Module[{pos, updated},
            pos = Position[storedPars, {par, __}];
            updated = Extract[storedPars, pos];
-           updated = ({#[[1]], #[[2]], If[CConversion`IsRealType[#[[3]]],
+           updated = ({First[#], #[[2]], If[CConversion`IsRealType[#[[3]]],
                                           If[CConversion`IsIntegerType[#[[3]]],
                                              GetIntegerTypeFromDimension[dims],
                                              GetRealTypeFromDimension[dims]
@@ -602,7 +618,7 @@ FindAllParametersClassified[expr_, exceptions_:{}] :=
 ReplaceAllRespectingSARAHHeads[expr_, rules_] :=
     Module[{pars, parsWithoutHeads, removeHeadsRules,
             uniqueRules, uniqueExpr, uniqueSubs},
-           pars = Parameters`FindAllParameters[(#[[1]])& /@ rules];
+           pars = Parameters`FindAllParameters[First /@ rules];
            removeHeadsRules = { SARAH`L[p_][__] :> p, SARAH`L[p_] :> p,
                                 SARAH`B[p_][__] :> p, SARAH`B[p_] :> p,
                                 SARAH`T[p_][__] :> p, SARAH`T[p_] :> p,
@@ -803,7 +819,7 @@ IsRealExpression[sum[index_, start_, stop_, expr_]] :=
 IsRealExpression[otherwise_] := False;
 
 HasPhase[particle_] :=
-    MemberQ[#[[1]]& /@ SARAH`ParticlePhases, particle];
+    MemberQ[First /@ SARAH`ParticlePhases, particle];
 
 GetPhase[particle_ /; HasPhase[particle]] :=
     Cases[SARAH`ParticlePhases, {particle, phase_} :> phase][[1]];
@@ -1223,6 +1239,9 @@ CreateEnumName[par_[idx__]] :=
 CreateEnumName[par_] :=
     CConversion`ToValidCSymbolString[par];
 
+CreateParameterEnumEntries[name_, type_] :=
+    CreateEnumName /@ DecomposeParameter[name, type];
+
 CreateParameterEnums[name_, type_] :=
     Utils`StringJoinWithSeparator[CreateEnumName /@ DecomposeParameter[name, type], ", "];
 
@@ -1604,6 +1623,12 @@ GetParticleFromDescription[multipletName_String, splitNames_List] :=
            DeleteCases[GetParticleFromDescription /@ splitNames, Null]
           ];
 
+GetPDGCodesForParticle[SARAH`bar[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
+GetPDGCodesForParticle[Susyno`LieGroups`conj[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
 GetPDGCodesForParticle[particle_] :=
     Module[{pdgList},
             pdgList = SARAH`getPDGList[particle];
@@ -1611,6 +1636,51 @@ GetPDGCodesForParticle[particle_] :=
                pdgList = {};
               ];
            pdgList
+          ];
+
+CreatePDGCodeFromParticleCase[particle_] :=
+    Module[{particleName,
+            pdgs = GetPDGCodesForParticle[particle],
+            dim = TreeMasses`GetDimension[particle], value},
+           particleName = CConversion`ToValidCSymbolString[particle];
+           If[dim != Length[pdgs],
+              Print["Error: number of PDG codes does not match ", particle, " multiplet size."];
+              Quit[1];
+             ];
+           If[dim == 1,
+              value = "pdg = " <> ToString[First[pdgs]];,
+              value = "pdg_codes = {" <> Utils`StringJoinWithSeparator[ToString /@ pdgs, ", "] <> "}";
+             ];
+           "case " <> particleName <> ": " <> value <> "; break;\n"
+          ];
+
+CreatePDGCodeFromParticleCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] == 1)&]];
+
+CreatePDGCodeFromParticleIndexedCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] > 1)&]];
+
+CreateParticleNameFromPDGCases[particles_List] :=
+    Module[{i, j, dims, starts, pdgCodes, names, result = ""},
+           dims = TreeMasses`GetDimension /@ particles;
+           dimsWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones /@ particles;
+           starts = TreeMasses`GetDimensionStartSkippingGoldstones /@ particles;
+           pdgCodes = GetPDGCodesForParticle /@ particles;
+           For[i = 1, i <= Length[particles], i++,
+               If[dims[[i]] != Length[pdgCodes[[i]]],
+                  Print["Error: number of PDG codes does not match ", particles[[i]], " multiplet size."];
+                  Quit[1];
+                 ];
+               If[dimsWithoutGoldstones[[i]] > 0,
+                  names = If[dims[[i]] > 1,
+                             Table[CConversion`ToValidCSymbolString[particles[[i]]] <> "(" <> ToString[j] <> ")", {j, starts[[i]], dims[[i]]}],
+                             {CConversion`ToValidCSymbolString[particles[[i]]]}
+                            ];
+                  result = result <> StringJoin[("case " <> ToString[#[[1]]] <> ": name = \"" <> #[[2]] <> "\"; break;\n")&
+                                                /@ Thread[{#1,#2}& @@ {pdgCodes[[i, starts[[i]] ;;]], names}]];
+                 ];
+              ];
+           result
           ];
 
 NumberOfIndependentEntriesOfSymmetricMatrix[n_] := (n^2 + n) / 2;
@@ -1684,7 +1754,7 @@ StripSARAHIndicesRules[numberOfIndices_] :=
     StripIndicesRules[sarahIndices, numberOfIndices];
 
 ExtractParametersFromSARAHBetaLists[beta_List] :=
-    StripIndices[#[[1]]]& /@ beta;
+    StripIndices[First[#]]& /@ beta;
 
 ExtractParametersFromSARAHBetaLists[_] := {};
 
@@ -1728,7 +1798,14 @@ GetModelParameterMassDimension[par_] :=
           Quit[1];
          ];
 
-IsGaugeCoupling[par_] := MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaGauge], par];
+IsGaugeCoupling[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaGauge], par];
+
+IsYukawaCoupling[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaYijk], par];
+
+IsVEV[par_] :=
+    MemberQ[ExtractParametersFromSARAHBetaLists[SARAH`BetaVEV], par];
 
 AreLinearDependent[{eq1_, eq2_}, parameters_List] :=
     Module[{frac = Simplify[eq1/eq2 /. FlexibleSUSY`tadpole[_] -> 0],
@@ -1746,7 +1823,7 @@ GetThirdGeneration[par_] :=
          ];
 
 GetSARAHParameters[] :=
-    (#[[1]])& /@ SARAH`SARAHparameters;
+    First /@ SARAH`SARAHparameters;
 
 GetAllDependenceSPhenoSymbols[] :=
     DeleteDuplicates @ Flatten @
@@ -1764,7 +1841,7 @@ GetDependenceSPhenoSymbols[] :=
 
 GetDependenceSPhenoRules[] :=
     Module[{sarahPars = GetSARAHParameters[]},
-           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,#[[1]]]&]
+           Select[GetAllDependenceSPhenoRules[], MemberQ[sarahPars,First[#]]&]
           ];
 
 GetAllOutputParameterDependencies[expr_] :=
@@ -1857,6 +1934,21 @@ CreateInputParameterArraySetter[inputParameters_List] :=
            Return[set];
           ];
 
+CreateModelParameterGetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par]]
+          ];
+
+CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par], "", macro]
+          ];
+
+CreateModelParameterSetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par], type = GetType[par]},
+           CConversion`CreateInlineSetters[name, type]
+          ];
+
 FindSLHABlock[blockList_List, par_] :=
     Module[{foundBlocks},
            foundBlocks = Cases[blockList, {par, block_, ___} :> block];
@@ -1884,6 +1976,11 @@ SetSMParameter[FlexibleSUSY`MDown2GeVInput     , value_String, struct_String] :=
 SetSMParameter[FlexibleSUSY`MUp2GeVInput       , value_String, struct_String] := struct <> ".setMass(softsusy::mUp, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MStrange2GeVInput  , value_String, struct_String] := struct <> ".setMass(softsusy::mStrange, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MCharmMCharm       , value_String, struct_String] := struct <> ".setMass(softsusy::mCharm, " <> value <> ")";
+
+(*  given a field will return it's indices,
+    e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
+GetFieldIndices[field_] :=
+    field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
 
 End[];
 

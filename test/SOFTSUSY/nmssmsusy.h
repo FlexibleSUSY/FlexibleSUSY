@@ -156,7 +156,7 @@ public:
 };
 
 /// Formatted output
-ostream & operator <<(ostream &, const NmssmSusy &);
+std::ostream & operator <<(std::ostream &, const NmssmSusy &);
 
 /// Outputs beta function coefficients for MSSM gauge coupling evolution in
 /// arguments.

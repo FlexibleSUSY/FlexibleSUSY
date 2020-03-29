@@ -42,8 +42,11 @@
 #include "error.hpp"
 #include "pv.hpp"
 #include "raii.hpp"
-#include "thread_pool.hpp"
 #include "functors.hpp"
+
+#ifdef ENABLE_THREADS
+#include "thread_pool.hpp"
+#endif
 
 @ewsbSolverHeaders@
 @twoLoopHiggsHeaders@
@@ -61,6 +64,8 @@
 
 namespace flexiblesusy {
 
+#define STRINGIFY(s) XSTRINGIFY(s)
+#define XSTRINGIFY(s) #s
 #define CLASSNAME @ModelName@_mass_eigenstates
 
 #define PHYSICAL(parameter) physical.parameter
@@ -81,10 +86,15 @@ namespace flexiblesusy {
 #define HIGGS_3LOOP_CORRECTION_AT_AT_AT    loop_corrections.higgs_at_at_at
 #define HIGGS_4LOOP_CORRECTION_AT_AS_AS_AS loop_corrections.higgs_at_as_as_as
 
-CLASSNAME::@ModelName@_mass_eigenstates(const @ModelName@_input_parameters& input_)
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
    : @ModelName@_soft_parameters(input_)
 @defaultEWSBSolverCctor@
 {
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
@@ -287,7 +297,7 @@ int CLASSNAME::solve_ewsb_tree_level_custom()
 int CLASSNAME::solve_ewsb_tree_level()
 {
    if (!ewsb_solver) {
-      throw SetupError("@ModelName@_mass_eigenstates::solve_ewsb_tree_level: "
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb_tree_level: "
                        "no EWSB solver set");
    }
 
@@ -319,7 +329,7 @@ int CLASSNAME::solve_ewsb_tree_level()
 int CLASSNAME::solve_ewsb_one_loop()
 {
    if (!ewsb_solver) {
-      throw SetupError("@ModelName@_mass_eigenstates::solve_ewsb_one_loop: "
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb_one_loop: "
                        "no EWSB solver set");
    }
 
@@ -351,7 +361,7 @@ int CLASSNAME::solve_ewsb_one_loop()
 int CLASSNAME::solve_ewsb()
 {
    if (!ewsb_solver) {
-      throw SetupError("@ModelName@_mass_eigenstates::solve_ewsb: "
+      throw SetupError(STRINGIFY(CLASSNAME) "::solve_ewsb: "
                        "no EWSB solver set");
    }
 
@@ -595,6 +605,51 @@ void CLASSNAME::run_to(double scale, double eps)
    @ModelName@_soft_parameters::run_to(scale, eps);
 }
 
+void CLASSNAME::calculate_tree_level_mass_spectrum()
+{
+   calculate_DRbar_masses();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum()
+{
+   calculate_pole_masses();
+}
+
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_spectrum();
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   return solve_ewsb_tree_level();
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+   return get_DRbar_masses();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   return get_DRbar_masses_and_mixings();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses(m);
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses_and_mixings(m);
+}
+
 @higgsMassGetters@
 
 @lspFunctions@
@@ -622,7 +677,7 @@ void CLASSNAME::run_to(double scale, double eps)
 
 @dependenceFunctions@
 
-std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates& model)
+std::ostream& operator<<(std::ostream& ostr, const CLASSNAME& model)
 {
    model.print(ostr);
    return ostr;

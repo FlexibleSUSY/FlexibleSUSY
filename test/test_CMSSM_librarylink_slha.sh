@@ -31,6 +31,7 @@ settings = {
     betaZeroThreshold -> 1.*10^-11,
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
+    thresholdCorrections -> 123111321,
     parameterOutputScale -> 1000
 };
 
@@ -79,7 +80,7 @@ Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF
 
-"$MATH" -run "<< \"$inputFile1\"; Quit[]"
+printf "%s" "<< \"$inputFile1\"; Quit[]" | "$MATH"
 
 "${MODELDIR}/CMSSM/run_CMSSM.x" \
     --slha-input-file="$inputFile2" \
@@ -104,5 +105,7 @@ if [ $errors = 0 ] ; then
 else
     echo "Test result: FAIL"
 fi
+
+rm -f "$inputFile1" "$outputFile1" "$outputFile2"
 
 exit $errors

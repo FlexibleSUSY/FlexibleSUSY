@@ -20,6 +20,7 @@
 
 #include "@ModelName@_two_scale_susy_scale_constraint.hpp"
 #include "@ModelName@_two_scale_model.hpp"
+#include "config.h"
 #include "wrappers.hpp"
 #include "logger.hpp"
 #include "error.hpp"

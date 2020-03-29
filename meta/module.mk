@@ -68,7 +68,14 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
+		$(DIR)/Decays.m \
+		$(DIR)/NPointFunctions.m \
+		$(DIR)/NPointFunctions/internal.m \
+		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/EDM.m \
+		$(DIR)/FFVFormFactors.m \
+		$(DIR)/BrLToLGamma.m \
+		$(DIR)/BtoSGamma.m \
 		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
@@ -76,9 +83,11 @@ META_SRC     := \
 		$(DIR)/FlexibleTower.m \
 		$(DIR)/Format.m \
 		$(DIR)/FSMathLink.m \
+		$(DIR)/FunctionModifiers.m \
 		$(DIR)/Himalaya.m \
 		$(DIR)/LatticeUtils.m \
 		$(DIR)/LoopFunctions.m \
+		$(DIR)/LoopFunctionsZeroMomentum.m \
 		$(DIR)/LoopMasses.m \
 		$(DIR)/Observables.m \
 		$(DIR)/Parameters.m \

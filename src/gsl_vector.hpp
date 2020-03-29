@@ -37,7 +37,7 @@ public:
    GSL_vector(std::initializer_list<double>);
    ~GSL_vector() noexcept;
 
-   const GSL_vector& operator=(const GSL_vector&);
+   GSL_vector& operator=(const GSL_vector&);
    GSL_vector& operator=(GSL_vector&&) noexcept;
    double& operator[](std::size_t);      ///< element read/write access
    double operator[](std::size_t) const; ///< element read access

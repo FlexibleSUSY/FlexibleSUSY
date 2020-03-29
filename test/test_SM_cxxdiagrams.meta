@@ -1,0 +1,221 @@
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+Needs["Utils`"];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_SM_cxxdiagrams.meta started...\n"];
+Utils`FSFancyLine[":"];
+
+Needs["FlexibleSUSY`"];
+
+workingDirectory = Directory[];
+SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
+SARAH`SARAH[InputDirectories] = {
+    FileNameJoin[{workingDirectory, "sarah"}],
+    ToFileName[{$sarahDir, "Models"}]
+};
+
+Start["SM"];
+
+modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
+
+FlexibleSUSY`LoadModelFile[modelFile];
+{susyBetaFunctions, susyBreakingBetaFunctions} = FlexibleSUSY`ReadSARAHBetaFunctions[];
+FlexibleSUSY`Private`PrepareUnrotatedParticles[FSEigenstates];
+allParameters = FlexibleSUSY`SetupModelParameters[susyBetaFunctions, susyBreakingBetaFunctions];
+
+{massMatrices, Lat$massMatrices} = FlexibleSUSY`SetupMassMatrices[allParameters];
+FlexibleSUSY`SetupOutputParameters[massMatrices];
+
+templateCode = StringJoin @ Riffle[Utils`ReadLinesInFile[
+		FileNameJoin[{workingDirectory, "test", "test_SM_cxxdiagrams.cpp.in"}]],
+	"\n"];
+
+VectorToGhost[field_ ? TreeMasses`IsVector] :=
+	Symbol[StringReplace[SymbolName[field], "V" ~~ name_ :> "g" <> name]];
+
+CXXVertexFromFSVertexCalls[ScalarVertex, {fsCall_String}] :=
+	"return ScalarVertex{ " <> fsCall <> "( model_and_indices ) };"
+
+CXXVertexFromFSVertexCalls[ChiralVertex,
+		{fsCallPL_String, fsCallPR_String}] :=
+	"return ChiralVertex{ " <> fsCallPL <> "( model_and_indices ), " <>
+		fsCallPR <> "( model_and_indices ) };"
+
+(* FIXME: The momentum index is hardcoded *)
+CXXVertexFromFSVertexCalls[MomentumVertex, {fsCall_String}] :=
+	"return MomentumVertex{ " <> fsCall <> "( model_and_indices ), 1 };"
+
+(* FIXME: The permutation is hardcoded *)
+CXXVertexFromFSVertexCalls[TripleVectorVertex, {fsCall_String}] :=
+	"return TripleVectorVertex{ " <> fsCall <> "( model_and_indices ), "<>
+		"TripleVectorVertex::odd_permutation{} };"
+
+CXXVertexFromFSVertexCalls[QuadrupleVectorVertex,
+		{fsCall1_String, fsCall2_String, fsCall3_String}] :=
+	"return QuadrupleVectorVertex{ " <> fsCall1 <> "( model_and_indices ), " <>
+		fsCall2 <> "( model_and_indices ), " <>
+		fsCall3 <> "( model_and_indices ) };"
+
+CXXVertexFromFSVertexCalls[InverseMetricVertex, {fsCall_String}] :=
+	"return InverseMetricVertex{ " <> fsCall <> "( model_and_indices ) };"
+
+(* Zero vertices are handled differently by CXXDiagrams. Hence we test
+ * them separately.
+ *)
+zeroVertices = {
+	(* The SM has no zero SSS vertices *)
+	{CXXDiagrams`LorentzConjugate[VectorToGhost[TreeMasses`GetGluon[]]],
+		VectorToGhost[TreeMasses`GetGluon[]], TreeMasses`GetHiggsBoson[]},
+	{CXXDiagrams`LorentzConjugate[VectorToGhost[TreeMasses`GetGluon[]]],
+		VectorToGhost[TreeMasses`GetGluon[]], TreeMasses`GetZBoson[]},
+	{TreeMasses`GetZBoson[], TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]},
+	{TreeMasses`GetZBoson[], TreeMasses`GetZBoson[],
+		TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]},
+	(* The SM has no zero SSSS vertices *)
+	{CXXDiagrams`LorentzConjugate[CXXDiagrams`AtomHead[TreeMasses`GetSMNeutrino1[]]],
+		CXXDiagrams`AtomHead[TreeMasses`GetSMNeutrino1[]],
+		TreeMasses`GetHiggsBoson[]},
+	{CXXDiagrams`LorentzConjugate[CXXDiagrams`AtomHead[TreeMasses`GetSMNeutrino1[]]],
+		CXXDiagrams`AtomHead[TreeMasses`GetSMNeutrino1[]],
+		TreeMasses`GetGluon[]},
+	{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[], TreeMasses`GetGluon[]},
+	{TreeMasses`GetHiggsBoson[], TreeMasses`GetGluon[], TreeMasses`GetGluon[]},
+	{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[],
+		TreeMasses`GetGluon[], TreeMasses`GetGluon[]}
+};
+
+nonzeroVertexPairs = {
+	{
+		{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[]},
+		{"Cphhhhhh"}
+	},
+	{
+		{CXXDiagrams`LorentzConjugate[VectorToGhost[TreeMasses`GetWBoson[]]],
+			VectorToGhost[TreeMasses`GetWBoson[]], TreeMasses`GetHiggsBoson[]},
+		{"CpbargWpgWphh"}
+	},
+	{
+		{CXXDiagrams`LorentzConjugate[VectorToGhost[TreeMasses`GetWBoson[]]],
+			VectorToGhost[TreeMasses`GetWBoson[]], TreeMasses`GetZBoson[]},
+		{"CpbargWpgWpVZ"}
+	},
+	{
+		{TreeMasses`GetWBoson[], CXXDiagrams`LorentzConjugate[TreeMasses`GetWBoson[]],
+			TreeMasses`GetZBoson[]},
+		{"CpconjVWpVWpVZ"}
+	},
+	{
+		{TreeMasses`GetWBoson[], CXXDiagrams`LorentzConjugate[TreeMasses`GetWBoson[]],
+			TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]},
+		{"CpconjVWpVWpVZVZ1", "CpconjVWpVWpVZVZ2", "CpconjVWpVWpVZVZ3"}
+	},
+	{
+		{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[],
+			TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[]},
+		{"Cphhhhhhhh"}
+	},
+	{
+		{CXXDiagrams`LorentzConjugate[CXXDiagrams`AtomHead[TreeMasses`GetSMTauLepton[]]],
+			CXXDiagrams`AtomHead[TreeMasses`GetSMTauLepton[]],
+			TreeMasses`GetHiggsBoson[]},
+		{"CpbarFeFehhPL", "CpbarFeFehhPR"}
+	},
+	{
+		{CXXDiagrams`LorentzConjugate[CXXDiagrams`AtomHead[TreeMasses`GetSMTauLepton[]]],
+			CXXDiagrams`AtomHead[TreeMasses`GetSMTauLepton[]],
+			TreeMasses`GetPhoton[]},
+		{"CpbarFeFeVPPL", "CpbarFeFeVPPR"}
+	},
+	(* The SM has no nonzero SSV vertices *)
+	{
+		{TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]},
+		{"CphhVZVZ"}
+	},
+	{
+		{TreeMasses`GetHiggsBoson[], TreeMasses`GetHiggsBoson[],
+			TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]},
+		{"CphhhhVZVZ"}
+	}
+};
+
+cxxZeroVertices = "boost::mpl::vector<\n" <> TextFormatting`IndentText[
+	StringJoin[Riffle[CXXDiagrams`CXXNameOfVertex /@ zeroVertices, ",\n"]]] <>
+	"\n>";
+
+cxxVertexWrappers = StringJoin[Riffle[
+	Module[{fields = #[[1]], fsVertexCalls = #[[2]], cxxFieldSequence},
+		cxxFieldSequence = StringJoin[Riffle[
+			CXXDiagrams`CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
+			", "]];
+
+		"template<> template<class Sequence>\n" <>
+		"FSVertexWrapper<" <> cxxFieldSequence <> ">" <>
+			"::vertex_type\n" <>
+		"FSVertexWrapper<" <> cxxFieldSequence <> ">" <>
+			"::evaluate_impl( Sequence &&model_and_indices )\n" <>
+		"{\n" <> TextFormatting`IndentText[
+			StringJoin[Riffle[
+				"auto " <> # <> " = boost::fusion::make_fused(\n" <>
+					TextFormatting`IndentText["&model_type::" <> # <> " );"] & /@
+				fsVertexCalls, "\n"]] <> "\n\n" <>
+			CXXVertexFromFSVertexCalls[
+				CXXDiagrams`VertexTypeForFields[fields], fsVertexCalls]
+		] <> "\n}"
+	] & /@ nonzeroVertexPairs, "\n\n"]];
+
+cxxNonzeroVertexPairs = "boost::mpl::vector<\n" <> TextFormatting`IndentText[
+	StringJoin[Riffle[
+	"boost::mpl::pair<" <> #[[1]] <> ", " <> #[[2]] <> ">" & /@
+		Transpose[{
+			CXXDiagrams`CXXNameOfVertex /@ nonzeroVertexPairs[[All, 1]],
+			StringReplace[#, "Vertex" -> "FSVertexWrapper"] & /@
+				(CXXDiagrams`CXXNameOfVertex /@ nonzeroVertexPairs[[All, 1]])
+		}],
+	",\n"]]] <> "\n>";
+
+cxxDiagramsDir = FileNameJoin[{SARAH`$sarahCurrentOutputMainDir,
+	ToString[FlexibleSUSY`FSEigenstates], "CXXDiagrams"}];
+createdVerticesFile = FileNameJoin[{cxxDiagramsDir, "CreatedVertices.m"}];
+
+createdVertices = If[FileExistsQ[createdVerticesFile] === True,
+	Get[createdVerticesFile], {}];
+
+remainingVertices = Complement[
+	Join[zeroVertices, nonzeroVertexPairs[[All, 1]]], createdVertices];
+
+verticesCode = CXXDiagrams`CreateVertices[remainingVertices,
+	CXXdiagrams`MaximumVerticesLimit -> Length[remainingVertices]][[1]];
+
+code = StringReplace[templateCode, {
+	"@VertexWrappers@" -> cxxVertexWrappers,
+	"@ZeroVertices@" -> cxxZeroVertices,
+	"@NonzeroVertexPairs@" -> cxxNonzeroVertexPairs,
+	"@CXXDiagrams_VertexPrototypes@" -> verticesCode[[1]],
+	"@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
+}];
+
+fileHandle = OpenWrite[FileNameJoin[{workingDirectory, "test", "test_SM_cxxdiagrams.cpp"}]];
+WriteString[fileHandle, code];
+Close[fileHandle];
+Utils`FSFancyLine[":"];
+WriteString[OutputStream["stdout",1],"::test:: test_SM_cxxdiagrams.meta done\n"];
+Utils`FSFancyLine[":"];

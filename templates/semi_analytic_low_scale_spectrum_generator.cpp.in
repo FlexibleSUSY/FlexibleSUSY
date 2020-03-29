@@ -101,6 +101,9 @@ void @ModelName@_spectrum_generator<Semi_analytic>::run_except(const softsusy::Q
    low_scale_constraint .initialize();
    soft_constraint      .initialize();
 
+   low_scale_constraint.set_SM_like_Higgs_index(
+      settings.get(Spectrum_generator_settings::eft_higgs_index));
+
    @ModelName@_susy_convergence_tester<Semi_analytic> inner_ct(
       &model, settings.get(Spectrum_generator_settings::precision));
    @ModelName@_convergence_tester<Semi_analytic> outer_ct(

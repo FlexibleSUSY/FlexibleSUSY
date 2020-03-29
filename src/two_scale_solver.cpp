@@ -20,7 +20,6 @@
 
 #include "convergence_tester.hpp"
 #include "error.hpp"
-#include "functors.hpp"
 #include "initial_guesser.hpp"
 #include "logger.hpp"
 #include "model.hpp"
@@ -28,12 +27,7 @@
 #include "single_scale_matching.hpp"
 #include "two_scale_running_precision.hpp"
 
-#include <cmath>
 #include <algorithm>
-#include <iterator>
-#include <limits>
-#include <cassert>
-#include <sstream>
 
 /**
  * @file two_scale_solver.cpp

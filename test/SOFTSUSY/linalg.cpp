@@ -722,7 +722,7 @@ void diagonaliseSvd(DoubleMatrix & a, DoubleVector & w, DoubleMatrix & v) {
   if (a.testNan()) {
     ostringstream ii;
     ii << "Nans present in linalg.cpp:diagonaliseSvd: diagonalising\n" 
-       << a << endl;
+       << a << std::endl;
     throw flexiblesusy::DiagonalizationError(ii.str());
   }
   

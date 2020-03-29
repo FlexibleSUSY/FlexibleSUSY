@@ -936,9 +936,9 @@ public:
   int nlsp(double & mass, int & posi, int & posj) const;
   
   /// Prints a list of important sparticle/Higgs masses to standard output
-  string printShort() const;
+  std::string printShort() const;
   /// Prints a list of all sparticle/Higgs masses to standard output
-  string printLong();
+  std::string printLong();
 
   /// Prints whols object to standard output
   virtual void printObj() { cout << *this; };
@@ -1034,7 +1034,7 @@ public:
   void isajetInterface764(const char fname[80]) const;
   /// prints a file into fname which acts as an input to isassrun: fstream
   /// should be opened before calling
-  void ssrunInterface764Inside(const char fname [80], fstream & ) const;
+  void ssrunInterface764Inside(const char fname [80], std::fstream & ) const;
   /// prints a file into fname which acts as an input to isajet
   /// First name input is the name of an OUTPUT file from ssrun, the second
   /// name is the name of the interface file for INPUT to ssrun
@@ -1056,12 +1056,12 @@ public:
   /// whereas mtau is the pole mass used (eg 1.777). mgut is the GUT scale
   /// that has been determined, and altEwsb is true if you specified mu and mA
   /// as input parameters (not tan beta and mH1, mH2).
-  virtual void lesHouchesAccordOutput(ostream & out, const char model[], 
+  virtual void lesHouchesAccordOutput(std::ostream & out, const char model[], 
 				      const DoubleVector & pars, 
 				      int sgnMu, double tanb, double qMax, 
 				      int numPoints, 
 				      bool ewsbBCscale);
-  void slha1(ostream & out, const char model[], const DoubleVector & pars, 
+  void slha1(std::ostream & out, const char model[], const DoubleVector & pars, 
 	     int sgnMu, double tanb, double qMax, int numPoints, 
 	     bool ewsbBCscale);
   /// Normally, this is just a dummy function that is un-used. But sometimes,
@@ -1070,48 +1070,48 @@ public:
   virtual void setEwsbConditions(const DoubleVector & inputs);
   /// This does the job of the above method, but performs the header and
   /// CHANGES TO 8 SIG FIGS
-  void headerSLHA(ostream & out);
+  void headerSLHA(std::ostream & out);
   /// This does the SPINFO block of SLHA
-  void spinfoSLHA(ostream & out);
+  void spinfoSLHA(std::ostream & out);
   /// This does the MODSEL block of SLHA
-  void modselSLHA(ostream & out, const char model[]);
+  void modselSLHA(std::ostream & out, const char model[]);
   /// SMINPUTS block of SLHA
-  void sminputsSLHA(ostream & out);
+  void sminputsSLHA(std::ostream & out);
   /// MINPAR block of SLHA
-  void minparSLHA(ostream & out, const char model [], 
+  void minparSLHA(std::ostream & out, const char model [], 
 		  const DoubleVector & pars, double tanb, int sgnMu, 
 		  bool ewsbBCscale);
   /// EXTPAR block of SLHA
-  virtual void extparSLHA(ostream & out, const DoubleVector & pars, 
+  virtual void extparSLHA(std::ostream & out, const DoubleVector & pars, 
 			  bool ewsbBCscale);
   /// This does the job of the above method, but outputs the Mass block
-  void massSLHA(ostream & out);
+  void massSLHA(std::ostream & out);
   /// higgs part of mass block of SLHA
-  virtual void higgsMSLHA(ostream & out);
+  virtual void higgsMSLHA(std::ostream & out);
   /// neutralino and charigno part of mass block of SLHA
-  virtual void neutralinoCharginoMSLHA(ostream & out);
+  virtual void neutralinoCharginoMSLHA(std::ostream & out);
   /// sfermions part of mass block of SLHA
-  virtual void sfermionsSLHA(ostream & out);
+  virtual void sfermionsSLHA(std::ostream & out);
   /// hmix block output of SLHA
-  void sfermionmixSLHA(ostream & out);
+  void sfermionmixSLHA(std::ostream & out);
   /// nmix block output of SLHA
-  virtual void neutralinoMixingSLHA(ostream & out);
+  virtual void neutralinoMixingSLHA(std::ostream & out);
   /// This does the job of the above method, but outputs the UMIX/VMIX blocks
-  void inomixingSLHA(ostream & out);
+  void inomixingSLHA(std::ostream & out);
   /// SOFTSUSY comments in SLHA
-  void softsusySLHA(ostream & out);
+  void softsusySLHA(std::ostream & out);
   /// sfermionic part of mixing blocks
-  void alphaSLHA(ostream & out);
+  void alphaSLHA(std::ostream & out);
   /// higgs part of mixing blocks
-  virtual void hmixSLHA(ostream & out);
+  virtual void hmixSLHA(std::ostream & out);
   /// sfermionic part of mixing blocks
-  void gaugeSLHA(ostream & out);
+  void gaugeSLHA(std::ostream & out);
   /// sfermionic part of mixing blocks
-  virtual void yukawasSLHA(ostream & out);
+  virtual void yukawasSLHA(std::ostream & out);
   /// MSOFT block of SLHA
-  virtual void msoftSLHA(ostream & out);
+  virtual void msoftSLHA(std::ostream & out);
   /// outputs DRbar parameters at scale Q (default is at MSUSY)
-  virtual void drbarSLHA(ostream & out, int numPoints, double qMax, int n);
+  virtual void drbarSLHA(std::ostream & out, int numPoints, double qMax, int n);
 
   /// Sets the minimum of potential to be the difference between the UFB-3
   /// direction minimum and the standard EW breaking minimum. mgut is

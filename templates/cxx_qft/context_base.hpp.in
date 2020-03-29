@@ -1,0 +1,83 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+/**
+ * @file cxx_qft/@ModelName@_context_base.hpp
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_CXXQFT_CONTEXT_BASE_H
+#define @ModelName@_CXXQFT_CONTEXT_BASE_H
+
+#include "@ModelName@_fields.hpp"
+#include "@ModelName@_mass_eigenstates_interface.hpp"
+
+namespace flexiblesusy {
+namespace @ModelName@_cxx_diagrams {
+
+   struct context_base {
+      @ModelName@_mass_eigenstates_interface const& model; ///< The model object.
+
+      template <class Field>
+      double mass(const typename field_indices<Field>::type& indices) const
+      {
+         using CleanField =
+            typename fields::remove_lorentz_conjugation<Field>::type;
+         return mass_impl<CleanField>(indices);
+      }
+      template<class Field>
+      double physical_mass(const typename field_indices<Field>::type& indices) const
+      {
+         using CleanField =
+            typename fields::remove_lorentz_conjugation<Field>::type;
+         return physical_mass_impl<CleanField>(indices);
+      }
+
+      context_base(@ModelName@_mass_eigenstates_interface const& m) : model(m) {}
+      context_base(@ModelName@_mass_eigenstates_interface const* const m) : model(*m) {}
+
+      context_base(const context_base&) = default;
+      context_base(context_base&&) = default;
+
+      context_base& operator=(const context_base&) = default;
+      context_base& operator=(context_base&&) = default;
+
+      virtual ~context_base(void) = default;
+
+   private:
+      template <class Field>
+      double
+      mass_impl(const typename field_indices<Field>::type& indices) const;
+      template<class Field>
+      double physical_mass_impl(const typename field_indices<Field>::type& indices) const;
+   };
+
+@CXXDiagrams_MassFunctions@
+
+@CXXDiagrams_PhysicalMassFunctions@
+
+} // namespace @ModelName@_cxx_diagrams
+} // namespace flexiblesusy
+
+#include "@ModelName@_vertices.hpp"
+
+#endif

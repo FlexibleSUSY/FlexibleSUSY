@@ -23,7 +23,7 @@
 #include <complex>
 #include <limits>
 #include <numeric>
-#include <iostream>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -31,9 +31,9 @@
 #include <Eigen/Core>
 #include <boost/lexical_cast.hpp>
 
-#include "config.h"
 #include "eigen_tensor.hpp"
 #include "error.hpp"
+#include "logger.hpp"
 #include "if.hpp"
 #include "sum.hpp"
 #include "which.hpp"
@@ -41,6 +41,7 @@
 namespace flexiblesusy {
 
 static constexpr double Pi = M_PI;
+static constexpr double oneOver16Pi = 1. / (16. * Pi);
 static constexpr double oneOver16PiSqr = 1./(16. * Pi * Pi);
 static constexpr double oneLoop = oneOver16PiSqr;
 static constexpr double twoLoop = oneOver16PiSqr * oneOver16PiSqr;
@@ -268,74 +269,74 @@ void Hermitianize(Eigen::MatrixBase<Derived>& m) noexcept
 ///////////////////////// logger commands /////////////////////////
 
 namespace {
-inline double PrintTo(std::ostream& ostr)
-{
-   ostr << '\n';
-   return 0.;
-}
-} // anonymous namespace
 
-///< print information to ostr
-template<typename T0, typename... Ts>
-double PrintTo(std::ostream& ostr, T0&& v, Ts&&... vs)
+template <typename Printer>
+void PrintTo(std::stringstream& ostr, Printer&& printer)
+{
+   printer(ostr.str());
+}
+
+template <typename Printer, typename T0, typename... Ts>
+void PrintTo(std::stringstream& ostr, Printer&& printer, T0&& v, Ts&&... vs)
 {
    ostr << v;
-   return PrintTo(ostr, std::forward<Ts>(vs)...);
+   PrintTo(ostr, printer, std::forward<Ts>(vs)...);
 }
 
-///< print debug information to cerr
+} // anonymous namespace
+
+/// print debug information to cerr
 template<typename... Ts>
 double PrintDEBUG(Ts&&... vs)
 {
-#ifdef ENABLE_DEBUG
-   return PrintTo(std::cerr, std::forward<Ts>(vs)...);
-#else
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { DEBUG_MSG(s); }, std::forward<Ts>(vs)...);
    return 0.;
-#endif
 }
 
-///< print error to cerr
+/// print error to cerr
 template<typename... Ts>
 double PrintERROR(Ts&&... vs)
 {
-   std::cerr << "ERROR: ";
-   return PrintTo(std::cerr, std::forward<Ts>(vs)...);
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { ERROR(s); }, std::forward<Ts>(vs)...);
+   return 0.;
 }
 
-///< print error to cerr and stop program
+/// print error to cerr and stop program
 template<typename... Ts>
 double PrintFATAL(Ts&&... vs)
 {
-   std::cerr << "FATAL: ";
-   PrintTo(std::cerr, std::forward<Ts>(vs)...);
-   throw FatalError();
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { FATAL(s); }, std::forward<Ts>(vs)...);
    return 0.;
 }
 
-///< print information to cerr
+/// print an information message
 template<typename... Ts>
 double PrintINFO(Ts&&... vs)
 {
-   return PrintTo(std::cerr, std::forward<Ts>(vs)...);
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { INFO(s); }, std::forward<Ts>(vs)...);
+   return 0.;
 }
 
-///< print verbose information to cerr
+/// print verbose information to cerr
 template<typename... Ts>
 double PrintVERBOSE(Ts&&... vs)
 {
-#ifdef ENABLE_VERBOSE
-   return PrintTo(std::cerr, std::forward<Ts>(vs)...);
-#else
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { VERBOSE_MSG(s); }, std::forward<Ts>(vs)...);
    return 0.;
-#endif
 }
 
-///< print warning to cerr
+/// print warning to cerr
 template<typename... Ts>
 double PrintWARNING(Ts&&... vs)
 {
-   std::cerr << "WARNING: ";
-   return PrintTo(std::cerr, std::forward<Ts>(vs)...);
+   std::stringstream ss;
+   PrintTo(ss, [] (const std::string& s) { WARNING(s); }, std::forward<Ts>(vs)...);
+   return 0.;
 }
 
 ///////////////////////// end of logger commands /////////////////////////

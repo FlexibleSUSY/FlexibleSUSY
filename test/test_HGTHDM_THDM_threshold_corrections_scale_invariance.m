@@ -110,7 +110,7 @@ betaDiff =
   Expand[(betaLambdaTHDM - betaLambdaHGTHDM + betaLambdaGaugeDiff) /. treeRules //. expandTraces];
 
 (* disable Higgsino and gaugino contributions *)
-hgthmdFlags = Join[{flagIno -> 1, flagSferm -> 0, flagMSDR -> 0}, GetTHDMThresholds1LFlags[]];
+hgthmdFlags = Join[{flagIno -> 1, flagSferm -> 0, flagMSDRg2 -> 0, flagMSDRlam -> 0}, GetTHDMThresholds1LFlags[]];
 
 (* convert to SARAH convention *)
 lamSARAH = GetTHDMThresholds1L[flags -> hgthmdFlags];

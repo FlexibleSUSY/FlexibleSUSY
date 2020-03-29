@@ -52,6 +52,18 @@ BOOST_AUTO_TEST_CASE(test_div_safe)
    BOOST_CHECK_EQUAL(result(2), 3./2.);
 }
 
+BOOST_AUTO_TEST_CASE(test_div_safe_dynamic)
+{
+   Eigen::ArrayXd v1(3,1), v2(3,1), result(3,1);
+   v1 << 1, 2, 3;
+   v2 << 0, 1, 2;
+   result = div_safe(v1, v2);
+
+   BOOST_CHECK_EQUAL(result(0), 0.);
+   BOOST_CHECK_EQUAL(result(1), 2.);
+   BOOST_CHECK_EQUAL(result(2), 3./2.);
+}
+
 BOOST_AUTO_TEST_CASE(test_reorder_vector)
 {
    Eigen::Array<double,3,1> vec1, vec2;

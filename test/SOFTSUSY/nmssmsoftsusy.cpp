@@ -10,6 +10,9 @@
 
 #ifdef NMSSMSOFTSUSY_H
 
+using std::cout;
+using std::endl;
+
 namespace softsusy {
 
 extern double sw2, gnuL, guL, gdL, geL, guR, gdR, geR, yuL, yuR, ydL,
@@ -100,7 +103,7 @@ void NmssmSoftsusy::printall() const {
   cout << "mSsq = " << displayMsSquared() << '\n';
   cout << "mSpsq = " << displayMspSquared() << '\n';
   cout << "xiS = " << displayXiS() << '\n';
-  cout << flush;
+  cout << std::flush;
 }
 
 
@@ -173,8 +176,8 @@ void NmssmSoftsusy::doTadpoles(double mt, double sinthDRbar) {
         	&costau, &scalesq, &amu, &tanb, &vev2, &s1tau, &s2tau);
       
       //rescale T1 to get TS
-      double sss = s1s * vev * cos(atan(tanb)) / s;
-      double ssb = s1b * vev * sin(atan(tanb)) / s;
+      double sss = s1s * sqr(vev * cos(atan(tanb)) / s);
+      double ssb = s1b * sqr(vev * sin(atan(tanb)) / s);
 
       if (!testNan(s1s * s1t * s1b * s1tau * s2s * s2t * s2b * s2tau 
                    * sss * ssb)) {
@@ -871,8 +874,8 @@ void NmssmSoftsusy::calcDrBarGauginos(double beta, double mw, double mz, double 
   treeNeutralinos(mNeut, beta, mz, mw, sinth);
   if (mNeut.diagonaliseSym(eg.mixNeut, eg.mneut) > TOLERANCE *
        1.0e-3) {
-      ostringstream ii;
-      ii << "accuracy bad in neutralino diagonalisation"<< flush;
+      std::ostringstream ii;
+      ii << "accuracy bad in neutralino diagonalisation"<< std::flush;
       throw ii.str();
    }
 
@@ -1052,8 +1055,8 @@ void NmssmSoftsusy::calcDrBarHiggs(double beta, double /* mz2 */, double /* mw2 
   DoubleMatrix mixh(3,3);
   if (mS.diagonaliseSym(mixh, mhsq) > TOLERANCE *
       1.0e-3) { 
-     ostringstream ii;
-    ii << "accuracy bad in CP-even Higgs diagonalisation"<< flush;
+     std::ostringstream ii;
+    ii << "accuracy bad in CP-even Higgs diagonalisation"<< std::flush;
     throw ii.str();
   }
 
@@ -3105,7 +3108,7 @@ void NmssmSoftsusy::addNeutralinoLoop(double p, DoubleMatrix & mass) {
 int NmssmSoftsusy::rewsbMu(int sgnMu, double & mu) const {
   int flag = 0;
    if (abs(sgnMu) != 1) {
-    ostringstream ii;     
+    std::ostringstream ii;     
     ii << "Error: sign mu = " << sgnMu << "\n";
     throw ii.str();
   }
@@ -3139,7 +3142,7 @@ int NmssmSoftsusy::rewsbMu(int sgnMu, double & mu) const {
 int NmssmSoftsusy::rewsbSvev(int sgnMu, double & svev) const {
   int flag = 0;
    if (abs(sgnMu) != 1) {
-    ostringstream ii;     
+    std::ostringstream ii;     
     ii << "Error: sign mu = " << sgnMu << "\n";
     throw ii.str();
   }
@@ -3469,7 +3472,7 @@ void NmssmSoftsusy::iterateMu(double & muold, int sgnMu,
     numTries = 0;
     throw a;
   }
-  catch(const string &a) {
+  catch(const std::string &a) {
     numTries = 0;
     throw a;
   }
@@ -3563,7 +3566,7 @@ void NmssmSoftsusy::iterateSvev(double & sold, int sgnMu,
     numTries = 0;
     throw a;
   }
-  catch(const string &a) {
+  catch(const std::string &a) {
     numTries = 0;
     throw a;
   }
@@ -4023,8 +4026,8 @@ bool NmssmSoftsusy::higgs(int accuracy, double piwwtMS, double /* pizztMS */,
   
   if (mhAtmH1.diagonaliseSym(mixHiggsLoops, temp) > TOLERANCE *
       1.0e-3) { 
-    ostringstream ii;
-    ii << "accuracy bad in CP-even Higgs diagonalisation"<< flush;
+    std::ostringstream ii;
+    ii << "accuracy bad in CP-even Higgs diagonalisation"<< std::flush;
     throw ii.str(); 
 	}
 
@@ -4048,8 +4051,8 @@ bool NmssmSoftsusy::higgs(int accuracy, double piwwtMS, double /* pizztMS */,
  
   if (mhAtmH2.diagonaliseSym(mixHiggsLoops, temp) > TOLERANCE *
       1.0e-3) {
-    ostringstream ii;
-    ii << "accuracy bad in CP-even Higgs diagonalisation"<< flush;
+    std::ostringstream ii;
+    ii << "accuracy bad in CP-even Higgs diagonalisation"<< std::flush;
     throw ii.str(); 
 	}
 
@@ -4073,8 +4076,8 @@ bool NmssmSoftsusy::higgs(int accuracy, double piwwtMS, double /* pizztMS */,
   
   if (mhAtmH3.diagonaliseSym(mixHiggsLoops, temp) > TOLERANCE *
       1.0e-3) { 
-    ostringstream ii;
-    ii << "accuracy bad in CP-even Higgs diagonalisation"<< flush;
+    std::ostringstream ii;
+    ii << "accuracy bad in CP-even Higgs diagonalisation"<< std::flush;
     throw ii.str(); 
 	}
   
@@ -4461,8 +4464,8 @@ void NmssmSoftsusy::neutralinos(int accuracy, double /* piwwtMS */, double /* pi
       mNeut3.diagonaliseSym(dummyMix, mneut3) > acceptableTol ||
        mNeut4.diagonaliseSym(dummyMix, mneut4) > acceptableTol || 
     mNeut5.diagonaliseSym(dummyMix, mneut5) > acceptableTol) { 
-    ostringstream ii;
-    ii << "accuracy bad in neutralino diagonalisation"<< flush;
+    std::ostringstream ii;
+    ii << "accuracy bad in neutralino diagonalisation"<< std::flush;
     ii << "diagonalising " << phys.mneut << " with "   
        << phys.mixNeut;
     throw ii.str(); 
@@ -7877,7 +7880,7 @@ double NmssmSoftsusy::calcRunningMt() {
 }
 
 double NmssmSoftsusy::calcRunMbHiggs() const {
-   double mbMZ = displayDataSet().displayMass(mBottom);
+   double mbMZ = displayDataSet().displayMass(legacy::mBottom);
   double p = mbMZ;
   double q = displayMu();
   double hb = displayDrBarPars().hb;
@@ -7927,7 +7930,7 @@ double NmssmSoftsusy::calcRunMbHiggs() const {
 }
 
 double NmssmSoftsusy::calcRunMbNeutralinos() const {
-   double mbMZ = displayDataSet().displayMass(mBottom);
+   double mbMZ = displayDataSet().displayMass(legacy::mBottom);
   double p = mbMZ;
   double q = displayMu();
   double thetab  = displayDrBarPars().thetab;
@@ -7991,13 +7994,13 @@ double NmssmSoftsusy::calcRunMbNeutralinos() const {
 double NmssmSoftsusy::calcRunningMb() const {
 
   if (displayMu() != displayMz()) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "Softsusy<SoftPars>::calcRunningMb called with mu=" <<
       displayMu() << endl; 
     throw ii.str();
   }
   
-  double mbMZ = displayDataSet().displayMass(mBottom);
+  double mbMZ = displayDataSet().displayMass(legacy::mBottom);
   /// First convert mbMZ into DRbar value from hep-ph/9703293,0207126,9701308
   /// (SM gauge boson contributions)
   mbMZ = mbMZ * Softsusy<SoftParsNmssm>::calcRunMbDrBarConv(); 
@@ -8129,7 +8132,7 @@ double NmssmSoftsusy::calcRunMtauNeutralinos(double mTauSMMZ) const {
 
 double NmssmSoftsusy::calcRunningMtau() const {
   /// MSbar value
-  double mTauSMMZ = displayDataSet().displayMass(mTau);
+  double mTauSMMZ = displayDataSet().displayMass(legacy::mTau);
   /// conversion to DRbar
   mTauSMMZ = mTauSMMZ * Softsusy<SoftParsNmssm>::calcRunMtauDrBarConv();
   /// Chargino contribution  
@@ -8363,7 +8366,7 @@ void NmssmSoftsusy::itLowsoft
 
     setMsusy(calcMs());
     if (ewsbBCscale) mxBC = displayMsusy();
-    if (PRINTOUT > 0) cout << " mgut=" << mxBC << flush;
+    if (PRINTOUT > 0) cout << " mgut=" << mxBC << std::flush;
     
     mtrun = displayDrBarPars().mt;
     if (numTries < 11) {
@@ -8383,7 +8386,7 @@ void NmssmSoftsusy::itLowsoft
     
     if (numTries !=0 && fD < tol) {///< Accuracy achieved: bail out
       numTries = 0; ///< Reset the number of iterations for the next time
-      if (PRINTOUT > 0) cout << " sT=" << fD << " " << flush; 
+      if (PRINTOUT > 0) cout << " sT=" << fD << " " << std::flush; 
       if (displayProblem().test() && PRINTOUT > 0) 
 	cout << " ***problem point***: " << displayProblem() << ".";
       
@@ -8404,7 +8407,7 @@ void NmssmSoftsusy::itLowsoft
       cout << "\n" << numTries << ". sT=" << displayFracDiff()  
 	   << " mu=" << displaySusyMu() <<  " m3sq=" << displayM3Squared() 
 	   << " MWp=" << displayMw() << " Mzp=" << sqrt(displayPredMzSq())
-	   << flush;
+	   << std::flush;
    
     if (displayProblem().noMuConvergence) {
       if (PRINTOUT) 
@@ -8430,7 +8433,7 @@ void NmssmSoftsusy::itLowsoft
     numTries = 0;
     throw a;
   }
-  catch(const string &a) {
+  catch(const std::string &a) {
     numTries = 0;
     throw a;
   }
@@ -8480,7 +8483,7 @@ void NmssmSoftsusy::lowOrg
     if (mxGuess > 0.0) 
       mxBC = mxGuess; 
     else {
-      string ii("Trying to use negative mx in NmssmSoftsusy::lowOrg.\n");
+      std::string ii("Trying to use negative mx in NmssmSoftsusy::lowOrg.\n");
       ii = ii + "Now illegal! Use positive mx for first guess of mx.\n";
       throw ii;
     }
@@ -8551,21 +8554,21 @@ void NmssmSoftsusy::lowOrg
     
   }
   catch(const char *a) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "SOFTSUSY problem: " << a << " pars=" << pars << " tanb=" << tanb 
        << " oneset=" << oneset << endl;
     flagProblemThrown(true);
     throw(ii.str());
   }
-  catch(const string & a) {
-    ostringstream ii;
+  catch(const std::string & a) {
+    std::ostringstream ii;
     ii << "SOFTSUSY problem: " << a << " pars=" << pars << " tanb=" << tanb 
 	 << " oneset=" << oneset << endl;
     flagProblemThrown(true);
     throw ii.str();
   }
   catch(...) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "SOFTSUSY problem: " << endl;
     ii << "pars=" << pars << " tanb=" << tanb
        << " oneset=" << oneset << endl;
@@ -8574,12 +8577,12 @@ void NmssmSoftsusy::lowOrg
   }
 }
 
-void NmssmSoftsusy::modselSLHA(ostream & out, const char model[]) {
+void NmssmSoftsusy::modselSLHA(std::ostream & out, const char model[]) {
   Softsusy<SoftParsNmssm>::modselSLHA(out, model);
   out << "     3    1   # NMSSM\n";
 }
 
-void NmssmSoftsusy::extparSLHA(ostream & out,
+void NmssmSoftsusy::extparSLHA(std::ostream & out,
                                const DoubleVector & pars,
                                bool ewsbBCscale) {
   Softsusy<SoftParsNmssm>::extparSLHA(out, pars, ewsbBCscale);
@@ -8595,7 +8598,7 @@ void NmssmSoftsusy::extparSLHA(ostream & out,
   }
 }
 
-void NmssmSoftsusy::higgsMSLHA(ostream & out) {
+void NmssmSoftsusy::higgsMSLHA(std::ostream & out) {
   out << "        25    "; printRow(out, displayPhys().mh0(1)); out << "   # h0(1)\n";
   out << "        35    "; printRow(out, displayPhys().mh0(2)); out << "   # h0(2)\n";
   out << "        45    "; printRow(out, displayPhys().mh0(3)); out << "   # h0(3)\n";
@@ -8604,7 +8607,7 @@ void NmssmSoftsusy::higgsMSLHA(ostream & out) {
   out << "        37    "; printRow(out, displayPhys().mHpm); out << "   # H+\n";
 }
 
-void NmssmSoftsusy::neutralinoCharginoMSLHA(ostream & out) {
+void NmssmSoftsusy::neutralinoCharginoMSLHA(std::ostream & out) {
   sPhysical s(displayPhys());
 
   Softsusy<SoftParsNmssm>::neutralinoCharginoMSLHA(out);
@@ -8612,7 +8615,7 @@ void NmssmSoftsusy::neutralinoCharginoMSLHA(ostream & out) {
   out << "   # ~neutralino(5)\n";
 }
 
-void NmssmSoftsusy::nmhmixSLHA(ostream& out) {
+void NmssmSoftsusy::nmhmixSLHA(std::ostream& out) {
   const sPhysical s(displayPhys());
   const int rank = s.mixh0.displayRows();
   assert(rank == s.mixh0.displayCols());
@@ -8627,7 +8630,7 @@ void NmssmSoftsusy::nmhmixSLHA(ostream& out) {
   }
 }
 
-void NmssmSoftsusy::nmamixSLHA(ostream& out) {
+void NmssmSoftsusy::nmamixSLHA(std::ostream& out) {
   DoubleMatrix P(3, 3);
   DegrassiSlavicMix(P);
 
@@ -8648,7 +8651,7 @@ void NmssmSoftsusy::nmamixSLHA(ostream& out) {
   }
 }
 
-void NmssmSoftsusy::neutralinoMixingSLHA(ostream& out) {
+void NmssmSoftsusy::neutralinoMixingSLHA(std::ostream& out) {
   const sPhysical s(displayPhys());
 
   out << "Block NMNmix                # neutralino mixing matrix\n";
@@ -8662,16 +8665,16 @@ void NmssmSoftsusy::neutralinoMixingSLHA(ostream& out) {
   }
 }
 
-void NmssmSoftsusy::nmssmrunSLHA(ostream& out) {
+void NmssmSoftsusy::nmssmrunSLHA(std::ostream& out) {
   const sPhysical s(displayPhys());
 
   double Alambda = 0., Akappa = 0.;
 
   try { Alambda = displaySoftAlambda(); }
-  catch (const string&) {}
+  catch (const std::string&) {}
 
   try { Akappa = displaySoftAkappa(); }
-  catch (const string&) {}
+  catch (const std::string&) {}
 
   out << "Block NMSSMRUN Q= " << displayMu()
       << "   # NMSSM specific DRbar parameters\n";
@@ -8698,13 +8701,13 @@ void NmssmSoftsusy::nmssmrunSLHA(ostream& out) {
   out << "      # mS^2(Q)\n";
 }
 
-void NmssmSoftsusy::drbarSLHA(ostream& out, int numPoints, double qMax, int n) {
+void NmssmSoftsusy::drbarSLHA(std::ostream& out, int numPoints, double qMax, int n) {
    Softsusy<SoftParsNmssm>::drbarSLHA(out, numPoints, qMax, n);
    nmssmrunSLHA(out);
 }
 
 /// SUSY Les Houches accord for interfacing to Monte-Carlos, decay programs etc.
-void NmssmSoftsusy::lesHouchesAccordOutput(ostream & out, const char model[],
+void NmssmSoftsusy::lesHouchesAccordOutput(std::ostream & out, const char model[],
 					  const DoubleVector & pars,
 					  int sgnMu, double tanb,
 					  double qMax,

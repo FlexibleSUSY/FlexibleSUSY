@@ -35,8 +35,8 @@ std::pair<SM_mass_eigenstates, standard_model::Standard_model> make_point()
 
    m2.set(m1.get());
 
-   m1.set_loops(4);
-   m2.set_loops(4);
+   m1.set_loops(5);
+   m2.set_loops(5);
 
    return std::make_pair(m1, m2);
 }
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_SM_beta_functions_literature )
 
 void compare_SM_pars(const SM_soft_parameters& m1, const standard_model::Standard_model& m2)
 {
-   const double eps = 1e-10;
+   const double eps = 1e-15;
 
    BOOST_CHECK_CLOSE_FRACTION(m1.get_g1()     , m2.get_g1()     , eps);
    BOOST_CHECK_CLOSE_FRACTION(m1.get_g2()     , m2.get_g2()     , eps);
@@ -110,4 +110,5 @@ BOOST_AUTO_TEST_CASE( test_SM_beta_functions )
    compare_SM_pars(m.first.calc_beta(2), m.second.calc_beta(2));
    compare_SM_pars(m.first.calc_beta(3), m.second.calc_beta(3));
    compare_SM_pars(m.first.calc_beta(4), m.second.calc_beta(4));
+   compare_SM_pars(m.first.calc_beta(5), m.second.calc_beta(5));
 }

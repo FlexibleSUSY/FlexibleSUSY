@@ -41,13 +41,13 @@ namespace mssm_twoloophiggs {
 namespace {
 
 template <typename T> T constexpr sqr(T a) { return a * a; }
+template <typename T> T constexpr pow3(T a) { return a * a * a; }
 template <typename T> T sqrtabs(T a) { return std::sqrt(std::abs(a)); }
 template <typename T> T logabs(T x) { return std::log(std::abs(x)); }
 
 double phi(double x, double y, double z)
 {
    using std::log;
-   using gm2calc::dilog;
 
    const double u = x/z, v = y/z;
    const double lambda = sqrtabs(sqr(1 - u - v) - 4*u*v);
@@ -65,7 +65,6 @@ double dphi_010(double t, double T, double g)
    using std::sqrt;
    using std::log;
    using std::pow;
-   using gm2calc::dilog;
 
    constexpr double Pi2 = M_PI * M_PI;
    const double g2 = sqr(g);
@@ -87,6 +86,38 @@ double dphi_010(double t, double T, double g)
       (T*(g - rabbr*g - t + T)))/(3.*pow(fabs(abbr),1.5)*g2);
 }
 
+/// First derivative of phi[g,t,T] w.r.t. T
+double dphi_001(double g, double t, double T)
+{
+   using std::sqrt;
+
+   const double Pi2 = 9.869604401089359;
+   const double T2 = sqr(T);
+   const double T3 = T2*T;
+   const double x = sqrt(sqr(1 - g/T - t/T) - 4*g*t/T2);
+   const double y = -(2*(g/T2 + t/T2)*(1 - g/T - t/T) + (8*g*t)/T3)/(2*x);
+   const double ym = -g/T + t/T;
+   const double yp = g/T - t/T;
+   const double lgT = logabs(g/T);
+   const double ltT = logabs(t/T);
+   const double lxmym = logabs(0.5*(1 - x + ym));
+   const double lxmyp = logabs(0.5*(1 - x + yp));
+   const double lxpym = logabs(0.5*(1 + x + ym));
+   const double lxpyp = logabs(0.5*(1 + x + yp));
+   const double li2xym = dilog(0.5*(1 - x + ym));
+   const double li2xyp = dilog(0.5*(1 - x + yp));
+
+   return ((t*(t - T) - g*(2*t + T) + sqr(g))*
+       (-6*li2xym - 6*li2xyp - 3*lgT*ltT + 6*lxmym*lxmyp + Pi2)
+       + 3*T*(lgT*T + ltT*T +
+              +2*lxmyp*(g - t + y*T2)/(1 - x + ym)
+              +2*lxmym*(-g + t + y*T2)/(1 - x + yp)
+              -2*lxpyp*(g - t + y*T2)/(-1 + x - ym)
+              -2*lxpym*(-g + t + y*T2)/(-1 + x - yp)
+              )*sqr(x))/
+      (3.*pow3(T)*pow3(x));
+}
+
 double calc_At(double mt2, double mst12, double mst22,
    double sxt, double cxt, double mu, double tanb)
 {
@@ -103,52 +134,56 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0(
    double /* sxt */, double /* cxt */, double scale2,
    double mu, double tanb, double vev2, double gs)
 {
-   using std::sqrt;
    using std::atan;
-   using std::log;
    using std::sin;
    using std::cos;
 
-   constexpr double Pi4 = M_PI * M_PI * M_PI * M_PI;
+   const double gs2 = sqr(gs);
    const double g = sqr(mg);
    const double q = scale2;
+   const double q2 = sqr(q);
    const double t = mt2;
    const double T1 = mst12;
    const double T2 = mst22;
+   const double g2 = sqr(g);
    const double v = sqrtabs(vev2);
    const double beta = std::atan(tanb);
    const double v2 = v * std::sin(beta);
    const double v1 = v * std::cos(beta);
+   const double ltg = logabs(t/g);
+   const double ltq = logabs(t/q);
+   const double lgq = logabs(g/q);
+   const double lT1q = logabs(T1/q);
+   const double lT2q = logabs(T2/q);
+   const double lgtq2 = logabs(g*t/q2);
+   const double del1 = g2 + sqr(t) + sqr(T1) - 2*(g*t + g*T1 + t*T1);
+   const double del2 = g2 + sqr(t) + sqr(T2) - 2*(g*t + g*T2 + t*T2);
 
-   const double t1 = (sqr(gs)*mg*mt2*mu*(T1*T2*(5*(T1 - T2) + (-T1 +
-      T2)*logabs(g/q)*logabs(t/q) + ((-g + t)*logabs(t/g) + T1*(-4 +
-      logabs((g*t)/sqr(q))))*logabs(T1/q) + ((g - t)*logabs(t/g) -
-      T2*(-4 + logabs((g*t)/sqr(q))))*logabs(T2/q)) + (sqr(g) + sqr(t
-      - T1) - 2*g*(t + T1))*T2*phi(g,t,T1) - T1*(sqr(g) + sqr(t - T2)
-      - 2*g*(t + T2))*phi(g,t,T2)))/(16.*Pi4*T1*(T1 -
-      T2)*T2*tanb*sqr(v1));
+   const double t1 =
+      (16*mg*mu*(T1*T2*(g*(-lT1q + lT2q)*ltg + lT1q*ltg*t - lT2q*ltg*t + 5*T1 +
+                        (-4 + lgtq2)*lT1q*T1 - lgq*ltq*T1 - 5*T2 + 4*lT2q*T2 -
+                        lgtq2*lT2q*T2 + lgq*ltq*T2) + del1*T2*phi(g,t,T1) -
+                 del2*T1*phi(g,t,T2)))/(T1*(T1 - T2)*T2*tanb*sqr(v1));
 
-   const double t2 = (sqr(gs)*mt2*(T1*T2*(-((T1 - T2)*(5*mg*mu + (2*g
-      + 5*(-2*t + T1 + T2))*tanb)) + 6*t*(T1 -
-      T2)*tanb*sqr(logabs(t/q)) + (4*mg*mu*T1 + 2*(g + t + 2*T1)*(T1 -
-      T2)*tanb + g*(-T1 + T2)*tanb*logabs(g/q) + mg*mu*((g -
-      t)*logabs(t/g) - T1*logabs((g*t)/sqr(q))))*logabs(T1/q) +
-      T1*(-T1 + T2)*tanb*sqr(logabs(T1/q)) + logabs(T2/q)*(-4*mg*mu*T2
-      + 2*(T1 - T2)*(g + t + 2*T2)*tanb + g*(-T1 +
-      T2)*tanb*logabs(g/q) + mg*mu*((-g + t)*logabs(t/g) +
-      T2*logabs((g*t)/sqr(q))) + T2*(-T1 + T2)*tanb*logabs(T2/q)) -
-      (T1 - T2)*logabs(t/q)*(12*t*tanb - (mg*mu +
-      2*g*tanb)*logabs(g/q) + (g + 2*t)*tanb*(logabs(T1/q) +
-      logabs(T2/q)))) - T2*(mg*mu*(sqr(g) + sqr(t - T1) - 2*g*(t +
-      T1)) - g*(g + t - T1)*(T1 - T2)*tanb)*phi(g,t,T1) +
-      T1*(mg*mu*(sqr(g) + sqr(t - T2) - 2*g*(t + T2)) + g*(g + t -
-      T2)*(T1 - T2)*tanb)*phi(g,t,T2)))/(16.*Pi4*T1*(T1 -
-      T2)*T2*tanb*sqr(v2));
+   const double t2 =
+      (16*(-(T2*(del1*mg*mu - (g2 + g*(t - T1))*(T1 - T2)*tanb)*phi(g,t,T1)) +
+           T1*(mg*mu*T2*(g*(lT1q - lT2q)*ltg + lT2q*ltg*t - 5*T1 + lgq*ltq*T1 -
+                         lT1q*(ltg*t + (-4 + lgtq2)*T1) +
+                         (5 + (-4 + lgtq2)*lT2q - lgq*ltq)*T2) +
+               T2*(-T1 + T2)*(g*(2 - 2*lgq*ltq + lT1q*(-2 + lgq + ltq) +
+                                 lT2q*(-2 + lgq + ltq)) +
+                              2*(-5 + lT1q*(-1 + ltq) + lT2q*(-1 + ltq) - 3*(-2 + ltq)*ltq)*
+                              t + (-4 + lT1q)*lT1q*T1 + (-4 + lT2q)*lT2q*T2 + 5*(T1 + T2))*
+               tanb + (del2*mg*mu + (g2 + g*(t - T2))*(T1 - T2)*tanb)*phi(g,t,T2)
+              )))/(T1*(T1 - T2)*T2*tanb*sqr(v2));
 
    Eigen::Matrix<double, 2, 1> result;
    result << t1, t2;
 
-   return -result;
+   const double k2 = 0.00004010149318236068; // 1/(4 Pi)^4
+   const double pref = k2*mt2*gs2;
+
+   return -result*pref;
 }
 
 /// limit st -> 0 and mst1 -> mst2
@@ -157,133 +192,52 @@ Eigen::Matrix<double, 2, 1> tadpole_higgs_2loop_at_as_mssm_st_0_mst1_eq_mst2(
    double /* sxt */, double /* cxt */, double scale2,
    double mu, double tanb, double vev2, double gs)
 {
-   using std::sqrt;
    using std::atan;
-   using std::log;
    using std::sin;
    using std::cos;
-   using gm2calc::dilog;
 
-   constexpr double Pi2 = M_PI * M_PI;
-   constexpr double Pi4 = M_PI * M_PI * M_PI * M_PI;
-   const double g = sqr(mg);
-   const double g2 = sqr(g);
+   const double gs2 = sqr(gs);
    const double q = scale2;
    const double q2 = sqr(q);
+   const double g = sqr(mg);
+   const double g2 = sqr(g);
    const double t = mt2;
-   const double tsq = sqr(t);
    const double T = mst12;
-   const double Tsq = sqr(mst12);
+   const double Tsqr = sqr(T);
+   const double ltg = logabs(t/g);
+   const double lTq = logabs(T/q);
+   const double ltq = logabs(t/q);
+   const double lgq = logabs(g/q);
+   const double lgtq2 = logabs(g*t/q2);
    const double v = sqrtabs(vev2);
    const double beta = std::atan(tanb);
    const double v2 = v * std::sin(beta);
    const double v1 = v * std::cos(beta);
 
-   const double t1 = (sqr(gs)*mg*mt2*mu*(T*((-g + t)*logabs(t/g) +
-      T*(1 - logabs(g/q)*logabs(t/q) - 4*logabs(T/q) +
-      logabs((g*t)/q2)*(1 + logabs(T/q)))) + T*(((g2 + g*(-2*t + T*(-2
-      + sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))) + (t - T)*(t +
-      T*(-1 + sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))))*
-      logabs(g/T) + (g2 + g*(-2*t + T*(-2 + sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq))) + (t - T)*(t + T*(-1 + sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))))* logabs(t/T) - 2*(g*(g - t - T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))* logabs((g - t +
-      T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) +
-      t*(-g + t - T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))*
-      logabs((-g + t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) + g2*logabs((g - t + T + T*sqrtabs((g2 + sqr(t
-      - T) - 2*g*(t + T))/Tsq))/(2.*T)) - g*t*logabs((g - t + T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) -
-      g*T*logabs((g - t + T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) + g*T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq)* logabs((g - t + T + T*sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq))/(2.*T)) - g*t*logabs((-g + t + T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) +
-      tsq*logabs((-g + t + T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) - t*T*logabs((-g + t + T + T*sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) + t*T*sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq)* logabs((-g + t + T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) ))/(g +
-      t - T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq)) + ((g2 -
-      2*g*t + tsq - 3*g*T - 3*t*T + 2*Tsq)* (Pi2 -
-      3*logabs(g/T)*logabs(t/T) + 6*logabs((g - t + T - T*sqrtabs((g2
-      + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T))* logabs((-g + t + T -
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) -
-      6*dilog((g - t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) - 6*dilog((-g + t + T - T*sqrtabs((g2 + sqr(t
-      - T) - 2*g*(t + T))/Tsq))/ (2.*T))))/(3.*T*sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))) - (Tsq*sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq)* (Pi2 - 3*logabs(g/T)*logabs(t/T) +
-      6*logabs((g - t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T))* logabs((-g + t + T - T*sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))/(2.*T)) - 6*dilog((g - t + T -
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) -
-      6*dilog((-g + t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T))))/3.))/ (16.*Pi4*Tsq*tanb*sqr(v1));
+   const double t1 =
+      (16*mg*mu*(-((g2 - 2*g*t + sqr(t) - Tsqr)*phi(g,t,T)) +
+                 T*(ltg*(-g + t) + (1 + lgtq2 - lgq*ltq - 4*lTq + lgtq2*lTq)*T +
+                    (g2 - 2*t*T - 2*g*(t + T) + sqr(t) + Tsqr)*
+                    dphi_001(g,t,T))))/(tanb*Tsqr*sqr(v1));
 
-   const double t2 = (sqr(gs)*mt2*(T*(-(mg*mu*T) - 2*g*T*tanb +
-      10*t*T*tanb - 10*Tsq*tanb + g*mg*mu*logabs(t/g) -
-      mg*mu*t*logabs(t/g) - mg*mu*T*logabs((g*t)/q2) -
-      12*t*T*tanb*logabs(t/q) + mg*mu*T*logabs(g/q)*logabs(t/q) +
-      2*g*T*tanb*logabs(g/q)*logabs(t/q) + 6*t*T*tanb*sqr(logabs(t/q))
-      + 4*mg*mu*T*logabs(T/q) + 4*g*T*tanb*logabs(T/q) +
-      4*t*T*tanb*logabs(T/q) + 8*Tsq*tanb*logabs(T/q) -
-      2*g*T*tanb*logabs(g/q)*logabs(T/q) -
-      mg*mu*T*logabs((g*t)/q2)*logabs(T/q) -
-      2*g*T*tanb*logabs(t/q)*logabs(T/q) -
-      4*t*T*tanb*logabs(t/q)*logabs(T/q) - 2*Tsq*tanb*sqr(logabs(T/q))
-      + (g*(g + t - T)*tanb*(Pi2 - 3*logabs(g/T)*logabs(t/T) +
-      6*logabs((g - t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T))* logabs((-g + t + T - T*sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))/(2.*T)) - 6*dilog((g - t + T -
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) -
-      6*dilog((-g + t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/ (2.*T))))/(3.*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))) + T*(-((mg*mu*((g2 + g*(-2*t + T*(-2 + sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq))) + (t - T)*(t + T*(-1 +
-      sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))))* logabs(g/T) +
-      (g2 + g*(-2*t + T*(-2 + sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))) + (t - T)*(t + T*(-1 + sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq))))* logabs(t/T) - 2*(g*(g - t - T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))* logabs((g - t +
-      T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) +
-      t*(-g + t - T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))*
-      logabs((-g + t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/ (2.*T)) + g2* logabs((g - t + T + T*sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) - g*t*logabs((g - t + T
-      + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) -
-      g*T*logabs((g - t + T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/ (2.*T)) + g*T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq)* logabs((g - t + T + T*sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq))/ (2.*T)) - g*t*logabs((-g + t + T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) +
-      tsq*logabs((-g + t + T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) - t*T*logabs((-g + t + T + T*sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) + t*T*sqrtabs((g2 +
-      sqr(t - T) - 2*g*(t + T))/Tsq)* logabs((-g + t + T +
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)))))/ (g
-      + t - T + T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))) -
-      ((mg*mu*(tsq - 3*t*T + 2*Tsq) + g2*(mg*mu - T*tanb) -
-      g*(mg*mu*(2*t + 3*T) + (t - T)*T*tanb))* (Pi2 -
-      3*logabs(g/T)*logabs(t/T) + 6*logabs((g - t + T - T*sqrtabs((g2
-      + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T))* logabs((-g + t + T -
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/(2.*T)) -
-      6*dilog((g - t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T)) - 6*dilog((-g + t + T - T*sqrtabs((g2 + sqr(t
-      - T) - 2*g*(t + T))/Tsq))/ (2.*T))))/(3.*T*sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))) + (mg*mu*Tsq*sqrtabs((g2 + sqr(t - T) -
-      2*g*(t + T))/Tsq)* (Pi2 - 3*logabs(g/T)*logabs(t/T) +
-      6*logabs((g - t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T))* logabs((-g + t + T - T*sqrtabs((g2 + sqr(t -
-      T) - 2*g*(t + T))/Tsq))/(2.*T)) - 6*dilog((g - t + T -
-      T*sqrtabs((g2 + sqr(t - T) - 2*g*(t + T))/Tsq))/ (2.*T)) -
-      6*dilog((-g + t + T - T*sqrtabs((g2 + sqr(t - T) - 2*g*(t +
-      T))/Tsq))/(2.*T))))/3.))/ (16.*Pi4*Tsq*tanb*sqr(v2));
+   const double t2 =
+      (-16*(-((g2*(mg*mu + 2*T*tanb) + mg*mu*(sqr(t) - Tsqr) -
+               2*g*(mg*mu*t - t*T*tanb + tanb*Tsqr))*phi(g,t,T)) +
+            T*(ltg*mg*mu*(-g + t) +
+               T*((1 + lgtq2 - lgq*ltq - 4*lTq + lgtq2*lTq)*mg*mu +
+                  2*tanb*(g*(1 + (-2 + ltq)*lTq + lgq*(-ltq + lTq)) +
+                          t*(-5 - 2*lTq + 2*ltq*(3 + lTq) - 3*sqr(ltq)) +
+                          T*(5 - 4*lTq + sqr(lTq)))) +
+               mg*mu*(g2 - 2*t*T - 2*g*(t + T) + sqr(t) + Tsqr)*
+               dphi_001(g,t,T))))/(tanb*Tsqr*sqr(v2));
 
    Eigen::Matrix<double, 2, 1> result;
    result << t1, t2;
 
-   return -result;
+   const double k2 = 0.00004010149318236068; // 1/(4 Pi)^4
+   const double pref = k2*mt2*gs2;
+
+   return -result*pref;
 }
 
 /// Pietro Slavich implementation
@@ -311,80 +265,49 @@ Eigen::Matrix<double, 2, 2> self_energy_higgs_2loop_at_as_mssm_with_tadpoles_st_
    double /* sxt */, double /* cxt */, double scale2, double mu,
    double tanb, double vev2, double gs, int /* scheme */)
 {
-   using std::fabs;
-   using std::sqrt;
    using std::atan;
-   using std::log;
    using std::sin;
-   using std::pow;
-   using gm2calc::dilog;
 
-   constexpr double Pi2 = M_PI * M_PI;
-   constexpr double Pi4 = M_PI * M_PI * M_PI * M_PI;
+   const double gs2 = sqr(gs);
    const double g = sqr(mg);
    const double g2 = sqr(g);
    const double q = scale2;
    const double t = mt2;
-   const double tsq = sqr(t);
    const double T = mst12;
-   const double Tsq = sqr(mst12);
-   const double del = g2 + tsq + Tsq - 2*(g*t + g*T + t*T);
-   const double rdel = sqrtabs(del);
+   const double t2 = sqr(t);
+   const double t3 = t2*t;
+   const double Tsqr = sqr(T);
+   const double Tcub = Tsqr*T;
+   const double ltg = logabs(t/g);
+   const double lTg = logabs(T/g);
+   const double lTq = logabs(T/q);
+   const double ltq = logabs(t/q);
+   const double lgq = logabs(g/q);
+   const double lT2t2 = logabs(Tsqr/t2);
+   const double del = g2 + t2 + Tsqr - 2*(g*t + g*T + t*T);
    const double sb = sin(atan(tanb));
    const double ht2 = 2./vev2*mt2/sqr(sb);
 
    Eigen::Matrix<double, 2, 2> result;
 
    result(0,0) = 0.;
-
-   result(0,1) = (sqr(gs)*ht2*mg*mt2*mu* (-1 + logabs(t/q) -
-      (T*((2*del* (-(logabs(t/g)/T) - (2*(g + t - T +
-      g*sqrtabs(del/g2))* logabs((g + t - T - g*sqrtabs(del/g2))/
-      (2.*g)))/ (g*sqrtabs(del/g2)* (t - T + g*(-1 +
-      sqrtabs(del/g2)))) + (2*logabs((g - t + T - g*sqrtabs(del/g2))/
-      (2.*g)))/(g*sqrtabs(del/g2)) - (2*((g + t - T +
-      g*sqrtabs(del/g2))* logabs((g + t - T + g*sqrtabs(del/g2))/
-      (2.*g)) + (g - t + T - g*sqrtabs(del/g2))* logabs((g - t + T +
-      g*sqrtabs(del/g2))/ (2.*g))))/ (g*sqrtabs(del/g2)* (t - T +
-      g*(-1 + sqrtabs(del/g2))))))/ g2 + (2*(g + t - T)*(Pi2 -
-      3*logabs(t/g)*logabs(T/g) + 6*logabs((g + t - T -
-      g*sqrtabs(del/g2))/(2.*g))*logabs((g - t + T -
-      g*sqrtabs(del/g2))/(2.*g)) - 6*dilog((g + t - T -
-      g*sqrtabs(del/g2))/(2.*g)) - 6*dilog((g - t + T -
-      g*sqrtabs(del/g2))/(2.*g))))/ (3.*g2)))/(2.*pow(fabs(del)/g2,1.5))))/
-      (8.*Pi4*T);
-
+   result(0,1) = (32*mg*mu*(-1 + ltq - T*dphi_010(t,T,g)))/T;
    result(1,0) = result(0,1);
+   result(1,1) =
+      (8*(8*del*mg*mu - 8*del*ltq*mg*mu + 8*del*g*tanb - 8*del*g*lgq*tanb +
+          8*del*t*tanb - 8*del*lgq*t*tanb - 8*del*T*tanb +
+          5*del*lT2t2*T*tanb + 8*del*ltg*T*tanb + 4*g2*ltg*T*tanb -
+          4*del*lTg*T*tanb + 16*g2*lTg*T*tanb + 6*del*ltq*T*tanb +
+          2*del*lTq*T*tanb + 40*g*ltg*t*T*tanb + 8*g*ltg*t2*tanb +
+          12*ltg*T*t2*tanb - 8*ltg*t3*tanb - 4*ltg*tanb*Tcub +
+          8*g*(g + t - T)*T*tanb*phi(t,T,g) + del*T*tanb*sqr(lT2t2) +
+          8*del*T*tanb*sqr(ltq) - 8*del*T*tanb*sqr(lTq) +
+          8*del*mg*mu*T*dphi_010(t,T,g)))/(del*T*tanb);
 
-   result(1,1) = (sqr(gs)*ht2*mt2*(-2 - (8*(g + t)*(-1 +
-      logabs(g/q)))/T + 8*logabs(t/g) + 6*(-1 + logabs(t/q)) +
-      8*sqr(logabs(t/q)) - 4*logabs(T/g) + (4*((g2*T - sqr(t - T)*(2*t
-      + T) + 2*g*t*(t + 5*T))*logabs(t/g) +
-      4*g2*T*logabs(T/g)))/(del*T) + 2*logabs(T/q) -
-      8*sqr(logabs(T/q)) + 5*logabs(Tsq/tsq) + sqr(logabs(Tsq/tsq)) +
-      (4*g2*(g + t - T)*(Pi2 - 6*dilog((g + t - T -
-      g*sqrtabs(del/g2))/ (2.*g)) - 6*dilog((g - t + T -
-      g*sqrtabs(del/g2))/(2.*g)) - 3*logabs(t/g)*logabs(T/g) +
-      6*logabs((-rdel + g + t - T)/(2.*g))* logabs((-rdel + g - t +
-      T)/(2.*g))))/(3.*pow(fabs(del),1.5)) + (4*g*(g + t - T)*(Pi2 -
-      6*dilog((g + t - T - g*sqrtabs(del/g2))/(2.*g)) - 6*dilog((g - t
-      + T - g*sqrtabs(del/g2))/ (2.*g)) - 3*logabs(t/g)*logabs(T/g) +
-      6*logabs((g + t - T - g*sqrtabs(del/g2))/(2.*g))* logabs((g - t
-      + T - g*sqrtabs(del/g2))/(2.*g))))/ (3.*del*sqrtabs(del/g2)) +
-      (8*mg*mu*(1/T - logabs(t/q)/T + (g*(g + t - T)* (Pi2 -
-      6*dilog((g + t - T - g*sqrtabs(del/g2))/(2.*g)) - 6*dilog((g - t
-      + T - g*sqrtabs(del/g2))/ (2.*g)) - 3*logabs(t/g)*logabs(T/g) +
-      6*logabs((-rdel + g + t - T)/(2.*g))*logabs((-rdel + g - t +
-      T)/(2.*g))))/ (3.*pow(fabs(del),1.5)) + (g*(-(logabs(t/g)/T) -
-      (2*(-(g*logabs(4.)) + (rdel + g + t - T)*logabs((-rdel + g + t -
-      T)/g) + (-rdel + g - t + T)*logabs((-rdel + g - t + T)/g)))/
-      (rdel*(rdel - g + t - T)) - 2*(((rdel + g + t - T)* logabs((g +
-      t - T + g*sqrtabs(del/g2))/ (2.*g)))/ (rdel*(t - T + g*(-1 +
-      sqrtabs(del/g2)))) - ((rdel - g - t + T)* logabs((g - t + T +
-      g*sqrtabs(del/g2))/ (2.*g)))/ (rdel*(-t + T + g*(-1 +
-      sqrtabs(del/g2)))))))/ rdel))/tanb))/(32.*Pi4);
+   const double k2 = 0.00004010149318236068; // 1/(4 Pi)^4
+   const double pref = k2*ht2*mt2*gs2;
 
-   return -result;
+   return -result*pref;
 }
 
 /// Pietro Slavich implementation

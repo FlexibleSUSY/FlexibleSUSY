@@ -19,7 +19,6 @@
 #include "nmssm_twoloophiggs.hpp"
 #include "mssm_twoloophiggs.hpp"
 #include "nmssm2loop.h"
-#include "config.h"
 #include <cmath>
 #include <utility>
 
@@ -42,10 +41,13 @@ Eigen::Matrix<double, 3, 1> tadpole_higgs_2loop_at_as_nmssm(
    const Eigen::Matrix<double, 2, 1> t_mssm = tadpole_higgs_2loop_at_as_mssm(
       mt2, mg, mst12, mst22, sxt, cxt, scale2, mu, tanb, vev2, gs);
 
+   const double vd = std::sqrt(vev2) * cosb;
+   const double vs = svev * std::sqrt(2.);
+
    Eigen::Matrix<double, 3, 1> result;
    result.head<2>() = t_mssm;
    // rescale T1 to get TS
-   result(2) = t_mssm(0) * std::sqrt(vev2) * cosb / (svev * std::sqrt(2.));
+   result(2) = t_mssm(0) * sqr(vd/vs);
 
    return result;
 }
@@ -61,10 +63,13 @@ Eigen::Matrix<double, 3, 1> tadpole_higgs_2loop_ab_as_nmssm(
    const Eigen::Matrix<double, 2, 1> t_mssm = tadpole_higgs_2loop_ab_as_mssm(
       mb2, mg, msb12, msb22, sxb, cxb, scale2, mu, cotb, vev2, gs);
 
+   const double vu = std::sqrt(vev2) * sinb;
+   const double vs = svev * std::sqrt(2.);
+
    Eigen::Matrix<double, 3, 1> result;
    result.head<2>() = t_mssm;
    // rescale T1 to get TS
-   result(2) = t_mssm(0) * std::sqrt(vev2) * sinb / (svev * std::sqrt(2.));
+   result(2) = t_mssm(0) * sqr(vu/vs);
 
    return result;
 }

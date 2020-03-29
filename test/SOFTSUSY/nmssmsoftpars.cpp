@@ -23,7 +23,7 @@ const SoftParsNmssm & SoftParsNmssm::operator=(const SoftParsNmssm & s) {
 
 double SoftParsNmssm::displaySoftAlambda() const {
   if (fabs(displayLambda()) < 1.0e-100) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "WARNING: asking for SoftParsNmssm::displaySoftAlambda() where Yukawa coupling is " <<
        fabs(displayLambda()) << endl;
     throw ii.str();
@@ -34,7 +34,7 @@ double SoftParsNmssm::displaySoftAlambda() const {
 
 double SoftParsNmssm::displaySoftAkappa() const {
   if (fabs(displayKappa()) < 1.0e-100) {
-    ostringstream ii;
+    std::ostringstream ii;
     ii << "WARNING: asking for SoftParsNmssm::displaySoftAkappa() where Yukawa coupling is " <<
        fabs(displayKappa()) << endl;
     throw ii.str();
@@ -532,7 +532,6 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
                            - 2.0 * mupr * mG(1))
          + 12.0 * gsq(2) * (lsq * mSpsq + 2.0 * mupr * lam * hlam
                            - 2.0 * mupr * mG(2));
-
     } else {
       /// In the mixed case, we need to use the slower full 3-family
       /// expressions
@@ -592,7 +591,7 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
 
     dxiS2 = - 4.0 * l4 * xiS - 16.0 * lam * lsq * hlam * xiF
        - 8.0 * k4 * xiS - 32.0 * kap * ksq * hkap * xiF
-       - 2.0 * lsq * xiF * (xiS * Ytr + 2.0 * aYtr)
+       - 2.0 * lsq * (xiS * Ytr + 2.0 * xiF * aYtr)
        - 4.0 * lam * hlam * xiF * Ytr
        - 8.0 * lsq * ksq * xiS
        - 16.0 * lam * kap * (kap * hlam + lam * hkap) * xiF
@@ -608,13 +607,13 @@ SoftParsNmssm SoftParsNmssm::beta2() const {
                 + lam * kap * hlam * sqr(mupr) + lam * hlam * hkap * mupr )
        - 8.0 * ksq * (mSpsq * (2.0 * hkap + kap * mupr) + hkap * mupr * mupr)
        - 8.0 * kap * (mupr * Mkapsq + sqr(hkap) * mupr + 2.0 * ksq * mupr * mSsq)
-       + 1.2 * gsq(1) * (3.0 * m3sq - 2.0 * smu * mG(1)) * hlam
-       + 1.2 * gsq(1) * lam * (3.0 * m3sq * (mupr - mG(1)) + lam * xiS
+       + 1.2 * gsq(1) * (2.0 * m3sq - 2.0 * smu * mG(1)) * hlam
+       + 1.2 * gsq(1) * lam * (2.0 * m3sq * (mupr - mG(1)) + lam * xiS
                                + 2.0 * smu * (mH1sq + mH2sq - mupr * mG(1)
                                               + 2.0 * msq(1))
                                + 2.0 * xiF * (hlam - lam * mG(1)))
-       + 3.0 * gsq(2) * (3.0 * m3sq - 2.0 * smu * mG(2)) * hlam
-       + 3.0 * gsq(2) * lam * (3.0 * m3sq * (mupr - mG(2)) + lam * xiS
+       + 6.0 * gsq(2) * (2.0 * m3sq - 2.0 * smu * mG(2)) * hlam
+       + 6.0 * gsq(2) * lam * (2.0 * m3sq * (mupr - mG(2)) + lam * xiS
                                + 2.0 * smu * (mH1sq + mH2sq - mupr * mG(2)
                                               + 2.0 * msq(2))
                                + 2.0 * xiF * (hlam - lam * mG(2)));
@@ -746,7 +745,7 @@ void SoftParsNmssm::standardsemiSugra(double m0, double m12, double a0, double A
   }
 }
 
-ostream & operator <<(ostream &left, const SoftParsNmssm &s) {
+std::ostream & operator <<(std::ostream &left, const SoftParsNmssm &s) {
   left << "SUSY breaking NMSSM parameters at Q: " << s.displayMu() << endl;
   left << " UA" << s.displayTrilinear(UA)
        << " UD" << s.displayTrilinear(DA)

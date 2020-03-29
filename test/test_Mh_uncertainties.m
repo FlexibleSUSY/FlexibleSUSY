@@ -10,10 +10,10 @@ Get["model_files/NUHMSSMNoFVHimalaya/NUHMSSMNoFVHimalaya_uncertainty_estimate.m"
 settings = {
     precisionGoal -> 1.*^-5,
     maxIterations -> 1000,
-    poleMassLoopOrder -> 3,
-    ewsbLoopOrder -> 3,
-    thresholdCorrectionsLoopOrder -> 2,
-    thresholdCorrections -> 122111121
+    poleMassLoopOrder -> 4,
+    ewsbLoopOrder -> 4,
+    thresholdCorrectionsLoopOrder -> 4,
+    thresholdCorrections -> 124111421
 };
 
 smpars = {
@@ -149,7 +149,14 @@ NUHMSSMNoFVCalcMh[MS_, TB_, Xtt_] :=
 
 NUHMSSMNoFVHimalayaCalcMh[MS_, TB_, Xtt_] :=
     CalcNUHMSSMNoFVHimalayaDMh[
-        fsSettings -> settings,
+        fsSettings -> {
+            precisionGoal -> 1.*^-5,
+            maxIterations -> 1000,
+            poleMassLoopOrder -> 3,
+            ewsbLoopOrder -> 3,
+            thresholdCorrectionsLoopOrder -> 2,
+            thresholdCorrections -> 122111121
+        },
         fsSMParameters -> smpars,
         fsModelParameters -> {
             TanBeta -> TB,

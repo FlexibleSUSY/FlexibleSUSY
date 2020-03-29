@@ -218,8 +218,17 @@ check_model_name() {
 
     local _model="$1"
 
-    [ $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ] || \
-        { printf "Error: invalid model name: ${_model}\n" && exit 1; }
+    if [ -z $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ]; then 
+        printf "Error: invalid model name ${_model}. "
+        if [ -n "$(echo "${_model}" | grep -E -o "^[0-9]")" ]; then
+            printf "Model name must start with a letter. "
+        fi
+        if [ -n "$(echo "${_model}" | grep -E -o "[^0-9a-zA-Z_]")" ]; then
+            printf "Disallowed character(s) in model name: $(echo "${_model}" | grep -E -o "[^0-9a-zA-Z_]"|sort|uniq|xargs)."
+        fi
+        printf "\n"
+        exit 1
+    fi
 }
 
 #_____________________________________________________________________
@@ -491,7 +500,7 @@ fi
 
 if test ! -d "$targetdir" ; then
     message -n "  Creating model directory $targetdir ... "
-    mkdir $targetdir
+    mkdir -p $targetdir
     message "done"
 fi
 

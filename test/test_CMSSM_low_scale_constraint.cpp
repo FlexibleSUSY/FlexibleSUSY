@@ -11,9 +11,28 @@
 
 #include "CMSSM_two_scale_model.hpp"
 #include "CMSSM_two_scale_low_scale_constraint.hpp"
+#include "conversion.hpp"
 #include "softsusy.h"
 #include "wrappers.hpp"
 #include "ew_input.hpp"
+
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
 
 DoubleVector calculate_gauge_couplings(CMSSM<Two_scale> model,
                                        CMSSM_low_scale_constraint<Two_scale> constraint,
@@ -73,14 +92,14 @@ BOOST_AUTO_TEST_CASE( test_delta_alpha )
 {
    CMSSM<Two_scale> m; MssmSoftsusy s;
    CMSSM_input_parameters input;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    setup_CMSSM(m, s, input);
    s.setData(qedqcd);
 
-   CMSSM_low_scale_constraint<Two_scale> constraint(&m, qedqcd);
+   CMSSM_low_scale_constraint<Two_scale> constraint(&m, convert(qedqcd));
 
-   const double alpha_em = qedqcd.displayAlpha(ALPHA);
-   const double alpha_s  = qedqcd.displayAlpha(ALPHAS);
+   const double alpha_em = qedqcd.displayAlpha(legacy::ALPHA);
+   const double alpha_s  = qedqcd.displayAlpha(legacy::ALPHAS);
    const double scale = m.get_scale();
 
    const double delta_alpha_em_fs = constraint.calculate_delta_alpha_em(alpha_em);
@@ -96,14 +115,14 @@ BOOST_AUTO_TEST_CASE( test_delta_alpha )
 BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
 {
    CMSSM_input_parameters input;
-   QedQcd qedqcd;
+   QedQcd_legacy qedqcd;
    qedqcd.setPoleMt(175.);       // non-default
-   qedqcd.setMass(mBottom, 4.3); // non-default
+   qedqcd.setMass(legacy::mBottom, 4.3); // non-default
    CMSSM<Two_scale> m; MssmSoftsusy s;
    s.setData(qedqcd);
    setup_CMSSM(m, s, input);
 
-   CMSSM_low_scale_constraint<Two_scale> constraint(&m, qedqcd);
+   CMSSM_low_scale_constraint<Two_scale> constraint(&m, convert(qedqcd));
 
    const double TanBeta = input.TanBeta;
    const double g1 = m.get_g1();
@@ -118,8 +137,8 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
    const double ss_new_vev = s.getVev();
 
    const double fs_mt = m.calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
-   const double fs_mb = m.calculate_MFd_DRbar(qedqcd.displayMass(mBottom), 2);
-   const double fs_me = m.calculate_MFe_DRbar(qedqcd.displayMass(mTau), 2);
+   const double fs_mb = m.calculate_MFd_DRbar(qedqcd.displayMass(legacy::mBottom), 2);
+   const double fs_me = m.calculate_MFe_DRbar(qedqcd.displayMass(legacy::mTau), 2);
    const double fs_MZ = m.calculate_MVZ_DRbar(Electroweak_constants::MZ);
    const double fs_old_vd = m.get_vd();
    const double fs_old_vu = m.get_vu();
@@ -129,7 +148,7 @@ BOOST_AUTO_TEST_CASE( test_low_energy_constraint )
    const double fs_new_vev = Sqrt(Sqr(fs_new_vu) + Sqr(fs_new_vd));
 
    BOOST_CHECK_CLOSE_FRACTION(fs_mt, ss_mt, 9.5e-5);
-   BOOST_CHECK_CLOSE_FRACTION(fs_mb, ss_mb, 3.0e-15);
+   BOOST_CHECK_CLOSE_FRACTION(fs_mb, ss_mb, 4.0e-12);
    BOOST_CHECK_CLOSE_FRACTION(fs_me, ss_me, 9.0e-4); // no tan(beta) resummation in SOFTSUSY
    BOOST_CHECK_CLOSE_FRACTION(fs_MZ, ss_MZ, 4.5e-10);
    BOOST_CHECK_CLOSE_FRACTION(fs_new_vev, ss_new_vev, 4.5e-10);

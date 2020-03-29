@@ -7,6 +7,7 @@
 #define private public
 
 #include "softsusy.h"
+#include "conversion.hpp"
 #include "error.hpp"
 #include "gsl_utils.hpp"
 #include "minimizer.hpp"
@@ -26,16 +27,31 @@
 #include "CMSSM_two_scale_initial_guesser.hpp"
 #include "test_CMSSM.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 using namespace weinberg_angle;
 
 class SoftSusy_error : public Error {
 public:
-   SoftSusy_error(const std::string& msg_)
-      : msg(msg_) {}
+   SoftSusy_error(const std::string& msg)
+      : Error(msg) {}
    virtual ~SoftSusy_error() {}
-   virtual std::string what() const { return msg; }
-private:
-   std::string msg;
 };
 
 class SoftSusy_NoConvergence_error : public SoftSusy_error {
@@ -43,7 +59,6 @@ public:
    SoftSusy_NoConvergence_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NoConvergence_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_NonPerturbative_error : public SoftSusy_error {
@@ -51,7 +66,6 @@ public:
    SoftSusy_NonPerturbative_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NonPerturbative_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_tester {
@@ -63,7 +77,7 @@ public:
    double get_msusy() const { return msusy; }
    sPhysical get_physical() const { return softSusy.displayPhys(); }
    MssmSoftsusy get_model() const { return softSusy; }
-   void test(const CMSSM_input_parameters& pp, double mxGuess, const QedQcd& qedqcd = QedQcd()) {
+   void test(const CMSSM_input_parameters& pp, double mxGuess, const QedQcd_legacy& qedqcd = QedQcd_legacy()) {
       // run softsusy
       softsusy::numRewsbLoops = 1;
       softsusy::numHiggsMassLoops = 1;
@@ -121,15 +135,15 @@ public:
    void set_low_scale_constraint(CMSSM_low_scale_constraint<Two_scale>* c) { low_constraint = c; }
    void set_susy_scale_constraint(CMSSM_susy_scale_constraint<Two_scale>* c) { susy_constraint = c; }
    void set_high_scale_constraint(CMSSM_high_scale_constraint<Two_scale>* c) { high_constraint = c; }
-   void setup_default_constaints(const CMSSM_input_parameters&, const QedQcd& qedqcd) {
+   void setup_default_constaints(const CMSSM_input_parameters&, const QedQcd_legacy& qedqcd) {
       if (!high_constraint)
          high_constraint = new CMSSM_high_scale_constraint<Two_scale>(&mssm);
       if (!susy_constraint)
-         susy_constraint = new CMSSM_susy_scale_constraint<Two_scale>(&mssm, qedqcd);
+         susy_constraint = new CMSSM_susy_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
       if (!low_constraint)
-         low_constraint = new CMSSM_low_scale_constraint<Two_scale>(&mssm, qedqcd);
+         low_constraint = new CMSSM_low_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
    }
-   void test(const CMSSM_input_parameters& pp, const QedQcd& qedqcd = QedQcd()) {
+   void test(const CMSSM_input_parameters& pp, const QedQcd_legacy& qedqcd = QedQcd_legacy()) {
       setup_default_constaints(pp, qedqcd);
 
       const double precision_goal = softsusy::TOLERANCE;
@@ -148,13 +162,13 @@ public:
       high_constraint->set_model(&mssm);
       susy_constraint->set_model(&mssm);
       low_constraint ->set_model(&mssm);
-      low_constraint ->set_sm_parameters(qedqcd);
+      low_constraint ->set_sm_parameters(convert(qedqcd));
       high_constraint->initialize();
       susy_constraint->initialize();
       low_constraint ->initialize();
 
       CMSSM_convergence_tester<Two_scale> convergence_tester(&mssm, precision_goal);
-      CMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, qedqcd,
+      CMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, convert(qedqcd),
                                                       *low_constraint,
                                                       *susy_constraint,
                                                       *high_constraint);
@@ -449,8 +463,8 @@ class CMSSM_iterative_low_scale_constraint
 public:
    CMSSM_iterative_low_scale_constraint()
       : CMSSM_low_scale_constraint<Two_scale>() {}
-   CMSSM_iterative_low_scale_constraint(CMSSM<Two_scale>* model_, const QedQcd& qedqcd_)
-      : CMSSM_low_scale_constraint<Two_scale>(model_,qedqcd_) {}
+   CMSSM_iterative_low_scale_constraint(CMSSM<Two_scale>* model_, const QedQcd_legacy& qedqcd_)
+      : CMSSM_low_scale_constraint<Two_scale>(model_,convert(qedqcd_)) {}
    virtual ~CMSSM_iterative_low_scale_constraint() {}
 
    virtual void apply();
@@ -515,7 +529,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_spectrum_higgs_iteration )
    pp.Azero = 1000.;
    pp.SignMu = 1;
    pp.TanBeta = 30.;
-   softsusy::QedQcd qedqcd;
+   softsusy::QedQcd_legacy qedqcd;
 
    CMSSM<Two_scale> _model;
    CMSSM_tester mssm_tester;

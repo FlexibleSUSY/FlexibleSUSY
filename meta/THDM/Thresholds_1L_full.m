@@ -32,7 +32,7 @@ EndPackage[];
 {B0, DB0, C0, D0, D2tilde, D4tilde, W};
 
 (* flags *)
-{ flagSferm, flagIno, flagZdd, flagZud, flagZuu, flagdg, flagMSDR };
+{ flagSferm, flagIno, flagZdd, flagZud, flagZuu, flagdg, flagMSDRg2, flagMSDRlam };
 
 (* options *)
 { coefficients, flags, loopFunctions, loopOrder, sumHead };
@@ -94,7 +94,8 @@ GetTHDMThresholds1LFlags[] := {
     flagZud      ->  0, (* Enable/disable field renormalization Zud *)
     flagZuu      ->  1, (* Enable/disable field renormalization Zuu *)
     flagdg       ->  1, (* Enable/disable gauge coupling renormalization *)
-    flagMSDR     ->  1  (* Enable/disable DREG <-> DRED conversion of g2 *)
+    flagMSDRg2   ->  1, (* Enable/disable DREG <-> DRED conversion of g2 *)
+    flagMSDRlam  ->  1  (* Enable/disable DREG <-> DRED conversion of lambda_i *)
 };
 
 lamBar = lamHat = lamTree = lamIno = lamSferm = Table[Undef, {i, 1, 7}];
@@ -509,7 +510,7 @@ dZuu := flagSferm flagZuu dZuuSferm + flagIno flagZuu dZuuIno;
 (* Eq. (117) *)
 dZW := Module[{i},
     g2^2 kappa/6 (
-    - 4 flagMSDR (* MS-bar/DR-bar conversion term *)
+    - 4 flagMSDRg2 (* MS-bar/DR-bar conversion term *)
     + flagIno (4 Log[Abs[Mu]^2/Q^2] + 8 Log[M2^2/Q^2])
     + flagSferm (
         Summation[
@@ -569,11 +570,11 @@ lamIno[[5]] = (
 
 (* Eq. (121) *)
 lamIno123467[i_] := (
-   g2^4 (as[i] + a2[i] D2tilde[M2, M2, Abs[Mu], Abs[Mu]] + 
+   g2^4 (flagMSDRlam as[i] + a2[i] D2tilde[M2, M2, Abs[Mu], Abs[Mu]] + 
        a4[i] D4tilde[M2, M2, Abs[Mu], Abs[Mu], Q])
-    + g2^2 gY^2 (asp[i] + a2p[i] D2tilde[M1, M2, Abs[Mu], Abs[Mu]] + 
+    + g2^2 gY^2 (flagMSDRlam asp[i] + a2p[i] D2tilde[M1, M2, Abs[Mu], Abs[Mu]] + 
        a4p[i] D4tilde[M1, M2, Abs[Mu], Abs[Mu], Q])
-    + gY^4 (aspp[i] + a2pp[i] D2tilde[M1, M1, Abs[Mu], Abs[Mu]] + 
+    + gY^4 (flagMSDRlam aspp[i] + a2pp[i] D2tilde[M1, M1, Abs[Mu], Abs[Mu]] + 
        a4pp[i] D4tilde[M1, M1, Abs[Mu], Abs[Mu], Q])
    );
 

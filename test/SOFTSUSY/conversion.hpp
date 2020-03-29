@@ -18,6 +18,7 @@
 
 #ifndef CONVERSION_H
 #define CONVERSION_H
+
 #include "linalg.h"
 #include <Eigen/Core>
 

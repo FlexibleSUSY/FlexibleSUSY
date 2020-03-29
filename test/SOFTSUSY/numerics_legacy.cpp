@@ -16,15 +16,9 @@ namespace flexiblesusy {
 
 class SoftsusyNumericsError : public Error {
 public:
-   explicit SoftsusyNumericsError(std::string msg_)
-      : msg(msg_)
-      {}
+   explicit SoftsusyNumericsError(std::string msg)
+      : Error(msg) {}
    virtual ~SoftsusyNumericsError() {}
-   virtual std::string what() const {
-      return msg;
-   }
-private:
-   std::string msg;
 };
 
 } // namespace flexiblesusy
@@ -109,11 +103,11 @@ double findMinimum(double ax, double bx, double cx, double (*f)(double),
 }
 
 double dilog(double x) {
-  return gm2calc::dilog(x);
+  return flexiblesusy::dilog(x);
 }
 
 Complex dilog(const Complex& x) {
-  return gm2calc::dilog(x);
+  return flexiblesusy::dilog(x);
 }
 
 double fps(double z) {

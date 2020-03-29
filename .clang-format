@@ -1,4 +1,5 @@
 Standard: Cpp11
+TabWidth: 8
 Cpp11BracedListStyle: true
 BreakBeforeBraces: Linux
 
@@ -7,12 +8,12 @@ IndentWidth: 3
 ContinuationIndentWidth: 3
 ConstructorInitializerIndentWidth: 3
 AccessModifierOffset: -3
-
 PointerAlignment: Left
 AlwaysBreakTemplateDeclarations: true
 AlignTrailingComments: true
 AllowShortIfStatementsOnASingleLine: false
-BreakStringLiterals: true
+# AllowShortFunctionsOnASingleLine: SFS_Inline
+# BreakStringLiterals: true
 # BreakConstructorInitializers: BeforeComma
 ObjCSpaceAfterProperty: false
 

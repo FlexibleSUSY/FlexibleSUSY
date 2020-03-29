@@ -213,8 +213,12 @@ UseHiggs3LoopSM = True;
 UseHiggs4LoopSM = True;
 UseSM3LoopRGEs = True;
 UseSM4LoopRGEs = True;
+UseSM5LoopRGEs = True;
+UseSMYukawa2Loop = True;
 UseYukawa3LoopQCD = True;
+UseYukawa4LoopQCD = True;
 UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 ExtraSLHAOutputBlocks = {
    {EFFHIGGSCOUPLINGS, NoScale,

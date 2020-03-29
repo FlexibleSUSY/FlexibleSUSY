@@ -30,7 +30,7 @@
 namespace flexiblesusy {
 namespace sfermions {
 
-static const double oneOverRoot2 = 1./sqrt(2.); // 0.7071067811865475
+static const double oneOverRoot2 = 0.7071067811865475; // 1/sqrt(2.)
 
 const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Isospin = {
    0.5, -0.5, 0.5, -0.5

@@ -19,6 +19,7 @@
 #include "ckm.hpp"
 #include "error.hpp"
 #include "ew_input.hpp"
+#include "numerics2.hpp"
 #include "wrappers.hpp"
 
 namespace flexiblesusy {
@@ -252,13 +253,14 @@ void CKM_parameters::to_pdg_convention(Eigen::Matrix<std::complex<double>,3,3>& 
    Eigen::DiagonalMatrix<std::complex<double>,3> l(1,1,1), r(1,1,1);
 
    const double s13 = sanitize_hypot(std::abs(ckm(0,2)));
-   const double c13 = std::sqrt(1 - Sqr(s13));
-   if (c13 == 0) {
+   const double c13_sq = 1. - Sqr(s13);
+   if (is_zero(c13_sq)) {
       o = std::conj(phase(ckm(0,2)));
-      r.diagonal().block<2,1>(0,0) = (o * ckm.block<1,2>(1,0)).adjoint();
+      r.diagonal().block<2,1>(0,0) = (o * ckm.block<1,2>(1,0)).unaryExpr(
+                                         std::ptr_fun(phase<double>)).adjoint();
       l.diagonal()[2] = std::conj(phase(o * r.diagonal()[1] * ckm(2,1)));
-   }
-   else {
+   } else {
+      const double c13 = std::sqrt(c13_sq);
       const double s12 = sanitize_hypot(std::abs(ckm(0,1)) / c13);
       const double c12 = std::sqrt(1 - Sqr(s12));
       const double s23 = sanitize_hypot(std::abs(ckm(1,2)) / c13);
@@ -266,15 +268,16 @@ void CKM_parameters::to_pdg_convention(Eigen::Matrix<std::complex<double>,3,3>& 
       const double side1 = s12*s23;
       const double side2 = c12*c23*s13;
       const double cosdelta = sanitize_hypot(
-         side1*side2 == 0 ? 1 // delta is removable
+         is_zero(side1*side2) ? 1 // delta is removable
          : (Sqr(side1)+Sqr(side2)-std::norm(ckm(2,0))) / (2*side1*side2));
       const double sindelta = std::sqrt(1 - Sqr(cosdelta));
       const std::complex<double> p(cosdelta, sindelta); // Exp[I delta]
       calc_phase_factors(ckm, p, o, l, r);
       const Eigen::Array<double,2,2>
          imagBL{(o * l * ckm * r).bottomLeftCorner<2,2>().imag()};
-      if (!((imagBL <= 0).all() || (imagBL >= 0).all()))
+      if (!((imagBL <= 0).all() || (imagBL >= 0).all())) {
          calc_phase_factors(ckm, std::conj(p), o, l, r);
+      }
    }
 
    Vu.transpose() *= l * o;

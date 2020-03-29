@@ -1,0 +1,98 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#define BOOST_TEST_MODULE Test NPointFunctions
+#include <boost/test/included/unit_test.hpp>
+#include <boost/test/data/test_case.hpp>
+
+#include "random_MSSM_dataset.hpp"
+#include "test_complex_equality.hpp"
+
+@NPointFunctions_Headers@
+
+using namespace flexiblesusy;
+using namespace boost_test_tools;
+
+#define INPUTPARAMETER(p) context.model.get_input().p
+#define MODELPARAMETER(p) context.model.get_##p()
+#define DERIVEDPARAMETER(p) context.model.p()
+#define PHASE(p) context.model.get_##p()
+
+namespace flexiblesusy
+{
+namespace MSSM_cxx_diagrams
+{
+namespace detail
+{
+@CXXDiagrams_VertexPrototypes@
+
+@CXXDiagrams_VertexDefinitions@
+}
+
+namespace npointfunctions
+{
+@NPointFunctions_Selfenergy_hh_1loop@
+}
+}
+}
+
+namespace
+{
+static constexpr int number_of_random_samples = 100;
+}
+
+BOOST_AUTO_TEST_SUITE(selfenergy_test_suite, 
+	* boost::unit_test::tolerance(1.0e-12) )
+
+BOOST_DATA_TEST_CASE( test_selfenergies,
+	random_MSSM_dataset( number_of_random_samples ),
+  index, FS_TEST_MSSM_PARAMETER_SEQUENCE )
+{
+	auto input_parameters = wrap_input_parameters(
+		FS_TEST_MSSM_PARAMETER_SEQUENCE );
+	auto model = calculate_spectrum( input_parameters );
+	
+	auto problems = model.get_problems();
+	BOOST_WARN_MESSAGE( !problems.have_problem(),
+		"There was an error calculating the spectrum: " <<
+		problems << "Skipping data point..." );
+		
+	if( problems.have_problem() == false )
+	{
+		auto hh_mix = model.get_ZH();
+	
+		auto fs_selfenergy_hh_unrotated =
+			model.self_energy_hh_1loop( 0 );
+		auto fs_selfenergy_hh = hh_mix * fs_selfenergy_hh_unrotated *
+			hh_mix.adjoint();
+		
+		auto np_selfenergy_hh = [&model] ( int i1, int i2 ) {
+			return MSSM_cxx_diagrams::npointfunctions::selfenergy_hh_1loop(
+				model, std::array<int, 2>{ i1, i2 },
+				std::array<Eigen::Vector4d, 0>{} );
+		};
+		
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,0), fs_selfenergy_hh(0,0) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,1), fs_selfenergy_hh(0,1) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,0), fs_selfenergy_hh(1,0) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,1), fs_selfenergy_hh(1,1) );
+	} else
+		BOOST_TEST( true );
+}
+
+BOOST_AUTO_TEST_SUITE_END()

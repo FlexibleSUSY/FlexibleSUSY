@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* :Copyright:
 
    ====================================================================
@@ -25,7 +27,9 @@ BeginPackage["Vertices`", {
     "SelfEnergies`",
     "Parameters`",
     "TreeMasses`",
-    "LatticeUtils`"}]
+    "LatticeUtils`",
+    "Utils`"}
+]
 
 VertexRules::usage;
 ToCpPattern::usage="ToCpPattern[cp] converts field indices inside cp to patterns, e.g. ToCpPattern[Cp[bar[UFd[{gO1}]], Sd[{gI1}], Glu[{1}]][PL]] === Cp[bar[UFd[{gO1_}]], Sd[{gI1_}], Glu[{1}]][PL].";
@@ -43,8 +47,48 @@ ToRotatedField::usage;
 ReplaceUnrotatedFields::usage;
 StripGroupStructure::usage="Removes group generators and Kronecker deltas.";
 StripFieldIndices::usage;
+IsNonZeroVertex::usage="Checks if a vertex may be non-zero.";
+
+SetCachedVertices::usage="";
+GetCachedVertices::usage="";
+ClearCachedVertices::usage="";
+SarahColorIndexQ::usage="Checks if an index is a color index. Returns True for indices starting with ct and followed by a number.";
+SarahLorentzIndexQ::usage="Checks if an index is a Lorentz index. Returns True for indices starting with lt and followed by a number.";
+SarahDummyIndexQ::usage="Checks if an index is a dummy index. Returns True for indices starting with j and followed by a number.";
+
+SortFieldsInCp::usage="";
 
 Begin["`Private`"]
+
+(* cached 3-point vertices, with and without dependencies imposed *)
+cachedVertices[3, False] = {};
+cacjedVertices[3, True] = {};
+(* cached 4-point vertices, with and without dependences imposed *)
+cachedVertices[4, False] = {};
+cachedVertices[4, True] = {};
+cachedVertices[numFields_, useDependences_] := {};
+
+SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
+
+GetCachedVertices[] := Flatten[cachedVertices[#[[1]], #[[2]]]& /@ Cases[DownValues[cachedVertices], (HoldPattern[_[_[l_, u_]]] :> _) /; IntegerQ[l] :> {l, u}]];
+GetCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences];
+
+AddToCachedVertices[sarahVertex_, useDependences_:False] :=
+    Module[{numFields, cached},
+           numFields = Length[sarahVertex[[1]]];
+           cached = cachedVertices[numFields, useDependences];
+           If[cached === {},
+              cachedVertices[numFields, useDependences] = {sarahVertex};,
+              cachedVertices[numFields, useDependences] = Append[cached, sarahVertex];
+             ];
+          ];
+
+ClearCachedVertices[numFields_Integer, useDependences_:False] := cachedVertices[numFields, useDependences] = {};
+ClearCachedVertices[] :=
+    (
+     DownValues[cachedVertices] = DeleteCases[DownValues[cachedVertices], (HoldPattern[_[_[l_, _]]] :> _) /; IntegerQ[l]];
+     cachedVertices[_, _] := {};
+    )
 
 (* There is a sign ambiguity when SARAH`Vertex[] factors an SSV-type
    vertex into a coefficient and a Lorentz part even though the
@@ -101,7 +145,19 @@ SortCp[SARAH`Cp[fields__]] :=
 
 SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
 
+SortCp[SARAH`Cp[vectors__]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
+	{sortedVectors = SortFieldsInCp[{vectors}]},
+	Utils`FSPermutationSignature[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
+];
+
 (* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
+SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
+Module[{
+	sortedVectors
+    },
+    sortedVectors = SortFieldsInCp[{vectors}];
+	(SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]
+];
 SortCp[cp : SARAH`Cp[vectors__][lor_Integer]] /; CpType[cp] === VVVV :=
 Module[{
 	vs = StripExtraFieldIndices[{vectors}],
@@ -643,6 +699,12 @@ SarahInternalGenerationIndexQ[index_Symbol] :=
 SarahColorIndexQ[index_Symbol] :=
     StringMatchQ[ToString[index], RegularExpression["ct[[:digit:]]+"]];
 
+SarahLorentzIndexQ[index_Symbol] :=
+    StringMatchQ[ToString[index], RegularExpression["lt[[:digit:]]+"]];
+
+SarahDummyIndexQ[index_Symbol] :=
+    StringMatchQ[ToString[index], RegularExpression["j[[:digit:]]+"]];
+
 GetLorentzStructure[SARAH`Cp[__]] := 1;
 
 GetLorentzStructure[SARAH`Cp[__][a_]] := a;
@@ -675,6 +737,20 @@ ReplaceUnrotatedFields[SARAH`Cp[p__]] :=
 
 ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[SARAH`Cp[p]][lorentz];
+
+IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
+    Module[{sortedFields, cached, vertex, isNonZero},
+           sortedFields = SortFieldsInCp[fields];
+           If[vertexList =!= {},
+              cached = DeleteDuplicates[Select[vertexList, StripFieldIndices[#[[1]]] === sortedFields &, 1]];
+              If[cached =!= {},
+                 Return[Or @@ (MemberQ[#[[2 ;;]][[All, 1]], Except[0]]& /@ cached)];
+                ];
+             ];
+           vertex = SARAH`Vertex[sortedFields, UseDependences -> useDependences];
+           AddToCachedVertices[vertex, useDependences];
+           MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
+          ];
 
 End[] (* `Private` *)
 

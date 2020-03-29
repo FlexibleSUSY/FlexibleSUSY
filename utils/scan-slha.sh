@@ -26,6 +26,7 @@ slha_input=
 slha_input_file=
 spectrum_generator=
 step_size="linear"
+AWK=${AWK:-awk}
 
 # prints SLHA block
 print_slha_block_awk='
@@ -38,8 +39,8 @@ BEGIN {
    }
 }
 {
-   pattern     = "^block[[:blank:]]*" tolower(block) "([^[:graph:]].*)?$";
-   not_pattern = "^block[[:blank:]]*.*$";
+   pattern     = "^block[ \t\n\r\f]*" tolower(block) "([^a-zA-Z0-9_].*)?$";
+   not_pattern = "^block[ \t\n\r\f]*.*$";
 
    if (tolower($0) ~ pattern) {
       is_block = 1
@@ -260,11 +261,11 @@ if test -z "$scan_range"; then
 fi
 
 # transform scientific notation into bc syntax
-start=$(echo "$scan_range" | awk -F '[=:~]' '{ print $2 }' | sed -e 's/[eE]+*/*10^/')
-stop=$(echo "$scan_range"  | awk -F '[=:~]' '{ print $3 }' | sed -e 's/[eE]+*/*10^/')
-steps=$(echo "$scan_range" | awk -F : '{ print $NF }'      | sed -e 's/[eE]+*/*10^/')
-block=$(echo "$scan_range" | awk -F [ '{ print $1 }')
-entry=$(echo "$scan_range" | awk -F '[][]' '{ print $2 }')
+start=$(echo "$scan_range" | ${AWK} -F '[=:~]' '{ print $2 }' | sed -e 's/[eE]+*/*10^/')
+stop=$(echo "$scan_range"  | ${AWK} -F '[=:~]' '{ print $3 }' | sed -e 's/[eE]+*/*10^/')
+steps=$(echo "$scan_range" | ${AWK} -F : '{ print $NF }'      | sed -e 's/[eE]+*/*10^/')
+block=$(echo "$scan_range" | ${AWK} -F [ '{ print $1 }')
+entry=$(echo "$scan_range" | ${AWK} -F '[][]' '{ print $2 }')
 
 output_fields="$(echo $output | tr ',' ' ')"
 
@@ -317,18 +318,18 @@ EOF
 
     # get the output
     for f in $output_fields; do
-        output_block=$(echo "$f" | awk -F [ '{ print $1 }')
+        output_block=$(echo "$f" | ${AWK} -F [ '{ print $1 }')
 
         # do we need to check only whether the entry exists?
         echo "$f" | grep -v '?' > /dev/null
         check_present=$?
 
         output_block=$(echo "$output_block" | sed -e 's/?//')
-        full_block=$(echo "$slha_output" | awk -v block="$output_block" "$print_slha_block_awk")
-        block_entries=$(echo "$f" | awk -F '[][]' '{ print $2 }')
+        full_block=$(echo "$slha_output" | ${AWK} -v block="$output_block" "$print_slha_block_awk")
+        block_entries=$(echo "$f" | ${AWK} -F '[][]' '{ print $2 }')
 
         # get data value
-        value=$(echo "$full_block" | awk -v keys="$block_entries" "$print_block_entry_awk" | tail -n 1)
+        value=$(echo "$full_block" | ${AWK} -v keys="$block_entries" "$print_block_entry_awk" | tail -n 1)
 
         if test "$check_present" -eq 1 ; then
             # check if entry exists

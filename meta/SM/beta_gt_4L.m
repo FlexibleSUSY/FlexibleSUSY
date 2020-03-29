@@ -1,4 +1,5 @@
-(* 4-loop beta function of Chetyrkin:2016ruf
+(* 4-loop beta function of Chetyrkin, Zoller [JHEP 1606 (2016) 175]
+   [arXiv:1604.00853] Chetyrkin:2016ruf.
    Copied from https://www.ttp.kit.edu/Progdata/ttp16/ttp16-008/
 
    Note: Chetyrkin:2016ruf defines the beta function to be
@@ -16,11 +17,16 @@
    factor yt is missing, which is present in Eq.(3.5).  This factor
    has been added below.
 
+   Note: In the 4-loop expression "betaytl4" g1 = gY denotes the
+   non-GUT normalized gauge coupling of U(1)_Y.
+
    h = 1/(4Pi)^2;
 
    cf = 4/3; ca = 3; tr = 1/2; dR = 3; ng = 8; nf = 6;
    dFA4 = 15/2; dFF4 = 5/12;
    z3 = Zeta[3]; z4 = Zeta[4]; z5 = Zeta[5];
+
+   toSARAHConvention = { lambda -> \[Lambda]/2, g1 -> Sqrt[3/5] g1 }
 
  *)
 

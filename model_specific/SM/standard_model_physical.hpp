@@ -21,7 +21,6 @@
 #ifndef STANDARD_MODEL_PHYSICAL_H
 #define STANDARD_MODEL_PHYSICAL_H
 
-#include "linalg2.hpp"
 #include <Eigen/Core>
 
 #include <iosfwd>

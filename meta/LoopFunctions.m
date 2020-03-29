@@ -196,17 +196,18 @@ B0analytic[p_, m1_, m2_, mu_] :=
            xp = (s + Sqrt[s^2 - 4 p^2 (m1^2 - I eps)]) / (2 p^2);
            xm = (s - Sqrt[s^2 - 4 p^2 (m1^2 - I eps)]) / (2 p^2);
            fB[x_] := Log[1-x] - x Log[1 - 1/x] - 1;
-           Limit[Delta - Log[p^2/mu^2] - fB[xp] - fB[xm], eps -> 0,
-                 Direction -> -1,
-                 Assumptions :> p > 0 && m1 >= 0 && m2 >= 0 && mu > 0]
+           Normal @ Series[Delta - Log[p^2/mu^2] - fB[xp] - fB[xm],
+                           {eps, 0, 0},
+                           Assumptions :> p > 0 && m1 > 0 && m2 > 0 && mu > 0]
           ];
 
 (* B0 with explicit integration [arxiv:hep-ph/9606211 Eq. (B.6)] *)
 B0integral[p_, m1_, m2_, mu_] :=
     Module[{eps},
-           Limit[
+           Normal @ Series[
                Delta - Integrate[Log[((1-x) m1^2 + x m2^2 - x (1-x) p^2 - I eps)/mu^2], {x,0,1}],
-               eps -> 0]
+               {eps, 0, 0}
+           ]
           ];
 
 DivB0[_, _, _, _] := Delta;
@@ -293,14 +294,13 @@ B22zero[m1_, m2_, mu_] :=
     Which[PossibleZeroQ[m1] && PossibleZeroQ[m2],
           0,
           PossibleZeroQ[m1],
-          (m2^2*(5 + 3*Delta + 3*Log[mu^2/m2^2]))/12,
+          (m2^2*(9/2 + 3*Delta + 3*Log[mu^2/m2^2]))/12,
           PossibleZeroQ[m2],
-          (m1^2*(5 + 3*Delta + 3*Log[mu^2/m1^2]))/12,
+          (m1^2*(9/2 + 3*Delta + 3*Log[mu^2/m1^2]))/12,
           PossibleZeroQ[m1 - m2],
           (m2^2*(1 + Delta + Log[mu^2/m2^2]))/2,
           True,
-          ((5 + 3*Delta)*(m1^4 - m2^4) + m1^2*(3*m1^2 + m2^2)*Log[mu^2/m1^2] -
-           m2^2*(m1^2 + 3*m2^2)*Log[mu^2/m2^2])/(12*(m1^2 - m2^2))
+          (A0impl[m2,mu] + m1^2 B0zero[m1, m2, mu] + (m1^2 + m2^2)/2)/4
       ];
 
 DivB22[p_, m1_, m2_, _] := Delta (3*m1^2 + 3*m2^2 - p^2)/12;
@@ -393,9 +393,8 @@ C0analytic[p1_, p2_, m1_, m2_, m3_, mu_] :=
                           ) Log[(1 - y0[i])/(-y0[i])],
                         {i,0,2}] / alpha;
 
-           Limit[result, eps -> 0, Direction -> -1,
-                 Assumptions :> Element[p1, Complexes] || \
-                                Element[p2, Complexes]]
+           Normal @ Series[result, {eps, 0, 0},
+                           Assumptions :> Element[p1, Complexes] || Element[p2, Complexes]]
           ];
 
 (********************* C1 *********************)

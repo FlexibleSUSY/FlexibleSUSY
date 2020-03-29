@@ -13,12 +13,14 @@ LIBFLEXI_SRC := \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/database.cpp \
+		$(DIR)/decay.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/dilogc.f \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/logger.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/numerics.cpp \
@@ -49,11 +51,16 @@ LIBFLEXI_HDR := \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
 		$(DIR)/compound_constraint.hpp \
+		$(DIR)/concatenate.hpp \
 		$(DIR)/constraint.hpp \
 		$(DIR)/convergence_tester.hpp \
 		$(DIR)/convergence_tester_drbar.hpp \
 		$(DIR)/coupling_monitor.hpp \
 		$(DIR)/database.hpp \
+		$(DIR)/decay.hpp \
+		$(DIR)/decay_amplitudes.hpp \
+		$(DIR)/decays_loop_corrections.hpp \
+		$(DIR)/decays_problems.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
 		$(DIR)/effective_couplings.hpp \
@@ -62,6 +69,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/error.hpp \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
+		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/functors.hpp \
 		$(DIR)/global_thread_pool.hpp \
@@ -77,8 +85,10 @@ LIBFLEXI_HDR := \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
 		$(DIR)/model.hpp \
+		$(DIR)/multiindex.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
+		$(DIR)/one_loop_decay_diagrams.hpp \
 		$(DIR)/physical_input.hpp \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \
@@ -151,20 +161,20 @@ all-$(MODNAME): $(LIBFLEXI)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIBFLEXI_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFLEXI_SRC) $(LIBFLEXI_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFLEXI_HDR) $(LIBFLEXI_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFLEXI_MK) $(LIBFLEXI_INSTALL_DIR)
+		$(Q)install -d $(LIBFLEXI_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_SRC) $(LIBFLEXI_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_HDR) $(LIBFLEXI_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFLEXI_MK) $(LIBFLEXI_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIBFLEXI_DEP)
+		$(Q)-rm -f $(LIBFLEXI_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIBFLEXI)
+		$(Q)-rm -f $(LIBFLEXI)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIBFLEXI_OBJ)
+		$(Q)-rm -f $(LIBFLEXI_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		@true
@@ -185,10 +195,12 @@ endif
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
 else
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 endif
 
 ALLDEP += $(LIBFLEXI_DEP)

@@ -28,7 +28,6 @@
 #include "softsusy.h"
 #include "mssmUtils.h"
 #include "nmssm2loop.h"
-#include "nmssm1loop.h"
 #include "nmssmUtils.h"
 
 namespace softsusy {
@@ -525,30 +524,30 @@ virtual  void treeChargedSlepton(DoubleMatrix & mass, double mTrun, double pizzt
   /// whereas mtau is the pole mass used (eg 1.777). mgut is the GUT scale
   /// that has been determined, and altEwsb is true if you specified mu and mA
   /// as input parameters (not tan beta and mH1, mH2).
-  virtual void lesHouchesAccordOutput(ostream & out, const char model[],
+  virtual void lesHouchesAccordOutput(std::ostream & out, const char model[],
 				      const DoubleVector & pars,
 				      int sgnMu, double tanb, double qMax,
 				      int numPoints,
 				      bool ewsbBCscale);
   /// This does the MODSEL block of SLHA
-  void modselSLHA(ostream & out, const char model[]);
+  void modselSLHA(std::ostream & out, const char model[]);
   /// EXTPAR block of SLHA
-  virtual void extparSLHA(ostream & out, const DoubleVector & pars,
+  virtual void extparSLHA(std::ostream & out, const DoubleVector & pars,
 			  bool ewsbBCscale);
   /// higgs part of mass block of SLHA
-  virtual void higgsMSLHA(ostream & out);
+  virtual void higgsMSLHA(std::ostream & out);
   /// neutralino and charigno part of mass block of SLHA
-  virtual void neutralinoCharginoMSLHA(ostream & out);
+  virtual void neutralinoCharginoMSLHA(std::ostream & out);
   /// nmnmix block output of SLHA
-  virtual void neutralinoMixingSLHA(ostream & out);
+  virtual void neutralinoMixingSLHA(std::ostream & out);
   /// CP even mixing matrix NMHMIX block of SLHA
-  void nmhmixSLHA(ostream&);
+  void nmhmixSLHA(std::ostream&);
   /// CP odd mixing matrix NMHMIX block of SLHA
-  void nmamixSLHA(ostream&);
+  void nmamixSLHA(std::ostream&);
   /// NMSSMRUN block of SLHA
-  void nmssmrunSLHA(ostream&);
+  void nmssmrunSLHA(std::ostream&);
   /// outputs DRbar parameters at scale Q (default is at MSUSY)
-  virtual void drbarSLHA(ostream&, int numPoints, double qMax, int n);
+  virtual void drbarSLHA(std::ostream&, int numPoints, double qMax, int n);
 };
 
 inline NmssmSoftsusy::NmssmSoftsusy()

@@ -49,7 +49,7 @@ std::vector<std::string> BVP_solver_problems::get_problem_strings() const
    std::vector<std::string> result;
 
    if (no_convergence())
-      result.push_back(name + " no convergence");
+      result.emplace_back(name + " no convergence");
 
    result.shrink_to_fit();
 

@@ -128,7 +128,7 @@ CreateMinimizationFunctionWrapper[functionName_String, dim_Integer, parameters_L
     Module[{type, stype},
            type  = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
            stype = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
-"auto " <> functionName <> " = [this](const "<> type <> "& x) {
+"auto " <> functionName <> " = [&](const "<> type <> "& x) {
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
@@ -161,7 +161,7 @@ ApplyConstraint[FlexibleSUSY`FSMinimize[parameters_List, function_], modelPrefix
 CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List, modelPrefix_String] :=
     Module[{type},
            type = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
-"auto " <> functionName <> " = [this](const "<> type <> "& x) {
+"auto " <> functionName <> " = [&](const "<> type <> "& x) {
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "

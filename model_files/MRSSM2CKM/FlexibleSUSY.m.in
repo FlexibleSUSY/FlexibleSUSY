@@ -1,0 +1,105 @@
+FSModelName = "MRSSM2CKM";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = MRSSM;
+
+OnlyLowEnergyFlexibleSUSY = True;
+
+MINPAR = {
+    {3, TanBeta}
+};
+
+EXTPAR = {
+    {0, Ms}
+};
+
+EWSBOutputParameters = { mHd2, mHu2, vS, vT };
+FSSolveEWSBTreeLevelFor = EWSBOutputParameters;
+
+SUSYScale = Ms;
+
+SUSYScaleFirstGuess = Ms;
+
+SUSYScaleInput = {
+    {mq2   , MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+    {mu2   , MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+    {md2   , MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+    {ml2   , MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+    {me2   , MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
+    {mS2   , LHInput[mS2]},
+    {mT2   , LHInput[mT2]},
+    {moc2  , LHInput[moc2]},
+    {mRd2  , LHInput[mRd2]},
+    {mRu2  , LHInput[mRu2]},
+    {\[Mu] , 0}, (* non-zero Mu would break R-symmetry *)
+    {B[\[Mu]], LHInput[B[\[Mu]]]},
+    {LamSD , SARAH`LHInput[LamSD]},
+    {LamSU , SARAH`LHInput[LamSU]},
+    {LamTD , SARAH`LHInput[LamTD]},
+    {LamTU , SARAH`LHInput[LamTU]},
+    {MDBS  , LHInput[MDBS] },
+    {MDGoc , LHInput[MDGoc]},
+    {MDWBT , LHInput[MDWBT]},
+    {MuD   , LHInput[MuD]},
+    {MuU   , LHInput[MuU]},
+    {B[MuD], 0}, (* non-zero B[MuD] would break R-symmetry *)
+    {B[MuU], 0}  (* non-zero B[MuU] would break R-symmetry *)
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+    {Yu, Sqrt[2] MatMul[upQuarksDRbar, CKM] / vu},
+    {Yd, Sqrt[2] downQuarksDRbar / vd},
+    {Ye, Sqrt[2] downLeptonsDRbar / vd},
+    {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
+};
+
+InitialGuessAtSUSYScale = {
+    {mq2   , MatMul[Adj[ZDL], LHInput[mq2], ZDL]},
+    {mu2   , MatMul[Tp[ZUR], LHInput[mu2], Conj[ZUR]]},
+    {md2   , MatMul[Tp[ZDR], LHInput[md2], Conj[ZDR]]},
+    {ml2   , MatMul[Adj[ZEL], LHInput[ml2], ZEL]},
+    {me2   , MatMul[Tp[ZER], LHInput[me2], Conj[ZER]]},
+    {mS2   , LHInput[mS2]},
+    {mT2   , LHInput[mT2]},
+    {moc2  , LHInput[moc2]},
+    {mRd2  , LHInput[mRd2]},
+    {mRu2  , LHInput[mRu2]},
+    {\[Mu] , 0}, (* non-zero Mu would break R-symmetry *)
+    {B[\[Mu]], LHInput[B[\[Mu]]]},
+    {MDBS  , LHInput[MDBS] },
+    {MDGoc , LHInput[MDGoc]},
+    {MDWBT , LHInput[MDWBT]},
+    {MuD   , LHInput[MuD]},
+    {MuU   , LHInput[MuU]},
+    {B[MuD], 0}, (* non-zero B[MuD] would break R-symmetry *)
+    {B[MuU], 0}  (* non-zero B[MuU] would break R-symmetry *)
+};
+
+InitialGuessAtLowScale = {
+    {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+    {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic}
+};
+
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`aMuon},
+         {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+         {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+         {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+         {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]},
+         {27, FlexibleSUSYObservable`bsgamma}
+      }
+   }
+};
+
+DefaultPoleMassPrecision = HighPrecision;
+HighPoleMassPrecision    = {hh, Ah, Hpm};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};

@@ -193,14 +193,14 @@ double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
 double PolyLog(int n, double z)
 {
    if (n == 2)
-      return gm2calc::dilog(z);
+      return dilog(z);
    throw SetupError("PolyLog(n!=2) not implemented");
 }
 
 std::complex<double> PolyLog(int n, const std::complex<double>& z)
 {
    if (n == 2)
-      return gm2calc::dilog(z);
+      return dilog(z);
    throw SetupError("PolyLog(n!=2) not implemented");
 }
 

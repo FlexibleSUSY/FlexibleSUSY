@@ -1,0 +1,363 @@
+\documentclass[final,3p,11pt,pdflatex]{elsarticle}
+\usepackage[utf8x]{inputenc}      % input font encoding
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage[T1]{fontenc}          % output font encoding
+\usepackage{booktabs,tabularx}
+\usepackage{graphicx,subfig}
+\usepackage{xspace}
+\usepackage[usenames]{xcolor}\definecolor{fscolor}{RGB}{44,118,255}
+\usepackage{tikz,tikz-uml}
+\usetikzlibrary{arrows,calc,matrix,positioning,shapes}
+\usepackage{listings}
+\usepackage[absolute]{textpos}
+\usepackage[many]{tcolorbox}
+\usepackage{xparse}
+\usepackage[font=small,labelfont=bf,format=plain,margin=0.05\textwidth]{caption}
+\usepackage{bbm}
+\bibstyle{elsarticle-num}
+% source code highlighting
+\lstset{breaklines=true,
+  breakatwhitespace=true,
+  stepnumber=1,
+  basicstyle=\ttfamily\footnotesize,
+  commentstyle=\ttfamily\color{gray},
+  prebreak={\textbackslash},
+  breakindent=10pt,
+  breakautoindent=false,
+  showspaces=false,
+  showstringspaces=false,
+  frame=shadowbox,
+  rulesepcolor=\color{gray},
+  rulesep=0.1em,
+  abovecaptionskip=0em,
+  aboveskip=1.5em,
+  belowcaptionskip=0.5em,
+  belowskip=1em,
+}
+
+\geometry{top=2.2cm,left=3cm,right=3cm,bottom=4cm,footskip=3em}
+
+\usepackage[pdftitle={New features in FlexibleSUSY since version 2.0},
+pdfauthor={Peter Athron, Markus Bach, Dylan Harries, Wojciech
+  Kotlarski, Thomas Kwasnitza, Jae-hyeon Park, Dominik Stockinger,
+  Alexander Voigt, Jobst Ziebell},
+pdfkeywords={FlexibleSUSY,supersymmetry,spectrum,generator,MSSM,NMSSM,E6SSM},
+bookmarks=true, linktocpage, colorlinks=true, allbordercolors=white,
+allcolors=fscolor]{hyperref} \biboptions{sort&compress}
+\allowdisplaybreaks
+
+%macros
+\newcommand{\modelname}[1]{\texttt{#1}\@\xspace}
+\newcommand{\sarah}{\texttt{SARAH}\@\xspace}
+\newcommand{\spheno}{\texttt{SPheno}\@\xspace}
+\newcommand{\suspect}{\texttt{SuSpect}\@\xspace}
+\newcommand{\isasusy}{\texttt{ISASUSY}\@\xspace}
+\newcommand{\suseflav}{\texttt{SuSeFLAV}\@\xspace}
+\newcommand{\nmspec}{\texttt{NMSPEC}\@\xspace}
+\newcommand{\fs}{\texttt{FlexibleSUSY}\@\xspace}
+\newcommand{\fsbreak}{\texttt{Flex\-ib\-le\-SUSY}\@\xspace}
+\newcommand{\HSSUSY}{\modelname{HSSUSY}}
+\newcommand{\susyhd}{\texttt{SusyHD}\@\xspace}
+\newcommand{\MhEFT}{\texttt{MhEFT}\@\xspace}
+\newcommand{\softsusy}{\texttt{SOFTSUSY}\@\xspace}
+\newcommand{\micromegas}{\texttt{micrOMEGAS}\@\xspace}
+\newcommand{\darksusy}{\texttt{DarkSUSY}\@\xspace}
+\newcommand{\calchep}{\texttt{CALCHEP}\@\xspace}
+\newcommand{\lanhep}{\texttt{LANHEP}\@\xspace}
+\newcommand{\madgraph}{\texttt{MadGraph}\@\xspace}
+\newcommand{\whizard}{\texttt{WHIZARD}\@\xspace}
+\newcommand{\sherpa}{\texttt{SHERPA}\@\xspace}
+\newcommand{\TSIL}{\texttt{TSIL}\@\xspace}
+\newcommand{\LoopTools}{\texttt{LoopTools}\@\xspace}
+\newcommand{\FAFC}{\texttt{FeynArts}\@\xspace}
+\newcommand{\helac}{\texttt{HELAC}\@\xspace}
+\newcommand{\herwig}{\texttt{HERWIG}\@\xspace}
+\newcommand{\pythia}{\texttt{PYTHIA}\@\xspace}
+\newcommand{\checkmate}{\texttt{CheckMate}\@\xspace}
+\newcommand{\madanalysis}{\texttt{MadAnalysis}\@\xspace}
+\newcommand{\smodels}{\texttt{SModelS}\@\xspace}
+\newcommand{\fastlim}{\texttt{Fastlim}\@\xspace}
+\newcommand{\colliderbit}{\texttt{ColliderBit}\@\xspace}
+\newcommand{\higgsbounds}{\texttt{HiggsBounds}\@\xspace}
+\newcommand{\higgssignals}{\texttt{HiggsSignals}\@\xspace}
+\newcommand{\htm}{\texttt{H3m}\@\xspace}
+\newcommand{\Himalaya}{\texttt{Himalaya}\@\xspace}
+\newcommand{\FeynHiggs}{\texttt{FeynHiggs}\@\xspace}
+\newcommand{\FeynRules}{\texttt{FeynRules}\@\xspace}
+\newcommand{\NMSSMCalc}{\texttt{NMSSMCalc}\@\xspace}
+\newcommand{\multinest}{\texttt{MultiNest}\@\xspace}
+\newcommand{\CPsuperH}{\texttt{CPsuperH}\@\xspace}
+\newcommand{\GAMBIT}{\texttt{GAMBIT}\@\xspace}
+\newcommand{\GMTCalc}{\texttt{GM2Calc}\@\xspace}
+\newcommand{\fsone}{\fs 1.0\@\xspace}
+\newcommand{\fstwo}{\fs 2.0\@\xspace}
+\newcommand{\fsh}{\texttt{FlexibleSUSY+}\Himalaya\xspace}
+\newcommand{\fbsm}{\texttt{FlexibleBSM}\@\xspace}
+\newcommand{\fcpv}{\texttt{FlexibleCPV}\@\xspace}
+\newcommand{\fmw}{\texttt{FlexibleMW}\@\xspace}
+\newcommand{\famu}{\texttt{FlexibleAMU}\@\xspace}
+\newcommand{\fsas}{\texttt{FlexibleSAS}\@\xspace}
+\newcommand{\feft}{\texttt{Flex\-ib\-le\-EFT\-Higgs}\@\xspace}
+\newcommand{\mathematica}{\texttt{Ma\-the\-ma\-ti\-ca}\xspace}
+\newcommand{\LibraryLink}{\texttt{LibraryLink}\xspace}
+\newcommand{\ESSM}{E$_6$SSM\@\xspace}
+\newcommand{\code}[1]{\lstinline|#1|}  % inline source code
+\newcommand{\ol}[1]{\overline{#1}}
+\newcommand{\MSbar}{\ensuremath{\ol{\text{MS}}}\xspace}
+\newcommand{\DRbar}{\ensuremath{\ol{\text{DR}}}\xspace}
+\newcommand{\MDRbar}{\ensuremath{\ol{\text{MDR}}}\xspace}
+\newcommand{\unit}[1]{\,\text{#1}}      % units
+\newcommand{\userinput}{\text{input}}
+\newcommand{\pole}{\text{pole}}
+\newcommand{\Lagr}{\mathcal{L}}
+\newcommand{\SM}{\ensuremath{\text{SM}}\xspace}
+\newcommand{\BSM}{\ensuremath{\text{BSM}}\xspace}
+\newcommand{\THDM}{\ensuremath{\text{THDM}}\xspace}
+\newcommand{\THDMII}{\ensuremath{\text{THDM-II}}\xspace}
+\newcommand{\MSSM}{\ensuremath{\text{MSSM}}\xspace}
+\newcommand{\MS}{\ensuremath{M_S}\xspace}
+\newcommand{\MLCP}{\ensuremath{M_\text{LCP}}\xspace}
+\newcommand{\MEWSB}{\ensuremath{M_\text{EWSB}}\xspace}
+\newcommand{\Qmatch}{\ensuremath{Q_\text{match}}}
+\newcommand{\QpoleBSM}{\ensuremath{Q_\text{pole,BSM}}}
+\newcommand{\QpoleSM}{\ensuremath{Q_\text{pole,SM}}}
+\newcommand{\QED}{\ensuremath{\text{QED}}}
+\newcommand{\unity}{\mathbf{1}}
+\newcommand{\amu}{\ensuremath{a_\mu}\xspace}
+\newcommand{\amuBSM}{\ensuremath{\amu^{\BSM}}\xspace}
+\newcommand{\amuMSSM}{\ensuremath{\amu^{\MSSM}}\xspace}
+\newcommand{\edm}[1]{\ensuremath{d_{#1}}\xspace}
+\newcommand{\edmBSM}[1]{\ensuremath{\edm{#1}^{\BSM}}\xspace}
+\newcommand{\deltaVB}{\ensuremath{\delta_{\text{VB}}}\xspace}
+\newcommand{\figref}[1]{\figurename~\ref{#1}}
+\newcommand{\secref}[1]{Section~\ref{#1}}
+\newcommand{\appref}[1]{Appendix~\ref{#1}}
+\newcommand{\tabref}[1]{\tablename~\ref{#1}}
+\newcommand{\exref}[1]{Example~\ref{#1}}
+\newcommand{\ptitle}[1]{\emph{#1}}
+\renewcommand{\ptitle}[1]{}
+\newcommand{\Zv}{\mathbf{\backslash}\mkern-11.0mu{Z}}
+\newcommand{\scoeff}[2]{[ c^{#1}_{#2}(Q) ]}
+\newcommand{\barlog}{\overline{\log}}
+\newcommand{\GSM}{\ensuremath{G_{\SM}}\xspace}
+\newcommand{\CP}{\ensuremath{CP}\xspace}
+\newcommand{\azero}{\ensuremath{A_0}\xspace}
+\newcommand{\mhalf}{\ensuremath{M_{1/2}}\xspace}
+\newcommand{\mzero}{\ensuremath{m_0}\xspace}
+\newcommand{\SQCD}{SUSY-QCD\xspace}
+
+\newcommand{\multilinecell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\newtcolorbox[
+  auto counter
+]{example}[1][]{%
+  breakable,
+  before skip=1em,
+  after skip=1em,
+  enhanced,
+  colback=white,
+  colbacktitle=white,
+  arc=0pt,
+  leftrule=1.5pt,
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  titlerule=0.5pt,
+  colframe=fscolor,
+  fonttitle=\bfseries\normalcolor,
+  overlay={},
+  parbox=false,
+  title=Example~\thetcbcounter,
+  #1
+}
+
+% comments
+\newcommand{\avnote}[1]{\textcolor{blue}{AV: #1}}
+\newcommand{\dhnote}[1]{\textcolor{green}{DH: #1}}
+\newcommand{\panote}[1]{\textcolor{red}{PA: #1}}
+\newcommand{\jpnote}[1]{\textcolor{magenta}{JP: #1}}
+\newcommand{\mbnote}[1]{\textcolor{orange}{MB: #1}}
+
+\NewDocumentEnvironment{OptionTable}{m m O{llXX}}{%
+\table[tbh!]
+  \tabularx{\textwidth}{#3}%
+    \toprule
+    Symbol & Default value & Allowed values & Description \\
+    \midrule
+}{\endtabularx\caption{#1}\label{#2}\endtable}
+
+\makeatletter
+\lstnewenvironment{numlstlisting}[1][]{%
+  \lstset{%
+    #1,
+    numbers=left,
+    firstnumber=auto,
+    numberstyle=\tiny\sffamily}%
+  \csname\@lst @SetFirstNumber\endcsname
+}{%
+  \csname \@lst @SaveFirstNumber\endcsname
+}
+\makeatother
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\re}{Re}
+\DeclareMathOperator{\im}{Im}
+\def\at{\alpha_t}
+\def\ab{\alpha_b}
+\def\as{\alpha_s}
+\def\atau{\alpha_{\tau}}
+\def\aem{\alpha_{\text{em}}}
+\def\oat{O(\at)}
+\def\oab{O(\ab)}
+\def\oatau{O(\atau)}
+\def\oatab{O(\at\ab)}
+\def\oatas{O(\at\as)}
+\def\oabas{O(\ab\as)}
+\def\oatababq{O(\at\ab + \ab^2)}
+\def\oatqatababq{O(\at^2 + \at\ab + \ab^2)}
+\def\oatasatq{O(\at\as + \at^2)}
+\def\oatasabas{O(\at\as +\ab\as)}
+\def\oatasabasatq{O(\at\as + \at^2 +\ab\as)}
+\def\oatq{O(\at^2)}
+\def\oabq{O(\ab^2)}
+\def\oatauq{O(\atau^2)}
+\def\oabatau{O(\ab \atau)}
+\def\oatplusabsq{O((\at+\ab)^2)}
+\def\oas{O(\as)}
+\def\oatauqatab{O(\atau^2 +\ab \atau )}
+
+\journal{Computer Physics Communications}
+\begin{document}
+\begin{frontmatter}
+ \vspace*{0.5cm}
+ \title{\Large\bf New features in FlexibleSUSY since version 2.0}
+
+\author[Monash]{Peter Athron}
+\author[dresden]{Markus Bach}
+\author[adelaide,prague]{Dylan Harries}
+\author[dresden]{Wojciech Kotlarski}
+\author[dresden]{Thomas Kwasnitza}
+\author[kiasquc]{Jae-hyeon Park}
+\author[dresden]{Dominik St\"ockinger}
+\author[rwth]{Alexander Voigt\corref{cor1}}
+\ead{Alexander.Voigt@physik.rwth-aachen.de}
+\cortext[cor1]{Corresponding author}
+\author[dresden]{Jobst Ziebell}
+\address[Monash]{ARC Centre of Excellence for Particle Physics at
+  the Terascale, School of Physics, Monash University, Melbourne,
+  Victoria 3800, Australia}
+\address[dresden]{Institut f\"ur Kern- und Teilchenphysik,
+TU Dresden, Zellescher Weg 19, 01069 Dresden, Germany}
+\address[adelaide]{ARC Centre of Excellence for Particle Physics at
+the Terascale, Department of Physics, The University of Adelaide,
+Adelaide, South Australia 5005, Australia}
+\address[prague]{Institute of Particle and Nuclear Physics, Faculty of
+  Mathematics and Physics, Charles University in Prague, V
+  Hole\v{s}ovi\v{c}k\'{a}ch 2, 180 00 Praha 8, Czech Republic}
+\address[kiasquc]{Quantum Universe Center,
+Korea Institute for Advanced Study,
+85 Hoegiro Dongdaemungu,
+Seoul 02455, Republic of Korea}
+\address[rwth]{Institute for Theoretical Particle Physics and Cosmology, RWTH Aachen University, 52074 Aachen, Germany}
+
+  \begin{abstract}
+    We document major new features and improvements of \fs
+    \cite{Athron:2014yba,Athron:2017fvs}, a \mathematica and C++
+    package with a dependency on the external package \sarah, that
+    generates fast and precise spectrum generators.
+  \end{abstract}
+
+\begin{keyword}
+sparticle,
+supersymmetry,
+Higgs,
+renormalization group equations
+\PACS 12.60.Cn, 12.60.Fr, 12.60.Jv, 12.60.-i
+\PACS 14.80.Bn, 14.80.Da, 14.80.Ec, 14.80.Fd, 14.80.Ly, 14.80.Nb, 14.80.Sv
+\end{keyword}
+\end{frontmatter}
+
+% report numbers
+\begin{textblock*}{10em}(\textwidth,1.5cm)
+\raggedleft\noindent\footnotesize
+KIAS--Q17043 \\
+TTK--17--31 \\
+CoEPP--MN--17--16
+\end{textblock*}
+
+\clearpage
+\newgeometry{top=2.5cm,left=3cm,right=3cm,bottom=4cm,footskip=3em}
+\section*{New version program summary}
+\noindent
+{\em Program title:} \fs\\[0.5em]
+{\em Licensing provisions:} GPLv3\\[0.5em]
+{\em Program obtainable from:} \url{http://flexiblesusy.hepforge.org/}\\[0.5em]
+{\em Programming language:} C++, Wolfram/Mathematica, FORTRAN, Bourne shell\\[0.5em]
+{\em Operating system:} Tested on FreeBSD, Linux, Mac OS X, Windows/Cygwin\\[0.5em]
+{\em External routines:} \sarah, Boost library, Eigen library, GNU Scientific Library\\[0.5em]
+{\em Optional external routines:} Himalaya, LoopTools, SQLite, TSIL\\[0.5em]
+{\em Journal reference of previous version:} Comput.Phys.Commun.\ 230 (2018) 145-217\\[0.5em]
+{\em Does the new version supersede the previous version?:} yes \\[0.5em]
+{\em Reasons for the new version:} Program extension including new models, observables and algorithms\\[0.5em]
+{\em Summary of revisions:} $\mu\to e\gamma$\\[0.5em]
+{\em Nature of problem:}
+%
+Determining the mass spectrum, mixings and further observables for an
+arbitrary extension of the Standard Model, input by the user. The
+generated code must find simultaneous solutions to constraints that
+are specified at two or more different renormalization scales, which
+are connected by renormalization group equations forming a large set
+of coupled first-order differential
+equations. \\[0.5em]
+%
+{\em Solution method:}
+%
+Nested iterative algorithm and numerical
+minimization of the Higgs potential.\\[0.5em]
+%
+{\em Restrictions:}
+%
+The couplings must remain perturbative at all scales between the
+highest and lowest boundary condition.  Tensor-like Lagrangian
+parameters of rank 3 are currently not supported.  The automatic
+determination of the Standard Model-like gauge and Yukawa couplings is
+only supported for models that have the Standard Model gauge group
+$SU(3)_C\times SU(2)_L\times U(1)_Y$ as a gauge symmetry group factor.
+However, due to the modular nature of the generated code, adapting and
+extending it to overcome restrictions in scope is quite straightforward.
+
+\clearpage
+\tableofcontents
+
+\clearpage
+\section{External libraries}
+
+\subsection{New mandatory external libraries}
+
+Since version X.Y.Z \fs requires the following additional libraries to
+be installed:
+%
+\begin{itemize}
+\item \LoopTools: required for calculating the 1-loop decays.
+\end{itemize}
+
+\subsection{New optional external libraries}
+
+\begin{itemize}
+\item \TSIL: Since version X.Y.Z \fs can calculate 2-loop corretions
+  to SM \MSbar top quark mass of the order $O(\at\as + \at^2)$ from
+  Ref.~\cite{Martin:2016xsp}.  The calculation of these corrections
+  requires linking the \TSIL library \cite{Martin:2005qm} to \fs.
+\end{itemize}
+
+\clearpage
+\section{$\mu\to e\gamma$}
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\bibliographystyle{JHEP}
+\bibliography{flexiblesusy-new_features}
+
+\end{document}

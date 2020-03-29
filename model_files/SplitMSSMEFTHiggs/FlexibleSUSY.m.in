@@ -1,0 +1,264 @@
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SplitMSSM;
+FlexibleEFTHiggs = True;
+
+(* input parameters *)
+
+MINPAR = {};
+
+EXTPAR = {
+    {0, MSUSY},
+    {1, M1Input},
+    {2, M2Input},
+    {3, M3Input},
+    {4, MuInput},
+    {5, mAInput},
+    {6, MEWSB},
+    {7, AtInput},
+    {25, TanBeta},
+    {100, LambdaLoopOrder}
+};
+
+FSAuxiliaryParameterInfo = {
+    {msq2, { LesHouches -> MSQ2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msu2, { LesHouches -> MSU2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msd2, { LesHouches -> MSD2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {msl2, { LesHouches -> MSL2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {mse2, { LesHouches -> MSE2IN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } }
+};
+
+EWSBOutputParameters = { mu2 };
+
+(* The high scale where we match to the MSSM *)
+HighScale = MSUSY;
+
+HighScaleFirstGuess = MSUSY;
+
+HighScaleInput = {
+    {\[Lambda], lambdaTree
+                + UnitStep[LambdaLoopOrder-1] (lambda1LReg + lambda1LPhi)
+                + UnitStep[LambdaLoopOrder-2] (
+                  If[IsCloseRel[msq2[3,3],msu2[3,3],0.01],
+                     lambda2LPhiMSqMSuDegenerate, lambda2LPhiFull])},
+    {gYu      , gYuTree + UnitStep[LambdaLoopOrder-1] gYu1L},
+    {gYd      , gYdTree + UnitStep[LambdaLoopOrder-1] gYd1L},
+    {g2u      , g2uTree + UnitStep[LambdaLoopOrder-1] g2u1L},
+    {g2d      , g2dTree + UnitStep[LambdaLoopOrder-1] g2d1L}
+};
+
+(* The scale where we impose the EWSB conditions
+   and calculate the spectrum *)
+SUSYScale = Max[Abs[MuInput], Abs[M2Input]];
+
+SUSYScaleFirstGuess = SUSYScale;
+
+SUSYScaleInput = {
+   {\[Mu] , MuInput},
+   {MassB , M1Input},
+   {MassWB, M2Input},
+   {MassG , M3Input}
+};
+
+InitialGuessAtSUSYScale = SUSYScaleInput;
+
+LowScale = LowEnergyConstant[MT];
+
+LowScaleFirstGuess = LowEnergyConstant[MT];
+
+MatchingScaleInput = {
+    {v, VEV / Sqrt[2]}
+};
+
+DefaultPoleMassPrecision = HighPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+
+OnlyLowEnergyFlexibleSUSY = False;
+UseSM3LoopRGEs = True;
+UseHiggs2LoopSM = True;
+UseHiggs3LoopSplit = True;
+
+SARAH`ParameterDefinitions = Append[
+    Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
+    {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
+];
+
+(*** Split-MSSM boundary conditions to the MSSM ***)
+(* Taken from arXiv:1407.4081 *)
+
+(* abbreviations *)
+xQU = Sqrt[Abs[msq2[3,3]/msu2[3,3]]];
+At = AtInput;
+xt = At - \[Mu]/TanBeta;
+xtt = xt^2/Sqrt[Abs[msq2[3,3] msu2[3,3]]];
+
+(* arXiv:1407.4081, Eq. (3) *)
+lambdaTree = 1/4 (g2^2 + 3/5 g1^2) Cos[2 ArcTan[TanBeta]]^2;
+
+(* arXiv:1407.4081, Eq. (9) *)
+lambda1LReg = 1/(4 Pi)^2 (
+    - 0.09 g1^4 - 0.3 g1^2 g2^2
+    - (0.75 - Cos[2 ArcTan[TanBeta]]^2/6) * g2^4
+    );
+
+(* arXiv:1407.4081, Eq. (10) *)
+lambda1LPhi = 1/(4 Pi)^2 (
+    3 Yu[3,3]^2 (Yu[3,3]^2 + 0.5 (g2^2-g1^2/5) Cos[2 ArcTan[TanBeta]]) Log[msq2[3,3]/SCALE^2]
+    + 3 Yu[3,3]^2 (Yu[3,3]^2 + 0.4 g1^2 Cos[2 ArcTan[TanBeta]]) Log[msu2[3,3]/SCALE^2]
+    + Cos[2 ArcTan[TanBeta]]^2/300 (
+        3 (g1^4 + 25 g2^4) (
+            + Log[msq2[1,1]/SCALE^2]
+            + Log[msq2[2,2]/SCALE^2]
+            + Log[msq2[3,3]/SCALE^2]
+        )
+        + 24 g1^4 (
+            + Log[msu2[1,1]/SCALE^2]
+            + Log[msu2[2,2]/SCALE^2]
+            + Log[msu2[3,3]/SCALE^2]
+        )
+        + 6 g1^4 (
+            + Log[msd2[1,1]/SCALE^2]
+            + Log[msd2[2,2]/SCALE^2]
+            + Log[msd2[3,3]/SCALE^2]
+        )
+        + (9 g1^4 + 25 g2^4) (
+            + Log[msl2[1,1]/SCALE^2]
+            + Log[msl2[2,2]/SCALE^2]
+            + Log[msl2[3,3]/SCALE^2]
+        )
+        + 18 g1^4 (
+            + Log[mse2[1,1]/SCALE^2]
+            + Log[mse2[2,2]/SCALE^2]
+            + Log[mse2[3,3]/SCALE^2]
+        )
+    )
+    + 1/4800 (261 g1^4 + 630 g1^2 g2^2 + 1325 g2^4
+              -4 Cos[4 ArcTan[TanBeta]] (9 g1^4 + 90 g1^2 g2^2 + 175 g2^4)
+              -9 Cos[8 ArcTan[TanBeta]] (3 g1^2 + 5 g2^2)^2) Log[mAInput^2/SCALE^2]
+    - 3/16 (3/5 g1^2 + g2^2)^2 Sin[4 ArcTan[TanBeta]]^2
+    + 6 Yu[3,3]^4 xtt (TCF[1][xQU] - xtt/12 TCF[2][xQU])
+    + 3/4 Yu[3,3]^2 xtt Cos[2 ArcTan[TanBeta]] (3/5 g1^2 TCF[3][xQU] + g2^2 TCF[4][xQU])
+    - 0.25 Yu[3,3]^2 xtt Cos[2 ArcTan[TanBeta]]^2 (3/5 g1^2 + g2^2) TCF[5][xQU]
+    );
+
+(* arXiv:1407.4081, Eq. (35),
+   Valid in the limit MSUSY = MQ[3,3] = MU[3,3] *)
+lambda2LPhiDegenerate = - (g3^2 Yu[3,3]^4)/(32 Pi^4) (
+    3 - 2 xtt + xtt^2 / 6
+);
+
+(* arXiv:1407.4081, Eq. (34) in the limit MSUSY != MQ[3,3] = MU[3,3]
+   Limit[lambda2LPhiFull, xQU -> 1] *)
+lambda2LPhiMSqMSuDegenerate = (
+    (g3^2*(-18 + 12*xtt - xtt^2 + 6*(4 - 12*xtt + xtt^2)*
+           Log[msq2[3, 3]/SCALE^2] - 36*Log[msq2[3, 3]/SCALE^2]^2)*
+     Yu[3, 3]^4)/(192*Pi^4)
+);
+
+(* arXiv:1407.4081, Eq. (34) *)
+lambda2LPhiFull = - (g3^2 Yu[3,3]^4)/(32 Pi^4) (
+    3
+    + 4 Log[xQU]
+    + 8 Log[xQU]^2
+    + 6 (Log[msq2[3,3]/SCALE^2])^2
+    - 4 (1 + 3 Log[xQU]) Log[msq2[3,3]/SCALE^2]
+    + xtt (
+        + (12 xQU Log[xQU])/(xQU^2 - 1) (2 Log[msq2[3,3]/SCALE^2] - 1)
+        - (16 xQU (xQU^2 - 2) Log[xQU]^2)/(xQU^2 - 1)^2
+    )
+    + xtt^2 (
+        + (6 xQU^2 (5 + xQU^2) Log[xQU])/(xQU^2 - 1)^3
+        + (4 xQU^2 (xQU^4 - 4 xQU^2 - 5) (Log[xQU])^2)/(xQU^2 - 1)^4
+        - (10 xQU^2)/(xQU^2 - 1)^2
+        + (12 xQU^2)/(xQU^2 - 1)^2 (1 - (xQU^2 + 1)/(xQU^2 - 1) Log[xQU]) Log[msq2[3,3]/SCALE^2]
+    )
+);
+
+(* arXiv:1407.4081, Eq. (5) *)
+gYuTree = Sqrt[3/5] g1 Sin[ArcTan[TanBeta]];
+gYdTree = Sqrt[3/5] g1 Cos[ArcTan[TanBeta]];
+g2uTree = g2 Sin[ArcTan[TanBeta]];
+g2dTree = g2 Cos[ArcTan[TanBeta]];
+
+(* arXiv:1407.4081, Eq. (17) *)
+gYu1L = 1/(4 Pi)^2 g1 Sqrt[3/5] Sin[ArcTan[TanBeta]] (
+    (3 g2^2/16) (-2 + 7 Cos[ArcTan[TanBeta]]^2)
+     + (3 g1^2/80) (-44 + 7 Cos[ArcTan[TanBeta]]^2)
+     + (9 Yu[3,3]^2)/(4 Sin[ArcTan[TanBeta]]^2)
+     + (4 g1^2 - 9 (g1^2 + 5 g2^2) Cos[ArcTan[TanBeta]]^2)/40 Log[mAInput^2/SCALE^2]
+     + (g1^2/10) (
+         +   Log[msl2[1,1]/SCALE^2] +   Log[msl2[2,2]/SCALE^2] +   Log[msl2[3,3]/SCALE^2]
+         + 2 Log[mse2[1,1]/SCALE^2] + 2 Log[mse2[2,2]/SCALE^2] + 2 Log[mse2[3,3]/SCALE^2]
+     )
+     + (g1^2/30) (
+         +   Log[msq2[1,1]/SCALE^2] +   Log[msq2[2,2]/SCALE^2] +   Log[msq2[3,3]/SCALE^2]
+         + 8 Log[msu2[1,1]/SCALE^2] + 8 Log[msu2[2,2]/SCALE^2] + 8 Log[msu2[3,3]/SCALE^2]
+         + 2 Log[msd2[1,1]/SCALE^2] + 2 Log[msd2[2,2]/SCALE^2] + 2 Log[msd2[3,3]/SCALE^2]
+     )
+     + Yu[3,3]^2/(4 Sin[ArcTan[TanBeta]]^2) (7 Log[msq2[3,3]/SCALE^2] - 13 Log[msu2[3,3]/SCALE^2])
+);
+
+(* arXiv:1407.4081, Eq. (18) *)
+gYd1L = 1/(4 Pi)^2 g1 Sqrt[3/5] Cos[ArcTan[TanBeta]] (
+    (3 g2^2/16) (-2 + 7 Sin[ArcTan[TanBeta]]^2)
+     + (3 g1^2/80) (-44 + 7 Sin[ArcTan[TanBeta]]^2)
+     + (4 g1^2 - 9 (g1^2 + 5 g2^2) Sin[ArcTan[TanBeta]]^2)/40 Log[mAInput^2/SCALE^2]
+     + (g1^2/10) (
+         +   Log[msl2[1,1]/SCALE^2] +   Log[msl2[2,2]/SCALE^2] +   Log[msl2[3,3]/SCALE^2]
+         + 2 Log[mse2[1,1]/SCALE^2] + 2 Log[mse2[2,2]/SCALE^2] + 2 Log[mse2[3,3]/SCALE^2]
+     )
+     + (g1^2/30) (
+         +   Log[msq2[1,1]/SCALE^2] +   Log[msq2[2,2]/SCALE^2] +   Log[msq2[3,3]/SCALE^2]
+         + 8 Log[msu2[1,1]/SCALE^2] + 8 Log[msu2[2,2]/SCALE^2] + 8 Log[msu2[3,3]/SCALE^2]
+         + 2 Log[msd2[1,1]/SCALE^2] + 2 Log[msd2[2,2]/SCALE^2] + 2 Log[msd2[3,3]/SCALE^2]
+     )
+);
+
+(* arXiv:1407.4081, Eq. (15) *)
+g2u1L = 1/(4 Pi)^2 g2 Sin[ArcTan[TanBeta]] (
+     - g2^2 (2/3 + 11/16 Cos[ArcTan[TanBeta]]^2)
+     + 3 g1^2/80 (-2 + 7 Cos[ArcTan[TanBeta]]^2)
+     + 9 Yu[3,3]^2/(4 Sin[ArcTan[TanBeta]]^2)
+     + (20 g2^2 + 3 (-9 g1^2 + 35 g2^2) Cos[ArcTan[TanBeta]]^2)/120 Log[mAInput^2/SCALE^2]
+     + g2^2/6 (
+         + Log[msl2[1,1]/SCALE^2]
+         + Log[msl2[2,2]/SCALE^2]
+         + Log[msl2[3,3]/SCALE^2]
+     )
+     + g2^2/2 (
+         + Log[msq2[1,1]/SCALE^2]
+         + Log[msq2[2,2]/SCALE^2]
+         + Log[msq2[3,3]/SCALE^2]
+     )
+     - 0.75 Yu[3,3]^2/Sin[ArcTan[TanBeta]]^2 (3 Log[msq2[3,3]/SCALE^2] - Log[msu2[3,3]/SCALE^2])
+);
+
+(* arXiv:1407.4081, Eq. (16) *)
+g2d1L = 1/(4 Pi)^2 g2 Cos[ArcTan[TanBeta]] (
+     - g2^2 (2/3 + 11/16 Sin[ArcTan[TanBeta]]^2)
+     + (3 g1^2/80) (-2 + 7 Sin[ArcTan[TanBeta]]^2)
+     + (g2^2/2) Log[msq2[1,1]/SCALE^2]
+     + (g2^2/2) Log[msq2[2,2]/SCALE^2]
+     + (g2^2/2) Log[msq2[3,3]/SCALE^2]
+     + (20 g2^2 + 3 (-9 g1^2 + 35 g2^2) Sin[ArcTan[TanBeta]]^2)/120 Log[mAInput^2/SCALE^2]
+     + (g2^2/6) Log[msl2[1,1]/SCALE^2]
+     + (g2^2/6) Log[msl2[2,2]/SCALE^2]
+     + (g2^2/6) Log[msl2[3,3]/SCALE^2]
+);

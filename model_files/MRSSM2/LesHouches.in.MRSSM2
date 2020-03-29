@@ -1,4 +1,5 @@
 Block MODSEL                 # Select model
+    6   1                    # flavour violation
 #   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
@@ -53,6 +54,18 @@ Block SMINPUTS               # Standard Model inputs
    22   2.400000000e-03      # mu(2 GeV) MS-bar
    23   1.040000000e-01      # ms(2 GeV) MS-bar
    24   1.270000000e+00      # mc(mc) MS-bar
+Block VCKMIN                 # CKM matrix input (Wolfenstein parameters)
+    1   2.272000000e-01      # lambda(MZ) SM DR-bar
+    2   8.180000000e-01      # A(MZ) SM DR-bar
+    3   2.210000000e-01      # rhobar(MZ) SM DR-bar
+    4   3.400000000e-01      # etabar(MZ) SM DR-bar
+# Block UPMNSIN                # PMNS matrix input
+#     1   5.837630000e-01      # theta_12
+#     2   7.695840000e-01      # theta_23
+#     3   1.549480000e-01      # theta_13
+#     4   0.000000000e+00      # delta
+#     5   0.000000000e+00      # alpha_1
+#     6   0.000000000e+00      # alpha_2
 Block MINPAR
    3   5         # TanBeta
 Block EXTPAR

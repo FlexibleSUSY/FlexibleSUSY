@@ -49,12 +49,12 @@ int integrateOdes(DoubleVector & ystart, double from, double to, double eps,
     if (fabs(hnext) <= hmin) {
       nstp = MAXSTP; // bail out
       if (PRINTOUT > 1) {
-	cout << "Step size too small in rk_legacy.cpp:integrateOdes\n";
-	cout << "**********x = " << x << "*********\n";
+	std::cout << "Step size too small in rk_legacy.cpp:integrateOdes\n";
+	std::cout << "**********x = " << x << "*********\n";
 	for (i = 1;i<= nvar;i++) 
-	  cout << "y(" << i << ") = " << y(i) << " dydx(" << i <<
-	    ") = " << dydx(i) << endl;
-	cout.flush();
+	  std::cout << "y(" << i << ") = " << y(i) << " dydx(" << i <<
+	    ") = " << dydx(i) << std::endl;
+	std::cout.flush();
       }
     }
     
@@ -62,12 +62,12 @@ int integrateOdes(DoubleVector & ystart, double from, double to, double eps,
   }
   
   if (PRINTOUT > 1) {
-    cout << "Bailed out of rk_legacy.cpp:too many steps in integrateOdes\n";
-    cout << "**********x = " << x << "*********\n";
+    std::cout << "Bailed out of rk_legacy.cpp:too many steps in integrateOdes\n";
+    std::cout << "**********x = " << x << "*********\n";
     for (i = 1;i<= nvar;i++) 
-      cout << "y(" << i << ") = " << y(i) << " dydx(" << i <<
-	") = " << dydx(i) << endl;
-    cout.flush();
+      std::cout << "y(" << i << ") = " << y(i) << " dydx(" << i <<
+	") = " << dydx(i) << std::endl;
+    std::cout.flush();
   }
   
   return 1;
@@ -97,8 +97,8 @@ int odeStepper(DoubleVector & y, const DoubleVector & dydx, double *x, double
     if (xnew == *x) 
       {
 	if (PRINTOUT) {
-	cout << "At x = " << *x;
-	cout << ",stepsize underflow in odeStepper" << flush << endl;
+	std::cout << "At x = " << *x;
+	std::cout << ",stepsize underflow in odeStepper" << std::flush << std::endl;
 	}
 	return 1;
       }

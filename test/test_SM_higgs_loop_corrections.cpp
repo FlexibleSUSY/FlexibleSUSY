@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( test_SM_1loop_alpha_t )
    const double scale2 = Sqr(scale);
    const double v = m.get_v();
 
-   const double se_smh = delta_mh_1loop_at_sm(
+   const double se_smh = -delta_mh_1loop_at_sm(
       p, scale, mt, yt);
 
    // top loop for p = 0, Drees p. 8
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_SM_1loop_full )
    const double g2 = m.get_g2() * SM_info::normalization_g2;
    const double lambda = m.get_Lambdax()/2;
 
-   const double se_smh = delta_mh_1loop_sm(
+   const double se_smh = -delta_mh_1loop_sm(
       p, scale, mt, yt, v, gY, g2, lambda);
 
    m.set_scale(scale);

@@ -166,22 +166,57 @@ tadpoles = {S1, S2};
 selfEnergy = {S11, S12, S22} /. s2t -> 0 /. c2t -> 1;
 
 (* Limits *)
-(* s2t -> 0 *)
 
+(* s2t -> 0 *)
 tadpolesS2t0 =
     Simplify[Limit[tadpoles, s2t -> 0] /. c2t -> 1 /. Xt -> 0];
 
 (* s2t -> 0 and mst1 -> mst2 *)
 tadpolesS2t0T1eqT2 =
-    Simplify[Normal /@
-             Series[tadpolesS2t0 /. phi -> phiExpr /. T1 -> T2 + eps,
-                    {eps, 0, 0}] /. T2 -> T];
+    Simplify[Normal[
+             Series[tadpolesS2t0 /. T1 -> T2 + eps,
+                    {eps, 0, 0}]] /. T2 -> T];
 
 (* s2t -> 0 and mst1 -> mst2 *)
 selfEnergyS2t0T1eqT2 = 
-    Simplify[Normal /@
-             Series[selfEnergy /. T1 -> T2 + eps, {eps, 0, 0}] /. T2 -> T];
+    Simplify[Normal[
+             Series[selfEnergy /. T1 -> T2 + eps,
+                    {eps, 0, 0}]] /. T2 -> T];
 
-Print[CForm /@ FullSimplify[tadpolesS2t0]];
-Print[CForm /@ Simplify[tadpolesS2t0T1eqT2]];
-Print[CForm /@ Simplify[selfEnergyS2t0T1eqT2]];
+gs /: gs^2 = gs2;
+ht /: ht^2 = ht2;
+mt /: mt^2 = mt2;
+g  /: g^2  = g2;
+t  /: t^2  = t2;
+t  /: t^3  = t3;
+T  /: T^2  = Tsqr;
+T  /: T^3  = Tcub;
+
+simp1 = {
+    Log[t/g] -> ltg,
+    Log[T/g] -> lTg,
+    Log[T/q] -> lTq,
+    Log[T1/q]-> lT1q,
+    Log[T2/q]-> lT2q,
+    Log[t/q] -> ltq,
+    Log[g/q] -> lgq,
+    Log[Tsqr/t2] -> lT2t2,
+    Log[g t/q^2] -> lgtq2
+};
+
+simp2 = {
+    a_^2 :> sqr[a],
+    a_^-2 :> 1/sqr[a]
+};
+
+(* simplify CP-even tadpole s2t = 0 *)
+pref = mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ FullSimplify[1/pref tadpolesS2t0 //. simp1] //. simp1 //. simp2];
+
+(* simplify CP-even tadpole s2t = 0 and T1 = T2 *)
+pref = mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ Simplify[1/pref tadpolesS2t0T1eqT2 //. simp1] //. simp1 //. simp2];
+
+(* simplify CP-even self-energy *)
+pref = ht^2 mt^2 gs^2 / (4 Pi)^4;
+Print[CForm /@ Simplify[1/pref selfEnergyS2t0T1eqT2 //. simp1] //. simp1 //. simp2];

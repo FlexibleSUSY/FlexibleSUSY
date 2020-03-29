@@ -113,7 +113,7 @@ void NmssmSusy::set(const DoubleVector & y) {
   xiF = y.display(38);
 }
 
-ostream & operator <<(ostream &left, const NmssmSusy &s) {
+std::ostream & operator <<(std::ostream &left, const NmssmSusy &s) {
   left << static_cast<MssmSusy>(s)
        << "singlet VEV: " << s.displaySvev()
        << " lambda: " << s.displayLambda()

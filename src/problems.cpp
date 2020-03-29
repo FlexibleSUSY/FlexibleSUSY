@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 namespace flexiblesusy {
 namespace {
@@ -35,7 +36,7 @@ void vector_or(std::vector<T>& v1, const std::vector<T>& v2)
       return;
    }
 
-   for (int i = 0; i < v2.size(); i++)
+   for (typename std::vector<T>::size_type i = 0; i < v2.size(); i++)
       if (v2[i]) v1[i] = v2[i];
 }
 
@@ -122,11 +123,11 @@ std::vector<std::string> Problems::get_problem_strings() const
 
    for (int i = 0; i < n_particles; ++i) {
       if (running_tachyons[i])
-         strings.push_back("running tachyon " + particle_names->get(i));
+         strings.emplace_back("running tachyon " + particle_names->get(i));
    }
    for (int i = 0; i < n_particles; ++i) {
       if (pole_tachyons[i])
-         strings.push_back("pole tachyon " + particle_names->get(i));
+         strings.emplace_back("pole tachyon " + particle_names->get(i));
    }
    if (failed_ewsb)
       strings.emplace_back("no ewsb");
@@ -137,10 +138,10 @@ std::vector<std::string> Problems::get_problem_strings() const
    if (failed_sinThetaW_convergence)
       strings.emplace_back("no sinThetaW convergence");
    if (have_thrown())
-      strings.push_back("exception thrown(" + exception_msg + ")");
+      strings.emplace_back("exception thrown(" + exception_msg + ")");
    for (int i = 0; i < n_particles; ++i) {
       if (failed_pole_mass_convergence[i])
-         strings.push_back("no M" + particle_names->get(i) + " pole convergence");
+         strings.emplace_back("no M" + particle_names->get(i) + " pole convergence");
    }
 
    for (const auto& par: non_pert_pars) {
@@ -156,7 +157,7 @@ std::vector<std::string> Problems::get_problem_strings() const
                 std::to_string(par.second.scale) +
                 ") = " + std::to_string(par.second.value) + "]";
       }
-      strings.push_back(str);
+      strings.emplace_back(str);
    }
 
    strings.shrink_to_fit();
@@ -171,7 +172,7 @@ std::vector<std::string> Problems::get_warning_strings() const
 
    for (int i = 0; i < n_particles; ++i) {
       if (bad_masses[i])
-         strings.push_back("Warning: imprecise M" + particle_names->get(i));
+         strings.emplace_back("Warning: imprecise M" + particle_names->get(i));
    }
 
    return strings;

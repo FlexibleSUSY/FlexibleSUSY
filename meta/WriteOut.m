@@ -51,6 +51,15 @@ PrintCmdLineOptions::usage="";
 GetGaugeCouplingNormalizationsDecls::usage="";
 GetGaugeCouplingNormalizationsDefs::usage="";
 
+CreateSetDecaysInfoBlockPrototypes::usage="";
+CreateSetDecaysInfoBlockFunctions::usage="";
+CreateSetDecaysPrototypes::usage="";
+CreateSetDecaysFunctions::usage="";
+CreateFillDecaysDataPrototypes::usage="";
+CreateFillDecaysDataFunctions::usage="";
+CreateFillSLHAeaIncludingDecaysPrototypes::usage="";
+CreateFillSLHAeaIncludingDecaysFunctions::usage="";
+
 CreateSLHAYukawaDefinition::usage="";
 CreateSLHAYukawaGetters::usage="";
 ConvertYukawaCouplingsToSLHA::usage="";
@@ -493,7 +502,7 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
           ];
 
 WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] :=
-    Module[{i, dim, scalarPDG, vectorPDG, result = ""},
+    Module[{result = ""},
            Switch[par,
                   FlexibleSUSYObservable`aMuon,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
@@ -515,6 +524,16 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`BrLToLGamma[__],
+                      result = WriteSLHABlockEntry[blockName,
+                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                                   Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`FToFConversionInNucleus[__],
+                      result = WriteSLHABlockEntry[blockName,
+                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                                   Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
                   _,
                      result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];
@@ -1140,6 +1159,18 @@ CalculatePMNSMatrix[] :=
               result = "pmns = " <>
               CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixL] <> " * " <>
               CreateSLHAFermionMixingMatrixName[SARAH`NeutrinoMM] <> ".adjoint();\n";
+              (* convert PMNS matrix to PDG convention *)
+              If[MemberQ[Parameters`GetOutputParameters[], SARAH`ElectronMatrixL] &&
+                 MemberQ[Parameters`GetOutputParameters[], SARAH`ElectronMatrixR] &&
+                 MemberQ[Parameters`GetOutputParameters[], SARAH`NeutrinoMM] &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixL] === {3,3} &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixR] === {3,3} &&
+                 SARAH`getDimParameters[SARAH`ElectronMatrixL] === SARAH`getDimParameters[SARAH`NeutrinoMM],
+                 result = result <> "PMNS_parameters::to_pdg_convention(pmns, " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`NeutrinoMM] <> ", " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixL] <> ", " <>
+                 CreateSLHAFermionMixingMatrixName[SARAH`ElectronMatrixR] <> ");\n";
+                ];
               ,
               result = "pmns << 1, 0, 0, 0, 1, 0, 0, 0, 1;\n";
              ];
@@ -1225,6 +1256,157 @@ CreateFormattedSLHABlocks[inputPars_List] :=
            sortForBlocks = {#, FindParametersInBlock[inputPars, #]}& /@ blocks;
            StringJoin[CreateFormattedSLHABlock /@ sortForBlocks]
           ];
+
+CreateSetDecaysInfoBlockPrototypes[] := "\
+void set_dcinfo(const Decays_problems&);
+void set_dcinfo(const std::vector<std::string>&, const std::vector<std::string>&);";
+
+CreateSetDecaysInfoBlockFunctions[modelName_String] := "\
+/**
+ * Stores the decays calculation information in the DCINFO block
+ * in the SLHA object.
+ *
+ * @param problems struct with decays calculation problems
+ */
+void " <> modelName <> "_slha_io::set_dcinfo(const Decays_problems& problems)
+{
+   set_dcinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores given problems and warnings in the DCINFO block in the SLHA
+ * object.
+ *
+ * @param problems vector of problem strings
+ * @param warnings vector of warning strings
+ */
+void " <> modelName <> "_slha_io::set_dcinfo(
+   const std::vector<std::string>& problems,
+   const std::vector<std::string>& warnings)
+{
+   std::ostringstream dcinfo;
+   dcinfo << \"Block DCINFO\\n\"
+          << FORMAT_SPINFO(1, PKGNAME)
+          << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
+
+   for (const auto& s: warnings)
+      dcinfo << FORMAT_SPINFO(3, s);
+
+   for (const auto& s: problems)
+      dcinfo << FORMAT_SPINFO(4, s);
+
+   dcinfo << FORMAT_SPINFO(5, " <> modelName <> "_info::model_name)
+          << FORMAT_SPINFO(9, SARAH_VERSION);
+
+   slha_io.set_block(dcinfo);
+}";
+
+CreateSetDecaysPrototypes[modelName_String] := "\
+void set_decay_block(const Decays_list&);
+void set_decays(const " <> modelName <> "_decay_table&);";
+
+CreateSetDecaysFunctions[modelName_String] := "\
+/**
+ * Stores the branching ratios for a given particle in the SLHA
+ * object.
+ *
+ * @param decays struct containing individual particle decays
+ */
+void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list)
+{
+   const auto pdg = decays_list.get_particle_id();
+   const auto width = decays_list.get_total_width();
+   const std::string name = " <> modelName <> "_info::get_particle_name_from_pdg(pdg);
+
+   std::ostringstream decay;
+
+   decay << \"DECAY \"
+         << format_total_width(pdg, width, name + \" decays\");
+
+   for (const auto& channel : decays_list) {
+      auto partial_width = channel.second.get_width();
+      const auto branching_ratio = is_zero(partial_width) ? 0. : partial_width / width;
+      const auto final_state = channel.second.get_final_state_particle_ids();
+      std::string comment = \"BR(\" + name + \" ->\";
+      for (auto id : final_state) {
+         comment += \" \" + " <> modelName <> "_info::get_particle_name_from_pdg(id);\n
+      }
+      comment += \")\";
+
+      decay << format_decay(branching_ratio, final_state, comment);
+   }
+
+   slha_io.set_block(decay);
+}
+
+/**
+ * Stores the particle decay branching ratios in the SLHA object.
+ *
+ * @param decays struct containing decays data
+ */
+void " <> modelName <> "_slha_io::set_decays(const " <> modelName <> "_decay_table& decay_table)
+{
+   for (const auto& particle : decay_table) {
+      set_decay_block(particle);
+   }
+}";
+
+CreateFillDecaysDataPrototypes[modelName_String] := "\
+void fill_decays_data(const " <> modelName <> "_decays&);";
+
+CreateFillDecaysDataFunctions[modelName_String] := "\
+void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_decays& decays)
+{
+   const auto& decays_problems = decays.get_problems();
+   const bool decays_error = decays_problems.have_problem();
+
+   set_dcinfo(decays_problems);
+
+   if (!decays_error) {
+      set_decays(decays.get_decay_table());
+   }
+}";
+
+CreateFillSLHAeaIncludingDecaysPrototypes[modelName_String] := "\
+template <class Model>
+static void fill_slhaea(
+   SLHAea::Coll&, const " <> modelName <> "_slha<Model>&, const softsusy::QedQcd&,
+   const " <> modelName <> "_scales&, const " <> modelName <> "_observables&,
+   const " <> modelName <> "_decays&);
+
+template <class Model>
+static SLHAea::Coll fill_slhaea(
+   const " <> modelName <> "_slha<Model>&, const softsusy::QedQcd&,
+   const " <> modelName <> "_scales&, const " <> modelName <> "_observables&,
+   const " <> modelName <> "_decays&);";
+
+CreateFillSLHAeaIncludingDecaysFunctions[modelName_String] := "\
+template <class Model>
+void " <> modelName <> "_slha_io::fill_slhaea(
+   SLHAea::Coll& slhaea, const " <> modelName <> "_slha<Model>& model,
+   const softsusy::QedQcd& qedqcd, const " <> modelName <> "_scales& scales,
+   const " <> modelName <> "_observables& observables, const " <> modelName <> "_decays& decays)
+{
+   " <> modelName <> "_slha_io slha_io;
+
+   slha_io.fill_spectrum_generator_data(model, qedqcd, scales, observables);
+   slha_io.fill_decays_data(decays);
+
+   slhaea = slha_io.get_slha_io().get_data();
+}
+
+template <class Model>
+SLHAea::Coll " <> modelName <> "_slha_io::fill_slhaea(
+   const " <> modelName <> "_slha<Model>& model, const softsusy::QedQcd& qedqcd,
+   const " <> modelName <> "_scales& scales, const " <> modelName <> "_observables& observables,
+   const " <> modelName <> "_decays& decays)
+{
+   SLHAea::Coll slhaea;
+   " <> modelName <> "_slha_io::fill_slhaea(slhaea, model, qedqcd, scales,
+                                    observables, decays);
+
+   return slhaea;
+}";
 
 End[];
 

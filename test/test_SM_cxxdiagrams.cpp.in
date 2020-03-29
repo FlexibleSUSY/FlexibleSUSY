@@ -1,0 +1,150 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#define BOOST_TEST_MODULE Test CXXDiagrams
+#include <boost/test/included/unit_test.hpp>
+#include <boost/test/data/test_case.hpp>
+#include <boost/fusion/include/boost_array.hpp>
+#include <boost/fusion/include/make_fused.hpp>
+#include <functional>
+#include <typeinfo>
+
+#include "test_cxxdiagrams_vertices.hpp"
+#include "random_SM_dataset.hpp"
+#include "test_complex_equality.hpp"
+
+#include "cxx_qft/SM_qft.hpp"
+
+using namespace flexiblesusy;
+using namespace boost_test_tools; 
+namespace bdata = boost::unit_test::data;
+
+#define INPUTPARAMETER(p) context.model.get_input().p
+#define MODELPARAMETER(p) context.model.get_##p()
+#define DERIVEDPARAMETER(p) context.model.p()
+#define PHASE(p) context.model.get_##p()
+
+namespace flexiblesusy
+{
+namespace SM_cxx_diagrams
+{
+namespace detail
+{
+@CXXDiagrams_VertexPrototypes@
+
+@CXXDiagrams_VertexDefinitions@
+}
+
+template<class ...Fields> class FSVertexWrapper
+{
+public:
+	using index_bounds = typename Vertex<Fields...>::index_bounds;
+	using indices_type = typename Vertex<Fields...>::indices_type;
+	using vertex_type = typename Vertex<Fields...>::vertex_type;
+private:
+	using boost_indices_type = boost::array<int,
+		std::tuple_size<indices_type>::value
+	>;
+	using model_type = SM_mass_eigenstates;
+	
+	template<class Sequence>
+	static vertex_type evaluate_impl( Sequence &&model_and_indices );
+public:
+	template<int FieldIndex>
+	static typename field_indices<typename boost::mpl::at_c<
+		boost::mpl::vector<Fields...>, FieldIndex>::type>::type
+	indices_of_field(const indices_type& indices)
+	{
+		return Vertex<Fields...>::template
+			indices_of_field<FieldIndex>( indices );
+	}
+	
+	static vertex_type evaluate( const indices_type& indices,
+		const context_base& context )
+	{
+		boost_indices_type boost_indices;
+		std::copy( indices.begin(), indices.end(), boost_indices.begin() );
+		
+		return evaluate_impl(
+			boost::fusion::push_front(
+            std::move( boost_indices ),
+            dynamic_cast<model_type const&>(context.model)
+			)
+		);
+	}
+};
+
+@VertexWrappers@
+}
+}
+
+namespace
+{
+static constexpr int number_of_random_samples = 100;
+}
+
+BOOST_AUTO_TEST_SUITE( vertices_test_suite, 
+	* boost::unit_test::tolerance(1.0e-12) )
+
+BOOST_DATA_TEST_CASE( test_zero_vertices,
+	random_SM_dataset( number_of_random_samples ),
+  index, FS_TEST_SM_PARAMETER_SEQUENCE )
+{
+	auto input_parameters = wrap_SM_parameters(
+		FS_TEST_SM_PARAMETER_SEQUENCE );
+	auto model = calculate_spectrum( input_parameters );
+	
+	auto problems = model.get_problems();
+	BOOST_WARN_MESSAGE( !problems.have_problem(),
+		"There was an error calculating the spectrum: " <<
+		problems << "Skipping data point..." );
+	
+	if( problems.have_problem() == false )
+	{
+		using namespace SM_cxx_diagrams;
+		using vertices = @ZeroVertices@;
+		boost::mpl::for_each<vertices>(
+			boost_test_tools::test_zero_vertex{ model } );
+	} else
+		BOOST_TEST( true );
+}
+
+BOOST_DATA_TEST_CASE( test_nonzero_vertices,
+	random_SM_dataset( number_of_random_samples ),
+  index, FS_TEST_SM_PARAMETER_SEQUENCE )
+{
+	auto input_parameters = wrap_SM_parameters(
+		FS_TEST_SM_PARAMETER_SEQUENCE );
+	auto model = calculate_spectrum( input_parameters );
+	
+	auto problems = model.get_problems();
+	BOOST_WARN_MESSAGE( !problems.have_problem(),
+		"There was an error calculating the spectrum: " <<
+		problems << "Skipping data point..." );
+	
+	if( problems.have_problem() == false )
+	{
+		using namespace SM_cxx_diagrams;
+		using vertex_pairs = @NonzeroVertexPairs@;
+		boost::mpl::for_each<vertex_pairs>(
+			boost_test_tools::test_vertex_equality{ model } );
+	} else
+		BOOST_TEST( true );
+}
+
+BOOST_AUTO_TEST_SUITE_END()

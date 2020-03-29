@@ -12,10 +12,6 @@
 #ifndef DEF_H
 #define DEF_H
 
-#ifdef HAVE_CONFIG_H
- #include <config.h>
-#endif
-
 #include <cmath>
 #include "ew_input.hpp"
 

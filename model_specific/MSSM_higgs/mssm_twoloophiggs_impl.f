@@ -5259,6 +5259,7 @@ c
       
       subroutine taubot(t,b,T1,T2,B1,B2,st,ct,sb,cb,q,mu,tanb,vv,
      $     S11,S12,S22) 
+     $ bind(C, name="taubot_")
       
       implicit none
       
@@ -5325,6 +5326,7 @@ c
       
       subroutine taubotodd(t,b,T1,T2,B1,B2,st,ct,sb,cb,q,mu,tanb,vv,
      $     DMA) 
+     $ bind(C, name="taubotodd_")
       
       implicit none
       
@@ -5375,6 +5377,7 @@ c
       
       subroutine taubottad(t,b,T1,T2,B1,B2,st,ct,sb,cb,q,mu,tanb,vv,
      $     S1,S2) 
+     $ bind(C, name="taubottad_")
       
       implicit none
       

@@ -15,7 +15,6 @@
 
 #include <iostream>
 #include "linalg.h"
-using namespace std;
 
 namespace softsusy {
   typedef enum {none=0, selectron, smuon, stau, sup, scharm, stop, sdown, 

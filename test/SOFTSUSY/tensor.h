@@ -20,8 +20,6 @@
 //#include "rge.h"
 //#include "lowe_legacy.h"
 //#include "susy.h"
-// using namespace std;
-// using namespace softsusy;
 
 namespace softsusy {
 

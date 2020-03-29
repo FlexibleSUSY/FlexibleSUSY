@@ -326,6 +326,12 @@ void @ModelName@_slha_io::set_spectrum(const standard_model::Standard_model& mod
    set_mixing_matrices(physical);
 }
 
+@setDecaysInfoFunctions@
+
+@setDecaysFunctions@
+
+@fillDecaysDataFunctions@
+
 /**
  * Write SLHA object to given output.  If output == "-", then the SLHA
  * object is written to std::cout.  Otherwise, output is interpreted

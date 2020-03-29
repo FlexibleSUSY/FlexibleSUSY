@@ -23,14 +23,29 @@
 #include "NUTNMSSM_two_scale_initial_guesser.hpp"
 #include "test_NUTNMSSM.hpp"
 
+softsusy::QedQcd convert(const softsusy::QedQcd_legacy& ql)
+{
+   softsusy::QedQcd qn;
+
+   qn.setAlphas(flexiblesusy::ToEigenArray(ql.displayAlphas()));
+   qn.setMasses(flexiblesusy::ToEigenArray(ql.displayMass()));
+   qn.set_input(ql.display_input());
+   qn.setPoleMb(ql.displayPoleMb());
+   qn.setCKM(ql.displayCKM());
+   qn.setPMNS(ql.displayPMNS());
+   qn.set_number_of_parameters(ql.howMany());
+   qn.set_scale(ql.displayMu());
+   qn.set_loops(ql.displayLoops());
+   qn.set_thresholds(ql.displayThresholds());
+
+   return qn;
+}
+
 class SoftSusy_error : public Error {
 public:
-   SoftSusy_error(const std::string& msg_)
-      : msg(msg_) {}
+   SoftSusy_error(const std::string& msg)
+      : Error(msg) {}
    virtual ~SoftSusy_error() {}
-   virtual std::string what() const { return msg; }
-private:
-   std::string msg;
 };
 
 class SoftSusy_NoConvergence_error : public SoftSusy_error {
@@ -38,7 +53,6 @@ public:
    SoftSusy_NoConvergence_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NoConvergence_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_NonPerturbative_error : public SoftSusy_error {
@@ -46,7 +60,6 @@ public:
    SoftSusy_NonPerturbative_error(const std::string& msg_)
       : SoftSusy_error(msg_) {}
    virtual ~SoftSusy_NonPerturbative_error() {}
-   virtual std::string what() const { return SoftSusy_error::what(); }
 };
 
 class SoftSusy_tester {
@@ -65,7 +78,7 @@ public:
       loops = 1;
    }
    void set_loops(int l) { loops = l; }
-   void test(const NUTNMSSM_input_parameters& pp, double mxGuess, const QedQcd& qedqcd) {
+   void test(const NUTNMSSM_input_parameters& pp, double mxGuess, const QedQcd_legacy& qedqcd) {
       // run softsusy
       softsusy::numRewsbLoops = loops;
       softsusy::numHiggsMassLoops = loops;
@@ -155,15 +168,15 @@ public:
    void set_low_scale_constraint(NUTNMSSM_low_scale_constraint<Two_scale>* c) { low_constraint = c; }
    void set_susy_scale_constraint(NUTNMSSM_susy_scale_constraint<Two_scale>* c) { susy_constraint = c; }
    void set_high_scale_constraint(NUTNMSSM_high_scale_constraint<Two_scale>* c) { high_constraint = c; }
-   void setup_default_constaints(const NUTNMSSM_input_parameters& pp, const QedQcd& qedqcd) {
+   void setup_default_constaints(const NUTNMSSM_input_parameters& pp, const QedQcd_legacy& qedqcd) {
       if (!high_constraint)
          high_constraint = new NUTNMSSM_high_scale_constraint<Two_scale>(&mssm);
       if (!susy_constraint)
-         susy_constraint = new NUTNMSSM_susy_scale_constraint<Two_scale>(&mssm, qedqcd);
+         susy_constraint = new NUTNMSSM_susy_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
       if (!low_constraint)
-         low_constraint = new NUTNMSSM_low_scale_constraint<Two_scale>(&mssm, qedqcd);
+         low_constraint = new NUTNMSSM_low_scale_constraint<Two_scale>(&mssm, convert(qedqcd));
    }
-   void test(const NUTNMSSM_input_parameters& pp, const QedQcd& qedqcd) {
+   void test(const NUTNMSSM_input_parameters& pp, const QedQcd_legacy& qedqcd) {
       setup_default_constaints(pp, qedqcd);
 
       mssm.clear();
@@ -181,14 +194,14 @@ public:
       high_constraint->set_model(&mssm);
       susy_constraint->set_model(&mssm);
       low_constraint ->set_model(&mssm);
-      low_constraint ->set_sm_parameters(qedqcd);
+      low_constraint ->set_sm_parameters(convert(qedqcd));
       high_constraint->initialize();
       susy_constraint->initialize();
       low_constraint ->initialize();
 
       NUTNMSSM_convergence_tester<Two_scale> convergence_tester(&mssm, 1.0e-4);
       convergence_tester.set_max_iterations(100);
-      NUTNMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, qedqcd,
+      NUTNMSSM_initial_guesser<Two_scale> initial_guesser(&mssm, convert(qedqcd),
                                                       *low_constraint,
                                                       *susy_constraint,
                                                       *high_constraint);
@@ -228,7 +241,7 @@ private:
    int loops;
 };
 
-void set_S1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
+void set_S1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd_legacy& qedqcd)
 {
    pp.m0 = 500.;
    pp.m12 = 500.;
@@ -240,21 +253,21 @@ void set_S1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
    pp.AKappaInput = -36.;
    pp.MuEff = 965;
 
-   qedqcd.setAlpha(ALPHA , 1./127.944);
-   qedqcd.setAlpha(ALPHAS, 1.185e-01);
+   qedqcd.setAlpha(legacy::ALPHA , 1./127.944);
+   qedqcd.setAlpha(legacy::ALPHAS, 1.185e-01);
    softsusy::GMU = 1.1663787e-5;
    softsusy::MZ = 91.1876;
    qedqcd.setPoleMZ(softsusy::MZ);
-   qedqcd.setMass(mBottom, 4.18000000E+00);
+   qedqcd.setMass(legacy::mBottom, 4.18000000E+00);
    qedqcd.setMbMb(4.18000000E+00);
    qedqcd.setPoleMt(1.73070000E+02);
-   qedqcd.setMass(mTau, 1.77682);
+   qedqcd.setMass(legacy::mTau, 1.77682);
    qedqcd.setPoleMtau(1.77682);
 
    qedqcd.toMz();
 }
 
-void set_BP1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
+void set_BP1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd_legacy& qedqcd)
 {
    pp.m0 = 2400;
    pp.m12 = 550;
@@ -266,21 +279,21 @@ void set_BP1(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
    pp.AKappaInput = -845.7;
    pp.MuEff = 120.5;
 
-   qedqcd.setAlpha(ALPHA , 1./127.944);
-   qedqcd.setAlpha(ALPHAS, 1.185e-01);
+   qedqcd.setAlpha(legacy::ALPHA , 1./127.944);
+   qedqcd.setAlpha(legacy::ALPHAS, 1.185e-01);
    softsusy::GMU = 1.1663787e-5;
    softsusy::MZ = 91.1876;
    qedqcd.setPoleMZ(softsusy::MZ);
-   qedqcd.setMass(mBottom, 4.18000000E+00);
+   qedqcd.setMass(legacy::mBottom, 4.18000000E+00);
    qedqcd.setMbMb(4.18000000E+00);
    qedqcd.setPoleMt(1.73070000E+02);
-   qedqcd.setMass(mTau, 1.77682);
+   qedqcd.setMass(legacy::mTau, 1.77682);
    qedqcd.setPoleMtau(1.77682);
 
    qedqcd.toMz();
 }
 
-void set_BP2(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
+void set_BP2(NUTNMSSM_input_parameters& pp, softsusy::QedQcd_legacy& qedqcd)
 {
    pp.m0 = 2450;
    pp.m12 = 550;
@@ -292,21 +305,21 @@ void set_BP2(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
    pp.AKappaInput = 2533.4;
    pp.MuEff = 229.2;
 
-   qedqcd.setAlpha(ALPHA , 1./127.944);
-   qedqcd.setAlpha(ALPHAS, 1.185e-01);
+   qedqcd.setAlpha(legacy::ALPHA , 1./127.944);
+   qedqcd.setAlpha(legacy::ALPHAS, 1.185e-01);
    softsusy::GMU = 1.1663787e-5;
    softsusy::MZ = 91.1876;
    qedqcd.setPoleMZ(softsusy::MZ);
-   qedqcd.setMass(mBottom, 4.18000000E+00);
+   qedqcd.setMass(legacy::mBottom, 4.18000000E+00);
    qedqcd.setMbMb(4.18000000E+00);
    qedqcd.setPoleMt(1.73070000E+02);
-   qedqcd.setMass(mTau, 1.77682);
+   qedqcd.setMass(legacy::mTau, 1.77682);
    qedqcd.setPoleMtau(1.77682);
 
    qedqcd.toMz();
 }
 
-void set_BP3(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
+void set_BP3(NUTNMSSM_input_parameters& pp, softsusy::QedQcd_legacy& qedqcd)
 {
    pp.m0 = 2400;
    pp.m12 = 600;
@@ -318,15 +331,15 @@ void set_BP3(NUTNMSSM_input_parameters& pp, softsusy::QedQcd& qedqcd)
    pp.AKappaInput = 1268.2;
    pp.MuEff = 265.2;
 
-   qedqcd.setAlpha(ALPHA , 1./127.944);
-   qedqcd.setAlpha(ALPHAS, 1.185e-01);
+   qedqcd.setAlpha(legacy::ALPHA , 1./127.944);
+   qedqcd.setAlpha(legacy::ALPHAS, 1.185e-01);
    softsusy::GMU = 1.1663787e-5;
    softsusy::MZ = 91.1876;
    qedqcd.setPoleMZ(softsusy::MZ);
-   qedqcd.setMass(mBottom, 4.18000000E+00);
+   qedqcd.setMass(legacy::mBottom, 4.18000000E+00);
    qedqcd.setMbMb(4.18000000E+00);
    qedqcd.setPoleMt(1.73070000E+02);
-   qedqcd.setMass(mTau, 1.77682);
+   qedqcd.setMass(legacy::mTau, 1.77682);
    qedqcd.setPoleMtau(1.77682);
 
    qedqcd.toMz();
@@ -449,7 +462,7 @@ void compare_tadpoles_2loop(NUTNMSSM<Two_scale> fs, NmssmSoftsusy ss)
 BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum )
 {
    NUTNMSSM_input_parameters pp;
-   softsusy::QedQcd qedqcd;
+   softsusy::QedQcd_legacy qedqcd;
    set_S1(pp, qedqcd);
 
    NUTNMSSM<Two_scale> _model(pp);
@@ -762,7 +775,7 @@ BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum )
 
 void test_NUTNMSSM_spectrum_with_fermi_constant_input_for_point(
    const NUTNMSSM_input_parameters& pp,
-   const softsusy::QedQcd& qedqcd)
+   const softsusy::QedQcd_legacy& qedqcd)
 {
    NUTNMSSM<Two_scale> _model(pp);
    const NUTNMSSM_high_scale_constraint<Two_scale> high_constraint(&_model);
@@ -888,7 +901,7 @@ BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum_with_fermi_constant_input )
    // standard NUTNMSSM testing point S1
    {
       BOOST_TEST_MESSAGE("testing S1 ...");
-      softsusy::QedQcd qedqcd;
+      softsusy::QedQcd_legacy qedqcd;
       NUTNMSSM_input_parameters pp;
       set_S1(pp, qedqcd);
       test_NUTNMSSM_spectrum_with_fermi_constant_input_for_point(pp, qedqcd);
@@ -897,7 +910,7 @@ BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum_with_fermi_constant_input )
    // // NUTNMSSM point BP1
    // {
    //    BOOST_TEST_MESSAGE("testing BP1 ...");
-   //    softsusy::QedQcd qedqcd;
+   //    softsusy::QedQcd_legacy qedqcd;
    //    NUTNMSSM_input_parameters pp;
    //    set_BP1(pp, qedqcd);
    //    test_NUTNMSSM_spectrum_with_fermi_constant_input_for_point(pp, qedqcd);
@@ -906,7 +919,7 @@ BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum_with_fermi_constant_input )
    // // NUTNMSSM point BP2
    // {
    //    BOOST_TEST_MESSAGE("testing BP2 ...");
-   //    softsusy::QedQcd qedqcd;
+   //    softsusy::QedQcd_legacy qedqcd;
    //    NUTNMSSM_input_parameters pp;
    //    set_BP2(pp, qedqcd);
    //    test_NUTNMSSM_spectrum_with_fermi_constant_input_for_point(pp, qedqcd);
@@ -915,7 +928,7 @@ BOOST_AUTO_TEST_CASE( test_NUTNMSSM_spectrum_with_fermi_constant_input )
    // // NUTNMSSM point BP3
    // {
    //    BOOST_TEST_MESSAGE("testing BP3 ...");
-   //    softsusy::QedQcd qedqcd;
+   //    softsusy::QedQcd_legacy qedqcd;
    //    NUTNMSSM_input_parameters pp;
    //    set_BP3(pp, qedqcd);
    //    test_NUTNMSSM_spectrum_with_fermi_constant_input_for_point(pp, qedqcd);

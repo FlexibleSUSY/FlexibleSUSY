@@ -8,13 +8,13 @@ Block FlexibleSUSY
     4   4                    # pole mass loop order
     5   4                    # EWSB loop order
     6   4                    # beta-functions loop order
-    7   3                    # threshold corrections loop order
+    7   4                    # threshold corrections loop order
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
    10   1                    # Higgs 2-loop corrections O(alpha_t^2 + alpha_t alpha_b + alpha_b^2)
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
-   13   1                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
+   13   3                    # Top pole mass QCD corrections (0 = 1L, 1 = 2L, 2 = 3L)
    14   1.000000000e-11      # beta-function zero threshold
    15   0                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
@@ -25,7 +25,7 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
-   24   123111321            # individual threshold correction loop orders
+   24   124111421            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR, 1 = MDR)
    26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
    27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
@@ -61,8 +61,8 @@ Block EXTPAR                 # Input parameters
     4   2000                 # Mu(MSUSY)
     5   2000                 # mA(MSUSY)
     6   173.34               # MEWSB
-    7   200                  # At(MSUSY)
-   25   10                   # TanBeta(MSUSY)
+    7   5000                 # At(MSUSY)
+   25   20                   # TanBeta(MSUSY)
   100   3                    # LambdaLoopOrder
   101   1                    # TwoLoopAtAs
   102   1                    # TwoLoopAbAs

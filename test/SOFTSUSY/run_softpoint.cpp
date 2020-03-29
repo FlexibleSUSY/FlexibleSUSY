@@ -12,8 +12,18 @@
 
 #include "run_softpoint.h"
 
-extern template class softsusy::Softsusy<SoftParsNmssm>;
-extern template class softsusy::Softsusy<SoftParsMssm>;
+extern template class softsusy::Softsusy<softsusy::SoftParsNmssm>;
+extern template class softsusy::Softsusy<softsusy::SoftParsMssm>;
+
+using std::istringstream;
+using std::ostringstream;
+using std::string;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
+
+using namespace softsusy;
 
 // Returns a string with all characters in upper case: very handy
 string ToUpper(const string & s) {
@@ -159,9 +169,9 @@ int main(int argc, char *argv[]) {
 	else if (starts_with(argv[i],"--mt=")) 
 	  oneset.setPoleMt(get_value(argv[i], "--mt="));
 	else if (starts_with(argv[i],"--alpha_s="))
-	  oneset.setAlpha(ALPHAS, get_value(argv[i], "--alpha_s="));      
+	  oneset.setAlpha(legacy::ALPHAS, get_value(argv[i], "--alpha_s="));      
 	else if (starts_with(argv[i],"--alpha_inverse="))
-	  oneset.setAlpha(ALPHA, 1.0 / get_value(argv[i],"--alpha_inverse="));
+	  oneset.setAlpha(legacy::ALPHA, 1.0 / get_value(argv[i],"--alpha_inverse="));
 	else if (starts_with(argv[i],"--RPV")) 
 	  RPVflag = true;
 	else if (starts_with(argv[i], "--tanBeta=")) 
@@ -900,33 +910,33 @@ int main(int argc, char *argv[]) {
 		else if (block == "SMINPUTS") {
 		  int i; double d; kk >> i >> d; 
 		  switch (i) {
-		  case 1: oneset.setAlpha(ALPHA, 1.0 / d); break;
+		  case 1: oneset.setAlpha(legacy::ALPHA, 1.0 / d); break;
 		  case 2: GMU = d; break;
-		  case 3: oneset.setAlpha(ALPHAS, d); break; 
+		  case 3: oneset.setAlpha(legacy::ALPHAS, d); break; 
 		  case 4: oneset.setMu(d); m.setData(oneset); MZ = d; break;
-		  case 5: oneset.setMass(mBottom, d); 
+		  case 5: oneset.setMass(legacy::mBottom, d); 
 		    oneset.setMbMb(d); break;
 		  case 6: oneset.setPoleMt(d); break;
-		  case 7: oneset.setMass(mTau, d); 
+		  case 7: oneset.setMass(legacy::mTau, d); 
 		    oneset.setPoleMtau(d); break;
 		  case 8: k.setMnuTau(d);
                      break;
-		  case 11: oneset.setMass(mElectron, d);
+		  case 11: oneset.setMass(legacy::mElectron, d);
                      k.setPoleMe(d);
                      break;
 		  case 12: k.setMnuMu(d);
                      break;
-		  case 13: oneset.setMass(mMuon, d); k.setPoleMmu(d);
+		  case 13: oneset.setMass(legacy::mMuon, d); k.setPoleMmu(d);
                      break;
 		  case 14: k.setMnuTau(d);
                      break;
-		  case 21: oneset.setMass(mDown, d); k.setMd2GeV(d);
+		  case 21: oneset.setMass(legacy::mDown, d); k.setMd2GeV(d);
 		    break;
-		  case 22: oneset.setMass(mUp, d); k.setMu2GeV(d);
+		  case 22: oneset.setMass(legacy::mUp, d); k.setMu2GeV(d);
                      break;
-		  case 23: oneset.setMass(mStrange, d); k.setMs2GeV(d);
+		  case 23: oneset.setMass(legacy::mStrange, d); k.setMs2GeV(d);
                      break;
-		  case 24: oneset.setMass(mCharm, d); k.setMcMc(d);
+		  case 24: oneset.setMass(legacy::mCharm, d); k.setMcMc(d);
                      break;
 		  default: 
 		    cout << "# WARNING: Don't understand data input " << i 

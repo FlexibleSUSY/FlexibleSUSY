@@ -1,0 +1,78 @@
+Block FlexibleSUSY
+    0   1.000000000e-04      # precision goal
+    1   0                    # max. iterations (0 = automatic)
+    2   0                    # algorithm (0 = two_scale, 1 = lattice)
+    3   0                    # calculate SM pole masses
+    4   2                    # pole mass loop order
+    5   2                    # EWSB loop order
+    6   3                    # beta-functions loop order
+    7   2                    # threshold corrections loop order
+    8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
+    9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
+   10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
+   11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
+   12   0                    # force output
+   13   1                    # Top quark 2-loop corrections QCD
+   14   1.000000000e-11      # beta-function zero threshold
+   15   0                    # calculate observables (a_muon, ...)
+Block SMINPUTS               # Standard Model inputs 
+    1   1.279340e+02         # alpha^(-1) SM MSbar(MZ)
+    2   1.166370E-05         # G_F,Fermi constant 
+    3   1.187000E-01         # alpha_s(MZ) SM MSbar 
+    4   9.118870E+01         # Z-boson pole mass 
+    5   4.180000E+00         # m_b(mb) SM MSbar 
+    6   1.735000E+02         # m_top(pole) 
+    7   1.776690E+00         # m_tau(pole) 
+    8   0.000000000e+00      # mnu3(pole)
+    9   80.404               # MW pole
+   11   5.109989020e-04      # melectron(pole)
+   12   0.000000000e+00      # mnu1(pole)
+   13   1.056583570e-01      # mmuon(pole)
+   14   0.000000000e+00      # mnu2(pole)
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
+Block MINPAR                 # Input parameters 
+    1   1.000000E+03         # vSinput
+    2   1.000000E+03         # MPhiinput
+Block EXTPAR                 # Input parameters 
+    1   1.000000E-01         # Linput
+    2   1.000000E+02         # LS3input
+    3   5.000000E-01         # LS4input
+    4   1.000000E-01         # LPhiinput
+    5   1.000000E-01         # gSHinput
+    6   1.000000E-01         # gHPinput
+    7   1.000000E-01         # gSPinput
+    8   1.000000E+03         # KSPinput
+    9  -1.000000E+02         # KSHinput
+Block GSCIN    #  
+    1 1   1.000000E-01         # gSC(1,1)
+    1 2   0.000000E+00         # gSC(1,2)
+    2 1   0.000000E+00         # gSC(2,1)
+    2 2   1.000000E-01         # gSC(2,2)
+Block LAMLIN    #  
+    1 1   1.000000E-01         # lamL(1,1)
+    1 2   0.000000E+00         # lamL(1,2)
+    1 3   0.000000E+00         # lamL(1,3)
+    2 1   0.000000E+00         # lamL(2,1)
+    2 2   1.000000E-01         # lamL(2,2)
+    2 3   0.000000E+00         # lamL(2,3)
+    3 1   0.000000E+00         # lamL(3,1)
+    3 2   0.000000E+00         # lamL(3,2)
+    3 3   1.000000E-01         # lamL(3,3)
+Block LAMRIN    #  
+    1 1   1.000000E-01         # lamR(1,1)
+    1 2   0.000000E+00         # lamR(1,2)
+    1 3   0.000000E+00         # lamR(1,3)
+    2 1   0.000000E+00         # lamR(2,1)
+    2 2   1.000000E-01         # lamR(2,2)
+    2 3   0.000000E+00         # lamR(2,3)
+    3 1   0.000000E+00         # lamR(3,1)
+    3 2   0.000000E+00         # lamR(3,2)
+    3 3   1.000000E-01         # lamR(3,3)
+Block MCHIIN    #  
+    1 1   1.000000E+02         # MChi(1,1)
+    1 2   1.000000E+02         # MChi(1,2)
+    2 1   1.000000E+02         # MChi(2,1)
+    2 2   1.000000E+02         # MChi(2,2)

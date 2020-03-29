@@ -30,8 +30,6 @@
 #include <signal.h>
 #include <dirent.h>
 
-using namespace std;
-
 /// returns either sqrt(f) for f>0 or 0 otherwise
 inline double zeroSqrt(double f){ if (f > 0.) return sqrt(f); 
   else return softsusy::EPSTOL;
@@ -99,7 +97,7 @@ inline int sgn(double x)
 
 /// Outputs a space if greater than zero, a minus otherwise.
 /// Useful for outputting negative numbers in rows
-void printRow(ostream & o, double x);
+void printRow(std::ostream & o, double x);
 
 /// Returns true if f's a nan. Unfortunately, the behaviour of this function
 /// is not standardised across all platforms yet. 

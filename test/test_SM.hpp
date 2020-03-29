@@ -32,8 +32,8 @@ void setup_SM_const(TSM& m, const TInput& input)
    Yd(0,0) = 0.001;
    Yd(1,1) = 0.001;
    Yd(2,2) = 2.9     * root2 / vev;
-   Ye(0,0) = 0.001;
-   Ye(1,1) = 0.1;
+   Ye(0,0) = 5.11e-4 * root2 / vev;
+   Ye(1,1) = 0.105  * root2 / vev;
    Ye(2,2) = 1.77699 * root2 / vev;
 
    m.set_scale(scale);

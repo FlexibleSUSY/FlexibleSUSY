@@ -1,0 +1,299 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+/**
+ * @file @ModelName@_decays.cpp
+ * @brief implementation of particle decays in the @ModelName@
+ *
+ * Contains the definition of @ModelName@ decays class methods,
+ * which calculate the decay rates for particles in the model.
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_decays.hpp"
+#include "@ModelName@_info.hpp"
+// @todo: move one_loop_decay_diagrams back to src
+#include "@ModelName@_one_loop_decay_diagrams.hpp"
+
+#include "concatenate.hpp"
+#include "dilog.hpp"
+
+#include "config.h"
+#include "thread_pool.hpp"
+#include "wrappers.hpp"
+
+#include <boost/range/algorithm.hpp>
+#include <boost/math/special_functions/zeta.hpp>
+
+#include <cmath>
+// TODO: remove before release
+#include <iomanip>
+#include "standard_model.hpp"
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_decays
+#define PHYSICAL(parameter) model.get_physical().parameter
+#define MODELPARAMETER(parameter) model.get_##parameter()
+
+using namespace @ModelName@_cxx_diagrams;
+using namespace @ModelName@_cxx_diagrams::fields;
+using effective_couplings::KallenLambda;
+namespace info = @ModelName@_info;
+using namespace std::complex_literals;
+
+const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
+{
+   return decay_table;
+}
+
+void CLASSNAME::set_loop_corrections(const Decays_loop_corrections& loop_corrections_)
+{
+   loop_corrections = loop_corrections_;
+}
+
+const Decays_loop_corrections& CLASSNAME::get_loop_corrections() const
+{
+   return loop_corrections;
+}
+
+const Decays_problems& CLASSNAME::get_problems() const
+{
+   return problems;
+}
+
+void CLASSNAME::clear_problems()
+{
+   problems.clear();
+}
+
+void CLASSNAME::clear()
+{
+   clear_problems();
+   decay_table.clear();
+}
+
+void CLASSNAME::calculate_decays()
+{
+#ifdef ENABLE_THREADS
+@callAllDecaysFunctionsInThreads@
+#else
+@callAllDecaysFunctions@
+#endif
+}
+
+double get_alphas(context_base const&  context)
+{
+   return pow(context.model.get_@gs_name@(), 2)/(4.*Pi);
+}
+
+double get_alpha(context_base const&  context)
+{
+   return pow(unit_charge(context), 2)/(4.*Pi);
+}
+
+/* 1-loop BSM amplitudes
+ *
+ * Notes:
+ *    - Since FS removes a factor of i from every vertex we reintroduce it
+ *      calls to one loop amplitudes
+ */
+
+@calcAmplitudeSpecializationDefs@
+
+// -------- specializations for decays needing higher order SM corrections --------
+
+@create_SM_particle_usings@
+
+namespace {
+
+unsigned int number_of_active_flavours(double m)
+{
+   /*
+   if (m < qedqcd.displayMbMb(){
+      return 4.0;
+   } else if (m < qedqcd.displayPoleMt()) {
+      return 5.0;
+   } else {
+      return 6.0;
+   }
+   */
+   return 5;
+}
+
+// eq. 2.7 of hep-ph/0503173
+double calc_A(double b)
+{
+   return (1 + b * b) *
+             (4. * dilog((1 - b) / (1 + b)) + 2. * dilog(-(1 - b) / (1 + b)) -
+              3. * log((1 + b) / (1 - b)) * log(2 / (1 + b)) -
+              2. * log((1 + b) / (1 - b)) * log(b)) -
+          3. * b * log(4. / (1 - b * b)) - 4. * b * log(b);
+}
+
+// eq. 2.6 of hep-ph/0503173
+double calc_DeltaH(double b)
+{
+   return calc_A(b)/b + 1./(16*b*b*b) * (
+      3 + 34*b*b - 13*pow(b,4)) * log((1+b)/(1-b)) + 3./(8.*b*b)*(7*b*b-1);
+}
+
+// eq. 2.6 of hep-ph/0503173
+double calc_DeltaAH(double b)
+{
+   return calc_A(b)/b + 1./(16*b) * (19 + 2*b*b + 3*pow(b,4))
+      * log((1+b)/(1-b)) + 3./8.*(7-b*b);
+}
+
+// 2 and higher order
+double calc_deltaqq(double alpha_s_red, double Nf)
+{
+   return
+      // order alphas are taken into account with mass sependence somewhere alse
+      0. * 17./3. * alpha_s_red 
+      + (35.94 - 1.36 * Nf) * Sqr(alpha_s_red) 
+      + (164.14 - 25.77 * Nf + 0.259 * Sqr(Nf)) * std::pow(alpha_s_red, 3) 
+      + (39.34 - 220.9 * Nf + 9.685 * std::pow(Nf, 2) - 0.0205 * std::pow(Nf, 3)) * std::pow(alpha_s_red, 4);
+}
+
+// eq. 2.31 of hep-ph/0503172
+double RT(double x) {
+   BOOST_ASSERT_MSG(x<=1, "This function");
+   if (is_zero(x-1)) {
+      return 0.;
+   } else if (1-x < 1e-6) {
+      return 39*(-1 + x) + (75*std::pow(-1 + x,2))/2. - 6*std::pow(-1 + x,3);
+   } else {
+    return 3.*(1. - 8.*x + 20.*x*x)/std::sqrt(4.*x-1.) * std::acos((3.*x-1.)/(2.*std::pow(x, 3./2.)))
+    - (1.-x)/(2.*x) * (2. - 13.*x + 47.*x*x)
+    - 3./2. * (1. - 6.*x + 4.*x*x) * std::log(x);
+   }
+}
+
+} // anonymous namespace
+
+@partialWidthSpecializationDefs@
+
+template <>
+double CLASSNAME::get_partial_width<H, A, A>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<A>::type& out1_idx,
+      const typename field_indices<A>::type& out2_idx) const
+{
+   const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<H>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
+   constexpr double ps_symmetry {1./2.};
+   const double color_gen_sqr = squared_color_generator<H, A, A>();
+   const double flux = 0.5/mH;
+   return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+}
+
+template <>
+double CLASSNAME::get_partial_width<H, A, Z>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<A>::type& out1_idx,
+      const typename field_indices<Z>::type& out2_idx) const
+{
+   const double mH = context.physical_mass<H>(in_idx);
+   const double mA = context.physical_mass<A>(out1_idx);
+   const double mZ = context.physical_mass<Z>(out2_idx);
+
+   const double ps {1./(8.*Pi) * sqrt(KallenLambda(1., Sqr(mA/mH), Sqr(mZ/mH)))};
+   constexpr double ps_symmetry {1.};
+   const double color_gen_sqr = squared_color_generator<H, A, Z>();
+   const double flux = 0.5/mH;
+
+   const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
+
+   return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();
+}
+
+template <>
+double CLASSNAME::get_partial_width<H, G, G>(
+      const context_base& context,
+      const typename field_indices<H>::type& in_idx,
+      const typename field_indices<G>::type& out1_idx,
+      const typename field_indices<G>::type& out2_idx) const
+{
+   const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
+   const double mH = context.physical_mass<H>(in_idx);
+   constexpr double ps {1./(8.*Pi)};
+   constexpr double ps_symmetry {1./2.};
+   const double color_fact = squared_color_generator<H, G, G>();
+   const double flux = 0.5/mH;
+
+   double result = flux * color_fact * ps * ps_symmetry * amp.square();
+
+   constexpr bool CPViolationInHiggsSector {@CPViolationInHiggsSector@};
+
+   // higher order corrections to CP-even Higgs
+   if (!CPViolationInHiggsSector) {
+      // higher order QCD corrections
+
+      // number of active light flavours
+      unsigned int Nf;
+      const double mtpole {qedqcd.displayPoleMt()};
+      if (mH > 5 && mH < mtpole) {
+         Nf = 5;
+      } else if (mH > mtpole) {
+         Nf = 6;
+      } else {
+         throw;
+      }
+
+      // NLO, NNLO - eq. 11 of hep-ph/9705240
+      const double deltaNLO {95./4. - 7./6.*Nf};
+
+      const double mtpole2 {Sqr(mtpole)};
+      using boost::math::zeta;
+      const double deltaNNLO {
+         149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
+               + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
+               + Nf*Nf*(127./108. - zeta(2)/6.)
+      };
+      // eq. 4.20 from Adam's thesis
+      const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
+
+
+      const double g3 = MODELPARAMETER(g3);
+      const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
+
+      switch (include_higher_order_corrections) {
+         case HigherOrderSMCorrections::enable:
+            result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+         case HigherOrderSMCorrections::disable:
+            result *= 1.;
+         default:
+            break;
+      }
+   }
+
+   return result;
+}
+
+@decaysCalculationFunctions@
+@partialWidthCalculationFunctions@
+
+} // namespace flexiblesusy

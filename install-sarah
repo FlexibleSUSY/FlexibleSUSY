@@ -13,7 +13,7 @@ ABSBASEDIR=$(cd $BASEDIR; pwd)
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.12.3"
+sarah_version="4.14.3"
 
 # determine Mathematica user directory
 case "$operating_system" in
@@ -109,7 +109,7 @@ Options:
 This script downloads and installs SARAH.
 At first the SARAH tarball is downloaded from the URL
 
-  https://www.hepforge.org/archive/sarah/
+  https://sarah.hepforge.org/downloads/
 
 and is stored in
 
@@ -182,8 +182,8 @@ fi
 
 sarah_tarball="SARAH-${sarah_version}.tar.gz"
 sarah_dir="SARAH-${sarah_version}"
-sarah_download_area="https://www.hepforge.org/downloads/sarah"
-sarah_download_url="https://www.hepforge.org/archive/sarah/${sarah_tarball}"
+sarah_download_area="https://sarah.hepforge.org/downloads/"
+sarah_download_url="https://sarah.hepforge.org/downloads/${sarah_tarball}"
 
 # check SARAH version string
 if echo "${sarah_version}" | grep -v '[0-9]\+.[0-9]\+.[0-9]\+' > /dev/null 2>&1 ; then
@@ -199,7 +199,7 @@ exists_in_path "${mathematica_kernel}" || {
     exit 1
 }
 printf "Checking for SARAH installation ... "
-${mathematica_kernel} -run "If[Needs[\"SARAH\`\"] === \$Failed || Not[StringQ[\$sarahDir]], Quit[1]]; Quit[0]" > /dev/null 2>&1
+printf "%s" "If[Needs[\"SARAH\`\"] === \$Failed || Not[StringQ[\$sarahDir]], Quit[1]]; Quit[0]" | ${mathematica_kernel} > /dev/null 2>&1
 sarah_is_installed="$?"
 
 if test "x${sarah_is_installed}" = "x0" ; then

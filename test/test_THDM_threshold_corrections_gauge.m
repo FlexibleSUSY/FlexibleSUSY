@@ -126,4 +126,25 @@ lamThDiff  = Simplify[result - deltaLambdaFull];
 
 TestEquality[lamThDiff, Table[0, {i,1,7}]];
 
+Print["testing MS-DR conversion ..."];
+
+(* tag MS-DR conversion terms and filter them out *)
+conv = Coefficient[
+    GetTHDMThresholds1L[loopOrder -> {0, k (4 Pi)^2},
+                        flags -> Join[{flagMSDRg2 -> tag, flagMSDRlam -> tag},
+                                      GetTHDMThresholds1LFlags[]]],
+    tag
+] /. gRules;
+
+(* [1805.00867] Eqs.(104) *)
+lit = {
+    -1/12 k (7 g2^4 + 6 g2^2 gY^2 + 3 gY^4),
+    -1/12 k (7 g2^4 + 6 g2^2 gY^2 + 3 gY^4),
+    -1/12 k (7 g2^4 - 6 g2^2 gY^2 + 3 gY^4),
+    -1/3  k g2^2 (g2^2 + 3 gY^2),
+    0, 0, 0
+};
+
+TestEquality[conv - lit // Simplify, Table[0, {i,1,7}]];
+
 PrintTestSummary[];

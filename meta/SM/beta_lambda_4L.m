@@ -1,4 +1,5 @@
-(* 4-loop beta function of Chetyrkin:2016ruf
+(* 4-loop beta function of Chetyrkin, Zoller [JHEP 1606 (2016) 175]
+   [arXiv:1604.00853] Chetyrkin:2016ruf.
    Copied from https://www.ttp.kit.edu/Progdata/ttp16/ttp16-008/
 
    Note: Chetyrkin:2016ruf defines the beta function to be

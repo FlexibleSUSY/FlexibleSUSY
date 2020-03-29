@@ -34,6 +34,7 @@ CalculateColorCoupling::usage="";
 CalculateElectromagneticCoupling::usage="";
 SetDRbarYukawaCouplings::usage="";
 GetTwoLoopThresholdHeaders::usage="";
+YukawaToMassPrefactor::usage="";
 
 CalculateGaugeCouplings::MissingRelation = "Warning: Coupling `1` is not\
  releated to `2` via DependenceNum: `1` = `3`"
@@ -111,7 +112,7 @@ CalculateDeltaAlphaEm[renormalizationScheme_] :=
            prefactor = Global`alphaEm / (2 Pi);
            deltaSM = -16/9 Global`FiniteLog[Abs[topQuark/Global`currentScale]];
            deltaSusy = CalculateElectromagneticCoupling[renormalizationScheme];
-           result = Parameters`CreateLocalConstRefs[deltaSusy + deltaSM] <> "\n" <>
+           result = Parameters`CreateLocalConstRefs[{deltaSusy, deltaSM}] <> "\n" <>
                     "const double delta_alpha_em_SM = " <>
                     CConversion`RValueToCFormString[prefactor * deltaSM] <> ";\n\n" <>
                     "const double delta_alpha_em = " <>
@@ -123,15 +124,15 @@ CalculateDeltaAlphaEm[renormalizationScheme_] :=
 CalculateDeltaAlpha2LSM[] :=
 "if (model->get_thresholds() > 1 && model->get_threshold_corrections().alpha_s > 1) {\n" <>
 IndentText["\
-sm_threeloop_as::Parameters pars;
+sm_fourloop_as::Parameters pars;
 pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
 pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
 pars.Q    = model->get_scale();
 
-const auto das_1L = sm_threeloop_as::delta_alpha_s_1loop_as(pars);
-const auto das_2L = sm_threeloop_as::delta_alpha_s_2loop_as_as(pars);
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
 
-delta_alpha_s_2loop = - das_2L + Sqr(das_1L);"
+delta_alpha_s_2loop = das_2L - Sqr(das_1L);"
 ] <> "
 }
 
@@ -140,16 +141,35 @@ delta_alpha_s_2loop = - das_2L + Sqr(das_1L);"
 CalculateDeltaAlpha3LSM[] :=
 "if (model->get_thresholds() > 2 && model->get_threshold_corrections().alpha_s > 2) {\n" <>
 IndentText["\
-sm_threeloop_as::Parameters pars;
+sm_fourloop_as::Parameters pars;
 pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
 pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
 pars.Q    = model->get_scale();
 
-const auto das_1L = sm_threeloop_as::delta_alpha_s_1loop_as(pars);
-const auto das_2L = sm_threeloop_as::delta_alpha_s_2loop_as_as(pars);
-const auto das_3L = sm_threeloop_as::delta_alpha_s_3loop_as_as_as(pars);
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
+const auto das_3L = sm_fourloop_as::delta_alpha_s_3loop_as_as_as(pars);
 
-delta_alpha_s_3loop = - das_3L - Power3(das_1L) + 2. * das_1L * das_2L;"
+delta_alpha_s_3loop = das_3L + Power3(das_1L) - 2. * das_1L * das_2L;"
+] <> "
+}
+
+";
+
+CalculateDeltaAlpha4LSM[] :=
+"if (model->get_thresholds() > 3 && model->get_threshold_corrections().alpha_s > 3) {\n" <>
+IndentText["\
+sm_fourloop_as::Parameters pars;
+pars.as   = alphaS; // alpha_s(SM(5)) MS-bar
+pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
+pars.Q    = model->get_scale();
+
+const auto das_1L = sm_fourloop_as::delta_alpha_s_1loop_as(pars);
+const auto das_2L = sm_fourloop_as::delta_alpha_s_2loop_as_as(pars);
+const auto das_3L = sm_fourloop_as::delta_alpha_s_3loop_as_as_as(pars);
+const auto das_4L = sm_fourloop_as::delta_alpha_s_4loop_as_as_as_as(pars);
+
+delta_alpha_s_4loop = das_4L - 2. * das_1L * das_3L - Power2(das_2L) + 3. * Power2(das_1L) * das_2L - Power4(das_1L);"
 ] <> "
 }
 
@@ -213,18 +233,20 @@ CalculateDeltaAlphaS[renormalizationScheme_] :=
            prefactor = Global`alphaS / (2 Pi);
            deltaSM = - 2/3 Global`FiniteLog[Abs[topQuark/Global`currentScale]];
            deltaSusy = CalculateColorCoupling[renormalizationScheme];
-           Parameters`CreateLocalConstRefs[deltaSusy + deltaSM] <> "\n" <>
+           Parameters`CreateLocalConstRefs[{deltaSusy, deltaSM}] <> "\n" <>
            "const double delta_alpha_s_SM = " <>
            CConversion`RValueToCFormString[prefactor * deltaSM] <> ";\n\n" <>
            "const double delta_alpha_s = " <>
            CConversion`RValueToCFormString[prefactor * deltaSusy] <> ";\n\n" <>
            "const double delta_alpha_s_1loop = delta_alpha_s + delta_alpha_s_SM;\n" <>
            "double delta_alpha_s_2loop = 0.;\n" <>
-           "double delta_alpha_s_3loop = 0.;\n\n" <>
+           "double delta_alpha_s_3loop = 0.;\n" <>
+           "double delta_alpha_s_4loop = 0.;\n\n" <>
            If[FlexibleSUSY`UseMSSMAlphaS2Loop === True, CalculateDeltaAlpha2LMSSM[], ""] <>
            If[FlexibleSUSY`UseSMAlphaS3Loop === True, CalculateDeltaAlpha2LSM[], ""] <>
            If[FlexibleSUSY`UseSMAlphaS3Loop === True, CalculateDeltaAlpha3LSM[], ""] <>
-           "return delta_alpha_s_1loop + delta_alpha_s_2loop + delta_alpha_s_3loop;\n"
+           If[FlexibleSUSY`UseSMAlphaS4Loop === True, CalculateDeltaAlpha4LSM[], ""] <>
+           "return delta_alpha_s_1loop + delta_alpha_s_2loop + delta_alpha_s_3loop + delta_alpha_s_4loop;\n"
           ];
 
 GetPrefactor[expr_Plus, _] := 1;
@@ -357,6 +379,19 @@ InvertMassRelation[fermion_, yukawa_] :=
            InvertRelation[matrixExpression, fermion / prefactor, yukawa]
           ];
 
+YukawaToMassPrefactor[fermion_, yukawa_] :=
+    Module[{massMatrix, polynom},
+           If[TreeMasses`IsUnmixed[fermion],
+              massMatrix = TreeMasses`GetMassOfUnmixedParticle[fermion];
+              massMatrix = TreeMasses`ReplaceDependencies[massMatrix];
+              massMatrix = Vertices`StripGroupStructure[massMatrix, {SARAH`ct1, SARAH`ct2}];
+              ,
+              massMatrix = SARAH`MassMatrix[fermion];
+             ];
+           polynom = Factor[massMatrix /. List -> Plus];
+           GetPrefactor[polynom, yukawa]
+          ];
+
 SetDRbarYukawaCouplingTop[settings_] :=
     SetDRbarYukawaCouplingFermion[TreeMasses`GetSMTopQuarkMultiplet[], SARAH`UpYukawa, Global`upQuarksDRbar, settings];
 
@@ -450,6 +485,7 @@ sm_pars.mw_pole = qedqcd.displayPoleMW();
 sm_pars.mz_pole = qedqcd.displayPoleMZ();
 sm_pars.mt_pole = qedqcd.displayPoleMt();
 sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+sm_pars.higgs_index = higgs_idx;
 
 const int number_of_iterations =
     std::max(20, static_cast<int>(std::abs(-log10(MODEL->get_precision()) * 10)));
@@ -467,7 +503,7 @@ try {
 
    MODEL->get_problems().unflag_no_sinThetaW_convergence();
 } catch (const Error& e) {
-   VERBOSE_MSG(e.what());
+   VERBOSE_MSG(e.what_detailed());
    MODEL->get_problems().flag_no_sinThetaW_convergence();
 }"
           ];
@@ -547,13 +583,17 @@ CalculateGaugeCouplings[] :=
 
 GetTwoLoopThresholdHeaders[] :=
     Module[{result = ""},
+           If[FlexibleSUSY`UseSMYukawa2Loop === True,
+              result = result <> "#include \"sm_twoloop_mt.hpp\"\n";
+             ];
            If[FlexibleSUSY`UseMSSMYukawa2Loop === True,
               result = "#include \"mssm_twoloop_mb.hpp\"\n" <>
                        "#include \"mssm_twoloop_mt.hpp\"\n" <>
                        "#include \"mssm_twoloop_mtau.hpp\"\n";
              ];
-           If[FlexibleSUSY`UseSMAlphaS3Loop === True,
-              result = result <> "#include \"sm_threeloop_as.hpp\"\n";
+           If[FlexibleSUSY`UseSMAlphaS3Loop === True ||
+              FlexibleSUSY`UseSMAlphaS4Loop === True,
+              result = result <> "#include \"sm_fourloop_as.hpp\"\n";
              ];
            If[FlexibleSUSY`UseMSSMAlphaS2Loop === True,
               result = result <> "#include \"mssm_twoloop_as.hpp\"\n";

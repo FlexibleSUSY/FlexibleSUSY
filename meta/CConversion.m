@@ -73,6 +73,7 @@ CountNumberOfEntries::usage = "returns numbers of entries of a
  given type";
 
 CreateCType::usage="returns string with the C/C++ data type";
+CreateCBoolValue::usage="returns string with C/C++ bool value";
 
 GetElementType::usage="returns type of matrix / vector / array elements";
 
@@ -132,6 +133,9 @@ using the default constructor";
 
 CreateConstExternDecl::usage="";
 CreateConstDef::usage="";
+
+CreateEnum::usage="creates a C/C++ enum using a given list of
+member names.";
 
 SetToDefault::usage="set parameter to default value";
 
@@ -238,6 +242,12 @@ CreateCType[CConversion`MatrixType[t_, dim1_, dim2_]] :=
 
 CreateCType[CConversion`TensorType[t_, dims__]] :=
     EigenTensor[CreateCType[ScalarType[t]], Sequence @@ (ToString /@ {dims})];
+
+(** \brief Returns the c++ keyword corresponding to a boolean value. **)
+CreateCBoolValue[True] := "true";
+CreateCBoolValue[False] := "false";
+CreateCBoolValue[sym_] :=
+    (PrintErrorMessage["CreateCBoolValue: cannot convert value to Boolean type: ", sym]; Quit[1]);
 
 CastTo[expr_String, toType_ /; toType === None] := expr;
 
@@ -548,6 +558,20 @@ CreateConstDef[parameter_String, type_, value_] :=
 
 CreateConstDef[parameter_, type_, value_] :=
     CreateConstDef[ToValidCSymbolString[parameter], type, value];
+
+CreateEnum[enumName_String, enumEntries_List] :=
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[ToValidCSymbolString /@ enumEntries, ", "];
+           "enum " <> enumName <> " : int { " <> result <> " };\n"
+          ];
+
+CreateEnum[enumName_String, enumEntries_List, start_Integer] :=
+    Module[{entries = enumEntries},
+           If[Length[entries] > 0,
+              entries[[1]] = ToValidCSymbolString[entries[[1]]] <> " = " <> ToString[start];
+             ];
+           CreateEnum[enumName, entries]
+          ];
 
 MakeUnique[name_String] :=
     Module[{appendix = ""},

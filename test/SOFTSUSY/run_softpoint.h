@@ -24,7 +24,6 @@
 #include "susy.h"
 #include "utils.h"
 #include "numerics.h"
-using namespace softsusy;
 
 
 
@@ -43,7 +42,7 @@ int get_valuei(const std::string& str, const std::string& prefix) {
 }
 
 bool contains_only_whitespace(const std::string& str) {
-  return str.find_first_not_of(" \t") == string::npos;
+  return str.find_first_not_of(" \t") == std::string::npos;
 }
 
 namespace softsusy {

@@ -19,7 +19,7 @@ rm -f "$output"
 # to make seq use point
 LANG=en_US
 
-Xt_values=$(seq -3 0.1 3)
+Xt_values=$(LC_NUMERIC=en_US.UTF-8 seq -3 0.1 3)
 MS=2000
 MS2=$(echo "$MS*$MS" | bc)
 Mu="$MS"
@@ -122,7 +122,9 @@ Block MSD2IN
 EOF
     } | $exe --slha-input-file=- 2>/dev/null | \
         awk -f "$print_block" -v block=MASS | \
-        awk '{ if ($1 == 25) print $2 }')
+        awk '{ if ($1 == 25) print $2 - 0.1 }')
+
+    # shift -0.1 GeV due to 2-loop O(at*as + at^2) corrections to mt(MZ)
 
     printf "%8s\t%16s\n" ${Xt} ${MH}
     printf "%8s\t%16s\n" ${Xt} ${MH} >> "$output"

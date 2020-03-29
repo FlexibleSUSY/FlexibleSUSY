@@ -54,7 +54,8 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_b alpha_s^2)",
    "Higgs 3-loop corrections O(alpha_t^2 alpha_s)",
    "Higgs 3-loop corrections O(alpha_t^3)",
-   "Higgs 4-loop corrections O(alpha_t alpha_s^3)"
+   "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
+   "calculate particle decays"
 };
 } // anonymous namespace
 
@@ -107,7 +108,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | pole_mass_loop_order             | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
  * | ewsb_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
  * | beta_loop_order                  | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
- * | threshold_corrections_loop_order | 0, 1, 2, 3                                      | 3 (= 3-loop)    |
+ * | threshold_corrections_loop_order | 0, 1, 2, 3, 4                                   | 4 (= 4-loop)    |
  * | higgs_2loop_correction_at_as     | 0, 1                                            | 1 (= enabled)   |
  * | higgs_2loop_correction_ab_as     | 0, 1                                            | 1 (= enabled)   |
  * | higgs_2loop_correction_at_at     | 0, 1                                            | 1 (= enabled)   |
@@ -124,13 +125,14 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | eft_matching_loop_order_down     | 0, 1                                            | 1 (= 1-loop)    |
  * | eft_higgs_index                  | any integer >= 0                                | 0 (= lightest)  |
  * | calculate_bsm_masses             | 0 (no) or 1 (yes)                               | 1 (= yes)       |
- * | threshold_corrections            | positive integer                                | 123111321       |
+ * | threshold_corrections            | positive integer                                | 124111421       |
  * | higgs_3loop_ren_scheme_atb_as2   | 0 (DR'), 1 (MDR'), 2 (H3m)                      | 0 (= DR')       |
  * | higgs_3loop_correction_at_as2    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_ab_as2    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
+ * | calculate_decays                 | 0, 1                                            | 1 (= enabled)   |
  */
 void Spectrum_generator_settings::reset()
 {
@@ -166,6 +168,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at2_as]    = 1.;
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
+   values[calculate_decays]                 = 1.;
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

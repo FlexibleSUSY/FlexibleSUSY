@@ -16,46 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "MSSMNoFV_onshell_susy_parameters.hpp"
+#include "gm2calc/MSSMNoFV_onshell_susy_parameters.hpp"
 
 #include <iostream>
+#include <utility>
 
 namespace gm2calc {
-
-MSSMNoFV_onshell_susy_parameters::MSSMNoFV_onshell_susy_parameters()
-   : scale(0)
-   , Yd(Eigen::Matrix<double,3,3>::Zero()), Ye(Eigen::Matrix<double,3,3>::Zero(
-   )), Yu(Eigen::Matrix<double,3,3>::Zero()), Mu(0), g1(0), g2(0), g3(0), vd(0)
-   , vu(0)
-{
-}
-
-MSSMNoFV_onshell_susy_parameters::MSSMNoFV_onshell_susy_parameters(
-   double scale_
-   , const Eigen::Matrix<double,3,3>& Yd_, const Eigen::Matrix<double,3,3>& Ye_
-   , const Eigen::Matrix<double,3,3>& Yu_, double Mu_, double g1_, double g2_,
-   double g3_, double vd_, double vu_
-
-)
-   : scale(scale_)
-   , Yd(Yd_), Ye(Ye_), Yu(Yu_), Mu(Mu_), g1(g1_), g2(g2_), g3(g3_), vd(vd_), vu
-   (vu_)
-{
-}
-
-void MSSMNoFV_onshell_susy_parameters::clear()
-{
-   scale = 0.;
-   Yd = Eigen::Matrix<double,3,3>::Zero();
-   Ye = Eigen::Matrix<double,3,3>::Zero();
-   Yu = Eigen::Matrix<double,3,3>::Zero();
-   Mu = 0.;
-   g1 = 0.;
-   g2 = 0.;
-   g3 = 0.;
-   vd = 0.;
-   vu = 0.;
-}
 
 void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
 {
@@ -73,7 +39,7 @@ void MSSMNoFV_onshell_susy_parameters::print(std::ostream& ostr) const
 
 std::ostream& operator<<(std::ostream& ostr, const MSSMNoFV_onshell_susy_parameters& susy_pars)
 {
-   susy_pars.print(std::cout);
+   susy_pars.print(ostr);
    return ostr;
 }
 

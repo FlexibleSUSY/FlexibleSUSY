@@ -19,10 +19,6 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
 
-#include "config.h"
-
-#ifdef ENABLE_THREADS
-
 #include "logger.hpp"
 
 #include <condition_variable>
@@ -145,7 +141,5 @@ private:
 };
 
 } // namespace flexiblesusy
-
-#endif
 
 #endif

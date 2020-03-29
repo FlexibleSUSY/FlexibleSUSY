@@ -20,7 +20,6 @@
 #define ROOT_FINDER_H
 
 #include <iostream>
-#include <cassert>
 #include <string>
 #include <utility>
 #include <Eigen/Core>
