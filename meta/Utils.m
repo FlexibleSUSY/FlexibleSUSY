@@ -210,6 +210,7 @@ Warning: This function may ignore empty lines.";
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
 FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
+
 PrintWarningMsg::usage = "";
 PrintErrorMsg::usage = "";
 FSPermutationSignature::usage = "";

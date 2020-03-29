@@ -247,7 +247,7 @@ CreateCType[CConversion`TensorType[t_, dims__]] :=
 CreateCBoolValue[True] := "true";
 CreateCBoolValue[False] := "false";
 CreateCBoolValue[sym_] :=
-    (PrintErrorMessage["CreateCBoolValue: cannot convert value to Boolean type: ", sym]; Quit[1]);
+    (Print["Error: CreateCBoolValue cannot convert value to Boolean type: ", sym]; Quit[1]);
 
 CastTo[expr_String, toType_ /; toType === None] := expr;
 

@@ -47,6 +47,7 @@ ToRotatedField::usage;
 ReplaceUnrotatedFields::usage;
 StripGroupStructure::usage="Removes group generators and Kronecker deltas.";
 StripFieldIndices::usage;
+
 IsNonZeroVertex::usage="Checks if a vertex may be non-zero.";
 
 SetCachedVertices::usage="";

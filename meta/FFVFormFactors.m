@@ -82,7 +82,7 @@ IsDiagramSupported[graph_, diagram_] :=
          " is currently not supported. " <>
          "Discarding diagram with particles " <>
          StringJoin @@ Riffle[ToString /@{EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ", "] <> "."
-      ]
+      ];
       Return[False];
    ];
 
