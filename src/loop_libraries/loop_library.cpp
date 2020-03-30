@@ -17,9 +17,9 @@
 // ====================================================================
 
 #include <memory>
-#include <iostream>
 
 #include "config.h"
+#include "logger.hpp"
 #include "loop_library.hpp"
 #include "loop_library_interface.hpp"
 
@@ -79,10 +79,10 @@ void Loop_library::set(int new_type) {
                   Loop_library::type_ = Loop_library::Library::Fflite;
                   break;
          #endif // ENABLE_FFLITE
-         default: std::cerr << "Warning: Check FlexibleSUSY[31]:\n" <<
+         default: ERROR("Warning: Check FlexibleSUSY[31]:\n"
                   "Currently configured values are 0 (=Softsusy)"
-                  COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO ".\n"<<
-                  "Setting default library.\n";
+                  COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO ".\n"
+                  "Setting default library.\n");
                   Loop_library::set_default();
                   break;
       }
@@ -91,8 +91,8 @@ void Loop_library::set(int new_type) {
 
 looplibrary::Loop_library_interface& Loop_library::get() {
    if(Loop_library::type_ == Loop_library::Library::Undefined) {
-      std::cerr << "Loop library should be initialized before first usage.\n" <<
-      "Setting default library.\n";
+      ERROR("Loop library should be initialized before first usage.\n"
+      "Setting default library.\n");
       Loop_library::set_default();
    }
    return *Loop_library::lib_;
