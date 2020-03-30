@@ -856,28 +856,25 @@ $(DIR)/test_loopfunctions.x: $(LIBCMSSM)
 $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
 $(DIR)/test_looplibrary_softsusy.cpp: $(DIR)/test_looplibrary.cpp.in
-	@sed 's/looplibrary_/looplibrary_softsusy/' \
-		 test/test_looplibrary.cpp.in > test/test_looplibrary_softsusy.cpp
+	@cp $< $@
+$(DIR)/test_looplibrary_softsusy.x: CPPFLAGS += -DLIBRARY_TYPE=0
 
 ifeq ($(ENABLE_COLLIER), yes)
 $(DIR)/test_looplibrary_collier.cpp: $(DIR)/test_looplibrary.cpp.in
-	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 1/' \
-		 -e 's/looplibrary_/looplibrary_collier/' \
-		 test/test_looplibrary.cpp.in > test/test_looplibrary_collier.cpp
+	@cp $< $@
+$(DIR)/test_looplibrary_collier.x: CPPFLAGS += -DLIBRARY_TYPE=1
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
 $(DIR)/test_looplibrary_looptools.cpp: $(DIR)/test_looplibrary.cpp.in
-	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 2/' \
-		 -e 's/looplibrary_/looplibrary_looptools/' \
-		 test/test_looplibrary.cpp.in > test/test_looplibrary_looptools.cpp
+	@cp $< $@
+$(DIR)/test_looplibrary_looptools.x: CPPFLAGS += -DLIBRARY_TYPE=2
 endif
 
 ifeq ($(ENABLE_FFLITE), yes)
 $(DIR)/test_looplibrary_fflite.cpp: $(DIR)/test_looplibrary.cpp.in
-	@sed -e 's/LIBRARY_TYPE 0/LIBRARY_TYPE 3/' \
-		 -e 's/looplibrary_/looplibrary_fflite/' \
-		 test/test_looplibrary.cpp.in > test/test_looplibrary_fflite.cpp
+	@cp $< $@
+$(DIR)/test_looplibrary_fflite.x: CPPFLAGS += -DLIBRARY_TYPE=3
 endif
 
 TEST_MSG = echo "\033[1;36m<<test<<\033[1;0m $<"

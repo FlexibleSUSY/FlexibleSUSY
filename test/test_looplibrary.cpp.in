@@ -1,12 +1,10 @@
-#define BOOST_TEST_MODULE looplibrary_ test
+#define BOOST_TEST_MODULE looplibrary LIBRARY_TYPE test
 
 #include <complex>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/tools/floating_point_comparison.hpp>
 #include "loop_libraries/loop_library.hpp"
 #include <iostream>
-
-#define LIBRARY_TYPE 0
 
 namespace flexiblesusy {
 
