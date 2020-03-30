@@ -76,8 +76,8 @@ SUSYScaleInput = {
 };
 
 InitialGuessAtSUSYScale = {
-    {vu, LowEnergyConstant[vev] Sin[ArcTan[TanBeta]]},
-    {vd, LowEnergyConstant[vev] Cos[ArcTan[TanBeta]]},
+    {vu, VEV Sin[ArcTan[TanBeta]]},
+    {vd, VEV Cos[ArcTan[TanBeta]]},
     {MassB, M1Input},
     {MassWB, M2Input},
     {MassG, M3Input},

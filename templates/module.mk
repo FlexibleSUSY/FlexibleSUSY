@@ -136,6 +136,8 @@ SHOOTING_TEMPLATES := \
 		$(DIR)/shooting_model.cpp.in \
 		$(DIR)/shooting_susy_scale_constraint.hpp.in \
 		$(DIR)/shooting_susy_scale_constraint.cpp.in \
+		$(DIR)/standard_model_shooting_initial_guesser.hpp.in \
+		$(DIR)/standard_model_shooting_initial_guesser.cpp.in \
 		$(DIR)/standard_model_shooting_matching.hpp.in \
 		$(DIR)/standard_model_shooting_matching.cpp.in \
 		$(DIR)/standard_model_shooting_low_scale_spectrum_generator.hpp.in \

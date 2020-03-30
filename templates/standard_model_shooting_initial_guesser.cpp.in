@@ -1,0 +1,119 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+// File generated at @DateAndTime@
+
+#include "@ModelName@_shooting_initial_guesser.hpp"
+#include "@ModelName@_shooting_model.hpp"
+#include "@ModelName@_standard_model_matching.hpp"
+#include "@ModelName@_shooting_susy_scale_constraint.hpp"
+#include "standard_model_shooting_model.hpp"
+#include "lowe.h"
+#include "logger.hpp"
+#include "error.hpp"
+#include "ew_input.hpp"
+#include "rkf_integrator.hpp"
+#include "wrappers.hpp"
+
+#include <Eigen/Core>
+
+#define INPUTPARAMETER(p) model->get_input().p
+#define MODELPARAMETER(p) model->get_##p()
+#define SMPARAMETER(p) sm.get_##p()
+#define PHASE(p) model->get_##p()
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define MODEL model
+
+namespace flexiblesusy {
+
+@ModelName@_standard_model_initial_guesser<Shooting>::@ModelName@_standard_model_initial_guesser(
+   @ModelName@<Shooting>* model_,
+   const softsusy::QedQcd& qedqcd_)
+   : model(model_)
+   , qedqcd(qedqcd_)
+{
+   if (!model_)
+      throw SetupError("@ModelName@_initial_guesser: Error: pointer to model"
+                       " @ModelName@<Shooting> must not be zero");
+}
+
+/**
+ * Calculates the Yukawa couplings @UpYukawa@ of the up-type quarks
+ * from the Standard Model up-type quark masses (ignoring threshold
+ * corrections).
+ */
+void @ModelName@_standard_model_initial_guesser<Shooting>::calculate_@UpYukawa@_DRbar()
+{
+@setDRbarUpQuarkYukawaCouplings@
+}
+
+/**
+ * Calculates the Yukawa couplings @DownYukawa@ of the down-type
+ * quarks from the Standard Model down-type quark masses (ignoring
+ * threshold corrections).
+ */
+void @ModelName@_standard_model_initial_guesser<Shooting>::calculate_@DownYukawa@_DRbar()
+{
+@setDRbarDownQuarkYukawaCouplings@
+}
+
+/**
+ * Calculates the Yukawa couplings @ElectronYukawa@ of the leptons
+ * from the Standard Model down-type lepton masses (ignoring threshold
+ * corrections).
+ */
+void @ModelName@_standard_model_initial_guesser<Shooting>::calculate_@ElectronYukawa@_DRbar()
+{
+@setDRbarElectronYukawaCouplings@
+}
+
+void @ModelName@_standard_model_initial_guesser<Shooting>::guess()
+{
+   VERBOSE_MSG("Starting initial guess ...");
+   VERBOSE_MSG("\t[1] initializing the SM ...");
+
+   @ModelName@_susy_scale_constraint<Shooting> ssc(model, qedqcd);
+   const double susy_scale_guess = ssc.get_initial_scale_guess();
+
+   standard_model::StandardModel<Shooting> sm;
+   sm.set_precision(1e-2);
+   sm.set_loops(3);
+   sm.set_pole_mass_loop_order(2);
+   sm.set_ewsb_loop_order(2);
+   sm.initialise_from_input(qedqcd);
+   sm.calculate_DRbar_masses();
+   sm.set_integrator(runge_kutta::RKF_integrator());
+
+   VERBOSE_MSG("\t[2] running SM up to Q_match = " << susy_scale_guess << " GeV ...");
+
+   sm.run_to(susy_scale_guess);
+   sm.calculate_DRbar_masses();
+
+   model->set_scale(susy_scale_guess);
+
+   const auto VEV = sm.get_v();
+
+   // apply susy-scale first guess
+@initialGuessAtSUSYScale@
+
+   VERBOSE_MSG("\t[3] matching low -> high at tree-level ...");
+
+   @ModelName@_standard_model_matching::match_low_to_high_scale_model_tree_level(*model, sm);
+}
+
+} // namespace flexiblesusy

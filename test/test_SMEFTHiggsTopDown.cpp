@@ -94,7 +94,7 @@ Block EXTPAR                 # Input parameters
     1   173.34               # scale QEWSB
 )";
 
-using Output_t = std::array<double, 1>;
+using Output_t = std::array<double, 9>;
 
 #define DEFINE_FUNCTION(model_name, solver_type, model_type)   \
    Output_t calc_ ## model_name(char const* const slha_input)  \
@@ -135,7 +135,17 @@ using Output_t = std::array<double, 1>;
          BOOST_TEST_MESSAGE(pr);                               \
       }                                                        \
                                                                \
-      return Output_t{ sm.get_physical().Mhh } ;               \
+      return Output_t{                                         \
+         sm.get_physical().Mhh,                                \
+         sm.get_Lambdax(),                                     \
+         sm.get_g1(),                                          \
+         sm.get_g2(),                                          \
+         sm.get_g3(),                                          \
+         sm.get_Yu(2,2),                                       \
+         sm.get_Yd(2,2),                                       \
+         sm.get_Ye(2,2),                                       \
+         sm.get_v()                                            \
+      };                                                       \
    }
 
 DEFINE_FUNCTION(SM, flexiblesusy::Two_scale, flexiblesusy::SM<flexiblesusy::Two_scale>)
@@ -143,8 +153,16 @@ DEFINE_FUNCTION(SMEFTHiggsTopDown, flexiblesusy::Shooting, standard_model::Stand
 
 BOOST_AUTO_TEST_CASE( test_Mh )
 {
-   const auto v0 = calc_SM(slha_input);
-   const auto v1 = calc_SMEFTHiggsTopDown(slha_input);
+   const auto bu = calc_SM(slha_input);
+   const auto td = calc_SMEFTHiggsTopDown(slha_input);
 
-   BOOST_CHECK_CLOSE_FRACTION(v0.at(0), v1.at(0), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(0), td.at(0), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(1), td.at(1), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(2), td.at(2), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(3), td.at(3), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(4), td.at(4), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(5), td.at(5), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(6), td.at(6), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(7), td.at(7), 1e-10);
+   BOOST_CHECK_CLOSE_FRACTION(bu.at(8), td.at(8), 1e-10);
 }

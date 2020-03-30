@@ -21,7 +21,7 @@
 #include "@ModelName@_shooting_spectrum_generator.hpp"
 #include "@ModelName@_input_parameters.hpp"
 #include "@ModelName@_shooting_ewsb_solver.hpp"
-// #include "@ModelName@_shooting_initial_guesser.hpp"
+#include "@ModelName@_shooting_initial_guesser.hpp"
 #include "@ModelName@_shooting_susy_scale_constraint.hpp"
 #include "@ModelName@_standard_model_matching.hpp"
 #include "standard_model_shooting_low_scale_constraint.hpp"
@@ -57,29 +57,12 @@ double @ModelName@_spectrum_generator<Shooting>::get_eft_pole_mass_scale(double 
 }
 
 double @ModelName@_spectrum_generator<Shooting>::get_matching_scale(
-   const @ModelName@<Shooting>& model, const softsusy::QedQcd& qedqcd) const
+   const Single_scale_constraint& constraint) const
 {
    double Q_match = settings.get(Spectrum_generator_settings::eft_matching_scale);
 
    if (is_zero(Q_match)) {
-      auto m = model;
-      @ModelName@_susy_scale_constraint<Shooting> hc(&m, qedqcd);
-      hc.apply();
-      Q_match = hc.get_scale();
-   }
-
-   return Q_match;
-}
-
-double @ModelName@_spectrum_generator<Shooting>::get_matching_scale_first_guess(
-   const @ModelName@_input_parameters& bsm_input, const softsusy::QedQcd& qedqcd) const
-{
-   double Q_match = settings.get(Spectrum_generator_settings::eft_matching_scale);
-
-   if (is_zero(Q_match)) {
-      @ModelName@<Shooting> model(bsm_input);
-      @ModelName@_susy_scale_constraint<Shooting> hc(&model, qedqcd);
-      Q_match = hc.get_initial_scale_guess();
+      Q_match = constraint.get_scale();
    }
 
    return Q_match;
@@ -106,6 +89,7 @@ void @ModelName@_spectrum_generator<Shooting>::init(
    @ModelName@_ewsb_solver<Shooting> ewsb_solver;
    model.set_ewsb_solver(
       std::make_shared<@ModelName@_ewsb_solver<Shooting> >(ewsb_solver));
+   model.set_integrator(runge_kutta::RKF_integrator());
 }
 
 void @ModelName@_spectrum_generator<Shooting>::init(
@@ -156,15 +140,30 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
       low_scale_constraint(&eft, qedqcd);
    low_scale_constraint.initialize();
 
+   @ModelName@_susy_scale_constraint<Shooting> susy_scale_constraint(&model, qedqcd);
+   susy_scale_constraint.initialize();
+
    susy_scale = 0.;
    low_scale = low_scale_constraint.get_scale();
 
-   // function to find root of
-   auto dev_from_input = [&](const Vec_t& pars) {
-      return deviation_from_observables(pars, qedqcd);
-   };
+   VERBOSE_MSG("\t[0] perform initial guess ...");
+
+   const Vec_t ig = initial_guess(qedqcd);
 
    VERBOSE_MSG("Setting up shooting solver ...");
+
+   // function to find root of
+   Shooting_solver<N>::Set_t setter = [&](const Vec_t& pars) {
+      VERBOSE_MSG("Running SM-like BSM parameters: " << pars.transpose());
+      set_SM_parameters(pars);
+   };
+
+   // function to find root of
+   Shooting_solver<N>::Pre_t predictor = [&]() -> Vec_t {
+      // TODO: put this into a MC slider for the shooting solver
+      match(qedqcd, susy_scale_constraint);
+      return deviation_from_observables(eft, qedqcd);
+   };
 
    Shooting_solver<N> solver;
 
@@ -174,15 +173,15 @@ void @ModelName@_spectrum_generator<Shooting>::run_except(const softsusy::QedQcd
       solver.set_max_iterations(max_it);
 
    solver.set_precision(settings.get(Spectrum_generator_settings::precision));
+   solver.add(&susy_scale_constraint, &model);
+   solver.add(setter);
+   solver.add(predictor);
 
    VERBOSE_MSG("\t[1] starting shooting solver ...");
 
-   solver.solve(dev_from_input, initial_guess(qedqcd, input));
+   solver.solve(ig);
 
    VERBOSE_MSG("\t[2] shooting solver has finished ...");
-   VERBOSE_MSG("\t[3] running to electroweak scale one last time ...");
-
-   std::tie(model, eft) = run_down(solver.get_solution(), qedqcd, input);
 
    susy_scale = model.get_scale();
 
@@ -279,49 +278,15 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
  */
 @ModelName@_spectrum_generator<Shooting>::Vec_t
 @ModelName@_spectrum_generator<Shooting>::initial_guess(
-   const softsusy::QedQcd& qedqcd,
-   const @ModelName@_input_parameters& bsm_input) const
+   const softsusy::QedQcd& qedqcd)
 {
-   using namespace @ModelName@_standard_model_matching;
-
    VERBOSE_MSG("Perform initial guess ...");
-   VERBOSE_MSG("\t[1] initializing the SM ...");
 
-   standard_model::Standard_model sm;
-   sm.set_precision(1e-2);
-   sm.set_loops(3);
-   sm.set_pole_mass_loop_order(2);
-   sm.set_ewsb_loop_order(2);
-   sm.initialise_from_input(qedqcd);
-   sm.calculate_DRbar_masses();
-   sm.set_integrator(runge_kutta::RKF_integrator());
-
-   const auto Q_match = get_matching_scale_first_guess(bsm_input, qedqcd);
-
-   VERBOSE_MSG("\t[2] running SM up to Q_match = " << Q_match << " GeV ...");
-
-   sm.run_to(Q_match);
-   sm.calculate_DRbar_masses();
-
-   VERBOSE_MSG("\t[3] initializing the BSM model ...");
-
-   @ModelName@<Shooting> model(bsm_input);
-   model.set_scale(sm.get_scale());
-   model.set_precision(1e-2);
-   model.set_loops(3);
-   model.set_pole_mass_loop_order(2);
-   model.set_ewsb_loop_order(2);
-
-   VERBOSE_MSG("\t[4] fill SM-like parameters of BSM model ...");
-
-   match_low_to_high_scale_model_tree_level(model, sm);
-
-   VERBOSE_MSG("\t[5] fill BSM parameters of BSM model ...");
-
-   fill_parameters(model, bsm_input, qedqcd);
+   @ModelName@_standard_model_initial_guesser<Shooting> ig(&model, qedqcd);
+   ig.guess();
 
    Vec_t vec;
-   vec(0) = model.get_@hyperchargeCoupling@(); // TODO: check normalization
+   vec(0) = model.get_@hyperchargeCoupling@();
    vec(1) = model.get_@leftCoupling@();
    vec(2) = model.get_@strongCoupling@();
    vec(3) = model.get_@UpYukawa@(2,2);
@@ -329,7 +294,7 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
    vec(5) = model.get_@ElectronYukawa@(2,2);
    vec(6) = model.VEV();
 
-   VERBOSE_MSG("\t[6] initial guess finished.");
+   VERBOSE_MSG("\tinitial guess finished.");
 
    return vec;
 }
@@ -342,8 +307,7 @@ void @ModelName@_spectrum_generator<Shooting>::calculate_spectrum(double Mt)
  * @return SM at Q_low
  */
 standard_model::StandardModel<Shooting>
-@ModelName@_spectrum_generator<Shooting>::run_down(
-   const @ModelName@<Shooting>& model) const
+@ModelName@_spectrum_generator<Shooting>::match_to_SM() const
 {
    using namespace @ModelName@_standard_model_matching;
 
@@ -352,6 +316,7 @@ standard_model::StandardModel<Shooting>
    const int loops =
       settings.get(Spectrum_generator_settings::eft_matching_loop_order_down);
 
+   /// TODO: use class member
    standard_model::StandardModel<Shooting> sm;
    sm.set_precision(model.get_precision());
    sm.set_scale(model.get_scale());
@@ -364,127 +329,75 @@ standard_model::StandardModel<Shooting>
    match_high_to_low_scale_model(sm, model, loops, index);
 
    VERBOSE_MSG("\t[2] lambda(Q_match = " << sm.get_scale() << ") = " << sm.get_Lambdax());
-   VERBOSE_MSG("\t[3] running SM down to Q_low = " << get_low_scale() << " ...");
-
-   sm.run_to(get_low_scale());
 
    return sm;
 }
 
-std::pair<@ModelName@<Shooting>, standard_model::StandardModel<Shooting>>
-@ModelName@_spectrum_generator<Shooting>::run_down(
-   const Vec_t& bsm_pars, const softsusy::QedQcd& qedqcd,
-   const @ModelName@_input_parameters& bsm_input) const
+void @ModelName@_spectrum_generator<Shooting>::match(
+   const softsusy::QedQcd& qedqcd,
+   Single_scale_constraint& constraint)
 {
    VERBOSE_MSG("Running down ...");
 
-   VERBOSE_MSG("\t[1] initializing the BSM model parameters ...");
+   const auto Q_match = get_matching_scale(constraint);
 
-   @ModelName@<Shooting> model;
-   init(model, bsm_input);
-   // overwrite SM-like parameters
-   fill_parameters(model, bsm_pars);
-   // impose susy-scale boundary condition
-   fill_parameters(model, bsm_input, qedqcd);
-
-   model.solve_ewsb_tree_level();
-   model.calculate_DRbar_masses();
-
-   // VERBOSE_MSG("\t[1-1] BSM model with filled parameters: \n" << model);
-
-   model.solve_ewsb();
-   model.set_integrator(runge_kutta::RKF_integrator());
-
-   const auto Q_match = get_matching_scale(model, qedqcd);
-
-   VERBOSE_MSG("\t[3] running to matching scale Q_match = "
+   VERBOSE_MSG("\t[1] running to matching scale Q_match = "
                << Q_match << " GeV ...");
 
    model.run_to(Q_match);
 
-   VERBOSE_MSG("\t[4] calculate BSM tree-level mass spectrum ...");
+   VERBOSE_MSG("\t[2] calculate BSM tree-level mass spectrum ...");
 
    model.calculate_DRbar_masses();
    model.solve_ewsb();
 
-   VERBOSE_MSG("\t[5] start matching to SM ...");
+   VERBOSE_MSG("\t[3] start matching to SM ...");
 
    // calculate lambda and run down
-   return std::make_pair(model, run_down(model));
+   eft = match_to_SM();
 }
 
-void @ModelName@_spectrum_generator<Shooting>::fill_parameters(
-   @ModelName@<Shooting>& model, const Vec_t& vec) const
+void @ModelName@_spectrum_generator<Shooting>::set_SM_parameters(
+   const Vec_t& vec)
 {
    using namespace @ModelName@_standard_model_matching;
 
    VERBOSE_MSG("Overwriting SM-like BSM parameters with " << vec.transpose());
 
-   int idx = 0;
+   model.set_@hyperchargeCoupling@(vec(0));
+   model.set_@leftCoupling@(vec(1));
+   model.set_@strongCoupling@(vec(2));
+   model.set_@UpYukawa@(2, 2, vec(3));
+   model.set_@DownYukawa@(2, 2, vec(4));
+   model.set_@ElectronYukawa@(2, 2, vec(5));
 
-   // TODO: check normalization
-   model.set_@hyperchargeCoupling@(vec(idx++));
-   model.set_@leftCoupling@(vec(idx++));
-   model.set_@strongCoupling@(vec(idx++));
-   model.set_@UpYukawa@(2, 2, vec(idx++));
-   model.set_@DownYukawa@(2, 2, vec(idx++));
-   model.set_@ElectronYukawa@(2, 2, vec(idx++));
-
-   const double VEV = vec(idx++);
+   const double VEV = vec(6);
 
    VERBOSE_MSG("Imposing user-defined matching condition ...");
 
    impose_user_matching(model, VEV);
 }
 
-void @ModelName@_spectrum_generator<Shooting>::fill_parameters(
-   @ModelName@<Shooting>& model,
-   const @ModelName@_input_parameters& input,
-   const softsusy::QedQcd& qedqcd) const
-{
-   VERBOSE_MSG("Setting BSM parameters ... ");
-   // VERBOSE_MSG("Using the model:\n" << model);
-   VERBOSE_MSG("\t[1] creating susy-scale constraint ...");
-
-   @ModelName@_susy_scale_constraint<Shooting> hc(&model, qedqcd);
-
-   VERBOSE_MSG("\t[2] imposing susy-scale constraint ...");
-
-   model.set_scale(hc.get_scale()); // TODO scale may be dynamic
-   hc.apply();
-
-   const auto Q_input = hc.get_scale();
-
-   VERBOSE_MSG("\t[3] setting input scale to Q_input = " << Q_input << " GeV");
-
-   model.set_scale(Q_input);
-}
-
 @ModelName@_spectrum_generator<Shooting>::Vec_t
 @ModelName@_spectrum_generator<Shooting>::deviation_from_observables(
-   const Vec_t& bsm_pars, const softsusy::QedQcd& qedqcd) const
+   const standard_model::StandardModel<Shooting>& eft_,
+   const softsusy::QedQcd& qedqcd) const
 {
    VERBOSE_MSG("Calculating deviation from SM input observables ...");
-   VERBOSE_MSG("\t[0] using the SM-like BSM parameters: " << bsm_pars.transpose());
 
    const double Q_low = get_low_scale();
-   const auto bsm_input = model.get_input();
 
-   VERBOSE_MSG("\t[1] running down ...");
+   VERBOSE_MSG("\t[1] running SM to Q_low = " << Q_low << " GeV ...");
 
-   auto eft = run_down(bsm_pars, qedqcd, bsm_input).second;
-
-   VERBOSE_MSG("\t[2] running to electroweak matching scale Q_low = "
-               << Q_low << " GeV ...");
-
+   auto eft = eft_;
    eft.run_to(Q_low);
 
-   VERBOSE_MSG("\t[3] calculating pole masses ...");
+   VERBOSE_MSG("\t[2] calculating pole masses ...");
 
    eft.solve_ewsb();
    eft.calculate_pole_masses();
 
-   VERBOSE_MSG("\t[4] calculating observables ...");
+   VERBOSE_MSG("\t[3] calculating observables ...");
 
    Vec_t diff(Vec_t::Zero());
 
@@ -523,7 +436,7 @@ void @ModelName@_spectrum_generator<Shooting>::fill_parameters(
    diff(5) = (eft.calculate_MFd_DRbar(mb_qedqcd, 2) - eft.get_MFd(2))/eft.calculate_MFd_DRbar(mb_qedqcd, 2) ;
    diff(6) = (qedqcd.displayPoleMtau() - eft.get_physical().MFe(2))/(qedqcd.displayPoleMtau());
 
-   VERBOSE_MSG("\t[5] relative deviation from input observables: " <<  diff.transpose());
+   VERBOSE_MSG("\t[4] relative deviation from input observables: " <<  diff.transpose());
 
    return diff;
 }

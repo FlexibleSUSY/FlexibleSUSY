@@ -23,6 +23,7 @@ LIB@ModelName@_SRC += \
 		$(DIR)/@ModelName@_shooting_model.cpp \
 		$(DIR)/@ModelName@_shooting_spectrum_generator.cpp \
 		$(DIR)/@ModelName@_shooting_high_scale_constraint.cpp \
+		$(DIR)/@ModelName@_shooting_initial_guesser.cpp \
 		$(DIR)/@ModelName@_shooting_low_scale_constraint.cpp \
 		$(DIR)/@ModelName@_shooting_susy_scale_constraint.cpp
 
@@ -31,6 +32,7 @@ LIB@ModelName@_HDR += \
 		$(DIR)/@ModelName@_shooting_model.hpp \
 		$(DIR)/@ModelName@_shooting_spectrum_generator.hpp \
 		$(DIR)/@ModelName@_shooting_high_scale_constraint.hpp \
+		$(DIR)/@ModelName@_shooting_initial_guesser.hpp \
 		$(DIR)/@ModelName@_shooting_low_scale_constraint.hpp \
 		$(DIR)/@ModelName@_shooting_susy_scale_constraint.hpp
 

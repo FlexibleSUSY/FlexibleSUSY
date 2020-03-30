@@ -20,9 +20,9 @@ SUSYScaleInput = {
     {\[Lambda], LambdaIN}
 };
 
-LowScale = LowEnergyConstant[MT];
+LowScale = LowEnergyConstant[MZ];
 
-LowScaleFirstGuess = LowEnergyConstant[MT];
+LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
     {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
@@ -33,7 +33,7 @@ LowScaleInput = {
 };
 
 InitialGuessAtSUSYScale = {
-    {v, LowEnergyConstant[vev]},
+    {v, VEV},
     {Yu, Automatic},
     {Yd, Automatic},
     {Ye, Automatic}

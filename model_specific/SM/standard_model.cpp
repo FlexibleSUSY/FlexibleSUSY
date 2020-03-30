@@ -904,13 +904,16 @@ double Standard_model::calculate_delta_alpha_s(double alphaS) const
 
 }
 
-/*
+/**
  * Determine Gf out of Weinberg angle
+ *
+ * @param qedqcd low-energy input parameters
+ *
+ * @return GF
  */
 double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 {
-	// 
-   double g_fermi= 0.;
+   double g_fermi = 0.;
 
    using namespace weinberg_angle;
 
@@ -922,16 +925,14 @@ double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
    const double mb_drbar            = MFd(2);
    const double mh_drbar            = Mhh;
    const double gY                  = g1 * 0.7745966692414834;
-   const double e                   =  gY*g2 / Sqrt(Sqr(gY) + Sqr(g2));
+   const double e                   = gY*g2 / Sqrt(Sqr(gY) + Sqr(g2));
    const double alpha_em_drbar      = Sqr(e) / (4*Pi);
    const double cos_theta_w         = MVWp / MVZ;
-   
+
    const double pizztMZ             = Re(self_energy_VZ_1loop(mz_pole));
    const double piwwt0              = Re(self_energy_VWp_1loop(0.));
    const double self_energy_w_at_mw = Re(self_energy_VWp_1loop(mw_pole));
    const double theta_w             = ArcCos(cos_theta_w);
-
-
 
    Weinberg_angle::Self_energy_data se_data;
    se_data.scale    = scale;
@@ -982,11 +983,12 @@ double Standard_model::calculate_G_fermi(const softsusy::QedQcd& qedqcd)
 
    g_fermi = weinberg.get_G_fermi();
 
-/*   if (error)
-      problems.flag_no_G_fermi_convergence();  //TODO: create flag for convergence
-   else
+   if (error) {
+      problems.flag_no_G_fermi_convergence();
+   } else {
       problems.unflag_no_G_fermi_convergence();
-*/
+   }
+
    return g_fermi;
 }
 

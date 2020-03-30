@@ -4404,6 +4404,21 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                    }
                                   ];
 
+              initialGuesserInputFile = "shooting_initial_guesser";
+              If[FlexibleSUSY`FlexibleEFTHiggs === True,
+                 initialGuesserInputFile = "standard_model_" <> initialGuesserInputFile;
+              ];
+
+              WriteInitialGuesserClass[FlexibleSUSY`InitialGuessAtLowScale,
+                                       FlexibleSUSY`InitialGuessAtSUSYScale,
+                                       FlexibleSUSY`InitialGuessAtHighScale,
+                                       {{FileNameJoin[{$flexiblesusyTemplateDir, initialGuesserInputFile <> ".hpp.in"}],
+                                         FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_shooting_initial_guesser.hpp"}]},
+                                        {FileNameJoin[{$flexiblesusyTemplateDir, initialGuesserInputFile <> ".cpp.in"}],
+                                         FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_shooting_initial_guesser.cpp"}]}
+                                       }
+              ];
+
               If[FlexibleSUSY`FlexibleEFTHiggs === True,
                  Print["Creating matching class ..."];
                  WriteMatchingClass[FlexibleSUSY`MatchingScaleInput, massMatrices,

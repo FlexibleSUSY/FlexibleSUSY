@@ -72,6 +72,7 @@ void Problems::clear()
    failed_ewsb_tree_level = false;
    non_perturbative = false;
    failed_sinThetaW_convergence = false;
+   failed_GF_convergence = false;
 }
 
 void Problems::add(const Problems& other)
@@ -92,12 +93,14 @@ void Problems::add(const Problems& other)
    failed_ewsb_tree_level = failed_ewsb_tree_level || other.failed_ewsb_tree_level;
    non_perturbative = non_perturbative || other.non_perturbative;
    failed_sinThetaW_convergence = failed_sinThetaW_convergence || other.failed_sinThetaW_convergence;
+   failed_GF_convergence = failed_GF_convergence || other.failed_GF_convergence;
 }
 
 bool Problems::have_problem() const
 {
    return have_tachyon() || failed_ewsb || failed_ewsb_tree_level
       || non_perturbative || failed_sinThetaW_convergence
+      || failed_GF_convergence
       || have_thrown()
       || have_failed_pole_mass_convergence()
       || have_non_perturbative_parameter();
@@ -137,6 +140,8 @@ std::vector<std::string> Problems::get_problem_strings() const
       strings.emplace_back("non-perturbative");
    if (failed_sinThetaW_convergence)
       strings.emplace_back("no sinThetaW convergence");
+   if (failed_GF_convergence)
+      strings.emplace_back("no GF convergence");
    if (have_thrown())
       strings.emplace_back("exception thrown(" + exception_msg + ")");
    for (int i = 0; i < n_particles; ++i) {
@@ -278,6 +283,11 @@ void Problems::flag_no_sinThetaW_convergence()
    failed_sinThetaW_convergence = true;
 }
 
+void Problems::flag_no_G_fermi_convergence()
+{
+   failed_GF_convergence = true;
+}
+
 void Problems::unflag_bad_mass(int particle)
 {
    bad_masses.at(particle) = false;
@@ -342,6 +352,11 @@ void Problems::unflag_all_non_perturbative_parameters()
 void Problems::unflag_no_sinThetaW_convergence()
 {
    failed_sinThetaW_convergence = false;
+}
+
+void Problems::unflag_no_G_fermi_convergence()
+{
+   failed_GF_convergence = false;
 }
 
 bool Problems::is_bad_mass(int particle) const
@@ -417,6 +432,11 @@ bool Problems::no_perturbative() const
 bool Problems::no_sinThetaW_convergence() const
 {
    return failed_sinThetaW_convergence;
+}
+
+bool Problems::no_G_fermi_convergence() const
+{
+   return failed_GF_convergence;
 }
 
 std::vector<int> Problems::get_bad_masses() const
