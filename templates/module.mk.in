@@ -63,7 +63,6 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/@CLASSNAME@_observables.cpp \
-		$(DIR)/@CLASSNAME@_one_loop_decay_diagrams.cpp \
 		$(DIR)/@CLASSNAME@_physical.cpp \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \
 		$(DIR)/@CLASSNAME@_soft_parameters.cpp \
@@ -105,7 +104,6 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_model.hpp \
 		$(DIR)/@CLASSNAME@_model_slha.hpp \
 		$(DIR)/@CLASSNAME@_observables.hpp \
-		$(DIR)/@CLASSNAME@_one_loop_decay_diagrams.hpp \
 		$(DIR)/@CLASSNAME@_physical.hpp \
 		$(DIR)/@CLASSNAME@_slha_io.hpp \
 		$(DIR)/@CLASSNAME@_spectrum_generator.hpp \

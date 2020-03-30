@@ -69,6 +69,8 @@ ExtraSLHAOutputBlocks = {
            {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
             {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
 };
+FSCalculateDecays = True;
+DecayParticles = {hh};
 
 SARAH`ParameterDefinitions = Append[
     Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
