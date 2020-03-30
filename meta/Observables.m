@@ -27,7 +27,23 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma };
+                  EDM, BrLToLGamma, bsgamma };
+
+Module[{file, str, out, yes = 0, no = 0},
+   file = OpenRead@#;
+   While[And[yes < 2, no < 1],
+      str = ReadLine@file;
+      out = StringCases[str, "ENABLE_FEYNARTS"|"ENABLE_FORMCALC" ~~ Whitespace ~~
+         ":=" ~~ Whitespace ~~ x : "yes"|"no" :> x];
+      If[out === {"yes"}, yes++];
+      If[out === {"no"}, no++];
+   ];
+   If[yes === 2,
+      AppendTo[FSObservables, FToFConversionInNucleus],
+      Print["Disabling code generation for FToFConversionInNucleus"]];
+   Close@#;
+   ] &@ FileNameJoin@{ParentDirectory@DirectoryName@FindFile@$Input, "Makefile"};
+
 End[];
 
 GetRequestedObservables::usage="";
@@ -421,7 +437,7 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
           ];
 
 CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     spec = CConversion`ToValidCSymbolString[spectator]},
            structName <> ".LToLGamma0(" <> pInStr <> ", " <> pOutStr <> ", " <> spec <> ") = " <>
            FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> spec <> "(MODEL, qedqcd, physical_input);"
@@ -439,7 +455,7 @@ CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[id
           ];
 
 CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     nuc = CConversion`ToValidCSymbolString[nucleai]},
            structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
            FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
