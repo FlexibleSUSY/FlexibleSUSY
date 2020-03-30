@@ -42,16 +42,16 @@ Block FlexibleSUSY
     1   0                    # max. iterations (0 = automatic)
     2   0                    # solver (0 = all, 1 = two_scale, 2 = semi_analytic)
     3   1                    # calculate SM pole masses
-    4   4                    # pole mass loop order
-    5   4                    # EWSB loop order
+    4   1                    # pole mass loop order
+    5   1                    # EWSB loop order
     6   4                    # beta-functions loop order
-    7   4                    # threshold corrections loop order
+    7   1                    # threshold corrections loop order
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
    10   1                    # Higgs 2-loop corrections O((alpha_t + alpha_b)^2)
    11   1                    # Higgs 2-loop corrections O(alpha_tau^2)
    12   0                    # force output
-   13   3                    # Top quark 2-loop corrections QCD
+   13   0                    # Top quark 2-loop corrections QCD
    14   1.000000000e-11      # beta-function zero threshold
    15   0                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
@@ -62,13 +62,10 @@ Block FlexibleSUSY
    21   0                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
-   24   124111321            # individual threshold correction loop orders
+   24   111111111            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR', 1 = MDR', 2 = H3m)
    26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
    27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
-   28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
-   29   1                    # Higgs 3-loop corrections O(alpha_t^3)
-   30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
