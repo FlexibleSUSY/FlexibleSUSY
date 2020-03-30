@@ -17,7 +17,7 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_CMSSMCKM_b_to_s_gamma
+#define BOOST_TEST_MODULE test_CMSSMCKM_b_to_s_gamma_internal_spectrum
 
 #include <boost/test/unit_test.hpp>
 #include <cstdlib>
@@ -34,7 +34,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_b_to_s_gamma, * boost::unit_test::tolerance(2e-6) )
+BOOST_AUTO_TEST_CASE( test_b_to_s_gamma_internal_spectrum, * boost::unit_test::tolerance(1e-5) )
 {
    char const * const slha_input = R"(
 Block MODSEL                 # Select model

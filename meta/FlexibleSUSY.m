@@ -2101,6 +2101,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
     Module[{fields = "", cxxVerticesParts = {},
             massFunctions, physicalMassFunctions,
             unitCharge,
+            defineFieldTraits,
             sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
             outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
             cxxQFTVerticesFiles},
@@ -2108,6 +2109,10 @@ WriteCXXDiagramClass[vertices_List, files_List,
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
         fields = CXXDiagrams`CreateFields[];
+        defineFieldTraits =
+           CXXDiagrams`CreateFieldTraitsDefinitions[
+              TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
+           ];
 
         If[vertices =!= {},
 
@@ -2136,6 +2141,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
                             {"@CXXDiagrams_Fields@"                -> fields,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
+                             "@defineFieldTraits@"                 -> defineFieldTraits,
                              "@CXXDiagrams_VertexPrototypes@"  ->
                                 StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
                              Sequence @@ GeneralReplacementRules[]
@@ -2210,6 +2216,7 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
                   Transpose[{extParticles, diagrams}]
             ]);
          ];
+
       WriteOut`ReplaceInFiles[files,
          {"@FFVFormFactors_InterfacePrototypes@"   -> interfacePrototypes,
           "@FFVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,

@@ -52,6 +52,10 @@ CreateParticleMixingEnum::usage="creates enum with mixing matrices";
 CreateParticleMultiplicity::usage="creates array of the particle
 multiplicities";
 
+prefixNamespace::usage="";
+CreateFieldClassName::usage="creates the names of the class associated with
+the given field";
+
 FillSpectrumVector::usage="";
 
 CreateMixingMatrixGetter::usage="creates a getter for the mixing
@@ -202,6 +206,7 @@ GetSMUpQuarks::usage="";
 GetSMDownQuarks::usage="";
 GetSMQuarks::usage="";
 GetColoredParticles::usage="";
+GetColorRepresentation::usage="";
 
 GetUpQuark::usage="";
 GetDownQuark::usage="";
@@ -263,6 +268,8 @@ CallDiagonalizeHermitianFunction::usage="";
 
 FlagPoleTachyon::usage = "";
 FlagRunningTachyon::usage = "";
+
+GetStrongCoupling::usage = "Returns the name of the QCD coupling, e.g. g3. If not present returns Null."
 
 Begin["`Private`"];
 
@@ -474,6 +481,25 @@ ColorChargedQ[field_] :=
 
 GetColoredParticles[] :=
     Select[GetParticles[], ColorChargedQ];
+
+GetColorRepresentation[SARAH`bar[particle_]] :=
+    Module[{rep = GetColorRepresentation[particle]},
+           If[rep =!= S && rep =!= O,
+              rep = -rep;
+             ];
+           rep
+          ];
+
+GetColorRepresentation[Susyno`LieGroups`conj[particle_]] :=
+    Module[{rep = GetColorRepresentation[particle]},
+           If[rep =!= S && rep =!= O,
+              rep = -rep;
+             ];
+           rep
+          ];
+
+GetColorRepresentation[particle_] :=
+    SARAH`getColorRep[particle];
 
 IsQuark[Susyno`LieGroups`conj[sym_]] := IsQuark[sym];
 IsQuark[SARAH`bar[sym_]] := IsQuark[sym];
@@ -1086,6 +1112,19 @@ CreateParticleMixingNames[mixings_List] :=
            "const std::array<std::string, NUMBER_OF_MIXINGS> particle_mixing_names = {" <>
            IndentText[result] <> "};\n"
           ];
+
+(* Note that "bar" and "conj" get turned into bar<...>::type and
+ conj<...>::type respectively! *)
+CreateFieldClassName[p_, OptionsPattern[{prefixNamespace -> False}]] :=
+    If[StringQ[OptionValue[prefixNamespace]],
+       OptionValue[prefixNamespace] <> "::",
+       ""] <> SymbolName[p];
+
+CreateFieldClassName[SARAH`bar[p_], OptionsPattern[{prefixNamespace -> False}]] :=
+    "typename field_traits::bar<" <> CreateFieldClassName[p, prefixNamespace -> OptionValue[prefixNamespace]] <> ">::type";
+
+CreateFieldClassName[Susyno`LieGroups`conj[p_], OptionsPattern[{prefixNamespace -> False}]] :=
+    "typename field_traits::conj<" <> CreateFieldClassName[p, prefixNamespace -> OptionValue[prefixNamespace]] <> ">::type";
 
 FillSpectrumVector[particles_List] :=
     Module[{par, parStr, massStr, latexName, result = ""},
@@ -2266,6 +2305,9 @@ GetChargedHiggsBoson[] :=
 
 GetPseudoscalarHiggsBoson[] :=
    If[ValueQ[SARAH`PseudoScalarBoson], SARAH`PseudoScalarBoson];
+
+GetStrongCoupling[] :=
+   If[ValueQ[SARAH`strongCoupling], SARAH`strongCoupling];
 
 End[];
 

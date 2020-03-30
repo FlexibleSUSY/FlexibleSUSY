@@ -56,7 +56,7 @@ namespace @ModelName@_cxx_diagrams {
     */
    template <class Field>
    struct field_indices {
-      /** @b using keyword here is type alias 
+      /** @b using keyword here is type alias
        * (see https://en.cppreference.com/w/cpp/language/type_alias).
        * It allows to use @code{.cpp}typename field_indices<Field>::type@endcode
        * to get @code{.cpp}std::array<int, Field::numberOfFieldIndices>@endcode
@@ -67,7 +67,7 @@ namespace @ModelName@_cxx_diagrams {
 
    namespace detail {
       /** @brief Declare a metafunction that gives the int value for Field
-       * during compilation time or `int_<int N>` typename of this index. 
+       * during compilation time or `int_<int N>` typename of this index.
        * @returns `::value` gives compile time integer value.
        * @returns `::type` gives `int_<int N>` typename.
        */
@@ -80,7 +80,7 @@ namespace @ModelName@_cxx_diagrams {
       /*
        * @param FieldSequence a Forward Sequence, e.g vector<type1,typ2,...>
        * (see https://www.boost.org/doc/libs/1_69_0/libs/mpl/doc/refmanual/forward-sequence.html).
-       * @returns `::type` which accomodates `mpl::int_<N>` with `int N` being the 
+       * @returns `::type` which accomodates `mpl::int_<N>` with `int N` being the
        * sum of @b number of indices of fields inside FieldSequence.
        * @returns `::value` which represents `N` where `N` being the `int`
        * sum of @b number of indices of fields inside FieldSequence
@@ -92,7 +92,7 @@ namespace @ModelName@_cxx_diagrams {
             boost::mpl::int_<0>,
             boost::mpl::plus<boost::mpl::_1,
                              number_of_field_indices<boost::mpl::_2>
-                            > 
+                            >
             >::type;
          static constexpr int value = type::value;
       };
@@ -121,64 +121,171 @@ namespace @ModelName@_cxx_diagrams {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
 
-   namespace fields {
-      template <class Field>
-      struct bar {
-         using index_bounds = typename Field::index_bounds;
-         static constexpr int numberOfGenerations = Field::numberOfGenerations;
-         using sm_flags = typename Field::sm_flags;
-         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-         static constexpr double electric_charge = -Field::electric_charge;
-         using lorentz_conjugate = Field;
+   namespace fields
+   {
+   enum class ParticleType {
+      scalar,
+      fermion,
+      vector,
+      ghost
+   };
 
-         using type = bar<Field>;
-       };
+   template<typename Field>
+   struct is_massless {
+      static constexpr bool value = Field::massless;
+   };
 
-      template <class Field>
-      struct conj {
-         using index_bounds = typename Field::index_bounds;
-         static constexpr int numberOfGenerations = Field::numberOfGenerations;
-         using sm_flags = typename Field::sm_flags;
-         static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
-         static constexpr double electric_charge = -Field::electric_charge;
-         using lorentz_conjugate = Field;
+   enum class ParticleColorRep {
+      singlet,
+      triplet,
+      anti_triplet,
+      sextet,
+      octet
+   };
 
-         using type = conj<Field>;
-      };
+   template<typename Field>
+   struct is_singlet {
+      static constexpr bool value =
+         Field::color_rep == ParticleColorRep::singlet;
+   };
+   template<typename Field>
+   struct is_triplet {
+      static constexpr bool value = Field::color_rep == ParticleColorRep::triplet;
+   };
+   template<typename Field>
+   struct is_anti_triplet {
+      static constexpr bool value =
+         Field::color_rep == ParticleColorRep::anti_triplet;
+   };
+   template<typename Field>
+   struct is_octet {
+      static constexpr bool value = Field::color_rep == ParticleColorRep::octet;
+   };
+   template<typename Field>
+   constexpr typename std::enable_if<
+      is_triplet<Field>::value, ParticleColorRep
+      >::type
+   color_conj() {
+      return ParticleColorRep::anti_triplet;
+   }
+   template<typename Field>
+   constexpr typename std::enable_if<
+      is_anti_triplet<Field>::value, ParticleColorRep
+      >::type
+   color_conj() {
+      return ParticleColorRep::triplet;
+   }
+   template<typename Field>
+   constexpr typename std::enable_if<
+      !is_triplet<Field>::value && !is_anti_triplet<Field>::value, ParticleColorRep
+      >::type
+   color_conj() {
+      return Field::color_rep;
+   }
 
-      // Double Lorentz conjugation
-      template <class Field>
-      struct bar<bar<Field>> {
-         using type = Field;
-      };
-      template <class Field>
-      struct conj<conj<Field>> {
-         using type = Field;
-      };
+   template<class Field>
+   struct bar {
+      using index_bounds = typename Field::index_bounds;
+      using sm_flags = typename Field::sm_flags;
+      using lorentz_conjugate = Field;
+      using type = bar<Field>;
 
-      // Remove Lorentz conjugation
-      template <class Field>
-      struct remove_lorentz_conjugation {
-         using type = Field;
-      };
+      static constexpr int numberOfGenerations = Field::numberOfGenerations;
+      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+      static constexpr double electric_charge = -Field::electric_charge;
+      static constexpr auto particle_type = Field::particle_type;
+      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr auto massless = Field::massless;
+   };
 
-      template <class Field>
-      struct remove_lorentz_conjugation<bar<Field>> {
-         using type = Field;
-      };
+   template<class Field>
+   struct conj {
+      using index_bounds = typename Field::index_bounds;
+      using sm_flags = typename Field::sm_flags;
+      using lorentz_conjugate = Field;
+      using type = conj<Field>;
 
-      template <class Field>
-      struct remove_lorentz_conjugation<conj<Field>> {
-         using type = Field;
-      };
+      static constexpr int numberOfGenerations = Field::numberOfGenerations;
+      static constexpr int numberOfFieldIndices = Field::numberOfFieldIndices;
+      static constexpr double electric_charge = -Field::electric_charge;
+      static constexpr auto particle_type = Field::particle_type;
+      static constexpr auto color_rep = color_conj<Field>();
+      static constexpr auto massless = Field::massless;
+   };
 
-      @CXXDiagrams_Fields@
+   // Double Lorentz conjugation
+   template <class Field>
+   struct bar<bar<Field>> {
+      using type = Field;
+   };
+   template <class Field>
+   struct conj<conj<Field>> {
+      using type = Field;
+   };
+
+   // Remove Lorentz conjugation
+   template <class Field>
+   struct remove_lorentz_conjugation {
+      using type = Field;
+   };
+
+   template <class Field>
+   struct remove_lorentz_conjugation<bar<Field>> {
+      using type = Field;
+   };
+
+   template <class Field>
+   struct remove_lorentz_conjugation<conj<Field>> {
+      using type = Field;
+   };
+
+@CXXDiagrams_Fields@
+
+   template <class Field>
+   struct is_scalar : public std::false_type {};
+
+   template <class Field>
+   struct is_scalar<bar<Field> > : public is_scalar<Field> {};
+
+   template <class Field>
+   struct is_scalar<conj<Field> > : public is_scalar<Field> {};
+
+   template <class Field>
+   struct is_fermion : public std::false_type {};
+
+   template <class Field>
+   struct is_fermion<bar<Field> > : public is_fermion<Field> {};
+
+   template <class Field>
+   struct is_fermion<conj<Field> > : public is_fermion<Field> {};
+
+   template <class Field>
+   struct is_vector : public std::false_type {};
+
+   template <class Field>
+   struct is_vector<bar<Field> > : public is_vector<Field> {};
+
+   template <class Field>
+   struct is_vector<conj<Field> > : public is_vector<Field> {};
+
+   template <class Field>
+   struct is_ghost : public std::false_type {};
+
+   template <class Field>
+   struct is_ghost<bar<Field> > : public is_ghost<Field> {};
+
+   template <class Field>
+   struct is_ghost<conj<Field> > : public is_ghost<Field> {};
+
+@defineFieldTraits@
+
    } // namespace fields
 
    using fields::bar;
    using fields::conj;
    using fields::remove_lorentz_conjugation;
 } // namespace @ModelName@_cxx_diagrams
+
 } // namespace flexiblesusy
 
 #endif
