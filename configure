@@ -2552,7 +2552,7 @@ If[Needs[\"SARAH\`\"] === \$Failed,
 #_____________________________________________________________________
 check_feynarts() {
     if test "x$enable_feynarts" = "xno"; then return; fi
-    
+
     checking_msg "FeynArts installation"
     rm -f ${feynartsconfig}
     "$MATH" <<EOF > /dev/null
@@ -2568,7 +2568,7 @@ EOF
     if test "x${_feynarts_is_available}" = "x0" ; then
         if test -r "${feynartsconfig}" ; then
             FEYNARTS_VERSION=$(cat "${feynartsconfig}")
-            
+
             if version_at_least $FEYNARTS_VERSION "${required_feynarts_version}"; then
                 enable_feynarts="yes"
                 result "ok (version ${FEYNARTS_VERSION})"
@@ -2603,7 +2603,7 @@ EOF
 #_____________________________________________________________________
 check_formcalc() {
     if test "x$enable_formcalc" = "xno"; then return; fi
-    
+
     checking_msg "FormCalc installation"
     rm -f ${formcalcconfig}
     "$MATH" <<EOF > /dev/null
@@ -2619,7 +2619,7 @@ EOF
     if test "x${_formcalc_is_available}" = "x0" ; then
         if test -r "${formcalcconfig}" ; then
             FORMCALC_VERSION=$(cat "${formcalcconfig}")
-            
+
             if version_at_least $FORMCALC_VERSION "${required_formcalc_version}"; then
                 result "ok (version ${FORMCALC_VERSION})"
             elif test "x$enable_formcalc" = "xautomatic"; then
@@ -2648,10 +2648,10 @@ EOF
         message "   Please make sure Needs[\"FormCalc\`\"] works correctly."
         exit 1
     fi
-    
+
     if test "x$enable_formcalc" != "xno"; then
         checking_msg "working FormCalc"
-        
+
         if test "x$enable_feynarts" != "xyes"; then
             if test "x$enable_formcalc" = "xautomatic"; then
                 enable_formcalc="no"
@@ -2665,7 +2665,7 @@ EOF
 Needs["FeynArts\`"];
 Needs["FormCalc\`"];
 SetDirectory[CreateDirectory[]];
-    
+
 topologies = FeynArts\`CreateTopologies[1, 1 -> 1];
 diagrams = FeynArts\`InsertFields[topologies,
   {FeynArts\`S[1]} -> {FeynArts\`S[1]},
@@ -2988,6 +2988,31 @@ enable_defines() {
         local addon_name="$(basename ${a})"
         DEFINE_ENABLE_ADDONS="${DEFINE_ENABLE_ADDONS}@n@#define ENABLE_${addon_name} 1"
     done
+}
+
+#_____________________________________________________________________
+add_metaflags() {
+   local tlib_='FSLoopLibraries = { FSSOFTSUSY'
+   local lib_="$tlib_"
+   test $enable_looptools = 'yes' && lib_="${lib_}, FSLOOPTOOLS"
+   test $enable_fflite = 'yes' && lib_="${lib_}, FSFFLITE"
+   lib_="${lib_} };"
+
+   local tfa_='FSFeynArtsAvailable = '
+   local fa_="${tfa_}$(test $enable_feynarts = 'yes' && echo 'True' || echo 'False');"
+
+   local tfc_='FSForcCalcAvailable = '
+   local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
+
+   # All *.m files exist because of check_models
+   local fs_=''
+   for m in ${MODELS}; do
+      fs_="${m}/FlexibleSUSY.m"
+
+      grep -q "$tlib_" $fs_ && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
+      grep -q "$tfa_" $fs_ && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
+      grep -q "$tfc_" $fs_ && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+   done
 }
 
 #_____________________________________________________________________
@@ -3428,6 +3453,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
 sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
+
+add_metaflags
 
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
