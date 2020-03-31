@@ -2994,8 +2994,8 @@ enable_defines() {
 add_metaflags() {
    local tlib_='FSLoopLibraries = { FSSOFTSUSY'
    local lib_="$tlib_"
-   test $enable_looptools = 'yes' && lib_="${lib_}, FSLOOPTOOLS"
-   test $enable_fflite = 'yes' && lib_="${lib_}, FSFFLITE"
+   test $enable_looptools = 'yes' && lib_="${lib_}, FSLoopTools"
+   test $enable_fflite = 'yes' && lib_="${lib_}, FSFFlite"
    lib_="${lib_} };"
 
    local tfa_='FSFeynArtsAvailable = '
