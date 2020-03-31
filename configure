@@ -3429,6 +3429,15 @@ sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
+FSLoopLibraries="FSSOFTSUSY, FSFFLite";
+if [[ $enable_looptools != "no" ]]; then
+   FSLoopLibraries="${FSLoopLibraries}, FSLoopTools"
+fi
+FSLoopLibraries="{${FSLoopLibraries}}"
+for m in ${MODELS}; do
+   echo "FSLoopLibraries = ${FSLoopLibraries}" >> $BASEDIR/$m/FlexibleSUSY.m
+done
+
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m

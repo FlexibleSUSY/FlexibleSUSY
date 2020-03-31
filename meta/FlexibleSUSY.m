@@ -215,6 +215,10 @@ ExtraSLHAOutputBlocks = {
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
+FSLoopLibraries;
+FSSOFTSUSY;
+FSFFLite;
+FSLoopTools;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
