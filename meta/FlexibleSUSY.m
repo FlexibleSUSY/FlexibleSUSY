@@ -356,6 +356,14 @@ FSHimalayaInput = {
 
 FSDebugOutput = False;
 
+FSLoopLibraries::usage = "Contains a List of enabled loop libraries.";
+FSLoopTools;
+FSFFlite;
+FSLoopLibraries = { FSSOFTSUSY };
+
+FSFeynArtsAvailable = False;
+FSFormCalcAvailable = False;
+
 Begin["`Private`"];
 
 allIndexReplacementRules = {};
