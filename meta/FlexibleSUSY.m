@@ -368,6 +368,7 @@ FSDebugOutput = False;
 FSLoopLibraries::usage = "Contains a List of enabled loop libraries.";
 FSLoopTools;
 FSFFlite;
+FSCOLLIER;
 FSLoopLibraries = { FSSOFTSUSY };
 
 FSFeynArtsAvailable = False;

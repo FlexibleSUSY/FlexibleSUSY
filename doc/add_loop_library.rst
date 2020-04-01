@@ -129,6 +129,10 @@ Open ``configure`` file and there do the following steps:
 
   This variables will go to ``config/config.h.in`` afterwards.
 
+* Add inside ``add_metaflags()``::
+
+    test $enable_<newlibrary> = 'yes' && lib_="${lib_}, FS<NEWLIBRARY>"
+
 * Add inside ``replace_markers()``::
 
     -e "s|@ENABLE_<NEWLIBRARY>@|$enable_<newlibrary>|" \
@@ -205,6 +209,10 @@ itself more directly.
 
 Note: file ``config/flexiblesusy-config.in`` could be be but was not modified by the
 author of this manual.
+
+* Open fie ``meta/FlexibleSUSY.m`` and add after ``FSLoopLibrary::usage``::
+
+    FS<NEWLIBRARY>;
 
 Modify documentation
 ````````````````````

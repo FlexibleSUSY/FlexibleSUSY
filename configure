@@ -3142,6 +3142,7 @@ add_metaflags() {
    local lib_="$tlib_"
    test $enable_looptools = 'yes' && lib_="${lib_}, FSLoopTools"
    test $enable_fflite = 'yes' && lib_="${lib_}, FSFFlite"
+   test $enable_collier = 'yes' && lib_="${lib_}, FSCOLLIER"
    lib_="${lib_} };"
 
    local tfa_='FSFeynArtsAvailable = '
