@@ -3001,7 +3001,7 @@ add_metaflags() {
    local tfa_='FSFeynArtsAvailable = '
    local fa_="${tfa_}$(test $enable_feynarts = 'yes' && echo 'True' || echo 'False');"
 
-   local tfc_='FSForcCalcAvailable = '
+   local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
    # All *.m files exist because of check_models
