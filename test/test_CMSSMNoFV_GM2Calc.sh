@@ -2,12 +2,12 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-GM2CALCDIR=$(readlink -f "${BASEDIR}/../addons/GM2Calc")
+GM2CALCDIR="${BASEDIR}/../addons/GM2Calc"
 FSCONFIG="$BASEDIR/../flexiblesusy-config"
-GM2CALC_EXE=$(readlink -f "${BASEDIR}/../addons/GM2Calc/gm2calc.x")
-CMSSMNoFV_EXE=$(readlink -f "${BASEDIR}/../models/CMSSMNoFV/run_CMSSMNoFV.x")
-SLHA_IN=$(readlink -f "${BASEDIR}/../models/CMSSMNoFV/LesHouches.in.CMSSMNoFV")
-SLHA_OUT=$(readlink -f "${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc")
+GM2CALC_EXE="${BASEDIR}/../addons/GM2Calc/gm2calc.x"
+CMSSMNoFV_EXE="${BASEDIR}/../models/CMSSMNoFV/run_CMSSMNoFV.x"
+SLHA_IN="${BASEDIR}/../models/CMSSMNoFV/LesHouches.in.CMSSMNoFV"
+SLHA_OUT="${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
 [ $("$FSCONFIG" --with-CMSSMNoFV) = yes -a -x ${CMSSMNoFV_EXE} ] || {

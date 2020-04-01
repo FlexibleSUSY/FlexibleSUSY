@@ -2,7 +2,7 @@
 
 BASEDIR=$(dirname $0)
 FSCONFIG="$BASEDIR/../flexiblesusy-config"
-MSSM_EXE=$(readlink -f "${BASEDIR}/../models/MSSM/run_MSSM.x")
+MSSM_EXE="${BASEDIR}/../models/MSSM/run_MSSM.x"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
 [ $("$FSCONFIG" --with-MSSM) = yes -a -x ${MSSM_EXE} ] || {
