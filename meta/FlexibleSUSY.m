@@ -454,6 +454,10 @@ ReplaceSymbolsInUserInput[rules_] :=
            FlexibleSUSY`FSSelfEnergyRules       = FlexibleSUSY`FSSelfEnergyRules         /. rules;
            FlexibleSUSY`FSVertexRules           = FlexibleSUSY`FSVertexRules             /. rules;
            FlexibleSUSY`FSBetaFunctionRules     = FlexibleSUSY`FSBetaFunctionRules       /. rules;
+           (* decay calculation require 3- and 4-point loop functions *)
+           If[!MemberQ[FSLoopLibraries, FSLoopTools],
+              FlexibleSUSY`FSCalculateDecays = False
+           ];
           ];
 
 CheckSARAHVersion[] :=
