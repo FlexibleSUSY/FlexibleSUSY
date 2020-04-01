@@ -3739,8 +3739,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               Print["Error: Model`Name is not defined.  Did you call SARAH`Start[\"Model\"]?"];
               Quit[1];
              ];
-           Needs@"NPointFunctions`";
-           Needs@"WilsonCoeffs`";
            FSDebugOutput = OptionValue[DebugOutput];
            FSOutputDir = OptionValue[OutputDirectory];
            If[!DirectoryQ[FSOutputDir],
@@ -3770,6 +3768,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
+
+           (* load additional packages if prerequisites are met *)
+           If[FSFeynArtsAvailable && FSFormCalcAvailable,
+               Needs@"NPointFunctions`";
+               Needs@"WilsonCoeffs`";
+           ];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
