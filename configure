@@ -3137,6 +3137,31 @@ enable_defines() {
 }
 
 #_____________________________________________________________________
+add_metaflags() {
+   local tlib_='FSLoopLibraries = { FSSOFTSUSY'
+   local lib_="$tlib_"
+   test $enable_looptools = 'yes' && lib_="${lib_}, FSLoopTools"
+   test $enable_fflite = 'yes' && lib_="${lib_}, FSFFlite"
+   lib_="${lib_} };"
+
+   local tfa_='FSFeynArtsAvailable = '
+   local fa_="${tfa_}$(test $enable_feynarts = 'yes' && echo 'True' || echo 'False');"
+
+   local tfc_='FSForcCalcAvailable = '
+   local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
+
+   # All *.m files exist because of check_models
+   local fs_=''
+   for m in ${MODELS}; do
+      fs_="${m}/FlexibleSUSY.m"
+
+      grep -q "$tlib_" $fs_ && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
+      grep -q "$tfa_" $fs_ && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
+      grep -q "$tfc_" $fs_ && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+   done
+}
+
+#_____________________________________________________________________
 replace_markers() {
 	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
@@ -3592,6 +3617,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
 sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
+
+add_metaflags
 
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit

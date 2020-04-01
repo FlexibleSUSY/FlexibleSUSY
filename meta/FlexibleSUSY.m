@@ -365,6 +365,14 @@ FSHimalayaInput = {
 
 FSDebugOutput = False;
 
+FSLoopLibraries::usage = "Contains a List of enabled loop libraries.";
+FSLoopTools;
+FSFFlite;
+FSLoopLibraries = { FSSOFTSUSY };
+
+FSFeynArtsAvailable = False;
+FSFormCalcAvailable = False;
+
 Begin["`Private`"];
 
 allIndexReplacementRules = {};
@@ -453,6 +461,17 @@ ReplaceSymbolsInUserInput[rules_] :=
            FlexibleSUSY`FSSelfEnergyRules       = FlexibleSUSY`FSSelfEnergyRules         /. rules;
            FlexibleSUSY`FSVertexRules           = FlexibleSUSY`FSVertexRules             /. rules;
            FlexibleSUSY`FSBetaFunctionRules     = FlexibleSUSY`FSBetaFunctionRules       /. rules;
+           SetAttributes[CheckParticleInPrecision, HoldFirst];
+
+           CheckParticleInPrecision[precision_] :=
+              If[!SubsetQ[TreeMasses`GetParticles[], precision],
+                 Print["Warning: Particle(s) ", Complement[precision, TreeMasses`GetParticles[]],
+                 " cannot be used in ", Unevaluated@precision, " as it is not part of ", FSModelName, ". Removing it/them."];
+                 precision = Intersection[precision, TreeMasses`GetParticles[]]
+              ];
+           CheckParticleInPrecision /@
+              {Unevaluated@FlexibleSUSY`HighPoleMassPrecision, Unevaluated@FlexibleSUSY`MediumPoleMassPrecision, Unevaluated@FlexibleSUSY`LowPoleMassPrecision};
+
           ];
 
 CheckSARAHVersion[] :=
