@@ -4773,6 +4773,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                         {{FileNameJoin[{$flexiblesusyTemplateDir, "FlexibleDecays.mk.in"}],
                                           FileNameJoin[{FSOutputDir, "FlexibleDecays.mk"}]}}
                                        ];
+              WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := yes"],
+
+              WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := no"]
              ]; (* If[FSCalculateDecays] *)
 
            Utils`PrintHeadline["Creating other observables"];

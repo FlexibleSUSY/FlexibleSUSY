@@ -1,4 +1,5 @@
 include test/SOFTSUSY/module.mk
+include test/FlexibleDecay.mk
 
 DIR      := test
 MODNAME  := test
@@ -206,10 +207,13 @@ endif
 
 ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecays.cpp \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
+endif
+ifeq ($(WITH_MRSSM2) $(ENABLE_FLEXIBLEDECAY), yes yes)
+TEST_SRC += \
+		$(DIR)/test_MRSSM2_FlexibleDecays.cpp
 endif
 
 ifeq ($(WITH_MRSSM2CKM),yes)
@@ -269,7 +273,7 @@ TEST_SRC += \
 		$(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.cpp
 endif
 
-ifeq ($(WITH_THDMII), yes)
+ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecays.cpp
 endif
@@ -426,11 +430,13 @@ TEST_SH += \
 endif
 
 ifeq ($(WITH_MSSM),yes)
-TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecays.cpp
 TEST_SH += \
 		$(DIR)/test_MSSM_stable_ewsb_failure.sh \
 		$(DIR)/test_standalone.sh
+endif
+ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+TEST_SRC += \
+		$(DIR)/test_MSSM_FlexibleDecays.cpp
 endif
 
 ifeq ($(WITH_CMSSM),yes)
@@ -460,7 +466,6 @@ TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_effective_couplings.cpp \
-		$(DIR)/test_SM_FlexibleDecays.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
@@ -472,6 +477,10 @@ TEST_SRC += \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_cxxdiagrams.cpp
+endif
+ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+TEST_SRC += \
+		$(DIR)/test_SM_FlexibleDecays.cpp
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
