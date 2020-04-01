@@ -47,7 +47,6 @@ BeginPackage["FlexibleSUSY`",
               "SemiAnalytic`",
               "ThreeLoopSM`",
               "ThreeLoopMSSM`",
-              "Observables`",
               "CXXDiagrams`",
               "AMuon`",
               "EDM`",
@@ -3768,6 +3767,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
+
+           Needs@"Observables`";
 
            (* load additional packages if prerequisites are met *)
            If[FSFeynArtsAvailable && FSFormCalcAvailable,

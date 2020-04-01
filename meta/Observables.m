@@ -29,20 +29,9 @@ FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
                   EDM, BrLToLGamma, bsgamma };
 
-Module[{file, str, out, yes = 0, no = 0},
-   file = OpenRead@#;
-   While[And[yes < 2, no < 1],
-      str = ReadLine@file;
-      out = StringCases[str, "ENABLE_FEYNARTS"|"ENABLE_FORMCALC" ~~ Whitespace ~~
-         ":=" ~~ Whitespace ~~ x : "yes"|"no" :> x];
-      If[out === {"yes"}, yes++];
-      If[out === {"no"}, no++];
-   ];
-   If[yes === 2,
-      AppendTo[FSObservables, FToFConversionInNucleus],
-      Print["Disabling code generation for FToFConversionInNucleus"]];
-   Close@#;
-   ] &@ FileNameJoin@{ParentDirectory@DirectoryName@FindFile@$Input, "Makefile"};
+If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   AppendTo[FSObservables, FToFConversionInNucleus]
+];
 
 End[];
 

@@ -22,7 +22,7 @@
 
 BeginPackage["WriteOut`", {"SARAH`", "TextFormatting`", "CConversion`",
                            "Parameters`", "TreeMasses`",
-                           "Utils`", "Observables`"}];
+                           "Utils`"}];
 
 ReplaceInFiles::usage="Replaces tokens in files.";
 PrintParameters::usage="Creates parameter printout statements";
@@ -492,7 +492,7 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
            result
           ];
 
-WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] :=
+WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
     Module[{result = ""},
            Switch[par,
                   FlexibleSUSYObservable`aMuon,
