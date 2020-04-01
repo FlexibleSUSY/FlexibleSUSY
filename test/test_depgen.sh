@@ -10,6 +10,9 @@ OUTPUT="${BASEDIR}/test_depgen.out"
 
 error=0
 
+# removes line breaks (indicated with trailing backslash)
+awk_join_lines='/\\$/ { printf "%s", substr($0, 1, length($0)-1); next } { print }'
+
 run_depgens() {
     local cmd1="$1"
     local cmd2="$2"
@@ -22,8 +25,8 @@ run_depgens() {
 
     rm -f ${OUTPUT}.1 ${OUTPUT}.2
 
-    $cmd1 $file | sed ':a;N;$!ba;s/ \\\n */ /g' > ${OUTPUT}.1
-    $cmd2 $file | sed ':a;N;$!ba;s/ \\\n */ /g' > ${OUTPUT}.2
+    $cmd1 $file | awk "${awk_join_lines}" | sed 's/ */ /g' > ${OUTPUT}.1
+    $cmd2 $file | awk "${awk_join_lines}" | sed 's/ */ /g' > ${OUTPUT}.2
 
     diff=$(diff -u ${OUTPUT}.1 ${OUTPUT}.2)
 

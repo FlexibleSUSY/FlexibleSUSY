@@ -23,9 +23,6 @@ script:
   - source activate_run.sh
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
   - make showbuild
-  - make VERBOSE=1
-  - make VERBOSE=1 -k all-test
-  - test/test_ckm.x --log_level=test_suite
-  - test/test_numerics.x --log_level=test_suite
+  - make
+  - make -k all-test
   - test/test_threshold_loop_functions.x
-  - test/test_depgen.sh
