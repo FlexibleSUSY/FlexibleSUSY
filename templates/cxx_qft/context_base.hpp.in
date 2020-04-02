@@ -58,9 +58,6 @@ namespace @ModelName@_cxx_diagrams {
       context_base(const context_base&) = default;
       context_base(context_base&&) = default;
 
-      context_base& operator=(const context_base&) = default;
-      context_base& operator=(context_base&&) = default;
-
       virtual ~context_base(void) = default;
 
    private:
