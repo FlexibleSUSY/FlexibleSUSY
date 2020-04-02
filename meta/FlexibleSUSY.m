@@ -251,7 +251,7 @@ SARAH`RealParameters = { All };
 
 (* precision of pole mass calculation *)
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {SARAH`HiggsBoson, SARAH`PseudoScalar, SARAH`ChargedHiggs};
+HighPoleMassPrecision    = DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null];
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
