@@ -53,10 +53,10 @@ namespace npointfunctions
 
 namespace
 {
-static constexpr int number_of_random_samples = 100;
+static constexpr int number_of_random_samples = 19;
 }
 
-BOOST_AUTO_TEST_SUITE(selfenergy_test_suite, 
+BOOST_AUTO_TEST_SUITE(selfenergy_test_suite,
 	* boost::unit_test::tolerance(1.0e-12) )
 
 BOOST_DATA_TEST_CASE( test_selfenergies,
@@ -66,21 +66,21 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
-	
+
 	auto problems = model.get_problems();
 	BOOST_WARN_MESSAGE( !problems.have_problem(),
 		"There was an error calculating the spectrum: " <<
 		problems << "Skipping data point..." );
-		
+
 	if( problems.have_problem() == false )
 	{
 		auto fs_selfenergy_hh = model.self_energy_hh_1loop( 0 );
-		auto np_selfenergy_hh = 
+		auto np_selfenergy_hh =
 			SM_cxx_diagrams::npointfunctions::selfenergy_hh_1loop(
 				model, std::array<int, 0>{},
 				std::array<Eigen::Vector4d, 0>{}
 		);
-		
+
 		TEST_COMPLEX_EQUALITY( np_selfenergy_hh, fs_selfenergy_hh );
 	} else
 		BOOST_TEST( true );
