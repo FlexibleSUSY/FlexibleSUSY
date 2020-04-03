@@ -197,3 +197,5 @@ ExtraSLHAOutputBlocks = {
            {{1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } }
 };
+
+FSCalculateDecays = False;
