@@ -70,3 +70,7 @@ ExtraSLHAOutputBlocks = {
             {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
             {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
 };
+
+(* doesn't compile since the model doen not have ThetaW *)
+FSCalculateDecays = False;
+
