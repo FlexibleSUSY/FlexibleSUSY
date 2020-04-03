@@ -26,11 +26,22 @@
 #include "numerics.h"
 #include "dilog.hpp"
 #include "logger.hpp"
-#include "read_data.hpp"
 #include "benchmark.hpp"
 
 #include <cmath>
+#include <fstream>
+#include <iterator>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
+
+const char PATH_SEPARATOR =
+#ifdef _WIN32
+   '\\';
+#else
+   '/';
+#endif
 
 using namespace flexiblesusy;
 
@@ -80,13 +91,22 @@ namespace {
    void test_1(const char* func_name, T func, double eps,
                std::function<bool(double, double)> filter = pass_all_1)
    {
-      const std::string filename(std::string(TEST_DATA_DIR) +
-                                 flexiblesusy::test::PATH_SEPARATOR +
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
                                  func_name + ".txt");
       BOOST_TEST_MESSAGE("reading file " << filename);
-      const auto data = flexiblesusy::test::read_from_file<double>(filename);
 
-      for (const auto v: data) {
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
          if (v.size() < 2) {
             continue;
          }
@@ -113,13 +133,22 @@ namespace {
    void test_2(const char* func_name, T func, double eps,
                std::function<bool(double, double, double)> filter = pass_all_2)
    {
-      const std::string filename(std::string(TEST_DATA_DIR) +
-                                 flexiblesusy::test::PATH_SEPARATOR +
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
                                  func_name + ".txt");
       BOOST_TEST_MESSAGE("reading file " << filename);
-      const auto data = flexiblesusy::test::read_from_file<double>(filename);
 
-      for (const auto v: data) {
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
          if (v.size() < 3) {
             continue;
          }
@@ -731,7 +760,7 @@ BOOST_AUTO_TEST_CASE(test_f1_data)
       return std::abs(f) > 1e-5;
    };
 
-   test_1("f1", [] (double x) { return f1(x); }, 1e-11, filter_small);
+   test_1("f1_", [] (double x) { return f1(x); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f2)
@@ -771,7 +800,7 @@ BOOST_AUTO_TEST_CASE(test_f2_data)
       return std::abs(f) > 1e-5;
    };
 
-   test_1("f2", [] (double x) { return f2(x); }, 1e-11, filter_small);
+   test_1("f2_", [] (double x) { return f2(x); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f3)
@@ -807,7 +836,7 @@ BOOST_AUTO_TEST_CASE(test_f3_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_1("f3", [] (double x) { return f3(x); }, 1e-11);
+   test_1("f3_", [] (double x) { return f3(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f4)
@@ -843,7 +872,7 @@ BOOST_AUTO_TEST_CASE(test_f4_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_1("f4", [] (double x) { return f4(x); }, 1e-11);
+   test_1("f4_", [] (double x) { return f4(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f5)
@@ -919,7 +948,7 @@ BOOST_AUTO_TEST_CASE(test_f5_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_2("f5", [] (double x, double y) { return f5(x, y); }, 3e-10);
+   test_2("f5_", [] (double x, double y) { return f5(x, y); }, 3e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f6)
@@ -999,7 +1028,7 @@ BOOST_AUTO_TEST_CASE(test_f6_data)
       return std::abs(f) > 1e-9;
    };
 
-   test_2("f6", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
+   test_2("f6_", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f7)
@@ -1075,7 +1104,7 @@ BOOST_AUTO_TEST_CASE(test_f7_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_2("f7", [] (double x, double y) { return f7(x, y); }, 5e-10);
+   test_2("f7_", [] (double x, double y) { return f7(x, y); }, 5e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f8)
@@ -1155,7 +1184,7 @@ BOOST_AUTO_TEST_CASE(test_f8_data)
       return std::abs(f) > 1e-10;
    };
 
-   test_2("f8", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
+   test_2("f8_", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
 }
 
 namespace {
@@ -1494,7 +1523,7 @@ std::vector<XYZ> generate_random_triples(
 
 BOOST_AUTO_TEST_CASE(test_phi_random)
 {
-   const unsigned N = 1000000;
+   const unsigned N = 10000;
    const auto triples = generate_random_triples(N, 1.0, 1000.0);
 
    auto phi_fs = [](const XYZ& t) {
@@ -1515,7 +1544,7 @@ BOOST_AUTO_TEST_CASE(test_phi_random)
 
 BOOST_AUTO_TEST_CASE(bench_phi)
 {
-   const unsigned N = 1000000;
+   const unsigned N = 10000;
    const auto triples = generate_random_triples(N, 1.0, 1000.0);
 
    auto phi_fs = [](const XYZ& t) {

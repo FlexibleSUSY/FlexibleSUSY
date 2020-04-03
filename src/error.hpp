@@ -46,6 +46,7 @@ public:
 class SetupError : public Error {
 public:
    explicit SetupError(const std::string& msg) : Error(msg) {}
+   explicit SetupError(const char* msg) : Error(msg) {}
    virtual ~SetupError() = default;
 };
 
@@ -157,8 +158,8 @@ private:
 
 class NonPerturbativeRunningQedQcdError : public Error {
 public:
-   explicit NonPerturbativeRunningQedQcdError(const std::string& msg)
-      : Error(msg) {}
+   explicit NonPerturbativeRunningQedQcdError(const std::string& msg) : Error(msg) {}
+   explicit NonPerturbativeRunningQedQcdError(const char* msg) : Error(msg) {}
    virtual ~NonPerturbativeRunningQedQcdError() = default;
 };
 
@@ -168,8 +169,8 @@ public:
  */
 class OutOfMemoryError : public Error {
 public:
-   explicit OutOfMemoryError(const std::string& msg)
-      : Error(msg) {}
+   explicit OutOfMemoryError(const std::string& msg) : Error(msg) {}
+   explicit OutOfMemoryError(const char* msg) : Error(msg) {}
    virtual ~OutOfMemoryError() = default;
    virtual std::string what_detailed() const override {
       return std::string("OutOfMemoryError: Not enought memory: ") + what();
@@ -182,15 +183,15 @@ public:
  */
 class OutOfBoundsError : public Error {
 public:
-   explicit OutOfBoundsError(const std::string& msg)
-      : Error(msg) {}
+   explicit OutOfBoundsError(const std::string& msg) : Error(msg) {}
+   explicit OutOfBoundsError(const char* msg) : Error(msg) {}
    virtual ~OutOfBoundsError() = default;
 };
 
 class ReadError : public Error {
 public:
-   explicit ReadError(const std::string& msg)
-      : Error(msg) {}
+   explicit ReadError(const std::string& msg) : Error(msg) {}
+   explicit ReadError(const char* msg) : Error(msg) {}
    virtual ~ReadError() = default;
 };
 
@@ -200,15 +201,15 @@ public:
  */
 class PhysicalError : public Error {
 public:
-   explicit PhysicalError(const std::string& msg)
-      : Error(msg) {}
+   explicit PhysicalError(const std::string& msg) : Error(msg) {}
+   explicit PhysicalError(const char* msg) : Error(msg) {}
    virtual ~PhysicalError() = default;
 };
 
 class HimalayaError : public Error {
 public:
-   explicit HimalayaError(const std::string& msg)
-      : Error(msg) {}
+   explicit HimalayaError(const std::string& msg) : Error(msg) {}
+   explicit HimalayaError(const char* msg) : Error(msg) {}
    virtual ~HimalayaError() = default;
 };
 

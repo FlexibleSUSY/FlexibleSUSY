@@ -3,7 +3,7 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-config_dir=$(readlink -f "${BASEDIR}/../config")
+config_dir="${BASEDIR}/../config"
 space_dir="${BASEDIR}/space dir"
 space_dir_touched_file="${space_dir}/touched"
 space_dir_makefile="${space_dir}/Makefile"

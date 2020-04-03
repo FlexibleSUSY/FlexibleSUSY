@@ -93,9 +93,13 @@ BOOST_AUTO_TEST_CASE( test_CKM_unitarity_from_angles )
 BOOST_AUTO_TEST_CASE( test_real_CKM_pdg_convention )
 {
    // fermion mass matrices
-   const Eigen::Matrix<double,3,3>
-      mu(Eigen::Matrix<double,3,3>::Random()),
-      md(Eigen::Matrix<double,3,3>::Random());
+   Eigen::Matrix<double,3,3> mu, md;
+   mu << 1.0, 0.1, 0.2,
+         0.3, 2.0, 0.4,
+         0.5, 0.6, 3.0;
+   md << 4.0, 0.2, 0.3,
+         0.4, 5.0, 0.5,
+         0.6, 0.7, 6.0;
 
    // mass eigenvalues
    Eigen::Array<double,3,1> su, sd;
@@ -103,44 +107,52 @@ BOOST_AUTO_TEST_CASE( test_real_CKM_pdg_convention )
    // mixing matrices
    Eigen::Matrix<double,3,3> vu, vd, uu, ud;
 
+   // diagonalize mass matrices
    fs_svd(mu, su, uu, vu);
    fs_svd(md, sd, ud, vd);
 
+   Eigen::Matrix<double,3,3> ckm = vu*vd.adjoint();
+
+   // consistency checks
    BOOST_CHECK(is_equal(mu, uu.transpose() * su.matrix().asDiagonal() * vu, 1.e-10));
    BOOST_CHECK(is_equal(md, ud.transpose() * sd.matrix().asDiagonal() * vd, 1.e-10));
-
-   Eigen::Matrix<double,3,3> ckm(vu*vd.adjoint());
-
-   // transpose in order to make (0,1), (1,2) negative
-   ckm.transposeInPlace();
+   BOOST_CHECK(is_equal(ckm, vu*vd.adjoint().eval(), 1.e-10));
    BOOST_CHECK(is_unitary(ckm, 1.e-10));
 
+   // convert to non-PDG convention by makeing (0,1), (1,2) negative
+   // by changing signs of mixing matrices
+   if (ckm(0,1) > 0.0 || ckm(1,2) > 0.0) {
+      uu *= -1.0;
+      vu *= -1.0;
+      ckm = vu*vd.adjoint();
+   }
+
+   // check that CKM matrix is in non-PDG convention
+   BOOST_REQUIRE(ckm(0,1) < 0.0);
+   BOOST_REQUIRE(ckm(1,2) < 0.0);
+
+   // consistency checks
+   BOOST_CHECK(is_equal(mu, uu.transpose() * su.matrix().asDiagonal() * vu, 1.e-10));
+   BOOST_CHECK(is_equal(md, ud.transpose() * sd.matrix().asDiagonal() * vd, 1.e-10));
+   BOOST_CHECK(is_equal(ckm, vu*vd.adjoint().eval(), 1.e-10));
+   BOOST_CHECK(is_unitary(ckm, 1.e-10));
+
+   // do conversion
    CKM_parameters::to_pdg_convention(ckm, vu, vd, uu, ud);
 
+   // consistency checks
+   BOOST_CHECK(is_equal(mu, uu.transpose() * su.matrix().asDiagonal() * vu, 1.e-10));
+   BOOST_CHECK(is_equal(md, ud.transpose() * sd.matrix().asDiagonal() * vd, 1.e-10));
+   BOOST_CHECK(is_equal(ckm, vu*vd.adjoint().eval(), 1.e-10));
+   BOOST_CHECK(is_unitary(ckm, 1.e-10));
+
+   // check that CKM matix is in PGD convention
    BOOST_CHECK(ckm(0,0) > 0.);
    BOOST_CHECK(ckm(1,1) > 0.);
    BOOST_CHECK(ckm(2,2) > 0.);
-
    BOOST_CHECK(ckm(0,1) > 0.);
    // BOOST_CHECK(ckm(0,2) < 0.); // 13 element is not made positive
    BOOST_CHECK(ckm(1,2) > 0.);
-
-   BOOST_CHECK(is_equal(mu, uu.transpose() * su.matrix().asDiagonal() * vu, 1.e-10));
-   BOOST_CHECK(is_equal(md, ud.transpose() * sd.matrix().asDiagonal() * vd, 1.e-10));
-
-   {
-      // check that converted matrices are consistent
-      const Eigen::Matrix<double,3,3> ckm_check(vu*vd.adjoint());
-      for (int i = 0; i < 3; i++) {
-         for (int k = 0; k < 3; k++) {
-            // check for transposed equality here, because the CKM
-            // matrix from above was transposed to generate negative
-            // (0,1), (1,2) elements
-            BOOST_CHECK_CLOSE_FRACTION(Re(ckm(i,k)), Re(ckm_check(k,i)), 1.0e-10);
-            BOOST_CHECK_CLOSE_FRACTION(Im(ckm(i,k)), Im(ckm_check(k,i)), 1.0e-10);
-         }
-      }
-   }
 }
 
 BOOST_AUTO_TEST_CASE( test_complex_CKM_pdg_convention )
