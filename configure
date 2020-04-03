@@ -3454,7 +3454,9 @@ sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
-add_metaflags
+if test "x${enable_meta}" = "xyes"; then
+    add_metaflags
+fi
 
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
