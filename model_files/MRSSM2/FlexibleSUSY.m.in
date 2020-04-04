@@ -97,8 +97,9 @@ ExtraSLHAOutputBlocks = {
       }
    }
 };
+
 FSCalculateDecays = True;
-DecayParticles = {hh, Ah, Hpm};
+DecayParticles = {hh, Ah, Hpm, phiO, sigmaO};
 
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
