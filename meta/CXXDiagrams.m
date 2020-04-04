@@ -860,6 +860,17 @@ GaugeStructureOfVertexLorentzPart[
 
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Collect[fullExpr, sum[___]],
+	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+     scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
+{scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] + AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
       Collect[ExpandAll@fullExpr, SARAH`Delta[___] SARAH`Delta[___], FullSimplify],
 	scalar_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]] :=
 Collect[ExpandAll@fullExpr, SARAH`Delta[__] SARAH`Delta[__], FullSimplify] /.
@@ -883,7 +894,8 @@ Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
   SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
 	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
      scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
-Parameters`DebugPrint["Vertices with sum of 2 deltas are currently not supported"];
+     {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
    (Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);
