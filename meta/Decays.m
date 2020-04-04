@@ -1673,12 +1673,19 @@ functionBody = "// skip indices that don't match external indices\n" <>
          "};\n" <>
 
          (* color factor *)
-          "\nconstexpr double " <> ToString@colorFac <> " {" <>
-          ToString[
-            N[CXXDiagrams`ExtractColourFactor @
-                CXXDiagrams`ColorFactorForDiagram[topology, diagram], 16]
-          ] <> "};\n" <>
+         "\nconstexpr " <>
+         With[{cf = CXXDiagrams`ExtractColourFactor @
+                CXXDiagrams`ColorFactorForDiagram[topology, diagram]},
+            If[Head[cf] === Complex,
+               (* complex colour factor *)
+               "std::complex<double> " <> ToString@colorFac <> " " <>
+                  ToString[N[#, 16]& /@ FSReIm @ cf],
 
+               (* real color factor *)
+               "double " <> ToString@colorFac <> " {" <>
+                  ToString @ N[cf, 16] <> "}"
+            ]
+         ] <> ";\n" <>
          WrapCodeInLoop[indices, functionBody]
       }
    ];
