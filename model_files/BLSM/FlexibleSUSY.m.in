@@ -68,3 +68,5 @@ ExtraSLHAOutputBlocks = {
            {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
             {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
 };
+
+FSCalculateDecays = True;
