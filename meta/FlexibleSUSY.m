@@ -72,7 +72,7 @@ FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
               "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2019";
+FS`Years   = "2013-2020";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -259,7 +259,7 @@ SARAH`RealParameters = { All };
 
 (* precision of pole mass calculation *)
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {SARAH`HiggsBoson, SARAH`PseudoScalar, SARAH`ChargedHiggs};
+HighPoleMassPrecision    = DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null];
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 

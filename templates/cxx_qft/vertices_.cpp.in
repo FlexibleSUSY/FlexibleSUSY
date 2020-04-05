@@ -26,12 +26,13 @@
  */
 
 #include "@ModelName@_context_base.hpp"
+#include "@ModelName@_input_parameters.hpp"
 #include "@ModelName@_vertices.hpp"
 
 #include "concatenate.hpp"
 #include "wrappers.hpp"
 
-#define INPUTPARAMETER(p) context.model.get_input().p
+#define INPUTPARAMETER(p) context.model.get_input_parameters().p
 #define MODELPARAMETER(p) context.model.get_##p()
 #define DERIVEDPARAMETER(p) context.model.p()
 #define PHASE(p) context.model.get_##p()

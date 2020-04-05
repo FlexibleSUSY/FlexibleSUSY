@@ -61,7 +61,7 @@
 namespace flexiblesusy {
 namespace @ModelName@_librarylink {
 
-using Handle = mint;
+using Handle = long;
 
 class Redirect_output {
 public:

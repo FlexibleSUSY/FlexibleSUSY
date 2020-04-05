@@ -25,4 +25,3 @@ script:
   - make showbuild
   - make
   - make -k all-test
-  - test/test_threshold_loop_functions.x
