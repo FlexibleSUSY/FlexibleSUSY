@@ -340,6 +340,16 @@ void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& pars)
 @setMasses@
 }
 
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
 Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
 {
 @getMasses@
