@@ -170,7 +170,7 @@ ExtraSLHAOutputBlocks = {
             {23, FlexibleSUSYObservable`EDM[Fe[1]]},
             {24, FlexibleSUSYObservable`EDM[Fe[2]]},
             {25, FlexibleSUSYObservable`EDM[Fe[3]]}
-           } 
+           }
    },
    {Au,        {{1, 1, T[Yu][1,1] / Yu[1,1]},
                 {2, 2, T[Yu][2,2] / Yu[2,2]},
@@ -191,3 +191,6 @@ ExtraSLHAOutputBlocks = {
    {ASigma,    {{1, T[\[Sigma]] / \[Sigma]} } },
    {ASigmaL,   {{1, T[\[Sigma]L] / \[Sigma]L} } }
 };
+
+(* turn decays of because down quarks are massless *)
+FSCalculateDecays = False;
