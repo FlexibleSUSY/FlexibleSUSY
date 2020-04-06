@@ -16,8 +16,6 @@
 #  <http://www.gnu.org/licenses/>.
 #  ====================================================================
 
-@ModelName@_INCLUDE_MK += $(DIR)/FlexibleDecays.mk
-
 LIB@ModelName@_SRC += \
 @FlexibleDecaysSource@
 

@@ -4776,14 +4776,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  Print["Skipping calculating decays as no particles to calculate decays for were found."];
                 ];
 
-              WriteDecaysMakefileModule[decaysSources, decaysHeaders,
-                                        {{FileNameJoin[{$flexiblesusyTemplateDir, "FlexibleDecays.mk.in"}],
-                                          FileNameJoin[{FSOutputDir, "FlexibleDecays.mk"}]}}
-                                       ];
               WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := yes"],
 
               WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := no"]
              ]; (* If[FSCalculateDecays] *)
+
+           WriteDecaysMakefileModule[decaysSources, decaysHeaders,
+                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "FlexibleDecays.mk.in"}],
+                                          FileNameJoin[{FSOutputDir, "FlexibleDecays.mk"}]}}
+                                    ];
 
            Utils`PrintHeadline["Creating other observables"];
            Print["Creating class for effective couplings ..."];
