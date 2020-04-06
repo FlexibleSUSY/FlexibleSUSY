@@ -41,6 +41,7 @@
 namespace flexiblesusy {
 
 class Problems;
+class @ModelName@_input_parameters;
 
 /**
  * @class @ModelName@_mass_eigenstates_interface
@@ -61,6 +62,8 @@ public:
 
    virtual Eigen::ArrayXd get_tree_level_masses() const = 0;
    virtual Eigen::ArrayXd get_tree_level_masses_and_mixings() const = 0;
+   virtual const @ModelName@_input_parameters& get_input_parameters() const = 0;
+   virtual @ModelName@_input_parameters& get_input_parameters() = 0;
    virtual Eigen::ArrayXd get_extra_parameters() const = 0;
    virtual const @ModelName@_physical& get_physical() const = 0;
    virtual @ModelName@_physical& get_physical() = 0;

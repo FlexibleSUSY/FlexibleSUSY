@@ -3004,14 +3004,28 @@ add_metaflags() {
    local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
-   # All *.m files exist because of check_models
+   local c_=''
    local fs_=''
    for m in ${MODELS}; do
       fs_="${m}/FlexibleSUSY.m"
 
-      grep -q "$tlib_" $fs_ && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
-      grep -q "$tfa_" $fs_ && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
-      grep -q "$tfc_" $fs_ && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      [ ! -e "$fs_" ] && continue
+
+      c_=$(grep "$tlib_" $fs_)
+      if [ "$c_" != "$lib_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
+      fi
+
+      c_=$(grep "$tfa_" $fs_)
+      if [ "$c_" != "$fa_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
+      fi
+
+      c_=$(grep "$tfc_" $fs_)
+      if [ "$c_" != "$fc_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      fi
+
    done
 }
 
