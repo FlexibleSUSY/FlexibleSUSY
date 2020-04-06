@@ -67,6 +67,7 @@ UncolouredVertex::usage="A SU(3) invariant vertex";
 KroneckerDeltaColourVertex::usage="A vertex proportional to \\delta( ct1, ct2 )";
 GellMannVertex::usage="A vertex proportional to \\Lambda^t_{a b}";
 AdjointlyColouredVertex::usage="A vertex proportional to f^{a b c}";
+UnsupportedColouredVertex::usage="An usnupported colour vertex";
 
 CreateVertices::usage="Creates c++ code that makes functions available that \
 numerically evaluates any of the given vertices.";
@@ -557,6 +558,10 @@ ConvertColourStructureToColorMathConvention[fields_List,
    AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
    ColorMath`CMf[cIndex1, cIndex2, cIndex3] * 2 ColorMath`CMt[{cIndex3}, cIndex4, cIndex5];
 
+ConvertColourStructureToColorMathConvention[fields_List,
+   UnsupportedColouredVertex] :=
+   (Print["Error! Cannot convert a colour structure to ColorMath convention for fiedls: ", fields]; Quit[1]);
+
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=
 	expr /. {
@@ -893,8 +898,8 @@ GaugeStructureOfVertexLorentzPart[
 Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
   SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
 	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
-     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
-     {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
+     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
+   {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=

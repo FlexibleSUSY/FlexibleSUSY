@@ -321,6 +321,12 @@ IsPossibleOneLoopDecay[decay_FSParticleDecay] :=
 ContainsOnlySupportedVertices[diagram_] :=
     Module[{vertices, vertexTypes, unsupportedVertices},
            vertices = CXXDiagrams`VerticesForDiagram[diagram];
+           (* This function indirectly calls a GaugeStructureOfVertexLorentzPart.
+              That's why we don't make GaugeStructureOfVertexLorentzPart function
+                 to fail on unsuported color structure.
+              We generated tree and 1-loop amplitude all at once and then select the
+              lowest order one. For the process we considered so far the amplitudes with
+              unsuported vertices don't contribitu in the end. *)
            vertexTypes = CXXDiagrams`VertexTypeForFields /@ vertices;
            unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
            If[unsupportedVertices =!= {},
