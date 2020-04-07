@@ -168,11 +168,30 @@ double squared_color_generator() {
       }
       // singlet to unhandlet color combination
       else {
-         throw Error("Decay of color singlet to unhandled color combination");
+         throw std::runtime_error("Decay of color singlet to unhandled color combination");
       }
+   }
+   else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldIn>::value) {
+      if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
+         color_factor = 40./3.;
+      }
+      // octet to triplet and anti-triplet
+      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
+            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
+         color_factor = 4.;
+      }
+      else if((@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) ||
+           (@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) ) {
+         color_factor = 8.;
+      }
+      // octet to unhandlet color combination
+      else {
+         throw std::runtime_error("Decay of color octet to unhandled color combination");
+      }
+   }
    // decays of color charged particles are currently not supported
-   } else {
-      throw Error("Color factors for decays of color charged particles are not supported");
+   else {
+      throw std::runtime_error("Color factors for decays of color charged particles are not supported");
    }
 
    return color_factor;
