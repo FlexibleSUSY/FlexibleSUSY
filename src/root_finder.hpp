@@ -19,6 +19,7 @@
 #ifndef ROOT_FINDER_H
 #define ROOT_FINDER_H
 
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -31,7 +32,6 @@
 #include "ewsb_solver.hpp"
 #include "gsl_utils.hpp"
 #include "gsl_vector.hpp"
-#include "wrappers.hpp"
 
 namespace flexiblesusy {
 
@@ -94,6 +94,7 @@ private:
    std::string solver_type_name() const;
    const gsl_multiroot_fsolver_type* solver_type_to_gsl_pointer() const;
    static int gsl_function(const gsl_vector*, void*, gsl_vector*);
+   static bool is_finite(const Vector_t&);
 };
 
 /**
@@ -198,7 +199,7 @@ void Root_finder<dimension>::print_state(const gsl_multiroot_fsolver* solver,
 template <std::size_t dimension>
 int Root_finder<dimension>::gsl_function(const gsl_vector* x, void* params, gsl_vector* f)
 {
-   if (!is_finite(x)) {
+   if (!flexiblesusy::is_finite(x)) {
       gsl_vector_set_all(f, std::numeric_limits<double>::max());
       return GSL_EDOM;
    }
@@ -211,7 +212,7 @@ int Root_finder<dimension>::gsl_function(const gsl_vector* x, void* params, gsl_
 
    try {
       result = (*fun)(arg);
-      status = IsFinite(result) ? GSL_SUCCESS : GSL_EDOM;
+      status = is_finite(result) ? GSL_SUCCESS : GSL_EDOM;
    } catch (const flexiblesusy::Error&) {
       status = GSL_EDOM;
    }
@@ -258,6 +259,20 @@ int Root_finder<dimension>::solve(const Eigen::VectorXd& start)
 {
    return (find_root(start) == GSL_SUCCESS ?
            EWSB_solver::SUCCESS : EWSB_solver::FAIL);
+}
+
+template <std::size_t dimension>
+bool Root_finder<dimension>::is_finite(const Vector_t& v)
+{
+   // workaround for intel compiler / Eigen bug that causes unexpected
+   // behavior from allFinite()
+   for (int i = 0; i < v.size(); i++) {
+      if (!std::isfinite(v(i))) {
+         return false;
+      }
+   }
+
+   return true;
 }
 
 } // namespace flexiblesusy

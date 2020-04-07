@@ -20,12 +20,11 @@
 #define SLHA_IO_H
 
 #include "error.hpp"
-#include "logger.hpp"
 #include "numerics2.hpp"
-#include "pmns.hpp"
 #include "slhaea.h"
-#include "wrappers.hpp"
+#include "string_utils.hpp"
 
+#include <complex>
 #include <iosfwd>
 #include <sstream>
 #include <string>
@@ -43,6 +42,7 @@ namespace flexiblesusy {
 
    class Spectrum_generator_settings;
    class Physical_input;
+   struct PMNS_parameters;
 
    namespace {
       /// SLHA line formatter for the MASS block entries
@@ -368,8 +368,8 @@ void SLHA_io::set_block(const std::string& name,
    ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
-      ss << boost::format(vector_formatter) % i % Re(matrix(i-1,0))
-         % ("Re(" + symbol + "(" + ToString(i) + "))");
+      ss << boost::format(vector_formatter) % i % std::real(matrix(i-1,0))
+         % ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "))");
    }
 
    set_block(ss);
@@ -386,9 +386,9 @@ void SLHA_io::set_block(const std::string& name,
    for (int i = 1; i <= NRows; ++i) {
       for (int k = 1; k <= NCols; ++k) {
          ss << boost::format(mixing_matrix_formatter) % i % k
-            % Re(matrix(i-1,k-1))
-            % ("Re(" + symbol + "(" + ToString(i) + ","
-               + ToString(k) + "))");
+            % std::real(matrix(i-1,k-1))
+            % ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + ","
+               + flexiblesusy::to_string(k) + "))");
       }
    }
 
@@ -404,8 +404,8 @@ void SLHA_io::set_block_imag(const std::string& name,
    ss << block_head(name, scale);
 
    for (int i = 1; i <= NRows; ++i) {
-      ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
-         % ("Im(" + symbol + "(" + ToString(i) + "))");
+      ss << boost::format(vector_formatter) % i % std::imag(matrix(i-1,0))
+         % ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))");
    }
 
    set_block(ss);
@@ -422,9 +422,9 @@ void SLHA_io::set_block_imag(const std::string& name,
    for (int i = 1; i <= NRows; ++i) {
       for (int k = 1; k <= NCols; ++k) {
          ss << boost::format(mixing_matrix_formatter) % i % k
-            % Im(matrix(i-1,k-1))
-            % ("Im(" + symbol + "(" + ToString(i) + ","
-               + ToString(k) + "))");
+            % std::imag(matrix(i-1,k-1))
+            % ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + ","
+               + flexiblesusy::to_string(k) + "))");
       }
    }
 
@@ -444,11 +444,11 @@ void SLHA_io::set_block(const std::string& name,
    for (int i = 1; i <= rows; ++i) {
       if (cols == 1) {
          ss << boost::format(vector_formatter) % i % matrix(i-1,0)
-            % (symbol + "(" + ToString(i) + ")");
+            % (symbol + "(" + flexiblesusy::to_string(i) + ")");
       } else {
          for (int k = 1; k <= cols; ++k) {
             ss << boost::format(mixing_matrix_formatter) % i % k % matrix(i-1,k-1)
-               % (symbol + "(" + ToString(i) + "," + ToString(k) + ")");
+               % (symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")");
          }
       }
    }
@@ -468,12 +468,12 @@ void SLHA_io::set_block_imag(const std::string& name,
    const int cols = matrix.cols();
    for (int i = 1; i <= rows; ++i) {
       if (cols == 1) {
-         ss << boost::format(vector_formatter) % i % Im(matrix(i-1,0))
-            % ("Im(" + symbol + "(" + ToString(i) + "))");
+         ss << boost::format(vector_formatter) % i % std::imag(matrix(i-1,0))
+            % ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))");
       } else {
          for (int k = 1; k <= cols; ++k) {
-            ss << boost::format(mixing_matrix_formatter) % i % k % Im(matrix(i-1,k-1))
-               % ("Im(" + symbol + "(" + ToString(i) + "," + ToString(k) + "))");
+            ss << boost::format(mixing_matrix_formatter) % i % k % std::imag(matrix(i-1,k-1))
+               % ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))");
          }
       }
    }

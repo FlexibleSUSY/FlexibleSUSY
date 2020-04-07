@@ -34,6 +34,7 @@
 #include "ckm.hpp"
 #include "ew_input.hpp"
 #include "lowe.h"
+#include "wrappers.hpp"
 
 #include <Eigen/Core>
 #include <string>

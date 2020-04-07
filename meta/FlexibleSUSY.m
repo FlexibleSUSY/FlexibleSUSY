@@ -251,7 +251,7 @@ SARAH`RealParameters = { All };
 
 (* precision of pole mass calculation *)
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null];
+HighPoleMassPrecision    = {};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
@@ -538,6 +538,12 @@ CheckDecaysOptions[] :=
          ]
       ]
    ];
+
+(* sets model file variables to default values, after SARAH`Start[] has been called *)
+FSSetDefaultModelFileSettings[] :=
+    Module[{},
+           FlexibleSUSY`HighPoleMassPrecision = DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null];
+    ];
 
 CheckModelFileSettings[] :=
     Module[{},
@@ -4011,6 +4017,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               Print["   Please run ./createmodel first."];
               Quit[1]];
            CheckSARAHVersion[];
+           (* set default values that need SARAH`Start[] to be called first *)
+           FSSetDefaultModelFileSettings[];
            (* load model file *)
            LoadModelFile[OptionValue[InputFile]];
            Print["FlexibleSUSY model file loaded"];

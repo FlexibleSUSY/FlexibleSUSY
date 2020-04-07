@@ -23,11 +23,30 @@
  */
 
 #include "sfermions.hpp"
+#include "config.h"
 #include "linalg2.hpp"
-#include "wrappers.hpp"
 #include "logger.hpp"
 
+#include <cmath>
+
 namespace flexiblesusy {
+
+namespace {
+
+template <typename Derived>
+Derived abs_sqrt(const Eigen::ArrayBase<Derived>& m)
+{
+   return m.cwiseAbs().cwiseSqrt();
+}
+
+double conj(double x) noexcept { return x; }
+
+double sqr(double x) noexcept { return x*x; }
+
+int sign(double x) noexcept { return x >= 0.0 ? 1 : -1; }
+
+} // anonymous namespace
+
 namespace sfermions {
 
 static const double oneOverRoot2 = 0.7071067811865475; // 1/sqrt(2.)
@@ -45,10 +64,10 @@ const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_right = {
 };
 
 /**
- * Obtains 2 x 2 mass matrix using input parameters in first argument 
+ * Obtains 2 x 2 mass matrix using input parameters in first argument
  * and diagonalises it.  Fills the second argument with the eigenvalues
  * and returns the mixing angle.
- */ 
+ */
 double diagonalize_sfermions_2x2(const Mass_data& pars,
                                  Eigen::Array<double,2,1>& msf)
 {
@@ -64,47 +83,49 @@ double diagonalize_sfermions_2x2(const Mass_data& pars,
    const double T3     = pars.T3;
    const double Yl     = pars.Yl;
    const double Yr     = pars.Yr;
-   const double vev2   = 0.25 * (Sqr(vd) - Sqr(vu));
+   const double vev2   = 0.25 * (sqr(vd) - sqr(vu));
    Eigen::Matrix<double,2,2> mass_matrix;
-   /// fill sfermion phi in mass matix in basis (phi_L phi_R)
-   if (Sign(T3) > 0) {
-      mass_matrix(0,0) = ml2 + 0.5 * AbsSqr(yf) * Sqr(vu)
-         + (T3 * Sqr(g2) - 0.5 * Yl * Sqr(gY)) * vev2;
-      mass_matrix(0,1) = oneOverRoot2 * (vu*Conj(Tyf) - vd*Conj(yf)*mu);
-      mass_matrix(1,0) = Conj(mass_matrix(0,1));
-      mass_matrix(1,1) = mr2 + 0.5 * AbsSqr(yf) * Sqr(vu)
-         - 0.5 * Yr * Sqr(gY) * vev2;
+
+   // fill sfermion phi in mass matix in basis (phi_L phi_R)
+   if (sign(T3) > 0) {
+      mass_matrix(0,0) = ml2 + 0.5 * sqr(yf) * sqr(vu)
+         + (T3 * sqr(g2) - 0.5 * Yl * sqr(gY)) * vev2;
+      mass_matrix(0,1) = oneOverRoot2 * (vu*conj(Tyf) - vd*conj(yf)*mu);
+      mass_matrix(1,0) = conj(mass_matrix(0,1));
+      mass_matrix(1,1) = mr2 + 0.5 * sqr(yf) * sqr(vu)
+         - 0.5 * Yr * sqr(gY) * vev2;
    } else {
-      mass_matrix(0,0) = ml2 + 0.5 * AbsSqr(yf) * Sqr(vd)
-         + (T3 * Sqr(g2) - 0.5 * Yl * Sqr(gY)) * vev2;
-      mass_matrix(0,1) = oneOverRoot2 * (vd*Conj(Tyf) - vu*Conj(yf)*mu);
-      mass_matrix(1,0) = Conj(mass_matrix(0,1));
-      mass_matrix(1,1) = mr2 + 0.5 * AbsSqr(yf) * Sqr(vd)
-         - 0.5 * Yr * Sqr(gY) * vev2;
+      mass_matrix(0,0) = ml2 + 0.5 * sqr(yf) * sqr(vd)
+         + (T3 * sqr(g2) - 0.5 * Yl * sqr(gY)) * vev2;
+      mass_matrix(0,1) = oneOverRoot2 * (vd*conj(Tyf) - vu*conj(yf)*mu);
+      mass_matrix(1,0) = conj(mass_matrix(0,1));
+      mass_matrix(1,1) = mr2 + 0.5 * sqr(yf) * sqr(vd)
+         - 0.5 * Yr * sqr(gY) * vev2;
    }
 
    Eigen::Matrix<double, 2, 2> Zf;
    diagonalize_hermitian(mass_matrix, msf, Zf);
 
 #ifdef ENABLE_VERBOSE
-   if (msf.minCoeff() < 0.)
+   if (msf.minCoeff() < 0.) {
       WARNING("diagonalize_sfermions_2x2: sfermion tachyon");
+   }
 #endif
 
-   msf = AbsSqrt(msf);
+   msf = abs_sqrt(msf);
 
    double theta;
 
-   if (Sign(Zf(0,0)) == Sign(Zf(1,1))) {
-      theta = ArcCos(Abs(Zf(0,0)));
+   if (sign(Zf(0,0)) == sign(Zf(1,1))) {
+      theta = std::acos(std::abs(Zf(0,0)));
    } else {
-      theta = ArcCos(Abs(Zf(0,1)));
+      theta = std::acos(std::abs(Zf(0,1)));
       Zf.col(0).swap(Zf.col(1));
       std::swap(msf(0), msf(1));
    }
 
-   theta = Sign(mass_matrix(0,1) / (mass_matrix(0,0) - mass_matrix(1,1)))
-      * Abs(theta);
+   theta = sign(mass_matrix(0,1) / (mass_matrix(0,0) - mass_matrix(1,1)))
+      * std::abs(theta);
 
    return theta;
 }

@@ -713,7 +713,7 @@ GetDimensionWithoutGoldstones[(SARAH`bar|Susyno`LieGroups`conj)[sym_], states_:F
     GetDimensionWithoutGoldstones[sym, states];
 
 GetDimensionWithoutGoldstones[sym_, states_:FlexibleSUSY`FSEigenstates] :=
-    Module[{numberOfGoldstones},
+    Module[{dim, numberOfGoldstones},
            numberOfGoldstones = GetDimensionStartSkippingGoldstones[sym] - 1;
            dim = GetDimension[sym] - numberOfGoldstones;
            If[dim <= 0, 0, dim]

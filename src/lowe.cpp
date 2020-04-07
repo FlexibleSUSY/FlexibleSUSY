@@ -26,6 +26,7 @@
 #include "lowe.h"
 #include "error.hpp"
 #include "ew_input.hpp"
+#include "string_utils.hpp"
 #include "wrappers.hpp"
 
 #include <algorithm>
@@ -147,7 +148,7 @@ void QedQcd::runto_safe(double scale, double eps)
    } catch (...) {
       throw flexiblesusy::NonPerturbativeRunningQedQcdError(
          "Non-perturbative running to Q = "
-         + flexiblesusy::ToString(scale)
+         + flexiblesusy::to_string(scale)
          + " during determination of the SM(5) parameters.");
    }
 }
@@ -336,7 +337,7 @@ double QedQcd::extractPoleMb(double alphasMb)
   if (get_scale() != displayMass(mBottom)) {
     throw flexiblesusy::SetupError(
        "QedQcd::extractPoleMb called at scale "
-       + flexiblesusy::ToString(get_scale()) + " instead of mb(mb)");
+       + flexiblesusy::to_string(get_scale()) + " instead of mb(mb)");
   }
 
   // Following is the MSbar correction from QCD, hep-ph/9912391
