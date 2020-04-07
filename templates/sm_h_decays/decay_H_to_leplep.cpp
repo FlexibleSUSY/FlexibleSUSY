@@ -27,5 +27,11 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
                        std::pow(mL1OS / mL1DR, 2);
 
    // flux * phase space factor * symmetry factor * matrix element^2
-   return 0.5 * ps * amp2OS / mHOS;
+   const double res = 0.5 * ps * amp2OS / mHOS;
+
+   if (res < 0) {
+      throw std::runtime_error("Error in H->ll. Partial width < 0.");
+   } else {
+      return res;
+   }
 }

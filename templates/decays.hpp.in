@@ -210,7 +210,13 @@ double @ModelName@_decays::get_partial_width(
    const auto mat_elem_sq = mat_elem.square();
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   return 0.5 * ps * ps_symmetry * color_factor * mat_elem_sq / mIn;
+   const auto result = 0.5 * ps * ps_symmetry * color_factor * mat_elem_sq / mIn;
+
+   if (result < 0) {
+      throw std::runtime_error("Width < 0");
+   } else {
+      return result;
+   }
 }
 
 @partialWidthSpecializationDecls@

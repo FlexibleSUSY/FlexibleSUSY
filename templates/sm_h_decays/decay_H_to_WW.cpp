@@ -15,7 +15,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
    // 4-body decay for mH < mW not implemented for a moment
    if (x > 1.0) {
-      return 0.0;
+      res = 0.0;
    }
 
    // three-body decays form mW < mH < w mW
@@ -27,7 +27,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const auto indices = concatenate(indexOut2, indexOut1, indexIn);
       const auto ghWW =
          Vertex<conj<W>::type, W, H>::evaluate(indices, context).value() * std::pow(mWOS/mW, 2);
-      return res * std::norm(ghWW);
+      res *= std::norm(ghWW);
 
    // two-body decay for mH > 2 mW
    } else {
@@ -42,6 +42,12 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const auto mat_elem_sq =mat_elem.square();
 
       // flux * phase space factor * matrix element squared
-      return flux * ps * mat_elem_sq;
+      res = flux * ps * mat_elem_sq;
+   }
+
+   if (res < 0) {
+      throw std::runtime_error("Error in H->WW. Partial width < 0.");
+   } else {
+      return res;
    }
 }

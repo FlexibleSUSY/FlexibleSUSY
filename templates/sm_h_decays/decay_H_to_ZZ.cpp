@@ -51,5 +51,12 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
    const auto ghZZ =
       Vertex<Z, Z, H>::evaluate(indices, context).value() * std::pow(mZOS/mZ, 2);
-   return res * std::norm(ghZZ);
+
+   res *= std::norm(ghZZ);
+
+   if (res < 0) {
+      throw std::runtime_error("Error in H->ZZ. Partial width < 0.");
+   } else {
+      return res;
+   }
 }

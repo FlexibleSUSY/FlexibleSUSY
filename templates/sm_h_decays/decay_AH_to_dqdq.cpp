@@ -42,7 +42,13 @@ double CLASSNAME::get_partial_width<AH,bar<dq>::type, dq>(
    const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdq/mAH), Sqr(mdq/mAH)));
    const double color_factor = 3;
 
-   return flux * phase_space * color_factor *
+   const auto result = flux * phase_space * color_factor *
       amplitude_squared<AH, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2) *
       (1. + deltaqq);
+
+   if (result < 0) {
+      throw std::runtime_error("Width < 0");
+   } else {
+      return result;
+   }
 }

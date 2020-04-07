@@ -53,5 +53,9 @@ double CLASSNAME::get_partial_width<AH, G, G>(
          break;
    }
 
-   return result;
+   if (result < 0) {
+      throw std::runtime_error("Width < 0");
+   } else {
+      return result;
+   }
 }

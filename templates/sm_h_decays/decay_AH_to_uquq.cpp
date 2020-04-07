@@ -48,9 +48,15 @@ double CLASSNAME::get_partial_width<AH,bar<uq>::type,uq>(
                             * Log((1+betaT)/(1-betaT)) / (16*Power(betaT,3))
                           + 3.0/(8*Sqr(betaT)) * (7*Sqr(betaT) - 1));
 
-     return 3.0/(8*Pi) * mAH * Power(betaT,3) * 
-      amplitude_squared<H, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2)
-            * (1 + deltaHt);
+     const auto result = 3.0/(8*Pi) * mAH * Power(betaT,3) *
+        amplitude_squared<H, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2)
+        * (1 + deltaHt);
+
+      if (result < 0) {
+         throw std::runtime_error("Width < 0");
+      } else {
+         return result;
+      }
    }
 
    const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
@@ -64,7 +70,13 @@ double CLASSNAME::get_partial_width<AH,bar<uq>::type,uq>(
    const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(muq/mAH), Sqr(muq/mAH)));
    const double color_factor = 3;
 
-   return flux * phase_space * color_factor *
+   const auto result = flux * phase_space * color_factor *
       amplitude_squared<AH, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2)
       * (1 + deltaqq + deltaAH2);
+
+   if (result < 0) {
+      throw std::runtime_error("Width < 0");
+   } else {
+      return result;
+   }
 }
