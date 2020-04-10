@@ -4745,6 +4745,12 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               Parameters`RemoveExtraParameters[SemiAnalytic`CreateCoefficientParameters[semiAnalyticSolns]];
              ]; (* If[HaveBVPSolver[FlexibleSUSY`SemiAnalyticSolver] *)
 
+           (* @todo: should all FlexibleDecay tests be moved into FlexibleDecay.mk
+              instead of just a variable that controlls wheter we call them or not? *)
+           With[{f = FileNameJoin[{"test", "FlexibleDecay.mk"}]},
+              If[FileExistsQ[f], DeleteFile[f]];
+              WriteString[f, "ENABLE_FLEXIBLEDECAY := no"]
+           ];
            If[FSCalculateDecays,
               PrintHeadline["Creating particle decays"];
 
@@ -4784,9 +4790,11 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  Print["Skipping calculating decays as no particles to calculate decays for were found."];
                 ];
 
-              WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := yes"],
+              With[{f = FileNameJoin[{"test", "FlexibleDecay.mk"}]},
+                 If[FileExistsQ[f], DeleteFile[f]]
+                 WriteString[f, "ENABLE_FLEXIBLEDECAY := yes"]
+              ];
 
-              WriteString["test/FlexibleDecay.mk", "ENABLE_FLEXIBLEDECAY := no"]
              ]; (* If[FSCalculateDecays] *)
 
            WriteDecaysMakefileModule[decaysSources, decaysHeaders,
