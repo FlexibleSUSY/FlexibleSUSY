@@ -416,7 +416,10 @@ constexpr T Quad(T a) noexcept
    return a * a * a * a;
 }
 
+/// real polylogarithm
 double PolyLog(int, double);
+
+/// complex polylogarithm
 std::complex<double> PolyLog(int, const std::complex<double>&);
 
 template <typename Base, typename Exponent>

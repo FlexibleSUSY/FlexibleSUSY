@@ -6,11 +6,11 @@
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
 FLEXIBLESUSY_MINOR=4
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_PATCH=2
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
-GM2CALC_VERSION="1.4.3"
+GM2CALC_VERSION="1.6.0"
 HIMALAYA_VERSION="unknown"
 
 # directory of this script
@@ -2103,6 +2103,12 @@ check_looptools_libs() {
         else
             LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
         fi
+
+        # check dependency on libquadmath by searching for cabsq in liblooptools
+        check_symbol "cabsq" "$found_lib" "$found_dir"
+        if test -n "$found_lib" ; then
+            LOOPTOOLSLIBS="$LOOPTOOLSLIBS -lquadmath"
+        fi
     fi
 }
 
@@ -3468,7 +3474,9 @@ sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
-add_metaflags
+if test "x${enable_meta}" = "xyes"; then
+    add_metaflags
+fi
 
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit

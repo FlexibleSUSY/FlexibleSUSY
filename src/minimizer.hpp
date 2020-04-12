@@ -19,7 +19,6 @@
 #ifndef MINIMIZER_H
 #define MINIMIZER_H
 
-#include <iostream>
 #include <utility>
 #include <Eigen/Core>
 #include <gsl/gsl_vector.h>

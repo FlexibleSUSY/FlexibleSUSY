@@ -19,6 +19,10 @@
 #include "wrappers.hpp"
 #include "dilog.hpp"
 #include "numerics2.hpp"
+#include "trilog.hpp"
+
+#include <complex>
+#include <cmath>
 
 namespace flexiblesusy {
 
@@ -166,8 +170,8 @@ double MaxAbsValue(const std::complex<double>& x) noexcept
 
 double MaxRelDiff(double a, double b)
 {
-   const double sTin = fabs(a);
-   const double sTout = fabs(b);
+   const double sTin = std::abs(a);
+   const double sTout = std::abs(b);
    const double maxx = std::max(sTin, sTout);
    const double underflow = 1.0e-20;
 
@@ -179,29 +183,24 @@ double MaxRelDiff(double a, double b)
 
 double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
 {
-   const double sTin = std::abs(a);
-   const double sTout = std::abs(b);
-   const double maxx = std::max(sTin, sTout);
-   const double underflow = 1.0e-20;
-
-   if (maxx < underflow)
-      return 0.0;
-
-   return std::abs(a - b) / maxx;
+   return MaxRelDiff(std::abs(a), std::abs(b));
 }
 
 double PolyLog(int n, double z)
 {
-   if (n == 2)
-      return dilog(z);
-   throw SetupError("PolyLog(n!=2) not implemented");
+   return std::real(PolyLog(n, z));
 }
 
 std::complex<double> PolyLog(int n, const std::complex<double>& z)
 {
-   if (n == 2)
-      return dilog(z);
-   throw SetupError("PolyLog(n!=2) not implemented");
+   switch (n) {
+   case 1: return -std::log(1.0 - z);
+   case 2: return dilog(z);
+   case 3: return trilog(z);
+   default: break;
+   }
+
+   throw SetupError("PolyLog(n != 1|2|3) not implemented");
 }
 
 double Re(double x) noexcept

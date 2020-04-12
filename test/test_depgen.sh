@@ -100,6 +100,12 @@ run_depgens "$CXX $flags" "$DEPGEN $flags" "${BASEDIR}/depgen/circular.cpp"
 flags="-MM"
 # run_depgens "$CXX $flags" "$DEPGEN $flags" "${BASEDIR}/depgen/ifdef.cpp"
 
+# test -MF without file argument
+flags="-MF"
+run_depgens "$CXX $flags" "$DEPGEN $flags" "${BASEDIR}/depgen/base.cpp"
+flags="-MF -MF"
+run_depgens "$CXX $flags" "$DEPGEN $flags" "${BASEDIR}/depgen/base.cpp"
+
 rm -f ${OUTPUT}*
 
 echo ""
