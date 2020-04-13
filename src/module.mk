@@ -21,6 +21,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/gsl_vector.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/lowe.cpp \
+		$(DIR)/linalg2.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
 		$(DIR)/numerics.cpp \

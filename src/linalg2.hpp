@@ -1481,6 +1481,52 @@ void fs_diagonalize_hermitian
     fs_diagonalize_hermitian_errbd(m, w, 0, &w_errbd);
 }
 
+// explicit template function instantiations ///////////////////////////
+
+extern template
+void fs_diagonalize_hermitian(const Eigen::Matrix<double, 2, 2>&,
+                              Eigen::Array<double, 2, 1>&,
+                              Eigen::Matrix<double, 2, 2>&);
+
+extern template
+void fs_diagonalize_hermitian(const Eigen::Matrix<double, 3, 3>&,
+                              Eigen::Array<double, 3, 1>&,
+                              Eigen::Matrix<double, 3, 3>&);
+
+extern template
+void fs_diagonalize_hermitian(const Eigen::Matrix<double, 6, 6>&,
+                              Eigen::Array<double, 6, 1>&,
+                              Eigen::Matrix<double, 6, 6>&);
+
+extern template
+void fs_diagonalize_symmetric(const Eigen::Matrix<double, 4, 4>&,
+                              Eigen::Array<double, 4, 1>&,
+                              Eigen::Matrix<std::complex<double>, 4, 4>&);
+
+extern template
+void fs_svd(const Eigen::Matrix<double, 2, 2>&,
+            Eigen::Array<double, 2, 1>&,
+            Eigen::Matrix<double, 2, 2>&,
+            Eigen::Matrix<double, 2, 2>&);
+
+extern template
+void fs_svd(const Eigen::Matrix<double, 2, 2>&,
+            Eigen::Array<double, 2, 1>&,
+            Eigen::Matrix<std::complex<double>, 2, 2>&,
+            Eigen::Matrix<std::complex<double>, 2, 2>&);
+
+extern template
+void fs_svd(const Eigen::Matrix<double, 3, 3>&,
+            Eigen::Array<double, 3, 1>&,
+            Eigen::Matrix<double, 3, 3>&,
+            Eigen::Matrix<double, 3, 3>&);
+
+extern template
+void fs_svd(const Eigen::Matrix<double, 3, 3>&,
+            Eigen::Array<double, 3, 1>&,
+            Eigen::Matrix<std::complex<double>, 3, 3>&,
+            Eigen::Matrix<std::complex<double>, 3, 3>&);
+
 } // namespace flexiblesusy
 
 #endif // LINALG2_H
