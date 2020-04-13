@@ -1378,12 +1378,12 @@ void test_ewsb_solvers(CMSSM<Two_scale> model, MssmSoftsusy softSusy)
       new Root_finder<2>(
          tadpole_stepper, number_of_ewsb_iterations,
          ewsb_iteration_precision, Root_finder<2>::GSLNewton),
-      new Fixed_point_iterator<2, fixed_point_iterator::Convergence_tester_relative>(
+      new Fixed_point_iterator<2, fixed_point_iterator::Convergence_tester_relative<2>>(
          ewsb_stepper, number_of_ewsb_iterations,
-         fixed_point_iterator::Convergence_tester_relative(ewsb_iteration_precision)),
-      new Fixed_point_iterator<2, fixed_point_iterator::Convergence_tester_absolute>(
+         fixed_point_iterator::Convergence_tester_relative<2>(ewsb_iteration_precision)),
+      new Fixed_point_iterator<2, fixed_point_iterator::Convergence_tester_absolute<2>>(
          ewsb_stepper, number_of_ewsb_iterations,
-         fixed_point_iterator::Convergence_tester_absolute(ewsb_iteration_precision))
+         fixed_point_iterator::Convergence_tester_absolute<2>(ewsb_iteration_precision))
    };
 
    const auto x_init(ewsb_solver.initial_guess(model));

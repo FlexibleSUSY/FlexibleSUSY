@@ -7,6 +7,7 @@
 #include "slha_io.hpp"
 #include "linalg2.hpp"
 #include "stopwatch.hpp"
+#include "wrappers.hpp"
 #include <Eigen/Core>
 #include <boost/lexical_cast.hpp>
 

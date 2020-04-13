@@ -18,16 +18,29 @@
 
 #include "slha_io.hpp"
 #include "ew_input.hpp"
+#include "logger.hpp"
 #include "lowe.h"
+#include "numerics2.hpp"
 #include "physical_input.hpp"
+#include "pmns.hpp"
 #include "spectrum_generator_settings.hpp"
-#include "wrappers.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <complex>
 #include <fstream>
 #include <string>
 
 namespace flexiblesusy {
+
+namespace {
+
+int round(double a) noexcept
+{
+   return static_cast<int>(a >= 0. ? a + 0.5 : a - 0.5);
+}
+
+} // anonymous namespace
 
 void SLHA_io::clear()
 {
@@ -48,11 +61,11 @@ void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double& m,
                                                         Eigen::Matrix<std::complex<double>, 1, 1>& z)
 {
    // check if 1st row contains non-zero imaginary parts
-   if (!is_zero(Abs(Im(z(0,0))))) {
+   if (!is_zero(std::abs(std::imag(z(0,0))))) {
       z(0,0) *= std::complex<double>(0.0,1.0);
       m *= -1;
 #ifdef ENABLE_DEBUG
-      if (!is_zero(Abs(Im(z(0,0))))) {
+      if (!is_zero(std::abs(std::imag(z(0,0))))) {
          WARNING("Element (0,0) of the following fermion mixing matrix"
                  " contains entries which have non-zero real and imaginary"
                  " parts:\nZ = " << z);
@@ -303,7 +316,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 {
    auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
    double entry = 0.;
-   const SLHAea::Block::key_type keys(1, ToString(key));
+   const SLHAea::Block::key_type keys(1, flexiblesusy::to_string(key));
 
    while (block != data.cend()) {
       auto line = block->find(keys);
@@ -492,7 +505,7 @@ void SLHA_io::process_modsel_tuple(Modsel& modsel, int key, double value)
       break;
    case 6: // Flavour violation (defined in SARAH model file)
    {
-      const int ivalue = Round(value);
+      const int ivalue = flexiblesusy::round(value);
 
       if (ivalue < 0 || ivalue > 3) {
          WARNING("Value " << ivalue << " in MODSEL block entry 6 out of range");

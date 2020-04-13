@@ -17,24 +17,38 @@
 // ====================================================================
 
 #include "effective_couplings.hpp"
-#include "error.hpp"
-#include "wrappers.hpp"
+
+#include <cmath>
+#include <complex>
 
 namespace flexiblesusy {
 
 namespace effective_couplings {
+
+namespace {
+
+constexpr double Pi = 3.141592653589793;
+
+double sqr(double x) noexcept { return x*x; }
+
+std::complex<double> sqr(const std::complex<double>& z) noexcept
+{
+   return z * z;
+}
+
+} // anonymous namespace
 
 std::complex<double> scaling_function(double tau)
 {
    std::complex<double> result;
 
    if (tau > 1) {
-      result = -0.25 * Sqr(Log((1.0 + Sqrt(1.0 - 1.0 / tau)) /
-         (1.0 - Sqrt(1.0 - 1.0 / tau))) - std::complex<double>(0,1) * Pi);
+      result = -0.25 * sqr(std::log((1.0 + std::sqrt(1.0 - 1.0 / tau)) /
+         (1.0 - std::sqrt(1.0 - 1.0 / tau))) - std::complex<double>(0,1) * Pi);
    } else if (tau == 1.0) {
-      result = 0.25 * Sqr(Pi);
+      result = 0.25 * sqr(Pi);
    } else {
-      result = Sqr(ArcSin(Sqrt(tau)));
+      result = sqr(std::asin(std::sqrt(tau)));
    }
 
    return result;
@@ -42,18 +56,18 @@ std::complex<double> scaling_function(double tau)
 
 std::complex<double> AS0(double tau)
 {
-   return -(tau - scaling_function(tau)) / Sqr(tau);
+   return -(tau - scaling_function(tau)) / sqr(tau);
 }
 
 std::complex<double> AS12(double tau)
 {
-   return 2.0 * (tau + (tau - 1.0) * scaling_function(tau)) / Sqr(tau);
+   return 2.0 * (tau + (tau - 1.0) * scaling_function(tau)) / sqr(tau);
 }
 
 std::complex<double> AS1(double tau)
 {
-   return -(2.0 * Sqr(tau) + 3.0 * tau + 3.0 * (2.0 * tau - 1.0)
-      * scaling_function(tau)) / Sqr(tau);
+   return -(2.0 * sqr(tau) + 3.0 * tau + 3.0 * (2.0 * tau - 1.0)
+      * scaling_function(tau)) / sqr(tau);
 }
 
 std::complex<double> AP12(double tau)
@@ -64,7 +78,7 @@ std::complex<double> AP12(double tau)
 std::complex<double> scalar_diphoton_fermion_loop(
    double m_decay, double m_loop)
 {
-   const double tau = 0.25 * Sqr(m_decay) / Sqr(m_loop);
+   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
    const double tau_min = 75.0;
 
    const std::map<double, std::complex<double> > data
@@ -81,16 +95,16 @@ std::complex<double> scalar_diphoton_fermion_loop(
    } else {
       // analytic expression in the m_loop -> 0 limit
       const std::complex<double> limit =
-         -(Sqr(Log(4.0 * tau)) - Sqr(Pi)) / 18.0 - 2.0 * Log(4.0 * tau) / 3.0
-         + 2.0 * Log(tau) + 22.0 / Log(4.0 * tau) + std::complex<double>(0,1)
-         * Pi * (Log(4.0 * tau) / 3.0 + 2.) / 3.0;
+         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
+         + 2.0 * std::log(tau) + 22.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
+         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
 
       const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
 
       const std::complex<double> constant = min_value
-         + (Sqr(Log(4.0 * tau_min)) - Sqr(Pi)) / 18.0 + 2.0 * Log(4.0 * tau_min)
-         / 3.0 - 2.0 * Log(tau_min) - 22.0 / Log(4.0 * tau_min)
-         - std::complex<double>(0,1) * Pi * (Log(4.0 * tau_min) / 3.0 + 2.)
+         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
+         / 3.0 - 2.0 * std::log(tau_min) - 22.0 / std::log(4.0 * tau_min)
+         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
          / 3.0;
 
       result = limit + constant;
@@ -102,7 +116,7 @@ std::complex<double> scalar_diphoton_fermion_loop(
 std::complex<double> pseudoscalar_diphoton_fermion_loop(
    double m_decay, double m_loop)
 {
-   const double tau = 0.25 * Sqr(m_decay) / Sqr(m_loop);
+   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
    const double tau_min = 75.0;
 
    const std::map<double, std::complex<double> > data
@@ -119,16 +133,16 @@ std::complex<double> pseudoscalar_diphoton_fermion_loop(
    } else {
       // analytic expression in the m_loop -> 0 limit
       const std::complex<double> limit =
-         -(Sqr(Log(4.0 * tau)) - Sqr(Pi)) / 18.0 - 2.0 * Log(4.0 * tau) / 3.0
-         + 2.0 * Log(tau) + 21.0 / Log(4.0 * tau) + std::complex<double>(0,1)
-         * Pi * (Log(4.0 * tau) / 3.0 + 2.) / 3.0;
+         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
+         + 2.0 * std::log(tau) + 21.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
+         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
 
       const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
 
       const std::complex<double> constant = min_value
-         + (Sqr(Log(4.0 * tau_min)) - Sqr(Pi)) / 18.0 + 2.0 * Log(4.0 * tau_min)
-         / 3.0 - 2.0 * Log(tau_min) - 21.0 / Log(4.0 * tau_min)
-         - std::complex<double>(0,1) * Pi * (Log(4.0 * tau_min) / 3.0 + 2.)
+         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
+         / 3.0 - 2.0 * std::log(tau_min) - 21.0 / std::log(4.0 * tau_min)
+         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
          / 3.0;
 
       result = limit + constant;

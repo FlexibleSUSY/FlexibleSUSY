@@ -22,6 +22,7 @@
 #define @ModelName@_INPUT_PARAMETERS_H
 
 #include <complex>
+#include <iosfwd>
 #include <Eigen/Core>
 
 namespace flexiblesusy {

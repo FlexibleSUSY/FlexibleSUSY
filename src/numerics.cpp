@@ -214,27 +214,24 @@ double b1(double p, double m1, double m2, double q) noexcept
       const double m16 = m12*m14 , m26 = m22*m24;
       const double m18 = sqr(m14), m28 = sqr(m24);
       const double p4 = sqr(p2);
+      const double diff = m12 - m22;
 
-      if (fabs(m12 - m22) < pTolerance * std::max(m12, m22)) {
-         return 0.08333333333333333*p2/m22
-            + 0.008333333333333333*p4/m24
-            + sqr(m12 - m22)*(0.041666666666666664/m24 +
-                              0.016666666666666666*p2/m26 +
-                              0.005357142857142856*p4/m28)
-            + (m12 - m22)*(-0.16666666666666666/m22 -
-                           0.03333333333333333*p2/m24 -
-                           0.007142857142857142*p4/m26)
-            - 0.5*log(m22/q2);
+      if (fabs(diff) < pTolerance * std::max(m12, m22)) {
+         return
+            - 0.5*log(m22/q2)
+            + 1.0/12.0*p2/m22 + 1.0/120.0*p4/m24
+            + diff*(-1.0/6.0/m22 - 1.0/30.0*p2/m24 - 1.0/140.0*p4/m26)
+            + sqr(diff)*(1.0/24.0/m24 + 1.0/60.0*p2/m26 + 3.0/560.0*p4/m28);
       }
 
       const double l12 = log(m12/m22);
 
-      return (3*m14 - 4*m12*m22 + m24 - 2*m14*l12)/(4.*sqr(m12 - m22))
-         + (p2*(4*pow3(m12 - m22)*
+      return (3*m14 - 4*m12*m22 + m24 - 2*m14*l12)/(4.*sqr(diff))
+         + (p2*(4*pow3(diff)*
                 (2*m14 + 5*m12*m22 - m24) +
                 (3*m18 + 44*m16*m22 - 36*m14*m24 - 12*m12*m26 + m28)*p2
-                - 12*m14*m22*(2*sqr(m12 - m22) + (2*m12 + 3*m22)*p2)*l12))/
-         (24.*pow6(m12 - m22)) - 0.5*log(m22/q2);
+                - 12*m14*m22*(2*sqr(diff) + (2*m12 + 3*m22)*p2)*l12))/
+         (24.*pow6(diff)) - 0.5*log(m22/q2);
    }
 
    return (m12 > m22)

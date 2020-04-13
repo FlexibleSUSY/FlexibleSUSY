@@ -31,6 +31,7 @@
 #include "loop_corrections.hpp"
 #include "threshold_corrections.hpp"
 #include "error.hpp"
+#include "names.hpp"
 #include "problems.hpp"
 #include "physical_input.hpp"
 

@@ -254,6 +254,91 @@ BOOST_AUTO_TEST_CASE(test_MaxRelDiff)
    BOOST_CHECK_CLOSE(MaxRelDiff(M1,M2), 2. , 1e-10);
 }
 
+
+BOOST_AUTO_TEST_CASE(test_MaxRelDiff_complex)
+{
+   const std::complex<double> unit(1.0, 0.0);
+
+   BOOST_CHECK_CLOSE(MaxRelDiff( 0.0*unit,  0.0*unit), 0.0, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff( 1.0*unit,  0.0*unit), 1.0, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff(-1.0*unit,  0.0*unit), 1.0, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff( 1.0*unit, -1.0*unit), 2.0, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff(-1.0*unit, -1.0*unit), 0.0, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff(-1.0*unit, -2.0*unit), 0.5, 1e-10);
+   BOOST_CHECK_CLOSE(MaxRelDiff( 1.0*unit,  2.0*unit), 0.5, 1e-10);
+}
+
+BOOST_AUTO_TEST_CASE(test_MaxRelDiff_array)
+{
+   Eigen::Array<double,2,2> M1, M2;
+   M1 << +1.0, +1.0, +1.0, +1.0;
+   M2 << -1.0, -2.0, -3.0, -4.0;
+
+   BOOST_CHECK_CLOSE(MaxRelDiff(M1,M2), 2.0, 1e-10);
+}
+
+BOOST_AUTO_TEST_CASE(test_MaxRelDiff_matrix)
+{
+   Eigen::Matrix<double,2,2> M1, M2;
+   M1 << +1.0, +1.0, +1.0, +1.0;
+   M2 << -1.0, -2.0, -3.0, -4.0;
+
+   BOOST_CHECK_CLOSE(MaxRelDiff(M1,M2), 2.0, 1e-10);
+}
+
+BOOST_AUTO_TEST_CASE(test_MaxRelDiff_matrix_complex)
+{
+   Eigen::Matrix<std::complex<double>,2,2> M1, M2;
+   M1 << +1.0, +1.0, +1.0, +1.0;
+   M2 << -1.0, -2.0, -3.0, -4.0;
+
+   BOOST_CHECK_CLOSE(MaxRelDiff(M1,M2), 2.0, 1e-10);
+}
+
+BOOST_AUTO_TEST_CASE(test_MaxAbsValue)
+{
+   BOOST_CHECK_CLOSE(MaxAbsValue(0.)  , 0. , 1e-10);
+   BOOST_CHECK_CLOSE(MaxAbsValue(1.)  , 1. , 1e-10);
+   BOOST_CHECK_CLOSE(MaxAbsValue(-1.) , 1. , 1e-10);
+   BOOST_CHECK_CLOSE(MaxAbsValue(std::complex<double>(0.,1.)), 1. , 1e-10);
+
+   {
+      Eigen::Matrix<double,3,1> M;
+      M << -2.0, 0.0, 1.0;
+      auto M2 = M;
+
+      BOOST_CHECK_CLOSE(MaxAbsValue(M), 2.0, 1e-10);
+      BOOST_CHECK_CLOSE(MaxAbsValue(M + M2), 4.0, 1e-10);
+   }
+
+   {
+      Eigen::Matrix<std::complex<double>,2,1> M;
+      M << std::complex<double>(0,1), std::complex<double>(0,2);
+      auto M2 = M;
+
+      BOOST_CHECK_CLOSE(MaxAbsValue(M), 2.0, 1e-10);
+      BOOST_CHECK_CLOSE(MaxAbsValue(M + M2), 4.0, 1e-10);
+   }
+
+   {
+      Eigen::Array<double,3,1> A;
+      A << -2.0, 0.0, 1.0;
+      auto A2 = A;
+
+      BOOST_CHECK_CLOSE(MaxAbsValue(A), 2.0, 1e-10);
+      BOOST_CHECK_CLOSE(MaxAbsValue(A + A2), 4.0, 1e-10);
+   }
+
+   {
+      Eigen::Array<std::complex<double>,2,1> A;
+      A << std::complex<double>(0,1), std::complex<double>(0,2);
+      auto A2 = A;
+
+      BOOST_CHECK_CLOSE(MaxAbsValue(A), 2.0, 1e-10);
+      BOOST_CHECK_CLOSE(MaxAbsValue(A + A2), 4.0, 1e-10);
+   }
+}
+
 BOOST_AUTO_TEST_CASE(test_Abs_vector)
 {
    std::vector<double> v(3);
@@ -503,6 +588,34 @@ BOOST_AUTO_TEST_CASE(test_Power8)
    BOOST_CHECK_EQUAL(Power(4.,8), Power8(4.));
 }
 
+BOOST_AUTO_TEST_CASE(test_Power9)
+{
+   BOOST_CHECK_EQUAL(Power(2.,9), Power9(2.));
+   BOOST_CHECK_EQUAL(Power(3.,9), Power9(3.));
+   BOOST_CHECK_EQUAL(Power(4.,9), Power9(4.));
+}
+
+BOOST_AUTO_TEST_CASE(test_Power10)
+{
+   BOOST_CHECK_EQUAL(Power(2.,10), Power10(2.));
+   BOOST_CHECK_EQUAL(Power(3.,10), Power10(3.));
+   BOOST_CHECK_EQUAL(Power(4.,10), Power10(4.));
+}
+
+BOOST_AUTO_TEST_CASE(test_Power11)
+{
+   BOOST_CHECK_EQUAL(Power(2.,11), Power11(2.));
+   BOOST_CHECK_EQUAL(Power(3.,11), Power11(3.));
+   BOOST_CHECK_EQUAL(Power(4.,11), Power11(4.));
+}
+
+BOOST_AUTO_TEST_CASE(test_Power12)
+{
+   BOOST_CHECK_EQUAL(Power(2.,12), Power12(2.));
+   BOOST_CHECK_EQUAL(Power(3.,12), Power12(3.));
+   BOOST_CHECK_EQUAL(Power(4.,12), Power12(4.));
+}
+
 template <typename Base, typename Exponent>
 double time_Power(std::size_t N, Base b, Exponent e)
 {
@@ -525,12 +638,17 @@ double time_Power(std::size_t N, Base b, Exponent e)
       return sw.get_time_in_seconds();          \
    }
 
+DEF_FUN(Sqr)
 DEF_FUN(Cube)
 DEF_FUN(Quad)
 DEF_FUN(Power5)
 DEF_FUN(Power6)
 DEF_FUN(Power7)
 DEF_FUN(Power8)
+DEF_FUN(Power9)
+DEF_FUN(Power10)
+DEF_FUN(Power11)
+DEF_FUN(Power12)
 
 std::string format_line(int exponent, double t1, double t2)
 {
@@ -546,27 +664,42 @@ BOOST_AUTO_TEST_CASE(test_Power_benchmark)
 {
    const std::size_t N = 1000000000;
 
-   const double timed_Power_3 = time_Power(N, 3., 3);
-   const double timed_Power_4 = time_Power(N, 3., 4);
-   const double timed_Power_5 = time_Power(N, 3., 5);
-   const double timed_Power_6 = time_Power(N, 3., 6);
-   const double timed_Power_7 = time_Power(N, 3., 7);
-   const double timed_Power_8 = time_Power(N, 3., 8);
-   const double timed_Cube    = time_Cube(N, 3.);
-   const double timed_Quad    = time_Quad(N, 3.);
-   const double timed_Power5  = time_Power5(N, 3.);
-   const double timed_Power6  = time_Power6(N, 3.);
-   const double timed_Power7  = time_Power7(N, 3.);
-   const double timed_Power8  = time_Power8(N, 3.);
+   const double timed_Power_2  = time_Power(N, 3., 2);
+   const double timed_Power_3  = time_Power(N, 3., 3);
+   const double timed_Power_4  = time_Power(N, 3., 4);
+   const double timed_Power_5  = time_Power(N, 3., 5);
+   const double timed_Power_6  = time_Power(N, 3., 6);
+   const double timed_Power_7  = time_Power(N, 3., 7);
+   const double timed_Power_8  = time_Power(N, 3., 8);
+   const double timed_Power_9  = time_Power(N, 3., 9);
+   const double timed_Power_10 = time_Power(N, 3., 10);
+   const double timed_Power_11 = time_Power(N, 3., 11);
+   const double timed_Power_12 = time_Power(N, 3., 12);
+   const double timed_Sqr      = time_Sqr(N, 3.);
+   const double timed_Cube     = time_Cube(N, 3.);
+   const double timed_Quad     = time_Quad(N, 3.);
+   const double timed_Power5   = time_Power5(N, 3.);
+   const double timed_Power6   = time_Power6(N, 3.);
+   const double timed_Power7   = time_Power7(N, 3.);
+   const double timed_Power8   = time_Power8(N, 3.);
+   const double timed_Power9   = time_Power9(N, 3.);
+   const double timed_Power10  = time_Power10(N, 3.);
+   const double timed_Power11  = time_Power11(N, 3.);
+   const double timed_Power12  = time_Power12(N, 3.);
 
    BOOST_TEST_MESSAGE("exponent | time/s (multiplication) | time/s (pow()) | rel. diff");
    BOOST_TEST_MESSAGE("---------------------------------------------------------------");
-   BOOST_TEST_MESSAGE(format_line(3, timed_Cube  , timed_Power_3));
-   BOOST_TEST_MESSAGE(format_line(4, timed_Quad  , timed_Power_4));
-   BOOST_TEST_MESSAGE(format_line(5, timed_Power5, timed_Power_5));
-   BOOST_TEST_MESSAGE(format_line(6, timed_Power6, timed_Power_6));
-   BOOST_TEST_MESSAGE(format_line(7, timed_Power7, timed_Power_7));
-   BOOST_TEST_MESSAGE(format_line(8, timed_Power8, timed_Power_8));
+   BOOST_TEST_MESSAGE(format_line( 2, timed_Sqr    , timed_Power_2 ));
+   BOOST_TEST_MESSAGE(format_line( 3, timed_Cube   , timed_Power_3 ));
+   BOOST_TEST_MESSAGE(format_line( 4, timed_Quad   , timed_Power_4 ));
+   BOOST_TEST_MESSAGE(format_line( 5, timed_Power5 , timed_Power_5 ));
+   BOOST_TEST_MESSAGE(format_line( 6, timed_Power6 , timed_Power_6 ));
+   BOOST_TEST_MESSAGE(format_line( 7, timed_Power7 , timed_Power_7 ));
+   BOOST_TEST_MESSAGE(format_line( 8, timed_Power8 , timed_Power_8 ));
+   BOOST_TEST_MESSAGE(format_line( 9, timed_Power9 , timed_Power_9 ));
+   BOOST_TEST_MESSAGE(format_line(10, timed_Power10, timed_Power_10));
+   BOOST_TEST_MESSAGE(format_line(11, timed_Power11, timed_Power_11));
+   BOOST_TEST_MESSAGE(format_line(12, timed_Power12, timed_Power_12));
 }
 
 BOOST_AUTO_TEST_CASE(test_Min)

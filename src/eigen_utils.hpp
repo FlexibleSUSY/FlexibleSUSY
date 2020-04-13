@@ -22,6 +22,7 @@
 #include <Eigen/Core>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <complex>
 #include <string>
 #include <limits>
@@ -73,6 +74,36 @@ Derived div_safe(
          const Scalar q = x / y;
          return std::isfinite(q) ? q : Scalar{};
       });
+}
+
+/**
+ * Returns true when two objects are element-wise equal up to a
+ * relative precision \a eps.
+ *
+ * @param a first object
+ * @param b second object
+ * @param eps maximum relative difference
+ *
+ * @return true when both objects are equal, false otherwise
+ */
+template <class Derived>
+bool is_equal_rel(const Eigen::PlainObjectBase<Derived>& a,
+                  const Eigen::PlainObjectBase<Derived>& b, double eps)
+{
+   if (a.rows() != b.rows() || a.cols() != b.cols()) {
+      return false;
+   }
+
+   for (decltype(a.size()) i = 0; i < a.size(); i++) {
+      const auto ai = a.data()[i];
+      const auto bi = b.data()[i];
+      const auto max = std::max(std::abs(ai), std::abs(bi));
+      if (std::abs(ai - bi) >= eps*(1 + max)) {
+         return false;
+      }
+   }
+
+   return true;
 }
 
 /**

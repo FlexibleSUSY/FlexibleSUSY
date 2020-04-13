@@ -37,12 +37,10 @@
 #include "ewsb_solver.hpp"
 #include "wrappers.hpp"
 #include "linalg2.hpp"
-#include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "raii.hpp"
-#include "functors.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -54,13 +52,11 @@
 @fourLoopHiggsHeaders@
 @twoLoopThresholdHeaders@
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <algorithm>
-#include <stdexcept>
 
 namespace flexiblesusy {
 
