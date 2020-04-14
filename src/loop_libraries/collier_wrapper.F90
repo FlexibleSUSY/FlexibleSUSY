@@ -69,19 +69,18 @@ contains
    function A0_dummy(m02) result(res) bind(C, name='A0_impl')
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02
       complex(C_DOUBLE_COMPLEX) :: res
-      complex(REAL64), allocatable :: Acoeff(:), Acoeffuv(:)
 
-      allocate(Acoeff(0:0))
-      allocate(Acoeffuv(0:0))
-
-      call A_cll(Acoeff,Acoeffuv,m02,0)
-
-      res = Acoeff(0)
-
-      deallocate(Acoeff, Acoeffuv)
+      call A0_cll(res, m02)
    end
 
-   two_point(B0,0,0)
+   function B0_dummy(p10, m02, m12) result(res) bind(C, name='B0_impl')
+      complex(C_DOUBLE_COMPLEX), intent(in) :: p10
+      complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
+      complex(C_DOUBLE_COMPLEX) :: res
+
+      call B0_cll(res, p10, m02, m12)
+   end
+
    two_point(B1,0,1)
    two_point(B00,1,0)
 
