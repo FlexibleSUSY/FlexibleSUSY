@@ -23,6 +23,7 @@
 #include "error.hpp"
 
 #include <iostream>
+#include <vector>
 
 namespace flexiblesusy {
 
