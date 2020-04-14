@@ -578,7 +578,7 @@ Module[
    Table["      << FORMAT_WILSON_COEFFICIENTS(" <> flha[[i,1]] <> ", " <>
       flha[[i,2]] <> ", " <> flha[[i,3]] <> ", " <> flha[[i,4]] <> ", " <>
       flha[[i,5]] <> ", " <> type <> "(" <> observable <> "(" <> ToString@i <>
-      ")), " <> "\"" <> type <> "(" <> flha[[i,6]] <> ")\")\n",
+      ")), " <> "\"" <> flha[[i,6]] <> "\")\n",
       {i, num-1}]
 ];
 
