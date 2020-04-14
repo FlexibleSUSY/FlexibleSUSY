@@ -1,5 +1,5 @@
 include test/SOFTSUSY/module.mk
-include test/FlexibleDecay.mk
+-include test/FlexibleDecay.mk
 
 DIR      := test
 MODNAME  := test
