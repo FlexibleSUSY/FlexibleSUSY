@@ -48,7 +48,10 @@ Begin["`Private`"];
 `args`LToLConversion = Sequence[
    (lIn:_?TreeMasses`IsLepton)[gIn:_Integer] -> (lOut_?TreeMasses`IsLepton)[gOut:_Integer],
    nucleus:_,
-   contribution:Alternatives[All,NPointFunctions`FourFermionScalarPenguins,
+   contribution:Alternatives[All,
+      NPointFunctions`noScalars,
+      NPointFunctions`Penguins,
+      NPointFunctions`FourFermionScalarPenguins,
       NPointFunctions`FourFermionMassiveVectorPenguins,
       NPointFunctions`FourFermionFlavourChangingBoxes]
 ];

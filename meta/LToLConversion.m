@@ -41,7 +41,10 @@ Begin["`internal`"];
 `type`lepton ~ SetAttributes ~ {Protected, Locked};
 
 `type`contribution = Alternatives[
-   All,NPointFunctions`FourFermionScalarPenguins,
+   All,
+   NPointFunctions`noScalars,
+   NPointFunctions`Penguins,
+   NPointFunctions`FourFermionScalarPenguins,
    NPointFunctions`FourFermionMassiveVectorPenguins,
    NPointFunctions`FourFermionFlavourChangingBoxes
 ];
@@ -373,6 +376,14 @@ Module[
                NPointFunctions`FourFermionMassiveVectorPenguins,
                NPointFunctions`FourFermionScalarPenguins,
                NPointFunctions`FourFermionFlavourChangingBoxes
+            },
+         NPointFunctions`noScalars, {
+               NPointFunctions`FourFermionMassiveVectorPenguins,
+               NPointFunctions`FourFermionFlavourChangingBoxes
+            },
+         NPointFunctions`Penguins, {
+               NPointFunctions`FourFermionScalarPenguins,
+               NPointFunctions`FourFermionMassiveVectorPenguins
             },
          _, con
       ],
