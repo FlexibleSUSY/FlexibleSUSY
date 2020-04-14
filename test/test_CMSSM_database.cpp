@@ -11,6 +11,7 @@
 #include "physical_input.hpp"
 #include "test.hpp"
 #include "lowe.h"
+#include "wrappers.hpp"
 
 using namespace flexiblesusy;
 

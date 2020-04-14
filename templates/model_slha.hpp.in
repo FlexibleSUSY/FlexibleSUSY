@@ -32,8 +32,8 @@
 
 #include "ckm.hpp"
 #include "linalg2.hpp"
+#include "mixings.hpp"
 #include "pmns.hpp"
-#include "slha_io.hpp"
 #include "wrappers.hpp"
 
 #define LOCALPHYSICAL(p) physical.p

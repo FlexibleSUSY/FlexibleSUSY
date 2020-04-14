@@ -186,34 +186,6 @@ public:
    void write_to_file(const std::string&) const;
    void write_to_stream(std::ostream& = std::cerr) const;
 
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                         Eigen::Matrix<double, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_slha(double&,
-                                                         Eigen::Matrix<double, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                         Eigen::Matrix<std::complex<double>, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_slha(double&,
-                                                         Eigen::Matrix<std::complex<double>, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                       Eigen::Matrix<double, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_hk(double&,
-                                                       Eigen::Matrix<double, 1, 1>&);
-
-   template<int N>
-   static void convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                       Eigen::Matrix<std::complex<double>, N, N>&);
-
-   static void convert_symmetric_fermion_mixings_to_hk(double&,
-                                                       Eigen::Matrix<std::complex<double>, 1, 1>&);
-
 private:
    SLHAea::Coll data{};        ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
@@ -466,65 +438,6 @@ void SLHA_io::set_block_imag(const std::string& name,
    }
 
    set_block(ss);
-}
-
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>&,
-                                                        Eigen::Matrix<double, N, N>&)
-{
-}
-
-/**
- * Converts the given vector of masses and the corresponding (complex)
- * mixing matrix to SLHA convention: Matrix rows with non-zero
- * imaginary parts are multiplied by i and the corresponding mass
- * eigenvalue is multiplied by -1.  As a result the mixing matrix will
- * be real and the mass eigenvalues might be positive or negative.  It
- * is assumed that these mixings result from diagonalizing a symmetric
- * fermion mass matrix in the convention of Haber and Kane,
- * Phys. Rept. 117 (1985) 75-263.  This conversion makes sense only if
- * the original symmetric mass matrix is real-valued.
- *
- * @param m vector of masses
- * @param z mixing matrix
- */
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(Eigen::Array<double, N, 1>& m,
-                                                        Eigen::Matrix<std::complex<double>, N, N>& z)
-{
-   for (int i = 0; i < N; i++) {
-      // check if i'th row contains non-zero imaginary parts
-      if (!is_zero(z.row(i).imag().cwiseAbs().maxCoeff())) {
-         z.row(i) *= std::complex<double>(0.0,1.0);
-         m(i) *= -1;
-      }
-   }
-}
-
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>&,
-                                                      Eigen::Matrix<double, N, N>&)
-{
-}
-
-/**
- * Converts the given vector of masses and the corresponding (real)
- * mixing matrix to Haber-Kane convention (Phys. Rept. 117 (1985)
- * 75-263): Masses are positive and mixing matrices can be complex.
- *
- * @param m vector of masses
- * @param z mixing matrix
- */
-template<int N>
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(Eigen::Array<double, N, 1>& m,
-                                                      Eigen::Matrix<std::complex<double>, N, N>& z)
-{
-   for (int i = 0; i < N; i++) {
-      if (m(i) < 0.) {
-         z.row(i) *= std::complex<double>(0.0,1.0);
-         m(i) *= -1;
-      }
-   }
 }
 
 } // namespace flexiblesusy
