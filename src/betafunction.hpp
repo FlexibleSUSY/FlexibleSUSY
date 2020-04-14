@@ -24,8 +24,7 @@
 #ifndef BETAFUNCTION_H
 #define BETAFUNCTION_H
 
-#include "basic_rk_integrator.hpp"
-
+#include <functional>
 #include <Eigen/Core>
 
 namespace flexiblesusy {
@@ -45,7 +44,7 @@ public:
    using Derivs = std::function<Eigen::ArrayXd(double, const Eigen::ArrayXd&)>;
    using ODE_integrator = std::function<void(double, double, Eigen::ArrayXd&, Derivs, double)>;
 
-   Beta_function() = default;
+   Beta_function();
    Beta_function(const Beta_function&) = default;
    Beta_function(Beta_function&&) = default;
    virtual ~Beta_function() = default;
@@ -85,8 +84,7 @@ private:
    double tolerance{1.e-4};      ///< running tolerance
    double min_tolerance{1.e-11}; ///< minimum tolerance allowed
    double zero_threshold{1.e-11};///< threshold for treating values as zero
-   ODE_integrator integrator{
-      runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>()};
+   ODE_integrator integrator{};  ///< ODE integrator
 
    Eigen::ArrayXd derivatives(double, const Eigen::ArrayXd&);
    double get_tolerance(double eps);

@@ -19,6 +19,7 @@
 #ifndef PMNS_H
 #define PMNS_H
 
+#include <complex>
 #include <Eigen/Core>
 
 namespace flexiblesusy {

@@ -35,9 +35,10 @@ jobs:
       matrix:
         CXXCOMPILER: [g++, clang++]
         LOOPLIBRARY: [internal, looptools]
+      max-parallel: 1
 
     env:
-      IMAGE_VERSION: '0.2.4'
+      IMAGE_VERSION: '0.2.5'
       SARAH_VERSION: '4.14.3'
       FEYNARTS_VERSION: '3.11'
       FORMCALC_VERSION: '9.9'

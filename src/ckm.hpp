@@ -19,6 +19,7 @@
 #ifndef CKM_H
 #define CKM_H
 
+#include <complex>
 #include <Eigen/Core>
 
 namespace flexiblesusy {

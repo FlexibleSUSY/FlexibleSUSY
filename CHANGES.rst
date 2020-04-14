@@ -1,4 +1,4 @@
-FlexibleSUSY 2.4.2 [not released yet]
+FlexibleSUSY 2.5.0 [not released yet]
 =====================================
 
 New features
@@ -32,12 +32,17 @@ Changes
   from the Conan repository is preferred over the one installed in the
   system directories.
 
+FlexibleSUSY 2.4.2 [April, 10 2020]
+===================================
+
 Fixed bugs
 ----------
 
 * [commit de7091b0d]: Fixed setting of threshold correction flags with
   clang++ 7.0.
 
+* [commit 23f66e54c]: Fixed compilation error of LibraryLink on
+  platforms where `mint = long long`.
 
 FlexibleSUSY 2.4.1 [October, 16 2019]
 =====================================
