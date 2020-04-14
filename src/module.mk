@@ -87,6 +87,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/minimizer.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
+		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
 		$(DIR)/one_loop_decay_diagrams.hpp \

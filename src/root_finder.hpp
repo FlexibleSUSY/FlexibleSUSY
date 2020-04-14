@@ -155,17 +155,13 @@ int Root_finder<dimension>::find_root(const Vector_t& start)
 
    gsl_multiroot_fsolver_set(solver, &f, tmp_root.raw());
 
-#ifdef ENABLE_VERBOSE
    print_state(solver, iter);
-#endif
 
    do {
       iter++;
       status = gsl_multiroot_fsolver_iterate(solver);
 
-#ifdef ENABLE_VERBOSE
       print_state(solver, iter);
-#endif
 
       if (status)   // check if solver is stuck
          break;

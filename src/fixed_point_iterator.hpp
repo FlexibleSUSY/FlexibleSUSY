@@ -27,7 +27,7 @@
 #include <Eigen/Core>
 
 #include "logger.hpp"
-#include "wrappers.hpp"
+#include "eigen_utils.hpp"
 #include "error.hpp"
 #include "ewsb_solver.hpp"
 
@@ -80,15 +80,14 @@ public:
    /**
     * Test whether the relative difference is less than the set
     * precision. The relative difference test used here is carried out
-    * by applying \a MaxRelDiff to each element of the vector.
+    * by applying \a is_equal_rel() to each element of the vector.
     *
     * @param a first vector
     * @param b second vector
     * @return status code (SUCCESS or CONTINUE)
     */
    int operator()(const Vector_t& a, const Vector_t& b) const {
-      const double res = MaxRelDiff(a, b);
-      return res < precision ? SUCCESS : CONTINUE;
+      return is_equal_rel(a, b, precision) ? SUCCESS : CONTINUE;
    }
 
 private:
@@ -113,7 +112,7 @@ public:
    /**
     * Test whether the relative difference is less than the set
     * precision. The relative difference test used here is carried out
-    * by applying \a MaxRelDiff to each element of the vector. If the
+    * by applying \a is_equal_rel() to each element of the vector. If the
     * relative difference is below the precision, it is tested whether
     * the tadpoles are below the precision. If the tadpoles are larger
     * than the precision, CONTINUE is returned.
@@ -124,15 +123,13 @@ public:
     */
    int operator()(const Vector_t& a, const Vector_t& b) const
    {
-      const double max_rel_diff = MaxRelDiff(a, b);
-
-      if (max_rel_diff > precision) {
+      if (!is_equal_rel(a, b, precision)) {
          return CONTINUE;
       }
 
       static const double eps = 10*std::pow(10., -std::numeric_limits<double>::digits10);
 
-      if (max_rel_diff < eps) {
+      if (is_equal_rel(a, b, eps)) {
          return SUCCESS;
       }
 
@@ -164,11 +161,11 @@ private:
  * arguments a Eigen vector of length \a dimension and returns a
  * vector with the next point.
  *
- * @note The standard relative convergence criterion
- * \f$\text{MaxRelDiff}(x_{n+1}, x_{n}) < \text{precision}\f$ is not
- * very good: The iteration might converge slowly.  This means, that
- * subsequent steps are very close to each other, but \f$x_n\f$ might
- * not be close to the true fixed point.
+ * @note The standard relative convergence criterion may not be
+ * suitable in all situations, for example not when the iteration
+ * converges slowly.  In this case subsequent steps are very close to
+ * each other, but \f$x_n\f$ might not be close to the true fixed
+ * point.
  *
  * @todo implement check for no progress towards solution
  */

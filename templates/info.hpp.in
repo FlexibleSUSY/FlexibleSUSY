@@ -21,7 +21,7 @@
 #ifndef @ModelName@_INFO_H
 #define @ModelName@_INFO_H
 
-#include "problems.hpp"
+#include "names.hpp"
 
 #include <array>
 #include <iosfwd>

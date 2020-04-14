@@ -19,6 +19,7 @@
 #include "wrappers.hpp"
 #include "dilog.hpp"
 #include "numerics2.hpp"
+#include "string_utils.hpp"
 #include "trilog.hpp"
 
 #include <complex>
@@ -170,20 +171,24 @@ double MaxAbsValue(const std::complex<double>& x) noexcept
 
 double MaxRelDiff(double a, double b)
 {
-   const double sTin = std::abs(a);
-   const double sTout = std::abs(b);
-   const double maxx = std::max(sTin, sTout);
-   const double underflow = 1.0e-20;
+   const double max = std::max(std::abs(a), std::abs(b));
 
-   if (maxx < underflow)
+   if (max < 1.0e-20) {
       return 0.0;
+   }
 
-   return std::abs((a - b) / maxx);
+   return std::abs((a - b) / max);
 }
 
 double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
 {
-   return MaxRelDiff(std::abs(a), std::abs(b));
+   const double max = std::max(std::abs(a), std::abs(b));
+
+   if (max < 1.0e-20) {
+      return 0.0;
+   }
+
+   return std::abs((a - b) / max);
 }
 
 double PolyLog(int n, double z)
@@ -242,6 +247,26 @@ double SignedAbsSqrt(double a) noexcept
 {
    return Sign(a) * AbsSqrt(a);
 }
+
+#define DEFINE_ToString(type)                   \
+   std::string ToString(type a)                 \
+   {                                            \
+      return flexiblesusy::to_string(a);        \
+   }
+
+DEFINE_ToString(char)
+DEFINE_ToString(unsigned char)
+DEFINE_ToString(unsigned short)
+DEFINE_ToString(unsigned int)
+DEFINE_ToString(unsigned long)
+DEFINE_ToString(unsigned long long)
+DEFINE_ToString(signed char)
+DEFINE_ToString(signed short)
+DEFINE_ToString(signed int)
+DEFINE_ToString(signed long)
+DEFINE_ToString(signed long long)
+DEFINE_ToString(double)
+DEFINE_ToString(const std::complex<double>&)
 
 double Total(double a) noexcept
 {

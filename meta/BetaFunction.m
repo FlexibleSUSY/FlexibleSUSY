@@ -146,18 +146,6 @@ ToList[expr_, head_] :=
              ]
           ];
 
-FactorOutLoopFactor[expr_] :=
-    Module[{i, prefactors = {CConversion`oneOver16PiSqr, CConversion`twoLoop,
-                             CConversion`threeLoop, CConversion`oneOver16PiSqr^4,
-                             CConversion`oneOver16PiSqr^5}},
-           For[i = 1, i <= Length[prefactors], i++,
-               If[Coefficient[expr, prefactors[[i]]] =!= 0,
-                  Return[TimeConstrainedSimplify[prefactors[[i]] Expand[expr / prefactors[[i]]]]];
-                 ];
-              ];
-           expr
-          ];
-
 TimeConstrainedSimplify[expr_] :=
     TimeConstrained[Factor[expr], FlexibleSUSY`FSSimplifyBetaFunctionsTimeConstraint, expr];
 
@@ -168,7 +156,7 @@ CollectMatMul[expr_] :=
 
 (* split expression into sub-expressions of given maximum size *)
 SplitExpression[expr_, size_Integer] :=
-    CollectMatMul[FactorOutLoopFactor /@ (Plus @@@ Utils`SplitList[ToList[expr, Plus], size])];
+    CollectMatMul[Plus @@@ Utils`SplitList[ToList[expr, Plus], size]];
 
 NeedToSplitExpression[expr_, threshold_Integer] :=
     Length[ToList[expr, Plus]] > threshold;
@@ -209,12 +197,7 @@ ConvertExprToC[expr_, type_, target_String] :=
  *)
 CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_List] :=
      Module[{beta, betaName, name, betaStr,
-             type = ErrorType, localDecl, traceRules, expr, loopFactor},
-            Switch[loopOrder,
-                   1, loopFactor = CConversion`oneOver16PiSqr;,
-                   2, loopFactor = CConversion`twoLoop;,
-                   3, loopFactor = CConversion`threeLoop;,
-                   _, loopFactor = CConversion`oneOver16PiSqr^loopOrder];
+             type = ErrorType, localDecl, traceRules, expr},
             name      = ToValidCSymbolString[GetName[betaFunction]];
             betaName  = "beta_" <> name;
             type = GetType[betaFunction];
@@ -226,7 +209,7 @@ CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_Lis
               ];
             expr       = expr[[loopOrder]];
             (* convert beta function expressions to C form *)
-            beta       = (loopFactor * expr) /.
+            beta       = expr /.
                             { Kronecker[Susyno`LieGroups`i1,SARAH`i2] :> CreateUnitMatrix[type],
                               a_[Susyno`LieGroups`i1] :> a,
                               a_[Susyno`LieGroups`i1,SARAH`i2] :> a,
@@ -238,7 +221,7 @@ CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_Lis
             traceRules = Rule[#,ToValidCSymbol[#]]& /@ (Traces`FindSARAHTraces[expr, sarahTraces]);
             beta = beta /. traceRules;
             (* collecting complicated matrix multiplications *)
-            beta = loopFactor CollectMatMul[beta / loopFactor];
+            beta = CollectMatMul[beta];
             (* declare SARAH traces locally *)
             localDecl  = localDecl <> Traces`CreateLocalCopiesOfSARAHTraces[expr, sarahTraces, "TRACE_STRUCT"];
             If[beta == 0,

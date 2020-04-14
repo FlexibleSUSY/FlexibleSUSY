@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE( test_parabola1 )
    // be close to the true fixed point.
 
    BOOST_REQUIRE(status == EWSB_solver::SUCCESS);
-   BOOST_CHECK_LT(residual_1, 100*precision);
-   BOOST_CHECK_LT(residual_2, 100*precision);
+   BOOST_CHECK_LT(residual_1, 200*precision);
+   BOOST_CHECK_LT(residual_2, 200*precision);
    BOOST_TEST_MESSAGE("fixed point iterator used " << get_number_of_calls() << " calls");
 }
 

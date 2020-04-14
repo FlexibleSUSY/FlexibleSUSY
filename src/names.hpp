@@ -16,25 +16,23 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
+#ifndef NAMES_H
+#define NAMES_H
 
-#ifndef @ModelName@_INPUT_PARAMETERS_H
-#define @ModelName@_INPUT_PARAMETERS_H
-
-#include <complex>
-#include <iosfwd>
-#include <Eigen/Core>
+#include <string>
 
 namespace flexiblesusy {
 
-struct @ModelName@_input_parameters {
-@defineInputParameters@
-
-   Eigen::ArrayXd get() const;
-   void set(const Eigen::ArrayXd&);
+/**
+ * @class Names
+ * @brief Generic interface to access names of parameters and particles
+ */
+class Names {
+public:
+   virtual ~Names() = default;
+   virtual const std::string& get(int) const = 0;
+   virtual int size() const = 0;
 };
-
-std::ostream& operator<<(std::ostream&, const @ModelName@_input_parameters&);
 
 } // namespace flexiblesusy
 

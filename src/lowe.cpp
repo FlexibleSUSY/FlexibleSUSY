@@ -27,7 +27,7 @@
 #include "error.hpp"
 #include "ew_input.hpp"
 #include "string_utils.hpp"
-#include "wrappers.hpp"
+#include "eigen_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -411,7 +411,7 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
       runto_safe(scale, running_precision);
       qedqcd_new = get();
 
-      converged = flexiblesusy::MaxRelDiff(qedqcd_old, qedqcd_new) < precision_goal;
+      converged = flexiblesusy::is_equal_rel(qedqcd_old, qedqcd_new, precision_goal);
 
       qedqcd_old = qedqcd_new;
 

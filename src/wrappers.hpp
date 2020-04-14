@@ -19,6 +19,7 @@
 #ifndef WRAPPERS_H
 #define WRAPPERS_H
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <limits>
@@ -34,7 +35,6 @@
 #include "error.hpp"
 #include "logger.hpp"
 #include "if.hpp"
-#include "string_utils.hpp"
 #include "sum.hpp"
 #include "which.hpp"
 
@@ -47,6 +47,7 @@ static constexpr double oneLoop = oneOver16PiSqr;
 static constexpr double twoLoop = oneOver16PiSqr * oneOver16PiSqr;
 static constexpr double threeLoop = oneOver16PiSqr * oneOver16PiSqr * oneOver16PiSqr;
 static constexpr double fourLoop = twoLoop * twoLoop;
+static constexpr double fiveLoop = oneLoop * fourLoop;
 static constexpr bool True = true;
 
 template <typename T>
@@ -255,15 +256,17 @@ double FiniteLog(double a) noexcept;
  * @param m matrix
  */
 template <typename Derived>
-void Hermitianize(Eigen::MatrixBase<Derived>& m) noexcept
+void Hermitianize(Eigen::PlainObjectBase<Derived>& m) noexcept
 {
-   static_assert(Eigen::MatrixBase<Derived>::RowsAtCompileTime ==
-                 Eigen::MatrixBase<Derived>::ColsAtCompileTime,
+   static_assert(Eigen::PlainObjectBase<Derived>::RowsAtCompileTime ==
+                 Eigen::PlainObjectBase<Derived>::ColsAtCompileTime,
                  "Hermitianize is only defined for squared matrices");
 
-   for (int i = 0; i < Eigen::MatrixBase<Derived>::RowsAtCompileTime; i++)
-      for (int k = 0; k < i; k++)
+   for (int i = 0; i < Eigen::PlainObjectBase<Derived>::RowsAtCompileTime; i++) {
+      for (int k = 0; k < i; k++) {
          m(i,k) = Conj(m(k,i));
+      }
+   }
 }
 
 ///////////////////////// logger commands /////////////////////////
@@ -343,39 +346,51 @@ double PrintWARNING(Ts&&... vs)
 
 double Log(double a) noexcept;
 
+// MaxRelDiff //////////////////////////////////////////////////////////
+
 double MaxRelDiff(double, double);
+
 double MaxRelDiff(const std::complex<double>&, const std::complex<double>&);
 
 template <class Derived>
-double MaxRelDiff(const Eigen::MatrixBase<Derived>& a,
-                  const Eigen::MatrixBase<Derived>& b)
+auto MaxRelDiff(const Eigen::PlainObjectBase<Derived>& a,
+                const Eigen::PlainObjectBase<Derived>& b)
+   -> decltype(MaxRelDiff(a.data()[0], b.data()[0]))
 {
-   typename Eigen::MatrixBase<Derived>::PlainObject sumTol(a.rows());
+   if (a.rows() != b.rows() || a.cols() != b.cols()) {
+      throw SetupError("MaxRelDiff: Matrices/Vectors have different size!");
+   }
 
-   if (a.rows() != b.rows())
-      throw SetupError("MaxRelDiff: vectors have different size!");
+   using Scalar_t = decltype(MaxRelDiff(a.data()[0], b.data()[0]));
 
-   for (int i = 0; i < a.rows(); i++)
-      sumTol(i) = MaxRelDiff(a(i), b(i));
+   std::vector<Scalar_t> v(a.size(), 0.0);
 
-   return sumTol.maxCoeff();
+   for (int i = 0; i < v.size(); i++) {
+      v[i] = MaxRelDiff(a.data()[i], b.data()[i]);
+   }
+
+   return *std::max_element(std::cbegin(v), std::cend(v));
 }
 
-template <class Derived>
-double MaxRelDiff(const Eigen::ArrayBase<Derived>& a,
-                  const Eigen::ArrayBase<Derived>& b)
-{
-   return MaxRelDiff(a.matrix(), b.matrix());
-}
+// MaxAbsValue /////////////////////////////////////////////////////////
 
 double MaxAbsValue(double x) noexcept;
+
 double MaxAbsValue(const std::complex<double>& x) noexcept;
 
 template <class Derived>
-double MaxAbsValue(const Eigen::MatrixBase<Derived>& x)
+auto MaxAbsValue(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().maxCoeff())
 {
    return x.cwiseAbs().maxCoeff();
 }
+
+template <class Derived>
+auto MaxAbsValue(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().maxCoeff())
+{
+   return x.cwiseAbs().maxCoeff();
+}
+
+// Max /////////////////////////////////////////////////////////////////
 
 template<typename T>
 T Max(T&&t)
@@ -624,15 +639,17 @@ DEFINE_COMMUTATIVE_OPERATOR_COMPLEX_INT(-)
  * @param m matrix
  */
 template <typename Derived>
-void Symmetrize(Eigen::MatrixBase<Derived>& m)
+void Symmetrize(Eigen::PlainObjectBase<Derived>& m)
 {
-   static_assert(Eigen::MatrixBase<Derived>::RowsAtCompileTime ==
-                 Eigen::MatrixBase<Derived>::ColsAtCompileTime,
+   static_assert(Eigen::PlainObjectBase<Derived>::RowsAtCompileTime ==
+                 Eigen::PlainObjectBase<Derived>::ColsAtCompileTime,
                  "Symmetrize is only defined for squared matrices");
 
-   for (int i = 0; i < Eigen::MatrixBase<Derived>::RowsAtCompileTime; i++)
-      for (int k = 0; k < i; k++)
+   for (int i = 0; i < Eigen::PlainObjectBase<Derived>::RowsAtCompileTime; i++) {
+      for (int k = 0; k < i; k++) {
          m(i,k) = m(k,i);
+      }
+   }
 }
 
 #define UNITMATRIX(rows)             Eigen::Matrix<double,rows,rows>::Identity()
@@ -673,11 +690,26 @@ Eigen::Matrix<Scalar,M,N> ToMatrix(const Eigen::Matrix<Scalar,M,N>& a) noexcept
    return a;
 }
 
-template <typename T>
-std::string ToString(T a)
-{
-   return flexiblesusy::to_string(a);
-}
+// ToString ////////////////////////////////////////////////////////////
+
+std::string ToString(char);
+
+std::string ToString(unsigned char);
+std::string ToString(unsigned short);
+std::string ToString(unsigned int);
+std::string ToString(unsigned long);
+std::string ToString(unsigned long long);
+
+std::string ToString(signed char);
+std::string ToString(signed short);
+std::string ToString(signed int);
+std::string ToString(signed long);
+std::string ToString(signed long long);
+
+std::string ToString(double);
+std::string ToString(const std::complex<double>&);
+
+// Total ///////////////////////////////////////////////////////////////
 
 double Total(double) noexcept;
 std::complex<double> Total(const std::complex<double>&) noexcept;
