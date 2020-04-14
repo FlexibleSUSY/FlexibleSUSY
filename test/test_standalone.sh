@@ -3,7 +3,7 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-examples_dir=$(readlink -f "${BASEDIR}/../examples")
+examples_dir="${BASEDIR}/../examples"
 
 standalone_dirs="standalone-model standalone-rge"
 

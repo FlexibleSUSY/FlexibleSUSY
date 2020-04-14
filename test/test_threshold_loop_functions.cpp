@@ -17,17 +17,31 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_wrappers
+#define BOOST_TEST_MODULE test_threshold_loop_functions
 
-#include <limits>
 #include <boost/test/unit_test.hpp>
+
+#include "config.h"
 #include "threshold_loop_functions.hpp"
 #include "numerics.h"
 #include "dilog.hpp"
 #include "logger.hpp"
-#include "read_data.hpp"
+#include "benchmark.hpp"
 
 #include <cmath>
+#include <fstream>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
+
+const char PATH_SEPARATOR =
+#ifdef _WIN32
+   '\\';
+#else
+   '/';
+#endif
 
 using namespace flexiblesusy;
 
@@ -68,11 +82,6 @@ namespace {
    template <typename T> T cube(T x) { return x*x*x; }
    template <typename T> T quad(T x) { return x*x*x*x; }
    template <typename T> T pow5(T x) { return x*x*x*x*x; }
-   template <typename T> T pow6(T x) { return x*x*x*x*x*x; }
-   template <typename T> T pow7(T x) { return x*x*x*x*x*x*x; }
-   template <typename T> T pow8(T x) { return x*x*x*x*x*x*x*x; }
-   template <typename T> T pow9(T x) { return x*x*x*x*x*x*x*x*x; }
-   template <typename T> T pow10(T x) { return x*x*x*x*x*x*x*x*x*x; }
 
    const auto pass_all_1 = [] (double, double) -> bool { return true; };
    const auto pass_all_2 = [] (double, double, double) -> bool { return true; };
@@ -82,13 +91,22 @@ namespace {
    void test_1(const char* func_name, T func, double eps,
                std::function<bool(double, double)> filter = pass_all_1)
    {
-      const std::string filename(std::string(TEST_DATA_DIR) +
-                                 flexiblesusy::test::PATH_SEPARATOR +
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
                                  func_name + ".txt");
       BOOST_TEST_MESSAGE("reading file " << filename);
-      const auto data = flexiblesusy::test::read_from_file<double>(filename);
 
-      for (const auto v: data) {
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
          if (v.size() < 2) {
             continue;
          }
@@ -115,13 +133,22 @@ namespace {
    void test_2(const char* func_name, T func, double eps,
                std::function<bool(double, double, double)> filter = pass_all_2)
    {
-      const std::string filename(std::string(TEST_DATA_DIR) +
-                                 flexiblesusy::test::PATH_SEPARATOR +
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
                                  func_name + ".txt");
       BOOST_TEST_MESSAGE("reading file " << filename);
-      const auto data = flexiblesusy::test::read_from_file<double>(filename);
 
-      for (const auto v: data) {
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
          if (v.size() < 3) {
             continue;
          }
@@ -733,7 +760,7 @@ BOOST_AUTO_TEST_CASE(test_f1_data)
       return std::abs(f) > 1e-5;
    };
 
-   test_1("f1", [] (double x) { return f1(x); }, 1e-11, filter_small);
+   test_1("f1_", [] (double x) { return f1(x); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f2)
@@ -773,7 +800,7 @@ BOOST_AUTO_TEST_CASE(test_f2_data)
       return std::abs(f) > 1e-5;
    };
 
-   test_1("f2", [] (double x) { return f2(x); }, 1e-11, filter_small);
+   test_1("f2_", [] (double x) { return f2(x); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f3)
@@ -809,7 +836,7 @@ BOOST_AUTO_TEST_CASE(test_f3_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_1("f3", [] (double x) { return f3(x); }, 1e-11);
+   test_1("f3_", [] (double x) { return f3(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f4)
@@ -845,7 +872,7 @@ BOOST_AUTO_TEST_CASE(test_f4_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_1("f4", [] (double x) { return f4(x); }, 1e-11);
+   test_1("f4_", [] (double x) { return f4(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f5)
@@ -921,7 +948,7 @@ BOOST_AUTO_TEST_CASE(test_f5_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_2("f5", [] (double x, double y) { return f5(x, y); }, 3e-10);
+   test_2("f5_", [] (double x, double y) { return f5(x, y); }, 3e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f6)
@@ -1001,7 +1028,7 @@ BOOST_AUTO_TEST_CASE(test_f6_data)
       return std::abs(f) > 1e-9;
    };
 
-   test_2("f6", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
+   test_2("f6_", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f7)
@@ -1077,7 +1104,7 @@ BOOST_AUTO_TEST_CASE(test_f7_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_2("f7", [] (double x, double y) { return f7(x, y); }, 5e-10);
+   test_2("f7_", [] (double x, double y) { return f7(x, y); }, 5e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_f8)
@@ -1157,7 +1184,7 @@ BOOST_AUTO_TEST_CASE(test_f8_data)
       return std::abs(f) > 1e-10;
    };
 
-   test_2("f8", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
+   test_2("f8_", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
 }
 
 namespace {
@@ -1172,8 +1199,12 @@ double phixyz(double x, double y, double z)
    const double u = x/z, v = y/z, m = x/y;
    double fac = 0., my_x = 0., my_y = 0., my_z = 0.;
    const double devu = std::fabs(u-1), devv = std::fabs(v-1), devm = std::fabs(m-1);
-   const double eps = 0.000001;
+   const double eps = 0.0000001;
    const double PI = M_PI;
+
+   if (std::abs(sqr(1 - u - v) - 4*u*v) <= std::numeric_limits<double>::epsilon()) {
+      return 0.0;
+   }
 
    // The defintion that we implement is valid when x/z < 1 and y/z < 1.
    // We have to reshuffle the arguments to obtain the other branches
@@ -1390,7 +1421,6 @@ double phixyz(double x, double y, double z)
 } // anonymous namespace
 
 struct XYZ {
-   XYZ(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
    double x{}, y{}, z{};
 };
 
@@ -1400,30 +1430,40 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
    double x = 0., y = 0., z = 0.;
 
    const XYZ xyz[] = {
-      XYZ(1, 2, 3),
-      XYZ(2, 3, 1),
-      XYZ(3, 1, 2),
-      XYZ(2, 1, 3),
-      XYZ(1, 3, 2),
-      XYZ(3, 2, 1),
+      {1, 2, 3},
+      {2, 3, 1},
+      {3, 1, 2},
+      {2, 1, 3},
+      {1, 3, 2},
+      {3, 2, 1},
 
-      XYZ(1, 1, 2),
-      XYZ(1, 2, 1),
-      XYZ(2, 1, 1),
+      {1, 1, 2},
+      {1, 2, 1},
+      {2, 1, 1},
 
-      XYZ(1, 1, 10),
-      XYZ(1, 10, 1),
-      XYZ(10, 1, 1),
+      {1, 1, 10},
+      {1, 10, 1},
+      {10, 1, 1},
 
-      XYZ(1, 10, 20),
-      XYZ(10, 20, 1),
-      XYZ(20, 1, 10),
+      {1, 10, 20},
+      {10, 20, 1},
+      {20, 1, 10},
 
-      XYZ(1, 2, 2),
-      XYZ(2, 2, 1),
-      XYZ(2, 1, 2),
+      {1, 2, 2},
+      {2, 2, 1},
+      {2, 1, 2},
 
-      XYZ(1, 1, 1)
+      {862.132647151542, 862.132267190459, 684.729637476883},
+
+      // lambda = 0
+      {1, 0, 1},
+      {4, 1, 1},
+
+      // lambda ~ 0
+      // {4, 1 + 1e-5, 1},
+      // {200.220790830763, 599.56612604427, 106.834963457636},
+
+      {1, 1, 1}
    };
 
    for (const auto s: xyz) {
@@ -1445,3 +1485,81 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
       BOOST_CHECK_CLOSE_FRACTION(phixyz(x,y,z), phi_xyz(x,y,z), prec);
    }
 }
+
+#ifdef ENABLE_RANDOM
+
+template <class T>
+std::vector<XYZ> generate_random_triples(
+   unsigned n, T start, T stop)
+{
+   const auto x = generate_random_data<T>(n, start, stop);
+   const auto y = generate_random_data<T>(n, start, stop);
+   const auto z = generate_random_data<T>(n, start, stop);
+
+   std::vector<XYZ> v(5*n);
+
+   for (int i = 0; i < n; i++) {
+      v[i] = {x[i], y[i], z[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[n + i] = {x[i], x[i], y[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[2*n + i] = {x[i], y[i], x[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[3*n + i] = {y[i], x[i], x[i]};
+   }
+
+   for (int i = 0; i < n; i++) {
+      v[4*n + i] = {x[i], x[i], x[i]};
+   }
+
+   return v;
+}
+
+BOOST_AUTO_TEST_CASE(test_phi_random)
+{
+   const unsigned N = 10000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   // low testing precision since phi_xyz becomes unstable when lambda ~ 0
+   const double prec = 1e-7;
+
+   for (const auto t: triples) {
+      BOOST_CHECK_CLOSE_FRACTION(phi_fs(t), phi_eb(t), prec);
+   }
+}
+
+BOOST_AUTO_TEST_CASE(bench_phi)
+{
+   const unsigned N = 10000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   const auto time_phi_fs_in_s = time_in_seconds(phi_fs, triples)/N;
+   const auto time_phi_eb_in_s = time_in_seconds(phi_eb, triples)/N;
+
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [FS]: " << time_phi_fs_in_s << " s");
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [EB]: " << time_phi_eb_in_s << " s");
+}
+
+#endif

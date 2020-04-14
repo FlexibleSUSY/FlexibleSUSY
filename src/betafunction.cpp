@@ -22,12 +22,17 @@
  */
 
 #include "betafunction.hpp"
+#include "basic_rk_integrator.hpp"
 #include "error.hpp"
-#include "logger.hpp"
 
 #include <cmath>
 
 namespace flexiblesusy {
+
+Beta_function::Beta_function()
+   : integrator(runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>())
+{
+}
 
 void Beta_function::reset()
 {
@@ -38,6 +43,7 @@ void Beta_function::reset()
    tolerance = 1.e-4;
    min_tolerance = 1.0e-11;
    zero_threshold = 1.e-11;
+   integrator = runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>();
 }
 
 /**

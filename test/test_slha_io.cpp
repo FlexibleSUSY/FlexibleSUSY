@@ -7,6 +7,7 @@
 #include "slha_io.hpp"
 #include "linalg2.hpp"
 #include "stopwatch.hpp"
+#include "wrappers.hpp"
 #include <Eigen/Core>
 #include <boost/lexical_cast.hpp>
 
@@ -149,7 +150,9 @@ BOOST_AUTO_TEST_CASE( test_read_scale )
    SLHAea::Coll coll;
    SLHAea::Block block;
 
-   const std::string str = "Block Matrix Q= 1234.56\n"
+   std::string str =
+      "Block Matrix Q= 1234.56\n"
+      "Block Matrix Q= 2000\n"
       "   1  1  1.0      # element 1,1\n"
       "   1  2  2.0      # element 1,2\n"
       "   2  1  3.0      # element 2,1\n"
@@ -158,13 +161,22 @@ BOOST_AUTO_TEST_CASE( test_read_scale )
    block.str(str);
    coll.push_back(block);
 
+   str =
+      "Block Matrix Q= 2000\n"
+      "   1  1  11.0      # element 1,1\n"
+      "   1  2  12.0      # element 1,2\n"
+      "   2  1  13.0      # element 2,1\n"
+      "   2  2  14.0      # element 2,2\n";
+
+   block.str(str);
+   coll.push_back(block);
+
    SLHA_io reader;
    reader.set_data(coll);
 
-   Eigen::MatrixXd matrix(Eigen::MatrixXd::Zero(2,2));
    const double scale = reader.read_scale("Matrix");
 
-   BOOST_CHECK_EQUAL(scale, 1234.56);
+   BOOST_CHECK_EQUAL(scale, 2000.);
 }
 
 BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
@@ -172,11 +184,22 @@ BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
    SLHAea::Coll coll;
    SLHAea::Block block;
 
-   const std::string str = "Block Matrix Q= 1234.56\n"
+   std::string str =
+      "Block Matrix Q= 1234.56\n"
       "   1  1  1.0      # element 1,1\n"
       "   1  2  2.0      # element 1,2\n"
       "   2  1  3.0      # element 2,1\n"
       "   2  2  4.0      # element 2,2\n";
+
+   block.str(str);
+   coll.push_back(block);
+
+   str =
+      "Block Matrix Q= 2000\n"
+      "   1  1  11.0      # element 1,1\n"
+      "   1  2  12.0      # element 1,2\n"
+      "   2  1  13.0      # element 2,1\n"
+      "   2  2  14.0      # element 2,2\n";
 
    block.str(str);
    coll.push_back(block);
@@ -187,11 +210,11 @@ BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
    Eigen::MatrixXd matrix(Eigen::MatrixXd::Zero(2,2));
    const double scale = reader.read_block("Matrix", matrix);
 
-   BOOST_CHECK_EQUAL(scale, 1234.56);
-   BOOST_CHECK_EQUAL(matrix(0,0), 1.0);
-   BOOST_CHECK_EQUAL(matrix(0,1), 2.0);
-   BOOST_CHECK_EQUAL(matrix(1,0), 3.0);
-   BOOST_CHECK_EQUAL(matrix(1,1), 4.0);
+   BOOST_CHECK_EQUAL(scale, 2000.0);
+   BOOST_CHECK_EQUAL(matrix(0,0), 11.0);
+   BOOST_CHECK_EQUAL(matrix(0,1), 12.0);
+   BOOST_CHECK_EQUAL(matrix(1,0), 13.0);
+   BOOST_CHECK_EQUAL(matrix(1,1), 14.0);
 }
 
 /**

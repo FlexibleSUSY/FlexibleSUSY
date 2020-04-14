@@ -16,9 +16,10 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gm2_uncertainty.hpp"
-#include "gm2_1loop.hpp"
-#include "gm2_2loop.hpp"
+#include "gm2calc/gm2_uncertainty.hpp"
+#include "gm2calc/gm2_1loop.hpp"
+#include "gm2calc/gm2_2loop.hpp"
+
 #include <cmath>
 
 /**
@@ -80,11 +81,10 @@ double calculate_uncertainty_amu_1loop(const MSSMNoFV_onshell& model)
  */
 double calculate_uncertainty_amu_2loop(const MSSMNoFV_onshell& model)
 {
-   using std::abs;
    const double amu_2La_Cha = amu2LaCha(model);
    const double amu_2La_Sferm = amu2LaSferm(model);
 
-   return 2.3e-10 + 0.3 * (abs(amu_2La_Cha) + abs(amu_2La_Sferm));
+   return 2.3e-10 + 0.3 * (std::abs(amu_2La_Cha) + std::abs(amu_2La_Sferm));
 }
 
 } // namespace gm2calc

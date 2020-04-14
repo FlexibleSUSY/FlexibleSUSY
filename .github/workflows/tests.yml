@@ -34,15 +34,16 @@ jobs:
     strategy:
       matrix:
         CXXCOMPILER: [g++, clang++]
-        LOOPLIBRARY: [internal]
+        LOOPLIBRARY: [internal, looptools]
+      max-parallel: 1
 
     env:
-      IMAGE_VERSION: '0.2.3'
+      IMAGE_VERSION: '0.2.5'
       SARAH_VERSION: '4.14.3'
       FEYNARTS_VERSION: '3.11'
       FORMCALC_VERSION: '9.9'
       LOOPTOOLS_VERSION: '2.15'
-      MODELS: 'SM THDMII MSSM MRSSM2 MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
+      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
 
     steps:
 
@@ -60,7 +61,8 @@ jobs:
       - name: Copy Wolfram Engine license to the image
         run: |
           docker exec builder bash -c "mkdir /root/.WolframEngine && mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
-          docker exec builder bash -c 'printf "Checking is Wolfram Engine workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+          docker exec builder bash -c 'printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+          docker exec builder bash -c 'printf "Checking if math command is workings... "; if [[ $(/usr/local/Wolfram/WolframEngine/12.0/Executables/math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi'
         env:
           MATHPASS: ${{ secrets.MATHPASS }}
 
@@ -101,8 +103,9 @@ jobs:
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2-preview
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
-          path: 'test'
+          path: test/test_*.log
+

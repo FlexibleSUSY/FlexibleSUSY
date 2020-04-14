@@ -21,5 +21,6 @@ install:
   - conan install . --build=missing
 script:
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
+  - make showbuild
   - make
   - make -k all-test

@@ -2,7 +2,7 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-HOMEDIR=$(readlink -f "${BASEDIR}/../")
+HOMEDIR="${BASEDIR}/.."
 FSCONFIG="${HOMEDIR}/flexiblesusy-config"
 
 DEFAULT_CMSSM_INPUT="${HOMEDIR}/model_files/CMSSM/LesHouches.in.CMSSM"

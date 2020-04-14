@@ -55,7 +55,8 @@ TEST_SRC := \
 		$(DIR)/test_threshold_loop_functions.cpp \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_which.cpp \
-		$(DIR)/test_wrappers.cpp
+		$(DIR)/test_wrappers.cpp \
+		$(DIR)/test_looplibrary_softsusy.cpp
 
 TEST_SH := \
 		$(DIR)/test_depgen.sh \
@@ -69,6 +70,7 @@ TEST_META := \
 		$(DIR)/test_CConversion.m \
 		$(DIR)/test_Constraint.m \
 		$(DIR)/test_EWSB.m \
+		$(DIR)/test_FunctionModifiers.m \
 		$(DIR)/test_LoopFunctions.m \
 		$(DIR)/test_MSSM_2L_analytic.m \
 		$(DIR)/test_MSSM_2L_mt.m \
@@ -97,7 +99,6 @@ TEST_META := \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
 
-
 ifeq ($(ENABLE_THREADS),yes)
 TEST_SRC += \
 		$(DIR)/test_thread_pool.cpp
@@ -106,6 +107,21 @@ endif
 ifeq ($(ENABLE_TSIL),yes)
 TEST_SRC += \
 		$(DIR)/test_sm_twoloop_mt.cpp
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_looptools.cpp
+endif
+
+ifeq ($(ENABLE_COLLIER), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_collier.cpp
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_fflite.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -135,7 +151,6 @@ TEST_SRC += \
 		$(DIR)/test_loopfunctions.cpp \
 		$(DIR)/test_sfermions.cpp \
 		$(DIR)/test_CMSSM_beta_function_benchmark.cpp \
-		$(DIR)/test_CMSSM_database.cpp \
 		$(DIR)/test_CMSSM_high_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_higgs_iteration.cpp \
 		$(DIR)/test_CMSSM_initial_guesser.cpp \
@@ -200,7 +215,6 @@ endif
 
 ifeq ($(WITH_CMSSMCKM),yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMCKM_b_to_s_gamma.cpp \
 		$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.cpp
 endif
 
@@ -434,6 +448,7 @@ TEST_SH += \
 		$(DIR)/test_CMSSM_QedQcd_no_convergence.sh \
 		$(DIR)/test_CMSSM_streams.sh
 TEST_SRC += \
+		$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_CMSSM_slha.cpp \
 		$(DIR)/test_CMSSM_slha_input.cpp \
 		$(DIR)/test_CMSSM_two_loop_spectrum.cpp \
@@ -452,11 +467,27 @@ TEST_SRC += \
 		$(DIR)/test_SM_effective_couplings.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
+		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
+		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_one_loop_spectrum.cpp \
 		$(DIR)/test_SM_higgs_loop_corrections.cpp \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
-		$(DIR)/test_SM_three_loop_spectrum.cpp \
-		$(DIR)/test_SM_mw_calculation.cpp
+		$(DIR)/test_SM_two_loop_spectrum.cpp \
+		$(DIR)/test_SM_mw_calculation.cpp \
+		$(DIR)/test_SM_cxxdiagrams.cpp
+endif
+
+ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
+ifeq ($(WITH_SM),yes)
+ TEST_SRC += \
+		$(DIR)/test_SM_npointfunctions.cpp \
+		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
+endif
+ifeq ($(WITH_MSSM),yes)
+TEST_SRC += \
+		$(DIR)/test_MSSM_npointfunctions.cpp \
+		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
+endif
 endif
 
 ifeq ($(WITH_SMHighPrecision),yes)
@@ -494,6 +525,8 @@ endif
 ifeq ($(WITH_CMSSMCPV),yes)
 TEST_SRC += \
 		$(DIR)/test_CMSSMCPV_ewsb.cpp
+endif
+ifeq ($(WITH_CMSSMCPV) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
 		$(DIR)/test_CMSSMCPV_librarylink.m
 endif
@@ -570,8 +603,11 @@ TEST_META += \
 TEST_SRC += \
 		$(DIR)/test_MSSMEFTHiggs_lambda_threshold_correction.cpp
 TEST_SH += \
-		$(DIR)/test_MSSMEFTHiggs_librarylink.sh \
 		$(DIR)/test_MSSMEFTHiggs_profile.sh
+endif
+ifeq ($(WITH_MSSMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_SH += \
+		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
 endif
 
 ifeq ($(WITH_MSSMEFTHiggs) $(WITH_MSSMNoFVEFTHiggs),yes yes)
@@ -599,12 +635,12 @@ TEST_SH += \
 		$(DIR)/test_SplitMSSMEFTHiggs.sh
 endif
 
-ifeq ($(WITH_SM) $(WITH_SMEFTHiggs),yes yes)
+ifeq ($(WITH_SM) $(WITH_SMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes yes)
 TEST_META += \
 		$(DIR)/test_multiple_librarylinks.m
 endif
 
-ifeq ($(WITH_SM),yes)
+ifeq ($(WITH_SM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_SH += \
 		$(DIR)/test_flexiblesusy-config.sh
 endif
@@ -644,7 +680,10 @@ endif
 
 ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
-		$(DIR)/test_CMSSM_3loop_beta.m \
+		$(DIR)/test_CMSSM_3loop_beta.m
+endif
+ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
+TEST_META += \
 		$(DIR)/test_CMSSM_librarylink.m \
 		$(DIR)/test_CMSSM_librarylink_parallel.m
 TEST_SH += \
@@ -828,6 +867,28 @@ $(DIR)/test_loopfunctions.x: $(LIBCMSSM)
 
 $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
+$(DIR)/test_looplibrary_softsusy.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_softsusy.x: CPPFLAGS += -DLIBRARY_TYPE=0
+
+ifeq ($(ENABLE_COLLIER), yes)
+$(DIR)/test_looplibrary_collier.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_collier.x: CPPFLAGS += -DLIBRARY_TYPE=1
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+$(DIR)/test_looplibrary_looptools.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_looptools.x: CPPFLAGS += -DLIBRARY_TYPE=2
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+$(DIR)/test_looplibrary_fflite.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_fflite.x: CPPFLAGS += -DLIBRARY_TYPE=3
+endif
+
 TEST_MSG = echo "\033[1;36m<<test<<\033[1;0m $<"
 
 ifeq ($(WITH_SM),yes)
@@ -895,13 +956,13 @@ $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
+$(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
+
 $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
-
-$(DIR)/test_CMSSMCKM_b_to_s_gamma.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
 
@@ -1018,6 +1079,10 @@ $(DIR)/test_SM_higgs_loop_corrections.x: $(LIBSM)
 
 $(DIR)/test_SM_low_scale_constraint.x: $(LIBSM)
 
+$(DIR)/test_SM_mass_eigenstates_interface.x: $(LIBSM)
+
+$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
+
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
 $(DIR)/test_SM_one_loop_spectrum.x: $(LIBSM)
@@ -1109,7 +1174,7 @@ $(DIR)/test_%.x: $(DIR)/test_%.o
 		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
-$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(TSILFLAGS)
+$(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)
 
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBTEST): $(LIBTEST_OBJ)

@@ -1,0 +1,159 @@
+#define BOOST_TEST_MODULE looplibrary LIBRARY_TYPE test
+
+#include <complex>
+#include <boost/test/included/unit_test.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
+#include "loop_libraries/loop_library.hpp"
+#include <iostream>
+
+namespace flexiblesusy {
+
+BOOST_AUTO_TEST_CASE(initialize_library) {
+   Loop_library::set(LIBRARY_TYPE);
+}
+
+BOOST_AUTO_TEST_CASE(test_one_loop_A0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().A0(1e-3, 1).real() , 0.007907755278982136, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().A0(1e-5, 1).real() , 0.000125129254649702, 1e-14 );
+}
+
+BOOST_AUTO_TEST_CASE(test_A) {
+   std::complex<double> a[1];
+   Loop_library::get().A(a, 1e-3, 1);
+   BOOST_CHECK_CLOSE_FRACTION( a[0].real() , 0.007907755278982136, 1e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_two_loop_B0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(0, 3, 7, 50).real(), 2.33063946108243, 6e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(3, 0, 7, 50).real(), 3.21995847245894, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(3, 7, 0, 50).real(), 3.21995847245894, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(3, 0, 0, 50).real(), 4.81341071676004, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(0, 3, 0, 50).real(), 3.81341071676004, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B0(0, 0, 3, 50).real(), 3.81341071676004, 1e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_two_loop_B1) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(0, 3, 7, 50).real(), -1.09635895142032, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(3, 0, 7, 50).real(), -1.31382601746235, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(3, 7, 0, 50).real(), -1.90613245499659, 4e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(3, 0, 0, 50).real(), -2.40670535838002, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(0, 3, 0, 50).real(), -2.15670535838002, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B1(0, 0, 3, 50).real(), -1.65670535838002, 2e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_two_loop_B00) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 3, 7, 50).real(), 8.1886770944643, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(3, 0, 7, 50).real(), 5.3363490107432, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(3, 7, 0, 50).real(), 5.3363490107432, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(3, 0, 0, 50).real(), -1.3700193458567, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 3, 0, 50).real(), 3.23505803757003, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().B00(0, 0, 3, 50).real(), 3.23505803757003, 2e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(test_B) {
+   std::complex<double> b[2];
+   Loop_library::get().B(b, 0, 3, 7, 50);
+   BOOST_CHECK_CLOSE_FRACTION( b[0].real() , 2.33063946108243, 6e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( b[1].real() , -1.09635895142032, 3e-15 );
+}
+
+// tests for zero external momentum
+#if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 // Looptools gives -nan
+
+BOOST_AUTO_TEST_CASE(zero_test_three_loop_C00) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 3, 7, 50).real(), 0.668765485631293, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 0, 3, 7, 50).real(), 0.707659865270607, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 0, 7, 50).real(), 0.785448624549237, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 3, 0, 50).real(), 0.941026143106495, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 1, 0, 0, 50).real(), 1.35300575135704, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 0, 3, 0, 50).real(), 1.07835267919001, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(0, 0, 0, 0, 0, 7, 50).real(), 0.866528214093208, 1e-15 );
+}
+
+#endif
+
+#if LIBRARY_TYPE == 0 || LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
+BOOST_AUTO_TEST_CASE(zero_test_three_loop_C0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 7, 50).real(), -0.155577518557259, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 0, 3, 7, 50).real(), -0.211824465096801, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 0, 7, 50).real(), -0.324318358175886, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(0, 0, 0, 1, 3, 0, 50).real(), -0.549306144334055, 1e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(zero_test_four_loop_D0) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 3, 7, 500, 50).real(), 0.0002968842790336, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 0, 3, 7, 500, 50).real(), 0.000408784403554618, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 0, 7, 500, 50).real(), 0.000632584652596653, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 3, 0, 500, 50).real(), 0.00108018515068072, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(0, 0, 0, 0, 0, 0, 1, 3, 7,   0, 50).real(), 0.0562469465395424, 2e-15 );
+}
+
+BOOST_AUTO_TEST_CASE(zero_test_four_loop_D00) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 3, 7, 500, 50).real(), -0.00178384476011462, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 0, 3, 7, 500, 50).real(), -0.00185806582987302, 1e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 0, 7, 500, 50).real(), -0.00200650796938982, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 3, 0, 500, 50).real(), -0.00230339224842342, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(0, 0, 0, 0, 0, 0, 1, 3, 7,   0, 50).real(), -0.0388943796393146, 2e-15 );
+}
+
+#endif
+
+// COLLIER and Looptools tests
+#if LIBRARY_TYPE == 1 || LIBRARY_TYPE == 2
+
+BOOST_AUTO_TEST_CASE(test_three_loop_Cij) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(1, 2, 7, 40, 50, 60, 50).real(), -0.0102393301312332, 6e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C1(1, 2, 7, 40, 50, 60, 50).real(), 0.00339093073306662, 9e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C2(1, 2, 7, 40, 50, 60, 50).real(), 0.00325189753369775, 5e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(1, 2, 7, 40, 50, 60, 50).real(), 0.00505602406221806, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C11(1, 2, 7, 40, 50, 60, 50).real(), -0.00168913532593899, 4e-11 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C12(1, 2, 7, 40, 50, 60, 50).real(), -0.000816899186005851, 4e-11 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C22(1, 2, 7, 40, 50, 60, 50).real(), -0.00157760282471719, 8e-12 );
+}
+
+BOOST_AUTO_TEST_CASE(test_C) {
+   std::complex<double> c[7];
+   Loop_library::get().C(c, 1, 2, 7, 40, 50, 60, 50);
+   BOOST_CHECK_CLOSE_FRACTION( c[0].real(), -0.0102393301312332, 6e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( c[1].real(), 0.00339093073306662, 9e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( c[2].real(), 0.00325189753369775, 5e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( c[3].real(), 0.00505602406221806, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( c[4].real(), -0.00168913532593899, 4e-11 );
+   BOOST_CHECK_CLOSE_FRACTION( c[5].real(), -0.000816899186005851, 4e-11 );
+   BOOST_CHECK_CLOSE_FRACTION( c[6].real(), -0.00157760282471719, 8e-12 );
+}
+
+BOOST_AUTO_TEST_CASE(test_three_loop_Dij) {
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.13242728302472e-07, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D1(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.67874509586995e-07, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D2(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.65985813303812e-08, 2e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D3(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.2628661716426e-07, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 8.05187632193884e-05, 6e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D11(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -9.75814300466367e-08, 2e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D12(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -8.63221516142818e-10, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D13(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -2.8583621711861e-08, 6e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D22(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 4.5244174519793e-08, 4e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D23(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -3.62793572133793e-09, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D33(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -5.64568234854199e-08, 3e-14 );
+}
+
+BOOST_AUTO_TEST_CASE(test_D) {
+   std::complex<double> d[11];
+   Loop_library::get().D(d, 1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50);
+   BOOST_CHECK_CLOSE_FRACTION( d[0].real(), -4.13242728302472e-07, 2e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( d[1].real(), 1.67874509586995e-07, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( d[2].real(), -4.65985813303812e-08, 2e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[3].real(), 1.2628661716426e-07, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( d[4].real(), 8.05187632193884e-05, 6e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( d[5].real(), -9.75814300466367e-08, 2e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[6].real(), -8.63221516142818e-10, 3e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( d[7].real(), -2.8583621711861e-08, 6e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[8].real(), 4.5244174519793e-08, 4e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[9].real(), -3.62793572133793e-09, 4e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( d[10].real(), -5.64568234854199e-08, 3e-14 );
+}
+
+#endif
+
+} // namespace flexiblesusy

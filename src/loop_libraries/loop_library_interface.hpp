@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_INTERFACE
-#define LOOP_LIBRARY_INTERFACE
+#ifndef LOOP_LIBRARY_INTERFACE_H
+#define LOOP_LIBRARY_INTERFACE_H
 
 #include <complex>
 #include <boost/preprocessor/seq/for_each.hpp>
@@ -42,6 +42,71 @@
 
 namespace looplibrary
 {
+/**
+ * @class Loop_library_interface
+ * @brief interface for different one loop function libraries with
+ * conventions of DE == [arXiv:0709.1075],
+ * arguments order as in LT == [http://www.feynarts.de/looptools/LT215Guide.pdf],
+ * filling of given arrays as in CO == [arXiv:1604.06792].
+ *
+ * Loop_library_interface is the abstract base class for one loop functions.
+ * It defines the following set of loop functions names:
+ *    one-loop ones:   A, A0
+ *    two-loop ones:   B, B0, B1, B00
+ *    three-loop ones: C, C0, C1, C2, C00, C11, C12, C22
+ *    four-loop ones:  D, D0, D1, D2, D3, D00, D11, D12, D13, D22, D23, D33.
+ *
+ * For making the notation a little bit shorter the following abbreviations for
+ * input momenta and masses are used:
+ *  A_ARGS means a single std::complex<double> m02 - squared mass of particle
+ *  in a loop (see sec. 1.3.1 of [LT]; name is different).
+ *
+ *  B_ARGS means a set of std::complex<double> p10, m02, m12 - squared momenta and
+ *  masses of particle in a loop (see sec. 1.3.2 of [LT]; names are different,
+ *  order is the same).
+ *
+ *  C_ARGS means a set of std::complex<double> p10, p21, p20, m02, m12, m22 -
+ *  squared momenta and masses of particle in a loop (see sec. 1.3.4 of [LT];
+ *  names are different, order is the same).
+ *
+ *  D_ARGS means a set of std::complex<double> p10, p21, p32, p30, p20, p31, m02,
+ *  m12, m22, m32 - squared momenta and masses of particle in a loop
+ *  (see sec. 1.3.5 of [LT]; names are different, order is the same).
+ *
+ * Functions with numeric indices return std::complex<double> of corresponding
+ * Passarino-Veltman coefficient (see r.h.s. of eq. (4.4) in [DE]). Ti and Tij
+ * functions accept T_ARGS, scl2  as arguments, where scl2 is squared scale
+ * (squared mu of eq. (4.1) in [DE]).
+ *
+ * Example 1: B0(B_ARGS, scl2) means B0(p10, m02, m12, scl2) with:
+ *            p10, m02, m12 being of std::complex<double> type;
+ *            scl2 being of double type;
+ *            p10 is p^2 from section 1.3.2 of [LT],
+ *            m02 is m1^2 from section 1.3.2 of [LT],
+ *            m12 is m2^2 from section 1.3.2 of [LT] - order is as in [LT];
+ *            scl2 is squared scale (squared mu of eq. (4.1) in [DE]);
+ *            returns T^1_0 from eq. (4.4) in [DE] of std::complex<double> type.
+ *
+ * A, B, C, D functions return void, their first arguments are std::complex<double>
+ * arrays of fixed length (passed by a reference), which equals to 1, 2, 7, 11.
+ * They fill given array with values of Passarino-Vertman coefficients (inspect
+ * table 3 of [CO]). After the first argument goes T_ARGS sequence, then scl2,
+ * which is described by the following example:
+ *
+ * Example 2: C(c, C_ARGS, scl2) means C(c, p10, p21, p20, m02, m12, m22, scl2) with:
+ *            c being array of std::complex<double> of fixed length 7 filled
+ *            by C function with C0, C1, C2, C00, C11, C12, C22 coefficients
+ *            (order is defined by table 3 of [CO], coefficients are defined by
+ *            r.h.s. of eq. (4.4) in [DE]);
+ *            p10 is p1^2 from section 1.3.4 of [LT],
+ *            p21 is p2^2 from section 1.3.4 of [LT],
+ *            p20 is (p1+p2)^2 from section 1.3.4 of [LT],
+ *            m02 is m1^2 from section 1.3.4 of [LT],
+ *            m12 is m2^2 from section 1.3.4 of [LT],
+ *            m22 is m3^2 from section 1.3.4 of [LT] - order is as in [LT];
+ *            scl2 is squared scale (squared mu of eq. (4.1) in [DE]);
+ *            returns void.
+ */
 class Loop_library_interface
 {
    public:
@@ -56,4 +121,4 @@ class Loop_library_interface
 };
 } // namespace looplibrary
 
-#endif // LOOP_LIBRARY_INTERFACE
+#endif // LOOP_LIBRARY_INTERFACE_H

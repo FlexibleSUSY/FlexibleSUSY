@@ -27,8 +27,12 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM, BrLToLGamma, bsgamma,
-                  LToLConversion };
+                  EDM, BrLToLGamma, bsgamma };
+
+If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   AppendTo[FSObservables, LToLConversion]
+];
+
 End[];
 
 GetRequestedObservables::usage="";
@@ -45,15 +49,17 @@ IsObservable::usage = "Returns true if given symbol is an observable.";
 
 Begin["`Private`"];
 
-`args`LToLConversion = Sequence[
-   (lIn:_?TreeMasses`IsLepton)[gIn:_Integer] -> (lOut_?TreeMasses`IsLepton)[gOut:_Integer],
-   nucleus:_,
-   contribution:Alternatives[All,
-      NPointFunctions`noScalars,
-      NPointFunctions`Penguins,
-      NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes]
+If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   `args`LToLConversion = Sequence[
+      (lIn:_?TreeMasses`IsLepton)[gIn:_Integer] -> (lOut_?TreeMasses`IsLepton)[gOut:_Integer],
+      nucleus:_,
+      contribution:Alternatives[All,
+         NPointFunctions`noScalars,
+         NPointFunctions`Penguins,
+         NPointFunctions`FourFermionScalarPenguins,
+         NPointFunctions`FourFermionMassiveVectorPenguins,
+         NPointFunctions`FourFermionFlavourChangingBoxes]
+   ];
 ];
 
 IsObservable[sym_] :=

@@ -16,17 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GM2_ERROR_H
-#define GM2_ERROR_H
+#ifndef GM2_ERROR_HPP
+#define GM2_ERROR_HPP
 
+#include <stdexcept>
 #include <string>
 
 namespace gm2calc {
 
-class Error {
+class Error : public std::runtime_error {
 public:
-   virtual ~Error() {}
-   virtual std::string what() const = 0;
+   explicit Error(const char* msg) : std::runtime_error(msg) {}
+   explicit Error(const std::string& msg) : std::runtime_error(msg) {}
 };
 
 /**
@@ -35,38 +36,26 @@ public:
  */
 class ESetupError : public Error {
 public:
-   explicit ESetupError(const std::string& message_) : message(message_) {}
-   virtual ~ESetupError() {}
-   virtual std::string what() const { return message; }
-private:
-   std::string message;
+   explicit ESetupError(const char* msg) : Error(msg) {}
+   explicit ESetupError(const std::string& msg) : Error(msg) {}
 };
 
 class EInvalidInput : public Error {
 public:
-   explicit EInvalidInput(const std::string& message_) : message(message_) {}
-   virtual ~EInvalidInput() {}
-   virtual std::string what() const { return message; }
-private:
-   std::string message;
+   explicit EInvalidInput(const char* msg) : Error(msg) {}
+   explicit EInvalidInput(const std::string& msg) : Error(msg) {}
 };
 
 class EPhysicalProblem : public Error {
 public:
-   explicit EPhysicalProblem(const std::string& message_) : message(message_) {}
-   virtual ~EPhysicalProblem() {}
-   virtual std::string what() const { return message; }
-private:
-   std::string message;
+   explicit EPhysicalProblem(const char* msg) : Error(msg) {}
+   explicit EPhysicalProblem(const std::string& msg) : Error(msg) {}
 };
 
 class EReadError : public Error {
 public:
-   EReadError(const std::string& message_) : message(message_) {}
-   virtual ~EReadError() {}
-   virtual std::string what() const { return message; }
-private:
-   std::string message;
+   explicit EReadError(const char* msg) : Error(msg) {}
+   explicit EReadError(const std::string& msg) : Error(msg) {}
 };
 
 } // namespace gm2calc

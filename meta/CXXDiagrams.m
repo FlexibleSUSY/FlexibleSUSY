@@ -25,6 +25,8 @@
 (*** This module generates c++ code capable of representing fields, vertices and diagrams. ***)
 BeginPackage["CXXDiagrams`", {"SARAH`", "TextFormatting`", "TreeMasses`", "Vertices`", "Parameters`", "CConversion`", "ColorMath`", "Utils`"}];
 
+CreateFieldTraitsDefinitions::usage="";
+
 (*** Public interfaces that model fields ***)
 CreateFields::usage="Creates c++ code that makes all fields and their properties \
 available as c++ types.";
@@ -41,6 +43,8 @@ NumberOfFieldIndices::usage="Return the number of indices a field has as would b
 determined by inspecting the result of TreeMasses`FieldInfo[].";
 CreateMassFunctions::usage="Creates c++ code that makes functions available that \
 return tree-level masses of given fields.";
+CreatePhysicalMassFunctions::usage="Creates c++ code that makes functions available that \
+return physical masses of given fields.";
 LorentzIndexOfField::usage="Returns the Lorentz index of a given indexed field.";
 ColourIndexOfField::usage="Returns the colour index of a given indexed field.";
 
@@ -87,7 +91,8 @@ AtomQ[] and return the result.";
 CreateUnitCharge::usage="Creates the c++ code for a function that returns the \
 numerical value of the electrical charge of the electron.";
 
-CXXBoolValue::usage = "Returns the c++ keyword corresponding to a boolean value.";
+ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
+ExtractColourFactor::usage = "Drop colour generator from the colour factor";
 
 Begin["`Private`"];
 
@@ -110,6 +115,35 @@ VertexTypes[] := {
 	InverseMetricVertex
 };
 
+CreateSelfConjugateFieldDefinition[field_, namespacePrefix_] := "";
+IsLorentzSelfConjugate[field_] := field === LorentzConjugate[field];
+CreateSelfConjugateFieldDefinition[field_?IsLorentzSelfConjugate, namespacePrefix_] :=
+    Module[{fieldName},
+           fieldName = TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix];
+           "template<> struct " <> FlexibleSUSY`FSModelName <>  "_cxx_diagrams::fields::" <> LorentzConjugateOperation[field] <> "<" <> fieldName <> ">" <>
+           " { using type = " <> fieldName <> "; };"
+          ];
+
+CreateFieldTypeTraitDefinition[field_?TreeMasses`IsScalar, namespacePrefix_] :=
+    "template<>\nstruct is_scalar<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix] <> " > : public std::true_type {};";
+CreateFieldTypeTraitDefinition[field_?TreeMasses`IsFermion, namespacePrefix_] :=
+    "template<>\nstruct is_fermion<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix] <> " > : public std::true_type {};";
+CreateFieldTypeTraitDefinition[field_?TreeMasses`IsVector, namespacePrefix_] :=
+    "template<>\nstruct is_vector<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix] <> " > : public std::true_type {};";
+CreateFieldTypeTraitDefinition[field_?TreeMasses`IsGhost, namespacePrefix_] :=
+    "template<>\nstruct is_ghost<" <> TreeMasses`CreateFieldClassName[field, prefixNamespace -> namespacePrefix] <> " > : public std::true_type {};";
+CreateFieldTraitsDefinition[field_, namespacePrefix_] :=
+    Module[{fieldTypeTraitDefinition = ""},
+           fieldTypeTraitDefinition = CreateFieldTypeTraitDefinition[field, namespacePrefix];
+           fieldTypeTraitDefinition <> "\n"
+          ];
+
+CreateFieldTraitsDefinitions[fields_, namespacePrefix_:""] :=
+    StringJoin[CreateFieldTraitsDefinition[#, namespacePrefix]& /@ fields];
+
+(* Return a string corresponding to the c++ class name of the field.
+ Note that "bar" and "conj" get turned into bar<...>::type and
+ conj<...>::type respectively! *)
 (** \brief Returns the name of the c++ type corresponding to a
  * (possibly conjugate) field.
  * Note that `bar` and `conj` get turned into `typename bar<...>::type`
@@ -126,11 +160,11 @@ CXXNameOfField[p_, OptionsPattern[{prefixNamespace -> False}]] :=
      OptionValue[prefixNamespace] <> "::",
      ""] <> SymbolName[p];
 CXXNameOfField[SARAH`bar[p_], OptionsPattern[{prefixNamespace -> False}]] :=
-  "typename bar<" <> CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
+  "typename " <> If[OptionValue[prefixNamespace] === False, "", OptionValue[prefixNamespace]<>"::"]  <> "bar<" <> CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
   ">::type";
 CXXNameOfField[Susyno`LieGroups`conj[p_],
                OptionsPattern[{prefixNamespace -> False}]] :=
-  "typename conj<" <> CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
+  "typename " <> If[OptionValue[prefixNamespace] === False, "", OptionValue[prefixNamespace]<>"::"] <> "conj<" <> CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
   ">::type";
 
 (** \brief Returns the name of the c++ type corresponding to a
@@ -143,10 +177,6 @@ CXXNameOfField[Susyno`LieGroups`conj[p_],
 CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
 	", "]] <> ">"
-
-(** \brief Returns the c++ keyword corresponding to a boolean value. **)
-CXXBoolValue[True] = "true";
-CXXBoolValue[False] = "false";
 
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
@@ -185,6 +215,17 @@ RemoveLorentzConjugation[Susyno`LieGroups`conj[p_]] := p
  **)
 AtomHead[x_] := If[AtomQ[x], x, AtomHead[Head[x]]]
 
+ParticleTypeAsString::argx = "Unknown type of particle `1`. Supported types are scalar, fermion, vector and ghost.";
+ParticleTypeAsString[part_] := Module[
+   {},
+   If[TreeMasses`IsScalar[part],    Return["scalar"]];
+   If[TreeMasses`IsVector[part],    Return["vector"]];
+   If[TreeMasses`IsFermion[part],   Return["fermion"]];
+   If[TreeMasses`IsGhost[part],   Return["ghost"]];
+
+   Message[ParticleTypeAsString::argx, part]; Abort[];
+];
+
 (** \brief Creates c++ code that makes all fields and their properties
  * available as c++ types. Also creates two using declarations for
  * the following fields:
@@ -199,6 +240,18 @@ AtomHead[x_] := If[AtomQ[x], x, AtomHead[Head[x]]]
  * - ghosts
  * \returns the corresponding c++ code.
  **)
+ParticleColorRepAsString::argx = "Unknown color representation `1` for particle `2`. Supported representations are singlet, (anti-)triplet and octet.";
+ParticleColorRepAsString[part_] :=
+   Module[{rep = TreeMasses`GetColorRepresentation[part]},
+      Switch[rep,
+         S, "singlet",
+         T, "triplet",
+         -T, "anti_triplet",
+         O, "octet",
+         _, Message[ParticleColorRepAsString::argx, rep, part]; Abort[];
+      ]
+   ];
+
 CreateFields[] :=
   Module[{fields, scalars, fermions, vectors, ghosts},
        fields = TreeMasses`GetParticles[];
@@ -210,6 +263,9 @@ CreateFields[] :=
        StringJoin @ Riffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
+              "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
+              "static constexpr auto color_rep = ParticleColorRep::" <> ParticleColorRepAsString[#] <> ";\n" <>
+              "static constexpr auto massless = " <> CConversion`CreateCBoolValue @ TreeMasses`IsMassless[#] <> ";\n" <>
               "using index_bounds = boost::mpl::pair<\n" <>
               "  boost::mpl::vector_c<int" <>
                    StringJoin[", " <> ToString[#] & /@
@@ -222,8 +278,8 @@ CreateFields[] :=
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
                      "using sm_flags = boost::mpl::vector_c<bool, " <>
                         If[TreeMasses`GetDimension[#] === 1,
-                           CXXBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CXXBoolValue /@
+                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
                              TreeMasses`IsSMParticleElementwise[#],
                                                ", "]] <>
                         ">;\n" <>
@@ -275,7 +331,7 @@ LorentzIndexOfField[field_]:=
 ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
 	Module[{colorIndices = Select[Vertices`FieldIndexList[field], Vertices`SarahColorIndexQ]},
 		Utils`AssertWithMessage[Length[colorIndices] === 1,
-			"ColorMathInterface`ColourIndexOfField[]: Argument " <>
+			"CXXDiagrams`ColourIndexOfField[]: Argument " <>
 			ToString[field] <> " does not have exactly one color index."];
     colorIndices[[1]]
   ]
@@ -430,19 +486,25 @@ ContractionsBetweenVerticesForDiagramFromGraph[v1_Integer, v2_Integer,
 
 (** \brief Convert color structures to the ColorMath convention **)
 ConvertColourStructureToColorMathConvention[fields_List,
-	ZeroColouredVertex] := 0
+	ZeroColouredVertex] := 0;
 
 ConvertColourStructureToColorMathConvention[fields_List,
-	UncolouredVertex] := 1
+	UncolouredVertex] := 1;
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	GellMannVertex[cIndex1_, cIndex2_, cIndex3_]] :=
-(* FIXME: Factor of two? *)
-	2 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3]
+	(* FIXME: Factor of two? *)
+	2 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3];
+
+ConvertColourStructureToColorMathConvention[fields_List,
+	GellMannVertex[cIndex1_, cIndex2_, cIndex3_] GellMannVertex[cIndex4_, cIndex5_, cIndex6_] +
+			GellMannVertex[cIndex7_, cIndex8_, cIndex9_] GellMannVertex[cIndex10_, cIndex11_, cIndex12_]] :=
+       (4 ColorMath`CMt[{cIndex1}, cIndex2, cIndex3] ColorMath`CMt[{cIndex4}, cIndex5, cIndex6] +
+				4 ColorMath`CMt[{cIndex7}, cIndex8, cIndex9] ColorMath`CMt[{cIndex10}, cIndex11, cIndex12]);
 
 ConvertColourStructureToColorMathConvention[fields_List,
 	AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]] :=
-	ColorMath`CMf[cIndex1, cIndex2, cIndex3]
+	ColorMath`CMf[cIndex1, cIndex2, cIndex3];
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
@@ -481,7 +543,11 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
 				ToString[{colourRep1, colourRep2}]];
 			Quit[1];
 		]
-	]
+	];
+
+ConvertColourStructureToColorMathConvention[fields_List,
+   AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
+   ColorMath`CMf[cIndex1, cIndex2, cIndex3] * 2 ColorMath`CMt[{cIndex3}, cIndex4, cIndex5];
 
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=
@@ -489,11 +555,12 @@ ColorMathToSARAHConvention[expr_] :=
 		Subscript[Superscript[CM\[Delta], cIndex1_], cIndex2_] :>
 			SARAH`Delta[cIndex1, cIndex2],
 		Superscript[CM\[Delta], {indices__}] :> SARAH`Delta[indices],
+		Superscript[CM\[CapitalDelta], {indices__}] :> SARAH`Delta[indices],
 		Subscript[Superscript[Superscript[ColorMath`CMt, {cIndex1_}], cIndex2_], cIndex3_] :>
 			1 / 2 * SARAH`Lam[cIndex1, cIndex2, cIndex3],
 		ColorMath`Nc -> 3,
 		ColorMath`TR -> 1/2
-	}
+	};
 
 (** \brief Fully index all fields in a given diagram such that
  * contracted fields share the same indices.
@@ -748,29 +815,64 @@ LabelLorentzPart[vertexPart_] :=
 
 (** \brief Turn SARAH-style colour structures into CXXDiagrams ones. **)
 GaugeStructureOfVertexLorentzPart[{0, lorentzStructure_}] :=
-	{0, ZeroColouredVertex, lorentzStructure}
+	{0, ZeroColouredVertex, lorentzStructure};
 
 GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	{scalar, UncolouredVertex, lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
 	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, GellMannVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`fSU3[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{scalar_ * sum[j_, 1, 8, SARAH`fSU3[cIndex1_, cIndex3_, j_] SARAH`Lam[j_, cIndex4_, cIndex2_]], lorentzStructure_}
+   ] /; Vertices`SarahDummyIndexQ[j] :=
+	{scalar, AdjointlyColouredVertex[cIndex1, cIndex3, cIndex5]  GellMannVertex[cIndex5, cIndex4, cIndex2], lorentzStructure} /;
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Expand @ fullExpr,
+	scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+     scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+		scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] :>
+{scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+(* @todo:
+      This case catches vertices with sum of products of 2 Kronecker deltas.
+      Currently, if scalar1 and scalar2 coefficients would be equal in principle
+      we could handle this vertex. The case of scalar1 != scalar2 we cannot.
+      For the moment therefore we only print a warning message, similar to
+      the generic catch all case *)
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+      Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
+  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}],
+	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
+     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] ] :=
+Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
+  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
+	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
+     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
+Parameters`DebugPrint["Vertices with sum of 2 deltas are currently not supported"];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
-	(Print["Unknown colour structure in vertex ", vertexPart]; Quit[1])
+   (Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * combine all left and right projector parts to chiral parts.
@@ -1257,7 +1359,30 @@ CreateMassFunctions[] :=
              "{ return model.get_M" <> CXXNameOfField[# /. ghostMappings] <>
              If[TreeMasses`GetDimension[#] === 1, "()", "(indices[0])"] <> "; }"
             ] & /@ massiveFields, "\n\n"]
-        ]
+        ];
+
+(** \brief Creates c++ code that makes functions available that
+ * return physical masses of given fields.
+ * \returns the corresponding c++ code as a string.
+ **)
+CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
+  Module[{massiveFields,
+          ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
+    massiveFields = TreeMasses`GetParticles[];
+
+    StringJoin @ Riffle[
+      Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
+             numberOfIndices = Length @ fieldInfo[[5]];
+
+             "template<> inline\n" <>
+             "double context_base::physical_mass_impl<" <>
+               CXXNameOfField[#, prefixNamespace -> "fields"] <>
+             ">(const std::array<int, " <> ToString @ numberOfIndices <>
+             ">& indices) const\n" <>
+             "{ return model.get_physical().M" <> CXXNameOfField[# /. ghostMappings] <>
+             If[TreeMasses`GetDimension[#] === 1, "", "[indices[0]]"] <> "; }"
+            ] & /@ massiveFields, "\n\n"]
+        ];
 
 (** \brief Creates the c++ code for a function that returns the
  * numerical value of the electrical charge of the electron.
@@ -1380,6 +1505,20 @@ StripColourIndices[p_] :=
 		If[Length[remainingIndices] === 0, Head[p],
 			Head[p][remainingIndices]]
 	]
+
+ColorFactorForDiagram[topology_, diagram_] :=
+   ColourFactorForIndexedDiagramFromGraph[
+      CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
+   ];
+
+(* TODO: generalize the Extraction *)
+ExtractColourFactor[colourfactor_ * SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_] /; NumericQ[colourfactor]] := 2*colourfactor;
+ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
+ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
+ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
+ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+ExtractColourFactor[args___] :=
+   (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 
 End[];
 EndPackage[];

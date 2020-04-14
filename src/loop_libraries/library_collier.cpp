@@ -158,7 +158,7 @@ void Collier::D(
    const std::complex<double> m22 = m22_in;
    const std::complex<double> m32 = m32_in;
 
-   set_mu2_uv(scl2_in);\
+   set_mu2_uv(scl2_in);
    get_D_impl(d, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
 }
 

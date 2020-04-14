@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef GM2_2LOOP_H
-#define GM2_2LOOP_H
+#ifndef GM2_2LOOP_HELPERS_HPP
+#define GM2_2LOOP_HELPERS_HPP
 
 #include <Eigen/Core>
 
@@ -25,49 +25,29 @@ namespace gm2calc {
 
 class MSSMNoFV_onshell;
 
-/// calculates best 2-loop SUSY contributions to a_mu in the MSSM (with tan(beta) resummation)
-double calculate_amu_2loop(const MSSMNoFV_onshell&);
-
-/// calculates best 2-loop SUSY contributions to a_mu in the MSSM (no tan(beta) resummation)
-double calculate_amu_2loop_non_tan_beta_resummed(const MSSMNoFV_onshell&);
-
 // === 2-loop fermion/sfermion approximations ===
 
-// main routines
+// routines for individual fermion/sfermion 2-loop contributions for
+// approximations
 
-double amu2LFSfapprox(const MSSMNoFV_onshell&);
-double amu2LFSfapprox_non_tan_beta_resummed(const MSSMNoFV_onshell&);
-
-// routines for individual contributions
-
-double amuWHnu2L(const MSSMNoFV_onshell&);
-double amuWHmuL2L(const MSSMNoFV_onshell&);
-double amuBHmuL2L(const MSSMNoFV_onshell&);
-double amuBHmuR2L(const MSSMNoFV_onshell&);
-double amuBmuLmuR2L(const MSSMNoFV_onshell&);
+double amu2LWHnu(const MSSMNoFV_onshell&);
+double amu2LWHmuL(const MSSMNoFV_onshell&);
+double amu2LBHmuL(const MSSMNoFV_onshell&);
+double amu2LBHmuR(const MSSMNoFV_onshell&);
+double amu2LBmuLmuR(const MSSMNoFV_onshell&);
 
 // routines for sub-expressions
 
-double LogNorm(const MSSMNoFV_onshell&);
+double log_scale(const MSSMNoFV_onshell&);
 
-double Delta_g1(const MSSMNoFV_onshell&);
-double Delta_g2(const MSSMNoFV_onshell&);
-double Delta_YukHiggsino(const MSSMNoFV_onshell&);
-double Delta_YukBinoHiggsino(const MSSMNoFV_onshell&);
-double Delta_YukWinoHiggsino(const MSSMNoFV_onshell&);
-double Delta_TanBeta(const MSSMNoFV_onshell&);
-
-// === photonic 2-loop corrections ===
-
-double amuChipmPhotonic(const MSSMNoFV_onshell&);
-double amuChi0Photonic(const MSSMNoFV_onshell&);
+double delta_g1(const MSSMNoFV_onshell&);
+double delta_g2(const MSSMNoFV_onshell&);
+double delta_yuk_higgsino(const MSSMNoFV_onshell&);
+double delta_yuk_bino_higgsino(const MSSMNoFV_onshell&);
+double delta_yuk_wino_higgsino(const MSSMNoFV_onshell&);
+double delta_tan_beta(const MSSMNoFV_onshell&);
 
 // === SUSY 2L(a) diagrams ===
-
-// main routines
-
-double amu2LaSferm(const MSSMNoFV_onshell&);
-double amu2LaCha(const MSSMNoFV_onshell&);
 
 // routines for sub-expressions (with tan(beta) resummation)
 

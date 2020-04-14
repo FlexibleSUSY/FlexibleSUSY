@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_HPP
-#define LOOP_LIBRARY_HPP
+#ifndef LOOP_LIBRARY_H
+#define LOOP_LIBRARY_H
 
 #include <memory>
 #include "loop_library_interface.hpp"
@@ -39,6 +39,7 @@ public:
 private:
    static Library type_;
    static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
+   static void set_default(void);
 
    Loop_library() {}
    Loop_library(Loop_library const&);
@@ -47,4 +48,4 @@ private:
 
 } // namespace flexiblesusy
 
-#endif // LOOP_LIBRARY_HPP
+#endif // LOOP_LIBRARY_H

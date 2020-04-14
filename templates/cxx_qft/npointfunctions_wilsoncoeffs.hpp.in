@@ -197,7 +197,7 @@ struct context_with_vertices : context_base {
    }
 
    double scale( void ) const {
-      return model.get_scale();
+      return dynamic_cast<@ModelName@_mass_eigenstates const&>(model).get_scale();
    }
 }; // End of context_with_vertices
 

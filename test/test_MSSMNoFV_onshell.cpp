@@ -6,14 +6,14 @@
 
 #include "test_CMSSMNoFV.hpp"
 #include "wrappers.hpp"
-#include "MSSMNoFV_onshell.hpp"
 #include "ew_input.hpp"
-#include "gm2_error.hpp"
+#include "gm2calc/gm2_error.hpp"
+#include "gm2calc/MSSMNoFV_onshell.hpp"
 
 using namespace flexiblesusy;
 using namespace gm2calc;
 
-void setup(MSSMNoFV_onshell_mass_eigenstates& model)
+void setup(MSSMNoFV_onshell& model)
 {
    const double TanBeta = 10;
    const double SignMu = 1;
@@ -85,7 +85,7 @@ void setup(MSSMNoFV_onshell_mass_eigenstates& model)
 
 BOOST_AUTO_TEST_CASE( test_DRbar_os_conversion )
 {
-   MSSMNoFV_onshell_mass_eigenstates model;
+   MSSMNoFV_onshell model;
    setup(model);
 
    MSSMNoFV_onshell osmodel(model);

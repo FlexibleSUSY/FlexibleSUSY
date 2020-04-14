@@ -26,15 +26,14 @@
  * 1.2.1 (git commit: v1.2.1-49-gfc4c300) and SARAH 4.5.8 .
  */
 
-#ifndef MSSMNoFV_onshell_MASS_EIGENSTATES_H
-#define MSSMNoFV_onshell_MASS_EIGENSTATES_H
+#ifndef GM2_MSSMNoFV_ONSHELL_MASS_EIGENSTATES_HPP
+#define GM2_MSSMNoFV_ONSHELL_MASS_EIGENSTATES_HPP
 
 #include "MSSMNoFV_onshell_soft_parameters.hpp"
 #include "MSSMNoFV_onshell_physical.hpp"
 #include "MSSMNoFV_onshell_problems.hpp"
 
 #include <iosfwd>
-#include <string>
 
 #include <Eigen/Core>
 
@@ -42,16 +41,15 @@ namespace gm2calc {
 
 /**
  * @class MSSMNoFV_onshell_mass_eigenstates
- * @brief model class with routines for determing masses and mixinga and EWSB
+ * @brief model class with routines determine masses, mixings and EWSB
  */
 class MSSMNoFV_onshell_mass_eigenstates : public MSSMNoFV_onshell_soft_parameters {
 public:
-   MSSMNoFV_onshell_mass_eigenstates();
-   virtual ~MSSMNoFV_onshell_mass_eigenstates();
+   virtual ~MSSMNoFV_onshell_mass_eigenstates() {}
+
+   void print(std::ostream&) const override;
 
    void calculate_DRbar_masses();
-   virtual void clear();
-   void clear_DRbar_parameters();
    void copy_DRbar_masses_to_pole_masses();
    void do_force_output(bool);
    bool do_force_output() const;
@@ -64,9 +62,6 @@ public:
    MSSMNoFV_onshell_problems& get_problems();
    int solve_ewsb_tree_level();
    int solve_ewsb();
-
-   std::string name() const;
-   void print(std::ostream&) const;
 
    double get_MVG() const { return MVG; }
    double get_MGlu() const { return MGlu; }
@@ -232,67 +227,67 @@ public:
 
 
 private:
-   bool force_output;             ///< switch to force output of pole masses
+   bool force_output{false};           ///< switch to force output of pole masses
    MSSMNoFV_onshell_physical physical; ///< contains the pole masses and mixings
    MSSMNoFV_onshell_problems problems; ///< problems
 
    int solve_ewsb_tree_level_via_soft_higgs_masses();
 
    // DR-bar masses
-   double MVG;
-   double MGlu;
-   double MVP;
-   double MVZ;
-   double MFd;
-   double MFs;
-   double MFb;
-   double MFu;
-   double MFc;
-   double MFt;
-   double MFve;
-   double MFvm;
-   double MFvt;
-   double MFe;
-   double MFm;
-   double MFtau;
-   double MSveL;
-   double MSvmL;
-   double MSvtL;
-   Eigen::Array<double,2,1> MSd;
-   Eigen::Array<double,2,1> MSu;
-   Eigen::Array<double,2,1> MSe;
-   Eigen::Array<double,2,1> MSm;
-   Eigen::Array<double,2,1> MStau;
-   Eigen::Array<double,2,1> MSs;
-   Eigen::Array<double,2,1> MSc;
-   Eigen::Array<double,2,1> MSb;
-   Eigen::Array<double,2,1> MSt;
-   Eigen::Array<double,2,1> Mhh;
-   Eigen::Array<double,2,1> MAh;
-   Eigen::Array<double,2,1> MHpm;
-   Eigen::Array<double,4,1> MChi;
-   Eigen::Array<double,2,1> MCha;
-   double MVWm;
+   double MVG{0.0};
+   double MGlu{0.0};
+   double MVP{0.0};
+   double MVZ{0.0};
+   double MVWm{0.0};
+   double MFd{0.0};
+   double MFs{0.0};
+   double MFb{0.0};
+   double MFu{0.0};
+   double MFc{0.0};
+   double MFt{0.0};
+   double MFve{0.0};
+   double MFvm{0.0};
+   double MFvt{0.0};
+   double MFe{0.0};
+   double MFm{0.0};
+   double MFtau{0.0};
+   double MSveL{0.0};
+   double MSvmL{0.0};
+   double MSvtL{0.0};
+   Eigen::Array<double,2,1> MSd{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSu{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSe{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSm{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MStau{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSs{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSc{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSb{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MSt{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> Mhh{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MAh{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,2,1> MHpm{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,4,1> MChi{Eigen::Array<double,4,1>::Zero()};
+   Eigen::Array<double,2,1> MCha{Eigen::Array<double,2,1>::Zero()};
 
    // DR-bar mixing matrices
-   Eigen::Matrix<double,2,2> ZD;
-   Eigen::Matrix<double,2,2> ZU;
-   Eigen::Matrix<double,2,2> ZE;
-   Eigen::Matrix<double,2,2> ZM;
-   Eigen::Matrix<double,2,2> ZTau;
-   Eigen::Matrix<double,2,2> ZS;
-   Eigen::Matrix<double,2,2> ZC;
-   Eigen::Matrix<double,2,2> ZB;
-   Eigen::Matrix<double,2,2> ZT;
-   Eigen::Matrix<double,2,2> ZH;
-   Eigen::Matrix<double,2,2> ZA;
-   Eigen::Matrix<double,2,2> ZP;
-   Eigen::Matrix<std::complex<double>,4,4> ZN;
-   Eigen::Matrix<std::complex<double>,2,2> UM;
-   Eigen::Matrix<std::complex<double>,2,2> UP;
+   Eigen::Matrix<double,2,2> ZD{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZU{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZE{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZM{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZTau{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZS{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZC{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZB{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZT{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZH{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZA{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<double,2,2> ZP{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<std::complex<double>,4,4> ZN{Eigen::Matrix<std::complex<double>,4,4>::Zero()};
+   Eigen::Matrix<std::complex<double>,2,2> UM{Eigen::Matrix<std::complex<double>,2,2>::Zero()};
+   Eigen::Matrix<std::complex<double>,2,2> UP{Eigen::Matrix<std::complex<double>,2,2>::Zero()};
 
    // phases
-   std::complex<double> PhaseGlu;
+   std::complex<double> PhaseGlu{1.0, 0.0};
 };
 
 std::ostream& operator<<(std::ostream&, const MSSMNoFV_onshell_mass_eigenstates&);

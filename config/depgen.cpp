@@ -234,7 +234,7 @@ std::vector<std::string> prepend(const std::string& str,
    std::vector<std::string> result;
    result.reserve(strings.size());
 
-   for (auto& s: strings) {
+   for (const auto& s: strings) {
       result.push_back(str + s);
    }
 
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
    using namespace flexiblesusy::depgen;
 
    if (argc < 2) {
-      std::cerr << "Error: no file given\n";
+      std::cerr << "Error: no input file\n";
       print_usage(argv[0]);
       return EXIT_FAILURE;
    }
@@ -421,8 +421,19 @@ int main(int argc, char* argv[])
          config.target_name = argv[++i];
          continue;
       }
-      if ((arg == "-MF" || arg == "-MMD" || arg == "-o") && i + 1 < argc) {
-         config.output_file = argv[++i];
+      if (arg == "-MF" || arg == "-MMD" || arg == "-o") {
+         // interpret next argument as output file name
+         if (i + 1 < argc) {
+            const std::string of(argv[i + 1]);
+            if (!starts_with(of, "-I") && !starts_with(of, "-M") &&
+                !starts_with(of, "-D") && of != "-o") {
+               config.output_file = std::move(of);
+               i++;
+            } else {
+               std::cerr << "Error: " << arg << " expects a file name argument\n";
+               return EXIT_FAILURE;
+            }
+         }
          continue;
       }
       if (arg == "--help" || arg == "-h") {
@@ -441,6 +452,11 @@ int main(int argc, char* argv[])
 
       std::cerr << "Error: unknown option: " << arg << '\n';
       print_usage(argv[0]);
+      return EXIT_FAILURE;
+   }
+
+   if (config.file_name.empty()) {
+      std::cerr << "Error: no input file\n";
       return EXIT_FAILURE;
    }
 

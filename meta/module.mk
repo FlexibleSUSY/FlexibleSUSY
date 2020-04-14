@@ -68,7 +68,6 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
-		$(DIR)/ColorMathInterface.m \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
@@ -85,6 +84,7 @@ META_SRC     := \
 		$(DIR)/FlexibleTower.m \
 		$(DIR)/Format.m \
 		$(DIR)/FSMathLink.m \
+		$(DIR)/FunctionModifiers.m \
 		$(DIR)/Himalaya.m \
 		$(DIR)/LatticeUtils.m \
 		$(DIR)/LoopFunctions.m \

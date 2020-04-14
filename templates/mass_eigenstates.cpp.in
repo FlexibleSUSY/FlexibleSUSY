@@ -37,12 +37,10 @@
 #include "ewsb_solver.hpp"
 #include "wrappers.hpp"
 #include "linalg2.hpp"
-#include "numerics2.hpp"
 #include "logger.hpp"
 #include "error.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "raii.hpp"
-#include "functors.hpp"
 
 #ifdef ENABLE_THREADS
 #include "thread_pool.hpp"
@@ -54,13 +52,11 @@
 @fourLoopHiggsHeaders@
 @twoLoopThresholdHeaders@
 
-#include <array>
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <algorithm>
-#include <stdexcept>
 
 namespace flexiblesusy {
 
@@ -90,6 +86,11 @@ CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
    : @ModelName@_soft_parameters(input_)
 @defaultEWSBSolverCctor@
 {
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates>(*this);
 }
 
 void CLASSNAME::do_calculate_sm_pole_masses(bool flag)
@@ -611,6 +612,61 @@ void CLASSNAME::run_to(double scale, double eps)
    if (eps < 0.0)
       eps = precision;
    @ModelName@_soft_parameters::run_to(scale, eps);
+}
+
+void CLASSNAME::calculate_tree_level_mass_spectrum()
+{
+   calculate_DRbar_masses();
+}
+
+void CLASSNAME::calculate_pole_mass_spectrum()
+{
+   calculate_pole_masses();
+}
+
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_spectrum();
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   return solve_ewsb_tree_level();
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb();
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+   return get_DRbar_masses();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   return get_DRbar_masses_and_mixings();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses(m);
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& m)
+{
+   set_DRbar_masses_and_mixings(m);
 }
 
 @higgsMassGetters@

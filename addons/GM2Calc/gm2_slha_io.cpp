@@ -17,29 +17,45 @@
 // ====================================================================
 
 #include "gm2_slha_io.hpp"
-#include "ffunctions.hpp"
-#include "MSSMNoFV_onshell.hpp"
+
+#include "gm2calc/MSSMNoFV_onshell.hpp"
+
+#include "gm2_config_options.hpp"
+#include "gm2_log.hpp"
+#include "gm2_numerics.hpp"
 
 #include <cmath>
 #include <fstream>
+#include <iostream>
 #include <limits>
+#include <string>
 
+#include <boost/lexical_cast.hpp>
 #include <Eigen/Core>
 
 namespace gm2calc {
 
-using namespace flexiblesusy;
-
-#define ERROR(message) std::cerr << "Error: " << message << '\n';
-#define WARNING(message) std::cerr << "Warning: " << message << '\n';
-
 namespace {
 
-   void process_gm2calcconfig_tuple(Config_options&, int, double);
-   void process_gm2calcinput_tuple(MSSMNoFV_onshell&, int, double);
-   void process_fermion_sminputs_tuple(MSSMNoFV_onshell_physical&, int, double);
-   void process_mass_tuple(MSSMNoFV_onshell_physical&, int, double);
-   void process_msoft_tuple(MSSMNoFV_onshell&, int, double);
+   struct HMIX_data {
+      double mu{0.0};
+      double tanb{0.0};
+      double v{0.0};
+      double mA2{0.0};
+   };
+
+   struct GM2CalcInput_data {
+      double alpha_MZ{0.0};
+      double alpha_thompson{0.0};
+   };
+
+   void process_gm2calcconfig_tuple(Config_options& /*config_options*/, int /*key*/, double /*value*/);
+   void process_gm2calcinput_tuple(GM2CalcInput_data& /*data*/, int /*key*/, double /*value*/);
+   void process_gm2calcinput_tuple(MSSMNoFV_onshell& /*model*/, int /*key*/, double /*value*/);
+   void process_sminputs_tuple(MSSMNoFV_onshell& /*model*/, int /*key*/, double /*value*/);
+   void process_hmix_tuple(HMIX_data& /*data*/, int /*key*/, double /*value*/);
+   void process_mass_tuple(MSSMNoFV_onshell_physical& /*physical*/, int /*key*/, double /*value*/);
+   void process_msoft_tuple(MSSMNoFV_onshell& /*model*/, int /*key*/, double /*value*/);
 
 } // anonymous namespace
 
@@ -53,10 +69,11 @@ namespace {
  */
 void GM2_slha_io::read_from_source(const std::string& source)
 {
-   if (source == "-")
+   if (source == "-") {
       read_from_stream(std::cin);
-   else
+   } else {
       read_from_file(source);
+   }
 }
 
 /**
@@ -70,9 +87,7 @@ void GM2_slha_io::read_from_file(const std::string& file_name)
       data.clear();
       data.read(ifs);
    } else {
-      std::ostringstream msg;
-      msg << "cannot read SLHA file: \"" << file_name << "\"";
-      throw EReadError(msg.str());
+      throw EReadError("cannot read input file: \"" + file_name + "\"");
    }
 }
 
@@ -85,29 +100,25 @@ void GM2_slha_io::read_from_stream(std::istream& istr)
    data.read(istr);
 }
 
-double GM2_slha_io::read_entry(const std::string& block_name, int key,
-                               double scale) const
+/**
+ * Reads scale definition from an SLHA block.
+ *
+ * @param block block
+ *
+ * @return scale (or 0 if no scale is defined)
+ */
+double GM2_slha_io::read_scale(const SLHAea::Block& block)
 {
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
+   double scale = 0.0;
 
-   double entry = 0.;
-   const SLHAea::Block::key_type keys(1, std::to_string(key));
-   SLHAea::Block::const_iterator line;
-
-   while (block != data.cend()) {
-      if (at_scale(*block, scale)) {
-         line = block->find(keys);
-
-         if (line != block->end() && line->is_data_line() && line->size() > 1)
-            entry = convert_to<double>(line->at(1));
+   for (const auto& line : block) {
+      // read scale from block definition
+      if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
+         scale = convert_to<double>(line[3]);
       }
-
-      ++block;
-      block = data.find(block, data.cend(), block_name);
    }
 
-   return entry;
+   return scale;
 }
 
 /**
@@ -119,27 +130,16 @@ double GM2_slha_io::read_entry(const std::string& block_name, int key,
  */
 double GM2_slha_io::read_scale(const std::string& block_name) const
 {
-   if (!block_exists(block_name))
-      return 0.;
-
    double scale = 0.;
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
-   for (SLHAea::Block::const_iterator line = data.at(block_name).cbegin(),
-        end = data.at(block_name).cend(); line != end; ++line) {
-      if (!line->is_data_line()) {
-         if (line->size() > 3 &&
-             to_lower((*line)[0]) == "block" && (*line)[2] == "Q=")
-            scale = convert_to<double>((*line)[3]);
-         break;
-      }
+   while (block != data.cend()) {
+      scale = GM2_slha_io::read_scale(*block);
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
 
    return scale;
-}
-
-bool GM2_slha_io::block_exists(const std::string& block_name) const
-{
-   return data.find(block_name) != data.cend();
 }
 
 /**
@@ -150,30 +150,33 @@ bool GM2_slha_io::block_exists(const std::string& block_name) const
  * @param scale scale
  * @param eps absolute tolerance to treat two scales being the same
  */
-bool GM2_slha_io::at_scale(const SLHAea::Block& block, double scale, double eps)
+bool GM2_slha_io::is_at_scale(const SLHAea::Block& block, double scale, double eps)
 {
-   if (flexiblesusy::is_zero(scale))
+   if (is_zero(scale, std::numeric_limits<double>::epsilon())) {
       return true;
-
-   for (SLHAea::Block::const_iterator line = block.cbegin(),
-           end = block.cend(); line != end; ++line) {
-      // check scale from block definition matches argument
-      if (!line->is_data_line() && line->size() > 3 &&
-          to_lower((*line)[0]) == "block" && (*line)[2] == "Q=") {
-         const double block_scale = convert_to<double>((*line)[3]);
-         if (flexiblesusy::is_equal(scale, block_scale, eps))
-            return true;
-      }
    }
 
-   return false;
+   const auto block_scale = GM2_slha_io::read_scale(block);
+
+   return is_equal(scale, block_scale, eps);
 }
 
-std::string GM2_slha_io::to_lower(const std::string& str)
+/**
+ * Applies processor to each (key, value) pair of a SLHA block.
+ * Non-data lines are ignored.
+ *
+ * @param block the block
+ * @param processor tuple processor to be applied
+ */
+void GM2_slha_io::read_block(const SLHAea::Block& block, const Tuple_processor& processor)
 {
-   std::string lower(str.size(), ' ');
-   std::transform(str.begin(), str.end(), lower.begin(), ::tolower);
-   return lower;
+   for (const auto& line : block) {
+      if (line.is_data_line() && line.size() >= 2) {
+         const auto key = convert_to<int>(line[0]);
+         const auto value = convert_to<double>(line[1]);
+         processor(key, value);
+      }
+   }
 }
 
 /**
@@ -188,38 +191,16 @@ void GM2_slha_io::read_block(const std::string& block_name,
                              const Tuple_processor& processor,
                              double scale) const
 {
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    while (block != data.cend()) {
-      if (at_scale(*block, scale)) {
-         for (SLHAea::Block::const_iterator line = block->cbegin(),
-                 end = block->cend(); line != end; ++line) {
-            if (!line->is_data_line())
-               continue;
-
-            if (line->size() >= 2) {
-               const int key = convert_to<int>((*line)[0]);
-               const double value = convert_to<double>((*line)[1]);
-               processor(key, value);
-            }
-         }
+      if (is_at_scale(*block, scale)) {
+         GM2_slha_io::read_block(*block, processor);
       }
 
       ++block;
-      block = data.find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
    }
-}
-
-void GM2_slha_io::set_block(const std::ostringstream& lines, Position position)
-{
-   SLHAea::Block block;
-   block.str(lines.str());
-   data.erase(block.name());
-   if (position == front)
-      data.push_front(block);
-   else
-      data.push_back(block);
 }
 
 void GM2_slha_io::write_to_file(const std::string& file_name)
@@ -230,10 +211,11 @@ void GM2_slha_io::write_to_file(const std::string& file_name)
 
 void GM2_slha_io::write_to_stream(std::ostream& ostr)
 {
-   if (ostr.good())
+   if (ostr.good()) {
       ostr << data;
-   else
+   } else {
       ERROR("cannot write SLHA file");
+   }
 }
 
 /**
@@ -249,21 +231,15 @@ void GM2_slha_io::fill_block_entry(const std::string& block_name,
                                    unsigned entry, double value,
                                    const std::string& description)
 {
-   std::ostringstream sstr;
-   sstr << FORMAT_ELEMENT(entry, value, description);
-
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    if (block == data.cend()) {
-      // create new block
-      std::ostringstream block;
-      block << "Block " << block_name << '\n'
-            << sstr.str();
-      set_block(block, GM2_slha_io::back);
-   } else {
-      data[block_name][SLHAea::to<double>(entry)] = sstr.str();
+      SLHAea::Block block;
+      block.str("Block " + block_name);
+      data.push_back(block);
    }
+
+   data[block_name][entry] = (FORMAT_ELEMENT(entry, value, description)).str();
 }
 
 /**
@@ -278,136 +254,117 @@ void GM2_slha_io::fill_block_entry(const std::string& block_name,
                                    unsigned entry,
                                    const std::string& description)
 {
-   std::ostringstream sstr;
-   sstr << FORMAT_SPINFO(entry, description);
-
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    if (block == data.cend()) {
-      // create new block
-      std::ostringstream block;
-      block << "Block " << block_name << '\n'
-            << sstr.str();
-      set_block(block, GM2_slha_io::back);
-   } else {
-      data[block_name][SLHAea::to<double>(entry)] = sstr.str();
+      SLHAea::Block block;
+      block.str("Block " + block_name);
+      data.push_front(block);
    }
+
+   data[block_name][entry] = (FORMAT_SPINFO(entry, description)).str();
 }
 
-void fill_alpha_s(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
+void GM2_slha_io::fill_from_msoft(MSSMNoFV_onshell& model) const
 {
-   const double Pi = 3.14159265358979323846;
-   const double alpha_S = slha_io.read_entry("SMINPUTS", 3);
+   GM2_slha_io::Tuple_processor processor = [&model] (int key, double value) {
+      return process_msoft_tuple(model, key, value);
+   };
 
-   if (!is_zero(alpha_S))
-      model.set_g3(std::sqrt(4*Pi*alpha_S));
+   read_block("MSOFT", processor, model.get_scale());
 }
 
-void fill_soft_parameters_from_msoft(const GM2_slha_io& slha_io,
-                                     MSSMNoFV_onshell& model, double scale)
+void GM2_slha_io::fill_from_A(MSSMNoFV_onshell& model) const
 {
-   using namespace std::placeholders;
-
-   GM2_slha_io::Tuple_processor processor
-      = std::bind(process_msoft_tuple, std::ref(model), _1, _2);
-
-   slha_io.read_block("MSOFT", processor, scale);
-}
-
-void fill_drbar_parameters(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
-{
-   const double scale = slha_io.read_scale("HMIX");
-
-   if (flexiblesusy::is_zero(scale)) {
-      throw EInvalidInput("Could not determine renormalization scale"
-                          " from HMIX block");
-   }
+   const double scale = model.get_scale();
 
    {
       Eigen::Matrix<double,3,3> Ae(Eigen::Matrix<double,3,3>::Zero());
-      slha_io.read_block("AE", Ae, scale);
+      read_block("AE", Ae, scale);
       model.set_Ae(Ae);
    }
    {
       Eigen::Matrix<double,3,3> Au(Eigen::Matrix<double,3,3>::Zero());
-      slha_io.read_block("AU", Au, scale);
+      read_block("AU", Au, scale);
       model.set_Au(Au);
    }
    {
       Eigen::Matrix<double,3,3> Ad(Eigen::Matrix<double,3,3>::Zero());
-      slha_io.read_block("AD", Ad, scale);
+      read_block("AD", Ad, scale);
       model.set_Ad(Ad);
    }
+}
 
-   fill_soft_parameters_from_msoft(slha_io, model, scale);
+void GM2_slha_io::fill_from_hmix(MSSMNoFV_onshell& model) const
+{
+   HMIX_data hmix;
 
-   model.set_Mu(slha_io.read_entry("HMIX", 1, scale));
+   GM2_slha_io::Tuple_processor processor = [&hmix] (int key, double value) {
+      return process_hmix_tuple(hmix, key, value);
+   };
 
-   const double tanb = slha_io.read_entry("HMIX", 2, scale);
-   const double MA2_drbar = slha_io.read_entry("HMIX", 4, scale);
-   const double sinb = tanb / std::sqrt(1 + tanb*tanb);
-   const double cosb = 1.   / std::sqrt(1 + tanb*tanb);
+   read_block("HMIX", processor, model.get_scale());
 
-   model.set_TB(tanb);
-   model.set_BMu(MA2_drbar * sinb * cosb);
+   const double tanb = hmix.tanb;
+   const double scb = tanb / (1 + tanb*tanb); // sin(beta)*cos(beta)
+
+   model.set_Mu(hmix.mu);
+   model.set_TB(hmix.tanb);
+   model.set_BMu(hmix.mA2 * scb);
+}
+
+void GM2_slha_io::fill_scale(MSSMNoFV_onshell& model) const
+{
+   const double eps = std::numeric_limits<double>::epsilon();
+   const double scale = read_scale("HMIX");
+
+   if (is_zero(scale, eps)) {
+      throw EInvalidInput("Could not determine renormalization scale"
+                          " from HMIX block");
+   }
+
    model.set_scale(scale);
 }
 
-void fill_pole_masses_from_sminputs(
-   const GM2_slha_io& slha_io, MSSMNoFV_onshell_physical& physical)
+void GM2_slha_io::fill_from_sminputs(MSSMNoFV_onshell& model) const
 {
-   using namespace std::placeholders;
+   GM2_slha_io::Tuple_processor processor = [&model] (int key, double value) {
+      return process_sminputs_tuple(model, key, value);
+   };
 
-   GM2_slha_io::Tuple_processor processor
-      = std::bind(process_fermion_sminputs_tuple, std::ref(physical), _1, _2);
-
-   slha_io.read_block("SMINPUTS", processor);
+   read_block("SMINPUTS", processor);
 }
 
-void fill_susy_masses_from_mass(
-   const GM2_slha_io& slha_io, MSSMNoFV_onshell_physical& physical)
+void GM2_slha_io::fill_from_mass(MSSMNoFV_onshell_physical& physical) const
 {
-   using namespace std::placeholders;
+   GM2_slha_io::Tuple_processor processor = [&physical] (int key, double value) {
+      return process_mass_tuple(physical, key, value);
+   };
 
-   GM2_slha_io::Tuple_processor processor
-      = std::bind(process_mass_tuple, std::ref(physical), _1, _2);
+   read_block("MASS", processor);
+   read_block("NMIX", physical.ZN);
+   read_block("SMUMIX", physical.ZM);
 
-   slha_io.read_block("MASS", processor);
+   physical.convert_to_hk();
 }
 
-void fill_physical(const GM2_slha_io& slha_io, MSSMNoFV_onshell_physical& physical)
+void GM2_slha_io::fill_alpha_from_gm2calcinput(MSSMNoFV_onshell& model) const
 {
-   // read all pole masses (includin MW) from SMINPUTS
-   fill_pole_masses_from_sminputs(slha_io, physical);
+   GM2CalcInput_data data;
 
-   // if MW if given in MASS[24], prefer this value
-   const double MW = slha_io.read_entry("MASS", 24);
-   if (!is_zero(MW))
-      physical.MVWm = MW;
+   GM2_slha_io::Tuple_processor processor = [&data] (int key, double value) {
+      return process_gm2calcinput_tuple(data, key, value);
+   };
 
-   fill_susy_masses_from_mass(slha_io, physical);
-}
+   read_block("GM2CalcInput", processor);
 
-void fill_pole_masses_from_sminputs_and_mass(
-   const GM2_slha_io& slha_io, MSSMNoFV_onshell_physical& physical)
-{
-   MSSMNoFV_onshell_physical physical_hk(physical);
-   fill_physical(slha_io, physical_hk);
-   physical_hk.convert_to_hk();
-   physical = physical_hk;
-}
+   if (data.alpha_MZ > std::numeric_limits<double>::epsilon()) {
+      model.set_alpha_MZ(data.alpha_MZ);
+   }
 
-void fill_gm2_specific_alphas(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
-{
-   const double alpha_MZ = std::abs(slha_io.read_entry("GM2CalcInput", 1));
-   const double alpha_thompson = std::abs(slha_io.read_entry("GM2CalcInput", 2));
-
-   if (alpha_MZ > std::numeric_limits<double>::epsilon())
-      model.set_alpha_MZ(alpha_MZ);
-
-   if (alpha_thompson > std::numeric_limits<double>::epsilon())
-      model.set_alpha_thompson(alpha_thompson);
+   if (data.alpha_thompson > std::numeric_limits<double>::epsilon()) {
+      model.set_alpha_thompson(data.alpha_thompson);
+   }
 }
 
 /**
@@ -415,84 +372,137 @@ void fill_gm2_specific_alphas(const GM2_slha_io& slha_io, MSSMNoFV_onshell& mode
  *
  * This function assumes that MW(pole) and MZ(pole) are non-zero.
  */
-void fill_gm2_specific_onshell_parameters(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
+void GM2_slha_io::fill_from_gm2calcinput(MSSMNoFV_onshell& model) const
 {
-   using namespace std::placeholders;
+   GM2_slha_io::Tuple_processor processor = [&model] (int key, double value) {
+      return process_gm2calcinput_tuple(model, key, value);
+   };
 
-   GM2_slha_io::Tuple_processor processor
-      = std::bind(process_gm2calcinput_tuple, std::ref(model), _1, _2);
-
-   slha_io.read_block("GM2CalcInput", processor);
+   read_block("GM2CalcInput", processor);
 }
 
 /**
  * Reads model parameters in GM2Calc format from GM2CalcInput and
  * SMINPUTS blocks
  *
- * @param slha_io SLHA object
  * @param model model
  */
-void fill_gm2calc(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
+void GM2_slha_io::fill_gm2calc(MSSMNoFV_onshell& model) const
 {
-   fill_pole_masses_from_sminputs(slha_io, model.get_physical());
-   fill_alpha_s(slha_io, model);
-   fill_gm2_specific_onshell_parameters(slha_io, model);
+   fill_from_sminputs(model);
+   fill_from_gm2calcinput(model);
 }
 
 /**
  * Reads model parameters in SLHA format (from SLHA and GM2CalcInput
  * input blocks)
  *
- * @param slha_io SLHA object
  * @param model model
  */
-void fill_slha(const GM2_slha_io& slha_io, MSSMNoFV_onshell& model)
+void GM2_slha_io::fill_slha(MSSMNoFV_onshell& model) const
 {
-   fill_pole_masses_from_sminputs_and_mass(slha_io, model.get_physical());
-   fill_alpha_s(slha_io, model);
-   fill_drbar_parameters(slha_io, model);
-   fill_gm2_specific_alphas(slha_io, model);
+   // read all pole masses (including MW) from SMINPUTS
+   fill_from_sminputs(model);
+   fill_from_mass(model.get_physical());
+   fill_scale(model);
+   fill_from_hmix(model);
+   fill_from_A(model);
+   fill_from_msoft(model);
+   fill_alpha_from_gm2calcinput(model);
 }
 
 /**
  * Reads configuration from GM2CalcConfig block
  *
- * @param slha_io SLHA object
  * @param config_options configuration settings
  */
-void fill(const GM2_slha_io& slha_io, Config_options& config_options)
+void GM2_slha_io::fill(Config_options& config_options) const
 {
-   using namespace std::placeholders;
+   GM2_slha_io::Tuple_processor processor = [&config_options] (int key, double value) {
+      return process_gm2calcconfig_tuple(config_options, key, value);
+   };
 
-   GM2_slha_io::Tuple_processor processor
-      = std::bind(process_gm2calcconfig_tuple, std::ref(config_options), _1, _2);
-
-   slha_io.read_block("GM2CalcConfig", processor);
+   read_block("GM2CalcConfig", processor);
 }
 
 namespace {
-void process_gm2calcconfig_tuple(Config_options& config_options,
-                                 int key, double value)
+
+bool is_integer(double value)
+{
+   double intpart;
+   return std::modf(value, &intpart) == 0.0;
+}
+
+template <class Source>
+std::string to_string(Source arg)
+{
+   return boost::lexical_cast<std::string>(arg);
+}
+
+void read_bool(double value, bool& result, const char* error_msg)
+{
+   if (value == 0.0 || value == 1.0) {
+      result = (value != 0.0);
+   } else {
+      throw EInvalidInput(std::string(error_msg) + ": " +
+                          gm2calc::to_string(value) +
+                          " (allowed values: 0 or 1)");
+   }
+}
+
+template <typename T>
+void read_integer(double value, T& result, T min, T max, const char* error_msg)
+{
+   if (is_integer(value) && value >= min && value <= max) {
+      result = static_cast<T>(value);
+   } else {
+      throw EInvalidInput(
+         std::string(error_msg) + ": " + gm2calc::to_string(value) +
+         " (allowed integer values: " + gm2calc::to_string(min) + ",...," +
+         gm2calc::to_string(max) + ")");
+   }
+}
+
+void read_double_non_zero(double value, double& result)
+{
+   const double eps = std::numeric_limits<double>::epsilon();
+
+   if (!is_zero(value, eps)) {
+      result = value;
+   }
+}
+
+void process_gm2calcconfig_tuple(
+   Config_options& config_options, int key, double value)
 {
    switch (key) {
    case 0:
-      config_options.output_format =
-         static_cast<Config_options::E_output_format>(value);
+      read_integer(value,
+                   config_options.output_format,
+                   static_cast<Config_options::E_output_format>(0),
+                   static_cast<Config_options::E_output_format>(
+                      Config_options::NUMBER_OF_OUTPUT_FORMATS - 1),
+                   "unsupported output format in GM2CalcConfig[0]");
       break;
    case 1:
-      config_options.loop_order = value;
+      read_integer(value, config_options.loop_order, 0u, 2u,
+                   "unsupported loop order in GM2CalcConfig[1]");
       break;
    case 2:
-      config_options.tanb_resummation = value;
+      read_bool(value, config_options.tanb_resummation,
+                "unsupported tan(beta) resummation flag value in GM2CalcConfig[2]");
       break;
    case 3:
-      config_options.force_output = value;
+      read_bool(value, config_options.force_output,
+                "unsupported force output flag value in GM2CalcConfig[3]");
       break;
    case 4:
-      config_options.verbose_output = value;
+      read_bool(value, config_options.verbose_output,
+                "unsupported verbose output flag value in GM2CalcConfig[4]");
       break;
    case 5:
-      config_options.calculate_uncertainty = value;
+      read_bool(value, config_options.calculate_uncertainty,
+                "unsupported uncertainty flag value in GM2CalcConfig[5]");
       break;
    default:
       WARNING("Unrecognized entry in block GM2CalcConfig: " << key);
@@ -500,19 +510,19 @@ void process_gm2calcconfig_tuple(Config_options& config_options,
    }
 }
 
-void process_gm2calcinput_tuple(MSSMNoFV_onshell& model,
-                                             int key, double value)
+void process_gm2calcinput_tuple(
+   MSSMNoFV_onshell& model, int key, double value)
 {
    switch (key) {
-   case 0: model.set_scale(value);          break;
-   case 1: model.set_alpha_MZ(value);       break;
-   case 2: model.set_alpha_thompson(value); break;
-   case  3: model.set_TB(    value); break;
-   case  4: model.set_Mu(    value); break;
-   case  5: model.set_MassB( value); break;
-   case  6: model.set_MassWB(value); break;
-   case  7: model.set_MassG( value); break;
-   case  8: model.set_MA0(   value); break;
+   case  0: model.set_scale(value);          break;
+   case  1: model.set_alpha_MZ(value);       break;
+   case  2: model.set_alpha_thompson(value); break;
+   case  3: model.set_TB(    value);         break;
+   case  4: model.set_Mu(    value);         break;
+   case  5: model.set_MassB( value);         break;
+   case  6: model.set_MassWB(value);         break;
+   case  7: model.set_MassG( value);         break;
+   case  8: model.set_MA0(   value);         break;
    case  9: model.set_ml2(0, 0, signed_sqr(value)); break;
    case 10: model.set_ml2(1, 1, signed_sqr(value)); break;
    case 11: model.set_ml2(2, 2, signed_sqr(value)); break;
@@ -543,23 +553,38 @@ void process_gm2calcinput_tuple(MSSMNoFV_onshell& model,
    }
 }
 
-void process_fermion_sminputs_tuple(
-   MSSMNoFV_onshell_physical& physical, int key, double value)
+void process_gm2calcinput_tuple(
+   GM2CalcInput_data& data, int key, double value)
 {
+   switch (key) {
+   case  0: /* scale */                  break;
+   case  1: data.alpha_MZ = value;       break;
+   case  2: data.alpha_thompson = value; break;
+   default:
+      break;
+   }
+}
+
+void process_sminputs_tuple(
+   MSSMNoFV_onshell& model, int key, double value)
+{
+   const double Pi = 3.14159265358979323846;
+   MSSMNoFV_onshell_physical& physical = model.get_physical();
+
    switch (key) {
    case  1: /* alpha_em(MZ) */      break;
    case  2: /* G_F */               break;
-   case  3: /* alpha_s(MZ) */       break;
+   case  3: model.set_g3(std::sqrt(4*Pi*value)); break;
    case  4: physical.MVZ = value;   break;
    case  5: physical.MFb = value;   break;
    case  6: physical.MFt = value;   break;
    case  7: physical.MFtau = value; break;
-   case  8: /* nu_3 */              break;
+   case  8: physical.MFvt = value;  break;
    case  9: physical.MVWm = value;  break;
    case 11: physical.MFe = value;   break;
-   case 12: /* nu_1 */              break;
+   case 12: physical.MFve = value;  break;
    case 13: physical.MFm = value;   break;
-   case 14: /* nu_2 */              break;
+   case 14: physical.MFvm = value;  break;
    case 21: physical.MFd = value;   break;
    case 23: physical.MFs = value;   break;
    case 22: physical.MFu = value;   break;
@@ -570,12 +595,26 @@ void process_fermion_sminputs_tuple(
    }
 }
 
+void process_hmix_tuple(
+   HMIX_data& data, int key, double value)
+{
+   switch (key) {
+   case 1: data.mu = value  ; break;
+   case 2: data.tanb = value; break;
+   case 3: data.v = value   ; break;
+   case 4: data.mA2 = value ; break;
+   default:
+      WARNING("Unrecognized entry in block HMIX: " << key);
+      break;
+   }
+}
+
 void process_msoft_tuple(
    MSSMNoFV_onshell& model, int key, double value)
 {
    switch (key) {
-   case 21: /* mHd2 */                            ; break;
-   case 22: /* mHu2 */                            ; break;
+   case 21: model.set_mHd2(value)                 ; break;
+   case 22: model.set_mHu2(value)                 ; break;
    case 31: model.set_ml2(0, 0, signed_sqr(value)); break;
    case 32: model.set_ml2(1, 1, signed_sqr(value)); break;
    case 33: model.set_ml2(2, 2, signed_sqr(value)); break;
@@ -625,12 +664,12 @@ void process_mass_tuple(
    case 2000005: physical.MSb(1) = value;   break;
    case 1000006: physical.MSt(0) = value;   break;
    case 2000006: physical.MSt(1) = value;   break;
-   case 24     : /* MW */                   break;
+   case 24     : read_double_non_zero(value, physical.MVWm); break;
    case 25     : physical.Mhh(0) = value;   break;
    case 35     : physical.Mhh(1) = value;   break;
    case 36     : physical.MAh(1) = value;   break;
    case 37     : physical.MHpm(1) = value;  break;
-   case 1000021: /* gluino */               break;
+   case 1000021: physical.MGlu = value;     break;
    case 1000022: physical.MChi(0) = value;  break;
    case 1000023: physical.MChi(1) = value;  break;
    case 1000025: physical.MChi(2) = value;  break;
@@ -641,6 +680,7 @@ void process_mass_tuple(
       break;
    }
 }
+
 } // anonymous namespace
 
 } // namespace gm2calc

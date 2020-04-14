@@ -51,6 +51,9 @@ CreateExtraParameterArrayGetter::usage="";
 CreateExtraParameterArraySetter::usage="";
 CreateInputParameterArrayGetter::usage="";
 CreateInputParameterArraySetter::usage="";
+CreateModelParameterGetter::usage="";
+CreateModelParameterSetter::usage="";
+CreateDelegateModelParameterGetter::usage="";
 
 CreateEnumName::usage="Creates enum symbol for given parameter";
 DecomposeParameter::usage="decomposes parameter into its real components";
@@ -169,23 +172,21 @@ expression.";
 
 FillInputParametersFromTuples::usage="";
 
-DecreaseIndexLiterals::usage="@unote
+DecreaseIndexLiterals::usage="@note
 Definetly safe calls:
 	f[ { Head1[Int1] , Head2[Int2], ... } ]
 	f[ { Head1[Int1] , Head2[Int2], ... }, { HeadI1, HeadI2, ...} ]
-Possible calls: 
-	1. f[ exprD ] 
+Possible calls:
+	1. f[ exprD ]
 	2. f[ exprD, listH ]
-where 
-	#1 exprD is @usomething which probably contains subexpressions (at @any level) of the form HeadOfExpression[SomeInteger]
-	#2 listH is List which has subexpressions (only at @lowest level) of the form	HeadOfExpression 
+where
+	#1 exprD is expression which probably contains subexpressions (at any level) of the form HeadOfExpression[SomeInteger]
+	#2 listH is List which has subexpressions (only at lowest level) of the form	HeadOfExpression
 Output:
-	1. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) of all InputParameters, ExtraParameters, allModelParameters, allOutputParameters and changes 
+	1. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) of all InputParameters, ExtraParameters, allModelParameters, allOutputParameters and changes
 	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
-	2. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) in listH and changes 
+	2. Gets names ({HeadOfExpression1, HeadOfExpression2, ...}) in listH and changes
 	   in exprD any HeadOfExpression1[SomeInteger] to HeadOfExpression1[SomeInteger-1]
-Issues: 
-	1. Do not work if HeadOfExpression1@HeadOfExpression2@SomeInteger exist in exprD
 ";
 IncreaseIndexLiterals::usage="";
 
@@ -1884,6 +1885,21 @@ CreateInputParameterArraySetter[inputParameters_List] :=
                paramCount += nAssignments;
               ];
            Return[set];
+          ];
+
+CreateModelParameterGetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par]]
+          ];
+
+CreateDelegateModelParameterGetter[par_, macro_String:"SUPER"] :=
+    Module[{name = CConversion`ToValidCSymbolString[par]},
+           CConversion`CreateInlineGetters[name, name, GetType[par], "", macro]
+          ];
+
+CreateModelParameterSetter[par_] :=
+    Module[{name = CConversion`ToValidCSymbolString[par], type = GetType[par]},
+           CConversion`CreateInlineSetters[name, type]
           ];
 
 FindSLHABlock[blockList_List, par_] :=

@@ -26,6 +26,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <type_traits>
+#include <boost/type_traits/is_complex.hpp>
 
 namespace flexiblesusy {
 
@@ -37,10 +38,20 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 }
 
 template <typename T>
-typename std::enable_if<!std::is_unsigned<T>::value, bool>::type
+typename std::enable_if<!std::is_unsigned<T>::value &&
+                        !boost::is_complex<T>::value, bool>::type
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return std::abs(a) <= prec;
+}
+
+template <typename T>
+typename std::enable_if<boost::is_complex<T>::value, bool>::type
+is_zero(T a,
+        typename T::value_type prec
+        = std::numeric_limits<typename T::value_type>::epsilon()) noexcept
+{
+   return is_zero(a.real(), prec) && is_zero(a.imag(), prec);
 }
 
 template <typename T>
