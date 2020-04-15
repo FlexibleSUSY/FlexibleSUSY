@@ -1483,49 +1483,39 @@ void fs_diagonalize_hermitian
 
 // explicit template function instantiations ///////////////////////////
 
-extern template
-void fs_diagonalize_hermitian(const Eigen::Matrix<double, 2, 2>&,
-                              Eigen::Array<double, 2, 1>&,
-                              Eigen::Matrix<double, 2, 2>&);
+#define INSTANTIATE_FS_HERMITIAN(N,Mtype,Ztype)                         \
+   extern template                                                      \
+   void fs_diagonalize_hermitian(const Eigen::Matrix<Mtype, N, N>&,     \
+                                 Eigen::Array<double, N, 1>&,           \
+                                 Eigen::Matrix<Ztype, N, N>&);
 
-extern template
-void fs_diagonalize_hermitian(const Eigen::Matrix<double, 3, 3>&,
-                              Eigen::Array<double, 3, 1>&,
-                              Eigen::Matrix<double, 3, 3>&);
+#define INSTANTIATE_FS_SYMMETRIC(N,Mtype,Ztype)                         \
+   extern template                                                      \
+   void fs_diagonalize_symmetric(const Eigen::Matrix<Mtype, N, N>&,     \
+                                 Eigen::Array<double, N, 1>&,           \
+                                 Eigen::Matrix<Ztype, N, N>&);
 
-extern template
-void fs_diagonalize_hermitian(const Eigen::Matrix<double, 6, 6>&,
-                              Eigen::Array<double, 6, 1>&,
-                              Eigen::Matrix<double, 6, 6>&);
+#define INSTANTIATE_FS_SVD(N,Mtype,Ztype)                               \
+   extern template                                                      \
+   void fs_svd(const Eigen::Matrix<Mtype, N, N>&,                       \
+               Eigen::Array<double, N, 1>&,                             \
+               Eigen::Matrix<Ztype, N, N>&,                             \
+               Eigen::Matrix<Ztype, N, N>&);
 
-extern template
-void fs_diagonalize_symmetric(const Eigen::Matrix<double, 4, 4>&,
-                              Eigen::Array<double, 4, 1>&,
-                              Eigen::Matrix<std::complex<double>, 4, 4>&);
+INSTANTIATE_FS_HERMITIAN(2,double,double)
+INSTANTIATE_FS_HERMITIAN(3,double,double)
+INSTANTIATE_FS_HERMITIAN(6,double,double)
 
-extern template
-void fs_svd(const Eigen::Matrix<double, 2, 2>&,
-            Eigen::Array<double, 2, 1>&,
-            Eigen::Matrix<double, 2, 2>&,
-            Eigen::Matrix<double, 2, 2>&);
+INSTANTIATE_FS_SYMMETRIC(4,double,std::complex<double>)
 
-extern template
-void fs_svd(const Eigen::Matrix<double, 2, 2>&,
-            Eigen::Array<double, 2, 1>&,
-            Eigen::Matrix<std::complex<double>, 2, 2>&,
-            Eigen::Matrix<std::complex<double>, 2, 2>&);
+INSTANTIATE_FS_SVD(2,double,double)
+INSTANTIATE_FS_SVD(2,double,std::complex<double>)
+INSTANTIATE_FS_SVD(3,double,double)
+INSTANTIATE_FS_SVD(3,double,std::complex<double>)
 
-extern template
-void fs_svd(const Eigen::Matrix<double, 3, 3>&,
-            Eigen::Array<double, 3, 1>&,
-            Eigen::Matrix<double, 3, 3>&,
-            Eigen::Matrix<double, 3, 3>&);
-
-extern template
-void fs_svd(const Eigen::Matrix<double, 3, 3>&,
-            Eigen::Array<double, 3, 1>&,
-            Eigen::Matrix<std::complex<double>, 3, 3>&,
-            Eigen::Matrix<std::complex<double>, 3, 3>&);
+#undef INSTANTIATE_FS_HERMITIAN
+#undef INSTANTIATE_FS_SYMMETRIC
+#undef INSTANTIATE_FS_SVD
 
 } // namespace flexiblesusy
 
