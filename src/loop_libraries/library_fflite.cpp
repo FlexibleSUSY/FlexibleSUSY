@@ -18,8 +18,8 @@
 
 #include <limits>
 #include <boost/preprocessor/repeat.hpp>
-
 #include "library_fflite.hpp"
+#include "fortran_utils.hpp"
 #include "fflite.hpp"
 
 #define NAN_Q std::numeric_limits<double>::quiet_NaN()
@@ -34,7 +34,10 @@ namespace looplibrary
 
 Fflite::Fflite()
 {
+   futils::swap();
    ltini_();
+   futils::flush();
+   futils::swap();
 }
 
 std::complex<double> Fflite::A0(A_ARGS) noexcept

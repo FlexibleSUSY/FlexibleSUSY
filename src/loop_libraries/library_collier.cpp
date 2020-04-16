@@ -19,6 +19,7 @@
 #include <limits>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
+#include "fortran_utils.hpp"
 #include "library_collier.hpp"
 
 #define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
@@ -87,7 +88,10 @@ namespace looplibrary
 
 void Collier::initialize() noexcept
 {
+   futils::swap();
    initialize_collier_impl();
+   futils::flush();
+   futils::swap();
 }
 
 void Collier::set_mu2_uv(double scl2_in) noexcept

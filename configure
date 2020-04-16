@@ -175,6 +175,8 @@ CXXFLAGS="-std=c++14 -O2 -fPIC"
 FFLAGS="-O2 -fPIC"
 FLIBS=""
 FMOD=""
+FSTD=''
+FUTILIBS=''
 BOOSTTESTLIBS=""
 BOOSTTHREADLIBS=""
 THREADLIBS=""
@@ -1889,6 +1891,18 @@ check_fmod() {
 }
 
 #_____________________________________________________________________
+check_fstd() {
+   case "${FC}" in
+      gfortran*)
+         FSTD='-std=f2008'
+         ;;
+      ifort*)
+         FSTD='-std08'
+         ;;
+   esac
+}
+
+#_____________________________________________________________________
 check_fflags() {
     case "${FC}" in
         gfortran*)
@@ -2230,15 +2244,6 @@ check_collier_incl() {
 
 #_____________________________________________________________________
 check_collier() {
-   case "${FC}" in
-      gfortran*)
-         COLLIERSTD='-std=f2008'
-         ;;
-      ifort*)
-         COLLIERSTD='-std08'
-         ;;
-   esac
-
    [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
    type pkg-config > /dev/null && [ -f COLLIER.pc ] && \
    {
@@ -2311,6 +2316,13 @@ check_looplibrary() {
       check_looptools
       LOOPFUNCFLAGS="$LOOPFUNCFLAGS $LOOPTOOLSFLAGS"
       LOOPFUNCLIBS="$LOOPFUNCLIBS $LOOPTOOLSLIBS"
+   fi
+
+   # if any is present then the fortran_utils will be compiled
+   if [ "$enable_collier" = "yes" ] || \
+      [ "$enable_fflite" = "yes" ] || \
+      [ "$enable_looptools" = "yes" ]; then
+      FUTILIBS="$ABSBASEDIR/src/libfortran_utils.a"
    fi
 }
 
@@ -3201,14 +3213,15 @@ replace_markers() {
 	-e "s|@ENABLE_COLLIER@|$enable_collier|" \
 	-e "s|@COLLIERFLAGS@|$COLLIERFLAGS|" \
 	-e "s|@COLLIERLIBS@|$COLLIERLIBS|" \
-   -e "s|@COLLIERSTD@|$COLLIERSTD|"   \
 	-e "s|@CPPFLAGS@|$CPPFLAGS|"       \
 	-e "s|@CXXFLAGS@|$CXXFLAGS|"       \
 	-e "s|@CXX@|$CXX|"                 \
 	-e "s|@FC@|$FC|"                   \
 	-e "s|@FFLAGS@|$FFLAGS|"           \
 	-e "s|@FLIBS@|$FLIBS|"             \
+	-e "s|@FUTILIBS@|$FUTILIBS|"       \
    -e "s|@FMOD@|$FMOD|"               \
+   -e "s|@FSTD@|$FSTD|"   \
 	-e "s|@FSCONFIG@|$FSCONFIG|"       \
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
@@ -3511,6 +3524,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_fc
     check_fflags
     check_fmod
+    check_fstd
     check_linking
     check_librarylink
     check_boost
@@ -3569,7 +3583,6 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@THREADLIBS@|$THREADLIBS|"                 \
     -e "s|@COLLIERFLAGS@|$COLLIERFLAGS|"             \
     -e "s|@COLLIERLIBS@|$COLLIERLIBS|"               \
-    -e "s|@COLLIERSTD@|$COLLIERSTD|"                 \
     -e "s|@CPPFLAGS@|$CPPFLAGS|"                     \
     -e "s|@CXX@|$CXX|"                               \
     -e "s|@CXXFLAGS@|$CXXFLAGS|"                     \
@@ -3578,6 +3591,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FFLAGS@|$FFLAGS|"                         \
     -e "s|@FLIBS@|$FLIBS|"                           \
     -e "s|@FMOD@|$FMOD|"                             \
+    -e "s|@FSTD@|$FSTD|"                             \
+    -e "s|@FUTILIBS@|$FUTILIBS|"                     \
     -e "s|@GSLLIBS@|$GSLLIBS|"                       \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \

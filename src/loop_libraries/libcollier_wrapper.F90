@@ -1,3 +1,21 @@
+! ====================================================================
+! This file is part of FlexibleSUSY.
+!
+! FlexibleSUSY is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published
+! by the Free Software Foundation, either version 3 of the License,
+! or (at your option) any later version.
+!
+! FlexibleSUSY is distributed in the hope that it will be useful, but
+! WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+! General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with FlexibleSUSY.  If not, see
+! <http://www.gnu.org/licenses/>.
+! ====================================================================
+
 #define PASTE(a) a
 #define CAT(a,b) PASTE(a)b
 #define TO_STRING(ARG) _QUOTE_START_ ARG _QUOTE_END_
@@ -50,7 +68,7 @@ _NL_\
 _NL_   deallocate(Dcoeff, Dcoeffuv) \
 _NL_end
 
-module Collier_wrapper
+module LibCollier_wrapper
    use COLLIER
    use, intrinsic :: iso_c_binding
    use, intrinsic :: iso_fortran_env

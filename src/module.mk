@@ -140,6 +140,32 @@ endif
 LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))
 LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
 
+# files which allow some useful things with fortran functions ##########
+ifeq (yes, $(sort $(filter yes, $(ENABLE_FFLITE) $(ENABLE_COLLIER) $(ENABLE_LOOPTOOLS) )))
+
+LIBFLEXI_SRC += \
+	$(DIR)/fortran_utils.cpp
+
+LIBFLEXI_HDR += \
+	$(DIR)/fortran_utils.hpp
+
+FUTI := $(DIR)/libfortran_utils
+
+$(DIR)/fortran_utils.hpp $(DIR)/fortran_utils.cpp : $(FUTI).a
+
+$(FUTI).a : $(FUTI).o
+	@$(MSG)
+	@$(MODULE_MAKE_LIB_CMD) $@ $(FUTI).o
+
+$(FUTI).o : $(FUTI).f90
+	@$(MSG)
+	@$(FC) $(FFLAGS) $(FSTD) $(FMOD) src -c $< -o $(FUTI).o
+
+$(FUTI).mod : $(FUTI).f90 $(FUTI).o
+	@true
+
+endif
+
 # loop library #########################################################
 LOOP_DIR := $(DIR)/loop_libraries
 
@@ -173,19 +199,24 @@ LIBFLEXI_SRC += \
 LIBFLEXI_HDR += \
 		$(LOOP_DIR)/library_collier.hpp
 
-$(LOOP_HDR) $(LOOP_SRC) : $(LOOP_DIR)/libcollier_wrapper.a
+COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
 
-$(LOOP_DIR)/libcollier_wrapper.a : $(LOOP_DIR)/collier_wrapper.o $(LOOP_DIR)/collier_wrapper.mod
-	@$(MSG)
-	@$(MODULE_MAKE_LIB_CMD) $(LOOP_DIR)/libcollier_wrapper.a $(LOOP_DIR)/collier_wrapper.o
+$(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
 
-$(LOOP_DIR)/collier_wrapper.mod $(LOOP_DIR)/collier_wrapper.o : $(LOOP_DIR)/collier_wrapper.f90
+$(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
 	@$(MSG)
-	@$(FC) $(FFLAGS) $(COLLIERSTD) -c $(LOOP_DIR)/collier_wrapper.f90 $(COLLIERFLAGS) -o $(LOOP_DIR)/collier_wrapper.o $(FMOD) $(LOOP_DIR)
+	@$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
 
-$(LOOP_DIR)/collier_wrapper.f90 : $(LOOP_DIR)/collier_wrapper.F90
+$(COLLWRAP).o : $(COLLWRAP).f90
 	@$(MSG)
-	@$(FC) -E $(LOOP_DIR)/collier_wrapper.F90 | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $(LOOP_DIR)/collier_wrapper.f90
+	@$(FC) $(FFLAGS) $(FSTD) $(FMOD) $(LOOP_DIR) -c $< $(COLLIERFLAGS) -o $(COLLWRAP).o
+
+$(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
+	@true
+
+$(COLLWRAP).f90 : $(COLLWRAP).F90
+	@$(MSG)
+	@$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $@
 endif
 
 LIBFLEXI_OBJ := \

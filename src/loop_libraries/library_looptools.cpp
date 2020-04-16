@@ -17,8 +17,9 @@
 // ====================================================================
 
 #include <limits>
-#include "library_looptools.hpp"
 #include "clooptools.h"
+#include "fortran_utils.hpp"
+#include "library_looptools.hpp"
 
 #define LOOPTOOLS_B(NAME,INDEX) std::complex<double> Looptools::NAME(B_ARGS) noexcept\
 {\
@@ -43,7 +44,10 @@ namespace looplibrary
 
 Looptools::Looptools() : current_mu2_uv(1.0)
 {
+   futils::swap();
    ltini();
+   futils::flush();
+   futils::swap();
 }
 
 void Looptools::set_mu2_uv(double scl2_in) noexcept
