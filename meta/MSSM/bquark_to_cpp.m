@@ -40,6 +40,9 @@ fin[m1_, m2_, m3_]       := Fin3[m1,m2,m3,mmu];
 Simp[expr_] := Collect[expr //. {
        mb^2                  -> mmb,
        1/mb^2                -> 1/mmb,
+       (-mmgl + mmsb1)^n_:-1 /; n < 0 :> (invdgb1)^(-n),
+       (-mmgl + mmsb2)^n_:-1 /; n < 0 :> (invdgb2)^(-n),
+       (mmsb1 - mmsb2)^n_:-1 /; n < 0 :> (invdb12)^(-n),
        Power[x_,n_] /; n > 0 :> Symbol["pow" <> ToString[n]][x],
        Power[x_,-2]          :> 1/Symbol["pow2"][x],
        Power[x_,-3]          :> 1/Symbol["pow3"][x],
@@ -348,6 +351,9 @@ double delta_mb_2loop(const Parameters& pars)
    const double ltu    = std::log(mmt/mmu);
    const double s2t    = 2*mt*Xt / (mmst1 - mmst2);
    const double s2b    = 2*mb*Xb / (mmsb1 - mmsb2);
+   const double invdgb1 = 1/(-mmgl + mmsb1);
+   const double invdgb2 = 1/(-mmgl + mmsb2);
+   const double invdb12 = 1/(mmsb1 - mmsb2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[b2l] <> ";"] <> "
