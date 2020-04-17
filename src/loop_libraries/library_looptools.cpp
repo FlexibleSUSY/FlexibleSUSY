@@ -89,24 +89,23 @@ LOOPTOOLS_D(D22,dd22)
 LOOPTOOLS_D(D23,dd23)
 LOOPTOOLS_D(D33,dd33)
 
-void Looptools::A(std::complex<double> (&a)[1], A_ARGS) noexcept
+void Looptools::A(std::array<std::complex<double>, 1> &a, A_ARGS) noexcept
 {
    set_mu2_uv(scl2_in);
-   a[0] = A0i(aa0, m02_in.real());
+   a.at(0) = A0i(aa0, m02_in.real());
 }
 
-void Looptools::B(std::complex<double> (&b)[2], B_ARGS) noexcept
+void Looptools::B(std::array<std::complex<double>, 2> &b, B_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double m02 = m02_in.real();
    double m12 = m12_in.real();
    set_mu2_uv(scl2_in);
-   b[0] = B0i(bb0, p10, m02, m12);
-   b[1] = B0i(bb1, p10, m02, m12);
+   b.at(0) = B0i(bb0, p10, m02, m12);
+   b.at(1) = B0i(bb1, p10, m02, m12);
 }
 
-void Looptools::C(
-   std::complex<double> (&c)[7], C_ARGS) noexcept
+void Looptools::C(std::array<std::complex<double>, 7> &c, C_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double p21 = p21_in.real();
@@ -115,17 +114,16 @@ void Looptools::C(
    double m12 = m12_in.real();
    double m22 = m22_in.real();
    set_mu2_uv(scl2_in);
-   c[0] = C0i(cc0, p10, p21, p20, m02, m12, m22);
-   c[1] = C0i(cc1, p10, p21, p20, m02, m12, m22);
-   c[2] = C0i(cc2, p10, p21, p20, m02, m12, m22);
-   c[3] = C0i(cc00, p10, p21, p20, m02, m12, m22);
-   c[4] = C0i(cc11, p10, p21, p20, m02, m12, m22);
-   c[5] = C0i(cc12, p10, p21, p20, m02, m12, m22);
-   c[6] = C0i(cc22, p10, p21, p20, m02, m12, m22);
+   c.at(0) = C0i(cc0, p10, p21, p20, m02, m12, m22);
+   c.at(1) = C0i(cc1, p10, p21, p20, m02, m12, m22);
+   c.at(2) = C0i(cc2, p10, p21, p20, m02, m12, m22);
+   c.at(3) = C0i(cc00, p10, p21, p20, m02, m12, m22);
+   c.at(4) = C0i(cc11, p10, p21, p20, m02, m12, m22);
+   c.at(5) = C0i(cc12, p10, p21, p20, m02, m12, m22);
+   c.at(6) = C0i(cc22, p10, p21, p20, m02, m12, m22);
 }
 
-void Looptools::D(
-   std::complex<double> (&d)[11], D_ARGS) noexcept
+void Looptools::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double p21 = p21_in.real();
@@ -138,17 +136,17 @@ void Looptools::D(
    double m22 = m22_in.real();
    double m32 = m32_in.real();
    set_mu2_uv(scl2_in);
-   d[0] = D0i(dd0, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[1] = D0i(dd1, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[2] = D0i(dd2, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[3] = D0i(dd3, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[4] = D0i(dd00, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[5] = D0i(dd11, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[6] = D0i(dd12, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[7] = D0i(dd13, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[8] = D0i(dd22, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[9] = D0i(dd23, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d[10] = D0i(dd33, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(0) = D0i(dd0, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(1) = D0i(dd1, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(2) = D0i(dd2, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(3) = D0i(dd3, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(4) = D0i(dd00, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(5) = D0i(dd11, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(6) = D0i(dd12, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(7) = D0i(dd13, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(8) = D0i(dd22, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(9) = D0i(dd23, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+   d.at(10) = D0i(dd33, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
 }
 
 } // namespace looplibrary

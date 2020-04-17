@@ -84,23 +84,23 @@ std::complex<double> Fflite::B00(B_ARGS) noexcept
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED,(C_ARGS),C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED,(D_ARGS),D_SEQ)
 
-void Fflite::A(std::complex<double> (&a)[1], A_ARGS) noexcept
+void Fflite::A(std::array<std::complex<double>, 1> &a, A_ARGS) noexcept
 {
-   a[0] = A0(m02_in, scl2_in);
+   a.at(0) = A0(m02_in, scl2_in);
 }
 
-void Fflite::B(std::complex<double> (&b)[2], B_ARGS) noexcept
+void Fflite::B(std::array<std::complex<double>, 2> &b, B_ARGS) noexcept
 {
-   b[0] = B0(p10_in, m02_in, m12_in, scl2_in);
-   b[1] = B1(p10_in, m02_in, m12_in, scl2_in);
+   b.at(0) = B0(p10_in, m02_in, m12_in, scl2_in);
+   b.at(1) = B1(p10_in, m02_in, m12_in, scl2_in);
 }
 
-void Fflite::C(std::complex<double> (&c)[7], C_ARGS) noexcept
+void Fflite::C(std::array<std::complex<double>, 7> &c, C_ARGS) noexcept
 {
    BOOST_PP_REPEAT(7,SET_TO_NAN,c)
 }
 
-void Fflite::D(std::complex<double> (&d)[11], D_ARGS) noexcept
+void Fflite::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 {
    BOOST_PP_REPEAT(11,SET_TO_NAN,d)
 }

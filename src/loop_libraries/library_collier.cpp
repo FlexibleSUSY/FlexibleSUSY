@@ -116,26 +116,25 @@ BOOST_PP_SEQ_FOR_EACH(COLLIER_B,(B_ARGS),B_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_C,(C_ARGS),C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_D,(D_ARGS),D_SEQ)
 
-void Collier::A(std::complex<double> (&a)[1], A_ARGS) noexcept
+void Collier::A(std::array<std::complex<double>, 1> &a, A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
 
    set_mu2_uv(scl2_in);
-   get_A_impl(a, &m02);
+   get_A_impl(a.data(), &m02);
 }
 
-void Collier::B(std::complex<double> (&b)[2], B_ARGS) noexcept
+void Collier::B(std::array<std::complex<double>, 2> &b, B_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
    const std::complex<double> m12 = m12_in;
 
    set_mu2_uv(scl2_in);
-   get_B_impl(b, &p10, &m02, &m12);
+   get_B_impl(b.data(), &p10, &m02, &m12);
 }
 
-void Collier::C(
-   std::complex<double> (&c)[7], C_ARGS) noexcept
+void Collier::C(std::array<std::complex<double>, 7> &c, C_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> p21 (p21_in.real(), 0.);
@@ -145,11 +144,10 @@ void Collier::C(
    const std::complex<double> m22 = m22_in;
 
    set_mu2_uv(scl2_in);
-   get_C_impl(c, &p10, &p21, &p20, &m02, &m12, &m22);
+   get_C_impl(c.data(), &p10, &p21, &p20, &m02, &m12, &m22);
 }
 
-void Collier::D(
-   std::complex<double> (&d)[11], D_ARGS) noexcept
+void Collier::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 {
    const std::complex<double> p10 (p10_in.real(), 0.);
    const std::complex<double> p21 (p21_in.real(), 0.);
@@ -163,7 +161,7 @@ void Collier::D(
    const std::complex<double> m32 = m32_in;
 
    set_mu2_uv(scl2_in);
-   get_D_impl(d, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
+   get_D_impl(d.data(), &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);
 }
 
 } // namespace looplibrary

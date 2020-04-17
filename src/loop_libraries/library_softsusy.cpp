@@ -110,26 +110,26 @@ std::complex<double> Softsusy::D00(D_ARGS) noexcept
 
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED,(D_ARGS),(D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33))
 
-void Softsusy::A(std::complex<double> (&a)[1], A_ARGS) noexcept
+void Softsusy::A(std::array<std::complex<double>, 1> &a, A_ARGS) noexcept
 {
    double m = std::sqrt(m02_in.real());
    double q = std::sqrt(scl2_in);
 
-   a[0] = {softsusy::a0(m, q), 0.0};
+   a.at(0) = {softsusy::a0(m, q), 0.0};
 }
 
-void Softsusy::B(std::complex<double> (&b)[2], B_ARGS) noexcept
+void Softsusy::B(std::array<std::complex<double>, 2> &b, B_ARGS) noexcept
 {
    double p = std::sqrt(p10_in.real());
    double m1 = std::sqrt(m02_in.real());
    double m2 = std::sqrt(m12_in.real());
    double q = std::sqrt(scl2_in);
 
-   b[0] = {softsusy::b0(p, m1, m2, q), 0.0};
-   b[1] = {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
+   b.at(0) = {softsusy::b0(p, m1, m2, q), 0.0};
+   b.at(1) = {(-1)*softsusy::b1(p, m1, m2, q), 0.0};
 }
 
-void Softsusy::C(std::complex<double> (&c)[7], C_ARGS) noexcept
+void Softsusy::C(std::array<std::complex<double>, 7> &c, C_ARGS) noexcept
 {
    double m1 = std::sqrt(m02_in.real());
    double m2 = std::sqrt(m12_in.real());
@@ -137,16 +137,16 @@ void Softsusy::C(std::complex<double> (&c)[7], C_ARGS) noexcept
    double q = std::sqrt(scl2_in);
    std::complex<double> undefined = {NAN_Q, NAN_Q};
 
-   c[0] = {softsusy::c0(m1, m2, m3), 0.0};
-   c[1] = undefined;
-   c[2] = undefined;
-   c[3] = {softsusy::c00(m1, m2, m3, q), 0.0};
-   c[4] = undefined;
-   c[5] = undefined;
-   c[6] = undefined;
+   c.at(0) = {softsusy::c0(m1, m2, m3), 0.0};
+   c.at(1) = undefined;
+   c.at(2) = undefined;
+   c.at(3) = {softsusy::c00(m1, m2, m3, q), 0.0};
+   c.at(4) = undefined;
+   c.at(5) = undefined;
+   c.at(6) = undefined;
 }
 
-void Softsusy::D(std::complex<double> (&d)[11], D_ARGS) noexcept
+void Softsusy::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 {
    double m1 = std::sqrt(m02_in.real());
    double m2 = std::sqrt(m12_in.real());
@@ -154,17 +154,17 @@ void Softsusy::D(std::complex<double> (&d)[11], D_ARGS) noexcept
    double m4 = std::sqrt(m32_in.real());
    std::complex<double> undefined = {NAN_Q, NAN_Q};
 
-   d[0] = {softsusy::d0(m1, m2, m3, m4), 0.0};
-   d[1] = undefined;
-   d[2] = undefined;
-   d[3] = undefined;
-   d[4] = {softsusy::d27(m1, m2, m3, m4), 0.0};
-   d[5] = undefined;
-   d[6] = undefined;
-   d[7] = undefined;
-   d[8] = undefined;
-   d[9] = undefined;
-   d[10] = undefined;
+   d.at(0) = {softsusy::d0(m1, m2, m3, m4), 0.0};
+   d.at(1) = undefined;
+   d.at(2) = undefined;
+   d.at(3) = undefined;
+   d.at(4) = {softsusy::d27(m1, m2, m3, m4), 0.0};
+   d.at(5) = undefined;
+   d.at(6) = undefined;
+   d.at(7) = undefined;
+   d.at(8) = undefined;
+   d.at(9) = undefined;
+   d.at(10) = undefined;
 }
 
 } // namespace looplibrary

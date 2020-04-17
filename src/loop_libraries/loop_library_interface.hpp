@@ -19,6 +19,7 @@
 #ifndef LOOP_LIBRARY_INTERFACE_H
 #define LOOP_LIBRARY_INTERFACE_H
 
+#include <array>
 #include <complex>
 #include <boost/preprocessor/seq/for_each.hpp>
 
@@ -114,10 +115,10 @@ class Loop_library_interface
       BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(B_ARGS),B_SEQ)
       BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(C_ARGS),C_SEQ)
       BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(D_ARGS),D_SEQ)
-      virtual void A(std::complex<double> (&)[1], A_ARGS) = 0;
-      virtual void B(std::complex<double> (&)[2], B_ARGS) = 0;
-      virtual void C(std::complex<double> (&)[7], C_ARGS) = 0;
-      virtual void D(std::complex<double> (&)[11], D_ARGS) = 0;
+      virtual void A(std::array<std::complex<double>, 1> &, A_ARGS) = 0;
+      virtual void B(std::array<std::complex<double>, 2> &, B_ARGS) = 0;
+      virtual void C(std::array<std::complex<double>, 7> &, C_ARGS) = 0;
+      virtual void D(std::array<std::complex<double>, 11> &, D_ARGS) = 0;
 };
 } // namespace looplibrary
 
