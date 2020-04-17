@@ -140,6 +140,9 @@ endif
 LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))
 LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
 
+LIBAUX := ''
+LIBAUX_AUTOGEN := ''
+
 # files which allow some useful things with fortran functions ##########
 ifeq (yes, $(sort $(filter yes, $(ENABLE_FFLITE) $(ENABLE_COLLIER) $(ENABLE_LOOPTOOLS) )))
 
@@ -163,6 +166,9 @@ $(FUTI).o : $(FUTI).f90
 
 $(FUTI).mod : $(FUTI).f90 $(FUTI).o
 	@true
+
+LIBAUX += \
+	$(FUTI).a
 
 endif
 
@@ -217,12 +223,23 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 $(COLLWRAP).f90 : $(COLLWRAP).F90
 	$(Q)$(MSG)
 	$(Q)$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $@
+
+LIBAUX += \
+	$(COLLWRAP).a
+
+LIBAUX_AUTOGEN += \
+	$(COLLWRAP).f90
+
 endif
 
 LIBFLEXI_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBFLEXI_SRC))) \
 		$(patsubst %.c, %.o, $(filter %.c, $(LIBFLEXI_SRC))) \
 		$(patsubst %.f, %.o, $(filter %.f, $(LIBFLEXI_SRC)))
+
+LIBAUX_OBJ := \
+		$(patsubst %.a, %.o, $(LIBAUX)) \
+		$(patsubst %.a, %.mod, $(LIBAUX))
 
 LIBFLEXI_DEP := \
 		$(LIBFLEXI_OBJ:.o=.d)
@@ -232,7 +249,8 @@ LIBFLEXI     := $(DIR)/libflexisusy$(MODULE_LIBEXT)
 LIBFLEXI_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) clean-$(MODNAME)-dep \
-		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME)
+		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME) \
+		clean-$(MODNAME)-autogen
 
 all-$(MODNAME): $(LIBFLEXI)
 		@true
@@ -249,12 +267,15 @@ clean-$(MODNAME)-dep:
 		$(Q)-rm -f $(LIBFLEXI_DEP)
 
 clean-$(MODNAME)-lib:
-		$(Q)-rm -f $(LIBFLEXI)
+		$(Q)-rm -f $(LIBFLEXI) $(LIBAUX)
 
 clean-$(MODNAME)-obj:
-		$(Q)-rm -f $(LIBFLEXI_OBJ)
+		$(Q)-rm -f $(LIBFLEXI_OBJ) $(LIBAUX_OBJ)
 
-clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
+clean-$(MODNAME)-autogen:
+		$(Q)-rm -f $(LIBAUX_AUTOGEN)
+
+clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj clean-$(MODNAME)-autogen
 		@true
 
 distclean-$(MODNAME): clean-$(MODNAME)
