@@ -154,12 +154,12 @@ FUTI := $(DIR)/libfortran_utils
 $(DIR)/fortran_utils.hpp $(DIR)/fortran_utils.cpp : $(FUTI).a
 
 $(FUTI).a : $(FUTI).o
-	@$(MSG)
-	@$(MODULE_MAKE_LIB_CMD) $@ $(FUTI).o
+	$(Q)$(MSG)
+	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(FUTI).o
 
 $(FUTI).o : $(FUTI).f90
-	@$(MSG)
-	@$(FC) $(FFLAGS) $(FSTD) $(FMOD) src -c $< -o $(FUTI).o
+	$(Q)$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(FSTD) $(FMOD) src -c $< -o $(FUTI).o
 
 $(FUTI).mod : $(FUTI).f90 $(FUTI).o
 	@true
@@ -204,19 +204,19 @@ COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
 $(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
 
 $(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
-	@$(MSG)
-	@$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
+	$(Q)$(MSG)
+	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
 
 $(COLLWRAP).o : $(COLLWRAP).f90
-	@$(MSG)
-	@$(FC) $(FFLAGS) $(FSTD) $(FMOD) $(LOOP_DIR) -c $< $(COLLIERFLAGS) -o $(COLLWRAP).o
+	$(Q)$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(FSTD) $(FMOD) $(LOOP_DIR) -c $< $(COLLIERFLAGS) -o $(COLLWRAP).o
 
 $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 	@true
 
 $(COLLWRAP).f90 : $(COLLWRAP).F90
-	@$(MSG)
-	@$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $@
+	$(Q)$(MSG)
+	$(Q)$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $@
 endif
 
 LIBFLEXI_OBJ := \
