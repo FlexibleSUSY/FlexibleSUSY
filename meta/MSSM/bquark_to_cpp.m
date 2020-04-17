@@ -23,6 +23,7 @@
 Get[FileNameJoin[{"meta", "TextFormatting.m"}]];
 
 b2l = Get[FileNameJoin[{"meta", "MSSM", "bquark_2loop_sqcd_decoupling.m"}]];
+b2l /= g3^4;
 
 colorCF = 4/3; colorCA = 3;
 GS = g3; scale = Q;
@@ -36,17 +37,22 @@ Delta[m1_, m2_, m3_, -1] := DeltaInv[m1,m2,m3];
 fin[0, m1_, m2_]         := Fin20[m1,m2,mmu];
 fin[m1_, m2_, m3_]       := Fin3[m1,m2,m3,mmu];
 
-Simp[expr_] := Collect[expr, { g3, Xt, Xb }] //. {
+Simp[expr_] := Collect[expr, { Xt, Xb }] //. {
         mb^2                  -> mmb,
         1/mb^2                -> 1/mmb,
         Power[x_,n_] /; n > 0 :> Symbol["pow" <> ToString[n]][x],
-        Power[x_,-2]          :> 1/Symbol["pow" <> ToString[2]][x],
-        Power[x_,-3]          :> 1/Symbol["pow" <> ToString[3]][x],
-        Power[x_,-4]          :> 1/Symbol["pow" <> ToString[4]][x],
-        Power[x_,-5]          :> 1/Symbol["pow" <> ToString[5]][x],
-        Power[x_,-6]          :> 1/Symbol["pow" <> ToString[6]][x],
-        Log[x_]               :> log[x],
-        PolyLog[2,x_]         :> dilog[x]
+        Power[x_,-2]          :> 1/Symbol["pow2"][x],
+        Power[x_,-3]          :> 1/Symbol["pow3"][x],
+        Power[x_,-4]          :> 1/Symbol["pow4"][x],
+        Power[x_,-5]          :> 1/Symbol["pow5"][x],
+        Power[x_,-6]          :> 1/Symbol["pow6"][x],
+        Log[mmgl/mmu]         -> lgu,
+        Log[mmst1/mmu]        -> lt1u,
+        Log[mmst2/mmu]        -> lt2u,
+        Log[mmsb1/mmu]        -> lb1u,
+        Log[mmsb2/mmu]        -> lb2u,
+        Log[mmsusy/mmu]       -> lsu,
+        Log[mmt/mmu]          -> ltu
     };
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
@@ -324,11 +330,18 @@ double delta_mb_2loop(const Parameters& pars)
    const double mmsb1  = pow2(pars.msb1);
    const double mmsb2  = pow2(pars.msb2);
    const double mmsusy = pow2(pars.msusy);
+   const double lgu    = std::log(mmgl/mmu);
+   const double lt1u   = std::log(mmst1/mmu);
+   const double lt2u   = std::log(mmst2/mmu);
+   const double lb1u   = std::log(mmsb1/mmu);
+   const double lb2u   = std::log(mmsb2/mmu);
+   const double lsu    = std::log(mmsusy/mmu);
+   const double ltu    = std::log(mmt/mmu);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[b2l] <> ";"] <> "
 
-   return result * twoLoop;
+   return pow4(g3) * result * twoLoop;
 }
 
 } // namespace mssm_twoloop_mb
