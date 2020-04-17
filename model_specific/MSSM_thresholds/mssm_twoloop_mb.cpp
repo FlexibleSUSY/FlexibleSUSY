@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// This file has been generated at Sat 18 Apr 2020 01:11:28
+// This file has been generated at Sat 18 Apr 2020 01:20:19
 // with the script "bquark_to_cpp.m".
 
 #include "mssm_twoloop_mb.hpp"
@@ -189,2222 +189,1426 @@ namespace {
  */
 double delta_mb_2loop(const Parameters& pars)
 {
-   const double g3     = pars.g3;
-   const double Xt     = pars.xt;
-   const double Xb     = pars.xb;
-   const double mgl    = pars.mg;
-   const double mt     = pars.mt;
-   const double mb     = pars.mb;
-   const double mmt    = pow2(pars.mt);
-   const double mmb    = pow2(pars.mb);
-   const double mmgl   = pow2(pars.mg);
-   const double mmgl2  = pow2(mmgl);
-   const double mmgl3  = mmgl*mmgl2;
-   const double mmu    = pow2(pars.Q);
-   const double mmst1  = pow2(pars.mst1);
-   const double mmst2  = pow2(pars.mst2);
-   const double mmsb1  = pow2(pars.msb1);
-   const double mmsb2  = pow2(pars.msb2);
-   const double mmsb12 = pow2(mmsb1);
-   const double mmsb22 = pow2(mmsb2);
-   const double mmsusy = pow2(pars.msusy);
-   const double lgu    = std::log(mmgl/mmu);
-   const double lt1u   = std::log(mmst1/mmu);
-   const double lt2u   = std::log(mmst2/mmu);
-   const double lb1u   = std::log(mmsb1/mmu);
-   const double lb2u   = std::log(mmsb2/mmu);
-   const double lsu    = std::log(mmsusy/mmu);
-   const double ltu    = std::log(mmt/mmu);
-   const double s2t    = 2*mt*Xt / (mmst1 - mmst2);
-   const double s2b    = 2*mb*Xb / (mmsb1 - mmsb2);
+   const double g3      = pars.g3;
+   const double Xt      = pars.xt;
+   const double Xb      = pars.xb;
+   const double mgl     = pars.mg;
+   const double mt      = pars.mt;
+   const double mb      = pars.mb;
+   const double mmt     = pow2(pars.mt);
+   const double mmgl    = pow2(pars.mg);
+   const double mmgl2   = pow2(mmgl);
+   const double mmu     = pow2(pars.Q);
+   const double mmst1   = pow2(pars.mst1);
+   const double mmst2   = pow2(pars.mst2);
+   const double mmsb1   = pow2(pars.msb1);
+   const double mmsb2   = pow2(pars.msb2);
+   const double mmsb12  = pow2(mmsb1);
+   const double mmsb22  = pow2(mmsb2);
+   const double mmsusy  = pow2(pars.msusy);
+   const double lgu     = std::log(mmgl/mmu);
+   const double lt1u    = std::log(mmst1/mmu);
+   const double lt2u    = std::log(mmst2/mmu);
+   const double lb1u    = std::log(mmsb1/mmu);
+   const double lb2u    = std::log(mmsb2/mmu);
+   const double lsu     = std::log(mmsusy/mmu);
+   const double ltu     = std::log(mmt/mmu);
+   const double s2t     = 2*mt*Xt / (mmst1 - mmst2);
+   const double s2b     = 2*mb*Xb / (mmsb1 - mmsb2);
    const double invdgb1 = 1/(-mmgl + mmsb1);
    const double invdgb2 = 1/(-mmgl + mmsb2);
    const double invdb12 = 1/(mmsb1 - mmsb2);
 
    const double result =
-   16.85185185185185 + (11*lb1u)/9. + (11*lb2u)/9. + 8*lgu + (11*lt1u)/9. + (11
-     *lt2u)/9. - (124*ltu)/9. + (16*lgu*ltu)/3. - (16*invdgb1*mmsb1)/3. + 6*
-     invdgb2*mmsb1 - 8*invdgb1*lb1u*mmsb1 - 4*invdgb2*lb1u*mmsb1 + 6*invdgb1*
-     lgu*mmsb1 - 2*invdgb2*lgu*mmsb1 + 20*invdgb1*ltu*mmsb1 - (4*invdgb1*lb1u*
-     ltu*mmsb1)/3. - (16*invdgb1*lgu*ltu*mmsb1)/3. + 6*invdgb1*mmsb2 - (16*
-     invdgb2*mmsb2)/3. - 4*invdgb1*lb2u*mmsb2 - 8*invdgb2*lb2u*mmsb2 - 2*
-     invdgb1*lgu*mmsb2 + 6*invdgb2*lgu*mmsb2 + 20*invdgb2*ltu*mmsb2 - (4*
-     invdgb2*lb2u*ltu*mmsb2)/3. - (16*invdgb2*lgu*ltu*mmsb2)/3. - 8*invdgb1*
-     mmst1 - 8*invdgb2*mmst1 - 2*invdgb1*lgu*mmst1 - 2*invdgb2*lgu*mmst1 + 2*
-     invdgb1*lt1u*mmst1 + 2*invdgb2*lt1u*mmst1 + invdgb1*lgu*lt1u*mmst1 +
-     invdgb2*lgu*lt1u*mmst1 + 6*invdgb1*ltu*mmst1 + 6*invdgb2*ltu*mmst1 - 2*
-     invdgb1*lt1u*ltu*mmst1 - 2*invdgb2*lt1u*ltu*mmst1 - 8*invdgb1*mmst2 - 8*
-     invdgb2*mmst2 - 2*invdgb1*lgu*mmst2 - 2*invdgb2*lgu*mmst2 + 2*invdgb1*lt2u
-     *mmst2 + 2*invdgb2*lt2u*mmst2 + invdgb1*lgu*lt2u*mmst2 + invdgb2*lgu*lt2u*
-     mmst2 + 6*invdgb1*ltu*mmst2 + 6*invdgb2*ltu*mmst2 - 2*invdgb1*lt2u*ltu*
-     mmst2 - 2*invdgb2*lt2u*ltu*mmst2 + 48*invdgb1*mmsusy + 48*invdgb2*mmsusy -
-     16*invdgb1*lgu*mmsusy - 16*invdgb2*lgu*mmsusy - 12*invdgb1*mmt - 12*
-     invdgb2*mmt + 4*invdgb1*lgu*mmt + 4*invdgb2*lgu*mmt + 8*invdgb1*ltu*mmt +
-     8*invdgb2*ltu*mmt - 2*invdgb1*lgu*ltu*mmt - 2*invdgb2*lgu*ltu*mmt + (4*zt2
-     )/3. - (19*invdgb1*mmsb1*zt2)/3. + invdgb2*mmsb1*zt2 + invdgb1*mmsb2*zt2 -
-     (19*invdgb2*mmsb2*zt2)/3. - invdgb1*mmst1*zt2 - invdgb2*mmst1*zt2 -
-     invdgb1*mmst2*zt2 - invdgb2*mmst2*zt2 + 8*invdgb1*mmsusy*zt2 + 8*invdgb2*
-     mmsusy*zt2 - 2*invdgb1*mmt*zt2 - 2*invdgb2*mmt*zt2 + (20*mmsb12*pow2(
-     invdgb1))/3. + (70*lb1u*mmsb12*pow2(invdgb1))/3. - (70*lgu*mmsb12*pow2(
-     invdgb1))/3. - 16*ltu*mmsb12*pow2(invdgb1) + (8*lb1u*ltu*mmsb12*pow2(
-     invdgb1))/3. + (8*lgu*ltu*mmsb12*pow2(invdgb1))/3. - 8*mmsb1*mmsb2*pow2(
-     invdgb1) - 2*lb1u*mmsb1*mmsb2*pow2(invdgb1) + (16*lb2u*mmsb1*mmsb2*pow2(
-     invdgb1))/3. + (14*lgu*mmsb1*mmsb2*pow2(invdgb1))/3. + (32*mmsb1*mmst1*
-     pow2(invdgb1))/3. - 2*lb1u*mmsb1*mmst1*pow2(invdgb1) + (14*lgu*mmsb1*mmst1
-     *pow2(invdgb1))/3. - (8*lt1u*mmsb1*mmst1*pow2(invdgb1))/3. + lb1u*lt1u*
-     mmsb1*mmst1*pow2(invdgb1) - (7*lgu*lt1u*mmsb1*mmst1*pow2(invdgb1))/3. - 8*
-     ltu*mmsb1*mmst1*pow2(invdgb1) + (8*lt1u*ltu*mmsb1*mmst1*pow2(invdgb1))/3.
-     + (32*mmsb1*mmst2*pow2(invdgb1))/3. - 2*lb1u*mmsb1*mmst2*pow2(invdgb1) + (
-     14*lgu*mmsb1*mmst2*pow2(invdgb1))/3. - (8*lt2u*mmsb1*mmst2*pow2(invdgb1))/
-     3. + lb1u*lt2u*mmsb1*mmst2*pow2(invdgb1) - (7*lgu*lt2u*mmsb1*mmst2*pow2(
-     invdgb1))/3. - 8*ltu*mmsb1*mmst2*pow2(invdgb1) + (8*lt2u*ltu*mmsb1*mmst2*
-     pow2(invdgb1))/3. - 64*mmsb1*mmsusy*pow2(invdgb1) - 16*lb1u*mmsb1*mmsusy*
-     pow2(invdgb1) + (112*lgu*mmsb1*mmsusy*pow2(invdgb1))/3. + 16*mmsb1*mmt*
-     pow2(invdgb1) + 4*lb1u*mmsb1*mmt*pow2(invdgb1) - (28*lgu*mmsb1*mmt*pow2(
-     invdgb1))/3. - (32*ltu*mmsb1*mmt*pow2(invdgb1))/3. - 2*lb1u*ltu*mmsb1*mmt*
-     pow2(invdgb1) + (14*lgu*ltu*mmsb1*mmt*pow2(invdgb1))/3. + (16*mmsb12*zt2*
-     pow2(invdgb1))/3. - (4*mmsb1*mmsb2*zt2*pow2(invdgb1))/3. + (4*mmsb1*mmst1*
-     zt2*pow2(invdgb1))/3. + (4*mmsb1*mmst2*zt2*pow2(invdgb1))/3. - (32*mmsb1*
-     mmsusy*zt2*pow2(invdgb1))/3. + (8*mmsb1*mmt*zt2*pow2(invdgb1))/3. - 8*
-     mmsb1*mmsb2*pow2(invdgb2) + (16*lb1u*mmsb1*mmsb2*pow2(invdgb2))/3. - 2*
-     lb2u*mmsb1*mmsb2*pow2(invdgb2) + (14*lgu*mmsb1*mmsb2*pow2(invdgb2))/3. + (
-     20*mmsb22*pow2(invdgb2))/3. + (70*lb2u*mmsb22*pow2(invdgb2))/3. - (70*lgu*
-     mmsb22*pow2(invdgb2))/3. - 16*ltu*mmsb22*pow2(invdgb2) + (8*lb2u*ltu*
-     mmsb22*pow2(invdgb2))/3. + (8*lgu*ltu*mmsb22*pow2(invdgb2))/3. + (32*mmsb2
-     *mmst1*pow2(invdgb2))/3. - 2*lb2u*mmsb2*mmst1*pow2(invdgb2) + (14*lgu*
-     mmsb2*mmst1*pow2(invdgb2))/3. - (8*lt1u*mmsb2*mmst1*pow2(invdgb2))/3. +
-     lb2u*lt1u*mmsb2*mmst1*pow2(invdgb2) - (7*lgu*lt1u*mmsb2*mmst1*pow2(invdgb2
-     ))/3. - 8*ltu*mmsb2*mmst1*pow2(invdgb2) + (8*lt1u*ltu*mmsb2*mmst1*pow2(
-     invdgb2))/3. + (32*mmsb2*mmst2*pow2(invdgb2))/3. - 2*lb2u*mmsb2*mmst2*pow2
-     (invdgb2) + (14*lgu*mmsb2*mmst2*pow2(invdgb2))/3. - (8*lt2u*mmsb2*mmst2*
-     pow2(invdgb2))/3. + lb2u*lt2u*mmsb2*mmst2*pow2(invdgb2) - (7*lgu*lt2u*
-     mmsb2*mmst2*pow2(invdgb2))/3. - 8*ltu*mmsb2*mmst2*pow2(invdgb2) + (8*lt2u*
-     ltu*mmsb2*mmst2*pow2(invdgb2))/3. - 64*mmsb2*mmsusy*pow2(invdgb2) - 16*
-     lb2u*mmsb2*mmsusy*pow2(invdgb2) + (112*lgu*mmsb2*mmsusy*pow2(invdgb2))/3.
-     + 16*mmsb2*mmt*pow2(invdgb2) + 4*lb2u*mmsb2*mmt*pow2(invdgb2) - (28*lgu*
-     mmsb2*mmt*pow2(invdgb2))/3. - (32*ltu*mmsb2*mmt*pow2(invdgb2))/3. - 2*lb2u
-     *ltu*mmsb2*mmt*pow2(invdgb2) + (14*lgu*ltu*mmsb2*mmt*pow2(invdgb2))/3. - (
-     4*mmsb1*mmsb2*zt2*pow2(invdgb2))/3. + (16*mmsb22*zt2*pow2(invdgb2))/3. + (
-     4*mmsb2*mmst1*zt2*pow2(invdgb2))/3. + (4*mmsb2*mmst2*zt2*pow2(invdgb2))/3.
-      - (32*mmsb2*mmsusy*zt2*pow2(invdgb2))/3. + (8*mmsb2*mmt*zt2*pow2(invdgb2)
-     )/3. + (4*lsu*(7.333333333333333 - 24*invdgb1*mmsusy - 24*invdgb2*mmsusy +
-     32*mmsb1*mmsusy*pow2(invdgb1) + 32*mmsb2*mmsusy*pow2(invdgb2)))/3. + pow2(
-     lb1u)/3. + (5*invdgb1*mmsb1*pow2(lb1u))/2. + (invdgb2*mmsb1*pow2(lb1u))/2.
-      - (55*mmsb12*pow2(invdgb1)*pow2(lb1u))/6. + (mmsb1*mmsb2*pow2(invdgb1)*
-     pow2(lb1u))/2. + (mmsb1*mmst1*pow2(invdgb1)*pow2(lb1u))/2. + (mmsb1*mmst2*
-     pow2(invdgb1)*pow2(lb1u))/2. + 4*mmsb1*mmsusy*pow2(invdgb1)*pow2(lb1u) -
-     mmsb1*mmt*pow2(invdgb1)*pow2(lb1u) - (2*mmsb1*mmsb2*pow2(invdgb2)*pow2(
-     lb1u))/3. + pow2(lb2u)/3. + (invdgb1*mmsb2*pow2(lb2u))/2. + (5*invdgb2*
-     mmsb2*pow2(lb2u))/2. - (2*mmsb1*mmsb2*pow2(invdgb1)*pow2(lb2u))/3. + (
-     mmsb1*mmsb2*pow2(invdgb2)*pow2(lb2u))/2. - (55*mmsb22*pow2(invdgb2)*pow2(
-     lb2u))/6. + (mmsb2*mmst1*pow2(invdgb2)*pow2(lb2u))/2. + (mmsb2*mmst2*pow2(
-     invdgb2)*pow2(lb2u))/2. + 4*mmsb2*mmsusy*pow2(invdgb2)*pow2(lb2u) - mmsb2*
-     mmt*pow2(invdgb2)*pow2(lb2u) - (4*pow2(lgu))/3. - (37*invdgb1*mmsb1*pow2(
-     lgu))/6. + (invdgb2*mmsb1*pow2(lgu))/2. + (invdgb1*mmsb2*pow2(lgu))/2. - (
-     37*invdgb2*mmsb2*pow2(lgu))/6. + (invdgb1*mmst1*pow2(lgu))/2. + (invdgb2*
-     mmst1*pow2(lgu))/2. + (invdgb1*mmst2*pow2(lgu))/2. + (invdgb2*mmst2*pow2(
-     lgu))/2. + 4*invdgb1*mmsusy*pow2(lgu) + 4*invdgb2*mmsusy*pow2(lgu) -
-     invdgb1*mmt*pow2(lgu) - invdgb2*mmt*pow2(lgu) + (85*mmsb12*pow2(invdgb1)*
-     pow2(lgu))/6. - (7*mmsb1*mmsb2*pow2(invdgb1)*pow2(lgu))/6. - (7*mmsb1*
-     mmst1*pow2(invdgb1)*pow2(lgu))/6. - (7*mmsb1*mmst2*pow2(invdgb1)*pow2(lgu)
-     )/6. - (28*mmsb1*mmsusy*pow2(invdgb1)*pow2(lgu))/3. + (7*mmsb1*mmt*pow2(
-     invdgb1)*pow2(lgu))/3. - (7*mmsb1*mmsb2*pow2(invdgb2)*pow2(lgu))/6. + (85*
-     mmsb22*pow2(invdgb2)*pow2(lgu))/6. - (7*mmsb2*mmst1*pow2(invdgb2)*pow2(lgu
-     ))/6. - (7*mmsb2*mmst2*pow2(invdgb2)*pow2(lgu))/6. - (28*mmsb2*mmsusy*pow2
-     (invdgb2)*pow2(lgu))/3. + (7*mmsb2*mmt*pow2(invdgb2)*pow2(lgu))/3. + (4*(2
-      + 3*invdgb1*mmsusy + 3*invdgb2*mmsusy - 4*mmsb1*mmsusy*pow2(invdgb1) - 4*
-     mmsb2*mmsusy*pow2(invdgb2))*pow2(lsu))/3. + pow2(lt1u)/3. - (invdgb1*mmst1
-     *pow2(lt1u))/2. - (invdgb2*mmst1*pow2(lt1u))/2. + (2*mmsb1*mmst1*pow2(
-     invdgb1)*pow2(lt1u))/3. + (2*mmsb2*mmst1*pow2(invdgb2)*pow2(lt1u))/3. +
-     pow2(lt2u)/3. - (invdgb1*mmst2*pow2(lt2u))/2. - (invdgb2*mmst2*pow2(lt2u))
-     /2. + (2*mmsb1*mmst2*pow2(invdgb1)*pow2(lt2u))/3. + (2*mmsb2*mmst2*pow2(
-     invdgb2)*pow2(lt2u))/3. + 4*pow2(ltu) - (10*invdgb1*mmsb1*pow2(ltu))/3. -
-     (10*invdgb2*mmsb2*pow2(ltu))/3. - invdgb1*mmst1*pow2(ltu) - invdgb2*mmst1*
-     pow2(ltu) - invdgb1*mmst2*pow2(ltu) - invdgb2*mmst2*pow2(ltu) - invdgb1*
-     mmt*pow2(ltu) - invdgb2*mmt*pow2(ltu) + (8*mmsb12*pow2(invdgb1)*pow2(ltu))
-     /3. + (4*mmsb1*mmst1*pow2(invdgb1)*pow2(ltu))/3. + (4*mmsb1*mmst2*pow2(
-     invdgb1)*pow2(ltu))/3. + (4*mmsb1*mmt*pow2(invdgb1)*pow2(ltu))/3. + (8*
-     mmsb22*pow2(invdgb2)*pow2(ltu))/3. + (4*mmsb2*mmst1*pow2(invdgb2)*pow2(ltu
-     ))/3. + (4*mmsb2*mmst2*pow2(invdgb2)*pow2(ltu))/3. + (4*mmsb2*mmt*pow2(
-     invdgb2)*pow2(ltu))/3. - (28*invdgb1*mmsb1*pow2(s2b))/3. + 8*invdgb1*lb1u*
-     mmsb1*pow2(s2b) - (112*invdgb1*mmsb2*pow2(s2b))/3. + 28*invdgb2*mmsb2*pow2
-     (s2b) + 8*invdgb1*lb1u*mmsb2*pow2(s2b) - 8*invdgb2*lb1u*mmsb2*pow2(s2b) +
-     8*invdgb1*lb2u*mmsb2*pow2(s2b) + 16*invdgb1*lgu*mmsb2*pow2(s2b) - 16*
-     invdgb2*lgu*mmsb2*pow2(s2b) - (112*invdb12*invdgb1*mmsb22*pow2(s2b))/3. +
-     (112*invdb12*invdgb2*mmsb22*pow2(s2b))/3. + 8*invdb12*invdgb1*lb1u*mmsb22*
-     pow2(s2b) - 8*invdb12*invdgb2*lb1u*mmsb22*pow2(s2b) + 8*invdb12*invdgb1*
-     lb2u*mmsb22*pow2(s2b) - 8*invdb12*invdgb2*lb2u*mmsb22*pow2(s2b) + 16*
-     invdb12*invdgb1*lgu*mmsb22*pow2(s2b) - 16*invdb12*invdgb2*lgu*mmsb22*pow2(
-     s2b) - (4*invdgb1*mmsb1*zt2*pow2(s2b))/3. - (16*invdgb1*mmsb2*zt2*pow2(s2b
-     ))/3. + 4*invdgb2*mmsb2*zt2*pow2(s2b) - (16*invdb12*invdgb1*mmsb22*zt2*
-     pow2(s2b))/3. + (16*invdb12*invdgb2*mmsb22*zt2*pow2(s2b))/3. - 8*lb1u*
-     mmsb12*pow2(invdgb1)*pow2(s2b) + 8*lgu*mmsb12*pow2(invdgb1)*pow2(s2b) - 8*
-     lb2u*mmsb22*pow2(invdgb2)*pow2(s2b) + 8*lgu*mmsb22*pow2(invdgb2)*pow2(s2b)
-     - (8*invdgb1*mmsb1*pow2(lb1u)*pow2(s2b))/3. - (4*invdgb1*mmsb2*pow2(lb1u)*
-     pow2(s2b))/3. + (4*invdgb2*mmsb2*pow2(lb1u)*pow2(s2b))/3. - (4*invdb12*
-     invdgb1*mmsb22*pow2(lb1u)*pow2(s2b))/3. + (4*invdb12*invdgb2*mmsb22*pow2(
-     lb1u)*pow2(s2b))/3. + 4*mmsb12*pow2(invdgb1)*pow2(lb1u)*pow2(s2b) - (4*
-     invdgb1*mmsb2*pow2(lb2u)*pow2(s2b))/3. - (4*invdgb2*mmsb2*pow2(lb2u)*pow2(
-     s2b))/3. - (4*invdb12*invdgb1*mmsb22*pow2(lb2u)*pow2(s2b))/3. + (4*invdb12
-     *invdgb2*mmsb22*pow2(lb2u)*pow2(s2b))/3. + 4*mmsb22*pow2(invdgb2)*pow2(
-     lb2u)*pow2(s2b) - (8*invdgb1*mmsb2*pow2(lgu)*pow2(s2b))/3. + (8*invdgb2*
-     mmsb2*pow2(lgu)*pow2(s2b))/3. - (8*invdb12*invdgb1*mmsb22*pow2(lgu)*pow2(
-     s2b))/3. + (8*invdb12*invdgb2*mmsb22*pow2(lgu)*pow2(s2b))/3. - (4*mmsb12*
-     pow2(invdgb1)*pow2(lgu)*pow2(s2b))/3. - (4*mmsb22*pow2(invdgb2)*pow2(lgu)*
-     pow2(s2b))/3. + 4*zt2*(1 - (7*invdgb1*mmsb1)/2. - 2*invdgb1*mmsb2 - (3*
-     invdgb2*mmsb2)/2. - 2*invdb12*invdgb1*mmsb22 + 2*invdb12*invdgb2*mmsb22 +
-     3*mmsb12*pow2(invdgb1) + 3*mmsb22*pow2(invdgb2) + (invdgb1*mmsb1*pow2(s2b)
-     )/4. - invdgb1*mmsb2*pow2(s2b) + (5*invdgb2*mmsb2*pow2(s2b))/4. - invdb12*
-     invdgb1*mmsb22*pow2(s2b) + invdb12*invdgb2*mmsb22*pow2(s2b)) + 4*lb1u*lb2u
-     *(invdgb1*mmsb2 - invdgb2*mmsb2 + invdb12*invdgb1*mmsb22 - invdb12*invdgb2
-     *mmsb22 - (5*invdgb1*mmsb2*pow2(s2b))/4. + (5*invdgb2*mmsb2*pow2(s2b))/4.
-     - (5*invdb12*invdgb1*mmsb22*pow2(s2b))/4. + (5*invdb12*invdgb2*mmsb22*pow2
-     (s2b))/4.) + 4*(16.680555555555557 - 36*invdgb1*mmsb1 - 14*invdgb1*mmsb2 -
-     22*invdgb2*mmsb2 - 14*invdb12*invdgb1*mmsb22 + 14*invdb12*invdgb2*mmsb22 +
-     31*mmsb12*pow2(invdgb1) + 31*mmsb22*pow2(invdgb2) + (7*invdgb1*mmsb1*pow2(
-     s2b))/4. - 7*invdgb1*mmsb2*pow2(s2b) + (35*invdgb2*mmsb2*pow2(s2b))/4. - 7
-     *invdb12*invdgb1*mmsb22*pow2(s2b) + 7*invdb12*invdgb2*mmsb22*pow2(s2b)) +
-     (8*lb1u*mmsb12*mmsb2*pow3(invdgb1))/3. - (8*lgu*mmsb12*mmsb2*pow3(invdgb1)
-     )/3. + (8*lb1u*mmsb12*mmst1*pow3(invdgb1))/3. - (8*lgu*mmsb12*mmst1*pow3(
-     invdgb1))/3. - (4*lb1u*lt1u*mmsb12*mmst1*pow3(invdgb1))/3. + (4*lgu*lt1u*
-     mmsb12*mmst1*pow3(invdgb1))/3. + (8*lb1u*mmsb12*mmst2*pow3(invdgb1))/3. -
-     (8*lgu*mmsb12*mmst2*pow3(invdgb1))/3. - (4*lb1u*lt2u*mmsb12*mmst2*pow3(
-     invdgb1))/3. + (4*lgu*lt2u*mmsb12*mmst2*pow3(invdgb1))/3. + (64*lb1u*
-     mmsb12*mmsusy*pow3(invdgb1))/3. - (64*lgu*mmsb12*mmsusy*pow3(invdgb1))/3.
-     - (16*lb1u*mmsb12*mmt*pow3(invdgb1))/3. + (16*lgu*mmsb12*mmt*pow3(invdgb1)
-     )/3. + (8*lb1u*ltu*mmsb12*mmt*pow3(invdgb1))/3. - (8*lgu*ltu*mmsb12*mmt*
-     pow3(invdgb1))/3. - (2*mmsb12*mmsb2*pow2(lb1u)*pow3(invdgb1))/3. - (2*
-     mmsb12*mmst1*pow2(lb1u)*pow3(invdgb1))/3. - (2*mmsb12*mmst2*pow2(lb1u)*
-     pow3(invdgb1))/3. - (16*mmsb12*mmsusy*pow2(lb1u)*pow3(invdgb1))/3. + (4*
-     mmsb12*mmt*pow2(lb1u)*pow3(invdgb1))/3. + (2*mmsb12*mmsb2*pow2(lgu)*pow3(
-     invdgb1))/3. + (2*mmsb12*mmst1*pow2(lgu)*pow3(invdgb1))/3. + (2*mmsb12*
-     mmst2*pow2(lgu)*pow3(invdgb1))/3. + (16*mmsb12*mmsusy*pow2(lgu)*pow3(
-     invdgb1))/3. - (4*mmsb12*mmt*pow2(lgu)*pow3(invdgb1))/3. + (4*lb1u*lsu*(6*
-     mmsb1*mmsusy*pow2(invdgb1) - 8*mmsb12*mmsusy*pow3(invdgb1)))/3. + Fin20(
-     mmsb1,mmsusy,mmu)*(s2b*((32*mmgl*mmsb1*pow2(invdgb1))/(3.*mb*mgl) - (32*
-     mmgl*mmsusy*pow2(invdgb1))/(3.*mb*mgl)) + (4*(4*invdgb1 - 14*mmsb1*pow2(
-     invdgb1) + 6*mmsusy*pow2(invdgb1) + 8*mmsb12*pow3(invdgb1) - 8*mmsb1*
-     mmsusy*pow3(invdgb1)))/3.) + (8*lb2u*mmsb1*mmsb22*pow3(invdgb2))/3. - (8*
-     lgu*mmsb1*mmsb22*pow3(invdgb2))/3. + (8*lb2u*mmsb22*mmst1*pow3(invdgb2))/
-     3. - (8*lgu*mmsb22*mmst1*pow3(invdgb2))/3. - (4*lb2u*lt1u*mmsb22*mmst1*
-     pow3(invdgb2))/3. + (4*lgu*lt1u*mmsb22*mmst1*pow3(invdgb2))/3. + (8*lb2u*
-     mmsb22*mmst2*pow3(invdgb2))/3. - (8*lgu*mmsb22*mmst2*pow3(invdgb2))/3. - (
-     4*lb2u*lt2u*mmsb22*mmst2*pow3(invdgb2))/3. + (4*lgu*lt2u*mmsb22*mmst2*pow3
-     (invdgb2))/3. + (64*lb2u*mmsb22*mmsusy*pow3(invdgb2))/3. - (64*lgu*mmsb22*
-     mmsusy*pow3(invdgb2))/3. - (16*lb2u*mmsb22*mmt*pow3(invdgb2))/3. + (16*lgu
-     *mmsb22*mmt*pow3(invdgb2))/3. + (8*lb2u*ltu*mmsb22*mmt*pow3(invdgb2))/3. -
-     (8*lgu*ltu*mmsb22*mmt*pow3(invdgb2))/3. - (2*mmsb1*mmsb22*pow2(lb2u)*pow3(
-     invdgb2))/3. - (2*mmsb22*mmst1*pow2(lb2u)*pow3(invdgb2))/3. - (2*mmsb22*
-     mmst2*pow2(lb2u)*pow3(invdgb2))/3. - (16*mmsb22*mmsusy*pow2(lb2u)*pow3(
-     invdgb2))/3. + (4*mmsb22*mmt*pow2(lb2u)*pow3(invdgb2))/3. + (2*mmsb1*
-     mmsb22*pow2(lgu)*pow3(invdgb2))/3. + (2*mmsb22*mmst1*pow2(lgu)*pow3(
-     invdgb2))/3. + (2*mmsb22*mmst2*pow2(lgu)*pow3(invdgb2))/3. + (16*mmsb22*
-     mmsusy*pow2(lgu)*pow3(invdgb2))/3. - (4*mmsb22*mmt*pow2(lgu)*pow3(invdgb2)
-     )/3. + (4*lb1u*lb2u*((3*mmsb1*mmsb2*pow2(invdgb1))/4. + (3*mmsb1*mmsb2*
-     pow2(invdgb2))/4. - mmsb12*mmsb2*pow3(invdgb1) - mmsb1*mmsb22*pow3(invdgb2
-     )))/3. + (4*lb2u*lsu*(6*mmsb2*mmsusy*pow2(invdgb2) - 8*mmsb22*mmsusy*pow3(
-     invdgb2)))/3. + (4*lgu*lsu*(6*invdgb1*mmsusy + 6*invdgb2*mmsusy - 14*mmsb1
-     *mmsusy*pow2(invdgb1) - 14*mmsb2*mmsusy*pow2(invdgb2) + 8*mmsb12*mmsusy*
-     pow3(invdgb1) + 8*mmsb22*mmsusy*pow3(invdgb2)))/3. + Fin20(mmsb2,mmgl,mmu)
-     *(s2b*((-16*invdgb1*mmgl)/(9.*mb*mgl) + (88*invdgb2*mmgl)/(9.*mb*mgl) - (4
-     *mmgl*mmsb1*pow2(invdgb1))/(3.*mb*mgl) + (4*mmgl*mmsb2*pow2(invdgb1))/(3.*
-     mb*mgl)) + 4*(-invdgb1 - 2*invdb12*invdgb1*mmsb2 + 2*invdb12*invdgb2*mmsb2
-      + 3*mmsb2*pow2(invdgb2) - (3*invdgb1*pow2(s2b))/4. + (3*invdgb2*pow2(s2b)
-     )/4. - (invdb12*invdgb1*mmsb2*pow2(s2b))/2. + (invdb12*invdgb2*mmsb2*pow2(
-     s2b))/2. - (mmsb1*pow2(invdgb1)*pow2(s2b))/2.) + (4*(invdgb1/4. + invdgb2/
-     4. + (3*mmsb1*pow2(invdgb1))/4. - (3*mmsb2*pow2(invdgb1))/4. - invdgb1*
-     pow2(s2b) + invdgb2*pow2(s2b) - 2*invdb12*invdgb1*mmsb2*pow2(s2b) + 2*
-     invdb12*invdgb2*mmsb2*pow2(s2b) - 2*mmsb1*pow2(invdgb1)*pow2(s2b) - mmsb12
-     *pow3(invdgb1) + mmsb1*mmsb2*pow3(invdgb1)))/3. + (16*(8*invdb12 + 2*
-     invdgb1 - (5*invdgb2)/2. + 4*invdb12*invdgb1*mmsb2 - 12*invdb12*invdgb2*
-     mmsb2 - 8*invdb12*pow2(s2b) + (3*invdgb1*pow2(s2b))/2. - (3*invdgb2*pow2(
-     s2b))/2. + invdb12*invdgb1*mmsb2*pow2(s2b) + 7*invdb12*invdgb2*mmsb2*pow2(
-     s2b) + mmsb1*pow2(invdgb1)*pow2(s2b) - 3*mmsb22*pow3(invdgb2)))/9.) +
-     Fin20(mmsb1,mmgl,mmu)*(s2b*((-88*invdgb1*mmgl)/(9.*mb*mgl) + (16*invdgb2*
-     mmgl)/(9.*mb*mgl) - (4*mmgl*mmsb1*pow2(invdgb2))/(3.*mb*mgl) + (4*mmgl*
-     mmsb2*pow2(invdgb2))/(3.*mb*mgl)) + 4*(-2*invdgb1 + invdgb2 - 2*invdb12*
-     invdgb1*mmsb2 + 2*invdb12*invdgb2*mmsb2 + 3*mmsb1*pow2(invdgb1) + (invdgb1
-     *pow2(s2b))/4. - (invdgb2*pow2(s2b))/4. - (invdb12*invdgb1*mmsb2*pow2(s2b)
-     )/2. + (invdb12*invdgb2*mmsb2*pow2(s2b))/2. - (mmsb2*pow2(invdgb2)*pow2(
-     s2b))/2.) + (16*(-8*invdb12 + (19*invdgb1)/2. - 2*invdgb2 + 12*invdb12*
-     invdgb1*mmsb2 - 4*invdb12*invdgb2*mmsb2 + 8*invdb12*pow2(s2b) - (17*
-     invdgb1*pow2(s2b))/2. + (invdgb2*pow2(s2b))/2. - 7*invdb12*invdgb1*mmsb2*
-     pow2(s2b) - invdb12*invdgb2*mmsb2*pow2(s2b) + mmsb2*pow2(invdgb2)*pow2(s2b
-     ) - 3*mmsb12*pow3(invdgb1)))/9. + (4*(invdgb1/4. + invdgb2/4. - (3*mmsb1*
-     pow2(invdgb2))/4. + (3*mmsb2*pow2(invdgb2))/4. - invdgb1*pow2(s2b) +
-     invdgb2*pow2(s2b) - 2*invdb12*invdgb1*mmsb2*pow2(s2b) + 2*invdb12*invdgb2*
-     mmsb2*pow2(s2b) - 2*mmsb2*pow2(invdgb2)*pow2(s2b) + mmsb1*mmsb2*pow3(
-     invdgb2) - mmsb22*pow3(invdgb2)))/3.) + Fin20(mmsb1,mmsb2,mmu)*(s2b*((4*
-     invdgb1*mmgl)/(9.*mb*mgl) - (4*invdgb2*mmgl)/(9.*mb*mgl) + (4*mmgl*mmsb1*
-     pow2(invdgb1))/(3.*mb*mgl) - (4*mmgl*mmsb2*pow2(invdgb1))/(3.*mb*mgl) + (4
-     *mmgl*mmsb1*pow2(invdgb2))/(3.*mb*mgl) - (4*mmgl*mmsb2*pow2(invdgb2))/(3.*
-     mb*mgl)) + (16*(-2*invdgb1 + 2*invdgb2 - 4*invdb12*invdgb1*mmsb2 + 4*
-     invdb12*invdgb2*mmsb2 - (invdgb1*pow2(s2b))/2. - (invdgb2*pow2(s2b))/2. -
-     mmsb1*pow2(invdgb1)*pow2(s2b) - mmsb2*pow2(invdgb2)*pow2(s2b)))/9. + 4*(
-     invdgb1 - invdgb2 + 2*invdb12*invdgb1*mmsb2 - 2*invdb12*invdgb2*mmsb2 + (
-     invdgb1*pow2(s2b))/4. + (invdgb2*pow2(s2b))/4. + (mmsb1*pow2(invdgb1)*pow2
-     (s2b))/2. + (mmsb2*pow2(invdgb2)*pow2(s2b))/2.) + (4*(invdgb1/2. + invdgb2
-     /2. - (7*mmsb1*pow2(invdgb1))/4. + (3*mmsb2*pow2(invdgb1))/4. + (3*mmsb1*
-     pow2(invdgb2))/4. - (7*mmsb2*pow2(invdgb2))/4. - invdgb1*pow2(s2b) -
-     invdgb2*pow2(s2b) + 2*mmsb1*pow2(invdgb1)*pow2(s2b) + 2*mmsb2*pow2(invdgb2
-     )*pow2(s2b) + mmsb12*pow3(invdgb1) - mmsb1*mmsb2*pow3(invdgb1) - mmsb1*
-     mmsb2*pow3(invdgb2) + mmsb22*pow3(invdgb2)))/3.) + Fin20(mmsb2,mmsusy,mmu)
-     *(s2b*((-32*mmgl*mmsb2*pow2(invdgb2))/(3.*mb*mgl) + (32*mmgl*mmsusy*pow2(
-     invdgb2))/(3.*mb*mgl)) + (4*(4*invdgb2 - 14*mmsb2*pow2(invdgb2) + 6*mmsusy
-     *pow2(invdgb2) + 8*mmsb22*pow3(invdgb2) - 8*mmsb2*mmsusy*pow3(invdgb2)))/
-     3.) + Fin20(mmgl,mmsusy,mmu)*(s2b*((-32*invdgb1*mmgl)/(3.*mb*mgl) + (32*
-     invdgb2*mmgl)/(3.*mb*mgl) - (32*mmgl*mmsb1*pow2(invdgb1))/(3.*mb*mgl) + (
-     32*mmgl*mmsusy*pow2(invdgb1))/(3.*mb*mgl) + (32*mmgl*mmsb2*pow2(invdgb2))/
-     (3.*mb*mgl) - (32*mmgl*mmsusy*pow2(invdgb2))/(3.*mb*mgl)) + (4*(2*invdgb1
-     + 2*invdgb2 + 6*mmsb1*pow2(invdgb1) - 6*mmsusy*pow2(invdgb1) + 6*mmsb2*
-     pow2(invdgb2) - 6*mmsusy*pow2(invdgb2) - 8*mmsb12*pow3(invdgb1) + 8*mmsb1*
-     mmsusy*pow3(invdgb1) - 8*mmsb22*pow3(invdgb2) + 8*mmsb2*mmsusy*pow3(
-     invdgb2)))/3.) - (40*lb1u*pow3(invdgb1)*pow3(mmsb1))/3. + (40*lgu*pow3(
-     invdgb1)*pow3(mmsb1))/3. + 6*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1) - (22*
-     pow2(lgu)*pow3(invdgb1)*pow3(mmsb1))/3. + 4*lb1u*((3*invdgb1*mmsb1)/2. + (
-     11*mmsb12*pow2(invdgb1))/2. - (3*invdgb1*mmsb1*pow2(s2b))/2. + (3*invdgb1*
-     mmsb2*pow2(s2b))/2. - (3*invdgb2*mmsb2*pow2(s2b))/2. + (3*invdb12*invdgb1*
-     mmsb22*pow2(s2b))/2. - (3*invdb12*invdgb2*mmsb22*pow2(s2b))/2. - (3*mmsb12
-     *pow2(invdgb1)*pow2(s2b))/2. - 10*pow3(invdgb1)*pow3(mmsb1)) + (4*lb1u*lgu
-     *((3*invdgb1*mmsb1)/4. + (3*invdgb2*mmsb1)/4. - (7*mmsb12*pow2(invdgb1))/
-     4. - (7*mmsb1*mmsb2*pow2(invdgb2))/4. - 2*invdgb1*mmsb2*pow2(s2b) + 2*
-     invdgb2*mmsb2*pow2(s2b) - 2*invdb12*invdgb1*mmsb22*pow2(s2b) + 2*invdb12*
-     invdgb2*mmsb22*pow2(s2b) - 2*mmsb12*pow2(invdgb1)*pow2(s2b) + mmsb1*mmsb22
-     *pow3(invdgb2) + pow3(invdgb1)*pow3(mmsb1)))/3. + 4*pow2(lb1u)*((3*invdgb1
-     *mmsb1)/2. - (7*mmsb12*pow2(invdgb1))/4. + (invdgb1*mmsb1*pow2(s2b))/2. -
-     (invdgb1*mmsb2*pow2(s2b))/4. + (invdgb2*mmsb2*pow2(s2b))/4. - (invdb12*
-     invdgb1*mmsb22*pow2(s2b))/4. + (invdb12*invdgb2*mmsb22*pow2(s2b))/4. + (
-     mmsb12*pow2(invdgb1)*pow2(s2b))/8. + 2*pow3(invdgb1)*pow3(mmsb1)) + 4*lb1u
-     *lgu*(-2*invdgb1*mmsb1 - invdgb1*mmsb2 + invdgb2*mmsb2 - invdb12*invdgb1*
-     mmsb22 + invdb12*invdgb2*mmsb22 - mmsb12*pow2(invdgb1) + (3*invdgb1*mmsb2*
-     pow2(s2b))/4. - (3*invdgb2*mmsb2*pow2(s2b))/4. + (3*invdb12*invdgb1*mmsb22
-     *pow2(s2b))/4. - (3*invdb12*invdgb2*mmsb22*pow2(s2b))/4. + (3*mmsb12*pow2(
-     invdgb1)*pow2(s2b))/4. + 2*pow3(invdgb1)*pow3(mmsb1)) + Fin3(mmt,mmsb1,
-     mmst1,mmu)*(-(mmsb1*pow2(invdgb1)) + mmst1*pow2(invdgb1) - mmt*pow2(
-     invdgb1) + s2b*((4*mmgl*mmsb1*pow2(invdgb1))/(3.*mb*mgl) - (4*mmgl*mmst1*
-     pow2(invdgb1))/(3.*mb*mgl) + (4*mmgl*mmt*pow2(invdgb1))/(3.*mb*mgl)) + (4*
-     mmsb12*pow3(invdgb1))/3. - (4*mmsb1*mmst1*pow3(invdgb1))/3. + (4*mmsb1*mmt
-     *pow3(invdgb1))/3. + s2t*((4*mmgl*mmt*pow2(invdgb1))/(3.*mgl*mt) + s2b*((4
-     *invdgb1*mmt)/(3.*mb*mt) - (8*mmsb1*mmt*pow2(invdgb1))/(3.*mb*mt)) - (8*
-     mmgl*mmsb1*mmt*pow3(invdgb1))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb1,mmst1)*((2
-     *invdgb1*mmsb12)/3. - (4*invdgb1*mmsb1*mmst1)/3. - (2*invdgb1*mmsb1*mmt)/
-     3. - (2*invdgb1*mmst1*mmt)/3. + (8*mmsb12*mmst1*pow2(invdgb1))/3. + (4*
-     mmsb12*mmt*pow2(invdgb1))/3. + (4*mmsb1*mmst1*mmt*pow2(invdgb1))/3. + (2*
-     invdgb1*pow2(mmst1))/3. - (4*mmsb1*pow2(invdgb1)*pow2(mmst1))/3. + s2t*((4
-     *mmgl*mmsb12*mmt*pow2(invdgb1))/(3.*mgl*mt) - (4*mmgl*mmsb1*mmst1*mmt*pow2
-     (invdgb1))/(3.*mgl*mt) - (4*mmgl*mmsb1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt
-     )) - (4*pow2(invdgb1)*pow3(mmsb1))/3.)) + Fin3(mmt,mmsb1,mmst2,mmu)*(-(
-     mmsb1*pow2(invdgb1)) + mmst2*pow2(invdgb1) - mmt*pow2(invdgb1) + s2b*((4*
-     mmgl*mmsb1*pow2(invdgb1))/(3.*mb*mgl) - (4*mmgl*mmst2*pow2(invdgb1))/(3.*
-     mb*mgl) + (4*mmgl*mmt*pow2(invdgb1))/(3.*mb*mgl)) + (4*mmsb12*pow3(invdgb1
-     ))/3. - (4*mmsb1*mmst2*pow3(invdgb1))/3. + (4*mmsb1*mmt*pow3(invdgb1))/3.
-     + s2t*((-4*mmgl*mmt*pow2(invdgb1))/(3.*mgl*mt) + s2b*((-4*invdgb1*mmt)/(3.
-     *mb*mt) + (8*mmsb1*mmt*pow2(invdgb1))/(3.*mb*mt)) + (8*mmgl*mmsb1*mmt*pow3
-     (invdgb1))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb1,mmst2)*((2*invdgb1*mmsb12)/3.
-      - (4*invdgb1*mmsb1*mmst2)/3. - (2*invdgb1*mmsb1*mmt)/3. - (2*invdgb1*
-     mmst2*mmt)/3. + (8*mmsb12*mmst2*pow2(invdgb1))/3. + (4*mmsb12*mmt*pow2(
-     invdgb1))/3. + (4*mmsb1*mmst2*mmt*pow2(invdgb1))/3. + (2*invdgb1*pow2(
-     mmst2))/3. - (4*mmsb1*pow2(invdgb1)*pow2(mmst2))/3. + s2t*((-4*mmgl*mmsb12
-     *mmt*pow2(invdgb1))/(3.*mgl*mt) + (4*mmgl*mmsb1*mmst2*mmt*pow2(invdgb1))/(
-     3.*mgl*mt) + (4*mmgl*mmsb1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt)) - (4*pow2
-     (invdgb1)*pow3(mmsb1))/3.)) - (40*lb2u*pow3(invdgb2)*pow3(mmsb2))/3. + (40
-     *lgu*pow3(invdgb2)*pow3(mmsb2))/3. + 6*pow2(lb2u)*pow3(invdgb2)*pow3(mmsb2
-     ) - (22*pow2(lgu)*pow3(invdgb2)*pow3(mmsb2))/3. + (16*lb1u*(4 + (17*
-     invdgb1*mmsb1)/2. + 8*invdb12*mmsb2 - (33*invdgb1*mmsb2)/4. + (invdgb2*
-     mmsb2)/4. - 8*invdb12*invdgb1*mmsb22 - (31*mmsb12*pow2(invdgb1))/2. + (
-     mmsb1*mmsb2*pow2(invdgb1))/4. + (mmsb22*pow2(invdgb1))/4. - 12*pow2(s2b) +
-     (45*invdgb1*mmsb1*pow2(s2b))/2. + (3*invdgb2*mmsb1*pow2(s2b))/2. - 8*
-     invdb12*mmsb2*pow2(s2b) + (15*invdgb1*mmsb2*pow2(s2b))/4. + (13*invdgb2*
-     mmsb2*pow2(s2b))/4. + 5*invdb12*invdgb1*mmsb22*pow2(s2b) + 3*invdb12*
-     invdgb2*mmsb22*pow2(s2b) - (13*mmsb12*pow2(invdgb1)*pow2(s2b))/2. + (9*
-     mmsb1*mmsb2*pow2(invdgb1)*pow2(s2b))/4. + (mmsb22*pow2(invdgb1)*pow2(s2b))
-     /4. - mmsb1*mmsb2*pow2(invdgb2)*pow2(s2b) - mmsb12*mmsb2*pow2(s2b)*pow3(
-     invdgb1) + (65*pow3(invdgb1)*pow3(mmsb1))/4. + (5*pow2(s2b)*pow3(invdgb1)*
-     pow3(mmsb1))/4. + (invdgb1*pow2(invdb12)*pow3(mmsb2))/4. - (invdgb2*pow2(
-     invdb12)*pow3(mmsb2))/4. + (invdb12*pow2(invdgb1)*pow3(mmsb2))/4. + (
-     invdgb1*pow2(invdb12)*pow2(s2b)*pow3(mmsb2))/4. - (invdgb2*pow2(invdb12)*
-     pow2(s2b)*pow3(mmsb2))/4. + (invdb12*pow2(invdgb1)*pow2(s2b)*pow3(mmsb2))/
-     4.))/9. + (16*(-85.125 + (159*invdgb1*mmsb1)/2. + (335*invdgb1*mmsb2)/4. -
-     (17*invdgb2*mmsb2)/4. + (335*invdb12*invdgb1*mmsb22)/4. - (335*invdb12*
-     invdgb2*mmsb22)/4. + (23*mmsb12*pow2(invdgb1))/8. + (23*mmsb22*pow2(
-     invdgb2))/8. + 40*pow2(s2b) - 50*invdgb1*mmsb1*pow2(s2b) - (3*invdgb2*
-     mmsb1*pow2(s2b))/2. - (175*invdgb1*mmsb2*pow2(s2b))/4. - (31*invdgb2*mmsb2
-     *pow2(s2b))/4. - (169*invdb12*invdgb1*mmsb22*pow2(s2b))/4. + (169*invdb12*
-     invdgb2*mmsb22*pow2(s2b))/4. - (9*mmsb12*pow2(invdgb1)*pow2(s2b))/8. +
-     mmsb1*mmsb2*pow2(invdgb1)*pow2(s2b) + mmsb1*mmsb2*pow2(invdgb2)*pow2(s2b)
-     - (9*mmsb22*pow2(invdgb2)*pow2(s2b))/8. - 21*pow3(invdgb1)*pow3(mmsb1) -
-     21*pow3(invdgb2)*pow3(mmsb2)))/9. + 4*lb2u*((3*invdgb2*mmsb2)/2. + (11*
-     mmsb22*pow2(invdgb2))/2. + (3*invdgb1*mmsb2*pow2(s2b))/2. - 3*invdgb2*
-     mmsb2*pow2(s2b) + (3*invdb12*invdgb1*mmsb22*pow2(s2b))/2. - (3*invdb12*
-     invdgb2*mmsb22*pow2(s2b))/2. - (3*mmsb22*pow2(invdgb2)*pow2(s2b))/2. - 10*
-     pow3(invdgb2)*pow3(mmsb2)) + 4*pow2(lgu)*(1.5 - (13*invdgb1*mmsb1)/2. - 3*
-     invdgb1*mmsb2 - (7*invdgb2*mmsb2)/2. - 3*invdb12*invdgb1*mmsb22 + 3*
-     invdb12*invdgb2*mmsb22 + (35*mmsb12*pow2(invdgb1))/4. + (35*mmsb22*pow2(
-     invdgb2))/4. - (7*invdgb1*mmsb2*pow2(s2b))/4. + (7*invdgb2*mmsb2*pow2(s2b)
-     )/4. - (7*invdb12*invdgb1*mmsb22*pow2(s2b))/4. + (7*invdb12*invdgb2*mmsb22
-     *pow2(s2b))/4. - (7*mmsb12*pow2(invdgb1)*pow2(s2b))/8. - (7*mmsb22*pow2(
-     invdgb2)*pow2(s2b))/8. - 4*pow3(invdgb1)*pow3(mmsb1) - 4*pow3(invdgb2)*
-     pow3(mmsb2)) + (16*zt2*(-7.5 + (19*invdgb1*mmsb1)/2. + 12*invdgb1*mmsb2 -
-     (5*invdgb2*mmsb2)/2. + 12*invdb12*invdgb1*mmsb22 - 12*invdb12*invdgb2*
-     mmsb22 + (3*mmsb12*pow2(invdgb1))/2. + (3*mmsb22*pow2(invdgb2))/2. + 8*
-     pow2(s2b) - (17*invdgb1*mmsb1*pow2(s2b))/2. - 6*invdgb1*mmsb2*pow2(s2b) -
-     (5*invdgb2*mmsb2*pow2(s2b))/2. - 6*invdb12*invdgb1*mmsb22*pow2(s2b) + 6*
-     invdb12*invdgb2*mmsb22*pow2(s2b) - 3*pow3(invdgb1)*pow3(mmsb1) - 3*pow3(
-     invdgb2)*pow3(mmsb2)))/9. + (4*lb2u*lgu*((3*invdgb1*mmsb2)/4. + (3*invdgb2
-     *mmsb2)/4. - (7*mmsb1*mmsb2*pow2(invdgb1))/4. - (7*mmsb22*pow2(invdgb2))/
-     4. - 2*invdgb1*mmsb2*pow2(s2b) + 2*invdgb2*mmsb2*pow2(s2b) - 2*invdb12*
-     invdgb1*mmsb22*pow2(s2b) + 2*invdb12*invdgb2*mmsb22*pow2(s2b) - 2*mmsb22*
-     pow2(invdgb2)*pow2(s2b) + mmsb12*mmsb2*pow3(invdgb1) + pow3(invdgb2)*pow3(
-     mmsb2)))/3. + 4*pow2(lb2u)*((3*invdgb2*mmsb2)/2. - (7*mmsb22*pow2(invdgb2)
-     )/4. - (invdgb1*mmsb2*pow2(s2b))/4. + (3*invdgb2*mmsb2*pow2(s2b))/4. - (
-     invdb12*invdgb1*mmsb22*pow2(s2b))/4. + (invdb12*invdgb2*mmsb22*pow2(s2b))/
-     4. + (mmsb22*pow2(invdgb2)*pow2(s2b))/8. + 2*pow3(invdgb2)*pow3(mmsb2)) +
-     4*lb2u*lgu*(-(invdgb1*mmsb2) - invdgb2*mmsb2 - invdb12*invdgb1*mmsb22 +
-     invdb12*invdgb2*mmsb22 - mmsb22*pow2(invdgb2) + (3*invdgb1*mmsb2*pow2(s2b)
-     )/4. - (3*invdgb2*mmsb2*pow2(s2b))/4. + (3*invdb12*invdgb1*mmsb22*pow2(s2b
-     ))/4. - (3*invdb12*invdgb2*mmsb22*pow2(s2b))/4. + (3*mmsb22*pow2(invdgb2)*
-     pow2(s2b))/4. + 2*pow3(invdgb2)*pow3(mmsb2)) + 4*lgu*(-1.3333333333333333
-     + 27*invdgb1*mmsb1 + 12*invdgb1*mmsb2 + 15*invdgb2*mmsb2 + 12*invdb12*
-     invdgb1*mmsb22 - 12*invdb12*invdgb2*mmsb22 - (59*mmsb12*pow2(invdgb1))/2.
-     - (59*mmsb22*pow2(invdgb2))/2. + 3*invdgb1*mmsb2*pow2(s2b) - 3*invdgb2*
-     mmsb2*pow2(s2b) + 3*invdb12*invdgb1*mmsb22*pow2(s2b) - 3*invdb12*invdgb2*
-     mmsb22*pow2(s2b) + (3*mmsb12*pow2(invdgb1)*pow2(s2b))/2. + (3*mmsb22*pow2(
-     invdgb2)*pow2(s2b))/2. + 10*pow3(invdgb1)*pow3(mmsb1) + 10*pow3(invdgb2)*
-     pow3(mmsb2)) + s2b*((64*lb1u*mmgl)/(9.*mb*mgl) - (64*lb2u*mmgl)/(9.*mb*mgl
-     ) - (64*lb1u*lgu*mmgl)/(9.*mb*mgl) + (64*lb2u*lgu*mmgl)/(9.*mb*mgl) - (36*
-     invdgb1*mmgl*mmsb1)/(mb*mgl) + (8*invdgb2*mmgl*mmsb1)/(mb*mgl) - (56*
-     invdgb1*lb1u*mmgl*mmsb1)/(9.*mb*mgl) - (16*invdgb2*lb1u*mmgl*mmsb1)/(3.*mb
-     *mgl) + (48*invdgb1*lgu*mmgl*mmsb1)/(mb*mgl) - (8*invdgb2*lgu*mmgl*mmsb1)/
-     (3.*mb*mgl) - (100*invdgb1*lb1u*lgu*mmgl*mmsb1)/(9.*mb*mgl) + (4*invdgb2*
-     lb1u*lgu*mmgl*mmsb1)/(3.*mb*mgl) - (16*invdgb1*ltu*mmgl*mmsb1)/(mb*mgl) +
-     (16*invdgb1*lgu*ltu*mmgl*mmsb1)/(3.*mb*mgl) - (8*invdgb1*mmgl*mmsb2)/(mb*
-     mgl) + (36*invdgb2*mmgl*mmsb2)/(mb*mgl) + (8*invdgb1*lb1u*mmgl*mmsb2)/(9.*
-     mb*mgl) - (8*invdgb2*lb1u*mmgl*mmsb2)/(9.*mb*mgl) + (40*invdgb1*lb2u*mmgl*
-     mmsb2)/(9.*mb*mgl) + (64*invdgb2*lb2u*mmgl*mmsb2)/(9.*mb*mgl) - (8*invdgb1
-     *lb1u*lb2u*mmgl*mmsb2)/(3.*mb*mgl) - (40*invdgb2*lb1u*lb2u*mmgl*mmsb2)/(9.
-     *mb*mgl) + (8*invdgb1*lgu*mmgl*mmsb2)/(3.*mb*mgl) - (48*invdgb2*lgu*mmgl*
-     mmsb2)/(mb*mgl) - (40*invdgb1*lb1u*lgu*mmgl*mmsb2)/(9.*mb*mgl) + (40*
-     invdgb2*lb1u*lgu*mmgl*mmsb2)/(9.*mb*mgl) + (4*invdgb1*lb2u*lgu*mmgl*mmsb2)
-     /(3.*mb*mgl) + (76*invdgb2*lb2u*lgu*mmgl*mmsb2)/(9.*mb*mgl) + (16*invdgb2*
-     ltu*mmgl*mmsb2)/(mb*mgl) - (16*invdgb2*lgu*ltu*mmgl*mmsb2)/(3.*mb*mgl) + (
-     8*invdb12*invdgb1*lb1u*mmgl*mmsb22)/(9.*mb*mgl) - (8*invdb12*invdgb2*lb1u*
-     mmgl*mmsb22)/(9.*mb*mgl) - (8*invdb12*invdgb1*lb2u*mmgl*mmsb22)/(9.*mb*mgl
-     ) + (8*invdb12*invdgb2*lb2u*mmgl*mmsb22)/(9.*mb*mgl) - (8*invdb12*invdgb1*
-     lb1u*lb2u*mmgl*mmsb22)/(9.*mb*mgl) - (56*invdb12*invdgb2*lb1u*lb2u*mmgl*
-     mmsb22)/(9.*mb*mgl) - (56*invdb12*invdgb1*lb1u*lgu*mmgl*mmsb22)/(9.*mb*mgl
-     ) + (56*invdb12*invdgb2*lb1u*lgu*mmgl*mmsb22)/(9.*mb*mgl) + (8*invdb12*
-     invdgb1*lb2u*lgu*mmgl*mmsb22)/(9.*mb*mgl) - (8*invdb12*invdgb2*lb2u*lgu*
-     mmgl*mmsb22)/(9.*mb*mgl) + (32*invdgb1*mmgl*mmst1)/(3.*mb*mgl) - (32*
-     invdgb2*mmgl*mmst1)/(3.*mb*mgl) + (8*invdgb1*lgu*mmgl*mmst1)/(3.*mb*mgl) -
-     (8*invdgb2*lgu*mmgl*mmst1)/(3.*mb*mgl) - (8*invdgb1*lt1u*mmgl*mmst1)/(3.*
-     mb*mgl) + (8*invdgb2*lt1u*mmgl*mmst1)/(3.*mb*mgl) - (4*invdgb1*lgu*lt1u*
-     mmgl*mmst1)/(3.*mb*mgl) + (4*invdgb2*lgu*lt1u*mmgl*mmst1)/(3.*mb*mgl) - (8
-     *invdgb1*ltu*mmgl*mmst1)/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmst1)/(mb*mgl) +
-     (8*invdgb1*lt1u*ltu*mmgl*mmst1)/(3.*mb*mgl) - (8*invdgb2*lt1u*ltu*mmgl*
-     mmst1)/(3.*mb*mgl) + (32*invdgb1*mmgl*mmst2)/(3.*mb*mgl) - (32*invdgb2*
-     mmgl*mmst2)/(3.*mb*mgl) + (8*invdgb1*lgu*mmgl*mmst2)/(3.*mb*mgl) - (8*
-     invdgb2*lgu*mmgl*mmst2)/(3.*mb*mgl) - (8*invdgb1*lt2u*mmgl*mmst2)/(3.*mb*
-     mgl) + (8*invdgb2*lt2u*mmgl*mmst2)/(3.*mb*mgl) - (4*invdgb1*lgu*lt2u*mmgl*
-     mmst2)/(3.*mb*mgl) + (4*invdgb2*lgu*lt2u*mmgl*mmst2)/(3.*mb*mgl) - (8*
-     invdgb1*ltu*mmgl*mmst2)/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmst2)/(mb*mgl) + (
-     8*invdgb1*lt2u*ltu*mmgl*mmst2)/(3.*mb*mgl) - (8*invdgb2*lt2u*ltu*mmgl*
-     mmst2)/(3.*mb*mgl) - (64*invdgb1*mmgl*mmsusy)/(mb*mgl) + (64*invdgb2*mmgl*
-     mmsusy)/(mb*mgl) + (64*invdgb1*lgu*mmgl*mmsusy)/(3.*mb*mgl) - (64*invdgb2*
-     lgu*mmgl*mmsusy)/(3.*mb*mgl) + (128*invdgb1*lsu*mmgl*mmsusy)/(3.*mb*mgl) -
-     (128*invdgb2*lsu*mmgl*mmsusy)/(3.*mb*mgl) - (32*invdgb1*lgu*lsu*mmgl*
-     mmsusy)/(3.*mb*mgl) + (32*invdgb2*lgu*lsu*mmgl*mmsusy)/(3.*mb*mgl) + (16*
-     invdgb1*mmgl*mmt)/(mb*mgl) - (16*invdgb2*mmgl*mmt)/(mb*mgl) - (16*invdgb1*
-     lgu*mmgl*mmt)/(3.*mb*mgl) + (16*invdgb2*lgu*mmgl*mmt)/(3.*mb*mgl) - (32*
-     invdgb1*ltu*mmgl*mmt)/(3.*mb*mgl) + (32*invdgb2*ltu*mmgl*mmt)/(3.*mb*mgl)
-     + (8*invdgb1*lgu*ltu*mmgl*mmt)/(3.*mb*mgl) - (8*invdgb2*lgu*ltu*mmgl*mmt)/
-     (3.*mb*mgl) - (40*invdgb1*mmgl*mmsb1*zt2)/(9.*mb*mgl) + (4*invdgb2*mmgl*
-     mmsb1*zt2)/(3.*mb*mgl) - (4*invdgb1*mmgl*mmsb2*zt2)/(3.*mb*mgl) + (40*
-     invdgb2*mmgl*mmsb2*zt2)/(9.*mb*mgl) + (4*invdgb1*mmgl*mmst1*zt2)/(3.*mb*
-     mgl) - (4*invdgb2*mmgl*mmst1*zt2)/(3.*mb*mgl) + (4*invdgb1*mmgl*mmst2*zt2)
-     /(3.*mb*mgl) - (4*invdgb2*mmgl*mmst2*zt2)/(3.*mb*mgl) - (32*invdgb1*mmgl*
-     mmsusy*zt2)/(3.*mb*mgl) + (32*invdgb2*mmgl*mmsusy*zt2)/(3.*mb*mgl) + (8*
-     invdgb1*mmgl*mmt*zt2)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmt*zt2)/(3.*mb*mgl) -
-     (40*lb1u*mmgl*mmsb12*pow2(invdgb1))/(mb*mgl) + (40*lgu*mmgl*mmsb12*pow2(
-     invdgb1))/(mb*mgl) + (148*lb1u*lgu*mmgl*mmsb12*pow2(invdgb1))/(9.*mb*mgl)
-     + (8*lb1u*mmgl*mmsb1*mmsb2*pow2(invdgb1))/(3.*mb*mgl) - (4*lb1u*lb2u*mmgl*
-     mmsb1*mmsb2*pow2(invdgb1))/(9.*mb*mgl) - (8*lgu*mmgl*mmsb1*mmsb2*pow2(
-     invdgb1))/(3.*mb*mgl) - (8*lb1u*lgu*mmgl*mmsb1*mmsb2*pow2(invdgb1))/(9.*mb
-     *mgl) + (4*lb2u*lgu*mmgl*mmsb1*mmsb2*pow2(invdgb1))/(9.*mb*mgl) + (8*lb1u*
-     lb2u*mmgl*mmsb22*pow2(invdgb1))/(9.*mb*mgl) - (8*lb1u*lgu*mmgl*mmsb22*pow2
-     (invdgb1))/(9.*mb*mgl) - (8*lb2u*lgu*mmgl*mmsb22*pow2(invdgb1))/(9.*mb*mgl
-     ) + (8*lb1u*mmgl*mmsb1*mmst1*pow2(invdgb1))/(3.*mb*mgl) - (8*lgu*mmgl*
-     mmsb1*mmst1*pow2(invdgb1))/(3.*mb*mgl) - (4*lb1u*lt1u*mmgl*mmsb1*mmst1*
-     pow2(invdgb1))/(3.*mb*mgl) + (4*lgu*lt1u*mmgl*mmsb1*mmst1*pow2(invdgb1))/(
-     3.*mb*mgl) + (8*lb1u*mmgl*mmsb1*mmst2*pow2(invdgb1))/(3.*mb*mgl) - (8*lgu*
-     mmgl*mmsb1*mmst2*pow2(invdgb1))/(3.*mb*mgl) - (4*lb1u*lt2u*mmgl*mmsb1*
-     mmst2*pow2(invdgb1))/(3.*mb*mgl) + (4*lgu*lt2u*mmgl*mmsb1*mmst2*pow2(
-     invdgb1))/(3.*mb*mgl) + (64*lb1u*mmgl*mmsb1*mmsusy*pow2(invdgb1))/(3.*mb*
-     mgl) - (64*lgu*mmgl*mmsb1*mmsusy*pow2(invdgb1))/(3.*mb*mgl) - (32*lb1u*lsu
-     *mmgl*mmsb1*mmsusy*pow2(invdgb1))/(3.*mb*mgl) + (32*lgu*lsu*mmgl*mmsb1*
-     mmsusy*pow2(invdgb1))/(3.*mb*mgl) - (16*lb1u*mmgl*mmsb1*mmt*pow2(invdgb1))
-     /(3.*mb*mgl) + (16*lgu*mmgl*mmsb1*mmt*pow2(invdgb1))/(3.*mb*mgl) + (8*lb1u
-     *ltu*mmgl*mmsb1*mmt*pow2(invdgb1))/(3.*mb*mgl) - (8*lgu*ltu*mmgl*mmsb1*mmt
-     *pow2(invdgb1))/(3.*mb*mgl) - (8*lb2u*mmgl*mmsb1*mmsb2*pow2(invdgb2))/(3.*
-     mb*mgl) + (4*lb1u*lb2u*mmgl*mmsb1*mmsb2*pow2(invdgb2))/(3.*mb*mgl) + (8*
-     lgu*mmgl*mmsb1*mmsb2*pow2(invdgb2))/(3.*mb*mgl) - (4*lb1u*lgu*mmgl*mmsb1*
-     mmsb2*pow2(invdgb2))/(3.*mb*mgl) + (40*lb2u*mmgl*mmsb22*pow2(invdgb2))/(mb
-     *mgl) + (8*lb1u*lb2u*mmgl*mmsb22*pow2(invdgb2))/(9.*mb*mgl) - (40*lgu*mmgl
-     *mmsb22*pow2(invdgb2))/(mb*mgl) - (8*lb1u*lgu*mmgl*mmsb22*pow2(invdgb2))/(
-     9.*mb*mgl) - (52*lb2u*lgu*mmgl*mmsb22*pow2(invdgb2))/(3.*mb*mgl) - (8*lb2u
-     *mmgl*mmsb2*mmst1*pow2(invdgb2))/(3.*mb*mgl) + (8*lgu*mmgl*mmsb2*mmst1*
-     pow2(invdgb2))/(3.*mb*mgl) + (4*lb2u*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2))/
-     (3.*mb*mgl) - (4*lgu*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2))/(3.*mb*mgl) - (8
-     *lb2u*mmgl*mmsb2*mmst2*pow2(invdgb2))/(3.*mb*mgl) + (8*lgu*mmgl*mmsb2*
-     mmst2*pow2(invdgb2))/(3.*mb*mgl) + (4*lb2u*lt2u*mmgl*mmsb2*mmst2*pow2(
-     invdgb2))/(3.*mb*mgl) - (4*lgu*lt2u*mmgl*mmsb2*mmst2*pow2(invdgb2))/(3.*mb
-     *mgl) - (64*lb2u*mmgl*mmsb2*mmsusy*pow2(invdgb2))/(3.*mb*mgl) + (64*lgu*
-     mmgl*mmsb2*mmsusy*pow2(invdgb2))/(3.*mb*mgl) + (32*lb2u*lsu*mmgl*mmsb2*
-     mmsusy*pow2(invdgb2))/(3.*mb*mgl) - (32*lgu*lsu*mmgl*mmsb2*mmsusy*pow2(
-     invdgb2))/(3.*mb*mgl) + (16*lb2u*mmgl*mmsb2*mmt*pow2(invdgb2))/(3.*mb*mgl)
-     - (16*lgu*mmgl*mmsb2*mmt*pow2(invdgb2))/(3.*mb*mgl) - (8*lb2u*ltu*mmgl*
-     mmsb2*mmt*pow2(invdgb2))/(3.*mb*mgl) + (8*lgu*ltu*mmgl*mmsb2*mmt*pow2(
-     invdgb2))/(3.*mb*mgl) + (22*invdgb1*mmgl*mmsb1*pow2(lb1u))/(9.*mb*mgl) + (
-     2*invdgb2*mmgl*mmsb1*pow2(lb1u))/(3.*mb*mgl) + (32*invdgb1*mmgl*mmsb2*pow2
-     (lb1u))/(9.*mb*mgl) + (32*invdb12*invdgb1*mmgl*mmsb22*pow2(lb1u))/(9.*mb*
-     mgl) + (62*mmgl*mmsb12*pow2(invdgb1)*pow2(lb1u))/(9.*mb*mgl) - (2*mmgl*
-     mmsb1*mmsb2*pow2(invdgb1)*pow2(lb1u))/(3.*mb*mgl) - (2*mmgl*mmsb1*mmst1*
-     pow2(invdgb1)*pow2(lb1u))/(3.*mb*mgl) - (2*mmgl*mmsb1*mmst2*pow2(invdgb1)*
-     pow2(lb1u))/(3.*mb*mgl) - (16*mmgl*mmsb1*mmsusy*pow2(invdgb1)*pow2(lb1u))/
-     (3.*mb*mgl) + (4*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(lb1u))/(3.*mb*mgl) - (2
-     *invdgb1*mmgl*mmsb2*pow2(lb2u))/(3.*mb*mgl) + (10*invdgb2*mmgl*mmsb2*pow2(
-     lb2u))/(9.*mb*mgl) + (32*invdb12*invdgb2*mmgl*mmsb22*pow2(lb2u))/(9.*mb*
-     mgl) + (2*mmgl*mmsb1*mmsb2*pow2(invdgb2)*pow2(lb2u))/(3.*mb*mgl) - (62*
-     mmgl*mmsb22*pow2(invdgb2)*pow2(lb2u))/(9.*mb*mgl) + (2*mmgl*mmsb2*mmst1*
-     pow2(invdgb2)*pow2(lb2u))/(3.*mb*mgl) + (2*mmgl*mmsb2*mmst2*pow2(invdgb2)*
-     pow2(lb2u))/(3.*mb*mgl) + (16*mmgl*mmsb2*mmsusy*pow2(invdgb2)*pow2(lb2u))/
-     (3.*mb*mgl) - (4*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(lb2u))/(3.*mb*mgl) - (
-     74*invdgb1*mmgl*mmsb1*pow2(lgu))/(9.*mb*mgl) + (2*invdgb2*mmgl*mmsb1*pow2(
-     lgu))/(3.*mb*mgl) + (2*invdgb1*mmgl*mmsb2*pow2(lgu))/(9.*mb*mgl) + (22*
-     invdgb2*mmgl*mmsb2*pow2(lgu))/(3.*mb*mgl) + (8*invdb12*invdgb1*mmgl*mmsb22
-     *pow2(lgu))/(3.*mb*mgl) - (8*invdb12*invdgb2*mmgl*mmsb22*pow2(lgu))/(3.*mb
-     *mgl) - (2*invdgb1*mmgl*mmst1*pow2(lgu))/(3.*mb*mgl) + (2*invdgb2*mmgl*
-     mmst1*pow2(lgu))/(3.*mb*mgl) - (2*invdgb1*mmgl*mmst2*pow2(lgu))/(3.*mb*mgl
-     ) + (2*invdgb2*mmgl*mmst2*pow2(lgu))/(3.*mb*mgl) - (16*invdgb1*mmgl*mmsusy
-     *pow2(lgu))/(3.*mb*mgl) + (16*invdgb2*mmgl*mmsusy*pow2(lgu))/(3.*mb*mgl) +
-     (4*invdgb1*mmgl*mmt*pow2(lgu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmt*pow2(lgu)
-     )/(3.*mb*mgl) - (70*mmgl*mmsb12*pow2(invdgb1)*pow2(lgu))/(3.*mb*mgl) + (14
-     *mmgl*mmsb1*mmsb2*pow2(invdgb1)*pow2(lgu))/(9.*mb*mgl) + (8*mmgl*mmsb22*
-     pow2(invdgb1)*pow2(lgu))/(9.*mb*mgl) + (2*mmgl*mmsb1*mmst1*pow2(invdgb1)*
-     pow2(lgu))/(3.*mb*mgl) + (2*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(lgu))/(3.*
-     mb*mgl) + (16*mmgl*mmsb1*mmsusy*pow2(invdgb1)*pow2(lgu))/(3.*mb*mgl) - (4*
-     mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(lgu))/(3.*mb*mgl) - (2*mmgl*mmsb1*mmsb2*
-     pow2(invdgb2)*pow2(lgu))/(3.*mb*mgl) + (218*mmgl*mmsb22*pow2(invdgb2)*pow2
-     (lgu))/(9.*mb*mgl) - (2*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(lgu))/(3.*mb*
-     mgl) - (2*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(lgu))/(3.*mb*mgl) - (16*mmgl
-     *mmsb2*mmsusy*pow2(invdgb2)*pow2(lgu))/(3.*mb*mgl) + (4*mmgl*mmsb2*mmt*
-     pow2(invdgb2)*pow2(lgu))/(3.*mb*mgl) - (16*invdgb1*mmgl*mmsusy*pow2(lsu))/
-     (3.*mb*mgl) + (16*invdgb2*mmgl*mmsusy*pow2(lsu))/(3.*mb*mgl) + (2*invdgb1*
-     mmgl*mmst1*pow2(lt1u))/(3.*mb*mgl) - (2*invdgb2*mmgl*mmst1*pow2(lt1u))/(3.
-     *mb*mgl) + (2*invdgb1*mmgl*mmst2*pow2(lt2u))/(3.*mb*mgl) - (2*invdgb2*mmgl
-     *mmst2*pow2(lt2u))/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb1*pow2(ltu))/(3.*mb*
-     mgl) - (8*invdgb2*mmgl*mmsb2*pow2(ltu))/(3.*mb*mgl) + (4*invdgb1*mmgl*
-     mmst1*pow2(ltu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmst1*pow2(ltu))/(3.*mb*mgl
-     ) + (4*invdgb1*mmgl*mmst2*pow2(ltu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmst2*
-     pow2(ltu))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmt*pow2(ltu))/(3.*mb*mgl) - (4*
-     invdgb2*mmgl*mmt*pow2(ltu))/(3.*mb*mgl) - (16*lb1u*lgu*mmgl*pow3(invdgb1)*
-     pow3(mmsb1))/(9.*mb*mgl) + (8*mmgl*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1))/(
-     9.*mb*mgl) + (8*mmgl*pow2(lgu)*pow3(invdgb1)*pow3(mmsb1))/(9.*mb*mgl) + (
-     16*invdgb1*lb1u*lb2u*mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) - (16*
-     invdgb2*lb1u*lb2u*mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) - (16*
-     invdgb1*lb1u*lgu*mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) + (16*invdgb2
-     *lb1u*lgu*mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) - (16*invdgb1*lb2u*
-     lgu*mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) + (16*invdgb2*lb2u*lgu*
-     mmgl*pow2(invdb12)*pow3(mmsb2))/(9.*mb*mgl) + (8*invdb12*lb1u*lb2u*mmgl*
-     pow2(invdgb1)*pow3(mmsb2))/(9.*mb*mgl) - (8*invdb12*lb1u*lgu*mmgl*pow2(
-     invdgb1)*pow3(mmsb2))/(9.*mb*mgl) - (8*invdb12*lb2u*lgu*mmgl*pow2(invdgb1)
-     *pow3(mmsb2))/(9.*mb*mgl) + (8*invdb12*lb1u*lb2u*mmgl*pow2(invdgb2)*pow3(
-     mmsb2))/(9.*mb*mgl) - (8*invdb12*lb1u*lgu*mmgl*pow2(invdgb2)*pow3(mmsb2))/
-     (9.*mb*mgl) - (8*invdb12*lb2u*lgu*mmgl*pow2(invdgb2)*pow3(mmsb2))/(9.*mb*
-     mgl) + (16*invdgb1*mmgl*pow2(invdb12)*pow2(lgu)*pow3(mmsb2))/(9.*mb*mgl) -
-     (16*invdgb2*mmgl*pow2(invdb12)*pow2(lgu)*pow3(mmsb2))/(9.*mb*mgl) + (8*
-     invdb12*mmgl*pow2(invdgb1)*pow2(lgu)*pow3(mmsb2))/(9.*mb*mgl) + (8*invdb12
-     *mmgl*pow2(invdgb2)*pow2(lgu)*pow3(mmsb2))/(9.*mb*mgl) + (16*lb2u*lgu*mmgl
-     *pow3(invdgb2)*pow3(mmsb2))/(9.*mb*mgl) - (8*mmgl*pow2(lb2u)*pow3(invdgb2)
-     *pow3(mmsb2))/(9.*mb*mgl) - (8*mmgl*pow2(lgu)*pow3(invdgb2)*pow3(mmsb2))/(
-     9.*mb*mgl)) + (16*lgu*(62 - 75*invdgb1*mmsb1 - (253*invdgb1*mmsb2)/4. - (
-     47*invdgb2*mmsb2)/4. - (253*invdb12*invdgb1*mmsb22)/4. + (253*invdb12*
-     invdgb2*mmsb22)/4. + (21*mmsb12*pow2(invdgb1))/2. - (mmsb1*mmsb2*pow2(
-     invdgb1))/4. - (mmsb22*pow2(invdgb1))/4. + (43*mmsb22*pow2(invdgb2))/4. -
-     24*pow2(s2b) + 23*invdgb1*mmsb1*pow2(s2b) + invdgb2*mmsb1*pow2(s2b) + (143
-     *invdgb1*mmsb2*pow2(s2b))/4. - (47*invdgb2*mmsb2*pow2(s2b))/4. + (139*
-     invdb12*invdgb1*mmsb22*pow2(s2b))/4. - (139*invdb12*invdgb2*mmsb22*pow2(
-     s2b))/4. + (15*mmsb12*pow2(invdgb1)*pow2(s2b))/2. - (9*mmsb1*mmsb2*pow2(
-     invdgb1)*pow2(s2b))/4. - (mmsb22*pow2(invdgb1)*pow2(s2b))/4. - 2*mmsb1*
-     mmsb2*pow2(invdgb2)*pow2(s2b) + (31*mmsb22*pow2(invdgb2)*pow2(s2b))/4. +
-     mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2
-     ) + (7*pow3(invdgb1)*pow3(mmsb1))/4. - (5*pow2(s2b)*pow3(invdgb1)*pow3(
-     mmsb1))/4. - (invdb12*pow2(invdgb1)*pow3(mmsb2))/4. + (invdb12*pow2(
-     invdgb2)*pow3(mmsb2))/4. - (invdb12*pow2(invdgb1)*pow2(s2b)*pow3(mmsb2))/
-     4. + (invdb12*pow2(invdgb2)*pow2(s2b)*pow3(mmsb2))/4. + (7*pow3(invdgb2)*
-     pow3(mmsb2))/4. - (5*pow2(s2b)*pow3(invdgb2)*pow3(mmsb2))/4.))/9. + (16*
-     lb2u*(-4 - 8*invdb12*mmsb2 - (invdgb1*mmsb2)/2. + 17*invdgb2*mmsb2 - (3*
-     invdb12*invdgb1*mmsb22)/4. + (35*invdb12*invdgb2*mmsb22)/4. - (63*mmsb22*
-     pow2(invdgb2))/4. - 4*pow2(s2b) - invdgb2*mmsb1*pow2(s2b) + 8*invdb12*
-     mmsb2*pow2(s2b) - 2*invdgb1*mmsb2*pow2(s2b) + 18*invdgb2*mmsb2*pow2(s2b) -
-     (15*invdb12*invdgb1*mmsb22*pow2(s2b))/4. - (17*invdb12*invdgb2*mmsb22*pow2
-     (s2b))/4. - mmsb1*mmsb2*pow2(invdgb1)*pow2(s2b) + 2*mmsb1*mmsb2*pow2(
-     invdgb2)*pow2(s2b) - (27*mmsb22*pow2(invdgb2)*pow2(s2b))/4. - mmsb1*mmsb22
-     *pow2(s2b)*pow3(invdgb2) - (invdgb1*pow2(invdb12)*pow3(mmsb2))/4. + (
-     invdgb2*pow2(invdb12)*pow3(mmsb2))/4. - (invdb12*pow2(invdgb2)*pow3(mmsb2)
-     )/4. - (invdgb1*pow2(invdb12)*pow2(s2b)*pow3(mmsb2))/4. + (invdgb2*pow2(
-     invdb12)*pow2(s2b)*pow3(mmsb2))/4. - (invdb12*pow2(invdgb2)*pow2(s2b)*pow3
-     (mmsb2))/4. + (65*pow3(invdgb2)*pow3(mmsb2))/4. + (5*pow2(s2b)*pow3(
-     invdgb2)*pow3(mmsb2))/4.))/9. + Fin3(mmt,mmsb2,mmst1,mmu)*(-(mmsb2*pow2(
-     invdgb2)) + mmst1*pow2(invdgb2) - mmt*pow2(invdgb2) + s2b*((-4*mmgl*mmsb2*
-     pow2(invdgb2))/(3.*mb*mgl) + (4*mmgl*mmst1*pow2(invdgb2))/(3.*mb*mgl) - (4
-     *mmgl*mmt*pow2(invdgb2))/(3.*mb*mgl)) + (4*mmsb22*pow3(invdgb2))/3. - (4*
-     mmsb2*mmst1*pow3(invdgb2))/3. + (4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((4*
-     mmgl*mmt*pow2(invdgb2))/(3.*mgl*mt) + s2b*((-4*invdgb2*mmt)/(3.*mb*mt) + (
-     8*mmsb2*mmt*pow2(invdgb2))/(3.*mb*mt)) - (8*mmgl*mmsb2*mmt*pow3(invdgb2))/
-     (3.*mgl*mt)) + DeltaInv(mmt,mmsb2,mmst1)*((2*invdgb2*mmsb22)/3. - (4*
-     invdgb2*mmsb2*mmst1)/3. - (2*invdgb2*mmsb2*mmt)/3. - (2*invdgb2*mmst1*mmt)
-     /3. + (8*mmsb22*mmst1*pow2(invdgb2))/3. + (4*mmsb22*mmt*pow2(invdgb2))/3.
-     + (4*mmsb2*mmst1*mmt*pow2(invdgb2))/3. + (2*invdgb2*pow2(mmst1))/3. - (4*
-     mmsb2*pow2(invdgb2)*pow2(mmst1))/3. + s2t*((4*mmgl*mmsb22*mmt*pow2(invdgb2
-     ))/(3.*mgl*mt) - (4*mmgl*mmsb2*mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*
-     mmgl*mmsb2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt)) - (4*pow2(invdgb2)*pow3(
-     mmsb2))/3.)) + Fin3(mmt,mmsb2,mmst2,mmu)*(-(mmsb2*pow2(invdgb2)) + mmst2*
-     pow2(invdgb2) - mmt*pow2(invdgb2) + s2b*((-4*mmgl*mmsb2*pow2(invdgb2))/(3.
-     *mb*mgl) + (4*mmgl*mmst2*pow2(invdgb2))/(3.*mb*mgl) - (4*mmgl*mmt*pow2(
-     invdgb2))/(3.*mb*mgl)) + (4*mmsb22*pow3(invdgb2))/3. - (4*mmsb2*mmst2*pow3
-     (invdgb2))/3. + (4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((-4*mmgl*mmt*pow2(
-     invdgb2))/(3.*mgl*mt) + s2b*((4*invdgb2*mmt)/(3.*mb*mt) - (8*mmsb2*mmt*
-     pow2(invdgb2))/(3.*mb*mt)) + (8*mmgl*mmsb2*mmt*pow3(invdgb2))/(3.*mgl*mt))
-     + DeltaInv(mmt,mmsb2,mmst2)*((2*invdgb2*mmsb22)/3. - (4*invdgb2*mmsb2*
-     mmst2)/3. - (2*invdgb2*mmsb2*mmt)/3. - (2*invdgb2*mmst2*mmt)/3. + (8*
-     mmsb22*mmst2*pow2(invdgb2))/3. + (4*mmsb22*mmt*pow2(invdgb2))/3. + (4*
-     mmsb2*mmst2*mmt*pow2(invdgb2))/3. + (2*invdgb2*pow2(mmst2))/3. - (4*mmsb2*
-     pow2(invdgb2)*pow2(mmst2))/3. + s2t*((-4*mmgl*mmsb22*mmt*pow2(invdgb2))/(
-     3.*mgl*mt) + (4*mmgl*mmsb2*mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*mmgl*
-     mmsb2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt)) - (4*pow2(invdgb2)*pow3(mmsb2)
-     )/3.)) + Fin3(mmt,mmst2,mmgl,mmu)*(-invdgb1 - invdgb2 + (7*mmsb1*pow2(
-     invdgb1))/3. - mmst2*pow2(invdgb1) + mmt*pow2(invdgb1) + (7*mmsb2*pow2(
-     invdgb2))/3. - mmst2*pow2(invdgb2) + mmt*pow2(invdgb2) + s2b*((4*invdgb1*
-     mmgl)/(3.*mb*mgl) - (4*invdgb2*mmgl)/(3.*mb*mgl) - (4*mmgl*mmsb1*pow2(
-     invdgb1))/(3.*mb*mgl) + (4*mmgl*mmst2*pow2(invdgb1))/(3.*mb*mgl) - (4*mmgl
-     *mmt*pow2(invdgb1))/(3.*mb*mgl) + (4*mmgl*mmsb2*pow2(invdgb2))/(3.*mb*mgl)
-     - (4*mmgl*mmst2*pow2(invdgb2))/(3.*mb*mgl) + (4*mmgl*mmt*pow2(invdgb2))/(
-     3.*mb*mgl)) - (4*mmsb12*pow3(invdgb1))/3. + (4*mmsb1*mmst2*pow3(invdgb1))/
-     3. - (4*mmsb1*mmt*pow3(invdgb1))/3. - (4*mmsb22*pow3(invdgb2))/3. + (4*
-     mmsb2*mmst2*pow3(invdgb2))/3. - (4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((4*
-     mmgl*mmt*pow2(invdgb1))/(3.*mgl*mt) + (4*mmgl*mmt*pow2(invdgb2))/(3.*mgl*
-     mt) + s2b*((4*invdgb1*mmt)/(3.*mb*mt) - (4*invdgb2*mmt)/(3.*mb*mt) - (8*
-     mmsb1*mmt*pow2(invdgb1))/(3.*mb*mt) + (8*mmsb2*mmt*pow2(invdgb2))/(3.*mb*
-     mt)) - (8*mmgl*mmsb1*mmt*pow3(invdgb1))/(3.*mgl*mt) - (8*mmgl*mmsb2*mmt*
-     pow3(invdgb2))/(3.*mgl*mt)) + DeltaInv(mmt,mmst2,mmgl)*((-8*mmgl)/3. - (8*
-     mmsb1)/3. + 4*invdgb1*mmsb12 - (8*mmsb2)/3. + 4*invdgb2*mmsb22 + (16*mmst2
-     )/3. - (16*invdgb1*mmsb1*mmst2)/3. - (16*invdgb2*mmsb2*mmst2)/3. + (8*mmt)
-     /3. - (8*invdgb1*mmsb1*mmt)/3. - (8*invdgb2*mmsb2*mmt)/3. - (4*invdgb1*
-     mmst2*mmt)/3. - (4*invdgb2*mmst2*mmt)/3. + (8*mmsb12*mmst2*pow2(invdgb1))/
-     3. + (4*mmsb12*mmt*pow2(invdgb1))/3. + (4*mmsb1*mmst2*mmt*pow2(invdgb1))/
-     3. + (8*mmsb22*mmst2*pow2(invdgb2))/3. + (4*mmsb22*mmt*pow2(invdgb2))/3. +
-     (4*mmsb2*mmst2*mmt*pow2(invdgb2))/3. + (4*invdgb1*pow2(mmst2))/3. + (4*
-     invdgb2*pow2(mmst2))/3. - (4*mmsb1*pow2(invdgb1)*pow2(mmst2))/3. - (4*
-     mmsb2*pow2(invdgb2)*pow2(mmst2))/3. + s2b*((8*mmgl*mmsb1)/(3.*mb*mgl) - (8
-     *invdgb1*mmgl*mmsb12)/(3.*mb*mgl) - (8*mmgl*mmsb2)/(3.*mb*mgl) + (8*
-     invdgb2*mmgl*mmsb22)/(3.*mb*mgl) + (16*invdgb1*mmgl*mmsb1*mmst2)/(3.*mb*
-     mgl) - (16*invdgb2*mmgl*mmsb2*mmst2)/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb1*
-     mmt)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb2*mmt)/(3.*mb*mgl) + (8*invdgb1*
-     mmgl*mmst2*mmt)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmst2*mmt)/(3.*mb*mgl) - (8*
-     invdgb1*mmgl*pow2(mmst2))/(3.*mb*mgl) + (8*invdgb2*mmgl*pow2(mmst2))/(3.*
-     mb*mgl)) + s2t*((-8*mmgl*mmt)/(3.*mgl*mt) + (8*invdgb1*mmgl*mmsb1*mmt)/(3.
-     *mgl*mt) + (8*invdgb2*mmgl*mmsb2*mmt)/(3.*mgl*mt) - (4*invdgb1*mmgl*mmst2*
-     mmt)/(3.*mgl*mt) - (4*invdgb2*mmgl*mmst2*mmt)/(3.*mgl*mt) - (4*mmgl*mmsb12
-     *mmt*pow2(invdgb1))/(3.*mgl*mt) + (4*mmgl*mmsb1*mmst2*mmt*pow2(invdgb1))/(
-     3.*mgl*mt) - (4*mmgl*mmsb22*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*mmgl*mmsb2
-     *mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*invdgb1*mmgl*pow2(mmt))/(3.*mgl
-     *mt) - (4*invdgb2*mmgl*pow2(mmt))/(3.*mgl*mt) + (4*mmgl*mmsb1*pow2(invdgb1
-     )*pow2(mmt))/(3.*mgl*mt) + (4*mmgl*mmsb2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*
-     mt) + s2b*((8*mmsb1*mmt)/(3.*mb*mt) - (8*invdgb1*mmsb12*mmt)/(3.*mb*mt) -
-     (8*mmsb2*mmt)/(3.*mb*mt) + (8*invdgb2*mmsb22*mmt)/(3.*mb*mt) + (8*invdgb1*
-     mmsb1*mmst2*mmt)/(3.*mb*mt) - (8*invdgb2*mmsb2*mmst2*mmt)/(3.*mb*mt) + (8*
-     invdgb1*mmsb1*pow2(mmt))/(3.*mb*mt) - (8*invdgb2*mmsb2*pow2(mmt))/(3.*mb*
-     mt))) - (4*pow2(invdgb1)*pow3(mmsb1))/3. - (4*pow2(invdgb2)*pow3(mmsb2))/
-     3.)) + Fin3(mmt,mmst1,mmgl,mmu)*(-invdgb1 - invdgb2 + (7*mmsb1*pow2(
-     invdgb1))/3. - mmst1*pow2(invdgb1) + mmt*pow2(invdgb1) + (7*mmsb2*pow2(
-     invdgb2))/3. - mmst1*pow2(invdgb2) + mmt*pow2(invdgb2) + s2b*((4*invdgb1*
-     mmgl)/(3.*mb*mgl) - (4*invdgb2*mmgl)/(3.*mb*mgl) - (4*mmgl*mmsb1*pow2(
-     invdgb1))/(3.*mb*mgl) + (4*mmgl*mmst1*pow2(invdgb1))/(3.*mb*mgl) - (4*mmgl
-     *mmt*pow2(invdgb1))/(3.*mb*mgl) + (4*mmgl*mmsb2*pow2(invdgb2))/(3.*mb*mgl)
-     - (4*mmgl*mmst1*pow2(invdgb2))/(3.*mb*mgl) + (4*mmgl*mmt*pow2(invdgb2))/(
-     3.*mb*mgl)) - (4*mmsb12*pow3(invdgb1))/3. + (4*mmsb1*mmst1*pow3(invdgb1))/
-     3. - (4*mmsb1*mmt*pow3(invdgb1))/3. - (4*mmsb22*pow3(invdgb2))/3. + (4*
-     mmsb2*mmst1*pow3(invdgb2))/3. - (4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((-4*
-     mmgl*mmt*pow2(invdgb1))/(3.*mgl*mt) - (4*mmgl*mmt*pow2(invdgb2))/(3.*mgl*
-     mt) + s2b*((-4*invdgb1*mmt)/(3.*mb*mt) + (4*invdgb2*mmt)/(3.*mb*mt) + (8*
-     mmsb1*mmt*pow2(invdgb1))/(3.*mb*mt) - (8*mmsb2*mmt*pow2(invdgb2))/(3.*mb*
-     mt)) + (8*mmgl*mmsb1*mmt*pow3(invdgb1))/(3.*mgl*mt) + (8*mmgl*mmsb2*mmt*
-     pow3(invdgb2))/(3.*mgl*mt)) + DeltaInv(mmt,mmst1,mmgl)*((-8*mmgl)/3. - (8*
-     mmsb1)/3. + 4*invdgb1*mmsb12 - (8*mmsb2)/3. + 4*invdgb2*mmsb22 + (16*mmst1
-     )/3. - (16*invdgb1*mmsb1*mmst1)/3. - (16*invdgb2*mmsb2*mmst1)/3. + (8*mmt)
-     /3. - (8*invdgb1*mmsb1*mmt)/3. - (8*invdgb2*mmsb2*mmt)/3. - (4*invdgb1*
-     mmst1*mmt)/3. - (4*invdgb2*mmst1*mmt)/3. + (8*mmsb12*mmst1*pow2(invdgb1))/
-     3. + (4*mmsb12*mmt*pow2(invdgb1))/3. + (4*mmsb1*mmst1*mmt*pow2(invdgb1))/
-     3. + (8*mmsb22*mmst1*pow2(invdgb2))/3. + (4*mmsb22*mmt*pow2(invdgb2))/3. +
-     (4*mmsb2*mmst1*mmt*pow2(invdgb2))/3. + (4*invdgb1*pow2(mmst1))/3. + (4*
-     invdgb2*pow2(mmst1))/3. - (4*mmsb1*pow2(invdgb1)*pow2(mmst1))/3. - (4*
-     mmsb2*pow2(invdgb2)*pow2(mmst1))/3. + s2b*((8*mmgl*mmsb1)/(3.*mb*mgl) - (8
-     *invdgb1*mmgl*mmsb12)/(3.*mb*mgl) - (8*mmgl*mmsb2)/(3.*mb*mgl) + (8*
-     invdgb2*mmgl*mmsb22)/(3.*mb*mgl) + (16*invdgb1*mmgl*mmsb1*mmst1)/(3.*mb*
-     mgl) - (16*invdgb2*mmgl*mmsb2*mmst1)/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb1*
-     mmt)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb2*mmt)/(3.*mb*mgl) + (8*invdgb1*
-     mmgl*mmst1*mmt)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmst1*mmt)/(3.*mb*mgl) - (8*
-     invdgb1*mmgl*pow2(mmst1))/(3.*mb*mgl) + (8*invdgb2*mmgl*pow2(mmst1))/(3.*
-     mb*mgl)) + s2t*((8*mmgl*mmt)/(3.*mgl*mt) - (8*invdgb1*mmgl*mmsb1*mmt)/(3.*
-     mgl*mt) - (8*invdgb2*mmgl*mmsb2*mmt)/(3.*mgl*mt) + (4*invdgb1*mmgl*mmst1*
-     mmt)/(3.*mgl*mt) + (4*invdgb2*mmgl*mmst1*mmt)/(3.*mgl*mt) + (4*mmgl*mmsb12
-     *mmt*pow2(invdgb1))/(3.*mgl*mt) - (4*mmgl*mmsb1*mmst1*mmt*pow2(invdgb1))/(
-     3.*mgl*mt) + (4*mmgl*mmsb22*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*mmgl*mmsb2
-     *mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*invdgb1*mmgl*pow2(mmt))/(3.*mgl
-     *mt) + (4*invdgb2*mmgl*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb1*pow2(invdgb1
-     )*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*
-     mt) + s2b*((-8*mmsb1*mmt)/(3.*mb*mt) + (8*invdgb1*mmsb12*mmt)/(3.*mb*mt) +
-     (8*mmsb2*mmt)/(3.*mb*mt) - (8*invdgb2*mmsb22*mmt)/(3.*mb*mt) - (8*invdgb1*
-     mmsb1*mmst1*mmt)/(3.*mb*mt) + (8*invdgb2*mmsb2*mmst1*mmt)/(3.*mb*mt) - (8*
-     invdgb1*mmsb1*pow2(mmt))/(3.*mb*mt) + (8*invdgb2*mmsb2*pow2(mmt))/(3.*mb*
-     mt))) - (4*pow2(invdgb1)*pow3(mmsb1))/3. - (4*pow2(invdgb2)*pow3(mmsb2))/
-     3.)) - (16*invdgb1*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl) - (16*invdgb2*mmgl*
-     mmsb1*pow3(s2b))/(9.*mb*mgl) + (32*invdgb1*lb1u*mmgl*mmsb1*pow3(s2b))/(9.*
-     mb*mgl) + (16*invdgb2*lb1u*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl) - (16*invdgb2
-     *lb2u*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl) + (16*invdgb2*lb1u*lb2u*mmgl*mmsb1
-     *pow3(s2b))/(9.*mb*mgl) - (16*invdgb1*lgu*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl
-     ) + (16*invdgb2*lgu*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl) + (16*invdgb1*lb1u*
-     lgu*mmgl*mmsb1*pow3(s2b))/(9.*mb*mgl) - (16*invdgb2*lb1u*lgu*mmgl*mmsb1*
-     pow3(s2b))/(9.*mb*mgl) + (16*invdgb1*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (
-     16*invdgb2*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (16*invdgb1*lb1u*mmgl*mmsb2
-     *pow3(s2b))/(9.*mb*mgl) - (16*invdgb1*lb2u*mmgl*mmsb2*pow3(s2b))/(9.*mb*
-     mgl) - (32*invdgb2*lb2u*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (16*invdgb1*
-     lb1u*lb2u*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (32*invdgb2*lb1u*lb2u*mmgl*
-     mmsb2*pow3(s2b))/(9.*mb*mgl) - (16*invdgb1*lgu*mmgl*mmsb2*pow3(s2b))/(9.*
-     mb*mgl) + (16*invdgb2*lgu*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (32*invdgb1*
-     lb1u*lgu*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) - (32*invdgb2*lb1u*lgu*mmgl*
-     mmsb2*pow3(s2b))/(9.*mb*mgl) - (16*invdgb1*lb2u*lgu*mmgl*mmsb2*pow3(s2b))/
-     (9.*mb*mgl) + (16*invdgb2*lb2u*lgu*mmgl*mmsb2*pow3(s2b))/(9.*mb*mgl) + (32
-     *invdb12*invdgb1*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(9.*mb*mgl) + (32*
-     invdb12*invdgb2*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(9.*mb*mgl) + (32*invdb12
-     *invdgb1*lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(9.*mb*mgl) - (32*invdb12*invdgb2
-     *lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(9.*mb*mgl) - (32*invdb12*invdgb1*lb2u*
-     lgu*mmgl*mmsb22*pow3(s2b))/(9.*mb*mgl) + (32*invdb12*invdgb2*lb2u*lgu*mmgl
-     *mmsb22*pow3(s2b))/(9.*mb*mgl) + (16*lb1u*mmgl*mmsb12*pow2(invdgb1)*pow3(
-     s2b))/(9.*mb*mgl) - (16*lgu*mmgl*mmsb12*pow2(invdgb1)*pow3(s2b))/(9.*mb*
-     mgl) + (16*lb1u*lgu*mmgl*mmsb12*pow2(invdgb1)*pow3(s2b))/(9.*mb*mgl) - (16
-     *lb1u*mmgl*mmsb1*mmsb2*pow2(invdgb1)*pow3(s2b))/(9.*mb*mgl) + (16*lb1u*
-     lb2u*mmgl*mmsb1*mmsb2*pow2(invdgb1)*pow3(s2b))/(9.*mb*mgl) + (16*lgu*mmgl*
-     mmsb1*mmsb2*pow2(invdgb1)*pow3(s2b))/(9.*mb*mgl) - (16*lb2u*lgu*mmgl*mmsb1
-     *mmsb2*pow2(invdgb1)*pow3(s2b))/(9.*mb*mgl) + (16*lb2u*mmgl*mmsb1*mmsb2*
-     pow2(invdgb2)*pow3(s2b))/(9.*mb*mgl) - (16*lb1u*lb2u*mmgl*mmsb1*mmsb2*pow2
-     (invdgb2)*pow3(s2b))/(9.*mb*mgl) - (16*lgu*mmgl*mmsb1*mmsb2*pow2(invdgb2)*
-     pow3(s2b))/(9.*mb*mgl) + (16*lb1u*lgu*mmgl*mmsb1*mmsb2*pow2(invdgb2)*pow3(
-     s2b))/(9.*mb*mgl) - (16*lb2u*mmgl*mmsb22*pow2(invdgb2)*pow3(s2b))/(9.*mb*
-     mgl) + (16*lgu*mmgl*mmsb22*pow2(invdgb2)*pow3(s2b))/(9.*mb*mgl) - (16*lb2u
-     *lgu*mmgl*mmsb22*pow2(invdgb2)*pow3(s2b))/(9.*mb*mgl) - (16*invdgb1*mmgl*
-     mmsb1*pow2(lb1u)*pow3(s2b))/(9.*mb*mgl) - (32*invdgb1*mmgl*mmsb2*pow2(lb1u
-     )*pow3(s2b))/(9.*mb*mgl) - (32*invdb12*invdgb1*mmgl*mmsb22*pow2(lb1u)*pow3
-     (s2b))/(9.*mb*mgl) - (16*mmgl*mmsb12*pow2(invdgb1)*pow2(lb1u)*pow3(s2b))/(
-     9.*mb*mgl) - (16*invdgb2*mmgl*mmsb2*pow2(lb2u)*pow3(s2b))/(9.*mb*mgl) - (
-     32*invdb12*invdgb2*mmgl*mmsb22*pow2(lb2u)*pow3(s2b))/(9.*mb*mgl) + (16*
-     mmgl*mmsb22*pow2(invdgb2)*pow2(lb2u)*pow3(s2b))/(9.*mb*mgl) + DeltaInv(mmt
-     ,mmsb1,mmst1)*((-14*invdgb1*mmsb12*mmst1)/3. + 4*invdgb1*lb1u*mmsb12*mmst1
-      - 2*invdgb1*lt1u*mmsb12*mmst1 + 2*invdgb1*ltu*mmsb12*mmst1 - (4*invdgb1*
-     lb1u*ltu*mmsb12*mmst1)/3. + (2*invdgb1*lt1u*ltu*mmsb12*mmst1)/3. - (14*
-     invdgb1*mmsb12*mmt)/3. + 2*invdgb1*lb1u*mmsb12*mmt + 2*invdgb1*ltu*mmsb12*
-     mmt - (2*invdgb1*lb1u*ltu*mmsb12*mmt)/3. - (56*invdgb1*mmsb1*mmst1*mmt)/3.
-      + 2*invdgb1*lb1u*mmsb1*mmst1*mmt + 2*invdgb1*lt1u*mmsb1*mmst1*mmt + (4*
-     invdgb1*lb1u*lt1u*mmsb1*mmst1*mmt)/3. + 12*invdgb1*ltu*mmsb1*mmst1*mmt - 2
-     *invdgb1*lb1u*ltu*mmsb1*mmst1*mmt - 2*invdgb1*lt1u*ltu*mmsb1*mmst1*mmt - (
-     2*invdgb1*mmsb12*mmst1*zt2)/3. - (2*invdgb1*mmsb12*mmt*zt2)/3. - (8*
-     invdgb1*mmsb1*mmst1*mmt*zt2)/3. + (112*mmsb12*mmst1*mmt*pow2(invdgb1))/3.
-     - 4*lb1u*mmsb12*mmst1*mmt*pow2(invdgb1) - 4*lt1u*mmsb12*mmst1*mmt*pow2(
-     invdgb1) - (8*lb1u*lt1u*mmsb12*mmst1*mmt*pow2(invdgb1))/3. - 24*ltu*mmsb12
-     *mmst1*mmt*pow2(invdgb1) + 4*lb1u*ltu*mmsb12*mmst1*mmt*pow2(invdgb1) + 4*
-     lt1u*ltu*mmsb12*mmst1*mmt*pow2(invdgb1) + (16*mmsb12*mmst1*mmt*zt2*pow2(
-     invdgb1))/3. - (2*invdgb1*mmsb12*mmst1*pow2(lb1u))/3. - (invdgb1*mmsb12*
-     mmt*pow2(lb1u))/3. - (invdgb1*mmsb1*mmst1*mmt*pow2(lb1u))/3. + (2*mmsb12*
-     mmst1*mmt*pow2(invdgb1)*pow2(lb1u))/3. + (invdgb1*mmsb12*mmst1*pow2(lt1u))
-     /3. - (invdgb1*mmsb1*mmst1*mmt*pow2(lt1u))/3. + (2*mmsb12*mmst1*mmt*pow2(
-     invdgb1)*pow2(lt1u))/3. - (invdgb1*mmsb12*mmst1*pow2(ltu))/3. - (invdgb1*
-     mmsb12*mmt*pow2(ltu))/3. - 2*invdgb1*mmsb1*mmst1*mmt*pow2(ltu) + 4*mmsb12*
-     mmst1*mmt*pow2(invdgb1)*pow2(ltu) - (14*invdgb1*mmsb1*pow2(mmst1))/3. - 2*
-     invdgb1*lb1u*mmsb1*pow2(mmst1) + 4*invdgb1*lt1u*mmsb1*pow2(mmst1) + 2*
-     invdgb1*ltu*mmsb1*pow2(mmst1) + (2*invdgb1*lb1u*ltu*mmsb1*pow2(mmst1))/3.
-     - (4*invdgb1*lt1u*ltu*mmsb1*pow2(mmst1))/3. - (14*invdgb1*mmt*pow2(mmst1))
-     /3. + 2*invdgb1*lt1u*mmt*pow2(mmst1) + 2*invdgb1*ltu*mmt*pow2(mmst1) - (2*
-     invdgb1*lt1u*ltu*mmt*pow2(mmst1))/3. - (2*invdgb1*mmsb1*zt2*pow2(mmst1))/
-     3. - (2*invdgb1*mmt*zt2*pow2(mmst1))/3. + (28*mmsb12*pow2(invdgb1)*pow2(
-     mmst1))/3. + 4*lb1u*mmsb12*pow2(invdgb1)*pow2(mmst1) - 8*lt1u*mmsb12*pow2(
-     invdgb1)*pow2(mmst1) - 4*ltu*mmsb12*pow2(invdgb1)*pow2(mmst1) - (4*lb1u*
-     ltu*mmsb12*pow2(invdgb1)*pow2(mmst1))/3. + (8*lt1u*ltu*mmsb12*pow2(invdgb1
-     )*pow2(mmst1))/3. + (28*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/3. - 4*lt1u*
-     mmsb1*mmt*pow2(invdgb1)*pow2(mmst1) - 4*ltu*mmsb1*mmt*pow2(invdgb1)*pow2(
-     mmst1) + (4*lt1u*ltu*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/3. + (4*mmsb12*
-     zt2*pow2(invdgb1)*pow2(mmst1))/3. + (4*mmsb1*mmt*zt2*pow2(invdgb1)*pow2(
-     mmst1))/3. + (invdgb1*mmsb1*pow2(lb1u)*pow2(mmst1))/3. - (2*mmsb12*pow2(
-     invdgb1)*pow2(lb1u)*pow2(mmst1))/3. - (2*invdgb1*mmsb1*pow2(lt1u)*pow2(
-     mmst1))/3. - (invdgb1*mmt*pow2(lt1u)*pow2(mmst1))/3. + (4*mmsb12*pow2(
-     invdgb1)*pow2(lt1u)*pow2(mmst1))/3. + (2*mmsb1*mmt*pow2(invdgb1)*pow2(lt1u
-     )*pow2(mmst1))/3. - (invdgb1*mmsb1*pow2(ltu)*pow2(mmst1))/3. - (invdgb1*
-     mmt*pow2(ltu)*pow2(mmst1))/3. + (2*mmsb12*pow2(invdgb1)*pow2(ltu)*pow2(
-     mmst1))/3. + (2*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)*pow2(mmst1))/3. + (14*
-     invdgb1*pow3(mmsb1))/3. - 2*invdgb1*lb1u*pow3(mmsb1) - 2*invdgb1*ltu*pow3(
-     mmsb1) + (2*invdgb1*lb1u*ltu*pow3(mmsb1))/3. + (2*invdgb1*zt2*pow3(mmsb1))
-     /3. + (28*mmst1*pow2(invdgb1)*pow3(mmsb1))/3. - 8*lb1u*mmst1*pow2(invdgb1)
-     *pow3(mmsb1) + 4*lt1u*mmst1*pow2(invdgb1)*pow3(mmsb1) - 4*ltu*mmst1*pow2(
-     invdgb1)*pow3(mmsb1) + (8*lb1u*ltu*mmst1*pow2(invdgb1)*pow3(mmsb1))/3. - (
-     4*lt1u*ltu*mmst1*pow2(invdgb1)*pow3(mmsb1))/3. + (28*mmt*pow2(invdgb1)*
-     pow3(mmsb1))/3. - 4*lb1u*mmt*pow2(invdgb1)*pow3(mmsb1) - 4*ltu*mmt*pow2(
-     invdgb1)*pow3(mmsb1) + (4*lb1u*ltu*mmt*pow2(invdgb1)*pow3(mmsb1))/3. + (4*
-     mmst1*zt2*pow2(invdgb1)*pow3(mmsb1))/3. + (4*mmt*zt2*pow2(invdgb1)*pow3(
-     mmsb1))/3. + (invdgb1*pow2(lb1u)*pow3(mmsb1))/3. + (4*mmst1*pow2(invdgb1)*
-     pow2(lb1u)*pow3(mmsb1))/3. + (2*mmt*pow2(invdgb1)*pow2(lb1u)*pow3(mmsb1))/
-     3. - (2*mmst1*pow2(invdgb1)*pow2(lt1u)*pow3(mmsb1))/3. + (invdgb1*pow2(ltu
-     )*pow3(mmsb1))/3. + (2*mmst1*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/3. + (2*
-     mmt*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/3. + s2t*((-28*mmgl*mmsb12*mmst1*
-     mmt*pow2(invdgb1))/(3.*mgl*mt) + (4*lb1u*mmgl*mmsb12*mmst1*mmt*pow2(
-     invdgb1))/(mgl*mt) - (4*lt1u*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(mgl*mt)
-     + (4*lb1u*lt1u*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(3.*mgl*mt) + (8*ltu*
-     mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(mgl*mt) - (8*lb1u*ltu*mmgl*mmsb12*
-     mmst1*mmt*pow2(invdgb1))/(3.*mgl*mt) - (4*mmgl*mmsb12*mmst1*mmt*zt2*pow2(
-     invdgb1))/(3.*mgl*mt) - (2*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(lb1u))
-     /(3.*mgl*mt) + (2*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(lt1u))/(3.*mgl*
-     mt) - (4*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(ltu))/(3.*mgl*mt) + (4*
-     lt1u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/(mgl*mt) - (4*lb1u*lt1u*
-     mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/(3.*mgl*mt) - (4*ltu*mmgl*mmsb1*
-     mmt*pow2(invdgb1)*pow2(mmst1))/(mgl*mt) + (4*lb1u*ltu*mmgl*mmsb1*mmt*pow2(
-     invdgb1)*pow2(mmst1))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(
-     lt1u)*pow2(mmst1))/(3.*mgl*mt) + (2*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)
-     *pow2(mmst1))/(3.*mgl*mt) - (28*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(3.*
-     mgl*mt) + (4*lb1u*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) + (4*ltu*
-     mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) - (4*lb1u*ltu*mmgl*mmsb12*
-     pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (56*mmgl*mmsb1*mmst1*pow2(invdgb1)*
-     pow2(mmt))/(3.*mgl*mt) + (4*lt1u*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))
-     /(mgl*mt) + (4*lb1u*lt1u*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl
-     *mt) + (12*ltu*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(mgl*mt) - (4*
-     lb1u*ltu*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (8*lt1u*
-     ltu*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb12
-     *zt2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (8*mmgl*mmsb1*mmst1*zt2*pow2(
-     invdgb1)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb12*pow2(invdgb1)*pow2(lb1u)*
-     pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(lt1u)*pow2
-     (mmt))/(3.*mgl*mt) - (2*mmgl*mmsb12*pow2(invdgb1)*pow2(ltu)*pow2(mmt))/(3.
-     *mgl*mt) - (2*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(ltu)*pow2(mmt))/(mgl*mt)
-     + (28*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) - (4*lb1u*mmgl*mmt*
-     pow2(invdgb1)*pow3(mmsb1))/(mgl*mt) - (4*ltu*mmgl*mmt*pow2(invdgb1)*pow3(
-     mmsb1))/(mgl*mt) + (4*lb1u*ltu*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl
-     *mt) + (4*mmgl*mmt*zt2*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) + (2*mmgl*
-     mmt*pow2(invdgb1)*pow2(lb1u)*pow3(mmsb1))/(3.*mgl*mt) + (2*mmgl*mmt*pow2(
-     invdgb1)*pow2(ltu)*pow3(mmsb1))/(3.*mgl*mt)) + (14*invdgb1*pow3(mmst1))/3.
-      - 2*invdgb1*lt1u*pow3(mmst1) - 2*invdgb1*ltu*pow3(mmst1) + (2*invdgb1*
-     lt1u*ltu*pow3(mmst1))/3. + (2*invdgb1*zt2*pow3(mmst1))/3. - (28*mmsb1*pow2
-     (invdgb1)*pow3(mmst1))/3. + 4*lt1u*mmsb1*pow2(invdgb1)*pow3(mmst1) + 4*ltu
-     *mmsb1*pow2(invdgb1)*pow3(mmst1) - (4*lt1u*ltu*mmsb1*pow2(invdgb1)*pow3(
-     mmst1))/3. - (4*mmsb1*zt2*pow2(invdgb1)*pow3(mmst1))/3. + (invdgb1*pow2(
-     lt1u)*pow3(mmst1))/3. - (2*mmsb1*pow2(invdgb1)*pow2(lt1u)*pow3(mmst1))/3.
-     + (invdgb1*pow2(ltu)*pow3(mmst1))/3. - (2*mmsb1*pow2(invdgb1)*pow2(ltu)*
-     pow3(mmst1))/3. - (28*pow2(invdgb1)*pow4(mmsb1))/3. + 4*lb1u*pow2(invdgb1)
-     *pow4(mmsb1) + 4*ltu*pow2(invdgb1)*pow4(mmsb1) - (4*lb1u*ltu*pow2(invdgb1)
-     *pow4(mmsb1))/3. - (4*zt2*pow2(invdgb1)*pow4(mmsb1))/3. - (2*pow2(invdgb1)
-     *pow2(lb1u)*pow4(mmsb1))/3. - (2*pow2(invdgb1)*pow2(ltu)*pow4(mmsb1))/3.)
-     + DeltaInv(mmt,mmsb1,mmst2)*((-14*invdgb1*mmsb12*mmst2)/3. + 4*invdgb1*
-     lb1u*mmsb12*mmst2 - 2*invdgb1*lt2u*mmsb12*mmst2 + 2*invdgb1*ltu*mmsb12*
-     mmst2 - (4*invdgb1*lb1u*ltu*mmsb12*mmst2)/3. + (2*invdgb1*lt2u*ltu*mmsb12*
-     mmst2)/3. - (14*invdgb1*mmsb12*mmt)/3. + 2*invdgb1*lb1u*mmsb12*mmt + 2*
-     invdgb1*ltu*mmsb12*mmt - (2*invdgb1*lb1u*ltu*mmsb12*mmt)/3. - (56*invdgb1*
-     mmsb1*mmst2*mmt)/3. + 2*invdgb1*lb1u*mmsb1*mmst2*mmt + 2*invdgb1*lt2u*
-     mmsb1*mmst2*mmt + (4*invdgb1*lb1u*lt2u*mmsb1*mmst2*mmt)/3. + 12*invdgb1*
-     ltu*mmsb1*mmst2*mmt - 2*invdgb1*lb1u*ltu*mmsb1*mmst2*mmt - 2*invdgb1*lt2u*
-     ltu*mmsb1*mmst2*mmt - (2*invdgb1*mmsb12*mmst2*zt2)/3. - (2*invdgb1*mmsb12*
-     mmt*zt2)/3. - (8*invdgb1*mmsb1*mmst2*mmt*zt2)/3. + (112*mmsb12*mmst2*mmt*
-     pow2(invdgb1))/3. - 4*lb1u*mmsb12*mmst2*mmt*pow2(invdgb1) - 4*lt2u*mmsb12*
-     mmst2*mmt*pow2(invdgb1) - (8*lb1u*lt2u*mmsb12*mmst2*mmt*pow2(invdgb1))/3.
-     - 24*ltu*mmsb12*mmst2*mmt*pow2(invdgb1) + 4*lb1u*ltu*mmsb12*mmst2*mmt*pow2
-     (invdgb1) + 4*lt2u*ltu*mmsb12*mmst2*mmt*pow2(invdgb1) + (16*mmsb12*mmst2*
-     mmt*zt2*pow2(invdgb1))/3. - (2*invdgb1*mmsb12*mmst2*pow2(lb1u))/3. - (
-     invdgb1*mmsb12*mmt*pow2(lb1u))/3. - (invdgb1*mmsb1*mmst2*mmt*pow2(lb1u))/
-     3. + (2*mmsb12*mmst2*mmt*pow2(invdgb1)*pow2(lb1u))/3. + (invdgb1*mmsb12*
-     mmst2*pow2(lt2u))/3. - (invdgb1*mmsb1*mmst2*mmt*pow2(lt2u))/3. + (2*mmsb12
-     *mmst2*mmt*pow2(invdgb1)*pow2(lt2u))/3. - (invdgb1*mmsb12*mmst2*pow2(ltu))
-     /3. - (invdgb1*mmsb12*mmt*pow2(ltu))/3. - 2*invdgb1*mmsb1*mmst2*mmt*pow2(
-     ltu) + 4*mmsb12*mmst2*mmt*pow2(invdgb1)*pow2(ltu) - (14*invdgb1*mmsb1*pow2
-     (mmst2))/3. - 2*invdgb1*lb1u*mmsb1*pow2(mmst2) + 4*invdgb1*lt2u*mmsb1*pow2
-     (mmst2) + 2*invdgb1*ltu*mmsb1*pow2(mmst2) + (2*invdgb1*lb1u*ltu*mmsb1*pow2
-     (mmst2))/3. - (4*invdgb1*lt2u*ltu*mmsb1*pow2(mmst2))/3. - (14*invdgb1*mmt*
-     pow2(mmst2))/3. + 2*invdgb1*lt2u*mmt*pow2(mmst2) + 2*invdgb1*ltu*mmt*pow2(
-     mmst2) - (2*invdgb1*lt2u*ltu*mmt*pow2(mmst2))/3. - (2*invdgb1*mmsb1*zt2*
-     pow2(mmst2))/3. - (2*invdgb1*mmt*zt2*pow2(mmst2))/3. + (28*mmsb12*pow2(
-     invdgb1)*pow2(mmst2))/3. + 4*lb1u*mmsb12*pow2(invdgb1)*pow2(mmst2) - 8*
-     lt2u*mmsb12*pow2(invdgb1)*pow2(mmst2) - 4*ltu*mmsb12*pow2(invdgb1)*pow2(
-     mmst2) - (4*lb1u*ltu*mmsb12*pow2(invdgb1)*pow2(mmst2))/3. + (8*lt2u*ltu*
-     mmsb12*pow2(invdgb1)*pow2(mmst2))/3. + (28*mmsb1*mmt*pow2(invdgb1)*pow2(
-     mmst2))/3. - 4*lt2u*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2) - 4*ltu*mmsb1*mmt*
-     pow2(invdgb1)*pow2(mmst2) + (4*lt2u*ltu*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2
-     ))/3. + (4*mmsb12*zt2*pow2(invdgb1)*pow2(mmst2))/3. + (4*mmsb1*mmt*zt2*
-     pow2(invdgb1)*pow2(mmst2))/3. + (invdgb1*mmsb1*pow2(lb1u)*pow2(mmst2))/3.
-     - (2*mmsb12*pow2(invdgb1)*pow2(lb1u)*pow2(mmst2))/3. - (2*invdgb1*mmsb1*
-     pow2(lt2u)*pow2(mmst2))/3. - (invdgb1*mmt*pow2(lt2u)*pow2(mmst2))/3. + (4*
-     mmsb12*pow2(invdgb1)*pow2(lt2u)*pow2(mmst2))/3. + (2*mmsb1*mmt*pow2(
-     invdgb1)*pow2(lt2u)*pow2(mmst2))/3. - (invdgb1*mmsb1*pow2(ltu)*pow2(mmst2)
-     )/3. - (invdgb1*mmt*pow2(ltu)*pow2(mmst2))/3. + (2*mmsb12*pow2(invdgb1)*
-     pow2(ltu)*pow2(mmst2))/3. + (2*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)*pow2(
-     mmst2))/3. + (14*invdgb1*pow3(mmsb1))/3. - 2*invdgb1*lb1u*pow3(mmsb1) - 2*
-     invdgb1*ltu*pow3(mmsb1) + (2*invdgb1*lb1u*ltu*pow3(mmsb1))/3. + (2*invdgb1
-     *zt2*pow3(mmsb1))/3. + (28*mmst2*pow2(invdgb1)*pow3(mmsb1))/3. - 8*lb1u*
-     mmst2*pow2(invdgb1)*pow3(mmsb1) + 4*lt2u*mmst2*pow2(invdgb1)*pow3(mmsb1) -
-     4*ltu*mmst2*pow2(invdgb1)*pow3(mmsb1) + (8*lb1u*ltu*mmst2*pow2(invdgb1)*
-     pow3(mmsb1))/3. - (4*lt2u*ltu*mmst2*pow2(invdgb1)*pow3(mmsb1))/3. + (28*
-     mmt*pow2(invdgb1)*pow3(mmsb1))/3. - 4*lb1u*mmt*pow2(invdgb1)*pow3(mmsb1) -
-     4*ltu*mmt*pow2(invdgb1)*pow3(mmsb1) + (4*lb1u*ltu*mmt*pow2(invdgb1)*pow3(
-     mmsb1))/3. + (4*mmst2*zt2*pow2(invdgb1)*pow3(mmsb1))/3. + (4*mmt*zt2*pow2(
-     invdgb1)*pow3(mmsb1))/3. + (invdgb1*pow2(lb1u)*pow3(mmsb1))/3. + (4*mmst2*
-     pow2(invdgb1)*pow2(lb1u)*pow3(mmsb1))/3. + (2*mmt*pow2(invdgb1)*pow2(lb1u)
-     *pow3(mmsb1))/3. - (2*mmst2*pow2(invdgb1)*pow2(lt2u)*pow3(mmsb1))/3. + (
-     invdgb1*pow2(ltu)*pow3(mmsb1))/3. + (2*mmst2*pow2(invdgb1)*pow2(ltu)*pow3(
-     mmsb1))/3. + (2*mmt*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/3. + s2t*((28*
-     mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(3.*mgl*mt) - (4*lb1u*mmgl*mmsb12*
-     mmst2*mmt*pow2(invdgb1))/(mgl*mt) + (4*lt2u*mmgl*mmsb12*mmst2*mmt*pow2(
-     invdgb1))/(mgl*mt) - (4*lb1u*lt2u*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(3.
-     *mgl*mt) - (8*ltu*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(mgl*mt) + (8*lb1u*
-     ltu*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(3.*mgl*mt) + (4*mmgl*mmsb12*
-     mmst2*mmt*zt2*pow2(invdgb1))/(3.*mgl*mt) + (2*mmgl*mmsb12*mmst2*mmt*pow2(
-     invdgb1)*pow2(lb1u))/(3.*mgl*mt) - (2*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1)*
-     pow2(lt2u))/(3.*mgl*mt) + (4*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1)*pow2(ltu)
-     )/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(mgl*mt)
-     + (4*lb1u*lt2u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(3.*mgl*mt) + (4*
-     ltu*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(mgl*mt) - (4*lb1u*ltu*mmgl*
-     mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(3.*mgl*mt) + (2*mmgl*mmsb1*mmt*pow2(
-     invdgb1)*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmt*pow2(
-     invdgb1)*pow2(ltu)*pow2(mmst2))/(3.*mgl*mt) + (28*mmgl*mmsb12*pow2(invdgb1
-     )*pow2(mmt))/(3.*mgl*mt) - (4*lb1u*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(
-     mgl*mt) - (4*ltu*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) + (4*lb1u*
-     ltu*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) + (56*mmgl*mmsb1*
-     mmst2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb1*mmst2*pow2
-     (invdgb1)*pow2(mmt))/(mgl*mt) - (4*lb1u*lt2u*mmgl*mmsb1*mmst2*pow2(invdgb1
-     )*pow2(mmt))/(3.*mgl*mt) - (12*ltu*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt
-     ))/(mgl*mt) + (4*lb1u*ltu*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(3.*
-     mgl*mt) + (8*lt2u*ltu*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt
-     ) + (4*mmgl*mmsb12*zt2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) + (8*mmgl*
-     mmsb1*mmst2*zt2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb12*pow2
-     (invdgb1)*pow2(lb1u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb1*mmst2*pow2(
-     invdgb1)*pow2(lt2u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb12*pow2(invdgb1)*
-     pow2(ltu)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(
-     ltu)*pow2(mmt))/(mgl*mt) - (28*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl
-     *mt) + (4*lb1u*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(mgl*mt) + (4*ltu*mmgl*
-     mmt*pow2(invdgb1)*pow3(mmsb1))/(mgl*mt) - (4*lb1u*ltu*mmgl*mmt*pow2(
-     invdgb1)*pow3(mmsb1))/(3.*mgl*mt) - (4*mmgl*mmt*zt2*pow2(invdgb1)*pow3(
-     mmsb1))/(3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb1)*pow2(lb1u)*pow3(mmsb1))/(
-     3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/(3.*mgl*mt))
-     + (14*invdgb1*pow3(mmst2))/3. - 2*invdgb1*lt2u*pow3(mmst2) - 2*invdgb1*ltu
-     *pow3(mmst2) + (2*invdgb1*lt2u*ltu*pow3(mmst2))/3. + (2*invdgb1*zt2*pow3(
-     mmst2))/3. - (28*mmsb1*pow2(invdgb1)*pow3(mmst2))/3. + 4*lt2u*mmsb1*pow2(
-     invdgb1)*pow3(mmst2) + 4*ltu*mmsb1*pow2(invdgb1)*pow3(mmst2) - (4*lt2u*ltu
-     *mmsb1*pow2(invdgb1)*pow3(mmst2))/3. - (4*mmsb1*zt2*pow2(invdgb1)*pow3(
-     mmst2))/3. + (invdgb1*pow2(lt2u)*pow3(mmst2))/3. - (2*mmsb1*pow2(invdgb1)*
-     pow2(lt2u)*pow3(mmst2))/3. + (invdgb1*pow2(ltu)*pow3(mmst2))/3. - (2*mmsb1
-     *pow2(invdgb1)*pow2(ltu)*pow3(mmst2))/3. - (28*pow2(invdgb1)*pow4(mmsb1))/
-     3. + 4*lb1u*pow2(invdgb1)*pow4(mmsb1) + 4*ltu*pow2(invdgb1)*pow4(mmsb1) -
-     (4*lb1u*ltu*pow2(invdgb1)*pow4(mmsb1))/3. - (4*zt2*pow2(invdgb1)*pow4(
-     mmsb1))/3. - (2*pow2(invdgb1)*pow2(lb1u)*pow4(mmsb1))/3. - (2*pow2(invdgb1
-     )*pow2(ltu)*pow4(mmsb1))/3.) + (16*pow2(lb1u)*(-4 - (9*invdgb1*mmsb1)/4. -
-     4*invdb12*mmsb2 + 4*invdgb1*mmsb2 + 4*invdb12*invdgb1*mmsb22 + (15*mmsb12*
-     pow2(invdgb1))/2. + 4*pow2(s2b) - 6*invdgb1*mmsb1*pow2(s2b) + 4*invdb12*
-     mmsb2*pow2(s2b) - (7*invdgb1*mmsb2*pow2(s2b))/2. - (invdgb2*mmsb2*pow2(s2b
-     ))/2. - (7*invdb12*invdgb1*mmsb22*pow2(s2b))/2. - (invdb12*invdgb2*mmsb22*
-     pow2(s2b))/2. + (5*mmsb12*pow2(invdgb1)*pow2(s2b))/4. - 6*pow3(invdgb1)*
-     pow3(mmsb1) - (pow2(s2b)*pow3(invdgb1)*pow3(mmsb1))/2. + (3*pow4(invdgb1)*
-     pow4(mmsb1))/8. - (pow2(s2b)*pow4(invdgb1)*pow4(mmsb1))/8.))/9. + DeltaInv
-     (mmt,mmsb2,mmst1)*((-14*invdgb2*mmsb22*mmst1)/3. + 4*invdgb2*lb2u*mmsb22*
-     mmst1 - 2*invdgb2*lt1u*mmsb22*mmst1 + 2*invdgb2*ltu*mmsb22*mmst1 - (4*
-     invdgb2*lb2u*ltu*mmsb22*mmst1)/3. + (2*invdgb2*lt1u*ltu*mmsb22*mmst1)/3. -
-     (14*invdgb2*mmsb22*mmt)/3. + 2*invdgb2*lb2u*mmsb22*mmt + 2*invdgb2*ltu*
-     mmsb22*mmt - (2*invdgb2*lb2u*ltu*mmsb22*mmt)/3. - (56*invdgb2*mmsb2*mmst1*
-     mmt)/3. + 2*invdgb2*lb2u*mmsb2*mmst1*mmt + 2*invdgb2*lt1u*mmsb2*mmst1*mmt
-     + (4*invdgb2*lb2u*lt1u*mmsb2*mmst1*mmt)/3. + 12*invdgb2*ltu*mmsb2*mmst1*
-     mmt - 2*invdgb2*lb2u*ltu*mmsb2*mmst1*mmt - 2*invdgb2*lt1u*ltu*mmsb2*mmst1*
-     mmt - (2*invdgb2*mmsb22*mmst1*zt2)/3. - (2*invdgb2*mmsb22*mmt*zt2)/3. - (8
-     *invdgb2*mmsb2*mmst1*mmt*zt2)/3. + (112*mmsb22*mmst1*mmt*pow2(invdgb2))/3.
-      - 4*lb2u*mmsb22*mmst1*mmt*pow2(invdgb2) - 4*lt1u*mmsb22*mmst1*mmt*pow2(
-     invdgb2) - (8*lb2u*lt1u*mmsb22*mmst1*mmt*pow2(invdgb2))/3. - 24*ltu*mmsb22
-     *mmst1*mmt*pow2(invdgb2) + 4*lb2u*ltu*mmsb22*mmst1*mmt*pow2(invdgb2) + 4*
-     lt1u*ltu*mmsb22*mmst1*mmt*pow2(invdgb2) + (16*mmsb22*mmst1*mmt*zt2*pow2(
-     invdgb2))/3. - (2*invdgb2*mmsb22*mmst1*pow2(lb2u))/3. - (invdgb2*mmsb22*
-     mmt*pow2(lb2u))/3. - (invdgb2*mmsb2*mmst1*mmt*pow2(lb2u))/3. + (2*mmsb22*
-     mmst1*mmt*pow2(invdgb2)*pow2(lb2u))/3. + (invdgb2*mmsb22*mmst1*pow2(lt1u))
-     /3. - (invdgb2*mmsb2*mmst1*mmt*pow2(lt1u))/3. + (2*mmsb22*mmst1*mmt*pow2(
-     invdgb2)*pow2(lt1u))/3. - (invdgb2*mmsb22*mmst1*pow2(ltu))/3. - (invdgb2*
-     mmsb22*mmt*pow2(ltu))/3. - 2*invdgb2*mmsb2*mmst1*mmt*pow2(ltu) + 4*mmsb22*
-     mmst1*mmt*pow2(invdgb2)*pow2(ltu) - (14*invdgb2*mmsb2*pow2(mmst1))/3. - 2*
-     invdgb2*lb2u*mmsb2*pow2(mmst1) + 4*invdgb2*lt1u*mmsb2*pow2(mmst1) + 2*
-     invdgb2*ltu*mmsb2*pow2(mmst1) + (2*invdgb2*lb2u*ltu*mmsb2*pow2(mmst1))/3.
-     - (4*invdgb2*lt1u*ltu*mmsb2*pow2(mmst1))/3. - (14*invdgb2*mmt*pow2(mmst1))
-     /3. + 2*invdgb2*lt1u*mmt*pow2(mmst1) + 2*invdgb2*ltu*mmt*pow2(mmst1) - (2*
-     invdgb2*lt1u*ltu*mmt*pow2(mmst1))/3. - (2*invdgb2*mmsb2*zt2*pow2(mmst1))/
-     3. - (2*invdgb2*mmt*zt2*pow2(mmst1))/3. + (28*mmsb22*pow2(invdgb2)*pow2(
-     mmst1))/3. + 4*lb2u*mmsb22*pow2(invdgb2)*pow2(mmst1) - 8*lt1u*mmsb22*pow2(
-     invdgb2)*pow2(mmst1) - 4*ltu*mmsb22*pow2(invdgb2)*pow2(mmst1) - (4*lb2u*
-     ltu*mmsb22*pow2(invdgb2)*pow2(mmst1))/3. + (8*lt1u*ltu*mmsb22*pow2(invdgb2
-     )*pow2(mmst1))/3. + (28*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/3. - 4*lt1u*
-     mmsb2*mmt*pow2(invdgb2)*pow2(mmst1) - 4*ltu*mmsb2*mmt*pow2(invdgb2)*pow2(
-     mmst1) + (4*lt1u*ltu*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/3. + (4*mmsb22*
-     zt2*pow2(invdgb2)*pow2(mmst1))/3. + (4*mmsb2*mmt*zt2*pow2(invdgb2)*pow2(
-     mmst1))/3. + (invdgb2*mmsb2*pow2(lb2u)*pow2(mmst1))/3. - (2*mmsb22*pow2(
-     invdgb2)*pow2(lb2u)*pow2(mmst1))/3. - (2*invdgb2*mmsb2*pow2(lt1u)*pow2(
-     mmst1))/3. - (invdgb2*mmt*pow2(lt1u)*pow2(mmst1))/3. + (4*mmsb22*pow2(
-     invdgb2)*pow2(lt1u)*pow2(mmst1))/3. + (2*mmsb2*mmt*pow2(invdgb2)*pow2(lt1u
-     )*pow2(mmst1))/3. - (invdgb2*mmsb2*pow2(ltu)*pow2(mmst1))/3. - (invdgb2*
-     mmt*pow2(ltu)*pow2(mmst1))/3. + (2*mmsb22*pow2(invdgb2)*pow2(ltu)*pow2(
-     mmst1))/3. + (2*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)*pow2(mmst1))/3. + (14*
-     invdgb2*pow3(mmsb2))/3. - 2*invdgb2*lb2u*pow3(mmsb2) - 2*invdgb2*ltu*pow3(
-     mmsb2) + (2*invdgb2*lb2u*ltu*pow3(mmsb2))/3. + (2*invdgb2*zt2*pow3(mmsb2))
-     /3. + (28*mmst1*pow2(invdgb2)*pow3(mmsb2))/3. - 8*lb2u*mmst1*pow2(invdgb2)
-     *pow3(mmsb2) + 4*lt1u*mmst1*pow2(invdgb2)*pow3(mmsb2) - 4*ltu*mmst1*pow2(
-     invdgb2)*pow3(mmsb2) + (8*lb2u*ltu*mmst1*pow2(invdgb2)*pow3(mmsb2))/3. - (
-     4*lt1u*ltu*mmst1*pow2(invdgb2)*pow3(mmsb2))/3. + (28*mmt*pow2(invdgb2)*
-     pow3(mmsb2))/3. - 4*lb2u*mmt*pow2(invdgb2)*pow3(mmsb2) - 4*ltu*mmt*pow2(
-     invdgb2)*pow3(mmsb2) + (4*lb2u*ltu*mmt*pow2(invdgb2)*pow3(mmsb2))/3. + (4*
-     mmst1*zt2*pow2(invdgb2)*pow3(mmsb2))/3. + (4*mmt*zt2*pow2(invdgb2)*pow3(
-     mmsb2))/3. + (invdgb2*pow2(lb2u)*pow3(mmsb2))/3. + (4*mmst1*pow2(invdgb2)*
-     pow2(lb2u)*pow3(mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(lb2u)*pow3(mmsb2))/
-     3. - (2*mmst1*pow2(invdgb2)*pow2(lt1u)*pow3(mmsb2))/3. + (invdgb2*pow2(ltu
-     )*pow3(mmsb2))/3. + (2*mmst1*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/3. + (2*
-     mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/3. + s2t*((-28*mmgl*mmsb22*mmst1*
-     mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*lb2u*mmgl*mmsb22*mmst1*mmt*pow2(
-     invdgb2))/(mgl*mt) - (4*lt1u*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(mgl*mt)
-     + (4*lb2u*lt1u*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) + (8*ltu*
-     mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(mgl*mt) - (8*lb2u*ltu*mmgl*mmsb22*
-     mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*mmgl*mmsb22*mmst1*mmt*zt2*pow2(
-     invdgb2))/(3.*mgl*mt) - (2*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*pow2(lb2u))
-     /(3.*mgl*mt) + (2*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*pow2(lt1u))/(3.*mgl*
-     mt) - (4*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*pow2(ltu))/(3.*mgl*mt) + (4*
-     lt1u*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/(mgl*mt) - (4*lb2u*lt1u*
-     mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/(3.*mgl*mt) - (4*ltu*mmgl*mmsb2*
-     mmt*pow2(invdgb2)*pow2(mmst1))/(mgl*mt) + (4*lb2u*ltu*mmgl*mmsb2*mmt*pow2(
-     invdgb2)*pow2(mmst1))/(3.*mgl*mt) - (2*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(
-     lt1u)*pow2(mmst1))/(3.*mgl*mt) + (2*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)
-     *pow2(mmst1))/(3.*mgl*mt) - (28*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(3.*
-     mgl*mt) + (4*lb2u*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) + (4*ltu*
-     mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) - (4*lb2u*ltu*mmgl*mmsb22*
-     pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (56*mmgl*mmsb2*mmst1*pow2(invdgb2)*
-     pow2(mmt))/(3.*mgl*mt) + (4*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))
-     /(mgl*mt) + (4*lb2u*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl
-     *mt) + (12*ltu*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(mgl*mt) - (4*
-     lb2u*ltu*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (8*lt1u*
-     ltu*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb22
-     *zt2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (8*mmgl*mmsb2*mmst1*zt2*pow2(
-     invdgb2)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb22*pow2(invdgb2)*pow2(lb2u)*
-     pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(lt1u)*pow2
-     (mmt))/(3.*mgl*mt) - (2*mmgl*mmsb22*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(3.
-     *mgl*mt) - (2*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(mgl*mt)
-     + (28*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(3.*mgl*mt) - (4*lb2u*mmgl*mmt*
-     pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) - (4*ltu*mmgl*mmt*pow2(invdgb2)*pow3(
-     mmsb2))/(mgl*mt) + (4*lb2u*ltu*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(3.*mgl
-     *mt) + (4*mmgl*mmt*zt2*pow2(invdgb2)*pow3(mmsb2))/(3.*mgl*mt) + (2*mmgl*
-     mmt*pow2(invdgb2)*pow2(lb2u)*pow3(mmsb2))/(3.*mgl*mt) + (2*mmgl*mmt*pow2(
-     invdgb2)*pow2(ltu)*pow3(mmsb2))/(3.*mgl*mt)) + (14*invdgb2*pow3(mmst1))/3.
-      - 2*invdgb2*lt1u*pow3(mmst1) - 2*invdgb2*ltu*pow3(mmst1) + (2*invdgb2*
-     lt1u*ltu*pow3(mmst1))/3. + (2*invdgb2*zt2*pow3(mmst1))/3. - (28*mmsb2*pow2
-     (invdgb2)*pow3(mmst1))/3. + 4*lt1u*mmsb2*pow2(invdgb2)*pow3(mmst1) + 4*ltu
-     *mmsb2*pow2(invdgb2)*pow3(mmst1) - (4*lt1u*ltu*mmsb2*pow2(invdgb2)*pow3(
-     mmst1))/3. - (4*mmsb2*zt2*pow2(invdgb2)*pow3(mmst1))/3. + (invdgb2*pow2(
-     lt1u)*pow3(mmst1))/3. - (2*mmsb2*pow2(invdgb2)*pow2(lt1u)*pow3(mmst1))/3.
-     + (invdgb2*pow2(ltu)*pow3(mmst1))/3. - (2*mmsb2*pow2(invdgb2)*pow2(ltu)*
-     pow3(mmst1))/3. - (28*pow2(invdgb2)*pow4(mmsb2))/3. + 4*lb2u*pow2(invdgb2)
-     *pow4(mmsb2) + 4*ltu*pow2(invdgb2)*pow4(mmsb2) - (4*lb2u*ltu*pow2(invdgb2)
-     *pow4(mmsb2))/3. - (4*zt2*pow2(invdgb2)*pow4(mmsb2))/3. - (2*pow2(invdgb2)
-     *pow2(lb2u)*pow4(mmsb2))/3. - (2*pow2(invdgb2)*pow2(ltu)*pow4(mmsb2))/3.)
-     + DeltaInv(mmt,mmsb2,mmst2)*((-14*invdgb2*mmsb22*mmst2)/3. + 4*invdgb2*
-     lb2u*mmsb22*mmst2 - 2*invdgb2*lt2u*mmsb22*mmst2 + 2*invdgb2*ltu*mmsb22*
-     mmst2 - (4*invdgb2*lb2u*ltu*mmsb22*mmst2)/3. + (2*invdgb2*lt2u*ltu*mmsb22*
-     mmst2)/3. - (14*invdgb2*mmsb22*mmt)/3. + 2*invdgb2*lb2u*mmsb22*mmt + 2*
-     invdgb2*ltu*mmsb22*mmt - (2*invdgb2*lb2u*ltu*mmsb22*mmt)/3. - (56*invdgb2*
-     mmsb2*mmst2*mmt)/3. + 2*invdgb2*lb2u*mmsb2*mmst2*mmt + 2*invdgb2*lt2u*
-     mmsb2*mmst2*mmt + (4*invdgb2*lb2u*lt2u*mmsb2*mmst2*mmt)/3. + 12*invdgb2*
-     ltu*mmsb2*mmst2*mmt - 2*invdgb2*lb2u*ltu*mmsb2*mmst2*mmt - 2*invdgb2*lt2u*
-     ltu*mmsb2*mmst2*mmt - (2*invdgb2*mmsb22*mmst2*zt2)/3. - (2*invdgb2*mmsb22*
-     mmt*zt2)/3. - (8*invdgb2*mmsb2*mmst2*mmt*zt2)/3. + (112*mmsb22*mmst2*mmt*
-     pow2(invdgb2))/3. - 4*lb2u*mmsb22*mmst2*mmt*pow2(invdgb2) - 4*lt2u*mmsb22*
-     mmst2*mmt*pow2(invdgb2) - (8*lb2u*lt2u*mmsb22*mmst2*mmt*pow2(invdgb2))/3.
-     - 24*ltu*mmsb22*mmst2*mmt*pow2(invdgb2) + 4*lb2u*ltu*mmsb22*mmst2*mmt*pow2
-     (invdgb2) + 4*lt2u*ltu*mmsb22*mmst2*mmt*pow2(invdgb2) + (16*mmsb22*mmst2*
-     mmt*zt2*pow2(invdgb2))/3. - (2*invdgb2*mmsb22*mmst2*pow2(lb2u))/3. - (
-     invdgb2*mmsb22*mmt*pow2(lb2u))/3. - (invdgb2*mmsb2*mmst2*mmt*pow2(lb2u))/
-     3. + (2*mmsb22*mmst2*mmt*pow2(invdgb2)*pow2(lb2u))/3. + (invdgb2*mmsb22*
-     mmst2*pow2(lt2u))/3. - (invdgb2*mmsb2*mmst2*mmt*pow2(lt2u))/3. + (2*mmsb22
-     *mmst2*mmt*pow2(invdgb2)*pow2(lt2u))/3. - (invdgb2*mmsb22*mmst2*pow2(ltu))
-     /3. - (invdgb2*mmsb22*mmt*pow2(ltu))/3. - 2*invdgb2*mmsb2*mmst2*mmt*pow2(
-     ltu) + 4*mmsb22*mmst2*mmt*pow2(invdgb2)*pow2(ltu) - (14*invdgb2*mmsb2*pow2
-     (mmst2))/3. - 2*invdgb2*lb2u*mmsb2*pow2(mmst2) + 4*invdgb2*lt2u*mmsb2*pow2
-     (mmst2) + 2*invdgb2*ltu*mmsb2*pow2(mmst2) + (2*invdgb2*lb2u*ltu*mmsb2*pow2
-     (mmst2))/3. - (4*invdgb2*lt2u*ltu*mmsb2*pow2(mmst2))/3. - (14*invdgb2*mmt*
-     pow2(mmst2))/3. + 2*invdgb2*lt2u*mmt*pow2(mmst2) + 2*invdgb2*ltu*mmt*pow2(
-     mmst2) - (2*invdgb2*lt2u*ltu*mmt*pow2(mmst2))/3. - (2*invdgb2*mmsb2*zt2*
-     pow2(mmst2))/3. - (2*invdgb2*mmt*zt2*pow2(mmst2))/3. + (28*mmsb22*pow2(
-     invdgb2)*pow2(mmst2))/3. + 4*lb2u*mmsb22*pow2(invdgb2)*pow2(mmst2) - 8*
-     lt2u*mmsb22*pow2(invdgb2)*pow2(mmst2) - 4*ltu*mmsb22*pow2(invdgb2)*pow2(
-     mmst2) - (4*lb2u*ltu*mmsb22*pow2(invdgb2)*pow2(mmst2))/3. + (8*lt2u*ltu*
-     mmsb22*pow2(invdgb2)*pow2(mmst2))/3. + (28*mmsb2*mmt*pow2(invdgb2)*pow2(
-     mmst2))/3. - 4*lt2u*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2) - 4*ltu*mmsb2*mmt*
-     pow2(invdgb2)*pow2(mmst2) + (4*lt2u*ltu*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2
-     ))/3. + (4*mmsb22*zt2*pow2(invdgb2)*pow2(mmst2))/3. + (4*mmsb2*mmt*zt2*
-     pow2(invdgb2)*pow2(mmst2))/3. + (invdgb2*mmsb2*pow2(lb2u)*pow2(mmst2))/3.
-     - (2*mmsb22*pow2(invdgb2)*pow2(lb2u)*pow2(mmst2))/3. - (2*invdgb2*mmsb2*
-     pow2(lt2u)*pow2(mmst2))/3. - (invdgb2*mmt*pow2(lt2u)*pow2(mmst2))/3. + (4*
-     mmsb22*pow2(invdgb2)*pow2(lt2u)*pow2(mmst2))/3. + (2*mmsb2*mmt*pow2(
-     invdgb2)*pow2(lt2u)*pow2(mmst2))/3. - (invdgb2*mmsb2*pow2(ltu)*pow2(mmst2)
-     )/3. - (invdgb2*mmt*pow2(ltu)*pow2(mmst2))/3. + (2*mmsb22*pow2(invdgb2)*
-     pow2(ltu)*pow2(mmst2))/3. + (2*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)*pow2(
-     mmst2))/3. + (14*invdgb2*pow3(mmsb2))/3. - 2*invdgb2*lb2u*pow3(mmsb2) - 2*
-     invdgb2*ltu*pow3(mmsb2) + (2*invdgb2*lb2u*ltu*pow3(mmsb2))/3. + (2*invdgb2
-     *zt2*pow3(mmsb2))/3. + (28*mmst2*pow2(invdgb2)*pow3(mmsb2))/3. - 8*lb2u*
-     mmst2*pow2(invdgb2)*pow3(mmsb2) + 4*lt2u*mmst2*pow2(invdgb2)*pow3(mmsb2) -
-     4*ltu*mmst2*pow2(invdgb2)*pow3(mmsb2) + (8*lb2u*ltu*mmst2*pow2(invdgb2)*
-     pow3(mmsb2))/3. - (4*lt2u*ltu*mmst2*pow2(invdgb2)*pow3(mmsb2))/3. + (28*
-     mmt*pow2(invdgb2)*pow3(mmsb2))/3. - 4*lb2u*mmt*pow2(invdgb2)*pow3(mmsb2) -
-     4*ltu*mmt*pow2(invdgb2)*pow3(mmsb2) + (4*lb2u*ltu*mmt*pow2(invdgb2)*pow3(
-     mmsb2))/3. + (4*mmst2*zt2*pow2(invdgb2)*pow3(mmsb2))/3. + (4*mmt*zt2*pow2(
-     invdgb2)*pow3(mmsb2))/3. + (invdgb2*pow2(lb2u)*pow3(mmsb2))/3. + (4*mmst2*
-     pow2(invdgb2)*pow2(lb2u)*pow3(mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(lb2u)
-     *pow3(mmsb2))/3. - (2*mmst2*pow2(invdgb2)*pow2(lt2u)*pow3(mmsb2))/3. + (
-     invdgb2*pow2(ltu)*pow3(mmsb2))/3. + (2*mmst2*pow2(invdgb2)*pow2(ltu)*pow3(
-     mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/3. + s2t*((28*
-     mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*lb2u*mmgl*mmsb22*
-     mmst2*mmt*pow2(invdgb2))/(mgl*mt) + (4*lt2u*mmgl*mmsb22*mmst2*mmt*pow2(
-     invdgb2))/(mgl*mt) - (4*lb2u*lt2u*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(3.
-     *mgl*mt) - (8*ltu*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(mgl*mt) + (8*lb2u*
-     ltu*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*mmgl*mmsb22*
-     mmst2*mmt*zt2*pow2(invdgb2))/(3.*mgl*mt) + (2*mmgl*mmsb22*mmst2*mmt*pow2(
-     invdgb2)*pow2(lb2u))/(3.*mgl*mt) - (2*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2)*
-     pow2(lt2u))/(3.*mgl*mt) + (4*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2)*pow2(ltu)
-     )/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2))/(mgl*mt)
-     + (4*lb2u*lt2u*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2))/(3.*mgl*mt) + (4*
-     ltu*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2))/(mgl*mt) - (4*lb2u*ltu*mmgl*
-     mmsb2*mmt*pow2(invdgb2)*pow2(mmst2))/(3.*mgl*mt) + (2*mmgl*mmsb2*mmt*pow2(
-     invdgb2)*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) - (2*mmgl*mmsb2*mmt*pow2(
-     invdgb2)*pow2(ltu)*pow2(mmst2))/(3.*mgl*mt) + (28*mmgl*mmsb22*pow2(invdgb2
-     )*pow2(mmt))/(3.*mgl*mt) - (4*lb2u*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(
-     mgl*mt) - (4*ltu*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) + (4*lb2u*
-     ltu*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) + (56*mmgl*mmsb2*
-     mmst2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb2*mmst2*pow2
-     (invdgb2)*pow2(mmt))/(mgl*mt) - (4*lb2u*lt2u*mmgl*mmsb2*mmst2*pow2(invdgb2
-     )*pow2(mmt))/(3.*mgl*mt) - (12*ltu*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt
-     ))/(mgl*mt) + (4*lb2u*ltu*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(3.*
-     mgl*mt) + (8*lt2u*ltu*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt
-     ) + (4*mmgl*mmsb22*zt2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) + (8*mmgl*
-     mmsb2*mmst2*zt2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb22*pow2
-     (invdgb2)*pow2(lb2u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb2*mmst2*pow2(
-     invdgb2)*pow2(lt2u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb22*pow2(invdgb2)*
-     pow2(ltu)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(
-     ltu)*pow2(mmt))/(mgl*mt) - (28*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(3.*mgl
-     *mt) + (4*lb2u*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) + (4*ltu*mmgl*
-     mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) - (4*lb2u*ltu*mmgl*mmt*pow2(
-     invdgb2)*pow3(mmsb2))/(3.*mgl*mt) - (4*mmgl*mmt*zt2*pow2(invdgb2)*pow3(
-     mmsb2))/(3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb2)*pow2(lb2u)*pow3(mmsb2))/(
-     3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/(3.*mgl*mt))
-     + (14*invdgb2*pow3(mmst2))/3. - 2*invdgb2*lt2u*pow3(mmst2) - 2*invdgb2*ltu
-     *pow3(mmst2) + (2*invdgb2*lt2u*ltu*pow3(mmst2))/3. + (2*invdgb2*zt2*pow3(
-     mmst2))/3. - (28*mmsb2*pow2(invdgb2)*pow3(mmst2))/3. + 4*lt2u*mmsb2*pow2(
-     invdgb2)*pow3(mmst2) + 4*ltu*mmsb2*pow2(invdgb2)*pow3(mmst2) - (4*lt2u*ltu
-     *mmsb2*pow2(invdgb2)*pow3(mmst2))/3. - (4*mmsb2*zt2*pow2(invdgb2)*pow3(
-     mmst2))/3. + (invdgb2*pow2(lt2u)*pow3(mmst2))/3. - (2*mmsb2*pow2(invdgb2)*
-     pow2(lt2u)*pow3(mmst2))/3. + (invdgb2*pow2(ltu)*pow3(mmst2))/3. - (2*mmsb2
-     *pow2(invdgb2)*pow2(ltu)*pow3(mmst2))/3. - (28*pow2(invdgb2)*pow4(mmsb2))/
-     3. + 4*lb2u*pow2(invdgb2)*pow4(mmsb2) + 4*ltu*pow2(invdgb2)*pow4(mmsb2) -
-     (4*lb2u*ltu*pow2(invdgb2)*pow4(mmsb2))/3. - (4*zt2*pow2(invdgb2)*pow4(
-     mmsb2))/3. - (2*pow2(invdgb2)*pow2(lb2u)*pow4(mmsb2))/3. - (2*pow2(invdgb2
-     )*pow2(ltu)*pow4(mmsb2))/3.) + DeltaInv(mmt,mmst1,mmgl)*((-56*mmgl2)/3. +
-     8*lgu*mmgl2 + 8*ltu*mmgl2 - (8*lgu*ltu*mmgl2)/3. - (56*mmgl*mmsb1)/3. + 8*
-     lgu*mmgl*mmsb1 + 8*ltu*mmgl*mmsb1 - (8*lgu*ltu*mmgl*mmsb1)/3. - 28*mmsb12
-     + 12*lgu*mmsb12 + 12*ltu*mmsb12 - 4*lgu*ltu*mmsb12 - (56*mmgl*mmsb2)/3. +
-     8*lgu*mmgl*mmsb2 + 8*ltu*mmgl*mmsb2 - (8*lgu*ltu*mmgl*mmsb2)/3. - 28*
-     mmsb22 + 12*lgu*mmsb22 + 12*ltu*mmsb22 - 4*lgu*ltu*mmsb22 + (56*mmgl*mmst1
-     )/3. - 16*lgu*mmgl*mmst1 + 8*lt1u*mmgl*mmst1 - 8*ltu*mmgl*mmst1 + (16*lgu*
-     ltu*mmgl*mmst1)/3. - (8*lt1u*ltu*mmgl*mmst1)/3. + (56*mmsb1*mmst1)/3. - 16
-     *lgu*mmsb1*mmst1 + 8*lt1u*mmsb1*mmst1 - 8*ltu*mmsb1*mmst1 + (16*lgu*ltu*
-     mmsb1*mmst1)/3. - (8*lt1u*ltu*mmsb1*mmst1)/3. - 28*invdgb1*mmsb12*mmst1 +
-     24*invdgb1*lgu*mmsb12*mmst1 - 12*invdgb1*lt1u*mmsb12*mmst1 + 12*invdgb1*
-     ltu*mmsb12*mmst1 - 8*invdgb1*lgu*ltu*mmsb12*mmst1 + 4*invdgb1*lt1u*ltu*
-     mmsb12*mmst1 + (56*mmsb2*mmst1)/3. - 16*lgu*mmsb2*mmst1 + 8*lt1u*mmsb2*
-     mmst1 - 8*ltu*mmsb2*mmst1 + (16*lgu*ltu*mmsb2*mmst1)/3. - (8*lt1u*ltu*
-     mmsb2*mmst1)/3. - 28*invdgb2*mmsb22*mmst1 + 24*invdgb2*lgu*mmsb22*mmst1 -
-     12*invdgb2*lt1u*mmsb22*mmst1 + 12*invdgb2*ltu*mmsb22*mmst1 - 8*invdgb2*lgu
-     *ltu*mmsb22*mmst1 + 4*invdgb2*lt1u*ltu*mmsb22*mmst1 + (56*mmgl*mmt)/3. - 8
-     *lgu*mmgl*mmt - 8*ltu*mmgl*mmt + (8*lgu*ltu*mmgl*mmt)/3. + (56*mmsb1*mmt)/
-     3. - 8*lgu*mmsb1*mmt - 8*ltu*mmsb1*mmt + (8*lgu*ltu*mmsb1*mmt)/3. - 28*
-     invdgb1*mmsb12*mmt + 12*invdgb1*lgu*mmsb12*mmt + 12*invdgb1*ltu*mmsb12*mmt
-      - 4*invdgb1*lgu*ltu*mmsb12*mmt + (56*mmsb2*mmt)/3. - 8*lgu*mmsb2*mmt - 8*
-     ltu*mmsb2*mmt + (8*lgu*ltu*mmsb2*mmt)/3. - 28*invdgb2*mmsb22*mmt + 12*
-     invdgb2*lgu*mmsb22*mmt + 12*invdgb2*ltu*mmsb22*mmt - 4*invdgb2*lgu*ltu*
-     mmsb22*mmt + (224*mmst1*mmt)/3. - 8*lgu*mmst1*mmt - 8*lt1u*mmst1*mmt - (16
-     *lgu*lt1u*mmst1*mmt)/3. - 48*ltu*mmst1*mmt + 8*lgu*ltu*mmst1*mmt + 8*lt1u*
-     ltu*mmst1*mmt - (224*invdgb1*mmsb1*mmst1*mmt)/3. + 8*invdgb1*lgu*mmsb1*
-     mmst1*mmt + 8*invdgb1*lt1u*mmsb1*mmst1*mmt + (16*invdgb1*lgu*lt1u*mmsb1*
-     mmst1*mmt)/3. + 48*invdgb1*ltu*mmsb1*mmst1*mmt - 8*invdgb1*lgu*ltu*mmsb1*
-     mmst1*mmt - 8*invdgb1*lt1u*ltu*mmsb1*mmst1*mmt - (224*invdgb2*mmsb2*mmst1*
-     mmt)/3. + 8*invdgb2*lgu*mmsb2*mmst1*mmt + 8*invdgb2*lt1u*mmsb2*mmst1*mmt +
-     (16*invdgb2*lgu*lt1u*mmsb2*mmst1*mmt)/3. + 48*invdgb2*ltu*mmsb2*mmst1*mmt
-     - 8*invdgb2*lgu*ltu*mmsb2*mmst1*mmt - 8*invdgb2*lt1u*ltu*mmsb2*mmst1*mmt -
-     (8*mmgl2*zt2)/3. - (8*mmgl*mmsb1*zt2)/3. - 4*mmsb12*zt2 - (8*mmgl*mmsb2*
-     zt2)/3. - 4*mmsb22*zt2 + (8*mmgl*mmst1*zt2)/3. + (8*mmsb1*mmst1*zt2)/3. -
-     4*invdgb1*mmsb12*mmst1*zt2 + (8*mmsb2*mmst1*zt2)/3. - 4*invdgb2*mmsb22*
-     mmst1*zt2 + (8*mmgl*mmt*zt2)/3. + (8*mmsb1*mmt*zt2)/3. - 4*invdgb1*mmsb12*
-     mmt*zt2 + (8*mmsb2*mmt*zt2)/3. - 4*invdgb2*mmsb22*mmt*zt2 + (32*mmst1*mmt*
-     zt2)/3. - (32*invdgb1*mmsb1*mmst1*mmt*zt2)/3. - (32*invdgb2*mmsb2*mmst1*
-     mmt*zt2)/3. + (112*mmsb12*mmst1*mmt*pow2(invdgb1))/3. - 4*lgu*mmsb12*mmst1
-     *mmt*pow2(invdgb1) - 4*lt1u*mmsb12*mmst1*mmt*pow2(invdgb1) - (8*lgu*lt1u*
-     mmsb12*mmst1*mmt*pow2(invdgb1))/3. - 24*ltu*mmsb12*mmst1*mmt*pow2(invdgb1)
-     + 4*lgu*ltu*mmsb12*mmst1*mmt*pow2(invdgb1) + 4*lt1u*ltu*mmsb12*mmst1*mmt*
-     pow2(invdgb1) + (16*mmsb12*mmst1*mmt*zt2*pow2(invdgb1))/3. + (112*mmsb22*
-     mmst1*mmt*pow2(invdgb2))/3. - 4*lgu*mmsb22*mmst1*mmt*pow2(invdgb2) - 4*
-     lt1u*mmsb22*mmst1*mmt*pow2(invdgb2) - (8*lgu*lt1u*mmsb22*mmst1*mmt*pow2(
-     invdgb2))/3. - 24*ltu*mmsb22*mmst1*mmt*pow2(invdgb2) + 4*lgu*ltu*mmsb22*
-     mmst1*mmt*pow2(invdgb2) + 4*lt1u*ltu*mmsb22*mmst1*mmt*pow2(invdgb2) + (16*
-     mmsb22*mmst1*mmt*zt2*pow2(invdgb2))/3. - (4*mmgl2*pow2(lgu))/3. - (4*mmgl*
-     mmsb1*pow2(lgu))/3. - 2*mmsb12*pow2(lgu) - (4*mmgl*mmsb2*pow2(lgu))/3. - 2
-     *mmsb22*pow2(lgu) + (8*mmgl*mmst1*pow2(lgu))/3. + (8*mmsb1*mmst1*pow2(lgu)
-     )/3. - 4*invdgb1*mmsb12*mmst1*pow2(lgu) + (8*mmsb2*mmst1*pow2(lgu))/3. - 4
-     *invdgb2*mmsb22*mmst1*pow2(lgu) + (4*mmgl*mmt*pow2(lgu))/3. + (4*mmsb1*mmt
-     *pow2(lgu))/3. - 2*invdgb1*mmsb12*mmt*pow2(lgu) + (4*mmsb2*mmt*pow2(lgu))/
-     3. - 2*invdgb2*mmsb22*mmt*pow2(lgu) + (4*mmst1*mmt*pow2(lgu))/3. - (4*
-     invdgb1*mmsb1*mmst1*mmt*pow2(lgu))/3. - (4*invdgb2*mmsb2*mmst1*mmt*pow2(
-     lgu))/3. + (2*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(lgu))/3. + (2*mmsb22*
-     mmst1*mmt*pow2(invdgb2)*pow2(lgu))/3. - (4*mmgl*mmst1*pow2(lt1u))/3. - (4*
-     mmsb1*mmst1*pow2(lt1u))/3. + 2*invdgb1*mmsb12*mmst1*pow2(lt1u) - (4*mmsb2*
-     mmst1*pow2(lt1u))/3. + 2*invdgb2*mmsb22*mmst1*pow2(lt1u) + (4*mmst1*mmt*
-     pow2(lt1u))/3. - (4*invdgb1*mmsb1*mmst1*mmt*pow2(lt1u))/3. - (4*invdgb2*
-     mmsb2*mmst1*mmt*pow2(lt1u))/3. + (2*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(
-     lt1u))/3. + (2*mmsb22*mmst1*mmt*pow2(invdgb2)*pow2(lt1u))/3. - (4*mmgl2*
-     pow2(ltu))/3. - (4*mmgl*mmsb1*pow2(ltu))/3. - 2*mmsb12*pow2(ltu) - (4*mmgl
-     *mmsb2*pow2(ltu))/3. - 2*mmsb22*pow2(ltu) + (4*mmgl*mmst1*pow2(ltu))/3. +
-     (4*mmsb1*mmst1*pow2(ltu))/3. - 2*invdgb1*mmsb12*mmst1*pow2(ltu) + (4*mmsb2
-     *mmst1*pow2(ltu))/3. - 2*invdgb2*mmsb22*mmst1*pow2(ltu) + (4*mmgl*mmt*pow2
-     (ltu))/3. + (4*mmsb1*mmt*pow2(ltu))/3. - 2*invdgb1*mmsb12*mmt*pow2(ltu) +
-     (4*mmsb2*mmt*pow2(ltu))/3. - 2*invdgb2*mmsb22*mmt*pow2(ltu) + 8*mmst1*mmt*
-     pow2(ltu) - 8*invdgb1*mmsb1*mmst1*mmt*pow2(ltu) - 8*invdgb2*mmsb2*mmst1*
-     mmt*pow2(ltu) + 4*mmsb12*mmst1*mmt*pow2(invdgb1)*pow2(ltu) + 4*mmsb22*
-     mmst1*mmt*pow2(invdgb2)*pow2(ltu) + (56*pow2(mmst1))/3. + 8*lgu*pow2(mmst1
-     ) - 16*lt1u*pow2(mmst1) - 8*ltu*pow2(mmst1) - (8*lgu*ltu*pow2(mmst1))/3. +
-     (16*lt1u*ltu*pow2(mmst1))/3. - (56*invdgb1*mmsb1*pow2(mmst1))/3. - 8*
-     invdgb1*lgu*mmsb1*pow2(mmst1) + 16*invdgb1*lt1u*mmsb1*pow2(mmst1) + 8*
-     invdgb1*ltu*mmsb1*pow2(mmst1) + (8*invdgb1*lgu*ltu*mmsb1*pow2(mmst1))/3. -
-     (16*invdgb1*lt1u*ltu*mmsb1*pow2(mmst1))/3. - (56*invdgb2*mmsb2*pow2(mmst1)
-     )/3. - 8*invdgb2*lgu*mmsb2*pow2(mmst1) + 16*invdgb2*lt1u*mmsb2*pow2(mmst1)
-     + 8*invdgb2*ltu*mmsb2*pow2(mmst1) + (8*invdgb2*lgu*ltu*mmsb2*pow2(mmst1))/
-     3. - (16*invdgb2*lt1u*ltu*mmsb2*pow2(mmst1))/3. - (28*invdgb1*mmt*pow2(
-     mmst1))/3. - (28*invdgb2*mmt*pow2(mmst1))/3. + 4*invdgb1*lt1u*mmt*pow2(
-     mmst1) + 4*invdgb2*lt1u*mmt*pow2(mmst1) + 4*invdgb1*ltu*mmt*pow2(mmst1) +
-     4*invdgb2*ltu*mmt*pow2(mmst1) - (4*invdgb1*lt1u*ltu*mmt*pow2(mmst1))/3. -
-     (4*invdgb2*lt1u*ltu*mmt*pow2(mmst1))/3. + (8*zt2*pow2(mmst1))/3. - (8*
-     invdgb1*mmsb1*zt2*pow2(mmst1))/3. - (8*invdgb2*mmsb2*zt2*pow2(mmst1))/3. -
-     (4*invdgb1*mmt*zt2*pow2(mmst1))/3. - (4*invdgb2*mmt*zt2*pow2(mmst1))/3. +
-     (28*mmsb12*pow2(invdgb1)*pow2(mmst1))/3. + 4*lgu*mmsb12*pow2(invdgb1)*pow2
-     (mmst1) - 8*lt1u*mmsb12*pow2(invdgb1)*pow2(mmst1) - 4*ltu*mmsb12*pow2(
-     invdgb1)*pow2(mmst1) - (4*lgu*ltu*mmsb12*pow2(invdgb1)*pow2(mmst1))/3. + (
-     8*lt1u*ltu*mmsb12*pow2(invdgb1)*pow2(mmst1))/3. + (28*mmsb1*mmt*pow2(
-     invdgb1)*pow2(mmst1))/3. - 4*lt1u*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1) - 4*
-     ltu*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1) + (4*lt1u*ltu*mmsb1*mmt*pow2(
-     invdgb1)*pow2(mmst1))/3. + (4*mmsb12*zt2*pow2(invdgb1)*pow2(mmst1))/3. + (
-     4*mmsb1*mmt*zt2*pow2(invdgb1)*pow2(mmst1))/3. + (28*mmsb22*pow2(invdgb2)*
-     pow2(mmst1))/3. + 4*lgu*mmsb22*pow2(invdgb2)*pow2(mmst1) - 8*lt1u*mmsb22*
-     pow2(invdgb2)*pow2(mmst1) - 4*ltu*mmsb22*pow2(invdgb2)*pow2(mmst1) - (4*
-     lgu*ltu*mmsb22*pow2(invdgb2)*pow2(mmst1))/3. + (8*lt1u*ltu*mmsb22*pow2(
-     invdgb2)*pow2(mmst1))/3. + (28*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/3. - 4
-     *lt1u*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1) - 4*ltu*mmsb2*mmt*pow2(invdgb2)*
-     pow2(mmst1) + (4*lt1u*ltu*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/3. + (4*
-     mmsb22*zt2*pow2(invdgb2)*pow2(mmst1))/3. + (4*mmsb2*mmt*zt2*pow2(invdgb2)*
-     pow2(mmst1))/3. - (4*pow2(lgu)*pow2(mmst1))/3. + (4*invdgb1*mmsb1*pow2(lgu
-     )*pow2(mmst1))/3. + (4*invdgb2*mmsb2*pow2(lgu)*pow2(mmst1))/3. - (2*mmsb12
-     *pow2(invdgb1)*pow2(lgu)*pow2(mmst1))/3. - (2*mmsb22*pow2(invdgb2)*pow2(
-     lgu)*pow2(mmst1))/3. + (8*pow2(lt1u)*pow2(mmst1))/3. - (8*invdgb1*mmsb1*
-     pow2(lt1u)*pow2(mmst1))/3. - (8*invdgb2*mmsb2*pow2(lt1u)*pow2(mmst1))/3. -
-     (2*invdgb1*mmt*pow2(lt1u)*pow2(mmst1))/3. - (2*invdgb2*mmt*pow2(lt1u)*pow2
-     (mmst1))/3. + (4*mmsb12*pow2(invdgb1)*pow2(lt1u)*pow2(mmst1))/3. + (2*
-     mmsb1*mmt*pow2(invdgb1)*pow2(lt1u)*pow2(mmst1))/3. + (4*mmsb22*pow2(
-     invdgb2)*pow2(lt1u)*pow2(mmst1))/3. + (2*mmsb2*mmt*pow2(invdgb2)*pow2(lt1u
-     )*pow2(mmst1))/3. + (4*pow2(ltu)*pow2(mmst1))/3. - (4*invdgb1*mmsb1*pow2(
-     ltu)*pow2(mmst1))/3. - (4*invdgb2*mmsb2*pow2(ltu)*pow2(mmst1))/3. - (2*
-     invdgb1*mmt*pow2(ltu)*pow2(mmst1))/3. - (2*invdgb2*mmt*pow2(ltu)*pow2(
-     mmst1))/3. + (2*mmsb12*pow2(invdgb1)*pow2(ltu)*pow2(mmst1))/3. + (2*mmsb1*
-     mmt*pow2(invdgb1)*pow2(ltu)*pow2(mmst1))/3. + (2*mmsb22*pow2(invdgb2)*pow2
-     (ltu)*pow2(mmst1))/3. + (2*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)*pow2(mmst1))/
-     3. + (112*invdgb1*pow3(mmsb1))/3. - 16*invdgb1*lgu*pow3(mmsb1) - 16*
-     invdgb1*ltu*pow3(mmsb1) + (16*invdgb1*lgu*ltu*pow3(mmsb1))/3. + (16*
-     invdgb1*zt2*pow3(mmsb1))/3. + (28*mmst1*pow2(invdgb1)*pow3(mmsb1))/3. - 8*
-     lgu*mmst1*pow2(invdgb1)*pow3(mmsb1) + 4*lt1u*mmst1*pow2(invdgb1)*pow3(
-     mmsb1) - 4*ltu*mmst1*pow2(invdgb1)*pow3(mmsb1) + (8*lgu*ltu*mmst1*pow2(
-     invdgb1)*pow3(mmsb1))/3. - (4*lt1u*ltu*mmst1*pow2(invdgb1)*pow3(mmsb1))/3.
-      + (28*mmt*pow2(invdgb1)*pow3(mmsb1))/3. - 4*lgu*mmt*pow2(invdgb1)*pow3(
-     mmsb1) - 4*ltu*mmt*pow2(invdgb1)*pow3(mmsb1) + (4*lgu*ltu*mmt*pow2(invdgb1
-     )*pow3(mmsb1))/3. + (4*mmst1*zt2*pow2(invdgb1)*pow3(mmsb1))/3. + (4*mmt*
-     zt2*pow2(invdgb1)*pow3(mmsb1))/3. + (8*invdgb1*pow2(lgu)*pow3(mmsb1))/3. +
-     (4*mmst1*pow2(invdgb1)*pow2(lgu)*pow3(mmsb1))/3. + (2*mmt*pow2(invdgb1)*
-     pow2(lgu)*pow3(mmsb1))/3. - (2*mmst1*pow2(invdgb1)*pow2(lt1u)*pow3(mmsb1))
-     /3. + (8*invdgb1*pow2(ltu)*pow3(mmsb1))/3. + (2*mmst1*pow2(invdgb1)*pow2(
-     ltu)*pow3(mmsb1))/3. + (2*mmt*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/3. + (
-     112*invdgb2*pow3(mmsb2))/3. - 16*invdgb2*lgu*pow3(mmsb2) - 16*invdgb2*ltu*
-     pow3(mmsb2) + (16*invdgb2*lgu*ltu*pow3(mmsb2))/3. + (16*invdgb2*zt2*pow3(
-     mmsb2))/3. + (28*mmst1*pow2(invdgb2)*pow3(mmsb2))/3. - 8*lgu*mmst1*pow2(
-     invdgb2)*pow3(mmsb2) + 4*lt1u*mmst1*pow2(invdgb2)*pow3(mmsb2) - 4*ltu*
-     mmst1*pow2(invdgb2)*pow3(mmsb2) + (8*lgu*ltu*mmst1*pow2(invdgb2)*pow3(
-     mmsb2))/3. - (4*lt1u*ltu*mmst1*pow2(invdgb2)*pow3(mmsb2))/3. + (28*mmt*
-     pow2(invdgb2)*pow3(mmsb2))/3. - 4*lgu*mmt*pow2(invdgb2)*pow3(mmsb2) - 4*
-     ltu*mmt*pow2(invdgb2)*pow3(mmsb2) + (4*lgu*ltu*mmt*pow2(invdgb2)*pow3(
-     mmsb2))/3. + (4*mmst1*zt2*pow2(invdgb2)*pow3(mmsb2))/3. + (4*mmt*zt2*pow2(
-     invdgb2)*pow3(mmsb2))/3. + (8*invdgb2*pow2(lgu)*pow3(mmsb2))/3. + (4*mmst1
-     *pow2(invdgb2)*pow2(lgu)*pow3(mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(lgu)*
-     pow3(mmsb2))/3. - (2*mmst1*pow2(invdgb2)*pow2(lt1u)*pow3(mmsb2))/3. + (8*
-     invdgb2*pow2(ltu)*pow3(mmsb2))/3. + (2*mmst1*pow2(invdgb2)*pow2(ltu)*pow3(
-     mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/3. + s2t*((56*
-     mmgl2*mmt)/(3.*mgl*mt) - (8*lgu*mmgl2*mmt)/(mgl*mt) - (8*ltu*mmgl2*mmt)/(
-     mgl*mt) + (8*lgu*ltu*mmgl2*mmt)/(3.*mgl*mt) + (56*mmgl*mmsb1*mmt)/(3.*mgl*
-     mt) - (8*lgu*mmgl*mmsb1*mmt)/(mgl*mt) - (8*ltu*mmgl*mmsb1*mmt)/(mgl*mt) +
-     (8*lgu*ltu*mmgl*mmsb1*mmt)/(3.*mgl*mt) - (28*invdgb1*mmgl*mmsb12*mmt)/(mgl
-     *mt) + (12*invdgb1*lgu*mmgl*mmsb12*mmt)/(mgl*mt) + (12*invdgb1*ltu*mmgl*
-     mmsb12*mmt)/(mgl*mt) - (4*invdgb1*lgu*ltu*mmgl*mmsb12*mmt)/(mgl*mt) + (56*
-     mmgl*mmsb2*mmt)/(3.*mgl*mt) - (8*lgu*mmgl*mmsb2*mmt)/(mgl*mt) - (8*ltu*
-     mmgl*mmsb2*mmt)/(mgl*mt) + (8*lgu*ltu*mmgl*mmsb2*mmt)/(3.*mgl*mt) - (28*
-     invdgb2*mmgl*mmsb22*mmt)/(mgl*mt) + (12*invdgb2*lgu*mmgl*mmsb22*mmt)/(mgl*
-     mt) + (12*invdgb2*ltu*mmgl*mmsb22*mmt)/(mgl*mt) - (4*invdgb2*lgu*ltu*mmgl*
-     mmsb22*mmt)/(mgl*mt) - (56*mmgl*mmst1*mmt)/(3.*mgl*mt) + (8*lgu*mmgl*mmst1
-     *mmt)/(mgl*mt) - (8*lt1u*mmgl*mmst1*mmt)/(mgl*mt) + (8*lgu*lt1u*mmgl*mmst1
-     *mmt)/(3.*mgl*mt) + (16*ltu*mmgl*mmst1*mmt)/(mgl*mt) - (16*lgu*ltu*mmgl*
-     mmst1*mmt)/(3.*mgl*mt) + (56*invdgb1*mmgl*mmsb1*mmst1*mmt)/(3.*mgl*mt) - (
-     8*invdgb1*lgu*mmgl*mmsb1*mmst1*mmt)/(mgl*mt) + (8*invdgb1*lt1u*mmgl*mmsb1*
-     mmst1*mmt)/(mgl*mt) - (8*invdgb1*lgu*lt1u*mmgl*mmsb1*mmst1*mmt)/(3.*mgl*mt
-     ) - (16*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt)/(mgl*mt) + (16*invdgb1*lgu*ltu*
-     mmgl*mmsb1*mmst1*mmt)/(3.*mgl*mt) + (56*invdgb2*mmgl*mmsb2*mmst1*mmt)/(3.*
-     mgl*mt) - (8*invdgb2*lgu*mmgl*mmsb2*mmst1*mmt)/(mgl*mt) + (8*invdgb2*lt1u*
-     mmgl*mmsb2*mmst1*mmt)/(mgl*mt) - (8*invdgb2*lgu*lt1u*mmgl*mmsb2*mmst1*mmt)
-     /(3.*mgl*mt) - (16*invdgb2*ltu*mmgl*mmsb2*mmst1*mmt)/(mgl*mt) + (16*
-     invdgb2*lgu*ltu*mmgl*mmsb2*mmst1*mmt)/(3.*mgl*mt) + (8*mmgl2*mmt*zt2)/(3.*
-     mgl*mt) + (8*mmgl*mmsb1*mmt*zt2)/(3.*mgl*mt) - (4*invdgb1*mmgl*mmsb12*mmt*
-     zt2)/(mgl*mt) + (8*mmgl*mmsb2*mmt*zt2)/(3.*mgl*mt) - (4*invdgb2*mmgl*
-     mmsb22*mmt*zt2)/(mgl*mt) - (8*mmgl*mmst1*mmt*zt2)/(3.*mgl*mt) + (8*invdgb1
-     *mmgl*mmsb1*mmst1*mmt*zt2)/(3.*mgl*mt) + (8*invdgb2*mmgl*mmsb2*mmst1*mmt*
-     zt2)/(3.*mgl*mt) - (28*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(3.*mgl*mt) +
-     (4*lgu*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(mgl*mt) - (4*lt1u*mmgl*mmsb12
-     *mmst1*mmt*pow2(invdgb1))/(mgl*mt) + (4*lgu*lt1u*mmgl*mmsb12*mmst1*mmt*
-     pow2(invdgb1))/(3.*mgl*mt) + (8*ltu*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(
-     mgl*mt) - (8*lgu*ltu*mmgl*mmsb12*mmst1*mmt*pow2(invdgb1))/(3.*mgl*mt) - (4
-     *mmgl*mmsb12*mmst1*mmt*zt2*pow2(invdgb1))/(3.*mgl*mt) - (28*mmgl*mmsb22*
-     mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*lgu*mmgl*mmsb22*mmst1*mmt*pow2(
-     invdgb2))/(mgl*mt) - (4*lt1u*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(mgl*mt)
-     + (4*lgu*lt1u*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) + (8*ltu*
-     mmgl*mmsb22*mmst1*mmt*pow2(invdgb2))/(mgl*mt) - (8*lgu*ltu*mmgl*mmsb22*
-     mmst1*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*mmgl*mmsb22*mmst1*mmt*zt2*pow2(
-     invdgb2))/(3.*mgl*mt) + (4*mmgl2*mmt*pow2(lgu))/(3.*mgl*mt) + (4*mmgl*
-     mmsb1*mmt*pow2(lgu))/(3.*mgl*mt) - (2*invdgb1*mmgl*mmsb12*mmt*pow2(lgu))/(
-     mgl*mt) + (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mgl*mt) - (2*invdgb2*mmgl*
-     mmsb22*mmt*pow2(lgu))/(mgl*mt) - (4*mmgl*mmst1*mmt*pow2(lgu))/(3.*mgl*mt)
-     + (4*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(lgu))/(3.*mgl*mt) + (4*invdgb2*mmgl
-     *mmsb2*mmst1*mmt*pow2(lgu))/(3.*mgl*mt) - (2*mmgl*mmsb12*mmst1*mmt*pow2(
-     invdgb1)*pow2(lgu))/(3.*mgl*mt) - (2*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*
-     pow2(lgu))/(3.*mgl*mt) + (4*mmgl*mmst1*mmt*pow2(lt1u))/(3.*mgl*mt) - (4*
-     invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(lt1u))/(3.*mgl*mt) - (4*invdgb2*mmgl*
-     mmsb2*mmst1*mmt*pow2(lt1u))/(3.*mgl*mt) + (2*mmgl*mmsb12*mmst1*mmt*pow2(
-     invdgb1)*pow2(lt1u))/(3.*mgl*mt) + (2*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*
-     pow2(lt1u))/(3.*mgl*mt) + (4*mmgl2*mmt*pow2(ltu))/(3.*mgl*mt) + (4*mmgl*
-     mmsb1*mmt*pow2(ltu))/(3.*mgl*mt) - (2*invdgb1*mmgl*mmsb12*mmt*pow2(ltu))/(
-     mgl*mt) + (4*mmgl*mmsb2*mmt*pow2(ltu))/(3.*mgl*mt) - (2*invdgb2*mmgl*
-     mmsb22*mmt*pow2(ltu))/(mgl*mt) - (8*mmgl*mmst1*mmt*pow2(ltu))/(3.*mgl*mt)
-     + (8*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(ltu))/(3.*mgl*mt) + (8*invdgb2*mmgl
-     *mmsb2*mmst1*mmt*pow2(ltu))/(3.*mgl*mt) - (4*mmgl*mmsb12*mmst1*mmt*pow2(
-     invdgb1)*pow2(ltu))/(3.*mgl*mt) - (4*mmgl*mmsb22*mmst1*mmt*pow2(invdgb2)*
-     pow2(ltu))/(3.*mgl*mt) - (4*invdgb1*lt1u*mmgl*mmt*pow2(mmst1))/(mgl*mt) -
-     (4*invdgb2*lt1u*mmgl*mmt*pow2(mmst1))/(mgl*mt) + (4*invdgb1*lgu*lt1u*mmgl*
-     mmt*pow2(mmst1))/(3.*mgl*mt) + (4*invdgb2*lgu*lt1u*mmgl*mmt*pow2(mmst1))/(
-     3.*mgl*mt) + (4*invdgb1*ltu*mmgl*mmt*pow2(mmst1))/(mgl*mt) + (4*invdgb2*
-     ltu*mmgl*mmt*pow2(mmst1))/(mgl*mt) - (4*invdgb1*lgu*ltu*mmgl*mmt*pow2(
-     mmst1))/(3.*mgl*mt) - (4*invdgb2*lgu*ltu*mmgl*mmt*pow2(mmst1))/(3.*mgl*mt)
-     + (4*lt1u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/(mgl*mt) - (4*lgu*lt1u
-     *mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst1))/(3.*mgl*mt) - (4*ltu*mmgl*mmsb1
-     *mmt*pow2(invdgb1)*pow2(mmst1))/(mgl*mt) + (4*lgu*ltu*mmgl*mmsb1*mmt*pow2(
-     invdgb1)*pow2(mmst1))/(3.*mgl*mt) + (4*lt1u*mmgl*mmsb2*mmt*pow2(invdgb2)*
-     pow2(mmst1))/(mgl*mt) - (4*lgu*lt1u*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(
-     mmst1))/(3.*mgl*mt) - (4*ltu*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/(
-     mgl*mt) + (4*lgu*ltu*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst1))/(3.*mgl*mt)
-     + (2*invdgb1*mmgl*mmt*pow2(lt1u)*pow2(mmst1))/(3.*mgl*mt) + (2*invdgb2*
-     mmgl*mmt*pow2(lt1u)*pow2(mmst1))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmt*pow2(
-     invdgb1)*pow2(lt1u)*pow2(mmst1))/(3.*mgl*mt) - (2*mmgl*mmsb2*mmt*pow2(
-     invdgb2)*pow2(lt1u)*pow2(mmst1))/(3.*mgl*mt) - (2*invdgb1*mmgl*mmt*pow2(
-     ltu)*pow2(mmst1))/(3.*mgl*mt) - (2*invdgb2*mmgl*mmt*pow2(ltu)*pow2(mmst1))
-     /(3.*mgl*mt) + (2*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)*pow2(mmst1))/(3.*
-     mgl*mt) + (2*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)*pow2(mmst1))/(3.*mgl*
-     mt) - (56*mmgl*pow2(mmt))/(3.*mgl*mt) + (8*lgu*mmgl*pow2(mmt))/(mgl*mt) +
-     (8*ltu*mmgl*pow2(mmt))/(mgl*mt) - (8*lgu*ltu*mmgl*pow2(mmt))/(3.*mgl*mt) +
-     (56*invdgb1*mmgl*mmsb1*pow2(mmt))/(3.*mgl*mt) - (8*invdgb1*lgu*mmgl*mmsb1*
-     pow2(mmt))/(mgl*mt) - (8*invdgb1*ltu*mmgl*mmsb1*pow2(mmt))/(mgl*mt) + (8*
-     invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt))/(3.*mgl*mt) + (56*invdgb2*mmgl*mmsb2
-     *pow2(mmt))/(3.*mgl*mt) - (8*invdgb2*lgu*mmgl*mmsb2*pow2(mmt))/(mgl*mt) -
-     (8*invdgb2*ltu*mmgl*mmsb2*pow2(mmt))/(mgl*mt) + (8*invdgb2*lgu*ltu*mmgl*
-     mmsb2*pow2(mmt))/(3.*mgl*mt) + (56*invdgb1*mmgl*mmst1*pow2(mmt))/(3.*mgl*
-     mt) + (56*invdgb2*mmgl*mmst1*pow2(mmt))/(3.*mgl*mt) - (4*invdgb1*lt1u*mmgl
-     *mmst1*pow2(mmt))/(mgl*mt) - (4*invdgb2*lt1u*mmgl*mmst1*pow2(mmt))/(mgl*mt
-     ) - (4*invdgb1*lgu*lt1u*mmgl*mmst1*pow2(mmt))/(3.*mgl*mt) - (4*invdgb2*lgu
-     *lt1u*mmgl*mmst1*pow2(mmt))/(3.*mgl*mt) - (12*invdgb1*ltu*mmgl*mmst1*pow2(
-     mmt))/(mgl*mt) - (12*invdgb2*ltu*mmgl*mmst1*pow2(mmt))/(mgl*mt) + (4*
-     invdgb1*lgu*ltu*mmgl*mmst1*pow2(mmt))/(3.*mgl*mt) + (4*invdgb2*lgu*ltu*
-     mmgl*mmst1*pow2(mmt))/(3.*mgl*mt) + (8*invdgb1*lt1u*ltu*mmgl*mmst1*pow2(
-     mmt))/(3.*mgl*mt) + (8*invdgb2*lt1u*ltu*mmgl*mmst1*pow2(mmt))/(3.*mgl*mt)
-     - (8*mmgl*zt2*pow2(mmt))/(3.*mgl*mt) + (8*invdgb1*mmgl*mmsb1*zt2*pow2(mmt)
-     )/(3.*mgl*mt) + (8*invdgb2*mmgl*mmsb2*zt2*pow2(mmt))/(3.*mgl*mt) + (8*
-     invdgb1*mmgl*mmst1*zt2*pow2(mmt))/(3.*mgl*mt) + (8*invdgb2*mmgl*mmst1*zt2*
-     pow2(mmt))/(3.*mgl*mt) - (28*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(3.*mgl*
-     mt) + (4*lgu*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) + (4*ltu*mmgl*
-     mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) - (4*lgu*ltu*mmgl*mmsb12*pow2(
-     invdgb1)*pow2(mmt))/(3.*mgl*mt) - (56*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(
-     mmt))/(3.*mgl*mt) + (4*lt1u*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(mgl
-     *mt) + (4*lgu*lt1u*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) +
-     (12*ltu*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(mgl*mt) - (4*lgu*ltu*
-     mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (8*lt1u*ltu*mmgl*
-     mmsb1*mmst1*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb12*zt2*pow2
-     (invdgb1)*pow2(mmt))/(3.*mgl*mt) - (8*mmgl*mmsb1*mmst1*zt2*pow2(invdgb1)*
-     pow2(mmt))/(3.*mgl*mt) - (28*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(3.*mgl*
-     mt) + (4*lgu*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) + (4*ltu*mmgl*
-     mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) - (4*lgu*ltu*mmgl*mmsb22*pow2(
-     invdgb2)*pow2(mmt))/(3.*mgl*mt) - (56*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(
-     mmt))/(3.*mgl*mt) + (4*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(mgl
-     *mt) + (4*lgu*lt1u*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) +
-     (12*ltu*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(mgl*mt) - (4*lgu*ltu*
-     mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (8*lt1u*ltu*mmgl*
-     mmsb2*mmst1*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*mmsb22*zt2*pow2
-     (invdgb2)*pow2(mmt))/(3.*mgl*mt) - (8*mmgl*mmsb2*mmst1*zt2*pow2(invdgb2)*
-     pow2(mmt))/(3.*mgl*mt) - (4*mmgl*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) + (4*
-     invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) + (4*invdgb2*mmgl*
-     mmsb2*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb12*pow2(invdgb1)*pow2
-     (lgu)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb22*pow2(invdgb2)*pow2(lgu)*pow2
-     (mmt))/(3.*mgl*mt) + (2*invdgb1*mmgl*mmst1*pow2(lt1u)*pow2(mmt))/(3.*mgl*
-     mt) + (2*invdgb2*mmgl*mmst1*pow2(lt1u)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*
-     mmsb1*mmst1*pow2(invdgb1)*pow2(lt1u)*pow2(mmt))/(3.*mgl*mt) - (2*mmgl*
-     mmsb2*mmst1*pow2(invdgb2)*pow2(lt1u)*pow2(mmt))/(3.*mgl*mt) - (4*mmgl*pow2
-     (ltu)*pow2(mmt))/(3.*mgl*mt) + (4*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt))/
-     (3.*mgl*mt) + (4*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmt))/(3.*mgl*mt) + (2*
-     invdgb1*mmgl*mmst1*pow2(ltu)*pow2(mmt))/(mgl*mt) + (2*invdgb2*mmgl*mmst1*
-     pow2(ltu)*pow2(mmt))/(mgl*mt) - (2*mmgl*mmsb12*pow2(invdgb1)*pow2(ltu)*
-     pow2(mmt))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmst1*pow2(invdgb1)*pow2(ltu)*pow2(
-     mmt))/(mgl*mt) - (2*mmgl*mmsb22*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(3.*mgl
-     *mt) - (2*mmgl*mmsb2*mmst1*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(mgl*mt) + (
-     28*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) - (4*lgu*mmgl*mmt*pow2(
-     invdgb1)*pow3(mmsb1))/(mgl*mt) - (4*ltu*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1)
-     )/(mgl*mt) + (4*lgu*ltu*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) +
-     (4*mmgl*mmt*zt2*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) + (2*mmgl*mmt*pow2(
-     invdgb1)*pow2(lgu)*pow3(mmsb1))/(3.*mgl*mt) + (2*mmgl*mmt*pow2(invdgb1)*
-     pow2(ltu)*pow3(mmsb1))/(3.*mgl*mt) + (28*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2
-     ))/(3.*mgl*mt) - (4*lgu*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) - (4*
-     ltu*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) + (4*lgu*ltu*mmgl*mmt*
-     pow2(invdgb2)*pow3(mmsb2))/(3.*mgl*mt) + (4*mmgl*mmt*zt2*pow2(invdgb2)*
-     pow3(mmsb2))/(3.*mgl*mt) + (2*mmgl*mmt*pow2(invdgb2)*pow2(lgu)*pow3(mmsb2)
-     )/(3.*mgl*mt) + (2*mmgl*mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/(3.*mgl*
-     mt) + s2b*((-56*mmgl*mmsb1*mmt)/(3.*mb*mt) + (8*lgu*mmgl*mmsb1*mmt)/(mb*mt
-     ) + (8*ltu*mmgl*mmsb1*mmt)/(mb*mt) - (8*lgu*ltu*mmgl*mmsb1*mmt)/(3.*mb*mt)
-     - (56*mmsb12*mmt)/(3.*mb*mt) + (8*lgu*mmsb12*mmt)/(mb*mt) + (8*ltu*mmsb12*
-     mmt)/(mb*mt) - (8*lgu*ltu*mmsb12*mmt)/(3.*mb*mt) + (56*mmgl*mmsb2*mmt)/(3.
-     *mb*mt) - (8*lgu*mmgl*mmsb2*mmt)/(mb*mt) - (8*ltu*mmgl*mmsb2*mmt)/(mb*mt)
-     + (8*lgu*ltu*mmgl*mmsb2*mmt)/(3.*mb*mt) + (56*mmsb22*mmt)/(3.*mb*mt) - (8*
-     lgu*mmsb22*mmt)/(mb*mt) - (8*ltu*mmsb22*mmt)/(mb*mt) + (8*lgu*ltu*mmsb22*
-     mmt)/(3.*mb*mt) + (56*mmsb1*mmst1*mmt)/(3.*mb*mt) - (8*lgu*mmsb1*mmst1*mmt
-     )/(mb*mt) + (8*lt1u*mmsb1*mmst1*mmt)/(mb*mt) - (8*lgu*lt1u*mmsb1*mmst1*mmt
-     )/(3.*mb*mt) - (16*ltu*mmsb1*mmst1*mmt)/(mb*mt) + (16*lgu*ltu*mmsb1*mmst1*
-     mmt)/(3.*mb*mt) - (56*invdgb1*mmsb12*mmst1*mmt)/(3.*mb*mt) + (8*invdgb1*
-     lgu*mmsb12*mmst1*mmt)/(mb*mt) - (8*invdgb1*lt1u*mmsb12*mmst1*mmt)/(mb*mt)
-     + (8*invdgb1*lgu*lt1u*mmsb12*mmst1*mmt)/(3.*mb*mt) + (16*invdgb1*ltu*
-     mmsb12*mmst1*mmt)/(mb*mt) - (16*invdgb1*lgu*ltu*mmsb12*mmst1*mmt)/(3.*mb*
-     mt) - (56*mmsb2*mmst1*mmt)/(3.*mb*mt) + (8*lgu*mmsb2*mmst1*mmt)/(mb*mt) -
-     (8*lt1u*mmsb2*mmst1*mmt)/(mb*mt) + (8*lgu*lt1u*mmsb2*mmst1*mmt)/(3.*mb*mt)
-     + (16*ltu*mmsb2*mmst1*mmt)/(mb*mt) - (16*lgu*ltu*mmsb2*mmst1*mmt)/(3.*mb*
-     mt) + (56*invdgb2*mmsb22*mmst1*mmt)/(3.*mb*mt) - (8*invdgb2*lgu*mmsb22*
-     mmst1*mmt)/(mb*mt) + (8*invdgb2*lt1u*mmsb22*mmst1*mmt)/(mb*mt) - (8*
-     invdgb2*lgu*lt1u*mmsb22*mmst1*mmt)/(3.*mb*mt) - (16*invdgb2*ltu*mmsb22*
-     mmst1*mmt)/(mb*mt) + (16*invdgb2*lgu*ltu*mmsb22*mmst1*mmt)/(3.*mb*mt) - (8
-     *mmgl*mmsb1*mmt*zt2)/(3.*mb*mt) - (8*mmsb12*mmt*zt2)/(3.*mb*mt) + (8*mmgl*
-     mmsb2*mmt*zt2)/(3.*mb*mt) + (8*mmsb22*mmt*zt2)/(3.*mb*mt) + (8*mmsb1*mmst1
-     *mmt*zt2)/(3.*mb*mt) - (8*invdgb1*mmsb12*mmst1*mmt*zt2)/(3.*mb*mt) - (8*
-     mmsb2*mmst1*mmt*zt2)/(3.*mb*mt) + (8*invdgb2*mmsb22*mmst1*mmt*zt2)/(3.*mb*
-     mt) - (4*mmgl*mmsb1*mmt*pow2(lgu))/(3.*mb*mt) - (4*mmsb12*mmt*pow2(lgu))/(
-     3.*mb*mt) + (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mb*mt) + (4*mmsb22*mmt*pow2(
-     lgu))/(3.*mb*mt) + (4*mmsb1*mmst1*mmt*pow2(lgu))/(3.*mb*mt) - (4*invdgb1*
-     mmsb12*mmst1*mmt*pow2(lgu))/(3.*mb*mt) - (4*mmsb2*mmst1*mmt*pow2(lgu))/(3.
-     *mb*mt) + (4*invdgb2*mmsb22*mmst1*mmt*pow2(lgu))/(3.*mb*mt) - (4*mmsb1*
-     mmst1*mmt*pow2(lt1u))/(3.*mb*mt) + (4*invdgb1*mmsb12*mmst1*mmt*pow2(lt1u))
-     /(3.*mb*mt) + (4*mmsb2*mmst1*mmt*pow2(lt1u))/(3.*mb*mt) - (4*invdgb2*
-     mmsb22*mmst1*mmt*pow2(lt1u))/(3.*mb*mt) - (4*mmgl*mmsb1*mmt*pow2(ltu))/(3.
-     *mb*mt) - (4*mmsb12*mmt*pow2(ltu))/(3.*mb*mt) + (4*mmgl*mmsb2*mmt*pow2(ltu
-     ))/(3.*mb*mt) + (4*mmsb22*mmt*pow2(ltu))/(3.*mb*mt) + (8*mmsb1*mmst1*mmt*
-     pow2(ltu))/(3.*mb*mt) - (8*invdgb1*mmsb12*mmst1*mmt*pow2(ltu))/(3.*mb*mt)
-     - (8*mmsb2*mmst1*mmt*pow2(ltu))/(3.*mb*mt) + (8*invdgb2*mmsb22*mmst1*mmt*
-     pow2(ltu))/(3.*mb*mt) + (8*invdgb1*lt1u*mmsb1*mmt*pow2(mmst1))/(mb*mt) - (
-     8*invdgb1*lgu*lt1u*mmsb1*mmt*pow2(mmst1))/(3.*mb*mt) - (8*invdgb1*ltu*
-     mmsb1*mmt*pow2(mmst1))/(mb*mt) + (8*invdgb1*lgu*ltu*mmsb1*mmt*pow2(mmst1))
-     /(3.*mb*mt) - (8*invdgb2*lt1u*mmsb2*mmt*pow2(mmst1))/(mb*mt) + (8*invdgb2*
-     lgu*lt1u*mmsb2*mmt*pow2(mmst1))/(3.*mb*mt) + (8*invdgb2*ltu*mmsb2*mmt*pow2
-     (mmst1))/(mb*mt) - (8*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst1))/(3.*mb*mt) -
-     (4*invdgb1*mmsb1*mmt*pow2(lt1u)*pow2(mmst1))/(3.*mb*mt) + (4*invdgb2*mmsb2
-     *mmt*pow2(lt1u)*pow2(mmst1))/(3.*mb*mt) + (4*invdgb1*mmsb1*mmt*pow2(ltu)*
-     pow2(mmst1))/(3.*mb*mt) - (4*invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst1))/(3.*
-     mb*mt) + (56*mmsb1*pow2(mmt))/(3.*mb*mt) - (8*lgu*mmsb1*pow2(mmt))/(mb*mt)
-     - (8*ltu*mmsb1*pow2(mmt))/(mb*mt) + (8*lgu*ltu*mmsb1*pow2(mmt))/(3.*mb*mt)
-     - (56*invdgb1*mmsb12*pow2(mmt))/(3.*mb*mt) + (8*invdgb1*lgu*mmsb12*pow2(
-     mmt))/(mb*mt) + (8*invdgb1*ltu*mmsb12*pow2(mmt))/(mb*mt) - (8*invdgb1*lgu*
-     ltu*mmsb12*pow2(mmt))/(3.*mb*mt) - (56*mmsb2*pow2(mmt))/(3.*mb*mt) + (8*
-     lgu*mmsb2*pow2(mmt))/(mb*mt) + (8*ltu*mmsb2*pow2(mmt))/(mb*mt) - (8*lgu*
-     ltu*mmsb2*pow2(mmt))/(3.*mb*mt) + (56*invdgb2*mmsb22*pow2(mmt))/(3.*mb*mt)
-     - (8*invdgb2*lgu*mmsb22*pow2(mmt))/(mb*mt) - (8*invdgb2*ltu*mmsb22*pow2(
-     mmt))/(mb*mt) + (8*invdgb2*lgu*ltu*mmsb22*pow2(mmt))/(3.*mb*mt) - (112*
-     invdgb1*mmsb1*mmst1*pow2(mmt))/(3.*mb*mt) + (8*invdgb1*lt1u*mmsb1*mmst1*
-     pow2(mmt))/(mb*mt) + (8*invdgb1*lgu*lt1u*mmsb1*mmst1*pow2(mmt))/(3.*mb*mt)
-     + (24*invdgb1*ltu*mmsb1*mmst1*pow2(mmt))/(mb*mt) - (8*invdgb1*lgu*ltu*
-     mmsb1*mmst1*pow2(mmt))/(3.*mb*mt) - (16*invdgb1*lt1u*ltu*mmsb1*mmst1*pow2(
-     mmt))/(3.*mb*mt) + (112*invdgb2*mmsb2*mmst1*pow2(mmt))/(3.*mb*mt) - (8*
-     invdgb2*lt1u*mmsb2*mmst1*pow2(mmt))/(mb*mt) - (8*invdgb2*lgu*lt1u*mmsb2*
-     mmst1*pow2(mmt))/(3.*mb*mt) - (24*invdgb2*ltu*mmsb2*mmst1*pow2(mmt))/(mb*
-     mt) + (8*invdgb2*lgu*ltu*mmsb2*mmst1*pow2(mmt))/(3.*mb*mt) + (16*invdgb2*
-     lt1u*ltu*mmsb2*mmst1*pow2(mmt))/(3.*mb*mt) + (8*mmsb1*zt2*pow2(mmt))/(3.*
-     mb*mt) - (8*invdgb1*mmsb12*zt2*pow2(mmt))/(3.*mb*mt) - (8*mmsb2*zt2*pow2(
-     mmt))/(3.*mb*mt) + (8*invdgb2*mmsb22*zt2*pow2(mmt))/(3.*mb*mt) - (16*
-     invdgb1*mmsb1*mmst1*zt2*pow2(mmt))/(3.*mb*mt) + (16*invdgb2*mmsb2*mmst1*
-     zt2*pow2(mmt))/(3.*mb*mt) + (4*mmsb1*pow2(lgu)*pow2(mmt))/(3.*mb*mt) - (4*
-     invdgb1*mmsb12*pow2(lgu)*pow2(mmt))/(3.*mb*mt) - (4*mmsb2*pow2(lgu)*pow2(
-     mmt))/(3.*mb*mt) + (4*invdgb2*mmsb22*pow2(lgu)*pow2(mmt))/(3.*mb*mt) - (4*
-     invdgb1*mmsb1*mmst1*pow2(lt1u)*pow2(mmt))/(3.*mb*mt) + (4*invdgb2*mmsb2*
-     mmst1*pow2(lt1u)*pow2(mmt))/(3.*mb*mt) + (4*mmsb1*pow2(ltu)*pow2(mmt))/(3.
-     *mb*mt) - (4*invdgb1*mmsb12*pow2(ltu)*pow2(mmt))/(3.*mb*mt) - (4*mmsb2*
-     pow2(ltu)*pow2(mmt))/(3.*mb*mt) + (4*invdgb2*mmsb22*pow2(ltu)*pow2(mmt))/(
-     3.*mb*mt) - (4*invdgb1*mmsb1*mmst1*pow2(ltu)*pow2(mmt))/(mb*mt) + (4*
-     invdgb2*mmsb2*mmst1*pow2(ltu)*pow2(mmt))/(mb*mt) + (56*invdgb1*mmt*pow3(
-     mmsb1))/(3.*mb*mt) - (8*invdgb1*lgu*mmt*pow3(mmsb1))/(mb*mt) - (8*invdgb1*
-     ltu*mmt*pow3(mmsb1))/(mb*mt) + (8*invdgb1*lgu*ltu*mmt*pow3(mmsb1))/(3.*mb*
-     mt) + (8*invdgb1*mmt*zt2*pow3(mmsb1))/(3.*mb*mt) + (4*invdgb1*mmt*pow2(lgu
-     )*pow3(mmsb1))/(3.*mb*mt) + (4*invdgb1*mmt*pow2(ltu)*pow3(mmsb1))/(3.*mb*
-     mt) - (56*invdgb2*mmt*pow3(mmsb2))/(3.*mb*mt) + (8*invdgb2*lgu*mmt*pow3(
-     mmsb2))/(mb*mt) + (8*invdgb2*ltu*mmt*pow3(mmsb2))/(mb*mt) - (8*invdgb2*lgu
-     *ltu*mmt*pow3(mmsb2))/(3.*mb*mt) - (8*invdgb2*mmt*zt2*pow3(mmsb2))/(3.*mb*
-     mt) - (4*invdgb2*mmt*pow2(lgu)*pow3(mmsb2))/(3.*mb*mt) - (4*invdgb2*mmt*
-     pow2(ltu)*pow3(mmsb2))/(3.*mb*mt))) + (28*invdgb1*pow3(mmst1))/3. + (28*
-     invdgb2*pow3(mmst1))/3. - 4*invdgb1*lt1u*pow3(mmst1) - 4*invdgb2*lt1u*pow3
-     (mmst1) - 4*invdgb1*ltu*pow3(mmst1) - 4*invdgb2*ltu*pow3(mmst1) + (4*
-     invdgb1*lt1u*ltu*pow3(mmst1))/3. + (4*invdgb2*lt1u*ltu*pow3(mmst1))/3. + (
-     4*invdgb1*zt2*pow3(mmst1))/3. + (4*invdgb2*zt2*pow3(mmst1))/3. - (28*mmsb1
-     *pow2(invdgb1)*pow3(mmst1))/3. + 4*lt1u*mmsb1*pow2(invdgb1)*pow3(mmst1) +
-     4*ltu*mmsb1*pow2(invdgb1)*pow3(mmst1) - (4*lt1u*ltu*mmsb1*pow2(invdgb1)*
-     pow3(mmst1))/3. - (4*mmsb1*zt2*pow2(invdgb1)*pow3(mmst1))/3. - (28*mmsb2*
-     pow2(invdgb2)*pow3(mmst1))/3. + 4*lt1u*mmsb2*pow2(invdgb2)*pow3(mmst1) + 4
-     *ltu*mmsb2*pow2(invdgb2)*pow3(mmst1) - (4*lt1u*ltu*mmsb2*pow2(invdgb2)*
-     pow3(mmst1))/3. - (4*mmsb2*zt2*pow2(invdgb2)*pow3(mmst1))/3. + (2*invdgb1*
-     pow2(lt1u)*pow3(mmst1))/3. + (2*invdgb2*pow2(lt1u)*pow3(mmst1))/3. - (2*
-     mmsb1*pow2(invdgb1)*pow2(lt1u)*pow3(mmst1))/3. - (2*mmsb2*pow2(invdgb2)*
-     pow2(lt1u)*pow3(mmst1))/3. + (2*invdgb1*pow2(ltu)*pow3(mmst1))/3. + (2*
-     invdgb2*pow2(ltu)*pow3(mmst1))/3. - (2*mmsb1*pow2(invdgb1)*pow2(ltu)*pow3(
-     mmst1))/3. - (2*mmsb2*pow2(invdgb2)*pow2(ltu)*pow3(mmst1))/3. + s2b*((56*
-     mmgl2*mmsb1)/(3.*mb*mgl) - (8*lgu*mmgl2*mmsb1)/(mb*mgl) - (8*ltu*mmgl2*
-     mmsb1)/(mb*mgl) + (8*lgu*ltu*mmgl2*mmsb1)/(3.*mb*mgl) + (56*mmgl*mmsb12)/(
-     3.*mb*mgl) - (8*lgu*mmgl*mmsb12)/(mb*mgl) - (8*ltu*mmgl*mmsb12)/(mb*mgl) +
-     (8*lgu*ltu*mmgl*mmsb12)/(3.*mb*mgl) - (56*mmgl2*mmsb2)/(3.*mb*mgl) + (8*
-     lgu*mmgl2*mmsb2)/(mb*mgl) + (8*ltu*mmgl2*mmsb2)/(mb*mgl) - (8*lgu*ltu*
-     mmgl2*mmsb2)/(3.*mb*mgl) - (56*mmgl*mmsb22)/(3.*mb*mgl) + (8*lgu*mmgl*
-     mmsb22)/(mb*mgl) + (8*ltu*mmgl*mmsb22)/(mb*mgl) - (8*lgu*ltu*mmgl*mmsb22)/
-     (3.*mb*mgl) - (56*mmgl*mmsb1*mmst1)/(3.*mb*mgl) + (16*lgu*mmgl*mmsb1*mmst1
-     )/(mb*mgl) - (8*lt1u*mmgl*mmsb1*mmst1)/(mb*mgl) + (8*ltu*mmgl*mmsb1*mmst1)
-     /(mb*mgl) - (16*lgu*ltu*mmgl*mmsb1*mmst1)/(3.*mb*mgl) + (8*lt1u*ltu*mmgl*
-     mmsb1*mmst1)/(3.*mb*mgl) + (56*invdgb1*mmgl*mmsb12*mmst1)/(3.*mb*mgl) - (
-     16*invdgb1*lgu*mmgl*mmsb12*mmst1)/(mb*mgl) + (8*invdgb1*lt1u*mmgl*mmsb12*
-     mmst1)/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb12*mmst1)/(mb*mgl) + (16*invdgb1
-     *lgu*ltu*mmgl*mmsb12*mmst1)/(3.*mb*mgl) - (8*invdgb1*lt1u*ltu*mmgl*mmsb12*
-     mmst1)/(3.*mb*mgl) + (56*mmgl*mmsb2*mmst1)/(3.*mb*mgl) - (16*lgu*mmgl*
-     mmsb2*mmst1)/(mb*mgl) + (8*lt1u*mmgl*mmsb2*mmst1)/(mb*mgl) - (8*ltu*mmgl*
-     mmsb2*mmst1)/(mb*mgl) + (16*lgu*ltu*mmgl*mmsb2*mmst1)/(3.*mb*mgl) - (8*
-     lt1u*ltu*mmgl*mmsb2*mmst1)/(3.*mb*mgl) - (56*invdgb2*mmgl*mmsb22*mmst1)/(
-     3.*mb*mgl) + (16*invdgb2*lgu*mmgl*mmsb22*mmst1)/(mb*mgl) - (8*invdgb2*lt1u
-     *mmgl*mmsb22*mmst1)/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmsb22*mmst1)/(mb*mgl)
-     - (16*invdgb2*lgu*ltu*mmgl*mmsb22*mmst1)/(3.*mb*mgl) + (8*invdgb2*lt1u*ltu
-     *mmgl*mmsb22*mmst1)/(3.*mb*mgl) - (56*mmgl*mmsb1*mmt)/(3.*mb*mgl) + (8*lgu
-     *mmgl*mmsb1*mmt)/(mb*mgl) + (8*ltu*mmgl*mmsb1*mmt)/(mb*mgl) - (8*lgu*ltu*
-     mmgl*mmsb1*mmt)/(3.*mb*mgl) + (56*invdgb1*mmgl*mmsb12*mmt)/(3.*mb*mgl) - (
-     8*invdgb1*lgu*mmgl*mmsb12*mmt)/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb12*mmt)/
-     (mb*mgl) + (8*invdgb1*lgu*ltu*mmgl*mmsb12*mmt)/(3.*mb*mgl) + (56*mmgl*
-     mmsb2*mmt)/(3.*mb*mgl) - (8*lgu*mmgl*mmsb2*mmt)/(mb*mgl) - (8*ltu*mmgl*
-     mmsb2*mmt)/(mb*mgl) + (8*lgu*ltu*mmgl*mmsb2*mmt)/(3.*mb*mgl) - (56*invdgb2
-     *mmgl*mmsb22*mmt)/(3.*mb*mgl) + (8*invdgb2*lgu*mmgl*mmsb22*mmt)/(mb*mgl) +
-     (8*invdgb2*ltu*mmgl*mmsb22*mmt)/(mb*mgl) - (8*invdgb2*lgu*ltu*mmgl*mmsb22*
-     mmt)/(3.*mb*mgl) + (224*invdgb1*mmgl*mmsb1*mmst1*mmt)/(3.*mb*mgl) - (8*
-     invdgb1*lgu*mmgl*mmsb1*mmst1*mmt)/(mb*mgl) - (8*invdgb1*lt1u*mmgl*mmsb1*
-     mmst1*mmt)/(mb*mgl) - (16*invdgb1*lgu*lt1u*mmgl*mmsb1*mmst1*mmt)/(3.*mb*
-     mgl) - (48*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt)/(mb*mgl) + (8*invdgb1*lgu*ltu
-     *mmgl*mmsb1*mmst1*mmt)/(mb*mgl) + (8*invdgb1*lt1u*ltu*mmgl*mmsb1*mmst1*mmt
-     )/(mb*mgl) - (224*invdgb2*mmgl*mmsb2*mmst1*mmt)/(3.*mb*mgl) + (8*invdgb2*
-     lgu*mmgl*mmsb2*mmst1*mmt)/(mb*mgl) + (8*invdgb2*lt1u*mmgl*mmsb2*mmst1*mmt)
-     /(mb*mgl) + (16*invdgb2*lgu*lt1u*mmgl*mmsb2*mmst1*mmt)/(3.*mb*mgl) + (48*
-     invdgb2*ltu*mmgl*mmsb2*mmst1*mmt)/(mb*mgl) - (8*invdgb2*lgu*ltu*mmgl*mmsb2
-     *mmst1*mmt)/(mb*mgl) - (8*invdgb2*lt1u*ltu*mmgl*mmsb2*mmst1*mmt)/(mb*mgl)
-     + (8*mmgl2*mmsb1*zt2)/(3.*mb*mgl) + (8*mmgl*mmsb12*zt2)/(3.*mb*mgl) - (8*
-     mmgl2*mmsb2*zt2)/(3.*mb*mgl) - (8*mmgl*mmsb22*zt2)/(3.*mb*mgl) - (8*mmgl*
-     mmsb1*mmst1*zt2)/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb12*mmst1*zt2)/(3.*mb*
-     mgl) + (8*mmgl*mmsb2*mmst1*zt2)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb22*mmst1
-     *zt2)/(3.*mb*mgl) - (8*mmgl*mmsb1*mmt*zt2)/(3.*mb*mgl) + (8*invdgb1*mmgl*
-     mmsb12*mmt*zt2)/(3.*mb*mgl) + (8*mmgl*mmsb2*mmt*zt2)/(3.*mb*mgl) - (8*
-     invdgb2*mmgl*mmsb22*mmt*zt2)/(3.*mb*mgl) + (32*invdgb1*mmgl*mmsb1*mmst1*
-     mmt*zt2)/(3.*mb*mgl) - (32*invdgb2*mmgl*mmsb2*mmst1*mmt*zt2)/(3.*mb*mgl) +
-     (4*mmgl2*mmsb1*pow2(lgu))/(3.*mb*mgl) + (4*mmgl*mmsb12*pow2(lgu))/(3.*mb*
-     mgl) - (4*mmgl2*mmsb2*pow2(lgu))/(3.*mb*mgl) - (4*mmgl*mmsb22*pow2(lgu))/(
-     3.*mb*mgl) - (8*mmgl*mmsb1*mmst1*pow2(lgu))/(3.*mb*mgl) + (8*invdgb1*mmgl*
-     mmsb12*mmst1*pow2(lgu))/(3.*mb*mgl) + (8*mmgl*mmsb2*mmst1*pow2(lgu))/(3.*
-     mb*mgl) - (8*invdgb2*mmgl*mmsb22*mmst1*pow2(lgu))/(3.*mb*mgl) - (4*mmgl*
-     mmsb1*mmt*pow2(lgu))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb12*mmt*pow2(lgu))/(
-     3.*mb*mgl) + (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mb*mgl) - (4*invdgb2*mmgl*
-     mmsb22*mmt*pow2(lgu))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(
-     lgu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(lgu))/(3.*mb*mgl)
-     + (4*mmgl*mmsb1*mmst1*pow2(lt1u))/(3.*mb*mgl) - (4*invdgb1*mmgl*mmsb12*
-     mmst1*pow2(lt1u))/(3.*mb*mgl) - (4*mmgl*mmsb2*mmst1*pow2(lt1u))/(3.*mb*mgl
-     ) + (4*invdgb2*mmgl*mmsb22*mmst1*pow2(lt1u))/(3.*mb*mgl) + (4*invdgb1*mmgl
-     *mmsb1*mmst1*mmt*pow2(lt1u))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*mmst1*mmt
-     *pow2(lt1u))/(3.*mb*mgl) + (4*mmgl2*mmsb1*pow2(ltu))/(3.*mb*mgl) + (4*mmgl
-     *mmsb12*pow2(ltu))/(3.*mb*mgl) - (4*mmgl2*mmsb2*pow2(ltu))/(3.*mb*mgl) - (
-     4*mmgl*mmsb22*pow2(ltu))/(3.*mb*mgl) - (4*mmgl*mmsb1*mmst1*pow2(ltu))/(3.*
-     mb*mgl) + (4*invdgb1*mmgl*mmsb12*mmst1*pow2(ltu))/(3.*mb*mgl) + (4*mmgl*
-     mmsb2*mmst1*pow2(ltu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb22*mmst1*pow2(ltu
-     ))/(3.*mb*mgl) - (4*mmgl*mmsb1*mmt*pow2(ltu))/(3.*mb*mgl) + (4*invdgb1*
-     mmgl*mmsb12*mmt*pow2(ltu))/(3.*mb*mgl) + (4*mmgl*mmsb2*mmt*pow2(ltu))/(3.*
-     mb*mgl) - (4*invdgb2*mmgl*mmsb22*mmt*pow2(ltu))/(3.*mb*mgl) + (8*invdgb1*
-     mmgl*mmsb1*mmst1*mmt*pow2(ltu))/(mb*mgl) - (8*invdgb2*mmgl*mmsb2*mmst1*mmt
-     *pow2(ltu))/(mb*mgl) + (56*invdgb1*mmgl*mmsb1*pow2(mmst1))/(3.*mb*mgl) + (
-     8*invdgb1*lgu*mmgl*mmsb1*pow2(mmst1))/(mb*mgl) - (16*invdgb1*lt1u*mmgl*
-     mmsb1*pow2(mmst1))/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb1*pow2(mmst1))/(mb*
-     mgl) - (8*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmst1))/(3.*mb*mgl) + (16*
-     invdgb1*lt1u*ltu*mmgl*mmsb1*pow2(mmst1))/(3.*mb*mgl) - (56*invdgb2*mmgl*
-     mmsb2*pow2(mmst1))/(3.*mb*mgl) - (8*invdgb2*lgu*mmgl*mmsb2*pow2(mmst1))/(
-     mb*mgl) + (16*invdgb2*lt1u*mmgl*mmsb2*pow2(mmst1))/(mb*mgl) + (8*invdgb2*
-     ltu*mmgl*mmsb2*pow2(mmst1))/(mb*mgl) + (8*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
-     mmst1))/(3.*mb*mgl) - (16*invdgb2*lt1u*ltu*mmgl*mmsb2*pow2(mmst1))/(3.*mb*
-     mgl) + (56*invdgb1*mmgl*mmt*pow2(mmst1))/(3.*mb*mgl) - (56*invdgb2*mmgl*
-     mmt*pow2(mmst1))/(3.*mb*mgl) - (8*invdgb1*lt1u*mmgl*mmt*pow2(mmst1))/(mb*
-     mgl) + (8*invdgb2*lt1u*mmgl*mmt*pow2(mmst1))/(mb*mgl) - (8*invdgb1*ltu*
-     mmgl*mmt*pow2(mmst1))/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmt*pow2(mmst1))/(mb*
-     mgl) + (8*invdgb1*lt1u*ltu*mmgl*mmt*pow2(mmst1))/(3.*mb*mgl) - (8*invdgb2*
-     lt1u*ltu*mmgl*mmt*pow2(mmst1))/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb1*zt2*
-     pow2(mmst1))/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb2*zt2*pow2(mmst1))/(3.*mb*
-     mgl) + (8*invdgb1*mmgl*mmt*zt2*pow2(mmst1))/(3.*mb*mgl) - (8*invdgb2*mmgl*
-     mmt*zt2*pow2(mmst1))/(3.*mb*mgl) - (4*invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(
-     mmst1))/(3.*mb*mgl) + (4*invdgb2*mmgl*mmsb2*pow2(lgu)*pow2(mmst1))/(3.*mb*
-     mgl) + (8*invdgb1*mmgl*mmsb1*pow2(lt1u)*pow2(mmst1))/(3.*mb*mgl) - (8*
-     invdgb2*mmgl*mmsb2*pow2(lt1u)*pow2(mmst1))/(3.*mb*mgl) + (4*invdgb1*mmgl*
-     mmt*pow2(lt1u)*pow2(mmst1))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmt*pow2(lt1u)*
-     pow2(mmst1))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst1))/(
-     3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmst1))/(3.*mb*mgl) + (4
-     *invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst1))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmt
-     *pow2(ltu)*pow2(mmst1))/(3.*mb*mgl) - (56*invdgb1*mmgl*pow3(mmsb1))/(3.*mb
-     *mgl) + (8*invdgb1*lgu*mmgl*pow3(mmsb1))/(mb*mgl) + (8*invdgb1*ltu*mmgl*
-     pow3(mmsb1))/(mb*mgl) - (8*invdgb1*lgu*ltu*mmgl*pow3(mmsb1))/(3.*mb*mgl) -
-     (8*invdgb1*mmgl*zt2*pow3(mmsb1))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(lgu)*
-     pow3(mmsb1))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(ltu)*pow3(mmsb1))/(3.*mb*
-     mgl) + (56*invdgb2*mmgl*pow3(mmsb2))/(3.*mb*mgl) - (8*invdgb2*lgu*mmgl*
-     pow3(mmsb2))/(mb*mgl) - (8*invdgb2*ltu*mmgl*pow3(mmsb2))/(mb*mgl) + (8*
-     invdgb2*lgu*ltu*mmgl*pow3(mmsb2))/(3.*mb*mgl) + (8*invdgb2*mmgl*zt2*pow3(
-     mmsb2))/(3.*mb*mgl) + (4*invdgb2*mmgl*pow2(lgu)*pow3(mmsb2))/(3.*mb*mgl) +
-     (4*invdgb2*mmgl*pow2(ltu)*pow3(mmsb2))/(3.*mb*mgl) - (56*invdgb1*mmgl*pow3
-     (mmst1))/(3.*mb*mgl) + (56*invdgb2*mmgl*pow3(mmst1))/(3.*mb*mgl) + (8*
-     invdgb1*lt1u*mmgl*pow3(mmst1))/(mb*mgl) - (8*invdgb2*lt1u*mmgl*pow3(mmst1)
-     )/(mb*mgl) + (8*invdgb1*ltu*mmgl*pow3(mmst1))/(mb*mgl) - (8*invdgb2*ltu*
-     mmgl*pow3(mmst1))/(mb*mgl) - (8*invdgb1*lt1u*ltu*mmgl*pow3(mmst1))/(3.*mb*
-     mgl) + (8*invdgb2*lt1u*ltu*mmgl*pow3(mmst1))/(3.*mb*mgl) - (8*invdgb1*mmgl
-     *zt2*pow3(mmst1))/(3.*mb*mgl) + (8*invdgb2*mmgl*zt2*pow3(mmst1))/(3.*mb*
-     mgl) - (4*invdgb1*mmgl*pow2(lt1u)*pow3(mmst1))/(3.*mb*mgl) + (4*invdgb2*
-     mmgl*pow2(lt1u)*pow3(mmst1))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(ltu)*pow3(
-     mmst1))/(3.*mb*mgl) + (4*invdgb2*mmgl*pow2(ltu)*pow3(mmst1))/(3.*mb*mgl))
-     - (28*pow2(invdgb1)*pow4(mmsb1))/3. + 4*lgu*pow2(invdgb1)*pow4(mmsb1) + 4*
-     ltu*pow2(invdgb1)*pow4(mmsb1) - (4*lgu*ltu*pow2(invdgb1)*pow4(mmsb1))/3. -
-     (4*zt2*pow2(invdgb1)*pow4(mmsb1))/3. - (2*pow2(invdgb1)*pow2(lgu)*pow4(
-     mmsb1))/3. - (2*pow2(invdgb1)*pow2(ltu)*pow4(mmsb1))/3. - (28*pow2(invdgb2
-     )*pow4(mmsb2))/3. + 4*lgu*pow2(invdgb2)*pow4(mmsb2) + 4*ltu*pow2(invdgb2)*
-     pow4(mmsb2) - (4*lgu*ltu*pow2(invdgb2)*pow4(mmsb2))/3. - (4*zt2*pow2(
-     invdgb2)*pow4(mmsb2))/3. - (2*pow2(invdgb2)*pow2(lgu)*pow4(mmsb2))/3. - (2
-     *pow2(invdgb2)*pow2(ltu)*pow4(mmsb2))/3.) + DeltaInv(mmt,mmst2,mmgl)*((-56
-     *mmgl2)/3. + 8*lgu*mmgl2 + 8*ltu*mmgl2 - (8*lgu*ltu*mmgl2)/3. - (56*mmgl*
-     mmsb1)/3. + 8*lgu*mmgl*mmsb1 + 8*ltu*mmgl*mmsb1 - (8*lgu*ltu*mmgl*mmsb1)/
-     3. - 28*mmsb12 + 12*lgu*mmsb12 + 12*ltu*mmsb12 - 4*lgu*ltu*mmsb12 - (56*
-     mmgl*mmsb2)/3. + 8*lgu*mmgl*mmsb2 + 8*ltu*mmgl*mmsb2 - (8*lgu*ltu*mmgl*
-     mmsb2)/3. - 28*mmsb22 + 12*lgu*mmsb22 + 12*ltu*mmsb22 - 4*lgu*ltu*mmsb22 +
-     (56*mmgl*mmst2)/3. - 16*lgu*mmgl*mmst2 + 8*lt2u*mmgl*mmst2 - 8*ltu*mmgl*
-     mmst2 + (16*lgu*ltu*mmgl*mmst2)/3. - (8*lt2u*ltu*mmgl*mmst2)/3. + (56*
-     mmsb1*mmst2)/3. - 16*lgu*mmsb1*mmst2 + 8*lt2u*mmsb1*mmst2 - 8*ltu*mmsb1*
-     mmst2 + (16*lgu*ltu*mmsb1*mmst2)/3. - (8*lt2u*ltu*mmsb1*mmst2)/3. - 28*
-     invdgb1*mmsb12*mmst2 + 24*invdgb1*lgu*mmsb12*mmst2 - 12*invdgb1*lt2u*
-     mmsb12*mmst2 + 12*invdgb1*ltu*mmsb12*mmst2 - 8*invdgb1*lgu*ltu*mmsb12*
-     mmst2 + 4*invdgb1*lt2u*ltu*mmsb12*mmst2 + (56*mmsb2*mmst2)/3. - 16*lgu*
-     mmsb2*mmst2 + 8*lt2u*mmsb2*mmst2 - 8*ltu*mmsb2*mmst2 + (16*lgu*ltu*mmsb2*
-     mmst2)/3. - (8*lt2u*ltu*mmsb2*mmst2)/3. - 28*invdgb2*mmsb22*mmst2 + 24*
-     invdgb2*lgu*mmsb22*mmst2 - 12*invdgb2*lt2u*mmsb22*mmst2 + 12*invdgb2*ltu*
-     mmsb22*mmst2 - 8*invdgb2*lgu*ltu*mmsb22*mmst2 + 4*invdgb2*lt2u*ltu*mmsb22*
-     mmst2 + (56*mmgl*mmt)/3. - 8*lgu*mmgl*mmt - 8*ltu*mmgl*mmt + (8*lgu*ltu*
-     mmgl*mmt)/3. + (56*mmsb1*mmt)/3. - 8*lgu*mmsb1*mmt - 8*ltu*mmsb1*mmt + (8*
-     lgu*ltu*mmsb1*mmt)/3. - 28*invdgb1*mmsb12*mmt + 12*invdgb1*lgu*mmsb12*mmt
-     + 12*invdgb1*ltu*mmsb12*mmt - 4*invdgb1*lgu*ltu*mmsb12*mmt + (56*mmsb2*mmt
-     )/3. - 8*lgu*mmsb2*mmt - 8*ltu*mmsb2*mmt + (8*lgu*ltu*mmsb2*mmt)/3. - 28*
-     invdgb2*mmsb22*mmt + 12*invdgb2*lgu*mmsb22*mmt + 12*invdgb2*ltu*mmsb22*mmt
-      - 4*invdgb2*lgu*ltu*mmsb22*mmt + (224*mmst2*mmt)/3. - 8*lgu*mmst2*mmt - 8
-     *lt2u*mmst2*mmt - (16*lgu*lt2u*mmst2*mmt)/3. - 48*ltu*mmst2*mmt + 8*lgu*
-     ltu*mmst2*mmt + 8*lt2u*ltu*mmst2*mmt - (224*invdgb1*mmsb1*mmst2*mmt)/3. +
-     8*invdgb1*lgu*mmsb1*mmst2*mmt + 8*invdgb1*lt2u*mmsb1*mmst2*mmt + (16*
-     invdgb1*lgu*lt2u*mmsb1*mmst2*mmt)/3. + 48*invdgb1*ltu*mmsb1*mmst2*mmt - 8*
-     invdgb1*lgu*ltu*mmsb1*mmst2*mmt - 8*invdgb1*lt2u*ltu*mmsb1*mmst2*mmt - (
-     224*invdgb2*mmsb2*mmst2*mmt)/3. + 8*invdgb2*lgu*mmsb2*mmst2*mmt + 8*
-     invdgb2*lt2u*mmsb2*mmst2*mmt + (16*invdgb2*lgu*lt2u*mmsb2*mmst2*mmt)/3. +
-     48*invdgb2*ltu*mmsb2*mmst2*mmt - 8*invdgb2*lgu*ltu*mmsb2*mmst2*mmt - 8*
-     invdgb2*lt2u*ltu*mmsb2*mmst2*mmt - (8*mmgl2*zt2)/3. - (8*mmgl*mmsb1*zt2)/
-     3. - 4*mmsb12*zt2 - (8*mmgl*mmsb2*zt2)/3. - 4*mmsb22*zt2 + (8*mmgl*mmst2*
-     zt2)/3. + (8*mmsb1*mmst2*zt2)/3. - 4*invdgb1*mmsb12*mmst2*zt2 + (8*mmsb2*
-     mmst2*zt2)/3. - 4*invdgb2*mmsb22*mmst2*zt2 + (8*mmgl*mmt*zt2)/3. + (8*
-     mmsb1*mmt*zt2)/3. - 4*invdgb1*mmsb12*mmt*zt2 + (8*mmsb2*mmt*zt2)/3. - 4*
-     invdgb2*mmsb22*mmt*zt2 + (32*mmst2*mmt*zt2)/3. - (32*invdgb1*mmsb1*mmst2*
-     mmt*zt2)/3. - (32*invdgb2*mmsb2*mmst2*mmt*zt2)/3. + (112*mmsb12*mmst2*mmt*
-     pow2(invdgb1))/3. - 4*lgu*mmsb12*mmst2*mmt*pow2(invdgb1) - 4*lt2u*mmsb12*
-     mmst2*mmt*pow2(invdgb1) - (8*lgu*lt2u*mmsb12*mmst2*mmt*pow2(invdgb1))/3. -
-     24*ltu*mmsb12*mmst2*mmt*pow2(invdgb1) + 4*lgu*ltu*mmsb12*mmst2*mmt*pow2(
-     invdgb1) + 4*lt2u*ltu*mmsb12*mmst2*mmt*pow2(invdgb1) + (16*mmsb12*mmst2*
-     mmt*zt2*pow2(invdgb1))/3. + (112*mmsb22*mmst2*mmt*pow2(invdgb2))/3. - 4*
-     lgu*mmsb22*mmst2*mmt*pow2(invdgb2) - 4*lt2u*mmsb22*mmst2*mmt*pow2(invdgb2)
-     - (8*lgu*lt2u*mmsb22*mmst2*mmt*pow2(invdgb2))/3. - 24*ltu*mmsb22*mmst2*mmt
-     *pow2(invdgb2) + 4*lgu*ltu*mmsb22*mmst2*mmt*pow2(invdgb2) + 4*lt2u*ltu*
-     mmsb22*mmst2*mmt*pow2(invdgb2) + (16*mmsb22*mmst2*mmt*zt2*pow2(invdgb2))/
-     3. - (4*mmgl2*pow2(lgu))/3. - (4*mmgl*mmsb1*pow2(lgu))/3. - 2*mmsb12*pow2(
-     lgu) - (4*mmgl*mmsb2*pow2(lgu))/3. - 2*mmsb22*pow2(lgu) + (8*mmgl*mmst2*
-     pow2(lgu))/3. + (8*mmsb1*mmst2*pow2(lgu))/3. - 4*invdgb1*mmsb12*mmst2*pow2
-     (lgu) + (8*mmsb2*mmst2*pow2(lgu))/3. - 4*invdgb2*mmsb22*mmst2*pow2(lgu) +
-     (4*mmgl*mmt*pow2(lgu))/3. + (4*mmsb1*mmt*pow2(lgu))/3. - 2*invdgb1*mmsb12*
-     mmt*pow2(lgu) + (4*mmsb2*mmt*pow2(lgu))/3. - 2*invdgb2*mmsb22*mmt*pow2(lgu
-     ) + (4*mmst2*mmt*pow2(lgu))/3. - (4*invdgb1*mmsb1*mmst2*mmt*pow2(lgu))/3.
-     - (4*invdgb2*mmsb2*mmst2*mmt*pow2(lgu))/3. + (2*mmsb12*mmst2*mmt*pow2(
-     invdgb1)*pow2(lgu))/3. + (2*mmsb22*mmst2*mmt*pow2(invdgb2)*pow2(lgu))/3. -
-     (4*mmgl*mmst2*pow2(lt2u))/3. - (4*mmsb1*mmst2*pow2(lt2u))/3. + 2*invdgb1*
-     mmsb12*mmst2*pow2(lt2u) - (4*mmsb2*mmst2*pow2(lt2u))/3. + 2*invdgb2*mmsb22
-     *mmst2*pow2(lt2u) + (4*mmst2*mmt*pow2(lt2u))/3. - (4*invdgb1*mmsb1*mmst2*
-     mmt*pow2(lt2u))/3. - (4*invdgb2*mmsb2*mmst2*mmt*pow2(lt2u))/3. + (2*mmsb12
-     *mmst2*mmt*pow2(invdgb1)*pow2(lt2u))/3. + (2*mmsb22*mmst2*mmt*pow2(invdgb2
-     )*pow2(lt2u))/3. - (4*mmgl2*pow2(ltu))/3. - (4*mmgl*mmsb1*pow2(ltu))/3. -
-     2*mmsb12*pow2(ltu) - (4*mmgl*mmsb2*pow2(ltu))/3. - 2*mmsb22*pow2(ltu) + (4
-     *mmgl*mmst2*pow2(ltu))/3. + (4*mmsb1*mmst2*pow2(ltu))/3. - 2*invdgb1*
-     mmsb12*mmst2*pow2(ltu) + (4*mmsb2*mmst2*pow2(ltu))/3. - 2*invdgb2*mmsb22*
-     mmst2*pow2(ltu) + (4*mmgl*mmt*pow2(ltu))/3. + (4*mmsb1*mmt*pow2(ltu))/3. -
-     2*invdgb1*mmsb12*mmt*pow2(ltu) + (4*mmsb2*mmt*pow2(ltu))/3. - 2*invdgb2*
-     mmsb22*mmt*pow2(ltu) + 8*mmst2*mmt*pow2(ltu) - 8*invdgb1*mmsb1*mmst2*mmt*
-     pow2(ltu) - 8*invdgb2*mmsb2*mmst2*mmt*pow2(ltu) + 4*mmsb12*mmst2*mmt*pow2(
-     invdgb1)*pow2(ltu) + 4*mmsb22*mmst2*mmt*pow2(invdgb2)*pow2(ltu) + (56*pow2
-     (mmst2))/3. + 8*lgu*pow2(mmst2) - 16*lt2u*pow2(mmst2) - 8*ltu*pow2(mmst2)
-     - (8*lgu*ltu*pow2(mmst2))/3. + (16*lt2u*ltu*pow2(mmst2))/3. - (56*invdgb1*
-     mmsb1*pow2(mmst2))/3. - 8*invdgb1*lgu*mmsb1*pow2(mmst2) + 16*invdgb1*lt2u*
-     mmsb1*pow2(mmst2) + 8*invdgb1*ltu*mmsb1*pow2(mmst2) + (8*invdgb1*lgu*ltu*
-     mmsb1*pow2(mmst2))/3. - (16*invdgb1*lt2u*ltu*mmsb1*pow2(mmst2))/3. - (56*
-     invdgb2*mmsb2*pow2(mmst2))/3. - 8*invdgb2*lgu*mmsb2*pow2(mmst2) + 16*
-     invdgb2*lt2u*mmsb2*pow2(mmst2) + 8*invdgb2*ltu*mmsb2*pow2(mmst2) + (8*
-     invdgb2*lgu*ltu*mmsb2*pow2(mmst2))/3. - (16*invdgb2*lt2u*ltu*mmsb2*pow2(
-     mmst2))/3. - (28*invdgb1*mmt*pow2(mmst2))/3. - (28*invdgb2*mmt*pow2(mmst2)
-     )/3. + 4*invdgb1*lt2u*mmt*pow2(mmst2) + 4*invdgb2*lt2u*mmt*pow2(mmst2) + 4
-     *invdgb1*ltu*mmt*pow2(mmst2) + 4*invdgb2*ltu*mmt*pow2(mmst2) - (4*invdgb1*
-     lt2u*ltu*mmt*pow2(mmst2))/3. - (4*invdgb2*lt2u*ltu*mmt*pow2(mmst2))/3. + (
-     8*zt2*pow2(mmst2))/3. - (8*invdgb1*mmsb1*zt2*pow2(mmst2))/3. - (8*invdgb2*
-     mmsb2*zt2*pow2(mmst2))/3. - (4*invdgb1*mmt*zt2*pow2(mmst2))/3. - (4*
-     invdgb2*mmt*zt2*pow2(mmst2))/3. + (28*mmsb12*pow2(invdgb1)*pow2(mmst2))/3.
-      + 4*lgu*mmsb12*pow2(invdgb1)*pow2(mmst2) - 8*lt2u*mmsb12*pow2(invdgb1)*
-     pow2(mmst2) - 4*ltu*mmsb12*pow2(invdgb1)*pow2(mmst2) - (4*lgu*ltu*mmsb12*
-     pow2(invdgb1)*pow2(mmst2))/3. + (8*lt2u*ltu*mmsb12*pow2(invdgb1)*pow2(
-     mmst2))/3. + (28*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/3. - 4*lt2u*mmsb1*
-     mmt*pow2(invdgb1)*pow2(mmst2) - 4*ltu*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2)
-     + (4*lt2u*ltu*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/3. + (4*mmsb12*zt2*pow2
-     (invdgb1)*pow2(mmst2))/3. + (4*mmsb1*mmt*zt2*pow2(invdgb1)*pow2(mmst2))/3.
-      + (28*mmsb22*pow2(invdgb2)*pow2(mmst2))/3. + 4*lgu*mmsb22*pow2(invdgb2)*
-     pow2(mmst2) - 8*lt2u*mmsb22*pow2(invdgb2)*pow2(mmst2) - 4*ltu*mmsb22*pow2(
-     invdgb2)*pow2(mmst2) - (4*lgu*ltu*mmsb22*pow2(invdgb2)*pow2(mmst2))/3. + (
-     8*lt2u*ltu*mmsb22*pow2(invdgb2)*pow2(mmst2))/3. + (28*mmsb2*mmt*pow2(
-     invdgb2)*pow2(mmst2))/3. - 4*lt2u*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2) - 4*
-     ltu*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2) + (4*lt2u*ltu*mmsb2*mmt*pow2(
-     invdgb2)*pow2(mmst2))/3. + (4*mmsb22*zt2*pow2(invdgb2)*pow2(mmst2))/3. + (
-     4*mmsb2*mmt*zt2*pow2(invdgb2)*pow2(mmst2))/3. - (4*pow2(lgu)*pow2(mmst2))/
-     3. + (4*invdgb1*mmsb1*pow2(lgu)*pow2(mmst2))/3. + (4*invdgb2*mmsb2*pow2(
-     lgu)*pow2(mmst2))/3. - (2*mmsb12*pow2(invdgb1)*pow2(lgu)*pow2(mmst2))/3. -
-     (2*mmsb22*pow2(invdgb2)*pow2(lgu)*pow2(mmst2))/3. + (8*pow2(lt2u)*pow2(
-     mmst2))/3. - (8*invdgb1*mmsb1*pow2(lt2u)*pow2(mmst2))/3. - (8*invdgb2*
-     mmsb2*pow2(lt2u)*pow2(mmst2))/3. - (2*invdgb1*mmt*pow2(lt2u)*pow2(mmst2))/
-     3. - (2*invdgb2*mmt*pow2(lt2u)*pow2(mmst2))/3. + (4*mmsb12*pow2(invdgb1)*
-     pow2(lt2u)*pow2(mmst2))/3. + (2*mmsb1*mmt*pow2(invdgb1)*pow2(lt2u)*pow2(
-     mmst2))/3. + (4*mmsb22*pow2(invdgb2)*pow2(lt2u)*pow2(mmst2))/3. + (2*mmsb2
-     *mmt*pow2(invdgb2)*pow2(lt2u)*pow2(mmst2))/3. + (4*pow2(ltu)*pow2(mmst2))/
-     3. - (4*invdgb1*mmsb1*pow2(ltu)*pow2(mmst2))/3. - (4*invdgb2*mmsb2*pow2(
-     ltu)*pow2(mmst2))/3. - (2*invdgb1*mmt*pow2(ltu)*pow2(mmst2))/3. - (2*
-     invdgb2*mmt*pow2(ltu)*pow2(mmst2))/3. + (2*mmsb12*pow2(invdgb1)*pow2(ltu)*
-     pow2(mmst2))/3. + (2*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)*pow2(mmst2))/3. + (
-     2*mmsb22*pow2(invdgb2)*pow2(ltu)*pow2(mmst2))/3. + (2*mmsb2*mmt*pow2(
-     invdgb2)*pow2(ltu)*pow2(mmst2))/3. + (112*invdgb1*pow3(mmsb1))/3. - 16*
-     invdgb1*lgu*pow3(mmsb1) - 16*invdgb1*ltu*pow3(mmsb1) + (16*invdgb1*lgu*ltu
-     *pow3(mmsb1))/3. + (16*invdgb1*zt2*pow3(mmsb1))/3. + (28*mmst2*pow2(
-     invdgb1)*pow3(mmsb1))/3. - 8*lgu*mmst2*pow2(invdgb1)*pow3(mmsb1) + 4*lt2u*
-     mmst2*pow2(invdgb1)*pow3(mmsb1) - 4*ltu*mmst2*pow2(invdgb1)*pow3(mmsb1) +
-     (8*lgu*ltu*mmst2*pow2(invdgb1)*pow3(mmsb1))/3. - (4*lt2u*ltu*mmst2*pow2(
-     invdgb1)*pow3(mmsb1))/3. + (28*mmt*pow2(invdgb1)*pow3(mmsb1))/3. - 4*lgu*
-     mmt*pow2(invdgb1)*pow3(mmsb1) - 4*ltu*mmt*pow2(invdgb1)*pow3(mmsb1) + (4*
-     lgu*ltu*mmt*pow2(invdgb1)*pow3(mmsb1))/3. + (4*mmst2*zt2*pow2(invdgb1)*
-     pow3(mmsb1))/3. + (4*mmt*zt2*pow2(invdgb1)*pow3(mmsb1))/3. + (8*invdgb1*
-     pow2(lgu)*pow3(mmsb1))/3. + (4*mmst2*pow2(invdgb1)*pow2(lgu)*pow3(mmsb1))/
-     3. + (2*mmt*pow2(invdgb1)*pow2(lgu)*pow3(mmsb1))/3. - (2*mmst2*pow2(
-     invdgb1)*pow2(lt2u)*pow3(mmsb1))/3. + (8*invdgb1*pow2(ltu)*pow3(mmsb1))/3.
-      + (2*mmst2*pow2(invdgb1)*pow2(ltu)*pow3(mmsb1))/3. + (2*mmt*pow2(invdgb1)
-     *pow2(ltu)*pow3(mmsb1))/3. + (112*invdgb2*pow3(mmsb2))/3. - 16*invdgb2*lgu
-     *pow3(mmsb2) - 16*invdgb2*ltu*pow3(mmsb2) + (16*invdgb2*lgu*ltu*pow3(mmsb2
-     ))/3. + (16*invdgb2*zt2*pow3(mmsb2))/3. + (28*mmst2*pow2(invdgb2)*pow3(
-     mmsb2))/3. - 8*lgu*mmst2*pow2(invdgb2)*pow3(mmsb2) + 4*lt2u*mmst2*pow2(
-     invdgb2)*pow3(mmsb2) - 4*ltu*mmst2*pow2(invdgb2)*pow3(mmsb2) + (8*lgu*ltu*
-     mmst2*pow2(invdgb2)*pow3(mmsb2))/3. - (4*lt2u*ltu*mmst2*pow2(invdgb2)*pow3
-     (mmsb2))/3. + (28*mmt*pow2(invdgb2)*pow3(mmsb2))/3. - 4*lgu*mmt*pow2(
-     invdgb2)*pow3(mmsb2) - 4*ltu*mmt*pow2(invdgb2)*pow3(mmsb2) + (4*lgu*ltu*
-     mmt*pow2(invdgb2)*pow3(mmsb2))/3. + (4*mmst2*zt2*pow2(invdgb2)*pow3(mmsb2)
-     )/3. + (4*mmt*zt2*pow2(invdgb2)*pow3(mmsb2))/3. + (8*invdgb2*pow2(lgu)*
-     pow3(mmsb2))/3. + (4*mmst2*pow2(invdgb2)*pow2(lgu)*pow3(mmsb2))/3. + (2*
-     mmt*pow2(invdgb2)*pow2(lgu)*pow3(mmsb2))/3. - (2*mmst2*pow2(invdgb2)*pow2(
-     lt2u)*pow3(mmsb2))/3. + (8*invdgb2*pow2(ltu)*pow3(mmsb2))/3. + (2*mmst2*
-     pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/3. + (2*mmt*pow2(invdgb2)*pow2(ltu)*
-     pow3(mmsb2))/3. + s2t*((-56*mmgl2*mmt)/(3.*mgl*mt) + (8*lgu*mmgl2*mmt)/(
-     mgl*mt) + (8*ltu*mmgl2*mmt)/(mgl*mt) - (8*lgu*ltu*mmgl2*mmt)/(3.*mgl*mt) -
-     (56*mmgl*mmsb1*mmt)/(3.*mgl*mt) + (8*lgu*mmgl*mmsb1*mmt)/(mgl*mt) + (8*ltu
-     *mmgl*mmsb1*mmt)/(mgl*mt) - (8*lgu*ltu*mmgl*mmsb1*mmt)/(3.*mgl*mt) + (28*
-     invdgb1*mmgl*mmsb12*mmt)/(mgl*mt) - (12*invdgb1*lgu*mmgl*mmsb12*mmt)/(mgl*
-     mt) - (12*invdgb1*ltu*mmgl*mmsb12*mmt)/(mgl*mt) + (4*invdgb1*lgu*ltu*mmgl*
-     mmsb12*mmt)/(mgl*mt) - (56*mmgl*mmsb2*mmt)/(3.*mgl*mt) + (8*lgu*mmgl*mmsb2
-     *mmt)/(mgl*mt) + (8*ltu*mmgl*mmsb2*mmt)/(mgl*mt) - (8*lgu*ltu*mmgl*mmsb2*
-     mmt)/(3.*mgl*mt) + (28*invdgb2*mmgl*mmsb22*mmt)/(mgl*mt) - (12*invdgb2*lgu
-     *mmgl*mmsb22*mmt)/(mgl*mt) - (12*invdgb2*ltu*mmgl*mmsb22*mmt)/(mgl*mt) + (
-     4*invdgb2*lgu*ltu*mmgl*mmsb22*mmt)/(mgl*mt) + (56*mmgl*mmst2*mmt)/(3.*mgl*
-     mt) - (8*lgu*mmgl*mmst2*mmt)/(mgl*mt) + (8*lt2u*mmgl*mmst2*mmt)/(mgl*mt) -
-     (8*lgu*lt2u*mmgl*mmst2*mmt)/(3.*mgl*mt) - (16*ltu*mmgl*mmst2*mmt)/(mgl*mt)
-     + (16*lgu*ltu*mmgl*mmst2*mmt)/(3.*mgl*mt) - (56*invdgb1*mmgl*mmsb1*mmst2*
-     mmt)/(3.*mgl*mt) + (8*invdgb1*lgu*mmgl*mmsb1*mmst2*mmt)/(mgl*mt) - (8*
-     invdgb1*lt2u*mmgl*mmsb1*mmst2*mmt)/(mgl*mt) + (8*invdgb1*lgu*lt2u*mmgl*
-     mmsb1*mmst2*mmt)/(3.*mgl*mt) + (16*invdgb1*ltu*mmgl*mmsb1*mmst2*mmt)/(mgl*
-     mt) - (16*invdgb1*lgu*ltu*mmgl*mmsb1*mmst2*mmt)/(3.*mgl*mt) - (56*invdgb2*
-     mmgl*mmsb2*mmst2*mmt)/(3.*mgl*mt) + (8*invdgb2*lgu*mmgl*mmsb2*mmst2*mmt)/(
-     mgl*mt) - (8*invdgb2*lt2u*mmgl*mmsb2*mmst2*mmt)/(mgl*mt) + (8*invdgb2*lgu*
-     lt2u*mmgl*mmsb2*mmst2*mmt)/(3.*mgl*mt) + (16*invdgb2*ltu*mmgl*mmsb2*mmst2*
-     mmt)/(mgl*mt) - (16*invdgb2*lgu*ltu*mmgl*mmsb2*mmst2*mmt)/(3.*mgl*mt) - (8
-     *mmgl2*mmt*zt2)/(3.*mgl*mt) - (8*mmgl*mmsb1*mmt*zt2)/(3.*mgl*mt) + (4*
-     invdgb1*mmgl*mmsb12*mmt*zt2)/(mgl*mt) - (8*mmgl*mmsb2*mmt*zt2)/(3.*mgl*mt)
-     + (4*invdgb2*mmgl*mmsb22*mmt*zt2)/(mgl*mt) + (8*mmgl*mmst2*mmt*zt2)/(3.*
-     mgl*mt) - (8*invdgb1*mmgl*mmsb1*mmst2*mmt*zt2)/(3.*mgl*mt) - (8*invdgb2*
-     mmgl*mmsb2*mmst2*mmt*zt2)/(3.*mgl*mt) + (28*mmgl*mmsb12*mmst2*mmt*pow2(
-     invdgb1))/(3.*mgl*mt) - (4*lgu*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(mgl*
-     mt) + (4*lt2u*mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(mgl*mt) - (4*lgu*lt2u*
-     mmgl*mmsb12*mmst2*mmt*pow2(invdgb1))/(3.*mgl*mt) - (8*ltu*mmgl*mmsb12*
-     mmst2*mmt*pow2(invdgb1))/(mgl*mt) + (8*lgu*ltu*mmgl*mmsb12*mmst2*mmt*pow2(
-     invdgb1))/(3.*mgl*mt) + (4*mmgl*mmsb12*mmst2*mmt*zt2*pow2(invdgb1))/(3.*
-     mgl*mt) + (28*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) - (4*lgu*
-     mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(mgl*mt) + (4*lt2u*mmgl*mmsb22*mmst2*
-     mmt*pow2(invdgb2))/(mgl*mt) - (4*lgu*lt2u*mmgl*mmsb22*mmst2*mmt*pow2(
-     invdgb2))/(3.*mgl*mt) - (8*ltu*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(mgl*
-     mt) + (8*lgu*ltu*mmgl*mmsb22*mmst2*mmt*pow2(invdgb2))/(3.*mgl*mt) + (4*
-     mmgl*mmsb22*mmst2*mmt*zt2*pow2(invdgb2))/(3.*mgl*mt) - (4*mmgl2*mmt*pow2(
-     lgu))/(3.*mgl*mt) - (4*mmgl*mmsb1*mmt*pow2(lgu))/(3.*mgl*mt) + (2*invdgb1*
-     mmgl*mmsb12*mmt*pow2(lgu))/(mgl*mt) - (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mgl
-     *mt) + (2*invdgb2*mmgl*mmsb22*mmt*pow2(lgu))/(mgl*mt) + (4*mmgl*mmst2*mmt*
-     pow2(lgu))/(3.*mgl*mt) - (4*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(lgu))/(3.*
-     mgl*mt) - (4*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(lgu))/(3.*mgl*mt) + (2*mmgl
-     *mmsb12*mmst2*mmt*pow2(invdgb1)*pow2(lgu))/(3.*mgl*mt) + (2*mmgl*mmsb22*
-     mmst2*mmt*pow2(invdgb2)*pow2(lgu))/(3.*mgl*mt) - (4*mmgl*mmst2*mmt*pow2(
-     lt2u))/(3.*mgl*mt) + (4*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(lt2u))/(3.*mgl*
-     mt) + (4*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(lt2u))/(3.*mgl*mt) - (2*mmgl*
-     mmsb12*mmst2*mmt*pow2(invdgb1)*pow2(lt2u))/(3.*mgl*mt) - (2*mmgl*mmsb22*
-     mmst2*mmt*pow2(invdgb2)*pow2(lt2u))/(3.*mgl*mt) - (4*mmgl2*mmt*pow2(ltu))/
-     (3.*mgl*mt) - (4*mmgl*mmsb1*mmt*pow2(ltu))/(3.*mgl*mt) + (2*invdgb1*mmgl*
-     mmsb12*mmt*pow2(ltu))/(mgl*mt) - (4*mmgl*mmsb2*mmt*pow2(ltu))/(3.*mgl*mt)
-     + (2*invdgb2*mmgl*mmsb22*mmt*pow2(ltu))/(mgl*mt) + (8*mmgl*mmst2*mmt*pow2(
-     ltu))/(3.*mgl*mt) - (8*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(ltu))/(3.*mgl*mt)
-     - (8*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(ltu))/(3.*mgl*mt) + (4*mmgl*mmsb12*
-     mmst2*mmt*pow2(invdgb1)*pow2(ltu))/(3.*mgl*mt) + (4*mmgl*mmsb22*mmst2*mmt*
-     pow2(invdgb2)*pow2(ltu))/(3.*mgl*mt) + (4*invdgb1*lt2u*mmgl*mmt*pow2(mmst2
-     ))/(mgl*mt) + (4*invdgb2*lt2u*mmgl*mmt*pow2(mmst2))/(mgl*mt) - (4*invdgb1*
-     lgu*lt2u*mmgl*mmt*pow2(mmst2))/(3.*mgl*mt) - (4*invdgb2*lgu*lt2u*mmgl*mmt*
-     pow2(mmst2))/(3.*mgl*mt) - (4*invdgb1*ltu*mmgl*mmt*pow2(mmst2))/(mgl*mt) -
-     (4*invdgb2*ltu*mmgl*mmt*pow2(mmst2))/(mgl*mt) + (4*invdgb1*lgu*ltu*mmgl*
-     mmt*pow2(mmst2))/(3.*mgl*mt) + (4*invdgb2*lgu*ltu*mmgl*mmt*pow2(mmst2))/(
-     3.*mgl*mt) - (4*lt2u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(mgl*mt) +
-     (4*lgu*lt2u*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(3.*mgl*mt) + (4*ltu
-     *mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(mgl*mt) - (4*lgu*ltu*mmgl*
-     mmsb1*mmt*pow2(invdgb1)*pow2(mmst2))/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb2*mmt*
-     pow2(invdgb2)*pow2(mmst2))/(mgl*mt) + (4*lgu*lt2u*mmgl*mmsb2*mmt*pow2(
-     invdgb2)*pow2(mmst2))/(3.*mgl*mt) + (4*ltu*mmgl*mmsb2*mmt*pow2(invdgb2)*
-     pow2(mmst2))/(mgl*mt) - (4*lgu*ltu*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(mmst2
-     ))/(3.*mgl*mt) - (2*invdgb1*mmgl*mmt*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) -
-     (2*invdgb2*mmgl*mmt*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) + (2*mmgl*mmsb1*
-     mmt*pow2(invdgb1)*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) + (2*mmgl*mmsb2*mmt*
-     pow2(invdgb2)*pow2(lt2u)*pow2(mmst2))/(3.*mgl*mt) + (2*invdgb1*mmgl*mmt*
-     pow2(ltu)*pow2(mmst2))/(3.*mgl*mt) + (2*invdgb2*mmgl*mmt*pow2(ltu)*pow2(
-     mmst2))/(3.*mgl*mt) - (2*mmgl*mmsb1*mmt*pow2(invdgb1)*pow2(ltu)*pow2(mmst2
-     ))/(3.*mgl*mt) - (2*mmgl*mmsb2*mmt*pow2(invdgb2)*pow2(ltu)*pow2(mmst2))/(
-     3.*mgl*mt) + (56*mmgl*pow2(mmt))/(3.*mgl*mt) - (8*lgu*mmgl*pow2(mmt))/(mgl
-     *mt) - (8*ltu*mmgl*pow2(mmt))/(mgl*mt) + (8*lgu*ltu*mmgl*pow2(mmt))/(3.*
-     mgl*mt) - (56*invdgb1*mmgl*mmsb1*pow2(mmt))/(3.*mgl*mt) + (8*invdgb1*lgu*
-     mmgl*mmsb1*pow2(mmt))/(mgl*mt) + (8*invdgb1*ltu*mmgl*mmsb1*pow2(mmt))/(mgl
-     *mt) - (8*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt))/(3.*mgl*mt) - (56*invdgb2*
-     mmgl*mmsb2*pow2(mmt))/(3.*mgl*mt) + (8*invdgb2*lgu*mmgl*mmsb2*pow2(mmt))/(
-     mgl*mt) + (8*invdgb2*ltu*mmgl*mmsb2*pow2(mmt))/(mgl*mt) - (8*invdgb2*lgu*
-     ltu*mmgl*mmsb2*pow2(mmt))/(3.*mgl*mt) - (56*invdgb1*mmgl*mmst2*pow2(mmt))/
-     (3.*mgl*mt) - (56*invdgb2*mmgl*mmst2*pow2(mmt))/(3.*mgl*mt) + (4*invdgb1*
-     lt2u*mmgl*mmst2*pow2(mmt))/(mgl*mt) + (4*invdgb2*lt2u*mmgl*mmst2*pow2(mmt)
-     )/(mgl*mt) + (4*invdgb1*lgu*lt2u*mmgl*mmst2*pow2(mmt))/(3.*mgl*mt) + (4*
-     invdgb2*lgu*lt2u*mmgl*mmst2*pow2(mmt))/(3.*mgl*mt) + (12*invdgb1*ltu*mmgl*
-     mmst2*pow2(mmt))/(mgl*mt) + (12*invdgb2*ltu*mmgl*mmst2*pow2(mmt))/(mgl*mt)
-     - (4*invdgb1*lgu*ltu*mmgl*mmst2*pow2(mmt))/(3.*mgl*mt) - (4*invdgb2*lgu*
-     ltu*mmgl*mmst2*pow2(mmt))/(3.*mgl*mt) - (8*invdgb1*lt2u*ltu*mmgl*mmst2*
-     pow2(mmt))/(3.*mgl*mt) - (8*invdgb2*lt2u*ltu*mmgl*mmst2*pow2(mmt))/(3.*mgl
-     *mt) + (8*mmgl*zt2*pow2(mmt))/(3.*mgl*mt) - (8*invdgb1*mmgl*mmsb1*zt2*pow2
-     (mmt))/(3.*mgl*mt) - (8*invdgb2*mmgl*mmsb2*zt2*pow2(mmt))/(3.*mgl*mt) - (8
-     *invdgb1*mmgl*mmst2*zt2*pow2(mmt))/(3.*mgl*mt) - (8*invdgb2*mmgl*mmst2*zt2
-     *pow2(mmt))/(3.*mgl*mt) + (28*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(3.*mgl
-     *mt) - (4*lgu*mmgl*mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) - (4*ltu*mmgl*
-     mmsb12*pow2(invdgb1)*pow2(mmt))/(mgl*mt) + (4*lgu*ltu*mmgl*mmsb12*pow2(
-     invdgb1)*pow2(mmt))/(3.*mgl*mt) + (56*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(
-     mmt))/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(mgl
-     *mt) - (4*lgu*lt2u*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) -
-     (12*ltu*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(mgl*mt) + (4*lgu*ltu*
-     mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) + (8*lt2u*ltu*mmgl*
-     mmsb1*mmst2*pow2(invdgb1)*pow2(mmt))/(3.*mgl*mt) + (4*mmgl*mmsb12*zt2*pow2
-     (invdgb1)*pow2(mmt))/(3.*mgl*mt) + (8*mmgl*mmsb1*mmst2*zt2*pow2(invdgb1)*
-     pow2(mmt))/(3.*mgl*mt) + (28*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(3.*mgl*
-     mt) - (4*lgu*mmgl*mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) - (4*ltu*mmgl*
-     mmsb22*pow2(invdgb2)*pow2(mmt))/(mgl*mt) + (4*lgu*ltu*mmgl*mmsb22*pow2(
-     invdgb2)*pow2(mmt))/(3.*mgl*mt) + (56*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(
-     mmt))/(3.*mgl*mt) - (4*lt2u*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(mgl
-     *mt) - (4*lgu*lt2u*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) -
-     (12*ltu*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(mgl*mt) + (4*lgu*ltu*
-     mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) + (8*lt2u*ltu*mmgl*
-     mmsb2*mmst2*pow2(invdgb2)*pow2(mmt))/(3.*mgl*mt) + (4*mmgl*mmsb22*zt2*pow2
-     (invdgb2)*pow2(mmt))/(3.*mgl*mt) + (8*mmgl*mmsb2*mmst2*zt2*pow2(invdgb2)*
-     pow2(mmt))/(3.*mgl*mt) + (4*mmgl*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) - (4*
-     invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) - (4*invdgb2*mmgl*
-     mmsb2*pow2(lgu)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb12*pow2(invdgb1)*pow2
-     (lgu)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb22*pow2(invdgb2)*pow2(lgu)*pow2
-     (mmt))/(3.*mgl*mt) - (2*invdgb1*mmgl*mmst2*pow2(lt2u)*pow2(mmt))/(3.*mgl*
-     mt) - (2*invdgb2*mmgl*mmst2*pow2(lt2u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*
-     mmsb1*mmst2*pow2(invdgb1)*pow2(lt2u)*pow2(mmt))/(3.*mgl*mt) + (2*mmgl*
-     mmsb2*mmst2*pow2(invdgb2)*pow2(lt2u)*pow2(mmt))/(3.*mgl*mt) + (4*mmgl*pow2
-     (ltu)*pow2(mmt))/(3.*mgl*mt) - (4*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt))/
-     (3.*mgl*mt) - (4*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmt))/(3.*mgl*mt) - (2*
-     invdgb1*mmgl*mmst2*pow2(ltu)*pow2(mmt))/(mgl*mt) - (2*invdgb2*mmgl*mmst2*
-     pow2(ltu)*pow2(mmt))/(mgl*mt) + (2*mmgl*mmsb12*pow2(invdgb1)*pow2(ltu)*
-     pow2(mmt))/(3.*mgl*mt) + (2*mmgl*mmsb1*mmst2*pow2(invdgb1)*pow2(ltu)*pow2(
-     mmt))/(mgl*mt) + (2*mmgl*mmsb22*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(3.*mgl
-     *mt) + (2*mmgl*mmsb2*mmst2*pow2(invdgb2)*pow2(ltu)*pow2(mmt))/(mgl*mt) - (
-     28*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) + (4*lgu*mmgl*mmt*pow2(
-     invdgb1)*pow3(mmsb1))/(mgl*mt) + (4*ltu*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1)
-     )/(mgl*mt) - (4*lgu*ltu*mmgl*mmt*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) -
-     (4*mmgl*mmt*zt2*pow2(invdgb1)*pow3(mmsb1))/(3.*mgl*mt) - (2*mmgl*mmt*pow2(
-     invdgb1)*pow2(lgu)*pow3(mmsb1))/(3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb1)*
-     pow2(ltu)*pow3(mmsb1))/(3.*mgl*mt) - (28*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2
-     ))/(3.*mgl*mt) + (4*lgu*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) + (4*
-     ltu*mmgl*mmt*pow2(invdgb2)*pow3(mmsb2))/(mgl*mt) - (4*lgu*ltu*mmgl*mmt*
-     pow2(invdgb2)*pow3(mmsb2))/(3.*mgl*mt) - (4*mmgl*mmt*zt2*pow2(invdgb2)*
-     pow3(mmsb2))/(3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb2)*pow2(lgu)*pow3(mmsb2)
-     )/(3.*mgl*mt) - (2*mmgl*mmt*pow2(invdgb2)*pow2(ltu)*pow3(mmsb2))/(3.*mgl*
-     mt) + s2b*((56*mmgl*mmsb1*mmt)/(3.*mb*mt) - (8*lgu*mmgl*mmsb1*mmt)/(mb*mt)
-     - (8*ltu*mmgl*mmsb1*mmt)/(mb*mt) + (8*lgu*ltu*mmgl*mmsb1*mmt)/(3.*mb*mt) +
-     (56*mmsb12*mmt)/(3.*mb*mt) - (8*lgu*mmsb12*mmt)/(mb*mt) - (8*ltu*mmsb12*
-     mmt)/(mb*mt) + (8*lgu*ltu*mmsb12*mmt)/(3.*mb*mt) - (56*mmgl*mmsb2*mmt)/(3.
-     *mb*mt) + (8*lgu*mmgl*mmsb2*mmt)/(mb*mt) + (8*ltu*mmgl*mmsb2*mmt)/(mb*mt)
-     - (8*lgu*ltu*mmgl*mmsb2*mmt)/(3.*mb*mt) - (56*mmsb22*mmt)/(3.*mb*mt) + (8*
-     lgu*mmsb22*mmt)/(mb*mt) + (8*ltu*mmsb22*mmt)/(mb*mt) - (8*lgu*ltu*mmsb22*
-     mmt)/(3.*mb*mt) - (56*mmsb1*mmst2*mmt)/(3.*mb*mt) + (8*lgu*mmsb1*mmst2*mmt
-     )/(mb*mt) - (8*lt2u*mmsb1*mmst2*mmt)/(mb*mt) + (8*lgu*lt2u*mmsb1*mmst2*mmt
-     )/(3.*mb*mt) + (16*ltu*mmsb1*mmst2*mmt)/(mb*mt) - (16*lgu*ltu*mmsb1*mmst2*
-     mmt)/(3.*mb*mt) + (56*invdgb1*mmsb12*mmst2*mmt)/(3.*mb*mt) - (8*invdgb1*
-     lgu*mmsb12*mmst2*mmt)/(mb*mt) + (8*invdgb1*lt2u*mmsb12*mmst2*mmt)/(mb*mt)
-     - (8*invdgb1*lgu*lt2u*mmsb12*mmst2*mmt)/(3.*mb*mt) - (16*invdgb1*ltu*
-     mmsb12*mmst2*mmt)/(mb*mt) + (16*invdgb1*lgu*ltu*mmsb12*mmst2*mmt)/(3.*mb*
-     mt) + (56*mmsb2*mmst2*mmt)/(3.*mb*mt) - (8*lgu*mmsb2*mmst2*mmt)/(mb*mt) +
-     (8*lt2u*mmsb2*mmst2*mmt)/(mb*mt) - (8*lgu*lt2u*mmsb2*mmst2*mmt)/(3.*mb*mt)
-     - (16*ltu*mmsb2*mmst2*mmt)/(mb*mt) + (16*lgu*ltu*mmsb2*mmst2*mmt)/(3.*mb*
-     mt) - (56*invdgb2*mmsb22*mmst2*mmt)/(3.*mb*mt) + (8*invdgb2*lgu*mmsb22*
-     mmst2*mmt)/(mb*mt) - (8*invdgb2*lt2u*mmsb22*mmst2*mmt)/(mb*mt) + (8*
-     invdgb2*lgu*lt2u*mmsb22*mmst2*mmt)/(3.*mb*mt) + (16*invdgb2*ltu*mmsb22*
-     mmst2*mmt)/(mb*mt) - (16*invdgb2*lgu*ltu*mmsb22*mmst2*mmt)/(3.*mb*mt) + (8
-     *mmgl*mmsb1*mmt*zt2)/(3.*mb*mt) + (8*mmsb12*mmt*zt2)/(3.*mb*mt) - (8*mmgl*
-     mmsb2*mmt*zt2)/(3.*mb*mt) - (8*mmsb22*mmt*zt2)/(3.*mb*mt) - (8*mmsb1*mmst2
-     *mmt*zt2)/(3.*mb*mt) + (8*invdgb1*mmsb12*mmst2*mmt*zt2)/(3.*mb*mt) + (8*
-     mmsb2*mmst2*mmt*zt2)/(3.*mb*mt) - (8*invdgb2*mmsb22*mmst2*mmt*zt2)/(3.*mb*
-     mt) + (4*mmgl*mmsb1*mmt*pow2(lgu))/(3.*mb*mt) + (4*mmsb12*mmt*pow2(lgu))/(
-     3.*mb*mt) - (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mb*mt) - (4*mmsb22*mmt*pow2(
-     lgu))/(3.*mb*mt) - (4*mmsb1*mmst2*mmt*pow2(lgu))/(3.*mb*mt) + (4*invdgb1*
-     mmsb12*mmst2*mmt*pow2(lgu))/(3.*mb*mt) + (4*mmsb2*mmst2*mmt*pow2(lgu))/(3.
-     *mb*mt) - (4*invdgb2*mmsb22*mmst2*mmt*pow2(lgu))/(3.*mb*mt) + (4*mmsb1*
-     mmst2*mmt*pow2(lt2u))/(3.*mb*mt) - (4*invdgb1*mmsb12*mmst2*mmt*pow2(lt2u))
-     /(3.*mb*mt) - (4*mmsb2*mmst2*mmt*pow2(lt2u))/(3.*mb*mt) + (4*invdgb2*
-     mmsb22*mmst2*mmt*pow2(lt2u))/(3.*mb*mt) + (4*mmgl*mmsb1*mmt*pow2(ltu))/(3.
-     *mb*mt) + (4*mmsb12*mmt*pow2(ltu))/(3.*mb*mt) - (4*mmgl*mmsb2*mmt*pow2(ltu
-     ))/(3.*mb*mt) - (4*mmsb22*mmt*pow2(ltu))/(3.*mb*mt) - (8*mmsb1*mmst2*mmt*
-     pow2(ltu))/(3.*mb*mt) + (8*invdgb1*mmsb12*mmst2*mmt*pow2(ltu))/(3.*mb*mt)
-     + (8*mmsb2*mmst2*mmt*pow2(ltu))/(3.*mb*mt) - (8*invdgb2*mmsb22*mmst2*mmt*
-     pow2(ltu))/(3.*mb*mt) - (8*invdgb1*lt2u*mmsb1*mmt*pow2(mmst2))/(mb*mt) + (
-     8*invdgb1*lgu*lt2u*mmsb1*mmt*pow2(mmst2))/(3.*mb*mt) + (8*invdgb1*ltu*
-     mmsb1*mmt*pow2(mmst2))/(mb*mt) - (8*invdgb1*lgu*ltu*mmsb1*mmt*pow2(mmst2))
-     /(3.*mb*mt) + (8*invdgb2*lt2u*mmsb2*mmt*pow2(mmst2))/(mb*mt) - (8*invdgb2*
-     lgu*lt2u*mmsb2*mmt*pow2(mmst2))/(3.*mb*mt) - (8*invdgb2*ltu*mmsb2*mmt*pow2
-     (mmst2))/(mb*mt) + (8*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst2))/(3.*mb*mt) +
-     (4*invdgb1*mmsb1*mmt*pow2(lt2u)*pow2(mmst2))/(3.*mb*mt) - (4*invdgb2*mmsb2
-     *mmt*pow2(lt2u)*pow2(mmst2))/(3.*mb*mt) - (4*invdgb1*mmsb1*mmt*pow2(ltu)*
-     pow2(mmst2))/(3.*mb*mt) + (4*invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst2))/(3.*
-     mb*mt) - (56*mmsb1*pow2(mmt))/(3.*mb*mt) + (8*lgu*mmsb1*pow2(mmt))/(mb*mt)
-     + (8*ltu*mmsb1*pow2(mmt))/(mb*mt) - (8*lgu*ltu*mmsb1*pow2(mmt))/(3.*mb*mt)
-     + (56*invdgb1*mmsb12*pow2(mmt))/(3.*mb*mt) - (8*invdgb1*lgu*mmsb12*pow2(
-     mmt))/(mb*mt) - (8*invdgb1*ltu*mmsb12*pow2(mmt))/(mb*mt) + (8*invdgb1*lgu*
-     ltu*mmsb12*pow2(mmt))/(3.*mb*mt) + (56*mmsb2*pow2(mmt))/(3.*mb*mt) - (8*
-     lgu*mmsb2*pow2(mmt))/(mb*mt) - (8*ltu*mmsb2*pow2(mmt))/(mb*mt) + (8*lgu*
-     ltu*mmsb2*pow2(mmt))/(3.*mb*mt) - (56*invdgb2*mmsb22*pow2(mmt))/(3.*mb*mt)
-     + (8*invdgb2*lgu*mmsb22*pow2(mmt))/(mb*mt) + (8*invdgb2*ltu*mmsb22*pow2(
-     mmt))/(mb*mt) - (8*invdgb2*lgu*ltu*mmsb22*pow2(mmt))/(3.*mb*mt) + (112*
-     invdgb1*mmsb1*mmst2*pow2(mmt))/(3.*mb*mt) - (8*invdgb1*lt2u*mmsb1*mmst2*
-     pow2(mmt))/(mb*mt) - (8*invdgb1*lgu*lt2u*mmsb1*mmst2*pow2(mmt))/(3.*mb*mt)
-     - (24*invdgb1*ltu*mmsb1*mmst2*pow2(mmt))/(mb*mt) + (8*invdgb1*lgu*ltu*
-     mmsb1*mmst2*pow2(mmt))/(3.*mb*mt) + (16*invdgb1*lt2u*ltu*mmsb1*mmst2*pow2(
-     mmt))/(3.*mb*mt) - (112*invdgb2*mmsb2*mmst2*pow2(mmt))/(3.*mb*mt) + (8*
-     invdgb2*lt2u*mmsb2*mmst2*pow2(mmt))/(mb*mt) + (8*invdgb2*lgu*lt2u*mmsb2*
-     mmst2*pow2(mmt))/(3.*mb*mt) + (24*invdgb2*ltu*mmsb2*mmst2*pow2(mmt))/(mb*
-     mt) - (8*invdgb2*lgu*ltu*mmsb2*mmst2*pow2(mmt))/(3.*mb*mt) - (16*invdgb2*
-     lt2u*ltu*mmsb2*mmst2*pow2(mmt))/(3.*mb*mt) - (8*mmsb1*zt2*pow2(mmt))/(3.*
-     mb*mt) + (8*invdgb1*mmsb12*zt2*pow2(mmt))/(3.*mb*mt) + (8*mmsb2*zt2*pow2(
-     mmt))/(3.*mb*mt) - (8*invdgb2*mmsb22*zt2*pow2(mmt))/(3.*mb*mt) + (16*
-     invdgb1*mmsb1*mmst2*zt2*pow2(mmt))/(3.*mb*mt) - (16*invdgb2*mmsb2*mmst2*
-     zt2*pow2(mmt))/(3.*mb*mt) - (4*mmsb1*pow2(lgu)*pow2(mmt))/(3.*mb*mt) + (4*
-     invdgb1*mmsb12*pow2(lgu)*pow2(mmt))/(3.*mb*mt) + (4*mmsb2*pow2(lgu)*pow2(
-     mmt))/(3.*mb*mt) - (4*invdgb2*mmsb22*pow2(lgu)*pow2(mmt))/(3.*mb*mt) + (4*
-     invdgb1*mmsb1*mmst2*pow2(lt2u)*pow2(mmt))/(3.*mb*mt) - (4*invdgb2*mmsb2*
-     mmst2*pow2(lt2u)*pow2(mmt))/(3.*mb*mt) - (4*mmsb1*pow2(ltu)*pow2(mmt))/(3.
-     *mb*mt) + (4*invdgb1*mmsb12*pow2(ltu)*pow2(mmt))/(3.*mb*mt) + (4*mmsb2*
-     pow2(ltu)*pow2(mmt))/(3.*mb*mt) - (4*invdgb2*mmsb22*pow2(ltu)*pow2(mmt))/(
-     3.*mb*mt) + (4*invdgb1*mmsb1*mmst2*pow2(ltu)*pow2(mmt))/(mb*mt) - (4*
-     invdgb2*mmsb2*mmst2*pow2(ltu)*pow2(mmt))/(mb*mt) - (56*invdgb1*mmt*pow3(
-     mmsb1))/(3.*mb*mt) + (8*invdgb1*lgu*mmt*pow3(mmsb1))/(mb*mt) + (8*invdgb1*
-     ltu*mmt*pow3(mmsb1))/(mb*mt) - (8*invdgb1*lgu*ltu*mmt*pow3(mmsb1))/(3.*mb*
-     mt) - (8*invdgb1*mmt*zt2*pow3(mmsb1))/(3.*mb*mt) - (4*invdgb1*mmt*pow2(lgu
-     )*pow3(mmsb1))/(3.*mb*mt) - (4*invdgb1*mmt*pow2(ltu)*pow3(mmsb1))/(3.*mb*
-     mt) + (56*invdgb2*mmt*pow3(mmsb2))/(3.*mb*mt) - (8*invdgb2*lgu*mmt*pow3(
-     mmsb2))/(mb*mt) - (8*invdgb2*ltu*mmt*pow3(mmsb2))/(mb*mt) + (8*invdgb2*lgu
-     *ltu*mmt*pow3(mmsb2))/(3.*mb*mt) + (8*invdgb2*mmt*zt2*pow3(mmsb2))/(3.*mb*
-     mt) + (4*invdgb2*mmt*pow2(lgu)*pow3(mmsb2))/(3.*mb*mt) + (4*invdgb2*mmt*
-     pow2(ltu)*pow3(mmsb2))/(3.*mb*mt))) + (28*invdgb1*pow3(mmst2))/3. + (28*
-     invdgb2*pow3(mmst2))/3. - 4*invdgb1*lt2u*pow3(mmst2) - 4*invdgb2*lt2u*pow3
-     (mmst2) - 4*invdgb1*ltu*pow3(mmst2) - 4*invdgb2*ltu*pow3(mmst2) + (4*
-     invdgb1*lt2u*ltu*pow3(mmst2))/3. + (4*invdgb2*lt2u*ltu*pow3(mmst2))/3. + (
-     4*invdgb1*zt2*pow3(mmst2))/3. + (4*invdgb2*zt2*pow3(mmst2))/3. - (28*mmsb1
-     *pow2(invdgb1)*pow3(mmst2))/3. + 4*lt2u*mmsb1*pow2(invdgb1)*pow3(mmst2) +
-     4*ltu*mmsb1*pow2(invdgb1)*pow3(mmst2) - (4*lt2u*ltu*mmsb1*pow2(invdgb1)*
-     pow3(mmst2))/3. - (4*mmsb1*zt2*pow2(invdgb1)*pow3(mmst2))/3. - (28*mmsb2*
-     pow2(invdgb2)*pow3(mmst2))/3. + 4*lt2u*mmsb2*pow2(invdgb2)*pow3(mmst2) + 4
-     *ltu*mmsb2*pow2(invdgb2)*pow3(mmst2) - (4*lt2u*ltu*mmsb2*pow2(invdgb2)*
-     pow3(mmst2))/3. - (4*mmsb2*zt2*pow2(invdgb2)*pow3(mmst2))/3. + (2*invdgb1*
-     pow2(lt2u)*pow3(mmst2))/3. + (2*invdgb2*pow2(lt2u)*pow3(mmst2))/3. - (2*
-     mmsb1*pow2(invdgb1)*pow2(lt2u)*pow3(mmst2))/3. - (2*mmsb2*pow2(invdgb2)*
-     pow2(lt2u)*pow3(mmst2))/3. + (2*invdgb1*pow2(ltu)*pow3(mmst2))/3. + (2*
-     invdgb2*pow2(ltu)*pow3(mmst2))/3. - (2*mmsb1*pow2(invdgb1)*pow2(ltu)*pow3(
-     mmst2))/3. - (2*mmsb2*pow2(invdgb2)*pow2(ltu)*pow3(mmst2))/3. + s2b*((56*
-     mmgl2*mmsb1)/(3.*mb*mgl) - (8*lgu*mmgl2*mmsb1)/(mb*mgl) - (8*ltu*mmgl2*
-     mmsb1)/(mb*mgl) + (8*lgu*ltu*mmgl2*mmsb1)/(3.*mb*mgl) + (56*mmgl*mmsb12)/(
-     3.*mb*mgl) - (8*lgu*mmgl*mmsb12)/(mb*mgl) - (8*ltu*mmgl*mmsb12)/(mb*mgl) +
-     (8*lgu*ltu*mmgl*mmsb12)/(3.*mb*mgl) - (56*mmgl2*mmsb2)/(3.*mb*mgl) + (8*
-     lgu*mmgl2*mmsb2)/(mb*mgl) + (8*ltu*mmgl2*mmsb2)/(mb*mgl) - (8*lgu*ltu*
-     mmgl2*mmsb2)/(3.*mb*mgl) - (56*mmgl*mmsb22)/(3.*mb*mgl) + (8*lgu*mmgl*
-     mmsb22)/(mb*mgl) + (8*ltu*mmgl*mmsb22)/(mb*mgl) - (8*lgu*ltu*mmgl*mmsb22)/
-     (3.*mb*mgl) - (56*mmgl*mmsb1*mmst2)/(3.*mb*mgl) + (16*lgu*mmgl*mmsb1*mmst2
-     )/(mb*mgl) - (8*lt2u*mmgl*mmsb1*mmst2)/(mb*mgl) + (8*ltu*mmgl*mmsb1*mmst2)
-     /(mb*mgl) - (16*lgu*ltu*mmgl*mmsb1*mmst2)/(3.*mb*mgl) + (8*lt2u*ltu*mmgl*
-     mmsb1*mmst2)/(3.*mb*mgl) + (56*invdgb1*mmgl*mmsb12*mmst2)/(3.*mb*mgl) - (
-     16*invdgb1*lgu*mmgl*mmsb12*mmst2)/(mb*mgl) + (8*invdgb1*lt2u*mmgl*mmsb12*
-     mmst2)/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb12*mmst2)/(mb*mgl) + (16*invdgb1
-     *lgu*ltu*mmgl*mmsb12*mmst2)/(3.*mb*mgl) - (8*invdgb1*lt2u*ltu*mmgl*mmsb12*
-     mmst2)/(3.*mb*mgl) + (56*mmgl*mmsb2*mmst2)/(3.*mb*mgl) - (16*lgu*mmgl*
-     mmsb2*mmst2)/(mb*mgl) + (8*lt2u*mmgl*mmsb2*mmst2)/(mb*mgl) - (8*ltu*mmgl*
-     mmsb2*mmst2)/(mb*mgl) + (16*lgu*ltu*mmgl*mmsb2*mmst2)/(3.*mb*mgl) - (8*
-     lt2u*ltu*mmgl*mmsb2*mmst2)/(3.*mb*mgl) - (56*invdgb2*mmgl*mmsb22*mmst2)/(
-     3.*mb*mgl) + (16*invdgb2*lgu*mmgl*mmsb22*mmst2)/(mb*mgl) - (8*invdgb2*lt2u
-     *mmgl*mmsb22*mmst2)/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmsb22*mmst2)/(mb*mgl)
-     - (16*invdgb2*lgu*ltu*mmgl*mmsb22*mmst2)/(3.*mb*mgl) + (8*invdgb2*lt2u*ltu
-     *mmgl*mmsb22*mmst2)/(3.*mb*mgl) - (56*mmgl*mmsb1*mmt)/(3.*mb*mgl) + (8*lgu
-     *mmgl*mmsb1*mmt)/(mb*mgl) + (8*ltu*mmgl*mmsb1*mmt)/(mb*mgl) - (8*lgu*ltu*
-     mmgl*mmsb1*mmt)/(3.*mb*mgl) + (56*invdgb1*mmgl*mmsb12*mmt)/(3.*mb*mgl) - (
-     8*invdgb1*lgu*mmgl*mmsb12*mmt)/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb12*mmt)/
-     (mb*mgl) + (8*invdgb1*lgu*ltu*mmgl*mmsb12*mmt)/(3.*mb*mgl) + (56*mmgl*
-     mmsb2*mmt)/(3.*mb*mgl) - (8*lgu*mmgl*mmsb2*mmt)/(mb*mgl) - (8*ltu*mmgl*
-     mmsb2*mmt)/(mb*mgl) + (8*lgu*ltu*mmgl*mmsb2*mmt)/(3.*mb*mgl) - (56*invdgb2
-     *mmgl*mmsb22*mmt)/(3.*mb*mgl) + (8*invdgb2*lgu*mmgl*mmsb22*mmt)/(mb*mgl) +
-     (8*invdgb2*ltu*mmgl*mmsb22*mmt)/(mb*mgl) - (8*invdgb2*lgu*ltu*mmgl*mmsb22*
-     mmt)/(3.*mb*mgl) + (224*invdgb1*mmgl*mmsb1*mmst2*mmt)/(3.*mb*mgl) - (8*
-     invdgb1*lgu*mmgl*mmsb1*mmst2*mmt)/(mb*mgl) - (8*invdgb1*lt2u*mmgl*mmsb1*
-     mmst2*mmt)/(mb*mgl) - (16*invdgb1*lgu*lt2u*mmgl*mmsb1*mmst2*mmt)/(3.*mb*
-     mgl) - (48*invdgb1*ltu*mmgl*mmsb1*mmst2*mmt)/(mb*mgl) + (8*invdgb1*lgu*ltu
-     *mmgl*mmsb1*mmst2*mmt)/(mb*mgl) + (8*invdgb1*lt2u*ltu*mmgl*mmsb1*mmst2*mmt
-     )/(mb*mgl) - (224*invdgb2*mmgl*mmsb2*mmst2*mmt)/(3.*mb*mgl) + (8*invdgb2*
-     lgu*mmgl*mmsb2*mmst2*mmt)/(mb*mgl) + (8*invdgb2*lt2u*mmgl*mmsb2*mmst2*mmt)
-     /(mb*mgl) + (16*invdgb2*lgu*lt2u*mmgl*mmsb2*mmst2*mmt)/(3.*mb*mgl) + (48*
-     invdgb2*ltu*mmgl*mmsb2*mmst2*mmt)/(mb*mgl) - (8*invdgb2*lgu*ltu*mmgl*mmsb2
-     *mmst2*mmt)/(mb*mgl) - (8*invdgb2*lt2u*ltu*mmgl*mmsb2*mmst2*mmt)/(mb*mgl)
-     + (8*mmgl2*mmsb1*zt2)/(3.*mb*mgl) + (8*mmgl*mmsb12*zt2)/(3.*mb*mgl) - (8*
-     mmgl2*mmsb2*zt2)/(3.*mb*mgl) - (8*mmgl*mmsb22*zt2)/(3.*mb*mgl) - (8*mmgl*
-     mmsb1*mmst2*zt2)/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb12*mmst2*zt2)/(3.*mb*
-     mgl) + (8*mmgl*mmsb2*mmst2*zt2)/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb22*mmst2
-     *zt2)/(3.*mb*mgl) - (8*mmgl*mmsb1*mmt*zt2)/(3.*mb*mgl) + (8*invdgb1*mmgl*
-     mmsb12*mmt*zt2)/(3.*mb*mgl) + (8*mmgl*mmsb2*mmt*zt2)/(3.*mb*mgl) - (8*
-     invdgb2*mmgl*mmsb22*mmt*zt2)/(3.*mb*mgl) + (32*invdgb1*mmgl*mmsb1*mmst2*
-     mmt*zt2)/(3.*mb*mgl) - (32*invdgb2*mmgl*mmsb2*mmst2*mmt*zt2)/(3.*mb*mgl) +
-     (4*mmgl2*mmsb1*pow2(lgu))/(3.*mb*mgl) + (4*mmgl*mmsb12*pow2(lgu))/(3.*mb*
-     mgl) - (4*mmgl2*mmsb2*pow2(lgu))/(3.*mb*mgl) - (4*mmgl*mmsb22*pow2(lgu))/(
-     3.*mb*mgl) - (8*mmgl*mmsb1*mmst2*pow2(lgu))/(3.*mb*mgl) + (8*invdgb1*mmgl*
-     mmsb12*mmst2*pow2(lgu))/(3.*mb*mgl) + (8*mmgl*mmsb2*mmst2*pow2(lgu))/(3.*
-     mb*mgl) - (8*invdgb2*mmgl*mmsb22*mmst2*pow2(lgu))/(3.*mb*mgl) - (4*mmgl*
-     mmsb1*mmt*pow2(lgu))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb12*mmt*pow2(lgu))/(
-     3.*mb*mgl) + (4*mmgl*mmsb2*mmt*pow2(lgu))/(3.*mb*mgl) - (4*invdgb2*mmgl*
-     mmsb22*mmt*pow2(lgu))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(
-     lgu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(lgu))/(3.*mb*mgl)
-     + (4*mmgl*mmsb1*mmst2*pow2(lt2u))/(3.*mb*mgl) - (4*invdgb1*mmgl*mmsb12*
-     mmst2*pow2(lt2u))/(3.*mb*mgl) - (4*mmgl*mmsb2*mmst2*pow2(lt2u))/(3.*mb*mgl
-     ) + (4*invdgb2*mmgl*mmsb22*mmst2*pow2(lt2u))/(3.*mb*mgl) + (4*invdgb1*mmgl
-     *mmsb1*mmst2*mmt*pow2(lt2u))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*mmst2*mmt
-     *pow2(lt2u))/(3.*mb*mgl) + (4*mmgl2*mmsb1*pow2(ltu))/(3.*mb*mgl) + (4*mmgl
-     *mmsb12*pow2(ltu))/(3.*mb*mgl) - (4*mmgl2*mmsb2*pow2(ltu))/(3.*mb*mgl) - (
-     4*mmgl*mmsb22*pow2(ltu))/(3.*mb*mgl) - (4*mmgl*mmsb1*mmst2*pow2(ltu))/(3.*
-     mb*mgl) + (4*invdgb1*mmgl*mmsb12*mmst2*pow2(ltu))/(3.*mb*mgl) + (4*mmgl*
-     mmsb2*mmst2*pow2(ltu))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmsb22*mmst2*pow2(ltu
-     ))/(3.*mb*mgl) - (4*mmgl*mmsb1*mmt*pow2(ltu))/(3.*mb*mgl) + (4*invdgb1*
-     mmgl*mmsb12*mmt*pow2(ltu))/(3.*mb*mgl) + (4*mmgl*mmsb2*mmt*pow2(ltu))/(3.*
-     mb*mgl) - (4*invdgb2*mmgl*mmsb22*mmt*pow2(ltu))/(3.*mb*mgl) + (8*invdgb1*
-     mmgl*mmsb1*mmst2*mmt*pow2(ltu))/(mb*mgl) - (8*invdgb2*mmgl*mmsb2*mmst2*mmt
-     *pow2(ltu))/(mb*mgl) + (56*invdgb1*mmgl*mmsb1*pow2(mmst2))/(3.*mb*mgl) + (
-     8*invdgb1*lgu*mmgl*mmsb1*pow2(mmst2))/(mb*mgl) - (16*invdgb1*lt2u*mmgl*
-     mmsb1*pow2(mmst2))/(mb*mgl) - (8*invdgb1*ltu*mmgl*mmsb1*pow2(mmst2))/(mb*
-     mgl) - (8*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmst2))/(3.*mb*mgl) + (16*
-     invdgb1*lt2u*ltu*mmgl*mmsb1*pow2(mmst2))/(3.*mb*mgl) - (56*invdgb2*mmgl*
-     mmsb2*pow2(mmst2))/(3.*mb*mgl) - (8*invdgb2*lgu*mmgl*mmsb2*pow2(mmst2))/(
-     mb*mgl) + (16*invdgb2*lt2u*mmgl*mmsb2*pow2(mmst2))/(mb*mgl) + (8*invdgb2*
-     ltu*mmgl*mmsb2*pow2(mmst2))/(mb*mgl) + (8*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
-     mmst2))/(3.*mb*mgl) - (16*invdgb2*lt2u*ltu*mmgl*mmsb2*pow2(mmst2))/(3.*mb*
-     mgl) + (56*invdgb1*mmgl*mmt*pow2(mmst2))/(3.*mb*mgl) - (56*invdgb2*mmgl*
-     mmt*pow2(mmst2))/(3.*mb*mgl) - (8*invdgb1*lt2u*mmgl*mmt*pow2(mmst2))/(mb*
-     mgl) + (8*invdgb2*lt2u*mmgl*mmt*pow2(mmst2))/(mb*mgl) - (8*invdgb1*ltu*
-     mmgl*mmt*pow2(mmst2))/(mb*mgl) + (8*invdgb2*ltu*mmgl*mmt*pow2(mmst2))/(mb*
-     mgl) + (8*invdgb1*lt2u*ltu*mmgl*mmt*pow2(mmst2))/(3.*mb*mgl) - (8*invdgb2*
-     lt2u*ltu*mmgl*mmt*pow2(mmst2))/(3.*mb*mgl) + (8*invdgb1*mmgl*mmsb1*zt2*
-     pow2(mmst2))/(3.*mb*mgl) - (8*invdgb2*mmgl*mmsb2*zt2*pow2(mmst2))/(3.*mb*
-     mgl) + (8*invdgb1*mmgl*mmt*zt2*pow2(mmst2))/(3.*mb*mgl) - (8*invdgb2*mmgl*
-     mmt*zt2*pow2(mmst2))/(3.*mb*mgl) - (4*invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(
-     mmst2))/(3.*mb*mgl) + (4*invdgb2*mmgl*mmsb2*pow2(lgu)*pow2(mmst2))/(3.*mb*
-     mgl) + (8*invdgb1*mmgl*mmsb1*pow2(lt2u)*pow2(mmst2))/(3.*mb*mgl) - (8*
-     invdgb2*mmgl*mmsb2*pow2(lt2u)*pow2(mmst2))/(3.*mb*mgl) + (4*invdgb1*mmgl*
-     mmt*pow2(lt2u)*pow2(mmst2))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmt*pow2(lt2u)*
-     pow2(mmst2))/(3.*mb*mgl) + (4*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst2))/(
-     3.*mb*mgl) - (4*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmst2))/(3.*mb*mgl) + (4
-     *invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst2))/(3.*mb*mgl) - (4*invdgb2*mmgl*mmt
-     *pow2(ltu)*pow2(mmst2))/(3.*mb*mgl) - (56*invdgb1*mmgl*pow3(mmsb1))/(3.*mb
-     *mgl) + (8*invdgb1*lgu*mmgl*pow3(mmsb1))/(mb*mgl) + (8*invdgb1*ltu*mmgl*
-     pow3(mmsb1))/(mb*mgl) - (8*invdgb1*lgu*ltu*mmgl*pow3(mmsb1))/(3.*mb*mgl) -
-     (8*invdgb1*mmgl*zt2*pow3(mmsb1))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(lgu)*
-     pow3(mmsb1))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(ltu)*pow3(mmsb1))/(3.*mb*
-     mgl) + (56*invdgb2*mmgl*pow3(mmsb2))/(3.*mb*mgl) - (8*invdgb2*lgu*mmgl*
-     pow3(mmsb2))/(mb*mgl) - (8*invdgb2*ltu*mmgl*pow3(mmsb2))/(mb*mgl) + (8*
-     invdgb2*lgu*ltu*mmgl*pow3(mmsb2))/(3.*mb*mgl) + (8*invdgb2*mmgl*zt2*pow3(
-     mmsb2))/(3.*mb*mgl) + (4*invdgb2*mmgl*pow2(lgu)*pow3(mmsb2))/(3.*mb*mgl) +
-     (4*invdgb2*mmgl*pow2(ltu)*pow3(mmsb2))/(3.*mb*mgl) - (56*invdgb1*mmgl*pow3
-     (mmst2))/(3.*mb*mgl) + (56*invdgb2*mmgl*pow3(mmst2))/(3.*mb*mgl) + (8*
-     invdgb1*lt2u*mmgl*pow3(mmst2))/(mb*mgl) - (8*invdgb2*lt2u*mmgl*pow3(mmst2)
-     )/(mb*mgl) + (8*invdgb1*ltu*mmgl*pow3(mmst2))/(mb*mgl) - (8*invdgb2*ltu*
-     mmgl*pow3(mmst2))/(mb*mgl) - (8*invdgb1*lt2u*ltu*mmgl*pow3(mmst2))/(3.*mb*
-     mgl) + (8*invdgb2*lt2u*ltu*mmgl*pow3(mmst2))/(3.*mb*mgl) - (8*invdgb1*mmgl
-     *zt2*pow3(mmst2))/(3.*mb*mgl) + (8*invdgb2*mmgl*zt2*pow3(mmst2))/(3.*mb*
-     mgl) - (4*invdgb1*mmgl*pow2(lt2u)*pow3(mmst2))/(3.*mb*mgl) + (4*invdgb2*
-     mmgl*pow2(lt2u)*pow3(mmst2))/(3.*mb*mgl) - (4*invdgb1*mmgl*pow2(ltu)*pow3(
-     mmst2))/(3.*mb*mgl) + (4*invdgb2*mmgl*pow2(ltu)*pow3(mmst2))/(3.*mb*mgl))
-     - (28*pow2(invdgb1)*pow4(mmsb1))/3. + 4*lgu*pow2(invdgb1)*pow4(mmsb1) + 4*
-     ltu*pow2(invdgb1)*pow4(mmsb1) - (4*lgu*ltu*pow2(invdgb1)*pow4(mmsb1))/3. -
-     (4*zt2*pow2(invdgb1)*pow4(mmsb1))/3. - (2*pow2(invdgb1)*pow2(lgu)*pow4(
-     mmsb1))/3. - (2*pow2(invdgb1)*pow2(ltu)*pow4(mmsb1))/3. - (28*pow2(invdgb2
-     )*pow4(mmsb2))/3. + 4*lgu*pow2(invdgb2)*pow4(mmsb2) + 4*ltu*pow2(invdgb2)*
-     pow4(mmsb2) - (4*lgu*ltu*pow2(invdgb2)*pow4(mmsb2))/3. - (4*zt2*pow2(
-     invdgb2)*pow4(mmsb2))/3. - (2*pow2(invdgb2)*pow2(lgu)*pow4(mmsb2))/3. - (2
-     *pow2(invdgb2)*pow2(ltu)*pow4(mmsb2))/3.) + (16*lb1u*lb2u*((-5*invdgb1*
-     mmsb2)/2. + (5*invdgb2*mmsb2)/2. - 2*invdb12*invdgb1*mmsb22 + 2*invdb12*
-     invdgb2*mmsb22 + (mmsb1*mmsb2*pow2(invdgb1))/2. + (3*mmsb22*pow2(invdgb1))
-     /4. - (mmsb22*pow2(invdgb2))/4. + invdgb2*mmsb1*pow2(s2b) + 3*invdgb1*
-     mmsb2*pow2(s2b) - 2*invdgb2*mmsb2*pow2(s2b) + (5*invdb12*invdgb1*mmsb22*
-     pow2(s2b))/2. - (5*invdb12*invdgb2*mmsb22*pow2(s2b))/2. - (3*mmsb1*mmsb2*
-     pow2(invdgb1)*pow2(s2b))/2. + (3*mmsb22*pow2(invdgb1)*pow2(s2b))/4. - 2*
-     mmsb1*mmsb2*pow2(invdgb2)*pow2(s2b) - (mmsb22*pow2(invdgb2)*pow2(s2b))/4.
-     + mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + mmsb1*mmsb22*pow2(s2b)*pow3(
-     invdgb2) + invdgb1*pow2(invdb12)*pow3(mmsb2) - invdgb2*pow2(invdb12)*pow3(
-     mmsb2) + invdb12*pow2(invdgb1)*pow3(mmsb2) + invdgb1*pow2(invdb12)*pow2(
-     s2b)*pow3(mmsb2) - invdgb2*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) + invdb12*
-     pow2(invdgb1)*pow2(s2b)*pow3(mmsb2) + (pow2(invdb12)*pow2(invdgb1)*pow4(
-     mmsb2))/4. + (pow2(invdb12)*pow2(invdgb2)*pow4(mmsb2))/4. + (pow2(invdb12)
-     *pow2(invdgb1)*pow2(s2b)*pow4(mmsb2))/4. + (pow2(invdb12)*pow2(invdgb2)*
-     pow2(s2b)*pow4(mmsb2))/4. + (invdgb1*pow3(invdb12)*pow4(mmsb2))/2. - (
-     invdgb2*pow3(invdb12)*pow4(mmsb2))/2. + (invdgb1*pow2(s2b)*pow3(invdb12)*
-     pow4(mmsb2))/2. - (invdgb2*pow2(s2b)*pow3(invdb12)*pow4(mmsb2))/2.))/9. +
-     (16*lb1u*lgu*(4 + (invdgb1*mmsb1)/2. + (5*invdgb1*mmsb2)/2. - (5*invdgb2*
-     mmsb2)/2. + 2*invdb12*invdgb1*mmsb22 - 2*invdb12*invdgb2*mmsb22 - (7*
-     mmsb12*pow2(invdgb1))/2. - (mmsb1*mmsb2*pow2(invdgb1))/2. - (3*mmsb22*pow2
-     (invdgb1))/4. + (mmsb22*pow2(invdgb2))/4. + 4*pow2(s2b) - 7*invdgb1*mmsb1*
-     pow2(s2b) - invdgb2*mmsb1*pow2(s2b) - invdgb1*mmsb2*pow2(s2b) + invdgb2*
-     mmsb2*pow2(s2b) - (3*invdb12*invdgb1*mmsb22*pow2(s2b))/2. + (3*invdb12*
-     invdgb2*mmsb22*pow2(s2b))/2. + (3*mmsb12*pow2(invdgb1)*pow2(s2b))/2. - (
-     mmsb1*mmsb2*pow2(invdgb1)*pow2(s2b))/2. - (3*mmsb22*pow2(invdgb1)*pow2(s2b
-     ))/4. + 2*mmsb1*mmsb2*pow2(invdgb2)*pow2(s2b) + (mmsb22*pow2(invdgb2)*pow2
-     (s2b))/4. - mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) + 2*pow3(invdgb1)*pow3(
-     mmsb1) - invdgb1*pow2(invdb12)*pow3(mmsb2) + invdgb2*pow2(invdb12)*pow3(
-     mmsb2) - invdb12*pow2(invdgb1)*pow3(mmsb2) - invdgb1*pow2(invdb12)*pow2(
-     s2b)*pow3(mmsb2) + invdgb2*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - invdb12*
-     pow2(invdgb1)*pow2(s2b)*pow3(mmsb2) - (3*pow4(invdgb1)*pow4(mmsb1))/4. + (
-     pow2(s2b)*pow4(invdgb1)*pow4(mmsb1))/4. - (pow2(invdb12)*pow2(invdgb1)*
-     pow4(mmsb2))/4. - (pow2(invdb12)*pow2(invdgb2)*pow4(mmsb2))/4. - (pow2(
-     invdb12)*pow2(invdgb1)*pow2(s2b)*pow4(mmsb2))/4. - (pow2(invdb12)*pow2(
-     invdgb2)*pow2(s2b)*pow4(mmsb2))/4. - (invdgb1*pow3(invdb12)*pow4(mmsb2))/
-     2. + (invdgb2*pow3(invdb12)*pow4(mmsb2))/2. - (invdgb1*pow2(s2b)*pow3(
-     invdb12)*pow4(mmsb2))/2. + (invdgb2*pow2(s2b)*pow3(invdb12)*pow4(mmsb2))/
-     2.))/9. + (16*pow2(lb2u)*(4*invdb12*mmsb2 - (25*invdgb2*mmsb2)/4. - 4*
-     invdb12*invdgb2*mmsb22 + (15*mmsb22*pow2(invdgb2))/2. - 4*invdb12*mmsb2*
-     pow2(s2b) + (invdgb1*mmsb2*pow2(s2b))/2. - (5*invdgb2*mmsb2*pow2(s2b))/2.
-     + (invdb12*invdgb1*mmsb22*pow2(s2b))/2. + (7*invdb12*invdgb2*mmsb22*pow2(
-     s2b))/2. + (5*mmsb22*pow2(invdgb2)*pow2(s2b))/4. - 6*pow3(invdgb2)*pow3(
-     mmsb2) - (pow2(s2b)*pow3(invdgb2)*pow3(mmsb2))/2. + (3*pow4(invdgb2)*pow4(
-     mmsb2))/8. - (pow2(s2b)*pow4(invdgb2)*pow4(mmsb2))/8.))/9. + (16*pow2(lgu)
-     *(-18.5 + (83*invdgb1*mmsb1)/4. + (35*invdgb1*mmsb2)/2. + (13*invdgb2*
-     mmsb2)/4. + 18*invdb12*invdgb1*mmsb22 - 18*invdb12*invdgb2*mmsb22 - mmsb12
-     *pow2(invdgb1) + (mmsb1*mmsb2*pow2(invdgb1))/2. + (3*mmsb22*pow2(invdgb1))
-     /4. - (5*mmsb22*pow2(invdgb2))/4. + 4*pow2(s2b) - 4*invdgb1*mmsb1*pow2(s2b
-     ) - 9*invdgb1*mmsb2*pow2(s2b) + 5*invdgb2*mmsb2*pow2(s2b) - (17*invdb12*
-     invdgb1*mmsb22*pow2(s2b))/2. + (17*invdb12*invdgb2*mmsb22*pow2(s2b))/2. -
-     (11*mmsb12*pow2(invdgb1)*pow2(s2b))/4. + (mmsb1*mmsb2*pow2(invdgb1)*pow2(
-     s2b))/2. + (3*mmsb22*pow2(invdgb1)*pow2(s2b))/4. - 3*mmsb22*pow2(invdgb2)*
-     pow2(s2b) - 2*pow3(invdgb1)*pow3(mmsb1) + (pow2(s2b)*pow3(invdgb1)*pow3(
-     mmsb1))/2. + invdgb1*pow2(invdb12)*pow3(mmsb2) - invdgb2*pow2(invdb12)*
-     pow3(mmsb2) + invdb12*pow2(invdgb1)*pow3(mmsb2) + invdgb1*pow2(invdb12)*
-     pow2(s2b)*pow3(mmsb2) - invdgb2*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) +
-     invdb12*pow2(invdgb1)*pow2(s2b)*pow3(mmsb2) - 2*pow3(invdgb2)*pow3(mmsb2)
-     + (pow2(s2b)*pow3(invdgb2)*pow3(mmsb2))/2. + (3*pow4(invdgb1)*pow4(mmsb1))
-     /8. - (pow2(s2b)*pow4(invdgb1)*pow4(mmsb1))/8. + (pow2(invdb12)*pow2(
-     invdgb1)*pow4(mmsb2))/4. + (pow2(invdb12)*pow2(invdgb2)*pow4(mmsb2))/4. +
-     (pow2(invdb12)*pow2(invdgb1)*pow2(s2b)*pow4(mmsb2))/4. + (pow2(invdb12)*
-     pow2(invdgb2)*pow2(s2b)*pow4(mmsb2))/4. + (invdgb1*pow3(invdb12)*pow4(
-     mmsb2))/2. - (invdgb2*pow3(invdb12)*pow4(mmsb2))/2. + (invdgb1*pow2(s2b)*
-     pow3(invdb12)*pow4(mmsb2))/2. - (invdgb2*pow2(s2b)*pow3(invdb12)*pow4(
-     mmsb2))/2. + (3*pow4(invdgb2)*pow4(mmsb2))/8. - (pow2(s2b)*pow4(invdgb2)*
-     pow4(mmsb2))/8.))/9. + (16*lb2u*lgu*(4 + (5*invdgb1*mmsb2)/2. - 2*invdgb2*
-     mmsb2 + 2*invdb12*invdgb1*mmsb22 - 2*invdb12*invdgb2*mmsb22 - (mmsb1*mmsb2
-     *pow2(invdgb1))/2. - (3*mmsb22*pow2(invdgb1))/4. - (13*mmsb22*pow2(invdgb2
-     ))/4. + 4*pow2(s2b) - 2*invdgb1*mmsb2*pow2(s2b) - 6*invdgb2*mmsb2*pow2(s2b
-     ) - (3*invdb12*invdgb1*mmsb22*pow2(s2b))/2. + (3*invdb12*invdgb2*mmsb22*
-     pow2(s2b))/2. + (3*mmsb1*mmsb2*pow2(invdgb1)*pow2(s2b))/2. - (3*mmsb22*
-     pow2(invdgb1)*pow2(s2b))/4. + (7*mmsb22*pow2(invdgb2)*pow2(s2b))/4. -
-     mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) - invdgb1*pow2(invdb12)*pow3(mmsb2) +
-     invdgb2*pow2(invdb12)*pow3(mmsb2) - invdb12*pow2(invdgb1)*pow3(mmsb2) -
-     invdgb1*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) + invdgb2*pow2(invdb12)*pow2(
-     s2b)*pow3(mmsb2) - invdb12*pow2(invdgb1)*pow2(s2b)*pow3(mmsb2) + 2*pow3(
-     invdgb2)*pow3(mmsb2) - (pow2(invdb12)*pow2(invdgb1)*pow4(mmsb2))/4. - (
-     pow2(invdb12)*pow2(invdgb2)*pow4(mmsb2))/4. - (pow2(invdb12)*pow2(invdgb1)
-     *pow2(s2b)*pow4(mmsb2))/4. - (pow2(invdb12)*pow2(invdgb2)*pow2(s2b)*pow4(
-     mmsb2))/4. - (invdgb1*pow3(invdb12)*pow4(mmsb2))/2. + (invdgb2*pow3(
-     invdb12)*pow4(mmsb2))/2. - (invdgb1*pow2(s2b)*pow3(invdb12)*pow4(mmsb2))/
-     2. + (invdgb2*pow2(s2b)*pow3(invdb12)*pow4(mmsb2))/2. - (3*pow4(invdgb2)*
-     pow4(mmsb2))/4. + (pow2(s2b)*pow4(invdgb2)*pow4(mmsb2))/4.))/9.;
+   Fin20(mmsb1,mmsusy,mmu)*((32*mmgl*(mmsb1 - mmsusy)*s2b*pow2(invdgb1))/(3.*mb
+     *mgl) + (8*(2*invdgb1 + (-7*mmsb1 + 3*mmsusy)*pow2(invdgb1) + 4*(mmsb12 -
+     mmsb1*mmsusy)*pow3(invdgb1)))/3.) + Fin20(mmsb2,mmgl,mmu)*((-4*mmgl*s2b*(4
+     *invdgb1 - 22*invdgb2 + 3*(mmsb1 - mmsb2)*pow2(invdgb1)))/(9.*mb*mgl) + (
+     128*invdb12 - invdgb1 - 37*invdgb2 - 8*invdb12*invdgb1*mmsb2 - 120*invdb12
+     *invdgb2*mmsb2 + 108*mmsb2*pow2(invdgb2) - 128*invdb12*pow2(s2b) - 15*
+     invdgb1*pow2(s2b) + 15*invdgb2*pow2(s2b) - 26*invdb12*invdgb1*mmsb2*pow2(
+     s2b) + 154*invdb12*invdgb2*mmsb2*pow2(s2b) + pow2(invdgb1)*(9*mmsb1 - 9*
+     mmsb2 - 26*mmsb1*pow2(s2b)) - 12*mmsb12*pow3(invdgb1) + 12*mmsb1*mmsb2*
+     pow3(invdgb1) - 48*mmsb22*pow3(invdgb2))/9.) + Fin20(mmsb1,mmgl,mmu)*((-4*
+     mmgl*s2b*(22*invdgb1 - 4*invdgb2 + 3*(mmsb1 - mmsb2)*pow2(invdgb2)))/(9.*
+     mb*mgl) + (-128*invdb12 + 83*invdgb1 + 7*invdgb2 + 120*invdb12*invdgb1*
+     mmsb2 + 8*invdb12*invdgb2*mmsb2 + 108*mmsb1*pow2(invdgb1) + 128*invdb12*
+     pow2(s2b) - 139*invdgb1*pow2(s2b) + 11*invdgb2*pow2(s2b) - 154*invdb12*
+     invdgb1*mmsb2*pow2(s2b) + 26*invdb12*invdgb2*mmsb2*pow2(s2b) + pow2(
+     invdgb2)*(-9*mmsb1 + 9*mmsb2 - 26*mmsb2*pow2(s2b)) - 48*mmsb12*pow3(
+     invdgb1) + 12*mmsb1*mmsb2*pow3(invdgb2) - 12*mmsb22*pow3(invdgb2))/9.) +
+     Fin20(mmsb1,mmsb2,mmu)*((4*mmgl*s2b*(invdgb1 - invdgb2 + 3*(mmsb1 - mmsb2)
+     *pow2(invdgb1) + 3*(mmsb1 - mmsb2)*pow2(invdgb2)))/(9.*mb*mgl) + (10*
+     invdgb1 + 2*invdgb2 + 8*invdb12*invdgb1*mmsb2 - 8*invdb12*invdgb2*mmsb2 -
+     11*invdgb1*pow2(s2b) - 11*invdgb2*pow2(s2b) + pow2(invdgb1)*(-21*mmsb1 + 9
+     *mmsb2 + 26*mmsb1*pow2(s2b)) + pow2(invdgb2)*(9*mmsb1 - 21*mmsb2 + 26*
+     mmsb2*pow2(s2b)) + 12*mmsb12*pow3(invdgb1) - 12*mmsb1*mmsb2*pow3(invdgb1)
+     - 12*mmsb1*mmsb2*pow3(invdgb2) + 12*mmsb22*pow3(invdgb2))/9.) + Fin20(mmgl
+     ,mmsusy,mmu)*((-32*mmgl*s2b*(invdgb1 - invdgb2 + (mmsb1 - mmsusy)*pow2(
+     invdgb1) + (-mmsb2 + mmsusy)*pow2(invdgb2)))/(3.*mb*mgl) + (8*(invdgb1 +
+     invdgb2 + 3*(mmsb1 - mmsusy)*pow2(invdgb1) + 3*(mmsb2 - mmsusy)*pow2(
+     invdgb2) - 4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmsusy*pow3(invdgb1) - 4*
+     mmsb22*pow3(invdgb2) + 4*mmsb2*mmsusy*pow3(invdgb2)))/3.) + Fin20(mmsb2,
+     mmsusy,mmu)*((32*mmgl*(-mmsb2 + mmsusy)*s2b*pow2(invdgb2))/(3.*mb*mgl) + (
+     8*(2*invdgb2 + (-7*mmsb2 + 3*mmsusy)*pow2(invdgb2) + 4*(mmsb22 - mmsb2*
+     mmsusy)*pow3(invdgb2)))/3.) + Fin3(mmt,mmsb1,mmst1,mmu)*(-((mmsb1 - mmst1
+     + mmt)*pow2(invdgb1)) + (4*mmgl*(mmsb1 - mmst1 + mmt)*s2b*pow2(invdgb1))/(
+     3.*mb*mgl) + (4*(mmsb12 + mmsb1*(-mmst1 + mmt))*pow3(invdgb1))/3. + s2t*((
+     4*mmt*s2b*(invdgb1 - 2*mmsb1*pow2(invdgb1)))/(3.*mb*mt) + (4*mmgl*mmt*(
+     pow2(invdgb1) - 2*mmsb1*pow3(invdgb1)))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb1,
+     mmst1)*((4*mmgl*s2t*pow2(invdgb1)*((mmsb12 - mmsb1*mmst1)*mmt - mmsb1*pow2
+     (mmt)))/(3.*mgl*mt) + (2*(invdgb1*(mmsb12 - 2*mmsb1*mmst1 - mmsb1*mmt -
+     mmst1*mmt + pow2(mmst1)) + 2*pow2(invdgb1)*(2*mmsb12*mmst1 + mmsb12*mmt +
+     mmsb1*mmst1*mmt - mmsb1*pow2(mmst1) - pow3(mmsb1))))/3.)) + Fin3(mmt,mmsb1
+     ,mmst2,mmu)*(-((mmsb1 - mmst2 + mmt)*pow2(invdgb1)) + (4*mmgl*(mmsb1 -
+     mmst2 + mmt)*s2b*pow2(invdgb1))/(3.*mb*mgl) + (4*(mmsb12 + mmsb1*(-mmst2 +
+     mmt))*pow3(invdgb1))/3. + s2t*((-4*mmt*s2b*(invdgb1 - 2*mmsb1*pow2(invdgb1
+     )))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb1) - 2*mmsb1*pow3(invdgb1)))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmsb1,mmst2)*((4*mmgl*s2t*pow2(invdgb1)*(-(mmsb12*
+     mmt) + mmsb1*mmst2*mmt + mmsb1*pow2(mmt)))/(3.*mgl*mt) + (2*(invdgb1*(
+     mmsb12 - 2*mmsb1*mmst2 - mmsb1*mmt - mmst2*mmt + pow2(mmst2)) + 2*pow2(
+     invdgb1)*(2*mmsb12*mmst2 + mmsb12*mmt + mmsb1*mmst2*mmt - mmsb1*pow2(mmst2
+     ) - pow3(mmsb1))))/3.)) + Fin3(mmt,mmsb2,mmst1,mmu)*(-((mmsb2 - mmst1 +
+     mmt)*pow2(invdgb2)) - (4*mmgl*(mmsb2 - mmst1 + mmt)*s2b*pow2(invdgb2))/(3.
+     *mb*mgl) + (4*(mmsb22 + mmsb2*(-mmst1 + mmt))*pow3(invdgb2))/3. + s2t*((-4
+     *mmt*s2b*(invdgb2 - 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) + (4*mmgl*mmt*(pow2
+     (invdgb2) - 2*mmsb2*pow3(invdgb2)))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb2,
+     mmst1)*((4*mmgl*s2t*pow2(invdgb2)*((mmsb22 - mmsb2*mmst1)*mmt - mmsb2*pow2
+     (mmt)))/(3.*mgl*mt) + (2*(invdgb2*(mmsb22 - 2*mmsb2*mmst1 - mmsb2*mmt -
+     mmst1*mmt + pow2(mmst1)) + 2*pow2(invdgb2)*(2*mmsb22*mmst1 + mmsb22*mmt +
+     mmsb2*mmst1*mmt - mmsb2*pow2(mmst1) - pow3(mmsb2))))/3.)) + Fin3(mmt,mmsb2
+     ,mmst2,mmu)*(-((mmsb2 - mmst2 + mmt)*pow2(invdgb2)) - (4*mmgl*(mmsb2 -
+     mmst2 + mmt)*s2b*pow2(invdgb2))/(3.*mb*mgl) + (4*(mmsb22 + mmsb2*(-mmst2 +
+     mmt))*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(invdgb2 - 2*mmsb2*pow2(invdgb2)
+     ))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb2) - 2*mmsb2*pow3(invdgb2)))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmsb2,mmst2)*((4*mmgl*s2t*pow2(invdgb2)*(-(mmsb22*
+     mmt) + mmsb2*mmst2*mmt + mmsb2*pow2(mmt)))/(3.*mgl*mt) + (2*(invdgb2*(
+     mmsb22 - 2*mmsb2*mmst2 - mmsb2*mmt - mmst2*mmt + pow2(mmst2)) + 2*pow2(
+     invdgb2)*(2*mmsb22*mmst2 + mmsb22*mmt + mmsb2*mmst2*mmt - mmsb2*pow2(mmst2
+     ) - pow3(mmsb2))))/3.)) - (2*mmgl*s2b*(-32*lb1u + 32*lb2u + 32*lb1u*lgu -
+     32*lb2u*lgu + 162*invdgb1*mmsb1 - 36*invdgb2*mmsb1 + 28*invdgb1*lb1u*mmsb1
+      + 24*invdgb2*lb1u*mmsb1 - 216*invdgb1*lgu*mmsb1 + 12*invdgb2*lgu*mmsb1 +
+     50*invdgb1*lb1u*lgu*mmsb1 - 6*invdgb2*lb1u*lgu*mmsb1 + 72*invdgb1*ltu*
+     mmsb1 - 24*invdgb1*lgu*ltu*mmsb1 + 36*invdgb1*mmsb2 - 162*invdgb2*mmsb2 -
+     4*invdgb1*lb1u*mmsb2 + 4*invdgb2*lb1u*mmsb2 - 20*invdgb1*lb2u*mmsb2 - 32*
+     invdgb2*lb2u*mmsb2 + 12*invdgb1*lb1u*lb2u*mmsb2 + 20*invdgb2*lb1u*lb2u*
+     mmsb2 - 12*invdgb1*lgu*mmsb2 + 216*invdgb2*lgu*mmsb2 + 20*invdgb1*lb1u*lgu
+     *mmsb2 - 20*invdgb2*lb1u*lgu*mmsb2 - 6*invdgb1*lb2u*lgu*mmsb2 - 38*invdgb2
+     *lb2u*lgu*mmsb2 - 72*invdgb2*ltu*mmsb2 + 24*invdgb2*lgu*ltu*mmsb2 - 4*
+     invdb12*invdgb1*lb1u*mmsb22 + 4*invdb12*invdgb2*lb1u*mmsb22 + 4*invdb12*
+     invdgb1*lb2u*mmsb22 - 4*invdb12*invdgb2*lb2u*mmsb22 + 4*invdb12*invdgb1*
+     lb1u*lb2u*mmsb22 + 28*invdb12*invdgb2*lb1u*lb2u*mmsb22 + 28*invdb12*
+     invdgb1*lb1u*lgu*mmsb22 - 28*invdb12*invdgb2*lb1u*lgu*mmsb22 - 4*invdb12*
+     invdgb1*lb2u*lgu*mmsb22 + 4*invdb12*invdgb2*lb2u*lgu*mmsb22 - 48*invdgb1*
+     mmst1 + 48*invdgb2*mmst1 - 12*invdgb1*lgu*mmst1 + 12*invdgb2*lgu*mmst1 +
+     12*invdgb1*lt1u*mmst1 - 12*invdgb2*lt1u*mmst1 + 6*invdgb1*lgu*lt1u*mmst1 -
+     6*invdgb2*lgu*lt1u*mmst1 + 36*invdgb1*ltu*mmst1 - 36*invdgb2*ltu*mmst1 -
+     12*invdgb1*lt1u*ltu*mmst1 + 12*invdgb2*lt1u*ltu*mmst1 - 48*invdgb1*mmst2 +
+     48*invdgb2*mmst2 - 12*invdgb1*lgu*mmst2 + 12*invdgb2*lgu*mmst2 + 12*
+     invdgb1*lt2u*mmst2 - 12*invdgb2*lt2u*mmst2 + 6*invdgb1*lgu*lt2u*mmst2 - 6*
+     invdgb2*lgu*lt2u*mmst2 + 36*invdgb1*ltu*mmst2 - 36*invdgb2*ltu*mmst2 - 12*
+     invdgb1*lt2u*ltu*mmst2 + 12*invdgb2*lt2u*ltu*mmst2 + 288*invdgb1*mmsusy -
+     288*invdgb2*mmsusy - 96*invdgb1*lgu*mmsusy + 96*invdgb2*lgu*mmsusy - 192*
+     invdgb1*lsu*mmsusy + 192*invdgb2*lsu*mmsusy + 48*invdgb1*lgu*lsu*mmsusy -
+     48*invdgb2*lgu*lsu*mmsusy - 72*invdgb1*mmt + 72*invdgb2*mmt + 24*invdgb1*
+     lgu*mmt - 24*invdgb2*lgu*mmt + 48*invdgb1*ltu*mmt - 48*invdgb2*ltu*mmt -
+     12*invdgb1*lgu*ltu*mmt + 12*invdgb2*lgu*ltu*mmt + 20*invdgb1*mmsb1*zt2 - 6
+     *invdgb2*mmsb1*zt2 + 6*invdgb1*mmsb2*zt2 - 20*invdgb2*mmsb2*zt2 - 6*
+     invdgb1*mmst1*zt2 + 6*invdgb2*mmst1*zt2 - 6*invdgb1*mmst2*zt2 + 6*invdgb2*
+     mmst2*zt2 + 48*invdgb1*mmsusy*zt2 - 48*invdgb2*mmsusy*zt2 - 12*invdgb1*mmt
+     *zt2 + 12*invdgb2*mmt*zt2 - 11*invdgb1*mmsb1*pow2(lb1u) - 3*invdgb2*mmsb1*
+     pow2(lb1u) - 16*invdgb1*mmsb2*pow2(lb1u) - 16*invdb12*invdgb1*mmsb22*pow2(
+     lb1u) + 3*invdgb1*mmsb2*pow2(lb2u) - 5*invdgb2*mmsb2*pow2(lb2u) - 16*
+     invdb12*invdgb2*mmsb22*pow2(lb2u) + 37*invdgb1*mmsb1*pow2(lgu) - 3*invdgb2
+     *mmsb1*pow2(lgu) - invdgb1*mmsb2*pow2(lgu) - 33*invdgb2*mmsb2*pow2(lgu) -
+     12*invdb12*invdgb1*mmsb22*pow2(lgu) + 12*invdb12*invdgb2*mmsb22*pow2(lgu)
+     + 3*invdgb1*mmst1*pow2(lgu) - 3*invdgb2*mmst1*pow2(lgu) + 3*invdgb1*mmst2*
+     pow2(lgu) - 3*invdgb2*mmst2*pow2(lgu) + 24*invdgb1*mmsusy*pow2(lgu) - 24*
+     invdgb2*mmsusy*pow2(lgu) - 6*invdgb1*mmt*pow2(lgu) + 6*invdgb2*mmt*pow2(
+     lgu) + 24*invdgb1*mmsusy*pow2(lsu) - 24*invdgb2*mmsusy*pow2(lsu) - 3*
+     invdgb1*mmst1*pow2(lt1u) + 3*invdgb2*mmst1*pow2(lt1u) - 3*invdgb1*mmst2*
+     pow2(lt2u) + 3*invdgb2*mmst2*pow2(lt2u) - 12*invdgb1*mmsb1*pow2(ltu) + 12*
+     invdgb2*mmsb2*pow2(ltu) - 6*invdgb1*mmst1*pow2(ltu) + 6*invdgb2*mmst1*pow2
+     (ltu) - 6*invdgb1*mmst2*pow2(ltu) + 6*invdgb2*mmst2*pow2(ltu) - 6*invdgb1*
+     mmt*pow2(ltu) + 6*invdgb2*mmt*pow2(ltu) + 8*lb1u*lgu*pow3(invdgb1)*pow3(
+     mmsb1) - 4*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1) - 4*pow2(lgu)*pow3(invdgb1
+     )*pow3(mmsb1) - 8*invdgb1*lb1u*lb2u*pow2(invdb12)*pow3(mmsb2) + 8*invdgb2*
+     lb1u*lb2u*pow2(invdb12)*pow3(mmsb2) + 8*invdgb1*lb1u*lgu*pow2(invdb12)*
+     pow3(mmsb2) - 8*invdgb2*lb1u*lgu*pow2(invdb12)*pow3(mmsb2) + 8*invdgb1*
+     lb2u*lgu*pow2(invdb12)*pow3(mmsb2) - 8*invdgb2*lb2u*lgu*pow2(invdb12)*pow3
+     (mmsb2) - 8*invdgb1*pow2(invdb12)*pow2(lgu)*pow3(mmsb2) + 8*invdgb2*pow2(
+     invdb12)*pow2(lgu)*pow3(mmsb2) - 8*lb2u*lgu*pow3(invdgb2)*pow3(mmsb2) + 4*
+     pow2(lb2u)*pow3(invdgb2)*pow3(mmsb2) + 4*pow2(lgu)*pow3(invdgb2)*pow3(
+     mmsb2) + pow2(invdgb2)*(2*lgu*(3*(-2 + lb1u)*mmsb1*mmsb2 + 2*(45 + lb1u)*
+     mmsb22 + 3*mmsb2*((-2 + lt1u)*mmst1 + (-2 + lt2u)*mmst2 - 16*mmsusy + 8*
+     lsu*mmsusy + 4*mmt - 2*ltu*mmt)) - 2*lb2u*(3*(-2 + lb1u)*mmsb1*mmsb2 + (90
+      + 2*lb1u - 39*lgu)*mmsb22 + 3*mmsb2*((-2 + lt1u)*mmst1 + (-2 + lt2u)*
+     mmst2 - 16*mmsusy + 8*lsu*mmsusy + 4*mmt - 2*ltu*mmt)) - (3*mmsb1*mmsb2 -
+     31*mmsb22 + 3*mmsb2*(mmst1 + mmst2 + 8*mmsusy - 2*mmt))*pow2(lb2u) - 4*
+     invdb12*(lb1u*(lb2u - lgu) - lb2u*lgu)*pow3(mmsb2) + pow2(lgu)*(3*mmsb1*
+     mmsb2 - 109*mmsb22 + 3*mmsb2*mmst1 + 3*mmsb2*mmst2 + 24*mmsb2*mmsusy - 6*
+     mmsb2*mmt - 4*invdb12*pow3(mmsb2))) + pow2(invdgb1)*((-31*mmsb12 + 3*mmsb1
+     *(mmsb2 + mmst1 + mmst2 + 8*mmsusy - 2*mmt))*pow2(lb1u) + pow2(lgu)*(105*
+     mmsb12 - 7*mmsb1*mmsb2 - 4*mmsb22 - 3*mmsb1*mmst1 - 3*mmsb1*mmst2 - 24*
+     mmsb1*mmsusy + 6*mmsb1*mmt - 4*invdb12*pow3(mmsb2)) - 2*(lgu*(90*mmsb12 +
+     (-6 + lb2u)*mmsb1*mmsb2 - 2*lb2u*mmsb22 + 3*mmsb1*((-2 + lt1u)*mmst1 + (-2
+      + lt2u)*mmst2 - 16*mmsusy + 8*lsu*mmsusy + 4*mmt - 2*ltu*mmt)) + lb1u*((-
+     90 + 37*lgu)*mmsb12 + 2*(lb2u - lgu)*mmsb22 - mmsb1*((-6 + lb2u + 2*lgu)*
+     mmsb2 + 3*((-2 + lt1u)*mmst1 + (-2 + lt2u)*mmst2 - 16*mmsusy + 8*lsu*
+     mmsusy + 4*mmt - 2*ltu*mmt))) + 2*invdb12*(lb1u*(lb2u - lgu) - lb2u*lgu)*
+     pow3(mmsb2)))))/(9.*mb*mgl) + Fin3(mmt,mmst1,mmgl,mmu)*((4*mmgl*s2b*(
+     invdgb1 - invdgb2 - (mmsb1 - mmst1 + mmt)*pow2(invdgb1) + (mmsb2 - mmst1 +
+     mmt)*pow2(invdgb2)))/(3.*mb*mgl) + (-3*invdgb1 - 3*invdgb2 + (7*mmsb1 - 3*
+     mmst1 + 3*mmt)*pow2(invdgb1) + (7*mmsb2 - 3*mmst1 + 3*mmt)*pow2(invdgb2) -
+     4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmst1*pow3(invdgb1) - 4*mmsb1*mmt*pow3(
+     invdgb1) - 4*mmsb22*pow3(invdgb2) + 4*mmsb2*mmst1*pow3(invdgb2) - 4*mmsb2*
+     mmt*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(-invdgb1 + invdgb2 + 2*mmsb1*pow2
+     (invdgb1) - 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb1
+     ) + pow2(invdgb2) - 2*(mmsb1*pow3(invdgb1) + mmsb2*pow3(invdgb2))))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmst1,mmgl)*((8*mmgl*s2b*(mmsb1 - invdgb1*mmsb12 -
+     mmsb2 + invdgb2*mmsb22 + 2*invdgb1*mmsb1*mmst1 - 2*invdgb2*mmsb2*mmst1 +
+     invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt + invdgb1*mmst1*mmt - invdgb2*mmst1*
+     mmt + (-invdgb1 + invdgb2)*pow2(mmst1)))/(3.*mb*mgl) + s2t*((-8*s2b*((
+     mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + invdgb1*mmsb1*mmst1 -
+     invdgb2*mmsb2*mmst1)*mmt + (invdgb1*mmsb1 - invdgb2*mmsb2)*pow2(mmt)))/(3.
+     *mb*mt) - (4*mmgl*(-2*mmt + 2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt -
+     invdgb1*mmst1*mmt - invdgb2*mmst1*mmt - invdgb1*pow2(mmt) - invdgb2*pow2(
+     mmt) + pow2(invdgb1)*(-(mmsb12*mmt) + mmsb1*mmst1*mmt + mmsb1*pow2(mmt)) +
+     pow2(invdgb2)*(-(mmsb22*mmt) + mmsb2*mmst1*mmt + mmsb2*pow2(mmt))))/(3.*
+     mgl*mt)) - (4*(2*mmgl + 2*mmsb1 - 3*invdgb1*mmsb12 + 2*mmsb2 - 3*invdgb2*
+     mmsb22 - 4*mmst1 + 4*invdgb1*mmsb1*mmst1 + 4*invdgb2*mmsb2*mmst1 - 2*mmt +
+     2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt + invdgb1*mmst1*mmt + invdgb2*
+     mmst1*mmt - invdgb1*pow2(mmst1) - invdgb2*pow2(mmst1) + pow2(invdgb1)*(-2*
+     mmsb12*mmst1 - mmsb12*mmt - mmsb1*mmst1*mmt + mmsb1*pow2(mmst1) + pow3(
+     mmsb1)) + pow2(invdgb2)*(-2*mmsb22*mmst1 - mmsb22*mmt - mmsb2*mmst1*mmt +
+     mmsb2*pow2(mmst1) + pow3(mmsb2))))/3.)) + Fin3(mmt,mmst2,mmgl,mmu)*((4*
+     mmgl*s2b*(invdgb1 - invdgb2 - (mmsb1 - mmst2 + mmt)*pow2(invdgb1) + (mmsb2
+      - mmst2 + mmt)*pow2(invdgb2)))/(3.*mb*mgl) + (-3*invdgb1 - 3*invdgb2 + (7
+     *mmsb1 - 3*mmst2 + 3*mmt)*pow2(invdgb1) + (7*mmsb2 - 3*mmst2 + 3*mmt)*pow2
+     (invdgb2) - 4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmst2*pow3(invdgb1) - 4*mmsb1
+     *mmt*pow3(invdgb1) - 4*mmsb22*pow3(invdgb2) + 4*mmsb2*mmst2*pow3(invdgb2)
+     - 4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(invdgb1 - invdgb2 - 2*
+     mmsb1*pow2(invdgb1) + 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) + (4*mmgl*mmt*(
+     pow2(invdgb1) + pow2(invdgb2) - 2*(mmsb1*pow3(invdgb1) + mmsb2*pow3(
+     invdgb2))))/(3.*mgl*mt)) + DeltaInv(mmt,mmst2,mmgl)*((8*mmgl*s2b*(mmsb1 -
+     invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + 2*invdgb1*mmsb1*mmst2 - 2*
+     invdgb2*mmsb2*mmst2 + invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt + invdgb1*
+     mmst2*mmt - invdgb2*mmst2*mmt + (-invdgb1 + invdgb2)*pow2(mmst2)))/(3.*mb*
+     mgl) + s2t*((8*s2b*((mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 +
+     invdgb1*mmsb1*mmst2 - invdgb2*mmsb2*mmst2)*mmt + (invdgb1*mmsb1 - invdgb2*
+     mmsb2)*pow2(mmt)))/(3.*mb*mt) + (4*mmgl*(-2*mmt + 2*invdgb1*mmsb1*mmt + 2*
+     invdgb2*mmsb2*mmt - invdgb1*mmst2*mmt - invdgb2*mmst2*mmt - invdgb1*pow2(
+     mmt) - invdgb2*pow2(mmt) + pow2(invdgb1)*(-(mmsb12*mmt) + mmsb1*mmst2*mmt
+     + mmsb1*pow2(mmt)) + pow2(invdgb2)*(-(mmsb22*mmt) + mmsb2*mmst2*mmt +
+     mmsb2*pow2(mmt))))/(3.*mgl*mt)) - (4*(2*mmgl + 2*mmsb1 - 3*invdgb1*mmsb12
+     + 2*mmsb2 - 3*invdgb2*mmsb22 - 4*mmst2 + 4*invdgb1*mmsb1*mmst2 + 4*invdgb2
+     *mmsb2*mmst2 - 2*mmt + 2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt + invdgb1
+     *mmst2*mmt + invdgb2*mmst2*mmt - invdgb1*pow2(mmst2) - invdgb2*pow2(mmst2)
+     + pow2(invdgb1)*(-2*mmsb12*mmst2 - mmsb12*mmt - mmsb1*mmst2*mmt + mmsb1*
+     pow2(mmst2) + pow3(mmsb1)) + pow2(invdgb2)*(-2*mmsb22*mmst2 - mmsb22*mmt -
+     mmsb2*mmst2*mmt + mmsb2*pow2(mmst2) + pow3(mmsb2))))/3.)) + DeltaInv(mmt,
+     mmsb1,mmst1)*((2*mmgl*s2t*pow2(invdgb1)*(-14*mmsb12*mmst1*mmt + 6*lb1u*
+     mmsb12*mmst1*mmt - 6*lt1u*mmsb12*mmst1*mmt + 2*lb1u*lt1u*mmsb12*mmst1*mmt
+     + 12*ltu*mmsb12*mmst1*mmt - 4*lb1u*ltu*mmsb12*mmst1*mmt - 2*mmsb12*mmst1*
+     mmt*zt2 - 2*mmsb12*mmst1*mmt*pow2(ltu) + 6*lt1u*mmsb1*mmt*pow2(mmst1) - 2*
+     lb1u*lt1u*mmsb1*mmt*pow2(mmst1) - 6*ltu*mmsb1*mmt*pow2(mmst1) + 2*lb1u*ltu
+     *mmsb1*mmt*pow2(mmst1) + mmsb1*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb12*pow2(
+     mmt) + 6*lb1u*mmsb12*pow2(mmt) + 6*ltu*mmsb12*pow2(mmt) - 2*lb1u*ltu*
+     mmsb12*pow2(mmt) - 28*mmsb1*mmst1*pow2(mmt) + 6*lt1u*mmsb1*mmst1*pow2(mmt)
+     + 2*lb1u*lt1u*mmsb1*mmst1*pow2(mmt) + 18*ltu*mmsb1*mmst1*pow2(mmt) - 2*
+     lb1u*ltu*mmsb1*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb1*mmst1*pow2(mmt) - 2*
+     mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst1*zt2*pow2(mmt) - mmsb12*pow2(ltu)*pow2
+     (mmt) - 3*mmsb1*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(mmsb12*mmst1*mmt -
+     mmsb1*mmt*pow2(mmst1) - mmsb1*mmst1*pow2(mmt)) + 14*mmt*pow3(mmsb1) - 6*
+     lb1u*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lb1u*ltu*mmt*pow3(mmsb1)
+     + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2(lb1u)*(mmsb12*
+     mmst1*mmt + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))))/(3.*mgl*mt) + (-(invdgb1
+     *(14*mmsb12*mmst1 - 12*lb1u*mmsb12*mmst1 + 6*lt1u*mmsb12*mmst1 - 6*ltu*
+     mmsb12*mmst1 + 4*lb1u*ltu*mmsb12*mmst1 - 2*lt1u*ltu*mmsb12*mmst1 + 14*
+     mmsb12*mmt - 6*lb1u*mmsb12*mmt - 6*ltu*mmsb12*mmt + 2*lb1u*ltu*mmsb12*mmt
+     + 56*mmsb1*mmst1*mmt - 6*lb1u*mmsb1*mmst1*mmt - 6*lt1u*mmsb1*mmst1*mmt - 4
+     *lb1u*lt1u*mmsb1*mmst1*mmt - 36*ltu*mmsb1*mmst1*mmt + 6*lb1u*ltu*mmsb1*
+     mmst1*mmt + 6*lt1u*ltu*mmsb1*mmst1*mmt + 2*mmsb12*mmst1*zt2 + 2*mmsb12*mmt
+     *zt2 + 8*mmsb1*mmst1*mmt*zt2 + mmsb12*mmst1*pow2(ltu) + mmsb12*mmt*pow2(
+     ltu) + 6*mmsb1*mmst1*mmt*pow2(ltu) + 14*mmsb1*pow2(mmst1) + 6*lb1u*mmsb1*
+     pow2(mmst1) - 12*lt1u*mmsb1*pow2(mmst1) - 6*ltu*mmsb1*pow2(mmst1) - 2*lb1u
+     *ltu*mmsb1*pow2(mmst1) + 4*lt1u*ltu*mmsb1*pow2(mmst1) + 14*mmt*pow2(mmst1)
+     - 6*lt1u*mmt*pow2(mmst1) - 6*ltu*mmt*pow2(mmst1) + 2*lt1u*ltu*mmt*pow2(
+     mmst1) + 2*mmsb1*zt2*pow2(mmst1) + 2*mmt*zt2*pow2(mmst1) + mmsb1*pow2(ltu)
+     *pow2(mmst1) + mmt*pow2(ltu)*pow2(mmst1) + pow2(lb1u)*(2*mmsb12*mmst1 +
+     mmsb12*mmt + mmsb1*mmst1*mmt - mmsb1*pow2(mmst1) - pow3(mmsb1)) - 14*pow3(
+     mmsb1) + 6*lb1u*pow3(mmsb1) + 6*ltu*pow3(mmsb1) - 2*lb1u*ltu*pow3(mmsb1) -
+     2*zt2*pow3(mmsb1) - pow2(ltu)*pow3(mmsb1) + pow2(lt1u)*(-(mmsb12*mmst1) +
+     mmsb1*mmst1*mmt + (2*mmsb1 + mmt)*pow2(mmst1) - pow3(mmst1)) - 14*pow3(
+     mmst1) + 6*lt1u*pow3(mmst1) + 6*ltu*pow3(mmst1) - 2*lt1u*ltu*pow3(mmst1) -
+     2*zt2*pow3(mmst1) - pow2(ltu)*pow3(mmst1))) - 2*pow2(invdgb1)*(-56*mmsb12*
+     mmst1*mmt + 6*lb1u*mmsb12*mmst1*mmt + 6*lt1u*mmsb12*mmst1*mmt + 4*lb1u*
+     lt1u*mmsb12*mmst1*mmt + 36*ltu*mmsb12*mmst1*mmt - 6*lb1u*ltu*mmsb12*mmst1*
+     mmt - 6*lt1u*ltu*mmsb12*mmst1*mmt - 8*mmsb12*mmst1*mmt*zt2 - 6*mmsb12*
+     mmst1*mmt*pow2(ltu) - 14*mmsb12*pow2(mmst1) - 6*lb1u*mmsb12*pow2(mmst1) +
+     12*lt1u*mmsb12*pow2(mmst1) + 6*ltu*mmsb12*pow2(mmst1) + 2*lb1u*ltu*mmsb12*
+     pow2(mmst1) - 4*lt1u*ltu*mmsb12*pow2(mmst1) - 14*mmsb1*mmt*pow2(mmst1) + 6
+     *lt1u*mmsb1*mmt*pow2(mmst1) + 6*ltu*mmsb1*mmt*pow2(mmst1) - 2*lt1u*ltu*
+     mmsb1*mmt*pow2(mmst1) - 2*mmsb12*zt2*pow2(mmst1) - 2*mmsb1*mmt*zt2*pow2(
+     mmst1) - mmsb12*pow2(ltu)*pow2(mmst1) - mmsb1*mmt*pow2(ltu)*pow2(mmst1) -
+     14*mmst1*pow3(mmsb1) + 12*lb1u*mmst1*pow3(mmsb1) - 6*lt1u*mmst1*pow3(mmsb1
+     ) + 6*ltu*mmst1*pow3(mmsb1) - 4*lb1u*ltu*mmst1*pow3(mmsb1) + 2*lt1u*ltu*
+     mmst1*pow3(mmsb1) - 14*mmt*pow3(mmsb1) + 6*lb1u*mmt*pow3(mmsb1) + 6*ltu*
+     mmt*pow3(mmsb1) - 2*lb1u*ltu*mmt*pow3(mmsb1) - 2*mmst1*zt2*pow3(mmsb1) - 2
+     *mmt*zt2*pow3(mmsb1) - mmst1*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(
+     mmsb1) + 14*mmsb1*pow3(mmst1) - 6*lt1u*mmsb1*pow3(mmst1) - 6*ltu*mmsb1*
+     pow3(mmst1) + 2*lt1u*ltu*mmsb1*pow3(mmst1) + 2*mmsb1*zt2*pow3(mmst1) +
+     mmsb1*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb12*mmst1*mmt) - (2*mmsb12
+     + mmsb1*mmt)*pow2(mmst1) + mmst1*pow3(mmsb1) + mmsb1*pow3(mmst1)) + 14*
+     pow4(mmsb1) - 6*lb1u*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lb1u*ltu*pow4(
+     mmsb1) + 2*zt2*pow4(mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lb1u)*(-(mmsb12*
+     mmst1*mmt) + mmsb12*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb1) + pow4(mmsb1
+     ))))/3.) + DeltaInv(mmt,mmsb1,mmst2)*((-2*mmgl*s2t*pow2(invdgb1)*(-14*
+     mmsb12*mmst2*mmt + 6*lb1u*mmsb12*mmst2*mmt - 6*lt2u*mmsb12*mmst2*mmt + 2*
+     lb1u*lt2u*mmsb12*mmst2*mmt + 12*ltu*mmsb12*mmst2*mmt - 4*lb1u*ltu*mmsb12*
+     mmst2*mmt - 2*mmsb12*mmst2*mmt*zt2 - 2*mmsb12*mmst2*mmt*pow2(ltu) + 6*lt2u
+     *mmsb1*mmt*pow2(mmst2) - 2*lb1u*lt2u*mmsb1*mmt*pow2(mmst2) - 6*ltu*mmsb1*
+     mmt*pow2(mmst2) + 2*lb1u*ltu*mmsb1*mmt*pow2(mmst2) + mmsb1*mmt*pow2(ltu)*
+     pow2(mmst2) - 14*mmsb12*pow2(mmt) + 6*lb1u*mmsb12*pow2(mmt) + 6*ltu*mmsb12
+     *pow2(mmt) - 2*lb1u*ltu*mmsb12*pow2(mmt) - 28*mmsb1*mmst2*pow2(mmt) + 6*
+     lt2u*mmsb1*mmst2*pow2(mmt) + 2*lb1u*lt2u*mmsb1*mmst2*pow2(mmt) + 18*ltu*
+     mmsb1*mmst2*pow2(mmt) - 2*lb1u*ltu*mmsb1*mmst2*pow2(mmt) - 4*lt2u*ltu*
+     mmsb1*mmst2*pow2(mmt) - 2*mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst2*zt2*pow2(
+     mmt) - mmsb12*pow2(ltu)*pow2(mmt) - 3*mmsb1*mmst2*pow2(ltu)*pow2(mmt) +
+     pow2(lt2u)*(mmsb12*mmst2*mmt - mmsb1*mmt*pow2(mmst2) - mmsb1*mmst2*pow2(
+     mmt)) + 14*mmt*pow3(mmsb1) - 6*lb1u*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1
+     ) + 2*lb1u*ltu*mmt*pow3(mmsb1) + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*
+     pow3(mmsb1) - pow2(lb1u)*(mmsb12*mmst2*mmt + mmsb12*pow2(mmt) - mmt*pow3(
+     mmsb1))))/(3.*mgl*mt) + (-(invdgb1*(14*mmsb12*mmst2 - 12*lb1u*mmsb12*mmst2
+      + 6*lt2u*mmsb12*mmst2 - 6*ltu*mmsb12*mmst2 + 4*lb1u*ltu*mmsb12*mmst2 - 2*
+     lt2u*ltu*mmsb12*mmst2 + 14*mmsb12*mmt - 6*lb1u*mmsb12*mmt - 6*ltu*mmsb12*
+     mmt + 2*lb1u*ltu*mmsb12*mmt + 56*mmsb1*mmst2*mmt - 6*lb1u*mmsb1*mmst2*mmt
+     - 6*lt2u*mmsb1*mmst2*mmt - 4*lb1u*lt2u*mmsb1*mmst2*mmt - 36*ltu*mmsb1*
+     mmst2*mmt + 6*lb1u*ltu*mmsb1*mmst2*mmt + 6*lt2u*ltu*mmsb1*mmst2*mmt + 2*
+     mmsb12*mmst2*zt2 + 2*mmsb12*mmt*zt2 + 8*mmsb1*mmst2*mmt*zt2 + mmsb12*mmst2
+     *pow2(ltu) + mmsb12*mmt*pow2(ltu) + 6*mmsb1*mmst2*mmt*pow2(ltu) + 14*mmsb1
+     *pow2(mmst2) + 6*lb1u*mmsb1*pow2(mmst2) - 12*lt2u*mmsb1*pow2(mmst2) - 6*
+     ltu*mmsb1*pow2(mmst2) - 2*lb1u*ltu*mmsb1*pow2(mmst2) + 4*lt2u*ltu*mmsb1*
+     pow2(mmst2) + 14*mmt*pow2(mmst2) - 6*lt2u*mmt*pow2(mmst2) - 6*ltu*mmt*pow2
+     (mmst2) + 2*lt2u*ltu*mmt*pow2(mmst2) + 2*mmsb1*zt2*pow2(mmst2) + 2*mmt*zt2
+     *pow2(mmst2) + mmsb1*pow2(ltu)*pow2(mmst2) + mmt*pow2(ltu)*pow2(mmst2) +
+     pow2(lb1u)*(2*mmsb12*mmst2 + mmsb12*mmt + mmsb1*mmst2*mmt - mmsb1*pow2(
+     mmst2) - pow3(mmsb1)) - 14*pow3(mmsb1) + 6*lb1u*pow3(mmsb1) + 6*ltu*pow3(
+     mmsb1) - 2*lb1u*ltu*pow3(mmsb1) - 2*zt2*pow3(mmsb1) - pow2(ltu)*pow3(mmsb1
+     ) + pow2(lt2u)*(-(mmsb12*mmst2) + mmsb1*mmst2*mmt + (2*mmsb1 + mmt)*pow2(
+     mmst2) - pow3(mmst2)) - 14*pow3(mmst2) + 6*lt2u*pow3(mmst2) + 6*ltu*pow3(
+     mmst2) - 2*lt2u*ltu*pow3(mmst2) - 2*zt2*pow3(mmst2) - pow2(ltu)*pow3(mmst2
+     ))) - 2*pow2(invdgb1)*(-56*mmsb12*mmst2*mmt + 6*lb1u*mmsb12*mmst2*mmt + 6*
+     lt2u*mmsb12*mmst2*mmt + 4*lb1u*lt2u*mmsb12*mmst2*mmt + 36*ltu*mmsb12*mmst2
+     *mmt - 6*lb1u*ltu*mmsb12*mmst2*mmt - 6*lt2u*ltu*mmsb12*mmst2*mmt - 8*
+     mmsb12*mmst2*mmt*zt2 - 6*mmsb12*mmst2*mmt*pow2(ltu) - 14*mmsb12*pow2(mmst2
+     ) - 6*lb1u*mmsb12*pow2(mmst2) + 12*lt2u*mmsb12*pow2(mmst2) + 6*ltu*mmsb12*
+     pow2(mmst2) + 2*lb1u*ltu*mmsb12*pow2(mmst2) - 4*lt2u*ltu*mmsb12*pow2(mmst2
+     ) - 14*mmsb1*mmt*pow2(mmst2) + 6*lt2u*mmsb1*mmt*pow2(mmst2) + 6*ltu*mmsb1*
+     mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb1*mmt*pow2(mmst2) - 2*mmsb12*zt2*pow2(
+     mmst2) - 2*mmsb1*mmt*zt2*pow2(mmst2) - mmsb12*pow2(ltu)*pow2(mmst2) -
+     mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*pow3(mmsb1) + 12*lb1u*mmst2*
+     pow3(mmsb1) - 6*lt2u*mmst2*pow3(mmsb1) + 6*ltu*mmst2*pow3(mmsb1) - 4*lb1u*
+     ltu*mmst2*pow3(mmsb1) + 2*lt2u*ltu*mmst2*pow3(mmsb1) - 14*mmt*pow3(mmsb1)
+     + 6*lb1u*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1) - 2*lb1u*ltu*mmt*pow3(
+     mmsb1) - 2*mmst2*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(mmsb1) - mmst2*pow2(ltu)
+     *pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*mmsb1*pow3(mmst2) - 6*lt2u*
+     mmsb1*pow3(mmst2) - 6*ltu*mmsb1*pow3(mmst2) + 2*lt2u*ltu*mmsb1*pow3(mmst2)
+     + 2*mmsb1*zt2*pow3(mmst2) + mmsb1*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(
+     mmsb12*mmst2*mmt) - (2*mmsb12 + mmsb1*mmt)*pow2(mmst2) + mmst2*pow3(mmsb1)
+     + mmsb1*pow3(mmst2)) + 14*pow4(mmsb1) - 6*lb1u*pow4(mmsb1) - 6*ltu*pow4(
+     mmsb1) + 2*lb1u*ltu*pow4(mmsb1) + 2*zt2*pow4(mmsb1) + pow2(ltu)*pow4(mmsb1
+     ) + pow2(lb1u)*(-(mmsb12*mmst2*mmt) + mmsb12*pow2(mmst2) - (2*mmst2 + mmt)
+     *pow3(mmsb1) + pow4(mmsb1))))/3.) + (-3659 + 450*lb1u - 318*lb2u + 6096*
+     lgu + 384*lb1u*lgu + 384*lb2u*lgu + 528*lsu + 66*lt1u + 66*lt2u - 744*ltu
+     + 288*lgu*ltu - 432*invdgb1*mmsb1 + 324*invdgb2*mmsb1 + 708*invdgb1*lb1u*
+     mmsb1 - 216*invdgb2*lb1u*mmsb1 - 1044*invdgb1*lgu*mmsb1 - 108*invdgb2*lgu*
+     mmsb1 - 330*invdgb1*lb1u*lgu*mmsb1 + 54*invdgb2*lb1u*lgu*mmsb1 + 1080*
+     invdgb1*ltu*mmsb1 - 72*invdgb1*lb1u*ltu*mmsb1 - 288*invdgb1*lgu*ltu*mmsb1
+     + 5340*invdgb1*mmsb2 - 5448*invdgb2*mmsb2 + 768*invdb12*lb1u*mmsb2 - 792*
+     invdgb1*lb1u*mmsb2 + 24*invdgb2*lb1u*mmsb2 - 768*invdb12*lb2u*mmsb2 - 264*
+     invdgb1*lb2u*mmsb2 + 1524*invdgb2*lb2u*mmsb2 - 24*invdgb1*lb1u*lb2u*mmsb2
+     + 24*invdgb2*lb1u*lb2u*mmsb2 - 3588*invdgb1*lgu*mmsb2 + 2436*invdgb2*lgu*
+     mmsb2 + 24*invdgb1*lb1u*lgu*mmsb2 - 24*invdgb2*lb1u*lgu*mmsb2 + 78*invdgb1
+     *lb2u*lgu*mmsb2 - 354*invdgb2*lb2u*lgu*mmsb2 + 1080*invdgb2*ltu*mmsb2 - 72
+     *invdgb2*lb2u*ltu*mmsb2 - 288*invdgb2*lgu*ltu*mmsb2 + 5016*invdb12*invdgb1
+     *mmsb22 - 5016*invdb12*invdgb2*mmsb22 - 768*invdb12*invdgb1*lb1u*mmsb22 -
+     72*invdb12*invdgb1*lb2u*mmsb22 + 840*invdb12*invdgb2*lb2u*mmsb22 + 24*
+     invdb12*invdgb1*lb1u*lb2u*mmsb22 - 24*invdb12*invdgb2*lb1u*lb2u*mmsb22 -
+     3480*invdb12*invdgb1*lgu*mmsb22 + 3480*invdb12*invdgb2*lgu*mmsb22 - 24*
+     invdb12*invdgb1*lb1u*lgu*mmsb22 + 24*invdb12*invdgb2*lb1u*lgu*mmsb22 - 24*
+     invdb12*invdgb1*lb2u*lgu*mmsb22 + 24*invdb12*invdgb2*lb2u*lgu*mmsb22 - 432
+     *invdgb1*mmst1 - 432*invdgb2*mmst1 - 108*invdgb1*lgu*mmst1 - 108*invdgb2*
+     lgu*mmst1 + 108*invdgb1*lt1u*mmst1 + 108*invdgb2*lt1u*mmst1 + 54*invdgb1*
+     lgu*lt1u*mmst1 + 54*invdgb2*lgu*lt1u*mmst1 + 324*invdgb1*ltu*mmst1 + 324*
+     invdgb2*ltu*mmst1 - 108*invdgb1*lt1u*ltu*mmst1 - 108*invdgb2*lt1u*ltu*
+     mmst1 - 432*invdgb1*mmst2 - 432*invdgb2*mmst2 - 108*invdgb1*lgu*mmst2 -
+     108*invdgb2*lgu*mmst2 + 108*invdgb1*lt2u*mmst2 + 108*invdgb2*lt2u*mmst2 +
+     54*invdgb1*lgu*lt2u*mmst2 + 54*invdgb2*lgu*lt2u*mmst2 + 324*invdgb1*ltu*
+     mmst2 + 324*invdgb2*ltu*mmst2 - 108*invdgb1*lt2u*ltu*mmst2 - 108*invdgb2*
+     lt2u*ltu*mmst2 + 2592*invdgb1*mmsusy + 2592*invdgb2*mmsusy - 864*invdgb1*
+     lgu*mmsusy - 864*invdgb2*lgu*mmsusy - 1728*invdgb1*lsu*mmsusy - 1728*
+     invdgb2*lsu*mmsusy + 432*invdgb1*lgu*lsu*mmsusy + 432*invdgb2*lgu*lsu*
+     mmsusy - 648*invdgb1*mmt - 648*invdgb2*mmt + 216*invdgb1*lgu*mmt + 216*
+     invdgb2*lgu*mmt + 432*invdgb1*ltu*mmt + 432*invdgb2*ltu*mmt - 108*invdgb1*
+     lgu*ltu*mmt - 108*invdgb2*lgu*ltu*mmt - 432*zt2 - 186*invdgb1*mmsb1*zt2 +
+     54*invdgb2*mmsb1*zt2 + 774*invdgb1*mmsb2*zt2 - 906*invdgb2*mmsb2*zt2 + 720
+     *invdb12*invdgb1*mmsb22*zt2 - 720*invdb12*invdgb2*mmsb22*zt2 - 54*invdgb1*
+     mmst1*zt2 - 54*invdgb2*mmst1*zt2 - 54*invdgb1*mmst2*zt2 - 54*invdgb2*mmst2
+     *zt2 + 432*invdgb1*mmsusy*zt2 + 432*invdgb2*mmsusy*zt2 - 108*invdgb1*mmt*
+     zt2 - 108*invdgb2*mmt*zt2 - 366*pow2(lb1u) + 243*invdgb1*mmsb1*pow2(lb1u)
+     + 27*invdgb2*mmsb1*pow2(lb1u) - 384*invdb12*mmsb2*pow2(lb1u) + 384*invdgb1
+     *mmsb2*pow2(lb1u) + 384*invdb12*invdgb1*mmsb22*pow2(lb1u) + 18*pow2(lb2u)
+     + 384*invdb12*mmsb2*pow2(lb2u) + 27*invdgb1*mmsb2*pow2(lb2u) - 141*invdgb2
+     *mmsb2*pow2(lb2u) - 384*invdb12*invdgb2*mmsb22*pow2(lb2u) - 1524*pow2(lgu)
+     + 255*invdgb1*mmsb1*pow2(lgu) + 27*invdgb2*mmsb1*pow2(lgu) + 1059*invdgb1*
+     mmsb2*pow2(lgu) - 777*invdgb2*mmsb2*pow2(lgu) + 1080*invdb12*invdgb1*
+     mmsb22*pow2(lgu) - 1080*invdb12*invdgb2*mmsb22*pow2(lgu) + 27*invdgb1*
+     mmst1*pow2(lgu) + 27*invdgb2*mmst1*pow2(lgu) + 27*invdgb1*mmst2*pow2(lgu)
+     + 27*invdgb2*mmst2*pow2(lgu) + 216*invdgb1*mmsusy*pow2(lgu) + 216*invdgb2*
+     mmsusy*pow2(lgu) - 54*invdgb1*mmt*pow2(lgu) - 54*invdgb2*mmt*pow2(lgu) +
+     144*pow2(lsu) + 216*invdgb1*mmsusy*pow2(lsu) + 216*invdgb2*mmsusy*pow2(lsu
+     ) + 18*pow2(lt1u) - 27*invdgb1*mmst1*pow2(lt1u) - 27*invdgb2*mmst1*pow2(
+     lt1u) + 18*pow2(lt2u) - 27*invdgb1*mmst2*pow2(lt2u) - 27*invdgb2*mmst2*
+     pow2(lt2u) + 216*pow2(ltu) - 180*invdgb1*mmsb1*pow2(ltu) - 180*invdgb2*
+     mmsb2*pow2(ltu) - 54*invdgb1*mmst1*pow2(ltu) - 54*invdgb2*mmst1*pow2(ltu)
+     - 54*invdgb1*mmst2*pow2(ltu) - 54*invdgb2*mmst2*pow2(ltu) - 54*invdgb1*mmt
+     *pow2(ltu) - 54*invdgb2*mmt*pow2(ltu) + 3840*pow2(s2b) - 1152*lb1u*pow2(
+     s2b) - 384*lb2u*pow2(s2b) - 2304*lgu*pow2(s2b) + 384*lb1u*lgu*pow2(s2b) +
+     384*lb2u*lgu*pow2(s2b) - 4926*invdgb1*mmsb1*pow2(s2b) - 144*invdgb2*mmsb1*
+     pow2(s2b) + 2268*invdgb1*lb1u*mmsb1*pow2(s2b) + 144*invdgb2*lb1u*mmsb1*
+     pow2(s2b) - 96*invdgb2*lb2u*mmsb1*pow2(s2b) + 96*invdgb2*lb1u*lb2u*mmsb1*
+     pow2(s2b) + 2208*invdgb1*lgu*mmsb1*pow2(s2b) + 96*invdgb2*lgu*mmsb1*pow2(
+     s2b) - 672*invdgb1*lb1u*lgu*mmsb1*pow2(s2b) - 96*invdgb2*lb1u*lgu*mmsb1*
+     pow2(s2b) - 7728*invdgb1*mmsb2*pow2(s2b) + 2658*invdgb2*mmsb2*pow2(s2b) -
+     768*invdb12*lb1u*mmsb2*pow2(s2b) + 1116*invdgb1*lb1u*mmsb2*pow2(s2b) - 444
+     *invdgb2*lb1u*mmsb2*pow2(s2b) + 768*invdb12*lb2u*mmsb2*pow2(s2b) + 564*
+     invdgb1*lb2u*mmsb2*pow2(s2b) + 1080*invdgb2*lb2u*mmsb2*pow2(s2b) + 18*
+     invdgb1*lb1u*lb2u*mmsb2*pow2(s2b) + 78*invdgb2*lb1u*lb2u*mmsb2*pow2(s2b) +
+     4944*invdgb1*lgu*mmsb2*pow2(s2b) - 2640*invdgb2*lgu*mmsb2*pow2(s2b) - 78*
+     invdgb1*lb1u*lgu*mmsb2*pow2(s2b) + 78*invdgb2*lb1u*lgu*mmsb2*pow2(s2b) -
+     174*invdgb1*lb2u*lgu*mmsb2*pow2(s2b) - 594*invdgb2*lb2u*lgu*mmsb2*pow2(s2b
+     ) - 7584*invdb12*invdgb1*mmsb22*pow2(s2b) + 7584*invdb12*invdgb2*mmsb22*
+     pow2(s2b) + 1236*invdb12*invdgb1*lb1u*mmsb22*pow2(s2b) - 468*invdb12*
+     invdgb2*lb1u*mmsb22*pow2(s2b) + 396*invdb12*invdgb1*lb2u*mmsb22*pow2(s2b)
+     - 1164*invdb12*invdgb2*lb2u*mmsb22*pow2(s2b) - 30*invdb12*invdgb1*lb1u*
+     lb2u*mmsb22*pow2(s2b) + 30*invdb12*invdgb2*lb1u*lb2u*mmsb22*pow2(s2b) +
+     4848*invdb12*invdgb1*lgu*mmsb22*pow2(s2b) - 4848*invdb12*invdgb2*lgu*
+     mmsb22*pow2(s2b) - 126*invdb12*invdgb1*lb1u*lgu*mmsb22*pow2(s2b) + 126*
+     invdb12*invdgb2*lb1u*lgu*mmsb22*pow2(s2b) - 126*invdb12*invdgb1*lb2u*lgu*
+     mmsb22*pow2(s2b) + 126*invdb12*invdgb2*lb2u*lgu*mmsb22*pow2(s2b) + 768*zt2
+     *pow2(s2b) - 834*invdgb1*mmsb1*zt2*pow2(s2b) - 1080*invdgb1*mmsb2*zt2*pow2
+     (s2b) + 246*invdgb2*mmsb2*zt2*pow2(s2b) - 1080*invdb12*invdgb1*mmsb22*zt2*
+     pow2(s2b) + 1080*invdb12*invdgb2*mmsb22*zt2*pow2(s2b) + 384*pow2(lb1u)*
+     pow2(s2b) - 612*invdgb1*mmsb1*pow2(lb1u)*pow2(s2b) + 384*invdb12*mmsb2*
+     pow2(lb1u)*pow2(s2b) - 462*invdgb1*mmsb2*pow2(lb1u)*pow2(s2b) + 78*invdgb2
+     *mmsb2*pow2(lb1u)*pow2(s2b) - 462*invdb12*invdgb1*mmsb22*pow2(lb1u)*pow2(
+     s2b) + 78*invdb12*invdgb2*mmsb22*pow2(lb1u)*pow2(s2b) - 384*invdb12*mmsb2*
+     pow2(lb2u)*pow2(s2b) - 78*invdgb1*mmsb2*pow2(lb2u)*pow2(s2b) - 150*invdgb2
+     *mmsb2*pow2(lb2u)*pow2(s2b) - 78*invdb12*invdgb1*mmsb22*pow2(lb2u)*pow2(
+     s2b) + 462*invdb12*invdgb2*mmsb22*pow2(lb2u)*pow2(s2b) + 384*pow2(lgu)*
+     pow2(s2b) - 384*invdgb1*mmsb1*pow2(lgu)*pow2(s2b) - 1386*invdgb1*mmsb2*
+     pow2(lgu)*pow2(s2b) + 1002*invdgb2*mmsb2*pow2(lgu)*pow2(s2b) - 1338*
+     invdb12*invdgb1*mmsb22*pow2(lgu)*pow2(s2b) + 1338*invdb12*invdgb2*mmsb22*
+     pow2(lgu)*pow2(s2b) + 144*lb1u*mmsb12*mmsb2*pow3(invdgb1) - 72*lb1u*lb2u*
+     mmsb12*mmsb2*pow3(invdgb1) - 144*lgu*mmsb12*mmsb2*pow3(invdgb1) + 72*lb2u*
+     lgu*mmsb12*mmsb2*pow3(invdgb1) + 144*lb1u*mmsb12*mmst1*pow3(invdgb1) - 144
+     *lgu*mmsb12*mmst1*pow3(invdgb1) - 72*lb1u*lt1u*mmsb12*mmst1*pow3(invdgb1)
+     + 72*lgu*lt1u*mmsb12*mmst1*pow3(invdgb1) + 144*lb1u*mmsb12*mmst2*pow3(
+     invdgb1) - 144*lgu*mmsb12*mmst2*pow3(invdgb1) - 72*lb1u*lt2u*mmsb12*mmst2*
+     pow3(invdgb1) + 72*lgu*lt2u*mmsb12*mmst2*pow3(invdgb1) + 1152*lb1u*mmsb12*
+     mmsusy*pow3(invdgb1) - 1152*lgu*mmsb12*mmsusy*pow3(invdgb1) - 576*lb1u*lsu
+     *mmsb12*mmsusy*pow3(invdgb1) + 576*lgu*lsu*mmsb12*mmsusy*pow3(invdgb1) -
+     288*lb1u*mmsb12*mmt*pow3(invdgb1) + 288*lgu*mmsb12*mmt*pow3(invdgb1) + 144
+     *lb1u*ltu*mmsb12*mmt*pow3(invdgb1) - 144*lgu*ltu*mmsb12*mmt*pow3(invdgb1)
+     - 36*mmsb12*mmsb2*pow2(lb1u)*pow3(invdgb1) - 36*mmsb12*mmst1*pow2(lb1u)*
+     pow3(invdgb1) - 36*mmsb12*mmst2*pow2(lb1u)*pow3(invdgb1) - 288*mmsb12*
+     mmsusy*pow2(lb1u)*pow3(invdgb1) + 72*mmsb12*mmt*pow2(lb1u)*pow3(invdgb1) +
+     36*mmsb12*mmsb2*pow2(lgu)*pow3(invdgb1) + 36*mmsb12*mmst1*pow2(lgu)*pow3(
+     invdgb1) + 36*mmsb12*mmst2*pow2(lgu)*pow3(invdgb1) + 288*mmsb12*mmsusy*
+     pow2(lgu)*pow3(invdgb1) - 72*mmsb12*mmt*pow2(lgu)*pow3(invdgb1) - 96*lb1u*
+     mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + 96*lb1u*lb2u*mmsb12*mmsb2*pow2(s2b)
+     *pow3(invdgb1) + 96*lgu*mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) - 96*lb2u*lgu
+     *mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + 144*lb2u*mmsb1*mmsb22*pow3(invdgb2
+     ) - 72*lb1u*lb2u*mmsb1*mmsb22*pow3(invdgb2) - 144*lgu*mmsb1*mmsb22*pow3(
+     invdgb2) + 72*lb1u*lgu*mmsb1*mmsb22*pow3(invdgb2) + 144*lb2u*mmsb22*mmst1*
+     pow3(invdgb2) - 144*lgu*mmsb22*mmst1*pow3(invdgb2) - 72*lb2u*lt1u*mmsb22*
+     mmst1*pow3(invdgb2) + 72*lgu*lt1u*mmsb22*mmst1*pow3(invdgb2) + 144*lb2u*
+     mmsb22*mmst2*pow3(invdgb2) - 144*lgu*mmsb22*mmst2*pow3(invdgb2) - 72*lb2u*
+     lt2u*mmsb22*mmst2*pow3(invdgb2) + 72*lgu*lt2u*mmsb22*mmst2*pow3(invdgb2) +
+     1152*lb2u*mmsb22*mmsusy*pow3(invdgb2) - 1152*lgu*mmsb22*mmsusy*pow3(
+     invdgb2) - 576*lb2u*lsu*mmsb22*mmsusy*pow3(invdgb2) + 576*lgu*lsu*mmsb22*
+     mmsusy*pow3(invdgb2) - 288*lb2u*mmsb22*mmt*pow3(invdgb2) + 288*lgu*mmsb22*
+     mmt*pow3(invdgb2) + 144*lb2u*ltu*mmsb22*mmt*pow3(invdgb2) - 144*lgu*ltu*
+     mmsb22*mmt*pow3(invdgb2) - 36*mmsb1*mmsb22*pow2(lb2u)*pow3(invdgb2) - 36*
+     mmsb22*mmst1*pow2(lb2u)*pow3(invdgb2) - 36*mmsb22*mmst2*pow2(lb2u)*pow3(
+     invdgb2) - 288*mmsb22*mmsusy*pow2(lb2u)*pow3(invdgb2) + 72*mmsb22*mmt*pow2
+     (lb2u)*pow3(invdgb2) + 36*mmsb1*mmsb22*pow2(lgu)*pow3(invdgb2) + 36*mmsb22
+     *mmst1*pow2(lgu)*pow3(invdgb2) + 36*mmsb22*mmst2*pow2(lgu)*pow3(invdgb2) +
+     288*mmsb22*mmsusy*pow2(lgu)*pow3(invdgb2) - 72*mmsb22*mmt*pow2(lgu)*pow3(
+     invdgb2) - 96*lb2u*mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) + 96*lb1u*lb2u*
+     mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) + 96*lgu*mmsb1*mmsb22*pow2(s2b)*pow3(
+     invdgb2) - 96*lb1u*lgu*mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) - 2016*pow3(
+     invdgb1)*pow3(mmsb1) - 1320*lb1u*pow3(invdgb1)*pow3(mmsb1) + 3048*lgu*pow3
+     (invdgb1)*pow3(mmsb1) + 696*lb1u*lgu*pow3(invdgb1)*pow3(mmsb1) - 288*zt2*
+     pow3(invdgb1)*pow3(mmsb1) + 180*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1) -
+     1452*pow2(lgu)*pow3(invdgb1)*pow3(mmsb1) + 120*lb1u*pow2(s2b)*pow3(invdgb1
+     )*pow3(mmsb1) - 120*lgu*pow2(s2b)*pow3(invdgb1)*pow3(mmsb1) - 48*pow2(lb1u
+     )*pow2(s2b)*pow3(invdgb1)*pow3(mmsb1) + 48*pow2(lgu)*pow2(s2b)*pow3(
+     invdgb1)*pow3(mmsb1) + 24*invdgb1*lb1u*pow2(invdb12)*pow3(mmsb2) - 24*
+     invdgb2*lb1u*pow2(invdb12)*pow3(mmsb2) - 24*invdgb1*lb2u*pow2(invdb12)*
+     pow3(mmsb2) + 24*invdgb2*lb2u*pow2(invdb12)*pow3(mmsb2) + 96*invdgb1*lb1u*
+     lb2u*pow2(invdb12)*pow3(mmsb2) - 96*invdgb2*lb1u*lb2u*pow2(invdb12)*pow3(
+     mmsb2) - 96*invdgb1*lb1u*lgu*pow2(invdb12)*pow3(mmsb2) + 96*invdgb2*lb1u*
+     lgu*pow2(invdb12)*pow3(mmsb2) - 96*invdgb1*lb2u*lgu*pow2(invdb12)*pow3(
+     mmsb2) + 96*invdgb2*lb2u*lgu*pow2(invdb12)*pow3(mmsb2) + 96*invdgb1*pow2(
+     invdb12)*pow2(lgu)*pow3(mmsb2) - 96*invdgb2*pow2(invdb12)*pow2(lgu)*pow3(
+     mmsb2) + 24*invdgb1*lb1u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 24*invdgb2*
+     lb1u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 24*invdgb1*lb2u*pow2(invdb12)*
+     pow2(s2b)*pow3(mmsb2) + 24*invdgb2*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2
+     ) + 96*invdgb1*lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 96*invdgb2*
+     lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 96*invdgb1*lb1u*lgu*pow2(
+     invdb12)*pow2(s2b)*pow3(mmsb2) + 96*invdgb2*lb1u*lgu*pow2(invdb12)*pow2(
+     s2b)*pow3(mmsb2) - 96*invdgb1*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow3(mmsb2)
+     + 96*invdgb2*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) + 96*invdgb1*
+     pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow3(mmsb2) - 96*invdgb2*pow2(invdb12)*
+     pow2(lgu)*pow2(s2b)*pow3(mmsb2) - 2016*pow3(invdgb2)*pow3(mmsb2) - 1320*
+     lb2u*pow3(invdgb2)*pow3(mmsb2) + 3048*lgu*pow3(invdgb2)*pow3(mmsb2) + 696*
+     lb2u*lgu*pow3(invdgb2)*pow3(mmsb2) - 288*zt2*pow3(invdgb2)*pow3(mmsb2) +
+     180*pow2(lb2u)*pow3(invdgb2)*pow3(mmsb2) - 1452*pow2(lgu)*pow3(invdgb2)*
+     pow3(mmsb2) + 120*lb2u*pow2(s2b)*pow3(invdgb2)*pow3(mmsb2) - 120*lgu*pow2(
+     s2b)*pow3(invdgb2)*pow3(mmsb2) - 48*pow2(lb2u)*pow2(s2b)*pow3(invdgb2)*
+     pow3(mmsb2) + 48*pow2(lgu)*pow2(s2b)*pow3(invdgb2)*pow3(mmsb2) - (96*
+     invdgb1*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (96*invdgb2*mmgl*mmsb1*pow3(s2b))
+     /(mb*mgl) + (192*invdgb1*lb1u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb2
+     *lb1u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (96*invdgb2*lb2u*mmgl*mmsb1*pow3(
+     s2b))/(mb*mgl) + (96*invdgb2*lb1u*lb2u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (
+     96*invdgb1*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb2*lgu*mmgl*mmsb1
+     *pow3(s2b))/(mb*mgl) + (96*invdgb1*lb1u*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl)
+     - (96*invdgb2*lb1u*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb1*mmgl*
+     mmsb2*pow3(s2b))/(mb*mgl) + (96*invdgb2*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     96*invdgb1*lb1u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lb2u*mmgl*
+     mmsb2*pow3(s2b))/(mb*mgl) - (192*invdgb2*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*
+     mgl) + (96*invdgb1*lb1u*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (192*invdgb2
+     *lb1u*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lgu*mmgl*mmsb2*
+     pow3(s2b))/(mb*mgl) + (96*invdgb2*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     192*invdgb1*lb1u*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (192*invdgb2*lb1u*
+     lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lb2u*lgu*mmgl*mmsb2*pow3(
+     s2b))/(mb*mgl) + (96*invdgb2*lb2u*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     192*invdb12*invdgb1*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*
+     invdb12*invdgb2*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*invdb12*
+     invdgb1*lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb2*
+     lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb1*lb2u*lgu*
+     mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*invdb12*invdgb2*lb2u*lgu*mmgl*
+     mmsb22*pow3(s2b))/(mb*mgl) - (96*invdgb1*mmgl*mmsb1*pow2(lb1u)*pow3(s2b))/
+     (mb*mgl) - (192*invdgb1*mmgl*mmsb2*pow2(lb1u)*pow3(s2b))/(mb*mgl) - (192*
+     invdb12*invdgb1*mmgl*mmsb22*pow2(lb1u)*pow3(s2b))/(mb*mgl) - (96*invdgb2*
+     mmgl*mmsb2*pow2(lb2u)*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb2*mmgl*
+     mmsb22*pow2(lb2u)*pow3(s2b))/(mb*mgl) - 72*lb1u*lgu*pow4(invdgb1)*pow4(
+     mmsb1) + 36*pow2(lb1u)*pow4(invdgb1)*pow4(mmsb1) + 36*pow2(lgu)*pow4(
+     invdgb1)*pow4(mmsb1) + 24*lb1u*lgu*pow2(s2b)*pow4(invdgb1)*pow4(mmsb1) -
+     12*pow2(lb1u)*pow2(s2b)*pow4(invdgb1)*pow4(mmsb1) - 12*pow2(lgu)*pow2(s2b)
+     *pow4(invdgb1)*pow4(mmsb1) + 48*invdgb1*lb1u*lb2u*pow3(invdb12)*pow4(mmsb2
+     ) - 48*invdgb2*lb1u*lb2u*pow3(invdb12)*pow4(mmsb2) - 48*invdgb1*lb1u*lgu*
+     pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb1u*lgu*pow3(invdb12)*pow4(mmsb2)
+     - 48*invdgb1*lb2u*lgu*pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb2u*lgu*pow3
+     (invdb12)*pow4(mmsb2) + 48*invdgb1*pow2(lgu)*pow3(invdb12)*pow4(mmsb2) -
+     48*invdgb2*pow2(lgu)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb1*lb1u*lb2u*pow2
+     (s2b)*pow3(invdb12)*pow4(mmsb2) - 48*invdgb2*lb1u*lb2u*pow2(s2b)*pow3(
+     invdb12)*pow4(mmsb2) - 48*invdgb1*lb1u*lgu*pow2(s2b)*pow3(invdb12)*pow4(
+     mmsb2) + 48*invdgb2*lb1u*lgu*pow2(s2b)*pow3(invdb12)*pow4(mmsb2) - 48*
+     invdgb1*lb2u*lgu*pow2(s2b)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb2u*lgu
+     *pow2(s2b)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb1*pow2(lgu)*pow2(s2b)*pow3
+     (invdb12)*pow4(mmsb2) - 48*invdgb2*pow2(lgu)*pow2(s2b)*pow3(invdb12)*pow4(
+     mmsb2) - 72*lb2u*lgu*pow4(invdgb2)*pow4(mmsb2) + 36*pow2(lb2u)*pow4(
+     invdgb2)*pow4(mmsb2) + 36*pow2(lgu)*pow4(invdgb2)*pow4(mmsb2) + 24*lb2u*
+     lgu*pow2(s2b)*pow4(invdgb2)*pow4(mmsb2) - 12*pow2(lb2u)*pow2(s2b)*pow4(
+     invdgb2)*pow4(mmsb2) - 12*pow2(lgu)*pow2(s2b)*pow4(invdgb2)*pow4(mmsb2) +
+     3*pow2(invdgb1)*(2444*mmsb12 + 320*lb1u*mmsb12 - 2208*lgu*mmsb12 - 226*
+     lb1u*lgu*mmsb12 - 288*ltu*mmsb12 + 48*lb1u*ltu*mmsb12 + 48*lgu*ltu*mmsb12
+     - 144*mmsb1*mmsb2 - 28*lb1u*mmsb1*mmsb2 + 96*lb2u*mmsb1*mmsb2 + 34*lb1u*
+     lb2u*mmsb1*mmsb2 + 76*lgu*mmsb1*mmsb2 - 16*lb1u*lgu*mmsb1*mmsb2 - 58*lb2u*
+     lgu*mmsb1*mmsb2 + 8*lb1u*mmsb22 + 24*lb1u*lb2u*mmsb22 - 8*lgu*mmsb22 - 24*
+     lb1u*lgu*mmsb22 - 24*lb2u*lgu*mmsb22 + 192*mmsb1*mmst1 - 36*lb1u*mmsb1*
+     mmst1 + 84*lgu*mmsb1*mmst1 - 48*lt1u*mmsb1*mmst1 + 18*lb1u*lt1u*mmsb1*
+     mmst1 - 42*lgu*lt1u*mmsb1*mmst1 - 144*ltu*mmsb1*mmst1 + 48*lt1u*ltu*mmsb1*
+     mmst1 + 192*mmsb1*mmst2 - 36*lb1u*mmsb1*mmst2 + 84*lgu*mmsb1*mmst2 - 48*
+     lt2u*mmsb1*mmst2 + 18*lb1u*lt2u*mmsb1*mmst2 - 42*lgu*lt2u*mmsb1*mmst2 -
+     144*ltu*mmsb1*mmst2 + 48*lt2u*ltu*mmsb1*mmst2 - 1152*mmsb1*mmsusy - 288*
+     lb1u*mmsb1*mmsusy + 672*lgu*mmsb1*mmsusy + 768*lsu*mmsb1*mmsusy + 144*lb1u
+     *lsu*mmsb1*mmsusy - 336*lgu*lsu*mmsb1*mmsusy + 288*mmsb1*mmt + 72*lb1u*
+     mmsb1*mmt - 168*lgu*mmsb1*mmt - 192*ltu*mmsb1*mmt - 36*lb1u*ltu*mmsb1*mmt
+     + 84*lgu*ltu*mmsb1*mmt + 360*mmsb12*zt2 - 24*mmsb1*mmsb2*zt2 + 24*mmsb1*
+     mmst1*zt2 + 24*mmsb1*mmst2*zt2 - 192*mmsb1*mmsusy*zt2 + 48*mmsb1*mmt*zt2 -
+     12*mmsb1*mmsb2*pow2(lb2u) + 853*mmsb12*pow2(lgu) - 5*mmsb1*mmsb2*pow2(lgu)
+     + 24*mmsb22*pow2(lgu) - 21*mmsb1*mmst1*pow2(lgu) - 21*mmsb1*mmst2*pow2(lgu
+     ) - 168*mmsb1*mmsusy*pow2(lgu) + 42*mmsb1*mmt*pow2(lgu) - 96*mmsb1*mmsusy*
+     pow2(lsu) + 12*mmsb1*mmst1*pow2(lt1u) + 12*mmsb1*mmst2*pow2(lt2u) + 48*
+     mmsb12*pow2(ltu) + 24*mmsb1*mmst1*pow2(ltu) + 24*mmsb1*mmst2*pow2(ltu) +
+     24*mmsb1*mmt*pow2(ltu) - 36*mmsb12*pow2(s2b) - 460*lb1u*mmsb12*pow2(s2b) +
+     492*lgu*mmsb12*pow2(s2b) + 54*lb1u*lgu*mmsb12*pow2(s2b) + 32*mmsb1*mmsb2*
+     pow2(s2b) + 72*lb1u*mmsb1*mmsb2*pow2(s2b) - 32*lb2u*mmsb1*mmsb2*pow2(s2b)
+     - 48*lb1u*lb2u*mmsb1*mmsb2*pow2(s2b) - 72*lgu*mmsb1*mmsb2*pow2(s2b) - 16*
+     lb1u*lgu*mmsb1*mmsb2*pow2(s2b) + 48*lb2u*lgu*mmsb1*mmsb2*pow2(s2b) + 8*
+     lb1u*mmsb22*pow2(s2b) + 24*lb1u*lb2u*mmsb22*pow2(s2b) - 8*lgu*mmsb22*pow2(
+     s2b) - 24*lb1u*lgu*mmsb22*pow2(s2b) - 24*lb2u*lgu*mmsb22*pow2(s2b) - 175*
+     mmsb12*pow2(lgu)*pow2(s2b) + 16*mmsb1*mmsb2*pow2(lgu)*pow2(s2b) + 24*
+     mmsb22*pow2(lgu)*pow2(s2b) + 8*invdb12*lb1u*pow3(mmsb2) + 32*invdb12*lb1u*
+     lb2u*pow3(mmsb2) - 8*invdb12*lgu*pow3(mmsb2) - 32*invdb12*lb1u*lgu*pow3(
+     mmsb2) - 32*invdb12*lb2u*lgu*pow3(mmsb2) + 32*invdb12*pow2(lgu)*pow3(mmsb2
+     ) + 8*invdb12*lb1u*pow2(s2b)*pow3(mmsb2) + 32*invdb12*lb1u*lb2u*pow2(s2b)*
+     pow3(mmsb2) - 8*invdb12*lgu*pow2(s2b)*pow3(mmsb2) - 32*invdb12*lb1u*lgu*
+     pow2(s2b)*pow3(mmsb2) - 32*invdb12*lb2u*lgu*pow2(s2b)*pow3(mmsb2) + 32*
+     invdb12*pow2(lgu)*pow2(s2b)*pow3(mmsb2) + (32*lb1u*mmgl*mmsb12*pow3(s2b))/
+     (mb*mgl) - (32*lgu*mmgl*mmsb12*pow3(s2b))/(mb*mgl) + (32*lb1u*lgu*mmgl*
+     mmsb12*pow3(s2b))/(mb*mgl) - (32*lb1u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl)
+     + (32*lb1u*lb2u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) + (32*lgu*mmgl*mmsb1*
+     mmsb2*pow3(s2b))/(mb*mgl) - (32*lb2u*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*
+     mgl) + pow2(lb1u)*(-51*mmsb12 + 9*mmsb1*(mmsb2 + mmst1 + mmst2 + 8*mmsusy
+     - 2*mmt) + 121*mmsb12*pow2(s2b) - (32*mmgl*mmsb12*pow3(s2b))/(mb*mgl)) + 8
+     *lb1u*lb2u*pow2(invdb12)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*pow4(mmsb2
+     ) - 8*lb2u*lgu*pow2(invdb12)*pow4(mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow4(
+     mmsb2) + 8*lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb1u*lgu*pow2
+     (invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow4(
+     mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow4(mmsb2)) + 3*pow2(invdgb2
+     )*(-144*mmsb1*mmsb2 + 96*lb1u*mmsb1*mmsb2 - 36*lb2u*mmsb1*mmsb2 + 18*lb1u*
+     lb2u*mmsb1*mmsb2 + 84*lgu*mmsb1*mmsb2 - 42*lb1u*lgu*mmsb1*mmsb2 + 2444*
+     mmsb22 + 312*lb2u*mmsb22 - 8*lb1u*lb2u*mmsb22 - 2200*lgu*mmsb22 + 8*lb1u*
+     lgu*mmsb22 - 218*lb2u*lgu*mmsb22 - 288*ltu*mmsb22 + 48*lb2u*ltu*mmsb22 +
+     48*lgu*ltu*mmsb22 + 192*mmsb2*mmst1 - 36*lb2u*mmsb2*mmst1 + 84*lgu*mmsb2*
+     mmst1 - 48*lt1u*mmsb2*mmst1 + 18*lb2u*lt1u*mmsb2*mmst1 - 42*lgu*lt1u*mmsb2
+     *mmst1 - 144*ltu*mmsb2*mmst1 + 48*lt1u*ltu*mmsb2*mmst1 + 192*mmsb2*mmst2 -
+     36*lb2u*mmsb2*mmst2 + 84*lgu*mmsb2*mmst2 - 48*lt2u*mmsb2*mmst2 + 18*lb2u*
+     lt2u*mmsb2*mmst2 - 42*lgu*lt2u*mmsb2*mmst2 - 144*ltu*mmsb2*mmst2 + 48*lt2u
+     *ltu*mmsb2*mmst2 - 1152*mmsb2*mmsusy - 288*lb2u*mmsb2*mmsusy + 672*lgu*
+     mmsb2*mmsusy + 768*lsu*mmsb2*mmsusy + 144*lb2u*lsu*mmsb2*mmsusy - 336*lgu*
+     lsu*mmsb2*mmsusy + 288*mmsb2*mmt + 72*lb2u*mmsb2*mmt - 168*lgu*mmsb2*mmt -
+     192*ltu*mmsb2*mmt - 36*lb2u*ltu*mmsb2*mmt + 84*lgu*ltu*mmsb2*mmt - 24*
+     mmsb1*mmsb2*zt2 + 360*mmsb22*zt2 + 24*mmsb2*mmst1*zt2 + 24*mmsb2*mmst2*zt2
+      - 192*mmsb2*mmsusy*zt2 + 48*mmsb2*mmt*zt2 - 12*mmsb1*mmsb2*pow2(lb1u) -
+     21*mmsb1*mmsb2*pow2(lgu) + 845*mmsb22*pow2(lgu) - 21*mmsb2*mmst1*pow2(lgu)
+     - 21*mmsb2*mmst2*pow2(lgu) - 168*mmsb2*mmsusy*pow2(lgu) + 42*mmsb2*mmt*
+     pow2(lgu) - 96*mmsb2*mmsusy*pow2(lsu) + 12*mmsb2*mmst1*pow2(lt1u) + 12*
+     mmsb2*mmst2*pow2(lt2u) + 48*mmsb22*pow2(ltu) + 24*mmsb2*mmst1*pow2(ltu) +
+     24*mmsb2*mmst2*pow2(ltu) + 24*mmsb2*mmt*pow2(ltu) + 32*mmsb1*mmsb2*pow2(
+     s2b) - 32*lb1u*mmsb1*mmsb2*pow2(s2b) + 64*lb2u*mmsb1*mmsb2*pow2(s2b) - 64*
+     lb1u*lb2u*mmsb1*mmsb2*pow2(s2b) - 64*lgu*mmsb1*mmsb2*pow2(s2b) + 64*lb1u*
+     lgu*mmsb1*mmsb2*pow2(s2b) - 36*mmsb22*pow2(s2b) - 468*lb2u*mmsb22*pow2(s2b
+     ) - 8*lb1u*lb2u*mmsb22*pow2(s2b) + 500*lgu*mmsb22*pow2(s2b) + 8*lb1u*lgu*
+     mmsb22*pow2(s2b) + 62*lb2u*lgu*mmsb22*pow2(s2b) - 183*mmsb22*pow2(lgu)*
+     pow2(s2b) - 8*invdb12*lb2u*pow3(mmsb2) + 8*invdb12*lgu*pow3(mmsb2) - 8*
+     invdb12*lb2u*pow2(s2b)*pow3(mmsb2) + 8*invdb12*lgu*pow2(s2b)*pow3(mmsb2) +
+     (32*lb2u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) - (32*lb1u*lb2u*mmgl*mmsb1*
+     mmsb2*pow3(s2b))/(mb*mgl) - (32*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) +
+     (32*lb1u*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) - (32*lb2u*mmgl*mmsb22*
+     pow3(s2b))/(mb*mgl) + (32*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (32*lb2u*
+     lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + pow2(lb2u)*(9*mmsb1*mmsb2 - 51*
+     mmsb22 + 9*mmsb2*mmst1 + 9*mmsb2*mmst2 + 72*mmsb2*mmsusy - 18*mmsb2*mmt +
+     121*mmsb22*pow2(s2b) + (32*mmgl*mmsb22*pow3(s2b))/(mb*mgl)) + 8*lb1u*lb2u*
+     pow2(invdb12)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*pow4(mmsb2) - 8*lb2u*
+     lgu*pow2(invdb12)*pow4(mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow4(mmsb2) + 8*
+     lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*
+     pow2(s2b)*pow4(mmsb2) - 8*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) + 8
+     *pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow4(mmsb2)))/54. + DeltaInv(mmt,mmsb2,
+     mmst1)*((2*mmgl*s2t*pow2(invdgb2)*(-14*mmsb22*mmst1*mmt + 6*lb2u*mmsb22*
+     mmst1*mmt - 6*lt1u*mmsb22*mmst1*mmt + 2*lb2u*lt1u*mmsb22*mmst1*mmt + 12*
+     ltu*mmsb22*mmst1*mmt - 4*lb2u*ltu*mmsb22*mmst1*mmt - 2*mmsb22*mmst1*mmt*
+     zt2 - 2*mmsb22*mmst1*mmt*pow2(ltu) + 6*lt1u*mmsb2*mmt*pow2(mmst1) - 2*lb2u
+     *lt1u*mmsb2*mmt*pow2(mmst1) - 6*ltu*mmsb2*mmt*pow2(mmst1) + 2*lb2u*ltu*
+     mmsb2*mmt*pow2(mmst1) + mmsb2*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb22*pow2(
+     mmt) + 6*lb2u*mmsb22*pow2(mmt) + 6*ltu*mmsb22*pow2(mmt) - 2*lb2u*ltu*
+     mmsb22*pow2(mmt) - 28*mmsb2*mmst1*pow2(mmt) + 6*lt1u*mmsb2*mmst1*pow2(mmt)
+     + 2*lb2u*lt1u*mmsb2*mmst1*pow2(mmt) + 18*ltu*mmsb2*mmst1*pow2(mmt) - 2*
+     lb2u*ltu*mmsb2*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb2*mmst1*pow2(mmt) - 2*
+     mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst1*zt2*pow2(mmt) - mmsb22*pow2(ltu)*pow2
+     (mmt) - 3*mmsb2*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(mmsb22*mmst1*mmt -
+     mmsb2*mmt*pow2(mmst1) - mmsb2*mmst1*pow2(mmt)) + 14*mmt*pow3(mmsb2) - 6*
+     lb2u*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2) + 2*lb2u*ltu*mmt*pow3(mmsb2)
+     + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(mmsb2) - pow2(lb2u)*(mmsb22*
+     mmst1*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2))))/(3.*mgl*mt) + (-(invdgb2
+     *(14*mmsb22*mmst1 - 12*lb2u*mmsb22*mmst1 + 6*lt1u*mmsb22*mmst1 - 6*ltu*
+     mmsb22*mmst1 + 4*lb2u*ltu*mmsb22*mmst1 - 2*lt1u*ltu*mmsb22*mmst1 + 14*
+     mmsb22*mmt - 6*lb2u*mmsb22*mmt - 6*ltu*mmsb22*mmt + 2*lb2u*ltu*mmsb22*mmt
+     + 56*mmsb2*mmst1*mmt - 6*lb2u*mmsb2*mmst1*mmt - 6*lt1u*mmsb2*mmst1*mmt - 4
+     *lb2u*lt1u*mmsb2*mmst1*mmt - 36*ltu*mmsb2*mmst1*mmt + 6*lb2u*ltu*mmsb2*
+     mmst1*mmt + 6*lt1u*ltu*mmsb2*mmst1*mmt + 2*mmsb22*mmst1*zt2 + 2*mmsb22*mmt
+     *zt2 + 8*mmsb2*mmst1*mmt*zt2 + mmsb22*mmst1*pow2(ltu) + mmsb22*mmt*pow2(
+     ltu) + 6*mmsb2*mmst1*mmt*pow2(ltu) + 14*mmsb2*pow2(mmst1) + 6*lb2u*mmsb2*
+     pow2(mmst1) - 12*lt1u*mmsb2*pow2(mmst1) - 6*ltu*mmsb2*pow2(mmst1) - 2*lb2u
+     *ltu*mmsb2*pow2(mmst1) + 4*lt1u*ltu*mmsb2*pow2(mmst1) + 14*mmt*pow2(mmst1)
+     - 6*lt1u*mmt*pow2(mmst1) - 6*ltu*mmt*pow2(mmst1) + 2*lt1u*ltu*mmt*pow2(
+     mmst1) + 2*mmsb2*zt2*pow2(mmst1) + 2*mmt*zt2*pow2(mmst1) + mmsb2*pow2(ltu)
+     *pow2(mmst1) + mmt*pow2(ltu)*pow2(mmst1) + pow2(lb2u)*(2*mmsb22*mmst1 +
+     mmsb22*mmt + mmsb2*mmst1*mmt - mmsb2*pow2(mmst1) - pow3(mmsb2)) - 14*pow3(
+     mmsb2) + 6*lb2u*pow3(mmsb2) + 6*ltu*pow3(mmsb2) - 2*lb2u*ltu*pow3(mmsb2) -
+     2*zt2*pow3(mmsb2) - pow2(ltu)*pow3(mmsb2) + pow2(lt1u)*(-(mmsb22*mmst1) +
+     mmsb2*mmst1*mmt + (2*mmsb2 + mmt)*pow2(mmst1) - pow3(mmst1)) - 14*pow3(
+     mmst1) + 6*lt1u*pow3(mmst1) + 6*ltu*pow3(mmst1) - 2*lt1u*ltu*pow3(mmst1) -
+     2*zt2*pow3(mmst1) - pow2(ltu)*pow3(mmst1))) - 2*pow2(invdgb2)*(-56*mmsb22*
+     mmst1*mmt + 6*lb2u*mmsb22*mmst1*mmt + 6*lt1u*mmsb22*mmst1*mmt + 4*lb2u*
+     lt1u*mmsb22*mmst1*mmt + 36*ltu*mmsb22*mmst1*mmt - 6*lb2u*ltu*mmsb22*mmst1*
+     mmt - 6*lt1u*ltu*mmsb22*mmst1*mmt - 8*mmsb22*mmst1*mmt*zt2 - 6*mmsb22*
+     mmst1*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst1) - 6*lb2u*mmsb22*pow2(mmst1) +
+     12*lt1u*mmsb22*pow2(mmst1) + 6*ltu*mmsb22*pow2(mmst1) + 2*lb2u*ltu*mmsb22*
+     pow2(mmst1) - 4*lt1u*ltu*mmsb22*pow2(mmst1) - 14*mmsb2*mmt*pow2(mmst1) + 6
+     *lt1u*mmsb2*mmt*pow2(mmst1) + 6*ltu*mmsb2*mmt*pow2(mmst1) - 2*lt1u*ltu*
+     mmsb2*mmt*pow2(mmst1) - 2*mmsb22*zt2*pow2(mmst1) - 2*mmsb2*mmt*zt2*pow2(
+     mmst1) - mmsb22*pow2(ltu)*pow2(mmst1) - mmsb2*mmt*pow2(ltu)*pow2(mmst1) -
+     14*mmst1*pow3(mmsb2) + 12*lb2u*mmst1*pow3(mmsb2) - 6*lt1u*mmst1*pow3(mmsb2
+     ) + 6*ltu*mmst1*pow3(mmsb2) - 4*lb2u*ltu*mmst1*pow3(mmsb2) + 2*lt1u*ltu*
+     mmst1*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lb2u*mmt*pow3(mmsb2) + 6*ltu*
+     mmt*pow3(mmsb2) - 2*lb2u*ltu*mmt*pow3(mmsb2) - 2*mmst1*zt2*pow3(mmsb2) - 2
+     *mmt*zt2*pow3(mmsb2) - mmst1*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*pow3(
+     mmsb2) + 14*mmsb2*pow3(mmst1) - 6*lt1u*mmsb2*pow3(mmst1) - 6*ltu*mmsb2*
+     pow3(mmst1) + 2*lt1u*ltu*mmsb2*pow3(mmst1) + 2*mmsb2*zt2*pow3(mmst1) +
+     mmsb2*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb22*mmst1*mmt) - (2*mmsb22
+     + mmsb2*mmt)*pow2(mmst1) + mmst1*pow3(mmsb2) + mmsb2*pow3(mmst1)) + 14*
+     pow4(mmsb2) - 6*lb2u*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lb2u*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lb2u)*(-(mmsb22*
+     mmst1*mmt) + mmsb22*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     ))))/3.) + DeltaInv(mmt,mmst1,mmgl)*(s2t*((-4*s2b*(14*mmgl*mmsb1*mmt - 6*
+     lgu*mmgl*mmsb1*mmt - 6*ltu*mmgl*mmsb1*mmt + 2*lgu*ltu*mmgl*mmsb1*mmt + 14*
+     mmsb12*mmt - 6*lgu*mmsb12*mmt - 6*ltu*mmsb12*mmt + 2*lgu*ltu*mmsb12*mmt -
+     14*mmgl*mmsb2*mmt + 6*lgu*mmgl*mmsb2*mmt + 6*ltu*mmgl*mmsb2*mmt - 2*lgu*
+     ltu*mmgl*mmsb2*mmt - 14*mmsb22*mmt + 6*lgu*mmsb22*mmt + 6*ltu*mmsb22*mmt -
+     2*lgu*ltu*mmsb22*mmt - 14*mmsb1*mmst1*mmt + 6*lgu*mmsb1*mmst1*mmt - 6*lt1u
+     *mmsb1*mmst1*mmt + 2*lgu*lt1u*mmsb1*mmst1*mmt + 12*ltu*mmsb1*mmst1*mmt - 4
+     *lgu*ltu*mmsb1*mmst1*mmt + 14*invdgb1*mmsb12*mmst1*mmt - 6*invdgb1*lgu*
+     mmsb12*mmst1*mmt + 6*invdgb1*lt1u*mmsb12*mmst1*mmt - 2*invdgb1*lgu*lt1u*
+     mmsb12*mmst1*mmt - 12*invdgb1*ltu*mmsb12*mmst1*mmt + 4*invdgb1*lgu*ltu*
+     mmsb12*mmst1*mmt + 14*mmsb2*mmst1*mmt - 6*lgu*mmsb2*mmst1*mmt + 6*lt1u*
+     mmsb2*mmst1*mmt - 2*lgu*lt1u*mmsb2*mmst1*mmt - 12*ltu*mmsb2*mmst1*mmt + 4*
+     lgu*ltu*mmsb2*mmst1*mmt - 14*invdgb2*mmsb22*mmst1*mmt + 6*invdgb2*lgu*
+     mmsb22*mmst1*mmt - 6*invdgb2*lt1u*mmsb22*mmst1*mmt + 2*invdgb2*lgu*lt1u*
+     mmsb22*mmst1*mmt + 12*invdgb2*ltu*mmsb22*mmst1*mmt - 4*invdgb2*lgu*ltu*
+     mmsb22*mmst1*mmt + 2*mmgl*mmsb1*mmt*zt2 + 2*mmsb12*mmt*zt2 - 2*mmgl*mmsb2*
+     mmt*zt2 - 2*mmsb22*mmt*zt2 - 2*mmsb1*mmst1*mmt*zt2 + 2*invdgb1*mmsb12*
+     mmst1*mmt*zt2 + 2*mmsb2*mmst1*mmt*zt2 - 2*invdgb2*mmsb22*mmst1*mmt*zt2 +
+     mmgl*mmsb1*mmt*pow2(ltu) + mmsb12*mmt*pow2(ltu) - mmgl*mmsb2*mmt*pow2(ltu)
+     - mmsb22*mmt*pow2(ltu) - 2*mmsb1*mmst1*mmt*pow2(ltu) + 2*invdgb1*mmsb12*
+     mmst1*mmt*pow2(ltu) + 2*mmsb2*mmst1*mmt*pow2(ltu) - 2*invdgb2*mmsb22*mmst1
+     *mmt*pow2(ltu) - 6*invdgb1*lt1u*mmsb1*mmt*pow2(mmst1) + 2*invdgb1*lgu*lt1u
+     *mmsb1*mmt*pow2(mmst1) + 6*invdgb1*ltu*mmsb1*mmt*pow2(mmst1) - 2*invdgb1*
+     lgu*ltu*mmsb1*mmt*pow2(mmst1) + 6*invdgb2*lt1u*mmsb2*mmt*pow2(mmst1) - 2*
+     invdgb2*lgu*lt1u*mmsb2*mmt*pow2(mmst1) - 6*invdgb2*ltu*mmsb2*mmt*pow2(
+     mmst1) + 2*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst1) - invdgb1*mmsb1*mmt*pow2(
+     ltu)*pow2(mmst1) + invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb1*pow2
+     (mmt) + 6*lgu*mmsb1*pow2(mmt) + 6*ltu*mmsb1*pow2(mmt) - 2*lgu*ltu*mmsb1*
+     pow2(mmt) + 14*invdgb1*mmsb12*pow2(mmt) - 6*invdgb1*lgu*mmsb12*pow2(mmt) -
+     6*invdgb1*ltu*mmsb12*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb12*pow2(mmt) + 14*
+     mmsb2*pow2(mmt) - 6*lgu*mmsb2*pow2(mmt) - 6*ltu*mmsb2*pow2(mmt) + 2*lgu*
+     ltu*mmsb2*pow2(mmt) - 14*invdgb2*mmsb22*pow2(mmt) + 6*invdgb2*lgu*mmsb22*
+     pow2(mmt) + 6*invdgb2*ltu*mmsb22*pow2(mmt) - 2*invdgb2*lgu*ltu*mmsb22*pow2
+     (mmt) + 28*invdgb1*mmsb1*mmst1*pow2(mmt) - 6*invdgb1*lt1u*mmsb1*mmst1*pow2
+     (mmt) - 2*invdgb1*lgu*lt1u*mmsb1*mmst1*pow2(mmt) - 18*invdgb1*ltu*mmsb1*
+     mmst1*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb1*mmst1*pow2(mmt) + 4*invdgb1*lt1u
+     *ltu*mmsb1*mmst1*pow2(mmt) - 28*invdgb2*mmsb2*mmst1*pow2(mmt) + 6*invdgb2*
+     lt1u*mmsb2*mmst1*pow2(mmt) + 2*invdgb2*lgu*lt1u*mmsb2*mmst1*pow2(mmt) + 18
+     *invdgb2*ltu*mmsb2*mmst1*pow2(mmt) - 2*invdgb2*lgu*ltu*mmsb2*mmst1*pow2(
+     mmt) - 4*invdgb2*lt1u*ltu*mmsb2*mmst1*pow2(mmt) - 2*mmsb1*zt2*pow2(mmt) +
+     2*invdgb1*mmsb12*zt2*pow2(mmt) + 2*mmsb2*zt2*pow2(mmt) - 2*invdgb2*mmsb22*
+     zt2*pow2(mmt) + 4*invdgb1*mmsb1*mmst1*zt2*pow2(mmt) - 4*invdgb2*mmsb2*
+     mmst1*zt2*pow2(mmt) - mmsb1*pow2(ltu)*pow2(mmt) + invdgb1*mmsb12*pow2(ltu)
+     *pow2(mmt) + mmsb2*pow2(ltu)*pow2(mmt) - invdgb2*mmsb22*pow2(ltu)*pow2(mmt
+     ) + 3*invdgb1*mmsb1*mmst1*pow2(ltu)*pow2(mmt) - 3*invdgb2*mmsb2*mmst1*pow2
+     (ltu)*pow2(mmt) + pow2(lt1u)*((mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*
+     mmsb22)*mmst1*mmt + (invdgb1*mmsb1 - invdgb2*mmsb2)*mmt*pow2(mmst1) + (
+     invdgb1*mmsb1 - invdgb2*mmsb2)*mmst1*pow2(mmt)) - 14*invdgb1*mmt*pow3(
+     mmsb1) + 6*invdgb1*lgu*mmt*pow3(mmsb1) + 6*invdgb1*ltu*mmt*pow3(mmsb1) - 2
+     *invdgb1*lgu*ltu*mmt*pow3(mmsb1) - 2*invdgb1*mmt*zt2*pow3(mmsb1) - invdgb1
+     *mmt*pow2(ltu)*pow3(mmsb1) + 14*invdgb2*mmt*pow3(mmsb2) - 6*invdgb2*lgu*
+     mmt*pow3(mmsb2) - 6*invdgb2*ltu*mmt*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmt*
+     pow3(mmsb2) + 2*invdgb2*mmt*zt2*pow3(mmsb2) + invdgb2*mmt*pow2(ltu)*pow3(
+     mmsb2) + pow2(lgu)*((-mmsb1 + invdgb1*mmsb12 + mmsb2 - invdgb2*mmsb22)*
+     pow2(mmt) + mmt*(mmgl*mmsb1 + mmsb12 - mmgl*mmsb2 - mmsb22 - mmsb1*mmst1 +
+     invdgb1*mmsb12*mmst1 + mmsb2*mmst1 - invdgb2*mmsb22*mmst1 - invdgb1*pow3(
+     mmsb1) + invdgb2*pow3(mmsb2)))))/(3.*mb*mt) + (2*(28*mmgl2*mmt - 12*lgu*
+     mmgl2*mmt - 12*ltu*mmgl2*mmt + 4*lgu*ltu*mmgl2*mmt + 28*mmgl*mmsb1*mmt -
+     12*lgu*mmgl*mmsb1*mmt - 12*ltu*mmgl*mmsb1*mmt + 4*lgu*ltu*mmgl*mmsb1*mmt -
+     42*invdgb1*mmgl*mmsb12*mmt + 18*invdgb1*lgu*mmgl*mmsb12*mmt + 18*invdgb1*
+     ltu*mmgl*mmsb12*mmt - 6*invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 28*mmgl*mmsb2*
+     mmt - 12*lgu*mmgl*mmsb2*mmt - 12*ltu*mmgl*mmsb2*mmt + 4*lgu*ltu*mmgl*mmsb2
+     *mmt - 42*invdgb2*mmgl*mmsb22*mmt + 18*invdgb2*lgu*mmgl*mmsb22*mmt + 18*
+     invdgb2*ltu*mmgl*mmsb22*mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb22*mmt - 28*mmgl*
+     mmst1*mmt + 12*lgu*mmgl*mmst1*mmt - 12*lt1u*mmgl*mmst1*mmt + 4*lgu*lt1u*
+     mmgl*mmst1*mmt + 24*ltu*mmgl*mmst1*mmt - 8*lgu*ltu*mmgl*mmst1*mmt + 28*
+     invdgb1*mmgl*mmsb1*mmst1*mmt - 12*invdgb1*lgu*mmgl*mmsb1*mmst1*mmt + 12*
+     invdgb1*lt1u*mmgl*mmsb1*mmst1*mmt - 4*invdgb1*lgu*lt1u*mmgl*mmsb1*mmst1*
+     mmt - 24*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt + 8*invdgb1*lgu*ltu*mmgl*mmsb1*
+     mmst1*mmt + 28*invdgb2*mmgl*mmsb2*mmst1*mmt - 12*invdgb2*lgu*mmgl*mmsb2*
+     mmst1*mmt + 12*invdgb2*lt1u*mmgl*mmsb2*mmst1*mmt - 4*invdgb2*lgu*lt1u*mmgl
+     *mmsb2*mmst1*mmt - 24*invdgb2*ltu*mmgl*mmsb2*mmst1*mmt + 8*invdgb2*lgu*ltu
+     *mmgl*mmsb2*mmst1*mmt + 4*mmgl2*mmt*zt2 + 4*mmgl*mmsb1*mmt*zt2 - 6*invdgb1
+     *mmgl*mmsb12*mmt*zt2 + 4*mmgl*mmsb2*mmt*zt2 - 6*invdgb2*mmgl*mmsb22*mmt*
+     zt2 - 4*mmgl*mmst1*mmt*zt2 + 4*invdgb1*mmgl*mmsb1*mmst1*mmt*zt2 + 4*
+     invdgb2*mmgl*mmsb2*mmst1*mmt*zt2 + 2*mmgl2*mmt*pow2(lgu) + 2*mmgl*mmsb1*
+     mmt*pow2(lgu) - 3*invdgb1*mmgl*mmsb12*mmt*pow2(lgu) + 2*mmgl*mmsb2*mmt*
+     pow2(lgu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(lgu) - 2*mmgl*mmst1*mmt*pow2(
+     lgu) + 2*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(lgu) + 2*invdgb2*mmgl*mmsb2*
+     mmst1*mmt*pow2(lgu) + 2*mmgl*mmst1*mmt*pow2(lt1u) - 2*invdgb1*mmgl*mmsb1*
+     mmst1*mmt*pow2(lt1u) - 2*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(lt1u) + 2*mmgl2
+     *mmt*pow2(ltu) + 2*mmgl*mmsb1*mmt*pow2(ltu) - 3*invdgb1*mmgl*mmsb12*mmt*
+     pow2(ltu) + 2*mmgl*mmsb2*mmt*pow2(ltu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(
+     ltu) - 4*mmgl*mmst1*mmt*pow2(ltu) + 4*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(
+     ltu) + 4*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(ltu) - 6*invdgb1*lt1u*mmgl*mmt*
+     pow2(mmst1) - 6*invdgb2*lt1u*mmgl*mmt*pow2(mmst1) + 2*invdgb1*lgu*lt1u*
+     mmgl*mmt*pow2(mmst1) + 2*invdgb2*lgu*lt1u*mmgl*mmt*pow2(mmst1) + 6*invdgb1
+     *ltu*mmgl*mmt*pow2(mmst1) + 6*invdgb2*ltu*mmgl*mmt*pow2(mmst1) - 2*invdgb1
+     *lgu*ltu*mmgl*mmt*pow2(mmst1) - 2*invdgb2*lgu*ltu*mmgl*mmt*pow2(mmst1) +
+     invdgb1*mmgl*mmt*pow2(lt1u)*pow2(mmst1) + invdgb2*mmgl*mmt*pow2(lt1u)*pow2
+     (mmst1) - invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmt*pow2(
+     ltu)*pow2(mmst1) - 28*mmgl*pow2(mmt) + 12*lgu*mmgl*pow2(mmt) + 12*ltu*mmgl
+     *pow2(mmt) - 4*lgu*ltu*mmgl*pow2(mmt) + 28*invdgb1*mmgl*mmsb1*pow2(mmt) -
+     12*invdgb1*lgu*mmgl*mmsb1*pow2(mmt) - 12*invdgb1*ltu*mmgl*mmsb1*pow2(mmt)
+     + 4*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt) + 28*invdgb2*mmgl*mmsb2*pow2(mmt)
+     - 12*invdgb2*lgu*mmgl*mmsb2*pow2(mmt) - 12*invdgb2*ltu*mmgl*mmsb2*pow2(mmt
+     ) + 4*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(mmt) + 28*invdgb1*mmgl*mmst1*pow2(
+     mmt) + 28*invdgb2*mmgl*mmst1*pow2(mmt) - 6*invdgb1*lt1u*mmgl*mmst1*pow2(
+     mmt) - 6*invdgb2*lt1u*mmgl*mmst1*pow2(mmt) - 2*invdgb1*lgu*lt1u*mmgl*mmst1
+     *pow2(mmt) - 2*invdgb2*lgu*lt1u*mmgl*mmst1*pow2(mmt) - 18*invdgb1*ltu*mmgl
+     *mmst1*pow2(mmt) - 18*invdgb2*ltu*mmgl*mmst1*pow2(mmt) + 2*invdgb1*lgu*ltu
+     *mmgl*mmst1*pow2(mmt) + 2*invdgb2*lgu*ltu*mmgl*mmst1*pow2(mmt) + 4*invdgb1
+     *lt1u*ltu*mmgl*mmst1*pow2(mmt) + 4*invdgb2*lt1u*ltu*mmgl*mmst1*pow2(mmt) -
+     4*mmgl*zt2*pow2(mmt) + 4*invdgb1*mmgl*mmsb1*zt2*pow2(mmt) + 4*invdgb2*mmgl
+     *mmsb2*zt2*pow2(mmt) + 4*invdgb1*mmgl*mmst1*zt2*pow2(mmt) + 4*invdgb2*mmgl
+     *mmst1*zt2*pow2(mmt) - 2*mmgl*pow2(lgu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*
+     pow2(lgu)*pow2(mmt) + 2*invdgb2*mmgl*mmsb2*pow2(lgu)*pow2(mmt) + invdgb1*
+     mmgl*mmst1*pow2(lt1u)*pow2(mmt) + invdgb2*mmgl*mmst1*pow2(lt1u)*pow2(mmt)
+     - 2*mmgl*pow2(ltu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt) +
+     2*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmt) + 3*invdgb1*mmgl*mmst1*pow2(ltu)*
+     pow2(mmt) + 3*invdgb2*mmgl*mmst1*pow2(ltu)*pow2(mmt) + mmgl*pow2(invdgb1)*
+     (-14*mmsb12*mmst1*mmt + 6*lgu*mmsb12*mmst1*mmt - 6*lt1u*mmsb12*mmst1*mmt +
+     2*lgu*lt1u*mmsb12*mmst1*mmt + 12*ltu*mmsb12*mmst1*mmt - 4*lgu*ltu*mmsb12*
+     mmst1*mmt - 2*mmsb12*mmst1*mmt*zt2 - 2*mmsb12*mmst1*mmt*pow2(ltu) + 6*lt1u
+     *mmsb1*mmt*pow2(mmst1) - 2*lgu*lt1u*mmsb1*mmt*pow2(mmst1) - 6*ltu*mmsb1*
+     mmt*pow2(mmst1) + 2*lgu*ltu*mmsb1*mmt*pow2(mmst1) + mmsb1*mmt*pow2(ltu)*
+     pow2(mmst1) - 14*mmsb12*pow2(mmt) + 6*lgu*mmsb12*pow2(mmt) + 6*ltu*mmsb12*
+     pow2(mmt) - 2*lgu*ltu*mmsb12*pow2(mmt) - 28*mmsb1*mmst1*pow2(mmt) + 6*lt1u
+     *mmsb1*mmst1*pow2(mmt) + 2*lgu*lt1u*mmsb1*mmst1*pow2(mmt) + 18*ltu*mmsb1*
+     mmst1*pow2(mmt) - 2*lgu*ltu*mmsb1*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb1*mmst1
+     *pow2(mmt) - 2*mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst1*zt2*pow2(mmt) - mmsb12
+     *pow2(ltu)*pow2(mmt) - 3*mmsb1*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(
+     mmsb12*mmst1*mmt - mmsb1*mmt*pow2(mmst1) - mmsb1*mmst1*pow2(mmt)) + 14*mmt
+     *pow3(mmsb1) - 6*lgu*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lgu*ltu*
+     mmt*pow3(mmsb1) + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2
+     (lgu)*(mmsb12*mmst1*mmt + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))) + mmgl*pow2
+     (invdgb2)*(-14*mmsb22*mmst1*mmt + 6*lgu*mmsb22*mmst1*mmt - 6*lt1u*mmsb22*
+     mmst1*mmt + 2*lgu*lt1u*mmsb22*mmst1*mmt + 12*ltu*mmsb22*mmst1*mmt - 4*lgu*
+     ltu*mmsb22*mmst1*mmt - 2*mmsb22*mmst1*mmt*zt2 - 2*mmsb22*mmst1*mmt*pow2(
+     ltu) + 6*lt1u*mmsb2*mmt*pow2(mmst1) - 2*lgu*lt1u*mmsb2*mmt*pow2(mmst1) - 6
+     *ltu*mmsb2*mmt*pow2(mmst1) + 2*lgu*ltu*mmsb2*mmt*pow2(mmst1) + mmsb2*mmt*
+     pow2(ltu)*pow2(mmst1) - 14*mmsb22*pow2(mmt) + 6*lgu*mmsb22*pow2(mmt) + 6*
+     ltu*mmsb22*pow2(mmt) - 2*lgu*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst1*pow2(
+     mmt) + 6*lt1u*mmsb2*mmst1*pow2(mmt) + 2*lgu*lt1u*mmsb2*mmst1*pow2(mmt) +
+     18*ltu*mmsb2*mmst1*pow2(mmt) - 2*lgu*ltu*mmsb2*mmst1*pow2(mmt) - 4*lt1u*
+     ltu*mmsb2*mmst1*pow2(mmt) - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst1*zt2*
+     pow2(mmt) - mmsb22*pow2(ltu)*pow2(mmt) - 3*mmsb2*mmst1*pow2(ltu)*pow2(mmt)
+     + pow2(lt1u)*(mmsb22*mmst1*mmt - mmsb2*mmt*pow2(mmst1) - mmsb2*mmst1*pow2(
+     mmt)) + 14*mmt*pow3(mmsb2) - 6*lgu*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2)
+     + 2*lgu*ltu*mmt*pow3(mmsb2) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(
+     mmsb2) - pow2(lgu)*(mmsb22*mmst1*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2))
+     )))/(3.*mgl*mt)) + (4*s2b*(14*mmgl2*mmsb1 - 6*lgu*mmgl2*mmsb1 - 6*ltu*
+     mmgl2*mmsb1 + 2*lgu*ltu*mmgl2*mmsb1 + 14*mmgl*mmsb12 - 6*lgu*mmgl*mmsb12 -
+     6*ltu*mmgl*mmsb12 + 2*lgu*ltu*mmgl*mmsb12 - 14*mmgl2*mmsb2 + 6*lgu*mmgl2*
+     mmsb2 + 6*ltu*mmgl2*mmsb2 - 2*lgu*ltu*mmgl2*mmsb2 - 14*mmgl*mmsb22 + 6*lgu
+     *mmgl*mmsb22 + 6*ltu*mmgl*mmsb22 - 2*lgu*ltu*mmgl*mmsb22 - 14*mmgl*mmsb1*
+     mmst1 + 12*lgu*mmgl*mmsb1*mmst1 - 6*lt1u*mmgl*mmsb1*mmst1 + 6*ltu*mmgl*
+     mmsb1*mmst1 - 4*lgu*ltu*mmgl*mmsb1*mmst1 + 2*lt1u*ltu*mmgl*mmsb1*mmst1 +
+     14*invdgb1*mmgl*mmsb12*mmst1 - 12*invdgb1*lgu*mmgl*mmsb12*mmst1 + 6*
+     invdgb1*lt1u*mmgl*mmsb12*mmst1 - 6*invdgb1*ltu*mmgl*mmsb12*mmst1 + 4*
+     invdgb1*lgu*ltu*mmgl*mmsb12*mmst1 - 2*invdgb1*lt1u*ltu*mmgl*mmsb12*mmst1 +
+     14*mmgl*mmsb2*mmst1 - 12*lgu*mmgl*mmsb2*mmst1 + 6*lt1u*mmgl*mmsb2*mmst1 -
+     6*ltu*mmgl*mmsb2*mmst1 + 4*lgu*ltu*mmgl*mmsb2*mmst1 - 2*lt1u*ltu*mmgl*
+     mmsb2*mmst1 - 14*invdgb2*mmgl*mmsb22*mmst1 + 12*invdgb2*lgu*mmgl*mmsb22*
+     mmst1 - 6*invdgb2*lt1u*mmgl*mmsb22*mmst1 + 6*invdgb2*ltu*mmgl*mmsb22*mmst1
+      - 4*invdgb2*lgu*ltu*mmgl*mmsb22*mmst1 + 2*invdgb2*lt1u*ltu*mmgl*mmsb22*
+     mmst1 - 14*mmgl*mmsb1*mmt + 6*lgu*mmgl*mmsb1*mmt + 6*ltu*mmgl*mmsb1*mmt -
+     2*lgu*ltu*mmgl*mmsb1*mmt + 14*invdgb1*mmgl*mmsb12*mmt - 6*invdgb1*lgu*mmgl
+     *mmsb12*mmt - 6*invdgb1*ltu*mmgl*mmsb12*mmt + 2*invdgb1*lgu*ltu*mmgl*
+     mmsb12*mmt + 14*mmgl*mmsb2*mmt - 6*lgu*mmgl*mmsb2*mmt - 6*ltu*mmgl*mmsb2*
+     mmt + 2*lgu*ltu*mmgl*mmsb2*mmt - 14*invdgb2*mmgl*mmsb22*mmt + 6*invdgb2*
+     lgu*mmgl*mmsb22*mmt + 6*invdgb2*ltu*mmgl*mmsb22*mmt - 2*invdgb2*lgu*ltu*
+     mmgl*mmsb22*mmt + 56*invdgb1*mmgl*mmsb1*mmst1*mmt - 6*invdgb1*lgu*mmgl*
+     mmsb1*mmst1*mmt - 6*invdgb1*lt1u*mmgl*mmsb1*mmst1*mmt - 4*invdgb1*lgu*lt1u
+     *mmgl*mmsb1*mmst1*mmt - 36*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt + 6*invdgb1*
+     lgu*ltu*mmgl*mmsb1*mmst1*mmt + 6*invdgb1*lt1u*ltu*mmgl*mmsb1*mmst1*mmt -
+     56*invdgb2*mmgl*mmsb2*mmst1*mmt + 6*invdgb2*lgu*mmgl*mmsb2*mmst1*mmt + 6*
+     invdgb2*lt1u*mmgl*mmsb2*mmst1*mmt + 4*invdgb2*lgu*lt1u*mmgl*mmsb2*mmst1*
+     mmt + 36*invdgb2*ltu*mmgl*mmsb2*mmst1*mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb2*
+     mmst1*mmt - 6*invdgb2*lt1u*ltu*mmgl*mmsb2*mmst1*mmt + 2*mmgl2*mmsb1*zt2 +
+     2*mmgl*mmsb12*zt2 - 2*mmgl2*mmsb2*zt2 - 2*mmgl*mmsb22*zt2 - 2*mmgl*mmsb1*
+     mmst1*zt2 + 2*invdgb1*mmgl*mmsb12*mmst1*zt2 + 2*mmgl*mmsb2*mmst1*zt2 - 2*
+     invdgb2*mmgl*mmsb22*mmst1*zt2 - 2*mmgl*mmsb1*mmt*zt2 + 2*invdgb1*mmgl*
+     mmsb12*mmt*zt2 + 2*mmgl*mmsb2*mmt*zt2 - 2*invdgb2*mmgl*mmsb22*mmt*zt2 + 8*
+     invdgb1*mmgl*mmsb1*mmst1*mmt*zt2 - 8*invdgb2*mmgl*mmsb2*mmst1*mmt*zt2 +
+     mmgl2*mmsb1*pow2(ltu) + mmgl*mmsb12*pow2(ltu) - mmgl2*mmsb2*pow2(ltu) -
+     mmgl*mmsb22*pow2(ltu) - mmgl*mmsb1*mmst1*pow2(ltu) + invdgb1*mmgl*mmsb12*
+     mmst1*pow2(ltu) + mmgl*mmsb2*mmst1*pow2(ltu) - invdgb2*mmgl*mmsb22*mmst1*
+     pow2(ltu) - mmgl*mmsb1*mmt*pow2(ltu) + invdgb1*mmgl*mmsb12*mmt*pow2(ltu) +
+     mmgl*mmsb2*mmt*pow2(ltu) - invdgb2*mmgl*mmsb22*mmt*pow2(ltu) + 6*invdgb1*
+     mmgl*mmsb1*mmst1*mmt*pow2(ltu) - 6*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(ltu)
+     + 14*invdgb1*mmgl*mmsb1*pow2(mmst1) + 6*invdgb1*lgu*mmgl*mmsb1*pow2(mmst1)
+     - 12*invdgb1*lt1u*mmgl*mmsb1*pow2(mmst1) - 6*invdgb1*ltu*mmgl*mmsb1*pow2(
+     mmst1) - 2*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmst1) + 4*invdgb1*lt1u*ltu*
+     mmgl*mmsb1*pow2(mmst1) - 14*invdgb2*mmgl*mmsb2*pow2(mmst1) - 6*invdgb2*lgu
+     *mmgl*mmsb2*pow2(mmst1) + 12*invdgb2*lt1u*mmgl*mmsb2*pow2(mmst1) + 6*
+     invdgb2*ltu*mmgl*mmsb2*pow2(mmst1) + 2*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
+     mmst1) - 4*invdgb2*lt1u*ltu*mmgl*mmsb2*pow2(mmst1) + 14*invdgb1*mmgl*mmt*
+     pow2(mmst1) - 14*invdgb2*mmgl*mmt*pow2(mmst1) - 6*invdgb1*lt1u*mmgl*mmt*
+     pow2(mmst1) + 6*invdgb2*lt1u*mmgl*mmt*pow2(mmst1) - 6*invdgb1*ltu*mmgl*mmt
+     *pow2(mmst1) + 6*invdgb2*ltu*mmgl*mmt*pow2(mmst1) + 2*invdgb1*lt1u*ltu*
+     mmgl*mmt*pow2(mmst1) - 2*invdgb2*lt1u*ltu*mmgl*mmt*pow2(mmst1) + 2*invdgb1
+     *mmgl*mmsb1*zt2*pow2(mmst1) - 2*invdgb2*mmgl*mmsb2*zt2*pow2(mmst1) + 2*
+     invdgb1*mmgl*mmt*zt2*pow2(mmst1) - 2*invdgb2*mmgl*mmt*zt2*pow2(mmst1) +
+     invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmsb2*pow2(ltu)*
+     pow2(mmst1) + invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmt*
+     pow2(ltu)*pow2(mmst1) - 14*invdgb1*mmgl*pow3(mmsb1) + 6*invdgb1*lgu*mmgl*
+     pow3(mmsb1) + 6*invdgb1*ltu*mmgl*pow3(mmsb1) - 2*invdgb1*lgu*ltu*mmgl*pow3
+     (mmsb1) - 2*invdgb1*mmgl*zt2*pow3(mmsb1) - invdgb1*mmgl*pow2(ltu)*pow3(
+     mmsb1) + 14*invdgb2*mmgl*pow3(mmsb2) - 6*invdgb2*lgu*mmgl*pow3(mmsb2) - 6*
+     invdgb2*ltu*mmgl*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmgl*pow3(mmsb2) + 2*
+     invdgb2*mmgl*zt2*pow3(mmsb2) + invdgb2*mmgl*pow2(ltu)*pow3(mmsb2) + pow2(
+     lgu)*(mmgl2*mmsb1 + mmgl*mmsb12 - mmgl2*mmsb2 - mmgl*mmsb22 - 2*mmgl*mmsb1
+     *mmst1 + 2*invdgb1*mmgl*mmsb12*mmst1 + 2*mmgl*mmsb2*mmst1 - 2*invdgb2*mmgl
+     *mmsb22*mmst1 - mmgl*mmsb1*mmt + invdgb1*mmgl*mmsb12*mmt + mmgl*mmsb2*mmt
+     - invdgb2*mmgl*mmsb22*mmt + invdgb1*mmgl*mmsb1*mmst1*mmt - invdgb2*mmgl*
+     mmsb2*mmst1*mmt + (-(invdgb1*mmgl*mmsb1) + invdgb2*mmgl*mmsb2)*pow2(mmst1)
+     - invdgb1*mmgl*pow3(mmsb1) + invdgb2*mmgl*pow3(mmsb2)) - 14*invdgb1*mmgl*
+     pow3(mmst1) + 14*invdgb2*mmgl*pow3(mmst1) + 6*invdgb1*lt1u*mmgl*pow3(mmst1
+     ) - 6*invdgb2*lt1u*mmgl*pow3(mmst1) + 6*invdgb1*ltu*mmgl*pow3(mmst1) - 6*
+     invdgb2*ltu*mmgl*pow3(mmst1) - 2*invdgb1*lt1u*ltu*mmgl*pow3(mmst1) + 2*
+     invdgb2*lt1u*ltu*mmgl*pow3(mmst1) - 2*invdgb1*mmgl*zt2*pow3(mmst1) + 2*
+     invdgb2*mmgl*zt2*pow3(mmst1) - invdgb1*mmgl*pow2(ltu)*pow3(mmst1) +
+     invdgb2*mmgl*pow2(ltu)*pow3(mmst1) + mmgl*pow2(lt1u)*(mmst1*(mmsb1 -
+     invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + invdgb1*mmsb1*mmt - invdgb2*
+     mmsb2*mmt) + (invdgb1*(2*mmsb1 + mmt) - invdgb2*(2*mmsb2 + mmt))*pow2(
+     mmst1) + (-invdgb1 + invdgb2)*pow3(mmst1))))/(3.*mb*mgl) - (2*(28*mmgl2 -
+     12*lgu*mmgl2 - 12*ltu*mmgl2 + 4*lgu*ltu*mmgl2 + 28*mmgl*mmsb1 - 12*lgu*
+     mmgl*mmsb1 - 12*ltu*mmgl*mmsb1 + 4*lgu*ltu*mmgl*mmsb1 + 42*mmsb12 - 18*lgu
+     *mmsb12 - 18*ltu*mmsb12 + 6*lgu*ltu*mmsb12 + 28*mmgl*mmsb2 - 12*lgu*mmgl*
+     mmsb2 - 12*ltu*mmgl*mmsb2 + 4*lgu*ltu*mmgl*mmsb2 + 42*mmsb22 - 18*lgu*
+     mmsb22 - 18*ltu*mmsb22 + 6*lgu*ltu*mmsb22 - 28*mmgl*mmst1 + 24*lgu*mmgl*
+     mmst1 - 12*lt1u*mmgl*mmst1 + 12*ltu*mmgl*mmst1 - 8*lgu*ltu*mmgl*mmst1 + 4*
+     lt1u*ltu*mmgl*mmst1 - 28*mmsb1*mmst1 + 24*lgu*mmsb1*mmst1 - 12*lt1u*mmsb1*
+     mmst1 + 12*ltu*mmsb1*mmst1 - 8*lgu*ltu*mmsb1*mmst1 + 4*lt1u*ltu*mmsb1*
+     mmst1 + 42*invdgb1*mmsb12*mmst1 - 36*invdgb1*lgu*mmsb12*mmst1 + 18*invdgb1
+     *lt1u*mmsb12*mmst1 - 18*invdgb1*ltu*mmsb12*mmst1 + 12*invdgb1*lgu*ltu*
+     mmsb12*mmst1 - 6*invdgb1*lt1u*ltu*mmsb12*mmst1 - 28*mmsb2*mmst1 + 24*lgu*
+     mmsb2*mmst1 - 12*lt1u*mmsb2*mmst1 + 12*ltu*mmsb2*mmst1 - 8*lgu*ltu*mmsb2*
+     mmst1 + 4*lt1u*ltu*mmsb2*mmst1 + 42*invdgb2*mmsb22*mmst1 - 36*invdgb2*lgu*
+     mmsb22*mmst1 + 18*invdgb2*lt1u*mmsb22*mmst1 - 18*invdgb2*ltu*mmsb22*mmst1
+     + 12*invdgb2*lgu*ltu*mmsb22*mmst1 - 6*invdgb2*lt1u*ltu*mmsb22*mmst1 - 28*
+     mmgl*mmt + 12*lgu*mmgl*mmt + 12*ltu*mmgl*mmt - 4*lgu*ltu*mmgl*mmt - 28*
+     mmsb1*mmt + 12*lgu*mmsb1*mmt + 12*ltu*mmsb1*mmt - 4*lgu*ltu*mmsb1*mmt + 42
+     *invdgb1*mmsb12*mmt - 18*invdgb1*lgu*mmsb12*mmt - 18*invdgb1*ltu*mmsb12*
+     mmt + 6*invdgb1*lgu*ltu*mmsb12*mmt - 28*mmsb2*mmt + 12*lgu*mmsb2*mmt + 12*
+     ltu*mmsb2*mmt - 4*lgu*ltu*mmsb2*mmt + 42*invdgb2*mmsb22*mmt - 18*invdgb2*
+     lgu*mmsb22*mmt - 18*invdgb2*ltu*mmsb22*mmt + 6*invdgb2*lgu*ltu*mmsb22*mmt
+     - 112*mmst1*mmt + 12*lgu*mmst1*mmt + 12*lt1u*mmst1*mmt + 8*lgu*lt1u*mmst1*
+     mmt + 72*ltu*mmst1*mmt - 12*lgu*ltu*mmst1*mmt - 12*lt1u*ltu*mmst1*mmt +
+     112*invdgb1*mmsb1*mmst1*mmt - 12*invdgb1*lgu*mmsb1*mmst1*mmt - 12*invdgb1*
+     lt1u*mmsb1*mmst1*mmt - 8*invdgb1*lgu*lt1u*mmsb1*mmst1*mmt - 72*invdgb1*ltu
+     *mmsb1*mmst1*mmt + 12*invdgb1*lgu*ltu*mmsb1*mmst1*mmt + 12*invdgb1*lt1u*
+     ltu*mmsb1*mmst1*mmt + 112*invdgb2*mmsb2*mmst1*mmt - 12*invdgb2*lgu*mmsb2*
+     mmst1*mmt - 12*invdgb2*lt1u*mmsb2*mmst1*mmt - 8*invdgb2*lgu*lt1u*mmsb2*
+     mmst1*mmt - 72*invdgb2*ltu*mmsb2*mmst1*mmt + 12*invdgb2*lgu*ltu*mmsb2*
+     mmst1*mmt + 12*invdgb2*lt1u*ltu*mmsb2*mmst1*mmt + 4*mmgl2*zt2 + 4*mmgl*
+     mmsb1*zt2 + 6*mmsb12*zt2 + 4*mmgl*mmsb2*zt2 + 6*mmsb22*zt2 - 4*mmgl*mmst1*
+     zt2 - 4*mmsb1*mmst1*zt2 + 6*invdgb1*mmsb12*mmst1*zt2 - 4*mmsb2*mmst1*zt2 +
+     6*invdgb2*mmsb22*mmst1*zt2 - 4*mmgl*mmt*zt2 - 4*mmsb1*mmt*zt2 + 6*invdgb1*
+     mmsb12*mmt*zt2 - 4*mmsb2*mmt*zt2 + 6*invdgb2*mmsb22*mmt*zt2 - 16*mmst1*mmt
+     *zt2 + 16*invdgb1*mmsb1*mmst1*mmt*zt2 + 16*invdgb2*mmsb2*mmst1*mmt*zt2 + 2
+     *mmgl2*pow2(lgu) + 2*mmgl*mmsb1*pow2(lgu) + 3*mmsb12*pow2(lgu) + 2*mmgl*
+     mmsb2*pow2(lgu) + 3*mmsb22*pow2(lgu) - 4*mmgl*mmst1*pow2(lgu) - 4*mmsb1*
+     mmst1*pow2(lgu) + 6*invdgb1*mmsb12*mmst1*pow2(lgu) - 4*mmsb2*mmst1*pow2(
+     lgu) + 6*invdgb2*mmsb22*mmst1*pow2(lgu) - 2*mmgl*mmt*pow2(lgu) - 2*mmsb1*
+     mmt*pow2(lgu) + 3*invdgb1*mmsb12*mmt*pow2(lgu) - 2*mmsb2*mmt*pow2(lgu) + 3
+     *invdgb2*mmsb22*mmt*pow2(lgu) - 2*mmst1*mmt*pow2(lgu) + 2*invdgb1*mmsb1*
+     mmst1*mmt*pow2(lgu) + 2*invdgb2*mmsb2*mmst1*mmt*pow2(lgu) + 2*mmgl*mmst1*
+     pow2(lt1u) + 2*mmsb1*mmst1*pow2(lt1u) - 3*invdgb1*mmsb12*mmst1*pow2(lt1u)
+     + 2*mmsb2*mmst1*pow2(lt1u) - 3*invdgb2*mmsb22*mmst1*pow2(lt1u) - 2*mmst1*
+     mmt*pow2(lt1u) + 2*invdgb1*mmsb1*mmst1*mmt*pow2(lt1u) + 2*invdgb2*mmsb2*
+     mmst1*mmt*pow2(lt1u) + 2*mmgl2*pow2(ltu) + 2*mmgl*mmsb1*pow2(ltu) + 3*
+     mmsb12*pow2(ltu) + 2*mmgl*mmsb2*pow2(ltu) + 3*mmsb22*pow2(ltu) - 2*mmgl*
+     mmst1*pow2(ltu) - 2*mmsb1*mmst1*pow2(ltu) + 3*invdgb1*mmsb12*mmst1*pow2(
+     ltu) - 2*mmsb2*mmst1*pow2(ltu) + 3*invdgb2*mmsb22*mmst1*pow2(ltu) - 2*mmgl
+     *mmt*pow2(ltu) - 2*mmsb1*mmt*pow2(ltu) + 3*invdgb1*mmsb12*mmt*pow2(ltu) -
+     2*mmsb2*mmt*pow2(ltu) + 3*invdgb2*mmsb22*mmt*pow2(ltu) - 12*mmst1*mmt*pow2
+     (ltu) + 12*invdgb1*mmsb1*mmst1*mmt*pow2(ltu) + 12*invdgb2*mmsb2*mmst1*mmt*
+     pow2(ltu) - 28*pow2(mmst1) - 12*lgu*pow2(mmst1) + 24*lt1u*pow2(mmst1) + 12
+     *ltu*pow2(mmst1) + 4*lgu*ltu*pow2(mmst1) - 8*lt1u*ltu*pow2(mmst1) + 28*
+     invdgb1*mmsb1*pow2(mmst1) + 12*invdgb1*lgu*mmsb1*pow2(mmst1) - 24*invdgb1*
+     lt1u*mmsb1*pow2(mmst1) - 12*invdgb1*ltu*mmsb1*pow2(mmst1) - 4*invdgb1*lgu*
+     ltu*mmsb1*pow2(mmst1) + 8*invdgb1*lt1u*ltu*mmsb1*pow2(mmst1) + 28*invdgb2*
+     mmsb2*pow2(mmst1) + 12*invdgb2*lgu*mmsb2*pow2(mmst1) - 24*invdgb2*lt1u*
+     mmsb2*pow2(mmst1) - 12*invdgb2*ltu*mmsb2*pow2(mmst1) - 4*invdgb2*lgu*ltu*
+     mmsb2*pow2(mmst1) + 8*invdgb2*lt1u*ltu*mmsb2*pow2(mmst1) + 14*invdgb1*mmt*
+     pow2(mmst1) + 14*invdgb2*mmt*pow2(mmst1) - 6*invdgb1*lt1u*mmt*pow2(mmst1)
+     - 6*invdgb2*lt1u*mmt*pow2(mmst1) - 6*invdgb1*ltu*mmt*pow2(mmst1) - 6*
+     invdgb2*ltu*mmt*pow2(mmst1) + 2*invdgb1*lt1u*ltu*mmt*pow2(mmst1) + 2*
+     invdgb2*lt1u*ltu*mmt*pow2(mmst1) - 4*zt2*pow2(mmst1) + 4*invdgb1*mmsb1*zt2
+     *pow2(mmst1) + 4*invdgb2*mmsb2*zt2*pow2(mmst1) + 2*invdgb1*mmt*zt2*pow2(
+     mmst1) + 2*invdgb2*mmt*zt2*pow2(mmst1) + 2*pow2(lgu)*pow2(mmst1) - 2*
+     invdgb1*mmsb1*pow2(lgu)*pow2(mmst1) - 2*invdgb2*mmsb2*pow2(lgu)*pow2(mmst1
+     ) - 4*pow2(lt1u)*pow2(mmst1) + 4*invdgb1*mmsb1*pow2(lt1u)*pow2(mmst1) + 4*
+     invdgb2*mmsb2*pow2(lt1u)*pow2(mmst1) + invdgb1*mmt*pow2(lt1u)*pow2(mmst1)
+     + invdgb2*mmt*pow2(lt1u)*pow2(mmst1) - 2*pow2(ltu)*pow2(mmst1) + 2*invdgb1
+     *mmsb1*pow2(ltu)*pow2(mmst1) + 2*invdgb2*mmsb2*pow2(ltu)*pow2(mmst1) +
+     invdgb1*mmt*pow2(ltu)*pow2(mmst1) + invdgb2*mmt*pow2(ltu)*pow2(mmst1) - 56
+     *invdgb1*pow3(mmsb1) + 24*invdgb1*lgu*pow3(mmsb1) + 24*invdgb1*ltu*pow3(
+     mmsb1) - 8*invdgb1*lgu*ltu*pow3(mmsb1) - 8*invdgb1*zt2*pow3(mmsb1) - 4*
+     invdgb1*pow2(lgu)*pow3(mmsb1) - 4*invdgb1*pow2(ltu)*pow3(mmsb1) - 56*
+     invdgb2*pow3(mmsb2) + 24*invdgb2*lgu*pow3(mmsb2) + 24*invdgb2*ltu*pow3(
+     mmsb2) - 8*invdgb2*lgu*ltu*pow3(mmsb2) - 8*invdgb2*zt2*pow3(mmsb2) - 4*
+     invdgb2*pow2(lgu)*pow3(mmsb2) - 4*invdgb2*pow2(ltu)*pow3(mmsb2) - 14*
+     invdgb1*pow3(mmst1) - 14*invdgb2*pow3(mmst1) + 6*invdgb1*lt1u*pow3(mmst1)
+     + 6*invdgb2*lt1u*pow3(mmst1) + 6*invdgb1*ltu*pow3(mmst1) + 6*invdgb2*ltu*
+     pow3(mmst1) - 2*invdgb1*lt1u*ltu*pow3(mmst1) - 2*invdgb2*lt1u*ltu*pow3(
+     mmst1) - 2*invdgb1*zt2*pow3(mmst1) - 2*invdgb2*zt2*pow3(mmst1) - invdgb1*
+     pow2(lt1u)*pow3(mmst1) - invdgb2*pow2(lt1u)*pow3(mmst1) - invdgb1*pow2(ltu
+     )*pow3(mmst1) - invdgb2*pow2(ltu)*pow3(mmst1) + pow2(invdgb1)*(-56*mmsb12*
+     mmst1*mmt + 6*lgu*mmsb12*mmst1*mmt + 6*lt1u*mmsb12*mmst1*mmt + 4*lgu*lt1u*
+     mmsb12*mmst1*mmt + 36*ltu*mmsb12*mmst1*mmt - 6*lgu*ltu*mmsb12*mmst1*mmt -
+     6*lt1u*ltu*mmsb12*mmst1*mmt - 8*mmsb12*mmst1*mmt*zt2 - 6*mmsb12*mmst1*mmt*
+     pow2(ltu) - 14*mmsb12*pow2(mmst1) - 6*lgu*mmsb12*pow2(mmst1) + 12*lt1u*
+     mmsb12*pow2(mmst1) + 6*ltu*mmsb12*pow2(mmst1) + 2*lgu*ltu*mmsb12*pow2(
+     mmst1) - 4*lt1u*ltu*mmsb12*pow2(mmst1) - 14*mmsb1*mmt*pow2(mmst1) + 6*lt1u
+     *mmsb1*mmt*pow2(mmst1) + 6*ltu*mmsb1*mmt*pow2(mmst1) - 2*lt1u*ltu*mmsb1*
+     mmt*pow2(mmst1) - 2*mmsb12*zt2*pow2(mmst1) - 2*mmsb1*mmt*zt2*pow2(mmst1) -
+     mmsb12*pow2(ltu)*pow2(mmst1) - mmsb1*mmt*pow2(ltu)*pow2(mmst1) - 14*mmst1*
+     pow3(mmsb1) + 12*lgu*mmst1*pow3(mmsb1) - 6*lt1u*mmst1*pow3(mmsb1) + 6*ltu*
+     mmst1*pow3(mmsb1) - 4*lgu*ltu*mmst1*pow3(mmsb1) + 2*lt1u*ltu*mmst1*pow3(
+     mmsb1) - 14*mmt*pow3(mmsb1) + 6*lgu*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1
+     ) - 2*lgu*ltu*mmt*pow3(mmsb1) - 2*mmst1*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(
+     mmsb1) - mmst1*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     mmsb1*pow3(mmst1) - 6*lt1u*mmsb1*pow3(mmst1) - 6*ltu*mmsb1*pow3(mmst1) + 2
+     *lt1u*ltu*mmsb1*pow3(mmst1) + 2*mmsb1*zt2*pow3(mmst1) + mmsb1*pow2(ltu)*
+     pow3(mmst1) + pow2(lt1u)*(-(mmsb12*mmst1*mmt) - (2*mmsb12 + mmsb1*mmt)*
+     pow2(mmst1) + mmst1*pow3(mmsb1) + mmsb1*pow3(mmst1)) + 14*pow4(mmsb1) - 6*
+     lgu*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lgu*ltu*pow4(mmsb1) + 2*zt2*pow4(
+     mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lgu)*(-(mmsb12*mmst1*mmt) + mmsb12*
+     pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb1) + pow4(mmsb1))) + pow2(invdgb2)*
+     (-56*mmsb22*mmst1*mmt + 6*lgu*mmsb22*mmst1*mmt + 6*lt1u*mmsb22*mmst1*mmt +
+     4*lgu*lt1u*mmsb22*mmst1*mmt + 36*ltu*mmsb22*mmst1*mmt - 6*lgu*ltu*mmsb22*
+     mmst1*mmt - 6*lt1u*ltu*mmsb22*mmst1*mmt - 8*mmsb22*mmst1*mmt*zt2 - 6*
+     mmsb22*mmst1*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst1) - 6*lgu*mmsb22*pow2(
+     mmst1) + 12*lt1u*mmsb22*pow2(mmst1) + 6*ltu*mmsb22*pow2(mmst1) + 2*lgu*ltu
+     *mmsb22*pow2(mmst1) - 4*lt1u*ltu*mmsb22*pow2(mmst1) - 14*mmsb2*mmt*pow2(
+     mmst1) + 6*lt1u*mmsb2*mmt*pow2(mmst1) + 6*ltu*mmsb2*mmt*pow2(mmst1) - 2*
+     lt1u*ltu*mmsb2*mmt*pow2(mmst1) - 2*mmsb22*zt2*pow2(mmst1) - 2*mmsb2*mmt*
+     zt2*pow2(mmst1) - mmsb22*pow2(ltu)*pow2(mmst1) - mmsb2*mmt*pow2(ltu)*pow2(
+     mmst1) - 14*mmst1*pow3(mmsb2) + 12*lgu*mmst1*pow3(mmsb2) - 6*lt1u*mmst1*
+     pow3(mmsb2) + 6*ltu*mmst1*pow3(mmsb2) - 4*lgu*ltu*mmst1*pow3(mmsb2) + 2*
+     lt1u*ltu*mmst1*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lgu*mmt*pow3(mmsb2) +
+     6*ltu*mmt*pow3(mmsb2) - 2*lgu*ltu*mmt*pow3(mmsb2) - 2*mmst1*zt2*pow3(mmsb2
+     ) - 2*mmt*zt2*pow3(mmsb2) - mmst1*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*
+     pow3(mmsb2) + 14*mmsb2*pow3(mmst1) - 6*lt1u*mmsb2*pow3(mmst1) - 6*ltu*
+     mmsb2*pow3(mmst1) + 2*lt1u*ltu*mmsb2*pow3(mmst1) + 2*mmsb2*zt2*pow3(mmst1)
+     + mmsb2*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb22*mmst1*mmt) - (2*
+     mmsb22 + mmsb2*mmt)*pow2(mmst1) + mmst1*pow3(mmsb2) + mmsb2*pow3(mmst1)) +
+     14*pow4(mmsb2) - 6*lgu*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lgu*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lgu)*(-(mmsb22*
+     mmst1*mmt) + mmsb22*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     )))))/3.) + DeltaInv(mmt,mmsb2,mmst2)*((-2*mmgl*s2t*pow2(invdgb2)*(-14*
+     mmsb22*mmst2*mmt + 6*lb2u*mmsb22*mmst2*mmt - 6*lt2u*mmsb22*mmst2*mmt + 2*
+     lb2u*lt2u*mmsb22*mmst2*mmt + 12*ltu*mmsb22*mmst2*mmt - 4*lb2u*ltu*mmsb22*
+     mmst2*mmt - 2*mmsb22*mmst2*mmt*zt2 - 2*mmsb22*mmst2*mmt*pow2(ltu) + 6*lt2u
+     *mmsb2*mmt*pow2(mmst2) - 2*lb2u*lt2u*mmsb2*mmt*pow2(mmst2) - 6*ltu*mmsb2*
+     mmt*pow2(mmst2) + 2*lb2u*ltu*mmsb2*mmt*pow2(mmst2) + mmsb2*mmt*pow2(ltu)*
+     pow2(mmst2) - 14*mmsb22*pow2(mmt) + 6*lb2u*mmsb22*pow2(mmt) + 6*ltu*mmsb22
+     *pow2(mmt) - 2*lb2u*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst2*pow2(mmt) + 6*
+     lt2u*mmsb2*mmst2*pow2(mmt) + 2*lb2u*lt2u*mmsb2*mmst2*pow2(mmt) + 18*ltu*
+     mmsb2*mmst2*pow2(mmt) - 2*lb2u*ltu*mmsb2*mmst2*pow2(mmt) - 4*lt2u*ltu*
+     mmsb2*mmst2*pow2(mmt) - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst2*zt2*pow2(
+     mmt) - mmsb22*pow2(ltu)*pow2(mmt) - 3*mmsb2*mmst2*pow2(ltu)*pow2(mmt) +
+     pow2(lt2u)*(mmsb22*mmst2*mmt - mmsb2*mmt*pow2(mmst2) - mmsb2*mmst2*pow2(
+     mmt)) + 14*mmt*pow3(mmsb2) - 6*lb2u*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2
+     ) + 2*lb2u*ltu*mmt*pow3(mmsb2) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*
+     pow3(mmsb2) - pow2(lb2u)*(mmsb22*mmst2*mmt + mmsb22*pow2(mmt) - mmt*pow3(
+     mmsb2))))/(3.*mgl*mt) + (-(invdgb2*(14*mmsb22*mmst2 - 12*lb2u*mmsb22*mmst2
+      + 6*lt2u*mmsb22*mmst2 - 6*ltu*mmsb22*mmst2 + 4*lb2u*ltu*mmsb22*mmst2 - 2*
+     lt2u*ltu*mmsb22*mmst2 + 14*mmsb22*mmt - 6*lb2u*mmsb22*mmt - 6*ltu*mmsb22*
+     mmt + 2*lb2u*ltu*mmsb22*mmt + 56*mmsb2*mmst2*mmt - 6*lb2u*mmsb2*mmst2*mmt
+     - 6*lt2u*mmsb2*mmst2*mmt - 4*lb2u*lt2u*mmsb2*mmst2*mmt - 36*ltu*mmsb2*
+     mmst2*mmt + 6*lb2u*ltu*mmsb2*mmst2*mmt + 6*lt2u*ltu*mmsb2*mmst2*mmt + 2*
+     mmsb22*mmst2*zt2 + 2*mmsb22*mmt*zt2 + 8*mmsb2*mmst2*mmt*zt2 + mmsb22*mmst2
+     *pow2(ltu) + mmsb22*mmt*pow2(ltu) + 6*mmsb2*mmst2*mmt*pow2(ltu) + 14*mmsb2
+     *pow2(mmst2) + 6*lb2u*mmsb2*pow2(mmst2) - 12*lt2u*mmsb2*pow2(mmst2) - 6*
+     ltu*mmsb2*pow2(mmst2) - 2*lb2u*ltu*mmsb2*pow2(mmst2) + 4*lt2u*ltu*mmsb2*
+     pow2(mmst2) + 14*mmt*pow2(mmst2) - 6*lt2u*mmt*pow2(mmst2) - 6*ltu*mmt*pow2
+     (mmst2) + 2*lt2u*ltu*mmt*pow2(mmst2) + 2*mmsb2*zt2*pow2(mmst2) + 2*mmt*zt2
+     *pow2(mmst2) + mmsb2*pow2(ltu)*pow2(mmst2) + mmt*pow2(ltu)*pow2(mmst2) +
+     pow2(lb2u)*(2*mmsb22*mmst2 + mmsb22*mmt + mmsb2*mmst2*mmt - mmsb2*pow2(
+     mmst2) - pow3(mmsb2)) - 14*pow3(mmsb2) + 6*lb2u*pow3(mmsb2) + 6*ltu*pow3(
+     mmsb2) - 2*lb2u*ltu*pow3(mmsb2) - 2*zt2*pow3(mmsb2) - pow2(ltu)*pow3(mmsb2
+     ) + pow2(lt2u)*(-(mmsb22*mmst2) + mmsb2*mmst2*mmt + (2*mmsb2 + mmt)*pow2(
+     mmst2) - pow3(mmst2)) - 14*pow3(mmst2) + 6*lt2u*pow3(mmst2) + 6*ltu*pow3(
+     mmst2) - 2*lt2u*ltu*pow3(mmst2) - 2*zt2*pow3(mmst2) - pow2(ltu)*pow3(mmst2
+     ))) - 2*pow2(invdgb2)*(-56*mmsb22*mmst2*mmt + 6*lb2u*mmsb22*mmst2*mmt + 6*
+     lt2u*mmsb22*mmst2*mmt + 4*lb2u*lt2u*mmsb22*mmst2*mmt + 36*ltu*mmsb22*mmst2
+     *mmt - 6*lb2u*ltu*mmsb22*mmst2*mmt - 6*lt2u*ltu*mmsb22*mmst2*mmt - 8*
+     mmsb22*mmst2*mmt*zt2 - 6*mmsb22*mmst2*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst2
+     ) - 6*lb2u*mmsb22*pow2(mmst2) + 12*lt2u*mmsb22*pow2(mmst2) + 6*ltu*mmsb22*
+     pow2(mmst2) + 2*lb2u*ltu*mmsb22*pow2(mmst2) - 4*lt2u*ltu*mmsb22*pow2(mmst2
+     ) - 14*mmsb2*mmt*pow2(mmst2) + 6*lt2u*mmsb2*mmt*pow2(mmst2) + 6*ltu*mmsb2*
+     mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb2*mmt*pow2(mmst2) - 2*mmsb22*zt2*pow2(
+     mmst2) - 2*mmsb2*mmt*zt2*pow2(mmst2) - mmsb22*pow2(ltu)*pow2(mmst2) -
+     mmsb2*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*pow3(mmsb2) + 12*lb2u*mmst2*
+     pow3(mmsb2) - 6*lt2u*mmst2*pow3(mmsb2) + 6*ltu*mmst2*pow3(mmsb2) - 4*lb2u*
+     ltu*mmst2*pow3(mmsb2) + 2*lt2u*ltu*mmst2*pow3(mmsb2) - 14*mmt*pow3(mmsb2)
+     + 6*lb2u*mmt*pow3(mmsb2) + 6*ltu*mmt*pow3(mmsb2) - 2*lb2u*ltu*mmt*pow3(
+     mmsb2) - 2*mmst2*zt2*pow3(mmsb2) - 2*mmt*zt2*pow3(mmsb2) - mmst2*pow2(ltu)
+     *pow3(mmsb2) - mmt*pow2(ltu)*pow3(mmsb2) + 14*mmsb2*pow3(mmst2) - 6*lt2u*
+     mmsb2*pow3(mmst2) - 6*ltu*mmsb2*pow3(mmst2) + 2*lt2u*ltu*mmsb2*pow3(mmst2)
+     + 2*mmsb2*zt2*pow3(mmst2) + mmsb2*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(
+     mmsb22*mmst2*mmt) - (2*mmsb22 + mmsb2*mmt)*pow2(mmst2) + mmst2*pow3(mmsb2)
+     + mmsb2*pow3(mmst2)) + 14*pow4(mmsb2) - 6*lb2u*pow4(mmsb2) - 6*ltu*pow4(
+     mmsb2) + 2*lb2u*ltu*pow4(mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2
+     ) + pow2(lb2u)*(-(mmsb22*mmst2*mmt) + mmsb22*pow2(mmst2) - (2*mmst2 + mmt)
+     *pow3(mmsb2) + pow4(mmsb2))))/3.) + DeltaInv(mmt,mmst2,mmgl)*(s2t*((4*s2b*
+     (14*mmgl*mmsb1*mmt - 6*lgu*mmgl*mmsb1*mmt - 6*ltu*mmgl*mmsb1*mmt + 2*lgu*
+     ltu*mmgl*mmsb1*mmt + 14*mmsb12*mmt - 6*lgu*mmsb12*mmt - 6*ltu*mmsb12*mmt +
+     2*lgu*ltu*mmsb12*mmt - 14*mmgl*mmsb2*mmt + 6*lgu*mmgl*mmsb2*mmt + 6*ltu*
+     mmgl*mmsb2*mmt - 2*lgu*ltu*mmgl*mmsb2*mmt - 14*mmsb22*mmt + 6*lgu*mmsb22*
+     mmt + 6*ltu*mmsb22*mmt - 2*lgu*ltu*mmsb22*mmt - 14*mmsb1*mmst2*mmt + 6*lgu
+     *mmsb1*mmst2*mmt - 6*lt2u*mmsb1*mmst2*mmt + 2*lgu*lt2u*mmsb1*mmst2*mmt +
+     12*ltu*mmsb1*mmst2*mmt - 4*lgu*ltu*mmsb1*mmst2*mmt + 14*invdgb1*mmsb12*
+     mmst2*mmt - 6*invdgb1*lgu*mmsb12*mmst2*mmt + 6*invdgb1*lt2u*mmsb12*mmst2*
+     mmt - 2*invdgb1*lgu*lt2u*mmsb12*mmst2*mmt - 12*invdgb1*ltu*mmsb12*mmst2*
+     mmt + 4*invdgb1*lgu*ltu*mmsb12*mmst2*mmt + 14*mmsb2*mmst2*mmt - 6*lgu*
+     mmsb2*mmst2*mmt + 6*lt2u*mmsb2*mmst2*mmt - 2*lgu*lt2u*mmsb2*mmst2*mmt - 12
+     *ltu*mmsb2*mmst2*mmt + 4*lgu*ltu*mmsb2*mmst2*mmt - 14*invdgb2*mmsb22*mmst2
+     *mmt + 6*invdgb2*lgu*mmsb22*mmst2*mmt - 6*invdgb2*lt2u*mmsb22*mmst2*mmt +
+     2*invdgb2*lgu*lt2u*mmsb22*mmst2*mmt + 12*invdgb2*ltu*mmsb22*mmst2*mmt - 4*
+     invdgb2*lgu*ltu*mmsb22*mmst2*mmt + 2*mmgl*mmsb1*mmt*zt2 + 2*mmsb12*mmt*zt2
+      - 2*mmgl*mmsb2*mmt*zt2 - 2*mmsb22*mmt*zt2 - 2*mmsb1*mmst2*mmt*zt2 + 2*
+     invdgb1*mmsb12*mmst2*mmt*zt2 + 2*mmsb2*mmst2*mmt*zt2 - 2*invdgb2*mmsb22*
+     mmst2*mmt*zt2 + mmgl*mmsb1*mmt*pow2(ltu) + mmsb12*mmt*pow2(ltu) - mmgl*
+     mmsb2*mmt*pow2(ltu) - mmsb22*mmt*pow2(ltu) - 2*mmsb1*mmst2*mmt*pow2(ltu) +
+     2*invdgb1*mmsb12*mmst2*mmt*pow2(ltu) + 2*mmsb2*mmst2*mmt*pow2(ltu) - 2*
+     invdgb2*mmsb22*mmst2*mmt*pow2(ltu) - 6*invdgb1*lt2u*mmsb1*mmt*pow2(mmst2)
+     + 2*invdgb1*lgu*lt2u*mmsb1*mmt*pow2(mmst2) + 6*invdgb1*ltu*mmsb1*mmt*pow2(
+     mmst2) - 2*invdgb1*lgu*ltu*mmsb1*mmt*pow2(mmst2) + 6*invdgb2*lt2u*mmsb2*
+     mmt*pow2(mmst2) - 2*invdgb2*lgu*lt2u*mmsb2*mmt*pow2(mmst2) - 6*invdgb2*ltu
+     *mmsb2*mmt*pow2(mmst2) + 2*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst2) - invdgb1
+     *mmsb1*mmt*pow2(ltu)*pow2(mmst2) + invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst2)
+     - 14*mmsb1*pow2(mmt) + 6*lgu*mmsb1*pow2(mmt) + 6*ltu*mmsb1*pow2(mmt) - 2*
+     lgu*ltu*mmsb1*pow2(mmt) + 14*invdgb1*mmsb12*pow2(mmt) - 6*invdgb1*lgu*
+     mmsb12*pow2(mmt) - 6*invdgb1*ltu*mmsb12*pow2(mmt) + 2*invdgb1*lgu*ltu*
+     mmsb12*pow2(mmt) + 14*mmsb2*pow2(mmt) - 6*lgu*mmsb2*pow2(mmt) - 6*ltu*
+     mmsb2*pow2(mmt) + 2*lgu*ltu*mmsb2*pow2(mmt) - 14*invdgb2*mmsb22*pow2(mmt)
+     + 6*invdgb2*lgu*mmsb22*pow2(mmt) + 6*invdgb2*ltu*mmsb22*pow2(mmt) - 2*
+     invdgb2*lgu*ltu*mmsb22*pow2(mmt) + 28*invdgb1*mmsb1*mmst2*pow2(mmt) - 6*
+     invdgb1*lt2u*mmsb1*mmst2*pow2(mmt) - 2*invdgb1*lgu*lt2u*mmsb1*mmst2*pow2(
+     mmt) - 18*invdgb1*ltu*mmsb1*mmst2*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb1*
+     mmst2*pow2(mmt) + 4*invdgb1*lt2u*ltu*mmsb1*mmst2*pow2(mmt) - 28*invdgb2*
+     mmsb2*mmst2*pow2(mmt) + 6*invdgb2*lt2u*mmsb2*mmst2*pow2(mmt) + 2*invdgb2*
+     lgu*lt2u*mmsb2*mmst2*pow2(mmt) + 18*invdgb2*ltu*mmsb2*mmst2*pow2(mmt) - 2*
+     invdgb2*lgu*ltu*mmsb2*mmst2*pow2(mmt) - 4*invdgb2*lt2u*ltu*mmsb2*mmst2*
+     pow2(mmt) - 2*mmsb1*zt2*pow2(mmt) + 2*invdgb1*mmsb12*zt2*pow2(mmt) + 2*
+     mmsb2*zt2*pow2(mmt) - 2*invdgb2*mmsb22*zt2*pow2(mmt) + 4*invdgb1*mmsb1*
+     mmst2*zt2*pow2(mmt) - 4*invdgb2*mmsb2*mmst2*zt2*pow2(mmt) - mmsb1*pow2(ltu
+     )*pow2(mmt) + invdgb1*mmsb12*pow2(ltu)*pow2(mmt) + mmsb2*pow2(ltu)*pow2(
+     mmt) - invdgb2*mmsb22*pow2(ltu)*pow2(mmt) + 3*invdgb1*mmsb1*mmst2*pow2(ltu
+     )*pow2(mmt) - 3*invdgb2*mmsb2*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*((
+     mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22)*mmst2*mmt + (invdgb1*
+     mmsb1 - invdgb2*mmsb2)*mmt*pow2(mmst2) + (invdgb1*mmsb1 - invdgb2*mmsb2)*
+     mmst2*pow2(mmt)) - 14*invdgb1*mmt*pow3(mmsb1) + 6*invdgb1*lgu*mmt*pow3(
+     mmsb1) + 6*invdgb1*ltu*mmt*pow3(mmsb1) - 2*invdgb1*lgu*ltu*mmt*pow3(mmsb1)
+     - 2*invdgb1*mmt*zt2*pow3(mmsb1) - invdgb1*mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     invdgb2*mmt*pow3(mmsb2) - 6*invdgb2*lgu*mmt*pow3(mmsb2) - 6*invdgb2*ltu*
+     mmt*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmt*pow3(mmsb2) + 2*invdgb2*mmt*zt2*
+     pow3(mmsb2) + invdgb2*mmt*pow2(ltu)*pow3(mmsb2) + pow2(lgu)*((-mmsb1 +
+     invdgb1*mmsb12 + mmsb2 - invdgb2*mmsb22)*pow2(mmt) + mmt*(mmgl*mmsb1 +
+     mmsb12 - mmgl*mmsb2 - mmsb22 - mmsb1*mmst2 + invdgb1*mmsb12*mmst2 + mmsb2*
+     mmst2 - invdgb2*mmsb22*mmst2 - invdgb1*pow3(mmsb1) + invdgb2*pow3(mmsb2)))
+     ))/(3.*mb*mt) - (2*(28*mmgl2*mmt - 12*lgu*mmgl2*mmt - 12*ltu*mmgl2*mmt + 4
+     *lgu*ltu*mmgl2*mmt + 28*mmgl*mmsb1*mmt - 12*lgu*mmgl*mmsb1*mmt - 12*ltu*
+     mmgl*mmsb1*mmt + 4*lgu*ltu*mmgl*mmsb1*mmt - 42*invdgb1*mmgl*mmsb12*mmt +
+     18*invdgb1*lgu*mmgl*mmsb12*mmt + 18*invdgb1*ltu*mmgl*mmsb12*mmt - 6*
+     invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 28*mmgl*mmsb2*mmt - 12*lgu*mmgl*mmsb2*
+     mmt - 12*ltu*mmgl*mmsb2*mmt + 4*lgu*ltu*mmgl*mmsb2*mmt - 42*invdgb2*mmgl*
+     mmsb22*mmt + 18*invdgb2*lgu*mmgl*mmsb22*mmt + 18*invdgb2*ltu*mmgl*mmsb22*
+     mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb22*mmt - 28*mmgl*mmst2*mmt + 12*lgu*mmgl*
+     mmst2*mmt - 12*lt2u*mmgl*mmst2*mmt + 4*lgu*lt2u*mmgl*mmst2*mmt + 24*ltu*
+     mmgl*mmst2*mmt - 8*lgu*ltu*mmgl*mmst2*mmt + 28*invdgb1*mmgl*mmsb1*mmst2*
+     mmt - 12*invdgb1*lgu*mmgl*mmsb1*mmst2*mmt + 12*invdgb1*lt2u*mmgl*mmsb1*
+     mmst2*mmt - 4*invdgb1*lgu*lt2u*mmgl*mmsb1*mmst2*mmt - 24*invdgb1*ltu*mmgl*
+     mmsb1*mmst2*mmt + 8*invdgb1*lgu*ltu*mmgl*mmsb1*mmst2*mmt + 28*invdgb2*mmgl
+     *mmsb2*mmst2*mmt - 12*invdgb2*lgu*mmgl*mmsb2*mmst2*mmt + 12*invdgb2*lt2u*
+     mmgl*mmsb2*mmst2*mmt - 4*invdgb2*lgu*lt2u*mmgl*mmsb2*mmst2*mmt - 24*
+     invdgb2*ltu*mmgl*mmsb2*mmst2*mmt + 8*invdgb2*lgu*ltu*mmgl*mmsb2*mmst2*mmt
+     + 4*mmgl2*mmt*zt2 + 4*mmgl*mmsb1*mmt*zt2 - 6*invdgb1*mmgl*mmsb12*mmt*zt2 +
+     4*mmgl*mmsb2*mmt*zt2 - 6*invdgb2*mmgl*mmsb22*mmt*zt2 - 4*mmgl*mmst2*mmt*
+     zt2 + 4*invdgb1*mmgl*mmsb1*mmst2*mmt*zt2 + 4*invdgb2*mmgl*mmsb2*mmst2*mmt*
+     zt2 + 2*mmgl2*mmt*pow2(lgu) + 2*mmgl*mmsb1*mmt*pow2(lgu) - 3*invdgb1*mmgl*
+     mmsb12*mmt*pow2(lgu) + 2*mmgl*mmsb2*mmt*pow2(lgu) - 3*invdgb2*mmgl*mmsb22*
+     mmt*pow2(lgu) - 2*mmgl*mmst2*mmt*pow2(lgu) + 2*invdgb1*mmgl*mmsb1*mmst2*
+     mmt*pow2(lgu) + 2*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(lgu) + 2*mmgl*mmst2*
+     mmt*pow2(lt2u) - 2*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(lt2u) - 2*invdgb2*
+     mmgl*mmsb2*mmst2*mmt*pow2(lt2u) + 2*mmgl2*mmt*pow2(ltu) + 2*mmgl*mmsb1*mmt
+     *pow2(ltu) - 3*invdgb1*mmgl*mmsb12*mmt*pow2(ltu) + 2*mmgl*mmsb2*mmt*pow2(
+     ltu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(ltu) - 4*mmgl*mmst2*mmt*pow2(ltu) +
+     4*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(ltu) + 4*invdgb2*mmgl*mmsb2*mmst2*mmt*
+     pow2(ltu) - 6*invdgb1*lt2u*mmgl*mmt*pow2(mmst2) - 6*invdgb2*lt2u*mmgl*mmt*
+     pow2(mmst2) + 2*invdgb1*lgu*lt2u*mmgl*mmt*pow2(mmst2) + 2*invdgb2*lgu*lt2u
+     *mmgl*mmt*pow2(mmst2) + 6*invdgb1*ltu*mmgl*mmt*pow2(mmst2) + 6*invdgb2*ltu
+     *mmgl*mmt*pow2(mmst2) - 2*invdgb1*lgu*ltu*mmgl*mmt*pow2(mmst2) - 2*invdgb2
+     *lgu*ltu*mmgl*mmt*pow2(mmst2) + invdgb1*mmgl*mmt*pow2(lt2u)*pow2(mmst2) +
+     invdgb2*mmgl*mmt*pow2(lt2u)*pow2(mmst2) - invdgb1*mmgl*mmt*pow2(ltu)*pow2(
+     mmst2) - invdgb2*mmgl*mmt*pow2(ltu)*pow2(mmst2) - 28*mmgl*pow2(mmt) + 12*
+     lgu*mmgl*pow2(mmt) + 12*ltu*mmgl*pow2(mmt) - 4*lgu*ltu*mmgl*pow2(mmt) + 28
+     *invdgb1*mmgl*mmsb1*pow2(mmt) - 12*invdgb1*lgu*mmgl*mmsb1*pow2(mmt) - 12*
+     invdgb1*ltu*mmgl*mmsb1*pow2(mmt) + 4*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt)
+     + 28*invdgb2*mmgl*mmsb2*pow2(mmt) - 12*invdgb2*lgu*mmgl*mmsb2*pow2(mmt) -
+     12*invdgb2*ltu*mmgl*mmsb2*pow2(mmt) + 4*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
+     mmt) + 28*invdgb1*mmgl*mmst2*pow2(mmt) + 28*invdgb2*mmgl*mmst2*pow2(mmt) -
+     6*invdgb1*lt2u*mmgl*mmst2*pow2(mmt) - 6*invdgb2*lt2u*mmgl*mmst2*pow2(mmt)
+     - 2*invdgb1*lgu*lt2u*mmgl*mmst2*pow2(mmt) - 2*invdgb2*lgu*lt2u*mmgl*mmst2*
+     pow2(mmt) - 18*invdgb1*ltu*mmgl*mmst2*pow2(mmt) - 18*invdgb2*ltu*mmgl*
+     mmst2*pow2(mmt) + 2*invdgb1*lgu*ltu*mmgl*mmst2*pow2(mmt) + 2*invdgb2*lgu*
+     ltu*mmgl*mmst2*pow2(mmt) + 4*invdgb1*lt2u*ltu*mmgl*mmst2*pow2(mmt) + 4*
+     invdgb2*lt2u*ltu*mmgl*mmst2*pow2(mmt) - 4*mmgl*zt2*pow2(mmt) + 4*invdgb1*
+     mmgl*mmsb1*zt2*pow2(mmt) + 4*invdgb2*mmgl*mmsb2*zt2*pow2(mmt) + 4*invdgb1*
+     mmgl*mmst2*zt2*pow2(mmt) + 4*invdgb2*mmgl*mmst2*zt2*pow2(mmt) - 2*mmgl*
+     pow2(lgu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(mmt) + 2*invdgb2
+     *mmgl*mmsb2*pow2(lgu)*pow2(mmt) + invdgb1*mmgl*mmst2*pow2(lt2u)*pow2(mmt)
+     + invdgb2*mmgl*mmst2*pow2(lt2u)*pow2(mmt) - 2*mmgl*pow2(ltu)*pow2(mmt) + 2
+     *invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt) + 2*invdgb2*mmgl*mmsb2*pow2(ltu)*
+     pow2(mmt) + 3*invdgb1*mmgl*mmst2*pow2(ltu)*pow2(mmt) + 3*invdgb2*mmgl*
+     mmst2*pow2(ltu)*pow2(mmt) + mmgl*pow2(invdgb1)*(-14*mmsb12*mmst2*mmt + 6*
+     lgu*mmsb12*mmst2*mmt - 6*lt2u*mmsb12*mmst2*mmt + 2*lgu*lt2u*mmsb12*mmst2*
+     mmt + 12*ltu*mmsb12*mmst2*mmt - 4*lgu*ltu*mmsb12*mmst2*mmt - 2*mmsb12*
+     mmst2*mmt*zt2 - 2*mmsb12*mmst2*mmt*pow2(ltu) + 6*lt2u*mmsb1*mmt*pow2(mmst2
+     ) - 2*lgu*lt2u*mmsb1*mmt*pow2(mmst2) - 6*ltu*mmsb1*mmt*pow2(mmst2) + 2*lgu
+     *ltu*mmsb1*mmt*pow2(mmst2) + mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmsb12*
+     pow2(mmt) + 6*lgu*mmsb12*pow2(mmt) + 6*ltu*mmsb12*pow2(mmt) - 2*lgu*ltu*
+     mmsb12*pow2(mmt) - 28*mmsb1*mmst2*pow2(mmt) + 6*lt2u*mmsb1*mmst2*pow2(mmt)
+     + 2*lgu*lt2u*mmsb1*mmst2*pow2(mmt) + 18*ltu*mmsb1*mmst2*pow2(mmt) - 2*lgu*
+     ltu*mmsb1*mmst2*pow2(mmt) - 4*lt2u*ltu*mmsb1*mmst2*pow2(mmt) - 2*mmsb12*
+     zt2*pow2(mmt) - 4*mmsb1*mmst2*zt2*pow2(mmt) - mmsb12*pow2(ltu)*pow2(mmt) -
+     3*mmsb1*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*(mmsb12*mmst2*mmt - mmsb1*
+     mmt*pow2(mmst2) - mmsb1*mmst2*pow2(mmt)) + 14*mmt*pow3(mmsb1) - 6*lgu*mmt*
+     pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lgu*ltu*mmt*pow3(mmsb1) + 2*mmt*
+     zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2(lgu)*(mmsb12*mmst2*mmt
+     + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))) + mmgl*pow2(invdgb2)*(-14*mmsb22*
+     mmst2*mmt + 6*lgu*mmsb22*mmst2*mmt - 6*lt2u*mmsb22*mmst2*mmt + 2*lgu*lt2u*
+     mmsb22*mmst2*mmt + 12*ltu*mmsb22*mmst2*mmt - 4*lgu*ltu*mmsb22*mmst2*mmt -
+     2*mmsb22*mmst2*mmt*zt2 - 2*mmsb22*mmst2*mmt*pow2(ltu) + 6*lt2u*mmsb2*mmt*
+     pow2(mmst2) - 2*lgu*lt2u*mmsb2*mmt*pow2(mmst2) - 6*ltu*mmsb2*mmt*pow2(
+     mmst2) + 2*lgu*ltu*mmsb2*mmt*pow2(mmst2) + mmsb2*mmt*pow2(ltu)*pow2(mmst2)
+     - 14*mmsb22*pow2(mmt) + 6*lgu*mmsb22*pow2(mmt) + 6*ltu*mmsb22*pow2(mmt) -
+     2*lgu*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst2*pow2(mmt) + 6*lt2u*mmsb2*mmst2
+     *pow2(mmt) + 2*lgu*lt2u*mmsb2*mmst2*pow2(mmt) + 18*ltu*mmsb2*mmst2*pow2(
+     mmt) - 2*lgu*ltu*mmsb2*mmst2*pow2(mmt) - 4*lt2u*ltu*mmsb2*mmst2*pow2(mmt)
+     - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst2*zt2*pow2(mmt) - mmsb22*pow2(ltu)*
+     pow2(mmt) - 3*mmsb2*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*(mmsb22*mmst2*
+     mmt - mmsb2*mmt*pow2(mmst2) - mmsb2*mmst2*pow2(mmt)) + 14*mmt*pow3(mmsb2)
+     - 6*lgu*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2) + 2*lgu*ltu*mmt*pow3(mmsb2
+     ) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(mmsb2) - pow2(lgu)*(mmsb22*
+     mmst2*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2)))))/(3.*mgl*mt)) + (4*s2b*(
+     14*mmgl2*mmsb1 - 6*lgu*mmgl2*mmsb1 - 6*ltu*mmgl2*mmsb1 + 2*lgu*ltu*mmgl2*
+     mmsb1 + 14*mmgl*mmsb12 - 6*lgu*mmgl*mmsb12 - 6*ltu*mmgl*mmsb12 + 2*lgu*ltu
+     *mmgl*mmsb12 - 14*mmgl2*mmsb2 + 6*lgu*mmgl2*mmsb2 + 6*ltu*mmgl2*mmsb2 - 2*
+     lgu*ltu*mmgl2*mmsb2 - 14*mmgl*mmsb22 + 6*lgu*mmgl*mmsb22 + 6*ltu*mmgl*
+     mmsb22 - 2*lgu*ltu*mmgl*mmsb22 - 14*mmgl*mmsb1*mmst2 + 12*lgu*mmgl*mmsb1*
+     mmst2 - 6*lt2u*mmgl*mmsb1*mmst2 + 6*ltu*mmgl*mmsb1*mmst2 - 4*lgu*ltu*mmgl*
+     mmsb1*mmst2 + 2*lt2u*ltu*mmgl*mmsb1*mmst2 + 14*invdgb1*mmgl*mmsb12*mmst2 -
+     12*invdgb1*lgu*mmgl*mmsb12*mmst2 + 6*invdgb1*lt2u*mmgl*mmsb12*mmst2 - 6*
+     invdgb1*ltu*mmgl*mmsb12*mmst2 + 4*invdgb1*lgu*ltu*mmgl*mmsb12*mmst2 - 2*
+     invdgb1*lt2u*ltu*mmgl*mmsb12*mmst2 + 14*mmgl*mmsb2*mmst2 - 12*lgu*mmgl*
+     mmsb2*mmst2 + 6*lt2u*mmgl*mmsb2*mmst2 - 6*ltu*mmgl*mmsb2*mmst2 + 4*lgu*ltu
+     *mmgl*mmsb2*mmst2 - 2*lt2u*ltu*mmgl*mmsb2*mmst2 - 14*invdgb2*mmgl*mmsb22*
+     mmst2 + 12*invdgb2*lgu*mmgl*mmsb22*mmst2 - 6*invdgb2*lt2u*mmgl*mmsb22*
+     mmst2 + 6*invdgb2*ltu*mmgl*mmsb22*mmst2 - 4*invdgb2*lgu*ltu*mmgl*mmsb22*
+     mmst2 + 2*invdgb2*lt2u*ltu*mmgl*mmsb22*mmst2 - 14*mmgl*mmsb1*mmt + 6*lgu*
+     mmgl*mmsb1*mmt + 6*ltu*mmgl*mmsb1*mmt - 2*lgu*ltu*mmgl*mmsb1*mmt + 14*
+     invdgb1*mmgl*mmsb12*mmt - 6*invdgb1*lgu*mmgl*mmsb12*mmt - 6*invdgb1*ltu*
+     mmgl*mmsb12*mmt + 2*invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 14*mmgl*mmsb2*mmt -
+     6*lgu*mmgl*mmsb2*mmt - 6*ltu*mmgl*mmsb2*mmt + 2*lgu*ltu*mmgl*mmsb2*mmt -
+     14*invdgb2*mmgl*mmsb22*mmt + 6*invdgb2*lgu*mmgl*mmsb22*mmt + 6*invdgb2*ltu
+     *mmgl*mmsb22*mmt - 2*invdgb2*lgu*ltu*mmgl*mmsb22*mmt + 56*invdgb1*mmgl*
+     mmsb1*mmst2*mmt - 6*invdgb1*lgu*mmgl*mmsb1*mmst2*mmt - 6*invdgb1*lt2u*mmgl
+     *mmsb1*mmst2*mmt - 4*invdgb1*lgu*lt2u*mmgl*mmsb1*mmst2*mmt - 36*invdgb1*
+     ltu*mmgl*mmsb1*mmst2*mmt + 6*invdgb1*lgu*ltu*mmgl*mmsb1*mmst2*mmt + 6*
+     invdgb1*lt2u*ltu*mmgl*mmsb1*mmst2*mmt - 56*invdgb2*mmgl*mmsb2*mmst2*mmt +
+     6*invdgb2*lgu*mmgl*mmsb2*mmst2*mmt + 6*invdgb2*lt2u*mmgl*mmsb2*mmst2*mmt +
+     4*invdgb2*lgu*lt2u*mmgl*mmsb2*mmst2*mmt + 36*invdgb2*ltu*mmgl*mmsb2*mmst2*
+     mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb2*mmst2*mmt - 6*invdgb2*lt2u*ltu*mmgl*
+     mmsb2*mmst2*mmt + 2*mmgl2*mmsb1*zt2 + 2*mmgl*mmsb12*zt2 - 2*mmgl2*mmsb2*
+     zt2 - 2*mmgl*mmsb22*zt2 - 2*mmgl*mmsb1*mmst2*zt2 + 2*invdgb1*mmgl*mmsb12*
+     mmst2*zt2 + 2*mmgl*mmsb2*mmst2*zt2 - 2*invdgb2*mmgl*mmsb22*mmst2*zt2 - 2*
+     mmgl*mmsb1*mmt*zt2 + 2*invdgb1*mmgl*mmsb12*mmt*zt2 + 2*mmgl*mmsb2*mmt*zt2
+     - 2*invdgb2*mmgl*mmsb22*mmt*zt2 + 8*invdgb1*mmgl*mmsb1*mmst2*mmt*zt2 - 8*
+     invdgb2*mmgl*mmsb2*mmst2*mmt*zt2 + mmgl2*mmsb1*pow2(ltu) + mmgl*mmsb12*
+     pow2(ltu) - mmgl2*mmsb2*pow2(ltu) - mmgl*mmsb22*pow2(ltu) - mmgl*mmsb1*
+     mmst2*pow2(ltu) + invdgb1*mmgl*mmsb12*mmst2*pow2(ltu) + mmgl*mmsb2*mmst2*
+     pow2(ltu) - invdgb2*mmgl*mmsb22*mmst2*pow2(ltu) - mmgl*mmsb1*mmt*pow2(ltu)
+     + invdgb1*mmgl*mmsb12*mmt*pow2(ltu) + mmgl*mmsb2*mmt*pow2(ltu) - invdgb2*
+     mmgl*mmsb22*mmt*pow2(ltu) + 6*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(ltu) - 6*
+     invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(ltu) + 14*invdgb1*mmgl*mmsb1*pow2(mmst2)
+     + 6*invdgb1*lgu*mmgl*mmsb1*pow2(mmst2) - 12*invdgb1*lt2u*mmgl*mmsb1*pow2(
+     mmst2) - 6*invdgb1*ltu*mmgl*mmsb1*pow2(mmst2) - 2*invdgb1*lgu*ltu*mmgl*
+     mmsb1*pow2(mmst2) + 4*invdgb1*lt2u*ltu*mmgl*mmsb1*pow2(mmst2) - 14*invdgb2
+     *mmgl*mmsb2*pow2(mmst2) - 6*invdgb2*lgu*mmgl*mmsb2*pow2(mmst2) + 12*
+     invdgb2*lt2u*mmgl*mmsb2*pow2(mmst2) + 6*invdgb2*ltu*mmgl*mmsb2*pow2(mmst2)
+     + 2*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(mmst2) - 4*invdgb2*lt2u*ltu*mmgl*mmsb2
+     *pow2(mmst2) + 14*invdgb1*mmgl*mmt*pow2(mmst2) - 14*invdgb2*mmgl*mmt*pow2(
+     mmst2) - 6*invdgb1*lt2u*mmgl*mmt*pow2(mmst2) + 6*invdgb2*lt2u*mmgl*mmt*
+     pow2(mmst2) - 6*invdgb1*ltu*mmgl*mmt*pow2(mmst2) + 6*invdgb2*ltu*mmgl*mmt*
+     pow2(mmst2) + 2*invdgb1*lt2u*ltu*mmgl*mmt*pow2(mmst2) - 2*invdgb2*lt2u*ltu
+     *mmgl*mmt*pow2(mmst2) + 2*invdgb1*mmgl*mmsb1*zt2*pow2(mmst2) - 2*invdgb2*
+     mmgl*mmsb2*zt2*pow2(mmst2) + 2*invdgb1*mmgl*mmt*zt2*pow2(mmst2) - 2*
+     invdgb2*mmgl*mmt*zt2*pow2(mmst2) + invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst2
+     ) - invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmst2) + invdgb1*mmgl*mmt*pow2(ltu)*
+     pow2(mmst2) - invdgb2*mmgl*mmt*pow2(ltu)*pow2(mmst2) - 14*invdgb1*mmgl*
+     pow3(mmsb1) + 6*invdgb1*lgu*mmgl*pow3(mmsb1) + 6*invdgb1*ltu*mmgl*pow3(
+     mmsb1) - 2*invdgb1*lgu*ltu*mmgl*pow3(mmsb1) - 2*invdgb1*mmgl*zt2*pow3(
+     mmsb1) - invdgb1*mmgl*pow2(ltu)*pow3(mmsb1) + 14*invdgb2*mmgl*pow3(mmsb2)
+     - 6*invdgb2*lgu*mmgl*pow3(mmsb2) - 6*invdgb2*ltu*mmgl*pow3(mmsb2) + 2*
+     invdgb2*lgu*ltu*mmgl*pow3(mmsb2) + 2*invdgb2*mmgl*zt2*pow3(mmsb2) +
+     invdgb2*mmgl*pow2(ltu)*pow3(mmsb2) + pow2(lgu)*(mmgl2*mmsb1 + mmgl*mmsb12
+     - mmgl2*mmsb2 - mmgl*mmsb22 - 2*mmgl*mmsb1*mmst2 + 2*invdgb1*mmgl*mmsb12*
+     mmst2 + 2*mmgl*mmsb2*mmst2 - 2*invdgb2*mmgl*mmsb22*mmst2 - mmgl*mmsb1*mmt
+     + invdgb1*mmgl*mmsb12*mmt + mmgl*mmsb2*mmt - invdgb2*mmgl*mmsb22*mmt +
+     invdgb1*mmgl*mmsb1*mmst2*mmt - invdgb2*mmgl*mmsb2*mmst2*mmt + (-(invdgb1*
+     mmgl*mmsb1) + invdgb2*mmgl*mmsb2)*pow2(mmst2) - invdgb1*mmgl*pow3(mmsb1) +
+     invdgb2*mmgl*pow3(mmsb2)) - 14*invdgb1*mmgl*pow3(mmst2) + 14*invdgb2*mmgl*
+     pow3(mmst2) + 6*invdgb1*lt2u*mmgl*pow3(mmst2) - 6*invdgb2*lt2u*mmgl*pow3(
+     mmst2) + 6*invdgb1*ltu*mmgl*pow3(mmst2) - 6*invdgb2*ltu*mmgl*pow3(mmst2) -
+     2*invdgb1*lt2u*ltu*mmgl*pow3(mmst2) + 2*invdgb2*lt2u*ltu*mmgl*pow3(mmst2)
+     - 2*invdgb1*mmgl*zt2*pow3(mmst2) + 2*invdgb2*mmgl*zt2*pow3(mmst2) -
+     invdgb1*mmgl*pow2(ltu)*pow3(mmst2) + invdgb2*mmgl*pow2(ltu)*pow3(mmst2) +
+     mmgl*pow2(lt2u)*(mmst2*(mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 +
+     invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt) + (invdgb1*(2*mmsb1 + mmt) -
+     invdgb2*(2*mmsb2 + mmt))*pow2(mmst2) + (-invdgb1 + invdgb2)*pow3(mmst2))))
+     /(3.*mb*mgl) - (2*(28*mmgl2 - 12*lgu*mmgl2 - 12*ltu*mmgl2 + 4*lgu*ltu*
+     mmgl2 + 28*mmgl*mmsb1 - 12*lgu*mmgl*mmsb1 - 12*ltu*mmgl*mmsb1 + 4*lgu*ltu*
+     mmgl*mmsb1 + 42*mmsb12 - 18*lgu*mmsb12 - 18*ltu*mmsb12 + 6*lgu*ltu*mmsb12
+     + 28*mmgl*mmsb2 - 12*lgu*mmgl*mmsb2 - 12*ltu*mmgl*mmsb2 + 4*lgu*ltu*mmgl*
+     mmsb2 + 42*mmsb22 - 18*lgu*mmsb22 - 18*ltu*mmsb22 + 6*lgu*ltu*mmsb22 - 28*
+     mmgl*mmst2 + 24*lgu*mmgl*mmst2 - 12*lt2u*mmgl*mmst2 + 12*ltu*mmgl*mmst2 -
+     8*lgu*ltu*mmgl*mmst2 + 4*lt2u*ltu*mmgl*mmst2 - 28*mmsb1*mmst2 + 24*lgu*
+     mmsb1*mmst2 - 12*lt2u*mmsb1*mmst2 + 12*ltu*mmsb1*mmst2 - 8*lgu*ltu*mmsb1*
+     mmst2 + 4*lt2u*ltu*mmsb1*mmst2 + 42*invdgb1*mmsb12*mmst2 - 36*invdgb1*lgu*
+     mmsb12*mmst2 + 18*invdgb1*lt2u*mmsb12*mmst2 - 18*invdgb1*ltu*mmsb12*mmst2
+     + 12*invdgb1*lgu*ltu*mmsb12*mmst2 - 6*invdgb1*lt2u*ltu*mmsb12*mmst2 - 28*
+     mmsb2*mmst2 + 24*lgu*mmsb2*mmst2 - 12*lt2u*mmsb2*mmst2 + 12*ltu*mmsb2*
+     mmst2 - 8*lgu*ltu*mmsb2*mmst2 + 4*lt2u*ltu*mmsb2*mmst2 + 42*invdgb2*mmsb22
+     *mmst2 - 36*invdgb2*lgu*mmsb22*mmst2 + 18*invdgb2*lt2u*mmsb22*mmst2 - 18*
+     invdgb2*ltu*mmsb22*mmst2 + 12*invdgb2*lgu*ltu*mmsb22*mmst2 - 6*invdgb2*
+     lt2u*ltu*mmsb22*mmst2 - 28*mmgl*mmt + 12*lgu*mmgl*mmt + 12*ltu*mmgl*mmt -
+     4*lgu*ltu*mmgl*mmt - 28*mmsb1*mmt + 12*lgu*mmsb1*mmt + 12*ltu*mmsb1*mmt -
+     4*lgu*ltu*mmsb1*mmt + 42*invdgb1*mmsb12*mmt - 18*invdgb1*lgu*mmsb12*mmt -
+     18*invdgb1*ltu*mmsb12*mmt + 6*invdgb1*lgu*ltu*mmsb12*mmt - 28*mmsb2*mmt +
+     12*lgu*mmsb2*mmt + 12*ltu*mmsb2*mmt - 4*lgu*ltu*mmsb2*mmt + 42*invdgb2*
+     mmsb22*mmt - 18*invdgb2*lgu*mmsb22*mmt - 18*invdgb2*ltu*mmsb22*mmt + 6*
+     invdgb2*lgu*ltu*mmsb22*mmt - 112*mmst2*mmt + 12*lgu*mmst2*mmt + 12*lt2u*
+     mmst2*mmt + 8*lgu*lt2u*mmst2*mmt + 72*ltu*mmst2*mmt - 12*lgu*ltu*mmst2*mmt
+      - 12*lt2u*ltu*mmst2*mmt + 112*invdgb1*mmsb1*mmst2*mmt - 12*invdgb1*lgu*
+     mmsb1*mmst2*mmt - 12*invdgb1*lt2u*mmsb1*mmst2*mmt - 8*invdgb1*lgu*lt2u*
+     mmsb1*mmst2*mmt - 72*invdgb1*ltu*mmsb1*mmst2*mmt + 12*invdgb1*lgu*ltu*
+     mmsb1*mmst2*mmt + 12*invdgb1*lt2u*ltu*mmsb1*mmst2*mmt + 112*invdgb2*mmsb2*
+     mmst2*mmt - 12*invdgb2*lgu*mmsb2*mmst2*mmt - 12*invdgb2*lt2u*mmsb2*mmst2*
+     mmt - 8*invdgb2*lgu*lt2u*mmsb2*mmst2*mmt - 72*invdgb2*ltu*mmsb2*mmst2*mmt
+     + 12*invdgb2*lgu*ltu*mmsb2*mmst2*mmt + 12*invdgb2*lt2u*ltu*mmsb2*mmst2*mmt
+      + 4*mmgl2*zt2 + 4*mmgl*mmsb1*zt2 + 6*mmsb12*zt2 + 4*mmgl*mmsb2*zt2 + 6*
+     mmsb22*zt2 - 4*mmgl*mmst2*zt2 - 4*mmsb1*mmst2*zt2 + 6*invdgb1*mmsb12*mmst2
+     *zt2 - 4*mmsb2*mmst2*zt2 + 6*invdgb2*mmsb22*mmst2*zt2 - 4*mmgl*mmt*zt2 - 4
+     *mmsb1*mmt*zt2 + 6*invdgb1*mmsb12*mmt*zt2 - 4*mmsb2*mmt*zt2 + 6*invdgb2*
+     mmsb22*mmt*zt2 - 16*mmst2*mmt*zt2 + 16*invdgb1*mmsb1*mmst2*mmt*zt2 + 16*
+     invdgb2*mmsb2*mmst2*mmt*zt2 + 2*mmgl2*pow2(lgu) + 2*mmgl*mmsb1*pow2(lgu) +
+     3*mmsb12*pow2(lgu) + 2*mmgl*mmsb2*pow2(lgu) + 3*mmsb22*pow2(lgu) - 4*mmgl*
+     mmst2*pow2(lgu) - 4*mmsb1*mmst2*pow2(lgu) + 6*invdgb1*mmsb12*mmst2*pow2(
+     lgu) - 4*mmsb2*mmst2*pow2(lgu) + 6*invdgb2*mmsb22*mmst2*pow2(lgu) - 2*mmgl
+     *mmt*pow2(lgu) - 2*mmsb1*mmt*pow2(lgu) + 3*invdgb1*mmsb12*mmt*pow2(lgu) -
+     2*mmsb2*mmt*pow2(lgu) + 3*invdgb2*mmsb22*mmt*pow2(lgu) - 2*mmst2*mmt*pow2(
+     lgu) + 2*invdgb1*mmsb1*mmst2*mmt*pow2(lgu) + 2*invdgb2*mmsb2*mmst2*mmt*
+     pow2(lgu) + 2*mmgl*mmst2*pow2(lt2u) + 2*mmsb1*mmst2*pow2(lt2u) - 3*invdgb1
+     *mmsb12*mmst2*pow2(lt2u) + 2*mmsb2*mmst2*pow2(lt2u) - 3*invdgb2*mmsb22*
+     mmst2*pow2(lt2u) - 2*mmst2*mmt*pow2(lt2u) + 2*invdgb1*mmsb1*mmst2*mmt*pow2
+     (lt2u) + 2*invdgb2*mmsb2*mmst2*mmt*pow2(lt2u) + 2*mmgl2*pow2(ltu) + 2*mmgl
+     *mmsb1*pow2(ltu) + 3*mmsb12*pow2(ltu) + 2*mmgl*mmsb2*pow2(ltu) + 3*mmsb22*
+     pow2(ltu) - 2*mmgl*mmst2*pow2(ltu) - 2*mmsb1*mmst2*pow2(ltu) + 3*invdgb1*
+     mmsb12*mmst2*pow2(ltu) - 2*mmsb2*mmst2*pow2(ltu) + 3*invdgb2*mmsb22*mmst2*
+     pow2(ltu) - 2*mmgl*mmt*pow2(ltu) - 2*mmsb1*mmt*pow2(ltu) + 3*invdgb1*
+     mmsb12*mmt*pow2(ltu) - 2*mmsb2*mmt*pow2(ltu) + 3*invdgb2*mmsb22*mmt*pow2(
+     ltu) - 12*mmst2*mmt*pow2(ltu) + 12*invdgb1*mmsb1*mmst2*mmt*pow2(ltu) + 12*
+     invdgb2*mmsb2*mmst2*mmt*pow2(ltu) - 28*pow2(mmst2) - 12*lgu*pow2(mmst2) +
+     24*lt2u*pow2(mmst2) + 12*ltu*pow2(mmst2) + 4*lgu*ltu*pow2(mmst2) - 8*lt2u*
+     ltu*pow2(mmst2) + 28*invdgb1*mmsb1*pow2(mmst2) + 12*invdgb1*lgu*mmsb1*pow2
+     (mmst2) - 24*invdgb1*lt2u*mmsb1*pow2(mmst2) - 12*invdgb1*ltu*mmsb1*pow2(
+     mmst2) - 4*invdgb1*lgu*ltu*mmsb1*pow2(mmst2) + 8*invdgb1*lt2u*ltu*mmsb1*
+     pow2(mmst2) + 28*invdgb2*mmsb2*pow2(mmst2) + 12*invdgb2*lgu*mmsb2*pow2(
+     mmst2) - 24*invdgb2*lt2u*mmsb2*pow2(mmst2) - 12*invdgb2*ltu*mmsb2*pow2(
+     mmst2) - 4*invdgb2*lgu*ltu*mmsb2*pow2(mmst2) + 8*invdgb2*lt2u*ltu*mmsb2*
+     pow2(mmst2) + 14*invdgb1*mmt*pow2(mmst2) + 14*invdgb2*mmt*pow2(mmst2) - 6*
+     invdgb1*lt2u*mmt*pow2(mmst2) - 6*invdgb2*lt2u*mmt*pow2(mmst2) - 6*invdgb1*
+     ltu*mmt*pow2(mmst2) - 6*invdgb2*ltu*mmt*pow2(mmst2) + 2*invdgb1*lt2u*ltu*
+     mmt*pow2(mmst2) + 2*invdgb2*lt2u*ltu*mmt*pow2(mmst2) - 4*zt2*pow2(mmst2) +
+     4*invdgb1*mmsb1*zt2*pow2(mmst2) + 4*invdgb2*mmsb2*zt2*pow2(mmst2) + 2*
+     invdgb1*mmt*zt2*pow2(mmst2) + 2*invdgb2*mmt*zt2*pow2(mmst2) + 2*pow2(lgu)*
+     pow2(mmst2) - 2*invdgb1*mmsb1*pow2(lgu)*pow2(mmst2) - 2*invdgb2*mmsb2*pow2
+     (lgu)*pow2(mmst2) - 4*pow2(lt2u)*pow2(mmst2) + 4*invdgb1*mmsb1*pow2(lt2u)*
+     pow2(mmst2) + 4*invdgb2*mmsb2*pow2(lt2u)*pow2(mmst2) + invdgb1*mmt*pow2(
+     lt2u)*pow2(mmst2) + invdgb2*mmt*pow2(lt2u)*pow2(mmst2) - 2*pow2(ltu)*pow2(
+     mmst2) + 2*invdgb1*mmsb1*pow2(ltu)*pow2(mmst2) + 2*invdgb2*mmsb2*pow2(ltu)
+     *pow2(mmst2) + invdgb1*mmt*pow2(ltu)*pow2(mmst2) + invdgb2*mmt*pow2(ltu)*
+     pow2(mmst2) - 56*invdgb1*pow3(mmsb1) + 24*invdgb1*lgu*pow3(mmsb1) + 24*
+     invdgb1*ltu*pow3(mmsb1) - 8*invdgb1*lgu*ltu*pow3(mmsb1) - 8*invdgb1*zt2*
+     pow3(mmsb1) - 4*invdgb1*pow2(lgu)*pow3(mmsb1) - 4*invdgb1*pow2(ltu)*pow3(
+     mmsb1) - 56*invdgb2*pow3(mmsb2) + 24*invdgb2*lgu*pow3(mmsb2) + 24*invdgb2*
+     ltu*pow3(mmsb2) - 8*invdgb2*lgu*ltu*pow3(mmsb2) - 8*invdgb2*zt2*pow3(mmsb2
+     ) - 4*invdgb2*pow2(lgu)*pow3(mmsb2) - 4*invdgb2*pow2(ltu)*pow3(mmsb2) - 14
+     *invdgb1*pow3(mmst2) - 14*invdgb2*pow3(mmst2) + 6*invdgb1*lt2u*pow3(mmst2)
+     + 6*invdgb2*lt2u*pow3(mmst2) + 6*invdgb1*ltu*pow3(mmst2) + 6*invdgb2*ltu*
+     pow3(mmst2) - 2*invdgb1*lt2u*ltu*pow3(mmst2) - 2*invdgb2*lt2u*ltu*pow3(
+     mmst2) - 2*invdgb1*zt2*pow3(mmst2) - 2*invdgb2*zt2*pow3(mmst2) - invdgb1*
+     pow2(lt2u)*pow3(mmst2) - invdgb2*pow2(lt2u)*pow3(mmst2) - invdgb1*pow2(ltu
+     )*pow3(mmst2) - invdgb2*pow2(ltu)*pow3(mmst2) + pow2(invdgb1)*(-56*mmsb12*
+     mmst2*mmt + 6*lgu*mmsb12*mmst2*mmt + 6*lt2u*mmsb12*mmst2*mmt + 4*lgu*lt2u*
+     mmsb12*mmst2*mmt + 36*ltu*mmsb12*mmst2*mmt - 6*lgu*ltu*mmsb12*mmst2*mmt -
+     6*lt2u*ltu*mmsb12*mmst2*mmt - 8*mmsb12*mmst2*mmt*zt2 - 6*mmsb12*mmst2*mmt*
+     pow2(ltu) - 14*mmsb12*pow2(mmst2) - 6*lgu*mmsb12*pow2(mmst2) + 12*lt2u*
+     mmsb12*pow2(mmst2) + 6*ltu*mmsb12*pow2(mmst2) + 2*lgu*ltu*mmsb12*pow2(
+     mmst2) - 4*lt2u*ltu*mmsb12*pow2(mmst2) - 14*mmsb1*mmt*pow2(mmst2) + 6*lt2u
+     *mmsb1*mmt*pow2(mmst2) + 6*ltu*mmsb1*mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb1*
+     mmt*pow2(mmst2) - 2*mmsb12*zt2*pow2(mmst2) - 2*mmsb1*mmt*zt2*pow2(mmst2) -
+     mmsb12*pow2(ltu)*pow2(mmst2) - mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*
+     pow3(mmsb1) + 12*lgu*mmst2*pow3(mmsb1) - 6*lt2u*mmst2*pow3(mmsb1) + 6*ltu*
+     mmst2*pow3(mmsb1) - 4*lgu*ltu*mmst2*pow3(mmsb1) + 2*lt2u*ltu*mmst2*pow3(
+     mmsb1) - 14*mmt*pow3(mmsb1) + 6*lgu*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1
+     ) - 2*lgu*ltu*mmt*pow3(mmsb1) - 2*mmst2*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(
+     mmsb1) - mmst2*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     mmsb1*pow3(mmst2) - 6*lt2u*mmsb1*pow3(mmst2) - 6*ltu*mmsb1*pow3(mmst2) + 2
+     *lt2u*ltu*mmsb1*pow3(mmst2) + 2*mmsb1*zt2*pow3(mmst2) + mmsb1*pow2(ltu)*
+     pow3(mmst2) + pow2(lt2u)*(-(mmsb12*mmst2*mmt) - (2*mmsb12 + mmsb1*mmt)*
+     pow2(mmst2) + mmst2*pow3(mmsb1) + mmsb1*pow3(mmst2)) + 14*pow4(mmsb1) - 6*
+     lgu*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lgu*ltu*pow4(mmsb1) + 2*zt2*pow4(
+     mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lgu)*(-(mmsb12*mmst2*mmt) + mmsb12*
+     pow2(mmst2) - (2*mmst2 + mmt)*pow3(mmsb1) + pow4(mmsb1))) + pow2(invdgb2)*
+     (-56*mmsb22*mmst2*mmt + 6*lgu*mmsb22*mmst2*mmt + 6*lt2u*mmsb22*mmst2*mmt +
+     4*lgu*lt2u*mmsb22*mmst2*mmt + 36*ltu*mmsb22*mmst2*mmt - 6*lgu*ltu*mmsb22*
+     mmst2*mmt - 6*lt2u*ltu*mmsb22*mmst2*mmt - 8*mmsb22*mmst2*mmt*zt2 - 6*
+     mmsb22*mmst2*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst2) - 6*lgu*mmsb22*pow2(
+     mmst2) + 12*lt2u*mmsb22*pow2(mmst2) + 6*ltu*mmsb22*pow2(mmst2) + 2*lgu*ltu
+     *mmsb22*pow2(mmst2) - 4*lt2u*ltu*mmsb22*pow2(mmst2) - 14*mmsb2*mmt*pow2(
+     mmst2) + 6*lt2u*mmsb2*mmt*pow2(mmst2) + 6*ltu*mmsb2*mmt*pow2(mmst2) - 2*
+     lt2u*ltu*mmsb2*mmt*pow2(mmst2) - 2*mmsb22*zt2*pow2(mmst2) - 2*mmsb2*mmt*
+     zt2*pow2(mmst2) - mmsb22*pow2(ltu)*pow2(mmst2) - mmsb2*mmt*pow2(ltu)*pow2(
+     mmst2) - 14*mmst2*pow3(mmsb2) + 12*lgu*mmst2*pow3(mmsb2) - 6*lt2u*mmst2*
+     pow3(mmsb2) + 6*ltu*mmst2*pow3(mmsb2) - 4*lgu*ltu*mmst2*pow3(mmsb2) + 2*
+     lt2u*ltu*mmst2*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lgu*mmt*pow3(mmsb2) +
+     6*ltu*mmt*pow3(mmsb2) - 2*lgu*ltu*mmt*pow3(mmsb2) - 2*mmst2*zt2*pow3(mmsb2
+     ) - 2*mmt*zt2*pow3(mmsb2) - mmst2*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*
+     pow3(mmsb2) + 14*mmsb2*pow3(mmst2) - 6*lt2u*mmsb2*pow3(mmst2) - 6*ltu*
+     mmsb2*pow3(mmst2) + 2*lt2u*ltu*mmsb2*pow3(mmst2) + 2*mmsb2*zt2*pow3(mmst2)
+     + mmsb2*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(mmsb22*mmst2*mmt) - (2*
+     mmsb22 + mmsb2*mmt)*pow2(mmst2) + mmst2*pow3(mmsb2) + mmsb2*pow3(mmst2)) +
+     14*pow4(mmsb2) - 6*lgu*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lgu*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lgu)*(-(mmsb22*
+     mmst2*mmt) + mmsb22*pow2(mmst2) - (2*mmst2 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     )))))/3.);
 
    return pow4(g3) * result * twoLoop;
 }

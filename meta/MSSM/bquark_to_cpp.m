@@ -58,7 +58,7 @@ Simp[expr_] := Collect[expr //. {
        Log[mmt/mmu]          -> ltu
     },
     { Fin20[__], Fin3[__], DeltaInv[__], s2t, s2b },
-    Refine
+    Simplify[#, TimeConstraint -> 300]&
 ];
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
@@ -323,34 +323,32 @@ namespace {
  */
 double delta_mb_2loop(const Parameters& pars)
 {
-   const double g3     = pars.g3;
-   const double Xt     = pars.xt;
-   const double Xb     = pars.xb;
-   const double mgl    = pars.mg;
-   const double mt     = pars.mt;
-   const double mb     = pars.mb;
-   const double mmt    = pow2(pars.mt);
-   const double mmb    = pow2(pars.mb);
-   const double mmgl   = pow2(pars.mg);
-   const double mmgl2  = pow2(mmgl);
-   const double mmgl3  = mmgl*mmgl2;
-   const double mmu    = pow2(pars.Q);
-   const double mmst1  = pow2(pars.mst1);
-   const double mmst2  = pow2(pars.mst2);
-   const double mmsb1  = pow2(pars.msb1);
-   const double mmsb2  = pow2(pars.msb2);
-   const double mmsb12 = pow2(mmsb1);
-   const double mmsb22 = pow2(mmsb2);
-   const double mmsusy = pow2(pars.msusy);
-   const double lgu    = std::log(mmgl/mmu);
-   const double lt1u   = std::log(mmst1/mmu);
-   const double lt2u   = std::log(mmst2/mmu);
-   const double lb1u   = std::log(mmsb1/mmu);
-   const double lb2u   = std::log(mmsb2/mmu);
-   const double lsu    = std::log(mmsusy/mmu);
-   const double ltu    = std::log(mmt/mmu);
-   const double s2t    = 2*mt*Xt / (mmst1 - mmst2);
-   const double s2b    = 2*mb*Xb / (mmsb1 - mmsb2);
+   const double g3      = pars.g3;
+   const double Xt      = pars.xt;
+   const double Xb      = pars.xb;
+   const double mgl     = pars.mg;
+   const double mt      = pars.mt;
+   const double mb      = pars.mb;
+   const double mmt     = pow2(pars.mt);
+   const double mmgl    = pow2(pars.mg);
+   const double mmgl2   = pow2(mmgl);
+   const double mmu     = pow2(pars.Q);
+   const double mmst1   = pow2(pars.mst1);
+   const double mmst2   = pow2(pars.mst2);
+   const double mmsb1   = pow2(pars.msb1);
+   const double mmsb2   = pow2(pars.msb2);
+   const double mmsb12  = pow2(mmsb1);
+   const double mmsb22  = pow2(mmsb2);
+   const double mmsusy  = pow2(pars.msusy);
+   const double lgu     = std::log(mmgl/mmu);
+   const double lt1u    = std::log(mmst1/mmu);
+   const double lt2u    = std::log(mmst2/mmu);
+   const double lb1u    = std::log(mmsb1/mmu);
+   const double lb2u    = std::log(mmsb2/mmu);
+   const double lsu     = std::log(mmsusy/mmu);
+   const double ltu     = std::log(mmt/mmu);
+   const double s2t     = 2*mt*Xt / (mmst1 - mmst2);
+   const double s2b     = 2*mb*Xb / (mmsb1 - mmsb2);
    const double invdgb1 = 1/(-mmgl + mmsb1);
    const double invdgb2 = 1/(-mmgl + mmsb2);
    const double invdb12 = 1/(mmsb1 - mmsb2);
