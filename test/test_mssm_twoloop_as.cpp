@@ -49,10 +49,10 @@ Parameters make_point(Real MS, Real tb, Real xt)
 BOOST_AUTO_TEST_CASE(test_points)
 {
    std::vector<Results> res = {
-      { make_point(1000.0l, 10.0l, 2.0l), 0.000715816532730145103587l, 0.000108116526832918386358l, -2.30035474310885696247e-05l }
+      { make_point(1000.0l, 10.0l, 2.0l), 0.000715816532730145103587l, 0.000108116526832918386358l, -2.30035477609371506891e-05l }
    };
 
-   for (const auto r: res) {
+   for (const auto& r: res) {
       const Real das_as_as = delta_alpha_s_2loop_as_as(r.pars);
       const Real das_at_as = delta_alpha_s_2loop_at_as(r.pars);
       const Real das_ab_as = delta_alpha_s_2loop_ab_as(r.pars);

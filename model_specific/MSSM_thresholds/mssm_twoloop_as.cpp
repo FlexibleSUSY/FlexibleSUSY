@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// This file has been generated at Fri 17 Apr 2020 18:55:31
+// This file has been generated at Fri 17 Apr 2020 19:33:32
 // with the script "as2_to_cpp.m".
 
 #include "mssm_twoloop_as.hpp"
@@ -650,10 +650,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real mt        = pars.mt;
    const Real mt2       = power2(pars.mt);
    const Real mb        = pars.mb;
-   const Real mg        = shift_mg(pars.mg, pars.mst1, pars.mst2);
-   const Real mg2       = power2(mg);
-   const Real mg4       = power2(mg2);
-   const Real mg6       = mg2*mg4;
    const Real mst12     = power2(pars.mst1);
    const Real mst14     = power2(mst12);
    const Real mst16     = mst12*mst14;
@@ -666,12 +662,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real msb22     = power2(pars.msb2);
    const Real msb24     = power2(msb22);
    const Real msb26     = msb22*msb24;
-   const Real msd12     = power2(pars.msd1);
-   const Real msd14     = power2(msd12);
-   const Real msd16     = msd12*msd14;
-   const Real msd22     = power2(pars.msd2);
-   const Real msd24     = power2(msd22);
-   const Real msd26     = msd22*msd24;
    const Real mw2       = power2(pars.mw);
    const Real mz2       = power2(pars.mz);
    const Real mh2       = power2(pars.mh);
@@ -690,7 +680,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real sa        = std::sin(alpha);
    const Real ca        = std::cos(alpha);
    const Real At        = xt + mu*cb/sb;
-   const Real Ab        = xb + mu*sb/cb;
    const Real invdmst   = 1/(mst12 - mst22);
    const Real invdct    = 1/(mC2 - mt2);
    const Real invdtw    = 1/(mt2 - mw2);
@@ -740,78 +729,79 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
      msb22)*((-1 - lmsb22 + lmt2)*mt2 + mu2*(40 - 17*lmt2 + 6*lmsb22*(-2 + lmt2
       - lmu2) - 7*lmu2 + 6*lmt2*lmu2 + 6*power2(lmt2) + power2(Pi))))*power2(
      snb))/(6.*msb22*mt2) + DeltaInv(mH2,mst12,mst12)*((invdmst*((1 + lmH2 -
-     lmst12)*mH2 + 6*(-lmH2 + lmst12)*mst12)*mt2*sa*(ca*(cb*mu2 - At*mu*sb) +
-     At*sa*xt))/(3.*sb) + (((1 + lmH2 - lmst12)*mH2 + 6*(-lmH2 + lmst12)*mst12)
-     *(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 +
-     power2(snt))*power2(snt)))/6.) + DeltaInv(mH2,mst22,mst22)*((invdmst*((1 +
-     lmH2 - lmst22)*mH2 + 6*(-lmH2 + lmst22)*mst22)*mt2*sa*(ca*(-(cb*mu2) + At*
-     mu*sb) - At*sa*xt))/(3.*sb) + (((1 + lmH2 - lmst22)*mH2 + 6*(-lmH2 +
-     lmst22)*mst22)*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 +
-     power2(sa)))*(-1 + power2(snt))*power2(snt)))/6.) + DeltaInv(mh2,mst12,
-     mst12)*(-(invdmst*((1 + lmh2 - lmst12)*mh2 + 6*(-lmh2 + lmst12)*mst12)*mt2
-     *(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(
-     -1 + power2(sa))))/(3.*sb) - (((1 + lmh2 - lmst12)*mh2 + 6*(-lmh2 + lmst12
-     )*mst12)*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 +
-     power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))/6.) +
-     DeltaInv(mst22,mst22,mh2)*((invdmst*((1 + lmh2 - lmst22)*mh2 + 6*(-lmh2 +
-     lmst22)*mst22)*mt2*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa)))
-     + sb*power2(At)*(-1 + power2(sa))))/(3.*sb) - (((1 + lmh2 - lmst22)*mh2 +
-     6*(-lmh2 + lmst22)*mst22)*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa +
-     power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(
-     snt)))/6.) + ((invdmst*mt2*(6*mst16*(42 + 8*lmh2*(-3 + lmst12) - 12*lmst12
-      + 4*power2(lmh2) + power2(Pi)) + mh2*mst14*(42 + 12*lmh2*(-1 + lmst12) -
-     24*lmst12 + 6*power2(lmh2) - 6*power2(lmst12) + power2(Pi)))*(ca*cb*mu2*sa
-      - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2(sa
-     ))))/(3.*sb) + ((6*mst16*(42 + 8*lmh2*(-3 + lmst12) - 12*lmst12 + 4*power2
-     (lmh2) + power2(Pi)) + mh2*mst14*(42 + 12*lmh2*(-1 + lmst12) - 24*lmst12 +
-     6*power2(lmh2) - 6*power2(lmst12) + power2(Pi)))*(mt2*(-1 + power2(sa)) -
-     (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 +
-     power2(snt))*power2(snt)))/6.)*power2(DeltaInv(mh2,mst12,mst12)) + Fin3(
-     mh2,mt2,mt2,Q2)*(DeltaInv(mh2,mt2,mt2)*(mt2 - mt2*power2(sa)) - 3*mh2*
-     power2(mt2)*(-1 + power2(sa))*power2(DeltaInv(mh2,mt2,mt2))) + ((invdmst*
-     mt2*sa*(ca*(-(cb*mu2) + At*mu*sb) - At*sa*xt)*(6*mst16*(42 + 8*lmH2*(-3 +
-     lmst12) - 12*lmst12 + 4*power2(lmH2) + power2(Pi)) + mH2*mst14*(42 + 12*
-     lmH2*(-1 + lmst12) - 24*lmst12 + 6*power2(lmH2) - 6*power2(lmst12) +
-     power2(Pi))))/(3.*sb) - ((6*mst16*(42 + 8*lmH2*(-3 + lmst12) - 12*lmst12 +
-     4*power2(lmH2) + power2(Pi)) + mH2*mst14*(42 + 12*lmH2*(-1 + lmst12) - 24*
-     lmst12 + 6*power2(lmH2) - 6*power2(lmst12) + power2(Pi)))*(mt2*power2(sa)
-     + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*
-     power2(snt)))/6.)*power2(DeltaInv(mH2,mst12,mst12)) + ((invdmst*mt2*sa*(ca
-     *(cb*mu2 - At*mu*sb) + At*sa*xt)*(6*mst26*(42 + 8*lmH2*(-3 + lmst22) - 12*
-     lmst22 + 4*power2(lmH2) + power2(Pi)) + mH2*mst24*(42 + 12*lmH2*(-1 +
-     lmst22) - 24*lmst22 + 6*power2(lmH2) - 6*power2(lmst22) + power2(Pi))))/(
-     3.*sb) - ((6*mst26*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmH2)
-     + power2(Pi)) + mH2*mst24*(42 + 12*lmH2*(-1 + lmst22) - 24*lmst22 + 6*
-     power2(lmH2) - 6*power2(lmst22) + power2(Pi)))*(mt2*power2(sa) + (At*sa*(2
+     lmst12)*mH2 + 6*(-lmH2 + lmst12)*mst12)*mt2*sa*(At*sa*(-(cb*mu) + At*sb) +
+     ca*(cb*mu2 - At*mu*sb)))/(3.*sb) + (((1 + lmH2 - lmst12)*mH2 + 6*(-lmH2 +
+     lmst12)*mst12)*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 +
+     power2(sa)))*(-1 + power2(snt))*power2(snt)))/6.) + DeltaInv(mH2,mst22,
+     mst22)*((invdmst*((1 + lmH2 - lmst22)*mH2 + 6*(-lmH2 + lmst22)*mst22)*mt2*
+     sa*(At*sa*(cb*mu - At*sb) + ca*(-(cb*mu2) + At*mu*sb)))/(3.*sb) + (((1 +
+     lmH2 - lmst22)*mH2 + 6*(-lmH2 + lmst22)*mst22)*(mt2*power2(sa) + (At*sa*(2
      *ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))/
-     6.)*power2(DeltaInv(mH2,mst22,mst22)) + Fin3(mH2,mt2,mt2,Q2)*(mt2*DeltaInv
-     (mH2,mt2,mt2)*power2(sa) + 3*mH2*power2(mt2)*power2(sa)*power2(DeltaInv(
-     mH2,mt2,mt2))) - (power2(mu2)*(msb16*(42 + 6*lmu2 - 6*lmt2*(3 + lmu2) + 6*
-     lmsb12*(-4 + lmt2 + lmu2) + 6*power2(lmsb12) + power2(Pi)) + mu2*(6*(lmt2
-     - lmu2)*(mt2 - mu2)*mu2 + 6*msb12*mt2*(42 + 4*lmsb12*(-1 + lmt2 - lmu2) -
-     12*lmu2 + lmt2*(-20 + 6*lmu2) + 5*power2(lmt2) + power2(lmu2) + power2(Pi)
-     ) + msb12*mu2*(294 + 6*lmsb12*(2 + lmt2 - lmu2) - 114*lmu2 + 6*lmt2*(-25 +
-     7*lmu2) + 24*power2(lmt2) + 18*power2(lmu2) + 7*power2(Pi))) + 2*msb14*(
-     mt2*(84 - 39*lmt2 + 6*lmsb12*(-5 + 2*lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 +
-     3*power2(lmsb12) + 9*power2(lmt2) + 2*power2(Pi)) + mu2*(336 - 201*lmt2 +
-     6*lmsb12*(-11 + 7*lmt2 - 4*lmu2) - 21*lmu2 + 30*lmt2*lmu2 + 9*power2(
-     lmsb12) + 36*power2(lmt2) + 3*power2(lmu2) + 8*power2(Pi))))*(-1 + power2(
-     snb))*power2(DeltaInv(msb12,mt2,mu2)))/(6.*mt2) + (-(invdmst*mt2*(6*mst26*
-     (42 + 8*lmh2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi)) +
-     mh2*mst24*(42 + 12*lmh2*(-1 + lmst22) - 24*lmst22 + 6*power2(lmh2) - 6*
-     power2(lmst22) + power2(Pi)))*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 +
-     power2(sa))) + sb*power2(At)*(-1 + power2(sa))))/(3.*sb) + ((6*mst26*(42 +
-     8*lmh2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi)) + mh2*
-     mst24*(42 + 12*lmh2*(-1 + lmst22) - 24*lmst22 + 6*power2(lmh2) - 6*power2(
-     lmst22) + power2(Pi)))*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(
-     At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))/
-     6.)*power2(DeltaInv(mst22,mst22,mh2)) + (power2(mu2)*(mst26*(42 + 6*lmu2 -
-     6*lmt2*(3 + lmu2) + 6*lmst22*(-4 + lmt2 + lmu2) + 6*power2(lmst22) +
-     power2(Pi)) + mu2*(6*(lmt2 - lmu2)*(mt2 - mu2)*mu2 + 6*mst22*mt2*(42 + 4*
-     lmst22*(-1 + lmt2 - lmu2) - 12*lmu2 + lmt2*(-20 + 6*lmu2) + 5*power2(lmt2)
-     + power2(lmu2) + power2(Pi)) + mst22*mu2*(294 + 6*lmst22*(2 + lmt2 - lmu2)
-     - 114*lmu2 + 6*lmt2*(-25 + 7*lmu2) + 24*power2(lmt2) + 18*power2(lmu2) + 7
-     *power2(Pi))) + 2*mst24*(mt2*(84 - 39*lmt2 + 6*lmst22*(-5 + 2*lmt2 - lmu2)
+     6.) + DeltaInv(mh2,mst12,mst12)*(-(invdmst*((1 + lmh2 - lmst12)*mh2 + 6*(-
+     lmh2 + lmst12)*mst12)*mt2*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 +
+     power2(sa))) + sb*power2(At)*(-1 + power2(sa))))/(3.*sb) - (((1 + lmh2 -
+     lmst12)*mh2 + 6*(-lmh2 + lmst12)*mst12)*(mt2*(-1 + power2(sa)) - (-2*At*ca
+     *mu*sa + power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))
+     *power2(snt)))/6.) + DeltaInv(mst22,mst22,mh2)*((invdmst*((1 + lmh2 -
+     lmst22)*mh2 + 6*(-lmh2 + lmst22)*mst22)*mt2*(ca*cb*mu2*sa - At*mu*(ca*sa*
+     sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2(sa))))/(3.*sb) - (
+     ((1 + lmh2 - lmst22)*mh2 + 6*(-lmh2 + lmst22)*mst22)*(mt2*(-1 + power2(sa)
+     ) - (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 +
+     power2(snt))*power2(snt)))/6.) + ((invdmst*mt2*(6*mst16*(42 + 8*lmh2*(-3 +
+     lmst12) - 12*lmst12 + 4*power2(lmh2) + power2(Pi)) + mh2*mst14*(42 + 12*
+     lmh2*(-1 + lmst12) - 24*lmst12 + 6*power2(lmh2) - 6*power2(lmst12) +
+     power2(Pi)))*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*
+     power2(At)*(-1 + power2(sa))))/(3.*sb) + ((6*mst16*(42 + 8*lmh2*(-3 +
+     lmst12) - 12*lmst12 + 4*power2(lmh2) + power2(Pi)) + mh2*mst14*(42 + 12*
+     lmh2*(-1 + lmst12) - 24*lmst12 + 6*power2(lmh2) - 6*power2(lmst12) +
+     power2(Pi)))*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 +
+     power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))/6.)*power2(
+     DeltaInv(mh2,mst12,mst12)) + Fin3(mh2,mt2,mt2,Q2)*(DeltaInv(mh2,mt2,mt2)*(
+     mt2 - mt2*power2(sa)) - 3*mh2*power2(mt2)*(-1 + power2(sa))*power2(
+     DeltaInv(mh2,mt2,mt2))) + ((invdmst*mt2*sa*(At*sa*(cb*mu - At*sb) + ca*(-(
+     cb*mu2) + At*mu*sb))*(6*mst16*(42 + 8*lmH2*(-3 + lmst12) - 12*lmst12 + 4*
+     power2(lmH2) + power2(Pi)) + mH2*mst14*(42 + 12*lmH2*(-1 + lmst12) - 24*
+     lmst12 + 6*power2(lmH2) - 6*power2(lmst12) + power2(Pi))))/(3.*sb) - ((6*
+     mst16*(42 + 8*lmH2*(-3 + lmst12) - 12*lmst12 + 4*power2(lmH2) + power2(Pi)
+     ) + mH2*mst14*(42 + 12*lmH2*(-1 + lmst12) - 24*lmst12 + 6*power2(lmH2) - 6
+     *power2(lmst12) + power2(Pi)))*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa)
+     + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))/6.)*power2(
+     DeltaInv(mH2,mst12,mst12)) + ((invdmst*mt2*sa*(At*sa*(-(cb*mu) + At*sb) +
+     ca*(cb*mu2 - At*mu*sb))*(6*mst26*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 +
+     4*power2(lmH2) + power2(Pi)) + mH2*mst24*(42 + 12*lmH2*(-1 + lmst22) - 24*
+     lmst22 + 6*power2(lmH2) - 6*power2(lmst22) + power2(Pi))))/(3.*sb) - ((6*
+     mst26*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmH2) + power2(Pi)
+     ) + mH2*mst24*(42 + 12*lmH2*(-1 + lmst22) - 24*lmst22 + 6*power2(lmH2) - 6
+     *power2(lmst22) + power2(Pi)))*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa)
+     + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))/6.)*power2(
+     DeltaInv(mH2,mst22,mst22)) + Fin3(mH2,mt2,mt2,Q2)*(mt2*DeltaInv(mH2,mt2,
+     mt2)*power2(sa) + 3*mH2*power2(mt2)*power2(sa)*power2(DeltaInv(mH2,mt2,mt2
+     ))) - (power2(mu2)*(msb16*(42 + 6*lmu2 - 6*lmt2*(3 + lmu2) + 6*lmsb12*(-4
+     + lmt2 + lmu2) + 6*power2(lmsb12) + power2(Pi)) + mu2*(6*(lmt2 - lmu2)*(
+     mt2 - mu2)*mu2 + 6*msb12*mt2*(42 + 4*lmsb12*(-1 + lmt2 - lmu2) - 12*lmu2 +
+     lmt2*(-20 + 6*lmu2) + 5*power2(lmt2) + power2(lmu2) + power2(Pi)) + msb12*
+     mu2*(294 + 6*lmsb12*(2 + lmt2 - lmu2) - 114*lmu2 + 6*lmt2*(-25 + 7*lmu2) +
+     24*power2(lmt2) + 18*power2(lmu2) + 7*power2(Pi))) + 2*msb14*(mt2*(84 - 39
+     *lmt2 + 6*lmsb12*(-5 + 2*lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 + 3*power2(
+     lmsb12) + 9*power2(lmt2) + 2*power2(Pi)) + mu2*(336 - 201*lmt2 + 6*lmsb12*
+     (-11 + 7*lmt2 - 4*lmu2) - 21*lmu2 + 30*lmt2*lmu2 + 9*power2(lmsb12) + 36*
+     power2(lmt2) + 3*power2(lmu2) + 8*power2(Pi))))*(-1 + power2(snb))*power2(
+     DeltaInv(msb12,mt2,mu2)))/(6.*mt2) + (-(invdmst*mt2*(6*mst26*(42 + 8*lmh2*
+     (-3 + lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi)) + mh2*mst24*(42 +
+     12*lmh2*(-1 + lmst22) - 24*lmst22 + 6*power2(lmh2) - 6*power2(lmst22) +
+     power2(Pi)))*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*
+     power2(At)*(-1 + power2(sa))))/(3.*sb) + ((6*mst26*(42 + 8*lmh2*(-3 +
+     lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi)) + mh2*mst24*(42 + 12*
+     lmh2*(-1 + lmst22) - 24*lmst22 + 6*power2(lmh2) - 6*power2(lmst22) +
+     power2(Pi)))*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 +
+     power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))/6.)*power2(
+     DeltaInv(mst22,mst22,mh2)) + (power2(mu2)*(mst26*(42 + 6*lmu2 - 6*lmt2*(3
+     + lmu2) + 6*lmst22*(-4 + lmt2 + lmu2) + 6*power2(lmst22) + power2(Pi)) +
+     mu2*(6*(lmt2 - lmu2)*(mt2 - mu2)*mu2 + 6*mst22*mt2*(42 + 4*lmst22*(-1 +
+     lmt2 - lmu2) - 12*lmu2 + lmt2*(-20 + 6*lmu2) + 5*power2(lmt2) + power2(
+     lmu2) + power2(Pi)) + mst22*mu2*(294 + 6*lmst22*(2 + lmt2 - lmu2) - 114*
+     lmu2 + 6*lmt2*(-25 + 7*lmu2) + 24*power2(lmt2) + 18*power2(lmu2) + 7*
+     power2(Pi))) + 2*mst24*(mt2*(84 - 39*lmt2 + 6*lmst22*(-5 + 2*lmt2 - lmu2)
      - 3*lmu2 + 6*lmt2*lmu2 + 3*power2(lmst22) + 9*power2(lmt2) + 2*power2(Pi))
      + mu2*(336 - 201*lmt2 + 6*lmst22*(-11 + 7*lmt2 - 4*lmu2) - 21*lmu2 + 30*
      lmt2*lmu2 + 9*power2(lmst22) + 36*power2(lmt2) + 3*power2(lmu2) + 8*power2
@@ -1200,129 +1190,130 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
      ))) + sb*power2(At)*(-1 + power2(sa))))/sb + 8*mh2*mst16*(mt2*(-1 + power2
      (sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(
      -1 + power2(snt))*power2(snt)))*power3(DeltaInv(mh2,mst12,mst12))) + Fin3(
-     mH2,mst12,mst12,Q2)*(((4*invdmst*mst14*mt2*sa*(ca*(-(cb*mu2) + At*mu*sb) -
-     At*sa*xt))/sb - 2*mst14*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(
-     -1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))*power2(DeltaInv(mH2,
-     mst12,mst12)) + ((16*invdmst*mH2*mst16*mt2*sa*(ca*(-(cb*mu2) + At*mu*sb) -
-     At*sa*xt))/sb - 8*mH2*mst16*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) +
+     mH2,mst12,mst12,Q2)*(((4*invdmst*mst14*mt2*sa*(At*sa*(cb*mu - At*sb) + ca*
+     (-(cb*mu2) + At*mu*sb)))/sb - 2*mst14*(mt2*power2(sa) + (At*sa*(2*ca*mu -
+     At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))*power2(
+     DeltaInv(mH2,mst12,mst12)) + ((16*invdmst*mH2*mst16*mt2*sa*(At*sa*(cb*mu -
+     At*sb) + ca*(-(cb*mu2) + At*mu*sb)))/sb - 8*mH2*mst16*(mt2*power2(sa) + (
+     At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2
+     (snt)))*power3(DeltaInv(mH2,mst12,mst12))) + Fin3(mH2,mst22,mst12,Q2)*((
+     mst22*(At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*power2(DeltaInv(
+     mH2,mst22,mst12))*power2(mH2 - 2*mH2*power2(snt)))/mst12 - ((-2*mst12*
+     mst24 - 2*mH2*(mst12*mst22 + mst24) + mst26 + mst22*power2(mH2))*(At*sa*(2
+     *ca*mu - At*sa) + mu2*(-1 + power2(sa)))*power2(mH2 - 2*mH2*power2(snt))*
+     power3(DeltaInv(mH2,mst22,mst12)))/mst12) + Fin3(mH2,mst22,mst22,Q2)*(((4*
+     invdmst*mst24*mt2*sa*(At*sa*(-(cb*mu) + At*sb) + ca*(cb*mu2 - At*mu*sb)))/
+     sb - 2*mst24*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2
+     (sa)))*(-1 + power2(snt))*power2(snt)))*power2(DeltaInv(mH2,mst22,mst22))
+     + ((16*invdmst*mH2*mst26*mt2*sa*(At*sa*(-(cb*mu) + At*sb) + ca*(cb*mu2 -
+     At*mu*sb)))/sb - 8*mH2*mst26*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) +
      mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))*power3(DeltaInv(
-     mH2,mst12,mst12))) + Fin3(mH2,mst22,mst12,Q2)*((mst22*(At*sa*(2*ca*mu - At
-     *sa) + mu2*(-1 + power2(sa)))*power2(DeltaInv(mH2,mst22,mst12))*power2(mH2
-      - 2*mH2*power2(snt)))/mst12 - ((-2*mst12*mst24 - 2*mH2*(mst12*mst22 +
-     mst24) + mst26 + mst22*power2(mH2))*(At*sa*(2*ca*mu - At*sa) + mu2*(-1 +
-     power2(sa)))*power2(mH2 - 2*mH2*power2(snt))*power3(DeltaInv(mH2,mst22,
-     mst12)))/mst12) + Fin3(mH2,mst22,mst22,Q2)*(((4*invdmst*mst24*mt2*sa*(ca*(
-     cb*mu2 - At*mu*sb) + At*sa*xt))/sb - 2*mst24*(mt2*power2(sa) + (At*sa*(2*
-     ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))*
-     power2(DeltaInv(mH2,mst22,mst22)) + ((16*invdmst*mH2*mst26*mt2*sa*(ca*(cb*
-     mu2 - At*mu*sb) + At*sa*xt))/sb - 8*mH2*mst26*(mt2*power2(sa) + (At*sa*(2*
-     ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt)))*
-     power3(DeltaInv(mH2,mst22,mst22))) + Fin3(msb12,mst12,mC2,Q2)*(((4*cb*
-     invdmst*mst12*mt2*power2(mC2)*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-
-     power2(cb) + power2(sb)))*(-1 + power2(snb)))/(msb12*sb) - (2*mst12*power2
-     (mC2)*(-1 + power2(snb))*(-(mu2*power2(snt)) - 2*At*cb*mu*sb*power2(snt) +
-     power2(cb)*(mt2*(-1 + power2(snt)) + (mu2 - power2(At))*power2(snt))))/
-     msb12)*power2(DeltaInv(msb12,mst12,mC2)) + ((4*cb*invdmst*mt2*power2(mC2)*
-     (-2*msb12*mst14 - 2*mC2*(msb12*mst12 + mst14) + mst16 + mst12*power2(mC2))
-     *(cb*mu2*sb - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*(-1 +
-     power2(snb)))/(msb12*sb) + (2*power2(mC2)*(-2*msb12*mst14 - 2*mC2*(msb12*
-     mst12 + mst14) + mst16 + mst12*power2(mC2))*(-1 + power2(snb))*(-(mu2*
+     mH2,mst22,mst22))) + Fin3(msb12,mst12,mC2,Q2)*(((4*cb*invdmst*mst12*mt2*
+     power2(mC2)*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-power2(cb) + power2
+     (sb)))*(-1 + power2(snb)))/(msb12*sb) - (2*mst12*power2(mC2)*(-1 + power2(
+     snb))*(-(mu2*power2(snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-
+     1 + power2(snt)) + (mu2 - power2(At))*power2(snt))))/msb12)*power2(
+     DeltaInv(msb12,mst12,mC2)) + ((4*cb*invdmst*mt2*power2(mC2)*(-2*msb12*
+     mst14 - 2*mC2*(msb12*mst12 + mst14) + mst16 + mst12*power2(mC2))*(cb*mu2*
+     sb - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*(-1 + power2(snb)
+     ))/(msb12*sb) + (2*power2(mC2)*(-2*msb12*mst14 - 2*mC2*(msb12*mst12 +
+     mst14) + mst16 + mst12*power2(mC2))*(-1 + power2(snb))*(-(mu2*power2(snt))
+     - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-1 + power2(snt)) + (mu2 -
+     power2(At))*power2(snt))))/msb12)*power3(DeltaInv(msb12,mst12,mC2))) +
+     Fin3(msb22,mst12,mC2,Q2)*(((4*cb*invdmst*mst12*mt2*power2(mC2)*(cb*mu2*sb
+     - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*power2(snb))/(msb22*
+     sb) + (2*mst12*power2(mC2)*power2(snb)*(-(mu2*power2(snt)) - 2*At*cb*mu*sb
+     *power2(snt) + power2(cb)*(mt2*(-1 + power2(snt)) + (mu2 - power2(At))*
+     power2(snt))))/msb22)*power2(DeltaInv(msb22,mst12,mC2)) + ((4*cb*invdmst*
+     mt2*power2(mC2)*(-2*msb22*mst14 - 2*mC2*(msb22*mst12 + mst14) + mst16 +
+     mst12*power2(mC2))*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-power2(cb) +
+     power2(sb)))*power2(snb))/(msb22*sb) - (2*power2(mC2)*(-2*msb22*mst14 - 2*
+     mC2*(msb22*mst12 + mst14) + mst16 + mst12*power2(mC2))*power2(snb)*(-(mu2*
      power2(snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-1 + power2(
-     snt)) + (mu2 - power2(At))*power2(snt))))/msb12)*power3(DeltaInv(msb12,
-     mst12,mC2))) + Fin3(msb22,mst12,mC2,Q2)*(((4*cb*invdmst*mst12*mt2*power2(
-     mC2)*(cb*mu2*sb - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*
-     power2(snb))/(msb22*sb) + (2*mst12*power2(mC2)*power2(snb)*(-(mu2*power2(
-     snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-1 + power2(snt)) + (
-     mu2 - power2(At))*power2(snt))))/msb22)*power2(DeltaInv(msb22,mst12,mC2))
-     + ((4*cb*invdmst*mt2*power2(mC2)*(-2*msb22*mst14 - 2*mC2*(msb22*mst12 +
-     mst14) + mst16 + mst12*power2(mC2))*(-(cb*mu2*sb) + cb*sb*power2(At) + At*
-     mu*(-power2(cb) + power2(sb)))*power2(snb))/(msb22*sb) - (2*power2(mC2)*(-
-     2*msb22*mst14 - 2*mC2*(msb22*mst12 + mst14) + mst16 + mst12*power2(mC2))*
-     power2(snb)*(-(mu2*power2(snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(
-     mt2*(-1 + power2(snt)) + (mu2 - power2(At))*power2(snt))))/msb22)*power3(
-     DeltaInv(msb22,mst12,mC2))) + Fin3(mst22,mA2,mst12,Q2)*(-((mst22*(mu2 + 2*
-     At*cb*mu*sb - mu2*power2(cb) + power2(At)*power2(cb))*power2(mA2)*power2(
-     DeltaInv(mst22,mA2,mst12)))/mst12) + ((mu2 + 2*At*cb*mu*sb - mu2*power2(cb
-     ) + power2(At)*power2(cb))*power2(mA2)*(-2*mst12*mst24 - 2*mA2*(mst12*
-     mst22 + mst24) + mst26 + mst22*power2(mA2))*power3(DeltaInv(mst22,mA2,
-     mst12)))/mst12) + Fin3(mst22,mh2,mst12,Q2)*((mst22*(-2*At*ca*mu*sa +
-     power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*power2(DeltaInv(mst22,mh2,
-     mst12))*power2(mh2 - 2*mh2*power2(snt)))/mst12 - ((-2*mst12*mst24 - 2*mh2*
-     (mst12*mst22 + mst24) + mst26 + mst22*power2(mh2))*(-2*At*ca*mu*sa +
-     power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*power2(mh2 - 2*mh2*power2(
-     snt))*power3(DeltaInv(mst22,mh2,mst12)))/mst12) + Fin3(mst22,msb12,mC2,Q2)
-     *(((4*cb*invdmst*mst22*mt2*power2(mC2)*(cb*mu2*sb - cb*sb*power2(At) + At*
-     mu*(power2(cb) - power2(sb)))*(-1 + power2(snb)))/(msb12*sb) + (2*mst22*
-     power2(mC2)*(-1 + power2(snb))*(-2*At*cb*mu*sb*(-1 + power2(snt)) + mu2*(-
-     1 + power2(cb))*(-1 + power2(snt)) - power2(At)*power2(cb)*(-1 + power2(
-     snt)) + mt2*power2(cb)*power2(snt)))/msb12)*power2(DeltaInv(mst22,msb12,
-     mC2)) + ((4*cb*invdmst*mt2*power2(mC2)*(-2*msb12*mst24 - 2*mC2*(msb12*
-     mst22 + mst24) + mst26 + mst22*power2(mC2))*(-(cb*mu2*sb) + cb*sb*power2(
-     At) + At*mu*(-power2(cb) + power2(sb)))*(-1 + power2(snb)))/(msb12*sb) + (
-     2*power2(mC2)*(-2*msb12*mst24 - 2*mC2*(msb12*mst22 + mst24) + mst26 +
-     mst22*power2(mC2))*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt)) -
-     mu2*(-1 + power2(cb))*(-1 + power2(snt)) + power2(At)*power2(cb)*(-1 +
-     power2(snt)) - mt2*power2(cb)*power2(snt)))/msb12)*power3(DeltaInv(mst22,
-     msb12,mC2))) + Fin3(mst22,msb22,mC2,Q2)*(((4*cb*invdmst*mst22*mt2*power2(
-     mC2)*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-power2(cb) + power2(sb)))*
-     power2(snb))/(msb22*sb) + (2*mst22*power2(mC2)*power2(snb)*(2*At*cb*mu*sb*
-     (-1 + power2(snt)) - mu2*(-1 + power2(cb))*(-1 + power2(snt)) + power2(At)
-     *power2(cb)*(-1 + power2(snt)) - mt2*power2(cb)*power2(snt)))/msb22)*
-     power2(DeltaInv(mst22,msb22,mC2)) + ((4*cb*invdmst*mt2*power2(mC2)*(-2*
-     msb22*mst24 - 2*mC2*(msb22*mst22 + mst24) + mst26 + mst22*power2(mC2))*(cb
-     *mu2*sb - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*power2(snb))
-     /(msb22*sb) + (2*power2(mC2)*(-2*msb22*mst24 - 2*mC2*(msb22*mst22 + mst24)
-     + mst26 + mst22*power2(mC2))*power2(snb)*(-2*At*cb*mu*sb*(-1 + power2(snt)
-     ) + mu2*(-1 + power2(cb))*(-1 + power2(snt)) - power2(At)*power2(cb)*(-1 +
-     power2(snt)) + mt2*power2(cb)*power2(snt)))/msb22)*power3(DeltaInv(mst22,
-     msb22,mC2))) + Fin3(mst22,mst22,mh2,Q2)*(((-4*invdmst*mst24*mt2*(ca*cb*mu2
-     *sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2
-     (sa))))/sb + 2*mst24*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)
-     *(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))*
-     power2(DeltaInv(mst22,mst22,mh2)) + ((-16*invdmst*mh2*mst26*mt2*(ca*cb*mu2
-     *sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2
-     (sa))))/sb + 8*mh2*mst26*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2
-     (At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))*
-     power3(DeltaInv(mst22,mst22,mh2))) + Fin3(mst22,mw2,msb12,Q2)*(((4*invdmst
-     *mst22*mt2*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*power2(cb
-     ) + At*cb*mu*(1 - power2(cb) + power2(sb)))*(-1 + power2(snb)))/(msb12*sb)
-     + (2*mst22*power2(mw2)*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt)
-     ) + power2(At)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) +
-     power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb12)*power2(
-     DeltaInv(mst22,mw2,msb12)) + ((-4*invdmst*mt2*(mst26 + mw2*(-2*mst24 +
-     mst22*mw2) - 2*msb12*(mst24 + mst22*mw2))*power2(mw2)*(sb*power2(At)*(-1 +
-     power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*
-     (-1 + power2(snb)))/(msb12*sb) - (2*(mst26 + mw2*(-2*mst24 + mst22*mw2) -
-     2*msb12*(mst24 + mst22*mw2))*power2(mw2)*(-1 + power2(snb))*(2*At*cb*mu*sb
-     *(-1 + power2(snt)) + power2(At)*(-1 + power2(cb))*(-1 + power2(snt)) +
-     mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/
-     msb12)*power3(DeltaInv(mst22,mw2,msb12))) + Fin3(mst22,mw2,msb22,Q2)*(((-4
-     *invdmst*mst22*mt2*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*
+     snt)) + (mu2 - power2(At))*power2(snt))))/msb22)*power3(DeltaInv(msb22,
+     mst12,mC2))) + Fin3(mst22,mA2,mst12,Q2)*(-((mst22*(mu2 + 2*At*cb*mu*sb -
+     mu2*power2(cb) + power2(At)*power2(cb))*power2(mA2)*power2(DeltaInv(mst22,
+     mA2,mst12)))/mst12) + ((mu2 + 2*At*cb*mu*sb - mu2*power2(cb) + power2(At)*
+     power2(cb))*power2(mA2)*(-2*mst12*mst24 - 2*mA2*(mst12*mst22 + mst24) +
+     mst26 + mst22*power2(mA2))*power3(DeltaInv(mst22,mA2,mst12)))/mst12) +
+     Fin3(mst22,mh2,mst12,Q2)*((mst22*(-2*At*ca*mu*sa + power2(At)*(-1 + power2
+     (sa)) - mu2*power2(sa))*power2(DeltaInv(mst22,mh2,mst12))*power2(mh2 - 2*
+     mh2*power2(snt)))/mst12 - ((-2*mst12*mst24 - 2*mh2*(mst12*mst22 + mst24) +
+     mst26 + mst22*power2(mh2))*(-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa))
+     - mu2*power2(sa))*power2(mh2 - 2*mh2*power2(snt))*power3(DeltaInv(mst22,
+     mh2,mst12)))/mst12) + Fin3(mst22,msb12,mC2,Q2)*(((4*cb*invdmst*mst22*mt2*
+     power2(mC2)*(cb*mu2*sb - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)
+     ))*(-1 + power2(snb)))/(msb12*sb) + (2*mst22*power2(mC2)*(-1 + power2(snb)
+     )*(-2*At*cb*mu*sb*(-1 + power2(snt)) + mu2*(-1 + power2(cb))*(-1 + power2(
+     snt)) - power2(At)*power2(cb)*(-1 + power2(snt)) + mt2*power2(cb)*power2(
+     snt)))/msb12)*power2(DeltaInv(mst22,msb12,mC2)) + ((4*cb*invdmst*mt2*
+     power2(mC2)*(-2*msb12*mst24 - 2*mC2*(msb12*mst22 + mst24) + mst26 + mst22*
+     power2(mC2))*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-power2(cb) +
+     power2(sb)))*(-1 + power2(snb)))/(msb12*sb) + (2*power2(mC2)*(-2*msb12*
+     mst24 - 2*mC2*(msb12*mst22 + mst24) + mst26 + mst22*power2(mC2))*(-1 +
+     power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt)) - mu2*(-1 + power2(cb))*(-1
+      + power2(snt)) + power2(At)*power2(cb)*(-1 + power2(snt)) - mt2*power2(cb
+     )*power2(snt)))/msb12)*power3(DeltaInv(mst22,msb12,mC2))) + Fin3(mst22,
+     msb22,mC2,Q2)*(((4*cb*invdmst*mst22*mt2*power2(mC2)*(-(cb*mu2*sb) + cb*sb*
+     power2(At) + At*mu*(-power2(cb) + power2(sb)))*power2(snb))/(msb22*sb) + (
+     2*mst22*power2(mC2)*power2(snb)*(2*At*cb*mu*sb*(-1 + power2(snt)) - mu2*(-
+     1 + power2(cb))*(-1 + power2(snt)) + power2(At)*power2(cb)*(-1 + power2(
+     snt)) - mt2*power2(cb)*power2(snt)))/msb22)*power2(DeltaInv(mst22,msb22,
+     mC2)) + ((4*cb*invdmst*mt2*power2(mC2)*(-2*msb22*mst24 - 2*mC2*(msb22*
+     mst22 + mst24) + mst26 + mst22*power2(mC2))*(cb*mu2*sb - cb*sb*power2(At)
+     + At*mu*(power2(cb) - power2(sb)))*power2(snb))/(msb22*sb) + (2*power2(mC2
+     )*(-2*msb22*mst24 - 2*mC2*(msb22*mst22 + mst24) + mst26 + mst22*power2(mC2
+     ))*power2(snb)*(-2*At*cb*mu*sb*(-1 + power2(snt)) + mu2*(-1 + power2(cb))*
+     (-1 + power2(snt)) - power2(At)*power2(cb)*(-1 + power2(snt)) + mt2*power2
+     (cb)*power2(snt)))/msb22)*power3(DeltaInv(mst22,msb22,mC2))) + Fin3(mst22,
+     mst22,mh2,Q2)*(((-4*invdmst*mst24*mt2*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb
+     *(-1 + power2(sa))) + sb*power2(At)*(-1 + power2(sa))))/sb + 2*mst24*(mt2*
+     (-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) - mu2*
+     power2(sa))*(-1 + power2(snt))*power2(snt)))*power2(DeltaInv(mst22,mst22,
+     mh2)) + ((-16*invdmst*mh2*mst26*mt2*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(
+     -1 + power2(sa))) + sb*power2(At)*(-1 + power2(sa))))/sb + 8*mh2*mst26*(
+     mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) -
+     mu2*power2(sa))*(-1 + power2(snt))*power2(snt)))*power3(DeltaInv(mst22,
+     mst22,mh2))) + Fin3(mst22,mw2,msb12,Q2)*(((4*invdmst*mst22*mt2*power2(mw2)
+     *(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 -
+     power2(cb) + power2(sb)))*(-1 + power2(snb)))/(msb12*sb) + (2*mst22*power2
+     (mw2)*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt)) + power2(At)*(-
+     1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 -
+     mt2*power2(snt) - mu2*power2(snt))))/msb12)*power2(DeltaInv(mst22,mw2,
+     msb12)) + ((-4*invdmst*mt2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb12*(
+     mst24 + mst22*mw2))*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*
+     power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*(-1 + power2(snb)))/(
+     msb12*sb) - (2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb12*(mst24 +
+     mst22*mw2))*power2(mw2)*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt
+     )) + power2(At)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) +
+     power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb12)*power3(
+     DeltaInv(mst22,mw2,msb12))) + Fin3(mst22,mw2,msb22,Q2)*(((-4*invdmst*mst22
+     *mt2*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*power2(cb) + At
+     *cb*mu*(1 - power2(cb) + power2(sb)))*power2(snb))/(msb22*sb) - (2*mst22*
+     power2(mw2)*power2(snb)*(2*At*cb*mu*sb*(-1 + power2(snt)) + power2(At)*(-1
+      + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 -
+     mt2*power2(snt) - mu2*power2(snt))))/msb22)*power2(DeltaInv(mst22,mw2,
+     msb22)) + ((4*invdmst*mt2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb22*(
+     mst24 + mst22*mw2))*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*
      power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*power2(snb))/(msb22*
-     sb) - (2*mst22*power2(mw2)*power2(snb)*(2*At*cb*mu*sb*(-1 + power2(snt)) +
-     power2(At)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2
-     (cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb22)*power2(DeltaInv(
-     mst22,mw2,msb22)) + ((4*invdmst*mt2*(mst26 + mw2*(-2*mst24 + mst22*mw2) -
-     2*msb22*(mst24 + mst22*mw2))*power2(mw2)*(sb*power2(At)*(-1 + power2(cb))
-     - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*power2(snb))
-     /(msb22*sb) + (2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb22*(mst24 +
-     mst22*mw2))*power2(mw2)*power2(snb)*(2*At*cb*mu*sb*(-1 + power2(snt)) +
-     power2(At)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2
-     (cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb22)*power3(DeltaInv(
-     mst22,mw2,msb22))) + Fin3(mst22,mz2,mst12,Q2)*((mst22*(2*At*cb*mu*sb +
-     power2(At)*(-1 + power2(cb)) - mu2*power2(cb))*power2(mz2)*power2(DeltaInv
-     (mst22,mz2,mst12)))/mst12 - ((mst26 + mz2*(-2*mst24 + mst22*mz2) - 2*mst12
-     *(mst24 + mst22*mz2))*(2*At*cb*mu*sb + power2(At)*(-1 + power2(cb)) - mu2*
-     power2(cb))*power2(mz2)*power3(DeltaInv(mst22,mz2,mst12)))/mst12) + Fin3(
-     mw2,msb12,mst12,Q2)*(((-4*invdmst*mst12*mt2*power2(mw2)*(sb*power2(At)*(-1
-      + power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)
-     ))*(-1 + power2(snb)))/(msb12*sb) + (2*mst12*power2(mw2)*(-1 + power2(snb)
-     )*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (-2*At*cb*mu*sb - power2(At)
-     *(-1 + power2(cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power2(DeltaInv(
-     mw2,msb12,mst12)) + ((4*invdmst*mt2*(mst16 + mw2*(-2*mst14 + mst12*mw2) -
-     2*msb12*(mst14 + mst12*mw2))*power2(mw2)*(sb*power2(At)*(-1 + power2(cb))
-     - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*(-1 + power2
-     (snb)))/(msb12*sb) - (2*(mst16 + mw2*(-2*mst14 + mst12*mw2) - 2*msb12*(
+     sb) + (2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb22*(mst24 + mst22*mw2)
+     )*power2(mw2)*power2(snb)*(2*At*cb*mu*sb*(-1 + power2(snt)) + power2(At)*(
+     -1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 -
+     mt2*power2(snt) - mu2*power2(snt))))/msb22)*power3(DeltaInv(mst22,mw2,
+     msb22))) + Fin3(mst22,mz2,mst12,Q2)*((mst22*(2*At*cb*mu*sb + power2(At)*(-
+     1 + power2(cb)) - mu2*power2(cb))*power2(mz2)*power2(DeltaInv(mst22,mz2,
+     mst12)))/mst12 - ((mst26 + mz2*(-2*mst24 + mst22*mz2) - 2*mst12*(mst24 +
+     mst22*mz2))*(2*At*cb*mu*sb + power2(At)*(-1 + power2(cb)) - mu2*power2(cb)
+     )*power2(mz2)*power3(DeltaInv(mst22,mz2,mst12)))/mst12) + Fin3(mw2,msb12,
+     mst12,Q2)*(((-4*invdmst*mst12*mt2*power2(mw2)*(sb*power2(At)*(-1 + power2(
+     cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*(-1 +
+     power2(snb)))/(msb12*sb) + (2*mst12*power2(mw2)*(-1 + power2(snb))*(mt2*(-
+     1 + power2(cb))*(-1 + power2(snt)) + (-2*At*cb*mu*sb - power2(At)*(-1 +
+     power2(cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power2(DeltaInv(mw2,
+     msb12,mst12)) + ((4*invdmst*mt2*(mst16 + mw2*(-2*mst14 + mst12*mw2) - 2*
+     msb12*(mst14 + mst12*mw2))*power2(mw2)*(sb*power2(At)*(-1 + power2(cb)) -
+     mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*(-1 + power2(
+     snb)))/(msb12*sb) - (2*(mst16 + mw2*(-2*mst14 + mst12*mw2) - 2*msb12*(
      mst14 + mst12*mw2))*power2(mw2)*(-1 + power2(snb))*(mt2*(-1 + power2(cb))*
      (-1 + power2(snt)) + (-2*At*cb*mu*sb - power2(At)*(-1 + power2(cb)) + mu2*
      power2(cb))*power2(snt)))/msb12)*power3(DeltaInv(mw2,msb12,mst12))) + Fin3
@@ -1346,74 +1337,58 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
      (DeltaInv(mt2,mu2,msb22)))/mt2 - (2*power2(mu2)*power2(snb)*power3(
      DeltaInv(mt2,mu2,msb22))*(msb26*(-mt2 + mu2) - 5*msb24*mu2*(2*mt2 + mu2) +
      msb22*(-5*mt2 + 3*mu2)*power2(mu2) + power4(msb22)))/mt2) + power3(
-     DeltaInv(mH2,mst12,mst12))*((8*invdmst*mH2*mt2*sa*(ca*(-(cb*mu2) + At*mu*
-     sb) - At*sa*xt)*(42 + 8*lmH2*(-3 + lmst12) - 12*lmst12 + 4*power2(lmH2) +
-     power2(Pi))*power4(mst12))/sb - 4*mH2*(42 + 8*lmH2*(-3 + lmst12) - 12*
-     lmst12 + 4*power2(lmH2) + power2(Pi))*(mt2*power2(sa) + (At*sa*(2*ca*mu -
-     At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt))*power4(
-     mst12)) + power3(DeltaInv(mh2,mst12,mst12))*((8*invdmst*mh2*mt2*(42 + 8*
-     lmh2*(-3 + lmst12) - 12*lmst12 + 4*power2(lmh2) + power2(Pi))*(ca*cb*mu2*
-     sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2(
-     sa)))*power4(mst12))/sb + 4*mh2*(42 + 8*lmh2*(-3 + lmst12) - 12*lmst12 + 4
-     *power2(lmh2) + power2(Pi))*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa +
-     power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(
-     snt))*power4(mst12)) + Fin3(mt2,mu2,mst12,Q2)*((2*(mst14 + mst12*(mt2 + 3*
-     mu2))*power2(mu2)*power2(DeltaInv(mt2,mu2,mst12)))/mt2 - (2*power2(mu2)*
-     power3(DeltaInv(mt2,mu2,mst12))*(mst16*(-mt2 + mu2) - 5*mst14*mu2*(2*mt2 +
-     mu2) + mst12*(-5*mt2 + 3*mu2)*power2(mu2) + power4(mst12)))/mt2) + power3(
-     DeltaInv(msb12,mst12,mC2))*((cb*invdmst*mt2*power2(mC2)*(cb*mu2*sb - cb*sb
-     *power2(At) + At*mu*(power2(cb) - power2(sb)))*(-1 + power2(snb))*(-(msb12
-     *mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*(-18 + lmC2 + 5*lmst12) + 18*
-     power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) - mC2*(3*mst16*
-     (42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 + lmst12) + 2*lmsb12*(-12 + 5*lmst12
-     ) - 2*power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst12) + power2(Pi)) + 2
-     *msb12*mst14*(294 + 30*lmsb12*(-6 + lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb12
-      - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst12)
-     + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12 + 5*lmsb12 -
-     lmst12) + 12*lmst12 - 2*lmsb12*(12 + lmst12) + 4*power2(lmC2) + 4*power2(
-     lmsb12) - 2*power2(lmst12) + power2(Pi)) + msb12*mst12*(6*lmC2*(-12 + 5*
-     lmsb12 - lmst12) + 6*lmsb12*(-18 + lmst12) + 12*power2(lmC2) + 18*power2(
-     lmsb12) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*lmsb12 -
-     lmst12) + 2*lmsb12*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(lmsb12) +
-     power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst12)) - 2*(6
-      + lmC2)*lmst12 + 4*power2(lmsb12) + 2*power2(lmst12) + power2(Pi))*power4
-     (mst12)))/(3.*msb12*sb) + (power2(mC2)*(-1 + power2(snb))*(-(mu2*power2(
-     snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-1 + power2(snt)) + (
-     mu2 - power2(At))*power2(snt)))*(-(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*
-     lmsb12*(-18 + lmC2 + 5*lmst12) + 18*power2(lmsb12) + 12*power2(lmst12) + 5
-     *(42 + power2(Pi)))) - mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12
-     + lmst12) + 2*lmsb12*(-12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb12)
-     + 4*power2(lmst12) + power2(Pi)) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 +
-     lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2)
-     + 30*power2(lmsb12) + 6*power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*
-     mst14*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 +
-     lmst12) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(lmst12) + power2(Pi
-     )) + msb12*mst12*(6*lmC2*(-12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 +
-     lmst12) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*
-     mst12*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*
-     power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*
-     lmsb12*(lmC2 + 3*(-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) +
-     2*power2(lmst12) + power2(Pi))*power4(mst12)))/(6.*msb12)) + power3(
-     DeltaInv(mw2,msb12,mst12))*(-(invdmst*mt2*power2(mw2)*(sb*power2(At)*(-1 +
-     power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) + power2(sb)))*
-     (-1 + power2(snb))*(3*mw2*(mst16*(42 + 2*lmsb12*(-12 + 5*lmst12 - lmw2) +
-     12*lmw2 - 2*lmst12*(12 + lmw2) + 4*power2(lmsb12) + 4*power2(lmst12) - 2*
-     power2(lmw2) + power2(Pi)) + mst14*mw2*(42 - 2*lmsb12*(12 + lmst12 - 5*
-     lmw2) - 2*lmst12*(-6 + lmw2) - 24*lmw2 + 4*power2(lmsb12) - 2*power2(
-     lmst12) + 4*power2(lmw2) + power2(Pi))) + msb12*(2*mst14*mw2*(294 - 36*
-     lmw2 - 18*lmst12*(2 + lmw2) + 30*lmsb12*(-6 + lmst12 + lmw2) + 30*power2(
-     lmsb12) + 6*power2(lmst12) + 6*power2(lmw2) + 7*power2(Pi)) + mst16*(-6*
-     lmst12*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst12 + lmw2) + 18*power2(lmsb12)
-     + 12*power2(lmst12) + 5*(42 + power2(Pi)))) + mst12*power2(mw2)*(-3*mw2*(
-     42 + 2*lmsb12*(lmst12 + 3*(-4 + lmw2)) - 2*(6 + lmst12)*lmw2 + 4*power2(
-     lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6*(12 + lmst12)*lmw2 + 6*
-     lmsb12*(-18 + lmst12 + 5*lmw2) + 18*power2(lmsb12) + 12*power2(lmw2) + 5*(
-     42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) + 2*lmsb12*(-12 + 3*
-     lmst12 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst12) + power2(Pi))*power4(
-     mst12)))/(3.*msb12*sb) - (power2(mw2)*(-1 + power2(snb))*(-(mt2*(-1 +
-     power2(cb))*(-1 + power2(snt))) + (2*At*cb*mu*sb + power2(At)*(-1 + power2
-     (cb)) - mu2*power2(cb))*power2(snt))*(3*mw2*(mst16*(42 + 2*lmsb12*(-12 + 5
-     *lmst12 - lmw2) + 12*lmw2 - 2*lmst12*(12 + lmw2) + 4*power2(lmsb12) + 4*
+     DeltaInv(mH2,mst12,mst12))*((8*invdmst*mH2*mt2*sa*(At*sa*(cb*mu - At*sb) +
+     ca*(-(cb*mu2) + At*mu*sb))*(42 + 8*lmH2*(-3 + lmst12) - 12*lmst12 + 4*
+     power2(lmH2) + power2(Pi))*power4(mst12))/sb - 4*mH2*(42 + 8*lmH2*(-3 +
+     lmst12) - 12*lmst12 + 4*power2(lmH2) + power2(Pi))*(mt2*power2(sa) + (At*
+     sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(
+     snt))*power4(mst12)) + power3(DeltaInv(mh2,mst12,mst12))*((8*invdmst*mh2*
+     mt2*(42 + 8*lmh2*(-3 + lmst12) - 12*lmst12 + 4*power2(lmh2) + power2(Pi))*
+     (ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-
+     1 + power2(sa)))*power4(mst12))/sb + 4*mh2*(42 + 8*lmh2*(-3 + lmst12) - 12
+     *lmst12 + 4*power2(lmh2) + power2(Pi))*(mt2*(-1 + power2(sa)) - (-2*At*ca*
+     mu*sa + power2(At)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*
+     power2(snt))*power4(mst12)) + Fin3(mt2,mu2,mst12,Q2)*((2*(mst14 + mst12*(
+     mt2 + 3*mu2))*power2(mu2)*power2(DeltaInv(mt2,mu2,mst12)))/mt2 - (2*power2
+     (mu2)*power3(DeltaInv(mt2,mu2,mst12))*(mst16*(-mt2 + mu2) - 5*mst14*mu2*(2
+     *mt2 + mu2) + mst12*(-5*mt2 + 3*mu2)*power2(mu2) + power4(mst12)))/mt2) +
+     power3(DeltaInv(msb12,mst12,mC2))*((cb*invdmst*mt2*power2(mC2)*(cb*mu2*sb
+     - cb*sb*power2(At) + At*mu*(power2(cb) - power2(sb)))*(-1 + power2(snb))*(
+     -(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*(-18 + lmC2 + 5*lmst12) +
+     18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) - mC2*(3*
+     mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 + lmst12) + 2*lmsb12*(-12 + 5*
+     lmst12) - 2*power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst12) + power2(Pi
+     )) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 + lmst12) - 36*lmst12 + 6*lmC2*(5*
+     lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(
+     lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12 + 5*
+     lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 + lmst12) + 4*power2(lmC2) + 4
+     *power2(lmsb12) - 2*power2(lmst12) + power2(Pi)) + msb12*mst12*(6*lmC2*(-
+     12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 + lmst12) + 12*power2(lmC2) + 18*
+     power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*
+     lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(
+     lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 +
+     lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) + 2*power2(lmst12) +
+     power2(Pi))*power4(mst12)))/(3.*msb12*sb) + (power2(mC2)*(-1 + power2(snb)
+     )*(-(mu2*power2(snt)) - 2*At*cb*mu*sb*power2(snt) + power2(cb)*(mt2*(-1 +
+     power2(snt)) + (mu2 - power2(At))*power2(snt)))*(-(msb12*mst16*(-6*(12 +
+     lmC2)*lmst12 + 6*lmsb12*(-18 + lmC2 + 5*lmst12) + 18*power2(lmsb12) + 12*
+     power2(lmst12) + 5*(42 + power2(Pi)))) - mC2*(3*mst16*(42 - 24*lmst12 - 2*
+     lmC2*(-6 + lmsb12 + lmst12) + 2*lmsb12*(-12 + 5*lmst12) - 2*power2(lmC2) +
+     4*power2(lmsb12) + 4*power2(lmst12) + power2(Pi)) + 2*msb12*mst14*(294 +
+     30*lmsb12*(-6 + lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst12)) +
+     6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst12) + 7*power2(Pi))) -
+     power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst12) + 12*lmst12 -
+     2*lmsb12*(12 + lmst12) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(
+     lmst12) + power2(Pi)) + msb12*mst12*(6*lmC2*(-12 + 5*lmsb12 - lmst12) + 6*
+     lmsb12*(-18 + lmst12) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 +
+     power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst12) + 2*lmsb12*(
+     -12 + lmst12) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2
+     ) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*
+     power2(lmsb12) + 2*power2(lmst12) + power2(Pi))*power4(mst12)))/(6.*msb12)
+     ) + power3(DeltaInv(mw2,msb12,mst12))*(-(invdmst*mt2*power2(mw2)*(sb*
+     power2(At)*(-1 + power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb
+     ) + power2(sb)))*(-1 + power2(snb))*(3*mw2*(mst16*(42 + 2*lmsb12*(-12 + 5*
+     lmst12 - lmw2) + 12*lmw2 - 2*lmst12*(12 + lmw2) + 4*power2(lmsb12) + 4*
      power2(lmst12) - 2*power2(lmw2) + power2(Pi)) + mst14*mw2*(42 - 2*lmsb12*(
      12 + lmst12 - 5*lmw2) - 2*lmst12*(-6 + lmw2) - 24*lmw2 + 4*power2(lmsb12)
      - 2*power2(lmst12) + 4*power2(lmw2) + power2(Pi))) + msb12*(2*mst14*mw2*(
@@ -1426,6 +1401,22 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
      lmst12)*lmw2 + 6*lmsb12*(-18 + lmst12 + 5*lmw2) + 18*power2(lmsb12) + 12*
      power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) + 2*
      lmsb12*(-12 + 3*lmst12 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst12) +
+     power2(Pi))*power4(mst12)))/(3.*msb12*sb) - (power2(mw2)*(-1 + power2(snb)
+     )*(-(mt2*(-1 + power2(cb))*(-1 + power2(snt))) + (2*At*cb*mu*sb + power2(
+     At)*(-1 + power2(cb)) - mu2*power2(cb))*power2(snt))*(3*mw2*(mst16*(42 + 2
+     *lmsb12*(-12 + 5*lmst12 - lmw2) + 12*lmw2 - 2*lmst12*(12 + lmw2) + 4*
+     power2(lmsb12) + 4*power2(lmst12) - 2*power2(lmw2) + power2(Pi)) + mst14*
+     mw2*(42 - 2*lmsb12*(12 + lmst12 - 5*lmw2) - 2*lmst12*(-6 + lmw2) - 24*lmw2
+      + 4*power2(lmsb12) - 2*power2(lmst12) + 4*power2(lmw2) + power2(Pi))) +
+     msb12*(2*mst14*mw2*(294 - 36*lmw2 - 18*lmst12*(2 + lmw2) + 30*lmsb12*(-6 +
+     lmst12 + lmw2) + 30*power2(lmsb12) + 6*power2(lmst12) + 6*power2(lmw2) + 7
+     *power2(Pi)) + mst16*(-6*lmst12*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst12 +
+     lmw2) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) +
+     mst12*power2(mw2)*(-3*mw2*(42 + 2*lmsb12*(lmst12 + 3*(-4 + lmw2)) - 2*(6 +
+     lmst12)*lmw2 + 4*power2(lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6
+     *(12 + lmst12)*lmw2 + 6*lmsb12*(-18 + lmst12 + 5*lmw2) + 18*power2(lmsb12)
+     + 12*power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) +
+     2*lmsb12*(-12 + 3*lmst12 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst12) +
      power2(Pi))*power4(mst12)))/(6.*msb12)) + power3(DeltaInv(msb22,mst12,mC2)
      )*((cb*invdmst*mt2*power2(mC2)*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-
      power2(cb) + power2(sb)))*power2(snb)*(-(msb22*mst16*(-6*(12 + lmC2)*
@@ -1556,70 +1547,70 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
      + 12*power2(lmz2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst22*(6 + lmz2) +
      2*lmst12*(-12 + 3*lmst22 + lmz2) + 4*power2(lmst12) + 2*power2(lmst22) +
      power2(Pi))*power4(mst22)))/(12.*mst12) + power3(DeltaInv(mH2,mst22,mst22)
-     )*((8*invdmst*mH2*mt2*sa*(ca*(cb*mu2 - At*mu*sb) + At*sa*xt)*(42 + 8*lmH2*
-     (-3 + lmst22) - 12*lmst22 + 4*power2(lmH2) + power2(Pi))*power4(mst22))/sb
-      - 4*mH2*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmH2) + power2(
-     Pi))*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) + mu2*(-1 + power2(sa)))*(
-     -1 + power2(snt))*power2(snt))*power4(mst22)) + power3(DeltaInv(mst22,
-     mst22,mh2))*((-8*invdmst*mh2*mt2*(42 + 8*lmh2*(-3 + lmst22) - 12*lmst22 +
-     4*power2(lmh2) + power2(Pi))*(ca*cb*mu2*sa - At*mu*(ca*sa*sb + cb*(-1 +
-     power2(sa))) + sb*power2(At)*(-1 + power2(sa)))*power4(mst22))/sb + 4*mh2*
-     (42 + 8*lmh2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi))*(mt2
-     *(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1 + power2(sa)) - mu2*
-     power2(sa))*(-1 + power2(snt))*power2(snt))*power4(mst22)) + Fin3(mst22,
-     mt2,mu2,Q2)*((2*(mst24 + mst22*(mt2 + 3*mu2))*power2(mu2)*power2(DeltaInv(
-     mst22,mt2,mu2)))/mt2 - (2*power2(mu2)*power3(DeltaInv(mst22,mt2,mu2))*(
-     mst26*(-mt2 + mu2) - 5*mst24*mu2*(2*mt2 + mu2) + mst22*(-5*mt2 + 3*mu2)*
-     power2(mu2) + power4(mst22)))/mt2) + power3(DeltaInv(mst22,msb12,mC2))*((
-     cb*invdmst*mt2*power2(mC2)*(-(cb*mu2*sb) + cb*sb*power2(At) + At*mu*(-
-     power2(cb) + power2(sb)))*(-1 + power2(snb))*(-(msb12*mst26*(-6*(12 + lmC2
-     )*lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(lmsb12) + 12*
-     power2(lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22 - 2*
-     lmC2*(-6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*power2(lmC2) +
-     4*power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12*mst24*(294 +
-     30*lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst22)) +
-     6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*power2(Pi))) -
-     power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22) + 12*lmst22 -
-     2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(
-     lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 - lmst22) + 6*
-     lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 +
-     power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*lmsb12*(
-     -12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2
-     ) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*lmst22 + 4*
-     power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))/(3.*msb12*
-     sb) + (power2(mC2)*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 + power2(snt)) -
-     mu2*(-1 + power2(cb))*(-1 + power2(snt)) + power2(At)*power2(cb)*(-1 +
-     power2(snt)) - mt2*power2(cb)*power2(snt))*(-(msb12*mst26*(-6*(12 + lmC2)*
-     lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(lmsb12) + 12*power2(
-     lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-
-     6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*power2(lmC2) + 4*
-     power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12*mst24*(294 + 30*
-     lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst22)) + 6*
-     power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*power2(Pi))) -
-     power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22) + 12*lmst22 -
-     2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(
-     lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 - lmst22) + 6*
-     lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 +
-     power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*lmsb12*(
-     -12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2
-     ) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*lmst22 + 4*
-     power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))/(6.*msb12)
-     ) + power3(DeltaInv(mst22,mw2,msb12))*((invdmst*mt2*power2(mw2)*(sb*power2
-     (At)*(-1 + power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 - power2(cb) +
-     power2(sb)))*(-1 + power2(snb))*(3*mw2*(mst26*(42 + 2*lmsb12*(-12 + 5*
-     lmst22 - lmw2) + 12*lmw2 - 2*lmst22*(12 + lmw2) + 4*power2(lmsb12) + 4*
-     power2(lmst22) - 2*power2(lmw2) + power2(Pi)) + mst24*mw2*(42 - 2*lmsb12*(
-     12 + lmst22 - 5*lmw2) - 2*lmst22*(-6 + lmw2) - 24*lmw2 + 4*power2(lmsb12)
-     - 2*power2(lmst22) + 4*power2(lmw2) + power2(Pi))) + msb12*(2*mst24*mw2*(
-     294 - 36*lmw2 - 18*lmst22*(2 + lmw2) + 30*lmsb12*(-6 + lmst22 + lmw2) + 30
-     *power2(lmsb12) + 6*power2(lmst22) + 6*power2(lmw2) + 7*power2(Pi)) +
-     mst26*(-6*lmst22*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst22 + lmw2) + 18*
-     power2(lmsb12) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) + mst22*power2(
-     mw2)*(-3*mw2*(42 + 2*lmsb12*(lmst22 + 3*(-4 + lmw2)) - 2*(6 + lmst22)*lmw2
-      + 4*power2(lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6*(12 +
-     lmst22)*lmw2 + 6*lmsb12*(-18 + lmst22 + 5*lmw2) + 18*power2(lmsb12) + 12*
-     power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst22*(6 + lmw2) + 2*
-     lmsb12*(-12 + 3*lmst22 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst22) +
+     )*((8*invdmst*mH2*mt2*sa*(At*sa*(-(cb*mu) + At*sb) + ca*(cb*mu2 - At*mu*sb
+     ))*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmH2) + power2(Pi))*
+     power4(mst22))/sb - 4*mH2*(42 + 8*lmH2*(-3 + lmst22) - 12*lmst22 + 4*
+     power2(lmH2) + power2(Pi))*(mt2*power2(sa) + (At*sa*(2*ca*mu - At*sa) +
+     mu2*(-1 + power2(sa)))*(-1 + power2(snt))*power2(snt))*power4(mst22)) +
+     power3(DeltaInv(mst22,mst22,mh2))*((-8*invdmst*mh2*mt2*(42 + 8*lmh2*(-3 +
+     lmst22) - 12*lmst22 + 4*power2(lmh2) + power2(Pi))*(ca*cb*mu2*sa - At*mu*(
+     ca*sa*sb + cb*(-1 + power2(sa))) + sb*power2(At)*(-1 + power2(sa)))*power4
+     (mst22))/sb + 4*mh2*(42 + 8*lmh2*(-3 + lmst22) - 12*lmst22 + 4*power2(lmh2
+     ) + power2(Pi))*(mt2*(-1 + power2(sa)) - (-2*At*ca*mu*sa + power2(At)*(-1
+     + power2(sa)) - mu2*power2(sa))*(-1 + power2(snt))*power2(snt))*power4(
+     mst22)) + Fin3(mst22,mt2,mu2,Q2)*((2*(mst24 + mst22*(mt2 + 3*mu2))*power2(
+     mu2)*power2(DeltaInv(mst22,mt2,mu2)))/mt2 - (2*power2(mu2)*power3(DeltaInv
+     (mst22,mt2,mu2))*(mst26*(-mt2 + mu2) - 5*mst24*mu2*(2*mt2 + mu2) + mst22*(
+     -5*mt2 + 3*mu2)*power2(mu2) + power4(mst22)))/mt2) + power3(DeltaInv(mst22
+     ,msb12,mC2))*((cb*invdmst*mt2*power2(mC2)*(-(cb*mu2*sb) + cb*sb*power2(At)
+     + At*mu*(-power2(cb) + power2(sb)))*(-1 + power2(snb))*(-(msb12*mst26*(-6*
+     (12 + lmC2)*lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(lmsb12)
+     + 12*power2(lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22
+      - 2*lmC2*(-6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*power2(
+     lmC2) + 4*power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12*mst24*
+     (294 + 30*lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(2 +
+     lmst22)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*
+     power2(Pi))) - power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22)
+     + 12*lmst22 - 2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) -
+     2*power2(lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 -
+     lmst22) + 6*lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) +
+     5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*
+     lmsb12*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*
+     power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*
+     lmst22 + 4*power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))
+     /(3.*msb12*sb) + (power2(mC2)*(-1 + power2(snb))*(2*At*cb*mu*sb*(-1 +
+     power2(snt)) - mu2*(-1 + power2(cb))*(-1 + power2(snt)) + power2(At)*
+     power2(cb)*(-1 + power2(snt)) - mt2*power2(cb)*power2(snt))*(-(msb12*mst26
+     *(-6*(12 + lmC2)*lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(
+     lmsb12) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 -
+     24*lmst22 - 2*lmC2*(-6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*
+     power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12
+     *mst24*(294 + 30*lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(
+     2 + lmst22)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*
+     power2(Pi))) - power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22)
+     + 12*lmst22 - 2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) -
+     2*power2(lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 -
+     lmst22) + 6*lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) +
+     5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*
+     lmsb12*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*
+     power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*
+     lmst22 + 4*power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))
+     /(6.*msb12)) + power3(DeltaInv(mst22,mw2,msb12))*((invdmst*mt2*power2(mw2)
+     *(sb*power2(At)*(-1 + power2(cb)) - mu2*sb*power2(cb) + At*cb*mu*(1 -
+     power2(cb) + power2(sb)))*(-1 + power2(snb))*(3*mw2*(mst26*(42 + 2*lmsb12*
+     (-12 + 5*lmst22 - lmw2) + 12*lmw2 - 2*lmst22*(12 + lmw2) + 4*power2(lmsb12
+     ) + 4*power2(lmst22) - 2*power2(lmw2) + power2(Pi)) + mst24*mw2*(42 - 2*
+     lmsb12*(12 + lmst22 - 5*lmw2) - 2*lmst22*(-6 + lmw2) - 24*lmw2 + 4*power2(
+     lmsb12) - 2*power2(lmst22) + 4*power2(lmw2) + power2(Pi))) + msb12*(2*
+     mst24*mw2*(294 - 36*lmw2 - 18*lmst22*(2 + lmw2) + 30*lmsb12*(-6 + lmst22 +
+     lmw2) + 30*power2(lmsb12) + 6*power2(lmst22) + 6*power2(lmw2) + 7*power2(
+     Pi)) + mst26*(-6*lmst22*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst22 + lmw2) +
+     18*power2(lmsb12) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) + mst22*
+     power2(mw2)*(-3*mw2*(42 + 2*lmsb12*(lmst22 + 3*(-4 + lmw2)) - 2*(6 +
+     lmst22)*lmw2 + 4*power2(lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6
+     *(12 + lmst22)*lmw2 + 6*lmsb12*(-18 + lmst22 + 5*lmw2) + 18*power2(lmsb12)
+     + 12*power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst22*(6 + lmw2) +
+     2*lmsb12*(-12 + 3*lmst22 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst22) +
      power2(Pi))*power4(mst22)))/(3.*msb12*sb) - (power2(mw2)*(-1 + power2(snb)
      )*(2*At*cb*mu*sb*(-1 + power2(snt)) + power2(At)*(-1 + power2(cb))*(-1 +
      power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*
@@ -2114,10 +2105,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real mt        = pars.mt;
    const Real mt2       = power2(pars.mt);
    const Real mb        = pars.mb;
-   const Real mg        = shift_mg(pars.mg, pars.mst1, pars.mst2);
-   const Real mg2       = power2(mg);
-   const Real mg4       = power2(mg2);
-   const Real mg6       = mg2*mg4;
    const Real mst12     = power2(pars.mst1);
    const Real mst14     = power2(mst12);
    const Real mst16     = mst12*mst14;
@@ -2130,12 +2117,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real msb22     = power2(pars.msb2);
    const Real msb24     = power2(msb22);
    const Real msb26     = msb22*msb24;
-   const Real msd12     = power2(pars.msd1);
-   const Real msd14     = power2(msd12);
-   const Real msd16     = msd12*msd14;
-   const Real msd22     = power2(pars.msd2);
-   const Real msd24     = power2(msd22);
-   const Real msd26     = msd22*msd24;
    const Real mw2       = power2(pars.mw);
    const Real mz2       = power2(pars.mz);
    const Real mh2       = power2(pars.mh);
@@ -2153,7 +2134,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real alpha     = calc_alpha(mh2, mH2, tb);
    const Real sa        = std::sin(alpha);
    const Real ca        = std::cos(alpha);
-   const Real At        = xt + mu*cb/sb;
    const Real Ab        = xb + mu*sb/cb;
    const Real invdmst   = 1/(mst12 - mst22);
    const Real invdct    = 1/(mC2 - mt2);
@@ -2191,84 +2171,84 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      *power2(snb))/6. + (((1 + lmH2 - lmsb22)*mH2 + 6*(-lmH2 + lmsb22)*msb22)*
      DeltaInv(mH2,msb22,msb22)*(2*Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa)) -
      mu2*power2(sa))*(-1 + power2(snb))*power2(snb))/6. + (invdmst*(mst12 -
-     mst22)*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*(
-     lmsb22*msb12*(mC2 + msb22)*(-1 + power2(snb)) + msb22*(msb12 - lmsb12*mC2*
-     power2(snb) - lmsb12*msb12*power2(snb)) + lmC2*mC2*(msb12 - msb12*power2(
-     snb) + msb22*power2(snb))))/(6.*msb12*msb22*mst12*mst22*sb) + ((6*msb16*(
-     42 + 8*lmh2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(lmh2) + power2(Pi)) + mh2
-     *msb14*(42 + 12*lmh2*(-1 + lmsb12) - 24*lmsb12 + 6*power2(lmh2) - 6*power2
-     (lmsb12) + power2(Pi)))*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*(
-     -1 + power2(snb))*power2(snb)*power2(DeltaInv(mh2,msb12,msb12)))/6. + ((6*
-     msb26*(42 + 8*lmh2*(-3 + lmsb22) - 12*lmsb22 + 4*power2(lmh2) + power2(Pi)
-     ) + mh2*msb24*(42 + 12*lmh2*(-1 + lmsb22) - 24*lmsb22 + 6*power2(lmh2) - 6
-     *power2(lmsb22) + power2(Pi)))*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2
-     (sa))*(-1 + power2(snb))*power2(snb)*power2(DeltaInv(mh2,msb22,msb22)))/6.
-      - ((6*msb16*(42 + 8*lmH2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(lmH2) +
-     power2(Pi)) + mH2*msb14*(42 + 12*lmH2*(-1 + lmsb12) - 24*lmsb12 + 6*power2
-     (lmH2) - 6*power2(lmsb12) + power2(Pi)))*(2*Ab*ca*mu*sa + power2(Ab)*(-1 +
-     power2(sa)) - mu2*power2(sa))*(-1 + power2(snb))*power2(snb)*power2(
-     DeltaInv(mH2,msb12,msb12)))/6. - ((6*msb26*(42 + 8*lmH2*(-3 + lmsb22) - 12
-     *lmsb22 + 4*power2(lmH2) + power2(Pi)) + mH2*msb24*(42 + 12*lmH2*(-1 +
-     lmsb22) - 24*lmsb22 + 6*power2(lmH2) - 6*power2(lmsb22) + power2(Pi)))*(2*
-     Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(
-     snb))*power2(snb)*power2(DeltaInv(mH2,msb22,msb22)))/6. + (power2(mu2)*(
-     msb16*(42 + 6*lmu2 - 6*lmt2*(3 + lmu2) + 6*lmsb12*(-4 + lmt2 + lmu2) + 6*
-     power2(lmsb12) + power2(Pi)) + mu2*(6*(lmt2 - lmu2)*(mt2 - mu2)*mu2 + 6*
-     msb12*mt2*(42 + 4*lmsb12*(-1 + lmt2 - lmu2) - 12*lmu2 + lmt2*(-20 + 6*lmu2
-     ) + 5*power2(lmt2) + power2(lmu2) + power2(Pi)) + msb12*mu2*(294 + 6*
-     lmsb12*(2 + lmt2 - lmu2) - 114*lmu2 + 6*lmt2*(-25 + 7*lmu2) + 24*power2(
-     lmt2) + 18*power2(lmu2) + 7*power2(Pi))) + 2*msb14*(mt2*(84 - 39*lmt2 + 6*
-     lmsb12*(-5 + 2*lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 + 3*power2(lmsb12) + 9*
-     power2(lmt2) + 2*power2(Pi)) + mu2*(336 - 201*lmt2 + 6*lmsb12*(-11 + 7*
-     lmt2 - 4*lmu2) - 21*lmu2 + 30*lmt2*lmu2 + 9*power2(lmsb12) + 36*power2(
-     lmt2) + 3*power2(lmu2) + 8*power2(Pi))))*power2(snb)*power2(DeltaInv(msb12
-     ,mt2,mu2)))/(6.*mt2) - (mz2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2
-     (Ab)*power2(cb))*(-3*lmsb22*(-msb26 + mz2*(2*(7 + lmz2)*msb24 + (-1 + 2*
-     lmz2)*msb22*mz2) + msb12*(msb24 + (3 + 2*lmz2)*msb22*mz2)) + 3*lmsb12*(-
-     msb26 + mz2*((-23 + 6*lmsb22 + 2*lmz2)*msb24 + ((-23 + 2*lmsb22 + 6*lmz2)*
-     msb22 - mz2)*mz2) + msb12*(msb24 + mz2*(2*(-3 + lmsb22 + lmz2)*msb22 + mz2
-     ))) + 6*mz2*(msb12*msb22 + 2*(msb24 + msb22*mz2))*power2(lmsb12) + 6*msb24
-     *mz2*power2(lmsb22) + mz2*(-3*lmz2*msb12*mz2 + msb12*msb22*(42 - 9*lmz2 +
-     power2(Pi)) + 3*msb24*(42 + lmz2 + power2(Pi)) + 3*mz2*(lmz2*mz2 + msb22*(
-     42 - 14*lmz2 + 2*power2(lmz2) + power2(Pi)))))*power2(DeltaInv(msb12,mz2,
-     msb22)))/(12.*msb12) - (mw2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2
-     (Ab)*power2(cb))*(-3*lmst22*(-mst26 + mw2*(2*(7 + lmw2)*mst24 + (-1 + 2*
-     lmw2)*mst22*mw2) + msb12*(mst24 + (3 + 2*lmw2)*mst22*mw2)) + 3*lmsb12*(-
-     mst26 + mw2*((-23 + 6*lmst22 + 2*lmw2)*mst24 + ((-23 + 2*lmst22 + 6*lmw2)*
-     mst22 - mw2)*mw2) + msb12*(mst24 + mw2*(2*(-3 + lmst22 + lmw2)*mst22 + mw2
-     ))) + 6*mw2*(msb12*mst22 + 2*(mst24 + mst22*mw2))*power2(lmsb12) + 6*mst24
-     *mw2*power2(lmst22) + mw2*(-3*lmw2*msb12*mw2 + msb12*mst22*(42 - 9*lmw2 +
-     power2(Pi)) + 3*mst24*(42 + lmw2 + power2(Pi)) + 3*mw2*(lmw2*mw2 + mst22*(
-     42 - 14*lmw2 + 2*power2(lmw2) + power2(Pi)))))*power2(snb)*power2(snt)*
-     power2(DeltaInv(mst22,mw2,msb12)))/(6.*msb12) + (mw2*(mu2 - 2*Ab*cb*mu*sb
-     - mu2*power2(cb) + power2(Ab)*power2(cb))*(-3*lmst22*(-mst26 + mw2*(2*(7 +
-     lmw2)*mst24 + (-1 + 2*lmw2)*mst22*mw2) + msb22*(mst24 + (3 + 2*lmw2)*mst22
-     *mw2)) + 3*lmsb22*(-mst26 + mw2*((-23 + 6*lmst22 + 2*lmw2)*mst24 + ((-23 +
-     2*lmst22 + 6*lmw2)*mst22 - mw2)*mw2) + msb22*(mst24 + mw2*(2*(-3 + lmst22
-     + lmw2)*mst22 + mw2))) + 6*mw2*(msb22*mst22 + 2*(mst24 + mst22*mw2))*
-     power2(lmsb22) + 6*mst24*mw2*power2(lmst22) + mw2*(-3*lmw2*msb22*mw2 +
-     msb22*mst22*(42 - 9*lmw2 + power2(Pi)) + 3*mst24*(42 + lmw2 + power2(Pi))
-     + 3*mw2*(lmw2*mw2 + mst22*(42 - 14*lmw2 + 2*power2(lmw2) + power2(Pi)))))*
-     (-1 + power2(snb))*power2(snt)*power2(DeltaInv(mst22,mw2,msb22)))/(6.*
-     msb22) - (power2(mu2)*(msb26*(42 + 6*lmu2 - 6*lmt2*(3 + lmu2) + 6*lmsb22*(
-     -4 + lmt2 + lmu2) + 6*power2(lmsb22) + power2(Pi)) + mu2*(6*(lmt2 - lmu2)*
-     (mt2 - mu2)*mu2 + 6*msb22*mt2*(42 + 4*lmsb22*(-1 + lmt2 - lmu2) - 12*lmu2
-     + lmt2*(-20 + 6*lmu2) + 5*power2(lmt2) + power2(lmu2) + power2(Pi)) +
-     msb22*mu2*(294 + 6*lmsb22*(2 + lmt2 - lmu2) - 114*lmu2 + 6*lmt2*(-25 + 7*
-     lmu2) + 24*power2(lmt2) + 18*power2(lmu2) + 7*power2(Pi))) + 2*msb24*(mt2*
-     (84 - 39*lmt2 + 6*lmsb22*(-5 + 2*lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 + 3*
-     power2(lmsb22) + 9*power2(lmt2) + 2*power2(Pi)) + mu2*(336 - 201*lmt2 + 6*
-     lmsb22*(-11 + 7*lmt2 - 4*lmu2) - 21*lmu2 + 30*lmt2*lmu2 + 9*power2(lmsb22)
-     + 36*power2(lmt2) + 3*power2(lmu2) + 8*power2(Pi))))*(-1 + power2(snb))*
-     power2(DeltaInv(mt2,mu2,msb22)))/(6.*mt2) + (mw2*(mu2 - 2*Ab*cb*mu*sb -
-     mu2*power2(cb) + power2(Ab)*power2(cb))*(-3*lmst12*(-mst16 + mw2*(2*(7 +
-     lmw2)*mst14 + (-1 + 2*lmw2)*mst12*mw2) + msb12*(mst14 + (3 + 2*lmw2)*mst12
-     *mw2)) + 3*lmsb12*(-mst16 + mw2*((-23 + 6*lmst12 + 2*lmw2)*mst14 + ((-23 +
-     2*lmst12 + 6*lmw2)*mst12 - mw2)*mw2) + msb12*(mst14 + mw2*(2*(-3 + lmst12
-     + lmw2)*mst12 + mw2))) + 6*mw2*(msb12*mst12 + 2*(mst14 + mst12*mw2))*
-     power2(lmsb12) + 6*mst14*mw2*power2(lmst12) + mw2*(-3*lmw2*msb12*mw2 +
-     msb12*mst12*(42 - 9*lmw2 + power2(Pi)) + 3*mst14*(42 + lmw2 + power2(Pi))
-     + 3*mw2*(lmw2*mw2 + mst12*(42 - 14*lmw2 + 2*power2(lmw2) + power2(Pi)))))*
+     mst22)*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*(-(lmsb22*msb12*(mC2 +
+     msb22)*(-1 + power2(snb))) + msb22*(-msb12 + lmsb12*mC2*power2(snb) +
+     lmsb12*msb12*power2(snb)) - lmC2*mC2*(msb12 - msb12*power2(snb) + msb22*
+     power2(snb))))/(6.*msb12*msb22*mst12*mst22) + ((6*msb16*(42 + 8*lmh2*(-3 +
+     lmsb12) - 12*lmsb12 + 4*power2(lmh2) + power2(Pi)) + mh2*msb14*(42 + 12*
+     lmh2*(-1 + lmsb12) - 24*lmsb12 + 6*power2(lmh2) - 6*power2(lmsb12) +
+     power2(Pi)))*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*(-1 + power2
+     (snb))*power2(snb)*power2(DeltaInv(mh2,msb12,msb12)))/6. + ((6*msb26*(42 +
+     8*lmh2*(-3 + lmsb22) - 12*lmsb22 + 4*power2(lmh2) + power2(Pi)) + mh2*
+     msb24*(42 + 12*lmh2*(-1 + lmsb22) - 24*lmsb22 + 6*power2(lmh2) - 6*power2(
+     lmsb22) + power2(Pi)))*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*(-
+     1 + power2(snb))*power2(snb)*power2(DeltaInv(mh2,msb22,msb22)))/6. - ((6*
+     msb16*(42 + 8*lmH2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(lmH2) + power2(Pi)
+     ) + mH2*msb14*(42 + 12*lmH2*(-1 + lmsb12) - 24*lmsb12 + 6*power2(lmH2) - 6
+     *power2(lmsb12) + power2(Pi)))*(2*Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa
+     )) - mu2*power2(sa))*(-1 + power2(snb))*power2(snb)*power2(DeltaInv(mH2,
+     msb12,msb12)))/6. - ((6*msb26*(42 + 8*lmH2*(-3 + lmsb22) - 12*lmsb22 + 4*
+     power2(lmH2) + power2(Pi)) + mH2*msb24*(42 + 12*lmH2*(-1 + lmsb22) - 24*
+     lmsb22 + 6*power2(lmH2) - 6*power2(lmsb22) + power2(Pi)))*(2*Ab*ca*mu*sa +
+     power2(Ab)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snb))*power2(
+     snb)*power2(DeltaInv(mH2,msb22,msb22)))/6. + (power2(mu2)*(msb16*(42 + 6*
+     lmu2 - 6*lmt2*(3 + lmu2) + 6*lmsb12*(-4 + lmt2 + lmu2) + 6*power2(lmsb12)
+     + power2(Pi)) + mu2*(6*(lmt2 - lmu2)*(mt2 - mu2)*mu2 + 6*msb12*mt2*(42 + 4
+     *lmsb12*(-1 + lmt2 - lmu2) - 12*lmu2 + lmt2*(-20 + 6*lmu2) + 5*power2(lmt2
+     ) + power2(lmu2) + power2(Pi)) + msb12*mu2*(294 + 6*lmsb12*(2 + lmt2 -
+     lmu2) - 114*lmu2 + 6*lmt2*(-25 + 7*lmu2) + 24*power2(lmt2) + 18*power2(
+     lmu2) + 7*power2(Pi))) + 2*msb14*(mt2*(84 - 39*lmt2 + 6*lmsb12*(-5 + 2*
+     lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 + 3*power2(lmsb12) + 9*power2(lmt2) +
+     2*power2(Pi)) + mu2*(336 - 201*lmt2 + 6*lmsb12*(-11 + 7*lmt2 - 4*lmu2) -
+     21*lmu2 + 30*lmt2*lmu2 + 9*power2(lmsb12) + 36*power2(lmt2) + 3*power2(
+     lmu2) + 8*power2(Pi))))*power2(snb)*power2(DeltaInv(msb12,mt2,mu2)))/(6.*
+     mt2) - (mz2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))
+     *(-3*lmsb22*(-msb26 + mz2*(2*(7 + lmz2)*msb24 + (-1 + 2*lmz2)*msb22*mz2) +
+     msb12*(msb24 + (3 + 2*lmz2)*msb22*mz2)) + 3*lmsb12*(-msb26 + mz2*((-23 + 6
+     *lmsb22 + 2*lmz2)*msb24 + ((-23 + 2*lmsb22 + 6*lmz2)*msb22 - mz2)*mz2) +
+     msb12*(msb24 + mz2*(2*(-3 + lmsb22 + lmz2)*msb22 + mz2))) + 6*mz2*(msb12*
+     msb22 + 2*(msb24 + msb22*mz2))*power2(lmsb12) + 6*msb24*mz2*power2(lmsb22)
+     + mz2*(-3*lmz2*msb12*mz2 + msb12*msb22*(42 - 9*lmz2 + power2(Pi)) + 3*
+     msb24*(42 + lmz2 + power2(Pi)) + 3*mz2*(lmz2*mz2 + msb22*(42 - 14*lmz2 + 2
+     *power2(lmz2) + power2(Pi)))))*power2(DeltaInv(msb12,mz2,msb22)))/(12.*
+     msb12) - (mw2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb
+     ))*(-3*lmst22*(-mst26 + mw2*(2*(7 + lmw2)*mst24 + (-1 + 2*lmw2)*mst22*mw2)
+     + msb12*(mst24 + (3 + 2*lmw2)*mst22*mw2)) + 3*lmsb12*(-mst26 + mw2*((-23 +
+     6*lmst22 + 2*lmw2)*mst24 + ((-23 + 2*lmst22 + 6*lmw2)*mst22 - mw2)*mw2) +
+     msb12*(mst24 + mw2*(2*(-3 + lmst22 + lmw2)*mst22 + mw2))) + 6*mw2*(msb12*
+     mst22 + 2*(mst24 + mst22*mw2))*power2(lmsb12) + 6*mst24*mw2*power2(lmst22)
+     + mw2*(-3*lmw2*msb12*mw2 + msb12*mst22*(42 - 9*lmw2 + power2(Pi)) + 3*
+     mst24*(42 + lmw2 + power2(Pi)) + 3*mw2*(lmw2*mw2 + mst22*(42 - 14*lmw2 + 2
+     *power2(lmw2) + power2(Pi)))))*power2(snb)*power2(snt)*power2(DeltaInv(
+     mst22,mw2,msb12)))/(6.*msb12) + (mw2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb)
+     + power2(Ab)*power2(cb))*(-3*lmst22*(-mst26 + mw2*(2*(7 + lmw2)*mst24 + (-
+     1 + 2*lmw2)*mst22*mw2) + msb22*(mst24 + (3 + 2*lmw2)*mst22*mw2)) + 3*
+     lmsb22*(-mst26 + mw2*((-23 + 6*lmst22 + 2*lmw2)*mst24 + ((-23 + 2*lmst22 +
+     6*lmw2)*mst22 - mw2)*mw2) + msb22*(mst24 + mw2*(2*(-3 + lmst22 + lmw2)*
+     mst22 + mw2))) + 6*mw2*(msb22*mst22 + 2*(mst24 + mst22*mw2))*power2(lmsb22
+     ) + 6*mst24*mw2*power2(lmst22) + mw2*(-3*lmw2*msb22*mw2 + msb22*mst22*(42
+     - 9*lmw2 + power2(Pi)) + 3*mst24*(42 + lmw2 + power2(Pi)) + 3*mw2*(lmw2*
+     mw2 + mst22*(42 - 14*lmw2 + 2*power2(lmw2) + power2(Pi)))))*(-1 + power2(
+     snb))*power2(snt)*power2(DeltaInv(mst22,mw2,msb22)))/(6.*msb22) - (power2(
+     mu2)*(msb26*(42 + 6*lmu2 - 6*lmt2*(3 + lmu2) + 6*lmsb22*(-4 + lmt2 + lmu2)
+     + 6*power2(lmsb22) + power2(Pi)) + mu2*(6*(lmt2 - lmu2)*(mt2 - mu2)*mu2 +
+     6*msb22*mt2*(42 + 4*lmsb22*(-1 + lmt2 - lmu2) - 12*lmu2 + lmt2*(-20 + 6*
+     lmu2) + 5*power2(lmt2) + power2(lmu2) + power2(Pi)) + msb22*mu2*(294 + 6*
+     lmsb22*(2 + lmt2 - lmu2) - 114*lmu2 + 6*lmt2*(-25 + 7*lmu2) + 24*power2(
+     lmt2) + 18*power2(lmu2) + 7*power2(Pi))) + 2*msb24*(mt2*(84 - 39*lmt2 + 6*
+     lmsb22*(-5 + 2*lmt2 - lmu2) - 3*lmu2 + 6*lmt2*lmu2 + 3*power2(lmsb22) + 9*
+     power2(lmt2) + 2*power2(Pi)) + mu2*(336 - 201*lmt2 + 6*lmsb22*(-11 + 7*
+     lmt2 - 4*lmu2) - 21*lmu2 + 30*lmt2*lmu2 + 9*power2(lmsb22) + 36*power2(
+     lmt2) + 3*power2(lmu2) + 8*power2(Pi))))*(-1 + power2(snb))*power2(
+     DeltaInv(mt2,mu2,msb22)))/(6.*mt2) + (mw2*(mu2 - 2*Ab*cb*mu*sb - mu2*
+     power2(cb) + power2(Ab)*power2(cb))*(-3*lmst12*(-mst16 + mw2*(2*(7 + lmw2)
+     *mst14 + (-1 + 2*lmw2)*mst12*mw2) + msb12*(mst14 + (3 + 2*lmw2)*mst12*mw2)
+     ) + 3*lmsb12*(-mst16 + mw2*((-23 + 6*lmst12 + 2*lmw2)*mst14 + ((-23 + 2*
+     lmst12 + 6*lmw2)*mst12 - mw2)*mw2) + msb12*(mst14 + mw2*(2*(-3 + lmst12 +
+     lmw2)*mst12 + mw2))) + 6*mw2*(msb12*mst12 + 2*(mst14 + mst12*mw2))*power2(
+     lmsb12) + 6*mst14*mw2*power2(lmst12) + mw2*(-3*lmw2*msb12*mw2 + msb12*
+     mst12*(42 - 9*lmw2 + power2(Pi)) + 3*mst14*(42 + lmw2 + power2(Pi)) + 3*
+     mw2*(lmw2*mw2 + mst12*(42 - 14*lmw2 + 2*power2(lmw2) + power2(Pi)))))*
      power2(snb)*(-1 + power2(snt))*power2(DeltaInv(mw2,msb12,mst12)))/(6.*
      msb12) - (mw2*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb
      ))*(-3*lmst12*(-mst16 + mw2*(2*(7 + lmw2)*mst14 + (-1 + 2*lmw2)*mst12*mw2)
@@ -2295,45 +2275,32 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      ))*(msb22*(2*mA2*msb12 + 5*lmsb22*mA2*msb22 - lmsb22*msb12*msb22 + lmsb22*
      msb24) + lmA2*(mA2 - msb12 + 5*msb22)*power2(mA2) - lmsb12*(msb22*(-(msb12
      *msb22) + msb24) - (msb12 - 5*msb22)*power2(mA2) + 5*mA2*power2(msb22) +
-     power3(mA2))))/(24.*msb12*msb22) + power2(DeltaInv(msb12,mst12,mC2))*(-(
-     invdmst*mC2*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*
-     power2(snb)*(42*mC2*msb12*mst12 - 9*lmst12*mC2*msb12*mst12 + 126*mC2*mst14
-      - 42*lmst12*mC2*mst14 - 3*lmst12*msb12*mst14 + 3*lmst12*mst16 + 6*mC2*(2*
-     mC2*mst12 + msb12*mst12 + 2*mst14)*power2(lmsb12) + 6*mC2*mst14*power2(
-     lmst12) + 126*mst12*power2(mC2) + 3*lmst12*mst12*power2(mC2) + 6*mst12*
-     power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst12)*msb12*
-     mst12 - mC2*(msb12 + 2*(7 - 3*lmsb12 + lmst12)*mst12) + (1 + 2*lmsb12 - 2*
-     lmst12)*mst14 + power2(mC2)) + mC2*msb12*mst12*power2(Pi) + 3*mC2*mst14*
-     power2(Pi) + 3*mst12*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*mst14) +
-     mC2*(-2*(-3 + lmst12)*msb12*mst12 + (23 - 6*lmst12)*mst14) + mst16 - (
-     msb12 + (-23 + 2*lmst12)*mst12)*power2(mC2) + power3(mC2))))/(3.*msb12*sb)
-     - (mC2*power2(snb)*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 +
-     power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*
-     power2(snt) - mu2*power2(snt)))*(42*mC2*msb12*mst12 - 9*lmst12*mC2*msb12*
-     mst12 + 126*mC2*mst14 - 42*lmst12*mC2*mst14 - 3*lmst12*msb12*mst14 + 3*
-     lmst12*mst16 + 6*mC2*(2*mC2*mst12 + msb12*mst12 + 2*mst14)*power2(lmsb12)
-     + 6*mC2*mst14*power2(lmst12) + 126*mst12*power2(mC2) + 3*lmst12*mst12*
-     power2(mC2) + 6*mst12*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*
-     lmsb12 - 2*lmst12)*msb12*mst12 - mC2*(msb12 + 2*(7 - 3*lmsb12 + lmst12)*
-     mst12) + (1 + 2*lmsb12 - 2*lmst12)*mst14 + power2(mC2)) + mC2*msb12*mst12*
-     power2(Pi) + 3*mC2*mst14*power2(Pi) + 3*mst12*power2(mC2)*power2(Pi) - 3*
-     lmsb12*(-(msb12*mst14) + mC2*(-2*(-3 + lmst12)*msb12*mst12 + (23 - 6*
-     lmst12)*mst14) + mst16 - (msb12 + (-23 + 2*lmst12)*mst12)*power2(mC2) +
-     power3(mC2))))/(6.*msb12)) + power2(DeltaInv(msb22,mst12,mC2))*((invdmst*
-     mC2*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*(-1 +
-     power2(snb))*(42*mC2*msb22*mst12 - 9*lmst12*mC2*msb22*mst12 + 126*mC2*
-     mst14 - 42*lmst12*mC2*mst14 - 3*lmst12*msb22*mst14 + 3*lmst12*mst16 + 6*
-     mC2*(2*mC2*mst12 + msb22*mst12 + 2*mst14)*power2(lmsb22) + 6*mC2*mst14*
+     power3(mA2))))/(24.*msb12*msb22) + power2(DeltaInv(msb12,mst12,mC2))*((
+     invdmst*mC2*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(snb)*(42*
+     mC2*msb12*mst12 - 9*lmst12*mC2*msb12*mst12 + 126*mC2*mst14 - 42*lmst12*mC2
+     *mst14 - 3*lmst12*msb12*mst14 + 3*lmst12*mst16 + 6*mC2*(2*mC2*mst12 +
+     msb12*mst12 + 2*mst14)*power2(lmsb12) + 6*mC2*mst14*power2(lmst12) + 126*
+     mst12*power2(mC2) + 3*lmst12*mst12*power2(mC2) + 6*mst12*power2(lmC2)*
+     power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst12)*msb12*mst12 - mC2*(
+     msb12 + 2*(7 - 3*lmsb12 + lmst12)*mst12) + (1 + 2*lmsb12 - 2*lmst12)*mst14
+      + power2(mC2)) + mC2*msb12*mst12*power2(Pi) + 3*mC2*mst14*power2(Pi) + 3*
+     mst12*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*mst14) + mC2*(-2*(-3 +
+     lmst12)*msb12*mst12 + (23 - 6*lmst12)*mst14) + mst16 - (msb12 + (-23 + 2*
+     lmst12)*mst12)*power2(mC2) + power3(mC2))))/(3.*msb12) - (mC2*power2(snb)*
+     (-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 +
+     power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*
+     power2(snt)))*(42*mC2*msb12*mst12 - 9*lmst12*mC2*msb12*mst12 + 126*mC2*
+     mst14 - 42*lmst12*mC2*mst14 - 3*lmst12*msb12*mst14 + 3*lmst12*mst16 + 6*
+     mC2*(2*mC2*mst12 + msb12*mst12 + 2*mst14)*power2(lmsb12) + 6*mC2*mst14*
      power2(lmst12) + 126*mst12*power2(mC2) + 3*lmst12*mst12*power2(mC2) + 6*
-     mst12*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb22 - 2*lmst12)*
-     msb22*mst12 - mC2*(msb22 + 2*(7 - 3*lmsb22 + lmst12)*mst12) + (1 + 2*
-     lmsb22 - 2*lmst12)*mst14 + power2(mC2)) + mC2*msb22*mst12*power2(Pi) + 3*
-     mC2*mst14*power2(Pi) + 3*mst12*power2(mC2)*power2(Pi) - 3*lmsb22*(-(msb22*
-     mst14) + mC2*(-2*(-3 + lmst12)*msb22*mst12 + (23 - 6*lmst12)*mst14) +
-     mst16 - (msb22 + (-23 + 2*lmst12)*mst12)*power2(mC2) + power3(mC2))))/(3.*
-     msb22*sb) + (mC2*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) +
-     power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2
-     (cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(42*mC2*msb22*mst12 - 9*
+     mst12*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst12)*
+     msb12*mst12 - mC2*(msb12 + 2*(7 - 3*lmsb12 + lmst12)*mst12) + (1 + 2*
+     lmsb12 - 2*lmst12)*mst14 + power2(mC2)) + mC2*msb12*mst12*power2(Pi) + 3*
+     mC2*mst14*power2(Pi) + 3*mst12*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*
+     mst14) + mC2*(-2*(-3 + lmst12)*msb12*mst12 + (23 - 6*lmst12)*mst14) +
+     mst16 - (msb12 + (-23 + 2*lmst12)*mst12)*power2(mC2) + power3(mC2))))/(6.*
+     msb12)) + power2(DeltaInv(msb22,mst12,mC2))*(-(invdmst*mC2*mt2*xt*(-(cb*mu
+     *sb) + Ab*(-1 + power2(cb)))*(-1 + power2(snb))*(42*mC2*msb22*mst12 - 9*
      lmst12*mC2*msb22*mst12 + 126*mC2*mst14 - 42*lmst12*mC2*mst14 - 3*lmst12*
      msb22*mst14 + 3*lmst12*mst16 + 6*mC2*(2*mC2*mst12 + msb22*mst12 + 2*mst14)
      *power2(lmsb22) + 6*mC2*mst14*power2(lmst12) + 126*mst12*power2(mC2) + 3*
@@ -2343,105 +2310,115 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      msb22*mst12*power2(Pi) + 3*mC2*mst14*power2(Pi) + 3*mst12*power2(mC2)*
      power2(Pi) - 3*lmsb22*(-(msb22*mst14) + mC2*(-2*(-3 + lmst12)*msb22*mst12
      + (23 - 6*lmst12)*mst14) + mst16 - (msb22 + (-23 + 2*lmst12)*mst12)*power2
-     (mC2) + power3(mC2))))/(6.*msb22)) + power2(DeltaInv(mst22,msb12,mC2))*((
-     invdmst*mC2*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*
-     power2(snb)*(42*mC2*msb12*mst22 - 9*lmst22*mC2*msb12*mst22 + 126*mC2*mst24
-      - 42*lmst22*mC2*mst24 - 3*lmst22*msb12*mst24 + 3*lmst22*mst26 + 6*mC2*(2*
-     mC2*mst22 + msb12*mst22 + 2*mst24)*power2(lmsb12) + 6*mC2*mst24*power2(
-     lmst22) + 126*mst22*power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*mst22*
-     power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst22)*msb12*
-     mst22 - mC2*(msb12 + 2*(7 - 3*lmsb12 + lmst22)*mst22) + (1 + 2*lmsb12 - 2*
-     lmst22)*mst24 + power2(mC2)) + mC2*msb12*mst22*power2(Pi) + 3*mC2*mst24*
-     power2(Pi) + 3*mst22*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*mst24) +
-     mC2*(-2*(-3 + lmst22)*msb12*mst22 + (23 - 6*lmst22)*mst24) + mst26 - (
-     msb12 + (-23 + 2*lmst22)*mst22)*power2(mC2) + power3(mC2))))/(3.*msb12*sb)
-     - (mC2*power2(snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu
-     *sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*(42*mC2*
-     msb12*mst22 - 9*lmst22*mC2*msb12*mst22 + 126*mC2*mst24 - 42*lmst22*mC2*
-     mst24 - 3*lmst22*msb12*mst24 + 3*lmst22*mst26 + 6*mC2*(2*mC2*mst22 + msb12
-     *mst22 + 2*mst24)*power2(lmsb12) + 6*mC2*mst24*power2(lmst22) + 126*mst22*
-     power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*mst22*power2(lmC2)*power2(mC2
-     ) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst22)*msb12*mst22 - mC2*(msb12 + 2*(7
-      - 3*lmsb12 + lmst22)*mst22) + (1 + 2*lmsb12 - 2*lmst22)*mst24 + power2(
-     mC2)) + mC2*msb12*mst22*power2(Pi) + 3*mC2*mst24*power2(Pi) + 3*mst22*
-     power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*mst24) + mC2*(-2*(-3 + lmst22)*
-     msb12*mst22 + (23 - 6*lmst22)*mst24) + mst26 - (msb12 + (-23 + 2*lmst22)*
-     mst22)*power2(mC2) + power3(mC2))))/(6.*msb12)) + power2(DeltaInv(mst22,
-     msb22,mC2))*(-(invdmst*mC2*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 +
-     power2(cb)))*(-1 + power2(snb))*(42*mC2*msb22*mst22 - 9*lmst22*mC2*msb22*
-     mst22 + 126*mC2*mst24 - 42*lmst22*mC2*mst24 - 3*lmst22*msb22*mst24 + 3*
-     lmst22*mst26 + 6*mC2*(2*mC2*mst22 + msb22*mst22 + 2*mst24)*power2(lmsb22)
-     + 6*mC2*mst24*power2(lmst22) + 126*mst22*power2(mC2) + 3*lmst22*mst22*
-     power2(mC2) + 6*mst22*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*
-     lmsb22 - 2*lmst22)*msb22*mst22 - mC2*(msb22 + 2*(7 - 3*lmsb22 + lmst22)*
-     mst22) + (1 + 2*lmsb22 - 2*lmst22)*mst24 + power2(mC2)) + mC2*msb22*mst22*
-     power2(Pi) + 3*mC2*mst24*power2(Pi) + 3*mst22*power2(mC2)*power2(Pi) - 3*
-     lmsb22*(-(msb22*mst24) + mC2*(-2*(-3 + lmst22)*msb22*mst22 + (23 - 6*
-     lmst22)*mst24) + mst26 - (msb22 + (-23 + 2*lmst22)*mst22)*power2(mC2) +
-     power3(mC2))))/(3.*msb22*sb) + (mC2*(-1 + power2(snb))*(mt2*(-1 + power2(
-     cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) +
-     mu2*power2(cb))*power2(snt))*(42*mC2*msb22*mst22 - 9*lmst22*mC2*msb22*
-     mst22 + 126*mC2*mst24 - 42*lmst22*mC2*mst24 - 3*lmst22*msb22*mst24 + 3*
-     lmst22*mst26 + 6*mC2*(2*mC2*mst22 + msb22*mst22 + 2*mst24)*power2(lmsb22)
-     + 6*mC2*mst24*power2(lmst22) + 126*mst22*power2(mC2) + 3*lmst22*mst22*
-     power2(mC2) + 6*mst22*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*
-     lmsb22 - 2*lmst22)*msb22*mst22 - mC2*(msb22 + 2*(7 - 3*lmsb22 + lmst22)*
-     mst22) + (1 + 2*lmsb22 - 2*lmst22)*mst24 + power2(mC2)) + mC2*msb22*mst22*
-     power2(Pi) + 3*mC2*mst24*power2(Pi) + 3*mst22*power2(mC2)*power2(Pi) - 3*
-     lmsb22*(-(msb22*mst24) + mC2*(-2*(-3 + lmst22)*msb22*mst22 + (23 - 6*
-     lmst22)*mst24) + mst26 - (msb22 + (-23 + 2*lmst22)*mst22)*power2(mC2) +
-     power3(mC2))))/(6.*msb22)) + DeltaInv(msb12,mst12,mC2)*((invdmst*mt2*(cb*
-     sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(snb)*(mst12*(2
-     *mC2*msb12 + 5*lmst12*mC2*mst12 - lmst12*msb12*mst12 + lmst12*mst14) +
+     (mC2) + power3(mC2))))/(3.*msb22) + (mC2*(-1 + power2(snb))*(-2*Ab*cb*mu*
+     sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) +
+     mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(
+     42*mC2*msb22*mst12 - 9*lmst12*mC2*msb22*mst12 + 126*mC2*mst14 - 42*lmst12*
+     mC2*mst14 - 3*lmst12*msb22*mst14 + 3*lmst12*mst16 + 6*mC2*(2*mC2*mst12 +
+     msb22*mst12 + 2*mst14)*power2(lmsb22) + 6*mC2*mst14*power2(lmst12) + 126*
+     mst12*power2(mC2) + 3*lmst12*mst12*power2(mC2) + 6*mst12*power2(lmC2)*
+     power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb22 - 2*lmst12)*msb22*mst12 - mC2*(
+     msb22 + 2*(7 - 3*lmsb22 + lmst12)*mst12) + (1 + 2*lmsb22 - 2*lmst12)*mst14
+      + power2(mC2)) + mC2*msb22*mst12*power2(Pi) + 3*mC2*mst14*power2(Pi) + 3*
+     mst12*power2(mC2)*power2(Pi) - 3*lmsb22*(-(msb22*mst14) + mC2*(-2*(-3 +
+     lmst12)*msb22*mst12 + (23 - 6*lmst12)*mst14) + mst16 - (msb22 + (-23 + 2*
+     lmst12)*mst12)*power2(mC2) + power3(mC2))))/(6.*msb22)) + power2(DeltaInv(
+     mst22,msb12,mC2))*(-(invdmst*mC2*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)
+     ))*power2(snb)*(42*mC2*msb12*mst22 - 9*lmst22*mC2*msb12*mst22 + 126*mC2*
+     mst24 - 42*lmst22*mC2*mst24 - 3*lmst22*msb12*mst24 + 3*lmst22*mst26 + 6*
+     mC2*(2*mC2*mst22 + msb12*mst22 + 2*mst24)*power2(lmsb12) + 6*mC2*mst24*
+     power2(lmst22) + 126*mst22*power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*
+     mst22*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst22)*
+     msb12*mst22 - mC2*(msb12 + 2*(7 - 3*lmsb12 + lmst22)*mst22) + (1 + 2*
+     lmsb12 - 2*lmst22)*mst24 + power2(mC2)) + mC2*msb12*mst22*power2(Pi) + 3*
+     mC2*mst24*power2(Pi) + 3*mst22*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*
+     mst24) + mC2*(-2*(-3 + lmst22)*msb12*mst22 + (23 - 6*lmst22)*mst24) +
+     mst26 - (msb12 + (-23 + 2*lmst22)*mst22)*power2(mC2) + power3(mC2))))/(3.*
+     msb12) - (mC2*power2(snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*
+     Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*
+     (42*mC2*msb12*mst22 - 9*lmst22*mC2*msb12*mst22 + 126*mC2*mst24 - 42*lmst22
+     *mC2*mst24 - 3*lmst22*msb12*mst24 + 3*lmst22*mst26 + 6*mC2*(2*mC2*mst22 +
+     msb12*mst22 + 2*mst24)*power2(lmsb12) + 6*mC2*mst24*power2(lmst22) + 126*
+     mst22*power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*mst22*power2(lmC2)*
+     power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb12 - 2*lmst22)*msb12*mst22 - mC2*(
+     msb12 + 2*(7 - 3*lmsb12 + lmst22)*mst22) + (1 + 2*lmsb12 - 2*lmst22)*mst24
+      + power2(mC2)) + mC2*msb12*mst22*power2(Pi) + 3*mC2*mst24*power2(Pi) + 3*
+     mst22*power2(mC2)*power2(Pi) - 3*lmsb12*(-(msb12*mst24) + mC2*(-2*(-3 +
+     lmst22)*msb12*mst22 + (23 - 6*lmst22)*mst24) + mst26 - (msb12 + (-23 + 2*
+     lmst22)*mst22)*power2(mC2) + power3(mC2))))/(6.*msb12)) + power2(DeltaInv(
+     mst22,msb22,mC2))*((invdmst*mC2*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb))
+     )*(-1 + power2(snb))*(42*mC2*msb22*mst22 - 9*lmst22*mC2*msb22*mst22 + 126*
+     mC2*mst24 - 42*lmst22*mC2*mst24 - 3*lmst22*msb22*mst24 + 3*lmst22*mst26 +
+     6*mC2*(2*mC2*mst22 + msb22*mst22 + 2*mst24)*power2(lmsb22) + 6*mC2*mst24*
+     power2(lmst22) + 126*mst22*power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*
+     mst22*power2(lmC2)*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb22 - 2*lmst22)*
+     msb22*mst22 - mC2*(msb22 + 2*(7 - 3*lmsb22 + lmst22)*mst22) + (1 + 2*
+     lmsb22 - 2*lmst22)*mst24 + power2(mC2)) + mC2*msb22*mst22*power2(Pi) + 3*
+     mC2*mst24*power2(Pi) + 3*mst22*power2(mC2)*power2(Pi) - 3*lmsb22*(-(msb22*
+     mst24) + mC2*(-2*(-3 + lmst22)*msb22*mst22 + (23 - 6*lmst22)*mst24) +
+     mst26 - (msb22 + (-23 + 2*lmst22)*mst22)*power2(mC2) + power3(mC2))))/(3.*
+     msb22) + (mC2*(-1 + power2(snb))*(mt2*(-1 + power2(cb))*(-1 + power2(snt))
+     + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(
+     snt))*(42*mC2*msb22*mst22 - 9*lmst22*mC2*msb22*mst22 + 126*mC2*mst24 - 42*
+     lmst22*mC2*mst24 - 3*lmst22*msb22*mst24 + 3*lmst22*mst26 + 6*mC2*(2*mC2*
+     mst22 + msb22*mst22 + 2*mst24)*power2(lmsb22) + 6*mC2*mst24*power2(lmst22)
+     + 126*mst22*power2(mC2) + 3*lmst22*mst22*power2(mC2) + 6*mst22*power2(lmC2
+     )*power2(mC2) + 3*lmC2*mC2*((-3 + 2*lmsb22 - 2*lmst22)*msb22*mst22 - mC2*(
+     msb22 + 2*(7 - 3*lmsb22 + lmst22)*mst22) + (1 + 2*lmsb22 - 2*lmst22)*mst24
+      + power2(mC2)) + mC2*msb22*mst22*power2(Pi) + 3*mC2*mst24*power2(Pi) + 3*
+     mst22*power2(mC2)*power2(Pi) - 3*lmsb22*(-(msb22*mst24) + mC2*(-2*(-3 +
+     lmst22)*msb22*mst22 + (23 - 6*lmst22)*mst24) + mst26 - (msb22 + (-23 + 2*
+     lmst22)*mst22)*power2(mC2) + power3(mC2))))/(6.*msb22)) + DeltaInv(msb12,
+     mst12,mC2)*(-(invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(
+     snb)*(mst12*(2*mC2*msb12 + 5*lmst12*mC2*mst12 - lmst12*msb12*mst12 +
+     lmst12*mst14) + lmC2*(mC2 - msb12 + 5*mst12)*power2(mC2) - lmsb12*(mst12*(
+     -(msb12*mst12) + mst14) - (msb12 - 5*mst12)*power2(mC2) + 5*mC2*power2(
+     mst12) + power3(mC2))))/(6.*msb12*mst12) + (power2(snb)*(-2*Ab*cb*mu*sb*(-
+     1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*
+     power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(mst12
+     *(2*mC2*msb12 + 5*lmst12*mC2*mst12 - lmst12*msb12*mst12 + lmst12*mst14) +
      lmC2*(mC2 - msb12 + 5*mst12)*power2(mC2) - lmsb12*(mst12*(-(msb12*mst12) +
      mst14) - (msb12 - 5*mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2)
-     )))/(6.*msb12*mst12*sb) + (power2(snb)*(-2*Ab*cb*mu*sb*(-1 + power2(snt))
-     + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) +
-     power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(mst12*(2*mC2*msb12
-     + 5*lmst12*mC2*mst12 - lmst12*msb12*mst12 + lmst12*mst14) + lmC2*(mC2 -
-     msb12 + 5*mst12)*power2(mC2) - lmsb12*(mst12*(-(msb12*mst12) + mst14) - (
-     msb12 - 5*mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2))))/(12.*
-     msb12*mst12)) + DeltaInv(msb22,mst12,mC2)*(-(invdmst*mt2*(cb*sb*(-(cb*mu2)
-     + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*(-1 + power2(snb))*(mst12*(2*mC2*
-     msb22 + 5*lmst12*mC2*mst12 - lmst12*msb22*mst12 + lmst12*mst14) + lmC2*(
-     mC2 - msb22 + 5*mst12)*power2(mC2) - lmsb22*(mst12*(-(msb22*mst12) + mst14
-     ) - (msb22 - 5*mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2))))/(
-     6.*msb22*mst12*sb) - ((-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 + power2(snt)
-     ) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) +
-     power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(mst12*(2*mC2*msb22
-     + 5*lmst12*mC2*mst12 - lmst12*msb22*mst12 + lmst12*mst14) + lmC2*(mC2 -
-     msb22 + 5*mst12)*power2(mC2) - lmsb22*(mst12*(-(msb22*mst12) + mst14) - (
-     msb22 - 5*mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2))))/(12.*
-     msb22*mst12)) + DeltaInv(mst22,msb12,mC2)*(-(invdmst*mt2*(cb*sb*(-(cb*mu2)
-     + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(snb)*(mst22*(2*mC2*msb12 + 5
-     *lmst22*mC2*mst22 - lmst22*msb12*mst22 + lmst22*mst24) + lmC2*(mC2 - msb12
-      + 5*mst22)*power2(mC2) - lmsb12*(mst22*(-(msb12*mst22) + mst24) - (msb12
-     - 5*mst22)*power2(mC2) + 5*mC2*power2(mst22) + power3(mC2))))/(6.*msb12*
-     mst22*sb) + (power2(snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab
-     *cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*(
-     mst22*(2*mC2*msb12 + 5*lmst22*mC2*mst22 - lmst22*msb12*mst22 + lmst22*
-     mst24) + lmC2*(mC2 - msb12 + 5*mst22)*power2(mC2) - lmsb12*(mst22*(-(msb12
-     *mst22) + mst24) - (msb12 - 5*mst22)*power2(mC2) + 5*mC2*power2(mst22) +
-     power3(mC2))))/(12.*msb12*mst22)) + DeltaInv(mst22,msb22,mC2)*((invdmst*
-     mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*(-1 + power2(
-     snb))*(mst22*(2*mC2*msb22 + 5*lmst22*mC2*mst22 - lmst22*msb22*mst22 +
-     lmst22*mst24) + lmC2*(mC2 - msb22 + 5*mst22)*power2(mC2) - lmsb22*(mst22*(
-     -(msb22*mst22) + mst24) - (msb22 - 5*mst22)*power2(mC2) + 5*mC2*power2(
-     mst22) + power3(mC2))))/(6.*msb22*mst22*sb) - ((-1 + power2(snb))*(mt2*(-1
-      + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 +
-     power2(cb)) + mu2*power2(cb))*power2(snt))*(mst22*(2*mC2*msb22 + 5*lmst22*
-     mC2*mst22 - lmst22*msb22*mst22 + lmst22*mst24) + lmC2*(mC2 - msb22 + 5*
-     mst22)*power2(mC2) - lmsb22*(mst22*(-(msb22*mst22) + mst24) - (msb22 - 5*
-     mst22)*power2(mC2) + 5*mC2*power2(mst22) + power3(mC2))))/(12.*msb22*mst22
-     )) - (mh2*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*power2(DeltaInv
-     (mh2,msb12,msb22))*power2(1 - 2*power2(snb))*(42*mh2*msb12*msb22 - 9*
-     lmsb22*mh2*msb12*msb22 + 126*mh2*msb24 - 42*lmsb22*mh2*msb24 - 3*lmsb22*
-     msb12*msb24 + 3*lmsb22*msb26 + 6*mh2*(2*mh2*msb22 + msb12*msb22 + 2*msb24)
-     *power2(lmsb12) + 6*mh2*msb24*power2(lmsb22) + 126*msb22*power2(mh2) + 3*
-     lmsb22*msb22*power2(mh2) + 6*msb22*power2(lmh2)*power2(mh2) + 3*lmh2*mh2*(
-     (-3 + 2*lmsb12 - 2*lmsb22)*msb12*msb22 - mh2*(msb12 + 2*(7 - 3*lmsb12 +
-     lmsb22)*msb22) + (1 + 2*lmsb12 - 2*lmsb22)*msb24 + power2(mh2)) + mh2*
-     msb12*msb22*power2(Pi) + 3*mh2*msb24*power2(Pi) + 3*msb22*power2(mh2)*
+     )))/(12.*msb12*mst12)) + DeltaInv(msb22,mst12,mC2)*((invdmst*mt2*xt*(-(cb*
+     mu*sb) + Ab*(-1 + power2(cb)))*(-1 + power2(snb))*(mst12*(2*mC2*msb22 + 5*
+     lmst12*mC2*mst12 - lmst12*msb22*mst12 + lmst12*mst14) + lmC2*(mC2 - msb22
+     + 5*mst12)*power2(mC2) - lmsb22*(mst12*(-(msb22*mst12) + mst14) - (msb22 -
+     5*mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2))))/(6.*msb22*
+     mst12) - ((-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(
+     Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(
+     mu2 - mt2*power2(snt) - mu2*power2(snt)))*(mst12*(2*mC2*msb22 + 5*lmst12*
+     mC2*mst12 - lmst12*msb22*mst12 + lmst12*mst14) + lmC2*(mC2 - msb22 + 5*
+     mst12)*power2(mC2) - lmsb22*(mst12*(-(msb22*mst12) + mst14) - (msb22 - 5*
+     mst12)*power2(mC2) + 5*mC2*power2(mst12) + power3(mC2))))/(12.*msb22*mst12
+     )) + DeltaInv(mst22,msb12,mC2)*((invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 +
+     power2(cb)))*power2(snb)*(mst22*(2*mC2*msb12 + 5*lmst22*mC2*mst22 - lmst22
+     *msb12*mst22 + lmst22*mst24) + lmC2*(mC2 - msb12 + 5*mst22)*power2(mC2) -
+     lmsb12*(mst22*(-(msb12*mst22) + mst24) - (msb12 - 5*mst22)*power2(mC2) + 5
+     *mC2*power2(mst22) + power3(mC2))))/(6.*msb12*mst22) + (power2(snb)*(mt2*(
+     -1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 +
+     power2(cb)) + mu2*power2(cb))*power2(snt))*(mst22*(2*mC2*msb12 + 5*lmst22*
+     mC2*mst22 - lmst22*msb12*mst22 + lmst22*mst24) + lmC2*(mC2 - msb12 + 5*
+     mst22)*power2(mC2) - lmsb12*(mst22*(-(msb12*mst22) + mst24) - (msb12 - 5*
+     mst22)*power2(mC2) + 5*mC2*power2(mst22) + power3(mC2))))/(12.*msb12*mst22
+     )) + DeltaInv(mst22,msb22,mC2)*(-(invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 +
+     power2(cb)))*(-1 + power2(snb))*(mst22*(2*mC2*msb22 + 5*lmst22*mC2*mst22 -
+     lmst22*msb22*mst22 + lmst22*mst24) + lmC2*(mC2 - msb22 + 5*mst22)*power2(
+     mC2) - lmsb22*(mst22*(-(msb22*mst22) + mst24) - (msb22 - 5*mst22)*power2(
+     mC2) + 5*mC2*power2(mst22) + power3(mC2))))/(6.*msb22*mst22) - ((-1 +
+     power2(snb))*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb -
+     power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*(mst22*(2*mC2*
+     msb22 + 5*lmst22*mC2*mst22 - lmst22*msb22*mst22 + lmst22*mst24) + lmC2*(
+     mC2 - msb22 + 5*mst22)*power2(mC2) - lmsb22*(mst22*(-(msb22*mst22) + mst24
+     ) - (msb22 - 5*mst22)*power2(mC2) + 5*mC2*power2(mst22) + power3(mC2))))/(
+     12.*msb22*mst22)) - (mh2*(mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*
+     power2(DeltaInv(mh2,msb12,msb22))*power2(1 - 2*power2(snb))*(42*mh2*msb12*
+     msb22 - 9*lmsb22*mh2*msb12*msb22 + 126*mh2*msb24 - 42*lmsb22*mh2*msb24 - 3
+     *lmsb22*msb12*msb24 + 3*lmsb22*msb26 + 6*mh2*(2*mh2*msb22 + msb12*msb22 +
+     2*msb24)*power2(lmsb12) + 6*mh2*msb24*power2(lmsb22) + 126*msb22*power2(
+     mh2) + 3*lmsb22*msb22*power2(mh2) + 6*msb22*power2(lmh2)*power2(mh2) + 3*
+     lmh2*mh2*((-3 + 2*lmsb12 - 2*lmsb22)*msb12*msb22 - mh2*(msb12 + 2*(7 - 3*
+     lmsb12 + lmsb22)*msb22) + (1 + 2*lmsb12 - 2*lmsb22)*msb24 + power2(mh2)) +
+     mh2*msb12*msb22*power2(Pi) + 3*mh2*msb24*power2(Pi) + 3*msb22*power2(mh2)*
      power2(Pi) - 3*lmsb12*(-(msb12*msb24) + mh2*(-2*(-3 + lmsb22)*msb12*msb22
      + (23 - 6*lmsb22)*msb24) + msb26 - (msb12 + (-23 + 2*lmsb22)*msb22)*power2
      (mh2) + power3(mh2))))/(12.*msb12) - (DeltaInv(mh2,msb12,msb22)*(-(Ab*sa*(
@@ -2523,179 +2500,176 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      mA2)*power2(DeltaInv(msb12,mA2,msb22)))/msb12 - ((-2*Ab*cb*mu*sb + power2(
      Ab)*(-1 + power2(cb)) - mu2*power2(cb))*power2(mA2)*(-2*msb12*msb24 - 2*
      mA2*(msb12*msb22 + msb24) + msb26 + msb22*power2(mA2))*power3(DeltaInv(
-     msb12,mA2,msb22)))/msb12) + Fin3(msb12,mst12,mC2,Q2)*(((-4*invdmst*mst12*
-     mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*
-     power2(snb))/(msb12*sb) - (2*mst12*power2(mC2)*power2(snb)*(-2*Ab*cb*mu*sb
-     *(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) +
-     mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/
-     msb12)*power2(DeltaInv(msb12,mst12,mC2)) + ((4*invdmst*mt2*(cb*sb*(-(cb*
-     mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-2*msb12*mst14 -
-     2*mC2*(msb12*mst12 + mst14) + mst16 + mst12*power2(mC2))*power2(snb))/(
-     msb12*sb) + (2*power2(mC2)*(-2*msb12*mst14 - 2*mC2*(msb12*mst12 + mst14) +
-     mst16 + mst12*power2(mC2))*power2(snb)*(-2*Ab*cb*mu*sb*(-1 + power2(snt))
-     + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) +
-     power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb12)*power3(
-     DeltaInv(msb12,mst12,mC2))) + Fin3(msb12,mz2,msb22,Q2)*(-((msb22*(mu2 - 2*
-     Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mz2)*power2(
-     DeltaInv(msb12,mz2,msb22)))/msb12) + ((msb26 + mz2*(-2*msb24 + msb22*mz2)
-     - 2*msb12*(msb24 + msb22*mz2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) +
-     power2(Ab)*power2(cb))*power2(mz2)*power3(DeltaInv(msb12,mz2,msb22)))/
-     msb12) + Fin3(msb22,mst12,mC2,Q2)*(((4*invdmst*mst12*mt2*(cb*sb*(-(cb*mu2)
-     + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-1 + power2(snb)))/(
-     msb22*sb) + (2*mst12*power2(mC2)*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 +
+     msb12,mA2,msb22)))/msb12) + Fin3(msb12,mst12,mC2,Q2)*(((4*invdmst*mst12*
+     mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*power2(snb))/msb12
+      - (2*mst12*power2(mC2)*power2(snb)*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) +
+     power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2
+     (cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb12)*power2(DeltaInv(
+     msb12,mst12,mC2)) + ((-4*invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)
+     ))*power2(mC2)*(-2*msb12*mst14 - 2*mC2*(msb12*mst12 + mst14) + mst16 +
+     mst12*power2(mC2))*power2(snb))/msb12 + (2*power2(mC2)*(-2*msb12*mst14 - 2
+     *mC2*(msb12*mst12 + mst14) + mst16 + mst12*power2(mC2))*power2(snb)*(-2*Ab
+     *cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(
+     snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(
+     snt))))/msb12)*power3(DeltaInv(msb12,mst12,mC2))) + Fin3(msb12,mz2,msb22,
+     Q2)*(-((msb22*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb
+     ))*power2(mz2)*power2(DeltaInv(msb12,mz2,msb22)))/msb12) + ((msb26 + mz2*(
+     -2*msb24 + msb22*mz2) - 2*msb12*(msb24 + msb22*mz2))*(mu2 - 2*Ab*cb*mu*sb
+     - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mz2)*power3(DeltaInv(
+     msb12,mz2,msb22)))/msb12) + Fin3(msb22,mst12,mC2,Q2)*(((-4*invdmst*mst12*
+     mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*(-1 + power2(snb))
+     )/msb22 + (2*mst12*power2(mC2)*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 +
      power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*
      power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb22
-     )*power2(DeltaInv(msb22,mst12,mC2)) + ((-4*invdmst*mt2*(cb*sb*(-(cb*mu2) +
-     At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-2*msb22*mst14 - 2*mC2*(
-     msb22*mst12 + mst14) + mst16 + mst12*power2(mC2))*(-1 + power2(snb)))/(
-     msb22*sb) - (2*power2(mC2)*(-2*msb22*mst14 - 2*mC2*(msb22*mst12 + mst14) +
-     mst16 + mst12*power2(mC2))*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 + power2
-     (snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt)
-     + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt))))/msb22)*power3(
-     DeltaInv(msb22,mst12,mC2))) + Fin3(mst22,msb12,mC2,Q2)*(((4*invdmst*mst22*
-     mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*
-     power2(snb))/(msb12*sb) - (2*mst22*power2(mC2)*power2(snb)*(mt2*(-1 +
-     power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(
-     cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power2(DeltaInv(mst22,msb12,
-     mC2)) + ((-4*invdmst*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 +
-     power2(cb)))*power2(mC2)*(-2*msb12*mst24 - 2*mC2*(msb12*mst22 + mst24) +
-     mst26 + mst22*power2(mC2))*power2(snb))/(msb12*sb) + (2*power2(mC2)*(-2*
-     msb12*mst24 - 2*mC2*(msb12*mst22 + mst24) + mst26 + mst22*power2(mC2))*
+     )*power2(DeltaInv(msb22,mst12,mC2)) + ((4*invdmst*mt2*xt*(-(cb*mu*sb) + Ab
+     *(-1 + power2(cb)))*power2(mC2)*(-2*msb22*mst14 - 2*mC2*(msb22*mst12 +
+     mst14) + mst16 + mst12*power2(mC2))*(-1 + power2(snb)))/msb22 - (2*power2(
+     mC2)*(-2*msb22*mst14 - 2*mC2*(msb22*mst12 + mst14) + mst16 + mst12*power2(
+     mC2))*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(
+     -1 + power2(cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 -
+     mt2*power2(snt) - mu2*power2(snt))))/msb22)*power3(DeltaInv(msb22,mst12,
+     mC2))) + Fin3(mst22,msb12,mC2,Q2)*(((4*invdmst*mst22*mt2*xt*(Ab + cb*mu*sb
+      - Ab*power2(cb))*power2(mC2)*power2(snb))/msb12 - (2*mst22*power2(mC2)*
      power2(snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb -
-     power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power3
-     (DeltaInv(mst22,msb12,mC2))) + Fin3(mst22,msb22,mC2,Q2)*(((-4*invdmst*
-     mst22*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(
-     mC2)*(-1 + power2(snb)))/(msb22*sb) + (2*mst22*power2(mC2)*(-1 + power2(
-     snb))*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(
-     Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt)))/msb22)*power2(
-     DeltaInv(mst22,msb22,mC2)) + ((4*invdmst*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb)
-     - Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-2*msb22*mst24 - 2*mC2*(msb22*
-     mst22 + mst24) + mst26 + mst22*power2(mC2))*(-1 + power2(snb)))/(msb22*sb)
-     - (2*power2(mC2)*(-2*msb22*mst24 - 2*mC2*(msb22*mst22 + mst24) + mst26 +
-     mst22*power2(mC2))*(-1 + power2(snb))*(mt2*(-1 + power2(cb))*(-1 + power2(
-     snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*
-     power2(snt)))/msb22)*power3(DeltaInv(mst22,msb22,mC2))) + Fin3(mst22,mw2,
-     msb12,Q2)*((-2*mst22*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*
-     power2(cb))*power2(mw2)*power2(snb)*power2(snt)*power2(DeltaInv(mst22,mw2,
-     msb12)))/msb12 + (2*(mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb12*(mst24 +
-     mst22*mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))
-     *power2(mw2)*power2(snb)*power2(snt)*power3(DeltaInv(mst22,mw2,msb12)))/
-     msb12) + Fin3(mst22,mw2,msb22,Q2)*((2*mst22*(mu2 - 2*Ab*cb*mu*sb - mu2*
-     power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 + power2(snb))*power2(
-     snt)*power2(DeltaInv(mst22,mw2,msb22)))/msb22 - (2*(mst26 + mw2*(-2*mst24
-     + mst22*mw2) - 2*msb22*(mst24 + mst22*mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*
-     power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 + power2(snb))*power2(
-     snt)*power3(DeltaInv(mst22,mw2,msb22)))/msb22) + Fin3(mw2,msb12,mst12,Q2)*
-     ((2*mst12*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*
-     power2(mw2)*power2(snb)*(-1 + power2(snt))*power2(DeltaInv(mw2,msb12,mst12
-     )))/msb12 - (2*(mst16 + mw2*(-2*mst14 + mst12*mw2) - 2*msb12*(mst14 +
-     mst12*mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))
-     *power2(mw2)*power2(snb)*(-1 + power2(snt))*power3(DeltaInv(mw2,msb12,
-     mst12)))/msb12) + Fin3(mw2,msb22,mst12,Q2)*((-2*mst12*(mu2 - 2*Ab*cb*mu*sb
-      - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 + power2(snb))*
-     (-1 + power2(snt))*power2(DeltaInv(mw2,msb22,mst12)))/msb22 + (2*(mst16 +
-     mw2*(-2*mst14 + mst12*mw2) - 2*msb22*(mst14 + mst12*mw2))*(mu2 - 2*Ab*cb*
-     mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 + power2(
-     snb))*(-1 + power2(snt))*power3(DeltaInv(mw2,msb22,mst12)))/msb22) - 4*mh2
-     *(42 + 8*lmh2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(lmh2) + power2(Pi))*(-(
-     Ab*sa*(2*ca*mu + Ab*sa)) + mu2*(-1 + power2(sa)))*(-1 + power2(snb))*
-     power2(snb)*power3(DeltaInv(mh2,msb12,msb12))*power4(msb12) - 4*mH2*(42 +
-     8*lmH2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(lmH2) + power2(Pi))*(2*Ab*ca*
-     mu*sa + power2(Ab)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snb))*
-     power2(snb)*power3(DeltaInv(mH2,msb12,msb12))*power4(msb12) + Fin3(msb12,
-     mt2,mu2,Q2)*((2*(msb14 + msb12*(mt2 + 3*mu2))*power2(mu2)*power2(snb)*
-     power2(DeltaInv(msb12,mt2,mu2)))/mt2 - (2*power2(mu2)*power2(snb)*power3(
-     DeltaInv(msb12,mt2,mu2))*(msb16*(-mt2 + mu2) - 5*msb14*mu2*(2*mt2 + mu2) +
-     msb12*(-5*mt2 + 3*mu2)*power2(mu2) + power4(msb12)))/mt2) - 4*mh2*(42 + 8*
-     lmh2*(-3 + lmsb22) - 12*lmsb22 + 4*power2(lmh2) + power2(Pi))*(-(Ab*sa*(2*
-     ca*mu + Ab*sa)) + mu2*(-1 + power2(sa)))*(-1 + power2(snb))*power2(snb)*
-     power3(DeltaInv(mh2,msb22,msb22))*power4(msb22) - 4*mH2*(42 + 8*lmH2*(-3 +
-     lmsb22) - 12*lmsb22 + 4*power2(lmH2) + power2(Pi))*(2*Ab*ca*mu*sa + power2
-     (Ab)*(-1 + power2(sa)) - mu2*power2(sa))*(-1 + power2(snb))*power2(snb)*
-     power3(DeltaInv(mH2,msb22,msb22))*power4(msb22) - ((-2*Ab*cb*mu*sb +
-     power2(Ab)*(-1 + power2(cb)) - mu2*power2(cb))*power2(mA2)*power3(DeltaInv
-     (msb12,mA2,msb22))*(-(msb12*msb26*(-6*(12 + lmA2)*lmsb22 + 6*lmsb12*(-18 +
-     lmA2 + 5*lmsb22) + 18*power2(lmsb12) + 12*power2(lmsb22) + 5*(42 + power2(
-     Pi)))) - mA2*(3*msb26*(42 - 24*lmsb22 - 2*lmA2*(-6 + lmsb12 + lmsb22) + 2*
-     lmsb12*(-12 + 5*lmsb22) - 2*power2(lmA2) + 4*power2(lmsb12) + 4*power2(
-     lmsb22) + power2(Pi)) + 2*msb12*msb24*(294 + 30*lmsb12*(-6 + lmsb22) - 36*
-     lmsb22 + 6*lmA2*(5*lmsb12 - 3*(2 + lmsb22)) + 6*power2(lmA2) + 30*power2(
-     lmsb12) + 6*power2(lmsb22) + 7*power2(Pi))) - power2(mA2)*(3*msb24*(42 + 2
-     *lmA2*(-12 + 5*lmsb12 - lmsb22) + 12*lmsb22 - 2*lmsb12*(12 + lmsb22) + 4*
-     power2(lmA2) + 4*power2(lmsb12) - 2*power2(lmsb22) + power2(Pi)) + msb12*
-     msb22*(6*lmA2*(-12 + 5*lmsb12 - lmsb22) + 6*lmsb12*(-18 + lmsb22) + 12*
-     power2(lmA2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*msb22*(42 + 2
-     *lmA2*(-6 + 3*lmsb12 - lmsb22) + 2*lmsb12*(-12 + lmsb22) + 2*power2(lmA2)
-     + 4*power2(lmsb12) + power2(Pi))*power3(mA2) + 3*(42 + 2*lmsb12*(lmA2 + 3*
-     (-4 + lmsb22)) - 2*(6 + lmA2)*lmsb22 + 4*power2(lmsb12) + 2*power2(lmsb22)
-     + power2(Pi))*power4(msb22)))/(12.*msb12) - ((mu2 + Ab*sa*(2*ca*mu + Ab*sa
-     ) - mu2*power2(sa))*power2(mh2 - 2*mh2*power2(snb))*power3(DeltaInv(mh2,
-     msb12,msb22))*(msb12*msb26*(-6*(12 + lmh2)*lmsb22 + 6*lmsb12*(-18 + lmh2 +
-     5*lmsb22) + 18*power2(lmsb12) + 12*power2(lmsb22) + 5*(42 + power2(Pi))) +
-     mh2*(3*msb26*(42 - 24*lmsb22 - 2*lmh2*(-6 + lmsb12 + lmsb22) + 2*lmsb12*(-
-     12 + 5*lmsb22) - 2*power2(lmh2) + 4*power2(lmsb12) + 4*power2(lmsb22) +
-     power2(Pi)) + 2*msb12*msb24*(294 + 30*lmsb12*(-6 + lmsb22) - 36*lmsb22 + 6
-     *lmh2*(5*lmsb12 - 3*(2 + lmsb22)) + 6*power2(lmh2) + 30*power2(lmsb12) + 6
-     *power2(lmsb22) + 7*power2(Pi))) + power2(mh2)*(3*msb24*(42 + 2*lmh2*(-12
-     + 5*lmsb12 - lmsb22) + 12*lmsb22 - 2*lmsb12*(12 + lmsb22) + 4*power2(lmh2)
-     + 4*power2(lmsb12) - 2*power2(lmsb22) + power2(Pi)) + msb12*msb22*(6*lmh2*
-     (-12 + 5*lmsb12 - lmsb22) + 6*lmsb12*(-18 + lmsb22) + 12*power2(lmh2) + 18
-     *power2(lmsb12) + 5*(42 + power2(Pi)))) - 3*msb22*(42 + 2*lmh2*(-6 + 3*
-     lmsb12 - lmsb22) + 2*lmsb12*(-12 + lmsb22) + 2*power2(lmh2) + 4*power2(
-     lmsb12) + power2(Pi))*power3(mh2) - 3*(42 + 2*lmsb12*(lmh2 + 3*(-4 +
-     lmsb22)) - 2*(6 + lmh2)*lmsb22 + 4*power2(lmsb12) + 2*power2(lmsb22) +
-     power2(Pi))*power4(msb22)))/(12.*msb12) + ((2*Ab*ca*mu*sa + power2(Ab)*(-1
-      + power2(sa)) - mu2*power2(sa))*power2(mH2 - 2*mH2*power2(snb))*power3(
-     DeltaInv(mH2,msb12,msb22))*(msb12*msb26*(-6*(12 + lmH2)*lmsb22 + 6*lmsb12*
-     (-18 + lmH2 + 5*lmsb22) + 18*power2(lmsb12) + 12*power2(lmsb22) + 5*(42 +
-     power2(Pi))) + mH2*(3*msb26*(42 - 24*lmsb22 - 2*lmH2*(-6 + lmsb12 + lmsb22
-     ) + 2*lmsb12*(-12 + 5*lmsb22) - 2*power2(lmH2) + 4*power2(lmsb12) + 4*
-     power2(lmsb22) + power2(Pi)) + 2*msb12*msb24*(294 + 30*lmsb12*(-6 + lmsb22
-     ) - 36*lmsb22 + 6*lmH2*(5*lmsb12 - 3*(2 + lmsb22)) + 6*power2(lmH2) + 30*
-     power2(lmsb12) + 6*power2(lmsb22) + 7*power2(Pi))) + power2(mH2)*(3*msb24*
-     (42 + 2*lmH2*(-12 + 5*lmsb12 - lmsb22) + 12*lmsb22 - 2*lmsb12*(12 + lmsb22
-     ) + 4*power2(lmH2) + 4*power2(lmsb12) - 2*power2(lmsb22) + power2(Pi)) +
-     msb12*msb22*(6*lmH2*(-12 + 5*lmsb12 - lmsb22) + 6*lmsb12*(-18 + lmsb22) +
-     12*power2(lmH2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) - 3*msb22*(42
-     + 2*lmH2*(-6 + 3*lmsb12 - lmsb22) + 2*lmsb12*(-12 + lmsb22) + 2*power2(
-     lmH2) + 4*power2(lmsb12) + power2(Pi))*power3(mH2) - 3*(42 + 2*lmsb12*(
-     lmH2 + 3*(-4 + lmsb22)) - 2*(6 + lmH2)*lmsb22 + 4*power2(lmsb12) + 2*
-     power2(lmsb22) + power2(Pi))*power4(msb22)))/(12.*msb12) - ((mu2 - 2*Ab*cb
-     *mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mz2)*power3(
-     DeltaInv(msb12,mz2,msb22))*(3*mz2*(msb26*(42 + 2*lmsb12*(-12 + 5*lmsb22 -
-     lmz2) + 12*lmz2 - 2*lmsb22*(12 + lmz2) + 4*power2(lmsb12) + 4*power2(
-     lmsb22) - 2*power2(lmz2) + power2(Pi)) + msb24*mz2*(42 - 2*lmsb12*(12 +
-     lmsb22 - 5*lmz2) - 2*lmsb22*(-6 + lmz2) - 24*lmz2 + 4*power2(lmsb12) - 2*
-     power2(lmsb22) + 4*power2(lmz2) + power2(Pi))) + msb12*(2*msb24*mz2*(294 -
-     36*lmz2 - 18*lmsb22*(2 + lmz2) + 30*lmsb12*(-6 + lmsb22 + lmz2) + 30*
-     power2(lmsb12) + 6*power2(lmsb22) + 6*power2(lmz2) + 7*power2(Pi)) + msb26
-     *(-6*lmsb22*(12 + lmz2) + 6*lmsb12*(-18 + 5*lmsb22 + lmz2) + 18*power2(
-     lmsb12) + 12*power2(lmsb22) + 5*(42 + power2(Pi)))) + msb22*power2(mz2)*(-
-     3*mz2*(42 + 2*lmsb12*(lmsb22 + 3*(-4 + lmz2)) - 2*(6 + lmsb22)*lmz2 + 4*
-     power2(lmsb12) + 2*power2(lmz2) + power2(Pi)) + msb12*(-6*(12 + lmsb22)*
-     lmz2 + 6*lmsb12*(-18 + lmsb22 + 5*lmz2) + 18*power2(lmsb12) + 12*power2(
-     lmz2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmsb22*(6 + lmz2) + 2*lmsb12*(-
-     12 + 3*lmsb22 + lmz2) + 4*power2(lmsb12) + 2*power2(lmsb22) + power2(Pi))*
-     power4(msb22)))/(12.*msb12) + Fin3(mt2,mu2,msb22,Q2)*((-2*(msb24 + msb22*(
-     mt2 + 3*mu2))*power2(mu2)*(-1 + power2(snb))*power2(DeltaInv(mt2,mu2,msb22
-     )))/mt2 + (2*power2(mu2)*(-1 + power2(snb))*power3(DeltaInv(mt2,mu2,msb22)
-     )*(msb26*(-mt2 + mu2) - 5*msb24*mu2*(2*mt2 + mu2) + msb22*(-5*mt2 + 3*mu2)
-     *power2(mu2) + power4(msb22)))/mt2) + ((mu2 - 2*Ab*cb*mu*sb - mu2*power2(
-     cb) + power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*(-1 + power2(snt))*
-     power3(DeltaInv(mw2,msb12,mst12))*(3*mw2*(mst16*(42 + 2*lmsb12*(-12 + 5*
-     lmst12 - lmw2) + 12*lmw2 - 2*lmst12*(12 + lmw2) + 4*power2(lmsb12) + 4*
-     power2(lmst12) - 2*power2(lmw2) + power2(Pi)) + mst14*mw2*(42 - 2*lmsb12*(
-     12 + lmst12 - 5*lmw2) - 2*lmst12*(-6 + lmw2) - 24*lmw2 + 4*power2(lmsb12)
-     - 2*power2(lmst12) + 4*power2(lmw2) + power2(Pi))) + msb12*(2*mst14*mw2*(
-     294 - 36*lmw2 - 18*lmst12*(2 + lmw2) + 30*lmsb12*(-6 + lmst12 + lmw2) + 30
-     *power2(lmsb12) + 6*power2(lmst12) + 6*power2(lmw2) + 7*power2(Pi)) +
-     mst16*(-6*lmst12*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst12 + lmw2) + 18*
-     power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) + mst12*power2(
-     mw2)*(-3*mw2*(42 + 2*lmsb12*(lmst12 + 3*(-4 + lmw2)) - 2*(6 + lmst12)*lmw2
-      + 4*power2(lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6*(12 +
-     lmst12)*lmw2 + 6*lmsb12*(-18 + lmst12 + 5*lmw2) + 18*power2(lmsb12) + 12*
-     power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) + 2*
-     lmsb12*(-12 + 3*lmst12 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst12) +
+     power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power2
+     (DeltaInv(mst22,msb12,mC2)) + ((4*invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 +
+     power2(cb)))*power2(mC2)*(-2*msb12*mst24 - 2*mC2*(msb12*mst22 + mst24) +
+     mst26 + mst22*power2(mC2))*power2(snb))/msb12 + (2*power2(mC2)*(-2*msb12*
+     mst24 - 2*mC2*(msb12*mst22 + mst24) + mst26 + mst22*power2(mC2))*power2(
+     snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(
+     Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt)))/msb12)*power3(
+     DeltaInv(mst22,msb12,mC2))) + Fin3(mst22,msb22,mC2,Q2)*(((4*invdmst*mst22*
+     mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*(-1 + power2(snb))
+     )/msb22 + (2*mst22*power2(mC2)*(-1 + power2(snb))*(mt2*(-1 + power2(cb))*(
+     -1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*
+     power2(cb))*power2(snt)))/msb22)*power2(DeltaInv(mst22,msb22,mC2)) + ((-4*
+     invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*(-2*msb22*
+     mst24 - 2*mC2*(msb22*mst22 + mst24) + mst26 + mst22*power2(mC2))*(-1 +
+     power2(snb)))/msb22 - (2*power2(mC2)*(-2*msb22*mst24 - 2*mC2*(msb22*mst22
+     + mst24) + mst26 + mst22*power2(mC2))*(-1 + power2(snb))*(mt2*(-1 + power2
+     (cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) +
+     mu2*power2(cb))*power2(snt)))/msb22)*power3(DeltaInv(mst22,msb22,mC2))) +
+     Fin3(mst22,mw2,msb12,Q2)*((-2*mst22*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb)
+     + power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*power2(snt)*power2(
+     DeltaInv(mst22,mw2,msb12)))/msb12 + (2*(mst26 + mw2*(-2*mst24 + mst22*mw2)
+     - 2*msb12*(mst24 + mst22*mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) +
+     power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*power2(snt)*power3(DeltaInv
+     (mst22,mw2,msb12)))/msb12) + Fin3(mst22,mw2,msb22,Q2)*((2*mst22*(mu2 - 2*
+     Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 +
+     power2(snb))*power2(snt)*power2(DeltaInv(mst22,mw2,msb22)))/msb22 - (2*(
+     mst26 + mw2*(-2*mst24 + mst22*mw2) - 2*msb22*(mst24 + mst22*mw2))*(mu2 - 2
+     *Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 +
+     power2(snb))*power2(snt)*power3(DeltaInv(mst22,mw2,msb22)))/msb22) + Fin3(
+     mw2,msb12,mst12,Q2)*((2*mst12*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) +
+     power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*(-1 + power2(snt))*power2(
+     DeltaInv(mw2,msb12,mst12)))/msb12 - (2*(mst16 + mw2*(-2*mst14 + mst12*mw2)
+     - 2*msb12*(mst14 + mst12*mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) +
+     power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*(-1 + power2(snt))*power3(
+     DeltaInv(mw2,msb12,mst12)))/msb12) + Fin3(mw2,msb22,mst12,Q2)*((-2*mst12*(
+     mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*
+     (-1 + power2(snb))*(-1 + power2(snt))*power2(DeltaInv(mw2,msb22,mst12)))/
+     msb22 + (2*(mst16 + mw2*(-2*mst14 + mst12*mw2) - 2*msb22*(mst14 + mst12*
+     mw2))*(mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*
+     power2(mw2)*(-1 + power2(snb))*(-1 + power2(snt))*power3(DeltaInv(mw2,
+     msb22,mst12)))/msb22) - 4*mh2*(42 + 8*lmh2*(-3 + lmsb12) - 12*lmsb12 + 4*
+     power2(lmh2) + power2(Pi))*(-(Ab*sa*(2*ca*mu + Ab*sa)) + mu2*(-1 + power2(
+     sa)))*(-1 + power2(snb))*power2(snb)*power3(DeltaInv(mh2,msb12,msb12))*
+     power4(msb12) - 4*mH2*(42 + 8*lmH2*(-3 + lmsb12) - 12*lmsb12 + 4*power2(
+     lmH2) + power2(Pi))*(2*Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa)) - mu2*
+     power2(sa))*(-1 + power2(snb))*power2(snb)*power3(DeltaInv(mH2,msb12,msb12
+     ))*power4(msb12) + Fin3(msb12,mt2,mu2,Q2)*((2*(msb14 + msb12*(mt2 + 3*mu2)
+     )*power2(mu2)*power2(snb)*power2(DeltaInv(msb12,mt2,mu2)))/mt2 - (2*power2
+     (mu2)*power2(snb)*power3(DeltaInv(msb12,mt2,mu2))*(msb16*(-mt2 + mu2) - 5*
+     msb14*mu2*(2*mt2 + mu2) + msb12*(-5*mt2 + 3*mu2)*power2(mu2) + power4(
+     msb12)))/mt2) - 4*mh2*(42 + 8*lmh2*(-3 + lmsb22) - 12*lmsb22 + 4*power2(
+     lmh2) + power2(Pi))*(-(Ab*sa*(2*ca*mu + Ab*sa)) + mu2*(-1 + power2(sa)))*(
+     -1 + power2(snb))*power2(snb)*power3(DeltaInv(mh2,msb22,msb22))*power4(
+     msb22) - 4*mH2*(42 + 8*lmH2*(-3 + lmsb22) - 12*lmsb22 + 4*power2(lmH2) +
+     power2(Pi))*(2*Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa)) - mu2*power2(sa)
+     )*(-1 + power2(snb))*power2(snb)*power3(DeltaInv(mH2,msb22,msb22))*power4(
+     msb22) - ((-2*Ab*cb*mu*sb + power2(Ab)*(-1 + power2(cb)) - mu2*power2(cb))
+     *power2(mA2)*power3(DeltaInv(msb12,mA2,msb22))*(-(msb12*msb26*(-6*(12 +
+     lmA2)*lmsb22 + 6*lmsb12*(-18 + lmA2 + 5*lmsb22) + 18*power2(lmsb12) + 12*
+     power2(lmsb22) + 5*(42 + power2(Pi)))) - mA2*(3*msb26*(42 - 24*lmsb22 - 2*
+     lmA2*(-6 + lmsb12 + lmsb22) + 2*lmsb12*(-12 + 5*lmsb22) - 2*power2(lmA2) +
+     4*power2(lmsb12) + 4*power2(lmsb22) + power2(Pi)) + 2*msb12*msb24*(294 +
+     30*lmsb12*(-6 + lmsb22) - 36*lmsb22 + 6*lmA2*(5*lmsb12 - 3*(2 + lmsb22)) +
+     6*power2(lmA2) + 30*power2(lmsb12) + 6*power2(lmsb22) + 7*power2(Pi))) -
+     power2(mA2)*(3*msb24*(42 + 2*lmA2*(-12 + 5*lmsb12 - lmsb22) + 12*lmsb22 -
+     2*lmsb12*(12 + lmsb22) + 4*power2(lmA2) + 4*power2(lmsb12) - 2*power2(
+     lmsb22) + power2(Pi)) + msb12*msb22*(6*lmA2*(-12 + 5*lmsb12 - lmsb22) + 6*
+     lmsb12*(-18 + lmsb22) + 12*power2(lmA2) + 18*power2(lmsb12) + 5*(42 +
+     power2(Pi)))) + 3*msb22*(42 + 2*lmA2*(-6 + 3*lmsb12 - lmsb22) + 2*lmsb12*(
+     -12 + lmsb22) + 2*power2(lmA2) + 4*power2(lmsb12) + power2(Pi))*power3(mA2
+     ) + 3*(42 + 2*lmsb12*(lmA2 + 3*(-4 + lmsb22)) - 2*(6 + lmA2)*lmsb22 + 4*
+     power2(lmsb12) + 2*power2(lmsb22) + power2(Pi))*power4(msb22)))/(12.*msb12
+     ) - ((mu2 + Ab*sa*(2*ca*mu + Ab*sa) - mu2*power2(sa))*power2(mh2 - 2*mh2*
+     power2(snb))*power3(DeltaInv(mh2,msb12,msb22))*(msb12*msb26*(-6*(12 + lmh2
+     )*lmsb22 + 6*lmsb12*(-18 + lmh2 + 5*lmsb22) + 18*power2(lmsb12) + 12*
+     power2(lmsb22) + 5*(42 + power2(Pi))) + mh2*(3*msb26*(42 - 24*lmsb22 - 2*
+     lmh2*(-6 + lmsb12 + lmsb22) + 2*lmsb12*(-12 + 5*lmsb22) - 2*power2(lmh2) +
+     4*power2(lmsb12) + 4*power2(lmsb22) + power2(Pi)) + 2*msb12*msb24*(294 +
+     30*lmsb12*(-6 + lmsb22) - 36*lmsb22 + 6*lmh2*(5*lmsb12 - 3*(2 + lmsb22)) +
+     6*power2(lmh2) + 30*power2(lmsb12) + 6*power2(lmsb22) + 7*power2(Pi))) +
+     power2(mh2)*(3*msb24*(42 + 2*lmh2*(-12 + 5*lmsb12 - lmsb22) + 12*lmsb22 -
+     2*lmsb12*(12 + lmsb22) + 4*power2(lmh2) + 4*power2(lmsb12) - 2*power2(
+     lmsb22) + power2(Pi)) + msb12*msb22*(6*lmh2*(-12 + 5*lmsb12 - lmsb22) + 6*
+     lmsb12*(-18 + lmsb22) + 12*power2(lmh2) + 18*power2(lmsb12) + 5*(42 +
+     power2(Pi)))) - 3*msb22*(42 + 2*lmh2*(-6 + 3*lmsb12 - lmsb22) + 2*lmsb12*(
+     -12 + lmsb22) + 2*power2(lmh2) + 4*power2(lmsb12) + power2(Pi))*power3(mh2
+     ) - 3*(42 + 2*lmsb12*(lmh2 + 3*(-4 + lmsb22)) - 2*(6 + lmh2)*lmsb22 + 4*
+     power2(lmsb12) + 2*power2(lmsb22) + power2(Pi))*power4(msb22)))/(12.*msb12
+     ) + ((2*Ab*ca*mu*sa + power2(Ab)*(-1 + power2(sa)) - mu2*power2(sa))*
+     power2(mH2 - 2*mH2*power2(snb))*power3(DeltaInv(mH2,msb12,msb22))*(msb12*
+     msb26*(-6*(12 + lmH2)*lmsb22 + 6*lmsb12*(-18 + lmH2 + 5*lmsb22) + 18*
+     power2(lmsb12) + 12*power2(lmsb22) + 5*(42 + power2(Pi))) + mH2*(3*msb26*(
+     42 - 24*lmsb22 - 2*lmH2*(-6 + lmsb12 + lmsb22) + 2*lmsb12*(-12 + 5*lmsb22)
+     - 2*power2(lmH2) + 4*power2(lmsb12) + 4*power2(lmsb22) + power2(Pi)) + 2*
+     msb12*msb24*(294 + 30*lmsb12*(-6 + lmsb22) - 36*lmsb22 + 6*lmH2*(5*lmsb12
+     - 3*(2 + lmsb22)) + 6*power2(lmH2) + 30*power2(lmsb12) + 6*power2(lmsb22)
+     + 7*power2(Pi))) + power2(mH2)*(3*msb24*(42 + 2*lmH2*(-12 + 5*lmsb12 -
+     lmsb22) + 12*lmsb22 - 2*lmsb12*(12 + lmsb22) + 4*power2(lmH2) + 4*power2(
+     lmsb12) - 2*power2(lmsb22) + power2(Pi)) + msb12*msb22*(6*lmH2*(-12 + 5*
+     lmsb12 - lmsb22) + 6*lmsb12*(-18 + lmsb22) + 12*power2(lmH2) + 18*power2(
+     lmsb12) + 5*(42 + power2(Pi)))) - 3*msb22*(42 + 2*lmH2*(-6 + 3*lmsb12 -
+     lmsb22) + 2*lmsb12*(-12 + lmsb22) + 2*power2(lmH2) + 4*power2(lmsb12) +
+     power2(Pi))*power3(mH2) - 3*(42 + 2*lmsb12*(lmH2 + 3*(-4 + lmsb22)) - 2*(6
+      + lmH2)*lmsb22 + 4*power2(lmsb12) + 2*power2(lmsb22) + power2(Pi))*power4
+     (msb22)))/(12.*msb12) - ((mu2 - 2*Ab*cb*mu*sb - mu2*power2(cb) + power2(Ab
+     )*power2(cb))*power2(mz2)*power3(DeltaInv(msb12,mz2,msb22))*(3*mz2*(msb26*
+     (42 + 2*lmsb12*(-12 + 5*lmsb22 - lmz2) + 12*lmz2 - 2*lmsb22*(12 + lmz2) +
+     4*power2(lmsb12) + 4*power2(lmsb22) - 2*power2(lmz2) + power2(Pi)) + msb24
+     *mz2*(42 - 2*lmsb12*(12 + lmsb22 - 5*lmz2) - 2*lmsb22*(-6 + lmz2) - 24*
+     lmz2 + 4*power2(lmsb12) - 2*power2(lmsb22) + 4*power2(lmz2) + power2(Pi)))
+     + msb12*(2*msb24*mz2*(294 - 36*lmz2 - 18*lmsb22*(2 + lmz2) + 30*lmsb12*(-6
+      + lmsb22 + lmz2) + 30*power2(lmsb12) + 6*power2(lmsb22) + 6*power2(lmz2)
+     + 7*power2(Pi)) + msb26*(-6*lmsb22*(12 + lmz2) + 6*lmsb12*(-18 + 5*lmsb22
+     + lmz2) + 18*power2(lmsb12) + 12*power2(lmsb22) + 5*(42 + power2(Pi)))) +
+     msb22*power2(mz2)*(-3*mz2*(42 + 2*lmsb12*(lmsb22 + 3*(-4 + lmz2)) - 2*(6 +
+     lmsb22)*lmz2 + 4*power2(lmsb12) + 2*power2(lmz2) + power2(Pi)) + msb12*(-6
+     *(12 + lmsb22)*lmz2 + 6*lmsb12*(-18 + lmsb22 + 5*lmz2) + 18*power2(lmsb12)
+     + 12*power2(lmz2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmsb22*(6 + lmz2) +
+     2*lmsb12*(-12 + 3*lmsb22 + lmz2) + 4*power2(lmsb12) + 2*power2(lmsb22) +
+     power2(Pi))*power4(msb22)))/(12.*msb12) + Fin3(mt2,mu2,msb22,Q2)*((-2*(
+     msb24 + msb22*(mt2 + 3*mu2))*power2(mu2)*(-1 + power2(snb))*power2(
+     DeltaInv(mt2,mu2,msb22)))/mt2 + (2*power2(mu2)*(-1 + power2(snb))*power3(
+     DeltaInv(mt2,mu2,msb22))*(msb26*(-mt2 + mu2) - 5*msb24*mu2*(2*mt2 + mu2) +
+     msb22*(-5*mt2 + 3*mu2)*power2(mu2) + power4(msb22)))/mt2) + ((mu2 - 2*Ab*
+     cb*mu*sb - mu2*power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*power2(snb)
+     *(-1 + power2(snt))*power3(DeltaInv(mw2,msb12,mst12))*(3*mw2*(mst16*(42 +
+     2*lmsb12*(-12 + 5*lmst12 - lmw2) + 12*lmw2 - 2*lmst12*(12 + lmw2) + 4*
+     power2(lmsb12) + 4*power2(lmst12) - 2*power2(lmw2) + power2(Pi)) + mst14*
+     mw2*(42 - 2*lmsb12*(12 + lmst12 - 5*lmw2) - 2*lmst12*(-6 + lmw2) - 24*lmw2
+      + 4*power2(lmsb12) - 2*power2(lmst12) + 4*power2(lmw2) + power2(Pi))) +
+     msb12*(2*mst14*mw2*(294 - 36*lmw2 - 18*lmst12*(2 + lmw2) + 30*lmsb12*(-6 +
+     lmst12 + lmw2) + 30*power2(lmsb12) + 6*power2(lmst12) + 6*power2(lmw2) + 7
+     *power2(Pi)) + mst16*(-6*lmst12*(12 + lmw2) + 6*lmsb12*(-18 + 5*lmst12 +
+     lmw2) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) +
+     mst12*power2(mw2)*(-3*mw2*(42 + 2*lmsb12*(lmst12 + 3*(-4 + lmw2)) - 2*(6 +
+     lmst12)*lmw2 + 4*power2(lmsb12) + 2*power2(lmw2) + power2(Pi)) + msb12*(-6
+     *(12 + lmst12)*lmw2 + 6*lmsb12*(-18 + lmst12 + 5*lmw2) + 18*power2(lmsb12)
+     + 12*power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) +
+     2*lmsb12*(-12 + 3*lmst12 + lmw2) + 4*power2(lmsb12) + 2*power2(lmst12) +
      power2(Pi))*power4(mst12)))/(6.*msb12) - ((mu2 - 2*Ab*cb*mu*sb - mu2*
      power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*(-1 + power2(snb))*(-1 +
      power2(snt))*power3(DeltaInv(mw2,msb22,mst12))*(3*mw2*(mst16*(42 + 2*
@@ -2713,73 +2687,72 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      + 12*power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst12*(6 + lmw2) +
      2*lmsb22*(-12 + 3*lmst12 + lmw2) + 4*power2(lmsb22) + 2*power2(lmst12) +
      power2(Pi))*power4(mst12)))/(6.*msb22) + power3(DeltaInv(msb12,mst12,mC2))
-     *((invdmst*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*
-     power2(mC2)*power2(snb)*(-(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*(
-     -18 + lmC2 + 5*lmst12) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 +
-     power2(Pi)))) - mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 +
-     lmst12) + 2*lmsb12*(-12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb12) +
-     4*power2(lmst12) + power2(Pi)) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 +
-     lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2)
-     + 30*power2(lmsb12) + 6*power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*
-     mst14*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 +
-     lmst12) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(lmst12) + power2(Pi
-     )) + msb12*mst12*(6*lmC2*(-12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 +
-     lmst12) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*
-     mst12*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*
-     power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*
-     lmsb12*(lmC2 + 3*(-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) +
-     2*power2(lmst12) + power2(Pi))*power4(mst12)))/(3.*msb12*sb) + (power2(mC2
-     )*power2(snb)*(-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2
-     (cb))*(-1 + power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(
-     snt) - mu2*power2(snt)))*(-(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*
-     (-18 + lmC2 + 5*lmst12) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 +
-     power2(Pi)))) - mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 +
-     lmst12) + 2*lmsb12*(-12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb12) +
-     4*power2(lmst12) + power2(Pi)) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 +
-     lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2)
-     + 30*power2(lmsb12) + 6*power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*
-     mst14*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 +
-     lmst12) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(lmst12) + power2(Pi
-     )) + msb12*mst12*(6*lmC2*(-12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 +
-     lmst12) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*
-     mst12*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*
-     power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*
-     lmsb12*(lmC2 + 3*(-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) +
-     2*power2(lmst12) + power2(Pi))*power4(mst12)))/(6.*msb12)) + power3(
-     DeltaInv(msb22,mst12,mC2))*(-(invdmst*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) -
-     Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-1 + power2(snb))*(-(msb22*mst16*(-6
-     *(12 + lmC2)*lmst12 + 6*lmsb22*(-18 + lmC2 + 5*lmst12) + 18*power2(lmsb22)
-     + 12*power2(lmst12) + 5*(42 + power2(Pi)))) - mC2*(3*mst16*(42 - 24*lmst12
-      - 2*lmC2*(-6 + lmsb22 + lmst12) + 2*lmsb22*(-12 + 5*lmst12) - 2*power2(
-     lmC2) + 4*power2(lmsb22) + 4*power2(lmst12) + power2(Pi)) + 2*msb22*mst14*
-     (294 + 30*lmsb22*(-6 + lmst12) - 36*lmst12 + 6*lmC2*(5*lmsb22 - 3*(2 +
-     lmst12)) + 6*power2(lmC2) + 30*power2(lmsb22) + 6*power2(lmst12) + 7*
-     power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12 + 5*lmsb22 - lmst12)
-     + 12*lmst12 - 2*lmsb22*(12 + lmst12) + 4*power2(lmC2) + 4*power2(lmsb22) -
-     2*power2(lmst12) + power2(Pi)) + msb22*mst12*(6*lmC2*(-12 + 5*lmsb22 -
-     lmst12) + 6*lmsb22*(-18 + lmst12) + 12*power2(lmC2) + 18*power2(lmsb22) +
-     5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*lmsb22 - lmst12) + 2*
-     lmsb22*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(lmsb22) + power2(Pi))*
-     power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*(-4 + lmst12)) - 2*(6 + lmC2)*
-     lmst12 + 4*power2(lmsb22) + 2*power2(lmst12) + power2(Pi))*power4(mst12)))
-     /(3.*msb22*sb) - (power2(mC2)*(-1 + power2(snb))*(-2*Ab*cb*mu*sb*(-1 +
-     power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(snt)) + mt2*
-     power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(snt)))*(-(
-     msb22*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb22*(-18 + lmC2 + 5*lmst12) + 18
-     *power2(lmsb22) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) - mC2*(3*mst16
-     *(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb22 + lmst12) + 2*lmsb22*(-12 + 5*
-     lmst12) - 2*power2(lmC2) + 4*power2(lmsb22) + 4*power2(lmst12) + power2(Pi
-     )) + 2*msb22*mst14*(294 + 30*lmsb22*(-6 + lmst12) - 36*lmst12 + 6*lmC2*(5*
-     lmsb22 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(lmsb22) + 6*power2(
-     lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12 + 5*
-     lmsb22 - lmst12) + 12*lmst12 - 2*lmsb22*(12 + lmst12) + 4*power2(lmC2) + 4
-     *power2(lmsb22) - 2*power2(lmst12) + power2(Pi)) + msb22*mst12*(6*lmC2*(-
-     12 + 5*lmsb22 - lmst12) + 6*lmsb22*(-18 + lmst12) + 12*power2(lmC2) + 18*
-     power2(lmsb22) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*
-     lmsb22 - lmst12) + 2*lmsb22*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(
-     lmsb22) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*(-4 +
-     lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb22) + 2*power2(lmst12) +
-     power2(Pi))*power4(mst12)))/(6.*msb22)) - ((mu2 - 2*Ab*cb*mu*sb - mu2*
+     *(-(invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*power2
+     (snb)*(-(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*(-18 + lmC2 + 5*
+     lmst12) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) -
+     mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 + lmst12) + 2*lmsb12*(-
+     12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst12) +
+     power2(Pi)) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 + lmst12) - 36*lmst12 + 6
+     *lmC2*(5*lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6
+     *power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12
+     + 5*lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 + lmst12) + 4*power2(lmC2)
+     + 4*power2(lmsb12) - 2*power2(lmst12) + power2(Pi)) + msb12*mst12*(6*lmC2*
+     (-12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 + lmst12) + 12*power2(lmC2) + 18
+     *power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*
+     lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(
+     lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 +
+     lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) + 2*power2(lmst12) +
+     power2(Pi))*power4(mst12)))/(3.*msb12) + (power2(mC2)*power2(snb)*(-2*Ab*
+     cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 + power2(
+     snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*power2(
+     snt)))*(-(msb12*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb12*(-18 + lmC2 + 5*
+     lmst12) + 18*power2(lmsb12) + 12*power2(lmst12) + 5*(42 + power2(Pi)))) -
+     mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb12 + lmst12) + 2*lmsb12*(-
+     12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst12) +
+     power2(Pi)) + 2*msb12*mst14*(294 + 30*lmsb12*(-6 + lmst12) - 36*lmst12 + 6
+     *lmC2*(5*lmsb12 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6
+     *power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2*lmC2*(-12
+     + 5*lmsb12 - lmst12) + 12*lmst12 - 2*lmsb12*(12 + lmst12) + 4*power2(lmC2)
+     + 4*power2(lmsb12) - 2*power2(lmst12) + power2(Pi)) + msb12*mst12*(6*lmC2*
+     (-12 + 5*lmsb12 - lmst12) + 6*lmsb12*(-18 + lmst12) + 12*power2(lmC2) + 18
+     *power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2*lmC2*(-6 + 3*
+     lmsb12 - lmst12) + 2*lmsb12*(-12 + lmst12) + 2*power2(lmC2) + 4*power2(
+     lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 +
+     lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb12) + 2*power2(lmst12) +
+     power2(Pi))*power4(mst12)))/(6.*msb12)) + power3(DeltaInv(msb22,mst12,mC2)
+     )*((invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*(-1 +
+     power2(snb))*(-(msb22*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb22*(-18 + lmC2
+     + 5*lmst12) + 18*power2(lmsb22) + 12*power2(lmst12) + 5*(42 + power2(Pi)))
+     ) - mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb22 + lmst12) + 2*
+     lmsb22*(-12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb22) + 4*power2(
+     lmst12) + power2(Pi)) + 2*msb22*mst14*(294 + 30*lmsb22*(-6 + lmst12) - 36*
+     lmst12 + 6*lmC2*(5*lmsb22 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(
+     lmsb22) + 6*power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2
+     *lmC2*(-12 + 5*lmsb22 - lmst12) + 12*lmst12 - 2*lmsb22*(12 + lmst12) + 4*
+     power2(lmC2) + 4*power2(lmsb22) - 2*power2(lmst12) + power2(Pi)) + msb22*
+     mst12*(6*lmC2*(-12 + 5*lmsb22 - lmst12) + 6*lmsb22*(-18 + lmst12) + 12*
+     power2(lmC2) + 18*power2(lmsb22) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2
+     *lmC2*(-6 + 3*lmsb22 - lmst12) + 2*lmsb22*(-12 + lmst12) + 2*power2(lmC2)
+     + 4*power2(lmsb22) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*
+     (-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb22) + 2*power2(lmst12)
+     + power2(Pi))*power4(mst12)))/(3.*msb22) - (power2(mC2)*(-1 + power2(snb))
+     *(-2*Ab*cb*mu*sb*(-1 + power2(snt)) + power2(Ab)*(-1 + power2(cb))*(-1 +
+     power2(snt)) + mt2*power2(snt) + power2(cb)*(mu2 - mt2*power2(snt) - mu2*
+     power2(snt)))*(-(msb22*mst16*(-6*(12 + lmC2)*lmst12 + 6*lmsb22*(-18 + lmC2
+      + 5*lmst12) + 18*power2(lmsb22) + 12*power2(lmst12) + 5*(42 + power2(Pi))
+     )) - mC2*(3*mst16*(42 - 24*lmst12 - 2*lmC2*(-6 + lmsb22 + lmst12) + 2*
+     lmsb22*(-12 + 5*lmst12) - 2*power2(lmC2) + 4*power2(lmsb22) + 4*power2(
+     lmst12) + power2(Pi)) + 2*msb22*mst14*(294 + 30*lmsb22*(-6 + lmst12) - 36*
+     lmst12 + 6*lmC2*(5*lmsb22 - 3*(2 + lmst12)) + 6*power2(lmC2) + 30*power2(
+     lmsb22) + 6*power2(lmst12) + 7*power2(Pi))) - power2(mC2)*(3*mst14*(42 + 2
+     *lmC2*(-12 + 5*lmsb22 - lmst12) + 12*lmst12 - 2*lmsb22*(12 + lmst12) + 4*
+     power2(lmC2) + 4*power2(lmsb22) - 2*power2(lmst12) + power2(Pi)) + msb22*
+     mst12*(6*lmC2*(-12 + 5*lmsb22 - lmst12) + 6*lmsb22*(-18 + lmst12) + 12*
+     power2(lmC2) + 18*power2(lmsb22) + 5*(42 + power2(Pi)))) + 3*mst12*(42 + 2
+     *lmC2*(-6 + 3*lmsb22 - lmst12) + 2*lmsb22*(-12 + lmst12) + 2*power2(lmC2)
+     + 4*power2(lmsb22) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*
+     (-4 + lmst12)) - 2*(6 + lmC2)*lmst12 + 4*power2(lmsb22) + 2*power2(lmst12)
+     + power2(Pi))*power4(mst12)))/(6.*msb22)) - ((mu2 - 2*Ab*cb*mu*sb - mu2*
      power2(cb) + power2(Ab)*power2(cb))*power2(mw2)*power2(snb)*power2(snt)*
      power3(DeltaInv(mst22,mw2,msb12))*(3*mw2*(mst26*(42 + 2*lmsb12*(-12 + 5*
      lmst22 - lmw2) + 12*lmw2 - 2*lmst22*(12 + lmw2) + 4*power2(lmsb12) + 4*
@@ -2812,57 +2785,40 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      power2(lmw2) + 5*(42 + power2(Pi)))) - 3*(42 - 2*lmst22*(6 + lmw2) + 2*
      lmsb22*(-12 + 3*lmst22 + lmw2) + 4*power2(lmsb22) + 2*power2(lmst22) +
      power2(Pi))*power4(mst22)))/(6.*msb22) + power3(DeltaInv(mst22,msb12,mC2))
-     *(-(invdmst*mt2*(cb*sb*(-(cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*
-     power2(mC2)*power2(snb)*(-(msb12*mst26*(-6*(12 + lmC2)*lmst22 + 6*lmsb12*(
-     -18 + lmC2 + 5*lmst22) + 18*power2(lmsb12) + 12*power2(lmst22) + 5*(42 +
-     power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-6 + lmsb12 +
-     lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*power2(lmC2) + 4*power2(lmsb12) +
-     4*power2(lmst22) + power2(Pi)) + 2*msb12*mst24*(294 + 30*lmsb12*(-6 +
-     lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst22)) + 6*power2(lmC2)
-     + 30*power2(lmsb12) + 6*power2(lmst22) + 7*power2(Pi))) - power2(mC2)*(3*
-     mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22) + 12*lmst22 - 2*lmsb12*(12 +
-     lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(lmst22) + power2(Pi
-     )) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 - lmst22) + 6*lmsb12*(-18 +
-     lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*
-     mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*lmsb12*(-12 + lmst22) + 2*
-     power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*
-     lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*lmst22 + 4*power2(lmsb12) +
-     2*power2(lmst22) + power2(Pi))*power4(mst22)))/(3.*msb12*sb) + (power2(mC2
-     )*power2(snb)*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb -
-     power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*(-(msb12*mst26
-     *(-6*(12 + lmC2)*lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(
-     lmsb12) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 -
-     24*lmst22 - 2*lmC2*(-6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*
-     power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12
-     *mst24*(294 + 30*lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(
-     2 + lmst22)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*
-     power2(Pi))) - power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22)
-     + 12*lmst22 - 2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) -
-     2*power2(lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 -
-     lmst22) + 6*lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) +
-     5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*
-     lmsb12*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*
-     power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*
-     lmst22 + 4*power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))
-     /(6.*msb12)) + power3(DeltaInv(mst22,msb22,mC2))*((invdmst*mt2*(cb*sb*(-(
-     cb*mu2) + At*mu*sb) - Ab*xt*(-1 + power2(cb)))*power2(mC2)*(-1 + power2(
-     snb))*(-(msb22*mst26*(-6*(12 + lmC2)*lmst22 + 6*lmsb22*(-18 + lmC2 + 5*
-     lmst22) + 18*power2(lmsb22) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) -
-     mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-6 + lmsb22 + lmst22) + 2*lmsb22*(-
-     12 + 5*lmst22) - 2*power2(lmC2) + 4*power2(lmsb22) + 4*power2(lmst22) +
-     power2(Pi)) + 2*msb22*mst24*(294 + 30*lmsb22*(-6 + lmst22) - 36*lmst22 + 6
-     *lmC2*(5*lmsb22 - 3*(2 + lmst22)) + 6*power2(lmC2) + 30*power2(lmsb22) + 6
+     *((invdmst*mt2*xt*(-(cb*mu*sb) + Ab*(-1 + power2(cb)))*power2(mC2)*power2(
+     snb)*(-(msb12*mst26*(-6*(12 + lmC2)*lmst22 + 6*lmsb12*(-18 + lmC2 + 5*
+     lmst22) + 18*power2(lmsb12) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) -
+     mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-6 + lmsb12 + lmst22) + 2*lmsb12*(-
+     12 + 5*lmst22) - 2*power2(lmC2) + 4*power2(lmsb12) + 4*power2(lmst22) +
+     power2(Pi)) + 2*msb12*mst24*(294 + 30*lmsb12*(-6 + lmst22) - 36*lmst22 + 6
+     *lmC2*(5*lmsb12 - 3*(2 + lmst22)) + 6*power2(lmC2) + 30*power2(lmsb12) + 6
      *power2(lmst22) + 7*power2(Pi))) - power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12
-     + 5*lmsb22 - lmst22) + 12*lmst22 - 2*lmsb22*(12 + lmst22) + 4*power2(lmC2)
-     + 4*power2(lmsb22) - 2*power2(lmst22) + power2(Pi)) + msb22*mst22*(6*lmC2*
-     (-12 + 5*lmsb22 - lmst22) + 6*lmsb22*(-18 + lmst22) + 12*power2(lmC2) + 18
-     *power2(lmsb22) + 5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*
-     lmsb22 - lmst22) + 2*lmsb22*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(
-     lmsb22) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*(-4 +
-     lmst22)) - 2*(6 + lmC2)*lmst22 + 4*power2(lmsb22) + 2*power2(lmst22) +
-     power2(Pi))*power4(mst22)))/(3.*msb22*sb) - (power2(mC2)*(-1 + power2(snb)
-     )*(mt2*(-1 + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*
-     (-1 + power2(cb)) + mu2*power2(cb))*power2(snt))*(-(msb22*mst26*(-6*(12 +
+     + 5*lmsb12 - lmst22) + 12*lmst22 - 2*lmsb12*(12 + lmst22) + 4*power2(lmC2)
+     + 4*power2(lmsb12) - 2*power2(lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*
+     (-12 + 5*lmsb12 - lmst22) + 6*lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18
+     *power2(lmsb12) + 5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*
+     lmsb12 - lmst22) + 2*lmsb12*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(
+     lmsb12) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 +
+     lmst22)) - 2*(6 + lmC2)*lmst22 + 4*power2(lmsb12) + 2*power2(lmst22) +
+     power2(Pi))*power4(mst22)))/(3.*msb12) + (power2(mC2)*power2(snb)*(mt2*(-1
+      + power2(cb))*(-1 + power2(snt)) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 +
+     power2(cb)) + mu2*power2(cb))*power2(snt))*(-(msb12*mst26*(-6*(12 + lmC2)*
+     lmst22 + 6*lmsb12*(-18 + lmC2 + 5*lmst22) + 18*power2(lmsb12) + 12*power2(
+     lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-
+     6 + lmsb12 + lmst22) + 2*lmsb12*(-12 + 5*lmst22) - 2*power2(lmC2) + 4*
+     power2(lmsb12) + 4*power2(lmst22) + power2(Pi)) + 2*msb12*mst24*(294 + 30*
+     lmsb12*(-6 + lmst22) - 36*lmst22 + 6*lmC2*(5*lmsb12 - 3*(2 + lmst22)) + 6*
+     power2(lmC2) + 30*power2(lmsb12) + 6*power2(lmst22) + 7*power2(Pi))) -
+     power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12 + 5*lmsb12 - lmst22) + 12*lmst22 -
+     2*lmsb12*(12 + lmst22) + 4*power2(lmC2) + 4*power2(lmsb12) - 2*power2(
+     lmst22) + power2(Pi)) + msb12*mst22*(6*lmC2*(-12 + 5*lmsb12 - lmst22) + 6*
+     lmsb12*(-18 + lmst22) + 12*power2(lmC2) + 18*power2(lmsb12) + 5*(42 +
+     power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb12 - lmst22) + 2*lmsb12*(
+     -12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb12) + power2(Pi))*power3(mC2
+     ) + 3*(42 + 2*lmsb12*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*lmst22 + 4*
+     power2(lmsb12) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))/(6.*msb12)
+     ) + power3(DeltaInv(mst22,msb22,mC2))*(-(invdmst*mt2*xt*(-(cb*mu*sb) + Ab*
+     (-1 + power2(cb)))*power2(mC2)*(-1 + power2(snb))*(-(msb22*mst26*(-6*(12 +
      lmC2)*lmst22 + 6*lmsb22*(-18 + lmC2 + 5*lmst22) + 18*power2(lmsb22) + 12*
      power2(lmst22) + 5*(42 + power2(Pi)))) - mC2*(3*mst26*(42 - 24*lmst22 - 2*
      lmC2*(-6 + lmsb22 + lmst22) + 2*lmsb22*(-12 + 5*lmst22) - 2*power2(lmC2) +
@@ -2876,99 +2832,115 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
      power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*lmsb22 - lmst22) + 2*lmsb22*(
      -12 + lmst22) + 2*power2(lmC2) + 4*power2(lmsb22) + power2(Pi))*power3(mC2
      ) + 3*(42 + 2*lmsb22*(lmC2 + 3*(-4 + lmst22)) - 2*(6 + lmC2)*lmst22 + 4*
-     power2(lmsb22) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))/(6.*msb22)
-     ) + (power2(mu2)*power2(snb)*power3(DeltaInv(msb12,mt2,mu2))*(mu2*(msb14*
-     mu2*(mu2*(42 + 6*(-15 + 4*lmt2)*lmu2 + 6*lmsb12*(9 - 4*lmt2 + lmu2) - 9*
-     power2(lmsb12) + 15*power2(lmu2) + power2(Pi)) + 5*mt2*(210 + 6*lmsb12*(-3
-      + 3*lmt2 - 2*lmu2) - 36*lmu2 + 6*lmt2*(-21 + 4*lmu2) + 3*power2(lmsb12) +
-     21*power2(lmt2) + 6*power2(lmu2) + 5*power2(Pi))) + msb16*(3*mu2*(126 - 84
-     *lmt2 + 10*lmsb12*(-3 + 2*lmt2 - lmu2) + 6*lmu2 + 8*lmt2*lmu2 + 5*power2(
-     lmsb12) + 14*power2(lmt2) - power2(lmu2) + 3*power2(Pi)) + mt2*(672 - 378*
-     lmt2 + 30*lmsb12*(-6 + 3*lmt2 - lmu2) - 18*lmu2 + 36*lmt2*lmu2 + 30*power2
-     (lmsb12) + 63*power2(lmt2) + 3*power2(lmu2) + 16*power2(Pi)))) + msb12*(3*
-     mt2*(-2*(15 + lmsb12)*lmu2 + 2*lmt2*(-21 + lmsb12 + 6*lmu2) + 7*power2(
-     lmt2) + 5*power2(lmu2) + 2*(42 + power2(Pi))) - mu2*(-6*(9 + lmsb12)*lmu2
-     + 6*lmt2*(-15 + lmsb12 + 4*lmu2) + 15*power2(lmt2) + 9*power2(lmu2) + 4*(
-     42 + power2(Pi))))*power3(mu2) + (mt2*(42 + 6*lmsb12*(-3 + lmt2) - 18*lmt2
-      + 3*power2(lmsb12) + 3*power2(lmt2) + power2(Pi)) - mu2*(210 + 24*lmt2*(-
-     6 + lmu2) - 18*lmu2 + 6*lmsb12*(4*lmt2 - 3*(1 + lmu2)) + 3*power2(lmsb12)
-     + 24*power2(lmt2) + 3*power2(lmu2) + 5*power2(Pi)))*power4(msb12) - (42 +
-     6*lmsb12*(-3 + lmt2) - 18*lmt2 + 3*power2(lmsb12) + 3*power2(lmt2) +
-     power2(Pi))*power5(msb12)))/(3.*mt2) + (power2(mu2)*(-1 + power2(snb))*
-     power3(DeltaInv(mt2,mu2,msb22))*(mu2*(-(msb24*mu2*(mu2*(42 + 6*(-15 + 4*
-     lmt2)*lmu2 + 6*lmsb22*(9 - 4*lmt2 + lmu2) - 9*power2(lmsb22) + 15*power2(
-     lmu2) + power2(Pi)) + 5*mt2*(210 + 6*lmsb22*(-3 + 3*lmt2 - 2*lmu2) - 36*
-     lmu2 + 6*lmt2*(-21 + 4*lmu2) + 3*power2(lmsb22) + 21*power2(lmt2) + 6*
-     power2(lmu2) + 5*power2(Pi)))) - msb26*(3*mu2*(126 - 84*lmt2 + 10*lmsb22*(
-     -3 + 2*lmt2 - lmu2) + 6*lmu2 + 8*lmt2*lmu2 + 5*power2(lmsb22) + 14*power2(
-     lmt2) - power2(lmu2) + 3*power2(Pi)) + mt2*(672 - 378*lmt2 + 30*lmsb22*(-6
-      + 3*lmt2 - lmu2) - 18*lmu2 + 36*lmt2*lmu2 + 30*power2(lmsb22) + 63*power2
-     (lmt2) + 3*power2(lmu2) + 16*power2(Pi)))) + msb22*(-3*mt2*(-2*(15 +
-     lmsb22)*lmu2 + 2*lmt2*(-21 + lmsb22 + 6*lmu2) + 7*power2(lmt2) + 5*power2(
-     lmu2) + 2*(42 + power2(Pi))) + mu2*(-6*(9 + lmsb22)*lmu2 + 6*lmt2*(-15 +
-     lmsb22 + 4*lmu2) + 15*power2(lmt2) + 9*power2(lmu2) + 4*(42 + power2(Pi)))
-     )*power3(mu2) + (-(mt2*(42 + 6*lmsb22*(-3 + lmt2) - 18*lmt2 + 3*power2(
-     lmsb22) + 3*power2(lmt2) + power2(Pi))) + mu2*(210 + 24*lmt2*(-6 + lmu2) -
-     18*lmu2 + 6*lmsb22*(4*lmt2 - 3*(1 + lmu2)) + 3*power2(lmsb22) + 24*power2(
-     lmt2) + 3*power2(lmu2) + 5*power2(Pi)))*power4(msb22) + (42 + 6*lmsb22*(-3
-      + lmt2) - 18*lmt2 + 3*power2(lmsb22) + 3*power2(lmt2) + power2(Pi))*
-     power5(msb22)))/(3.*mt2) + (36 - 72*lmt2 - 108*lmu2 - 35*invdct*mC2 - 60*
-     invdct*lmC2*mC2 + 84*invdct*lmt2*mC2 - (9*mA2)/msb12 - (9*mH2)/msb12 - (9*
-     mA2)/msb22 - (18*mC2)/msb22 + (18*lmC2*mC2)/msb22 - (9*mH2)/msb22 - (18*
-     msb12)/msb22 + (18*lmsb12*msb12)/msb22 - (18*msb22)/msb12 + (18*lmsb22*
-     msb22)/msb12 - (18*mC2)/mst12 + (18*lmC2*mC2)/mst12 - (18*msb22)/mst12 + (
-     18*lmsb22*msb22)/mst12 - (18*mst12)/msb22 + (18*lmst12*mst12)/msb22 - (35*
-     mC2)/mt2 + (12*lmC2*mC2)/mt2 + (12*lmt2*mC2)/mt2 + (18*mt2)/msb22 + (18*
-     lmsb22*mt2)/msb22 - (36*lmt2*mt2)/msb22 - (18*mt2)/mst22 + (18*lmsb22*mt2)
-     /mst22 - (18*lmC2*mC2*mt2)/(msb22*mst22) + (18*lmsb22*mC2*mt2)/(msb22*
-     mst22) - (36*lmsb12*msb12)/(msb12 - mu2) + (36*lmu2*msb12)/(msb12 - mu2) -
-     (36*lmsb22*msb22)/(msb22 - mu2) + (36*lmu2*msb22)/(msb22 - mu2) - (36*
-     lmst12*mst12)/(mst12 - mu2) + (36*lmu2*mst12)/(mst12 - mu2) + (18*mu2)/
-     msb12 + (18*lmsb12*mu2)/msb12 - (36*lmu2*mu2)/msb12 + (36*mu2)/msb22 + (18
-     *lmsb12*mu2)/msb22 + (18*lmsb22*mu2)/msb22 - (36*lmt2*mu2)/msb22 - (36*
-     lmu2*mu2)/msb22 - (9*lmh2*mh2*mu2)/(msb12*msb22) + (9*lmsb12*mh2*mu2)/(
-     msb12*msb22) + (18*mu2)/mst12 + (18*lmsb22*mu2)/mst12 - (36*lmu2*mu2)/
-     mst12 - (36*mu2)/mt2 + (18*lmsb22*mu2*mw2)/(msb22*mst12) - (18*lmw2*mu2*
-     mw2)/(msb22*mst12) + (9*lmsb12*mu2*mz2)/(msb12*msb22) - (9*lmz2*mu2*mz2)/(
-     msb12*msb22) - (18*Ab*ca*lmh2*mh2*mu*sa)/(msb12*msb22) + (18*Ab*ca*lmsb12*
-     mh2*mu*sa)/(msb12*msb22) - (18*Ab*ca*lmsb12*mH2*mu*sa)/(msb12*msb22) + (18
-     *Ab*cb*lmsb12*mA2*mu*sb)/(msb12*msb22) - (36*Ab*cb*lmC2*mC2*mu*sb)/(msb22*
-     mst12) + (36*Ab*cb*lmsb22*mC2*mu*sb)/(msb22*mst12) - (36*Ab*cb*lmsb22*mu*
-     mw2*sb)/(msb22*mst12) + (36*Ab*cb*lmw2*mu*mw2*sb)/(msb22*mst12) - (18*Ab*
-     cb*lmsb12*mu*mz2*sb)/(msb12*msb22) + (18*Ab*cb*lmz2*mu*mz2*sb)/(msb12*
-     msb22) - (18*power2(Ab))/msb12 + (18*lmsb12*power2(Ab))/msb12 - (36*power2
-     (Ab))/msb22 + (18*lmsb12*power2(Ab))/msb22 + (18*lmsb22*power2(Ab))/msb22
-     + (9*lmsb12*mA2*power2(Ab))/(msb12*msb22) + (9*lmsb12*mH2*power2(Ab))/(
-     msb12*msb22) - (18*power2(Ab))/mst12 + (18*lmsb22*power2(Ab))/mst12 - (18*
-     lmC2*mC2*power2(Ab))/(msb22*mst12) + (18*lmsb22*mC2*power2(Ab))/(msb22*
-     mst12) - 54*lmz2*power2(cb) + 35*invdct*mC2*power2(cb) + 60*invdct*lmC2*
-     mC2*power2(cb) - 84*invdct*lmt2*mC2*power2(cb) + (9*mA2*power2(cb))/msb12
-     + (9*mA2*power2(cb))/msb22 + (18*mC2*power2(cb))/msb22 - (18*lmC2*mC2*
-     power2(cb))/msb22 + (18*mC2*power2(cb))/mst12 - (18*lmC2*mC2*power2(cb))/
-     mst12 + (35*mC2*power2(cb))/mt2 - (12*lmC2*mC2*power2(cb))/mt2 - (12*lmt2*
-     mC2*power2(cb))/mt2 + (18*mt2*power2(cb))/msb22 - (18*lmsb22*mt2*power2(cb
-     ))/msb22 + (18*mt2*power2(cb))/mst22 - (18*lmsb22*mt2*power2(cb))/mst22 +
-     (18*lmC2*mC2*mt2*power2(cb))/(msb22*mst22) - (18*lmsb22*mC2*mt2*power2(cb)
-     )/(msb22*mst22) + (9*lmsb12*mA2*mu2*power2(cb))/(msb12*msb22) - (18*lmC2*
-     mC2*mu2*power2(cb))/(msb22*mst12) + (18*lmsb22*mC2*mu2*power2(cb))/(msb22*
-     mst12) + 35*invdtw*mw2*power2(cb) - 84*invdtw*lmt2*mw2*power2(cb) + 60*
-     invdtw*lmw2*mw2*power2(cb) - (18*mw2*power2(cb))/msb22 + (18*lmw2*mw2*
-     power2(cb))/msb22 - (18*mw2*power2(cb))/mst12 + (18*lmw2*mw2*power2(cb))/
-     mst12 - (35*mw2*power2(cb))/mt2 + (12*lmt2*mw2*power2(cb))/mt2 + (12*lmw2*
-     mw2*power2(cb))/mt2 - (18*lmsb22*mu2*mw2*power2(cb))/(msb22*mst12) + (18*
-     lmw2*mu2*mw2*power2(cb))/(msb22*mst12) - (9*mz2*power2(cb))/msb12 + (9*
-     lmz2*mz2*power2(cb))/msb12 - (9*mz2*power2(cb))/msb22 + (9*lmz2*mz2*power2
-     (cb))/msb22 - (9*lmsb12*mu2*mz2*power2(cb))/(msb12*msb22) + (9*lmz2*mu2*
-     mz2*power2(cb))/(msb12*msb22) - (9*lmsb12*mA2*power2(Ab)*power2(cb))/(
-     msb12*msb22) + (18*lmC2*mC2*power2(Ab)*power2(cb))/(msb22*mst12) - (18*
-     lmsb22*mC2*power2(Ab)*power2(cb))/(msb22*mst12) + (18*lmsb22*mw2*power2(Ab
-     )*power2(cb))/(msb22*mst12) - (18*lmw2*mw2*power2(Ab)*power2(cb))/(msb22*
-     mst12) + (9*lmsb12*mz2*power2(Ab)*power2(cb))/(msb12*msb22) - (9*lmz2*mz2*
-     power2(Ab)*power2(cb))/(msb12*msb22) + (9*lmA2*(-2*Ab*cb*mA2*mu*sb + 6*
-     msb12*msb22*(-1 + power2(cb)) + mA2*power2(Ab)*(-1 + power2(cb)) + mA2*(
-     msb12 + msb22 - msb12*power2(cb) - msb22*power2(cb) - mu2*power2(cb))))/(
-     msb12*msb22) - 35*power2(invdct)*power2(mC2) + 12*lmC2*power2(invdct)*
-     power2(mC2) + 12*lmt2*power2(invdct)*power2(mC2) + 35*power2(cb)*power2(
+     power2(lmsb22) + 2*power2(lmst22) + power2(Pi))*power4(mst22)))/(3.*msb22)
+     - (power2(mC2)*(-1 + power2(snb))*(mt2*(-1 + power2(cb))*(-1 + power2(snt)
+     ) + (2*Ab*cb*mu*sb - power2(Ab)*(-1 + power2(cb)) + mu2*power2(cb))*power2
+     (snt))*(-(msb22*mst26*(-6*(12 + lmC2)*lmst22 + 6*lmsb22*(-18 + lmC2 + 5*
+     lmst22) + 18*power2(lmsb22) + 12*power2(lmst22) + 5*(42 + power2(Pi)))) -
+     mC2*(3*mst26*(42 - 24*lmst22 - 2*lmC2*(-6 + lmsb22 + lmst22) + 2*lmsb22*(-
+     12 + 5*lmst22) - 2*power2(lmC2) + 4*power2(lmsb22) + 4*power2(lmst22) +
+     power2(Pi)) + 2*msb22*mst24*(294 + 30*lmsb22*(-6 + lmst22) - 36*lmst22 + 6
+     *lmC2*(5*lmsb22 - 3*(2 + lmst22)) + 6*power2(lmC2) + 30*power2(lmsb22) + 6
+     *power2(lmst22) + 7*power2(Pi))) - power2(mC2)*(3*mst24*(42 + 2*lmC2*(-12
+     + 5*lmsb22 - lmst22) + 12*lmst22 - 2*lmsb22*(12 + lmst22) + 4*power2(lmC2)
+     + 4*power2(lmsb22) - 2*power2(lmst22) + power2(Pi)) + msb22*mst22*(6*lmC2*
+     (-12 + 5*lmsb22 - lmst22) + 6*lmsb22*(-18 + lmst22) + 12*power2(lmC2) + 18
+     *power2(lmsb22) + 5*(42 + power2(Pi)))) + 3*mst22*(42 + 2*lmC2*(-6 + 3*
+     lmsb22 - lmst22) + 2*lmsb22*(-12 + lmst22) + 2*power2(lmC2) + 4*power2(
+     lmsb22) + power2(Pi))*power3(mC2) + 3*(42 + 2*lmsb22*(lmC2 + 3*(-4 +
+     lmst22)) - 2*(6 + lmC2)*lmst22 + 4*power2(lmsb22) + 2*power2(lmst22) +
+     power2(Pi))*power4(mst22)))/(6.*msb22)) + (power2(mu2)*power2(snb)*power3(
+     DeltaInv(msb12,mt2,mu2))*(mu2*(msb14*mu2*(mu2*(42 + 6*(-15 + 4*lmt2)*lmu2
+     + 6*lmsb12*(9 - 4*lmt2 + lmu2) - 9*power2(lmsb12) + 15*power2(lmu2) +
+     power2(Pi)) + 5*mt2*(210 + 6*lmsb12*(-3 + 3*lmt2 - 2*lmu2) - 36*lmu2 + 6*
+     lmt2*(-21 + 4*lmu2) + 3*power2(lmsb12) + 21*power2(lmt2) + 6*power2(lmu2)
+     + 5*power2(Pi))) + msb16*(3*mu2*(126 - 84*lmt2 + 10*lmsb12*(-3 + 2*lmt2 -
+     lmu2) + 6*lmu2 + 8*lmt2*lmu2 + 5*power2(lmsb12) + 14*power2(lmt2) - power2
+     (lmu2) + 3*power2(Pi)) + mt2*(672 - 378*lmt2 + 30*lmsb12*(-6 + 3*lmt2 -
+     lmu2) - 18*lmu2 + 36*lmt2*lmu2 + 30*power2(lmsb12) + 63*power2(lmt2) + 3*
+     power2(lmu2) + 16*power2(Pi)))) + msb12*(3*mt2*(-2*(15 + lmsb12)*lmu2 + 2*
+     lmt2*(-21 + lmsb12 + 6*lmu2) + 7*power2(lmt2) + 5*power2(lmu2) + 2*(42 +
+     power2(Pi))) - mu2*(-6*(9 + lmsb12)*lmu2 + 6*lmt2*(-15 + lmsb12 + 4*lmu2)
+     + 15*power2(lmt2) + 9*power2(lmu2) + 4*(42 + power2(Pi))))*power3(mu2) + (
+     mt2*(42 + 6*lmsb12*(-3 + lmt2) - 18*lmt2 + 3*power2(lmsb12) + 3*power2(
+     lmt2) + power2(Pi)) - mu2*(210 + 24*lmt2*(-6 + lmu2) - 18*lmu2 + 6*lmsb12*
+     (4*lmt2 - 3*(1 + lmu2)) + 3*power2(lmsb12) + 24*power2(lmt2) + 3*power2(
+     lmu2) + 5*power2(Pi)))*power4(msb12) - (42 + 6*lmsb12*(-3 + lmt2) - 18*
+     lmt2 + 3*power2(lmsb12) + 3*power2(lmt2) + power2(Pi))*power5(msb12)))/(3.
+     *mt2) + (power2(mu2)*(-1 + power2(snb))*power3(DeltaInv(mt2,mu2,msb22))*(
+     mu2*(-(msb24*mu2*(mu2*(42 + 6*(-15 + 4*lmt2)*lmu2 + 6*lmsb22*(9 - 4*lmt2 +
+     lmu2) - 9*power2(lmsb22) + 15*power2(lmu2) + power2(Pi)) + 5*mt2*(210 + 6*
+     lmsb22*(-3 + 3*lmt2 - 2*lmu2) - 36*lmu2 + 6*lmt2*(-21 + 4*lmu2) + 3*power2
+     (lmsb22) + 21*power2(lmt2) + 6*power2(lmu2) + 5*power2(Pi)))) - msb26*(3*
+     mu2*(126 - 84*lmt2 + 10*lmsb22*(-3 + 2*lmt2 - lmu2) + 6*lmu2 + 8*lmt2*lmu2
+      + 5*power2(lmsb22) + 14*power2(lmt2) - power2(lmu2) + 3*power2(Pi)) + mt2
+     *(672 - 378*lmt2 + 30*lmsb22*(-6 + 3*lmt2 - lmu2) - 18*lmu2 + 36*lmt2*lmu2
+      + 30*power2(lmsb22) + 63*power2(lmt2) + 3*power2(lmu2) + 16*power2(Pi))))
+     + msb22*(-3*mt2*(-2*(15 + lmsb22)*lmu2 + 2*lmt2*(-21 + lmsb22 + 6*lmu2) +
+     7*power2(lmt2) + 5*power2(lmu2) + 2*(42 + power2(Pi))) + mu2*(-6*(9 +
+     lmsb22)*lmu2 + 6*lmt2*(-15 + lmsb22 + 4*lmu2) + 15*power2(lmt2) + 9*power2
+     (lmu2) + 4*(42 + power2(Pi))))*power3(mu2) + (-(mt2*(42 + 6*lmsb22*(-3 +
+     lmt2) - 18*lmt2 + 3*power2(lmsb22) + 3*power2(lmt2) + power2(Pi))) + mu2*(
+     210 + 24*lmt2*(-6 + lmu2) - 18*lmu2 + 6*lmsb22*(4*lmt2 - 3*(1 + lmu2)) + 3
+     *power2(lmsb22) + 24*power2(lmt2) + 3*power2(lmu2) + 5*power2(Pi)))*power4
+     (msb22) + (42 + 6*lmsb22*(-3 + lmt2) - 18*lmt2 + 3*power2(lmsb22) + 3*
+     power2(lmt2) + power2(Pi))*power5(msb22)))/(3.*mt2) + (36 - 72*lmt2 - 108*
+     lmu2 - 35*invdct*mC2 - 60*invdct*lmC2*mC2 + 84*invdct*lmt2*mC2 - (9*mA2)/
+     msb12 - (9*mH2)/msb12 - (9*mA2)/msb22 - (18*mC2)/msb22 + (18*lmC2*mC2)/
+     msb22 - (9*mH2)/msb22 - (18*msb12)/msb22 + (18*lmsb12*msb12)/msb22 - (18*
+     msb22)/msb12 + (18*lmsb22*msb22)/msb12 - (18*mC2)/mst12 + (18*lmC2*mC2)/
+     mst12 - (18*msb22)/mst12 + (18*lmsb22*msb22)/mst12 - (18*mst12)/msb22 + (
+     18*lmst12*mst12)/msb22 - (35*mC2)/mt2 + (12*lmC2*mC2)/mt2 + (12*lmt2*mC2)/
+     mt2 + (18*mt2)/msb22 + (18*lmsb22*mt2)/msb22 - (36*lmt2*mt2)/msb22 - (18*
+     mt2)/mst22 + (18*lmsb22*mt2)/mst22 - (18*lmC2*mC2*mt2)/(msb22*mst22) + (18
+     *lmsb22*mC2*mt2)/(msb22*mst22) - (36*lmsb12*msb12)/(msb12 - mu2) + (36*
+     lmu2*msb12)/(msb12 - mu2) - (36*lmsb22*msb22)/(msb22 - mu2) + (36*lmu2*
+     msb22)/(msb22 - mu2) - (36*lmst12*mst12)/(mst12 - mu2) + (36*lmu2*mst12)/(
+     mst12 - mu2) + (18*mu2)/msb12 + (18*lmsb12*mu2)/msb12 - (36*lmu2*mu2)/
+     msb12 + (36*mu2)/msb22 + (18*lmsb12*mu2)/msb22 + (18*lmsb22*mu2)/msb22 - (
+     36*lmt2*mu2)/msb22 - (36*lmu2*mu2)/msb22 - (9*lmh2*mh2*mu2)/(msb12*msb22)
+     + (9*lmsb12*mh2*mu2)/(msb12*msb22) + (18*mu2)/mst12 + (18*lmsb22*mu2)/
+     mst12 - (36*lmu2*mu2)/mst12 - (36*mu2)/mt2 + (18*lmsb22*mu2*mw2)/(msb22*
+     mst12) - (18*lmw2*mu2*mw2)/(msb22*mst12) + (9*lmsb12*mu2*mz2)/(msb12*msb22
+     ) - (9*lmz2*mu2*mz2)/(msb12*msb22) - (18*Ab*ca*lmh2*mh2*mu*sa)/(msb12*
+     msb22) + (18*Ab*ca*lmsb12*mh2*mu*sa)/(msb12*msb22) - (18*Ab*ca*lmsb12*mH2*
+     mu*sa)/(msb12*msb22) + (18*Ab*cb*lmsb12*mA2*mu*sb)/(msb12*msb22) - (36*Ab*
+     cb*lmC2*mC2*mu*sb)/(msb22*mst12) + (36*Ab*cb*lmsb22*mC2*mu*sb)/(msb22*
+     mst12) - (36*Ab*cb*lmsb22*mu*mw2*sb)/(msb22*mst12) + (36*Ab*cb*lmw2*mu*mw2
+     *sb)/(msb22*mst12) - (18*Ab*cb*lmsb12*mu*mz2*sb)/(msb12*msb22) + (18*Ab*cb
+     *lmz2*mu*mz2*sb)/(msb12*msb22) - (18*power2(Ab))/msb12 + (18*lmsb12*power2
+     (Ab))/msb12 - (36*power2(Ab))/msb22 + (18*lmsb12*power2(Ab))/msb22 + (18*
+     lmsb22*power2(Ab))/msb22 + (9*lmsb12*mA2*power2(Ab))/(msb12*msb22) + (9*
+     lmsb12*mH2*power2(Ab))/(msb12*msb22) - (18*power2(Ab))/mst12 + (18*lmsb22*
+     power2(Ab))/mst12 - (18*lmC2*mC2*power2(Ab))/(msb22*mst12) + (18*lmsb22*
+     mC2*power2(Ab))/(msb22*mst12) - 54*lmz2*power2(cb) + 35*invdct*mC2*power2(
+     cb) + 60*invdct*lmC2*mC2*power2(cb) - 84*invdct*lmt2*mC2*power2(cb) + (9*
+     mA2*power2(cb))/msb12 + (9*mA2*power2(cb))/msb22 + (18*mC2*power2(cb))/
+     msb22 - (18*lmC2*mC2*power2(cb))/msb22 + (18*mC2*power2(cb))/mst12 - (18*
+     lmC2*mC2*power2(cb))/mst12 + (35*mC2*power2(cb))/mt2 - (12*lmC2*mC2*power2
+     (cb))/mt2 - (12*lmt2*mC2*power2(cb))/mt2 + (18*mt2*power2(cb))/msb22 - (18
+     *lmsb22*mt2*power2(cb))/msb22 + (18*mt2*power2(cb))/mst22 - (18*lmsb22*mt2
+     *power2(cb))/mst22 + (18*lmC2*mC2*mt2*power2(cb))/(msb22*mst22) - (18*
+     lmsb22*mC2*mt2*power2(cb))/(msb22*mst22) + (9*lmsb12*mA2*mu2*power2(cb))/(
+     msb12*msb22) - (18*lmC2*mC2*mu2*power2(cb))/(msb22*mst12) + (18*lmsb22*mC2
+     *mu2*power2(cb))/(msb22*mst12) + 35*invdtw*mw2*power2(cb) - 84*invdtw*lmt2
+     *mw2*power2(cb) + 60*invdtw*lmw2*mw2*power2(cb) - (18*mw2*power2(cb))/
+     msb22 + (18*lmw2*mw2*power2(cb))/msb22 - (18*mw2*power2(cb))/mst12 + (18*
+     lmw2*mw2*power2(cb))/mst12 - (35*mw2*power2(cb))/mt2 + (12*lmt2*mw2*power2
+     (cb))/mt2 + (12*lmw2*mw2*power2(cb))/mt2 - (18*lmsb22*mu2*mw2*power2(cb))/
+     (msb22*mst12) + (18*lmw2*mu2*mw2*power2(cb))/(msb22*mst12) - (9*mz2*power2
+     (cb))/msb12 + (9*lmz2*mz2*power2(cb))/msb12 - (9*mz2*power2(cb))/msb22 + (
+     9*lmz2*mz2*power2(cb))/msb22 - (9*lmsb12*mu2*mz2*power2(cb))/(msb12*msb22)
+     + (9*lmz2*mu2*mz2*power2(cb))/(msb12*msb22) - (9*lmsb12*mA2*power2(Ab)*
+     power2(cb))/(msb12*msb22) + (18*lmC2*mC2*power2(Ab)*power2(cb))/(msb22*
+     mst12) - (18*lmsb22*mC2*power2(Ab)*power2(cb))/(msb22*mst12) + (18*lmsb22*
+     mw2*power2(Ab)*power2(cb))/(msb22*mst12) - (18*lmw2*mw2*power2(Ab)*power2(
+     cb))/(msb22*mst12) + (9*lmsb12*mz2*power2(Ab)*power2(cb))/(msb12*msb22) -
+     (9*lmz2*mz2*power2(Ab)*power2(cb))/(msb12*msb22) + (9*lmA2*(-2*Ab*cb*mA2*
+     mu*sb + 6*msb12*msb22*(-1 + power2(cb)) + mA2*power2(Ab)*(-1 + power2(cb))
+     + mA2*(msb12 + msb22 - msb12*power2(cb) - msb22*power2(cb) - mu2*power2(cb
+     ))))/(msb12*msb22) - 35*power2(invdct)*power2(mC2) + 12*lmC2*power2(invdct
+     )*power2(mC2) + 12*lmt2*power2(invdct)*power2(mC2) + 35*power2(cb)*power2(
      invdct)*power2(mC2) - 12*lmC2*power2(cb)*power2(invdct)*power2(mC2) - 12*
      lmt2*power2(cb)*power2(invdct)*power2(mC2) - (36*lmt2*power2(mu2))/(msb22*
      mt2) + (36*lmu2*power2(mu2))/(msb22*mt2) - 35*power2(cb)*power2(invdtw)*

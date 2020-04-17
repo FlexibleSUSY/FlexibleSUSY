@@ -66,15 +66,13 @@ mst2 /: mst2^n_ := mst22^(n/2) /; EvenQ[n];
 msb1 /: msb1^n_ := msb12^(n/2) /; EvenQ[n];
 msb2 /: msb2^n_ := msb22^(n/2) /; EvenQ[n];
 
-simpA = {
-    At -> xt + MUE CB/SB,
-    Ab -> xb + MUE SB/CB
-};
+simpAt = { At -> xt + MUE CB/SB };
+simpAb = { Ab -> xb + MUE SB/CB };
 
 a2l     = Get[FileNameJoin[{"meta", "MSSM", "das2.m"}]];
-a2lsqcd = Coefficient[a2l, g3^4] /. simpA;
-a2latas = Coefficient[a2l, g3^2 yt^2];
-a2labas = Coefficient[a2l, g3^2 yb^2];
+a2lsqcd = Coefficient[a2l, g3^4] /. simpAt /. simpAb;
+a2latas = Coefficient[a2l, g3^2 yt^2] /. simpAb;
+a2labas = Coefficient[a2l, g3^2 yb^2] /. simpAt;
 
 fpart[m1_, m2_, m3_, Q_]      := Fin3[m1^2, m2^2, m3^2, Q^2];
 delta3[m1_, m2_, m3_]         := Delta[m1^2, m2^2, m3^2, -1]; 
@@ -134,9 +132,7 @@ Simp[expr_] :=
         Power[x_,-3]          :> 1/Symbol["power3"][x],
         Power[x_,-4]          :> 1/Symbol["power4"][x],
         Power[x_,-5]          :> 1/Symbol["power5"][x],
-        Power[x_,-6]          :> 1/Symbol["power6"][x],
-        cb*mu - At*sb         -> -xt,
-        -(cb*mu) + At*sb      -> xt
+        Power[x_,-6]          :> 1/Symbol["power6"][x]
     };
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
@@ -295,11 +291,6 @@ namespace {
       }
 
       return std::abs((a - b)/a) < prec;
-   }
-
-   Real Log(Real x) noexcept
-   {
-      return std::log(x);
    }
 
    Real LambdaSquared(Real x, Real y) noexcept
@@ -521,10 +512,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real mt        = pars.mt;
    const Real mt2       = power2(pars.mt);
    const Real mb        = pars.mb;
-   const Real mg        = shift_mg(pars.mg, pars.mst1, pars.mst2);
-   const Real mg2       = power2(mg);
-   const Real mg4       = power2(mg2);
-   const Real mg6       = mg2*mg4;
    const Real mst12     = power2(pars.mst1);
    const Real mst14     = power2(mst12);
    const Real mst16     = mst12*mst14;
@@ -537,12 +524,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real msb22     = power2(pars.msb2);
    const Real msb24     = power2(msb22);
    const Real msb26     = msb22*msb24;
-   const Real msd12     = power2(pars.msd1);
-   const Real msd14     = power2(msd12);
-   const Real msd16     = msd12*msd14;
-   const Real msd22     = power2(pars.msd2);
-   const Real msd24     = power2(msd22);
-   const Real msd26     = msd22*msd24;
    const Real mw2       = power2(pars.mw);
    const Real mz2       = power2(pars.mz);
    const Real mh2       = power2(pars.mh);
@@ -561,7 +542,6 @@ Real delta_alpha_s_2loop_at_as(const Parameters& pars)
    const Real sa        = std::sin(alpha);
    const Real ca        = std::cos(alpha);
    const Real At        = xt + mu*cb/sb;
-   const Real Ab        = xb + mu*sb/cb;
    const Real invdmst   = 1/(mst12 - mst22);
    const Real invdct    = 1/(mC2 - mt2);
    const Real invdtw    = 1/(mt2 - mw2);
@@ -609,10 +589,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real mt        = pars.mt;
    const Real mt2       = power2(pars.mt);
    const Real mb        = pars.mb;
-   const Real mg        = shift_mg(pars.mg, pars.mst1, pars.mst2);
-   const Real mg2       = power2(mg);
-   const Real mg4       = power2(mg2);
-   const Real mg6       = mg2*mg4;
    const Real mst12     = power2(pars.mst1);
    const Real mst14     = power2(mst12);
    const Real mst16     = mst12*mst14;
@@ -625,12 +601,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real msb22     = power2(pars.msb2);
    const Real msb24     = power2(msb22);
    const Real msb26     = msb22*msb24;
-   const Real msd12     = power2(pars.msd1);
-   const Real msd14     = power2(msd12);
-   const Real msd16     = msd12*msd14;
-   const Real msd22     = power2(pars.msd2);
-   const Real msd24     = power2(msd22);
-   const Real msd26     = msd22*msd24;
    const Real mw2       = power2(pars.mw);
    const Real mz2       = power2(pars.mz);
    const Real mh2       = power2(pars.mh);
@@ -648,7 +618,6 @@ Real delta_alpha_s_2loop_ab_as(const Parameters& pars)
    const Real alpha     = calc_alpha(mh2, mH2, tb);
    const Real sa        = std::sin(alpha);
    const Real ca        = std::cos(alpha);
-   const Real At        = xt + mu*cb/sb;
    const Real Ab        = xb + mu*sb/cb;
    const Real invdmst   = 1/(mst12 - mst22);
    const Real invdct    = 1/(mC2 - mt2);
