@@ -59,6 +59,7 @@ Begin["`internal`"];
 `type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][`type`vertex,`type`vertex,Repeated[FeynArts`Field[_Integer],{0,1}]];
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
+`type`nullableDiagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]...];
 
 `type`indexCol = FeynArts`Index[Global`Colour,_Integer];
 `type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
@@ -351,9 +352,11 @@ Module[
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
-   topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
+   topologies = FeynArts`CreateTopologies[
+      OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
-      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
+      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
+   ];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
@@ -758,7 +761,6 @@ Module[
             Print["Warning: t-boxes are non-zero: @todo implement rules"];#,
             #] &/@ newInserted;
 
-
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
          newInserted = If[`topologyQ`boxU[#[[1]]],
             #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@5->leptonPattern],
@@ -772,7 +774,7 @@ Module[
 getModifiedDiagrams // Utils`MakeUnknownInputDefinition;
 getModifiedDiagrams ~ SetAttributes ~ {Protected,Locked};
 
-removeTopologiesWithoutInsertions[diagrams:`type`diagramSet] :=
+removeTopologiesWithoutInsertions[diagrams:`type`nullableDiagramSet] :=
    diagrams /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
 removeTopologiesWithoutInsertions // Utils`MakeUnknownInputDefinition;
 removeTopologiesWithoutInsertions ~ SetAttributes ~ {Protected,Locked};
