@@ -28,32 +28,36 @@ b2l /= g3^4;
 colorCF = 4/3; colorCA = 3;
 GS = g3; scale = Q;
 MT = mt; MB = mb; MGl = mgl;
-At = Xt + MUE CB / SB;
-Ab = Xb + MUE SB / CB;
-s2t = 2 mt Xt / (mmst1 - mmst2);
-s2b = 2 mb Xb / (mmsb1 - mmsb2);
+
+mmgl  /: mmgl^2  := mmgl2;
+mmgl  /: mmgl^3  := mmgl3;
+mmsb1 /: mmsb1^2 := mmsb12;
+mmsb2 /: mmsb2^2 := mmsb22;
 
 Delta[m1_, m2_, m3_, -1] := DeltaInv[m1,m2,m3];
 fin[0, m1_, m2_]         := Fin20[m1,m2,mmu];
 fin[m1_, m2_, m3_]       := Fin3[m1,m2,m3,mmu];
 
-Simp[expr_] := Collect[expr, { Xt, Xb }] //. {
-        mb^2                  -> mmb,
-        1/mb^2                -> 1/mmb,
-        Power[x_,n_] /; n > 0 :> Symbol["pow" <> ToString[n]][x],
-        Power[x_,-2]          :> 1/Symbol["pow2"][x],
-        Power[x_,-3]          :> 1/Symbol["pow3"][x],
-        Power[x_,-4]          :> 1/Symbol["pow4"][x],
-        Power[x_,-5]          :> 1/Symbol["pow5"][x],
-        Power[x_,-6]          :> 1/Symbol["pow6"][x],
-        Log[mmgl/mmu]         -> lgu,
-        Log[mmst1/mmu]        -> lt1u,
-        Log[mmst2/mmu]        -> lt2u,
-        Log[mmsb1/mmu]        -> lb1u,
-        Log[mmsb2/mmu]        -> lb2u,
-        Log[mmsusy/mmu]       -> lsu,
-        Log[mmt/mmu]          -> ltu
-    };
+Simp[expr_] := Collect[expr //. {
+       mb^2                  -> mmb,
+       1/mb^2                -> 1/mmb,
+       Power[x_,n_] /; n > 0 :> Symbol["pow" <> ToString[n]][x],
+       Power[x_,-2]          :> 1/Symbol["pow2"][x],
+       Power[x_,-3]          :> 1/Symbol["pow3"][x],
+       Power[x_,-4]          :> 1/Symbol["pow4"][x],
+       Power[x_,-5]          :> 1/Symbol["pow5"][x],
+       Power[x_,-6]          :> 1/Symbol["pow6"][x],
+       Log[mmgl/mmu]         -> lgu,
+       Log[mmst1/mmu]        -> lt1u,
+       Log[mmst2/mmu]        -> lt2u,
+       Log[mmsb1/mmu]        -> lb1u,
+       Log[mmsb2/mmu]        -> lb2u,
+       Log[mmsusy/mmu]       -> lsu,
+       Log[mmt/mmu]          -> ltu
+    },
+    { Fin20[__], Fin3[__], DeltaInv[__], s2t, s2b },
+    Refine
+];
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
 
@@ -321,14 +325,20 @@ double delta_mb_2loop(const Parameters& pars)
    const double Xt     = pars.xt;
    const double Xb     = pars.xb;
    const double mgl    = pars.mg;
+   const double mt     = pars.mt;
+   const double mb     = pars.mb;
    const double mmt    = pow2(pars.mt);
    const double mmb    = pow2(pars.mb);
    const double mmgl   = pow2(pars.mg);
+   const double mmgl2  = pow2(mmgl);
+   const double mmgl3  = mmgl*mmgl2;
    const double mmu    = pow2(pars.Q);
    const double mmst1  = pow2(pars.mst1);
    const double mmst2  = pow2(pars.mst2);
    const double mmsb1  = pow2(pars.msb1);
    const double mmsb2  = pow2(pars.msb2);
+   const double mmsb12 = pow2(mmsb1);
+   const double mmsb22 = pow2(mmsb2);
    const double mmsusy = pow2(pars.msusy);
    const double lgu    = std::log(mmgl/mmu);
    const double lt1u   = std::log(mmst1/mmu);
@@ -337,6 +347,8 @@ double delta_mb_2loop(const Parameters& pars)
    const double lb2u   = std::log(mmsb2/mmu);
    const double lsu    = std::log(mmsusy/mmu);
    const double ltu    = std::log(mmt/mmu);
+   const double s2t    = 2*mt*Xt / (mmst1 - mmst2);
+   const double s2b    = 2*mb*Xb / (mmsb1 - mmsb2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[b2l] <> ";"] <> "
