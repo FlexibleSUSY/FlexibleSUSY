@@ -49,7 +49,7 @@ Parameters make_point(Real MS, Real tb, Real xt)
 BOOST_AUTO_TEST_CASE(test_points)
 {
    std::vector<Results> res = {
-      { make_point(1000.0l, 10.0l, 2.0l), 0.000715816532740327740285l, 0.000108116526835543301426l, -2.30035477609372403075e-05l }
+      { make_point(1000.0l, 10.0l, 2.0l), 0.000715816532730145103587l, 0.000108116526832918386358l, -2.30035474310885696247e-05l }
    };
 
    for (const auto r: res) {
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(test_points)
       const Real das_at_as = delta_alpha_s_2loop_at_as(r.pars);
       const Real das_ab_as = delta_alpha_s_2loop_ab_as(r.pars);
 
-      BOOST_CHECK_CLOSE_FRACTION(das_as_as, r.das_as_as, 1.0e-15l);
-      BOOST_CHECK_CLOSE_FRACTION(das_at_as, r.das_at_as, 1.0e-15l);
-      BOOST_CHECK_CLOSE_FRACTION(das_ab_as, r.das_ab_as, 1.0e-15l);
+      BOOST_CHECK_CLOSE_FRACTION(das_as_as, r.das_as_as, 1.0e-10l);
+      BOOST_CHECK_CLOSE_FRACTION(das_at_as, r.das_at_as, 1.0e-10l);
+      BOOST_CHECK_CLOSE_FRACTION(das_ab_as, r.das_ab_as, 1.0e-10l);
    }
 }
