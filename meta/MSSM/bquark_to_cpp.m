@@ -156,22 +156,22 @@ namespace {
    const double Pi  = 3.1415926535897932384626433832795;
    const double zt2 = 1.6449340668482264364724151666460;
 
-   template <typename T> T pow2(T x)  { return x*x; }
-   template <typename T> T pow3(T x)  { return x*x*x; }
-   template <typename T> T pow4(T x)  { return x*x*x*x; }
-   template <typename T> T pow5(T x)  { return x*x*x*x*x; }
+   template <typename T> T pow2(T x) noexcept { return x*x; }
+   template <typename T> T pow3(T x) noexcept { return x*x*x; }
+   template <typename T> T pow4(T x) noexcept { return pow2(pow2(x)); }
+   template <typename T> T pow5(T x) noexcept { return x*pow4(x); }
 
-   const double oneLoop = 1./pow2(4*Pi);
+   const double oneLoop = 1/pow2(4*Pi);
    const double twoLoop = pow2(oneLoop);
 
    template <typename T>
-   bool is_zero(T a, T prec = std::numeric_limits<T>::epsilon())
+   bool is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
    {
-      return std::fabs(a) < prec;
+      return std::abs(a) < prec;
    }
 
    template <typename T>
-   bool is_equal(T a, T b, T prec = std::numeric_limits<T>::epsilon())
+   bool is_equal(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
    {
       return is_zero(a - b, prec);
    }
@@ -185,63 +185,62 @@ namespace {
     *
     * @return Fin20(m12, m22, mmu)
     */
-   double Fin20(double mm1, double mm2, double mmu)
+   double Fin20(double mm1, double mm2, double mmu) noexcept
    {
-      using std::log;
-      const double PI = 3.14159265358979323846264338327950288;
+      const double log12 = std::log(mm1/mm2);
+      const double log1u = std::log(mm1/mmu);
+      const double log2u = std::log(mm2/mmu);
 
-      return (6*(mm1*log(mm1/mmu) + mm2*log(mm2/mmu)) +
-         (-mm1 - mm2)*(7 + pow2(PI)/6.) +
+      return (6*(mm1*log1u + mm2*log2u) +
+         (-mm1 - mm2)*(7 + pow2(Pi)/6) +
          (mm1 - mm2)*(2*dilog(1 - mm1/mm2) +
-            pow2(log(mm1/mm2))/2.) +
-         ((mm1 + mm2)*pow2(log(mm1/mm2)))/2. -
-         2*(mm1*pow2(log(mm1/mmu)) + mm2*pow2(log(mm2/mmu))))/2.;
+            pow2(log12)/2) +
+         ((mm1 + mm2)*pow2(log12))/2 -
+         2*(mm1*pow2(log1u) + mm2*pow2(log2u)))/2;
    }
 
-   double LambdaSquared(double x, double y)
+   double LambdaSquared(double x, double y) noexcept
    {
       return pow2(1 - x - y) - 4*x*y;
    }
 
    /// ClausenCl[2,x]
-   double ClausenCl2(double x)
+   double ClausenCl2(double x) noexcept
    {
-      using std::exp;
-      const std::complex<double> img(0.,1.);
+      const std::complex<double> img(0.0, 1.0);
 
-      return std::imag(dilog(exp(img*x)));
+      return std::imag(dilog(std::exp(img*x)));
    }
 
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
-   double PhiPos(double x, double y)
+   double PhiPos(double x, double y) noexcept
    {
       const double lambda = std::sqrt(LambdaSquared(x,y));
 
-      return (-(log(x)*log(y))
-              + 2*log((1 - lambda + x - y)/2.)*log((1 - lambda - x + y)/2.)
-              - 2*dilog((1 - lambda + x - y)/2.)
-              - 2*dilog((1 - lambda - x + y)/2.)
-              + pow2(Pi)/3.)/lambda;
+      return (-(std::log(x)*std::log(y))
+              + 2*std::log((1 - lambda + x - y)/2)*std::log((1 - lambda - x + y)/2)
+              - 2*dilog((1 - lambda + x - y)/2)
+              - 2*dilog((1 - lambda - x + y)/2)
+              + pow2(Pi)/3)/lambda;
    }
 
    /// LambdaSquared(x,y) < 0
-   double PhiNeg(double x, double y)
+   double PhiNeg(double x, double y) noexcept
    {
-      using std::acos;
-      using std::sqrt;
       const double lambda = std::sqrt(-LambdaSquared(x,y));
 
-      return 2*(+ ClausenCl2(2*acos((1 + x - y)/(2.*sqrt(x))))
-                + ClausenCl2(2*acos((1 - x + y)/(2.*sqrt(y))))
-                + ClausenCl2(2*acos((-1 + x + y)/(2.*sqrt(x*y)))))/lambda;
+      return 2*(+ ClausenCl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
+                + ClausenCl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
+                + ClausenCl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
    }
 
-   double Phi(double x, double y)
+   double Phi(double x, double y) noexcept
    {
       const double lambda = LambdaSquared(x,y);
 
-      if (lambda > 0.)
+      if (lambda > 0) {
          return PhiPos(x,y);
+      }
 
       return PhiNeg(x,y);
    }
@@ -256,39 +255,39 @@ namespace {
     *
     * @return Fin3(m12, m22, m32, mmu)
     */
-   double Fin3(double mm1, double mm2, double mm3, double mmu)
+   double Fin3(double mm1, double mm2, double mm3, double mmu) noexcept
    {
-      using std::log;
-
       std::array<double,3> masses = { mm1, mm2, mm3 };
       std::sort(masses.begin(), masses.end());
 
       const double mm = masses[2];
       const double x = masses[0]/mm;
       const double y = masses[1]/mm;
-
       const double lambda = LambdaSquared(x,y);
+      const double logx = std::log(x);
+      const double logy = std::log(y);
+      const double logm = std::log(mm/mmu);
 
       if (is_zero(lambda, 1e-10)) {
-         return -(mm*(2*y*(-3 + 2*log(mm/mmu))*log(y)
-                      + log(x)*(2*x*(-3 + 2*log(mm/mmu)) + (-1 + x + y)*log(y))
-                      + (1 + x + y)*(7 - 6*log(mm/mmu) + pow2(Pi)/6. + 2*pow2(log(mm/mmu)))
-                      + x*pow2(log(x)) + y*pow2(log(y))))/2.;
+         return -(mm*(2*y*(-3 + 2*logm)*logy
+                      + logx*(2*x*(-3 + 2*logm) + (-1 + x + y)*logy)
+                      + (1 + x + y)*(7 - 6*logm + pow2(Pi)/6 + 2*pow2(logm))
+                      + x*pow2(logx) + y*pow2(logy)))/2;
       }
 
-      return mm*((-7 + 6*log(mm/mmu) + log(x)*log(y)
-                  - lambda*Phi(x,y) - pow2(Pi)/6. - 2*pow2(log(mm/mmu)))/2.
-                 - (x*(7 - 6*log(mm/mmu) + log(x)*(-6 + 4*log(mm/mmu) + log(y))
-                       + pow2(Pi)/6. + 2*pow2(log(mm/mmu)) + pow2(log(x))))/2.
-                 - (y*(7 - 6*log(mm/mmu) + (
-                     -6 + 4*log(mm/mmu) + log(x))*log(y) + pow2(Pi)/6.
-                       + 2*pow2(log(mm/mmu)) + pow2(log(y))))/2.);
+      return mm*((-7 + 6*logm + logx*logy
+                  - lambda*Phi(x,y) - pow2(Pi)/6 - 2*pow2(logm))/2
+                 - (x*(7 - 6*logm + logx*(-6 + 4*logm + logy)
+                       + pow2(Pi)/6 + 2*pow2(logm) + pow2(logx)))/2
+                 - (y*(7 - 6*logm + (
+                     -6 + 4*logm + logx)*logy + pow2(Pi)/6
+                       + 2*pow2(logm) + pow2(logy)))/2);
    }
 
    /// Delta[m1,m2,m3,-1]
-   double DeltaInv(double m1, double m2, double m3)
+   double DeltaInv(double m1, double m2, double m3) noexcept
    {
-      return 1./(pow2(m1) + pow2(m2) + pow2(m3) - 2*(m1*m2 + m1*m3 + m2*m3));
+      return 1/(pow2(m1) + pow2(m2) + pow2(m3) - 2*(m1*m2 + m1*m3 + m2*m3));
    }
 
 } // anonymous namespace
@@ -312,7 +311,6 @@ namespace {
  */
 double delta_mb_2loop(const Parameters& pars)
 {
-   using std::log;
    const double g3     = pars.g3;
    const double Xt     = pars.xt;
    const double Xb     = pars.xb;
