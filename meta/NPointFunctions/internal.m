@@ -369,7 +369,6 @@ Module[
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
    debugMakePictures[diagrams,"class"];
 
-
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
@@ -504,7 +503,7 @@ Module[
       rulesForClassesToSave, newDiagrams = diagrams, newAmplitudes = amplitudes
    },
    If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-      Print["t-pinguins: tree-like massless vector bosons are excluded"];
+      Print@"t-pinguins: tree-like massless vector bosons were removed";
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`pinguinT];
       numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
@@ -526,7 +525,7 @@ Module[
       printDiagramsInfo@newDiagrams;
    ];
    If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
-      Print["boxes: massless vector bosons are excluded"];
+      Print@"boxes: massless vector bosons were removed";
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`box];
       numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
@@ -711,16 +710,16 @@ Module[
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
             #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
             #] &/@ newInserted;
-            newInserted = removeTopologiesWithoutInsertions@newInserted;
-            Print["t-penguins: tree-like vector bosons were deleted"];
+         newInserted = removeTopologiesWithoutInsertions@newInserted;
+         Print@"t-penguins: tree-like vector bosons were removed";
          printDiagramsInfo@newInserted;
       ];
       If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
             #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
             #] &/@ newInserted;
-            newInserted = removeTopologiesWithoutInsertions@newInserted;
-            Print["t-penguins: tree-like scalar bosons were deleted"];
+         newInserted = removeTopologiesWithoutInsertions@newInserted;
+         Print@"t-penguins: tree-like scalar bosons were removed";
          printDiagramsInfo@newInserted;
       ];
    ];
@@ -735,7 +734,7 @@ Module[
             #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[7|8]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["t-penguins: external leptons in sed-like processes were deleted"];
+         Print@"t-penguins: external leptons in sed-like processes were removed";
          printDiagramsInfo@newInserted;
 
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
@@ -743,13 +742,13 @@ Module[
             #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6|7]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["t-penguins: external leptons in triangle loop were deleted"];
+         Print@"t-penguins: external leptons in triangle loop were removed";
          printDiagramsInfo@newInserted;
    ];
    If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
          newInserted = If[`topologyQ`boxS[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@6->leptonPattern],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
          Print["s-boxes: loops with initial lepton are removed"];
@@ -763,7 +762,7 @@ Module[
 
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
          newInserted = If[`topologyQ`boxU[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@5->leptonPattern],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[5]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
          Print["u-boxes: loops with initial lepton were deleted"];
