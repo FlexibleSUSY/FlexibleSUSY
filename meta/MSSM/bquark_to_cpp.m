@@ -23,10 +23,9 @@
 Get[FileNameJoin[{"meta", "TextFormatting.m"}]];
 
 b2l = Get[FileNameJoin[{"meta", "MSSM", "bquark_2loop_sqcd_decoupling.m"}]];
-b2l /= g3^4;
 
 colorCF = 4/3; colorCA = 3;
-GS = g3; scale = Q;
+GS = g3 = 1; scale = Q;
 MT = mt; MB = mb; MGl = mgl;
 
 mmgl  /: mmgl^2  := mmgl2;
