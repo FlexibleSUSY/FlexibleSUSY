@@ -9,7 +9,6 @@
 src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
-src/libfortran_utils.f90
 
 config/config.h
 config/version
