@@ -23,9 +23,6 @@
 Get[FileNameJoin[{"meta", "TextFormatting.m"}]];
 
 scale = Q;
-At  = xt + MUE CB/SB;
-Ab  = xb + MUE SB/CB;
-Al  = xtau + MUE SB/CB;
 YT  = yt; YB = yb; YL = ytau;
 MW  = mw; MZ = mz;
 mh0 = mh; mH0 = mH; mA0 = mA; mHp = mC;
@@ -71,7 +68,7 @@ Delta[m1_, m2_, m3_, -1]      := DeltaInv[m1,m2,m3];
 
 Simp[expr_] :=
     Collect[expr,
-            {xt, xb, xtau, Fin3[__]}
+            {Fin3[__], Fin20[__]}
     ] //. {
         Power[x_,n_] /; n > 0 :> Symbol["power" <> ToString[n]][x],
         Power[x_,-2]          :> 1/Symbol["power" <> ToString[2]][x],
@@ -384,6 +381,8 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
 {
    using std::log;
    const Real ytau  = pars.ytau;
+   const Real xt    = pars.xt;
+   const Real xb    = pars.xb;
    const Real xtau  = pars.xtau;
    const Real mstau1 = pars.mstau1;
    const Real mstau12 = power2(pars.mstau1);
@@ -406,6 +405,9 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
    const Real alpha = calc_alpha(mh2, mH2, tb);
    const Real sa    = std::sin(alpha);
    const Real ca    = std::cos(alpha);
+   const Real At    = xt + mu/tb;
+   const Real Ab    = xb + mu*tb;
+   const Real Al    = xtau + mu*tb;
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl4] <> ";"] <> "
@@ -419,6 +421,7 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
    const Real ytau  = pars.ytau;
    const Real yt    = pars.yt;
    const Real xt    = pars.xt;
+   const Real xb    = pars.xb;
    const Real xtau  = pars.xtau;
    const Real mt    = pars.mt;
    const Real mt2   = power2(pars.mt);
@@ -448,6 +451,9 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
    const Real alpha = calc_alpha(mh2, mH2, tb);
    const Real sa    = std::sin(alpha);
    const Real ca    = std::cos(alpha);
+   const Real At    = xt + mu/tb;
+   const Real Ab    = xb + mu*tb;
+   const Real Al    = xtau + mu*tb;
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yt2] <> ";"] <> "
@@ -462,6 +468,7 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real yb    = pars.yb;
    const Real xt    = pars.xt;
    const Real xb    = pars.xb;
+   const Real xtau  = pars.xtau;
    const Real mt    = pars.mt;
    const Real mt2   = power2(pars.mt);
    const Real mst1  = pars.mst1;
@@ -494,6 +501,9 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real alpha = calc_alpha(mh2, mH2, tb);
    const Real sa    = std::sin(alpha);
    const Real ca    = std::cos(alpha);
+   const Real At    = xt + mu/tb;
+   const Real Ab    = xb + mu*tb;
+   const Real Al    = xtau + mu*tb;
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yb2] <> ";"] <> "
