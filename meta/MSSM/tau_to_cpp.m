@@ -85,7 +85,8 @@ Simp[expr_] :=
                 (-mA2 + mH2)^n_:-1        /; n < 0 :> (invdmAH)^(-n),
                 (-mA2 + mC2)^n_:-1        /; n < 0 :> (invdmAC)^(-n),
                 (mC2 - mh2)^n_:-1         /; n < 0 :> (invdmCh)^(-n),
-                (mC2 - mH2)^n_:-1         /; n < 0 :> (invdmCH)^(-n)
+                (mC2 - mH2)^n_:-1         /; n < 0 :> (invdmCH)^(-n),
+                Log[a_/b_]                         :> Symbol["log" <> ToString[a] <> ToString[b]]
             },
             {Fin3[__], Fin20[__]}
     ] //. {
@@ -94,8 +95,7 @@ Simp[expr_] :=
         Power[x_,-3]          :> 1/Symbol["power" <> ToString[3]][x],
         Power[x_,-4]          :> 1/Symbol["power" <> ToString[4]][x],
         Power[x_,-5]          :> 1/Symbol["power" <> ToString[5]][x],
-        Power[x_,-6]          :> 1/Symbol["power" <> ToString[6]][x],
-        Log[x_]               :> log[x]
+        Power[x_,-6]          :> 1/Symbol["power" <> ToString[6]][x]
     };
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
@@ -398,7 +398,6 @@ namespace {
 
 double delta_mtau_2loop_atau_atau(const Parameters& pars)
 {
-   using std::log;
    const Real ytau  = pars.ytau;
    const Real xtau  = pars.xtau;
    const Real mstau1 = pars.mstau1;
@@ -435,6 +434,17 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
    const Real invdmCh       = 1/(mC2 - mh2);
    const Real invdmCH       = 1/(mC2 - mH2);
 
+   const Real logmstau12Q2  = std::log(mstau12/Q2);
+   const Real logmstau22Q2  = std::log(mstau22/Q2);
+   const Real logmH2Q2      = std::log(mH2/Q2);
+   const Real logmA2Q2      = std::log(mA2/Q2);
+   const Real logmh2Q2      = std::log(mh2/Q2);
+   const Real logmu2Q2      = std::log(mu2/Q2);
+   const Real logmC2Q2      = std::log(mC2/Q2);
+   const Real logmw2Q2      = std::log(mw2/Q2);
+   const Real logmz2Q2      = std::log(mz2/Q2);
+   const Real logmsntau2Q2  = std::log(msntau2/Q2);
+
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl4] <> ";"] <> "
 
@@ -443,7 +453,6 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
 
 double delta_mtau_2loop_atau_at(const Parameters& pars)
 {
-   using std::log;
    const Real ytau  = pars.ytau;
    const Real yt    = pars.yt;
    const Real xt    = pars.xt;
@@ -488,6 +497,19 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
    const Real invdmsntau2mu = 1/(-msntau2 + mu2);
    const Real invdmhH       = 1/(-mh2 + mH2);
 
+   const Real logmstau12Q2  = std::log(mstau12/Q2);
+   const Real logmstau22Q2  = std::log(mstau22/Q2);
+   const Real logmH2Q2      = std::log(mH2/Q2);
+   const Real logmA2Q2      = std::log(mA2/Q2);
+   const Real logmh2Q2      = std::log(mh2/Q2);
+   const Real logmu2Q2      = std::log(mu2/Q2);
+   const Real logmC2Q2      = std::log(mC2/Q2);
+   const Real logmsntau2Q2  = std::log(msntau2/Q2);
+   const Real logmst12Q2    = std::log(mst12/Q2);
+   const Real logmst22Q2    = std::log(mst22/Q2);
+   const Real logmsb12Q2    = std::log(msb12/Q2);
+   const Real logmt2Q2      = std::log(mt2/Q2);
+
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yt2] <> ";"] <> "
 
@@ -496,7 +518,6 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
 
 double delta_mtau_2loop_atau_ab(const Parameters& pars)
 {
-   using std::log;
    const Real ytau  = pars.ytau;
    const Real yb    = pars.yb;
    const Real xt    = pars.xt;
@@ -548,6 +569,20 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real invdmstau2mu  = 1/(-mstau22 + mu2);
    const Real invdmsntau2mu = 1/(-msntau2 + mu2);
    const Real invdmhH       = 1/(-mh2 + mH2);
+
+   const Real logmstau12Q2  = std::log(mstau12/Q2);
+   const Real logmstau22Q2  = std::log(mstau22/Q2);
+   const Real logmH2Q2      = std::log(mH2/Q2);
+   const Real logmA2Q2      = std::log(mA2/Q2);
+   const Real logmh2Q2      = std::log(mh2/Q2);
+   const Real logmu2Q2      = std::log(mu2/Q2);
+   const Real logmC2Q2      = std::log(mC2/Q2);
+   const Real logmsntau2Q2  = std::log(msntau2/Q2);
+   const Real logmst12Q2    = std::log(mst12/Q2);
+   const Real logmst22Q2    = std::log(mst22/Q2);
+   const Real logmsb12Q2    = std::log(msb12/Q2);
+   const Real logmsb22Q2    = std::log(msb22/Q2);
+   const Real logmt2Q2      = std::log(mt2/Q2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yb2] <> ";"] <> "
