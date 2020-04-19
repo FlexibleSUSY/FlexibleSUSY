@@ -67,7 +67,26 @@ delta3[m1_, m2_, m3_]         := Delta[m1^2, m2^2, m3^2, -1];
 Delta[m1_, m2_, m3_, -1]      := DeltaInv[m1,m2,m3];
 
 Simp[expr_] :=
-    Collect[expr,
+    Collect[expr //. {
+                (-mst12 + mst22)^n_:-1    /; n < 0 :> (invdmst)^(-n),
+                (msb12 - msb22)^n_:-1     /; n < 0 :> (invdmsb)^(-n),
+                (msb12 - mstau12)^n_:-1   /; n < 0 :> (invdmsb1stau1)^(-n),
+                (msb12 - mstau22)^n_:-1   /; n < 0 :> (invdmsb1stau2)^(-n),
+                (-msb22 + mstau22)^n_:-1  /; n < 0 :> (invdmsb2stau2)^(-n),
+                (-msb22 + mstau12)^n_:-1  /; n < 0 :> (invdmsb2stau1)^(-n),
+                (msntau2 - mst12)^n_:-1   /; n < 0 :> (-invdmsntaust1)^(-n),
+                (-msntau2 + mst22)^n_:-1  /; n < 0 :> (invdmsntaust2)^(-n),
+                (mstau12 - mstau22)^n_:-1 /; n < 0 :> (invdmstau)^(-n),
+                (-mstau12 + mu2)^n_:-1    /; n < 0 :> (invdmstau1mu)^(-n),
+                (-mstau22 + mu2)^n_:-1    /; n < 0 :> (invdmstau2mu)^(-n),
+                (-msntau2 + mu2)^n_:-1    /; n < 0 :> (invdmsntau2mu)^(-n),
+                (-mh2 + mH2)^n_:-1        /; n < 0 :> (invdmhH)^(-n),
+                (-mA2 + mh2)^n_:-1        /; n < 0 :> (invdmAh)^(-n),
+                (-mA2 + mH2)^n_:-1        /; n < 0 :> (invdmAH)^(-n),
+                (-mA2 + mC2)^n_:-1        /; n < 0 :> (invdmAC)^(-n),
+                (mC2 - mh2)^n_:-1         /; n < 0 :> (invdmCh)^(-n),
+                (mC2 - mH2)^n_:-1         /; n < 0 :> (invdmCH)^(-n)
+            },
             {Fin3[__], Fin20[__]}
     ] //. {
         Power[x_,n_] /; n > 0 :> Symbol["power" <> ToString[n]][x],
@@ -381,8 +400,6 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
 {
    using std::log;
    const Real ytau  = pars.ytau;
-   const Real xt    = pars.xt;
-   const Real xb    = pars.xb;
    const Real xtau  = pars.xtau;
    const Real mstau1 = pars.mstau1;
    const Real mstau12 = power2(pars.mstau1);
@@ -399,15 +416,24 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
    const Real mu    = pars.mu;
    const Real mu2   = power2(pars.mu);
    const Real tb    = pars.tb;
-   const Real sb    = tb / std::sqrt(1. + power2(tb));
-   const Real cb    = 1. / std::sqrt(1. + power2(tb));
+   const Real sb    = tb / std::sqrt(1 + power2(tb));
+   const Real cb    = 1  / std::sqrt(1 + power2(tb));
    const Real Q2    = power2(pars.Q);
    const Real alpha = calc_alpha(mh2, mH2, tb);
    const Real sa    = std::sin(alpha);
    const Real ca    = std::cos(alpha);
-   const Real At    = xt + mu/tb;
-   const Real Ab    = xb + mu*tb;
    const Real Al    = xtau + mu*tb;
+
+   const Real invdmstau     = 1/(mstau12 - mstau22);
+   const Real invdmstau1mu  = 1/(-mstau12 + mu2);
+   const Real invdmstau2mu  = 1/(-mstau22 + mu2);
+   const Real invdmsntau2mu = 1/(-msntau2 + mu2);
+   const Real invdmhH       = 1/(-mh2 + mH2);
+   const Real invdmAh       = 1/(-mA2 + mh2);
+   const Real invdmAH       = 1/(-mA2 + mH2);
+   const Real invdmAC       = 1/(-mA2 + mC2);
+   const Real invdmCh       = 1/(mC2 - mh2);
+   const Real invdmCH       = 1/(mC2 - mH2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl4] <> ";"] <> "
@@ -421,7 +447,6 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
    const Real ytau  = pars.ytau;
    const Real yt    = pars.yt;
    const Real xt    = pars.xt;
-   const Real xb    = pars.xb;
    const Real xtau  = pars.xtau;
    const Real mt    = pars.mt;
    const Real mt2   = power2(pars.mt);
@@ -444,16 +469,24 @@ double delta_mtau_2loop_atau_at(const Parameters& pars)
    const Real mu    = pars.mu;
    const Real mu2   = power2(pars.mu);
    const Real tb    = pars.tb;
-   const Real sb    = tb / std::sqrt(1. + power2(tb));
-   const Real cb    = 1. / std::sqrt(1. + power2(tb));
+   const Real sb    = tb / std::sqrt(1 + power2(tb));
+   const Real cb    = 1  / std::sqrt(1 + power2(tb));
    const Real Q2    = power2(pars.Q);
    const Real snt   = calc_sin_theta(mt, xt, mst12, mst22);
    const Real alpha = calc_alpha(mh2, mH2, tb);
    const Real sa    = std::sin(alpha);
    const Real ca    = std::cos(alpha);
    const Real At    = xt + mu/tb;
-   const Real Ab    = xb + mu*tb;
    const Real Al    = xtau + mu*tb;
+
+   const Real invdmst       = 1/(-mst12 + mst22);
+   const Real invdmsntaust1 = 1/(-msntau2 + mst12);
+   const Real invdmsntaust2 = 1/(-msntau2 + mst22);
+   const Real invdmstau     = 1/(mstau12 - mstau22);
+   const Real invdmstau1mu  = 1/(-mstau12 + mu2);
+   const Real invdmstau2mu  = 1/(-mstau22 + mu2);
+   const Real invdmsntau2mu = 1/(-msntau2 + mu2);
+   const Real invdmhH       = 1/(-mh2 + mH2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yt2] <> ";"] <> "
@@ -468,7 +501,6 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real yb    = pars.yb;
    const Real xt    = pars.xt;
    const Real xb    = pars.xb;
-   const Real xtau  = pars.xtau;
    const Real mt    = pars.mt;
    const Real mt2   = power2(pars.mt);
    const Real mst1  = pars.mst1;
@@ -494,8 +526,8 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real mu    = pars.mu;
    const Real mu2   = power2(pars.mu);
    const Real tb    = pars.tb;
-   const Real sb    = tb / std::sqrt(1. + power2(tb));
-   const Real cb    = 1. / std::sqrt(1. + power2(tb));
+   const Real sb    = tb / std::sqrt(1 + power2(tb));
+   const Real cb    = 1  / std::sqrt(1 + power2(tb));
    const Real Q2    = power2(pars.Q);
    const Real snt   = calc_sin_theta(mt, xt, mst12, mst22);
    const Real alpha = calc_alpha(mh2, mH2, tb);
@@ -503,7 +535,19 @@ double delta_mtau_2loop_atau_ab(const Parameters& pars)
    const Real ca    = std::cos(alpha);
    const Real At    = xt + mu/tb;
    const Real Ab    = xb + mu*tb;
-   const Real Al    = xtau + mu*tb;
+
+   const Real invdmst       = 1/(-mst12 + mst22);
+   const Real invdmsb       = 1/(msb12 - msb22);
+   const Real invdmsb1stau1 = 1/(msb12 - mstau12);
+   const Real invdmsb1stau2 = 1/(msb12 - mstau22);
+   const Real invdmsb2stau2 = 1/(-msb22 + mstau22);
+   const Real invdmsb2stau1 = 1/(-msb22 + mstau12);
+   const Real invdmsntaust1 = 1/(-msntau2 + mst12);
+   const Real invdmsntaust2 = 1/(-msntau2 + mst22);
+   const Real invdmstau1mu  = 1/(-mstau12 + mu2);
+   const Real invdmstau2mu  = 1/(-mstau22 + mu2);
+   const Real invdmsntau2mu = 1/(-msntau2 + mu2);
+   const Real invdmhH       = 1/(-mh2 + mH2);
 
    const double result =
 " <> WrapText @ IndentText[ToCPP[tau2lyl2yb2] <> ";"] <> "
