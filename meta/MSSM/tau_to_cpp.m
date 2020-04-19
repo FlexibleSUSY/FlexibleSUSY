@@ -88,14 +88,15 @@ Simp[expr_] :=
                 (mC2 - mH2)^n_:-1         /; n < 0 :> (invdmCH)^(-n),
                 Log[a_/b_]                         :> Symbol["log" <> ToString[a] <> ToString[b]]
             },
-            {Fin3[__], Fin20[__]}
+            { Fin3[__], Fin20[__], DeltaInv[__], Al, At, Ab },
+            Simplify
     ] //. {
         Power[x_,n_] /; n > 0 :> Symbol["power" <> ToString[n]][x],
-        Power[x_,-2]          :> 1/Symbol["power" <> ToString[2]][x],
-        Power[x_,-3]          :> 1/Symbol["power" <> ToString[3]][x],
-        Power[x_,-4]          :> 1/Symbol["power" <> ToString[4]][x],
-        Power[x_,-5]          :> 1/Symbol["power" <> ToString[5]][x],
-        Power[x_,-6]          :> 1/Symbol["power" <> ToString[6]][x]
+        Power[x_,-2]          :> 1/Symbol["power2"][x],
+        Power[x_,-3]          :> 1/Symbol["power3"][x],
+        Power[x_,-4]          :> 1/Symbol["power4"][x],
+        Power[x_,-5]          :> 1/Symbol["power5"][x],
+        Power[x_,-6]          :> 1/Symbol["power6"][x]
     };
 
 ToCPP[expr_] := ToString[Simp[expr], CForm];
@@ -401,7 +402,7 @@ double delta_mtau_2loop_atau_atau(const Parameters& pars)
    const Real ytau  = pars.ytau;
    const Real xtau  = pars.xtau;
    const Real mstau1 = pars.mstau1;
-   const Real mstau12 = power2(pars.mstau1);
+   const Real mstau12 = power2(mstau1);
    const Real mstau2  = pars.mstau2;
    const Real mstau22 = power2(pars.mstau2);
    const Real mstau24 = power4(pars.mstau2);
