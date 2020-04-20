@@ -48,50 +48,6 @@ void SLHA_io::clear()
    modsel.clear();
 }
 
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double& /*unused*/,
-                                                        Eigen::Matrix<double, 1, 1>& /*unused*/)
-{
-}
-
-/**
- * @param m mass
- * @param z 1x1 mixing matrix
- */
-void SLHA_io::convert_symmetric_fermion_mixings_to_slha(double& m,
-                                                        Eigen::Matrix<std::complex<double>, 1, 1>& z)
-{
-   // check if 1st row contains non-zero imaginary parts
-   if (!is_zero(std::abs(std::imag(z(0,0))))) {
-      z(0,0) *= std::complex<double>(0.0,1.0);
-      m *= -1;
-#ifdef ENABLE_DEBUG
-      if (!is_zero(std::abs(std::imag(z(0,0))))) {
-         WARNING("Element (0,0) of the following fermion mixing matrix"
-                 " contains entries which have non-zero real and imaginary"
-                 " parts:\nZ = " << z);
-      }
-#endif
-   }
-}
-
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(double& /*unused*/,
-                                                      Eigen::Matrix<double, 1, 1>& /*unused*/)
-{
-}
-
-/**
- * @param m mass
- * @param z 1x1 mixing matrix
- */
-void SLHA_io::convert_symmetric_fermion_mixings_to_hk(double& m,
-                                                      Eigen::Matrix<std::complex<double>, 1, 1>& z)
-{
-   if (m < 0.) {
-      z(0,0) *= std::complex<double>(0.0,1.0);
-      m *= -1;
-   }
-}
-
 std::string SLHA_io::block_head(const std::string& name, double scale)
 {
    const double eps = std::numeric_limits<double>::epsilon();

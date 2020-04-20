@@ -23,6 +23,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/logger.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
+		$(DIR)/mixings.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/physical_input.cpp \
@@ -85,6 +86,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/lowe.h \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
+		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
 		$(DIR)/names.hpp \
