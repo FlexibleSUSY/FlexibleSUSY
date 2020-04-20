@@ -35,7 +35,6 @@ showProgress // Utils`MakeUnknownInputDefinition;
 showProgress ~ SetAttributes ~ {Protected, Locked};
 
 define[s:_Symbol] := TagSetDelayed[s, Dynamic@s, ""];
-define[(s:_Symbol)["done"]] := TagSetDelayed[s, Dynamic@s, "done"];
 define[(s:_Symbol)[p:_]] := TagSetDelayed[s, Dynamic@s@p, ""];
 define[RuleDelayed[s:_Symbol, what:_ ]] := TagSetDelayed[s, Dynamic@s, what];
 define[RuleDelayed[(s:_Symbol)[p:_], what:_ ]] := TagSetDelayed[s, Dynamic@s@p, what];
@@ -49,9 +48,9 @@ define /@ {
    DynamicMatterNr, DynamicDGnr, DynamicKineticScalarNr, DynamicKineticFermionNr,
    DynamicGauginoMatter, DynamicGauginoVector, DynamicVectorNr, DynamicGaugeTNr,
    DynamicOneLoopNrMM, DynamicOneLoopTadName, DynamicOneLoopTadNr, DynamicOneLoopNrNM,
-   DynamicCheckModelFiles["done"], DynamicInitGaugeG["done"], DynamicInitFields["done"],
-   DynamicInitMisc["done"], DynamicCheckAnomalies["done"], DynamicCheckingCCSup["done"],
-   DynamicSoftTermsCurrent["done"], DynamicSpectrumFileInput["done"],
+   DynamicCheckModelFiles :> "done", DynamicInitGaugeG :> "done", DynamicInitFields :> "done",
+   DynamicInitMisc :> "done", DynamicCheckAnomalies :> "done", DynamicCheckingCCSup :> "done",
+   DynamicSoftTermsCurrent :> "done", DynamicSpectrumFileInput :> "done",
    DynamicCalcTreeMasses :> "for all eigenstates",
    DynamicStatusAddTerms[_], DynamicGFnr[_], DynamicUGT[_], DynamicStatusAddTerms[_],
    DynamicMMgaugeNr[_], DynamicNrMass[_], DynamicProgressRGE[_], progressNrGV[_],
