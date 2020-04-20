@@ -3759,7 +3759,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             semiAnalyticBCs, semiAnalyticSolns,
             semiAnalyticHighScaleFiles, semiAnalyticSUSYScaleFiles, semiAnalyticLowScaleFiles,
             semiAnalyticSolnsOutputFile, semiAnalyticEWSBSubstitutions = {}, semiAnalyticInputScale = ""},
-           TerminalFormatting`onSuppressedMessages[];
 
            Utils`PrintHeadline["Starting FlexibleSUSY"];
            FSDebugOutput["meta code directory: ", $flexiblesusyMetaDir];
