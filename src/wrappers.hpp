@@ -363,13 +363,13 @@ auto MaxRelDiff(const Eigen::PlainObjectBase<Derived>& a,
 
    using Scalar_t = decltype(MaxRelDiff(a.data()[0], b.data()[0]));
 
-   std::vector<Scalar_t> v(a.size(), 0.0);
+   Scalar_t max = 0;
 
-   for (int i = 0; i < v.size(); i++) {
-      v[i] = MaxRelDiff(a.data()[i], b.data()[i]);
+   for (Eigen::Index i = 0; i < a.size(); i++) {
+      max = std::max(max, MaxRelDiff(a.data()[i], b.data()[i]));
    }
 
-   return *std::max_element(std::cbegin(v), std::cend(v));
+   return max;
 }
 
 // MaxAbsValue /////////////////////////////////////////////////////////

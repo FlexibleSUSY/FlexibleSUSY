@@ -89,7 +89,7 @@ private:
    Solver_type solver_type{GSLHybrid}; ///< solver type
 
    void print_state(const gsl_multiroot_fsolver*, std::size_t) const;
-   char const * const solver_type_name() const;
+   const char* solver_type_name() const;
    const gsl_multiroot_fsolver_type* solver_type_to_gsl_pointer() const;
    static int gsl_function(const gsl_vector*, void*, gsl_vector*);
 
@@ -220,7 +220,7 @@ int Root_finder<dimension>::gsl_function(const gsl_vector* x, void* params, gsl_
 }
 
 template <std::size_t dimension>
-char const * const Root_finder<dimension>::solver_type_name() const
+const char* Root_finder<dimension>::solver_type_name() const
 {
    switch (solver_type) {
    case GSLHybrid : return "GSLHybrid";

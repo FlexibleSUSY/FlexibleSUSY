@@ -41,7 +41,7 @@
 namespace flexiblesusy {
 
 class Problems;
-class @ModelName@_input_parameters;
+struct @ModelName@_input_parameters;
 
 /**
  * @class @ModelName@_mass_eigenstates_interface

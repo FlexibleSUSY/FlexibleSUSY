@@ -9,7 +9,7 @@ Get["model_files/NUHMSSMNoFVHimalaya/NUHMSSMNoFVHimalaya_uncertainty_estimate.m"
 
 settings = {
     precisionGoal -> 1.*^-5,
-    maxIterations -> 1000,
+    maxIterations -> 100,
     poleMassLoopOrder -> 4,
     ewsbLoopOrder -> 4,
     thresholdCorrectionsLoopOrder -> 4,
@@ -105,7 +105,7 @@ NUHMSSMNoFVCalcMh[MS_, TB_, Xtt_] :=
     CalcNUHMSSMNoFVHimalayaDMh[
         fsSettings -> {
             precisionGoal -> 1.*^-5,
-            maxIterations -> 1000,
+            maxIterations -> 100,
             poleMassLoopOrder -> 2,
             ewsbLoopOrder -> 2,
             thresholdCorrectionsLoopOrder -> 2,
@@ -151,7 +151,7 @@ NUHMSSMNoFVHimalayaCalcMh[MS_, TB_, Xtt_] :=
     CalcNUHMSSMNoFVHimalayaDMh[
         fsSettings -> {
             precisionGoal -> 1.*^-5,
-            maxIterations -> 1000,
+            maxIterations -> 100,
             poleMassLoopOrder -> 3,
             ewsbLoopOrder -> 3,
             thresholdCorrectionsLoopOrder -> 2,
@@ -198,14 +198,14 @@ NUHMSSMNoFVHimalayaCalcMh[MS_, TB_, Xtt_] :=
 TB  = 5;
 Xtt = 0;
 
-data = Map[
+data = ParallelMap[
     { N[#],
       Sequence @@ NUHMSSMNoFVCalcMh[#, TB, Xtt],
       Sequence @@ NUHMSSMNoFVHimalayaCalcMh[#, TB, Xtt],
       Sequence @@ MSSMEFTHiggsCalcMh[#, TB, Xtt],
       Sequence @@ HSSUSYCalcMh[#, TB, Xtt]
     }&,
-    LogRange[300, 5 10^4, 60]
+    LogRange[300, 10^4, 60]
 ];
 
 Export["test/test_Mh_uncertainties_TB-5_Xt-0.dat", data];
@@ -214,14 +214,14 @@ Export["test/test_Mh_uncertainties_TB-5_Xt-0.dat", data];
 
 Xtt = -2;
 
-data = Map[
+data = ParallelMap[
     { N[#],
       Sequence @@ NUHMSSMNoFVCalcMh[#, TB, Xtt],
       Sequence @@ NUHMSSMNoFVHimalayaCalcMh[#, TB, Xtt],
       Sequence @@ MSSMEFTHiggsCalcMh[#, TB, Xtt],
       Sequence @@ HSSUSYCalcMh[#, TB, Xtt]
     }&,
-    LogRange[300, 5 10^4, 60]
+    LogRange[300, 10^4, 60]
 ];
 
 Export["test/test_Mh_uncertainties_TB-5_Xt--2.dat", data];

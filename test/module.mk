@@ -38,8 +38,10 @@ TEST_SRC := \
 		$(DIR)/test_gsl_vector.cpp \
 		$(DIR)/test_minimizer.cpp \
 		$(DIR)/test_namespace_collisions.cpp \
+		$(DIR)/test_mssm_twoloop_as.cpp \
 		$(DIR)/test_mssm_twoloop_mb.cpp \
 		$(DIR)/test_mssm_twoloop_mt.cpp \
+		$(DIR)/test_mssm_twoloop_mtau.cpp \
 		$(DIR)/test_MSSM_2L_limits.cpp \
 		$(DIR)/test_numerics.cpp \
 		$(DIR)/test_pmns.cpp \
@@ -596,11 +598,6 @@ endif
 ifeq ($(WITH_HSSUSY) $(WITH_MSSMEFTHiggs) $(WITH_MSSMMuBMu),yes yes yes)
 TEST_SH += \
 		$(DIR)/test_MSSMEFTHiggs.sh
-endif
-
-ifeq ($(WITH_HSSUSY) $(WITH_MSSMEFTHiggs) $(WITH_NUHMSSMNoFVHimalaya),yes yes yes)
-TEST_SH += \
-		$(DIR)/test_Mh_uncertainties.sh
 endif
 
 ifeq ($(WITH_MSSMEFTHiggs),yes)

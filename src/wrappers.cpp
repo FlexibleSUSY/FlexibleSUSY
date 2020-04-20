@@ -193,7 +193,7 @@ double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
 
 double PolyLog(int n, double z)
 {
-   return std::real(PolyLog(n, z));
+   return std::real(PolyLog(n, std::complex<double>(z, 0.0)));
 }
 
 std::complex<double> PolyLog(int n, const std::complex<double>& z)

@@ -396,19 +396,19 @@ void @ModelName@_slha_io::read_from_stream(std::istream& istr)
  */
 void @ModelName@_slha_io::fill(@ModelName@_input_parameters& input) const
 {
-   SLHA_io::Tuple_processor minpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor minpar_processor = [&input] (int key, double value) {
       return fill_minpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor extpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor extpar_processor = [&input] (int key, double value) {
       return fill_extpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imminpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor imminpar_processor = [&input] (int key, double value) {
       return fill_imminpar_tuple(input, key, value);
    };
 
-   SLHA_io::Tuple_processor imextpar_processor = [&input, this] (int key, double value) {
+   SLHA_io::Tuple_processor imextpar_processor = [&input] (int key, double value) {
       return fill_imextpar_tuple(input, key, value);
    };
 
