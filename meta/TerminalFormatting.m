@@ -20,17 +20,31 @@
 
 *)
 
-BeginPackage["TerminalFormatting`", {"SARAH`"}];
+BeginPackage["TerminalFormatting`", {"SARAH`", "Utils`"}];
 
 Off[FileByteCount::fdnfnd];
+
+onSuppressedMessages::usage =
+"Turns on corresponding warning messages";
+onFileByteCount[] := On[FileByteCount::fdnfnd];
+onFileByteCount // Utils`MakeUnknownInputDefinition;
+onFileByteCount ~ SetAttributes ~ {Protected, Locked};
 
 Begin["`internal`"];
 
 showSingle[] := "done";
+showSingle // Utils`MakeUnknownInputDefinition;
+showSingle ~ SetAttributes ~ {Protected, Locked};
 
 showTerms[info:_Integer, add:_Integer:3, pre:_String:""] :=
    "\033["<>ToString[Length@IntegerDigits@#+add]<>"D"<>
    pre<>"("<>ToString@#<>" terms"&[info];
+showTerms // Utils`MakeUnknownInputDefinition;
+showTerms ~ SetAttributes ~ {Protected, Locked};
+
+showProgress[ind:_String:"      "] := "\r\033[K"<>ind<>"(in progress";
+showProgress // Utils`MakeUnknownInputDefinition;
+showProgress ~ SetAttributes ~ {Protected, Locked};
 
 If[!$Notebooks,
 
@@ -39,7 +53,6 @@ DynamicInitGaugeG /: Dynamic[DynamicInitGaugeG] := showSingle[];
 DynamicInitFields /: Dynamic[DynamicInitFields] := showSingle[];
 DynamicInitMisc /: Dynamic[DynamicInitMisc] := showSingle[];
 DynamicCheckAnomalies /: Dynamic[DynamicCheckAnomalies] := showSingle[];
-
 
 DynamicTermSuperpotentialNr /: Dynamic[DynamicTermSuperpotentialNr] := "";
 DynamicTermSuperpotential /: Dynamic[DynamicTermSuperpotential] :=
@@ -98,9 +111,7 @@ DynamicMMgaugeName /: Dynamic[DynamicMMgaugeName[_]] :=
 nameMassQ = True;
 DynamicNrMass /: Dynamic[DynamicNrMass[_]] := "";
 DynamicNameMass /: Dynamic[DynamicNameMass[_]] :=
-   showTerms[Length@If[NameMassQ,NameMassQ=False;mixBasis,NameMassQ=True;mixBasisNoFV], 5, ": "];
-
-showProgress[ind:_String:"      "] := "\r\033[K"<>ind<>"(in progress";
+   showTerms[Length@If[nameMassQ,nameMassQ=False;mixBasis,nameMassQ=True;mixBasisNoFV], 5, ": "];
 
 DynamicCalcTreeMasses /: Dynamic[DynamicCalcTreeMasses] := "for all eigenstates";
 DynamicSpectrumFileInput /: Dynamic[DynamicSpectrumFileInput] := showSingle[];
