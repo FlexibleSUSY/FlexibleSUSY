@@ -26,12 +26,7 @@
 
 namespace flexiblesusy {
 
-class Names {
-public:
-   virtual ~Names() = default;
-   virtual const std::string& get(int) const = 0;
-   virtual int size() const = 0;
-};
+class Names;
 
 /**
  * @class Problems

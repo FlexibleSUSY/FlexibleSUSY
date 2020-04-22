@@ -6,11 +6,11 @@
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
 FLEXIBLESUSY_MINOR=4
-FLEXIBLESUSY_PATCH=1
+FLEXIBLESUSY_PATCH=2
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
-GM2CALC_VERSION="1.4.3"
+GM2CALC_VERSION="1.6.0"
 HIMALAYA_VERSION="unknown"
 
 # directory of this script
@@ -2047,6 +2047,12 @@ check_required_libs() {
             local model_name=$(echo ${m} | sed -e 's|models/||')
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
+            [ -e "${model_file}" ] || continue
+
+            # early continue to skip expensive Mathematica kernel
+            # calls, if possible
+            grep 'UseSMYukawa2Loop\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
                 enable_tsil=yes
@@ -2102,6 +2108,12 @@ check_looptools_libs() {
             LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
         else
             LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
+        fi
+
+        # check dependency on libquadmath by searching for cabsq in liblooptools
+        check_symbol "cabsq" "$found_lib" "$found_dir"
+        if test -n "$found_lib" ; then
+            LOOPTOOLSLIBS="$LOOPTOOLSLIBS -lquadmath"
         fi
     fi
 }
@@ -3004,14 +3016,28 @@ add_metaflags() {
    local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
-   # All *.m files exist because of check_models
+   local c_=''
    local fs_=''
    for m in ${MODELS}; do
       fs_="${m}/FlexibleSUSY.m"
 
-      grep -q "$tlib_" $fs_ && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
-      grep -q "$tfa_" $fs_ && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
-      grep -q "$tfc_" $fs_ && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      [ ! -e "$fs_" ] && continue
+
+      c_=$(grep "$tlib_" $fs_)
+      if [ "$c_" != "$lib_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tlib_}.*/${lib_}/g" $fs_ || echo "$lib_" >> $fs_
+      fi
+
+      c_=$(grep "$tfa_" $fs_)
+      if [ "$c_" != "$fa_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfa_}.*/${fa_}/g" $fs_ || echo "$fa_" >> $fs_
+      fi
+
+      c_=$(grep "$tfc_" $fs_)
+      if [ "$c_" != "$fc_" ]; then
+         [ "$c_" != '' ] && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      fi
+
    done
 }
 
@@ -3454,7 +3480,9 @@ sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
     < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
-add_metaflags
+if test "x${enable_meta}" = "xyes"; then
+    add_metaflags
+fi
 
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit

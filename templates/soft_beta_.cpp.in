@@ -75,7 +75,7 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
 
 @betaOneLoop@
 
-   return beta_@parameterName@;
+   return oneLoop * beta_@parameterName@;
 }
 
 /**
@@ -91,7 +91,7 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
 
 @betaTwoLoop@
 
-   return beta_@parameterName@;
+   return twoLoop * beta_@parameterName@;
 }
 
 /**
@@ -109,7 +109,7 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
 
 @betaThreeLoop@
 
-   return beta_@parameterName@;
+   return threeLoop * beta_@parameterName@;
 }
 
 /**
@@ -127,7 +127,7 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
 
 @betaFourLoop@
 
-   return beta_@parameterName@;
+   return fourLoop * beta_@parameterName@;
 }
 
 /**
@@ -145,7 +145,7 @@ typename Eigen::MatrixBase<Derived>::PlainObject operator-(double n, const Eigen
 
 @betaFiveLoop@
 
-   return beta_@parameterName@;
+   return fiveLoop * beta_@parameterName@;
 }
 
 } // namespace flexiblesusy

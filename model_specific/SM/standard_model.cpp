@@ -320,7 +320,7 @@ int Standard_model::solve_ewsb_iteratively()
    };
 
    std::unique_ptr<EWSB_solver> solvers[] = {
-      std::unique_ptr<EWSB_solver>(new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_relative>(ewsb_stepper, get_number_of_ewsb_iterations(), fixed_point_iterator::Convergence_tester_relative(ewsb_iteration_precision))),
+      std::unique_ptr<EWSB_solver>(new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_relative<number_of_ewsb_equations> >(ewsb_stepper, get_number_of_ewsb_iterations(), fixed_point_iterator::Convergence_tester_relative<number_of_ewsb_equations>(ewsb_iteration_precision))),
       std::unique_ptr<EWSB_solver>(new Root_finder<number_of_ewsb_equations>(tadpole_stepper, get_number_of_ewsb_iterations(), ewsb_iteration_precision, Root_finder<number_of_ewsb_equations>::GSLHybridS)),
       std::unique_ptr<EWSB_solver>(new Root_finder<number_of_ewsb_equations>(tadpole_stepper, get_number_of_ewsb_iterations(), ewsb_iteration_precision, Root_finder<number_of_ewsb_equations>::GSLBroyden))
    };

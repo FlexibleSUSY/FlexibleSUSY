@@ -49,6 +49,7 @@ namespace standard_model {
 class Standard_model;
 }
 
+struct @ModelName@_input_parameters;
 class @ModelName@_mass_eigenstates;
 
 /**
@@ -94,6 +95,8 @@ public:
    int solve_ewsb_equations() override;
    Eigen::ArrayXd get_tree_level_masses() const override;
    Eigen::ArrayXd get_tree_level_masses_and_mixings() const override;
+   const @ModelName@_input_parameters& get_input_parameters() const override;
+   @ModelName@_input_parameters& get_input_parameters() override;
    Eigen::ArrayXd get_extra_parameters() const override;
    const @ModelName@_physical& get_physical() const override;
    @ModelName@_physical& get_physical() override;

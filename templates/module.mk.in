@@ -23,16 +23,18 @@ MOD@CLASSNAME@_SUBMOD_INC := $(patsubst %,-I%,$(MOD@CLASSNAME@_SUBMOD))
 @CLASSNAME@_SOFT_BETAS_MK := \
 		$(DIR)/soft_betas.mk
 
-@CLASSNAME@_CXX_QFT_VERTICES_MK := \
+@CLASSNAME@_CXXQFT_VERTICES_MK := \
 		$(DIR)/cxx_qft/vertices.mk
+
+-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 
 @CLASSNAME@_FlexibleEFTHiggs_MK := \
 		$(DIR)/FlexibleEFTHiggs.mk
 
 @CLASSNAME@_INCLUDE_MK := \
 		$(@CLASSNAME@_SUSY_BETAS_MK) \
-		$(@CLASSNAME@_SOFT_BETAS_MK) \
-		$(@CLASSNAME@_CXX_QFT_VERTICES_MK)
+		$(@CLASSNAME@_SOFT_BETAS_MK)
 
 @CLASSNAME@_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.@CLASSNAME@_generated \
@@ -66,6 +68,8 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_susy_parameters.cpp \
 		$(DIR)/@CLASSNAME@_utilities.cpp \
 		$(DIR)/@CLASSNAME@_weinberg_angle.cpp
+
+LIB@CLASSNAME@_SRC += $(LIB@CLASSNAME@_CXXQFT_VERTICES_SRC)
 
 EXE@CLASSNAME@_SRC := \
 		$(DIR)/run_@CLASSNAME@.cpp \
@@ -134,7 +138,7 @@ ifneq ($(MAKECMDGOALS),release)
 ifneq ($(MAKECMDGOALS),doc)
 -include $(@CLASSNAME@_SUSY_BETAS_MK)
 -include $(@CLASSNAME@_SOFT_BETAS_MK)
--include $(@CLASSNAME@_CXX_QFT_VERTICES_MK)
+-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
 -include $(@CLASSNAME@_FlexibleEFTHiggs_MK)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
@@ -146,7 +150,7 @@ $(@CLASSNAME@_SUSY_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 $(@CLASSNAME@_SOFT_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
-$(@CLASSNAME@_CXX_QFT_VERTICES_MK): run-metacode-$(MODNAME)
+$(@CLASSNAME@_CXXQFT_VERTICES_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 $(@CLASSNAME@_FlexibleEFTHiggs_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
@@ -211,6 +215,7 @@ install-src::
 		$(Q)install -d $(@CLASSNAME@_INSTALL_DIR)
 		$(Q)install -d $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_VERTICES_SRC) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_HDR) $(@CLASSNAME@_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB@CLASSNAME@_CXXQFT_HDR) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(EXE@CLASSNAME@_SRC) $(@CLASSNAME@_INSTALL_DIR)
@@ -218,6 +223,8 @@ install-src::
 		$(Q)install -m u=rw,g=r,o=r $(LL@CLASSNAME@_MMA) $(@CLASSNAME@_INSTALL_DIR)
 		$(Q)$(INSTALL_STRIPPED) $(@CLASSNAME@_MK) $(@CLASSNAME@_INSTALL_DIR) -m u=rw,g=r,o=r
 		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_CXXQFT_VERTICES_MK) $(@CLASSNAME@_INSTALL_CXXQFT_DIR)
+
 ifneq ($(@CLASSNAME@_SLHA_INPUT),)
 		$(Q)install -m u=rw,g=r,o=r $(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_INSTALL_DIR)
 endif
@@ -249,6 +256,7 @@ clean-$(MODNAME)-src:
 		$(Q)-rm -f $(LL@CLASSNAME@_MMA)
 		$(Q)-rm -f $(METACODE_STAMP_@CLASSNAME@)
 		$(Q)-rm -f $(@CLASSNAME@_INCLUDE_MK)
+		$(Q)-rm -f $(@CLASSNAME@_CXXQFT_VERTICES_MK)
 		$(Q)-rm -f $(@CLASSNAME@_SLHA_INPUT)
 		$(Q)-rm -f $(@CLASSNAME@_REFERENCES)
 		$(Q)-rm -f $(@CLASSNAME@_GNUPLOT)
@@ -275,7 +283,7 @@ pack-$(MODNAME)-src:
 		$(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) \
 		$(EXE@CLASSNAME@_SRC) \
 		$(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
-		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) \
+		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_CXXQFT_VERTICES_MK) \
 		$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_REFERENCES) \
 		$(@CLASSNAME@_GNUPLOT)
 

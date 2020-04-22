@@ -21,7 +21,6 @@
 #ifndef @ModelName@_SLHA_IO_H
 #define @ModelName@_SLHA_IO_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_model_slha.hpp"
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_observables.hpp"
@@ -33,6 +32,7 @@
 #include "ckm.hpp"
 #include "ew_input.hpp"
 #include "lowe.h"
+#include "wrappers.hpp"
 
 #include <Eigen/Core>
 #include <string>
@@ -56,6 +56,7 @@
 namespace flexiblesusy {
 
 struct @ModelName@_input_parameters;
+class @ModelName@_mass_eigenstates;
 class Spectrum_generator_settings;
 
 template <class T>

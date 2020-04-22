@@ -37,7 +37,7 @@ jobs:
         LOOPLIBRARY: [internal, looptools]
 
     env:
-      IMAGE_VERSION: '0.2.4'
+      IMAGE_VERSION: '0.2.5'
       SARAH_VERSION: '4.14.3'
       FEYNARTS_VERSION: '3.11'
       FORMCALC_VERSION: '9.9'

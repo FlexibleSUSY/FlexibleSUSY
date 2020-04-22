@@ -127,7 +127,7 @@ void test_tanbeta_scan()
 
       run_point(input_file, fs_data, ss_data);
 
-      printf("%10g %22g (%5d) %22g (%5d) %19.1f%\n", tanBeta,
+      printf("%10g %22g (%5d) %22g (%5d) %19.1f%%\n", tanBeta,
              ss_data.time, ss_data.error,
              fs_data.time, fs_data.error,
              100.*(fs_data.time - ss_data.time)/ss_data.time);

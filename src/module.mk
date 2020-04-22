@@ -22,6 +22,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/logger.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
+		$(DIR)/mixings.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/physical_input.cpp \
@@ -36,6 +37,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
+		$(DIR)/trilog.cpp \
 		$(DIR)/weinberg_angle.cpp \
 		$(DIR)/wrappers.cpp
 
@@ -79,8 +81,10 @@ LIBFLEXI_HDR := \
 		$(DIR)/lowe.h \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
+		$(DIR)/mixings.hpp \
 		$(DIR)/model.hpp \
 		$(DIR)/multiindex.hpp \
+		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
 		$(DIR)/physical_input.hpp \
@@ -105,6 +109,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
+		$(DIR)/trilog.hpp \
 		$(DIR)/weinberg_angle.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp

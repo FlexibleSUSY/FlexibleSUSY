@@ -16,35 +16,19 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef DILOG_H
-#define DILOG_H
+#ifndef TRILOG_H
+#define TRILOG_H
 
 #include <complex>
 
-#define DILOGATTR noexcept
-
 namespace flexiblesusy {
 
-/// real dilogarithm
-double dilog(double) DILOGATTR;
+/// complex trilogarithm
+std::complex<double> trilog(const std::complex<double>&) noexcept;
 
-/// real dilogarithm
-long double dilog(long double) DILOGATTR;
-
-/// complex dilogarithm
-std::complex<double> dilog(const std::complex<double>&) DILOGATTR;
-
-/// complex dilogarithm
-std::complex<long double> dilog(const std::complex<long double>&) DILOGATTR;
-
-/// Clausen function Cl_2(x)
-double clausen_2(double) DILOGATTR;
-
-/// Clausen function Cl_2(x)
-long double clausen_2(long double) DILOGATTR;
+/// complex trilogarithm (long double precision)
+std::complex<long double> trilog(const std::complex<long double>&) noexcept;
 
 } // namespace flexiblesusy
-
-#undef DILOGATTR
 
 #endif
