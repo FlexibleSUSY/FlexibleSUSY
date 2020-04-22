@@ -336,10 +336,10 @@ TSIL_COMPLEXCPP delta2mixed(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt,
    const auto v2 = v*v;
    const auto t2 = t*t;
    const auto h2 = h*h;
-   const auto h3 = h*h*h;
+   const auto h3 = h2*h;
    const auto At = TSIL_A_(t,qq);
    const auto Ah = TSIL_A_(h,qq);
-   const auto At2 = TSIL_A_(t,qq)*TSIL_A_(t,qq);
+   const auto At2 = At*At;
    const auto Bht = TSIL_B_(h,t,t,qq);
    const auto Ihtt = TSIL_I2_(h,t,t,qq);
 
@@ -430,11 +430,11 @@ TSIL_COMPLEXCPP delta2Higgs(TSIL_REAL t, TSIL_REAL h, TSIL_REAL yt,
    const auto q2 = q*q;
    const auto v4 = v*v*v*v;
    const auto h2 = h*h;
-   const auto h3 = h*h*h;
-   const auto h4 = h*h*h*h;
+   const auto h3 = h2*h;
+   const auto h4 = h2*h2;
    const auto t2 = t*t;
-   const auto t3 = t*t*t;
-   const auto t4 = t*t*t*t;
+   const auto t3 = t2*t;
+   const auto t4 = t2*t2;
    const auto Logt = std::log(t);
    const auto Logh = std::log(h);
    const auto Logtmh = std::log(t-h);

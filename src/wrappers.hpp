@@ -28,7 +28,6 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-#include <vector>
 #include <Eigen/Core>
 
 #include "eigen_tensor.hpp"
@@ -40,120 +39,90 @@
 
 namespace flexiblesusy {
 
-static constexpr double Pi = M_PI;
+// Constants ///////////////////////////////////////////////////////////
+
+static constexpr double Pi             = 3.141592653589793;
 static constexpr double oneOver16Pi = 1. / (16. * Pi);
-static constexpr double oneOver16PiSqr = 1./(16. * Pi * Pi);
-static constexpr double oneLoop = oneOver16PiSqr;
-static constexpr double twoLoop = oneOver16PiSqr * oneOver16PiSqr;
-static constexpr double threeLoop = oneOver16PiSqr * oneOver16PiSqr * oneOver16PiSqr;
-static constexpr double fourLoop = twoLoop * twoLoop;
-static constexpr double fiveLoop = oneLoop * fourLoop;
+static constexpr double oneOver16PiSqr = 6.332573977646110963e-03;
+static constexpr double oneLoop        = 6.332573977646110963e-03;
+static constexpr double twoLoop        = 4.010149318236068752e-05;
+static constexpr double threeLoop      = 2.539456721913701978e-07;
+static constexpr double fourLoop       = 1.608129755454920543e-09;
+static constexpr double fiveLoop       = 1.018360064207223307e-11;
 static constexpr bool True = true;
 
-template <typename T>
-T Abs(T a) noexcept
-{
-   return std::abs(a);
-}
+// Abs /////////////////////////////////////////////////////////////////
 
-template <typename T>
-T Abs(const std::complex<T>& z) noexcept
-{
-   return std::abs(z);
-}
-
-template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Abs(const Eigen::Array<Scalar, M, N>& a)
-{
-   return a.cwiseAbs();
-}
-
-template <typename Scalar, int M, int N>
-Eigen::Matrix<Scalar, M, N> Abs(const Eigen::Matrix<Scalar, M, N>& a)
-{
-   return a.cwiseAbs();
-}
-
-template <class T>
-std::vector<T> Abs(std::vector<T> v) noexcept
-{
-   for (auto& e: v)
-      e = Abs(e);
-   return v;
-}
-
-double AbsSqr(double) noexcept;
-double AbsSqr(const std::complex<double>&) noexcept;
-double AbsSqrt(double) noexcept;
+inline int         Abs(int x)                              noexcept { return std::abs(x); }
+inline long        Abs(long x)                             noexcept { return std::abs(x); }
+inline long long   Abs(long long x)                        noexcept { return std::abs(x); }
+inline float       Abs(float x)                            noexcept { return std::abs(x); }
+inline double      Abs(double x)                           noexcept { return std::abs(x); }
+inline long double Abs(long double x)                      noexcept { return std::abs(x); }
+inline float       Abs(const std::complex<float>& x)       noexcept { return std::abs(x); }
+inline double      Abs(const std::complex<double>& x)      noexcept { return std::abs(x); }
+inline long double Abs(const std::complex<long double>& x) noexcept { return std::abs(x); }
 
 template <typename Derived>
-Derived AbsSqrt(const Eigen::MatrixBase<Derived>& m)
+auto Abs(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().eval())
 {
-   return m.cwiseAbs().cwiseSqrt();
+   return x.cwiseAbs();
 }
 
 template <typename Derived>
-Derived AbsSqrt(const Eigen::ArrayBase<Derived>& m)
+auto Abs(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().eval())
 {
-   return m.cwiseAbs().cwiseSqrt();
+   return x.cwiseAbs();
 }
 
-/**
- * Calculates the mass of a singlet from a (possibly complex)
- * numerical value by taking the magnitude of the value.
- *
- * @param value numerical value
- * @return mass
- */
-template <typename T>
-double calculate_singlet_mass(T value) noexcept
+// AbsSqr //////////////////////////////////////////////////////////////
+
+inline int         AbsSqr(int x)                              noexcept { return x*x; }
+inline long        AbsSqr(long x)                             noexcept { return x*x; }
+inline long long   AbsSqr(long long x)                        noexcept { return x*x; }
+inline float       AbsSqr(float x)                            noexcept { return x*x; }
+inline double      AbsSqr(double x)                           noexcept { return x*x; }
+inline long double AbsSqr(long double x)                      noexcept { return x*x; }
+inline float       AbsSqr(const std::complex<float>& x)       noexcept { return std::norm(x); }
+inline double      AbsSqr(const std::complex<double>& x)      noexcept { return std::norm(x); }
+inline long double AbsSqr(const std::complex<long double>& x) noexcept { return std::norm(x); }
+
+template <typename Derived>
+auto AbsSqr(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().eval().square().eval())
 {
-   return std::abs(value);
+   return x.eval().cwiseAbs().square();
 }
 
-/**
- * Calculates the mass of a Majoran fermion singlet from a (possibly
- * complex) numerical value by taking the magnitude of the value.
- *
- * The phase is set to exp(i theta/2), where theta is the phase angle
- * of the complex value.  If the value is pure real, then the phase
- * will be set to 1.  If the value is purely imaginary, then the phase
- * will be set to \f$e^{i \pi/2}\f$.
- *
- * @param value numerical value
- * @param[out] phase phase
- * @return mass
- */
-template <typename T>
-double calculate_majorana_singlet_mass(T value, std::complex<double>& phase)
+template <typename Derived>
+auto AbsSqr(const Eigen::MatrixBase<Derived>& x) -> decltype(AbsSqr(x.array()).matrix().eval())
 {
-   phase = std::polar(1., 0.5 * std::arg(std::complex<double>(value)));
-   return std::abs(value);
+   return AbsSqr(x.array()).matrix().eval();
 }
 
-/**
- * Calculates the mass of a Dirac fermion singlet from a (possibly
- * complex) numerical value by taking the magnitude of the value.
- *
- * The phase is set to exp(i theta), where theta is the phase angle of
- * the complex value.  If the value is pure real, then the phase will
- * be set to 1.  If the value is purely imaginary, then the phase will
- * be set to \f$e^{i \pi}\f$.
- *
- * @param value numerical value
- * @param[out] phase phase
- * @return mass
- */
-template <typename T>
-double calculate_dirac_singlet_mass(T value, std::complex<double>& phase)
+// AbsSqrt /////////////////////////////////////////////////////////////
+
+inline double AbsSqrt(double x) noexcept { return std::sqrt(std::abs(x)); }
+
+inline double AbsSqrt(const std::complex<double>& x) noexcept { return std::sqrt(std::abs(x)); }
+
+template <typename Derived>
+auto AbsSqrt(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().cwiseSqrt())
 {
-   phase = std::polar(1., std::arg(std::complex<double>(value)));
-   return std::abs(value);
+   return x.cwiseAbs().cwiseSqrt();
 }
+
+template <typename Derived>
+auto AbsSqrt(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().cwiseSqrt())
+{
+   return x.cwiseAbs().cwiseSqrt();
+}
+
+// ArcTan, ArcSin, ArcCos //////////////////////////////////////////////
 
 double ArcTan(double) noexcept;
 double ArcSin(double) noexcept;
 double ArcCos(double) noexcept;
+
 double Arg(const std::complex<double>&) noexcept;
 
 template <typename T>
@@ -586,14 +555,6 @@ Eigen::Array<Scalar, M, N> Sqrt(const Eigen::Array<Scalar, M, N>& m)
    return m.unaryExpr([](Scalar a){ return Sqrt(a); });
 }
 
-template <class T>
-std::vector<T> Sqrt(std::vector<T> v)
-{
-   for (auto& e: v)
-      e = Sqrt(e);
-   return v;
-}
-
 template <typename T>
 constexpr T Sqr(T a) noexcept
 {
@@ -604,14 +565,6 @@ template <typename Scalar, int M, int N>
 Eigen::Array<Scalar, M, N> Sqr(const Eigen::Array<Scalar, M, N>& a)
 {
    return a.unaryExpr([](Scalar a){ return Sqr(a); });
-}
-
-template <class T>
-std::vector<T> Sqr(std::vector<T> v)
-{
-   for (auto& e: v)
-      e = Sqr(e);
-   return v;
 }
 
 #define DEFINE_COMMUTATIVE_OPERATOR_COMPLEX_INT(op)                     \
@@ -714,12 +667,6 @@ std::string ToString(const std::complex<double>&);
 double Total(double) noexcept;
 std::complex<double> Total(const std::complex<double>&) noexcept;
 
-template <class T>
-T Total(const std::vector<T>& v)
-{
-   return std::accumulate(v.begin(), v.end(), T(0));
-}
-
 template <typename Scalar, int M, int N>
 Scalar Total(const Eigen::Array<Scalar, M, N>& a)
 {
@@ -730,24 +677,6 @@ template <typename Scalar, int M, int N>
 Scalar Total(const Eigen::Matrix<Scalar, M, N>& a)
 {
    return a.sum();
-}
-
-template <class Scalar, int M, int N>
-Eigen::Array<Scalar,M,N> Total(const std::vector<Eigen::Array<Scalar,M,N> >& v)
-{
-   if (v.empty()) {
-      Eigen::Array<Scalar,M,N> result(0,0);
-      result.setZero();
-      return result;
-   }
-
-   Eigen::Array<Scalar,M,N> result(v[0].rows(), v[0].cols());
-   result.setZero();
-
-   for (std::size_t i = 0; i < v.size(); i++)
-      result += v[i];
-
-   return result;
 }
 
 /// unit vector of length N into direction i

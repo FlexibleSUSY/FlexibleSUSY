@@ -95,11 +95,9 @@ void @ModelName@_spectrum_generator<Semi_analytic>::run_except(const softsusy::Q
    @ModelName@_soft_parameters_constraint<Semi_analytic> soft_constraint(&model, qedqcd);
 
    soft_constraint.set_boundary_scale(
-      [this,&@boundaryConstraint@] () {
-         return @boundaryConstraint@.get_scale(); });
+      [&@boundaryConstraint@] () { return @boundaryConstraint@.get_scale(); });
    @semiAnalyticConstraint@.set_scale(
-      [this,&soft_constraint] () {
-         return soft_constraint.get_scale(); });
+      [&soft_constraint] () { return soft_constraint.get_scale(); });
 
    high_scale_constraint.initialize();
    susy_scale_constraint.initialize();
