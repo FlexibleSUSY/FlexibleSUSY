@@ -26,7 +26,8 @@ MOD@CLASSNAME@_SUBMOD_INC := $(patsubst %,-I%,$(MOD@CLASSNAME@_SUBMOD))
 @CLASSNAME@_CXXQFT_VERTICES_MK := \
 		$(DIR)/cxx_qft/vertices.mk
 
-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+-include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
+LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 
 @CLASSNAME@_FlexibleEFTHiggs_MK := \
 		$(DIR)/FlexibleEFTHiggs.mk

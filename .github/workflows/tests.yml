@@ -35,7 +35,6 @@ jobs:
       matrix:
         CXXCOMPILER: [g++, clang++]
         LOOPLIBRARY: [internal, looptools]
-      max-parallel: 1
 
     env:
       IMAGE_VERSION: '0.2.5'

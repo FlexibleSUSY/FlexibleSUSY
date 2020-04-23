@@ -703,4 +703,71 @@ BOOST_AUTO_TEST_CASE(test_fs_diagonalize_hermitian_errbd)
 	BOOST_CHECK_LE(z_error, z_errbd[i] * 10);
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_calculate_majorana_singlet_mass)
+{
+   const double Pi = 3.141592653589793;
+
+   double mass;
+   std::complex<double> phase;
+
+   mass = calculate_majorana_singlet_mass(100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_majorana_singlet_mass(-100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_SMALL(phase.real(), 1e-15);
+   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(-100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_SMALL(phase.real(), 1e-15);
+   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(1.,1.), phase);
+   BOOST_CHECK_EQUAL(mass, std::sqrt(2.));
+   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
+   BOOST_CHECK_CLOSE(std::arg(phase), 0.5 * Pi/4., 1e-13);
+}
+
+BOOST_AUTO_TEST_CASE(test_calculate_dirac_singlet_mass)
+{
+   const double Pi = 3.141592653589793;
+
+   double mass;
+   std::complex<double> phase;
+
+   mass = calculate_dirac_singlet_mass(100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(-100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), -1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(-100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), -1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(1.,1.), phase);
+   BOOST_CHECK_EQUAL(mass, std::sqrt(2.));
+   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
+   BOOST_CHECK_CLOSE(std::arg(phase), Pi/4., 1e-13);
+}
+
 #endif // TEST_LINALG2_PART8

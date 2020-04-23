@@ -5,6 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "slha_io.hpp"
+#include "mixings.hpp"
 #include "linalg2.hpp"
 #include "stopwatch.hpp"
 #include "wrappers.hpp"
@@ -306,7 +307,7 @@ BOOST_AUTO_TEST_CASE( test_processor_vs_loop )
    using namespace std::placeholders;
    Stopwatch timer;
    double processor_time = 0., loop_time = 0.;
-   const int number_of_entries = 10000;
+   const int number_of_entries = 1000;
    SLHA_io reader;
    SLHAea::Coll coll;
 
@@ -371,7 +372,7 @@ BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
                 Z.row(0).imag().cwiseAbs().maxCoeff() == 0.));
 
    // convert to SLHA convention
-   SLHA_io::convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
+   convert_symmetric_fermion_mixings_to_slha(eigenvalues, Z);
 
    BOOST_CHECK(eigenvalues(0) < 0. || eigenvalues(1) < 0.);
    BOOST_CHECK_EQUAL(Z.imag().cwiseAbs().maxCoeff(), 0.);
@@ -391,7 +392,7 @@ BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
    BOOST_CHECK_EQUAL(Im(reconstructed_mass_matrix(1,1)), 0.);
 
    // convert to HK convention
-   SLHA_io::convert_symmetric_fermion_mixings_to_hk(eigenvalues, Z);
+   convert_symmetric_fermion_mixings_to_hk(eigenvalues, Z);
 
    BOOST_CHECK(eigenvalues(0) > 0. && eigenvalues(1) > 0.);
    BOOST_CHECK_GT(Z.imag().cwiseAbs().maxCoeff(), 0.);
@@ -472,7 +473,7 @@ void convert_symmetric_fermion_mixings_to_slha_rediagonalization(
 
 BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_conversion_speed )
 {
-   const int number_of_iterations = 10000000;
+   const int number_of_iterations = 1000000;
 
    MEASURE(forloop          , number_of_iterations);
    MEASURE(rediagonalization, number_of_iterations);

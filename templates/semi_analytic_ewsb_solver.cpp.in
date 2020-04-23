@@ -36,6 +36,7 @@
 #include "root_finder.hpp"
 #include "fixed_point_iterator.hpp"
 #include "raii.hpp"
+#include "wrappers.hpp"
 
 #include <memory>
 

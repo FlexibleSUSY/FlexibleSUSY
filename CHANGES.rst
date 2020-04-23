@@ -32,6 +32,22 @@ Changes
   from the Conan repository is preferred over the one installed in the
   system directories.
 
+* Improved performance and compile-time of 2-loop MSSM threshold
+  corrections.
+
+* Updated GM2Calc to version 1.6.0.
+
+* Improved performance of 1- and 2-loop threshold correction loop
+  functions used in HSSUSY.
+
+Fixed bugs
+----------
+
+* [commit 6d4310f6a]: Fix linking error with LoopTools on some
+  platforms by linking with libquadmath when necessary.
+
+* Fixed numerical instability of SOFTSUSY's B0 function.
+
 FlexibleSUSY 2.4.2 [April, 10 2020]
 ===================================
 

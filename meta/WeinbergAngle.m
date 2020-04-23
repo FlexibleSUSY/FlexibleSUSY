@@ -896,7 +896,7 @@ CreateDeltaVBContribution[deltaVBcontri_WeinbergAngle`DeltaVB, vertexRules_List]
            body = Parameters`CreateLocalConstRefs[expr] <> "\n";
            body = body <> "const " <> type <> " result = " <>
                   Parameters`ExpressionToString[expr /. vertexRules /. a_[List[i__]] :> a[i]] <> ";\n";
-           body = body <> "\nreturn result;";
+           body = body <> "\nreturn result;\n";
            body = TextFormatting`IndentText[TextFormatting`WrapLines[body]];
            decl = decl <> body <> "}\n";
            {prototype, decl}

@@ -21,9 +21,7 @@
 #ifndef @ModelName@_UTILITIES_H
 #define @ModelName@_UTILITIES_H
 
-#include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_info.hpp"
-#include "wrappers.hpp"
 
 #include <Eigen/Core>
 #include <array>
@@ -38,81 +36,46 @@ class QedQcd;
 
 namespace flexiblesusy {
 
+class @ModelName@_mass_eigenstates;
 struct @ModelName@_observables;
 class Physical_input;
 
 class @ModelName@_parameter_getter {
 private:
-   std::vector<std::string> get_mass_names(const std::string& head = "") const {
-      using namespace @ModelName@_info;
-      std::vector<std::string> masses;
-      for (int i = 0; i < NUMBER_OF_PARTICLES; i++) {
-         for (int m = 0; m < particle_multiplicities[i]; m++) {
-            masses.push_back(
-               head + "M" + particle_names[i] +
-               (particle_multiplicities[i] == 1 ? "" : "("
-                + std::to_string(static_cast<long long>(m)) + ")"));
-         }
-      }
+   std::vector<std::string> get_mass_names(const std::string& head = "") const;
 
-      masses.shrink_to_fit();
-
-      return masses;
-   }
-
-   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_mixing_names() const {
-      return @ModelName@_info::particle_mixing_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_mixing_names() const;
 
 public:
    /// returns DR-bar parameters
-   Eigen::ArrayXd get_parameters(const @ModelName@_mass_eigenstates& model) {
-      return model.get();
-   }
+   Eigen::ArrayXd get_parameters(const @ModelName@_mass_eigenstates& model);
 
    /// returns names of DR-bar parameters
-   std::array<std::string, @ModelName@_info::NUMBER_OF_PARAMETERS> get_parameter_names() const {
-      return @ModelName@_info::parameter_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_PARAMETERS> get_parameter_names() const;
 
    /// returns names of particles
-   std::array<std::string, @ModelName@_info::NUMBER_OF_PARTICLES> get_particle_names() const {
-      return @ModelName@_info::particle_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_PARTICLES> get_particle_names() const;
 
    /// returns names of DR-bar masses
-   std::vector<std::string> get_DRbar_mass_names() const { return get_mass_names(); }
+   std::vector<std::string> get_DRbar_mass_names() const;
 
    /// returns names of pole masses
-   std::vector<std::string> get_pole_mass_names() const { return get_mass_names("Pole"); }
+   std::vector<std::string> get_pole_mass_names() const;
 
    /// returns names of DR-bar mixing matrices
-   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_DRbar_mixing_names() const {
-      return get_mixing_names();
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_DRbar_mixing_names() const;
 
    /// returns names of pole mixing matrices
-   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_pole_mixing_names() const {
-      auto mixing_names = get_mixing_names();
-      for (auto& n: mixing_names)
-         n = std::string("Pole") + n;
-      return mixing_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_MIXINGS> get_pole_mixing_names() const;
 
    /// returns names of input parameters
-   std::array<std::string, @ModelName@_info::NUMBER_OF_INPUT_PARAMETERS> get_input_parameter_names() const {
-      return @ModelName@_info::input_parameter_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_INPUT_PARAMETERS> get_input_parameter_names() const;
 
    /// returns names of input parameters
-   std::array<std::string, @ModelName@_info::NUMBER_OF_EXTRA_PARAMETERS> get_extra_parameter_names() const {
-      return @ModelName@_info::extra_parameter_names;
-   }
+   std::array<std::string, @ModelName@_info::NUMBER_OF_EXTRA_PARAMETERS> get_extra_parameter_names() const;
 
    /// returns number of particle masses
-   decltype(@ModelName@_info::NUMBER_OF_MASSES) get_number_of_masses() const {
-      return @ModelName@_info::NUMBER_OF_MASSES;
-   }
+   decltype(@ModelName@_info::NUMBER_OF_MASSES) get_number_of_masses() const;
 };
 
 class @ModelName@_spectrum_plotter {
