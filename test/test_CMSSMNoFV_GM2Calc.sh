@@ -15,7 +15,7 @@ print_block="$BASEDIR/../utils/print_slha_block.awk"
     exit 1;
 }
 
-[ $("$FSCONFIG" --with-GM2Calc) = yes -a -x ${GM2CALC_EXE} ] || {
+[ -x ${GM2CALC_EXE} ] || {
     echo "Error: GM2Calc needs to be build!"
     exit 1;
 }
