@@ -998,9 +998,7 @@ $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_CMSSMNoFV_GM2Calc.sh: $(GM2CALC_EXE)
 
-$(DIR)/test_gm2calc.x: $(LIBMSSMNoFVSLHA2) $(LIBGM2Calc)
-
-$(DIR)/test_MSSMNoFV_onshell.x: $(LIBGM2Calc)
+$(DIR)/test_gm2calc.x: $(LIBMSSMNoFVSLHA2)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
 
@@ -1100,10 +1098,10 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAt
 $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 
 # general test rule
-$(DIR)/test_%.x: $(DIR)/test_%.o
+$(DIR)/test_%.x: $(DIR)/test_%.o $(LIBGM2Calc)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
+		$(filter -%,$(LOOPFUNCLIBS)) $(LIBGM2Calc) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
 		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
