@@ -28,7 +28,7 @@
 #include "gm2calc/gm2_error.hpp"
 #include "gm2calc/gm2_uncertainty.hpp"
 #include "gm2calc/MSSMNoFV_onshell.hpp"
-#include "logger.hpp"
+#include "gm2_log.hpp"
 #include <cmath>
 
 namespace flexiblesusy {

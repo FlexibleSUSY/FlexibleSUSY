@@ -135,7 +135,7 @@ $(LIBGM2Calc): $(LIBGM2Calc_OBJ)
 		@$(MSG)
 		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
-$(EXEGM2Calc_EXE): $(LIBGM2Calc_OBJ) $(LIBGM2Calc) $(LIBFLEXI)
+$(EXEGM2Calc_EXE): $(LIBGM2Calc_OBJ) $(LIBGM2Calc)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^)
 
