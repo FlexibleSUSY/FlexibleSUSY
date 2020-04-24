@@ -107,7 +107,7 @@ create_model_specific_modules_list() {
 }
 
 create_module_list() {
-    echo "config src fflite slhaea doc $models $addons $model_specific_modules $optional_modules"
+    echo "config src fflite slhaea GM2Calc doc $models $addons $model_specific_modules $optional_modules"
 }
 
 create_include_directives_for_FS_modules() {
@@ -143,28 +143,17 @@ create_flexiblesusy_libs() {
     local flexiblesusylibs=
 
     for a in $addons $models ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && continue
         flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/${a}/lib$(basename $a)${module_lib_ext}"
     done
 
     for a in $model_specific_modules ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && continue
         flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/${a}/libmodel_specific_$(basename $a)${module_lib_ext}"
     done
 
     flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/src/libflexisusy${module_lib_ext}"
+    flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/GM2Calc/libGM2Calc${module_lib_ext}"
 
     echo "$flexiblesusylibs"
-}
-
-create_gm2calc_libs() {
-    for a in $addons ; do
-        [ "x$(basename $a)" = "xGM2Calc" ] && {
-            echo "${ABSBASEDIR}/addons/GM2Calc/libGM2Calc${module_lib_ext}"
-            return
-        }
-    done
-    echo ""
 }
 
 create_cppflags() {
@@ -191,7 +180,7 @@ cppflags_without_modules=""
 cppflags=""
 flexiblesusy_libs="$(create_flexiblesusy_libs)"
 compile_cmd=""
-libs="$ldflags $flexiblesusy_libs $(create_gm2calc_libs) $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
+libs="$ldflags $flexiblesusy_libs $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
 modules="$(create_module_list)"
 
 help() {
