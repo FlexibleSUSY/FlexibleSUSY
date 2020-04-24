@@ -17,14 +17,11 @@
 // ====================================================================
 
 #include "gm2calc_interface.hpp"
-#include "config.h"
 
 /**
  * @file gm2calc_interface.cpp
  * @brief contains definitions of GM2Calc interface functions
  */
-
-#ifdef ENABLE_GM2Calc
 
 #include "gm2calc/gm2_1loop.hpp"
 #include "gm2calc/gm2_2loop.hpp"
@@ -169,24 +166,3 @@ double gm2calc_calculate_amu_uncertainty(const GM2Calc_data& data)
 }
 
 } // namespace flexiblesusy
-
-#else
-
-namespace flexiblesusy {
-
-GM2Calc_data::GM2Calc_data() {}
-void GM2Calc_data::initialize() {}
-
-double gm2calc_calculate_amu(const GM2Calc_data&)
-{
-   return 0.;
-}
-
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data&)
-{
-   return 0.;
-}
-
-} // namespace flexiblesusy
-
-#endif

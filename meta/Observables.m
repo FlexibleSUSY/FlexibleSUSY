@@ -274,14 +274,10 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, str
     structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
-    "#ifdef ENABLE_GM2Calc\n" <>
-    structName <> ".AMUGM2CALC = gm2calc_calculate_amu(gm2calc_data);\n" <>
-    "#endif";
+    structName <> ".AMUGM2CALC = gm2calc_calculate_amu(gm2calc_data);\n";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty, structName_String] :=
-    "#ifdef ENABLE_GM2Calc\n" <>
-    structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);\n" <>
-    "#endif";
+    structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);\n";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton, structName_String] :=
     Module[{i, type, dim, start, result = ""},
@@ -524,10 +520,10 @@ FillGM2CalcInterfaceData[struct_String] :=
            struct <> ".Ad    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[td] <>
                                "(), MODEL.get_" <> CConversion`RValueToCFormString[yd] <> "());\n" <>
            struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <>
-                               "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
-           "#ifdef ENABLE_GM2Calc\n" <>
+                               "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());\n";
+           "\n" <>
            "GM2Calc_data " <> struct <> ";\n" <> filling <> "\n" <>
-           "#endif\n\n"
+           "\n\n"
           ];
 
 FillEffectiveCouplingsInterfaceData[struct_String] :=
