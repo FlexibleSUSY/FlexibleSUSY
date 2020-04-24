@@ -658,8 +658,7 @@ Creating an addon
 
 A FlexibleSUSY addon is a program or library, which uses parts of the
 FlexibleSUSY libraries or the generated models or is integrated into
-FlexibleSUSY.  An example is GM2Calc_, which is included in
-FlexibleSUSY in form of an addon.  An addon can be created via ::
+FlexibleSUSY.  An addon can be created via ::
 
     ./createaddon --name=<addon>
 
@@ -764,7 +763,7 @@ Package content
 In the following all sub-directories within the FlexibleSUSY package
 are listed:
 
-* ``addons/`` contains addons for FlexibleSUSY, such as GM2Calc_
+* ``addons/`` contains addons for FlexibleSUSY
 
 * ``config/`` contains helper scripts and makefile modules for the
   build system
@@ -776,6 +775,8 @@ are listed:
 
 * ``fflite/`` contains an alternative implementation of the
   Passarino-Veltman loop functions, based on FF
+
+* ``GM2Calc/`` contains GM2Calc_, used in some FlexibleSUSY models
 
 * ``meta/`` contains the Mathematica meta code which generates the
   spectrum generators.  See the `meta code documentation`_ for more
