@@ -35,7 +35,7 @@ ENABLE_VERBOSE        := @ENABLE_VERBOSE@
 # Makefile modules
 MODELS             := @MODELS@
 ADDONS             := @ADDONS@
-MODULES            := config src fflite slhaea doc
+MODULES            := config src fflite slhaea GM2Calc doc
 # BEGIN: NOT EXPORTED ##########################################
 MODULES            += meta templates
 # END:   NOT EXPORTED ##########################################

@@ -1,4 +1,4 @@
-DIR          := addons/GM2Calc
+DIR          := GM2Calc
 MODNAME      := GM2Calc
 WITH_$(MODNAME) := yes
 

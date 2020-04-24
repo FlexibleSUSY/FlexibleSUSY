@@ -996,6 +996,8 @@ $(DIR)/test_CMSSMNoFV_two_loop_spectrum.x: $(LIBCMSSMNoFV)
 
 $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
+$(DIR)/test_CMSSMNoFV_GM2Calc.sh: $(GM2CALC_EXE)
+
 $(DIR)/test_gm2calc.x: $(LIBMSSMNoFVSLHA2) $(LIBGM2Calc)
 
 $(DIR)/test_MSSMNoFV_onshell.x: $(LIBGM2Calc)
