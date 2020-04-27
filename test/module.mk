@@ -108,6 +108,7 @@ endif
 
 ifeq ($(ENABLE_TSIL),yes)
 TEST_SRC += \
+		$(DIR)/test_tsil.cpp \
 		$(DIR)/test_sm_twoloop_mt.cpp
 endif
 

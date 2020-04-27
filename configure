@@ -2319,6 +2319,8 @@ check_tsil_size() {
 
 #_____________________________________________________________________
 check_tsil() {
+    [ "x$enable_tsil" = "xno" ] && return
+
     [ -z "$tsil_inc_dir" ] && \
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
@@ -2332,16 +2334,14 @@ check_tsil() {
         return
     }
 
-    if test "x$enable_tsil" != "xno" ; then
-        if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
-            enable_tsil=yes
-        else
-            if [ "x$enable_tsil" = xyes ] ; then
-                message "Error: TSIL not found."
-                exit 1
-            fi
-            enable_tsil=no
+    if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
+        enable_tsil=yes
+    else
+        if [ "x$enable_tsil" = xyes ] ; then
+            message "Error: TSIL not found."
+            exit 1
         fi
+        enable_tsil=no
     fi
 }
 

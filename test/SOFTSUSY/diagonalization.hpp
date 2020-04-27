@@ -27,9 +27,9 @@ namespace flexiblesusy {
  * @class DiagonalizationError
  * @brief Diagonalization failed
  */
-class DiagonalizationError : public Error {
+class DiagonalizationError : public std::runtime_error {
 public:
-   explicit DiagonalizationError(const std::string& msg) : Error(msg) {}
+   explicit DiagonalizationError(const std::string& msg) : std::runtime_error(msg) {}
    virtual ~DiagonalizationError() {}
 };
 

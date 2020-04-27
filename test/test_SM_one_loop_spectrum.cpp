@@ -11,9 +11,12 @@
 #include "standard_model.hpp"
 #include "config.h"
 
-#define SARAH_VERSION_AT_LEAST(x,y,z) (SARAH_MAJOR > x || (SARAH_MAJOR >= x && \
-                                      (SARAH_MINOR > y || (SARAH_MINOR >= y && \
-                                                           SARAH_PATCH >= z))))
+#define SARAH_VERSION_AT_LEAST(x,y,z) (                                 \
+      (SARAH_MAJOR == 0 && SARAH_MINOR == 0 && SARAH_PATCH == 0) ||     \
+      (SARAH_MAJOR > x || (SARAH_MAJOR >= x &&                          \
+                           (SARAH_MINOR > y || (SARAH_MINOR >= y &&     \
+                                                SARAH_PATCH >= z))))    \
+      )
 
 using namespace flexiblesusy;
 using namespace passarino_veltman;

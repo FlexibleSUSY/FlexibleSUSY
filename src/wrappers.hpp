@@ -52,124 +52,121 @@ static constexpr bool True = true;
 
 // Abs /////////////////////////////////////////////////////////////////
 
-template <typename T>
-T Abs(T a) noexcept
-{
-   return std::abs(a);
-}
-
-template <typename T>
-T Abs(const std::complex<T>& z) noexcept
-{
-   return std::abs(z);
-}
-
-template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Abs(const Eigen::Array<Scalar, M, N>& a)
-{
-   return a.cwiseAbs();
-}
-
-template <typename Scalar, int M, int N>
-Eigen::Matrix<Scalar, M, N> Abs(const Eigen::Matrix<Scalar, M, N>& a)
-{
-   return a.cwiseAbs();
-}
-
-double AbsSqr(double) noexcept;
-double AbsSqr(const std::complex<double>&) noexcept;
-double AbsSqrt(double) noexcept;
+inline int         Abs(int x)                              noexcept { return std::abs(x); }
+inline long        Abs(long x)                             noexcept { return std::abs(x); }
+inline long long   Abs(long long x)                        noexcept { return std::abs(x); }
+inline float       Abs(float x)                            noexcept { return std::abs(x); }
+inline double      Abs(double x)                           noexcept { return std::abs(x); }
+inline long double Abs(long double x)                      noexcept { return std::abs(x); }
+inline float       Abs(const std::complex<float>& x)       noexcept { return std::abs(x); }
+inline double      Abs(const std::complex<double>& x)      noexcept { return std::abs(x); }
+inline long double Abs(const std::complex<long double>& x) noexcept { return std::abs(x); }
 
 template <typename Derived>
-Derived AbsSqrt(const Eigen::MatrixBase<Derived>& m)
+auto Abs(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().eval())
 {
-   return m.cwiseAbs().cwiseSqrt();
+   return x.cwiseAbs();
 }
 
 template <typename Derived>
-Derived AbsSqrt(const Eigen::ArrayBase<Derived>& m)
+auto Abs(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().eval())
 {
-   return m.cwiseAbs().cwiseSqrt();
+   return x.cwiseAbs();
 }
 
-/**
- * Calculates the mass of a singlet from a (possibly complex)
- * numerical value by taking the magnitude of the value.
- *
- * @param value numerical value
- * @return mass
- */
-template <typename T>
-double calculate_singlet_mass(T value) noexcept
+// AbsSqr //////////////////////////////////////////////////////////////
+
+inline int         AbsSqr(int x)                              noexcept { return x*x; }
+inline long        AbsSqr(long x)                             noexcept { return x*x; }
+inline long long   AbsSqr(long long x)                        noexcept { return x*x; }
+inline float       AbsSqr(float x)                            noexcept { return x*x; }
+inline double      AbsSqr(double x)                           noexcept { return x*x; }
+inline long double AbsSqr(long double x)                      noexcept { return x*x; }
+inline float       AbsSqr(const std::complex<float>& x)       noexcept { return std::norm(x); }
+inline double      AbsSqr(const std::complex<double>& x)      noexcept { return std::norm(x); }
+inline long double AbsSqr(const std::complex<long double>& x) noexcept { return std::norm(x); }
+
+template <typename Derived>
+auto AbsSqr(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().eval().square().eval())
 {
-   return std::abs(value);
+   return x.eval().cwiseAbs().square();
 }
 
-/**
- * Calculates the mass of a Majoran fermion singlet from a (possibly
- * complex) numerical value by taking the magnitude of the value.
- *
- * The phase is set to exp(i theta/2), where theta is the phase angle
- * of the complex value.  If the value is pure real, then the phase
- * will be set to 1.  If the value is purely imaginary, then the phase
- * will be set to \f$e^{i \pi/2}\f$.
- *
- * @param value numerical value
- * @param[out] phase phase
- * @return mass
- */
-template <typename T>
-double calculate_majorana_singlet_mass(T value, std::complex<double>& phase)
+template <typename Derived>
+auto AbsSqr(const Eigen::MatrixBase<Derived>& x) -> decltype(AbsSqr(x.array()).matrix().eval())
 {
-   phase = std::polar(1., 0.5 * std::arg(std::complex<double>(value)));
-   return std::abs(value);
+   return AbsSqr(x.array()).matrix().eval();
 }
 
-/**
- * Calculates the mass of a Dirac fermion singlet from a (possibly
- * complex) numerical value by taking the magnitude of the value.
- *
- * The phase is set to exp(i theta), where theta is the phase angle of
- * the complex value.  If the value is pure real, then the phase will
- * be set to 1.  If the value is purely imaginary, then the phase will
- * be set to \f$e^{i \pi}\f$.
- *
- * @param value numerical value
- * @param[out] phase phase
- * @return mass
- */
-template <typename T>
-double calculate_dirac_singlet_mass(T value, std::complex<double>& phase)
+// AbsSqrt /////////////////////////////////////////////////////////////
+
+inline double AbsSqrt(double x) noexcept { return std::sqrt(std::abs(x)); }
+
+inline double AbsSqrt(const std::complex<double>& x) noexcept { return std::sqrt(std::abs(x)); }
+
+template <typename Derived>
+auto AbsSqrt(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().cwiseSqrt())
 {
-   phase = std::polar(1., std::arg(std::complex<double>(value)));
-   return std::abs(value);
+   return x.cwiseAbs().cwiseSqrt();
 }
 
-double ArcTan(double) noexcept;
-double ArcSin(double) noexcept;
-double ArcCos(double) noexcept;
-double Arg(const std::complex<double>&) noexcept;
-
-template <typename T>
-constexpr T Cbrt(T a) noexcept
+template <typename Derived>
+auto AbsSqrt(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().cwiseSqrt())
 {
-   return std::cbrt(a);
+   return x.cwiseAbs().cwiseSqrt();
 }
 
-double Conj(double a) noexcept;
-std::complex<double> Conj(const std::complex<double>& a) noexcept;
+// ArcCos //////////////////////////////////////////////////////////////
 
-template<typename Scalar, int M, int N>
-Eigen::Matrix<Scalar,M,N> Conj(const Eigen::Matrix<Scalar,M,N>& a) noexcept
+inline double               ArcCos(double x)                      noexcept { return std::acos(x); }
+inline std::complex<double> ArcCos(const std::complex<double>& x) noexcept { return std::acos(x); }
+
+// ArcSin //////////////////////////////////////////////////////////////
+
+inline double               ArcSin(double x)                      noexcept { return std::asin(x); }
+inline std::complex<double> ArcSin(const std::complex<double>& x) noexcept { return std::asin(x); }
+
+// ArcTan //////////////////////////////////////////////////////////////
+
+inline double               ArcTan(double x)                      noexcept { return std::atan(x); }
+inline std::complex<double> ArcTan(const std::complex<double>& x) noexcept { return std::atan(x); }
+
+// Arg /////////////////////////////////////////////////////////////////
+
+inline double Arg(double x)                      noexcept { return std::arg(x); }
+inline double Arg(const std::complex<double>& x) noexcept { return std::arg(x); }
+
+// Cbrt ////////////////////////////////////////////////////////////////
+
+inline double Cbrt(double x) noexcept { return std::cbrt(x); }
+
+// Conj ////////////////////////////////////////////////////////////////
+
+inline int                       Conj(int x)                              noexcept { return x; }
+inline long                      Conj(long x)                             noexcept { return x; }
+inline long long                 Conj(long long x)                        noexcept { return x; }
+inline float                     Conj(float x)                            noexcept { return x; }
+inline double                    Conj(double x)                           noexcept { return x; }
+inline long double               Conj(long double x)                      noexcept { return x; }
+inline std::complex<float>       Conj(const std::complex<float>& x)       noexcept { return std::conj(x); }
+inline std::complex<double>      Conj(const std::complex<double>& x)      noexcept { return std::conj(x); }
+inline std::complex<long double> Conj(const std::complex<long double>& x) noexcept { return std::conj(x); }
+
+template <typename Derived>
+auto Conj(const Eigen::ArrayBase<Derived>& x) -> decltype(x.conjugate())
 {
-   return a.conjugate();
+   return x.conjugate();
 }
 
-template <class T>
-T Conjugate(T a) noexcept
+template <typename Derived>
+auto Conj(const Eigen::MatrixBase<Derived>& x) -> decltype(x.conjugate())
 {
-   return Conj(a);
+   return x.conjugate();
 }
+
+#define Conjugate(x) Conj(x)
+
+// Cube ////////////////////////////////////////////////////////////////
 
 template <typename T>
 constexpr T Cube(T a) noexcept

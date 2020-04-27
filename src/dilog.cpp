@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "dilog.hpp"
+#include <cfloat>
 #include <cmath>
 #include <limits>
 
@@ -25,6 +26,16 @@ namespace flexiblesusy {
 namespace {
    template <typename T>
    T sqr(T x) noexcept { return x*x; }
+
+   template <typename T>
+   std::complex<T> clog(const std::complex<T>& z) noexcept
+   {
+      const T rz = std::real(z);
+      const T iz = std::imag(z);
+      const T nz = sqr(rz) + sqr(iz);
+
+      return std::complex<T>(0.5*std::log(nz), std::atan2(iz, rz));
+   }
 
    template <typename T>
    std::complex<T> cadd(T a, const std::complex<T>& b) noexcept
@@ -52,7 +63,8 @@ namespace {
          std::real(a) * std::real(b) - std::imag(a) * std::imag(b),
          std::real(a) * std::imag(b) + std::imag(a) * std::real(b));
    }
-} // namespace
+
+} // anonymous namespace
 
 /**
  * @brief Clausen function \f$\mathrm{Cl}_2(\theta) = \mathrm{Im}(\mathrm{Li}_2(e^{i\theta}))\f$
@@ -125,7 +137,7 @@ double dilog(double x) noexcept {
    const double PI3 = PI2/3;
    const double PI6 = PI2/6;
    const double PI12 = PI2/12;
-   const double C[20] = {  0.42996693560813697, 0.40975987533077105,
+   const double C[20] = {  0.42996693560813697, 0.40975987533077106,
      -0.01858843665014592, 0.00145751084062268,-0.00014304184442340,
       0.00001588415541880,-0.00000190784959387, 0.00000024195180854,
      -0.00000003193341274, 0.00000000434545063,-0.00000000060578480,
@@ -133,7 +145,7 @@ double dilog(double x) noexcept {
      -0.00000000000027007, 0.00000000000004042,-0.00000000000000610,
       0.00000000000000093,-0.00000000000000014, 0.00000000000000002};
 
-   double T,H,Y,S,A,ALFA,B1,B2,B0;
+   double T{}, H{}, Y{}, S{}, A{}, ALFA{}, B1{}, B2{}, B0{};
 
    if (x == 1) {
        H = PI6;
@@ -189,7 +201,9 @@ double dilog(double x) noexcept {
 /**
  * @brief Real dilogarithm \f$\mathrm{Li}_2(z)\f$ with long double precision
  * @param x real argument
- * @note Implementation translated by R.Brun from CERNLIB DILOG function C332
+ * @note Implementation based on translation by R.Brun from CERNLIB
+ *    DILOG function C332, extended by Alexander Voigt to quadruple
+ *    precision
  * @return \f$\mathrm{Li}_2(z)\f$
  *
  * Implemented as a truncated series expansion in terms of Chebyshev
@@ -203,17 +217,57 @@ long double dilog(long double x) noexcept {
    const long double PI3 = PI2/3;
    const long double PI6 = PI2/6;
    const long double PI12 = PI2/12;
-   const long double C[24] = { 0.42996693560813697204L, 0.40975987533077105847L,
-     -0.01858843665014591965L, 0.00145751084062267855L,-0.00014304184442340049L,
-      0.00001588415541879553L,-0.00000190784959386583L, 0.00000024195180854165L,
-     -0.00000003193341274252L, 0.00000000434545062677L,-0.00000000060578480118L,
-      0.00000000008612097799L,-0.00000000001244331660L, 0.00000000000182255696L,
-     -0.00000000000027006766L, 0.00000000000004042209L,-0.00000000000000610325L,
-      0.00000000000000092863L,-0.00000000000000014226L, 0.00000000000000002193L,
-     -0.00000000000000000340L, 0.00000000000000000053L,-0.00000000000000000008L,
-      0.00000000000000000001L};
+   const long double C[] = {
+      0.4299669356081369720370336786993879912L,
+      0.4097598753307710584682637109252552781L,
+     -0.0185884366501459196476416491402122676L,
+      0.0014575108406226785536739284164594927L,
+     -0.0001430418444234004877488301200908765L,
+      0.0000158841554187955323619055047167740L,
+     -0.0000019078495938658272271963211420884L,
+      0.0000002419518085416474949946146434290L,
+     -0.0000000319334127425178346049601414286L,
+      0.0000000043454506267691229879571784782L,
+     -0.0000000006057848011840744442970533091L,
+      0.0000000000861209779935949824428368452L,
+     -0.0000000000124433165993886798964242137L,
+      0.0000000000018225569623573633006554774L,
+     -0.0000000000002700676604911465180857223L,
+      0.0000000000000404220926315266464883286L,
+     -0.0000000000000061032514526918795037783L,
+      0.0000000000000009286297533019575861303L,
+     -0.0000000000000001422602085511244683975L,
+      0.0000000000000000219263171815395735398L,
+     -0.0000000000000000033979732421589786340L,
+#if LDBL_DIG > 18
+      0.0000000000000000005291954244833147146L,
+     -0.0000000000000000000827858081427899765L,
+      0.0000000000000000000130037173454556037L,
+     -0.0000000000000000000020502222425528249L,
+      0.0000000000000000000003243578549148930L,
+     -0.0000000000000000000000514779990334321L,
+      0.0000000000000000000000081938774771716L,
+     -0.0000000000000000000000013077835405713L,
+      0.0000000000000000000000002092562930580L,
+     -0.0000000000000000000000000335616615054L,
+      0.0000000000000000000000000053946577714L,
+     -0.0000000000000000000000000008689193209L,
+      0.0000000000000000000000000001402281687L,
+     -0.0000000000000000000000000000226715578L,
+      0.0000000000000000000000000000036717417L,
+     -0.0000000000000000000000000000005956152L,
+      0.0000000000000000000000000000000967662L,
+     -0.0000000000000000000000000000000157439L,
+      0.0000000000000000000000000000000025650L,
+     -0.0000000000000000000000000000000004185L,
+      0.0000000000000000000000000000000000683L,
+     -0.0000000000000000000000000000000000112L,
+      0.0000000000000000000000000000000000018L,
+     -0.0000000000000000000000000000000000003L
+#endif
+   };
 
-   long double T,H,Y,S,A,ALFA,B1,B2,B0;
+   long double T{}, H{}, Y{}, S{}, A{}, ALFA{}, B1{}, B2{}, B0{};
 
    if (x == 1) {
        H = PI6;
@@ -256,7 +310,7 @@ long double dilog(long double x) noexcept {
        ALFA = H+H;
        B1   = 0;
        B2   = 0;
-       for (int i = 23; i >= 0; i--) {
+       for (int i = sizeof(C)/sizeof(C[0]) - 1; i >= 0; i--) {
           B0 = C[i] + ALFA*B1-B2;
           B2 = B1;
           B1 = B0;
@@ -308,30 +362,30 @@ std::complex<double> dilog(const std::complex<double>& z) noexcept
    }
 
    std::complex<double> cy(0.0, 0.0), cz(0.0, 0.0);
-   int jsgn, ipi12;
+   int jsgn = 0, ipi12 = 0;
 
    // transformation to |z|<1, Re(z)<=0.5
    if (rz <= 0.5) {
       if (nz > 1.0) {
-         cy = -0.5 * sqr(std::log(-z));
-         cz = -std::log(1.0 - 1.0 / z);
+         cy = -0.5 * sqr(clog(-z));
+         cz = -clog(1.0 - 1.0 / z);
          jsgn = -1;
          ipi12 = -2;
       } else { // nz <= 1
          cy = 0;
-         cz = -std::log(1.0 - z);
+         cz = -clog(1.0 - z);
          jsgn = 1;
          ipi12 = 0;
       }
    } else { // rz > 0.5
       if (nz <= 2*rz) {
-         cz = -std::log(z);
-         cy = cz * std::log(1.0 - z);
+         cz = -clog(z);
+         cy = cz * clog(1.0 - z);
          jsgn = -1;
          ipi12 = 2;
       } else { // nz > 2*rz
-         cy = -0.5 * sqr(std::log(-z));
-         cz = -std::log(1.0 - 1.0 / z);
+         cy = -0.5 * sqr(clog(-z));
+         cz = -clog(1.0 - 1.0 / z);
          jsgn = -1;
          ipi12 = -2;
       }
@@ -379,6 +433,7 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
       -1.99392958607210756872364434779378971e-14L,
        4.51898002961991819165047655285559323e-16L,
       -1.03565176121812470144834115422186567e-17L,
+#if LDBL_DIG > 18
        2.39521862102618674574028374300098038e-19L,
       -5.58178587432500933628307450562541991e-21L,
        1.30915075541832128581230739918659230e-22L,
@@ -391,6 +446,7 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
       -5.76834735536739008429179316187765424e-34L,
        1.39317947964700797782788660391154833e-35L,
       -3.37212196548508947046847363525493096e-37L
+#endif
    };
 
    const long double rz = std::real(z);
@@ -410,62 +466,44 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
    }
 
    std::complex<long double> cy(0.0L, 0.0L), cz(0.0L, 0.0L);
-   int jsgn, ipi12;
+   int jsgn = 0, ipi12 = 0;
 
    // transformation to |z|<1, Re(z)<=0.5
    if (rz <= 0.5L) {
       if (nz > 1.0L) {
-         cy = -0.5L * sqr(std::log(-z));
-         cz = -std::log(1.0L - 1.0L/z);
+         cy = -0.5L * sqr(clog(-z));
+         cz = -clog(1.0L - 1.0L/z);
          jsgn = -1;
          ipi12 = -2;
       } else { // nz <= 1.0L
          cy = 0;
-         cz = -std::log(1.0L - z);
+         cz = -clog(1.0L - z);
          jsgn = 1;
          ipi12 = 0;
       }
    } else { // rz > 0.5L
       if (nz <= 2*rz) {
-         cz = -std::log(z);
-         cy = cz * std::log(1.0L - z);
+         cz = -clog(z);
+         cy = cz * clog(1.0L - z);
          jsgn = -1;
          ipi12 = 2;
       } else { // nz > 2*rz
-         cy = -0.5L * sqr(std::log(-z));
-         cz = -std::log(1.0L - 1.0L/z);
+         cy = -0.5L * sqr(clog(-z));
+         cz = -clog(1.0L - 1.0L/z);
          jsgn = -1;
          ipi12 = -2;
       }
    }
 
-   // the dilogarithm
    const std::complex<long double> cz2(sqr(cz));
-   const std::complex<long double> sum =
-      cadd(cz,
-      cmul(cz2, cadd(bf[0],
-      cmul(cz , cadd(bf[1],
-      cmul(cz2, cadd(bf[2],
-      cmul(cz2, cadd(bf[3],
-      cmul(cz2, cadd(bf[4],
-      cmul(cz2, cadd(bf[5],
-      cmul(cz2, cadd(bf[6],
-      cmul(cz2, cadd(bf[7],
-      cmul(cz2, cadd(bf[8],
-      cmul(cz2, cadd(bf[9],
-      cmul(cz2, cadd(bf[10],
-      cmul(cz2, cadd(bf[11],
-      cmul(cz2, cadd(bf[12],
-      cmul(cz2, cadd(bf[13],
-      cmul(cz2, cadd(bf[14],
-      cmul(cz2, cadd(bf[15],
-      cmul(cz2, cadd(bf[16],
-      cmul(cz2, cadd(bf[17],
-      cmul(cz2, cadd(bf[18],
-      cmul(cz2, cadd(bf[19],
-      cmul(cz2, cadd(bf[20],
-      cmul(cz2, cadd(bf[21],
-      cmul(cz2, bf[22]))))))))))))))))))))))))))))))))))))))))))))));
+   std::complex<long double> sum(0.0L, 0.0L);
+
+   for (int i = sizeof(bf)/sizeof(bf[0]) - 1; i >= 2; i--) {
+      sum = cmul(cz2, cadd(bf[i], sum));
+   }
+
+   // lowest order terms w/ different powers
+   sum = cadd(cz, cmul(cz2, cadd(bf[0], cmul(cz, cadd(bf[1], sum)))));
 
    return static_cast<long double>(jsgn)*sum + cy + ipi12*PI*PI/12.0L;
 }

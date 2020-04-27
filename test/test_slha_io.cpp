@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE( test_processor_vs_loop )
    BOOST_TEST_MESSAGE("time using the tuple processor: " << processor_time << " s");
    BOOST_TEST_MESSAGE("time using the for loop: " << loop_time << " s");
 
-   BOOST_CHECK_LT(100. * processor_time, loop_time);
+   BOOST_CHECK_LT(10 * processor_time, loop_time);
 }
 
 BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )
