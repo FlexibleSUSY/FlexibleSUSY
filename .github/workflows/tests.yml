@@ -102,7 +102,7 @@ jobs:
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2-preview
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
