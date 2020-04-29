@@ -40,6 +40,7 @@ class Looptools : public Loop_library_interface
       void B(std::array<std::complex<double>, 2> &, B_ARGS) noexcept override;
       void C(std::array<std::complex<double>, 7> &, C_ARGS) noexcept override;
       void D(std::array<std::complex<double>, 11> &, D_ARGS) noexcept override;
+      ~Looptools() noexcept override {};
 };
 } // namespace looplibrary
 

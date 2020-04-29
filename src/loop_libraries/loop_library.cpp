@@ -54,7 +54,7 @@ namespace flexiblesusy {
 Loop_library::Library Loop_library::type_ = Loop_library::Library::Undefined;
 std::unique_ptr<looplibrary::Loop_library_interface> Loop_library::lib_;
 
-void Loop_library::set_default(void) {
+void Loop_library::set_default() {
    Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
    Loop_library::type_ = Loop_library::Library::Softsusy;
 }

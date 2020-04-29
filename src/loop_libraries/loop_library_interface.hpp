@@ -119,6 +119,7 @@ class Loop_library_interface
       virtual void B(std::array<std::complex<double>, 2> &, B_ARGS) = 0;
       virtual void C(std::array<std::complex<double>, 7> &, C_ARGS) = 0;
       virtual void D(std::array<std::complex<double>, 11> &, D_ARGS) = 0;
+      virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary
 
