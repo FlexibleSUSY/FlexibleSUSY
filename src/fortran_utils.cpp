@@ -20,12 +20,12 @@
 #include "fortran_utils.hpp"
 
 extern "C" {
-   void flush_impl(void);
+   void flush_impl();
 }
 
 namespace futils {
 
-void swap(void) noexcept
+void swap() noexcept
 {
    int stdout_copy = dup(STDOUT_FILENO);
    dup2(STDERR_FILENO, STDOUT_FILENO);
@@ -33,7 +33,7 @@ void swap(void) noexcept
    close(stdout_copy);
 }
 
-void flush(void) noexcept
+void flush() noexcept
 {
    flush_impl();
 }

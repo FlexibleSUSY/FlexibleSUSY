@@ -24,12 +24,12 @@ namespace futils {
 /**
  * @brief Flushes output of fortran routines.
  */
-void flush(void) noexcept;
+void flush() noexcept;
 
 /**
  * @brief Swaps stdout and stderr descriptors.
  */
-void swap(void) noexcept;
+void swap() noexcept;
 
 } // namespace futils
 
