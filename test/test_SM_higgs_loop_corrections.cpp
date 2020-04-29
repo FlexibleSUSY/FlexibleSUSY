@@ -4,9 +4,9 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "loop_libraries/loop_library.hpp"
 #include "test_SM.hpp"
 #include "wrappers.hpp"
-#include "pv.hpp"
 #include "scan.hpp"
 #include "SM_two_scale_model.hpp"
 #include "standard_model.hpp"
@@ -15,11 +15,11 @@
 #include <iterator>
 
 using namespace flexiblesusy;
-using namespace passarino_veltman;
 using namespace flexiblesusy::sm_twoloophiggs;
 
 BOOST_AUTO_TEST_CASE( test_SM_1loop_alpha_t )
 {
+   Loop_library::set(0);
    SM_input_parameters input;
    input.LambdaIN = 0.25;
    SM<Two_scale> m;
@@ -42,16 +42,16 @@ BOOST_AUTO_TEST_CASE( test_SM_1loop_alpha_t )
    // top loop for p = 0, Drees p. 8
    const double se_fs_eff =
       -6 * Sqr(yt) * oneOver16PiSqr * (
-         ReA0(mt2, scale2)
-         + 2*mt2*ReB0(p2, mt2, mt2, scale2));
+         Loop_library::get().A0(mt2, scale2).real()
+         + 2*mt2*Loop_library::get().B0(p2, mt2, mt2, scale2).real());
 
    const double se_fs =
       se_fs_eff
-      + 3.*Sqr(yt)*p2*ReB0(p2,mt2,mt2,scale2) * oneOver16PiSqr;
+      + 3.*Sqr(yt)*p2*Loop_library::get().B0(p2,mt2,mt2,scale2).real() * oneOver16PiSqr;
 
    // tadpole
    const double t_fs =
-      6 * oneOver16PiSqr * (2*yt/Sqrt(2)) * mt / v * ReA0(mt2, scale2);
+      6 * oneOver16PiSqr * (2*yt/Sqrt(2)) * mt / v * Loop_library::get().A0(mt2, scale2).real();
 
    BOOST_CHECK_CLOSE_FRACTION(se_smh, se_fs + t_fs, 1.0e-10);
 }

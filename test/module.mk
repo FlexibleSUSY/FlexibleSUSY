@@ -503,6 +503,7 @@ TEST_SRC += \
 		$(DIR)/test_SM_higgs_loop_corrections.cpp \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
+		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
@@ -1196,12 +1197,7 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAt
 # test rule for files which depend on pv #######################################
 PV_DEP_EXE := \
 		$(DIR)/test_pv.x \
-		$(DIR)/test_pv_crosschecks.x \
-		$(DIR)/test_SM_higgs_loop_corrections.x \
-		$(DIR)/test_SM_one_loop_spectrum.x \
-		$(DIR)/test_SM_two_loop_spectrum.x \
-		$(DIR)/test_SM_three_loop_spectrum.x \
-		$(DIR)/test_SMHighPrecision_two_loop_spectrum.x
+		$(DIR)/test_pv_crosschecks.x
 
 $(PV_DEP_EXE): %.x: %.o $(LIBPV)
 		@$(MSG)

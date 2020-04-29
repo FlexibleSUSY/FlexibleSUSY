@@ -4,19 +4,18 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "loop_libraries/loop_library.hpp"
 #include "test_SM.hpp"
 #include "wrappers.hpp"
-#include "pv.hpp"
 #include "SMHighPrecision_two_scale_model.hpp"
 #include "lowe.h"
 
 using namespace flexiblesusy;
 using namespace softsusy;
-using namespace passarino_veltman;
-
 
 BOOST_AUTO_TEST_CASE( test_SMHighPrecision_two_loop_top_pole_mass )
 {
+   Loop_library::set(0);
    const QedQcd qedqcd;
    SMHighPrecision_input_parameters input;
    input.LambdaIN = 0.25;
