@@ -8,16 +8,16 @@
 
 #include "numerics_legacy.h"
 #include "dilog.hpp"
-#include "error.hpp"
 #include "utils.h"
 #include <cmath>
+#include <exception>
 
 namespace flexiblesusy {
 
-class SoftsusyNumericsError : public Error {
+class SoftsusyNumericsError : public std::runtime_error {
 public:
    explicit SoftsusyNumericsError(std::string msg)
-      : Error(msg) {}
+      : std::runtime_error(msg) {}
    virtual ~SoftsusyNumericsError() {}
 };
 

@@ -35,7 +35,6 @@ jobs:
       matrix:
         CXXCOMPILER: [g++, clang++]
         LOOPLIBRARY: [internal, looptools]
-      max-parallel: 1
 
     env:
       IMAGE_VERSION: '0.2.5'
@@ -43,7 +42,7 @@ jobs:
       FEYNARTS_VERSION: '3.11'
       FORMCALC_VERSION: '9.9'
       LOOPTOOLS_VERSION: '2.15'
-      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
+      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
 
     steps:
 
@@ -103,7 +102,7 @@ jobs:
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2-preview
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs

@@ -100,6 +100,7 @@ META_SRC     := \
 		$(DIR)/SemiAnalytic.m \
 		$(DIR)/TestSuite.m \
 		$(DIR)/TextFormatting.m \
+		$(DIR)/TerminalFormatting.m \
 		$(DIR)/ThreeLoopMSSM.m \
 		$(DIR)/ThreeLoopQCD.m \
 		$(DIR)/ThreeLoopSM.m \

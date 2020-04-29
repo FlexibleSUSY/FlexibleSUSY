@@ -45,7 +45,7 @@ public:
       : precision(precision_)
    {}
 
-   char const * const name() const { return "Convergence_tester_absolute"; }
+   const char* name() const { return "Convergence_tester_absolute"; }
 
    /**
     * Test whether the absolute value of the residual, defined by
@@ -75,7 +75,7 @@ public:
       : precision(precision_)
    {}
 
-   char const * const name() const { return "Convergence_tester_relative"; }
+   const char* name() const { return "Convergence_tester_relative"; }
 
    /**
     * Test whether the relative difference is less than the set
@@ -107,7 +107,7 @@ public:
       , tadpole_function(tadpole_function_)
    {}
 
-   char const * const name() const { return "Convergence_tester_tadpole"; }
+   const char* name() const { return "Convergence_tester_tadpole"; }
 
    /**
     * Test whether the relative difference is less than the set

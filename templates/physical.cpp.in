@@ -19,7 +19,7 @@
 // File generated at @DateAndTime@
 
 #include "@ModelName@_physical.hpp"
-#include "slha_io.hpp"
+#include "mixings.hpp"
 #include "wrappers.hpp"
 
 #include <iostream>

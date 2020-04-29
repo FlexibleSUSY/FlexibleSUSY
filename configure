@@ -2091,6 +2091,12 @@ check_required_libs() {
             local model_name=$(echo ${m} | sed -e 's|models/||')
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
+            [ -e "${model_file}" ] || continue
+
+            # early continue to skip expensive Mathematica kernel
+            # calls, if possible
+            grep 'UseSMYukawa2Loop\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
                 enable_tsil=yes
@@ -2456,6 +2462,8 @@ check_tsil_size() {
 
 #_____________________________________________________________________
 check_tsil() {
+    [ "x$enable_tsil" = "xno" ] && return
+
     [ -z "$tsil_inc_dir" ] && \
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
@@ -2469,16 +2477,14 @@ check_tsil() {
         return
     }
 
-    if test "x$enable_tsil" != "xno" ; then
-        if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
-            enable_tsil=yes
-        else
-            if [ "x$enable_tsil" = xyes ] ; then
-                message "Error: TSIL not found."
-                exit 1
-            fi
-            enable_tsil=no
+    if check_tsil_incl && check_tsil_libs && check_tsil_size ; then
+        enable_tsil=yes
+    else
+        if [ "x$enable_tsil" = xyes ] ; then
+            message "Error: TSIL not found."
+            exit 1
         fi
+        enable_tsil=no
     fi
 }
 

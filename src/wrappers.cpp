@@ -27,51 +27,6 @@
 
 namespace flexiblesusy {
 
-double AbsSqr(double z) noexcept
-{
-   return z * z;
-}
-
-double AbsSqr(const std::complex<double>& z) noexcept
-{
-   return std::norm(z);
-}
-
-double AbsSqrt(double x) noexcept
-{
-   return std::sqrt(std::fabs(x));
-}
-
-double ArcTan(double a) noexcept
-{
-   return std::atan(a);
-}
-
-double ArcSin(double a) noexcept
-{
-   return std::asin(a);
-}
-
-double ArcCos(double a) noexcept
-{
-   return std::acos(a);
-}
-
-double Arg(const std::complex<double>& z) noexcept
-{
-   return std::arg(z);
-}
-
-double Conj(double a) noexcept
-{
-   return a;
-}
-
-std::complex<double> Conj(const std::complex<double>& a) noexcept
-{
-   return std::conj(a);
-}
-
 double Tan(double a) noexcept
 {
    return std::tan(a);
@@ -193,7 +148,7 @@ double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
 
 double PolyLog(int n, double z)
 {
-   return std::real(PolyLog(n, z));
+   return std::real(PolyLog(n, std::complex<double>(z, 0.0)));
 }
 
 std::complex<double> PolyLog(int n, const std::complex<double>& z)
