@@ -19,7 +19,10 @@
 #ifndef FORTRAN_UTILS_H
 #define FORTRAN_UTILS_H
 
-namespace futils {
+namespace flexiblesusy
+{
+namespace futils
+{
 
 /**
  * @brief Flushes output of fortran routines.
@@ -32,5 +35,6 @@ void flush() noexcept;
 void swap() noexcept;
 
 } // namespace futils
+} // namespace flexiblesusy
 
 #endif

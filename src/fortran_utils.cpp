@@ -23,7 +23,10 @@ extern "C" {
    void flush_impl();
 }
 
-namespace futils {
+namespace flexiblesusy
+{
+namespace futils
+{
 
 void swap() noexcept
 {
@@ -39,3 +42,4 @@ void flush() noexcept
 }
 
 } // namespace futils
+} // namespace flexiblesusy
