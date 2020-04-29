@@ -23,6 +23,8 @@
 
 #define REDEFINE(R,ARGS,NAME) std::complex<double> NAME ARGS noexcept override;
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 class Fflite : public Loop_library_interface
@@ -40,5 +42,6 @@ class Fflite : public Loop_library_interface
       ~Fflite() noexcept override {};
 };
 } // namespace looplibrary
+} // namespace flexiblesusy
 
 #endif // LOOP_LIBRARY_FFLITE_H

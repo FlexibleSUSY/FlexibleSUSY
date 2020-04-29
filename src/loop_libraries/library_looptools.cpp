@@ -39,6 +39,8 @@
                      m22_in.real(), m32_in.real());\
 }
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 
@@ -150,3 +152,4 @@ void Looptools::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 }
 
 } // namespace looplibrary
+} // namespace flexiblesusy

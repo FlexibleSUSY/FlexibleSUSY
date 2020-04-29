@@ -23,6 +23,8 @@
 
 #define REDEFINE(R,ARGS,NAME) std::complex<double> NAME ARGS noexcept override;
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 class Collier : public Loop_library_interface
@@ -44,5 +46,6 @@ class Collier : public Loop_library_interface
       ~Collier() noexcept override {};
 };
 } // namespace looplibrary
+} // namespace flexiblesusy
 
 #endif // LOOP_LIBRARY_COLLIER_H

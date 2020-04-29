@@ -41,6 +41,8 @@
 #define C_SEQ (C0)(C1)(C2)(C00)(C11)(C12)(C22)
 #define D_SEQ (D0)(D00)(D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33)
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 /**
@@ -122,5 +124,6 @@ class Loop_library_interface
       virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary
+} // namespace flexiblesusy
 
 #endif // LOOP_LIBRARY_INTERFACE_H

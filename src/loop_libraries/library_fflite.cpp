@@ -29,6 +29,8 @@
    return {NAN_Q, NAN_Q}; \
 }
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 
@@ -106,3 +108,4 @@ void Fflite::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 }
 
 } // namespace looplibrary
+} // namespace flexiblesusy

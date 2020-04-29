@@ -83,6 +83,8 @@ extern "C" {
    void get_D_impl(const std::complex<double> [11], COLLIER_ARGS(9));
 }
 
+namespace flexiblesusy
+{
 namespace looplibrary
 {
 
@@ -165,3 +167,4 @@ void Collier::D(std::array<std::complex<double>, 11> &d, D_ARGS) noexcept
 }
 
 } // namespace looplibrary
+} // namespace flexiblesusy
