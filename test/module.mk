@@ -22,6 +22,32 @@ LIBTEST_DEP := \
 
 LIBTEST     := $(DIR)/lib$(MODNAME)$(MODULE_LIBEXT)
 
+# pv and looplibrary should not interfere ######################################
+LIBPV_SRC := \
+		$(DIR)/pv.cpp
+
+LIBPV_OBJ := \
+		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBPV_SRC))) \
+		$(patsubst %.f, %.o, $(filter %.f, $(LIBPV_SRC)))
+
+LIBPV_DEP := \
+		$(LIBPV_OBJ:.o=.d)
+
+LIBPV     := $(DIR)/libpv$(MODULE_LIBEXT)
+
+$(LIBPV_DEP) $(LIBPV_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
+
+ifeq ($(ENABLE_SHARED_LIBS),yes)
+$(LIBPV): $(LIBPV_OBJ)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS) $(LOOPFUNCLIBS)
+else
+$(LIBPV): $(LIBPV_OBJ)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
+endif
+################################################################################
+
 TEST_SRC := \
 		$(DIR)/test_array_view.cpp \
 		$(DIR)/test_cast_model.cpp \
@@ -722,8 +748,6 @@ endif
 TEST_ALL_LOG  := $(TEST_ALL_XML:.xml=.log)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-TEST_EXE += $(TEST_PV_EXE)
-
 $(DIR)/test_pv_fflite.x    : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_FFLITE
 $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_LOOPTOOLS
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
@@ -737,19 +761,22 @@ $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data
 		execute-tests execute-meta-tests execute-compiled-tests \
 		execute-shell-tests
 
-all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
+all-$(MODNAME): $(LIBPV) $(LIBTEST) $(TEST_EXE) $(TEST_XML)
 		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
 		$(Q)-rm -f $(TEST_DEP)
 		$(Q)-rm -f $(LIBTEST_DEP)
+		$(Q)-rm -f $(LIBPV_DEP)
 
 clean-$(MODNAME)-lib: clean-SOFTSUSY-lib
 		$(Q)-rm -f $(LIBTEST)
+		$(Q)-rm -f $(LIBPV)
 
 clean-$(MODNAME)-obj: clean-SOFTSUSY-obj
 		$(Q)-rm -f $(TEST_OBJ)
 		$(Q)-rm -f $(LIBTEST_OBJ)
+		$(Q)-rm -f $(LIBPV_OBJ)
 
 clean-$(MODNAME)-log:
 		$(Q)-rm -f $(TEST_XML)
@@ -759,6 +786,8 @@ clean-$(MODNAME)-log:
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-obj \
                   clean-$(MODNAME)-lib clean-$(MODNAME)-log
 		$(Q)-rm -f $(TEST_EXE)
+		$(Q)-rm -f $(PV_DEP_EXE)
+		$(Q)-rm -f $(TEST_PV_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
@@ -842,15 +871,15 @@ $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(LIBFFLITE)
+$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV) $(LIBFFLITE)
 		@$(MSG)
 		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
-$(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBFLEXI)
+$(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
 
-$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(filter-out %pv.o,$(LIBFLEXI_OBJ))
+$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(SQLITELIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
 endif
@@ -1164,6 +1193,23 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWS
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
 
+# test rule for files which depend on pv #######################################
+PV_DEP_EXE := \
+		$(DIR)/test_pv.x \
+		$(DIR)/test_pv_crosschecks.x \
+		$(DIR)/test_SM_higgs_loop_corrections.x \
+		$(DIR)/test_SM_one_loop_spectrum.x \
+		$(DIR)/test_SM_two_loop_spectrum.x \
+		$(DIR)/test_SM_three_loop_spectrum.x \
+		$(DIR)/test_SMHighPrecision_two_loop_spectrum.x
+
+$(PV_DEP_EXE): %.x: %.o $(LIBPV)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
+		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
+		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(LIBPV)
+################################################################################
+
 # adding libraries to the end of the list of dependencies
 $(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 
@@ -1188,6 +1234,6 @@ $(LIBTEST): $(LIBTEST_OBJ)
 endif
 
 ALLDEP += $(LIBTEST_DEP) $(TEST_DEP)
-ALLLIB += $(LIBTEST)
-ALLTST += $(TEST_EXE)
+ALLLIB += $(LIBTEST) $(LIBPV)
+ALLTST += $(TEST_EXE) $(PV_DEP_EXE)
 ALLMODDEP += $(MODtest_DEP)
