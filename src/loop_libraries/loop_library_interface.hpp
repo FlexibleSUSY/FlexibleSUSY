@@ -19,22 +19,24 @@
 #ifndef LOOP_LIBRARY_INTERFACE_H
 #define LOOP_LIBRARY_INTERFACE_H
 
+#include <boost/preprocessor/seq/for_each.hpp>
 #include <array>
 #include <complex>
-#include <boost/preprocessor/seq/for_each.hpp>
 
-#define ARGS_TYPE(R,COMMA,ELEM) std::complex<double> ELEM,
-#define VIRTUAL(R,ARGS,NAME) virtual std::complex<double> NAME ARGS = 0;
+#define ARGS_TYPE(R, COMMA, ELEM) std::complex<double> ELEM,
+#define VIRTUAL(R, ARGS, NAME) virtual std::complex<double> NAME ARGS = 0;
 
 #define A_ARGS_SEQ (m02_in)
 #define B_ARGS_SEQ (p10_in)(m02_in)(m12_in)
 #define C_ARGS_SEQ (p10_in)(p21_in)(p20_in)(m02_in)(m12_in)(m22_in)
-#define D_ARGS_SEQ (p10_in)(p21_in)(p32_in)(p30_in)(p20_in)(p31_in)(m02_in)(m12_in)(m22_in)(m32_in)
+#define D_ARGS_SEQ                                                             \
+   (p10_in)(p21_in)(p32_in)(p30_in)(p20_in)(p31_in)(m02_in)(m12_in)(m22_in)(   \
+      m32_in)
 
-#define A_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,A_ARGS_SEQ) double scl2_in
-#define B_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,B_ARGS_SEQ) double scl2_in
-#define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,C_ARGS_SEQ) double scl2_in
-#define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE,,D_ARGS_SEQ) double scl2_in
+#define A_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , A_ARGS_SEQ) double scl2_in
+#define B_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , B_ARGS_SEQ) double scl2_in
+#define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , C_ARGS_SEQ) double scl2_in
+#define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , D_ARGS_SEQ) double scl2_in
 
 #define A_SEQ (A0)
 #define B_SEQ (B0)(B1)(B00)
@@ -49,8 +51,9 @@ namespace looplibrary
  * @class Loop_library_interface
  * @brief interface for different one loop function libraries with
  * conventions of DE == [arXiv:0709.1075],
- * arguments order as in LT == [http://www.feynarts.de/looptools/LT215Guide.pdf],
- * filling of given arrays as in CO == [arXiv:1604.06792].
+ * arguments order as in LT ==
+ * [http://www.feynarts.de/looptools/LT215Guide.pdf], filling of given arrays as
+ * in CO == [arXiv:1604.06792].
  *
  * Loop_library_interface is the abstract base class for one loop functions.
  * It defines the following set of loop functions names:
@@ -64,17 +67,17 @@ namespace looplibrary
  *  A_ARGS means a single std::complex<double> m02 - squared mass of particle
  *  in a loop (see sec. 1.3.1 of [LT]; name is different).
  *
- *  B_ARGS means a set of std::complex<double> p10, m02, m12 - squared momenta and
- *  masses of particle in a loop (see sec. 1.3.2 of [LT]; names are different,
- *  order is the same).
+ *  B_ARGS means a set of std::complex<double> p10, m02, m12 - squared momenta
+ * and masses of particle in a loop (see sec. 1.3.2 of [LT]; names are
+ * different, order is the same).
  *
  *  C_ARGS means a set of std::complex<double> p10, p21, p20, m02, m12, m22 -
  *  squared momenta and masses of particle in a loop (see sec. 1.3.4 of [LT];
  *  names are different, order is the same).
  *
- *  D_ARGS means a set of std::complex<double> p10, p21, p32, p30, p20, p31, m02,
- *  m12, m22, m32 - squared momenta and masses of particle in a loop
- *  (see sec. 1.3.5 of [LT]; names are different, order is the same).
+ *  D_ARGS means a set of std::complex<double> p10, p21, p32, p30, p20, p31,
+ * m02, m12, m22, m32 - squared momenta and masses of particle in a loop (see
+ * sec. 1.3.5 of [LT]; names are different, order is the same).
  *
  * Functions with numeric indices return std::complex<double> of corresponding
  * Passarino-Veltman coefficient (see r.h.s. of eq. (4.4) in [DE]). Ti and Tij
@@ -90,17 +93,16 @@ namespace looplibrary
  *            scl2 is squared scale (squared mu of eq. (4.1) in [DE]);
  *            returns T^1_0 from eq. (4.4) in [DE] of std::complex<double> type.
  *
- * A, B, C, D functions return void, their first arguments are std::complex<double>
- * arrays of fixed length (passed by a reference), which equals to 1, 2, 7, 11.
- * They fill given array with values of Passarino-Vertman coefficients (inspect
- * table 3 of [CO]). After the first argument goes T_ARGS sequence, then scl2,
- * which is described by the following example:
+ * A, B, C, D functions return void, their first arguments are
+ * std::complex<double> arrays of fixed length (passed by a reference), which
+ * equals to 1, 2, 7, 11. They fill given array with values of Passarino-Vertman
+ * coefficients (inspect table 3 of [CO]). After the first argument goes T_ARGS
+ * sequence, then scl2, which is described by the following example:
  *
- * Example 2: C(c, C_ARGS, scl2) means C(c, p10, p21, p20, m02, m12, m22, scl2) with:
- *            c being array of std::complex<double> of fixed length 7 filled
- *            by C function with C0, C1, C2, C00, C11, C12, C22 coefficients
- *            (order is defined by table 3 of [CO], coefficients are defined by
- *            r.h.s. of eq. (4.4) in [DE]);
+ * Example 2: C(c, C_ARGS, scl2) means C(c, p10, p21, p20, m02, m12, m22, scl2)
+ * with: c being array of std::complex<double> of fixed length 7 filled by C
+ * function with C0, C1, C2, C00, C11, C12, C22 coefficients (order is defined
+ * by table 3 of [CO], coefficients are defined by r.h.s. of eq. (4.4) in [DE]);
  *            p10 is p1^2 from section 1.3.4 of [LT],
  *            p21 is p2^2 from section 1.3.4 of [LT],
  *            p20 is (p1+p2)^2 from section 1.3.4 of [LT],
@@ -112,16 +114,16 @@ namespace looplibrary
  */
 class Loop_library_interface
 {
-   public:
-      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(A_ARGS),A_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(B_ARGS),B_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(C_ARGS),C_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(VIRTUAL,(D_ARGS),D_SEQ)
-      virtual void A(std::array<std::complex<double>, 1> &, A_ARGS) = 0;
-      virtual void B(std::array<std::complex<double>, 2> &, B_ARGS) = 0;
-      virtual void C(std::array<std::complex<double>, 7> &, C_ARGS) = 0;
-      virtual void D(std::array<std::complex<double>, 11> &, D_ARGS) = 0;
-      virtual ~Loop_library_interface() {}
+public:
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (A_ARGS), A_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
+   virtual void A(std::array<std::complex<double>, 1>&, A_ARGS) = 0;
+   virtual void B(std::array<std::complex<double>, 2>&, B_ARGS) = 0;
+   virtual void C(std::array<std::complex<double>, 7>&, C_ARGS) = 0;
+   virtual void D(std::array<std::complex<double>, 11>&, D_ARGS) = 0;
+   virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary
 } // namespace flexiblesusy

@@ -16,11 +16,11 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include <unistd.h>
 #include "fortran_utils.hpp"
+#include <unistd.h>
 
 extern "C" {
-   void flush_impl();
+void flush_impl();
 }
 
 namespace flexiblesusy
@@ -36,10 +36,7 @@ void swap() noexcept
    close(stdout_copy);
 }
 
-void flush() noexcept
-{
-   flush_impl();
-}
+void flush() noexcept { flush_impl(); }
 
 } // namespace futils
 } // namespace flexiblesusy

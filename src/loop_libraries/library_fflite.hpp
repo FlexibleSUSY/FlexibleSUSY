@@ -21,7 +21,8 @@
 
 #include "loop_library_interface.hpp"
 
-#define REDEFINE(R,ARGS,NAME) std::complex<double> NAME ARGS noexcept override;
+#define REDEFINE(R, ARGS, NAME)                                                \
+   std::complex<double> NAME ARGS noexcept override;
 
 namespace flexiblesusy
 {
@@ -29,17 +30,17 @@ namespace looplibrary
 {
 class Fflite : public Loop_library_interface
 {
-   public:
-      Fflite();
-      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(A_ARGS),A_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(B_ARGS),B_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(C_ARGS),C_SEQ)
-      BOOST_PP_SEQ_FOR_EACH(REDEFINE,(D_ARGS),D_SEQ)
-      void A(std::array<std::complex<double>, 1> &, A_ARGS) noexcept override;
-      void B(std::array<std::complex<double>, 2> &, B_ARGS) noexcept override;
-      void C(std::array<std::complex<double>, 7> &, C_ARGS) noexcept override;
-      void D(std::array<std::complex<double>, 11> &, D_ARGS) noexcept override;
-      ~Fflite() noexcept override {};
+public:
+   Fflite();
+   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (A_ARGS), A_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (B_ARGS), B_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (C_ARGS), C_SEQ)
+   BOOST_PP_SEQ_FOR_EACH(REDEFINE, (D_ARGS), D_SEQ)
+   void A(std::array<std::complex<double>, 1>&, A_ARGS) noexcept override;
+   void B(std::array<std::complex<double>, 2>&, B_ARGS) noexcept override;
+   void C(std::array<std::complex<double>, 7>&, C_ARGS) noexcept override;
+   void D(std::array<std::complex<double>, 11>&, D_ARGS) noexcept override;
+   ~Fflite() noexcept override{};
 };
 } // namespace looplibrary
 } // namespace flexiblesusy
