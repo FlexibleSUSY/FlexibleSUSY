@@ -17,7 +17,6 @@
 // ====================================================================
 
 #include <limits>
-#include <complex.h>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 #include "fortran_utils.hpp"
@@ -25,7 +24,7 @@
 
 #define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
 #define COLLIER_ARGS(N) BOOST_PP_REPEAT(N,COLLIER_TYPE,) const std::complex<double>*
-#define IMPL(R,ARGS,NAME) double _Complex BOOST_PP_CAT(NAME,_impl)(COLLIER_ARGS(ARGS));
+#define IMPL(R,ARGS,NAME) void BOOST_PP_CAT(NAME,_impl)(std::complex<double>*, COLLIER_ARGS(ARGS));
 
 // Imaginary parts of momentum invariants are not suppoted by COLLIER 1.2.4
 #define COLLIER_B(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
@@ -33,9 +32,10 @@
    const std::complex<double> p10 (p10_in.real(), 0.);\
    const std::complex<double> m02 = m02_in;\
    const std::complex<double> m12 = m12_in;\
+   std::complex<double> res = 0.0;\
    set_mu2_uv(scl2_in);\
-   const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &m02, &m12);\
-   return {creal(res), cimag(res)};\
+   BOOST_PP_CAT(NAME,_impl)(&res, &p10, &m02, &m12);\
+   return res;\
 }
 #define COLLIER_C(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
@@ -45,9 +45,10 @@
    const std::complex<double> m02 = m02_in;\
    const std::complex<double> m12 = m12_in;\
    const std::complex<double> m22 = m22_in;\
+   std::complex<double> res = 0.0;\
    set_mu2_uv(scl2_in);\
-   const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p20, &m02, &m12, &m22);\
-   return {creal(res), cimag(res)};\
+   BOOST_PP_CAT(NAME,_impl)(&res, &p10, &p21, &p20, &m02, &m12, &m22);\
+   return res;\
 }
 #define COLLIER_D(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
@@ -61,9 +62,10 @@
    const std::complex<double> m12 = m12_in;\
    const std::complex<double> m22 = m22_in;\
    const std::complex<double> m32 = m32_in;\
+   std::complex<double> res = 0.0;\
    set_mu2_uv(scl2_in);\
-   const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);\
-   return {creal(res), cimag(res)};\
+   BOOST_PP_CAT(NAME,_impl)(&res, &p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);\
+   return res;\
 }
 
 // Fortran wrapper routines
@@ -108,9 +110,10 @@ void Collier::set_mu2_uv(double scl2_in) noexcept
 std::complex<double> Collier::A0(A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
+   std::complex<double> res = 0.0;
    set_mu2_uv(scl2_in);
-   const double _Complex res = A0_impl(&m02);
-   return {creal(res), cimag(res)};
+   A0_impl(&res, &m02);
+   return res;
 }
 
 BOOST_PP_SEQ_FOR_EACH(COLLIER_B,(B_ARGS),B_SEQ)

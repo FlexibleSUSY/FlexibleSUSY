@@ -21,10 +21,10 @@
 #define TO_STRING(ARG) _QUOTE_START_ ARG _QUOTE_END_
 
 #define two_point(NAME,N1,N2) \
-_NL_function CAT(NAME,_dummy)(p10, m02, m12) result(res) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
+_NL_subroutine CAT(NAME,_dummy)(res, p10, m02, m12) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
-_NL_   complex(C_DOUBLE_COMPLEX) :: res \
+_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
 _NL_   complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:) \
 _NL_\
 _NL_   allocate(Bcoeff(0:1, 0:2)) \
@@ -37,10 +37,10 @@ _NL_   deallocate(Bcoeff, Bcoeffuv) \
 _NL_end
 
 #define three_point(NAME,N1,N2,N3) \
-_NL_function CAT(NAME,_dummy)(p10, p21, p20, m02, m12, m22) result(res) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
+_NL_subroutine CAT(NAME,_dummy)(res, p10, p21, p20, m02, m12, m22) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22 \
-_NL_   complex(C_DOUBLE_COMPLEX) :: res \
+_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
 _NL_   complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:) \
 _NL_\
 _NL_   allocate(Ccoeff(0:1, 0:2, 0:2)) \
@@ -53,10 +53,10 @@ _NL_   deallocate(Ccoeff, Ccoeffuv) \
 _NL_end
 
 #define four_point(NAME,N1,N2,N3,N4) \
-_NL_function CAT(NAME,_dummy)(p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) result(res) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
+_NL_subroutine CAT(NAME,_dummy)(res,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name=TO_STRING(CAT(NAME,_impl)))\
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32 \
-_NL_   complex(C_DOUBLE_COMPLEX) :: res \
+_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
 _NL_   complex(REAL64), allocatable :: Dcoeff(:,:,:,:), Dcoeffuv(:,:,:,:) \
 _NL_\
 _NL_   allocate(Dcoeff(0:1, 0:2, 0:2, 0:2)) \
@@ -81,20 +81,21 @@ contains
 
    subroutine set_mu2_uv_dummy(scl2) bind(C, name='set_mu2_uv_impl')
       real(C_DOUBLE), intent(in) :: scl2
+
       call SetMuUV2_cll(scl2)
    end
 
-   function A0_dummy(m02) result(res) bind(C, name='A0_impl')
+   subroutine A0_dummy(res, m02) bind(C, name='A0_impl')
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02
-      complex(C_DOUBLE_COMPLEX) :: res
+      complex(C_DOUBLE_COMPLEX), intent(out) :: res
 
       call A0_cll(res, m02)
    end
 
-   function B0_dummy(p10, m02, m12) result(res) bind(C, name='B0_impl')
+   subroutine B0_dummy(res, p10, m02, m12) bind(C, name='B0_impl')
       complex(C_DOUBLE_COMPLEX), intent(in) :: p10
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
-      complex(C_DOUBLE_COMPLEX) :: res
+      complex(C_DOUBLE_COMPLEX), intent(out) :: res
 
       call B0_cll(res, p10, m02, m12)
    end
