@@ -25,45 +25,42 @@
 
 #define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
 #define COLLIER_ARGS(N) BOOST_PP_REPEAT(N,COLLIER_TYPE,) const std::complex<double>*
-
-#define IMPL_TYPE(Z, N, TEXT) const double _Complex*,
-#define IMPL_ARGS(N) BOOST_PP_REPEAT(N,IMPL_TYPE,) const double _Complex*
-#define IMPL(R,ARGS,NAME) double _Complex BOOST_PP_CAT(NAME,_impl)(IMPL_ARGS(ARGS));
+#define IMPL(R,ARGS,NAME) double _Complex BOOST_PP_CAT(NAME,_impl)(COLLIER_ARGS(ARGS));
 
 // Imaginary parts of momentum invariants are not suppoted by COLLIER 1.2.4
 #define COLLIER_B(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
-   const double _Complex p10 = p10_in.real();\
-   const double _Complex m02 = m02_in.real() + I * m02_in.imag();\
-   const double _Complex m12 = m12_in.real() + I * m12_in.imag();\
+   const std::complex<double> p10 (p10_in.real(), 0.);\
+   const std::complex<double> m02 = m02_in;\
+   const std::complex<double> m12 = m12_in;\
    set_mu2_uv(scl2_in);\
    const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &m02, &m12);\
    return {creal(res), cimag(res)};\
 }
 #define COLLIER_C(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
-   const double _Complex p10 = p10_in.real();\
-   const double _Complex p21 = p21_in.real();\
-   const double _Complex p20 = p20_in.real();\
-   const double _Complex m02 = m02_in.real() + I * m02_in.imag();\
-   const double _Complex m12 = m12_in.real() + I * m12_in.imag();\
-   const double _Complex m22 = m22_in.real() + I * m22_in.imag();\
+   const std::complex<double> p10 (p10_in.real(), 0.);\
+   const std::complex<double> p21 (p21_in.real(), 0.);\
+   const std::complex<double> p20 (p20_in.real(), 0.);\
+   const std::complex<double> m02 = m02_in;\
+   const std::complex<double> m12 = m12_in;\
+   const std::complex<double> m22 = m22_in;\
    set_mu2_uv(scl2_in);\
    const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p20, &m02, &m12, &m22);\
    return {creal(res), cimag(res)};\
 }
 #define COLLIER_D(R,ARGS,NAME) std::complex<double> Collier::NAME ARGS noexcept\
 {\
-   const double _Complex p10 = p10_in.real();\
-   const double _Complex p21 = p21_in.real();\
-   const double _Complex p32 = p32_in.real();\
-   const double _Complex p30 = p30_in.real();\
-   const double _Complex p20 = p20_in.real();\
-   const double _Complex p31 = p31_in.real();\
-   const double _Complex m02 = m02_in.real() + I * m02_in.imag();\
-   const double _Complex m12 = m12_in.real() + I * m12_in.imag();\
-   const double _Complex m22 = m22_in.real() + I * m22_in.imag();\
-   const double _Complex m32 = m32_in.real() + I * m32_in.imag();\
+   const std::complex<double> p10 (p10_in.real(), 0.);\
+   const std::complex<double> p21 (p21_in.real(), 0.);\
+   const std::complex<double> p32 (p32_in.real(), 0.);\
+   const std::complex<double> p30 (p30_in.real(), 0.);\
+   const std::complex<double> p20 (p20_in.real(), 0.);\
+   const std::complex<double> p31 (p31_in.real(), 0.);\
+   const std::complex<double> m02 = m02_in;\
+   const std::complex<double> m12 = m12_in;\
+   const std::complex<double> m22 = m22_in;\
+   const std::complex<double> m32 = m32_in;\
    set_mu2_uv(scl2_in);\
    const double _Complex res = BOOST_PP_CAT(NAME,_impl)(&p10, &p21, &p32, &p30, &p20, &p31, &m02, &m12, &m22, &m32);\
    return {creal(res), cimag(res)};\
@@ -110,10 +107,8 @@ void Collier::set_mu2_uv(double scl2_in) noexcept
 
 std::complex<double> Collier::A0(A_ARGS) noexcept
 {
-   const double _Complex m02 = m02_in.real() + I * m02_in.imag();
-
+   const std::complex<double> m02 = m02_in;
    set_mu2_uv(scl2_in);
-
    const double _Complex res = A0_impl(&m02);
    return {creal(res), cimag(res)};
 }
