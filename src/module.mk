@@ -222,7 +222,7 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).F90
 	$(Q)$(MSG)
-	$(Q)$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_QUOTE_START_ /'/g" -e "s/ _QUOTE_END_/'/g"  > $@
+	$(Q)$(FC) -E $< | sed "s/_NL_/\n   /g" > $@
 
 LIBAUX += \
 	$(COLLWRAP).a
