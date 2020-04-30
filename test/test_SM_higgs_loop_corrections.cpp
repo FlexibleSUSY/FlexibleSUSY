@@ -19,7 +19,6 @@ using namespace flexiblesusy::sm_twoloophiggs;
 
 BOOST_AUTO_TEST_CASE( test_SM_1loop_alpha_t )
 {
-   Loop_library::set(0);
    SM_input_parameters input;
    input.LambdaIN = 0.25;
    SM<Two_scale> m;

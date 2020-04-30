@@ -15,7 +15,6 @@ using namespace softsusy;
 
 BOOST_AUTO_TEST_CASE( test_SM_two_loop_top_pole_mass )
 {
-   Loop_library::set(0);
    const QedQcd qedqcd;
    SM_input_parameters input;
    input.LambdaIN = 0.25;
