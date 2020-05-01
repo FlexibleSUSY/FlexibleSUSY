@@ -61,9 +61,18 @@ Begin["`internal`"];
 `type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
 `type`nullableDiagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]...];
 
-`type`indexCol = FeynArts`Index[Global`Colour,_Integer];
-`type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
-`type`indexGeneric = FeynArts`Index[Generic,_Integer];
+`type`indexCol =
+   FeynArts`Index[Global`Colour,_Integer];
+
+`type`indexGlu =
+   FeynArts`Index[Global`Gluon,_Integer];
+
+`type`indexGeneric =
+   FeynArts`Index[Generic, _Integer];
+indexGeneric[index:_Integer] :=
+   FeynArts`Index[Generic, index];
+indexGeneric // Utils`MakeUnknownInputDefinition;
+indexGeneric ~ SetAttributes ~ {Protected,Locked};
 
 `type`fieldFA = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 
@@ -135,6 +144,25 @@ Module[{},
 
    (*Which index types do we load with the model?*)
    `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer];
+
+   (* Define type of masses *)
+   genericMass::usage="
+   @note In FeynArts 3.11 the pattern for a generic mass was changed and now
+         contains Loop and Internal as well.";
+   With[{new=Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]},
+      `type`genericMass =
+         FeynArts`Mass[`type`fieldFA[`type`indexGeneric], new];
+      genericMass[field:`type`fieldFA, index:_Integer] :=
+         FeynArts`Mass[field@indexGeneric@index, new];
+      genericMass[field:`type`fieldFA] :=
+         FeynArts`Mass[field[`type`indexGeneric], new];
+      genericMass // Utils`MakeUnknownInputDefinition;
+      genericMass ~ SetAttributes ~ {Protected,Locked};
+   ];
+
+   `type`specificMass =
+      FeynArts`Mass[`type`fieldFA[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
+
    {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
@@ -367,7 +395,6 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
-   debugMakePictures[diagrams,"class"];
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
@@ -512,7 +539,7 @@ Module[
          Do[
             numAmp = Part[numbersOfAmplitudes,i];
             currentAmplitude = newAmplitudes[[numAmp]];
-            massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,5]]]];
+            massPosition = Position[currentAmplitude[[4,1]],genericMass[FeynArts`V, 5]];
             If[massPosition=!={},
                massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
                Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
@@ -534,7 +561,7 @@ Module[
          Do[
             numAmp = numbersOfAmplitudes[[i]];
             currentAmplitude = newAmplitudes[[numAmp]];
-            massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,_]]]];
+            massPosition = Position[currentAmplitude[[4,1]],genericMass@FeynArts`V];
             If[massPosition=!={},
                massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
                Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
