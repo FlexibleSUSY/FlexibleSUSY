@@ -240,8 +240,8 @@ Module[
       ] :>
       SARAH`Cp[fields][SARAH`PR],
 
-      FeynArts`G[1][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :> (*checked*)
-      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],                 (*checked*)
+      FeynArts`G[_][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :>
+      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],
 
       FeynArts`G[_][0][fields__][
          FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ]
@@ -261,18 +261,41 @@ Module[
          SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
       ],
 
-      (*@note It seems that FA convention is changed by FC.*)
-      (*@note See Lorentz.gen (inside FA) for more information.*)
       (*VVV couplings*)
-      FeynArts`G[-1][0][fields__][
-         (-FeynArts`Mom[i1_Integer]+FeynArts`Mom[i2_Integer])*
+      FeynArts`G[_][0][fields__][
+         (-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer])*
          Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]]
          +
-         (+FeynArts`Mom[i1_Integer]-FeynArts`Mom[i3_Integer])*
+         (+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer])*
          Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i3_Integer]]
          +
          (-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer])*
          Global`MetricTensor[FeynArts`KI1[i2_Integer],FeynArts`KI1[i3_Integer]]
+      ] :>
+      SARAH`Cp[fields][
+         (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
+         SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i2]] ] ]
+         ,
+         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] -
+         SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i3]] ] ]
+         ,
+         (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] -
+         SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i2]] ],LorentzIndex[ {fields}[[i3]] ] ]
+      ],
+
+      (* Since FormCalc-9.7 *)
+      FeynArts`G[_][0][fields__][
+         Global`FourVector[-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer], FeynArts`KI1[i3_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i2_Integer]]
+         +
+         Global`FourVector[+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer], FeynArts`KI1[i2_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i3_Integer]]
+         +
+         Global`FourVector[-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer], FeynArts`KI1[i1_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i2_Integer], FeynArts`KI1[i3_Integer]]
       ] :>
       SARAH`Cp[fields][
          (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
