@@ -1359,7 +1359,6 @@ SetAttributes[
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
-   CombinatorialFactorsForClasses,
    ZeroRules,FCAmplitudesToFSConvention
    },
    {Protected, Locked}];
