@@ -1275,17 +1275,22 @@ Module[
    result
 ];
 
-CombinatorialFactorsForClasses::usage=
-"@brief takes generic amplitude and finds numerical combinatirical factors
-which arise at class level
+CombinatorialFactorsForClasses::usage="
+@brief Takes generic amplitude and finds numerical combinatirical factors
+       which arise at class level.
 @returns list of combinatorical factors for a given generic amplitude
 @param FeynArts`.`FeynAmp[__]";
 CombinatorialFactorsForClasses[
    FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]
 ]:=
-Module[{position = Position[rules, FeynArts`RelativeCF]},
-   {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
-];
+   {classReplacements}[[ All,#[[1,1]] ]] /.
+      {
+         FeynArts`IndexDelta[___] -> 1,
+         FeynArts`SumOver[__] -> 1
+      } &@
+   Position[rules, FeynArts`RelativeCF];
+CombinatorialFactorsForClasses // Utils`MakeUnknownInputDefinition;
+CombinatorialFactorsForClasses ~ SetAttributes ~ {Locked,Protected};
 
 ToGenericSum::usage=
 "@todo
