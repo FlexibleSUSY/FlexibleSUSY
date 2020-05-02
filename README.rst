@@ -653,8 +653,8 @@ directory configure via ::
        --with-collier-libdir=$COLLIER_DIR
 
 Note: versions since COLLIER-1.2.3 were tested so far.
-Also, COLLIER static library should be configured with ``-Dstatic=ON`` option
-and compiled with ``Fortran_FLAGS = -fPIC`` of ``COLLIER-x.y.z/build/CMakeFiles/collier.dir/flags.make`` file.
+Also, COLLIER static library should be configured with
+``-Dstatic=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON`` flags.
 
 TSIL support
 ------------
