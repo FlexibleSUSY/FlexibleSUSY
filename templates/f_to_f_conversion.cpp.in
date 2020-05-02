@@ -25,8 +25,6 @@
 
 #include <valarray>
 #include <complex>
-#include <iostream>
-#include <iomanip> // TODO: remove
 
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
@@ -76,24 +74,26 @@ overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd&
          res.Vn = 0.1080 * muon_pole_mass_5o2;
          res.Sp = 0.0523 * muon_pole_mass_5o2;
          res.Sn = 0.0610 * muon_pole_mass_5o2;
-         return res;
+         break;
       case Nucleus::Al:
          res.D  = 0.0357 * muon_pole_mass_5o2;
          res.Vp = 0.0159 * muon_pole_mass_5o2;
          res.Vn = 0.0169 * muon_pole_mass_5o2;
          res.Sp = 0.0153 * muon_pole_mass_5o2;
          res.Sn = 0.0163 * muon_pole_mass_5o2;
-         return res;
+         break;
       case Nucleus::Ti:
          res.D  = 0. * muon_pole_mass_5o2;
          res.Vp = 0. * muon_pole_mass_5o2;
          res.Vn = 0. * muon_pole_mass_5o2;
          res.Sp = 0. * muon_pole_mass_5o2;
          res.Sn = 0. * muon_pole_mass_5o2;
-         return res;
+         break;
       default:
          throw std::invalid_argument("Unknown nucleus");
    }
+   
+   return res;
 }
 
 double get_capture_rate (const Nucleus N) {
