@@ -56,6 +56,11 @@ Looptools::Looptools() : current_mu2_uv(1.0)
    futils::swap();
 }
 
+Looptools::~Looptools() noexcept
+{
+   ltexi();
+}
+
 void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
    if (std::abs(scl2_in - this->current_mu2_uv) >
