@@ -18,6 +18,7 @@
 
 #include "fortran_utils.hpp"
 #include <unistd.h>
+#include <iostream>
 
 extern "C" {
 void flush_impl();
@@ -30,6 +31,8 @@ namespace futils
 
 void swap() noexcept
 {
+   std::cout << std::flush;
+   std::cerr << std::flush;
    int stdout_copy = dup(STDOUT_FILENO);
    dup2(STDERR_FILENO, STDOUT_FILENO);
    dup2(stdout_copy, STDERR_FILENO);
