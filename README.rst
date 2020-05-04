@@ -91,6 +91,7 @@ Optional:
 
 * FeynArts_ (version 3.9 or higher)
 * FormCalc_ (version 9.5 or higher)
+* GM2Calc_ (version 1.7.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * Himalaya_
 * TSIL_
@@ -98,9 +99,9 @@ Optional:
 Installation of required libraries
 ----------------------------------
 
-The required libraries Boost_, `Eigen 3`_, LoopTools_, Himalaya_ and
-TSIL_ can be installed using the Conan_ package manager.  If not
-already installed, Conan can be installed with pip::
+The required libraries Boost_, `Eigen 3`_, GM2Calc_, LoopTools_,
+Himalaya_ and TSIL_ can be installed using the Conan_ package manager.
+If not already installed, Conan can be installed with pip::
 
     pip install conan
 
@@ -658,8 +659,7 @@ Creating an addon
 
 A FlexibleSUSY addon is a program or library, which uses parts of the
 FlexibleSUSY libraries or the generated models or is integrated into
-FlexibleSUSY.  An example is GM2Calc_, which is included in
-FlexibleSUSY in form of an addon.  An addon can be created via ::
+FlexibleSUSY.  An addon can be created via ::
 
     ./createaddon --name=<addon>
 
@@ -764,7 +764,7 @@ Package content
 In the following all sub-directories within the FlexibleSUSY package
 are listed:
 
-* ``addons/`` contains addons for FlexibleSUSY, such as GM2Calc_
+* ``addons/`` contains addons for FlexibleSUSY
 
 * ``config/`` contains helper scripts and makefile modules for the
   build system

@@ -35,7 +35,8 @@ Changes
 * Improved performance and compile-time of 2-loop MSSM threshold
   corrections.
 
-* Updated GM2Calc to version 1.6.0.
+* GM2Calc_ is now an external dependency.  It can be calculated via
+  Conan_.  FlexibleSUSY requires GM2Calc version 1.7.0 or higher.
 
 * Improved performance of 1- and 2-loop threshold correction loop
   functions used in HSSUSY.
