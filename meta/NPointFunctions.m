@@ -842,7 +842,7 @@ CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 GenerateFAModelFileOnKernel::usage=
 "@brief Generate the FeynArts model file on a given subkernel.";
-GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
+GenerateFAModelFileOnKernel[kernel:_Parallel`Kernels`kernel|_KernelObject] :=
 Module[
    {
       currentPath = $Path,
