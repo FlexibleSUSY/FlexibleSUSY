@@ -126,14 +126,14 @@ template<class T>
 std::complex<double> F0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return A0(m2a, scl2) - 2.0*A0(m2b, scl2)
-	   - (2.0*p2 + 2.0*m2a - m2b) * B0(p2, m2a, m2b, scl2);
+       - (2.0*p2 + 2.0*m2a - m2b) * B0(p2, m2a, m2b, scl2);
 }
 
 template<class T>
 std::complex<double> G0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return (p2 - m2a - m2b) * B0(p2, m2a, m2b, scl2)
-	   - A0(m2a, scl2) - A0(m2b, scl2);
+       - A0(m2a, scl2) - A0(m2b, scl2);
 }
 
 template<class T>

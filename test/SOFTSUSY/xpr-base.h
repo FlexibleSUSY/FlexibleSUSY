@@ -14,9 +14,9 @@
 #ifndef XPR_BASE_H
 #define XPR_BASE_H
 
+#include <exception>
 #include <iostream>
 #include <math.h>
-#include "error.hpp"
 
 /****************** VECTOR **************************/
 
@@ -264,7 +264,7 @@ public:
       int n2, n3;
       frexp(a(m,i), &n2); frexp(b(i,n), &n3);
       if (n2+n3>=1024 || n2+n3 <= -1024) { 
-	throw OutOfBoundsError("Multiply * overload; overflow\n");
+	throw std::runtime_error("Multiply * overload; overflow\n");
 	if (n2+n3<=-1024) return 1e-290;
 	else return 1e290;
       } else 
@@ -293,7 +293,7 @@ public:
       int n2, n3;
       frexp(a(n,i), &n2); frexp(b(i), &n3);
       if (n2+n3>=1024 || n2+n3 <= -1024) { 
-	throw OutOfBoundsError("Multiply * overload; overflow\n");
+	throw std::runtime_error("Multiply * overload; overflow\n");
 	if (n2+n3<=-1024) return 1e-290;
 	else return 1e290;
       } else 

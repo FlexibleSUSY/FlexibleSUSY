@@ -40,7 +40,7 @@
 
 namespace flexiblesusy {
 
-namespace utilities {
+namespace {
 
 template <typename Iterable>
 void append(std::vector<std::string>& a, const Iterable& b)
@@ -54,10 +54,6 @@ void append(Eigen::ArrayXd& a, const Eigen::ArrayXd& b)
    a.conservativeResize(a_rows + b.rows());
    a.block(a_rows, 0, b.rows(), 1) = b;
 }
-
-} // namespace utilities
-
-namespace {
 
 std::valarray<double> to_valarray(double v)
 {
@@ -244,8 +240,6 @@ void to_database(
    const softsusy::QedQcd* qedqcd, const Physical_input* physical_input,
    const @ModelName@_observables* observables)
 {
-   using utilities::append;
-
    std::vector<std::string> names(9,"");
    Eigen::ArrayXd values(9);
 
@@ -351,8 +345,6 @@ Eigen::ArrayXd extract_entry(const std::string& file_name, long long entry)
    const std::string& file_name, long long entry, softsusy::QedQcd* qedqcd,
    Physical_input* physical_input, @ModelName@_observables* observables)
 {
-   using utilities::append;
-
    @ModelName@_mass_eigenstates model;
    const auto number_of_parameters = model.get_number_of_parameters();
    const auto number_of_masses = @ModelName@_parameter_getter().get_number_of_masses();

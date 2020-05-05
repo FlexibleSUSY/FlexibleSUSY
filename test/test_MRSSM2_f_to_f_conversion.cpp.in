@@ -1,0 +1,182 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE Test NPointFunction
+
+#include <boost/test/unit_test.hpp>
+#include "test_complex_equality.hpp"
+#include "test_MRSSM2.hpp"
+
+#include "loop_libraries/loop_library.hpp"
+
+#include "cxx_qft/MRSSM2_qft.hpp"
+#include "MRSSM2_two_scale_spectrum_generator.hpp"
+#include "MRSSM2_input_parameters.hpp"
+#include "MRSSM2_mass_eigenstates.hpp"
+
+#include "test_MRSSM2_FFMassiveV_form_factors.hpp"
+
+@npf_headers@
+
+namespace flexiblesusy
+{
+// new vertices =======================================================
+#define INPUTPARAMETER(p) context.model.get_input().p
+#define MODELPARAMETER(p) context.model.get_##p()
+#define DERIVEDPARAMETER(p) context.model.p()
+#define PHASE(p) context.model.get_##p()
+namespace MRSSM2_cxx_diagrams {
+namespace detail {
+@CXXDiagrams_VertexPrototypes@
+@CXXDiagrams_VertexDefinitions@
+} // namespace detail
+} // namespace MRSSM2_cxx_diagrams
+// ====================================================================
+} // namespace flexiblesusy
+
+using namespace flexiblesusy;
+using namespace MRSSM2_FFMassiveV_form_factors;
+
+namespace flexiblesusy {
+using namespace MRSSM2_cxx_diagrams::fields;
+
+namespace MRSSM2_cxx_diagrams
+{
+namespace npointfunctions
+{
+@npf_definitions@
+} // namespace npointfunctions
+} // namespace MRSSM2_cxx_diagrams
+
+namespace MRSSM2_f_to_f_conversion {
+
+template <class FOutBar, class FIn, class VBar>
+std::complex<double> vectorCurrent(const MRSSM2_mass_eigenstates& model) {
+    context_base context {model};
+    using vertex = Vertex<FOutBar, FIn, VBar>;
+    std::array<int, 2> indices {0, 0};
+    const auto value =  vertex::evaluate(indices, context);
+    return 0.5*(value.left() + value.right());
+}
+
+template <class V, class FormFactor>
+std::valarray<std::complex<double>> create_massive_penguin_amp(
+      FormFactor V_exchange,
+      const MRSSM2_mass_eigenstates& model,
+      const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+
+   const auto uVectorCurrent =
+      vectorCurrent<typename Fu::lorentz_conjugate, Fu, typename V::lorentz_conjugate>(model);
+   const auto dVectorCurrent =
+      vectorCurrent<typename Fd::lorentz_conjugate, Fd, typename V::lorentz_conjugate>(model);
+
+   const auto mVsqr = pow(context.mass<V>({}), 2);
+   const auto GF = qedqcd.displayFermiConstant();
+
+   std::complex<double> guLV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[0] * uVectorCurrent;
+   std::complex<double> guRV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[1] * uVectorCurrent;
+   std::complex<double> gdLV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[0] * dVectorCurrent;
+   std::complex<double> gdRV = -sqrt(2.0)/GF * 1./(-mVsqr) * V_exchange[1] * dVectorCurrent;
+
+   return {guLV, guRV, gdLV, gdRV};
+}
+
+std::array<std::complex<double>, 8> calculate_Fe_to_Fe_in_nucleus (int generationIndex1,
+   int generationIndex2, const MRSSM2_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+{
+   context_base context {model};
+   const auto GF = qedqcd.displayFermiConstant();
+
+   const auto uEMVectorCurrent =
+      vectorCurrent<typename Fu::lorentz_conjugate, Fu, typename VP::lorentz_conjugate>(model);
+   const auto dEMVectorCurrent =
+      vectorCurrent<typename Fd::lorentz_conjugate, Fd, typename VP::lorentz_conjugate>(model);
+   // all contributions
+   auto MRSSM2_npf_up = MRSSM2_cxx_diagrams::npointfunctions::zpinguins_uFeFe_1loop(model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});
+   auto MRSSM2_npf_down = MRSSM2_cxx_diagrams::npointfunctions::zpinguins_dFeFe_1loop(model, std::array<int, 4>{generationIndex1, 0, generationIndex2, 0}, std::array<Eigen::Vector4d, 0>{});
+
+   //minus because of descending order in FormCalc spinor chains
+   std::complex<double> CVLu = -( MRSSM2_npf_up.at(4)+MRSSM2_npf_up.at(5) )/2.;
+   std::complex<double> CVRu = -( MRSSM2_npf_up.at(6)+MRSSM2_npf_up.at(7) )/2.;
+   std::complex<double> CVLd = -( MRSSM2_npf_down.at(4)+MRSSM2_npf_down.at(5) )/2.;
+   std::complex<double> CVRd = -( MRSSM2_npf_down.at(6)+MRSSM2_npf_down.at(7) )/2.;
+
+   const auto VZ_FF = calculate_Fe_Fe_VZ_form_factors (generationIndex1,  generationIndex2, model);
+   const auto VZ_penguin = create_massive_penguin_amp<VZ>(VZ_FF, model, qedqcd);
+
+   // gLVu gLVd gRVu gRVd cLVu cLVd cRVu cRVd
+   return {VZ_penguin[0],      VZ_penguin[2],      VZ_penguin[1],      VZ_penguin[3],
+           -sqrt(2.0)/GF*CVLu, -sqrt(2.0)/GF*CVLd, -sqrt(2.0)/GF*CVRu, -sqrt(2.0)/GF*CVRd};
+}
+} // namespace MRSSM2_f_to_f_conversion
+} // namespace flexiblesusy
+
+// test part==========================================================
+BOOST_AUTO_TEST_SUITE(conversion_suite,
+	* boost::unit_test::tolerance(1.2e-5) )
+BOOST_AUTO_TEST_CASE( test_MRSSM2_f_to_f_conversion )
+{
+   typedef Eigen::DiagonalMatrix<double, 3> DiagonalMatrix3;
+   MRSSM2_input_parameters input;
+
+   // chargino dominance
+   input.TanBeta = 10;
+   input.Ms = 1000;
+   input.LamTDInput = -1.0;
+   input.LamTUInput = -1.0;
+   input.LamSDInput = 1.1;
+   input.LamSUInput = -1.1;
+   input.MuDInput = 400;
+   input.MuUInput = 400;
+   input.BMuInput = Sqr(300);
+   input.mq2Input = DiagonalMatrix3(Sqr(1000), Sqr(1000), Sqr(1000));
+   input.ml2Input = (Eigen::Matrix3d() << Sqr( 500), 20, 0, 20, Sqr( 500), 0, 0, 0, Sqr( 500)).finished();
+   input.md2Input = DiagonalMatrix3(Sqr(1000), Sqr(1000), Sqr(1000));
+   input.mu2Input = DiagonalMatrix3(Sqr(1000), Sqr(1000), Sqr(1000));
+   input.me2Input = DiagonalMatrix3(Sqr( 500), Sqr( 500), Sqr( 500));
+   input.mS2Input = Sqr(2000);
+   input.mT2Input = Sqr(3000);
+   input.moc2Input = Sqr(1000);
+   input.mRd2Input = Sqr(700);
+   input.mRu2Input = Sqr(1000);
+   input.MDBSInput = 1000;
+   input.MDWBTInput = 500;
+   input.MDGocInput = 1500;
+
+   softsusy::QedQcd qedqcd;
+   Loop_library::set(1);
+   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
+
+   auto point = MRSSM2_f_to_f_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
+
+   TEST_COMPLEX_EQUALITY( point.at(0), point.at(4) );
+   TEST_COMPLEX_EQUALITY( point.at(1), point.at(5) );
+
+   input.ml2Input = DiagonalMatrix3(Sqr( 500), Sqr( 500), Sqr( 500));
+   input.me2Input = (Eigen::Matrix3d() << Sqr( 500), 20, 0, 20, Sqr( 500), 0, 0, 0, Sqr( 500)).finished();
+   m = setup_MRSSM2(input, qedqcd);
+   point = MRSSM2_f_to_f_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
+
+   TEST_COMPLEX_EQUALITY( point.at(2), point.at(6) );
+   TEST_COMPLEX_EQUALITY( point.at(3), point.at(7) );
+}
+BOOST_AUTO_TEST_SUITE_END()
+// ====================================================================

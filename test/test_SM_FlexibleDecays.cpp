@@ -15,11 +15,14 @@
 // #include "standard_model.hpp"
 // TODO: remove before release
 #include <iomanip>
+#include "loop_libraries/loop_library.hpp"
 
 using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
 {
+
+   Loop_library::set(2);
 
    SM_input_parameters input;
    input.LambdaIN = 0.285;

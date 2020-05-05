@@ -19,6 +19,7 @@
 #include "@ModelName@_one_loop_decay_diagrams.hpp"
 #include "pv.hpp"
 #include "wrappers.hpp"
+#include "loop_libraries/loop_library.hpp"
 
 namespace flexiblesusy {
 
@@ -53,13 +54,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
       complex<double>& CpcF6F4S2PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -129,7 +132,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
       CpS2S4cS6, const std::complex<double>& CpS3S5S6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -166,7 +171,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
       CpS2cU6U4, const std::complex<double>& CpS3U5U6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -203,13 +210,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
       CpS2S4cV6, const std::complex<double>& CpS3S5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -249,13 +258,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
       CpS2S4cS6, const std::complex<double>& CpS3S6V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -295,13 +306,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
       CpS2cS6V4, const std::complex<double>& CpS3S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -341,13 +354,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
       CpS2S4cV6, const std::complex<double>& CpS3V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -387,13 +402,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
       CpS2V4cV6, const std::complex<double>& CpS3S5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -433,13 +450,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
       CpS2cS6V4, const std::complex<double>& CpS3S6V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -479,7 +498,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
       CpS2V4cV6, const std::complex<double>& CpS3V5V6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
@@ -514,7 +535,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
       CpS3S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -548,7 +571,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
       CpS3S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -582,7 +607,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
       CpS2S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -616,7 +643,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
       CpS2S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -650,7 +679,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
       CpS2S3S4S5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -684,7 +715,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
       CpS2S3V4V5,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -719,7 +752,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
       CpS1S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -753,7 +788,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
       CpS1S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSS result;
 
@@ -787,7 +824,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g1n19_SS(
       CpS1S3S4S5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS4*mLS4, mLS5*mLS5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLS5*mLS5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -821,7 +860,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g2n20_VV(
       CpS1S3V4V5,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLV4*mLV4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLV4*mLV4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -856,7 +897,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g1n21_SS(
       CpS1S2S4S5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS4*mLS4, mLS5*mLS5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS4*mLS4, mLS5*mLS5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -890,7 +933,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
       CpS1S2V4V5,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV4*mLV4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV4*mLV4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -930,10 +975,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
       double>& CpcF6cF5S3PR, const std::complex<double>& CpS1S2cS4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -973,7 +1020,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
       CpS3cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1010,7 +1059,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
       CpS3cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1048,10 +1099,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
       CpS3cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1089,7 +1142,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
       CpS3cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1131,9 +1186,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
       double>& CpcF6cF5S3PR, const std::complex<double>& CpS1S2cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1173,9 +1230,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
       CpS3cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1215,9 +1274,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
       double>& CpU5U6V42,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1256,9 +1317,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
       CpS3cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1298,9 +1361,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
       CpS3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1341,10 +1406,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1S3cS4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1384,7 +1451,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
       CpS2cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1421,7 +1490,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
       CpS2cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1459,10 +1530,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
       CpS2cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1500,7 +1573,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
       CpS2cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1542,9 +1617,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1S3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1584,9 +1661,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
       CpS2cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1626,9 +1705,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
       double>& CpU5U6V42,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1667,9 +1748,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
       CpS2cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1709,9 +1792,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
       CpS2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1752,10 +1837,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2S3cS4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1795,7 +1882,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
       CpS2S3cS4, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1832,7 +1921,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
       CpS2S3cS4, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1870,10 +1961,12 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
       CpS2S3cS4, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1911,7 +2004,9 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
       CpS2S3cS4, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1953,9 +2048,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2S3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -1995,9 +2092,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
       CpS2S3cV4, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -2037,9 +2136,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
       double>& CpU5U6V42,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -2078,9 +2179,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
       CpS2S3cV4, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -2120,9 +2223,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
       CpS2S3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSS result;
@@ -2169,19 +2274,21 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
       complex<double>& CpcF6F4V2PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c00tmp3 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp4 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c12tmp5 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp6 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c22tmp7 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2324,13 +2431,15 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
       CpS4cS6V2, const std::complex<double>& CpS5S6V3,
    double scale)
 {
-   const auto c00tmp1 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp2 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp4 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2375,13 +2484,15 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
       , const std::complex<double>& CpcU6U4V2,
    double scale)
 {
-   const auto c00tmp1 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c12tmp2 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c22tmp4 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2426,7 +2537,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
       CpS4V2cV6, const std::complex<double>& CpS5V3V6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2464,13 +2577,15 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
       CpS4cS6V2, const std::complex<double>& CpS6V3V5,
    double scale)
 {
-   const auto c00tmp1 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c12tmp2 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c22tmp4 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2516,17 +2631,19 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
       , const std::complex<double>& CpcS6V2V4,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c00tmp2 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp2 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp4 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp4 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp5 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp5 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp6 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp6 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2578,19 +2695,21 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
       CpS4V2cV6, const std::complex<double>& CpV3V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp5 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp6 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp7 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2641,19 +2760,21 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
       , const std::complex<double>& CpV2V4cV6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c00tmp3 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp4 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c12tmp5 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp6 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c22tmp7 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2705,7 +2826,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
       CpcS6V2V4, const std::complex<double>& CpS6V3V5,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2746,19 +2869,21 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
       CpV2V4cV6, const std::complex<double>& CpV3V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp5 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp6 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp7 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2808,7 +2933,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
       CpcS5S5V3V4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -2848,7 +2975,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
       complex<double>& CpV3V4cV5V53,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -2883,7 +3012,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
       CpcS5S5V2V4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -2923,7 +3054,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
       complex<double>& CpV2V4cV5V53,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -2958,7 +3091,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
       CpS4S5V2V3,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -2998,7 +3133,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
       double>& CpV2V3V4V53,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3033,7 +3170,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
       CpS1S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -3067,7 +3206,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
       CpS1S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SVV result;
 
@@ -3101,7 +3242,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
       CpS1S4V3V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3135,7 +3278,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
       CpS1S4V2V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS4*mLS4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3178,12 +3323,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
       double>& CpcF6cF5V3PR, const std::complex<double>& CpS1V2cV4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext3*mext3, mLF5*mLF5, mLF6*
+   const auto b00tmp3 = lib.B00(mext3*mext3, mLF5*mLF5, mLF6*
       mLF6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp4 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3226,7 +3373,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
       CpcS5cS6V3, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b00tmp1 = passarino_veltman::B00(mext3*mext3, mLS5*mLS5, mLS6*
+   auto& lib = Loop_library::get();
+
+   const auto b00tmp1 = lib.B00(mext3*mext3, mLS5*mLS5, mLS6*
       mLS6, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3263,7 +3412,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
       const std::complex<double>& CpcU6cU5V3,
    double scale)
 {
-   const auto b00tmp1 = passarino_veltman::B00(mext3*mext3, mLU5*mLU5, mLU6*
+   auto& lib = Loop_library::get();
+
+   const auto b00tmp1 = lib.B00(mext3*mext3, mLU5*mLU5, mLU6*
       mLU6, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3300,7 +3451,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
       CpcS5V3cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3341,12 +3494,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
       CpV3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext3*mext3, mLV5*mLV5, mLV6*
+   const auto b00tmp3 = lib.B00(mext3*mext3, mLV5*mLV5, mLV6*
       mLV6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp4 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3393,12 +3548,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
       double>& CpcF6cF5V2PR, const std::complex<double>& CpS1V3cV4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext2*mext2, mLF5*mLF5, mLF6*
+   const auto b00tmp3 = lib.B00(mext2*mext2, mLF5*mLF5, mLF6*
       mLF6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp4 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3441,7 +3598,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
       CpcS5cS6V2, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b00tmp1 = passarino_veltman::B00(mext2*mext2, mLS5*mLS5, mLS6*
+   auto& lib = Loop_library::get();
+
+   const auto b00tmp1 = lib.B00(mext2*mext2, mLS5*mLS5, mLS6*
       mLS6, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3478,7 +3637,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
       const std::complex<double>& CpcU6cU5V2,
    double scale)
 {
-   const auto b00tmp1 = passarino_veltman::B00(mext2*mext2, mLU5*mLU5, mLU6*
+   auto& lib = Loop_library::get();
+
+   const auto b00tmp1 = lib.B00(mext2*mext2, mLU5*mLU5, mLU6*
       mLU6, scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3515,7 +3676,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
       CpcS5V2cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3556,12 +3719,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
       CpV2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext2*mext2, mLV5*mLV5, mLV6*
+   const auto b00tmp3 = lib.B00(mext2*mext2, mLV5*mLV5, mLV6*
       mLV6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp4 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3604,10 +3769,12 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpcS4V2V3,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3647,7 +3814,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
       CpcS4V2V3, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3684,7 +3853,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
       CpcS4V2V3, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3722,10 +3893,12 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
       CpcS4V2V3, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3763,7 +3936,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
       CpcS4V2V3, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3807,9 +3982,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpV2V3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3851,9 +4028,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
       , const std::complex<double>& CpV2V3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3893,7 +4072,9 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
       , const std::complex<double>& CpV2V3cV4,
    double scale)
 {
-   const auto b1tmp1 = passarino_veltman::B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3934,9 +4115,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
       , const std::complex<double>& CpV2V3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -3978,9 +4161,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
       CpV2V3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SVV result;
@@ -4025,13 +4210,15 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(
       complex<double>& CpcF6F4S2PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4085,11 +4272,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g2n2_SSS(
       CpS2S4cS6, const std::complex<double>& CpS5S6V3,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4126,11 +4315,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g3n3_UUU(
       CpS2cU6U4, const std::complex<double>& CpU5U6V3,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4167,11 +4358,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g4n4_SSV(
       CpS2S4cV6, const std::complex<double>& CpS5V3V6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4209,11 +4402,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g5n5_SVS(
       CpS2S4cS6, const std::complex<double>& CpS6V3V5,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4251,19 +4446,21 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g6n6_VSS(
       CpS2cS6V4, const std::complex<double>& CpS5S6V3,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c00tmp2 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp2 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c11tmp4 = passarino_veltman::C11(mext2*mext2, mext3*mext3, mext1*
+   const auto c11tmp4 = lib.C11(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp5 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp6 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp7 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4309,21 +4506,23 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g7n7_SVV(
       CpS2S4cV6, const std::complex<double>& CpV3V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = passarino_veltman::C00(mext2*mext2, mext3*mext3, mext1*
+   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c11tmp5 = passarino_veltman::C11(mext2*mext2, mext3*mext3, mext1*
+   const auto c11tmp5 = lib.C11(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp6 = passarino_veltman::C12(mext2*mext2, mext3*mext3, mext1*
+   const auto c12tmp6 = lib.C12(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp7 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp7 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp8 = passarino_veltman::C22(mext2*mext2, mext3*mext3, mext1*
+   const auto c22tmp8 = lib.C22(mext2*mext2, mext3*mext3, mext1*
       mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4366,11 +4565,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g8n8_VSV(
       CpS2V4cV6, const std::complex<double>& CpS5V3V6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4407,11 +4608,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g9n9_VVS(
       CpS2cS6V4, const std::complex<double>& CpS6V3V5,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4450,11 +4653,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
       CpS2V4cV6, const std::complex<double>& CpV3V5V6,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext3*mext3, mext1*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext3*mext3, mext1*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext3*mext3, mext1*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
       mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4489,7 +4694,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
       CpcS5S5V3V4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4529,7 +4736,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
       complex<double>& CpV3V4cV5V53,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4564,7 +4773,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
       CpS2S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4598,7 +4809,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
       CpS2S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4633,9 +4846,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
       CpS2S4V3V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4670,7 +4885,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
       CpS1S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4704,7 +4921,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
       CpS1S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SSV result;
 
@@ -4739,9 +4958,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
       CpS1S4V3V5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4785,12 +5006,14 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
       double>& CpcF6cF5V3PR, const std::complex<double>& CpS1S2cV4,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext3*mext3, mLF5*mLF5, mLF6*
+   const auto b00tmp3 = lib.B00(mext3*mext3, mLF5*mLF5, mLF6*
       mLF6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp4 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4833,7 +5056,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
       CpcS5cS6V3, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b00tmp1 = passarino_veltman::B00(mext3*mext3, mLS5*mLS5, mLS6*
+   auto& lib = Loop_library::get();
+
+   const auto b00tmp1 = lib.B00(mext3*mext3, mLS5*mLS5, mLS6*
       mLS6, scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4870,7 +5095,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
       CpcS5V3cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4911,12 +5138,14 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
       CpV3cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b00tmp3 = passarino_veltman::B00(mext3*mext3, mLV5*mLV5, mLV6*
+   const auto b00tmp3 = lib.B00(mext3*mext3, mLV5*mLV5, mLV6*
       mLV6, scale*scale);
-   const auto b1tmp4 = passarino_veltman::B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp4 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -4959,10 +5188,12 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1cS4V3,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5002,7 +5233,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
       CpS2cS5cS6, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5039,7 +5272,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
       CpS2cU6cU5, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5077,10 +5312,12 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
       CpS2cS5cV6, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5118,7 +5355,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
       CpS2cV5cV6, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5160,9 +5399,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
       double>& CpcF6cF5S2PR, const std::complex<double>& CpS1V3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5202,9 +5443,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
       CpS2cS5cS6, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5241,7 +5484,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
       CpS2cU6cU5, const std::complex<double>& CpU5U6V4,
    double scale)
 {
-   const auto b1tmp1 = passarino_veltman::B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b1tmp1 = lib.B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5279,9 +5524,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
       CpS2cS5cV6, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5320,9 +5567,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
       CpS2cV5cV6, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5362,10 +5611,12 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2cS4V3,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5405,7 +5656,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
       CpS2cS4V3, const std::complex<double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5442,7 +5695,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
       CpS2cS4V3, const std::complex<double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5480,10 +5735,12 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
       CpS2cS4V3, const std::complex<double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5521,7 +5778,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
       CpS2cS4V3, const std::complex<double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5563,9 +5822,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
       double>& CpcF6cF5S1PR, const std::complex<double>& CpS2V3cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5605,9 +5866,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
       CpS2V3cV4, const std::complex<double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5644,7 +5907,9 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
       CpS2V3cV4, const std::complex<double>& CpU5U6V4,
    double scale)
 {
-   const auto b1tmp1 = passarino_veltman::B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5682,9 +5947,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
       CpS2V3cV4, const std::complex<double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5723,9 +5990,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
       CpS2V3cV4, const std::complex<double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SSV result;
@@ -5767,13 +6036,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
       ::complex<double>& CpF5F3S6PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext1*mext1, mext3*mext3, mext2*
+   const auto c0tmp2 = lib.C0(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext1*mext1, mext3*mext3, mext2*
+   const auto c1tmp3 = lib.C1(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext1*mext1, mext3*mext3, mext2*
+   const auto c2tmp4 = lib.C2(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -5832,11 +6103,13 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
       double>& CpF6F3S5PR, const std::complex<double>& CpS1cS4cS5,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext1*mext1, mext3*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext1*mext1, mext3*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext1*mext1, mext3*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -5886,13 +6159,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
       ::complex<double>& CpF5F3V6PR,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext1*mext1, mext3*mext3, mext2*
+   const auto c0tmp2 = lib.C0(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext1*mext1, mext3*mext3, mext2*
+   const auto c1tmp3 = lib.C1(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext1*mext1, mext3*mext3, mext2*
+   const auto c2tmp4 = lib.C2(mext1*mext1, mext3*mext3, mext2*
       mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -5951,13 +6226,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
       double>& CpF6F3V5PR, const std::complex<double>& CpS1cS4cV5,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF6*mLF6, mLV5*mLV5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF6*mLF6, mLV5*mLV5,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext1*mext1, mext3*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext1*mext1, mext3*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext1*mext1, mext3*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6012,13 +6289,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
       double>& CpF6F3S5PR, const std::complex<double>& CpS1cS5cV4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF6*mLF6, mLS5*mLS5,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF6*mLF6, mLS5*mLS5,
       scale*scale);
-   const auto c0tmp2 = passarino_veltman::C0(mext2*mext2, mext1*mext1, mext3*
+   const auto c0tmp2 = lib.C0(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = passarino_veltman::C1(mext2*mext2, mext1*mext1, mext3*
+   const auto c1tmp3 = lib.C1(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = passarino_veltman::C2(mext2*mext2, mext1*mext1, mext3*
+   const auto c2tmp4 = lib.C2(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6078,11 +6357,13 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
       double>& CpF6F3V5PR, const std::complex<double>& CpS1cV4cV5,
    double scale)
 {
-   const auto c0tmp1 = passarino_veltman::C0(mext2*mext2, mext1*mext1, mext3*
+   auto& lib = Loop_library::get();
+
+   const auto c0tmp1 = lib.C0(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = passarino_veltman::C1(mext2*mext2, mext1*mext1, mext3*
+   const auto c1tmp2 = lib.C1(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = passarino_veltman::C2(mext2*mext2, mext1*mext1, mext3*
+   const auto c2tmp3 = lib.C2(mext2*mext2, mext1*mext1, mext3*
       mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6122,7 +6403,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
       CpF2F3cS4PR, const std::complex<double>& CpS1S4cS5S5,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLS5*mLS5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
 
    Decay_amplitude_SFF result;
 
@@ -6159,7 +6442,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
       CpF2F3cS4PR, const std::complex<double>& CpS1S4cV5V5,
    double scale, double finite)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV5*mLV5, scale*scale);
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
 
    Decay_amplitude_SFF result;
 
@@ -6202,9 +6487,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
       ::complex<double>& CpcF5F3cS6PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6256,9 +6543,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
       ::complex<double>& CpcF5F3cV6PR,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6308,9 +6597,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
       ::complex<double>& CpF5F4S6PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6362,9 +6653,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
       ::complex<double>& CpF5F4V6PR,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6414,10 +6707,12 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
       ::complex<double>& CpcF6cF5S1PR,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6464,7 +6759,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
       double>& CpS4S5S6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6505,7 +6802,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
       double>& CpS4U5U6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6547,10 +6846,12 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
       double>& CpS4S5V6,
    double scale)
 {
-   const auto a0tmp1 = passarino_veltman::A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
+   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp3 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6593,7 +6894,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
       double>& CpS4V5V6,
    double scale, double finite)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6643,9 +6946,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
       ::complex<double>& CpcF6cF5S1PR,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6694,9 +6999,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
       double>& CpS5S6V4,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6741,7 +7048,9 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
       double>& CpU5U6V4,
    double scale)
 {
-   const auto b1tmp1 = passarino_veltman::B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
+   auto& lib = Loop_library::get();
+
+   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6787,9 +7096,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
       double>& CpS5V4V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;
@@ -6836,9 +7147,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
       double>& CpV4V5V6,
    double scale)
 {
-   const auto b0tmp1 = passarino_veltman::B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   auto& lib = Loop_library::get();
+
+   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
-   const auto b1tmp2 = passarino_veltman::B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
+   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
       scale*scale);
 
    Decay_amplitude_SFF result;

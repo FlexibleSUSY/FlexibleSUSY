@@ -8,7 +8,6 @@
 #include <gsl/gsl_multimin.h>
 
 #include "minimizer.hpp"
-#include "gsl_utils.hpp"
 #include "error.hpp"
 #include "logger.hpp"
 #include "ew_input.hpp"

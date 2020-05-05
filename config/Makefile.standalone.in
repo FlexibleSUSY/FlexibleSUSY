@@ -6,7 +6,7 @@ ABSBASEDIR      := @ABSBASEDIR@
 # Switches
 ENABLE_FFLITE    := @ENABLE_FFLITE@
 ENABLE_LOOPTOOLS := @ENABLE_LOOPTOOLS@
-ENABLE_THREADS   := @ENABLE_THREADS@
+ENABLE_COLLIER   := @ENABLE_COLLIER@
 
 MODULE_LIBEXT   := @MODULE_LIBEXT@
 
@@ -38,19 +38,13 @@ CXX_DEP_GEN     := $(CXX)
 CXXFLAGS_DEP_GEN:= $(CXXFLAGS)
 FC              := @FC@
 FFLAGS          := @FFLAGS@
-FLIBS           := @FLIBS@
 FOR_DEP_GEN     := $(FC)
-BOOSTTESTLIBS   := @BOOSTTESTLIBS@
-BOOSTTHREADLIBS := @BOOSTTHREADLIBS@
 BOOSTFLAGS      := @BOOSTFLAGS@
 EIGENFLAGS      := @EIGENFLAGS@
 GSLLIBS         := @GSLLIBS@
 GSLFLAGS        := @GSLFLAGS@
 LOOPFUNCFLAGS   := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS    := @LOOPFUNCLIBS@
-SQLITEFLAGS     := @SQLITEFLAGS@
-SQLITELIBS      := @SQLITELIBS@
-THREADLIBS      := @THREADLIBS@
 
 STANDALONE_SRC := \
 		standalone.cpp
@@ -94,12 +88,12 @@ distclean: clean
 
 $(STANDALONE_DEP) $(STANDALONE_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS)
 
-ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
+ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)$(ENABLE_COLLIER)))
 $(STANDALONE_DEP) $(STANDALONE_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
 $(STANDALONE_EXE): $(STANDALONE_OBJ) $(LIBMODEL) $(LIBSMHO) $(LIBMSSMHO) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(FLIBS) $(SQLITELIBS)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean-dep)
@@ -144,10 +138,7 @@ showbuild:
 	@echo "CXXFLAGS_DEP_GEN   = $(CXXFLAGS_DEP_GEN)"
 	@echo "FC                 = $(FC)"
 	@echo "FFLAGS             = $(FFLAGS)"
-	@echo "FLIBS              = $(FLIBS)"
 	@echo "FOR_DEP_GEN        = $(FOR_DEP_GEN)"
-	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
-	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
 	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
 	@echo "GSLLIBS            = $(GSLLIBS)"
@@ -155,10 +146,7 @@ showbuild:
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
 	@echo "LOOPFUNCLIBS       = $(LOOPFUNCLIBS)"
 	@echo "MODULE_LIBEXT      = $(MODULE_LIBEXT)"
-	@echo "SQLITELIBS         = $(SQLITELIBS)"
-	@echo "SQLITEFLAGS        = $(SQLITEFLAGS)"
-	@echo "THREADLIBS         = $(THREADLIBS)"
 	@echo ""
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
-	@echo "ENABLE_THREADS     = $(ENABLE_THREADS)"
+	@echo "ENABLE_COLLIER     = $(ENABLE_COLLIER)"

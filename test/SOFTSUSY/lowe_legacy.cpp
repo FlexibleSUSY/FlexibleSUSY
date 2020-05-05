@@ -9,8 +9,6 @@
 #include "lowe_legacy.h"
 #include "conversion.hpp"
 #include "ew_input.hpp"
-#include "error.hpp"
-#include "wrappers.hpp"
 
 namespace softsusy {
 
@@ -30,6 +28,37 @@ const std::array<std::string, NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS> qedqcd_inpu
    "CKM_theta_12", "CKM_theta_13", "CKM_theta_23", "CKM_delta",
    "PMNS_theta_12", "PMNS_theta_13", "PMNS_theta_23", "PMNS_delta", "PMNS_alpha_1", "PMNS_alpha_2"
 };
+
+double MaxRelDiff(double a, double b)
+{
+   const double max = std::max(std::abs(a), std::abs(b));
+
+   if (max < 1.0e-20) {
+      return 0.0;
+   }
+
+   return std::abs((a - b) / max);
+}
+
+template <class Derived>
+auto MaxRelDiff(const Eigen::PlainObjectBase<Derived>& a,
+                const Eigen::PlainObjectBase<Derived>& b)
+   -> decltype(MaxRelDiff(a.data()[0], b.data()[0]))
+{
+   if (a.rows() != b.rows() || a.cols() != b.cols()) {
+      throw std::runtime_error("MaxRelDiff: Matrices/Vectors have different size!");
+   }
+
+   using Scalar_t = decltype(MaxRelDiff(a.data()[0], b.data()[0]));
+
+   Scalar_t max = 0;
+
+   for (Eigen::Index i = 0; i < a.size(); i++) {
+      max = std::max(max, MaxRelDiff(a.data()[i], b.data()[i]));
+   }
+
+   return max;
+}
 
 // Given a value of mt, and alphas(MZ), find alphas(mt) to 1 loops in qcd:
 // it's a very good approximation at these scales, better than 10^-3 accuracy
@@ -178,9 +207,9 @@ const DoubleVector QedQcd_legacy::display() const {
 void QedQcd_legacy::runto_safe(double scale, double eps)
 {
    if (runto(scale, eps)) {
-      throw flexiblesusy::NonPerturbativeRunningQedQcdError(
+      throw std::runtime_error(
          std::string("Non-perturbative running to Q = ")
-         + flexiblesusy::ToString(scale)
+         + std::to_string(scale)
          + " during determination of the SM(5) parameters.");
    }
 }
@@ -255,7 +284,7 @@ std::istream & operator >>(std::istream &left, QedQcd_legacy &m) {
   m.setMass(mTop, getRunMtFromMz(mtpole, alphas));
 
   if (cmbmb == "?" && cmbpole == "?") {
-     throw flexiblesusy::ReadError(
+     throw std::runtime_error(
         "Error reading in low energy QCDQED object: must specify "
         "running AND/OR pole bottom mass");
   }
@@ -382,7 +411,7 @@ double QedQcd_legacy::extractRunningMb(double alphasMb) {
     std::ostringstream ii;
     ii << "QedQcd_legacy::extractRunningMb called at scale "
          << displayMu() << " instead of mbpole\n";
-    throw flexiblesusy::SetupError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 
   // Following is the MSbar correction from QCD, hep-ph/9912391 and ZPC48 673
@@ -408,7 +437,7 @@ double QedQcd_legacy::extractPoleMb(double alphasMb) {
     std::ostringstream ii;
     ii << "QedQcd_legacy::extractPoleMb called at scale " << displayMu() <<
       " instead of mb(mb)\n";
-    throw flexiblesusy::SetupError(ii.str());
+    throw std::runtime_error(ii.str());
   }
 
   // Following is the MSbar correction from QCD, hep-ph/9912391
@@ -555,7 +584,7 @@ void QedQcd_legacy::to(double scale, double precision_goal, unsigned max_iterati
       runto_safe(scale, running_precision);
       qedqcd_new = display();
 
-      converged = flexiblesusy::MaxRelDiff(
+      converged = MaxRelDiff(
          flexiblesusy::ToEigenArray(qedqcd_old),
          flexiblesusy::ToEigenArray(qedqcd_new)) < precision_goal;
 
@@ -577,7 +606,7 @@ void QedQcd_legacy::to(double scale, double precision_goal, unsigned max_iterati
          " converge after " + std::to_string(max_iterations) +
          " iterations (precision goal: " + std::to_string(precision_goal)
          + ").";
-      throw flexiblesusy::NoConvergenceError(max_iterations, msg);
+      throw std::runtime_error(msg);
    }
 }
 

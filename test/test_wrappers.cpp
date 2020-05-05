@@ -175,6 +175,110 @@ BOOST_AUTO_TEST_CASE( test_AbsSqrt )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_ArcCos )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(ArcCos(1  ), std::acos(1  ), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(ArcCos(1.0), std::acos(1.0), 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcCos(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::acos(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::acos(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_ArcSin )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(ArcSin(1  ), std::asin(1  ), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(ArcSin(1.0), std::asin(1.0), 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcSin(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::asin(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::asin(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_ArcTan )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(4*ArcTan(1  ), Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(4*ArcTan(1.0), Pi, 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcTan(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::atan(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::atan(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Arg )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1    ),   0.0, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1    ),    Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1.0  ),   0.0, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1.0*i),  Pi/2, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1.0  ),    Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1.0*i), -Pi/2, 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Cbrt )
+{
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt( 1  ), std::cbrt( 1)  , 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt( 1.0), std::cbrt( 1.0), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt(-1.0), std::cbrt(-1.0), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Conj )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Conj(-4),-4);
+   BOOST_CHECK_EQUAL(Conj( 0), 0);
+   BOOST_CHECK_EQUAL(Conj( 4), 4);
+
+   BOOST_CHECK_EQUAL(Conj(-4.0),-4.0);
+   BOOST_CHECK_EQUAL(Conj( 0.0), 0.0);
+   BOOST_CHECK_EQUAL(Conj(-0.0),-0.0);
+   BOOST_CHECK_EQUAL(Conj( 4.0), 4.0);
+
+   BOOST_CHECK_EQUAL(Conj(i    ), -i  );
+   BOOST_CHECK_EQUAL(Conj(i*i  ), -1.0);
+   BOOST_CHECK_EQUAL(Conj(1 + i),  1.0 - i);
+
+   Eigen::Matrix<double,2,2> m;
+   m << -1.0, -2.0, -3.0, -4.0;
+
+   Eigen::Array<double,2,2> a = m.array();
+
+   Eigen::Matrix<std::complex<double>,2,2> cm = m + i*m;
+   Eigen::Array<std::complex<double>,2,2> ca = a + i*a;
+
+   for (int i = 0; i < m.rows(); i++) {
+      for (int k = 0; k < m.cols(); k++) {
+         BOOST_CHECK_EQUAL(Conj(a)(i,k), Conj(a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(m)(i,k), Conj(m(i,k)));
+
+         BOOST_CHECK_EQUAL(Conj(ca)(i,k), Conj(ca(i,k)));
+         BOOST_CHECK_EQUAL(Conj(cm)(i,k), Conj(cm(i,k)));
+
+         // test expressions
+         BOOST_CHECK_EQUAL(Conj(a + a)(i,k), Conj(a(i,k) + a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(m + m)(i,k), Conj(m(i,k) + m(i,k)));
+
+         BOOST_CHECK_EQUAL(Conj(4*a)(i,k), 4*Conj(a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(4*m)(i,k), 4*Conj(m(i,k)));
+      }
+   }
+}
+
 BOOST_AUTO_TEST_CASE( test_Delta )
 {
    BOOST_CHECK_EQUAL(Delta(0,0), 1);

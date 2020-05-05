@@ -9,9 +9,11 @@ addons:
   apt:
     packages:
       - libgsl0-dev
+      - libsqlite3-dev
   homebrew:
     packages:
       - gsl
+      - sqlite
     update: true
 install:
   - export PATH=$(python -c 'import site; print(site.USER_BASE + "/bin")'):$PATH

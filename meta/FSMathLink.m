@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Observables`", "TextFormatting`", "Utils`"}];
+BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Utils`"}];
 
 GetNumberOfInputParameterRules::usage = "";
 GetNumberOfSpectrumEntries::usage = "";
