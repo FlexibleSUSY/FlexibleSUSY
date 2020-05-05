@@ -330,7 +330,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at2_as]    = 1.;
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
-   values[loop_library]                     = 0.; // 0 = (Softsusy)
+   values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

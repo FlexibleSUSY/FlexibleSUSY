@@ -77,12 +77,14 @@ module LibCollier_wrapper
 contains
    subroutine initialize_collier_dummy() bind(C, name='initialize_collier_impl')
       call Init_cll(4,2,"")
+      call SetDeltaIR_cll(0d0, 0d0)
    end
 
    subroutine set_mu2_uv_dummy(scl2) bind(C, name='set_mu2_uv_impl')
       real(C_DOUBLE), intent(in) :: scl2
 
       call SetMuUV2_cll(scl2)
+      call SetMuIR2_cll(scl2)
    end
 
    subroutine A0_dummy(res, m02) bind(C, name='A0_impl')
