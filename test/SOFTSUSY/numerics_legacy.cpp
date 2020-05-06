@@ -12,17 +12,6 @@
 #include <cmath>
 #include <exception>
 
-namespace flexiblesusy {
-
-class SoftsusyNumericsError : public std::runtime_error {
-public:
-   explicit SoftsusyNumericsError(std::string msg)
-      : std::runtime_error(msg) {}
-   virtual ~SoftsusyNumericsError() {}
-};
-
-} // namespace flexiblesusy
-
 namespace softsusy {
 
 namespace {
@@ -41,7 +30,7 @@ double calcDerivative(double (*func)(double), double x, double h, double
   int i, j;
   double errt, fac, hh, ans = 0.0;
   
-  if (h == 0.0) throw flexiblesusy::SoftsusyNumericsError("h must be nonzero in numerics.cpp:calcDerivative");
+  if (h == 0.0) throw std::runtime_error("h must be nonzero in numerics.cpp:calcDerivative");
 
 
   DoubleMatrix a(NTAB, NTAB);
@@ -125,7 +114,7 @@ double fps(double z) {
      dilog(1.0 - (1.0 + y) / (2.0 * zz)));
 
   /// answer should always be real
-  if (ans.imag() > EPSTOL) throw flexiblesusy::SoftsusyNumericsError("Error in fps");
+  if (ans.imag() > EPSTOL) throw std::runtime_error("Error in fps");
   return ans.real();
 }
 

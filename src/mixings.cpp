@@ -39,7 +39,7 @@ void convert_symmetric_fermion_mixings_to_slha(double& m,
    if (!is_zero(std::abs(std::imag(z(0,0))))) {
       z(0,0) *= std::complex<double>(0.0,1.0);
       m *= -1;
-#ifdef ENABLE_DEBUG
+#if defined(ENABLE_VERBOSE) || defined(ENABLE_DEBUG)
       if (!is_zero(std::abs(std::imag(z(0,0))))) {
          WARNING("Element (0,0) of the following fermion mixing matrix"
                  " contains entries which have non-zero real and imaginary"
