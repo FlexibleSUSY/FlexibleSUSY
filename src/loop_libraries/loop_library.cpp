@@ -109,7 +109,7 @@ void Loop_library::set(int new_type)
    }
 }
 
-Loop_library::Library Loop_library::get_type()
+const Loop_library::Library Loop_library::get_type()
 {
    return type_;
 }
