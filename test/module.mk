@@ -84,14 +84,16 @@ TEST_SRC := \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_which.cpp \
 		$(DIR)/test_wrappers.cpp \
-		$(DIR)/test_looplibrary_softsusy.cpp
+		$(DIR)/test_looplibrary_softsusy.cpp \
+		$(DIR)/test_looplibrary_environment.cpp
 
 TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
 		$(DIR)/test_space_dir.sh \
-		$(DIR)/test_wolframscript.sh
+		$(DIR)/test_wolframscript.sh \
+		$(DIR)/test_looplibrary_environment.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \

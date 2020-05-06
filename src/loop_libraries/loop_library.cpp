@@ -109,6 +109,11 @@ void Loop_library::set(int new_type)
    }
 }
 
+Loop_library::Library Loop_library::get_type()
+{
+   return type_;
+}
+
 looplibrary::Loop_library_interface& Loop_library::get()
 {
    if (Loop_library::type_ == Loop_library::Library::Undefined) {
