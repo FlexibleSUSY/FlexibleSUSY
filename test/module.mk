@@ -867,6 +867,8 @@ $$(for f in $^ ; do echo "\t<test filename=\"$$(basename $$f)\"/>"; done)\n\
 
 $(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
 
+$(DIR)/test_looplibrary_environment.sh : $(DIR)/test_looplibrary_environment.x
+
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
