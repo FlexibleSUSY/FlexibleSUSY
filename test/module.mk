@@ -251,8 +251,7 @@ ifeq ($(WITH_MRSSM2),yes)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_gmm2.cpp \
 		$(DIR)/test_MRSSM2_mw_calculation.cpp \
-		$(DIR)/test_MRSSM2_l_to_lgamma.cpp \
-		$(DIR)/test_MRSSM2_l_to_l_conversion.cpp
+		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
 
 ifeq ($(WITH_MRSSM2CKM),yes)
@@ -990,8 +989,6 @@ $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
-
-$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
 
