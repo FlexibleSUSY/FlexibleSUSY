@@ -219,7 +219,7 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).F90
 	$(Q)$(MSG)
-	$(Q)$(FC) -E $< | sed "s/_NL_/\n   /g" > $@
+	$(Q)$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_STRS_ /'/g" -e "s/ _STRE_/'/g" > $@
 
 LIBAUX += \
 	$(COLLWRAP).a
