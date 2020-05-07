@@ -11,27 +11,47 @@ cd test
 
 export FLEXIBLESUSY_LOOP_LIBRARY='0'
 exe_test
+./test_looplibrary_environment.x -l message
+./test_looplibrary_environment.x -l message | grep -oP 'lib<(.*)>'
+echo $TEST_LOOPLIBRARY
+echo $TEST_LOOPLIBRARY | cat -v
 [ $TEST_LOOPLIBRARY = 'lib<Softsusy>' ] || exit_code=1
 
 export FLEXIBLESUSY_LOOP_LIBRARY="not an integer"
 exe_test
+./test_looplibrary_environment.x -l message
+./test_looplibrary_environment.x -l message | grep -oP 'lib<(.*)>'
+echo $TEST_LOOPLIBRARY
+echo $TEST_LOOPLIBRARY | cat -v
 [ $TEST_LOOPLIBRARY = 'lib<Softsusy>' ] || exit_code=1
 
 if grep -q '#define ENABLE_COLLIER' ../config/config.h; then
    export FLEXIBLESUSY_LOOP_LIBRARY='1'
    exe_test
+./test_looplibrary_environment.x -l message
+./test_looplibrary_environment.x -l message | grep -oP 'lib<(.*)>'
+echo $TEST_LOOPLIBRARY
+echo $TEST_LOOPLIBRARY | cat -v
    [ $TEST_LOOPLIBRARY = 'lib<Collier>' ] || exit_code=1
 fi
 
 if grep -q '#define ENABLE_LOOPTOOLS' ../config/config.h; then
    export FLEXIBLESUSY_LOOP_LIBRARY='2'
    exe_test
+./test_looplibrary_environment.x -l message
+./test_looplibrary_environment.x -l message | grep -oP 'lib<(.*)>'
+echo $TEST_LOOPLIBRARY
+echo $TEST_LOOPLIBRARY | cat -v
    [ $TEST_LOOPLIBRARY = 'lib<Looptools>' ] || exit_code=1
 fi
 
 if grep -q '#define ENABLE_FFLITE' ../config/config.h; then
    export FLEXIBLESUSY_LOOP_LIBRARY='3'
    exe_test
+./test_looplibrary_environment.x -l message
+./test_looplibrary_environment.x -l message | grep -oP 'lib<(.*)>'
+echo $TEST_LOOPLIBRARY
+echo $TEST_LOOPLIBRARY | cat -v
    [ $TEST_LOOPLIBRARY = 'lib<Fflite>' ] || exit_code=1
 fi
 

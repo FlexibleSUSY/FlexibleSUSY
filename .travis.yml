@@ -23,4 +23,5 @@ script:
   - ./configure --with-models= --with-optional-modules=test --with-addons=GM2Calc --disable-meta
   - make showbuild
   - make
-  - make -k all-test
+  - make test/test_looplibraries_environment.x
+  - test/test_looplibraries_environment.sh
