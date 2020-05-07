@@ -54,14 +54,60 @@ std::complex<double> A0 (double m2, double scl2) PVATTR;
 std::complex<double> B0 (double p2, double m2a, double m2b, double scl2)PVATTR;
 std::complex<double> B1 (double p2, double m2a, double m2b, double scl2)PVATTR;
 std::complex<double> B00(double p2, double m2a, double m2b, double scl2)PVATTR;
+#ifdef ENABLE_LOOPTOOLS
+std::complex<double> C0(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C1(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C2(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C00(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C11(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C12(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c, double scl2) PVATTR;
+std::complex<double> C22(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c, double scl2) PVATTR;
+#endif
 
 std::complex<double> A0 (std::complex<double> m2, double scl2) PVATTR;
 std::complex<double> B0 (std::complex<double> p2, std::complex<double> m2a,
-			 std::complex<double> m2b, double scl2) PVATTR;
+                         std::complex<double> m2b, double scl2) PVATTR;
 std::complex<double> B1 (std::complex<double> p2, std::complex<double> m2a,
-			 std::complex<double> m2b, double scl2) PVATTR;
+                         std::complex<double> m2b, double scl2) PVATTR;
 std::complex<double> B00(std::complex<double> p2, std::complex<double> m2a,
-			 std::complex<double> m2b, double scl2) PVATTR;
+                         std::complex<double> m2b, double scl2) PVATTR;
+#ifdef ENABLE_LOOPTOOLS
+std::complex<double> C0(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) PVATTR;
+std::complex<double> C1(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) PVATTR;
+std::complex<double> C2(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) PVATTR;
+std::complex<double> C00(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) PVATTR;
+std::complex<double> C11(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) PVATTR;
+std::complex<double> C12(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) PVATTR;
+std::complex<double> C22(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) PVATTR;
+#endif
 
 template<class T> std::complex<double> B22(T, T, T, double) PVATTR;
 template<class T> std::complex<double> F0 (T, T, T, double) PVATTR;
@@ -80,14 +126,14 @@ template<class T>
 std::complex<double> F0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return A0(m2a, scl2) - 2.0*A0(m2b, scl2)
-	   - (2.0*p2 + 2.0*m2a - m2b) * B0(p2, m2a, m2b, scl2);
+       - (2.0*p2 + 2.0*m2a - m2b) * B0(p2, m2a, m2b, scl2);
 }
 
 template<class T>
 std::complex<double> G0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return (p2 - m2a - m2b) * B0(p2, m2a, m2b, scl2)
-	   - A0(m2a, scl2) - A0(m2b, scl2);
+       - A0(m2a, scl2) - A0(m2b, scl2);
 }
 
 template<class T>

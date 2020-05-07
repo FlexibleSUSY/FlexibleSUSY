@@ -96,9 +96,9 @@ private:
    int width{16};          ///< width of columns in output table
 
    /// write line with parameter names
-   void write_parameter_names_line(std::ofstream&) const;
+   void write_parameter_names_line(std::ostream&) const;
    /// write a comment line
-   void write_comment_line(std::ofstream&) const;
+   void write_comment_line(std::ostream&) const;
 };
 
 template <class Model, class DataGetter>
@@ -144,7 +144,7 @@ void Coupling_monitor<Model,DataGetter>::clear()
  * @param fout output stream
  */
 template <class Model, class DataGetter>
-void Coupling_monitor<Model,DataGetter>::write_parameter_names_line(std::ofstream& fout) const
+void Coupling_monitor<Model,DataGetter>::write_parameter_names_line(std::ostream& fout) const
 {
    if (!fout.good() || couplings.empty())
       return;
@@ -165,7 +165,7 @@ void Coupling_monitor<Model,DataGetter>::write_parameter_names_line(std::ofstrea
  * @param fout output stream
  */
 template <class Model, class DataGetter>
-void Coupling_monitor<Model,DataGetter>::write_comment_line(std::ofstream& fout) const
+void Coupling_monitor<Model,DataGetter>::write_comment_line(std::ostream& fout) const
 {
    if (!fout.good() || couplings.empty())
       return;

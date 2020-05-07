@@ -63,6 +63,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_SM_dataset( number_of_random_samples ),
   index, FS_TEST_SM_PARAMETER_SEQUENCE )
 {
+	Loop_library::set(0);
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
@@ -81,7 +82,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 				std::array<Eigen::Vector4d, 0>{}
 		);
 
-		TEST_COMPLEX_EQUALITY( np_selfenergy_hh, fs_selfenergy_hh );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh.at(0), fs_selfenergy_hh );
 	} else
 		BOOST_TEST( true );
 }

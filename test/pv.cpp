@@ -78,6 +78,62 @@ complex<double> B00(double p2, double m2a, double m2b, double scl2) noexcept
     return ::B00(p2, m2a, m2b);
 }
 
+std::complex<double> C0(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0(p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C1(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc1, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C2(double p2a, double p2b, double p2ab,
+                        double m2a, double m2b, double m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc2, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C00(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc00, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C11(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc11, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C12(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc12, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C22(double p2a, double p2b, double p2ab,
+                         double m2a, double m2b, double m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0i(cc22, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
 complex<double> A0(complex<double> m2, double scl2) noexcept
 {
     setmudim(scl2);
@@ -103,6 +159,69 @@ complex<double> B00
 {
     setmudim(scl2);
     return ::B00C(p2, m2a, m2b);
+}
+
+std::complex<double> C0(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0C(p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C1(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc1, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C2(std::complex<double> p2a, std::complex<double> p2b,
+                        std::complex<double> p2ab, std::complex<double> m2a,
+                        std::complex<double> m2b, std::complex<double> m2c,
+                        double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc2, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C00(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc00, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C11(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc11, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C12(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc12, p2a, p2b, p2ab, m2a, m2b, m2c);
+}
+
+std::complex<double> C22(std::complex<double> p2a, std::complex<double> p2b,
+                         std::complex<double> p2ab, std::complex<double> m2a,
+                         std::complex<double> m2b, std::complex<double> m2c,
+                         double scl2) noexcept
+{
+   setmudim(scl2);
+   return ::C0iC(cc22, p2a, p2b, p2ab, m2a, m2b, m2c);
 }
 
 complex<double> D1B0(double p2, double m2a, double m2b) noexcept

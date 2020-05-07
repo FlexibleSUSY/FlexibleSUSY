@@ -14,13 +14,37 @@ LIBTEST_SRC := \
 		$(DIR)/stopwatch.cpp
 
 LIBTEST_OBJ := \
-		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBTEST_SRC))) \
-		$(patsubst %.f, %.o, $(filter %.f, $(LIBTEST_SRC)))
+		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBTEST_SRC)))
 
 LIBTEST_DEP := \
 		$(LIBTEST_OBJ:.o=.d)
 
 LIBTEST     := $(DIR)/lib$(MODNAME)$(MODULE_LIBEXT)
+
+# pv and looplibrary should not interfere ######################################
+LIBPV_SRC := \
+		$(DIR)/pv.cpp
+
+LIBPV_OBJ := \
+		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBPV_SRC)))
+
+LIBPV_DEP := \
+		$(LIBPV_OBJ:.o=.d)
+
+LIBPV     := $(DIR)/libpv$(MODULE_LIBEXT)
+
+$(LIBPV_DEP) $(LIBPV_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
+
+ifeq ($(ENABLE_SHARED_LIBS),yes)
+$(LIBPV): $(LIBPV_OBJ)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(LOOPFUNCLIBS)
+else
+$(LIBPV): $(LIBPV_OBJ)
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
+endif
+################################################################################
 
 TEST_SRC := \
 		$(DIR)/test_array_view.cpp \
@@ -57,7 +81,8 @@ TEST_SRC := \
 		$(DIR)/test_threshold_loop_functions.cpp \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_which.cpp \
-		$(DIR)/test_wrappers.cpp
+		$(DIR)/test_wrappers.cpp \
+		$(DIR)/test_looplibrary_softsusy.cpp
 
 TEST_SH := \
 		$(DIR)/test_depgen.sh \
@@ -100,7 +125,6 @@ TEST_META := \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
 
-
 ifeq ($(ENABLE_THREADS),yes)
 TEST_SRC += \
 		$(DIR)/test_thread_pool.cpp
@@ -110,6 +134,21 @@ ifeq ($(ENABLE_TSIL),yes)
 TEST_SRC += \
 		$(DIR)/test_tsil.cpp \
 		$(DIR)/test_sm_twoloop_mt.cpp
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_looptools.cpp
+endif
+
+ifeq ($(ENABLE_COLLIER), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_collier.cpp
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+TEST_SRC += \
+		$(DIR)/test_looplibrary_fflite.cpp
 endif
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
@@ -460,14 +499,15 @@ TEST_SRC += \
 		$(DIR)/test_SM_one_loop_spectrum.cpp \
 		$(DIR)/test_SM_higgs_loop_corrections.cpp \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
-		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
+		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_SM),yes)
+
 TEST_SRC += \
 		$(DIR)/test_SM_npointfunctions.cpp \
 		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
@@ -707,8 +747,6 @@ endif
 TEST_ALL_LOG  := $(TEST_ALL_XML:.xml=.log)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-TEST_EXE += $(TEST_PV_EXE)
-
 $(DIR)/test_pv_fflite.x    : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_FFLITE
 $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_LOOPTOOLS
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
@@ -722,19 +760,22 @@ $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data
 		execute-tests execute-meta-tests execute-compiled-tests \
 		execute-shell-tests
 
-all-$(MODNAME): $(LIBTEST) $(TEST_EXE) $(TEST_XML)
+all-$(MODNAME): $(LIBPV) $(LIBTEST) $(TEST_EXE) $(TEST_XML)
 		@printf "%s\n" "All tests passed."
 
 clean-$(MODNAME)-dep: clean-SOFTSUSY-dep
 		$(Q)-rm -f $(TEST_DEP)
 		$(Q)-rm -f $(LIBTEST_DEP)
+		$(Q)-rm -f $(LIBPV_DEP)
 
 clean-$(MODNAME)-lib: clean-SOFTSUSY-lib
 		$(Q)-rm -f $(LIBTEST)
+		$(Q)-rm -f $(LIBPV)
 
 clean-$(MODNAME)-obj: clean-SOFTSUSY-obj
 		$(Q)-rm -f $(TEST_OBJ)
 		$(Q)-rm -f $(LIBTEST_OBJ)
+		$(Q)-rm -f $(LIBPV_OBJ)
 
 clean-$(MODNAME)-log:
 		$(Q)-rm -f $(TEST_XML)
@@ -744,6 +785,8 @@ clean-$(MODNAME)-log:
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-obj \
                   clean-$(MODNAME)-lib clean-$(MODNAME)-log
 		$(Q)-rm -f $(TEST_EXE)
+		$(Q)-rm -f $(PV_DEP_EXE)
+		$(Q)-rm -f $(TEST_PV_EXE)
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
@@ -827,17 +870,17 @@ $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(LIBFFLITE)
+$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV) $(LIBFFLITE)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(FLIBS)
 
-$(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBFLEXI)
+$(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(FLIBS)
 
-$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/pv.cpp $(filter-out %pv.o,$(LIBFLEXI_OBJ))
+$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(SQLITELIBS) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS)
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)
@@ -851,35 +894,88 @@ $(DIR)/test_loopfunctions.x: $(LIBCMSSM)
 
 $(DIR)/test_sfermions.x: $(LIBCMSSM)
 
+$(DIR)/test_looplibrary_softsusy.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_softsusy.x: CPPFLAGS += -DLIBRARY_TYPE=0
+
+ifeq ($(ENABLE_COLLIER), yes)
+$(DIR)/test_looplibrary_collier.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_collier.x: CPPFLAGS += -DLIBRARY_TYPE=1
+endif
+
+ifeq ($(ENABLE_LOOPTOOLS), yes)
+$(DIR)/test_looplibrary_looptools.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_looptools.x: CPPFLAGS += -DLIBRARY_TYPE=2
+endif
+
+ifeq ($(ENABLE_FFLITE), yes)
+$(DIR)/test_looplibrary_fflite.cpp: $(DIR)/test_looplibrary.cpp.in
+	@cp $< $@
+$(DIR)/test_looplibrary_fflite.x: CPPFLAGS += -DLIBRARY_TYPE=3
+endif
+
+TEST_MSG = echo "\033[1;36m<<test<<\033[1;0m $<"
+
+ifeq ($(WITH_SM),yes)
+
+$(DIR)/test_SM_cxxdiagrams.o $(DIR)/test_SM_cxxdiagrams.d: CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_SM_cxxdiagrams.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_cxxdiagrams.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		@$(MSG)
-		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
-$(DIR)/test_SM_cxxdiagrams.x: $(LIBSM)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
+endif
+
+ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
+ifeq ($(WITH_MRSSM2),yes)
+
+$(DIR)/test_MRSSM2_f_to_f_conversion.o $(DIR)/test_MRSSM2_f_to_f_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_MRSSM2_f_to_f_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/test_MRSSM2_f_to_f_conversion.cpp : $(DIR)/test_MRSSM2_f_to_f_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_f_to_f_conversion.cpp.in $(META_SRC)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+
+endif
+
+ifeq ($(WITH_SM),yes)
+
+$(DIR)/test_SM_npointfunctions.o $(DIR)/test_SM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_SM_npointfunctions.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_npointfunctions.cpp : $(DIR)/test_SM_npointfunctions.meta $(DIR)/test_SM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		@$(MSG)
-		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
-$(DIR)/test_SM_npointfunctions.x: $(LIBSM)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
+$(DIR)/test_SM_matching_selfenergy_Fd.o $(DIR)/test_SM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
 $(DIR)/test_SM_matching_selfenergy_Fd.cpp : $(DIR)/test_SM_matching_selfenergy_Fd.meta $(DIR)/test_SM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_SM)
-		printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
-$(DIR)/test_SM_matching_selfenergy_Fd.x: $(LIBSM)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
-$(DIR)/test_MSSM_npointfunctions.cpp : \
-		$(DIR)/test_MSSM_npointfunctions.meta \
-		$(DIR)/test_MSSM_npointfunctions.cpp.in \
-		$(META_SRC) $(METACODE_STAMP_MSSM)
-		@$(MSG)
-		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
-$(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM)
+endif
+ifeq ($(WITH_MSSM),yes)
 
-$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : \
-		$(DIR)/test_MSSM_matching_selfenergy_Fd.meta \
-		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in \
-		$(META_SRC) $(METACODE_STAMP_MSSM)
-		@$(MSG)
-		$(Q)printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
-$(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM)
+$(DIR)/test_MSSM_npointfunctions.o $(DIR)/test_MSSM_npointfunctions.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_MSSM_npointfunctions.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/test_MSSM_npointfunctions.cpp : $(DIR)/test_MSSM_npointfunctions.meta $(DIR)/test_MSSM_npointfunctions.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+
+$(DIR)/test_MSSM_matching_selfenergy_Fd.o $(DIR)/test_MSSM_matching_selfenergy_Fd.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
+$(DIR)/test_MSSM_matching_selfenergy_Fd.x: $(LIBMSSM) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfenergy_Fd.meta $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp.in $(META_SRC) $(METACODE_STAMP_MSSM)
+	@$(MSG)
+	@$(TEST_MSG)
+	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+
+endif
+endif
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
@@ -1094,15 +1190,25 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWS
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
 
+# test rule for files which depend on pv #######################################
+PV_DEP_EXE := \
+		$(DIR)/test_pv.x \
+		$(DIR)/test_pv_crosschecks.x
+
+$(PV_DEP_EXE): %.x: %.o $(LIBPV)
+		@$(MSG)
+		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
+		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS) $(LIBPV)
+################################################################################
+
 # adding libraries to the end of the list of dependencies
-$(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 
 # general test rule
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(BOOSTTHREADLIBS) \
-		$(THREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)
@@ -1110,7 +1216,7 @@ $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBTEST): $(LIBTEST_OBJ)
 		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(GSLLIBS)
 else
 $(LIBTEST): $(LIBTEST_OBJ)
 		@$(MSG)
@@ -1118,6 +1224,6 @@ $(LIBTEST): $(LIBTEST_OBJ)
 endif
 
 ALLDEP += $(LIBTEST_DEP) $(TEST_DEP)
-ALLLIB += $(LIBTEST)
-ALLTST += $(TEST_EXE)
+ALLLIB += $(LIBTEST) $(LIBPV)
+ALLTST += $(TEST_EXE) $(PV_DEP_EXE)
 ALLMODDEP += $(MODtest_DEP)

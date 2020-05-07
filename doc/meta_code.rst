@@ -243,7 +243,8 @@ Output::
 
 ``meta/SM/mt_4loop_qcd.m`` contains the 4-loop QCD relation between
 the top quark pole mass and the corresponding running
-:math:`\overline{\text{MS}}` mass from [1604.01134]_.
+:math:`\overline{\text{MS}}` mass from [1604.01134]_, [1502.01030]_,
+[1606.06754]_.
 
 Example::
 
@@ -406,4 +407,6 @@ References
 .. [1508.02680] `Phys.Lett. B762 (2016) 151-156 <https://inspirehep.net/record/1387530>`_ [`arXiv:1508.02680 <https://arxiv.org/abs/1508.02680>`_]
 .. [1604.00853] `JHEP 1606 (2016) 175 <https://inspirehep.net/record/1441223>`_ [`arXiv:1604.00853 <https://arxiv.org/abs/1604.00853>`_]
 .. [1604.01134] `Phys.Rev. D93 (2016) no.9, 094017 <https://inspirehep.net/record/1442368>`_ [`arXiv:1604.01134 <https://arxiv.org/abs/1604.01134>`_]
+.. [1502.01030] `Phys.Rev.Lett. 114 (2015) 14, 142002 <https://inspirehep.net/literature/1342942>`_ [`arXiv:1502.01030 <https://arxiv.org/abs/1502.01030>`_]
+.. [1606.06754] `Phys.Rev.D 94 (2016) 7, 074025 <https://inspirehep.net/literature/1471728>`_ [`arXiv:1606.06754 <https://arxiv.org/abs/1606.06754>`_]
 .. [1606.08659] `Phys.Rev.Lett. 118 (2017) no.8, 082002 <https://inspirehep.net/record/1472834>`_ [`arXiv:1606.08659 <https://arxiv.org/abs/1606.08659>`_]

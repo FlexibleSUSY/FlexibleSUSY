@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["EffectiveCouplings`", {"SARAH`", "CConversion`", "Parameters`", "SelfEnergies`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`", "Observables`", "Constraint`"}];
+BeginPackage["EffectiveCouplings`", {"SARAH`", "CConversion`", "Parameters`", "SelfEnergies`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`", "Constraint`"}];
 
 InitializeEffectiveCouplings::usage="";
 InitializeMixingFromModelInput::usage="";
