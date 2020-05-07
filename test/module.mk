@@ -869,7 +869,7 @@ $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV) $(LIBFFLITE)
+$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/logger.cpp $(DIR)/pv.cpp $(LIBFFLITE)
 		@$(MSG)
 		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(FLIBS)
 
@@ -877,9 +877,9 @@ $(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(FLIBS)
 
-$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
+$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/numerics.o $(LIBPV)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS)
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)
