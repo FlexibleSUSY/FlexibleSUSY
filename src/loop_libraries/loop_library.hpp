@@ -30,7 +30,7 @@ class Loop_library
 public:
    enum class Library { Undefined, Softsusy, Collier, Looptools, Fflite };
    static void set(int);
-   static const Library get_type();
+   static Library get_type();
    static looplibrary::Loop_library_interface& get();
 
 private:
