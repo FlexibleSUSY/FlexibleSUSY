@@ -219,7 +219,13 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).F90
 	$(Q)$(MSG)
+	@echo "Do we have ours file?"
+	@ls src/loop_libraries
+	@$(FC) -E $<
+	@ls src/loop_libraries
+	@cat src/loop_libraries/libcollier_wrapper.f90
 	$(Q)$(FC) -E $< | sed -e "s/_NL_/\n   /g" -e "s/_STRS_ /'/g" -e "s/ _STRE_/'/g" > $@
+	@cat src/loop_libraries/libcollier_wrapper.f90
 
 LIBAUX += \
 	$(COLLWRAP).a
