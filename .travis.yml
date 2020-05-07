@@ -33,6 +33,8 @@ script:
     --disable-meta
   - make showbuild
   - make -j2
+  - make test/test_looplibrary_collier.x
+  - ./test/test_looplibrary_collier.x
   - make -j2 -k all-test
 before_cache:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cleanup ; fi
