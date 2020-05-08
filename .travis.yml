@@ -12,12 +12,10 @@ compiler:
 addons:
   apt:
     packages:
-      - gfortran
       - libgsl0-dev
       - libsqlite3-dev
   homebrew:
     packages:
-      - gcc
       - gsl
       - sqlite
     update: true
@@ -38,11 +36,3 @@ script:
   - make -j2
   - make test/test_looplibrary_collier.x
   - ./test/test_looplibrary_collier.x
-before_cache:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cleanup ; fi
-cache:
-  pip: true
-  directories:
-    - $HOME/.conan
-    - $HOME/Library/Caches/Homebrew
-    - /usr/local/Homebrew
