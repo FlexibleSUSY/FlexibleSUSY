@@ -2,13 +2,9 @@ language: cpp
 os:
   - linux
   - osx
-jobs:
-  exclude:
-  - compilex: gcc
-    os: osx
 compiler:
   - clang
-  - gcc
+  - gfortran
 addons:
   apt:
     packages:
