@@ -30,7 +30,7 @@ script:
     --with-cxxflags="-std=c++14 -fPIC"
     --with-optional-modules=test
     --with-addons=GM2Calc
-    --with-loop-libraries=collier
+    --with-loop-libraries=collier,looptools
     --disable-meta
   - make showbuild
   - make -j2
@@ -38,3 +38,4 @@ script:
   - ./test/test_looplibrary_collier.x
   - make test/test_looplibrary_softsusy.x
   - ./test/test_looplibrary_softsusy.x
+  - make -j2 all-test
