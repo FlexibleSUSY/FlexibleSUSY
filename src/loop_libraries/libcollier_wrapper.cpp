@@ -16,13 +16,12 @@
 ! <http://www.gnu.org/licenses/>.
 ! ====================================================================
 
-#define PASTE(a) a
-#define IMPL(a) PASTE(a)_impl
-#define DUMMY(a) PASTE(a)_dummy
-#define TO_STRING(NAME) _STRS_ IMPL(NAME) _STRE_
+#define DUMMY(a) a ## _dummy
+#define STR(a) #a
+#define IMPL(a) STR(a ## _impl)
 
 #define two_point(NAME,N1,N2) \
-_NL_subroutine DUMMY(NAME)(res, p10, m02, m12) bind(C, name=TO_STRING(NAME))\
+_NL_subroutine DUMMY(NAME)(res, p10, m02, m12) bind(C, name=IMPL(NAME))\
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
@@ -38,7 +37,7 @@ _NL_   deallocate(Bcoeff, Bcoeffuv) \
 _NL_end
 
 #define three_point(NAME,N1,N2,N3) \
-_NL_subroutine DUMMY(NAME)(res, p10, p21, p20, m02, m12, m22) bind(C, name=TO_STRING(NAME)) \
+_NL_subroutine DUMMY(NAME)(res, p10, p21, p20, m02, m12, m22) bind(C, name=IMPL(NAME)) \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
@@ -54,7 +53,7 @@ _NL_   deallocate(Ccoeff, Ccoeffuv) \
 _NL_end
 
 #define four_point(NAME,N1,N2,N3,N4) \
-_NL_subroutine DUMMY(NAME)(res,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name=TO_STRING(NAME)) \
+_NL_subroutine DUMMY(NAME)(res,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name=IMPL(NAME)) \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32 \
 _NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
