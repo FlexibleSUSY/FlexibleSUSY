@@ -76,7 +76,7 @@ module LibCollier_wrapper
 
 contains
    subroutine initialize_collier_dummy() bind(C, name='initialize_collier_impl')
-      call Init_cll(4,2,'')
+      call Init_cll(4,2,"")
    end
 
    subroutine set_mu2_uv_dummy(scl2) bind(C, name='set_mu2_uv_impl')
