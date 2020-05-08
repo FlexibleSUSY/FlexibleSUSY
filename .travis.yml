@@ -35,9 +35,9 @@ script:
     --with-loop-libraries=collier,looptools
     --disable-meta
   - make showbuild
-  - make -j2
-  - make test/test_looplibrary_collier.x
+  - make -j2 VERBOSE=1
+  - make test/test_looplibrary_collier.x VERBOSE=1
   - ./test/test_looplibrary_collier.x
-  - make test/test_looplibrary_softsusy.x
+  - make test/test_looplibrary_softsusy.x VERBOSE=1
   - ./test/test_looplibrary_softsusy.x
-  - make -j2 all-test
+  - make -j2 all-test VERBOSE=1
