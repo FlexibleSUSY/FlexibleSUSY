@@ -29,7 +29,8 @@ install:
 script:
   - >
     ./configure
-    --with-cxxflags="-std=c++14 -fPIC"
+    --with-cxxflags="-std=c++14 --verbose -fPIC"
+    --with-ldflags="-Wl,--verbose"
     --with-optional-modules=test
     --with-addons=GM2Calc
     --with-loop-libraries=collier,looptools
