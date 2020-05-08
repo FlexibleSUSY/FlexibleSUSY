@@ -896,13 +896,11 @@ $(DIR)/test_sfermions.x: $(LIBCMSSM)
 $(DIR)/test_looplibrary_softsusy.cpp: $(DIR)/test_looplibrary.cpp.in
 	@cp $< $@
 $(DIR)/test_looplibrary_softsusy.x: CPPFLAGS += -DLIBRARY_TYPE=0
-$(DIR)/test_looplibrary_softsusy.x: LDFLAGS += "-Wl,-no_compact_unwind"
 
 ifeq ($(ENABLE_COLLIER), yes)
 $(DIR)/test_looplibrary_collier.cpp: $(DIR)/test_looplibrary.cpp.in
 	@cp $< $@
 $(DIR)/test_looplibrary_collier.x: CPPFLAGS += -DLIBRARY_TYPE=1
-$(DIR)/test_looplibrary_collier.x: LDFLAGS += "-Wl,-no_compact_unwind"
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS), yes)
