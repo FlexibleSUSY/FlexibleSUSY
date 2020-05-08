@@ -2,9 +2,13 @@ language: cpp
 os:
   - linux
   - osx
+jobs:
+  exclude:
+  - compilex: gcc
+    os: osx
 compiler:
   - clang
-  - gfortran
+  - gcc
 addons:
   apt:
     packages:
@@ -12,6 +16,7 @@ addons:
       - libsqlite3-dev
   homebrew:
     packages:
+      - gfortran
       - gsl
       - sqlite
     update: true
