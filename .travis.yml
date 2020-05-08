@@ -15,8 +15,9 @@ addons:
       - libgsl0-dev
       - libsqlite3-dev
   homebrew:
-    packages:
+    casks:
       - gfortran
+    packages:
       - gsl
       - sqlite
     update: true
