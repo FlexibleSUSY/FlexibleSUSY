@@ -22,6 +22,7 @@ addons:
     update: true
 install:
   - export PATH=$(python -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew unlink gcc; fi
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
   - conan install . --build=missing
