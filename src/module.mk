@@ -219,7 +219,7 @@ $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 
 $(COLLWRAP).f90 : $(COLLWRAP).cpp
 	$(Q)$(MSG)
-	$(Q)$(CXX) -E $< | perl -pe 's/_NL_/\n/g' > $@
+	$(Q)$(CXX) -E $< | tr '@' '\n' > $@
 
 LIBAUX += \
 	$(COLLWRAP).a
