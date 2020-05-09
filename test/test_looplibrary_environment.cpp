@@ -16,28 +16,37 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "gsl_utils.hpp"
-#include <cstddef>
-#include <cmath>
+#define BOOST_TEST_MODULE "Set looplibrary via environment"
 
-namespace flexiblesusy {
+#include <boost/test/unit_test.hpp>
+#include "loop_libraries/loop_library.hpp"
 
-/**
- * Returns true if GSL vector contains only finite elements (neither
- * nan nor inf), false otherwise.
- *
- * @param x GSL vector
- * @return true if vector contains only finite elements, false otherwise.
- */
-bool is_finite(const gsl_vector* x)
+namespace flexiblesusy
 {
-   for (std::size_t i = 0; i < x->size; i++) {
-      if (!std::isfinite(gsl_vector_get(x, i))) {
-         return false;
-      }
+
+BOOST_AUTO_TEST_CASE(set_library) {
+   Loop_library::set(-1);
+   bool predicted_behavior = true;
+
+   switch (Loop_library::get_type()) {
+   case Loop_library::Library::Softsusy:
+      BOOST_TEST_MESSAGE("lib<Softsusy>");
+      break;
+   case Loop_library::Library::Collier:
+      BOOST_TEST_MESSAGE("lib<Collier>");
+      break;
+   case Loop_library::Library::Looptools:
+      BOOST_TEST_MESSAGE("lib<Looptools>");
+      break;
+   case Loop_library::Library::Fflite:
+      BOOST_TEST_MESSAGE("lib<Fflite>");
+      break;
+   default:
+      BOOST_TEST_MESSAGE("lib<Oops>");
+      predicted_behavior = false;
    }
 
-   return true;
+   BOOST_CHECK(predicted_behavior);
 }
 
-} // namespace flexiblesusy
+} // flexiblesusy

@@ -7,6 +7,7 @@ ABSBASEDIR      := @ABSBASEDIR@
 ENABLE_FFLITE    := @ENABLE_FFLITE@
 ENABLE_LOOPTOOLS := @ENABLE_LOOPTOOLS@
 ENABLE_COLLIER   := @ENABLE_COLLIER@
+ENABLE_THREADS   := @ENABLE_THREADS@
 
 MODULE_LIBEXT   := @MODULE_LIBEXT@
 
@@ -42,6 +43,8 @@ CXX_DEP_GEN     := $(CXX)
 CXXFLAGS_DEP_GEN:= $(CXXFLAGS)
 FC              := @FC@
 FFLAGS          := @FFLAGS@
+FLIBS           := @FLIBS@
+FUTILIBS        := @FUTILIBS@
 FOR_DEP_GEN     := $(FC)
 BOOSTFLAGS      := @BOOSTFLAGS@
 EIGENFLAGS      := @EIGENFLAGS@
@@ -49,6 +52,9 @@ GSLLIBS         := @GSLLIBS@
 GSLFLAGS        := @GSLFLAGS@
 LOOPFUNCFLAGS   := @LOOPFUNCFLAGS@
 LOOPFUNCLIBS    := @LOOPFUNCLIBS@
+SQLITEFLAGS     := @SQLITEFLAGS@
+SQLITELIBS      := @SQLITELIBS@
+THREADLIBS      := @THREADLIBS@
 
 TOWER_SRC := \
 		run_tower.cpp \
@@ -98,8 +104,8 @@ ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)$(ENABLE_COLLIER)))
 $(TOWER_DEP) $(TOWER_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
-$(TOWER_EXE): $(TOWER_OBJ) $(LIBMODEL1) $(LIBMODEL2) $(LIBSMHO) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS)
+$(TOWER_EXE): $(TOWER_OBJ) $(LIBMODEL1) $(LIBMODEL2) $(LIBSMHO) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+		$(CXX) -o $@ $(call abspathx,$^) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(THREADLIBS) $(FLIBS) $(FUTILIBS) $(SQLITELIBS)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean-dep)
@@ -147,6 +153,7 @@ showbuild:
 	@echo "CXXFLAGS_DEP_GEN   = $(CXXFLAGS_DEP_GEN)"
 	@echo "FC                 = $(FC)"
 	@echo "FFLAGS             = $(FFLAGS)"
+	@echo "FLIBS              = $(FLIBS)"
 	@echo "FOR_DEP_GEN        = $(FOR_DEP_GEN)"
 	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
 	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
@@ -155,7 +162,11 @@ showbuild:
 	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
 	@echo "LOOPFUNCLIBS       = $(LOOPFUNCLIBS)"
 	@echo "MODULE_LIBEXT      = $(MODULE_LIBEXT)"
+	@echo "SQLITELIBS         = $(SQLITELIBS)"
+	@echo "SQLITEFLAGS        = $(SQLITEFLAGS)"
+	@echo "THREADLIBS         = $(THREADLIBS)"
 	@echo ""
 	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
 	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
 	@echo "ENABLE_COLLIER     = $(ENABLE_COLLIER)"
+	@echo "ENABLE_THREADS     = $(ENABLE_THREADS)"

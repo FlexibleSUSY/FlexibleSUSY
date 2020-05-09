@@ -125,7 +125,7 @@ LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
-		$(DIR)/cxx_qft/@CLASSNAME@npointfunctions_wilsoncoeffs.hpp
+		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 -include $(DIR)/two_scale.mk
@@ -333,7 +333,7 @@ $(LIB@CLASSNAME@): $(LIB@CLASSNAME@_OBJ)
 
 $(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
+		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
 
 $(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
