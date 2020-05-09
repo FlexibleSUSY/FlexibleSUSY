@@ -14,6 +14,7 @@ addons:
       - libsqlite3-dev
   homebrew:
     packages:
+      - gcc
       - gsl
       - sqlite
     update: true
@@ -26,8 +27,7 @@ install:
 script:
   - >
     ./configure
-    --with-cxxflags="-std=c++14 --verbose -fPIC"
-    --with-shared-ldflags="-Wl,--verbose"
+    --with-cxxflags="-std=c++14 -fPIC"
     --with-optional-modules=test
     --with-addons=GM2Calc
     --with-loop-libraries=collier,looptools
@@ -38,7 +38,6 @@ script:
   - make install-src
 before_cache:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cleanup; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
 cache:
   pip: true
   directories:
