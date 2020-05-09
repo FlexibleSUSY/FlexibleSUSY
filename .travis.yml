@@ -2,10 +2,6 @@ language: cpp
 os:
   - linux
   - osx
-jobs:
-  exclude:
-  - compilex: gcc
-    os: osx
 compiler:
   - clang
   - gcc
@@ -13,6 +9,7 @@ python: "3.8"
 addons:
   apt:
     packages:
+      - gfortran
       - libgsl0-dev
       - libsqlite3-dev
   homebrew:
@@ -24,6 +21,7 @@ addons:
     update: true
 install:
   - export PATH=$(python -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+  - [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CXX" = "g++" ] && export CXX="g++-9" CC="gcc-9"
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
   - conan install . --build=missing
@@ -35,12 +33,17 @@ script:
     --with-optional-modules=test
     --with-addons=GM2Calc
     --with-loop-libraries=collier,looptools
+    --with-install-dir=install
     --disable-meta
-  - make showbuild
-  - make -j2 VERBOSE=1
-  - make test/test_looplibrary_collier.x VERBOSE=1
-  - ./test/test_looplibrary_collier.x
-  - make test/test_looplibrary_softsusy.x VERBOSE=1
-  - ./test/test_looplibrary_softsusy.x
-  - make test/test_looplibrary_looptools.x VERBOSE=1
-  - ./test/test_looplibrary_looptools.x
+  - make -j2
+  - make -j2 -k all-test
+  - make install-src
+before_cache:
+  - [ "$TRAVIS_OS_NAME" = "osx" ] && brew cleanup
+  - [ "$TRAVIS_OS_NAME" = "osx" ] && find /usr/local/Homebrew \! -regex ".+\.git.+" -delete
+cache:
+  pip: true
+  directories:
+    - $HOME/.conan
+    - $HOME/Library/Caches/Homebrew
+    - /usr/local/Homebrew make showbuild
