@@ -41,4 +41,5 @@ script:
   - ./test/test_looplibrary_collier.x
   - make test/test_looplibrary_softsusy.x VERBOSE=1
   - ./test/test_looplibrary_softsusy.x
-  - make -j2 all-test VERBOSE=1
+  - make test/test_looplibrary_looptools.x VERBOSE=1
+  - ./test/test_looplibrary_looptools.x
