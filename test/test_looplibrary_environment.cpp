@@ -16,33 +16,37 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef LOOP_LIBRARY_H
-#define LOOP_LIBRARY_H
+#define BOOST_TEST_MODULE "Set looplibrary via environment"
 
-#include "loop_library_interface.hpp"
-#include <memory>
+#include <boost/test/unit_test.hpp>
+#include "loop_libraries/loop_library.hpp"
 
 namespace flexiblesusy
 {
 
-class Loop_library
-{
-public:
-   enum class Library { Undefined, Softsusy, Collier, Looptools, Fflite };
-   static void set(int);
-   static Library get_type();
-   static looplibrary::Loop_library_interface& get();
+BOOST_AUTO_TEST_CASE(set_library) {
+   Loop_library::set(-1);
+   bool predicted_behavior = true;
 
-private:
-   static Library type_;
-   static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
-   static void set_default();
+   switch (Loop_library::get_type()) {
+   case Loop_library::Library::Softsusy:
+      BOOST_TEST_MESSAGE("lib<Softsusy>");
+      break;
+   case Loop_library::Library::Collier:
+      BOOST_TEST_MESSAGE("lib<Collier>");
+      break;
+   case Loop_library::Library::Looptools:
+      BOOST_TEST_MESSAGE("lib<Looptools>");
+      break;
+   case Loop_library::Library::Fflite:
+      BOOST_TEST_MESSAGE("lib<Fflite>");
+      break;
+   default:
+      BOOST_TEST_MESSAGE("lib<Oops>");
+      predicted_behavior = false;
+   }
 
-   Loop_library() {}
-   Loop_library(Loop_library const&);
-   void operator=(Loop_library const&);
-};
+   BOOST_CHECK(predicted_behavior);
+}
 
-} // namespace flexiblesusy
-
-#endif // LOOP_LIBRARY_H
+} // flexiblesusy
