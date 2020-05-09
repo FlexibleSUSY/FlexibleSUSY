@@ -2129,7 +2129,6 @@ EOF
 
 #_____________________________________________________________________
 check_looptools_libs() {
-# defines LOOPTOOLSLIBS variable
    if [ -z "$looptools_lib_dir" ]; then
       message "Warning: --with-looptools-libdir= has not been set, but"
       message "         LoopTools has been enabled via --enable-looptools or"
@@ -2193,11 +2192,50 @@ check_looptools() {
       LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
       enable_looptools=yes
       message "ok"
-      return
    }
 
-   check_looptools_incl
-   check_looptools_libs
+   #check_looptools_incl
+   #check_looptools_libs
+
+   test=test$$
+
+cat > $test.f << _EOF_
+	program dontpanic
+	print *, "Hi"
+	end
+_EOF_
+
+LOOPTOOLSLIBS=$(
+eval $FC -v -o $test $test.f 2>&1 | while read line ; do
+  set -- $(echo "$line" | tr ':,()' '    ')
+  case "$1" in
+      */collect2 | */ld | ld) ;;
+      *) continue ;;
+  esac
+  while test $# -gt 1 ; do
+    shift
+    case "$1" in
+    *.o | -lc*)
+      ;;
+    -l* | -L* | *.a)
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS $1" ;;
+    -Bstatic | -Bdynamic | *.ld)
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -Wl,$1" ;;
+    /*)
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$1" ;;
+    -rpath*)
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -Wl,$1,$2"
+      shift ;;
+    -dynamic-linker)
+      shift ;;
+    esac
+  done
+  echo $LOOPTOOLSLIBS
+done)
+
+rm -rf $test.f
+rm -rf $test
+
 }
 
 #_____________________________________________________________________
