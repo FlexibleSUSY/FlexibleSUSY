@@ -13,8 +13,6 @@ addons:
       - libgsl0-dev
       - libsqlite3-dev
   homebrew:
-    casks:
-      - gfortran
     packages:
       - gsl
       - sqlite
