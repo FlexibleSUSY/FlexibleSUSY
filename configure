@@ -2190,7 +2190,8 @@ check_looptools() {
       message -n "Checking LoopTools using local LoopTools.pc ... "
       local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS=$(echo "$(grep -r "$ldf_.*" $(PKG_CONFIG_PATH=. pkg-config LoopTools --variable=prefix)/../..)" | sed "s/.*$ldf_\(.*\)/\1/")
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS  $(echo "$(grep -r "$ldf_.*" $(PKG_CONFIG_PATH=. pkg-config LoopTools --variable=prefix)/../..)" | sed "s/.*$ldf_\(.*\)/\1/")"
       enable_looptools=yes
       message "ok"
       return
