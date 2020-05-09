@@ -46,4 +46,4 @@ cache:
   directories:
     - $HOME/.conan
     - $HOME/Library/Caches/Homebrew
-    - /usr/local/Homebrew make showbuild
+    - /usr/local/Homebrew
