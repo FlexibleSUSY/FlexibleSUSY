@@ -2210,6 +2210,7 @@ eval $FC -v -o $test $test.f 2>&1 | while read line ; do
   set -- $(echo "$line" | tr ':,()' '    ')
   case "$1" in
       */collect2 | */ld | ld)
+         :
          ;;
       *)
          continue ;;
@@ -2217,8 +2218,6 @@ eval $FC -v -o $test $test.f 2>&1 | while read line ; do
   while test $# -gt 1 ; do
     shift
     case "$1" in
-    *.o | -lc*)
-      ;;
     -l* | -L* | *.a)
       LOOPTOOLSLIBS="$LOOPTOOLSLIBS $1" ;;
     -Bstatic | -Bdynamic | *.ld)
