@@ -2188,54 +2188,16 @@ check_looptools() {
    type pkg-config > /dev/null && [ -f LoopTools.pc ] && \
    {
       message -n "Checking LoopTools using local LoopTools.pc ... "
+      local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+      LOOPTOOLSLIBS=$(echo "$(grep -r "$ldf_.*" $(PKG_CONFIG_PATH=. pkg-config LoopTools --variable=prefix)/../..)" | sed "s/.*$ldf_\(.*\)/\1/")
       enable_looptools=yes
       message "ok"
+      return
    }
 
-   #check_looptools_incl
-   #check_looptools_libs
-
-   test=test$$
-
-cat > $test.f << _EOF_
-	program dontpanic
-	print *, "Hi"
-	end
-_EOF_
-
-LOOPTOOLSLIBS=$(
-eval $FC -v -o $test $test.f 2>&1 | while read line ; do
-  set -- $(echo "$line" | tr ':,()' '    ')
-  case "$1" in
-      */collect2 | */ld | ld)
-         echo "" ;;
-      *)
-         continue ;;
-  esac
-  while test $# -gt 1 ; do
-    shift
-    case "$1" in
-    -l* | -L* | *.a)
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS $1" ;;
-    -Bstatic | -Bdynamic | *.ld)
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -Wl,$1" ;;
-    /*)
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$1" ;;
-    -rpath*)
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -Wl,$1,$2"
-      shift ;;
-    -dynamic-linker)
-      shift ;;
-    esac
-  done
-  echo $LOOPTOOLSLIBS
-done)
-
-rm -rf $test.f
-rm -rf $test
-
+   check_looptools_incl
+   check_looptools_libs
 }
 
 #_____________________________________________________________________
