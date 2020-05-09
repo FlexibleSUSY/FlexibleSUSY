@@ -21,7 +21,7 @@ addons:
     update: true
 install:
   - export PATH=$(python -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-  - [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CXX" = "g++" ] && export CXX="g++-9" CC="gcc-9"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" == "g++" ]]; then export CXX="g++-9" CC="gcc-9"; fi
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
   - conan install . --build=missing
@@ -39,8 +39,8 @@ script:
   - make -j2 -k all-test
   - make install-src
 before_cache:
-  - [ "$TRAVIS_OS_NAME" = "osx" ] && brew cleanup
-  - [ "$TRAVIS_OS_NAME" = "osx" ] && find /usr/local/Homebrew \! -regex ".+\.git.+" -delete
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cleanup; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then find /usr/local/Homebrew \! -regex ".+\.git.+" -delete; fi
 cache:
   pip: true
   directories:
