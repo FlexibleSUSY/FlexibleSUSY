@@ -1945,7 +1945,7 @@ check_fortran_libs() {
                 message "Error: libgfortran not found in $gfortran_lib_search_paths $default_lib_paths"
                 exit 1
             else
-                FLIBS="-L$found_dir -lgfortran -lm"
+                FLIBS="-L$found_dir -lgfortran -lm -lgcc"
             fi ;;
         g77|f77)
             FLIBS="-lg2c -lm" ;;
@@ -2190,7 +2190,7 @@ check_looptools() {
       message -n "Checking LoopTools using local LoopTools.pc ... "
       local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS="$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs) -lgcc"
+      LOOPTOOLSLIBS="$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)"
       enable_looptools=yes
       message "ok"
       return
