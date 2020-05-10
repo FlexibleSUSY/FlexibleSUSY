@@ -58,10 +58,6 @@ Looptools::Looptools() : current_mu2_uv(1.0)
 
 Looptools::~Looptools() noexcept
 {
-   futils::swap();
-   ltexi();
-   futils::flush();
-   futils::swap();
 }
 
 void Looptools::set_mu2_uv(double scl2_in) noexcept
