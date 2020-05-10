@@ -2191,7 +2191,8 @@ check_looptools() {
       local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
       LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
-      #LOOPTOOLSLIBS="$LOOPTOOLSLIBS  $(echo "$(grep -r "$ldf_.*" $(PKG_CONFIG_PATH=. pkg-config LoopTools --variable=prefix)/../..)" | sed "s/.*$ldf_\(.*\)/\1/")"
+      local str_="$(echo "$(grep -r "$ldf_.*" $(PKG_CONFIG_PATH=. pkg-config LoopTools --variable=prefix)/../..)" | sed "s/.*$ldf_\(.*\)/\1/")"
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS $(make_unique "$str_")"
       enable_looptools=yes
       message "ok"
       return
