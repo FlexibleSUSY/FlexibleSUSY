@@ -37,5 +37,11 @@ script:
     --disable-meta
   - make showbuild
   - make -j2
+  - make test/test_pv.x
+  - ldd test/test_pv.x
+  - ./test/test_pv.x
+  - make test/test_looplibrary_looptools.x
+  - ldd test/test_looplibrary_looptools.x
+  - ./test/test_looplibrary_looptools.x
   - make -j2 -k all-test
   - make install-src
