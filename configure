@@ -2194,7 +2194,7 @@ check_looptools() {
 
       gcc_lib_search_paths=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
       check_library "libgcc" "$gcc_lib_search_paths" "$default_lib_paths"
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
+      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc -Wl,-rpath,$found_dir"
 
       enable_looptools=yes
       message "ok"
