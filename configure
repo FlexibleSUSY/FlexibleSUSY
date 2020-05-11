@@ -2158,6 +2158,18 @@ check_looptools_libs() {
          LOOPTOOLSLIBS="$LOOPTOOLSLIBS -lquadmath"
       fi
    fi
+   case "$operating_system" in
+      Darwin)
+         local gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         check_library "libgcc" "$gcc_" "$default_lib_paths"
+         if test "x$found_lib" = "x" ; then
+            message "Error: libgcc not found in $gcc_ $default_lib_paths"
+            message "       but required by LoopTools."
+               exit 1
+            else
+               LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
+         fi;;
+   esac
 }
 
 #_____________________________________________________________________
@@ -2198,18 +2210,6 @@ check_looptools() {
 
    check_looptools_incl
    check_looptools_libs
-   case "$operating_system" in
-      Darwin)
-         local gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
-         check_library "libgcc" "$gcc_" "$default_lib_paths"
-         if test "x$found_lib" = "x" ; then
-            message "Error: libgcc not found in $gcc_ $default_lib_paths"
-            message "       but required by LoopTools."
-               exit 1
-            else
-               LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
-         fi;;
-   esac
 }
 
 #_____________________________________________________________________
