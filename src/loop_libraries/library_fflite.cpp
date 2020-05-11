@@ -42,10 +42,6 @@ Fflite::Fflite()
 
 Fflite::~Fflite() noexcept
 {
-   futils::swap();
-   ltexi_();
-   futils::flush();
-   futils::swap();
 }
 
 std::complex<double> Fflite::A0(A_ARGS) noexcept
