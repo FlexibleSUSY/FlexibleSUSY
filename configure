@@ -1307,9 +1307,10 @@ check_platform() {
 #_____________________________________________________________________
 reset_default_static_linker_cmd() {
    local os_=$( (uname -s) 2>/dev/null || echo unknown)
-   if [ "$(case "$os_" in Linux) echo 'true' ;; esac )" = 'true' ]; then
-      STATIC_LIB_CMD="ar cruU"
-   fi
+   case "$os_" in
+      Linux)
+         STATIC_LIB_CMD="ar cruU";;
+   esac
 }
 
 #_____________________________________________________________________
