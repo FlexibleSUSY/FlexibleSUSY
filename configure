@@ -2189,7 +2189,6 @@ check_looptools() {
    type pkg-config > /dev/null && [ -f LoopTools.pc ] && \
    {
       message -n "Checking LoopTools using local LoopTools.pc ... "
-      local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
       LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
       enable_looptools=yes
