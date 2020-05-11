@@ -26,7 +26,6 @@
 #include "logger.hpp"
 #include "ew_input.hpp"
 #include "error.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "raii.hpp"
 #include "root_finder.hpp"

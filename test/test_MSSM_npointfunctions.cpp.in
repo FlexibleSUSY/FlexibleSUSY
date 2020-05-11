@@ -53,44 +53,45 @@ namespace npointfunctions
 
 namespace
 {
-static constexpr int number_of_random_samples = 100;
+static constexpr int number_of_random_samples = 25;
 }
 
-BOOST_AUTO_TEST_SUITE(selfenergy_test_suite, 
+BOOST_AUTO_TEST_SUITE(selfenergy_test_suite,
 	* boost::unit_test::tolerance(1.0e-12) )
 
 BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_MSSM_dataset( number_of_random_samples ),
   index, FS_TEST_MSSM_PARAMETER_SEQUENCE )
 {
+	Loop_library::set(0);
 	auto input_parameters = wrap_input_parameters(
 		FS_TEST_MSSM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
-	
+
 	auto problems = model.get_problems();
 	BOOST_WARN_MESSAGE( !problems.have_problem(),
 		"There was an error calculating the spectrum: " <<
 		problems << "Skipping data point..." );
-		
+
 	if( problems.have_problem() == false )
 	{
 		auto hh_mix = model.get_ZH();
-	
+
 		auto fs_selfenergy_hh_unrotated =
 			model.self_energy_hh_1loop( 0 );
 		auto fs_selfenergy_hh = hh_mix * fs_selfenergy_hh_unrotated *
 			hh_mix.adjoint();
-		
+
 		auto np_selfenergy_hh = [&model] ( int i1, int i2 ) {
 			return MSSM_cxx_diagrams::npointfunctions::selfenergy_hh_1loop(
 				model, std::array<int, 2>{ i1, i2 },
 				std::array<Eigen::Vector4d, 0>{} );
 		};
-		
-		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,0), fs_selfenergy_hh(0,0) );
-		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,1), fs_selfenergy_hh(0,1) );
-		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,0), fs_selfenergy_hh(1,0) );
-		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,1), fs_selfenergy_hh(1,1) );
+
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,0).at(0), fs_selfenergy_hh(0,0) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(0,1).at(0), fs_selfenergy_hh(0,1) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,0).at(0), fs_selfenergy_hh(1,0) );
+		TEST_COMPLEX_EQUALITY( np_selfenergy_hh(1,1).at(0), fs_selfenergy_hh(1,1) );
 	} else
 		BOOST_TEST( true );
 }

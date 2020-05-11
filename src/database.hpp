@@ -16,8 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "error.hpp"
-#include <cstddef>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -43,26 +41,12 @@ public:
 private:
    using TCallback = int (*)(void*, int, char**, char**);
 
-   class DisabledSQLiteError : Error {
-   public:
-      explicit DisabledSQLiteError(const std::string& msg) : Error(msg) {}
-      virtual ~DisabledSQLiteError() = default;
-   };
-
-   class SQLiteReadError : Error {
-   public:
-      explicit SQLiteReadError(const std::string& msg) : Error(msg) {}
-      virtual ~SQLiteReadError() = default;
-   };
-
    sqlite3* db; ///< pointer to database object
 
-   sqlite3* open(const std::string&);
    void execute(const std::string&);
    void execute(const std::string&, TCallback, void*);
-   template <typename T> void create_table(const std::string&, const std::vector<std::string>&);
-
-   static int extract_callback(void*, int, char**, char**);
+   template <typename T>
+   void create_table(const std::string&, const std::vector<std::string>&);
 };
 
 } // namespace database

@@ -103,18 +103,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_svd, T, svd_tests)
     Matrix<S, M, N> sigma = u.adjoint() * m * vh.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 1e-13);
 
     if (T::check_ascending_order)
-	for (size_t i = 0; i < s.size()-1; i++)
+	for (Eigen::Index i = 0; i < s.size()-1; i++)
 	    BOOST_CHECK(s[i] <= s[i+1]);
 
     T().svs(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 1e-13);
 }
 #endif // TEST_LINALG2_PART1
@@ -296,17 +296,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_fs_svd, T, fs_svd_tests)
     Matrix<S, M, N> sigma = u.conjugate() * m * v.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 
-    for (size_t i = 0; i < s.size()-1; i++)
+    for (Eigen::Index i = 0; i < s.size()-1; i++)
 	BOOST_CHECK(s[i] <= s[i+1]);
 
     fs_svd(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 }
 #endif // TEST_LINALG2_PART4
@@ -340,17 +340,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_casting_fs_svd, T, casting_fs_svd_tests)
     Matrix<complex<R>, M, N> sigma = u.conjugate() * m * v.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 
-    for (size_t i = 0; i < s.size()-1; i++)
+    for (Eigen::Index i = 0; i < s.size()-1; i++)
 	BOOST_CHECK(s[i] <= s[i+1]);
 
     fs_svd(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 }
 #endif // TEST_LINALG2_PART5

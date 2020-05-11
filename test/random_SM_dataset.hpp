@@ -43,7 +43,7 @@ static auto random_SM_dataset( void ) -> decltype(
 	auto LambdaIN_random = boost::unit_test::data::random( 0.15, 0.3 );
 	auto Qin_random = boost::unit_test::data::random( 200.0, 3000.0 );
 	auto QEWSB_random = boost::unit_test::data::random( 100.0, 1000.0 );
-	
+
 	return (
 		std::move(LambdaIN_random) ^ std::move(Qin_random) ^
 		std::move(QEWSB_random)
@@ -60,12 +60,12 @@ decltype(
 	if( !(number_of_random_samples >= 2) )
 		throw std::invalid_argument( "random_SM::data_points(): \
 number_of_random_samples must be >= 2." );
-	
+
 	auto random_datset =
 		boost::unit_test::data::xrange( 1, number_of_random_samples + 1 ) ^
 		detail::random_SM_dataset();
-	
-	return std::move(random_datset);
+
+	return random_datset;
 }
 
 #define FS_TEST_SM_PARAMETER_SEQUENCE LambdaIN_p, Qin_p, QEWSB_p
@@ -74,11 +74,11 @@ static SM_input_parameters wrap_SM_parameters(
 	double LambdaIN, int Qin, double QEWSB )
 {
 	SM_input_parameters input;
-	
+
 	input.LambdaIN = LambdaIN;
 	input.Qin = Qin;
 	input.QEWSB = QEWSB;
-	
+
 	return input;
 }
 
@@ -86,11 +86,11 @@ static SM_mass_eigenstates calculate_spectrum(
 	const SM_input_parameters &input )
 {
 	softsusy::QedQcd qedqcd;
-	
+
 	Spectrum_generator_settings spectrum_generator_settings;
 	spectrum_generator_settings.set(
 		Spectrum_generator_settings::calculate_sm_masses, 1.0 );
-	
+
 	SM_spectrum_generator<Two_scale> spectrum_generator;
 	spectrum_generator.set_settings( spectrum_generator_settings );
 	spectrum_generator.set_parameter_output_scale( qedqcd.get_scale() );

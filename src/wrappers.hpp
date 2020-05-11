@@ -116,34 +116,57 @@ auto AbsSqrt(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().cwise
    return x.cwiseAbs().cwiseSqrt();
 }
 
-// ArcTan, ArcSin, ArcCos //////////////////////////////////////////////
+// ArcCos //////////////////////////////////////////////////////////////
 
-double ArcTan(double) noexcept;
-double ArcSin(double) noexcept;
-double ArcCos(double) noexcept;
+inline double               ArcCos(double x)                      noexcept { return std::acos(x); }
+inline std::complex<double> ArcCos(const std::complex<double>& x) noexcept { return std::acos(x); }
 
-double Arg(const std::complex<double>&) noexcept;
+// ArcSin //////////////////////////////////////////////////////////////
 
-template <typename T>
-constexpr T Cbrt(T a) noexcept
+inline double               ArcSin(double x)                      noexcept { return std::asin(x); }
+inline std::complex<double> ArcSin(const std::complex<double>& x) noexcept { return std::asin(x); }
+
+// ArcTan //////////////////////////////////////////////////////////////
+
+inline double               ArcTan(double x)                      noexcept { return std::atan(x); }
+inline std::complex<double> ArcTan(const std::complex<double>& x) noexcept { return std::atan(x); }
+
+// Arg /////////////////////////////////////////////////////////////////
+
+inline double Arg(double x)                      noexcept { return std::arg(x); }
+inline double Arg(const std::complex<double>& x) noexcept { return std::arg(x); }
+
+// Cbrt ////////////////////////////////////////////////////////////////
+
+inline double Cbrt(double x) noexcept { return std::cbrt(x); }
+
+// Conj ////////////////////////////////////////////////////////////////
+
+inline int                       Conj(int x)                              noexcept { return x; }
+inline long                      Conj(long x)                             noexcept { return x; }
+inline long long                 Conj(long long x)                        noexcept { return x; }
+inline float                     Conj(float x)                            noexcept { return x; }
+inline double                    Conj(double x)                           noexcept { return x; }
+inline long double               Conj(long double x)                      noexcept { return x; }
+inline std::complex<float>       Conj(const std::complex<float>& x)       noexcept { return std::conj(x); }
+inline std::complex<double>      Conj(const std::complex<double>& x)      noexcept { return std::conj(x); }
+inline std::complex<long double> Conj(const std::complex<long double>& x) noexcept { return std::conj(x); }
+
+template <typename Derived>
+auto Conj(const Eigen::ArrayBase<Derived>& x) -> decltype(x.conjugate())
 {
-   return std::cbrt(a);
+   return x.conjugate();
 }
 
-double Conj(double a) noexcept;
-std::complex<double> Conj(const std::complex<double>& a) noexcept;
-
-template<typename Scalar, int M, int N>
-Eigen::Matrix<Scalar,M,N> Conj(const Eigen::Matrix<Scalar,M,N>& a) noexcept
+template <typename Derived>
+auto Conj(const Eigen::MatrixBase<Derived>& x) -> decltype(x.conjugate())
 {
-   return a.conjugate();
+   return x.conjugate();
 }
 
-template <class T>
-T Conjugate(T a) noexcept
-{
-   return Conj(a);
-}
+#define Conjugate(x) Conj(x)
+
+// Cube ////////////////////////////////////////////////////////////////
 
 template <typename T>
 constexpr T Cube(T a) noexcept

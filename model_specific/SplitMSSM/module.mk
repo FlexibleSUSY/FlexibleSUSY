@@ -56,21 +56,15 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIB_model_specific_SplitMSSM_DEP) $(LIB_model_specific_SplitMSSM_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(TSILFLAGS)
+$(LIB_model_specific_SplitMSSM_DEP) $(LIB_model_specific_SplitMSSM_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_SplitMSSM_DEP) $(LIB_model_specific_SplitMSSM_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
-ifeq ($(ENABLE_SHARED_LIBS),yes)
-$(LIB_model_specific_SplitMSSM): $(LIB_model_specific_SplitMSSM_OBJ)
-		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
-else
 $(LIB_model_specific_SplitMSSM): $(LIB_model_specific_SplitMSSM_OBJ)
 		@$(MSG)
 		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
-endif
 
 ALLDEP += $(LIB_model_specific_SplitMSSM_DEP)
 ALLLIB += $(LIB_model_specific_SplitMSSM)

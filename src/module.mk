@@ -14,12 +14,12 @@ LIBFLEXI_SRC := \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/database.cpp \
 		$(DIR)/dilog.cpp \
-		$(DIR)/dilogc.f \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
 		$(DIR)/logger.cpp \
+		$(DIR)/loop_libraries/library_softsusy.cpp \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
@@ -28,7 +28,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/physical_input.cpp \
 		$(DIR)/pmns.cpp \
 		$(DIR)/problems.cpp \
-		$(DIR)/pv.cpp \
 		$(DIR)/rkf_integrator.cpp \
 		$(DIR)/scan.cpp \
 		$(DIR)/slha_io.cpp \
@@ -38,7 +37,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
 		$(DIR)/trilog.cpp \
-		$(DIR)/weinberg_angle.cpp \
 		$(DIR)/wrappers.cpp
 
 LIBFLEXI_HDR := \
@@ -79,6 +77,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/linalg2.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
+		$(DIR)/loop_libraries/library_softsusy.hpp \
 		$(DIR)/mathlink_utils.hpp \
 		$(DIR)/minimizer.hpp \
 		$(DIR)/mixings.hpp \
@@ -91,7 +90,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \
 		$(DIR)/problems.hpp \
-		$(DIR)/pv.hpp \
 		$(DIR)/raii.hpp \
 		$(DIR)/rg_flow.hpp \
 		$(DIR)/rk.hpp \
@@ -110,7 +108,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
 		$(DIR)/trilog.hpp \
-		$(DIR)/weinberg_angle.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp
 
@@ -140,10 +137,106 @@ endif
 LIBFLEXI_SRC := $(sort $(LIBFLEXI_SRC))
 LIBFLEXI_HDR := $(sort $(LIBFLEXI_HDR))
 
+LIBAUX := ''
+LIBAUX_AUTOGEN := ''
+
+# files which allow some useful things with fortran functions ##########
+ifeq (yes, $(sort $(filter yes, $(ENABLE_FFLITE) $(ENABLE_COLLIER) $(ENABLE_LOOPTOOLS) )))
+
+LIBFLEXI_SRC += \
+	$(DIR)/fortran_utils.cpp
+
+LIBFLEXI_HDR += \
+	$(DIR)/fortran_utils.hpp
+
+FUTI := $(DIR)/libfortran_utils
+
+$(DIR)/fortran_utils.hpp $(DIR)/fortran_utils.cpp : $(FUTI).a
+
+$(FUTI).a : $(FUTI).o
+	$(Q)$(MSG)
+	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(FUTI).o
+
+$(FUTI).o : $(FUTI).f90
+	$(Q)$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(FSTD) $(FMOD) src -c $< -o $(FUTI).o
+
+$(FUTI).mod : $(FUTI).f90 $(FUTI).o
+	@true
+
+LIBAUX += \
+	$(FUTI).a
+
+endif
+
+# loop library #########################################################
+LOOP_DIR := $(DIR)/loop_libraries
+
+LOOP_SRC := \
+		$(LOOP_DIR)/loop_library.cpp
+
+LOOP_HDR := \
+		$(LOOP_DIR)/loop_library.hpp \
+		$(LOOP_DIR)/loop_library_interface.hpp
+
+LIBFLEXI_SRC += $(LOOP_SRC)
+LIBFLEXI_HDR += $(LOOP_HDR)
+
+ifeq ($(ENABLE_LOOPTOOLS),yes)
+LIBFLEXI_SRC += \
+		$(LOOP_DIR)/library_looptools.cpp
+LIBFLEXI_HDR += \
+		$(LOOP_DIR)/library_looptools.hpp
+endif
+
+ifeq ($(ENABLE_FFLITE),yes)
+LIBFLEXI_SRC += \
+		$(LOOP_DIR)/library_fflite.cpp
+LIBFLEXI_HDR += \
+		$(LOOP_DIR)/library_fflite.hpp
+endif
+
+ifeq ($(ENABLE_COLLIER),yes)
+LIBFLEXI_SRC += \
+		$(LOOP_DIR)/library_collier.cpp
+LIBFLEXI_HDR += \
+		$(LOOP_DIR)/library_collier.hpp
+
+COLLWRAP := $(LOOP_DIR)/libcollier_wrapper
+
+$(LOOP_HDR) $(LOOP_SRC) : $(COLLWRAP).a
+
+$(COLLWRAP).a : $(COLLWRAP).o $(COLLWRAP).mod
+	$(Q)$(MSG)
+	$(Q)$(MODULE_MAKE_LIB_CMD) $@ $(COLLWRAP).o
+
+$(COLLWRAP).o : $(COLLWRAP).f90
+	$(Q)$(MSG)
+	$(Q)$(FC) $(FFLAGS) $(FSTD) $(FMOD) $(LOOP_DIR) -c $< $(COLLIERFLAGS) -o $(COLLWRAP).o
+
+$(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
+	@true
+
+$(COLLWRAP).f90 : $(COLLWRAP).F90
+	$(Q)$(MSG)
+	$(Q)$(FC) -E $< | sed "s/_NL_/\n   /g" > $@
+
+LIBAUX += \
+	$(COLLWRAP).a
+
+LIBAUX_AUTOGEN += \
+	$(COLLWRAP).f90
+
+endif
+
 LIBFLEXI_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIBFLEXI_SRC))) \
 		$(patsubst %.c, %.o, $(filter %.c, $(LIBFLEXI_SRC))) \
 		$(patsubst %.f, %.o, $(filter %.f, $(LIBFLEXI_SRC)))
+
+LIBAUX_OBJ := \
+		$(patsubst %.a, %.o, $(LIBAUX)) \
+		$(patsubst %.a, %.mod, $(LIBAUX))
 
 LIBFLEXI_DEP := \
 		$(LIBFLEXI_OBJ:.o=.d)
@@ -153,7 +246,8 @@ LIBFLEXI     := $(DIR)/libflexisusy$(MODULE_LIBEXT)
 LIBFLEXI_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) clean-$(MODNAME)-dep \
-		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME)
+		clean-$(MODNAME)-lib clean-$(MODNAME)-obj distclean-$(MODNAME) \
+		clean-$(MODNAME)-autogen
 
 all-$(MODNAME): $(LIBFLEXI)
 		@true
@@ -170,12 +264,15 @@ clean-$(MODNAME)-dep:
 		$(Q)-rm -f $(LIBFLEXI_DEP)
 
 clean-$(MODNAME)-lib:
-		$(Q)-rm -f $(LIBFLEXI)
+		$(Q)-rm -f $(LIBFLEXI) $(LIBAUX)
 
 clean-$(MODNAME)-obj:
-		$(Q)-rm -f $(LIBFLEXI_OBJ)
+		$(Q)-rm -f $(LIBFLEXI_OBJ) $(LIBAUX_OBJ)
 
-clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
+clean-$(MODNAME)-autogen:
+		$(Q)-rm -f $(LIBAUX_AUTOGEN)
+
+clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj clean-$(MODNAME)-autogen
 		@true
 
 distclean-$(MODNAME): clean-$(MODNAME)
@@ -186,7 +283,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(TSILFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
@@ -195,7 +292,7 @@ endif
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
 		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(THREADLIBS)
 else
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
 		@$(MSG)

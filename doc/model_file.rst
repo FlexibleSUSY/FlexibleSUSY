@@ -1565,6 +1565,23 @@ Note, that these 3-loop corrections are only applied at run-time if
 the threshold correction loop order (block ``FlexibleSUSY[7]``) is set
 to a value > 2.
 
+Four-loop threshold corrections
+```````````````````````````````
+
+Standard Model
+''''''''''''''
+
+In non-SUSY models the known 4-loop (Standard Model) QCD corrections
+:math:`O(\alpha_s^4)` [1604.01134]_, [1502.01030]_, [1606.06754]_ can
+be used in the determination of the running :math:`\overline{MS}` top
+Yukawa coupling :math:`y_t` at the low-energy scale by setting::
+
+    UseYukawa4LoopQCD = Automatic;
+
+or::
+
+    UseYukawa4LoopQCD = True;
+
 
 References
 ----------
@@ -1578,3 +1595,6 @@ References
 .. [hep-ph:0308231] `Phys.Lett. B579 (2004) 180-188 <https://inspirehep.net/record/626390>`_ [`arxiv:hep-ph/0308231 <https://arxiv.org/abs/hep-ph/0308231>`_]
 .. [1406.2319] `CPC 190 (2015) 139-172 <https://inspirehep.net/record/1299998>`_ [`arxiv:1406.2319 <https://arxiv.org/abs/1406.2319>`_]
 .. [1602.05581] `Eur.Phys.J. C76 (2016) no.9, 516 <https://inspirehep.net/record/1422208>`_ [`arxiv:1602.05581 <https://arxiv.org/abs/1602.05581>`_]
+.. [1604.01134] `Phys.Rev. D93 (2016) no.9, 094017 <https://inspirehep.net/record/1442368>`_ [`arXiv:1604.01134 <https://arxiv.org/abs/1604.01134>`_]
+.. [1502.01030] `Phys.Rev.Lett. 114 (2015) 14, 142002 <https://inspirehep.net/literature/1342942>`_ [`arXiv:1502.01030 <https://arxiv.org/abs/1502.01030>`_]
+.. [1606.06754] `Phys.Rev.D 94 (2016) 7, 074025 <https://inspirehep.net/literature/1471728>`_ [`arXiv:1606.06754 <https://arxiv.org/abs/1606.06754>`_]

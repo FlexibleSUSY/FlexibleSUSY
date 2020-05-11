@@ -92,6 +92,7 @@ Optional:
 * FeynArts_ (version 3.9 or higher)
 * FormCalc_ (version 9.5 or higher)
 * LoopTools_ (version 2.8 or higher)
+* COLLIER_
 * Himalaya_
 * TSIL_
 
@@ -319,7 +320,7 @@ model name.
 Example::
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
-    
+
     (* Create a handle to a model given the input parameters.
        See Options[FSCMSSMOpenHandle] for all default options. *)
     handle = FSCMSSMOpenHandle[
@@ -328,13 +329,13 @@ Example::
       fsModelParameters -> {
           m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
     ];
-    
+
     (* calculate pole mass spectrum *)
     FSCMSSMCalculateSpectrum[handle]
-    
+
     (* calculate observables *)
     FSCMSSMCalculateObservables[handle]
-    
+
     (* close the model handle *)
     FSCMSSMCloseHandle[handle];
 
@@ -613,6 +614,9 @@ configure FlexibleSUSY via ::
 
     ./configure --enable-looptools
 
+One can use an optional call ``--with-loop-libraries=looptools`` instead of
+``--enable-looptools`` during configuration.
+
 To use the LoopTools library and header files from a specific
 directory configure via
 ::
@@ -630,6 +634,27 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
 
     FFLAGS=-fPIC ./configure
 
+COLLIER support
+---------------
+
+It is possible to use COLLIER_ for calculating the loop functions,
+instead of using SOFTSUSY's loop functions.  To enable COLLIER
+configure FlexibleSUSY via ::
+
+   ./configure --with-loop-libraries=collier
+
+To use the COLLIER library and header files from a specific
+directory configure via ::
+
+    COLLIER_DIR=/path/to/COLLIER-x.y.z
+
+    ./configure --with-loop-libraries=collier \
+       --with-collier-incdir=$COLLIER_DIR/modules \
+       --with-collier-libdir=$COLLIER_DIR
+
+Note: versions since COLLIER-1.2.3 were tested so far.
+Also, COLLIER static library should be configured with
+``-Dstatic=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON`` flags.
 
 TSIL support
 ------------
@@ -832,6 +857,7 @@ References
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _GNU scientific library: http://www.gnu.org/software/gsl/
 .. _LoopTools: http://www.feynarts.de/looptools/
+.. _COLLIER: https://collier.hepforge.org/
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
 

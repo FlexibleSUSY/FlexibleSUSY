@@ -115,9 +115,9 @@ Block MSQ2IN
    1   3   0     # mq2Input(1,3)
    2   1   0     # mq2Input(2,1)
    2   2   1e6   # mq2Input(2,2)
-   2   3   1e4     # mq2Input(2,3)
+   2   3   1e4   # mq2Input(2,3)
    3   1   0     # mq2Input(3,1)
-   3   2   0     # mq2Input(3,2)
+   3   2   1e4   # mq2Input(3,2)
    3   3   1e6   # mq2Input(3,3)
 Block MSL2IN
    1   1   1e6   # ml2Input(1,1)
@@ -135,9 +135,9 @@ Block MSD2IN
    1   3   0     # md2Input(1,3)
    2   1   0     # md2Input(2,1)
    2   2   1e6   # md2Input(2,2)
-   2   3   1e4     # md2Input(2,3)
+   2   3   1e4   # md2Input(2,3)
    3   1   0     # md2Input(3,1)
-   3   2   0     # md2Input(3,2)
+   3   2   1e4   # md2Input(3,2)
    3   3   1e6   # md2Input(3,3)
 Block MSU2IN
    1   1   2e6   # mu2Input(1,1)
@@ -145,9 +145,9 @@ Block MSU2IN
    1   3   0     # mu2Input(1,3)
    2   1   0     # mu2Input(2,1)
    2   2   1e6   # mu2Input(2,2)
-   2   3   1e4     # mu2Input(2,3)
+   2   3   1e4   # mu2Input(2,3)
    3   1   0     # mu2Input(3,1)
-   3   2   0     # mu2Input(3,2)
+   3   2   1e4   # mu2Input(3,2)
    3   3   1e6   # mu2Input(3,3)
 Block MSE2IN
    1   1   1e6   # me2Input(1,1)
@@ -198,14 +198,14 @@ Block MSOFTIN
 
    auto model = std::get<0>(spectrum_generator.get_models_slha());
 
-   const auto reference_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
+   const auto calculated_value = MRSSM2CKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
    constexpr std::complex<double> C7NP {-0.20234454161004062, -0.00369650084326421};
-   constexpr std::complex<double> C7pNP {-0.00435452005573289, -0.00007954989509452};
+   constexpr std::complex<double> C7pNP {-0.0043545363467531548, -7.9550192704575207e-05};
    constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
-   constexpr std::complex<double> C8pNP {-0.00379732860057805, -0.00006937092674948};
+   constexpr std::complex<double> C8pNP {-0.0037973614617843958, -6.9371527069492648e-05};
 
-   TEST_COMPLEX_EQUALITY(C7NP, reference_value[0]);
-   TEST_COMPLEX_EQUALITY(C7pNP, reference_value[1]);
-   TEST_COMPLEX_EQUALITY(C8NP, reference_value[2]);
-   TEST_COMPLEX_EQUALITY(C8pNP, reference_value[3]);
+   TEST_COMPLEX_EQUALITY(C7NP,  calculated_value[0]);
+   TEST_COMPLEX_EQUALITY(C7pNP, calculated_value[1]);
+   TEST_COMPLEX_EQUALITY(C8NP,  calculated_value[2]);
+   TEST_COMPLEX_EQUALITY(C8pNP, calculated_value[3]);
 }

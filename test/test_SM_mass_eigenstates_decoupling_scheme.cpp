@@ -118,7 +118,7 @@ std::unique_ptr<standard_model::Standard_model> make_sm(
    sm->solve_ewsb_tree_level();
    sm->calculate_DRbar_masses();
 
-   return std::move(sm);
+   return sm;
 }
 
 BOOST_AUTO_TEST_CASE( test_SM_mass_eigenstates_conversion )

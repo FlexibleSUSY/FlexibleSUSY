@@ -19,9 +19,9 @@
 #include "SoftsusyNMSSM_two_scale_initial_guesser.hpp"
 #include "SoftsusyNMSSM_two_scale.hpp"
 #include "nmssmsoftsusy.h"
-#include "logger.hpp"
 
 #include <cassert>
+#include <iostream>
 
 using namespace softsusy;
 
@@ -68,8 +68,8 @@ void SoftsusyNMSSM_initial_guesser::guess()
    double mz = nmssm->displayMz();
 
    if (oneset.displayMu() != mz) {
-      WARNING("NmssmSoftsusy::lowOrg called with oneset at scale\n"
-              << oneset.displayMu() << "instead of " << mz);
+      std::cerr << "NmssmSoftsusy::lowOrg called with oneset at scale\n"
+              << oneset.displayMu() << "instead of " << mz << std::endl;
    }
 
    NmssmSusy t(nmssm->guessAtSusyMt(pp.tanBeta, pp.get_nmpars(), oneset));
@@ -77,8 +77,8 @@ void SoftsusyNMSSM_initial_guesser::guess()
    t.setLoops(2); /// 2 loops should protect against ht Landau pole
    int err = t.runto(mx);
    if (err)
-      ERROR("<SoftsusyNMSSM_initial_guesser::guess()>: non-perturbative running to"
-            " mx = " << mx);
+      std::cerr << "<SoftsusyNMSSM_initial_guesser::guess()>: non-perturbative running to"
+            " mx = " << mx << std::endl;
 
    nmssm->setSusy(t);
 
@@ -102,8 +102,8 @@ void SoftsusyNMSSM_initial_guesser::guess()
 
    err = nmssm->run(mx, mz);
    if (err)
-      ERROR("<SoftsusyNMSSM_initial_guesser::guess()>: non-perturbative running from"
-            " mx = " << mx << " to mz = " << mz);
+      std::cerr << "<SoftsusyNMSSM_initial_guesser::guess()>: non-perturbative running from"
+            " mx = " << mx << " to mz = " << mz << std::endl;
 
    if (sgnMu == 1 || sgnMu == -1)
       nmssm->rewsbTreeLevel(sgnMu);
@@ -116,9 +116,9 @@ void SoftsusyNMSSM_initial_guesser::guess()
    sProblem problem = nmssm->displayProblem();
    if (problem.test()) {
       if (problem.testSeriousProblem())
-         WARNING("<SoftsusyNMSSM_initial_guesser::guess()>: serious problem: " << problem);
+         std::cerr << "<SoftsusyNMSSM_initial_guesser::guess()>: serious problem: " << problem << std::endl;
       else
-         WARNING("<SoftsusyNMSSM_initial_guesser::guess()>: problem: " << problem);
+         std::cerr << "<SoftsusyNMSSM_initial_guesser::guess()>: problem: " << problem << std::endl;
    }
 }
 

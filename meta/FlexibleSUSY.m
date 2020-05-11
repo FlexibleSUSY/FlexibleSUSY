@@ -46,15 +46,14 @@ BeginPackage["FlexibleSUSY`",
               "References`",
               "SemiAnalytic`",
               "ThreeLoopSM`",
+              "TerminalFormatting`",
               "ThreeLoopMSSM`",
-              "Observables`",
               "CXXDiagrams`",
-              "NPointFunctions`",
-              "WilsonCoeffs`",
               "AMuon`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
+              "FToFConversionInNucleus`",
               "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
@@ -203,14 +202,27 @@ UseYukawa3LoopQCD = Automatic;
 UseYukawa4LoopQCD = Automatic;
 FSRGELoopOrder = 2; (* RGE loop order (0, 1 or 2) *)
 PotentialLSPParticles = {};
+ExtraSLHAOutputBlocks::usage = "@note
+this List is rewritten during the runnig of start.m script
+in the directory FlexibleSUSY/models/@CLASSNAME@ by
+the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
 ExtraSLHAOutputBlocks = {
-    {FlexibleSUSYLowEnergy,
-        {{1, FlexibleSUSYObservable`aMuon} } },
-    {EFFHIGGSCOUPLINGS, NoScale,
-        {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-         {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-         {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-         {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+    {
+    	FlexibleSUSYLowEnergy,
+        {
+        	{1, FlexibleSUSYObservable`aMuon}
+        }
+    },
+    {
+    	EFFHIGGSCOUPLINGS,
+    	NoScale,
+        {
+        	{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
+        	{2, FlexibleSUSYObservable`CpHiggsGluonGluon},
+        	{3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
+        	{4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon}
+        }
+    }
 };
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
@@ -356,6 +368,7 @@ FSDebugOutput = False;
 FSLoopLibraries::usage = "Contains a List of enabled loop libraries.";
 FSLoopTools;
 FSFFlite;
+FSCOLLIER;
 FSLoopLibraries = { FSSOFTSUSY };
 
 FSFeynArtsAvailable = False;
@@ -2239,46 +2252,6 @@ WriteFFVFormFactorsClass[extParticles_List, files_List] :=
       vertices
    ];
 
-WriteFFMassiveVFormFactorsClass[extParticles_List, files_List] :=
-   Module[{
-         interfacePrototypes = "", interfaceDefinitions = "",
-         insertionsAndVertices, massiveVIndices = "", vertices = {}
-      },
-
-      If[extParticles =!= {},
-
-         massiveVIndices =
-            StringJoin[
-               Riffle[
-                  FFMassiveVFormFactors`MassiveVIndices /@
-                     Select[GetVectorBosons[], !(IsMassless[#] || IsElectricallyCharged[#])&],
-                  "\n"
-               ]
-            ];
-
-         insertionsAndVertices = FlattenAt[#, 1]& /@ Transpose[
-            {extParticles, ff @@@  extParticles}
-         ];
-
-         {interfacePrototypes, interfaceDefinitions} =
-             StringJoin /@ Transpose[
-                FFMassiveVFormFactors`FFMassiveVFormFactorsCreateInterface @@@
-                    insertionsAndVertices
-            ];
-
-         vertices = Flatten[insertionsAndVertices[[All, 3]][[All, All, 2]][[All, All, 2]], 2];
-      ];
-
-      WriteOut`ReplaceInFiles[files,
-         {"@FFMassiveVFormFactors_InterfacePrototypes@"  -> interfacePrototypes,
-          "@FFMassiveVFormFactors_InterfaceDefinitions@"  -> interfaceDefinitions,
-          "@FFMassiveVFormFactors_VIndices@" ->  massiveVIndices,
-          Sequence @@ GeneralReplacementRules[]}
-      ];
-
-      vertices
-  ];
-
 WriteLToLGammaClass[decays_List, files_List] :=
    Module[{interfacePrototypes, interfaceDefinitions},
 
@@ -2311,11 +2284,11 @@ WriteBToSGammaClass[decays_List, files_List] :=
    ];
 
 (* Write c++ files for the F -> F conversion in nucleus *)
-(* leptonPairs is a list of lists, sth like {{Fe[2] -> Fe[1], Au}, {Fe[2] ->  Fe[1], Al}} etc *)
-WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
+(* leptonPairs is a list of lists, sth like {{Fe -> Fe, Au}, {Fe ->  Fe, Al}} etc *)
+WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
    Module[{interfacePrototypes = "", interfaceDefinitions = "",
       massiveNeutralVectorBosons, masslessNeutralVectorBosons, externalFermions,
-      vertices = {}
+      vertices = {},processesUnderInterest,npfVertices = {},npfHeaders = "",npfCode = ""
       },
 
       If[leptonPairs =!= {},
@@ -2337,21 +2310,25 @@ WriteFToFConversionInNucleusClass[leptonPairs_List, files_List] :=
             {{CXXDiagrams`LorentzConjugate[#], #}& /@ externalFermions,
             Join[masslessNeutralVectorBosons, massiveNeutralVectorBosons]}
          ];
-
+         processesUnderInterest = DeleteDuplicates@Transpose[Drop[Transpose@leptonPairs, -1]];
+         {npfVertices,npfHeaders,npfCode} = NPointFunctions`CreateCXXFToFConversionInNucleus@processesUnderInterest;
          {interfacePrototypes, interfaceDefinitions} =
               StringJoin @@@
             (Riffle[#, "\n\n"] & /@ Transpose[FToFConversionInNucleus`FToFConversionInNucleusCreateInterface @@@
-               DeleteDuplicatesBy[leptonPairs, Drop[#, -1]&]
-            ] )
+               processesUnderInterest
+            ] );
       ];
 
       WriteOut`ReplaceInFiles[files,
-         {"@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
-          "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
-          Sequence @@ GeneralReplacementRules[]}
+         {
+            "@npf_headers@" -> npfHeaders,
+            "@npf_definitions@" -> npfCode,
+            "@FToFConversion_InterfacePrototypes@"     -> interfacePrototypes,
+            "@FToFConversion_InterfaceDefinitions@"    -> interfaceDefinitions,
+            Sequence @@ GeneralReplacementRules[]}
       ];
 
-      vertices
+      DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
 (* Write the AMuon c++ files *)
@@ -2448,7 +2425,7 @@ ScanEnabledSpectrumGenerator[solver_] :=
     Module[{key = "", class = "", macro = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
-           body = "result = run_parameter_point<" <> class <> ">(qedqcd, input);\n"
+           body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
                   <> "if (!result.problems.have_problem() || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[IndentText[result]]] <> "\n"
@@ -2458,7 +2435,7 @@ RunCmdLineEnabledSpectrumGenerator[solver_] :=
     Module[{key = "", class = "", macro = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
-           body = "exit_code = run_solver<" <> class <> ">(input);\n"
+           body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
                   <> "if (!exit_code || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
            EnableForBVPSolver[solver, IndentText[result]] <> "\n"
@@ -2949,7 +2926,7 @@ FSCheckFlags[] :=
               Print["Adding 2-loop SM O(as^2,at*as,at^2) corrections to yt from ",
                     "[arXiv:1604.01134]"];
               Print["Adding 4-loop SM QCD corrections to yt from ",
-                    "[arxiv:1604.01134]"];
+                    "[arxiv:1502.01030, arxiv:1604.01134, arxiv:1606.06754]"];
               References`AddReference["Martin:2016xsp"];
              ];
 
@@ -3735,7 +3712,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
-            fieldsForFToFMassiveVFormFactors = {}, fFFMassiveVFormFactorVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -3792,13 +3768,22 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            FSCheckFlags[];
            FSCheckLoopCorrections[FSEigenstates];
-           nPointFunctions = EnforceCpColorStructures @ SortCps @
-             Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
+           nPointFunctions = Vertices`EnforceCpColorStructures @
+           					 Vertices`SortCps @
+             				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
 
            allParameters = SetupModelParameters[susyBetaFunctionsSARAH, susyBreakingBetaFunctionsSARAH];
+
+           Needs@"Observables`";
+
+           (* load additional packages if prerequisites are met *)
+           If[FSFeynArtsAvailable && FSFormCalcAvailable,
+               Needs@"NPointFunctions`";
+               Needs@"WilsonCoeffs`";
+           ];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
@@ -4095,7 +4080,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   effectiveCouplingsFileName];
               extraVertices = EffectiveCouplings`GetNeededVerticesList[effectiveCouplings];
               Put[vertexRules =
-                      Vertices`VertexRules[Join[nPointFunctions, extraVertices, deltaVBwave,
+                      Vertices`VertexRules[Join[nPointFunctions,
+                      							extraVertices, deltaVBwave,
                                                 deltaVBvertex, deltaVBbox], Lat$massMatrices],
                   vertexRuleFileName],
               vertexRules = Get[vertexRuleFileName];
@@ -4560,7 +4546,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            (* OBSERVABLE: l -> l conversion *)
 
-           (*
            Print["Creating FToFConversionInNucleus class ..."];
            LToLConversionFields =
               DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
@@ -4575,7 +4560,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.hpp"}]},
                             {FileNameJoin[{$flexiblesusyTemplateDir, "f_to_f_conversion.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_f_to_f_conversion.cpp"}]}}];
-                             *)
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
@@ -4611,29 +4595,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
 
-            (* internally the F -> F conversion routines require form factors with massive vector bosons *)
-           (*
-            fieldsForFToFMassiveVFormFactors = {};
-            If[LToLConversionFields =!= {},
-               fieldsForFToFMassiveVFormFactors =
-               DeleteDuplicates @ Join[
-                  fieldsForFToFMassiveVFormFactors,
-                      Flatten /@ Tuples[{Drop[LToLConversionFields,None, -1],
-                        Select[GetVectorBosons[], !(IsMassless[#] || IsElectricallyCharged[#])&]}]
-               ]
-            ];
-
-            Print["Creating FFMassiveV form factor class for other observables ..."];
-            fFFMassiveVFormFactorVertices =
-               WriteFFMassiveVFormFactorsClass[
-                  DeleteDuplicates @ fieldsForFToFMassiveVFormFactors,
-                           {{FileNameJoin[{$flexiblesusyTemplateDir, "FFMassiveV_form_factors.hpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFMassiveV_form_factors.hpp"}]},
-                            {FileNameJoin[{$flexiblesusyTemplateDir, "FFMassiveV_form_factors.cpp.in"}],
-                             FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFMassiveV_form_factors.cpp"}]}}
-               ];
-               *)
-
            Print["Creating AMuon class ..."];
            WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
@@ -4652,8 +4613,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_vertices.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "context_base.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_context_base.hpp"}]},
-                          {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions.hpp.in"}],
-                           FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions.hpp"}]},
                           {FileNameJoin[{cxxQFTTemplateDir, "npointfunctions_wilsoncoeffs.hpp.in"}],
                            FileNameJoin[{cxxQFTOutputDir, FlexibleSUSY`FSModelName <> "_npointfunctions_wilsoncoeffs.hpp"}]}
                           };
@@ -4663,9 +4622,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
-
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, fFFMassiveVFormFactorVertices, conversionVertices],
+              Join[edmVertices, FFMasslessVVertices, conversionVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

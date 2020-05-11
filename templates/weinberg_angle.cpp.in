@@ -27,7 +27,7 @@
 #include "config.h"
 #include "numerics.h"
 #include "error.hpp"
-#include "pv.hpp"
+#include "loop_libraries/loop_library.hpp"
 #include "standard_model.hpp"
 #include "ew_input.hpp"
 
@@ -61,7 +61,7 @@ const double ROOT2 = Sqrt(2.0);
 /**
  * Sets the maximum number of iterations to 20, the number of loops to 2,
  * the precision goal to 1.0e-8, and the model pointer as well as the
- * SM parameter struct to the ones which are handed over as parameters. 
+ * SM parameter struct to the ones which are handed over as parameters.
  *
  * @param model_ pointer to the model for which the calculation shall be done
  * @param sm_parameters_ struct containing the required SM parameters
@@ -232,7 +232,7 @@ double CLASSNAME::calculate_rho_hat_tree() const
 
 /**
  * Calculates the \f$\Delta\hat{\rho}\f$ corrections as defined in
- * Eqs. (C.4), (C.6) from hep-ph/9606211 but with the dependency on 
+ * Eqs. (C.4), (C.6) from hep-ph/9606211 but with the dependency on
  * rhohat eliminated.
  *
  * @param sinThetaW sin(theta_W)
@@ -425,12 +425,13 @@ double CLASSNAME::calculate_delta_vb_bsm(double sinThetaW) const
 
 double CLASSNAME::B0(double p2, double m12, double m22) const noexcept
 {
-   return passarino_veltman::ReB0(p2, m12, m22, Sqr(model->get_scale()));
+   return Loop_library::get().B0(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 double CLASSNAME::B1(double p2, double m12, double m22) const noexcept
 {
-   return -1. * passarino_veltman::ReB1(p2, m12, m22, Sqr(model->get_scale()));
+   // @note this minus sign is very confusing
+   return -1. * Loop_library::get().B1(p2, m12, m22, Sqr(model->get_scale())).real();
 }
 
 double CLASSNAME::C0(double m12, double m22, double m32) const noexcept
