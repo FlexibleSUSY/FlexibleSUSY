@@ -2190,12 +2190,7 @@ check_looptools() {
       message -n "Checking LoopTools using local LoopTools.pc ... "
       local ldf_='LDFLAGS = '
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS="$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)"
-
-      gcc_lib_search_paths=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
-      check_library "libgcc" "$gcc_lib_search_paths" "$default_lib_paths"
-      LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
-
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
       enable_looptools=yes
       message "ok"
       return
@@ -2203,6 +2198,18 @@ check_looptools() {
 
    check_looptools_incl
    check_looptools_libs
+   case "$operating_system" in
+      Darwin)
+         local gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         check_library "libgcc" "$gcc_" "$default_lib_paths"
+         if test "x$found_lib" = "x" ; then
+            message "Error: libgcc not found in $gcc_ $default_lib_paths"
+            message "       but required by LoopTools."
+               exit 1
+            else
+               LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
+         fi;;
+   esac
 }
 
 #_____________________________________________________________________
