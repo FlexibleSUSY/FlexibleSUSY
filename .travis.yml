@@ -38,6 +38,12 @@ script:
   - make showbuild
   - make -j2
   - make -j2 -k all-test
-  - ./test/test_pv.x
-  - test/test_pv_crosschecks.sh
   - make install-src
+before_cache:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cleanup ; fi
+cache:
+  pip: true
+  directories:
+    - $HOME/.conan
+    - $HOME/Library/Caches/Homebrew
+    - /usr/local/Homebrew
