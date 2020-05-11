@@ -1307,9 +1307,10 @@ check_platform() {
 #_____________________________________________________________________
 reset_default_static_linker_cmd() {
    local os_=$( (uname -s) 2>/dev/null || echo unknown)
-   if [ "$(case "$os_" in Linux) echo 'true' ;; esac )" = 'true' ]; then
-      STATIC_LIB_CMD="ar cruU"
-   fi
+   case "$os_" in
+      Linux)
+         STATIC_LIB_CMD="ar cruU";;
+   esac
 }
 
 #_____________________________________________________________________
@@ -2129,7 +2130,6 @@ EOF
 
 #_____________________________________________________________________
 check_looptools_libs() {
-# defines LOOPTOOLSLIBS variable
    if [ -z "$looptools_lib_dir" ]; then
       message "Warning: --with-looptools-libdir= has not been set, but"
       message "         LoopTools has been enabled via --enable-looptools or"
@@ -2158,6 +2158,18 @@ check_looptools_libs() {
          LOOPTOOLSLIBS="$LOOPTOOLSLIBS -lquadmath"
       fi
    fi
+   case "$operating_system" in
+      Darwin)
+         local gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         check_library "libgcc" "$gcc_" "$default_lib_paths"
+         if test "x$found_lib" = "x" ; then
+            message "Error: libgcc not found in $gcc_ $default_lib_paths"
+            message "       but required by LoopTools."
+               exit 1
+            else
+               LOOPTOOLSLIBS="$LOOPTOOLSLIBS -L$found_dir -lgcc"
+         fi;;
+   esac
 }
 
 #_____________________________________________________________________
@@ -3202,6 +3214,7 @@ add_metaflags() {
 #_____________________________________________________________________
 replace_markers() {
 	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
+   -e "s|@OPERATING_SYSTEM@|$operating_system|"     \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
 	-e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
 	-e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \

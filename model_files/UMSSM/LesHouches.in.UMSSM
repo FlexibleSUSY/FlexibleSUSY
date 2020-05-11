@@ -43,7 +43,6 @@ Block SMINPUTS               # Standard Model inputs
     6   1.733000000e+02      # mtop(pole)
     7   1.777000000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
-    9   80.404               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
    13   1.056583570e-01      # mmuon(pole)

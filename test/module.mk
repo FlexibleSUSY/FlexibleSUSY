@@ -69,7 +69,6 @@ TEST_SRC := \
 		$(DIR)/test_numerics.cpp \
 		$(DIR)/test_pmns.cpp \
 		$(DIR)/test_problems.cpp \
-		$(DIR)/test_pv.cpp \
 		$(DIR)/test_raii.cpp \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
@@ -82,14 +81,16 @@ TEST_SRC := \
 		$(DIR)/test_spectrum_generator_settings.cpp \
 		$(DIR)/test_which.cpp \
 		$(DIR)/test_wrappers.cpp \
-		$(DIR)/test_looplibrary_softsusy.cpp
+		$(DIR)/test_looplibrary_softsusy.cpp \
+		$(DIR)/test_looplibrary_environment.cpp
 
 TEST_SH := \
 		$(DIR)/test_depgen.sh \
 		$(DIR)/test_run_examples.sh \
 		$(DIR)/test_run_all_spectrum_generators.sh \
 		$(DIR)/test_space_dir.sh \
-		$(DIR)/test_wolframscript.sh
+		$(DIR)/test_wolframscript.sh \
+		$(DIR)/test_looplibrary_environment.sh
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
@@ -124,6 +125,11 @@ TEST_META := \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
+
+ifneq ($(OPERATING_SYSTEM),Darwin)
+TEST_SRC += \
+		$(DIR)/test_pv.cpp
+endif
 
 ifeq ($(ENABLE_THREADS),yes)
 TEST_SRC += \
@@ -441,7 +447,10 @@ TEST_SRC += \
 endif
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-TEST_SH +=	$(DIR)/test_pv_crosschecks.sh
+ifneq ($(OPERATING_SYSTEM),Darwin)
+
+TEST_SH += \
+		$(DIR)/test_pv_crosschecks.sh
 
 TEST_PV_EXE := \
 		$(DIR)/test_pv_fflite.x \
@@ -453,6 +462,8 @@ $(DIR)/test_pv_crosschecks.sh.xml: $(TEST_PV_EXE)
 ifneq (,$(findstring test,$(MAKECMDGOALS)))
 ALLDEP += $(LIBFFLITE_DEP)
 endif
+
+endif # ifneq ($(OPERATING_SYSTEM),Darwin)
 endif # ifeq ($(ENABLE_LOOPTOOLS),yes)
 
 ifeq ($(WITH_BLSMlightZp),yes)
@@ -747,9 +758,11 @@ endif
 TEST_ALL_LOG  := $(TEST_ALL_XML:.xml=.log)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
+ifneq ($(OPERATING_SYSTEM),Darwin)
 $(DIR)/test_pv_fflite.x    : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_FFLITE
 $(DIR)/test_pv_looptools.x : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_LOOPTOOLS
 $(DIR)/test_pv_softsusy.x  : CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS) -DTEST_PV_SOFTSUSY
+endif
 endif
 
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
@@ -863,6 +876,8 @@ $$(for f in $^ ; do echo "\t<test filename=\"$$(basename $$f)\"/>"; done)\n\
 
 $(DIR)/test_depgen.sh.xml: $(DEPGEN_EXE)
 
+$(DIR)/test_looplibrary_environment.sh.xml : $(DIR)/test_looplibrary_environment.x
+
 $(DIR)/test_lowMSSM.sh.xml: $(RUN_CMSSM_EXE) $(RUN_lowMSSM_EXE)
 
 $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
@@ -870,17 +885,19 @@ $(DIR)/test_run_all_spectrum_generators.sh.xml: allexec
 $(DIR)/test_CMSSM_NMSSM_linking.x: $(LIBCMSSM) $(LIBNMSSM)
 
 ifeq ($(ENABLE_LOOPTOOLS),yes)
-$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV) $(LIBFFLITE)
+ifneq ($(OPERATING_SYSTEM),Darwin)
+$(DIR)/test_pv_fflite.x: $(DIR)/test_pv_crosschecks.cpp src/logger.cpp $(DIR)/pv.cpp $(LIBFFLITE)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(THREADLIBS) $(FLIBS)
 
 $(DIR)/test_pv_looptools.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(THREADLIBS) $(BOOSTTESTLIBS) $(FLIBS)
 
-$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp $(LIBPV)
+$(DIR)/test_pv_softsusy.x: $(DIR)/test_pv_crosschecks.cpp src/numerics.o $(LIBPV)
 		@$(MSG)
-		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS)
+		$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(call abspathx,$^) $(LOOPFUNCLIBS) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS)
+endif
 endif
 
 $(DIR)/test_CMSSMNoFV_benchmark.x.xml: $(RUN_CMSSM_EXE) $(RUN_SOFTPOINT_EXE)
@@ -1191,6 +1208,7 @@ $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_semi_analytic_solutions.x: $(LIBTHDMIIEWS
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_consistent_solutions.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic) $(LIBTHDMII)
 
 # test rule for files which depend on pv #######################################
+ifneq ($(OPERATING_SYSTEM),Darwin)
 PV_DEP_EXE := \
 		$(DIR)/test_pv.x \
 		$(DIR)/test_pv_crosschecks.x
@@ -1198,17 +1216,18 @@ PV_DEP_EXE := \
 $(PV_DEP_EXE): %.x: %.o $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(GSLLIBS) $(FLIBS) $(LIBPV)
+		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS) $(LIBPV)
+endif
 ################################################################################
 
 # adding libraries to the end of the list of dependencies
-$(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
+$(TEST_EXE): $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS) $(LIBPV)
 
 # general test rule
 $(DIR)/test_%.x: $(DIR)/test_%.o
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
-		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
+		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS)
 
 # add boost and eigen flags for the test object files and dependencies
 $(TEST_OBJ) $(TEST_DEP): CPPFLAGS += -Itest/SOFTSUSY $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS) $(GSLFLAGS) $(TSILFLAGS)

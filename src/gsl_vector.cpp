@@ -280,4 +280,22 @@ const double* cend(const GSL_vector& v)
    return nullptr;
 }
 
+/**
+ * Returns true if GSL_vector contains only finite elements (neither
+ * nan nor inf), false otherwise.
+ *
+ * @param v GSL vector
+ * @return true if vector contains only finite elements, false otherwise.
+ */
+bool is_finite(const GSL_vector& v)
+{
+   for (std::size_t i = 0; i < v.size(); i++) {
+      if (!std::isfinite(v[i])) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
 } // namespace flexiblesusy

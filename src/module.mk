@@ -217,9 +217,9 @@ $(COLLWRAP).o : $(COLLWRAP).f90
 $(COLLWRAP).mod :  $(COLLWRAP).f90 $(COLLWRAP).o
 	@true
 
-$(COLLWRAP).f90 : $(COLLWRAP).F90
+$(COLLWRAP).f90 : $(COLLWRAP).cpp
 	$(Q)$(MSG)
-	$(Q)$(FC) -E $< | sed "s/_NL_/\n   /g" > $@
+	$(Q)$(CXX) -E $< | tr '@' '\n' > $@
 
 LIBAUX += \
 	$(COLLWRAP).a

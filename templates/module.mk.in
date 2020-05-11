@@ -122,7 +122,7 @@ LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
-		$(DIR)/cxx_qft/@CLASSNAME@npointfunctions_wilsoncoeffs.hpp
+		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 -include $(DIR)/two_scale.mk
