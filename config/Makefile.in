@@ -270,6 +270,7 @@ showbuild:
 	@echo "VERSION            = $(FLEXIBLESUSY_VERSION)"
 	@echo "ABSBASEDIR         = $(ABSBASEDIR)"
 	@echo "INSTALL_DIR        = $(INSTALL_DIR)"
+	@echo "OPERATING_SYSTEM   = $(OPERATING_SYSTEM)"
 	@echo ""
 	@echo "MATH               = $(MATH)"
 	@echo "MODELS             = $(MODELS)"
