@@ -253,7 +253,7 @@ double OneLoopFunctionC(double r)
    const double y = r - 1.0;
    if (is_zero(r)) {
       return 3.0;
-   } else if (isinf(r)) {
+   } else if (std::isinf(r)) {
       return 3.0;
    } else if (std::abs(y) < 0.185) {
       // error around x=1 is <= 10^-13 on an intel i7
@@ -280,7 +280,9 @@ double OneLoopFunctionC(double r)
 
 double OneLoopFunctionD(double r)
 {
-   if (is_zero(1.0 - r)) {
+   if (std::isinf(r)) {
+      return 0.0;
+   } else if (is_zero(1.0 - r)) {
       return -9.0 / 2.0;
    } else {
       return (16.0 - 45.0 * r + 36.0 * r * r - 7.0 * r * r * r +
@@ -350,6 +352,8 @@ double OneLoopFunctionH(double r)
 {
    if (is_zero(r)) {
       return 5.0;
+   } else if (is_zero(1.0 - r)){
+      return 0.0;
    } else {
       return (5.0 - 27.0 * r + 27.0 * r * r - 5.0 * r * r * r + 6.0 * (r - 3.0) * r * r * std::log(r)) /
               pow(1.0 - r, 4);
@@ -360,6 +364,8 @@ double OneLoopFunctionI(double r)
 {
    if (is_zero(r)) {
       return 1.0;
+   } else if (is_zero(1.0 - r)){
+      return 1.0 / 2.0;
    } else {
       return (1.0 - r + r * std::log(r)) / pow(1.0 - r, 2);
    }
@@ -369,6 +375,8 @@ double OneLoopFunctionJ(double r)
 {
    if (is_zero(r)) {
       return 7.0;
+   } else if (is_zero(1.0 - r)){
+      return 5.0;
    } else {
       return (7.0 - 33.0 * r + 57.0 * r * r - 31.0 * r * r * r + 6.0 * r * r * (3.0 * r - 1.0)
                    * std::log(r)) / pow(1.0 - r, 4);
@@ -377,16 +385,22 @@ double OneLoopFunctionJ(double r)
 
 double OneLoopFunctionK(double r)
 {
-   if (is_zero(r)){
+   if (is_zero(r)) {
       return 1.0;
+   } else if (is_zero(1.0 - r)){
+      return 2.0 / 3.0;
    } else {   
       return (1.0 - 4.0 * r + 3.0 * r * r - 2 * r * r * std::log(r)) / pow(1.0 - r, 3);
    }
 }
 
 double OneLoopFunctionL(double r)
-{
-   if (isinf(r)) {
+{  
+   if (is_zero(r)) {
+      return -10.0;
+   } else if (is_zero(1.0 - r)){
+      return 21.0 / 2.0;
+   } else if (std::isinf(r)) {
       return 0.0;
    } else {
       return (2.0 + 27.0 * r - 54.0 * r * r + 25.0 * r * r * r - 6.0 * (2.0 - 9.0 * r + 6.0 * r * r)
@@ -398,8 +412,10 @@ double OneLoopFunctionM(double r)
 {
    if (is_zero(r)) {
       return 4.0;
-   } else if (isinf(r)) {
-      return 5.0;
+   } else if (is_zero(1.0 - r)){
+      return 3.0 / 2.0;
+   } else if (std::isinf(r)) {
+      return 0.0;
    } else {
       return (4.0 - 9.0 * r + 5.0 * r * r * r + 6.0 * (1.0 - 2.0 * r) * r * std::log(r)) / 
               pow(1.0 - r, 4);
@@ -411,6 +427,8 @@ double OneLoopFunctionN(double r, double s)
    if (is_zero(r - s)) {
       if (is_zero(r)) {
          return 1.0;
+      } else if (is_zero(1.0 - r)){
+         return 2.0 / 3.0;
       } else {
          return (1.0 - 4.0 * r + 3 * r * r - 2 * r * r * std::log(r)) / pow(1.0 - r, 3);
       }
@@ -772,7 +790,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
             + vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3.;
 
 	 std::complex<double> massFactor = 0.0;
-         if (isinf(x)) {
+         if (std::isinf(x)) {
             massFactor = pow(mF,-2);
          } else {
             massFactor = pow(mV,-2);
