@@ -34,13 +34,6 @@
 namespace flexiblesusy {
 namespace database {
 
-class DisabledSQLiteError : Error {
-public:
-   explicit DisabledSQLiteError(const std::string& msg) : Error(msg) {}
-   explicit DisabledSQLiteError(const char* msg) : Error(msg) {}
-   virtual ~DisabledSQLiteError() = default;
-};
-
 class SQLiteReadError : Error {
 public:
    explicit SQLiteReadError(const std::string& msg) : Error(msg) {}
@@ -240,8 +233,14 @@ void Database::execute(const std::string& cmd, TCallback callback, void* data)
 namespace flexiblesusy {
 namespace database {
 
+class DisabledSQLiteError : Error {
+public:
+   explicit DisabledSQLiteError(const std::string& msg) : Error(msg) {}
+   explicit DisabledSQLiteError(const char* msg) : Error(msg) {}
+   virtual ~DisabledSQLiteError() = default;
+};
+
 Database::Database(const std::string&)
-   : db(nullptr)
 {
 }
 
@@ -268,11 +267,6 @@ void Database::create_table(const std::string&, const std::vector<std::string>&)
 void Database::execute(const std::string&) {}
 
 void Database::execute(const std::string&, TCallback, void*) {}
-
-sqlite3* Database::open(const std::string&)
-{
-   return nullptr;
-}
 
 } // namespace database
 } // namespace flexiblesusy
