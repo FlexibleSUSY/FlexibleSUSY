@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( test_parabola_2dim )
       new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_absolute<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_absolute<dimension>(precision))
    };
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       reset();
 
       const int status = solvers[i]->solve(start);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_parabola_2dim )
                     << get_number_of_calls() << " function calls)");
    }
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       delete solvers[i];
    }
 }
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( test_perturbation )
       new Fixed_point_iterator<dimension,fixed_point_iterator::Convergence_tester_tadpole<dimension>>(update, max_iterations, fixed_point_iterator::Convergence_tester_tadpole<dimension>(precision, func))
    };
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       reset();
 
       const int status = solvers[i]->solve(start);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE( test_perturbation )
                     << get_number_of_calls() << " function calls)");
    }
 
-   for (int i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
+   for (unsigned i = 0; i < sizeof(solvers)/sizeof(solvers[0]); i++) {
       delete solvers[i];
    }
 }

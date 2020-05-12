@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_fill_array)
          tp.run_task([&a, i](){ a[i] = i; });
    }
 
-   for (int i = 0; i < a.size(); i++)
+   for (std::size_t i = 0; i < a.size(); i++)
       BOOST_CHECK_EQUAL(a[i], i);
 }
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_fill_array_packaged_task)
    for (std::size_t i = 0; i < a.size(); i++)
       a[i] = f[i].get();
 
-   for (int i = 0; i < a.size(); i++)
+   for (std::size_t i = 0; i < a.size(); i++)
       BOOST_CHECK_EQUAL(a[i], i);
 }
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_fill_array_benchmark)
    const double time_parallel = measure_time([&a](){ fill_parallel(a); });
    const double time_sequential = measure_time([&b](){ fill_sequential(b); });
 
-   for (int i = 0; i < a.size(); i++)
+   for (std::size_t i = 0; i < a.size(); i++)
       BOOST_CHECK_EQUAL(a[i], b[i]);
 
    BOOST_TEST_MESSAGE("parallel array fill  : " << time_parallel << "s");

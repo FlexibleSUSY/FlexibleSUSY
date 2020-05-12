@@ -65,6 +65,9 @@ double* end(GSL_vector&);   ///< iterator to end of GSL_vector
 const double* cbegin(const GSL_vector&); ///< const iterator to begin of GSL_vector
 const double* cend(const GSL_vector&);   ///< const iterator to end of GSL_vector
 
+/// Returns true if GSL_vector contains only finite elements, false otherwise
+bool is_finite(const GSL_vector&);
+
 std::ostream& operator<<(std::ostream&, const GSL_vector&);
 
 } // namespace flexiblesusy

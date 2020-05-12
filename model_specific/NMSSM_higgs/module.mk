@@ -62,7 +62,7 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 $(LIB_model_specific_NMSSM_higgs_DEP) $(LIB_model_specific_NMSSM_higgs_OBJ): \
-	CPPFLAGS += $(MODmodel_specific_NMSSM_higgs_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(TSILFLAGS)
+	CPPFLAGS += $(MODmodel_specific_NMSSM_higgs_INC) $(EIGENFLAGS) $(BOOSTFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_NMSSM_higgs_DEP) $(LIB_model_specific_NMSSM_higgs_OBJ): \
@@ -72,7 +72,7 @@ endif
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_NMSSM_higgs): $(LIB_model_specific_NMSSM_higgs_OBJ)
 		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(FLIBS)
 else
 $(LIB_model_specific_NMSSM_higgs): $(LIB_model_specific_NMSSM_higgs_OBJ)
 		@$(MSG)

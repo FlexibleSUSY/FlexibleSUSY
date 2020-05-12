@@ -755,7 +755,7 @@ std::string format_line(int exponent, double t1, double t2)
 
 BOOST_AUTO_TEST_CASE(test_Power_benchmark)
 {
-   const std::size_t N = 1000000000;
+   const std::size_t N = 10000000;
 
    const double timed_Power_2  = time_Power(N, 3., 2);
    const double timed_Power_3  = time_Power(N, 3., 3);

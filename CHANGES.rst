@@ -4,6 +4,12 @@ FlexibleSUSY 2.5.0 [not released yet]
 New features
 ------------
 
+* Interface to one loop integrals was changed to a new one, which allows
+  switching of loop library at run time. See
+  `doc/add_loop_library.rst <doc/add_loop_library.rst>`_ and
+  `src/loop_libraries/loop_library_interface.hpp <src/loop_libraries/loop_library_interface.hpp>`_
+  for further details.
+
 * Added calculation of :math:`$b \to s \gamma$`.  Currently only
   diagrams with scalars and fermions in the loop are supported.  See
   `doc/observables/b_physics.rst <doc/observables/b_physics.rst>`_ for
@@ -18,6 +24,11 @@ New features
 
 Changes
 -------
+
+* Changed code organization of NPointFunctions module: improved speed of
+  ``C++`` calculations, improved maintainability of the metacode.
+
+* Added support of ``COLLIER`` loop library.
 
 * Improved performance of ``flexiblesusy-config`` script.
 
@@ -402,12 +413,12 @@ New features
           {g1 -> 0, g2 -> 0}, (* applied to 2L beta functions *)
           {g1 -> 0, g2 -> 0}  (* applied to 3L beta functions *)
       };
-   
+
       FSSelfEnergyRules = {
           (* applied to 1L self-energies/tadpoles *)
           { (Mass|Mass2)[VZ|gZ] -> 0 }
       };
-   
+
       (* applied to all vertices *)
       FSVertexRules = { g1 -> 0, g2 -> 0 };
 
@@ -1249,7 +1260,7 @@ FlexibleSUSY-1.6.0 [August, 27 2016]
   * ``FlexibleSUSY[13] = 0`` and ``FlexibleSUSY[4] > 0``: 1L QCD correction
   * ``FlexibleSUSY[13] = 1`` and ``FlexibleSUSY[4] > 1``: 2L QCD correction
   * ``FlexibleSUSY[13] = 2`` and ``FlexibleSUSY[4] > 2``: 3L QCD correction
-   
+
 * Feature [commits 98bc536, e8fd56a]: Speed up of the RG running in
   models with very complicated beta functions.
 
@@ -1869,7 +1880,7 @@ FlexibleSUSY-1.1.0 [May, 31 2015]
   their variants.  The method for the calculation of the weak mixing
   angle can be selected via the ``FSWeakMixingAngleInput`` variable in
   the FlexibleSUSY model file.
-  
+
   Example::
 
       FSWeakMixingAngleInput = FSFermiConstant; (* or FSMassW *)

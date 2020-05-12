@@ -38,6 +38,9 @@
 #define FC                    "@FC@"
 #define FFLAGS                "@FFLAGS@"
 #define FLIBS                 "@FLIBS@"
+#define FMOD                  "@FMOD@"
+#define FSTD                  "@FSTD@"
+#define FUTILIBS              "@FUTILIBS@"
 #define GM2CALCFLAGS          "@GM2CALCFLAGS@"
 #define GM2CALCLIBS           "@GM2CALCLIBS@"
 #define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
@@ -48,6 +51,8 @@
 #define LDLIBS                "@LDLIBS@"
 #define LLFLAGS               "@LLFLAGS@"
 #define LLLIBS                "@LLLIBS@"
+#define COLLIERFLAGS          "@COLLIERFLAGS@"
+#define COLLIERLIBS           "@COLLIERLIBS@"
 #define LOOPFUNCFLAGS         "@LOOPFUNCFLAGS@"
 #define LOOPFUNCLIBS          "@LOOPFUNCLIBS@"
 #define SQLITELIBS            "@SQLITELIBS@"
@@ -87,6 +92,9 @@
 
 /* Enable LoopTools */
 @DEFINE_ENABLE_LOOPTOOLS@
+
+/* Enable COLLIER */
+@DEFINE_ENABLE_COLLIER@
 
 /* Enable odeint */
 @DEFINE_ENABLE_ODEINT@

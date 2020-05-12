@@ -15,7 +15,8 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/standard_model_physical.cpp \
 		$(DIR)/standard_model_two_scale_convergence_tester.cpp \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.cpp \
-		$(DIR)/standard_model_two_scale_model.cpp
+		$(DIR)/standard_model_two_scale_model.cpp \
+		$(DIR)/weinberg_angle.cpp
 
 LIB_model_specific_SM_HDR := \
 		$(DIR)/sm_fourloophiggs.hpp \
@@ -29,7 +30,8 @@ LIB_model_specific_SM_HDR := \
 		$(DIR)/standard_model_physical.hpp \
 		$(DIR)/standard_model_two_scale_convergence_tester.hpp \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.hpp \
-		$(DIR)/standard_model_two_scale_model.hpp
+		$(DIR)/standard_model_two_scale_model.hpp \
+		$(DIR)/weinberg_angle.hpp
 
 LIB_model_specific_SM_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIB_model_specific_SM_SRC)))
@@ -74,7 +76,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(TSILFLAGS)
+$(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(EIGENFLAGS) $(BOOSTFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB_model_specific_SM_DEP) $(LIB_model_specific_SM_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
@@ -83,7 +85,7 @@ endif
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
 		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(BOOSTTHREADLIBS) $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(THREADLIBS)
 else
 $(LIB_model_specific_SM): $(LIB_model_specific_SM_OBJ)
 		@$(MSG)

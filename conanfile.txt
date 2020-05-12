@@ -4,6 +4,7 @@ eigen/[>=3.1]@conan/stable
 GM2Calc/[>=1.7.0]@conan/stable
 Himalaya/[>=2.0.2]@conan/stable
 LoopTools/2.15@conan/stable
+COLLIER/1.2.3@conan/stable
 TSIL/1.44@conan/stable
 
 [options]
@@ -59,7 +60,12 @@ Himalaya:fPIC=True
 
 LoopTools:fPIC=True
 
+COLLIER:shared=False
+COLLIER:fPIC=True
+
 TSIL:fPIC=True
 
 [generators]
+cmake
+make
 pkg_config
