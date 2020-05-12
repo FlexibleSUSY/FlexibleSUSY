@@ -16,7 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#define BOOST_TEST_MODULE Test CXXDiagrams
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "Test SM CXXDiagrams"
+
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/fusion/include/boost_array.hpp>

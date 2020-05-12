@@ -41,7 +41,7 @@ public:
 private:
    using TCallback = int (*)(void*, int, char**, char**);
 
-   sqlite3* db; ///< pointer to database object
+   sqlite3* db{nullptr}; ///< pointer to database object
 
    void execute(const std::string&);
    void execute(const std::string&, TCallback, void*);

@@ -46,7 +46,6 @@ struct Initialize_looptools {
 	ltini();
     }
     ~Initialize_looptools() {
-	ltexi();
     }
 } initialize_looptools;
 
@@ -259,7 +258,6 @@ struct Initialize_looptools {
 	ltini_();
     }
     ~Initialize_looptools() {
-	ltexi_();
     }
 } initialize_looptools;
 

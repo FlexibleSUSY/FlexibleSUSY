@@ -9,6 +9,7 @@ FLEXIBLESUSY_PKG   := $(PKGNAME)-$(FLEXIBLESUSY_VERSION)
 FLEXIBLESUSY_TAG   := v$(FLEXIBLESUSY_VERSION)
 ABSBASEDIR         := @ABSBASEDIR@
 INSTALL_DIR        := @INSTALL_DIR@
+OPERATING_SYSTEM   := @OPERATING_SYSTEM@
 
 # Makefile switches
 ENABLE_COMPILE     := @ENABLE_COMPILE@
@@ -269,6 +270,7 @@ showbuild:
 	@echo "VERSION            = $(FLEXIBLESUSY_VERSION)"
 	@echo "ABSBASEDIR         = $(ABSBASEDIR)"
 	@echo "INSTALL_DIR        = $(INSTALL_DIR)"
+	@echo "OPERATING_SYSTEM   = $(OPERATING_SYSTEM)"
 	@echo ""
 	@echo "MATH               = $(MATH)"
 	@echo "MODELS             = $(MODELS)"

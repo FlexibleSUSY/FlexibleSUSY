@@ -16,58 +16,57 @@
 ! <http://www.gnu.org/licenses/>.
 ! ====================================================================
 
-#define START_STR(a) 'a
-#define IMPL(a) START_STR(a)_impl'
-#define PASTE(a) a
-#define DUMMY(a) PASTE(a)_dummy
+#define DUMMY(a) a ## _dummy
+#define STR(a) #a
+#define IMPL(a) STR(a ## _impl)
 
 #define two_point(NAME,N1,N2) \
-_NL_subroutine DUMMY(NAME)(res, p10, m02, m12) bind(C, name=IMPL(NAME))\
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
-_NL_   complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:) \
-_NL_\
-_NL_   allocate(Bcoeff(0:1, 0:2)) \
-_NL_   allocate(Bcoeffuv(0:1, 0:2)) \
-_NL_   call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 2) \
-_NL_\
-_NL_   res = Bcoeff(N1,N2) \
-_NL_\
-_NL_   deallocate(Bcoeff, Bcoeffuv) \
-_NL_end
+@subroutine DUMMY(NAME)(res, p10, m02, m12) bind(C, name=IMPL(NAME))\
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: p10 \
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12 \
+@   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
+@   complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:) \
+@\
+@   allocate(Bcoeff(0:1, 0:2)) \
+@   allocate(Bcoeffuv(0:1, 0:2)) \
+@   call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 2) \
+@\
+@   res = Bcoeff(N1,N2) \
+@\
+@   deallocate(Bcoeff, Bcoeffuv) \
+@end
 
 #define three_point(NAME,N1,N2,N3) \
-_NL_subroutine DUMMY(NAME)(res, p10, p21, p20, m02, m12, m22) bind(C, name=IMPL(NAME)) \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
-_NL_   complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:) \
-_NL_\
-_NL_   allocate(Ccoeff(0:1, 0:2, 0:2)) \
-_NL_   allocate(Ccoeffuv(0:1, 0:2, 0:2)) \
-_NL_   call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, 2) \
-_NL_\
-_NL_   res = Ccoeff(N1,N2,N3) \
-_NL_\
-_NL_   deallocate(Ccoeff, Ccoeffuv) \
-_NL_end
+@subroutine DUMMY(NAME)(res, p10, p21, p20, m02, m12, m22) bind(C, name=IMPL(NAME)) \
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p20 \
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22 \
+@   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
+@   complex(REAL64), allocatable :: Ccoeff(:,:,:), Ccoeffuv(:,:,:) \
+@\
+@   allocate(Ccoeff(0:1, 0:2, 0:2)) \
+@   allocate(Ccoeffuv(0:1, 0:2, 0:2)) \
+@   call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, 2) \
+@\
+@   res = Ccoeff(N1,N2,N3) \
+@\
+@   deallocate(Ccoeff, Ccoeffuv) \
+@end
 
 #define four_point(NAME,N1,N2,N3,N4) \
-_NL_subroutine DUMMY(NAME)(res,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name=IMPL(NAME)) \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32 \
-_NL_   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
-_NL_   complex(REAL64), allocatable :: Dcoeff(:,:,:,:), Dcoeffuv(:,:,:,:) \
-_NL_\
-_NL_   allocate(Dcoeff(0:1, 0:2, 0:2, 0:2)) \
-_NL_   allocate(Dcoeffuv(0:1, 0:2, 0:2, 0:2)) \
-_NL_   call D_cll(Dcoeff,Dcoeffuv,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32,2) \
-_NL_\
-_NL_   res = Dcoeff(N1,N2,N3,N4) \
-_NL_\
-_NL_   deallocate(Dcoeff, Dcoeffuv) \
-_NL_end
+@subroutine DUMMY(NAME)(res,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32) bind(C, name=IMPL(NAME)) \
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: p10, p21, p32, p30, p20, p31 \
+@   complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12, m22, m32 \
+@   complex(C_DOUBLE_COMPLEX), intent(out) :: res \
+@   complex(REAL64), allocatable :: Dcoeff(:,:,:,:), Dcoeffuv(:,:,:,:) \
+@\
+@   allocate(Dcoeff(0:1, 0:2, 0:2, 0:2)) \
+@   allocate(Dcoeffuv(0:1, 0:2, 0:2, 0:2)) \
+@   call D_cll(Dcoeff,Dcoeffuv,p10,p21,p32,p30,p20,p31,m02,m12,m22,m32,2) \
+@\
+@   res = Dcoeff(N1,N2,N3,N4) \
+@\
+@   deallocate(Dcoeff, Dcoeffuv) \
+@end
 
 module LibCollier_wrapper
    use COLLIER
@@ -77,7 +76,7 @@ module LibCollier_wrapper
 
 contains
    subroutine initialize_collier_dummy() bind(C, name='initialize_collier_impl')
-      call Init_cll(4,2,'')
+      call Init_cll(4,2,"")
    end
 
    subroutine set_mu2_uv_dummy(scl2) bind(C, name='set_mu2_uv_impl')
