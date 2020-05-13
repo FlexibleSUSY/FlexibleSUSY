@@ -28,7 +28,9 @@
 #ifndef @ModelName@_BToSGamma_H
 #define @ModelName@_BToSGamma_H
 
-#include "lowe.h"
+namespace softsusy {
+class QedQcd;
+}
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;

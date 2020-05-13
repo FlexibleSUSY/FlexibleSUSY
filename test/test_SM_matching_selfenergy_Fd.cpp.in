@@ -16,7 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#define BOOST_TEST_MODULE Test NPointFunctions
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "Test SM matching selfenergy Fd"
+
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 

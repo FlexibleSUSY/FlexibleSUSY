@@ -32,6 +32,7 @@
 #include "@ModelName@_f_to_f_conversion.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
+#include "lowe.h"
 #include "wrappers.hpp"
 
 @npf_headers@
