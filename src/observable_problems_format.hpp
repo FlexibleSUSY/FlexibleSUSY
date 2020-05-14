@@ -23,11 +23,25 @@
 
 namespace flexiblesusy {
 
+namespace observable_problems {
+
+/// copies problem strings to output iterator
+template <typename OutputIterator>
+void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
+{
+   if (p.have_non_perturbative_running()) {
+      oi = "non-perturbative running";
+      oi++;
+   }
+}
+
+} // namespace observable_problems
+
 /// copies problem strings to output iterator
 template <typename OutputIterator>
 void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 {
-   op.a_muon.copy_problem_strings(oi);
+   copy_problem_strings(op.a_muon, oi);
 }
 
 } // namespace flexiblesusy
