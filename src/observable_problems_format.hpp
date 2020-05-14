@@ -22,7 +22,6 @@
 #include "observables.hpp"
 #include "observable_problems.hpp"
 #include <string>
-#include <boost/format.hpp>
 
 namespace flexiblesusy {
 
@@ -40,11 +39,13 @@ public:
    {
    }
 
-   template <typename T>
-   void operator=(const T& elem) {
-      oi = (boost::format(" %5d %5d   %s: %s") % obs_idx % flag % obs_name % elem).str();
+   void operator=(const std::string& elem) {
+      char buf[80];
+      std::snprintf(buf, 80, " %5d %5d   %s: %s", obs_idx, flag, obs_name, elem.c_str());
+      oi = buf;
    }
    void operator++(int) { oi++; }
+
 private:
    OutputIterator& oi;
    const char* obs_name{nullptr}; ///< name of observable
