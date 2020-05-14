@@ -20,11 +20,30 @@
 #define OBSERVABLE_PROBLEMS_FORMAT_H
 
 #include "observable_problems.hpp"
+#include <iosfwd>
 #include <string>
+#include <boost/format.hpp>
 
 namespace flexiblesusy {
 
 namespace observable_problems {
+
+template <typename T>
+class SLHA_observable_problems_output_iterator {
+public:
+   SLHA_observable_problems_output_iterator(std::ostream& ostr_, int obs_idx_, int flag_)
+      : ostr(ostr_), obs_idx(obs_idx_), flag(flag_) {}
+
+   void operator=(const T& elem) {
+      ostr << boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem;
+   }
+   void operator++(int) {}
+private:
+   std::ostream& ostr;
+   int obs_idx; ///< 1st index, observable index
+   int flag;    ///< 2nd index, problem type (problem or warning)
+};
+
 
 /// copies problem strings to output iterator
 template <typename OutputIterator>

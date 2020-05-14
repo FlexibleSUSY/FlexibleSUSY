@@ -4,7 +4,6 @@
 #include <iterator>
 #include <string>
 #include <vector>
-#include <boost/format.hpp>
 
 int errors = 0;
 
@@ -22,23 +21,6 @@ int count(const flexiblesusy::Observable_problems& op)
    copy_problem_strings(op, std::back_insert_iterator<std::vector<std::string>>(str));
    return str.size();
 }
-
-// should be moved to SLHA class
-template <typename T>
-class SLHA_output_iterator {
-public:
-   SLHA_output_iterator(std::ostream& ostr_, int obs_idx_, int flag_)
-      : ostr(ostr_), obs_idx(obs_idx_), flag(flag_) {}
-
-   void operator=(const T& elem) {
-      ostr << boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem;
-   }
-   void operator++(int) {}
-private:
-   std::ostream& ostr;
-   int obs_idx; ///< 1st index, observable index
-   int flag;    ///< 2nd index, problem type (problem or warning)
-};
 
 
 void print(const flexiblesusy::Observable_problems& op)
@@ -77,7 +59,7 @@ void test_slha()
    flexiblesusy::Observable_problems op;
    op.a_muon.flag_non_perturbative_running(1.0);
 
-   copy_problem_strings(op, SLHA_output_iterator<std::string>(std::cout, 1, 3));
+   copy_problem_strings(op, flexiblesusy::observable_problems::SLHA_observable_problems_output_iterator<std::string>(std::cout, 1, 3));
 }
 
 
