@@ -21,7 +21,6 @@
 
 #include "observables.hpp"
 #include "observable_problems.hpp"
-#include <iosfwd>
 #include <string>
 #include <boost/format.hpp>
 
@@ -65,12 +64,14 @@ void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
 
 } // namespace observable_problems
 
+
 /// copies problem strings to output iterator
 template <typename OutputIterator>
 void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 {
    copy_problem_strings(op.a_muon, oi);
 }
+
 
 /// copies problem strings to output iterator
 template <typename OutputIterator>
