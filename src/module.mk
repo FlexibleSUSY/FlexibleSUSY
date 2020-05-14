@@ -90,6 +90,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/numerics2.hpp \
 		$(DIR)/observables.hpp \
 		$(DIR)/observable_problems.hpp \
+		$(DIR)/observable_problems_format.hpp \
 		$(DIR)/physical_input.hpp \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \

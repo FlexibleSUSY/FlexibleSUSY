@@ -16,6 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#ifndef OBSERVABLE_PROBLEMS_H
+#define OBSERVABLE_PROBLEMS_H
+
 #include "observables.hpp"
 
 namespace flexiblesusy {
@@ -52,13 +55,10 @@ public:
    void clear();
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
-   /// copies problem strings to output iterator
-   template <typename OutputIterator>
-   void copy_problem_strings(OutputIterator oi) const {
-      a_muon.copy_problem_strings(oi);
-   }
 
    observable_problems::Problem_a_muon a_muon{};
 };
 
 } // namespace flexiblesusy
+
+#endif

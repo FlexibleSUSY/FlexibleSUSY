@@ -1,4 +1,5 @@
 #include "observable_problems.hpp"
+#include "observable_problems_format.hpp"
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -18,7 +19,7 @@ int errors = 0;
 std::vector<std::string> problem_strings(const flexiblesusy::Observable_problems& op)
 {
    std::vector<std::string> str;
-   op.copy_problem_strings(std::back_insert_iterator<std::vector<std::string>>(str));
+   copy_problem_strings(op, std::back_insert_iterator<std::vector<std::string>>(str));
    return str;
 }
 
@@ -41,7 +42,7 @@ private:
 
 void print(const flexiblesusy::Observable_problems& op)
 {
-   op.copy_problem_strings(std::ostream_iterator<const char*>(std::cout, "\n"));
+   copy_problem_strings(op, std::ostream_iterator<const char*>(std::cout, "\n"));
 }
 
 
@@ -75,7 +76,7 @@ void test_slha()
    flexiblesusy::Observable_problems op;
    op.a_muon.flag_non_perturbative_running(1.0);
 
-   op.copy_problem_strings(SLHA_output_iterator<const char*>(std::cout, 1, 3));
+   copy_problem_strings(op, SLHA_output_iterator<const char*>(std::cout, 1, 3));
 }
 
 
