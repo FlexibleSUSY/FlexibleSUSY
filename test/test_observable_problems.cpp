@@ -16,11 +16,11 @@ int errors = 0;
    } while (false)
 
 
-std::vector<std::string> problem_strings(const flexiblesusy::Observable_problems& op)
+int count(const flexiblesusy::Observable_problems& op)
 {
    std::vector<std::string> str;
    copy_problem_strings(op, std::back_insert_iterator<std::vector<std::string>>(str));
-   return str;
+   return str.size();
 }
 
 // should be moved to SLHA class
@@ -51,7 +51,7 @@ void test_empty()
 {
    flexiblesusy::Observable_problems op;
    CHECK(!op.have_problem());
-   CHECK(problem_strings(op).empty());
+   CHECK(count(op) == 0);
 }
 
 
@@ -60,7 +60,7 @@ void test_error()
    flexiblesusy::Observable_problems op;
    op.a_muon.flag_non_perturbative_running(1.0);
    CHECK(op.have_problem());
-   CHECK(problem_strings(op).size() == 1);
+   CHECK(count(op) == 1);
 }
 
 
