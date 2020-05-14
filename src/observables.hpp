@@ -25,8 +25,8 @@ namespace observables {
 
 /// all observables supported by FlexibleSUSY
 enum EObservables {
-   a_muon,
-   NUMBER_OF_OBSERVABLES
+   a_muon = 1,
+   NUMBER_OF_OBSERVABLES = a_muon
 };
 
 /// observable names
