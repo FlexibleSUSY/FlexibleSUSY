@@ -47,6 +47,7 @@ public:
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
 
+   /// problems for a_muon
    observable_problems::Problem_a_muon a_muon{};
 };
 
