@@ -21,6 +21,7 @@
 #ifndef @ModelName@_OBSERVABLES_H
 #define @ModelName@_OBSERVABLES_H
 
+#include "observable_problems.hpp"
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -43,6 +44,7 @@ struct @ModelName@_observables {
    void clear(); ///< sets all observables to zero
    void set(const Eigen::ArrayXd&); ///< sets all observables from given vector
 
+   Observable_problems problems;
 @observablesDef@
 };
 

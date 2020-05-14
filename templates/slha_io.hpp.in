@@ -25,6 +25,8 @@
 #include "@ModelName@_info.hpp"
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_physical.hpp"
+#include "observable_problems.hpp"
+#include "observable_problems_format.hpp"
 #include "problems.hpp"
 #include "spectrum_generator_problems.hpp"
 #include "standard_model_two_scale_model.hpp"
@@ -206,6 +208,13 @@ void @ModelName@_slha_io::set_extra(
 {
    const @ModelName@_physical physical(model.get_physical_slha());
 
+   if (observables.problems.have_problem()) {
+      std::ostringstream block;
+      block << "Block OBSINFO\n";
+      format_problems_and_warnings(observables.problems,
+                                   std::ostream_iterator<std::string>(block, "\n"));
+      slha_io.set_block(block);
+   }
 @writeExtraSLHAOutputBlock@
 }
 
