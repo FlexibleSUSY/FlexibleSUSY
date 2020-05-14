@@ -17,25 +17,26 @@
 // ====================================================================
 
 #include "observables.hpp"
-#include <string>
-#include <vector>
 
 namespace flexiblesusy {
 
 namespace observable_problems {
 
-class Problem {
-   virtual void clear() = 0;
-   virtual bool have_problem() const = 0;
-   virtual std::vector<std::string> get_problem_strings() const = 0;
-};
-
 /// a_muon problems
-class Problem_a_muon : public Problem {
+class Problem_a_muon {
 public:
-   void clear() override;
-   bool have_problem() const override;
-   std::vector<std::string> get_problem_strings() const override;
+   /// clears all problems
+   void clear();
+   /// returns true if there is a problem, false otherwise
+   bool have_problem() const;
+   /// copies problem strings to output iterator
+   template <typename OutputIterator>
+   void copy_problem_strings(OutputIterator oi) const {
+      if (non_perturbative_running) {
+         oi = "non-perturbative running";
+         oi++;
+      }
+   }
 
    void flag_non_perturbative_running(double);
 private:
@@ -45,11 +46,17 @@ private:
 
 } // namespace observable_problems
 
-class Observable_problems : observable_problems::Problem {
+class Observable_problems {
 public:
-   void clear() override;
-   bool have_problem() const override;
-   std::vector<std::string> get_problem_strings() const override;
+   /// clears all problems
+   void clear();
+   /// returns true if there is a problem, false otherwise
+   bool have_problem() const;
+   /// copies problem strings to output iterator
+   template <typename OutputIterator>
+   void copy_problem_strings(OutputIterator oi) const {
+      a_muon.copy_problem_strings(oi);
+   }
 
    observable_problems::Problem_a_muon a_muon{};
 };

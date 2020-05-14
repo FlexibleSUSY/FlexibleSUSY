@@ -38,19 +38,6 @@ void Problem_a_muon::flag_non_perturbative_running(double scale)
    non_perturbative_running_to_scale = scale;
 }
 
-std::vector<std::string> Problem_a_muon::get_problem_strings() const
-{
-   std::vector<std::string> str;
-
-   if (non_perturbative_running) {
-      str.emplace_back("non-perturbative running to scale "
-                       + std::to_string(non_perturbative_running_to_scale)
-                       + " GeV");
-   }
-
-   return str;
-}
-
 } // namespace observable_problems
 
 void Observable_problems::clear()
@@ -61,11 +48,6 @@ void Observable_problems::clear()
 bool Observable_problems::have_problem() const
 {
    return a_muon.have_problem();
-}
-
-std::vector<std::string> Observable_problems::get_problem_strings() const
-{
-   return a_muon.get_problem_strings();
 }
 
 } // namespace flexiblesusy
