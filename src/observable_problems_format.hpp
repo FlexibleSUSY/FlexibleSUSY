@@ -31,11 +31,14 @@ namespace observable_problems {
 template <class OutputIterator>
 class SLHA_output_iterator_adaptor {
 public:
-   SLHA_output_iterator_adaptor(OutputIterator& oi_) : oi(oi_) {}
-
-   void set_observable_name(const char* obs_name_) { obs_name = obs_name_; }
-   void set_observable_index(int obs_idx_) { obs_idx = obs_idx_; }
-   void set_flag(int flag_) { flag = flag_; }
+   SLHA_output_iterator_adaptor(OutputIterator& oi_, const char* obs_name_,
+                                int obs_idx_, int flag_)
+      : oi(oi_)
+      , obs_name(obs_name_)
+      , obs_idx(obs_idx_)
+      , flag(flag_)
+   {
+   }
 
    template <typename T>
    void operator=(const T& elem) {
@@ -77,11 +80,12 @@ void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 template <typename OutputIterator>
 void format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
 {
-   observable_problems::SLHA_output_iterator_adaptor<OutputIterator> slha_oi(oi);
+   using SLHA_oi = observable_problems::SLHA_output_iterator_adaptor<OutputIterator>;
 
-   slha_oi.set_observable_name(observables::observable_names[observables::a_muon]);
-   slha_oi.set_observable_index(observables::a_muon + 1);
-   slha_oi.set_flag(3); // problems have index 3
+   SLHA_oi slha_oi(oi,
+                   observables::observable_names[observables::a_muon],
+                   observables::a_muon + 1,
+                   3);
    copy_problem_strings(op.a_muon, slha_oi);
 }
 
