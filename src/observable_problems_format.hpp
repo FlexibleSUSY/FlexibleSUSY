@@ -40,7 +40,7 @@ public:
 
    template <typename T>
    void operator=(const T& elem) {
-      oi = (boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem).str();
+      oi = (boost::format(" %5d %5d   %s") % obs_idx % flag % elem).str();
    }
    void operator++(int) { oi++; }
 private:
