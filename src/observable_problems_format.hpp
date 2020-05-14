@@ -30,9 +30,9 @@ namespace flexiblesusy {
 namespace observable_problems {
 
 template <class OutputIterator>
-class SLHA_output_iterator_adapter {
+class SLHA_output_iterator_adaptor {
 public:
-   SLHA_output_iterator_adapter(OutputIterator& oi_)
+   SLHA_output_iterator_adaptor(OutputIterator& oi_)
       : oi(oi_) {}
 
    void set_observable_index(int obs_idx_) { obs_idx = obs_idx_; }
@@ -75,7 +75,7 @@ void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 template <typename OutputIterator>
 void format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
 {
-   observable_problems::SLHA_output_iterator_adapter<OutputIterator> slha_oi(oi);
+   observable_problems::SLHA_output_iterator_adaptor<OutputIterator> slha_oi(oi);
 
    slha_oi.set_observable_index(observables::a_muon);
    slha_oi.set_flag(3); // problems have index 3
