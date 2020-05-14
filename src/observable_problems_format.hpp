@@ -80,7 +80,7 @@ void format_problems_and_warnings(const Observable_problems& op, OutputIterator 
    observable_problems::SLHA_output_iterator_adaptor<OutputIterator> slha_oi(oi);
 
    slha_oi.set_observable_name(observables::observable_names[observables::a_muon]);
-   slha_oi.set_observable_index(observables::a_muon);
+   slha_oi.set_observable_index(observables::a_muon + 1);
    slha_oi.set_flag(3); // problems have index 3
    copy_problem_strings(op.a_muon, slha_oi);
 }
