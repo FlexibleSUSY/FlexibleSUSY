@@ -254,54 +254,16 @@ CreateBetaFunctionCallSequential[betaFunction_BetaFunction, loopOrder_Integer] :
            result
           ];
 
-CreateBetaFunctionCallsSequential[betaFunctions_List, loopOrder_Integer] :=
-    StringJoin[CreateBetaFunctionCallSequential[#,loopOrder]& /@ betaFunctions];
-
-CreateBetaFunctionCallParallel[betaFunction_BetaFunction, loopOrder_Integer] :=
-    Module[{name, betaName, result = ""},
-           If[Length[GetAllBetaFunctions[betaFunction]] >= loopOrder,
-              name = ToValidCSymbolString[GetName[betaFunction]];
-              betaName = "beta_" <> name;
-              result = "auto fut_" <> name <>
-                       " = global_thread_pool().run_packaged_task([this, &TRACE_STRUCT](){ return calc_" <>
-                       betaName <> "_" <> ToString[loopOrder] <> "_loop(TRACE_STRUCT); });\n";
-             ];
-           result
-          ];
-
-CollectBetaFunctionFutures[betaFunction_BetaFunction, loopOrder_Integer] :=
-    Module[{name, betaName, result = ""},
-           If[Length[GetAllBetaFunctions[betaFunction]] >= loopOrder,
-              name = ToValidCSymbolString[GetName[betaFunction]];
-              betaName = "beta_" <> name;
-              result = betaName <> " += fut_" <> name <> ".get();\n";
-             ];
-           result
-          ];
-
-CreateBetaFunctionCallsParallel[betaFunctions_List, loopOrder_Integer] :=
-    "{\n" <>
-    TextFormatting`IndentText[
-        StringJoin[CreateBetaFunctionCallParallel[#,loopOrder]& /@ betaFunctions] <> "\n" <>
-        StringJoin[CollectBetaFunctionFutures[#,loopOrder]& /@ betaFunctions]
-    ] <>
-    "\n}\n";
-
-CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer, parallel_:False] :=
-    If[parallel,
-       CreateBetaFunctionCallsParallel[betaFunctions, loopOrder],
-       CreateBetaFunctionCallsSequential[betaFunctions, loopOrder]
-      ];
+CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer] :=
+    StringJoin[CreateBetaFunctionCallSequential[#,loopOrder]& /@ betaFunctions]
 
 CreateBetaFunction[betaFunctions_List] :=
-    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta3LParallel, allBeta4L, allBeta5L},
+    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta4L, allBeta5L},
            allBeta1L = CreateBetaFunctionCalls[betaFunctions,1];
            allBeta2L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,2];
            allBeta3L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3];
            allBeta4L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,4];
            allBeta5L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,5];
-           (* only parallelization of 3L betas leads to a speed-up *)
-           allBeta3LParallel = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3,True];
            StringJoin[DeclareBetaFunction /@ betaFunctions] <> "\n" <>
            "if (loops > 0) {\n" <>
            TextFormatting`IndentText[
@@ -311,11 +273,7 @@ CreateBetaFunction[betaFunctions_List] :=
                allBeta2L <> "\n" <>
                TextFormatting`IndentText[
                    "if (loops > 2) {\n" <>
-                   "#ifdef ENABLE_THREADS\n" <>
-                   allBeta3LParallel <>
-                   "#else\n" <>
                    allBeta3L <>
-                   "#endif\n" <>
                    "\n" <>
                    TextFormatting`IndentText[
                        "if (loops > 3) {\n" <>

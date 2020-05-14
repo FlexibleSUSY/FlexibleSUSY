@@ -24,7 +24,6 @@
 #ifndef BETAFUNCTION_H
 #define BETAFUNCTION_H
 
-#include <functional>
 #include <Eigen/Core>
 
 namespace flexiblesusy {
@@ -41,9 +40,6 @@ namespace flexiblesusy {
  */
 class Beta_function {
 public:
-   using Derivs = std::function<Eigen::ArrayXd(double, const Eigen::ArrayXd&)>;
-   using ODE_integrator = std::function<void(double, double, Eigen::ArrayXd&, Derivs, double)>;
-
    Beta_function();
    Beta_function(const Beta_function&) = default;
    Beta_function(Beta_function&&) = default;
@@ -56,7 +52,6 @@ public:
    void set_loops(int l) { loops = l; }
    void set_thresholds(int t) { thresholds = t; }
    void set_zero_threshold(double t) { zero_threshold = t; }
-   void set_integrator(const ODE_integrator& i) { integrator = i; }
 
    double get_scale() const { return scale; }
    int get_number_of_parameters() const { return num_pars; }
@@ -73,9 +68,6 @@ public:
    virtual void run(double, double, double eps = -1.0);
    virtual void run_to(double, double eps = -1.0);
 
-protected:
-   void call_rk(double, double, Eigen::ArrayXd&, Derivs, double eps = -1.0);
-
 private:
    int num_pars{0};              ///< number of parameters
    int loops{0};                 ///< to what loop order does the RG evolution run
@@ -84,7 +76,6 @@ private:
    double tolerance{1.e-4};      ///< running tolerance
    double min_tolerance{1.e-11}; ///< minimum tolerance allowed
    double zero_threshold{1.e-11};///< threshold for treating values as zero
-   ODE_integrator integrator{};  ///< ODE integrator
 
    Eigen::ArrayXd derivatives(double, const Eigen::ArrayXd&);
    double get_tolerance(double eps);

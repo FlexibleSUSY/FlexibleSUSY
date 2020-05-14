@@ -29,8 +29,13 @@
 
 namespace flexiblesusy {
 
+namespace {
+
+const auto integrator = runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>();
+
+} // anonymous namespace
+
 Beta_function::Beta_function()
-   : integrator(runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>())
 {
 }
 
@@ -43,7 +48,6 @@ void Beta_function::reset()
    tolerance = 1.e-4;
    min_tolerance = 1.0e-11;
    zero_threshold = 1.e-11;
-   integrator = runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>();
 }
 
 /**
@@ -77,14 +81,18 @@ void Beta_function::run(double x1, double x2, double eps)
       if (std::fabs(x2) < tol)
          throw NonPerturbativeRunningError(x2);
 
-      Eigen::ArrayXd y(get());
+      if (fabs(x1 - x2) >= min_tolerance) {
+         Eigen::ArrayXd y(get());
+         const double start = std::log(fabs(x1));
+         const double end = std::log(fabs(x2));
 
-      Derivs derivs = [this] (double x, const Eigen::ArrayXd& y) {
-         return derivatives(x, y);
-      };
+         integrator(start, end, y,
+                    [this](double x, const Eigen::ArrayXd& y) { return derivatives(x, y); },
+                    tol);
 
-      call_rk(x1, x2, y, derivs, tol);
-      set(y);
+         set_scale(x2);
+         set(y);
+      }
    }
 
    set_scale(x2);
@@ -106,35 +114,6 @@ Eigen::ArrayXd Beta_function::derivatives(double x, const Eigen::ArrayXd& y)
    set_scale(exp(x));
    set(y);
    return beta();
-}
-
-/**
- * Calls Runge Kutta routine, passing the start and end scales
- * as first and second argument respectively.  Parameters are passed
- * as third argument and the derivatives method as the fourth
- * argument.  The precison is passed as the last argument or if not
- * passed it is set to default value tolerance which is a private data
- * member of the class set to 1e-4 in the constructor.
- *
- * @param x1 renormalization scale to start RG running from
- * @param x2 renormalization scale to run parameters to
- * @param v array of model parameters
- * @param derivs function which calculates the derivatives (beta functions)
- * @param eps RG running precision
- */
-void Beta_function::call_rk(double x1, double x2, Eigen::ArrayXd & v,
-                            Derivs derivs, double eps)
-{
-   if (fabs(x1 - x2) < min_tolerance)
-      return;
-
-   const double start = std::log(fabs(x1));
-   const double end = std::log(fabs(x2));
-   const double tol = get_tolerance(eps);
-
-   integrator(start, end, v, derivs, tol);
-
-   set_scale(x2);
 }
 
 /**
