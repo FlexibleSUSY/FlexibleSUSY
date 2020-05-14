@@ -19,6 +19,7 @@
 #ifndef OBSERVABLE_PROBLEMS_FORMAT_H
 #define OBSERVABLE_PROBLEMS_FORMAT_H
 
+#include "observables.hpp"
 #include "observable_problems.hpp"
 #include <iosfwd>
 #include <string>
@@ -28,20 +29,24 @@ namespace flexiblesusy {
 
 namespace observable_problems {
 
-template <typename T>
-class SLHA_observable_problems_output_iterator {
+template <class OutputIterator>
+class SLHA_output_iterator_adapter {
 public:
-   SLHA_observable_problems_output_iterator(std::ostream& ostr_, int obs_idx_, int flag_)
-      : ostr(ostr_), obs_idx(obs_idx_), flag(flag_) {}
+   SLHA_output_iterator_adapter(OutputIterator& oi_)
+      : oi(oi_) {}
 
+   void set_observable_index(int obs_idx_) { obs_idx = obs_idx_; }
+   void set_flag(int flag_) { flag = flag_; }
+
+   template <typename T>
    void operator=(const T& elem) {
-      ostr << boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem;
+      oi = (boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem).str();
    }
-   void operator++(int) {}
+   void operator++(int) { oi++; }
 private:
-   std::ostream& ostr;
-   int obs_idx; ///< 1st index, observable index
-   int flag;    ///< 2nd index, problem type (problem or warning)
+   OutputIterator& oi;
+   int obs_idx{-1}; ///< 1st index, observable index
+   int flag{-1};    ///< 2nd index, problem type (problem or warning)
 };
 
 
@@ -64,6 +69,17 @@ template <typename OutputIterator>
 void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 {
    copy_problem_strings(op.a_muon, oi);
+}
+
+/// copies problem strings to output iterator
+template <typename OutputIterator>
+void format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
+{
+   observable_problems::SLHA_output_iterator_adapter<OutputIterator> slha_oi(oi);
+
+   slha_oi.set_observable_index(observables::a_muon);
+   slha_oi.set_flag(3); // problems have index 3
+   copy_problem_strings(op.a_muon, slha_oi);
 }
 
 } // namespace flexiblesusy

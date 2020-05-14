@@ -21,14 +21,18 @@
 
 namespace flexiblesusy {
 
+namespace observables {
+
 /// all observables supported by FlexibleSUSY
 enum EObservables {
-   aMuon,
+   a_muon,
    NUMBER_OF_OBSERVABLES
 };
 
 /// observable names
 extern const char* const observable_names[NUMBER_OF_OBSERVABLES];
+
+} // namespace observables
 
 } // namespace flexiblesusy
 

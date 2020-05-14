@@ -19,6 +19,7 @@
 #include "observables.hpp"
 
 namespace flexiblesusy {
+namespace observables {
 
 /// observable names
 const char* const observable_names[NUMBER_OF_OBSERVABLES] =
@@ -26,4 +27,5 @@ const char* const observable_names[NUMBER_OF_OBSERVABLES] =
    "aMuon"
 };
 
+} // namespace observables
 } // namespace flexiblesusy
