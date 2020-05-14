@@ -22,6 +22,51 @@ namespace flexiblesusy {
 
 namespace observable_problems {
 
+// general /////////////////////////////////////////////////////////////
+
+void Problem_general::clear()
+{
+   *this = Problem_general();
+}
+
+bool Problem_general::have_problem() const
+{
+   return have_non_perturbative_running() || have_thrown();
+}
+
+void Problem_general::flag_non_perturbative_running(double scale)
+{
+   non_perturbative_running = true;
+   non_perturbative_running_to_scale = scale;
+}
+
+bool Problem_general::have_non_perturbative_running() const
+{
+   return non_perturbative_running;
+}
+
+double Problem_general::get_non_perturbative_running_scale() const
+{
+   return non_perturbative_running_to_scale;
+}
+
+void Problem_general::flag_thrown(const char* msg)
+{
+   thrown_msg = msg;
+}
+
+bool Problem_general::have_thrown() const
+{
+   return thrown_msg != nullptr;
+}
+
+const char* Problem_general::get_thrown_message() const
+{
+   return thrown_msg;
+}
+
+// a_muon //////////////////////////////////////////////////////////////
+
 void Problem_a_muon::clear()
 {
    *this = Problem_a_muon();
@@ -50,14 +95,17 @@ double Problem_a_muon::get_non_perturbative_running_scale() const
 
 } // namespace observable_problems
 
+// wrapper class ///////////////////////////////////////////////////////
+
 void Observable_problems::clear()
 {
+   general.clear();
    a_muon.clear();
 }
 
 bool Observable_problems::have_problem() const
 {
-   return a_muon.have_problem();
+   return general.have_problem() || a_muon.have_problem();
 }
 
 } // namespace flexiblesusy

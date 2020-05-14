@@ -55,6 +55,23 @@ private:
 
 /// copies problem strings to output iterator
 template <typename OutputIterator>
+void copy_problem_strings(const Problem_general& p, OutputIterator oi)
+{
+   if (p.have_non_perturbative_running()) {
+      oi = "non-perturbative running to scale "
+         + std::to_string(p.get_non_perturbative_running_scale())
+         + " GeV";
+      oi++;
+   }
+   if (p.have_thrown()) {
+      oi = "unknown exception thrown";
+      oi++;
+   }
+}
+
+
+/// copies problem strings to output iterator
+template <typename OutputIterator>
 void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
@@ -80,13 +97,24 @@ void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 template <typename OutputIterator>
 void format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
 {
+   const int problem_flag = 3;
    using SLHA_oi = observable_problems::SLHA_output_iterator_adaptor<OutputIterator>;
 
-   SLHA_oi slha_oi(oi,
-                   observables::observable_names[observables::a_muon],
-                   observables::a_muon + 1,
-                   3);
-   copy_problem_strings(op.a_muon, slha_oi);
+   {
+      SLHA_oi slha_oi(oi,
+                      "general",
+                      0,
+                      problem_flag);
+      copy_problem_strings(op.general, slha_oi);
+   }
+
+   {
+      SLHA_oi slha_oi(oi,
+                      observables::observable_names[observables::a_muon],
+                      observables::a_muon + 1,
+                      problem_flag);
+      copy_problem_strings(op.a_muon, slha_oi);
+   }
 }
 
 } // namespace flexiblesusy

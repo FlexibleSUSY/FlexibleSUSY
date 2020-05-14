@@ -23,6 +23,27 @@ namespace flexiblesusy {
 
 namespace observable_problems {
 
+/// general problems for all observables
+class Problem_general {
+public:
+   /// clears all problems
+   void clear();
+   /// returns true if there is a problem, false otherwise
+   bool have_problem() const;
+
+   void flag_non_perturbative_running(double);
+   bool have_non_perturbative_running() const;
+   double get_non_perturbative_running_scale() const;
+
+   void flag_thrown(const char*);
+   bool have_thrown() const;
+   const char* get_thrown_message() const;
+private:
+   const char* thrown_msg{nullptr};
+   bool non_perturbative_running{false};
+   double non_perturbative_running_to_scale{0.0};
+};
+
 /// a_muon problems
 class Problem_a_muon {
 public:
@@ -48,6 +69,8 @@ public:
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
 
+   /// general problems
+   observable_problems::Problem_general general{};
    /// problems for a_muon
    observable_problems::Problem_a_muon a_muon{};
 };

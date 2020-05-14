@@ -102,12 +102,18 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
    if (scale > 0.) {
       try {
          model_at_scale.run_to(scale);
+      } catch (const NonPerturbativeRunningError& e) {
+         @ModelName@_observables observables;
+         observables.problems.general.flag_non_perturbative_running(scale);
+         return observables;
       } catch (const Error& e) {
-         model.get_problems().flag_thrown(e.what_detailed());
-         return @ModelName@_observables();
+         @ModelName@_observables observables;
+         observables.problems.general.flag_thrown(e.what());
+         return observables;
       } catch (const std::exception& e) {
-         model.get_problems().flag_thrown(e.what());
-         return @ModelName@_observables();
+         @ModelName@_observables observables;
+         observables.problems.general.flag_thrown(e.what());
+         return observables;
       }
    }
 
@@ -122,10 +128,12 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
 
    try {
 @calculateObservables@
+   } catch (const NonPerturbativeRunningError& e) {
+      observables.problems.general.flag_non_perturbative_running(e.get_scale());
    } catch (const Error& e) {
-      model.get_problems().flag_thrown(e.what_detailed());
+      observables.problems.general.flag_thrown(e.what());
    } catch (const std::exception& e) {
-      model.get_problems().flag_thrown(e.what());
+      observables.problems.general.flag_thrown(e.what());
    }
 
    return observables;
