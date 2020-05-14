@@ -27,16 +27,17 @@ std::vector<std::string> problem_strings(const flexiblesusy::Observable_problems
 template <typename T>
 class SLHA_output_iterator {
 public:
-   SLHA_output_iterator(std::ostream& ostr_, int idx1_, int idx2_)
-      : ostr(ostr_), idx1(idx1_), idx2(idx2_) {}
+   SLHA_output_iterator(std::ostream& ostr_, int obs_idx_, int flag_)
+      : ostr(ostr_), obs_idx(obs_idx_), flag(flag_) {}
 
    void operator=(const T& elem) {
-      ostr << boost::format(" %5d %5d   %s\n") % idx1 % idx2 % elem;
+      ostr << boost::format(" %5d %5d   %s\n") % obs_idx % flag % elem;
    }
    void operator++(int) {}
 private:
    std::ostream& ostr;
-   int idx1, idx2;
+   int obs_idx; ///< 1st index, observable index
+   int flag;    ///< 2nd index, problem type (problem or warning)
 };
 
 
