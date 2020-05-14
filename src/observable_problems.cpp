@@ -43,6 +43,11 @@ bool Problem_a_muon::have_non_perturbative_running() const
    return non_perturbative_running;
 }
 
+double Problem_a_muon::get_non_perturbative_running_scale() const
+{
+   return non_perturbative_running_to_scale;
+}
+
 } // namespace observable_problems
 
 void Observable_problems::clear()

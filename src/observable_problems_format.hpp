@@ -20,6 +20,7 @@
 #define OBSERVABLE_PROBLEMS_FORMAT_H
 
 #include "observable_problems.hpp"
+#include <string>
 
 namespace flexiblesusy {
 
@@ -30,7 +31,9 @@ template <typename OutputIterator>
 void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
-      oi = "non-perturbative running";
+      oi = "non-perturbative running to scale "
+         + std::to_string(p.get_non_perturbative_running_scale())
+         + " GeV";
       oi++;
    }
 }

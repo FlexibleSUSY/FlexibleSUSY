@@ -33,6 +33,7 @@ public:
 
    void flag_non_perturbative_running(double);
    bool have_non_perturbative_running() const;
+   double get_non_perturbative_running_scale() const;
 private:
    bool non_perturbative_running{false};
    double non_perturbative_running_to_scale{0.0};

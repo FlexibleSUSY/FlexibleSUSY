@@ -43,7 +43,7 @@ private:
 
 void print(const flexiblesusy::Observable_problems& op)
 {
-   copy_problem_strings(op, std::ostream_iterator<const char*>(std::cout, "\n"));
+   copy_problem_strings(op, std::ostream_iterator<std::string>(std::cout, "\n"));
 }
 
 
@@ -77,7 +77,7 @@ void test_slha()
    flexiblesusy::Observable_problems op;
    op.a_muon.flag_non_perturbative_running(1.0);
 
-   copy_problem_strings(op, SLHA_output_iterator<const char*>(std::cout, 1, 3));
+   copy_problem_strings(op, SLHA_output_iterator<std::string>(std::cout, 1, 3));
 }
 
 
