@@ -126,6 +126,11 @@ TEST_META := \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
 
+ifeq ($(WITH_E6SSM), yes)
+TEST_META += \
+		$(DIR)/test_E6SSM_CXXDiagrams.m
+endif
+
 ifneq ($(OPERATING_SYSTEM),Darwin)
 TEST_SRC += \
 		$(DIR)/test_pv.cpp
