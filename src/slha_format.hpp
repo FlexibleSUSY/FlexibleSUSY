@@ -37,6 +37,8 @@ extern const char * const scale_formatter;
 extern const char * const single_element_formatter;
 /// SLHA line formatter for the SPINFO block entries
 extern const char * const spinfo_formatter;
+/// SLHA line formatter for the OBSINFO block entries
+extern const char * const obsinfo_formatter;
 
 namespace {
    /// maximum line length in SLHA output
@@ -112,6 +114,17 @@ namespace {
       const int n_ = (n);                                                      \
       const std::string str_ = (str);                                          \
       std::snprintf(buf, SLHA_MAX_LINE_LENGTH, spinfo_formatter, n_,           \
+                    str_.c_str());                                             \
+      return std::string(buf);                                                 \
+   }()
+
+#define FORMAT_OBSINFO(i, j, str)                                              \
+   [&] {                                                                       \
+      char buf[SLHA_MAX_LINE_LENGTH];                                          \
+      const int i_ = (i);                                                      \
+      const int j_ = (j);                                                      \
+      const std::string str_ = (str);                                          \
+      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, obsinfo_formatter, i_, j_,      \
                     str_.c_str());                                             \
       return std::string(buf);                                                 \
    }()

@@ -53,7 +53,7 @@ void test_slha()
    flexiblesusy::Observable_problems op;
    op.a_muon.flag_non_perturbative_running(1.0);
 
-   format_problems_and_warnings(op, std::ostream_iterator<std::string>(std::cout, "\n"));
+   format_problems_and_warnings(op, std::ostream_iterator<std::string>(std::cout));
 }
 
 

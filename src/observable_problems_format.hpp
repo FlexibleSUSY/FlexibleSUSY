@@ -21,6 +21,7 @@
 
 #include "observables.hpp"
 #include "observable_problems.hpp"
+#include "slha_format.hpp"
 #include <string>
 
 namespace flexiblesusy {
@@ -40,10 +41,9 @@ public:
    }
 
    void operator=(const std::string& elem) {
-      char buf[80];
-      std::snprintf(buf, 80, " %5d %5d   %s: %s", obs_idx, flag, obs_name, elem.c_str());
-      oi = buf;
+      oi = FORMAT_OBSINFO(obs_idx, flag, std::string(obs_name) + ": " + elem);
    }
+
    void operator++(int) { oi++; }
 
 private:
