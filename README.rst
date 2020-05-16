@@ -314,7 +314,7 @@ Mathematica interface
 
 FlexibleSUSY can be called from within Mathematica using Wolfram's
 LibraryLink.  By default, FlexibleSUSY creates a LibraryLink library
-for each spectrum genreator.  The generated library can be found in
+for each spectrum generator.  The generated library can be found in
 ``models/<model>/<model>_librarylink.so``, where ``<model>`` is the
 model name.
 
@@ -548,9 +548,9 @@ Dynamic libraries
 
 If you want to create dynamic model libraries (instead of static
 libraries, which is the default) you need to pass the
---enable-shared-libs option to the configure script.  The file name
-extension for the shared libraries as well as the command to build
-them can be overwritten using the ``--with-shared-lib-ext=``
+``--enable-shared-libs`` option to the configure script.  The file
+name extension for the shared libraries as well as the command to
+build them can be overwritten using the ``--with-shared-lib-ext=``
 ``--with-shared-lib-cmd=``.  parameters.  For example, when Intel
 compilers should be used, replace gcc by icc or icpc::
 
@@ -623,7 +623,7 @@ The loop function libraries can be enabled by passing
 
     ./configure --with-loop-libraries=<libraries>
 
-where ``<libraries>`` can be any (or a compbination) of ``collier``,
+where ``<libraries>`` can be any (or a combination) of ``collier``,
 ``looptools`` or ``fflite``.
 
 Example::

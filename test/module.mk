@@ -1260,10 +1260,17 @@ PV_DEP_EXE := \
 		$(DIR)/test_pv.x \
 		$(DIR)/test_pv_crosschecks.x
 
+PV_DEP_OBJ := $(patsubst %.x, %.o, $(PV_DEP_EXE))
+
+PV_DEP_DEP := $(patsubst %.x, %.d, $(PV_DEP_EXE))
+
 $(PV_DEP_EXE): %.x: %.o $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
 		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS) $(LIBPV)
+
+$(PV_DEP_OBJ) $(PV_DEP_DEP): CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS)
+
 endif
 ################################################################################
 
