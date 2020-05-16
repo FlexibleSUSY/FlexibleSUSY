@@ -52,12 +52,13 @@ double Problem_general::get_non_perturbative_running_scale() const
 
 void Problem_general::flag_thrown(const char* msg)
 {
+   thrown = true;
    thrown_msg = msg;
 }
 
 bool Problem_general::have_thrown() const
 {
-   return thrown_msg != nullptr;
+   return thrown;
 }
 
 const char* Problem_general::get_thrown_message() const

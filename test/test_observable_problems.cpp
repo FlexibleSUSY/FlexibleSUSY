@@ -15,6 +15,18 @@ int errors = 0;
    } while (false)
 
 
+flexiblesusy::Observable_problems setup_errors()
+{
+   flexiblesusy::Observable_problems op;
+
+   op.general.flag_thrown(nullptr);
+   op.general.flag_non_perturbative_running(1.0);
+   op.a_muon.flag_non_perturbative_running(1.0);
+
+   return op;
+}
+
+
 int count(const flexiblesusy::Observable_problems& op)
 {
    std::vector<std::string> str;
@@ -33,26 +45,22 @@ void test_empty()
 
 void test_error()
 {
-   flexiblesusy::Observable_problems op;
-   op.a_muon.flag_non_perturbative_running(1.0);
+   flexiblesusy::Observable_problems op = setup_errors();
    CHECK(op.have_problem());
-   CHECK(count(op) == 1);
+   CHECK(count(op) == 3);
 }
 
 
 void test_print()
 {
-   flexiblesusy::Observable_problems op;
-   op.a_muon.flag_non_perturbative_running(1.0);
+   flexiblesusy::Observable_problems op = setup_errors();
    copy_problem_strings(op, std::ostream_iterator<std::string>(std::cout, "\n"));
 }
 
 
 void test_slha()
 {
-   flexiblesusy::Observable_problems op;
-   op.a_muon.flag_non_perturbative_running(1.0);
-
+   flexiblesusy::Observable_problems op = setup_errors();
    format_problems_and_warnings(op, std::ostream_iterator<std::string>(std::cout));
 }
 

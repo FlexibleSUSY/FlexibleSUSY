@@ -90,6 +90,7 @@ void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
 template <typename OutputIterator>
 void copy_problem_strings(const Observable_problems& op, OutputIterator oi)
 {
+   copy_problem_strings(op.general, oi);
    copy_problem_strings(op.a_muon, oi);
 }
 

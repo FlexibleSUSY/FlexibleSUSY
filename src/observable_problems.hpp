@@ -39,6 +39,7 @@ public:
    bool have_thrown() const;
    const char* get_thrown_message() const;
 private:
+   bool thrown{false};
    const char* thrown_msg{nullptr};
    bool non_perturbative_running{false};
    double non_perturbative_running_to_scale{0.0};
