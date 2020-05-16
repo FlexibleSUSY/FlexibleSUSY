@@ -433,7 +433,7 @@ double OneLoopFunctionN(double r, double s)
          return (1.0 - 4.0 * r + 3 * r * r - 2 * r * r * std::log(r)) / Power3(1.0 - r);
       }
    } else {
-      return s * (r * pow(r - s, 2) * std::log(r) + (r - 1.0) * ((r - s) * (s - 1.0) - (r - 1.0)
+      return s * (r * Power2(r - s) * std::log(r) + (r - 1.0) * ((r - s) * (s - 1.0) - (r - 1.0)
                               * r * std::log(r/s))) / Power2(1.0 - r) / Power2(r - s) / (s - 1.0);
    }
 }
@@ -497,7 +497,7 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
 
          const auto mS = context.mass<SA>(scalarFieldIndicesIn);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         const auto x = pow(mF/mS, 2);
+         const auto x = Power2(mF/mS);
 
          // TODO: check the sign convention of this coupling
          std::complex<double> vector_boson_coupling {-vertexEmit.value(1,0)};
@@ -519,7 +519,7 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
             - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionC(x)/3.
             - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionB(x)/12.; 
 
-         const std::complex<double> massFactor = pow(mS,-2);
+         const std::complex<double> massFactor = Power2(1.0/mS);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
@@ -586,7 +586,7 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
 
          const auto mF = context.mass<FA>(fermionFieldIndicesIn);
          const auto mS = context.mass<S>(scalarFieldIndicesIn);
-         const auto x = pow(mF/mS, 2);
+         const auto x = Power2(mF/mS);
 
          std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
@@ -607,7 +607,7 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
             - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionF(x) * 2./3.
             - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionE(x)/12.0; 
 
-         const std::complex<double> massFactor = pow(mS,-2);
+         const std::complex<double> massFactor = Power2(1.0/mS);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
@@ -678,7 +678,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
          const auto mV = context.mass<VA>(vectorFieldIndicesIn);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         const auto x = pow(mF/mV, 2);
+         const auto x = Power2(mF/mV);
 
          // triple gauge boson vertex
          // need to check that the sign and function call are correct
@@ -700,7 +700,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
             + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionJ(x) / 6. 
             + vertexIn.left() * vertexOut.left() * OneLoopFunctionJ(x) / 6.;
 
-         const std::complex<double> massFactor = pow(mV,-2);
+         const std::complex<double> massFactor = Power2(1.0/mV);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
       }
@@ -771,7 +771,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
          const auto mV = context.mass<V>(vectorFieldIndicesIn);
          const auto mF = context.mass<FA>(fermionFieldIndicesIn);
-         const auto x = pow(mF/mV, 2);
+         const auto x = Power2(mF/mV);
 
 	 std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
@@ -791,9 +791,9 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
 	 std::complex<double> massFactor = 0.0;
          if (std::isinf(x)) {
-            massFactor = pow(mF,-2);
+            massFactor = Power2(1.0/mF);
          } else {
-            massFactor = pow(mV,-2);
+            massFactor = Power2(1.0/mV);
          }
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
@@ -867,8 +867,8 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
          const auto mV = context.mass<VA>(vectorFieldIndicesIn);
          const auto mG = context.mass<GB>(goldstoneFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         const auto x = pow(mF/mV, 2);
-         const auto y = pow(mF/mG, 2);
+         const auto x = Power2(mF/mV);
+         const auto y = Power2(mF/mG);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
@@ -880,7 +880,7 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
          const std::complex<double> A1R = -1./mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionN(x,y) / 2.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionN(x,y) / 2.;
 
-         const std::complex<double> massFactor = pow(mV,-2);
+         const std::complex<double> massFactor = Power2(1.0/mV);
           
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
       }
@@ -953,8 +953,8 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
          const auto mG = context.mass<VB>(vectorFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
-         const auto x = pow(mF/mV, 2);
-         const auto y = pow(mF/mG, 2);
+         const auto x = Power2(mF/mV);
+         const auto y = Power2(mF/mG);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
@@ -966,7 +966,7 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const std::complex<double> A1R = 1./mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionN(x,y) / 2.;
          const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionN(x,y) / 2.;
 
-         const std::complex<double> massFactor = pow(mV,-2);
+         const std::complex<double> massFactor = Power2(1.0/mV);
           
          res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
       }
