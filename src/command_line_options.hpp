@@ -22,9 +22,11 @@
 #include <cstdlib>
 #include <iosfwd>
 #include <string>
-#include "array_view.hpp"
 
 namespace flexiblesusy {
+
+template <class T>
+class Dynamic_array_view;
 
 /**
  * @class Command_line_options

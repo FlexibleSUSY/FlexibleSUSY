@@ -512,13 +512,17 @@ TEST_SRC += \
 		$(DIR)/test_SM_tree_level_spectrum.cpp \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
-		$(DIR)/test_SM_mw_calculation.cpp \
+		$(DIR)/test_SM_mw_calculation.cpp
+endif
+
+ifeq ($(WITH_SM) $(ENABLE_META),yes yes)
+TEST_SRC += \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 
-ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
+ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC) $(ENABLE_META),yes yes yes)
 ifeq ($(WITH_SM),yes)
- TEST_SRC += \
+TEST_SRC += \
 		$(DIR)/test_SM_npointfunctions.cpp \
 		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
@@ -1212,10 +1216,17 @@ PV_DEP_EXE := \
 		$(DIR)/test_pv.x \
 		$(DIR)/test_pv_crosschecks.x
 
+PV_DEP_OBJ := $(patsubst %.x, %.o, $(PV_DEP_EXE))
+
+PV_DEP_DEP := $(patsubst %.x, %.d, $(PV_DEP_EXE))
+
 $(PV_DEP_EXE): %.x: %.o $(LIBPV)
 		@$(MSG)
 		$(Q)$(CXX) -o $@ $(call abspathx,$^) \
 		$(filter -%,$(LOOPFUNCLIBS)) $(BOOSTTESTLIBS) $(THREADLIBS) $(GSLLIBS) $(FLIBS) $(LIBPV)
+
+$(PV_DEP_OBJ) $(PV_DEP_DEP): CPPFLAGS += $(BOOSTFLAGS) $(EIGENFLAGS)
+
 endif
 ################################################################################
 

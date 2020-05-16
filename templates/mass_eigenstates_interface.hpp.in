@@ -30,13 +30,11 @@
 #ifndef @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 #define @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 
-#include <iosfwd>
+#include "@ModelName@_physical.hpp"
+
 #include <memory>
-#include <string>
 
 #include <Eigen/Core>
-
-#include "@ModelName@_physical.hpp"
 
 namespace flexiblesusy {
 

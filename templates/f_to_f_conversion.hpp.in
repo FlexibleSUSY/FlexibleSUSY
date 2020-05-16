@@ -26,7 +26,9 @@
 #ifndef @ModelName@_FToFConversion_H
 #define @ModelName@_FToFConversion_H
 
-#include "lowe.h"
+namespace softsusy {
+class QedQcd;
+}
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;

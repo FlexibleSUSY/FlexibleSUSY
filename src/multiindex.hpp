@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef H_FS_MULTIINDEX
-#define H_FS_MULTIINDEX
+#ifndef FS_MULTIINDEX_H
+#define FS_MULTIINDEX_H
 
 #include "find_if.hpp"
 
@@ -139,9 +139,9 @@ public:
       return copy;
    }
 
-   const data_type& operator*(void)const { return data; }
+   const data_type& operator*() const { return data; }
 
-   const data_type* operator->(void)const { return &data; }
+   const data_type* operator->() const { return &data; }
 
    bool operator==(const multiindex_impl& other) const
    {
@@ -182,9 +182,9 @@ public:
       return copy;
    }
 
-   const data_type& operator*(void)const { return data; }
+   const data_type& operator*() const { return data; }
 
-   const data_type* operator->(void)const { return &data; }
+   const data_type* operator->() const { return &data; }
 
    bool operator==(const multiindex_impl& other) const
    {
@@ -246,7 +246,7 @@ static decltype(boost::make_iterator_range(
    multiindex<
       typename meta::index_bounds<ObjectWithIndexBounds>::type::first,
       typename meta::index_bounds<ObjectWithIndexBounds>::type::second>::end()))
-index_range(void)
+index_range()
 {
    return boost::make_iterator_range(
       multiindex<

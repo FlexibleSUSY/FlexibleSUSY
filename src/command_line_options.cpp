@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "command_line_options.hpp"
+#include "array_view.hpp"
 #include "build_info.hpp"
 #include "logger.hpp"
 
@@ -154,7 +155,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                double& parameter)
 {
    if (starts_with(str, prefix)) {
-      parameter = stod(str.substr(prefix.length()));
+      parameter = std::stod(str.substr(prefix.length()));
       return true;
    }
    return false;
@@ -175,7 +176,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                int& parameter)
 {
    if (starts_with(str, prefix)) {
-      parameter = stoi(str.substr(prefix.length()));
+      parameter = std::stoi(str.substr(prefix.length()));
       return true;
    }
    return false;
