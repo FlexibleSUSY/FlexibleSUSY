@@ -32,6 +32,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/problems.cpp \
 		$(DIR)/rkf_integrator.cpp \
 		$(DIR)/scan.cpp \
+		$(DIR)/slha_format.cpp \
 		$(DIR)/slha_io.cpp \
 		$(DIR)/spectrum_generator_problems.cpp \
 		$(DIR)/spectrum_generator_settings.cpp \
@@ -104,6 +105,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/sfermions.hpp \
 		$(DIR)/single_scale_constraint.hpp \
 		$(DIR)/single_scale_matching.hpp \
+		$(DIR)/slha_format.hpp \
 		$(DIR)/slha_io.hpp \
 		$(DIR)/spectrum_generator_problems.hpp \
 		$(DIR)/spectrum_generator_settings.hpp \
