@@ -577,11 +577,16 @@ Currently the following set is available for usage:
 ======= =========== =========== ============== =================================
  index   name        library     thread-safety   commentary
 ======= =========== =========== ============== =================================
-  0      softsusy    softsusy    yes            default value; always enabled
+  0      softsusy    SOFTSUSY_   yes            default value; always enabled
   1      collier     COLLIER_    no             optional; see **specific** below
   2      looptools   LoopTools_  no             optional; see **specific** below
-  3      fflite      fflite      yes            optional; build in; see **specific** below
+  3      fflite      FFlite      yes            optional; build in; see **specific** below
 ======= =========== =========== ============== =================================
+
+If the entry ``FlexibleSUSY[31]`` is absent, the loop functions from
+SOFTSUSY are used.  If the entry ``FlexibleSUSY[31]`` is set to
+``-1``, FlexibleSUSY uses the value from the environment variable
+``FLEXIBLESUSY_LOOP_LIBRARY``.
 
 **COLLIER specific**:
 To use the COLLIER_ library and header files from a specific directory configure via::
@@ -674,6 +679,7 @@ References
 .. _`FlexibleSUSY model file`: model_file.rst
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _COLLIER: https://collier.hepforge.org/
+.. _SOFTSUSY: http://softsusy.hepforge.org
 
 .. [1708.05720] `Eur.Phys.J. C77 (2017) no.12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1005.5709] `JHEP 1008 (2010) 104 <https://inspirehep.net/record/856612>`_ [`arxiv:1005.5709 <https://arxiv.org/abs/1005.5709>`_]

@@ -40,6 +40,207 @@ int round(double a) noexcept
    return static_cast<int>(a >= 0. ? a + 0.5 : a - 0.5);
 }
 
+/**
+ * fill Modsel struct from given key - value pair
+ *
+ * @param modsel MODSEL data
+ * @param key SLHA key in MODSEL
+ * @param value value corresponding to key
+ */
+void process_modsel_tuple(SLHA_io::Modsel& modsel, int key, double value)
+{
+   switch (key) {
+   case 1: // SUSY breaking model (defined in FlexibleSUSY model file)
+   case 3: // SUSY model (defined in SARAH model file)
+   case 4: // R-parity violation (defined in SARAH model file)
+   case 5: // CP-parity violation (defined in SARAH model file)
+   case 11:
+   case 21:
+      WARNING("Key " << key << " in Block MODSEL currently not supported");
+      break;
+   case 6: // Flavour violation (defined in SARAH model file)
+   {
+      const int ivalue = flexiblesusy::round(value);
+
+      if (ivalue < 0 || ivalue > 3) {
+         WARNING("Value " << ivalue << " in MODSEL block entry 6 out of range");
+      } else {
+         const auto uvalue = static_cast<unsigned>(ivalue);
+         modsel.quark_flavour_violated = ((uvalue & 0x1u) != 0);
+         modsel.lepton_flavour_violated = ((uvalue & 0x2u) != 0);
+      }
+   }
+      break;
+   case 12:
+      modsel.parameter_output_scale = value;
+      break;
+   default:
+      WARNING("Unrecognized entry in block MODSEL: " << key);
+      break;
+   }
+}
+
+/**
+ * fill qedqcd from given key - value pair
+ *
+ * @param qedqcd low-energy data set
+ * @param key SLHA key in SMINPUTS
+ * @param value value corresponding to key
+ */
+void process_sminputs_tuple(softsusy::QedQcd& qedqcd, int key, double value)
+{
+   switch (key) {
+   case 1:
+      qedqcd.setAlpha(softsusy::ALPHA, 1.0 / value);
+      qedqcd.setAlphaEmInput(1.0 / value);
+      break;
+   case 2:
+      qedqcd.setFermiConstant(value);
+      break;
+   case 3:
+      qedqcd.setAlpha(softsusy::ALPHAS, value);
+      qedqcd.setAlphaSInput(value);
+      break;
+   case 4:
+      qedqcd.setPoleMZ(value);
+      qedqcd.set_scale(value);
+      break;
+   case 5:
+      qedqcd.setMass(softsusy::mBottom, value);
+      qedqcd.setMbMb(value);
+      break;
+   case 6:
+      qedqcd.setPoleMt(value);
+      break;
+   case 7:
+      qedqcd.setMass(softsusy::mTau, value);
+      qedqcd.setPoleMtau(value);
+      break;
+   case 8:
+      qedqcd.setNeutrinoPoleMass(3, value);
+      break;
+   case 9:
+      qedqcd.setPoleMW(value);
+      break;
+   case 11:
+      qedqcd.setMass(softsusy::mElectron, value);
+      qedqcd.setPoleMel(value);
+      break;
+   case 12:
+      qedqcd.setNeutrinoPoleMass(1, value);
+      break;
+   case 13:
+      qedqcd.setMass(softsusy::mMuon, value);
+      qedqcd.setPoleMmuon(value);
+      break;
+   case 14:
+      qedqcd.setNeutrinoPoleMass(2, value);
+      break;
+   case 21:
+      qedqcd.setMass(softsusy::mDown, value);
+      qedqcd.setMd2GeV(value);
+      break;
+   case 22:
+      qedqcd.setMass(softsusy::mUp, value);
+      qedqcd.setMu2GeV(value);
+      break;
+   case 23:
+      qedqcd.setMass(softsusy::mStrange, value);
+      qedqcd.setMs2GeV(value);
+      break;
+   case 24:
+      qedqcd.setMass(softsusy::mCharm, value);
+      qedqcd.setMcMc(value);
+      break;
+   default:
+      WARNING("Unrecognized entry in block SMINPUTS: " << key);
+      break;
+   }
+}
+
+void process_flexiblesusy_tuple(Spectrum_generator_settings& settings,
+                                int key, double value)
+{
+   if (0 <= key && key < static_cast<int>(Spectrum_generator_settings::NUMBER_OF_OPTIONS)) {
+      settings.set(static_cast<Spectrum_generator_settings::Settings>(key), value);
+   } else {
+      WARNING("Unrecognized entry in block FlexibleSUSY: " << key);
+   }
+}
+
+void process_flexiblesusyinput_tuple(
+   Physical_input& input,
+   int key, double value)
+{
+   if (0 <= key && key < static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS)) {
+      input.set(static_cast<Physical_input::Input>(key), value);
+   } else {
+      WARNING("Unrecognized entry in block FlexibleSUSYInput: " << key);
+   }
+}
+
+/**
+ * fill CKM_wolfenstein from given key - value pair
+ *
+ * @param ckm_wolfenstein Wolfenstein parameters
+ * @param key SLHA key in SMINPUTS
+ * @param value value corresponding to key
+ */
+void process_vckmin_tuple(SLHA_io::CKM_wolfenstein& ckm_wolfenstein, int key, double value)
+{
+   switch (key) {
+   case 1:
+      ckm_wolfenstein.lambdaW = value;
+      break;
+   case 2:
+      ckm_wolfenstein.aCkm = value;
+      break;
+   case 3:
+      ckm_wolfenstein.rhobar = value;
+      break;
+   case 4:
+      ckm_wolfenstein.etabar = value;
+      break;
+   default:
+      WARNING("Unrecognized entry in block VCKMIN: " << key);
+      break;
+   }
+}
+
+/**
+ * fill PMNS_parameters from given key - value pair
+ *
+ * @param pmns_parameters PMNS matrix parameters
+ * @param key SLHA key in SMINPUTS
+ * @param value value corresponding to key
+ */
+void process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double value)
+{
+   switch (key) {
+   case 1:
+      pmns_parameters.theta_12 = value;
+      break;
+   case 2:
+      pmns_parameters.theta_23 = value;
+      break;
+   case 3:
+      pmns_parameters.theta_13 = value;
+      break;
+   case 4:
+      pmns_parameters.delta = value;
+      break;
+   case 5:
+      pmns_parameters.alpha_1 = value;
+      break;
+   case 6:
+      pmns_parameters.alpha_2 = value;
+      break;
+   default:
+      WARNING("Unrecognized entry in block UPMNSIN: " << key);
+      break;
+   }
+}
+
 } // anonymous namespace
 
 void SLHA_io::clear()
@@ -55,7 +256,7 @@ std::string SLHA_io::block_head(const std::string& name, double scale)
    std::string result("Block " + name);
 
    if (!is_zero(scale, eps)) {
-      result += " Q= " + (FORMAT_SCALE(scale)).str();
+      result += " Q= " + FORMAT_SCALE(scale);
    }
 
    result += '\n';
@@ -353,7 +554,7 @@ void SLHA_io::set_block(const std::string& name, double value,
 {
    std::ostringstream ss;
    ss << block_head(name, scale);
-   ss << boost::format(mixing_matrix_formatter) % 1 % 1 % value % symbol;
+   ss << FORMAT_MIXING_MATRIX(1, 1, value, symbol);
 
    set_block(ss);
 }
@@ -438,207 +639,6 @@ void SLHA_io::write_to_stream(std::ostream& ostr) const
       ostr << data;
    } else {
       ERROR("cannot write SLHA file");
-   }
-}
-
-/**
- * fill Modsel struct from given key - value pair
- *
- * @param modsel MODSEL data
- * @param key SLHA key in MODSEL
- * @param value value corresponding to key
- */
-void SLHA_io::process_modsel_tuple(Modsel& modsel, int key, double value)
-{
-   switch (key) {
-   case 1: // SUSY breaking model (defined in FlexibleSUSY model file)
-   case 3: // SUSY model (defined in SARAH model file)
-   case 4: // R-parity violation (defined in SARAH model file)
-   case 5: // CP-parity violation (defined in SARAH model file)
-   case 11:
-   case 21:
-      WARNING("Key " << key << " in Block MODSEL currently not supported");
-      break;
-   case 6: // Flavour violation (defined in SARAH model file)
-   {
-      const int ivalue = flexiblesusy::round(value);
-
-      if (ivalue < 0 || ivalue > 3) {
-         WARNING("Value " << ivalue << " in MODSEL block entry 6 out of range");
-      } else {
-         const auto uvalue = static_cast<unsigned>(ivalue);
-         modsel.quark_flavour_violated = ((uvalue & 0x1u) != 0);
-         modsel.lepton_flavour_violated = ((uvalue & 0x2u) != 0);
-      }
-   }
-      break;
-   case 12:
-      modsel.parameter_output_scale = value;
-      break;
-   default:
-      WARNING("Unrecognized entry in block MODSEL: " << key);
-      break;
-   }
-}
-
-/**
- * fill qedqcd from given key - value pair
- *
- * @param qedqcd low-energy data set
- * @param key SLHA key in SMINPUTS
- * @param value value corresponding to key
- */
-void SLHA_io::process_sminputs_tuple(softsusy::QedQcd& qedqcd, int key, double value)
-{
-   switch (key) {
-   case 1:
-      qedqcd.setAlpha(softsusy::ALPHA, 1.0 / value);
-      qedqcd.setAlphaEmInput(1.0 / value);
-      break;
-   case 2:
-      qedqcd.setFermiConstant(value);
-      break;
-   case 3:
-      qedqcd.setAlpha(softsusy::ALPHAS, value);
-      qedqcd.setAlphaSInput(value);
-      break;
-   case 4:
-      qedqcd.setPoleMZ(value);
-      qedqcd.set_scale(value);
-      break;
-   case 5:
-      qedqcd.setMass(softsusy::mBottom, value);
-      qedqcd.setMbMb(value);
-      break;
-   case 6:
-      qedqcd.setPoleMt(value);
-      break;
-   case 7:
-      qedqcd.setMass(softsusy::mTau, value);
-      qedqcd.setPoleMtau(value);
-      break;
-   case 8:
-      qedqcd.setNeutrinoPoleMass(3, value);
-      break;
-   case 9:
-      qedqcd.setPoleMW(value);
-      break;
-   case 11:
-      qedqcd.setMass(softsusy::mElectron, value);
-      qedqcd.setPoleMel(value);
-      break;
-   case 12:
-      qedqcd.setNeutrinoPoleMass(1, value);
-      break;
-   case 13:
-      qedqcd.setMass(softsusy::mMuon, value);
-      qedqcd.setPoleMmuon(value);
-      break;
-   case 14:
-      qedqcd.setNeutrinoPoleMass(2, value);
-      break;
-   case 21:
-      qedqcd.setMass(softsusy::mDown, value);
-      qedqcd.setMd2GeV(value);
-      break;
-   case 22:
-      qedqcd.setMass(softsusy::mUp, value);
-      qedqcd.setMu2GeV(value);
-      break;
-   case 23:
-      qedqcd.setMass(softsusy::mStrange, value);
-      qedqcd.setMs2GeV(value);
-      break;
-   case 24:
-      qedqcd.setMass(softsusy::mCharm, value);
-      qedqcd.setMcMc(value);
-      break;
-   default:
-      WARNING("Unrecognized entry in block SMINPUTS: " << key);
-      break;
-   }
-}
-
-void SLHA_io::process_flexiblesusy_tuple(Spectrum_generator_settings& settings,
-                                         int key, double value)
-{
-   if (0 <= key && key < static_cast<int>(Spectrum_generator_settings::NUMBER_OF_OPTIONS)) {
-      settings.set(static_cast<Spectrum_generator_settings::Settings>(key), value);
-   } else {
-      WARNING("Unrecognized entry in block FlexibleSUSY: " << key);
-   }
-}
-
-void SLHA_io::process_flexiblesusyinput_tuple(
-   Physical_input& input,
-   int key, double value)
-{
-   if (0 <= key && key < static_cast<int>(Physical_input::NUMBER_OF_INPUT_PARAMETERS)) {
-      input.set(static_cast<Physical_input::Input>(key), value);
-   } else {
-      WARNING("Unrecognized entry in block FlexibleSUSYInput: " << key);
-   }
-}
-
-/**
- * fill CKM_wolfenstein from given key - value pair
- *
- * @param ckm_wolfenstein Wolfenstein parameters
- * @param key SLHA key in SMINPUTS
- * @param value value corresponding to key
- */
-void SLHA_io::process_vckmin_tuple(CKM_wolfenstein& ckm_wolfenstein, int key, double value)
-{
-   switch (key) {
-   case 1:
-      ckm_wolfenstein.lambdaW = value;
-      break;
-   case 2:
-      ckm_wolfenstein.aCkm = value;
-      break;
-   case 3:
-      ckm_wolfenstein.rhobar = value;
-      break;
-   case 4:
-      ckm_wolfenstein.etabar = value;
-      break;
-   default:
-      WARNING("Unrecognized entry in block VCKMIN: " << key);
-      break;
-   }
-}
-
-/**
- * fill PMNS_parameters from given key - value pair
- *
- * @param pmns_parameters PMNS matrix parameters
- * @param key SLHA key in SMINPUTS
- * @param value value corresponding to key
- */
-void SLHA_io::process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double value)
-{
-   switch (key) {
-   case 1:
-      pmns_parameters.theta_12 = value;
-      break;
-   case 2:
-      pmns_parameters.theta_23 = value;
-      break;
-   case 3:
-      pmns_parameters.theta_13 = value;
-      break;
-   case 4:
-      pmns_parameters.delta = value;
-      break;
-   case 5:
-      pmns_parameters.alpha_1 = value;
-      break;
-   case 6:
-      pmns_parameters.alpha_2 = value;
-      break;
-   default:
-      WARNING("Unrecognized entry in block UPMNSIN: " << key);
-      break;
    }
 }
 

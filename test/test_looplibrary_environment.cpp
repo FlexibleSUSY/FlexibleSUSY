@@ -16,15 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "Set looplibrary via environment"
 
 #include <boost/test/unit_test.hpp>
 #include "loop_libraries/loop_library.hpp"
 
-namespace flexiblesusy
+BOOST_AUTO_TEST_CASE(set_library)
 {
+   using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE(set_library) {
    Loop_library::set(-1);
    bool predicted_behavior = true;
 
@@ -48,5 +49,3 @@ BOOST_AUTO_TEST_CASE(set_library) {
 
    BOOST_CHECK(predicted_behavior);
 }
-
-} // flexiblesusy

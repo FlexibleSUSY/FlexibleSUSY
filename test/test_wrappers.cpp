@@ -20,7 +20,6 @@
 #define BOOST_TEST_MODULE test_wrappers
 
 #include <complex>
-#include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 #include "wrappers.hpp"
 #include "stopwatch.hpp"
@@ -747,10 +746,11 @@ std::string format_line(int exponent, double t1, double t2)
 {
    const double diff = MaxRelDiff(t1, t2) * 100;
 
-   auto fmt = boost::format("%|8| | %|23.10| | %|14.10| | %|+8.3|%%")
-              % exponent % t1 % t2 % diff;
+   char buf[100];
+   std::snprintf(buf, 100, "%8d | %23.6f | %14.6f | %+8.1f%%",
+                 exponent, t1, t2, diff);
 
-   return fmt.str();
+   return std::string(buf);
 }
 
 BOOST_AUTO_TEST_CASE(test_Power_benchmark)

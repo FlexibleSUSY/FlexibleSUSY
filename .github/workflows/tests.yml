@@ -101,6 +101,18 @@ jobs:
       - name: Make and run tests
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
 
+      - name: Testing pack-SM-src
+        run: |
+          docker exec builder bash -c 'cd FlexibleSUSY && make pack-SM-src'
+          docker exec builder bash -c 'cd FlexibleSUSY && rm -rf models/SM'
+          docker exec builder bash -c 'cd FlexibleSUSY && tar -xf SM.tar.gz'
+          docker exec builder bash -c "cd FlexibleSUSY && if [ \"$LOOPLIBRARY\" = \"looptools\" ]; then export FL=\"--enable-looptools --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include\"; fi && ./configure --with-cxx=$CXXCOMPILER --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math --with-optional-modules=test --with-models=SM --disable-meta \$FL"
+          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
+          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          LOOPLIBRARY: ${{ matrix.LOOPLIBRARY }}
+
       - name: (Optional) Save logs in case of an error
         uses: actions/upload-artifact@v2
         if: failure()
