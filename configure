@@ -1986,8 +1986,86 @@ check_linking() {
 }
 
 #_____________________________________________________________________
+check_gm2calc_version() {
+    checking_msg "GM2Calc version"
+
+    try_compile_run_cpp_program "#include <iostream>
+#include \"gm2calc/gm2_version.h\"
+int main() {
+   std::cout << GM2CALC_VERSION << '\n';
+   return 0;
+}" "$CXX" "${GM2CALCFLAGS}" && [ $cpp_exit = 0 ] || {
+        result "unknown"
+        message "Warning: could not determine GM2Calc version because"
+        message "   compilation or execution of the GM2Calc test program failed."
+	return 1
+    }
+
+    local GM2CALC_VERSION="$cpp_output"
+
+    result "ok (version ${GM2CALC_VERSION})"
+    logmsg "   GM2Calc version found: ${GM2CALC_VERSION}"
+
+    version_at_least "$GM2CALC_VERSION" "1.7.0" || {
+        message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+        message "   Please consider upgrading to version 1.7.0 (or higher)."
+    }
+}
+
+#_____________________________________________________________________
+check_gm2calc_incl() {
+    check_header "gm2calc/gm2_version.h" "$gm2calc_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: GM2Calc's gm2_version.h must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-incdir= option to specify the"
+            message "   location of version.hpp and the other headers."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        # assume that the compiler will look in the default paths
+        if [ -n "$gm2calc_inc_dir" ]; then
+            GM2CALCFLAGS="-I$gm2calc_inc_dir"
+        fi
+
+        check_gm2calc_version
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_gm2calc_libs() {
+    check_library "libgm2calc" "$gm2calc_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: The GM2Calc library must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-libdir= option to specify the"
+            message "   location of the GM2Calc library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local GM2CALCLIBS_="-lgm2calc"
+        if [ -z "$gm2calc_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            GM2CALCLIBS="$GM2CALCLIBS_"
+        else
+            GM2CALCLIBS="-L$gm2calc_lib_dir -Wl,-rpath,$gm2calc_lib_dir $GM2CALCLIBS_"
+        fi
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
 check_gm2calc() {
     if test "x$enable_gm2calc" != "xno" ; then
+        [ -z "$gm2calc_inc_dir" ] && \
+        [ -z "$gm2calc_lib_dir" ] && \
         type pkg-config > /dev/null && \
         [ -f GM2Calc.pc ] && \
         {
@@ -1997,14 +2075,18 @@ check_gm2calc() {
             GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config GM2Calc --modversion)
             enable_gm2calc=yes
             message "ok (version ${GM2CALC_VERSION})"
-
             version_at_least "$GM2CALC_VERSION" "1.7.0" || {
                 message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
                 message "   Please consider upgrading to version 1.7.0 (or higher)."
             }
-
             return
         }
+
+        if check_gm2calc_incl && check_gm2calc_libs ; then
+            enable_gm2calc=yes
+        else
+            enable_gm2calc=no
+        fi
     fi
 }
 
@@ -3391,6 +3473,8 @@ Package directories, compilation settings and model selection
   --with-fflags=            Fortran compiler flags (default: $FFLAGS)
   --with-flibs=             Fortran libraries (default: $FLIBS)
                             If empty, FLIBS will be determined automatically.
+  --with-gm2calc-libdir=    Path to search for GM2Calc library
+  --with-gm2calc-incdir=    Path to search for GM2Calc header
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
@@ -3513,6 +3597,8 @@ if test $# -gt 0 ; then
             --with-fc=*)             FC=$optarg ;;
             --with-fflags=*)         FFLAGS=$optarg ;;
             --with-flibs=*)          FLIBS=$optarg ;;
+            --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
+            --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
