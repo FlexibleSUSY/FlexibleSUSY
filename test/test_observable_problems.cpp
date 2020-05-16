@@ -65,12 +65,20 @@ void test_slha()
 }
 
 
+void test_ostream()
+{
+   flexiblesusy::Observable_problems op = setup_errors();
+   std::cout << op;
+}
+
+
 int main()
 {
    test_empty();
    test_error();
    test_print();
    test_slha();
+   test_ostream();
 
    return errors;
 }

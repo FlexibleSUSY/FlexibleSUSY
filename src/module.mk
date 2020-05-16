@@ -27,6 +27,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/observables.cpp \
 		$(DIR)/observable_problems.cpp \
+		$(DIR)/observable_problems_format.cpp \
 		$(DIR)/physical_input.cpp \
 		$(DIR)/pmns.cpp \
 		$(DIR)/problems.cpp \

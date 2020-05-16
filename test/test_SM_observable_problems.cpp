@@ -11,17 +11,6 @@
 #include "SM_input_parameters.hpp"
 #include "SM_observables.hpp"
 
-#include <sstream>
-#include <iterator>
-
-
-std::string to_string(const flexiblesusy::Observable_problems& op)
-{
-   std::ostringstream oss;
-   flexiblesusy::format_problems_and_warnings(op, std::ostream_iterator<std::string>(oss));
-   return oss.str();
-}
-
 
 BOOST_AUTO_TEST_CASE( test_non_perturbative_running )
 {
@@ -37,5 +26,5 @@ BOOST_AUTO_TEST_CASE( test_non_perturbative_running )
    const auto op = obs.problems;
 
    BOOST_CHECK(op.have_problem());
-   BOOST_TEST_MESSAGE(to_string(op));
+   BOOST_TEST_MESSAGE(op);
 }

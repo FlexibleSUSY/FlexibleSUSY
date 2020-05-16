@@ -22,6 +22,8 @@
 #include "observables.hpp"
 #include "observable_problems.hpp"
 #include "slha_format.hpp"
+
+#include <iosfwd>
 #include <string>
 
 namespace flexiblesusy {
@@ -118,6 +120,9 @@ void format_problems_and_warnings(const Observable_problems& op, OutputIterator 
       copy_problem_strings(op.a_muon, slha_oi);
    }
 }
+
+/// write observable problems to stream
+std::ostream& operator<<(std::ostream&, const Observable_problems&);
 
 } // namespace flexiblesusy
 
