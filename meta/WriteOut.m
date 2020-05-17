@@ -1321,7 +1321,7 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
    std::ostringstream decay;
 
    decay << \"DECAY \"
-         << format_total_width(pdg, width, name + \" decays\");
+         << FORMAT_TOTAL_WIDTH(pdg, width, name + \" decays\");
 
    for (const auto& channel : decays_list) {
       auto partial_width = channel.second.get_width();
