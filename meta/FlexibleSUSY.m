@@ -2049,7 +2049,6 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@numberOfDecayParticles@" -> ToString[numberOfDecayParticles],
                             "@create_SM_particle_usings@" -> smParticleAliases,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
-                            "@CPViolationInHiggsSector@" -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -2937,8 +2936,8 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@drBarBlockNames@"                -> WrapLines[drBarBlockNames],
                             "@getPDGCodeFromParticleEnumNoIndex@" -> IndentText[getPDGCodeFromParticleEnumNoIndex],
                             "@getPDGCodeFromParticleEnumIndex@" -> IndentText[getPDGCodeFromParticleEnumIndex],
-                            "@CPViolationInHiggsSector@" -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             "@setParticleNameFromPDG@" -> IndentText[setParticleNameFromPDG],
+                            "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];

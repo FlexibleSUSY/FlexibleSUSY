@@ -19,6 +19,8 @@
 #ifndef SLHA_FORMAT_H
 #define SLHA_FORMAT_H
 
+#include <string>
+
 namespace flexiblesusy {
 
 /// SLHA line formatter for the MASS block entries

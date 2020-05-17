@@ -258,10 +258,8 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
-   constexpr bool CPViolationInHiggsSector {@CPViolationInHiggsSector@};
-
    // higher order corrections to CP-even Higgs
-   if (!CPViolationInHiggsSector) {
+   if (!info::is_CP_violating_Higgs_sector) {
       // higher order QCD corrections
 
       // number of active light flavours

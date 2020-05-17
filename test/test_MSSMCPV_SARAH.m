@@ -23,14 +23,7 @@
 AppendTo[$Path, FileNameJoin[{Directory[], "meta"}]];
 
 Needs["SARAH`"];
-Needs["FlexibleSUSY`", "FlexibleSUSY.m"];
 Needs["TestSuite`", "TestSuite.m"];
-
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{Directory[], "Output"}];
-SARAH`SARAH[InputDirectories] = {
-    FileNameJoin[{Directory[], "sarah"}],
-    ToFileName[{$sarahDir, "Models"}]
-};
 
 Start["MSSM", "CPV"];
 
