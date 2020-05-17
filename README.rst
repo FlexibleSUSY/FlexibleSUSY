@@ -100,11 +100,8 @@ Optional:
 Installation of required/optional libraries
 -------------------------------------------
 
-The required libraries Boost_, `Eigen 3`_, GM2Calc_, LoopTools_,
-Himalaya_ and TSIL_ can be installed using the Conan_ package manager.
-If not already installed, Conan can be installed with pip::
-The required and optional libraries Boost_, COLLIER_, GM2Calc_, `Eigen
-3`_, LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
+The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
+LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
 package manager.  If not already installed, Conan can be installed
 with pip::
 
