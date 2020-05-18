@@ -186,7 +186,6 @@ TEST_SRC += \
 		$(DIR)/test_loopfunctions.cpp \
 		$(DIR)/test_sfermions.cpp \
 		$(DIR)/test_CMSSM_beta_function_benchmark.cpp \
-		$(DIR)/test_CMSSM_database.cpp \
 		$(DIR)/test_CMSSM_high_scale_constraint.cpp \
 		$(DIR)/test_CMSSM_higgs_iteration.cpp \
 		$(DIR)/test_CMSSM_initial_guesser.cpp \
@@ -518,7 +517,6 @@ endif
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
-		$(DIR)/test_SM_mass_eigenstates_decoupling_scheme.cpp \
 		$(DIR)/test_SM_effective_couplings.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
@@ -669,11 +667,6 @@ TEST_SH += \
 		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
 endif
 
-ifeq ($(WITH_MSSMEFTHiggs) $(ENABLE_LIBRARYLINK),yes yes)
-TEST_SH += \
-		$(DIR)/test_MSSMEFTHiggs_librarylink.sh
-endif
-
 ifeq ($(WITH_MSSMEFTHiggs) $(WITH_MSSMNoFVEFTHiggs),yes yes)
 TEST_SH += \
 		$(DIR)/test_MSSMNoFVEFTHiggs.sh
@@ -746,7 +739,6 @@ ifeq ($(WITH_CMSSM),yes)
 TEST_META += \
 		$(DIR)/test_CMSSM_3loop_beta.m
 endif
-
 ifeq ($(WITH_CMSSM) $(ENABLE_LIBRARYLINK),yes yes)
 TEST_META += \
 		$(DIR)/test_CMSSM_librarylink.m \
@@ -1034,19 +1026,9 @@ $(DIR)/test_MRSSM2_FlexibleDecays.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
-$(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
-
-$(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
-
-$(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
-
 $(DIR)/test_CMSSM_mass_eigenstates_decoupling_scheme.x: $(LIBCMSSM)
 
 $(DIR)/test_MRSSM2_mw_calculation.x: $(LIBMRSSM2)
-
-$(DIR)/test_MRSSM2CKM_b_to_s_gamma.x: $(LIBMRSSM2CKM)
-
-$(DIR)/test_CMSSMCKM_b_to_s_gamma_internal_spectrum.x: $(LIBCMSSMCKM)
 
 $(DIR)/test_MRSSM2_l_to_lgamma.x: $(LIBMRSSM2)
 
