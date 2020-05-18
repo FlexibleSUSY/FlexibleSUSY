@@ -59,7 +59,7 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
-   31   2                    # 0(Softsusy),1(Collier),2(Looptools),3(fflite)
+   31   -1                   # 0(Softsusy),1(Collier),2(Looptools),3(fflite)
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole
@@ -707,9 +707,9 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00020375074486812735, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00020375074486812735, 4e-11);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 8.5869265018085558e-06, 9e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 8.5869265018085558e-06, 3e-11);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 9.6974720629860577e-06, 4e-11);
 

@@ -55,7 +55,7 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
-   31   2                    # 0(Softsusy),1(Collier),2(Looptools),3(fflite)
+   31   -1                   # 0(Softsusy),1(Collier),2(Looptools),3(fflite)
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166378700e-05      # G_Fermi
@@ -649,13 +649,13 @@ Block MSOFT Q= 8.61574711E+02
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0016298093732297074, 6e-14);
+                              0.0016298093732297074, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
-                              0.0002600448772469762, 6e-14);
+                              0.0002600448772469762, 3e-13);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00022767000236269188, 8e-13);
+                              0.00022767000236269188, 2e-12);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m, 0),
                               1.6116438957094875e-05, 2e-12);
@@ -663,10 +663,10 @@ Block MSOFT Q= 8.61574711E+02
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 3e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 7e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 4e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 4e-12);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 1e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 2e-11);
 
 }

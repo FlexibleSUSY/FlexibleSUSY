@@ -22,7 +22,7 @@ using namespace flexiblesusy;
 BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
 {
 
-   Loop_library::set(2);
+   Loop_library::set(-1);
 
    SM_input_parameters input;
    input.LambdaIN = 0.285;
@@ -68,11 +68,11 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00038065195151794183, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00038065195151794183, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.1612701951517063e-06, 2e-14);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.1612701951517063e-06, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -98,9 +98,9 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VGVG(&m), 0.00019973935357968308, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VGVG(&m), 0.00019973935357968308, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 1.1056906116442182e-05, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.1612701951517063e-06, 2e-14);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.1612701951517063e-06, 2e-13);
 }
