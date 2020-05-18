@@ -42,7 +42,7 @@ namespace flexiblesusy {
 // Constants ///////////////////////////////////////////////////////////
 
 static constexpr double Pi             = 3.141592653589793;
-static constexpr double oneOver16Pi = 1. / (16. * Pi);
+static constexpr double oneOver16Pi    = 1./(16.*Pi);
 static constexpr double oneOver16PiSqr = 6.332573977646110963e-03;
 static constexpr double oneLoop        = 6.332573977646110963e-03;
 static constexpr double twoLoop        = 4.010149318236068752e-05;

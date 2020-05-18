@@ -10,7 +10,6 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
-		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/decay_table.hpp.in \
 		$(DIR)/decay_table.cpp.in \
 		$(DIR)/decays.hpp.in \
@@ -23,8 +22,6 @@ BASE_TEMPLATES := \
 		$(DIR)/FFV_form_factors.cpp.in \
 		$(DIR)/l_to_lgamma.hpp.in \
 		$(DIR)/l_to_lgamma.cpp.in \
-		$(DIR)/f_to_f_conversion.hpp.in \
-		$(DIR)/f_to_f_conversion.cpp.in \
 		$(DIR)/b_to_s_gamma.cpp.in \
 		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \
@@ -79,9 +76,7 @@ BASE_TEMPLATES := \
 
 MODULE_MK_TEMPLATES := \
 		$(DIR)/FlexibleEFTHiggs.mk.in \
-		$(DIR)/FlexibleDecays.mk.in \
-		$(DIR)/semi_analytic.mk.in \
-		$(DIR)/two_scale.mk.in
+		$(DIR)/FlexibleDecays.mk.in
 
 TWO_SCALE_TEMPLATES := \
 		$(DIR)/standard_model_two_scale_high_scale_initial_guesser.cpp.in \
