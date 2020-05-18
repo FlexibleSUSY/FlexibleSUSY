@@ -30,6 +30,7 @@ namespace flexiblesusy {
 
 namespace observable_problems {
 
+/// output iterator adaptor for SLHA output
 template <class OutputIterator>
 class SLHA_output_iterator_adaptor {
 public:
@@ -47,9 +48,9 @@ public:
    void operator++(int) { oi++; }
 
 private:
-   OutputIterator& oi;
-   int obs_idx{-1}; ///< 1st index, observable index
-   int flag{-1};    ///< 2nd index, problem type (problem or warning)
+   OutputIterator& oi; ///< output iterator to adapt
+   int obs_idx{-1};    ///< 1st index, observable index
+   int flag{-1};       ///< 2nd index, problem type (problem or warning)
 };
 
 } // namespace observable_problems
@@ -63,16 +64,12 @@ void slha_format_problems_and_warnings(const Observable_problems& op, OutputIter
    using SLHA_oi = observable_problems::SLHA_output_iterator_adaptor<OutputIterator>;
 
    {
-      SLHA_oi slha_oi(oi,
-                      0,
-                      problem_flag);
+      SLHA_oi slha_oi(oi, 0, problem_flag);
       copy_problem_strings(op.general, slha_oi);
    }
 
    {
-      SLHA_oi slha_oi(oi,
-                      observables::a_muon + 1,
-                      problem_flag);
+      SLHA_oi slha_oi(oi, observables::a_muon + 1, problem_flag);
       copy_problem_strings(op.a_muon, slha_oi);
    }
 }

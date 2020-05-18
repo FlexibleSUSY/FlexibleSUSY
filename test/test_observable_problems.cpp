@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
+
 int errors = 0;
+
 
 #define CHECK(cond) do {                                                \
       if (!(cond)) {                                                    \
@@ -76,11 +78,25 @@ void test_ostream()
 
 int main()
 {
+   std::cout << "----- test empty struct ----------------------\n";
    test_empty();
+   std::cout << "----- test problems --------------------------\n";
    test_error();
+   std::cout << "----- test ostream_iterator ------------------\n";
    test_print();
+   std::cout << "----- test SLHA output -----------------------\n";
    test_slha();
+   std::cout << "----- test ostream output --------------------\n";
    test_ostream();
+
+   std::cout << '\n';
+   std::cout << "===== Summary ================================\n";
+   if (errors == 0) {
+      std::cout << "All tests PASSED\n";
+   } else {
+      std::cout << "Failed tests: " << errors << '\n';
+   }
+   std::cout << "==============================================\n";
 
    return errors;
 }

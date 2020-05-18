@@ -31,7 +31,7 @@ public:
    bool have_problem() const;         ///< problems which yield invalid spectrum
    bool have_warning() const;         ///< warnings
    unsigned number_of_problems() const; ///< returns number of problems
-   unsigned number_of_warnings() const; ///< returns number of problems
+   unsigned number_of_warnings() const; ///< returns number of warnings
    std::vector<std::string> get_problem_strings() const;
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string() const;

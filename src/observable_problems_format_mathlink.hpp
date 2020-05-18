@@ -23,12 +23,12 @@
 #include "observables.hpp"
 #include "observable_problems.hpp"
 
-#include <string>
-
 namespace flexiblesusy {
 
 namespace observable_problems {
 
+
+/// format general observable problems to MathLink output
 void mathlink_format_problems(MLINK link, const Problem_general& problems)
 {
    MLPutRule(link, "general");
@@ -41,7 +41,7 @@ void mathlink_format_problems(MLINK link, const Problem_general& problems)
 }
 
 
-
+/// format a_muon problems to MathLink output
 void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
 {
    MLPutRule(link, observables::observable_names[observables::a_muon]);
@@ -51,9 +51,11 @@ void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
       MLPutRuleTo(link, "True", "NonPerturbative");
 }
 
+
 } // namespace observable_problems
 
 
+/// format observable problems to MathLink output
 void mathlink_format_problems(MLINK link, const Observable_problems& op)
 {
    if (op.have_problem()) {
@@ -64,6 +66,7 @@ void mathlink_format_problems(MLINK link, const Observable_problems& op)
       MLPutFunction(link, "List", 0);
    }
 }
+
 
 } // namespace flexiblesusy
 

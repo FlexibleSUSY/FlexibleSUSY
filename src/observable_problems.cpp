@@ -37,15 +37,8 @@ bool Problem_general::have_problem() const
 unsigned Problem_general::number_of_problems() const
 {
    unsigned count = 0;
-
-   if (have_non_perturbative_running()) {
-      count++;
-   }
-
-   if (have_thrown()) {
-      count++;
-   }
-
+   if (have_non_perturbative_running()) count++;
+   if (have_thrown()) count++;
    return count;
 }
 
@@ -96,11 +89,7 @@ bool Problem_a_muon::have_problem() const
 unsigned Problem_a_muon::number_of_problems() const
 {
    unsigned count = 0;
-
-   if (have_non_perturbative_running()) {
-      count++;
-   }
-
+   if (have_non_perturbative_running()) count++;
    return count;
 }
 
