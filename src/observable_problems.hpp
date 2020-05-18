@@ -31,7 +31,7 @@ public:
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
    /// returns number of problems
-   unsigned size() const;
+   unsigned number_of_problems() const;
 
    void flag_non_perturbative_running(double);
    bool have_non_perturbative_running() const;
@@ -55,7 +55,7 @@ public:
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
    /// returns number of problems
-   unsigned size() const;
+   unsigned number_of_problems() const;
 
    void flag_non_perturbative_running(double);
    bool have_non_perturbative_running() const;
@@ -74,7 +74,7 @@ public:
    /// returns true if there is a problem, false otherwise
    bool have_problem() const;
    /// returns number of problems
-   unsigned size() const;
+   unsigned number_of_problems() const;
 
    /// general problems
    observable_problems::Problem_general general{};

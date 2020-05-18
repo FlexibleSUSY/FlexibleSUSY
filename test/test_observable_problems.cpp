@@ -39,7 +39,7 @@ void test_empty()
 {
    flexiblesusy::Observable_problems op;
    CHECK(!op.have_problem());
-   CHECK(op.size() == 0);
+   CHECK(op.number_of_problems() == 0);
    CHECK(count_lines(op) == 0);
 }
 
@@ -48,7 +48,7 @@ void test_error()
 {
    flexiblesusy::Observable_problems op = setup_errors();
    CHECK(op.have_problem());
-   CHECK(op.size() == 3);
+   CHECK(op.number_of_problems() == 3);
    CHECK(count_lines(op) == 3);
 }
 

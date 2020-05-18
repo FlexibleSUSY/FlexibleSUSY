@@ -31,10 +31,10 @@ void Problem_general::clear()
 
 bool Problem_general::have_problem() const
 {
-   return size() > 0;
+   return number_of_problems() > 0;
 }
 
-unsigned Problem_general::size() const
+unsigned Problem_general::number_of_problems() const
 {
    unsigned count = 0;
 
@@ -90,10 +90,10 @@ void Problem_a_muon::clear()
 
 bool Problem_a_muon::have_problem() const
 {
-   return size() > 0;
+   return number_of_problems() > 0;
 }
 
-unsigned Problem_a_muon::size() const
+unsigned Problem_a_muon::number_of_problems() const
 {
    unsigned count = 0;
 
@@ -132,14 +132,14 @@ void Observable_problems::clear()
 
 bool Observable_problems::have_problem() const
 {
-   return size() > 0;
+   return number_of_problems() > 0;
 }
 
-unsigned Observable_problems::size() const
+unsigned Observable_problems::number_of_problems() const
 {
    unsigned count = 0;
-   count += general.size();
-   count += a_muon.size();
+   count += general.number_of_problems();
+   count += a_muon.number_of_problems();
    return count;
 }
 

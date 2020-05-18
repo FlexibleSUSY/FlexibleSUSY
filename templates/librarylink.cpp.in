@@ -590,7 +590,7 @@ void Model_data::put_problems(MLINK link) const
    }
 
    MLPutRule(link, "Observables");
-   MLPutFunction(link, "List", observables.size());
+   MLPutFunction(link, "List", observables.number_of_problems());
    put_problems(link, observables);
 
    MLEndPacket(link);
