@@ -27,7 +27,7 @@ flexiblesusy::Observable_problems setup_errors()
 }
 
 
-int count(const flexiblesusy::Observable_problems& op)
+int count_lines(const flexiblesusy::Observable_problems& op)
 {
    std::vector<std::string> str;
    copy_problem_strings(op, std::back_insert_iterator<std::vector<std::string>>(str));
@@ -39,7 +39,8 @@ void test_empty()
 {
    flexiblesusy::Observable_problems op;
    CHECK(!op.have_problem());
-   CHECK(count(op) == 0);
+   CHECK(op.size() == 0);
+   CHECK(count_lines(op) == 0);
 }
 
 
@@ -47,7 +48,8 @@ void test_error()
 {
    flexiblesusy::Observable_problems op = setup_errors();
    CHECK(op.have_problem());
-   CHECK(count(op) == 3);
+   CHECK(op.size() == 3);
+   CHECK(count_lines(op) == 3);
 }
 
 

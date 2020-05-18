@@ -31,7 +31,22 @@ void Problem_general::clear()
 
 bool Problem_general::have_problem() const
 {
-   return have_non_perturbative_running() || have_thrown();
+   return size() > 0;
+}
+
+int Problem_general::size() const
+{
+   int count = 0;
+
+   if (have_non_perturbative_running()) {
+      count++;
+   }
+
+   if (have_thrown()) {
+      count++;
+   }
+
+   return count;
 }
 
 void Problem_general::flag_non_perturbative_running(double scale)
@@ -75,7 +90,18 @@ void Problem_a_muon::clear()
 
 bool Problem_a_muon::have_problem() const
 {
-   return non_perturbative_running;
+   return size() > 0;
+}
+
+int Problem_a_muon::size() const
+{
+   int count = 0;
+
+   if (have_non_perturbative_running()) {
+      count++;
+   }
+
+   return count;
 }
 
 void Problem_a_muon::flag_non_perturbative_running(double scale)
@@ -106,7 +132,15 @@ void Observable_problems::clear()
 
 bool Observable_problems::have_problem() const
 {
-   return general.have_problem() || a_muon.have_problem();
+   return size() > 0;
+}
+
+int Observable_problems::size() const
+{
+   int count = 0;
+   count += general.size();
+   count += a_muon.size();
+   return count;
 }
 
 } // namespace flexiblesusy
