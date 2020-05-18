@@ -94,6 +94,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/observable_problems.hpp \
 		$(DIR)/observable_problems_format.hpp \
 		$(DIR)/observable_problems_format_slha.hpp \
+		$(DIR)/observable_problems_format_mathlink.hpp \
 		$(DIR)/physical_input.hpp \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \

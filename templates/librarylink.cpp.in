@@ -30,6 +30,7 @@
 @solverIncludes@
 #include "array_view.hpp"
 #include "error.hpp"
+#include "observable_problems_format_mathlink.hpp"
 #include "physical_input.hpp"
 #include "slha_io.hpp"
 #include "spectrum_generator_settings.hpp"
@@ -520,12 +521,7 @@ void Model_data::put_problems(MLINK link, const BVP_solver_problems& problems) c
 
 void Model_data::put_problems(MLINK link, const Observable_problems& problems) const
 {
-   if (problems.general.have_non_perturbative_running())
-      MLPutRuleTo(link, "True", "NonPerturbative");
-   if (problems.general.have_thrown())
-      MLPutRuleTo(link, "True", "Exceptions");
-   if (problems.a_muon.have_non_perturbative_running())
-      MLPutRuleTo(link, "True", "NonPerturbative");
+   mathlink_format_problems(link, problems);
 }
 
 /******************************************************************/
