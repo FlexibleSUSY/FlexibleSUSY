@@ -20,6 +20,7 @@
 #define OBSERVABLE_PROBLEMS_FORMAT_MATHLINK_H
 
 #include "mathlink_utils.hpp"
+#include "observables.hpp"
 #include "observable_problems.hpp"
 
 #include <string>
@@ -30,6 +31,9 @@ namespace observable_problems {
 
 void mathlink_format_problems(MLINK link, const Problem_general& problems)
 {
+   MLPutRule(link, "general");
+   MLPutFunction(link, "List", problems.number_of_problems());
+
    if (problems.have_non_perturbative_running())
       MLPutRuleTo(link, "True", "NonPerturbative");
    if (problems.have_thrown())
@@ -40,6 +44,9 @@ void mathlink_format_problems(MLINK link, const Problem_general& problems)
 
 void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
 {
+   MLPutRule(link, observables::observable_names[observables::a_muon]);
+   MLPutFunction(link, "List", problems.number_of_problems());
+
    if (problems.have_non_perturbative_running())
       MLPutRuleTo(link, "True", "NonPerturbative");
 }
@@ -49,8 +56,13 @@ void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
 
 void mathlink_format_problems(MLINK link, const Observable_problems& op)
 {
-   mathlink_format_problems(link, op.general);
-   mathlink_format_problems(link, op.a_muon);
+   if (op.have_problem()) {
+      MLPutFunction(link, "List", 2);
+      mathlink_format_problems(link, op.general);
+      mathlink_format_problems(link, op.a_muon);
+   } else {
+      MLPutFunction(link, "List", 0);
+   }
 }
 
 } // namespace flexiblesusy

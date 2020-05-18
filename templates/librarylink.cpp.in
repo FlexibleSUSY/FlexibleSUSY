@@ -203,7 +203,6 @@ public:
    void put_problems(MLINK link) const;
    void put_problems(MLINK link, const Problems&) const;
    void put_problems(MLINK link, const BVP_solver_problems&) const;
-   void put_problems(MLINK link, const Observable_problems&) const;
    void put_warnings(MLINK link) const;
    void put_warnings(MLINK link, const Problems&) const;
    void put_warnings(MLINK link, const BVP_solver_problems&) const;
@@ -519,13 +518,6 @@ void Model_data::put_problems(MLINK link, const BVP_solver_problems& problems) c
 
 /******************************************************************/
 
-void Model_data::put_problems(MLINK link, const Observable_problems& problems) const
-{
-   mathlink_format_problems(link, problems);
-}
-
-/******************************************************************/
-
 void Model_data::put_problems(MLINK link) const
 {
    check_spectrum_pointer();
@@ -551,8 +543,7 @@ void Model_data::put_problems(MLINK link) const
    }
 
    MLPutRule(link, "Observables");
-   MLPutFunction(link, "List", observables.number_of_problems());
-   put_problems(link, observables);
+   mathlink_format_problems(link, observables);
 
    MLEndPacket(link);
 }
