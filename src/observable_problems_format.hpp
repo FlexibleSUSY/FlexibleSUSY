@@ -19,6 +19,7 @@
 #ifndef OBSERVABLE_PROBLEMS_FORMAT_H
 #define OBSERVABLE_PROBLEMS_FORMAT_H
 
+#include "observables.hpp"
 #include "observable_problems.hpp"
 
 #include <iosfwd>
@@ -33,13 +34,13 @@ template <typename OutputIterator>
 void copy_problem_strings(const Problem_general& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
-      oi = "non-perturbative running to scale "
+      oi = "general: non-perturbative running to scale "
          + std::to_string(p.get_non_perturbative_running_scale())
          + " GeV";
       oi++;
    }
    if (p.have_thrown()) {
-      oi = "unknown exception thrown";
+      oi = "general: unknown exception thrown";
       oi++;
    }
 }
@@ -50,7 +51,8 @@ template <typename OutputIterator>
 void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
-      oi = "non-perturbative running to scale "
+      oi = std::string(observables::observable_names[observables::a_muon])
+         + ": non-perturbative running to scale "
          + std::to_string(p.get_non_perturbative_running_scale())
          + " GeV";
       oi++;

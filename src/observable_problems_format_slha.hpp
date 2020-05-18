@@ -33,24 +33,21 @@ namespace observable_problems {
 template <class OutputIterator>
 class SLHA_output_iterator_adaptor {
 public:
-   SLHA_output_iterator_adaptor(OutputIterator& oi_, const char* obs_name_,
-                                int obs_idx_, int flag_)
+   SLHA_output_iterator_adaptor(OutputIterator& oi_, int obs_idx_, int flag_)
       : oi(oi_)
-      , obs_name(obs_name_)
       , obs_idx(obs_idx_)
       , flag(flag_)
    {
    }
 
    void operator=(const std::string& elem) {
-      oi = FORMAT_OBSINFO(obs_idx, flag, std::string(obs_name) + ": " + elem);
+      oi = FORMAT_OBSINFO(obs_idx, flag, elem);
    }
 
    void operator++(int) { oi++; }
 
 private:
    OutputIterator& oi;
-   const char* obs_name{nullptr}; ///< name of observable
    int obs_idx{-1}; ///< 1st index, observable index
    int flag{-1};    ///< 2nd index, problem type (problem or warning)
 };
@@ -67,7 +64,6 @@ void slha_format_problems_and_warnings(const Observable_problems& op, OutputIter
 
    {
       SLHA_oi slha_oi(oi,
-                      "general",
                       0,
                       problem_flag);
       copy_problem_strings(op.general, slha_oi);
@@ -75,7 +71,6 @@ void slha_format_problems_and_warnings(const Observable_problems& op, OutputIter
 
    {
       SLHA_oi slha_oi(oi,
-                      observables::observable_names[observables::a_muon],
                       observables::a_muon + 1,
                       problem_flag);
       copy_problem_strings(op.a_muon, slha_oi);
