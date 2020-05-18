@@ -202,6 +202,7 @@ public:
    void put_problems(MLINK link) const;
    void put_problems(MLINK link, const Problems&) const;
    void put_problems(MLINK link, const BVP_solver_problems&) const;
+   void put_problems(MLINK link, const Observable_problems&) const;
    void put_warnings(MLINK link) const;
    void put_warnings(MLINK link, const Problems&) const;
    void put_warnings(MLINK link, const BVP_solver_problems&) const;
@@ -550,6 +551,18 @@ void Model_data::put_problems(MLINK link, const BVP_solver_problems& problems) c
 
 /******************************************************************/
 
+void Model_data::put_problems(MLINK link, const Observable_problems& problems) const
+{
+   if (problems.general.have_non_perturbative_running())
+      MLPutRuleTo(link, "True", "NonPerturbative");
+   if (problems.general.have_thrown())
+      MLPutRuleTo(link, "True", "Exceptions");
+   if (problems.a_muon.have_non_perturbative_running())
+      MLPutRuleTo(link, "True", "NonPerturbative");
+}
+
+/******************************************************************/
+
 void Model_data::put_problems(MLINK link) const
 {
    check_spectrum_pointer();
@@ -558,8 +571,9 @@ void Model_data::put_problems(MLINK link) const
    const auto n_models = models.size();
    const auto solvers = problems.get_bvp_solver_problems();
    const auto n_solvers = solvers.size();
+   const auto observables = spectrum->get_observables().problems;
 
-   MLPutFunction(link, "List", n_models + n_solvers);
+   MLPutFunction(link, "List", n_models + n_solvers + 1);
 
    for (const auto& m: models) {
       const auto np = number_of_problems(m);
@@ -574,6 +588,10 @@ void Model_data::put_problems(MLINK link) const
       MLPutFunction(link, "List", np);
       put_problems(link, m);
    }
+
+   MLPutRule(link, "Observables");
+   MLPutFunction(link, "List", observables.size());
+   put_problems(link, observables);
 
    MLEndPacket(link);
 }
