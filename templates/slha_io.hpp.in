@@ -26,7 +26,7 @@
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_physical.hpp"
 #include "observable_problems.hpp"
-#include "observable_problems_format.hpp"
+#include "observable_problems_format_slha.hpp"
 #include "problems.hpp"
 #include "spectrum_generator_problems.hpp"
 #include "standard_model_two_scale_model.hpp"

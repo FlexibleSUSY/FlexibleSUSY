@@ -1,5 +1,5 @@
 #include "observable_problems.hpp"
-#include "observable_problems_format.hpp"
+#include "observable_problems_format_slha.hpp"
 #include <iostream>
 #include <iterator>
 #include <string>

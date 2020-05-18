@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "observable_problems_format.hpp"
+#include "observable_problems_format_slha.hpp"
 
 #include <iostream>
 #include <iterator>

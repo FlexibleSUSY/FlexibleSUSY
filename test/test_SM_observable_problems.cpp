@@ -5,7 +5,7 @@
 
 #include "test_SM.hpp"
 #include "lowe.h"
-#include "observable_problems_format.hpp"
+#include "observable_problems_format_slha.hpp"
 #include "physical_input.hpp"
 #include "SM_mass_eigenstates.hpp"
 #include "SM_input_parameters.hpp"
