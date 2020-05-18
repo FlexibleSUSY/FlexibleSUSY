@@ -211,8 +211,8 @@ void @ModelName@_slha_io::set_extra(
    if (observables.problems.have_problem()) {
       std::ostringstream block;
       block << "Block OBSINFO\n";
-      format_problems_and_warnings(observables.problems,
-                                   std::ostream_iterator<std::string>(block));
+      slha_format_problems_and_warnings(observables.problems,
+                                        std::ostream_iterator<std::string>(block));
       slha_io.set_block(block);
    }
 @writeExtraSLHAOutputBlock@

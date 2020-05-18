@@ -60,7 +60,7 @@ private:
 
 /// copies problem strings to output iterator
 template <typename OutputIterator>
-void format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
+void slha_format_problems_and_warnings(const Observable_problems& op, OutputIterator oi)
 {
    const int problem_flag = 3;
    using SLHA_oi = observable_problems::SLHA_output_iterator_adaptor<OutputIterator>;

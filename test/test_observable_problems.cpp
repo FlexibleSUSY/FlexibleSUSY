@@ -63,7 +63,7 @@ void test_print()
 void test_slha()
 {
    flexiblesusy::Observable_problems op = setup_errors();
-   format_problems_and_warnings(op, std::ostream_iterator<std::string>(std::cout));
+   slha_format_problems_and_warnings(op, std::ostream_iterator<std::string>(std::cout));
 }
 
 
