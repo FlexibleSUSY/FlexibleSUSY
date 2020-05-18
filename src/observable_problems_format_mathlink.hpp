@@ -29,7 +29,7 @@ namespace observable_problems {
 
 
 /// format general observable problems to MathLink output
-void mathlink_format_problems(MLINK link, const Problem_general& problems)
+inline void mathlink_format_problems(MLINK link, const Problem_general& problems)
 {
    MLPutRule(link, "general");
    MLPutFunction(link, "List", problems.number_of_problems());
@@ -42,7 +42,7 @@ void mathlink_format_problems(MLINK link, const Problem_general& problems)
 
 
 /// format a_muon problems to MathLink output
-void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
+inline void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
 {
    MLPutRule(link, observables::observable_names[observables::a_muon]);
    MLPutFunction(link, "List", problems.number_of_problems());
@@ -56,7 +56,7 @@ void mathlink_format_problems(MLINK link, const Problem_a_muon& problems)
 
 
 /// format observable problems to MathLink output
-void mathlink_format_problems(MLINK link, const Observable_problems& op)
+inline void mathlink_format_problems(MLINK link, const Observable_problems& op)
 {
    if (op.have_problem()) {
       MLPutFunction(link, "List", 2);
