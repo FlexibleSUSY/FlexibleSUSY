@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "observable_problems_format_slha.hpp"
+#include "observable_problems_format.hpp"
 
 #include <iostream>
 #include <iterator>
@@ -26,7 +26,7 @@ namespace flexiblesusy {
 std::ostream& operator<<(std::ostream& ostr, const Observable_problems& op)
 {
    ostr << "Observable problems:\n";
-   format_problems_and_warnings(op, std::ostream_iterator<std::string>(ostr));
+   copy_problem_strings(op, std::ostream_iterator<std::string>(ostr, "\n"));
    return ostr;
 }
 
