@@ -479,7 +479,11 @@ ReplaceSymbolsInUserInput[rules_] :=
               {Unevaluated@FlexibleSUSY`HighPoleMassPrecision, Unevaluated@FlexibleSUSY`MediumPoleMassPrecision, Unevaluated@FlexibleSUSY`LowPoleMassPrecision};
 
            (* decay calculation require 3- and 4-point loop functions *)
-           If[!MemberQ[FSLoopLibraries, FSLoopTools],
+           If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
+              Print["Warning: Decay calculation requires a dedicated loop library. Curretly it's either ",
+                    "LoopTools or Collier but FlexibleSUSY was only configured with internal libraries. ",
+                    "Disabling decays."
+              ];
               FlexibleSUSY`FSCalculateDecays = False
            ];
           ];
