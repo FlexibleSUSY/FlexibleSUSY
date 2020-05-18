@@ -34,9 +34,9 @@ bool Problem_general::have_problem() const
    return size() > 0;
 }
 
-int Problem_general::size() const
+unsigned Problem_general::size() const
 {
-   int count = 0;
+   unsigned count = 0;
 
    if (have_non_perturbative_running()) {
       count++;
@@ -93,9 +93,9 @@ bool Problem_a_muon::have_problem() const
    return size() > 0;
 }
 
-int Problem_a_muon::size() const
+unsigned Problem_a_muon::size() const
 {
-   int count = 0;
+   unsigned count = 0;
 
    if (have_non_perturbative_running()) {
       count++;
@@ -135,9 +135,9 @@ bool Observable_problems::have_problem() const
    return size() > 0;
 }
 
-int Observable_problems::size() const
+unsigned Observable_problems::size() const
 {
-   int count = 0;
+   unsigned count = 0;
    count += general.size();
    count += a_muon.size();
    return count;
