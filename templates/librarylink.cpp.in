@@ -447,39 +447,6 @@ void Model_data::put_input_parameters(MLINK link) const
 
 /******************************************************************/
 
-int number_of_problems(const Problems& problems)
-{
-   return problems.have_tachyon()
-      + problems.no_ewsb()
-      + (problems.no_perturbative() || problems.have_non_perturbative_parameter())
-      + problems.no_sinThetaW_convergence()
-      + problems.have_thrown()
-      + problems.have_failed_pole_mass_convergence();
-}
-
-/******************************************************************/
-
-int number_of_problems(const BVP_solver_problems& problems)
-{
-   return problems.no_convergence();
-}
-
-/******************************************************************/
-
-int number_of_warnings(const Problems& problems)
-{
-   return problems.have_bad_mass();
-}
-
-/******************************************************************/
-
-int number_of_warnings(const BVP_solver_problems&)
-{
-   return 0; // no warnings yet
-}
-
-/******************************************************************/
-
 template <typename F>
 void put_masses(MLINK link, const F& flags,
                 const std::vector<std::string>& heads = {})
@@ -576,16 +543,14 @@ void Model_data::put_problems(MLINK link) const
    MLPutFunction(link, "List", n_models + n_solvers + 1);
 
    for (const auto& m: models) {
-      const auto np = number_of_problems(m);
       MLPutRule(link, m.get_model_name());
-      MLPutFunction(link, "List", np);
+      MLPutFunction(link, "List", m.number_of_problems());
       put_problems(link, m);
    }
 
    for (const auto& m: solvers) {
-      const auto np = number_of_problems(m);
       MLPutRule(link, m.get_solver_name());
-      MLPutFunction(link, "List", np);
+      MLPutFunction(link, "List", m.number_of_problems());
       put_problems(link, m);
    }
 
@@ -625,16 +590,14 @@ void Model_data::put_warnings(MLINK link) const
    MLPutFunction(link, "List", n_models + n_solvers);
 
    for (const auto& m: models) {
-      const auto nw = number_of_warnings(m);
       MLPutRule(link, m.get_model_name());
-      MLPutFunction(link, "List", nw);
+      MLPutFunction(link, "List", m.number_of_warnings());
       put_warnings(link, m);
    }
 
    for (const auto& m: solvers) {
-      const auto nw = number_of_warnings(m);
       MLPutRule(link, m.get_solver_name());
-      MLPutFunction(link, "List", nw);
+      MLPutFunction(link, "List", m.number_of_warnings());
       put_warnings(link, m);
    }
 
