@@ -515,6 +515,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_two_loop_spectrum.cpp \
 		$(DIR)/test_SM_three_loop_spectrum.cpp \
 		$(DIR)/test_SM_mw_calculation.cpp
+TEST_SH += \
+		$(DIR)/test_SM_observable_problems.sh
 endif
 
 ifeq ($(WITH_SM) $(ENABLE_META),yes yes)
