@@ -180,7 +180,14 @@ double SLHA_io::read_block(const std::string& block_name, Eigen::PlainObjectBase
       : read_matrix(block_name, dense.data(), dense.rows(), dense.cols());
 }
 
-
+/**
+ * Writes real part of a matrix or vector to SLHA object
+ *
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
+ */
 template<class Derived>
 void SLHA_io::set_block(const std::string& name,
                         const Eigen::MatrixBase<Derived>& dense,
@@ -191,7 +198,14 @@ void SLHA_io::set_block(const std::string& name,
       : set_matrix(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
-
+/**
+ * Writes imaginary part of a matrix or vector to SLHA object
+ *
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
+ */
 template<class Derived>
 void SLHA_io::set_block_imag(const std::string& name,
                              const Eigen::MatrixBase<Derived>& dense,
