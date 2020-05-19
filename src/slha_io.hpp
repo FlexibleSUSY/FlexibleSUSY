@@ -30,7 +30,7 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace softsusy {
    class QedQcd;
