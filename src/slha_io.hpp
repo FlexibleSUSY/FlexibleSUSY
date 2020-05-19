@@ -152,48 +152,16 @@ private:
    static bool read_scale(const SLHAea::Line& line, double& scale);
 
    void read_modsel();
-   template <class Derived>
-   double read_matrix(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_matrix(const std::string&, double*, int, int) const;
    double read_matrix(const std::string&, std::complex<double>*, int, int) const;
-   template <class Derived>
-   double read_vector(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_vector(const std::string&, double*, int) const;
    double read_vector(const std::string&, std::complex<double>*, int) const;
 
-   void set_vector_(const std::string& name, const double*, const std::string& symbol, double scale, int);
-   void set_vector_(const std::string& name, const std::complex<double>*, const std::string& symbol, double scale, int);
-   void set_matrix_(const std::string& name, const double*, const std::string& symbol, double scale, int, int);
-   void set_matrix_(const std::string& name, const std::complex<double>*, const std::string& symbol, double scale, int, int);
+   void set_vector(const std::string&, const double*, const std::string&, double, int);
+   void set_vector(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
 };
-
-/**
- * Fills a matrix from a SLHA block
- *
- * @param block_name block name
- * @param matrix matrix to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_matrix(const std::string& block_name, Eigen::PlainObjectBase<Derived>& matrix) const
-{
-   return read_matrix(block_name, matrix.data(), matrix.rows(), matrix.cols());
-}
-
-/**
- * Fills a vector from a SLHA block
- *
- * @param block_name block name
- * @param vector vector to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_vector(const std::string& block_name, Eigen::PlainObjectBase<Derived>& vector) const
-{
-   return read_vector(block_name, vector.data(), vector.rows());
-}
 
 /**
  * Fills a matrix or vector from a SLHA block
@@ -207,8 +175,8 @@ template <class Derived>
 double SLHA_io::read_block(const std::string& block_name, Eigen::PlainObjectBase<Derived>& dense) const
 {
    return dense.cols() == 1
-      ? read_vector(block_name, dense)
-      : read_matrix(block_name, dense);
+      ? read_vector(block_name, dense.data(), dense.rows())
+      : read_matrix(block_name, dense.data(), dense.rows(), dense.cols());
 }
 
 
@@ -218,8 +186,8 @@ void SLHA_io::set_block(const std::string& name,
                         const std::string& symbol, double scale)
 {
    dense.cols() == 1
-      ? set_vector_(name, dense.eval().data(), symbol, scale, dense.rows())
-      : set_matrix_(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
+      ? set_vector(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
 

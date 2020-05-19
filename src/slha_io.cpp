@@ -769,7 +769,7 @@ double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>*
 }
 
 
-void SLHA_io::set_vector_(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
+void SLHA_io::set_vector(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
 {
    std::ostringstream ss;
    ss << block_head(name, scale);
@@ -782,7 +782,7 @@ void SLHA_io::set_vector_(const std::string& name, const double* a, const std::s
 }
 
 
-void SLHA_io::set_vector_(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
+void SLHA_io::set_vector(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
 {
    std::ostringstream ss;
    ss << block_head(name, scale);
@@ -796,7 +796,7 @@ void SLHA_io::set_vector_(const std::string& name, const std::complex<double>* a
 }
 
 
-void SLHA_io::set_matrix_(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
+void SLHA_io::set_matrix(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
 {
    std::ostringstream ss;
    ss << block_head(name, scale);
@@ -813,7 +813,7 @@ void SLHA_io::set_matrix_(const std::string& name, const double* a, const std::s
 }
 
 
-void SLHA_io::set_matrix_(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
+void SLHA_io::set_matrix(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
 {
    std::ostringstream ss;
    ss << block_head(name, scale);
