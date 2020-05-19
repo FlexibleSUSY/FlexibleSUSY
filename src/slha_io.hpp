@@ -129,10 +129,6 @@ public:
    void set_block(const std::string&, double, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M, int N>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, N>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, 1>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block_imag(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    void set_modsel(const Modsel&);
@@ -161,6 +157,11 @@ private:
    void set_vector(const std::string&, const std::complex<double>*, const std::string&, double, int);
    void set_matrix(const std::string&, const double*, const std::string&, double, int, int);
    void set_matrix(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
+
+   void set_vector_imag(const std::string&, const double*, const std::string&, double, int);
+   void set_vector_imag(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix_imag(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix_imag(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
 };
 
 /**
@@ -191,63 +192,14 @@ void SLHA_io::set_block(const std::string& name,
 }
 
 
-template<class Scalar, int NRows>
+template<class Derived>
 void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, 1>& matrix,
+                             const Eigen::MatrixBase<Derived>& dense,
                              const std::string& symbol, double scale)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      ss << FORMAT_VECTOR(i, std::imag(matrix(i-1,0)),
-         ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows, int NCols>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, NCols>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      for (int k = 1; k <= NCols; ++k) {
-         ss << FORMAT_MIXING_MATRIX(i, k, std::imag(matrix(i-1,k-1)),
-            ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + ","
-             + flexiblesusy::to_string(k) + "))"));
-      }
-   }
-
-   set_block(ss);
-}
-
-template <class Derived>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::MatrixBase<Derived>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   const int rows = matrix.rows();
-   const int cols = matrix.cols();
-   for (int i = 1; i <= rows; ++i) {
-      if (cols == 1) {
-         ss << FORMAT_VECTOR(i, std::imag(matrix(i-1,0)), ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-      } else {
-         for (int k = 1; k <= cols; ++k) {
-            ss << FORMAT_MIXING_MATRIX(i, k, std::imag(matrix(i-1,k-1)),
-               ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
-         }
-      }
-   }
-
-   set_block(ss);
+   dense.cols() == 1
+      ? set_vector_imag(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix_imag(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
 } // namespace flexiblesusy
