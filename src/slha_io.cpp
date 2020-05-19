@@ -370,7 +370,7 @@ std::string format_vector(const std::string& name, const T* a, const std::string
    ss << name;
 
    for (int i = 1; i <= rows; ++i) {
-      ss << FORMAT_VECTOR(i, std::imag(a[i-1]), (prefix + symbol + "(" + flexiblesusy::to_string(i) + ")" + suffix));
+      ss << FORMAT_VECTOR(i, std::real(a[i-1]), (prefix + symbol + "(" + flexiblesusy::to_string(i) + ")" + suffix));
    }
 
    return ss.str();
@@ -389,7 +389,7 @@ std::string format_matrix(const std::string& name, const T* a, const std::string
    for (int i = 1; i <= rows; ++i) {
       for (int k = 1; k <= cols; ++k) {
          const int idx = column_major_index(i-1, k-1, rows, cols);
-         ss << FORMAT_MIXING_MATRIX(i, k, std::imag(a[idx]),
+         ss << FORMAT_MIXING_MATRIX(i, k, std::real(a[idx]),
                (prefix + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")" + suffix));
       }
    }
