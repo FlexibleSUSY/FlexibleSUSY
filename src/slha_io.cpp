@@ -341,7 +341,7 @@ double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* 
 
 
 template <typename T>
-std::string format_vector(const std::string& name, const T* a, const std::string& symbol, double scale, int rows)
+std::string format_vector(const std::string& name, const T* a, const std::string& symbol, int rows)
 {
    std::ostringstream ss;
    ss << name;
@@ -355,7 +355,7 @@ std::string format_vector(const std::string& name, const T* a, const std::string
 
 
 template <typename T>
-std::string format_matrix(const std::string& name, const T* a, const std::string& symbol, double scale, int rows, int cols)
+std::string format_matrix(const std::string& name, const T* a, const std::string& symbol, int rows, int cols)
 {
    std::ostringstream ss;
    ss << name;
@@ -373,7 +373,7 @@ std::string format_matrix(const std::string& name, const T* a, const std::string
 
 
 template <typename T>
-std::string format_vector_imag(const std::string& name, const T* a, const std::string& symbol, double scale, int rows)
+std::string format_vector_imag(const std::string& name, const T* a, const std::string& symbol, int rows)
 {
    std::ostringstream ss;
    ss << name;
@@ -387,7 +387,7 @@ std::string format_vector_imag(const std::string& name, const T* a, const std::s
 
 
 template <typename T>
-std::string format_matrix_imag(const std::string& name, const T* a, const std::string& symbol, double scale, int rows, int cols)
+std::string format_matrix_imag(const std::string& name, const T* a, const std::string& symbol, int rows, int cols)
 {
    std::ostringstream ss;
    ss << name;
@@ -841,49 +841,49 @@ double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>*
 
 void SLHA_io::set_vector(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
 {
-   set_block(detail::format_vector(block_head(name, scale), a, symbol, scale, rows));
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, rows));
 }
 
 
 void SLHA_io::set_vector(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
 {
-   set_block(detail::format_vector(block_head(name, scale), a, symbol, scale, rows));
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, rows));
 }
 
 
 void SLHA_io::set_matrix(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   set_block(detail::format_matrix(block_head(name, scale), a, symbol, scale, rows, cols));
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, rows, cols));
 }
 
 
 void SLHA_io::set_matrix(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   set_block(detail::format_matrix(block_head(name, scale), a, symbol, scale, rows, cols));
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, rows, cols));
 }
 
 
 void SLHA_io::set_vector_imag(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
 {
-   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, scale, rows));
+   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, rows));
 }
 
 
 void SLHA_io::set_vector_imag(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
 {
-   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, scale, rows));
+   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, rows));
 }
 
 
 void SLHA_io::set_matrix_imag(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, scale, rows, cols));
+   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
 
 void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, scale, rows, cols));
+   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
 }
 
 
