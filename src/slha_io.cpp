@@ -341,6 +341,38 @@ double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* 
 
 
 template <typename T>
+std::string format_vector(const std::string& name, const T* a, const std::string& symbol, double scale, int rows)
+{
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      ss << FORMAT_VECTOR(i, std::imag(a[i-1]), ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
+   }
+
+   return ss.str();
+}
+
+
+template <typename T>
+std::string format_matrix(const std::string& name, const T* a, const std::string& symbol, double scale, int rows, int cols)
+{
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      for (int k = 1; k <= cols; ++k) {
+         const int idx = column_major_index(i-1, k-1, rows, cols);
+         ss << FORMAT_MIXING_MATRIX(i, k, std::imag(a[idx]),
+               ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
+      }
+   }
+
+   return ss.str();
+}
+
+
+template <typename T>
 std::string format_vector_imag(const std::string& name, const T* a, const std::string& symbol, double scale, int rows)
 {
    std::ostringstream ss;
@@ -809,61 +841,25 @@ double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>*
 
 void SLHA_io::set_vector(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= rows; ++i) {
-      ss << FORMAT_VECTOR(i, a[i-1], (symbol + "(" + flexiblesusy::to_string(i) + ")"));
-   }
-
-   set_block(ss);
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, scale, rows));
 }
 
 
 void SLHA_io::set_vector(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= rows; ++i) {
-      ss << FORMAT_VECTOR(i, std::real(a[i-1]), ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-   }
-
-   set_block(ss);
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, scale, rows));
 }
 
 
 void SLHA_io::set_matrix(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= rows; ++i) {
-      for (int k = 1; k <= cols; ++k) {
-         const int idx = column_major_index(i-1, k-1, rows, cols);
-         ss << FORMAT_MIXING_MATRIX(i, k, a[idx],
-               (symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")"));
-      }
-   }
-
-   set_block(ss);
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, scale, rows, cols));
 }
 
 
 void SLHA_io::set_matrix(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= rows; ++i) {
-      for (int k = 1; k <= cols; ++k) {
-         const int idx = column_major_index(i-1, k-1, rows, cols);
-         ss << FORMAT_MIXING_MATRIX(i, k, std::real(a[idx]),
-               ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
-      }
-   }
-
-   set_block(ss);
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, scale, rows, cols));
 }
 
 
