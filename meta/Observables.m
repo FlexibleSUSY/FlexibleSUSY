@@ -27,7 +27,12 @@ Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
-                  EDM, BrLToLGamma, FToFConversionInNucleus, bsgamma };
+                  EDM, BrLToLGamma, bsgamma };
+
+If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   AppendTo[FSObservables, FToFConversionInNucleus]
+];
+
 End[];
 
 GetRequestedObservables::usage="";
@@ -421,7 +426,7 @@ CalculateObservable[FlexibleSUSYObservable`EDM[p_[idx_]], structName_String] :=
           ];
 
 CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     spec = CConversion`ToValidCSymbolString[spectator]},
            structName <> ".LToLGamma0(" <> pInStr <> ", " <> pOutStr <> ", " <> spec <> ") = " <>
            FlexibleSUSY`FSModelName <> "_l_to_lgamma::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_" <> spec <> "(MODEL, qedqcd, physical_input);"
@@ -439,7 +444,7 @@ CalculateObservable[FlexibleSUSYObservable`BrLToLGamma[pIn_[idxIn_] -> {pOut_[id
           ];
 
 CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_ -> pOut_, nucleai_], structName_String] :=
-    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut], 
+    Module[{pInStr = CConversion`ToValidCSymbolString[pIn], pOutStr = CConversion`ToValidCSymbolString[pOut],
     nuc = CConversion`ToValidCSymbolString[nucleai]},
            structName <> ".FToFConversion0(" <> pInStr <> ") = " <>
            FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(MODEL);"
@@ -452,7 +457,7 @@ CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] 
             idxOutStr = ToString[idxOut],
             nucleiStr = ToString[nucleus]
     },
-           structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ") = " <>
+           structName <> ".FToFConversion1(" <> pInStr <> ", " <> idxInStr <> ", " <> pOutStr <> ", " <> idxOutStr <> ", " <> nucleiStr <> ", " <> "qedqcd) = " <>
            FlexibleSUSY`FSModelName <> "_f_to_f_conversion::calculate_" <> pInStr <> "_to_" <> pOutStr <> "_in_nucleus(" <> idxInStr <> ", " <> idxOutStr <> ", "<> FlexibleSUSY`FSModelName <> "_f_to_f_conversion::Nucleus::" <> nucleiStr <> ", MODEL, qedqcd);"
           ];
 
@@ -485,6 +490,15 @@ FillGM2CalcInterfaceData[struct_String] :=
            yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
+
+           If[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
+                       chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
+                       md2, ml2, me2, tu, td, te, yu, yd, ye}, Null],
+              Print["Error: The GM2Calc addon cannot be used in this model, because it is not a MSSM-like model with sfermion flavour conservation. ",
+                    "Please remove aMuonGM2Calc and aMuonGM2CalcUncertainty from the model file."];
+              Quit[1];
+           ];
+
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>

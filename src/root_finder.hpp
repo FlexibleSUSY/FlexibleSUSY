@@ -89,7 +89,7 @@ private:
    Solver_type solver_type{GSLHybrid}; ///< solver type
 
    void print_state(const gsl_multiroot_fsolver*, std::size_t) const;
-   char const * const solver_type_name() const;
+   const char* solver_type_name() const;
    const gsl_multiroot_fsolver_type* solver_type_to_gsl_pointer() const;
    static int gsl_function(const gsl_vector*, void*, gsl_vector*);
 
@@ -171,7 +171,7 @@ int Root_finder<dimension>::find_root(const Vector_t& start)
 
    VERBOSE_MSG("\t\t\tRoot_finder status = " << gsl_strerror(status));
 
-   root = to_eigen_vector_fixed<dimension>(solver->x);
+   root = to_eigen_vector<dimension>(solver->x);
 
    gsl_multiroot_fsolver_free(solver);
 
@@ -203,7 +203,7 @@ int Root_finder<dimension>::gsl_function(const gsl_vector* x, void* params, gsl_
 
    Function_t* fun = static_cast<Function_t*>(params);
    int status = GSL_SUCCESS;
-   const Vector_t arg(to_eigen_vector_fixed<dimension>(x));
+   const Vector_t arg(to_eigen_vector<dimension>(x));
    Vector_t result;
    result.setConstant(std::numeric_limits<double>::max());
 
@@ -214,13 +214,16 @@ int Root_finder<dimension>::gsl_function(const gsl_vector* x, void* params, gsl_
       status = GSL_EDOM;
    }
 
-   copy(result, f);
+   // copy result -> f
+   for (std::size_t i = 0; i < dimension; i++) {
+      gsl_vector_set(f, i, result(i));
+   }
 
    return status;
 }
 
 template <std::size_t dimension>
-char const * const Root_finder<dimension>::solver_type_name() const
+const char* Root_finder<dimension>::solver_type_name() const
 {
    switch (solver_type) {
    case GSLHybrid : return "GSLHybrid";

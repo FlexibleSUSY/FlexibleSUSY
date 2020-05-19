@@ -9,7 +9,6 @@
 #include "softsusy.h"
 #include "conversion.hpp"
 #include "error.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "logger.hpp"
 #include "ew_input.hpp"

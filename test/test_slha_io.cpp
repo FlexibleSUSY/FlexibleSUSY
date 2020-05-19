@@ -9,8 +9,8 @@
 #include "linalg2.hpp"
 #include "stopwatch.hpp"
 #include "wrappers.hpp"
+#include <string>
 #include <Eigen/Core>
-#include <boost/lexical_cast.hpp>
 
 using namespace flexiblesusy;
 
@@ -238,12 +238,12 @@ SLHAea::Block create_block(int number_of_entries, int offset, double scale = 0.)
    SLHAea::Block block;
    std::string str = "Block TestBlock";
    if (scale != 0.)
-      str += " Q= " + boost::lexical_cast<std::string>(scale);
+      str += " Q= " + std::to_string(scale);
    str += '\n';
 
    for (int i = 0; i < number_of_entries; i++) {
-      const std::string key(boost::lexical_cast<std::string>(i));
-      const std::string num(boost::lexical_cast<std::string>(i + offset));
+      const std::string key(std::to_string(i));
+      const std::string num(std::to_string(i + offset));
       str += "   " + key + "  " + num + "\n";
    }
 
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE( test_processor_vs_loop )
    BOOST_TEST_MESSAGE("time using the tuple processor: " << processor_time << " s");
    BOOST_TEST_MESSAGE("time using the for loop: " << loop_time << " s");
 
-   BOOST_CHECK_LT(100. * processor_time, loop_time);
+   BOOST_CHECK_LT(10 * processor_time, loop_time);
 }
 
 BOOST_AUTO_TEST_CASE( test_slha_mixing_matrix_convention )

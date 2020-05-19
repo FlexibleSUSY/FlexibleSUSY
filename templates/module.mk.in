@@ -54,6 +54,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_a_muon.cpp \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.cpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.cpp \
@@ -89,6 +90,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_convergence_tester.hpp \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
+		$(DIR)/@CLASSNAME@_f_to_f_conversion.hpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.hpp \
 		$(DIR)/@CLASSNAME@_effective_couplings.hpp \
@@ -120,7 +122,7 @@ LIB@CLASSNAME@_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/@CLASSNAME@_fields.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_vertices.hpp \
 		$(DIR)/cxx_qft/@CLASSNAME@_context_base.hpp \
-		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions.hpp
+		$(DIR)/cxx_qft/@CLASSNAME@_npointfunctions_wilsoncoeffs.hpp
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 -include $(DIR)/two_scale.mk
@@ -309,7 +311,7 @@ $(METACODE_STAMP_@CLASSNAME@):
 endif
 
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
-	CPPFLAGS += $(MOD@CLASSNAME@_SUBMOD_INC) $(MOD@CLASSNAME@_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(TSILFLAGS) $(HIMALAYAFLAGS)
+	CPPFLAGS += $(MOD@CLASSNAME@_SUBMOD_INC) $(MOD@CLASSNAME@_INC) $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS)  $(HIMALAYAFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP) $(LL@CLASSNAME@_DEP) $(LIB@CLASSNAME@_OBJ) $(EXE@CLASSNAME@_OBJ) $(LL@CLASSNAME@_OBJ) $(LL@CLASSNAME@_LIB): \
@@ -323,13 +325,13 @@ $(LIB@CLASSNAME@): $(LIB@CLASSNAME@_OBJ)
 		@$(MSG)
 		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
-$(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/%.x: $(DIR)/%.o $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
+		$(Q)$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(SQLITELIBS) $(TSILLIBS) $(FLIBS) $(THREADLIBS) $(LDLIBS) $(FUTILIBS)
 
-$(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(LL@CLASSNAME@_LIB): $(LL@CLASSNAME@_OBJ) $(LIB@CLASSNAME@) $(MOD@CLASSNAME@_LIB) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 		@$(MSG)
-		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS)
+		$(Q)$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$(ADDONLIBS) $^ $(LIBGM2Calc)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(THREADLIBS) $(LDLIBS) $(LLLIBS) $(FUTILIBS)
 
 ALLDEP += $(LIB@CLASSNAME@_DEP) $(EXE@CLASSNAME@_DEP)
 ALLSRC += $(LIB@CLASSNAME@_SRC) $(EXE@CLASSNAME@_SRC)

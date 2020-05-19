@@ -1481,6 +1481,59 @@ void fs_diagonalize_hermitian
     fs_diagonalize_hermitian_errbd(m, w, 0, &w_errbd);
 }
 
+/**
+ * Calculates the mass of a singlet from a (possibly complex)
+ * numerical value by taking the magnitude of the value.
+ *
+ * @param value numerical value
+ * @return mass
+ */
+template <typename T>
+double calculate_singlet_mass(T value) noexcept
+{
+   return std::abs(value);
+}
+
+/**
+ * Calculates the mass of a Majoran fermion singlet from a (possibly
+ * complex) numerical value by taking the magnitude of the value.
+ *
+ * The phase is set to exp(i theta/2), where theta is the phase angle
+ * of the complex value.  If the value is pure real, then the phase
+ * will be set to 1.  If the value is purely imaginary, then the phase
+ * will be set to \f$e^{i \pi/2}\f$.
+ *
+ * @param value numerical value
+ * @param[out] phase phase
+ * @return mass
+ */
+template <typename T>
+double calculate_majorana_singlet_mass(T value, std::complex<double>& phase)
+{
+   phase = std::polar(1., 0.5 * std::arg(std::complex<double>(value)));
+   return std::abs(value);
+}
+
+/**
+ * Calculates the mass of a Dirac fermion singlet from a (possibly
+ * complex) numerical value by taking the magnitude of the value.
+ *
+ * The phase is set to exp(i theta), where theta is the phase angle of
+ * the complex value.  If the value is pure real, then the phase will
+ * be set to 1.  If the value is purely imaginary, then the phase will
+ * be set to \f$e^{i \pi}\f$.
+ *
+ * @param value numerical value
+ * @param[out] phase phase
+ * @return mass
+ */
+template <typename T>
+double calculate_dirac_singlet_mass(T value, std::complex<double>& phase)
+{
+   phase = std::polar(1., std::arg(std::complex<double>(value)));
+   return std::abs(value);
+}
+
 // explicit template function instantiations ///////////////////////////
 
 #define INSTANTIATE_FS_HERMITIAN(N,Mtype,Ztype)                         \

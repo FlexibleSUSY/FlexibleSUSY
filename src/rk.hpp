@@ -30,9 +30,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <functional>
-
-#include <Eigen/Core>
 
 #include "logger.hpp"
 #include "error.hpp"

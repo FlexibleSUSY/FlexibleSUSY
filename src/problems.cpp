@@ -19,6 +19,7 @@
 #include "problems.hpp"
 #include "logger.hpp"
 #include "names.hpp"
+#include "string_format.hpp"
 #include "string_utils.hpp"
 #include "config.h"
 
@@ -150,13 +151,13 @@ std::vector<std::string> Problems::get_problem_strings() const
       std::string str("non-perturbative " + par_name);
       if (par.second.threshold > 0) {
          str += " [|" + par_name + "|(" +
-                std::to_string(par.second.scale) + ") = " +
-                std::to_string(par.second.value) +
-                " > " + std::to_string(par.second.threshold) + "]";
+                flexiblesusy::to_string(par.second.scale) + ") = " +
+                flexiblesusy::to_string(par.second.value) +
+                " > " + flexiblesusy::to_string(par.second.threshold) + "]";
       } else {
          str += " [" + par_name + "(" +
-                std::to_string(par.second.scale) +
-                ") = " + std::to_string(par.second.value) + "]";
+                flexiblesusy::to_string(par.second.scale) +
+                ") = " + flexiblesusy::to_string(par.second.value) + "]";
       }
       strings.emplace_back(str);
    }

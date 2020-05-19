@@ -17,20 +17,27 @@
 // ====================================================================
 
 #include "trilog.hpp"
+#include <cfloat>
 #include <cmath>
 #include <limits>
 
 namespace flexiblesusy {
 
 namespace {
-   template <typename T> T pow2(T x) noexcept { return x*x; }
+   template <typename T> T sqr(T x) noexcept { return x*x; }
 
-   // converts -0.0 to 0.0
    template <typename T>
-   std::complex<T> clog(std::complex<T> z) noexcept {
+   std::complex<T> clog(std::complex<T> z) noexcept
+   {
+      // converts -0.0 to 0.0
       if (std::real(z) == T(0)) { z.real(T(0)); }
       if (std::imag(z) == T(0)) { z.imag(T(0)); }
-      return std::log(z);
+
+      const T rz = std::real(z);
+      const T iz = std::imag(z);
+      const T nz = sqr(rz) + sqr(iz);
+
+      return std::complex<T>(0.5*std::log(nz), std::atan2(iz, rz));
    }
 
    template <typename T>
@@ -107,11 +114,13 @@ std::complex<double> trilog(const std::complex<double>& z) noexcept
       return { (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0, 0.0 };
    }
 
-   const auto az  = std::abs(z);
-   const auto pz  = std::arg(z);
-   const auto lnz = std::log(az);
+   const auto rz  = std::real(z);
+   const auto iz  = std::imag(z);
+   const auto nz  = sqr(rz) + sqr(iz);
+   const auto pz  = std::atan2(iz, rz);
+   const auto lnz = 0.5*std::log(nz);
 
-   if (pow2(lnz) + pow2(pz) < 1.0) { // |log(z)| < 1
+   if (sqr(lnz) + sqr(pz) < 1.0) { // |log(z)| < 1
       const auto u  = std::complex<double>(lnz, pz); // clog(z)
       const auto u2 = u*u;
       const auto c0 = zeta3 + u*(zeta2 - u2/12.0);
@@ -138,14 +147,13 @@ std::complex<double> trilog(const std::complex<double>& z) noexcept
 
    std::complex<double> u(0.0, 0.0), rest(0.0, 0.0);
 
-   if (az <= 1.0) {
+   if (nz <= 1.0) {
       u = -clog(1.0 - z);
-   } else { // az > 1
-      auto arg = PI + pz;
-      if (arg > PI) { arg -= 2*PI; }
+   } else { // nz > 1
+      const auto arg = pz > 0.0 ? pz - PI : pz + PI;
       const auto lmz = std::complex<double>(lnz, arg); // clog(-z)
       u = -clog(1.0 - 1.0/z);
-      rest = -lmz*(pow2(lmz)/6.0 + zeta2);
+      rest = -lmz*(sqr(lmz)/6.0 + zeta2);
    }
 
    return
@@ -182,7 +190,7 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
    const long double PI2   = PI*PI;
    const long double zeta2 = 1.64493406684822643647241516664602519L;
    const long double zeta3 = 1.20205690315959428539973816151144999L;
-   const long double bf[45] = {
+   const long double bf[] = {
       1.0L,
      -3.0L/8.0L,
       17.0L/216.0L,
@@ -205,6 +213,7 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
      -1.18623225777522852530825009512459322e-16L,
       1.83169799654913833820892731212815349e-17L,
       2.70681710318373501514907347126169436e-18L,
+#if LDBL_DIG > 18
      -4.45543389782963882643263099217632212e-19L,
      -6.23754849225569465036532224739838641e-20L,
       1.08515215348745349131365609968642833e-20L,
@@ -228,6 +237,7 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
      -3.47010516489959160555004020312910903e-35L,
      -3.56210662409746357967357370318293608e-36L,
       8.55369656823692105754731289124468101e-37L
+#endif
    };
 
    if (is_close(z, 0.0L, eps)) {
@@ -245,17 +255,19 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
       return { (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0L, 0.0L };
    }
 
-   const auto az  = std::abs(z);
-   const auto pz  = std::arg(z);
-   const auto lnz = std::log(az);
+   const auto rz  = std::real(z);
+   const auto iz  = std::imag(z);
+   const auto nz  = sqr(rz) + sqr(iz);
+   const auto pz  = std::atan2(iz, rz);
+   const auto lnz = 0.5L*std::log(nz);
 
-   if (pow2(lnz) + pow2(pz) < 1.0L) { // |log(z)| < 1
+   if (sqr(lnz) + sqr(pz) < 1.0L) { // |log(z)| < 1
       const auto u  = std::complex<long double>(lnz, pz); // clog(z)
       const auto u2 = u*u;
       const auto c0 = zeta3 + u*(zeta2 - u2/12.0L);
       const auto c1 = 0.25L * (3.0L - 2.0L*clog(-u));
 
-      const long double cs[20] = {
+      const long double cs[] = {
         -3.47222222222222222222222222222222222e-03L,
          1.15740740740740740740740740740740741e-05L,
         -9.84189972285210380448475686570924666e-08L,
@@ -265,6 +277,7 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
         -3.98289777698948774786517290926462002e-15L,
          6.92336661830592905806820954095065870e-17L,
         -1.25527223044997727545846570912655367e-18L,
+#if LDBL_DIG > 18
          2.35375400276846523056441171414060379e-20L,
         -4.53639890345868701844750708901700830e-22L,
          8.94516967039264316712031170773304472e-24L,
@@ -276,92 +289,39 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
          7.28227228675776469531725636144432664e-34L,
         -1.57502264795800348718497893940378261e-35L,
          3.43354009248058933588797212016527038e-37L
+#endif
       };
 
-      return
-         cadd(c0,
-         cmul(u2, cadd(c1,
-         cmul(u2, cadd(cs[0],
-         cmul(u2, cadd(cs[1],
-         cmul(u2, cadd(cs[2],
-         cmul(u2, cadd(cs[3],
-         cmul(u2, cadd(cs[4],
-         cmul(u2, cadd(cs[5],
-         cmul(u2, cadd(cs[6],
-         cmul(u2, cadd(cs[7],
-         cmul(u2, cadd(cs[8],
-         cmul(u2, cadd(cs[9],
-         cmul(u2, cadd(cs[10],
-         cmul(u2, cadd(cs[11],
-         cmul(u2, cadd(cs[12],
-         cmul(u2, cadd(cs[13],
-         cmul(u2, cadd(cs[14],
-         cmul(u2, cadd(cs[15],
-         cmul(u2, cadd(cs[16],
-         cmul(u2, cadd(cs[17],
-         cmul(u2, cadd(cs[18],
-         cmul(u2, cs[19]))))))))))))))))))))))))))))))))))))))))));
+      std::complex<long double> sum(0.0L, 0.0L);
+
+      for (int i = sizeof(cs)/sizeof(cs[0]) - 1; i >= 0; i--) {
+         sum = cmul(u2, cadd(cs[i], sum));
+      }
+
+      // lowest order terms w/ different powers
+      sum = cadd(c0, cmul(u2, cadd(c1, sum)));
+
+      return sum;
    }
 
    std::complex<long double> u(0.0L, 0.0L), rest(0.0L, 0.0L);
 
-   if (az <= 1.0L) {
+   if (nz <= 1.0L) {
       u = -clog(1.0L - z);
-   } else { // az > 1.0L
-      auto arg = PI + pz;
-      if (arg > PI) { arg -= 2*PI; }
+   } else { // nz > 1.0L
+      const auto arg = pz > 0.0 ? pz - PI : pz + PI;
       const auto lmz = std::complex<long double>(lnz, arg); // clog(-z)
       u = -clog(1.0L - 1.0L/z);
-      rest = -lmz*(pow2(lmz)/6.0L + zeta2);
+      rest = -lmz*(sqr(lmz)/6.0L + zeta2);
    }
 
-   return
-      cadd(rest,
-      cmul(u, cadd(bf[0],
-      cmul(u, cadd(bf[1],
-      cmul(u, cadd(bf[2],
-      cmul(u, cadd(bf[3],
-      cmul(u, cadd(bf[4],
-      cmul(u, cadd(bf[5],
-      cmul(u, cadd(bf[6],
-      cmul(u, cadd(bf[7],
-      cmul(u, cadd(bf[8],
-      cmul(u, cadd(bf[9],
-      cmul(u, cadd(bf[10],
-      cmul(u, cadd(bf[11],
-      cmul(u, cadd(bf[12],
-      cmul(u, cadd(bf[13],
-      cmul(u, cadd(bf[14],
-      cmul(u, cadd(bf[15],
-      cmul(u, cadd(bf[16],
-      cmul(u, cadd(bf[17],
-      cmul(u, cadd(bf[18],
-      cmul(u, cadd(bf[19],
-      cmul(u, cadd(bf[20],
-      cmul(u, cadd(bf[21],
-      cmul(u, cadd(bf[22],
-      cmul(u, cadd(bf[23],
-      cmul(u, cadd(bf[24],
-      cmul(u, cadd(bf[25],
-      cmul(u, cadd(bf[26],
-      cmul(u, cadd(bf[27],
-      cmul(u, cadd(bf[28],
-      cmul(u, cadd(bf[29],
-      cmul(u, cadd(bf[30],
-      cmul(u, cadd(bf[31],
-      cmul(u, cadd(bf[32],
-      cmul(u, cadd(bf[33],
-      cmul(u, cadd(bf[34],
-      cmul(u, cadd(bf[35],
-      cmul(u, cadd(bf[36],
-      cmul(u, cadd(bf[37],
-      cmul(u, cadd(bf[38],
-      cmul(u, cadd(bf[39],
-      cmul(u, cadd(bf[40],
-      cmul(u, cadd(bf[41],
-      cmul(u, cadd(bf[42],
-      cmul(u, cadd(bf[43],
-      cmul(u, bf[44]))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+   std::complex<long double> sum(0.0L, 0.0L);
+
+   for (int i = sizeof(bf)/sizeof(bf[0]) - 1; i >= 0; i--) {
+      sum = cmul(u, cadd(bf[i], sum));
+   }
+
+   return cadd(rest, sum);
 }
 
 } // namespace flexiblesusy

@@ -20,12 +20,7 @@
 #include "standard_model_two_scale_low_scale_constraint.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "wrappers.hpp"
-#include "logger.hpp"
 #include "ew_input.hpp"
-#include "gsl_utils.hpp"
-#include "minimizer.hpp"
-#include "root_finder.hpp"
-#include "threshold_loop_functions.hpp"
 #include "weinberg_angle.hpp"
 
 #include <cmath>

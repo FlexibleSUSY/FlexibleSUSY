@@ -2,10 +2,9 @@
 #ifndef GUT_SCALE_RUNNER_H
 #define GUT_SCALE_RUNNER_H
 
-#include "logger.hpp"
-
 #include <cmath>
 #include <limits>
+#include <iostream>
 
 namespace flexiblesusy {
 
@@ -53,8 +52,8 @@ double GUT_scale_calculator<T>::calculateGUTScale(const T& rge) const
    if (std::fabs(diffBeta) > std::numeric_limits<double>::epsilon()) {
       gutScale = currentScale * exp((g1 - g2)/diffBeta);
    } else {
-      ERROR("can't calculate GUT scale because beta functions of g1"
-            " and g2 are equal to " << betaG1);
+      std::cerr << "can't calculate GUT scale because beta functions of g1"
+         " and g2 are equal to " << betaG1 << std::endl;
       gutScale = 1.0e12;
    }
 

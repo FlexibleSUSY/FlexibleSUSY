@@ -142,44 +142,44 @@ double b0(double p, double m1, double m2, double q) noexcept
    //  return B0(p*p, m1*m1, m2*m2).real();
 #endif
 
+   m1 = std::abs(m1);
+   m2 = std::abs(m2);
+   p = std::abs(p);
+   q = std::abs(q);
+
+   if (m1 > m2) {
+      std::swap(m1, m2);
+   }
+
    // protect against infrared divergence
    if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL)) {
       return 0.0;
    }
 
-   const double m12 = sqr(m1);
-   const double m22 = sqr(m2);
-   const double mMinSq = std::min(m12, m22);
-   const double mMaxSq = std::max(m12, m22);
-   const double pSq = sqr(p);
+   // p is not 0
+   if (p > 1.0e-5 * m2) {
+      const double m12 = sqr(m1), m22 = sqr(m2), p2 = sqr(p);
+      const double s = p2 - m22 + m12;
+      const std::complex<double> imin(m12, -EPSTOL);
+      const std::complex<double> x = std::sqrt(sqr(s) - 4.0 * p2 * imin);
+      const std::complex<double> xp  = (s + sign(s)*x) / (2*p2);
+      const std::complex<double> xm = imin / (xp*p2);
 
-   const double pTest = divide_finite(pSq, mMaxSq);
-   /// Decides level at which one switches to p=0 limit of calculations
-   const double pTolerance = 1.0e-10;
-
-   /// p is not 0
-   if (pTest > pTolerance) {
-      const double s = pSq - mMaxSq + mMinSq;
-      const std::complex<double> imin(mMinSq, -EPSTOL);
-      const std::complex<double> x = std::sqrt(sqr(s) - 4.0 * pSq * imin);
-      const std::complex<double> xPlus  = (s + sign(s)*x) / (2*pSq);
-      const std::complex<double> xMinus = imin / (xPlus*pSq);
-
-      return -2.0 * std::log(p / q) - fB(xPlus) - fB(xMinus);
+      return -2.0*std::log(p/q) - fB(xp) - fB(xm);
    }
 
    if (is_close(m1, m2, EPSTOL)) {
-      return -2.0 * std::log(std::abs(m1 / q));
+      return -2.0*std::log(m1/q);
    }
 
-   const double qSq = sqr(q);
-
-   if (mMinSq < 1.0e-30) {
-      return 1.0 - std::log(mMaxSq / qSq);
+   if (m1 < 1.0e-15) {
+      return 1.0 - 2.0*std::log(m2/q);
    }
 
-   return 1.0 - std::log(mMaxSq / qSq) + mMinSq * std::log(mMaxSq / mMinSq)
-      / (mMinSq - mMaxSq);
+   const double m12 = sqr(m1), m22 = sqr(m2);
+
+   return 1.0 - 2.0 * std::log(m2/q)
+        + 2.0 * m12 * std::log(m2/m1) / (m12 - m22);
 }
 
 /// Note that b1 is NOT symmetric in m1 <-> m2!!!
@@ -243,6 +243,11 @@ double b22(double p,  double m1, double m2, double q) noexcept
    double b22l = B00(p*p, m1*m1, m2*m2).real();
 #endif
 
+   p = std::abs(p);
+   m1 = std::abs(m1);
+   m2 = std::abs(m2);
+   q = std::abs(q);
+
    // protect against infrared divergence
    if (is_zero(p, EPSTOL) && is_zero(m1, EPSTOL) && is_zero(m2, EPSTOL))
       return 0.0;
@@ -251,20 +256,20 @@ double b22(double p,  double m1, double m2, double q) noexcept
    const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2);
    const double pTolerance = 1.0e-10;
 
-   if (p2 < pTolerance * std::max(m12, m22) ) {
+   if (p2 < pTolerance * std::max(m12, m22)) {
       // m1 == m2 with good accuracy
       if (is_close(m1, m2, EPSTOL)) {
-         return -m12 * std::log(sqr(m1 / q)) * 0.5 + m12 * 0.5;
+         return -m12 * std::log(m1/q) + m12 * 0.5;
       }
       // p == 0 limit
-      if (std::abs(m1) > EPSTOL && std::abs(m2) > EPSTOL) {
-         return 0.375 * (m12 + m22) - 0.25 *
-            (sqr(m22) * std::log(sqr(m2 / q)) - sqr(m12) *
-             std::log(sqr(m1 / q))) / (m22 - m12);
+      if (m1 > EPSTOL && m2 > EPSTOL) {
+         return 0.375 * (m12 + m22) - 0.5 *
+            (sqr(m22) * std::log(m2/q) -
+             sqr(m12) * std::log(m1/q)) / (m22 - m12);
       }
-      return (std::abs(m1) < EPSTOL)
-         ? 0.375 * m22 - 0.25 * m22 * std::log(sqr(m2 / q))
-         : 0.375 * m12 - 0.25 * m12 * std::log(sqr(m1 / q));
+      return (m1 < EPSTOL)
+         ? 0.375 * m22 - 0.5 * m22 * std::log(m2/q)
+         : 0.375 * m12 - 0.5 * m12 * std::log(m1/q);
    }
 
    const double b0Save = b0(p, m1, m2, q);
@@ -412,6 +417,63 @@ double d1_b0(double /* p2 */, double m2a, double m2b) noexcept
 
    return (m4a - m4b + 2. * m2a * m2b * std::log(m2b/m2a))
       /(2. * pow3(m2a - m2b));
+}
+
+double c00(double m1, double m2, double m3, double q) noexcept
+{  
+  // taken from Package X
+  using std::log;
+  const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3), q2 = sqr(q); 
+   
+  double ans = 0.;
+
+  if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)
+    && is_close(m3, 0., EPSTOL)) {
+      // IR singularity
+     ans =  0.;
+  } else if (is_close(m2, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m12);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m22);
+  } else if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)) {
+     ans = 3./8. + 1./4*log(q2/m32);
+  } else if (is_close(m1, 0., EPSTOL)) {
+     if (is_close(m2, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m22);
+     } else {
+        ans = 3./8 - m22*log(m22/m32)/(4*(m22-m32)) + 1./4*log(q2/m32);
+     }
+  } else if (is_close(m2, 0., EPSTOL)) {
+     if (is_close(m1, m3, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m12);
+     } else {
+        ans = 3./8 - m12*log(m12/m32)/(4*(m12-m32)) + 1./4*log(q2/m32);
+     }
+  } else if (is_close(m3, 0., EPSTOL)) {
+     if (is_close(m1, m2, EPSTOL)) {
+        ans = 1./8 + 1./4*log(q2/m12);
+     } else {
+        ans = 3./8 - m22*log(m12/m22)/(4*(m12-m22)) + 1./4*log(q2/m12);
+     }
+  } else if (is_close(m2, m3, EPSTOL)) {
+    if (is_close(m1, m2, EPSTOL)) {
+        ans = 1./4*log(q2/m12);
+    } else {
+        ans = (3*m12-m22)/(8*(m12-m22))
+            - 1./4*(sqr(m12)*log(m12/m22))/sqr(m12-m22) + 1./4*log(q2/m22);
+    }
+  } else if (is_close(m1, m2, EPSTOL)) {
+     ans = (3*m32-m12)/(8*(m32-m12)) - 1./4*(sqr(m32)*log(m32/m12))/sqr(m32-m12)
+         + 1./4*log(q2/m12);
+  } else if (is_close(m1, m3, EPSTOL)) {
+     ans = (3*m22-m12)/(8*(m22-m12)) - 1./4*(sqr(m22)*log(m22/m12))/sqr(m22-m12)
+         + 1./4*log(q2/m12);
+  } else {
+     ans = 3./8 - 1./4*sqr(m12)*log(m12/m32)/((m12-m22)*(m12-m32))
+         - 1./4*sqr(m22)*log(m22/m32)/((m22-m12)*(m22-m32)) + 1./4*log(q2/m32);
+  }
+
+  return ans;
 }
 
 } // namespace softsusy

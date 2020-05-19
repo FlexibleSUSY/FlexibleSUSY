@@ -1,0 +1,469 @@
+(* ::Package:: *)
+
+(* :Copyright:
+
+   ====================================================================
+   This file is part of FlexibleSUSY.
+
+   FlexibleSUSY is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published
+   by the Free Software Foundation, either version 3 of the License,
+   or (at your option) any later version.
+
+   FlexibleSUSY is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FlexibleSUSY.  If not, see
+   <http://www.gnu.org/licenses/>.
+   ====================================================================
+
+*)
+
+BeginPackage["FFMassiveVFormFactors`",
+   {"SARAH`", "TextFormatting`", "TreeMasses`", "Vertices`", "CXXDiagrams`","ColorMath`"}
+];
+
+FFMassiveVFormFactorsCreateInterface::usage = "";
+ff::usage = "";
+MassiveVIndices::usage = "";
+
+Begin["Private`"];
+
+(*Outline:
+1.  We assume that the input for the calculation is a list from Jobst
+    having the following format:
+    {list of external fields, list of lists of fields in vertices}
+    e.g.
+    {Fe,bar[Fe],VP,{bar[Fe],Ah,Fe},{Fe,Ah,bar[Fe]},{VP,bar[Fe],Fe}}
+    Sizes of those lists are arbitrary.
+2.  For each external color charged field I generate a random name for
+    the color index. This is done through
+    GenerateUniqueColorAssociationsForExternalParticles function
+    which takes list from Jobst and returns a association list,
+    e.g. \[LeftAssociation]1\[Rule]c22\[RightAssociation] meaning that external particle at position on in
+    Jobst list will have color index c22.
+3.  Final step. Take fields in vertices and pass them to SARAH`Vertex function.
+    Each vertex will get automatically generated indices starting from c1.
+    Using info the info from Jobst adjacency matrix and my association list
+    create new dummny indices and connect them between vertices.
+
+Limitations:
+1.  We asumme that there are only 3-particle vertices.*)
+
+(*  given a field will return it's indices,
+    e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
+GetFieldIndices[field_] :=
+   field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
+
+(*  given a field with indices will discard indices,
+    e.g. bar[Fd[{a,b}] -> bar[Fd] *)
+DropFieldIndices[field_] :=
+   field /. f_[_List] -> f;
+
+GetFieldColorIndex[field_/;TreeMasses`ColorChargedQ[field]]:=
+Module[{res},
+   res = GetFieldIndices[field];
+   res = Select[res, Vertices`SarahColorIndexQ];
+   Assert[Length[res] === 1];
+   res[[1]]
+];
+
+CalculateColorFactor[vertex_List] :=
+Module[{return},
+   return =
+      vertex // DropColorles;
+   If[return === {}, Return[1]];
+   return =
+      TakeOnlyColor @ return;
+   return = Times @@ return;
+   (* CSimplify[1] doesn't evaluate *)
+   If[return === 1,
+      1,
+      CSimplify[return]
+   ]
+];
+
+ColorStructureFreeQ[el_] :=
+FreeQ[el,
+   Subscript[Superscript[Superscript[ColorMath`CMt, List[__]], _], _] |
+      Superscript[ColorMath`CMf, List[__]] |
+      Superscript[ColorMath`CMd, List[__]] |
+      Superscript[ColorMath`CMo, List[__]] |
+      Subscript[Superscript[ColorMath`CM\[Delta], _], _] |
+      Superscript[ColorMath`CM\[CapitalDelta], List[_, _]]
+];
+
+DropColorles::notes = "Drop colorles vertices from the list of Vertex objets  ";
+DropColorles[vertices_List] :=
+DeleteCases[vertices,
+   el_ /; ColorStructureFreeQ[el]
+];
+
+
+TakeOnlyColor[vvvv__] :=
+Module[{result},
+   (* the generic structure of the Vertex "object" is
+      {{ParticleList},{{Coefficient 1, Lorentz 1},{Coefficient 2, Lorentz 2},...} *)
+   (* drop ParticleList *)
+   result = Drop[#, 1]& /@ vvvv;
+   result = (Transpose @ Drop[Transpose[#], -1])& /@ result;
+   result = result //.
+      __?ColorStructureFreeQ el_ /; !ColorStructureFreeQ[el] :> el //.
+      (el_  /; !ColorStructureFreeQ[el]) __?ColorStructureFreeQ  :> el;
+   result = DeleteCases[#, {0}]& /@ result;
+   (* There should be one, overal color factor for an entire vertex.
+      For example, both left and right handed parts should have it the same. *)
+   Assert[CountDistinct[#] === 1]& /@ result;
+   result = DeleteDuplicates /@ result;
+   result = Flatten[result, 2];
+   result
+];
+
+SARAHToColorMathSymbols[vertex_List] :=
+Module[{result},
+
+   result = vertex //.
+   SARAH`Lam[colIdx1_, colIdx2_, colIdx3_] :> 2 ColorMath`CMt[{colIdx1}, colIdx2, colIdx3] //.
+   SARAH`fSU3[colSeq__] :> ColorMath`CMf[colSeq];
+
+   (* if the result has Delta, we need to find out if it's adj. or fundamental *)
+   result = result /. SARAH`Delta[c1_?Vertices`SarahColorIndexQ, c2_?Vertices`SarahColorIndexQ] :>
+      If[getColorRep[Select[vertex[[1]], ! FreeQ[#, c1] &][[1]]] === T,
+         ColorMath`CMdelta[c1, c2]
+      ];
+   result = result /. SARAH`Delta[c1_?Vertices`SarahColorIndexQ, c2_?Vertices`SarahColorIndexQ] :>
+      If[getColorRep[Select[vertex[[1]], ! FreeQ[#, c1] &][[1]]] === O,
+         ColorMath`CMDelta[c1, c2]
+      ];
+
+   result
+];
+
+(* for SU(3) *)
+ColorN[expr_] :=
+   expr /. ColorMath`Nc -> 3 /. ColorMath`TR -> 1/2;
+
+(* connect color indices of field1 and field2 *)
+ConnectColorLines[field1_, field2_] :=
+Module[{r1 = getColorRep[field1], r2 = getColorRep[field2]},
+   Assert[r1 === r2];
+   Switch[r1,
+      S, 1,
+      T, ColorMath`CMdelta @@ (GetFieldColorIndex /@ {field1, field2}),
+      O, ColorMath`CMDelta @@ (GetFieldColorIndex /@ {field1, field2}),
+      (* for now we only deal with color scalars, triplets and octets *)
+      _, Abort[]
+   ]
+];
+
+(* coefficient of the generator *)
+StripSU3Generators[inP_, outP_, spec_, c_] :=
+Module[{temp, temp2, temp3},
+   (* SSS *)
+   If[getColorRep[inP] === S && getColorRep[outP] === S && getColorRep[spec] === S,
+      Return[c]
+   ];
+
+   (* TTS *)
+   If[getColorRep[inP] === T && getColorRep[outP] === T && getColorRep[spec] === S,
+      temp =  Coefficient[c, ColorMath`CMdelta @@ (GetFieldColorIndex /@ {outP, inP})];
+      If[temp === 0, Abort[]];
+      Return[temp];
+   ];
+
+   (* TTO *)
+   If[getColorRep[inP] === T && getColorRep[outP] === T && getColorRep[spec] === O,
+      temp =
+         Coefficient[c, ColorMath`CMt[{GetFieldColorIndex[spec]}, GetFieldColorIndex[outP], GetFieldColorIndex[inP]]];
+         If[temp === 0, Abort[]];
+         Return[temp];
+      ];
+
+   (* OOO *)
+   (* closed color triplet line gives
+      o^abc = Tr(Ta Tb Tc) = 1/2 TR (dabc + I fabc) *)
+   If[getColorRep[inP] === O && getColorRep[outP] === O && getColorRep[spec] === O,
+      (* expect f^{out in V} *)
+      temp =
+         Coefficient[
+            Expand[c] /.  a_ Superscript[ColorMath`CMo, {c1_,c2_,c3_}] +
+               b_ Superscript[ColorMath`CMo, {c1_,c3_,c2_}] /; a===-b :> a TR Superscript[ColorMath`CMf, {c1,c2,c3}],
+               Superscript[ColorMath`CMf, GetFieldColorIndex /@ {outP, inP, spec}]
+         ];
+      If[temp === 0,
+
+         temp = Coefficient[
+            c,
+            Superscript[ColorMath`CMo, GetFieldColorIndex /@ {outP, spec, inP}]
+         ];
+
+      ];
+      If[temp === 0,
+
+         temp = Coefficient[
+            c,
+            Superscript[ColorMath`CMo, GetFieldColorIndex /@ {outP, inP, spec}]
+         ];
+
+      ];
+         If[temp === 0, Abort[]];
+         Return[temp];
+   ];
+
+   Print["Unhandled color combination of external particles in form factor"];
+   Abort[];
+];
+
+FlipDeltaIdxRule[field1_, field2_] :=
+Module[{colIdx1 = GetFieldColorIndex[field1], colIdx2 = GetFieldColorIndex[field2],
+        colRep1 = getColorRep[field1], colRep2 = getColorRep[field2], repl},
+
+   Assert[colRep1 === colRep2];
+      repl = Switch[colRep1,
+      T, ColorMath`CMdelta[colIdx1, colIdx2] -> ColorMath`CMdelta[colIdx2, colIdx1],
+      O, ColorMath`CMDelta[colIdx1, colIdx2] -> ColorMath`CMDelta[colIdx2, colIdx1],
+      _, Abort[]
+   ];
+   repl
+];
+
+SortColorDeltas[inP_, outP_, V_, Fin_, Fout_, SIn_, Sout_] :=
+Module[{
+   inPCCharge = getColorRep[inP],
+   outPCCharge = getColorRep[outP],
+   VCCharge = getColorRep[V],
+   FCCharge = getColorRep[Fout],
+   SCCharge = getColorRep[Sout],
+   rule
+   },
+   rule = Switch[{inPCCharge, VCCharge, SCCharge, FCCharge},
+      {T, S, T, S}, {
+         FlipDeltaIdxRule[inP, SIn],
+         FlipDeltaIdxRule[Sout, outP],
+         FlipDeltaIdxRule[SIn, Sout]
+      },
+      {T, S, S, T}, {
+         FlipDeltaIdxRule[inP, Fin],
+         FlipDeltaIdxRule[Fout, outP]
+      },
+      (* closed color loop *)
+      {S, S, T, T}, {
+         FlipDeltaIdxRule[SIn, Fin],
+         FlipDeltaIdxRule[Fout, Sout],
+         FlipDeltaIdxRule[Sout, SIn],
+         FlipDeltaIdxRule[Fin, Fout]
+      },
+      {T, O, S, T}, {
+         FlipDeltaIdxRule[inP, Fin],
+         FlipDeltaIdxRule[Fout, outP]
+      },
+      {T, O, T, S},  {
+         FlipDeltaIdxRule[inP, SIn],
+         FlipDeltaIdxRule[Sout, outP],
+         (* this is fishy *)
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {SIn, Sout})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Sout, SIn})]
+      },
+      {T, O, T, O}, {
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {SIn, Fin})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Fin, SIn})],
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Fout, Sout})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Sout, Fout})],
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {SIn, Sout})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Sout, SIn})],
+         ColorMath`CMf[GetFieldColorIndex /@ {Fin, Fout, V}] -> ColorMath`CMf[GetFieldColorIndex /@ {Fout, Fin, V}]
+      },
+      {O, O, T, T}, {
+         FlipDeltaIdxRule[Sout, SIn],
+         FlipDeltaIdxRule[Fin, Fout],
+         ColorMath`CMt[{GetFieldColorIndex[inP]}, Sequence @@ (GetFieldColorIndex /@ {SIn, Fin})] ->
+         ColorMath`CMt[{GetFieldColorIndex[inP]}, Sequence @@ (GetFieldColorIndex /@ {Fin, SIn})],
+         ColorMath`CMt[{GetFieldColorIndex[outP]}, Sequence @@ (GetFieldColorIndex /@ {Fout, Sout})] ->
+         ColorMath`CMt[{GetFieldColorIndex[outP]}, Sequence @@ (GetFieldColorIndex /@ {Sout, Fout})],
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Sout, SIn})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {SIn, Sout})],
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Fin, Fout})] ->
+         ColorMath`CMt[{GetFieldColorIndex[V]}, Sequence @@ (GetFieldColorIndex /@ {Fout, Fin})]
+      },
+      _, {}
+   ];
+   rule
+];
+
+MyReIm[z_] := If[$VersionNumber >= 10.1,
+      ReIm[z],
+      {Re[z], Im[z]}
+   ];
+
+MyVertex[particles_List] := MyVertex[particles] = SARAH`Vertex[particles];
+
+MassiveVIndices[V_] :=
+   Module[{name = CXXNameOfField[V], dim = TreeMasses`GetDimension[V]},
+      (* we expect that the gauge group from which massive vector bosons come from is broken,
+         i.e. there is no index *)
+      Assert[dim === 1];
+
+      "template<>\n" <>
+      "typename field_indices<" <> name <> ">::type\n" <>
+      "default_indices_for_spectator<" <> name <> "> (void)\n" <>
+      "{\n" <>
+         "return {};\n" <>
+      "}\n"
+   ];
+
+FFMassiveVFormFactorsCreateInterface[inFermion_ -> outFermion_, spectator_, loopParticles_List] :=
+    Module[{prototype, definition,
+            numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[inFermion],
+            numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[outFermion],
+            numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[spectator]},
+
+      prototype =
+         "std::valarray<std::complex<double>> calculate_" <> CXXNameOfField[inFermion] <>
+            "_" <> CXXNameOfField[outFermion] <> "_" <> CXXNameOfField[spectator] <> "_form_factors" <>
+            " (\n" <>
+            If[TreeMasses`GetDimension[inFermion] =!= 1,
+               "   int generationIndex1, ",
+               " "
+            ] <>
+            If[TreeMasses`GetDimension[outFermion] =!= 1,
+               " int generationIndex2, ",
+               " "
+            ] <>
+            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model )";
+
+      definition =
+          prototype <> "{\n" <>
+            IndentText[
+               "context_base context {model};\n" <>
+               "std::array<int, " <> ToString @ numberOfIndices1 <> "> indices1 = {" <>
+                     (* TODO: Specify indices correctly *)
+                       If[TreeMasses`GetDimension[inFermion] =!= 1,
+                          " generationIndex1" <>
+                          If[numberOfIndices1 =!= 1,
+                             StringJoin @ Table[", 0", {numberOfIndices1-1}],
+                             ""] <> " ",
+                          If[numberOfIndices1 =!= 0,
+                             StringJoin @ Riffle[Table[" 0", {numberOfIndices1}], ","] <> " ",
+                             ""]
+                         ] <> "};\n" <>
+                   "std::array<int, " <> ToString @ numberOfIndices2 <>
+                     "> indices2 = {" <>
+                       If[TreeMasses`GetDimension[outFermion] =!= 1,
+                          " generationIndex2" <>
+                          If[numberOfIndices2 =!= 1,
+                             StringJoin @ Table[", 0", {numberOfIndices2-1}],
+                             ""] <> " ",
+                          If[numberOfIndices2 =!= 0,
+                             StringJoin @ Riffle[Table[" 0", {numberOfIndices2}], ","] <> " ",
+                             ""]
+                         ] <> "};\n\n" <>
+
+               "std::valarray<std::complex<double>> val {0.0, 0.0};\n\n" <>
+
+               StringJoin[
+                  ("val += std::complex<double> " <> (ToString @ N[MyReIm@ColorN[#[[2,1]]], 16]) <> " * FFMassiveVVertexCorrectionFS<" <>
+                   StringJoin @ Riffle[CXXDiagrams`CXXNameOfField /@ {inFermion, outFermion, spectator, #[[1,1]], #[[1,2]]}, ","]  <>
+                   ">::value(indices1, indices2, context);\n") & /@ loopParticles
+               ] <> "\n" <>
+
+               "return val;"
+
+            ] <> "\n}\n\n";
+
+    {prototype <> ";", definition}
+  ];
+
+(* if t is TreeMasses`IsScalar then returns list of scalars and anti-scalar, etc. *)
+getParticlesOfType[t_] :=
+    DeleteDuplicates@Join[#, CXXDiagrams`LorentzConjugate /@ #]& @
+      Select[TreeMasses`GetParticles[], t];
+
+vertexNonZero[vertex_] :=
+    Transpose[Drop[vertex, 1]][[1]] =!= {0,0};
+
+vertexNonZeroS[vertex_] :=
+    Transpose[Drop[vertex, 1]][[1]] =!= {0};
+
+VertexIsNonZeroQ[vertex_] :=
+   Module[{},
+      True
+   ];
+
+
+singleMassiveDiagram[inFermion_, outFermion_, spectator_, F_?TreeMasses`IsFermion, S_?TreeMasses`IsScalar] :=
+   Module[{FBarFjSBar, FiBarFS, SBarSVBar, FBarFVBar, FjBarFjVBar, FiBarFiVBar, v1, v2, v3, v4, v5, v6, colorIndexAssociation, p},
+
+      On[Assert];
+      (* calculation of color coefficients  for massive vector bosons is correct only if they are color singlets *)
+      Assert[IsMassless[spectator] || !ColorChargedQ[spectator]];
+
+      (* if the electric charge of an incomind particle doesn't equal to the sum of charges of outgoing ones,
+         return an {} *)
+      If[TreeMasses`GetElectricCharge[inFermion] =!= Plus @@ (TreeMasses`GetElectricCharge /@ {S,F}),
+         Return[{}]
+      ];
+
+      colorIndexAssociation =
+         If[TreeMasses`ColorChargedQ[#],
+            If[TreeMasses`GetDimension[#] === 1,
+               #[{Unique["ct"]}],
+               #[{Unique["gt"], Unique["ct"]}]
+            ], #
+         ]& /@ {outFermion, F, S, F, S, inFermion, spectator};
+
+      p = colorIndexAssociation;
+      p = {p[[6]], p[[1]], p[[7]], p[[4]], p[[2]], p[[5]], p[[3]]};
+
+      v1 = {CXXDiagrams`LorentzConjugate[F], inFermion, CXXDiagrams`LorentzConjugate[S]};
+      FBarFjSBar = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[p[[4]]], p[[1]], CXXDiagrams`LorentzConjugate[p[[6]]]}];
+      v2 = {CXXDiagrams`LorentzConjugate[outFermion], F, S};
+      FiBarFS = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[p[[2]]], p[[5]], p[[7]]}];
+      v3 = {CXXDiagrams`LorentzConjugate[S], S, CXXDiagrams`LorentzConjugate[spectator]};
+      SBarSVBar = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[p[[7]]], p[[6]], CXXDiagrams`LorentzConjugate[p[[3]]]}];
+      v4 = {CXXDiagrams`LorentzConjugate[F], F, CXXDiagrams`LorentzConjugate[spectator]};
+      FBarFVBar = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[p[[5]]], p[[4]], CXXDiagrams`LorentzConjugate[p[[3]]]}];
+
+      v5 = {CXXDiagrams`LorentzConjugate[inFermion], inFermion, CXXDiagrams`LorentzConjugate[spectator]};
+      FjBarFjVBar = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[inFermion], inFermion, CXXDiagrams`LorentzConjugate[spectator]}];
+
+      v6 = {CXXDiagrams`LorentzConjugate[outFermion], outFermion, CXXDiagrams`LorentzConjugate[spectator]};
+      FiBarFiVBar = SARAHToColorMathSymbols@SARAH`Vertex[{CXXDiagrams`LorentzConjugate[outFermion], outFermion, CXXDiagrams`LorentzConjugate[spectator]}];
+
+      If[vertexNonZero[FBarFjSBar] && vertexNonZero[FiBarFS]
+         && (vertexNonZeroS[SBarSVBar] || vertexNonZero[FBarFVBar] || vertexNonZero[FiBarFiVBar] || vertexNonZero[FjBarFjVBar]),
+            Return[
+               {StripSU3Generators[p[[1]], p[[2]], p[[3]],
+                  ColorMath`CSimplify[CalculateColorFactor[{FBarFjSBar, FiBarFS, SBarSVBar}] ConnectColorLines[p[[5]], p[[4]]]]
+                  ]
+               , (*{v1, v2, v3}*){v1, v2, v3, v4}}
+            ]
+         ];
+
+      Return[{}];
+   ];
+
+
+ff[inFermion_ -> outFermion_, spectator_] :=
+   Module[{scalars, fermions, internalParticles = {}, temp},
+
+      scalars = getParticlesOfType[TreeMasses`IsScalar];
+      fermions = getParticlesOfType[TreeMasses`IsFermion];
+
+      Map[
+         (temp = singleMassiveDiagram[inFermion, outFermion, spectator, #[[1]], #[[2]]];
+         If[temp =!= {},
+            AppendTo[internalParticles, {#, temp}]
+         ])&,
+         Tuples[{fermions, scalars}]
+      ];
+
+      internalParticles
+   ];
+
+(* TODO: add other topologies? *)
+
+End[];
+EndPackage[];

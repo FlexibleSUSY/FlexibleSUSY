@@ -35,6 +35,7 @@ double b0(double p, double m1, double m2, double q) noexcept;
 double b1(double p, double m1, double m2, double q) noexcept;
 double b22(double p,  double m1, double m2, double q) noexcept;
 double c0(double m1, double m2, double m3) noexcept;
+double c00(double m1, double m2, double m3, double q) noexcept;
 double d27(double m1, double m2, double m3, double m4) noexcept;
 double d0(double m1, double m2, double m3, double m4) noexcept;
 double ffn(double p, double m1, double m2, double q) noexcept;

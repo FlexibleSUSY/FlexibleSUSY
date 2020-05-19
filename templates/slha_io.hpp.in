@@ -109,11 +109,8 @@ public:
    static void fill_imminpar_tuple(@ModelName@_input_parameters&, int, double);
    static void fill_imextpar_tuple(@ModelName@_input_parameters&, int, double);
 
-   template <class Model>
-   static void fill_slhaea(SLHAea::Coll&, const @ModelName@_slha<Model>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&);
-
-   template <class Model>
-   static SLHAea::Coll fill_slhaea(const @ModelName@_slha<Model>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&);
+   template <class... Ts>
+   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&);
 
 private:
    SLHA_io slha_io; ///< SLHA io class
@@ -147,37 +144,26 @@ void @ModelName@_slha_io::fill(@ModelName@_slha<Model>& model) const
    fill_physical(model.get_physical_slha());
 }
 
-template <class Model>
-void @ModelName@_slha_io::fill_slhaea(
-   SLHAea::Coll& slhaea, const @ModelName@_slha<Model>& model,
-   const softsusy::QedQcd& qedqcd, const @ModelName@_scales& scales,
+/**
+ * Convenience wrapper function to fill all information at once
+ */
+template <class... Ts>
+void @ModelName@_slha_io::fill(
+   const std::tuple<Ts...>& models,
+   const softsusy::QedQcd& qedqcd,
+   const @ModelName@_scales& scales,
    const @ModelName@_observables& observables)
 {
-   @ModelName@_slha_io slha_io;
-   const @ModelName@_input_parameters& input = model.get_input();
+   const auto& model = std::get<0>(models);
    const auto& problems = model.get_problems();
-   const bool error = problems.have_problem();
 
-   slha_io.set_spinfo(problems);
-   slha_io.set_sminputs(qedqcd);
-   slha_io.set_input(input);
-   if (!error) {
-      slha_io.set_spectrum(model);
-      slha_io.set_extra(model, scales, observables);
+   set_spinfo(problems);
+   set_sminputs(qedqcd);
+   set_input(model.get_input());
+   if (!problems.have_problem()) {
+      set_spectrum(models);
+      set_extra(model, scales, observables);
    }
-
-   slhaea = slha_io.get_slha_io().get_data();
-}
-
-template <class Model>
-SLHAea::Coll @ModelName@_slha_io::fill_slhaea(
-   const @ModelName@_slha<Model>& model, const softsusy::QedQcd& qedqcd,
-   const @ModelName@_scales& scales, const @ModelName@_observables& observables)
-{
-   SLHAea::Coll slhaea;
-   @ModelName@_slha_io::fill_slhaea(slhaea, model, qedqcd, scales, observables);
-
-   return slhaea;
 }
 
 /**

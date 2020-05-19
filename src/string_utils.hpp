@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 
 namespace flexiblesusy {
 
@@ -38,12 +37,6 @@ std::string concat(const std::vector<std::string>& strings, const T& separator)
       result += s + separator;
 
    return result;
-}
-
-template <typename T>
-std::string to_string(T a)
-{
-   return boost::lexical_cast<std::string>(a);
 }
 
 } // namespace flexiblesusy

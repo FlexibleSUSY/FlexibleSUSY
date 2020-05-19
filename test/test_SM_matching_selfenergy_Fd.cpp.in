@@ -16,7 +16,9 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#define BOOST_TEST_MODULE Test NPointFunctions
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "Test SM matching selfenergy Fd"
+
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 
@@ -56,7 +58,7 @@ namespace npointfunctions
 
 namespace
 {
-static constexpr int number_of_random_samples = 100;
+static constexpr int number_of_random_samples = 50;
 }
 
 BOOST_AUTO_TEST_SUITE( selfenergy_test_suite,
@@ -66,6 +68,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_SM_dataset( number_of_random_samples ),
   index, FS_TEST_SM_PARAMETER_SEQUENCE )
 {
+	Loop_library::set(0);
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );

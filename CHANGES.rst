@@ -4,6 +4,12 @@ FlexibleSUSY 2.5.0 [not released yet]
 New features
 ------------
 
+* Interface to one loop integrals was changed to a new one, which allows
+  switching of loop library at run time. See
+  `doc/add_loop_library.rst <doc/add_loop_library.rst>`_ and
+  `src/loop_libraries/loop_library_interface.hpp <src/loop_libraries/loop_library_interface.hpp>`_
+  for further details.
+
 * Added calculation of :math:`$b \to s \gamma$`.  Currently only
   diagrams with scalars and fermions in the loop are supported.  See
   `doc/observables/b_physics.rst <doc/observables/b_physics.rst>`_ for
@@ -19,6 +25,11 @@ New features
 Changes
 -------
 
+* Changed code organization of NPointFunctions module: improved speed of
+  ``C++`` calculations, improved maintainability of the metacode.
+
+* Added support of ``COLLIER`` loop library.
+
 * Improved performance of ``flexiblesusy-config`` script.
 
 * Improved performance of 1-loop threshold functions from
@@ -31,6 +42,22 @@ Changes
 * When installing the dependencies with Conan_, the `Eigen 3`_ library
   from the Conan repository is preferred over the one installed in the
   system directories.
+
+* Improved performance and compile-time of 2-loop MSSM threshold
+  corrections.
+
+* Updated GM2Calc to version 1.6.0.
+
+* Improved performance of 1- and 2-loop threshold correction loop
+  functions used in HSSUSY.
+
+Fixed bugs
+----------
+
+* [commit 6d4310f6a]: Fix linking error with LoopTools on some
+  platforms by linking with libquadmath when necessary.
+
+* Fixed numerical instability of SOFTSUSY's B0 function.
 
 FlexibleSUSY 2.4.2 [April, 10 2020]
 ===================================
@@ -84,7 +111,9 @@ New features
 
 * Implementation of the 4-loop O(αs^4) contributions to the running
   MS-bar top mass of the Standard Model from [`1604.01134
-  <https://arxiv.org/abs/1604.01134>`_].  The contributions can be
+  <https://arxiv.org/abs/1604.01134>`_, `1502.01030
+  <https://arxiv.org/abs/1502.01030>`_, `1606.06754
+  <https://arxiv.org/abs/1606.06754>`_].  The contributions can be
   enabled in SM-like models by setting the flag::
 
       UseYukawa4LoopQCD = True
@@ -383,12 +412,12 @@ New features
           {g1 -> 0, g2 -> 0}, (* applied to 2L beta functions *)
           {g1 -> 0, g2 -> 0}  (* applied to 3L beta functions *)
       };
-   
+
       FSSelfEnergyRules = {
           (* applied to 1L self-energies/tadpoles *)
           { (Mass|Mass2)[VZ|gZ] -> 0 }
       };
-   
+
       (* applied to all vertices *)
       FSVertexRules = { g1 -> 0, g2 -> 0 };
 
@@ -1230,7 +1259,7 @@ FlexibleSUSY-1.6.0 [August, 27 2016]
   * ``FlexibleSUSY[13] = 0`` and ``FlexibleSUSY[4] > 0``: 1L QCD correction
   * ``FlexibleSUSY[13] = 1`` and ``FlexibleSUSY[4] > 1``: 2L QCD correction
   * ``FlexibleSUSY[13] = 2`` and ``FlexibleSUSY[4] > 2``: 3L QCD correction
-   
+
 * Feature [commits 98bc536, e8fd56a]: Speed up of the RG running in
   models with very complicated beta functions.
 
@@ -1850,7 +1879,7 @@ FlexibleSUSY-1.1.0 [May, 31 2015]
   their variants.  The method for the calculation of the weak mixing
   angle can be selected via the ``FSWeakMixingAngleInput`` variable in
   the FlexibleSUSY model file.
-  
+
   Example::
 
       FSWeakMixingAngleInput = FSFermiConstant; (* or FSMassW *)
