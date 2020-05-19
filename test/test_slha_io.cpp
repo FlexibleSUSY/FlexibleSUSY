@@ -218,6 +218,44 @@ BOOST_AUTO_TEST_CASE( test_read_scale_from_block )
    BOOST_CHECK_EQUAL(matrix(1,1), 14.0);
 }
 
+BOOST_AUTO_TEST_CASE( test_write_read_matrix )
+{
+   const double scale = 100.0;
+   const char* block_name = "Matrix";
+
+   Eigen::MatrixXd matrix(2,2);
+   matrix << 1, 2, 3, 4;
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name, matrix, "M", scale);
+
+   Eigen::MatrixXd new_matrix(2,2);
+   const double new_scale = slha_io.read_block(block_name, new_matrix);
+
+   BOOST_CHECK_EQUAL(matrix(0,0), new_matrix(0,0));
+   BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
+   BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
+   BOOST_CHECK_EQUAL(matrix(1,1), new_matrix(1,1));
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_vector )
+{
+   const double scale = 100.0;
+   const char* block_name = "Vector";
+
+   Eigen::VectorXd vector(2);
+   vector << 1, 2;
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name, vector, "V", scale);
+
+   Eigen::VectorXd new_vector(2);
+   const double new_scale = slha_io.read_block(block_name, new_vector);
+
+   BOOST_CHECK_EQUAL(vector(0), new_vector(0));
+   BOOST_CHECK_EQUAL(vector(1), new_vector(1));
+}
+
 /**
  * Creates a SLHAea block with name `TestBlock' with
  *  `number_of_entries' entries of the form
