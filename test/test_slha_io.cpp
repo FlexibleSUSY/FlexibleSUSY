@@ -232,6 +232,38 @@ BOOST_AUTO_TEST_CASE( test_write_read_matrix )
    Eigen::MatrixXd new_matrix(2,2);
    const double new_scale = slha_io.read_block(block_name, new_matrix);
 
+   BOOST_CHECK_EQUAL(scale, new_scale);
+   BOOST_CHECK_EQUAL(matrix(0,0), new_matrix(0,0));
+   BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
+   BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
+   BOOST_CHECK_EQUAL(matrix(1,1), new_matrix(1,1));
+}
+
+BOOST_AUTO_TEST_CASE( test_write_read_matrix_complex )
+{
+   const double scale = 100.0;
+   const char* block_name_real = "Matrix";
+   const char* block_name_imag = "ImMatrix";
+   const std::complex<double> i(0.0, 1.0);
+
+   Eigen::MatrixXcd matrix(2,2);
+   matrix << std::complex<double>(1.0,1.0),
+             std::complex<double>(2.0,2.0),
+             std::complex<double>(3.0,3.0),
+             std::complex<double>(4.0,4.0);
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name_real, matrix, "M", scale);
+   slha_io.set_block(block_name_imag, matrix, "M", scale);
+
+   Eigen::MatrixXd new_matrix_real(2,2), new_matrix_imag(2,2);
+   const double new_scale_real = slha_io.read_block(block_name_real, new_matrix_real);
+   const double new_scale_imag = slha_io.read_block(block_name_imag, new_matrix_imag);
+
+   Eigen::MatrixXcd new_matrix = new_matrix_real + new_matrix_imag*i;
+
+   BOOST_CHECK_EQUAL(scale, new_scale_real);
+   BOOST_CHECK_EQUAL(scale, new_scale_imag);
    BOOST_CHECK_EQUAL(matrix(0,0), new_matrix(0,0));
    BOOST_CHECK_EQUAL(matrix(0,1), new_matrix(0,1));
    BOOST_CHECK_EQUAL(matrix(1,0), new_matrix(1,0));
@@ -252,6 +284,7 @@ BOOST_AUTO_TEST_CASE( test_write_read_vector )
    Eigen::VectorXd new_vector(2);
    const double new_scale = slha_io.read_block(block_name, new_vector);
 
+   BOOST_CHECK_EQUAL(scale, new_scale);
    BOOST_CHECK_EQUAL(vector(0), new_vector(0));
    BOOST_CHECK_EQUAL(vector(1), new_vector(1));
 }
