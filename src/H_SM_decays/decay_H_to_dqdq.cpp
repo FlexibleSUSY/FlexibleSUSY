@@ -22,10 +22,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
       throw std::runtime_error("Error in H->ddbar: down quarks cannot be massless");
    }
-   const auto xOS = std::pow(mdqOS/mHOS, 2);
-   const auto xDR = std::pow(mdqDR/mHOS, 2);
-   const auto betaOS = sqrt(1. - 4.*xOS);
-   const auto betaDR = sqrt(1. - 4.*xDR);
+   const auto xOS = Sqr(mdqOS/mHOS);
+   const auto xDR = Sqr(mdqDR/mHOS);
+   const auto betaOS = std::sqrt(1. - 4.*xOS);
+   const auto betaDR = std::sqrt(1. - 4.*xDR);
 
    // TODO: add off-shell decays?
    if (mHOS < 2.*mdqDR) {
@@ -47,9 +47,9 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
       calc_deltaqq(alpha_s_red, Nf);
 
    const double deltaqqDRQED =
-      17./4. * alpha_red * pow(dq::electric_charge, 2);
+      17./4. * alpha_red * Sqr(dq::electric_charge);
    const double deltaqqOSQED =
-      alpha_red * pow(dq::electric_charge, 2) * calc_DeltaH(betaOS);
+      alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
 
    // chiral breaking correctios
    // TODO: probably shouldn't be applied in case of CP-breaking
@@ -71,10 +71,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto indices = concatenate(indexIn, indexOut1, indexOut2);
    const auto HBBbarVertexDR = Vertex<H, bar<dq>::type, dq>::evaluate(indices, context);
 
-   const auto amp2DR = std::pow(mHOS, 2) * std::pow(betaDR, 2) *
+   const auto amp2DR = Sqr(mHOS) * Sqr(betaDR) *
                2.*std::norm(HBBbarVertexDR.left());
-   const auto amp2OS = std::pow(mHOS, 2) * std::pow(betaOS, 2) *
-                2.*std::norm(HBBbarVertexDR.left()) * std::pow(mdqOS / mdqDR, 2);
+   const auto amp2OS = Sqr(mHOS) * Sqr(betaOS) *
+                2.*std::norm(HBBbarVertexDR.left()) * Sqr(mdqOS / mdqDR);
 
    return flux * color_factor *
           (

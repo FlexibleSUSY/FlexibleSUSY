@@ -50,7 +50,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    }
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
    const auto ghZZ =
-      Vertex<Z, Z, H>::evaluate(indices, context).value() * std::pow(mZOS/mZ, 2);
+      Vertex<Z, Z, H>::evaluate(indices, context).value() * Sqr(mZOS/mZ);
 
    res *= std::norm(ghZZ);
 

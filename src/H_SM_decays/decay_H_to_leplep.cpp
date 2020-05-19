@@ -17,14 +17,14 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(1., Sqr(mL1OS/mHOS), Sqr(mL2OS/mHOS)));
 
    // matrix element squared
-   const auto xOS = std::pow(mL1OS / mHOS, 2);
+   const auto xOS = Sqr(mL1OS / mHOS);
    const auto betaOS = sqrt(1. - 4. * xOS);
    const auto indices = concatenate(indexIn, indexOut1, indexOut2);
    const auto HLLbarVertexDR =
       Vertex<H, bar<lep>::type, lep>::evaluate(indices, context);
-   const auto amp2OS = std::pow(mHOS, 2) * std::pow(betaOS, 2) * 2. *
+   const auto amp2OS = Sqr(mHOS) * Sqr(betaOS) * 2. *
                        std::norm(HLLbarVertexDR.left()) *
-                       std::pow(mL1OS / mL1DR, 2);
+                       Sqr(mL1OS / mL1DR);
 
    // flux * phase space factor * symmetry factor * matrix element^2
    const double res = 0.5 * ps * amp2OS / mHOS;

@@ -22,6 +22,8 @@
 #include <complex>
 #include <map>
 
+#include "wrappers.hpp"
+
 namespace flexiblesusy {
 
 namespace effective_couplings {
@@ -51,7 +53,7 @@ std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data();
 
 template<typename T>
 T KallenLambda(T x, T y, T z) {
-   return std::pow(x-y-z, 2) - 4*y*z;
+   return Sqr(x-y-z) - 4*y*z;
 }
 
 } // namespace effective_couplings

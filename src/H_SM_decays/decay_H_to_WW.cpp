@@ -22,11 +22,11 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    else if (4 * x > 1.0) {
       const auto vev = context.model.VEV();
 
-      res = 3.0 / (128 * std::pow(Pi, 3)) * mHOS / Sqr(vev) * RT(x);
+      res = 3.0 / (128 * Power3(Pi)) * mHOS / Sqr(vev) * RT(x);
 
       const auto indices = concatenate(indexOut2, indexOut1, indexIn);
       const auto ghWW =
-         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value() * std::pow(mWOS/mW, 2);
+         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value() * Sqr(mWOS/mW);
       res *= std::norm(ghWW);
 
    // two-body decay for mH > 2 mW
