@@ -242,6 +242,11 @@ void process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double val
    }
 }
 
+int column_major_index(int r, int c, int /* rows */ , int cols)
+{
+   return c*cols + r;
+}
+
 } // anonymous namespace
 
 namespace detail {
@@ -357,7 +362,7 @@ std::string format_matrix_imag(const std::string& name, const T* a, const std::s
 
    for (int i = 1; i <= rows; ++i) {
       for (int k = 1; k <= cols; ++k) {
-         const int idx = (k-1)*cols + (i-1);
+         const int idx = column_major_index(i-1, k-1, rows, cols);
          ss << FORMAT_MIXING_MATRIX(i, k, std::imag(a[idx]),
                ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
       }
@@ -835,7 +840,7 @@ void SLHA_io::set_matrix(const std::string& name, const double* a, const std::st
 
    for (int i = 1; i <= rows; ++i) {
       for (int k = 1; k <= cols; ++k) {
-         const int idx = (k-1)*cols + (i-1);
+         const int idx = column_major_index(i-1, k-1, rows, cols);
          ss << FORMAT_MIXING_MATRIX(i, k, a[idx],
                (symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")"));
       }
@@ -852,7 +857,7 @@ void SLHA_io::set_matrix(const std::string& name, const std::complex<double>* a,
 
    for (int i = 1; i <= rows; ++i) {
       for (int k = 1; k <= cols; ++k) {
-         const int idx = (k-1)*cols + (i-1);
+         const int idx = column_major_index(i-1, k-1, rows, cols);
          ss << FORMAT_MIXING_MATRIX(i, k, std::real(a[idx]),
                ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
       }
