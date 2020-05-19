@@ -244,6 +244,71 @@ void process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double val
 
 } // anonymous namespace
 
+namespace detail {
+
+int to_int(const std::string& str)
+{
+   int i = 0;
+
+   try {
+      i = std::stoi(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return i;
+}
+
+double to_double(const std::string& str)
+{
+   double d = 0.0;
+
+   try {
+      d = std::stod(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return d;
+}
+
+bool read_scale(const SLHAea::Line& line, double& scale)
+{
+   if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
+      scale = to_double(line[3]);
+      return true;
+   }
+   return false;
+}
+
+template <typename T>
+double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* a, int len)
+{
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+
+   double scale = 0.;
+
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         detail::read_scale(line, scale);
+
+         if (line.is_data_line() && line.size() >= 2) {
+            const int i = detail::to_int(line[0]) - 1;
+            if (0 <= i && i < len) {
+               a[i] = detail::to_double(line[1]);
+            }
+         }
+      }
+
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
+   }
+
+   return scale;
+}
+
+} // namespace detail
+
 void SLHA_io::clear()
 {
    data.clear();
@@ -323,11 +388,7 @@ void SLHA_io::read_from_stream(std::istream& istr)
  */
 bool SLHA_io::read_scale(const SLHAea::Line& line, double& scale)
 {
-   if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
-      scale = to_double(line[3]);
-      return true;
-   }
-   return false;
+   return detail::read_scale(line, scale);
 }
 
 void SLHA_io::read_modsel()
@@ -645,28 +706,23 @@ void SLHA_io::write_to_stream(std::ostream& ostr) const
 
 int SLHA_io::to_int(const std::string& str)
 {
-   int i = 0;
-
-   try {
-      i = std::stoi(str);
-   } catch (std::exception& e) {
-      throw ReadError(e.what());
-   }
-
-   return i;
+   return detail::to_int(str);
 }
 
 double SLHA_io::to_double(const std::string& str)
 {
-   double d = 0.0;
-
-   try {
-      d = std::stod(str);
-   } catch (std::exception& e) {
-      throw ReadError(e.what());
-   }
-
-   return d;
+   return detail::to_double(str);
 }
+
+double SLHA_io::read_vector(const std::string& block_name, double* a, int len) const
+{
+   return detail::read_vector_(data, block_name, a, len);
+}
+
+double SLHA_io::read_vector(const std::string& block_name, std::complex<double>* a, int len) const
+{
+   return detail::read_vector_(data, block_name, a, len);
+}
+
 
 } // namespace flexiblesusy

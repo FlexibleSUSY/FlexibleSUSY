@@ -160,6 +160,8 @@ private:
    double read_matrix(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    template <class Derived>
    double read_vector(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
+   double read_vector(const std::string&, double*, int) const;
+   double read_vector(const std::string&, std::complex<double>*, int) const;
 };
 
 /**
@@ -209,28 +211,7 @@ double SLHA_io::read_matrix(const std::string& block_name, Eigen::PlainObjectBas
 template <class Derived>
 double SLHA_io::read_vector(const std::string& block_name, Eigen::PlainObjectBase<Derived>& vector) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
-
-   const int rows = vector.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         read_scale(line, scale);
-
-         if (line.is_data_line() && line.size() >= 2) {
-            const int i = to_int(line[0]) - 1;
-            if (0 <= i && i < rows) {
-               vector(i) = to_double(line[1]);
-            }
-         }
-      }
-
-      ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
-   }
-
-   return scale;
+   return read_vector(block_name, vector.data(), vector.rows());
 }
 
 /**
