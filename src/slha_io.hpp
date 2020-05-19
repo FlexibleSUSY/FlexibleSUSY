@@ -152,8 +152,8 @@ private:
    SLHAea::Coll data{};        ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
 
-   template <class Scalar>
-   static Scalar convert_to(const std::string&); ///< convert string
+   static int to_int(const std::string&);       ///< convert string to int
+   static double to_double(const std::string&); ///< convert string to double
    static std::string block_head(const std::string& name, double scale);
    static bool read_scale(const SLHAea::Line& line, double& scale);
 
@@ -163,20 +163,6 @@ private:
    template <class Derived>
    double read_vector(const std::string&, Eigen::MatrixBase<Derived>&) const;
 };
-
-template <class Scalar>
-Scalar SLHA_io::convert_to(const std::string& str)
-{
-   Scalar value;
-   try {
-      value = SLHAea::to<Scalar>(str);
-   }  catch (const boost::bad_lexical_cast& error) {
-      const std::string msg(R"(cannot convert string ")" + str + R"(" to )"
-                            + typeid(Scalar).name());
-      throw ReadError(msg);
-   }
-   return value;
-}
 
 /**
  * Fills a matrix from a SLHA block
@@ -203,10 +189,10 @@ double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Der
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 3) {
-            const int i = convert_to<int>(line[0]) - 1;
-            const int k = convert_to<int>(line[1]) - 1;
+            const int i = to_int(line[0]) - 1;
+            const int k = to_int(line[1]) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
-               matrix(i,k) = convert_to<double>(line[2]);
+               matrix(i,k) = to_double(line[2]);
             }
          }
       }
@@ -243,9 +229,9 @@ double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Der
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const int i = convert_to<int>(line[0]) - 1;
+            const int i = to_int(line[0]) - 1;
             if (0 <= i && i < rows) {
-               vector(i) = convert_to<double>(line[1]);
+               vector(i) = to_double(line[1]);
             }
          }
       }

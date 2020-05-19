@@ -24,15 +24,32 @@
 #include <cstddef>
 #include <limits>
 #include <sstream>
+#include <string>
 #include <iomanip>
 
 #ifdef ENABLE_SQLITE
 
-#include <boost/lexical_cast.hpp>
 #include <sqlite3.h>
 
 namespace flexiblesusy {
 namespace database {
+
+namespace {
+
+double to_double(const std::string& str)
+{
+   double d = 0.0;
+
+   try {
+      d = std::stod(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return d;
+}
+
+} // anonymous namespace
 
 class SQLiteReadError : Error {
 public:
@@ -79,7 +96,7 @@ int extract_callback(void* data, int argc, char** argv, char** col_name)
    values->conservativeResize(argc);
 
    for (int i = 0; i < argc; i++) {
-      (*values)(i) = boost::lexical_cast<double>(argv[i]);
+      (*values)(i) = to_double(argv[i]);
       VERBOSE_MSG(col_name[i] << " = " << argv[i]);
    }
 
@@ -129,7 +146,7 @@ void Database::insert(
    sql += ") VALUES (";
 
    for (std::size_t i = 0; i < number_of_elements; i++) {
-      sql += boost::lexical_cast<std::string>(data[i]);
+      sql += std::to_string(data[i]);
       if (i + 1 != number_of_elements)
          sql += ',';
    }

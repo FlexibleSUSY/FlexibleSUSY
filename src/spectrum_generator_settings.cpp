@@ -17,12 +17,12 @@
 // ====================================================================
 
 #include "spectrum_generator_settings.hpp"
+#include "string_utils.hpp"
 #include "error.hpp"
 
 #include <cmath>
 #include <iostream>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 namespace flexiblesusy {
 
@@ -88,7 +88,7 @@ void assert_ge(double value, double lower_bound, const char* quantity)
    if (value < lower_bound) {
       throw SetupError(std::string(quantity) +
                        " must be greater than or equal to " +
-                       boost::lexical_cast<std::string>(lower_bound));
+                       flexiblesusy::to_string(lower_bound));
    }
 }
 
@@ -96,7 +96,7 @@ void assert_gt(double value, double lower_bound, const char* quantity)
 {
    if (value <= lower_bound) {
       throw SetupError(std::string(quantity) + " must be greater than " +
-                       boost::lexical_cast<std::string>(lower_bound));
+                       flexiblesusy::to_string(lower_bound));
    }
 }
 
@@ -105,7 +105,7 @@ void assert_le(double value, double upper_bound, const char* quantity)
    if (value > upper_bound) {
       throw SetupError(std::string(quantity) +
                        " must be lower than or equal to " +
-                       boost::lexical_cast<std::string>(upper_bound));
+                       flexiblesusy::to_string(upper_bound));
    }
 }
 
