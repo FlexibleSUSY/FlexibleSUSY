@@ -663,11 +663,11 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    MRSSM2_slha_io slha_io;
    slha_io.read_from_stream(istr);
 
-   // extract the input parameters
    softsusy::QedQcd qedqcd;
    MRSSM2_input_parameters input;
    Spectrum_generator_settings settings;
 
+   // extract the input parameters from spectrum string
    try {
       slha_io.fill(settings);
       slha_io.fill(qedqcd);

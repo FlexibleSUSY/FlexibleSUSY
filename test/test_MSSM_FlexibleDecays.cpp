@@ -621,13 +621,11 @@ Block MSOFT Q= 8.61574711E+02
    MSSM_slha_io slha_io;
    slha_io.read_from_stream(istr);
 
-   // extract the input parameters
    softsusy::QedQcd qedqcd;
    MSSM_input_parameters input;
    Spectrum_generator_settings settings;
-   settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
-   settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
 
+   // extract the input parameters from spectrum string
    try {
       slha_io.fill(settings);
       slha_io.fill(qedqcd);
