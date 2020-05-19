@@ -247,6 +247,26 @@ int column_major_index(int r, int c, int /* rows */ , int cols)
    return c*cols + r;
 }
 
+template <typename T>
+struct real_prefix {
+   constexpr static const char* const value = "Re(";
+};
+
+template <>
+struct real_prefix<double> {
+   constexpr static const char* const value = "";
+};
+
+template <typename T>
+struct real_suffix {
+   constexpr static const char* const value = ")";
+};
+
+template <>
+struct real_suffix<double> {
+   constexpr static const char* const value = "";
+};
+
 } // anonymous namespace
 
 namespace detail {
@@ -343,11 +363,14 @@ double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* 
 template <typename T>
 std::string format_vector(const std::string& name, const T* a, const std::string& symbol, int rows)
 {
+   constexpr const char* const prefix = real_prefix<T>::value;
+   constexpr const char* const suffix = real_suffix<T>::value;
+
    std::ostringstream ss;
    ss << name;
 
    for (int i = 1; i <= rows; ++i) {
-      ss << FORMAT_VECTOR(i, std::imag(a[i-1]), ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
+      ss << FORMAT_VECTOR(i, std::imag(a[i-1]), (prefix + symbol + "(" + flexiblesusy::to_string(i) + ")" + suffix));
    }
 
    return ss.str();
@@ -357,6 +380,9 @@ std::string format_vector(const std::string& name, const T* a, const std::string
 template <typename T>
 std::string format_matrix(const std::string& name, const T* a, const std::string& symbol, int rows, int cols)
 {
+   constexpr const char* const prefix = real_prefix<T>::value;
+   constexpr const char* const suffix = real_suffix<T>::value;
+
    std::ostringstream ss;
    ss << name;
 
@@ -364,7 +390,7 @@ std::string format_matrix(const std::string& name, const T* a, const std::string
       for (int k = 1; k <= cols; ++k) {
          const int idx = column_major_index(i-1, k-1, rows, cols);
          ss << FORMAT_MIXING_MATRIX(i, k, std::imag(a[idx]),
-               ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
+               (prefix + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")" + suffix));
       }
    }
 
