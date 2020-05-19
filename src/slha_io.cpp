@@ -282,6 +282,33 @@ bool read_scale(const SLHAea::Line& line, double& scale)
 }
 
 template <typename T>
+double read_matrix_(const SLHAea::Coll& data, const std::string& block_name, T* a, int rows, int cols)
+{
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+
+   double scale = 0.;
+
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         detail::read_scale(line, scale);
+
+         if (line.is_data_line() && line.size() >= 3) {
+            const int i = to_int(line[0]) - 1;
+            const int k = to_int(line[1]) - 1;
+            if (0 <= i && i < rows && 0 <= k && k < cols) {
+               a[k*cols + i] = detail::to_double(line[2]);
+            }
+         }
+      }
+
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
+   }
+
+   return scale;
+}
+
+template <typename T>
 double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* a, int len)
 {
    auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
@@ -722,6 +749,16 @@ double SLHA_io::read_vector(const std::string& block_name, double* a, int len) c
 double SLHA_io::read_vector(const std::string& block_name, std::complex<double>* a, int len) const
 {
    return detail::read_vector_(data, block_name, a, len);
+}
+
+double SLHA_io::read_matrix(const std::string& block_name, double* a, int rows, int cols) const
+{
+   return detail::read_matrix_(data, block_name, a, rows, cols);
+}
+
+double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>* a, int rows, int cols) const
+{
+   return detail::read_matrix_(data, block_name, a, rows, cols);
 }
 
 

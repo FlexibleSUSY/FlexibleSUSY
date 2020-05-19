@@ -158,6 +158,8 @@ private:
    void read_modsel();
    template <class Derived>
    double read_matrix(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
+   double read_matrix(const std::string&, double*, int, int) const;
+   double read_matrix(const std::string&, std::complex<double>*, int, int) const;
    template <class Derived>
    double read_vector(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_vector(const std::string&, double*, int) const;
@@ -175,29 +177,7 @@ private:
 template <class Derived>
 double SLHA_io::read_matrix(const std::string& block_name, Eigen::PlainObjectBase<Derived>& matrix) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
-
-   const int cols = matrix.cols(), rows = matrix.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         read_scale(line, scale);
-
-         if (line.is_data_line() && line.size() >= 3) {
-            const int i = to_int(line[0]) - 1;
-            const int k = to_int(line[1]) - 1;
-            if (0 <= i && i < rows && 0 <= k && k < cols) {
-               matrix(i,k) = to_double(line[2]);
-            }
-         }
-      }
-
-      ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
-   }
-
-   return scale;
+   return read_matrix(block_name, matrix.data(), matrix.rows(), matrix.cols());
 }
 
 /**
