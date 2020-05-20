@@ -3618,6 +3618,17 @@ ReadSARAHBetaFunctions[] :=
            {susyBetaFunctions, susyBreakingBetaFunctions}
     ]
 
+(* disable tensor couplings *)
+FSDisableTensorCouplings[parameters_] :=
+    Module[{tensorCouplings = Select[parameters, Parameters`IsTensor]},
+           If[tensorCouplings =!= {},
+              Print["Error: Models with tensor couplings are currently not supported."];
+              Print["   The following parameters have a tensor structure:"];
+              Print["   ", InputForm[tensorCouplings]];
+              Quit[1];
+           ];
+    ];
+
 SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
     Module[{allParameters, phases},
            (* identify real parameters *)
@@ -3635,6 +3646,8 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
                ConvertSarahPhases[SARAH`ParticlePhases],
                Exp[I #]& /@ GetVEVPhases[FlexibleSUSY`FSEigenstates]];
            Parameters`SetPhases[phases];
+
+           FSDisableTensorCouplings[allParameters];
 
            allParameters
     ]
