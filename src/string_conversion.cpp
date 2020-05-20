@@ -22,7 +22,7 @@
 
 namespace flexiblesusy {
 
-int to_int(const std::string& str)
+int to_int(const char* str)
 {
    int i = 0;
 
@@ -35,7 +35,7 @@ int to_int(const std::string& str)
    return i;
 }
 
-double to_double(const std::string& str)
+double to_double(const char* str)
 {
    double d = 0.0;
 

@@ -279,7 +279,7 @@ namespace detail {
 bool read_scale(const SLHAea::Line& line, double& scale)
 {
    if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
-      scale = to_double(line[3]);
+      scale = to_double(line[3].c_str());
       return true;
    }
    return false;
@@ -297,10 +297,10 @@ double read_matrix_(const SLHAea::Coll& data, const std::string& block_name, T* 
          detail::read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 3) {
-            const int i = to_int(line[0]) - 1;
-            const int k = to_int(line[1]) - 1;
+            const int i = to_int(line[0].c_str()) - 1;
+            const int k = to_int(line[1].c_str()) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
-               a[k*cols + i] = to_double(line[2]);
+               a[k*cols + i] = to_double(line[2].c_str());
             }
          }
       }
@@ -324,9 +324,9 @@ double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* 
          detail::read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const int i = to_int(line[0]) - 1;
+            const int i = to_int(line[0].c_str()) - 1;
             if (0 <= i && i < len) {
-               a[i] = to_double(line[1]);
+               a[i] = to_double(line[1].c_str());
             }
          }
       }
@@ -642,8 +642,8 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const auto key = to_int(line[0]);
-            const auto value = to_double(line[1]);
+            const auto key = to_int(line[0].c_str());
+            const auto value = to_double(line[1].c_str());
             processor(key, value);
          }
       }
@@ -673,7 +673,7 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
          read_scale(line, scale);
 
          if (line.is_data_line()) {
-            entry = to_double(line[0]);
+            entry = to_double(line[0].c_str());
          }
       }
 
@@ -695,7 +695,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 
       while (line != block->end()) {
          if (line->is_data_line() && line->size() > 1) {
-            entry = to_double(line->at(1));
+            entry = to_double(line->at(1).c_str());
          }
 
          ++line;

@@ -19,12 +19,10 @@
 #ifndef STRING_CONVERSION_H
 #define STRING_CONVERSION_H
 
-#include <string>
-
 namespace flexiblesusy {
 
-int to_int(const std::string&);
-double to_double(const std::string&);
+int to_int(const char*);
+double to_double(const char*);
 
 } // namespace flexiblesusy
 
