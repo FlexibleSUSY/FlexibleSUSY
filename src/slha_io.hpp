@@ -20,18 +20,15 @@
 #define SLHA_IO_H
 
 #include "slha_format.hpp"
-#include "string_format.hpp"
 
 #include <complex>
+#include <functional>
 #include <iosfwd>
-#include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include <Eigen/Core>
-#include <functional>
 
 namespace softsusy {
    class QedQcd;
@@ -150,7 +147,8 @@ public:
    void set_settings(const Spectrum_generator_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    void write_to_file(const std::string&) const;
-   void write_to_stream(std::ostream& = std::cerr) const;
+   void write_to_stream() const;
+   void write_to_stream(std::ostream&) const;
 
 private:
    std::unique_ptr<SLHAea::Coll> data; ///< SHLA data

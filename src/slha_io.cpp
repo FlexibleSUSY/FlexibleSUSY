@@ -26,11 +26,14 @@
 #include "pmns.hpp"
 #include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
+#include "string_format.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <complex>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace flexiblesusy {
@@ -877,6 +880,12 @@ void SLHA_io::write_to_stream(std::ostream& ostr) const
    } else {
       ERROR("cannot write SLHA file");
    }
+}
+
+
+void SLHA_io::write_to_stream() const
+{
+   write_to_stream(std::cerr);
 }
 
 
