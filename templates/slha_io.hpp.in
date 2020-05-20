@@ -101,8 +101,9 @@ public:
    void set_spinfo(const std::vector<std::string>&, const std::vector<std::string>&);
    void set_print_imaginary_parts_of_majorana_mixings(bool);
    void write_to(const std::string&) const;
-   void write_to_file(const std::string& file_name) const { slha_io.write_to_file(file_name); }
-   void write_to_stream(std::ostream& ostr = std::cout) const { slha_io.write_to_stream(ostr); }
+   void write_to_file(const std::string&) const;
+   void write_to_stream() const;
+   void write_to_stream(std::ostream&) const;
 
    static void fill_minpar_tuple(@ModelName@_input_parameters&, int, double);
    static void fill_extpar_tuple(@ModelName@_input_parameters&, int, double);

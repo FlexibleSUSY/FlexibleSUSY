@@ -23,6 +23,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
+		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/physical_input.cpp \

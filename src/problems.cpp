@@ -190,12 +190,22 @@ std::string Problems::get_warning_string(const std::string& sep) const
    return concat(get_warning_strings(), sep);
 }
 
+void Problems::print_problems() const
+{
+   print_problems(std::cerr);
+}
+
 void Problems::print_problems(std::ostream& ostr) const
 {
    if (!have_problem())
       return;
 
    ostr << get_problem_string();
+}
+
+void Problems::print_warnings() const
+{
+   print_warnings(std::cerr);
 }
 
 void Problems::print_warnings(std::ostream& ostr) const
