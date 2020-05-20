@@ -5,6 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "slha_io.hpp"
+#include "slhaea.h"
 #include "mixings.hpp"
 #include "linalg2.hpp"
 #include "stopwatch.hpp"

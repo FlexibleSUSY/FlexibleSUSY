@@ -24,6 +24,7 @@
 #include "numerics2.hpp"
 #include "physical_input.hpp"
 #include "pmns.hpp"
+#include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
 
 #include <algorithm>
@@ -433,11 +434,61 @@ std::string format_matrix_imag(const std::string& name, const T* a, const std::s
 } // namespace detail
 
 
+SLHA_io::SLHA_io()
+   : data(std::make_unique<SLHAea::Coll>())
+{
+}
+
+
+SLHA_io::SLHA_io(const SLHA_io& other)
+   : data(std::make_unique<SLHAea::Coll>(*other.data))
+   , modsel(other.modsel)
+{
+}
+
+
+SLHA_io::SLHA_io(SLHA_io&& other) noexcept
+   : data(std::move(other.data))
+   , modsel(std::move(other.modsel))
+{
+}
+
+
+SLHA_io::~SLHA_io() = default;
+
+
+SLHA_io& SLHA_io::operator=(const SLHA_io& other)
+{
+   return *this = SLHA_io(other);
+}
+
+
+SLHA_io& SLHA_io::operator=(SLHA_io&& other) noexcept
+{
+   data = std::move(other.data);
+   modsel = std::move(other.modsel);
+   return *this;
+}
+
+
 void SLHA_io::clear()
 {
-   data.clear();
+   data->clear();
    modsel.clear();
 }
+
+
+const SLHAea::Coll& SLHA_io::get_data() const
+{
+   return *data;
+}
+
+
+void SLHA_io::set_data(const SLHAea::Coll& data_)
+{
+   data.reset(new SLHAea::Coll(data_));
+}
+
 
 std::string SLHA_io::block_head(const std::string& name, double scale)
 {
@@ -456,7 +507,7 @@ std::string SLHA_io::block_head(const std::string& name, double scale)
 
 bool SLHA_io::block_exists(const std::string& block_name) const
 {
-   return data.find(block_name) != data.cend();
+   return data->find(block_name) != data->cend();
 }
 
 /**
@@ -496,8 +547,8 @@ void SLHA_io::read_from_file(const std::string& file_name)
  */
 void SLHA_io::read_from_stream(std::istream& istr)
 {
-   data.clear();
-   data.read(istr);
+   data->clear();
+   data->read(istr);
    read_modsel();
 }
 
@@ -605,10 +656,10 @@ void SLHA_io::fill(Spectrum_generator_settings& settings) const
  */
 double SLHA_io::read_block(const std::string& block_name, const Tuple_processor& processor) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double scale = 0.;
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
 
@@ -620,7 +671,7 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -636,10 +687,10 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
  */
 double SLHA_io::read_block(const std::string& block_name, double& entry) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double scale = 0.;
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
 
@@ -649,7 +700,7 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -657,11 +708,11 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
 
 double SLHA_io::read_entry(const std::string& block_name, int key) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double entry = 0.;
    const SLHAea::Block::key_type keys(1, flexiblesusy::to_string(key));
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       auto line = block->find(keys);
 
       while (line != block->end()) {
@@ -674,7 +725,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return entry;
@@ -690,15 +741,15 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 double SLHA_io::read_scale(const std::string& block_name) const
 {
    double scale = 0.;
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -714,12 +765,12 @@ void SLHA_io::set_block(const std::string& lines, Position position)
    SLHAea::Block block;
    block.str(lines);
 
-   data.erase(block.name());
+   data->erase(block.name());
 
    if (position == front) {
-      data.push_front(block);
+      data->push_front(block);
    } else {
-      data.push_back(block);
+      data->push_back(block);
    }
 }
 
@@ -822,7 +873,7 @@ void SLHA_io::write_to_file(const std::string& file_name) const
 void SLHA_io::write_to_stream(std::ostream& ostr) const
 {
    if (ostr.good()) {
-      ostr << data;
+      ostr << *data;
    } else {
       ERROR("cannot write SLHA file");
    }
@@ -843,25 +894,25 @@ double SLHA_io::to_double(const std::string& str)
 
 double SLHA_io::read_vector(const std::string& block_name, double* a, int len) const
 {
-   return detail::read_vector_(data, block_name, a, len);
+   return detail::read_vector_(*data, block_name, a, len);
 }
 
 
 double SLHA_io::read_vector(const std::string& block_name, std::complex<double>* a, int len) const
 {
-   return detail::read_vector_(data, block_name, a, len);
+   return detail::read_vector_(*data, block_name, a, len);
 }
 
 
 double SLHA_io::read_matrix(const std::string& block_name, double* a, int rows, int cols) const
 {
-   return detail::read_matrix_(data, block_name, a, rows, cols);
+   return detail::read_matrix_(*data, block_name, a, rows, cols);
 }
 
 
 double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>* a, int rows, int cols) const
 {
-   return detail::read_matrix_(data, block_name, a, rows, cols);
+   return detail::read_matrix_(*data, block_name, a, rows, cols);
 }
 
 

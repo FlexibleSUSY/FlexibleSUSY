@@ -20,11 +20,12 @@
 #define SLHA_IO_H
 
 #include "slha_format.hpp"
-#include "slhaea.h"
 #include "string_format.hpp"
 
 #include <complex>
 #include <iosfwd>
+#include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -35,6 +36,11 @@
 namespace softsusy {
    class QedQcd;
 } // namespace softsusy
+
+namespace SLHAea {
+   class Coll;
+   class Line;
+} // namespace SLHAea
 
 namespace flexiblesusy {
 
@@ -102,6 +108,14 @@ public:
       void clear() { *this = CKM_wolfenstein(); }
    };
 
+   SLHA_io();
+   SLHA_io(const SLHA_io&);
+   SLHA_io(SLHA_io&&) noexcept;
+   ~SLHA_io();
+
+   SLHA_io& operator=(const SLHA_io&);
+   SLHA_io& operator=(SLHA_io&&) noexcept;
+
    void clear();
 
    // reading functions
@@ -110,7 +124,7 @@ public:
    void fill(Spectrum_generator_settings&) const;
    void fill(Physical_input&) const;
    const Modsel& get_modsel() const { return modsel; }
-   const SLHAea::Coll& get_data() const { return data; }
+   const SLHAea::Coll& get_data() const;
    void read_from_file(const std::string&);
    void read_from_source(const std::string&);
    void read_from_stream(std::istream&);
@@ -122,7 +136,7 @@ public:
    double read_scale(const std::string&) const;
 
    // writing functions
-   void set_data(const SLHAea::Coll& data_) { data = data_; }
+   void set_data(const SLHAea::Coll&);
    void set_block(const std::ostringstream&, Position position = back);
    void set_block(const std::string&, Position position = back);
    void set_blocks(const std::vector<std::string>&, Position position = back);
@@ -139,7 +153,7 @@ public:
    void write_to_stream(std::ostream& = std::cerr) const;
 
 private:
-   SLHAea::Coll data{};        ///< SHLA data
+   std::unique_ptr<SLHAea::Coll> data; ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
 
    static int to_int(const std::string&);       ///< convert string to int
