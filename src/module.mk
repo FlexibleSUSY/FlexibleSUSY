@@ -34,6 +34,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/slha_io.cpp \
 		$(DIR)/spectrum_generator_problems.cpp \
 		$(DIR)/spectrum_generator_settings.cpp \
+		$(DIR)/string_conversion.cpp \
 		$(DIR)/string_format.cpp \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
@@ -105,6 +106,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/slha_io.hpp \
 		$(DIR)/spectrum_generator_problems.hpp \
 		$(DIR)/spectrum_generator_settings.hpp \
+		$(DIR)/string_conversion.hpp \
 		$(DIR)/string_format.hpp \
 		$(DIR)/string_utils.hpp \
 		$(DIR)/sum.hpp \
