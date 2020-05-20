@@ -18,32 +18,53 @@
 
 #include "string_conversion.hpp"
 #include "error.hpp"
-#include <string>
+#include <climits>
+#include <cstdlib>
 
 namespace flexiblesusy {
 
-int to_int(const char* str)
+int to_int(const char* s)
 {
-   int i = 0;
+   char* end;
+   errno = 0;
 
-   try {
-      i = std::stoi(str);
-   } catch (std::exception& e) {
-      throw ReadError(e.what());
+   const long l = std::strtol(s, &end, 10);
+
+   if ((errno == ERANGE && l == LONG_MAX) || l > INT_MAX) {
+      errno = 0;
+      throw ReadError("range overflow occurred in conversion to int");
+   }
+   if ((errno == ERANGE && l == LONG_MIN) || l < INT_MIN) {
+      errno = 0;
+      throw ReadError("range underflow occurred in conversion to int");
+   }
+   if (*s == '\0' || *end != '\0') {
+      errno = 0;
+      throw ReadError("cannot convert string to int");
    }
 
-   return i;
+   errno = 0;
+
+   return static_cast<int>(l);
 }
 
-double to_double(const char* str)
+double to_double(const char* s)
 {
-   double d = 0.0;
+   char* end;
+   errno = 0;
 
-   try {
-      d = std::stod(str);
-   } catch (std::exception& e) {
-      throw ReadError(e.what());
+   const double d = std::strtod(s, &end);
+
+   if (errno == ERANGE) {
+      errno = 0;
+      throw ReadError("range error occurred in conversion to double");
    }
+   if (*s == '\0' || *end != '\0') {
+      errno = 0;
+      throw ReadError("cannot convert string to double");
+   }
+
+   errno = 0;
 
    return d;
 }
