@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["Utils`"];
+BeginPackage["Utils`", {"TextFormatting`"}];
 
 AppendOrReplaceInList::usage="Replaces existing element in list,
 or appends it if not already present.";
@@ -214,6 +214,9 @@ FSReIm::usage = "FS replacement for the mathematica's function ReIm";
 FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 
+PrintWarningMsg::usage = "";
+PrintErrorMsg::usage = "";
+
 Begin["`Private`"];
 
 AppendOrReplaceInList[values_List, elem_, test_:SameQ] :=
@@ -353,8 +356,10 @@ PrintHeadline[text__] :=
 
 PrintAndReturn[e___] := (Print[e]; e)
 
-AssertWithMessage[assertion_, message_String] :=
-	If[assertion =!= True, Print[message]; Quit[1]];
+AssertWithMessage[assertion_/;Element[assertion, Booleans], message_String] :=
+	If[!assertion, PrintErrorMsg[message]; Quit[1]];
+AssertWithMessage[el___] :=
+    (PrintErrorMsg["AssertWithMessage requires boolean and string."]; Quit[1]);
 
 AssertOrQuit::errNotDefined =
 "Error message \"`1`\" is not defined in the code.";
@@ -547,6 +552,33 @@ FSBooleanQ[b_] :=
       BooleanQ[b],
       If[b === True || b === False, True, False]
    ];
+
+StringInColorForTerminal[s_String, color_] :=
+   Switch[color,
+      Red, "\033[1;31m" <> s <> "\033[1;0m",
+      Blue, "\033[1;34m" <> s <> "\033[1;0m",
+      _, Print["Errror: Unrecognized color ", color];Quit[1]
+   ];
+
+PrintErrorMsg[s_String] :=
+   Print[
+      TextFormatting`WrapText[
+         StringInColorForTerminal["Error: ", Red] <>
+            "" <> s, 79, StringLength["Error: "]
+      ]
+   ];
+PrintErrorMsg[arg___] :=
+    (PrintErrorMsg["PrintErrorMsg expects one argument of type string."];Quit[1]);
+
+PrintWarningMsg[s_String] :=
+   Print[
+      TextFormatting`WrapText[
+         StringInColorForTerminal["Warning: ", Blue] <>
+            "" <> s, 79, StringLength["Warning: "]
+      ]
+   ];
+PrintWarningMsg[arg___] :=
+    (PrintErrorMsg["PrintWarningMsg expects one argument of type string."];Quit[1]);
 
 (* MathIndexToCPP *)
 
