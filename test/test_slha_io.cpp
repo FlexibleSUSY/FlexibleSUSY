@@ -289,6 +289,33 @@ BOOST_AUTO_TEST_CASE( test_write_read_vector )
    BOOST_CHECK_EQUAL(vector(1), new_vector(1));
 }
 
+BOOST_AUTO_TEST_CASE( test_write_read_vector_complex )
+{
+   const double scale = 100.0;
+   const char* block_name_real = "Vector";
+   const char* block_name_imag = "ImVector";
+   const std::complex<double> i(0.0, 1.0);
+
+   Eigen::VectorXcd vector(2);
+   vector << std::complex<double>(1.0,1.0),
+             std::complex<double>(2.0,2.0);
+
+   SLHA_io slha_io;
+   slha_io.set_block(block_name_real, vector, "M", scale);
+   slha_io.set_block(block_name_imag, vector, "M", scale);
+
+   Eigen::VectorXd new_vector_real(2), new_vector_imag(2);
+   const double new_scale_real = slha_io.read_block(block_name_real, new_vector_real);
+   const double new_scale_imag = slha_io.read_block(block_name_imag, new_vector_imag);
+
+   Eigen::VectorXcd new_vector = new_vector_real + new_vector_imag*i;
+
+   BOOST_CHECK_EQUAL(scale, new_scale_real);
+   BOOST_CHECK_EQUAL(scale, new_scale_imag);
+   BOOST_CHECK_EQUAL(vector(0), new_vector(0));
+   BOOST_CHECK_EQUAL(vector(1), new_vector(1));
+}
+
 /**
  * Creates a SLHAea block with name `TestBlock' with
  *  `number_of_entries' entries of the form
