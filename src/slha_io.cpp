@@ -304,7 +304,7 @@ double to_double(const std::string& str)
 bool read_scale(const SLHAea::Line& line, double& scale)
 {
    if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
-      scale = to_double(line[3]);
+      scale = detail::to_double(line[3]);
       return true;
    }
    return false;
@@ -322,8 +322,8 @@ double read_matrix_(const SLHAea::Coll& data, const std::string& block_name, T* 
          detail::read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 3) {
-            const int i = to_int(line[0]) - 1;
-            const int k = to_int(line[1]) - 1;
+            const int i = detail::to_int(line[0]) - 1;
+            const int k = detail::to_int(line[1]) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
                a[k*cols + i] = detail::to_double(line[2]);
             }
@@ -667,8 +667,8 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const auto key = to_int(line[0]);
-            const auto value = to_double(line[1]);
+            const auto key = detail::to_int(line[0]);
+            const auto value = detail::to_double(line[1]);
             processor(key, value);
          }
       }
@@ -698,7 +698,7 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
          read_scale(line, scale);
 
          if (line.is_data_line()) {
-            entry = to_double(line[0]);
+            entry = detail::to_double(line[0]);
          }
       }
 
@@ -720,7 +720,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 
       while (line != block->end()) {
          if (line->is_data_line() && line->size() > 1) {
-            entry = to_double(line->at(1));
+            entry = detail::to_double(line->at(1));
          }
 
          ++line;
@@ -886,18 +886,6 @@ void SLHA_io::write_to_stream(std::ostream& ostr) const
 void SLHA_io::write_to_stream() const
 {
    write_to_stream(std::cerr);
-}
-
-
-int SLHA_io::to_int(const std::string& str)
-{
-   return detail::to_int(str);
-}
-
-
-double SLHA_io::to_double(const std::string& str)
-{
-   return detail::to_double(str);
 }
 
 

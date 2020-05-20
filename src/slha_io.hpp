@@ -154,8 +154,6 @@ private:
    std::unique_ptr<SLHAea::Coll> data; ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
 
-   static int to_int(const std::string&);       ///< convert string to int
-   static double to_double(const std::string&); ///< convert string to double
    static std::string block_head(const std::string& name, double scale);
    static bool read_scale(const SLHAea::Line& line, double& scale);
 
