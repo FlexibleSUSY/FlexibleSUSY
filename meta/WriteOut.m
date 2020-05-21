@@ -1369,43 +1369,24 @@ void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_dec
 
 CreateFillSLHAeaIncludingDecaysPrototypes[modelName_String] := "\
 template <class Model>
-static void fill_slhaea(
-   SLHAea::Coll&, const " <> modelName <> "_slha<Model>&, const softsusy::QedQcd&,
-   const " <> modelName <> "_scales&, const " <> modelName <> "_observables&,
-   const " <> modelName <> "_decays&);
-
-template <class Model>
-static SLHAea::Coll fill_slhaea(
+static void fill(
    const " <> modelName <> "_slha<Model>&, const softsusy::QedQcd&,
    const " <> modelName <> "_scales&, const " <> modelName <> "_observables&,
-   const " <> modelName <> "_decays&);";
+   const " <> modelName <> "_decays&);"
 
 CreateFillSLHAeaIncludingDecaysFunctions[modelName_String] := "\
 template <class Model>
-void " <> modelName <> "_slha_io::fill_slhaea(
-   SLHAea::Coll& slhaea, const " <> modelName <> "_slha<Model>& model,
-   const softsusy::QedQcd& qedqcd, const " <> modelName <> "_scales& scales,
-   const " <> modelName <> "_observables& observables, const " <> modelName <> "_decays& decays)
+void fill(
+   const " <> modelName <> "_slha<Model>& model,
+   const softsusy::QedQcd& qedqcd,
+   const " <> modelName <> "_scales& scales,
+   const " <> modelName <> "_observables& observables,
+   const " <> modelName <> "_decays& decays)
 {
    " <> modelName <> "_slha_io slha_io;
 
    slha_io.fill_spectrum_generator_data(model, qedqcd, scales, observables);
    slha_io.fill_decays_data(decays);
-
-   slhaea = slha_io.get_slha_io().get_data();
-}
-
-template <class Model>
-SLHAea::Coll " <> modelName <> "_slha_io::fill_slhaea(
-   const " <> modelName <> "_slha<Model>& model, const softsusy::QedQcd& qedqcd,
-   const " <> modelName <> "_scales& scales, const " <> modelName <> "_observables& observables,
-   const " <> modelName <> "_decays& decays)
-{
-   SLHAea::Coll slhaea;
-   " <> modelName <> "_slha_io::fill_slhaea(slhaea, model, qedqcd, scales,
-                                    observables, decays);
-
-   return slhaea;
 }";
 
 End[];
