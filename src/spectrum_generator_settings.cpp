@@ -296,7 +296,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
  * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
- * | calculate_decays                 | 0, 1                                            | 1 (= enabled)   |
+ * | calculate_decays                 | 0 (no) or 1 (yes)                               | 1 (= enabled)   |
  */
 void Spectrum_generator_settings::reset()
 {
