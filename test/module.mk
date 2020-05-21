@@ -75,6 +75,7 @@ TEST_SRC := \
 		$(DIR)/test_sm_fourloop_as.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
+		$(DIR)/test_string_conversion.cpp \
 		$(DIR)/test_sum.cpp \
 		$(DIR)/test_threshold_corrections.cpp \
 		$(DIR)/test_threshold_loop_functions.cpp \
@@ -126,6 +127,11 @@ TEST_META := \
 		$(DIR)/test_Vertices.m \
 		$(DIR)/test_Vertices_SortCp.m \
 		$(DIR)/test_Vertices_colorsum.m
+
+ifeq ($(WITH_E6SSM), yes)
+TEST_META += \
+		$(DIR)/test_E6SSM_CXXDiagrams.m
+endif
 
 ifneq ($(OPERATING_SYSTEM),Darwin)
 TEST_SRC += \
