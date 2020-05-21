@@ -22,7 +22,6 @@
 #include <cstring>
 #include <exception>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <set>
 #include <string>
@@ -101,7 +100,7 @@ std::vector<std::string> delete_duplicates(
    std::vector<std::string> unique_vector;
 
    std::copy_if(vec.begin(), vec.end(), std::back_inserter(unique_vector),
-                std::ref(pred));
+                [&pred] (const std::string& f) { return pred(f); });
 
    return unique_vector;
 }
