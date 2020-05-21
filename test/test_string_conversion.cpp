@@ -41,6 +41,23 @@ void test_to_int()
 }
 
 
+void test_to_long()
+{
+   using namespace flexiblesusy;
+
+   CHECK(to_long("0")  ==  0);
+   CHECK(to_long("1")  ==  1);
+   CHECK(to_long("-1") == -1);
+   CHECK(to_long(std::to_string(std::numeric_limits<int>::min()).c_str()) == std::numeric_limits<int>::min());
+   CHECK(to_long(std::to_string(std::numeric_limits<int>::max()).c_str()) == std::numeric_limits<int>::max());
+   CHECK(to_long(std::to_string(std::numeric_limits<long>::min()).c_str()) == std::numeric_limits<long>::min());
+   CHECK(to_long(std::to_string(std::numeric_limits<long>::max()).c_str()) == std::numeric_limits<long>::max());
+
+   CHECK_THROW(to_long("a"));
+   CHECK_THROW(to_long("1a"));
+}
+
+
 void test_to_double()
 {
    using namespace flexiblesusy;
@@ -67,6 +84,7 @@ void test_to_double()
 int main()
 {
    test_to_int();
+   test_to_long();
    test_to_double();
 
    std::cout << "==================================\n";

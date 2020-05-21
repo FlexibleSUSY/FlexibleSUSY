@@ -22,6 +22,7 @@
 namespace flexiblesusy {
 
 int to_int(const char*);
+long to_long(const char*);
 double to_double(const char*);
 
 } // namespace flexiblesusy

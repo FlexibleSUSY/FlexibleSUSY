@@ -18,6 +18,7 @@
 
 #include "string_conversion.hpp"
 #include "error.hpp"
+#include <cerrno>
 #include <climits>
 #include <cstdlib>
 
@@ -47,6 +48,33 @@ int to_int(const char* s)
 
    return static_cast<int>(l);
 }
+
+
+long to_long(const char* s)
+{
+   char* end;
+   errno = 0;
+
+   const long l = std::strtol(s, &end, 10);
+
+   if (errno == ERANGE && l == LONG_MAX) {
+      errno = 0;
+      throw ReadError("range overflow occurred in conversion to long");
+   }
+   if (errno == ERANGE && l == LONG_MIN) {
+      errno = 0;
+      throw ReadError("range underflow occurred in conversion to long");
+   }
+   if (*s == '\0' || *end != '\0') {
+      errno = 0;
+      throw ReadError("cannot convert string to long");
+   }
+
+   errno = 0;
+
+   return l;
+}
+
 
 double to_double(const char* s)
 {
