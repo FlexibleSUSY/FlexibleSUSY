@@ -24,6 +24,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/lowe.cpp \
 		$(DIR)/sfermions.cpp \
 		$(DIR)/mixings.cpp \
+		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
 		$(DIR)/physical_input.cpp \
@@ -35,6 +36,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/slha_io.cpp \
 		$(DIR)/spectrum_generator_problems.cpp \
 		$(DIR)/spectrum_generator_settings.cpp \
+		$(DIR)/string_format.cpp \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
@@ -72,6 +74,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/ewsb_solver.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
+		$(DIR)/for_each.hpp \
 		$(DIR)/functors.hpp \
 		$(DIR)/global_thread_pool.hpp \
 		$(DIR)/gsl.hpp \
@@ -110,6 +113,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/slha_io.hpp \
 		$(DIR)/spectrum_generator_problems.hpp \
 		$(DIR)/spectrum_generator_settings.hpp \
+		$(DIR)/string_format.hpp \
 		$(DIR)/string_utils.hpp \
 		$(DIR)/sum.hpp \
 		$(DIR)/thread_pool.hpp \

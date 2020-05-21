@@ -20,6 +20,7 @@
 #include "error.hpp"
 #include "logger.hpp"
 #include "config.h"
+#include "string_format.hpp"
 
 #include <cstddef>
 #include <limits>
@@ -146,7 +147,7 @@ void Database::insert(
    sql += ") VALUES (";
 
    for (std::size_t i = 0; i < number_of_elements; i++) {
-      sql += std::to_string(data[i]);
+      sql += flexiblesusy::to_string(data[i]);
       if (i + 1 != number_of_elements)
          sql += ',';
    }
@@ -170,9 +171,9 @@ Eigen::ArrayXd Database::extract(const std::string& table_name, long long row)
    const std::string sql =
       (row >= 0 ?
        "SELECT * FROM " + table_name + " LIMIT 1 OFFSET "
-          + std::to_string(row) + ";" :
+          + flexiblesusy::to_string(row) + ";" :
        "SELECT * FROM " + table_name + " WHERE ROWID = (SELECT MAX(ROWID) - "
-          + std::to_string(std::abs(row + 1)) + " FROM " + table_name + ");");
+          + flexiblesusy::to_string(std::abs(row + 1)) + " FROM " + table_name + ");");
 
    execute(sql, extract_callback, static_cast<void*>(&values));
 

@@ -26,7 +26,7 @@
 #include "lowe.h"
 #include "error.hpp"
 #include "ew_input.hpp"
-#include "string_utils.hpp"
+#include "string_format.hpp"
 #include "eigen_utils.hpp"
 
 #include <algorithm>

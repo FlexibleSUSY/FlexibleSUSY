@@ -19,7 +19,7 @@
 #include "wrappers.hpp"
 #include "dilog.hpp"
 #include "numerics2.hpp"
-#include "string_utils.hpp"
+#include "string_format.hpp"
 #include "trilog.hpp"
 
 #include <complex>

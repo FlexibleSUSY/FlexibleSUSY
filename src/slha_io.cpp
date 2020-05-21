@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "slha_io.hpp"
+#include "error.hpp"
 #include "ew_input.hpp"
 #include "logger.hpp"
 #include "lowe.h"

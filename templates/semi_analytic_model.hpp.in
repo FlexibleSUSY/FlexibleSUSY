@@ -59,7 +59,7 @@ public:
    virtual void clear_problems();
    virtual std::string name() const;
    virtual void run_to(double scale, double eps = -1.0);
-   virtual void print(std::ostream& out = std::cerr) const;
+   virtual void print(std::ostream&) const;
    virtual void set_precision(double);
 
    /**
