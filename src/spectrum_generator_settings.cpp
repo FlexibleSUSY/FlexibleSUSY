@@ -17,12 +17,12 @@
 // ====================================================================
 
 #include "spectrum_generator_settings.hpp"
+#include "string_format.hpp"
 #include "error.hpp"
 
 #include <cmath>
 #include <iostream>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 namespace flexiblesusy {
 
@@ -87,7 +87,7 @@ void assert_ge(double value, double lower_bound, const char* quantity)
    if (value < lower_bound) {
       throw SetupError(std::string(quantity) +
                        " must be greater than or equal to " +
-                       boost::lexical_cast<std::string>(lower_bound));
+                       flexiblesusy::to_string(lower_bound));
    }
 }
 
@@ -95,7 +95,7 @@ void assert_gt(double value, double lower_bound, const char* quantity)
 {
    if (value <= lower_bound) {
       throw SetupError(std::string(quantity) + " must be greater than " +
-                       boost::lexical_cast<std::string>(lower_bound));
+                       flexiblesusy::to_string(lower_bound));
    }
 }
 
@@ -104,7 +104,7 @@ void assert_le(double value, double upper_bound, const char* quantity)
    if (value > upper_bound) {
       throw SetupError(std::string(quantity) +
                        " must be lower than or equal to " +
-                       boost::lexical_cast<std::string>(upper_bound));
+                       flexiblesusy::to_string(upper_bound));
    }
 }
 
@@ -330,7 +330,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at2_as]    = 1.;
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
-   values[loop_library]                     = 0.; // 0 = (Softsusy)
+   values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

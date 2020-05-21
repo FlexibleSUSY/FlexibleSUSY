@@ -48,6 +48,7 @@ namespace @ModelName@_info {
    constexpr bool is_low_energy_model = @isLowEnergyModel@;
    constexpr bool is_supersymmetric_model = @isSupersymmetricModel@;
    constexpr bool is_FlexibleEFTHiggs = @isFlexibleEFTHiggs@;
+   constexpr bool is_CP_violating_Higgs_sector {@isCPViolatingHiggsSector@};
 
    void print(std::ostream&);
 

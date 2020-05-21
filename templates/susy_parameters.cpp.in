@@ -90,6 +90,11 @@ Eigen::ArrayXd @ModelName@_susy_parameters::get() const
    return pars;
 }
 
+void @ModelName@_susy_parameters::print() const
+{
+   this->print(std::cerr);
+}
+
 void @ModelName@_susy_parameters::print(std::ostream& ostr) const
 {
    ostr << "susy parameters at Q = " << get_scale() << ":\n";

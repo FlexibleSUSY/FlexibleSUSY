@@ -342,6 +342,21 @@ void @ModelName@_slha_io::write_to(const std::string& output) const
       write_to_file(output);
 }
 
+void @ModelName@_slha_io::write_to_file(const std::string& file_name) const
+{
+   slha_io.write_to_file(file_name);
+}
+
+void @ModelName@_slha_io::write_to_stream() const
+{
+   write_to_stream(std::cout);
+}
+
+void @ModelName@_slha_io::write_to_stream(std::ostream& ostr) const
+{
+   slha_io.write_to_stream(ostr);
+}
+
 /**
  * Read (DR-bar) model parameter output scale from MODSEL entry 12
  */

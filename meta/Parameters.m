@@ -1627,6 +1627,12 @@ GetParticleFromDescription[multipletName_String, splitNames_List] :=
            DeleteCases[GetParticleFromDescription /@ splitNames, Null]
           ];
 
+GetPDGCodesForParticle[SARAH`bar[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
+GetPDGCodesForParticle[Susyno`LieGroups`conj[particle_]] :=
+    -GetPDGCodesForParticle[particle];
+
 GetPDGCodesForParticle[particle_] :=
     Module[{pdgList},
             pdgList = SARAH`getPDGList[particle];

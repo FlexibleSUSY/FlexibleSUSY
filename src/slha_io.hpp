@@ -19,11 +19,9 @@
 #ifndef SLHA_IO_H
 #define SLHA_IO_H
 
-#include "error.hpp"
-#include "numerics2.hpp"
 #include "slha_format.hpp"
 #include "slhaea.h"
-#include "string_utils.hpp"
+#include "string_format.hpp"
 
 #include <complex>
 #include <iosfwd>
@@ -32,7 +30,7 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace softsusy {
    class QedQcd;
@@ -118,7 +116,7 @@ public:
    void read_from_stream(std::istream&);
    double read_block(const std::string&, const Tuple_processor&) const;
    template <class Derived>
-   double read_block(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_block(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_block(const std::string&, double&) const;
    double read_entry(const std::string&, int) const;
    double read_scale(const std::string&) const;
@@ -152,31 +150,17 @@ private:
    SLHAea::Coll data{};        ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
 
-   template <class Scalar>
-   static Scalar convert_to(const std::string&); ///< convert string
+   static int to_int(const std::string&);       ///< convert string to int
+   static double to_double(const std::string&); ///< convert string to double
    static std::string block_head(const std::string& name, double scale);
    static bool read_scale(const SLHAea::Line& line, double& scale);
 
    void read_modsel();
    template <class Derived>
-   double read_matrix(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_matrix(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    template <class Derived>
-   double read_vector(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_vector(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
 };
-
-template <class Scalar>
-Scalar SLHA_io::convert_to(const std::string& str)
-{
-   Scalar value;
-   try {
-      value = SLHAea::to<Scalar>(str);
-   }  catch (const boost::bad_lexical_cast& error) {
-      const std::string msg(R"(cannot convert string ")" + str + R"(" to )"
-                            + typeid(Scalar).name());
-      throw ReadError(msg);
-   }
-   return value;
-}
 
 /**
  * Fills a matrix from a SLHA block
@@ -187,12 +171,8 @@ Scalar SLHA_io::convert_to(const std::string& str)
  * @return scale (or 0 if no scale is defined)
  */
 template <class Derived>
-double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Derived>& matrix) const
+double SLHA_io::read_matrix(const std::string& block_name, Eigen::PlainObjectBase<Derived>& matrix) const
 {
-   if (matrix.cols() <= 1) {
-      throw SetupError("Matrix has less than 2 columns");
-   }
-
    auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    const int cols = matrix.cols(), rows = matrix.rows();
@@ -203,10 +183,10 @@ double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Der
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 3) {
-            const int i = convert_to<int>(line[0]) - 1;
-            const int k = convert_to<int>(line[1]) - 1;
+            const int i = to_int(line[0]) - 1;
+            const int k = to_int(line[1]) - 1;
             if (0 <= i && i < rows && 0 <= k && k < cols) {
-               matrix(i,k) = convert_to<double>(line[2]);
+               matrix(i,k) = to_double(line[2]);
             }
          }
       }
@@ -227,12 +207,8 @@ double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Der
  * @return scale (or 0 if no scale is defined)
  */
 template <class Derived>
-double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Derived>& vector) const
+double SLHA_io::read_vector(const std::string& block_name, Eigen::PlainObjectBase<Derived>& vector) const
 {
-   if (vector.cols() != 1) {
-      throw SetupError("Vector has more than 1 column");
-   }
-
    auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
 
    const int rows = vector.rows();
@@ -243,9 +219,9 @@ double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Der
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const int i = convert_to<int>(line[0]) - 1;
+            const int i = to_int(line[0]) - 1;
             if (0 <= i && i < rows) {
-               vector(i) = convert_to<double>(line[1]);
+               vector(i) = to_double(line[1]);
             }
          }
       }
@@ -266,7 +242,7 @@ double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Der
  * @return scale (or 0 if no scale is defined)
  */
 template <class Derived>
-double SLHA_io::read_block(const std::string& block_name, Eigen::MatrixBase<Derived>& dense) const
+double SLHA_io::read_block(const std::string& block_name, Eigen::PlainObjectBase<Derived>& dense) const
 {
    return dense.cols() == 1
       ? read_vector(block_name, dense)

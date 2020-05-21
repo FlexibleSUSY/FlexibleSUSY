@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "slha_io.hpp"
+#include "error.hpp"
 #include "ew_input.hpp"
 #include "logger.hpp"
 #include "lowe.h"
@@ -323,7 +324,7 @@ void SLHA_io::read_from_stream(std::istream& istr)
 bool SLHA_io::read_scale(const SLHAea::Line& line, double& scale)
 {
    if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
-      scale = convert_to<double>(line[3]);
+      scale = to_double(line[3]);
       return true;
    }
    return false;
@@ -427,8 +428,8 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const auto key = convert_to<int>(line[0]);
-            const auto value = convert_to<double>(line[1]);
+            const auto key = to_int(line[0]);
+            const auto value = to_double(line[1]);
             processor(key, value);
          }
       }
@@ -458,7 +459,7 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
          read_scale(line, scale);
 
          if (line.is_data_line()) {
-            entry = convert_to<double>(line[0]);
+            entry = to_double(line[0]);
          }
       }
 
@@ -480,7 +481,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 
       while (line != block->end()) {
          if (line->is_data_line() && line->size() > 1) {
-            entry = convert_to<double>(line->at(1));
+            entry = to_double(line->at(1));
          }
 
          ++line;
@@ -640,6 +641,32 @@ void SLHA_io::write_to_stream(std::ostream& ostr) const
    } else {
       ERROR("cannot write SLHA file");
    }
+}
+
+int SLHA_io::to_int(const std::string& str)
+{
+   int i = 0;
+
+   try {
+      i = std::stoi(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return i;
+}
+
+double SLHA_io::to_double(const std::string& str)
+{
+   double d = 0.0;
+
+   try {
+      d = std::stod(str);
+   } catch (std::exception& e) {
+      throw ReadError(e.what());
+   }
+
+   return d;
 }
 
 } // namespace flexiblesusy

@@ -58,7 +58,7 @@ public:
    virtual void clear_problems() override;
    virtual std::string name() const override;
    virtual void run_to(double scale, double eps = -1.0) override;
-   virtual void print(std::ostream& out = std::cerr) const override;
+   virtual void print(std::ostream&) const override;
    virtual void set_precision(double) override;
 };
 

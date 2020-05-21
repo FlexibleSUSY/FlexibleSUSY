@@ -16,42 +16,27 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef STRING_FORMAT_H
+#define STRING_FORMAT_H
 
+#include <complex>
 #include <string>
-#include <iosfwd>
-#include <typeinfo>
 
 namespace flexiblesusy {
 
-class Model {
-public:
-   virtual ~Model() = default;
-   virtual void calculate_spectrum() = 0;
-   virtual void clear_problems() = 0;
-   virtual std::string name() const = 0;
-   virtual void print(std::ostream&) const = 0;
-   virtual void run_to(double, double eps = -1.0) = 0;
-   virtual void set_precision(double) = 0;
-
-   void print() const;
-};
-
-template <class TargetModel, class InputModel>
-TargetModel cast_model(InputModel abstract_model)
-{
-#ifdef ENABLE_DEBUG
-   TargetModel tmp = dynamic_cast<TargetModel>(abstract_model);
-   if (!tmp) {
-      FATAL("model " << abstract_model << " is not of type "
-            << typeid(TargetModel).name());
-   }
-   return tmp;
-#else
-   return static_cast<TargetModel>(abstract_model);
-#endif
-}
+std::string to_string(char);
+std::string to_string(unsigned char);
+std::string to_string(unsigned short);
+std::string to_string(unsigned int);
+std::string to_string(unsigned long);
+std::string to_string(unsigned long long);
+std::string to_string(signed char);
+std::string to_string(signed short);
+std::string to_string(signed int);
+std::string to_string(signed long);
+std::string to_string(signed long long);
+std::string to_string(double);
+std::string to_string(const std::complex<double>&);
 
 } // namespace flexiblesusy
 
