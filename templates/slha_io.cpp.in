@@ -36,11 +36,14 @@
 #define PHYSICAL(p) model.get_physical().p
 #define PHYSICAL_SLHA(p) model.get_physical_slha().p
 #define LOCALPHYSICAL(p) physical.p
+#define MODEL model
 #define MODELPARAMETER(p) model.get_##p()
 #define INPUTPARAMETER(p) input.p
 #define EXTRAPARAMETER(p) model.get_##p()
+#define OBSERVABLES observables
 #define DEFINE_PHYSICAL_PARAMETER(p) decltype(LOCALPHYSICAL(p)) p;
 #define LowEnergyConstant(p) Electroweak_constants::p
+#define SCALES(p) scales.p
 
 namespace flexiblesusy {
 
@@ -58,6 +61,16 @@ void @ModelName@_slha_io::clear()
 void @ModelName@_slha_io::set_print_imaginary_parts_of_majorana_mixings(bool flag)
 {
    print_imaginary_parts_of_majorana_mixings = flag;
+}
+
+/**
+ * Reads DR-bar parameters, pole masses and mixing matrices from a
+ * SLHA output file.
+ */
+void @ModelName@_slha_io::fill(@ModelName@_slha& model) const
+{
+   fill(static_cast<@ModelName@_mass_eigenstates&>(model));
+   fill_physical(model.get_physical_slha());
 }
 
 /**
@@ -325,6 +338,45 @@ void @ModelName@_slha_io::set_spectrum(const standard_model::Standard_model& mod
    set_model_parameters(model);
    set_mass(physical);
    set_mixing_matrices(physical);
+}
+
+/**
+ * Stores the model (DR-bar) parameters, masses and mixing matrices in
+ * the SLHA object.
+ *
+ * @param model model class in SLHA convention
+ */
+void @ModelName@_slha_io::set_spectrum(const @ModelName@_slha& model)
+{
+   const @ModelName@_physical physical(model.get_physical_slha());
+   const bool write_sm_masses = model.do_calculate_sm_pole_masses();
+
+   set_model_parameters(model);
+   set_mass(physical, write_sm_masses);
+   set_mixing_matrices(physical, write_sm_masses);
+
+   if (slha_io.get_modsel().quark_flavour_violated)
+      set_ckm(model.get_ckm_matrix(), model.get_scale());
+
+   if (slha_io.get_modsel().lepton_flavour_violated)
+      set_pmns(model.get_pmns_matrix(), model.get_scale());
+}
+
+/**
+ * Writes extra SLHA blocks
+ *
+ * @param model model class
+ * @param scales struct of boundary condition scales
+ * @param observables struct of observables
+ */
+void @ModelName@_slha_io::set_extra(
+   const @ModelName@_slha& model,
+   const @ModelName@_scales& scales,
+   const @ModelName@_observables& observables)
+{
+   const @ModelName@_physical physical(model.get_physical_slha());
+
+@writeExtraSLHAOutputBlock@
 }
 
 /**

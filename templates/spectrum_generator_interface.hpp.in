@@ -50,15 +50,15 @@ public:
 
    std::tuple<@ModelName@<T>> get_models() const
    { return std::make_tuple(model); }
-   std::tuple<@ModelName@_slha<@ModelName@<T>>> get_models_slha() const
-   { return std::make_tuple(@ModelName@_slha<@ModelName@<T> >(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
+   std::tuple<@ModelName@<T>> get_models_slha() const
+   { return std::make_tuple(@ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
 
    const @ModelName@<T>& get_model() const
    { return model; }
    @ModelName@<T>& get_model()
    { return model; }
-   @ModelName@_slha<@ModelName@<T>> get_model_slha() const
-   { return @ModelName@_slha<@ModelName@<T>>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
+   @ModelName@<T> get_model_slha() const
+   { return @ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
 
    Spectrum_generator_problems get_problems() const { return problems; }
    int get_exit_code() const { return problems.have_problem(); }

@@ -714,8 +714,7 @@ void put_spectrum(const standard_model::StandardModel<Solver_type>& model, MLINK
 
 /******************************************************************/
 
-template <typename Model>
-void put_spectrum(const @ModelName@_slha<Model>& model, MLINK link)
+void put_spectrum(const @ModelName@_slha& model, MLINK link)
 {
    MLPutRule(link, @ModelName@_info::model_name);
    MLPutFunction(link, "List", @numberOfSpectrumEntries@);

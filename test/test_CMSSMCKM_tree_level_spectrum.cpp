@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
    m0.calculate_DRbar_masses();
    s.calcDrBarPars();
 
-   CMSSMCKM_slha<CMSSMCKM<Two_scale> > m(m0); // converts to SLHA-2
+   CMSSMCKM_slha m(m0); // converts to SLHA-2
 
    // re-set model parameters to super-CKM basis
    m.set_Yu(m.get_Yu_slha().matrix().cast<std::complex<double> >().asDiagonal());

@@ -4118,7 +4118,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["Creating class for SLHA model ..."];
            WriteModelSLHAClass[massMatrices,
                                {{FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.hpp.in"}],
-                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]}
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]},
+                                {FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.cpp.in"}],
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.cpp"}]}
                                }];
 
            Utils`PrintHeadline["Creating utilities"];
