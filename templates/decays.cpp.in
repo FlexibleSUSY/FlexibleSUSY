@@ -29,31 +29,26 @@
  * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
  */
 
-#include "@ModelName@_decays.hpp"
-#include "@ModelName@_info.hpp"
-// @todo: move one_loop_decay_diagrams back to src
-#include "@ModelName@_one_loop_decay_diagrams.hpp"
-
-#include "concatenate.hpp"
-#include "dilog.hpp"
-
-#include "config.h"
-#include "thread_pool.hpp"
-#include "wrappers.hpp"
+#include <cmath>
 
 #include <boost/range/algorithm.hpp>
 #include <boost/math/special_functions/zeta.hpp>
 
-#include <cmath>
-// TODO: remove before release
-#include <iomanip>
+#include "@ModelName@_decays.hpp"
+#include "@ModelName@_info.hpp"
+// @todo: move one_loop_decay_diagrams back to src
+#include "@ModelName@_one_loop_decay_diagrams.hpp"
+#include "concatenate.hpp"
+#include "dilog.hpp"
+#include "config.h"
+#include "thread_pool.hpp"
+#include "wrappers.hpp"
 #include "standard_model.hpp"
 
 namespace flexiblesusy {
 
 #define CLASSNAME @ModelName@_decays
 #define PHYSICAL(parameter) model.get_physical().parameter
-#define MODELPARAMETER(parameter) model.get_##parameter()
 
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
@@ -286,9 +281,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       // eq. 4.20 from Adam's thesis
       const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
 
-
-      const double g3 = MODELPARAMETER(g3);
-      const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
+      const double alpha_s_red = get_alphas(context)/Pi;
 
       switch (include_higher_order_corrections) {
          case HigherOrderSMCorrections::enable:
