@@ -263,6 +263,17 @@ void @ModelName@_slha_io::set_pmns(
    slha_io.set_block("IMVPMNS", pmns_matrix.imag(), "Im(PMNS)", scale);
 }
 
+/**
+ * Stores the model (DR-bar) parameters in the SLHA object.
+ *
+ * @param model model class
+ */
+void @ModelName@_slha_io::set_model_parameters(const @ModelName@_slha& model)
+{
+@writeSLHAModelParametersBlocks@
+@writeSLHAPhasesBlocks@
+}
+
 void @ModelName@_slha_io::set_model_parameters(const standard_model::Standard_model& model)
 {
    {

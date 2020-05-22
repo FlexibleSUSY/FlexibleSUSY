@@ -154,17 +154,6 @@ void @ModelName@_slha_io::fill(
 }
 
 /**
- * Stores the model (DR-bar) parameters in the SLHA object.
- *
- * @param model model class
- */
-void @ModelName@_slha_io::set_model_parameters(const @ModelName@_slha& model)
-{
-@writeSLHAModelParametersBlocks@
-@writeSLHAPhasesBlocks@
-}
-
-/**
  * Stores the model (DR-bar) parameters, masses and mixing matrices of
  * all given models in the SLHA object.
  *
