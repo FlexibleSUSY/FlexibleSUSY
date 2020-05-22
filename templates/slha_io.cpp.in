@@ -21,9 +21,15 @@
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_input_parameters.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_model_slha.hpp"
+#include "@ModelName@_observables.hpp"
+#include "@ModelName@_physical.hpp"
+#include "ew_input.hpp"
 #include "logger.hpp"
-#include "wrappers.hpp"
 #include "numerics2.hpp"
+#include "spectrum_generator_problems.hpp"
+#include "standard_model.hpp"
+#include "wrappers.hpp"
 #include "config.h"
 
 #include <array>

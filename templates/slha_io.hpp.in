@@ -21,44 +21,28 @@
 #ifndef @ModelName@_SLHA_IO_H
 #define @ModelName@_SLHA_IO_H
 
-#include "@ModelName@_model_slha.hpp"
-#include "@ModelName@_info.hpp"
-#include "@ModelName@_observables.hpp"
-#include "@ModelName@_physical.hpp"
 #include "problems.hpp"
-#include "spectrum_generator_problems.hpp"
-#include "standard_model_two_scale_model.hpp"
 #include "slha_io.hpp"
-#include "ckm.hpp"
-#include "ew_input.hpp"
 #include "for_each.hpp"
-#include "lowe.h"
-#include "wrappers.hpp"
 
 #include <Eigen/Core>
 #include <string>
 #include <tuple>
-#include <utility>
-
-#define Pole(p) physical.p
-#define PHYSICAL(p) model.get_physical().p
-#define PHYSICAL_SLHA(p) model.get_physical_slha().p
-#define LOCALPHYSICAL(p) physical.p
-#define MODEL model
-#define MODELPARAMETER(p) model.get_##p()
-#define EXTRAPARAMETER(p) model.get_##p()
-#define OBSERVABLES observables
-#define LowEnergyConstant(p) Electroweak_constants::p
-#define SCALES(p) scales.p
 
 namespace flexiblesusy {
 
 struct @ModelName@_input_parameters;
 class @ModelName@_mass_eigenstates;
+struct @ModelName@_observables;
+struct @ModelName@_physical;
+class @ModelName@_slha;
+class Spectrum_generator_problems;
 class Spectrum_generator_settings;
 
-template <class T>
-class @ModelName@;
+namespace standard_model {
+class Standard_model;
+struct Standard_model_physical;
+} // namespace standard_model
 
 struct @ModelName@_scales {
    double HighScale{0.}, SUSYScale{0.}, LowScale{0.};
@@ -167,16 +151,5 @@ void @ModelName@_slha_io::set_spectrum(const std::tuple<Ts...>& models)
 }
 
 } // namespace flexiblesusy
-
-#undef Pole
-#undef PHYSICAL
-#undef PHYSICAL_SLHA
-#undef LOCALPHYSICAL
-#undef MODEL
-#undef MODELPARAMETER
-#undef EXTRAPARAMETER
-#undef OBSERVABLES
-#undef LowEnergyConstant
-#undef SCALES
 
 #endif
