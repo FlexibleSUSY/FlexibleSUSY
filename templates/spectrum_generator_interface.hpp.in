@@ -21,6 +21,7 @@
 #ifndef @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 #define @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 
+#include "@ModelName@_info.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_model.hpp"
 #include "@ModelName@_model_slha.hpp"
@@ -148,10 +149,17 @@ void @ModelName@_spectrum_generator_interface<T>::write_running_couplings(
       return;
    }
 
-   @ModelName@_parameter_getter parameter_getter;
-   Coupling_monitor<@ModelName@_mass_eigenstates, @ModelName@_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return @ModelName@_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(@ModelName@_info::parameter_names),
+      std::cend(@ModelName@_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(start, stop, 100, true);
    coupling_monitor.write_to_file(filename);
 }
