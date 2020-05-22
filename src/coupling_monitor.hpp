@@ -26,7 +26,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include "logger.hpp"
 #include "error.hpp"
 

@@ -24,6 +24,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <set>
 #include <string>
 #include <utility>
@@ -162,45 +163,44 @@ void print_empty_phony_targets(std::ostream& ostr, const std::vector<std::string
       ostr << '\n' << d << ":\n";
 }
 
-/// returns file name from include "..." statement
-std::string get_filename_from_include(const std::string& line)
+/// extracts file name from include "..." statement
+template <class OutputIterator>
+void get_filename_from_include(const char* s, OutputIterator it)
 {
-   if (line.empty()) return "";
-
-   const char* s = line.c_str();
+   if (!s || !*s) return;
 
    // skip whitespace
    while (*s && std::isspace(*s)) s++;
 
    // skip #
    if (*s && *s == '#') s++;
-   else return "";
+   else return;
 
    // skip whitespace
    while (*s && std::isspace(*s)) s++;
 
    // skip `include'
    if (*s && std::strncmp(s, "include", 7) == 0) s += 7;
-   else return "";
+   else return;
 
    // extract file name from "file-name"
    if (*s) s = std::strchr(s, '"');
-   if (!s) return "";
+   if (!s) return;
    if (*s) s++;
 
    const char* pos1 = s;
 
    if (*s) s = std::strchr(s, '"');
-   if (!s) return "";
+   if (!s) return;
 
    const char* pos2 = s;
 
    const std::ptrdiff_t len = pos2 - pos1;
 
-   if (len <= 0)
-      return "";
-
-   return std::string(pos1, len);
+   if (len > 0) {
+      *it = std::string(pos1, len);
+      it++;
+   }
 }
 
 /// extract include statements from file (ignoring system headers)
@@ -211,9 +211,7 @@ std::vector<std::string> get_included_files(const std::string& file_name)
    std::string line;
 
    while (std::getline(istr, line)) {
-      auto file = get_filename_from_include(line);
-      if (!file.empty())
-         includes.push_back(std::move(file));
+      get_filename_from_include(line.c_str(), std::back_inserter(includes));
    }
 
    return includes;
