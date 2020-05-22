@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
 
    softsusy::PRINTOUT = 2;
    FlavourMssmSoftsusy s;
-   CMSSMCKM<Two_scale> m0;
+   CMSSMCKM_mass_eigenstates m0;
    m0.do_force_output(true);
    setup(m0, s);
 
