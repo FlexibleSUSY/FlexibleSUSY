@@ -92,7 +92,6 @@ public:
    void set_sminputs(const softsusy::QedQcd&);
    template <class... Ts> void set_spectrum(const std::tuple<Ts...>&);
    void set_spectrum(const @ModelName@_slha&);
-   template <class T> void set_spectrum(const @ModelName@<T>&);
    void set_spectrum(const standard_model::Standard_model&);
    void set_spinfo(const Spectrum_generator_problems&);
    void set_spinfo(const Problems&);
@@ -176,18 +175,6 @@ void @ModelName@_slha_io::set_spectrum(const std::tuple<Ts...>& models)
 {
    for_each_in_tuple(models,
                      [this](const auto& model) { this->set_spectrum(model); });
-}
-
-/**
- * Stores the model (DR-bar) parameters, masses and mixing matrices in
- * the SLHA object.
- *
- * @param model model class in BPMZ convention
- */
-template <class T>
-void @ModelName@_slha_io::set_spectrum(const @ModelName@<T>& model)
-{
-   set_spectrum(model);
 }
 
 } // namespace flexiblesusy
