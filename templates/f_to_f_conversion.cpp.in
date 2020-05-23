@@ -19,8 +19,7 @@
 /**
  * @file @ModelName@_f_to_f_conversion.cpp
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #include <valarray>

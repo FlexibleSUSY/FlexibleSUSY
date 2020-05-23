@@ -12,6 +12,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/ckm.cpp \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
+		$(DIR)/coupling_monitor.cpp \
 		$(DIR)/database.cpp \
 		$(DIR)/decay.cpp \
 		$(DIR)/dilog.cpp \

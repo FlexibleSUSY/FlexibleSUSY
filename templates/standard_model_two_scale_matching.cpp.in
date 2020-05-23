@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_standard_model_two_scale_matching.hpp"
 #include "@ModelName@_standard_model_matching.hpp"

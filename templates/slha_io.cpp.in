@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_input_parameters.hpp"

@@ -21,7 +21,6 @@
  * @brief contains wrapper class for model class in SLHA convention
  */
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_SLHA_H
 #define @ModelName@_SLHA_H
