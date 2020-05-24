@@ -295,6 +295,7 @@ endif
 ifeq ($(WITH_CE6SSM), yes)
 TEST_SRC += \
 		$(DIR)/test_CE6SSM_ewsb.cpp \
+		$(DIR)/test_CE6SSM_gmm2.cpp \
 		$(DIR)/test_CE6SSM_semi_analytic_solutions.cpp
 endif
 
@@ -1180,6 +1181,8 @@ $(DIR)/test_CNMSSM_semi_analytic_solutions.x: $(LIBCNMSSM)
 $(DIR)/test_CNMSSM_consistent_solutions.x: $(LIBCNMSSM) $(LIBNMSSM)
 
 $(DIR)/test_CE6SSM_ewsb.x: $(LIBCE6SSM)
+
+$(DIR)/test_CE6SSM_gmm2.x: $(LIBCE6SSM)
 
 $(DIR)/test_CE6SSM_semi_analytic_solutions.x: $(LIBCE6SSM)
 
