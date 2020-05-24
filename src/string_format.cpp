@@ -42,8 +42,7 @@ DEFINE_TO_STRING(double            );
 
 std::string to_string(const std::complex<double>& a)
 {
-   return "(" + boost::lexical_cast<std::string>(std::real(a)) + "," +
-          boost::lexical_cast<std::string>(std::real(a)) + ")";
+   return "(" + to_string(std::real(a)) + "," + to_string(std::imag(a)) + ")";
 }
 
 } // namespace flexiblesusy

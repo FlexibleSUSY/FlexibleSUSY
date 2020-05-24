@@ -20,6 +20,7 @@ BOOST_AUTO_TEST_CASE(test_is_equal)
    unsigned int ui = 0;
    unsigned long ul = 0UL;
    unsigned long long ull = 0ULL;
+   std::complex<double> c(0.0, 0.0);
 
    BOOST_CHECK(is_zero(s));
    BOOST_CHECK(is_zero(i));
@@ -29,6 +30,7 @@ BOOST_AUTO_TEST_CASE(test_is_equal)
    BOOST_CHECK(is_zero(ui));
    BOOST_CHECK(is_zero(ul));
    BOOST_CHECK(is_zero(ull));
+   BOOST_CHECK(is_zero(c));
 
    // BOOST_CHECK(is_equal(s, (short)0));
    BOOST_CHECK(is_equal(i, 0));
