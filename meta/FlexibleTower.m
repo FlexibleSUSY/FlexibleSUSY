@@ -30,7 +30,7 @@ GetModelType[name_String, templatePar_String] :=
     name <> "<" <> templatePar <> ">";
 
 GetSLHAModelType[name_String, templatePar_String] :=
-    GetModelType[name <> "_slha", GetModelType[name, templatePar]];
+    GetModelType[name, templatePar];
 
 GetModelTypes[] :=
     Utils`StringJoinWithSeparator[

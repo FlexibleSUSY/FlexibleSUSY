@@ -26,9 +26,18 @@
 #include <cstddef>
 #include <cstdlib>
 #include <type_traits>
-#include <boost/type_traits/is_complex.hpp>
 
 namespace flexiblesusy {
+
+namespace detail {
+
+template <class T> struct is_complex : public std::false_type {};
+template <class T> struct is_complex<const T > : public is_complex<T>{};
+template <class T> struct is_complex<volatile const T > : public is_complex<T>{};
+template <class T> struct is_complex<volatile T > : public is_complex<T>{};
+template <class T> struct is_complex<std::complex<T> > : public std::true_type{};
+
+} // namespace detail
 
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value, bool>::type
@@ -39,14 +48,14 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 
 template <typename T>
 typename std::enable_if<!std::is_unsigned<T>::value &&
-                        !boost::is_complex<T>::value, bool>::type
+                        !detail::is_complex<T>::value, bool>::type
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return std::abs(a) <= prec;
 }
 
 template <typename T>
-typename std::enable_if<boost::is_complex<T>::value, bool>::type
+typename std::enable_if<detail::is_complex<T>::value, bool>::type
 is_zero(T a,
         typename T::value_type prec
         = std::numeric_limits<typename T::value_type>::epsilon()) noexcept

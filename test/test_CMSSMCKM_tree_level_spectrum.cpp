@@ -217,14 +217,14 @@ BOOST_AUTO_TEST_CASE( test_CMSSMCKM_tree_level_masses )
 
    softsusy::PRINTOUT = 2;
    FlavourMssmSoftsusy s;
-   CMSSMCKM<Two_scale> m0;
+   CMSSMCKM_mass_eigenstates m0;
    m0.do_force_output(true);
    setup(m0, s);
 
    m0.calculate_DRbar_masses();
    s.calcDrBarPars();
 
-   CMSSMCKM_slha<CMSSMCKM<Two_scale> > m(m0); // converts to SLHA-2
+   CMSSMCKM_slha m(m0); // converts to SLHA-2
 
    // re-set model parameters to super-CKM basis
    m.set_Yu(m.get_Yu_slha().matrix().cast<std::complex<double> >().asDiagonal());

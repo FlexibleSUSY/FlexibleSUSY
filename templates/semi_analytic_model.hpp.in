@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_semi_analytic_model.hpp
@@ -24,15 +23,14 @@
  *        value problem using the semi_analytic solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_SEMI_ANALYTIC_MODEL_H
 #define @ModelName@_SEMI_ANALYTIC_MODEL_H
 
 #include "@ModelName@_model.hpp"
-#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_model_slha.hpp"
 #include "@ModelName@_semi_analytic_solutions.hpp"
 
 #include "model.hpp"
@@ -45,9 +43,10 @@ class Semi_analytic;
  * @brief model class with routines for determining masses and mixings and EWSB
  */
 template<>
-class @ModelName@<Semi_analytic> : public Model, public @ModelName@_mass_eigenstates {
+class @ModelName@<Semi_analytic> : public Model, public @ModelName@_slha {
 public:
-   explicit @ModelName@(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters());
+   explicit @ModelName@(const @ModelName@_input_parameters& input_ = @ModelName@_input_parameters(), bool do_convert_masses_to_slha = true);
+   explicit @ModelName@(const @ModelName@_slha&, bool do_convert_masses_to_slha = true);
    @ModelName@(const @ModelName@&) = default;
    @ModelName@(@ModelName@&&) = default;
    virtual ~@ModelName@() = default;

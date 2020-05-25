@@ -19,6 +19,7 @@
 #ifndef MSSMD5O_MSSMRHN_SPECTRUM_GENERATOR_H
 #define MSSMD5O_MSSMRHN_SPECTRUM_GENERATOR_H
 
+#include "MSSMD5O_info.hpp"
 #include "MSSMD5O_two_scale_ewsb_solver.hpp"
 #include "MSSMD5O_two_scale_model.hpp"
 #include "MSSMD5O_two_scale_susy_scale_constraint.hpp"
@@ -224,10 +225,17 @@ void MSSMD5O_MSSMRHN_spectrum_generator<T>::write_running_couplings_1(const std:
    MSSMD5O<T> tmp_model(model_1);
    tmp_model.run_to(low_scale_1);
 
-   MSSMD5O_parameter_getter parameter_getter;
-   Coupling_monitor<MSSMD5O<T>, MSSMD5O_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return MSSMD5O_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(MSSMD5O_info::parameter_names),
+      std::cend(MSSMD5O_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(low_scale_1, matching_scale, 100, true);
    coupling_monitor.write_to_file(filename);
 }
