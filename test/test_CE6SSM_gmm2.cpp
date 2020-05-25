@@ -20,30 +20,34 @@
 #define BOOST_TEST_MODULE test_CE6SSM_gmm2
 
 #include <boost/test/unit_test.hpp>
-#include <cstdlib>
+//#include <cstdlib>
 
-#include "test.hpp"
+//#include "test.hpp"
 #include "test_CE6SSM.hpp"
 
-#include "lowe.h"
-#include "wrappers.hpp"
+//#include "lowe.h"
+//#include "wrappers.hpp"
 #include "CE6SSM_a_muon.hpp"
-#include "CE6SSM_mass_eigenstates.hpp"
-#include "CE6SSM_susy_parameters.hpp"
-#include "CE6SSM_semi_analytic_ewsb_solver.hpp"
-#include "CE6SSM_semi_analytic_solutions.hpp"
+//#include "CE6SSM_mass_eigenstates.hpp"
+//#include "CE6SSM_susy_parameters.hpp"
+#include "physical_input.hpp"
+#include "CE6SSM_semi_analytic_spectrum_generator.hpp"
+//#include "CE6SSM_semi_analytic_ewsb_solver.hpp"
+//#include "CE6SSM_semi_analytic_solutions.hpp"
 #include "CE6SSM_slha_io.hpp"
-#include "spectrum_generator_settings.hpp"
+#include "CE6SSM_spectrum_generator.hpp"
+#include "CE6SSM_effective_couplings.hpp"
+//#include "spectrum_generator_settings.hpp"
 
 using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_amu )
 {
    
-   CE6SSM_input_parameters input;
+  // CE6SSM_input_parameters input;
 
    // Chosen point in parameter space
-   input.TanBeta = 7.1;
+   /*input.TanBeta = 7.1;
    input.LambdaInput = 0.4;
    input.KappaInput = 0.171;
    input.MuPrimeInput = 7276;
@@ -54,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
    input.m12Guess = 400;
    input.AzeroGuess = 400;
 
-   std::cout << input.LambdaInput << std::endl;
+   std::cout << input.LambdaInput << std::endl;*/
 
      char const * const slha_input = R"(
 Block MODSEL
@@ -123,31 +127,59 @@ Block EXTPAR
 
    // extract the input parameters
    softsusy::QedQcd qedqcd;
-   //CE6SSM_input_parameters input;
+   Physical_input physical_input;
+   CE6SSM_input_parameters input;
    Spectrum_generator_settings settings;
 
    try {
       slha_io.fill(qedqcd);
       slha_io.fill(input);
+      slha_io.fill(physical_input);
       slha_io.fill(settings);
    } catch (const Error& error) {
       BOOST_TEST_MESSAGE(error.what());
       BOOST_TEST(false);
    }
 
-   std::cout << input.LambdaInput << std::endl;
+   //std::cout << input.LambdaInput << std::endl;
 
-   settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
-   settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
+   //settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
+   //settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
 
-   CE6SSM_mass_eigenstates m;
+   CE6SSM_spectrum_generator<Semi_analytic> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.set_parameter_output_scale(slha_io.get_parameter_output_scale());
 
-   setup_CE6SSM_const(m, input);
+   spectrum_generator.run(qedqcd, input);
 
+   CE6SSM_scales scales;
+   scales.HighScale = spectrum_generator.get_high_scale();
+   scales.SUSYScale = spectrum_generator.get_susy_scale();
+   scales.LowScale  = spectrum_generator.get_low_scale();
+   scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
+
+
+   /*CE6SSM_mass_eigenstates m;
+
+   //setup_CE6SSM_const(m, input);
+
+   std::cout << "vd" << m.get_vd() << std::endl;
    std::cout << "vu" << m.get_vu() << std::endl;
-   std::cout << "g1 " << m.get_g1() << std::endl;
+   std::cout << "Cha " << m.get_mass_matrix_Cha() << std::endl;
+   std::cout << "Chi " << m.get_mass_matrix_Chi() << std::endl;
+   std::cout << "Se " << m.get_mass_matrix_Se() << std::endl;
+   std::cout << "Sv " << m.get_mass_matrix_Sv() << std::endl;*/
+   std::cout << "qedqcd " << qedqcd << std::endl;
 
-   auto amu = CE6SSM_a_muon::calculate_a_muon(m, qedqcd);
+   auto models = spectrum_generator.get_models_slha();
+
+   auto model_at_scale = std::get<0>(models);
+   model_at_scale.run_to(scales.pole_mass_scale);
+
+   CE6SSM_effective_couplings effective_couplings(model_at_scale, qedqcd, physical_input);
+   effective_couplings.calculate_effective_couplings();   
+
+   auto amu = CE6SSM_a_muon::calculate_a_muon(model_at_scale, qedqcd);
 
    constexpr double reference_value = 1.82135849E-11;
 
