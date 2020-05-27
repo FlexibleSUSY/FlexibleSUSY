@@ -57,7 +57,9 @@ namespace {
          return true;
       }
 
-      if (std::fabs(a) < std::numeric_limits<T>::epsilon()) {
+      const T min = std::min(std::abs(a), std::abs(b));
+
+      if (min < std::numeric_limits<T>::epsilon()) {
          return is_equal(a, b, prec);
       }
 

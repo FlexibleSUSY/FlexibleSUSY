@@ -39,6 +39,8 @@ template <class T> struct is_complex<std::complex<T> > : public std::true_type{}
 
 } // namespace detail
 
+
+/// compares a number for being close to zero
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value, bool>::type
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
@@ -46,6 +48,8 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
    return a <= prec;
 }
 
+
+/// compares a number for being close to zero
 template <typename T>
 typename std::enable_if<!std::is_unsigned<T>::value &&
                         !detail::is_complex<T>::value, bool>::type
@@ -54,6 +58,8 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
    return std::abs(a) <= prec;
 }
 
+
+/// compares a complex number for being close to zero
 template <typename T>
 typename std::enable_if<detail::is_complex<T>::value, bool>::type
 is_zero(T a,
@@ -63,34 +69,59 @@ is_zero(T a,
    return is_zero(a.real(), prec) && is_zero(a.imag(), prec);
 }
 
+
+/// compares two numbers for (absolute) equality
 template <typename T>
 bool is_equal(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return is_zero(a - b, prec);
 }
 
+
+/// compares two complex numbers for (absolute) equality
 template <typename T>
 bool is_equal(std::complex<T> a, std::complex<T> b,
               T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
-   return (is_equal(a.real(), b.real(), prec)
-           && is_equal(a.imag(), b.imag(), prec));
+   return is_equal(a.real(), b.real(), prec) &&
+          is_equal(a.imag(), b.imag(), prec);
 }
 
+
+/// compares two numbers for relative equality
+template <typename T>
+typename std::enable_if<!std::is_unsigned<T>::value, bool>::type
+is_equal_fraction(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
+{
+   const T max = std::max(std::abs(a), std::abs(b));
+   return is_zero(a - b, max*prec);
+}
+
+
+/// compares two numbers for relative equality, treating numbers with
+/// small differences as equal
 template <typename T>
 typename std::enable_if<!std::is_unsigned<T>::value, bool>::type
 is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
-   if (is_equal(a, b, std::numeric_limits<T>::epsilon()))
+   if (is_equal(a, b, std::numeric_limits<T>::epsilon())) {
       return true;
+   }
 
-   if (std::abs(a) < std::numeric_limits<T>::epsilon() ||
-       std::abs(b) < std::numeric_limits<T>::epsilon())
-      return false;
+   const T min = std::min(std::abs(a), std::abs(b));
 
-   return std::abs((a - b)/a) < prec;
+   if (min < std::numeric_limits<T>::epsilon()) {
+      return is_equal(a, b, prec);
+   }
+
+   const T max = std::max(std::abs(a), std::abs(b));
+
+   return is_equal(a, b, prec*max);
 }
 
+
+/// compares two numbers for relative equality, treating numbers with
+/// small differences as equal
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value, bool>::type
 is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
@@ -103,29 +134,35 @@ is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
    return is_equal_rel(sa, sb, sprec);
 }
 
-bool is_finite(const double*, long length);
 
-template <std::size_t N>
-bool is_finite(const double v[N]) noexcept
+/// returns true if all array elements are finite
+bool is_finite(const double*, long) noexcept;
+
+
+/// returns true if all array elements are finite
+template <typename T, std::size_t N>
+bool is_finite(const T (&v)[N]) noexcept
 {
-   bool is_finite = true;
-
-   for (std::size_t i = 0; i < N; i++)
-      is_finite = is_finite && std::isfinite(v[i]);
-
-   return is_finite;
+   return is_finite(&v[0], N);
 }
 
+
+/// returns true if all array elements are finite
 template <typename T, std::size_t N>
 bool is_finite(const std::array<T, N>& v) noexcept
 {
-   return is_finite<N>(&v[0]);
+   return is_finite(&v[0], N);
 }
 
+
+/// fast implementation of complex logarithm
 template <class T>
 std::complex<T> fast_log(const std::complex<T>& z) noexcept
 {
-   return std::complex<T>(std::log(std::abs(z)), std::arg(z));
+   const T rz = std::real(z);
+   const T iz = std::imag(z);
+
+   return std::complex<T>(0.5*std::log(rz*rz + iz*iz), std::atan2(iz, rz));
 }
 
 } // namespace flexiblesusy
