@@ -102,7 +102,7 @@ public:
    int solve_ewsb_one_loop();
    int solve_ewsb();            ///< solve EWSB at ewsb_loop_order level
 
-   void calculate_spectrum();
+   virtual void calculate_spectrum();
    std::string name() const;
    void run_to(double scale, double eps = -1.0) override;
    void print(std::ostream&) const override;

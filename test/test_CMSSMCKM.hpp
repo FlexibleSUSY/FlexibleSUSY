@@ -31,7 +31,7 @@ namespace softsusy {
 
 namespace flexiblesusy {
 
-inline CMSSMCKM_slha<CMSSMCKM<Two_scale>> setup_CMSSMCKM(
+inline CMSSMCKM_slha setup_CMSSMCKM(
    const CMSSMCKM_input_parameters& input,
    const softsusy::QedQcd& qedqcd,
    const Spectrum_generator_settings& settings)

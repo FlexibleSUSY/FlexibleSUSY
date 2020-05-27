@@ -639,7 +639,7 @@ Block MSOFT Q= 8.61574711E+02
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   MSSM_slha<MSSM<Two_scale>> m = std::get<0>(spectrum_generator.get_models_slha());
+   MSSM_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
    MSSM_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 

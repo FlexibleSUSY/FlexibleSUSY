@@ -256,7 +256,7 @@ Block UERMIX
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   THDMII_slha<THDMII<Two_scale>> m = std::get<0>(spectrum_generator.get_models_slha());
+   THDMII_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
    THDMII_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 

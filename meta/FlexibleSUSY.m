@@ -2580,10 +2580,9 @@ if (show_decays) {
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-    FlexibleSUSY`FSModelName <>
-"_decays decays(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
-if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays.calculate_decays();
+"if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
+   decays = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_decays>(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
+   decays->calculate_decays();
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2817,7 +2816,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             setDecaysInfoPrototypes = "", setDecaysInfoFunctions = "",
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
-            fillSLHAeaIncludingDecaysPrototypes = "", fillSLHAeaIncludingDecaysFunctions = "",
             decaysHeaderIncludes = ""
            },
            particles = DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices];
@@ -2882,8 +2880,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
               setDecaysFunctions = WriteOut`CreateSetDecaysFunctions[FlexibleSUSY`FSModelName];
               fillDecaysDataPrototypes = WriteOut`CreateFillDecaysDataPrototypes[FlexibleSUSY`FSModelName];
               fillDecaysDataFunctions = WriteOut`CreateFillDecaysDataFunctions[FlexibleSUSY`FSModelName];
-              fillSLHAeaIncludingDecaysPrototypes = WriteOut`CreateFillSLHAeaIncludingDecaysPrototypes[FlexibleSUSY`FSModelName];
-              fillSLHAeaIncludingDecaysFunctions = WriteOut`CreateFillSLHAeaIncludingDecaysFunctions[FlexibleSUSY`FSModelName];
               decaysHeaderIncludes = Utils`StringJoinWithSeparator[("#include \"" <> # <> "\"")& /@ decaysSLHAIncludeFiles, "\n"];
              ];
            getPDGCodeFromParticleEnumNoIndex = Parameters`CreatePDGCodeFromParticleCases[particles];
@@ -2935,8 +2931,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@setDecaysFunctions@"             -> setDecaysFunctions,
                             "@fillDecaysDataPrototypes@"       -> IndentText[fillDecaysDataPrototypes],
                             "@fillDecaysDataFunctions@"        -> fillDecaysDataFunctions,
-                            "@fillSLHAeaIncludingDecaysPrototypes@" -> IndentText[fillSLHAeaIncludingDecaysPrototypes],
-                            "@fillSLHAeaIncludingDecaysFunctions@" -> fillSLHAeaIncludingDecaysFunctions,
                             "@drBarBlockNames@"                -> WrapLines[drBarBlockNames],
                             "@getPDGCodeFromParticleEnumNoIndex@" -> IndentText[getPDGCodeFromParticleEnumNoIndex],
                             "@getPDGCodeFromParticleEnumIndex@" -> IndentText[getPDGCodeFromParticleEnumIndex],
@@ -4388,7 +4382,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["Creating class for SLHA model ..."];
            WriteModelSLHAClass[massMatrices,
                                {{FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.hpp.in"}],
-                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]}
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]},
+                                {FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.cpp.in"}],
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.cpp"}]}
                                }];
 
            Utils`PrintHeadline["Creating utilities"];

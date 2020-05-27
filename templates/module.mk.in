@@ -65,6 +65,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates.cpp \
 		$(DIR)/@CLASSNAME@_mass_eigenstates_decoupling_scheme.cpp \
+		$(DIR)/@CLASSNAME@_model_slha.cpp \
 		$(DIR)/@CLASSNAME@_observables.cpp \
 		$(DIR)/@CLASSNAME@_physical.cpp \
 		$(DIR)/@CLASSNAME@_slha_io.cpp \

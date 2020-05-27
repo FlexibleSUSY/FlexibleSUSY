@@ -681,7 +681,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    spectrum_generator.set_settings(settings);
    spectrum_generator.run(qedqcd, input);
 
-   MRSSM2_slha<MRSSM2<Two_scale>> m = std::get<0>(spectrum_generator.get_models_slha());
+   MRSSM2_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
    MRSSM2_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 

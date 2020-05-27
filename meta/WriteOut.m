@@ -57,8 +57,6 @@ CreateSetDecaysPrototypes::usage="";
 CreateSetDecaysFunctions::usage="";
 CreateFillDecaysDataPrototypes::usage="";
 CreateFillDecaysDataFunctions::usage="";
-CreateFillSLHAeaIncludingDecaysPrototypes::usage="";
-CreateFillSLHAeaIncludingDecaysFunctions::usage="";
 
 CreateSLHAYukawaDefinition::usage="";
 CreateSLHAYukawaGetters::usage="";
@@ -1365,28 +1363,6 @@ void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_dec
    if (!decays_error) {
       set_decays(decays.get_decay_table());
    }
-}";
-
-CreateFillSLHAeaIncludingDecaysPrototypes[modelName_String] := "\
-template <class Model>
-static void fill(
-   const " <> modelName <> "_slha<Model>&, const softsusy::QedQcd&,
-   const " <> modelName <> "_scales&, const " <> modelName <> "_observables&,
-   const " <> modelName <> "_decays&);"
-
-CreateFillSLHAeaIncludingDecaysFunctions[modelName_String] := "\
-template <class Model>
-void fill(
-   const " <> modelName <> "_slha<Model>& model,
-   const softsusy::QedQcd& qedqcd,
-   const " <> modelName <> "_scales& scales,
-   const " <> modelName <> "_observables& observables,
-   const " <> modelName <> "_decays& decays)
-{
-   " <> modelName <> "_slha_io slha_io;
-
-   slha_io.fill_spectrum_generator_data(model, qedqcd, scales, observables);
-   slha_io.fill_decays_data(decays);
 }";
 
 End[];

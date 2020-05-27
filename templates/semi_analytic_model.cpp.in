@@ -40,8 +40,13 @@ using namespace @ModelName@_info;
 #define INPUTPARAMETER(parameter) model.get_input().parameter
 #define MODELPARAMETER(parameter) model.get_##parameter()
 
-CLASSNAME::@ModelName@(const @ModelName@_input_parameters& input_)
-   : @ModelName@_mass_eigenstates(input_)
+CLASSNAME::@ModelName@(const @ModelName@_slha& model_, bool do_convert_masses_to_slha)
+   : @ModelName@_slha(model_, do_convert_masses_to_slha)
+{
+}
+
+CLASSNAME::@ModelName@(const @ModelName@_input_parameters& input_, bool do_convert_masses_to_slha)
+   : @ModelName@_slha(input_, do_convert_masses_to_slha)
 {
 }
 
