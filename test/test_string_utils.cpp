@@ -33,10 +33,22 @@ void test_concat_with_separator()
 }
 
 
+void test_concat_ints_with_separator()
+{
+   using namespace flexiblesusy;
+
+   std::vector<int> vec = {1, 2, 3};
+
+   CHECK_EQ(concat(vec.cbegin(), vec.cend(), ","), "1,2,3");
+   CHECK_EQ(concat(vec.cbegin(), vec.cend(), ','), "1,2,3");
+}
+
+
 int main()
 {
    test_concat();
    test_concat_with_separator();
+   test_concat_ints_with_separator();
 
    return errors;
 }
