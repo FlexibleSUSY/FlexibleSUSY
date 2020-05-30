@@ -32,7 +32,6 @@
 #include <cmath>
 
 #include <boost/range/algorithm.hpp>
-#include <boost/math/special_functions/zeta.hpp>
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_info.hpp"
@@ -271,15 +270,13 @@ double CLASSNAME::get_partial_width<H, G, G>(
       // NLO, NNLO - eq. 11 of hep-ph/9705240
       const double deltaNLO {95./4. - 7./6.*Nf};
 
-      const double mtpole2 {Sqr(mtpole)};
-      using boost::math::zeta;
       const double deltaNNLO {
-         149533./288. - 363./8.*zeta(2) - 495./8.*zeta(3) + 19./8.*log(mH*mH/mtpole2)
-               + Nf*(-4157./72 + 11./2.*zeta(2) + 5./4.*zeta(3) + 2./3.*log(mH*mH/mtpole2))
-               + Nf*Nf*(127./108. - zeta(2)/6.)
+         149533./288. - 363./8.*zeta2 - 495./8.*zeta3 + 19./8.*std::log(Sqr(mH/mtpole))
+               + Nf*(-4157./72 + 11./2.*zeta2 + 5./4.*zeta3 + 2./3.*std::log(Sqr(mH/mtpole)))
+               + Nf*Nf*(127./108. - zeta2/6.)
       };
       // eq. 4.20 from Adam's thesis
-      const double deltaNNNLO {467.683620788 + 122.440972222*log(mH*mH/mtpole2) + 10.9409722222*Sqr(log(mH*mH/mtpole2))};
+      const double deltaNNNLO {467.683620788 + 122.440972222*std::log(Sqr(mH/mtpole)) + 10.9409722222*Sqr(std::log(Sqr(mH/mtpole)))};
 
       const double alpha_s_red = get_alphas(context)/Pi;
 
