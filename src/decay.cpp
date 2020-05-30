@@ -107,10 +107,10 @@ const Decay& Decays_list::get_decay(
 
       std::size_t count = 0;
       const std::size_t n_final = product_pdgs.size();
-      for (auto it = std::begin(product_pdgs),
-              end = std::end(product_pdgs); it != end; ++it, ++count) {
-         msg << *it;
-         if (count != n_final) {
+      for (int pdg : product_pdgs) {
+         count++;
+         msg << pdg;
+         if (++count != n_final) {
             msg << ", ";
          }
       }
