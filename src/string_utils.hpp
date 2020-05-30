@@ -28,16 +28,10 @@ namespace flexiblesusy {
 std::string concat(const std::vector<std::string>&);
 
 /// concatenate strings with separator
-template <typename T>
-std::string concat(const std::vector<std::string>& strings, const T& separator)
-{
-   std::string result;
+std::string concat(const std::vector<std::string>&, const std::string&);
 
-   for (const auto& s: strings)
-      result += s + separator;
-
-   return result;
-}
+/// concatenate strings with separator
+std::string concat(const std::vector<std::string>&, char);
 
 } // namespace flexiblesusy
 
