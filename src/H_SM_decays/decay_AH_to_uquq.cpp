@@ -1,6 +1,6 @@
 // special case for H -> Fu Fu
 template<>
-double CLASSNAME::get_partial_width<AH,bar<uq>::type,uq>(
+double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<uq>::type const& indexOut1,
@@ -74,9 +74,5 @@ double CLASSNAME::get_partial_width<AH,bar<uq>::type,uq>(
       * (1 + deltaqq + deltaAH2);
    }
 
-   if (result < 0) {
-      throw std::runtime_error("Error in Ah->uquq. Partial width < 0.");
-   } else {
-      return result;
-   }
+   return result;
 }

@@ -76,11 +76,13 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto amp2OS = Sqr(mHOS) * Sqr(betaOS) *
                 2.*std::norm(HBBbarVertexDR.left()) * Sqr(mdqOS / mdqDR);
 
-   return flux * color_factor *
+   const double result = flux * color_factor *
           (
              // low x limit
              (1 - 4. * xOS) * phase_spaceDR * amp2DR *
                 (1. + deltaqqDR + deltaqqDRQED +  deltaH2) +
              // high x limit
              4 * xOS * phase_spaceOS * amp2OS * (1. + deltaqqOS + deltaqqOSQED));
+
+   return result;
 }

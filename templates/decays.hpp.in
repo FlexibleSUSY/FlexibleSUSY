@@ -30,13 +30,13 @@
 #ifndef @ModelName@_DECAYS_H
 #define @ModelName@_DECAYS_H
 
+#include <boost/core/demangle.hpp>
+
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "@ModelName@_input_parameters.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
-
-
 #include "@ModelName@_decay_amplitudes.hpp"
 #include "decays_loop_corrections.hpp"
 #include "decays_problems.hpp"
@@ -197,6 +197,41 @@ double squared_color_generator() {
    return color_factor;
 }
 
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+std::string wrong_width_sign_msg(std::vector<int> in, std::vector<int> out1, std::vector<int> out2) {
+
+   using boost::core::demangle;
+   auto strip_namespace = [](std::string const& s) {
+      std::string result = s.substr(s.find_last_of(':')+1);
+      if (s.find("bar") != std::string::npos) {
+         result.pop_back();
+         return "bar" + result;
+      } else if (s.find("conj") != std::string::npos) {
+         result.pop_back();
+         return "conj" + result;
+      } else {
+         return result;
+      }
+   };
+   auto vector_to_idx = [](std::vector<int> v) {
+      if (v.empty()) {
+         return std::string();
+      }
+      else {
+         return "(" + std::to_string(v[1]) + ")";
+      }
+   };
+
+   std::string msg =
+         strip_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
+         + "->{" +
+         strip_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
+         strip_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
+         "}";
+
+      return msg;
+}
+
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 double @ModelName@_decays::get_partial_width(
@@ -214,7 +249,7 @@ double @ModelName@_decays::get_partial_width(
    const double mOut2 = context.physical_mass<FieldOut2>(indexOut2);
 
    // phase space without symmetry factor
-   const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(mIn*mIn, mOut1*mOut1, mOut2*mOut2))/(mIn*mIn);
+   const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mOut1/mIn), Sqr(mOut2/mIn)));
 
    // phase space symmetry factor
    const double ps_symmetry =
@@ -231,11 +266,7 @@ double @ModelName@_decays::get_partial_width(
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
    const auto result = 0.5 * ps * ps_symmetry * color_factor * mat_elem_sq / mIn;
 
-   if (result < 0) {
-      throw std::runtime_error("Width < 0");
-   } else {
-      return result;
-   }
+   return result;
 }
 
 @partialWidthSpecializationDecls@

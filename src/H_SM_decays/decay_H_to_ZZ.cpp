@@ -54,9 +54,5 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
    res *= std::norm(ghZZ);
 
-   if (res < 0) {
-      throw std::runtime_error("Error in H->ZZ. Partial width < 0.");
-   } else {
-      return res;
-   }
+   return res;
 }

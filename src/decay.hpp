@@ -22,12 +22,13 @@
 #include <initializer_list>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 namespace flexiblesusy {
 
 class Decay {
 public:
-   Decay(int, std::initializer_list<int>, double);
+   Decay(int, std::initializer_list<int>, double, std::string const&);
    ~Decay() = default;
    Decay(const Decay&) = default;
    Decay(Decay&&) = default;
@@ -41,12 +42,14 @@ public:
    std::size_t get_final_state_size() const { return pids_out.size(); }
 
    double get_width() const { return width; }
+   std::string get_proc_string() const { return proc_string; }
    void set_width(double w) { width = w; }
 
 private:
    int pid_in{0};
    std::vector<int> pids_out{};
    double width{0.};
+   std::string proc_string;
 };
 
 std::size_t hash_decay(const Decay& decay);
@@ -75,7 +78,13 @@ public:
    std::size_t size() const noexcept { return decays.size(); }
 
    void clear();
-   void set_decay(double width, std::initializer_list<int> products);
+   // @todo
+   // the string cannot be taken by const&
+   // if you do this, the printed to the screen total_width of Higgs boson
+   // in the SM is shifted from 4.07 MeV 3.98 MeV
+   // none of this makes any sense
+   // this happend with clang 10.0.0, but not with gcc 9.3.1
+   void set_decay(double width, std::initializer_list<int> products, std::string);
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }

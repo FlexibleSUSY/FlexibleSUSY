@@ -74,9 +74,5 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
       * (1 + deltaqq + deltaH2);
    }
 
-   if (result < 0) {
-      throw std::runtime_error("Error in H->uquq. Partial width < 0.");
-   } else {
-      return result;
-   }
+   return result;
 }

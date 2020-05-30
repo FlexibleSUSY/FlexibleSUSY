@@ -775,7 +775,18 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
               ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n"
                 ];
            (* call decay *)
-           body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> ");";
+                      body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> 
+               ", wrong_width_sign_msg<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
+                  If[initialStateDim > 1, "{gI1}", "{}"] <> "," <>
+                  StringJoin @ Riffle[
+                  MapIndexed[
+                     With[{idx = First[#2]},
+                        If[finalStateDims[[idx]] > 1, "{gO" <> ToString[idx] <> "}", "{}"]
+                     ]&,
+                     finalState
+                  ], ","] <>
+                  ")" <>
+           ");";
 
            loopIndices = Reverse[Select[MapIndexed[With[{idx = First[#2]},
                                                         If[#1 > 1,

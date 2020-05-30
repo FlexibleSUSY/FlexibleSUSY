@@ -23,9 +23,5 @@ double CLASSNAME::get_partial_width<H, H, H>(
    const double res = flux * ps * ps_symmetry *
       calculate_amplitude<H, H, H>(context, indexIn, indexOut1, indexOut2).square();
 
-   if (res < 0) {
-      throw std::runtime_error("Error in H->HH. Partial width < 0.");
-   } else {
-      return res;
-   }
+   return res;
 }

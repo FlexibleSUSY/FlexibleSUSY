@@ -45,9 +45,5 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       res = flux * ps * mat_elem_sq;
    }
 
-   if (res < 0) {
-      throw std::runtime_error("Error in H->WW. Partial width < 0.");
-   } else {
-      return res;
-   }
+   return res;
 }
