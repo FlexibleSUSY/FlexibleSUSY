@@ -1670,9 +1670,11 @@ functionBody = "// skip indices that don't match external indices\n" <>
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
             "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+            "{\n" <>
+               TextFormatting`IndentText[
 
          (* usings for vertices *)
-         "\n" <> cppVertices <>
+         cppVertices <>
 
          (* diagram symmetry factor *)
           "\nconstexpr double " <> ToString@symmetryFac <> " {" <>
@@ -1703,7 +1705,9 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   ToString @ N[cf, 16] <> "}"
             ]
          ] <> ";\n" <>
-         WrapCodeInLoop[indices, functionBody]
+         WrapCodeInLoop[indices, functionBody] 
+               ] <>
+         "}\n"
       }
    ];
 
