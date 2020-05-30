@@ -24,6 +24,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/core/demangle.hpp>
+
 namespace flexiblesusy {
 
 class Decay {
@@ -94,6 +96,41 @@ private:
    std::unordered_map<std::size_t, Decay> decays{};
    double total_width{0.};
 };
+
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+std::string wrong_width_sign_msg(std::vector<int> in, std::vector<int> out1, std::vector<int> out2) {
+
+   using boost::core::demangle;
+   auto strip_namespace = [](std::string const& s) {
+      std::string result = s.substr(s.find_last_of(':')+1);
+      if (s.find("bar") != std::string::npos) {
+         result.pop_back();
+         return "bar" + result;
+      } else if (s.find("conj") != std::string::npos) {
+         result.pop_back();
+         return "conj" + result;
+      } else {
+         return result;
+      }
+   };
+   auto vector_to_idx = [](std::vector<int> v) {
+      if (v.empty()) {
+         return std::string();
+      }
+      else {
+         return "(" + std::to_string(v[1]) + ")";
+      }
+   };
+
+   std::string msg =
+         strip_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
+         + "->{" +
+         strip_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
+         strip_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
+         "}";
+
+   return msg;
+}
 
 } // namespace flexiblesusy
 
