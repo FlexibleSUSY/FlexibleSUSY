@@ -126,8 +126,12 @@ Block EXTPAR
    auto models = spectrum_generator.get_models_slha();
    auto amu = CE6SSM_a_muon::calculate_a_muon(std::get<0>(models), qedqcd);
 
-   constexpr double reference_value = 1.82135849E-11;
+   // Reference value from FlexibleSUSY, checks that value does not change
+   constexpr double reference_value = 
+	   + 1.88800475E-11   // Contribution from FFS + SSF diagrams
+	   - 0.06664329E-11;  // Contribution from Vector diagrams
 
+   // Perform a rough closeness check
    BOOST_CHECK_CLOSE_FRACTION(amu, reference_value, 1e-3);
 
 }
