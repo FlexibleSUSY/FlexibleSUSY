@@ -508,17 +508,20 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
 
            Print[""];
            Print["Creating amplitudes for ", particle, " decays..."];
-           decays = (
-               (* @todo StringPadRigh was introduced only in 10.1 *)
-               WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
-               temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-               Print[" Done."];
-               temp
-              )& /@ concreteFinalStates;
+           decays =
+              ParallelMap[
+                 (
+                    (* @todo StringPadRigh was introduced only in 10.1 *)
+                    WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
+                    Print[" Done."];
+                    temp
+                 )&,
+                 concreteFinalStates
+              ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
-
     ];
 
 GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
@@ -1988,10 +1991,20 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {}},
            Print[""];
            FSFancyLine[];
-           specializations = Flatten[(
-              (If[!MemberQ[listing, GetInitialState[#]], Print[""];Print["Creating C++ code for ", GetInitialState[#], " decays..."]; AppendTo[listing, GetInitialState[#]]];
-              CreateTotalAmplitudeSpecialization[#, modelName])& /@ Last[#]
-              )& /@ particleDecays, 1];
+           (* @todo: can this be a ParallelMap? *)
+           (*SetSharedVariable[listing];*)
+           specializations =
+              ParallelMap[
+                 (
+                    (*If[!MemberQ[listing, GetInitialState[#]],
+                       Print[""];
+                       Print["Creating C++ code for ", GetInitialState[#], " decays..."];
+                       AppendTo[listing, GetInitialState[#]];
+                    ];*)
+                    CreateTotalAmplitudeSpecialization[#, modelName]
+                 )&,
+                 Flatten[Last @@@ particleDecays, 1]
+              ];
            vertices = Flatten[First@Transpose[specializations], 1];
            specializations = Transpose[Drop[Transpose[specializations], 1]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
