@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include "string_utils.hpp"
+
 namespace flexiblesusy {
 
 namespace {
@@ -103,18 +105,9 @@ const Decay& Decays_list::get_decay(
    if (pos == std::end(decays)) {
       std::ostringstream msg;
       msg << "Decay of particle " << initial_pdg
-          << " into particles {";
-
-      std::size_t count = 0;
-      const std::size_t n_final = product_pdgs.size();
-      for (int pdg : product_pdgs) {
-         msg << pdg;
-         if (++count != n_final) {
-            msg << ", ";
-         }
-      }
-
-      msg << "} not found\n";
+          << " into particles {"
+          << concat(product_pdgs.begin(), product_pdgs.end(), ", ")
+          << "} not found\n";
 
       throw OutOfBoundsError(msg.str());
    }
