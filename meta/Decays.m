@@ -508,8 +508,10 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
 
            Print[""];
            Print["Creating amplitudes for ", particle, " decays..."];
+           (*ParallelEvaluate[Get["/home/wojciech/HEP-software/mathematica/SARAH-4.14.3/SARAH.m"]]
+           ParallelEvaluate[Start["MSSM"]];*)
            decays =
-              ParallelMap[
+              Map[
                  (
                     (* @todo StringPadRigh was introduced only in 10.1 *)
                     WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
@@ -517,7 +519,8 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                     Print[" Done."];
                     temp
                  )&,
-                 concreteFinalStates
+                 concreteFinalStates(*,
+                 DistributedContexts -> All*)
               ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
@@ -1992,18 +1995,21 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            Print[""];
            FSFancyLine[];
            (* @todo: can this be a ParallelMap? *)
-           (*SetSharedVariable[listing];*)
+           (*SetSharedVariable[listing];
+           CloseKernels[]
+           LaunchKernels[2];*)
            specializations =
-              ParallelMap[
+              Map[
                  (
-                    (*If[!MemberQ[listing, GetInitialState[#]],
+                    If[!MemberQ[listing, GetInitialState[#]],
                        Print[""];
                        Print["Creating C++ code for ", GetInitialState[#], " decays..."];
                        AppendTo[listing, GetInitialState[#]];
-                    ];*)
+                    ];
                     CreateTotalAmplitudeSpecialization[#, modelName]
                  )&,
-                 Flatten[Last @@@ particleDecays, 1]
+                 Flatten[Last @@@ particleDecays, 1](*,
+                 DistributedContexts -> All*)
               ];
            vertices = Flatten[First@Transpose[specializations], 1];
            specializations = Transpose[Drop[Transpose[specializations], 1]];
