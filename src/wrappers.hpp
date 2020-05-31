@@ -760,6 +760,11 @@ Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m)
    return m.unaryExpr([](double a){ return ZeroSqrt(a); });
 }
 
+template<typename T>
+T KallenLambda(T x, T y, T z) {
+   return Sqr(x-y-z) - 4*y*z;
+}
+
 } // namespace flexiblesusy
 
 #endif

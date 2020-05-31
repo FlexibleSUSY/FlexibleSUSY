@@ -51,11 +51,6 @@ std::complex<double> quadratic_interpolation(
 std::map<double,std::complex<double> > get_scalar_fermion_loop_data();
 std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data();
 
-template<typename T>
-T KallenLambda(T x, T y, T z) {
-   return Sqr(x-y-z) - 4*y*z;
-}
-
 } // namespace effective_couplings
 
 } // namespace flexiblesusy

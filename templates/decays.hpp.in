@@ -37,7 +37,6 @@
 #include "@ModelName@_decay_amplitudes.hpp"
 #include "decays_loop_corrections.hpp"
 #include "decays_problems.hpp"
-#include "effective_couplings.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "error.hpp"
@@ -203,7 +202,6 @@ double @ModelName@_decays::get_partial_width(
    typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
    ) const
 {
-   using effective_couplings::KallenLambda;
 
    // onshell masses
    const double mIn = context.physical_mass<FieldIn>(indexIn);
