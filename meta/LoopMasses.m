@@ -303,8 +303,8 @@ Do1DimVector[particleName_String, massName_String, massMatrixName_String,
     "const double p = " <> momentum <> ";\n" <>
     "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
     "const double mass_sqr = " <> massMatrixName <> " - self_energy;\n\n" <>
-    "if (mass_sqr < 0.)\n" <>
-    IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n" <>
+    "if (mass_sqr < 0.) {\n" <>
+    IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n}\n\n" <>
     "PHYSICAL(" <> massName <> ") = AbsSqrt(mass_sqr);\n";
 
 
@@ -947,8 +947,8 @@ Create1DimPoleMassFunction[particle_Symbol] :=
                body = body <>
                       "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
                       "const double mass_sqr = " <> mTree <> " - self_energy;\n\n" <>
-                      "if (mass_sqr < 0.)\n" <>
-                      IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n" <>
+                      "if (mass_sqr < 0.) {\n" <>
+                      IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n}\n\n" <>
                       "return AbsSqrt(mass_sqr);\n";
               ,
               body = "return 0.;\n";
@@ -1076,7 +1076,7 @@ CreateRunningDRbarMassPrototype[particle_ /; IsFermion[particle]] :=
 
 CreateRunningDRbarMassPrototype[particle_] :=
     "double calculate_" <> ToValidCSymbolString[FlexibleSUSY`M[particle]] <>
-    "_DRbar(double);\n";
+    "_DRbar(double) const;\n";
 
 CreateRunningDRbarMassPrototypes[] :=
     Module[{result = "", particles},
@@ -1352,10 +1352,10 @@ CreateRunningDRbarMassFunction[particle_, _] :=
            particleName = ToValidCSymbolString[particle];
            name = ToValidCSymbolString[FlexibleSUSY`M[particle]];
            If[IsMassless[particle],
-              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double)\n{\n";
+              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double) const\n{\n";
               body = "return 0.0;\n";
               ,
-              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double m_pole)\n{\n";
+              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double m_pole) const\n{\n";
               body = "const double p = m_pole;\n" <>
               "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
               "const double mass_sqr = Sqr(m_pole) + self_energy;\n\n" <>

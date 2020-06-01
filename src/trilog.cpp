@@ -17,72 +17,42 @@
 // ====================================================================
 
 #include "trilog.hpp"
+#include "complex.hpp"
 #include <cfloat>
 #include <cmath>
-#include <limits>
 
 namespace flexiblesusy {
 
 namespace {
-   template <typename T> T sqr(T x) noexcept { return x*x; }
 
-   template <typename T>
-   std::complex<T> clog(std::complex<T> z) noexcept
+   template <typename T, int N>
+   Complex<T> horner(const Complex<T>& z, const T (&coeffs)[N]) noexcept
    {
-      // converts -0.0 to 0.0
-      if (std::real(z) == T(0)) { z.real(T(0)); }
-      if (std::imag(z) == T(0)) { z.imag(T(0)); }
+      static_assert(N >= 2, "more than two coefficients required");
 
-      const T rz = std::real(z);
-      const T iz = std::imag(z);
-      const T nz = sqr(rz) + sqr(iz);
+      const T r = z.re + z.re;
+      const T s = z.re * z.re + z.im * z.im;
+      T a = coeffs[N - 1], b = coeffs[N - 2];
 
-      return std::complex<T>(0.5*std::log(nz), std::atan2(iz, rz));
-   }
+      for (int i = N - 3; i >= 0; --i) {
+         const T t = a;
+         a = b + r * a;
+         b = coeffs[i] - s * t;
+      }
 
-   template <typename T>
-   bool is_close(const std::complex<T>& a, T b, T eps)
-   {
-      return std::abs(std::real(a) - b) < eps && std::abs(std::imag(a)) < eps;
-   }
-
-   template <typename T>
-   std::complex<T> cadd(T a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(a + std::real(b), std::imag(b));
-   }
-
-   template <typename T>
-   std::complex<T> cadd(const std::complex<T>& a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(std::real(a) + std::real(b),
-                             std::imag(a) + std::imag(b));
-   }
-
-   template <typename T>
-   std::complex<T> cmul(const std::complex<T>& a, T b) noexcept
-   {
-      return std::complex<T>(std::real(a) * b, std::imag(a) * b);
-   }
-
-   template <typename T>
-   std::complex<T> cmul(const std::complex<T>& a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(
-         std::real(a) * std::real(b) - std::imag(a) * std::imag(b),
-         std::real(a) * std::imag(b) + std::imag(a) * std::real(b));
+      return Complex<T>(z.re*a + b, z.im*a);
    }
 
 } // anonymous namespace
 
 /**
  * @brief Complex trilogarithm \f$\mathrm{Li}_3(z)\f$
- * @param z complex argument
+ * @param z_ complex argument
  * @return \f$\mathrm{Li}_3(z)\f$
+ * @author Alexander Voigt
  */
-std::complex<double> trilog(const std::complex<double>& z) noexcept
+std::complex<double> trilog(const std::complex<double>& z_) noexcept
 {
-   const double eps   = 10.0*std::numeric_limits<double>::epsilon();
    const double PI    = 3.141592653589793;
    const double PI2   = PI*PI;
    const double zeta2 = 1.644934066848226;
@@ -99,32 +69,36 @@ std::complex<double> trilog(const std::complex<double>& z) noexcept
       3.104357887965462e-14,  5.261758629912506e-15
    };
 
-   if (is_close(z, 0.0, eps)) {
-      return { 0.0, 0.0 };
-   }
-   if (is_close(z, 1.0, eps)) {
-      return { zeta3, 0.0 };
-   }
-   if (is_close(z, -1.0, eps)) {
-      return { -0.75*zeta3, 0.0 };
-   }
-   if (is_close(z, 0.5, eps)) {
-      const double ln2  = 0.6931471805599453; // ln(2)
-      const double ln23 = 0.3330246519889295; // ln(2)^3
-      return { (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0, 0.0 };
+   const Complex<double> z = { std::real(z_), std::imag(z_) };
+
+   if (z.im == 0) {
+      if (z.re == 0) {
+         return 0.0;
+      }
+      if (z.re == 1) {
+         return zeta3;
+      }
+      if (z.re == -1) {
+         return -0.75*zeta3;
+      }
+      if (z.re == 0.5) {
+         const double ln2  = 0.6931471805599453; // ln(2)
+         const double ln23 = 0.3330246519889295; // ln(2)^3
+         return (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0;
+      }
    }
 
-   const auto rz  = std::real(z);
-   const auto iz  = std::imag(z);
-   const auto nz  = sqr(rz) + sqr(iz);
-   const auto pz  = std::atan2(iz, rz);
-   const auto lnz = 0.5*std::log(nz);
+   const double nz  = norm_sqr(z);
+   const double pz  = arg(z);
+   const double lnz = 0.5*std::log(nz);
 
-   if (sqr(lnz) + sqr(pz) < 1.0) { // |log(z)| < 1
-      const auto u  = std::complex<double>(lnz, pz); // clog(z)
-      const auto u2 = u*u;
-      const auto c0 = zeta3 + u*(zeta2 - u2/12.0);
-      const auto c1 = 0.25 * (3.0 - 2.0*clog(-u));
+   if (lnz*lnz + pz*pz < 1) { // |log(z)| < 1
+      const Complex<double> u(lnz, pz); // log(z)
+      const Complex<double> u2 = u*u;
+      const Complex<double> u4 = u2*u2;
+      const Complex<double> u8 = u4*u4;
+      const Complex<double> c0 = zeta3 + u*(zeta2 - u2/12.0);
+      const Complex<double> c1 = 0.25 * (3.0 - 2.0*log(-u));
 
       const double cs[7] = {
          -3.472222222222222e-03, 1.157407407407407e-05,
@@ -134,58 +108,46 @@ std::complex<double> trilog(const std::complex<double>& z) noexcept
       };
 
       return
-         cadd(c0,
-         cmul(u2, cadd(c1,
-         cmul(u2, cadd(cs[0],
-         cmul(u2, cadd(cs[1],
-         cmul(u2, cadd(cs[2],
-         cmul(u2, cadd(cs[3],
-         cmul(u2, cadd(cs[4],
-         cmul(u2, cadd(cs[5],
-         cmul(u2, cs[6]))))))))))))))));
+         c0 +
+         c1*u2 +
+         u4*(cs[0] + u2*cs[1]) +
+         u8*(cs[2] + u2*cs[3] + u4*(cs[4] + u2*cs[5])) +
+         u8*u8*cs[6];
    }
 
-   std::complex<double> u(0.0, 0.0), rest(0.0, 0.0);
+   Complex<double> u(0.0, 0.0), rest(0.0, 0.0);
 
-   if (nz <= 1.0) {
-      u = -clog(1.0 - z);
+   if (nz <= 1) {
+      u = -log(1.0 - z);
    } else { // nz > 1
-      const auto arg = pz > 0.0 ? pz - PI : pz + PI;
-      const auto lmz = std::complex<double>(lnz, arg); // clog(-z)
-      u = -clog(1.0 - 1.0/z);
-      rest = -lmz*(sqr(lmz)/6.0 + zeta2);
+      const double arg = pz > 0.0 ? pz - PI : pz + PI;
+      const Complex<double> lmz(lnz, arg); // log(-z)
+      u = -log(1.0 - 1.0/z);
+      rest = -lmz*(lmz*lmz/6.0 + zeta2);
    }
+
+   const Complex<double> u2 = u*u;
+   const Complex<double> u4 = u2*u2;
+   const Complex<double> u8 = u4*u4;
 
    return
-      cadd(rest,
-      cmul(u, cadd(bf[0],
-      cmul(u, cadd(bf[1],
-      cmul(u, cadd(bf[2],
-      cmul(u, cadd(bf[3],
-      cmul(u, cadd(bf[4],
-      cmul(u, cadd(bf[5],
-      cmul(u, cadd(bf[6],
-      cmul(u, cadd(bf[7],
-      cmul(u, cadd(bf[8],
-      cmul(u, cadd(bf[9],
-      cmul(u, cadd(bf[10],
-      cmul(u, cadd(bf[11],
-      cmul(u, cadd(bf[12],
-      cmul(u, cadd(bf[13],
-      cmul(u, cadd(bf[14],
-      cmul(u, cadd(bf[15],
-      cmul(u, cadd(bf[16],
-      cmul(u, bf[17]))))))))))))))))))))))))))))))))))));
+      rest +
+      u*bf[0] +
+      u2*(bf[1] + u*bf[2]) +
+      u4*(bf[3] + u*bf[4] + u2*(bf[5] + u*bf[6])) +
+      u8*(bf[7] + u*bf[8] + u2*(bf[9] + u*bf[10]) +
+          u4*(bf[11] + u*bf[12] + u2*(bf[13] + u*bf[14]))) +
+      u8*u8*(bf[15] + u*bf[16] + u2*bf[17]);
 }
 
 /**
  * @brief Complex trilogarithm \f$\mathrm{Li}_3(z)\f$ with long double precision
- * @param z complex argument
+ * @param z_ complex argument
  * @return \f$\mathrm{Li}_3(z)\f$
+ * @author Alexander Voigt
  */
-std::complex<long double> trilog(const std::complex<long double>& z) noexcept
+std::complex<long double> trilog(const std::complex<long double>& z_) noexcept
 {
-   const long double eps   = 10.0L*std::numeric_limits<long double>::epsilon();
    const long double PI    = 3.14159265358979323846264338327950288L;
    const long double PI2   = PI*PI;
    const long double zeta2 = 1.64493406684822643647241516664602519L;
@@ -240,32 +202,34 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
 #endif
    };
 
-   if (is_close(z, 0.0L, eps)) {
-      return { 0.0L, 0.0L };
-   }
-   if (is_close(z, 1.0L, eps)) {
-      return { zeta3, 0.0L };
-   }
-   if (is_close(z, -1.0L, eps)) {
-      return { -0.75L*zeta3, 0.0L };
-   }
-   if (is_close(z, 0.5L, eps)) {
-      const long double ln2  = 0.693147180559945309417232121458176568L; // ln(2)
-      const long double ln23 = 0.333024651988929479718853582611730544L; // ln(2)^3
-      return { (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0L, 0.0L };
+   const Complex<long double> z = { std::real(z_), std::imag(z_) };
+
+   if (z.im == 0) {
+      if (z.re == 0) {
+         return 0.0L;
+      }
+      if (z.re == 1) {
+         return zeta3;
+      }
+      if (z.re == -1) {
+         return -0.75L*zeta3;
+      }
+      if (z.re == 0.5L) {
+         const long double ln2  = 0.693147180559945309417232121458176568L; // ln(2)
+         const long double ln23 = 0.333024651988929479718853582611730544L; // ln(2)^3
+         return (-2*PI2*ln2 + 4*ln23 + 21*zeta3)/24.0L;
+      }
    }
 
-   const auto rz  = std::real(z);
-   const auto iz  = std::imag(z);
-   const auto nz  = sqr(rz) + sqr(iz);
-   const auto pz  = std::atan2(iz, rz);
-   const auto lnz = 0.5L*std::log(nz);
+   const long double nz  = norm_sqr(z);
+   const long double pz  = arg(z);
+   const long double lnz = 0.5L*std::log(nz);
 
-   if (sqr(lnz) + sqr(pz) < 1.0L) { // |log(z)| < 1
-      const auto u  = std::complex<long double>(lnz, pz); // clog(z)
-      const auto u2 = u*u;
-      const auto c0 = zeta3 + u*(zeta2 - u2/12.0L);
-      const auto c1 = 0.25L * (3.0L - 2.0L*clog(-u));
+   if (lnz*lnz + pz*pz < 1) { // |log(z)| < 1
+      const Complex<long double> u(lnz, pz); // log(z)
+      const Complex<long double> u2 = u*u;
+      const Complex<long double> c0 = zeta3 + u*(zeta2 - u2/12.0L);
+      const Complex<long double> c1 = 0.25L * (3.0L - 2.0L*log(-u));
 
       const long double cs[] = {
         -3.47222222222222222222222222222222222e-03L,
@@ -292,36 +256,21 @@ std::complex<long double> trilog(const std::complex<long double>& z) noexcept
 #endif
       };
 
-      std::complex<long double> sum(0.0L, 0.0L);
-
-      for (int i = sizeof(cs)/sizeof(cs[0]) - 1; i >= 0; i--) {
-         sum = cmul(u2, cadd(cs[i], sum));
-      }
-
-      // lowest order terms w/ different powers
-      sum = cadd(c0, cmul(u2, cadd(c1, sum)));
-
-      return sum;
+      return c0 + u2*(c1 + u2*horner(u2, cs));
    }
 
-   std::complex<long double> u(0.0L, 0.0L), rest(0.0L, 0.0L);
+   Complex<long double> u(0.0L, 0.0L), rest(0.0L, 0.0L);
 
-   if (nz <= 1.0L) {
-      u = -clog(1.0L - z);
-   } else { // nz > 1.0L
-      const auto arg = pz > 0.0 ? pz - PI : pz + PI;
-      const auto lmz = std::complex<long double>(lnz, arg); // clog(-z)
-      u = -clog(1.0L - 1.0L/z);
-      rest = -lmz*(sqr(lmz)/6.0L + zeta2);
+   if (nz <= 1) {
+      u = -log(1.0L - z);
+   } else { // nz > 1
+      const long double arg = pz > 0.0 ? pz - PI : pz + PI;
+      const Complex<long double> lmz(lnz, arg); // log(-z)
+      u = -log(1.0L - 1.0L/z);
+      rest = -lmz*(lmz*lmz/6.0L + zeta2);
    }
 
-   std::complex<long double> sum(0.0L, 0.0L);
-
-   for (int i = sizeof(bf)/sizeof(bf[0]) - 1; i >= 0; i--) {
-      sum = cmul(u, cadd(bf[i], sum));
-   }
-
-   return cadd(rest, sum);
+   return rest + u*horner(u, bf);
 }
 
 } // namespace flexiblesusy

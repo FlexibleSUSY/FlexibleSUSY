@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "dilog.hpp"
+#include "complex.hpp"
 #include <cfloat>
 #include <cmath>
 #include <limits>
@@ -24,44 +25,23 @@
 namespace flexiblesusy {
 
 namespace {
-   template <typename T>
-   T sqr(T x) noexcept { return x*x; }
 
-   template <typename T>
-   std::complex<T> clog(const std::complex<T>& z) noexcept
+   template <int Nstart, int Nend, typename T, int N>
+   Complex<T> horner(const Complex<T>& z, const T (&coeffs)[N]) noexcept
    {
-      const T rz = std::real(z);
-      const T iz = std::imag(z);
-      const T nz = sqr(rz) + sqr(iz);
+      static_assert(Nstart <= Nend && Nend < N && Nend >= 1, "invalid array bounds");
 
-      return std::complex<T>(0.5*std::log(nz), std::atan2(iz, rz));
-   }
+      const T r = z.re + z.re;
+      const T s = z.re * z.re + z.im * z.im;
+      T a = coeffs[Nend], b = coeffs[Nend - 1];
 
-   template <typename T>
-   std::complex<T> cadd(T a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(a + std::real(b), std::imag(b));
-   }
+      for (int i = Nend - 2; i >= Nstart; --i) {
+         const T t = a;
+         a = b + r * a;
+         b = coeffs[i] - s * t;
+      }
 
-   template <typename T>
-   std::complex<T> cadd(const std::complex<T>& a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(std::real(a) + std::real(b),
-                             std::imag(a) + std::imag(b));
-   }
-
-   template <typename T>
-   std::complex<T> cmul(const std::complex<T>& a, T b) noexcept
-   {
-      return std::complex<T>(std::real(a) * b, std::imag(a) * b);
-   }
-
-   template <typename T>
-   std::complex<T> cmul(const std::complex<T>& a, const std::complex<T>& b) noexcept
-   {
-      return std::complex<T>(
-         std::real(a) * std::real(b) - std::imag(a) * std::imag(b),
-         std::real(a) * std::imag(b) + std::imag(a) * std::real(b));
+      return Complex<T>(z.re*a + b, z.im*a);
    }
 
 } // anonymous namespace
@@ -123,14 +103,16 @@ long double clausen_2(long double x) noexcept
 /**
  * @brief Real dilogarithm \f$\mathrm{Li}_2(x)\f$
  * @param x real argument
- * @note Implementation translated by R.Brun from CERNLIB DILOG function C332
  * @return \f$\mathrm{Li}_2(x)\f$
+ * @note Implementation translated by R.Brun from CERNLIB DILOG function C332
+ * @author K.S. Kölbig
  *
  * Implemented as a truncated series expansion in terms of Chebyshev
  * polynomials, see [Yudell L. Luke: Mathematical functions and their
  * approximations, Academic Press Inc., New York 1975, p.67].
  */
-double dilog(double x) noexcept {
+double dilog(double x) noexcept
+{
    const double PI  = 3.141592653589793;
    const double HF  = 0.5;
    const double PI2 = PI*PI;
@@ -145,7 +127,7 @@ double dilog(double x) noexcept {
      -0.00000000000027007, 0.00000000000004042,-0.00000000000000610,
       0.00000000000000093,-0.00000000000000014, 0.00000000000000002};
 
-   double T{}, H{}, Y{}, S{}, A{}, ALFA{}, B1{}, B2{}, B0{};
+   double T = 0, H = 0, Y = 0, S = 0, A = 0, ALFA = 0, B1 = 0, B2 = 0, B0 = 0;
 
    if (x == 1) {
        H = PI6;
@@ -201,16 +183,18 @@ double dilog(double x) noexcept {
 /**
  * @brief Real dilogarithm \f$\mathrm{Li}_2(z)\f$ with long double precision
  * @param x real argument
- * @note Implementation based on translation by R.Brun from CERNLIB
- *    DILOG function C332, extended by Alexander Voigt to quadruple
- *    precision
  * @return \f$\mathrm{Li}_2(z)\f$
+ * @author K.S. Kölbig
+ * @note Implementation based on translation by R.Brun from CERNLIB
+ *    DILOG function C332, extended by Alexander Voigt to long double
+ *    precision
  *
  * Implemented as a truncated series expansion in terms of Chebyshev
  * polynomials, see [Yudell L. Luke: Mathematical functions and their
  * approximations, Academic Press Inc., New York 1975, p.67].
  */
-long double dilog(long double x) noexcept {
+long double dilog(long double x) noexcept
+{
    const long double PI  = 3.14159265358979323846264338327950288L;
    const long double HF  = 0.5L;
    const long double PI2 = PI*PI;
@@ -267,7 +251,7 @@ long double dilog(long double x) noexcept {
 #endif
    };
 
-   long double T{}, H{}, Y{}, S{}, A{}, ALFA{}, B1{}, B2{}, B0{};
+   long double T = 0, H = 0, Y = 0, S = 0, A = 0, ALFA = 0, B1 = 0, B2 = 0, B0 = 0;
 
    if (x == 1) {
        H = PI6;
@@ -322,13 +306,16 @@ long double dilog(long double x) noexcept {
 
 /**
  * @brief Complex dilogarithm \f$\mathrm{Li}_2(z)\f$
- * @param z complex argument
- * @note Implementation translated from SPheno to C++
+ * @param z_ complex argument
  * @return \f$\mathrm{Li}_2(z)\f$
+ * @note Implementation translated from SPheno to C++
+ * @author Werner Porod
+ * @note translated to C++ by Alexander Voigt
  */
-std::complex<double> dilog(const std::complex<double>& z) noexcept
+std::complex<double> dilog(const std::complex<double>& z_) noexcept
 {
    const double PI = 3.141592653589793;
+   const Complex<double> z = { std::real(z_), std::imag(z_) };
 
    // bf[1..N-1] are the even Bernoulli numbers / (2 n + 1)!
    // generated by: Table[BernoulliB[2 n]/(2 n + 1)!, {n, 1, 9}]
@@ -345,79 +332,64 @@ std::complex<double> dilog(const std::complex<double>& z) noexcept
       + 4.518980029619918e-16
    };
 
-   const double rz = std::real(z);
-   const double iz = std::imag(z);
-   const double nz = sqr(rz) + sqr(iz);
+   const double nz = norm_sqr(z);
 
    // special cases
-   if (iz == 0.0) {
-      if (rz <= 1.0) {
-         return {dilog(rz), 0.0};
+   if (z.im == 0) {
+      if (z.re <= 1) {
+         return dilog(z.re);
       }
-      if (rz > 1.0) {
-         return {dilog(rz), -PI*std::log(rz)};
-      }
+      // z.re > 1
+      return { dilog(z.re), -PI*std::log(z.re) };
    } else if (nz < std::numeric_limits<double>::epsilon()) {
-      return z;
+      return z_;
    }
 
-   std::complex<double> cy(0.0, 0.0), cz(0.0, 0.0);
-   int jsgn = 0, ipi12 = 0;
+   Complex<double> cy(0.0, 0.0), cz(0.0, 0.0);
+   double sgn = 1;
 
    // transformation to |z|<1, Re(z)<=0.5
-   if (rz <= 0.5) {
-      if (nz > 1.0) {
-         cy = -0.5 * sqr(clog(-z));
-         cz = -clog(1.0 - 1.0 / z);
-         jsgn = -1;
-         ipi12 = -2;
+   if (z.re <= 0.5) {
+      if (nz > 1) {
+         const Complex<double> lz = log(-z);
+         cy = -0.5 * lz*lz - PI * PI / 6.0;
+         cz = -log(1.0 - 1.0 / z);
+         sgn = -1;
       } else { // nz <= 1
          cy = 0;
-         cz = -clog(1.0 - z);
-         jsgn = 1;
-         ipi12 = 0;
+         cz = -log(1.0 - z);
+         sgn = 1;
       }
-   } else { // rz > 0.5
-      if (nz <= 2*rz) {
-         cz = -clog(z);
-         cy = cz * clog(1.0 - z);
-         jsgn = -1;
-         ipi12 = 2;
-      } else { // nz > 2*rz
-         cy = -0.5 * sqr(clog(-z));
-         cz = -clog(1.0 - 1.0 / z);
-         jsgn = -1;
-         ipi12 = -2;
+   } else { // z.re > 0.5
+      if (nz <= 2*z.re) {
+         cz = -log(z);
+         cy = cz * log(1.0 - z) + PI * PI / 6.0;
+         sgn = -1;
+      } else { // nz > 2*z.re
+         const Complex<double> lz = log(-z);
+         cy = -0.5 * lz*lz - PI * PI / 6.0;
+         cz = -log(1.0 - 1.0 / z);
+         sgn = -1;
       }
    }
 
-   // the dilogarithm
-   const std::complex<double> cz2(sqr(cz));
-   const std::complex<double> sum =
-      cadd(cz,
-      cmul(cz2, cadd(bf[0],
-      cmul(cz , cadd(bf[1],
-      cmul(cz2, cadd(bf[2],
-      cmul(cz2, cadd(bf[3],
-      cmul(cz2, cadd(bf[4],
-      cmul(cz2, cadd(bf[5],
-      cmul(cz2, cadd(bf[6],
-      cmul(cz2, cadd(bf[7],
-      cmul(cz2, cadd(bf[8],
-      cmul(cz2, bf[9]))))))))))))))))))));
+   const Complex<double> cz2(cz*cz);
 
-   return double(jsgn) * sum + cy + ipi12 * PI * PI / 12.0;
+   return sgn*(cz + cz2*(bf[0] + cz*horner<1, 9>(cz2, bf))) + cy;
 }
 
 /**
  * @brief Complex dilogarithm \f$\mathrm{Li}_2(z)\f$ with long double precision
- * @param z complex argument
- * @note Implementation translated from SPheno to C++
+ * @param z_ complex argument
  * @return \f$\mathrm{Li}_2(z)\f$
+ * @note Implementation translated from SPheno to C++
+ * @author Werner Porod
+ * @note translated to C++ and extended to long double precision by Alexander Voigt
  */
-std::complex<long double> dilog(const std::complex<long double>& z) noexcept
+std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
 {
    const long double PI = 3.14159265358979323846264338327950288L;
+   const Complex<long double> z = { std::real(z_), std::imag(z_) };
 
    // bf[1..N-1] are the even Bernoulli numbers / (2 n + 1)!
    // generated by: Table[BernoulliB[2 n]/(2 n + 1)!, {n, 1, 22}]
@@ -449,63 +421,53 @@ std::complex<long double> dilog(const std::complex<long double>& z) noexcept
 #endif
    };
 
-   const long double rz = std::real(z);
-   const long double iz = std::imag(z);
-   const long double nz = sqr(rz) + sqr(iz);
+   constexpr int N = sizeof(bf)/sizeof(bf[0]);
+
+   const long double nz = norm_sqr(z);
 
    // special cases
-   if (iz == 0.0L) {
-      if (rz <= 1.0L) {
-         return {dilog(rz), 0.0L};
+   if (z.im == 0) {
+      if (z.re <= 1) {
+         return dilog(z.re);
       }
-      if (rz > 1.0L) {
-         return {dilog(rz), -PI*std::log(rz)};
+      if (z.re > 1) {
+         return { dilog(z.re), -PI*std::log(z.re) };
       }
    } else if (nz < std::numeric_limits<long double>::epsilon()) {
-      return z;
+      return z_;
    }
 
-   std::complex<long double> cy(0.0L, 0.0L), cz(0.0L, 0.0L);
-   int jsgn = 0, ipi12 = 0;
+   Complex<long double> cy(0.0L, 0.0L), cz(0.0L, 0.0L);
+   long double sgn = 1;
 
    // transformation to |z|<1, Re(z)<=0.5
-   if (rz <= 0.5L) {
-      if (nz > 1.0L) {
-         cy = -0.5L * sqr(clog(-z));
-         cz = -clog(1.0L - 1.0L/z);
-         jsgn = -1;
-         ipi12 = -2;
-      } else { // nz <= 1.0L
+   if (z.re <= 0.5L) {
+      if (nz > 1) {
+         const Complex<long double> lz = log(-z);
+         cy = -0.5L * lz*lz - PI * PI / 6.0L;
+         cz = -log(1.0L - 1.0L/z);
+         sgn = -1;
+      } else { // nz <= 1
          cy = 0;
-         cz = -clog(1.0L - z);
-         jsgn = 1;
-         ipi12 = 0;
+         cz = -log(1.0L - z);
+         sgn = 1;
       }
-   } else { // rz > 0.5L
-      if (nz <= 2*rz) {
-         cz = -clog(z);
-         cy = cz * clog(1.0L - z);
-         jsgn = -1;
-         ipi12 = 2;
-      } else { // nz > 2*rz
-         cy = -0.5L * sqr(clog(-z));
-         cz = -clog(1.0L - 1.0L/z);
-         jsgn = -1;
-         ipi12 = -2;
+   } else { // z.re > 0.5L
+      if (nz <= 2*z.re) {
+         cz = -log(z);
+         cy = cz * log(1.0L - z) + PI * PI / 6.0L;
+         sgn = -1;
+      } else { // nz > 2*z.re
+         const Complex<long double> lz = log(-z);
+         cy = -0.5L * lz*lz - PI * PI / 6.0L;
+         cz = -log(1.0L - 1.0L/z);
+         sgn = -1;
       }
    }
 
-   const std::complex<long double> cz2(sqr(cz));
-   std::complex<long double> sum(0.0L, 0.0L);
+   const Complex<long double> cz2(cz*cz);
 
-   for (int i = sizeof(bf)/sizeof(bf[0]) - 1; i >= 2; i--) {
-      sum = cmul(cz2, cadd(bf[i], sum));
-   }
-
-   // lowest order terms w/ different powers
-   sum = cadd(cz, cmul(cz2, cadd(bf[0], cmul(cz, cadd(bf[1], sum)))));
-
-   return static_cast<long double>(jsgn)*sum + cy + ipi12*PI*PI/12.0L;
+   return sgn*(cz + cz2*(bf[0] + cz*horner<1, N-1>(cz2, bf))) + cy;
 }
 
 } // namespace flexiblesusy

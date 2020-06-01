@@ -54,6 +54,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
 		$(DIR)/command_line_options.hpp \
+		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
 		$(DIR)/compound_constraint.hpp \
 		$(DIR)/concatenate.hpp \

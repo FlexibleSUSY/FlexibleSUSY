@@ -170,9 +170,9 @@ private:
    double precision{1.e-4};               ///< RG running precision
    double ewsb_iteration_precision{1.e-5};///< precision goal of EWSB solution
    @ModelName@_physical physical{}; ///< contains the pole masses and mixings
-   Problems problems{@ModelName@_info::model_name,
-                     &@ModelName@_info::particle_names_getter,
-                     &@ModelName@_info::parameter_names_getter}; ///< problems
+   mutable Problems problems{@ModelName@_info::model_name,
+                             &@ModelName@_info::particle_names_getter,
+                             &@ModelName@_info::parameter_names_getter}; ///< problems
    Loop_corrections loop_corrections{}; ///< used pole mass corrections
    std::shared_ptr<@ModelName@_ewsb_solver_interface> ewsb_solver{};
    Threshold_corrections threshold_corrections{}; ///< used threshold corrections

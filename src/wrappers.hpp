@@ -465,7 +465,7 @@ constexpr Base Power5(Base b) noexcept
 template <typename Base>
 constexpr Base Power6(Base b) noexcept
 {
-   return Power4(b) * Power2(b);
+   return Power2(Power2(b)*b);
 }
 
 template <typename Base>
@@ -489,7 +489,7 @@ constexpr Base Power9(Base b) noexcept
 template <typename Base>
 constexpr Base Power10(Base b) noexcept
 {
-   return Power8(b) * Power2(b);
+   return Power2(Power4(b)*b);
 }
 
 template <typename Base>
