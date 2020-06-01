@@ -135,11 +135,14 @@ unsigned int number_of_active_flavours(double m)
 // eq. 2.7 of hep-ph/0503173
 double calc_A(double b)
 {
+   const double log_b {std::log(b)};
+   const double log_ratio {std::log((1 + b) / (1 - b))};
+
    return (1 + b * b) *
              (4. * dilog((1 - b) / (1 + b)) + 2. * dilog(-(1 - b) / (1 + b)) -
-              3. * std::log((1 + b) / (1 - b)) * std::log(2 / (1 + b)) -
-              2. * std::log((1 + b) / (1 - b)) * std::log(b)) -
-          3. * b * std::log(4. / (1 - b * b)) - 4. * b * std::log(b);
+              3. * log_ratio * std::log(2 / (1 + b)) -
+              2. * log_ratio * log_b) -
+          3. * b * std::log(4. / (1 - b * b)) - 4. * b * log_b;
 }
 
 // eq. 2.6 of hep-ph/0503173
