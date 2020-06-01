@@ -20,6 +20,7 @@
 #define STRING_UTILS_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace flexiblesusy {
@@ -27,16 +28,37 @@ namespace flexiblesusy {
 /// concatenate strings
 std::string concat(const std::vector<std::string>&);
 
+
 /// concatenate strings with separator
-template <typename T>
-std::string concat(const std::vector<std::string>& strings, const T& separator)
+std::string concat(const std::vector<std::string>&, const std::string&);
+
+
+/// concatenate strings with separator
+std::string concat(const std::vector<std::string>&, char);
+
+
+/// concatenate strings with separator
+template <class InputIterator>
+std::string concat(InputIterator start, InputIterator end, const std::string& separator)
 {
-   std::string result;
+   std::ostringstream result;
 
-   for (const auto& s: strings)
-      result += s + separator;
+   for (InputIterator it = start; it != end; ++it) {
+      if (it != start) {
+         result << separator;
+      }
+      result << *it;
+   }
 
-   return result;
+   return result.str();
+}
+
+
+/// concatenate strings with separator
+template <class InputIterator>
+std::string concat(InputIterator start, InputIterator end, char separator)
+{
+   return concat(start, end, std::string(1, separator));
 }
 
 } // namespace flexiblesusy
