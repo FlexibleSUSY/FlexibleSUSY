@@ -148,7 +148,7 @@ double calc_A(double b)
 // eq. 2.6 of hep-ph/0503173
 double calc_DeltaH(double b)
 {
-   return calc_A(b)/b + 1./(16*b*b*b) * (
+   return calc_A(b)/b + 1./(16*Power3(b)) * (
       3 + 34*b*b - 13*Power4(b)) * std::log((1+b)/(1-b)) + 3./(8.*b*b)*(7*b*b-1);
 }
 
@@ -278,8 +278,9 @@ double CLASSNAME::get_partial_width<H, G, G>(
       switch (include_higher_order_corrections) {
          case HigherOrderSMCorrections::enable:
             result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+            break;
          case HigherOrderSMCorrections::disable:
-            result *= 1.;
+            break;
          default:
             break;
       }
