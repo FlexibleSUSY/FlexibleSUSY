@@ -203,11 +203,7 @@ double CLASSNAME::get_partial_width<H, A, A>(
    const double flux = 0.5/mH;
    const auto res = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
 
-   if (res < 0) {
-      throw std::runtime_error("Error in H->AA. Partial width < 0");
-   } else {
-      return res;
-   }
+   return res;
 }
 
 template <>
@@ -230,11 +226,7 @@ double CLASSNAME::get_partial_width<H, A, Z>(
 
    const auto res = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
 
-   if (res < 0) {
-      throw std::runtime_error("Error in H->AZ. Partial width < 0");
-   } else {
-      return res;
-   }
+   return res;
 }
 
 template <>
@@ -293,11 +285,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       }
    }
 
-   if (result < 0) {
-      throw std::runtime_error("Error in H->GG. Partial width < 0");
-   } else {
-      return result;
-   }
+   return result;
 }
 
 @decaysCalculationFunctions@
