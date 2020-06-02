@@ -34,13 +34,13 @@ template <typename OutputIterator>
 void copy_problem_strings(const Problem_general& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
-      oi = "general: non-perturbative running to scale "
+      oi = "all observables: non-perturbative running to scale "
          + std::to_string(p.get_non_perturbative_running_scale())
          + " GeV";
       oi++;
    }
    if (p.have_thrown()) {
-      oi = "general: unknown exception thrown";
+      oi = "all observables: unknown exception thrown";
       oi++;
    }
 }
