@@ -97,39 +97,32 @@ private:
    double total_width{0.};
 };
 
-template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-std::string wrong_width_sign_msg(std::vector<int> in, std::vector<int> out1, std::vector<int> out2) {
+std::string strip_field_namespace(std::string const&);
 
-   using boost::core::demangle;
-   auto strip_namespace = [](std::string const& s) {
-      std::string result = s.substr(s.find_last_of(':')+1);
-      if (s.find("bar") != std::string::npos) {
-         result.pop_back();
-         return "bar" + result;
-      } else if (s.find("conj") != std::string::npos) {
-         result.pop_back();
-         return "conj" + result;
-      } else {
-         return result;
-      }
-   };
-   auto vector_to_idx = [](std::vector<int> v) {
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+std::string create_process_string(
+      std::array<int, FieldIn::numberOfFieldIndices> const in,
+      std::array<int, FieldOut1::numberOfFieldIndices> const out1,
+      std::array<int, FieldOut2::numberOfFieldIndices> const out2) {
+
+   auto vector_to_idx = [](auto v) {
       if (v.empty()) {
          return std::string();
       }
       else {
-         return "(" + std::to_string(v[1]) + ")";
+         return "(" + std::to_string(v[0]) + ")";
       }
    };
 
-   std::string msg =
-         strip_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
+   using boost::core::demangle;
+   std::string process_string =
+         strip_field_namespace(demangle(typeid(FieldIn).name())) + vector_to_idx(in)
          + "->{" +
-         strip_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
-         strip_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
+         strip_field_namespace(demangle(typeid(FieldOut1).name())) + vector_to_idx(out1) + "," +
+         strip_field_namespace(demangle(typeid(FieldOut2).name())) + vector_to_idx(out2) +
          "}";
 
-   return msg;
+   return process_string;
 }
 
 } // namespace flexiblesusy

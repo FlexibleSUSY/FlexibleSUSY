@@ -782,7 +782,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                 ];
            (* call decay *)
                       body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> 
-               ", wrong_width_sign_msg<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
+               ", create_process_string<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
                   If[initialStateDim > 1, "{gI1}", "{}"] <> "," <>
                   StringJoin @ Riffle[
                   MapIndexed[

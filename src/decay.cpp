@@ -115,4 +115,17 @@ const Decay& Decays_list::get_decay(
    return pos->second;
 }
 
+std::string strip_field_namespace(std::string const& s) {
+   std::string result = s.substr(s.find_last_of(':')+1);
+   if (s.find("bar") != std::string::npos) {
+      result.pop_back();
+      return "bar" + result;
+   } else if (s.find("conj") != std::string::npos) {
+      result.pop_back();
+      return "conj" + result;
+   } else {
+      return result;
+   }
+};
+
 } // namespace flexiblesusy
