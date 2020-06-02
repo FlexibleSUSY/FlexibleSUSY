@@ -43,8 +43,8 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
    if(indexOut1[1] == 2) {
      const double betaT = Sqrt(1 - x);//Sqrt(1 - 4*Sqr(mtpole/mass));
      const double Abeta = (1 + Sqr(betaT))
-                        * (4*PolyLog(2, (1-betaT)/(1+betaT))
-                          + 2*PolyLog(2, (betaT-1)/(1+betaT))
+                        * (4*dilog((1-betaT)/(1+betaT))
+                          + 2*dilog((betaT-1)/(1+betaT))
                           - 3*Log((1+betaT)/(1-betaT))*Log(2.0/(1+betaT))
                           - 2*Log((1+betaT)/(1-betaT))*Log(betaT))
                         - 3*betaT*Log(4.0/(1-Sqr(betaT)))

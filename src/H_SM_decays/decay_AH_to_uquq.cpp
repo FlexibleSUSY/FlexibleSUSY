@@ -42,8 +42,8 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
      const double betaT = Sqrt(1 - x); // sqrt(1 - 4*Sqr(mtpole/mass));
      const double log_ratio {std::log((1 + betaT) / (1 - betaT))};
      const double Abeta = (1 + Sqr(betaT))
-                        * (4*PolyLog(2, (1-betaT)/(1+betaT))
-                          + 2*PolyLog(2, (betaT-1)/(1+betaT))
+                        * (4*dilog((1-betaT)/(1+betaT))
+                          + 2*dilog((betaT-1)/(1+betaT))
                           - 3*log_ratio*Log(2.0/(1+betaT))
                           - 2*log_ratio*Log(betaT))
                         - 3*betaT*Log(4.0/(1-Sqr(betaT)))
