@@ -643,6 +643,8 @@ Block MSOFT Q= 8.61574711E+02
 
    MSSM_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
 
+   // scalar Higgs
+
    // ------------ tree-level decays ------------
 
    // h -> b bbar
@@ -661,10 +663,35 @@ Block MSOFT Q= 8.61574711E+02
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 7e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 7e-11);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 3e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 2e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 9e-11);
 
+   // pseudoscalar Higgs
+
+   // ------------ tree-level decays ------------
+
+   // h -> b bbar
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
+                              0.76567862493067118, 4e-13);
+   // h -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
+                              0.14217577420945629, 4e-13);
+   // h -> W+ W-
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_conjVWmVWm(&m, 1),
+                              3.92679593098481e-05, 2e-12);
+   // h -> Z Z
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VZVZ(&m, 1),
+                              1.0275363926856272e-05, 2e-12);
+
+   // ------------ loop-induces decays ------------
+
+   // h -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VGVG(&m, 1), 0.00069973676532247917, 7e-13);
+   // h -> gamma gamma
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VPVP(&m, 1), 4.8001690139837537e-06, 4e-12);
+   // h -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VPVZ(&m, 1), 1.0128224862285261e-05, 2e-11);
 }

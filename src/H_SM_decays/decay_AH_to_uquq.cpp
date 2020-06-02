@@ -40,17 +40,18 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    const double x = 4.*Sqr(muq/mAH);
    if(indexOut1[1] == 2) {
      const double betaT = Sqrt(1 - x); // sqrt(1 - 4*Sqr(mtpole/mass));
+     const double log_ratio {std::log((1 + betaT) / (1 - betaT))};
      const double Abeta = (1 + Sqr(betaT))
                         * (4*PolyLog(2, (1-betaT)/(1+betaT))
                           + 2*PolyLog(2, (betaT-1)/(1+betaT))
-                          - 3*Log((1+betaT)/(1-betaT))*Log(2.0/(1+betaT))
-                          - 2*Log((1+betaT)/(1-betaT))*Log(betaT))
+                          - 3*log_ratio*Log(2.0/(1+betaT))
+                          - 2*log_ratio*Log(betaT))
                         - 3*betaT*Log(4.0/(1-Sqr(betaT)))
                         - 4*betaT*Log(betaT);
 
      const double deltaHt = 4.0/3.0 * alpha_s_red * (Abeta/betaT
                           + (3 + 34*Sqr(betaT) - 13*Power(betaT,4))
-                            * Log((1+betaT)/(1-betaT)) / (16*Power(betaT,3))
+                            * log_ratio / (16*Power(betaT,3))
                           + 3.0/(8*Sqr(betaT)) * (7*Sqr(betaT) - 1));
 
      // @todo: check numerical prefactors
