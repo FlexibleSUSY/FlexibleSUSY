@@ -42,17 +42,18 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
    const double x = 4.*Sqr(muq/mHOS);
    if(indexOut1[1] == 2) {
      const double betaT = Sqrt(1 - x);//Sqrt(1 - 4*Sqr(mtpole/mass));
+     const double log_ratio {std::log((1 + betaT) / (1 - betaT))};
      const double Abeta = (1 + Sqr(betaT))
                         * (4*dilog((1-betaT)/(1+betaT))
                           + 2*dilog((betaT-1)/(1+betaT))
-                          - 3*Log((1+betaT)/(1-betaT))*Log(2.0/(1+betaT))
-                          - 2*Log((1+betaT)/(1-betaT))*Log(betaT))
-                        - 3*betaT*Log(4.0/(1-Sqr(betaT)))
-                        - 4*betaT*Log(betaT);
+                          - 3*log_ratio*std::log(2.0/(1+betaT))
+                          - 2*log_ratio*std::log(betaT))
+                        - 3*betaT*std::log(4.0/(1-Sqr(betaT)))
+                        - 4*betaT*std::log(betaT);
 
      const double deltaHt = 4.0/3.0 * alpha_s_red * (Abeta/betaT
                           + (3 + 34*Sqr(betaT) - 13*Power(betaT,4))
-                            * Log((1+betaT)/(1-betaT)) / (16*Power(betaT,3))
+                            * log_ratio / (16*Power(betaT,3))
                           + 3.0/(8*Sqr(betaT)) * (7*Sqr(betaT) - 1));
 
      // @todo: check numerical prefactors
@@ -65,8 +66,8 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
    } else {
 
    const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
-   const double lt = Log(Sqr(mHOS/mtpole));
-   const double lq = Log(Sqr(muq/mHOS));
+   const double lt = std::log(Sqr(mHOS/mtpole));
+   const double lq = std::log(Sqr(muq/mHOS));
    const double deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
 
    result = flux * phase_space * color_factor *

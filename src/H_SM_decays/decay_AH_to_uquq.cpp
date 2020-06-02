@@ -44,10 +44,10 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
      const double Abeta = (1 + Sqr(betaT))
                         * (4*dilog((1-betaT)/(1+betaT))
                           + 2*dilog((betaT-1)/(1+betaT))
-                          - 3*log_ratio*Log(2.0/(1+betaT))
-                          - 2*log_ratio*Log(betaT))
-                        - 3*betaT*Log(4.0/(1-Sqr(betaT)))
-                        - 4*betaT*Log(betaT);
+                          - 3*log_ratio*std::log(2.0/(1+betaT))
+                          - 2*log_ratio*std::log(betaT))
+                        - 3*betaT*std::log(4.0/(1-Sqr(betaT)))
+                        - 4*betaT*std::log(betaT);
 
      const double deltaHt = 4.0/3.0 * alpha_s_red * (Abeta/betaT
                           + (3 + 34*Sqr(betaT) - 13*Power(betaT,4))
@@ -65,8 +65,8 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    } else {
 
    const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
-   const double lt = Log(Sqr(mAH/mtpole));
-   const double lq = Log(Sqr(muq/mAH));
+   const double lt = std::log(Sqr(mAH/mtpole));
+   const double lq = std::log(Sqr(muq/mAH));
    const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
 
    result =

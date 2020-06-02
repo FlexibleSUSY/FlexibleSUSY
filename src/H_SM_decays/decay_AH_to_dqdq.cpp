@@ -33,8 +33,8 @@ double CLASSNAME::get_partial_width<AH,bar<dq>::type, dq>(
 
    const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
 
-   const double lt = Log(Sqr(mAH/mtpole));
-   const double lq = Log(Sqr(mdq/mAH));
+   const double lt = std::log(Sqr(mAH/mtpole));
+   const double lq = std::log(Sqr(mdq/mAH));
    // eq. 2.4 of
    const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
 
