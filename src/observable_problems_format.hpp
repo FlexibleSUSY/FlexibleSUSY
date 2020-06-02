@@ -21,6 +21,7 @@
 
 #include "observables.hpp"
 #include "observable_problems.hpp"
+#include "string_format.hpp"
 
 #include <iosfwd>
 #include <string>
@@ -35,7 +36,7 @@ void copy_problem_strings(const Problem_general& p, OutputIterator oi)
 {
    if (p.have_non_perturbative_running()) {
       oi = "all observables: non-perturbative running to scale "
-         + std::to_string(p.get_non_perturbative_running_scale())
+         + to_string(p.get_non_perturbative_running_scale())
          + " GeV";
       oi++;
    }
@@ -53,7 +54,7 @@ void copy_problem_strings(const Problem_a_muon& p, OutputIterator oi)
    if (p.have_non_perturbative_running()) {
       oi = std::string(observables::observable_names[observables::a_muon])
          + ": non-perturbative running to scale "
-         + std::to_string(p.get_non_perturbative_running_scale())
+         + to_string(p.get_non_perturbative_running_scale())
          + " GeV";
       oi++;
    }
