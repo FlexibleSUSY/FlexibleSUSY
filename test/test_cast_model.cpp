@@ -3,6 +3,7 @@
 #define BOOST_TEST_MODULE test_cast_model
 
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 
 #include "model.hpp"
 

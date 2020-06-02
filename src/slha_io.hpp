@@ -19,24 +19,25 @@
 #ifndef SLHA_IO_H
 #define SLHA_IO_H
 
-#include "error.hpp"
-#include "numerics2.hpp"
 #include "slha_format.hpp"
-#include "slhaea.h"
-#include "string_utils.hpp"
 
 #include <complex>
+#include <functional>
 #include <iosfwd>
-#include <sstream>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <Eigen/Core>
-#include <boost/function.hpp>
 
 namespace softsusy {
    class QedQcd;
 } // namespace softsusy
+
+namespace SLHAea {
+   class Coll;
+   class Line;
+} // namespace SLHAea
 
 namespace flexiblesusy {
 
@@ -104,6 +105,14 @@ public:
       void clear() { *this = CKM_wolfenstein(); }
    };
 
+   SLHA_io();
+   SLHA_io(const SLHA_io&);
+   SLHA_io(SLHA_io&&) noexcept;
+   ~SLHA_io();
+
+   SLHA_io& operator=(const SLHA_io&);
+   SLHA_io& operator=(SLHA_io&&) noexcept;
+
    void clear();
 
    // reading functions
@@ -112,31 +121,23 @@ public:
    void fill(Spectrum_generator_settings&) const;
    void fill(Physical_input&) const;
    const Modsel& get_modsel() const { return modsel; }
-   const SLHAea::Coll& get_data() const { return data; }
+   const SLHAea::Coll& get_data() const;
    void read_from_file(const std::string&);
    void read_from_source(const std::string&);
    void read_from_stream(std::istream&);
    double read_block(const std::string&, const Tuple_processor&) const;
    template <class Derived>
-   double read_block(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_block(const std::string&, Eigen::PlainObjectBase<Derived>&) const;
    double read_block(const std::string&, double&) const;
    double read_entry(const std::string&, int) const;
    double read_scale(const std::string&) const;
 
    // writing functions
-   void set_data(const SLHAea::Coll& data_) { data = data_; }
+   void set_data(const SLHAea::Coll&);
    void set_block(const std::ostringstream&, Position position = back);
    void set_block(const std::string&, Position position = back);
    void set_blocks(const std::vector<std::string>&, Position position = back);
    void set_block(const std::string&, double, const std::string&, double scale = 0.);
-   template<class Scalar, int M, int N>
-   void set_block(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, N>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M>
-   void set_block(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, 1>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M, int N>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, N>&, const std::string&, double scale = 0.);
-   template<class Scalar, int M>
-   void set_block_imag(const std::string&, const Eigen::Matrix<std::complex<Scalar>, M, 1>&, const std::string&, double scale = 0.);
    template <class Derived>
    void set_block(const std::string&, const Eigen::MatrixBase<Derived>&, const std::string&, double scale = 0.);
    template <class Derived>
@@ -146,116 +147,32 @@ public:
    void set_settings(const Spectrum_generator_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    void write_to_file(const std::string&) const;
-   void write_to_stream(std::ostream& = std::cerr) const;
+   void write_to_stream() const;
+   void write_to_stream(std::ostream&) const;
 
 private:
-   SLHAea::Coll data{};        ///< SHLA data
+   std::unique_ptr<SLHAea::Coll> data; ///< SHLA data
    Modsel modsel{};            ///< data from block MODSEL
 
-   template <class Scalar>
-   static Scalar convert_to(const std::string&); ///< convert string
    static std::string block_head(const std::string& name, double scale);
    static bool read_scale(const SLHAea::Line& line, double& scale);
 
    void read_modsel();
-   template <class Derived>
-   double read_matrix(const std::string&, Eigen::MatrixBase<Derived>&) const;
-   template <class Derived>
-   double read_vector(const std::string&, Eigen::MatrixBase<Derived>&) const;
+   double read_matrix(const std::string&, double*, int, int) const;
+   double read_matrix(const std::string&, std::complex<double>*, int, int) const;
+   double read_vector(const std::string&, double*, int) const;
+   double read_vector(const std::string&, std::complex<double>*, int) const;
+
+   void set_vector(const std::string&, const double*, const std::string&, double, int);
+   void set_vector(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
+
+   void set_vector_imag(const std::string&, const double*, const std::string&, double, int);
+   void set_vector_imag(const std::string&, const std::complex<double>*, const std::string&, double, int);
+   void set_matrix_imag(const std::string&, const double*, const std::string&, double, int, int);
+   void set_matrix_imag(const std::string&, const std::complex<double>*, const std::string&, double, int, int);
 };
-
-template <class Scalar>
-Scalar SLHA_io::convert_to(const std::string& str)
-{
-   Scalar value;
-   try {
-      value = SLHAea::to<Scalar>(str);
-   }  catch (const boost::bad_lexical_cast& error) {
-      const std::string msg(R"(cannot convert string ")" + str + R"(" to )"
-                            + typeid(Scalar).name());
-      throw ReadError(msg);
-   }
-   return value;
-}
-
-/**
- * Fills a matrix from a SLHA block
- *
- * @param block_name block name
- * @param matrix matrix to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_matrix(const std::string& block_name, Eigen::MatrixBase<Derived>& matrix) const
-{
-   if (matrix.cols() <= 1) {
-      throw SetupError("Matrix has less than 2 columns");
-   }
-
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
-
-   const int cols = matrix.cols(), rows = matrix.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         read_scale(line, scale);
-
-         if (line.is_data_line() && line.size() >= 3) {
-            const int i = convert_to<int>(line[0]) - 1;
-            const int k = convert_to<int>(line[1]) - 1;
-            if (0 <= i && i < rows && 0 <= k && k < cols) {
-               matrix(i,k) = convert_to<double>(line[2]);
-            }
-         }
-      }
-
-      ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
-   }
-
-   return scale;
-}
-
-/**
- * Fills a vector from a SLHA block
- *
- * @param block_name block name
- * @param vector vector to be filled
- *
- * @return scale (or 0 if no scale is defined)
- */
-template <class Derived>
-double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Derived>& vector) const
-{
-   if (vector.cols() != 1) {
-      throw SetupError("Vector has more than 1 column");
-   }
-
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
-
-   const int rows = vector.rows();
-   double scale = 0.;
-
-   while (block != data.cend()) {
-      for (const auto& line: *block) {
-         read_scale(line, scale);
-
-         if (line.is_data_line() && line.size() >= 2) {
-            const int i = convert_to<int>(line[0]) - 1;
-            if (0 <= i && i < rows) {
-               vector(i) = convert_to<double>(line[1]);
-            }
-         }
-      }
-
-      ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
-   }
-
-   return scale;
-}
 
 /**
  * Fills a matrix or vector from a SLHA block
@@ -266,129 +183,47 @@ double SLHA_io::read_vector(const std::string& block_name, Eigen::MatrixBase<Der
  * @return scale (or 0 if no scale is defined)
  */
 template <class Derived>
-double SLHA_io::read_block(const std::string& block_name, Eigen::MatrixBase<Derived>& dense) const
+double SLHA_io::read_block(const std::string& block_name, Eigen::PlainObjectBase<Derived>& dense) const
 {
    return dense.cols() == 1
-      ? read_vector(block_name, dense)
-      : read_matrix(block_name, dense);
+      ? read_vector(block_name, dense.data(), dense.rows())
+      : read_matrix(block_name, dense.data(), dense.rows(), dense.cols());
 }
 
-template<class Scalar, int NRows>
+/**
+ * Writes real part of a matrix or vector to SLHA object
+ *
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
+ */
+template<class Derived>
 void SLHA_io::set_block(const std::string& name,
-                        const Eigen::Matrix<std::complex<Scalar>, NRows, 1>& matrix,
+                        const Eigen::MatrixBase<Derived>& dense,
                         const std::string& symbol, double scale)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      ss << FORMAT_VECTOR(i, std::real(matrix(i-1,0)),
-         ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-   }
-
-   set_block(ss);
+   dense.cols() == 1
+      ? set_vector(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
-template<class Scalar, int NRows, int NCols>
-void SLHA_io::set_block(const std::string& name,
-                        const Eigen::Matrix<std::complex<Scalar>, NRows, NCols>& matrix,
-                        const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      for (int k = 1; k <= NCols; ++k) {
-         ss << FORMAT_MIXING_MATRIX(i, k, std::real(matrix(i-1,k-1)),
-            ("Re(" + symbol + "(" + flexiblesusy::to_string(i) + ","
-             + flexiblesusy::to_string(k) + "))"));
-      }
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows>
+/**
+ * Writes imaginary part of a matrix or vector to SLHA object
+ *
+ * @param name bloch name
+ * @param dense matrix ox vector
+ * @param symbol symbol name
+ * @param scale renormalization scale
+ */
+template<class Derived>
 void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, 1>& matrix,
+                             const Eigen::MatrixBase<Derived>& dense,
                              const std::string& symbol, double scale)
 {
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      ss << FORMAT_VECTOR(i, std::imag(matrix(i-1,0)),
-         ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-   }
-
-   set_block(ss);
-}
-
-template<class Scalar, int NRows, int NCols>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::Matrix<std::complex<Scalar>, NRows, NCols>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   for (int i = 1; i <= NRows; ++i) {
-      for (int k = 1; k <= NCols; ++k) {
-         ss << FORMAT_MIXING_MATRIX(i, k, std::imag(matrix(i-1,k-1)),
-            ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + ","
-             + flexiblesusy::to_string(k) + "))"));
-      }
-   }
-
-   set_block(ss);
-}
-
-template <class Derived>
-void SLHA_io::set_block(const std::string& name,
-                        const Eigen::MatrixBase<Derived>& matrix,
-                        const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   const int rows = matrix.rows();
-   const int cols = matrix.cols();
-   for (int i = 1; i <= rows; ++i) {
-      if (cols == 1) {
-         ss << FORMAT_VECTOR(i, matrix(i-1,0), (symbol + "(" + flexiblesusy::to_string(i) + ")"));
-      } else {
-         for (int k = 1; k <= cols; ++k) {
-            ss << FORMAT_MIXING_MATRIX(i, k, matrix(i-1,k-1),
-               (symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")"));
-         }
-      }
-   }
-
-   set_block(ss);
-}
-
-template <class Derived>
-void SLHA_io::set_block_imag(const std::string& name,
-                             const Eigen::MatrixBase<Derived>& matrix,
-                             const std::string& symbol, double scale)
-{
-   std::ostringstream ss;
-   ss << block_head(name, scale);
-
-   const int rows = matrix.rows();
-   const int cols = matrix.cols();
-   for (int i = 1; i <= rows; ++i) {
-      if (cols == 1) {
-         ss << FORMAT_VECTOR(i, std::imag(matrix(i-1,0)), ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
-      } else {
-         for (int k = 1; k <= cols; ++k) {
-            ss << FORMAT_MIXING_MATRIX(i, k, std::imag(matrix(i-1,k-1)),
-               ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
-         }
-      }
-   }
-
-   set_block(ss);
+   dense.cols() == 1
+      ? set_vector_imag(name, dense.eval().data(), symbol, scale, dense.rows())
+      : set_matrix_imag(name, dense.eval().data(), symbol, scale, dense.rows(), dense.cols());
 }
 
 } // namespace flexiblesusy

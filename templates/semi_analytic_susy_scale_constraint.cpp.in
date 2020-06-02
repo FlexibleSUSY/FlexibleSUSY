@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_semi_analytic_susy_scale_constraint.hpp"
 #include "@ModelName@_semi_analytic_model.hpp"

@@ -19,7 +19,7 @@
 #ifndef PROBLEMS_H
 #define PROBLEMS_H
 
-#include <iostream>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
@@ -86,8 +86,10 @@ public:
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string(const std::string& sep = "\n") const;
    std::string get_warning_string(const std::string& sep = "\n") const;
-   void print_problems(std::ostream& = std::cerr) const;
-   void print_warnings(std::ostream& = std::cerr) const;
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
    const std::string& get_model_name() const;
 
    std::vector<int> get_bad_masses() const;

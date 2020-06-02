@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -88,6 +87,11 @@ Eigen::ArrayXd @ModelName@_susy_parameters::get() const
 @display@
 
    return pars;
+}
+
+void @ModelName@_susy_parameters::print() const
+{
+   this->print(std::cerr);
 }
 
 void @ModelName@_susy_parameters::print(std::ostream& ostr) const

@@ -119,7 +119,7 @@ looplibrary::Loop_library_interface& Loop_library::get()
    if (Loop_library::type_ == Loop_library::Library::Undefined) {
       ERROR("Loop library should be initialized before first usage.\n"
             "Setting default library.");
-      Loop_library::set_default();
+      Loop_library::set(-1);
    }
    return *Loop_library::lib_;
 }

@@ -16,11 +16,11 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 #define @ModelName@_SPECTRUM_GENERATOR_INTERFACE_H
 
+#include "@ModelName@_info.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_model.hpp"
 #include "@ModelName@_model_slha.hpp"
@@ -32,7 +32,6 @@
 #include "lowe.h"
 #include "spectrum_generator_problems.hpp"
 #include "spectrum_generator_settings.hpp"
-#include "loop_corrections.hpp"
 
 #include "loop_libraries/loop_library.hpp"
 
@@ -50,15 +49,15 @@ public:
 
    std::tuple<@ModelName@<T>> get_models() const
    { return std::make_tuple(model); }
-   std::tuple<@ModelName@_slha<@ModelName@<T>>> get_models_slha() const
-   { return std::make_tuple(@ModelName@_slha<@ModelName@<T> >(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
+   std::tuple<@ModelName@<T>> get_models_slha() const
+   { return std::make_tuple(@ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
 
    const @ModelName@<T>& get_model() const
    { return model; }
    @ModelName@<T>& get_model()
    { return model; }
-   @ModelName@_slha<@ModelName@<T>> get_model_slha() const
-   { return @ModelName@_slha<@ModelName@<T>>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
+   @ModelName@<T> get_model_slha() const
+   { return @ModelName@<T>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
 
    Spectrum_generator_problems get_problems() const { return problems; }
    int get_exit_code() const { return problems.have_problem(); }
@@ -148,10 +147,17 @@ void @ModelName@_spectrum_generator_interface<T>::write_running_couplings(
       return;
    }
 
-   @ModelName@_parameter_getter parameter_getter;
-   Coupling_monitor<@ModelName@_mass_eigenstates, @ModelName@_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return @ModelName@_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(@ModelName@_info::parameter_names),
+      std::cend(@ModelName@_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(start, stop, 100, true);
    coupling_monitor.write_to_file(filename);
 }

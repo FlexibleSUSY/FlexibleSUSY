@@ -468,6 +468,11 @@ Eigen::Matrix<double, Standard_model::number_of_ewsb_equations, 1> Standard_mode
    return ewsb_parameters;
 }
 
+void Standard_model::print() const
+{
+   this->print(std::cerr);
+}
+
 void Standard_model::print(std::ostream& ostr) const
 {
    ostr << "========================================\n"

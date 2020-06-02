@@ -230,12 +230,12 @@ BOOST_AUTO_TEST_CASE( test_scale_variation )
       distance(minmax(vary_scale(make_point(4).second)))
    };
 
-   for (int i = 0; i < DMh_1.size(); i++)
+   for (unsigned i = 0; i < DMh_1.size(); i++)
       BOOST_TEST_MESSAGE("DMh(" << i << "-loop) = " << DMh_1[i]);
 
    BOOST_REQUIRE(DMh_1.size() == DMh_2.size());
 
-   for (int i = 0; i < DMh_1.size(); i++)
+   for (unsigned i = 0; i < DMh_1.size(); i++)
       BOOST_CHECK_CLOSE_FRACTION(DMh_1[i], DMh_2[i], 1e-10);
 
    // Check that scale variation shrinks for 0L, 1L and 2L.  For 3L

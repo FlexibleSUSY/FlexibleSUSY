@@ -189,7 +189,7 @@ Block MSOFTIN
    settings.set(Spectrum_generator_settings::calculate_sm_masses, 0);
    settings.set(Spectrum_generator_settings::calculate_bsm_masses, 0);
 
-   CMSSMCKM_slha<CMSSMCKM<Two_scale>> model = setup_CMSSMCKM(input, qedqcd, settings);
+   CMSSMCKM_slha model = setup_CMSSMCKM(input, qedqcd, settings);
 
    const auto calculated_value = CMSSMCKM_b_to_s_gamma::calculate_b_to_s_gamma(model, qedqcd);
    constexpr std::complex<double> C7NP  {-0.0053094128952261635,  -9.7025869191383121e-05};

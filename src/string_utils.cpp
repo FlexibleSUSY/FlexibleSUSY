@@ -30,4 +30,25 @@ std::string concat(const std::vector<std::string>& strings)
    return result;
 }
 
+
+std::string concat(const std::vector<std::string>& strings, const std::string& separator)
+{
+   std::string result;
+
+   for (auto it = strings.cbegin(), end = strings.end(); it != end; ++it) {
+      if (it != strings.cbegin()) {
+         result += separator;
+      }
+      result += *it;
+   }
+
+   return result;
+}
+
+
+std::string concat(const std::vector<std::string>& strings, char separator)
+{
+   return concat(strings, std::string(1, separator));
+}
+
 } // namespace flexiblesusy

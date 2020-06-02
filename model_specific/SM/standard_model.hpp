@@ -167,7 +167,8 @@ public:
 
    virtual Eigen::ArrayXd beta() const override;
    virtual Eigen::ArrayXd get() const override;
-   void print(std::ostream& out = std::cerr) const;
+   void print() const;
+   void print(std::ostream&) const;
    virtual void set(const Eigen::ArrayXd&) override;
 
    Standard_model calc_beta() const;

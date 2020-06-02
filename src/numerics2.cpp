@@ -18,18 +18,18 @@
 
 #include "numerics2.hpp"
 #include <cmath>
-#include <cstddef>
 
 namespace flexiblesusy {
 
-bool is_finite(const double* v, long length)
+bool is_finite(const double* v, long length) noexcept
 {
-   bool is_finite = true;
+   for (long i = 0; i < length; ++i) {
+      if (!std::isfinite(v[i])) {
+         return false;
+      }
+   }
 
-   for (long i = 0; i < length; i++)
-      is_finite = is_finite && std::isfinite(v[i]);
-
-   return is_finite;
+   return true;
 }
 
 } // namespace flexiblesusy
