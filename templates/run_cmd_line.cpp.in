@@ -102,12 +102,11 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
    const auto observables = calculate_observables(
       std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
 
-   std::unique_ptr<@ModelName@_decays> decays = nullptr;
 @calculateCmdLineDecays@
 
    // SLHA output
    @ModelName@_slha_io slha_io;
-   slha_io.fill(models, qedqcd, scales, observables, std::move(decays));
+   @fillSLHAIO@
    slha_io.write_to_stream(std::cout);
 
    return spectrum_generator.get_exit_code();

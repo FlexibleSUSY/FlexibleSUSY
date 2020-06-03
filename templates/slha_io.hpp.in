@@ -50,6 +50,8 @@ struct @ModelName@_scales {
    double pole_mass_scale{0.};
 };
 
+class @ModelName@_decays;
+
 class @ModelName@_slha_io {
 public:
    @ModelName@_slha_io();
@@ -95,7 +97,7 @@ public:
    static void fill_imextpar_tuple(@ModelName@_input_parameters&, int, double);
 
    template <class... Ts>
-   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, std::unique_ptr<const @ModelName@_decays> = nullptr);
+   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, @ModelName@_decays const * const = nullptr);
 @fillDecaysDataPrototypes@
 
 private:
@@ -128,7 +130,7 @@ void @ModelName@_slha_io::fill(
    const softsusy::QedQcd& qedqcd,
    const @ModelName@_scales& scales,
    const @ModelName@_observables& observables,
-   std::unique_ptr<const @ModelName@_decays> decays)
+   @ModelName@_decays const * const decays)
 {
    const auto& model = std::get<0>(models);
    const auto& problems = model.get_problems();
@@ -141,7 +143,7 @@ void @ModelName@_slha_io::fill(
       set_extra(model, scales, observables);
    }
    if (decays) {
-      fill_decays_data(*decays);
+      @useDecaysData@
    }
 }
 

@@ -2580,9 +2580,9 @@ if (show_decays) {
 }";
 
 ExampleCalculateCmdLineDecays[] :=
+FlexibleSUSY`FSModelName <> "_decays " <> "decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_decays>(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
-   decays->calculate_decays();
+   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2598,7 +2598,7 @@ WriteUserExample[inputParameters_List, files_List] :=
             solverIncludes = "", runEnabledSolvers = "", scanEnabledSolvers = "",
             runEnabledCmdLineSolvers = "", defaultSolverType,
             decaysIncludes = "", calculateDecaysForModel = "", setDecaysSLHAOutput = "",
-            calculateCmdLineDecays = "", writeCmdLineOutput = ""},
+            calculateCmdLineDecays = "", writeCmdLineOutput = "", fillSLHAIO = ""},
            inputPars = {First[#], #[[3]]}& /@ inputParameters;
            parseCmdLineOptions = WriteOut`ParseCmdLineOptions[inputPars];
            printCommandLineOptions = WriteOut`PrintCmdLineOptions[inputPars];
@@ -2615,6 +2615,8 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);",
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
              ];
            writeCmdLineOutput = WriteExampleCmdLineOutput[FlexibleSUSY`FSCalculateDecays];
            WriteOut`ReplaceInFiles[files,
@@ -2630,6 +2632,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
+                            "@fillSLHAIO@" -> fillSLHAIO,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -2816,7 +2819,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             setDecaysInfoPrototypes = "", setDecaysInfoFunctions = "",
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
-            decaysHeaderIncludes = ""
+            decaysHeaderIncludes = "", useDecaysData = ""
            },
            particles = DeleteDuplicates @ Flatten[TreeMasses`GetMassEigenstate /@ massMatrices];
            susyParticles = Select[particles, (!TreeMasses`IsSMParticle[#])&];
@@ -2881,6 +2884,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
               fillDecaysDataPrototypes = WriteOut`CreateFillDecaysDataPrototypes[FlexibleSUSY`FSModelName];
               fillDecaysDataFunctions = WriteOut`CreateFillDecaysDataFunctions[FlexibleSUSY`FSModelName];
               decaysHeaderIncludes = Utils`StringJoinWithSeparator[("#include \"" <> # <> "\"")& /@ decaysSLHAIncludeFiles, "\n"];
+              useDecaysData = "fill_decays_data(*decays);"
              ];
            getPDGCodeFromParticleEnumNoIndex = Parameters`CreatePDGCodeFromParticleCases[particles];
            getPDGCodeFromParticleEnumIndex = Parameters`CreatePDGCodeFromParticleIndexedCases[particles];
@@ -2936,6 +2940,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@getPDGCodeFromParticleEnumIndex@" -> IndentText[getPDGCodeFromParticleEnumIndex],
                             "@setParticleNameFromPDG@" -> IndentText[setParticleNameFromPDG],
                             "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
+                            "@useDecaysData@"                   -> useDecaysData,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
