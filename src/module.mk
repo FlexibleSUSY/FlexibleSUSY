@@ -64,7 +64,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/coupling_monitor.hpp \
 		$(DIR)/database.hpp \
 		$(DIR)/decay.hpp \
-		$(DIR)/decay_amplitudes.hpp \
 		$(DIR)/decays_loop_corrections.hpp \
 		$(DIR)/decays_problems.hpp \
 		$(DIR)/derivative.hpp \
@@ -98,7 +97,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
-		$(DIR)/one_loop_decay_diagrams.hpp \
 		$(DIR)/physical_input.hpp \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \
