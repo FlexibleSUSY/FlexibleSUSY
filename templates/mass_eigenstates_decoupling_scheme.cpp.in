@@ -93,6 +93,16 @@ bool CLASSNAME::do_force_output() const
    return force_output;
 }
 
+double CLASSNAME::get_precision() const
+{
+   return precision;
+}
+
+void CLASSNAME::set_precision(double precision_)
+{
+   precision = precision_;
+}
+
 void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
 {
    using RM33 = Eigen::Matrix<double, 3, 3>;
@@ -179,6 +189,8 @@ void CLASSNAME::fill_from(const @ModelName@_mass_eigenstates& model)
    set_thresholds(model.get_thresholds());
    set_zero_threshold(model.get_zero_threshold());
    set_input_parameters(model.get_input());
+   force_output = model.do_force_output();
+   precision = model.get_precision();
    physical = model.get_physical();
 
 #define OTHER(p) model.get_##p()

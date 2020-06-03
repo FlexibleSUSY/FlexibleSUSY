@@ -69,13 +69,7 @@ bool IsClose(double a, double b, double eps) noexcept
 
 bool IsCloseRel(double a, double b, double eps) noexcept
 {
-   if (IsClose(a, b, std::numeric_limits<double>::epsilon()))
-      return true;
-
-   if (std::abs(a) < std::numeric_limits<double>::epsilon())
-      return IsClose(a, b, eps);
-
-   return std::abs((a - b)/a) < eps;
+   return is_equal_rel(a, b, eps);
 }
 
 bool IsFinite(double x) noexcept

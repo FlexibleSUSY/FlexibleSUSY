@@ -313,21 +313,79 @@ BOOST_AUTO_TEST_CASE( test_UnitStep )
 
 BOOST_AUTO_TEST_CASE(test_Diag)
 {
-   Eigen::Matrix<double,3,3> m;
-   for (int i = 0; i < 3; i++)
-      for (int k = 0; k < 3; k++)
-         m(i,k) = (i+1) * (k+1);
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const auto d = Diag(m);
 
-   Eigen::Matrix<double,3,3> diag(Diag(m));
+      BOOST_CHECK_EQUAL(d(0,0), 1.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 4.0);
+   }
+   {
+      Eigen::Matrix<double, 2, 2> m;
+      m << 1, 2, 3, 4;
+      const Eigen::Matrix<double, 2, 2> d = Diag(m);
 
-   for (int i = 0; i < 3; i++)
-      for (int k = 0; k < 3; k++) {
-         if (i == k)
-            BOOST_CHECK_PREDICATE(std::not_equal_to<double>(), (diag(i,k))(0.));
-         else
-            BOOST_CHECK_EQUAL(diag(i,k), 0.);
-      }
+      BOOST_CHECK_EQUAL(d(0,0), 1.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 4.0);
+   }
+   {
+      Eigen::Matrix<double, 2, 2> m;
+      m << 1, 2, 3, 4;
+      const Eigen::Matrix<double, 2, 2> d = Diag(m + m);
+
+      BOOST_CHECK_EQUAL(d(0,0), 2.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 8.0);
+   }
+   {
+      BOOST_CHECK_THROW(Diag(Eigen::MatrixXd(1,2)), flexiblesusy::SetupError);
+   }
 }
+
+BOOST_AUTO_TEST_CASE(test_Hermitianize)
+{
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      Hermitianize(m);
+
+      BOOST_CHECK_EQUAL(m(0,0), 1.0);
+      BOOST_CHECK_EQUAL(m(0,1), 2.0);
+      BOOST_CHECK_EQUAL(m(1,0), 2.0);
+      BOOST_CHECK_EQUAL(m(1,1), 4.0);
+   }
+   {
+      Eigen::MatrixXd m(1,2);
+      m << 1, 2;
+      BOOST_CHECK_THROW(Hermitianize(m), flexiblesusy::SetupError);
+   }
+}
+
+BOOST_AUTO_TEST_CASE(test_Symmetrize)
+{
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      Symmetrize(m);
+
+      BOOST_CHECK_EQUAL(m(0,0), 1.0);
+      BOOST_CHECK_EQUAL(m(0,1), 2.0);
+      BOOST_CHECK_EQUAL(m(1,0), 2.0);
+      BOOST_CHECK_EQUAL(m(1,1), 4.0);
+   }
+   {
+      Eigen::MatrixXd m(1,2);
+      m << 1, 2;
+      BOOST_CHECK_THROW(Symmetrize(m), flexiblesusy::SetupError);
+   }
+}
+
 
 template <typename T>
 std::string ToString_sstream(T a)
@@ -352,6 +410,12 @@ std::string ToString_sprintf(T a)
    char buf[buf_length];
    snprintf(buf, buf_length, "%i", a);
    return std::string(buf);
+}
+
+template <typename T>
+std::string ToString_ToString(T a)
+{
+   return ToString(a);
 }
 
 template <typename T>
@@ -383,6 +447,7 @@ BOOST_AUTO_TEST_CASE(test_ToString)
    MEASURE(to_string   , number, number_of_iterations);
 #endif
    MEASURE(sprintf     , number, number_of_iterations);
+   MEASURE(ToString    , number, number_of_iterations);
    MEASURE(lexical_cast, number, number_of_iterations);
 }
 
