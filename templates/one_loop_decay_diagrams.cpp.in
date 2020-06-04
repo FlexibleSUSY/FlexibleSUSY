@@ -23,9 +23,13 @@
 
 namespace flexiblesusy {
 
+namespace {
+
 inline double Den(double x2, double y2) {
    return 1.0/(x2-y2);
 }
+
+} // anonymous
 
 /**
  * @brief Evaluates T1G1N1 diagram for process S -> SS
