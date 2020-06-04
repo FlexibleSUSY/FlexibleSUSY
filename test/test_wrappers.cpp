@@ -925,6 +925,29 @@ BOOST_AUTO_TEST_CASE(test_Power_benchmark)
    BOOST_TEST_MESSAGE(format_line(12, timed_Power12, timed_Power_12));
 }
 
+BOOST_AUTO_TEST_CASE(test_Re)
+{
+   const std::complex<double> o(1.0, 0.0);
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Re(1.0)   ,  1.0);
+   BOOST_CHECK_EQUAL(Re(o)     ,  1.0);
+   BOOST_CHECK_EQUAL(Re(Sqr(o)),  1.0);
+   BOOST_CHECK_EQUAL(Re(Sqr(i)), -1.0);
+}
+
+BOOST_AUTO_TEST_CASE(test_Im)
+{
+   const std::complex<double> o(1.0, 0.0);
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Im(1.0)   ,  0.0);
+   BOOST_CHECK_EQUAL(Im(o)     ,  0.0);
+   BOOST_CHECK_EQUAL(Im(i)     ,  1.0);
+   BOOST_CHECK_EQUAL(Im(Sqr(o)),  0.0);
+   BOOST_CHECK_EQUAL(Im(Sqr(i)),  0.0);
+}
+
 BOOST_AUTO_TEST_CASE(test_Min)
 {
    BOOST_CHECK_EQUAL(Min(0.), 0.);
