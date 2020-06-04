@@ -610,6 +610,8 @@ Derived SignedAbsSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
    return m.unaryExpr([](double a) { return SignedAbsSqrt(a); });
 }
 
+// Sqrt ////////////////////////////////////////////////////////////////
+
 template <class T, typename = typename std::enable_if<std::is_floating_point<T>::value,T>::type>
 T Sqrt(T a) noexcept
 {
@@ -628,16 +630,33 @@ Eigen::Array<Scalar, M, N> Sqrt(const Eigen::Array<Scalar, M, N>& m) noexcept
    return m.unaryExpr([](Scalar a){ return Sqrt(a); });
 }
 
+// Sqr /////////////////////////////////////////////////////////////////
+
 template <typename T>
+constexpr std::complex<T> Sqr(const std::complex<T>& a) noexcept
+{
+   return a * a;
+}
+
+template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value,T>::type>
 constexpr T Sqr(T a) noexcept
 {
    return a * a;
 }
 
-template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Sqr(const Eigen::Array<Scalar, M, N>& a) noexcept
+/// component-wise square
+template <typename Derived>
+auto Sqr(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Derived::PlainObject
 {
-   return a.unaryExpr([](Scalar a){ return Sqr(a); });
+   using Scalar = typename Derived::PlainObject::Scalar;
+   return a.unaryExpr([](Scalar a) -> Scalar { return Sqr(a); });
+}
+
+/// matrix square
+template <typename Derived>
+auto Sqr(const Eigen::MatrixBase<Derived>& a) noexcept -> typename Derived::PlainObject
+{
+   return a * a;
 }
 
 #define DEFINE_COMMUTATIVE_OPERATOR_COMPLEX_INT(op)                     \

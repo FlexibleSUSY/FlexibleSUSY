@@ -598,17 +598,49 @@ BOOST_AUTO_TEST_CASE(test_Abs_Eigen_Array)
    BOOST_CHECK_CLOSE(v_abs(2), 0., 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE(test_Sqr_Eigen_Array)
+BOOST_AUTO_TEST_CASE(test_Sqr)
 {
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   Eigen::ArrayXd v_sqr(Sqr(v));
-   BOOST_CHECK_CLOSE(v_sqr(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr(1), 4., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr(2), 9., 1e-10);
+   {
+      BOOST_CHECK_CLOSE(Sqr(1.0), 1.0, 1e-10);
+      BOOST_CHECK_CLOSE(Sqr(2.0), 4.0, 1e-10);
+      BOOST_CHECK_CLOSE(Sqr(3.0), 9.0, 1e-10);
+      BOOST_CHECK_CLOSE(std::real(Sqr(std::complex<double>(2.0,0.0))), 4.0, 1e-10);
+      BOOST_CHECK_CLOSE(std::imag(Sqr(std::complex<double>(2.0,0.0))), 0.0, 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v2(Sqr(v));
+      BOOST_CHECK_CLOSE(v2(0), 1., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1), 4., 1e-10);
+      BOOST_CHECK_CLOSE(v2(2), 9., 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v2(Sqr(v + v));
+      BOOST_CHECK_CLOSE(v2(0),  4, 1e-10);
+      BOOST_CHECK_CLOSE(v2(1), 16, 1e-10);
+      BOOST_CHECK_CLOSE(v2(2), 36, 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      Eigen::MatrixXd v2(Sqr(v));
+      BOOST_CHECK_CLOSE(v2(0,0),  7., 1e-10);
+      BOOST_CHECK_CLOSE(v2(0,1), 10., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,0), 15., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,1), 22., 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      Eigen::MatrixXd v2(Sqr(v + v));
+      BOOST_CHECK_CLOSE(v2(0,0), 28., 1e-10);
+      BOOST_CHECK_CLOSE(v2(0,1), 40., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,0), 60., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,1), 88., 1e-10);
+   }
 }
 
 BOOST_AUTO_TEST_CASE(test_Sqrt_overloads)
