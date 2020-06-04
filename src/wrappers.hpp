@@ -548,44 +548,25 @@ constexpr T Quad(T a) noexcept
 // Re //////////////////////////////////////////////////////////////////
 
 double Re(double) noexcept;
+
 double Re(const std::complex<double>&) noexcept;
 
-template<int M, int N>
-Eigen::Matrix<double,M,N> Re(const Eigen::Matrix<double,M,N>& x) noexcept
-{
-   return x;
-}
-
 template<class Derived>
-typename Eigen::Matrix<
-   double,
-   Eigen::MatrixBase<Derived>::RowsAtCompileTime,
-   Eigen::MatrixBase<Derived>::ColsAtCompileTime>
-Re(const Eigen::MatrixBase<Derived>& x) noexcept
+auto Re(const Eigen::MatrixBase<Derived>& x) noexcept -> decltype(x.real().eval())
 {
-   return x.real();
+   return x.real().eval();
 }
 
 // Im //////////////////////////////////////////////////////////////////
 
 double Im(double) noexcept;
+
 double Im(const std::complex<double>&) noexcept;
 
-template<int M, int N>
-Eigen::Matrix<double,M,N> Im(Eigen::Matrix<double,M,N> m) noexcept
-{
-   m.setZero();
-   return m;
-}
-
 template<class Derived>
-typename Eigen::Matrix<
-   double,
-   Eigen::MatrixBase<Derived>::RowsAtCompileTime,
-   Eigen::MatrixBase<Derived>::ColsAtCompileTime>
-Im(const Eigen::MatrixBase<Derived>& x) noexcept
+auto Im(const Eigen::MatrixBase<Derived>& x) noexcept -> decltype(x.imag().eval())
 {
-   return x.imag();
+   return x.imag().eval();
 }
 
 // RelDiff /////////////////////////////////////////////////////////////

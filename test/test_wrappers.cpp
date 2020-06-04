@@ -945,6 +945,15 @@ BOOST_AUTO_TEST_CASE(test_Re)
       BOOST_CHECK_EQUAL(rem(1,1), m(1,1));
    }
    {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd rem = Re(m + m);
+      BOOST_CHECK_EQUAL(rem(0,0), (m + m)(0,0));
+      BOOST_CHECK_EQUAL(rem(0,1), (m + m)(0,1));
+      BOOST_CHECK_EQUAL(rem(1,0), (m + m)(1,0));
+      BOOST_CHECK_EQUAL(rem(1,1), (m + m)(1,1));
+   }
+   {
       Eigen::MatrixXcd m(2,2);
       m << 1*o, 2*o, 3*o, 4*o;
       const Eigen::MatrixXd rem = Re(m);
@@ -952,6 +961,15 @@ BOOST_AUTO_TEST_CASE(test_Re)
       BOOST_CHECK_EQUAL(rem(0,1), std::real(m(0,1)));
       BOOST_CHECK_EQUAL(rem(1,0), std::real(m(1,0)));
       BOOST_CHECK_EQUAL(rem(1,1), std::real(m(1,1)));
+   }
+   {
+      Eigen::MatrixXcd m(2,2);
+      m << 1*o, 2*o, 3*o, 4*o;
+      const Eigen::MatrixXd rem = Re(m + m);
+      BOOST_CHECK_EQUAL(rem(0,0), std::real((m + m)(0,0)));
+      BOOST_CHECK_EQUAL(rem(0,1), std::real((m + m)(0,1)));
+      BOOST_CHECK_EQUAL(rem(1,0), std::real((m + m)(1,0)));
+      BOOST_CHECK_EQUAL(rem(1,1), std::real((m + m)(1,1)));
    }
 }
 
@@ -976,13 +994,22 @@ BOOST_AUTO_TEST_CASE(test_Im)
       BOOST_CHECK_EQUAL(imm(1,1), 0.0);
    }
    {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd imm = Im(m + m);
+      BOOST_CHECK_EQUAL(imm(0,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(0,1), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,1), 0.0);
+   }
+   {
       Eigen::MatrixXcd m(2,2);
       m << 1*i, 2*i, 3*i, 4*i;
-      const Eigen::MatrixXd imm = Im(m);
-      BOOST_CHECK_EQUAL(imm(0,0), std::imag(m(0,0)));
-      BOOST_CHECK_EQUAL(imm(0,1), std::imag(m(0,1)));
-      BOOST_CHECK_EQUAL(imm(1,0), std::imag(m(1,0)));
-      BOOST_CHECK_EQUAL(imm(1,1), std::imag(m(1,1)));
+      const Eigen::MatrixXd imm = Im(m + m);
+      BOOST_CHECK_EQUAL(imm(0,0), std::imag((m + m)(0,0)));
+      BOOST_CHECK_EQUAL(imm(0,1), std::imag((m + m)(0,1)));
+      BOOST_CHECK_EQUAL(imm(1,0), std::imag((m + m)(1,0)));
+      BOOST_CHECK_EQUAL(imm(1,1), std::imag((m + m)(1,1)));
    }
 }
 
