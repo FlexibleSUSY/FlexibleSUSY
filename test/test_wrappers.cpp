@@ -24,6 +24,7 @@
 #include "wrappers.hpp"
 #include "stopwatch.hpp"
 #include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions/zeta.hpp>
 
 #if defined(__CYGWIN__) || defined(__FreeBSD__)
 // std::to_string is missing on Cygwin and FreeBSD
@@ -45,6 +46,8 @@ BOOST_AUTO_TEST_CASE( test_Constants )
    BOOST_CHECK_EQUAL(fourLoop      , 1.608129755454920445735606800552522082e-9);
    BOOST_CHECK_EQUAL(fiveLoop      , 1.018360064207223287777021556086771147e-11);
    BOOST_CHECK(True);
+   BOOST_CHECK_EQUAL(zeta2         , boost::math::zeta(2));
+   BOOST_CHECK_EQUAL(zeta3         , boost::math::zeta(3));
 }
 
 BOOST_AUTO_TEST_CASE( test_Abs )
