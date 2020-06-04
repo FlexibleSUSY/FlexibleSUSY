@@ -624,10 +624,12 @@ double Sqrt(T a) noexcept
    return std::sqrt(static_cast<double>(a));
 }
 
-template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Sqrt(const Eigen::Array<Scalar, M, N>& m) noexcept
+/// component-wise square root
+template <typename Derived>
+auto Sqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Derived::PlainObject
 {
-   return m.unaryExpr([](Scalar a){ return Sqrt(a); });
+   using Scalar = typename Derived::PlainObject::Scalar;
+   return a.unaryExpr([](Scalar a) -> Scalar { return Sqrt(a); });
 }
 
 // Sqr /////////////////////////////////////////////////////////////////
@@ -658,6 +660,8 @@ auto Sqr(const Eigen::MatrixBase<Derived>& a) noexcept -> typename Derived::Plai
 {
    return a * a;
 }
+
+// arithmetic operators for integer and complex numbers ////////////////
 
 #define DEFINE_COMMUTATIVE_OPERATOR_COMPLEX_INT(op)                     \
    template <typename T>                                                \

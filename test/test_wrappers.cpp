@@ -643,25 +643,28 @@ BOOST_AUTO_TEST_CASE(test_Sqr)
    }
 }
 
-BOOST_AUTO_TEST_CASE(test_Sqrt_overloads)
+BOOST_AUTO_TEST_CASE(test_Sqrt)
 {
    BOOST_CHECK_EQUAL(Sqrt(2.f), std::sqrt(2.f));
    BOOST_CHECK_EQUAL(Sqrt(2.) , std::sqrt(2.));
    BOOST_CHECK_EQUAL(Sqrt(2.L), std::sqrt(2.L));
    BOOST_CHECK_EQUAL(Sqrt(2)  , std::sqrt(2.));
-}
-
-BOOST_AUTO_TEST_CASE(test_Sqrt_Eigen_Array)
-{
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   Eigen::ArrayXd v_sqrt(Sqrt(v));
-   BOOST_CHECK_CLOSE(v_sqrt(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt(1), std::sqrt(2.), 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(3.), 1e-10);
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v_sqrt(Sqrt(v));
+      BOOST_CHECK_CLOSE(v_sqrt(0),            1., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1), std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(3.), 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v_sqrt(Sqrt(v + v));
+      BOOST_CHECK_CLOSE(v_sqrt(0), std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1),            2., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(6.), 1e-10);
+   }
 }
 
 BOOST_AUTO_TEST_CASE(test_Total)
