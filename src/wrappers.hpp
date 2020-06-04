@@ -572,9 +572,10 @@ double Im(double) noexcept;
 double Im(const std::complex<double>&) noexcept;
 
 template<int M, int N>
-Eigen::Matrix<double,M,N> Im(const Eigen::Matrix<double,M,N>&) noexcept
+Eigen::Matrix<double,M,N> Im(Eigen::Matrix<double,M,N> m) noexcept
 {
-   return Eigen::Matrix<double,M,N>::Zero();
+   m.setZero();
+   return m;
 }
 
 template<class Derived>
