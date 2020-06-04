@@ -737,20 +737,27 @@ std::string ToString(const std::complex<double>&);
 
 // Total ///////////////////////////////////////////////////////////////
 
+/// sum of all arguments
 double Total(double) noexcept;
+
+/// sum of all arguments
 std::complex<double> Total(const std::complex<double>&) noexcept;
 
+/// sum of array elements
 template <typename Scalar, int M, int N>
 Scalar Total(const Eigen::Array<Scalar, M, N>& a) noexcept
 {
    return a.sum();
 }
 
+/// sum of matrix elements
 template <typename Scalar, int M, int N>
 Scalar Total(const Eigen::Matrix<Scalar, M, N>& a) noexcept
 {
    return a.sum();
 }
+
+// UnitVector //////////////////////////////////////////////////////////
 
 /// unit vector of length N into direction i
 template <int N, int i, typename Scalar = double>
@@ -768,6 +775,8 @@ constexpr auto UnitVector(int i) noexcept -> Eigen::Matrix<Scalar,N,1>
 
 /// unit vector of length N into direction i
 Eigen::VectorXd UnitVector(int N, int i) noexcept;
+
+// MatrixProjector /////////////////////////////////////////////////////
 
 /// matrix projector of size MxN into direction i, j
 template <int M, int N, int i, int j, typename Scalar = double>
@@ -792,6 +801,8 @@ auto MatrixProjector(int i, int j) noexcept -> Eigen::Matrix<Scalar,M,N>
 /// unit matrix projector of size MxN into direction i, j
 Eigen::MatrixXd MatrixProjector(int M, int N, int i, int j) noexcept;
 
+// UnitStep ////////////////////////////////////////////////////////////
+
 /// step function (0 for x < 0, 1 otherwise)
 template <typename T>
 constexpr int UnitStep(T x) noexcept
@@ -799,8 +810,12 @@ constexpr int UnitStep(T x) noexcept
    return x < T() ? 0 : 1;
 }
 
+// ZeroSqrt ////////////////////////////////////////////////////////////
+
+/// sqrt(x) for x >= 0; 0 for x < 0
 double ZeroSqrt(double x) noexcept;
 
+/// sqrt(x) for x >= 0; 0 for x < 0
 template <typename Derived>
 Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
 {
