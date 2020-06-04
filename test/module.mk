@@ -77,6 +77,7 @@ TEST_SRC := \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_string_conversion.cpp \
+		$(DIR)/test_string_format.cpp \
 		$(DIR)/test_sum.cpp \
 		$(DIR)/test_string_utils.cpp \
 		$(DIR)/test_threshold_corrections.cpp \
