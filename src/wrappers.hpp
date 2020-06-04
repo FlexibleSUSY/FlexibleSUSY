@@ -743,16 +743,9 @@ double Total(double) noexcept;
 /// sum of all arguments
 std::complex<double> Total(const std::complex<double>&) noexcept;
 
-/// sum of array elements
-template <typename Scalar, int M, int N>
-Scalar Total(const Eigen::Array<Scalar, M, N>& a) noexcept
-{
-   return a.sum();
-}
-
-/// sum of matrix elements
-template <typename Scalar, int M, int N>
-Scalar Total(const Eigen::Matrix<Scalar, M, N>& a) noexcept
+/// sum of elements
+template <typename Derived>
+auto Total(const Eigen::DenseBase<Derived>& a) noexcept -> typename Derived::Scalar
 {
    return a.sum();
 }

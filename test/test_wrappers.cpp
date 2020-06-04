@@ -632,14 +632,20 @@ BOOST_AUTO_TEST_CASE(test_Sqrt_Eigen_Array)
    BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(3.), 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE(test_Total_Array)
+BOOST_AUTO_TEST_CASE(test_Total)
 {
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   BOOST_CHECK_CLOSE(Total(v), 6., 1e-10);
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      BOOST_CHECK_CLOSE(Total(v), 6.0, 1e-10);
+      BOOST_CHECK_CLOSE(Total(v + v), 12.0, 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      BOOST_CHECK_CLOSE(Total(v), 10.0, 1e-10);
+      BOOST_CHECK_CLOSE(Total(v + v), 20.0, 1e-10);
+   }
 }
 
 BOOST_AUTO_TEST_CASE(test_Re_scalars)
