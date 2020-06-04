@@ -600,14 +600,21 @@ T RelDiff(T a, T b, T eps = std::numeric_limits<T>::epsilon()) noexcept
    return (a - b) / max;
 }
 
+// Round ///////////////////////////////////////////////////////////////
+
 int Round(double a) noexcept;
 
+// SignedAbsSqrt ///////////////////////////////////////////////////////
+
+/// signed square root of absolute
 double SignedAbsSqrt(double a) noexcept;
 
+/// component-wise signed square root of absolute
 template <typename Derived>
-Derived SignedAbsSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
+auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Derived::PlainObject
 {
-   return m.unaryExpr([](double a) { return SignedAbsSqrt(a); });
+   using Scalar = typename Derived::PlainObject::Scalar;
+   return a.unaryExpr([](Scalar a) -> Scalar { return SignedAbsSqrt(a); });
 }
 
 // Sqrt ////////////////////////////////////////////////////////////////

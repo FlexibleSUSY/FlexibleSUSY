@@ -667,6 +667,27 @@ BOOST_AUTO_TEST_CASE(test_Sqrt)
    }
 }
 
+BOOST_AUTO_TEST_CASE(test_SignedAbsSqrt)
+{
+   BOOST_CHECK_EQUAL(SignedAbsSqrt(2.) , std::sqrt(2.));
+   {
+      Eigen::ArrayXd v(3);
+      v << -1, -2, -3;
+      Eigen::ArrayXd v_sqrt(SignedAbsSqrt(v));
+      BOOST_CHECK_CLOSE(v_sqrt(0),            -1., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1), -std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), -std::sqrt(3.), 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << -1, -2, -3;
+      Eigen::ArrayXd v_sqrt(SignedAbsSqrt(v + v));
+      BOOST_CHECK_CLOSE(v_sqrt(0), -std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1),            -2., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), -std::sqrt(6.), 1e-10);
+   }
+}
+
 BOOST_AUTO_TEST_CASE(test_Total)
 {
    {
