@@ -378,9 +378,9 @@ double Log(double a) noexcept;
 
 // MaxRelDiff //////////////////////////////////////////////////////////
 
-double MaxRelDiff(double, double);
+double MaxRelDiff(double, double) noexcept;
 
-double MaxRelDiff(const std::complex<double>&, const std::complex<double>&);
+double MaxRelDiff(const std::complex<double>&, const std::complex<double>&) noexcept;
 
 template <class Derived>
 auto MaxRelDiff(const Eigen::PlainObjectBase<Derived>& a,
@@ -409,13 +409,13 @@ double MaxAbsValue(double x) noexcept;
 double MaxAbsValue(const std::complex<double>& x) noexcept;
 
 template <class Derived>
-auto MaxAbsValue(const Eigen::MatrixBase<Derived>& x) -> decltype(x.cwiseAbs().maxCoeff())
+auto MaxAbsValue(const Eigen::MatrixBase<Derived>& x) noexcept -> decltype(x.cwiseAbs().maxCoeff())
 {
    return x.cwiseAbs().maxCoeff();
 }
 
 template <class Derived>
-auto MaxAbsValue(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().maxCoeff())
+auto MaxAbsValue(const Eigen::ArrayBase<Derived>& x) noexcept -> decltype(x.cwiseAbs().maxCoeff())
 {
    return x.cwiseAbs().maxCoeff();
 }
@@ -423,13 +423,13 @@ auto MaxAbsValue(const Eigen::ArrayBase<Derived>& x) -> decltype(x.cwiseAbs().ma
 // Max /////////////////////////////////////////////////////////////////
 
 template<typename T>
-T Max(T&&t)
+T Max(T&&t) noexcept
 {
    return std::forward<T>(t);
 }
 
 template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Max(T0&& val1, T1&& val2, Ts&&... vs)
+typename std::common_type<T0, T1, Ts...>::type Max(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Max(val1, std::forward<Ts>(vs)...);
@@ -438,13 +438,13 @@ typename std::common_type<T0, T1, Ts...>::type Max(T0&& val1, T1&& val2, Ts&&...
 }
 
 template<typename T>
-T Min(T&&t)
+T Min(T&&t) noexcept
 {
    return std::forward<T>(t);
 }
 
 template<typename T0, typename T1, typename... Ts>
-typename std::common_type<T0, T1, Ts...>::type Min(T0&& val1, T1&& val2, Ts&&... vs)
+typename std::common_type<T0, T1, Ts...>::type Min(T0&& val1, T1&& val2, Ts&&... vs) noexcept
 {
    if (val2 < val1)
       return Min(val2, std::forward<Ts>(vs)...);
@@ -457,11 +457,13 @@ typename std::common_type<T0, T1, Ts...>::type Min(T0&& val1, T1&& val2, Ts&&...
 int Sign(double x) noexcept;
 int Sign(int x) noexcept;
 
+// PolyLog /////////////////////////////////////////////////////////////
+
 /// real polylogarithm
-double PolyLog(int, double);
+double PolyLog(int, double) noexcept;
 
 /// complex polylogarithm
-std::complex<double> PolyLog(int, const std::complex<double>&);
+std::complex<double> PolyLog(int, const std::complex<double>&) noexcept;
 
 // Power functions /////////////////////////////////////////////////////
 
@@ -549,7 +551,7 @@ double Re(double) noexcept;
 double Re(const std::complex<double>&) noexcept;
 
 template<int M, int N>
-Eigen::Matrix<double,M,N> Re(const Eigen::Matrix<double,M,N>& x)
+Eigen::Matrix<double,M,N> Re(const Eigen::Matrix<double,M,N>& x) noexcept
 {
    return x;
 }
@@ -559,7 +561,7 @@ typename Eigen::Matrix<
    double,
    Eigen::MatrixBase<Derived>::RowsAtCompileTime,
    Eigen::MatrixBase<Derived>::ColsAtCompileTime>
-Re(const Eigen::MatrixBase<Derived>& x)
+Re(const Eigen::MatrixBase<Derived>& x) noexcept
 {
    return x.real();
 }
@@ -570,7 +572,7 @@ double Im(double) noexcept;
 double Im(const std::complex<double>&) noexcept;
 
 template<int M, int N>
-Eigen::Matrix<double,M,N> Im(const Eigen::Matrix<double,M,N>&)
+Eigen::Matrix<double,M,N> Im(const Eigen::Matrix<double,M,N>&) noexcept
 {
    return Eigen::Matrix<double,M,N>::Zero();
 }
@@ -580,7 +582,7 @@ typename Eigen::Matrix<
    double,
    Eigen::MatrixBase<Derived>::RowsAtCompileTime,
    Eigen::MatrixBase<Derived>::ColsAtCompileTime>
-Im(const Eigen::MatrixBase<Derived>& x)
+Im(const Eigen::MatrixBase<Derived>& x) noexcept
 {
    return x.imag();
 }
@@ -603,7 +605,7 @@ int Round(double a) noexcept;
 double SignedAbsSqrt(double a) noexcept;
 
 template <typename Derived>
-Derived SignedAbsSqrt(const Eigen::ArrayBase<Derived>& m)
+Derived SignedAbsSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
 {
    return m.unaryExpr([](double a) { return SignedAbsSqrt(a); });
 }
@@ -621,7 +623,7 @@ double Sqrt(T a) noexcept
 }
 
 template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Sqrt(const Eigen::Array<Scalar, M, N>& m)
+Eigen::Array<Scalar, M, N> Sqrt(const Eigen::Array<Scalar, M, N>& m) noexcept
 {
    return m.unaryExpr([](Scalar a){ return Sqrt(a); });
 }
@@ -633,7 +635,7 @@ constexpr T Sqr(T a) noexcept
 }
 
 template <typename Scalar, int M, int N>
-Eigen::Array<Scalar, M, N> Sqr(const Eigen::Array<Scalar, M, N>& a)
+Eigen::Array<Scalar, M, N> Sqr(const Eigen::Array<Scalar, M, N>& a) noexcept
 {
    return a.unaryExpr([](Scalar a){ return Sqr(a); });
 }
@@ -703,7 +705,7 @@ inline double FSThrow(const std::string& s)
 }
 
 template<class Scalar, int M>
-Eigen::Matrix<Scalar,M,M> ToMatrix(const Eigen::Array<Scalar,M,1>& a)
+Eigen::Matrix<Scalar,M,M> ToMatrix(const Eigen::Array<Scalar,M,1>& a) noexcept
 {
    return Eigen::Matrix<Scalar,M,M>(a.matrix().asDiagonal());
 }
@@ -739,37 +741,37 @@ double Total(double) noexcept;
 std::complex<double> Total(const std::complex<double>&) noexcept;
 
 template <typename Scalar, int M, int N>
-Scalar Total(const Eigen::Array<Scalar, M, N>& a)
+Scalar Total(const Eigen::Array<Scalar, M, N>& a) noexcept
 {
    return a.sum();
 }
 
 template <typename Scalar, int M, int N>
-Scalar Total(const Eigen::Matrix<Scalar, M, N>& a)
+Scalar Total(const Eigen::Matrix<Scalar, M, N>& a) noexcept
 {
    return a.sum();
 }
 
 /// unit vector of length N into direction i
 template <int N, int i, typename Scalar = double>
-constexpr auto UnitVector() -> Eigen::Matrix<Scalar,N,1>
+constexpr auto UnitVector() noexcept -> Eigen::Matrix<Scalar,N,1>
 {
    return Eigen::Matrix<Scalar,N,1>::Unit(i);
 }
 
 /// unit vector of length N into direction i
 template <int N, typename Scalar = double>
-constexpr auto UnitVector(int i) -> Eigen::Matrix<Scalar,N,1>
+constexpr auto UnitVector(int i) noexcept -> Eigen::Matrix<Scalar,N,1>
 {
    return Eigen::Matrix<Scalar,N,1>::Unit(i);
 }
 
 /// unit vector of length N into direction i
-Eigen::VectorXd UnitVector(int N, int i);
+Eigen::VectorXd UnitVector(int N, int i) noexcept;
 
 /// matrix projector of size MxN into direction i, j
 template <int M, int N, int i, int j, typename Scalar = double>
-auto MatrixProjector() -> Eigen::Matrix<Scalar,M,N>
+auto MatrixProjector() noexcept -> Eigen::Matrix<Scalar,M,N>
 {
    Eigen::Matrix<Scalar,M,N> proj(Eigen::Matrix<Scalar,M,N>::Zero());
    proj(i,j) = 1;
@@ -779,7 +781,7 @@ auto MatrixProjector() -> Eigen::Matrix<Scalar,M,N>
 
 /// matrix projector of size MxN into direction i, j
 template <int M, int N, typename Scalar = double>
-auto MatrixProjector(int i, int j) -> Eigen::Matrix<Scalar,M,N>
+auto MatrixProjector(int i, int j) noexcept -> Eigen::Matrix<Scalar,M,N>
 {
    Eigen::Matrix<Scalar,M,N> proj(Eigen::Matrix<Scalar,M,N>::Zero());
    proj(i,j) = 1;
@@ -788,7 +790,7 @@ auto MatrixProjector(int i, int j) -> Eigen::Matrix<Scalar,M,N>
 }
 
 /// unit matrix projector of size MxN into direction i, j
-Eigen::MatrixXd MatrixProjector(int M, int N, int i, int j);
+Eigen::MatrixXd MatrixProjector(int M, int N, int i, int j) noexcept;
 
 /// step function (0 for x < 0, 1 otherwise)
 template <typename T>
@@ -800,7 +802,7 @@ constexpr int UnitStep(T x) noexcept
 double ZeroSqrt(double x) noexcept;
 
 template <typename Derived>
-Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m)
+Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
 {
    return m.unaryExpr([](double a){ return ZeroSqrt(a); });
 }
