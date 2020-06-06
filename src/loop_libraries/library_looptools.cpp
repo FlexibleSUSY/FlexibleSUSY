@@ -56,9 +56,7 @@ Looptools::Looptools() : current_mu2_uv(1.0)
    futils::swap();
 }
 
-Looptools::~Looptools() noexcept
-{
-}
+Looptools::~Looptools() noexcept {}
 
 void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
@@ -117,46 +115,30 @@ void Looptools::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
 
 void Looptools::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
 {
-   double p10 = p10_in.real();
-   double p21 = p21_in.real();
-   double p20 = p20_in.real();
-   double m02 = m02_in.real();
-   double m12 = m12_in.real();
-   double m22 = m22_in.real();
+   const int coeffs[] = {cc0, cc1, cc2, cc00, cc11, cc12, cc22};
+   ComplexType res[Ncc];
    set_mu2_uv(scl2_in);
-   c.at(0) = C0i(cc0, p10, p21, p20, m02, m12, m22);
-   c.at(1) = C0i(cc1, p10, p21, p20, m02, m12, m22);
-   c.at(2) = C0i(cc2, p10, p21, p20, m02, m12, m22);
-   c.at(3) = C0i(cc00, p10, p21, p20, m02, m12, m22);
-   c.at(4) = C0i(cc11, p10, p21, p20, m02, m12, m22);
-   c.at(5) = C0i(cc12, p10, p21, p20, m02, m12, m22);
-   c.at(6) = C0i(cc22, p10, p21, p20, m02, m12, m22);
+
+   Cput(res, p10_in.real(), p21_in.real(), p20_in.real(), m02_in.real(),
+        m12_in.real(), m22_in.real());
+   for (int i = 0; i < 7; ++i) {
+      c.at(i) = res[coeffs[i]];
+   }
 }
 
 void Looptools::D(std::array<std::complex<double>, 11>& d, D_ARGS) noexcept
 {
-   double p10 = p10_in.real();
-   double p21 = p21_in.real();
-   double p32 = p32_in.real();
-   double p30 = p30_in.real();
-   double p20 = p20_in.real();
-   double p31 = p31_in.real();
-   double m02 = m02_in.real();
-   double m12 = m12_in.real();
-   double m22 = m22_in.real();
-   double m32 = m32_in.real();
+   const int coeffs[] = {dd0,  dd1,  dd2,  dd3,  dd00, dd11,
+                         dd12, dd13, dd22, dd23, dd33};
+   ComplexType res[Ndd];
    set_mu2_uv(scl2_in);
-   d.at(0) = D0i(dd0, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(1) = D0i(dd1, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(2) = D0i(dd2, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(3) = D0i(dd3, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(4) = D0i(dd00, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(5) = D0i(dd11, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(6) = D0i(dd12, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(7) = D0i(dd13, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(8) = D0i(dd22, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(9) = D0i(dd23, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(10) = D0i(dd33, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
+
+   Dput(res, p10_in.real(), p21_in.real(), p32_in.real(), p30_in.real(),
+        p20_in.real(), p31_in.real(), m02_in.real(), m12_in.real(),
+        m22_in.real(), m32_in.real());
+   for (int i = 0; i < 11; ++i) {
+      d.at(i) = res[coeffs[i]];
+   }
 }
 
 } // namespace looplibrary
