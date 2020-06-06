@@ -692,16 +692,19 @@ UnresolvedColorFactorFreeQ[cpPattern_, exprs_] := Module[{
 
 (* CHECK: are the following right semantics of SARAH indices? *)
 SarahExternalGenerationIndexQ[index_Symbol] :=
-    StringMatchQ[ToString[index], RegularExpression["gO[[:digit:]]+"]];
+    StringMatchQ[SymbolName[index], RegularExpression["gO[[:digit:]]+"]];
 
 SarahInternalGenerationIndexQ[index_Symbol] :=
-    StringMatchQ[ToString[index], RegularExpression["gI[[:digit:]]+"]];
+    StringMatchQ[SymbolName[index], RegularExpression["gI[[:digit:]]+"]];
 
 SarahColorIndexQ[index_Symbol] :=
-    StringMatchQ[ToString[index], RegularExpression["ct[[:digit:]]+"]];
+    StringMatchQ[SymbolName[index], RegularExpression["ct[[:digit:]]+"]];
 
 SarahLorentzIndexQ[index_Symbol] :=
-    StringMatchQ[ToString[index], RegularExpression["lt[[:digit:]]+"]];
+    StringMatchQ[SymbolName[index], RegularExpression["lt[[:digit:]]+"]];
+
+SarahDummyIndexQ[index_Symbol] :=
+    StringMatchQ[SymbolName[index], RegularExpression["j[[:digit:]]+"]];
 
 SarahDummyIndexQ[index_Symbol] :=
     StringMatchQ[ToString[index], RegularExpression["j[[:digit:]]+"]];
