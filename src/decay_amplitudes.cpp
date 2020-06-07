@@ -20,9 +20,9 @@
  * @todo implement formulas for most general forms of amplitudes
  */
 
-#include "@ModelName@_decay_amplitudes.hpp"
+#include "decay_amplitudes.hpp"
 #include "wrappers.hpp"
-#include <iomanip>
+#include <iomanip> // @todo: remove
 
 namespace flexiblesusy {
 
@@ -66,6 +66,10 @@ double Decay_amplitude_SVV::square() const
             // + Re(form_factor_12 * Conj(form_factor_21))
             + AbsSqr(form_factor_eps));
 
+      // check Ward identity
+      //std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
+      //   "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) <<
+      //   ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
       return m0 + m2 + m4;
    } else if (m_vector_1 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
@@ -84,6 +88,10 @@ double Decay_amplitude_SVV::square() const
          Re(form_factor_11 * Conj(form_factor_21)) / m_vec_sq;
      */
 
+      // TODO(Wojciech): remove printout before release
+      //std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)) << ' ' << form_factor_21 << ' ' <<
+      //   "real: " << std::real(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::real(form_factor_21) <<
+      //   ", imag: " << std::imag(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::imag(form_factor_21) << '\n';
       return m0 + m41/* + m42 + m43*/;
    } else if (m_vector_2 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);

@@ -15,7 +15,6 @@ BASE_TEMPLATES := \
 		$(DIR)/decays.hpp.in \
 		$(DIR)/decays.cpp.in \
 		$(DIR)/decay_amplitudes.hpp.in \
-		$(DIR)/decay_amplitudes.cpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
@@ -49,8 +48,6 @@ BASE_TEMPLATES := \
 		$(DIR)/model_slha.hpp.in \
 		$(DIR)/observables.hpp.in \
 		$(DIR)/observables.cpp.in \
-		$(DIR)/one_loop_decay_diagrams.hpp.in \
-		$(DIR)/one_loop_decay_diagrams.cpp.in \
 		$(DIR)/physical.hpp.in \
 		$(DIR)/physical.cpp.in \
 		$(DIR)/plot_rgflow.gnuplot.in \

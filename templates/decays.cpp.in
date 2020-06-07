@@ -34,8 +34,7 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_info.hpp"
-// @todo: move one_loop_decay_diagrams back to src
-#include "@ModelName@_one_loop_decay_diagrams.hpp"
+#include "one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
 #include "dilog.hpp"
 #include "config.h"
