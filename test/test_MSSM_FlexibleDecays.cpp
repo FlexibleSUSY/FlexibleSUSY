@@ -658,7 +658,7 @@ Block MSOFT Q= 8.61574711E+02
                               0.00022767000236269188, 2e-12);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m, 0),
-                              1.6116438957094875e-05, 2e-12);
+                              1.6116438957094875e-05, 3e-12);
 
    // ------------ loop-induces decays ------------
 
