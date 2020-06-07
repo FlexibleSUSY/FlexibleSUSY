@@ -706,9 +706,6 @@ SarahLorentzIndexQ[index_Symbol] :=
 SarahDummyIndexQ[index_Symbol] :=
     StringMatchQ[SymbolName[index], RegularExpression["j[[:digit:]]+"]];
 
-SarahDummyIndexQ[index_Symbol] :=
-    StringMatchQ[ToString[index], RegularExpression["j[[:digit:]]+"]];
-
 GetLorentzStructure[SARAH`Cp[__]] := 1;
 
 GetLorentzStructure[SARAH`Cp[__][a_]] := a;

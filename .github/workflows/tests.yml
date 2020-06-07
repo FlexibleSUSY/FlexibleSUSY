@@ -37,8 +37,6 @@ jobs:
 
     env:
       IMAGE_VERSION: '0.3.1'
-      SARAH_VERSION: '4.14.3'
-      FEYNARTS_VERSION: '3.11'
       FORMCALC_VERSION: '9.9'
       LOOPTOOLS_VERSION: '2.15'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM'
@@ -58,7 +56,7 @@ jobs:
 
       - name: Copy Wolfram Engine license to the image
         run: |
-          docker exec builder bash -c "mkdir /root/.WolframEngine && mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
+          docker exec builder bash -c "mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
           printf "Checking if wolframscript command is workings... "
           docker exec builder bash -c 'if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
           printf "Checking if math command is workings... "
@@ -73,13 +71,6 @@ jobs:
             '
         env:
           MATHPASS: ${{ secrets.MATHPASS }}
-
-      - name: Install SARAH and FeynArts
-        run: |
-          docker exec builder bash -c "wget -q -O - https://sarah.hepforge.org/downloads/SARAH-$SARAH_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "mkdir /root/.WolframEngine/Kernel && echo 'AppendTo[\$Path, \"/SARAH-$SARAH_VERSION\"];' > /root/.WolframEngine/Kernel/init.m"
-          docker exec builder bash -c "wget -q -O - http://www.feynarts.de/FeynArts-$FEYNARTS_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FeynArts-$FEYNARTS_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
       - name: Install FormCalc
         run: |
