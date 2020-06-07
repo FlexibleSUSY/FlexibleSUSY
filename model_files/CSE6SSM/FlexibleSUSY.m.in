@@ -192,5 +192,5 @@ ExtraSLHAOutputBlocks = {
    {ASigmaL,   {{1, T[\[Sigma]L] / \[Sigma]L} } }
 };
 
-(* turn decays of because down quarks are massless *)
+(* turn decays off because down quarks are massless *)
 FSCalculateDecays = False;
