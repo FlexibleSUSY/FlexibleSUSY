@@ -458,7 +458,7 @@ not symmetric"];
  * \param diagram The given Feynman diagram
  * \returns a list of all vertices present in a diagram.
  **)
-VerticesForDiagram[diagram_] := Select[diagram,Length[#] > 1 &]
+VerticesForDiagram[diagram_] := Select[diagram, Length[#] > 1 &];
 
 (** \brief Returns a list of the positions of the contracted fields in
  * a given diagram in the given vertices.
@@ -834,26 +834,32 @@ GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	{scalar, UncolouredVertex, lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* Delta[] *)
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
-	  Collect[fullExpr, SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]]],
-	  scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]]
+	  Collect[fullExpr, SARAH`Delta[cIndex1_, cIndex2_]],
+	  scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]] /;
+     (And @@ Vertices`SarahColorIndexQ /@ {cIndex1, cIndex2}) &&
+	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
    ] :=
-   Collect[fullExpr, SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]]] /.
+   Collect[fullExpr, SARAH`Delta[_, _]] /.
       scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]] :>
 	   {scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
 	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* Lam[] *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, GellMannVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* fSU3 *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`fSU3[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* fSU3[] Lam[] *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * sum[j_, 1, 8, SARAH`fSU3[cIndex1_, cIndex3_, j_] SARAH`Lam[j_, cIndex4_, cIndex2_]], lorentzStructure_}
    ] /; Vertices`SarahDummyIndexQ[j] :=
@@ -866,7 +872,7 @@ GaugeStructureOfVertexLorentzPart[
 	scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
      scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] /;
          MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
-] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+] := Collect[fullExpr, sum[___]] /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
 		scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] :>
 {scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
@@ -882,14 +888,17 @@ GaugeStructureOfVertexLorentzPart[
 {scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] + AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* coeff Delta[] Delta[] *)
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
-      Collect[ExpandAll@fullExpr, SARAH`Delta[___] SARAH`Delta[___], FullSimplify],
-	scalar_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]] :=
-Collect[ExpandAll@fullExpr, SARAH`Delta[__] SARAH`Delta[__], FullSimplify] /.
+      Collect[fullExpr, SARAH`Delta[_, _] SARAH`Delta[_, _]],
+	scalar_ SARAH`Delta[c1_ /; Vertices`SarahColorIndexQ[c1], c4_ /; Vertices`SarahColorIndexQ[c4]]
+           SARAH`Delta[c2_ /; Vertices`SarahColorIndexQ[c2], c3_ /; Vertices`SarahColorIndexQ[c3]]/;
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[_, _]] /.
 	scalar_ SARAH`Delta[cIndex1_, cIndex4_] SARAH`Delta[cIndex2_, cIndex3_] :>
-	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex4] KroneckerDeltaColourVertex[cIndex2, cIndex3], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex4] KroneckerDeltaColourVertex[cIndex2, cIndex3], lorentzStructure};
 
 (* @todo:
       This case catches vertices with sum of products of 2 Kronecker deltas.
@@ -898,17 +907,17 @@ Collect[ExpandAll@fullExpr, SARAH`Delta[__] SARAH`Delta[__], FullSimplify] /.
       For the moment therefore we only print a warning message, similar to
       the generic catch all case *)
 GaugeStructureOfVertexLorentzPart[
-	{fullExpr_, lorentzStructure_}] /; MatchQ[
-      Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
-  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}],
-	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
-     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] ] :=
-Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
-  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
-	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
-     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
-   {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+	{fullExpr_, lorentzStructure_}] /;
+   MatchQ[
+      Collect[fullExpr, SARAH`Delta[__]],
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]
+         + scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[__]] /.
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] + scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
+      {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
+         (And @@ Vertices`SarahColorIndexQ /@ {c1, c2, c3, c4}) &&
+   	   FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
    (Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);
