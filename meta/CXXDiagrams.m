@@ -1083,8 +1083,36 @@ CreateVertices::errMaximumVerticesLimit =
 CreateVertices[
    vertices:{{__}...},
    OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
-Module[{cxxVertices, vertexPartition},
-   cxxVertices = CreateVertex /@ DeleteDuplicates[vertices];
+Module[{cxxVertices, vertexPartition,
+        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
+
+   (* without this CForm includes context in name of symbols
+      such that we get for example SARAH_g1 instead of g1 in
+      generated C++ code *)
+   ParallelEvaluate[
+      (BeginPackage[#];EndPackage[];)& /@ contextsToDistribute,
+      DistributedContexts->Automatic
+   ];
+   (* without this CForm converts complex numbers using
+      Complex wrapper *)
+   ParallelEvaluate[
+      Unprotect[Complex];
+      Format[Complex[r_,i_],CForm] :=
+         Format[CreateCType[CConversion`ScalarType[complexScalarCType]] <>
+            "(" <> ToString[CForm[r]] <> "," <> ToString[CForm[i]] <> ")",
+            OutputForm
+         ];
+      Protect[Complex];,
+      DistributedContexts->None
+   ];
+   cxxVertices =
+      AbsoluteTiming@ParallelMap[
+         CreateVertex,
+         DeleteDuplicates[vertices], DistributedContexts->All
+      ];
+   Print[""];
+   Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
+   cxxVertices = Last@cxxVertices;
 
    (* Mathematica 7 does not support the `UpTo[n]` notation *)
    vertexPartition = Partition[cxxVertices, OptionValue[MaximumVerticesLimit]];
