@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_one_loop_A0) {
 }
 
 BOOST_AUTO_TEST_CASE(test_A) {
-   std::array<std::complex<double>, 1> a{};
+   std::array<std::complex<double>, A_N> a{};
    Loop_library::get().A(a, 1e-3, 1);
    BOOST_CHECK_CLOSE_FRACTION( a[0].real() , 0.007907755278982136, 1e-15 );
 }
@@ -69,10 +69,11 @@ BOOST_AUTO_TEST_CASE(test_two_loop_B00) {
 }
 
 BOOST_AUTO_TEST_CASE(test_B) {
-   std::array<std::complex<double>, 2> b{};
+   std::array<std::complex<double>, B_N> b{};
    Loop_library::get().B(b, 0, 3, 7, 50);
    BOOST_CHECK_CLOSE_FRACTION( b[0].real() , 2.33063946108243, 6e-13 );
    BOOST_CHECK_CLOSE_FRACTION( b[1].real() , -1.09635895142032, 3e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( b[2].real(), 8.1886770944643, 3e-15 );
 }
 
 // tests for zero external momentum
@@ -131,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_three_loop_Cij) {
 }
 
 BOOST_AUTO_TEST_CASE(test_C) {
-   std::array<std::complex<double>, 7> c{};
+   std::array<std::complex<double>, C_N> c{};
    Loop_library::get().C(c, 1, 2, 7, 40, 50, 60, 50);
    BOOST_CHECK_CLOSE_FRACTION( c[0].real(), -0.0102393301312332, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( c[1].real(), 0.00339093073306662, 9e-13 );
@@ -157,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_three_loop_Dij) {
 }
 
 BOOST_AUTO_TEST_CASE(test_D) {
-   std::array<std::complex<double>, 11> d{};
+   std::array<std::complex<double>, D_N> d{};
    Loop_library::get().D(d, 1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50);
    BOOST_CHECK_CLOSE_FRACTION( d[0].real(), -4.13242728302472e-07, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( d[1].real(), 1.67874509586995e-07, 4e-15 );

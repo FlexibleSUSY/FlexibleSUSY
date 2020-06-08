@@ -128,6 +128,7 @@ void Softsusy::B(std::array<std::complex<double>, B_N>& b, B_ARGS) noexcept
 
    b.at(0) = {softsusy::b0(p, m1, m2, q), 0.0};
    b.at(1) = {(-1) * softsusy::b1(p, m1, m2, q), 0.0};
+   b.at(2) = {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
 void Softsusy::C(std::array<std::complex<double>, C_N>& c, C_ARGS) noexcept
