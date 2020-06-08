@@ -128,6 +128,10 @@ namespace looplibrary
 class Loop_library_interface
 {
 public:
+   using Acoeff_t = std::array<std::complex<double>, A_N>;
+   using Bcoeff_t = std::array<std::complex<double>, B_N>;
+   using Ccoeff_t = std::array<std::complex<double>, C_N>;
+   using Dcoeff_t = std::array<std::complex<double>, D_N>;
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (A_ARGS), A_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
