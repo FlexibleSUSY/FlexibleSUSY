@@ -119,7 +119,7 @@ void Looptools::C(std::array<std::complex<double>, C_N>& c, C_ARGS) noexcept
 
    Cput(res, p10_in.real(), p21_in.real(), p20_in.real(), m02_in.real(),
         m12_in.real(), m22_in.real());
-   for (int i = 0; i < 7; ++i) {
+   for (int i = 0; i < C_N; ++i) {
       c.at(i) = res[coeffs[i]];
    }
 }
@@ -134,7 +134,7 @@ void Looptools::D(std::array<std::complex<double>, D_N>& d, D_ARGS) noexcept
    Dput(res, p10_in.real(), p21_in.real(), p32_in.real(), p30_in.real(),
         p20_in.real(), p31_in.real(), m02_in.real(), m12_in.real(),
         m22_in.real(), m32_in.real());
-   for (int i = 0; i < 11; ++i) {
+   for (int i = 0; i < D_N; ++i) {
       d.at(i) = res[coeffs[i]];
    }
 }
