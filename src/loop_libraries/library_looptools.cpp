@@ -56,8 +56,6 @@ Looptools::Looptools() : current_mu2_uv(1.0)
    futils::swap();
 }
 
-Looptools::~Looptools() noexcept {}
-
 void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
    if (std::abs(scl2_in - this->current_mu2_uv) >
@@ -97,13 +95,13 @@ LOOPTOOLS_D(D22, dd22)
 LOOPTOOLS_D(D23, dd23)
 LOOPTOOLS_D(D33, dd33)
 
-void Looptools::A(std::array<std::complex<double>, 1>& a, A_ARGS) noexcept
+void Looptools::A(std::array<std::complex<double>, A_N>& a, A_ARGS) noexcept
 {
    set_mu2_uv(scl2_in);
    a.at(0) = A0i(aa0, m02_in.real());
 }
 
-void Looptools::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
+void Looptools::B(std::array<std::complex<double>, B_N>& b, B_ARGS) noexcept
 {
    double p10 = p10_in.real();
    double m02 = m02_in.real();
@@ -113,7 +111,7 @@ void Looptools::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
    b.at(1) = B0i(bb1, p10, m02, m12);
 }
 
-void Looptools::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
+void Looptools::C(std::array<std::complex<double>, C_N>& c, C_ARGS) noexcept
 {
    const int coeffs[] = {cc0, cc1, cc2, cc00, cc11, cc12, cc22};
    ComplexType res[Ncc];
@@ -126,7 +124,7 @@ void Looptools::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
    }
 }
 
-void Looptools::D(std::array<std::complex<double>, 11>& d, D_ARGS) noexcept
+void Looptools::D(std::array<std::complex<double>, D_N>& d, D_ARGS) noexcept
 {
    const int coeffs[] = {dd0,  dd1,  dd2,  dd3,  dd00, dd11,
                          dd12, dd13, dd22, dd23, dd33};

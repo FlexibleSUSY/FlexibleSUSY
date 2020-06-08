@@ -20,6 +20,7 @@
 #define LOOP_LIBRARY_INTERFACE_H
 
 #include <boost/preprocessor/seq/for_each.hpp>
+#include <boost/preprocessor/seq/size.hpp>
 #include <array>
 #include <complex>
 
@@ -42,6 +43,11 @@
 #define B_SEQ (B0)(B1)(B00)
 #define C_SEQ (C0)(C1)(C2)(C00)(C11)(C12)(C22)
 #define D_SEQ (D0)(D00)(D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33)
+
+#define A_N BOOST_PP_SEQ_SIZE(A_SEQ)
+#define B_N BOOST_PP_SEQ_SIZE(B_SEQ)
+#define C_N BOOST_PP_SEQ_SIZE(C_SEQ)
+#define D_N BOOST_PP_SEQ_SIZE(D_SEQ)
 
 namespace flexiblesusy
 {
@@ -119,10 +125,10 @@ public:
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
-   virtual void A(std::array<std::complex<double>, 1>&, A_ARGS) = 0;
-   virtual void B(std::array<std::complex<double>, 2>&, B_ARGS) = 0;
-   virtual void C(std::array<std::complex<double>, 7>&, C_ARGS) = 0;
-   virtual void D(std::array<std::complex<double>, 11>&, D_ARGS) = 0;
+   virtual void A(std::array<std::complex<double>, A_N>&, A_ARGS) = 0;
+   virtual void B(std::array<std::complex<double>, B_N>&, B_ARGS) = 0;
+   virtual void C(std::array<std::complex<double>, C_N>&, C_ARGS) = 0;
+   virtual void D(std::array<std::complex<double>, D_N>&, D_ARGS) = 0;
    virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary

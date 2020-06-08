@@ -41,10 +41,10 @@ public:
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (D_ARGS), D_SEQ)
-   void A(std::array<std::complex<double>, 1>&, A_ARGS) noexcept override;
-   void B(std::array<std::complex<double>, 2>&, B_ARGS) noexcept override;
-   void C(std::array<std::complex<double>, 7>&, C_ARGS) noexcept override;
-   void D(std::array<std::complex<double>, 11>&, D_ARGS) noexcept override;
+   void A(std::array<std::complex<double>, A_N>&, A_ARGS) noexcept override;
+   void B(std::array<std::complex<double>, B_N>&, B_ARGS) noexcept override;
+   void C(std::array<std::complex<double>, C_N>&, C_ARGS) noexcept override;
+   void D(std::array<std::complex<double>, D_N>&, D_ARGS) noexcept override;
    ~Collier() noexcept override{};
 };
 } // namespace looplibrary
