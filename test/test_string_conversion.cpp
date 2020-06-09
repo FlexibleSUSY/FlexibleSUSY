@@ -35,7 +35,9 @@ void test_to_int()
    CHECK(to_int(std::to_string(std::numeric_limits<int>::min()).c_str()) == std::numeric_limits<int>::min());
    CHECK(to_int(std::to_string(std::numeric_limits<int>::max()).c_str()) == std::numeric_limits<int>::max());
 
-   CHECK_THROW(to_int(std::to_string(std::numeric_limits<long>::max()).c_str()));
+   if (sizeof(long) > sizeof(int)) {
+      CHECK_THROW(to_int(std::to_string(std::numeric_limits<long>::max()).c_str()));
+   }
    CHECK_THROW(to_int("a"));
    CHECK_THROW(to_int("1a"));
 }
