@@ -1461,8 +1461,10 @@ Module[
          {
             LoopTools`B0@@#2 -> "b"<>#1<>".at(0)",
             LoopTools`B1@@#2 -> "b"<>#1<>".at(1)",
+            LoopTools`B00@@#2 -> "b"<>#1<>".at(2)",
             LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>".at(0)",
-            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>".at(1)"
+            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>".at(1)",
+            LoopTools`B0i[LoopTools`bb00,Sequence@@#2] -> "b"<>#1<>".at(2)"
          }&,
 
       threePoint,
@@ -1508,9 +1510,9 @@ Module[
       _LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`E0i,_LoopTools`E0,
       _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
-   append[loopFunctions_List,function_,functionName_String,arrayName_String[arraySize_Integer]] := If[loopFunctions=!={},
+   append[loopFunctions_List,function_,functionName_String,arrayName_String] := If[loopFunctions=!={},
       AppendTo[loopArrayDefine,Array[
-         "std::array<std::complex<double>, "<>ToString@arraySize<>"> "<>arrayName<>ToString@#<>"{}"&,
+         "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
          Length@loopFunctions]
       ];
       AppendTo[loopArraySet,Array[
@@ -1541,10 +1543,10 @@ Module[
       Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]
    ];
 
-   append[onePoint,onePointTemplate,"A","a"[1]];
-   append[twoPoint,twoPointTemplate,"B","b"[2]];
-   append[threePoint,threePointTemplate,"C","c"[7]];
-   append[fourPoint,fourPointTemplate,"D","d"[11]];
+   append[onePoint,onePointTemplate,"A","a"];
+   append[twoPoint,twoPointTemplate,"B","b"];
+   append[threePoint,threePointTemplate,"C","c"];
+   append[fourPoint,fourPointTemplate,"D","d"];
 
    {
       Flatten@loopRules,

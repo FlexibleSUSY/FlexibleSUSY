@@ -19,7 +19,10 @@
 #ifndef LOOP_LIBRARY_INTERFACE_H
 #define LOOP_LIBRARY_INTERFACE_H
 
+#include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
+#include <boost/preprocessor/seq/size.hpp>
+#include <boost/preprocessor/seq/transform.hpp>
 #include <array>
 #include <complex>
 
@@ -38,15 +41,45 @@
 #define C_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , C_ARGS_SEQ) double scl2_in
 #define D_ARGS BOOST_PP_SEQ_FOR_EACH(ARGS_TYPE, , D_ARGS_SEQ) double scl2_in
 
-#define A_SEQ (A0)
-#define B_SEQ (B0)(B1)(B00)
-#define C_SEQ (C0)(C1)(C2)(C00)(C11)(C12)(C22)
-#define D_SEQ (D0)(D00)(D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33)
+#define A_CSEQ (0)
+#define B_CSEQ (0)(1)(00)
+#define C_CSEQ (0)(1)(2)(00)(11)(12)(22)
+#define D_CSEQ (0)(1)(2)(3)(00)(11)(12)(13)(22)(23)(33)
+
+#define A_N BOOST_PP_SEQ_SIZE(A_CSEQ)
+#define B_N BOOST_PP_SEQ_SIZE(B_CSEQ)
+#define C_N BOOST_PP_SEQ_SIZE(C_CSEQ)
+#define D_N BOOST_PP_SEQ_SIZE(D_CSEQ)
+
+#define APPEND(s, data, elem) data##elem
+#define A_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, A, A_CSEQ)
+#define B_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, B, B_CSEQ)
+#define C_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, C, C_CSEQ)
+#define D_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, D, D_CSEQ)
 
 namespace flexiblesusy
 {
 namespace looplibrary
 {
+
+using Acoeff_t = std::array<std::complex<double>, A_N>;
+using Bcoeff_t = std::array<std::complex<double>, B_N>;
+using Ccoeff_t = std::array<std::complex<double>, C_N>;
+using Dcoeff_t = std::array<std::complex<double>, D_N>;
+
+enum Acoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, a, A_CSEQ))
+};
+enum Bcoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, b, B_CSEQ))
+};
+enum Ccoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, c, C_CSEQ))
+};
+enum Dcoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, d, D_CSEQ))
+};
+
 /**
  * @class Loop_library_interface
  * @brief interface for different one loop function libraries with
@@ -119,10 +152,10 @@ public:
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
-   virtual void A(std::array<std::complex<double>, 1>&, A_ARGS) = 0;
-   virtual void B(std::array<std::complex<double>, 2>&, B_ARGS) = 0;
-   virtual void C(std::array<std::complex<double>, 7>&, C_ARGS) = 0;
-   virtual void D(std::array<std::complex<double>, 11>&, D_ARGS) = 0;
+   virtual void A(Acoeff_t&, A_ARGS) = 0;
+   virtual void B(Bcoeff_t&, B_ARGS) = 0;
+   virtual void C(Ccoeff_t&, C_ARGS) = 0;
+   virtual void D(Dcoeff_t&, D_ARGS) = 0;
    virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary
