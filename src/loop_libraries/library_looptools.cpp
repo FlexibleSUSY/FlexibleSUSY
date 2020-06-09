@@ -54,9 +54,9 @@
    }
 
 #define LT_ALL(PAIR)                                                           \
-   void Looptools::LIB(PAIR)(                                                  \
-      std::array<std::complex<double>, CAT(LIB(PAIR), _N)> & arr,              \
-      CAT(LIB(PAIR), _ARGS)) noexcept                                          \
+   void Looptools::LIB(PAIR)(Loop_library_interface::CAT(LIB(PAIR), coeff_t) & \
+                                arr,                                           \
+                             CAT(LIB(PAIR), _ARGS)) noexcept                   \
    {                                                                           \
       const int coeffs[] = {BOOST_PP_SEQ_ENUM(                                 \
          BOOST_PP_SEQ_TRANSFORM(APPEND, LT(PAIR), CAT(LIB(PAIR), _CSEQ)))};    \

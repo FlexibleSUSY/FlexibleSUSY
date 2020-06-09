@@ -111,7 +111,7 @@ std::complex<double> Softsusy::D00(D_ARGS) noexcept
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (D_ARGS),
                       (D1)(D11)(D12)(D13)(D2)(D22)(D23)(D3)(D33))
 
-void Softsusy::A(std::array<std::complex<double>, A_N>& a, A_ARGS) noexcept
+void Softsusy::A(Loop_library_interface::Acoeff_t& a, A_ARGS) noexcept
 {
    double m = std::sqrt(m02_in.real());
    double q = std::sqrt(scl2_in);
@@ -119,7 +119,7 @@ void Softsusy::A(std::array<std::complex<double>, A_N>& a, A_ARGS) noexcept
    a.at(0) = {softsusy::a0(m, q), 0.0};
 }
 
-void Softsusy::B(std::array<std::complex<double>, B_N>& b, B_ARGS) noexcept
+void Softsusy::B(Loop_library_interface::Bcoeff_t& b, B_ARGS) noexcept
 {
    double p = std::sqrt(p10_in.real());
    double m1 = std::sqrt(m02_in.real());
@@ -131,7 +131,7 @@ void Softsusy::B(std::array<std::complex<double>, B_N>& b, B_ARGS) noexcept
    b.at(2) = {softsusy::b22(p, m1, m2, q), 0.0};
 }
 
-void Softsusy::C(std::array<std::complex<double>, C_N>& c, C_ARGS) noexcept
+void Softsusy::C(Loop_library_interface::Ccoeff_t& c, C_ARGS) noexcept
 {
    double m1 = std::sqrt(m02_in.real());
    double m2 = std::sqrt(m12_in.real());
@@ -148,7 +148,7 @@ void Softsusy::C(std::array<std::complex<double>, C_N>& c, C_ARGS) noexcept
    c.at(6) = undefined;
 }
 
-void Softsusy::D(std::array<std::complex<double>, D_N>& d, D_ARGS) noexcept
+void Softsusy::D(Loop_library_interface::Dcoeff_t& d, D_ARGS) noexcept
 {
    double m1 = std::sqrt(m02_in.real());
    double m2 = std::sqrt(m12_in.real());
