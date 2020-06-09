@@ -19,6 +19,7 @@
 #ifndef LOOP_LIBRARY_INTERFACE_H
 #define LOOP_LIBRARY_INTERFACE_H
 
+#include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/seq/size.hpp>
 #include <boost/preprocessor/seq/transform.hpp>
@@ -50,7 +51,7 @@
 #define C_N BOOST_PP_SEQ_SIZE(C_CSEQ)
 #define D_N BOOST_PP_SEQ_SIZE(D_CSEQ)
 
-#define APPEND(s, data, elem) data ## elem
+#define APPEND(s, data, elem) data##elem
 #define A_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, A, A_CSEQ)
 #define B_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, B, B_CSEQ)
 #define C_SEQ BOOST_PP_SEQ_TRANSFORM(APPEND, C, C_CSEQ)
@@ -60,6 +61,25 @@ namespace flexiblesusy
 {
 namespace looplibrary
 {
+
+using Acoeff_t = std::array<std::complex<double>, A_N>;
+using Bcoeff_t = std::array<std::complex<double>, B_N>;
+using Ccoeff_t = std::array<std::complex<double>, C_N>;
+using Dcoeff_t = std::array<std::complex<double>, D_N>;
+
+enum Acoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, a, A_CSEQ))
+};
+enum Bcoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, b, B_CSEQ))
+};
+enum Ccoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, c, C_CSEQ))
+};
+enum Dcoeffs : int {
+   BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(APPEND, d, D_CSEQ))
+};
+
 /**
  * @class Loop_library_interface
  * @brief interface for different one loop function libraries with
@@ -128,10 +148,6 @@ namespace looplibrary
 class Loop_library_interface
 {
 public:
-   using Acoeff_t = std::array<std::complex<double>, A_N>;
-   using Bcoeff_t = std::array<std::complex<double>, B_N>;
-   using Ccoeff_t = std::array<std::complex<double>, C_N>;
-   using Dcoeff_t = std::array<std::complex<double>, D_N>;
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (A_ARGS), A_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)

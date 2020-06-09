@@ -1512,7 +1512,7 @@ Module[
       _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
    append[loopFunctions_List,function_,functionName_String,arrayName_String] := If[loopFunctions=!={},
       AppendTo[loopArrayDefine,Array[
-         "looplibrary::Loop_library_interface::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
+         "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
          Length@loopFunctions]
       ];
       AppendTo[loopArraySet,Array[

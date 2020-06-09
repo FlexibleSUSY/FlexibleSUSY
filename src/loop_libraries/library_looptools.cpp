@@ -20,7 +20,6 @@
 #include "clooptools.h"
 #include "fortran_utils.hpp"
 #include <boost/preprocessor/seq/elem.hpp>
-#include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <limits>
 
