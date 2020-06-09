@@ -1746,7 +1746,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             body = "", vertices = {}},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
-           WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];
+           (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
@@ -1791,7 +1791,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            body = body <> "return " <> returnVar <> ";\n";
 
-           Print[" Done."];
+           (*Print[" Done."];*)
            vertices = Flatten[vertices, 1];
 
            {vertices,
@@ -1991,26 +1991,27 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
           ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
-    Module[{specializations, vertices = {}, listing = {}},
+    Module[{specializations, vertices = {}, listing = {},
+            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
            Print[""];
            FSFancyLine[];
-           (* @todo: can this be a ParallelMap? *)
-           (*SetSharedVariable[listing];
-           CloseKernels[]
-           LaunchKernels[2];*)
+           Print["Creating a C++ code for decay amplitudes..."];
+           ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
            specializations =
-              Map[
+              AbsoluteTiming@ParallelMap[
                  (
-                    If[!MemberQ[listing, GetInitialState[#]],
+                    (*If[!MemberQ[listing, GetInitialState[#]],
                        Print[""];
                        Print["Creating C++ code for ", GetInitialState[#], " decays..."];
                        AppendTo[listing, GetInitialState[#]];
-                    ];
+                    ];*)
                     CreateTotalAmplitudeSpecialization[#, modelName]
                  )&,
-                 Flatten[Last @@@ particleDecays, 1](*,
-                 DistributedContexts -> All*)
+                 Flatten[Last @@@ particleDecays, 1],
+                 DistributedContexts -> All, Method -> "FinestGrained"
               ];
+           Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
+           specializations = Last@specializations;
            vertices = Flatten[First@Transpose[specializations], 1];
            specializations = Transpose[Drop[Transpose[specializations], 1]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];

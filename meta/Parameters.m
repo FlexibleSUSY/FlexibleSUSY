@@ -711,7 +711,7 @@ IsPhase[parameter_] := MemberQ[Phases`GetArg /@ allPhases, Phases`GetArg[paramet
 IsModelParameter[parameter_] := MemberQ[allModelParameters, parameter];
 IsModelParameter[Re[parameter_]] := IsModelParameter[parameter];
 IsModelParameter[Im[parameter_]] := IsModelParameter[parameter];
-IsModelParameter[FlexibleSUSY`Temporary[parameter_]] := IsModelParameter[parameter];
+IsModelParameter[FlexibleSUSY`FSTemporary[parameter_]] := IsModelParameter[parameter];
 
 IsModelParameter[parameter_[indices__] /; And @@ (IsIndex /@ {indices})] :=
     IsModelParameter[parameter];

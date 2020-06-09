@@ -169,7 +169,7 @@ FSRestrictParameter; (* restrict parameter to interval *)
 FSInitialSetting;    (* set parameter before calculating masses *)
 FSSolveEWSBFor;
 FSSolveEWSBTreeLevelFor = {};
-Temporary;
+FSTemporary;
 MZ;
 MT;
 MZDRbar;
@@ -2009,7 +2009,14 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
            (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
-           decaysLists = {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}& /@ decayParticles;
+           decaysLists =
+              AbsoluteTiming@Map[
+                 {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
+                 decayParticles
+              ];
+           Print[""];
+           Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
+           decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
            decaysVertices2 = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
