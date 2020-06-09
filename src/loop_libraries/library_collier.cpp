@@ -132,7 +132,7 @@ BOOST_PP_SEQ_FOR_EACH(COLLIER_B, (B_ARGS), B_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_C, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_D, (D_ARGS), D_SEQ)
 
-void Collier::A(Loop_library_interface::Acoeff_t& a, A_ARGS) noexcept
+void Collier::A(Acoeff_t& a, A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
 
@@ -140,7 +140,7 @@ void Collier::A(Loop_library_interface::Acoeff_t& a, A_ARGS) noexcept
    get_A_impl(a.data(), &m02);
 }
 
-void Collier::B(Loop_library_interface::Bcoeff_t& b, B_ARGS) noexcept
+void Collier::B(Bcoeff_t& b, B_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
@@ -150,7 +150,7 @@ void Collier::B(Loop_library_interface::Bcoeff_t& b, B_ARGS) noexcept
    get_B_impl(b.data(), &p10, &m02, &m12);
 }
 
-void Collier::C(Loop_library_interface::Ccoeff_t& c, C_ARGS) noexcept
+void Collier::C(Ccoeff_t& c, C_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> p21(p21_in.real(), 0.);
@@ -163,7 +163,7 @@ void Collier::C(Loop_library_interface::Ccoeff_t& c, C_ARGS) noexcept
    get_C_impl(c.data(), &p10, &p21, &p20, &m02, &m12, &m22);
 }
 
-void Collier::D(Loop_library_interface::Dcoeff_t& d, D_ARGS) noexcept
+void Collier::D(Dcoeff_t& d, D_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> p21(p21_in.real(), 0.);

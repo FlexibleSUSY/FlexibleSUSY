@@ -40,10 +40,10 @@ public:
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(REDEFINE, (D_ARGS), D_SEQ)
-   void A(Loop_library_interface::Acoeff_t&, A_ARGS) noexcept override;
-   void B(Loop_library_interface::Bcoeff_t&, B_ARGS) noexcept override;
-   void C(Loop_library_interface::Ccoeff_t&, C_ARGS) noexcept override;
-   void D(Loop_library_interface::Dcoeff_t&, D_ARGS) noexcept override;
+   void A(Acoeff_t&, A_ARGS) noexcept override;
+   void B(Bcoeff_t&, B_ARGS) noexcept override;
+   void C(Ccoeff_t&, C_ARGS) noexcept override;
+   void D(Dcoeff_t&, D_ARGS) noexcept override;
    ~Looptools() noexcept override {};
 };
 } // namespace looplibrary

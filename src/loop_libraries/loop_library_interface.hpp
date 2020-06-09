@@ -136,10 +136,10 @@ public:
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (B_ARGS), B_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (C_ARGS), C_SEQ)
    BOOST_PP_SEQ_FOR_EACH(VIRTUAL, (D_ARGS), D_SEQ)
-   virtual void A(Loop_library_interface::Acoeff_t&, A_ARGS) = 0;
-   virtual void B(Loop_library_interface::Bcoeff_t&, B_ARGS) = 0;
-   virtual void C(Loop_library_interface::Ccoeff_t&, C_ARGS) = 0;
-   virtual void D(Loop_library_interface::Dcoeff_t&, D_ARGS) = 0;
+   virtual void A(Acoeff_t&, A_ARGS) = 0;
+   virtual void B(Bcoeff_t&, B_ARGS) = 0;
+   virtual void C(Ccoeff_t&, C_ARGS) = 0;
+   virtual void D(Dcoeff_t&, D_ARGS) = 0;
    virtual ~Loop_library_interface() {}
 };
 } // namespace looplibrary

@@ -54,7 +54,7 @@
    }
 
 #define LT_ALL(PAIR)                                                           \
-   void Looptools::LIB(PAIR)(Loop_library_interface::CAT(LIB(PAIR), coeff_t) & \
+   void Looptools::LIB(PAIR)(CAT(LIB(PAIR), coeff_t) & \
                                 arr,                                           \
                              CAT(LIB(PAIR), _ARGS)) noexcept                   \
    {                                                                           \

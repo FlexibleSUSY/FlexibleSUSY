@@ -86,24 +86,24 @@ std::complex<double> Fflite::B00(B_ARGS) noexcept
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (D_ARGS), D_SEQ)
 
-void Fflite::A(Loop_library_interface::Acoeff_t& a, A_ARGS) noexcept
+void Fflite::A(Acoeff_t& a, A_ARGS) noexcept
 {
    a.at(0) = A0(m02_in, scl2_in);
 }
 
-void Fflite::B(Loop_library_interface::Bcoeff_t& b, B_ARGS) noexcept
+void Fflite::B(Bcoeff_t& b, B_ARGS) noexcept
 {
    b.at(0) = B0(p10_in, m02_in, m12_in, scl2_in);
    b.at(1) = B1(p10_in, m02_in, m12_in, scl2_in);
    b.at(2) = B00(p10_in, m02_in, m12_in, scl2_in);
 }
 
-void Fflite::C(Loop_library_interface::Ccoeff_t& c, C_ARGS) noexcept
+void Fflite::C(Ccoeff_t& c, C_ARGS) noexcept
 {
    BOOST_PP_REPEAT(C_N, SET_TO_NAN, c)
 }
 
-void Fflite::D(Loop_library_interface::Dcoeff_t& d, D_ARGS) noexcept
+void Fflite::D(Dcoeff_t& d, D_ARGS) noexcept
 {
    BOOST_PP_REPEAT(D_N, SET_TO_NAN, d)
 }
