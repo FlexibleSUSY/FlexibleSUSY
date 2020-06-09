@@ -44,10 +44,11 @@ define ~ SetAttributes ~ {Protected, Locked};
 nameMassQ = True;
 
 define /@ {
-   DynamicTermSuperpotentialNr, DynamicFTermNr, DynamicDTermsNr,
+   DynamicTermSuperpotentialNr, DynamicFTermNr, DynamicDTermsNr, DynamicOneLoopNameMM,
    DynamicMatterNr, DynamicDGnr, DynamicKineticScalarNr, DynamicKineticFermionNr,
    DynamicGauginoMatter, DynamicGauginoVector, DynamicVectorNr, DynamicGaugeTNr,
    DynamicOneLoopNrMM, DynamicOneLoopTadName, DynamicOneLoopTadNr, DynamicOneLoopNrNM,
+   DynamicOneLoopNameNM,
    DynamicCheckModelFiles :> "done", DynamicInitGaugeG :> "done", DynamicInitFields :> "done",
    DynamicInitMisc :> "done", DynamicCheckAnomalies :> "done", DynamicCheckingCCSup :> "done",
    DynamicSoftTermsCurrent :> "done", DynamicSpectrumFileInput :> "done",
