@@ -64,6 +64,7 @@ public:
    template <typename F>
    Minimizer(F&&, std::size_t, double, Solver_type solver_type_ = GSLSimplex2);
    virtual ~Minimizer() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    double get_minimum_value() const { return minimum_value; }
    template <typename F>
