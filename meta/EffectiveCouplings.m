@@ -183,7 +183,7 @@ CalculatePartialWidths[couplings_List] :=
                   functionName = functionName <> "int gO1) const";
                  ];
                couplingName = "eff_Cp" <> particlesStr;
-               massStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[particle]];
+               massStr = CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[particle]];
                body = "const double mass = PHYSICAL(" <> massStr <> ")";
                If[dim != 1,
                   body = body <> "(gO1)";
@@ -409,7 +409,7 @@ CallEffectiveCouplingCalculation[couplingSymbol_] :=
     Module[{particle, vectorBoson, savedMass, dim, start, idx = "",
             body, couplingName, call = ""},
            {particle, vectorBoson} = GetExternalStates[couplingSymbol];
-           savedMass = CConversion`RValueToCFormString[FlexibleSUSY`M[particle]];
+           savedMass = CConversion`RValueToCFormString[FlexibleSUSY`FSM[particle]];
            dim = TreeMasses`GetDimension[particle];
            start = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
            If[dim != 1 && start <= dim,
@@ -446,7 +446,7 @@ CreateEffectiveCouplingsCalculation[couplings_List] :=
               ];
            For[i = 1, i <= Length[couplingsForParticles], i++,
                particle = couplingsForParticles[[i,1]];
-               mass = CConversion`ToValidCSymbolString[FlexibleSUSY`M[particle]];
+               mass = CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[particle]];
                savedMass = "const auto " <> mass <> " = PHYSICAL(" <> mass <> ");\n";
                dim = TreeMasses`GetDimension[particle];
                start = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
@@ -545,8 +545,8 @@ CreateLocalConstRefsIgnoringMixings[expr_, mixings_List] :=
     Module[{symbols, poleMasses},
            symbols = Parameters`FindAllParameters[expr];
            poleMasses = {
-               Cases[expr, FlexibleSUSY`Pole[FlexibleSUSY`M[a_]]     /; MemberQ[Parameters`GetOutputParameters[],FlexibleSUSY`M[a]] :> FlexibleSUSY`M[a], {0,Infinity}],
-               Cases[expr, FlexibleSUSY`Pole[FlexibleSUSY`M[a_[__]]] /; MemberQ[Parameters`GetOutputParameters[],FlexibleSUSY`M[a]] :> FlexibleSUSY`M[a], {0,Infinity}]
+               Cases[expr, FlexibleSUSY`Pole[FlexibleSUSY`FSM[a_]]     /; MemberQ[Parameters`GetOutputParameters[],FlexibleSUSY`FSM[a]] :> FlexibleSUSY`FSM[a], {0,Infinity}],
+               Cases[expr, FlexibleSUSY`Pole[FlexibleSUSY`FSM[a_[__]]] /; MemberQ[Parameters`GetOutputParameters[],FlexibleSUSY`FSM[a]] :> FlexibleSUSY`FSM[a], {0,Infinity}]
                         };
            symbols = DeleteDuplicates[Flatten[symbols]];
            symbols = Complement[symbols, mixings];
@@ -615,7 +615,7 @@ CreateCouplingContribution[particle_, vectorBoson_, coupling_] :=
                                   p_ /; p === particle, 1];
            internal = First[internal /. {SARAH`bar[p_] :> p, Susyno`LieGroups`conj[p_] :> p}];
            dim = TreeMasses`GetDimension[internal];
-           mass = FlexibleSUSY`M[internal];
+           mass = FlexibleSUSY`FSM[internal];
            massStr = CConversion`ToValidCSymbolString[mass];
            If[dim != 1,
               massStr = massStr <> "(gI1)";
@@ -699,7 +699,7 @@ CreateEffectiveCouplingFunction[coupling_] :=
                  result = result <> "int gO1)\n{\n";
                 ];
 
-              mass = CConversion`ToValidCSymbolString[FlexibleSUSY`M[particle]];
+              mass = CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[particle]];
               savedMass = "const auto decay_mass = PHYSICAL(" <> mass <> ")";
               If[dim == 1,
                  savedMass = savedMass <> ";\n";,

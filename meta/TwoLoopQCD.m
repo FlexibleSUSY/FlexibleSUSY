@@ -71,7 +71,7 @@ GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === TreeMasses`GetSMTop
            CF = SA`Casimir[quark, colorPosition];
            CA = SA`Casimir[SARAH`VectorG, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
-           mf = FlexibleSUSY`M[quark];
+           mf = FlexibleSUSY`FSM[quark];
            log = Log[(mf / renScale)^2];
            result = CF (alphaStrong / (4 Pi))^2 (
                -43 - 12 Zeta[2] + 26 log - 6 log^2
@@ -88,8 +88,8 @@ GetDeltaMPoleOverMRunningQCDTwoLoopDRbar[quark_ /; quark === TreeMasses`GetSMBot
            CF = SA`Casimir[quark, colorPosition];
            CA = SA`Casimir[SARAH`VectorG, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
-           mf = FlexibleSUSY`M[quark];
-           mt = FlexibleSUSY`M[TreeMasses`GetSMTopQuarkMultiplet[]];
+           mf = FlexibleSUSY`FSM[quark];
+           mt = FlexibleSUSY`FSM[TreeMasses`GetSMTopQuarkMultiplet[]];
            log = Log[(mf / renScale)^2];
            logMt = Log[(mf / mt)^2];
            result = CF (alphaStrong / (4 Pi))^2 (
@@ -111,7 +111,7 @@ GetDeltaMPoleOverMRunningQCDTwoLoopMSbar[quark_, renScale_] :=
            CF = SA`Casimir[quark, colorPosition];
            CA = SA`Casimir[SARAH`VectorG, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
-           mf = FlexibleSUSY`M[quark];
+           mf = FlexibleSUSY`FSM[quark];
            log = Log[(renScale / mf)^2];
            I31 = 3/2 Zeta[3] - 6 Zeta[2] Log[2];
            result = (alphaStrong / (4 Pi))^2 (
@@ -137,7 +137,7 @@ GetDeltaMPoleOverMRunningQCDOneLoopDRbar[quark_, renScale_] :=
            colorPosition = Position[SARAH`Gauge, SARAH`color][[1,1]];
            CF = SA`Casimir[quark, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
-           mf = FlexibleSUSY`M[quark];
+           mf = FlexibleSUSY`FSM[quark];
            result = CF alphaStrong / (4 Pi) (5 - 3 Log[(mf / renScale)^2]);
            result
           ];
@@ -147,7 +147,7 @@ GetDeltaMPoleOverMRunningQCDOneLoopMSbar[quark_, renScale_] :=
            colorPosition = Position[SARAH`Gauge, SARAH`color][[1,1]];
            CF = SA`Casimir[quark, colorPosition];
            alphaStrong = SARAH`strongCoupling^2 / (4 Pi);
-           mf = FlexibleSUSY`M[quark];
+           mf = FlexibleSUSY`FSM[quark];
            result = CF alphaStrong / (4 Pi) (4 - 3 Log[(mf / renScale)^2]);
            result
           ];

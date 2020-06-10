@@ -93,8 +93,8 @@ CalculateCoupling[{coupling_, name_, group_}, scheme_] :=
                If[!NumericQ[prefactor], prefactor = 0];
                (* sum over generations *)
                If[GetDimension[particle] == 1,
-                  result -= prefactor Global`FiniteLog[Abs[FlexibleSUSY`M[particle]/Global`currentScale]];,
-                  result -= Sum[prefactor Global`FiniteLog[Abs[FlexibleSUSY`M[particle][i-1]/Global`currentScale]],
+                  result -= prefactor Global`FiniteLog[Abs[FlexibleSUSY`FSM[particle]/Global`currentScale]];,
+                  result -= Sum[prefactor Global`FiniteLog[Abs[FlexibleSUSY`FSM[particle][i-1]/Global`currentScale]],
                                 {i,TreeMasses`GetDimensionStartSkippingSMGoldstones[particle],GetDimension[particle]}];
                  ];
               ];
@@ -194,7 +194,7 @@ pars.yt   = model->get_" <> CConversion`RValueToCFormString[Parameters`GetThirdG
 pars.yb   = model->get_" <> CConversion`RValueToCFormString[Parameters`GetThirdGeneration[SARAH`DownYukawa]] <> ";
 pars.mt   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMTopQuarkMultiplet[],True,True]] <> ";
 pars.mb   = model->get_" <> CConversion`RValueToCFormString[TreeMasses`GetThirdGenerationMass[TreeMasses`GetSMBottomQuarkMultiplet[],True,True]] <> ";
-pars.mg   = model->get_" <> CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]] <> "();
+pars.mg   = model->get_" <> CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]] <> "();
 pars.mst1 = mst_1;
 pars.mst2 = mst_2;
 pars.msb1 = msb_1;
@@ -203,13 +203,13 @@ pars.msd1 = msd_1;
 pars.msd2 = msd_2;
 pars.xt   = Sin(2*theta_t) * (Sqr(mst_1) - Sqr(mst_2)) / (2. * pars.mt);
 pars.xb   = Sin(2*theta_b) * (Sqr(msb_1) - Sqr(msb_2)) / (2. * pars.mb);
-pars.mw   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`VectorW]] <> "();
-pars.mz   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`VectorZ]] <> "();
-pars.mh   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`HiggsBoson]] <>"(0);
-pars.mH   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`HiggsBoson]] <> "(1);
-pars.mC   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`ChargedHiggs]] <>
+pars.mw   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`VectorW]] <> "();
+pars.mz   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`VectorZ]] <> "();
+pars.mh   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`HiggsBoson]] <>"(0);
+pars.mH   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`HiggsBoson]] <> "(1);
+pars.mC   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`ChargedHiggs]] <>
    "(" <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`ChargedHiggs]-1] <> ");
-pars.mA   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`M[SARAH`PseudoScalar]] <>
+pars.mA   = model->get_" <> CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[SARAH`PseudoScalar]] <>
    "(" <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar]-1] <> ");
 pars.mu   = " <> CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]] <> ";
 pars.tb   = model->get_" <> CConversion`RValueToCFormString[SARAH`VEVSM2] <>
@@ -463,8 +463,8 @@ GetParameter[par_[idx1_,idx2_], factor_:1] :=
     CConversion`RValueToCFormString[idx2] <> ")" <>
     MultiplyBy[factor];
 
-GetParameter[FlexibleSUSY`M[par_], factor_:1] :=
-    "MODEL->get_" <> CConversion`RValueToCFormString[FlexibleSUSY`M[par]] <> "()" <>
+GetParameter[FlexibleSUSY`FSM[par_], factor_:1] :=
+    "MODEL->get_" <> CConversion`RValueToCFormString[FlexibleSUSY`FSM[par]] <> "()" <>
     MultiplyBy[factor];
 
 GetParameter[par_[idx_], factor_:1] :=

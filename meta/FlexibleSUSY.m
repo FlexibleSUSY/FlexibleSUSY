@@ -277,7 +277,7 @@ FSMaximumExpressionSize = 100;
    Example:
 
    FSConvergenceCheck = {
-      M[hh], g3, Yu, Yd[3,3], Ye, B[\[Mu]]
+      FSM[hh], g3, Yu, Yd[3,3], Ye, B[\[Mu]]
    };
 *)
 FSConvergenceCheck = Automatic;
@@ -359,8 +359,8 @@ FSHimalayaInput = {
     Ye -> SARAH`ElectronYukawa,
     M1 -> 0,
     M2 -> 0,
-    M3 -> FlexibleSUSY`M[SARAH`Gluino],
-    mA -> FlexibleSUSY`M[SARAH`PseudoScalar]
+    M3 -> FlexibleSUSY`FSM[SARAH`Gluino],
+    mA -> FlexibleSUSY`FSM[SARAH`PseudoScalar]
 };
 
 FSDebugOutput = False;
@@ -654,7 +654,7 @@ CheckModelFileSettings[] :=
              ];
            CheckEWSBSolvers[FlexibleSUSY`FSEWSBSolvers];
            CheckBVPSolvers[FlexibleSUSY`FSBVPSolvers];
-           ReplaceSymbolsInUserInput[{Susyno`LieGroups`M -> FlexibleSUSY`M}];
+           ReplaceSymbolsInUserInput[{Susyno`LieGroups`M -> FlexibleSUSY`FSM}];
           ];
 
 CheckExtraParametersUsage[parameters_List, boundaryConditions_List] :=
@@ -1736,8 +1736,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
            callAllLoopMassFunctions     = LoopMasses`CallAllPoleMassFunctions[FlexibleSUSY`FSEigenstates, enablePoleMassThreads];
            enablePoleMassThreads = True;
            callAllLoopMassFunctionsInThreads = LoopMasses`CallAllPoleMassFunctions[FlexibleSUSY`FSEigenstates, enablePoleMassThreads];
-           masses                       = Flatten[(FlexibleSUSY`M[TreeMasses`GetMassEigenstate[#]]& /@ massMatrices) /.
-                                                  FlexibleSUSY`M[p_List] :> (FlexibleSUSY`M /@ p)];
+           masses                       = Flatten[(FlexibleSUSY`FSM[TreeMasses`GetMassEigenstate[#]]& /@ massMatrices) /.
+                                                  FlexibleSUSY`FSM[p_List] :> (FlexibleSUSY`FSM /@ p)];
            {lspGetters, lspFunctions}   = LoopMasses`CreateLSPFunctions[FlexibleSUSY`PotentialLSPParticles];
            printMasses                  = WriteOut`PrintParameters[masses, "ostr"];
            getMixings                   = TreeMasses`CreateMixingArrayGetter[massMatrices];
@@ -2504,7 +2504,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
            setInputParameters = FSMathLink`SetInputParametersFromArguments[inputPars];
            setInputParameterDefaultArguments = FSMathLink`SetInputParameterDefaultArguments[inputPars];
            setInputParameterArguments = FSMathLink`SetInputParameterArguments[inputPars];
-           outPars = Parameters`GetOutputParameters[] /. FlexibleSUSY`M[p_List] :> Sequence @@ (FlexibleSUSY`M /@ p);
+           outPars = Parameters`GetOutputParameters[] /. FlexibleSUSY`FSM[p_List] :> Sequence @@ (FlexibleSUSY`FSM /@ p);
            outPars = Join[outPars, FlexibleSUSY`Pole /@ outPars, Parameters`GetModelParameters[],
                           Parameters`GetExtraParameters[], {FlexibleSUSY`SCALE}];
            numberOfSpectrumEntries = FSMathLink`GetNumberOfSpectrumEntries[outPars];
@@ -3704,7 +3704,7 @@ SetupMassMatrices[allParameters_] :=
 
 SetupOutputParameters[massMatrices_] :=
 		Module[{allParticles, allOutputParameters},
-           allParticles = FlexibleSUSY`M[TreeMasses`GetMassEigenstate[#]]& /@ massMatrices;
+           allParticles = FlexibleSUSY`FSM[TreeMasses`GetMassEigenstate[#]]& /@ massMatrices;
            allOutputParameters = DeleteCases[DeleteDuplicates[
                Join[allParticles,
                     Flatten[TreeMasses`GetMixingMatrixSymbol[#]& /@ massMatrices]]], Null];

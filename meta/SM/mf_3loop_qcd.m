@@ -10,7 +10,7 @@ Get["meta/ThreeLoopQCD.m"];
 
 MfOvermf = Collect[
    GetMTopPoleOverMTopMSbar[{1,h^1,h^2,h^3}, TopQuark, Q, NH, NL] //. {
-      FlexibleSUSY`M[Fu] -> mf,
+      FlexibleSUSY`FSM[Fu] -> mf,
       h -> (4Pi)^2 k,
       Log[mf^2/Q^2] -> L,
       Log[Q^2/mf^2] -> -L
@@ -20,7 +20,7 @@ MfOvermf = Collect[
 
 mfOverMf = Collect[
    GetMTopMSbarOverMTopPole[{1,h^1,h^2,h^3}, TopQuark, Q, NH, NL] //. {
-      FlexibleSUSY`M[Fu] -> mf,
+      FlexibleSUSY`FSM[Fu] -> mf,
       h -> (4Pi)^2 k,
       Log[mf^2/Q^2] -> L,
       Log[Q^2/mf^2] -> -L

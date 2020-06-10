@@ -26,7 +26,7 @@ CreateCompareFunction::usage="";
 
 Begin["`Private`"];
 
-CountNumberOfParameters[FlexibleSUSY`M[particle_]] :=
+CountNumberOfParameters[FlexibleSUSY`FSM[particle_]] :=
     TreeMasses`GetDimension[particle];
 
 CountNumberOfParameters[parameters_List] :=
@@ -46,10 +46,10 @@ IndexMapping[d_List, i_List] :=
     IndexMapping[Take[d,Length[d]-1], Take[i,Length[i]-1]] <>
     " + " <> ToString[Times @@ Take[d,Length[d]-1]] <> "*" <> Last[i];
 
-CalcDifference[FlexibleSUSY`M[particle_], offset_Integer, diff_String] :=
+CalcDifference[FlexibleSUSY`FSM[particle_], offset_Integer, diff_String] :=
     Module[{result, body, dim, dimStart, esStr},
            dim = TreeMasses`GetDimension[particle];
-           esStr = ToValidCSymbolString[FlexibleSUSY`M[particle]];
+           esStr = ToValidCSymbolString[FlexibleSUSY`FSM[particle]];
            If[dim == 1,
               result = diff <> "[" <> ToString[offset] <> "] = " <>
                        "MaxRelDiff(OLD(" <> esStr <> "),NEW(" <> esStr <> "));\n";
@@ -125,7 +125,7 @@ CreateCompareFunction[crit_ /; crit === Automatic] :=
               particles = TreeMasses`GetParticles[];
              ];
            particles = Select[particles, (!TreeMasses`IsMassless[#] && !IsGhost[#] && !IsGoldstone[#])&];
-           particles = FlexibleSUSY`M /@ particles;
+           particles = FlexibleSUSY`FSM /@ particles;
            CreateCompareFunction[particles]
           ];
 

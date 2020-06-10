@@ -259,7 +259,7 @@ ConvertSarahTadpoles[tadpoles_List] :=
     Module[{result},
            result = (SelfEnergies`Tadpole @@@ tadpoles) /. CreateMassEigenstateReplacements[];
            result = AppendFieldIndices[result, SARAH`gO1];
-           result /. SARAH`Mass -> FlexibleSUSY`M
+           result /. SARAH`Mass -> FlexibleSUSY`FSM
           ];
 
 ConvertSarahSelfEnergies[selfEnergies_List] :=
@@ -299,7 +299,7 @@ ConvertSarahSelfEnergies[selfEnergies_List] :=
                                                    SARAH`VectorG
                                                   ]
                                                ]& /@ heavySE];
-           result /. SARAH`Mass -> FlexibleSUSY`M
+           result /. SARAH`Mass -> FlexibleSUSY`FSM
           ];
 
 GetParticleIndicesInCoupling[Cp[a__]] := Flatten[Cases[{a}, List[__], Infinity]];
@@ -682,7 +682,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "MSSM"] :=
            vev2Str = CConversion`RValueToCFormString[SARAH`VEVSM1^2 + SARAH`VEVSM2^2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
@@ -768,7 +768,7 @@ GetTwoLoopTadpoleCorrections[model_String /; model === "NMSSM"] :=
            vev2Str = CConversion`RValueToCFormString[SARAH`VEVSM1^2 + SARAH`VEVSM2^2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            svevStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
@@ -1029,7 +1029,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
@@ -1115,7 +1115,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
 "\
 using namespace flexiblesusy::mssm_twoloophiggs;
@@ -1202,7 +1202,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
@@ -1300,7 +1300,7 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`PseudoScalar,
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            tanbStr = CConversion`RValueToCFormString[SARAH`VEVSM2 / SARAH`VEVSM1];
            muStr   = CConversion`RValueToCFormString[-Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = CConversion`RValueToCFormString[Parameters`GetEffectiveMASqr[]];
            vsStr   = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-VEV"]];
            lambdaStr = CConversion`RValueToCFormString[Parameters`GetParameterFromDescription["Singlet-Higgs-Interaction"]];
@@ -1396,13 +1396,13 @@ GetNLoopSelfEnergyCorrections[particle_ /; particle === SARAH`HiggsBoson,
            vdStr   = CConversion`RValueToCFormString[SARAH`VEVSM1];
            vuStr   = CConversion`RValueToCFormString[SARAH`VEVSM2];
            muStr   = CConversion`RValueToCFormString[Parameters`GetEffectiveMu[]];
-           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`Gluino]];
+           m3Str   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`Gluino]];
            mA0Str  = TreeMasses`CallPseudoscalarHiggsMassGetterFunction[] <> "(0)";
            AtStr   = CConversion`RValueToCFormString[SARAH`TrilinearUp[2,2] / SARAH`UpYukawa[2,2]];
            AbStr   = CConversion`RValueToCFormString[SARAH`TrilinearDown[2,2] / SARAH`DownYukawa[2,2]];
            AeStr   = CConversion`RValueToCFormString[SARAH`TrilinearLepton[2,2] / SARAH`ElectronYukawa[2,2]];
-           mWStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorW]];
-           mZStr   = CConversion`RValueToCFormString[FlexibleSUSY`M[SARAH`VectorZ]];
+           mWStr   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`VectorW]];
+           mZStr   = CConversion`RValueToCFormString[FlexibleSUSY`FSM[SARAH`VectorZ]];
            mq2Str  = CConversion`RValueToCFormString[SARAH`SoftSquark];
            mu2Str  = CConversion`RValueToCFormString[SARAH`SoftUp];
            md2Str  = CConversion`RValueToCFormString[SARAH`SoftDown];

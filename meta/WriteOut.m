@@ -204,7 +204,7 @@ WriteSLHAMass[massMatrix_TreeMasses`FSMassMatrix] :=
               pdg = Abs[pdgList[[1]]];
               If[pdg != 0,
                  eigenstateNameStr = CConversion`RValueToCFormString[eigenstateName];
-                 massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`M[eigenstateName]];
+                 massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`FSM[eigenstateName]];
                  result = "<< FORMAT_MASS(" <> ToString[pdg] <>
                           ", LOCALPHYSICAL(" <> massNameStr <> "), \"" <> eigenstateNameStr <> "\")\n";
                 ];
@@ -213,7 +213,7 @@ WriteSLHAMass[massMatrix_TreeMasses`FSMassMatrix] :=
                   pdg = Abs[pdgList[[i]]];
                   If[pdg != 0,
                      eigenstateNameStr = CConversion`RValueToCFormString[eigenstateName] <> "(" <> ToString[i] <> ")";
-                     massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`M[eigenstateName[i-1]]];
+                     massNameStr = CConversion`RValueToCFormString[FlexibleSUSY`FSM[eigenstateName[i-1]]];
                      result = result <> "<< FORMAT_MASS(" <> ToString[pdg] <>
                               ", LOCALPHYSICAL(" <> massNameStr <> "), \"" <> eigenstateNameStr <> "\")\n";
                     ];
@@ -750,7 +750,7 @@ ReadSLHAPhysicalMixingMatrixBlock[{parameter_, blockName_}, struct_String:"PHYSI
 
 ReadSLHAPhysicalMass[particle_,struct_String:"PHYSICAL"] :=
     Module[{result = "", mass, massStr, dim, pdgList, pdg, pdgStr, i},
-           mass = FlexibleSUSY`M[particle];
+           mass = FlexibleSUSY`FSM[particle];
            massStr = CConversion`ToValidCSymbolString[mass];
            dim = TreeMasses`GetDimension[particle];
            pdgList = SARAH`getPDGList[particle];
@@ -829,7 +829,7 @@ ConvertMixingsToConvention[massMatrices_List, convention_String] :=
                eigenstateName = TreeMasses`GetMassEigenstate[massMatrices[[i]]];
                mixingMatrixSym = TreeMasses`GetMixingMatrixSymbol[massMatrices[[i]]];
                If[IsMajoranaFermion[eigenstateName] && mixingMatrixSym =!= Null,
-                  eigenstateNameStr  = CConversion`ToValidCSymbolString[FlexibleSUSY`M[eigenstateName]];
+                  eigenstateNameStr  = CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[eigenstateName]];
                   mixingMatrixSymStr = CConversion`ToValidCSymbolString[mixingMatrixSym];
                   result = result <>
                            "convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>

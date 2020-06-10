@@ -332,7 +332,7 @@ HiggsContributions2LoopSM[] :=
               MuonDecayWorks = False;
               DebugPrint["Error: SM like Higgs vev does not exist"];
               Return[0]];
-           higgsDep = (Abs[#[[2]]]^2 - Abs[#[[3]]]^2) RHO2[FlexibleSUSY`M[#[[1]]]/MT] &;
+           higgsDep = (Abs[#[[2]]]^2 - Abs[#[[3]]]^2) RHO2[FlexibleSUSY`FSM[#[[1]]]/MT] &;
            Simplify[3 (GFERMI MT higgsVEV / (8 Pi^2 Sqrt[2]))^2 *
                     (Plus @@ (higgsDep /@ Join[HiggsTopVertices[SARAH`HiggsBoson],
                                                HiggsTopVertices[SARAH`PseudoScalar]]))]
@@ -611,7 +611,7 @@ VertexResultFFS[diagr_List, includeGoldstones_] :=
            intfermions = Select[intparticles, TreeMasses`IsFermion];
            intscalar = Select[intparticles, TreeMasses`IsScalar][[1]];
            result = couplFFSout couplFFSin *
-                    (-couplFFVPL FlexibleSUSY`M[intfermions[[1]]] FlexibleSUSY`M[intfermions[[2]]] *
+                    (-couplFFVPL FlexibleSUSY`FSM[intfermions[[1]]] FlexibleSUSY`FSM[intfermions[[2]]] *
                         SARAH`C0[SARAH`Mass2[intscalar], SARAH`Mass2[intfermions[[1]]],
                                  SARAH`Mass2[intfermions[[2]]]] +
                      1/2 couplFFVPR *
@@ -779,10 +779,10 @@ BoxResult[diagr_List, includeGoldstones_] :=
            If[toponr == 2 && TreeMasses`IsFermion[intparticles[[1]]],
               result = result * (-1) * SARAH`D27[Sequence @@ SARAH`Mass2 /@ intparticles]];
            If[toponr == 2 && TreeMasses`IsScalar[intparticles[[1]]],
-              result = result * 1/2 * FlexibleSUSY`M[intfermions[[1]]] FlexibleSUSY`M[intfermions[[2]]] *
+              result = result * 1/2 * FlexibleSUSY`FSM[intfermions[[1]]] FlexibleSUSY`FSM[intfermions[[2]]] *
                        SARAH`D0[Sequence @@ SARAH`Mass2 /@ intparticles]];
            If[toponr == 3 && TreeMasses`IsFermion[intparticles[[1]]],
-              result = result * 1/2 * FlexibleSUSY`M[intfermions[[1]]] FlexibleSUSY`M[intfermions[[2]]] *
+              result = result * 1/2 * FlexibleSUSY`FSM[intfermions[[1]]] FlexibleSUSY`FSM[intfermions[[2]]] *
                        SARAH`D0[Sequence @@ SARAH`Mass2 /@ intparticles]];
            If[toponr == 3 && TreeMasses`IsScalar[intparticles[[1]]],
               result = result * (-1) * SARAH`D27[Sequence @@ SARAH`Mass2 /@ intparticles]];

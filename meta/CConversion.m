@@ -660,6 +660,8 @@ ConvertGreekLetters[text_] :=
        "\[Sampi]"        -> "Sampi"
     }]];
 
+ToValidCSymbol[FlexibleSUSY`FSM[symbol_Symbol]] := Symbol["M" <> ToValidCSymbolString[symbol]];
+
 ToValidCSymbol[symbol_Symbol] := ConvertGreekLetters[symbol];
 
 ToValidCSymbol[symbol_Integer] := symbol;
@@ -886,7 +888,7 @@ RValueToCFormString[expr_] :=
              ];
            result = Block[{Which, If}, expr /. greekSymbolsRules] /.
                     SARAH`sum -> FlexibleSUSY`SUM /.
-                    SARAH`Mass -> FlexibleSUSY`M /.
+                    SARAH`Mass -> FlexibleSUSY`FSM /.
                     SARAH`A0[0]              -> 0 /.
                     SARAH`B0[0,0,0]          -> 0 /.
                     SARAH`B1[0,0,0]          -> 0 /.
@@ -897,11 +899,11 @@ RValueToCFormString[expr_] :=
                     SARAH`B11[0,0,0]         -> 0 /.
                     SARAH`B22[0,0,0]         -> 0 /.
                     SARAH`Mass2[a_?NumberQ]  :> Sqr[a] /.
-                    SARAH`Mass2[a_]          :> Sqr[FlexibleSUSY`M[a]] /.
-                    FlexibleSUSY`M[a_?NumberQ]   :> a /.
-                    FlexibleSUSY`M[SARAH`bar[a_]] :> FlexibleSUSY`M[a] /.
-                    FlexibleSUSY`M[a_[idx_]]     :> ToValidCSymbol[FlexibleSUSY`M[a]][idx] /.
-                    FlexibleSUSY`M[a_]           :> ToValidCSymbol[FlexibleSUSY`M[a]] /.
+                    SARAH`Mass2[a_]          :> Sqr[FlexibleSUSY`FSM[a]] /.
+                    FlexibleSUSY`FSM[a_?NumberQ]   :> a /.
+                    FlexibleSUSY`FSM[SARAH`bar[a_]] :> FlexibleSUSY`FSM[a] /.
+                    FlexibleSUSY`FSM[a_[idx_]]     :> ToValidCSymbol[FlexibleSUSY`FSM[a]][idx] /.
+                    FlexibleSUSY`FSM[a_]           :> ToValidCSymbol[FlexibleSUSY`FSM[a]] /.
                     FlexibleSUSY`BETA[l_,p_]     :> FlexibleSUSY`BETA1[l,p] /.
                     SARAH`Adj[0]                 -> 0 /.
                     SARAH`Conj[0]                -> 0 /.

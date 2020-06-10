@@ -39,7 +39,7 @@ GetCXXMuonIndex[] := If[TreeMasses`GetDimension[TreeMasses`GetSMMuonLeptonMultip
 
 GetMinMass[particle_] :=
     Module[{dim = TreeMasses`GetDimension[particle],
-            mStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[particle]],
+            mStr = CConversion`ToValidCSymbolString[FlexibleSUSY`FSM[particle]],
             tail},
            If[dim == 1,
               "model.get_" <> mStr <> "()",

@@ -499,7 +499,7 @@ FillGM2CalcInterfaceData[struct_String] :=
               Quit[1];
            ];
 
-           mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
+           mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`FSM[w]];
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
            struct <> ".MZ    = MZPole;\n" <>
@@ -512,15 +512,15 @@ FillGM2CalcInterfaceData[struct_String] :=
            struct <> ".MTau  = MTauPole;\n" <>
            struct <> ".MM    = MMPole;\n" <>
            struct <> ".MA0   = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[pseudoscalar][1]] <> ";\n" <>
+           CConversion`RValueToCFormString[FlexibleSUSY`FSM[pseudoscalar][1]] <> ";\n" <>
            struct <> ".MSvm  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[muonsneutrino]] <> ";\n" <>
+           CConversion`RValueToCFormString[FlexibleSUSY`FSM[muonsneutrino]] <> ";\n" <>
            struct <> ".MSm   = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[smuon]] <> ";\n" <>
+           CConversion`RValueToCFormString[FlexibleSUSY`FSM[smuon]] <> ";\n" <>
            struct <> ".MCha  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[chargino]] <> ";\n" <>
+           CConversion`RValueToCFormString[FlexibleSUSY`FSM[chargino]] <> ";\n" <>
            struct <> ".MChi  = MODEL.get_physical()." <>
-           CConversion`RValueToCFormString[FlexibleSUSY`M[neutralino]] <> ";\n" <>
+           CConversion`RValueToCFormString[FlexibleSUSY`FSM[neutralino]] <> ";\n" <>
            struct <> ".scale = MODEL.get_scale();\n" <>
            struct <> ".TB    = MODEL.get_" <> CConversion`RValueToCFormString[SARAH`VEVSM2] <> "() / " <>
                               "MODEL.get_" <> CConversion`RValueToCFormString[SARAH`VEVSM1] <> "();\n" <>
