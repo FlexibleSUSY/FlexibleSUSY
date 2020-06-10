@@ -168,7 +168,7 @@ FSRestrictParameter; (* restrict parameter to interval *)
 FSInitialSetting;    (* set parameter before calculating masses *)
 FSSolveEWSBFor;
 FSSolveEWSBTreeLevelFor = {};
-Temporary;
+FSTemporary;
 MZ;
 MT;
 MZDRbar;
