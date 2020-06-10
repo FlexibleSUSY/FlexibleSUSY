@@ -18,9 +18,15 @@
 
 #include "library_collier.hpp"
 #include "fortran_utils.hpp"
+#include <boost/preprocessor/arithmetic/sub.hpp>
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
 #include <limits>
+
+#define A_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(A_ARGS_SEQ), 1)
+#define B_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(B_ARGS_SEQ), 1)
+#define C_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(C_ARGS_SEQ), 1)
+#define D_ARGS_N BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(D_ARGS_SEQ), 1)
 
 #define COLLIER_TYPE(Z, N, TEXT) const std::complex<double>*,
 #define COLLIER_ARGS(N)                                                        \
@@ -79,15 +85,15 @@ extern "C" {
 void initialize_collier_impl();
 void set_mu2_uv_impl(double*);
 
-BOOST_PP_SEQ_FOR_EACH(IMPL, 0, A_SEQ)
-BOOST_PP_SEQ_FOR_EACH(IMPL, 2, B_SEQ)
-BOOST_PP_SEQ_FOR_EACH(IMPL, 5, C_SEQ)
-BOOST_PP_SEQ_FOR_EACH(IMPL, 9, D_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, A_ARGS_N, A_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, B_ARGS_N, B_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, C_ARGS_N, C_SEQ)
+BOOST_PP_SEQ_FOR_EACH(IMPL, D_ARGS_N, D_SEQ)
 
-void get_A_impl(const std::complex<double>[1], COLLIER_ARGS(0));
-void get_B_impl(const std::complex<double>[2], COLLIER_ARGS(2));
-void get_C_impl(const std::complex<double>[7], COLLIER_ARGS(5));
-void get_D_impl(const std::complex<double>[11], COLLIER_ARGS(9));
+void get_A_impl(const std::complex<double>[A_N], COLLIER_ARGS(A_ARGS_N));
+void get_B_impl(const std::complex<double>[B_N], COLLIER_ARGS(B_ARGS_N));
+void get_C_impl(const std::complex<double>[C_N], COLLIER_ARGS(C_ARGS_N));
+void get_D_impl(const std::complex<double>[D_N], COLLIER_ARGS(D_ARGS_N));
 }
 
 namespace flexiblesusy
@@ -126,7 +132,7 @@ BOOST_PP_SEQ_FOR_EACH(COLLIER_B, (B_ARGS), B_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_C, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(COLLIER_D, (D_ARGS), D_SEQ)
 
-void Collier::A(std::array<std::complex<double>, 1>& a, A_ARGS) noexcept
+void Collier::A(Acoeff_t& a, A_ARGS) noexcept
 {
    const std::complex<double> m02 = m02_in;
 
@@ -134,7 +140,7 @@ void Collier::A(std::array<std::complex<double>, 1>& a, A_ARGS) noexcept
    get_A_impl(a.data(), &m02);
 }
 
-void Collier::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
+void Collier::B(Bcoeff_t& b, B_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> m02 = m02_in;
@@ -144,7 +150,7 @@ void Collier::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
    get_B_impl(b.data(), &p10, &m02, &m12);
 }
 
-void Collier::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
+void Collier::C(Ccoeff_t& c, C_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> p21(p21_in.real(), 0.);
@@ -157,7 +163,7 @@ void Collier::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
    get_C_impl(c.data(), &p10, &p21, &p20, &m02, &m12, &m22);
 }
 
-void Collier::D(std::array<std::complex<double>, 11>& d, D_ARGS) noexcept
+void Collier::D(Dcoeff_t& d, D_ARGS) noexcept
 {
    const std::complex<double> p10(p10_in.real(), 0.);
    const std::complex<double> p21(p21_in.real(), 0.);

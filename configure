@@ -1833,16 +1833,6 @@ int main() {
 
 #_____________________________________________________________________
 check_eigen() {
-    [ -z "$eigen_inc_dir" ] && \
-    type pkg-config > /dev/null && \
-    [ -f eigen.pc ] && \
-    {
-        message -n "Checking Eigen library using local eigen.pc ... "
-        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config eigen --cflags)
-        message "ok"
-        return
-    }
-
     check_eigen_incl
     check_eigen_version
 }

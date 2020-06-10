@@ -178,6 +178,7 @@ public:
    Fixed_point_iterator() = default;
    Fixed_point_iterator(const Function_t&, std::size_t, const Convergence_tester&);
    virtual ~Fixed_point_iterator() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    void set_function(const Function_t& f) { function = f; }
    void set_max_iterations(std::size_t n) { max_iterations = n; }

@@ -19,28 +19,54 @@
 #include "library_looptools.hpp"
 #include "clooptools.h"
 #include "fortran_utils.hpp"
+#include <boost/preprocessor/seq/elem.hpp>
+#include <boost/preprocessor/seq/for_each_i.hpp>
 #include <limits>
 
-#define LOOPTOOLS_B(NAME, INDEX)                                               \
-   std::complex<double> Looptools::NAME(B_ARGS) noexcept                       \
+#define A_PAIR (A)(aa)
+#define B_PAIR (B)(bb)
+#define C_PAIR (C)(cc)
+#define D_PAIR (D)(dd)
+
+#define REAL(R, DUMMY, ELEM) , ELEM.real()
+
+#define CAT_(a, b) a##b
+#define CAT(a, b) CAT_(a, b)
+
+#define LIB(PAIR) BOOST_PP_SEQ_ELEM(0, PAIR)
+#define LT(PAIR) BOOST_PP_SEQ_ELEM(1, PAIR)
+
+#define LIB_NAME(PAIR, INDEX) CAT(LIB(PAIR), INDEX)
+#define LIB_ARGS(PAIR) CAT(LIB(PAIR), _ARGS)
+
+#define LT_ARGS(PAIR) CAT(LIB(PAIR), _ARGS_SEQ)
+#define LT_NAME(PAIR) CAT(LIB(PAIR), 0i)
+#define LT_IDX(PAIR, INDEX) CAT(LT(PAIR), INDEX)
+
+#define LT_ONE(_, PAIR, I, INDEX)                                              \
+   std::complex<double> Looptools::LIB_NAME(PAIR,                              \
+                                            INDEX)(LIB_ARGS(PAIR)) noexcept    \
    {                                                                           \
       set_mu2_uv(scl2_in);                                                     \
-      return B0i(INDEX, p10_in.real(), m02_in.real(), m12_in.real());          \
+      return LT_NAME(PAIR)(LT_IDX(PAIR, INDEX)                                 \
+                              BOOST_PP_SEQ_FOR_EACH(REAL, , LT_ARGS(PAIR)));   \
    }
-#define LOOPTOOLS_C(NAME, INDEX)                                               \
-   std::complex<double> Looptools::NAME(C_ARGS) noexcept                       \
+
+#define LT_ALL(PAIR)                                                           \
+   void Looptools::LIB(PAIR)(CAT(LIB(PAIR), coeff_t) & \
+                                arr,                                           \
+                             CAT(LIB(PAIR), _ARGS)) noexcept                   \
    {                                                                           \
+      const int coeffs[] = {BOOST_PP_SEQ_ENUM(                                 \
+         BOOST_PP_SEQ_TRANSFORM(APPEND, LT(PAIR), CAT(LIB(PAIR), _CSEQ)))};    \
+      ComplexType res[CAT(N, LT(PAIR))];                                       \
       set_mu2_uv(scl2_in);                                                     \
-      return C0i(INDEX, p10_in.real(), p21_in.real(), p20_in.real(),           \
-                 m02_in.real(), m12_in.real(), m22_in.real());                 \
-   }
-#define LOOPTOOLS_D(NAME, INDEX)                                               \
-   std::complex<double> Looptools::NAME(D_ARGS) noexcept                       \
-   {                                                                           \
-      set_mu2_uv(scl2_in);                                                     \
-      return D0i(INDEX, p10_in.real(), p21_in.real(), p32_in.real(),           \
-                 p30_in.real(), p20_in.real(), p31_in.real(), m02_in.real(),   \
-                 m12_in.real(), m22_in.real(), m32_in.real());                 \
+                                                                               \
+      CAT(LIB(PAIR), put)                                                      \
+      (res BOOST_PP_SEQ_FOR_EACH(REAL, , CAT(LIB(PAIR), _ARGS_SEQ)));          \
+      for (int i = 0; i < CAT(LIB(PAIR), _N); ++i) {                           \
+         arr.at(i) = res[coeffs[i]];                                           \
+      }                                                                        \
    }
 
 namespace flexiblesusy
@@ -56,10 +82,6 @@ Looptools::Looptools() : current_mu2_uv(1.0)
    futils::swap();
 }
 
-Looptools::~Looptools() noexcept
-{
-}
-
 void Looptools::set_mu2_uv(double scl2_in) noexcept
 {
    if (std::abs(scl2_in - this->current_mu2_uv) >
@@ -69,95 +91,15 @@ void Looptools::set_mu2_uv(double scl2_in) noexcept
    }
 }
 
-std::complex<double> Looptools::A0(A_ARGS) noexcept
-{
-   set_mu2_uv(scl2_in);
-   return A0i(aa0, m02_in.real());
-}
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, A_PAIR, A_CSEQ)
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, B_PAIR, B_CSEQ)
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, C_PAIR, C_CSEQ)
+BOOST_PP_SEQ_FOR_EACH_I(LT_ONE, D_PAIR, D_CSEQ)
 
-LOOPTOOLS_B(B0, bb0)
-LOOPTOOLS_B(B1, bb1)
-LOOPTOOLS_B(B00, bb00)
-
-LOOPTOOLS_C(C0, cc0)
-LOOPTOOLS_C(C1, cc1)
-LOOPTOOLS_C(C2, cc2)
-LOOPTOOLS_C(C00, cc00)
-LOOPTOOLS_C(C11, cc11)
-LOOPTOOLS_C(C12, cc12)
-LOOPTOOLS_C(C22, cc22)
-
-LOOPTOOLS_D(D0, dd0)
-LOOPTOOLS_D(D1, dd1)
-LOOPTOOLS_D(D2, dd2)
-LOOPTOOLS_D(D3, dd3)
-LOOPTOOLS_D(D00, dd00)
-LOOPTOOLS_D(D11, dd11)
-LOOPTOOLS_D(D12, dd12)
-LOOPTOOLS_D(D13, dd13)
-LOOPTOOLS_D(D22, dd22)
-LOOPTOOLS_D(D23, dd23)
-LOOPTOOLS_D(D33, dd33)
-
-void Looptools::A(std::array<std::complex<double>, 1>& a, A_ARGS) noexcept
-{
-   set_mu2_uv(scl2_in);
-   a.at(0) = A0i(aa0, m02_in.real());
-}
-
-void Looptools::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
-{
-   double p10 = p10_in.real();
-   double m02 = m02_in.real();
-   double m12 = m12_in.real();
-   set_mu2_uv(scl2_in);
-   b.at(0) = B0i(bb0, p10, m02, m12);
-   b.at(1) = B0i(bb1, p10, m02, m12);
-}
-
-void Looptools::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
-{
-   double p10 = p10_in.real();
-   double p21 = p21_in.real();
-   double p20 = p20_in.real();
-   double m02 = m02_in.real();
-   double m12 = m12_in.real();
-   double m22 = m22_in.real();
-   set_mu2_uv(scl2_in);
-   c.at(0) = C0i(cc0, p10, p21, p20, m02, m12, m22);
-   c.at(1) = C0i(cc1, p10, p21, p20, m02, m12, m22);
-   c.at(2) = C0i(cc2, p10, p21, p20, m02, m12, m22);
-   c.at(3) = C0i(cc00, p10, p21, p20, m02, m12, m22);
-   c.at(4) = C0i(cc11, p10, p21, p20, m02, m12, m22);
-   c.at(5) = C0i(cc12, p10, p21, p20, m02, m12, m22);
-   c.at(6) = C0i(cc22, p10, p21, p20, m02, m12, m22);
-}
-
-void Looptools::D(std::array<std::complex<double>, 11>& d, D_ARGS) noexcept
-{
-   double p10 = p10_in.real();
-   double p21 = p21_in.real();
-   double p32 = p32_in.real();
-   double p30 = p30_in.real();
-   double p20 = p20_in.real();
-   double p31 = p31_in.real();
-   double m02 = m02_in.real();
-   double m12 = m12_in.real();
-   double m22 = m22_in.real();
-   double m32 = m32_in.real();
-   set_mu2_uv(scl2_in);
-   d.at(0) = D0i(dd0, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(1) = D0i(dd1, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(2) = D0i(dd2, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(3) = D0i(dd3, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(4) = D0i(dd00, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(5) = D0i(dd11, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(6) = D0i(dd12, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(7) = D0i(dd13, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(8) = D0i(dd22, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(9) = D0i(dd23, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-   d.at(10) = D0i(dd33, p10, p21, p32, p30, p20, p31, m02, m12, m22, m32);
-}
+LT_ALL(A_PAIR)
+LT_ALL(B_PAIR)
+LT_ALL(C_PAIR)
+LT_ALL(D_PAIR)
 
 } // namespace looplibrary
 } // namespace flexiblesusy

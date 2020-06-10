@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( test_init_default )
 
 BOOST_AUTO_TEST_CASE( test_init_0 )
 {
-   GSL_vector v(0ul);
+   GSL_vector v(static_cast<std::size_t>(0));
    BOOST_CHECK_EQUAL(v.size(), 0);
 }
 

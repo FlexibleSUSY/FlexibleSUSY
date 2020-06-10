@@ -64,6 +64,7 @@ public:
    virtual ~@ModelName@_mass_eigenstates() = default;
    @ModelName@_mass_eigenstates& operator=(const @ModelName@_mass_eigenstates&) = default;
    @ModelName@_mass_eigenstates& operator=(@ModelName@_mass_eigenstates&&) = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const override;
 
