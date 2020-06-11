@@ -881,10 +881,10 @@ Temporary parameter re-definitions
 
 Since FlexibleSUSY 1.4.0, the user can perform a temporary parameter
 definition to be used in the boundary conditions using the
-``Temporary[]`` head.
+``FSTemporary[]`` head.
 
 If a parameter ``p`` set in a boundary conditions in the form
-``Temporary[p,<expr>]``, the following happens: Immediately after the RG
+``FSTemporary[p,<expr>]``, the following happens: Immediately after the RG
 running the value of the parameter is saved locally.  Afterwards, the
 parameter is assigned to ``<expr>``.  Now, all further boundary
 conditions are imposed and calculations are performed (calculation of
@@ -899,10 +899,10 @@ triangular basis::
     g1XT = (g1X*gX + g1*gX1)/Sqrt[gX^2 + gX1^2];
     
     SUSYScaleInput = {
-        {Temporary[g1], g1T},
-        {Temporary[gX], gXT},
-        {Temporary[g1X], g1XT},
-        {Temporary[gX1], 0},
+        {FSTemporary[g1], g1T},
+        {FSTemporary[gX], gXT},
+        {FSTemporary[g1X], g1XT},
+        {FSTemporary[gX1], 0},
         {xS, vSInput},
         {x2, Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)]/(2*gX*Sqrt[1 + TanBetaX^2])},
         {x1, (TanBetaX*Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)])/(2*gX*Sqrt[1 + TanBetaX^2])},
