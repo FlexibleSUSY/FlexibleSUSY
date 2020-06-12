@@ -842,7 +842,7 @@ GaugeStructureOfVertexLorentzPart[
      (And @@ Vertices`SarahColorIndexQ /@ {cIndex1, cIndex2}) &&
 	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
    ] :=
-   Collect[fullExpr, SARAH`Delta[_, _]] /.
+   Collect[fullExpr, SARAH`Delta[ct1_, ct2_] (* collecting with respect to SARAH`Delta[_, _] gives wrong result in NMSSMCPV *)] /.
       scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]] :>
 	   {scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
 	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
