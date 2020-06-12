@@ -1513,8 +1513,8 @@ FlexibleSUSY-1.4.0 [March, 08 2016]
   and set the up-quark Yukawa coupling to zero::
 
       LowScaleInput = {
-         {Temporary[g1], g1 / 2},
-         {Temporary[Yu[1,1]], 0},
+         {FSTemporary[g1], g1 / 2},
+         {FSTemporary[Yu[1,1]], 0},
          ...
       };
 

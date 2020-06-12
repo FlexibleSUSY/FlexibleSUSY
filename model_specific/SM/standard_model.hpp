@@ -132,8 +132,8 @@ public:
    double,3,3>& Ye_, double mu2_, double v_);
    Standard_model(const Standard_model&) = default;
    Standard_model(Standard_model&&) = default;
-
    virtual ~Standard_model() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    Standard_model& operator=(const Standard_model&) = default;
    Standard_model& operator=(Standard_model&&) = default;

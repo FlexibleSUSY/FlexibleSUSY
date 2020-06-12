@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <complex>
+#include <map>
 
 namespace flexiblesusy {
 
@@ -36,173 +37,7 @@ std::complex<double> sqr(const std::complex<double>& z) noexcept
    return z * z;
 }
 
-} // anonymous namespace
-
-std::complex<double> scaling_function(double tau)
-{
-   std::complex<double> result;
-
-   if (tau > 1) {
-      result = -0.25 * sqr(std::log((1.0 + std::sqrt(1.0 - 1.0 / tau)) /
-         (1.0 - std::sqrt(1.0 - 1.0 / tau))) - std::complex<double>(0,1) * Pi);
-   } else if (tau == 1.0) {
-      result = 0.25 * sqr(Pi);
-   } else {
-      result = sqr(std::asin(std::sqrt(tau)));
-   }
-
-   return result;
-}
-
-std::complex<double> AS0(double tau)
-{
-   return -(tau - scaling_function(tau)) / sqr(tau);
-}
-
-std::complex<double> AS12(double tau)
-{
-   return 2.0 * (tau + (tau - 1.0) * scaling_function(tau)) / sqr(tau);
-}
-
-std::complex<double> AS1(double tau)
-{
-   return -(2.0 * sqr(tau) + 3.0 * tau + 3.0 * (2.0 * tau - 1.0)
-      * scaling_function(tau)) / sqr(tau);
-}
-
-std::complex<double> AP12(double tau)
-{
-   return scaling_function(tau) / tau;
-}
-
-std::complex<double> scalar_diphoton_fermion_loop(
-   double m_decay, double m_loop)
-{
-   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
-   const double tau_min = 75.0;
-
-   const std::map<double, std::complex<double> > data
-      = get_scalar_fermion_loop_data();
-
-   std::complex<double> result;
-   if (tau < tau_min) {
-      const bool do_linear_interp = false;
-      if (do_linear_interp) {
-         result = linear_interpolation(tau, data);
-      } else {
-         result = quadratic_interpolation(tau, data);
-      }
-   } else {
-      // analytic expression in the m_loop -> 0 limit
-      const std::complex<double> limit =
-         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
-         + 2.0 * std::log(tau) + 22.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
-         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
-
-      const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
-
-      const std::complex<double> constant = min_value
-         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
-         / 3.0 - 2.0 * std::log(tau_min) - 22.0 / std::log(4.0 * tau_min)
-         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
-         / 3.0;
-
-      result = limit + constant;
-   }
-
-   return result;
-}
-
-std::complex<double> pseudoscalar_diphoton_fermion_loop(
-   double m_decay, double m_loop)
-{
-   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
-   const double tau_min = 75.0;
-
-   const std::map<double, std::complex<double> > data
-      = get_pseudoscalar_fermion_loop_data();
-
-   std::complex<double> result;
-   if (tau < tau_min) {
-      const bool do_linear_interp = false;
-      if (do_linear_interp) {
-         result = linear_interpolation(tau, data);
-      } else {
-         result = quadratic_interpolation(tau, data);
-      }
-   } else {
-      // analytic expression in the m_loop -> 0 limit
-      const std::complex<double> limit =
-         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
-         + 2.0 * std::log(tau) + 21.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
-         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
-
-      const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
-
-      const std::complex<double> constant = min_value
-         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
-         / 3.0 - 2.0 * std::log(tau_min) - 21.0 / std::log(4.0 * tau_min)
-         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
-         / 3.0;
-
-      result = limit + constant;
-   }
-
-   return result;
-}
-
-std::complex<double> linear_interpolation(
-   double x, const std::map<double,std::complex<double> >& data)
-{
-   auto right = data.upper_bound(x);
-
-   if (right == data.begin()) {
-      ++right;
-   } else if (right == data.end()) {
-      --right;
-   }
-
-   auto left = right;
-   --left;
-
-   const double x_left = (x - right->first) / (left->first - right->first);
-   const double x_right = (x - left->first) / (right->first - left->first);
-
-   return left->second * x_left + right->second * x_right;
-}
-
-std::complex<double> quadratic_interpolation(
-   double x, const std::map<double,std::complex<double> >& data)
-{
-   auto right = data.upper_bound(x);
-   auto begin = data.begin();
-
-   if (right == begin) {
-      ++right;
-      ++right;
-   } else if (right == ++begin) {
-      ++right;
-   } else if (right == data.end()) {
-      --right;
-   }
-
-   auto center = right;
-   --center;
-   auto left = center;
-   --left;
-
-   const double x_left = (x - center->first) * (x - right->first)
-      / ((left->first - center->first) * (left->first - right->first));
-   const double x_center = (x - left->first) * (x - right->first)
-      / ((center->first - left->first) * (center->first - right->first));
-   const double x_right = (x - left->first) * (x - center->first)
-      / ((right->first - left->first) * (right->first - center->first));
-
-   return left->second * x_left + center->second * x_center
-      + right->second * x_right;
-}
-
-std::map<double,std::complex<double> > get_scalar_fermion_loop_data()
+const std::map<double,std::complex<double> >& get_scalar_fermion_loop_data()
 {
    static const std::map<double,std::complex<double> > data = {
       {0.000000, std::complex<double>(-1.000000, 0.000000)},
@@ -671,7 +506,7 @@ std::map<double,std::complex<double> > get_scalar_fermion_loop_data()
    return data;
 }
 
-std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data()
+const std::map<double,std::complex<double> >& get_pseudoscalar_fermion_loop_data()
 {
    static const std::map<double,std::complex<double> > data = {
       {0.000000, std::complex<double>(0.000000, 0.000000)},
@@ -1138,6 +973,172 @@ std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data()
    };
 
    return data;
+}
+
+std::complex<double> linear_interpolation(
+   double x, const std::map<double,std::complex<double> >& data)
+{
+   auto right = data.upper_bound(x);
+
+   if (right == data.begin()) {
+      ++right;
+   } else if (right == data.end()) {
+      --right;
+   }
+
+   auto left = right;
+   --left;
+
+   const double x_left = (x - right->first) / (left->first - right->first);
+   const double x_right = (x - left->first) / (right->first - left->first);
+
+   return left->second * x_left + right->second * x_right;
+}
+
+std::complex<double> quadratic_interpolation(
+   double x, const std::map<double,std::complex<double> >& data)
+{
+   auto right = data.upper_bound(x);
+   auto begin = data.begin();
+
+   if (right == begin) {
+      ++right;
+      ++right;
+   } else if (right == ++begin) {
+      ++right;
+   } else if (right == data.end()) {
+      --right;
+   }
+
+   auto center = right;
+   --center;
+   auto left = center;
+   --left;
+
+   const double x_left = (x - center->first) * (x - right->first)
+      / ((left->first - center->first) * (left->first - right->first));
+   const double x_center = (x - left->first) * (x - right->first)
+      / ((center->first - left->first) * (center->first - right->first));
+   const double x_right = (x - left->first) * (x - center->first)
+      / ((right->first - left->first) * (right->first - center->first));
+
+   return left->second * x_left + center->second * x_center
+      + right->second * x_right;
+}
+
+} // anonymous namespace
+
+std::complex<double> scaling_function(double tau)
+{
+   std::complex<double> result;
+
+   if (tau > 1) {
+      result = -0.25 * sqr(std::log((1.0 + std::sqrt(1.0 - 1.0 / tau)) /
+         (1.0 - std::sqrt(1.0 - 1.0 / tau))) - std::complex<double>(0,1) * Pi);
+   } else if (tau == 1.0) {
+      result = 0.25 * sqr(Pi);
+   } else {
+      result = sqr(std::asin(std::sqrt(tau)));
+   }
+
+   return result;
+}
+
+std::complex<double> AS0(double tau)
+{
+   return -(tau - scaling_function(tau)) / sqr(tau);
+}
+
+std::complex<double> AS12(double tau)
+{
+   return 2.0 * (tau + (tau - 1.0) * scaling_function(tau)) / sqr(tau);
+}
+
+std::complex<double> AS1(double tau)
+{
+   return -(2.0 * sqr(tau) + 3.0 * tau + 3.0 * (2.0 * tau - 1.0)
+      * scaling_function(tau)) / sqr(tau);
+}
+
+std::complex<double> AP12(double tau)
+{
+   return scaling_function(tau) / tau;
+}
+
+std::complex<double> scalar_diphoton_fermion_loop(
+   double m_decay, double m_loop)
+{
+   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
+   const double tau_min = 75.0;
+
+   const std::map<double, std::complex<double> > data
+      = get_scalar_fermion_loop_data();
+
+   std::complex<double> result;
+   if (tau < tau_min) {
+      const bool do_linear_interp = false;
+      if (do_linear_interp) {
+         result = linear_interpolation(tau, data);
+      } else {
+         result = quadratic_interpolation(tau, data);
+      }
+   } else {
+      // analytic expression in the m_loop -> 0 limit
+      const std::complex<double> limit =
+         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
+         + 2.0 * std::log(tau) + 22.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
+         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
+
+      const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
+
+      const std::complex<double> constant = min_value
+         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
+         / 3.0 - 2.0 * std::log(tau_min) - 22.0 / std::log(4.0 * tau_min)
+         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
+         / 3.0;
+
+      result = limit + constant;
+   }
+
+   return result;
+}
+
+std::complex<double> pseudoscalar_diphoton_fermion_loop(
+   double m_decay, double m_loop)
+{
+   const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
+   const double tau_min = 75.0;
+
+   const std::map<double, std::complex<double> > data
+      = get_pseudoscalar_fermion_loop_data();
+
+   std::complex<double> result;
+   if (tau < tau_min) {
+      const bool do_linear_interp = false;
+      if (do_linear_interp) {
+         result = linear_interpolation(tau, data);
+      } else {
+         result = quadratic_interpolation(tau, data);
+      }
+   } else {
+      // analytic expression in the m_loop -> 0 limit
+      const std::complex<double> limit =
+         -(sqr(std::log(4.0 * tau)) - sqr(Pi)) / 18.0 - 2.0 * std::log(4.0 * tau) / 3.0
+         + 2.0 * std::log(tau) + 21.0 / std::log(4.0 * tau) + std::complex<double>(0,1)
+         * Pi * (std::log(4.0 * tau) / 3.0 + 2.) / 3.0;
+
+      const std::complex<double> min_value = (data.lower_bound(tau_min))->second;
+
+      const std::complex<double> constant = min_value
+         + (sqr(std::log(4.0 * tau_min)) - sqr(Pi)) / 18.0 + 2.0 * std::log(4.0 * tau_min)
+         / 3.0 - 2.0 * std::log(tau_min) - 21.0 / std::log(4.0 * tau_min)
+         - std::complex<double>(0,1) * Pi * (std::log(4.0 * tau_min) / 3.0 + 2.)
+         / 3.0;
+
+      result = limit + constant;
+   }
+
+   return result;
 }
 
 } // namespace effective_couplings

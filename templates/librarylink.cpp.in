@@ -235,7 +235,7 @@ Handle_map handles;
 Handle get_new_handle()
 {
    static const std::size_t max_handles =
-      static_cast<std::size_t>(std::exp2(std::numeric_limits<Handle>::digits) - 1);
+      static_cast<std::size_t>(std::numeric_limits<Handle>::max());
 
    if (handles.size() >= max_handles)
       throw ENotEnoughFreeHandles(handles.size());
