@@ -231,15 +231,14 @@ CreateSpectrumDecaysCalculationName[] := "calculate_model_decays";
 CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
 
 CreateSpectrumDecaysInterface[modelName_] :=
-    "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const " <>
-    modelName <> "_input_parameters&) = 0;";
+    "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&) = 0;";
 
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
-                       "(const softsusy::QedQcd&, const " <> modelName <> "_input_parameters&) override;\n";
-           args = "const softsusy::QedQcd& qedqcd, const " <> modelName <> "_input_parameters& input";
-           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, input);\n" <>
+                       "(const softsusy::QedQcd&) override;\n";
+           args = "const softsusy::QedQcd& qedqcd";
+           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd);\n" <>
                   "decays.calculate_decays();\n";
            function = "template <typename Solver_type>\n" <>
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
@@ -256,7 +255,7 @@ CreateModelDecaysCalculation[] :=
            body = "check_spectrum_pointer();\n" <>
                   "if (settings.get(Spectrum_generator_settings::calculate_decays)) {\n" <>
                   TextFormatting`IndentText["spectrum->" <> CreateSpectrumDecaysCalculationName[] <>
-                                            "(qedqcd, input);\n"] <> "}\n";
+                                            "(qedqcd);\n"] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";

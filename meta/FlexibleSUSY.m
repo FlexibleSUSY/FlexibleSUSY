@@ -2571,7 +2571,7 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] := FlexibleSUSY`FSModelName <>
-"_decays decays(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
+"_decays decays(std::get<0>(models), qedqcd, HigherOrderSMCorrections::enable);
 if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
     spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
    decays.calculate_decays();
@@ -2589,7 +2589,7 @@ if (show_decays) {
 ExampleCalculateCmdLineDecays[] :=
 FlexibleSUSY`FSModelName <> "_decays " <> "decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, input, HigherOrderSMCorrections::enable);
+   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, HigherOrderSMCorrections::enable);
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=

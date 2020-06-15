@@ -32,7 +32,6 @@
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
-#include "@ModelName@_input_parameters.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_decay_amplitudes.hpp"
 #include "decays_loop_corrections.hpp"
@@ -65,10 +64,9 @@ enum class HigherOrderSMCorrections {enable, disable};
 class @ModelName@_decays {
 public:
    @ModelName@_decays() = default;
-   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_, @ModelName@_input_parameters const& input_,
+   @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_,
          HigherOrderSMCorrections enable_corrections = HigherOrderSMCorrections::enable)
       : model(model_)
-      , input(input_)
       , qedqcd(qedqcd_)
       , include_higher_order_corrections(enable_corrections)
       {}
@@ -94,7 +92,6 @@ public:
 
 private:
    @ModelName@_mass_eigenstates model{};
-   @ModelName@_input_parameters input{};
    softsusy::QedQcd qedqcd{};
    HigherOrderSMCorrections include_higher_order_corrections{HigherOrderSMCorrections::enable};
    bool run_to_decay_particle_scale {true};

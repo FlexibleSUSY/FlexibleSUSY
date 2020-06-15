@@ -258,7 +258,7 @@ Block UERMIX
 
    THDMII_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
-   THDMII_decays decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
+   THDMII_decays decays(m, qedqcd, HigherOrderSMCorrections::enable);
 
    // ------------ tree-level decays ------------
 

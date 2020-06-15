@@ -867,7 +867,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  "switch (flag) {\n" <> TextFormatting`IndentText[
                  "case 1: {\n" <>
                  TextFormatting`IndentText[
-                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(input);\n" <>
+                    "auto dm = std::make_unique<" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme>(model.get_input());\n" <>
                     "// fill_from BSM model has to be called before fill_from SM\n" <>
                     "// both calls are required\n" <>
                     "dm->fill_from(model);\n" <>

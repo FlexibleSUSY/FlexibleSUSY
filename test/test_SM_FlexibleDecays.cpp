@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   SM_decays decays_HO = SM_decays(m, qedqcd, input, HigherOrderSMCorrections::enable);
+   SM_decays decays_HO = SM_decays(m, qedqcd, HigherOrderSMCorrections::enable);
 
    // ------------ tree-level decays ------------
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   SM_decays decays_no_HO = SM_decays(m, qedqcd, input, HigherOrderSMCorrections::disable);
+   SM_decays decays_no_HO = SM_decays(m, qedqcd, HigherOrderSMCorrections::disable);
 
    // ------------ tree-level decays ------------
 
