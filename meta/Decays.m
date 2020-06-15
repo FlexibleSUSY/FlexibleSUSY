@@ -766,12 +766,12 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
               MapIndexed[
                  With[{idx = First[#2]},
                     If[
-                       initialState === #1, "if(gI1 == gO" <> ToString[idx] <> ") {continue;}", ""]]&, finalState
+                       initialState === #1, "if (gI1 == gO" <> ToString[idx] <> ")\n" <> TextFormatting`IndentText["continue;\n"], ""]]&, finalState
               ] <>
               If[
                 CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
 
-              "if(context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
+              "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
                StringJoin @ Riffle[
                   MapIndexed[
                      With[{idx = First[#2]},
@@ -780,7 +780,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                      ]&,
                      finalState
                   ], " + "
-              ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n"
+              ] <> ")\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
                 ];
            (* call decay *)
                       body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> 
@@ -810,7 +810,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
 
 
 
-               "\nif(context.physical_mass<" <> CXXNameOfField[initialState] <>
+               "\nif (context.physical_mass<" <> CXXNameOfField[initialState] <>
                  ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) > " <>
                  StringJoin @ Riffle[
                     MapIndexed[
@@ -902,7 +902,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
                  ] <>
                  "}\n"
                  ] <>
-                 "}();\n" <>
+                 "}();\n\n" <>
               "context_base context {dec_model.get()};\n" <>
               body;
 
@@ -913,7 +913,7 @@ CreateDecaysCalculationFunction[decaysList_] :=
              ];
            "void " <> CreateDecaysCalculationFunctionName[particle, "CLASSNAME"] <>
            "()\n{\n"
-           <> TextFormatting`IndentText[body] <> "}\n"
+           <> TextFormatting`IndentText[body] <> "\n}\n"
           ];
 
 CreateDecaysCalculationFunctions[particleDecays_List] :=
@@ -1535,7 +1535,7 @@ WrapCodeInLoop[indices_, code_] :=
       StringJoin@@(MapIndexed[
       Nest[
          TextFormatting`IndentText,
-         "for(const auto& index" <> ToString@#1 <> ": index_range<vertex" <> ToString@#1 <> ">()) {\n" <>
+         "for (const auto& index" <> ToString@#1 <> ": index_range<vertex" <> ToString@#1 <> ">()) {\n" <>
             If[First@#2===Length[indices], "\n" <> TextFormatting`IndentText[code], ""],
          First@#2 -1
       ]&,
@@ -1637,7 +1637,7 @@ If[Length@positions =!= 1, Quit[1]];
       },
         If[Length@positions =!= 2, Quit[1]];
             matchInternalFieldIndicesCode = matchInternalFieldIndicesCode <>
-                "if(vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
+                "if (vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
 
                 ToString@Utils`MathIndexToCPP@positions[[1,2]] <>
 
@@ -1647,14 +1647,14 @@ If[Length@positions =!= 1, Quit[1]];
                 "vertex" <> ToString@indices[[positions[[2,1]]]] <> "::template indices_of_field<" <>
                 ToString@Utils`MathIndexToCPP@positions[[2,2]] <>
 
-                ">(index"<> ToString@indices[[positions[[2,1]]]] <> ")) {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n"
+                ">(index"<> ToString@indices[[positions[[2,1]]]] <> "))\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
       ]& /@ Range[4, 3 + Length[verticesInFieldTypesForFACp]];
 
 functionBody = "// skip indices that don't match external indices\n" <>
                   matchExternalFieldIndicesCode <>
-                     "if(externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3) {\n" <>
+                     "\nif (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)\n" <>
                      TextFormatting`IndentText["continue;"] <>
-                     "\n}\n\n" <>
+                     "\n\n" <>
 
                   "// connect internal particles in vertices\n" <>
                   matchInternalFieldIndicesCode <>
