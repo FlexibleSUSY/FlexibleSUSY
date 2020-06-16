@@ -1552,7 +1552,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       mass = {}, translation, fieldAssociation,
       externalEdges,
      (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = Unique["colorFac"], symmetryFac = Unique["symmetryFac"]
+     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac"
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
@@ -1583,7 +1583,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
 
       (* set of unique indices used in names of vertices and indices *)
-      indices = Table[Unique["Id"], {Length@verticesForFACp}];
+      indices = Table["Id"<>ToString@i, {i, Length@verticesForFACp}];
 
       (* create using declarations for vertices *)
       cppVertices =
