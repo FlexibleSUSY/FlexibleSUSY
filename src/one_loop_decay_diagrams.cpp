@@ -17,7 +17,6 @@
 // ====================================================================
 
 #include "one_loop_decay_diagrams.hpp"
-#include "pv.hpp"
 #include "wrappers.hpp"
 #include "loop_libraries/loop_library.hpp"
 
