@@ -35,10 +35,6 @@ const auto integrator = runge_kutta::Basic_rk_integrator<Eigen::ArrayXd>();
 
 } // anonymous namespace
 
-Beta_function::Beta_function()
-{
-}
-
 void Beta_function::reset()
 {
    num_pars = 0;
@@ -128,9 +124,9 @@ Eigen::ArrayXd Beta_function::derivatives(double x, const Eigen::ArrayXd& y)
  *
  * @return RG running precision
  */
-double Beta_function::get_tolerance(double eps)
+double Beta_function::get_tolerance(double eps) const
 {
-   double tol;
+   double tol = 0;
    if (eps < 0.0)
       tol = tolerance;
    else if (eps < min_tolerance)

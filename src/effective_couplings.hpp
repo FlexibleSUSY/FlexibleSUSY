@@ -21,8 +21,6 @@
 
 #include <complex>
 
-#include "wrappers.hpp"
-
 namespace flexiblesusy {
 
 namespace effective_couplings {

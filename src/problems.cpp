@@ -17,11 +17,11 @@
 // ====================================================================
 
 #include "problems.hpp"
+#include "config.h"
 #include "logger.hpp"
 #include "names.hpp"
 #include "string_format.hpp"
 #include "string_utils.hpp"
-#include "config.h"
 
 #include <algorithm>
 #include <iostream>

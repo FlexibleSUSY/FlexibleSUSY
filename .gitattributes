@@ -79,6 +79,7 @@ model_files/SMNoRGEs            export-ignore
 model_files/SMRules             export-ignore
 model_files/SMSemiAnalytic      export-ignore
 model_files/SMSU3               export-ignore
+model_files/SSMMhInput          export-ignore
 model_files/SSMSemiAnalytic     export-ignore
 model_files/SMThrow             export-ignore
 model_files/TensorCoupling      export-ignore

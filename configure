@@ -342,6 +342,7 @@ log_package_information() {
 #_____________________________________________________________________
 guess_machine_word_size() {
     local chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    exists_in_path getconf && chip="${chip}$(getconf LONG_BIT)"
     case "$chip" in
         *32|i[36]86)
              machine_word_size="32"; return 0 ;;
@@ -1250,6 +1251,7 @@ check_librarylink() {
     if [ "x$enable_librarylink" = "xyes" ] ; then
         check_librarylink_incl
         check_librarylink_libs
+	[ "x$machine_word_size" = "x32" ] && CPPFLAGS="$CPPFLAGS -DMINT_32"
     fi
 }
 

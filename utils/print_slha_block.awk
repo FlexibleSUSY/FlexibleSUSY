@@ -22,11 +22,11 @@ BEGIN {
    # SLHA defines that the first character of a block statement is
    # 'B'.  However, for compatibility we allow for 'b' as well.
 
-   pattern     = "^block[[:blank:]]*" tolower(block) "([^[:graph:]].*)?$"
-   not_pattern = "^block[[:blank:]]*.*$"
+   pattern     = "^block[ \t\n\r\f]*" tolower(block) "([^a-zA-Z0-9_].*)?$";
+   not_pattern = "^block[ \t\n\r\f]*.*$";
 
    # line is a comment
-   if (omit_comments == 1 && $0 ~ "^[[:blank:]]*#")
+   if (omit_comments == 1 && $0 ~ "^[ \t\n\r\f]*#")
        next
 
    if (tolower($0) ~ pattern) {

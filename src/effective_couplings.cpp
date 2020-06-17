@@ -1071,8 +1071,7 @@ std::complex<double> scalar_diphoton_fermion_loop(
    const double tau = 0.25 * sqr(m_decay) / sqr(m_loop);
    const double tau_min = 75.0;
 
-   const std::map<double, std::complex<double> > data
-      = get_scalar_fermion_loop_data();
+   const auto& data = get_scalar_fermion_loop_data();
 
    std::complex<double> result;
    if (tau < tau_min) {

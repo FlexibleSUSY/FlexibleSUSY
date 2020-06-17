@@ -166,7 +166,7 @@ void integrateOdes(ArrayType& ystart, double from, double to, double eps,
    ArrayType yscal(nvar);
    ArrayType y(ystart);
    ArrayType dydx;
-   int max_step_dir;
+   int max_step_dir = 0;
 
    for (int nstp = 0; nstp < max_steps; ++nstp) {
       dydx = derivs(x, y);
