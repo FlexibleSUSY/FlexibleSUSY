@@ -50,10 +50,10 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
 
    switch (include_higher_order_corrections) {
-      case HigherOrderSMCorrections::enable:
+      case SM_higher_order_corrections::enable:
          result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
          break;
-      case HigherOrderSMCorrections::disable:
+      case SM_higher_order_corrections::disable:
          break;
       default:
          break;

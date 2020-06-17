@@ -641,7 +641,7 @@ Block MSOFT Q= 8.61574711E+02
 
    MSSM_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
-   MSSM_decays decays(m, qedqcd, HigherOrderSMCorrections::enable);
+   MSSM_decays decays(m, qedqcd, SM_higher_order_corrections::enable);
 
    // scalar Higgs
 

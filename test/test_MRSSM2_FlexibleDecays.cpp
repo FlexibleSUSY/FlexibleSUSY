@@ -683,7 +683,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    MRSSM2_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
-   MRSSM2_decays decays(m, qedqcd, HigherOrderSMCorrections::enable);
+   MRSSM2_decays decays(m, qedqcd, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 

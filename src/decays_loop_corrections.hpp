@@ -27,6 +27,8 @@
 
 namespace flexiblesusy {
 
+enum class SM_higher_order_corrections {enable, disable};
+
 struct Decays_loop_corrections {
    // @todo determine what loop corrections are required
 };
