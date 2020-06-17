@@ -1090,13 +1090,12 @@ Module[{cxxVertices, vertexPartition,
       such that we get for example SARAH_g1 instead of g1 in
       generated C++ code *)
    ParallelEvaluate[
-      (BeginPackage[#];EndPackage[];
-       (* prevent shdw warning with Susyno`LieGroups`M: *)
-       Off[Remove::remal];
-       Remove[Susyno`LieGroups`M];
-       On[Remove::remal];
-      )& /@ contextsToDistribute,
-      DistributedContexts->Automatic
+      (BeginPackage[#];EndPackage[])& /@ contextsToDistribute;
+      (* prevent shdw warning with Susyno`LieGroups`M: *)
+      Off[Remove::remal];
+      Remove[Susyno`LieGroups`M];
+      On[Remove::remal];,
+      DistributedContexts->All
    ];
    (* without this CForm converts complex numbers using
       Complex wrapper *)
