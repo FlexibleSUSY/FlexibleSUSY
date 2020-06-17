@@ -24,8 +24,8 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 namespace flexiblesusy {
 

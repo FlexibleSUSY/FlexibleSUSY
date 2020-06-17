@@ -17,8 +17,8 @@
 // ====================================================================
 
 #include "spectrum_generator_settings.hpp"
-#include "string_format.hpp"
 #include "error.hpp"
+#include "string_format.hpp"
 
 #include <cmath>
 #include <iostream>

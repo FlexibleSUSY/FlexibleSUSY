@@ -26,7 +26,7 @@ namespace flexiblesusy {
 
 int to_int(const char* s)
 {
-   char* end;
+   char* end = nullptr;
    errno = 0;
 
    const long l = std::strtol(s, &end, 10);
@@ -52,7 +52,7 @@ int to_int(const char* s)
 
 long to_long(const char* s)
 {
-   char* end;
+   char* end = nullptr;
    errno = 0;
 
    const long l = std::strtol(s, &end, 10);
@@ -78,7 +78,7 @@ long to_long(const char* s)
 
 double to_double(const char* s)
 {
-   char* end;
+   char* end = nullptr;
    errno = 0;
 
    const double d = std::strtod(s, &end);

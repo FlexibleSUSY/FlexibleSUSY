@@ -29,7 +29,7 @@ struct CKM_parameters {
    void reset_to_observation();
 
    void set_from_wolfenstein(double, double, double, double);
-   void get_wolfenstein(double&, double&, double&, double&);
+   void get_wolfenstein(double&, double&, double&, double&) const;
 
    Eigen::Matrix<double,3,3> get_real_ckm() const;
    Eigen::Matrix<std::complex<double>,3,3> get_complex_ckm() const;
