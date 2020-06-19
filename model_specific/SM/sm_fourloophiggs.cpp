@@ -17,10 +17,18 @@
 // ====================================================================
 
 #include "sm_fourloophiggs.hpp"
-#include "wrappers.hpp"
+#include <cmath>
 
 namespace flexiblesusy {
 namespace sm_fourloophiggs {
+
+namespace {
+
+constexpr double fourLoop = 1.608129755454920543e-09; // 1/(4 Pi)^8
+
+double sqr(double x) noexcept { return x*x; }
+
+} // anonymous namespace
 
 /**
  * Standard Model Higgs mass 4-loop contribution, \f$O(\alpha_t
@@ -39,14 +47,14 @@ namespace sm_fourloophiggs {
 double delta_mh_4loop_at_as_as_as_sm(
    double scale, double mt, double yt, double g3)
 {
-   const double yt2 = Sqr(yt);
-   const double mt2 = Sqr(mt);
-   const double g36 = Power6(g3);
-   const double Q2 = Sqr(scale);
-   const double LogT = FiniteLog(mt2 / Q2);
-   const double LogT2 = Sqr(LogT);
-   const double LogT3 = Power3(LogT);
-   const double LogT4 = Power4(LogT);
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double g36 = sqr(g3*g3*g3);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mt2/Q2);
+   const double LogT2 = sqr(LogT);
+   const double LogT3 = LogT2*LogT;
+   const double LogT4 = sqr(LogT2);
 
    const double result =
       g36*yt2*mt2 * (23925.974863118638

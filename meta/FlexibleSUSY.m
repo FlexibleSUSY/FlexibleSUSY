@@ -168,7 +168,7 @@ FSRestrictParameter; (* restrict parameter to interval *)
 FSInitialSetting;    (* set parameter before calculating masses *)
 FSSolveEWSBFor;
 FSSolveEWSBTreeLevelFor = {};
-Temporary;
+FSTemporary;
 MZ;
 MT;
 MZDRbar;
@@ -2700,6 +2700,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@gaugeCouplingNormalizationDefs@" -> IndentText[gaugeCouplingNormalizationDefs],
                             "@numberOfDRbarBlocks@"            -> ToString[numberOfDRbarBlocks],
                             "@drBarBlockNames@"                -> WrapLines[drBarBlockNames],
+                            "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -3617,6 +3618,17 @@ ReadSARAHBetaFunctions[] :=
            {susyBetaFunctions, susyBreakingBetaFunctions}
     ]
 
+(* disable tensor couplings *)
+FSDisableTensorCouplings[parameters_] :=
+    Module[{tensorCouplings = Select[parameters, Parameters`IsTensor]},
+           If[tensorCouplings =!= {},
+              Print["Error: Models with tensor couplings are currently not supported."];
+              Print["   The following parameters have a tensor structure:"];
+              Print["   ", InputForm[tensorCouplings]];
+              Quit[1];
+           ];
+    ];
+
 SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
     Module[{allParameters, phases},
            (* identify real parameters *)
@@ -3634,6 +3646,8 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
                ConvertSarahPhases[SARAH`ParticlePhases],
                Exp[I #]& /@ GetVEVPhases[FlexibleSUSY`FSEigenstates]];
            Parameters`SetPhases[phases];
+
+           FSDisableTensorCouplings[allParameters];
 
            allParameters
     ]
@@ -4117,7 +4131,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["Creating class for SLHA model ..."];
            WriteModelSLHAClass[massMatrices,
                                {{FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.hpp.in"}],
-                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]}
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]},
+                                {FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.cpp.in"}],
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.cpp"}]}
                                }];
 
            Utils`PrintHeadline["Creating utilities"];

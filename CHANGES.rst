@@ -1,14 +1,39 @@
+FlexibleSUSY 2.6.0 [not released yet]
+=====================================
+
+Changes
+-------
+
+* GM2Calc_ is now an external dependency.  It can be calculated via
+  Conan_.  FlexibleSUSY requires GM2Calc version 1.7.0 or higher.
+
 FlexibleSUSY 2.5.0 [not released yet]
 =====================================
 
 New features
 ------------
 
-* Interface to one loop integrals was changed to a new one, which allows
-  switching of loop library at run time. See
-  `doc/add_loop_library.rst <doc/add_loop_library.rst>`_ and
-  `src/loop_libraries/loop_library_interface.hpp <src/loop_libraries/loop_library_interface.hpp>`_
-  for further details.
+* Added support for the `COLLIER <https://collier.hepforge.org/>`_
+  [`arXiv:1604.06792 <https://arxiv.org/abs/1604.06792>`_]
+  Passarino-Veltman loop function library.  The COLLIER support can be
+  activated by the following ``configure`` command::
+
+      ./configure --with-loop-libraries=collier [...]
+
+  See ``./configure --help`` and `README.rst <README.rst>`_ for
+  further information.
+
+  Note: COLLIER can be automatically installed via::
+
+      conan install . --build=missing
+
+  The loop function library to use at run-time can be selected by
+  setting the flag ``FlexibleSUSY[31]`` accordingly in the SLHA input
+  record (0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFLite).  In
+  the Mathematica interface, chose ``loopLibrary -> [...]``
+  accordingly.
+
+  Thanks to Uladzimir Khasianevich.
 
 * Added calculation of :math:`$b \to s \gamma$`.  Currently only
   diagrams with scalars and fermions in the loop are supported.  See
@@ -25,32 +50,42 @@ New features
 Changes
 -------
 
-* Changed code organization of NPointFunctions module: improved speed of
-  ``C++`` calculations, improved maintainability of the metacode.
+* [commit c5b7e4a8b]: Rename FlexibleSUSY symbol ``Temporary`` to
+  ``FSTemporary`` in order to avoid a conflict with an internal
+  mathematica symbol.
 
-* Added support of ``COLLIER`` loop library.
+* The C++ interface for the one-loop integrals has been changed to
+  allow switching between the used loop library at run-time. See
+  `doc/add_loop_library.rst <doc/add_loop_library.rst>`_ and
+  `src/loop_libraries/loop_library_interface.hpp
+  <src/loop_libraries/loop_library_interface.hpp>`_ for further
+  technical details.
+
+  Thanks to Uladzimir Khasianevich.
+
+* Changed code organization of ``NPointFunctions`` module: improved
+  speed of ``C++`` calculations, improved maintainability of the
+  metacode.
 
 * Improved performance of ``flexiblesusy-config`` script.
 
 * Improved performance of 1-loop threshold functions from
-  `[arXiv:1407.4081] <https://arxiv.org/abs/1407.4081>`_, used in
+  [`arXiv:1407.4081 <https://arxiv.org/abs/1407.4081>`_], used in
   HSSUSY.
 
-* ``make all-test`` returns early and with a non-zero exit code when a
+* ``make all-test`` now returns early and with a non-zero exit code when a
   test fails.  Use ``make -k all-test`` to force running of all tests.
 
 * When installing the dependencies with Conan_, the `Eigen 3`_ library
   from the Conan repository is preferred over the one installed in the
   system directories.
 
-* Improved performance and compile-time of 2-loop MSSM threshold
+* Improved performance and compile-time of the 2-loop MSSM threshold
   corrections.
 
-* GM2Calc_ is now an external dependency.  It can be calculated via
-  Conan_.  FlexibleSUSY requires GM2Calc version 1.7.0 or higher.
+* Improved compile time.
 
-* Improved performance of 1- and 2-loop threshold correction loop
-  functions used in HSSUSY.
+* Updated GM2Calc to version 1.6.0.
 
 Fixed bugs
 ----------
@@ -59,6 +94,8 @@ Fixed bugs
   platforms by linking with libquadmath when necessary.
 
 * Fixed numerical instability of SOFTSUSY's B0 function.
+
+* Fixed run-time error on 32-bit ARM platforms
 
 FlexibleSUSY 2.4.2 [April, 10 2020]
 ===================================
@@ -1511,8 +1548,8 @@ FlexibleSUSY-1.4.0 [March, 08 2016]
   and set the up-quark Yukawa coupling to zero::
 
       LowScaleInput = {
-         {Temporary[g1], g1 / 2},
-         {Temporary[Yu[1,1]], 0},
+         {FSTemporary[g1], g1 / 2},
+         {FSTemporary[Yu[1,1]], 0},
          ...
       };
 

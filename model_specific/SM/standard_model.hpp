@@ -132,8 +132,8 @@ public:
    double,3,3>& Ye_, double mu2_, double v_);
    Standard_model(const Standard_model&) = default;
    Standard_model(Standard_model&&) = default;
-
    virtual ~Standard_model() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    Standard_model& operator=(const Standard_model&) = default;
    Standard_model& operator=(Standard_model&&) = default;
@@ -167,7 +167,8 @@ public:
 
    virtual Eigen::ArrayXd beta() const override;
    virtual Eigen::ArrayXd get() const override;
-   void print(std::ostream& out = std::cerr) const;
+   void print() const;
+   void print(std::ostream&) const;
    virtual void set(const Eigen::ArrayXd&) override;
 
    Standard_model calc_beta() const;

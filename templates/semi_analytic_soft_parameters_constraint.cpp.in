@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_semi_analytic_soft_parameters_constraint.hpp"
 #include "@ModelName@_semi_analytic_model.hpp"

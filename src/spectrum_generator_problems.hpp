@@ -39,8 +39,10 @@ public:
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string(const std::string& sep = "\n") const;
    std::string get_warning_string(const std::string& sep = "\n") const;
-   void print_problems(std::ostream& = std::cerr) const;
-   void print_warnings(std::ostream& = std::cerr) const;
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
 
    void set_model_problems(const std::vector<Problems>&); ///< (re)set all model problems
    void set_model_problems(std::vector<Problems>&&);      ///< (re)set all model problems

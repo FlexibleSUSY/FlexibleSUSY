@@ -490,6 +490,15 @@ FillGM2CalcInterfaceData[struct_String] :=
            yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
+
+           If[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
+                       chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
+                       md2, ml2, me2, tu, td, te, yu, yd, ye}, Null],
+              Print["Error: The GM2Calc addon cannot be used in this model, because it is not a MSSM-like model with sfermion flavour conservation. ",
+                    "Please remove aMuonGM2Calc and aMuonGM2CalcUncertainty from the model file."];
+              Quit[1];
+           ];
+
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>

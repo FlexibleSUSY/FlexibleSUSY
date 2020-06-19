@@ -17,13 +17,14 @@
 // ====================================================================
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <fstream>
-#include <functional>
 #include <iostream>
+#include <iterator>
 #include <set>
 #include <string>
 #include <utility>
@@ -101,7 +102,7 @@ std::vector<std::string> delete_duplicates(
    std::vector<std::string> unique_vector;
 
    std::copy_if(vec.begin(), vec.end(), std::back_inserter(unique_vector),
-                std::ref(pred));
+                [&pred] (const std::string& f) { return pred(f); });
 
    return unique_vector;
 }
@@ -117,22 +118,6 @@ std::string replace_extension(const std::string& str, const std::string& ext)
 bool starts_with(const std::string& str, const std::string& prefix)
 {
    return str.compare(0, prefix.size(), prefix) == 0;
-}
-
-/// removes whitespace from left side of string
-void trim_left(std::string& str)
-{
-   str.erase(str.begin(),
-             std::find_if(str.begin(), str.end(),
-                          [] (std::string::value_type c) { return std::isspace(c) == 0; }));
-}
-
-/// returns copy of s with whitespace removed from left side of string
-std::string trim_left_copy(const std::string& s)
-{
-   std::string str(s);
-   trim_left(str);
-   return str;
 }
 
 /// print usage message
@@ -178,37 +163,44 @@ void print_empty_phony_targets(std::ostream& ostr, const std::vector<std::string
       ostr << '\n' << d << ":\n";
 }
 
-/// returns file name from include "..." statement
-std::string get_filename_from_include(std::string line)
+/// extracts file name from include "..." statement
+template <class OutputIterator>
+void get_filename_from_include(const char* s, OutputIterator it)
 {
-   trim_left(line);
+   if (!s || !*s) return;
 
-   if (line.empty() || line[0] != '#')
-      return "";
+   // skip whitespace
+   while (*s && std::isspace(*s)) s++;
 
-   // skip `#' and following whitespace
-   line = trim_left_copy(line.substr(std::strlen("#")));
+   // skip #
+   if (*s && *s == '#') s++;
+   else return;
 
-   if (!starts_with(line, "include"))
-      return "";
+   // skip whitespace
+   while (*s && std::isspace(*s)) s++;
 
    // skip `include'
-   line = trim_left_copy(line.substr(std::strlen("include")));
+   if (*s && std::strncmp(s, "include", 7) == 0) s += 7;
+   else return;
 
    // extract file name from "file-name"
-   std::size_t pos1 = line.find_first_of('"');
-   if (pos1 == std::string::npos)
-      return "";
+   if (*s) s = std::strchr(s, '"');
+   if (!s) return;
+   if (*s) s++;
 
-   pos1++;
+   const char* pos1 = s;
 
-   std::size_t pos2 = line.find_first_of('"', pos1);
-   if (pos2 == std::string::npos)
-      return "";
+   if (*s) s = std::strchr(s, '"');
+   if (!s) return;
 
-   pos2--;
+   const char* pos2 = s;
 
-   return line.substr(pos1, pos2);
+   const std::ptrdiff_t len = pos2 - pos1;
+
+   if (len > 0) {
+      *it = std::string(pos1, len);
+      it++;
+   }
 }
 
 /// extract include statements from file (ignoring system headers)
@@ -219,9 +211,7 @@ std::vector<std::string> get_included_files(const std::string& file_name)
    std::string line;
 
    while (std::getline(istr, line)) {
-      auto file = get_filename_from_include(line);
-      if (!file.empty())
-         includes.push_back(std::move(file));
+      get_filename_from_include(line.c_str(), std::back_inserter(includes));
    }
 
    return includes;

@@ -19,7 +19,7 @@
 #include "wrappers.hpp"
 #include "dilog.hpp"
 #include "numerics2.hpp"
-#include "string_utils.hpp"
+#include "string_format.hpp"
 #include "trilog.hpp"
 
 #include <complex>
@@ -69,13 +69,7 @@ bool IsClose(double a, double b, double eps) noexcept
 
 bool IsCloseRel(double a, double b, double eps) noexcept
 {
-   if (IsClose(a, b, std::numeric_limits<double>::epsilon()))
-      return true;
-
-   if (std::abs(a) < std::numeric_limits<double>::epsilon())
-      return IsClose(a, b, eps);
-
-   return std::abs((a - b)/a) < eps;
+   return is_equal_rel(a, b, eps);
 }
 
 bool IsFinite(double x) noexcept
@@ -124,7 +118,7 @@ double MaxAbsValue(const std::complex<double>& x) noexcept
    return Abs(x);
 }
 
-double MaxRelDiff(double a, double b)
+double MaxRelDiff(double a, double b) noexcept
 {
    const double max = std::max(std::abs(a), std::abs(b));
 
@@ -135,7 +129,7 @@ double MaxRelDiff(double a, double b)
    return std::abs((a - b) / max);
 }
 
-double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
+double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b) noexcept
 {
    const double max = std::max(std::abs(a), std::abs(b));
 
@@ -146,12 +140,12 @@ double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b)
    return std::abs((a - b) / max);
 }
 
-double PolyLog(int n, double z)
+double PolyLog(int n, double z) noexcept
 {
    return std::real(PolyLog(n, std::complex<double>(z, 0.0)));
 }
 
-std::complex<double> PolyLog(int n, const std::complex<double>& z)
+std::complex<double> PolyLog(int n, const std::complex<double>& z) noexcept
 {
    switch (n) {
    case 1: return -std::log(1.0 - z);
@@ -160,7 +154,9 @@ std::complex<double> PolyLog(int n, const std::complex<double>& z)
    default: break;
    }
 
-   throw SetupError("PolyLog(n != 1|2|3) not implemented");
+   ERROR("PolyLog(n != 1|2|3) not implemented");
+
+   return { 0.0, 0.0 };
 }
 
 double Re(double x) noexcept
@@ -234,7 +230,7 @@ std::complex<double> Total(const std::complex<double>& a) noexcept
 }
 
 /// unit vector of length N into direction i
-Eigen::VectorXd UnitVector(int N, int i)
+Eigen::VectorXd UnitVector(int N, int i) noexcept
 {
    Eigen::VectorXd v = Eigen::VectorXd::Zero(N);
    v(i) = 1;
@@ -243,7 +239,7 @@ Eigen::VectorXd UnitVector(int N, int i)
 }
 
 /// unit matrix projector of size MxN into direction i, j
-Eigen::MatrixXd MatrixProjector(int M, int N, int i, int j)
+Eigen::MatrixXd MatrixProjector(int M, int N, int i, int j) noexcept
 {
    Eigen::MatrixXd m = Eigen::MatrixXd::Zero(M,N);
    m(i,j) = 1;

@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "config.h"
 
@@ -158,6 +157,7 @@ class @ModelName@_spectrum_impl : public @ModelName@_spectrum
 {
 public:
    virtual ~@ModelName@_spectrum_impl() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    virtual void put_model_spectra(MLINK link) const override;
 
@@ -236,7 +236,7 @@ Handle_map handles;
 Handle get_new_handle()
 {
    static const std::size_t max_handles =
-      static_cast<std::size_t>(std::exp2(std::numeric_limits<Handle>::digits) - 1);
+      static_cast<std::size_t>(std::numeric_limits<Handle>::max());
 
    if (handles.size() >= max_handles)
       throw ENotEnoughFreeHandles(handles.size());
@@ -714,8 +714,7 @@ void put_spectrum(const standard_model::StandardModel<Solver_type>& model, MLINK
 
 /******************************************************************/
 
-template <typename Model>
-void put_spectrum(const @ModelName@_slha<Model>& model, MLINK link)
+void put_spectrum(const @ModelName@_slha& model, MLINK link)
 {
    MLPutRule(link, @ModelName@_info::model_name);
    MLPutFunction(link, "List", @numberOfSpectrumEntries@);

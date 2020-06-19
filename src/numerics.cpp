@@ -420,57 +420,56 @@ double d1_b0(double /* p2 */, double m2a, double m2b) noexcept
 }
 
 double c00(double m1, double m2, double m3, double q) noexcept
-{  
+{
   // taken from Package X
-  using std::log;
-  const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3), q2 = sqr(q); 
-   
+  const double m12 = sqr(m1), m22 = sqr(m2), m32 = sqr(m3), q2 = sqr(q);
+
   double ans = 0.;
 
   if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)
-    && is_close(m3, 0., EPSTOL)) {
+      && is_close(m3, 0., EPSTOL)) {
       // IR singularity
-     ans =  0.;
+     ans = 0.;
   } else if (is_close(m2, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
-     ans = 3./8. + 1./4*log(q2/m12);
+     ans = 3./8. + 1./4*std::log(q2/m12);
   } else if (is_close(m1, 0., EPSTOL) && is_close(m3, 0., EPSTOL)) {
-     ans = 3./8. + 1./4*log(q2/m22);
+     ans = 3./8. + 1./4*std::log(q2/m22);
   } else if (is_close(m1, 0., EPSTOL) && is_close(m2, 0., EPSTOL)) {
-     ans = 3./8. + 1./4*log(q2/m32);
+     ans = 3./8. + 1./4*std::log(q2/m32);
   } else if (is_close(m1, 0., EPSTOL)) {
      if (is_close(m2, m3, EPSTOL)) {
-        ans = 1./8 + 1./4*log(q2/m22);
+        ans = 1./8 + 1./4*std::log(q2/m22);
      } else {
-        ans = 3./8 - m22*log(m22/m32)/(4*(m22-m32)) + 1./4*log(q2/m32);
+        ans = 3./8 - m22*std::log(m22/m32)/(4*(m22-m32)) + 1./4*std::log(q2/m32);
      }
   } else if (is_close(m2, 0., EPSTOL)) {
      if (is_close(m1, m3, EPSTOL)) {
-        ans = 1./8 + 1./4*log(q2/m12);
+        ans = 1./8 + 1./4*std::log(q2/m12);
      } else {
-        ans = 3./8 - m12*log(m12/m32)/(4*(m12-m32)) + 1./4*log(q2/m32);
+        ans = 3./8 - m12*std::log(m12/m32)/(4*(m12-m32)) + 1./4*std::log(q2/m32);
      }
   } else if (is_close(m3, 0., EPSTOL)) {
      if (is_close(m1, m2, EPSTOL)) {
-        ans = 1./8 + 1./4*log(q2/m12);
+        ans = 1./8 + 1./4*std::log(q2/m12);
      } else {
-        ans = 3./8 - m22*log(m12/m22)/(4*(m12-m22)) + 1./4*log(q2/m12);
+        ans = 3./8 - m22*std::log(m12/m22)/(4*(m12-m22)) + 1./4*std::log(q2/m12);
      }
   } else if (is_close(m2, m3, EPSTOL)) {
     if (is_close(m1, m2, EPSTOL)) {
-        ans = 1./4*log(q2/m12);
+        ans = 1./4*std::log(q2/m12);
     } else {
         ans = (3*m12-m22)/(8*(m12-m22))
-            - 1./4*(sqr(m12)*log(m12/m22))/sqr(m12-m22) + 1./4*log(q2/m22);
+            - 1./4*(sqr(m12)*std::log(m12/m22))/sqr(m12-m22) + 1./4*std::log(q2/m22);
     }
   } else if (is_close(m1, m2, EPSTOL)) {
-     ans = (3*m32-m12)/(8*(m32-m12)) - 1./4*(sqr(m32)*log(m32/m12))/sqr(m32-m12)
-         + 1./4*log(q2/m12);
+     ans = (3*m32-m12)/(8*(m32-m12)) - 1./4*(sqr(m32)*std::log(m32/m12))/sqr(m32-m12)
+         + 1./4*std::log(q2/m12);
   } else if (is_close(m1, m3, EPSTOL)) {
-     ans = (3*m22-m12)/(8*(m22-m12)) - 1./4*(sqr(m22)*log(m22/m12))/sqr(m22-m12)
-         + 1./4*log(q2/m12);
+     ans = (3*m22-m12)/(8*(m22-m12)) - 1./4*(sqr(m22)*std::log(m22/m12))/sqr(m22-m12)
+         + 1./4*std::log(q2/m12);
   } else {
-     ans = 3./8 - 1./4*sqr(m12)*log(m12/m32)/((m12-m22)*(m12-m32))
-         - 1./4*sqr(m22)*log(m22/m32)/((m22-m12)*(m22-m32)) + 1./4*log(q2/m32);
+     ans = 3./8 - 1./4*sqr(m12)*std::log(m12/m32)/((m12-m22)*(m12-m32))
+         - 1./4*sqr(m22)*std::log(m22/m32)/((m22-m12)*(m22-m32)) + 1./4*std::log(q2/m32);
   }
 
   return ans;

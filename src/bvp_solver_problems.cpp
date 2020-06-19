@@ -71,12 +71,22 @@ std::string BVP_solver_problems::get_warning_string() const
    return concat(get_warning_strings(), '\n');
 }
 
+void BVP_solver_problems::print_problems() const
+{
+   print_problems(std::cerr);
+}
+
 void BVP_solver_problems::print_problems(std::ostream& ostr) const
 {
    if (!have_problem())
       return;
 
    ostr << get_problem_string();
+}
+
+void BVP_solver_problems::print_warnings() const
+{
+   print_warnings(std::cerr);
 }
 
 void BVP_solver_problems::print_warnings(std::ostream& ostr) const

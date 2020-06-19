@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_points)
       const Real das_at_as = delta_alpha_s_2loop_at_as(r.pars);
       const Real das_ab_as = delta_alpha_s_2loop_ab_as(r.pars);
 
-      BOOST_CHECK_CLOSE_FRACTION(das_as_as, r.das_as_as, 1.0e-10l);
+      BOOST_CHECK_CLOSE_FRACTION(das_as_as, r.das_as_as, 1.0e-6l);
       BOOST_CHECK_CLOSE_FRACTION(das_at_as, r.das_at_as, 1.0e-10l);
       BOOST_CHECK_CLOSE_FRACTION(das_ab_as, r.das_ab_as, 1.0e-10l);
    }

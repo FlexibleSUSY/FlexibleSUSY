@@ -29,7 +29,7 @@ namespace softsusy {
 
 namespace flexiblesusy {
 
-inline MRSSM2_slha<MRSSM2<Two_scale>>
+inline MRSSM2_slha
 setup_MRSSM2(const MRSSM2_input_parameters& input, const softsusy::QedQcd& qedqcd)
 {
 
@@ -44,7 +44,7 @@ setup_MRSSM2(const MRSSM2_input_parameters& input, const softsusy::QedQcd& qedqc
     return std::get<0>(spectrum_generator.get_models_slha());
 }
 
-inline MRSSM2_slha<MRSSM2<Two_scale>>
+inline MRSSM2_slha
 setup_MRSSM2(const MRSSM2_input_parameters& input, const softsusy::QedQcd& qedqcd,
         const Spectrum_generator_settings& settings)
 {

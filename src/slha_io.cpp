@@ -17,18 +17,24 @@
 // ====================================================================
 
 #include "slha_io.hpp"
+#include "error.hpp"
 #include "ew_input.hpp"
 #include "logger.hpp"
 #include "lowe.h"
 #include "numerics2.hpp"
 #include "physical_input.hpp"
 #include "pmns.hpp"
+#include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
+#include "string_conversion.hpp"
+#include "string_format.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <complex>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace flexiblesusy {
@@ -241,13 +247,226 @@ void process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, double val
    }
 }
 
+int column_major_index(int r, int c, int /* rows */ , int cols)
+{
+   return c*cols + r;
+}
+
+template <typename T>
+struct real_prefix {
+   constexpr static const char* const value = "Re(";
+};
+
+template <>
+struct real_prefix<double> {
+   constexpr static const char* const value = "";
+};
+
+template <typename T>
+struct real_suffix {
+   constexpr static const char* const value = ")";
+};
+
+template <>
+struct real_suffix<double> {
+   constexpr static const char* const value = "";
+};
+
 } // anonymous namespace
+
+namespace detail {
+
+bool read_scale(const SLHAea::Line& line, double& scale)
+{
+   if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
+      scale = to_double(line[3].c_str());
+      return true;
+   }
+   return false;
+}
+
+template <typename T>
+double read_matrix_(const SLHAea::Coll& data, const std::string& block_name, T* a, int rows, int cols)
+{
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+
+   double scale = 0.;
+
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         detail::read_scale(line, scale);
+
+         if (line.is_data_line() && line.size() >= 3) {
+            const int i = to_int(line[0].c_str()) - 1;
+            const int k = to_int(line[1].c_str()) - 1;
+            if (0 <= i && i < rows && 0 <= k && k < cols) {
+               a[k*cols + i] = to_double(line[2].c_str());
+            }
+         }
+      }
+
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
+   }
+
+   return scale;
+}
+
+template <typename T>
+double read_vector_(const SLHAea::Coll& data, const std::string& block_name, T* a, int len)
+{
+   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+
+   double scale = 0.;
+
+   while (block != data.cend()) {
+      for (const auto& line: *block) {
+         detail::read_scale(line, scale);
+
+         if (line.is_data_line() && line.size() >= 2) {
+            const int i = to_int(line[0].c_str()) - 1;
+            if (0 <= i && i < len) {
+               a[i] = to_double(line[1].c_str());
+            }
+         }
+      }
+
+      ++block;
+      block = SLHAea::Coll::find(block, data.cend(), block_name);
+   }
+
+   return scale;
+}
+
+
+template <typename T>
+std::string format_vector(const std::string& name, const T* a, const std::string& symbol, int rows)
+{
+   constexpr const char* const prefix = real_prefix<T>::value;
+   constexpr const char* const suffix = real_suffix<T>::value;
+
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      ss << FORMAT_VECTOR(i, std::real(a[i-1]), (prefix + symbol + "(" + flexiblesusy::to_string(i) + ")" + suffix));
+   }
+
+   return ss.str();
+}
+
+
+template <typename T>
+std::string format_matrix(const std::string& name, const T* a, const std::string& symbol, int rows, int cols)
+{
+   constexpr const char* const prefix = real_prefix<T>::value;
+   constexpr const char* const suffix = real_suffix<T>::value;
+
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      for (int k = 1; k <= cols; ++k) {
+         const int idx = column_major_index(i-1, k-1, rows, cols);
+         ss << FORMAT_MIXING_MATRIX(i, k, std::real(a[idx]),
+               (prefix + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + ")" + suffix));
+      }
+   }
+
+   return ss.str();
+}
+
+
+template <typename T>
+std::string format_vector_imag(const std::string& name, const T* a, const std::string& symbol, int rows)
+{
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      ss << FORMAT_VECTOR(i, std::imag(a[i-1]), ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "))"));
+   }
+
+   return ss.str();
+}
+
+
+template <typename T>
+std::string format_matrix_imag(const std::string& name, const T* a, const std::string& symbol, int rows, int cols)
+{
+   std::ostringstream ss;
+   ss << name;
+
+   for (int i = 1; i <= rows; ++i) {
+      for (int k = 1; k <= cols; ++k) {
+         const int idx = column_major_index(i-1, k-1, rows, cols);
+         ss << FORMAT_MIXING_MATRIX(i, k, std::imag(a[idx]),
+               ("Im(" + symbol + "(" + flexiblesusy::to_string(i) + "," + flexiblesusy::to_string(k) + "))"));
+      }
+   }
+
+   return ss.str();
+}
+
+
+} // namespace detail
+
+
+SLHA_io::SLHA_io()
+   : data(std::make_unique<SLHAea::Coll>())
+{
+}
+
+
+SLHA_io::SLHA_io(const SLHA_io& other)
+   : data(std::make_unique<SLHAea::Coll>(*other.data))
+   , modsel(other.modsel)
+{
+}
+
+
+SLHA_io::SLHA_io(SLHA_io&& other) noexcept
+   : data(std::move(other.data))
+   , modsel(std::move(other.modsel))
+{
+}
+
+
+SLHA_io::~SLHA_io() = default;
+
+
+SLHA_io& SLHA_io::operator=(const SLHA_io& other)
+{
+   return *this = SLHA_io(other);
+}
+
+
+SLHA_io& SLHA_io::operator=(SLHA_io&& other) noexcept
+{
+   data = std::move(other.data);
+   modsel = std::move(other.modsel);
+   return *this;
+}
+
 
 void SLHA_io::clear()
 {
-   data.clear();
+   data->clear();
    modsel.clear();
 }
+
+
+const SLHAea::Coll& SLHA_io::get_data() const
+{
+   return *data;
+}
+
+
+void SLHA_io::set_data(const SLHAea::Coll& data_)
+{
+   data.reset(new SLHAea::Coll(data_));
+}
+
 
 std::string SLHA_io::block_head(const std::string& name, double scale)
 {
@@ -266,7 +485,7 @@ std::string SLHA_io::block_head(const std::string& name, double scale)
 
 bool SLHA_io::block_exists(const std::string& block_name) const
 {
-   return data.find(block_name) != data.cend();
+   return data->find(block_name) != data->cend();
 }
 
 /**
@@ -306,8 +525,8 @@ void SLHA_io::read_from_file(const std::string& file_name)
  */
 void SLHA_io::read_from_stream(std::istream& istr)
 {
-   data.clear();
-   data.read(istr);
+   data->clear();
+   data->read(istr);
    read_modsel();
 }
 
@@ -322,11 +541,7 @@ void SLHA_io::read_from_stream(std::istream& istr)
  */
 bool SLHA_io::read_scale(const SLHAea::Line& line, double& scale)
 {
-   if (line.is_block_def() && line.size() > 3 && line[2] == "Q=") {
-      scale = convert_to<double>(line[3]);
-      return true;
-   }
-   return false;
+   return detail::read_scale(line, scale);
 }
 
 void SLHA_io::read_modsel()
@@ -419,22 +634,22 @@ void SLHA_io::fill(Spectrum_generator_settings& settings) const
  */
 double SLHA_io::read_block(const std::string& block_name, const Tuple_processor& processor) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double scale = 0.;
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
 
          if (line.is_data_line() && line.size() >= 2) {
-            const auto key = convert_to<int>(line[0]);
-            const auto value = convert_to<double>(line[1]);
+            const auto key = to_int(line[0].c_str());
+            const auto value = to_double(line[1].c_str());
             processor(key, value);
          }
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -450,20 +665,20 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
  */
 double SLHA_io::read_block(const std::string& block_name, double& entry) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double scale = 0.;
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
 
          if (line.is_data_line()) {
-            entry = convert_to<double>(line[0]);
+            entry = to_double(line[0].c_str());
          }
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -471,16 +686,16 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
 
 double SLHA_io::read_entry(const std::string& block_name, int key) const
 {
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
    double entry = 0.;
    const SLHAea::Block::key_type keys(1, flexiblesusy::to_string(key));
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       auto line = block->find(keys);
 
       while (line != block->end()) {
          if (line->is_data_line() && line->size() > 1) {
-            entry = convert_to<double>(line->at(1));
+            entry = to_double(line->at(1).c_str());
          }
 
          ++line;
@@ -488,7 +703,7 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return entry;
@@ -504,15 +719,15 @@ double SLHA_io::read_entry(const std::string& block_name, int key) const
 double SLHA_io::read_scale(const std::string& block_name) const
 {
    double scale = 0.;
-   auto block = SLHAea::Coll::find(data.cbegin(), data.cend(), block_name);
+   auto block = SLHAea::Coll::find(data->cbegin(), data->cend(), block_name);
 
-   while (block != data.cend()) {
+   while (block != data->cend()) {
       for (const auto& line: *block) {
          read_scale(line, scale);
       }
 
       ++block;
-      block = SLHAea::Coll::find(block, data.cend(), block_name);
+      block = SLHAea::Coll::find(block, data->cend(), block_name);
    }
 
    return scale;
@@ -528,12 +743,12 @@ void SLHA_io::set_block(const std::string& lines, Position position)
    SLHAea::Block block;
    block.str(lines);
 
-   data.erase(block.name());
+   data->erase(block.name());
 
    if (position == front) {
-      data.push_front(block);
+      data->push_front(block);
    } else {
-      data.push_back(block);
+      data->push_back(block);
    }
 }
 
@@ -636,10 +851,89 @@ void SLHA_io::write_to_file(const std::string& file_name) const
 void SLHA_io::write_to_stream(std::ostream& ostr) const
 {
    if (ostr.good()) {
-      ostr << data;
+      ostr << *data;
    } else {
       ERROR("cannot write SLHA file");
    }
 }
+
+
+void SLHA_io::write_to_stream() const
+{
+   write_to_stream(std::cerr);
+}
+
+
+double SLHA_io::read_vector(const std::string& block_name, double* a, int len) const
+{
+   return detail::read_vector_(*data, block_name, a, len);
+}
+
+
+double SLHA_io::read_vector(const std::string& block_name, std::complex<double>* a, int len) const
+{
+   return detail::read_vector_(*data, block_name, a, len);
+}
+
+
+double SLHA_io::read_matrix(const std::string& block_name, double* a, int rows, int cols) const
+{
+   return detail::read_matrix_(*data, block_name, a, rows, cols);
+}
+
+
+double SLHA_io::read_matrix(const std::string& block_name, std::complex<double>* a, int rows, int cols) const
+{
+   return detail::read_matrix_(*data, block_name, a, rows, cols);
+}
+
+
+void SLHA_io::set_vector(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
+{
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, rows));
+}
+
+
+void SLHA_io::set_vector(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
+{
+   set_block(detail::format_vector(block_head(name, scale), a, symbol, rows));
+}
+
+
+void SLHA_io::set_matrix(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
+{
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, rows, cols));
+}
+
+
+void SLHA_io::set_matrix(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
+{
+   set_block(detail::format_matrix(block_head(name, scale), a, symbol, rows, cols));
+}
+
+
+void SLHA_io::set_vector_imag(const std::string& name, const double* a, const std::string& symbol, double scale, int rows)
+{
+   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, rows));
+}
+
+
+void SLHA_io::set_vector_imag(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows)
+{
+   set_block(detail::format_vector_imag(block_head(name, scale), a, symbol, rows));
+}
+
+
+void SLHA_io::set_matrix_imag(const std::string& name, const double* a, const std::string& symbol, double scale, int rows, int cols)
+{
+   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
+}
+
+
+void SLHA_io::set_matrix_imag(const std::string& name, const std::complex<double>* a, const std::string& symbol, double scale, int rows, int cols)
+{
+   set_block(detail::format_matrix_imag(block_head(name, scale), a, symbol, rows, cols));
+}
+
 
 } // namespace flexiblesusy

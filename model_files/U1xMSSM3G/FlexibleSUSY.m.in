@@ -105,10 +105,10 @@ gXT  = Sqrt[gX^2 + gX1^2];
 g1XT = (g1X*gX + g1*gX1)/Sqrt[gX^2 + gX1^2];
 
 SUSYScaleInput = {
-    {Temporary[g1], g1T},
-    {Temporary[gX], gXT},
-    {Temporary[g1X], g1XT},
-    {Temporary[gX1], 0},
+    {FSTemporary[g1], g1T},
+    {FSTemporary[gX], gXT},
+    {FSTemporary[g1X], g1XT},
+    {FSTemporary[gX1], 0},
     {xS, vSInput},
     {x2, Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)]/(2*gX*Sqrt[1 + TanBetaX^2])},
     {x1, (TanBetaX*Sqrt[4*MZpInput^2 - gX^2*(vu^2 + vd^2)])/(2*gX*Sqrt[1 + TanBetaX^2])},
@@ -130,10 +130,10 @@ vDRbar  = AbsSqrt[
 
 LowScaleInput = {
     (* do not rotate g1, because it is set to gY *)
-    (* {Temporary[g1], g1T}, *)
-    {Temporary[gX], gXT},
-    {Temporary[g1X], g1XT},
-    {Temporary[gX1], 0},
+    (* {FSTemporary[g1], g1T}, *)
+    {FSTemporary[gX], gXT},
+    {FSTemporary[g1X], g1XT},
+    {FSTemporary[gX1], 0},
     {vd, vDRbar Cos[ArcTan[TanBeta]]},
     {vu, vDRbar Sin[ArcTan[TanBeta]]},
     {Yu[1,1], Sqrt[2] upQuarksDRbar[1,1] / vu},
