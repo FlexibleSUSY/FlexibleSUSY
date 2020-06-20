@@ -40,10 +40,6 @@ Fflite::Fflite()
    futils::swap();
 }
 
-Fflite::~Fflite() noexcept
-{
-}
-
 std::complex<double> Fflite::A0(A_ARGS) noexcept
 {
    std::complex<double> ca0;
@@ -90,25 +86,26 @@ std::complex<double> Fflite::B00(B_ARGS) noexcept
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (C_ARGS), C_SEQ)
 BOOST_PP_SEQ_FOR_EACH(UNDEFINED, (D_ARGS), D_SEQ)
 
-void Fflite::A(std::array<std::complex<double>, 1>& a, A_ARGS) noexcept
+void Fflite::A(Acoeff_t& a, A_ARGS) noexcept
 {
    a.at(0) = A0(m02_in, scl2_in);
 }
 
-void Fflite::B(std::array<std::complex<double>, 2>& b, B_ARGS) noexcept
+void Fflite::B(Bcoeff_t& b, B_ARGS) noexcept
 {
    b.at(0) = B0(p10_in, m02_in, m12_in, scl2_in);
    b.at(1) = B1(p10_in, m02_in, m12_in, scl2_in);
+   b.at(2) = B00(p10_in, m02_in, m12_in, scl2_in);
 }
 
-void Fflite::C(std::array<std::complex<double>, 7>& c, C_ARGS) noexcept
+void Fflite::C(Ccoeff_t& c, C_ARGS) noexcept
 {
-   BOOST_PP_REPEAT(7, SET_TO_NAN, c)
+   BOOST_PP_REPEAT(C_N, SET_TO_NAN, c)
 }
 
-void Fflite::D(std::array<std::complex<double>, 11>& d, D_ARGS) noexcept
+void Fflite::D(Dcoeff_t& d, D_ARGS) noexcept
 {
-   BOOST_PP_REPEAT(11, SET_TO_NAN, d)
+   BOOST_PP_REPEAT(D_N, SET_TO_NAN, d)
 }
 
 } // namespace looplibrary

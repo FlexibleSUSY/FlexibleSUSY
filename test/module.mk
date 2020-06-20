@@ -66,6 +66,7 @@ TEST_SRC := \
 		$(DIR)/test_mssm_twoloop_mt.cpp \
 		$(DIR)/test_mssm_twoloop_mtau.cpp \
 		$(DIR)/test_MSSM_2L_limits.cpp \
+		$(DIR)/test_multiindex.cpp \
 		$(DIR)/test_numerics.cpp \
 		$(DIR)/test_observable_problems.cpp \
 		$(DIR)/test_pmns.cpp \
@@ -77,6 +78,7 @@ TEST_SRC := \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_string_conversion.cpp \
+		$(DIR)/test_string_format.cpp \
 		$(DIR)/test_sum.cpp \
 		$(DIR)/test_string_utils.cpp \
 		$(DIR)/test_threshold_corrections.cpp \

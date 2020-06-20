@@ -69,6 +69,7 @@ public:
    Root_finder() = default;
    Root_finder(const Function_t&, std::size_t, double, Solver_type solver_type_ = GSLHybrid);
    virtual ~Root_finder() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    void set_function(const Function_t& f) { function = f; }
    void set_precision(double p) { precision = p; }

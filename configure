@@ -5,8 +5,8 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=4
-FLEXIBLESUSY_PATCH=2
+FLEXIBLESUSY_MINOR=5
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -342,6 +342,7 @@ log_package_information() {
 #_____________________________________________________________________
 guess_machine_word_size() {
     local chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    exists_in_path getconf && chip="${chip}$(getconf LONG_BIT)"
     case "$chip" in
         *32|i[36]86)
              machine_word_size="32"; return 0 ;;
@@ -1250,6 +1251,7 @@ check_librarylink() {
     if [ "x$enable_librarylink" = "xyes" ] ; then
         check_librarylink_incl
         check_librarylink_libs
+	[ "x$machine_word_size" = "x32" ] && CPPFLAGS="$CPPFLAGS -DMINT_32"
     fi
 }
 
@@ -1833,16 +1835,6 @@ int main() {
 
 #_____________________________________________________________________
 check_eigen() {
-    [ -z "$eigen_inc_dir" ] && \
-    type pkg-config > /dev/null && \
-    [ -f eigen.pc ] && \
-    {
-        message -n "Checking Eigen library using local eigen.pc ... "
-        EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config eigen --cflags)
-        message "ok"
-        return
-    }
-
     check_eigen_incl
     check_eigen_version
 }

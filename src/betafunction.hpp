@@ -40,7 +40,7 @@ namespace flexiblesusy {
  */
 class Beta_function {
 public:
-   Beta_function();
+   Beta_function() = default;
    Beta_function(const Beta_function&) = default;
    Beta_function(Beta_function&&) = default;
    virtual ~Beta_function() = default;
@@ -78,7 +78,7 @@ private:
    double zero_threshold{1.e-11};///< threshold for treating values as zero
 
    Eigen::ArrayXd derivatives(double, const Eigen::ArrayXd&);
-   double get_tolerance(double eps);
+   double get_tolerance(double eps) const;
 };
 
 } // namespace flexiblesusy

@@ -142,15 +142,15 @@ contains
    subroutine get_T2_dummy(b,p10,m02,m12) bind(C, name='get_B_impl')
       complex(C_DOUBLE_COMPLEX), intent(in) :: p10
       complex(C_DOUBLE_COMPLEX), intent(in) :: m02, m12
-      complex(C_DOUBLE_COMPLEX), intent(out), dimension(2) :: b
+      complex(C_DOUBLE_COMPLEX), intent(out), dimension(3) :: b
       complex(REAL64), allocatable :: Bcoeff(:,:), Bcoeffuv(:,:)
 
-      allocate(Bcoeff(0:0,0:1))
-      allocate(Bcoeffuv(0:0,0:1))
-      ! B_cll is ~20% faster than TN_cll
-      call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 1)
+      allocate(Bcoeff(0:1,0:2))
+      allocate(Bcoeffuv(0:1,0:2))
+      call B_cll(Bcoeff, Bcoeffuv, p10, m02, m12, 2)
       b(1) = Bcoeff(0,0)
       b(2) = Bcoeff(0,1)
+      b(3) = Bcoeff(1,0)
 
       deallocate(Bcoeff,Bcoeffuv)
    end
@@ -163,7 +163,6 @@ contains
 
       allocate(Ccoeff(0:1,0:2,0:2))
       allocate(Ccoeffuv(0:1,0:2,0:2))
-      ! C_cll is ~20% faster than TN_cll
       call C_cll(Ccoeff, Ccoeffuv, p10, p21, p20, m02, m12, m22, 2)
       c(1) = Ccoeff(0,0,0)
       c(2) = Ccoeff(0,1,0)

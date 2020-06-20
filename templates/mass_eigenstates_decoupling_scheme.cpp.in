@@ -178,6 +178,7 @@ void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
 @setDecouplingYukawaDownLeptons@
    }
 
+   solve_ewsb_equations_tree_level();
    calculate_tree_level_mass_spectrum();
 }
 

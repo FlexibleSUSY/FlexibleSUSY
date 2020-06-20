@@ -17,13 +17,24 @@
 // ====================================================================
 
 #include "sm_twoloophiggs.hpp"
-#include "wrappers.hpp"
 #include "loop_libraries/loop_library.hpp"
 
 #include <cmath>
 
 namespace flexiblesusy {
 namespace sm_twoloophiggs {
+
+namespace {
+
+constexpr double Pi      = 3.141592653589793;
+constexpr double oneLoop = 6.332573977646110963e-03; // 1/(4 Pi)^2
+constexpr double twoLoop = 4.010149318236068752e-05; // 1/(4 Pi)^4
+
+double sqr(double x) noexcept { return x*x; }
+double pow3(double x) noexcept { return x*x*x; }
+double pow4(double x) noexcept { return sqr(sqr(x)); }
+
+} // anonymous namespace
 
 /**
  * Standard Model Higgs 1-loop contribution (Landau gauge).
@@ -52,34 +63,34 @@ double delta_mh_1loop_sm(
    double p, double scale, double mt, double yt,
    double v, double gY, double g2, double lambda)
 {
-   const double yt2 = Sqr(yt);
-   const double mt2 = Sqr(mt);
-   const double p2 = Sqr(p);
-   const double Q2 = Sqr(scale);
-   const double lambda2 = Sqr(lambda);
-   const double v2 = Sqr(v);
-   const double g22 = Sqr(g2);
-   const double g24 = Sqr(g22);
-   const double gp2 = Sqr(gY);
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
+   const double lambda2 = sqr(lambda);
+   const double v2 = sqr(v);
+   const double g22 = sqr(g2);
+   const double g24 = sqr(g22);
+   const double gp2 = sqr(gY);
    const double G2 = g22 + gp2;
-   const double G4 = Sqr(G2);
+   const double G4 = sqr(G2);
    const double mW2 = g22 * v2/4.;
    const double mZ2 = G2 * v2/4.;
    const double mH2 = 2*lambda*v2;
-   const double LogW = FiniteLog(mW2 / Q2);
-   const double LogZ = FiniteLog(mZ2 / Q2);
-   const double LogH = FiniteLog(mH2 / Q2);
+   const double LogW = std::log(mW2 / Q2);
+   const double LogZ = std::log(mZ2 / Q2);
+   const double LogH = std::log(mH2 / Q2);
 
    const double result =
       (+3*yt2*(4*mt2 - p2)*Loop_library::get().B0(p2,mt2,mt2,Q2).real()
-       +6*lambda2*v2*(3*LogH-6+Pi*Sqrt(3))
+       +6*lambda2*v2*(3*LogH-6+Pi*std::sqrt(3))
        -v2/4.*(3*g24-8*lambda*g22+16*lambda2)*Loop_library::get().B0(p2,mW2,mW2,Q2).real()
        -v2/8.*(3*G4-8*lambda*G2+16*lambda2)*Loop_library::get().B0(p2,mZ2,mZ2,Q2).real()
        +2*mW2*(g22-2*lambda*(LogW-1))
        +mZ2*(G2-2*lambda*(LogZ-1))
       );
 
-   return result * oneOver16PiSqr;
+   return result * oneLoop;
 }
 
 /**
@@ -99,15 +110,15 @@ double delta_mh_1loop_sm(
 double delta_mh_1loop_at_sm(
    double p, double scale, double mt, double yt)
 {
-   const double yt2 = Sqr(yt);
-   const double mt2 = Sqr(mt);
-   const double p2 = Sqr(p);
-   const double Q2 = Sqr(scale);
+   const double yt2 = sqr(yt);
+   const double mt2 = sqr(mt);
+   const double p2 = sqr(p);
+   const double Q2 = sqr(scale);
 
    const double result =
       3*yt2*(4.*mt2 - p2)*Loop_library::get().B0(p2,mt2,mt2,Q2).real();
 
-   return result * oneOver16PiSqr;
+   return result * oneLoop;
 }
 
 /**
@@ -127,16 +138,16 @@ double delta_mh_1loop_at_sm(
 double self_energy_higgs_2loop_at_as_sm(
    double p2, double scale, double mt, double yt, double g3)
 {
-   const double yt2 = Sqr(yt);
-   const double g32 = Sqr(g3);
-   const double t = Sqr(mt);
-   const double q = Sqr(scale);
+   const double yt2 = sqr(yt);
+   const double g32 = sqr(g3);
+   const double t = sqr(mt);
+   const double q = sqr(scale);
    const double lnt = std::log(t/q);
 
    const double result =
-      1./135. * g32 * yt2 * (-10800*t - 1665*p2 + (122*Sqr(p2))/t +
+      1./135. * g32 * yt2 * (-10800*t - 1665*p2 + (122*sqr(p2))/t +
                              540*(12*t + 5*p2) * lnt -
-                             1620*(12*t - p2) * Sqr(lnt));
+                             1620*(12*t - p2) * sqr(lnt));
 
    return result * twoLoop;
 }
@@ -176,14 +187,14 @@ double self_energy_higgs_2loop_ab_as_sm(
 double tadpole_higgs_2loop_at_as_sm(
    double scale, double mt, double yt, double g3)
 {
-   const double yt2 = Sqr(yt);
-   const double g32 = Sqr(g3);
-   const double t = Sqr(mt);
-   const double q = Sqr(scale);
+   const double yt2 = sqr(yt);
+   const double g32 = sqr(g3);
+   const double t = sqr(mt);
+   const double q = sqr(scale);
    const double lnt = std::log(t/q);
 
    const double result =
-      -16 * g32 * t * yt2 * (5 - 5*lnt + 3*Sqr(lnt));
+      -16 * g32 * t * yt2 * (5 - 5*lnt + 3*sqr(lnt));
 
    return result * twoLoop;
 }
@@ -234,24 +245,24 @@ double delta_mh_2loop_ab_as_sm(
 double self_energy_higgs_2loop_at_at_sm(
    double /* p2 */, double scale, double mt, double yt, double mb)
 {
-   const double Pi2 = Sqr(Pi);
-   const double yt4 = Power4(yt);
-   const double mt2 = Sqr(mt);
-   const double mb2 = Sqr(mb);
-   const double Q2 = Sqr(scale);
+   const double Pi2 = sqr(Pi);
+   const double yt4 = pow4(yt);
+   const double mt2 = sqr(mt);
+   const double mb2 = sqr(mb);
+   const double Q2 = sqr(scale);
    const double r = mb2/mt2;
-   const double LogT = FiniteLog(mt2 / Q2);
-   const double LogT2 = Sqr(LogT);
-   const double LogTB = 0.5*FiniteLog(r);
-   const double LogTB2 = Sqr(LogTB);
+   const double LogT = std::log(mt2 / Q2);
+   const double LogT2 = sqr(LogT);
+   const double LogTB = 0.5*std::log(r);
+   const double LogTB2 = sqr(LogTB);
 
    const double result =
       3 * mt2 * yt4 * (19 + Pi2 - 27 * LogT + 9 * LogT2)
       - 3 * mt2 * yt4 * (5 + 3*Pi2 - 3*LogT + 9*LogT2)*r
       + 3./2. * mt2 * yt4 * (35 + 6*Pi2 + 6*LogT - 18*LogT2
-                             - 24*LogTB*(1 + 3*LogT))*Sqr(r)
+                             - 24*LogTB*(1 + 3*LogT))*sqr(r)
       - 0.5 * mt2 * yt4 * (-29 + 6*Pi2 - 144*LogTB2 + 162*LogT - 54*LogT2
-                           - 24*LogTB*(-8 + 9*LogT))*Power3(r);
+                           - 24*LogTB*(-8 + 9*LogT))*pow3(r);
 
    return result * twoLoop;
 }
@@ -269,24 +280,24 @@ double self_energy_higgs_2loop_at_at_sm(
 double tadpole_higgs_2loop_at_at_sm(
    double scale, double mt, double yt, double mb)
 {
-   const double Pi2 = Sqr(Pi);
-   const double yt4 = Power4(yt);
-   const double mt2 = Sqr(mt);
-   const double mb2 = Sqr(mb);
-   const double Q2 = Sqr(scale);
+   const double Pi2 = sqr(Pi);
+   const double yt4 = pow4(yt);
+   const double mt2 = sqr(mt);
+   const double mb2 = sqr(mb);
+   const double Q2 = sqr(scale);
    const double r = mb2/mt2;
-   const double LogT = FiniteLog(mt2 / Q2);
-   const double LogT2 = Sqr(LogT);
-   const double LogTB = 0.5*FiniteLog(r);
-   const double LogTB2 = Sqr(LogTB);
+   const double LogT = std::log(mt2 / Q2);
+   const double LogT2 = sqr(LogT);
+   const double LogTB = 0.5*std::log(r);
+   const double LogTB2 = sqr(LogTB);
 
    const double result =
       mt2 * yt4 * (45 + Pi2 - 39*LogT + 9*LogT2)
       - 3 * mt2 * yt4 * (5 + Pi2 - 5*LogT + 3*LogT2)*r
       + 3./2. * mt2 * yt4 * (5 + 2*Pi2 + LogTB*(8 - 24*LogT) + 10*LogT
-                             - 6*LogT2)*Sqr(r)
+                             - 6*LogT2)*sqr(r)
       - 1./6. * mt2 * yt4 * (-185 + 6*Pi2 - 144*LogTB2 + 234*LogT - 54*LogT2
-                             - 24*LogTB*(-14 + 9*LogT))*Power3(r);
+                             - 24*LogTB*(-14 + 9*LogT))*pow3(r);
 
    return result * twoLoop;
 }
@@ -311,14 +322,14 @@ double delta_mh_2loop_at_at_sm(
 double self_energy_higgs_2loop_atau_atau_sm(
    double /* p2 */, double scale, double mtau, double ytau)
 {
-   const double ytau4 = Power4(ytau);
-   const double mtau2 = Sqr(mtau);
-   const double Q2 = Sqr(scale);
-   const double LogT = FiniteLog(mtau2 / Q2);
-   const double LogT2 = Sqr(LogT);
+   const double ytau4 = pow4(ytau);
+   const double mtau2 = sqr(mtau);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mtau2 / Q2);
+   const double LogT2 = sqr(LogT);
 
    const double result =
-      mtau2 * ytau4 * (19 + Sqr(Pi) - 27 * LogT + 9 * LogT2);
+      mtau2 * ytau4 * (19 + sqr(Pi) - 27 * LogT + 9 * LogT2);
 
    return result * twoLoop;
 }
@@ -335,14 +346,14 @@ double self_energy_higgs_2loop_atau_atau_sm(
 double tadpole_higgs_2loop_atau_atau_sm(
    double scale, double mtau, double ytau)
 {
-   const double ytau4 = Power4(ytau);
-   const double mtau2 = Sqr(mtau);
-   const double Q2 = Sqr(scale);
-   const double LogT = FiniteLog(mtau2 / Q2);
-   const double LogT2 = Sqr(LogT);
+   const double ytau4 = pow4(ytau);
+   const double mtau2 = sqr(mtau);
+   const double Q2 = sqr(scale);
+   const double LogT = std::log(mtau2 / Q2);
+   const double LogT2 = sqr(LogT);
 
    const double result =
-      1./3. * mtau2 * ytau4 * (45 + Sqr(Pi) - 39*LogT + 9*LogT2);
+      1./3. * mtau2 * ytau4 * (45 + sqr(Pi) - 39*LogT + 9*LogT2);
 
    return result * twoLoop;
 }

@@ -232,13 +232,13 @@ ApplyConstraints[settings_List, modelPrefix_String:"MODEL->"] :=
                FlexibleSUSY`FSMinimize[__] | \
                FlexibleSUSY`FSFindRoot[__] | \
                FlexibleSUSY`FSSolveEWSBFor[__] | \
-               {FlexibleSUSY`Temporary[_], _} | \
+               {FlexibleSUSY`FSTemporary[_], _} | \
                FlexibleSUSY`FSRestrictParameter[__] | \
                FlexibleSUSY`FSInitialSetting[__]
            ];
            noTemp = DeleteCases[
                settings,
-               {FlexibleSUSY`Temporary[_], _} | \
+               {FlexibleSUSY`FSTemporary[_], _} | \
                FlexibleSUSY`FSRestrictParameter[__] | \
                FlexibleSUSY`FSInitialSetting[__]
            ];
@@ -680,7 +680,7 @@ SaveValue[par_] :=
           ];
 
 SetTemporarily[settings_List] :=
-    Module[{tempSettings = Cases[settings, {FlexibleSUSY`Temporary[p_], v_} :> {p,v}],
+    Module[{tempSettings = Cases[settings, {FlexibleSUSY`FSTemporary[p_], v_} :> {p,v}],
             set, savedVals},
            If[tempSettings === {}, Return[""];];
            set = ApplyConstraints[tempSettings];

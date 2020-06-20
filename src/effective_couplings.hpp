@@ -20,7 +20,6 @@
 #define EFFECTIVE_COUPLINGS_H
 
 #include <complex>
-#include <map>
 
 namespace flexiblesusy {
 
@@ -33,21 +32,13 @@ std::complex<double> AS12(double tau);
 std::complex<double> AS1(double tau);
 std::complex<double> AP12(double tau);
 
-// QCD corrections to the diphoton decay width
-// for scalars and pseudoscalars, at the scale
-// m_decay / 2
+/// QCD corrections to the diphoton decay width
+/// for scalars and pseudoscalars, at the scale
+/// m_decay / 2
 std::complex<double> scalar_diphoton_fermion_loop(
    double m_decay, double m_loop);
 std::complex<double> pseudoscalar_diphoton_fermion_loop(
    double m_decay, double m_loop);
-
-std::complex<double> linear_interpolation(
-   double x, const std::map<double,std::complex<double> >& data);
-std::complex<double> quadratic_interpolation(
-   double x, const std::map<double,std::complex<double> >& data);
-
-std::map<double,std::complex<double> > get_scalar_fermion_loop_data();
-std::map<double,std::complex<double> > get_pseudoscalar_fermion_loop_data();
 
 } // namespace effective_couplings
 
