@@ -41,6 +41,8 @@
 #define FMOD                  "@FMOD@"
 #define FSTD                  "@FSTD@"
 #define FUTILIBS              "@FUTILIBS@"
+#define GM2CALCFLAGS          "@GM2CALCFLAGS@"
+#define GM2CALCLIBS           "@GM2CALCLIBS@"
 #define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
 #define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
@@ -78,6 +80,9 @@
 
 /* Enable fflite */
 @DEFINE_ENABLE_FFLITE@
+
+/* Enable GM2Calc */
+@DEFINE_ENABLE_GM2CALC@
 
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@

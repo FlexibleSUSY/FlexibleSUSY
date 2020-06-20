@@ -24,7 +24,7 @@
  * @brief contains definitions of GM2Calc interface functions
  */
 
-#ifdef ENABLE_GM2Calc
+#ifdef ENABLE_GM2CALC
 
 #include "gm2calc/gm2_1loop.hpp"
 #include "gm2calc/gm2_2loop.hpp"

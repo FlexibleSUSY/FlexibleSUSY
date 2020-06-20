@@ -433,13 +433,7 @@ TEST_SRC += \
 		$(DIR)/test_CMSSMNoFV_two_loop_spectrum.cpp
 endif
 
-ifeq ($(WITH_GM2Calc),yes)
-TEST_SRC += \
-		$(DIR)/test_gm2calc.cpp \
-		$(DIR)/test_MSSMNoFV_onshell.cpp
-endif
-
-ifeq ($(WITH_GM2Calc) $(WITH_CMSSMNoFV),yes yes)
+ifeq ($(ENABLE_GM2CALC) $(WITH_CMSSMNoFV),yes yes)
 TEST_SH += \
 		$(DIR)/test_CMSSMNoFV_GM2Calc.sh
 endif
@@ -1127,10 +1121,6 @@ $(DIR)/test_CMSSMNoFV_tree_level_spectrum.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 $(DIR)/test_CMSSMNoFV_two_loop_spectrum.x: $(LIBCMSSMNoFV)
 
 $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
-
-$(DIR)/test_gm2calc.x: $(LIBMSSMNoFVSLHA2) $(LIBGM2Calc)
-
-$(DIR)/test_MSSMNoFV_onshell.x: $(LIBGM2Calc)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
 

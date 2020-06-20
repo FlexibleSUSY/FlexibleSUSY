@@ -29,7 +29,6 @@ script:
     ./configure
     --with-cxxflags="-std=c++14 -fPIC"
     --with-optional-modules=test
-    --with-addons=GM2Calc
     --with-loop-libraries=collier,looptools
     --with-install-dir=install
     --disable-meta
