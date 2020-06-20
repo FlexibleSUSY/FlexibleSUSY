@@ -7,8 +7,8 @@ Changes
 * GM2Calc_ is now an external dependency.  It can be calculated via
   Conan_.  FlexibleSUSY requires GM2Calc version 1.7.0 or higher.
 
-FlexibleSUSY 2.5.0 [not released yet]
-=====================================
+FlexibleSUSY 2.5.0 [June, 20 2020]
+==================================
 
 New features
 ------------
