@@ -118,8 +118,8 @@ nonzeroVertexPairs = {
 		{"CpbargWpgWpVZ"}
 	},
 	{
-		{TreeMasses`GetWBoson[], CXXDiagrams`LorentzConjugate[TreeMasses`GetWBoson[]],
-			TreeMasses`GetZBoson[]},
+      {CXXDiagrams`LorentzConjugate[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[],
+         TreeMasses`GetZBoson[]},
 		{"CpconjVWpVWpVZ"}
 	},
 	{
