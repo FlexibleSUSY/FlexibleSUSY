@@ -36,7 +36,9 @@ const char * const scale_formatter = "%9.8E";
 const char * const single_element_formatter = " %5d   %16.8E   # %s\n";
 /// SLHA line formatter for the SPINFO block entries
 const char * const spinfo_formatter = " %5d   %s\n";
-/// SLHA line formatter for the
+/// SLHA line formatter for the OBSINFO block entries
+const char * const obsinfo_formatter = " %5d %5d   %s\n";
+/// SLHA line formatter for the DECAY block
 const char * const format_total_width = "%9d   %16.8E   # %s\n";
 
 } // namespace flexiblesusy

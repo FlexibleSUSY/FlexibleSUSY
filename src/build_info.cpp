@@ -158,7 +158,7 @@ void print_build_info(std::ostream& ostr)
 #endif
       "\n"
       "Use GM2Calc:                            "
-#ifdef ENABLE_GM2Calc
+#ifdef ENABLE_GM2CALC
       "yes"
 #else
       "no"
