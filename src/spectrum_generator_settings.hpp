@@ -71,7 +71,7 @@ public:
       higgs_3loop_correction_at3,    ///< [29] Higgs 3-loop correction O(alpha_t^3)
       higgs_4loop_correction_at_as3, ///< [30] Higgs 4-loop correction O(alpha_t alpha_s^3)
       loop_library, ///< [31] Loop library (0 = Softsusy)
-      calculate_decays,      ///< [31] calculate particle decays
+      calculate_decays,      ///< [32] calculate particle decays
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 
