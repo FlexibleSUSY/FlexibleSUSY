@@ -2087,7 +2087,7 @@ check_himalaya_version() {
     checking_msg "Himalaya version"
 
     try_compile_run_cpp_program "#include <iostream>
-#include \"version.hpp\"
+#include \"himalaya/version.hpp\"
 int main() {
    std::cout << Himalaya_VERSION_MAJOR << '.' << Himalaya_VERSION_MINOR << '.' << Himalaya_VERSION_RELEASE << '\n';
    return 0;
@@ -2111,7 +2111,7 @@ int main() {
 
 #_____________________________________________________________________
 check_himalaya_incl() {
-    check_header "version.hpp" "$himalaya_inc_dir"
+    check_header "himalaya/version.hpp" "$himalaya_inc_dir"
     if test "x$found_hdr" = "x" ; then
         if test "x$enable_himalaya" = "xyes" ; then
             message "Error: Himalaya's version.hpp must be installed if you want"
