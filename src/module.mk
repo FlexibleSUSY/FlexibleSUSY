@@ -17,6 +17,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
+		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
 		$(DIR)/logger.cpp \
@@ -27,6 +28,9 @@ LIBFLEXI_SRC := \
 		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
+		$(DIR)/observables.cpp \
+		$(DIR)/observable_problems.cpp \
+		$(DIR)/observable_problems_format.cpp \
 		$(DIR)/physical_input.cpp \
 		$(DIR)/pmns.cpp \
 		$(DIR)/problems.cpp \
@@ -50,6 +54,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/betafunction.hpp \
 		$(DIR)/build_info.hpp \
 		$(DIR)/bvp_solver_problems.hpp \
+		$(DIR)/bvp_solver_problems_format_mathlink.hpp \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
 		$(DIR)/command_line_options.hpp \
@@ -75,6 +80,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/for_each.hpp \
 		$(DIR)/functors.hpp \
 		$(DIR)/global_thread_pool.hpp \
+		$(DIR)/gm2calc_interface.hpp \
 		$(DIR)/gsl.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
@@ -93,10 +99,16 @@ LIBFLEXI_HDR := \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
+		$(DIR)/observables.hpp \
+		$(DIR)/observable_problems.hpp \
+		$(DIR)/observable_problems_format.hpp \
+		$(DIR)/observable_problems_format_slha.hpp \
+		$(DIR)/observable_problems_format_mathlink.hpp \
 		$(DIR)/physical_input.hpp \
 		$(DIR)/pmns.hpp \
 		$(DIR)/pp_map.hpp \
 		$(DIR)/problems.hpp \
+		$(DIR)/problems_format_mathlink.hpp \
 		$(DIR)/raii.hpp \
 		$(DIR)/rg_flow.hpp \
 		$(DIR)/rk.hpp \
@@ -293,7 +305,7 @@ clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
-$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS)
+$(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(SQLITEFLAGS) $(GM2CALCFLAGS) $(TSILFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
 $(LIBFLEXI_DEP) $(LIBFLEXI_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
@@ -302,7 +314,7 @@ endif
 ifeq ($(ENABLE_SHARED_LIBS),yes)
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
 		@$(MSG)
-		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(THREADLIBS)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^ $(GSLLIBS) $(FLIBS) $(SQLITELIBS) $(GM2CALCLIBS) $(THREADLIBS)
 else
 $(LIBFLEXI): $(LIBFLEXI_OBJ)
 		@$(MSG)

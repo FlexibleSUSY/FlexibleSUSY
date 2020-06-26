@@ -41,7 +41,19 @@ bool BVP_solver_problems::have_problem() const
 
 bool BVP_solver_problems::have_warning() const
 {
-   return false; // no warnings yet
+   return number_of_warnings() > 0;
+}
+
+unsigned BVP_solver_problems::number_of_problems() const
+{
+   unsigned count = 0;
+   if (no_convergence()) count++;
+   return count;
+}
+
+unsigned BVP_solver_problems::number_of_warnings() const
+{
+   return 0; // no warnings yet
 }
 
 std::vector<std::string> BVP_solver_problems::get_problem_strings() const
