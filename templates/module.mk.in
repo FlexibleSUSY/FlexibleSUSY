@@ -55,6 +55,8 @@ LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 
 LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_a_muon.cpp \
+		$(DIR)/@CLASSNAME@_decays.cpp \
+		$(DIR)/@CLASSNAME@_decay_table.cpp \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
 		$(DIR)/@CLASSNAME@_f_to_f_conversion.cpp \
