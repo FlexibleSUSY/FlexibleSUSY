@@ -1315,32 +1315,37 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
    const auto pdg = decays_list.get_particle_id();
    const auto width = decays_list.get_total_width();
    const std::string name = " <> modelName <> "_info::get_particle_name_from_pdg(pdg);
+   if (std::isnan(width) || std::isinf(width)) {
+      throw std::runtime_error(\"Error! Total width of \" + name + \" is \" + std::to_string(width));
+   }
 
    std::ostringstream decay;
 
    decay << \"DECAY \"
          << FORMAT_TOTAL_WIDTH(pdg, width, name + \" decays\");
 
-   constexpr double NEGATIVE_WIDTH_TOLERANCE = 1e-11;
-   for (const auto& channel : decays_list) {
-      auto partial_width = channel.second.get_width();
-      const auto branching_ratio = partial_width / width;
-      if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
-         std::stringstream ss;
-         ss << std::scientific << partial_width;
-         throw std::runtime_error(\"Error in \" + channel.second.get_proc_string() + \": partial width is negative (\" + ss.str() + \" GeV).\");
-      }
-      else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
-         partial_width = 0;
-      }
-      const auto final_state = channel.second.get_final_state_particle_ids();
-      std::string comment = \"BR(\" + name + \" ->\";
-      for (auto id : final_state) {
-         comment += \" \" + " <> modelName <> "_info::get_particle_name_from_pdg(id);\n
-      }
-      comment += \")\";
+   if (!is_zero(width, 1e-100)) {
+      constexpr double NEGATIVE_WIDTH_TOLERANCE = 1e-11;
+      for (const auto& channel : decays_list) {
+         auto partial_width = channel.second.get_width();
+         const auto branching_ratio = partial_width / width;
+         if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
+            std::stringstream ss;
+            ss << std::scientific << partial_width;
+            throw std::runtime_error(\"Error in \" + channel.second.get_proc_string() + \": partial width is negative (\" + ss.str() + \" GeV).\");
+         }
+         else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
+            partial_width = 0;
+         }
+         const auto final_state = channel.second.get_final_state_particle_ids();
+         std::string comment = \"BR(\" + name + \" ->\";
+         for (auto id : final_state) {
+            comment += \" \" + " <> modelName <> "_info::get_particle_name_from_pdg(id);\n
+         }
+         comment += \")\";
 
-      decay << format_decay(branching_ratio, final_state, comment);
+         decay << format_decay(branching_ratio, final_state, comment);
+      }
    }
 
    slha_io.set_block(decay);
