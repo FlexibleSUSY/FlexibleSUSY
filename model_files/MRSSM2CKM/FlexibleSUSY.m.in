@@ -99,6 +99,13 @@ ExtraSLHAOutputBlocks = {
    }
 };
 
+FSCalculateDecays = True;
+(* SRdp, SRum, Sd, Su,  gives
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  MomentumDifferenceVertex: Wrong index combination
+  *)
+DecayParticles = {hh, Ah, Hpm, Se, Sv, phiO, sigmaO, Rh};
+
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
