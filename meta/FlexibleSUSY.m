@@ -2570,11 +2570,22 @@ ExampleDecaysIncludes[] :=
        "\n"
     ];
 
-ExampleCalculateDecaysForModel[] := FlexibleSUSY`FSModelName <>
-"_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
-if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
-    spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays.calculate_decays();
+ExampleCalculateDecaysForModel[] :=
+"const bool loop_library_for_decays =
+    (Loop_library::get_type() == Loop_library::Library::Collier) ||
+    (Loop_library::get_type() == Loop_library::Library::Looptools);" <>
+FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
+if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses) &&
+       loop_library_for_decays) {
+      decays.calculate_decays();
+   }
+   else if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
+      WARNING(\"Decay module requires SM pole masses. Set flag 3 in Block FlexibleSUSY of the LesHouches input to '1'.\");
+   }
+   else if (!loop_library_for_decays) {
+      WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
+   }
 }";
 
 ExampleSetDecaysSLHAOutput[] := "\
