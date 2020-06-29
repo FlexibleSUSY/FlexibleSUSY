@@ -35,8 +35,6 @@
 
 #include "loop_libraries/loop_library.hpp"
 
-#include "loop_libraries/loop_library.hpp"
-
 #include <string>
 #include <tuple>
 

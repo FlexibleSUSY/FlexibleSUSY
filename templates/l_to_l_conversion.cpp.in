@@ -25,7 +25,6 @@
 
 #include <valarray>
 #include <complex>
-#include <iostream>
 
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
