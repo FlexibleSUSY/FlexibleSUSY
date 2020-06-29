@@ -48,7 +48,7 @@
  */
 template <class solver_type>
 int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
-               const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+               flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
                const std::string& slha_output_file,
                const std::string& database_output_file,
                const std::string& spectrum_file,
@@ -70,6 +70,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
    }
 
    @ModelName@_spectrum_generator<solver_type> spectrum_generator;
+@decaySetttingsOverride@
    spectrum_generator.set_settings(spectrum_generator_settings);
    spectrum_generator.set_parameter_output_scale(
       slha_io.get_parameter_output_scale());
@@ -145,7 +146,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
  */
 int run(
    flexiblesusy::@ModelName@_slha_io& slha_io,
-   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+   flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
    const std::string& slha_output_file,
    const std::string& database_output_file,
    const std::string& spectrum_file,

@@ -2576,12 +2576,8 @@ ExampleCalculateDecaysForModel[] :=
     (Loop_library::get_type() == Loop_library::Library::Looptools);" <>
 FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
 if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
-   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses) &&
-       loop_library_for_decays) {
+   if (loop_library_for_decays) {
       decays.calculate_decays();
-   }
-   else if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-      WARNING(\"Decay module requires SM pole masses. Set flag 3 in Block FlexibleSUSY of the LesHouches input to '1'.\");
    }
    else if (!loop_library_for_decays) {
       WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
@@ -2615,7 +2611,7 @@ WriteUserExample[inputParameters_List, files_List] :=
     Module[{parseCmdLineOptions, printCommandLineOptions, inputPars,
             solverIncludes = "", runEnabledSolvers = "", scanEnabledSolvers = "",
             runEnabledCmdLineSolvers = "", defaultSolverType,
-            decaysIncludes = "", calculateDecaysForModel = "", setDecaysSLHAOutput = "",
+            decaysIncludes = "", calculateDecaysForModel = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
             calculateCmdLineDecays = "", writeCmdLineOutput = "", fillSLHAIO = ""},
            inputPars = {First[#], #[[3]]}& /@ inputParameters;
            parseCmdLineOptions = WriteOut`ParseCmdLineOptions[inputPars];
@@ -2633,7 +2629,14 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);",
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
+              decaySetttingsOverride =
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
+   !spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
+   WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
+   spectrum_generator_settings.set(
+      Spectrum_generator_settings::calculate_sm_masses, 1.0);
+}",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
              ];
            writeCmdLineOutput = WriteExampleCmdLineOutput[FlexibleSUSY`FSCalculateDecays];
@@ -2651,6 +2654,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
                             "@fillSLHAIO@" -> fillSLHAIO,
+                            "@decaySetttingsOverride@" -> IndentText[decaySetttingsOverride],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
