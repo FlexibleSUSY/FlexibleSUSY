@@ -1726,8 +1726,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
-#include \"HierarchyCalculator.hpp\"
-#include \"version.hpp\"
+#include \"himalaya/HierarchyCalculator.hpp\"
+#include \"himalaya/version.hpp\"
 #endif
 ";
              ];
