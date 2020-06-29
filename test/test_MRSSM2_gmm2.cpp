@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( test_amu )
    input.MDGocInput = 1500;
 
    softsusy::QedQcd qedqcd;
-   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
+   MRSSM2_slha m = setup_MRSSM2(input, qedqcd);
 
    auto amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
    BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719200196512154e-11, 1e-7);

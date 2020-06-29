@@ -299,12 +299,12 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, str
     structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
-    "#ifdef ENABLE_GM2Calc\n" <>
+    "#ifdef ENABLE_GM2CALC\n" <>
     structName <> ".AMUGM2CALC = gm2calc_calculate_amu(gm2calc_data);\n" <>
     "#endif";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty, structName_String] :=
-    "#ifdef ENABLE_GM2Calc\n" <>
+    "#ifdef ENABLE_GM2CALC\n" <>
     structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);\n" <>
     "#endif";
 
@@ -504,6 +504,15 @@ FillGM2CalcInterfaceData[struct_String] :=
            yu            = Parameters`GetParameterFromDescription["Up-Yukawa-Coupling"];
            yd            = Parameters`GetParameterFromDescription["Down-Yukawa-Coupling"];
            ye            = Parameters`GetParameterFromDescription["Lepton-Yukawa-Coupling"];
+
+           If[MemberQ[{w, pseudoscalar, smuon, muonsneutrino,
+                       chargino, neutralino, mu, m1, m2, m3, mq2, mu2,
+                       md2, ml2, me2, tu, td, te, yu, yd, ye}, Null],
+              Print["Error: The GM2Calc addon cannot be used in this model, because it is not a MSSM-like model with sfermion flavour conservation. ",
+                    "Please remove aMuonGM2Calc and aMuonGM2CalcUncertainty from the model file."];
+              Quit[1];
+           ];
+
            mwStr         = "MODEL.get_physical()." <> CConversion`RValueToCFormString[FlexibleSUSY`M[w]];
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
@@ -544,7 +553,7 @@ FillGM2CalcInterfaceData[struct_String] :=
                                "(), MODEL.get_" <> CConversion`RValueToCFormString[yd] <> "());\n" <>
            struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <>
                                "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
-           "#ifdef ENABLE_GM2Calc\n" <>
+           "#ifdef ENABLE_GM2CALC\n" <>
            "GM2Calc_data " <> struct <> ";\n" <> filling <> "\n" <>
            "#endif\n\n"
           ];

@@ -59,10 +59,20 @@ Begin["`internal`"];
 `type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][`type`vertex,`type`vertex,Repeated[FeynArts`Field[_Integer],{0,1}]];
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
+`type`nullableDiagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]...];
 
-`type`indexCol = FeynArts`Index[Global`Colour,_Integer];
-`type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
-`type`indexGeneric = FeynArts`Index[Generic,_Integer];
+`type`indexCol =
+   FeynArts`Index[Global`Colour,_Integer];
+
+`type`indexGlu =
+   FeynArts`Index[Global`Gluon,_Integer];
+
+`type`indexGeneric =
+   FeynArts`Index[Generic, _Integer];
+indexGeneric[index:_Integer] :=
+   FeynArts`Index[Generic, index];
+indexGeneric // Utils`MakeUnknownInputDefinition;
+indexGeneric ~ SetAttributes ~ {Protected,Locked};
 
 `type`fieldFA = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 
@@ -134,6 +144,25 @@ Module[{},
 
    (*Which index types do we load with the model?*)
    `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer];
+
+   (* Define type of masses *)
+   genericMass::usage="
+   @note In FeynArts 3.11 the pattern for a generic mass was changed and now
+         contains Loop and Internal as well.";
+   With[{new=Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]},
+      `type`genericMass =
+         FeynArts`Mass[`type`fieldFA[`type`indexGeneric], new];
+      genericMass[field:`type`fieldFA, index:_Integer] :=
+         FeynArts`Mass[field@indexGeneric@index, new];
+      genericMass[field:`type`fieldFA] :=
+         FeynArts`Mass[field[`type`indexGeneric], new];
+      genericMass // Utils`MakeUnknownInputDefinition;
+      genericMass ~ SetAttributes ~ {Protected,Locked};
+   ];
+
+   `type`specificMass =
+      FeynArts`Mass[`type`fieldFA[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
+
    {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
    substitutionsFile = substitutionsFileS;
@@ -211,8 +240,8 @@ Module[
       ] :>
       SARAH`Cp[fields][SARAH`PR],
 
-      FeynArts`G[1][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :> (*checked*)
-      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],                 (*checked*)
+      FeynArts`G[_][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :>
+      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],
 
       FeynArts`G[_][0][fields__][
          FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ]
@@ -232,18 +261,41 @@ Module[
          SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
       ],
 
-      (*@note It seems that FA convention is changed by FC.*)
-      (*@note See Lorentz.gen (inside FA) for more information.*)
       (*VVV couplings*)
-      FeynArts`G[-1][0][fields__][
-         (-FeynArts`Mom[i1_Integer]+FeynArts`Mom[i2_Integer])*
+      FeynArts`G[_][0][fields__][
+         (-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer])*
          Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]]
          +
-         (+FeynArts`Mom[i1_Integer]-FeynArts`Mom[i3_Integer])*
+         (+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer])*
          Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i3_Integer]]
          +
          (-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer])*
          Global`MetricTensor[FeynArts`KI1[i2_Integer],FeynArts`KI1[i3_Integer]]
+      ] :>
+      SARAH`Cp[fields][
+         (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
+         SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i2]] ] ]
+         ,
+         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] -
+         SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i3]] ] ]
+         ,
+         (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] -
+         SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
+         SARAH`g[LorentzIndex[ {fields}[[i2]] ],LorentzIndex[ {fields}[[i3]] ] ]
+      ],
+
+      (* Since FormCalc-9.7 *)
+      FeynArts`G[_][0][fields__][
+         Global`FourVector[-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer], FeynArts`KI1[i3_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i2_Integer]]
+         +
+         Global`FourVector[+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer], FeynArts`KI1[i2_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i3_Integer]]
+         +
+         Global`FourVector[-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer], FeynArts`KI1[i1_Integer]]*
+         Global`MetricTensor[FeynArts`KI1[i2_Integer], FeynArts`KI1[i3_Integer]]
       ] :>
       SARAH`Cp[fields][
          (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
@@ -351,9 +403,11 @@ Module[
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
-   topologies = FeynArts`CreateTopologies[OptionValue@LoopLevel,
+   topologies = FeynArts`CreateTopologies[
+      OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
-      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses];
+      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
+   ];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
@@ -364,8 +418,6 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    amplitudes = Delete[amplitudes,Position[amplitudes,FeynArts`Index[Global`Colour,_Integer]]];(* @note Remove colour indices following assumption 1. *)
    {diagrams,amplitudes} = getModifiedDA[{diagrams,amplitudes},OptionValue@KeepProcesses];
-   debugMakePictures[diagrams,"class"];
-
 
    settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
@@ -501,7 +553,7 @@ Module[
       rulesForClassesToSave, newDiagrams = diagrams, newAmplitudes = amplitudes
    },
    If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-      Print["t-pinguins: tree-like massless vector bosons are excluded"];
+      Print@"t-pinguins: tree-like massless vector bosons were removed";
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`pinguinT];
       numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
@@ -510,7 +562,7 @@ Module[
          Do[
             numAmp = Part[numbersOfAmplitudes,i];
             currentAmplitude = newAmplitudes[[numAmp]];
-            massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,5]]]];
+            massPosition = Position[currentAmplitude[[4,1]],genericMass[FeynArts`V, 5]];
             If[massPosition=!={},
                massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
                Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
@@ -523,7 +575,7 @@ Module[
       printDiagramsInfo@newDiagrams;
    ];
    If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
-      Print["boxes: massless vector bosons are excluded"];
+      Print@"boxes: massless vector bosons were removed";
       (* Step 1: Get positions of topologies and amplitudes to change. *)
       daPairs = getTopologyAmplitudeRulesByTopologyCriterion[newDiagrams,`topologyQ`box];
       numbersOfAmplitudes = Flatten@Cases[daPairs,Rule[True,nums_]:>nums];
@@ -532,7 +584,7 @@ Module[
          Do[
             numAmp = numbersOfAmplitudes[[i]];
             currentAmplitude = newAmplitudes[[numAmp]];
-            massPosition = Position[currentAmplitude[[4,1]],FeynArts`Mass[FeynArts`V[_[Generic,_]]]];
+            massPosition = Position[currentAmplitude[[4,1]],genericMass@FeynArts`V];
             If[massPosition=!={},
                massesOfVector = (And@@(#=!=0&/@#)&@Extract[#,massPosition]) &/@ currentAmplitude[[4,2]];
                Sow[numbersOfAmplitudes[[i]]->Array[If[massesOfVector[[#]],#,(##&)[]]&,Length@massesOfVector]];,
@@ -708,16 +760,16 @@ Module[
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
             #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
             #] &/@ newInserted;
-            newInserted = removeTopologiesWithoutInsertions@newInserted;
-            Print["t-penguins: tree-like vector bosons were deleted"];
+         newInserted = removeTopologiesWithoutInsertions@newInserted;
+         Print@"t-penguins: tree-like vector bosons were removed";
          printDiagramsInfo@newInserted;
       ];
       If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
          newInserted = If[`topologyQ`pinguinT[#[[1]]],
             #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
             #] &/@ newInserted;
-            newInserted = removeTopologiesWithoutInsertions@newInserted;
-            Print["t-penguins: tree-like scalar bosons were deleted"];
+         newInserted = removeTopologiesWithoutInsertions@newInserted;
+         Print@"t-penguins: tree-like scalar bosons were removed";
          printDiagramsInfo@newInserted;
       ];
    ];
@@ -732,7 +784,7 @@ Module[
             #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[7|8]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["t-penguins: external leptons in sed-like processes were deleted"];
+         Print@"t-penguins: external leptons in sed-like processes were removed";
          printDiagramsInfo@newInserted;
 
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
@@ -740,13 +792,13 @@ Module[
             #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6|7]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["t-penguins: external leptons in triangle loop were deleted"];
+         Print@"t-penguins: external leptons in triangle loop were removed";
          printDiagramsInfo@newInserted;
    ];
    If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
          newInserted = If[`topologyQ`boxS[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@6->leptonPattern],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
          Print["s-boxes: loops with initial lepton are removed"];
@@ -758,10 +810,9 @@ Module[
             Print["Warning: t-boxes are non-zero: @todo implement rules"];#,
             #] &/@ newInserted;
 
-
          leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
          newInserted = If[`topologyQ`boxU[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field@5->leptonPattern],
+            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[5]->leptonPattern],
             #] &/@ newInserted;
          newInserted = removeTopologiesWithoutInsertions@newInserted;
          Print["u-boxes: loops with initial lepton were deleted"];
@@ -772,7 +823,7 @@ Module[
 getModifiedDiagrams // Utils`MakeUnknownInputDefinition;
 getModifiedDiagrams ~ SetAttributes ~ {Protected,Locked};
 
-removeTopologiesWithoutInsertions[diagrams:`type`diagramSet] :=
+removeTopologiesWithoutInsertions[diagrams:`type`nullableDiagramSet] :=
    diagrams /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
 removeTopologiesWithoutInsertions // Utils`MakeUnknownInputDefinition;
 removeTopologiesWithoutInsertions ~ SetAttributes ~ {Protected,Locked};
@@ -1224,17 +1275,22 @@ Module[
    result
 ];
 
-CombinatorialFactorsForClasses::usage=
-"@brief takes generic amplitude and finds numerical combinatirical factors
-which arise at class level
+CombinatorialFactorsForClasses::usage="
+@brief Takes generic amplitude and finds numerical combinatirical factors
+       which arise at class level.
 @returns list of combinatorical factors for a given generic amplitude
 @param FeynArts`.`FeynAmp[__]";
 CombinatorialFactorsForClasses[
    FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]
 ]:=
-Module[{position = Position[rules, FeynArts`RelativeCF]},
-   {classReplacements}[[ All,position[[1,1]] ]] /. FeynArts`SumOver[__] -> 1
-];
+   {classReplacements}[[ All,#[[1,1]] ]] /.
+      {
+         FeynArts`IndexDelta[___] -> 1,
+         FeynArts`SumOver[__] -> 1
+      } &@
+   Position[rules, FeynArts`RelativeCF];
+CombinatorialFactorsForClasses // Utils`MakeUnknownInputDefinition;
+CombinatorialFactorsForClasses ~ SetAttributes ~ {Locked,Protected};
 
 ToGenericSum::usage=
 "@todo
@@ -1303,7 +1359,6 @@ SetAttributes[
    NPointFunctionFAFC,
    GenericInsertionsForDiagram,FindGenericInsertions,StripParticleIndices,
    ColourFactorForDiagram,
-   CombinatorialFactorsForClasses,
    ZeroRules,FCAmplitudesToFSConvention
    },
    {Protected, Locked}];

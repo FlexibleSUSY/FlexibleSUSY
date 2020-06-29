@@ -16,6 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#include <cstdlib>
 #include <memory>
 
 #include "config.h"
@@ -49,51 +50,76 @@
 #define STRINGIFY(X) #X
 #define TOSTR(MACROS) STRINGIFY(MACROS)
 
-namespace flexiblesusy {
+namespace flexiblesusy
+{
 
 Loop_library::Library Loop_library::type_ = Loop_library::Library::Undefined;
 std::unique_ptr<looplibrary::Loop_library_interface> Loop_library::lib_;
 
-void Loop_library::set_default(void) {
+void Loop_library::set_default()
+{
    Loop_library::lib_ = std::make_unique<looplibrary::Softsusy>();
    Loop_library::type_ = Loop_library::Library::Softsusy;
+   VERBOSE_MSG("Enabling softsusy.");
 }
 
-void Loop_library::set(int new_type) {
-   if( Loop_library::type_ == Loop_library::Library::Undefined) {
-      switch(new_type) {
-         case 0 : Loop_library::set_default();
-                  break;
-         #ifdef ENABLE_COLLIER
-         case 1 : Loop_library::lib_ = std::make_unique<looplibrary::Collier>();
-                  Loop_library::type_ = Loop_library::Library::Collier;
-                  break;
-         #endif // ENABLE_COLLIER
-         #ifdef ENABLE_LOOPTOOLS
-         case 2 : Loop_library::lib_ = std::make_unique<looplibrary::Looptools>();
-                  Loop_library::type_ = Loop_library::Library::Looptools;
-                  break;
-         #endif // ENABLE_LOOPTOOLS
-         #ifdef ENABLE_FFLITE
-         case 3 : Loop_library::lib_ = std::make_unique<looplibrary::Fflite>();
-                  Loop_library::type_ = Loop_library::Library::Fflite;
-                  break;
-         #endif // ENABLE_FFLITE
-         default: ERROR("Warning: Check FlexibleSUSY[31]:\n"
-                  "Currently configured values are 0 (=Softsusy)"
-                  COLLIER_INFO LOOPTOOLS_INFO FFLITE_INFO ".\n"
-                  "Setting default library.\n");
-                  Loop_library::set_default();
-                  break;
+void Loop_library::set(int new_type)
+{
+   if (Loop_library::type_ == Loop_library::Library::Undefined) {
+      if (new_type == -1) {
+         if (const char* flag = std::getenv("FLEXIBLESUSY_LOOP_LIBRARY")) {
+            new_type = std::atoi(flag);
+            VERBOSE_MSG("Setting looplibrary using environment variable "
+                        << "FLEXIBLESUSY_LOOP_LIBRARY=" << new_type);
+         }
+      }
+      switch (new_type) {
+      case 0:
+         Loop_library::set_default();
+         break;
+#ifdef ENABLE_COLLIER
+      case 1:
+         Loop_library::lib_ = std::make_unique<looplibrary::Collier>();
+         Loop_library::type_ = Loop_library::Library::Collier;
+         VERBOSE_MSG("Enabling COLLIER.");
+         break;
+#endif // ENABLE_COLLIER
+#ifdef ENABLE_LOOPTOOLS
+      case 2:
+         Loop_library::lib_ = std::make_unique<looplibrary::Looptools>();
+         Loop_library::type_ = Loop_library::Library::Looptools;
+         VERBOSE_MSG("Enabling LoopTools.");
+         break;
+#endif // ENABLE_LOOPTOOLS
+#ifdef ENABLE_FFLITE
+      case 3:
+         Loop_library::lib_ = std::make_unique<looplibrary::Fflite>();
+         Loop_library::type_ = Loop_library::Library::Fflite;
+         VERBOSE_MSG("Enabling FFlite.");
+         break;
+#endif // ENABLE_FFLITE
+      default:
+         ERROR("Warning: Check FlexibleSUSY[31]:\n"
+               "Currently configured values are 0 (=softsusy)" COLLIER_INFO
+                  LOOPTOOLS_INFO FFLITE_INFO ".\n"
+               "Setting default library.");
+         Loop_library::set_default();
+         break;
       }
    }
 }
 
-looplibrary::Loop_library_interface& Loop_library::get() {
-   if(Loop_library::type_ == Loop_library::Library::Undefined) {
+Loop_library::Library Loop_library::get_type()
+{
+   return type_;
+}
+
+looplibrary::Loop_library_interface& Loop_library::get()
+{
+   if (Loop_library::type_ == Loop_library::Library::Undefined) {
       ERROR("Loop library should be initialized before first usage.\n"
-      "Setting default library.\n");
-      Loop_library::set_default();
+            "Setting default library.");
+      Loop_library::set(-1);
    }
    return *Loop_library::lib_;
 }

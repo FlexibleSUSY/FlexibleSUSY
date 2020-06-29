@@ -19,7 +19,7 @@
 #ifndef PROBLEMS_H
 #define PROBLEMS_H
 
-#include <iostream>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
@@ -80,12 +80,18 @@ public:
    void clear();                      ///< clear all problems
    bool have_problem() const;         ///< problems which yield invalid spectrum
    bool have_warning() const;         ///< warnings
+   unsigned number_of_problems() const; ///< returns number of problems
+   unsigned number_of_warnings() const; ///< returns number of warnings
    std::vector<std::string> get_problem_strings() const;
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string(const std::string& sep = "\n") const;
    std::string get_warning_string(const std::string& sep = "\n") const;
-   void print_problems(std::ostream& = std::cerr) const;
-   void print_warnings(std::ostream& = std::cerr) const;
+   std::string get_particle_name(int) const;  ///< returns particle name
+   std::string get_parameter_name(int) const; ///< returns parameter name
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
    const std::string& get_model_name() const;
 
    std::vector<int> get_bad_masses() const;
@@ -114,8 +120,6 @@ private:
    bool failed_ewsb_tree_level{false}; ///< no tree-level EWSB
    bool non_perturbative{false};       ///< non-perturbative running
    bool failed_sinThetaW_convergence{false}; ///< sinThetaW-parameter not converged
-
-   std::string get_parameter_name(int) const; ///< returns parameter name
 };
 
 std::ostream& operator<<(std::ostream&, const Problems&);

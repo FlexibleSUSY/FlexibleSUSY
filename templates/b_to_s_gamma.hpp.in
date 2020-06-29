@@ -16,19 +16,19 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_b_to_s_gamma.hpp
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_BToSGamma_H
 #define @ModelName@_BToSGamma_H
 
-#include "lowe.h"
+namespace softsusy {
+class QedQcd;
+}
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// This file has been generated at Thu 13 Jul 2017 10:34:54
+// This file has been generated at Sat 18 Apr 2020 01:20:19
 // with the script "bquark_to_cpp.m".
 
 #include "mssm_twoloop_mb.hpp"
@@ -34,22 +34,22 @@ namespace {
    const double Pi  = 3.1415926535897932384626433832795;
    const double zt2 = 1.6449340668482264364724151666460;
 
-   template <typename T> T pow2(T x)  { return x*x; }
-   template <typename T> T pow3(T x)  { return x*x*x; }
-   template <typename T> T pow4(T x)  { return x*x*x*x; }
-   template <typename T> T pow5(T x)  { return x*x*x*x*x; }
+   template <typename T> T pow2(T x) noexcept { return x*x; }
+   template <typename T> T pow3(T x) noexcept { return x*x*x; }
+   template <typename T> T pow4(T x) noexcept { return pow2(pow2(x)); }
+   template <typename T> T pow5(T x) noexcept { return x*pow4(x); }
 
-   const double oneLoop = 1./pow2(4*Pi);
+   const double oneLoop = 1/pow2(4*Pi);
    const double twoLoop = pow2(oneLoop);
 
    template <typename T>
-   bool is_zero(T a, T prec = std::numeric_limits<T>::epsilon())
+   bool is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
    {
-      return std::fabs(a) < prec;
+      return std::abs(a) < prec;
    }
 
    template <typename T>
-   bool is_equal(T a, T b, T prec = std::numeric_limits<T>::epsilon())
+   bool is_equal(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
    {
       return is_zero(a - b, prec);
    }
@@ -63,63 +63,62 @@ namespace {
     *
     * @return Fin20(m12, m22, mmu)
     */
-   double Fin20(double mm1, double mm2, double mmu)
+   double Fin20(double mm1, double mm2, double mmu) noexcept
    {
-      using std::log;
-      const double PI = 3.14159265358979323846264338327950288;
+      const double log12 = std::log(mm1/mm2);
+      const double log1u = std::log(mm1/mmu);
+      const double log2u = std::log(mm2/mmu);
 
-      return (6*(mm1*log(mm1/mmu) + mm2*log(mm2/mmu)) +
-         (-mm1 - mm2)*(7 + pow2(PI)/6.) +
+      return (6*(mm1*log1u + mm2*log2u) +
+         (-mm1 - mm2)*(7 + pow2(Pi)/6) +
          (mm1 - mm2)*(2*dilog(1 - mm1/mm2) +
-            pow2(log(mm1/mm2))/2.) +
-         ((mm1 + mm2)*pow2(log(mm1/mm2)))/2. -
-         2*(mm1*pow2(log(mm1/mmu)) + mm2*pow2(log(mm2/mmu))))/2.;
+            pow2(log12)/2) +
+         ((mm1 + mm2)*pow2(log12))/2 -
+         2*(mm1*pow2(log1u) + mm2*pow2(log2u)))/2;
    }
 
-   double LambdaSquared(double x, double y)
+   double LambdaSquared(double x, double y) noexcept
    {
       return pow2(1 - x - y) - 4*x*y;
    }
 
    /// ClausenCl[2,x]
-   double ClausenCl2(double x)
+   double ClausenCl2(double x) noexcept
    {
-      using std::exp;
-      const std::complex<double> img(0.,1.);
+      const std::complex<double> img(0.0, 1.0);
 
-      return std::imag(dilog(exp(img*x)));
+      return std::imag(dilog(std::exp(img*x)));
    }
 
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
-   double PhiPos(double x, double y)
+   double PhiPos(double x, double y) noexcept
    {
       const double lambda = std::sqrt(LambdaSquared(x,y));
 
-      return (-(log(x)*log(y))
-              + 2*log((1 - lambda + x - y)/2.)*log((1 - lambda - x + y)/2.)
-              - 2*dilog((1 - lambda + x - y)/2.)
-              - 2*dilog((1 - lambda - x + y)/2.)
-              + pow2(Pi)/3.)/lambda;
+      return (-(std::log(x)*std::log(y))
+              + 2*std::log((1 - lambda + x - y)/2)*std::log((1 - lambda - x + y)/2)
+              - 2*dilog((1 - lambda + x - y)/2)
+              - 2*dilog((1 - lambda - x + y)/2)
+              + pow2(Pi)/3)/lambda;
    }
 
    /// LambdaSquared(x,y) < 0
-   double PhiNeg(double x, double y)
+   double PhiNeg(double x, double y) noexcept
    {
-      using std::acos;
-      using std::sqrt;
       const double lambda = std::sqrt(-LambdaSquared(x,y));
 
-      return 2*(+ ClausenCl2(2*acos((1 + x - y)/(2.*sqrt(x))))
-                + ClausenCl2(2*acos((1 - x + y)/(2.*sqrt(y))))
-                + ClausenCl2(2*acos((-1 + x + y)/(2.*sqrt(x*y)))))/lambda;
+      return 2*(+ ClausenCl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
+                + ClausenCl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
+                + ClausenCl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
    }
 
-   double Phi(double x, double y)
+   double Phi(double x, double y) noexcept
    {
       const double lambda = LambdaSquared(x,y);
 
-      if (lambda > 0.)
+      if (lambda > 0) {
          return PhiPos(x,y);
+      }
 
       return PhiNeg(x,y);
    }
@@ -134,39 +133,39 @@ namespace {
     *
     * @return Fin3(m12, m22, m32, mmu)
     */
-   double Fin3(double mm1, double mm2, double mm3, double mmu)
+   double Fin3(double mm1, double mm2, double mm3, double mmu) noexcept
    {
-      using std::log;
-
       std::array<double,3> masses = { mm1, mm2, mm3 };
       std::sort(masses.begin(), masses.end());
 
       const double mm = masses[2];
       const double x = masses[0]/mm;
       const double y = masses[1]/mm;
-
       const double lambda = LambdaSquared(x,y);
+      const double logx = std::log(x);
+      const double logy = std::log(y);
+      const double logm = std::log(mm/mmu);
 
       if (is_zero(lambda, 1e-10)) {
-         return -(mm*(2*y*(-3 + 2*log(mm/mmu))*log(y)
-                      + log(x)*(2*x*(-3 + 2*log(mm/mmu)) + (-1 + x + y)*log(y))
-                      + (1 + x + y)*(7 - 6*log(mm/mmu) + pow2(Pi)/6. + 2*pow2(log(mm/mmu)))
-                      + x*pow2(log(x)) + y*pow2(log(y))))/2.;
+         return -(mm*(2*y*(-3 + 2*logm)*logy
+                      + logx*(2*x*(-3 + 2*logm) + (-1 + x + y)*logy)
+                      + (1 + x + y)*(7 - 6*logm + pow2(Pi)/6 + 2*pow2(logm))
+                      + x*pow2(logx) + y*pow2(logy)))/2;
       }
 
-      return mm*((-7 + 6*log(mm/mmu) + log(x)*log(y)
-                  - lambda*Phi(x,y) - pow2(Pi)/6. - 2*pow2(log(mm/mmu)))/2.
-                 - (x*(7 - 6*log(mm/mmu) + log(x)*(-6 + 4*log(mm/mmu) + log(y))
-                       + pow2(Pi)/6. + 2*pow2(log(mm/mmu)) + pow2(log(x))))/2.
-                 - (y*(7 - 6*log(mm/mmu) + (
-                     -6 + 4*log(mm/mmu) + log(x))*log(y) + pow2(Pi)/6.
-                       + 2*pow2(log(mm/mmu)) + pow2(log(y))))/2.);
+      return mm*((-7 + 6*logm + logx*logy
+                  - lambda*Phi(x,y) - pow2(Pi)/6 - 2*pow2(logm))/2
+                 - (x*(7 - 6*logm + logx*(-6 + 4*logm + logy)
+                       + pow2(Pi)/6 + 2*pow2(logm) + pow2(logx)))/2
+                 - (y*(7 - 6*logm + (
+                     -6 + 4*logm + logx)*logy + pow2(Pi)/6
+                       + 2*pow2(logm) + pow2(logy)))/2);
    }
 
    /// Delta[m1,m2,m3,-1]
-   double DeltaInv(double m1, double m2, double m3)
+   double DeltaInv(double m1, double m2, double m3) noexcept
    {
-      return 1./(pow2(m1) + pow2(m2) + pow2(m3) - 2*(m1*m2 + m1*m3 + m2*m3));
+      return 1/(pow2(m1) + pow2(m2) + pow2(m3) - 2*(m1*m2 + m1*m3 + m2*m3));
    }
 
 } // anonymous namespace
@@ -190,4082 +189,1428 @@ namespace {
  */
 double delta_mb_2loop(const Parameters& pars)
 {
-   using std::log;
-   const double g3     = pars.g3;
-   const double Xt     = pars.xt;
-   const double Xb     = pars.xb;
-   const double mgl    = pars.mg;
-   const double mmt    = pow2(pars.mt);
-   const double mmb    = pow2(pars.mb);
-   const double mmgl   = pow2(pars.mg);
-   const double mmu    = pow2(pars.Q);
-   const double mmst1  = pow2(pars.mst1);
-   const double mmst2  = pow2(pars.mst2);
-   const double mmsb1  = pow2(pars.msb1);
-   const double mmsb2  = pow2(pars.msb2);
-   const double mmsusy = pow2(pars.msusy);
+   const double g3      = pars.g3;
+   const double Xt      = pars.xt;
+   const double Xb      = pars.xb;
+   const double mgl     = pars.mg;
+   const double mt      = pars.mt;
+   const double mb      = pars.mb;
+   const double mmt     = pow2(pars.mt);
+   const double mmgl    = pow2(pars.mg);
+   const double mmgl2   = pow2(mmgl);
+   const double mmu     = pow2(pars.Q);
+   const double mmst1   = pow2(pars.mst1);
+   const double mmst2   = pow2(pars.mst2);
+   const double mmsb1   = pow2(pars.msb1);
+   const double mmsb2   = pow2(pars.msb2);
+   const double mmsb12  = pow2(mmsb1);
+   const double mmsb22  = pow2(mmsb2);
+   const double mmsusy  = pow2(pars.msusy);
+   const double lgu     = std::log(mmgl/mmu);
+   const double lt1u    = std::log(mmst1/mmu);
+   const double lt2u    = std::log(mmst2/mmu);
+   const double lb1u    = std::log(mmsb1/mmu);
+   const double lb2u    = std::log(mmsb2/mmu);
+   const double lsu     = std::log(mmsusy/mmu);
+   const double ltu     = std::log(mmt/mmu);
+   const double s2t     = 2*mt*Xt / (mmst1 - mmst2);
+   const double s2b     = 2*mb*Xb / (mmsb1 - mmsb2);
+   const double invdgb1 = 1/(-mmgl + mmsb1);
+   const double invdgb2 = 1/(-mmgl + mmsb2);
+   const double invdb12 = 1/(mmsb1 - mmsb2);
 
    const double result =
-   pow4(g3)*(-67.75925925925925 - (8*mmsb1)/(-mmgl + mmsb1) + (890*mmsb2)/(9.*(
-     -mmgl + mmsb1)) + (6*mmsb1)/(-mmgl + mmsb2) - (908*mmsb2)/(9.*(-mmgl +
-     mmsb2)) - (8*mmst1)/(-mmgl + mmsb1) - (8*mmst1)/(-mmgl + mmsb2) - (8*
-     mmst2)/(-mmgl + mmsb1) - (8*mmst2)/(-mmgl + mmsb2) + (48*mmsusy)/(-mmgl +
-     mmsb1) + (48*mmsusy)/(-mmgl + mmsb2) - (12*mmt)/(-mmgl + mmsb1) - (12*mmt)
-     /(-mmgl + mmsb2) - 8*zt2 - (31*mmsb1*zt2)/(9.*(-mmgl + mmsb1)) + (43*
-     mmsb2*zt2)/(3.*(-mmgl + mmsb1)) + (mmsb1*zt2)/(-mmgl + mmsb2) - (151*
-     mmsb2*zt2)/(9.*(-mmgl + mmsb2)) - (mmst1*zt2)/(-mmgl + mmsb1) - (mmst1*
-     zt2)/(-mmgl + mmsb2) - (mmst2*zt2)/(-mmgl + mmsb1) - (mmst2*zt2)/(-mmgl +
-     mmsb2) + (8*mmsusy*zt2)/(-mmgl + mmsb1) + (8*mmsusy*zt2)/(-mmgl + mmsb2) -
-     (2*mmt*zt2)/(-mmgl + mmsb1) - (2*mmt*zt2)/(-mmgl + mmsb2) - (56*mmsb1*
-     mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(3.*(-mmgl + mmsb1)) - (8*mmsb1*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1))/(3.*(-mmgl + mmsb1)) - (56*mmsb1*
-     mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(3.*(-mmgl + mmsb1)) - (8*mmsb1*
-     mmst2*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2))/(3.*(-mmgl + mmsb1)) - (56*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(3.*(-mmgl + mmsb2)) - (8*mmsb2*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmsb2,mmst1))/(3.*(-mmgl + mmsb2)) - (56*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(3.*(-mmgl + mmsb2)) - (8*mmsb2*
-     mmst2*mmt*zt2*DeltaInv(mmt,mmsb2,mmst2))/(3.*(-mmgl + mmsb2)) - (56*mmgl*
-     mmsb1*DeltaInv(mmt,mmst1,mmgl))/3. - (56*mmgl*mmsb2*DeltaInv(mmt,mmst1,
-     mmgl))/3. + (56*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl))/3. + (56*mmsb1*mmst1*
-     DeltaInv(mmt,mmst1,mmgl))/3. + (56*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl))/
-     3. + (56*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl))/3. + (56*mmsb1*mmt*DeltaInv(
-     mmt,mmst1,mmgl))/3. + (56*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl))/3. + (224*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/3. - (224*mmsb1*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl))/(3.*(-mmgl + mmsb1)) - (224*mmsb2*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl))/(3.*(-mmgl + mmsb2)) - (8*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst1,
-     mmgl))/3. - (8*mmgl*mmsb2*zt2*DeltaInv(mmt,mmst1,mmgl))/3. + (8*mmgl*
-     mmst1*zt2*DeltaInv(mmt,mmst1,mmgl))/3. + (8*mmsb1*mmst1*zt2*DeltaInv(mmt,
-     mmst1,mmgl))/3. + (8*mmsb2*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl))/3. + (8*
-     mmgl*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/3. + (8*mmsb1*mmt*zt2*DeltaInv(mmt,
-     mmst1,mmgl))/3. + (8*mmsb2*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/3. + (32*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/3. - (32*mmsb1*mmst1*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl))/(3.*(-mmgl + mmsb1)) - (32*mmsb2*mmst1*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl))/(3.*(-mmgl + mmsb2)) - (56*mmgl*mmsb1*DeltaInv(
-     mmt,mmst2,mmgl))/3. - (56*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl))/3. + (56*
-     mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl))/3. + (56*mmsb1*mmst2*DeltaInv(mmt,
-     mmst2,mmgl))/3. + (56*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl))/3. + (56*mmgl*
-     mmt*DeltaInv(mmt,mmst2,mmgl))/3. + (56*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl))
-     /3. + (56*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl))/3. + (224*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl))/3. - (224*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*(-mmgl + mmsb1)) - (224*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*(-mmgl + mmsb2)) - (8*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl))/
-     3. - (8*mmgl*mmsb2*zt2*DeltaInv(mmt,mmst2,mmgl))/3. + (8*mmgl*mmst2*zt2*
-     DeltaInv(mmt,mmst2,mmgl))/3. + (8*mmsb1*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)
-     )/3. + (8*mmsb2*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl))/3. + (8*mmgl*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl))/3. + (8*mmsb1*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/
-     3. + (8*mmsb2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/3. + (32*mmst2*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl))/3. - (32*mmsb1*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*(-mmgl + mmsb1)) - (32*mmsb2*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*(-mmgl + mmsb2)) + (83*Fin20(mmsb1,mmgl,mmu))/(9.*(-mmgl +
-     mmsb1)) - (128*Fin20(mmsb1,mmgl,mmu))/(9.*(mmsb1 - mmsb2)) + (40*mmsb2*
-     Fin20(mmsb1,mmgl,mmu))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (7*Fin20(
-     mmsb1,mmgl,mmu))/(9.*(-mmgl + mmsb2)) + (8*mmsb2*Fin20(mmsb1,mmgl,mmu))/(
-     9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (10*Fin20(mmsb1,mmsb2,mmu))/(9.*(-
-     mmgl + mmsb1)) + (8*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(9.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (2*Fin20(mmsb1,mmsb2,mmu))/(9.*(-mmgl + mmsb2)) - (8*
-     mmsb2*Fin20(mmsb1,mmsb2,mmu))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) -
-     Fin20(mmsb2,mmgl,mmu)/(9.*(-mmgl + mmsb1)) + (128*Fin20(mmsb2,mmgl,mmu))/(
-     9.*(mmsb1 - mmsb2)) - (8*mmsb2*Fin20(mmsb2,mmgl,mmu))/(9.*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) - (37*Fin20(mmsb2,mmgl,mmu))/(9.*(-mmgl + mmsb2)) - (40*
-     mmsb2*Fin20(mmsb2,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (1016*
-     log(mmgl/mmu))/9. - (58*mmsb1*log(mmgl/mmu))/(3.*(-mmgl + mmsb1)) - (598*
-     mmsb2*log(mmgl/mmu))/(9.*(-mmgl + mmsb1)) - (2*mmsb1*log(mmgl/mmu))/(-mmgl
-     + mmsb2) + (406*mmsb2*log(mmgl/mmu))/(9.*(-mmgl + mmsb2)) - (2*mmst1*log(
-     mmgl/mmu))/(-mmgl + mmsb1) - (2*mmst1*log(mmgl/mmu))/(-mmgl + mmsb2) - (2*
-     mmst2*log(mmgl/mmu))/(-mmgl + mmsb1) - (2*mmst2*log(mmgl/mmu))/(-mmgl +
-     mmsb2) - (16*mmsusy*log(mmgl/mmu))/(-mmgl + mmsb1) - (16*mmsusy*log(mmgl/
-     mmu))/(-mmgl + mmsb2) + (4*mmt*log(mmgl/mmu))/(-mmgl + mmsb1) + (4*mmt*
-     log(mmgl/mmu))/(-mmgl + mmsb2) + 8*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu) + 8*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu) - 16*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu) - 16*mmsb1*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu) - 16*mmsb2*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu) - 8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu) - 8*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu) - 8*mmsb2*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu) - 8*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu) + (8*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu))/(-mmgl + mmsb1) + (8*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu))/(-mmgl + mmsb2) + 8*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu) + 8*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu) - 16*
-     mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu) - 16*mmsb1*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu) - 16*mmsb2*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu) - 8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/
-     mmu) - 8*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu) - 8*mmsb2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu) - 8*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu) + (8*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu))/(-mmgl + mmsb1) + (8*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu))/(-mmgl + mmsb2) + (25*log(mmsb1/mmu))/3. + (118*mmsb1*log(
-     mmsb1/mmu))/(9.*(-mmgl + mmsb1)) - (44*mmsb2*log(mmsb1/mmu))/(3.*(-mmgl +
-     mmsb1)) + (128*mmsb2*log(mmsb1/mmu))/(9.*(mmsb1 - mmsb2)) - (4*mmsb1*log(
-     mmsb1/mmu))/(-mmgl + mmsb2) + (4*mmsb2*log(mmsb1/mmu))/(9.*(-mmgl + mmsb2)
-     ) + (2*mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu))/(-mmgl +
-     mmsb1) + (2*mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu))/(-
-     mmgl + mmsb1) + (64*log(mmgl/mmu)*log(mmsb1/mmu))/9. - (55*mmsb1*log(mmgl/
-     mmu)*log(mmsb1/mmu))/(9.*(-mmgl + mmsb1)) + (4*mmsb2*log(mmgl/mmu)*log(
-     mmsb1/mmu))/(9.*(-mmgl + mmsb1)) + (mmsb1*log(mmgl/mmu)*log(mmsb1/mmu))/(-
-     mmgl + mmsb2) - (4*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*(-mmgl + mmsb2)
-     ) - (53*log(mmsb2/mmu))/9. - (44*mmsb2*log(mmsb2/mmu))/(9.*(-mmgl + mmsb1)
-     ) - (128*mmsb2*log(mmsb2/mmu))/(9.*(mmsb1 - mmsb2)) + (254*mmsb2*log(
-     mmsb2/mmu))/(9.*(-mmgl + mmsb2)) + (2*mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,
-     mmst1)*log(mmsb2/mmu))/(-mmgl + mmsb2) + (2*mmsb2*mmst2*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*log(mmsb2/mmu))/(-mmgl + mmsb2) + (64*log(mmgl/mmu)*log(
-     mmsb2/mmu))/9. + (13*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*(-mmgl +
-     mmsb1)) - (59*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*(-mmgl + mmsb2)) - (
-     4*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*(-mmgl + mmsb1)) + (4*mmsb2*
-     log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*(-mmgl + mmsb2)) - (56*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmgl))/3. - (8*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/
-     3. - (56*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/3. - (8*zt2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmgl))/3. + 8*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     pow2(mmgl) + 8*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmgl) - (14*
-     mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (14*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (2*
-     mmst1*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (
-     2*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (
-     14*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (
-     14*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (2*
-     mmst2*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) - (
-     2*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)) -
-     28*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1) - (28*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - (28*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1))/(-mmgl + mmsb1) - 4*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)
-     - (4*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - (4*
-     mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - 28*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1) - (28*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1))/(-mmgl + mmsb1) - (28*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb1))/(-mmgl + mmsb1) - 4*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1) - (4*
-     mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - (4*mmt*
-     zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) + 12*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1) + (24*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + (12*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + 12*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb1) + (24*mmst2*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmgl/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + (12*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + (4*mmst1*DeltaInv(mmt,
-     mmsb1,mmst1)*log(mmsb1/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + (2*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow2(mmsb1))/(-mmgl + mmsb1) + (
-     4*mmst2*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow2(mmsb1))/(-mmgl +
-     mmsb1) + (2*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow2(mmsb1))/(-
-     mmgl + mmsb1) - (8*mmsb1*mmsb2)/pow2(-mmgl + mmsb1) + (32*mmsb1*mmst1)/(3.
-     *pow2(-mmgl + mmsb1)) + (32*mmsb1*mmst2)/(3.*pow2(-mmgl + mmsb1)) - (64*
-     mmsb1*mmsusy)/pow2(-mmgl + mmsb1) + (16*mmsb1*mmt)/pow2(-mmgl + mmsb1) - (
-     4*mmsb1*mmsb2*zt2)/(3.*pow2(-mmgl + mmsb1)) + (4*mmsb1*mmst1*zt2)/(3.*
-     pow2(-mmgl + mmsb1)) + (4*mmsb1*mmst2*zt2)/(3.*pow2(-mmgl + mmsb1)) - (32*
-     mmsb1*mmsusy*zt2)/(3.*pow2(-mmgl + mmsb1)) + (8*mmsb1*mmt*zt2)/(3.*pow2(-
-     mmgl + mmsb1)) + (12*mmsb1*Fin20(mmsb1,mmgl,mmu))/pow2(-mmgl + mmsb1) - (
-     7*mmsb1*Fin20(mmsb1,mmsb2,mmu))/(3.*pow2(-mmgl + mmsb1)) + (mmsb2*Fin20(
-     mmsb1,mmsb2,mmu))/pow2(-mmgl + mmsb1) + (mmsb1*Fin20(mmsb2,mmgl,mmu))/
-     pow2(-mmgl + mmsb1) - (mmsb2*Fin20(mmsb2,mmgl,mmu))/pow2(-mmgl + mmsb1) +
-     (38*mmsb1*mmsb2*log(mmgl/mmu))/(9.*pow2(-mmgl + mmsb1)) + (14*mmsb1*mmst1*
-     log(mmgl/mmu))/(3.*pow2(-mmgl + mmsb1)) + (14*mmsb1*mmst2*log(mmgl/mmu))/(
-     3.*pow2(-mmgl + mmsb1)) + (112*mmsb1*mmsusy*log(mmgl/mmu))/(3.*pow2(-mmgl
-     + mmsb1)) - (28*mmsb1*mmt*log(mmgl/mmu))/(3.*pow2(-mmgl + mmsb1)) - (14*
-     mmsb1*mmsb2*log(mmsb1/mmu))/(9.*pow2(-mmgl + mmsb1)) - (2*mmsb1*mmst1*log(
-     mmsb1/mmu))/pow2(-mmgl + mmsb1) - (2*mmsb1*mmst2*log(mmsb1/mmu))/pow2(-
-     mmgl + mmsb1) - (16*mmsb1*mmsusy*log(mmsb1/mmu))/pow2(-mmgl + mmsb1) + (4*
-     mmsb1*mmt*log(mmsb1/mmu))/pow2(-mmgl + mmsb1) - (8*mmsb1*mmsb2*log(mmgl/
-     mmu)*log(mmsb1/mmu))/(9.*pow2(-mmgl + mmsb1)) + (16*mmsb1*mmsb2*log(mmsb2/
-     mmu))/(3.*pow2(-mmgl + mmsb1)) - (29*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb2/
-     mmu))/(9.*pow2(-mmgl + mmsb1)) + (8*mmsb1*mmsb2*log(mmsb1/mmu)*log(mmsb2/
-     mmu))/(9.*pow2(-mmgl + mmsb1)) + (1222*pow2(mmsb1))/(9.*pow2(-mmgl +
-     mmsb1)) + (20*zt2*pow2(mmsb1))/pow2(-mmgl + mmsb1) + (112*mmst1*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (16*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*pow2(-mmgl +
-     mmsb1)) + (112*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*pow2(-
-     mmgl + mmsb1)) + (16*mmst2*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/
-     (3.*pow2(-mmgl + mmsb1)) + (112*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (16*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (112*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (16*mmst2*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (368*log(
-     mmgl/mmu)*pow2(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (4*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (4*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (160*log(mmsb1/mmu)*pow2(mmsb1))/(9.*pow2(-mmgl + mmsb1)) - (4*
-     mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow2(mmsb1))/pow2(-mmgl
-     + mmsb1) - (4*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) - (113*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(
-     mmsb1))/(9.*pow2(-mmgl + mmsb1)) + (836*pow2(mmsb2))/(9.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (836*pow2(mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) +
-     (40*zt2*pow2(mmsb2))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (40*zt2*pow2(
-     mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (14*mmst1*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (14*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (2*mmst1*zt2*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (2*mmt*zt2*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (14*mmst2*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (14*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (2*mmst2*zt2*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - (2*mmt*zt2*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)) - 28*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2) - (28*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/
-     (-mmgl + mmsb2) - (28*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl +
-     mmsb2) - 4*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2) - (4*mmst1*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (4*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - 28*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2) - (28*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/
-     (-mmgl + mmsb2) - (28*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl +
-     mmsb2) - 4*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2) - (4*mmst2*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (4*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (580*log(mmgl/mmu)
-     *pow2(mmsb2))/(9.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (580*log(mmgl/mmu)*
-     pow2(mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + 12*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*pow2(mmsb2) + (24*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb2))/(-mmgl + mmsb2) + (12*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*pow2(mmsb2))/(-mmgl + mmsb2) + 12*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow2(mmsb2) + (24*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/
-     mmu)*pow2(mmsb2))/(-mmgl + mmsb2) + (12*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb2))/(-mmgl + mmsb2) - (128*log(mmsb1/mmu)*pow2(mmsb2))/
-     (9.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (4*log(mmgl/mmu)*log(mmsb1/mmu)*
-     pow2(mmsb2))/(9.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (4*log(mmgl/mmu)*log(
-     mmsb1/mmu)*pow2(mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (4*log(
-     mmsb2/mmu)*pow2(mmsb2))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (140*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (4*mmst1*
-     DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmsb2))/(-mmgl + mmsb2) + (
-     2*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmsb2))/(-mmgl +
-     mmsb2) + (4*mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*pow2(mmsb2))/(-
-     mmgl + mmsb2) + (2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*pow2(
-     mmsb2))/(-mmgl + mmsb2) - (4*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.
-     *(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (4*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(
-     mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (4*log(mmsb1/mmu)*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (4*log(
-     mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)
-     ) - (4*log(mmgl/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb1)) + (4*log(mmsb1/
-     mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb1)) - (4*log(mmgl/mmu)*log(mmsb1/
-     mmu)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb1)) - (4*log(mmgl/mmu)*log(mmsb2/
-     mmu)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb1)) + (4*log(mmsb1/mmu)*log(mmsb2/
-     mmu)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb1)) + (4*log(mmsusy/mmu)*(
-     7.333333333333333 - (24*mmsusy)/(-mmgl + mmsb1) - (24*mmsusy)/(-mmgl +
-     mmsb2) + (32*mmsb1*mmsusy)/pow2(-mmgl + mmsb1) + (32*mmsb2*mmsusy)/pow2(-
-     mmgl + mmsb2)))/3. - (8*mmsb1*mmsb2)/pow2(-mmgl + mmsb2) + (32*mmsb2*
-     mmst1)/(3.*pow2(-mmgl + mmsb2)) + (32*mmsb2*mmst2)/(3.*pow2(-mmgl + mmsb2)
-     ) - (64*mmsb2*mmsusy)/pow2(-mmgl + mmsb2) + (16*mmsb2*mmt)/pow2(-mmgl +
-     mmsb2) - (4*mmsb1*mmsb2*zt2)/(3.*pow2(-mmgl + mmsb2)) + (4*mmsb2*mmst1*
-     zt2)/(3.*pow2(-mmgl + mmsb2)) + (4*mmsb2*mmst2*zt2)/(3.*pow2(-mmgl +
-     mmsb2)) - (32*mmsb2*mmsusy*zt2)/(3.*pow2(-mmgl + mmsb2)) + (8*mmsb2*mmt*
-     zt2)/(3.*pow2(-mmgl + mmsb2)) - (mmsb1*Fin20(mmsb1,mmgl,mmu))/pow2(-mmgl +
-     mmsb2) + (mmsb2*Fin20(mmsb1,mmgl,mmu))/pow2(-mmgl + mmsb2) + (mmsb1*Fin20(
-     mmsb1,mmsb2,mmu))/pow2(-mmgl + mmsb2) - (7*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(
-     3.*pow2(-mmgl + mmsb2)) + (12*mmsb2*Fin20(mmsb2,mmgl,mmu))/pow2(-mmgl +
-     mmsb2) + (14*mmsb1*mmsb2*log(mmgl/mmu))/(3.*pow2(-mmgl + mmsb2)) + (14*
-     mmsb2*mmst1*log(mmgl/mmu))/(3.*pow2(-mmgl + mmsb2)) + (14*mmsb2*mmst2*log(
-     mmgl/mmu))/(3.*pow2(-mmgl + mmsb2)) + (112*mmsb2*mmsusy*log(mmgl/mmu))/(3.
-     *pow2(-mmgl + mmsb2)) - (28*mmsb2*mmt*log(mmgl/mmu))/(3.*pow2(-mmgl +
-     mmsb2)) + (16*mmsb1*mmsb2*log(mmsb1/mmu))/(3.*pow2(-mmgl + mmsb2)) - (7*
-     mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(3.*pow2(-mmgl + mmsb2)) - (2*
-     mmsb1*mmsb2*log(mmsb2/mmu))/pow2(-mmgl + mmsb2) - (2*mmsb2*mmst1*log(
-     mmsb2/mmu))/pow2(-mmgl + mmsb2) - (2*mmsb2*mmst2*log(mmsb2/mmu))/pow2(-
-     mmgl + mmsb2) - (16*mmsb2*mmsusy*log(mmsb2/mmu))/pow2(-mmgl + mmsb2) + (4*
-     mmsb2*mmt*log(mmsb2/mmu))/pow2(-mmgl + mmsb2) + (1222*pow2(mmsb2))/(9.*
-     pow2(-mmgl + mmsb2)) + (20*zt2*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (112*
-     mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb2))
-     + (16*mmst1*mmt*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(3.*pow2(-mmgl
-     + mmsb2)) + (112*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*
-     pow2(-mmgl + mmsb2)) + (16*mmst2*mmt*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (112*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)
-     *pow2(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (16*mmst1*mmt*zt2*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (112*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (16*
-     mmst2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*pow2(-mmgl +
-     mmsb2)) - (1100*log(mmgl/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb2)) - (4*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/pow2(-mmgl +
-     mmsb2) - (4*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/
-     pow2(-mmgl + mmsb2) + (4*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*
-     pow2(-mmgl + mmsb2)) + (52*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow2(-mmgl +
-     mmsb2)) - (4*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(
-     mmsb2))/pow2(-mmgl + mmsb2) - (4*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(
-     mmsb2/mmu)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (109*log(mmgl/mmu)*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb2)) - (4*log(mmsb1/mmu)*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb2)) - (14*mmsb1*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb1)) - (14*mmt*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb1)) - (2*mmsb1*zt2*DeltaInv(
-     mmt,mmsb1,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb1)) - (2*mmt*zt2*DeltaInv(
-     mmt,mmsb1,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb1)) - (14*mmsb2*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb2)) - (14*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb2)) - (2*mmsb2*zt2*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb2)) - (2*mmt*zt2*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmst1))/(3.*(-mmgl + mmsb2)) + (56*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1))/3. - (56*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(3.*(-mmgl + mmsb1)) - (56*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(3.*(-mmgl + mmsb2)) - (28*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(3.*(-mmgl + mmsb1)) - (28*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(3.*(-mmgl + mmsb2)) + (8*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)
-     )/3. - (8*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*(-mmgl +
-     mmsb1)) - (8*mmsb2*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*(-mmgl +
-     mmsb2)) - (4*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*(-mmgl +
-     mmsb1)) - (4*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*(-mmgl +
-     mmsb2)) + 8*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmst1) - (8*mmsb1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmst1))/(-mmgl + mmsb1) - (8*
-     mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmst1))/(-mmgl + mmsb2)
-     - (2*mmsb1*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow2(mmst1))/(-mmgl +
-     mmsb1) - (2*mmsb2*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmst1))/(-
-     mmgl + mmsb2) + (28*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(3.*
-     pow2(-mmgl + mmsb1)) + (4*mmsb1*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmst1))/(3.*pow2(-mmgl + mmsb1)) + (28*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmst1))/(3.*pow2(-mmgl + mmsb1)) + (4*mmsb1*mmt*zt2*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb1)) + (28*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb1)) + (4*zt2*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb1)
-     ) + (28*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/(3.*pow2(-mmgl +
-     mmsb1)) + (4*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/(3.*
-     pow2(-mmgl + mmsb1)) + (4*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(
-     mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) + (4*DeltaInv(mmt,mmsb1,mmst1)*
-     log(mmsb1/mmu)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) + (28*mmsb2*
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb2)) + (4*
-     mmsb2*mmt*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(3.*pow2(-mmgl +
-     mmsb2)) + (28*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*pow2(-
-     mmgl + mmsb2)) + (4*mmsb2*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(
-     3.*pow2(-mmgl + mmsb2)) + (28*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(
-     mmst1))/(3.*pow2(-mmgl + mmsb2)) + (4*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow2(
-     mmsb2)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb2)) + (28*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb2)) + (4*zt2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmst1))/(3.*pow2(-mmgl + mmsb2)) + (4*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl
-     + mmsb2) + (4*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmsb2)*pow2(
-     mmst1))/pow2(-mmgl + mmsb2) - (14*mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmst2))/(3.*(-mmgl + mmsb1)) - (14*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmst2))/(3.*(-mmgl + mmsb1)) - (2*mmsb1*zt2*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb1)) - (2*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb1)) - (14*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb2)) - (14*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb2)) - (2*mmsb2*zt2*DeltaInv(mmt,mmsb2,mmst2)
-     *pow2(mmst2))/(3.*(-mmgl + mmsb2)) - (2*mmt*zt2*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb2)) + (56*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/3. - (56*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl +
-     mmsb1)) - (56*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl +
-     mmsb2)) - (28*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl +
-     mmsb1)) - (28*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl +
-     mmsb2)) + (8*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/3. - (8*mmsb1*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl + mmsb1)) - (8*mmsb2*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl + mmsb2)) - (4*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl + mmsb1)) - (4*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*(-mmgl + mmsb2)) + 8*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmst2) - (8*mmsb1*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*pow2(mmst2))/(-mmgl + mmsb1) - (8*mmsb2*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow2(mmst2))/(-mmgl + mmsb2) - (2*mmsb1*
-     DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow2(mmst2))/(-mmgl + mmsb1) - (
-     2*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*pow2(mmst2))/(-mmgl +
-     mmsb2) + (28*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(3.*pow2(-
-     mmgl + mmsb1)) + (4*mmsb1*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(
-     3.*pow2(-mmgl + mmsb1)) + (28*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/(3.*pow2(-mmgl + mmsb1)) + (4*mmsb1*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb1)) + (28*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(mmsb1)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb1)) + (4*zt2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb1)
-     ) + (28*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2))/(3.*pow2(-mmgl +
-     mmsb1)) + (4*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2))/(3.*
-     pow2(-mmgl + mmsb1)) + (4*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(
-     mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) + (4*DeltaInv(mmt,mmsb1,mmst2)*
-     log(mmsb1/mmu)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) + (28*mmsb2*
-     mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb2)) + (4*
-     mmsb2*mmt*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(3.*pow2(-mmgl +
-     mmsb2)) + (28*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*pow2(-
-     mmgl + mmsb2)) + (4*mmsb2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(
-     3.*pow2(-mmgl + mmsb2)) + (28*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(
-     mmst2))/(3.*pow2(-mmgl + mmsb2)) + (4*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmsb2)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb2)) + (28*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb2)) + (4*zt2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/(3.*pow2(-mmgl + mmsb2)) + (4*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl
-     + mmsb2) + (4*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*pow2(mmsb2)*pow2(
-     mmst2))/pow2(-mmgl + mmsb2) - (254*pow2(log(mmgl/mmu)))/9. + (85*mmsb1*
-     pow2(log(mmgl/mmu)))/(18.*(-mmgl + mmsb1)) + (353*mmsb2*pow2(log(mmgl/mmu)
-     ))/(18.*(-mmgl + mmsb1)) + (mmsb1*pow2(log(mmgl/mmu)))/(2.*(-mmgl + mmsb2)
-     ) - (259*mmsb2*pow2(log(mmgl/mmu)))/(18.*(-mmgl + mmsb2)) + (mmst1*pow2(
-     log(mmgl/mmu)))/(2.*(-mmgl + mmsb1)) + (mmst1*pow2(log(mmgl/mmu)))/(2.*(-
-     mmgl + mmsb2)) + (mmst2*pow2(log(mmgl/mmu)))/(2.*(-mmgl + mmsb1)) + (
-     mmst2*pow2(log(mmgl/mmu)))/(2.*(-mmgl + mmsb2)) + (4*mmsusy*pow2(log(mmgl/
-     mmu)))/(-mmgl + mmsb1) + (4*mmsusy*pow2(log(mmgl/mmu)))/(-mmgl + mmsb2) -
-     (mmt*pow2(log(mmgl/mmu)))/(-mmgl + mmsb1) - (mmt*pow2(log(mmgl/mmu)))/(-
-     mmgl + mmsb2) - (4*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))
-     )/3. - (4*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/3. + (
-     8*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/3. + (8*mmsb1*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/3. + (8*mmsb2*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/3. + (4*mmgl*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/3. + (4*mmsb1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(log(mmgl/mmu)))/3. + (4*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu)))/3. + (4*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmgl/mmu)))/3. - (4*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*(-mmgl + mmsb1)) - (4*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb2)) - (4*mmgl*mmsb1*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/3. - (4*mmgl*mmsb2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(log(mmgl/mmu)))/3. + (8*mmgl*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(log(mmgl/mmu)))/3. + (8*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(log(mmgl/mmu)))/3. + (8*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     log(mmgl/mmu)))/3. + (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/
-     mmu)))/3. + (4*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/3.
-      + (4*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/
-     3. + (4*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/3. - (4*
-     mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*(-mmgl +
-     mmsb1)) - (4*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))
-     /(3.*(-mmgl + mmsb2)) - (4*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl)*pow2(log(
-     mmgl/mmu)))/3. - (4*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(mmgl/mmu)
-     ))/3. - 2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)) - (4*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(-mmgl +
-     mmsb1) - (2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/
-     (-mmgl + mmsb1) - 2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/
-     mmu)) - (4*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))
-     /(-mmgl + mmsb1) - (2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(
-     mmgl/mmu)))/(-mmgl + mmsb1) - (5*mmsb1*mmsb2*pow2(log(mmgl/mmu)))/(18.*
-     pow2(-mmgl + mmsb1)) - (7*mmsb1*mmst1*pow2(log(mmgl/mmu)))/(6.*pow2(-mmgl
-     + mmsb1)) - (7*mmsb1*mmst2*pow2(log(mmgl/mmu)))/(6.*pow2(-mmgl + mmsb1)) -
-     (28*mmsb1*mmsusy*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb1)) + (7*mmsb1*
-     mmt*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb1)) + (853*pow2(mmsb1)*pow2(
-     log(mmgl/mmu)))/(18.*pow2(-mmgl + mmsb1)) + (2*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb1)) + (
-     2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*
-     pow2(-mmgl + mmsb1)) + (20*pow2(mmsb2)*pow2(log(mmgl/mmu)))/((-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (20*pow2(mmsb2)*pow2(log(mmgl/mmu)))/((mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - 2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(
-     mmgl/mmu)) - (4*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/
-     mmu)))/(-mmgl + mmsb2) - (2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(
-     log(mmgl/mmu)))/(-mmgl + mmsb2) - 2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*
-     pow2(log(mmgl/mmu)) - (4*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(
-     log(mmgl/mmu)))/(-mmgl + mmsb2) - (2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(-mmgl + mmsb2) + (4*pow2(mmsb2)*pow2(log(
-     mmgl/mmu)))/(3.*pow2(-mmgl + mmsb1)) - (7*mmsb1*mmsb2*pow2(log(mmgl/mmu)))
-     /(6.*pow2(-mmgl + mmsb2)) - (7*mmsb2*mmst1*pow2(log(mmgl/mmu)))/(6.*pow2(-
-     mmgl + mmsb2)) - (7*mmsb2*mmst2*pow2(log(mmgl/mmu)))/(6.*pow2(-mmgl +
-     mmsb2)) - (28*mmsb2*mmsusy*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb2)) +
-     (7*mmsb2*mmt*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb2)) + (845*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(18.*pow2(-mmgl + mmsb2)) + (2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl +
-     mmsb2)) + (2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmgl/
-     mmu)))/(3.*pow2(-mmgl + mmsb2)) - (4*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*
-     pow2(log(mmgl/mmu)))/3. + (4*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*
-     pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb1)) + (4*mmsb2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1)*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb2)) - (2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1)*pow2(log(mmgl/mmu)))/(3.*pow2(-
-     mmgl + mmsb1)) - (2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmst1)*pow2(
-     log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb2)) - (4*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmst2)*pow2(log(mmgl/mmu)))/3. + (4*mmsb1*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmst2)*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb1)) + (4*mmsb2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb2)) - (
-     2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2)*pow2(log(mmgl/mmu)))/(
-     3.*pow2(-mmgl + mmsb1)) - (2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(
-     mmst2)*pow2(log(mmgl/mmu)))/(3.*pow2(-mmgl + mmsb2)) - (61*pow2(log(mmsb1/
-     mmu)))/9. + (9*mmsb1*pow2(log(mmsb1/mmu)))/(2.*(-mmgl + mmsb1)) + (64*
-     mmsb2*pow2(log(mmsb1/mmu)))/(9.*(-mmgl + mmsb1)) - (64*mmsb2*pow2(log(
-     mmsb1/mmu)))/(9.*(mmsb1 - mmsb2)) + (mmsb1*pow2(log(mmsb1/mmu)))/(2.*(-
-     mmgl + mmsb2)) - (mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(log(
-     mmsb1/mmu)))/(3.*(-mmgl + mmsb1)) - (mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(log(mmsb1/mmu)))/(3.*(-mmgl + mmsb1)) - (2*mmst1*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*(-mmgl + mmsb1)) - (
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*(-mmgl
-     + mmsb1)) - (2*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(log(mmsb1/
-     mmu)))/(3.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*
-     pow2(log(mmsb1/mmu)))/(3.*(-mmgl + mmsb1)) + (mmsb1*mmsb2*pow2(log(mmsb1/
-     mmu)))/(2.*pow2(-mmgl + mmsb1)) + (mmsb1*mmst1*pow2(log(mmsb1/mmu)))/(2.*
-     pow2(-mmgl + mmsb1)) + (mmsb1*mmst2*pow2(log(mmsb1/mmu)))/(2.*pow2(-mmgl +
-     mmsb1)) + (4*mmsb1*mmsusy*pow2(log(mmsb1/mmu)))/pow2(-mmgl + mmsb1) - (
-     mmsb1*mmt*pow2(log(mmsb1/mmu)))/pow2(-mmgl + mmsb1) - (17*pow2(mmsb1)*
-     pow2(log(mmsb1/mmu)))/(6.*pow2(-mmgl + mmsb1)) + (2*mmst1*mmt*DeltaInv(
-     mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow2(-mmgl + mmsb1)
-     ) + (2*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(log(mmsb1/mmu)
-     ))/(3.*pow2(-mmgl + mmsb1)) + (64*pow2(mmsb2)*pow2(log(mmsb1/mmu)))/(9.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) - (2*mmsb1*mmsb2*pow2(log(mmsb1/mmu)))/(3.*
-     pow2(-mmgl + mmsb2)) + (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1)*pow2(
-     log(mmsb1/mmu)))/(3.*(-mmgl + mmsb1)) - (2*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmsb1)*pow2(mmst1)*pow2(log(mmsb1/mmu)))/(3.*pow2(-mmgl + mmsb1)) + (
-     mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2)*pow2(log(mmsb1/mmu)))/(3.*(-
-     mmgl + mmsb1)) - (2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmst2)*
-     pow2(log(mmsb1/mmu)))/(3.*pow2(-mmgl + mmsb1)) + pow2(log(mmsb2/mmu))/3. +
-     (mmsb2*pow2(log(mmsb2/mmu)))/(2.*(-mmgl + mmsb1)) + (64*mmsb2*pow2(log(
-     mmsb2/mmu)))/(9.*(mmsb1 - mmsb2)) - (47*mmsb2*pow2(log(mmsb2/mmu)))/(18.*(
-     -mmgl + mmsb2)) - (mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(log(
-     mmsb2/mmu)))/(3.*(-mmgl + mmsb2)) - (mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2)*pow2(log(mmsb2/mmu)))/(3.*(-mmgl + mmsb2)) - (2*mmsb1*mmsb2*pow2(
-     log(mmsb2/mmu)))/(3.*pow2(-mmgl + mmsb1)) - (64*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(9.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (2*mmst1*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(3.*(-mmgl + mmsb2)) - (
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(3.*(-mmgl
-     + mmsb2)) - (2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(log(mmsb2/
-     mmu)))/(3.*(-mmgl + mmsb2)) - (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*
-     pow2(log(mmsb2/mmu)))/(3.*(-mmgl + mmsb2)) + (mmsb1*mmsb2*pow2(log(mmsb2/
-     mmu)))/(2.*pow2(-mmgl + mmsb2)) + (mmsb2*mmst1*pow2(log(mmsb2/mmu)))/(2.*
-     pow2(-mmgl + mmsb2)) + (mmsb2*mmst2*pow2(log(mmsb2/mmu)))/(2.*pow2(-mmgl +
-     mmsb2)) + (4*mmsb2*mmsusy*pow2(log(mmsb2/mmu)))/pow2(-mmgl + mmsb2) - (
-     mmsb2*mmt*pow2(log(mmsb2/mmu)))/pow2(-mmgl + mmsb2) - (17*pow2(mmsb2)*
-     pow2(log(mmsb2/mmu)))/(6.*pow2(-mmgl + mmsb2)) + (2*mmst1*mmt*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(3.*pow2(-mmgl + mmsb2)
-     ) + (2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(log(mmsb2/mmu)
-     ))/(3.*pow2(-mmgl + mmsb2)) + (mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1)
-     *pow2(log(mmsb2/mmu)))/(3.*(-mmgl + mmsb2)) - (2*DeltaInv(mmt,mmsb2,mmst1)
-     *pow2(mmsb2)*pow2(mmst1)*pow2(log(mmsb2/mmu)))/(3.*pow2(-mmgl + mmsb2)) +
-     (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2)*pow2(log(mmsb2/mmu)))/(3.*(-
-     mmgl + mmsb2)) - (2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2)*
-     pow2(log(mmsb2/mmu)))/(3.*pow2(-mmgl + mmsb2)) + (4*(2 + (3*mmsusy)/(-mmgl
-     + mmsb1) + (3*mmsusy)/(-mmgl + mmsb2) - (4*mmsb1*mmsusy)/pow2(-mmgl +
-     mmsb1) - (4*mmsb2*mmsusy)/pow2(-mmgl + mmsb2))*pow2(log(mmsusy/mmu)))/3. +
-     (14*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (2*zt2*
-     DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (14*
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (2*zt2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (112*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (16*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (112*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (16*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) - (16*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/(-mmgl + mmsb1) - (16*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/(-mmgl + mmsb1) - (2*DeltaInv(
-     mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow3(mmsb1))/(-mmgl + mmsb1) - (2*
-     DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow3(mmsb1))/(-mmgl + mmsb1) + (
-     28*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) +
-     (28*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) +
-     (4*mmst1*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*pow2(-mmgl +
-     mmsb1)) + (4*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*pow2(-mmgl
-     + mmsb1)) + (28*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*pow2(-
-     mmgl + mmsb1)) + (28*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*pow2(-
-     mmgl + mmsb1)) + (4*mmst2*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*
-     pow2(-mmgl + mmsb1)) + (4*mmt*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(
-     3.*pow2(-mmgl + mmsb1)) + (28*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/
-     (3.*pow2(-mmgl + mmsb1)) + (28*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(
-     3.*pow2(-mmgl + mmsb1)) + (4*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (28*mmst2*DeltaInv(mmt,mmst2,mmgl)
-     *pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (28*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*mmst2*zt2*DeltaInv(mmt,mmst2,
-     mmgl)*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*mmt*zt2*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (8*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (4*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/pow2(-mmgl + mmsb1) -
-     (8*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/pow2(-mmgl +
-     mmsb1) - (4*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/pow2(-
-     mmgl + mmsb1) - (8*mmst1*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow3(
-     mmsb1))/pow2(-mmgl + mmsb1) - (4*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/
-     mmu)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (8*mmst2*DeltaInv(mmt,mmsb1,mmst2)
-     *log(mmsb1/mmu)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (4*mmt*DeltaInv(mmt,
-     mmsb1,mmst2)*log(mmsb1/mmu)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (8*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*(-mmgl +
-     mmsb1)) + (8*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.
-     *(-mmgl + mmsb1)) + (4*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*
-     pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (2*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*pow2(-mmgl +
-     mmsb1)) + (2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))
-     /(3.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst1)*pow2(log(mmsb1/mmu)
-     )*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst2)*pow2(log(
-     mmsb1/mmu))*pow3(mmsb1))/(3.*(-mmgl + mmsb1)) + (4*mmst1*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) +
-     (2*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(3.*
-     pow2(-mmgl + mmsb1)) + (4*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(log(mmsb1/
-     mmu))*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (2*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*
-     Fin3(mmt,mmsb1,mmst1,mmu)*(-((mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1))/(-
-     mmgl + mmsb1)) - (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl + mmsb1)
-     ) - (mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl + mmsb1)) + (
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) - (3*mmsb1)/(
-     4.*pow2(-mmgl + mmsb1)) + (3*mmst1)/(4.*pow2(-mmgl + mmsb1)) - (3*mmt)/(4.
-     *pow2(-mmgl + mmsb1)) + (mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/pow2(-
-     mmgl + mmsb1) + (2*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl
-     + mmsb1) + (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl + mmsb1)
-     + (DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb1)) - (mmsb1*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (DeltaInv(
-     mmt,mmsb1,mmst1)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (mmsb1*mmst1)/pow3(-
-     mmgl + mmsb1) + (mmsb1*mmt)/pow3(-mmgl + mmsb1) + pow2(mmsb1)/pow3(-mmgl +
-     mmsb1)))/3. + (4*Fin3(mmt,mmsb1,mmst2,mmu)*(-((mmsb1*mmst2*DeltaInv(mmt,
-     mmsb1,mmst2))/(-mmgl + mmsb1)) - (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2))/(2.
-     *(-mmgl + mmsb1)) - (mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(2.*(-mmgl +
-     mmsb1)) + (DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) - (
-     3*mmsb1)/(4.*pow2(-mmgl + mmsb1)) + (3*mmst2)/(4.*pow2(-mmgl + mmsb1)) - (
-     3*mmt)/(4.*pow2(-mmgl + mmsb1)) + (mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,
-     mmst2))/pow2(-mmgl + mmsb1) + (2*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) + (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) + (DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(2.*(-mmgl +
-     mmsb1)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/pow2(-mmgl +
-     mmsb1) - (DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (
-     mmsb1*mmst2)/pow3(-mmgl + mmsb1) + (mmsb1*mmt)/pow3(-mmgl + mmsb1) + pow2(
-     mmsb1)/pow3(-mmgl + mmsb1)))/3. + (4*Fin20(mmsb1,mmsusy,mmu)*(4/(-mmgl +
-     mmsb1) - (14*mmsb1)/pow2(-mmgl + mmsb1) + (6*mmsusy)/pow2(-mmgl + mmsb1) -
-     (8*mmsb1*mmsusy)/pow3(-mmgl + mmsb1) + (8*pow2(mmsb1))/pow3(-mmgl + mmsb1)
-     ))/3. + (4*log(mmsb1/mmu)*log(mmst1/mmu)*((mmsb1*mmst1*mmt*DeltaInv(mmt,
-     mmsb1,mmst1))/(-mmgl + mmsb1) + (3*mmsb1*mmst1)/(4.*pow2(-mmgl + mmsb1)) -
-     (2*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl + mmsb1) -
-     (mmst1*pow2(mmsb1))/pow3(-mmgl + mmsb1)))/3. + (4*log(mmsb1/mmu)*log(
-     mmst2/mmu)*((mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(-mmgl + mmsb1) +
-     (3*mmsb1*mmst2)/(4.*pow2(-mmgl + mmsb1)) - (2*mmst2*mmt*DeltaInv(mmt,
-     mmsb1,mmst2)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (mmst2*pow2(mmsb1))/pow3(-
-     mmgl + mmsb1)))/3. + (4*log(mmsb1/mmu)*log(mmsusy/mmu)*((6*mmsb1*mmsusy)/
-     pow2(-mmgl + mmsb1) - (8*mmsusy*pow2(mmsb1))/pow3(-mmgl + mmsb1)))/3. - (
-     4*mmsb1*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(3.*pow3(-mmgl + mmsb1)) + (4*mmsb1*
-     mmsb2*Fin20(mmsb2,mmgl,mmu))/(3.*pow3(-mmgl + mmsb1)) - (16*Fin20(mmsb1,
-     mmgl,mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (4*Fin20(mmsb1,mmsb2,
-     mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) - (4*Fin20(mmsb2,mmgl,mmu)*
-     pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) - (8*mmsb2*log(mmgl/mmu)*pow2(mmsb1)
-     )/(3.*pow3(-mmgl + mmsb1)) - (8*mmst1*log(mmgl/mmu)*pow2(mmsb1))/(3.*pow3(
-     -mmgl + mmsb1)) - (8*mmst2*log(mmgl/mmu)*pow2(mmsb1))/(3.*pow3(-mmgl +
-     mmsb1)) - (64*mmsusy*log(mmgl/mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) +
-     (16*mmt*log(mmgl/mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (8*mmsb2*
-     log(mmsb1/mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (8*mmst1*log(mmsb1/
-     mmu)*pow2(mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (8*mmst2*log(mmsb1/mmu)*pow2(
-     mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (64*mmsusy*log(mmsb1/mmu)*pow2(mmsb1))/
-     (3.*pow3(-mmgl + mmsb1)) - (16*mmt*log(mmsb1/mmu)*pow2(mmsb1))/(3.*pow3(-
-     mmgl + mmsb1)) + (4*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb1))/(3.*
-     pow3(-mmgl + mmsb1)) + (2*mmsb2*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow3(
-     -mmgl + mmsb1)) + (2*mmst1*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl
-     + mmsb1)) + (2*mmst2*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl +
-     mmsb1)) + (16*mmsusy*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl +
-     mmsb1)) - (4*mmt*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb1))
-     - (2*mmsb2*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow3(-mmgl + mmsb1)) - (
-     2*mmst1*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow3(-mmgl + mmsb1)) - (2*
-     mmst2*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow3(-mmgl + mmsb1)) - (16*
-     mmsusy*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow3(-mmgl + mmsb1)) + (4*
-     mmt*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*pow3(-mmgl + mmsb1)) - (112*
-     pow3(mmsb1))/(3.*pow3(-mmgl + mmsb1)) - (16*zt2*pow3(mmsb1))/(3.*pow3(-
-     mmgl + mmsb1)) + (508*log(mmgl/mmu)*pow3(mmsb1))/(9.*pow3(-mmgl + mmsb1))
-     - (220*log(mmsb1/mmu)*pow3(mmsb1))/(9.*pow3(-mmgl + mmsb1)) + (116*log(
-     mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb1))/(9.*pow3(-mmgl + mmsb1)) - (242*
-     pow2(log(mmgl/mmu))*pow3(mmsb1))/(9.*pow3(-mmgl + mmsb1)) + (10*pow2(log(
-     mmsb1/mmu))*pow3(mmsb1))/(3.*pow3(-mmgl + mmsb1)) + (14*DeltaInv(mmt,
-     mmsb2,mmst1)*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (2*zt2*DeltaInv(mmt,
-     mmsb2,mmst1)*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (14*DeltaInv(mmt,mmsb2,
-     mmst2)*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (2*zt2*DeltaInv(mmt,mmsb2,
-     mmst2)*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (112*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (16*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb2))/(3.*(-mmgl + mmsb2)) + (112*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/
-     (3.*(-mmgl + mmsb2)) + (16*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*(
-     -mmgl + mmsb2)) - (16*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/
-     (-mmgl + mmsb2) - (16*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/
-     (-mmgl + mmsb2) - (2*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow3(mmsb2))
-     /(-mmgl + mmsb2) - (2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*pow3(mmsb2)
-     )/(-mmgl + mmsb2) - (4*log(mmgl/mmu)*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) + (4*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) - (16*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (16*log(mmgl/mmu)*log(mmsb2/mmu)*
-     pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (16*log(mmsb1/mmu)
-     *log(mmsb2/mmu)*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (
-     4*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (
-     4*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) - (
-     16*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) + (16*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl
-     + mmsb2)*pow2(mmsb1 - mmsb2)) - (4*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl
-     + mmsb1)*pow2(mmsb1 - mmsb2)) + (4*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl
-     + mmsb2)*pow2(mmsb1 - mmsb2)) - (16*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(
-     mmsb2))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (16*log(mmgl/mmu)*log(
-     mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (16*
-     log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow2(mmsb1
-     - mmsb2)) - (16*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl +
-     mmsb2)*pow2(mmsb1 - mmsb2)) + (28*mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow3(
-     mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (28*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow3(
-     mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*mmst1*zt2*DeltaInv(mmt,mmsb2,mmst1)*
-     pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*mmt*zt2*DeltaInv(mmt,mmsb2,
-     mmst1)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (28*mmst2*DeltaInv(mmt,
-     mmsb2,mmst2)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (28*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*mmst2*zt2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*mmt*
-     zt2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (28*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (
-     28*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (
-     4*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2))
-     + (4*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)
-     ) + (28*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl +
-     mmsb2)) + (28*mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*pow2(-mmgl +
-     mmsb2)) + (4*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*pow2(-
-     mmgl + mmsb2)) + (4*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*
-     pow2(-mmgl + mmsb2)) + (4*log(mmgl/mmu)*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb2)) - (8*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) - (4*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (8*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (4*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (4*log(
-     mmsb2/mmu)*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*
-     mmst1*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow3(mmsb2))/pow2(-mmgl +
-     mmsb2) - (4*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow3(mmsb2))/
-     pow2(-mmgl + mmsb2) - (8*mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) - (4*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(
-     mmsb2/mmu)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (8*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (8*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (16*
-     pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1))
-     + (16*pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) - (16*pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow2(
-     mmsb1 - mmsb2)) + (4*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*
-     pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (2*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*pow2(-mmgl +
-     mmsb2)) + (2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2))
-     /(3.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,mmst1)*pow2(log(mmsb2/mmu)
-     )*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,mmst2)*pow2(log(
-     mmsb2/mmu))*pow3(mmsb2))/(3.*(-mmgl + mmsb2)) + (4*mmst1*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) +
-     (2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*
-     pow2(-mmgl + mmsb2)) + (4*mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(log(mmsb2/
-     mmu))*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2)*pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + Xt*((
-     112*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) + (
-     112*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) - (
-     112*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) + (
-     112*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmst1 - mmst2)) + (112*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(
-     3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmsb1*mmt*zt2*DeltaInv(
-     mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) - (16*mmgl*mmst1*mmt*
-     zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) + (16*mmgl*mmsb2*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(
-     -mmgl + mmsb2)*(mmst1 - mmst2)) - (112*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*mgl*(mmst1 - mmst2)) - (112*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*mgl*(mmst1 - mmst2)) + (112*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*mgl*(mmst1 - mmst2)) - (112*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (112*mmgl*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (16*mmgl*mmsb1*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmst1
-     - mmst2)) - (16*mmgl*mmsb2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(
-     mmst1 - mmst2)) + (16*mmgl*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*
-     mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb1*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmsb2*mmst2*
-     mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     + (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*
-     (mmst1 - mmst2)) - (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,
-     mmst1,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*
-     mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) +
-     (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*
-     mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*
-     (-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) -
-     (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/(mgl*(mmst1 -
-     mmst2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/(mgl*
-     (mmst1 - mmst2)) + (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu))/(mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*
-     mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu))/(mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu))/(mgl*(mmst1 - mmst2)) - (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) + (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu))/(mgl*(mmst1 - mmst2)) + (16*mmgl*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu))/(mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmst1/mmu))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu))/(3.*mgl*(
-     mmst1 - mmst2)) - (16*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmst1/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*
-     mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)
-     )/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmst2/mmu))/(mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb1*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) - (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmst2/mmu))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu))/(3.*mgl*(mmst1 -
-     mmst2)) + (16*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     log(mmst2/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu))/(3.*mgl*(
-     -mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmt/mmu))/(mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb2*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmst1 - mmst2)) + (32*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmst1 - mmst2)) - (32*mmgl*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (32*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmt/mmu))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*
-     mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(mmst1 - mmst2)) + (
-     16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(mmst1 -
-     mmst2)) - (32*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(
-     mmst1 - mmst2)) + (32*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (32*mmgl*mmsb2*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmst1 - mmst2)) - (32*
-     mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*
-     mgl*(mmst1 - mmst2)) + (32*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (
-     32*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/
-     mmu))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmst1 -
-     mmst2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu))/(3.*mgl*(mmst1 - mmst2)) + (32*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmst1 - mmst2)) - (32*
-     mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/
-     (3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (32*mmgl*mmsb2*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (112*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/(
-     3.*mgl*(mmst1 - mmst2)) + (16*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))
-     /(3.*mgl*(mmst1 - mmst2)) - (112*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/
-     (3.*mgl*(mmst1 - mmst2)) - (16*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)
-     )/(3.*mgl*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu)*pow2(mmgl))/(mgl*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow2(mmgl))/(mgl*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmt/mmu)*pow2(mmgl))/(mgl*(mmst1 - mmst2)) + (16*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmgl))/(mgl*(mmst1 - mmst2)) +
-     (16*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmgl))/(
-     3.*mgl*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     log(mmt/mmu)*pow2(mmgl))/(3.*mgl*(mmst1 - mmst2)) - (56*mmgl*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*
-     mmgl*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) + (56*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(mgl*
-     (-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (24*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) - (24*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (24*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) - (24*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(
-     mmsb1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmt*
-     Fin3(mmt,mmsb1,mmst1,mmu))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) -
-     (8*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*Fin3(mmt,mmsb1,mmst1,
-     mmu))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*Fin3(mmt,
-     mmsb1,mmst2,mmu))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*
-     mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*Fin3(mmt,mmsb1,mmst2,mmu))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*Fin3(mmt,mmst1,
-     mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*Fin3(mmt,mmst2,mmgl,mmu)
-     )/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb1)) - (56*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmst1*mmt*
-     zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb1)) + (56*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))
-     /(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst2*mmt*zt2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb1)) - (56*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmst1*mmt*zt2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1))
-     + (56*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*Fin3(mmt,mmsb1,mmst1,mmu)*pow2(mmsb1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*Fin3(mmt,mmsb1,mmst2,mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,
-     mmst1,mmgl,mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1))
-     - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow2(mmsb1))/(mgl*
-     (mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmsb1,mmst2)*log(mmsb1/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmst1/mmu)*pow2(
-     mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmst1/mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(
-     mmst1/mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmst2/mmu)*pow2(mmsb1))/(mgl*
-     (mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmst2/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmst2/mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*log(mmst2/mmu)*
-     pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*mmgl*
-     mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1))
-     + (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb1)) - (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmsb1,mmst2)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (56*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmt*zt2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (56*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1
-     - mmst2)) + (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (24*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (24*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (24*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/
-     mmu)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (24*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmsb2))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmt*Fin3(mmt,mmsb2,mmst1,mmu))/(
-     3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*Fin3(mmt,mmsb2,mmst1,mmu))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmst2*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) - (56*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))
-     /(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmst1*mmt*zt2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb2)) + (56*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst2*mmt*zt2*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2))
-     - (56*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (56*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*Fin3(mmt,mmsb2,mmst1,mmu)*pow2(mmsb2))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmsb2,
-     mmst2)*Fin3(mmt,mmsb2,mmst2,mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,
-     mmst1,mmgl,mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2))
-     - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(
-     mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*
-     mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmsb2))/(mgl*
-     (mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*log(mmsb2/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) - (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmst1/mmu)*pow2(
-     mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmst1/mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*log(
-     mmst1/mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmst2/mmu)*pow2(mmsb2))/(mgl*
-     (mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmst2/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) - (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmst2/mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*log(mmst2/mmu)*
-     pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (16*mmgl*
-     mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2))
-     + (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb2))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb2)) - (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (16*
-     mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (16*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmsb2,mmst2)*log(mmsb2/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*pow2(mmst1))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu)*log(mmst1/mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2))
-     + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(
-     mmst1))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/(mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/(
-     mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*
-     mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmst1/mmu)*pow2(mmst1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(mmst1/mmu)*
-     pow2(mmst1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmt/mmu)*pow2(mmst1))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmt/mmu)*pow2(mmst1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmst1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(
-     mmst1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(mmst1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*log(mmsb2/mmu)*log(mmst1/mmu)*pow2(mmst1))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*
-     log(mmt/mmu)*pow2(mmst1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*
-     mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/(mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*
-     log(mmsb2/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(
-     mmst2))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmst2/mmu)*pow2(mmst2))/(mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/
-     mmu)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(mmst2))/(3.*
-     mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmt/mmu)*pow2(mmst2))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (
-     8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmst2))/(mgl*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/
-     mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) +
-     (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmst2))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*log(mmst2/mmu)*pow2(mmst2))/(mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmst2/mmu)*pow2(mmst2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(
-     mmst2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*log(mmst2/mmu)*pow2(mmst2))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmt*DeltaInv(mmt,
-     mmsb1,mmst2)*log(mmt/mmu)*pow2(mmst2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(
-     mmst2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,
-     mmsb1,mmst2)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     log(mmst2/mmu)*pow2(mmst2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (
-     8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmst2))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(mmst2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     log(mmsb2/mmu)*log(mmst2/mmu)*pow2(mmst2))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmt/mmu)*
-     pow2(mmst2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmst2))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb2)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*
-     log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (
-     112*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)) + (
-     112*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmst1 - mmst2)) + (112*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(
-     3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (112*mmgl*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (112*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (16*mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (16*mmgl*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(
-     -mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmst1*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (112*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)) - (112*mmgl*
-     mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) - (112*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) - (112*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (112*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (16*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(mmst1
-     - mmst2)) - (16*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmsb2*zt2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*
-     mmgl*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmst1 - mmst2)) - (16*mmgl*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))
-     /(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*DeltaInv(mmt,mmst1,
-     mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(
-     mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmst1 - mmst2)) - (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,
-     mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)) -
-     (16*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmt))/(mgl*(-
-     mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)) +
-     (16*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmt))/(mgl*(-
-     mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmt))/(mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(mmt))/(3.
-     *mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (8*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*
-     pow2(mmt))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmst2*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (8*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/
-     mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(mmt))/(3.*mgl*(
-     -mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2))
-     - (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) - (24*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (24*mmgl*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow2(mmt))/(mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*
-     mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (24*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/
-     mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (24*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/
-     mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmst1 - mmst2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/
-     (3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*
-     (mmst1 - mmst2)) + (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)) - (16*mmgl*mmsb1*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     - (8*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmst2*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)
-     ) + (16*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu)*
-     pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmst2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (112*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmst1*zt2*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (112*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmst2*zt2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (112*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmst1*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (112*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmst2*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmsb1*DeltaInv(mmt,mmsb1,mmst1)*Fin3(mmt,mmsb1,mmst1,
-     mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*
-     mmsb1*DeltaInv(mmt,mmsb1,mmst2)*Fin3(mmt,mmsb1,mmst2,mmu)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,
-     mmst2,mmgl,mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) +
-     (8*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*log(mmst1/mmu)*pow2(mmt))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb1)) + (8*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     log(mmst1/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (
-     8*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(mmst1/mmu)
-     *pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmsb1,mmst2)*log(mmst2/mmu)*pow2(mmt))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmst2/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*
-     mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*log(mmst2/mmu)*pow2(mmt))/(
-     3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (24*mmgl*mmsb1*mmst1*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (24*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmsb1,mmst2)*log(
-     mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (24*mmgl*
-     mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (24*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) -
-     (8*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmst1*DeltaInv(
-     mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmsb1,
-     mmst2)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*log(
-     mmst1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (16*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*
-     log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (
-     16*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmsb1,mmst2)*log(mmst2/mmu)*log(mmt/mmu)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (56*mmgl*DeltaInv(mmt,mmsb1,
-     mmst1)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1))
-     - (8*mmgl*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (56*mmgl*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (56*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*
-     zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) + (56*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*
-     zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (
-     8*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*
-     (mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*DeltaInv(mmt,mmsb1,mmst1)*
-     log(mmsb1/mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow2(mmsb1)*
-     pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*DeltaInv(
-     mmt,mmsb1,mmst1)*log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (8*mmgl*DeltaInv(mmt,mmsb1,mmst2)*log(mmt/mmu)*
-     pow2(mmsb1)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1)*pow2(
-     mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*DeltaInv(mmt,
-     mmsb1,mmst1)*log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*DeltaInv(mmt,mmsb1,mmst2)*
-     log(mmsb1/mmu)*log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb1)) - (112*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb2*
-     mmst1*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (112*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (16*mmgl*mmsb2*
-     mmst2*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (112*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb2*
-     mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (112*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (16*mmgl*mmsb2*
-     mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*DeltaInv(mmt,mmsb2,mmst1)*Fin3(mmt,
-     mmsb2,mmst1,mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) +
-     (8*mmgl*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*Fin3(mmt,mmsb2,mmst2,mmu)*pow2(
-     mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*
-     DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmt))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*log(mmst1/
-     mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmt))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)
-     *log(mmgl/mmu)*log(mmst1/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/
-     mmu)*log(mmst1/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)
-     ) - (8*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(mmst2/mmu)*pow2(mmt)
-     )/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmst2/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) - (8*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*
-     log(mmst2/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (
-     24*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*log(mmt/mmu)*pow2(mmt))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (24*mmgl*mmsb2*mmst2*DeltaInv(
-     mmt,mmsb2,mmst2)*log(mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (24*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(
-     mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (24*mmgl*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*
-     mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*log(mmt/mmu)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*
-     mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.
-     *mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb2*mmst1*DeltaInv(
-     mmt,mmsb2,mmst1)*log(mmst1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmst1/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(
-     -mmgl + mmsb2)) + (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*log(
-     mmst2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*
-     log(mmt/mmu)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (
-     56*mmgl*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow2(
-     mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (56*mmgl*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (56*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (56*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/
-     mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (
-     8*mmgl*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow2(mmsb2)*pow2(mmt))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,mmsb2,
-     mmst2)*log(mmsb2/mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*DeltaInv(mmt,mmsb2,mmst1)*log(mmt/mmu)*pow2(
-     mmsb2)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*
-     DeltaInv(mmt,mmsb2,mmst2)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmt/
-     mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (
-     8*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) - (8*mmgl*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*log(mmt/mmu)*
-     pow2(mmsb2)*pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*
-     mmgl*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*log(mmt/mmu)*pow2(mmsb2)*
-     pow2(mmt))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2))
-     + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*
-     (mmst1 - mmst2)) - (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)) + (8*mmgl*mmsb1*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) + (8*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/
-     mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (
-     8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*mmgl*mmsb1*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 -
-     mmst2)) - (8*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/
-     mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)) - (4*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(
-     log(mmgl/mmu)))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (4*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (4*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) +
-     (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu))
-     )/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmgl/
-     mmu)))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (4*mmgl*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) -
-     (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)) + (8*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmsb2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*mmgl*mmsb1*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1
-     - mmst2)) - (8*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (4*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb1)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (4*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmt)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmst1*mmt*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmsb1)*pow2(log(mmsb1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1))
-     - (4*mmgl*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmsb1/
-     mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*DeltaInv(
-     mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmsb1/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmst1*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmsb2)*pow2(log(mmsb2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2))
-     - (4*mmgl*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmsb2/
-     mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmsb2/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*mmgl*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     + (4*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmst1/
-     mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,
-     mmst1)*pow2(mmsb2)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (4*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*
-     mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (4*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1)*pow2(
-     log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*
-     mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (4*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2))
-     + (4*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmst1/mmu)))/(
-     3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (4*mmgl*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmt)*pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1
-     - mmst2)) - (4*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmt)*pow2(
-     log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*
-     mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmst1/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmsb2*mmst1*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmt)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (4*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmt)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) -
-     (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)) + (8*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (8*mmgl*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmsb1)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (4*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(
-     mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmst2*
-     mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(log(mmst2/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*
-     pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (4*mmgl*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(3.*mgl*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb1)) + (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*
-     pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*
-     mmgl*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2)*pow2(log(mmst2/mmu)))
-     /(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmsb2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmt)*pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) -
-     (4*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmst2/mmu)))/(3.
-     *mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (4*mmgl*mmsb1*mmst2*DeltaInv(mmt,
-     mmsb1,mmst2)*pow2(mmt)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(
-     -mmgl + mmsb1)) + (4*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*
-     pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*
-     mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmt)*pow2(log(mmst2/mmu)))
-     /(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) + (8*mmgl*mmsb2*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (16*mmgl*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 -
-     mmst2)) + (16*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) + (16*mmgl*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (
-     16*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (8*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl)*pow2(log(mmt/mmu)))/(
-     3.*mgl*(mmst1 - mmst2)) - (8*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (4*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)
-     ) + (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(
-     mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmst1*mmt*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(
-     -mmgl + mmsb1)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*
-     pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*
-     mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(
-     3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (4*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (4*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (8*mmgl*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*
-     pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) - (4*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) - (4*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*
-     pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(
-     mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmsb2*
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (4*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) - (4*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(
-     mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmsb2*
-     mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmst1 - mmst2)) + (8*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmst1 - mmst2)) + (
-     8*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (4*mmgl*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb1)*(mmst1 - mmst2))
-     + (4*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(
-     mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)) - (8*mmgl*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (8*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)
-     *pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (4*mmgl*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(-mmgl +
-     mmsb1)*(mmst1 - mmst2)) - (4*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)
-     *pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (4*mmgl*
-     mmsb1*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmsb1*mmst2*DeltaInv(mmt,
-     mmsb1,mmst2)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb1)) - (4*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(
-     log(mmt/mmu)))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmsb1)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (4*mmgl*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmt)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (4*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow2(
-     mmt)*pow2(log(mmt/mmu)))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*
-     mmgl*mmsb2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmt)*pow2(log(mmt/mmu)))/(
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmsb2*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (4*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*
-     pow2(log(mmt/mmu)))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*DeltaInv(mmt,mmsb2,
-     mmst2)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (4*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(
-     mmt)*pow2(log(mmt/mmu)))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (
-     4*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmt/mmu)))/
-     (3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (56*mmgl*mmt*DeltaInv(mmt,
-     mmsb1,mmst1)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (
-     8*mmgl*mmt*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) - (56*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*zt2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb1)) + (56*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (56*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     pow3(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow3(mmsb1))/(mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/
-     mmu)*pow3(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*log(mmt/mmu)*pow3(mmsb1))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmt/mmu)*
-     pow3(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow3(mmsb1))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow3(mmsb1))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb1))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb1)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst1)*log(mmsb1/mmu)*log(
-     mmt/mmu)*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (8*
-     mmgl*mmt*DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*log(mmt/mmu)*pow3(mmsb1)
-     )/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(
-     -mmgl + mmsb1)) - (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))
-     *pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(log(mmsb1/mmu))*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (4*mmgl*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(log(mmt/mmu))*pow3(
-     mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(log(mmt/mmu))*pow3(mmsb1))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     log(mmt/mmu))*pow3(mmsb1))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) -
-     (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb1))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmt*Fin3(mmt,
-     mmsb1,mmst1,mmu))/(3.*mgl*(mmst1 - mmst2)*pow3(-mmgl + mmsb1)) + (16*mmgl*
-     mmsb1*mmt*Fin3(mmt,mmsb1,mmst2,mmu))/(3.*mgl*(mmst1 - mmst2)*pow3(-mmgl +
-     mmsb1)) + (16*mmgl*mmsb1*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmst1 -
-     mmst2)*pow3(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmt*Fin3(mmt,mmst2,mmgl,mmu))
-     /(3.*mgl*(mmst1 - mmst2)*pow3(-mmgl + mmsb1)) + (56*mmgl*mmt*DeltaInv(mmt,
-     mmsb2,mmst1)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (
-     8*mmgl*mmt*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmsb2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) - (56*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow3(
-     mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*zt2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl
-     + mmsb2)) + (56*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (56*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     pow3(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*pow3(mmsb2))/(mgl*(mmst1 - mmst2)
-     *pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/
-     mmu)*pow3(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*log(mmt/mmu)*pow3(mmsb2))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmt/mmu)*
-     pow3(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow3(mmsb2))/(mgl*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow3(mmsb2))/(mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb2))/(3.*mgl*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst1)*log(mmsb2/mmu)*log(
-     mmt/mmu)*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (8*
-     mmgl*mmt*DeltaInv(mmt,mmsb2,mmst2)*log(mmsb2/mmu)*log(mmt/mmu)*pow3(mmsb2)
-     )/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(
-     -mmgl + mmsb2)) - (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))
-     *pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*mgl*(mmst1
-     - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb2)) + (4*mmgl*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(log(mmt/mmu))*pow3(
-     mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(log(mmt/mmu))*pow3(mmsb2))/(3.*mgl*(mmst1 -
-     mmst2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     log(mmt/mmu))*pow3(mmsb2))/(3.*mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) -
-     (4*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb2))/(3.*
-     mgl*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + Xb*((-224*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (224*
-     mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (224*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (224*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(
-     3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmgl*mmsb1*mmt*zt2*DeltaInv(mmt,
-     mmst1,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmgl*mmsb2*mmt*
-     zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*
-     mmsb1*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb2*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (224*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl))/(
-     3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst2,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (224*
-     mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmgl*mmsb1*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*mmgl*mmsb2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))
-     /(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmst2*mmt*zt2*DeltaInv(
-     mmt,mmst2,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmst2*
-     mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     16*mmt*Fin3(mmt,mmsb1,mmst1,mmu))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (16*mmt*Fin3(mmt,mmsb1,mmst2,mmu))/(3.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmt*Fin3(mmt,mmsb2,mmst1,mmu))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmt*Fin3(mmt,mmsb2,
-     mmst2,mmu))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*
-     mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (16*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,
-     mmst1,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (32*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,
-     mmst1,mmgl,mmu))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*
-     (mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmt*Fin3(mmt,mmst2,
-     mmgl,mmu))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmt*
-     Fin3(mmt,mmst2,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))
-     /(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmgl*mmsb2*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/((
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/((
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/((mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu))/((
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmst1/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*log(mmst1/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*
-     mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu))/((mmsb1 - mmsb2)*
-     (mmst1 - mmst2)) + (32*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/
-     mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmst2/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmgl*mmsb1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) -
-     (32*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)
-     *(mmst1 - mmst2)) - (64*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/
-     mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmsb2*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (32*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)
-     )/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmsb1*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/((mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmgl*mmsb2*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (64*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu)*log(mmt/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmsb2*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (32*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmgl*
-     mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)) - (64*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*
-     mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (224*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2))
-     + (224*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)
-     *(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmst2*mmt*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*
-     (mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,
-     mmu)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (
-     32*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmsb1))/(3.*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) +
-     (32*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/((-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*pow2(mmsb1))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/((-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmst1/mmu)*pow2(mmsb1))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (32*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     log(mmst1/mmu)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(
-     mmsb1))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(mmsb1))/(3.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) +
-     (64*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/((-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmt/mmu)*pow2(mmsb1))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb1))/((-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) -
-     (64*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmt*Fin3(mmt,mmsb1,mmst1,mmu))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (32*mmsb1*mmt*Fin3(
-     mmt,mmsb1,mmst2,mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)*pow2(-mmgl +
-     mmsb1)) + (32*mmsb1*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb1)) - (32*mmsb1*mmt*Fin3(mmt,mmst2,mmgl,
-     mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)*pow2(-mmgl + mmsb1)) + (224*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2))
-     + (224*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)
-     *(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmst1*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*
-     (mmst1 - mmst2)) - (224*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*
-     mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(
-     mmt,mmst2,mmgl,mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(
-     mmsb2))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(
-     mmsb2))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (32*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*
-     pow2(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(
-     mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmsb2))/((mmsb1 - mmsb2)*
-     (-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*log(mmst2/mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*
-     pow2(mmsb2))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)
-     *(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(
-     mmsb2))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/
-     mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (64*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     log(mmt/mmu)*pow2(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb2*mmt*Fin3(mmt,mmsb2,mmst1,mmu))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (32*mmsb2*mmt*Fin3(mmt,mmsb2,mmst2,
-     mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) - (32*
-     mmsb2*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)*
-     pow2(-mmgl + mmsb2)) + (32*mmsb2*mmt*Fin3(mmt,mmst2,mmgl,mmu))/(3.*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)*pow2(-mmgl + mmsb2)) + (32*mmsb1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmst1))/((-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*pow2(mmst1))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     - (32*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*
-     pow2(mmst1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*
-     mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)*pow2(
-     mmst1))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/((-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmt/mmu)*pow2(mmst1))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)
-     ) + (32*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmst1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*
-     mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst1))
-     /(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmst2))/((-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmst2/mmu)*pow2(mmst2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/
-     mmu)*pow2(mmst2))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (
-     32*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)*pow2(
-     mmst2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmst2))/((-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmt/mmu)*pow2(mmst2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)
-     ) - (32*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmst2))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*
-     mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst2))
-     /(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (224*mmsb1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) -
-     (224*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1
-     - mmst2)) - (448*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (448*mmsb2*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (32*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*zt2*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmsb1*mmst1*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (64*mmsb2*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt))/
-     (3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (224*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) +
-     (224*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1
-     - mmst2)) + (448*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (448*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (32*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*zt2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (64*mmsb1*mmst2*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (64*mmsb2*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt))/
-     (3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*DeltaInv(
-     mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*DeltaInv(mmt,mmst1,mmgl)*Fin3(
-     mmt,mmst1,mmgl,mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1
-     - mmst2)) + (32*mmsb1*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*
-     pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*
-     mmsb2*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmt))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow2(mmt))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmt))/((mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)
-     *pow2(mmt))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow2(mmt))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmt))/((-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmst1/mmu)*pow2(mmt))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) + (32*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     log(mmst1/mmu)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmst1/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     - (32*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmt))/((-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmst2*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmt))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)
-     *(mmst1 - mmst2)) - (32*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)
-     *log(mmst2/mmu)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmst2/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2))
-     - (32*mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/((mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*
-     pow2(mmt))/((mmsb1 - mmsb2)*(mmst1 - mmst2)) + (96*mmsb1*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmt))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (96*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*
-     pow2(mmt))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/((mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/((
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (96*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmt/mmu)*pow2(mmt))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2))
-     + (96*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmt))/((mmsb1
-     - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb2*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(
-     3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmsb1*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (64*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*
-     log(mmt/mmu)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (64*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/
-     mmu)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (
-     64*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(
-     mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (64*mmsb2*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(mmt))/(3.*
-     (mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (224*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb1)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (32*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt))/
-     (3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (224*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (32*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmt))/
-     (3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1)*pow2(mmt))/((-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (32*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(
-     mmsb1)*pow2(mmt))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/((-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmt/mmu)*pow2(mmsb1)*pow2(mmt))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (32*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*
-     pow2(mmsb1)*pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)
-     ) + (32*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1)*
-     pow2(mmt))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (224*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) + (32*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (224*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) - (32*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*
-     pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2)*pow2(mmt))/((mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow2(mmsb2)*pow2(mmt))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (32*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb2)*
-     pow2(mmt))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/((mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) - (32*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/
-     mmu)*log(mmt/mmu)*pow2(mmsb2)*pow2(mmt))/(3.*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmgl*
-     mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (16*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmgl*
-     mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (16*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*
-     pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,mmst2,mmgl)
-     *pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     16*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.
-     *(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (16*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(
-     mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (16*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (16*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmgl/mmu))
-     )/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmsb2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2))
-     - (16*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmt)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)
-     *pow2(mmt)*pow2(log(mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1
-     - mmst2)) - (16*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt)*pow2(log(
-     mmgl/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)) + (16*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmst1/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmst1/mmu)))/(3.*(-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmst1/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) - (16*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1)*pow2(log(mmst1/mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (16*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(
-     mmst1/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*
-     mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmst1/mmu)))/(3.*(
-     -mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmsb2*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmst1/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmsb1*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2))
-     - (16*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1)*pow2(log(mmst2/mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (16*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(
-     log(mmst2/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (
-     16*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(
-     3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmsb2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (16*mmsb1*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmt)*pow2(log(mmst2/mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) - (16*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmt)*pow2(log(mmst2/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/
-     (3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     32*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)) - (32*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(
-     mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))
-     /(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (
-     32*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/
-     mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*(mmsb1 -
-     mmsb2)*(mmst1 - mmst2)) + (32*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (16*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))
-     /(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*
-     (mmst1 - mmst2)) + (16*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*
-     pow2(log(mmt/mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) -
-     (16*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.
-     *(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmsb1*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmsb2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)*(mmst1 - mmst2)) + (16*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*
-     pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (16*mmsb2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)
-     *(mmst1 - mmst2)) - (16*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*
-     pow2(log(mmt/mmu)))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (
-     16*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/((
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmsb1*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (16*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))
-     /(3.*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmsb1*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmt)*pow2(log(mmt/mmu)))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)
-     *(mmst1 - mmst2)) - (16*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmt)*
-     pow2(log(mmt/mmu)))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (
-     16*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1)*pow2(mmt)*pow2(log(mmt/mmu)))/(3.*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)) + (16*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(
-     mmt)*pow2(log(mmt/mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) - (16*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmt)*pow2(log(mmt/
-     mmu)))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (224*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*
-     (mmst1 - mmst2)) + (32*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*(
-     -mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (224*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (32*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(3.*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst1,mmgl)
-     *log(mmgl/mmu)*pow3(mmsb1))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) + (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/((-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmt/mmu)*pow3(mmsb1))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(
-     mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow3(
-     mmsb1))/((-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (32*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb1))/(3.*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     log(mmgl/mmu))*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 -
-     mmst2)) - (16*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1)
-     )/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/
-     mmu))*pow3(mmsb1))/(3.*(-mmgl + mmsb1)*(mmsb1 - mmsb2)*(mmst1 - mmst2)) -
-     (224*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) - (32*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (224*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*
-     (mmst1 - mmst2)) + (32*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(
-     mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(
-     mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow3(mmsb2))/((mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) - (32*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow3(mmsb2))/((mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (32*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb2))/(3.*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) + (32*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     log(mmgl/mmu))*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 -
-     mmst2)) + (16*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2)
-     )/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2)) - (16*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)*(mmst1 - mmst2)) + (16*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/
-     mmu))*pow3(mmsb2))/(3.*(mmsb1 - mmsb2)*(-mmgl + mmsb2)*(mmst1 - mmst2))) -
-     (16*mmgl*mmsb2*mmt*Fin3(mmt,mmsb2,mmst1,mmu))/(3.*mgl*(mmst1 - mmst2)*
-     pow3(-mmgl + mmsb2)) + (16*mmgl*mmsb2*mmt*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*
-     mgl*(mmst1 - mmst2)*pow3(-mmgl + mmsb2)) + (16*mmgl*mmsb2*mmt*Fin3(mmt,
-     mmst1,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)*pow3(-mmgl + mmsb2)) - (16*mmgl*
-     mmsb2*mmt*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmst1 - mmst2)*pow3(-mmgl +
-     mmsb2))) + (4*Fin20(mmgl,mmsusy,mmu)*(2/(-mmgl + mmsb1) + 2/(-mmgl +
-     mmsb2) + (6*mmsb1)/pow2(-mmgl + mmsb1) - (6*mmsusy)/pow2(-mmgl + mmsb1) +
-     (6*mmsb2)/pow2(-mmgl + mmsb2) - (6*mmsusy)/pow2(-mmgl + mmsb2) + (8*mmsb1*
-     mmsusy)/pow3(-mmgl + mmsb1) - (8*pow2(mmsb1))/pow3(-mmgl + mmsb1) + (8*
-     mmsb2*mmsusy)/pow3(-mmgl + mmsb2) - (8*pow2(mmsb2))/pow3(-mmgl + mmsb2)))/
-     3. + (4*Fin3(mmt,mmst1,mmgl,mmu)*(-3/(4.*(-mmgl + mmsb1)) - 3/(4.*(-mmgl +
-     mmsb2)) - 2*mmgl*DeltaInv(mmt,mmst1,mmgl) - 2*mmsb1*DeltaInv(mmt,mmst1,
-     mmgl) - 2*mmsb2*DeltaInv(mmt,mmst1,mmgl) + 4*mmst1*DeltaInv(mmt,mmst1,
-     mmgl) - (4*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) - (4*
-     mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) + 2*mmt*DeltaInv(
-     mmt,mmst1,mmgl) - (2*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) -
-     (2*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) - (mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) - (mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl))/(-mmgl + mmsb2) + (3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl +
-     mmsb1) + (7*mmsb1)/(4.*pow2(-mmgl + mmsb1)) - (3*mmst1)/(4.*pow2(-mmgl +
-     mmsb1)) + (3*mmt)/(4.*pow2(-mmgl + mmsb1)) + (mmsb1*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl))/pow2(-mmgl + mmsb1) + (2*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1))/pow2(-mmgl + mmsb1) + (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) + (3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-
-     mmgl + mmsb2) + (7*mmsb2)/(4.*pow2(-mmgl + mmsb2)) - (3*mmst1)/(4.*pow2(-
-     mmgl + mmsb2)) + (3*mmt)/(4.*pow2(-mmgl + mmsb2)) + (mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl))/pow2(-mmgl + mmsb2) + (2*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(-mmgl + mmsb1) + (DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl +
-     mmsb2) - (mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb1)
-     - (mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb2) - (
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (mmsb1*mmst1)/
-     pow3(-mmgl + mmsb1) - (mmsb1*mmt)/pow3(-mmgl + mmsb1) - pow2(mmsb1)/pow3(-
-     mmgl + mmsb1) - (DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/pow2(-mmgl + mmsb2)
-     + (mmsb2*mmst1)/pow3(-mmgl + mmsb2) - (mmsb2*mmt)/pow3(-mmgl + mmsb2) -
-     pow2(mmsb2)/pow3(-mmgl + mmsb2)))/3. + (4*Fin3(mmt,mmst2,mmgl,mmu)*(-3/(4.
-     *(-mmgl + mmsb1)) - 3/(4.*(-mmgl + mmsb2)) - 2*mmgl*DeltaInv(mmt,mmst2,
-     mmgl) - 2*mmsb1*DeltaInv(mmt,mmst2,mmgl) - 2*mmsb2*DeltaInv(mmt,mmst2,
-     mmgl) + 4*mmst2*DeltaInv(mmt,mmst2,mmgl) - (4*mmsb1*mmst2*DeltaInv(mmt,
-     mmst2,mmgl))/(-mmgl + mmsb1) - (4*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl))/(-
-     mmgl + mmsb2) + 2*mmt*DeltaInv(mmt,mmst2,mmgl) - (2*mmsb1*mmt*DeltaInv(
-     mmt,mmst2,mmgl))/(-mmgl + mmsb1) - (2*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl))/
-     (-mmgl + mmsb2) - (mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb1) - (
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb2) + (3*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) + (7*mmsb1)/(4.*pow2(-mmgl +
-     mmsb1)) - (3*mmst2)/(4.*pow2(-mmgl + mmsb1)) + (3*mmt)/(4.*pow2(-mmgl +
-     mmsb1)) + (mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/pow2(-mmgl + mmsb1) +
-     (2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) + (mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) + (3*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) + (7*mmsb2)/(4.*pow2(-mmgl +
-     mmsb2)) - (3*mmst2)/(4.*pow2(-mmgl + mmsb2)) + (3*mmt)/(4.*pow2(-mmgl +
-     mmsb2)) + (mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/pow2(-mmgl + mmsb2) +
-     (2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) + (DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/(-mmgl + mmsb2) - (mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/
-     pow2(-mmgl + mmsb1) - (mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/pow2(-
-     mmgl + mmsb2) - (DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1)
-     + (mmsb1*mmst2)/pow3(-mmgl + mmsb1) - (mmsb1*mmt)/pow3(-mmgl + mmsb1) -
-     pow2(mmsb1)/pow3(-mmgl + mmsb1) - (DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/
-     pow2(-mmgl + mmsb2) + (mmsb2*mmst2)/pow3(-mmgl + mmsb2) - (mmsb2*mmt)/
-     pow3(-mmgl + mmsb2) - pow2(mmsb2)/pow3(-mmgl + mmsb2)))/3. + (4*Fin3(mmt,
-     mmsb2,mmst1,mmu)*(-((mmsb2*mmst1*DeltaInv(mmt,mmsb2,mmst1))/(-mmgl +
-     mmsb2)) - (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl + mmsb2)) - (
-     mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl + mmsb2)) + (DeltaInv(mmt,
-     mmsb2,mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (3*mmsb2)/(4.*pow2(-mmgl
-     + mmsb2)) + (3*mmst1)/(4.*pow2(-mmgl + mmsb2)) - (3*mmt)/(4.*pow2(-mmgl +
-     mmsb2)) + (mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/pow2(-mmgl + mmsb2)
-     + (2*mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) - (mmsb2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb2) - (DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (mmsb2*mmst1)/pow3(-
-     mmgl + mmsb2) + (mmsb2*mmt)/pow3(-mmgl + mmsb2) + pow2(mmsb2)/pow3(-mmgl +
-     mmsb2)))/3. + (4*Fin3(mmt,mmsb2,mmst2,mmu)*(-((mmsb2*mmst2*DeltaInv(mmt,
-     mmsb2,mmst2))/(-mmgl + mmsb2)) - (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.
-     *(-mmgl + mmsb2)) - (mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.*(-mmgl +
-     mmsb2)) + (DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (
-     3*mmsb2)/(4.*pow2(-mmgl + mmsb2)) + (3*mmst2)/(4.*pow2(-mmgl + mmsb2)) - (
-     3*mmt)/(4.*pow2(-mmgl + mmsb2)) + (mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2))/pow2(-mmgl + mmsb2) + (2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/
-     pow2(-mmgl + mmsb2) + (DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*(-mmgl +
-     mmsb2)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/pow2(-mmgl +
-     mmsb2) - (DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (
-     mmsb2*mmst2)/pow3(-mmgl + mmsb2) + (mmsb2*mmt)/pow3(-mmgl + mmsb2) + pow2(
-     mmsb2)/pow3(-mmgl + mmsb2)))/3. + (4*Fin20(mmsb2,mmsusy,mmu)*(4/(-mmgl +
-     mmsb2) - (14*mmsb2)/pow2(-mmgl + mmsb2) + (6*mmsusy)/pow2(-mmgl + mmsb2) -
-     (8*mmsb2*mmsusy)/pow3(-mmgl + mmsb2) + (8*pow2(mmsb2))/pow3(-mmgl + mmsb2)
-     ))/3. + (4*log(mmsb1/mmu)*log(mmsb2/mmu)*((3*mmsb1*mmsb2)/(4.*pow2(-mmgl +
-     mmsb1)) + (3*mmsb1*mmsb2)/(4.*pow2(-mmgl + mmsb2)) - (mmsb2*pow2(mmsb1))/
-     pow3(-mmgl + mmsb1) - (mmsb1*pow2(mmsb2))/pow3(-mmgl + mmsb2)))/3. + (4*
-     log(mmsb2/mmu)*log(mmst1/mmu)*((mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))
-     /(-mmgl + mmsb2) + (3*mmsb2*mmst1)/(4.*pow2(-mmgl + mmsb2)) - (2*mmst1*
-     mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (mmst1*
-     pow2(mmsb2))/pow3(-mmgl + mmsb2)))/3. + (4*log(mmgl/mmu)*log(mmst1/mmu)*((
-     3*mmst1)/(4.*(-mmgl + mmsb1)) + (3*mmst1)/(4.*(-mmgl + mmsb2)) - 4*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl) + (4*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)
-     )/(-mmgl + mmsb1) + (4*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl +
-     mmsb2) - (7*mmsb1*mmst1)/(4.*pow2(-mmgl + mmsb1)) - (2*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (7*mmsb2*mmst1)/(4.*
-     pow2(-mmgl + mmsb2)) - (2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/
-     pow2(-mmgl + mmsb2) + (mmst1*pow2(mmsb1))/pow3(-mmgl + mmsb1) + (mmst1*
-     pow2(mmsb2))/pow3(-mmgl + mmsb2)))/3. + (4*log(mmsb2/mmu)*log(mmst2/mmu)*(
-     (mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(-mmgl + mmsb2) + (3*mmsb2*
-     mmst2)/(4.*pow2(-mmgl + mmsb2)) - (2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmsb2))/pow2(-mmgl + mmsb2) - (mmst2*pow2(mmsb2))/pow3(-mmgl + mmsb2)
-     ))/3. + (4*log(mmgl/mmu)*log(mmst2/mmu)*((3*mmst2)/(4.*(-mmgl + mmsb1)) +
-     (3*mmst2)/(4.*(-mmgl + mmsb2)) - 4*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl) + (
-     4*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb1) + (4*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb2) - (7*mmsb1*mmst2)/(4.*
-     pow2(-mmgl + mmsb1)) - (2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) - (7*mmsb2*mmst2)/(4.*pow2(-mmgl + mmsb2)) - (2*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (mmst2*
-     pow2(mmsb1))/pow3(-mmgl + mmsb1) + (mmst2*pow2(mmsb2))/pow3(-mmgl + mmsb2)
-     ))/3. + (4*log(mmsb2/mmu)*log(mmsusy/mmu)*((6*mmsb2*mmsusy)/pow2(-mmgl +
-     mmsb2) - (8*mmsusy*pow2(mmsb2))/pow3(-mmgl + mmsb2)))/3. + (4*log(mmgl/
-     mmu)*log(mmsusy/mmu)*((6*mmsusy)/(-mmgl + mmsb1) + (6*mmsusy)/(-mmgl +
-     mmsb2) - (14*mmsb1*mmsusy)/pow2(-mmgl + mmsb1) - (14*mmsb2*mmsusy)/pow2(-
-     mmgl + mmsb2) + (8*mmsusy*pow2(mmsb1))/pow3(-mmgl + mmsb1) + (8*mmsusy*
-     pow2(mmsb2))/pow3(-mmgl + mmsb2)))/3. + (4*mmsb1*mmsb2*Fin20(mmsb1,mmgl,
-     mmu))/(3.*pow3(-mmgl + mmsb2)) - (4*mmsb1*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(
-     3.*pow3(-mmgl + mmsb2)) - (4*Fin20(mmsb1,mmgl,mmu)*pow2(mmsb2))/(3.*pow3(-
-     mmgl + mmsb2)) + (4*Fin20(mmsb1,mmsb2,mmu)*pow2(mmsb2))/(3.*pow3(-mmgl +
-     mmsb2)) - (16*Fin20(mmsb2,mmgl,mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2))
-     - (8*mmsb1*log(mmgl/mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2)) - (8*mmst1*
-     log(mmgl/mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2)) - (8*mmst2*log(mmgl/
-     mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2)) - (64*mmsusy*log(mmgl/mmu)*
-     pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2)) + (16*mmt*log(mmgl/mmu)*pow2(mmsb2))
-     /(3.*pow3(-mmgl + mmsb2)) + (4*mmsb1*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(
-     mmsb2))/(3.*pow3(-mmgl + mmsb2)) + (8*mmsb1*log(mmsb2/mmu)*pow2(mmsb2))/(
-     3.*pow3(-mmgl + mmsb2)) + (8*mmst1*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow3(-
-     mmgl + mmsb2)) + (8*mmst2*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow3(-mmgl +
-     mmsb2)) + (64*mmsusy*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2))
-     - (16*mmt*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow3(-mmgl + mmsb2)) + (2*mmsb1*
-     pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb2)) + (2*mmst1*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb2)) + (2*mmst2*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb2)) + (16*mmsusy*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb2)) - (4*mmt*pow2(mmsb2)*
-     pow2(log(mmgl/mmu)))/(3.*pow3(-mmgl + mmsb2)) - (2*mmsb1*pow2(mmsb2)*pow2(
-     log(mmsb2/mmu)))/(3.*pow3(-mmgl + mmsb2)) - (2*mmst1*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(3.*pow3(-mmgl + mmsb2)) - (2*mmst2*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(3.*pow3(-mmgl + mmsb2)) - (16*mmsusy*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(3.*pow3(-mmgl + mmsb2)) + (4*mmt*pow2(mmsb2)*pow2(log(mmsb2/
-     mmu)))/(3.*pow3(-mmgl + mmsb2)) - (112*pow3(mmsb2))/(3.*pow3(-mmgl +
-     mmsb2)) - (16*zt2*pow3(mmsb2))/(3.*pow3(-mmgl + mmsb2)) + (508*log(mmgl/
-     mmu)*pow3(mmsb2))/(9.*pow3(-mmgl + mmsb2)) - (220*log(mmsb2/mmu)*pow3(
-     mmsb2))/(9.*pow3(-mmgl + mmsb2)) + (116*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(
-     mmsb2))/(9.*pow3(-mmgl + mmsb2)) - (242*pow2(log(mmgl/mmu))*pow3(mmsb2))/(
-     9.*pow3(-mmgl + mmsb2)) + (10*pow2(log(mmsb2/mmu))*pow3(mmsb2))/(3.*pow3(-
-     mmgl + mmsb2)) + (14*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(3.*(-mmgl +
-     mmsb1)) + (2*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(3.*(-mmgl +
-     mmsb1)) + (14*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(3.*(-mmgl + mmsb2))
-     + (2*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(3.*(-mmgl + mmsb2)) + (
-     28*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*(-mmgl + mmsb1)) + (28*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*(-mmgl + mmsb2)) + (4*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*(-mmgl + mmsb1)) + (4*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*(-mmgl + mmsb2)) - (28*mmsb1*
-     DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(3.*pow2(-mmgl + mmsb1)) - (4*
-     mmsb1*zt2*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(3.*pow2(-mmgl + mmsb1))
-     - (28*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*pow2(-mmgl + mmsb1))
-     - (4*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*pow2(-mmgl +
-     mmsb1)) - (28*mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(3.*pow2(-mmgl
-     + mmsb2)) - (4*mmsb2*zt2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(3.*pow2(-
-     mmgl + mmsb2)) - (28*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*pow2(
-     -mmgl + mmsb2)) - (4*mmsb2*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*
-     pow2(-mmgl + mmsb2)) + (4*log(mmst1/mmu)*log(mmt/mmu)*((-3*mmst1)/(2.*(-
-     mmgl + mmsb1)) - (3*mmst1)/(2.*(-mmgl + mmsb2)) - (3*mmsb1*mmst1*mmt*
-     DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl + mmsb1)) - (3*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl + mmsb2)) - 2*mmgl*mmst1*DeltaInv(
-     mmt,mmst1,mmgl) - 2*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl) - 2*mmsb2*mmst1*
-     DeltaInv(mmt,mmst1,mmgl) + 6*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl) - (6*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) - (6*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) + (mmst1*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (3*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) + (2*mmsb1*mmst1)/pow2(-mmgl +
-     mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)
-     ) + (3*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) + (2*
-     mmsb2*mmst1)/pow2(-mmgl + mmsb2) + (3*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*
-     pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb2))/pow2(-mmgl + mmsb2) - (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmst1))/(-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*
-     (-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(-mmgl +
-     mmsb2) - (mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2))
-     + 4*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1) - (4*mmsb1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1))/(-mmgl + mmsb1) - (4*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmst1))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/
-     (-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl +
-     mmsb2) + (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/pow2(-mmgl +
-     mmsb1) + (mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl +
-     mmsb1) + (2*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl
-     + mmsb1) + (2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl
-     + mmsb1) + (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/pow2(-mmgl +
-     mmsb2) + (mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl +
-     mmsb2) + (2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl
-     + mmsb2) + (2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl
-     + mmsb2) - (mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/pow2(-mmgl +
-     mmsb1) - (mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1)
-     - (mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (
-     DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(2.*(-mmgl + mmsb1)) + (DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmst1))/(2.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmst1))/(-mmgl + mmsb1) + (DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1)
-     )/(-mmgl + mmsb2) - (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/pow2(-
-     mmgl + mmsb1) - (mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/pow2(-mmgl +
-     mmsb1) - (mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/pow2(-mmgl + mmsb2)
-     - (mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/pow2(-mmgl + mmsb2)))/3. +
-     (4*pow2(log(mmst1/mmu))*(0.25 - (3*mmst1)/(8.*(-mmgl + mmsb1)) - (3*mmst1)
-     /(8.*(-mmgl + mmsb2)) - (mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(4.*(-
-     mmgl + mmsb1)) - (mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(4.*(-mmgl +
-     mmsb2)) - mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl) - mmsb1*mmst1*DeltaInv(mmt,
-     mmst1,mmgl) - mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl) + mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl) - (mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl +
-     mmsb1) - (mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) + (
-     mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(4.*(-mmgl + mmsb1)) + (3*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (mmsb1*
-     mmst1)/(2.*pow2(-mmgl + mmsb1)) + (mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*
-     pow2(mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst1*DeltaInv(mmt,mmsb2,
-     mmst1)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)) + (3*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (mmsb2*mmst1)/(2.*pow2(-mmgl +
-     mmsb2)) + (mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(2.*pow2(-mmgl
-     + mmsb2)) + (mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(2.*pow2(-
-     mmgl + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*(-mmgl
-     + mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(4.*(-mmgl +
-     mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl +
-     mmsb2)) - (mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(4.*(-mmgl + mmsb2))
-     + 2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1) - (2*mmsb1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1))/(-mmgl + mmsb1) - (2*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmst1))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/
-     (2.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(2.*(-
-     mmgl + mmsb2)) + (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*
-     pow2(-mmgl + mmsb1)) + (mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(
-     2.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(
-     mmst1))/pow2(-mmgl + mmsb1) + (DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(
-     mmst1))/pow2(-mmgl + mmsb1) + (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(
-     mmst1))/(2.*pow2(-mmgl + mmsb2)) + (mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmst1))/(2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,mmst1)*pow2(
-     mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) + (DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) - (mmst1*DeltaInv(mmt,mmsb1,mmst1)
-     *pow3(mmsb1))/(2.*pow2(-mmgl + mmsb1)) - (mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb1))/(2.*pow2(-mmgl + mmsb1)) - (mmst1*DeltaInv(mmt,mmsb2,mmst1)*
-     pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) - (mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb1,mmst1)*pow3(
-     mmst1))/(4.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(4.
-     *(-mmgl + mmsb2)) + (DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*(-mmgl +
-     mmsb1)) + (DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*(-mmgl + mmsb2)) - (
-     mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(2.*pow2(-mmgl + mmsb1)) - (
-     mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*pow2(-mmgl + mmsb1)) - (
-     mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(2.*pow2(-mmgl + mmsb2)) - (
-     mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*pow2(-mmgl + mmsb2))))/3.
-      + (4*log(mmst1/mmu)*(
-     0.9166666666666666 + (3*mmst1)/(2.*(-mmgl + mmsb1)) + (3*mmst1)/(2.*(-mmgl
-     + mmsb2)) + (3*mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl +
-     mmsb1)) + (3*mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl +
-     mmsb2)) + 6*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl) + 6*mmsb1*mmst1*DeltaInv(
-     mmt,mmst1,mmgl) + 6*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl) - 6*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl) + (6*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-
-     mmgl + mmsb1) + (6*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl +
-     mmsb2) - (3*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(2.*(-mmgl +
-     mmsb1)) - (9*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) -
-     (2*mmsb1*mmst1)/pow2(-mmgl + mmsb1) - (3*mmst1*mmt*DeltaInv(mmt,mmsb1,
-     mmst1)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst1*DeltaInv(mmt,mmsb2,
-     mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (9*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (2*mmsb2*mmst1)/pow2(-mmgl + mmsb2) -
-     (3*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) -
-     (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (
-     3*mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(-mmgl + mmsb1) + (3*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb1)) + (3*mmsb2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(-mmgl + mmsb2) + (3*mmt*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) - 12*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1) + (12*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/
-     (-mmgl + mmsb1) + (12*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl +
-     mmsb2) + (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl + mmsb1) + (
-     3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl + mmsb2) - (3*mmsb1*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (3*mmsb1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (6*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (
-     6*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb2) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb2) - (
-     6*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) -
-     (6*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) +
-     (3*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (3*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (3*
-     mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (3*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*
-     DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(2.*(-mmgl + mmsb1)) - (3*DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmst1))/(2.*(-mmgl + mmsb2)) - (3*DeltaInv(mmt,
-     mmst1,mmgl)*pow3(mmst1))/(-mmgl + mmsb1) - (3*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmst1))/(-mmgl + mmsb2) + (3*mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow3(
-     mmst1))/pow2(-mmgl + mmsb1) + (3*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmst1))/pow2(-mmgl + mmsb1) + (3*mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow3(
-     mmst1))/pow2(-mmgl + mmsb2) + (3*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmst1))/pow2(-mmgl + mmsb2)))/3. + (14*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmst2))/(3.*(-mmgl + mmsb1)) + (2*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmst2))/(3.*(-mmgl + mmsb1)) + (14*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/
-     (3.*(-mmgl + mmsb2)) + (2*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/(3.*(
-     -mmgl + mmsb2)) + (28*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*(-mmgl +
-     mmsb1)) + (28*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*(-mmgl + mmsb2)) +
-     (4*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*(-mmgl + mmsb1)) + (4*
-     zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*(-mmgl + mmsb2)) - (28*
-     mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(3.*pow2(-mmgl + mmsb1)) - (
-     4*mmsb1*zt2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(3.*pow2(-mmgl + mmsb1)
-     ) - (28*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*pow2(-mmgl +
-     mmsb1)) - (4*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*pow2(-
-     mmgl + mmsb1)) - (28*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/(3.*
-     pow2(-mmgl + mmsb2)) - (4*mmsb2*zt2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))
-     /(3.*pow2(-mmgl + mmsb2)) - (28*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2)
-     )/(3.*pow2(-mmgl + mmsb2)) - (4*mmsb2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(3.*pow2(-mmgl + mmsb2)) + (4*log(mmst2/mmu)*log(mmt/mmu)*((-3*
-     mmst2)/(2.*(-mmgl + mmsb1)) - (3*mmst2)/(2.*(-mmgl + mmsb2)) - (3*mmsb1*
-     mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(2.*(-mmgl + mmsb1)) - (3*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.*(-mmgl + mmsb2)) - 2*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl) - 2*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl) - 2*
-     mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl) + 6*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl) - (6*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb1) - (6*
-     mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb2) + (mmst2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (3*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) + (2*mmsb1*mmst2)/
-     pow2(-mmgl + mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) + (mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(2.*(-
-     mmgl + mmsb2)) + (3*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl +
-     mmsb2) + (2*mmsb2*mmst2)/pow2(-mmgl + mmsb2) + (3*mmst2*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (mmsb1*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(mmst2))/(-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmst2))/(2.*(-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmst2))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*
-     (-mmgl + mmsb2)) + 4*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2) - (4*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) - (4*mmsb2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/(-mmgl + mmsb2) + (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2)
-     )/pow2(-mmgl + mmsb1) + (mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/
-     pow2(-mmgl + mmsb1) + (2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmst2)
-     )/pow2(-mmgl + mmsb1) + (2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(
-     mmst2))/pow2(-mmgl + mmsb1) + (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmst2))/pow2(-mmgl + mmsb2) + (mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/pow2(-mmgl + mmsb2) + (2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*
-     pow2(mmst2))/pow2(-mmgl + mmsb2) + (2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)
-     *pow2(mmst2))/pow2(-mmgl + mmsb2) - (mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmsb1))/pow2(-mmgl + mmsb1) - (mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))
-     /pow2(-mmgl + mmsb1) - (mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/pow2(
-     -mmgl + mmsb2) - (mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/pow2(-mmgl +
-     mmsb2) + (DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(2.*(-mmgl + mmsb1)) + (
-     DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/(2.*(-mmgl + mmsb2)) + (DeltaInv(
-     mmt,mmst2,mmgl)*pow3(mmst2))/(-mmgl + mmsb1) + (DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmst2))/(-mmgl + mmsb2) - (mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmst2))/pow2(-mmgl + mmsb1) - (mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))
-     /pow2(-mmgl + mmsb1) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/pow2(
-     -mmgl + mmsb2) - (mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/pow2(-mmgl +
-     mmsb2)))/3. + (4*pow2(log(mmst2/mmu))*(0.25 - (3*mmst2)/(8.*(-mmgl +
-     mmsb1)) - (3*mmst2)/(8.*(-mmgl + mmsb2)) - (mmsb1*mmst2*mmt*DeltaInv(mmt,
-     mmsb1,mmst2))/(4.*(-mmgl + mmsb1)) - (mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2))/(4.*(-mmgl + mmsb2)) - mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl) -
-     mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl) - mmsb2*mmst2*DeltaInv(mmt,mmst2,
-     mmgl) + mmst2*mmt*DeltaInv(mmt,mmst2,mmgl) - (mmsb1*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl))/(-mmgl + mmsb1) - (mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl))/(-mmgl + mmsb2) + (mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(4.
-     *(-mmgl + mmsb1)) + (3*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(2.*(-
-     mmgl + mmsb1)) + (mmsb1*mmst2)/(2.*pow2(-mmgl + mmsb1)) + (mmst2*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (
-     mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)) + (3*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (mmsb2*
-     mmst2)/(2.*pow2(-mmgl + mmsb2)) + (mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*
-     pow2(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2))/(2.*pow2(-mmgl + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(4.*(-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmst2))/(2.*(-mmgl + mmsb2)) - (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))
-     /(4.*(-mmgl + mmsb2)) + 2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2) - (2*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) - (2*mmsb2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmst2))/(2.*(-mmgl + mmsb2)) + (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (mmsb1*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) + (DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) + (mmsb2*mmt*DeltaInv(mmt,
-     mmsb2,mmst2)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb2)) + (mmsb2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,
-     mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) + (DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) - (mmst2*
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(2.*pow2(-mmgl + mmsb1)) - (mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(2.*pow2(-mmgl + mmsb1)) - (mmst2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) - (mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(4.*(-mmgl + mmsb1)) + (DeltaInv(
-     mmt,mmsb2,mmst2)*pow3(mmst2))/(4.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmst2,
-     mmgl)*pow3(mmst2))/(2.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(2.*(-mmgl + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmst2))/(2.*pow2(-mmgl + mmsb1)) - (mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(2.*pow2(-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow3(
-     mmst2))/(2.*pow2(-mmgl + mmsb2)) - (mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(2.*pow2(-mmgl + mmsb2))))/3. + (4*log(mmst2/mmu)*(
-     0.9166666666666666 + (3*mmst2)/(2.*(-mmgl + mmsb1)) + (3*mmst2)/(2.*(-mmgl
-     + mmsb2)) + (3*mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(2.*(-mmgl +
-     mmsb1)) + (3*mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.*(-mmgl +
-     mmsb2)) + 6*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl) + 6*mmsb1*mmst2*DeltaInv(
-     mmt,mmst2,mmgl) + 6*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl) - 6*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl) + (6*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-
-     mmgl + mmsb1) + (6*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl +
-     mmsb2) - (3*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*(-mmgl +
-     mmsb1)) - (9*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) -
-     (2*mmsb1*mmst2)/pow2(-mmgl + mmsb1) - (3*mmst2*mmt*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst2*DeltaInv(mmt,mmsb2,
-     mmst2)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (9*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (2*mmsb2*mmst2)/pow2(-mmgl + mmsb2) -
-     (3*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/pow2(-mmgl + mmsb2) -
-     (3*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (
-     3*mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(-mmgl + mmsb1) + (3*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) + (3*mmsb2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(-mmgl + mmsb2) + (3*mmt*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb2)) - 12*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmst2) + (12*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/
-     (-mmgl + mmsb1) + (12*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl +
-     mmsb2) + (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) + (
-     3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb2) - (3*mmsb1*
-     mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/pow2(-mmgl + mmsb1) - (3*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/pow2(-mmgl + mmsb1) - (6*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) - (
-     6*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/pow2(-mmgl + mmsb2) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/pow2(-mmgl + mmsb2) - (
-     6*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) -
-     (6*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) +
-     (3*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (3*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (3*
-     mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (3*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(2.*(-mmgl + mmsb1)) - (3*DeltaInv(
-     mmt,mmsb2,mmst2)*pow3(mmst2))/(2.*(-mmgl + mmsb2)) - (3*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmst2))/(-mmgl + mmsb1) - (3*DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmst2))/(-mmgl + mmsb2) + (3*mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmst2))/pow2(-mmgl + mmsb1) + (3*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/pow2(-mmgl + mmsb1) + (3*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow3(
-     mmst2))/pow2(-mmgl + mmsb2) + (3*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/pow2(-mmgl + mmsb2)))/3. + Xb*((-72*mmgl*mmsb1)/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2)/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmsb1)/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (72*
-     mmgl*mmsb2)/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (64*mmgl*mmst1)/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (64*mmgl*mmst1)/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (64*mmgl*mmst2)/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (64*mmgl*mmst2)/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (128*
-     mmgl*mmsusy)/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (128*mmgl*mmsusy)/(
-     mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (32*mmgl*mmt)/(mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) - (32*mmgl*mmt)/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (
-     80*mmgl*mmsb1*zt2)/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*
-     mmsb2*zt2)/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmsb1*zt2)/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (80*mmgl*mmsb2*zt2)/(9.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmst1*zt2)/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmst1*zt2)/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (8*mmgl*mmst2*zt2)/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (8*mmgl*mmst2*zt2)/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (
-     64*mmgl*mmsusy*zt2)/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (64*mmgl*
-     mmsusy*zt2)/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*zt2)/(
-     3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmt*zt2)/(3.*mgl*(mmsb1
-     - mmsb2)*(-mmgl + mmsb2)) - (112*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)
-     )/(3.*mgl*(mmsb1 - mmsb2)) + (112*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,
-     mmgl))/(3.*mgl*(mmsb1 - mmsb2)) - (112*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,
-     mmgl))/(3.*mgl*(mmsb1 - mmsb2)) + (112*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,
-     mmgl))/(3.*mgl*(mmsb1 - mmsb2)) + (448*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (448*mmgl*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (16*mmgl*mmsb1*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*
-     mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(
-     3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))
-     /(3.*mgl*(mmsb1 - mmsb2)) + (64*mmgl*mmsb1*mmst1*mmt*zt2*DeltaInv(mmt,
-     mmst1,mmgl))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (64*mmgl*mmsb2*
-     mmst1*mmt*zt2*DeltaInv(mmt,mmst1,mmgl))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (112*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (112*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) - (112*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (112*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (448*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) - (448*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*
-     mmst2*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*
-     mmsb2*mmst2*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 - mmsb2)) - (16*
-     mmgl*mmsb1*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 - mmsb2)) + (
-     16*mmgl*mmsb2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(mmsb1 - mmsb2)) +
-     (64*mmgl*mmsb1*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,mmgl))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (64*mmgl*mmsb2*mmst2*mmt*zt2*DeltaInv(mmt,mmst2,
-     mmgl))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (64*mmgl*Fin20(mmgl,
-     mmsusy,mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (64*mmgl*Fin20(
-     mmgl,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (176*mmgl*
-     Fin20(mmsb1,mmgl,mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*
-     mmgl*Fin20(mmsb1,mmgl,mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*
-     mmgl*Fin20(mmsb1,mmsb2,mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (
-     8*mmgl*Fin20(mmsb1,mmsb2,mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) -
-     (32*mmgl*Fin20(mmsb2,mmgl,mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) +
-     (176*mmgl*Fin20(mmsb2,mmgl,mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2))
-     + (8*mmgl*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (8*mmgl*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)) + (16*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,
-     mmu))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (32*mmgl*mmsb1*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmsb1 - mmsb2)) - (32*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*Fin3(
-     mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) +
-     (16*mmgl*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (8*mmgl*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)) - (8*mmgl*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (16*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,
-     mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (32*mmgl*mmsb1*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) +
-     (16*mmgl*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (96*mmgl*mmsb1*log(mmgl/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmsb2*log(mmgl/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmsb1*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (96*mmgl*mmsb2*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (16*mmgl*mmst1*log(mmgl/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmst1*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (16*mmgl*mmst2*log(mmgl/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmst2*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (128*mmgl*mmsusy*log(mmgl/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (128*mmgl*mmsusy*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (32*mmgl*mmt*log(mmgl/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (32*mmgl*mmt*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (32*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/(
-     mgl*(mmsb1 - mmsb2)) - (32*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu))/(mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb1*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (32*mmgl*mmsb1*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2)) - (32*mmgl*
-     mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2))
-     + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*
-     (mmsb1 - mmsb2)) - (16*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (128*mmgl*log(mmsb1/mmu))/(9.*mgl*(mmsb1 - mmsb2)) - (112*mmgl*
-     mmsb1*log(mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*
-     mmsb2*log(mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*
-     mmsb1*log(mmsb1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmsb2*log(mmsb1/mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (128*
-     mmgl*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(mmsb1 - mmsb2)) - (200*mmgl*
-     mmsb1*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (80*mmgl*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmsb1*log(mmgl/mmu)*log(mmsb1/mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (80*mmgl*mmsb2*log(mmgl/mmu)*log(
-     mmsb1/mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (128*mmgl*log(
-     mmsb2/mmu))/(9.*mgl*(mmsb1 - mmsb2)) + (80*mmgl*mmsb2*log(mmsb2/mmu))/(9.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (128*mmgl*mmsb2*log(mmsb2/mmu))/(9.
-     *mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (128*mmgl*log(mmgl/mmu)*log(mmsb2/
-     mmu))/(9.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*log(mmgl/mmu)*log(mmsb2/
-     mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (152*mmgl*mmsb2*log(mmgl/
-     mmu)*log(mmsb2/mmu))/(9.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (80*mmgl*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmst1*log(mmst1/mmu))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmst1*log(mmst1/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmst1/mmu))/(mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmst1/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb1*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)
-     )/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmst1*log(mmgl/mmu)*log(
-     mmst1/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmst1*log(
-     mmgl/mmu)*log(mmst1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*
-     mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu)
-     )/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmst1/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmst2*log(mmst2/mmu))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmst2*log(mmst2/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmst2/mmu))/(mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmst2/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb1*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)
-     )/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmst2*log(mmgl/mmu)*log(
-     mmst2/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmst2*log(
-     mmgl/mmu)*log(mmst2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*
-     mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu)
-     )/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmst2/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (256*mmgl*mmsusy*log(mmsusy/mmu))/(3.*mgl*(-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)) - (256*mmgl*mmsusy*log(mmsusy/mmu))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (64*mmgl*mmsusy*log(mmgl/mmu)*log(
-     mmsusy/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (64*mmgl*mmsusy*
-     log(mmgl/mmu)*log(mmsusy/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) -
-     (32*mmgl*mmsb1*log(mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*
-     mmgl*mmsb2*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmst1*log(mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*
-     mmst1*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmst2*log(mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*
-     mmst2*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (64*mmgl*mmt*
-     log(mmt/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (64*mmgl*mmt*log(
-     mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmsb1*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*
-     mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)) +
-     (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(
-     mmsb1 - mmsb2)) - (96*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (96*mmgl*mmsb2*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (16*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(
-     mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmt/mmu))/(mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)) - (96*mmgl*mmsb1*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (96*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (32*mmgl*mmsb1*log(mmgl/
-     mmu)*log(mmt/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*
-     mmsb2*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2))
-     + (16*mmgl*mmt*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)) - (16*mmgl*mmt*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1
-     - mmsb2)) - (16*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (16*
-     mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/
-     (mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (32*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(
-     mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) - (16*
-     mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmgl/mmu)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) +
-     (16*mmgl*mmst1*log(mmst1/mmu)*log(mmt/mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)) - (16*mmgl*mmst1*log(mmst1/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmst1/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1
-     - mmsb2)) + (16*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/
-     mmu)*log(mmt/mmu))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu))/(mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmst2*log(mmst2/mmu)*log(mmt/
-     mmu))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmst2*log(mmst2/
-     mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu))/(3.*mgl*
-     (mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmst2/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmst2/mmu)*log(mmt/mmu))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) +
-     (112*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 - mmsb2)) -
-     (112*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 - mmsb2)) +
-     (16*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 - mmsb2)
-     ) - (16*mmsb2*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (112*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) - (112*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (16*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/(3.*mgl*(
-     mmsb1 - mmsb2)) - (16*mmsb2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl))/(3.*
-     mgl*(mmsb1 - mmsb2)) - (16*mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) + (16*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmgl/mmu)*pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) - (16*mmsb1*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) + (16*mmsb2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) -
-     (16*mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmgl))/(mgl*(mmsb1 -
-     mmsb2)) + (16*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmgl))/(
-     mgl*(mmsb1 - mmsb2)) - (16*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) + (16*mmsb2*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmt/mmu)*pow2(mmgl))/(mgl*(mmsb1 - mmsb2)) + (16*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmgl))/(3.*mgl*(mmsb1 - mmsb2)
-     ) - (16*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmgl))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmgl))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmsb2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmgl))/(3.*mgl*(
-     mmsb1 - mmsb2)) + (112*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*mgl*
-     (mmsb1 - mmsb2)) + (112*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(
-     3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (112*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*
-     mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*mgl*(mmsb1 - mmsb2)) +
-     (16*mmgl*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (112*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(mmsb1 - mmsb2)) + (112*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (112*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmst2*zt2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*
-     mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,
-     mmu)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmsb1))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)) - (32*mmgl*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb1))
-     /(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst2,mmgl)
-     *log(mmgl/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)) - (32*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*
-     pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)) - (16*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(-mmgl
-     + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/
-     mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)) -
-     (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb1))/(mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmt/mmu)*pow2(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*
-     mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*
-     mgl*(mmsb1 - mmsb2)) + (32*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/
-     mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) +
-     (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(
-     mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (32*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/
-     mmu)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*mgl*(
-     -mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmst1/mmu)*log(mmt/mmu)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/
-     mmu)*pow2(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (64*mmgl*
-     mmsb1*Fin20(mmgl,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1))
-     + (64*mmgl*mmsusy*Fin20(mmgl,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb1)) + (8*mmgl*mmsb1*Fin20(mmsb1,mmsb2,mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (64*mmgl*mmsb1*Fin20(mmsb1,
-     mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (64*mmgl*
-     mmsusy*Fin20(mmsb1,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmsb1*Fin20(mmsb2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb2*Fin20(mmsb2,mmgl,mmu))/(3.*mgl*(mmsb1
-     - mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*Fin3(mmt,mmsb1,mmst1,mmu))/(
-     3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmst1*Fin3(mmt,
-     mmsb1,mmst1,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*
-     mmt*Fin3(mmt,mmsb1,mmst1,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)
-     ) + (8*mmgl*mmsb1*Fin3(mmt,mmsb1,mmst2,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(
-     -mmgl + mmsb1)) - (8*mmgl*mmst2*Fin3(mmt,mmsb1,mmst2,mmu))/(3.*mgl*(mmsb1
-     - mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmt*Fin3(mmt,mmsb1,mmst2,mmu))/(3.
-     *mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*Fin3(mmt,mmst1,
-     mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmst1*
-     Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (
-     8*mmgl*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (8*mmgl*mmsb1*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) + (8*mmgl*mmst2*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmt*Fin3(mmt,mmst2,mmgl,mmu)
-     )/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmsb2*log(
-     mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*
-     mmst1*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (16*
-     mmgl*mmsb1*mmst2*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (128*mmgl*mmsb1*mmsusy*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) + (32*mmgl*mmsb1*mmt*log(mmgl/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmsb2*log(mmsb1/mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmst1*log(mmsb1/
-     mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmst2*
-     log(mmsb1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (128*mmgl*
-     mmsb1*mmsusy*log(mmsb1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1))
-     - (32*mmgl*mmsb1*mmt*log(mmsb1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (16*mmgl*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmsb2*log(mmgl/mmu)*
-     log(mmsb2/mmu))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*
-     mmsb1*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb1)) + (8*mmgl*mmsb1*mmst1*log(mmgl/mmu)*log(mmst1/mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmst1*log(mmsb1/
-     mmu)*log(mmst1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (8*
-     mmgl*mmsb1*mmst2*log(mmgl/mmu)*log(mmst2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmst2*log(mmsb1/mmu)*log(mmst2/mmu))/
-     (3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (64*mmgl*mmsb1*mmsusy*log(
-     mmgl/mmu)*log(mmsusy/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) -
-     (64*mmgl*mmsb1*mmsusy*log(mmsb1/mmu)*log(mmsusy/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb1)) - (16*mmgl*mmsb1*mmt*log(mmgl/mmu)*log(mmt/
-     mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (16*mmgl*mmsb1*mmt*
-     log(mmsb1/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1))
-     + (80*mmgl*log(mmgl/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (80*mmgl*log(mmsb1/mmu)*pow2(mmsb1))/(mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb1)) + (296*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb1))/(9.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (112*mmgl*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)) - (112*mmgl*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (
-     112*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)
-     *(-mmgl + mmsb2)) - (16*mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.
-     *mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmst1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmt*zt2*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (112*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 -
-     mmsb2)) - (112*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (112*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*zt2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmgl*
-     mmst2*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) - (16*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst1,
-     mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl
-     + mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*
-     pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)) + (32*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*(mmsb1
-     - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2))
-     + (32*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmsb2))/(mgl*
-     (mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*
-     mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmsb2))/(mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmst2/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*
-     mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmsb2)
-     )/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (
-     16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmsb1 -
-     mmsb2)) + (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmsb2)
-     )/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmt/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (
-     16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(
-     3.*mgl*(mmsb1 - mmsb2)) - (32*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)
-     *pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(
-     mmsb1 - mmsb2)) - (32*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*
-     log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmsb2))/
-     (3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmst2/mmu)*log(mmt/mmu)*pow2(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (16*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (16*mmgl*log(mmgl/mmu)*log(mmsb2/
-     mmu)*pow2(mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (16*mmgl*
-     log(mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb1)) + (16*mmgl*log(mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl +
-     mmsb1)*pow2(mmsb1 - mmsb2)) - (16*mmgl*log(mmsb1/mmu)*pow2(mmsb2))/(9.*
-     mgl*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) - (112*mmgl*log(mmgl/mmu)*log(
-     mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (
-     112*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb2)
-     *pow2(mmsb1 - mmsb2)) - (16*mmgl*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-
-     mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (16*mmgl*log(mmsb2/mmu)*pow2(mmsb2))/
-     (9.*mgl*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (16*mmgl*log(mmgl/mmu)*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (
-     16*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*
-     pow2(mmsb1 - mmsb2)) - (16*mmgl*log(mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))
-     /(9.*mgl*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (112*mmgl*log(mmsb1/mmu)*
-     log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) +
-     (64*mmgl*mmsb2*Fin20(mmgl,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl
-     + mmsb2)) - (64*mmgl*mmsusy*Fin20(mmgl,mmsusy,mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb1*Fin20(mmsb1,mmgl,mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*Fin20(mmsb1,mmgl,
-     mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb1*Fin20(
-     mmsb1,mmsb2,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*
-     mmsb2*Fin20(mmsb1,mmsb2,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2))
-     - (64*mmgl*mmsb2*Fin20(mmsb2,mmsusy,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) + (64*mmgl*mmsusy*Fin20(mmsb2,mmsusy,mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*Fin3(mmt,mmsb2,mmst1,mmu))/(3.
-     *mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmst1*Fin3(mmt,mmsb2,
-     mmst1,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     Fin3(mmt,mmsb2,mmst1,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) -
-     (8*mmgl*mmsb2*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) + (8*mmgl*mmst2*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmt*Fin3(mmt,mmsb2,mmst2,mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*Fin3(mmt,mmst1,
-     mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmst1*
-     Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (
-     8*mmgl*mmt*Fin3(mmt,mmst1,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmsb2*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb2)) - (8*mmgl*mmst2*Fin3(mmt,mmst2,mmgl,mmu))/(3.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmt*Fin3(mmt,mmst2,mmgl,mmu)
-     )/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (16*mmgl*mmsb1*mmsb2*log(
-     mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (16*mmgl*mmsb2*
-     mmst1*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (16*
-     mmgl*mmsb2*mmst2*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) + (128*mmgl*mmsb2*mmsusy*log(mmgl/mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb2)) - (32*mmgl*mmsb2*mmt*log(mmgl/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/
-     mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb1*mmsb2*
-     log(mmsb2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (16*mmgl*
-     mmsb2*mmst1*log(mmsb2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) -
-     (16*mmgl*mmsb2*mmst2*log(mmsb2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) - (128*mmgl*mmsb2*mmsusy*log(mmsb2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb2)) + (32*mmgl*mmsb2*mmt*log(mmsb2/mmu))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb1*mmsb2*log(mmsb1/mmu)*log(
-     mmsb2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*
-     mmst1*log(mmgl/mmu)*log(mmst1/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) + (8*mmgl*mmsb2*mmst1*log(mmsb2/mmu)*log(mmst1/mmu))/(3.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmst2*log(mmgl/mmu)*
-     log(mmst2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*
-     mmsb2*mmst2*log(mmsb2/mmu)*log(mmst2/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) - (64*mmgl*mmsb2*mmsusy*log(mmgl/mmu)*log(mmsusy/mmu))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (64*mmgl*mmsb2*mmsusy*log(
-     mmsb2/mmu)*log(mmsusy/mmu))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) +
-     (16*mmgl*mmsb2*mmt*log(mmgl/mmu)*log(mmt/mmu))/(3.*mgl*(mmsb1 - mmsb2)*
-     pow2(-mmgl + mmsb2)) - (16*mmgl*mmsb2*mmt*log(mmsb2/mmu)*log(mmt/mmu))/(3.
-     *mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (80*mmgl*log(mmgl/mmu)*pow2(
-     mmsb2))/(mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (16*mmgl*log(mmgl/mmu)
-     *log(mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2))
-     + (80*mmgl*log(mmsb2/mmu)*pow2(mmsb2))/(mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) - (104*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(3.*mgl*(
-     mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (16*mmgl*log(mmsb1/mmu)*log(mmsb2/
-     mmu)*pow2(mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (112*
-     mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (112*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (112*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (112*
-     mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (16*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/
-     (3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*zt2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (
-     16*mmgl*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmt*zt2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,
-     mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*Fin3(mmt,mmst1,mmgl,
-     mmu)*pow2(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*pow2(mmst1))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow2(mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*
-     mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*pow2(mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow2(mmst1))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/
-     mmu)*pow2(mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*
-     pow2(mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(mmst1))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow2(
-     mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (32*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/
-     mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*
-     mmsb2*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu)*pow2(mmst1))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmst1/mmu)*log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*
-     log(mmt/mmu)*pow2(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (112*
-     mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (112*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (112*mmgl*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (112*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (16*mmgl*mmsb1*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/
-     (3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*zt2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (
-     16*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmt*zt2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,mmu)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*Fin3(mmt,mmst2,mmgl,
-     mmu)*pow2(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow2(mmst2))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*pow2(mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*
-     mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmst2))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmst2/mmu)*pow2(mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow2(mmst2))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/
-     mmu)*pow2(mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmst2))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*
-     pow2(mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(mmst2))/(mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow2(
-     mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*mmsb1*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(
-     mmgl/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (32*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/
-     mmu)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*
-     mmsb2*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(mmst2))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*log(mmst2/mmu)*log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (16*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*
-     log(mmt/mmu)*pow2(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (148*
-     mmgl*mmsb1*pow2(log(mmgl/mmu)))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) +
-     (4*mmgl*mmsb2*pow2(log(mmgl/mmu)))/(9.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)
-     ) + (4*mmgl*mmsb1*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (44*mmgl*mmsb2*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) - (4*mmgl*mmst1*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (4*mmgl*mmst1*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (4*mmgl*mmst2*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (4*mmgl*mmst2*pow2(log(mmgl/mmu)))/
-     (3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*mmsusy*pow2(log(mmgl/
-     mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*mmsusy*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmt*
-     pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*
-     mmt*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*
-     mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmgl*mmsb1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2))
-     + (8*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(
-     3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) - (16*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb2*mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmgl*mmsb1*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2))
-     + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*
-     (mmsb1 - mmsb2)) + (8*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmsb2*
-     mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (8*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl)*
-     pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmsb2*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*
-     mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(mmgl/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) - (8*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*
-     mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2))
-     + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)
-     *pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(3.*mgl*(-
-     mmgl + mmsb1)*(mmsb1 - mmsb2)) + (28*mmgl*mmsb1*mmsb2*pow2(log(mmgl/mmu)))
-     /(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (4*mmgl*mmsb1*mmst1*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (4*mmgl*
-     mmsb1*mmst2*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) + (32*mmgl*mmsb1*mmsusy*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*mmsb1*mmt*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (140*mmgl*pow2(mmsb1)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (8*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)) - (16*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(
-     mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*
-     pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (16*mmgl*mmst2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(
-     -mmgl + mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*pow2(
-     mmsb2)*pow2(log(mmgl/mmu)))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) +
-     (16*mmgl*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) - (16*mmgl*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl
-     + mmsb2)*pow2(mmsb1 - mmsb2)) - (4*mmgl*mmsb1*mmsb2*pow2(log(mmgl/mmu)))/(
-     3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (4*mmgl*mmsb2*mmst1*pow2(
-     log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (4*mmgl*
-     mmsb2*mmst2*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) - (32*mmgl*mmsb2*mmsusy*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*mmsb2*mmt*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (436*mmgl*pow2(mmsb2)*pow2(log(
-     mmgl/mmu)))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmgl/mmu)))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*
-     mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmgl/mmu)))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2)*pow2(log(mmgl/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (44*mmgl*mmsb1*pow2(log(mmsb1/mmu)))/(9.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (64*mmgl*mmsb2*pow2(log(mmsb1/mmu)))/(9.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (4*mmgl*mmsb1*pow2(log(mmsb1/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (4*mmgl*mmsb1*mmsb2*pow2(log(mmsb1/mmu))
-     )/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (4*mmgl*mmsb1*mmst1*pow2(
-     log(mmsb1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) - (4*mmgl*
-     mmsb1*mmst2*pow2(log(mmsb1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb1)) - (32*mmgl*mmsb1*mmsusy*pow2(log(mmsb1/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb1)) + (8*mmgl*mmsb1*mmt*pow2(log(mmsb1/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (124*mmgl*pow2(mmsb1)*pow2(log(
-     mmsb1/mmu)))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb1)) + (64*mmgl*pow2(
-     mmsb2)*pow2(log(mmsb1/mmu)))/(9.*mgl*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2))
-     - (4*mmgl*mmsb2*pow2(log(mmsb2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (20*mmgl*mmsb2*pow2(log(mmsb2/mmu)))/(9.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (64*mmgl*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(9.*mgl*(-mmgl
-     + mmsb2)*pow2(mmsb1 - mmsb2)) + (4*mmgl*mmsb1*mmsb2*pow2(log(mmsb2/mmu)))/
-     (3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmsb2*mmst1*pow2(
-     log(mmsb2/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (4*mmgl*
-     mmsb2*mmst2*pow2(log(mmsb2/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) + (32*mmgl*mmsb2*mmsusy*pow2(log(mmsb2/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmgl*mmsb2*mmt*pow2(log(mmsb2/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (124*mmgl*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(9.*mgl*(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (4*mmgl*mmst1*
-     pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (4*mmgl*
-     mmst1*pow2(log(mmst1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*
-     mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) - (8*mmgl*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmst1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmsb1*mmst1*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (8*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmst1/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmst1/mmu)))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (8*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(log(mmst1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(
-     -mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2))
-     + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(
-     3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1)*pow2(log(mmst1/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (4*mmgl*mmst2*pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (4*mmgl*mmst2*pow2(log(mmst2/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(log(mmst2/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmgl*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) +
-     (8*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.
-     *mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmsb2*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (8*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(
-     mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmst2/mmu)))/(3.*mgl*(mmsb1
-     - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2)*pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (
-     16*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(
-     3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2)*pow2(log(mmst2/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmst2/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*mmsusy*pow2(
-     log(mmsusy/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (32*mmgl*
-     mmsusy*pow2(log(mmsusy/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (
-     16*mmgl*mmsb1*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2))
-     - (16*mmgl*mmsb2*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (8*mmgl*mmst1*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1
-     - mmsb2)) - (8*mmgl*mmst1*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (8*mmgl*mmst2*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)
-     *(mmsb1 - mmsb2)) - (8*mmgl*mmst2*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmt*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmt*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (
-     8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmst1*mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (
-     16*mmgl*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu)))/(mgl*
-     (mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmsb1*mmst2*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmsb2*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (
-     8*mmgl*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) + (8*mmgl*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (16*mmgl*mmsb1*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(log(mmt/mmu)))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (
-     16*mmgl*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu)))/(mgl*
-     (mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmsb2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) +
-     (8*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(mmt/mmu)))/(3.*mgl*(
-     mmsb1 - mmsb2)) - (8*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl)*pow2(log(
-     mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) + (8*mmgl*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)
-     *pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)) + (8*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (8*mmgl*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(
-     mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*mmgl*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)) - (8*
-     mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb2)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (8*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmsb2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(
-     log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1)*pow2(log(mmt/mmu)))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*
-     mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*
-     mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2)*pow2(log(mmt/mmu)))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (8*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)*pow2(log(mmt/
-     mmu)))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (112*mmgl*DeltaInv(mmt,
-     mmst1,mmgl)*pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*
-     mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) - (112*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/(3.*mgl*
-     (-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb1))/(
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     log(mmt/mmu)*pow3(mmsb1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*
-     mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow3(mmsb1))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*
-     log(mmt/mmu)*pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (16*
-     mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb1))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2))
-     - (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb1))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) - (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(log(mmt/mmu))*pow3(mmsb1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) -
-     (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb1))/(3.*mgl*(
-     -mmgl + mmsb1)*(mmsb1 - mmsb2)) - (32*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*
-     pow3(mmsb1))/(9.*mgl*(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) + (16*mmgl*pow2(
-     log(mmgl/mmu))*pow3(mmsb1))/(9.*mgl*(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) +
-     (16*mmgl*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(9.*mgl*(mmsb1 - mmsb2)*pow3(-
-     mmgl + mmsb1)) + (112*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (112*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl +
-     mmsb2)) + (16*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(3.*mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow3(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*log(mmgl/mmu)*pow3(mmsb2))/(mgl*(mmsb1 - mmsb2)*(
-     -mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow3(
-     mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmt/mmu)*pow3(mmsb2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)
-     ) + (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(
-     mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*log(mmt/mmu)*pow3(mmsb2))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(
-     mmsb2))/(9.*mgl*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (16*mmgl*log(
-     mmgl/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*pow2(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) + (16*mmgl*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*
-     mgl*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (16*mmgl*log(mmgl/mmu)*log(
-     mmsb1/mmu)*pow3(mmsb2))/(9.*mgl*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) -
-     (16*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (16*mmgl*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(
-     mmsb2))/(9.*mgl*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*pow3(mmsb2))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/
-     mmu))*pow3(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*mgl*pow2(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) + (16*mmgl*pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*mgl*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(log(
-     mmt/mmu))*pow3(mmsb2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (8*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*pow3(mmsb2))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (32*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(
-     mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (32*mmgl*log(mmgl/
-     mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 -
-     mmsb2)) - (32*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*(-
-     mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (32*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)
-     *pow3(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (32*mmgl*log(
-     mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1
-     - mmsb2)) - (32*mmgl*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*(-
-     mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (32*mmgl*pow2(log(mmgl/mmu))*pow3(
-     mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (32*mmgl*pow2(log(
-     mmgl/mmu))*pow3(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (
-     32*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*
-     pow3(-mmgl + mmsb2)) - (16*mmgl*pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*mgl*(
-     mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) - (16*mmgl*pow2(log(mmsb2/mmu))*pow3(
-     mmsb2))/(9.*mgl*(mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) - (112*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*pow3(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (
-     112*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-
-     mmgl + mmsb2)) - (16*mmgl*zt2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(3.*
-     mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*
-     DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow3(mmst1))/(mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*pow3(
-     mmst1))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*DeltaInv(mmt,
-     mmst1,mmgl)*log(mmt/mmu)*pow3(mmst1))/(mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)
-     ) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmt/mmu)*pow3(mmst1))/(mgl*(
-     mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmst1/mmu)*log(mmt/mmu)*pow3(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst1,mmgl)*log(mmst1/mmu)*log(mmt/mmu)*
-     pow3(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmst1/mmu))*pow3(mmst1))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmst1/mmu))*
-     pow3(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmt/mmu))*pow3(mmst1))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmt/mmu))*
-     pow3(mmst1))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (112*mmgl*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (112*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(3.*mgl*(mmsb1 -
-     mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*zt2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 - mmsb2)) + (16*mmgl*zt2*DeltaInv(
-     mmt,mmst2,mmgl)*pow3(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (
-     16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*pow3(mmst2))/(mgl*(-mmgl +
-     mmsb1)*(mmsb1 - mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)
-     *pow3(mmst2))/(mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) + (16*mmgl*DeltaInv(
-     mmt,mmst2,mmgl)*log(mmt/mmu)*pow3(mmst2))/(mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmt/mmu)*pow3(mmst2))/(
-     mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmst2/mmu)*log(mmt/mmu)*pow3(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(mmsb1 -
-     mmsb2)) + (16*mmgl*DeltaInv(mmt,mmst2,mmgl)*log(mmst2/mmu)*log(mmt/mmu)*
-     pow3(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmst2/mmu))*pow3(mmst2))/(3.*mgl*(-mmgl + mmsb1)*
-     (mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmst2/mmu))*
-     pow3(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2)) - (8*mmgl*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*pow3(mmst2))/(3.*mgl*(-mmgl + mmsb1)*(
-     mmsb1 - mmsb2)) + (8*mmgl*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmt/mmu))*
-     pow3(mmst2))/(3.*mgl*(mmsb1 - mmsb2)*(-mmgl + mmsb2))) - (28*DeltaInv(mmt,
-     mmsb1,mmst1)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (4*zt2*DeltaInv(mmt,
-     mmsb1,mmst1)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (28*DeltaInv(mmt,
-     mmsb1,mmst2)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (4*zt2*DeltaInv(mmt,
-     mmsb1,mmst2)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (28*DeltaInv(mmt,
-     mmst1,mmgl)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (4*zt2*DeltaInv(mmt,
-     mmst1,mmgl)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (28*DeltaInv(mmt,
-     mmst2,mmgl)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (4*zt2*DeltaInv(mmt,
-     mmst2,mmgl)*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*DeltaInv(mmt,mmst1,
-     mmgl)*log(mmgl/mmu)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (4*DeltaInv(mmt,
-     mmst2,mmgl)*log(mmgl/mmu)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (4*DeltaInv(
-     mmt,mmsb1,mmst1)*log(mmsb1/mmu)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (4*
-     DeltaInv(mmt,mmsb1,mmst2)*log(mmsb1/mmu)*pow4(mmsb1))/pow2(-mmgl + mmsb1)
-     - (2*DeltaInv(mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*pow4(mmsb1))/(3.*pow2(-
-     mmgl + mmsb1)) - (2*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow4(
-     mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (2*DeltaInv(mmt,mmsb1,mmst1)*pow2(log(
-     mmsb1/mmu))*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) - (2*DeltaInv(mmt,mmsb1,
-     mmst2)*pow2(log(mmsb1/mmu))*pow4(mmsb1))/(3.*pow2(-mmgl + mmsb1)) + (4*
-     log(mmsb1/mmu)*log(mmt/mmu)*(-(mmsb1/(-mmgl + mmsb1)) - (3*mmsb1*mmst1*
-     mmt*DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl + mmsb1)) - (3*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmsb1,mmst2))/(2.*(-mmgl + mmsb1)) - (mmst1*DeltaInv(mmt,
-     mmsb1,mmst1)*pow2(mmsb1))/(-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmsb1,mmst1)
-     *pow2(mmsb1))/(2.*(-mmgl + mmsb1)) - (mmst2*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmsb1))/(-mmgl + mmsb1) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))
-     /(2.*(-mmgl + mmsb1)) - (3*mmsb1*mmt)/(2.*pow2(-mmgl + mmsb1)) + (2*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmsb1))/pow2(-mmgl + mmsb1) + (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1)
-     )/(2.*(-mmgl + mmsb1)) - (DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(
-     mmst1))/pow2(-mmgl + mmsb1) + (mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2)
-     )/(2.*(-mmgl + mmsb1)) - (DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(
-     mmst2))/pow2(-mmgl + mmsb1) + (DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(2.*
-     (-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(2.*(-mmgl +
-     mmsb1)) + (2*mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/pow2(-mmgl +
-     mmsb1) + (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/pow2(-mmgl + mmsb1) +
-     (2*mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (
-     mmt*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (2*mmt*
-     pow2(mmsb1))/pow3(-mmgl + mmsb1) - (DeltaInv(mmt,mmsb1,mmst1)*pow4(mmsb1))
-     /pow2(-mmgl + mmsb1) - (DeltaInv(mmt,mmsb1,mmst2)*pow4(mmsb1))/pow2(-mmgl
-     + mmsb1)))/3. - (4*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb1))/(3.*pow4(-
-     mmgl + mmsb1)) + (2*pow2(log(mmgl/mmu))*pow4(mmsb1))/(3.*pow4(-mmgl +
-     mmsb1)) + (2*pow2(log(mmsb1/mmu))*pow4(mmsb1))/(3.*pow4(-mmgl + mmsb1)) +
-     pow3(Xb)*((-128*mmb*mmgl*mmsb1)/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) + (128*mmb*mmgl*mmsb2)/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)
-     ) - (128*mmb*mmgl*mmsb1)/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (
-     128*mmb*mmgl*mmsb2)/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (128*
-     mmb*mmgl*mmsb1*log(mmgl/mmu))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2))
-     - (128*mmb*mmgl*mmsb2*log(mmgl/mmu))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) + (128*mmb*mmgl*mmsb1*log(mmgl/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(
-     mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb2*log(mmgl/mmu))/(9.*mgl*(-mmgl +
-     mmsb2)*pow3(mmsb1 - mmsb2)) + (256*mmb*mmgl*mmsb1*log(mmsb1/mmu))/(9.*mgl*
-     (-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb2*log(mmsb1/mmu))
-     /(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb1*log(
-     mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*
-     mmsb1*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) + (256*mmb*mmgl*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(-mmgl
-     + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb1*log(mmgl/mmu)*log(
-     mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (256*mmb*mmgl*
-     mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 -
-     mmsb2)) - (128*mmb*mmgl*mmsb2*log(mmsb2/mmu))/(9.*mgl*(-mmgl + mmsb1)*
-     pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb1*log(mmsb2/mmu))/(9.*mgl*(-mmgl
-     + mmsb2)*pow3(mmsb1 - mmsb2)) - (256*mmb*mmgl*mmsb2*log(mmsb2/mmu))/(9.*
-     mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb2*log(mmgl/
-     mmu)*log(mmsb2/mmu))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (128*
-     mmb*mmgl*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(
-     mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*
-     mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb1*log(mmsb1/
-     mmu)*log(mmsb2/mmu))/(9.*mgl*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (256*
-     mmb*mmgl*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*mgl*(-mmgl + mmsb2)*
-     pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb1*mmsb2*log(mmgl/mmu))/(9.*mgl*
-     pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb1*mmsb2*log(
-     mmsb1/mmu))/(9.*mgl*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*
-     mmgl*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*mgl*pow2(-mmgl + mmsb1)
-     *pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb1*mmsb2*log(mmsb1/mmu)*log(
-     mmsb2/mmu))/(9.*mgl*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*
-     mmgl*log(mmgl/mmu)*pow2(mmsb1))/(9.*mgl*pow2(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) + (128*mmb*mmgl*log(mmsb1/mmu)*pow2(mmsb1))/(9.*mgl*pow2(-mmgl +
-     mmsb1)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*
-     pow2(mmsb1))/(9.*mgl*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*
-     mmgl*mmsb1*mmsb2*log(mmgl/mmu))/(9.*mgl*pow2(-mmgl + mmsb2)*pow3(mmsb1 -
-     mmsb2)) + (128*mmb*mmgl*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*mgl*
-     pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*mmsb1*mmsb2*log(
-     mmsb2/mmu))/(9.*mgl*pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (128*mmb*
-     mmgl*mmsb1*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(9.*mgl*pow2(-mmgl +
-     mmsb2)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*log(mmgl/mmu)*pow2(mmsb2))/(9.
-     *mgl*pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*log(mmsb2/
-     mmu)*pow2(mmsb2))/(9.*mgl*pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (128*
-     mmb*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*pow2(-mmgl +
-     mmsb2)*pow3(mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb1*pow2(log(mmsb1/mmu)))/(
-     9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (256*mmb*mmgl*mmsb2*pow2(
-     log(mmsb1/mmu)))/(9.*mgl*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (128*mmb*
-     mmgl*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(9.*mgl*pow2(-mmgl + mmsb1)*pow3(
-     mmsb1 - mmsb2)) - (128*mmb*mmgl*mmsb2*pow2(log(mmsb2/mmu)))/(9.*mgl*(-mmgl
-     + mmsb2)*pow3(mmsb1 - mmsb2)) + (128*mmb*mmgl*pow2(mmsb2)*pow2(log(mmsb2/
-     mmu)))/(9.*mgl*pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (256*mmb*mmgl*
-     log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow4(
-     mmsb1 - mmsb2)) - (256*mmb*mmgl*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/
-     (9.*mgl*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) - (256*mmb*mmgl*log(mmgl/mmu)
-     *log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2))
-     + (256*mmb*mmgl*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl +
-     mmsb2)*pow4(mmsb1 - mmsb2)) + (256*mmb*mmgl*log(mmsb1/mmu)*log(mmsb2/mmu)*
-     pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) + (256*mmb*mmgl*
-     log(mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*mgl*(-mmgl + mmsb2)*pow4(
-     mmsb1 - mmsb2)) - (256*mmb*mmgl*pow2(mmsb2)*pow2(log(mmsb1/mmu)))/(9.*mgl*
-     (-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) - (256*mmb*mmgl*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(9.*mgl*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2))) - (4*log(mmgl/
-     mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) - (4*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl +
-     mmsb1)*pow2(mmsb1 - mmsb2)) + (4*log(mmsb1/mmu)*log(mmsb2/mmu)*pow4(mmsb2)
-     )/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (28*DeltaInv(mmt,mmsb2,
-     mmst1)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (4*zt2*DeltaInv(mmt,mmsb2,
-     mmst1)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (28*DeltaInv(mmt,mmsb2,
-     mmst2)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (4*zt2*DeltaInv(mmt,mmsb2,
-     mmst2)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (28*DeltaInv(mmt,mmst1,
-     mmgl)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (4*zt2*DeltaInv(mmt,mmst1,
-     mmgl)*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (28*DeltaInv(mmt,mmst2,mmgl)
-     *pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (4*zt2*DeltaInv(mmt,mmst2,mmgl)*
-     pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) + (4*DeltaInv(mmt,mmst1,mmgl)*log(
-     mmgl/mmu)*pow4(mmsb2))/pow2(-mmgl + mmsb2) + (4*DeltaInv(mmt,mmst2,mmgl)*
-     log(mmgl/mmu)*pow4(mmsb2))/pow2(-mmgl + mmsb2) + (4*DeltaInv(mmt,mmsb2,
-     mmst1)*log(mmsb2/mmu)*pow4(mmsb2))/pow2(-mmgl + mmsb2) + (4*DeltaInv(mmt,
-     mmsb2,mmst2)*log(mmsb2/mmu)*pow4(mmsb2))/pow2(-mmgl + mmsb2) - (4*log(
-     mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl +
-     mmsb2)) - (4*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (4*log(mmsb1/mmu)*log(mmsb2/mmu)*pow4(mmsb2)
-     )/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (4*pow2(log(mmgl/mmu))*
-     pow4(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (2*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(log(mmgl/mmu))*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2))
-     - (2*DeltaInv(mmt,mmst2,mmgl)*pow2(log(mmgl/mmu))*pow4(mmsb2))/(3.*pow2(-
-     mmgl + mmsb2)) + (4*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (2*DeltaInv(mmt,mmsb2,mmst1)*pow2(log(mmsb2/
-     mmu))*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (2*DeltaInv(mmt,mmsb2,mmst2)
-     *pow2(log(mmsb2/mmu))*pow4(mmsb2))/(3.*pow2(-mmgl + mmsb2)) - (8*log(mmgl/
-     mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2))
-     + (8*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(
-     mmsb1 - mmsb2)) - (8*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*(-mmgl
-     + mmsb1)*pow3(mmsb1 - mmsb2)) + (8*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(
-     mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (8*log(mmsb1/mmu)*log(
-     mmsb2/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (8*log(
-     mmsb1/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 -
-     mmsb2)) + (8*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(
-     mmsb1 - mmsb2)) - (8*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*
-     pow3(mmsb1 - mmsb2)) + (4*log(mmsb2/mmu)*log(mmt/mmu)*(-(mmsb2/(-mmgl +
-     mmsb2)) - (3*mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl +
-     mmsb2)) - (3*mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.*(-mmgl +
-     mmsb2)) - (mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(-mmgl + mmsb2) -
-     (mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (mmst2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(-mmgl + mmsb2) - (mmt*DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (3*mmsb2*mmt)/(2.*
-     pow2(-mmgl + mmsb2)) + (2*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst1*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst2*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (mmsb2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) - (DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) + (mmsb2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb2)) - (DeltaInv(
-     mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) + (DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmsb2))/(2.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,
-     mmst2)*pow3(mmsb2))/(2.*(-mmgl + mmsb2)) + (2*mmst1*DeltaInv(mmt,mmsb2,
-     mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmsb2,mmst1)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) + (2*mmst2*DeltaInv(mmt,mmsb2,mmst2)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow3(
-     mmsb2))/pow2(-mmgl + mmsb2) + (2*mmt*pow2(mmsb2))/pow3(-mmgl + mmsb2) - (
-     DeltaInv(mmt,mmsb2,mmst1)*pow4(mmsb2))/pow2(-mmgl + mmsb2) - (DeltaInv(
-     mmt,mmsb2,mmst2)*pow4(mmsb2))/pow2(-mmgl + mmsb2)))/3. + (4*log(mmgl/mmu)*
-     log(mmt/mmu)*(4 - (4*mmsb1)/(-mmgl + mmsb1) - (4*mmsb2)/(-mmgl + mmsb2) -
-     (3*mmt)/(2.*(-mmgl + mmsb1)) - (3*mmt)/(2.*(-mmgl + mmsb2)) - 2*mmgl*
-     mmsb1*DeltaInv(mmt,mmst1,mmgl) - 2*mmgl*mmsb2*DeltaInv(mmt,mmst1,mmgl) +
-     4*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl) + 4*mmsb1*mmst1*DeltaInv(mmt,mmst1,
-     mmgl) + 4*mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl) + 2*mmgl*mmt*DeltaInv(mmt,
-     mmst1,mmgl) + 2*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl) + 2*mmsb2*mmt*DeltaInv(
-     mmt,mmst1,mmgl) + 6*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl) - (6*mmsb1*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) - (6*mmsb2*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) - 2*mmgl*mmsb1*DeltaInv(mmt,
-     mmst2,mmgl) - 2*mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl) + 4*mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl) + 4*mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl) + 4*
-     mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl) + 2*mmgl*mmt*DeltaInv(mmt,mmst2,mmgl)
-     + 2*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl) + 2*mmsb2*mmt*DeltaInv(mmt,mmst2,
-     mmgl) + 6*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl) - (6*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb1) - (6*mmsb2*mmst2*mmt*DeltaInv(
-     mmt,mmst2,mmgl))/(-mmgl + mmsb2) - 2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl) -
-     2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl) - 3*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb1) - (6*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) -
-     (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - 3*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb1) - (6*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmsb1))/(-mmgl + mmsb1) - (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-
-     mmgl + mmsb1) + (7*mmsb1*mmt)/(2.*pow2(-mmgl + mmsb1)) + (2*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/
-     pow2(-mmgl + mmsb1) - 3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2) - (6*mmst1*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (3*mmt*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - 3*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb2) - (6*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl +
-     mmsb2) - (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) + (
-     7*mmsb2*mmt)/(2.*pow2(-mmgl + mmsb2)) + (2*pow2(mmsb2))/pow2(-mmgl +
-     mmsb2) + (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/pow2(-mmgl +
-     mmsb2) + (3*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl +
-     mmsb2) - 2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1) + (2*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmst1))/(-mmgl + mmsb1) + (2*mmsb2*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmst1))/(-mmgl + mmsb2) - (DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)
-     *pow2(mmst1))/pow2(-mmgl + mmsb1) - (DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(mmst1))/pow2(-mmgl + mmsb2) - 2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2)
-     + (2*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) + (2*
-     mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb2) - (DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl + mmsb1) - (DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl + mmsb2) + (4*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(-mmgl + mmsb1) + (4*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb1))/(-mmgl + mmsb1) + (2*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmsb1))/pow2(-mmgl + mmsb1) + (mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb1))/pow2(-mmgl + mmsb1) + (2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb1))/pow2(-mmgl + mmsb1) + (mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/
-     pow2(-mmgl + mmsb1) - (2*mmt*pow2(mmsb1))/pow3(-mmgl + mmsb1) + (4*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) + (4*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) + (2*mmst1*DeltaInv(mmt,mmst1,
-     mmgl)*pow3(mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) + (2*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb2))/pow2(-mmgl + mmsb2) + (mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/
-     pow2(-mmgl + mmsb2) - (2*mmt*pow2(mmsb2))/pow3(-mmgl + mmsb2) - (DeltaInv(
-     mmt,mmst1,mmgl)*pow4(mmsb1))/pow2(-mmgl + mmsb1) - (DeltaInv(mmt,mmst2,
-     mmgl)*pow4(mmsb1))/pow2(-mmgl + mmsb1) - (DeltaInv(mmt,mmst1,mmgl)*pow4(
-     mmsb2))/pow2(-mmgl + mmsb2) - (DeltaInv(mmt,mmst2,mmgl)*pow4(mmsb2))/pow2(
-     -mmgl + mmsb2)))/3. + (4*pow2(log(mmt/mmu))*(3 - (5*mmsb1)/(2.*(-mmgl +
-     mmsb1)) - (5*mmsb2)/(2.*(-mmgl + mmsb2)) - (3*mmst1)/(4.*(-mmgl + mmsb1))
-     - (3*mmst1)/(4.*(-mmgl + mmsb2)) - (3*mmst2)/(4.*(-mmgl + mmsb1)) - (3*
-     mmst2)/(4.*(-mmgl + mmsb2)) - (3*mmt)/(4.*(-mmgl + mmsb1)) - (3*mmt)/(4.*(
-     -mmgl + mmsb2)) - (3*mmsb1*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(2.*(-mmgl
-     + mmsb1)) - (3*mmsb1*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2))/(2.*(-mmgl +
-     mmsb1)) - (3*mmsb2*mmst1*mmt*DeltaInv(mmt,mmsb2,mmst1))/(2.*(-mmgl +
-     mmsb2)) - (3*mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,mmst2))/(2.*(-mmgl +
-     mmsb2)) - mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl) - mmgl*mmsb2*DeltaInv(mmt,
-     mmst1,mmgl) + mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl) + mmsb1*mmst1*DeltaInv(
-     mmt,mmst1,mmgl) + mmsb2*mmst1*DeltaInv(mmt,mmst1,mmgl) + mmgl*mmt*
-     DeltaInv(mmt,mmst1,mmgl) + mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl) + mmsb2*mmt*
-     DeltaInv(mmt,mmst1,mmgl) + 6*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl) - (6*
-     mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb1) - (6*mmsb2*
-     mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl + mmsb2) - mmgl*mmsb1*DeltaInv(
-     mmt,mmst2,mmgl) - mmgl*mmsb2*DeltaInv(mmt,mmst2,mmgl) + mmgl*mmst2*
-     DeltaInv(mmt,mmst2,mmgl) + mmsb1*mmst2*DeltaInv(mmt,mmst2,mmgl) + mmsb2*
-     mmst2*DeltaInv(mmt,mmst2,mmgl) + mmgl*mmt*DeltaInv(mmt,mmst2,mmgl) +
-     mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl) + mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl) +
-     6*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl) - (6*mmsb1*mmst2*mmt*DeltaInv(mmt,
-     mmst2,mmgl))/(-mmgl + mmsb1) - (6*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)
-     )/(-mmgl + mmsb2) - DeltaInv(mmt,mmst1,mmgl)*pow2(mmgl) - DeltaInv(mmt,
-     mmst2,mmgl)*pow2(mmgl) - (mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(4.
-     *(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(4.*(-mmgl
-     + mmsb1)) - (mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(4.*(-mmgl +
-     mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(4.*(-mmgl + mmsb1))
-     - (3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/2. - (3*mmst1*DeltaInv(mmt,
-     mmst1,mmgl)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) - (3*mmt*DeltaInv(mmt,mmst1,
-     mmgl)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) - (3*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmsb1))/2. - (3*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(2.*(-
-     mmgl + mmsb1)) - (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(2.*(-mmgl +
-     mmsb1)) + (mmsb1*mmst1)/pow2(-mmgl + mmsb1) + (mmsb1*mmst2)/pow2(-mmgl +
-     mmsb1) + (mmsb1*mmt)/pow2(-mmgl + mmsb1) + (2*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (3*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) + (3*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/pow2(-mmgl +
-     mmsb1) - (mmst1*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)
-     ) - (mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)) - (
-     mmst2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)) - (mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(4.*(-mmgl + mmsb2)) - (3*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2))/2. - (3*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2))/(2.*(-mmgl + mmsb2)) - (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)
-     )/(2.*(-mmgl + mmsb2)) - (3*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/2. - (3*
-     mmst2*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) - (3*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (mmsb2*mmst1)
-     /pow2(-mmgl + mmsb2) + (mmsb2*mmst2)/pow2(-mmgl + mmsb2) + (mmsb2*mmt)/
-     pow2(-mmgl + mmsb2) + (2*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst1*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst2*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmst2*mmt*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (mmsb1*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(4.*(-mmgl + mmsb1)) - (mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(4.*(-mmgl + mmsb1)) - (mmsb2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(4.*(-mmgl + mmsb2)) - (mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(4.*(-mmgl + mmsb2)) + DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmst1) - (mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))
-     /(-mmgl + mmsb1) - (mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl +
-     mmsb2) - (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(2.*(-mmgl + mmsb1)) -
-     (mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) + (mmsb1*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*pow2(-mmgl + mmsb1)) + (
-     mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(2.*pow2(-mmgl + mmsb1)) +
-     (DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/(2.*pow2(-mmgl +
-     mmsb1)) + (DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/(2.*pow2(-
-     mmgl + mmsb1)) + (mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*
-     pow2(-mmgl + mmsb2)) + (mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(
-     2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(
-     mmst1))/(2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*
-     pow2(mmst1))/(2.*pow2(-mmgl + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(4.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(
-     mmst2))/(4.*(-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(
-     mmst2))/(4.*(-mmgl + mmsb2)) - (mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))
-     /(4.*(-mmgl + mmsb2)) + DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2) - (mmsb1*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb1) - (mmsb2*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl + mmsb2) - (mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) - (mmt*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmst2))/(2.*(-mmgl + mmsb2)) + (mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (mmsb1*mmt*DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb1,mmst2)*
-     pow2(mmsb1)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmst2,
-     mmgl)*pow2(mmsb1)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb1)) + (mmsb2*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb2)) + (mmsb2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb2)) + (
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2))/(2.*pow2(-mmgl + mmsb2)
-     ) + (DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/(2.*pow2(-mmgl +
-     mmsb2)) + (DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(4.*(-mmgl + mmsb1)) + (
-     DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(4.*(-mmgl + mmsb1)) + (2*DeltaInv(
-     mmt,mmst1,mmgl)*pow3(mmsb1))/(-mmgl + mmsb1) + (2*DeltaInv(mmt,mmst2,mmgl)
-     *pow3(mmsb1))/(-mmgl + mmsb1) + (mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmt*DeltaInv(mmt,mmsb1,mmst1)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmt*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb2,mmst1)*pow3(mmsb2))
-     /(4.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(4.*(-mmgl
-     + mmsb2)) + (2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) + (2*
-     DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) + (mmst1*DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmt*DeltaInv(
-     mmt,mmsb2,mmst1)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmst2*DeltaInv(
-     mmt,mmsb2,mmst2)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmt*DeltaInv(
-     mmt,mmsb2,mmst2)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmst1*DeltaInv(
-     mmt,mmst1,mmgl)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmt*DeltaInv(mmt,
-     mmst1,mmgl)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmst2*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (mmt*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb2))/(2.*pow2(-mmgl + mmsb2)) + (DeltaInv(mmt,mmsb1,
-     mmst1)*pow3(mmst1))/(4.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmsb2,mmst1)*
-     pow3(mmst1))/(4.*(-mmgl + mmsb2)) + (DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))
-     /(2.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*(-mmgl
-     + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(2.*pow2(-mmgl +
-     mmsb1)) - (mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*pow2(-mmgl +
-     mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(2.*pow2(-mmgl +
-     mmsb2)) - (mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(2.*pow2(-mmgl +
-     mmsb2)) + (DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/(4.*(-mmgl + mmsb1)) + (
-     DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/(4.*(-mmgl + mmsb2)) + (DeltaInv(
-     mmt,mmst2,mmgl)*pow3(mmst2))/(2.*(-mmgl + mmsb1)) + (DeltaInv(mmt,mmst2,
-     mmgl)*pow3(mmst2))/(2.*(-mmgl + mmsb2)) - (mmsb1*DeltaInv(mmt,mmsb1,mmst2)
-     *pow3(mmst2))/(2.*pow2(-mmgl + mmsb1)) - (mmsb1*DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmst2))/(2.*pow2(-mmgl + mmsb1)) - (mmsb2*DeltaInv(mmt,mmsb2,mmst2)*
-     pow3(mmst2))/(2.*pow2(-mmgl + mmsb2)) - (mmsb2*DeltaInv(mmt,mmst2,mmgl)*
-     pow3(mmst2))/(2.*pow2(-mmgl + mmsb2)) - (DeltaInv(mmt,mmsb1,mmst1)*pow4(
-     mmsb1))/(2.*pow2(-mmgl + mmsb1)) - (DeltaInv(mmt,mmsb1,mmst2)*pow4(mmsb1))
-     /(2.*pow2(-mmgl + mmsb1)) - (DeltaInv(mmt,mmst1,mmgl)*pow4(mmsb1))/(2.*
-     pow2(-mmgl + mmsb1)) - (DeltaInv(mmt,mmst2,mmgl)*pow4(mmsb1))/(2.*pow2(-
-     mmgl + mmsb1)) - (DeltaInv(mmt,mmsb2,mmst1)*pow4(mmsb2))/(2.*pow2(-mmgl +
-     mmsb2)) - (DeltaInv(mmt,mmsb2,mmst2)*pow4(mmsb2))/(2.*pow2(-mmgl + mmsb2))
-     - (DeltaInv(mmt,mmst1,mmgl)*pow4(mmsb2))/(2.*pow2(-mmgl + mmsb2)) - (
-     DeltaInv(mmt,mmst2,mmgl)*pow4(mmsb2))/(2.*pow2(-mmgl + mmsb2))))/3. + (4*
-     log(mmt/mmu)*(-10.333333333333334 + (15*mmsb1)/(-mmgl + mmsb1) + (15*
-     mmsb2)/(-mmgl + mmsb2) + (9*mmst1)/(2.*(-mmgl + mmsb1)) + (9*mmst1)/(2.*(-
-     mmgl + mmsb2)) + (9*mmst2)/(2.*(-mmgl + mmsb1)) + (9*mmst2)/(2.*(-mmgl +
-     mmsb2)) + (6*mmt)/(-mmgl + mmsb1) + (6*mmt)/(-mmgl + mmsb2) + (9*mmsb1*
-     mmst1*mmt*DeltaInv(mmt,mmsb1,mmst1))/(-mmgl + mmsb1) + (9*mmsb1*mmst2*mmt*
-     DeltaInv(mmt,mmsb1,mmst2))/(-mmgl + mmsb1) + (9*mmsb2*mmst1*mmt*DeltaInv(
-     mmt,mmsb2,mmst1))/(-mmgl + mmsb2) + (9*mmsb2*mmst2*mmt*DeltaInv(mmt,mmsb2,
-     mmst2))/(-mmgl + mmsb2) + 6*mmgl*mmsb1*DeltaInv(mmt,mmst1,mmgl) + 6*mmgl*
-     mmsb2*DeltaInv(mmt,mmst1,mmgl) - 6*mmgl*mmst1*DeltaInv(mmt,mmst1,mmgl) -
-     6*mmsb1*mmst1*DeltaInv(mmt,mmst1,mmgl) - 6*mmsb2*mmst1*DeltaInv(mmt,mmst1,
-     mmgl) - 6*mmgl*mmt*DeltaInv(mmt,mmst1,mmgl) - 6*mmsb1*mmt*DeltaInv(mmt,
-     mmst1,mmgl) - 6*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl) - 36*mmst1*mmt*
-     DeltaInv(mmt,mmst1,mmgl) + (36*mmsb1*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(
-     -mmgl + mmsb1) + (36*mmsb2*mmst1*mmt*DeltaInv(mmt,mmst1,mmgl))/(-mmgl +
-     mmsb2) + 6*mmgl*mmsb1*DeltaInv(mmt,mmst2,mmgl) + 6*mmgl*mmsb2*DeltaInv(
-     mmt,mmst2,mmgl) - 6*mmgl*mmst2*DeltaInv(mmt,mmst2,mmgl) - 6*mmsb1*mmst2*
-     DeltaInv(mmt,mmst2,mmgl) - 6*mmsb2*mmst2*DeltaInv(mmt,mmst2,mmgl) - 6*
-     mmgl*mmt*DeltaInv(mmt,mmst2,mmgl) - 6*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl) -
-     6*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl) - 36*mmst2*mmt*DeltaInv(mmt,mmst2,
-     mmgl) + (36*mmsb1*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb1) + (
-     36*mmsb2*mmst2*mmt*DeltaInv(mmt,mmst2,mmgl))/(-mmgl + mmsb2) + 6*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmgl) + 6*DeltaInv(mmt,mmst2,mmgl)*pow2(mmgl) + (3*
-     mmst1*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (3*
-     mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (3*
-     mmst2*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + (3*
-     mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/(2.*(-mmgl + mmsb1)) + 9*
-     DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1) + (9*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow2(mmsb1))/(-mmgl + mmsb1) + (9*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)
-     )/(-mmgl + mmsb1) + 9*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1) + (9*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) + (9*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb1))/(-mmgl + mmsb1) - (6*mmsb1*mmst1)/pow2(-mmgl
-     + mmsb1) - (6*mmsb1*mmst2)/pow2(-mmgl + mmsb1) - (8*mmsb1*mmt)/pow2(-mmgl
-     + mmsb1) - (12*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (18*mmst1*mmt*DeltaInv(
-     mmt,mmsb1,mmst1)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (18*mmst2*mmt*
-     DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (18*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) - (18*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1))/pow2(-mmgl + mmsb1) + (3*mmst1*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (3*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (3*mmst2*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + (3*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/(2.*(-mmgl + mmsb2)) + 9*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmsb2) + (9*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmsb2))/(-mmgl + mmsb2) + (9*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/(-
-     mmgl + mmsb2) + 9*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2) + (9*mmst2*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) + (9*mmt*DeltaInv(
-     mmt,mmst2,mmgl)*pow2(mmsb2))/(-mmgl + mmsb2) - (6*mmsb2*mmst1)/pow2(-mmgl
-     + mmsb2) - (6*mmsb2*mmst2)/pow2(-mmgl + mmsb2) - (8*mmsb2*mmt)/pow2(-mmgl
-     + mmsb2) - (12*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (18*mmst1*mmt*DeltaInv(
-     mmt,mmsb2,mmst1)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (18*mmst2*mmt*
-     DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (18*mmst1*
-     mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) - (18*mmst2*
-     mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2))/pow2(-mmgl + mmsb2) + (3*mmsb1*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb1)) + (3*mmt*
-     DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb1)) + (3*mmsb2*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) + (3*mmt*
-     DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/(2.*(-mmgl + mmsb2)) - 6*DeltaInv(
-     mmt,mmst1,mmgl)*pow2(mmst1) + (6*mmsb1*DeltaInv(mmt,mmst1,mmgl)*pow2(
-     mmst1))/(-mmgl + mmsb1) + (6*mmsb2*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(
-     -mmgl + mmsb2) + (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl +
-     mmsb1) + (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/(-mmgl + mmsb2) - (
-     3*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (
-     3*mmsb1*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb1) - (
-     3*DeltaInv(mmt,mmsb1,mmst1)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) -
-     (3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb1)*pow2(mmst1))/pow2(-mmgl + mmsb1) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmst1))/pow2(-mmgl + mmsb2) -
-     (3*mmsb2*mmt*DeltaInv(mmt,mmst1,mmgl)*pow2(mmst1))/pow2(-mmgl + mmsb2) - (
-     3*DeltaInv(mmt,mmsb2,mmst1)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) -
-     (3*DeltaInv(mmt,mmst1,mmgl)*pow2(mmsb2)*pow2(mmst1))/pow2(-mmgl + mmsb2) +
-     (3*mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) + (3*
-     mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb1)) + (3*
-     mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb2)) + (3*
-     mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/(2.*(-mmgl + mmsb2)) - 6*
-     DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2) + (6*mmsb1*DeltaInv(mmt,mmst2,mmgl)*
-     pow2(mmst2))/(-mmgl + mmsb1) + (6*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow2(
-     mmst2))/(-mmgl + mmsb2) + (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-
-     mmgl + mmsb1) + (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/(-mmgl +
-     mmsb2) - (3*mmsb1*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmst2))/pow2(-mmgl +
-     mmsb1) - (3*mmsb1*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/pow2(-mmgl +
-     mmsb1) - (3*DeltaInv(mmt,mmsb1,mmst2)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl
-     + mmsb1) - (3*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb1)*pow2(mmst2))/pow2(-mmgl
-     + mmsb1) - (3*mmsb2*mmt*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmst2))/pow2(-mmgl
-     + mmsb2) - (3*mmsb2*mmt*DeltaInv(mmt,mmst2,mmgl)*pow2(mmst2))/pow2(-mmgl +
-     mmsb2) - (3*DeltaInv(mmt,mmsb2,mmst2)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl
-     + mmsb2) - (3*DeltaInv(mmt,mmst2,mmgl)*pow2(mmsb2)*pow2(mmst2))/pow2(-mmgl
-     + mmsb2) - (3*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmsb1))/(2.*(-mmgl + mmsb1))
-     - (3*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmsb1))/(2.*(-mmgl + mmsb1)) - (12*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))/(-mmgl + mmsb1) - (12*DeltaInv(mmt,
-     mmst2,mmgl)*pow3(mmsb1))/(-mmgl + mmsb1) - (3*mmst1*DeltaInv(mmt,mmsb1,
-     mmst1)*pow3(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmt*DeltaInv(mmt,mmsb1,mmst1)
-     *pow3(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst2*DeltaInv(mmt,mmsb1,mmst2)*
-     pow3(mmsb1))/pow2(-mmgl + mmsb1) - (3*mmt*DeltaInv(mmt,mmsb1,mmst2)*pow3(
-     mmsb1))/pow2(-mmgl + mmsb1) - (3*mmst1*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb1))/pow2(-mmgl + mmsb1) - (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb1))
-     /pow2(-mmgl + mmsb1) - (3*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/
-     pow2(-mmgl + mmsb1) - (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb1))/pow2(-
-     mmgl + mmsb1) - (3*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmsb2))/(2.*(-mmgl +
-     mmsb2)) - (3*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmsb2))/(2.*(-mmgl + mmsb2)) -
-     (12*DeltaInv(mmt,mmst1,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) - (12*DeltaInv(
-     mmt,mmst2,mmgl)*pow3(mmsb2))/(-mmgl + mmsb2) - (3*mmst1*DeltaInv(mmt,
-     mmsb2,mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*mmt*DeltaInv(mmt,mmsb2,
-     mmst1)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*mmst2*DeltaInv(mmt,mmsb2,
-     mmst2)*pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*mmt*DeltaInv(mmt,mmsb2,mmst2)
-     *pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*mmst1*DeltaInv(mmt,mmst1,mmgl)*
-     pow3(mmsb2))/pow2(-mmgl + mmsb2) - (3*mmt*DeltaInv(mmt,mmst1,mmgl)*pow3(
-     mmsb2))/pow2(-mmgl + mmsb2) - (3*mmst2*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmsb2))/pow2(-mmgl + mmsb2) - (3*mmt*DeltaInv(mmt,mmst2,mmgl)*pow3(mmsb2))
-     /pow2(-mmgl + mmsb2) - (3*DeltaInv(mmt,mmsb1,mmst1)*pow3(mmst1))/(2.*(-
-     mmgl + mmsb1)) - (3*DeltaInv(mmt,mmsb2,mmst1)*pow3(mmst1))/(2.*(-mmgl +
-     mmsb2)) - (3*DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(-mmgl + mmsb1) - (3*
-     DeltaInv(mmt,mmst1,mmgl)*pow3(mmst1))/(-mmgl + mmsb2) + (3*mmsb1*DeltaInv(
-     mmt,mmsb1,mmst1)*pow3(mmst1))/pow2(-mmgl + mmsb1) + (3*mmsb1*DeltaInv(mmt,
-     mmst1,mmgl)*pow3(mmst1))/pow2(-mmgl + mmsb1) + (3*mmsb2*DeltaInv(mmt,
-     mmsb2,mmst1)*pow3(mmst1))/pow2(-mmgl + mmsb2) + (3*mmsb2*DeltaInv(mmt,
-     mmst1,mmgl)*pow3(mmst1))/pow2(-mmgl + mmsb2) - (3*DeltaInv(mmt,mmsb1,
-     mmst2)*pow3(mmst2))/(2.*(-mmgl + mmsb1)) - (3*DeltaInv(mmt,mmsb2,mmst2)*
-     pow3(mmst2))/(2.*(-mmgl + mmsb2)) - (3*DeltaInv(mmt,mmst2,mmgl)*pow3(
-     mmst2))/(-mmgl + mmsb1) - (3*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/(-mmgl
-     + mmsb2) + (3*mmsb1*DeltaInv(mmt,mmsb1,mmst2)*pow3(mmst2))/pow2(-mmgl +
-     mmsb1) + (3*mmsb1*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/pow2(-mmgl +
-     mmsb1) + (3*mmsb2*DeltaInv(mmt,mmsb2,mmst2)*pow3(mmst2))/pow2(-mmgl +
-     mmsb2) + (3*mmsb2*DeltaInv(mmt,mmst2,mmgl)*pow3(mmst2))/pow2(-mmgl +
-     mmsb2) + (3*DeltaInv(mmt,mmsb1,mmst1)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (
-     3*DeltaInv(mmt,mmsb1,mmst2)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (3*
-     DeltaInv(mmt,mmst1,mmgl)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (3*DeltaInv(
-     mmt,mmst2,mmgl)*pow4(mmsb1))/pow2(-mmgl + mmsb1) + (3*DeltaInv(mmt,mmsb2,
-     mmst1)*pow4(mmsb2))/pow2(-mmgl + mmsb2) + (3*DeltaInv(mmt,mmsb2,mmst2)*
-     pow4(mmsb2))/pow2(-mmgl + mmsb2) + (3*DeltaInv(mmt,mmst1,mmgl)*pow4(mmsb2)
-     )/pow2(-mmgl + mmsb2) + (3*DeltaInv(mmt,mmst2,mmgl)*pow4(mmsb2))/pow2(-
-     mmgl + mmsb2)))/3. - (4*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(3.*
-     pow4(-mmgl + mmsb2)) + (2*pow2(log(mmgl/mmu))*pow4(mmsb2))/(3.*pow4(-mmgl
-     + mmsb2)) + (2*pow2(log(mmsb2/mmu))*pow4(mmsb2))/(3.*pow4(-mmgl + mmsb2))
-     + pow2(Xb)*((2560*mmb)/(9.*pow2(mmsb1 - mmsb2)) - (3284*mmb*mmsb1)/(9.*(-
-     mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (5152*mmb*mmsb2)/(9.*(-mmgl + mmsb1)*
-     pow2(mmsb1 - mmsb2)) - (32*mmb*mmsb1)/(3.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) + (1772*mmb*mmsb2)/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (
-     512*mmb*zt2)/(9.*pow2(mmsb1 - mmsb2)) - (556*mmb*mmsb1*zt2)/(9.*(-mmgl +
-     mmsb1)*pow2(mmsb1 - mmsb2)) - (80*mmb*mmsb2*zt2)/((-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) + (164*mmb*mmsb2*zt2)/(9.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) - (556*mmb*Fin20(mmsb1,mmgl,mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) + (44*mmb*Fin20(mmsb1,mmgl,mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) - (44*mmb*Fin20(mmsb1,mmsb2,mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) - (44*mmb*Fin20(mmsb1,mmsb2,mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) - (20*mmb*Fin20(mmsb2,mmgl,mmu))/(3.*(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) + (20*mmb*Fin20(mmsb2,mmgl,mmu))/(3.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) - (512*mmb*log(mmgl/mmu))/(3.*pow2(mmsb1 - mmsb2)) + (1472*mmb*
-     mmsb1*log(mmgl/mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (3296*mmb*
-     mmsb2*log(mmgl/mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (64*mmb*
-     mmsb1*log(mmgl/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) - (1760*mmb*
-     mmsb2*log(mmgl/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) - (256*mmb*
-     log(mmsb1/mmu))/(3.*pow2(mmsb1 - mmsb2)) + (168*mmb*mmsb1*log(mmsb1/mmu))/
-     ((-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (248*mmb*mmsb2*log(mmsb1/mmu))/(3.
-     *(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (32*mmb*mmsb1*log(mmsb1/mmu))/(3.*
-     (-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) - (296*mmb*mmsb2*log(mmsb1/mmu))/(9.*
-     (-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (256*mmb*log(mmgl/mmu)*log(mmsb1/
-     mmu))/(9.*pow2(mmsb1 - mmsb2)) - (448*mmb*mmsb1*log(mmgl/mmu)*log(mmsb1/
-     mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (52*mmb*mmsb2*log(mmgl/
-     mmu)*log(mmsb1/mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (64*mmb*
-     mmsb1*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 -
-     mmsb2)) + (52*mmb*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*(-mmgl + mmsb2)*
-     pow2(mmsb1 - mmsb2)) - (256*mmb*log(mmsb2/mmu))/(9.*pow2(mmsb1 - mmsb2)) +
-     (376*mmb*mmsb2*log(mmsb2/mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) -
-     (64*mmb*mmsb1*log(mmsb2/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (
-     80*mmb*mmsb2*log(mmsb2/mmu))/((-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (256*
-     mmb*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*pow2(mmsb1 - mmsb2)) - (116*mmb*
-     mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) - (44*mmb*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/((-mmgl + mmsb2)*
-     pow2(mmsb1 - mmsb2)) + (4*mmb*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(3.*(-
-     mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (64*mmb*mmsb1*log(mmsb1/mmu)*log(
-     mmsb2/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (52*mmb*mmsb2*log(
-     mmsb1/mmu)*log(mmsb2/mmu))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (64*
-     mmb*mmsb1*mmsb2)/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (104*mmb*
-     mmsb1*Fin20(mmsb1,mmsb2,mmu))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2))
-     - (104*mmb*mmsb1*Fin20(mmsb2,mmgl,mmu))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1
-     - mmsb2)) - (16*mmb*mmsb1*mmsb2*log(mmgl/mmu))/(pow2(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) + (16*mmb*mmsb1*mmsb2*log(mmsb1/mmu))/(pow2(-mmgl + mmsb1)
-     *pow2(mmsb1 - mmsb2)) - (32*mmb*mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/
-     (9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (64*mmb*mmsb1*mmsb2*log(
-     mmsb2/mmu))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (32*mmb*mmsb1*
-     mmsb2*log(mmgl/mmu)*log(mmsb2/mmu))/(3.*pow2(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) - (32*mmb*mmsb1*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu))/(3.*pow2(-
-     mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (8*mmb*pow2(mmsb1))/(pow2(-mmgl +
-     mmsb1)*pow2(mmsb1 - mmsb2)) + (328*mmb*log(mmgl/mmu)*pow2(mmsb1))/(3.*
-     pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (920*mmb*log(mmsb1/mmu)*pow2(
-     mmsb1))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (12*mmb*log(mmgl/
-     mmu)*log(mmsb1/mmu)*pow2(mmsb1))/(pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2))
-     - (16*mmb*log(mmgl/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow2(mmsb1 -
-     mmsb2)) + (16*mmb*log(mmsb1/mmu)*pow2(mmsb2))/(9.*pow2(-mmgl + mmsb1)*
-     pow2(mmsb1 - mmsb2)) - (16*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(
-     3.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (16*mmb*log(mmgl/mmu)*log(
-     mmsb2/mmu)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (
-     16*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(3.*pow2(-mmgl + mmsb1)*
-     pow2(mmsb1 - mmsb2)) + (64*mmb*mmsb1*mmsb2)/(9.*pow2(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) - (104*mmb*mmsb2*Fin20(mmsb1,mmgl,mmu))/(9.*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) + (104*mmb*mmsb2*Fin20(mmsb1,mmsb2,mmu))/(9.*
-     pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (128*mmb*mmsb1*mmsb2*log(mmgl/
-     mmu))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (64*mmb*mmsb1*mmsb2*
-     log(mmsb1/mmu))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (128*mmb*
-     mmsb1*mmsb2*log(mmgl/mmu)*log(mmsb1/mmu))/(9.*pow2(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) + (128*mmb*mmsb1*mmsb2*log(mmsb2/mmu))/(9.*pow2(mmsb1 -
-     mmsb2)*pow2(-mmgl + mmsb2)) - (128*mmb*mmsb1*mmsb2*log(mmsb1/mmu)*log(
-     mmsb2/mmu))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (8*mmb*pow2(
-     mmsb2))/(pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (1000*mmb*log(mmgl/
-     mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (16*mmb*
-     log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow2(-
-     mmgl + mmsb2)) - (104*mmb*log(mmsb2/mmu)*pow2(mmsb2))/(pow2(mmsb1 - mmsb2)
-     *pow2(-mmgl + mmsb2)) + (124*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))
-     /(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) - (16*mmb*log(mmsb1/mmu)*
-     log(mmsb2/mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) +
-     (256*mmb*pow2(log(mmgl/mmu)))/(9.*pow2(mmsb1 - mmsb2)) - (256*mmb*mmsb1*
-     pow2(log(mmgl/mmu)))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (308*mmb*
-     mmsb2*pow2(log(mmgl/mmu)))/(3.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (
-     668*mmb*mmsb2*pow2(log(mmgl/mmu)))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)
-     ) + (32*mmb*mmsb1*mmsb2*pow2(log(mmgl/mmu)))/(9.*pow2(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) - (350*mmb*pow2(mmsb1)*pow2(log(mmgl/mmu)))/(9.*pow2(-mmgl
-     + mmsb1)*pow2(mmsb1 - mmsb2)) + (16*mmb*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(
-     3.*pow2(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (122*mmb*pow2(mmsb2)*pow2(
-     log(mmgl/mmu)))/(3.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (256*mmb*
-     pow2(log(mmsb1/mmu)))/(9.*pow2(mmsb1 - mmsb2)) - (136*mmb*mmsb1*pow2(log(
-     mmsb1/mmu)))/(3.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) - (308*mmb*mmsb2*
-     pow2(log(mmsb1/mmu)))/(9.*(-mmgl + mmsb1)*pow2(mmsb1 - mmsb2)) + (52*mmb*
-     mmsb2*pow2(log(mmsb1/mmu)))/(9.*(-mmgl + mmsb2)*pow2(mmsb1 - mmsb2)) + (
-     242*mmb*pow2(mmsb1)*pow2(log(mmsb1/mmu)))/(9.*pow2(-mmgl + mmsb1)*pow2(
-     mmsb1 - mmsb2)) - (52*mmb*mmsb2*pow2(log(mmsb2/mmu)))/(9.*(-mmgl + mmsb1)*
-     pow2(mmsb1 - mmsb2)) - (100*mmb*mmsb2*pow2(log(mmsb2/mmu)))/(9.*(-mmgl +
-     mmsb2)*pow2(mmsb1 - mmsb2)) + (242*mmb*pow2(mmsb2)*pow2(log(mmsb2/mmu)))/(
-     9.*pow2(mmsb1 - mmsb2)*pow2(-mmgl + mmsb2)) + (64*mmb*mmsb2*log(mmgl/mmu)*
-     pow2(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) - (64*mmb*mmsb2*
-     log(mmsb1/mmu)*pow2(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) -
-     (64*mmb*mmsb2*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb1))/(9.*pow2(mmsb1 -
-     mmsb2)*pow3(-mmgl + mmsb1)) + (64*mmb*mmsb2*log(mmsb1/mmu)*log(mmsb2/mmu)*
-     pow2(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) - (80*mmb*log(
-     mmgl/mmu)*pow3(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) + (80*
-     mmb*log(mmsb1/mmu)*pow3(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl +
-     mmsb1)) + (32*mmb*pow2(log(mmgl/mmu))*pow3(mmsb1))/(9.*pow2(mmsb1 - mmsb2)
-     *pow3(-mmgl + mmsb1)) - (32*mmb*pow2(log(mmsb1/mmu))*pow3(mmsb1))/(9.*
-     pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb1)) + (512*mmb*Fin20(mmsb1,mmgl,mmu))
-     /(9.*pow3(mmsb1 - mmsb2)) - (616*mmb*mmsb2*Fin20(mmsb1,mmgl,mmu))/(9.*(-
-     mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (104*mmb*mmsb2*Fin20(mmsb1,mmgl,mmu))
-     /(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (512*mmb*Fin20(mmsb2,mmgl,mmu)
-     )/(9.*pow3(mmsb1 - mmsb2)) - (104*mmb*mmsb2*Fin20(mmsb2,mmgl,mmu))/(9.*(-
-     mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (616*mmb*mmsb2*Fin20(mmsb2,mmgl,mmu))
-     /(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (512*mmb*mmsb2*log(mmsb1/mmu))
-     /(9.*pow3(mmsb1 - mmsb2)) + (512*mmb*mmsb2*log(mmsb2/mmu))/(9.*pow3(mmsb1
-     - mmsb2)) - (5056*mmb*pow2(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)
-     ) + (5056*mmb*pow2(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (80*
-     mmb*zt2*pow2(mmsb2))/((-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (80*mmb*zt2*
-     pow2(mmsb2))/((-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (3232*mmb*log(mmgl/
-     mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (3232*mmb*
-     log(mmgl/mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (
-     824*mmb*log(mmsb1/mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) - (104*mmb*log(mmsb1/mmu)*pow2(mmsb2))/(3.*(-mmgl + mmsb2)*pow3(
-     mmsb1 - mmsb2)) - (28*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(3.*(-
-     mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (28*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*
-     pow2(mmsb2))/(3.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (88*mmb*log(mmsb2/
-     mmu)*pow2(mmsb2))/(3.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (776*mmb*log(
-     mmsb2/mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (28*
-     mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(3.*(-mmgl + mmsb1)*pow3(
-     mmsb1 - mmsb2)) + (28*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(3.*(-
-     mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (20*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)
-     *pow2(mmsb2))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (20*mmb*log(
-     mmsb1/mmu)*log(mmsb2/mmu)*pow2(mmsb2))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 -
-     mmsb2)) - (892*mmb*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(9.*(-mmgl + mmsb1)*
-     pow3(mmsb1 - mmsb2)) + (892*mmb*pow2(mmsb2)*pow2(log(mmgl/mmu)))/(9.*(-
-     mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (256*mmb*mmsb2*pow2(log(mmsb1/mmu)))/
-     (9.*pow3(mmsb1 - mmsb2)) - (308*mmb*pow2(mmsb2)*pow2(log(mmsb1/mmu)))/(9.*
-     (-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (52*mmb*pow2(mmsb2)*pow2(log(mmsb1/
-     mmu)))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (256*mmb*mmsb2*pow2(log(
-     mmsb2/mmu)))/(9.*pow3(mmsb1 - mmsb2)) - (52*mmb*pow2(mmsb2)*pow2(log(
-     mmsb2/mmu)))/(9.*(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (308*mmb*pow2(
-     mmsb2)*pow2(log(mmsb2/mmu)))/(9.*(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) - (
-     16*mmb*log(mmgl/mmu)*pow3(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow3(mmsb1 -
-     mmsb2)) + (16*mmb*log(mmsb1/mmu)*pow3(mmsb2))/(9.*pow2(-mmgl + mmsb1)*
-     pow3(mmsb1 - mmsb2)) - (64*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(
-     9.*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) - (64*mmb*log(mmgl/mmu)*log(
-     mmsb2/mmu)*pow3(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (
-     64*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*pow2(-mmgl + mmsb1)*
-     pow3(mmsb1 - mmsb2)) + (16*mmb*log(mmgl/mmu)*pow3(mmsb2))/(9.*pow2(-mmgl +
-     mmsb2)*pow3(mmsb1 - mmsb2)) - (16*mmb*log(mmsb2/mmu)*pow3(mmsb2))/(9.*
-     pow2(-mmgl + mmsb2)*pow3(mmsb1 - mmsb2)) + (64*mmb*pow2(log(mmgl/mmu))*
-     pow3(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow3(mmsb1 - mmsb2)) + (64*mmb*mmsb1*
-     log(mmgl/mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) -
-     (64*mmb*mmsb1*log(mmgl/mmu)*log(mmsb1/mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 -
-     mmsb2)*pow3(-mmgl + mmsb2)) - (64*mmb*mmsb1*log(mmsb2/mmu)*pow2(mmsb2))/(
-     9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) + (64*mmb*mmsb1*log(mmsb1/mmu)
-     *log(mmsb2/mmu)*pow2(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb2))
-     - (80*mmb*log(mmgl/mmu)*pow3(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl +
-     mmsb2)) + (80*mmb*log(mmsb2/mmu)*pow3(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*
-     pow3(-mmgl + mmsb2)) + (32*mmb*pow2(log(mmgl/mmu))*pow3(mmsb2))/(9.*pow2(
-     mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) - (32*mmb*pow2(log(mmsb2/mmu))*pow3(
-     mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow3(-mmgl + mmsb2)) + (16*mmb*log(mmgl/
-     mmu)*log(mmsb1/mmu)*pow4(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*pow4(-mmgl +
-     mmsb1)) - (8*mmb*pow2(log(mmgl/mmu))*pow4(mmsb1))/(9.*pow2(mmsb1 - mmsb2)*
-     pow4(-mmgl + mmsb1)) - (8*mmb*pow2(log(mmsb1/mmu))*pow4(mmsb1))/(9.*pow2(
-     mmsb1 - mmsb2)*pow4(-mmgl + mmsb1)) + (16*mmb*log(mmsb1/mmu)*pow3(mmsb2))/
-     (9.*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) - (16*mmb*log(mmsb1/mmu)*pow3(
-     mmsb2))/(9.*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) - (64*mmb*log(mmgl/mmu)*
-     log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) + (
-     64*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow4(
-     mmsb1 - mmsb2)) - (16*mmb*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*
-     pow4(mmsb1 - mmsb2)) + (16*mmb*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl +
-     mmsb2)*pow4(mmsb1 - mmsb2)) - (64*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow3(
-     mmsb2))/(9.*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) + (64*mmb*log(mmgl/mmu)*
-     log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) + (
-     64*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/(9.*(-mmgl + mmsb1)*
-     pow4(mmsb1 - mmsb2)) - (64*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)*pow3(mmsb2))/
-     (9.*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) + (64*mmb*pow2(log(mmgl/mmu))*
-     pow3(mmsb2))/(9.*(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) - (64*mmb*pow2(log(
-     mmgl/mmu))*pow3(mmsb2))/(9.*(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) - (16*
-     mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb1)*
-     pow4(mmsb1 - mmsb2)) - (16*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(
-     9.*pow2(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) + (16*mmb*log(mmsb1/mmu)*log(
-     mmsb2/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow4(mmsb1 - mmsb2)) - (
-     16*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb2)*
-     pow4(mmsb1 - mmsb2)) - (16*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(
-     9.*pow2(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) + (16*mmb*log(mmsb1/mmu)*log(
-     mmsb2/mmu)*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb2)*pow4(mmsb1 - mmsb2)) + (
-     16*mmb*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*pow2(-mmgl + mmsb1)*pow4(mmsb1
-     - mmsb2)) + (16*mmb*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*pow2(-mmgl +
-     mmsb2)*pow4(mmsb1 - mmsb2)) + (16*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(
-     mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow4(-mmgl + mmsb2)) - (8*mmb*pow2(log(
-     mmgl/mmu))*pow4(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow4(-mmgl + mmsb2)) - (8*
-     mmb*pow2(log(mmsb2/mmu))*pow4(mmsb2))/(9.*pow2(mmsb1 - mmsb2)*pow4(-mmgl +
-     mmsb2)) - (32*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(mmsb2))/(9.*(-mmgl +
-     mmsb1)*pow5(mmsb1 - mmsb2)) + (32*mmb*log(mmgl/mmu)*log(mmsb1/mmu)*pow4(
-     mmsb2))/(9.*(-mmgl + mmsb2)*pow5(mmsb1 - mmsb2)) - (32*mmb*log(mmgl/mmu)*
-     log(mmsb2/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb1)*pow5(mmsb1 - mmsb2)) + (
-     32*mmb*log(mmgl/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*pow5(
-     mmsb1 - mmsb2)) + (32*mmb*log(mmsb1/mmu)*log(mmsb2/mmu)*pow4(mmsb2))/(9.*(
-     -mmgl + mmsb1)*pow5(mmsb1 - mmsb2)) - (32*mmb*log(mmsb1/mmu)*log(mmsb2/
-     mmu)*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*pow5(mmsb1 - mmsb2)) + (32*mmb*pow2(
-     log(mmgl/mmu))*pow4(mmsb2))/(9.*(-mmgl + mmsb1)*pow5(mmsb1 - mmsb2)) - (
-     32*mmb*pow2(log(mmgl/mmu))*pow4(mmsb2))/(9.*(-mmgl + mmsb2)*pow5(mmsb1 -
-     mmsb2))));
+   Fin20(mmsb1,mmsusy,mmu)*((32*mmgl*(mmsb1 - mmsusy)*s2b*pow2(invdgb1))/(3.*mb
+     *mgl) + (8*(2*invdgb1 + (-7*mmsb1 + 3*mmsusy)*pow2(invdgb1) + 4*(mmsb12 -
+     mmsb1*mmsusy)*pow3(invdgb1)))/3.) + Fin20(mmsb2,mmgl,mmu)*((-4*mmgl*s2b*(4
+     *invdgb1 - 22*invdgb2 + 3*(mmsb1 - mmsb2)*pow2(invdgb1)))/(9.*mb*mgl) + (
+     128*invdb12 - invdgb1 - 37*invdgb2 - 8*invdb12*invdgb1*mmsb2 - 120*invdb12
+     *invdgb2*mmsb2 + 108*mmsb2*pow2(invdgb2) - 128*invdb12*pow2(s2b) - 15*
+     invdgb1*pow2(s2b) + 15*invdgb2*pow2(s2b) - 26*invdb12*invdgb1*mmsb2*pow2(
+     s2b) + 154*invdb12*invdgb2*mmsb2*pow2(s2b) + pow2(invdgb1)*(9*mmsb1 - 9*
+     mmsb2 - 26*mmsb1*pow2(s2b)) - 12*mmsb12*pow3(invdgb1) + 12*mmsb1*mmsb2*
+     pow3(invdgb1) - 48*mmsb22*pow3(invdgb2))/9.) + Fin20(mmsb1,mmgl,mmu)*((-4*
+     mmgl*s2b*(22*invdgb1 - 4*invdgb2 + 3*(mmsb1 - mmsb2)*pow2(invdgb2)))/(9.*
+     mb*mgl) + (-128*invdb12 + 83*invdgb1 + 7*invdgb2 + 120*invdb12*invdgb1*
+     mmsb2 + 8*invdb12*invdgb2*mmsb2 + 108*mmsb1*pow2(invdgb1) + 128*invdb12*
+     pow2(s2b) - 139*invdgb1*pow2(s2b) + 11*invdgb2*pow2(s2b) - 154*invdb12*
+     invdgb1*mmsb2*pow2(s2b) + 26*invdb12*invdgb2*mmsb2*pow2(s2b) + pow2(
+     invdgb2)*(-9*mmsb1 + 9*mmsb2 - 26*mmsb2*pow2(s2b)) - 48*mmsb12*pow3(
+     invdgb1) + 12*mmsb1*mmsb2*pow3(invdgb2) - 12*mmsb22*pow3(invdgb2))/9.) +
+     Fin20(mmsb1,mmsb2,mmu)*((4*mmgl*s2b*(invdgb1 - invdgb2 + 3*(mmsb1 - mmsb2)
+     *pow2(invdgb1) + 3*(mmsb1 - mmsb2)*pow2(invdgb2)))/(9.*mb*mgl) + (10*
+     invdgb1 + 2*invdgb2 + 8*invdb12*invdgb1*mmsb2 - 8*invdb12*invdgb2*mmsb2 -
+     11*invdgb1*pow2(s2b) - 11*invdgb2*pow2(s2b) + pow2(invdgb1)*(-21*mmsb1 + 9
+     *mmsb2 + 26*mmsb1*pow2(s2b)) + pow2(invdgb2)*(9*mmsb1 - 21*mmsb2 + 26*
+     mmsb2*pow2(s2b)) + 12*mmsb12*pow3(invdgb1) - 12*mmsb1*mmsb2*pow3(invdgb1)
+     - 12*mmsb1*mmsb2*pow3(invdgb2) + 12*mmsb22*pow3(invdgb2))/9.) + Fin20(mmgl
+     ,mmsusy,mmu)*((-32*mmgl*s2b*(invdgb1 - invdgb2 + (mmsb1 - mmsusy)*pow2(
+     invdgb1) + (-mmsb2 + mmsusy)*pow2(invdgb2)))/(3.*mb*mgl) + (8*(invdgb1 +
+     invdgb2 + 3*(mmsb1 - mmsusy)*pow2(invdgb1) + 3*(mmsb2 - mmsusy)*pow2(
+     invdgb2) - 4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmsusy*pow3(invdgb1) - 4*
+     mmsb22*pow3(invdgb2) + 4*mmsb2*mmsusy*pow3(invdgb2)))/3.) + Fin20(mmsb2,
+     mmsusy,mmu)*((32*mmgl*(-mmsb2 + mmsusy)*s2b*pow2(invdgb2))/(3.*mb*mgl) + (
+     8*(2*invdgb2 + (-7*mmsb2 + 3*mmsusy)*pow2(invdgb2) + 4*(mmsb22 - mmsb2*
+     mmsusy)*pow3(invdgb2)))/3.) + Fin3(mmt,mmsb1,mmst1,mmu)*(-((mmsb1 - mmst1
+     + mmt)*pow2(invdgb1)) + (4*mmgl*(mmsb1 - mmst1 + mmt)*s2b*pow2(invdgb1))/(
+     3.*mb*mgl) + (4*(mmsb12 + mmsb1*(-mmst1 + mmt))*pow3(invdgb1))/3. + s2t*((
+     4*mmt*s2b*(invdgb1 - 2*mmsb1*pow2(invdgb1)))/(3.*mb*mt) + (4*mmgl*mmt*(
+     pow2(invdgb1) - 2*mmsb1*pow3(invdgb1)))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb1,
+     mmst1)*((4*mmgl*s2t*pow2(invdgb1)*((mmsb12 - mmsb1*mmst1)*mmt - mmsb1*pow2
+     (mmt)))/(3.*mgl*mt) + (2*(invdgb1*(mmsb12 - 2*mmsb1*mmst1 - mmsb1*mmt -
+     mmst1*mmt + pow2(mmst1)) + 2*pow2(invdgb1)*(2*mmsb12*mmst1 + mmsb12*mmt +
+     mmsb1*mmst1*mmt - mmsb1*pow2(mmst1) - pow3(mmsb1))))/3.)) + Fin3(mmt,mmsb1
+     ,mmst2,mmu)*(-((mmsb1 - mmst2 + mmt)*pow2(invdgb1)) + (4*mmgl*(mmsb1 -
+     mmst2 + mmt)*s2b*pow2(invdgb1))/(3.*mb*mgl) + (4*(mmsb12 + mmsb1*(-mmst2 +
+     mmt))*pow3(invdgb1))/3. + s2t*((-4*mmt*s2b*(invdgb1 - 2*mmsb1*pow2(invdgb1
+     )))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb1) - 2*mmsb1*pow3(invdgb1)))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmsb1,mmst2)*((4*mmgl*s2t*pow2(invdgb1)*(-(mmsb12*
+     mmt) + mmsb1*mmst2*mmt + mmsb1*pow2(mmt)))/(3.*mgl*mt) + (2*(invdgb1*(
+     mmsb12 - 2*mmsb1*mmst2 - mmsb1*mmt - mmst2*mmt + pow2(mmst2)) + 2*pow2(
+     invdgb1)*(2*mmsb12*mmst2 + mmsb12*mmt + mmsb1*mmst2*mmt - mmsb1*pow2(mmst2
+     ) - pow3(mmsb1))))/3.)) + Fin3(mmt,mmsb2,mmst1,mmu)*(-((mmsb2 - mmst1 +
+     mmt)*pow2(invdgb2)) - (4*mmgl*(mmsb2 - mmst1 + mmt)*s2b*pow2(invdgb2))/(3.
+     *mb*mgl) + (4*(mmsb22 + mmsb2*(-mmst1 + mmt))*pow3(invdgb2))/3. + s2t*((-4
+     *mmt*s2b*(invdgb2 - 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) + (4*mmgl*mmt*(pow2
+     (invdgb2) - 2*mmsb2*pow3(invdgb2)))/(3.*mgl*mt)) + DeltaInv(mmt,mmsb2,
+     mmst1)*((4*mmgl*s2t*pow2(invdgb2)*((mmsb22 - mmsb2*mmst1)*mmt - mmsb2*pow2
+     (mmt)))/(3.*mgl*mt) + (2*(invdgb2*(mmsb22 - 2*mmsb2*mmst1 - mmsb2*mmt -
+     mmst1*mmt + pow2(mmst1)) + 2*pow2(invdgb2)*(2*mmsb22*mmst1 + mmsb22*mmt +
+     mmsb2*mmst1*mmt - mmsb2*pow2(mmst1) - pow3(mmsb2))))/3.)) + Fin3(mmt,mmsb2
+     ,mmst2,mmu)*(-((mmsb2 - mmst2 + mmt)*pow2(invdgb2)) - (4*mmgl*(mmsb2 -
+     mmst2 + mmt)*s2b*pow2(invdgb2))/(3.*mb*mgl) + (4*(mmsb22 + mmsb2*(-mmst2 +
+     mmt))*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(invdgb2 - 2*mmsb2*pow2(invdgb2)
+     ))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb2) - 2*mmsb2*pow3(invdgb2)))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmsb2,mmst2)*((4*mmgl*s2t*pow2(invdgb2)*(-(mmsb22*
+     mmt) + mmsb2*mmst2*mmt + mmsb2*pow2(mmt)))/(3.*mgl*mt) + (2*(invdgb2*(
+     mmsb22 - 2*mmsb2*mmst2 - mmsb2*mmt - mmst2*mmt + pow2(mmst2)) + 2*pow2(
+     invdgb2)*(2*mmsb22*mmst2 + mmsb22*mmt + mmsb2*mmst2*mmt - mmsb2*pow2(mmst2
+     ) - pow3(mmsb2))))/3.)) - (2*mmgl*s2b*(-32*lb1u + 32*lb2u + 32*lb1u*lgu -
+     32*lb2u*lgu + 162*invdgb1*mmsb1 - 36*invdgb2*mmsb1 + 28*invdgb1*lb1u*mmsb1
+      + 24*invdgb2*lb1u*mmsb1 - 216*invdgb1*lgu*mmsb1 + 12*invdgb2*lgu*mmsb1 +
+     50*invdgb1*lb1u*lgu*mmsb1 - 6*invdgb2*lb1u*lgu*mmsb1 + 72*invdgb1*ltu*
+     mmsb1 - 24*invdgb1*lgu*ltu*mmsb1 + 36*invdgb1*mmsb2 - 162*invdgb2*mmsb2 -
+     4*invdgb1*lb1u*mmsb2 + 4*invdgb2*lb1u*mmsb2 - 20*invdgb1*lb2u*mmsb2 - 32*
+     invdgb2*lb2u*mmsb2 + 12*invdgb1*lb1u*lb2u*mmsb2 + 20*invdgb2*lb1u*lb2u*
+     mmsb2 - 12*invdgb1*lgu*mmsb2 + 216*invdgb2*lgu*mmsb2 + 20*invdgb1*lb1u*lgu
+     *mmsb2 - 20*invdgb2*lb1u*lgu*mmsb2 - 6*invdgb1*lb2u*lgu*mmsb2 - 38*invdgb2
+     *lb2u*lgu*mmsb2 - 72*invdgb2*ltu*mmsb2 + 24*invdgb2*lgu*ltu*mmsb2 - 4*
+     invdb12*invdgb1*lb1u*mmsb22 + 4*invdb12*invdgb2*lb1u*mmsb22 + 4*invdb12*
+     invdgb1*lb2u*mmsb22 - 4*invdb12*invdgb2*lb2u*mmsb22 + 4*invdb12*invdgb1*
+     lb1u*lb2u*mmsb22 + 28*invdb12*invdgb2*lb1u*lb2u*mmsb22 + 28*invdb12*
+     invdgb1*lb1u*lgu*mmsb22 - 28*invdb12*invdgb2*lb1u*lgu*mmsb22 - 4*invdb12*
+     invdgb1*lb2u*lgu*mmsb22 + 4*invdb12*invdgb2*lb2u*lgu*mmsb22 - 48*invdgb1*
+     mmst1 + 48*invdgb2*mmst1 - 12*invdgb1*lgu*mmst1 + 12*invdgb2*lgu*mmst1 +
+     12*invdgb1*lt1u*mmst1 - 12*invdgb2*lt1u*mmst1 + 6*invdgb1*lgu*lt1u*mmst1 -
+     6*invdgb2*lgu*lt1u*mmst1 + 36*invdgb1*ltu*mmst1 - 36*invdgb2*ltu*mmst1 -
+     12*invdgb1*lt1u*ltu*mmst1 + 12*invdgb2*lt1u*ltu*mmst1 - 48*invdgb1*mmst2 +
+     48*invdgb2*mmst2 - 12*invdgb1*lgu*mmst2 + 12*invdgb2*lgu*mmst2 + 12*
+     invdgb1*lt2u*mmst2 - 12*invdgb2*lt2u*mmst2 + 6*invdgb1*lgu*lt2u*mmst2 - 6*
+     invdgb2*lgu*lt2u*mmst2 + 36*invdgb1*ltu*mmst2 - 36*invdgb2*ltu*mmst2 - 12*
+     invdgb1*lt2u*ltu*mmst2 + 12*invdgb2*lt2u*ltu*mmst2 + 288*invdgb1*mmsusy -
+     288*invdgb2*mmsusy - 96*invdgb1*lgu*mmsusy + 96*invdgb2*lgu*mmsusy - 192*
+     invdgb1*lsu*mmsusy + 192*invdgb2*lsu*mmsusy + 48*invdgb1*lgu*lsu*mmsusy -
+     48*invdgb2*lgu*lsu*mmsusy - 72*invdgb1*mmt + 72*invdgb2*mmt + 24*invdgb1*
+     lgu*mmt - 24*invdgb2*lgu*mmt + 48*invdgb1*ltu*mmt - 48*invdgb2*ltu*mmt -
+     12*invdgb1*lgu*ltu*mmt + 12*invdgb2*lgu*ltu*mmt + 20*invdgb1*mmsb1*zt2 - 6
+     *invdgb2*mmsb1*zt2 + 6*invdgb1*mmsb2*zt2 - 20*invdgb2*mmsb2*zt2 - 6*
+     invdgb1*mmst1*zt2 + 6*invdgb2*mmst1*zt2 - 6*invdgb1*mmst2*zt2 + 6*invdgb2*
+     mmst2*zt2 + 48*invdgb1*mmsusy*zt2 - 48*invdgb2*mmsusy*zt2 - 12*invdgb1*mmt
+     *zt2 + 12*invdgb2*mmt*zt2 - 11*invdgb1*mmsb1*pow2(lb1u) - 3*invdgb2*mmsb1*
+     pow2(lb1u) - 16*invdgb1*mmsb2*pow2(lb1u) - 16*invdb12*invdgb1*mmsb22*pow2(
+     lb1u) + 3*invdgb1*mmsb2*pow2(lb2u) - 5*invdgb2*mmsb2*pow2(lb2u) - 16*
+     invdb12*invdgb2*mmsb22*pow2(lb2u) + 37*invdgb1*mmsb1*pow2(lgu) - 3*invdgb2
+     *mmsb1*pow2(lgu) - invdgb1*mmsb2*pow2(lgu) - 33*invdgb2*mmsb2*pow2(lgu) -
+     12*invdb12*invdgb1*mmsb22*pow2(lgu) + 12*invdb12*invdgb2*mmsb22*pow2(lgu)
+     + 3*invdgb1*mmst1*pow2(lgu) - 3*invdgb2*mmst1*pow2(lgu) + 3*invdgb1*mmst2*
+     pow2(lgu) - 3*invdgb2*mmst2*pow2(lgu) + 24*invdgb1*mmsusy*pow2(lgu) - 24*
+     invdgb2*mmsusy*pow2(lgu) - 6*invdgb1*mmt*pow2(lgu) + 6*invdgb2*mmt*pow2(
+     lgu) + 24*invdgb1*mmsusy*pow2(lsu) - 24*invdgb2*mmsusy*pow2(lsu) - 3*
+     invdgb1*mmst1*pow2(lt1u) + 3*invdgb2*mmst1*pow2(lt1u) - 3*invdgb1*mmst2*
+     pow2(lt2u) + 3*invdgb2*mmst2*pow2(lt2u) - 12*invdgb1*mmsb1*pow2(ltu) + 12*
+     invdgb2*mmsb2*pow2(ltu) - 6*invdgb1*mmst1*pow2(ltu) + 6*invdgb2*mmst1*pow2
+     (ltu) - 6*invdgb1*mmst2*pow2(ltu) + 6*invdgb2*mmst2*pow2(ltu) - 6*invdgb1*
+     mmt*pow2(ltu) + 6*invdgb2*mmt*pow2(ltu) + 8*lb1u*lgu*pow3(invdgb1)*pow3(
+     mmsb1) - 4*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1) - 4*pow2(lgu)*pow3(invdgb1
+     )*pow3(mmsb1) - 8*invdgb1*lb1u*lb2u*pow2(invdb12)*pow3(mmsb2) + 8*invdgb2*
+     lb1u*lb2u*pow2(invdb12)*pow3(mmsb2) + 8*invdgb1*lb1u*lgu*pow2(invdb12)*
+     pow3(mmsb2) - 8*invdgb2*lb1u*lgu*pow2(invdb12)*pow3(mmsb2) + 8*invdgb1*
+     lb2u*lgu*pow2(invdb12)*pow3(mmsb2) - 8*invdgb2*lb2u*lgu*pow2(invdb12)*pow3
+     (mmsb2) - 8*invdgb1*pow2(invdb12)*pow2(lgu)*pow3(mmsb2) + 8*invdgb2*pow2(
+     invdb12)*pow2(lgu)*pow3(mmsb2) - 8*lb2u*lgu*pow3(invdgb2)*pow3(mmsb2) + 4*
+     pow2(lb2u)*pow3(invdgb2)*pow3(mmsb2) + 4*pow2(lgu)*pow3(invdgb2)*pow3(
+     mmsb2) + pow2(invdgb2)*(2*lgu*(3*(-2 + lb1u)*mmsb1*mmsb2 + 2*(45 + lb1u)*
+     mmsb22 + 3*mmsb2*((-2 + lt1u)*mmst1 + (-2 + lt2u)*mmst2 - 16*mmsusy + 8*
+     lsu*mmsusy + 4*mmt - 2*ltu*mmt)) - 2*lb2u*(3*(-2 + lb1u)*mmsb1*mmsb2 + (90
+      + 2*lb1u - 39*lgu)*mmsb22 + 3*mmsb2*((-2 + lt1u)*mmst1 + (-2 + lt2u)*
+     mmst2 - 16*mmsusy + 8*lsu*mmsusy + 4*mmt - 2*ltu*mmt)) - (3*mmsb1*mmsb2 -
+     31*mmsb22 + 3*mmsb2*(mmst1 + mmst2 + 8*mmsusy - 2*mmt))*pow2(lb2u) - 4*
+     invdb12*(lb1u*(lb2u - lgu) - lb2u*lgu)*pow3(mmsb2) + pow2(lgu)*(3*mmsb1*
+     mmsb2 - 109*mmsb22 + 3*mmsb2*mmst1 + 3*mmsb2*mmst2 + 24*mmsb2*mmsusy - 6*
+     mmsb2*mmt - 4*invdb12*pow3(mmsb2))) + pow2(invdgb1)*((-31*mmsb12 + 3*mmsb1
+     *(mmsb2 + mmst1 + mmst2 + 8*mmsusy - 2*mmt))*pow2(lb1u) + pow2(lgu)*(105*
+     mmsb12 - 7*mmsb1*mmsb2 - 4*mmsb22 - 3*mmsb1*mmst1 - 3*mmsb1*mmst2 - 24*
+     mmsb1*mmsusy + 6*mmsb1*mmt - 4*invdb12*pow3(mmsb2)) - 2*(lgu*(90*mmsb12 +
+     (-6 + lb2u)*mmsb1*mmsb2 - 2*lb2u*mmsb22 + 3*mmsb1*((-2 + lt1u)*mmst1 + (-2
+      + lt2u)*mmst2 - 16*mmsusy + 8*lsu*mmsusy + 4*mmt - 2*ltu*mmt)) + lb1u*((-
+     90 + 37*lgu)*mmsb12 + 2*(lb2u - lgu)*mmsb22 - mmsb1*((-6 + lb2u + 2*lgu)*
+     mmsb2 + 3*((-2 + lt1u)*mmst1 + (-2 + lt2u)*mmst2 - 16*mmsusy + 8*lsu*
+     mmsusy + 4*mmt - 2*ltu*mmt))) + 2*invdb12*(lb1u*(lb2u - lgu) - lb2u*lgu)*
+     pow3(mmsb2)))))/(9.*mb*mgl) + Fin3(mmt,mmst1,mmgl,mmu)*((4*mmgl*s2b*(
+     invdgb1 - invdgb2 - (mmsb1 - mmst1 + mmt)*pow2(invdgb1) + (mmsb2 - mmst1 +
+     mmt)*pow2(invdgb2)))/(3.*mb*mgl) + (-3*invdgb1 - 3*invdgb2 + (7*mmsb1 - 3*
+     mmst1 + 3*mmt)*pow2(invdgb1) + (7*mmsb2 - 3*mmst1 + 3*mmt)*pow2(invdgb2) -
+     4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmst1*pow3(invdgb1) - 4*mmsb1*mmt*pow3(
+     invdgb1) - 4*mmsb22*pow3(invdgb2) + 4*mmsb2*mmst1*pow3(invdgb2) - 4*mmsb2*
+     mmt*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(-invdgb1 + invdgb2 + 2*mmsb1*pow2
+     (invdgb1) - 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) - (4*mmgl*mmt*(pow2(invdgb1
+     ) + pow2(invdgb2) - 2*(mmsb1*pow3(invdgb1) + mmsb2*pow3(invdgb2))))/(3.*
+     mgl*mt)) + DeltaInv(mmt,mmst1,mmgl)*((8*mmgl*s2b*(mmsb1 - invdgb1*mmsb12 -
+     mmsb2 + invdgb2*mmsb22 + 2*invdgb1*mmsb1*mmst1 - 2*invdgb2*mmsb2*mmst1 +
+     invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt + invdgb1*mmst1*mmt - invdgb2*mmst1*
+     mmt + (-invdgb1 + invdgb2)*pow2(mmst1)))/(3.*mb*mgl) + s2t*((-8*s2b*((
+     mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + invdgb1*mmsb1*mmst1 -
+     invdgb2*mmsb2*mmst1)*mmt + (invdgb1*mmsb1 - invdgb2*mmsb2)*pow2(mmt)))/(3.
+     *mb*mt) - (4*mmgl*(-2*mmt + 2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt -
+     invdgb1*mmst1*mmt - invdgb2*mmst1*mmt - invdgb1*pow2(mmt) - invdgb2*pow2(
+     mmt) + pow2(invdgb1)*(-(mmsb12*mmt) + mmsb1*mmst1*mmt + mmsb1*pow2(mmt)) +
+     pow2(invdgb2)*(-(mmsb22*mmt) + mmsb2*mmst1*mmt + mmsb2*pow2(mmt))))/(3.*
+     mgl*mt)) - (4*(2*mmgl + 2*mmsb1 - 3*invdgb1*mmsb12 + 2*mmsb2 - 3*invdgb2*
+     mmsb22 - 4*mmst1 + 4*invdgb1*mmsb1*mmst1 + 4*invdgb2*mmsb2*mmst1 - 2*mmt +
+     2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt + invdgb1*mmst1*mmt + invdgb2*
+     mmst1*mmt - invdgb1*pow2(mmst1) - invdgb2*pow2(mmst1) + pow2(invdgb1)*(-2*
+     mmsb12*mmst1 - mmsb12*mmt - mmsb1*mmst1*mmt + mmsb1*pow2(mmst1) + pow3(
+     mmsb1)) + pow2(invdgb2)*(-2*mmsb22*mmst1 - mmsb22*mmt - mmsb2*mmst1*mmt +
+     mmsb2*pow2(mmst1) + pow3(mmsb2))))/3.)) + Fin3(mmt,mmst2,mmgl,mmu)*((4*
+     mmgl*s2b*(invdgb1 - invdgb2 - (mmsb1 - mmst2 + mmt)*pow2(invdgb1) + (mmsb2
+      - mmst2 + mmt)*pow2(invdgb2)))/(3.*mb*mgl) + (-3*invdgb1 - 3*invdgb2 + (7
+     *mmsb1 - 3*mmst2 + 3*mmt)*pow2(invdgb1) + (7*mmsb2 - 3*mmst2 + 3*mmt)*pow2
+     (invdgb2) - 4*mmsb12*pow3(invdgb1) + 4*mmsb1*mmst2*pow3(invdgb1) - 4*mmsb1
+     *mmt*pow3(invdgb1) - 4*mmsb22*pow3(invdgb2) + 4*mmsb2*mmst2*pow3(invdgb2)
+     - 4*mmsb2*mmt*pow3(invdgb2))/3. + s2t*((4*mmt*s2b*(invdgb1 - invdgb2 - 2*
+     mmsb1*pow2(invdgb1) + 2*mmsb2*pow2(invdgb2)))/(3.*mb*mt) + (4*mmgl*mmt*(
+     pow2(invdgb1) + pow2(invdgb2) - 2*(mmsb1*pow3(invdgb1) + mmsb2*pow3(
+     invdgb2))))/(3.*mgl*mt)) + DeltaInv(mmt,mmst2,mmgl)*((8*mmgl*s2b*(mmsb1 -
+     invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + 2*invdgb1*mmsb1*mmst2 - 2*
+     invdgb2*mmsb2*mmst2 + invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt + invdgb1*
+     mmst2*mmt - invdgb2*mmst2*mmt + (-invdgb1 + invdgb2)*pow2(mmst2)))/(3.*mb*
+     mgl) + s2t*((8*s2b*((mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 +
+     invdgb1*mmsb1*mmst2 - invdgb2*mmsb2*mmst2)*mmt + (invdgb1*mmsb1 - invdgb2*
+     mmsb2)*pow2(mmt)))/(3.*mb*mt) + (4*mmgl*(-2*mmt + 2*invdgb1*mmsb1*mmt + 2*
+     invdgb2*mmsb2*mmt - invdgb1*mmst2*mmt - invdgb2*mmst2*mmt - invdgb1*pow2(
+     mmt) - invdgb2*pow2(mmt) + pow2(invdgb1)*(-(mmsb12*mmt) + mmsb1*mmst2*mmt
+     + mmsb1*pow2(mmt)) + pow2(invdgb2)*(-(mmsb22*mmt) + mmsb2*mmst2*mmt +
+     mmsb2*pow2(mmt))))/(3.*mgl*mt)) - (4*(2*mmgl + 2*mmsb1 - 3*invdgb1*mmsb12
+     + 2*mmsb2 - 3*invdgb2*mmsb22 - 4*mmst2 + 4*invdgb1*mmsb1*mmst2 + 4*invdgb2
+     *mmsb2*mmst2 - 2*mmt + 2*invdgb1*mmsb1*mmt + 2*invdgb2*mmsb2*mmt + invdgb1
+     *mmst2*mmt + invdgb2*mmst2*mmt - invdgb1*pow2(mmst2) - invdgb2*pow2(mmst2)
+     + pow2(invdgb1)*(-2*mmsb12*mmst2 - mmsb12*mmt - mmsb1*mmst2*mmt + mmsb1*
+     pow2(mmst2) + pow3(mmsb1)) + pow2(invdgb2)*(-2*mmsb22*mmst2 - mmsb22*mmt -
+     mmsb2*mmst2*mmt + mmsb2*pow2(mmst2) + pow3(mmsb2))))/3.)) + DeltaInv(mmt,
+     mmsb1,mmst1)*((2*mmgl*s2t*pow2(invdgb1)*(-14*mmsb12*mmst1*mmt + 6*lb1u*
+     mmsb12*mmst1*mmt - 6*lt1u*mmsb12*mmst1*mmt + 2*lb1u*lt1u*mmsb12*mmst1*mmt
+     + 12*ltu*mmsb12*mmst1*mmt - 4*lb1u*ltu*mmsb12*mmst1*mmt - 2*mmsb12*mmst1*
+     mmt*zt2 - 2*mmsb12*mmst1*mmt*pow2(ltu) + 6*lt1u*mmsb1*mmt*pow2(mmst1) - 2*
+     lb1u*lt1u*mmsb1*mmt*pow2(mmst1) - 6*ltu*mmsb1*mmt*pow2(mmst1) + 2*lb1u*ltu
+     *mmsb1*mmt*pow2(mmst1) + mmsb1*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb12*pow2(
+     mmt) + 6*lb1u*mmsb12*pow2(mmt) + 6*ltu*mmsb12*pow2(mmt) - 2*lb1u*ltu*
+     mmsb12*pow2(mmt) - 28*mmsb1*mmst1*pow2(mmt) + 6*lt1u*mmsb1*mmst1*pow2(mmt)
+     + 2*lb1u*lt1u*mmsb1*mmst1*pow2(mmt) + 18*ltu*mmsb1*mmst1*pow2(mmt) - 2*
+     lb1u*ltu*mmsb1*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb1*mmst1*pow2(mmt) - 2*
+     mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst1*zt2*pow2(mmt) - mmsb12*pow2(ltu)*pow2
+     (mmt) - 3*mmsb1*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(mmsb12*mmst1*mmt -
+     mmsb1*mmt*pow2(mmst1) - mmsb1*mmst1*pow2(mmt)) + 14*mmt*pow3(mmsb1) - 6*
+     lb1u*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lb1u*ltu*mmt*pow3(mmsb1)
+     + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2(lb1u)*(mmsb12*
+     mmst1*mmt + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))))/(3.*mgl*mt) + (-(invdgb1
+     *(14*mmsb12*mmst1 - 12*lb1u*mmsb12*mmst1 + 6*lt1u*mmsb12*mmst1 - 6*ltu*
+     mmsb12*mmst1 + 4*lb1u*ltu*mmsb12*mmst1 - 2*lt1u*ltu*mmsb12*mmst1 + 14*
+     mmsb12*mmt - 6*lb1u*mmsb12*mmt - 6*ltu*mmsb12*mmt + 2*lb1u*ltu*mmsb12*mmt
+     + 56*mmsb1*mmst1*mmt - 6*lb1u*mmsb1*mmst1*mmt - 6*lt1u*mmsb1*mmst1*mmt - 4
+     *lb1u*lt1u*mmsb1*mmst1*mmt - 36*ltu*mmsb1*mmst1*mmt + 6*lb1u*ltu*mmsb1*
+     mmst1*mmt + 6*lt1u*ltu*mmsb1*mmst1*mmt + 2*mmsb12*mmst1*zt2 + 2*mmsb12*mmt
+     *zt2 + 8*mmsb1*mmst1*mmt*zt2 + mmsb12*mmst1*pow2(ltu) + mmsb12*mmt*pow2(
+     ltu) + 6*mmsb1*mmst1*mmt*pow2(ltu) + 14*mmsb1*pow2(mmst1) + 6*lb1u*mmsb1*
+     pow2(mmst1) - 12*lt1u*mmsb1*pow2(mmst1) - 6*ltu*mmsb1*pow2(mmst1) - 2*lb1u
+     *ltu*mmsb1*pow2(mmst1) + 4*lt1u*ltu*mmsb1*pow2(mmst1) + 14*mmt*pow2(mmst1)
+     - 6*lt1u*mmt*pow2(mmst1) - 6*ltu*mmt*pow2(mmst1) + 2*lt1u*ltu*mmt*pow2(
+     mmst1) + 2*mmsb1*zt2*pow2(mmst1) + 2*mmt*zt2*pow2(mmst1) + mmsb1*pow2(ltu)
+     *pow2(mmst1) + mmt*pow2(ltu)*pow2(mmst1) + pow2(lb1u)*(2*mmsb12*mmst1 +
+     mmsb12*mmt + mmsb1*mmst1*mmt - mmsb1*pow2(mmst1) - pow3(mmsb1)) - 14*pow3(
+     mmsb1) + 6*lb1u*pow3(mmsb1) + 6*ltu*pow3(mmsb1) - 2*lb1u*ltu*pow3(mmsb1) -
+     2*zt2*pow3(mmsb1) - pow2(ltu)*pow3(mmsb1) + pow2(lt1u)*(-(mmsb12*mmst1) +
+     mmsb1*mmst1*mmt + (2*mmsb1 + mmt)*pow2(mmst1) - pow3(mmst1)) - 14*pow3(
+     mmst1) + 6*lt1u*pow3(mmst1) + 6*ltu*pow3(mmst1) - 2*lt1u*ltu*pow3(mmst1) -
+     2*zt2*pow3(mmst1) - pow2(ltu)*pow3(mmst1))) - 2*pow2(invdgb1)*(-56*mmsb12*
+     mmst1*mmt + 6*lb1u*mmsb12*mmst1*mmt + 6*lt1u*mmsb12*mmst1*mmt + 4*lb1u*
+     lt1u*mmsb12*mmst1*mmt + 36*ltu*mmsb12*mmst1*mmt - 6*lb1u*ltu*mmsb12*mmst1*
+     mmt - 6*lt1u*ltu*mmsb12*mmst1*mmt - 8*mmsb12*mmst1*mmt*zt2 - 6*mmsb12*
+     mmst1*mmt*pow2(ltu) - 14*mmsb12*pow2(mmst1) - 6*lb1u*mmsb12*pow2(mmst1) +
+     12*lt1u*mmsb12*pow2(mmst1) + 6*ltu*mmsb12*pow2(mmst1) + 2*lb1u*ltu*mmsb12*
+     pow2(mmst1) - 4*lt1u*ltu*mmsb12*pow2(mmst1) - 14*mmsb1*mmt*pow2(mmst1) + 6
+     *lt1u*mmsb1*mmt*pow2(mmst1) + 6*ltu*mmsb1*mmt*pow2(mmst1) - 2*lt1u*ltu*
+     mmsb1*mmt*pow2(mmst1) - 2*mmsb12*zt2*pow2(mmst1) - 2*mmsb1*mmt*zt2*pow2(
+     mmst1) - mmsb12*pow2(ltu)*pow2(mmst1) - mmsb1*mmt*pow2(ltu)*pow2(mmst1) -
+     14*mmst1*pow3(mmsb1) + 12*lb1u*mmst1*pow3(mmsb1) - 6*lt1u*mmst1*pow3(mmsb1
+     ) + 6*ltu*mmst1*pow3(mmsb1) - 4*lb1u*ltu*mmst1*pow3(mmsb1) + 2*lt1u*ltu*
+     mmst1*pow3(mmsb1) - 14*mmt*pow3(mmsb1) + 6*lb1u*mmt*pow3(mmsb1) + 6*ltu*
+     mmt*pow3(mmsb1) - 2*lb1u*ltu*mmt*pow3(mmsb1) - 2*mmst1*zt2*pow3(mmsb1) - 2
+     *mmt*zt2*pow3(mmsb1) - mmst1*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(
+     mmsb1) + 14*mmsb1*pow3(mmst1) - 6*lt1u*mmsb1*pow3(mmst1) - 6*ltu*mmsb1*
+     pow3(mmst1) + 2*lt1u*ltu*mmsb1*pow3(mmst1) + 2*mmsb1*zt2*pow3(mmst1) +
+     mmsb1*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb12*mmst1*mmt) - (2*mmsb12
+     + mmsb1*mmt)*pow2(mmst1) + mmst1*pow3(mmsb1) + mmsb1*pow3(mmst1)) + 14*
+     pow4(mmsb1) - 6*lb1u*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lb1u*ltu*pow4(
+     mmsb1) + 2*zt2*pow4(mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lb1u)*(-(mmsb12*
+     mmst1*mmt) + mmsb12*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb1) + pow4(mmsb1
+     ))))/3.) + DeltaInv(mmt,mmsb1,mmst2)*((-2*mmgl*s2t*pow2(invdgb1)*(-14*
+     mmsb12*mmst2*mmt + 6*lb1u*mmsb12*mmst2*mmt - 6*lt2u*mmsb12*mmst2*mmt + 2*
+     lb1u*lt2u*mmsb12*mmst2*mmt + 12*ltu*mmsb12*mmst2*mmt - 4*lb1u*ltu*mmsb12*
+     mmst2*mmt - 2*mmsb12*mmst2*mmt*zt2 - 2*mmsb12*mmst2*mmt*pow2(ltu) + 6*lt2u
+     *mmsb1*mmt*pow2(mmst2) - 2*lb1u*lt2u*mmsb1*mmt*pow2(mmst2) - 6*ltu*mmsb1*
+     mmt*pow2(mmst2) + 2*lb1u*ltu*mmsb1*mmt*pow2(mmst2) + mmsb1*mmt*pow2(ltu)*
+     pow2(mmst2) - 14*mmsb12*pow2(mmt) + 6*lb1u*mmsb12*pow2(mmt) + 6*ltu*mmsb12
+     *pow2(mmt) - 2*lb1u*ltu*mmsb12*pow2(mmt) - 28*mmsb1*mmst2*pow2(mmt) + 6*
+     lt2u*mmsb1*mmst2*pow2(mmt) + 2*lb1u*lt2u*mmsb1*mmst2*pow2(mmt) + 18*ltu*
+     mmsb1*mmst2*pow2(mmt) - 2*lb1u*ltu*mmsb1*mmst2*pow2(mmt) - 4*lt2u*ltu*
+     mmsb1*mmst2*pow2(mmt) - 2*mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst2*zt2*pow2(
+     mmt) - mmsb12*pow2(ltu)*pow2(mmt) - 3*mmsb1*mmst2*pow2(ltu)*pow2(mmt) +
+     pow2(lt2u)*(mmsb12*mmst2*mmt - mmsb1*mmt*pow2(mmst2) - mmsb1*mmst2*pow2(
+     mmt)) + 14*mmt*pow3(mmsb1) - 6*lb1u*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1
+     ) + 2*lb1u*ltu*mmt*pow3(mmsb1) + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*
+     pow3(mmsb1) - pow2(lb1u)*(mmsb12*mmst2*mmt + mmsb12*pow2(mmt) - mmt*pow3(
+     mmsb1))))/(3.*mgl*mt) + (-(invdgb1*(14*mmsb12*mmst2 - 12*lb1u*mmsb12*mmst2
+      + 6*lt2u*mmsb12*mmst2 - 6*ltu*mmsb12*mmst2 + 4*lb1u*ltu*mmsb12*mmst2 - 2*
+     lt2u*ltu*mmsb12*mmst2 + 14*mmsb12*mmt - 6*lb1u*mmsb12*mmt - 6*ltu*mmsb12*
+     mmt + 2*lb1u*ltu*mmsb12*mmt + 56*mmsb1*mmst2*mmt - 6*lb1u*mmsb1*mmst2*mmt
+     - 6*lt2u*mmsb1*mmst2*mmt - 4*lb1u*lt2u*mmsb1*mmst2*mmt - 36*ltu*mmsb1*
+     mmst2*mmt + 6*lb1u*ltu*mmsb1*mmst2*mmt + 6*lt2u*ltu*mmsb1*mmst2*mmt + 2*
+     mmsb12*mmst2*zt2 + 2*mmsb12*mmt*zt2 + 8*mmsb1*mmst2*mmt*zt2 + mmsb12*mmst2
+     *pow2(ltu) + mmsb12*mmt*pow2(ltu) + 6*mmsb1*mmst2*mmt*pow2(ltu) + 14*mmsb1
+     *pow2(mmst2) + 6*lb1u*mmsb1*pow2(mmst2) - 12*lt2u*mmsb1*pow2(mmst2) - 6*
+     ltu*mmsb1*pow2(mmst2) - 2*lb1u*ltu*mmsb1*pow2(mmst2) + 4*lt2u*ltu*mmsb1*
+     pow2(mmst2) + 14*mmt*pow2(mmst2) - 6*lt2u*mmt*pow2(mmst2) - 6*ltu*mmt*pow2
+     (mmst2) + 2*lt2u*ltu*mmt*pow2(mmst2) + 2*mmsb1*zt2*pow2(mmst2) + 2*mmt*zt2
+     *pow2(mmst2) + mmsb1*pow2(ltu)*pow2(mmst2) + mmt*pow2(ltu)*pow2(mmst2) +
+     pow2(lb1u)*(2*mmsb12*mmst2 + mmsb12*mmt + mmsb1*mmst2*mmt - mmsb1*pow2(
+     mmst2) - pow3(mmsb1)) - 14*pow3(mmsb1) + 6*lb1u*pow3(mmsb1) + 6*ltu*pow3(
+     mmsb1) - 2*lb1u*ltu*pow3(mmsb1) - 2*zt2*pow3(mmsb1) - pow2(ltu)*pow3(mmsb1
+     ) + pow2(lt2u)*(-(mmsb12*mmst2) + mmsb1*mmst2*mmt + (2*mmsb1 + mmt)*pow2(
+     mmst2) - pow3(mmst2)) - 14*pow3(mmst2) + 6*lt2u*pow3(mmst2) + 6*ltu*pow3(
+     mmst2) - 2*lt2u*ltu*pow3(mmst2) - 2*zt2*pow3(mmst2) - pow2(ltu)*pow3(mmst2
+     ))) - 2*pow2(invdgb1)*(-56*mmsb12*mmst2*mmt + 6*lb1u*mmsb12*mmst2*mmt + 6*
+     lt2u*mmsb12*mmst2*mmt + 4*lb1u*lt2u*mmsb12*mmst2*mmt + 36*ltu*mmsb12*mmst2
+     *mmt - 6*lb1u*ltu*mmsb12*mmst2*mmt - 6*lt2u*ltu*mmsb12*mmst2*mmt - 8*
+     mmsb12*mmst2*mmt*zt2 - 6*mmsb12*mmst2*mmt*pow2(ltu) - 14*mmsb12*pow2(mmst2
+     ) - 6*lb1u*mmsb12*pow2(mmst2) + 12*lt2u*mmsb12*pow2(mmst2) + 6*ltu*mmsb12*
+     pow2(mmst2) + 2*lb1u*ltu*mmsb12*pow2(mmst2) - 4*lt2u*ltu*mmsb12*pow2(mmst2
+     ) - 14*mmsb1*mmt*pow2(mmst2) + 6*lt2u*mmsb1*mmt*pow2(mmst2) + 6*ltu*mmsb1*
+     mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb1*mmt*pow2(mmst2) - 2*mmsb12*zt2*pow2(
+     mmst2) - 2*mmsb1*mmt*zt2*pow2(mmst2) - mmsb12*pow2(ltu)*pow2(mmst2) -
+     mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*pow3(mmsb1) + 12*lb1u*mmst2*
+     pow3(mmsb1) - 6*lt2u*mmst2*pow3(mmsb1) + 6*ltu*mmst2*pow3(mmsb1) - 4*lb1u*
+     ltu*mmst2*pow3(mmsb1) + 2*lt2u*ltu*mmst2*pow3(mmsb1) - 14*mmt*pow3(mmsb1)
+     + 6*lb1u*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1) - 2*lb1u*ltu*mmt*pow3(
+     mmsb1) - 2*mmst2*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(mmsb1) - mmst2*pow2(ltu)
+     *pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*mmsb1*pow3(mmst2) - 6*lt2u*
+     mmsb1*pow3(mmst2) - 6*ltu*mmsb1*pow3(mmst2) + 2*lt2u*ltu*mmsb1*pow3(mmst2)
+     + 2*mmsb1*zt2*pow3(mmst2) + mmsb1*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(
+     mmsb12*mmst2*mmt) - (2*mmsb12 + mmsb1*mmt)*pow2(mmst2) + mmst2*pow3(mmsb1)
+     + mmsb1*pow3(mmst2)) + 14*pow4(mmsb1) - 6*lb1u*pow4(mmsb1) - 6*ltu*pow4(
+     mmsb1) + 2*lb1u*ltu*pow4(mmsb1) + 2*zt2*pow4(mmsb1) + pow2(ltu)*pow4(mmsb1
+     ) + pow2(lb1u)*(-(mmsb12*mmst2*mmt) + mmsb12*pow2(mmst2) - (2*mmst2 + mmt)
+     *pow3(mmsb1) + pow4(mmsb1))))/3.) + (-3659 + 450*lb1u - 318*lb2u + 6096*
+     lgu + 384*lb1u*lgu + 384*lb2u*lgu + 528*lsu + 66*lt1u + 66*lt2u - 744*ltu
+     + 288*lgu*ltu - 432*invdgb1*mmsb1 + 324*invdgb2*mmsb1 + 708*invdgb1*lb1u*
+     mmsb1 - 216*invdgb2*lb1u*mmsb1 - 1044*invdgb1*lgu*mmsb1 - 108*invdgb2*lgu*
+     mmsb1 - 330*invdgb1*lb1u*lgu*mmsb1 + 54*invdgb2*lb1u*lgu*mmsb1 + 1080*
+     invdgb1*ltu*mmsb1 - 72*invdgb1*lb1u*ltu*mmsb1 - 288*invdgb1*lgu*ltu*mmsb1
+     + 5340*invdgb1*mmsb2 - 5448*invdgb2*mmsb2 + 768*invdb12*lb1u*mmsb2 - 792*
+     invdgb1*lb1u*mmsb2 + 24*invdgb2*lb1u*mmsb2 - 768*invdb12*lb2u*mmsb2 - 264*
+     invdgb1*lb2u*mmsb2 + 1524*invdgb2*lb2u*mmsb2 - 24*invdgb1*lb1u*lb2u*mmsb2
+     + 24*invdgb2*lb1u*lb2u*mmsb2 - 3588*invdgb1*lgu*mmsb2 + 2436*invdgb2*lgu*
+     mmsb2 + 24*invdgb1*lb1u*lgu*mmsb2 - 24*invdgb2*lb1u*lgu*mmsb2 + 78*invdgb1
+     *lb2u*lgu*mmsb2 - 354*invdgb2*lb2u*lgu*mmsb2 + 1080*invdgb2*ltu*mmsb2 - 72
+     *invdgb2*lb2u*ltu*mmsb2 - 288*invdgb2*lgu*ltu*mmsb2 + 5016*invdb12*invdgb1
+     *mmsb22 - 5016*invdb12*invdgb2*mmsb22 - 768*invdb12*invdgb1*lb1u*mmsb22 -
+     72*invdb12*invdgb1*lb2u*mmsb22 + 840*invdb12*invdgb2*lb2u*mmsb22 + 24*
+     invdb12*invdgb1*lb1u*lb2u*mmsb22 - 24*invdb12*invdgb2*lb1u*lb2u*mmsb22 -
+     3480*invdb12*invdgb1*lgu*mmsb22 + 3480*invdb12*invdgb2*lgu*mmsb22 - 24*
+     invdb12*invdgb1*lb1u*lgu*mmsb22 + 24*invdb12*invdgb2*lb1u*lgu*mmsb22 - 24*
+     invdb12*invdgb1*lb2u*lgu*mmsb22 + 24*invdb12*invdgb2*lb2u*lgu*mmsb22 - 432
+     *invdgb1*mmst1 - 432*invdgb2*mmst1 - 108*invdgb1*lgu*mmst1 - 108*invdgb2*
+     lgu*mmst1 + 108*invdgb1*lt1u*mmst1 + 108*invdgb2*lt1u*mmst1 + 54*invdgb1*
+     lgu*lt1u*mmst1 + 54*invdgb2*lgu*lt1u*mmst1 + 324*invdgb1*ltu*mmst1 + 324*
+     invdgb2*ltu*mmst1 - 108*invdgb1*lt1u*ltu*mmst1 - 108*invdgb2*lt1u*ltu*
+     mmst1 - 432*invdgb1*mmst2 - 432*invdgb2*mmst2 - 108*invdgb1*lgu*mmst2 -
+     108*invdgb2*lgu*mmst2 + 108*invdgb1*lt2u*mmst2 + 108*invdgb2*lt2u*mmst2 +
+     54*invdgb1*lgu*lt2u*mmst2 + 54*invdgb2*lgu*lt2u*mmst2 + 324*invdgb1*ltu*
+     mmst2 + 324*invdgb2*ltu*mmst2 - 108*invdgb1*lt2u*ltu*mmst2 - 108*invdgb2*
+     lt2u*ltu*mmst2 + 2592*invdgb1*mmsusy + 2592*invdgb2*mmsusy - 864*invdgb1*
+     lgu*mmsusy - 864*invdgb2*lgu*mmsusy - 1728*invdgb1*lsu*mmsusy - 1728*
+     invdgb2*lsu*mmsusy + 432*invdgb1*lgu*lsu*mmsusy + 432*invdgb2*lgu*lsu*
+     mmsusy - 648*invdgb1*mmt - 648*invdgb2*mmt + 216*invdgb1*lgu*mmt + 216*
+     invdgb2*lgu*mmt + 432*invdgb1*ltu*mmt + 432*invdgb2*ltu*mmt - 108*invdgb1*
+     lgu*ltu*mmt - 108*invdgb2*lgu*ltu*mmt - 432*zt2 - 186*invdgb1*mmsb1*zt2 +
+     54*invdgb2*mmsb1*zt2 + 774*invdgb1*mmsb2*zt2 - 906*invdgb2*mmsb2*zt2 + 720
+     *invdb12*invdgb1*mmsb22*zt2 - 720*invdb12*invdgb2*mmsb22*zt2 - 54*invdgb1*
+     mmst1*zt2 - 54*invdgb2*mmst1*zt2 - 54*invdgb1*mmst2*zt2 - 54*invdgb2*mmst2
+     *zt2 + 432*invdgb1*mmsusy*zt2 + 432*invdgb2*mmsusy*zt2 - 108*invdgb1*mmt*
+     zt2 - 108*invdgb2*mmt*zt2 - 366*pow2(lb1u) + 243*invdgb1*mmsb1*pow2(lb1u)
+     + 27*invdgb2*mmsb1*pow2(lb1u) - 384*invdb12*mmsb2*pow2(lb1u) + 384*invdgb1
+     *mmsb2*pow2(lb1u) + 384*invdb12*invdgb1*mmsb22*pow2(lb1u) + 18*pow2(lb2u)
+     + 384*invdb12*mmsb2*pow2(lb2u) + 27*invdgb1*mmsb2*pow2(lb2u) - 141*invdgb2
+     *mmsb2*pow2(lb2u) - 384*invdb12*invdgb2*mmsb22*pow2(lb2u) - 1524*pow2(lgu)
+     + 255*invdgb1*mmsb1*pow2(lgu) + 27*invdgb2*mmsb1*pow2(lgu) + 1059*invdgb1*
+     mmsb2*pow2(lgu) - 777*invdgb2*mmsb2*pow2(lgu) + 1080*invdb12*invdgb1*
+     mmsb22*pow2(lgu) - 1080*invdb12*invdgb2*mmsb22*pow2(lgu) + 27*invdgb1*
+     mmst1*pow2(lgu) + 27*invdgb2*mmst1*pow2(lgu) + 27*invdgb1*mmst2*pow2(lgu)
+     + 27*invdgb2*mmst2*pow2(lgu) + 216*invdgb1*mmsusy*pow2(lgu) + 216*invdgb2*
+     mmsusy*pow2(lgu) - 54*invdgb1*mmt*pow2(lgu) - 54*invdgb2*mmt*pow2(lgu) +
+     144*pow2(lsu) + 216*invdgb1*mmsusy*pow2(lsu) + 216*invdgb2*mmsusy*pow2(lsu
+     ) + 18*pow2(lt1u) - 27*invdgb1*mmst1*pow2(lt1u) - 27*invdgb2*mmst1*pow2(
+     lt1u) + 18*pow2(lt2u) - 27*invdgb1*mmst2*pow2(lt2u) - 27*invdgb2*mmst2*
+     pow2(lt2u) + 216*pow2(ltu) - 180*invdgb1*mmsb1*pow2(ltu) - 180*invdgb2*
+     mmsb2*pow2(ltu) - 54*invdgb1*mmst1*pow2(ltu) - 54*invdgb2*mmst1*pow2(ltu)
+     - 54*invdgb1*mmst2*pow2(ltu) - 54*invdgb2*mmst2*pow2(ltu) - 54*invdgb1*mmt
+     *pow2(ltu) - 54*invdgb2*mmt*pow2(ltu) + 3840*pow2(s2b) - 1152*lb1u*pow2(
+     s2b) - 384*lb2u*pow2(s2b) - 2304*lgu*pow2(s2b) + 384*lb1u*lgu*pow2(s2b) +
+     384*lb2u*lgu*pow2(s2b) - 4926*invdgb1*mmsb1*pow2(s2b) - 144*invdgb2*mmsb1*
+     pow2(s2b) + 2268*invdgb1*lb1u*mmsb1*pow2(s2b) + 144*invdgb2*lb1u*mmsb1*
+     pow2(s2b) - 96*invdgb2*lb2u*mmsb1*pow2(s2b) + 96*invdgb2*lb1u*lb2u*mmsb1*
+     pow2(s2b) + 2208*invdgb1*lgu*mmsb1*pow2(s2b) + 96*invdgb2*lgu*mmsb1*pow2(
+     s2b) - 672*invdgb1*lb1u*lgu*mmsb1*pow2(s2b) - 96*invdgb2*lb1u*lgu*mmsb1*
+     pow2(s2b) - 7728*invdgb1*mmsb2*pow2(s2b) + 2658*invdgb2*mmsb2*pow2(s2b) -
+     768*invdb12*lb1u*mmsb2*pow2(s2b) + 1116*invdgb1*lb1u*mmsb2*pow2(s2b) - 444
+     *invdgb2*lb1u*mmsb2*pow2(s2b) + 768*invdb12*lb2u*mmsb2*pow2(s2b) + 564*
+     invdgb1*lb2u*mmsb2*pow2(s2b) + 1080*invdgb2*lb2u*mmsb2*pow2(s2b) + 18*
+     invdgb1*lb1u*lb2u*mmsb2*pow2(s2b) + 78*invdgb2*lb1u*lb2u*mmsb2*pow2(s2b) +
+     4944*invdgb1*lgu*mmsb2*pow2(s2b) - 2640*invdgb2*lgu*mmsb2*pow2(s2b) - 78*
+     invdgb1*lb1u*lgu*mmsb2*pow2(s2b) + 78*invdgb2*lb1u*lgu*mmsb2*pow2(s2b) -
+     174*invdgb1*lb2u*lgu*mmsb2*pow2(s2b) - 594*invdgb2*lb2u*lgu*mmsb2*pow2(s2b
+     ) - 7584*invdb12*invdgb1*mmsb22*pow2(s2b) + 7584*invdb12*invdgb2*mmsb22*
+     pow2(s2b) + 1236*invdb12*invdgb1*lb1u*mmsb22*pow2(s2b) - 468*invdb12*
+     invdgb2*lb1u*mmsb22*pow2(s2b) + 396*invdb12*invdgb1*lb2u*mmsb22*pow2(s2b)
+     - 1164*invdb12*invdgb2*lb2u*mmsb22*pow2(s2b) - 30*invdb12*invdgb1*lb1u*
+     lb2u*mmsb22*pow2(s2b) + 30*invdb12*invdgb2*lb1u*lb2u*mmsb22*pow2(s2b) +
+     4848*invdb12*invdgb1*lgu*mmsb22*pow2(s2b) - 4848*invdb12*invdgb2*lgu*
+     mmsb22*pow2(s2b) - 126*invdb12*invdgb1*lb1u*lgu*mmsb22*pow2(s2b) + 126*
+     invdb12*invdgb2*lb1u*lgu*mmsb22*pow2(s2b) - 126*invdb12*invdgb1*lb2u*lgu*
+     mmsb22*pow2(s2b) + 126*invdb12*invdgb2*lb2u*lgu*mmsb22*pow2(s2b) + 768*zt2
+     *pow2(s2b) - 834*invdgb1*mmsb1*zt2*pow2(s2b) - 1080*invdgb1*mmsb2*zt2*pow2
+     (s2b) + 246*invdgb2*mmsb2*zt2*pow2(s2b) - 1080*invdb12*invdgb1*mmsb22*zt2*
+     pow2(s2b) + 1080*invdb12*invdgb2*mmsb22*zt2*pow2(s2b) + 384*pow2(lb1u)*
+     pow2(s2b) - 612*invdgb1*mmsb1*pow2(lb1u)*pow2(s2b) + 384*invdb12*mmsb2*
+     pow2(lb1u)*pow2(s2b) - 462*invdgb1*mmsb2*pow2(lb1u)*pow2(s2b) + 78*invdgb2
+     *mmsb2*pow2(lb1u)*pow2(s2b) - 462*invdb12*invdgb1*mmsb22*pow2(lb1u)*pow2(
+     s2b) + 78*invdb12*invdgb2*mmsb22*pow2(lb1u)*pow2(s2b) - 384*invdb12*mmsb2*
+     pow2(lb2u)*pow2(s2b) - 78*invdgb1*mmsb2*pow2(lb2u)*pow2(s2b) - 150*invdgb2
+     *mmsb2*pow2(lb2u)*pow2(s2b) - 78*invdb12*invdgb1*mmsb22*pow2(lb2u)*pow2(
+     s2b) + 462*invdb12*invdgb2*mmsb22*pow2(lb2u)*pow2(s2b) + 384*pow2(lgu)*
+     pow2(s2b) - 384*invdgb1*mmsb1*pow2(lgu)*pow2(s2b) - 1386*invdgb1*mmsb2*
+     pow2(lgu)*pow2(s2b) + 1002*invdgb2*mmsb2*pow2(lgu)*pow2(s2b) - 1338*
+     invdb12*invdgb1*mmsb22*pow2(lgu)*pow2(s2b) + 1338*invdb12*invdgb2*mmsb22*
+     pow2(lgu)*pow2(s2b) + 144*lb1u*mmsb12*mmsb2*pow3(invdgb1) - 72*lb1u*lb2u*
+     mmsb12*mmsb2*pow3(invdgb1) - 144*lgu*mmsb12*mmsb2*pow3(invdgb1) + 72*lb2u*
+     lgu*mmsb12*mmsb2*pow3(invdgb1) + 144*lb1u*mmsb12*mmst1*pow3(invdgb1) - 144
+     *lgu*mmsb12*mmst1*pow3(invdgb1) - 72*lb1u*lt1u*mmsb12*mmst1*pow3(invdgb1)
+     + 72*lgu*lt1u*mmsb12*mmst1*pow3(invdgb1) + 144*lb1u*mmsb12*mmst2*pow3(
+     invdgb1) - 144*lgu*mmsb12*mmst2*pow3(invdgb1) - 72*lb1u*lt2u*mmsb12*mmst2*
+     pow3(invdgb1) + 72*lgu*lt2u*mmsb12*mmst2*pow3(invdgb1) + 1152*lb1u*mmsb12*
+     mmsusy*pow3(invdgb1) - 1152*lgu*mmsb12*mmsusy*pow3(invdgb1) - 576*lb1u*lsu
+     *mmsb12*mmsusy*pow3(invdgb1) + 576*lgu*lsu*mmsb12*mmsusy*pow3(invdgb1) -
+     288*lb1u*mmsb12*mmt*pow3(invdgb1) + 288*lgu*mmsb12*mmt*pow3(invdgb1) + 144
+     *lb1u*ltu*mmsb12*mmt*pow3(invdgb1) - 144*lgu*ltu*mmsb12*mmt*pow3(invdgb1)
+     - 36*mmsb12*mmsb2*pow2(lb1u)*pow3(invdgb1) - 36*mmsb12*mmst1*pow2(lb1u)*
+     pow3(invdgb1) - 36*mmsb12*mmst2*pow2(lb1u)*pow3(invdgb1) - 288*mmsb12*
+     mmsusy*pow2(lb1u)*pow3(invdgb1) + 72*mmsb12*mmt*pow2(lb1u)*pow3(invdgb1) +
+     36*mmsb12*mmsb2*pow2(lgu)*pow3(invdgb1) + 36*mmsb12*mmst1*pow2(lgu)*pow3(
+     invdgb1) + 36*mmsb12*mmst2*pow2(lgu)*pow3(invdgb1) + 288*mmsb12*mmsusy*
+     pow2(lgu)*pow3(invdgb1) - 72*mmsb12*mmt*pow2(lgu)*pow3(invdgb1) - 96*lb1u*
+     mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + 96*lb1u*lb2u*mmsb12*mmsb2*pow2(s2b)
+     *pow3(invdgb1) + 96*lgu*mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) - 96*lb2u*lgu
+     *mmsb12*mmsb2*pow2(s2b)*pow3(invdgb1) + 144*lb2u*mmsb1*mmsb22*pow3(invdgb2
+     ) - 72*lb1u*lb2u*mmsb1*mmsb22*pow3(invdgb2) - 144*lgu*mmsb1*mmsb22*pow3(
+     invdgb2) + 72*lb1u*lgu*mmsb1*mmsb22*pow3(invdgb2) + 144*lb2u*mmsb22*mmst1*
+     pow3(invdgb2) - 144*lgu*mmsb22*mmst1*pow3(invdgb2) - 72*lb2u*lt1u*mmsb22*
+     mmst1*pow3(invdgb2) + 72*lgu*lt1u*mmsb22*mmst1*pow3(invdgb2) + 144*lb2u*
+     mmsb22*mmst2*pow3(invdgb2) - 144*lgu*mmsb22*mmst2*pow3(invdgb2) - 72*lb2u*
+     lt2u*mmsb22*mmst2*pow3(invdgb2) + 72*lgu*lt2u*mmsb22*mmst2*pow3(invdgb2) +
+     1152*lb2u*mmsb22*mmsusy*pow3(invdgb2) - 1152*lgu*mmsb22*mmsusy*pow3(
+     invdgb2) - 576*lb2u*lsu*mmsb22*mmsusy*pow3(invdgb2) + 576*lgu*lsu*mmsb22*
+     mmsusy*pow3(invdgb2) - 288*lb2u*mmsb22*mmt*pow3(invdgb2) + 288*lgu*mmsb22*
+     mmt*pow3(invdgb2) + 144*lb2u*ltu*mmsb22*mmt*pow3(invdgb2) - 144*lgu*ltu*
+     mmsb22*mmt*pow3(invdgb2) - 36*mmsb1*mmsb22*pow2(lb2u)*pow3(invdgb2) - 36*
+     mmsb22*mmst1*pow2(lb2u)*pow3(invdgb2) - 36*mmsb22*mmst2*pow2(lb2u)*pow3(
+     invdgb2) - 288*mmsb22*mmsusy*pow2(lb2u)*pow3(invdgb2) + 72*mmsb22*mmt*pow2
+     (lb2u)*pow3(invdgb2) + 36*mmsb1*mmsb22*pow2(lgu)*pow3(invdgb2) + 36*mmsb22
+     *mmst1*pow2(lgu)*pow3(invdgb2) + 36*mmsb22*mmst2*pow2(lgu)*pow3(invdgb2) +
+     288*mmsb22*mmsusy*pow2(lgu)*pow3(invdgb2) - 72*mmsb22*mmt*pow2(lgu)*pow3(
+     invdgb2) - 96*lb2u*mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) + 96*lb1u*lb2u*
+     mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) + 96*lgu*mmsb1*mmsb22*pow2(s2b)*pow3(
+     invdgb2) - 96*lb1u*lgu*mmsb1*mmsb22*pow2(s2b)*pow3(invdgb2) - 2016*pow3(
+     invdgb1)*pow3(mmsb1) - 1320*lb1u*pow3(invdgb1)*pow3(mmsb1) + 3048*lgu*pow3
+     (invdgb1)*pow3(mmsb1) + 696*lb1u*lgu*pow3(invdgb1)*pow3(mmsb1) - 288*zt2*
+     pow3(invdgb1)*pow3(mmsb1) + 180*pow2(lb1u)*pow3(invdgb1)*pow3(mmsb1) -
+     1452*pow2(lgu)*pow3(invdgb1)*pow3(mmsb1) + 120*lb1u*pow2(s2b)*pow3(invdgb1
+     )*pow3(mmsb1) - 120*lgu*pow2(s2b)*pow3(invdgb1)*pow3(mmsb1) - 48*pow2(lb1u
+     )*pow2(s2b)*pow3(invdgb1)*pow3(mmsb1) + 48*pow2(lgu)*pow2(s2b)*pow3(
+     invdgb1)*pow3(mmsb1) + 24*invdgb1*lb1u*pow2(invdb12)*pow3(mmsb2) - 24*
+     invdgb2*lb1u*pow2(invdb12)*pow3(mmsb2) - 24*invdgb1*lb2u*pow2(invdb12)*
+     pow3(mmsb2) + 24*invdgb2*lb2u*pow2(invdb12)*pow3(mmsb2) + 96*invdgb1*lb1u*
+     lb2u*pow2(invdb12)*pow3(mmsb2) - 96*invdgb2*lb1u*lb2u*pow2(invdb12)*pow3(
+     mmsb2) - 96*invdgb1*lb1u*lgu*pow2(invdb12)*pow3(mmsb2) + 96*invdgb2*lb1u*
+     lgu*pow2(invdb12)*pow3(mmsb2) - 96*invdgb1*lb2u*lgu*pow2(invdb12)*pow3(
+     mmsb2) + 96*invdgb2*lb2u*lgu*pow2(invdb12)*pow3(mmsb2) + 96*invdgb1*pow2(
+     invdb12)*pow2(lgu)*pow3(mmsb2) - 96*invdgb2*pow2(invdb12)*pow2(lgu)*pow3(
+     mmsb2) + 24*invdgb1*lb1u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 24*invdgb2*
+     lb1u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 24*invdgb1*lb2u*pow2(invdb12)*
+     pow2(s2b)*pow3(mmsb2) + 24*invdgb2*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2
+     ) + 96*invdgb1*lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 96*invdgb2*
+     lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) - 96*invdgb1*lb1u*lgu*pow2(
+     invdb12)*pow2(s2b)*pow3(mmsb2) + 96*invdgb2*lb1u*lgu*pow2(invdb12)*pow2(
+     s2b)*pow3(mmsb2) - 96*invdgb1*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow3(mmsb2)
+     + 96*invdgb2*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow3(mmsb2) + 96*invdgb1*
+     pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow3(mmsb2) - 96*invdgb2*pow2(invdb12)*
+     pow2(lgu)*pow2(s2b)*pow3(mmsb2) - 2016*pow3(invdgb2)*pow3(mmsb2) - 1320*
+     lb2u*pow3(invdgb2)*pow3(mmsb2) + 3048*lgu*pow3(invdgb2)*pow3(mmsb2) + 696*
+     lb2u*lgu*pow3(invdgb2)*pow3(mmsb2) - 288*zt2*pow3(invdgb2)*pow3(mmsb2) +
+     180*pow2(lb2u)*pow3(invdgb2)*pow3(mmsb2) - 1452*pow2(lgu)*pow3(invdgb2)*
+     pow3(mmsb2) + 120*lb2u*pow2(s2b)*pow3(invdgb2)*pow3(mmsb2) - 120*lgu*pow2(
+     s2b)*pow3(invdgb2)*pow3(mmsb2) - 48*pow2(lb2u)*pow2(s2b)*pow3(invdgb2)*
+     pow3(mmsb2) + 48*pow2(lgu)*pow2(s2b)*pow3(invdgb2)*pow3(mmsb2) - (96*
+     invdgb1*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (96*invdgb2*mmgl*mmsb1*pow3(s2b))
+     /(mb*mgl) + (192*invdgb1*lb1u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb2
+     *lb1u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (96*invdgb2*lb2u*mmgl*mmsb1*pow3(
+     s2b))/(mb*mgl) + (96*invdgb2*lb1u*lb2u*mmgl*mmsb1*pow3(s2b))/(mb*mgl) - (
+     96*invdgb1*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb2*lgu*mmgl*mmsb1
+     *pow3(s2b))/(mb*mgl) + (96*invdgb1*lb1u*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl)
+     - (96*invdgb2*lb1u*lgu*mmgl*mmsb1*pow3(s2b))/(mb*mgl) + (96*invdgb1*mmgl*
+     mmsb2*pow3(s2b))/(mb*mgl) + (96*invdgb2*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     96*invdgb1*lb1u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lb2u*mmgl*
+     mmsb2*pow3(s2b))/(mb*mgl) - (192*invdgb2*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*
+     mgl) + (96*invdgb1*lb1u*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (192*invdgb2
+     *lb1u*lb2u*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lgu*mmgl*mmsb2*
+     pow3(s2b))/(mb*mgl) + (96*invdgb2*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     192*invdgb1*lb1u*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (192*invdgb2*lb1u*
+     lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) - (96*invdgb1*lb2u*lgu*mmgl*mmsb2*pow3(
+     s2b))/(mb*mgl) + (96*invdgb2*lb2u*lgu*mmgl*mmsb2*pow3(s2b))/(mb*mgl) + (
+     192*invdb12*invdgb1*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*
+     invdb12*invdgb2*lb1u*lb2u*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*invdb12*
+     invdgb1*lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb2*
+     lb1u*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb1*lb2u*lgu*
+     mmgl*mmsb22*pow3(s2b))/(mb*mgl) + (192*invdb12*invdgb2*lb2u*lgu*mmgl*
+     mmsb22*pow3(s2b))/(mb*mgl) - (96*invdgb1*mmgl*mmsb1*pow2(lb1u)*pow3(s2b))/
+     (mb*mgl) - (192*invdgb1*mmgl*mmsb2*pow2(lb1u)*pow3(s2b))/(mb*mgl) - (192*
+     invdb12*invdgb1*mmgl*mmsb22*pow2(lb1u)*pow3(s2b))/(mb*mgl) - (96*invdgb2*
+     mmgl*mmsb2*pow2(lb2u)*pow3(s2b))/(mb*mgl) - (192*invdb12*invdgb2*mmgl*
+     mmsb22*pow2(lb2u)*pow3(s2b))/(mb*mgl) - 72*lb1u*lgu*pow4(invdgb1)*pow4(
+     mmsb1) + 36*pow2(lb1u)*pow4(invdgb1)*pow4(mmsb1) + 36*pow2(lgu)*pow4(
+     invdgb1)*pow4(mmsb1) + 24*lb1u*lgu*pow2(s2b)*pow4(invdgb1)*pow4(mmsb1) -
+     12*pow2(lb1u)*pow2(s2b)*pow4(invdgb1)*pow4(mmsb1) - 12*pow2(lgu)*pow2(s2b)
+     *pow4(invdgb1)*pow4(mmsb1) + 48*invdgb1*lb1u*lb2u*pow3(invdb12)*pow4(mmsb2
+     ) - 48*invdgb2*lb1u*lb2u*pow3(invdb12)*pow4(mmsb2) - 48*invdgb1*lb1u*lgu*
+     pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb1u*lgu*pow3(invdb12)*pow4(mmsb2)
+     - 48*invdgb1*lb2u*lgu*pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb2u*lgu*pow3
+     (invdb12)*pow4(mmsb2) + 48*invdgb1*pow2(lgu)*pow3(invdb12)*pow4(mmsb2) -
+     48*invdgb2*pow2(lgu)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb1*lb1u*lb2u*pow2
+     (s2b)*pow3(invdb12)*pow4(mmsb2) - 48*invdgb2*lb1u*lb2u*pow2(s2b)*pow3(
+     invdb12)*pow4(mmsb2) - 48*invdgb1*lb1u*lgu*pow2(s2b)*pow3(invdb12)*pow4(
+     mmsb2) + 48*invdgb2*lb1u*lgu*pow2(s2b)*pow3(invdb12)*pow4(mmsb2) - 48*
+     invdgb1*lb2u*lgu*pow2(s2b)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb2*lb2u*lgu
+     *pow2(s2b)*pow3(invdb12)*pow4(mmsb2) + 48*invdgb1*pow2(lgu)*pow2(s2b)*pow3
+     (invdb12)*pow4(mmsb2) - 48*invdgb2*pow2(lgu)*pow2(s2b)*pow3(invdb12)*pow4(
+     mmsb2) - 72*lb2u*lgu*pow4(invdgb2)*pow4(mmsb2) + 36*pow2(lb2u)*pow4(
+     invdgb2)*pow4(mmsb2) + 36*pow2(lgu)*pow4(invdgb2)*pow4(mmsb2) + 24*lb2u*
+     lgu*pow2(s2b)*pow4(invdgb2)*pow4(mmsb2) - 12*pow2(lb2u)*pow2(s2b)*pow4(
+     invdgb2)*pow4(mmsb2) - 12*pow2(lgu)*pow2(s2b)*pow4(invdgb2)*pow4(mmsb2) +
+     3*pow2(invdgb1)*(2444*mmsb12 + 320*lb1u*mmsb12 - 2208*lgu*mmsb12 - 226*
+     lb1u*lgu*mmsb12 - 288*ltu*mmsb12 + 48*lb1u*ltu*mmsb12 + 48*lgu*ltu*mmsb12
+     - 144*mmsb1*mmsb2 - 28*lb1u*mmsb1*mmsb2 + 96*lb2u*mmsb1*mmsb2 + 34*lb1u*
+     lb2u*mmsb1*mmsb2 + 76*lgu*mmsb1*mmsb2 - 16*lb1u*lgu*mmsb1*mmsb2 - 58*lb2u*
+     lgu*mmsb1*mmsb2 + 8*lb1u*mmsb22 + 24*lb1u*lb2u*mmsb22 - 8*lgu*mmsb22 - 24*
+     lb1u*lgu*mmsb22 - 24*lb2u*lgu*mmsb22 + 192*mmsb1*mmst1 - 36*lb1u*mmsb1*
+     mmst1 + 84*lgu*mmsb1*mmst1 - 48*lt1u*mmsb1*mmst1 + 18*lb1u*lt1u*mmsb1*
+     mmst1 - 42*lgu*lt1u*mmsb1*mmst1 - 144*ltu*mmsb1*mmst1 + 48*lt1u*ltu*mmsb1*
+     mmst1 + 192*mmsb1*mmst2 - 36*lb1u*mmsb1*mmst2 + 84*lgu*mmsb1*mmst2 - 48*
+     lt2u*mmsb1*mmst2 + 18*lb1u*lt2u*mmsb1*mmst2 - 42*lgu*lt2u*mmsb1*mmst2 -
+     144*ltu*mmsb1*mmst2 + 48*lt2u*ltu*mmsb1*mmst2 - 1152*mmsb1*mmsusy - 288*
+     lb1u*mmsb1*mmsusy + 672*lgu*mmsb1*mmsusy + 768*lsu*mmsb1*mmsusy + 144*lb1u
+     *lsu*mmsb1*mmsusy - 336*lgu*lsu*mmsb1*mmsusy + 288*mmsb1*mmt + 72*lb1u*
+     mmsb1*mmt - 168*lgu*mmsb1*mmt - 192*ltu*mmsb1*mmt - 36*lb1u*ltu*mmsb1*mmt
+     + 84*lgu*ltu*mmsb1*mmt + 360*mmsb12*zt2 - 24*mmsb1*mmsb2*zt2 + 24*mmsb1*
+     mmst1*zt2 + 24*mmsb1*mmst2*zt2 - 192*mmsb1*mmsusy*zt2 + 48*mmsb1*mmt*zt2 -
+     12*mmsb1*mmsb2*pow2(lb2u) + 853*mmsb12*pow2(lgu) - 5*mmsb1*mmsb2*pow2(lgu)
+     + 24*mmsb22*pow2(lgu) - 21*mmsb1*mmst1*pow2(lgu) - 21*mmsb1*mmst2*pow2(lgu
+     ) - 168*mmsb1*mmsusy*pow2(lgu) + 42*mmsb1*mmt*pow2(lgu) - 96*mmsb1*mmsusy*
+     pow2(lsu) + 12*mmsb1*mmst1*pow2(lt1u) + 12*mmsb1*mmst2*pow2(lt2u) + 48*
+     mmsb12*pow2(ltu) + 24*mmsb1*mmst1*pow2(ltu) + 24*mmsb1*mmst2*pow2(ltu) +
+     24*mmsb1*mmt*pow2(ltu) - 36*mmsb12*pow2(s2b) - 460*lb1u*mmsb12*pow2(s2b) +
+     492*lgu*mmsb12*pow2(s2b) + 54*lb1u*lgu*mmsb12*pow2(s2b) + 32*mmsb1*mmsb2*
+     pow2(s2b) + 72*lb1u*mmsb1*mmsb2*pow2(s2b) - 32*lb2u*mmsb1*mmsb2*pow2(s2b)
+     - 48*lb1u*lb2u*mmsb1*mmsb2*pow2(s2b) - 72*lgu*mmsb1*mmsb2*pow2(s2b) - 16*
+     lb1u*lgu*mmsb1*mmsb2*pow2(s2b) + 48*lb2u*lgu*mmsb1*mmsb2*pow2(s2b) + 8*
+     lb1u*mmsb22*pow2(s2b) + 24*lb1u*lb2u*mmsb22*pow2(s2b) - 8*lgu*mmsb22*pow2(
+     s2b) - 24*lb1u*lgu*mmsb22*pow2(s2b) - 24*lb2u*lgu*mmsb22*pow2(s2b) - 175*
+     mmsb12*pow2(lgu)*pow2(s2b) + 16*mmsb1*mmsb2*pow2(lgu)*pow2(s2b) + 24*
+     mmsb22*pow2(lgu)*pow2(s2b) + 8*invdb12*lb1u*pow3(mmsb2) + 32*invdb12*lb1u*
+     lb2u*pow3(mmsb2) - 8*invdb12*lgu*pow3(mmsb2) - 32*invdb12*lb1u*lgu*pow3(
+     mmsb2) - 32*invdb12*lb2u*lgu*pow3(mmsb2) + 32*invdb12*pow2(lgu)*pow3(mmsb2
+     ) + 8*invdb12*lb1u*pow2(s2b)*pow3(mmsb2) + 32*invdb12*lb1u*lb2u*pow2(s2b)*
+     pow3(mmsb2) - 8*invdb12*lgu*pow2(s2b)*pow3(mmsb2) - 32*invdb12*lb1u*lgu*
+     pow2(s2b)*pow3(mmsb2) - 32*invdb12*lb2u*lgu*pow2(s2b)*pow3(mmsb2) + 32*
+     invdb12*pow2(lgu)*pow2(s2b)*pow3(mmsb2) + (32*lb1u*mmgl*mmsb12*pow3(s2b))/
+     (mb*mgl) - (32*lgu*mmgl*mmsb12*pow3(s2b))/(mb*mgl) + (32*lb1u*lgu*mmgl*
+     mmsb12*pow3(s2b))/(mb*mgl) - (32*lb1u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl)
+     + (32*lb1u*lb2u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) + (32*lgu*mmgl*mmsb1*
+     mmsb2*pow3(s2b))/(mb*mgl) - (32*lb2u*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*
+     mgl) + pow2(lb1u)*(-51*mmsb12 + 9*mmsb1*(mmsb2 + mmst1 + mmst2 + 8*mmsusy
+     - 2*mmt) + 121*mmsb12*pow2(s2b) - (32*mmgl*mmsb12*pow3(s2b))/(mb*mgl)) + 8
+     *lb1u*lb2u*pow2(invdb12)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*pow4(mmsb2
+     ) - 8*lb2u*lgu*pow2(invdb12)*pow4(mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow4(
+     mmsb2) + 8*lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb1u*lgu*pow2
+     (invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow4(
+     mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow4(mmsb2)) + 3*pow2(invdgb2
+     )*(-144*mmsb1*mmsb2 + 96*lb1u*mmsb1*mmsb2 - 36*lb2u*mmsb1*mmsb2 + 18*lb1u*
+     lb2u*mmsb1*mmsb2 + 84*lgu*mmsb1*mmsb2 - 42*lb1u*lgu*mmsb1*mmsb2 + 2444*
+     mmsb22 + 312*lb2u*mmsb22 - 8*lb1u*lb2u*mmsb22 - 2200*lgu*mmsb22 + 8*lb1u*
+     lgu*mmsb22 - 218*lb2u*lgu*mmsb22 - 288*ltu*mmsb22 + 48*lb2u*ltu*mmsb22 +
+     48*lgu*ltu*mmsb22 + 192*mmsb2*mmst1 - 36*lb2u*mmsb2*mmst1 + 84*lgu*mmsb2*
+     mmst1 - 48*lt1u*mmsb2*mmst1 + 18*lb2u*lt1u*mmsb2*mmst1 - 42*lgu*lt1u*mmsb2
+     *mmst1 - 144*ltu*mmsb2*mmst1 + 48*lt1u*ltu*mmsb2*mmst1 + 192*mmsb2*mmst2 -
+     36*lb2u*mmsb2*mmst2 + 84*lgu*mmsb2*mmst2 - 48*lt2u*mmsb2*mmst2 + 18*lb2u*
+     lt2u*mmsb2*mmst2 - 42*lgu*lt2u*mmsb2*mmst2 - 144*ltu*mmsb2*mmst2 + 48*lt2u
+     *ltu*mmsb2*mmst2 - 1152*mmsb2*mmsusy - 288*lb2u*mmsb2*mmsusy + 672*lgu*
+     mmsb2*mmsusy + 768*lsu*mmsb2*mmsusy + 144*lb2u*lsu*mmsb2*mmsusy - 336*lgu*
+     lsu*mmsb2*mmsusy + 288*mmsb2*mmt + 72*lb2u*mmsb2*mmt - 168*lgu*mmsb2*mmt -
+     192*ltu*mmsb2*mmt - 36*lb2u*ltu*mmsb2*mmt + 84*lgu*ltu*mmsb2*mmt - 24*
+     mmsb1*mmsb2*zt2 + 360*mmsb22*zt2 + 24*mmsb2*mmst1*zt2 + 24*mmsb2*mmst2*zt2
+      - 192*mmsb2*mmsusy*zt2 + 48*mmsb2*mmt*zt2 - 12*mmsb1*mmsb2*pow2(lb1u) -
+     21*mmsb1*mmsb2*pow2(lgu) + 845*mmsb22*pow2(lgu) - 21*mmsb2*mmst1*pow2(lgu)
+     - 21*mmsb2*mmst2*pow2(lgu) - 168*mmsb2*mmsusy*pow2(lgu) + 42*mmsb2*mmt*
+     pow2(lgu) - 96*mmsb2*mmsusy*pow2(lsu) + 12*mmsb2*mmst1*pow2(lt1u) + 12*
+     mmsb2*mmst2*pow2(lt2u) + 48*mmsb22*pow2(ltu) + 24*mmsb2*mmst1*pow2(ltu) +
+     24*mmsb2*mmst2*pow2(ltu) + 24*mmsb2*mmt*pow2(ltu) + 32*mmsb1*mmsb2*pow2(
+     s2b) - 32*lb1u*mmsb1*mmsb2*pow2(s2b) + 64*lb2u*mmsb1*mmsb2*pow2(s2b) - 64*
+     lb1u*lb2u*mmsb1*mmsb2*pow2(s2b) - 64*lgu*mmsb1*mmsb2*pow2(s2b) + 64*lb1u*
+     lgu*mmsb1*mmsb2*pow2(s2b) - 36*mmsb22*pow2(s2b) - 468*lb2u*mmsb22*pow2(s2b
+     ) - 8*lb1u*lb2u*mmsb22*pow2(s2b) + 500*lgu*mmsb22*pow2(s2b) + 8*lb1u*lgu*
+     mmsb22*pow2(s2b) + 62*lb2u*lgu*mmsb22*pow2(s2b) - 183*mmsb22*pow2(lgu)*
+     pow2(s2b) - 8*invdb12*lb2u*pow3(mmsb2) + 8*invdb12*lgu*pow3(mmsb2) - 8*
+     invdb12*lb2u*pow2(s2b)*pow3(mmsb2) + 8*invdb12*lgu*pow2(s2b)*pow3(mmsb2) +
+     (32*lb2u*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) - (32*lb1u*lb2u*mmgl*mmsb1*
+     mmsb2*pow3(s2b))/(mb*mgl) - (32*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) +
+     (32*lb1u*lgu*mmgl*mmsb1*mmsb2*pow3(s2b))/(mb*mgl) - (32*lb2u*mmgl*mmsb22*
+     pow3(s2b))/(mb*mgl) + (32*lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) - (32*lb2u*
+     lgu*mmgl*mmsb22*pow3(s2b))/(mb*mgl) + pow2(lb2u)*(9*mmsb1*mmsb2 - 51*
+     mmsb22 + 9*mmsb2*mmst1 + 9*mmsb2*mmst2 + 72*mmsb2*mmsusy - 18*mmsb2*mmt +
+     121*mmsb22*pow2(s2b) + (32*mmgl*mmsb22*pow3(s2b))/(mb*mgl)) + 8*lb1u*lb2u*
+     pow2(invdb12)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*pow4(mmsb2) - 8*lb2u*
+     lgu*pow2(invdb12)*pow4(mmsb2) + 8*pow2(invdb12)*pow2(lgu)*pow4(mmsb2) + 8*
+     lb1u*lb2u*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) - 8*lb1u*lgu*pow2(invdb12)*
+     pow2(s2b)*pow4(mmsb2) - 8*lb2u*lgu*pow2(invdb12)*pow2(s2b)*pow4(mmsb2) + 8
+     *pow2(invdb12)*pow2(lgu)*pow2(s2b)*pow4(mmsb2)))/54. + DeltaInv(mmt,mmsb2,
+     mmst1)*((2*mmgl*s2t*pow2(invdgb2)*(-14*mmsb22*mmst1*mmt + 6*lb2u*mmsb22*
+     mmst1*mmt - 6*lt1u*mmsb22*mmst1*mmt + 2*lb2u*lt1u*mmsb22*mmst1*mmt + 12*
+     ltu*mmsb22*mmst1*mmt - 4*lb2u*ltu*mmsb22*mmst1*mmt - 2*mmsb22*mmst1*mmt*
+     zt2 - 2*mmsb22*mmst1*mmt*pow2(ltu) + 6*lt1u*mmsb2*mmt*pow2(mmst1) - 2*lb2u
+     *lt1u*mmsb2*mmt*pow2(mmst1) - 6*ltu*mmsb2*mmt*pow2(mmst1) + 2*lb2u*ltu*
+     mmsb2*mmt*pow2(mmst1) + mmsb2*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb22*pow2(
+     mmt) + 6*lb2u*mmsb22*pow2(mmt) + 6*ltu*mmsb22*pow2(mmt) - 2*lb2u*ltu*
+     mmsb22*pow2(mmt) - 28*mmsb2*mmst1*pow2(mmt) + 6*lt1u*mmsb2*mmst1*pow2(mmt)
+     + 2*lb2u*lt1u*mmsb2*mmst1*pow2(mmt) + 18*ltu*mmsb2*mmst1*pow2(mmt) - 2*
+     lb2u*ltu*mmsb2*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb2*mmst1*pow2(mmt) - 2*
+     mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst1*zt2*pow2(mmt) - mmsb22*pow2(ltu)*pow2
+     (mmt) - 3*mmsb2*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(mmsb22*mmst1*mmt -
+     mmsb2*mmt*pow2(mmst1) - mmsb2*mmst1*pow2(mmt)) + 14*mmt*pow3(mmsb2) - 6*
+     lb2u*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2) + 2*lb2u*ltu*mmt*pow3(mmsb2)
+     + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(mmsb2) - pow2(lb2u)*(mmsb22*
+     mmst1*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2))))/(3.*mgl*mt) + (-(invdgb2
+     *(14*mmsb22*mmst1 - 12*lb2u*mmsb22*mmst1 + 6*lt1u*mmsb22*mmst1 - 6*ltu*
+     mmsb22*mmst1 + 4*lb2u*ltu*mmsb22*mmst1 - 2*lt1u*ltu*mmsb22*mmst1 + 14*
+     mmsb22*mmt - 6*lb2u*mmsb22*mmt - 6*ltu*mmsb22*mmt + 2*lb2u*ltu*mmsb22*mmt
+     + 56*mmsb2*mmst1*mmt - 6*lb2u*mmsb2*mmst1*mmt - 6*lt1u*mmsb2*mmst1*mmt - 4
+     *lb2u*lt1u*mmsb2*mmst1*mmt - 36*ltu*mmsb2*mmst1*mmt + 6*lb2u*ltu*mmsb2*
+     mmst1*mmt + 6*lt1u*ltu*mmsb2*mmst1*mmt + 2*mmsb22*mmst1*zt2 + 2*mmsb22*mmt
+     *zt2 + 8*mmsb2*mmst1*mmt*zt2 + mmsb22*mmst1*pow2(ltu) + mmsb22*mmt*pow2(
+     ltu) + 6*mmsb2*mmst1*mmt*pow2(ltu) + 14*mmsb2*pow2(mmst1) + 6*lb2u*mmsb2*
+     pow2(mmst1) - 12*lt1u*mmsb2*pow2(mmst1) - 6*ltu*mmsb2*pow2(mmst1) - 2*lb2u
+     *ltu*mmsb2*pow2(mmst1) + 4*lt1u*ltu*mmsb2*pow2(mmst1) + 14*mmt*pow2(mmst1)
+     - 6*lt1u*mmt*pow2(mmst1) - 6*ltu*mmt*pow2(mmst1) + 2*lt1u*ltu*mmt*pow2(
+     mmst1) + 2*mmsb2*zt2*pow2(mmst1) + 2*mmt*zt2*pow2(mmst1) + mmsb2*pow2(ltu)
+     *pow2(mmst1) + mmt*pow2(ltu)*pow2(mmst1) + pow2(lb2u)*(2*mmsb22*mmst1 +
+     mmsb22*mmt + mmsb2*mmst1*mmt - mmsb2*pow2(mmst1) - pow3(mmsb2)) - 14*pow3(
+     mmsb2) + 6*lb2u*pow3(mmsb2) + 6*ltu*pow3(mmsb2) - 2*lb2u*ltu*pow3(mmsb2) -
+     2*zt2*pow3(mmsb2) - pow2(ltu)*pow3(mmsb2) + pow2(lt1u)*(-(mmsb22*mmst1) +
+     mmsb2*mmst1*mmt + (2*mmsb2 + mmt)*pow2(mmst1) - pow3(mmst1)) - 14*pow3(
+     mmst1) + 6*lt1u*pow3(mmst1) + 6*ltu*pow3(mmst1) - 2*lt1u*ltu*pow3(mmst1) -
+     2*zt2*pow3(mmst1) - pow2(ltu)*pow3(mmst1))) - 2*pow2(invdgb2)*(-56*mmsb22*
+     mmst1*mmt + 6*lb2u*mmsb22*mmst1*mmt + 6*lt1u*mmsb22*mmst1*mmt + 4*lb2u*
+     lt1u*mmsb22*mmst1*mmt + 36*ltu*mmsb22*mmst1*mmt - 6*lb2u*ltu*mmsb22*mmst1*
+     mmt - 6*lt1u*ltu*mmsb22*mmst1*mmt - 8*mmsb22*mmst1*mmt*zt2 - 6*mmsb22*
+     mmst1*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst1) - 6*lb2u*mmsb22*pow2(mmst1) +
+     12*lt1u*mmsb22*pow2(mmst1) + 6*ltu*mmsb22*pow2(mmst1) + 2*lb2u*ltu*mmsb22*
+     pow2(mmst1) - 4*lt1u*ltu*mmsb22*pow2(mmst1) - 14*mmsb2*mmt*pow2(mmst1) + 6
+     *lt1u*mmsb2*mmt*pow2(mmst1) + 6*ltu*mmsb2*mmt*pow2(mmst1) - 2*lt1u*ltu*
+     mmsb2*mmt*pow2(mmst1) - 2*mmsb22*zt2*pow2(mmst1) - 2*mmsb2*mmt*zt2*pow2(
+     mmst1) - mmsb22*pow2(ltu)*pow2(mmst1) - mmsb2*mmt*pow2(ltu)*pow2(mmst1) -
+     14*mmst1*pow3(mmsb2) + 12*lb2u*mmst1*pow3(mmsb2) - 6*lt1u*mmst1*pow3(mmsb2
+     ) + 6*ltu*mmst1*pow3(mmsb2) - 4*lb2u*ltu*mmst1*pow3(mmsb2) + 2*lt1u*ltu*
+     mmst1*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lb2u*mmt*pow3(mmsb2) + 6*ltu*
+     mmt*pow3(mmsb2) - 2*lb2u*ltu*mmt*pow3(mmsb2) - 2*mmst1*zt2*pow3(mmsb2) - 2
+     *mmt*zt2*pow3(mmsb2) - mmst1*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*pow3(
+     mmsb2) + 14*mmsb2*pow3(mmst1) - 6*lt1u*mmsb2*pow3(mmst1) - 6*ltu*mmsb2*
+     pow3(mmst1) + 2*lt1u*ltu*mmsb2*pow3(mmst1) + 2*mmsb2*zt2*pow3(mmst1) +
+     mmsb2*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb22*mmst1*mmt) - (2*mmsb22
+     + mmsb2*mmt)*pow2(mmst1) + mmst1*pow3(mmsb2) + mmsb2*pow3(mmst1)) + 14*
+     pow4(mmsb2) - 6*lb2u*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lb2u*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lb2u)*(-(mmsb22*
+     mmst1*mmt) + mmsb22*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     ))))/3.) + DeltaInv(mmt,mmst1,mmgl)*(s2t*((-4*s2b*(14*mmgl*mmsb1*mmt - 6*
+     lgu*mmgl*mmsb1*mmt - 6*ltu*mmgl*mmsb1*mmt + 2*lgu*ltu*mmgl*mmsb1*mmt + 14*
+     mmsb12*mmt - 6*lgu*mmsb12*mmt - 6*ltu*mmsb12*mmt + 2*lgu*ltu*mmsb12*mmt -
+     14*mmgl*mmsb2*mmt + 6*lgu*mmgl*mmsb2*mmt + 6*ltu*mmgl*mmsb2*mmt - 2*lgu*
+     ltu*mmgl*mmsb2*mmt - 14*mmsb22*mmt + 6*lgu*mmsb22*mmt + 6*ltu*mmsb22*mmt -
+     2*lgu*ltu*mmsb22*mmt - 14*mmsb1*mmst1*mmt + 6*lgu*mmsb1*mmst1*mmt - 6*lt1u
+     *mmsb1*mmst1*mmt + 2*lgu*lt1u*mmsb1*mmst1*mmt + 12*ltu*mmsb1*mmst1*mmt - 4
+     *lgu*ltu*mmsb1*mmst1*mmt + 14*invdgb1*mmsb12*mmst1*mmt - 6*invdgb1*lgu*
+     mmsb12*mmst1*mmt + 6*invdgb1*lt1u*mmsb12*mmst1*mmt - 2*invdgb1*lgu*lt1u*
+     mmsb12*mmst1*mmt - 12*invdgb1*ltu*mmsb12*mmst1*mmt + 4*invdgb1*lgu*ltu*
+     mmsb12*mmst1*mmt + 14*mmsb2*mmst1*mmt - 6*lgu*mmsb2*mmst1*mmt + 6*lt1u*
+     mmsb2*mmst1*mmt - 2*lgu*lt1u*mmsb2*mmst1*mmt - 12*ltu*mmsb2*mmst1*mmt + 4*
+     lgu*ltu*mmsb2*mmst1*mmt - 14*invdgb2*mmsb22*mmst1*mmt + 6*invdgb2*lgu*
+     mmsb22*mmst1*mmt - 6*invdgb2*lt1u*mmsb22*mmst1*mmt + 2*invdgb2*lgu*lt1u*
+     mmsb22*mmst1*mmt + 12*invdgb2*ltu*mmsb22*mmst1*mmt - 4*invdgb2*lgu*ltu*
+     mmsb22*mmst1*mmt + 2*mmgl*mmsb1*mmt*zt2 + 2*mmsb12*mmt*zt2 - 2*mmgl*mmsb2*
+     mmt*zt2 - 2*mmsb22*mmt*zt2 - 2*mmsb1*mmst1*mmt*zt2 + 2*invdgb1*mmsb12*
+     mmst1*mmt*zt2 + 2*mmsb2*mmst1*mmt*zt2 - 2*invdgb2*mmsb22*mmst1*mmt*zt2 +
+     mmgl*mmsb1*mmt*pow2(ltu) + mmsb12*mmt*pow2(ltu) - mmgl*mmsb2*mmt*pow2(ltu)
+     - mmsb22*mmt*pow2(ltu) - 2*mmsb1*mmst1*mmt*pow2(ltu) + 2*invdgb1*mmsb12*
+     mmst1*mmt*pow2(ltu) + 2*mmsb2*mmst1*mmt*pow2(ltu) - 2*invdgb2*mmsb22*mmst1
+     *mmt*pow2(ltu) - 6*invdgb1*lt1u*mmsb1*mmt*pow2(mmst1) + 2*invdgb1*lgu*lt1u
+     *mmsb1*mmt*pow2(mmst1) + 6*invdgb1*ltu*mmsb1*mmt*pow2(mmst1) - 2*invdgb1*
+     lgu*ltu*mmsb1*mmt*pow2(mmst1) + 6*invdgb2*lt1u*mmsb2*mmt*pow2(mmst1) - 2*
+     invdgb2*lgu*lt1u*mmsb2*mmt*pow2(mmst1) - 6*invdgb2*ltu*mmsb2*mmt*pow2(
+     mmst1) + 2*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst1) - invdgb1*mmsb1*mmt*pow2(
+     ltu)*pow2(mmst1) + invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst1) - 14*mmsb1*pow2
+     (mmt) + 6*lgu*mmsb1*pow2(mmt) + 6*ltu*mmsb1*pow2(mmt) - 2*lgu*ltu*mmsb1*
+     pow2(mmt) + 14*invdgb1*mmsb12*pow2(mmt) - 6*invdgb1*lgu*mmsb12*pow2(mmt) -
+     6*invdgb1*ltu*mmsb12*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb12*pow2(mmt) + 14*
+     mmsb2*pow2(mmt) - 6*lgu*mmsb2*pow2(mmt) - 6*ltu*mmsb2*pow2(mmt) + 2*lgu*
+     ltu*mmsb2*pow2(mmt) - 14*invdgb2*mmsb22*pow2(mmt) + 6*invdgb2*lgu*mmsb22*
+     pow2(mmt) + 6*invdgb2*ltu*mmsb22*pow2(mmt) - 2*invdgb2*lgu*ltu*mmsb22*pow2
+     (mmt) + 28*invdgb1*mmsb1*mmst1*pow2(mmt) - 6*invdgb1*lt1u*mmsb1*mmst1*pow2
+     (mmt) - 2*invdgb1*lgu*lt1u*mmsb1*mmst1*pow2(mmt) - 18*invdgb1*ltu*mmsb1*
+     mmst1*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb1*mmst1*pow2(mmt) + 4*invdgb1*lt1u
+     *ltu*mmsb1*mmst1*pow2(mmt) - 28*invdgb2*mmsb2*mmst1*pow2(mmt) + 6*invdgb2*
+     lt1u*mmsb2*mmst1*pow2(mmt) + 2*invdgb2*lgu*lt1u*mmsb2*mmst1*pow2(mmt) + 18
+     *invdgb2*ltu*mmsb2*mmst1*pow2(mmt) - 2*invdgb2*lgu*ltu*mmsb2*mmst1*pow2(
+     mmt) - 4*invdgb2*lt1u*ltu*mmsb2*mmst1*pow2(mmt) - 2*mmsb1*zt2*pow2(mmt) +
+     2*invdgb1*mmsb12*zt2*pow2(mmt) + 2*mmsb2*zt2*pow2(mmt) - 2*invdgb2*mmsb22*
+     zt2*pow2(mmt) + 4*invdgb1*mmsb1*mmst1*zt2*pow2(mmt) - 4*invdgb2*mmsb2*
+     mmst1*zt2*pow2(mmt) - mmsb1*pow2(ltu)*pow2(mmt) + invdgb1*mmsb12*pow2(ltu)
+     *pow2(mmt) + mmsb2*pow2(ltu)*pow2(mmt) - invdgb2*mmsb22*pow2(ltu)*pow2(mmt
+     ) + 3*invdgb1*mmsb1*mmst1*pow2(ltu)*pow2(mmt) - 3*invdgb2*mmsb2*mmst1*pow2
+     (ltu)*pow2(mmt) + pow2(lt1u)*((mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*
+     mmsb22)*mmst1*mmt + (invdgb1*mmsb1 - invdgb2*mmsb2)*mmt*pow2(mmst1) + (
+     invdgb1*mmsb1 - invdgb2*mmsb2)*mmst1*pow2(mmt)) - 14*invdgb1*mmt*pow3(
+     mmsb1) + 6*invdgb1*lgu*mmt*pow3(mmsb1) + 6*invdgb1*ltu*mmt*pow3(mmsb1) - 2
+     *invdgb1*lgu*ltu*mmt*pow3(mmsb1) - 2*invdgb1*mmt*zt2*pow3(mmsb1) - invdgb1
+     *mmt*pow2(ltu)*pow3(mmsb1) + 14*invdgb2*mmt*pow3(mmsb2) - 6*invdgb2*lgu*
+     mmt*pow3(mmsb2) - 6*invdgb2*ltu*mmt*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmt*
+     pow3(mmsb2) + 2*invdgb2*mmt*zt2*pow3(mmsb2) + invdgb2*mmt*pow2(ltu)*pow3(
+     mmsb2) + pow2(lgu)*((-mmsb1 + invdgb1*mmsb12 + mmsb2 - invdgb2*mmsb22)*
+     pow2(mmt) + mmt*(mmgl*mmsb1 + mmsb12 - mmgl*mmsb2 - mmsb22 - mmsb1*mmst1 +
+     invdgb1*mmsb12*mmst1 + mmsb2*mmst1 - invdgb2*mmsb22*mmst1 - invdgb1*pow3(
+     mmsb1) + invdgb2*pow3(mmsb2)))))/(3.*mb*mt) + (2*(28*mmgl2*mmt - 12*lgu*
+     mmgl2*mmt - 12*ltu*mmgl2*mmt + 4*lgu*ltu*mmgl2*mmt + 28*mmgl*mmsb1*mmt -
+     12*lgu*mmgl*mmsb1*mmt - 12*ltu*mmgl*mmsb1*mmt + 4*lgu*ltu*mmgl*mmsb1*mmt -
+     42*invdgb1*mmgl*mmsb12*mmt + 18*invdgb1*lgu*mmgl*mmsb12*mmt + 18*invdgb1*
+     ltu*mmgl*mmsb12*mmt - 6*invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 28*mmgl*mmsb2*
+     mmt - 12*lgu*mmgl*mmsb2*mmt - 12*ltu*mmgl*mmsb2*mmt + 4*lgu*ltu*mmgl*mmsb2
+     *mmt - 42*invdgb2*mmgl*mmsb22*mmt + 18*invdgb2*lgu*mmgl*mmsb22*mmt + 18*
+     invdgb2*ltu*mmgl*mmsb22*mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb22*mmt - 28*mmgl*
+     mmst1*mmt + 12*lgu*mmgl*mmst1*mmt - 12*lt1u*mmgl*mmst1*mmt + 4*lgu*lt1u*
+     mmgl*mmst1*mmt + 24*ltu*mmgl*mmst1*mmt - 8*lgu*ltu*mmgl*mmst1*mmt + 28*
+     invdgb1*mmgl*mmsb1*mmst1*mmt - 12*invdgb1*lgu*mmgl*mmsb1*mmst1*mmt + 12*
+     invdgb1*lt1u*mmgl*mmsb1*mmst1*mmt - 4*invdgb1*lgu*lt1u*mmgl*mmsb1*mmst1*
+     mmt - 24*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt + 8*invdgb1*lgu*ltu*mmgl*mmsb1*
+     mmst1*mmt + 28*invdgb2*mmgl*mmsb2*mmst1*mmt - 12*invdgb2*lgu*mmgl*mmsb2*
+     mmst1*mmt + 12*invdgb2*lt1u*mmgl*mmsb2*mmst1*mmt - 4*invdgb2*lgu*lt1u*mmgl
+     *mmsb2*mmst1*mmt - 24*invdgb2*ltu*mmgl*mmsb2*mmst1*mmt + 8*invdgb2*lgu*ltu
+     *mmgl*mmsb2*mmst1*mmt + 4*mmgl2*mmt*zt2 + 4*mmgl*mmsb1*mmt*zt2 - 6*invdgb1
+     *mmgl*mmsb12*mmt*zt2 + 4*mmgl*mmsb2*mmt*zt2 - 6*invdgb2*mmgl*mmsb22*mmt*
+     zt2 - 4*mmgl*mmst1*mmt*zt2 + 4*invdgb1*mmgl*mmsb1*mmst1*mmt*zt2 + 4*
+     invdgb2*mmgl*mmsb2*mmst1*mmt*zt2 + 2*mmgl2*mmt*pow2(lgu) + 2*mmgl*mmsb1*
+     mmt*pow2(lgu) - 3*invdgb1*mmgl*mmsb12*mmt*pow2(lgu) + 2*mmgl*mmsb2*mmt*
+     pow2(lgu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(lgu) - 2*mmgl*mmst1*mmt*pow2(
+     lgu) + 2*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(lgu) + 2*invdgb2*mmgl*mmsb2*
+     mmst1*mmt*pow2(lgu) + 2*mmgl*mmst1*mmt*pow2(lt1u) - 2*invdgb1*mmgl*mmsb1*
+     mmst1*mmt*pow2(lt1u) - 2*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(lt1u) + 2*mmgl2
+     *mmt*pow2(ltu) + 2*mmgl*mmsb1*mmt*pow2(ltu) - 3*invdgb1*mmgl*mmsb12*mmt*
+     pow2(ltu) + 2*mmgl*mmsb2*mmt*pow2(ltu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(
+     ltu) - 4*mmgl*mmst1*mmt*pow2(ltu) + 4*invdgb1*mmgl*mmsb1*mmst1*mmt*pow2(
+     ltu) + 4*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(ltu) - 6*invdgb1*lt1u*mmgl*mmt*
+     pow2(mmst1) - 6*invdgb2*lt1u*mmgl*mmt*pow2(mmst1) + 2*invdgb1*lgu*lt1u*
+     mmgl*mmt*pow2(mmst1) + 2*invdgb2*lgu*lt1u*mmgl*mmt*pow2(mmst1) + 6*invdgb1
+     *ltu*mmgl*mmt*pow2(mmst1) + 6*invdgb2*ltu*mmgl*mmt*pow2(mmst1) - 2*invdgb1
+     *lgu*ltu*mmgl*mmt*pow2(mmst1) - 2*invdgb2*lgu*ltu*mmgl*mmt*pow2(mmst1) +
+     invdgb1*mmgl*mmt*pow2(lt1u)*pow2(mmst1) + invdgb2*mmgl*mmt*pow2(lt1u)*pow2
+     (mmst1) - invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmt*pow2(
+     ltu)*pow2(mmst1) - 28*mmgl*pow2(mmt) + 12*lgu*mmgl*pow2(mmt) + 12*ltu*mmgl
+     *pow2(mmt) - 4*lgu*ltu*mmgl*pow2(mmt) + 28*invdgb1*mmgl*mmsb1*pow2(mmt) -
+     12*invdgb1*lgu*mmgl*mmsb1*pow2(mmt) - 12*invdgb1*ltu*mmgl*mmsb1*pow2(mmt)
+     + 4*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt) + 28*invdgb2*mmgl*mmsb2*pow2(mmt)
+     - 12*invdgb2*lgu*mmgl*mmsb2*pow2(mmt) - 12*invdgb2*ltu*mmgl*mmsb2*pow2(mmt
+     ) + 4*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(mmt) + 28*invdgb1*mmgl*mmst1*pow2(
+     mmt) + 28*invdgb2*mmgl*mmst1*pow2(mmt) - 6*invdgb1*lt1u*mmgl*mmst1*pow2(
+     mmt) - 6*invdgb2*lt1u*mmgl*mmst1*pow2(mmt) - 2*invdgb1*lgu*lt1u*mmgl*mmst1
+     *pow2(mmt) - 2*invdgb2*lgu*lt1u*mmgl*mmst1*pow2(mmt) - 18*invdgb1*ltu*mmgl
+     *mmst1*pow2(mmt) - 18*invdgb2*ltu*mmgl*mmst1*pow2(mmt) + 2*invdgb1*lgu*ltu
+     *mmgl*mmst1*pow2(mmt) + 2*invdgb2*lgu*ltu*mmgl*mmst1*pow2(mmt) + 4*invdgb1
+     *lt1u*ltu*mmgl*mmst1*pow2(mmt) + 4*invdgb2*lt1u*ltu*mmgl*mmst1*pow2(mmt) -
+     4*mmgl*zt2*pow2(mmt) + 4*invdgb1*mmgl*mmsb1*zt2*pow2(mmt) + 4*invdgb2*mmgl
+     *mmsb2*zt2*pow2(mmt) + 4*invdgb1*mmgl*mmst1*zt2*pow2(mmt) + 4*invdgb2*mmgl
+     *mmst1*zt2*pow2(mmt) - 2*mmgl*pow2(lgu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*
+     pow2(lgu)*pow2(mmt) + 2*invdgb2*mmgl*mmsb2*pow2(lgu)*pow2(mmt) + invdgb1*
+     mmgl*mmst1*pow2(lt1u)*pow2(mmt) + invdgb2*mmgl*mmst1*pow2(lt1u)*pow2(mmt)
+     - 2*mmgl*pow2(ltu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt) +
+     2*invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmt) + 3*invdgb1*mmgl*mmst1*pow2(ltu)*
+     pow2(mmt) + 3*invdgb2*mmgl*mmst1*pow2(ltu)*pow2(mmt) + mmgl*pow2(invdgb1)*
+     (-14*mmsb12*mmst1*mmt + 6*lgu*mmsb12*mmst1*mmt - 6*lt1u*mmsb12*mmst1*mmt +
+     2*lgu*lt1u*mmsb12*mmst1*mmt + 12*ltu*mmsb12*mmst1*mmt - 4*lgu*ltu*mmsb12*
+     mmst1*mmt - 2*mmsb12*mmst1*mmt*zt2 - 2*mmsb12*mmst1*mmt*pow2(ltu) + 6*lt1u
+     *mmsb1*mmt*pow2(mmst1) - 2*lgu*lt1u*mmsb1*mmt*pow2(mmst1) - 6*ltu*mmsb1*
+     mmt*pow2(mmst1) + 2*lgu*ltu*mmsb1*mmt*pow2(mmst1) + mmsb1*mmt*pow2(ltu)*
+     pow2(mmst1) - 14*mmsb12*pow2(mmt) + 6*lgu*mmsb12*pow2(mmt) + 6*ltu*mmsb12*
+     pow2(mmt) - 2*lgu*ltu*mmsb12*pow2(mmt) - 28*mmsb1*mmst1*pow2(mmt) + 6*lt1u
+     *mmsb1*mmst1*pow2(mmt) + 2*lgu*lt1u*mmsb1*mmst1*pow2(mmt) + 18*ltu*mmsb1*
+     mmst1*pow2(mmt) - 2*lgu*ltu*mmsb1*mmst1*pow2(mmt) - 4*lt1u*ltu*mmsb1*mmst1
+     *pow2(mmt) - 2*mmsb12*zt2*pow2(mmt) - 4*mmsb1*mmst1*zt2*pow2(mmt) - mmsb12
+     *pow2(ltu)*pow2(mmt) - 3*mmsb1*mmst1*pow2(ltu)*pow2(mmt) + pow2(lt1u)*(
+     mmsb12*mmst1*mmt - mmsb1*mmt*pow2(mmst1) - mmsb1*mmst1*pow2(mmt)) + 14*mmt
+     *pow3(mmsb1) - 6*lgu*mmt*pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lgu*ltu*
+     mmt*pow3(mmsb1) + 2*mmt*zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2
+     (lgu)*(mmsb12*mmst1*mmt + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))) + mmgl*pow2
+     (invdgb2)*(-14*mmsb22*mmst1*mmt + 6*lgu*mmsb22*mmst1*mmt - 6*lt1u*mmsb22*
+     mmst1*mmt + 2*lgu*lt1u*mmsb22*mmst1*mmt + 12*ltu*mmsb22*mmst1*mmt - 4*lgu*
+     ltu*mmsb22*mmst1*mmt - 2*mmsb22*mmst1*mmt*zt2 - 2*mmsb22*mmst1*mmt*pow2(
+     ltu) + 6*lt1u*mmsb2*mmt*pow2(mmst1) - 2*lgu*lt1u*mmsb2*mmt*pow2(mmst1) - 6
+     *ltu*mmsb2*mmt*pow2(mmst1) + 2*lgu*ltu*mmsb2*mmt*pow2(mmst1) + mmsb2*mmt*
+     pow2(ltu)*pow2(mmst1) - 14*mmsb22*pow2(mmt) + 6*lgu*mmsb22*pow2(mmt) + 6*
+     ltu*mmsb22*pow2(mmt) - 2*lgu*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst1*pow2(
+     mmt) + 6*lt1u*mmsb2*mmst1*pow2(mmt) + 2*lgu*lt1u*mmsb2*mmst1*pow2(mmt) +
+     18*ltu*mmsb2*mmst1*pow2(mmt) - 2*lgu*ltu*mmsb2*mmst1*pow2(mmt) - 4*lt1u*
+     ltu*mmsb2*mmst1*pow2(mmt) - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst1*zt2*
+     pow2(mmt) - mmsb22*pow2(ltu)*pow2(mmt) - 3*mmsb2*mmst1*pow2(ltu)*pow2(mmt)
+     + pow2(lt1u)*(mmsb22*mmst1*mmt - mmsb2*mmt*pow2(mmst1) - mmsb2*mmst1*pow2(
+     mmt)) + 14*mmt*pow3(mmsb2) - 6*lgu*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2)
+     + 2*lgu*ltu*mmt*pow3(mmsb2) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(
+     mmsb2) - pow2(lgu)*(mmsb22*mmst1*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2))
+     )))/(3.*mgl*mt)) + (4*s2b*(14*mmgl2*mmsb1 - 6*lgu*mmgl2*mmsb1 - 6*ltu*
+     mmgl2*mmsb1 + 2*lgu*ltu*mmgl2*mmsb1 + 14*mmgl*mmsb12 - 6*lgu*mmgl*mmsb12 -
+     6*ltu*mmgl*mmsb12 + 2*lgu*ltu*mmgl*mmsb12 - 14*mmgl2*mmsb2 + 6*lgu*mmgl2*
+     mmsb2 + 6*ltu*mmgl2*mmsb2 - 2*lgu*ltu*mmgl2*mmsb2 - 14*mmgl*mmsb22 + 6*lgu
+     *mmgl*mmsb22 + 6*ltu*mmgl*mmsb22 - 2*lgu*ltu*mmgl*mmsb22 - 14*mmgl*mmsb1*
+     mmst1 + 12*lgu*mmgl*mmsb1*mmst1 - 6*lt1u*mmgl*mmsb1*mmst1 + 6*ltu*mmgl*
+     mmsb1*mmst1 - 4*lgu*ltu*mmgl*mmsb1*mmst1 + 2*lt1u*ltu*mmgl*mmsb1*mmst1 +
+     14*invdgb1*mmgl*mmsb12*mmst1 - 12*invdgb1*lgu*mmgl*mmsb12*mmst1 + 6*
+     invdgb1*lt1u*mmgl*mmsb12*mmst1 - 6*invdgb1*ltu*mmgl*mmsb12*mmst1 + 4*
+     invdgb1*lgu*ltu*mmgl*mmsb12*mmst1 - 2*invdgb1*lt1u*ltu*mmgl*mmsb12*mmst1 +
+     14*mmgl*mmsb2*mmst1 - 12*lgu*mmgl*mmsb2*mmst1 + 6*lt1u*mmgl*mmsb2*mmst1 -
+     6*ltu*mmgl*mmsb2*mmst1 + 4*lgu*ltu*mmgl*mmsb2*mmst1 - 2*lt1u*ltu*mmgl*
+     mmsb2*mmst1 - 14*invdgb2*mmgl*mmsb22*mmst1 + 12*invdgb2*lgu*mmgl*mmsb22*
+     mmst1 - 6*invdgb2*lt1u*mmgl*mmsb22*mmst1 + 6*invdgb2*ltu*mmgl*mmsb22*mmst1
+      - 4*invdgb2*lgu*ltu*mmgl*mmsb22*mmst1 + 2*invdgb2*lt1u*ltu*mmgl*mmsb22*
+     mmst1 - 14*mmgl*mmsb1*mmt + 6*lgu*mmgl*mmsb1*mmt + 6*ltu*mmgl*mmsb1*mmt -
+     2*lgu*ltu*mmgl*mmsb1*mmt + 14*invdgb1*mmgl*mmsb12*mmt - 6*invdgb1*lgu*mmgl
+     *mmsb12*mmt - 6*invdgb1*ltu*mmgl*mmsb12*mmt + 2*invdgb1*lgu*ltu*mmgl*
+     mmsb12*mmt + 14*mmgl*mmsb2*mmt - 6*lgu*mmgl*mmsb2*mmt - 6*ltu*mmgl*mmsb2*
+     mmt + 2*lgu*ltu*mmgl*mmsb2*mmt - 14*invdgb2*mmgl*mmsb22*mmt + 6*invdgb2*
+     lgu*mmgl*mmsb22*mmt + 6*invdgb2*ltu*mmgl*mmsb22*mmt - 2*invdgb2*lgu*ltu*
+     mmgl*mmsb22*mmt + 56*invdgb1*mmgl*mmsb1*mmst1*mmt - 6*invdgb1*lgu*mmgl*
+     mmsb1*mmst1*mmt - 6*invdgb1*lt1u*mmgl*mmsb1*mmst1*mmt - 4*invdgb1*lgu*lt1u
+     *mmgl*mmsb1*mmst1*mmt - 36*invdgb1*ltu*mmgl*mmsb1*mmst1*mmt + 6*invdgb1*
+     lgu*ltu*mmgl*mmsb1*mmst1*mmt + 6*invdgb1*lt1u*ltu*mmgl*mmsb1*mmst1*mmt -
+     56*invdgb2*mmgl*mmsb2*mmst1*mmt + 6*invdgb2*lgu*mmgl*mmsb2*mmst1*mmt + 6*
+     invdgb2*lt1u*mmgl*mmsb2*mmst1*mmt + 4*invdgb2*lgu*lt1u*mmgl*mmsb2*mmst1*
+     mmt + 36*invdgb2*ltu*mmgl*mmsb2*mmst1*mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb2*
+     mmst1*mmt - 6*invdgb2*lt1u*ltu*mmgl*mmsb2*mmst1*mmt + 2*mmgl2*mmsb1*zt2 +
+     2*mmgl*mmsb12*zt2 - 2*mmgl2*mmsb2*zt2 - 2*mmgl*mmsb22*zt2 - 2*mmgl*mmsb1*
+     mmst1*zt2 + 2*invdgb1*mmgl*mmsb12*mmst1*zt2 + 2*mmgl*mmsb2*mmst1*zt2 - 2*
+     invdgb2*mmgl*mmsb22*mmst1*zt2 - 2*mmgl*mmsb1*mmt*zt2 + 2*invdgb1*mmgl*
+     mmsb12*mmt*zt2 + 2*mmgl*mmsb2*mmt*zt2 - 2*invdgb2*mmgl*mmsb22*mmt*zt2 + 8*
+     invdgb1*mmgl*mmsb1*mmst1*mmt*zt2 - 8*invdgb2*mmgl*mmsb2*mmst1*mmt*zt2 +
+     mmgl2*mmsb1*pow2(ltu) + mmgl*mmsb12*pow2(ltu) - mmgl2*mmsb2*pow2(ltu) -
+     mmgl*mmsb22*pow2(ltu) - mmgl*mmsb1*mmst1*pow2(ltu) + invdgb1*mmgl*mmsb12*
+     mmst1*pow2(ltu) + mmgl*mmsb2*mmst1*pow2(ltu) - invdgb2*mmgl*mmsb22*mmst1*
+     pow2(ltu) - mmgl*mmsb1*mmt*pow2(ltu) + invdgb1*mmgl*mmsb12*mmt*pow2(ltu) +
+     mmgl*mmsb2*mmt*pow2(ltu) - invdgb2*mmgl*mmsb22*mmt*pow2(ltu) + 6*invdgb1*
+     mmgl*mmsb1*mmst1*mmt*pow2(ltu) - 6*invdgb2*mmgl*mmsb2*mmst1*mmt*pow2(ltu)
+     + 14*invdgb1*mmgl*mmsb1*pow2(mmst1) + 6*invdgb1*lgu*mmgl*mmsb1*pow2(mmst1)
+     - 12*invdgb1*lt1u*mmgl*mmsb1*pow2(mmst1) - 6*invdgb1*ltu*mmgl*mmsb1*pow2(
+     mmst1) - 2*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmst1) + 4*invdgb1*lt1u*ltu*
+     mmgl*mmsb1*pow2(mmst1) - 14*invdgb2*mmgl*mmsb2*pow2(mmst1) - 6*invdgb2*lgu
+     *mmgl*mmsb2*pow2(mmst1) + 12*invdgb2*lt1u*mmgl*mmsb2*pow2(mmst1) + 6*
+     invdgb2*ltu*mmgl*mmsb2*pow2(mmst1) + 2*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
+     mmst1) - 4*invdgb2*lt1u*ltu*mmgl*mmsb2*pow2(mmst1) + 14*invdgb1*mmgl*mmt*
+     pow2(mmst1) - 14*invdgb2*mmgl*mmt*pow2(mmst1) - 6*invdgb1*lt1u*mmgl*mmt*
+     pow2(mmst1) + 6*invdgb2*lt1u*mmgl*mmt*pow2(mmst1) - 6*invdgb1*ltu*mmgl*mmt
+     *pow2(mmst1) + 6*invdgb2*ltu*mmgl*mmt*pow2(mmst1) + 2*invdgb1*lt1u*ltu*
+     mmgl*mmt*pow2(mmst1) - 2*invdgb2*lt1u*ltu*mmgl*mmt*pow2(mmst1) + 2*invdgb1
+     *mmgl*mmsb1*zt2*pow2(mmst1) - 2*invdgb2*mmgl*mmsb2*zt2*pow2(mmst1) + 2*
+     invdgb1*mmgl*mmt*zt2*pow2(mmst1) - 2*invdgb2*mmgl*mmt*zt2*pow2(mmst1) +
+     invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmsb2*pow2(ltu)*
+     pow2(mmst1) + invdgb1*mmgl*mmt*pow2(ltu)*pow2(mmst1) - invdgb2*mmgl*mmt*
+     pow2(ltu)*pow2(mmst1) - 14*invdgb1*mmgl*pow3(mmsb1) + 6*invdgb1*lgu*mmgl*
+     pow3(mmsb1) + 6*invdgb1*ltu*mmgl*pow3(mmsb1) - 2*invdgb1*lgu*ltu*mmgl*pow3
+     (mmsb1) - 2*invdgb1*mmgl*zt2*pow3(mmsb1) - invdgb1*mmgl*pow2(ltu)*pow3(
+     mmsb1) + 14*invdgb2*mmgl*pow3(mmsb2) - 6*invdgb2*lgu*mmgl*pow3(mmsb2) - 6*
+     invdgb2*ltu*mmgl*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmgl*pow3(mmsb2) + 2*
+     invdgb2*mmgl*zt2*pow3(mmsb2) + invdgb2*mmgl*pow2(ltu)*pow3(mmsb2) + pow2(
+     lgu)*(mmgl2*mmsb1 + mmgl*mmsb12 - mmgl2*mmsb2 - mmgl*mmsb22 - 2*mmgl*mmsb1
+     *mmst1 + 2*invdgb1*mmgl*mmsb12*mmst1 + 2*mmgl*mmsb2*mmst1 - 2*invdgb2*mmgl
+     *mmsb22*mmst1 - mmgl*mmsb1*mmt + invdgb1*mmgl*mmsb12*mmt + mmgl*mmsb2*mmt
+     - invdgb2*mmgl*mmsb22*mmt + invdgb1*mmgl*mmsb1*mmst1*mmt - invdgb2*mmgl*
+     mmsb2*mmst1*mmt + (-(invdgb1*mmgl*mmsb1) + invdgb2*mmgl*mmsb2)*pow2(mmst1)
+     - invdgb1*mmgl*pow3(mmsb1) + invdgb2*mmgl*pow3(mmsb2)) - 14*invdgb1*mmgl*
+     pow3(mmst1) + 14*invdgb2*mmgl*pow3(mmst1) + 6*invdgb1*lt1u*mmgl*pow3(mmst1
+     ) - 6*invdgb2*lt1u*mmgl*pow3(mmst1) + 6*invdgb1*ltu*mmgl*pow3(mmst1) - 6*
+     invdgb2*ltu*mmgl*pow3(mmst1) - 2*invdgb1*lt1u*ltu*mmgl*pow3(mmst1) + 2*
+     invdgb2*lt1u*ltu*mmgl*pow3(mmst1) - 2*invdgb1*mmgl*zt2*pow3(mmst1) + 2*
+     invdgb2*mmgl*zt2*pow3(mmst1) - invdgb1*mmgl*pow2(ltu)*pow3(mmst1) +
+     invdgb2*mmgl*pow2(ltu)*pow3(mmst1) + mmgl*pow2(lt1u)*(mmst1*(mmsb1 -
+     invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 + invdgb1*mmsb1*mmt - invdgb2*
+     mmsb2*mmt) + (invdgb1*(2*mmsb1 + mmt) - invdgb2*(2*mmsb2 + mmt))*pow2(
+     mmst1) + (-invdgb1 + invdgb2)*pow3(mmst1))))/(3.*mb*mgl) - (2*(28*mmgl2 -
+     12*lgu*mmgl2 - 12*ltu*mmgl2 + 4*lgu*ltu*mmgl2 + 28*mmgl*mmsb1 - 12*lgu*
+     mmgl*mmsb1 - 12*ltu*mmgl*mmsb1 + 4*lgu*ltu*mmgl*mmsb1 + 42*mmsb12 - 18*lgu
+     *mmsb12 - 18*ltu*mmsb12 + 6*lgu*ltu*mmsb12 + 28*mmgl*mmsb2 - 12*lgu*mmgl*
+     mmsb2 - 12*ltu*mmgl*mmsb2 + 4*lgu*ltu*mmgl*mmsb2 + 42*mmsb22 - 18*lgu*
+     mmsb22 - 18*ltu*mmsb22 + 6*lgu*ltu*mmsb22 - 28*mmgl*mmst1 + 24*lgu*mmgl*
+     mmst1 - 12*lt1u*mmgl*mmst1 + 12*ltu*mmgl*mmst1 - 8*lgu*ltu*mmgl*mmst1 + 4*
+     lt1u*ltu*mmgl*mmst1 - 28*mmsb1*mmst1 + 24*lgu*mmsb1*mmst1 - 12*lt1u*mmsb1*
+     mmst1 + 12*ltu*mmsb1*mmst1 - 8*lgu*ltu*mmsb1*mmst1 + 4*lt1u*ltu*mmsb1*
+     mmst1 + 42*invdgb1*mmsb12*mmst1 - 36*invdgb1*lgu*mmsb12*mmst1 + 18*invdgb1
+     *lt1u*mmsb12*mmst1 - 18*invdgb1*ltu*mmsb12*mmst1 + 12*invdgb1*lgu*ltu*
+     mmsb12*mmst1 - 6*invdgb1*lt1u*ltu*mmsb12*mmst1 - 28*mmsb2*mmst1 + 24*lgu*
+     mmsb2*mmst1 - 12*lt1u*mmsb2*mmst1 + 12*ltu*mmsb2*mmst1 - 8*lgu*ltu*mmsb2*
+     mmst1 + 4*lt1u*ltu*mmsb2*mmst1 + 42*invdgb2*mmsb22*mmst1 - 36*invdgb2*lgu*
+     mmsb22*mmst1 + 18*invdgb2*lt1u*mmsb22*mmst1 - 18*invdgb2*ltu*mmsb22*mmst1
+     + 12*invdgb2*lgu*ltu*mmsb22*mmst1 - 6*invdgb2*lt1u*ltu*mmsb22*mmst1 - 28*
+     mmgl*mmt + 12*lgu*mmgl*mmt + 12*ltu*mmgl*mmt - 4*lgu*ltu*mmgl*mmt - 28*
+     mmsb1*mmt + 12*lgu*mmsb1*mmt + 12*ltu*mmsb1*mmt - 4*lgu*ltu*mmsb1*mmt + 42
+     *invdgb1*mmsb12*mmt - 18*invdgb1*lgu*mmsb12*mmt - 18*invdgb1*ltu*mmsb12*
+     mmt + 6*invdgb1*lgu*ltu*mmsb12*mmt - 28*mmsb2*mmt + 12*lgu*mmsb2*mmt + 12*
+     ltu*mmsb2*mmt - 4*lgu*ltu*mmsb2*mmt + 42*invdgb2*mmsb22*mmt - 18*invdgb2*
+     lgu*mmsb22*mmt - 18*invdgb2*ltu*mmsb22*mmt + 6*invdgb2*lgu*ltu*mmsb22*mmt
+     - 112*mmst1*mmt + 12*lgu*mmst1*mmt + 12*lt1u*mmst1*mmt + 8*lgu*lt1u*mmst1*
+     mmt + 72*ltu*mmst1*mmt - 12*lgu*ltu*mmst1*mmt - 12*lt1u*ltu*mmst1*mmt +
+     112*invdgb1*mmsb1*mmst1*mmt - 12*invdgb1*lgu*mmsb1*mmst1*mmt - 12*invdgb1*
+     lt1u*mmsb1*mmst1*mmt - 8*invdgb1*lgu*lt1u*mmsb1*mmst1*mmt - 72*invdgb1*ltu
+     *mmsb1*mmst1*mmt + 12*invdgb1*lgu*ltu*mmsb1*mmst1*mmt + 12*invdgb1*lt1u*
+     ltu*mmsb1*mmst1*mmt + 112*invdgb2*mmsb2*mmst1*mmt - 12*invdgb2*lgu*mmsb2*
+     mmst1*mmt - 12*invdgb2*lt1u*mmsb2*mmst1*mmt - 8*invdgb2*lgu*lt1u*mmsb2*
+     mmst1*mmt - 72*invdgb2*ltu*mmsb2*mmst1*mmt + 12*invdgb2*lgu*ltu*mmsb2*
+     mmst1*mmt + 12*invdgb2*lt1u*ltu*mmsb2*mmst1*mmt + 4*mmgl2*zt2 + 4*mmgl*
+     mmsb1*zt2 + 6*mmsb12*zt2 + 4*mmgl*mmsb2*zt2 + 6*mmsb22*zt2 - 4*mmgl*mmst1*
+     zt2 - 4*mmsb1*mmst1*zt2 + 6*invdgb1*mmsb12*mmst1*zt2 - 4*mmsb2*mmst1*zt2 +
+     6*invdgb2*mmsb22*mmst1*zt2 - 4*mmgl*mmt*zt2 - 4*mmsb1*mmt*zt2 + 6*invdgb1*
+     mmsb12*mmt*zt2 - 4*mmsb2*mmt*zt2 + 6*invdgb2*mmsb22*mmt*zt2 - 16*mmst1*mmt
+     *zt2 + 16*invdgb1*mmsb1*mmst1*mmt*zt2 + 16*invdgb2*mmsb2*mmst1*mmt*zt2 + 2
+     *mmgl2*pow2(lgu) + 2*mmgl*mmsb1*pow2(lgu) + 3*mmsb12*pow2(lgu) + 2*mmgl*
+     mmsb2*pow2(lgu) + 3*mmsb22*pow2(lgu) - 4*mmgl*mmst1*pow2(lgu) - 4*mmsb1*
+     mmst1*pow2(lgu) + 6*invdgb1*mmsb12*mmst1*pow2(lgu) - 4*mmsb2*mmst1*pow2(
+     lgu) + 6*invdgb2*mmsb22*mmst1*pow2(lgu) - 2*mmgl*mmt*pow2(lgu) - 2*mmsb1*
+     mmt*pow2(lgu) + 3*invdgb1*mmsb12*mmt*pow2(lgu) - 2*mmsb2*mmt*pow2(lgu) + 3
+     *invdgb2*mmsb22*mmt*pow2(lgu) - 2*mmst1*mmt*pow2(lgu) + 2*invdgb1*mmsb1*
+     mmst1*mmt*pow2(lgu) + 2*invdgb2*mmsb2*mmst1*mmt*pow2(lgu) + 2*mmgl*mmst1*
+     pow2(lt1u) + 2*mmsb1*mmst1*pow2(lt1u) - 3*invdgb1*mmsb12*mmst1*pow2(lt1u)
+     + 2*mmsb2*mmst1*pow2(lt1u) - 3*invdgb2*mmsb22*mmst1*pow2(lt1u) - 2*mmst1*
+     mmt*pow2(lt1u) + 2*invdgb1*mmsb1*mmst1*mmt*pow2(lt1u) + 2*invdgb2*mmsb2*
+     mmst1*mmt*pow2(lt1u) + 2*mmgl2*pow2(ltu) + 2*mmgl*mmsb1*pow2(ltu) + 3*
+     mmsb12*pow2(ltu) + 2*mmgl*mmsb2*pow2(ltu) + 3*mmsb22*pow2(ltu) - 2*mmgl*
+     mmst1*pow2(ltu) - 2*mmsb1*mmst1*pow2(ltu) + 3*invdgb1*mmsb12*mmst1*pow2(
+     ltu) - 2*mmsb2*mmst1*pow2(ltu) + 3*invdgb2*mmsb22*mmst1*pow2(ltu) - 2*mmgl
+     *mmt*pow2(ltu) - 2*mmsb1*mmt*pow2(ltu) + 3*invdgb1*mmsb12*mmt*pow2(ltu) -
+     2*mmsb2*mmt*pow2(ltu) + 3*invdgb2*mmsb22*mmt*pow2(ltu) - 12*mmst1*mmt*pow2
+     (ltu) + 12*invdgb1*mmsb1*mmst1*mmt*pow2(ltu) + 12*invdgb2*mmsb2*mmst1*mmt*
+     pow2(ltu) - 28*pow2(mmst1) - 12*lgu*pow2(mmst1) + 24*lt1u*pow2(mmst1) + 12
+     *ltu*pow2(mmst1) + 4*lgu*ltu*pow2(mmst1) - 8*lt1u*ltu*pow2(mmst1) + 28*
+     invdgb1*mmsb1*pow2(mmst1) + 12*invdgb1*lgu*mmsb1*pow2(mmst1) - 24*invdgb1*
+     lt1u*mmsb1*pow2(mmst1) - 12*invdgb1*ltu*mmsb1*pow2(mmst1) - 4*invdgb1*lgu*
+     ltu*mmsb1*pow2(mmst1) + 8*invdgb1*lt1u*ltu*mmsb1*pow2(mmst1) + 28*invdgb2*
+     mmsb2*pow2(mmst1) + 12*invdgb2*lgu*mmsb2*pow2(mmst1) - 24*invdgb2*lt1u*
+     mmsb2*pow2(mmst1) - 12*invdgb2*ltu*mmsb2*pow2(mmst1) - 4*invdgb2*lgu*ltu*
+     mmsb2*pow2(mmst1) + 8*invdgb2*lt1u*ltu*mmsb2*pow2(mmst1) + 14*invdgb1*mmt*
+     pow2(mmst1) + 14*invdgb2*mmt*pow2(mmst1) - 6*invdgb1*lt1u*mmt*pow2(mmst1)
+     - 6*invdgb2*lt1u*mmt*pow2(mmst1) - 6*invdgb1*ltu*mmt*pow2(mmst1) - 6*
+     invdgb2*ltu*mmt*pow2(mmst1) + 2*invdgb1*lt1u*ltu*mmt*pow2(mmst1) + 2*
+     invdgb2*lt1u*ltu*mmt*pow2(mmst1) - 4*zt2*pow2(mmst1) + 4*invdgb1*mmsb1*zt2
+     *pow2(mmst1) + 4*invdgb2*mmsb2*zt2*pow2(mmst1) + 2*invdgb1*mmt*zt2*pow2(
+     mmst1) + 2*invdgb2*mmt*zt2*pow2(mmst1) + 2*pow2(lgu)*pow2(mmst1) - 2*
+     invdgb1*mmsb1*pow2(lgu)*pow2(mmst1) - 2*invdgb2*mmsb2*pow2(lgu)*pow2(mmst1
+     ) - 4*pow2(lt1u)*pow2(mmst1) + 4*invdgb1*mmsb1*pow2(lt1u)*pow2(mmst1) + 4*
+     invdgb2*mmsb2*pow2(lt1u)*pow2(mmst1) + invdgb1*mmt*pow2(lt1u)*pow2(mmst1)
+     + invdgb2*mmt*pow2(lt1u)*pow2(mmst1) - 2*pow2(ltu)*pow2(mmst1) + 2*invdgb1
+     *mmsb1*pow2(ltu)*pow2(mmst1) + 2*invdgb2*mmsb2*pow2(ltu)*pow2(mmst1) +
+     invdgb1*mmt*pow2(ltu)*pow2(mmst1) + invdgb2*mmt*pow2(ltu)*pow2(mmst1) - 56
+     *invdgb1*pow3(mmsb1) + 24*invdgb1*lgu*pow3(mmsb1) + 24*invdgb1*ltu*pow3(
+     mmsb1) - 8*invdgb1*lgu*ltu*pow3(mmsb1) - 8*invdgb1*zt2*pow3(mmsb1) - 4*
+     invdgb1*pow2(lgu)*pow3(mmsb1) - 4*invdgb1*pow2(ltu)*pow3(mmsb1) - 56*
+     invdgb2*pow3(mmsb2) + 24*invdgb2*lgu*pow3(mmsb2) + 24*invdgb2*ltu*pow3(
+     mmsb2) - 8*invdgb2*lgu*ltu*pow3(mmsb2) - 8*invdgb2*zt2*pow3(mmsb2) - 4*
+     invdgb2*pow2(lgu)*pow3(mmsb2) - 4*invdgb2*pow2(ltu)*pow3(mmsb2) - 14*
+     invdgb1*pow3(mmst1) - 14*invdgb2*pow3(mmst1) + 6*invdgb1*lt1u*pow3(mmst1)
+     + 6*invdgb2*lt1u*pow3(mmst1) + 6*invdgb1*ltu*pow3(mmst1) + 6*invdgb2*ltu*
+     pow3(mmst1) - 2*invdgb1*lt1u*ltu*pow3(mmst1) - 2*invdgb2*lt1u*ltu*pow3(
+     mmst1) - 2*invdgb1*zt2*pow3(mmst1) - 2*invdgb2*zt2*pow3(mmst1) - invdgb1*
+     pow2(lt1u)*pow3(mmst1) - invdgb2*pow2(lt1u)*pow3(mmst1) - invdgb1*pow2(ltu
+     )*pow3(mmst1) - invdgb2*pow2(ltu)*pow3(mmst1) + pow2(invdgb1)*(-56*mmsb12*
+     mmst1*mmt + 6*lgu*mmsb12*mmst1*mmt + 6*lt1u*mmsb12*mmst1*mmt + 4*lgu*lt1u*
+     mmsb12*mmst1*mmt + 36*ltu*mmsb12*mmst1*mmt - 6*lgu*ltu*mmsb12*mmst1*mmt -
+     6*lt1u*ltu*mmsb12*mmst1*mmt - 8*mmsb12*mmst1*mmt*zt2 - 6*mmsb12*mmst1*mmt*
+     pow2(ltu) - 14*mmsb12*pow2(mmst1) - 6*lgu*mmsb12*pow2(mmst1) + 12*lt1u*
+     mmsb12*pow2(mmst1) + 6*ltu*mmsb12*pow2(mmst1) + 2*lgu*ltu*mmsb12*pow2(
+     mmst1) - 4*lt1u*ltu*mmsb12*pow2(mmst1) - 14*mmsb1*mmt*pow2(mmst1) + 6*lt1u
+     *mmsb1*mmt*pow2(mmst1) + 6*ltu*mmsb1*mmt*pow2(mmst1) - 2*lt1u*ltu*mmsb1*
+     mmt*pow2(mmst1) - 2*mmsb12*zt2*pow2(mmst1) - 2*mmsb1*mmt*zt2*pow2(mmst1) -
+     mmsb12*pow2(ltu)*pow2(mmst1) - mmsb1*mmt*pow2(ltu)*pow2(mmst1) - 14*mmst1*
+     pow3(mmsb1) + 12*lgu*mmst1*pow3(mmsb1) - 6*lt1u*mmst1*pow3(mmsb1) + 6*ltu*
+     mmst1*pow3(mmsb1) - 4*lgu*ltu*mmst1*pow3(mmsb1) + 2*lt1u*ltu*mmst1*pow3(
+     mmsb1) - 14*mmt*pow3(mmsb1) + 6*lgu*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1
+     ) - 2*lgu*ltu*mmt*pow3(mmsb1) - 2*mmst1*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(
+     mmsb1) - mmst1*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     mmsb1*pow3(mmst1) - 6*lt1u*mmsb1*pow3(mmst1) - 6*ltu*mmsb1*pow3(mmst1) + 2
+     *lt1u*ltu*mmsb1*pow3(mmst1) + 2*mmsb1*zt2*pow3(mmst1) + mmsb1*pow2(ltu)*
+     pow3(mmst1) + pow2(lt1u)*(-(mmsb12*mmst1*mmt) - (2*mmsb12 + mmsb1*mmt)*
+     pow2(mmst1) + mmst1*pow3(mmsb1) + mmsb1*pow3(mmst1)) + 14*pow4(mmsb1) - 6*
+     lgu*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lgu*ltu*pow4(mmsb1) + 2*zt2*pow4(
+     mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lgu)*(-(mmsb12*mmst1*mmt) + mmsb12*
+     pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb1) + pow4(mmsb1))) + pow2(invdgb2)*
+     (-56*mmsb22*mmst1*mmt + 6*lgu*mmsb22*mmst1*mmt + 6*lt1u*mmsb22*mmst1*mmt +
+     4*lgu*lt1u*mmsb22*mmst1*mmt + 36*ltu*mmsb22*mmst1*mmt - 6*lgu*ltu*mmsb22*
+     mmst1*mmt - 6*lt1u*ltu*mmsb22*mmst1*mmt - 8*mmsb22*mmst1*mmt*zt2 - 6*
+     mmsb22*mmst1*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst1) - 6*lgu*mmsb22*pow2(
+     mmst1) + 12*lt1u*mmsb22*pow2(mmst1) + 6*ltu*mmsb22*pow2(mmst1) + 2*lgu*ltu
+     *mmsb22*pow2(mmst1) - 4*lt1u*ltu*mmsb22*pow2(mmst1) - 14*mmsb2*mmt*pow2(
+     mmst1) + 6*lt1u*mmsb2*mmt*pow2(mmst1) + 6*ltu*mmsb2*mmt*pow2(mmst1) - 2*
+     lt1u*ltu*mmsb2*mmt*pow2(mmst1) - 2*mmsb22*zt2*pow2(mmst1) - 2*mmsb2*mmt*
+     zt2*pow2(mmst1) - mmsb22*pow2(ltu)*pow2(mmst1) - mmsb2*mmt*pow2(ltu)*pow2(
+     mmst1) - 14*mmst1*pow3(mmsb2) + 12*lgu*mmst1*pow3(mmsb2) - 6*lt1u*mmst1*
+     pow3(mmsb2) + 6*ltu*mmst1*pow3(mmsb2) - 4*lgu*ltu*mmst1*pow3(mmsb2) + 2*
+     lt1u*ltu*mmst1*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lgu*mmt*pow3(mmsb2) +
+     6*ltu*mmt*pow3(mmsb2) - 2*lgu*ltu*mmt*pow3(mmsb2) - 2*mmst1*zt2*pow3(mmsb2
+     ) - 2*mmt*zt2*pow3(mmsb2) - mmst1*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*
+     pow3(mmsb2) + 14*mmsb2*pow3(mmst1) - 6*lt1u*mmsb2*pow3(mmst1) - 6*ltu*
+     mmsb2*pow3(mmst1) + 2*lt1u*ltu*mmsb2*pow3(mmst1) + 2*mmsb2*zt2*pow3(mmst1)
+     + mmsb2*pow2(ltu)*pow3(mmst1) + pow2(lt1u)*(-(mmsb22*mmst1*mmt) - (2*
+     mmsb22 + mmsb2*mmt)*pow2(mmst1) + mmst1*pow3(mmsb2) + mmsb2*pow3(mmst1)) +
+     14*pow4(mmsb2) - 6*lgu*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lgu*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lgu)*(-(mmsb22*
+     mmst1*mmt) + mmsb22*pow2(mmst1) - (2*mmst1 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     )))))/3.) + DeltaInv(mmt,mmsb2,mmst2)*((-2*mmgl*s2t*pow2(invdgb2)*(-14*
+     mmsb22*mmst2*mmt + 6*lb2u*mmsb22*mmst2*mmt - 6*lt2u*mmsb22*mmst2*mmt + 2*
+     lb2u*lt2u*mmsb22*mmst2*mmt + 12*ltu*mmsb22*mmst2*mmt - 4*lb2u*ltu*mmsb22*
+     mmst2*mmt - 2*mmsb22*mmst2*mmt*zt2 - 2*mmsb22*mmst2*mmt*pow2(ltu) + 6*lt2u
+     *mmsb2*mmt*pow2(mmst2) - 2*lb2u*lt2u*mmsb2*mmt*pow2(mmst2) - 6*ltu*mmsb2*
+     mmt*pow2(mmst2) + 2*lb2u*ltu*mmsb2*mmt*pow2(mmst2) + mmsb2*mmt*pow2(ltu)*
+     pow2(mmst2) - 14*mmsb22*pow2(mmt) + 6*lb2u*mmsb22*pow2(mmt) + 6*ltu*mmsb22
+     *pow2(mmt) - 2*lb2u*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst2*pow2(mmt) + 6*
+     lt2u*mmsb2*mmst2*pow2(mmt) + 2*lb2u*lt2u*mmsb2*mmst2*pow2(mmt) + 18*ltu*
+     mmsb2*mmst2*pow2(mmt) - 2*lb2u*ltu*mmsb2*mmst2*pow2(mmt) - 4*lt2u*ltu*
+     mmsb2*mmst2*pow2(mmt) - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst2*zt2*pow2(
+     mmt) - mmsb22*pow2(ltu)*pow2(mmt) - 3*mmsb2*mmst2*pow2(ltu)*pow2(mmt) +
+     pow2(lt2u)*(mmsb22*mmst2*mmt - mmsb2*mmt*pow2(mmst2) - mmsb2*mmst2*pow2(
+     mmt)) + 14*mmt*pow3(mmsb2) - 6*lb2u*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2
+     ) + 2*lb2u*ltu*mmt*pow3(mmsb2) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*
+     pow3(mmsb2) - pow2(lb2u)*(mmsb22*mmst2*mmt + mmsb22*pow2(mmt) - mmt*pow3(
+     mmsb2))))/(3.*mgl*mt) + (-(invdgb2*(14*mmsb22*mmst2 - 12*lb2u*mmsb22*mmst2
+      + 6*lt2u*mmsb22*mmst2 - 6*ltu*mmsb22*mmst2 + 4*lb2u*ltu*mmsb22*mmst2 - 2*
+     lt2u*ltu*mmsb22*mmst2 + 14*mmsb22*mmt - 6*lb2u*mmsb22*mmt - 6*ltu*mmsb22*
+     mmt + 2*lb2u*ltu*mmsb22*mmt + 56*mmsb2*mmst2*mmt - 6*lb2u*mmsb2*mmst2*mmt
+     - 6*lt2u*mmsb2*mmst2*mmt - 4*lb2u*lt2u*mmsb2*mmst2*mmt - 36*ltu*mmsb2*
+     mmst2*mmt + 6*lb2u*ltu*mmsb2*mmst2*mmt + 6*lt2u*ltu*mmsb2*mmst2*mmt + 2*
+     mmsb22*mmst2*zt2 + 2*mmsb22*mmt*zt2 + 8*mmsb2*mmst2*mmt*zt2 + mmsb22*mmst2
+     *pow2(ltu) + mmsb22*mmt*pow2(ltu) + 6*mmsb2*mmst2*mmt*pow2(ltu) + 14*mmsb2
+     *pow2(mmst2) + 6*lb2u*mmsb2*pow2(mmst2) - 12*lt2u*mmsb2*pow2(mmst2) - 6*
+     ltu*mmsb2*pow2(mmst2) - 2*lb2u*ltu*mmsb2*pow2(mmst2) + 4*lt2u*ltu*mmsb2*
+     pow2(mmst2) + 14*mmt*pow2(mmst2) - 6*lt2u*mmt*pow2(mmst2) - 6*ltu*mmt*pow2
+     (mmst2) + 2*lt2u*ltu*mmt*pow2(mmst2) + 2*mmsb2*zt2*pow2(mmst2) + 2*mmt*zt2
+     *pow2(mmst2) + mmsb2*pow2(ltu)*pow2(mmst2) + mmt*pow2(ltu)*pow2(mmst2) +
+     pow2(lb2u)*(2*mmsb22*mmst2 + mmsb22*mmt + mmsb2*mmst2*mmt - mmsb2*pow2(
+     mmst2) - pow3(mmsb2)) - 14*pow3(mmsb2) + 6*lb2u*pow3(mmsb2) + 6*ltu*pow3(
+     mmsb2) - 2*lb2u*ltu*pow3(mmsb2) - 2*zt2*pow3(mmsb2) - pow2(ltu)*pow3(mmsb2
+     ) + pow2(lt2u)*(-(mmsb22*mmst2) + mmsb2*mmst2*mmt + (2*mmsb2 + mmt)*pow2(
+     mmst2) - pow3(mmst2)) - 14*pow3(mmst2) + 6*lt2u*pow3(mmst2) + 6*ltu*pow3(
+     mmst2) - 2*lt2u*ltu*pow3(mmst2) - 2*zt2*pow3(mmst2) - pow2(ltu)*pow3(mmst2
+     ))) - 2*pow2(invdgb2)*(-56*mmsb22*mmst2*mmt + 6*lb2u*mmsb22*mmst2*mmt + 6*
+     lt2u*mmsb22*mmst2*mmt + 4*lb2u*lt2u*mmsb22*mmst2*mmt + 36*ltu*mmsb22*mmst2
+     *mmt - 6*lb2u*ltu*mmsb22*mmst2*mmt - 6*lt2u*ltu*mmsb22*mmst2*mmt - 8*
+     mmsb22*mmst2*mmt*zt2 - 6*mmsb22*mmst2*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst2
+     ) - 6*lb2u*mmsb22*pow2(mmst2) + 12*lt2u*mmsb22*pow2(mmst2) + 6*ltu*mmsb22*
+     pow2(mmst2) + 2*lb2u*ltu*mmsb22*pow2(mmst2) - 4*lt2u*ltu*mmsb22*pow2(mmst2
+     ) - 14*mmsb2*mmt*pow2(mmst2) + 6*lt2u*mmsb2*mmt*pow2(mmst2) + 6*ltu*mmsb2*
+     mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb2*mmt*pow2(mmst2) - 2*mmsb22*zt2*pow2(
+     mmst2) - 2*mmsb2*mmt*zt2*pow2(mmst2) - mmsb22*pow2(ltu)*pow2(mmst2) -
+     mmsb2*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*pow3(mmsb2) + 12*lb2u*mmst2*
+     pow3(mmsb2) - 6*lt2u*mmst2*pow3(mmsb2) + 6*ltu*mmst2*pow3(mmsb2) - 4*lb2u*
+     ltu*mmst2*pow3(mmsb2) + 2*lt2u*ltu*mmst2*pow3(mmsb2) - 14*mmt*pow3(mmsb2)
+     + 6*lb2u*mmt*pow3(mmsb2) + 6*ltu*mmt*pow3(mmsb2) - 2*lb2u*ltu*mmt*pow3(
+     mmsb2) - 2*mmst2*zt2*pow3(mmsb2) - 2*mmt*zt2*pow3(mmsb2) - mmst2*pow2(ltu)
+     *pow3(mmsb2) - mmt*pow2(ltu)*pow3(mmsb2) + 14*mmsb2*pow3(mmst2) - 6*lt2u*
+     mmsb2*pow3(mmst2) - 6*ltu*mmsb2*pow3(mmst2) + 2*lt2u*ltu*mmsb2*pow3(mmst2)
+     + 2*mmsb2*zt2*pow3(mmst2) + mmsb2*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(
+     mmsb22*mmst2*mmt) - (2*mmsb22 + mmsb2*mmt)*pow2(mmst2) + mmst2*pow3(mmsb2)
+     + mmsb2*pow3(mmst2)) + 14*pow4(mmsb2) - 6*lb2u*pow4(mmsb2) - 6*ltu*pow4(
+     mmsb2) + 2*lb2u*ltu*pow4(mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2
+     ) + pow2(lb2u)*(-(mmsb22*mmst2*mmt) + mmsb22*pow2(mmst2) - (2*mmst2 + mmt)
+     *pow3(mmsb2) + pow4(mmsb2))))/3.) + DeltaInv(mmt,mmst2,mmgl)*(s2t*((4*s2b*
+     (14*mmgl*mmsb1*mmt - 6*lgu*mmgl*mmsb1*mmt - 6*ltu*mmgl*mmsb1*mmt + 2*lgu*
+     ltu*mmgl*mmsb1*mmt + 14*mmsb12*mmt - 6*lgu*mmsb12*mmt - 6*ltu*mmsb12*mmt +
+     2*lgu*ltu*mmsb12*mmt - 14*mmgl*mmsb2*mmt + 6*lgu*mmgl*mmsb2*mmt + 6*ltu*
+     mmgl*mmsb2*mmt - 2*lgu*ltu*mmgl*mmsb2*mmt - 14*mmsb22*mmt + 6*lgu*mmsb22*
+     mmt + 6*ltu*mmsb22*mmt - 2*lgu*ltu*mmsb22*mmt - 14*mmsb1*mmst2*mmt + 6*lgu
+     *mmsb1*mmst2*mmt - 6*lt2u*mmsb1*mmst2*mmt + 2*lgu*lt2u*mmsb1*mmst2*mmt +
+     12*ltu*mmsb1*mmst2*mmt - 4*lgu*ltu*mmsb1*mmst2*mmt + 14*invdgb1*mmsb12*
+     mmst2*mmt - 6*invdgb1*lgu*mmsb12*mmst2*mmt + 6*invdgb1*lt2u*mmsb12*mmst2*
+     mmt - 2*invdgb1*lgu*lt2u*mmsb12*mmst2*mmt - 12*invdgb1*ltu*mmsb12*mmst2*
+     mmt + 4*invdgb1*lgu*ltu*mmsb12*mmst2*mmt + 14*mmsb2*mmst2*mmt - 6*lgu*
+     mmsb2*mmst2*mmt + 6*lt2u*mmsb2*mmst2*mmt - 2*lgu*lt2u*mmsb2*mmst2*mmt - 12
+     *ltu*mmsb2*mmst2*mmt + 4*lgu*ltu*mmsb2*mmst2*mmt - 14*invdgb2*mmsb22*mmst2
+     *mmt + 6*invdgb2*lgu*mmsb22*mmst2*mmt - 6*invdgb2*lt2u*mmsb22*mmst2*mmt +
+     2*invdgb2*lgu*lt2u*mmsb22*mmst2*mmt + 12*invdgb2*ltu*mmsb22*mmst2*mmt - 4*
+     invdgb2*lgu*ltu*mmsb22*mmst2*mmt + 2*mmgl*mmsb1*mmt*zt2 + 2*mmsb12*mmt*zt2
+      - 2*mmgl*mmsb2*mmt*zt2 - 2*mmsb22*mmt*zt2 - 2*mmsb1*mmst2*mmt*zt2 + 2*
+     invdgb1*mmsb12*mmst2*mmt*zt2 + 2*mmsb2*mmst2*mmt*zt2 - 2*invdgb2*mmsb22*
+     mmst2*mmt*zt2 + mmgl*mmsb1*mmt*pow2(ltu) + mmsb12*mmt*pow2(ltu) - mmgl*
+     mmsb2*mmt*pow2(ltu) - mmsb22*mmt*pow2(ltu) - 2*mmsb1*mmst2*mmt*pow2(ltu) +
+     2*invdgb1*mmsb12*mmst2*mmt*pow2(ltu) + 2*mmsb2*mmst2*mmt*pow2(ltu) - 2*
+     invdgb2*mmsb22*mmst2*mmt*pow2(ltu) - 6*invdgb1*lt2u*mmsb1*mmt*pow2(mmst2)
+     + 2*invdgb1*lgu*lt2u*mmsb1*mmt*pow2(mmst2) + 6*invdgb1*ltu*mmsb1*mmt*pow2(
+     mmst2) - 2*invdgb1*lgu*ltu*mmsb1*mmt*pow2(mmst2) + 6*invdgb2*lt2u*mmsb2*
+     mmt*pow2(mmst2) - 2*invdgb2*lgu*lt2u*mmsb2*mmt*pow2(mmst2) - 6*invdgb2*ltu
+     *mmsb2*mmt*pow2(mmst2) + 2*invdgb2*lgu*ltu*mmsb2*mmt*pow2(mmst2) - invdgb1
+     *mmsb1*mmt*pow2(ltu)*pow2(mmst2) + invdgb2*mmsb2*mmt*pow2(ltu)*pow2(mmst2)
+     - 14*mmsb1*pow2(mmt) + 6*lgu*mmsb1*pow2(mmt) + 6*ltu*mmsb1*pow2(mmt) - 2*
+     lgu*ltu*mmsb1*pow2(mmt) + 14*invdgb1*mmsb12*pow2(mmt) - 6*invdgb1*lgu*
+     mmsb12*pow2(mmt) - 6*invdgb1*ltu*mmsb12*pow2(mmt) + 2*invdgb1*lgu*ltu*
+     mmsb12*pow2(mmt) + 14*mmsb2*pow2(mmt) - 6*lgu*mmsb2*pow2(mmt) - 6*ltu*
+     mmsb2*pow2(mmt) + 2*lgu*ltu*mmsb2*pow2(mmt) - 14*invdgb2*mmsb22*pow2(mmt)
+     + 6*invdgb2*lgu*mmsb22*pow2(mmt) + 6*invdgb2*ltu*mmsb22*pow2(mmt) - 2*
+     invdgb2*lgu*ltu*mmsb22*pow2(mmt) + 28*invdgb1*mmsb1*mmst2*pow2(mmt) - 6*
+     invdgb1*lt2u*mmsb1*mmst2*pow2(mmt) - 2*invdgb1*lgu*lt2u*mmsb1*mmst2*pow2(
+     mmt) - 18*invdgb1*ltu*mmsb1*mmst2*pow2(mmt) + 2*invdgb1*lgu*ltu*mmsb1*
+     mmst2*pow2(mmt) + 4*invdgb1*lt2u*ltu*mmsb1*mmst2*pow2(mmt) - 28*invdgb2*
+     mmsb2*mmst2*pow2(mmt) + 6*invdgb2*lt2u*mmsb2*mmst2*pow2(mmt) + 2*invdgb2*
+     lgu*lt2u*mmsb2*mmst2*pow2(mmt) + 18*invdgb2*ltu*mmsb2*mmst2*pow2(mmt) - 2*
+     invdgb2*lgu*ltu*mmsb2*mmst2*pow2(mmt) - 4*invdgb2*lt2u*ltu*mmsb2*mmst2*
+     pow2(mmt) - 2*mmsb1*zt2*pow2(mmt) + 2*invdgb1*mmsb12*zt2*pow2(mmt) + 2*
+     mmsb2*zt2*pow2(mmt) - 2*invdgb2*mmsb22*zt2*pow2(mmt) + 4*invdgb1*mmsb1*
+     mmst2*zt2*pow2(mmt) - 4*invdgb2*mmsb2*mmst2*zt2*pow2(mmt) - mmsb1*pow2(ltu
+     )*pow2(mmt) + invdgb1*mmsb12*pow2(ltu)*pow2(mmt) + mmsb2*pow2(ltu)*pow2(
+     mmt) - invdgb2*mmsb22*pow2(ltu)*pow2(mmt) + 3*invdgb1*mmsb1*mmst2*pow2(ltu
+     )*pow2(mmt) - 3*invdgb2*mmsb2*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*((
+     mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22)*mmst2*mmt + (invdgb1*
+     mmsb1 - invdgb2*mmsb2)*mmt*pow2(mmst2) + (invdgb1*mmsb1 - invdgb2*mmsb2)*
+     mmst2*pow2(mmt)) - 14*invdgb1*mmt*pow3(mmsb1) + 6*invdgb1*lgu*mmt*pow3(
+     mmsb1) + 6*invdgb1*ltu*mmt*pow3(mmsb1) - 2*invdgb1*lgu*ltu*mmt*pow3(mmsb1)
+     - 2*invdgb1*mmt*zt2*pow3(mmsb1) - invdgb1*mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     invdgb2*mmt*pow3(mmsb2) - 6*invdgb2*lgu*mmt*pow3(mmsb2) - 6*invdgb2*ltu*
+     mmt*pow3(mmsb2) + 2*invdgb2*lgu*ltu*mmt*pow3(mmsb2) + 2*invdgb2*mmt*zt2*
+     pow3(mmsb2) + invdgb2*mmt*pow2(ltu)*pow3(mmsb2) + pow2(lgu)*((-mmsb1 +
+     invdgb1*mmsb12 + mmsb2 - invdgb2*mmsb22)*pow2(mmt) + mmt*(mmgl*mmsb1 +
+     mmsb12 - mmgl*mmsb2 - mmsb22 - mmsb1*mmst2 + invdgb1*mmsb12*mmst2 + mmsb2*
+     mmst2 - invdgb2*mmsb22*mmst2 - invdgb1*pow3(mmsb1) + invdgb2*pow3(mmsb2)))
+     ))/(3.*mb*mt) - (2*(28*mmgl2*mmt - 12*lgu*mmgl2*mmt - 12*ltu*mmgl2*mmt + 4
+     *lgu*ltu*mmgl2*mmt + 28*mmgl*mmsb1*mmt - 12*lgu*mmgl*mmsb1*mmt - 12*ltu*
+     mmgl*mmsb1*mmt + 4*lgu*ltu*mmgl*mmsb1*mmt - 42*invdgb1*mmgl*mmsb12*mmt +
+     18*invdgb1*lgu*mmgl*mmsb12*mmt + 18*invdgb1*ltu*mmgl*mmsb12*mmt - 6*
+     invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 28*mmgl*mmsb2*mmt - 12*lgu*mmgl*mmsb2*
+     mmt - 12*ltu*mmgl*mmsb2*mmt + 4*lgu*ltu*mmgl*mmsb2*mmt - 42*invdgb2*mmgl*
+     mmsb22*mmt + 18*invdgb2*lgu*mmgl*mmsb22*mmt + 18*invdgb2*ltu*mmgl*mmsb22*
+     mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb22*mmt - 28*mmgl*mmst2*mmt + 12*lgu*mmgl*
+     mmst2*mmt - 12*lt2u*mmgl*mmst2*mmt + 4*lgu*lt2u*mmgl*mmst2*mmt + 24*ltu*
+     mmgl*mmst2*mmt - 8*lgu*ltu*mmgl*mmst2*mmt + 28*invdgb1*mmgl*mmsb1*mmst2*
+     mmt - 12*invdgb1*lgu*mmgl*mmsb1*mmst2*mmt + 12*invdgb1*lt2u*mmgl*mmsb1*
+     mmst2*mmt - 4*invdgb1*lgu*lt2u*mmgl*mmsb1*mmst2*mmt - 24*invdgb1*ltu*mmgl*
+     mmsb1*mmst2*mmt + 8*invdgb1*lgu*ltu*mmgl*mmsb1*mmst2*mmt + 28*invdgb2*mmgl
+     *mmsb2*mmst2*mmt - 12*invdgb2*lgu*mmgl*mmsb2*mmst2*mmt + 12*invdgb2*lt2u*
+     mmgl*mmsb2*mmst2*mmt - 4*invdgb2*lgu*lt2u*mmgl*mmsb2*mmst2*mmt - 24*
+     invdgb2*ltu*mmgl*mmsb2*mmst2*mmt + 8*invdgb2*lgu*ltu*mmgl*mmsb2*mmst2*mmt
+     + 4*mmgl2*mmt*zt2 + 4*mmgl*mmsb1*mmt*zt2 - 6*invdgb1*mmgl*mmsb12*mmt*zt2 +
+     4*mmgl*mmsb2*mmt*zt2 - 6*invdgb2*mmgl*mmsb22*mmt*zt2 - 4*mmgl*mmst2*mmt*
+     zt2 + 4*invdgb1*mmgl*mmsb1*mmst2*mmt*zt2 + 4*invdgb2*mmgl*mmsb2*mmst2*mmt*
+     zt2 + 2*mmgl2*mmt*pow2(lgu) + 2*mmgl*mmsb1*mmt*pow2(lgu) - 3*invdgb1*mmgl*
+     mmsb12*mmt*pow2(lgu) + 2*mmgl*mmsb2*mmt*pow2(lgu) - 3*invdgb2*mmgl*mmsb22*
+     mmt*pow2(lgu) - 2*mmgl*mmst2*mmt*pow2(lgu) + 2*invdgb1*mmgl*mmsb1*mmst2*
+     mmt*pow2(lgu) + 2*invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(lgu) + 2*mmgl*mmst2*
+     mmt*pow2(lt2u) - 2*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(lt2u) - 2*invdgb2*
+     mmgl*mmsb2*mmst2*mmt*pow2(lt2u) + 2*mmgl2*mmt*pow2(ltu) + 2*mmgl*mmsb1*mmt
+     *pow2(ltu) - 3*invdgb1*mmgl*mmsb12*mmt*pow2(ltu) + 2*mmgl*mmsb2*mmt*pow2(
+     ltu) - 3*invdgb2*mmgl*mmsb22*mmt*pow2(ltu) - 4*mmgl*mmst2*mmt*pow2(ltu) +
+     4*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(ltu) + 4*invdgb2*mmgl*mmsb2*mmst2*mmt*
+     pow2(ltu) - 6*invdgb1*lt2u*mmgl*mmt*pow2(mmst2) - 6*invdgb2*lt2u*mmgl*mmt*
+     pow2(mmst2) + 2*invdgb1*lgu*lt2u*mmgl*mmt*pow2(mmst2) + 2*invdgb2*lgu*lt2u
+     *mmgl*mmt*pow2(mmst2) + 6*invdgb1*ltu*mmgl*mmt*pow2(mmst2) + 6*invdgb2*ltu
+     *mmgl*mmt*pow2(mmst2) - 2*invdgb1*lgu*ltu*mmgl*mmt*pow2(mmst2) - 2*invdgb2
+     *lgu*ltu*mmgl*mmt*pow2(mmst2) + invdgb1*mmgl*mmt*pow2(lt2u)*pow2(mmst2) +
+     invdgb2*mmgl*mmt*pow2(lt2u)*pow2(mmst2) - invdgb1*mmgl*mmt*pow2(ltu)*pow2(
+     mmst2) - invdgb2*mmgl*mmt*pow2(ltu)*pow2(mmst2) - 28*mmgl*pow2(mmt) + 12*
+     lgu*mmgl*pow2(mmt) + 12*ltu*mmgl*pow2(mmt) - 4*lgu*ltu*mmgl*pow2(mmt) + 28
+     *invdgb1*mmgl*mmsb1*pow2(mmt) - 12*invdgb1*lgu*mmgl*mmsb1*pow2(mmt) - 12*
+     invdgb1*ltu*mmgl*mmsb1*pow2(mmt) + 4*invdgb1*lgu*ltu*mmgl*mmsb1*pow2(mmt)
+     + 28*invdgb2*mmgl*mmsb2*pow2(mmt) - 12*invdgb2*lgu*mmgl*mmsb2*pow2(mmt) -
+     12*invdgb2*ltu*mmgl*mmsb2*pow2(mmt) + 4*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(
+     mmt) + 28*invdgb1*mmgl*mmst2*pow2(mmt) + 28*invdgb2*mmgl*mmst2*pow2(mmt) -
+     6*invdgb1*lt2u*mmgl*mmst2*pow2(mmt) - 6*invdgb2*lt2u*mmgl*mmst2*pow2(mmt)
+     - 2*invdgb1*lgu*lt2u*mmgl*mmst2*pow2(mmt) - 2*invdgb2*lgu*lt2u*mmgl*mmst2*
+     pow2(mmt) - 18*invdgb1*ltu*mmgl*mmst2*pow2(mmt) - 18*invdgb2*ltu*mmgl*
+     mmst2*pow2(mmt) + 2*invdgb1*lgu*ltu*mmgl*mmst2*pow2(mmt) + 2*invdgb2*lgu*
+     ltu*mmgl*mmst2*pow2(mmt) + 4*invdgb1*lt2u*ltu*mmgl*mmst2*pow2(mmt) + 4*
+     invdgb2*lt2u*ltu*mmgl*mmst2*pow2(mmt) - 4*mmgl*zt2*pow2(mmt) + 4*invdgb1*
+     mmgl*mmsb1*zt2*pow2(mmt) + 4*invdgb2*mmgl*mmsb2*zt2*pow2(mmt) + 4*invdgb1*
+     mmgl*mmst2*zt2*pow2(mmt) + 4*invdgb2*mmgl*mmst2*zt2*pow2(mmt) - 2*mmgl*
+     pow2(lgu)*pow2(mmt) + 2*invdgb1*mmgl*mmsb1*pow2(lgu)*pow2(mmt) + 2*invdgb2
+     *mmgl*mmsb2*pow2(lgu)*pow2(mmt) + invdgb1*mmgl*mmst2*pow2(lt2u)*pow2(mmt)
+     + invdgb2*mmgl*mmst2*pow2(lt2u)*pow2(mmt) - 2*mmgl*pow2(ltu)*pow2(mmt) + 2
+     *invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmt) + 2*invdgb2*mmgl*mmsb2*pow2(ltu)*
+     pow2(mmt) + 3*invdgb1*mmgl*mmst2*pow2(ltu)*pow2(mmt) + 3*invdgb2*mmgl*
+     mmst2*pow2(ltu)*pow2(mmt) + mmgl*pow2(invdgb1)*(-14*mmsb12*mmst2*mmt + 6*
+     lgu*mmsb12*mmst2*mmt - 6*lt2u*mmsb12*mmst2*mmt + 2*lgu*lt2u*mmsb12*mmst2*
+     mmt + 12*ltu*mmsb12*mmst2*mmt - 4*lgu*ltu*mmsb12*mmst2*mmt - 2*mmsb12*
+     mmst2*mmt*zt2 - 2*mmsb12*mmst2*mmt*pow2(ltu) + 6*lt2u*mmsb1*mmt*pow2(mmst2
+     ) - 2*lgu*lt2u*mmsb1*mmt*pow2(mmst2) - 6*ltu*mmsb1*mmt*pow2(mmst2) + 2*lgu
+     *ltu*mmsb1*mmt*pow2(mmst2) + mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmsb12*
+     pow2(mmt) + 6*lgu*mmsb12*pow2(mmt) + 6*ltu*mmsb12*pow2(mmt) - 2*lgu*ltu*
+     mmsb12*pow2(mmt) - 28*mmsb1*mmst2*pow2(mmt) + 6*lt2u*mmsb1*mmst2*pow2(mmt)
+     + 2*lgu*lt2u*mmsb1*mmst2*pow2(mmt) + 18*ltu*mmsb1*mmst2*pow2(mmt) - 2*lgu*
+     ltu*mmsb1*mmst2*pow2(mmt) - 4*lt2u*ltu*mmsb1*mmst2*pow2(mmt) - 2*mmsb12*
+     zt2*pow2(mmt) - 4*mmsb1*mmst2*zt2*pow2(mmt) - mmsb12*pow2(ltu)*pow2(mmt) -
+     3*mmsb1*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*(mmsb12*mmst2*mmt - mmsb1*
+     mmt*pow2(mmst2) - mmsb1*mmst2*pow2(mmt)) + 14*mmt*pow3(mmsb1) - 6*lgu*mmt*
+     pow3(mmsb1) - 6*ltu*mmt*pow3(mmsb1) + 2*lgu*ltu*mmt*pow3(mmsb1) + 2*mmt*
+     zt2*pow3(mmsb1) + mmt*pow2(ltu)*pow3(mmsb1) - pow2(lgu)*(mmsb12*mmst2*mmt
+     + mmsb12*pow2(mmt) - mmt*pow3(mmsb1))) + mmgl*pow2(invdgb2)*(-14*mmsb22*
+     mmst2*mmt + 6*lgu*mmsb22*mmst2*mmt - 6*lt2u*mmsb22*mmst2*mmt + 2*lgu*lt2u*
+     mmsb22*mmst2*mmt + 12*ltu*mmsb22*mmst2*mmt - 4*lgu*ltu*mmsb22*mmst2*mmt -
+     2*mmsb22*mmst2*mmt*zt2 - 2*mmsb22*mmst2*mmt*pow2(ltu) + 6*lt2u*mmsb2*mmt*
+     pow2(mmst2) - 2*lgu*lt2u*mmsb2*mmt*pow2(mmst2) - 6*ltu*mmsb2*mmt*pow2(
+     mmst2) + 2*lgu*ltu*mmsb2*mmt*pow2(mmst2) + mmsb2*mmt*pow2(ltu)*pow2(mmst2)
+     - 14*mmsb22*pow2(mmt) + 6*lgu*mmsb22*pow2(mmt) + 6*ltu*mmsb22*pow2(mmt) -
+     2*lgu*ltu*mmsb22*pow2(mmt) - 28*mmsb2*mmst2*pow2(mmt) + 6*lt2u*mmsb2*mmst2
+     *pow2(mmt) + 2*lgu*lt2u*mmsb2*mmst2*pow2(mmt) + 18*ltu*mmsb2*mmst2*pow2(
+     mmt) - 2*lgu*ltu*mmsb2*mmst2*pow2(mmt) - 4*lt2u*ltu*mmsb2*mmst2*pow2(mmt)
+     - 2*mmsb22*zt2*pow2(mmt) - 4*mmsb2*mmst2*zt2*pow2(mmt) - mmsb22*pow2(ltu)*
+     pow2(mmt) - 3*mmsb2*mmst2*pow2(ltu)*pow2(mmt) + pow2(lt2u)*(mmsb22*mmst2*
+     mmt - mmsb2*mmt*pow2(mmst2) - mmsb2*mmst2*pow2(mmt)) + 14*mmt*pow3(mmsb2)
+     - 6*lgu*mmt*pow3(mmsb2) - 6*ltu*mmt*pow3(mmsb2) + 2*lgu*ltu*mmt*pow3(mmsb2
+     ) + 2*mmt*zt2*pow3(mmsb2) + mmt*pow2(ltu)*pow3(mmsb2) - pow2(lgu)*(mmsb22*
+     mmst2*mmt + mmsb22*pow2(mmt) - mmt*pow3(mmsb2)))))/(3.*mgl*mt)) + (4*s2b*(
+     14*mmgl2*mmsb1 - 6*lgu*mmgl2*mmsb1 - 6*ltu*mmgl2*mmsb1 + 2*lgu*ltu*mmgl2*
+     mmsb1 + 14*mmgl*mmsb12 - 6*lgu*mmgl*mmsb12 - 6*ltu*mmgl*mmsb12 + 2*lgu*ltu
+     *mmgl*mmsb12 - 14*mmgl2*mmsb2 + 6*lgu*mmgl2*mmsb2 + 6*ltu*mmgl2*mmsb2 - 2*
+     lgu*ltu*mmgl2*mmsb2 - 14*mmgl*mmsb22 + 6*lgu*mmgl*mmsb22 + 6*ltu*mmgl*
+     mmsb22 - 2*lgu*ltu*mmgl*mmsb22 - 14*mmgl*mmsb1*mmst2 + 12*lgu*mmgl*mmsb1*
+     mmst2 - 6*lt2u*mmgl*mmsb1*mmst2 + 6*ltu*mmgl*mmsb1*mmst2 - 4*lgu*ltu*mmgl*
+     mmsb1*mmst2 + 2*lt2u*ltu*mmgl*mmsb1*mmst2 + 14*invdgb1*mmgl*mmsb12*mmst2 -
+     12*invdgb1*lgu*mmgl*mmsb12*mmst2 + 6*invdgb1*lt2u*mmgl*mmsb12*mmst2 - 6*
+     invdgb1*ltu*mmgl*mmsb12*mmst2 + 4*invdgb1*lgu*ltu*mmgl*mmsb12*mmst2 - 2*
+     invdgb1*lt2u*ltu*mmgl*mmsb12*mmst2 + 14*mmgl*mmsb2*mmst2 - 12*lgu*mmgl*
+     mmsb2*mmst2 + 6*lt2u*mmgl*mmsb2*mmst2 - 6*ltu*mmgl*mmsb2*mmst2 + 4*lgu*ltu
+     *mmgl*mmsb2*mmst2 - 2*lt2u*ltu*mmgl*mmsb2*mmst2 - 14*invdgb2*mmgl*mmsb22*
+     mmst2 + 12*invdgb2*lgu*mmgl*mmsb22*mmst2 - 6*invdgb2*lt2u*mmgl*mmsb22*
+     mmst2 + 6*invdgb2*ltu*mmgl*mmsb22*mmst2 - 4*invdgb2*lgu*ltu*mmgl*mmsb22*
+     mmst2 + 2*invdgb2*lt2u*ltu*mmgl*mmsb22*mmst2 - 14*mmgl*mmsb1*mmt + 6*lgu*
+     mmgl*mmsb1*mmt + 6*ltu*mmgl*mmsb1*mmt - 2*lgu*ltu*mmgl*mmsb1*mmt + 14*
+     invdgb1*mmgl*mmsb12*mmt - 6*invdgb1*lgu*mmgl*mmsb12*mmt - 6*invdgb1*ltu*
+     mmgl*mmsb12*mmt + 2*invdgb1*lgu*ltu*mmgl*mmsb12*mmt + 14*mmgl*mmsb2*mmt -
+     6*lgu*mmgl*mmsb2*mmt - 6*ltu*mmgl*mmsb2*mmt + 2*lgu*ltu*mmgl*mmsb2*mmt -
+     14*invdgb2*mmgl*mmsb22*mmt + 6*invdgb2*lgu*mmgl*mmsb22*mmt + 6*invdgb2*ltu
+     *mmgl*mmsb22*mmt - 2*invdgb2*lgu*ltu*mmgl*mmsb22*mmt + 56*invdgb1*mmgl*
+     mmsb1*mmst2*mmt - 6*invdgb1*lgu*mmgl*mmsb1*mmst2*mmt - 6*invdgb1*lt2u*mmgl
+     *mmsb1*mmst2*mmt - 4*invdgb1*lgu*lt2u*mmgl*mmsb1*mmst2*mmt - 36*invdgb1*
+     ltu*mmgl*mmsb1*mmst2*mmt + 6*invdgb1*lgu*ltu*mmgl*mmsb1*mmst2*mmt + 6*
+     invdgb1*lt2u*ltu*mmgl*mmsb1*mmst2*mmt - 56*invdgb2*mmgl*mmsb2*mmst2*mmt +
+     6*invdgb2*lgu*mmgl*mmsb2*mmst2*mmt + 6*invdgb2*lt2u*mmgl*mmsb2*mmst2*mmt +
+     4*invdgb2*lgu*lt2u*mmgl*mmsb2*mmst2*mmt + 36*invdgb2*ltu*mmgl*mmsb2*mmst2*
+     mmt - 6*invdgb2*lgu*ltu*mmgl*mmsb2*mmst2*mmt - 6*invdgb2*lt2u*ltu*mmgl*
+     mmsb2*mmst2*mmt + 2*mmgl2*mmsb1*zt2 + 2*mmgl*mmsb12*zt2 - 2*mmgl2*mmsb2*
+     zt2 - 2*mmgl*mmsb22*zt2 - 2*mmgl*mmsb1*mmst2*zt2 + 2*invdgb1*mmgl*mmsb12*
+     mmst2*zt2 + 2*mmgl*mmsb2*mmst2*zt2 - 2*invdgb2*mmgl*mmsb22*mmst2*zt2 - 2*
+     mmgl*mmsb1*mmt*zt2 + 2*invdgb1*mmgl*mmsb12*mmt*zt2 + 2*mmgl*mmsb2*mmt*zt2
+     - 2*invdgb2*mmgl*mmsb22*mmt*zt2 + 8*invdgb1*mmgl*mmsb1*mmst2*mmt*zt2 - 8*
+     invdgb2*mmgl*mmsb2*mmst2*mmt*zt2 + mmgl2*mmsb1*pow2(ltu) + mmgl*mmsb12*
+     pow2(ltu) - mmgl2*mmsb2*pow2(ltu) - mmgl*mmsb22*pow2(ltu) - mmgl*mmsb1*
+     mmst2*pow2(ltu) + invdgb1*mmgl*mmsb12*mmst2*pow2(ltu) + mmgl*mmsb2*mmst2*
+     pow2(ltu) - invdgb2*mmgl*mmsb22*mmst2*pow2(ltu) - mmgl*mmsb1*mmt*pow2(ltu)
+     + invdgb1*mmgl*mmsb12*mmt*pow2(ltu) + mmgl*mmsb2*mmt*pow2(ltu) - invdgb2*
+     mmgl*mmsb22*mmt*pow2(ltu) + 6*invdgb1*mmgl*mmsb1*mmst2*mmt*pow2(ltu) - 6*
+     invdgb2*mmgl*mmsb2*mmst2*mmt*pow2(ltu) + 14*invdgb1*mmgl*mmsb1*pow2(mmst2)
+     + 6*invdgb1*lgu*mmgl*mmsb1*pow2(mmst2) - 12*invdgb1*lt2u*mmgl*mmsb1*pow2(
+     mmst2) - 6*invdgb1*ltu*mmgl*mmsb1*pow2(mmst2) - 2*invdgb1*lgu*ltu*mmgl*
+     mmsb1*pow2(mmst2) + 4*invdgb1*lt2u*ltu*mmgl*mmsb1*pow2(mmst2) - 14*invdgb2
+     *mmgl*mmsb2*pow2(mmst2) - 6*invdgb2*lgu*mmgl*mmsb2*pow2(mmst2) + 12*
+     invdgb2*lt2u*mmgl*mmsb2*pow2(mmst2) + 6*invdgb2*ltu*mmgl*mmsb2*pow2(mmst2)
+     + 2*invdgb2*lgu*ltu*mmgl*mmsb2*pow2(mmst2) - 4*invdgb2*lt2u*ltu*mmgl*mmsb2
+     *pow2(mmst2) + 14*invdgb1*mmgl*mmt*pow2(mmst2) - 14*invdgb2*mmgl*mmt*pow2(
+     mmst2) - 6*invdgb1*lt2u*mmgl*mmt*pow2(mmst2) + 6*invdgb2*lt2u*mmgl*mmt*
+     pow2(mmst2) - 6*invdgb1*ltu*mmgl*mmt*pow2(mmst2) + 6*invdgb2*ltu*mmgl*mmt*
+     pow2(mmst2) + 2*invdgb1*lt2u*ltu*mmgl*mmt*pow2(mmst2) - 2*invdgb2*lt2u*ltu
+     *mmgl*mmt*pow2(mmst2) + 2*invdgb1*mmgl*mmsb1*zt2*pow2(mmst2) - 2*invdgb2*
+     mmgl*mmsb2*zt2*pow2(mmst2) + 2*invdgb1*mmgl*mmt*zt2*pow2(mmst2) - 2*
+     invdgb2*mmgl*mmt*zt2*pow2(mmst2) + invdgb1*mmgl*mmsb1*pow2(ltu)*pow2(mmst2
+     ) - invdgb2*mmgl*mmsb2*pow2(ltu)*pow2(mmst2) + invdgb1*mmgl*mmt*pow2(ltu)*
+     pow2(mmst2) - invdgb2*mmgl*mmt*pow2(ltu)*pow2(mmst2) - 14*invdgb1*mmgl*
+     pow3(mmsb1) + 6*invdgb1*lgu*mmgl*pow3(mmsb1) + 6*invdgb1*ltu*mmgl*pow3(
+     mmsb1) - 2*invdgb1*lgu*ltu*mmgl*pow3(mmsb1) - 2*invdgb1*mmgl*zt2*pow3(
+     mmsb1) - invdgb1*mmgl*pow2(ltu)*pow3(mmsb1) + 14*invdgb2*mmgl*pow3(mmsb2)
+     - 6*invdgb2*lgu*mmgl*pow3(mmsb2) - 6*invdgb2*ltu*mmgl*pow3(mmsb2) + 2*
+     invdgb2*lgu*ltu*mmgl*pow3(mmsb2) + 2*invdgb2*mmgl*zt2*pow3(mmsb2) +
+     invdgb2*mmgl*pow2(ltu)*pow3(mmsb2) + pow2(lgu)*(mmgl2*mmsb1 + mmgl*mmsb12
+     - mmgl2*mmsb2 - mmgl*mmsb22 - 2*mmgl*mmsb1*mmst2 + 2*invdgb1*mmgl*mmsb12*
+     mmst2 + 2*mmgl*mmsb2*mmst2 - 2*invdgb2*mmgl*mmsb22*mmst2 - mmgl*mmsb1*mmt
+     + invdgb1*mmgl*mmsb12*mmt + mmgl*mmsb2*mmt - invdgb2*mmgl*mmsb22*mmt +
+     invdgb1*mmgl*mmsb1*mmst2*mmt - invdgb2*mmgl*mmsb2*mmst2*mmt + (-(invdgb1*
+     mmgl*mmsb1) + invdgb2*mmgl*mmsb2)*pow2(mmst2) - invdgb1*mmgl*pow3(mmsb1) +
+     invdgb2*mmgl*pow3(mmsb2)) - 14*invdgb1*mmgl*pow3(mmst2) + 14*invdgb2*mmgl*
+     pow3(mmst2) + 6*invdgb1*lt2u*mmgl*pow3(mmst2) - 6*invdgb2*lt2u*mmgl*pow3(
+     mmst2) + 6*invdgb1*ltu*mmgl*pow3(mmst2) - 6*invdgb2*ltu*mmgl*pow3(mmst2) -
+     2*invdgb1*lt2u*ltu*mmgl*pow3(mmst2) + 2*invdgb2*lt2u*ltu*mmgl*pow3(mmst2)
+     - 2*invdgb1*mmgl*zt2*pow3(mmst2) + 2*invdgb2*mmgl*zt2*pow3(mmst2) -
+     invdgb1*mmgl*pow2(ltu)*pow3(mmst2) + invdgb2*mmgl*pow2(ltu)*pow3(mmst2) +
+     mmgl*pow2(lt2u)*(mmst2*(mmsb1 - invdgb1*mmsb12 - mmsb2 + invdgb2*mmsb22 +
+     invdgb1*mmsb1*mmt - invdgb2*mmsb2*mmt) + (invdgb1*(2*mmsb1 + mmt) -
+     invdgb2*(2*mmsb2 + mmt))*pow2(mmst2) + (-invdgb1 + invdgb2)*pow3(mmst2))))
+     /(3.*mb*mgl) - (2*(28*mmgl2 - 12*lgu*mmgl2 - 12*ltu*mmgl2 + 4*lgu*ltu*
+     mmgl2 + 28*mmgl*mmsb1 - 12*lgu*mmgl*mmsb1 - 12*ltu*mmgl*mmsb1 + 4*lgu*ltu*
+     mmgl*mmsb1 + 42*mmsb12 - 18*lgu*mmsb12 - 18*ltu*mmsb12 + 6*lgu*ltu*mmsb12
+     + 28*mmgl*mmsb2 - 12*lgu*mmgl*mmsb2 - 12*ltu*mmgl*mmsb2 + 4*lgu*ltu*mmgl*
+     mmsb2 + 42*mmsb22 - 18*lgu*mmsb22 - 18*ltu*mmsb22 + 6*lgu*ltu*mmsb22 - 28*
+     mmgl*mmst2 + 24*lgu*mmgl*mmst2 - 12*lt2u*mmgl*mmst2 + 12*ltu*mmgl*mmst2 -
+     8*lgu*ltu*mmgl*mmst2 + 4*lt2u*ltu*mmgl*mmst2 - 28*mmsb1*mmst2 + 24*lgu*
+     mmsb1*mmst2 - 12*lt2u*mmsb1*mmst2 + 12*ltu*mmsb1*mmst2 - 8*lgu*ltu*mmsb1*
+     mmst2 + 4*lt2u*ltu*mmsb1*mmst2 + 42*invdgb1*mmsb12*mmst2 - 36*invdgb1*lgu*
+     mmsb12*mmst2 + 18*invdgb1*lt2u*mmsb12*mmst2 - 18*invdgb1*ltu*mmsb12*mmst2
+     + 12*invdgb1*lgu*ltu*mmsb12*mmst2 - 6*invdgb1*lt2u*ltu*mmsb12*mmst2 - 28*
+     mmsb2*mmst2 + 24*lgu*mmsb2*mmst2 - 12*lt2u*mmsb2*mmst2 + 12*ltu*mmsb2*
+     mmst2 - 8*lgu*ltu*mmsb2*mmst2 + 4*lt2u*ltu*mmsb2*mmst2 + 42*invdgb2*mmsb22
+     *mmst2 - 36*invdgb2*lgu*mmsb22*mmst2 + 18*invdgb2*lt2u*mmsb22*mmst2 - 18*
+     invdgb2*ltu*mmsb22*mmst2 + 12*invdgb2*lgu*ltu*mmsb22*mmst2 - 6*invdgb2*
+     lt2u*ltu*mmsb22*mmst2 - 28*mmgl*mmt + 12*lgu*mmgl*mmt + 12*ltu*mmgl*mmt -
+     4*lgu*ltu*mmgl*mmt - 28*mmsb1*mmt + 12*lgu*mmsb1*mmt + 12*ltu*mmsb1*mmt -
+     4*lgu*ltu*mmsb1*mmt + 42*invdgb1*mmsb12*mmt - 18*invdgb1*lgu*mmsb12*mmt -
+     18*invdgb1*ltu*mmsb12*mmt + 6*invdgb1*lgu*ltu*mmsb12*mmt - 28*mmsb2*mmt +
+     12*lgu*mmsb2*mmt + 12*ltu*mmsb2*mmt - 4*lgu*ltu*mmsb2*mmt + 42*invdgb2*
+     mmsb22*mmt - 18*invdgb2*lgu*mmsb22*mmt - 18*invdgb2*ltu*mmsb22*mmt + 6*
+     invdgb2*lgu*ltu*mmsb22*mmt - 112*mmst2*mmt + 12*lgu*mmst2*mmt + 12*lt2u*
+     mmst2*mmt + 8*lgu*lt2u*mmst2*mmt + 72*ltu*mmst2*mmt - 12*lgu*ltu*mmst2*mmt
+      - 12*lt2u*ltu*mmst2*mmt + 112*invdgb1*mmsb1*mmst2*mmt - 12*invdgb1*lgu*
+     mmsb1*mmst2*mmt - 12*invdgb1*lt2u*mmsb1*mmst2*mmt - 8*invdgb1*lgu*lt2u*
+     mmsb1*mmst2*mmt - 72*invdgb1*ltu*mmsb1*mmst2*mmt + 12*invdgb1*lgu*ltu*
+     mmsb1*mmst2*mmt + 12*invdgb1*lt2u*ltu*mmsb1*mmst2*mmt + 112*invdgb2*mmsb2*
+     mmst2*mmt - 12*invdgb2*lgu*mmsb2*mmst2*mmt - 12*invdgb2*lt2u*mmsb2*mmst2*
+     mmt - 8*invdgb2*lgu*lt2u*mmsb2*mmst2*mmt - 72*invdgb2*ltu*mmsb2*mmst2*mmt
+     + 12*invdgb2*lgu*ltu*mmsb2*mmst2*mmt + 12*invdgb2*lt2u*ltu*mmsb2*mmst2*mmt
+      + 4*mmgl2*zt2 + 4*mmgl*mmsb1*zt2 + 6*mmsb12*zt2 + 4*mmgl*mmsb2*zt2 + 6*
+     mmsb22*zt2 - 4*mmgl*mmst2*zt2 - 4*mmsb1*mmst2*zt2 + 6*invdgb1*mmsb12*mmst2
+     *zt2 - 4*mmsb2*mmst2*zt2 + 6*invdgb2*mmsb22*mmst2*zt2 - 4*mmgl*mmt*zt2 - 4
+     *mmsb1*mmt*zt2 + 6*invdgb1*mmsb12*mmt*zt2 - 4*mmsb2*mmt*zt2 + 6*invdgb2*
+     mmsb22*mmt*zt2 - 16*mmst2*mmt*zt2 + 16*invdgb1*mmsb1*mmst2*mmt*zt2 + 16*
+     invdgb2*mmsb2*mmst2*mmt*zt2 + 2*mmgl2*pow2(lgu) + 2*mmgl*mmsb1*pow2(lgu) +
+     3*mmsb12*pow2(lgu) + 2*mmgl*mmsb2*pow2(lgu) + 3*mmsb22*pow2(lgu) - 4*mmgl*
+     mmst2*pow2(lgu) - 4*mmsb1*mmst2*pow2(lgu) + 6*invdgb1*mmsb12*mmst2*pow2(
+     lgu) - 4*mmsb2*mmst2*pow2(lgu) + 6*invdgb2*mmsb22*mmst2*pow2(lgu) - 2*mmgl
+     *mmt*pow2(lgu) - 2*mmsb1*mmt*pow2(lgu) + 3*invdgb1*mmsb12*mmt*pow2(lgu) -
+     2*mmsb2*mmt*pow2(lgu) + 3*invdgb2*mmsb22*mmt*pow2(lgu) - 2*mmst2*mmt*pow2(
+     lgu) + 2*invdgb1*mmsb1*mmst2*mmt*pow2(lgu) + 2*invdgb2*mmsb2*mmst2*mmt*
+     pow2(lgu) + 2*mmgl*mmst2*pow2(lt2u) + 2*mmsb1*mmst2*pow2(lt2u) - 3*invdgb1
+     *mmsb12*mmst2*pow2(lt2u) + 2*mmsb2*mmst2*pow2(lt2u) - 3*invdgb2*mmsb22*
+     mmst2*pow2(lt2u) - 2*mmst2*mmt*pow2(lt2u) + 2*invdgb1*mmsb1*mmst2*mmt*pow2
+     (lt2u) + 2*invdgb2*mmsb2*mmst2*mmt*pow2(lt2u) + 2*mmgl2*pow2(ltu) + 2*mmgl
+     *mmsb1*pow2(ltu) + 3*mmsb12*pow2(ltu) + 2*mmgl*mmsb2*pow2(ltu) + 3*mmsb22*
+     pow2(ltu) - 2*mmgl*mmst2*pow2(ltu) - 2*mmsb1*mmst2*pow2(ltu) + 3*invdgb1*
+     mmsb12*mmst2*pow2(ltu) - 2*mmsb2*mmst2*pow2(ltu) + 3*invdgb2*mmsb22*mmst2*
+     pow2(ltu) - 2*mmgl*mmt*pow2(ltu) - 2*mmsb1*mmt*pow2(ltu) + 3*invdgb1*
+     mmsb12*mmt*pow2(ltu) - 2*mmsb2*mmt*pow2(ltu) + 3*invdgb2*mmsb22*mmt*pow2(
+     ltu) - 12*mmst2*mmt*pow2(ltu) + 12*invdgb1*mmsb1*mmst2*mmt*pow2(ltu) + 12*
+     invdgb2*mmsb2*mmst2*mmt*pow2(ltu) - 28*pow2(mmst2) - 12*lgu*pow2(mmst2) +
+     24*lt2u*pow2(mmst2) + 12*ltu*pow2(mmst2) + 4*lgu*ltu*pow2(mmst2) - 8*lt2u*
+     ltu*pow2(mmst2) + 28*invdgb1*mmsb1*pow2(mmst2) + 12*invdgb1*lgu*mmsb1*pow2
+     (mmst2) - 24*invdgb1*lt2u*mmsb1*pow2(mmst2) - 12*invdgb1*ltu*mmsb1*pow2(
+     mmst2) - 4*invdgb1*lgu*ltu*mmsb1*pow2(mmst2) + 8*invdgb1*lt2u*ltu*mmsb1*
+     pow2(mmst2) + 28*invdgb2*mmsb2*pow2(mmst2) + 12*invdgb2*lgu*mmsb2*pow2(
+     mmst2) - 24*invdgb2*lt2u*mmsb2*pow2(mmst2) - 12*invdgb2*ltu*mmsb2*pow2(
+     mmst2) - 4*invdgb2*lgu*ltu*mmsb2*pow2(mmst2) + 8*invdgb2*lt2u*ltu*mmsb2*
+     pow2(mmst2) + 14*invdgb1*mmt*pow2(mmst2) + 14*invdgb2*mmt*pow2(mmst2) - 6*
+     invdgb1*lt2u*mmt*pow2(mmst2) - 6*invdgb2*lt2u*mmt*pow2(mmst2) - 6*invdgb1*
+     ltu*mmt*pow2(mmst2) - 6*invdgb2*ltu*mmt*pow2(mmst2) + 2*invdgb1*lt2u*ltu*
+     mmt*pow2(mmst2) + 2*invdgb2*lt2u*ltu*mmt*pow2(mmst2) - 4*zt2*pow2(mmst2) +
+     4*invdgb1*mmsb1*zt2*pow2(mmst2) + 4*invdgb2*mmsb2*zt2*pow2(mmst2) + 2*
+     invdgb1*mmt*zt2*pow2(mmst2) + 2*invdgb2*mmt*zt2*pow2(mmst2) + 2*pow2(lgu)*
+     pow2(mmst2) - 2*invdgb1*mmsb1*pow2(lgu)*pow2(mmst2) - 2*invdgb2*mmsb2*pow2
+     (lgu)*pow2(mmst2) - 4*pow2(lt2u)*pow2(mmst2) + 4*invdgb1*mmsb1*pow2(lt2u)*
+     pow2(mmst2) + 4*invdgb2*mmsb2*pow2(lt2u)*pow2(mmst2) + invdgb1*mmt*pow2(
+     lt2u)*pow2(mmst2) + invdgb2*mmt*pow2(lt2u)*pow2(mmst2) - 2*pow2(ltu)*pow2(
+     mmst2) + 2*invdgb1*mmsb1*pow2(ltu)*pow2(mmst2) + 2*invdgb2*mmsb2*pow2(ltu)
+     *pow2(mmst2) + invdgb1*mmt*pow2(ltu)*pow2(mmst2) + invdgb2*mmt*pow2(ltu)*
+     pow2(mmst2) - 56*invdgb1*pow3(mmsb1) + 24*invdgb1*lgu*pow3(mmsb1) + 24*
+     invdgb1*ltu*pow3(mmsb1) - 8*invdgb1*lgu*ltu*pow3(mmsb1) - 8*invdgb1*zt2*
+     pow3(mmsb1) - 4*invdgb1*pow2(lgu)*pow3(mmsb1) - 4*invdgb1*pow2(ltu)*pow3(
+     mmsb1) - 56*invdgb2*pow3(mmsb2) + 24*invdgb2*lgu*pow3(mmsb2) + 24*invdgb2*
+     ltu*pow3(mmsb2) - 8*invdgb2*lgu*ltu*pow3(mmsb2) - 8*invdgb2*zt2*pow3(mmsb2
+     ) - 4*invdgb2*pow2(lgu)*pow3(mmsb2) - 4*invdgb2*pow2(ltu)*pow3(mmsb2) - 14
+     *invdgb1*pow3(mmst2) - 14*invdgb2*pow3(mmst2) + 6*invdgb1*lt2u*pow3(mmst2)
+     + 6*invdgb2*lt2u*pow3(mmst2) + 6*invdgb1*ltu*pow3(mmst2) + 6*invdgb2*ltu*
+     pow3(mmst2) - 2*invdgb1*lt2u*ltu*pow3(mmst2) - 2*invdgb2*lt2u*ltu*pow3(
+     mmst2) - 2*invdgb1*zt2*pow3(mmst2) - 2*invdgb2*zt2*pow3(mmst2) - invdgb1*
+     pow2(lt2u)*pow3(mmst2) - invdgb2*pow2(lt2u)*pow3(mmst2) - invdgb1*pow2(ltu
+     )*pow3(mmst2) - invdgb2*pow2(ltu)*pow3(mmst2) + pow2(invdgb1)*(-56*mmsb12*
+     mmst2*mmt + 6*lgu*mmsb12*mmst2*mmt + 6*lt2u*mmsb12*mmst2*mmt + 4*lgu*lt2u*
+     mmsb12*mmst2*mmt + 36*ltu*mmsb12*mmst2*mmt - 6*lgu*ltu*mmsb12*mmst2*mmt -
+     6*lt2u*ltu*mmsb12*mmst2*mmt - 8*mmsb12*mmst2*mmt*zt2 - 6*mmsb12*mmst2*mmt*
+     pow2(ltu) - 14*mmsb12*pow2(mmst2) - 6*lgu*mmsb12*pow2(mmst2) + 12*lt2u*
+     mmsb12*pow2(mmst2) + 6*ltu*mmsb12*pow2(mmst2) + 2*lgu*ltu*mmsb12*pow2(
+     mmst2) - 4*lt2u*ltu*mmsb12*pow2(mmst2) - 14*mmsb1*mmt*pow2(mmst2) + 6*lt2u
+     *mmsb1*mmt*pow2(mmst2) + 6*ltu*mmsb1*mmt*pow2(mmst2) - 2*lt2u*ltu*mmsb1*
+     mmt*pow2(mmst2) - 2*mmsb12*zt2*pow2(mmst2) - 2*mmsb1*mmt*zt2*pow2(mmst2) -
+     mmsb12*pow2(ltu)*pow2(mmst2) - mmsb1*mmt*pow2(ltu)*pow2(mmst2) - 14*mmst2*
+     pow3(mmsb1) + 12*lgu*mmst2*pow3(mmsb1) - 6*lt2u*mmst2*pow3(mmsb1) + 6*ltu*
+     mmst2*pow3(mmsb1) - 4*lgu*ltu*mmst2*pow3(mmsb1) + 2*lt2u*ltu*mmst2*pow3(
+     mmsb1) - 14*mmt*pow3(mmsb1) + 6*lgu*mmt*pow3(mmsb1) + 6*ltu*mmt*pow3(mmsb1
+     ) - 2*lgu*ltu*mmt*pow3(mmsb1) - 2*mmst2*zt2*pow3(mmsb1) - 2*mmt*zt2*pow3(
+     mmsb1) - mmst2*pow2(ltu)*pow3(mmsb1) - mmt*pow2(ltu)*pow3(mmsb1) + 14*
+     mmsb1*pow3(mmst2) - 6*lt2u*mmsb1*pow3(mmst2) - 6*ltu*mmsb1*pow3(mmst2) + 2
+     *lt2u*ltu*mmsb1*pow3(mmst2) + 2*mmsb1*zt2*pow3(mmst2) + mmsb1*pow2(ltu)*
+     pow3(mmst2) + pow2(lt2u)*(-(mmsb12*mmst2*mmt) - (2*mmsb12 + mmsb1*mmt)*
+     pow2(mmst2) + mmst2*pow3(mmsb1) + mmsb1*pow3(mmst2)) + 14*pow4(mmsb1) - 6*
+     lgu*pow4(mmsb1) - 6*ltu*pow4(mmsb1) + 2*lgu*ltu*pow4(mmsb1) + 2*zt2*pow4(
+     mmsb1) + pow2(ltu)*pow4(mmsb1) + pow2(lgu)*(-(mmsb12*mmst2*mmt) + mmsb12*
+     pow2(mmst2) - (2*mmst2 + mmt)*pow3(mmsb1) + pow4(mmsb1))) + pow2(invdgb2)*
+     (-56*mmsb22*mmst2*mmt + 6*lgu*mmsb22*mmst2*mmt + 6*lt2u*mmsb22*mmst2*mmt +
+     4*lgu*lt2u*mmsb22*mmst2*mmt + 36*ltu*mmsb22*mmst2*mmt - 6*lgu*ltu*mmsb22*
+     mmst2*mmt - 6*lt2u*ltu*mmsb22*mmst2*mmt - 8*mmsb22*mmst2*mmt*zt2 - 6*
+     mmsb22*mmst2*mmt*pow2(ltu) - 14*mmsb22*pow2(mmst2) - 6*lgu*mmsb22*pow2(
+     mmst2) + 12*lt2u*mmsb22*pow2(mmst2) + 6*ltu*mmsb22*pow2(mmst2) + 2*lgu*ltu
+     *mmsb22*pow2(mmst2) - 4*lt2u*ltu*mmsb22*pow2(mmst2) - 14*mmsb2*mmt*pow2(
+     mmst2) + 6*lt2u*mmsb2*mmt*pow2(mmst2) + 6*ltu*mmsb2*mmt*pow2(mmst2) - 2*
+     lt2u*ltu*mmsb2*mmt*pow2(mmst2) - 2*mmsb22*zt2*pow2(mmst2) - 2*mmsb2*mmt*
+     zt2*pow2(mmst2) - mmsb22*pow2(ltu)*pow2(mmst2) - mmsb2*mmt*pow2(ltu)*pow2(
+     mmst2) - 14*mmst2*pow3(mmsb2) + 12*lgu*mmst2*pow3(mmsb2) - 6*lt2u*mmst2*
+     pow3(mmsb2) + 6*ltu*mmst2*pow3(mmsb2) - 4*lgu*ltu*mmst2*pow3(mmsb2) + 2*
+     lt2u*ltu*mmst2*pow3(mmsb2) - 14*mmt*pow3(mmsb2) + 6*lgu*mmt*pow3(mmsb2) +
+     6*ltu*mmt*pow3(mmsb2) - 2*lgu*ltu*mmt*pow3(mmsb2) - 2*mmst2*zt2*pow3(mmsb2
+     ) - 2*mmt*zt2*pow3(mmsb2) - mmst2*pow2(ltu)*pow3(mmsb2) - mmt*pow2(ltu)*
+     pow3(mmsb2) + 14*mmsb2*pow3(mmst2) - 6*lt2u*mmsb2*pow3(mmst2) - 6*ltu*
+     mmsb2*pow3(mmst2) + 2*lt2u*ltu*mmsb2*pow3(mmst2) + 2*mmsb2*zt2*pow3(mmst2)
+     + mmsb2*pow2(ltu)*pow3(mmst2) + pow2(lt2u)*(-(mmsb22*mmst2*mmt) - (2*
+     mmsb22 + mmsb2*mmt)*pow2(mmst2) + mmst2*pow3(mmsb2) + mmsb2*pow3(mmst2)) +
+     14*pow4(mmsb2) - 6*lgu*pow4(mmsb2) - 6*ltu*pow4(mmsb2) + 2*lgu*ltu*pow4(
+     mmsb2) + 2*zt2*pow4(mmsb2) + pow2(ltu)*pow4(mmsb2) + pow2(lgu)*(-(mmsb22*
+     mmst2*mmt) + mmsb22*pow2(mmst2) - (2*mmst2 + mmt)*pow3(mmsb2) + pow4(mmsb2
+     )))))/3.);
 
-   return result * twoLoop;
+   return pow4(g3) * result * twoLoop;
 }
 
 } // namespace mssm_twoloop_mb

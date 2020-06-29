@@ -17,9 +17,12 @@
 #include "standard_model_two_scale_model.hpp"
 #include "standard_model_two_scale_low_scale_constraint.hpp"
 
-#define SARAH_VERSION_AT_LEAST(x,y,z) (SARAH_MAJOR > x || (SARAH_MAJOR >= x && \
-                                      (SARAH_MINOR > y || (SARAH_MINOR >= y && \
-                                                           SARAH_PATCH >= z))))
+#define SARAH_VERSION_AT_LEAST(x,y,z) (                                 \
+      (SARAH_MAJOR == 0 && SARAH_MINOR == 0 && SARAH_PATCH == 0) ||     \
+      (SARAH_MAJOR > x || (SARAH_MAJOR >= x &&                          \
+                           (SARAH_MINOR > y || (SARAH_MINOR >= y &&     \
+                                                SARAH_PATCH >= z))))    \
+      )
 
 using namespace flexiblesusy;
 using namespace softsusy;

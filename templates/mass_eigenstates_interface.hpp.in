@@ -16,32 +16,28 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_mass_eigenstates_interface.hpp
  *
  * @brief Contains the mass eigenstates interface class definition
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 #define @ModelName@_MASS_EIGENSTATES_INTERFACE_H
 
-#include <iosfwd>
+#include "@ModelName@_physical.hpp"
+
 #include <memory>
-#include <string>
 
 #include <Eigen/Core>
-
-#include "@ModelName@_physical.hpp"
 
 namespace flexiblesusy {
 
 class Problems;
-class @ModelName@_input_parameters;
+struct @ModelName@_input_parameters;
 
 /**
  * @class @ModelName@_mass_eigenstates_interface

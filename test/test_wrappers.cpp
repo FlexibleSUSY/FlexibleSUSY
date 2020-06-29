@@ -20,7 +20,6 @@
 #define BOOST_TEST_MODULE test_wrappers
 
 #include <complex>
-#include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 #include "wrappers.hpp"
 #include "stopwatch.hpp"
@@ -35,6 +34,249 @@
 #endif
 
 using namespace flexiblesusy;
+
+BOOST_AUTO_TEST_CASE( test_Constants )
+{
+   BOOST_CHECK_EQUAL(Pi            , 3.141592653589793238462643383279502884);
+   BOOST_CHECK_EQUAL(oneOver16PiSqr, 0.006332573977646110715242466450607977432);
+   BOOST_CHECK_EQUAL(oneLoop       , 0.006332573977646110715242466450607977432);
+   BOOST_CHECK_EQUAL(twoLoop       , 0.00004010149318236068433262805963718239899);
+   BOOST_CHECK_EQUAL(threeLoop     , 2.539456721913701894750580163364759355e-7);
+   BOOST_CHECK_EQUAL(fourLoop      , 1.608129755454920445735606800552522082e-9);
+   BOOST_CHECK_EQUAL(fiveLoop      , 1.018360064207223287777021556086771147e-11);
+   BOOST_CHECK(True);
+}
+
+BOOST_AUTO_TEST_CASE( test_Abs )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Abs(-1), 1);
+   BOOST_CHECK_EQUAL(Abs( 0), 0);
+   BOOST_CHECK_EQUAL(Abs( 1), 1);
+
+   BOOST_CHECK_EQUAL(Abs(-1.0), 1.0);
+   BOOST_CHECK_EQUAL(Abs( 0.0), 0.0);
+   BOOST_CHECK_EQUAL(Abs( 1.0), 1.0);
+
+   BOOST_CHECK_EQUAL(Abs(i    ), 1.0);
+   BOOST_CHECK_EQUAL(Abs(i*i  ), 1.0);
+   BOOST_CHECK_EQUAL(Abs(1 + i), std::sqrt(2.0));
+
+   Eigen::Matrix<double,2,2> m;
+   m << -1.0, -2.0, -3.0, -4.0;
+
+   Eigen::Array<double,2,2> a = m.array();
+
+   Eigen::Matrix<std::complex<double>,2,2> cm = m + i*m;
+   Eigen::Array<std::complex<double>,2,2> ca = a + i*a;
+
+   for (int i = 0; i < m.rows(); i++) {
+      for (int k = 0; k < m.cols(); k++) {
+         BOOST_CHECK_EQUAL(Abs(a)(i,k), Abs(a(i,k)));
+         BOOST_CHECK_EQUAL(Abs(m)(i,k), Abs(m(i,k)));
+
+         BOOST_CHECK_EQUAL(Abs(ca)(i,k), Abs(ca(i,k)));
+         BOOST_CHECK_EQUAL(Abs(cm)(i,k), Abs(cm(i,k)));
+
+         // test expressions
+         BOOST_CHECK_EQUAL(Abs(a + a)(i,k), Abs(a(i,k)) + Abs(a(i,k)));
+         BOOST_CHECK_EQUAL(Abs(m + m)(i,k), Abs(m(i,k)) + Abs(m(i,k)));
+
+         BOOST_CHECK_EQUAL(Abs(2*a)(i,k), Abs(a(i,k)) + Abs(a(i,k)));
+         BOOST_CHECK_EQUAL(Abs(2*m)(i,k), Abs(m(i,k)) + Abs(m(i,k)));
+      }
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_AbsSqr )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(AbsSqr(-2), 4);
+   BOOST_CHECK_EQUAL(AbsSqr( 0), 0);
+   BOOST_CHECK_EQUAL(AbsSqr( 2), 4);
+
+   BOOST_CHECK_EQUAL(AbsSqr(-2.0), 4.0);
+   BOOST_CHECK_EQUAL(AbsSqr( 0.0), 0.0);
+   BOOST_CHECK_EQUAL(AbsSqr( 2.0), 4.0);
+
+   BOOST_CHECK_EQUAL(AbsSqr(i    ), 1.0);
+   BOOST_CHECK_EQUAL(AbsSqr(i*i  ), 1.0);
+   BOOST_CHECK_CLOSE_FRACTION(AbsSqr(1 + i), 2.0, 1e-15);
+
+   Eigen::Matrix<double,2,2> m;
+   m << -1.0, -2.0, -3.0, -4.0;
+
+   Eigen::Array<double,2,2> a = m.array();
+
+   Eigen::Matrix<std::complex<double>,2,2> cm = m + i*m;
+   Eigen::Array<std::complex<double>,2,2> ca = a + i*a;
+
+   for (int i = 0; i < m.rows(); i++) {
+      for (int k = 0; k < m.cols(); k++) {
+         BOOST_CHECK_EQUAL(AbsSqr(a)(i,k), AbsSqr(a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqr(m)(i,k), AbsSqr(m(i,k)));
+
+         BOOST_CHECK_CLOSE_FRACTION(AbsSqr(ca)(i,k), AbsSqr(ca(i,k)), 1e-15);
+         BOOST_CHECK_CLOSE_FRACTION(AbsSqr(cm)(i,k), AbsSqr(cm(i,k)), 1e-15);
+
+         // test expressions
+         BOOST_CHECK_EQUAL(AbsSqr(a + a)(i,k), AbsSqr(a(i,k) + a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqr(m + m)(i,k), AbsSqr(m(i,k) + m(i,k)));
+
+         BOOST_CHECK_EQUAL(AbsSqr(2*a)(i,k), 4*AbsSqr(a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqr(2*m)(i,k), 4*AbsSqr(m(i,k)));
+      }
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_AbsSqrt )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(AbsSqrt(-4), 2);
+   BOOST_CHECK_EQUAL(AbsSqrt( 0), 0);
+   BOOST_CHECK_EQUAL(AbsSqrt( 4), 2);
+
+   BOOST_CHECK_EQUAL(AbsSqrt(-4.0), 2.0);
+   BOOST_CHECK_EQUAL(AbsSqrt( 0.0), 0.0);
+   BOOST_CHECK_EQUAL(AbsSqrt(-0.0), 0.0);
+   BOOST_CHECK_EQUAL(AbsSqrt( 4.0), 2.0);
+
+   BOOST_CHECK_EQUAL(AbsSqrt(i    ), 1.0);
+   BOOST_CHECK_EQUAL(AbsSqrt(i*i  ), 1.0);
+   BOOST_CHECK_CLOSE_FRACTION(AbsSqrt(1 + i), std::sqrt(std::sqrt(2.0)), 1e-15);
+
+   Eigen::Matrix<double,2,2> m;
+   m << -1.0, -2.0, -3.0, -4.0;
+
+   Eigen::Array<double,2,2> a = m.array();
+
+   Eigen::Matrix<std::complex<double>,2,2> cm = m + i*m;
+   Eigen::Array<std::complex<double>,2,2> ca = a + i*a;
+
+   for (int i = 0; i < m.rows(); i++) {
+      for (int k = 0; k < m.cols(); k++) {
+         BOOST_CHECK_EQUAL(AbsSqrt(a)(i,k), AbsSqrt(a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqrt(m)(i,k), AbsSqrt(m(i,k)));
+
+         BOOST_CHECK_EQUAL(AbsSqrt(ca)(i,k), AbsSqrt(ca(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqrt(cm)(i,k), AbsSqrt(cm(i,k)));
+
+         // test expressions
+         BOOST_CHECK_EQUAL(AbsSqrt(a + a)(i,k), AbsSqrt(a(i,k) + a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqrt(m + m)(i,k), AbsSqrt(m(i,k) + m(i,k)));
+
+         BOOST_CHECK_EQUAL(AbsSqrt(4*a)(i,k), 2*AbsSqrt(a(i,k)));
+         BOOST_CHECK_EQUAL(AbsSqrt(4*m)(i,k), 2*AbsSqrt(m(i,k)));
+      }
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_ArcCos )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(ArcCos(1  ), std::acos(1  ), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(ArcCos(1.0), std::acos(1.0), 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcCos(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::acos(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::acos(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_ArcSin )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(ArcSin(1  ), std::asin(1  ), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(ArcSin(1.0), std::asin(1.0), 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcSin(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::asin(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::asin(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_ArcTan )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(4*ArcTan(1  ), Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(4*ArcTan(1.0), Pi, 1e-14);
+
+   const std::complex<double> z = 1.0 + i;
+   const std::complex<double> a = ArcTan(z);
+
+   BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(std::atan(z)), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(std::atan(z)), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Arg )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1    ),   0.0, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1    ),    Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1.0  ),   0.0, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg( 1.0*i),  Pi/2, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1.0  ),    Pi, 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Arg(-1.0*i), -Pi/2, 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Cbrt )
+{
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt( 1  ), std::cbrt( 1)  , 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt( 1.0), std::cbrt( 1.0), 1e-14);
+   BOOST_CHECK_CLOSE_FRACTION(Cbrt(-1.0), std::cbrt(-1.0), 1e-14);
+}
+
+BOOST_AUTO_TEST_CASE( test_Conj )
+{
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Conj(-4),-4);
+   BOOST_CHECK_EQUAL(Conj( 0), 0);
+   BOOST_CHECK_EQUAL(Conj( 4), 4);
+
+   BOOST_CHECK_EQUAL(Conj(-4.0),-4.0);
+   BOOST_CHECK_EQUAL(Conj( 0.0), 0.0);
+   BOOST_CHECK_EQUAL(Conj(-0.0),-0.0);
+   BOOST_CHECK_EQUAL(Conj( 4.0), 4.0);
+
+   BOOST_CHECK_EQUAL(Conj(i    ), -i  );
+   BOOST_CHECK_EQUAL(Conj(i*i  ), -1.0);
+   BOOST_CHECK_EQUAL(Conj(1 + i),  1.0 - i);
+
+   Eigen::Matrix<double,2,2> m;
+   m << -1.0, -2.0, -3.0, -4.0;
+
+   Eigen::Array<double,2,2> a = m.array();
+
+   Eigen::Matrix<std::complex<double>,2,2> cm = m + i*m;
+   Eigen::Array<std::complex<double>,2,2> ca = a + i*a;
+
+   for (int i = 0; i < m.rows(); i++) {
+      for (int k = 0; k < m.cols(); k++) {
+         BOOST_CHECK_EQUAL(Conj(a)(i,k), Conj(a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(m)(i,k), Conj(m(i,k)));
+
+         BOOST_CHECK_EQUAL(Conj(ca)(i,k), Conj(ca(i,k)));
+         BOOST_CHECK_EQUAL(Conj(cm)(i,k), Conj(cm(i,k)));
+
+         // test expressions
+         BOOST_CHECK_EQUAL(Conj(a + a)(i,k), Conj(a(i,k) + a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(m + m)(i,k), Conj(m(i,k) + m(i,k)));
+
+         BOOST_CHECK_EQUAL(Conj(4*a)(i,k), 4*Conj(a(i,k)));
+         BOOST_CHECK_EQUAL(Conj(4*m)(i,k), 4*Conj(m(i,k)));
+      }
+   }
+}
 
 BOOST_AUTO_TEST_CASE( test_Delta )
 {
@@ -69,25 +311,81 @@ BOOST_AUTO_TEST_CASE( test_UnitStep )
    BOOST_CHECK_EQUAL(UnitStep(2   ), 1);
 }
 
-using namespace std;
-
 BOOST_AUTO_TEST_CASE(test_Diag)
 {
-   Eigen::Matrix<double,3,3> m;
-   for (int i = 0; i < 3; i++)
-      for (int k = 0; k < 3; k++)
-         m(i,k) = (i+1) * (k+1);
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const auto d = Diag(m);
 
-   Eigen::Matrix<double,3,3> diag(Diag(m));
+      BOOST_CHECK_EQUAL(d(0,0), 1.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 4.0);
+   }
+   {
+      Eigen::Matrix<double, 2, 2> m;
+      m << 1, 2, 3, 4;
+      const Eigen::Matrix<double, 2, 2> d = Diag(m);
 
-   for (int i = 0; i < 3; i++)
-      for (int k = 0; k < 3; k++) {
-         if (i == k)
-            BOOST_CHECK_PREDICATE(std::not_equal_to<double>(), (diag(i,k))(0.));
-         else
-            BOOST_CHECK_EQUAL(diag(i,k), 0.);
-      }
+      BOOST_CHECK_EQUAL(d(0,0), 1.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 4.0);
+   }
+   {
+      Eigen::Matrix<double, 2, 2> m;
+      m << 1, 2, 3, 4;
+      const Eigen::Matrix<double, 2, 2> d = Diag(m + m);
+
+      BOOST_CHECK_EQUAL(d(0,0), 2.0);
+      BOOST_CHECK_EQUAL(d(0,1), 0.0);
+      BOOST_CHECK_EQUAL(d(1,0), 0.0);
+      BOOST_CHECK_EQUAL(d(1,1), 8.0);
+   }
+   {
+      BOOST_CHECK_THROW(Diag(Eigen::MatrixXd(1,2)), flexiblesusy::SetupError);
+   }
 }
+
+BOOST_AUTO_TEST_CASE(test_Hermitianize)
+{
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      Hermitianize(m);
+
+      BOOST_CHECK_EQUAL(m(0,0), 1.0);
+      BOOST_CHECK_EQUAL(m(0,1), 2.0);
+      BOOST_CHECK_EQUAL(m(1,0), 2.0);
+      BOOST_CHECK_EQUAL(m(1,1), 4.0);
+   }
+   {
+      Eigen::MatrixXd m(1,2);
+      m << 1, 2;
+      BOOST_CHECK_THROW(Hermitianize(m), flexiblesusy::SetupError);
+   }
+}
+
+BOOST_AUTO_TEST_CASE(test_Symmetrize)
+{
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      Symmetrize(m);
+
+      BOOST_CHECK_EQUAL(m(0,0), 1.0);
+      BOOST_CHECK_EQUAL(m(0,1), 2.0);
+      BOOST_CHECK_EQUAL(m(1,0), 2.0);
+      BOOST_CHECK_EQUAL(m(1,1), 4.0);
+   }
+   {
+      Eigen::MatrixXd m(1,2);
+      m << 1, 2;
+      BOOST_CHECK_THROW(Symmetrize(m), flexiblesusy::SetupError);
+   }
+}
+
 
 template <typename T>
 std::string ToString_sstream(T a)
@@ -112,6 +410,12 @@ std::string ToString_sprintf(T a)
    char buf[buf_length];
    snprintf(buf, buf_length, "%i", a);
    return std::string(buf);
+}
+
+template <typename T>
+std::string ToString_ToString(T a)
+{
+   return ToString(a);
 }
 
 template <typename T>
@@ -143,69 +447,8 @@ BOOST_AUTO_TEST_CASE(test_ToString)
    MEASURE(to_string   , number, number_of_iterations);
 #endif
    MEASURE(sprintf     , number, number_of_iterations);
+   MEASURE(ToString    , number, number_of_iterations);
    MEASURE(lexical_cast, number, number_of_iterations);
-}
-
-BOOST_AUTO_TEST_CASE(test_calculate_majorana_singlet_mass)
-{
-   double mass;
-   std::complex<double> phase;
-
-   mass = calculate_majorana_singlet_mass(100., phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), 1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_majorana_singlet_mass(-100., phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_SMALL(phase.real(), 1e-15);
-   BOOST_CHECK_EQUAL(phase.imag(), 1.);
-
-   mass = calculate_majorana_singlet_mass(std::complex<double>(100.,0.), phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), 1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_majorana_singlet_mass(std::complex<double>(-100.,0.), phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_SMALL(phase.real(), 1e-15);
-   BOOST_CHECK_EQUAL(phase.imag(), 1.);
-
-   mass = calculate_majorana_singlet_mass(std::complex<double>(1.,1.), phase);
-   BOOST_CHECK_EQUAL(mass, sqrt(2.));
-   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
-   BOOST_CHECK_CLOSE(std::arg(phase), 0.5 * Pi/4., 1e-13);
-}
-
-BOOST_AUTO_TEST_CASE(test_calculate_dirac_singlet_mass)
-{
-   double mass;
-   std::complex<double> phase;
-
-   mass = calculate_dirac_singlet_mass(100., phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), 1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_dirac_singlet_mass(-100., phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), -1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_dirac_singlet_mass(std::complex<double>(100.,0.), phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), 1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_dirac_singlet_mass(std::complex<double>(-100.,0.), phase);
-   BOOST_CHECK_EQUAL(mass, 100.);
-   BOOST_CHECK_EQUAL(phase.real(), -1.);
-   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
-
-   mass = calculate_dirac_singlet_mass(std::complex<double>(1.,1.), phase);
-   BOOST_CHECK_EQUAL(mass, sqrt(2.));
-   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
-   BOOST_CHECK_CLOSE(std::arg(phase), Pi/4., 1e-13);
 }
 
 BOOST_AUTO_TEST_CASE(test_IF)
@@ -339,19 +582,6 @@ BOOST_AUTO_TEST_CASE(test_MaxAbsValue)
    }
 }
 
-BOOST_AUTO_TEST_CASE(test_Abs_vector)
-{
-   std::vector<double> v(3);
-   v.at(0) = 1.;
-   v.at(1) = -1.;
-   v.at(2) = 0.;
-
-   std::vector<double> v_abs(Abs(v));
-   BOOST_CHECK_CLOSE(v_abs.at(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_abs.at(1), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_abs.at(2), 0., 1e-10);
-}
-
 BOOST_AUTO_TEST_CASE(test_Abs_Eigen_Array)
 {
    Eigen::ArrayXd v(3);
@@ -365,121 +595,110 @@ BOOST_AUTO_TEST_CASE(test_Abs_Eigen_Array)
    BOOST_CHECK_CLOSE(v_abs(2), 0., 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE(test_Abs_vector_Eigen_Array)
+BOOST_AUTO_TEST_CASE(test_Sqr)
 {
-   std::vector<Eigen::ArrayXd> v(3);
-   Abs(v);
+   {
+      BOOST_CHECK_CLOSE(Sqr(1.0), 1.0, 1e-10);
+      BOOST_CHECK_CLOSE(Sqr(2.0), 4.0, 1e-10);
+      BOOST_CHECK_CLOSE(Sqr(3.0), 9.0, 1e-10);
+      BOOST_CHECK_CLOSE(std::real(Sqr(std::complex<double>(2.0,0.0))), 4.0, 1e-10);
+      BOOST_CHECK_CLOSE(std::imag(Sqr(std::complex<double>(2.0,0.0))), 0.0, 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v2(Sqr(v));
+      BOOST_CHECK_CLOSE(v2(0), 1., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1), 4., 1e-10);
+      BOOST_CHECK_CLOSE(v2(2), 9., 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v2(Sqr(v + v));
+      BOOST_CHECK_CLOSE(v2(0),  4, 1e-10);
+      BOOST_CHECK_CLOSE(v2(1), 16, 1e-10);
+      BOOST_CHECK_CLOSE(v2(2), 36, 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      Eigen::MatrixXd v2(Sqr(v));
+      BOOST_CHECK_CLOSE(v2(0,0),  7., 1e-10);
+      BOOST_CHECK_CLOSE(v2(0,1), 10., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,0), 15., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,1), 22., 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      Eigen::MatrixXd v2(Sqr(v + v));
+      BOOST_CHECK_CLOSE(v2(0,0), 28., 1e-10);
+      BOOST_CHECK_CLOSE(v2(0,1), 40., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,0), 60., 1e-10);
+      BOOST_CHECK_CLOSE(v2(1,1), 88., 1e-10);
+   }
 }
 
-BOOST_AUTO_TEST_CASE(test_Sqr_vector)
-{
-   std::vector<double> v(3);
-   v.at(0) = 1.;
-   v.at(1) = 2.;
-   v.at(2) = 3.;
-
-   std::vector<double> v_sqr(Sqr(v));
-   BOOST_CHECK_CLOSE(v_sqr.at(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr.at(1), 4., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr.at(2), 9., 1e-10);
-}
-
-BOOST_AUTO_TEST_CASE(test_Sqr_Eigen_Array)
-{
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   Eigen::ArrayXd v_sqr(Sqr(v));
-   BOOST_CHECK_CLOSE(v_sqr(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr(1), 4., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqr(2), 9., 1e-10);
-}
-
-BOOST_AUTO_TEST_CASE(test_Sqr_vector_Eigen_Array)
-{
-   std::vector<Eigen::ArrayXd> v(3);
-   Sqr(v);
-}
-
-BOOST_AUTO_TEST_CASE(test_Sqrt_overloads)
+BOOST_AUTO_TEST_CASE(test_Sqrt)
 {
    BOOST_CHECK_EQUAL(Sqrt(2.f), std::sqrt(2.f));
    BOOST_CHECK_EQUAL(Sqrt(2.) , std::sqrt(2.));
    BOOST_CHECK_EQUAL(Sqrt(2.L), std::sqrt(2.L));
    BOOST_CHECK_EQUAL(Sqrt(2)  , std::sqrt(2.));
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v_sqrt(Sqrt(v));
+      BOOST_CHECK_CLOSE(v_sqrt(0),            1., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1), std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(3.), 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      Eigen::ArrayXd v_sqrt(Sqrt(v + v));
+      BOOST_CHECK_CLOSE(v_sqrt(0), std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1),            2., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(6.), 1e-10);
+   }
 }
 
-BOOST_AUTO_TEST_CASE(test_Sqrt_vector)
+BOOST_AUTO_TEST_CASE(test_SignedAbsSqrt)
 {
-   std::vector<double> v(3);
-   v.at(0) = 1.;
-   v.at(1) = 2.;
-   v.at(2) = 3.;
-
-   std::vector<double> v_sqrt(Sqrt(v));
-   BOOST_CHECK_CLOSE(v_sqrt.at(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt.at(1), std::sqrt(2.), 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt.at(2), std::sqrt(3.), 1e-10);
+   BOOST_CHECK_EQUAL(SignedAbsSqrt(2.) , std::sqrt(2.));
+   {
+      Eigen::ArrayXd v(3);
+      v << -1, -2, -3;
+      Eigen::ArrayXd v_sqrt(SignedAbsSqrt(v));
+      BOOST_CHECK_CLOSE(v_sqrt(0),            -1., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1), -std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), -std::sqrt(3.), 1e-10);
+   }
+   {
+      Eigen::ArrayXd v(3);
+      v << -1, -2, -3;
+      Eigen::ArrayXd v_sqrt(SignedAbsSqrt(v + v));
+      BOOST_CHECK_CLOSE(v_sqrt(0), -std::sqrt(2.), 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(1),            -2., 1e-10);
+      BOOST_CHECK_CLOSE(v_sqrt(2), -std::sqrt(6.), 1e-10);
+   }
 }
 
-BOOST_AUTO_TEST_CASE(test_Sqrt_Eigen_Array)
+BOOST_AUTO_TEST_CASE(test_Total)
 {
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   Eigen::ArrayXd v_sqrt(Sqrt(v));
-   BOOST_CHECK_CLOSE(v_sqrt(0), 1., 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt(1), std::sqrt(2.), 1e-10);
-   BOOST_CHECK_CLOSE(v_sqrt(2), std::sqrt(3.), 1e-10);
-}
-
-BOOST_AUTO_TEST_CASE(test_Sqrt_vector_Eigen_Array)
-{
-   std::vector<Eigen::ArrayXd> v(3);
-   Sqrt(v);
-}
-
-BOOST_AUTO_TEST_CASE(test_Total_vector)
-{
-   std::vector<double> v(3);
-   v.at(0) = 1.;
-   v.at(1) = 2.;
-   v.at(2) = 3.;
-
-   BOOST_CHECK_CLOSE(Total(v), 6., 1e-10);
-}
-
-BOOST_AUTO_TEST_CASE(test_Total_Array)
-{
-   Eigen::ArrayXd v(3);
-   v(0) = 1.;
-   v(1) = 2.;
-   v(2) = 3.;
-
-   BOOST_CHECK_CLOSE(Total(v), 6., 1e-10);
-}
-
-BOOST_AUTO_TEST_CASE(test_Total_vector_Array)
-{
-   std::vector<Eigen::ArrayXd> v(3);
-   Eigen::ArrayXd v1(2), v2(2), v3(2);
-   v1 << 1., 2.;
-   v2 << 1., 2.;
-   v3 << 1., 2.;
-
-   v.at(0) = v1;
-   v.at(1) = v2;
-   v.at(2) = v3;
-
-   Eigen::ArrayXd total(Total(v));
-
-   BOOST_CHECK_EQUAL(total.size(), 2);
-   BOOST_CHECK_CLOSE(total(0), 3., 1e-10);
-   BOOST_CHECK_CLOSE(total(1), 6., 1e-10);
+   {
+      Eigen::ArrayXd v(3);
+      v << 1, 2, 3;
+      BOOST_CHECK_CLOSE(Total(v), 6.0, 1e-10);
+      BOOST_CHECK_CLOSE(Total(v + v), 12.0, 1e-10);
+   }
+   {
+      Eigen::MatrixXd v(2,2);
+      v << 1, 2, 3, 4;
+      BOOST_CHECK_CLOSE(Total(v), 10.0, 1e-10);
+      BOOST_CHECK_CLOSE(Total(v + v), 20.0, 1e-10);
+   }
 }
 
 BOOST_AUTO_TEST_CASE(test_Re_scalars)
@@ -654,15 +873,16 @@ std::string format_line(int exponent, double t1, double t2)
 {
    const double diff = MaxRelDiff(t1, t2) * 100;
 
-   auto fmt = boost::format("%|8| | %|23.10| | %|14.10| | %|+8.3|%%")
-              % exponent % t1 % t2 % diff;
+   char buf[100];
+   std::snprintf(buf, 100, "%8d | %23.6f | %14.6f | %+8.1f%%",
+                 exponent, t1, t2, diff);
 
-   return fmt.str();
+   return std::string(buf);
 }
 
 BOOST_AUTO_TEST_CASE(test_Power_benchmark)
 {
-   const std::size_t N = 1000000000;
+   const std::size_t N = 10000000;
 
    const double timed_Power_2  = time_Power(N, 3., 2);
    const double timed_Power_3  = time_Power(N, 3., 3);
@@ -700,6 +920,94 @@ BOOST_AUTO_TEST_CASE(test_Power_benchmark)
    BOOST_TEST_MESSAGE(format_line(10, timed_Power10, timed_Power_10));
    BOOST_TEST_MESSAGE(format_line(11, timed_Power11, timed_Power_11));
    BOOST_TEST_MESSAGE(format_line(12, timed_Power12, timed_Power_12));
+}
+
+BOOST_AUTO_TEST_CASE(test_Re)
+{
+   const std::complex<double> o(1.0, 0.0);
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Re(1.0)   ,  1.0);
+   BOOST_CHECK_EQUAL(Re(o)     ,  1.0);
+   BOOST_CHECK_EQUAL(Re(Sqr(o)),  1.0);
+   BOOST_CHECK_EQUAL(Re(Sqr(i)), -1.0);
+
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd rem = Re(m);
+      BOOST_CHECK_EQUAL(rem(0,0), m(0,0));
+      BOOST_CHECK_EQUAL(rem(0,1), m(0,1));
+      BOOST_CHECK_EQUAL(rem(1,0), m(1,0));
+      BOOST_CHECK_EQUAL(rem(1,1), m(1,1));
+   }
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd rem = Re(m + m);
+      BOOST_CHECK_EQUAL(rem(0,0), (m + m)(0,0));
+      BOOST_CHECK_EQUAL(rem(0,1), (m + m)(0,1));
+      BOOST_CHECK_EQUAL(rem(1,0), (m + m)(1,0));
+      BOOST_CHECK_EQUAL(rem(1,1), (m + m)(1,1));
+   }
+   {
+      Eigen::MatrixXcd m(2,2);
+      m << 1*o, 2*o, 3*o, 4*o;
+      const Eigen::MatrixXd rem = Re(m);
+      BOOST_CHECK_EQUAL(rem(0,0), std::real(m(0,0)));
+      BOOST_CHECK_EQUAL(rem(0,1), std::real(m(0,1)));
+      BOOST_CHECK_EQUAL(rem(1,0), std::real(m(1,0)));
+      BOOST_CHECK_EQUAL(rem(1,1), std::real(m(1,1)));
+   }
+   {
+      Eigen::MatrixXcd m(2,2);
+      m << 1*o, 2*o, 3*o, 4*o;
+      const Eigen::MatrixXd rem = Re(m + m);
+      BOOST_CHECK_EQUAL(rem(0,0), std::real((m + m)(0,0)));
+      BOOST_CHECK_EQUAL(rem(0,1), std::real((m + m)(0,1)));
+      BOOST_CHECK_EQUAL(rem(1,0), std::real((m + m)(1,0)));
+      BOOST_CHECK_EQUAL(rem(1,1), std::real((m + m)(1,1)));
+   }
+}
+
+BOOST_AUTO_TEST_CASE(test_Im)
+{
+   const std::complex<double> o(1.0, 0.0);
+   const std::complex<double> i(0.0, 1.0);
+
+   BOOST_CHECK_EQUAL(Im(1.0)   ,  0.0);
+   BOOST_CHECK_EQUAL(Im(o)     ,  0.0);
+   BOOST_CHECK_EQUAL(Im(i)     ,  1.0);
+   BOOST_CHECK_EQUAL(Im(Sqr(o)),  0.0);
+   BOOST_CHECK_EQUAL(Im(Sqr(i)),  0.0);
+
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd imm = Im(m);
+      BOOST_CHECK_EQUAL(imm(0,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(0,1), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,1), 0.0);
+   }
+   {
+      Eigen::MatrixXd m(2,2);
+      m << 1, 2, 3, 4;
+      const Eigen::MatrixXd imm = Im(m + m);
+      BOOST_CHECK_EQUAL(imm(0,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(0,1), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,0), 0.0);
+      BOOST_CHECK_EQUAL(imm(1,1), 0.0);
+   }
+   {
+      Eigen::MatrixXcd m(2,2);
+      m << 1*i, 2*i, 3*i, 4*i;
+      const Eigen::MatrixXd imm = Im(m + m);
+      BOOST_CHECK_EQUAL(imm(0,0), std::imag((m + m)(0,0)));
+      BOOST_CHECK_EQUAL(imm(0,1), std::imag((m + m)(0,1)));
+      BOOST_CHECK_EQUAL(imm(1,0), std::imag((m + m)(1,0)));
+      BOOST_CHECK_EQUAL(imm(1,1), std::imag((m + m)(1,1)));
+   }
 }
 
 BOOST_AUTO_TEST_CASE(test_Min)

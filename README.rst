@@ -91,17 +91,19 @@ Optional:
 
 * FeynArts_ (version 3.9 or higher)
 * FormCalc_ (version 9.5 or higher)
+* GM2Calc_ (version 1.7.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * COLLIER_
 * Himalaya_
 * TSIL_
 
-Installation of required libraries
-----------------------------------
+Installation of required/optional libraries
+-------------------------------------------
 
-The required libraries Boost_, `Eigen 3`_, LoopTools_, Himalaya_ and
-TSIL_ can be installed using the Conan_ package manager.  If not
-already installed, Conan can be installed with pip::
+The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
+LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
+package manager.  If not already installed, Conan can be installed
+with pip::
 
     pip install conan
 
@@ -110,7 +112,7 @@ repositories::
 
     conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
 
-To install the libraries required by FlexibleSUSY run::
+To install the libraries required by FlexibleSUSY, run::
 
     conan install . --build=missing
 
@@ -313,7 +315,7 @@ Mathematica interface
 
 FlexibleSUSY can be called from within Mathematica using Wolfram's
 LibraryLink.  By default, FlexibleSUSY creates a LibraryLink library
-for each spectrum genreator.  The generated library can be found in
+for each spectrum generator.  The generated library can be found in
 ``models/<model>/<model>_librarylink.so``, where ``<model>`` is the
 model name.
 
@@ -547,9 +549,9 @@ Dynamic libraries
 
 If you want to create dynamic model libraries (instead of static
 libraries, which is the default) you need to pass the
---enable-shared-libs option to the configure script.  The file name
-extension for the shared libraries as well as the command to build
-them can be overwritten using the ``--with-shared-lib-ext=``
+``--enable-shared-libs`` option to the configure script.  The file
+name extension for the shared libraries as well as the command to
+build them can be overwritten using the ``--with-shared-lib-ext=``
 ``--with-shared-lib-cmd=``.  parameters.  For example, when Intel
 compilers should be used, replace gcc by icc or icpc::
 
@@ -605,20 +607,70 @@ the options ``--with-shared-ldflags=`` and ``--with-shared-ldlibs=`` must
 be used to set ``LDFLAGS`` and ``LDLIBS``.
 
 
+Support for alternative loop libraries
+--------------------------------------
+
+FlexibleSUSY ships with its own implementation of the
+Passarino-Veltman 1-loop functions, which have been translated from
+SOFTSUSY_.  However, alternative implementations of the 1-loop
+functions can be used:
+
+* LoopTools_
+* COLLIER_
+* FFlite (a thread-safe variant of LoopTools_, shipped with FlexibleSUSY)
+
+The loop function libraries can be enabled by passing
+``--with-loop-libraries=`` to the ``configure`` script::
+
+    ./configure --with-loop-libraries=<libraries>
+
+where ``<libraries>`` can be any (or a combination) of ``collier``,
+``looptools`` or ``fflite``.
+
+Example::
+
+    ./configure --with-loop-libraries=collier,looptools
+
+When the SLHA input is used, the loop library to use can be selected
+by setting the entry of ``FlexibleSUSY[31]`` to ``0`` (= SOFTSUSY),
+``1`` ( = COLLIER), ``2`` (= LoopTools) or ``3`` (= FFlite).  See
+`SLHA input parameters`_ for details.
+
+Example::
+
+    Block FlexibleSUSY
+       31   0    # loop library (0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFlite)
+
+When the Mathematica interface is used, the loop library to use can be
+selected by setting the value of ``loopLibrary`` appropriately::
+
+    FS@ModelName@OpenHandle[
+        fsSettings -> {
+            loopLibrary -> 0   (* 0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFlite *)
+        }
+    ]
+
+In the following it is described in more detail how to enable these
+alternative loop function libraries in FlexibleSUSY.
+
 LoopTools support
------------------
+`````````````````
 
 It is possible to use LoopTools_ for calculating the loop functions,
-instead of using SOFTSUSY's loop functions.  To enable LoopTools
+instead of using SOFTSUSY's loop functions.  To enable LoopTools,
 configure FlexibleSUSY via ::
 
     ./configure --enable-looptools
 
-One can use an optional call ``--with-loop-libraries=looptools`` instead of
-``--enable-looptools`` during configuration.
+or::
+
+    ./configure --with-loop-libraries=looptools
+
+If LoopTools has been installed via Conan_, the configure will
+automatically find the paths to the LoopTools library.
 
 To use the LoopTools library and header files from a specific
-directory configure via
+directory, run ``configure`` via
 ::
 
     LOOPTOOL_DIR=/path/to/looptools/build
@@ -635,7 +687,7 @@ This is achieved by setting the ``FFLAGS`` variable during LoopTools configurati
     FFLAGS=-fPIC ./configure
 
 COLLIER support
----------------
+```````````````
 
 It is possible to use COLLIER_ for calculating the loop functions,
 instead of using SOFTSUSY's loop functions.  To enable COLLIER
@@ -653,16 +705,16 @@ directory configure via ::
        --with-collier-libdir=$COLLIER_DIR
 
 Note: versions since COLLIER-1.2.3 were tested so far.
-Also, COLLIER static library should be configured with ``-Dstatic=ON`` option
-and compiled with ``Fortran_FLAGS = -fPIC`` of ``COLLIER-x.y.z/build/CMakeFiles/collier.dir/flags.make`` file.
+Also, COLLIER static library should be configured with
+``-Dstatic=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON`` flags.
 
 TSIL support
-------------
+````````````
 
-Some models of FlexibleSUSY require TSIL_, for example HSSUSY.  When
+Some models of FlexibleSUSY require TSIL_, for example `HSSUSY`_.  When
 such models are activated (via ``./configure --with-models=<model>``),
 FlexibleSUSY requires TSIL to be available.  If TSIL is installed in a
-system directory or installed via Conan, FlexibleSUSY will find the
+system directory or installed via Conan_, FlexibleSUSY will find the
 TSIL automatically.  To use TSIL from a a non-standard directory,
 configure FlexibleSUSY like this::
 
@@ -683,8 +735,7 @@ Creating an addon
 
 A FlexibleSUSY addon is a program or library, which uses parts of the
 FlexibleSUSY libraries or the generated models or is integrated into
-FlexibleSUSY.  An example is GM2Calc_, which is included in
-FlexibleSUSY in form of an addon.  An addon can be created via ::
+FlexibleSUSY.  An addon can be created via ::
 
     ./createaddon --name=<addon>
 
@@ -789,7 +840,7 @@ Package content
 In the following all sub-directories within the FlexibleSUSY package
 are listed:
 
-* ``addons/`` contains addons for FlexibleSUSY, such as GM2Calc_
+* ``addons/`` contains addons for FlexibleSUSY
 
 * ``config/`` contains helper scripts and makefile modules for the
   build system

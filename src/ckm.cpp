@@ -92,7 +92,7 @@ void CKM_parameters::set_from_wolfenstein(double lambdaW, double aCkm,
  * hep-ph/0406184)
  */
 void CKM_parameters::get_wolfenstein(double& lambdaW, double& aCkm,
-                                     double& rhobar, double& etabar)
+                                     double& rhobar, double& etabar) const
 {
    const double sin_12 = std::sin(theta_12);
    const double sin_13 = std::sin(theta_13);

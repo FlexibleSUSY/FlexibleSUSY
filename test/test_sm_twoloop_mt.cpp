@@ -3,6 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "sm_twoloop_mt.hpp"
+#include "benchmark.hpp"
 #include <complex>
 #include <cmath>
 #include <tsil_cpp.h>
@@ -106,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_fixed_values )
                       )
             );
 
-      BOOST_CHECK_CLOSE_FRACTION(mt_FS_fixed, mt_FS_num, 1e-12);
+      BOOST_CHECK_CLOSE_FRACTION(mt_FS_fixed, mt_FS_num, 1e-10);
    }
 
    {
@@ -146,7 +147,7 @@ BOOST_AUTO_TEST_CASE( test_fixed_values )
                       )
             );
 
-      BOOST_CHECK_CLOSE_FRACTION(mt_SP_fixed, mt_SP_num, 1e-12);
+      BOOST_CHECK_CLOSE_FRACTION(mt_SP_fixed, mt_SP_num, 1e-10);
    }
 }
 
@@ -284,3 +285,72 @@ BOOST_AUTO_TEST_CASE( test_sm_2loop_all )
    BOOST_CHECK_CLOSE_FRACTION(Mt_1l, 171.160204343174181488L, 1e-15L);
    BOOST_CHECK_CLOSE_FRACTION(Mt_2l, 172.877644921476320339L, 1e-15L);
 }
+
+
+#ifdef ENABLE_RANDOM
+
+struct TSIL_Point {
+   double gs{}, yt{}, t{}, h{}, s{}, qq{};
+};
+
+double sqr(double x) { return x*x; }
+
+std::vector<TSIL_Point> generate_random_points(unsigned n)
+{
+   using namespace flexiblesusy;
+
+   const auto gs = generate_random_data<double>(n, 1.21772, 1.21978);
+   const auto yt = generate_random_data<double>(n, 0.8, 0.9);
+   const auto t  = generate_random_data<double>(n, sqr(160.0), sqr(175.0));
+   const auto h  = generate_random_data<double>(n, sqr(91.0), sqr(125.0));
+   const auto s  = generate_random_data<double>(n, sqr(160.0), sqr(175.0));
+   const auto qq = generate_random_data<double>(n, sqr(160.0), sqr(175.0));
+
+   std::vector<TSIL_Point> v(n);
+
+   for (unsigned i = 0; i < n; i++) {
+      v[i] = {gs[i], yt[i], t[i], h[i], s[i], qq[i]};
+   }
+
+   return v;
+}
+
+BOOST_AUTO_TEST_CASE( test_sm_2loop_benchmark )
+{
+   using namespace flexiblesusy;
+
+   const unsigned N = 100;
+   const auto points = generate_random_points(N);
+
+   auto at_as_S_fs = [](const TSIL_Point& p) {
+      return flexiblesusy::sm_twoloop_mt::delta_mt_2loop_as_at_S_flexiblesusy(
+         p.gs, p.yt, p.t, p.h, p.s, p.qq);
+   };
+
+   auto at_as_LR_fs = [](const TSIL_Point& p) {
+      return flexiblesusy::sm_twoloop_mt::delta_mt_2loop_as_at_LR_flexiblesusy(
+         p.gs, p.yt, p.t, p.h, p.s, p.qq);
+   };
+
+   auto at_at_S_fs = [](const TSIL_Point& p) {
+      return flexiblesusy::sm_twoloop_mt::delta_mt_2loop_at_at_S_flexiblesusy(
+         p.yt, p.t, p.h, p.s, p.qq);
+   };
+
+   auto at_at_LR_fs = [](const TSIL_Point& p) {
+      return flexiblesusy::sm_twoloop_mt::delta_mt_2loop_at_at_LR_flexiblesusy(
+         p.yt, p.t, p.h, p.s, p.qq);
+   };
+
+   const auto time_at_as_S_fs_in_s  = time_in_seconds(at_as_S_fs , points)/N;
+   const auto time_at_as_LR_fs_in_s = time_in_seconds(at_as_LR_fs, points)/N;
+   const auto time_at_at_S_fs_in_s  = time_in_seconds(at_at_S_fs , points)/N;
+   const auto time_at_at_LR_fs_in_s = time_in_seconds(at_at_LR_fs, points)/N;
+
+   BOOST_TEST_MESSAGE("average run-time for S  O(at*as) [FS]: " << time_at_as_S_fs_in_s  << " s");
+   BOOST_TEST_MESSAGE("average run-time for LR O(at*as) [FS]: " << time_at_as_LR_fs_in_s << " s");
+   BOOST_TEST_MESSAGE("average run-time for S  O(at*at) [FS]: " << time_at_at_S_fs_in_s  << " s");
+   BOOST_TEST_MESSAGE("average run-time for LR O(at*at) [FS]: " << time_at_at_LR_fs_in_s << " s");
+}
+
+#endif

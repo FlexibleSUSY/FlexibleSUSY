@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "config.h"
 
@@ -26,12 +25,14 @@
 
 @solverIncludes@
 #include "command_line_options.hpp"
+#include "array_view.hpp"
 #include "scan.hpp"
 #include "lowe.h"
 #include "logger.hpp"
 
 #include <iostream>
-#include <cstring>
+#include <iomanip>
+#include <string>
 
 #define INPUTPARAMETER(p) input.p
 
@@ -57,7 +58,7 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
                                  int& loop_library)
 {
    for (int i = 1; i < args.size(); ++i) {
-      const auto option = args[i];
+      const std::string option = args[i];
 
 @parseCmdLineOptions@
       if (Command_line_options::get_parameter_value(
@@ -68,7 +69,7 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
              option, "--loop-library=", loop_library))
          continue;
 
-      if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
+      if (option == "--help" || option == "-h") {
          print_usage();
          exit(EXIT_SUCCESS);
       }

@@ -725,7 +725,7 @@ CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
 GenerateFAModelFileOnKernel::usage=
 "@brief Generate the FeynArts model file on a given subkernel.";
-GenerateFAModelFileOnKernel[kernel_Parallel`Kernels`kernel] :=
+GenerateFAModelFileOnKernel[kernel:_Parallel`Kernels`kernel|_KernelObject] :=
 Module[
    {
       currentPath = $Path,
@@ -1335,46 +1335,48 @@ Module[
       onePoint,
       onePointTemplate =
          {
-            LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
-            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"
+            LoopTools`A0@@#2 -> "a"<>#1<>".at(0)",
+            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>".at(0)"
          }&,
 
       twoPoint,
       twoPointTemplate =
          {
-            LoopTools`B0@@#2 -> "b"<>#1<>"[0]",
-            LoopTools`B1@@#2 -> "b"<>#1<>"[1]",
-            LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",
-            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>"[1]"
+            LoopTools`B0@@#2 -> "b"<>#1<>".at(0)",
+            LoopTools`B1@@#2 -> "b"<>#1<>".at(1)",
+            LoopTools`B00@@#2 -> "b"<>#1<>".at(2)",
+            LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>".at(0)",
+            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>".at(1)",
+            LoopTools`B0i[LoopTools`bb00,Sequence@@#2] -> "b"<>#1<>".at(2)"
          }&,
 
       threePoint,
       threePointTemplate =
          {
-            LoopTools`C0@@#2 -> "c"<>#1<>"[0]",
-            LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>"[0]",
-            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>"[1]",
-            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>"[2]",
-            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>"[3]",
-            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>"[4]",
-            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>"[5]",
-            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>"[6]"
+            LoopTools`C0@@#2 -> "c"<>#1<>".at(0)",
+            LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>".at(0)",
+            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>".at(1)",
+            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>".at(2)",
+            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>".at(3)",
+            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>".at(4)",
+            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>".at(5)",
+            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>".at(6)"
          }&,
 
       fourPoint,
       fourPointTemplate =
          {
-            LoopTools`D0@@#2 -> "d"<>#1<>"[0]",
-            LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>"[0]",
-            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>"[1]",
-            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>"[2]",
-            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>"[3]",
-            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>"[4]",
-            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>"[5]",
-            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>"[6]",
-            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>"[7]",
-            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>"[8]",
-            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>"[9]",
+            LoopTools`D0@@#2 -> "d"<>#1<>".at(0)",
+            LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>".at(0)",
+            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>".at(1)",
+            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>".at(2)",
+            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>".at(3)",
+            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>".at(4)",
+            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>".at(5)",
+            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>".at(6)",
+            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>".at(7)",
+            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>".at(8)",
+            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>".at(9)",
             LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"
          }&,
 
@@ -1391,9 +1393,9 @@ Module[
       _LoopTools`DB00,_LoopTools`DB11,
       _LoopTools`E0i,_LoopTools`E0,
       _LoopTools`F0i,_LoopTools`F0],Infinity,Heads->True];
-   append[loopFunctions_List,function_,functionName_String,arrayName_String[arraySize_Integer]] := If[loopFunctions=!={},
+   append[loopFunctions_List,function_,functionName_String,arrayName_String] := If[loopFunctions=!={},
       AppendTo[loopArrayDefine,Array[
-         arrayName<>ToString@#<>"["<>ToString@arraySize<>"] = {}"&,
+         "looplibrary::"<>functionName<>"coeff_t "<>arrayName<>ToString@#<>"{}"&,
          Length@loopFunctions]
       ];
       AppendTo[loopArraySet,Array[
@@ -1424,14 +1426,14 @@ Module[
       Cases[modifiedExpr,(LoopTools`D0)[args:__]:>{args},Infinity]
    ];
 
-   append[onePoint,onePointTemplate,"A","a"[1]];
-   append[twoPoint,twoPointTemplate,"B","b"[2]];
-   append[threePoint,threePointTemplate,"C","c"[7]];
-   append[fourPoint,fourPointTemplate,"D","d"[11]];
+   append[onePoint,onePointTemplate,"A","a"];
+   append[twoPoint,twoPointTemplate,"B","b"];
+   append[threePoint,threePointTemplate,"C","c"];
+   append[fourPoint,fourPointTemplate,"D","d"];
 
    {
       Flatten@loopRules,
-      "std::complex<double> "<>Utils`StringJoinWithSeparator[Join@@loopArrayDefine,", "]<>";",
+      Utils`StringJoinWithSeparator[Join@@loopArrayDefine,";\n"]<>";\n",
       Utils`StringJoinWithReplacement[Join@@loopArraySet,"\n","\""->""],
       modifiedExpr/.Flatten@loopRules
    }

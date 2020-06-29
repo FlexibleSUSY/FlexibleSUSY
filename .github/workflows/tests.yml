@@ -29,21 +29,17 @@ jobs:
     # For non PR triggers we check for the name of the repo so that if someone
     # forks FS github doesn't try to run tests on their code.
     if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
         CXXCOMPILER: [g++, clang++]
-        LOOPLIBRARY: [internal, looptools]
-      max-parallel: 1
 
     env:
-      IMAGE_VERSION: '0.2.5'
-      SARAH_VERSION: '4.14.3'
-      FEYNARTS_VERSION: '3.11'
+      IMAGE_VERSION: '0.3.1'
       FORMCALC_VERSION: '9.9'
       LOOPTOOLS_VERSION: '2.15'
-      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR'
+      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM'
 
     steps:
 
@@ -60,50 +56,118 @@ jobs:
 
       - name: Copy Wolfram Engine license to the image
         run: |
-          docker exec builder bash -c "mkdir /root/.WolframEngine && mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
-          docker exec builder bash -c 'printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
-          docker exec builder bash -c 'printf "Checking if math command is workings... "; if [[ $(/usr/local/Wolfram/WolframEngine/12.0/Executables/math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi'
+          docker exec builder bash -c "mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
+          printf "Checking if wolframscript command is workings... "
+          docker exec builder bash -c 'if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+          printf "Checking if math command is workings... "
+          docker exec builder bash -c '
+              if [[ $(/usr/local/Wolfram/WolframEngine/12.1/Executables/math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]];
+              then
+                echo OK
+              else
+                echo fail
+                exit 1
+              fi
+            '
         env:
           MATHPASS: ${{ secrets.MATHPASS }}
-
-      - name: Install SARAH and FeynArts
-        run: |
-          docker exec builder bash -c "wget -q -O - https://sarah.hepforge.org/downloads/SARAH-$SARAH_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "mkdir /root/.WolframEngine/Kernel && echo 'AppendTo[\$Path, \"/SARAH-$SARAH_VERSION\"];' > /root/.WolframEngine/Kernel/init.m"
-          docker exec builder bash -c "wget -q -O - http://www.feynarts.de/FeynArts-$FEYNARTS_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FeynArts-$FEYNARTS_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
       - name: Install FormCalc
         run: |
           docker exec builder bash -c "wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.0/Executables:\$PATH ./compile"
+          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
-      - name: (Optional) Install LoopTools
+      - name: Install LoopTools
         run: |
           docker exec builder bash -c "cd /tmp && wget -qO- http://www.feynarts.de/looptools/LoopTools-$LOOPTOOLS_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "cd /tmp/LoopTools-$LOOPTOOLS_VERSION && if [ \"$CXX\" = "g++" ]; then export CC=gcc; export CXX=g++; fi && FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-$LOOPTOOLS_VERSION && make install"
+          docker exec builder bash -c "
+               cd /tmp/LoopTools-$LOOPTOOLS_VERSION &&
+               if [ \"$CXX\" = "g++" ];
+               then
+                  export CC=gcc; export CXX=g++;
+               fi &&
+               FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-$LOOPTOOLS_VERSION &&
+               make install
+            "
         env:
           CXX:  ${{ matrix.CXXCOMPILER }}
-        if: matrix.LOOPLIBRARY == 'looptools'
 
       - name: Create models
-        run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --name=\$m; done"
+        run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math --name=\$m; done"
 
       - name: Configure
-        run: docker exec builder bash -c "cd FlexibleSUSY && if [ \"$LOOPLIBRARY\" = \"looptools\" ]; then export FL=\"--enable-looptools --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include\"; fi && ./configure --with-cxx=$CXXCOMPILER --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.0/Executables/math --with-optional-modules=test --with-models=\$(echo $MODELS| tr ' ' ',') \$FL"
+        run: docker exec builder bash -c "
+               cd /FlexibleSUSY &&
+               ./configure
+                  --with-cxx=$CXXCOMPILER
+                  --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math
+                  --with-models=$(echo $MODELS| tr ' ' ',')
+                  --with-loop-libraries=collier,looptools
+                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include
+                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64
+                  --with-collier-incdir=/COLLIER/include
+                  --with-collier-libdir=/COLLIER/lib
+                  --with-optional-modules=test
+               "
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
-          LOOPLIBRARY: ${{ matrix.LOOPLIBRARY }}
 
       - name: Make
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
 
-      - name: Make and run tests
-        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+      - name: Run Mathematica tests
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 execute-meta-tests'
+
+      - name: Build compiled tests
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 alltest'
+
+      # Having a single name entry and a bash loop over integers in the run tag would save a
+      # little writing but splitting it into multiple entries makes it easier to see on github which loop
+      # library has failed
+      - name: Run compiled and shell script tests with 0
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+
+      - name: Run compiled and shell script tests with 1
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+
+      - name: Run compiled and shell script tests with 2
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+
+      - name: Run compiled and shell script tests with 3
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+
+      - name: Testing pack-SM-src
+        run: |
+          docker exec builder bash -c 'cd FlexibleSUSY && make pack-SM-src'
+          docker exec builder bash -c 'cd FlexibleSUSY && rm -rf models/SM'
+          docker exec builder bash -c 'cd FlexibleSUSY && tar -xf SM.tar.gz'
+          # The dashes '\' are neeeded here even though the previous step with
+          # configure didn't need them. Maybe it has smothething to with
+          # 'run: ' vs 'run: |'?
+          docker exec builder bash -c "
+               cd /FlexibleSUSY &&
+               ./configure \
+                  --with-cxx=$CXXCOMPILER \
+                  --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math \
+                  --with-models=$(echo $MODELS| tr ' ' ',') \
+                  --with-loop-libraries=collier,looptools \
+                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include \
+                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 \
+                  --with-collier-incdir=/COLLIER/include \
+                  --with-collier-libdir=/COLLIER/lib \
+                  --disable-meta \
+                  --with-optional-modules=test
+               "
+          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
+          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2-preview
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs

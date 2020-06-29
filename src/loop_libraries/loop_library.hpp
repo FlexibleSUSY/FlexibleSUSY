@@ -19,27 +19,24 @@
 #ifndef LOOP_LIBRARY_H
 #define LOOP_LIBRARY_H
 
-#include <memory>
 #include "loop_library_interface.hpp"
+#include <memory>
 
-namespace flexiblesusy {
+namespace flexiblesusy
+{
 
-class Loop_library {
+class Loop_library
+{
 public:
-   enum class Library {
-      Undefined,
-      Softsusy,
-      Collier,
-      Looptools,
-      Fflite
-   };
+   enum class Library { Undefined, Softsusy, Collier, Looptools, Fflite };
    static void set(int);
+   static Library get_type();
    static looplibrary::Loop_library_interface& get();
 
 private:
    static Library type_;
    static std::unique_ptr<looplibrary::Loop_library_interface> lib_;
-   static void set_default(void);
+   static void set_default();
 
    Loop_library() {}
    Loop_library(Loop_library const&);

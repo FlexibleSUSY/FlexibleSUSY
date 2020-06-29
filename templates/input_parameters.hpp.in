@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_INPUT_PARAMETERS_H
 #define @ModelName@_INPUT_PARAMETERS_H

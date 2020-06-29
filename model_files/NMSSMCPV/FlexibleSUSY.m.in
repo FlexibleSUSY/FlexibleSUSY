@@ -94,7 +94,7 @@ InitialGuessAtHighScale = {};
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {hh, Ah, Hpm};
+HighPoleMassPrecision    = {hh, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 

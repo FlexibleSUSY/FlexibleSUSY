@@ -46,12 +46,14 @@ BeginPackage["FlexibleSUSY`",
               "References`",
               "SemiAnalytic`",
               "ThreeLoopSM`",
+              "TerminalFormatting`",
               "ThreeLoopMSSM`",
               "CXXDiagrams`",
               "AMuon`",
               "EDM`",
               "FFVFormFactors`",
               "BrLToLGamma`",
+              "LToLConversion`",
               "BtoSGamma`",
               "EffectiveCouplings`",
               "FlexibleEFTHiggsMatching`",
@@ -166,7 +168,7 @@ FSRestrictParameter; (* restrict parameter to interval *)
 FSInitialSetting;    (* set parameter before calculating masses *)
 FSSolveEWSBFor;
 FSSolveEWSBTreeLevelFor = {};
-Temporary;
+FSTemporary;
 MZ;
 MT;
 MZDRbar;
@@ -1690,8 +1692,8 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
               {threeLoopSelfEnergyPrototypes, threeLoopSelfEnergyFunctions} = SelfEnergies`CreateThreeLoopSelfEnergiesMSSM[{SARAH`HiggsBoson}];
               threeLoopHiggsHeaders = threeLoopHiggsHeaders <> "\
 #ifdef ENABLE_HIMALAYA
-#include \"HierarchyCalculator.hpp\"
-#include \"version.hpp\"
+#include \"himalaya/HierarchyCalculator.hpp\"
+#include \"himalaya/version.hpp\"
 #endif
 ";
              ];
@@ -2707,6 +2709,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@gaugeCouplingNormalizationDefs@" -> IndentText[gaugeCouplingNormalizationDefs],
                             "@numberOfDRbarBlocks@"            -> ToString[numberOfDRbarBlocks],
                             "@drBarBlockNames@"                -> WrapLines[drBarBlockNames],
+                            "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -2933,7 +2936,7 @@ FSCheckFlags[] :=
               Print["Adding 2-loop SM O(as^2,at*as,at^2) corrections to yt from ",
                     "[arXiv:1604.01134]"];
               Print["Adding 4-loop SM QCD corrections to yt from ",
-                    "[arxiv:1604.01134]"];
+                    "[arxiv:1502.01030, arxiv:1604.01134, arxiv:1606.06754]"];
               References`AddReference["Martin:2016xsp"];
              ];
 
@@ -3624,6 +3627,17 @@ ReadSARAHBetaFunctions[] :=
            {susyBetaFunctions, susyBreakingBetaFunctions}
     ]
 
+(* disable tensor couplings *)
+FSDisableTensorCouplings[parameters_] :=
+    Module[{tensorCouplings = Select[parameters, Parameters`IsTensor]},
+           If[tensorCouplings =!= {},
+              Print["Error: Models with tensor couplings are currently not supported."];
+              Print["   The following parameters have a tensor structure:"];
+              Print["   ", InputForm[tensorCouplings]];
+              Quit[1];
+           ];
+    ];
+
 SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
     Module[{allParameters, phases},
            (* identify real parameters *)
@@ -3641,6 +3655,8 @@ SetupModelParameters[susyBetaFunctions_, susyBreakingBetaFunctions_] :=
                ConvertSarahPhases[SARAH`ParticlePhases],
                Exp[I #]& /@ GetVEVPhases[FlexibleSUSY`FSEigenstates]];
            Parameters`SetPhases[phases];
+
+           FSDisableTensorCouplings[allParameters];
 
            allParameters
     ]
@@ -3720,7 +3736,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             QToQGammaFields = {},
             LToLGammaFields = {},
             LToLConversion = {}, FFMasslessVVertices = {},
-
             LToLConversionVertices = {}, LToLConversionFields = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
@@ -4127,7 +4142,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["Creating class for SLHA model ..."];
            WriteModelSLHAClass[massMatrices,
                                {{FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.hpp.in"}],
-                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]}
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.hpp"}]},
+                                {FileNameJoin[{$flexiblesusyTemplateDir, "model_slha.cpp.in"}],
+                                 FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_model_slha.cpp"}]}
                                }];
 
            Utils`PrintHeadline["Creating utilities"];

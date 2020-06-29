@@ -17,10 +17,11 @@
 // ====================================================================
 
 #include "problems.hpp"
+#include "config.h"
 #include "logger.hpp"
 #include "names.hpp"
+#include "string_format.hpp"
 #include "string_utils.hpp"
-#include "config.h"
 
 #include <algorithm>
 #include <iostream>
@@ -97,16 +98,32 @@ void Problems::add(const Problems& other)
 
 bool Problems::have_problem() const
 {
-   return have_tachyon() || failed_ewsb || failed_ewsb_tree_level
-      || non_perturbative || failed_sinThetaW_convergence
-      || have_thrown()
-      || have_failed_pole_mass_convergence()
-      || have_non_perturbative_parameter();
+   return number_of_problems() > 0;
+}
+
+unsigned Problems::number_of_problems() const
+{
+   unsigned count = 0;
+   if (have_tachyon()) count++;
+   if (failed_ewsb) count++;
+   if (failed_ewsb_tree_level) count++;
+   if (non_perturbative || have_non_perturbative_parameter()) count++;
+   if (failed_sinThetaW_convergence) count++;
+   if (have_thrown()) count++;
+   if (have_failed_pole_mass_convergence()) count++;
+   return count;
 }
 
 bool Problems::have_warning() const
 {
-   return have_bad_mass();
+   return number_of_warnings() > 0;
+}
+
+unsigned Problems::number_of_warnings() const
+{
+   unsigned count = 0;
+   if (have_bad_mass()) count++;
+   return count;
 }
 
 std::string Problems::get_parameter_name(int idx) const
@@ -115,6 +132,11 @@ std::string Problems::get_parameter_name(int idx) const
       return "Q";
 
    return parameter_names->get(idx);
+}
+
+std::string Problems::get_particle_name(int idx) const
+{
+   return particle_names->get(idx);
 }
 
 std::vector<std::string> Problems::get_problem_strings() const
@@ -150,13 +172,13 @@ std::vector<std::string> Problems::get_problem_strings() const
       std::string str("non-perturbative " + par_name);
       if (par.second.threshold > 0) {
          str += " [|" + par_name + "|(" +
-                std::to_string(par.second.scale) + ") = " +
-                std::to_string(par.second.value) +
-                " > " + std::to_string(par.second.threshold) + "]";
+                flexiblesusy::to_string(par.second.scale) + ") = " +
+                flexiblesusy::to_string(par.second.value) +
+                " > " + flexiblesusy::to_string(par.second.threshold) + "]";
       } else {
          str += " [" + par_name + "(" +
-                std::to_string(par.second.scale) +
-                ") = " + std::to_string(par.second.value) + "]";
+                flexiblesusy::to_string(par.second.scale) +
+                ") = " + flexiblesusy::to_string(par.second.value) + "]";
       }
       strings.emplace_back(str);
    }
@@ -189,12 +211,22 @@ std::string Problems::get_warning_string(const std::string& sep) const
    return concat(get_warning_strings(), sep);
 }
 
+void Problems::print_problems() const
+{
+   print_problems(std::cerr);
+}
+
 void Problems::print_problems(std::ostream& ostr) const
 {
    if (!have_problem())
       return;
 
    ostr << get_problem_string();
+}
+
+void Problems::print_warnings() const
+{
+   print_warnings(std::cerr);
 }
 
 void Problems::print_warnings(std::ostream& ostr) const

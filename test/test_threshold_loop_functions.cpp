@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( test_C0 )
       {1, 2, 3}
    };
 
-   for (int i = 0; i < sizeof(value)/sizeof(value[0]); i++) {
+   for (unsigned i = 0; i < sizeof(value)/sizeof(value[0]); i++) {
       BOOST_TEST_MESSAGE("> m1 = " << value[i].m1
                     << ", m2 = " << value[i].m2
                     << ", m3 = " << value[i].m3);
@@ -1498,23 +1498,23 @@ std::vector<XYZ> generate_random_triples(
 
    std::vector<XYZ> v(5*n);
 
-   for (int i = 0; i < n; i++) {
+   for (unsigned i = 0; i < n; i++) {
       v[i] = {x[i], y[i], z[i]};
    }
 
-   for (int i = 0; i < n; i++) {
+   for (unsigned i = 0; i < n; i++) {
       v[n + i] = {x[i], x[i], y[i]};
    }
 
-   for (int i = 0; i < n; i++) {
+   for (unsigned i = 0; i < n; i++) {
       v[2*n + i] = {x[i], y[i], x[i]};
    }
 
-   for (int i = 0; i < n; i++) {
+   for (unsigned i = 0; i < n; i++) {
       v[3*n + i] = {y[i], x[i], x[i]};
    }
 
-   for (int i = 0; i < n; i++) {
+   for (unsigned i = 0; i < n; i++) {
       v[4*n + i] = {x[i], x[i], x[i]};
    }
 

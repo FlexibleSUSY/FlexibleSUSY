@@ -118,7 +118,7 @@ std::unique_ptr<standard_model::Standard_model> make_sm(
    sm->solve_ewsb_tree_level();
    sm->calculate_DRbar_masses();
 
-   return std::move(sm);
+   return sm;
 }
 
 BOOST_AUTO_TEST_CASE( test_SM_mass_eigenstates_conversion )
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE( test_SM_mass_eigenstates_conversion )
    auto models = make_model_ptrs(input);
    auto model = std::move(std::get<0>(models));
 
-   model->solve_ewsb_equations_tree_level();
    model->calculate_tree_level_mass_spectrum();
+   model->solve_ewsb();
    model->calculate_pole_mass_spectrum();
 
    auto dec = std::make_unique<SM_mass_eigenstates_decoupling_scheme>(input);

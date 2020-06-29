@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #ifndef @ModelName@_TWO_SCALE_CONVERGENCE_TESTER_H
 #define @ModelName@_TWO_SCALE_CONVERGENCE_TESTER_H

@@ -1,0 +1,67 @@
+
+FSModelName = "@CLASSNAME@";
+FSEigenstates = SARAH`EWSB;
+FSDefaultSARAHModel = SSM;
+
+(* SSM input parameters *)
+
+MINPAR = {};
+
+EXTPAR = {
+    {0, Qin},
+    {1, QEWSB},
+    {2, MhInput},
+    {3, LambdaSinput},
+    {4, Kappainput},
+    {5, K1input},
+    {6, K2input},
+    {7, vSInput}
+};
+
+EWSBOutputParameters = { mu2, MS };
+
+HighScale = Qin;
+
+HighScaleFirstGuess = Qin;
+
+HighScaleInput = {
+    {LambdaS, LambdaSinput},
+    {K1, K1input},
+    {K2, K2input},
+    {\[Kappa], Kappainput}
+};
+
+SUSYScale = QEWSB;
+
+SUSYScaleFirstGuess = QEWSB;
+
+SUSYScaleInput = {
+    {vS, vSInput}
+};
+
+LowScale = LowEnergyConstant[MZ];
+
+LowScaleFirstGuess = LowEnergyConstant[MZ];
+
+LowScaleInput = {
+   FSFindRoot[{\[Lambda]}, {MhInput - Pole[M[hh[1]]]}],
+   {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+InitialGuessAtLowScale = {
+   {v, LowEnergyConstant[vev]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
+OnlyLowEnergyFlexibleSUSY = False;
+
+DefaultPoleMassPrecision = MediumPrecision;
+HighPoleMassPrecision    = {hh};
+MediumPoleMassPrecision  = {};
+LowPoleMassPrecision     = {};
+

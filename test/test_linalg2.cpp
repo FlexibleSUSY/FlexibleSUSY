@@ -103,18 +103,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_svd, T, svd_tests)
     Matrix<S, M, N> sigma = u.adjoint() * m * vh.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 1e-13);
 
     if (T::check_ascending_order)
-	for (size_t i = 0; i < s.size()-1; i++)
+	for (Eigen::Index i = 0; i < s.size()-1; i++)
 	    BOOST_CHECK(s[i] <= s[i+1]);
 
     T().svs(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 1e-13);
 }
 #endif // TEST_LINALG2_PART1
@@ -296,17 +296,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_fs_svd, T, fs_svd_tests)
     Matrix<S, M, N> sigma = u.conjugate() * m * v.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 
-    for (size_t i = 0; i < s.size()-1; i++)
+    for (Eigen::Index i = 0; i < s.size()-1; i++)
 	BOOST_CHECK(s[i] <= s[i+1]);
 
     fs_svd(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 }
 #endif // TEST_LINALG2_PART4
@@ -340,17 +340,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_casting_fs_svd, T, casting_fs_svd_tests)
     Matrix<complex<R>, M, N> sigma = u.conjugate() * m * v.adjoint();
 
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 
-    for (size_t i = 0; i < s.size()-1; i++)
+    for (Eigen::Index i = 0; i < s.size()-1; i++)
 	BOOST_CHECK(s[i] <= s[i+1]);
 
     fs_svd(m, s);
     BOOST_CHECK((s >= 0).all());
-    for (size_t i = 0; i < sigma.rows(); i++)
-	for (size_t j = 0; j < sigma.cols(); j++)
+    for (Eigen::Index i = 0; i < sigma.rows(); i++)
+	for (Eigen::Index j = 0; j < sigma.cols(); j++)
 	    BOOST_CHECK_SMALL(abs(sigma(i,j) - (i==j ? s(i) : 0)), 50*eps);
 }
 #endif // TEST_LINALG2_PART5
@@ -703,4 +703,71 @@ BOOST_AUTO_TEST_CASE(test_fs_diagonalize_hermitian_errbd)
 	BOOST_CHECK_LE(z_error, z_errbd[i] * 10);
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_calculate_majorana_singlet_mass)
+{
+   const double Pi = 3.141592653589793;
+
+   double mass;
+   std::complex<double> phase;
+
+   mass = calculate_majorana_singlet_mass(100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_majorana_singlet_mass(-100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_SMALL(phase.real(), 1e-15);
+   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(-100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_SMALL(phase.real(), 1e-15);
+   BOOST_CHECK_EQUAL(phase.imag(), 1.);
+
+   mass = calculate_majorana_singlet_mass(std::complex<double>(1.,1.), phase);
+   BOOST_CHECK_EQUAL(mass, std::sqrt(2.));
+   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
+   BOOST_CHECK_CLOSE(std::arg(phase), 0.5 * Pi/4., 1e-13);
+}
+
+BOOST_AUTO_TEST_CASE(test_calculate_dirac_singlet_mass)
+{
+   const double Pi = 3.141592653589793;
+
+   double mass;
+   std::complex<double> phase;
+
+   mass = calculate_dirac_singlet_mass(100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(-100., phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), -1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), 1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(-100.,0.), phase);
+   BOOST_CHECK_EQUAL(mass, 100.);
+   BOOST_CHECK_EQUAL(phase.real(), -1.);
+   BOOST_CHECK_SMALL(phase.imag(), 1e-15);
+
+   mass = calculate_dirac_singlet_mass(std::complex<double>(1.,1.), phase);
+   BOOST_CHECK_EQUAL(mass, std::sqrt(2.));
+   BOOST_CHECK_EQUAL(std::abs(phase), 1.);
+   BOOST_CHECK_CLOSE(std::arg(phase), Pi/4., 1e-13);
+}
+
 #endif // TEST_LINALG2_PART8

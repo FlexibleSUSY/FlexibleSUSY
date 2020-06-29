@@ -24,7 +24,6 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-#include <string>
 #include <limits>
 
 namespace flexiblesusy {

@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <boost/lexical_cast.hpp>
 
 #include "test.hpp"
 #include "run_cmd.hpp"
@@ -92,7 +91,7 @@ SLHAea::Coll create_point(double tanBeta)
       "Block MINPAR\n"
       "   1   2.000000000e+02   # m0\n"
       "   2   5.000000000e+02   # m12\n"
-      "   3   " + boost::lexical_cast<std::string>(tanBeta) + "   # TanBeta\n"
+      "   3   " + std::to_string(tanBeta) + "   # TanBeta\n"
       "   5  -5.000000000e+02   # A0\n");
 
    const std::string extpar_str(
@@ -133,7 +132,7 @@ void test_tanbeta_scan()
 
       run_point(input_file, fs_data, ss_data);
 
-      printf("%10g %22g (%5d) %24g (%3d) %19.1f%\n", tanBeta,
+      printf("%10g %22g (%5d) %24g (%3d) %19.1f%%\n", tanBeta,
              ss_data.time, ss_data.error,
              fs_data.time, fs_data.error,
              100.*(fs_data.time - ss_data.time)/ss_data.time);
