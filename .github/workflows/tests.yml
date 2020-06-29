@@ -36,10 +36,10 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.3.1'
+      IMAGE_VERSION: '0.4.0'
       FORMCALC_VERSION: '9.9'
       LOOPTOOLS_VERSION: '2.15'
-      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM'
+      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
     steps:
 
@@ -108,6 +108,8 @@ jobs:
                   --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64
                   --with-collier-incdir=/COLLIER/include
                   --with-collier-libdir=/COLLIER/lib
+                  --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
+                  --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64
                   --with-optional-modules=test
                "
         env:
