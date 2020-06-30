@@ -70,6 +70,8 @@ META_SRC     := \
 		$(DIR)/CXXDiagrams.m \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
+		$(DIR)/NPointFunctions/LToLConversion/observable.m \
+		$(DIR)/NPointFunctions/LToLConversion/class.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \

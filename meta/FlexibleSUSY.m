@@ -2286,60 +2286,6 @@ WriteBToSGammaClass[decays_List, files_List] :=
             Sequence @@ GeneralReplacementRules[]}];
    ];
 
-WriteLToLConversionClass[
-   extraSLHAOutputBlocks:_List,
-   files:{{_?FileExistsQ,_String}..}
-] :=
-Module[
-   {
-      observables = DeleteDuplicates@Cases[
-         Observables`GetRequestedObservables@extraSLHAOutputBlocks,
-         FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]
-      ],
-      fields = {}, vertices = {}, additionalVertices = {},
-      prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
-      masslessNeutralVectorBosons
-   },
-
-   If[observables =!= {},
-      Print["Creating LToLConversion class ..."];
-
-      fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
-
-      (* additional vertices needed for the calculation *)
-      masslessNeutralVectorBosons = Select[GetVectorBosons[],
-         (TreeMasses`IsMassless[#] && !TreeMasses`IsElectricallyCharged[#] && !TreeMasses`ColorChargedQ[#])&
-      ];
-
-      vertices = Flatten /@ Tuples[
-         {
-            {CXXDiagrams`LorentzConjugate@#,#}&/@Flatten@Join[
-               TreeMasses`GetSMQuarks[],vertices],
-            masslessNeutralVectorBosons
-         }
-      ];
-
-      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
-         LToLConversion`create@observables;
-   ];
-
-   WriteOut`ReplaceInFiles[
-      files,
-      {
-         "@npf_headers@" -> npfHeaders,
-         "@npf_definitions@" -> npfDefinitions,
-         "@calculate_prototypes@" -> prototypes,
-         "@calculate_definitions@" -> definitions,
-         Sequence@@GeneralReplacementRules[]
-      }
-   ];
-   {
-      fields,
-      DeleteDuplicates@Join[vertices,additionalVertices]
-   }
-];
-WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
-
 (* Write the AMuon c++ files *)
 WriteAMuonClass[calcAMu_, files_List] :=
     Module[{calculation, getMSUSY,
@@ -4571,13 +4517,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
-           (* OBSERVABLE: l -> l conversion *)
+         (* OBSERVABLE: l -> l conversion *)
+         Get@FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions", "LToLConversion", "class.m"};
          {LToLConversionFields, LToLConversionVertices} =
             WriteLToLConversionClass[extraSLHAOutputBlocks,
-                  {
-                     FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
-                     FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
-                  } &/@ ("l_to_l_conversion"<># &/@ {".hpp", ".cpp"})
+               {
+                  FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
+                  FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
+               } &/@ ("l_to_l_conversion"<># &/@ {".hpp", ".cpp"})
             ];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
