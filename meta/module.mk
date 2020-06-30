@@ -72,11 +72,11 @@ META_SRC     := \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/LToLConversion/observable.m \
 		$(DIR)/NPointFunctions/LToLConversion/class.m \
+		$(DIR)/NPointFunctions/LToLConversion/main.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-      $(DIR)/LToLConversion.m \
 		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
 		$(DIR)/EffectiveCouplings.m \
