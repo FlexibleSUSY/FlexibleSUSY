@@ -92,6 +92,7 @@ for f in "$outputFile1" "$outputFile2" ; do
     sed -e 's/ *#.*$//' "$f~" | \
         awk -f "${UTILSDIR}"/remove_slha_block -v block=FlexibleSUSY -v entry=15 \
         > "$f"
+    rm "$f~"
 done
 
 numdiff --absolute-tolerance=1.0e-12 \
