@@ -55,9 +55,19 @@ On[General::shdw]
 
 Begin["`internal`"];
 
+Get@FileNameJoin@{DirectoryName@FindFile@$Input, "time.m"};
+
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
+`type`vertex ~ SetAttributes ~ {Protected, Locked};
+
 `type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][`type`vertex,`type`vertex,Repeated[FeynArts`Field[_Integer],{0,1}]];
+`type`propagator ~ SetAttributes ~ {Protected, Locked};
+
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
+`type`topology ~ SetAttributes ~ {Protected, Locked};
+
+Get@FileNameJoin@{DirectoryName@FindFile@$Input, "topologies.m"};
+
 `type`diagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][__]]..];
 `type`nullableDiagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]...];
 
@@ -69,6 +79,7 @@ Begin["`internal`"];
 
 `type`indexGeneric =
    FeynArts`Index[Generic, _Integer];
+
 indexGeneric[index:_Integer] :=
    FeynArts`Index[Generic, index];
 indexGeneric // Utils`MakeUnknownInputDefinition;
@@ -136,11 +147,14 @@ SetInitialValues[FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
 Module[{},
-   If[!DirectoryQ@FCDir,CreateDirectory@FCDir];
+   If[!DirectoryQ@FCDir, CreateDirectory@FCDir];
    SetDirectory@FCDir;
 
    FeynArts`InitializeModel@FAModel;
-   SetOptions[FeynArts`InsertFields,FeynArts`Model->FAModel,FeynArts`InsertionLevel->FeynArts`Classes];
+   SetOptions[FeynArts`InsertFields,
+      FeynArts`Model -> FAModel,
+      FeynArts`InsertionLevel -> FeynArts`Classes
+   ];
 
    (*Which index types do we load with the model?*)
    `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer];
@@ -396,7 +410,7 @@ Options[NPointFunctionFAFC]={
 };
 NPointFunctionFAFC::usage=
 "@todo";
-NPointFunctionFAFC[inFields_,outFields_,OptionsPattern[]] :=
+NPointFunctionFAFC[inFields_, outFields_, OptionsPattern[]] :=
 Module[
    {
       settingsForGenericSums,settingsForMomElim,
@@ -409,6 +423,7 @@ Module[
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
    ];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
+
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
 
@@ -480,19 +495,6 @@ Module[
 getRestrictionsOnGenericSumsByTopology // Utils`MakeUnknownInputDefinition;
 getRestrictionsOnGenericSumsByTopology ~ SetAttributes ~ {Protected,Locked};
 
-getAdjacencyMatrix[topology:`type`topology] :=
-Module[
-   {
-      propagatorPattern,needNewNumbers,adjacencies,adjacencyMatrix
-   },
-   propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
-   needNewNumbers = And[Max@@(topology/.propagatorPattern[i_,j_,___]:>Sequence[i,j])>100,MatchQ[List@@topology,{propagatorPattern[_,_]..}]];
-   adjacencies = Tally[(List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}] &@ If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
-   adjacencyMatrix=Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies]
-];
-getAdjacencyMatrix // Utils`MakeUnknownInputDefinition;
-getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
-
 `restrictions`momenta =
 {
    {
@@ -506,10 +508,10 @@ getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
 
 getMomElimForAmplitudesByTopology::usage=
 "@brief Uses internally defined replacement list funMomRules for definition of
-momenta to eliminate in specific topologies.
+        momenta to eliminate in specific topologies.
 @param <FeynArts`TopologyList> diagrams Set of topologies with class insertions.
 @returns {_Integer... | Automatic...} List of option values for FormCalc`MomElim
-for every generic amplitude.";
+         for every generic amplitude.";
 getMomElimForAmplitudesByTopology::errOverlap=
 "Some topology rules inside funMomRules overlap. Criteria should be defined in a
 way, which gives unique distinction of topology.";
@@ -660,82 +662,6 @@ Module[
 ];
 getTopologyAmplitudeRulesByTopologyCriterion // Utils`MakeUnknownInputDefinition;
 getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,Locked};
-
-topologyReplacements::usage =
-"@brief List of topology replacement rules for a processes to keep.
-@note R.h.s. should be pure functions of one argument.";
-topologyReplacements =
-{
-   Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
-   Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   FourFermionFlavourChangingBoxes -> (`topologyQ`box@#&),
-   FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
-   FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
-};
-topologyReplacements ~ SetAttributes ~ {Protected,Locked};
-
-getExcludedTopologies::usage =
-"@brief Registers and returns a function, whose outcome - True or everything
-else - determines whether the topology is kept or discarded (see FeynArts
-manual).
-@param {} or _Symbol or {_Symbol} or {__Symbol} Name(s) of processes to hold.
-@returns _Symbol Generated name of topologies to hold.";
-getExcludedTopologies[{}] := {};
-getExcludedTopologies[{sym_Symbol}] := getExcludedTopologies@sym;
-getExcludedTopologies[syms:{__Symbol}] :=
-Module[{excludeTopologyName},
-   FeynArts`$ExcludeTopologies[excludeTopologyName] = (Or @@ Through[(syms/.topologyReplacements)@#])&;
-   excludeTopologyName];
-getExcludedTopologies[sym_Symbol] :=
-Module[{excludeTopologyName},
-   FeynArts`$ExcludeTopologies[excludeTopologyName] = sym/.topologyReplacements;
-   excludeTopologyName];
-getExcludedTopologies // Utils`MakeUnknownInputDefinition;
-getExcludedTopologies ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`pinguinT[topology:`type`topology] :=
-Or[
-   `topologyQ`trianglepinguinT@topology,
-   `topologyQ`self1pinguinT@topology,
-   `topologyQ`self3pinguinT@topology
-];
-`topologyQ`pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`trianglepinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,0,1,1},{0,1,0,1,0,0,0,1},{0,0,1,0,1,0,0,1},{0,0,0,0,1,1,1,0}};
-`topologyQ`trianglepinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`trianglepinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`self1pinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,0,0,2},{0,1,0,1,0,0,1,0},{0,0,1,0,0,1,0,1},{0,0,0,0,2,0,1,0}};
-`topologyQ`self1pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`self1pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`self3pinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,1,0,0},{1,0,0,0,0,1,0,1},{0,1,0,1,1,0,0,0},{0,0,1,0,0,0,0,2},{0,0,0,0,1,0,2,0}};
-`topologyQ`self3pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`self3pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`boxS[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,1,1,0},{0,1,0,0,1,0,0,1},{0,0,1,0,1,0,0,1},{0,0,0,1,0,1,1,0}};
-`topologyQ`boxS // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxS ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`boxT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,1,0,1},{0,1,0,0,1,0,1,0},{0,0,1,0,0,1,0,1},{0,0,0,1,1,0,1,0}};
-`topologyQ`boxT // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`boxU[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {{0,0,0,0,1,0,0,0},{0,0,0,0,0,1,0,0},{0,0,0,0,0,0,1,0},{0,0,0,0,0,0,0,1},{1,0,0,0,0,0,1,1},{0,1,0,0,0,0,1,1},{0,0,1,0,1,1,0,0},{0,0,0,1,1,1,0,0}};
-`topologyQ`boxU // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`box[topology:`type`topology] :=
-Or[`topologyQ`boxS@topology,`topologyQ`boxT@topology,`topologyQ`boxU@topology];
-`topologyQ`box // Utils`MakeUnknownInputDefinition;
-`topologyQ`box ~ SetAttributes ~ {Protected,Locked};
 
 getModifiedDiagrams::usage =
 "@brief Modifies diagrams according to excudeProcess list.
@@ -988,22 +914,23 @@ Module[
 CalculateAmplitudes::usage=
 "@brief Calculate a given set of amplitudes.
 @param amps A set of class level amplitudes as generated by
-FeynArts`.`CreateFeynAmp[] (with colour indices removed)
-form:
-FeynAmpList[___][FeynAmp[
-   GraphID[__],
-   Integral[mom_],
-   amp_,
-   {whatIsInAmp___}->Insertion[Classes][{howToReplace___}..]]..]
+       FeynArts`.`CreateFeynAmp[] (with colour indices removed)
+       form:
+       FeynAmpList[___][FeynAmp[
+          GraphID[__],
+          Integral[mom_],
+          amp_,
+          {whatIsInAmp___}->Insertion[Classes][{howToReplace___}..]]..
+       ]
 @param <List> settingsForMomElim Sets up the MomElim option.
 @param @todo.
 @param genericInsertions the list of generic insertions for the amplitudes
 @param regularizationScheme the regularization scheme for the calculation
 @param zeroExternalMomenta True if external momenta should be set to zero and
-False otherwise
+       False otherwise.
 @returns a list of the format {fsAmplitudes, subexpressions} where
-fsAmplitudes denote the calculated amplitudes and subexpressions denote
-the subexpressions used to simplify the expressions";
+         fsAmplitudes denote the calculated amplitudes and subexpressions denote
+         the subexpressions used to simplify the expressions";
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
    settingsForMomElim_List,
@@ -1020,9 +947,10 @@ Module[
       calculatedAmplitudes,abbreviations,subexpressions,
       zeroedRules
    },
-   ampsGen = If[zeroExternalMomenta===True,
-      FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&,numExtParticles] ], (* Relations Mom[i]^2 = 0 are true now. *)
-      ampsGen];
+   If[zeroExternalMomenta === True,
+      (* Relations Mom[i]^2 = 0 are true now. *)
+      ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, numExtParticles]]
+   ];
 
    subWrite["\nAmplitude calculation started ...\n"];
    `time`set[];
@@ -1061,23 +989,6 @@ Module[
       {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
 ];
-
-`time`time = AbsoluteTime[];
-`time`time ~ SetAttributes ~ {Protected};
-
-`time`set[] := (
-   Unprotect@`time`time;
-   `time`time = AbsoluteTime[];
-   Protect@`time`time;
-);
-`time`set // Utils`MakeUnknownInputDefinition;
-`time`set ~ SetAttributes ~ {Locked,Protected};
-
-`time`get[] :=
-   ToString@N[AbsoluteTime[]-`time`time,{Infinity,3}];
-`time`get // Utils`MakeUnknownInputDefinition;
-`time`get ~ SetAttributes ~ {Locked,Protected};
-
 
 (*@Todo think how to implement this in an elegant way.*)
 uniqueChains[calculatedAmplitudes_,rules:{}] :=
