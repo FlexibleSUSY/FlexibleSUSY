@@ -122,7 +122,10 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
             OptionValue[precisionGoal],
             OptionValue[maxIterations],
             OptionValue[solver],
-            OptionValue[calculateStandardModelMasses],
+            If[OptionValue[calculateDecays] === 1 && MemberQ[{-1,1,2}, OptionValue[loopLibrary]],
+               1,
+               OptionValue[calculateStandardModelMasses]
+            ],
             OptionValue[poleMassLoopOrder],
             OptionValue[ewsbLoopOrder],
             OptionValue[betaFunctionLoopOrder],
@@ -150,7 +153,10 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
             OptionValue[loopLibrary],
-            OptionValue[calculateDecays],
+            If[MemberQ[{-1,1,2}, OptionValue[loopLibrary]] && OptionValue[calculateDecays] === 1,
+               1,
+               0
+            ],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
@@ -202,7 +208,10 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
             OptionValue[precisionGoal],
             OptionValue[maxIterations],
             OptionValue[solver],
-            OptionValue[calculateStandardModelMasses],
+            If[OptionValue[calculateDecays] === 1 && MemberQ[{-1,1,2}, OptionValue[loopLibrary]],
+               1,
+               OptionValue[calculateStandardModelMasses]
+            ],
             OptionValue[poleMassLoopOrder],
             OptionValue[ewsbLoopOrder],
             OptionValue[betaFunctionLoopOrder],
@@ -230,7 +239,10 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
             OptionValue[loopLibrary],
-            OptionValue[calculateDecays],
+            If[MemberQ[{-1,1,2}, OptionValue[loopLibrary]] && OptionValue[calculateDecays] === 1,
+               1,
+               0
+            ],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
