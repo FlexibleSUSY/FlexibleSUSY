@@ -65,7 +65,7 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
         * (1 + deltaHt);
    } else {
 
-   const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
+   const double deltaqq = calc_Deltaqq(alpha_s_red, Nf);
    const double lt = std::log(Sqr(mHOS/mtpole));
    const double lq = std::log(Sqr(muq/mHOS));
    const double deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));

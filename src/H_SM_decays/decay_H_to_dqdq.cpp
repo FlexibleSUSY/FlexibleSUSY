@@ -44,7 +44,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const double deltaqqDR =
       2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
       4./3. * alpha_s_red * calc_DeltaH(betaDR) +
-      calc_deltaqq(alpha_s_red, Nf);
+      calc_Deltaqq(alpha_s_red, Nf);
 
    const double deltaqqDRQED =
       17./4. * alpha_red * Sqr(dq::electric_charge);

@@ -71,8 +71,8 @@ double calc_DeltaAH(double b) noexcept
       * std::log((1+b)/(1-b)) + 3./8.*(7-b*b);
 }
 
-/// 2-loop and higher order
-double calc_deltaqq(double alpha_s_red, double Nf) noexcept
+/// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
+double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
    return
       // order alphas are taken into account with mass sependence somewhere alse

@@ -31,7 +31,7 @@ double CLASSNAME::get_partial_width<AH,bar<dq>::type, dq>(
    const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
    const double mtpole = qedqcd.displayPoleMt();
 
-   const double deltaqq = calc_deltaqq(alpha_s_red, Nf);
+   const double deltaqq = calc_Deltaqq(alpha_s_red, Nf);
 
    const double lt = std::log(Sqr(mAH/mtpole));
    const double lq = std::log(Sqr(mdq/mAH));
