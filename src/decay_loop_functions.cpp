@@ -60,15 +60,20 @@ double calc_A(double b) noexcept
 /// Eq.(2.6) of hep-ph/0503173
 double calc_DeltaH(double b) noexcept
 {
-   return calc_A(b)/b + 1./(16*pow3(b)) * (
-      3 + 34*b*b - 13*pow4(b)) * std::log((1+b)/(1-b)) + 3./(8.*b*b)*(7*b*b-1);
+   const double b2 = b*b;
+
+   return calc_A(b)/b
+      + 1./(16*b2*b) * (3 + 34*b2 - 13*sqr(b2)) * std::log((1+b)/(1-b))
+      + 3./(8.*b2)*(7*b2 - 1);
 }
 
 // Eq.(2.6 of) hep-ph/0503173
 double calc_DeltaAH(double b) noexcept
 {
-   return calc_A(b)/b + 1./(16*b) * (19 + 2*b*b + 3*pow4(b))
-      * std::log((1+b)/(1-b)) + 3./8.*(7-b*b);
+   const double b2 = b*b;
+
+   return calc_A(b)/b + 1./(16*b) * (19 + 2*b2 + 3*sqr(b2))
+      * std::log((1+b)/(1-b)) + 3./8.*(7 - b2);
 }
 
 /// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
