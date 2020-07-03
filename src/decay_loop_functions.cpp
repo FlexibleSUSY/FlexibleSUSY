@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "decay_loop_functions.hpp"
+#include "dilog.hpp"
 #include <cmath>
 #include <complex>
 #include <limits>
@@ -24,6 +25,10 @@
 namespace flexiblesusy {
 
 namespace {
+
+double sqr(double x) noexcept { return x*x; }
+double pow3(double x) noexcept { return x*x*x; }
+double pow4(double x) noexcept { return sqr(sqr(x)); }
 
 /// Eq.(2.31) of hep-ph/0503172
 double RT_general(double x) noexcept
@@ -37,7 +42,45 @@ double RT_general(double x) noexcept
    );
 }
 
+/// Eq.(2.7) of hep-ph/0503173
+double calc_A(double b) noexcept
+{
+   const double log_b {std::log(b)};
+   const double log_ratio {std::log((1 + b) / (1 - b))};
+
+   return (1 + b * b) *
+             (4. * dilog((1 - b) / (1 + b)) + 2. * dilog(-(1 - b) / (1 + b)) -
+              3. * log_ratio * std::log(2 / (1 + b)) -
+              2. * log_ratio * log_b) -
+          3. * b * std::log(4. / (1 - b * b)) - 4. * b * log_b;
+}
+
 } // anonymous namespace
+
+/// Eq.(2.6) of hep-ph/0503173
+double calc_DeltaH(double b) noexcept
+{
+   return calc_A(b)/b + 1./(16*pow3(b)) * (
+      3 + 34*b*b - 13*pow4(b)) * std::log((1+b)/(1-b)) + 3./(8.*b*b)*(7*b*b-1);
+}
+
+// Eq.(2.6 of) hep-ph/0503173
+double calc_DeltaAH(double b) noexcept
+{
+   return calc_A(b)/b + 1./(16*b) * (19 + 2*b*b + 3*pow4(b))
+      * std::log((1+b)/(1-b)) + 3./8.*(7-b*b);
+}
+
+/// 2-loop and higher order
+double calc_deltaqq(double alpha_s_red, double Nf) noexcept
+{
+   return
+      // order alphas are taken into account with mass sependence somewhere alse
+      0. * 17./3. * alpha_s_red
+      + (35.94 - 1.36 * Nf) * sqr(alpha_s_red)
+      + (164.14 - 25.77 * Nf + 0.259 * sqr(Nf)) * pow3(alpha_s_red)
+      + (39.34 - 220.9 * Nf + 9.685 * sqr(Nf) - 0.0205 * pow3(Nf)) * pow4(alpha_s_red);
+}
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
 double RT(double x) noexcept
