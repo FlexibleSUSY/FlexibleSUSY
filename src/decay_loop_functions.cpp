@@ -63,7 +63,7 @@ double calc_DeltaH(double b) noexcept
    const double b2 = b*b;
 
    return calc_A(b)/b
-      + 1./(16*b2*b) * (3 + 34*b2 - 13*sqr(b2)) * std::log((1+b)/(1-b))
+      + 1./(16*b2*b) * (3 + b2*(34 - 13*b2)) * std::log((1+b)/(1-b))
       + 3./(8.*b2)*(7*b2 - 1);
 }
 
@@ -72,7 +72,7 @@ double calc_DeltaAH(double b) noexcept
 {
    const double b2 = b*b;
 
-   return calc_A(b)/b + 1./(16*b) * (19 + 2*b2 + 3*sqr(b2))
+   return calc_A(b)/b + 1./(16*b) * (19 + b2*(2 + 3*b2))
       * std::log((1+b)/(1-b)) + 3./8.*(7 - b2);
 }
 
@@ -83,8 +83,8 @@ double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
       // order alphas are taken into account with mass sependence somewhere alse
       0. * 17./3. * alpha_s_red
       + (35.94 - 1.36 * Nf) * sqr(alpha_s_red)
-      + (164.14 - 25.77 * Nf + 0.259 * sqr(Nf)) * pow3(alpha_s_red)
-      + (39.34 - 220.9 * Nf + 9.685 * sqr(Nf) - 0.0205 * pow3(Nf)) * pow4(alpha_s_red);
+      + (164.14 + Nf*(-25.77 + 0.259 * Nf)) * pow3(alpha_s_red)
+      + (39.34 + Nf*(-220.9 + 9.685 * Nf) - 0.0205 * pow3(Nf)) * pow4(alpha_s_red);
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
