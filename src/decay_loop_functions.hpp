@@ -21,7 +21,7 @@
 
 namespace flexiblesusy {
 
-// Eq.(2.6 of) hep-ph/0503173
+// Eq.(2.6) of hep-ph/0503173
 double calc_DeltaAH(double b) noexcept;
 
 /// Eq.(2.6) of hep-ph/0503173
