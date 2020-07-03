@@ -26,10 +26,6 @@ namespace flexiblesusy {
 
 namespace {
 
-double sqr(double x) noexcept { return x*x; }
-double pow3(double x) noexcept { return x*x*x; }
-double pow4(double x) noexcept { return sqr(sqr(x)); }
-
 /// Eq.(2.31) of hep-ph/0503172
 double RT_general(double x) noexcept
 {
