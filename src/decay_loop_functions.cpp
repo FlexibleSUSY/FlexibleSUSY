@@ -80,11 +80,17 @@ double calc_DeltaAH(double b) noexcept
 double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
    return
-      // order alphas are taken into account with mass sependence somewhere alse
-      0. * 17./3. * alpha_s_red
-      + (35.94 - 1.36 * Nf) * sqr(alpha_s_red)
-      + (164.14 + Nf*(-25.77 + 0.259 * Nf)) * pow3(alpha_s_red)
-      + (39.34 + Nf*(-220.9 + 9.685 * Nf) - 0.0205 * pow3(Nf)) * pow4(alpha_s_red);
+      alpha_s_red*(
+         // order alpha_s_red^1 are taken into account with mass sependence somewhere alse
+         0. * 17./3.
+         + alpha_s_red*(
+            + 35.94 - 1.36*Nf
+            + alpha_s_red*(
+               + 164.14 + Nf*(-25.77 + 0.259*Nf)
+               + alpha_s_red*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)))
+            )
+         )
+      );
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
