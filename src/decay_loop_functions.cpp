@@ -75,18 +75,12 @@ double calc_DeltaAH(double b) noexcept
 /// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
 double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
+   // order alpha_s_red^1 is taken into account with mass dependence somewhere else
    return
-      alpha_s_red*(
-         // order alpha_s_red^1 is taken into account with mass dependence somewhere else
-         0. * 17./3.
-         + alpha_s_red*(
-            + 35.94 - 1.36*Nf
-            + alpha_s_red*(
-               + 164.14 + Nf*(-25.77 + 0.259*Nf)
-               + alpha_s_red*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)))
-            )
-         )
-      );
+      + alpha_s_red*(0. * 17./3.
+      + alpha_s_red*(35.94 - 1.36*Nf
+      + alpha_s_red*(164.14 + Nf*(-25.77 + 0.259*Nf)
+      + alpha_s_red*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf))))));
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
