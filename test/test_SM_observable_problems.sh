@@ -39,6 +39,7 @@ echo "${SLHA_IN}" | "${SM_EXE}" --slha-input-file=- --slha-output-file="${SLHA_O
 Block FlexibleSUSY
     3   0   # calculate SM pole masses
     15  1   # calculate observables
+    32  0   # calculate decays
 EOF
   } | "${SM_EXE}" --slha-input-file=- --slha-output-file="${SLHA_OUT}"
 
