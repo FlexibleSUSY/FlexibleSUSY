@@ -77,7 +77,7 @@ double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
    return
       alpha_s_red*(
-         // order alpha_s_red^1 are taken into account with mass sependence somewhere alse
+         // order alpha_s_red^1 is taken into account with mass dependence somewhere else
          0. * 17./3.
          + alpha_s_red*(
             + 35.94 - 1.36*Nf
