@@ -36,9 +36,8 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.1'
+      IMAGE_VERSION: '0.4.2'
       FORMCALC_VERSION: '9.9'
-      LOOPTOOLS_VERSION: '2.15'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
     steps:
@@ -78,21 +77,6 @@ jobs:
           docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
-      - name: Install LoopTools
-        run: |
-          docker exec builder bash -c "cd /tmp && wget -qO- http://www.feynarts.de/looptools/LoopTools-$LOOPTOOLS_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "
-               cd /tmp/LoopTools-$LOOPTOOLS_VERSION &&
-               if [ \"$CXX\" = "g++" ];
-               then
-                  export CC=gcc; export CXX=g++;
-               fi &&
-               FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-$LOOPTOOLS_VERSION &&
-               make install
-            "
-        env:
-          CXX:  ${{ matrix.CXXCOMPILER }}
-
       - name: Create models
         run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math --name=\$m; done"
 
@@ -104,8 +88,8 @@ jobs:
                   --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math
                   --with-models=$(echo $MODELS| tr ' ' ',')
                   --with-loop-libraries=collier,looptools
-                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include
-                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64
+                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include
+                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64
                   --with-collier-incdir=/COLLIER/include
                   --with-collier-libdir=/COLLIER/lib
                   --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
@@ -156,8 +140,8 @@ jobs:
                   --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math \
                   --with-models=$(echo $MODELS| tr ' ' ',') \
                   --with-loop-libraries=collier,looptools \
-                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include \
-                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 \
+                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
+                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
                   --with-collier-incdir=/COLLIER/include \
                   --with-collier-libdir=/COLLIER/lib \
                   --disable-meta \
