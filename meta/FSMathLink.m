@@ -249,13 +249,25 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            {prototype, function}
           ];
 
-CreateModelDecaysCalculation[] :=
+CreateModelDecaysCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
            prototype = "void " <> CreateModelDecaysCalculationName[] <> "();\n";
            body = "check_spectrum_pointer();\n" <>
+                  "const bool loop_library_for_decays =\n" <>
+                  TextFormatting`IndentText[
+                     "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                     "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                  ] <>
                   "if (settings.get(Spectrum_generator_settings::calculate_decays)) {\n" <>
+                     TextFormatting`IndentText[
+                        "if (loop_library_for_decays) {\n" <>
                   TextFormatting`IndentText["spectrum->" <> CreateSpectrumDecaysCalculationName[] <>
-                                            "(qedqcd);\n"] <> "}\n";
+                                            "(qedqcd);\n"] <> "}\n" <>
+                        "else if (!loop_library_for_decays) {\n" <>
+                           TextFormatting`IndentText[
+         "WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");\n"
+                           ] <> "}\n"
+                        ] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";

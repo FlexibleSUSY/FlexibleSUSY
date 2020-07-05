@@ -2573,7 +2573,7 @@ ExampleDecaysIncludes[] :=
 ExampleCalculateDecaysForModel[] :=
 "const bool loop_library_for_decays =
     (Loop_library::get_type() == Loop_library::Library::Collier) ||
-    (Loop_library::get_type() == Loop_library::Library::Looptools);" <>
+    (Loop_library::get_type() == Loop_library::Library::Looptools);\n" <>
 FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
 if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (loop_library_for_decays) {
@@ -2724,7 +2724,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               {calculateSpectrumDecaysPrototype, calculateSpectrumDecaysFunction} =
                   FSMathLink`CreateSpectrumDecaysCalculation[FlexibleSUSY`FSModelName];
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =
-                  FSMathLink`CreateModelDecaysCalculation[];
+                  FSMathLink`CreateModelDecaysCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
               {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
