@@ -24,7 +24,8 @@
 
 BeginPackage@"LToLConversion`";
 
-create::usage = "";
+create::usage =
+"@brief Main entrance point for the canculation.";
 
 getFLHA::usage =
 "@brief Returns information of Wilson coefficients, calculated by this observable
@@ -158,8 +159,6 @@ setPrototype[obs:`type`observable] := (
 setPrototype // Utils`MakeUnknownInputDefinition;
 setPrototype ~ SetAttributes ~ {Protected, Locked};
 
-create::usage =
-"@brief Main entrance point for the canculation.";
 create[obs:`type`observable] :=
 Module[
    {
