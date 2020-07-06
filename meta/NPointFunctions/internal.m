@@ -465,6 +465,11 @@ Module[
    }
 ];
 
+getRestrictionsOnGenericSumsByTopology::usage="
+@brief Some topologies can lead to physically incorrect summation on C++ level.
+       This function provides required information in order to prevent this.
+@todo
+";
 getRestrictionsOnGenericSumsByTopology[diagrams:`type`diagramSet] :=
 Module[
    {
@@ -816,31 +821,32 @@ Module[
 ];
 
 GenericInsertionsForDiagram::usage=
-"@brief applies FindGenericInsertions[] to a
-(Topology[_]->Insertions[Generic][__]) rule.
+"@brief Applies FindGenericInsertions[] to a
+        (Topology[_]->Insertions[Generic][__]) rule.
 @returns list (for a given topology) of list (for all generic fields)
-of list (for all class fields) of rules {{{x->y,..},..},..}
+         of list (for all class fields) of rules {{{x->y,..},..},..}.
 @param 1st argument is of the form Topology[_]->Insertions[Generic][__]
-from FeynArts TopologyList[__][Topology[_]->Insertions[Generic][__],___]
-@param 2nd argument changes the type of output field names
-@note all indices in rhs. of rules are removed";
+       from FeynArts TopologyList[__][Topology[_]->Insertions[Generic][__],___].
+@param 2nd argument changes the type of output field names.
+@note All indices in rhs. of rules are removed.";
 GenericInsertionsForDiagram[_->insertGen_, keepFieldNum_:False]:=
 Map[FindGenericInsertions[#,keepFieldNum]&, Apply[List,insertGen,{0,1}]];
 
 FindGenericInsertions::usage=
 "@brief generic FeynmanGraph has rules Field[num]->particleType,
-class FeynmanGraph has rules Field[num]->particleClass.
-This function gives pairs particleType[gen,num]->particleClass, avoiding
-Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass is given)
+        class FeynmanGraph has rules Field[num]->particleClass.
+        This function gives pairs particleType[gen,num]->particleClass, avoiding
+        Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass
+        is given).
 @param 1st argument is of the form
-{FeynmanGraph[__][__],Insertions[Classes][__]}
+       {FeynmanGraph[__][__],Insertions[Classes][__]}.
 @param 2nd argument changes the type of output field names
-True gives Field[_] names, False gives particleClass names
+       True gives Field[_] names, False gives particleClass names.
 @returns list (sorted; for all generic fields) of list (for all class fields)
-of rules {{x->y,..},..}
-@note this function is called by GenericInsertionsForDiagram[]
-@note this function doesn't look at external particles
-@note all indices in rhs. of rules are removed";
+         of rules {{x->y,..},..}.
+@note this function is called by GenericInsertionsForDiagram[].
+@note this function doesn't look at external particles.
+@note all indices in rhs. of rules are removed.";
 FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_]:=
 Module[
    {
@@ -860,28 +866,26 @@ Module[
    ]
 ];
 
-StripParticleIndices::usage=
-"@brief Remove particle indices from a given (possibley generic) field
-@param field the given field
-@returns the given field with all indices removed";
+StripParticleIndices::usage="
+@brief Removes particle indices from a given (possibley generic) field.
+@param field the given field.
+@returns The given field with all indices removed.";
 StripParticleIndices[Times[-1,field_]] :=
    Times[-1, StripParticleIndices[field]];
 StripParticleIndices[genericType_[classIndex_, ___]] :=
    genericType[classIndex];
 
-ColourFactorForDiagram::usage=
-"@brief acts on a (Topology[_]->Insertions[Generic][__]) rule.
-creates adjacency matrix and field array for this topology and uses this
-information for creation of colour factors for a given topology
-@param diagram (Topology[_]->Insertions[Generic][__]) rule
-@returns list (for a given topology) of lists (for all generic fields) of
-(potentially) colour factors
-@note during generation of genericDiagram at 1-loop level the ii-type loop
-propagators have the largest number because of FeynArts
-@note in seqProp numbers of the first vertices inside propagators are sorted
-by FeynArts
-@note external fields always come at first places in adjacency matrix
-@note this function doesn't know anything about CXXDiagrams`.` context";
+ColourFactorForDiagram::usage="
+@brief Creates colour factors for a given diagram.
+@param diagram (Topology[_]->Insertions[Generic][__]) rule.
+@returns List (for a given topology) of lists (for all generic fields) of
+         (potentially) colour factors.
+@note During generation of genericDiagram at 1-loop level the ii-type loop
+      propagators have the largest number because of FeynArts.
+@note In seqProp numbers of the first vertices inside propagators are sorted
+      by FeynArts.
+@note External fields always come at first places in adjacency matrix.
+@note This function doesn't know anything about CXXDiagrams`.` context.";
 ColourFactorForDiagram[
    diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
 Module[
@@ -970,8 +974,12 @@ Module[
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
 
    abbreviations=FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
-   If[zeroExternalMomenta === OperatorsOnly, abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> nullifyMomentaChains@ch];
-   {calculatedAmplitudes,abbreviations} = uniqueChains[calculatedAmplitudes,abbreviations];
+
+   If[zeroExternalMomenta === OperatorsOnly,
+      abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> setChainWithMomentaToZero@ch
+   ];
+
+   {calculatedAmplitudes,abbreviations} = makeChainsUnique[calculatedAmplitudes,abbreviations];
 
    abbreviations = identifySpinors[abbreviations,ampsGen];
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
@@ -990,21 +998,53 @@ Module[
       abbreviations, subexpressions]
 ];
 
-(*@Todo think how to implement this in an elegant way.*)
-uniqueChains[calculatedAmplitudes_,rules:{}] :=
-{calculatedAmplitudes,rules};
-uniqueChains[calculatedAmplitudes_,rules:{Rule[_Symbol,_]..}] :=
-Module[{chainRules,otherRules,zeroChainRules,uniqueChains,amplitudeRules},
-   chainRules = Cases[rules,chain:Rule[_?(StringMatchQ[ToString@#,RegularExpression@"[F][1-9][\\d]*"]&),_]:>chain];
+getChainsRule::usage="
+@brief Finds a subset of rules inside a List, which represent Dirac chains. It
+       is possible, because the naming convention for this abbreviation is fixed
+       and it is given by encoded regular expression.
+@param rules A List of rules.
+@return List of rules.";
+getChainsRule[rules:{Rule[_Symbol, _]..}] :=
+   Cases[rules,chain:Rule[_?(StringMatchQ[ToString@#,RegularExpression@"[F][1-9][\\d]*"]&),_]:>chain];
+getChainsRule // Utils`MakeUnknownInputDefinition;
+getChainsRule ~ SetAttributes ~ {Protected,Locked};
+
+makeChainsUnique::usage="
+@brief After manual simplification of dirac chains one can get duplicates.
+       This is not a desired thing, so they have to be removed. After this,
+       unique chains acquire unique names in appropriate context.
+@param calculatedAmplitudes A set of calculated amplitudes, no specific structure
+       required.
+@param rules A List of rules with abbreviations.
+@returns {calculatedAmplitudes, rules} with appropriate changes.";
+makeChainsUnique[calculatedAmplitudes_, rules:{}] := {calculatedAmplitudes, {}};
+makeChainsUnique[calculatedAmplitudes_, rules:{Rule[_Symbol, _]..}] :=
+Module[
+   {
+      chainRules, otherRules, zeroChainRules, uniqueChains, rulesForAmplitudes
+   },
+   chainRules = getChainsRule@rules;
    otherRules = rules ~ Complement ~ chainRules;
-   zeroChainRules = Cases[chainRules,chain:Rule[_,0]:>chain];
+
+   zeroChainRules = Cases[chainRules, chain:Rule[_,0]:>chain];
    chainRules = chainRules ~ Complement ~ zeroChainRules;
-   uniqueChains = DeleteDuplicates@Cases[chainRules,FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__],Infinity];
-   If[uniqueChains === {},uniqueChains = DeleteDuplicates@Cases[chainRules,FormCalc`DiracChain[__],Infinity]];
-   uniqueChains = MapThread[Rule[Symbol["NPointFunctions`internal`dc"<>ToString@#1],#2]&,{Range@Length@#,#}] & [uniqueChains];
-   amplitudeRules = Rule[FormCalc`Mat@First@#,Last@#] &/@ (chainRules/.(uniqueChains/.Rule[x_,y_]:>Rule[y,NPointFunctions`internal`mat@x]));
-   {calculatedAmplitudes/.zeroChainRules/.amplitudeRules,Join[uniqueChains,otherRules]}
+
+   uniqueChains = DeleteDuplicates@Cases[chainRules, FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__], Infinity];
+
+   If[uniqueChains === {},uniqueChains = DeleteDuplicates@Cases[chainRules, FormCalc`DiracChain[__], Infinity]];
+
+   uniqueChains = MapThread[
+      Rule[Symbol["NPointFunctions`internal`dc"<>#1], #2]&,
+      {ToString/@Range@Length@#, #}
+   ] &@ uniqueChains;
+
+   rulesForAmplitudes = Rule[FormCalc`Mat@First@#,Last@#] &/@
+      (chainRules/.(uniqueChains/.Rule[x_,y_]:>Rule[y,NPointFunctions`internal`mat@x]));
+
+   {calculatedAmplitudes /.zeroChainRules /.rulesForAmplitudes, Join[uniqueChains,otherRules]}
 ];
+makeChainsUnique // Utils`MakeUnknownInputDefinition;
+makeChainsUnique ~ SetAttributes ~ {Protected,Locked};
 
 (*@Todo think how to implement this in an elegant way.*)
 simplifySimpleChain[chain_FormCalc`DiracChain,numExtParticles_Integer] :=
@@ -1032,7 +1072,7 @@ Module[
 ];
 
 (*@Todo think how to implement this in an elegant way.*)
-nullifyMomentaChains[Times[chain1_FormCalc`DiracChain,chain2_FormCalc`DiracChain]] :=
+setChainWithMomentaToZero[Times[chain1_FormCalc`DiracChain, chain2_FormCalc`DiracChain]] :=
 Module[
    {
       ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,l=FormCalc`Lor
@@ -1054,15 +1094,10 @@ Module[
    }
 ];
 
-setZeroExternalMomentaInChains::usage =
-"@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
+setZeroExternalMomentaInChains::usage = "
+@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
 @param abbreviations list of rules.
 @returns Changed list of rules.";
-setZeroExternalMomentaInChains::errUnknownInput =
-"Input should be
-setZeroExternalMomentaInChains@@{ <list of rules> }
-and not
-setZeroExternalMomentaInChains@@`1`";
 setZeroExternalMomentaInChains[abbreviations:{Rule[_,_]...}] :=
 Module[
    {
@@ -1074,9 +1109,8 @@ Module[
    setZeroChainToZero[chain:FormCalc`DiracChain[__]] := chain;
    temp/.chain:FormCalc`DiracChain[__] :> setZeroChainToZero@chain
 ];
-setZeroExternalMomentaInChains[x___] :=
-Utils`AssertOrQuit[False,setZeroExternalMomentaInChains::errUnknownInput,{x}];
-SetAttributes[setZeroExternalMomentaInChains,{Protected,Locked}];
+setZeroExternalMomentaInChains // Utils`MakeUnknownInputDefinition;
+setZeroExternalMomentaInChains ~ SetAttributes ~ {Protected,Locked};
 
 identifySpinors::usage =
 "@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
