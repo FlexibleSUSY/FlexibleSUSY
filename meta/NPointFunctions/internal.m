@@ -973,7 +973,7 @@ Module[
 
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
 
-   abbreviations=FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
+   abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
 
    If[zeroExternalMomenta === OperatorsOnly,
       abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> setChainWithMomentaToZero@ch
@@ -1045,6 +1045,10 @@ Module[
 ];
 makeChainsUnique // Utils`MakeUnknownInputDefinition;
 makeChainsUnique ~ SetAttributes ~ {Protected,Locked};
+
+NPointFunctions`internal`mat::usage = "
+@brief Serves as a wrapper for Dirac chain abbreviations inside amplidudes.";
+NPointFunctions`internal`mat[0] = 0;
 
 (*@Todo think how to implement this in an elegant way.*)
 simplifySimpleChain[chain_FormCalc`DiracChain,numExtParticles_Integer] :=

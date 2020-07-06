@@ -422,7 +422,8 @@ Module[
          inner[doG,foG] :> m@fiG^2/2+inner[diG,fiG]
       };
 
-   sp[particle:_,num:_Integer] := SARAH`DiracSpinor[#,p@num,m@#] &@
+   (* @note If ZeroExternalMomenta is set to True, replace p and m to zeroes *)
+   sp[particle:_,num:_Integer] := SARAH`DiracSpinor[#, p@num, m@#] &@
       particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    dim6[i_,o_,q_] := {
