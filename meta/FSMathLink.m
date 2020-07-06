@@ -238,7 +238,7 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
                        "(const softsusy::QedQcd&) override;\n";
            args = "const softsusy::QedQcd& qedqcd";
-           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd);\n" <>
+           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);\n" <>
                   "decays.calculate_decays();\n";
            function = "template <typename Solver_type>\n" <>
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
