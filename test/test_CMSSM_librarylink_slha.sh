@@ -34,7 +34,7 @@ settings = {
     thresholdCorrections -> 123111321,
     parameterOutputScale -> 1000,
     loopLibrary -> -1,
-    calculateDecays -> 1
+    calculateDecays -> 0
 };
 
 smInputs = {
