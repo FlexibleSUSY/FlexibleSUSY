@@ -689,7 +689,7 @@ Block MSOFT Q= 8.61574711E+02
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VGVG(&m, 1), 0.00069973676532247917, 7e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057267442186, 3e-13);
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VPVP(&m, 1), 4.8001690139837537e-06, 4e-12);
    // h -> gamma Z
