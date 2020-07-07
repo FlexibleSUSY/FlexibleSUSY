@@ -106,7 +106,7 @@ jobs:
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 execute-meta-tests'
 
       - name: Build compiled tests
-        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j3 alltest'
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 alltest'
 
       # Having a single name entry and a bash loop over integers in the run tag would save a
       # little writing but splitting it into multiple entries makes it easier to see on github which loop
@@ -117,10 +117,10 @@ jobs:
       #        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script tests with 1
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script tests with 2
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
         #      - name: Run compiled and shell script tests with 3
         #        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
@@ -147,8 +147,11 @@ jobs:
                   --disable-meta \
                   --with-optional-modules=test
                "
-          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
-          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-meta-tests'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 alltest'
+          docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+          docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
 
