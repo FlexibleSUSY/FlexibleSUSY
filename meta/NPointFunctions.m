@@ -490,7 +490,7 @@ Module[
 
    If[!FileExistsQ[feynArtsModel <> ".mod"],
       subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
-      GenerateFAModelFileOnKernel@subKernel;                                    (*generates .dat .mod .m files insiide FeynArts directory*)
+      GenerateFAModelFileOnKernel@subKernel;                                    (*generates .dat .mod .m files inside FeynArts directory*)
       WriteParticleNamespaceFile@particleNamespaceFile;
       CloseKernels@subKernel;
    ];
@@ -723,8 +723,8 @@ Module[
 CachedNPointFunction // Utils`MakeUnknownInputDefinition;
 CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
 
-GenerateFAModelFileOnKernel::usage=
-"@brief Generate the FeynArts model file on a given subkernel.";
+GenerateFAModelFileOnKernel::usage="
+@brief Generate the FeynArts model file on a given subkernel.";
 GenerateFAModelFileOnKernel[kernel:_Parallel`Kernels`kernel|_KernelObject] :=
 Module[
    {
@@ -739,6 +739,9 @@ Module[
    DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs,
       sarahOutputDir, SARAHModelName, eigenstates];
 
+   Print["Generating FeynArts model file ..."];
+   SetSharedFunction[Print];
+
    ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDir;
@@ -746,6 +749,9 @@ Module[
       NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
          SARAHModelName, eigenstates];,
       kernel];
+
+   UnsetShared[Print];
+   Print["Generating FeynArts model file ... done"];
 ];
 GenerateFAModelFileOnKernel // Utils`MakeUnknownInputDefinition;
 GenerateFAModelFileOnKernel ~ SetAttributes ~ {Locked,Protected};
