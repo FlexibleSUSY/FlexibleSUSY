@@ -93,7 +93,7 @@ public:
 
 private:
    int initial_pdg{0};
-   std::unordered_map<std::size_t, Decay> decays{};
+   List_type decays{};
    double total_width{0.};
 };
 
