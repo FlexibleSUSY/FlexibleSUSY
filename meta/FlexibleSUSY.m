@@ -2588,8 +2588,8 @@ ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
    spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
 
-slha_io.set_dcinfo(decays.get_problems());
-if (show_decays) {
+if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) && loop_library_for_decays) {
+   slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table());
 }";
 
