@@ -278,7 +278,7 @@ Block UERMIX
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00039046196869208178, 3e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00039046196869208178, 4e-13);
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 9.9357276197179806e-06, 3e-12);
    // h -> gamma Z
