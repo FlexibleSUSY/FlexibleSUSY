@@ -110,10 +110,10 @@ jobs:
       # Having a single name entry and a bash loop over integers in the run tag would save a
       # little writing but splitting it into multiple entries makes it easier to see on github which loop
       # library has failed
-      #      - name: Run compiled and shell script tests with 0
-      #        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
-      #        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
-      #        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+      - name: Run compiled and shell script tests with 0
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script tests with 1
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
@@ -121,8 +121,8 @@ jobs:
       - name: Run compiled and shell script tests with 2
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
-        #      - name: Run compiled and shell script tests with 3
-        #        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+      - name: Run compiled and shell script tests with 3
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Testing pack-SM-src
         run: |
@@ -148,7 +148,7 @@ jobs:
           docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2'
           docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-meta-tests'
           docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 alltest'
-          for i in {1..2}
+          for i in {0..3}
           do
             docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=$i -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
           done
@@ -161,3 +161,4 @@ jobs:
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
           path: test/test_*.log
+

@@ -270,8 +270,14 @@ TEST_SRC += \
 		$(DIR)/test_MRSSM2_l_to_lgamma.cpp
 endif
 ifeq ($(WITH_MRSSM2) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_MRSSM2_FlexibleDecays.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_MRSSM2_FlexibleDecays.cpp
+endif
 endif
 
 ifeq ($(WITH_MRSSM2CKM),yes)
@@ -332,8 +338,14 @@ TEST_SRC += \
 endif
 
 ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_THDMII_FlexibleDecays.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_THDMII_FlexibleDecays.cpp
+endif
 endif
 
 ifeq ($(WITH_THDMIIEWSBAtMZSemiAnalytic), yes)
@@ -492,8 +504,14 @@ TEST_SH += \
 		$(DIR)/test_standalone.sh
 endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_MSSM_FlexibleDecays.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_MSSM_FlexibleDecays.cpp
+endif
 endif
 
 ifeq ($(WITH_CMSSM),yes)
@@ -542,8 +560,14 @@ TEST_SRC += \
 		$(DIR)/test_SM_cxxdiagrams.cpp
 endif
 ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
 		$(DIR)/test_SM_FlexibleDecays.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_SM_FlexibleDecays.cpp
+endif
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC) $(ENABLE_META),yes yes yes)

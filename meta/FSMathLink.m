@@ -275,11 +275,17 @@ CreateModelDecaysCalculation[modelName_] :=
           ];
 
 FillDecaysSLHAData[] :=
-    "\n\n" <>
     "const auto& decays_problems = decays.get_problems();\n" <>
-    "slha_io.set_dcinfo(decays_problems);\n" <>
-    "if (!decays_problems.have_problem() || force_output) {\n" <>
-    TextFormatting`IndentText["slha_io.set_decays(decays.get_decay_table());\n"] <>
+    "const bool loop_library_for_decays =\n" <>
+    TextFormatting`IndentText[
+      "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+      "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+    ] <>
+    "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
+    TextFormatting`IndentText[
+       "slha_io.set_dcinfo(decays_problems);\n" <>
+       "slha_io.set_decays(decays.get_decay_table());\n"
+    ] <>
     "}";
 
 PutDecaysFunctionName[] := "put_decays";
