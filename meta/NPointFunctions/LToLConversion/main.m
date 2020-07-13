@@ -160,7 +160,7 @@ setPrototype[obs:`type`observable] := (
    Unprotect@`cxx`prototype;
    `cxx`prototype =
       CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>CConversion`ToValidCSymbolString@massless<>"(\n"<>
+      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>`cxx`massless<>"(\n"<>
       "   int generationIndex1,\n"<>
       "   int generationIndex2,\n"<>
       "   const " <> FlexibleSUSY`FSModelName <>
