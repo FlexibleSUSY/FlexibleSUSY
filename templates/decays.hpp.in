@@ -43,19 +43,24 @@
 namespace flexiblesusy {
 
 template <typename Field1, typename Field2>
-double
+constexpr typename std::enable_if<!std::is_same<Field1, Field2>::value, double>::type
 final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
-   if (std::is_same<Field1, Field2>::value) {
-      // TODO: we also compare if (potential) color indices are the same,
-      //       this might cause problems if someone accidentaly initializes them
-      //       differently
-      if (boost::range::equal(idx1, idx2)) {
-         return 0.5;
-      }
-   }
    return 1.;
+}
+
+template <typename Field1, typename Field2>
+typename std::enable_if<std::is_same<Field1, Field2>::value, double>::type
+final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
+                            typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
+{
+   if (boost::range::equal(idx1, idx2)) {
+      return 0.5;
+   }
+   else {
+      return 1.;
+   }
 }
 
 class @ModelName@_decays {
