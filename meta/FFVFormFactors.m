@@ -81,13 +81,11 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
-      Utils`PrintWarningMsg[
-         "Warning: Diagram with internal particles of type " <>
-         StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}) <>
-         " is currently not supported. " <>
-         "Discarding diagram with particles " <>
-         StringJoin @@ Riffle[ToString /@{EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ", "] <> "."
-      ];
+      Print["Warning: Diagram with internal particles of type ",
+         StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]})];
+      Print["         is currently not supported."];
+      Print["         Discarding diagram with particles ",
+         {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, "."];
       Return[False];
    ];
 

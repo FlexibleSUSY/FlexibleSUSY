@@ -1339,7 +1339,7 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
                   {#1, #2} -> FieldFromDiagram[insertion, {#1, CXXDiagrams`ContractionsBetweenVerticesForDiagramFromGraph[#1, #2, insertion, topology][[2,1]]}]
                },
                (* error *)
-               _, Utils`PrintErrorMsg["Only 1 or 2 connections between vertices are supported"]; Quit[1];
+               _, Print["Only 1 or 2 connections between vertices are supported"]; Quit[1];
             ]& @@@ connectedVertices,
          1
       ];
@@ -1417,7 +1417,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
                {lt1, lt2, lt3, lt4}, "value1()",
                {lt1, lt3, lt2, lt4}, "value2()",
                {lt1, lt4, lt2, lt3}, "value3()",
-               _, (Utils`PrintErrorMsg["Unknown lorentz index combination " <> ToString@{l1, l2, l3, l4} <> " in 4-vector vertex."]; Quit[1])
+               _, (Print["Unknown lorentz index combination " <> ToString@{l1, l2, l3, l4} <> " in 4-vector vertex."]; Quit[1])
             ],
 
          g[lt1_, lt2_] -> "value()",
@@ -1454,7 +1454,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
         ),
 
         (* error *)
-        lor :> (Utils`PrintErrorMsg["Unhandled lorentz structure " <> ToString@lor]; Quit[1])
+        lor :> (Print["Unhandled lorentz structure " <> ToString@lor]; Quit[1])
       }
    ];
 
