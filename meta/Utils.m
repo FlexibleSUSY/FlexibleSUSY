@@ -214,7 +214,7 @@ FSReIm::usage = "FS replacement for the mathematica's function ReIm";
 FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 
-FSPermutationSignature::usage = "";
+FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
 Begin["`Private`"];
 
@@ -562,12 +562,12 @@ MathIndexToCPP::nonIntInput =
 "Cannot convert a non integer index \"`1`\".";
 MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJoin@@Riffle[ToString/@{i},", "]];
 
-(* FSPermutationSignature *)
+(* FSPermutationSign *)
 
 (* from https://reference.wolfram.com/language/tutorial/Permutations.html *)
-FSPermutationSignature[perm_?PermutationCyclesQ] :=
+FSPermutationSign[perm_?PermutationCyclesQ] :=
     Apply[Times, (-1)^(Length /@ First[perm] - 1)];
-FSPermutationSignature[perm___] :=
+FSPermutationSign[perm___] :=
     (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
 
 End[];
