@@ -148,7 +148,7 @@ SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
 
 SortCp[SARAH`Cp[vectors__]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
 	{sortedVectors = SortFieldsInCp[{vectors}]},
-	Utils`FSPermutationSignature[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
+	Utils`FSPermutationSign[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
 ];
 
 (* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
