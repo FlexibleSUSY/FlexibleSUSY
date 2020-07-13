@@ -31,13 +31,14 @@ Begin["Observables`Private`"];
       NPointFunctions`Penguins,
       NPointFunctions`FourFermionScalarPenguins,
       NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes]
+      NPointFunctions`FourFermionFlavourChangingBoxes],
+   massless:True|False
 ];
 
 GetObservableName@FlexibleSUSYObservable`LToLConversion@`args`LToLConversion :=
    StringJoin[
       #@lIn, #@gIn, "_to_", #@lOut, #@gOut, "_conversion_in_", #@nucleus,
-      "_for_", #@contribution
+      "_for_", #@contribution, #@massless
    ] &@ CConversion`ToValidCSymbolString;
 
 GetObservableDescription@FlexibleSUSYObservable`LToLConversion@
@@ -57,9 +58,9 @@ CalculateObservable[
    StringJoin[
       structName, ".",
       GetObservableName@FlexibleSUSYObservable`LToLConversion[
-         lIn@gIn->lOut@gOut, nucleus, contribution],
+         lIn@gIn->lOut@gOut, nucleus, contribution, massless],
       " = ", #2, "::calculate_", #1@lIn, "_to_", #1@lOut, "_for_",
-      #1@contribution, "(", #1@gIn, ", ", #1@gOut, ", ", #2, "::Nucleus::",
+      #1@contribution, #1@massless, "(", #1@gIn, ", ", #1@gOut, ", ", #2, "::Nucleus::",
       #1@nucleus, ", MODEL, qedqcd);"
    ] & [CConversion`ToValidCSymbolString,
       FlexibleSUSY`FSModelName<>"_l_to_l_conversion"

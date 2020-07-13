@@ -54,7 +54,8 @@ Begin["`internal`"];
 `type`observable = FlexibleSUSYObservable`LToLConversion[
    (lIn:`type`lepton)[iIn:_Integer]->(lOut:`type`lepton)[iOut:_Integer],
    _Symbol,
-   con:`type`contribution
+   con:`type`contribution,
+   massless:True|False
 ];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
@@ -91,6 +92,17 @@ setCon[con:`type`contribution] := (
 setCon // Utils`MakeUnknownInputDefinition;
 setCon ~ SetAttributes ~ {Protected, Locked};
 
+`cxx`massless = "";
+`cxx`massless // Protect;
+
+setTemp[massless:True|False] := (
+   Unprotect@`cxx`massless;
+   `cxx`massless = CConversion`ToValidCSymbolString@massless;
+   Protect@`cxx`massless;
+);
+setTemp // Utils`MakeUnknownInputDefinition;
+setTemp ~ SetAttributes ~ {Protected, Locked};
+
 {`cxx`up, `cxx`down} := {
    CConversion`ToValidCSymbolString@SARAH`UpQuark,
    CConversion`ToValidCSymbolString@SARAH`DownQuark
@@ -104,12 +116,12 @@ setCon ~ SetAttributes ~ {Protected, Locked};
 setClass[] := (
    Unprotect@`cxx`classU;
    `cxx`classU = "conversion_"<>`cxx`in<>`cxx`up<>"_to_"<>
-         `cxx`out<>`cxx`up<>"_for_"<>`cxx`con;
+         `cxx`out<>`cxx`up<>"_for_"<>`cxx`con<>`cxx`massless;
    Protect@`cxx`classU;
 
    Unprotect@`cxx`classD;
    `cxx`classD = "conversion_"<>`cxx`in<>`cxx`up<>"_to_"<>
-         `cxx`out<>`cxx`down<>"_for_"<>`cxx`con;
+         `cxx`out<>`cxx`down<>"_for_"<>`cxx`con<>`cxx`massless;
    Protect@`cxx`classD;
 );
 setClass // Utils`MakeUnknownInputDefinition;
@@ -143,11 +155,12 @@ getFLHA ~ SetAttributes ~ {Protected, Locked};
 `cxx`prototype = "";
 `cxx`prototype // Protect;
 
+(*TODO this code is partially duplicated in observable.*)
 setPrototype[obs:`type`observable] := (
    Unprotect@`cxx`prototype;
    `cxx`prototype =
       CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>"(\n"<>
+      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>CConversion`ToValidCSymbolString@massless<>"(\n"<>
       "   int generationIndex1,\n"<>
       "   int generationIndex2,\n"<>
       "   const " <> FlexibleSUSY`FSModelName <>
@@ -169,6 +182,7 @@ Module[
    setIn@lIn;
    setOut@lOut;
    setCon@con;
+   setTemp@massless;
    setPrototype@obs;
    setClass[];
 
@@ -404,7 +418,7 @@ Module[
       {lIn,#},{lOut,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
-      NPointFunctions`ZeroExternalMomenta -> NPointFunctions`OperatorsOnly,
+      NPointFunctions`ZeroExternalMomenta -> If[massless===True, True, NPointFunctions`OperatorsOnly],
       NPointFunctions`KeepProcesses -> parsedCon] &/@ {SARAH`UpQuark,SARAH`DownQuark};
 
    {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
@@ -423,7 +437,7 @@ Module[
       };
 
    (* @note If ZeroExternalMomenta is set to True, replace p and m to zeroes *)
-   sp[particle:_,num:_Integer] := SARAH`DiracSpinor[#, p@num, m@#] &@
+   sp[particle:_,num:_Integer] := If[massless===True,SARAH`DiracSpinor[#, 0, 0], SARAH`DiracSpinor[#, p@num, m@#]] &@
       particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    dim6[i_,o_,q_] := {

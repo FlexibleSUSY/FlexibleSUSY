@@ -891,15 +891,15 @@ And@@(Utils`AssertOrQuit[Length@wilsonBasis === Length@#,CreateCXXFunctions::err
 CreateCXXFunctions // Utils`MakeUnknownInputDefinition;
 CreateCXXFunctions ~ SetAttributes ~ {Locked,Protected};
 
-`cxx`arguments::usage=
-"@brief Returns the c++ arguments that the c++ version of the given n-point
-correlation function shall take.
-Default value of zero for all external momenta is chosen if the second parameter
-is Default.
+`cxx`arguments::usage="
+@brief Returns the c++ arguments that the c++ version of the given n-point
+       correlation function shall take.
+       Default value of zero for all external momenta is chosen if the second
+       parameter is Default.
 @param npf The given n-point correlation function
 @param control String that sets up the type of argument string
 @return the c++ arguments that the c++ version of the given n-point
-correlation function shall take.";
+        correlation function shall take.";
 `cxx`arguments[npf:`type`npf,control:Null|Default:Null] :=
    "const "<>#1<>" &model,"<>
    " const std::array<int,"<>#2<>"> &indices,"<>
