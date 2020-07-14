@@ -82,19 +82,19 @@ IsDiagramSupported[graph_, diagram_] :=
       ];
 
       If[TreeMasses`IsFermion[photonEmitter] && TreeMasses`IsFermion[photonEmitterAfter] && TreeMasses`IsVector[exchangeParticle],
-	Return[True]
+         Return[True]
       ];
 
       If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
-        Return[True]
+         Return[True]
       ];
 
       If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsScalar[photonEmitterAfter],
-        Return[True]
+         Return[True]
       ];
 
       If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
-        Return[True]
+         Return[True]
       ];
 
       Print["Warning: Diagram with internal particles of type ",
