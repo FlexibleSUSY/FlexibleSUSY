@@ -48,7 +48,7 @@ New features
   Thanks to Markus Bach.
 
 * Added calculation of vector diagram contributions to 
-  :math: `$g_\mu-2$`.
+  :math: `(g-2)/2`.
 
 Changes
 -------
