@@ -50,6 +50,8 @@ New features
 * Added calculation of vector diagram contributions to 
   :math: `(g-2)/2`.
 
+  Thanks to Douglas Jacob.
+
 Changes
 -------
 
