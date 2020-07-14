@@ -36,9 +36,8 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.1'
+      IMAGE_VERSION: '0.4.3'
       FORMCALC_VERSION: '9.9'
-      LOOPTOOLS_VERSION: '2.15'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
     steps:
@@ -61,7 +60,7 @@ jobs:
           docker exec builder bash -c 'if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
           printf "Checking if math command is workings... "
           docker exec builder bash -c '
-              if [[ $(/usr/local/Wolfram/WolframEngine/12.1/Executables/math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]];
+              if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]];
               then
                 echo OK
               else
@@ -78,34 +77,18 @@ jobs:
           docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
-      - name: Install LoopTools
-        run: |
-          docker exec builder bash -c "cd /tmp && wget -qO- http://www.feynarts.de/looptools/LoopTools-$LOOPTOOLS_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "
-               cd /tmp/LoopTools-$LOOPTOOLS_VERSION &&
-               if [ \"$CXX\" = "g++" ];
-               then
-                  export CC=gcc; export CXX=g++;
-               fi &&
-               FFLAGS=-fPIC CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --prefix=/LoopTools-$LOOPTOOLS_VERSION &&
-               make install
-            "
-        env:
-          CXX:  ${{ matrix.CXXCOMPILER }}
-
       - name: Create models
-        run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math --name=\$m; done"
+        run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --name=\$m; done"
 
       - name: Configure
         run: docker exec builder bash -c "
                cd /FlexibleSUSY &&
                ./configure
                   --with-cxx=$CXXCOMPILER
-                  --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math
                   --with-models=$(echo $MODELS| tr ' ' ',')
                   --with-loop-libraries=collier,looptools
-                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include
-                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64
+                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include
+                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64
                   --with-collier-incdir=/COLLIER/include
                   --with-collier-libdir=/COLLIER/lib
                   --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
@@ -153,18 +136,22 @@ jobs:
                cd /FlexibleSUSY &&
                ./configure \
                   --with-cxx=$CXXCOMPILER \
-                  --with-math-cmd=/usr/local/Wolfram/WolframEngine/12.1/Executables/math \
-                  --with-models=$(echo $MODELS| tr ' ' ',') \
+                  --with-models=SM \
                   --with-loop-libraries=collier,looptools \
-                  --with-looptools-incdir=/LoopTools-$LOOPTOOLS_VERSION/include \
-                  --with-looptools-libdir=/LoopTools-$LOOPTOOLS_VERSION/lib64 \
+                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
+                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
                   --with-collier-incdir=/COLLIER/include \
                   --with-collier-libdir=/COLLIER/lib \
                   --disable-meta \
                   --with-optional-modules=test
                "
-          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2'
-          docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 all-test'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-meta-tests'
+          docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 alltest'
+          for i in {0..3}
+          do
+            docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=$i -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
+          done
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
 
