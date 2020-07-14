@@ -95,13 +95,13 @@ setCon ~ SetAttributes ~ {Protected, Locked};
 `cxx`massless = "";
 `cxx`massless // Protect;
 
-setTemp[massless:True|False] := (
+setMassless[massless:True|False] := (
    Unprotect@`cxx`massless;
    `cxx`massless = CConversion`ToValidCSymbolString@massless;
    Protect@`cxx`massless;
 );
-setTemp // Utils`MakeUnknownInputDefinition;
-setTemp ~ SetAttributes ~ {Protected, Locked};
+setMassless // Utils`MakeUnknownInputDefinition;
+setMassless ~ SetAttributes ~ {Protected, Locked};
 
 {`cxx`up, `cxx`down} := {
    CConversion`ToValidCSymbolString@SARAH`UpQuark,
@@ -182,7 +182,7 @@ Module[
    setIn@lIn;
    setOut@lOut;
    setCon@con;
-   setTemp@massless;
+   setMassless@massless;
    setPrototype@obs;
    setClass[];
 
