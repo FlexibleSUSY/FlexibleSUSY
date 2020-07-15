@@ -102,6 +102,12 @@ double get_alpha(context_base const&  context)
    return Sqr(unit_charge(context))/(4.*Pi);
 }
 
+std::complex<double> delta_hAA(double x) noexcept
+{
+   return 0.;
+}
+
+
 /* 1-loop BSM amplitudes
  *
  * Notes:

@@ -1650,19 +1650,9 @@ If[Length@positions =!= 1, Quit[1]];
                 ">(index"<> ToString@indices[[positions[[2,1]]]] <> "))\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
       ]& /@ Range[4, 3 + Length[verticesInFieldTypesForFACp]];
 
-functionBody = "// skip indices that don't match external indices\n" <>
-                  matchExternalFieldIndicesCode <>
-                     "\nif (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)\n" <>
-                     TextFormatting`IndentText["continue;"] <>
-                     "\n\n" <>
-
-                  "// connect internal particles in vertices\n" <>
-                  matchInternalFieldIndicesCode <>
-
-                     "\n// internal masses\n" <>
-                  mass <>
-
-                  "\nresult += " <> ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
+      (* body of nested loops over vertices indices *)
+      Block[{ampCall =
+                  "result += " <> ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
                      FillMasses[decay] <> ",\n" <>
@@ -1674,8 +1664,60 @@ functionBody = "// skip indices that don't match external indices\n" <>
                   (* renormalization scale *)
                   "result.m_decay" <>
                   (* if amplitude is UV divergent, take the finite part *)
-                  If[!Last@translation === True, ",\nFinite", ""] <> ");"
-                  ] <> "\n";
+                  If[!Last@translation === True, ",\nFinite", ""] <> ")"
+                  ],
+            fieldsInLoop = DeleteDuplicates[Map[
+            verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]&,
+      Range[4, 3+Length@verticesForFACp]
+      ] /. SARAH`bar|Susyno`LieGroups`conj -> Identity]
+
+               },
+         functionBody =
+                  "// skip indices that don't match external indices\n" <>
+                  matchExternalFieldIndicesCode <>
+                     "\nif (externalFieldIndicesIn1 != idx_1 || externalFieldIndicesIn2 != idx_2 || externalFieldIndicesIn3 != idx_3)\n" <>
+                     TextFormatting`IndentText["continue;"] <>
+                     "\n\n" <>
+
+                  "// connect internal particles in vertices\n" <>
+                  matchInternalFieldIndicesCode <>
+
+                  "\n// internal masses\n" <>
+                  mass <>
+
+                  (* in some cases, we apply higher order corrections at the level of amplitude *)
+                  If[
+                     (* for h -> gamma gamma *)
+                     GetHiggsBoson[] === First@diagram && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]) &&
+                     (* CP conserving Higgs sector *)
+                     !SA`CPViolationHiggsSector &&
+                     (* the quark loop amplitude *)
+                     Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop]
+                  ,
+                     "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                     TextFormatting`IndentText[
+                       Module[{pos1, post2, res},
+                          StringJoin@Riffle[
+                          MapIndexed[
+                             (pos1 = Position[#1, First@fieldsInLoop, 1];
+                          pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                          If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") != " <> "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                          ])&, verticesForFACp]
+                          , " &&\n"
+                       ]
+                       ] <>
+                     ") {\n"] <>
+                     TextFormatting`IndentText[
+                        ampCall <> ";"
+                     ] <> "\n}\n" <>
+                    "else {\n" <>
+                    TextFormatting`IndentText[
+                    ampCall <> ";"
+                    ] <> "\n}\n",
+                    "\n" <> ampCall <> ";\n"
+                  ];
+     ];
 
       {verticesForFACp,
 
