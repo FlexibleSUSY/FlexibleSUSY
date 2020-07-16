@@ -190,9 +190,99 @@ Module[{},
 SetInitialValues // Utils`MakeUnknownInputDefinition;
 SetInitialValues ~ SetAttributes ~ {Protected,Locked};
 
-SetFSConventionRules::usage=
-"@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
-language.";
+`fa`metric::usage = "
+@brief Is used to shortly represent a Pattern for a FeynArts metric tensor.
+@param i1 A Symbol for the first entry.
+@param i2 A Symbol for the second entry.
+@returns A Pattern for a FeynArts metric tensor.
+@note Because of Mathematica warning the definition should be done quietly.";
+Quiet[
+   `fa`metric[i1:_Symbol, i2:_Symbol] :=
+   Global`MetricTensor[FeynArts`KI1[i1:_Integer], FeynArts`KI1[i2:_Integer]],
+   RuleDelayed::rhs
+];
+`fa`metric // Utils`MakeUnknownInputDefinition;
+`fa`metric ~ SetAttributes ~ {Protected, Locked};
+
+`fa`momdiff::usage = "
+@brief Is used to shortly represent a Pattern for a FeynArts momentum
+       difference between the first and the second entries.
+@param i1-i2 Symbols, representing the difference.
+@param i3 A Symbol for the component index.
+@returns A Pattern for a FeynArts momentum difference.
+@note Because of Mathematica warning the definition should be done quietly.
+@note There is a change in notation since FormCalc 9.7.";
+Quiet[
+   If[FormCalc`$FormCalc < 9.7,
+      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol), Repeated[_, {0, 1}]] :=
+         FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
+
+      (* Else *)
+      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol)] :=
+         Global`FourVector[
+            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
+            FeynArts`KI1[3]
+         ];
+
+      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol), i3:_Symbol] :=
+         Global`FourVector[
+            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
+            FeynArts`KI1[i3:_Integer]
+         ]
+   ],
+   RuleDelayed::rhs
+];
+`fa`momdiff // Utils`MakeUnknownInputDefinition;
+`fa`momdiff ~ SetAttributes ~ {Protected, Locked};
+
+`fa`pl::usage = "
+@brief Represents left-handed projector: P_L.";
+`fa`pr::usage = "
+@brief Represents right-handed projector: P_R.";
+{`fa`pl, `fa`pr} = Alternatives[
+   FeynArts`NonCommutative@Global`ChiralityProjector@#,
+
+   FeynArts`NonCommutative[
+      Global`DiracMatrix@FeynArts`KI1@3,
+      Global`ChiralityProjector@#
+   ]
+] &/@ {-1, 1};
+{`fa`pl, `fa`pr} ~ SetAttributes ~ {Protected, Locked};
+
+`sarah`metric::usage = "
+@brief Is used to shortly represent SARAH metric tensor.
+@param fields A List for the set of fields.
+@param i1 An Integer for the first index.
+@param i2 An Integer for the second index.
+@returns SARAH metric tensor.
+@todo One can be more specific about fields.";
+`sarah`metric[fields:{__}, i1:_Integer, i2:_Integer] := SARAH`g[
+   LorentzIndex[ fields[[i1]] ],
+   LorentzIndex[ fields[[i2]] ]
+];
+`sarah`metric // Utils`MakeUnknownInputDefinition;
+`sarah`metric ~ SetAttributes ~ {Protected, Locked};
+
+`sarah`momdiff::usage = "
+@brief Is used to shortly represent a SARAH momentum difference between the first
+       and the second entries, while the third one representing the open index.
+       If the third index is omitted, then a different form is used.
+@param fields A List for the set of fields.
+@param i1 An Integer for the first index.
+@param i2 An Integer for the second index.
+@param i3 An Integer for the third index.
+@returns A SARAH momentum difference expression.";
+`sarah`momdiff[fields:{__}, i1:_Integer, i2:_Integer] :=
+   SARAH`Mom@Part[fields, i1] - SARAH`Mom@Part[fields, i2];
+`sarah`momdiff[fields:{__}, i1:_Integer, i2:_Integer, i3:_Integer] :=
+   SARAH`Mom[Part[fields, i1], LorentzIndex@Part[fields, i3]] -
+   SARAH`Mom[Part[fields, i2], LorentzIndex@Part[fields, i3]]
+`sarah`momdiff // Utils`MakeUnknownInputDefinition;
+`sarah`momdiff ~ SetAttributes ~ {Protected, Locked};
+
+SetFSConventionRules::usage="
+@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
+       language.";
 SetFSConventionRules[] :=
 Module[
    {
@@ -218,113 +308,29 @@ Module[
       ] &/@ fieldNames[[All, 1]] ],
       FeynArts`Mass[field_, _ : Null] :> SARAH`Mass[field]
    ];
+   couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
+      {
+         f@1 :> s@1,
 
-   couplingRules =
-   {
-      FeynArts`G[_][0][fields__][1] :>
-      SARAH`Cp[fields][1],
+         f@`fa`pl :> s@SARAH`PL,
 
-      FeynArts`G[_][0][fields__][
-         FeynArts`NonCommutative[
-            Global`ChiralityProjector[-1]
+         f@`fa`pr :> s@SARAH`PR,
+
+         f@`fa`metric[i1, i2] :> s@`sarah`metric[{fields}, i1, i2],
+
+         f@`fa`momdiff[i1-i2] :> s@`sarah`momdiff[{fields}, i1, i2],
+
+         f[`fa`momdiff[i2-i1, i3]*`fa`metric[i1, i2] +
+            `fa`momdiff[i1-i3, i2]*`fa`metric[i1, i3] +
+            `fa`momdiff[i3-i2, i1]*`fa`metric[i2, i3]
+         ] :>
+         s[
+            `sarah`momdiff[{fields}, i2, i1, i3] * `sarah`metric[{fields}, i1, i2],
+            `sarah`momdiff[{fields}, i1, i3, i2] * `sarah`metric[{fields}, i1, i3],
+            `sarah`momdiff[{fields}, i3, i2, i1] * `sarah`metric[{fields}, i2, i3]
          ]
-      ] :>
-      SARAH`Cp[fields][SARAH`PL],
-
-      FeynArts`G[_][0][fields__][
-         FeynArts`NonCommutative[
-            Global`ChiralityProjector[1]
-         ]
-      ] :>
-      SARAH`Cp[fields][SARAH`PR],
-
-      FeynArts`G[_][0][fields__][
-         FeynArts`NonCommutative[
-            Global`DiracMatrix@FeynArts`KI1@3,
-            Global`ChiralityProjector[-1]
-         ]
-      ] :>
-      SARAH`Cp[fields][SARAH`PL],
-
-      FeynArts`G[_][0][fields__][
-         FeynArts`NonCommutative[
-            Global`DiracMatrix@FeynArts`KI1@3,
-            Global`ChiralityProjector[1]
-         ]
-      ] :>
-      SARAH`Cp[fields][SARAH`PR],
-
-      FeynArts`G[_][0][fields__][ Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]] ] :>
-      SARAH`Cp[fields][SARAH`g[ LorentzIndex[{fields}[[i1]]],LorentzIndex[{fields}[[i2]]]] ],
-
-      FeynArts`G[_][0][fields__][
-         FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ]
-      ] :>
-      SARAH`Cp[fields][
-         SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
-      ],
-
-      (*Since FormCalc-9.7*)
-      FeynArts`G[_][0][fields__][
-         Global`FourVector[
-            FeynArts`Mom[ i1_Integer ] - FeynArts`Mom[ i2_Integer ],
-            FeynArts`KI1[3]
-         ]
-      ] :>
-      SARAH`Cp[fields][
-         SARAH`Mom[ {fields}[[i1]] ] - SARAH`Mom[ {fields}[[i2]] ]
-      ],
-
-      (*VVV couplings*)
-      FeynArts`G[_][0][fields__][
-         (-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer])*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i2_Integer]]
-         +
-         (+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer])*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer],FeynArts`KI1[i3_Integer]]
-         +
-         (-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer])*
-         Global`MetricTensor[FeynArts`KI1[i2_Integer],FeynArts`KI1[i3_Integer]]
-      ] :>
-      SARAH`Cp[fields][
-         (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
-         SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i2]] ] ]
-         ,
-         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] -
-         SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i3]] ] ]
-         ,
-         (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] -
-         SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i2]] ],LorentzIndex[ {fields}[[i3]] ] ]
-      ],
-
-      (* Since FormCalc-9.7 *)
-      FeynArts`G[_][0][fields__][
-         Global`FourVector[-FeynArts`Mom[i1_Integer] + FeynArts`Mom[i2_Integer], FeynArts`KI1[i3_Integer]]*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i2_Integer]]
-         +
-         Global`FourVector[+FeynArts`Mom[i1_Integer] - FeynArts`Mom[i3_Integer], FeynArts`KI1[i2_Integer]]*
-         Global`MetricTensor[FeynArts`KI1[i1_Integer], FeynArts`KI1[i3_Integer]]
-         +
-         Global`FourVector[-FeynArts`Mom[i2_Integer] + FeynArts`Mom[i3_Integer], FeynArts`KI1[i1_Integer]]*
-         Global`MetricTensor[FeynArts`KI1[i2_Integer], FeynArts`KI1[i3_Integer]]
-      ] :>
-      SARAH`Cp[fields][
-         (SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i3]]]] -
-         SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i3]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i2]] ] ]
-         ,
-         (SARAH`Mom[{fields}[[i1]], LorentzIndex[{fields}[[i2]]]] -
-         SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i2]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i1]] ],LorentzIndex[ {fields}[[i3]] ] ]
-         ,
-         (SARAH`Mom[{fields}[[i3]], LorentzIndex[{fields}[[i1]]]] -
-         SARAH`Mom[{fields}[[i2]], LorentzIndex[{fields}[[i1]]]]) *
-         SARAH`g[LorentzIndex[ {fields}[[i2]] ],LorentzIndex[ {fields}[[i3]] ] ]
-      ]
-   };
+      }
+   ];
 
    (* @note Sec 4.4 of FormCalc manual *)
    generalFCRules =
@@ -338,7 +344,8 @@ Module[
       FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
    };
 
-   indexRules =                                                                 (* @note These index rules are specific to SARAH generated FeynArts model files.*)
+   (* @note Rules, specific to SARAH generated FeynArts model files.*)
+   indexRules =
    {
       index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
       index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
