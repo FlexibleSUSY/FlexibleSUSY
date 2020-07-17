@@ -24,6 +24,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/gsl_multiroot_fsolver.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/Li4.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/loop_libraries/library_softsusy.cpp \
 		$(DIR)/lowe.cpp \
@@ -95,6 +96,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/gsl_multiroot_fsolver.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
+		$(DIR)/Li4.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \

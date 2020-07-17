@@ -18,6 +18,7 @@
 
 #include "wrappers.hpp"
 #include "dilog.hpp"
+#include "Li4.hpp"
 #include "numerics2.hpp"
 #include "string_format.hpp"
 #include "trilog.hpp"
@@ -151,10 +152,11 @@ std::complex<double> PolyLog(int n, const std::complex<double>& z) noexcept
    case 1: return -std::log(1.0 - z);
    case 2: return dilog(z);
    case 3: return trilog(z);
+   case 4: return Li4(z);
    default: break;
    }
 
-   ERROR("PolyLog(n != 1|2|3) not implemented");
+   ERROR("PolyLog(n != 1|2|3|4) not implemented");
 
    return { 0.0, 0.0 };
 }
