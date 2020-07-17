@@ -148,6 +148,10 @@ Decay_amplitude_SSS operator*(std::complex<double> factor, Decay_amplitude_SSS c
    amp.form_factor = factor * amp2.form_factor;
    return amp;
 }
+Decay_amplitude_SSS operator*(Decay_amplitude_SSS const& amp2, std::complex<double> factor) {
+   return operator*(factor, amp2);
+}
+
 Decay_amplitude_SSV operator*(std::complex<double> factor, Decay_amplitude_SSV const& amp2) {
    Decay_amplitude_SSV amp;
    amp.m_decay = amp2.m_decay;
@@ -155,6 +159,9 @@ Decay_amplitude_SSV operator*(std::complex<double> factor, Decay_amplitude_SSV c
    amp.m_vector = amp2.m_vector;
    amp.form_factor = factor * amp2.form_factor;
    return amp;
+}
+Decay_amplitude_SSV operator*(Decay_amplitude_SSV const& amp2, std::complex<double> factor) {
+   return operator*(factor, amp2);
 }
 
 Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV const& amp2) {
@@ -171,6 +178,9 @@ Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV 
    amp.form_factor_eps = factor * amp2.form_factor_eps;
    return amp;
 }
+Decay_amplitude_SVV operator*(Decay_amplitude_SVV const& amp2, std::complex<double> factors) {
+   return operator*(factors, amp2);
+}
 
 Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF const& amp2) {
    Decay_amplitude_SFF amp;
@@ -180,6 +190,9 @@ Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF c
    amp.form_factor_left = factor * amp2.form_factor_left;
    amp.form_factor_right = factor * amp2.form_factor_right;
    return amp;
+}
+Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp2, std::complex<double> factor) {
+   return operator*(factor, amp2);
 }
 
 double Decay_amplitude_SFF::square() const

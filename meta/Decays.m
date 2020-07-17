@@ -1709,12 +1709,20 @@ If[Length@positions =!= 1, Quit[1]];
                        ] <>
                      ") {\n"] <>
                      TextFormatting`IndentText[
-                        ampCall <> ";"
-                     ] <> "\n}\n" <>
+                        "const double tau = Sqr(result.m_decay/(2*mInternal1));\n" <>
+                        "std::complex<double> theta;\n" <>
+                        "if (is_zero(tau)) {\n" <>
+                           TextFormatting`IndentText["theta = 1.0;\n"] <>
+                        "}\n" <>
+                        "else {\n" <>
+                           TextFormatting`IndentText["theta = (std::sqrt(1.0-1.0/tau) - 1.0)/(std::sqrt(1.0-1.0/tau) + 1.0);\n"] <>
+                        "}\n" <>
+                        ampCall <> " * (1. + delta_hAA2loopQCD(theta));\n"
+                     ] <> "}\n" <>
                     "else {\n" <>
                     TextFormatting`IndentText[
-                    ampCall <> ";"
-                    ] <> "\n}\n",
+                    ampCall <> ";\n"
+                    ] <> "}\n",
                     "\n" <> ampCall <> ";\n"
                   ];
      ];
