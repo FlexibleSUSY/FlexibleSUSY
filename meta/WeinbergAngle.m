@@ -377,10 +377,9 @@ RhoHatTree[]:=
            Zmass2unmixed = UnmixedZMass2[];
            Zmass2mixed = FindMassZ2[TreeMasses`GetUnmixedParticleMasses[] /.
                                        Parameters`ApplyGUTNormalization[]];
-           (* The last replacement fixes vev issue during usage of Utils`DumpStart *)
            expr = Simplify[RhoZero[] Zmass2unmixed / Zmass2mixed /.
                               SARAH`Weinberg -> ExpressWeinbergAngleInTermsOfGaugeCouplings[],
-                           SARAH`hyperchargeCoupling > 0 && SARAH`leftCoupling > 0] /. (x_)[{_}] :> x;
+                           SARAH`hyperchargeCoupling > 0 && SARAH`leftCoupling > 0];
            result = Parameters`CreateLocalConstRefs[expr] <> "\n";
            result = result <> "rhohat_tree = ";
            result = result <> CConversion`RValueToCFormString[expr] <> ";";

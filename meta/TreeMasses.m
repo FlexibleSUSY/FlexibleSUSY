@@ -1008,8 +1008,7 @@ GetMixingMatrixSymbol[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[3]];
 
 GetMassEigenstate[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[2]];
 
-(* The last replacement fixes vev issue during usage of Utils`DumpStart *)
-GetMassMatrix[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[1]] /. (x_)[{_}] :> x;
+GetMassMatrix[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[1]];
 
 MakeESSymbol[p_List] := Symbol[StringJoin[ToString /@ p]];
 MakeESSymbol[FlexibleSUSY`M[p_List]] := FlexibleSUSY`M[MakeESSymbol[p]];
