@@ -598,10 +598,12 @@ Module[
 
       definitionsHash = FileHash@fileDef;
       sarahHash = Hash[FileHash /@ sarahFiles];
+      himalayaHash = FileHash@FindFile@"Himalaya`";
+      fsHash = FileHash@FindFile@"FlexibleSUSY`";
 
       write["Saving hash to " <> fileHash <> " ..."];
       If[FileExistsQ@#, DeleteFile@#] &@ fileHash;
-      Save[fileHash, {definitionsHash, sarahHash}];
+      Save[fileHash, {definitionsHash, sarahHash, himalayaHash, fsHash}];
       write[" done\n"];
    );
 
@@ -611,7 +613,9 @@ Module[
       Get@fileHash;
 
       If[And[definitionsHash === FileHash@fileDef,
-         sarahHash === Hash[FileHash /@ sarahFiles]],
+         sarahHash === Hash[FileHash /@ sarahFiles],
+         himalayaHash === FileHash@FindFile@"Himalaya`",
+         fsHash === FileHash@FindFile@"FlexibleSUSY`"],
 
          Print["Taking definitions from " <> fileDef <> "."];
          DumpGet@fileDef;
