@@ -377,9 +377,10 @@ RhoHatTree[]:=
            Zmass2unmixed = UnmixedZMass2[];
            Zmass2mixed = FindMassZ2[TreeMasses`GetUnmixedParticleMasses[] /.
                                        Parameters`ApplyGUTNormalization[]];
+           (* The last replacement fixes vev issue during usage of Utils`DumpStart *)
            expr = Simplify[RhoZero[] Zmass2unmixed / Zmass2mixed /.
                               SARAH`Weinberg -> ExpressWeinbergAngleInTermsOfGaugeCouplings[],
-                           SARAH`hyperchargeCoupling > 0 && SARAH`leftCoupling > 0];
+                           SARAH`hyperchargeCoupling > 0 && SARAH`leftCoupling > 0] /. (x_)[{_}] :> x;
            result = Parameters`CreateLocalConstRefs[expr] <> "\n";
            result = result <> "rhohat_tree = ";
            result = result <> CConversion`RValueToCFormString[expr] <> ";";
@@ -949,7 +950,7 @@ GetNeutrinoIndex[] :=
                             GetWPlusBoson[]][SARAH`PL];
            (*follow vertex conventions:*)
            coupl = Vertices`SortCp[coupl];
-           (*omit a possible minus sign:*)   
+           (*omit a possible minus sign:*)
            If[MatchQ[coupl, Times[-1, _]], coupl = -coupl];
            coupl = SelfEnergies`CreateCouplingSymbol[coupl];
            For[k = 0, k <= 2, k++,

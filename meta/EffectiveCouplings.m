@@ -502,8 +502,9 @@ CreateEffectiveCouplingPrototype[coupling_] :=
 GetEffectiveVEV[] :=
     Module[{vev, parameters = {}, result = ""},
            If[SARAH`SupersymmetricModel,
+              (* The last replacement fixes vev issue during usage of Utils`DumpStart *)
               vev = Simplify[2 Sqrt[-SARAH`Vertex[{SARAH`VectorW, Susyno`LieGroups`conj[SARAH`VectorW]}][[2,1]]
-                           / SARAH`leftCoupling^2] /. SARAH`sum[a_,b_,c_,d_] :> Sum[d,{a,b,c}]];
+                           / SARAH`leftCoupling^2] /. SARAH`sum[a_,b_,c_,d_] :> Sum[d,{a,b,c}]] /. (x_)[{_}] :> x;
               vev = Parameters`DecreaseIndexLiterals[vev];
               parameters = Parameters`FindAllParameters[vev];
               result = "const auto vev = " <> CConversion`RValueToCFormString[vev] <> ";\n";,

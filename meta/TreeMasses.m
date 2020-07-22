@@ -307,11 +307,11 @@ IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
     MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], FSAntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
-	includeColourIndices -> False}]] := 
+	includeColourIndices -> False}]] :=
 	Module[{fieldInfo = Cases[SARAH`Particles[FlexibleSUSY`FSEigenstates],
 		{SARAH`getParticleName @ field, ___}][[1]]},
 		fieldInfo = DeleteCases[fieldInfo, {SARAH`generation, 1}, {2}];
-		
+
 		fieldInfo = If[!OptionValue[includeLorentzIndices],
 			DeleteCases[fieldInfo, {SARAH`lorentz, _}, {2}],
 			fieldInfo];
@@ -1008,7 +1008,8 @@ GetMixingMatrixSymbol[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[3]];
 
 GetMassEigenstate[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[2]];
 
-GetMassMatrix[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[1]];
+(* The last replacement fixes vev issue during usage of Utils`DumpStart *)
+GetMassMatrix[massMatrix_TreeMasses`FSMassMatrix] := massMatrix[[1]] /. (x_)[{_}] :> x;
 
 MakeESSymbol[p_List] := Symbol[StringJoin[ToString /@ p]];
 MakeESSymbol[FlexibleSUSY`M[p_List]] := FlexibleSUSY`M[MakeESSymbol[p]];
