@@ -32,7 +32,7 @@ SARAH`SARAH[InputDirectories] = {
     ToFileName[{$sarahDir, "Models"}]
 };
 
-Start["SM"];
+DumpStart["SM"];
 
 modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
 

@@ -14,7 +14,7 @@ Print["Current working directory: ", workingDirectory];
 Print["SARAH output directory: ", SARAH`SARAH[OutputDirectory]];
 Print["Starting model: ", ToString[HoldForm[Start["@ModelName@"@SubModel@]]]];
 
-Start["@ModelName@"@SubModel@];
+DumpStart["@ModelName@"@SubModel@];
 
 MakeFlexibleSUSY[InputFile -> FileNameJoin[{"@DIR@","FlexibleSUSY.m"}],
                  OutputDirectory -> "@DIR@",

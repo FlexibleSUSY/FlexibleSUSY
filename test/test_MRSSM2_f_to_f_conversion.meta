@@ -34,7 +34,7 @@ SARAH`SARAH[InputDirectories] =
    ToFileName@{$sarahDir, "Models"}
 };
 
-Start@"MRSSM";
+DumpStart@"MRSSM";
 
 modelFile = FileNameJoin@{workingDirectory, "models", "MRSSM2", "FlexibleSUSY.m"};
 
