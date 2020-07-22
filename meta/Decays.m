@@ -1662,7 +1662,7 @@ If[Length@positions =!= 1, Quit[1]];
                          TextFormatting`WrapLines[
                   StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
                   (* renormalization scale *)
-                  "result.m_decay" <>
+                  "ren_scale" <>
                   (* if amplitude is UV divergent, take the finite part *)
                   If[!Last@translation === True, ",\nFinite", ""] <> ")"
                   ],
@@ -1702,22 +1702,14 @@ If[Length@positions =!= 1, Quit[1]];
                              (pos1 = Position[#1, First@fieldsInLoop, 1];
                           pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
                           If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
-                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") != " <> "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <> "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
                           ])&, verticesForFACp]
                           , " &&\n"
                        ]
                        ] <>
                      ") {\n"] <>
                      TextFormatting`IndentText[
-                        "const double tau = Sqr(result.m_decay/(2*mInternal1));\n" <>
-                        "std::complex<double> theta;\n" <>
-                        "if (is_zero(tau)) {\n" <>
-                           TextFormatting`IndentText["theta = 1.0;\n"] <>
-                        "}\n" <>
-                        "else {\n" <>
-                           TextFormatting`IndentText["theta = (std::sqrt(1.0-1.0/tau) - 1.0)/(std::sqrt(1.0-1.0/tau) + 1.0);\n"] <>
-                        "}\n" <>
-                        ampCall <> " * (1. + delta_hAA2loopQCD(theta));\n"
+                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_hAA2loopQCD(result.m_decay, mInternal1, ren_scale));\n"
                      ] <> "}\n" <>
                     "else {\n" <>
                     TextFormatting`IndentText[
@@ -1767,7 +1759,7 @@ If[Length@positions =!= 1, Quit[1]];
                   ToString @ N[cf, 16] <> "}"
             ]
          ] <> ";\n" <>
-         WrapCodeInLoop[indices, functionBody] 
+         WrapCodeInLoop[indices, functionBody]
                ] <>
          "}\n"
       }
@@ -1841,6 +1833,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                 AppendTo[vertices, First@res];
                 body = body <> "\n// FormCalc's Finite variable\n";
                 body = body <>"constexpr double Finite {1.};\n";
+                body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
              ];
