@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["NPointFunctions`", {"SARAH`"}];
+BeginPackage["NPointFunctions`", {"SARAH`", "Utils`"}];
 
 CreateFAModelFile::usage=
 "@brief Create the FeynArts model file using SARAH`.`MakeFeynArts[].
@@ -30,15 +30,15 @@ CreateFAModelFile::usage=
 @param eigenstates the option to forward to SARAH`.`MakeFeynArts[]
 @note Effectively Private function hence there are no checks for input";
 
-Begin["`Private`"];
+Begin["`internal`"];
 
-CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, 
+CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_,
    eigenstates_] :=
 (
    SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;
    SARAH`SARAH@SARAH`OutputDirectory = sarahOutputDir;
-   SARAH`Start@sarahModelName;
-   SA`CurrentStates = eigenstates; 
+   Quiet[Utils`DumpStart@sarahModelName];
+   SA`CurrentStates = eigenstates;
    SARAH`InitVertexCalculation[eigenstates, False];
    SARAH`partDefinition = SARAH`ParticleDefinitions@eigenstates;
    SARAH`Particles@SARAH`Current = SARAH`Particles@eigenstates;
