@@ -1687,8 +1687,8 @@ If[Length@positions =!= 1, Quit[1]];
 
                   (* in some cases, we apply higher order corrections at the level of amplitude *)
                   If[
-                     (* for h -> gamma gamma *)
-                     GetHiggsBoson[] === First@diagram && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]) &&
+                     (* for H/A -> gamma gamma *)
+                     (GetHiggsBoson[] === First@diagram || GetPseudoscalarHiggsBoson[] === First@diagram) && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]) &&
                      (* CP conserving Higgs sector *)
                      !SA`CPViolationHiggsSector &&
                      (* the quark loop amplitude *)
@@ -1709,7 +1709,7 @@ If[Length@positions =!= 1, Quit[1]];
                        ] <>
                      ") {\n"] <>
                      TextFormatting`IndentText[
-                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_hAA2loopQCD(result.m_decay, mInternal1, ren_scale));\n"
+                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA2loopQCD(result.m_decay, mInternal1, ren_scale));\n"
                      ] <> "}\n" <>
                     "else {\n" <>
                     TextFormatting`IndentText[

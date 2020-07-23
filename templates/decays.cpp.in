@@ -150,6 +150,31 @@ std::complex<double> delta_hAA2loopQCD(double mH, double mq, double mu) noexcept
    return (F0HC1H + F0HC2H*std::log(Sqr(mu/mq)))/F0H;
 }
 
+// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> delta_AhAA2loopQCD(double mH, double mq, double mu) noexcept {
+   const double tau = Sqr(mH/(2.*mq));
+   const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
+   const std::complex<double> ln = std::log(z);
+   const std::complex<double> li2p = dilog(z);
+   const std::complex<double> li2m = dilog(-z);
+   const std::complex<double> li3p = trilog(z);
+   const std::complex<double> li3m = trilog(-z);
+   const std::complex<double> li4p = Li4(z);
+   const std::complex<double> li4m = Li4(-z);
+
+   const std::complex<double> F0A = f(tau)/tau;
+
+   const std::complex<double> F0AC1A =
+      - z*(1.+Sqr(z))/(Cube(1.-z)*(1.+z))*(72.*li4p + 96.*li4m - 128./3.*(li3p + li3m)*ln
+            + 28./3.*li2p*Sqr(ln) + 16./3.*li2m*Sqr(ln) + 1./18.*Power4(ln)
+            + 8./3.*zeta2*Sqr(ln) + 32./3.*zeta3*ln + 12.*zeta4)
+      + z/Sqr(1.-z)*(-56./.3*li3p - 64./3.*li3m + 16.*li2p*ln
+            + 32./3*li2m*ln + 20./3.*std::log(1.-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
+      + 2.*z*(1.+z)/(3.*Cube(1.-z))*Cube(ln);
+   const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));
+
+   return (F0AC1A + F0AC2A*std::log(Sqr(mu/mq)))/F0A;
+}
 
 /* 1-loop BSM amplitudes
  *
