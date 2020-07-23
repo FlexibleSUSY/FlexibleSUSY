@@ -38,6 +38,7 @@
 #include "spectrum_generator_settings.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
+@decaysIncludes@
 
 #include <mathlink.h>
 #include "mathlink_utils.hpp"

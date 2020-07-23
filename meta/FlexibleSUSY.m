@@ -2566,7 +2566,8 @@ ExampleDecaysIncludes[] :=
        ("#include \"" <> # <> "\"")& /@ {
          FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays_problems.hpp",
-         FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp"},
+         FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
+         "loop_libraries/loop_library.hpp"},
        "\n"
     ];
 
@@ -2693,7 +2694,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            calculateDecaysMessages = "", calculateDecaysExample = ""},
+            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = ""},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2734,6 +2735,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
+              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\""
              ];
            WriteOut`ReplaceInFiles[files,
                           { "@numberOfInputParameters@" -> ToString[numberOfInputParameters],
@@ -2765,6 +2767,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                             "@loadCalculateDecaysFunction@" -> loadCalculateDecaysFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
+                            "@decaysIncludes@" -> decaysIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
