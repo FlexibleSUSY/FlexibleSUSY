@@ -588,8 +588,8 @@ Module[
       If[FileExistsQ@#, DeleteFile@#] &@ fileDef;
       DumpSave[fileDef,
          {
-            "Himalaya`", "FlexibleSUSY`", "Model`","Global`", "SA`", "SARAH`", "SPheno`",
-            "Susyno`LieGroups`"
+            "Himalaya`", "Model`","Global`", "SA`", "SARAH`", "SPheno`",
+            "Susyno`LieGroups`", "FlexibleSUSY`"
          }
       ];
       write[" done\n"];
