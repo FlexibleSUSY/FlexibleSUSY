@@ -34,10 +34,12 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_info.hpp"
-#include "one_loop_decay_diagrams.hpp"
+#include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
-#include "decay_loop_functions.hpp"
+#include "decays/decay_loop_functions.hpp"
 #include "dilog.hpp"
+#include "trilog.hpp"
+#include "Li4.hpp"
 #include "config.h"
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
@@ -101,6 +103,78 @@ double get_alphas(context_base const&  context)
 double get_alpha(context_base const&  context)
 {
    return Sqr(unit_charge(context))/(4.*Pi);
+}
+
+std::complex<double> f(double tau) {
+   if (tau <= 1) {
+      return Sqr(std::asin(std::sqrt(tau)));
+   }
+   else {
+      return -0.25*(std::log((1.+std::sqrt(1.+1./tau))/(1.+std::sqrt(1.-1./tau))) - 1i*Pi);
+   }
+}
+std::complex<double> fprime(double tau) {
+   if (tau <= 1) {
+      return std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
+   }
+   else {
+      return 0.5*1i*(Pi + 1i*std::log(-1. + 2.*std::sqrt(-1. + tau)*std::sqrt(tau) + 2.*tau))/
+             (std::sqrt(-1. + tau)*std::sqrt(tau));
+   }
+}
+
+// eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> delta_hAA2loopQCD(double mH, double mq, double mu) noexcept
+{
+   const double tau = Sqr(mH/(2.*mq));
+   const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
+   const std::complex<double> ln = std::log(z);
+   const std::complex<double> li2p = dilog(z);
+   const std::complex<double> li2m = dilog(-z);
+   const std::complex<double> li3p = trilog(z);
+   const std::complex<double> li3m = trilog(-z);
+   const std::complex<double> li4p = Li4(z);
+   const std::complex<double> li4m = Li4(-z);
+
+   const std::complex<double> F0H = 3./(2.*Sqr(tau))*(tau+(tau-1.)*f(tau));
+
+   const std::complex<double> F0HC1H =
+      - z*(1. + z + Sqr(z) + Cube(z))/Power5(1.-z) * (108.*li4p + 144.*li4m - 64.*li3p*ln
+            - 64.*li3m*ln + 14.*li2p*Sqr(ln) + 8.*li2m*Sqr(ln) + 1./12.*Power4(ln)
+            + 4.*zeta2*Sqr(ln) + 16.*zeta3*ln + 18.*zeta4)
+      + z*Sqr(1+z)/Power4(1.-z) * (-32.*li3m + 16.*li2m*ln - 4.*zeta2*ln)
+      - 4.*z*(7.-2*z+7*Sqr(z))/Power4(1.-z)*li3p + 8.*z*(3.-2*z+3*Sqr(z))/Power4(1.-z)*li2p*ln
+      + 2.*z*(5.-6.*z+5.*Sqr(z))/Power4(1.-z)*std::log(1.-z)*Sqr(ln) + z*(3.+25.*z-7.*Sqr(z)+3.*Cube(z))/(3.*Power5(1.-z))*Cube(ln)
+      + 4.*z*(1.-14.*z+Sqr(z))/Power4(1.-z)*zeta3 + 12.*Sqr(z)/Power4(1.-z)*Sqr(ln) - 12.*z*(1.+z)/Power3(1.-z)*ln - 20.*z/Sqr(1.-z);
+   const std::complex<double> F0HC2H = 3./Sqr(tau)*(tau+(tau-2.)*f(tau) - (tau-1.)*tau*fprime(tau));
+
+   return (F0HC1H + F0HC2H*std::log(Sqr(mu/mq)))/F0H;
+}
+
+// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> delta_AhAA2loopQCD(double mH, double mq, double mu) noexcept {
+   const double tau = Sqr(mH/(2.*mq));
+   const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
+   const std::complex<double> ln = std::log(z);
+   const std::complex<double> li2p = dilog(z);
+   const std::complex<double> li2m = dilog(-z);
+   const std::complex<double> li3p = trilog(z);
+   const std::complex<double> li3m = trilog(-z);
+   const std::complex<double> li4p = Li4(z);
+   const std::complex<double> li4m = Li4(-z);
+
+   const std::complex<double> F0A = f(tau)/tau;
+
+   const std::complex<double> F0AC1A =
+      - z*(1.+Sqr(z))/(Cube(1.-z)*(1.+z))*(72.*li4p + 96.*li4m - 128./3.*(li3p + li3m)*ln
+            + 28./3.*li2p*Sqr(ln) + 16./3.*li2m*Sqr(ln) + 1./18.*Power4(ln)
+            + 8./3.*zeta2*Sqr(ln) + 32./3.*zeta3*ln + 12.*zeta4)
+      + z/Sqr(1.-z)*(-56./.3*li3p - 64./3.*li3m + 16.*li2p*ln
+            + 32./3*li2m*ln + 20./3.*std::log(1.-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
+      + 2.*z*(1.+z)/(3.*Cube(1.-z))*Cube(ln);
+   const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));
+
+   return (F0AC1A + F0AC2A*std::log(Sqr(mu/mq)))/F0A;
 }
 
 /* 1-loop BSM amplitudes
@@ -194,43 +268,51 @@ double CLASSNAME::get_partial_width<H, G, G>(
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
    // higher order corrections to CP-even Higgs
+   // in models with CP-violating Higgs sector H multiplet contains
+   // both H and A states, while the corrections below apply only to H.
+   // Hence the if.
    if (!info::is_CP_violating_Higgs_sector) {
+
       // higher order QCD corrections
 
-      // number of active light flavours
-      unsigned int Nf;
+
       const double mtpole {qedqcd.displayPoleMt()};
-      if (mH > 5 && mH < mtpole) {
-         Nf = 5;
-      } else if (mH > mtpole) {
-         Nf = 6;
-      } else {
-         throw;
-      }
+      // the analytic form o corrections is valid in mH/(2.*mtpole) -> 0
+      if (mH/(2.*mtpole) < 0.4) {
+         // number of active light flavours
+         unsigned int Nf;
+         if (mH > 5 && mH < mtpole) {
+            Nf = 5;
+         } else if (mH > mtpole) {
+            Nf = 6;
+         } else {
+            throw;
+         }
 
-      // NLO, NNLO - eq. 11 of hep-ph/9705240
-      const double deltaNLO {95./4. - 7./6.*Nf};
+         // NLO, NNLO - eq. 11 of hep-ph/9705240
+         const double deltaNLO {95./4. - 7./6.*Nf};
 
-      const double log_mH2OverMT2 {std::log(Sqr(mH/mtpole))};
+         const double log_mH2OverMT2 {std::log(Sqr(mH/mtpole))};
 
-      const double deltaNNLO {
-         149533./288. - 363./8.*zeta2 - 495./8.*zeta3 + 19./8.*log_mH2OverMT2
-               + Nf*(-4157./72 + 11./2.*zeta2 + 5./4.*zeta3 + 2./3.*log_mH2OverMT2)
-               + Nf*Nf*(127./108. - zeta2/6.)
-      };
-      // eq. 4.20 from Adam's thesis
-      const double deltaNNNLO {467.683620788 + 122.440972222*log_mH2OverMT2 + 10.9409722222*Sqr(log_mH2OverMT2)};
+         const double deltaNNLO {
+            149533./288. - 363./8.*zeta2 - 495./8.*zeta3 + 19./8.*log_mH2OverMT2
+                  + Nf*(-4157./72 + 11./2.*zeta2 + 5./4.*zeta3 + 2./3.*log_mH2OverMT2)
+                  + Nf*Nf*(127./108. - zeta2/6.)
+         };
+         // eq. 4.20 from Adam's thesis
+         const double deltaNNNLO {467.683620788 + 122.440972222*log_mH2OverMT2 + 10.9409722222*Sqr(log_mH2OverMT2)};
 
-      const double alpha_s_red = get_alphas(context)/Pi;
+         const double alpha_s_red = get_alphas(context)/Pi;
 
-      switch (include_higher_order_corrections) {
-         case SM_higher_order_corrections::enable:
-            result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
-            break;
-         case SM_higher_order_corrections::disable:
-            break;
-         default:
-            break;
+         switch (include_higher_order_corrections) {
+            case SM_higher_order_corrections::enable:
+               result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+               break;
+            case SM_higher_order_corrections::disable:
+               break;
+            default:
+               break;
+         }
       }
    }
 

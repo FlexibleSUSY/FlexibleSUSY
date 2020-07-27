@@ -22,7 +22,7 @@
 
 #include "@ModelName@_info.hpp"
 
-#include "decay.hpp"
+#include "decays/decay.hpp"
 
 #include <array>
 #include <iosfwd>

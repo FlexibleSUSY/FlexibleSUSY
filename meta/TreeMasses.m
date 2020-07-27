@@ -182,6 +182,7 @@ IsMassless::usage="";
 IsUnmixed::usage="";
 IsQuark::usage="";
 IsLepton::usage="";
+IsPhoton::usage="";
 IsSMChargedLepton::usage="";
 IsSMNeutralLepton::usage="";
 IsSMLepton::usage="";
@@ -511,6 +512,11 @@ IsLepton[SARAH`bar[sym_]] := IsLepton[sym];
 IsLepton[sym_[___]] := IsLepton[sym];
 IsLepton[sym_Symbol] :=
     MemberQ[Complement[GetParticles[], GetColoredParticles[]], sym] && IsFermion[sym] && IsSMParticle[sym];
+
+IsPhoton[Susyno`LieGroups`conj[sym_]] := IsPhoton[sym];
+IsPhoton[SARAH`bar[sym_]] := IsPhoton[sym];
+IsPhoton[sym_[___]] := IsPhoton[sym];
+IsPhoton[field_Symbol] := field === GetPhoton[];
 
 IsSMChargedLepton[Susyno`LieGroups`conj[sym_]] := IsSMChargedLepton[sym];
 IsSMChargedLepton[SARAH`bar[sym_]] := IsSMChargedLepton[sym];

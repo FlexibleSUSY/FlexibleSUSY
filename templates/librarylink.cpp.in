@@ -38,6 +38,7 @@
 #include "spectrum_generator_settings.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
+@decaysIncludes@
 
 #include <mathlink.h>
 #include "mathlink_utils.hpp"
@@ -672,7 +673,9 @@ void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& s
    if (!problems.have_problem() || force_output) {
       slha_io.set_spectrum(models);
       slha_io.set_extra(std::get<0>(models), scales, observables);
-   }@fillDecaysSLHA@
+   }
+
+@fillDecaysSLHA@
 }
 
 /******************************************************************/

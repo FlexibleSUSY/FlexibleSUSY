@@ -641,57 +641,68 @@ Block MSOFT Q= 8.61574711E+02
 
    MSSM_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
-   MSSM_decays decays(m, qedqcd, SM_higher_order_corrections::enable);
+   // -----------------------------------------------------
+   // decays with higher-order SM corrections
+
+   MSSM_decays decays_with_HO(m, qedqcd, SM_higher_order_corrections::enable);
 
    // scalar Higgs
 
    // ------------ tree-level decays ------------
 
    // h -> b bbar
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
                               0.0016298093732297074, 3e-13);
    // h -> tau+ tau-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.0002600448772469762, 3e-13);
    // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_conjVWmVWm(&m, 0),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
                               0.00022767000236269188, 2e-12);
    // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m, 0),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               1.6116438957094875e-05, 3e-12);
 
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00015442075031863592, 2e-10);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 9e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 3.2717635916980618e-06, 9e-11);
 
    // pseudoscalar Higgs
 
    // ------------ tree-level decays ------------
 
-   // h -> b bbar
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
+   // Ah -> b bbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
                               0.76567862493067118, 4e-13);
-   // h -> tau+ tau-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
+   // Ah -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
                               0.14217577420945629, 4e-13);
-   // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_conjVWmVWm(&m, 1),
+   // Ah -> W+ W-
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_conjVWmVWm(&m, 1),
                               3.92679593098481e-05, 2e-12);
-   // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VZVZ(&m, 1),
+   // Ah -> Z Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VZVZ(&m, 1),
                               1.0275363926856272e-05, 2e-12);
 
    // ------------ loop-induces decays ------------
 
-   // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VGVG(&m, 1), 0.00069973676532247917, 7e-13);
+   // Ah -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057267442186, 3e-13);
+   // Ah -> gamma gamma
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 6.1372679254020265e-06, 4e-12);
+   // Ah -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVZ(&m, 1), 1.0128224862285261e-05, 2e-11);
+
+   // -----------------------------------------------------
+   // decays without higher-order SM corrections
+
+   MSSM_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
+
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VPVP(&m, 1), 4.8001690139837537e-06, 4e-12);
-   // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_Ah_to_VPVZ(&m, 1), 1.0128224862285261e-05, 2e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 6.5333738573774704e-06, 4e-11);
 }

@@ -258,30 +258,62 @@ Block UERMIX
 
    THDMII_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
-   THDMII_decays decays(m, qedqcd, SM_higher_order_corrections::enable);
+   // -----------------------------------------------------
+   // decays with higher-order SM corrections
+
+   THDMII_decays decays_with_HO(m, qedqcd, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 
    // h -> b bbar
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
                               0.00078624320962414611, 2e-15);
    // h -> tau+ tau-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.8811709644693243e-05, 1e-15);
    // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_conjVWmVWm(&m, 0),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
                               0.00077464947934456846, 1e-14);
    // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VZVZ(&m, 0),
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               8.3396512232490906e-05, 2e-14);
 
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VGVG(&m, 0), 0.00039046196869208178, 3e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00039046196869208178, 4e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVP(&m, 0), 9.9357276197179806e-06, 3e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 9.6979699437322999e-06, 3e-12);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_VPVZ(&m, 0), 6.3818951172675953e-06, 8e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.3818951172675953e-06, 8e-12);
+
+   // -----------------------------------------------------
+   // decays without higher-order SM corrections
+
+   THDMII_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
+
+   // ------------ tree-level decays ------------
+
+   // h -> b bbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
+                              0.00078624320962414611, 2e-15);
+   // h -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
+                              7.8811709644693243e-05, 1e-15);
+   // h -> W+ W-
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
+                              0.00077464947934456846, 1e-14);
+   // h -> Z Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VZVZ(&m, 0),
+                              8.3396512232490906e-05, 2e-14);
+
+   // ------------ loop-induces decays ------------
+
+   // h -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020488527576778421, 4e-13);
+   // h -> gamma gamma
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 9.9357276197179806e-06, 3e-12);
+   // h -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 6.3818951172675953e-06, 8e-12);
 
 }

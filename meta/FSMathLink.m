@@ -238,7 +238,7 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
                        "(const softsusy::QedQcd&) override;\n";
            args = "const softsusy::QedQcd& qedqcd";
-           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd);\n" <>
+           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);\n" <>
                   "decays.calculate_decays();\n";
            function = "template <typename Solver_type>\n" <>
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
@@ -249,13 +249,25 @@ CreateSpectrumDecaysCalculation[modelName_] :=
            {prototype, function}
           ];
 
-CreateModelDecaysCalculation[] :=
+CreateModelDecaysCalculation[modelName_] :=
     Module[{prototype = "", body = "", function = ""},
            prototype = "void " <> CreateModelDecaysCalculationName[] <> "();\n";
            body = "check_spectrum_pointer();\n" <>
+                  "const bool loop_library_for_decays =\n" <>
+                  TextFormatting`IndentText[
+                     "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                     "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                  ] <>
                   "if (settings.get(Spectrum_generator_settings::calculate_decays)) {\n" <>
+                     TextFormatting`IndentText[
+                        "if (loop_library_for_decays) {\n" <>
                   TextFormatting`IndentText["spectrum->" <> CreateSpectrumDecaysCalculationName[] <>
-                                            "(qedqcd);\n"] <> "}\n";
+                                            "(qedqcd);\n"] <> "}\n" <>
+                        "else if (!loop_library_for_decays) {\n" <>
+                           TextFormatting`IndentText[
+         "WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");\n"
+                           ] <> "}\n"
+                        ] <> "}\n";
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
                       TextFormatting`IndentText[body] <> "}\n";
@@ -263,14 +275,18 @@ CreateModelDecaysCalculation[] :=
           ];
 
 FillDecaysSLHAData[] :=
-    Module[{result = ""},
-           result = "const auto& decays_problems = decays.get_problems();\n" <>
-                    "slha_io.set_dcinfo(decays_problems);\n" <>
-                    "if (!decays_problems.have_problem() || force_output) {\n" <>
-                    TextFormatting`IndentText["slha_io.set_decays(decays.get_decay_table());\n"] <>
-                    "}";
-           "\n\n" <> result
-          ];
+    "const auto& decays_problems = decays.get_problems();\n" <>
+    "const bool loop_library_for_decays =\n" <>
+    TextFormatting`IndentText[
+      "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+      "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+    ] <>
+    "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
+    TextFormatting`IndentText[
+       "slha_io.set_dcinfo(decays_problems);\n" <>
+       "slha_io.set_decays(decays.get_decay_table());\n"
+    ] <>
+    "}";
 
 PutDecaysFunctionName[] := "put_decays";
 

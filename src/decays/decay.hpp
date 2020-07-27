@@ -20,7 +20,7 @@
 #define DECAY_H
 
 #include <initializer_list>
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -58,7 +58,8 @@ std::size_t hash_decay(const Decay& decay);
 
 class Decays_list {
 private:
-   using List_type = std::unordered_map<std::size_t, Decay>;
+   /* map is slower than unordered_map but will preserve order of etries */
+   using List_type = std::map<std::size_t, Decay>;
 public:
    using iterator = List_type::iterator;
    using const_iterator = List_type::const_iterator;
@@ -93,7 +94,7 @@ public:
 
 private:
    int initial_pdg{0};
-   std::unordered_map<std::size_t, Decay> decays{};
+   List_type decays{};
    double total_width{0.};
 };
 

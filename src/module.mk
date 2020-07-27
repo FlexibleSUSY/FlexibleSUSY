@@ -14,15 +14,18 @@ LIBFLEXI_SRC := \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/coupling_monitor.cpp \
 		$(DIR)/database.cpp \
-		$(DIR)/decay.cpp \
-		$(DIR)/decay_amplitudes.cpp \
-		$(DIR)/decay_loop_functions.cpp \
+		$(DIR)/decays/decay.cpp \
+		$(DIR)/decays/decay_amplitudes.cpp \
+		$(DIR)/decays/decay_loop_functions.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
+		$(DIR)/gsl_multimin_fminimizer.cpp \
+		$(DIR)/gsl_multiroot_fsolver.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/Li4.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/loop_libraries/library_softsusy.cpp \
 		$(DIR)/lowe.cpp \
@@ -31,7 +34,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
-		$(DIR)/one_loop_decay_diagrams.cpp \
+		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/observables.cpp \
 		$(DIR)/observable_problems.cpp \
 		$(DIR)/observable_problems_format.cpp \
@@ -71,11 +74,11 @@ LIBFLEXI_HDR := \
 		$(DIR)/convergence_tester_drbar.hpp \
 		$(DIR)/coupling_monitor.hpp \
 		$(DIR)/database.hpp \
-		$(DIR)/decay.hpp \
-		$(DIR)/decay_amplitudes.hpp \
-		$(DIR)/decays_loop_corrections.hpp \
-		$(DIR)/decay_loop_functions.hpp \
-		$(DIR)/decays_problems.hpp \
+		$(DIR)/decays/decay.hpp \
+		$(DIR)/decays/decay_amplitudes.hpp \
+		$(DIR)/decays/decays_loop_corrections.hpp \
+		$(DIR)/decays/decay_loop_functions.hpp \
+		$(DIR)/decays/decays_problems.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
 		$(DIR)/effective_couplings.hpp \
@@ -91,8 +94,11 @@ LIBFLEXI_HDR := \
 		$(DIR)/global_thread_pool.hpp \
 		$(DIR)/gm2calc_interface.hpp \
 		$(DIR)/gsl.hpp \
+		$(DIR)/gsl_multimin_fminimizer.hpp \
+		$(DIR)/gsl_multiroot_fsolver.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
+		$(DIR)/Li4.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \
@@ -108,7 +114,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
-		$(DIR)/one_loop_decay_diagrams.hpp \
+		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/observables.hpp \
 		$(DIR)/observable_problems.hpp \
 		$(DIR)/observable_problems_format.hpp \

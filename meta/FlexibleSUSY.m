@@ -2564,16 +2564,17 @@ RunCmdLineEnabledSpectrumGenerator[solver_] :=
 ExampleDecaysIncludes[] :=
     Utils`StringJoinWithSeparator[
        ("#include \"" <> # <> "\"")& /@ {
-         FlexibleSUSY`FSModelName <> "_decays.hpp",
-         "decays_problems.hpp",
-         FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp"},
+         "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
+         "decays/decays_problems.hpp",
+         FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
+         "loop_libraries/loop_library.hpp"},
        "\n"
     ];
 
 ExampleCalculateDecaysForModel[] :=
 "const bool loop_library_for_decays =
     (Loop_library::get_type() == Loop_library::Library::Collier) ||
-    (Loop_library::get_type() == Loop_library::Library::Looptools);" <>
+    (Loop_library::get_type() == Loop_library::Library::Looptools);\n" <>
 FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
 if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (loop_library_for_decays) {
@@ -2588,8 +2589,8 @@ ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
    spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
 
-slha_io.set_dcinfo(decays.get_problems());
-if (show_decays) {
+if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) && loop_library_for_decays) {
+   slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table());
 }";
 
@@ -2693,7 +2694,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            calculateDecaysMessages = "", calculateDecaysExample = ""},
+            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = ""},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2724,7 +2725,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               {calculateSpectrumDecaysPrototype, calculateSpectrumDecaysFunction} =
                   FSMathLink`CreateSpectrumDecaysCalculation[FlexibleSUSY`FSModelName];
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =
-                  FSMathLink`CreateModelDecaysCalculation[];
+                  FSMathLink`CreateModelDecaysCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
               {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
@@ -2734,6 +2735,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
+              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\""
              ];
            WriteOut`ReplaceInFiles[files,
                           { "@numberOfInputParameters@" -> ToString[numberOfInputParameters],
@@ -2765,6 +2767,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                             "@loadCalculateDecaysFunction@" -> loadCalculateDecaysFunction,
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
+                            "@decaysIncludes@" -> decaysIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -2905,7 +2908,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
               setDecaysFunctions = WriteOut`CreateSetDecaysFunctions[FlexibleSUSY`FSModelName];
               fillDecaysDataPrototypes = WriteOut`CreateFillDecaysDataPrototypes[FlexibleSUSY`FSModelName];
               fillDecaysDataFunctions = WriteOut`CreateFillDecaysDataFunctions[FlexibleSUSY`FSModelName];
-              decaysHeaderIncludes = Utils`StringJoinWithSeparator[("#include \"" <> # <> "\"")& /@ decaysSLHAIncludeFiles, "\n"];
+              decaysHeaderIncludes = Utils`StringJoinWithSeparator[("#include \"decays/" <> # <> "\"")& /@ decaysSLHAIncludeFiles, "\n"];
               useDecaysData = "fill_decays_data(*decays);"
              ];
            getPDGCodeFromParticleEnumNoIndex = Parameters`CreatePDGCodeFromParticleCases[particles];
@@ -4782,25 +4785,26 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               decaysFinalStateParticles = Decays`CreateCompleteParticleList[Select[TreeMasses`GetParticles[], !TreeMasses`IsGhost[#]&]];
 
               If[FlexibleSUSY`DecayParticles =!= {},
-                 decaysSources = Join[decaysSources, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
-                                                      FileNameJoin[{FlexibleSUSY`FSModelName <> "_decays.cpp"}]}
+                 With[{dir=FileNameJoin[{FSOutputDir, "decays"}]}, If[!DirectoryQ[dir], CreateDirectory[dir]]];
+                 decaysSources = Join[decaysSources, {FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
+                                                      FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]}
                                                       ];
-                 decaysHeaders = Join[decaysHeaders, {FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_table.hpp"}],
-                                                      FileNameJoin[{FlexibleSUSY`FSModelName <> "_decays.hpp"}],
-                                                      FileNameJoin[{FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
+                 decaysHeaders = Join[decaysHeaders, {FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_table.hpp"}],
+                                                      FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.hpp"}],
+                                                      FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
 
                                                       ];
                  decaysVertices = WriteDecaysClass[FlexibleSUSY`DecayParticles, decaysFinalStateParticles,
-                                                   {{FileNameJoin[{$flexiblesusyTemplateDir, "decay_table.hpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_decay_table.hpp"}]},
-                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decay_table.cpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_decay_table.cpp"}]},
-                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays.hpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_decays.hpp"}]},
-                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays.cpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_decays.cpp"}]},
-                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decay_amplitudes.hpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
+                                                   {{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_table.hpp.in"}],
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_table.hpp"}]},
+                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_table.cpp.in"}],
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_table.cpp"}]},
+                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decays.hpp.in"}],
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decays.hpp"}]},
+                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decays.cpp.in"}],
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]},
+                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_amplitudes.hpp.in"}],
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
                                                    }];
                  ,
                  Print["Skipping calculating decays as no particles to calculate decays for were found."];
@@ -4814,8 +4818,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
              ]; (* If[FSCalculateDecays] *)
 
            WriteDecaysMakefileModule[decaysSources, decaysHeaders,
-                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "FlexibleDecays.mk.in"}],
-                                          FileNameJoin[{FSOutputDir, "FlexibleDecays.mk"}]}}
+                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
+                                          FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}}
                                     ];
 
            Utils`PrintHeadline["Creating other observables"];
