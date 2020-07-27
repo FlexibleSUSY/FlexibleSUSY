@@ -34,7 +34,7 @@
 
 #include "@ModelName@_decays.hpp"
 #include "@ModelName@_info.hpp"
-#include "one_loop_decay_diagrams.hpp"
+#include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
 #include "dilog.hpp"
 #include "trilog.hpp"

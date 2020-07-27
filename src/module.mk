@@ -14,8 +14,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/coupling_monitor.cpp \
 		$(DIR)/database.cpp \
-		$(DIR)/decay.cpp \
-		$(DIR)/decay_amplitudes.cpp \
+		$(DIR)/decays/decay.cpp \
+		$(DIR)/decays/decay_amplitudes.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
@@ -33,7 +33,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
-		$(DIR)/one_loop_decay_diagrams.cpp \
+		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/observables.cpp \
 		$(DIR)/observable_problems.cpp \
 		$(DIR)/observable_problems_format.cpp \
@@ -73,10 +73,10 @@ LIBFLEXI_HDR := \
 		$(DIR)/convergence_tester_drbar.hpp \
 		$(DIR)/coupling_monitor.hpp \
 		$(DIR)/database.hpp \
-		$(DIR)/decay.hpp \
-		$(DIR)/decay_amplitudes.hpp \
-		$(DIR)/decays_loop_corrections.hpp \
-		$(DIR)/decays_problems.hpp \
+		$(DIR)/decays/decay.hpp \
+		$(DIR)/decays/decay_amplitudes.hpp \
+		$(DIR)/decays/decays_loop_corrections.hpp \
+		$(DIR)/decays/decays_problems.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
 		$(DIR)/effective_couplings.hpp \
@@ -112,7 +112,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
-		$(DIR)/one_loop_decay_diagrams.hpp \
+		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/observables.hpp \
 		$(DIR)/observable_problems.hpp \
 		$(DIR)/observable_problems_format.hpp \

@@ -19,7 +19,7 @@
 #ifndef DECAY_AMPLITUDES_H
 #define DECAY_AMPLITUDES_H
 
-#include "decay_amplitudes.hpp"
+#include "decays/decay_amplitudes.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 namespace flexiblesusy {
