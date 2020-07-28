@@ -418,7 +418,7 @@ Module[
       {lIn,#},{lOut,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
-      NPointFunctions`ZeroExternalMomenta -> If[massless===True, True, NPointFunctions`OperatorsOnly],
+      NPointFunctions`ZeroExternalMomenta -> If[massless===True, NPointFunctions`ExceptLoops, NPointFunctions`OperatorsOnly],
       NPointFunctions`KeepProcesses -> parsedCon] &/@ {SARAH`UpQuark,SARAH`DownQuark};
 
    {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
@@ -437,7 +437,7 @@ Module[
       };
 
    (* @note If ZeroExternalMomenta is set to True, replace p and m to zeroes *)
-   sp[particle:_,num:_Integer] := If[massless===True,SARAH`DiracSpinor[#, 0, 0], SARAH`DiracSpinor[#, p@num, m@#]] &@
+   sp[particle:_,num:_Integer] := If[massless===True, SARAH`DiracSpinor[#, 0, 0], SARAH`DiracSpinor[#, p@num, m@#]] &@
       particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    dim6[i_,o_,q_] := {

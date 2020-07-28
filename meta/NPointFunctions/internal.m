@@ -46,7 +46,7 @@ Off[General::shdw]
    LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses,
 
 
-   DimensionalReduction,DimensionalRegularization,OperatorsOnly,
+   DimensionalReduction,DimensionalRegularization,OperatorsOnly,ExceptLoops,
    (*for further details inspect topologyReplacements*)
    Irreducible,Triangles,FourFermionScalarPenguins,
    FourFermionMassiveVectorPenguins,FourFermionFlavourChangingBoxes
@@ -457,7 +457,7 @@ Module[
    fsFields = Join[fsInFields,fsOutFields];
    externalMomentumRules = Switch[OptionValue@ZeroExternalMomenta,
       True, {SARAH`Mom[_Integer,_] :> 0},
-      False|OperatorsOnly, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}];
+      False|OperatorsOnly|ExceptLoops, {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}];
 
    nPointFunction = {
       {fsInFields, fsOutFields},
@@ -979,16 +979,27 @@ Module[
 
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
 
+   (* << Work with chains *)
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
 
-   If[zeroExternalMomenta === OperatorsOnly,
+   If[zeroExternalMomenta === OperatorsOnly || zeroExternalMomenta === ExceptLoops,
       abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> setChainWithMomentaToZero@ch
    ];
 
    {calculatedAmplitudes,abbreviations} = makeChainsUnique[calculatedAmplitudes,abbreviations];
 
    abbreviations = identifySpinors[abbreviations,ampsGen];
+   (* >> Work with chains *)
+
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
+
+   If[zeroExternalMomenta === ExceptLoops,
+      `current`setZeroMassRules@proc;
+      calculatedAmplitudes = makeMassesZero@calculatedAmplitudes;
+      abbreviations = setZeroExternalMomentaInChains@abbreviations;
+      abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
+      {abbreviations, subexpressions} = makeMassesZero[{abbreviations, subexpressions}];
+   ];
 
    If[zeroExternalMomenta,
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
@@ -1003,6 +1014,54 @@ Module[
       {calculatedAmplitudes, genericInsertions, combinatorialFactors},
       abbreviations, subexpressions]
 ];
+
+`current`zeroMassRules::usage = "
+@brief A static-like variable, which stores the set of nullify rules for
+       external particles.";
+`current`zeroMassRules = {};
+`current`zeroMassRules ~ SetAttributes ~ {Protected};
+
+`current`setZeroMassRules::usage = "
+@brief For a given type of a process creates a set of rules to nullify masses
+       of external particles.
+@param expt A representation of the process under interest.
+@return None.
+@note Explicit names are expected only for external particles.";
+`current`setZeroMassRules[expr:Rule[{{_, _, _, _}..}, {{_, _, _, _}..}]] :=
+Module[
+   {
+      particles = First /@ Flatten[List@@expr, 1],
+      uniqueNames, particleRules, fcRules
+   },
+   uniqueNames = DeleteDuplicates[particles /. (x:_)[i:_Integer, ___] :> x@i];
+   particleRules = FeynArts`M$ClassesDescription /. Equal -> Rule;
+   fcRules = Flatten[{#[_] -> 0, # -> 0} &/@ (FeynArts`Mass /. (uniqueNames /. particleRules))];
+   Unprotect@`current`zeroMassRules;
+   `current`zeroMassRules = Join[(FeynArts`Mass[#] -> 0) &/@ particles, fcRules];
+   Protect@`current`zeroMassRules;
+];
+`current`setZeroMassRules // Utils`MakeUnknownInputDefinition;
+`current`setZeroMassRules ~ SetAttributes ~ {Protected, Locked};
+
+makeMassesZero::usage = "
+@brief Sets the masses of external particles to zero everywhere, except loop
+       integrals.
+@param expr An expression to modify.
+@returns Modified expression.";
+makeMassesZero[expr:_] :=
+Module[
+   {
+      names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
+      pattern, uniqueIntegrals, rules, backRules
+   },
+   pattern = Alternatives @@ ( #[__] &/@ names );
+   uniqueIntegrals = DeleteDuplicates@Cases[expr, pattern, Infinity];
+   rules = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
+   backRules = rules /. Rule[x_, y_] -> Rule[y, x];
+   expr /. rules /. `current`zeroMassRules /. backRules
+];
+makeMassesZero // Utils`MakeUnknownInputDefinition;
+makeMassesZero ~ SetAttributes ~ {Protected, Locked};
 
 getChainsRule::usage="
 @brief Finds a subset of rules inside a List, which represent Dirac chains. It

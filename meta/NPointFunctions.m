@@ -52,7 +52,7 @@ ZeroExternalMomenta::usage=
 "Option for NPointFunctions`NPointFunction[].
 Encodes whether to set the external momenta to zero or leave them undetermined.
 
-def. True | False | OperatorsOnly";
+def. True | False | OperatorsOnly | ExceptLoops";
 OnShellFlag::usage=
 "Option for NPointFunctions`NPointFunction[].
 Use on-shell external fields or not.
@@ -121,7 +121,7 @@ LorentzIndex::usage=
 SetAttributes[
    {
    LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,
-   KeepProcesses,
+   ExceptLoops,KeepProcesses,
    DimensionalReduction,DimensionalRegularization,
    Irreducible,Triangles,
    GenericS,GenericF,GenericV,GenericU,
@@ -444,7 +444,7 @@ Currently DimensionalReduction, DimensionalRegularization are supported.";
 NPointFunction::errUseCache=
 "UseCache must be either True or False.";
 NPointFunction::errZeroExternalMomenta=
-"ZeroExternalMomenta must be True, False or OperatorsOnly.";
+"ZeroExternalMomenta must be True, False, ExceptLoops, OperatorsOnly.";
 NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
 NPointFunction::errKeepProcesses=
@@ -568,7 +568,7 @@ Module[
    Cases[{opts},Rule[UseCache,x_]:>
       aoq[x===True || x===False,NPointFunction::errUseCache]];
    Cases[{opts},Rule[ZeroExternalMomenta,x_]:>
-      aoq[MemberQ[{True,False,OperatorsOnly},x],NPointFunction::errZeroExternalMomenta]];
+      aoq[MemberQ[{True,False,OperatorsOnly,ExceptLoops},x],NPointFunction::errZeroExternalMomenta]];
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    Cases[{opts},Rule[KeepProcesses,x_]:>
