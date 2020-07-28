@@ -2632,11 +2632,17 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
               decaySetttingsOverride =
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
-   !spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
-   spectrum_generator_settings.set(
-      Spectrum_generator_settings::calculate_sm_masses, 1.0);
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+   if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
+      WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
+      spectrum_generator_settings.set(
+         Spectrum_generator_settings::calculate_sm_masses, 1.0);
+   }
+   if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_bsm_masses)) {
+      WARNING(\"Decay module requires BSM pole masses. Setting FlexibleSUSY[23] = 1.\");
+      spectrum_generator_settings.set(
+         Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   }
 }",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
              ];
