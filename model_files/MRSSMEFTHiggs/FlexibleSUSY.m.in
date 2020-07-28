@@ -95,3 +95,5 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{21, FlexibleSUSYObservable`aMuon} } }
 };
+
+FSCalculateDecays = True;
