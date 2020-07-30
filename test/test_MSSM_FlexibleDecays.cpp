@@ -6,7 +6,7 @@
 
 #include "MSSM_two_scale_spectrum_generator.hpp"
 #include "MSSM_two_scale_model.hpp"
-#include "MSSM_decays.hpp"
+#include "decays/MSSM_decays.hpp"
 #include "MSSM_slha_io.hpp"
 
 using namespace flexiblesusy;

@@ -7,7 +7,7 @@
 #include "test_MRSSM2.hpp"
 #include "MRSSM2_two_scale_model.hpp"
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
-#include "MRSSM2_decays.hpp"
+#include "decays/MRSSM2_decays.hpp"
 #include "MRSSM2_slha_io.hpp"
 
 using namespace flexiblesusy;

@@ -8,7 +8,7 @@
 
 #include "test_SM.hpp"
 #include "SM_two_scale_model.hpp"
-#include "SM_decays.hpp"
+#include "decays/SM_decays.hpp"
 
 // #include "wrappers.hpp"
 #include "lowe.h"
