@@ -1688,35 +1688,58 @@ If[Length@positions =!= 1, Quit[1]];
                   (* in some cases, we apply higher order corrections at the level of amplitude *)
                   If[
                      (* for H/A -> gamma gamma *)
-                     (GetHiggsBoson[] === First@diagram || GetPseudoscalarHiggsBoson[] === First@diagram) && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]) &&
-                     (* CP conserving Higgs sector *)
-                     !SA`CPViolationHiggsSector &&
-                     (* the quark loop amplitude *)
-                     Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop]
-                  ,
+                     (GetHiggsBoson[] === First@diagram || GetPseudoscalarHiggsBoson[] === First@diagram) && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]),
+                     If[(* CP conserving Higgs sector *)
+                        !SA`CPViolationHiggsSector &&
+                        (* the quark loop amplitude *)
+                        Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop],
+                        "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                        TextFormatting`IndentText[
+                           Module[{pos1, post2, res},
+                              StringJoin@Riffle[
+                              MapIndexed[
+                              (pos1 = Position[#1, First@fieldsInLoop, 1];
+                              pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                              If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                                 "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
+                                 "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                              ])&, verticesForFACp]," &&\n"]
+                           ] <>
+                           ") {\n"
+                        ] <>
+                        TextFormatting`IndentText[
+                           ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale));\n"
+                        ] <> "}\n" <>
+                        "else {\n" <>
+                        TextFormatting`IndentText[
+                           ampCall <> ";\n"
+                        ] <> "}\n",
+                    If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
                      "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
                      TextFormatting`IndentText[
                        Module[{pos1, post2, res},
                           StringJoin@Riffle[
                           MapIndexed[
                              (pos1 = Position[#1, First@fieldsInLoop, 1];
-                          pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                          pos2 = Position[#1, Susyno`LieGroups`conj[First@fieldsInLoop], 1];
                           If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
-                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <> "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
+                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
                           ])&, verticesForFACp]
                           , " &&\n"
                        ]
                        ] <>
                      ") {\n"] <>
                      TextFormatting`IndentText[
-                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA2loopQCD(result.m_decay, mInternal1, ren_scale));\n"
+                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
                      ] <> "}\n" <>
                     "else {\n" <>
                     TextFormatting`IndentText[
-                    ampCall <> ";\n"
-                    ] <> "}\n",
-                    "\n" <> ampCall <> ";\n"
-                  ];
+                        ampCall <> ";\n"
+                    ] <> "}\"\n", ampCall <> ";\n"
+                    ]
+                  ], ampCall <> ";\n"
+                  ]
      ];
 
       {verticesForFACp,

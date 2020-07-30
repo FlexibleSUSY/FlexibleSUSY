@@ -123,7 +123,7 @@ std::complex<double> fprime(double tau) {
 }
 
 // eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
-std::complex<double> delta_hAA2loopQCD(double mH, double mq, double mu) noexcept
+std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, double mu) noexcept
 {
    const double tau = Sqr(mH/(2.*mq));
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
@@ -151,8 +151,8 @@ std::complex<double> delta_hAA2loopQCD(double mH, double mq, double mu) noexcept
 }
 
 // eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
-std::complex<double> delta_AhAA2loopQCD(double mH, double mq, double mu) noexcept {
-   const double tau = Sqr(mH/(2.*mq));
+std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept {
+   const double tau = Sqr(mAh/(2.*mq));
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
    const std::complex<double> ln = std::log(z);
    const std::complex<double> li2p = dilog(z);
@@ -174,6 +174,32 @@ std::complex<double> delta_AhAA2loopQCD(double mH, double mq, double mu) noexcep
    const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));
 
    return (F0AC1A + F0AC2A*std::log(Sqr(mu/mq)))/F0A;
+}
+
+double delta_AhAA_2loopQCD_for_squark_loop(double mH, double msq, double mu) noexcept {
+   const double r = Sqr(mH/msq);
+   if (r < 0.7) {
+      return 0.;
+   }
+   else if (r > 1.5) {
+      return 0.;
+   }
+   else {
+      return 0.;
+   }
+}
+
+double delta_hAA_2loopQCD_for_squark_loop(double mAh, double msq, double mu) noexcept {
+   const double r = Sqr(mAh/msq);
+   if (r < 0.7) {
+      return 0.;
+   }
+   else if (r > 1.5) {
+      return 0.;
+   }
+   else {
+      return 0.;
+   }
 }
 
 /* 1-loop BSM amplitudes
