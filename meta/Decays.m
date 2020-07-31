@@ -1736,7 +1736,7 @@ If[Length@positions =!= 1, Quit[1]];
                     "else {\n" <>
                     TextFormatting`IndentText[
                         ampCall <> ";\n"
-                    ] <> "}\"\n", ampCall <> ";\n"
+                    ] <> "}\n", ampCall <> ";\n"
                     ]
                   ], ampCall <> ";\n"
                   ]
