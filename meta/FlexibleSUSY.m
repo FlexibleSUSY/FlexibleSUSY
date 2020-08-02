@@ -542,15 +542,10 @@ CheckDecaysOptions[] :=
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
          If[FlexibleSUSY`DecayParticles === All,
             FlexibleSUSY`DecayParticles = TreeMasses`GetParticles[],
-            If[Head[FlexibleSUSY`DecayParticles] =!= List,
-               Print["Warning: FlexibleSUSY`DecayParticles should be set to a ",
-                     "list or Automatic"];
-               FlexibleSUSY`DecayParticles = {},
-               If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles],
-                  Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`DecayParticles, TreeMasses`GetParticles[]],
-                        " which are not part of the model. Removing them."];
-                  FlexibleSUSY`DecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles]
-               ]
+            If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles],
+               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`DecayParticles, TreeMasses`GetParticles[]],
+                     " which are not part of the model. Removing them."];
+               FlexibleSUSY`DecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles]
             ]
          ]
       ]
