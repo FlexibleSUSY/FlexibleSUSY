@@ -673,10 +673,22 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 
 		If[(Times @@ colorMathExpressions) === 1, 1,
 			ColorMathToSARAHConvention[
-            (* RemoveFD converts f and d color structures into a sum of ColorMath`o *)
-				ColorMath`CSimplify[Times @@ colorMathExpressions, RemoveFD -> False]]
+            With[{colorFac = ColorMath`CSimplify[Times @@ colorMathExpressions]},
+               If[!FreeQ[colorFac, Superscript[CMo, {__}]],
+                  (* RemoveFD converts f and d color structures into a sum of ColorMath`o *)
+                  ColorMath`CSimplify[Times @@ colorMathExpressions, RemoveFD -> False],
+                  (* on the other hand, without RemoveFD -> True expression
+                          {ct94450, ct94453}ct94448           {ct94450, ct94453, ct94454}
+                     4 CMt                                 CMf
+                                                   ct94455
+                     is not simplified *)
+                  colorFac
+               ]
+            ]
+         ]
 		]
-	]
+	];
+
 (** \brief Returns the index prefix string for an index of a given type **)
 IndexPrefixForType[SARAH`generation] = "gt";
 IndexPrefixForType[SARAH`lorentz] = "lt";
