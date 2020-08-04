@@ -293,7 +293,8 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
            result
           ];
 
-(* don't generate decays like Fe3 -> Fe1 VP *)
+(* don't generate decays like Fe3 -> Fe1 VP
+   @todo: should we generate them? *)
 IsSelfDecay[initialParticle_, finalState_List] :=
    (MemberQ[finalState, initialParticle] && (MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]]));
 
@@ -1580,7 +1581,6 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             diagram,
              verticesInFieldTypesForFACp
           ];
-
 
       (* vertices in an orientation as required by Cp *)
 (*      vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];*)

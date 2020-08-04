@@ -78,7 +78,7 @@ double Decay_amplitude_SVV::square() const
       const double m_vec_sq = Sqr(m_vector_2);
 
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
-         2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
+         2.*AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
 
       /*
       const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *
@@ -100,7 +100,7 @@ double Decay_amplitude_SVV::square() const
       const double m_vec_sq = Sqr(m_vector_1);
 
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
-         2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
+         2.*AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
 
       /*
       const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *

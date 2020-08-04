@@ -176,6 +176,8 @@ std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, d
    return (F0AC1A + F0AC2A*std::log(Sqr(mu/mq)))/F0A;
 }
 
+/* this functions could be improved to cover all range in r by linking
+ * to CHAPLIN library (https://arxiv.org/abs/1106.5739) */
 double delta_AhAA_2loopQCD_for_squark_loop(double mH, double msq, double mu) noexcept {
    const double r = Sqr(mH/msq);
    if (r < 0.7) {
