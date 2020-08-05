@@ -352,7 +352,15 @@ GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
    Module[{externalFields, diagrams},
            externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]];
-           diagrams = CXXDiagrams`FeynmanDiagramsOfType[graph, externalFields, True];
+           diagrams =
+             CXXDiagrams`FeynmanDiagramsOfType[
+               graph,
+               externalFields,
+               (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
+                  With below argument set to True, charged particles are inserted twice in
+                  such bubble - once as particle and once as antiparticle. *)
+               If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
+             ];
            Select[diagrams, IsPossibleNonZeroDiagram]
           ];
 
@@ -1040,6 +1048,7 @@ FillSSVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            assignments
           ];
 
+(* replace 'physical_mass' with 'mass' to check Ward identity *)
 FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{assignments = ""},
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
@@ -1762,13 +1771,12 @@ If[Length@positions =!= 1, Quit[1]];
              ToString @
                N[With[{topoName = FeynArtsTopologyName[topology]},
 
-                If[MemberQ[{"T4", "T2", "T3", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
-                (* A0 diagrams are generated twice, once with field and once with antifield in the loop, but that's the same for A0 *)
-                If[topoName === "T2" || topoName === "T3" || topoName === "T5", 1/2, 1] *
-                   If[topoName === "T9" || topoName === "T8",
-                     If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
-                     1
-                   ]
+                (* weird FA factor *)
+                If[MemberQ[{"T2", "T3", "T4", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
+                If[topoName === "T9" || topoName === "T8",
+                   If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
+                   1
+                ]
                ],16] <>
          "};\n" <>
 
