@@ -1744,7 +1744,13 @@ If[Length@positions =!= 1, Quit[1]];
                        ] <>
                      ") {\n"] <>
                      TextFormatting`IndentText[
-                        ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
+                        ampCall <> " * (1. + get_alphas(context)/Pi * " <>
+                        ToString@N[Switch[TreeMasses`GetColorRepresentation@First@fieldsInLoop,
+                           T, 4/3,
+                           -T, 4/3,
+                           O, 3,
+                           _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"];Quit[]
+                         ], 16] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
                      ] <> "}\n" <>
                     "else {\n" <>
                     TextFormatting`IndentText[
