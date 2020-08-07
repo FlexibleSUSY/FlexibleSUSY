@@ -1007,13 +1007,13 @@ FillSSSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
     Module[{assignments = ""},
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
-                         " >(idx_1);\n";
+                         ">(idx_1);\n";
            assignments = assignments <> structName <> ".m_scalar_1 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <>
-                         " >(idx_2);\n";
+                         ">(idx_2);\n";
            assignments = assignments <> structName <> ".m_scalar_2 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <>
-                         " >(idx_3);\n";
+                         ">(idx_3);\n";
            assignments
           ];
 
@@ -1040,13 +1040,13 @@ FillSSVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            vectorPos = First[First[Position[finalState, vector]]];
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
-                         " >(idx_1);\n";
+                         ">(idx_1);\n";
            assignments = assignments <> structName <> ".m_scalar = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[scalar] <>
-                         " >(idx_" <> ToString[scalarPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[scalarPos + 1] <> ");\n";
            assignments = assignments <> structName <> ".m_vector = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[vector] <>
-                         " >(idx_" <> ToString[vectorPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[vectorPos + 1] <> ");\n";
            assignments
           ];
 
@@ -1055,13 +1055,13 @@ FillSVVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
     Module[{assignments = ""},
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
-                         " >(idx_1);\n";
+                         ">(idx_1);\n";
            assignments = assignments <> structName <> ".m_vector_1 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[First[GetFinalState[decay]]] <>
-                         " >(idx_2);\n";
+                         ">(idx_2);\n";
            assignments = assignments <> structName <> ".m_vector_2 = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[Last[GetFinalState[decay]]] <>
-                         " >(idx_3);\n";
+                         ">(idx_3);\n";
            assignments
           ];
 
@@ -1074,13 +1074,13 @@ FillFFSDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            scalarPos = First[First[Position[finalState, scalar]]];
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
-                         " >(idx_1);\n";
+                         ">(idx_1);\n";
            assignments = assignments <> structName <> ".m_fermion = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[fermion] <>
-                         " >(idx_" <> ToString[fermionPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[fermionPos + 1] <> ");\n";
            assignments = assignments <> structName <> ".m_scalar = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[scalar] <>
-                         " >(idx_" <> ToString[scalarPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[scalarPos + 1] <> ");\n";
            assignments
           ];
 
@@ -1093,13 +1093,13 @@ FillFFVDecayAmplitudeMasses[decay_FSParticleDecay, modelName_, structName_, para
            vectorPos = First[First[Position[finalState, vector]]];
            assignments = assignments <> structName <> ".m_decay = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[GetInitialState[decay]] <>
-                         " >(idx_1);\n";
+                         ">(idx_1);\n";
            assignments = assignments <> structName <> ".m_fermion = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[fermion] <>
-                         " >(idx_" <> ToString[fermionPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[fermionPos + 1] <> ");\n";
            assignments = assignments <> structName <> ".m_vector = " <> paramsStruct <> ".physical_mass<" <>
                          CXXDiagrams`CXXNameOfField[vector] <>
-                         " >(idx_" <> ToString[vectorPos + 1] <> ");\n";
+                         ">(idx_" <> ToString[vectorPos + 1] <> ");\n";
            assignments
           ];
 
