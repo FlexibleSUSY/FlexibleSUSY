@@ -23,6 +23,7 @@
 #include "decay_amplitudes.hpp"
 #include "wrappers.hpp"
 #include <iomanip> // @todo: remove
+#include "src/numerics2.hpp"
 
 namespace flexiblesusy {
 
@@ -67,32 +68,51 @@ double Decay_amplitude_SVV::square() const
             + AbsSqr(form_factor_eps));
 
       // check Ward identity
-      //std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
+      // std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
       //   "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) <<
       //   ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
       return m0 + m2 + m4;
    } else if (m_vector_1 <= massless_vector_threshold) {
-      const double m0 = 3. * AbsSqr(form_factor_g);
 
       const double m_s_sq = Sqr(m_decay);
       const double m_vec_sq = Sqr(m_vector_2);
 
-      const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
-         2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
-
-      /*
-      const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *
-         Re(form_factor_g * Conj(form_factor_11)) / m_vec_sq;
-
-      const double m43 = -0.25 * Power3(m_s_sq - m_vec_sq) *
-         Re(form_factor_11 * Conj(form_factor_21)) / m_vec_sq;
-     */
+      const double fgSqr = AbsSqr(form_factor_g);
+      const double f21Sqr = AbsSqr(form_factor_21);
+      const double fepsSqr = AbsSqr(form_factor_eps);
 
       // TODO(Wojciech): remove printout before release
-      //std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)) << ' ' << form_factor_21 << ' ' <<
-      //   "real: " << std::real(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::real(form_factor_21) <<
+      // std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) <<
+      //   - 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)) << ' ' << form_factor_21 << ' ' << form_factor_eps << ' ' <<
+      //   "real: " <<   std::real(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::real(form_factor_21) <<
       //   ", imag: " << std::imag(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::imag(form_factor_21) << '\n';
-      return m0 + m41/* + m42 + m43*/;
+
+      if (!is_zero(form_factor_21) && !is_zero(form_factor_g)) {
+         // use Ward identity to eliminate form_factor_g
+         const double res1 =
+            0.5*Sqr(m_s_sq - m_vec_sq)*f21Sqr
+            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+         // use Ward identity to eliminate form_factor_21
+         const double res2 =
+            2*fgSqr
+            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+         // compare two results
+         const double WI_violation = std::abs(1. - std::abs(res1/res2));
+         if (WI_violation > 0.1) {
+            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + std::to_string(100.*WI_violation) + "%");
+         }
+         // use res1 since form_factor_21 is not sensitive to the renormalization
+         // scheme in which the Higgs mass is defined
+         return res1;
+      }
+      // use full expression for tree-level decays where one of the form factors might be 0
+      else {
+         const double res3 =
+            3.*fgSqr
+            - 0.25*Sqr(m_s_sq - m_vec_sq)*f21Sqr
+            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+         return res3;
+      }
    } else if (m_vector_2 <= massless_vector_threshold) {
       const double m0 = 3. * AbsSqr(form_factor_g);
 
@@ -100,7 +120,7 @@ double Decay_amplitude_SVV::square() const
       const double m_vec_sq = Sqr(m_vector_1);
 
       const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
-         2. * AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
+         2.*AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
 
       /*
       const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *

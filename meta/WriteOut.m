@@ -1316,7 +1316,7 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
    const auto width = decays_list.get_total_width();
    const std::string name = " <> modelName <> "_info::get_particle_name_from_pdg(pdg);
    if (std::isnan(width) || std::isinf(width)) {
-      throw std::runtime_error(\"Error! Total width of \" + name + \" is \" + std::to_string(width));
+      throw std::runtime_error(\"Total width of \" + name + \" is \" + std::to_string(width));
    }
 
    std::ostringstream decay;

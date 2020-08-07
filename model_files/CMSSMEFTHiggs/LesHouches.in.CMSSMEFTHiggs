@@ -25,6 +25,8 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   0                    # calculate BSM pole masses
+   31   0                    # loop library (0 = softsusy)
+   32   0                    # calculate decays (0 = no, 1 = yes)
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole

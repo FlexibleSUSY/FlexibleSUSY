@@ -6,7 +6,7 @@
 
 #include "THDMII_two_scale_spectrum_generator.hpp"
 #include "THDMII_two_scale_model.hpp"
-#include "THDMII_decays.hpp"
+#include "decays/THDMII_decays.hpp"
 #include "THDMII_slha_io.hpp"
 
 using namespace flexiblesusy;
