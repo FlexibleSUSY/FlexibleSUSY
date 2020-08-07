@@ -53,9 +53,15 @@ double Decay_amplitude_SSV::square() const
 // @todo check expressions correct
 double Decay_amplitude_SVV::square() const
 {
+   if (m_decay < m_vector_1 + m_vector_2) {
+      WARNING("Warning in Decay_amplitude_SVV::square(): decaying particle mass smaller than sum of product masses. Returning 0.");
+      return 0.;
+   }
+
    // eq. B.38 of http://etheses.dur.ac.uk/2301
    if (m_vector_1 <= massless_vector_threshold &&
        m_vector_2 <= massless_vector_threshold) {
+      /*
       const double m0 = 4. * AbsSqr(form_factor_g);
 
       const double m2 = Sqr(m_decay) * (
@@ -66,12 +72,39 @@ double Decay_amplitude_SVV::square() const
             //Re(form_factor_11 * Conj(form_factor_22))
             // + Re(form_factor_12 * Conj(form_factor_21))
             + AbsSqr(form_factor_eps));
+            */
 
       // check Ward identity
       // std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
       //   "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) <<
       //   ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
-      return m0 + m2 + m4;
+
+      const double fgSqr = AbsSqr(form_factor_g);
+      const double f21Sqr = AbsSqr(form_factor_21);
+      const double fepsSqr = AbsSqr(form_factor_eps);
+
+      if (!is_zero(form_factor_21) && !is_zero(form_factor_g)) {
+         // use Ward identity to eliminate form_factor_g
+         const double res1 =
+            0.5*Power4(m_decay)*(f21Sqr + fepsSqr);
+         // use Ward identity to eliminate form_factor_21
+         const double res2 =
+            2.*fgSqr + 0.5*Power4(m_decay)*fepsSqr;
+         const double WI_violation = std::abs(1. - std::abs(res1/res2));
+         std::cout << m_decay << ' ' << WI_violation << '\n';
+         if (WI_violation > 0.1) {
+            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + std::to_string(100.*WI_violation) + "%");
+         }
+         // use res1 since form_factor_21 is not sensitive to the renormalization
+         // scheme in which the Higgs mass is defined
+         return res1;
+      }
+      // use full expression for tree-level decays where one of the form factors might be 0
+      else {
+         const double Refgf21 = Re(form_factor_g * Conj(form_factor_21));
+         const double res3 = 4.*fgSqr + Sqr(m_decay)*Refgf21 + 0.5*Power4(m_decay)*fepsSqr;
+         return res3;
+      }
    } else if (m_vector_1 <= massless_vector_threshold) {
 
       const double m_s_sq = Sqr(m_decay);
