@@ -182,4 +182,4 @@ ExtraSLHAOutputBlocks = {
 
 (* Disabling decays because hh(1) gives number but
    hh(2), Hpm(2) and Ah(2) give NaNs *)
-FSCalculateDecays = False;
+FSCalculateDecays = True;
