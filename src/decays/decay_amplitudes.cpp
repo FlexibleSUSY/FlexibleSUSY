@@ -80,6 +80,7 @@ double Decay_amplitude_SVV::square() const
       const double fgSqr = AbsSqr(form_factor_g);
       const double f21Sqr = AbsSqr(form_factor_21);
       const double fepsSqr = AbsSqr(form_factor_eps);
+      const double prefactor = 0.25*Sqr(m_s_sq - m_vec_sq);
 
       // TODO(Wojciech): remove printout before release
       // std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) <<
@@ -90,12 +91,10 @@ double Decay_amplitude_SVV::square() const
       if (!is_zero(form_factor_21) && !is_zero(form_factor_g)) {
          // use Ward identity to eliminate form_factor_g
          const double res1 =
-            0.5*Sqr(m_s_sq - m_vec_sq)*f21Sqr
-            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+            2.*prefactor*(f21Sqr + fepsSqr);
          // use Ward identity to eliminate form_factor_21
          const double res2 =
-            2*fgSqr
-            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+            2.*(fgSqr + prefactor*fepsSqr);
          // compare two results
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
          if (WI_violation > 0.1) {
@@ -108,9 +107,7 @@ double Decay_amplitude_SVV::square() const
       // use full expression for tree-level decays where one of the form factors might be 0
       else {
          const double res3 =
-            3.*fgSqr
-            - 0.25*Sqr(m_s_sq - m_vec_sq)*f21Sqr
-            + 0.5*Sqr(m_s_sq - m_vec_sq)*fepsSqr;
+            3.*fgSqr + prefactor*(2.*fepsSqr-f21Sqr);
          return res3;
       }
    } else if (m_vector_2 <= massless_vector_threshold) {
