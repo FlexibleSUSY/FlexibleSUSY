@@ -1383,7 +1383,7 @@ Module[
             LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>".at(7)",
             LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>".at(8)",
             LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>".at(9)",
-            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"
+            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>".at(10)"
          }&,
 
       append,
