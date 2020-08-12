@@ -655,7 +655,7 @@ Block MSOFT Q= 8.61574711E+02
                               0.0016298093732297074, 3e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
-                              0.0002600448772469762, 3e-13);
+                              0.00026283520047186703, 3e-13);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
                               0.0001976368796373175, 2e-12);
@@ -706,6 +706,9 @@ Block MSOFT Q= 8.61574711E+02
 
    MSSM_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
 
+   // h -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
+                              0.0002600448772469762, 3e-13);
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 8.4479732851110568e-06, 4e-11);
 }

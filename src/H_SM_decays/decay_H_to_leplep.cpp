@@ -27,7 +27,14 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
                        Sqr(mL1OS / mL1DR);
 
    // flux * phase space factor * symmetry factor * matrix element^2
-   const double res = 0.5 * ps * amp2OS / mHOS;
+   double res = 0.5 * ps * amp2OS / mHOS;
+
+   // higher order corrections
+
+   if (include_higher_order_corrections == SM_higher_order_corrections::enable) {
+      // 1-loop QED corrections
+      res *= 1. + get_alpha(context)/Pi*17./4.;
+   }
 
    return res;
 }
