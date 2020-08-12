@@ -886,6 +886,8 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "dm->fill_from(model);\n" <>
                     "standard_model::Standard_model sm{};\n" <>
                     "sm.initialise_from_input(qedqcd);\n" <>
+		    "// set loop level for RGE running to match RGE setting of BSM model\n" <>
+		    "sm.set_loops(model.get_loops());\n" <>
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
