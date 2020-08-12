@@ -705,7 +705,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
                               0.00066154345019159267, 5e-11);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              8.765854811656519e-05, 9e-12);
+                              7.5807344468583867e-05, 9e-12);
 
    // ------------ loop-induces decays ------------
 
