@@ -715,9 +715,9 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
    // with 2-loop QCD corrections to squark loop
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.4048934606386419e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.1727756260116535e-05, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.9440628969348722e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.9440628969348722e-06, 5e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -725,5 +725,5 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    MRSSM2_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
 
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 8.5869265018085558e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.1943830812277772e-05, 4e-11);
 }
