@@ -273,7 +273,7 @@ Block UERMIX
                               7.8811709644693243e-05, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00077464947934456846, 1e-14);
+                              0.0007420072130724369, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               8.3396512232490906e-05, 2e-14);
@@ -300,9 +300,6 @@ Block UERMIX
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.8811709644693243e-05, 1e-15);
-   // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00077464947934456846, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VZVZ(&m, 0),
                               8.3396512232490906e-05, 2e-14);
