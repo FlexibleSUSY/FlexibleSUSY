@@ -11,24 +11,31 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
-   const double mZ = context.mass<Z>(indexOut1);
    const double mZOS = context.physical_mass<Z>(indexOut1);
    const double x = Sqr(mZOS/mHOS);
    double res;
 
-   const auto vev = context.model.VEV();
-
    // mH < mZ
    // 4-body decay not implemented for a moment
    if (x > 1.0) {
+      const std::string index_as_string = (indexIn.size() > 0 ? "(" + std::to_string(indexIn[0]) + ")" : "");
+      WARNING("H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
       return 0.0;
-   // mZ < mH < 2mZ
+   // mZ < mH < 2*mZ
    // three-body decay
    } else if(4.0*x > 1.0) {
       const double sw2 = Sqr(Sin(model.ThetaW()));
-      const double deltaV = 7.0/12.0 - 10.0/9.0 * sw2 + 40.0/27.0 * Sqr(sw2);
+      const double deltaV = 7.0/12.0 - 10.0/9.0*sw2 + 40.0/27.0*Sqr(sw2);
 
-      res = 3.0/(128*pow(Pi,3)) * mHOS/Sqr(vev) * deltaV * RT(x);
+      res = 3./(512.*Power3(Pi)) * 1./mHOS * deltaV * RT(x)/x;
+
+      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto ghZZ =
+         Vertex<Z, Z, H>::evaluate(indices, context).value();
+
+      const double g2 = context.model.get_g2();
+
+      res *= std::norm(ghZZ*g2)/(1-sw2);
    // mH > 2mZ
    // two-body decay
    } else {
@@ -46,13 +53,8 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       const auto mat_elem_sq = mat_elem.square();
 
       // flux * phase space factor * matrix element squared
-      return flux * ps * ps_symmetry * mat_elem_sq;
+      res = flux * ps * ps_symmetry * mat_elem_sq;
    }
-   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto ghZZ =
-      Vertex<Z, Z, H>::evaluate(indices, context).value() * Sqr(mZOS/mZ);
-
-   res *= std::norm(ghZZ);
 
    return res;
 }

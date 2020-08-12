@@ -289,7 +289,7 @@ double calc_deltaqq(double alpha_s_red, double Nf)
       + (39.34 - 220.9 * Nf + 9.685 * Sqr(Nf) - 0.0205 * Power3(Nf)) * Power4(alpha_s_red);
 }
 
-/// Eq.(2.31) of hep-ph/0503172
+// eq. (2.31) of hep-ph/0503172
 double RT_general(double x) noexcept
 {
    const std::complex<double> z(x, 0.0);

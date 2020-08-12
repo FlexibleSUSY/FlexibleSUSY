@@ -57,13 +57,13 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
                               0.0026142076883103791, 2e-15);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
-                              0.00026800741537194096, 1e-15);
+                              0.00027084177013049477, 1e-15);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.0008470512012646494, 1e-14);
+                              0.00088266545237025511, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
-                              9.4231400598120973e-05, 3e-14);
+                              0.00010156817056564993, 3e-14);
 
    // ------------ loop-induces decays_HO ------------
 
@@ -88,12 +88,6 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026800741537194096, 1e-15);
-   // h -> W+ W-
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.0008470512012646494, 1e-14);
-   // h -> Z Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VZVZ(&m),
-                              9.4231400598120973e-05, 3e-14);
 
    // ------------ loop-induces decays_no_HO ------------
 
