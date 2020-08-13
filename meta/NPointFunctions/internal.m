@@ -281,29 +281,93 @@ Quiet[
 `sarah`momdiff // Utils`MakeUnknownInputDefinition;
 `sarah`momdiff ~ SetAttributes ~ {Protected, Locked};
 
-getFieldNames::usage="
+getFieldNames::usage = "
 @brief Loads and connects particle definitions for SARAH` and FeynArts`.
 @param fnames Name of file with information about SARAH` and FeynArts` names.
 @param fnamespaces Name of file with information about contexts of SARAH`
        particles.
-@returns List of Lists, each contains three String entries:
-         1) SARAH` name of particle with context;
-         2) FeynArts` type of particle;
-         3) FeynArts` integer number of particle.";
+@returns List of Lists, each contains four String entries:
+         1) SARAH` context of particle;
+         2) SARAH` name of particle;
+         3) FeynArts` type of particle;
+         4) FeynArts` integer number of particle.";
 getFieldNames[fnames:_String:particleNamesFile,
    fnamespaces:_String:particleNamespaceFile] :=
 Module[
    {
       regex = "(\\w+): ([SFVU])\\[(\\d+)\\]",
       lines = Utils`ReadLinesInFile@fnames,
-      namespaceRules = Rule[First@#, Last@#<>First@#] &/@ Get@fnamespaces,
+      namespaceRules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@fnamespaces,
       names
    },
       names = StringCases[lines, RegularExpression@regex :> {"$1","$2","$3"}] ~ Flatten ~ 1;
       names /. namespaceRules
 ];
 getFieldNames // Utils`MakeUnknownInputDefinition;
-getFieldNames ~ SetAttributes ~ {Protected, Locked};~
+getFieldNames ~ SetAttributes ~ {Protected, Locked};
+
+getMassRules::usage = "
+@brief Generates mass replacement rules for a given set of particles.
+@param fieldNames Set of field names.
+@returns A List of replacements rules for masses.";
+getMassRules[fieldNames:{{_, _, _, _}..}] :=
+Module[
+   {
+      faMasses = Symbol["Mass" <> #[[2]]] &/@ fieldNames,
+      sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldNames,
+      massRules
+   },
+   massRules = MapThread[
+      {
+         #1[index_] :> SARAH`Mass@#2@{Symbol["SARAH`gt" <> StringTake[SymbolName@index, -1]]},
+         #1[indices__] :> SARAH`Mass@#2@indices,
+         #1 :> SARAH`Mass@#2
+      } &,
+      {faMasses, sarahNames}
+   ];
+   Append[Flatten@massRules,
+      FeynArts`Mass[field_, _ : Null] :> SARAH`Mass[field]
+   ]
+];
+getMassRules // Utils`MakeUnknownInputDefinition;
+getMassRules ~ SetAttributes ~ {Protected, Locked};
+
+getFieldRules::usage = "
+@brief Generates field replacement rules for a given set of particles.
+@param fieldNames Set of field names.
+@returns A List of replacements rules for fields.";
+getFieldRules[fieldNames:{{_, _, _, _}..}] :=
+Module[
+   {
+      fullNames = Map[ToExpression, {#[[1]] <> #[[2]], #[[3]], #[[4]]} &/@ fieldNames, 2]
+   },
+   Join[
+      # /. {name_,type_,number_}:>Rule[type@number,name],
+      # /. {name_,type_,number_}:>RuleDelayed[type[number,{indices__}],name@{indices}],
+      # /.
+      {
+         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name],Susyno`LieGroups`conj@name],
+         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name],SARAH`bar@name]
+      },
+      # /.
+      {
+         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name@{indices__}],Susyno`LieGroups`conj@name@{indices}],
+         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
+      },
+      {
+         index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
+         index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
+         index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
+      },
+      {FeynArts`S->GenericS,FeynArts`F->GenericF,FeynArts`V->GenericV,FeynArts`U->GenericU},
+      {
+         Times[-1,field:_GenericS|_GenericV]:>Susyno`LieGroups`conj@field,
+         Times[-1,field:_GenericF|_GenericU]:>SARAH`bar@field
+      }
+   ] &@ fullNames
+];
+getFieldRules // Utils`MakeUnknownInputDefinition;
+getFieldRules ~ SetAttributes ~ {Protected, Locked};
 
 SetFSConventionRules::usage="
 @brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
@@ -313,21 +377,9 @@ Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
       fieldNames = getFieldNames[],
-      indexRules,massRules,couplingRules,generalFCRules,
+      couplingRules,generalFCRules,
       sumOverRules
    },
-
-   massRules = Append[Flatten[Module[
-      {P="SARAH`Mass@"<>#,MassP=StringReplace[#,__~~"`"->"Global`Mass"]},
-      {
-         ToExpression[MassP <> "@indices_:>" <> P <>
-         "@{Symbol[\"SARAH`gt\"<>StringTake[SymbolName@indices,-1]]}"],
-         ToExpression[MassP <> "@indices__:>" <> P <> "@{indices}"],
-         ToExpression[MassP <> "->" <> P]
-      }
-      ] &/@ fieldNames[[All, 1]] ],
-      FeynArts`Mass[field_, _ : Null] :> SARAH`Mass[field]
-   ];
    couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
       {
          f@1 :> s@1,
@@ -364,14 +416,6 @@ Module[
       FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
    };
 
-   (* @note Rules, specific to SARAH generated FeynArts model files.*)
-   indexRules =
-   {
-      index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
-      index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
-      index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
-   };
-
    sumOverRules =
    {
       FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
@@ -383,34 +427,15 @@ Module[
          SARAH`sum[index,1,max,max2],                                                       (* *)
       SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,{min2_Integer,max2_Integer}]](* *)
     :> SARAH`sum[index,1,max,max2-min2]                                                     (* *)
-};
+   };
 
    Unprotect@fieldNameToFSRules;
-   fieldNameToFSRules = Join[
-      Map[ToExpression,fieldNames,2] /. {name_,type_,number_}:>Rule[type@number,name],
-      Map[ToExpression,fieldNames,2] /. {name_,type_,number_}:>RuleDelayed[type[number,{indices__}],name@{indices}],
-      Map[ToExpression,fieldNames,2] /.
-      {
-         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name],Susyno`LieGroups`conj@name],
-         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name],SARAH`bar@name]
-      },
-      Map[ToExpression,fieldNames,2] /.
-      {
-         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name@{indices__}],Susyno`LieGroups`conj@name@{indices}],
-         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
-      },
-      indexRules,
-      {FeynArts`S->GenericS,FeynArts`F->GenericF,FeynArts`V->GenericV,FeynArts`U->GenericU},
-      {
-         Times[-1,field:_GenericS|_GenericV]:>Susyno`LieGroups`conj@field,
-         Times[-1,field:_GenericF|_GenericU]:>SARAH`bar@field
-      }
-   ];
+   fieldNameToFSRules = getFieldRules@fieldNames;
    Protect@fieldNameToFSRules;
 
    Unprotect@subexpressionToFSRules;
    subexpressionToFSRules = Join[
-      massRules,
+      getMassRules@fieldNames,
       fieldNameToFSRules,
       couplingRules,
       generalFCRules
