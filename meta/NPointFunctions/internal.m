@@ -291,8 +291,7 @@ getFieldNames::usage = "
          2) SARAH` name of particle;
          3) FeynArts` type of particle;
          4) FeynArts` integer number of particle.";
-getFieldNames[fnames:_String:particleNamesFile,
-   fnamespaces:_String:particleNamespaceFile] :=
+getFieldNames[fnames:_String, fnamespaces:_String] :=
 Module[
    {
       regex = "(\\w+): ([SFVU])\\[(\\d+)\\]",
@@ -376,7 +375,7 @@ SetFSConventionRules[] :=
 Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
-      fieldNames = getFieldNames[],
+      fieldNames = getFieldNames[particleNamesFile, particleNamespaceFile],
       couplingRules,generalFCRules,
       sumOverRules
    },
