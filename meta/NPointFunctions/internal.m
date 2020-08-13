@@ -1232,37 +1232,6 @@ MapThread[Rule,{Range@Length@#,#//.fieldNameToFSRules}] & [Part[in,All,1]~Join~P
 getFieldPositionRules // Utils`MakeUnknownInputDefinition;
 getFieldPositionRules ~ SetAttributes ~ {Protected,Locked};
 
-getNumberOfChains::usage =
-"@brief Is used to calculate number of opened fermion chains.
-@param FeynArts`FeynAmpList[..][..]
-@returns Number of opened fermion chains.";
-getNumberOfChains::errNumberOfFermions =
-"During evaluation unexpected value of fermions `1` was calculated.";
-getNumberOfChains::errUnknownInput =
-"Input should be
-getNumberOfExternalFermions@@{ FeynArts`FeynAmpList[___][___] }
-and not
-getNumberOfExternalFermions@@`1`";
-getNumberOfChains[
-   FeynArts`FeynAmpList[
-      ___,
-      FeynArts`Process->Rule[in:{{__}..},out:{{__}..}],
-      ___,
-      FeynArts`AmplitudeLevel->{Generic},
-      ___][___]
-] :=
-Module[{numberOfChains = 0},
-   Cases[Join[in[[All,1]],out[[All,1]]],FeynArts`F[__]|-FeynArts`F[__]:>numberOfChains++,{1}];
-   numberOfChains /= 2;
-   If[IntegerQ@numberOfChains && numberOfChains >= 0,
-      numberOfChains,
-      Utils`AssertOrQuit[False,getNumberOfChains::errNumberOfFermions,numberOfChains]
-   ]
-];
-getNumberOfChains[x___] :=
-Utils`AssertOrQuit[False,getNumberOfChains::errUnknownInput,{x}]
-SetAttributes[getNumberOfChains,{Protected,Locked}];
-
 applyAndPrint[func_,{expr_,opts_List},defLength_Integer:70] :=
 Module[
    {
