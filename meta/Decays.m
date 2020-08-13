@@ -793,7 +793,8 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
               MapIndexed[
                  With[{idx = First[#2]},
                     If[
-                       initialState === #1, "if (gI1 == gO" <> ToString[idx] <> ")\n" <> TextFormatting`IndentText["continue;\n"], ""]]&, finalState
+                       initialState === #1, "if (gI1 == gO" <> ToString[idx] <> ") {\n" <> TextFormatting`IndentText["continue;\n}\n"], ""
+                    ]]&, finalState
               ] <>
               If[
                 CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
@@ -807,10 +808,10 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                      ]&,
                      finalState
                   ], " + "
-              ] <> ")\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
+              ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n"
                 ];
            (* call decay *)
-                      body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <> 
+                      body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <>
                ", create_process_string<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
                   If[initialStateDim > 1, "{gI1}", "{}"] <> "," <>
                   StringJoin @ Riffle[
@@ -821,7 +822,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                      finalState
                   ], ","] <>
                   ")" <>
-           ");";
+           ");\n";
 
            loopIndices = Reverse[Select[MapIndexed[With[{idx = First[#2]},
                                                         If[#1 > 1,
@@ -847,7 +848,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                        ]&,
                        finalState
                     ], " + "
-                 ] <> ") {\n"] <> TextFormatting`IndentText[body] <> ";\n" <>
+                 ] <> ") {\n"] <> TextFormatting`IndentText[body] <>
                  If[CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]],
                    "",
 
@@ -900,9 +901,9 @@ CreateDecaysCalculationFunction[decaysList_] :=
                     "dm->fill_from(model);\n" <>
                     "standard_model::Standard_model sm{};\n" <>
                     "sm.initialise_from_input(qedqcd);\n" <>
-		    "// set loop level for RGE running to match RGE setting\n" <>
-		    "// of BSM model\n" <>
-		    "sm.set_loops(model.get_loops());\n" <>
+                    "// set loop level for RGE running to match RGE setting\n" <>
+                    "// of BSM model\n" <>
+                    "sm.set_loops(model.get_loops());\n" <>
                     "if (run_to_decay_particle_scale) {\n" <>
                     TextFormatting`IndentText[
                        "auto decay_mass = PHYSICAL(" <>
@@ -1304,9 +1305,9 @@ GenericTranslationForInsertion[topology_, insertion_] := Module[{
    res
 },
 
-  If[$translationFile === $Failed,
-     Print["Getting translation file failed"];Quit[1]
-  ];
+   If[$translationFile === $Failed,
+      Print["Getting translation file failed"];Quit[1]
+   ];
 
    genericDiagramsWithCorrectTopology = Select[$translationFile, MemberQ[#, topology]&];
    Utils`AssertWithMessage[genericDiagramsWithCorrectTopology =!= {},
