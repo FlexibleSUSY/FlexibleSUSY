@@ -366,7 +366,21 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
 
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
     Module[{nFinalParticles = Length[finalParticles], topologies, diagrams},
-           topologies = Join[Table[{i, GetPossibleDecayTopologies[nFinalParticles, i]}, {i, 0, maxLoops}]];
+           (* Until we include non-renormalizable operators, existence
+              of tree-level amplitude for h->Zgamma or h->gamma gamma
+              would violate Ward identity (as at the level of dim 4
+              operators there can be only terms proportional to gmunu
+              and not to p2mu p1nu). So even if SARAH claims that there
+              is such a coupling, it must be 0. So for those processes
+              we start generating amplitudes from the 1-loop level. *)
+           minLoops =
+              If[MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+                 (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
+                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]),
+                 1,
+                 0
+              ];
+           topologies = Join[Table[{i, GetPossibleDecayTopologies[nFinalParticles, i]}, {i, minLoops, maxLoops}]];
            diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, GetFinalStateExternalField /@ finalParticles, #]}& /@ #[[2]]}&
                       /@ topologies;
            diagrams = {#[[1]], With[{toposAndDiags = #[[2]]}, Select[toposAndDiags, #[[2]] =!= {}&]]}& /@ diagrams;
