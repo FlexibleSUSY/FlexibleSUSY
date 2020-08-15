@@ -222,6 +222,19 @@ std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq,
    }
 }
 
+// eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
+std::complex<double> hgg_SM_loop_function(double x) {
+   if(is_zero(1.-x)) {
+      return Sqr(M_PI/2.);
+   }
+   else if (x > 1) {
+      return Sqr(std::asin(1./std::sqrt(x)));
+   }
+   else {
+      return -0.25*Sqr(std::log((1.+std::sqrt(1.-x))/(1.-std::sqrt(1.-x))) - M_PI*std::complex<double>(0.,1.));
+   }
+}
+
 /* 1-loop BSM amplitudes
  *
  * Notes:
@@ -408,6 +421,19 @@ double CLASSNAME::get_partial_width<H, G, G>(
             throw;
          }
 
+         const auto indices = concatenate(in_idx, std::array<int, 1> {2}, std::array<int, 1> {2});
+         const auto HGGVertex = Vertex<H, bar<uq>::type, uq>::evaluate(indices, context);
+         std::complex<double> const HGGVertexVal = 0.5*(HGGVertex.left() + HGGVertex.right());
+
+         const double tau = Sqr(2.*context.mass<uq>({2})/mH);
+
+         // eq. 5 of https://arxiv.org/pdf/1109.5304.pdf
+         const std::complex<double> Ff = -2.*(1.+(1.-tau)*hgg_SM_loop_function(tau));
+
+         // LO width comming only from the top-loop
+         // agrees up to a full double precision with autmatically generated one
+         const double Gamma_SM_LO = Sqr(context.mass<uq>({2}))/mH  /(8.*Power3(Pi))*std::norm(get_alphas(context)*HGGVertexVal*Ff);
+
          // NLO, NNLO - eq. 11 of hep-ph/9705240
          const double deltaNLO {95./4. - 7./6.*Nf};
 
@@ -425,7 +451,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
          switch (include_higher_order_corrections) {
             case SM_higher_order_corrections::enable:
-               result *= 1. + deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red);
+               result += Gamma_SM_LO*(deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red));
                break;
             case SM_higher_order_corrections::disable:
                break;
