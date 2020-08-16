@@ -109,7 +109,7 @@ std::complex<double> f(double tau) {
       return Sqr(std::asin(std::sqrt(tau)));
    }
    else {
-      return -0.25*(std::log((1.+std::sqrt(1.+1./tau))/(1.+std::sqrt(1.-1./tau))) - 1i*Pi);
+      return -0.25*Sqr(std::log((1.+std::sqrt(1.+1./tau))/(1.+std::sqrt(1.-1./tau))) - 1i*Pi);
    }
 }
 std::complex<double> fprime(double tau) {
@@ -117,8 +117,7 @@ std::complex<double> fprime(double tau) {
       return std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
    }
    else {
-      return 0.5*1i*(Pi + 1i*std::log(-1. + 2.*std::sqrt(-1. + tau)*std::sqrt(tau) + 2.*tau))/
-             (std::sqrt(-1. + tau)*std::sqrt(tau));
+      return 0.5i*(Pi + 2i*std::asinh(std::sqrt(-1. + tau)))/std::sqrt((-1. + tau)*tau);
    }
 }
 
