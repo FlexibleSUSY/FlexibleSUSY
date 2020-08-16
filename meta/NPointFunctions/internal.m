@@ -383,6 +383,26 @@ getFieldRules ~ SetAttributes ~ {Protected, Locked};
 };
 `rules`sum ~ SetAttributes ~ {Protected, Locked};
 
+FAFieldQ::usage = "
+@brief Checks whether symbol belongs to FeynArts` field names or not.
+@param Symbol to check.
+@returns True if symbol belongs to FeynArts` field names, False otherwise.";
+FAFieldQ = MatchQ[#,`type`fieldFA]&;
+FAFieldQ ~ SetAttributes ~ {Protected, Locked};
+
+`rules`general::usage = "
+@brief General translation rules from FeynArts/FormCalc to FlexibleSUSY
+       language.
+@note See sec. 4.4. of FormCalc manual for details.";
+`rules`general = {
+   FormCalc`Finite -> 1,
+   FormCalc`Den[a:_,b:_] :> 1/(a-b),
+   FormCalc`Pair[a:_,b:_] :> SARAH`sum[#, 1, 4, SARAH`g[#, #]*Append[a, #]*Append[b, #]],
+   (f:_)?(FAFieldQ)[FeynArts`Index[Generic, i:_Integer]] :> f@GenericIndex@i,
+   FormCalc`k[i:_Integer, pairIndex:___] :> SARAH`Mom[i, pairIndex]
+} &@ Unique@"SARAH`lt";
+`rules`general ~ SetAttributes ~ {Protected, Locked};
+
 SetFSConventionRules::usage="
 @brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
        language.";
@@ -391,7 +411,7 @@ Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
       fieldNames = getFieldNames[particleNamesFile, particleNamespaceFile],
-      couplingRules,generalFCRules
+      couplingRules
    },
    couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
       {
@@ -417,18 +437,6 @@ Module[
       }
    ];
 
-   (* @note Sec 4.4 of FormCalc manual *)
-   generalFCRules =
-   {
-      FormCalc`Finite -> 1,
-      FormCalc`Den[a_,b_] :> 1/(a-b),
-      FormCalc`Pair[a_,b_] :> SARAH`sum[
-         pairSumIndex,1,4,
-         SARAH`g[pairSumIndex,pairSumIndex]*Append[a,pairSumIndex]*Append[b,pairSumIndex]],
-      fieldType_?(FAFieldQ)[FeynArts`Index[Generic,number_Integer]] :> fieldType@GenericIndex@number,
-      FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
-   };
-
    Unprotect@fieldNameToFSRules;
    fieldNameToFSRules = getFieldRules@fieldNames;
    Protect@fieldNameToFSRules;
@@ -438,7 +446,7 @@ Module[
       getMassRules@fieldNames,
       fieldNameToFSRules,
       couplingRules,
-      generalFCRules
+      `rules`general
    ];
    Protect@subexpressionToFSRules;
 
@@ -1335,13 +1343,6 @@ Module[
    GenericSum[{amp}, replSumFields]
 ];
 SetAttributes[ToGenericSum,{Protected,Locked}];
-
-FAFieldQ::usage=
-"@brief Checks whether symbol belongs to FeynArts` field names or not.
-@param Symbol to check.
-@returns True if symbol belongs to FeynArts` field names, False otherwise.";
-FAFieldQ = MatchQ[#,`type`fieldFA]&;
-SetAttributes[FAFieldQ,{Protected,Locked}];
 
 ZeroRules::usage=
 "@brief Given a set of rules that map to zero and a set that does
