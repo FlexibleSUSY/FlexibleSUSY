@@ -364,6 +364,7 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
            Select[diagrams, IsPossibleNonZeroDiagram]
           ];
 
+(* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
     Module[{nFinalParticles = Length[finalParticles], topologies, diagrams},
            (* Until we include non-renormalizable operators, existence
