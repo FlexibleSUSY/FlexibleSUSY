@@ -368,6 +368,21 @@ Module[
 getFieldRules // Utils`MakeUnknownInputDefinition;
 getFieldRules ~ SetAttributes ~ {Protected, Locked};
 
+`rules`sum::usage = "
+@brief Sum translation rules from FeynArts/FormCalc to FlexibleSUSY language.";
+`rules`sum = {
+   FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
+   Times[expr:_, FeynArts`SumOver[index:_Symbol, max:_Integer]] :>
+      SARAH`sum[index, 1, max, expr],
+   Times[expr:_, FeynArts`SumOver[index:_Symbol, {min:_Integer, max:_Integer}]] :>
+      SARAH`sum[index, min, max, expr],
+   SARAH`sum[i:_Symbol, _Integer, max:_Integer, FeynArts`SumOver[_Symbol, max2:_Integer]] :>
+      SARAH`sum[i, 1, max, max2],
+   SARAH`sum[i:_Symbol, _Integer, max:_Integer, FeynArts`SumOver[_, {min2:_Integer, max2:_Integer}]] :>
+      SARAH`sum[i, 1, max, max2-min2]
+};
+`rules`sum ~ SetAttributes ~ {Protected, Locked};
+
 SetFSConventionRules::usage="
 @brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
        language.";
@@ -376,8 +391,7 @@ Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
       fieldNames = getFieldNames[particleNamesFile, particleNamespaceFile],
-      couplingRules,generalFCRules,
-      sumOverRules
+      couplingRules,generalFCRules
    },
    couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
       {
@@ -415,19 +429,6 @@ Module[
       FormCalc`k[i_Integer,indexInPair___] :> SARAH`Mom[i,indexInPair]
    };
 
-   sumOverRules =
-   {
-      FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
-      Times[expr_,FeynArts`SumOver[index_,max_Integer]] :>
-         SARAH`sum[index,1,max,expr],
-      Times[expr_,FeynArts`SumOver[index_,{min_Integer,max_Integer}]] :>
-         SARAH`sum[index,min,max,expr],
-      SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,max2_Integer]] :>            (* @todo check these weird convention rules *)
-         SARAH`sum[index,1,max,max2],                                                       (* *)
-      SARAH`sum[index_,_Integer,max_Integer,FeynArts`SumOver[_,{min2_Integer,max2_Integer}]](* *)
-    :> SARAH`sum[index,1,max,max2-min2]                                                     (* *)
-   };
-
    Unprotect@fieldNameToFSRules;
    fieldNameToFSRules = getFieldRules@fieldNames;
    Protect@fieldNameToFSRules;
@@ -444,7 +445,7 @@ Module[
    Unprotect@amplitudeToFSRules;
    amplitudeToFSRules = Join[
       subexpressionToFSRules,
-      sumOverRules,
+      `rules`sum,
       {FeynArts`IndexSum -> Sum}
    ];
    Protect@amplitudeToFSRules;
