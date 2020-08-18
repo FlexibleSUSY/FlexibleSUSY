@@ -100,7 +100,7 @@ namespace @ModelName@_cxx_diagrams {
     * is not 1.
     */
    template <class Field>
-   typename std::enable_if<Field::numberOfGenerations != 1, bool>::type
+   std::enable_if_t<Field::numberOfGenerations != 1, bool>
    isSMField(const typename field_indices<Field>::type& indices) {
       boost::array<bool, Field::numberOfGenerations> sm_flags;
 
@@ -114,7 +114,7 @@ namespace @ModelName@_cxx_diagrams {
    }
 
    template <class Field>
-   typename std::enable_if<Field::numberOfGenerations == 1, bool>::type
+   std::enable_if_t<Field::numberOfGenerations == 1, bool>
    isSMField(const typename field_indices<Field>::type&) {
       return boost::mpl::at_c<typename Field::sm_flags, 0>::type::value;
    }
@@ -160,23 +160,23 @@ namespace @ModelName@_cxx_diagrams {
       static constexpr bool value = Field::color_rep == ParticleColorRep::octet;
    };
    template<typename Field>
-   constexpr typename std::enable_if<
+   constexpr std::enable_if_t<
       is_triplet<Field>::value, ParticleColorRep
-      >::type
+      >
    color_conj() {
       return ParticleColorRep::anti_triplet;
    }
    template<typename Field>
-   constexpr typename std::enable_if<
+   constexpr std::enable_if_t<
       is_anti_triplet<Field>::value, ParticleColorRep
-      >::type
+      >
    color_conj() {
       return ParticleColorRep::triplet;
    }
    template<typename Field>
-   constexpr typename std::enable_if<
+   constexpr std::enable_if_t<
       !is_triplet<Field>::value && !is_anti_triplet<Field>::value, ParticleColorRep
-      >::type
+      >
    color_conj() {
       return Field::color_rep;
    }

@@ -43,7 +43,7 @@
 namespace flexiblesusy {
 
 template <typename Field1, typename Field2>
-constexpr typename std::enable_if<!std::is_same<Field1, Field2>::value, double>::type
+constexpr std::enable_if_t<!std::is_same<Field1, Field2>::value, double>
 final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
@@ -51,7 +51,7 @@ final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Fie
 }
 
 template <typename Field1, typename Field2>
-typename std::enable_if<std::is_same<Field1, Field2>::value, double>::type
+std::enable_if_t<std::is_same<Field1, Field2>::value, double>
 final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
