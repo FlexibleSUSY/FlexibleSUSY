@@ -278,7 +278,8 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
                                   (finalStateReps === {O, O}));,
                      T|-T, result = ((finalStateReps === Sort[{T, S}]) ||
                                      (finalStateReps === Sort[{-T, S}]) ||
-                                     (finalStateReps === Sort[{O, S}]));,
+                                     (finalStateReps === Sort[{O, T}]) ||
+                                     (finalStateReps === Sort[{O, -T}]));,
                      O, result = ((finalStateReps === Sort[{O, S}]) ||
                                   (finalStateReps === {T, T}) ||
                                   (finalStateReps === {-T, -T}) ||
