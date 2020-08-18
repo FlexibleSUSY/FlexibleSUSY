@@ -138,7 +138,8 @@ double
    return mat_elem.square();
 }
 
-// returns a squared color generator for 3  point amplitude with FieldIn, FieldOut1 and FieldOut2
+// returns a squared color generator for a 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
+// averaged over inital state colors
 // the generator is guessed from color representations of FieldIn, FieldOut1 and FieldOut2
 // This is not a bulletproof solution and might fail in general but is enough for
 // decays of color singlets
@@ -146,16 +147,16 @@ double
 // 1 -> 1, 1
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
-typename std::enable_if<
+std::enable_if_t<
 @ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value &&
 @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value &&
-@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value, double>::type
+@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value, double>
 squared_color_generator() {return 1.;}
 
 // 1 -> 3, 3bar
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
-typename std::enable_if<
+std::enable_if_t<
    @ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value
    &&
    (
@@ -165,22 +166,22 @@ typename std::enable_if<
    (@ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value &&
    @ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value)
    ), double
->::type
+>
 squared_color_generator() {return 3.;}
 
 // 1 -> 8, 8
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
-typename std::enable_if<
+std::enable_if_t<
 @ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value &&
 @ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value &&
-@ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value, double>::type
+@ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value, double>
 squared_color_generator() {return 8.;}
 
 // 3 -> 3, 1; 3bar -> 3bar, 1
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
-typename std::enable_if<
+std::enable_if_t<
 (
 @ModelName@_cxx_diagrams::fields::is_triplet<FieldIn>::value &&
 ((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value &&
@@ -196,13 +197,13 @@ typename std::enable_if<
 (@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value &&
 @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value))
 )
-, double>::type
+, double>
 squared_color_generator() {return 1.;}
 
 // 3 -> 3, 1; 3bar -> 3bar, 1
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
-typename std::enable_if<
+std::enable_if_t<
 (
 @ModelName@_cxx_diagrams::fields::is_triplet<FieldIn>::value &&
 ((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value &&
@@ -218,8 +219,36 @@ typename std::enable_if<
 (@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value &&
 @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value))
 )
-, double>::type
+, double>
 squared_color_generator() {return 4.;}
+
+// 8 -> 8, 1
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_octet<FieldIn>::value &&
+((@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value &&
+@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) ||
+(@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value &&
+@ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value))
+, double>
+squared_color_generator() {return 1.;}
+
+// 8 -> 3, 3bar
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+   @ModelName@_cxx_diagrams::fields::is_octet<FieldIn>::value
+   &&
+   (
+   (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value &&
+   @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value)
+   ||
+   (@ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value &&
+   @ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value)
+   ), double
+>
+squared_color_generator() {return 1./2.;}
 
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
@@ -244,7 +273,7 @@ double @ModelName@_decays::get_partial_width(
       final_state_symmetry_factor<FieldOut1, FieldOut2>(indexOut1, indexOut2);
 
    // color factor
-   const double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
+   constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
    // matrix element squared
    const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(

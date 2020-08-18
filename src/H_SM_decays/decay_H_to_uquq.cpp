@@ -36,7 +36,7 @@ double CLASSNAME::get_partial_width<H,bar<uq>::type,uq>(
 
    const double flux = 1./(2.*mHOS);
    const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(mHOS*mHOS, muq*muq, muq*muq))/(mHOS*mHOS);
-   const double color_factor = squared_color_generator<H, bar<uq>::type, uq>();
+   constexpr double color_factor = squared_color_generator<H, bar<uq>::type, uq>();
 
    // top-quark needs special treatment
    const double x = 4.*Sqr(muq/mHOS);

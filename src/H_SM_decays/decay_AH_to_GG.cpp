@@ -9,7 +9,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    const double mAh = context.physical_mass<AH>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
-   const double color_fact = squared_color_generator<AH, G, G>();
+   constexpr double color_fact = squared_color_generator<AH, G, G>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
