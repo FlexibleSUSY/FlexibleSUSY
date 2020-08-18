@@ -1,5 +1,14 @@
 // special case for H -> W+ W-
 // TODO: implement higher order corrections
+
+double hWW_4body(double *k, size_t dim, void *params)
+{
+  (void)(dim); /* avoid unused parameter warnings */    
+  (void)(params);
+  double A = 1.0 / (M_PI * M_PI * M_PI);
+  return A / (1.0 - cos (k[0]) * cos (k[1]) * cos (k[2]));
+}
+
 template <>
 double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
@@ -14,6 +23,34 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
    // 4-body decay for mH < mW not implemented for a moment
    if (x > 1.0) {
+      // working example of multidimensional integration from withing FS
+      // to be used for double off-shell decays
+      /*
+      double res, err;
+
+      double xl[3] = { 0, 0, 0 };
+      double xu[3] = { M_PI, M_PI, M_PI };
+
+      const gsl_rng_type *T;
+      gsl_rng *r;
+
+      gsl_monte_function G = { &hWW_4body, 3, 0 };
+
+      size_t calls = 500000;
+
+      gsl_rng_env_setup ();
+
+      T = gsl_rng_default;
+      r = gsl_rng_alloc (T);
+
+      gsl_monte_miser_state *s = gsl_monte_miser_alloc (3);
+      gsl_monte_miser_integrate (&G, xl, xu, 3, calls, r, s,
+                                &res, &err);
+      gsl_monte_miser_free (s);
+
+      gsl_rng_free (r);
+      */
+
       const std::string index_as_string = (indexIn.size() > 0 ? "(" + std::to_string(indexIn[0]) + ")" : "");
       WARNING("H" + index_as_string + "->W+W- decays: double off-shell decays currently not implemented.");
       res = 0.0;

@@ -43,6 +43,7 @@
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
 #include "standard_model.hpp"
+#include <gsl/gsl_monte_miser.h>
 
 namespace flexiblesusy {
 
