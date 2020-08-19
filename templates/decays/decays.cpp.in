@@ -24,8 +24,7 @@
  * Contains the definition of @ModelName@ decays class methods,
  * which calculate the decay rates for particles in the model.
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #include <cmath>

@@ -22,8 +22,7 @@
  *
  * @brief contains class for calculating particle decays
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_DECAYS_H
