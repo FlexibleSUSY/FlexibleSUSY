@@ -280,18 +280,18 @@ CreateFields[] :=
               ">;\n" <>
               "static constexpr int numberOfGenerations = " <>
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
-                     "using sm_flags = boost::mpl::vector_c<bool, " <>
-                        If[TreeMasses`GetDimension[#] === 1,
-                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
-                             TreeMasses`IsSMParticleElementwise[#],
-                                               ", "]] <>
-                        ">;\n" <>
-                "static constexpr int numberOfFieldIndices = " <>
+              "using sm_flags = boost::mpl::vector_c<bool, " <>
+                   If[TreeMasses`GetDimension[#] === 1,
+                      CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                      StringJoin @ Riffle[CConversion`CreateCBoolValue /@
+                         TreeMasses`IsSMParticleElementwise[#],
+                         ", "]
+                   ] <> ">;\n" <>
+              "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-                "static constexpr double electric_charge = " <>
+              "static constexpr double electric_charge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
-                "using lorentz_conjugate = " <>
+              "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
