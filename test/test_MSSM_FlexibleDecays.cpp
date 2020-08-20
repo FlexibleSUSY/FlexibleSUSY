@@ -717,10 +717,10 @@ Block MSOFT Q= 8.61574711E+02
 
    // Sd5 -> Chi d
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sd_to_ChiFd(&m, 5, 0, 0),
-                              0.16874114268942286, 5e-15);
+                              0.16874114268942286, 8e-14);
    // Su5 -> Cha d
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Su_to_barChaFd(&m, 4, 0, 0),
-                              6.1539819602071395, 3e-15);
+                              6.1539819602071395, 8e-14);
 
    // Sv -> Chi Fv
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sv_to_FvChi(&m, 2, 0, 0),
