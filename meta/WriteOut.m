@@ -1326,6 +1326,8 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
 
    if (!is_zero(width, 1e-100)) {
       constexpr double NEGATIVE_WIDTH_TOLERANCE = 1e-11;
+      /* @todo: this should be set by LHA input */
+      constexpr double MIN_BR_TO_PRINT = 1e-5;
       for (const auto& channel : decays_list) {
          auto const partial_width = channel.second.get_width();
          auto branching_ratio = partial_width / width;
@@ -1337,6 +1339,7 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
          else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
             branching_ratio = 0;
          }
+         if (branching_ratio < MIN_BR_TO_PRINT) continue;
          const auto final_state = channel.second.get_final_state_particle_ids();
          std::string comment = \"BR(\" + name + \" ->\";
          for (auto id : final_state) {
