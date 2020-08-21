@@ -1183,7 +1183,7 @@ Module[
    {
       ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,result
    },
-   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[k[mom],mass,type];
+   spinor[mom:_:_,mass:_:_,type:_:(1|-1)] := FormCalc`Spinor[k[mom],mass,type];
    flip@7 = 6;
    flip@6 = 7;
    result = If[numExtParticles === 4,
@@ -1208,7 +1208,7 @@ Module[
    {
       ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,l=FormCalc`Lor
    },
-   spinor[mom_:_,mass_:_,type_:1|-1] := FormCalc`Spinor[k[mom],mass,type];
+   spinor[mom:_:_,mass:_:_,type:_:(1|-1)] := FormCalc`Spinor[k[mom],mass,type];
    flip@7 = 6;
    flip@6 = 7;
    chain1*chain2 /.
