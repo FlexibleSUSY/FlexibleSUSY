@@ -1030,6 +1030,7 @@ Module[
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
       {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
+   itosave = FormCalc`Abbr[];
    subWrite["Amplitude calculation started ... done in "<>`time`get[]<>" seconds.\n"];
 
    calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
@@ -1049,7 +1050,7 @@ Module[
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[zeroExternalMomenta === ExceptLoops,
-      `current`setZeroMassRules@proc;
+      `rules`setZeroMasses@proc;
       calculatedAmplitudes = makeMassesZero@calculatedAmplitudes;
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
@@ -1070,19 +1071,19 @@ Module[
       abbreviations, subexpressions]
 ];
 
-`current`zeroMassRules::usage = "
+`rules`zeroExternalMasses::usage = "
 @brief A static-like variable, which stores the set of nullify rules for
        external particles.";
-`current`zeroMassRules = {};
-`current`zeroMassRules ~ SetAttributes ~ {Protected};
+`rules`zeroExternalMasses = {};
+`rules`zeroExternalMasses // Protect;
 
-`current`setZeroMassRules::usage = "
+`rules`setZeroMasses::usage = "
 @brief For a given type of a process creates a set of rules to nullify masses
        of external particles.
 @param expt A representation of the process under interest.
 @return None.
 @note Explicit names are expected only for external particles.";
-`current`setZeroMassRules[expr:Rule[{{_, _, _, _}..}, {{_, _, _, _}..}]] :=
+`rules`setZeroMasses[expr:Rule[{{_, _, _, _}..}, {{_, _, _, _}..}]] :=
 Module[
    {
       particles = First /@ Flatten[List@@expr, 1],
@@ -1091,29 +1092,35 @@ Module[
    uniqueNames = DeleteDuplicates[particles /. (x:_)[i:_Integer, ___] :> x@i];
    particleRules = FeynArts`M$ClassesDescription /. Equal -> Rule;
    fcRules = Flatten[{#[_] -> 0, # -> 0} &/@ (FeynArts`Mass /. (uniqueNames /. particleRules))];
-   Unprotect@`current`zeroMassRules;
-   `current`zeroMassRules = Join[(FeynArts`Mass[#] -> 0) &/@ particles, fcRules];
-   Protect@`current`zeroMassRules;
+   Unprotect@`rules`zeroExternalMasses;
+   `rules`zeroExternalMasses = Join[(FeynArts`Mass[#] -> 0) &/@ particles, fcRules];
+   Protect@`rules`zeroExternalMasses;
 ];
-`current`setZeroMassRules // Utils`MakeUnknownInputDefinition;
-`current`setZeroMassRules ~ SetAttributes ~ {Protected, Locked};
+`rules`setZeroMasses // Utils`MakeUnknownInputDefinition;
+`rules`setZeroMasses ~ SetAttributes ~ {Protected, Locked};
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
-       integrals.
+       integrals and denominators.
 @param expr An expression to modify.
-@returns Modified expression.";
+@returns A modified expression.";
 makeMassesZero[expr:_] :=
 Module[
    {
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
-      pattern, uniqueIntegrals, rules, backRules
+      pattern, uniqueIntegrals, integralRules, integralBack,
+      uniqueDenominators, denominatorRules, denominatorBack
    },
    pattern = Alternatives @@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[expr, pattern, Infinity];
-   rules = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
-   backRules = rules /. Rule[x_, y_] -> Rule[y, x];
-   expr /. rules /. `current`zeroMassRules /. backRules
+   integralRules = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
+   integralBack = integralRules /. Rule[x_, y_] -> Rule[y, x];
+
+   uniqueDenominators = DeleteDuplicates@Cases[expr, FormCalc`Den[_, _], Infinity];
+   denominatorRules = Rule[#, Unique@"loopDenominator"] &/@ uniqueDenominators;
+   denominatorBack = denominatorRules /. Rule[x_, y_] -> Rule[y, x];
+
+   expr /. integralRules /. denominatorRules /. `rules`zeroExternalMasses /. integralBack /. denominatorBack
 ];
 makeMassesZero // Utils`MakeUnknownInputDefinition;
 makeMassesZero ~ SetAttributes ~ {Protected, Locked};
