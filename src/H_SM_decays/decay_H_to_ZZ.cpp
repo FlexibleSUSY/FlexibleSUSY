@@ -24,7 +24,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // mZ < mH < 2*mZ
    // three-body decay
    } else if(4.0*x > 1.0) {
-      const double sw2 = Sqr(Sin(context.model.ThetaW()));
+      const double sw2 = Sqr(std::sin(context.model.ThetaW()));
       const double deltaV = 7.0/12.0 - 10.0/9.0*sw2 + 40.0/27.0*Sqr(sw2);
 
       res = 3./(512.*Power3(Pi)) * 1./mHOS * deltaV * RT(x)/x;
