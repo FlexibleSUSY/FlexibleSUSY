@@ -18,7 +18,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // mH < mZ
    // 4-body decay not implemented for a moment
    if (x > 1.0) {
-      const std::string index_as_string = (indexIn.size() > 0 ? "(" + std::to_string(indexIn[0]) + ")" : "");
+      const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn[0]) + ")";
       WARNING("H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
       return 0.0;
    // mZ < mH < 2*mZ
