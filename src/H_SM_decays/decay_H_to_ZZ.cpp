@@ -11,7 +11,12 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
-   const double mZOS = context.physical_mass<Z>(indexOut1);
+   // There might be large differences between mZ from mass block
+   // and one from slha input, especially in the decoupling limit
+   // so we use the latter one. There might be a problem with
+   // models where Z mixes with something else.
+   // const double mZOS = context.physical_mass<Z>(indexOut1);
+   const double mZOS = qedqcd.displayPoleMZ();
    const double x = Sqr(mZOS/mHOS);
    double res;
 
@@ -42,7 +47,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mZOS*mZOS, mZOS*mZOS))/(mHOS*mHOS);
+      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(1., Sqr(mZOS/mHOS), Sqr(mZOS/mHOS)));
 
       // phase space symmetry factor
       const double ps_symmetry = 1. / 2.;

@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
                               0.00088266545237025511, 1e-14);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
-                              0.00010156817056564993, 3e-14);
+                              8.4959557304996447e-05, 3e-14);
 
    // ------------ loop-induces decays_HO ------------
 
