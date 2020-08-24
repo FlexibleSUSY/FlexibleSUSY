@@ -486,7 +486,6 @@ Module[
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
    ];
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
-
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
 
@@ -1206,22 +1205,27 @@ Module[
 setChainWithMomentaToZero[Times[chain1_FormCalc`DiracChain, chain2_FormCalc`DiracChain]] :=
 Module[
    {
-      ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,l=FormCalc`Lor
+      ch=FormCalc`DiracChain,spinor,k=FormCalc`k,l=FormCalc`Lor, q, f
    },
    spinor[mom:_:_,mass:_:_,type:_:(1|-1)] := FormCalc`Spinor[k[mom],mass,type];
-   flip@7 = 6;
-   flip@6 = 7;
+   q[expr:__] := ch[spinor@4, expr, spinor@2];
+   f[expr:__] := ch[spinor@3, expr, spinor@1];
    chain1*chain2 /.
    {
-      ch[spinor[3],6|7,k@4,spinor[1]] -> 0,
-      ch[spinor[4],6|7,k@1,spinor[2]] -> 0,
-      ch[spinor[3],6|7,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
-      ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],6|7,l@1,spinor[2]] -> 0,
-      ch[spinor[3],-6|-7,k@4,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,spinor[2]] -> 0,
-      ch[spinor[3],-6|-7,k@4,l@1,l@2,spinor[1]]*ch[spinor[4],-6|-7,k@1,l@1,l@2,spinor[2]] -> 0,
+      f[6|7,k@4] -> 0,
+      q[6|7,k@1] -> 0,
+      f[6|7,l@1] * q[-6|-7,k@1,l@1] -> 0,
+      f[-6|-7,k@4,l@1] * q[6|7,l@1] -> 0,
+      f[-6|-7,k@4,l@1] * q[-6|-7,k@1,l@1] -> 0,
+      f[-6|-7,k@4,l@1,l@2] * q[-6|-7,k@1,l@1,l@2] -> 0,
 
-      ch[spinor[3],-6|-7,k@1,k@4,l@1,spinor[1]]*ch[spinor[4],6|7,l@1,spinor[2]] -> 0,
-      ch[spinor[3],6|7,l@1,spinor[1]]*ch[spinor[4],-6|-7,k@1,k@4,l@1,spinor[2]] -> 0
+      f[-6|-7,k@1,k@4,l@1] * q[6|7,l@1] -> 0,
+      f[6|7,l@1] * q[-6|-7,k@1,k@4,l@1] -> 0,
+      (* additional replacement rules *)
+      f[6 | 7, k@1] * q[6 | 7] -> 0,
+      f[6 | 7] * q[6 | 7, k@4] -> 0,
+      f[-6 | -7, k@1, l@1] * q[6 | 7, l@1] -> 0,
+      f[-6 | -7, l@1, l@2] * q[-6 | -7 , k@1, l@1, l@2 ] -> 0
    }
 ];
 
