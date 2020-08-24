@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This test compares the real CMSSM with the complex CMSSM (cCMSSM)
 # for real input parameters
@@ -6,11 +6,15 @@
 BASEDIR=$(dirname $0)
 UTILSDIR=${BASEDIR}/../utils
 
-cmssm_input="$BASEDIR/../model_files/CMSSM/LesHouches.in.CMSSM"
+cmssm_input=$(
+    cat "$BASEDIR/../model_files/CMSSM/LesHouches.in.CMSSM"
+    cat <<EOF
+Block FlexibleSUSY
+    6   2                    # beta-functions loop order
+EOF
+    )
 cmssm_output="$BASEDIR/test_cCMSSM_CMSSM.out.spc"
-ccmssm_input="$cmssm_input"
 ccmssm_output="$BASEDIR/test_cCMSSM_cCMSSM.out.spc"
-ccmssm_real_output="$BASEDIR/test_cCMSSM_cCMSSM_real_part.out.spc"
 
 sed_cmd=`command -v sed`
 awk_cmd=`command -v awk`
@@ -39,69 +43,62 @@ if test ! -x "$ccmssm_exe"; then
     exit 1
 fi
 
-remove_imaginary_blocks() {
-    $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=ImAu \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=ImAd \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=ImAe \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=ImHMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=ImMSOFT
+remove_comments() {
+    $sed_cmd -e 's/ *#\(.*\)//'
 }
 
-remove_mixing_matrix_blocks() {
-    $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=UMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=VMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=PSEUDOSCALARMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=DSQMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=SELMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=SCALARMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=NMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=CHARGEMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=USQMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=SNUMIX \
-        | $awk_cmd -f $UTILSDIR/remove_slha_block.awk -v block=FlexibleSUSYOutput -v entry=0
+print_blocks_to_compare() {
+    cat - | tee \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=GAUGE              -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=YU                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=YD                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=YE                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=TU                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=TD                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=TE                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSQ2               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSU2               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSD2               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSL2               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSE2               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Phases             -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=FlexibleSUSYOutput -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=ALPHA              -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=HMIX               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Au                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Ad                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Ae                 -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSOFT              -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MASS               -v omit_comments=1 | remove_comments) \
+        > /dev/null
 }
 
 # generate CMSSM point
 echo -n "running CMSSM point ... "
-$cmssm_exe --slha-input-file=$cmssm_input --slha-output-file=$cmssm_output
+echo "$cmssm_input" | $cmssm_exe --slha-input-file=- --slha-output-file=$cmssm_output
 echo "done"
-echo "CMSSM SLHA input file:  $cmssm_input"
 echo "CMSSM SLHA output file: $cmssm_output"
 
 # generate cCMSSM point
 echo -n "running cCMSSM point ... "
-$ccmssm_exe --slha-input-file=$ccmssm_input --slha-output-file=$ccmssm_output
+echo "$cmssm_input" | $ccmssm_exe --slha-input-file=- --slha-output-file=$ccmssm_output
 echo "done"
-echo "cCMSSM SLHA input file:  $ccmssm_input"
 echo "cCMSSM SLHA output file: $ccmssm_output"
 
-remove_imaginary_blocks < "$ccmssm_output" > "$ccmssm_real_output"
-
-# remove mixing matrix blocks and comments
-cp "$cmssm_output" "$cmssm_output~"
-cp "$ccmssm_real_output" "$ccmssm_real_output~"
-
-remove_mixing_matrix_blocks < "$cmssm_output~"       | $sed_cmd -e '/#.*/d' > "$cmssm_output"
-remove_mixing_matrix_blocks < "$ccmssm_real_output~" | $sed_cmd -e '/#.*/d' > "$ccmssm_real_output"
+echo "$(cat "$cmssm_output"  | print_blocks_to_compare)" > "$cmssm_output"
+echo "$(cat "$ccmssm_output" | print_blocks_to_compare)" > "$ccmssm_output"
 
 echo ""
-echo "comparing files: $cmssm_output and $ccmssm_real_output ..."
+echo "comparing files: $cmssm_output and $ccmssm_output ..."
 
-diff=`$numdiff_cmd\
- $cmssm_output $ccmssm_real_output`
+$numdiff_cmd $cmssm_output $ccmssm_output
+exit_code=$?
 
-diff_without_comments=`echo $diff | $sed_cmd -e '/^ *#/d' | $sed_cmd -e '/^+++/d'`
-
-exit_code=0
-
-if [ -n "$diff_without_comments" ]; then
-    echo "Error: difference between $cmssm_output and $ccmssm_real_output"
-    echo "$diff"
+if [ "x$exit_code" != "x0" ]; then
+    echo "Error: difference between $cmssm_output and $ccmssm_output"
     echo ""
     echo "Test result: FAIL"
-    exit_code=1
 else
-    echo "$diff"
     echo ""
     echo "Test result: OK"
 fi
