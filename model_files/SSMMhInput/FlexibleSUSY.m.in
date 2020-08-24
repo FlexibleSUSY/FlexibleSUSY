@@ -20,6 +20,8 @@ EXTPAR = {
 
 EWSBOutputParameters = { mu2, MS };
 
+OnlyLowEnergyFlexibleSUSY = False;
+
 HighScale = Qin;
 
 HighScaleFirstGuess = Qin;
@@ -36,7 +38,8 @@ SUSYScale = QEWSB;
 SUSYScaleFirstGuess = QEWSB;
 
 SUSYScaleInput = {
-    {vS, vSInput}
+   FSFindRoot[{\[Lambda]}, {MhInput - Pole[M[hh[1]]]}],
+   {vS, vSInput}
 };
 
 LowScale = LowEnergyConstant[MZ];
@@ -44,7 +47,6 @@ LowScale = LowEnergyConstant[MZ];
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
 LowScaleInput = {
-   FSFindRoot[{\[Lambda]}, {MhInput - Pole[M[hh[1]]]}],
    {v, 2 MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
    {Yu, Automatic},
    {Yd, Automatic},
@@ -52,13 +54,12 @@ LowScaleInput = {
 };
 
 InitialGuessAtLowScale = {
+   {\[Lambda], 0.1},
    {v, LowEnergyConstant[vev]},
    {Yu, Automatic},
    {Yd, Automatic},
    {Ye, Automatic}
 };
-
-OnlyLowEnergyFlexibleSUSY = False;
 
 DefaultPoleMassPrecision = MediumPrecision;
 HighPoleMassPrecision    = {hh};
