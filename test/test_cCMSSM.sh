@@ -43,6 +43,28 @@ if test ! -x "$ccmssm_exe"; then
     exit 1
 fi
 
+# applies abs to every entry in every line that does not start with `B'
+apply_abs() {
+    local bc_friendly
+
+    while read line ; do
+        case "${line}" in
+            B*)
+                printf "%s\n" "${line}"
+                continue ;;
+            *)
+                for entry in ${line} ; do
+                    # convert scientific notation to to bc friendly input
+                    bc_friendly=$(echo "${entry}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+                    # apply abs
+                    printf "%s " $(echo  "scale=15; abs(${bc_friendly})" | bc $BASEDIR/abs.bc)
+                done
+                printf "\n"
+                continue ;;
+            esac
+    done
+}
+
 remove_comments() {
     $sed_cmd -e 's/ *#\(.*\)//'
 }
@@ -69,7 +91,7 @@ print_blocks_to_compare() {
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Ad                 -v omit_comments=1 | remove_comments) \
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=Ae                 -v omit_comments=1 | remove_comments) \
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MSOFT              -v omit_comments=1 | remove_comments) \
-        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MASS               -v omit_comments=1 | remove_comments) \
+        >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=MASS               -v omit_comments=1 | remove_comments | apply_abs) \
         > /dev/null
 }
 
