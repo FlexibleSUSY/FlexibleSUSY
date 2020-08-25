@@ -70,7 +70,7 @@ remove_comments() {
 }
 
 print_blocks_to_compare() {
-    cat - | tee \
+    tee \
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=GAUGE              -v omit_comments=1 | remove_comments) \
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=YU                 -v omit_comments=1 | remove_comments) \
         >($awk_cmd -f $UTILSDIR/print_slha_block.awk -v block=YD                 -v omit_comments=1 | remove_comments) \
