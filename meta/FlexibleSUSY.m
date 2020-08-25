@@ -1980,17 +1980,6 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                           } ];
           ];
 
-WriteDecaysMakefileModule[sources_List, headers_List, files_List] :=
-    Module[{source = "", header = ""},
-           source = Utils`StringJoinWithSeparator[("\t\t$(DIR)/" <> #)& /@ sources, " \\\n"];
-           header = Utils`StringJoinWithSeparator[("\t\t$(DIR)/" <> #)& /@ headers, " \\\n"];
-           WriteOut`ReplaceInFiles[files,
-                  { "@FlexibleDecaysSource@" -> source,
-                    "@FlexibleDecaysHeader@" -> header,
-                    Sequence @@ GeneralReplacementRules[]
-                  } ];
-          ];
-
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
     Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, decaysVertices2 = {}, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
@@ -4812,6 +4801,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                      FileNameJoin[{FSOutputDir,  "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
 
                                                    }];
+                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
+                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}},
+                                         {Sequence @@ GeneralReplacementRules[]}
+                 ];
                  ,
                  Print["Skipping calculating decays as no particles to calculate decays for were found."];
                 ];
@@ -4822,11 +4815,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
 
              ]; (* If[FSCalculateDecays] *)
-
-           WriteDecaysMakefileModule[decaysSources, decaysHeaders,
-                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
-                                          FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}}
-                                    ];
 
            Utils`PrintHeadline["Creating other observables"];
            Print["Creating class for effective couplings ..."];
