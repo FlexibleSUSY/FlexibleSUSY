@@ -4790,8 +4790,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               If[FlexibleSUSY`DecayParticles =!= {},
                  With[{dir=FileNameJoin[{FSOutputDir, "decays"}]}, If[!DirectoryQ[dir], CreateDirectory[dir]]];
                  decaysSources = Join[decaysSources, {FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
-                                                      FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}],
-                                                      "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}
+                                                      FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]}
                                                       ];
                  decaysHeaders = Join[decaysHeaders, {FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_table.hpp"}],
                                                       FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.hpp"}],
@@ -5002,9 +5001,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              {FileNameJoin[{$flexiblesusyTemplateDir, "run_cmd_line.cpp.in"}],
                               FileNameJoin[{FSOutputDir, "run_cmd_line_" <> FlexibleSUSY`FSModelName <> ".cpp"}]},
                              {FileNameJoin[{$flexiblesusyTemplateDir, "scan.cpp.in"}],
-                              FileNameJoin[{FSOutputDir, "scan_" <> FlexibleSUSY`FSModelName <> ".cpp"}]},
-                             {FileNameJoin[{$flexiblesusyTemplateDir, "run_decays.cpp.in"}],
-                              FileNameJoin[{FSOutputDir, "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
+                              FileNameJoin[{FSOutputDir, "scan_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
                             }
                            ];
 
