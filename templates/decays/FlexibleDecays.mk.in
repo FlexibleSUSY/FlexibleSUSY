@@ -21,3 +21,6 @@ LIB@ModelName@_SRC += \
 
 LIB@ModelName@_HDR += \
 @FlexibleDecaysHeader@
+
+EXE@ModelName@_SRC += \
+		$(DIR)/run_decays_@ModelName@.cpp
