@@ -203,9 +203,10 @@ Module[
    // Hisano defines form factors A2 through a matrix element in eq. 14
    // Kitano uses a lagrangian with F_munu. There is a factor of 2 from translation
    // because Fmunu = qeps - eps q
+   // add one minus here because of descending order from chains
 
-   const auto D_L = -0.5 * photon_penguin[2];
-   const auto D_R = -0.5 * photon_penguin[3];
+   const auto D_L = 0.5 * photon_penguin[2];
+   const auto D_R = 0.5 * photon_penguin[3];
 
    const auto A2L = D_L/(4.*GF/sqrt(2.));
    const auto A2R = D_R/(4.*GF/sqrt(2.));
@@ -235,10 +236,11 @@ Module[
    const auto vcD = 0.5 * (dL + dR);
 
    // the A1 term if the factor in front of q^2, the photon propagator is -1/q^2, we need only factor -1
-   auto gpLV = -sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
-   auto gpRV = -sqrt(2.0)/GF * photon_penguin[1] * (2.*vcU + vcD);
-   auto gnLV = -sqrt(2.0)/GF * photon_penguin[0] * (vcU + 2.*vcD);
-   auto gnRV = -sqrt(2.0)/GF * photon_penguin[1] * (vcU + 2.*vcD);
+   // one additional minus, because of missing permutation
+   auto gpLV = sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
+   auto gpRV = sqrt(2.0)/GF * photon_penguin[1] * (2.*vcU + vcD);
+   auto gnLV = sqrt(2.0)/GF * photon_penguin[0] * (vcU + 2.*vcD);
+   auto gnRV = sqrt(2.0)/GF * photon_penguin[1] * (vcU + 2.*vcD);
 
    // all contributions
 
@@ -277,27 +279,25 @@ Module[
    double GTpu = 0.77,          GTpd = -0.23,         GTps = 0.008;
    double GTnu = 0.77,          GTnd = -0.23,         GTns = 0.008;
 
-   //minus because of descending order in FormCalc spinor chains
-   auto CSLu = -( npfU.at(0)+npfU.at(1) )/2.;
-   auto CSRu = -( npfU.at(2)+npfU.at(3) )/2.;
-   auto CSLd = -( npfD.at(0)+npfD.at(1) )/2.;
-   auto CSRd = -( npfD.at(2)+npfD.at(3) )/2.;
-   auto CSLs = -( npfS.at(0)+npfS.at(1) )/2.;
-   auto CSRs = -( npfS.at(2)+npfS.at(3) )/2.;
+   auto CSLu = ( npfU.at(0)+npfU.at(1) )/2.;
+   auto CSRu = ( npfU.at(2)+npfU.at(3) )/2.;
+   auto CSLd = ( npfD.at(0)+npfD.at(1) )/2.;
+   auto CSRd = ( npfD.at(2)+npfD.at(3) )/2.;
+   auto CSLs = ( npfS.at(0)+npfS.at(1) )/2.;
+   auto CSRs = ( npfS.at(2)+npfS.at(3) )/2.;
 
-   //minus because of descending order in FormCalc spinor chains
-   auto CVLu = -( npfU.at(4)+npfU.at(5) )/2.;
-   auto CVRu = -( npfU.at(6)+npfU.at(7) )/2.;
-   auto CVLd = -( npfD.at(4)+npfD.at(5) )/2.;
-   auto CVRd = -( npfD.at(6)+npfD.at(7) )/2.;
+   auto CVLu = ( npfU.at(4)+npfU.at(5) )/2.;
+   auto CVRu = ( npfU.at(6)+npfU.at(7) )/2.;
+   auto CVLd = ( npfD.at(4)+npfD.at(5) )/2.;
+   auto CVRd = ( npfD.at(6)+npfD.at(7) )/2.;
 
-   //plus because of descending order in FormCalc spinor chains and definition of tensor operators
-   auto CTLu = npfU.at(8);
-   auto CTRu = npfU.at(9);
-   auto CTLd = npfD.at(8);
-   auto CTRd = npfD.at(9);
-   auto CTLs = npfS.at(8);
-   auto CTRs = npfS.at(9);
+   //minus because of definition of tensor operators
+   auto CTLu = -npfU.at(8);
+   auto CTRu = -npfU.at(9);
+   auto CTLd = -npfD.at(8);
+   auto CTRd = -npfD.at(9);
+   auto CTLs = -npfS.at(8);
+   auto CTRs = -npfS.at(9);
 
    gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );
    gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );
