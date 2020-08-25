@@ -107,6 +107,7 @@ echo "$cmssm_input" | $ccmssm_exe --slha-input-file=- --slha-output-file=$ccmssm
 echo "done"
 echo "cCMSSM SLHA output file: $ccmssm_output"
 
+# extract blocks that we want to compare
 echo "$(cat "$cmssm_output"  | print_blocks_to_compare)" > "$cmssm_output"
 echo "$(cat "$ccmssm_output" | print_blocks_to_compare)" > "$ccmssm_output"
 
