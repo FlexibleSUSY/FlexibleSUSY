@@ -55,7 +55,7 @@ apply_abs() {
             *)
                 for entry in ${line} ; do
                     # convert scientific notation to bc friendly input
-                    bc_friendly=$(echo "${entry}" | sed -e 's/[eE]/\*10\^/' | sed -e 's/\^+/\^/')
+                    bc_friendly=$(echo "${entry}" | $sed_cmd -e 's/[eE]/\*10\^/' | $sed_cmd -e 's/\^+/\^/')
                     # apply abs
                     printf "%s " $(echo  "scale=15; abs(${bc_friendly})" | bc $BASEDIR/abs.bc)
                 done
