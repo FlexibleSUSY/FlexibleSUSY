@@ -503,6 +503,9 @@ Module[
       Get[file[[1]]];,
       `settings`topologyReplacements = {};
       `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
+
+      `settings`diagrams = {}&;
+      `settings`diagrams ~ SetAttributes ~ {Protected, Locked};
    ];
 ];
 getSettings // Utils`MakeUnknownInputDefinition;
@@ -531,9 +534,9 @@ Module[
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludeTopologies@OptionValue@KeepProcesses
    ];
-
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
-   diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
+
+   diagrams = FeynArts`InsertFields[topologies, inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];
 
    diagrams = getModifiedDiagrams[diagrams,OptionValue@KeepProcesses];
@@ -777,85 +780,35 @@ getTopologyAmplitudeRulesByTopologyCriterion // Utils`MakeUnknownInputDefinition
 getTopologyAmplitudeRulesByTopologyCriterion ~ SetAttributes ~ {Protected,Locked};
 
 getModifiedDiagrams::usage =
-"@brief Modifies diagrams according to excudeProcess list.
-@param <TopologyList> set of topology-insertion rules to modify.
-@param <List> set of names which specify the process to consider.
-@returns <TopologyList> modified set of diagrams.";
+"@brief Modifies diagrams according to `keepProcess' list.
+@param inserted A set of topology-insertion rules to modify.
+@param keepProcesses A set of names which specify the process to consider.
+@returns A modified set of diagrams.";
 getModifiedDiagrams[
    inserted:`type`diagramSet,
-   excludeProcesses_
-] :=
-getModifiedDiagrams[inserted,{excludeProcesses}];
-getModifiedDiagrams[
-   inserted:`type`diagramSet,
-   excludeProcesses:{___}] :=
+   keepProcesses:{__Symbol}] :=
 Module[
    {
-      newInserted = inserted,leptonPattern
+      settings = `settings`diagrams@inserted,
+      positiveRules, negativeRules, discardProcesses, actions,
+      newInserted = inserted
    },
-   If[Not[MemberQ[excludeProcesses,FourFermionScalarPenguins]&&
-          MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins]],
-      If[MemberQ[excludeProcesses,FourFermionScalarPenguins],
-         newInserted = If[`topologyQ`pinguinT[#[[1]]],
-            #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`V]&],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print@"t-penguins: tree-like vector bosons were removed";
-         printDiagramsInfo@newInserted;
-      ];
-      If[MemberQ[excludeProcesses,FourFermionMassiveVectorPenguins],
-         newInserted = If[`topologyQ`pinguinT[#[[1]]],
-            #[[1]]->FeynArts`DiagramSelect[#[[2]],FreeQ[#,FeynArts`Field@5->FeynArts`S]&],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print@"t-penguins: tree-like scalar bosons were removed";
-         printDiagramsInfo@newInserted;
-      ];
+   positiveRules = settings /. Rule[s:_, {p:_, _}] :> Rule[s, p];
+   negativeRules = settings /. Rule[s:_, {_, n:_}] :> Rule[s, n];
+   discardProcesses = Complement[settings[[All, 1]], keepProcesses];
+   actions = DeleteDuplicates@Join[
+      DeleteDuplicates@Flatten[keepProcesses /. positiveRules, 1],
+      DeleteDuplicates@Flatten[discardProcesses /. negativeRules, 1]
    ];
-   If[Or@@(MemberQ[excludeProcesses,#]&/@{FourFermionScalarPenguins,FourFermionMassiveVectorPenguins}),
-         leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
-         newInserted = If[`topologyQ`self1pinguinT[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[7|8]->leptonPattern],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         leptonPattern = getField[newInserted,3]/.index:`type`indexGen:>Blank[];
-         newInserted = If[`topologyQ`self3pinguinT[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[7|8]->leptonPattern],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print@"t-penguins: external leptons in sed-like processes were removed";
-         printDiagramsInfo@newInserted;
 
-         leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
-         newInserted = If[`topologyQ`trianglepinguinT[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6|7]->leptonPattern],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print@"t-penguins: external leptons in triangle loop were removed";
-         printDiagramsInfo@newInserted;
-   ];
-   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
-         leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
-         newInserted = If[`topologyQ`boxS[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[6]->leptonPattern],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["s-boxes: loops with initial lepton are removed"];
-         printDiagramsInfo@newInserted;
-   ];
-   If[MemberQ[excludeProcesses,FourFermionFlavourChangingBoxes],
-
-         newInserted = If[`topologyQ`boxT[#[[1]]],
-            Print["Warning: t-boxes are non-zero: @todo implement rules"];#,
-            #] &/@ newInserted;
-
-         leptonPattern = getField[newInserted,1]/.index:`type`indexGen:>Blank[];
-         newInserted = If[`topologyQ`boxU[#[[1]]],
-            #[[1]]->removeGenericInsertionsBy[#[[2]],FeynArts`Field[5]->leptonPattern],
-            #] &/@ newInserted;
-         newInserted = removeTopologiesWithoutInsertions@newInserted;
-         Print["u-boxes: loops with initial lepton were deleted"];
-         printDiagramsInfo@newInserted;
+   Do[
+      newInserted = If[Part[ac,1][Part[#,1]],
+         Part[#,1] -> Part[ac,2][Part[#,2], Part[ac,3]],
+         #] &/@ newInserted;
+      newInserted = removeTopologiesWithoutInsertions@newInserted;
+      Print@Part[ac,4];
+      printDiagramsInfo@newInserted;,
+      {ac, actions}
    ];
    newInserted
 ];
