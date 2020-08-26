@@ -529,7 +529,7 @@ Module[
    topologies = FeynArts`CreateTopologies[
       OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
-      FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
+      FeynArts`ExcludeTopologies -> getExcludeTopologies@OptionValue@KeepProcesses
    ];
 
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];

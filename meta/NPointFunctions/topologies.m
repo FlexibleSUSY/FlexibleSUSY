@@ -167,13 +167,14 @@ topologyReplacements =
 };
 topologyReplacements ~ SetAttributes ~ {Protected, Locked};
 
-getExcludedTopologies::usage =
+getExcludeTopologies::usage =
 "@brief Registers and returns a function, whose outcome - True or everything
         else - determines whether the topology is kept or discarded (see
         FeynArts manual).
 @param keepProcesses Name(s) of processes to hold.
-@returns _Symbol Generated name of topologies to hold.";
-getExcludedTopologies[keepProcesses:{__Symbol}] :=
+@returns _Symbol Generated name of topologies to hold.
+@todo Add a catcher for the case 2 or more.";
+getExcludeTopologies[keepProcesses:{__Symbol}] :=
 Module[
    {
       excludeTopologyName,
@@ -184,8 +185,8 @@ Module[
       _, (Or @@ Through[(keepProcesses /. rules)@#])&
    ];
    excludeTopologyName];
-getExcludedTopologies // Utils`MakeUnknownInputDefinition;
-getExcludedTopologies ~ SetAttributes ~ {Protected, Locked};
+getExcludeTopologies // Utils`MakeUnknownInputDefinition;
+getExcludeTopologies ~ SetAttributes ~ {Protected, Locked};
 
 End[];
 EndPackage[];
