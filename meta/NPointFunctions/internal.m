@@ -55,7 +55,25 @@ On[General::shdw]
 
 Begin["`internal`"];
 
-Get@FileNameJoin@{DirectoryName@FindFile@$Input, "time.m"};
+`directory`internal::usage = "
+@brief A `String' variable, containing the directory name of `internal.m' file.";
+`directory`internal = DirectoryName@FindFile@$Input;
+`directory`internal ~ SetAttributes ~ {Protected, Locked};
+
+`process`directory::usage = "
+@brief A structure of the pattern {Rule[{__Symbol}, _String]..}, which connects
+       the name of symbols, used for the calculation of some process, with the
+       name of directory/file, where process specific information is stored.";
+`settings`file = {
+   {
+      FourFermionScalarPenguins,
+      FourFermionMassiveVectorPenguins,
+      FourFermionFlavourChangingBoxes
+   } -> #@"LToLConversion"
+} &@ ( FileNameJoin@{`directory`internal, #, "settings.m"}& );
+`settings`file ~ SetAttributes ~ {Protected, Locked};
+
+Get@FileNameJoin@{`directory`internal, "time.m"};
 
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`vertex ~ SetAttributes ~ {Protected, Locked};
@@ -66,7 +84,7 @@ Get@FileNameJoin@{DirectoryName@FindFile@$Input, "time.m"};
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`topology ~ SetAttributes ~ {Protected, Locked};
 
-Get@FileNameJoin@{DirectoryName@FindFile@$Input, "topologies.m"};
+Get@FileNameJoin@{`directory`internal, "topologies.m"};
 
 `type`diagram = Rule[`type`topology,FeynArts`Insertions[Generic][__]];
 
@@ -114,8 +132,13 @@ getField ~ SetAttributes ~ {Protected,Locked};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 
 particleNamesFile = "";
+particleNamesFile // Protect;
+
 substitutionsFile = "";
+substitutionsFile // Protect;
+
 particleNamespaceFile = "";
+particleNamespaceFile // Protect;
 
 `rules`subexpressions::usage = "
 @brief Translation rules for subexpressions from FeynArts/FormCalc to
@@ -135,10 +158,8 @@ particleNamespaceFile = "";
 `rules`amplitudes= {};
 `rules`amplitudes // Protect;
 
-Protect[particleNamesFile, substitutionsFile, particleNamespaceFile];
-
-SetInitialValues::usage=
-"@brief Set the FeynArts and FormCalc paths, creates required directories.
+SetInitialValues::usage= "
+@brief Set the FeynArts and FormCalc paths, creates required directories.
 @param FCDirS the directory designated for FormCalc output
 @param FAModelS the name of the FeynArts model file
 @param particleNamesFileS the name of the SARAH-generated particle names file
@@ -464,6 +485,29 @@ Module[
 SetFSConventionRules // Utils`MakeUnknownInputDefinition;
 SetFSConventionRules ~ SetAttributes ~ {Protected,Locked};
 
+getSettings::usage =
+"@brief Loads the file with processor specific settings according to keep
+        keep processes option. If there is no process file to load, defines
+        default settins.
+@param keepProcesses A `List' of `Symbol's with information about required
+       processes.
+@returns Null.";
+getSettings[keepProcesses:{__Symbol}] :=
+Module[
+   {
+      rules = `settings`file /. Rule[e:_, s:_] :> Sequence@@(Rule[#, s] &/@ e),
+      file
+   },
+   file = DeleteDuplicates[keepProcesses /. rules];
+   If[Length@file === 1,
+      Get[file[[1]]];,
+      `settings`topologyReplacements = {};
+      `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
+   ];
+];
+getSettings // Utils`MakeUnknownInputDefinition;
+getSettings ~ SetAttributes ~ {Protected, Locked};
+
 Options[NPointFunctionFAFC]={
    LoopLevel -> 1,
    Regularize -> DimensionalReduction,
@@ -480,11 +524,14 @@ Module[
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
+   getSettings@OptionValue@KeepProcesses;
+
    topologies = FeynArts`CreateTopologies[
       OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludedTopologies@OptionValue@KeepProcesses
    ];
+
    If[List@@topologies === {},Return@`subkernel`error@`subkernel`message::errNoTopologies];
    diagrams = FeynArts`InsertFields[topologies,inFields->outFields];
    If[List@@diagrams === {},Return@`subkernel`error@`subkernel`message::errNoDiagrams];

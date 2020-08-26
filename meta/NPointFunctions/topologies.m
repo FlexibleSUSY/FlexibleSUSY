@@ -20,6 +20,9 @@
 
 *)
 
+BeginPackage["NPointFunctions`"];
+Begin["NPointFunctions`internal`"];
+
 getAdjacencyMatrix[topology:`type`topology] :=
 Module[
    {
@@ -154,42 +157,35 @@ getAdjacencyMatrix@topology === {
 `topologyQ`boxU // Utils`MakeUnknownInputDefinition;
 `topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
 
-topologyReplacements::usage =
-"@brief List of topology replacement rules for a processes to keep.
+topologyReplacements::usage = "
+@brief List of topology replacement rules for a processes to keep.
 @note R.h.s. should be pure functions of one argument.";
-
 topologyReplacements =
 {
    Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
-   Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&),
-   FourFermionFlavourChangingBoxes -> (`topologyQ`box@#&),
-   FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
-   FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
+   Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&)
 };
-
-topologyReplacements ~ SetAttributes ~ {Protected,Locked};
+topologyReplacements ~ SetAttributes ~ {Protected, Locked};
 
 getExcludedTopologies::usage =
 "@brief Registers and returns a function, whose outcome - True or everything
         else - determines whether the topology is kept or discarded (see
         FeynArts manual).
-@param {} or _Symbol or {_Symbol} or {__Symbol} Name(s) of processes to hold.
+@param keepProcesses Name(s) of processes to hold.
 @returns _Symbol Generated name of topologies to hold.";
-
-getExcludedTopologies[{}] := {};
-
-getExcludedTopologies[{sym_Symbol}] := getExcludedTopologies@sym;
-
-getExcludedTopologies[syms:{__Symbol}] :=
-Module[{excludeTopologyName},
-   FeynArts`$ExcludeTopologies[excludeTopologyName] =
-      (Or @@ Through[(syms/.topologyReplacements)@#])&;
+getExcludedTopologies[keepProcesses:{__Symbol}] :=
+Module[
+   {
+      excludeTopologyName,
+      rules = Join[topologyReplacements, `settings`topologyReplacements]
+   },
+   FeynArts`$ExcludeTopologies[excludeTopologyName] = Switch[Length@keepProcesses,
+      1,  keepProcesses[[1]] /. rules,
+      _, (Or @@ Through[(keepProcesses /. rules)@#])&
+   ];
    excludeTopologyName];
-
-getExcludedTopologies[sym_Symbol] :=
-Module[{excludeTopologyName},
-   FeynArts`$ExcludeTopologies[excludeTopologyName] = sym/.topologyReplacements;
-   excludeTopologyName];
-
 getExcludedTopologies // Utils`MakeUnknownInputDefinition;
-getExcludedTopologies ~ SetAttributes ~ {Protected,Locked};
+getExcludedTopologies ~ SetAttributes ~ {Protected, Locked};
+
+End[];
+EndPackage[];

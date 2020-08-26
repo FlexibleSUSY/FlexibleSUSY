@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* :Copyright:
 
    ====================================================================
@@ -20,24 +22,23 @@
 
 *)
 
+(* @todo topology.m should be pre-loaded *)
+
 BeginPackage["NPointFunctions`"];
-Begin["NPointFunctions`internal`time`"];
 
-time = AbsoluteTime[];
-time // Protect;
+{
+   FourFermionMassiveVectorPenguins,
+   FourFermionScalarPenguins,
+   FourFermionFlavourChangingBoxes
+}
 
-set[] := (
-   Unprotect@time;
-   time = AbsoluteTime[];
-   Protect@time;
-);
-set // Utils`MakeUnknownInputDefinition;
-set ~ SetAttributes ~ {Protected, Locked};
+Begin["NPointFunctions`internal`"];
 
-get[] :=
-   ToString@N[AbsoluteTime[]-time, {Infinity,3}];
-get // Utils`MakeUnknownInputDefinition;
-get ~ SetAttributes ~ {Protected, Locked};
+`settings`topologyReplacements = {
+   FourFermionFlavourChangingBoxes -> (`topologyQ`box@#&),
+   FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
+   FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&)
+};
 
 End[];
 EndPackage[];
