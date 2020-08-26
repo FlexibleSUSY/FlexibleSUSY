@@ -9,9 +9,20 @@
 
 int main(int argc, char* argv[])
 {
-  std::ifstream ifs(argv[1]);
-  std::string slha_input( (std::istreambuf_iterator<char>(ifs) ),
-                       (std::istreambuf_iterator<char>()    ) );
+   if (argc < 2) {
+      ERROR("Need at least one argument - the name of the file containing a spectrum.");
+      return EXIT_FAILURE;
+   }
+   else if (argc > 3) {
+      ERROR("The program expects at most 2 arguments.");
+      return EXIT_FAILURE;
+   }
+
+   std::ifstream ifs(argv[1]);
+   std::string slha_input(
+      (std::istreambuf_iterator<char>(ifs)),
+      (std::istreambuf_iterator<char>())
+   );
 
    std::stringstream istr(slha_input);
 
@@ -52,7 +63,7 @@ int main(int argc, char* argv[])
       slha_io.set_decays(decays.get_decay_table());
    }
 
-   slha_io.write_to(argv[2]);
+   slha_io.write_to(argc > 2 ? argv[2] : "-");
 
    return 0;
 }
