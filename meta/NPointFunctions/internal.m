@@ -716,7 +716,7 @@ Module[
 getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
 getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked};
 
-getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]..}] :=
+getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]...}] :=
 Module[{
       positiveRules = settings /. Rule[s:_, {p:_, _}] :> Rule[s, p],
       negativeRules = settings /. Rule[s:_, {_, n:_}] :> Rule[s, n],
