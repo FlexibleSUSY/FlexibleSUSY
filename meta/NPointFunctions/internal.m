@@ -562,8 +562,11 @@ Module[
       file
    },
    file = DeleteDuplicates[keepProcesses /. rules];
-   If[Length@file === 1,
+
+   If[MatchQ[file, {_String}],
       Get[file[[1]]];,
+      BeginPackage["NPointFunctions`"];
+      Begin["`internal`"];
       `settings`topologyReplacements = {};
       `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
 
@@ -572,6 +575,8 @@ Module[
 
       `settings`amplitudes = {};
       `settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
+      End[];
+      EndPackage[];
    ];
 ];
 getSettings // Utils`MakeUnknownInputDefinition;
@@ -594,7 +599,6 @@ Module[
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
    getSettings@OptionValue@KeepProcesses;
-
    topologies = FeynArts`CreateTopologies[
       OptionValue@LoopLevel,
       Length@inFields -> Length@outFields,
@@ -716,7 +720,8 @@ Module[
 getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
 getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked};
 
-getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]...}] :=
+getActions[keepProcesses:`type`keepProcesses, settings:{}] := {};
+getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]..}] :=
 Module[{
       positiveRules = settings /. Rule[s:_, {p:_, _}] :> Rule[s, p],
       negativeRules = settings /. Rule[s:_, {_, n:_}] :> Rule[s, n],

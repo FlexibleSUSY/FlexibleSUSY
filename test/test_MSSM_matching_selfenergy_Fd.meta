@@ -51,7 +51,7 @@ Selfenergy = NPointFunctions`NPointFunction[
    {SARAH`DownQuark}, {SARAH`DownQuark},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
+   NPointFunctions`KeepProcesses -> {NPointFunctions`Irreducible}];
 
 ChiralBasis =
    {

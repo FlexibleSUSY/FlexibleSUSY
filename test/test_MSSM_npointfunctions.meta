@@ -53,7 +53,7 @@ hhSelfenergy = NPointFunctions`NPointFunction[
    {SARAH`HiggsBoson}, {SARAH`HiggsBoson},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> True,
-   NPointFunctions`KeepProcesses -> NPointFunctions`Irreducible];
+   NPointFunctions`KeepProcesses -> {NPointFunctions`Irreducible}];
 
 hhSelfenergyCode = NPointFunctions`CreateCXXFunctions[
    hhSelfenergy,
