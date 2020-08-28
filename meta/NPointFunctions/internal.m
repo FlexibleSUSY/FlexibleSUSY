@@ -627,10 +627,7 @@ Module[
    sumSettings = getSumSettings@diagrams;
    momSettings = getMomSettings@diagrams;
    genericInsertions = getFieldInsertions@diagrams;
-
-   colourFactors = Flatten[
-      ColourFactorForDiagram /@ (List @@ diagrams), 1] //.
-      `rules`fieldNames;
+   colourFactors = getColourFactors@diagrams;
 
    fsInFields = Head[amplitudes][[1,2,1,All,1]] //. `rules`fieldNames;
    fsOutFields = Head[amplitudes][[1,2,2,All,1]] //. `rules`fieldNames;
@@ -969,18 +966,21 @@ StripParticleIndices[Times[-1,field_]] :=
 StripParticleIndices[genericType_[classIndex_, ___]] :=
    genericType[classIndex];
 
-ColourFactorForDiagram::usage="
+getColourFactors::usage = "
 @brief Creates colour factors for a given diagram.
-@param diagram (Topology[_]->Insertions[Generic][__]) rule.
+@param ds A diagram set.
+@param diagram A diagram to work with.
 @returns List (for a given topology) of lists (for all generic fields) of
-         (potentially) colour factors.
+         colour factors.
 @note During generation of genericDiagram at 1-loop level the ii-type loop
       propagators have the largest number because of FeynArts.
 @note In seqProp numbers of the first vertices inside propagators are sorted
       by FeynArts.
 @note External fields always come at first places in adjacency matrix.
 @note This function doesn't know anything about CXXDiagrams`.` context.";
-ColourFactorForDiagram[
+getColourFactors[ds:`type`diagramSet] :=
+   Flatten[getColourFactors /@ (List @@ ds), 1] //. `rules`fieldNames;
+getColourFactors[
    diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
 Module[
    {
@@ -1008,6 +1008,8 @@ Module[
       genericInsertions,
       {2}]
 ];
+getColourFactors // Utils`MakeUnknownInputDefinition;
+getColourFactors ~ SetAttributes ~ {Protected, Locked};
 
 CalculateAmplitudes::usage=
 "@brief Calculate a given set of amplitudes.
@@ -1426,7 +1428,6 @@ SetAttributes[
    {
    NPointFunctionFAFC,
    FindGenericInsertions,StripParticleIndices,
-   ColourFactorForDiagram,
    ZeroRules,FCAmplitudesToFSConvention
    },
    {Protected, Locked}];
