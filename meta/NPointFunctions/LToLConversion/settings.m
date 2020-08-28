@@ -189,3 +189,9 @@
       {6, getField[ds,3]}
    }
 };
+
+`settings`momenta = {
+   `topologyQ`pinguinT->2,
+   `topologyQ`boxS->2,
+   `topologyQ`boxU->2
+};

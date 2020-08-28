@@ -576,12 +576,14 @@ Module[
       `settings`diagrams[`type`diagramSet] := {};
       `settings`amplitudes = {};
       `settings`sum[`type`diagramSet] := {};
+      `settings`momenta = {};
    ];
 
    `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
    `settings`diagrams ~ SetAttributes ~ {Protected, Locked};
    `settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
    `settings`sum ~ SetAttributes ~ {Protected, Locked};
+   `settings`momenta ~ SetAttributes ~ {Protected, Locked};
 
    End[];
    EndPackage[];
@@ -601,7 +603,7 @@ NPointFunctionFAFC::usage=
 NPointFunctionFAFC[inFields_, outFields_, OptionsPattern[]] :=
 Module[
    {
-      sumSettings,settingsForMomElim,
+      sumSettings,momSettings,
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -622,9 +624,8 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    {diagrams,amplitudes} = modify[{diagrams,amplitudes},OptionValue@KeepProcesses];
 
-   sumSettings = getSumRestrictions@diagrams;
-   settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
-
+   sumSettings = getSumSettings@diagrams;
+   momSettings = getMomSettings@diagrams;
    genericInsertions = getFieldInsertions@diagrams;
 
    colourFactors = Flatten[
@@ -642,7 +643,7 @@ Module[
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
-         CalculateAmplitudes[amplitudes,settingsForMomElim,sumSettings,genericInsertions,
+         CalculateAmplitudes[amplitudes,momSettings,sumSettings,genericInsertions,
             OptionValue@Regularize,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag
@@ -652,12 +653,12 @@ Module[
    }
 ];
 
-getSumRestrictions::usage = "
+getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on C++ level.
        This function provides required information in order to prevent this.
-@todo
-";
-getSumRestrictions[diagrams:`type`diagramSet] :=
+@param diagrams A set of diagrams.
+@returns A set of restrictions on generic sums.";
+getSumSettings[diagrams:`type`diagramSet] :=
 Module[{
      replacements = {},
      actions = `settings`sum@diagrams, res
@@ -667,48 +668,33 @@ Module[{
    res = If[MatchQ[#, `type`diagram], Table[{},{Length@getInsertions@#}], First[#]] &/@ res;
    Flatten[res, 1]
 ];
-getSumRestrictions // Utils`MakeUnknownInputDefinition;
-getSumRestrictions ~ SetAttributes ~ {Protected,Locked};
+getSumSettings // Utils`MakeUnknownInputDefinition;
+getSumSettings ~ SetAttributes ~ {Protected,Locked};
 
-`restrictions`momenta =
-{
-   {
-      `topologyQ`pinguinT->2,
-      `topologyQ`boxS->2,
-      `topologyQ`boxT->2,
-      `topologyQ`boxU->2
-   },
-   Default->Automatic
-};
-
-getMomElimForAmplitudesByTopology::usage=
-"@brief Uses internally defined replacement list funMomRules for definition of
-        momenta to eliminate in specific topologies.
-@param <FeynArts`TopologyList> diagrams Set of topologies with class insertions.
-@returns {_Integer... | Automatic...} List of option values for FormCalc`MomElim
-         for every generic amplitude.";
-getMomElimForAmplitudesByTopology::errOverlap=
-"Some topology rules inside funMomRules overlap. Criteria should be defined in a
+getMomSettings::usage = "
+@brief Uses settings to eliminale specific momenta in specific topologies.
+@param diagrams A set of topologies with class insertions.
+@returns A List of option values for FormCalc`MomElim for every generic
+         amplitude.";
+getMomSettings::errOverlap = "
+Some topology rules inside funMomRules overlap. Criteria should be defined in a
 way, which gives unique distinction of topology.";
-getMomElimForAmplitudesByTopology[
-   diagrams:`type`diagramSet
-] :=
-Module[
-   {
+getMomSettings[diagrams:`type`diagramSet] :=
+Module[{
       replacements
    },
-   replacements = (getAmplitudeRules[diagrams,First@#]/.x_Integer:>Last@#) &/@ `restrictions`momenta[[1]];
+   replacements = (getAmplitudeRules[diagrams,First@#]/.x_Integer:>Last@#) &/@ `settings`momenta;
    replacements = Transpose@replacements;
    replacements = Switch[ Count[First/@#,True],
       0,First@#,
       1,#~Extract~Position[#,True][[1,1]],
-      _,Utils`AssertOrQuit[False,getMomElimForAmplitudesByTopology::errOverlap]
+      _,Utils`AssertOrQuit[False,getMomSettings::errOverlap]
       ] &/@ replacements;
-   replacements = If[First@#===False,#/.x_Integer:>`restrictions`momenta[[2,2]],#] &/@ replacements;
+   replacements = If[First@#===False,#/.x_Integer:>Automatic,#] &/@ replacements;
    Flatten[Last/@replacements]
 ];
-getMomElimForAmplitudesByTopology // Utils`MakeUnknownInputDefinition;
-getMomElimForAmplitudesByTopology ~ SetAttributes ~ {Protected,Locked};
+getMomSettings // Utils`MakeUnknownInputDefinition;
+getMomSettings ~ SetAttributes ~ {Protected,Locked};
 
 getActions[keepProcesses:`type`keepProcesses, settings:{}] := {};
 getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]..}] :=
@@ -1027,7 +1013,7 @@ CalculateAmplitudes::usage=
 "@brief Calculate a given set of amplitudes.
 @param amps A set of amplitudes without colour indices generated by
        FeynArts`.`CreateFeynAmp[].
-@param settingsForMomElim Sets up the MomElim option.
+@param momSettings Sets up the MomElim option.
 @param @todo.
 @param genericInsertions the list of generic insertions for the amplitudes
 @param regularizationScheme the regularization scheme for the calculation
@@ -1037,7 +1023,7 @@ CalculateAmplitudes::usage=
          the subexpressions used to simplify the expressions";
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
-   settingsForMomElim_List,
+   momSettings_List,
    sumSettings:{{Rule[_Integer,_]...}..},
    genericInsertions_List,
    regularizationScheme_,
@@ -1068,7 +1054,7 @@ Module[
          FormCalc`FermionOrder -> Switch[numExtParticles,4,{4,2,3,1},2,{2,1},_,None],
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #2]&,
-      {ampsGen,settingsForMomElim}] //. FormCalc`GenericList[];
+      {ampsGen,momSettings}] //. FormCalc`GenericList[];
    itosave = FormCalc`Abbr[];
    subWrite["Amplitude calculation started ... done in "<>`time`get[]<>" seconds.\n"];
 
