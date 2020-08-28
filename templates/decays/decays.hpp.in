@@ -259,7 +259,7 @@ double @ModelName@_decays::get_partial_width(
    ) const
 {
 
-   // onshell masses
+   // on-shell masses
    const double mIn = context.physical_mass<FieldIn>(indexIn);
    const double mOut1 = context.physical_mass<FieldOut1>(indexOut1);
    const double mOut2 = context.physical_mass<FieldOut2>(indexOut2);
