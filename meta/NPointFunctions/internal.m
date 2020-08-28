@@ -576,6 +576,7 @@ Module[
       `settings`diagrams[`type`diagramSet] := {};
       `settings`amplitudes = {};
       `settings`sum[`type`diagramSet] := {};
+      `settings`massless[`type`diagramSet] := {};
       `settings`momenta = {};
    ];
 
@@ -583,6 +584,7 @@ Module[
    `settings`diagrams ~ SetAttributes ~ {Protected, Locked};
    `settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
    `settings`sum ~ SetAttributes ~ {Protected, Locked};
+   `settings`massless ~ SetAttributes ~ {Protected, Locked};
    `settings`momenta ~ SetAttributes ~ {Protected, Locked};
 
    End[];
@@ -603,7 +605,7 @@ NPointFunctionFAFC::usage=
 NPointFunctionFAFC[inFields_, outFields_, OptionsPattern[]] :=
 Module[
    {
-      sumSettings,momSettings,
+      sumSettings,momSettings,masslessSettings,
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -628,6 +630,7 @@ Module[
    momSettings = getMomSettings@diagrams;
    genericInsertions = getFieldInsertions@diagrams;
    colourFactors = getColourFactors@diagrams;
+   masslessSettings = getMasslessSettings@diagrams;
 
    fsInFields = Head[amplitudes][[1,2,1,All,1]] //. `rules`fieldNames;
    fsOutFields = Head[amplitudes][[1,2,2,All,1]] //. `rules`fieldNames;
@@ -640,7 +643,7 @@ Module[
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
-         CalculateAmplitudes[amplitudes,momSettings,sumSettings,genericInsertions,
+         CalculateAmplitudes[amplitudes,momSettings,sumSettings,masslessSettings,genericInsertions,
             OptionValue@Regularize,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag
@@ -667,6 +670,24 @@ Module[{
 ];
 getSumSettings // Utils`MakeUnknownInputDefinition;
 getSumSettings ~ SetAttributes ~ {Protected,Locked};
+
+getMasslessSettings::usage = "
+@brief Some topologies can lead to physically incorrect simplifications.
+       This function provides required information in order to prevent this.
+@param diagrams A set of diagrams.
+@returns A set of rules for amplitudes.";
+getMasslessSettings[diagrams:`type`diagramSet] :=
+Module[{
+     replacements = {},
+     actions = `settings`massless@diagrams, res
+   },
+   Do[AppendTo[replacements, applyAction[diagrams, ac]];, {ac, actions}];
+   res = List@@(diagrams /. replacements);
+   res = If[MatchQ[#, `type`diagram], Table["dummy",{Length@getInsertions@#}], First[#]] &/@ res;
+   Flatten[res, 1]
+];
+getMasslessSettings // Utils`MakeUnknownInputDefinition;
+getMasslessSettings ~ SetAttributes ~ {Protected,Locked};
 
 getMomSettings::usage = "
 @brief Uses settings to eliminale specific momenta in specific topologies.
@@ -757,6 +778,22 @@ Module[{
          Print@text;
          Return[
             getTopology@d -> Table[{n -> Or[f, -f]}, {Length@getInsertions@d}]
+         ]
+      ];,
+      {d, List@@diagrams}
+   ]
+];
+applyAction[
+   diagrams:`type`diagramSet,
+   {text:_String, Rule[topologyQ:_, {t:`type`fieldFA, n:_Integer}]}
+] :=
+Module[{
+   },
+   Do[
+      If[topologyQ@getTopology@d,
+         Print@text;
+         Return[
+            getTopology@d -> Table[genericMass[t, n], {Length@getInsertions@d}]
          ]
       ];,
       {d, List@@diagrams}
@@ -1027,6 +1064,7 @@ CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
    momSettings_List,
    sumSettings:{{Rule[_Integer,_]...}..},
+   masslessSettings:_,
    genericInsertions_List,
    regularizationScheme_,
    zeroExternalMomenta_,
@@ -1078,10 +1116,11 @@ Module[
 
    If[zeroExternalMomenta === ExceptLoops,
       `rules`setZeroMasses@proc;
-      calculatedAmplitudes = makeMassesZero@calculatedAmplitudes;
+      calculatedAmplitudes = makeMassesZero[calculatedAmplitudes,masslessSettings];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
-      {abbreviations, subexpressions} = makeMassesZero[{abbreviations, subexpressions}];
+      abbreviations = abbreviations /. `rules`zeroExternalMasses;
+      subexpressions = {};
    ];
 
    If[zeroExternalMomenta,
@@ -1130,13 +1169,14 @@ makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
        integrals and denominators.
 @param expr An expression to modify.
+@param masslessSettings A set of settings for amplitudes.
 @returns A modified expression.";
-makeMassesZero[expr:_] :=
+makeMassesZero[expr:_, masslessSettings:_] :=
 Module[
    {
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
-      pattern, uniqueIntegrals, integralRules, integralBack,
-      uniqueDenominators, denominatorRules, denominatorBack
+      pattern, uniqueIntegrals, integralRules, integralBack, masslessRules,
+      uniqueDenominators, denominatorRules, denominatorBack, newExpr
    },
    pattern = Alternatives @@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[expr, pattern, Infinity];
@@ -1147,7 +1187,15 @@ Module[
    denominatorRules = Rule[#, Unique@"loopDenominator"] &/@ uniqueDenominators;
    denominatorBack = denominatorRules /. Rule[x_, y_] -> Rule[y, x];
 
-   expr /. integralRules /. denominatorRules /. `rules`zeroExternalMasses /. integralBack /. denominatorBack
+   masslessRules = Table[
+      DeleteDuplicates@Cases[expr[[i]], e:masslessSettings[[i]]:>(e->0), Infinity],
+      {i, Length@expr}
+   ];
+   masslessRules = If[#==={}, `rules`zeroExternalMasses, #] &/@ masslessRules;
+
+   newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. integralRules /. denominatorRules;
+
+   Table[newExpr[[i]] /. masslessRules[[i]] /. integralBack /. denominatorBack /. masslessRules[[i]] , {i, Length@expr}]
 ];
 makeMassesZero // Utils`MakeUnknownInputDefinition;
 makeMassesZero ~ SetAttributes ~ {Protected, Locked};

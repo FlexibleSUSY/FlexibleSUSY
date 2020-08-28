@@ -190,8 +190,15 @@
    }
 };
 
+`settings`massless[ds:`type`diagramSet] := {
+   {
+      "t-pinguins: remove lighter particle in initial SED bridge",
+      `topologyQ`self1pinguinT -> {FeynArts`F, 6}
+   }
+};
+
 `settings`momenta = {
-   `topologyQ`pinguinT->2,
-   `topologyQ`boxS->2,
-   `topologyQ`boxU->2
+   `topologyQ`pinguinT -> 2,
+   `topologyQ`boxS -> 2,
+   `topologyQ`boxU -> 2
 };
