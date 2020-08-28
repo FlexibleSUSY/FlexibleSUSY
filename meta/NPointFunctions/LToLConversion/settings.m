@@ -22,19 +22,13 @@
 
 *)
 
-BeginPackage["NPointFunctions`"];
-Begin["NPointFunctions`internal`"];
-
-`settings`topologyReplacements =
-{
+`settings`topologyReplacements = {
    FourFermionMassiveVectorPenguins -> (`topologyQ`pinguinT@#&),
    FourFermionScalarPenguins -> (`topologyQ`pinguinT@#&),
    FourFermionFlavourChangingBoxes -> (`topologyQ`box@#&)
 };
-`settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
 
-`settings`diagrams = Function[ds,
-{
+`settings`diagrams[ds:`type`diagramSet] := {
    FourFermionMassiveVectorPenguins -> {
       {
          {
@@ -160,12 +154,9 @@ Begin["NPointFunctions`internal`"];
       },
       {}
    }
-}
-];
-`settings`diagrams ~ SetAttributes ~ {Protected, Locked};
+};
 
-`settings`amplitudes =
-{
+`settings`amplitudes = {
    FourFermionMassiveVectorPenguins -> {
       {
          {
@@ -185,7 +176,16 @@ Begin["NPointFunctions`internal`"];
       {}
    }
 };
-`settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
 
-End[];
-EndPackage[];
+`settings`sum[ds:`type`diagramSet] := {
+   {
+      "t-pinguins: no external lepton in initial SED bridge",
+      `topologyQ`self1pinguinT,
+      {6, getField[ds,1]}
+   },
+   {
+      "t-pinguins: no external lepton in final SED bridge",
+      `topologyQ`self3pinguinT,
+      {6, getField[ds,3]}
+   }
+};

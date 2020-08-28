@@ -126,7 +126,11 @@ Get@FileNameJoin@{`directory`internal, "topologies.m"};
 
 `type`diagram = Rule[`type`topology,FeynArts`Insertions[Generic][__]];
 
-getInsertions[obj:`type`diagram] := obj[[2]];
+getTopology[d:`type`diagram] := First@d;
+getTopology // Utils`MakeUnknownInputDefinition;
+getTopology ~ SetAttributes ~ {Protected, Locked};
+
+getInsertions[d:`type`diagram] := Last@d;
 getInsertions // Utils`MakeUnknownInputDefinition;
 getInsertions ~ SetAttributes ~ {Protected, Locked};
 
@@ -563,21 +567,24 @@ Module[
    },
    file = DeleteDuplicates[keepProcesses /. rules];
 
+   BeginPackage["NPointFunctions`"];
+   Begin["`internal`"];
+
    If[MatchQ[file, {_String}],
       Get[file[[1]]];,
-      BeginPackage["NPointFunctions`"];
-      Begin["`internal`"];
       `settings`topologyReplacements = {};
-      `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
-
-      `settings`diagrams = {}&;
-      `settings`diagrams ~ SetAttributes ~ {Protected, Locked};
-
+      `settings`diagrams[`type`diagramSet] := {};
       `settings`amplitudes = {};
-      `settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
-      End[];
-      EndPackage[];
+      `settings`sum[`type`diagramSet] := {};
    ];
+
+   `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
+   `settings`diagrams ~ SetAttributes ~ {Protected, Locked};
+   `settings`amplitudes ~ SetAttributes ~ {Protected, Locked};
+   `settings`sum ~ SetAttributes ~ {Protected, Locked};
+
+   End[];
+   EndPackage[];
 ];
 getSettings // Utils`MakeUnknownInputDefinition;
 getSettings ~ SetAttributes ~ {Protected, Locked};
@@ -594,7 +601,7 @@ NPointFunctionFAFC::usage=
 NPointFunctionFAFC[inFields_, outFields_, OptionsPattern[]] :=
 Module[
    {
-      settingsForGenericSums,settingsForMomElim,
+      sumSettings,settingsForMomElim,
       topologies, diagrams, amplitudes, genericInsertions, colourFactors,
       fsFields, fsInFields, fsOutFields, externalMomentumRules, nPointFunction
    },
@@ -615,7 +622,7 @@ Module[
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    {diagrams,amplitudes} = modify[{diagrams,amplitudes},OptionValue@KeepProcesses];
 
-   settingsForGenericSums = getRestrictionsOnGenericSumsByTopology@diagrams;
+   sumSettings = getSumRestrictions@diagrams;
    settingsForMomElim = getMomElimForAmplitudesByTopology@diagrams;
 
    genericInsertions = getFieldInsertions@diagrams;
@@ -635,7 +642,7 @@ Module[
    nPointFunction = {
       {fsInFields, fsOutFields},
       Insert[
-         CalculateAmplitudes[amplitudes,settingsForMomElim,settingsForGenericSums,genericInsertions,
+         CalculateAmplitudes[amplitudes,settingsForMomElim,sumSettings,genericInsertions,
             OptionValue@Regularize,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag
@@ -645,40 +652,23 @@ Module[
    }
 ];
 
-getRestrictionsOnGenericSumsByTopology::usage="
+getSumRestrictions::usage = "
 @brief Some topologies can lead to physically incorrect summation on C++ level.
        This function provides required information in order to prevent this.
 @todo
 ";
-getRestrictionsOnGenericSumsByTopology[diagrams:`type`diagramSet] :=
-Module[
-   {
-     processParticles = Delete[#,Position[#,FeynArts`Index[Global`Colour,_Integer]]] &/@ Flatten[List@@(getProcess@diagrams)],
-     newDiagrams = diagrams
+getSumRestrictions[diagrams:`type`diagramSet] :=
+Module[{
+     replacements = {},
+     actions = `settings`sum@diagrams, res
    },
-   newDiagrams = If[`topologyQ`self1pinguinT@First@#,
-      (* Skip sum if FeynArts`Field@6 is the same as external particle 1 *)
-      First@# -> Table[{6 -> Or[ processParticles[[1]],-processParticles[[1]] ]},{Length@Last@#}],
-      #] &/@ diagrams;
-
-   newDiagrams = If[`topologyQ`self3pinguinT@First@#,
-      (* Skip sum if FeynArts`Field@6 is the same as external particle 3 *)
-      First@# -> Table[{6 -> Or[ processParticles[[3]],-processParticles[[3]] ]},{Length@Last@#}],
-      #] &/@ newDiagrams;
-
-   (*No more rules*)
-   newDiagrams = If[MatchQ[#,Rule[`type`topology,{__}]],
-      #,
-      (* Empty rules to skip *)
-      First@#->Table[{},{Length@Last@#}]
-      ] &/@ newDiagrams;
-   (* Simpler external form. *)
-   newDiagrams = Last /@ newDiagrams;
-   newDiagrams = Flatten[List@@newDiagrams,1];
-   If[MatchQ[newDiagrams,{{Rule[_Integer,_]...}..}],newDiagrams,Print@"@todo FAILED";Quit[1]]
+   Do[AppendTo[replacements, applyAction[diagrams, ac]];, {ac, actions}];
+   res = List@@(diagrams /. replacements);
+   res = If[MatchQ[#, `type`diagram], Table[{},{Length@getInsertions@#}], First[#]] &/@ res;
+   Flatten[res, 1]
 ];
-getRestrictionsOnGenericSumsByTopology // Utils`MakeUnknownInputDefinition;
-getRestrictionsOnGenericSumsByTopology ~ SetAttributes ~ {Protected,Locked};
+getSumRestrictions // Utils`MakeUnknownInputDefinition;
+getSumRestrictions ~ SetAttributes ~ {Protected,Locked};
 
 `restrictions`momenta =
 {
@@ -773,6 +763,22 @@ Module[{
    printDiagramsInfo@d;
    d
 ];
+applyAction[
+   diagrams:`type`diagramSet,
+   {text:_String, topologyQ:_, {n:_Integer, f:_}}
+] :=
+Module[{
+   },
+   Do[
+      If[topologyQ@getTopology@d,
+         Print@text;
+         Return[
+            getTopology@d -> Table[{n -> Or[f, -f]}, {Length@getInsertions@d}]
+         ]
+      ];,
+      {d, List@@diagrams}
+   ]
+];
 applyAction // Utils`MakeUnknownInputDefinition;
 applyAction ~ SetAttributes ~ {Protected, Locked};
 
@@ -820,9 +826,8 @@ modify[
    keepProcesses:`type`keepProcesses
 ] :=
 Module[{
-      d = diagrams, a = amplitudes
+      d = diagrams, a = removeColours@amplitudes
    },
-   a = Delete[a,Position[a,FeynArts`Index[Global`Colour,_Integer]]];
    Do[
       {d, a} = applyAction[{d, a}, ac];,
       {ac, getActions[keepProcesses, `settings`amplitudes]}
@@ -831,6 +836,11 @@ Module[{
 ];
 modify // Utils`MakeUnknownInputDefinition;
 modify ~ SetAttributes ~ {Protected,Locked};
+
+removeColours[i:`type`diagramSet|`type`amplitudeSet] :=
+   Delete[i, Position[i, FeynArts`Index[Global`Colour, _Integer]]];
+removeColours // Utils`MakeUnknownInputDefinition;
+removeColours ~ SetAttributes ~ {Protected, Locked};
 
 getAmplitudeRules::usage=
 "@brief Gives numbers of amplitudes which are accepted by a criterion on topology.
@@ -1028,7 +1038,7 @@ CalculateAmplitudes::usage=
 CalculateAmplitudes[
    amps:FeynArts`FeynAmpList[___,FeynArts`Process->proc_,___][feynAmps:_[__]..],
    settingsForMomElim_List,
-   settingsForGenericSums:{{Rule[_Integer,_]...}..},
+   sumSettings:{{Rule[_Integer,_]...}..},
    genericInsertions_List,
    regularizationScheme_,
    zeroExternalMomenta_,
@@ -1062,7 +1072,7 @@ Module[
    itosave = FormCalc`Abbr[];
    subWrite["Amplitude calculation started ... done in "<>`time`get[]<>" seconds.\n"];
 
-   calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,settingsForGenericSums};
+   calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,sumSettings};
 
    (* << Work with chains *)
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
