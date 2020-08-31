@@ -19,10 +19,10 @@ int main(int argc, char* argv[])
    }
 
    std::ifstream ifs(argv[1]);
-   std::string slha_input(
-      (std::istreambuf_iterator<char>(ifs)),
-      (std::istreambuf_iterator<char>())
-   );
+   std::string slha_input {
+      std::istreambuf_iterator<char>(ifs),
+      std::istreambuf_iterator<char>()
+   };
 
    std::stringstream istr(slha_input);
 
