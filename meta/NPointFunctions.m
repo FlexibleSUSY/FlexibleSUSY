@@ -191,15 +191,6 @@ Module[
 `type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
 
-`subkernel`message::errNoTopologies =
-"No topologies are generated for a given set of options.";
-`subkernel`message::errNoDiagrams =
-"No diagrams are generated for a given set of options.";
-
-`subkernel`error[message_] := Utils`AssertOrQuit[False,message];
-`subkernel`error // Utils`MakeUnknownInputDefinition;
-`subkernel`error ~ SetAttributes ~ {Locked,Protected,HoldFirst};
-
 `cxx`getLength[obj:`type`wilsonBasis] := ToString@Length@obj;
 `cxx`getLength // Utils`MakeUnknownInputDefinition;
 `cxx`getLength ~ SetAttributes ~ {Locked,Protected};

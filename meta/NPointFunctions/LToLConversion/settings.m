@@ -202,3 +202,9 @@
    `topologyQ`boxS -> 2,
    `topologyQ`boxU -> 2
 };
+
+`settings`regularization = {
+   `topologyQ`boxS -> D,
+   `topologyQ`boxU -> D
+};
+
