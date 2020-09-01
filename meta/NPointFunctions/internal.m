@@ -154,7 +154,7 @@ indexGeneric[index:_Integer] :=
 indexGeneric // Utils`MakeUnknownInputDefinition;
 indexGeneric ~ SetAttributes ~ {Protected,Locked};
 
-`type`fieldFA = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
+`type`fa`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 
 getClassVariables[amp:`type`amplitude] :=
    amp[[4, 1]];
@@ -181,7 +181,7 @@ getTruePositions[list:{Alternatives[True, False]...}] :=
 getTruePositions // Utils`MakeUnknownInputDefinition;
 getTruePositions ~ SetAttributes ~ {Protected, Locked};
 
-`type`FAfieldGeneric = `type`fieldFA[`type`indexGeneric];
+`type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
 
 getProcess[diagrams:`type`diagramSet] := Cases[
    Head@diagrams,
@@ -208,6 +208,12 @@ getField ~ SetAttributes ~ {Protected, Locked};
 
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
+
+`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
+`type`fc`mass = Alternatives[_Symbol, _Symbol@_Symbol];
+`type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
+`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
+`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
 
 particleNamesFile = "";
 particleNamesFile // Protect;
@@ -268,17 +274,17 @@ Module[{},
          contains Loop and Internal as well.";
    With[{new=Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]},
       `type`genericMass =
-         FeynArts`Mass[`type`fieldFA[`type`indexGeneric], new];
-      genericMass[field:`type`fieldFA, index:_Integer] :=
+         FeynArts`Mass[`type`fa`field[`type`indexGeneric], new];
+      genericMass[field:`type`fa`field, index:_Integer] :=
          FeynArts`Mass[field@indexGeneric@index, new];
-      genericMass[field:`type`fieldFA] :=
+      genericMass[field:`type`fa`field] :=
          FeynArts`Mass[field[`type`indexGeneric], new];
       genericMass // Utils`MakeUnknownInputDefinition;
       genericMass ~ SetAttributes ~ {Protected,Locked};
    ];
 
    `type`specificMass =
-      FeynArts`Mass[`type`fieldFA[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
+      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
 
    {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
@@ -507,7 +513,7 @@ FAFieldQ::usage = "
 @brief Checks whether symbol belongs to FeynArts` field names or not.
 @param Symbol to check.
 @returns True if symbol belongs to FeynArts` field names, False otherwise.";
-FAFieldQ = MatchQ[#,`type`fieldFA]&;
+FAFieldQ = MatchQ[#,`type`fa`field]&;
 FAFieldQ ~ SetAttributes ~ {Protected, Locked};
 
 `rules`general::usage = "
@@ -585,7 +591,9 @@ getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settins.
 @param keepProcesses A set of process names to keep.
-@returns Null.";
+@returns Null.
+@todo Check which settings exist and apply defauld definitions for non-existing
+      ones.";
 getSettings[keepProcesses:`type`keepProcesses] :=
 Module[{
       rules = `settings`file /. Rule[e:_, s:_] :> Sequence@@(Rule[#, s] &/@ e),
@@ -817,7 +825,7 @@ Module[{
 ];
 applyAction[
    diagrams:`type`diagramSet,
-   {text:_String, Rule[topologyQ:_, {t:`type`fieldFA, n:_Integer}]}
+   {text:_String, Rule[topologyQ:_, {t:`type`fa`field, n:_Integer}]}
 ] :=
 Module[{
    },
@@ -1097,7 +1105,6 @@ calculateAmplitudes[
    onShellFlag_] :=
 Module[{
       proc = getProcess@amplitudes,
-      sumSettings = getSumSettings@diagrams,
       masslessSettings = getMasslessSettings@diagrams,
       genericInsertions = getFieldInsertions@diagrams,
 
@@ -1128,11 +1135,14 @@ Module[{
          getRegularizationSettings[#, regularizationScheme],
          getMomSettings@#
       } &@ diagrams,
-      "Amplitude calculation"] //. FormCalc`GenericList[];
+      "Amplitude calculation"
+   ] //. FormCalc`GenericList[];
 
-   calculatedAmplitudes = ToGenericSum ~ MapThread ~ {calculatedAmplitudes,sumSettings};
+   calculatedAmplitudes = MapThread[
+      getGenericSum,
+      {calculatedAmplitudes, getSumSettings@diagrams}
+   ];
 
-   (* << Work with chains *)
    abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
 
    If[zeroExternalMomenta === OperatorsOnly || zeroExternalMomenta === ExceptLoops,
@@ -1466,22 +1476,35 @@ CombinatorialFactorsForClasses[
 CombinatorialFactorsForClasses // Utils`MakeUnknownInputDefinition;
 CombinatorialFactorsForClasses ~ SetAttributes ~ {Locked,Protected};
 
-ToGenericSum::usage=
-"@todo
-@brief Given a generic amplitude, determine the generic fields over which it
-needs to be summed and return a corresponding GenericSum[] object.
-@param FormCalc`Amp[_->_][amp_] the given generic amplitude
-@returns {S|F|V|U|T[GenericIndex[number of index]]...}.";
-ToGenericSum[FormCalc`Amp[_->_][amp_],genericSumRestictions:{Rule[_Integer,_]...}] :=
-Module[
-   {
-      sortSumFields = Sort@DeleteDuplicates[Cases[amp,`type`FAfieldGeneric,Infinity]],
-      replSumFields
+getGenericFields::usage = "
+@brief Generates a list of unique sorted generic fields in expression.
+@param expr An expression, where to search.
+@returns A list of unique sorted generic fields.";
+getGenericFields[expr:_] :=
+   Sort@DeleteDuplicates[Cases[expr, `type`FAfieldGeneric, Infinity]];
+getGenericFields // Utils`MakeUnknownInputDefinition;
+getGenericFields ~ SetAttributes ~ {Protected, Locked};
+
+getGenericSum::usage= "
+@brief Converts FormCalc`Amp into NPointFunctions`GenericSum object using
+       restriction rules for generic fields.
+@param amplitude FormCalc`Amp expression.
+@param sumRules A set of rules, restricting the summation.
+@returns A NPointFunctions`GenericSum object.";
+getGenericSum[
+   amplitude:`type`fc`amplitude,
+   sumRules:{Rule[_Integer, _]...}] :=
+Module[{
+      sort = getGenericFields@amplitude,
+      rules = Append[sumRules, _Integer -> False]
    },
-   replSumFields = sortSumFields /. f_[_[_,i_]]:>{f@GenericIndex@i,Replace[i,genericSumRestictions~Join~{_Integer->False}]};
-   GenericSum[{amp}, replSumFields]
+   GenericSum[
+      List@@amplitude,
+      sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}
+   ]
 ];
-SetAttributes[ToGenericSum,{Protected,Locked}];
+getGenericSum // Utils`MakeUnknownInputDefinition;
+getGenericSum ~ SetAttributes ~ {Protected, Locked};
 
 ZeroRules::usage=
 "@brief Given a set of rules that map to zero and a set that does
