@@ -176,7 +176,7 @@ getTruePositions::usage = "
        all `True' entries.
 @param list A `List' of booleans.
 @returns A list of integers (of an empty one)."
-getTruePositions[list:{Alternatives[True, False]...}] :=
+getTruePositions[list:{(True|False)...}] :=
    Flatten@Position[list, True];
 getTruePositions // Utils`MakeUnknownInputDefinition;
 getTruePositions ~ SetAttributes ~ {Protected, Locked};
@@ -210,7 +210,7 @@ getField ~ SetAttributes ~ {Protected, Locked};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 
 `type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`type`fc`mass = Alternatives[_Symbol, _Symbol@_Symbol];
+`type`fc`mass = _Symbol|_Symbol@_Symbol;
 `type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
 `type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
 `type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
@@ -1143,7 +1143,7 @@ Module[{
       {calculatedAmplitudes, getSumSettings@diagrams}
    ];
 
-   abbreviations = FormCalc`Abbr[] //. FormCalc`GenericList[] /. ch:FormCalc`DiracChain[__]:>simplifySimpleChain[ch,numExtParticles];
+   abbreviations = simplifyChain[FormCalc`Abbr[] //. FormCalc`GenericList[]];
 
    If[zeroExternalMomenta === OperatorsOnly || zeroExternalMomenta === ExceptLoops,
       abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> setChainWithMomentaToZero@ch
@@ -1302,30 +1302,31 @@ NPointFunctions`internal`mat::usage = "
 @brief Serves as a wrapper for Dirac chain abbreviations inside amplitudes.";
 NPointFunctions`internal`mat[0] = 0;
 
-(*@Todo think how to implement this in an elegant way.*)
-simplifySimpleChain[chain_FormCalc`DiracChain,numExtParticles_Integer] :=
-Module[
-   {
-      ch=FormCalc`DiracChain,spinor,flip,k=FormCalc`k,result
+simplifyChain::usage = "
+@brief Simplifies some chains applying Dirac equation.
+@param chain A chain to simplify.
+@returns A simplified chain.";
+simplifyChain[expr:_] := expr /. ch:FormCalc`DiracChain[__] :> simplifyChain@ch;
+simplifyChain[chain:_FormCalc`DiracChain] :=
+Module[{
+      s = 6|7, a = -6|-7, ch = FormCalc`DiracChain, k = FormCalc`k,
+      m, pair, sp, flip
    },
-   spinor[mom:_:_,mass:_:_,type:_:(1|-1)] := FormCalc`Spinor[k[mom],mass,type];
-   flip@7 = 6;
-   flip@6 = 7;
-   result = If[numExtParticles === 4,
-      chain //.
-      {
-         ch[s1:spinor[3],proj:6|7,k@2,s2:spinor[1]] :> ch[s1,proj,k@1,s2]+ch[s1,proj,k@4,s2]-ch[s1,proj,k@3,s2],
-         ch[s1:spinor[3],proj:-6|-7,k@1,k@4,s2:spinor[1,mass_]] :> FormCalc`Pair[k@4,k@1]*ch[s1,-proj,s2]-Last[s2]*mass*ch[s1,-proj,k@4,s2],
-         ch[s1:spinor[4,mass_],proj:-6|-7,k@1,k@4,s2:spinor[2]] :> FormCalc`Pair[k@4,k@1]*ch[s1,-proj,s2]-Last[s1]*mass*ch[s1,flip[-proj],k@1,s2]
-      },
-      chain
-      ];
-   result //.
-   {
-         ch[s1:spinor[],proj:6|7,k[number_],s2:spinor[number_,mass_]] :> Last[s2]*mass*ch[s1,proj,s2],
-         ch[s1:spinor[number_,mass_],proj:6|7,k[number_],s2:spinor[]] :> Last[s2]*mass*ch[s1,flip@proj,s2]
+   m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
+   pair = FormCalc`Pair[k@#1,k@#2]&;
+   sp[mom:_:_] = FormCalc`Spinor[k@mom, _, _];
+   flip[7|-7] = 6;
+   flip[6|-6] = 7;
+
+   chain //. {
+      ch[l:sp[j_],p:a,k[n_],k[i_],r:sp[n_]] :> pair[i,n]*ch[l,-p,r]-m[r]*ch[l,-p,k[i],r],
+      ch[l:sp[n_],p:a,k[i_],k[n_],r:sp[j_]] :> pair[i,n]*ch[l,-p,r]-m[l]*ch[l,flip@p,k[i],r],
+      ch[l:sp[],p:s,k[n_],r:sp[n_]] :> m[r]*ch[l,p,r],
+      ch[l:sp[n_],p:s k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]
    }
 ];
+simplifyChain // Utils`MakeUnknownInputDefinition;
+simplifyChain ~ SetAttributes ~ {Protected, Locked};
 
 (*@Todo think how to implement this in an elegant way.*)
 setChainWithMomentaToZero[Times[chain1_FormCalc`DiracChain, chain2_FormCalc`DiracChain]] :=
