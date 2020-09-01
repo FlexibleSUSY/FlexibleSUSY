@@ -76,13 +76,23 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto amp2OS = Sqr(mHOS) * Sqr(betaOS) *
                 2.*std::norm(HBBbarVertexDR.left()) * Sqr(mdqOS / mdqDR);
 
-   const double result = flux * color_factor *
-          (
-             // low x limit
-             (1 - 4. * xOS) * phase_spaceDR * amp2DR *
-                (1. + deltaqqDR + deltaqqDRQED +  deltaH2) +
-             // high x limit
-             4 * xOS * phase_spaceOS * amp2OS * (1. + deltaqqOS + deltaqqOSQED));
+   // low x limit
+   double result_DR =
+      flux * color_factor * phase_spaceDR * amp2DR;
+   // high x limit
+   double result_OS =
+      flux * color_factor * phase_spaceOS * amp2OS;
 
-   return result;
+   switch (include_higher_order_corrections) {
+      case SM_higher_order_corrections::enable:
+         result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
+         result_OS *= 1. + deltaqqOS + deltaqqOSQED;
+         break;
+      case SM_higher_order_corrections::disable:
+         break;
+      default:
+         break;
+   }
+
+   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 }
