@@ -302,7 +302,7 @@ Block UERMIX
                               0.00062168170474045936, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00010631486484366614, 1e-16);
+                              0.00010013195346875581, 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.8811709644693243e-05, 1e-15);

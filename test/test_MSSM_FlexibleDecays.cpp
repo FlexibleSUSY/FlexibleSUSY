@@ -714,7 +714,7 @@ Block MSOFT Q= 8.61574711E+02
                               0.0013683067973089443, 2e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              7.8856128321885715e-05, 2e-13);
+                              7.6098850088855512e-05, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.0002600448772469762, 3e-13);
