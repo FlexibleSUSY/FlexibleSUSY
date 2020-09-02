@@ -52,9 +52,11 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ tree-level decays ------------
 
    // h -> b bbar
-   // no QED corrections
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
                               0.0026142076883103791, 2e-15);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
+                              7.9883035101449685e-06, 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00027084177013049477, 1e-15);
@@ -84,6 +86,9 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
                               0.00207153178400001, 2e-15);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
+                              7.9883035101449685e-06, 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026800741537194096, 1e-15);
