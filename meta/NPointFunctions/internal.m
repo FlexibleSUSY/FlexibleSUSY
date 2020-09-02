@@ -183,12 +183,8 @@ getTruePositions ~ SetAttributes ~ {Protected, Locked};
 
 `type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
 
-getProcess[diagrams:`type`diagramSet] := Cases[
-   Head@diagrams,
-   (FeynArts`Process -> process:_) :> process
-][[1]];
-getProcess[amplitudes:`type`amplitudeSet] := Cases[
-   Head@amplitudes,
+getProcess[expression:`type`diagramSet|`type`amplitudeSet] := Cases[
+   Head@expression,
    (FeynArts`Process -> process:_) :> process
 ][[1]];
 getProcess // Utils`MakeUnknownInputDefinition;
@@ -587,6 +583,15 @@ Module[
 SetFSConventionRules // Utils`MakeUnknownInputDefinition;
 SetFSConventionRules ~ SetAttributes ~ {Protected,Locked};
 
+expandRules::usage = "
+@brief Expands a set of compact rules into the full one.
+@param rules A set of compact rules to expand.
+@returns A set of rules.";
+expandRules[rules:{Rule[{__Symbol}, _]..}] :=
+   rules /. Rule[e:_, s:_] :> Sequence @@ (Rule[#, s] &/@ e);
+expandRules // Utils`MakeUnknownInputDefinition;
+expandRules ~ SetAttributes ~ {Protected, Locked};
+
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settins.
@@ -596,7 +601,7 @@ getSettings::usage = "
       ones.";
 getSettings[keepProcesses:`type`keepProcesses] :=
 Module[{
-      rules = `settings`file /. Rule[e:_, s:_] :> Sequence@@(Rule[#, s] &/@ e),
+      rules = expandRules@`settings`file,
       file
    },
    file = DeleteDuplicates[keepProcesses /. rules];
@@ -613,6 +618,8 @@ Module[{
       `settings`massless[`type`diagramSet] := {};
       `settings`momenta = {};
       `settings`regularization = {};
+      `settings`order = {};
+      `settings`chains = {};
    ];
 
    `settings`topologyReplacements ~ SetAttributes ~ {Protected, Locked};
@@ -622,6 +629,8 @@ Module[{
    `settings`massless ~ SetAttributes ~ {Protected, Locked};
    `settings`momenta ~ SetAttributes ~ {Protected, Locked};
    `settings`regularization ~ SetAttributes ~ {Protected, Locked};
+   `settings`order ~ SetAttributes ~ {Protected, Locked};
+   `settings`chains ~ SetAttributes ~ {Protected, Locked};
 
    End[];
    EndPackage[];
@@ -1088,6 +1097,28 @@ Module[
 getColourFactors // Utils`MakeUnknownInputDefinition;
 getColourFactors ~ SetAttributes ~ {Protected, Locked};
 
+getFermionOrder::usage = "
+@brief Returns the order of fermions for FormCalc`FermionOrder option. Default
+       is a reversed one. Can be overwritten by `settings`order for specific
+       process.
+@param expression A set of amplitudes or diagrams.
+@note The order is cashed.
+@returns A list of integers, representing an order of fermions.";
+Module[{
+      result
+   },
+   getFermionOrder[expression:`type`amplitudeSet|`type`diagramSet] :=
+   If[Head@result === Symbol,
+      If[# === {},
+         Reverse@Range[Plus@@Length/@getProcess@expression],
+         #
+      ] &@ `settings`order,
+      result
+   ];
+];
+getFermionOrder // Utils`MakeUnknownInputDefinition;
+getFermionOrder ~ SetAttributes ~ {Protected, Locked};
+
 calculateAmplitudes::usage = "
 @brief Applies FormCalc` routines to amplitude set, then simplifies the
        result, according to options.
@@ -1126,7 +1157,7 @@ Module[{
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> onShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> Switch[numExtParticles,4,{4,2,3,1},2,{2,1},_,None],
+         FormCalc`FermionOrder -> getFermionOrder@diagrams,
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #3
       ]&,
@@ -1144,10 +1175,7 @@ Module[{
    ];
 
    abbreviations = simplifyChain[FormCalc`Abbr[] //. FormCalc`GenericList[]];
-
-   If[zeroExternalMomenta === OperatorsOnly || zeroExternalMomenta === ExceptLoops,
-      abbreviations = Expand@abbreviations /. ch:FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__] :> setChainWithMomentaToZero@ch
-   ];
+   abbreviations = modifyChains[abbreviations, diagrams, zeroExternalMomenta];
 
    {calculatedAmplitudes,abbreviations} = makeChainsUnique[calculatedAmplitudes,abbreviations];
 
@@ -1328,33 +1356,60 @@ Module[{
 simplifyChain // Utils`MakeUnknownInputDefinition;
 simplifyChain ~ SetAttributes ~ {Protected, Locked};
 
-(*@Todo think how to implement this in an elegant way.*)
-setChainWithMomentaToZero[Times[chain1_FormCalc`DiracChain, chain2_FormCalc`DiracChain]] :=
-Module[
-   {
-      ch=FormCalc`DiracChain,spinor,k=FormCalc`k,l=FormCalc`Lor, q, f
+modifyChains::usage = "
+@brief Applies a set of process specific chain rules to some expression,
+       depending on zeroMomentum option.
+@param expression Any expression to modify.
+@set A set of amplitudes or diagrams.
+@zeroMomentum An value of ZeroExternalMomenta option.
+@returns A modified expression.
+@todo Currently a very specific set of rules is supported. In order to have
+      chains on RHS of rules one needs to separate left and right parts and
+      make different reveal functions.
+@todo Write explanations about anticommutation rules in chains and other
+      conventions.";
+Module[{
+      rules
    },
-   spinor[mom:_:_,mass:_:_,type:_:(1|-1)] := FormCalc`Spinor[k[mom],mass,type];
-   q[expr:__] := ch[spinor@4, expr, spinor@2];
-   f[expr:__] := ch[spinor@3, expr, spinor@1];
-   chain1*chain2 /.
-   {
-      f[6|7,k@4] -> 0,
-      q[6|7,k@1] -> 0,
-      f[6|7,l@1] * q[-6|-7,k@1,l@1] -> 0,
-      f[-6|-7,k@4,l@1] * q[6|7,l@1] -> 0,
-      f[-6|-7,k@4,l@1] * q[-6|-7,k@1,l@1] -> 0,
-      f[-6|-7,k@4,l@1,l@2] * q[-6|-7,k@1,l@1,l@2] -> 0,
-
-      f[-6|-7,k@1,k@4,l@1] * q[6|7,l@1] -> 0,
-      f[6|7,l@1] * q[-6|-7,k@1,k@4,l@1] -> 0,
-      (* additional replacement rules *)
-      f[6 | 7, k@1] * q[6 | 7] -> 0,
-      f[6 | 7] * q[6 | 7, k@4] -> 0,
-      f[-6 | -7, k@1, l@1] * q[6 | 7, l@1] -> 0,
-      f[-6 | -7, l@1, l@2] * q[-6 | -7 , k@1, l@1, l@2 ] -> 0
-   }
+   modifyChains[
+      expression_,
+      set:`type`amplitudeSet|`type`diagramSet,
+      zeroMomentum:_Symbol
+   ] :=
+   Expand@expression //.
+   If[Head@rules === Symbol,
+      Module[{
+            i = 0, sp, L, reveal, ch = FormCalc`DiracChain
+         },
+         Block[{
+            k = FormCalc`k,
+            l = FormCalc`Lor
+         },
+            sp[mom_] := FormCalc`Spinor[k[mom], _, _];
+            L[a_, e___ ,b_] := L[
+               a,
+               Switch[Length@{e},
+                  0, {},
+                  1, If[Head@Part[{e},1] === Integer, {e}, {6|7,e}],
+                  _, If[Head@Part[{e},1] === Integer, {e}, {-6|-7,e}]
+               ],
+               b
+            ];
+            L[a_, {e___}, b_] := ch[sp@a, e, sp@b];
+            reveal[{}] := Sequence[];
+            reveal[{a_, b_, c___}] :=
+               Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
+            chainRules = reveal@getFermionOrder@set;
+            rules = zeroMomentum /. expandRules[`settings`chains] /. chainRules;
+            If[Head@rules =!= List, rules = {}];
+            rules
+         ]
+      ],
+      rules
+   ];
 ];
+modifyChains // Utils`MakeUnknownInputDefinition;
+modifyChains ~ SetAttributes ~ {Protected, Locked};
 
 setZeroExternalMomentaInChains::usage = "
 @brief Sets FormCalc`k[i] to zero inside fermioinic chains.
