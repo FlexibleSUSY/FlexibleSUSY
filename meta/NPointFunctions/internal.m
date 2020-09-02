@@ -1278,40 +1278,44 @@ Module[
 makeMassesZero // Utils`MakeUnknownInputDefinition;
 makeMassesZero ~ SetAttributes ~ {Protected, Locked};
 
-getChainsRule::usage="
+getChainRules::usage = "
 @brief Finds a subset of rules inside a List, which represent Dirac chains. It
        is possible, because the naming convention for this abbreviation is fixed
        and it is given by encoded regular expression.
-@param rules A List of rules.
-@return List of rules.";
-getChainsRule[rules:{Rule[_Symbol, _]..}] :=
-   Cases[rules,chain:Rule[_?(StringMatchQ[ToString@#,RegularExpression@"[F][1-9][\\d]*"]&),_]:>chain];
-getChainsRule // Utils`MakeUnknownInputDefinition;
-getChainsRule ~ SetAttributes ~ {Protected,Locked};
+@param rules A list of rules.
+@return A list of rules.";
+getChainRules[rules:{Rule[_Symbol, _]..}] :=
+Module[{
+      regex = RegularExpression@"[F][1-9][\\d]*"
+   },
+   Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]
+];
+getChainRules // Utils`MakeUnknownInputDefinition;
+getChainRules ~ SetAttributes ~ {Protected,Locked};
 
-makeChainsUnique::usage="
-@brief After manual simplification of dirac chains one can get duplicates.
-       This is not a desired thing, so they have to be removed. After this,
-       unique chains acquire unique names in appropriate context.
-@param calculatedAmplitudes A set of calculated amplitudes, no specific structure
-       required.
-@param rules A List of rules with abbreviations.
-@returns {calculatedAmplitudes, rules} with appropriate changes.";
+makeChainsUnique::usage = "
+@brief After manual simplification of dirac chains one can get duplicates. They
+       have to be removed. Then chains acquire unique names.
+@param expression An expression to modify.
+@param rules A list of rules, containing explicit chains.
+@returns A list of expression and rules.";
 makeChainsUnique[calculatedAmplitudes_, rules:{}] := {calculatedAmplitudes, {}};
 makeChainsUnique[calculatedAmplitudes_, rules:{Rule[_Symbol, _]..}] :=
 Module[
    {
       chainRules, otherRules, zeroChainRules, uniqueChains, rulesForAmplitudes
    },
-   chainRules = getChainsRule@rules;
+   chainRules = getChainRules@rules;
    otherRules = rules ~ Complement ~ chainRules;
 
    zeroChainRules = Cases[chainRules, chain:Rule[_,0]:>chain];
    chainRules = chainRules ~ Complement ~ zeroChainRules;
 
-   uniqueChains = DeleteDuplicates@Cases[chainRules, FormCalc`DiracChain[x__]*FormCalc`DiracChain[y__], Infinity];
-
-   If[uniqueChains === {},uniqueChains = DeleteDuplicates@Cases[chainRules, FormCalc`DiracChain[__], Infinity]];
+   uniqueChains = DeleteDuplicates@Cases[
+      chainRules,
+      Longest@HoldPattern@Times[FormCalc`DiracChain[__]..],
+      Infinity
+   ];
 
    uniqueChains = MapThread[
       Rule[Symbol["NPointFunctions`internal`dc"<>#1], #2]&,
