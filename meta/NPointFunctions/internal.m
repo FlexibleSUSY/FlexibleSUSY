@@ -1316,31 +1316,33 @@ identifySpinors::usage =
 @param inp List of abbreviations to modify | FormCalc`DiracChain chain to modify.
 @param ampsGen FeynArts`FeynAmpList with information of process
 @returns DiracChain with inserted fermion names | Expression with new DiracChains.
-@note DiracChains live only inside FormCalc`Abbr.
+@note Dirac chains live only inside FormCalc`Abbr.
 @note Should NOT be used for Automatic FormCalc`FermionOrder.";
-identifySpinors[
-   inp:{Rule[_Symbol, _]...},
-   set:`type`amplitudeSet|`type`diagramSet
-] :=
-inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch, set];
-identifySpinors[
-   FormCalc`DiracChain[
-      FormCalc`Spinor[FormCalc`k[fermion1_Integer],mass1_,1|-1],
-      seqOfElems___,
-      FormCalc`Spinor[FormCalc`k[fermion2_Integer],mass2_,1|-1]],
-   set:`type`amplitudeSet|`type`diagramSet
-] :=
-Module[
-   {
-      id = foreach[#1->#2&, getField[set, All] //. `rules`fieldNames]
+Module[{
+      id, idf
    },
-   FormCalc`DiracChain[
-   FormCalc`Spinor[fermion1 /. id, FormCalc`k[fermion1],mass1],
-   seqOfElems,
-   FormCalc`Spinor[fermion2 /. id, FormCalc`k[fermion2],mass2]]
+   identifySpinors[
+      rules:{Rule[_Symbol, _]...},
+      set:`type`amplitudeSet|`type`diagramSet
+   ] :=
+   (
+      If[Head@id === Symbol,
+         id = foreach[#1->#2&, getField[set, All] //. `rules`fieldNames];
+         With[{
+               ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k
+            },
+            idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
+               ch[s[i1 /. id, k[i2], m1], e, s[i2 /. id, k[i2], m2]];
+            Print@idf;
+            Print@Information@idf;
+         ];
+      ];
+      rules /. ch:FormCalc`DiracChain[__] :> idf@ch
+   );
+
+   identifySpinors // Utils`MakeUnknownInputDefinition;
+   identifySpinors ~ SetAttributes ~ {Protected,Locked};
 ];
-identifySpinors // Utils`MakeUnknownInputDefinition;
-identifySpinors ~ SetAttributes ~ {Protected,Locked};
 
 mapThread::usage = "
 @brief Maps a function onto multiple sets of equal length, accompanying it by
