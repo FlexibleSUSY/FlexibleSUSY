@@ -695,7 +695,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
                               0.0018859412659263085, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              8.5819316415354055e-05, 3e-14);
+                              9.953578694799394e-05, 3e-14);
    // QED corrections
 //   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
 //                              2.6059181498481999E-003, 5e-15);
@@ -731,7 +731,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
                               0.0015852320624501718, 4e-14);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              8.2848988970708227e-05, 3e-14);
+                              8.2876032145842477e-05, 3e-14);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00027722644959993561, 5e-12);
