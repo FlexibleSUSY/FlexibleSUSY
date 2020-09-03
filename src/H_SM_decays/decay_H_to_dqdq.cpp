@@ -10,11 +10,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
 {
    // TODO: should we take the off-diagonal case at all?
    //       or should this never happen and we should crash
-   if(!boost::range::equal(indexOut1, indexOut2))
+   if(!boost::range::equal(indexOut1, indexOut2)) {
+      WARNING("Flavour violating decays of H->ddbar currently not implemented!");
       return 0.;
-//    BOOST_ASSERT_MSG(boost::range::equal(indexOut1, indexOut2),
-      // "Template specialization for H -> Fd1 bar[Fd2] is only valid for Fd1 = Fd2"
-//    );
+   }
 
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mdqDR = context.mass<dq>(indexOut1);
