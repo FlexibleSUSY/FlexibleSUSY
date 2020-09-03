@@ -183,8 +183,16 @@ getTruePositions ~ SetAttributes ~ {Protected, Locked};
 
 `type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
 
-getProcess[expression:`type`diagramSet|`type`amplitudeSet] :=
-   Cases[Head@expression, (FeynArts`Process -> e:_) :> e][[1]];
+`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
+`type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
+`type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
+`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
+`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
+
+getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
+   Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
+getProcess[set:{`type`fc`amplitude..}] :=
+   Part[Head@Part[set, 1], 1];
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
@@ -202,12 +210,6 @@ getField ~ SetAttributes ~ {Protected, Locked};
 
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
-
-`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`type`fc`mass = _Symbol|_Symbol@_Symbol;
-`type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
-`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
-`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
 
 particleNamesFile = "";
 particleNamesFile // Protect;
@@ -587,6 +589,8 @@ expandRules::usage = "
 @brief Expands a set of compact rules into the full one.
 @param rules A set of compact rules to expand.
 @returns A set of rules.";
+expandRules[{}] :=
+   {};
 expandRules[rules:{Rule[{__Symbol}, _]..}] :=
    rules /. Rule[e:_, s:_] :> Sequence @@ (Rule[#, s] &/@ e);
 expandRules // Utils`MakeUnknownInputDefinition;
@@ -720,7 +724,8 @@ getRegularizationSettings::usage = "
        some topologies.
 @param diagrams A set of diagrams.
 @param scheme A default setting for regularization scheme.
-@returns A set of settings for FormCalc`Dimension.";
+@returns A set of settings for FormCalc`Dimension.
+@todo Unify with getMomSettings.";
 getRegularizationSettings::errOverlap = "
 Topology rules in `.`settings`.`regularization overlap.";
 getRegularizationSettings[
@@ -731,12 +736,16 @@ Module[{
       replacements,
       f = (getAmplitudeRules[diagrams, First@#] /. x:_Integer :> Last@#) &
    },
-   replacements = Transpose[f /@ `settings`regularization];
-   Flatten[Switch[ Count[First/@#,True],
-      0, Array[scheme&, Length[False /. #]],
-      1, True /. #,
-      _, Utils`AssertOrQuit[False, getRegularizationSettings::errOverlap]
-      ] &/@ replacements]
+   If[`settings`regularization === {},
+      Array[scheme&, getClassAmount@diagrams],
+      replacements = Transpose[f /@ `settings`regularization];
+      Flatten[Switch[ Count[First/@#,True],
+         0, Array[scheme&, Length[False /. #]],
+         1, True /. #,
+         _, Utils`AssertOrQuit[False, getRegularizationSettings::errOverlap]
+         ] &/@ replacements
+      ]
+   ]
 ];
 getRegularizationSettings // Utils`MakeUnknownInputDefinition;
 getRegularizationSettings ~ SetAttributes ~ {Protected, Locked};
@@ -753,12 +762,16 @@ Module[{
       replacements,
       f = (getAmplitudeRules[diagrams, First@#] /. x:_Integer :> Last@#) &
    },
-   replacements = Transpose[f /@ `settings`momenta];
-   Flatten[Switch[ Count[First/@#,True],
-      0, Array[Automatic&, Length[False /. #]],
-      1, True /. #,
-      _, Utils`AssertOrQuit[False, getMomSettings::errOverlap]
-      ] &/@ replacements]
+   If[`settings`momenta === {},
+      Array[Automatic&, getClassAmount@diagrams],
+      replacements = Transpose[f /@ `settings`momenta];
+      Flatten[Switch[ Count[First/@#,True],
+         0, Array[Automatic&, Length[False /. #]],
+         1, True /. #,
+         _, Utils`AssertOrQuit[False, getMomSettings::errOverlap]
+         ] &/@ replacements
+      ]
+   ]
 ];
 getMomSettings // Utils`MakeUnknownInputDefinition;
 getMomSettings ~ SetAttributes ~ {Protected,Locked};
@@ -968,13 +981,17 @@ printDiagramsInfo[
    diagrams:`type`diagramSet,
    where_String:" "
 ] :=
-Module[
-   {
+Module[{
       nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True],
-      nClasses = Length@Cases[diagrams,FeynArts`Classes==_Integer:>1,Infinity,Heads -> True]
+      nClasses = getClassAmount@diagrams
    },
    Print[where,"in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];
 ];
+
+getClassAmount[set:`type`diagramSet] :=
+   Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
+getClassAmount // Utils`MakeUnknownInputDefinition;
+getClassAmount ~ SetAttributes ~ {Protected, Locked};
 
 debugMakePictures[
    diagrams:`type`diagramSet,
@@ -1168,7 +1185,6 @@ Module[{
       } &@ diagrams,
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
-
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
    abbreviations = simplifyChains[FormCalc`Abbr[] //. FormCalc`GenericList[]];
@@ -1179,7 +1195,7 @@ Module[{
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[zeroExternalMomenta === ExceptLoops,
-      `rules`setZeroMasses@proc;
+      `rules`setZeroMasses@amplitudes;
       generic = makeMassesZero[generic, masslessSettings];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
@@ -1221,21 +1237,14 @@ calculatedAmplitudes ~ SetAttributes ~ {Protected, Locked};
 @brief For a given type of a process creates a set of rules to nullify masses
        of external particles.
 @param expt A representation of the process under interest.
-@return None.
+@returns None.
 @note Explicit names are expected only for external particles.";
-`rules`setZeroMasses[expr:Rule[{{_, _, _, _}..}, {{_, _, _, _}..}]] :=
-Module[
-   {
-      particles = First /@ Flatten[List@@expr, 1],
-      uniqueNames, particleRules, fcRules
-   },
-   uniqueNames = DeleteDuplicates[particles /. (x:_)[i:_Integer, ___] :> x@i];
-   particleRules = FeynArts`M$ClassesDescription /. Equal -> Rule;
-   fcRules = Flatten[{#[_] -> 0, # -> 0} &/@ (FeynArts`Mass /. (uniqueNames /. particleRules))];
+`rules`setZeroMasses[set:`type`amplitudeSet|`type`diagramSet] :=
+(
    Unprotect@`rules`zeroExternalMasses;
-   `rules`zeroExternalMasses = Join[(FeynArts`Mass[#] -> 0) &/@ particles, fcRules];
+   `rules`zeroExternalMasses = DeleteDuplicates[FeynArts`Mass[#] -> 0 &/@ getField[set, All]];
    Protect@`rules`zeroExternalMasses;
-];
+);
 `rules`setZeroMasses // Utils`MakeUnknownInputDefinition;
 `rules`setZeroMasses ~ SetAttributes ~ {Protected, Locked};
 
