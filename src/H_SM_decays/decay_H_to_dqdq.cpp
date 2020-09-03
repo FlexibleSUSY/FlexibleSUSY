@@ -28,7 +28,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto betaDR = std::sqrt(1. - 4.*xDR);
 
    // TODO: add off-shell decays?
-   if (mHOS < 2.*mdqDR) {
+   if (mHOS < 2.*std::min(mdqDR, mdqOS)) {
       return 0.;
    }
 
@@ -52,7 +52,6 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
       alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
 
    // chiral breaking correctios
-   // TODO: probably shouldn't be applied in case of CP-breaking
    double deltaH2 = 0.;
    if(!info::is_CP_violating_Higgs_sector) {
       const double lt = std::log(Sqr(mHOS/mtpole));
