@@ -46,7 +46,7 @@
          {
             `topologyQ`self3pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> getField[ds,3] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGen:>Blank[],
             "t-penguins: remove leptons in final SED loop"
          },
          {
