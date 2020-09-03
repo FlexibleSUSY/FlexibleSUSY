@@ -71,6 +71,7 @@ META_SRC     := \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/time.m \
+		$(DIR)/NPointFunctions/chains.m \
 		$(DIR)/NPointFunctions/topologies.m \
 		$(DIR)/NPointFunctions/LToLConversion/observable.m \
 		$(DIR)/NPointFunctions/LToLConversion/class.m \
