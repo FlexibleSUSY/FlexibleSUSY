@@ -3808,7 +3808,7 @@ if test "x${enable_meta}" = "xyes"; then
     add_metaflags
 fi
 
-echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
+echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m
 
