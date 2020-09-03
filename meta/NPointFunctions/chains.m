@@ -168,8 +168,6 @@ Module[{id, idf},
             },
             idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
                ch[s[i1 /. id, k[i2], m1], e, s[i2 /. id, k[i2], m2]];
-            Print@idf;
-            Print@Information@idf;
          ];
       ];
       rules /. ch:FormCalc`DiracChain[__] :> idf@ch

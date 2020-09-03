@@ -1142,7 +1142,7 @@ Module[{
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
       numExtParticles,
-      calculatedAmplitudes,abbreviations,subexpressions,
+      feynAmps, generic, abbreviations,subexpressions,
       zeroedRules
    },
    numExtParticles = Plus@@Length/@proc;
@@ -1152,7 +1152,7 @@ Module[{
       ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, numExtParticles]]
    ];
 
-   calculatedAmplitudes = mapThread[
+   feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> onShellFlag,
@@ -1169,23 +1169,18 @@ Module[{
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
 
-   calculatedAmplitudes = MapThread[
-      getGenericSum,
-      {calculatedAmplitudes, getSumSettings@diagrams}
-   ];
+   generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
    abbreviations = simplifyChains[FormCalc`Abbr[] //. FormCalc`GenericList[]];
    abbreviations = modifyChains[abbreviations, diagrams, zeroExternalMomenta];
-   {calculatedAmplitudes, abbreviations} = makeChainsUnique@{calculatedAmplitudes, abbreviations};
-
-   abbreviations = identifySpinors[abbreviations,amplitudes];
-   (* >> Work with chains *)
+   {generic, abbreviations} = makeChainsUnique@{generic, abbreviations};
+   abbreviations = identifySpinors[abbreviations, amplitudes];
 
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[zeroExternalMomenta === ExceptLoops,
       `rules`setZeroMasses@proc;
-      calculatedAmplitudes = makeMassesZero[calculatedAmplitudes,masslessSettings];
+      generic = makeMassesZero[generic, masslessSettings];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
       abbreviations = abbreviations /. `rules`zeroExternalMasses;
@@ -1199,17 +1194,19 @@ Module[{
          :> (pair->0)];
       {abbreviations, zeroedRules} = ZeroRules[abbreviations, zeroedRules];
       {subexpressions, zeroedRules} = ZeroRules[subexpressions, zeroedRules];
-      calculatedAmplitudes = calculatedAmplitudes /. zeroedRules;];
+      generic = generic /. zeroedRules;
+   ];
 
-      FCAmplitudesToFSConvention[{
-            calculatedAmplitudes,
-            genericInsertions,
-            combinatorialFactors,
-      getColourFactors@diagrams
-         },
-         abbreviations,
-         subexpressions
-      ] /. getExternalMomentumRules[zeroExternalMomenta, amplitudes]
+   FCAmplitudesToFSConvention[
+      {
+         generic,
+         genericInsertions,
+         combinatorialFactors,
+         getColourFactors@diagrams
+      },
+      abbreviations,
+      subexpressions
+   ] /. getExternalMomentumRules[zeroExternalMomenta, amplitudes]
 ];
 calculatedAmplitudes // Utils`MakeUnknownInputDefinition;
 calculatedAmplitudes ~ SetAttributes ~ {Protected, Locked};
