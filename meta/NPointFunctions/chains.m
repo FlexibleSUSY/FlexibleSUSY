@@ -128,6 +128,7 @@ makeChainsUnique::usage = "
 makeChainsUnique[list:{expression_, rules:{Rule[_Symbol, _]...}}] :=
 Module[{
       chains = Longest@HoldPattern@Times[FormCalc`DiracChain[__]..],
+      chain = FormCalc`DiracChain[__],
       name = Rule[Symbol["NPointFunctions`internal`dc"<>ToString@#1], #2]&,
       old, zero, rest, unique, erules
    },
@@ -136,6 +137,9 @@ Module[{
    rest = Complement[rules, old];
    old = Complement[old, zero];
    unique = foreach[name, DeleteDuplicates@Cases[old, chains, Infinity]];
+   If[unique == {},
+      unique = foreach[name, DeleteDuplicates@Cases[old, chain, Infinity]];
+   ];
 
    erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
 
