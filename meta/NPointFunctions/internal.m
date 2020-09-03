@@ -1174,10 +1174,9 @@ Module[{
       {calculatedAmplitudes, getSumSettings@diagrams}
    ];
 
-   abbreviations = simplifyChain[FormCalc`Abbr[] //. FormCalc`GenericList[]];
+   abbreviations = simplifyChains[FormCalc`Abbr[] //. FormCalc`GenericList[]];
    abbreviations = modifyChains[abbreviations, diagrams, zeroExternalMomenta];
-
-   {calculatedAmplitudes,abbreviations} = makeChainsUnique[calculatedAmplitudes,abbreviations];
+   {calculatedAmplitudes, abbreviations} = makeChainsUnique@{calculatedAmplitudes, abbreviations};
 
    abbreviations = identifySpinors[abbreviations,ampsGen];
    (* >> Work with chains *)
@@ -1284,48 +1283,56 @@ getChainRules::usage = "
        and it is given by encoded regular expression.
 @param rules A list of rules.
 @return A list of rules.";
-getChainRules[rules:{Rule[_Symbol, _]..}] :=
+getChainRules[rules:{Rule[_Symbol, _]...}] :=
 Module[{
       regex = RegularExpression@"[F][1-9][\\d]*"
    },
    Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]
 ];
 getChainRules // Utils`MakeUnknownInputDefinition;
-getChainRules ~ SetAttributes ~ {Protected,Locked};
+getChainRules ~ SetAttributes ~ {Protected, Locked};
+
+foreach::usage = "
+@brief Applies a two-argument function on every element in the list. The first
+       argument is substituted by the number of the element in the list, while
+       the second one is the element itself.
+@param f A two-argument function to apply on serial number and the element itself.
+@param list A list of elements.
+@returns A list of modified elements";
+Module[{
+      i = 0
+   },
+   foreach[f_, list:{e_, rest___}] := Flatten@{f[++i, e], foreach[f, {rest}]};
+   foreach[f_, list:{}] := (i = 0; {});
+   foreach // Utils`MakeUnknownInputDefinition;
+   foreach ~ SetAttributes ~ {Protected, Locked};
+];
 
 makeChainsUnique::usage = "
 @brief After manual simplification of dirac chains one can get duplicates. They
        have to be removed. Then chains acquire unique names.
-@param expression An expression to modify.
-@param rules A list of rules, containing explicit chains.
+@param list A list of expression to modify and a list of rules, containing
+            chains.
 @returns A list of expression and rules.";
-makeChainsUnique[calculatedAmplitudes_, rules:{}] := {calculatedAmplitudes, {}};
-makeChainsUnique[calculatedAmplitudes_, rules:{Rule[_Symbol, _]..}] :=
+makeChainsUnique[list:{expression_, rules:{Rule[_Symbol, _]...}}] :=
 Module[
    {
-      chainRules, otherRules, zeroChainRules, uniqueChains, rulesForAmplitudes
+      chains = Longest@HoldPattern@Times[FormCalc`DiracChain[__]..],
+      name = Rule[Symbol["NPointFunctions`internal`dc"<>ToString@#1], #2]&,
+      old, zero, rest, unique, erules
    },
-   chainRules = getChainRules@rules;
-   otherRules = rules ~ Complement ~ chainRules;
+   old = getChainRules@rules;
+   zero = Cases[old, e:Rule[_, 0] :> e];
+   rest = Complement[rules, old];
+   old = Complement[old, zero];
+   unique = foreach[name, DeleteDuplicates@Cases[old, chains, Infinity]];
 
-   zeroChainRules = Cases[chainRules, chain:Rule[_,0]:>chain];
-   chainRules = chainRules ~ Complement ~ zeroChainRules;
+   erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
 
-   uniqueChains = DeleteDuplicates@Cases[
-      chainRules,
-      Longest@HoldPattern@Times[FormCalc`DiracChain[__]..],
-      Infinity
-   ];
-
-   uniqueChains = MapThread[
-      Rule[Symbol["NPointFunctions`internal`dc"<>#1], #2]&,
-      {ToString/@Range@Length@#, #}
-   ] &@ uniqueChains;
-
-   rulesForAmplitudes = Rule[FormCalc`Mat@First@#,Last@#] &/@
-      (chainRules/.(uniqueChains/.Rule[x_,y_]:>Rule[y,NPointFunctions`internal`mat@x]));
-
-   {calculatedAmplitudes /.zeroChainRules /.rulesForAmplitudes, Join[uniqueChains,otherRules]}
+   {
+      expression /. zero /. erules,
+      Join[unique, rest]
+   } /. FormCalc`Mat -> NPointFunctions`internal`mat
 ];
 makeChainsUnique // Utils`MakeUnknownInputDefinition;
 makeChainsUnique ~ SetAttributes ~ {Protected,Locked};
@@ -1334,12 +1341,12 @@ NPointFunctions`internal`mat::usage = "
 @brief Serves as a wrapper for Dirac chain abbreviations inside amplitudes.";
 NPointFunctions`internal`mat[0] = 0;
 
-simplifyChain::usage = "
+simplifyChains::usage = "
 @brief Simplifies some chains applying Dirac equation.
 @param chain A chain to simplify.
 @returns A simplified chain.";
-simplifyChain[expr:_] := expr /. ch:FormCalc`DiracChain[__] :> simplifyChain@ch;
-simplifyChain[chain:_FormCalc`DiracChain] :=
+simplifyChains[expr:_] := expr /. ch:FormCalc`DiracChain[__] :> simplifyChains@ch;
+simplifyChains[chain:_FormCalc`DiracChain] :=
 Module[{
       s = 6|7, a = -6|-7, ch = FormCalc`DiracChain, k = FormCalc`k,
       m, pair, sp, flip
@@ -1357,8 +1364,8 @@ Module[{
       ch[l:sp[n_],p:s k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]
    }
 ];
-simplifyChain // Utils`MakeUnknownInputDefinition;
-simplifyChain ~ SetAttributes ~ {Protected, Locked};
+simplifyChains // Utils`MakeUnknownInputDefinition;
+simplifyChains ~ SetAttributes ~ {Protected, Locked};
 
 modifyChains::usage = "
 @brief Applies a set of process specific chain rules to some expression,
