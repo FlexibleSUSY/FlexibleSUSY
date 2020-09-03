@@ -183,21 +183,19 @@ getTruePositions ~ SetAttributes ~ {Protected, Locked};
 
 `type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
 
-getProcess[expression:`type`diagramSet|`type`amplitudeSet] := Cases[
-   Head@expression,
-   (FeynArts`Process -> process:_) :> process
-][[1]];
+getProcess[expression:`type`diagramSet|`type`amplitudeSet] :=
+   Cases[Head@expression, (FeynArts`Process -> e:_) :> e][[1]];
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
-getField[set:`type`amplitudeSet|`type`diagramSet, number:_Integer] :=
-   Cases[getProcess@set,Rule[FeynArts`Field@number,x_] :> x][[1]] /;
+getField[set:`type`diagramSet, number:_Integer] :=
+   Flatten[List @@ getProcess[set], 1][[number]] /;
    0<number<=Plus@@(Length/@getProcess@set);
-getField[set:`type`amplitudeSet|`type`diagramSet, In] :=
+getField[set:`type`amplitudeSet, In] :=
    First /@ getProcess[set][[1]];
-getField[set:`type`amplitudeSet|`type`diagramSet, Out] :=
+getField[set:`type`amplitudeSet, Out] :=
    First /@ getProcess[set][[2]];
-getField[set:`type`amplitudeSet|`type`diagramSet, All] :=
+getField[set:`type`amplitudeSet, All] :=
    First /@ Flatten[List @@ getProcess[set], 1];
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
@@ -1334,26 +1332,15 @@ identifySpinors[
 ] :=
 Module[
    {
-      identificationRules = getFieldPositionRules@getProcess@set
+      id = foreach[#1->#2&, getField[set, All] //. `rules`fieldNames]
    },
    FormCalc`DiracChain[
-   FormCalc`Spinor[fermion1/.identificationRules,FormCalc`k[fermion1],mass1],
+   FormCalc`Spinor[fermion1 /. id, FormCalc`k[fermion1],mass1],
    seqOfElems,
-   FormCalc`Spinor[fermion2/.identificationRules,FormCalc`k[fermion2],mass2]]
+   FormCalc`Spinor[fermion2 /. id, FormCalc`k[fermion2],mass2]]
 ];
 identifySpinors // Utils`MakeUnknownInputDefinition;
 identifySpinors ~ SetAttributes ~ {Protected,Locked};
-
-getFieldPositionRules::usage =
-"@brief Gives rules of the form number_of_input_field->name_of_fermion.
-@param FeynArts`Process->Rule[_,_].
-@returns Rules of the form number_of_input_field->name_of_fermion.";
-getFieldPositionRules[
-   Rule[in:{{__}..},out:{{__}..}]
-] :=
-MapThread[Rule,{Range@Length@#,#//.`rules`fieldNames}] & [Part[in,All,1]~Join~Part[out,All,1]];
-getFieldPositionRules // Utils`MakeUnknownInputDefinition;
-getFieldPositionRules ~ SetAttributes ~ {Protected,Locked};
 
 mapThread::usage = "
 @brief Maps a function onto multiple sets of equal length, accompanying it by
