@@ -23,13 +23,15 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    }
    const auto xOS = Sqr(muqOS/mHOS);
    const auto xDR = Sqr(muqDR/mHOS);
-   const auto betaOS = std::sqrt(1. - 4.*xOS);
-   const auto betaDR = std::sqrt(1. - 4.*xDR);
 
    // TODO: add off-shell decays?
-   if (mHOS < 2.*std::min(muqDR, muqOS)) {
+   if (4.*std::max(xDR, xOS) > 1.) {
       return 0.;
    }
+
+   const auto betaOS = std::sqrt(1.-4.*xOS);
+   const auto betaDR = std::sqrt(1.-4.*xDR);
+
 
    const double alpha_s = get_alphas(context);
    const double alpha_s_red = alpha_s/Pi;
@@ -54,14 +56,14 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    double deltaH2 = 0.;
    if(!info::is_CP_violating_Higgs_sector) {
       const double lt = std::log(Sqr(mHOS/mtpole));
-      const double lq = std::log(Sqr(muqDR/mHOS));
+      const double lq = std::log(xDR);
       deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
    }
 
    const double flux = 1./(2.*mHOS);
    constexpr double color_factor = 3;
-   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(muqDR/mHOS), Sqr(muqDR/mHOS)));
-   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(muqOS/mHOS), Sqr(muqOS/mHOS)));
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
