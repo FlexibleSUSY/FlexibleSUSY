@@ -192,7 +192,7 @@ getProcess ~ SetAttributes ~ {Protected,Locked};
 
 getField[set:`type`amplitudeSet|`type`diagramSet, number:_Integer] :=
    Cases[getProcess@set,Rule[FeynArts`Field@number,x_] :> x][[1]] /;
-   0<number<=Plus@@(Length/@getProcess@diagrams);
+   0<number<=Plus@@(Length/@getProcess@set);
 getField[set:`type`amplitudeSet|`type`diagramSet, In] :=
    First /@ getProcess[set][[1]];
 getField[set:`type`amplitudeSet|`type`diagramSet, Out] :=
