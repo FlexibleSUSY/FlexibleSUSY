@@ -23,21 +23,19 @@
 BeginPackage["NPointFunctions`"];
 Begin["NPointFunctions`internal`time`"];
 
-time = AbsoluteTime[];
-time // Protect;
+Module[{
+      time = AbsoluteTime[]
+   },
 
-set[] := (
-   Unprotect@time;
-   time = AbsoluteTime[];
-   Protect@time;
-);
-set // Utils`MakeUnknownInputDefinition;
-set ~ SetAttributes ~ {Protected, Locked};
+   set[] := (time = AbsoluteTime[];);
+   set // Utils`MakeUnknownInputDefinition;
+   set ~ SetAttributes ~ {Protected, Locked};
 
-get[] :=
-   ToString@N[AbsoluteTime[]-time, {Infinity,3}];
-get // Utils`MakeUnknownInputDefinition;
-get ~ SetAttributes ~ {Protected, Locked};
+   get[] :=
+      ToString@N[AbsoluteTime[]-time, {Infinity, 3}];
+   get // Utils`MakeUnknownInputDefinition;
+   get ~ SetAttributes ~ {Protected, Locked};
+];
 
 End[];
 EndPackage[];
