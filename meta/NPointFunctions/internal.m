@@ -190,15 +190,15 @@ getProcess[expression:`type`diagramSet|`type`amplitudeSet] := Cases[
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
-getField[diagrams:`type`diagramSet, number:_Integer] :=
-   Cases[diagrams[[1,2,1,2,1]],Rule[FeynArts`Field@number,x_] :> x][[1]] /;
+getField[set:`type`amplitudeSet|`type`diagramSet, number:_Integer] :=
+   Cases[getProcess@set,Rule[FeynArts`Field@number,x_] :> x][[1]] /;
    0<number<=Plus@@(Length/@getProcess@diagrams);
-getField[amplitudes:`type`amplitudeSet, In] :=
-   Head[amplitudes][[1, 2, 1, All, 1]];
-getField[amplitudes:`type`amplitudeSet, Out] :=
-   Head[amplitudes][[1, 2, 2, All, 1]];
-getField[amplitudes:`type`amplitudeSet, All] :=
-   Join[getField[amplitudes, In], getField[amplitudes, Out]];
+getField[set:`type`amplitudeSet|`type`diagramSet, In] :=
+   First /@ getProcess[set][[1]];
+getField[set:`type`amplitudeSet|`type`diagramSet, Out] :=
+   First /@ getProcess[set][[2]];
+getField[set:`type`amplitudeSet|`type`diagramSet, All] :=
+   First /@ Flatten[List @@ getProcess[set], 1];
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
 
@@ -1180,7 +1180,7 @@ Module[{
    abbreviations = modifyChains[abbreviations, diagrams, zeroExternalMomenta];
    {calculatedAmplitudes, abbreviations} = makeChainsUnique@{calculatedAmplitudes, abbreviations};
 
-   abbreviations = identifySpinors[abbreviations,ampsGen];
+   abbreviations = identifySpinors[abbreviations,amplitudes];
    (* >> Work with chains *)
 
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
@@ -1321,29 +1321,20 @@ identifySpinors::usage =
 @note DiracChains live only inside FormCalc`Abbr.
 @note Should NOT be used for Automatic FormCalc`FermionOrder.";
 identifySpinors[
-   inp:{Rule[_,_]...},
-   ampsGen:FeynArts`FeynAmpList[
-      ___,
-      (FeynArts`Process->Rule[{{__}..},{{__}..}]),
-      ___,
-      FeynArts`AmplitudeLevel->{Generic},
-      ___][___]] :=
-inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch,ampsGen];
+   inp:{Rule[_Symbol, _]...},
+   set:`type`amplitudeSet|`type`diagramSet
+] :=
+inp/.ch:FormCalc`DiracChain[__]:>identifySpinors[ch, set];
 identifySpinors[
    FormCalc`DiracChain[
       FormCalc`Spinor[FormCalc`k[fermion1_Integer],mass1_,1|-1],
       seqOfElems___,
       FormCalc`Spinor[FormCalc`k[fermion2_Integer],mass2_,1|-1]],
-   FeynArts`FeynAmpList[
-      ___,
-      process:(FeynArts`Process->Rule[{{__}..},{{__}..}]),
-      ___,
-      FeynArts`AmplitudeLevel->{Generic},
-      ___][___]
+   set:`type`amplitudeSet|`type`diagramSet
 ] :=
 Module[
    {
-      identificationRules = getFieldPositionRules@process
+      identificationRules = getFieldPositionRules@getProcess@set
    },
    FormCalc`DiracChain[
    FormCalc`Spinor[fermion1/.identificationRules,FormCalc`k[fermion1],mass1],
@@ -1358,7 +1349,7 @@ getFieldPositionRules::usage =
 @param FeynArts`Process->Rule[_,_].
 @returns Rules of the form number_of_input_field->name_of_fermion.";
 getFieldPositionRules[
-   FeynArts`Process->Rule[in:{{__}..},out:{{__}..}]
+   Rule[in:{{__}..},out:{{__}..}]
 ] :=
 MapThread[Rule,{Range@Length@#,#//.`rules`fieldNames}] & [Part[in,All,1]~Join~Part[out,All,1]];
 getFieldPositionRules // Utils`MakeUnknownInputDefinition;
