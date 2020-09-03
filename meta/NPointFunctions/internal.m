@@ -1311,39 +1311,6 @@ Module[
 setZeroExternalMomentaInChains // Utils`MakeUnknownInputDefinition;
 setZeroExternalMomentaInChains ~ SetAttributes ~ {Protected,Locked};
 
-identifySpinors::usage =
-"@brief Inserts the names of fermionic fields inside FormCalc`DicaChain structures.
-@param inp List of abbreviations to modify | FormCalc`DiracChain chain to modify.
-@param ampsGen FeynArts`FeynAmpList with information of process
-@returns DiracChain with inserted fermion names | Expression with new DiracChains.
-@note Dirac chains live only inside FormCalc`Abbr.
-@note Should NOT be used for Automatic FormCalc`FermionOrder.";
-Module[{
-      id, idf
-   },
-   identifySpinors[
-      rules:{Rule[_Symbol, _]...},
-      set:`type`amplitudeSet|`type`diagramSet
-   ] :=
-   (
-      If[Head@id === Symbol,
-         id = foreach[#1->#2&, getField[set, All] //. `rules`fieldNames];
-         With[{
-               ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k
-            },
-            idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
-               ch[s[i1 /. id, k[i2], m1], e, s[i2 /. id, k[i2], m2]];
-            Print@idf;
-            Print@Information@idf;
-         ];
-      ];
-      rules /. ch:FormCalc`DiracChain[__] :> idf@ch
-   );
-
-   identifySpinors // Utils`MakeUnknownInputDefinition;
-   identifySpinors ~ SetAttributes ~ {Protected,Locked};
-];
-
 mapThread::usage = "
 @brief Maps a function onto multiple sets of equal length, accompanying it by
        printing a progress bar.
