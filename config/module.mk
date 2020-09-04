@@ -28,7 +28,7 @@ REQUIRED_SARAH_VERSION_FILE := \
 		$(DIR)/required_sarah_version.m
 
 FLEXIBLESUSY_VERSION_FILE := \
-		$(DIR)/version
+		$(DIR)/flexiblesusy-version
 
 FLEXIBLESUSY_GIT_COMMIT_FILE := \
 		$(DIR)/git_commit
