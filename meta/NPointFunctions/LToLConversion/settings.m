@@ -193,7 +193,13 @@
 `settings`massless[ds:`type`diagramSet] := {
    {
       "t-pinguins: remove lighter particle in initial SED bridge",
-      `topologyQ`self1pinguinT -> {FeynArts`F, 6}
+      `topologyQ`self1pinguinT,
+      {Append, FeynArts`F[6] :> 3}
+   },
+   {
+      "t-pinguins: keep initial fermion mass untouched in initial SED bridge",
+      `topologyQ`self1pinguinT,
+      {Hold, 1}
    }
 };
 

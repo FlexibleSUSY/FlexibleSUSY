@@ -701,23 +701,38 @@ Module[{
 getSumSettings // Utils`MakeUnknownInputDefinition;
 getSumSettings ~ SetAttributes ~ {Protected,Locked};
 
-getMasslessSettings::usage = "
-@brief Some topologies can lead to physically incorrect simplifications.
-       This function provides required information in order to prevent this.
+collectSame::usage = "
+@brief Finds the same keys in the list of rules and for them collects RHSs into
+       one list, i.e.:
+          collectSame@{a->{1}, b->{2}, a->{3}} leads to {a->{1,3}, b->2}.
+@param list A list of rules.
+@returnd A list of rules.";
+collectSame[list:{Rule[_, {_}]...}] :=
+   (#->Cases[list, (#->{el_}):>el, Infinity]) &/@ DeleteDuplicates[First/@list];
+collectSame // Utils`MakeUnknownInputDefinition;
+collectSame ~ SetAttributes ~ {Protected, Locked};
+
+`get`masslessSettings::usage = "
+@brief In some topologies field insertions can lead to physically incorrect
+       simplifications if they are done naively. This function provides
+       rules in order to prevent this.
 @param diagrams A set of diagrams.
 @returns A set of rules for amplitudes.";
-getMasslessSettings[diagrams:`type`diagramSet] :=
+`get`masslessSettings[diagrams:`type`diagramSet] :=
 Module[{
-     replacements = {},
-     actions = `settings`massless@diagrams, res
+     rules = foreach[applyAction[diagrams, #2]&, `settings`massless@diagrams],
+     res
    },
-   Do[AppendTo[replacements, applyAction[diagrams, ac]];, {ac, actions}];
-   res = List@@(diagrams /. replacements);
-   res = If[MatchQ[#, `type`diagram], Table["dummy",{Length@getInsertions@#}], First[#]] &/@ res;
+   rules = collectSame@rules;
+   res = List@@(diagrams /. rules);
+   res = If[MatchQ[#, `type`diagram],
+      Table[{}, {Length@getInsertions@#}],
+      {First@#}
+   ] &/@ res;
    Flatten[res, 1]
 ];
-getMasslessSettings // Utils`MakeUnknownInputDefinition;
-getMasslessSettings ~ SetAttributes ~ {Protected,Locked};
+`get`masslessSettings // Utils`MakeUnknownInputDefinition;
+`get`masslessSettings ~ SetAttributes ~ {Protected,Locked};
 
 getRegularizationSettings::usage = "
 @brief Some amplitudes are calculated incorrectly in some schemes (like box
@@ -846,9 +861,38 @@ Module[{
       {d, List@@diagrams}
    ]
 ];
+
 applyAction[
    diagrams:`type`diagramSet,
-   {text:_String, Rule[topologyQ:_, {t:`type`fa`field, n:_Integer}]}
+   {
+      text:_String,
+      topologyQ:_,
+      {Append, RuleDelayed[(t:`type`fa`field)[n:_Integer], e:_Integer]}
+   }
+] :=
+Module[{
+      ext = First /@ `get`zeroMasses[]
+   },
+   Do[
+      If[topologyQ@getTopology@d,
+         Print@text;
+         Return[
+            getTopology@d -> Table[Append[#, genericMass[t, n] :> ext[[e]]]&,
+               {Length@getInsertions@d}
+            ]
+         ]
+      ];,
+      {d, List@@diagrams}
+   ]
+];
+
+applyAction[
+   diagrams:`type`diagramSet,
+   {
+      text:_String,
+      topologyQ:_,
+      {Hold, e:_Integer}
+   }
 ] :=
 Module[{
    },
@@ -856,7 +900,9 @@ Module[{
       If[topologyQ@getTopology@d,
          Print@text;
          Return[
-            getTopology@d -> Table[genericMass[t, n], {Length@getInsertions@d}]
+            getTopology@d -> Table[Delete[#, e]&,
+               {Length@getInsertions@d}
+            ]
          ]
       ];,
       {d, List@@diagrams}
@@ -1197,7 +1243,7 @@ Module[{
 
    If[OptionValue@ZeroExternalMomenta === ExceptLoops,
       `set`zeroMasses@amplitudes;
-      generic = makeMassesZero[generic, getMasslessSettings@diagrams];
+      generic = makeMassesZero[generic, diagrams];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
       abbreviations = abbreviations /. `get`zeroMasses[];
@@ -1257,35 +1303,27 @@ Call `.`set`.`zeroMasses to set up a set of rules first.";
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
-       integrals and denominators.
+       integrals.
 @param expr An expression to modify.
-@param masslessSettings A set of settings for amplitudes.
+@param diagrams A set of diagrams.
 @returns A modified expression.";
-makeMassesZero[expr:_, masslessSettings:_] :=
+makeMassesZero[expr:{__}, diagrams:`type`diagramSet] :=
 Module[
    {
+      funcs = `get`masslessSettings@diagrams,
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
-      pattern, uniqueIntegrals, integralRules, integralBack, masslessRules,
-      uniqueDenominators, denominatorRules, denominatorBack, newExpr
+      pattern, uniqueIntegrals, hideInt, showInt, rules,
+      newExpr
    },
    pattern = Alternatives @@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[expr, pattern, Infinity];
-   integralRules = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
-   integralBack = integralRules /. Rule[x_, y_] -> Rule[y, x];
+   hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
+   showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
-   uniqueDenominators = DeleteDuplicates@Cases[expr, FormCalc`Den[_, _], Infinity];
-   denominatorRules = Rule[#, Unique@"loopDenominator"] &/@ uniqueDenominators;
-   denominatorBack = denominatorRules /. Rule[x_, y_] -> Rule[y, x];
+   rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMasses[]&, expr];
 
-   masslessRules = Table[
-      DeleteDuplicates@Cases[expr[[i]], e:masslessSettings[[i]]:>(e->0), Infinity],
-      {i, Length@expr}
-   ];
-   masslessRules = If[#==={}, `get`zeroMasses[], #] &/@ masslessRules;
-
-   newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. integralRules /. denominatorRules;
-
-   Table[newExpr[[i]] /. masslessRules[[i]] /. integralBack /. denominatorBack /. masslessRules[[i]] , {i, Length@expr}]
+   newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. hideInt;
+   foreach[#2 //. rules[[#1]] /. showInt&, newExpr]
 ];
 makeMassesZero // Utils`MakeUnknownInputDefinition;
 makeMassesZero ~ SetAttributes ~ {Protected, Locked};
@@ -1300,7 +1338,7 @@ foreach::usage = "
 Module[{
       i = 0
    },
-   foreach[f_, list:{e_, rest___}] := Flatten@{f[++i, e], foreach[f, {rest}]};
+   foreach[f_, list:{e_, rest___}] := {f[++i, e], Sequence@@foreach[f, {rest}]};
    foreach[f_, list:{}] := (i = 0; {});
    foreach // Utils`MakeUnknownInputDefinition;
    foreach ~ SetAttributes ~ {Protected, Locked};
