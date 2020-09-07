@@ -1197,11 +1197,11 @@ Module[{
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[OptionValue@ZeroExternalMomenta === ExceptLoops,
-      `rules`setZeroMasses@amplitudes;
+      `set`zeroMasses@amplitudes;
       generic = makeMassesZero[generic, masslessSettings];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
-      abbreviations = abbreviations /. `rules`zeroExternalMasses;
+      abbreviations = abbreviations /. `get`zeroMasses[];
       subexpressions = {};
    ];
 
@@ -1229,26 +1229,32 @@ Module[{
 calculatedAmplitudes // Utils`MakeUnknownInputDefinition;
 calculatedAmplitudes ~ SetAttributes ~ {Protected, Locked};
 
-`rules`zeroExternalMasses::usage = "
-@brief A static-like variable, which stores the set of nullify rules for
-       external particles.";
-`rules`zeroExternalMasses = {};
-`rules`zeroExternalMasses // Protect;
+Module[{rules},
 
-`rules`setZeroMasses::usage = "
+`set`zeroMasses::usage = "
 @brief For a given type of a process creates a set of rules to nullify masses
        of external particles.
-@param expt A representation of the process under interest.
-@returns None.
+@param set A set of amplitudes or diagrams.
 @note Explicit names are expected only for external particles.";
-`rules`setZeroMasses[set:`type`amplitudeSet|`type`diagramSet] :=
-(
-   Unprotect@`rules`zeroExternalMasses;
-   `rules`zeroExternalMasses = DeleteDuplicates[FeynArts`Mass[#] -> 0 &/@ getField[set, All]];
-   Protect@`rules`zeroExternalMasses;
+`set`zeroMasses[set:`type`amplitudeSet|`type`diagramSet] :=
+   rules = DeleteDuplicates[FeynArts`Mass[#] -> 0 &/@ getField[set, All]];
+`set`zeroMasses // Utils`MakeUnknownInputDefinition;
+`set`zeroMasses ~ SetAttributes ~ {Protected, Locked};
+
+`get`zeroMasses::errNotSet = "
+Call `.`set`.`zeroMasses to set up a set of rules first.";
+`get`zeroMasses::usage = "
+@brief Returns a set of rules to nullify masses of external particles.
+@note An order of rules correspond to the order of external particles.
+@return A list of rules to nullify masses of external particles.";
+`get`zeroMasses[] := (
+   Utils`AssertOrQuit[Head@rules =!= Symbol, `get`zeroMasses::errNotSet];
+   rules
 );
-`rules`setZeroMasses // Utils`MakeUnknownInputDefinition;
-`rules`setZeroMasses ~ SetAttributes ~ {Protected, Locked};
+`get`zeroMasses // Utils`MakeUnknownInputDefinition;
+`get`zeroMasses ~ SetAttributes ~ {Protected, Locked};
+
+];
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
@@ -1276,7 +1282,7 @@ Module[
       DeleteDuplicates@Cases[expr[[i]], e:masslessSettings[[i]]:>(e->0), Infinity],
       {i, Length@expr}
    ];
-   masslessRules = If[#==={}, `rules`zeroExternalMasses, #] &/@ masslessRules;
+   masslessRules = If[#==={}, `get`zeroMasses[], #] &/@ masslessRules;
 
    newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. integralRules /. denominatorRules;
 
