@@ -1155,7 +1155,6 @@ calculateAmplitudes[
    ] :=
 Module[{
       proc = getProcess@amplitudes,
-      masslessSettings = getMasslessSettings@diagrams,
       genericInsertions = getFieldInsertions@diagrams,
 
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
@@ -1198,7 +1197,7 @@ Module[{
 
    If[OptionValue@ZeroExternalMomenta === ExceptLoops,
       `set`zeroMasses@amplitudes;
-      generic = makeMassesZero[generic, masslessSettings];
+      generic = makeMassesZero[generic, getMasslessSettings@diagrams];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
       abbreviations = abbreviations /. `get`zeroMasses[];
@@ -1234,9 +1233,9 @@ Module[{rules},
 `set`zeroMasses::usage = "
 @brief For a given type of a process creates a set of rules to nullify masses
        of external particles.
-@param set A set of amplitudes or diagrams.
+@param set A set of amplitudes.
 @note Explicit names are expected only for external particles.";
-`set`zeroMasses[set:`type`amplitudeSet|`type`diagramSet] :=
+`set`zeroMasses[set:`type`amplitudeSet] :=
    rules = DeleteDuplicates[FeynArts`Mass[#] -> 0 &/@ getField[set, All]];
 `set`zeroMasses // Utils`MakeUnknownInputDefinition;
 `set`zeroMasses ~ SetAttributes ~ {Protected, Locked};
