@@ -63,10 +63,10 @@ and not
 InterfaceToMatching@@`1`.";
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]}] := obj;
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
-Module[{basis, coefficientsWilson},
-   basis = findFermionChains[getSubexpressions@obj, operatorBasis];
-   coefficientsWilson = removeFermionChains[createNewNPF[obj, basis]];
-   coefficientsWilson
+Module[{
+      basis = findFermionChains[getSubexpressions@obj, operatorBasis]
+   },
+   removeFermionChains[createNewNPF[obj, basis]]
 ];
 InterfaceToMatching[x___] :=
 Utils`AssertOrQuit[False,InterfaceToMatching::errUnknownInput,{x}];
