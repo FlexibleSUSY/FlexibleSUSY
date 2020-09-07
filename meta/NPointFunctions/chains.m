@@ -142,7 +142,6 @@ Module[{
    ];
 
    erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
-
    {
       expression /. zero /. erules,
       Join[unique, rest]
@@ -150,6 +149,12 @@ Module[{
 ];
 makeChainsUnique // Utils`MakeUnknownInputDefinition;
 makeChainsUnique ~ SetAttributes ~ {Protected, Locked};
+
+mat::usage = "
+@todo Sometimes this is needed, sometimes not. Why?";
+mat[0] = 0;
+mat[HoldPattern@Times[e__]] := Times@@mat/@{e};
+mat[mass:_FeynArts`Mass] := mass;
 
 identifySpinors::usage = "
 @brief Inserts names of fermionic fields inside FormCalc`DicaChain structures.
@@ -171,7 +176,7 @@ Module[{id, idf},
                ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k
             },
             idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
-               ch[s[i1 /. id, k[i2], m1], e, s[i2 /. id, k[i2], m2]];
+               ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
          ];
       ];
       rules /. ch:FormCalc`DiracChain[__] :> idf@ch
