@@ -653,8 +653,8 @@ NPointFunctionFAFC::usage = "
 @brief Applies FeynArts` routines for a given process, preparing it for
        FormCalc`.
 @returns A structure, representing NPF object.
-@todo If topologies are not generated, then check and return";
-NPointFunctionFAFC[inFields_, outFields_, OptionsPattern[]] :=
+@todo If topologies are not generated, then check and return.";
+NPointFunctionFAFC[inFields_, outFields_, options:OptionsPattern[]] :=
 Module[{
       topologies, diagrams, amplitudes
    },
@@ -674,10 +674,11 @@ Module[{
    {
       {getField[amplitudes, In], getField[amplitudes, Out]} //. `rules`fieldNames,
       calculateAmplitudes[
-            {diagrams, amplitudes},
-            OptionValue@Regularize,
-            OptionValue@ZeroExternalMomenta,
-            OptionValue@OnShellFlag
+         {diagrams, amplitudes},
+         Sequence@@FilterRules[
+            {options},
+            {Regularize, ZeroExternalMomenta, OnShellFlag}
+         ]
       ]
    }
 ];
@@ -1136,21 +1137,22 @@ Module[{
 getFermionOrder // Utils`MakeUnknownInputDefinition;
 getFermionOrder ~ SetAttributes ~ {Protected, Locked};
 
+Options[calculateAmplitudes] = {
+   Regularize -> DimensionalReduction,
+   ZeroExternalMomenta -> True,
+   OnShellFlag -> False
+};
 calculateAmplitudes::usage = "
 @brief Applies FormCalc` routines to amplitude set, then simplifies the
        result, according to options.
 @param diagrams A set of diagrams.
 @param amplitudes A modified (without colour indices) set of amplitudes.
-@param regularizationScheme A regularization scheme for the calculation.
-@param zeroExternalMomenta A setting for handling of external momenta.
-@param onShellFlag A setting for handling squared momenta.
 @returns The main part of NPF object, containing: generic amplitudes,
          class specific insertions, subexpressions.";
 calculateAmplitudes[
    {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
-   regularizationScheme_,
-   zeroExternalMomenta_,
-   onShellFlag_] :=
+   OptionsPattern[]
+   ] :=
 Module[{
       proc = getProcess@amplitudes,
       masslessSettings = getMasslessSettings@diagrams,
@@ -1164,7 +1166,7 @@ Module[{
    },
    numExtParticles = Plus@@Length/@proc;
 
-   If[zeroExternalMomenta === True,
+   If[OptionValue@ZeroExternalMomenta === True,
       (* Relations Mom[i]^2 = 0 are true now. *)
       ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, numExtParticles]]
    ];
@@ -1172,7 +1174,7 @@ Module[{
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
-         FormCalc`OnShell -> onShellFlag,
+         FormCalc`OnShell -> OptionValue@OnShellFlag,
          FormCalc`FermionChains -> FormCalc`Chiral,
          FormCalc`FermionOrder -> getFermionOrder@diagrams,
          FormCalc`Invariants -> False,
@@ -1180,7 +1182,7 @@ Module[{
       ]&,
       {
          ampsGen,
-         getRegularizationSettings[#, regularizationScheme],
+         getRegularizationSettings[#, OptionValue@Regularize],
          getMomSettings@#
       } &@ diagrams,
       "Amplitude calculation"
@@ -1188,13 +1190,13 @@ Module[{
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
    abbreviations = simplifyChains[FormCalc`Abbr[] //. FormCalc`GenericList[]];
-   abbreviations = modifyChains[abbreviations, diagrams, zeroExternalMomenta];
+   abbreviations = modifyChains[abbreviations, diagrams, OptionValue@ZeroExternalMomenta];
    {generic, abbreviations} = makeChainsUnique@{generic, abbreviations};
    abbreviations = identifySpinors[abbreviations, amplitudes];
 
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
-   If[zeroExternalMomenta === ExceptLoops,
+   If[OptionValue@ZeroExternalMomenta === ExceptLoops,
       `rules`setZeroMasses@amplitudes;
       generic = makeMassesZero[generic, masslessSettings];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
@@ -1203,7 +1205,7 @@ Module[{
       subexpressions = {};
    ];
 
-   If[zeroExternalMomenta,
+   If[OptionValue@ZeroExternalMomenta,
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       zeroedRules = Cases[FormCalc`Abbr[],
          Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]
@@ -1222,7 +1224,7 @@ Module[{
       },
       abbreviations,
       subexpressions
-   ] /. getExternalMomentumRules[zeroExternalMomenta, amplitudes]
+   ] /. getExternalMomentumRules[OptionValue@ZeroExternalMomenta, amplitudes]
 ];
 calculatedAmplitudes // Utils`MakeUnknownInputDefinition;
 calculatedAmplitudes ~ SetAttributes ~ {Protected, Locked};
