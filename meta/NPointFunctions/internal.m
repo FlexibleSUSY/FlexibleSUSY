@@ -710,11 +710,11 @@ getSumSettings // Utils`MakeUnknownInputDefinition;
 getSumSettings ~ SetAttributes ~ {Protected,Locked};
 
 collectSame::usage = "
-@brief Finds the same keys in the list of rules and for them collects RHSs into
-       one list, i.e.:
+@brief Finds the same keys in the list of rules and for them collects RHSs
+       into one list, i.e.:
           collectSame@{a->{1}, b->{2}, a->{3}} leads to {a->{1,3}, b->2}.
 @param list A list of rules.
-@returnd A list of rules.";
+@return A list of rules.";
 collectSame[list:{Rule[_, {_}]...}] :=
    (#->Cases[list, (#->{el_}):>el, Infinity]) &/@ DeleteDuplicates[First/@list];
 collectSame // Utils`MakeUnknownInputDefinition;

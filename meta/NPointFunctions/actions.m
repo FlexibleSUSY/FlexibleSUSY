@@ -63,6 +63,7 @@ Module[
    printDiagramsInfo@res[[1]];
    res
 ];
+
 applyAction[
    diagrams:`type`diagramSet,
    {topologyQ:_, function:_, crit:_, text:_String}
@@ -76,69 +77,66 @@ Module[{
    printDiagramsInfo@d;
    d
 ];
-applyAction[
-   diagrams:`type`diagramSet,
-   {text:_String, topologyQ:_, {n:_Integer, f:_}}
-] :=
+
 Module[{
+      template, func
    },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[{n -> Or[f, -f]}, {Length@getInsertions@d}]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
+
+template[{text:_, topologyQ:_}, realization:_] := If[topologyQ@getTopology@#2,
+   Print@text;
+   getTopology@#2 -> Table[realization, {Length@getInsertions@#2}],
+
+   Null
+]&;
+
+makeApplication::usage = "
+@brief This metafunction allows to define applyAction functions without the
+       repetition of the code. One need to specify the pattern of setting to
+       be used with applyAction and the realization of this setting. Patterns
+       for names text and topologyQ are reserved for information text to be
+       printed and the topologyQ-function to parse the correct topology.
+@param setting A pattern, replesenting some setting.
+@param realization An expression, which represent something, which should be
+       done for a setting.
+@returns Null.";
+makeApplication[{setting:_, realization:_}] := (
+   applyAction[diagrams:`type`diagramSet, setting] := (
+      func = template[{text, topologyQ}, realization];
+      Sequence@@(foreach[func, List@@diagrams] /. Null -> Sequence[])
+   );
+);
+makeApplication // Utils`MakeUnknownInputDefinition;
+makeApplication ~ SetAttributes ~ {Protected, Locked};
+
 ];
 
-applyAction[
-   diagrams:`type`diagramSet,
+makeApplication@{
    {
       text:_String,
       topologyQ:_,
-      {Append, RuleDelayed[(t:`type`fa`field)[n:_Integer], e:_Integer]}
-   }
-] :=
-Module[{
-      ext = First /@ `get`zeroMassRules[]
+      {n:_Integer, f:_}
    },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[Append[#, genericMass[t, n] :> ext[[2*e-1]]]&,
-               {Length@getInsertions@d}
-            ]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
-];
+   {n -> Or[f, -f]}
+};
 
-applyAction[
-   diagrams:`type`diagramSet,
+makeApplication@{
    {
       text:_String,
       topologyQ:_,
       {Hold, e:_Integer}
-   }
-] :=
-Module[{
    },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[Delete[#, {{2*e}, {2*e-1}}]&,
-               {Length@getInsertions@d}
-            ]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
-];
+   Delete[#, {{2*e}, {2*e-1}}]&
+};
+
+makeApplication@{
+   {
+      text:_String,
+      topologyQ:_,
+      {Append, (t:`type`fa`field)[n:_Integer] :> e:_Integer}
+   },
+   Append[#, genericMass[t, n] :> (First /@ `get`zeroMassRules[])[[2*e-1]]]&
+};
+
 applyAction // Utils`MakeUnknownInputDefinition;
 applyAction ~ SetAttributes ~ {Protected, Locked};
 
