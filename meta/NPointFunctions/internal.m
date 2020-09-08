@@ -1095,13 +1095,12 @@ Module[{
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
       numExtParticles,
-      feynAmps, generic, abbreviations,subexpressions,
+      feynAmps, generic, chains, abbr, subs,
       zeroedRules
    },
    numExtParticles = Plus@@Length/@proc;
 
    If[OptionValue@ZeroExternalMomenta === True,
-      (* Relations Mom[i]^2 = 0 are true now. *)
       ampsGen = FormCalc`OffShell[ampsGen, Sequence@@Array[#->0&, numExtParticles]]
    ];
 
@@ -1123,30 +1122,22 @@ Module[{
    ] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
-   abbreviations = simplifyChains[FormCalc`Abbr[] //. FormCalc`GenericList[]];
-   abbreviations = modifyChains[abbreviations, diagrams, OptionValue@ZeroExternalMomenta];
-   {generic, abbreviations} = makeChainsUnique@{generic, abbreviations};
-   abbreviations = identifySpinors[abbreviations, amplitudes];
+   abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
+   subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
 
-   subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
+   {chains, abbr} = {#, Complement[abbr, #]} &@ getChainRules@abbr;
+   chains = simplifyChains@chains;
+   chains = modifyChains[chains, diagrams, OptionValue@ZeroExternalMomenta];
+   {generic, chains} = makeChainsUnique@{generic /. abbr, chains};
+   chains = identifySpinors[chains, amplitudes];
 
-   If[OptionValue@ZeroExternalMomenta === ExceptLoops,
-      `set`zeroMassRules@{amplitudes, feynAmps};
-      generic = makeMassesZero[generic, diagrams];
-      abbreviations = setZeroExternalMomentaInChains@abbreviations;
-      abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
-      abbreviations = abbreviations /. `get`zeroMassRules[];
-      subexpressions = {};
-   ];
 
-   If[OptionValue@ZeroExternalMomenta,
-      abbreviations = setZeroExternalMomentaInChains@abbreviations;
-      zeroedRules = Cases[FormCalc`Abbr[],
-         Rule[_,pair:FormCalc`Pair[FormCalc`k[_], FormCalc`k[_]]]
-         :> (pair->0)];
-      {abbreviations, zeroedRules} = ZeroRules[abbreviations, zeroedRules];
-      {subexpressions, zeroedRules} = ZeroRules[subexpressions, zeroedRules];
-      generic = generic /. zeroedRules;
+   `set`zeroMassRules@{amplitudes, feynAmps};
+
+   {generic, chains, subs} = makeMassesZero[
+      {generic, chains, subs},
+      diagrams,
+      OptionValue@ZeroExternalMomenta
    ];
 
    FCAmplitudesToFSConvention[
@@ -1156,8 +1147,8 @@ Module[{
          combinatorialFactors,
          getColourFactors@diagrams
       },
-      abbreviations,
-      subexpressions
+      chains,
+      subs
    ] /. getExternalMomentumRules[OptionValue@ZeroExternalMomenta, amplitudes]
 ];
 calculatedAmplitudes // Utils`MakeUnknownInputDefinition;
@@ -1198,28 +1189,45 @@ Call `.`set`.`zeroMassRules to set up rules first.";
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
-       integrals.
-@param expr An expression to modify.
+       integrals, applies subexpressions.
+@param generic An expression to modify.
+@param chains A lis with fermionic chains.
+@param subs A list of subexpressions.
 @param diagrams A set of diagrams.
-@returns A modified expression.";
-makeMassesZero[expr:{__}, diagrams:`type`diagramSet] :=
+@returns A list with modified expression, chains and empty non-applied subexpressions.";
+makeMassesZero[{generic_, chains_, subs_}, diagrams:`type`diagramSet, ExceptLoops] :=
 Module[{
       funcs = `get`masslessSettings@diagrams,
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
       pattern, uniqueIntegrals, hideInt, showInt, rules,
-      newExpr
+      new = generic //. subs /. FormCalc`Pair[_,_] -> 0
    },
    pattern = Alternatives @@ ( #[__] &/@ names );
-   uniqueIntegrals = DeleteDuplicates@Cases[expr, pattern, Infinity];
+   uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
-   rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMassRules[]&, expr];
+   rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMassRules[]&, new];
 
-   newExpr = expr //. FormCalc`Subexpr[] //. FormCalc`GenericList[]
-                  /. hideInt /. FormCalc`Pair[_,_] -> 0;
-   foreach[#2 //. rules[[#1]] /. showInt&, newExpr]
+   {
+      foreach[#2 //. rules[[#1]] /. showInt&, new /. hideInt],
+      setZeroExternalMomentaInChains@chains /. `get`zeroMassRules[],
+      {}
+   }
 ];
+makeMassesZero[{generic_, chains_, subs_}, diagrams:`type`diagramSet, True] :=
+Module[{
+      zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)]
+   },
+   {new, zeroedRules} = ZeroRules[subs, zeroedRules];
+   {
+      generic /. zeroedRules,
+      chains = setZeroExternalMomentaInChains@chains,
+      new
+   }
+];
+makeMassesZero[{expr_, chains_, subs_}, diagrams:`type`diagramSet, _] :=
+   {expr, chains, subs};
 makeMassesZero // Utils`MakeUnknownInputDefinition;
 makeMassesZero ~ SetAttributes ~ {Protected, Locked};
 
@@ -1239,24 +1247,6 @@ Module[{
    foreach // Utils`MakeUnknownInputDefinition;
    foreach ~ SetAttributes ~ {Protected, Locked};
 ];
-
-setZeroExternalMomentaInChains::usage = "
-@brief Sets FormCalc`k[i] to zero inside fermioinic chains.
-@param abbreviations list of rules.
-@returns Changed list of rules.";
-setZeroExternalMomentaInChains[abbreviations:{Rule[_,_]...}] :=
-Module[
-   {
-      replaceMomenta,temp,setZeroChainToZero
-   },
-   replaceMomenta[expr_] := expr/.FormCalc`k[_Integer]:>0;
-   temp = abbreviations/.chain:FormCalc`DiracChain[__] :> replaceMomenta@chain;
-   setZeroChainToZero[FormCalc`DiracChain[__,0,__]] := 0;
-   setZeroChainToZero[chain:FormCalc`DiracChain[__]] := chain;
-   temp/.chain:FormCalc`DiracChain[__] :> setZeroChainToZero@chain
-];
-setZeroExternalMomentaInChains // Utils`MakeUnknownInputDefinition;
-setZeroExternalMomentaInChains ~ SetAttributes ~ {Protected,Locked};
 
 mapThread::usage = "
 @brief Maps a function onto multiple sets of equal length, accompanying it by

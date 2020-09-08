@@ -186,5 +186,14 @@ Module[{id, idf},
    identifySpinors ~ SetAttributes ~ {Protected,Locked};
 ];
 
+setZeroExternalMomentaInChains::usage = "
+@brief Sets FormCalc`k[i] to zero inside fermionic chains.
+@param expression Any expression.
+@returns An expression with modified fermionic chains.";
+setZeroExternalMomentaInChains[expression_] :=
+   expression /. e:FormCalc`DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
+setZeroExternalMomentaInChains // Utils`MakeUnknownInputDefinition;
+setZeroExternalMomentaInChains ~ SetAttributes ~ {Protected,Locked};
+
 End[];
 EndPackage[];
