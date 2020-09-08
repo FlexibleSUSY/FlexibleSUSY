@@ -69,6 +69,7 @@ META_SRC     := \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
 		$(DIR)/NPointFunctions.m \
+		$(DIR)/NPointFunctions/actions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/time.m \
 		$(DIR)/NPointFunctions/chains.m \

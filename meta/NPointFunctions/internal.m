@@ -111,8 +111,6 @@ Begin["`internal`"];
 } &@ ( FileNameJoin@{`directory`internal, #, "settings.m"}& );
 `settings`file ~ SetAttributes ~ {Protected, Locked};
 
-Get@FileNameJoin@{`directory`internal, "time.m"};
-
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`vertex ~ SetAttributes ~ {Protected, Locked};
 
@@ -121,8 +119,6 @@ Get@FileNameJoin@{`directory`internal, "time.m"};
 
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`topology ~ SetAttributes ~ {Protected, Locked};
-
-Get@FileNameJoin@{`directory`internal, "topologies.m"};
 
 `type`diagram = Rule[`type`topology,FeynArts`Insertions[Generic][__]];
 
@@ -156,6 +152,22 @@ indexGeneric ~ SetAttributes ~ {Protected,Locked};
 
 `type`fa`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 
+`type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
+
+`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
+`type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
+`type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
+`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
+`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
+`type`fc`amplitudeSet = {`type`fc`amplitude..};
+
+`type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
+`type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
+
+Get@FileNameJoin@{`directory`internal, "time.m"};
+Get@FileNameJoin@{`directory`internal, "topologies.m"};
+Get@FileNameJoin@{`directory`internal, "actions.m"};
+
 getClassVariables[amp:`type`amplitude] :=
    amp[[4, 1]];
 getClassVariables // Utils`MakeUnknownInputDefinition;
@@ -181,20 +193,19 @@ getTruePositions[list:{(True|False)...}] :=
 getTruePositions // Utils`MakeUnknownInputDefinition;
 getTruePositions ~ SetAttributes ~ {Protected, Locked};
 
-`type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
-
-`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
-`type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
-`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
-`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
-
 getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
-getProcess[set:{`type`fc`amplitude..}] :=
+getProcess[set:`type`fc`amplitudeSet] :=
    Part[Head@Part[set, 1], 1];
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
+
+`get`masses[set:`type`fc`amplitudeSet] :=
+   Flatten[List@@getProcess@set, 1][[All, 3]];
+`get`masses[set:`type`amplitudeSet] :=
+   FeynArts`Mass[#] &/@ getField[set, All];
+`get`masses // Utils`MakeUnknownInputDefinition;
+`get`masses ~ SetAttributes ~ {Protected, Locked};
 
 getField[set:`type`diagramSet, number:_Integer] :=
    Flatten[List @@ getProcess[set], 1][[number]] /;
@@ -207,9 +218,6 @@ getField[set:`type`amplitudeSet, All] :=
    First /@ Flatten[List @@ getProcess[set], 1];
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
-
-`type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
-`type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 
 particleNamesFile = "";
 particleNamesFile // Protect;
@@ -792,125 +800,6 @@ Module[{
 getMomSettings // Utils`MakeUnknownInputDefinition;
 getMomSettings ~ SetAttributes ~ {Protected,Locked};
 
-getActions[keepProcesses:`type`keepProcesses, settings:{}] := {};
-getActions[keepProcesses:`type`keepProcesses, settings:{Rule[_,{{___},{___}}]..}] :=
-Module[{
-      positiveRules = settings /. Rule[s:_, {p:_, _}] :> Rule[s, p],
-      negativeRules = settings /. Rule[s:_, {_, n:_}] :> Rule[s, n],
-      discardProcesses = Complement[settings[[All, 1]], keepProcesses],
-      actions
-   },
-   actions = DeleteDuplicates@Join[
-      DeleteDuplicates@Flatten[keepProcesses /. positiveRules, 1],
-      DeleteDuplicates@Flatten[discardProcesses /. negativeRules, 1]
-   ]
-];
-getActions // Utils`MakeUnknownInputDefinition;
-getActions ~ SetAttributes ~ {Protected,Locked};
-
-applyAction[
-   {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
-   {topologyQ:_, {name:_, function:_, value:_}, text:_String}
-] :=
-Module[
-   {
-      daPairs = getAmplitudeRules[diagrams, topologyQ],
-      amplitudeNumbers, saveClassRules, viPairs, insertions, res
-   },
-   amplitudeNumbers = Cases[daPairs, Rule[True, {e:__}] :> e];
-   saveClassRules = Table[
-      viPairs = getClassRules@amplitudes[[i]];
-      insertions = Cases[viPairs, (name -> {e:__}) :> e, Infinity ];
-      i -> getTruePositions[function[#, value] &/@ insertions] /. {} -> All,
-      {i, amplitudeNumbers}
-   ];
-   res = {
-      deleteClasses[diagrams, daPairs, saveClassRules],
-      deleteClasses[amplitudes, daPairs, saveClassRules]
-   };
-   Print@text;
-   printDiagramsInfo@res[[1]];
-   res
-];
-applyAction[
-   diagrams:`type`diagramSet,
-   {topologyQ:_, function:_, crit:_, text:_String}
-] :=
-Module[{
-      d = diagrams
-   },
-   d = If[topologyQ@#[[1]], Part[#,1] -> function[Part[#,2], crit], #] &/@ d;
-   d = removeTopologiesWithoutInsertions@d;
-   Print@text;
-   printDiagramsInfo@d;
-   d
-];
-applyAction[
-   diagrams:`type`diagramSet,
-   {text:_String, topologyQ:_, {n:_Integer, f:_}}
-] :=
-Module[{
-   },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[{n -> Or[f, -f]}, {Length@getInsertions@d}]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
-];
-
-applyAction[
-   diagrams:`type`diagramSet,
-   {
-      text:_String,
-      topologyQ:_,
-      {Append, RuleDelayed[(t:`type`fa`field)[n:_Integer], e:_Integer]}
-   }
-] :=
-Module[{
-      ext = First /@ `get`zeroMasses[]
-   },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[Append[#, genericMass[t, n] :> ext[[e]]]&,
-               {Length@getInsertions@d}
-            ]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
-];
-
-applyAction[
-   diagrams:`type`diagramSet,
-   {
-      text:_String,
-      topologyQ:_,
-      {Hold, e:_Integer}
-   }
-] :=
-Module[{
-   },
-   Do[
-      If[topologyQ@getTopology@d,
-         Print@text;
-         Return[
-            getTopology@d -> Table[Delete[#, e]&,
-               {Length@getInsertions@d}
-            ]
-         ]
-      ];,
-      {d, List@@diagrams}
-   ]
-];
-applyAction // Utils`MakeUnknownInputDefinition;
-applyAction ~ SetAttributes ~ {Protected, Locked};
-
 deleteClasses[amplitudes:`type`amplitudeSet,topoAmpList:`type`pickTopoAmp,classesToSave:`type`saveAmpClass] :=
 Module[{i,numbersOfAmplitudes,numAmp,result = amplitudes},
    numbersOfAmplitudes = Cases[topoAmpList, Rule[True, {e:__}] :> e];
@@ -1242,11 +1131,11 @@ Module[{
    subexpressions = FormCalc`Subexpr[] //. FormCalc`GenericList[];
 
    If[OptionValue@ZeroExternalMomenta === ExceptLoops,
-      `set`zeroMasses@amplitudes;
+      `set`zeroMassRules@{amplitudes, feynAmps};
       generic = makeMassesZero[generic, diagrams];
       abbreviations = setZeroExternalMomentaInChains@abbreviations;
       abbreviations = abbreviations /. FormCalc`Pair[_,_] -> 0;
-      abbreviations = abbreviations /. `get`zeroMasses[];
+      abbreviations = abbreviations /. `get`zeroMassRules[];
       subexpressions = {};
    ];
 
@@ -1276,28 +1165,34 @@ calculatedAmplitudes ~ SetAttributes ~ {Protected, Locked};
 
 Module[{rules},
 
-`set`zeroMasses::usage = "
-@brief For a given type of a process creates a set of rules to nullify masses
-       of external particles.
-@param set A set of amplitudes.
-@note Explicit names are expected only for external particles.";
-`set`zeroMasses[set:`type`amplitudeSet] :=
-   rules = DeleteDuplicates[FeynArts`Mass[#] -> 0 &/@ getField[set, All]];
-`set`zeroMasses // Utils`MakeUnknownInputDefinition;
-`set`zeroMasses ~ SetAttributes ~ {Protected, Locked};
+`set`zeroMassRules::usage = "
+@brief For a given sets of FeynArts` amd FormCalc` amplitudes creates rules to
+       nullify masses of external particles.
+@param fa A set of FeynArts` amplitudes.
+@param fc A set of FormCalc` amplitudes.
+@returns Null.
+@note Both of sets are required, because, unfortunately, FormCalc` introduces
+      new abbreviations, which mix with FeynArts` ones.
+@note Amplitudes are taken, because they do not have colour structures already.
+@note Explicit names for masses are expected only for external particles.";
+`set`zeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
+   (
+      rules = RuleDelayed[#, 0] &/@ Riffle[`get`masses@fa, `get`masses@fc]);
+`set`zeroMassRules // Utils`MakeUnknownInputDefinition;
+`set`zeroMassRules ~ SetAttributes ~ {Protected, Locked};
 
-`get`zeroMasses::errNotSet = "
-Call `.`set`.`zeroMasses to set up a set of rules first.";
-`get`zeroMasses::usage = "
+`get`zeroMassRules::errNotSet = "
+Call `.`set`.`zeroMassRules to set up rules first.";
+`get`zeroMassRules::usage = "
 @brief Returns a set of rules to nullify masses of external particles.
-@note An order of rules correspond to the order of external particles.
-@return A list of rules to nullify masses of external particles.";
-`get`zeroMasses[] := (
-   Utils`AssertOrQuit[Head@rules =!= Symbol, `get`zeroMasses::errNotSet];
+@return A list of rules to nullify masses of external particles.
+@note Rules of external particle #i are under numbers (2*#i) and (2*#i-1).";
+`get`zeroMassRules[] := (
+   Utils`AssertOrQuit[Head@rules =!= Symbol, `get`zeroMassRules::errNotSet];
    rules
 );
-`get`zeroMasses // Utils`MakeUnknownInputDefinition;
-`get`zeroMasses ~ SetAttributes ~ {Protected, Locked};
+`get`zeroMassRules // Utils`MakeUnknownInputDefinition;
+`get`zeroMassRules ~ SetAttributes ~ {Protected, Locked};
 
 ];
 
@@ -1308,8 +1203,7 @@ makeMassesZero::usage = "
 @param diagrams A set of diagrams.
 @returns A modified expression.";
 makeMassesZero[expr:{__}, diagrams:`type`diagramSet] :=
-Module[
-   {
+Module[{
       funcs = `get`masslessSettings@diagrams,
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
       pattern, uniqueIntegrals, hideInt, showInt, rules,
@@ -1320,7 +1214,7 @@ Module[
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
-   rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMasses[]&, expr];
+   rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMassRules[]&, expr];
 
    newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. hideInt;
    foreach[#2 //. rules[[#1]] /. showInt&, newExpr]
@@ -1332,7 +1226,8 @@ foreach::usage = "
 @brief Applies a two-argument function on every element in the list. The first
        argument is substituted by the number of the element in the list, while
        the second one is the element itself.
-@param f A two-argument function to apply on serial number and the element itself.
+@param f A two-argument function to apply on serial number and the element
+       itself.
 @param list A list of elements.
 @returns A list of modified elements";
 Module[{
