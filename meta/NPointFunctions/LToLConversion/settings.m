@@ -35,37 +35,37 @@
             `topologyQ`self1pinguinT,
             removeGenericInsertionsBy,
             FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in initial SED loop"
+            "initial SED: remove initial lepton in the loop"
          },
          {
             `topologyQ`self1pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field[7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in initial SED loop"
+            "initial SED: remove vector bosons in the loop"
          },
          {
             `topologyQ`self3pinguinT,
             removeGenericInsertionsBy,
             FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in final SED loop"
+            "final SED: remove final lepton in the loop"
          },
          {
             `topologyQ`self3pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field[7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in final SED loop"
+            "final SED: remove vector bosons in the loop"
          },
          {
            `topologyQ`trianglepinguinT,
             removeGenericInsertionsBy,
             FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in triangle loop"
+            "penguins: remove initial lepton in triangle loop"
          },
          {
            `topologyQ`trianglepinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#, FeynArts`Field[6|7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in triangle loop"
+            "penguins: remove vector bosons in triangle loop"
          }
       },
       {
@@ -73,7 +73,7 @@
             `topologyQ`pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field@5 -> FeynArts`V]&,
-            "t-penguins: remove tree-like vector bosons"
+            "penguins: remove tree-like vector bosons"
          }
       }
    },
@@ -83,37 +83,37 @@
             `topologyQ`self1pinguinT,
             removeGenericInsertionsBy,
             FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in initial SED loop"
+            "initial SED: remove initial lepton in the loop"
          },
          {
             `topologyQ`self1pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field[7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in initial SED loop"
+            "initial SED: remove vector bosons in the loop"
          },
          {
             `topologyQ`self3pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> getField[ds,3] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in final SED loop"
+            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGen:>Blank[],
+            "final SED: remove final lepton in the loop"
          },
          {
             `topologyQ`self3pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field[7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in final SED loop"
+            "final SED: remove vector bosons in the loop"
          },
          {
            `topologyQ`trianglepinguinT,
             removeGenericInsertionsBy,
             FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
-            "t-penguins: remove leptons in triangle loop"
+            "penguins: remove initial lepton in triangle loop"
          },
          {
            `topologyQ`trianglepinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#, FeynArts`Field[6|7|8] -> FeynArts`V]&,
-            "t-penguins: remove vector bosons in triangle loop"
+            "penguins: remove vector bosons in triangle loop"
          }
       },
       {
@@ -121,7 +121,7 @@
             `topologyQ`pinguinT,
             FeynArts`DiagramSelect,
             FreeQ[#,FeynArts`Field@5 -> FeynArts`S]&,
-            "t-penguins: remove tree-like scalar bosons"
+            "penguins: remove tree-like scalar bosons"
          }
       }
    },
@@ -162,7 +162,7 @@
          {
             `topologyQ`pinguinT,
             {genericMass[FeynArts`V, 5], UnsameQ, 0},
-            "t-pinguins: remove tree-like massless vector bosons"
+            "pinguins: remove tree-like massless vector bosons"
          }
       },
       {}
@@ -179,12 +179,12 @@
 
 `settings`sum[ds:`type`diagramSet] := {
    {
-      "t-pinguins: no external lepton in initial SED bridge",
+      "initial SED: skip initial lepton in sum",
       `topologyQ`self1pinguinT,
       {6, getField[ds,1]}
    },
    {
-      "t-pinguins: no external lepton in final SED bridge",
+      "final SED: skip final lepton in sum",
       `topologyQ`self3pinguinT,
       {6, getField[ds,3]}
    }
@@ -192,12 +192,12 @@
 
 `settings`massless[ds:`type`diagramSet] := {
    {
-      "t-pinguins: remove lighter particle in initial SED bridge",
+      "initial SED: use explicit final lepton mass",
       `topologyQ`self1pinguinT,
       {Append, FeynArts`F[6] :> 3}
    },
    {
-      "t-pinguins: keep initial fermion mass untouched in initial SED bridge",
+      "initial SED: keep initial lepton mass untouched",
       `topologyQ`self1pinguinT,
       {Hold, 1}
    }
