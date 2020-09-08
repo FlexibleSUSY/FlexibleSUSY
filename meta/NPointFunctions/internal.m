@@ -1222,9 +1222,10 @@ Module[{
    {new, zeroedRules} = ZeroRules[subs, zeroedRules];
    {
       generic /. zeroedRules,
-      chains = setZeroExternalMomentaInChains@chains,
+      setZeroExternalMomentaInChains@chains,
       new
    }
+
 ];
 makeMassesZero[{expr_, chains_, subs_}, diagrams:`type`diagramSet, _] :=
    {expr, chains, subs};
