@@ -1216,7 +1216,8 @@ Module[{
 
    rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMassRules[]&, expr];
 
-   newExpr = (expr//.FormCalc`Subexpr[]//.FormCalc`GenericList[]) /. hideInt;
+   newExpr = expr //. FormCalc`Subexpr[] //. FormCalc`GenericList[]
+                  /. hideInt /. FormCalc`Pair[_,_] -> 0;
    foreach[#2 //. rules[[#1]] /. showInt&, newExpr]
 ];
 makeMassesZero // Utils`MakeUnknownInputDefinition;
