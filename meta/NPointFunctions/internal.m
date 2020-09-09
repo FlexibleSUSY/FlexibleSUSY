@@ -1199,7 +1199,7 @@ Module[{
       funcs = `get`masslessSettings@diagrams,
       names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
       pattern, uniqueIntegrals, hideInt, showInt, rules,
-      new = generic //. subs /. FormCalc`Pair[_,_] -> 0
+      new = generic //. subs
    },
    pattern = Alternatives @@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
@@ -1209,7 +1209,7 @@ Module[{
    rules = foreach[Composition[Sequence@@funcs[[#1]]]@`get`zeroMassRules[]&, new];
 
    {
-      foreach[#2 //. rules[[#1]] /. showInt&, new /. hideInt],
+      foreach[#2 //. rules[[#1]] /. showInt&, new /. hideInt /. FormCalc`Pair[_,_] -> 0],
       setZeroExternalMomentaInChains@chains /. `get`zeroMassRules[],
       {}
    }
