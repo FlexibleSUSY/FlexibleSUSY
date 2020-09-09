@@ -34,7 +34,7 @@
          {
             `topologyQ`self1pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "initial SED: remove initial lepton in the loop"
          },
          {
@@ -46,7 +46,7 @@
          {
             `topologyQ`self3pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGeneration:>Blank[],
             "final SED: remove final lepton in the loop"
          },
          {
@@ -58,7 +58,7 @@
          {
            `topologyQ`trianglepinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "penguins: remove initial lepton in triangle loop"
          },
          {
@@ -82,7 +82,7 @@
          {
             `topologyQ`self1pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[7|8] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "initial SED: remove initial lepton in the loop"
          },
          {
@@ -94,7 +94,7 @@
          {
             `topologyQ`self3pinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[7|8] -> -getField[ds,3] /. i:`type`indexGeneration:>Blank[],
             "final SED: remove final lepton in the loop"
          },
          {
@@ -106,7 +106,7 @@
          {
            `topologyQ`trianglepinguinT,
             removeGenericInsertionsBy,
-            FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[6|7] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "penguins: remove initial lepton in triangle loop"
          },
          {
@@ -130,7 +130,7 @@
          {
             `topologyQ`boxS,
             removeGenericInsertionsBy,
-            FeynArts`Field[6] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[6] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "s-boxes: remove loops with initial lepton"
          },
          {
@@ -142,7 +142,7 @@
          {
             `topologyQ`boxU,
             removeGenericInsertionsBy,
-            FeynArts`Field[5] -> getField[ds,1] /. i:`type`indexGen:>Blank[],
+            FeynArts`Field[5] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
             "u-boxes: remove loops with initial lepton"
          },
          {
