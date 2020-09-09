@@ -164,9 +164,28 @@ indexGeneric ~ SetAttributes ~ {Protected,Locked};
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 
+With[{
+      new = Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]
+   },
+
+`type`genericMass = FeynArts`Mass[`type`fa`field[`type`indexGeneric], new];
+
+genericMass::usage = "
+@note In FeynArts 3.11 the pattern for a generic mass was changed and since it
+      contains Loop and Internal as well.";
+genericMass[field:`type`fa`field, index:_Integer] :=
+   FeynArts`Mass[field@indexGeneric@index, new];
+genericMass[field:`type`fa`field] :=
+   FeynArts`Mass[field@`type`indexGeneric, new];
+genericMass // Utils`MakeUnknownInputDefinition;
+genericMass ~ SetAttributes ~ {Protected, Locked};
+
+];
+
+Get@FileNameJoin@{`directory`internal, "actions.m"};
+Get@FileNameJoin@{`directory`internal, "chains.m"};
 Get@FileNameJoin@{`directory`internal, "time.m"};
 Get@FileNameJoin@{`directory`internal, "topologies.m"};
-Get@FileNameJoin@{`directory`internal, "actions.m"};
 
 getClassVariables[amp:`type`amplitude] :=
    amp[[4, 1]];
@@ -219,15 +238,6 @@ getField[set:`type`amplitudeSet, All] :=
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
 
-particleNamesFile = "";
-particleNamesFile // Protect;
-
-substitutionsFile = "";
-substitutionsFile // Protect;
-
-particleNamespaceFile = "";
-particleNamespaceFile // Protect;
-
 `rules`subexpressions::usage = "
 @brief Translation rules for subexpressions from FeynArts/FormCalc to
        FlexibleSUSY language.";
@@ -246,7 +256,77 @@ particleNamespaceFile // Protect;
 `rules`amplitudes= {};
 `rules`amplitudes // Protect;
 
-Get@FileNameJoin@{`directory`internal, "chains.m"};
+Module[{once},
+
+setGenerationIndices::errOnce = "
+This function should be called only once.";
+setGenerationIndices::errNoModel = "
+Please call FeynArts`.`InitializeModel first.";
+setGenerationIndices::usage = "
+@brief Looks into the definition of the model and gets names or generation
+       indices in order to create appropriate type.
+@note `type`indexGeneration cannot be used in the function definitions, because
+      it is defined after their actual definition.";
+setGenerationIndices[] :=
+Module[{
+      filter = (FeynArts`Indices -> e_) :> e,
+      rules = {FeynArts`Index -> Identity, Global`Colour :> {}, Global`Gluon :> {}}
+   },
+   Utils`AssertOrQuit[Head@once === Symbol, setGenerationIndices::errOnce];
+   Utils`AssertOrQuit[FeynArts`$Model =!= "", setGenerationIndices::errNoModel];
+
+   indices = Cases[FeynArts`M$ClassesDescription, filter, Infinity];
+   indices = DeleteDuplicates@Flatten[indices //. rules];
+
+   `type`indexGeneration = FeynArts`Index[Alternatives@@indices, _Integer];
+   `type`indexGeneration ~ SetAttributes ~ {Protected, Locked};
+   once = {};
+];
+setGenerationIndices // Utils`MakeUnknownInputDefinition;
+setGenerationIndices ~ SetAttributes ~ {Protected, Locked};
+
+];
+
+createGetSetOnce::usage = "
+@brief Defines safe getter and setter for a given symbol by prepending \"set\"
+       and \"get\" in front of it. This variable can be set only once.
+@param sym A symbol, which serves as a root name for a new functions, i.e. for
+       MySymbol symbol setMySymbol and getMySymbol will be created.
+@param pattern An expression, which will be used for a pattern for a set
+       function, i.e. it will have the form setMySymbol[new:pattern].";
+createGetSetOnce[{sym:_Symbol, pattern:_}] :=
+Module[{
+      set = Symbol["set"<>SymbolName@sym],
+      get = Symbol["get"<>SymbolName@sym],
+      once, value
+   },
+
+   set::errOnce = "The value can be set only once.";
+   set[new:pattern] := (
+      Utils`AssertOrQuit[Head@once === Symbol, set::errOnce];
+      once = {};
+      value = new;
+   );
+   set // Utils`MakeUnknownInputDefinition;
+   set ~ SetAttributes ~ {Protected, Locked};
+
+   get::errNotSet = "The value should be set first.";
+   get[] := (
+      Utils`AssertOrQuit[Head@once =!= Symbol, get::errNotSet];
+      value
+   );
+   get // Utils`MakeUnknownInputDefinition;
+   get ~ SetAttributes ~ {Protected, Locked};
+
+];
+createGetSetOnce // Utils`MakeUnknownInputDefinition;
+createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
+
+createGetSetOnce /@ {
+   {ParticleFile, _String},
+   {SubstitutionsFile, _String},
+   {NamespaceFile, _String}
+};
 
 SetInitialValues::usage= "
 @brief Set the FeynArts and FormCalc paths, creates required directories.
@@ -271,37 +351,17 @@ Module[{},
       FeynArts`InsertionLevel -> FeynArts`Classes
    ];
 
-   (*Which index types do we load with the model?*)
-   `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer];
-
-   (* Define type of masses *)
-   genericMass::usage="
-   @note In FeynArts 3.11 the pattern for a generic mass was changed and now
-         contains Loop and Internal as well.";
-   With[{new=Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]},
-      `type`genericMass =
-         FeynArts`Mass[`type`fa`field[`type`indexGeneric], new];
-      genericMass[field:`type`fa`field, index:_Integer] :=
-         FeynArts`Mass[field@indexGeneric@index, new];
-      genericMass[field:`type`fa`field] :=
-         FeynArts`Mass[field[`type`indexGeneric], new];
-      genericMass // Utils`MakeUnknownInputDefinition;
-      genericMass ~ SetAttributes ~ {Protected,Locked};
-   ];
+   setGenerationIndices[];
 
    `type`specificMass =
-      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
+      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
 
-   {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
-   particleNamesFile = particleNamesFileS;
-   substitutionsFile = substitutionsFileS;
-   particleNamespaceFile = particleNamespaceFileS;
-   {particleNamesFile,substitutionsFile,particleNamespaceFile}~SetAttributes~{Protected, Locked};
+   setParticleFile@particleNamesFileS;
+   setSubstitutionsFile@substitutionsFileS;
+   setNamespaceFile@particleNamespaceFileS;
 
    SetFSConventionRules[];
-] /; Utils`AssertOrQuit[
-   And@@(TrueQ[#=={Protected}] &/@ Attributes@{particleNamesFile,substitutionsFile,particleNamespaceFile}),
-   SetInitialValues::errOnce];
+];
 SetInitialValues // Utils`MakeUnknownInputDefinition;
 SetInitialValues ~ SetAttributes ~ {Protected,Locked};
 
@@ -468,7 +528,7 @@ Module[
          {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
       },
       {
-         index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
+         index:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@index],
          index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
          index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
       },
@@ -542,7 +602,7 @@ SetFSConventionRules[] :=
 Module[
    {
       pairSumIndex=Unique@"SARAH`lt",
-      fieldNames = getFieldNames[particleNamesFile, particleNamespaceFile],
+      fieldNames = getFieldNames[getParticleFile[], getNamespaceFile[]],
       couplingRules
    },
    couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
