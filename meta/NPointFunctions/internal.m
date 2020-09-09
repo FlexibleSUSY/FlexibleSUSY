@@ -219,15 +219,6 @@ getField[set:`type`amplitudeSet, All] :=
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
 
-particleNamesFile = "";
-particleNamesFile // Protect;
-
-substitutionsFile = "";
-substitutionsFile // Protect;
-
-particleNamespaceFile = "";
-particleNamespaceFile // Protect;
-
 `rules`subexpressions::usage = "
 @brief Translation rules for subexpressions from FeynArts/FormCalc to
        FlexibleSUSY language.";
@@ -247,6 +238,44 @@ particleNamespaceFile // Protect;
 `rules`amplitudes // Protect;
 
 Get@FileNameJoin@{`directory`internal, "chains.m"};
+
+particleNamesFile = "";
+particleNamesFile // Protect;
+
+substitutionsFile = "";
+substitutionsFile // Protect;
+
+particleNamespaceFile = "";
+particleNamespaceFile // Protect;
+
+Module[{once},
+
+setGenerationIndices::errOnce = "
+This function should be called only once.";
+setGenerationIndices::errNoModel = "
+Please call FeynArts`.`InitializeModel first.";
+setGenerationIndices::usage = "
+@brief Looks into the definition of the model and gets names or generation
+       indices in order to create appropriate type.";
+setGenerationIndices[] :=
+Module[{
+      filter = (FeynArts`Indices -> e_) :> e,
+      rules = {FeynArts`Index -> Identity, Global`Colour :> {}, Global`Gluon :> {}}
+   },
+   Utils`AssertOrQuit[Head@once === Symbol, setGenerationIndices::errOnce];
+   Utils`AssertOrQuit[FeynArts`$Model =!= "", setGenerationIndices::errNoModel];
+
+   indices = Cases[FeynArts`M$ClassesDescription, filter, Infinity];
+   indices = DeleteDuplicates@Flatten[indices //. rules];
+
+   `type`indexGeneration = FeynArts`Index[Alternatives@@indices,_Integer];
+   `type`indexGeneration ~ SetAttributes ~ {Protected, Locked};
+   once = {};
+];
+setGenerationIndices // Utils`MakeUnknownInputDefinition;
+setGenerationIndices ~ SetAttributes ~ {Protected, Locked};
+
+];
 
 SetInitialValues::usage= "
 @brief Set the FeynArts and FormCalc paths, creates required directories.
@@ -271,8 +300,7 @@ Module[{},
       FeynArts`InsertionLevel -> FeynArts`Classes
    ];
 
-   (*Which index types do we load with the model?*)
-   `type`indexGen = FeynArts`Index[Alternatives@@Cases[MakeBoxes@Definition@FeynArts`IndexRange,RowBox@{"Index","[",name:Except["Colour"|"Gluon"],"]"}:>ToExpression["Global`"<>name],Infinity],_Integer];
+   setGenerationIndices[];
 
    (* Define type of masses *)
    genericMass::usage="
@@ -290,7 +318,7 @@ Module[{},
    ];
 
    `type`specificMass =
-      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGen]..}]];
+      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
 
    {particleNamesFile,substitutionsFile,particleNamespaceFile}~ClearAttributes~{Protected};
    particleNamesFile = particleNamesFileS;
@@ -468,7 +496,7 @@ Module[
          {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
       },
       {
-         index:`type`indexGen :> Symbol["SARAH`gt" <> ToString@Last@index],
+         index:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@index],
          index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
          index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
       },
