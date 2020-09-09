@@ -45,7 +45,7 @@ applyAction[
 ] :=
 Module[
    {
-      daPairs = getAmplitudeRules[diagrams, topologyQ],
+      daPairs = getAmplitudeNumbers[diagrams, topologyQ],
       amplitudeNumbers, saveClassRules, viPairs, insertions, res
    },
    amplitudeNumbers = Cases[daPairs, Rule[True, {e:__}] :> e];

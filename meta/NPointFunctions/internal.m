@@ -37,7 +37,7 @@ Needs["Utils`"];
 
 BeginPackage["NPointFunctions`"];
 
-{SetInitialValues,NPointFunctionFAFC}
+{SetInitialValues, NPointFunctionFAFC}
 
 Off[General::shdw]
 {
@@ -238,24 +238,6 @@ getField[set:`type`amplitudeSet, All] :=
 getField // Utils`MakeUnknownInputDefinition;
 getField ~ SetAttributes ~ {Protected, Locked};
 
-`rules`subexpressions::usage = "
-@brief Translation rules for subexpressions from FeynArts/FormCalc to
-       FlexibleSUSY language.";
-`rules`subexpressions = {};
-`rules`subexpressions // Protect;
-
-`rules`fieldNames::usage = "
-@brief Translation rules for fields from FeynArts/FormCalc to FlexibleSUSY
-       language.";
-`rules`fieldNames = {};
-`rules`fieldNames // Protect;
-
-`rules`amplitudes::usage = "
-@brief Translation rules for amplitudes from FeynArts/FormCalc to FlexibleSUSY
-       language.";
-`rules`amplitudes= {};
-`rules`amplitudes // Protect;
-
 Module[{once},
 
 setGenerationIndices::errOnce = "
@@ -308,7 +290,7 @@ Module[{
       value = new;
    );
    set // Utils`MakeUnknownInputDefinition;
-   set ~ SetAttributes ~ {Protected, Locked};
+   Evaluate[set] ~ SetAttributes ~ {Protected, Locked};
 
    get::errNotSet = "The value should be set first.";
    get[] := (
@@ -316,7 +298,7 @@ Module[{
       value
    );
    get // Utils`MakeUnknownInputDefinition;
-   get ~ SetAttributes ~ {Protected, Locked};
+   Evaluate[get] ~ SetAttributes ~ {Protected, Locked};
 
 ];
 createGetSetOnce // Utils`MakeUnknownInputDefinition;
@@ -325,7 +307,9 @@ createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
 createGetSetOnce /@ {
    {ParticleFile, _String},
    {SubstitutionsFile, _String},
-   {NamespaceFile, _String}
+   {NamespaceFile, _String},
+   {SubexpressionRules, {__}},
+   {AmplitudeRules, {__}}
 };
 
 SetInitialValues::usage= "
@@ -341,7 +325,9 @@ SetInitialValues::errOnce=
 SetInitialValues[FCDir_String, FAModel_String,
    particleNamesFileS_String, substitutionsFileS_String,
    particleNamespaceFileS_String] :=
-Module[{},
+Module[{
+      fieldNames
+   },
    If[!DirectoryQ@FCDir, CreateDirectory@FCDir];
    SetDirectory@FCDir;
 
@@ -360,121 +346,41 @@ Module[{},
    setSubstitutionsFile@substitutionsFileS;
    setNamespaceFile@particleNamespaceFileS;
 
-   SetFSConventionRules[];
+   fieldNames = getFieldNames[];
+   setFieldRules@fieldNames;
+
+   setSubexpressionRules@Join[
+      getMassRules@fieldNames,
+      getFieldRules[],
+      getCouplingRules[],
+      getGeneralRules[]
+   ];
+
+   setAmplitudeRules@Join[
+      getSubexpressionRules[],
+      getSumRules[],
+      {FeynArts`IndexSum -> Sum}
+   ];
 ];
 SetInitialValues // Utils`MakeUnknownInputDefinition;
 SetInitialValues ~ SetAttributes ~ {Protected,Locked};
 
-`fa`metric::usage = "
-@brief Is used to shortly represent a Pattern for a FeynArts metric tensor.
-@param i1 A Symbol for the first entry.
-@param i2 A Symbol for the second entry.
-@returns A Pattern for a FeynArts metric tensor.
-@note Because of Mathematica warning the definition should be done quietly.";
-Quiet[
-   `fa`metric[i1:_Symbol, i2:_Symbol] :=
-   Global`MetricTensor[FeynArts`KI1[i1:_Integer], FeynArts`KI1[i2:_Integer]],
-   RuleDelayed::rhs
-];
-`fa`metric // Utils`MakeUnknownInputDefinition;
-`fa`metric ~ SetAttributes ~ {Protected, Locked};
-
-`fa`momdiff::usage = "
-@brief Is used to shortly represent a Pattern for a FeynArts momentum
-       difference between the first and the second entries.
-@param i1-i2 Symbols, representing the difference.
-@param i3 A Symbol for the component index.
-@returns A Pattern for a FeynArts momentum difference.
-@note Because of Mathematica warning the definition should be done quietly.
-@note There is a change in notation since FormCalc 9.7.";
-Quiet[
-   If[FormCalc`$FormCalc < 9.7,
-      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol), Repeated[_, {0, 1}]] :=
-         FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
-
-      (* Else *)
-      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol)] :=
-         Global`FourVector[
-            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
-            FeynArts`KI1[3]
-         ];
-
-      `fa`momdiff[(i1:_Symbol)-(i2:_Symbol), i3:_Symbol] :=
-         Global`FourVector[
-            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
-            FeynArts`KI1[i3:_Integer]
-         ]
-   ],
-   RuleDelayed::rhs
-];
-`fa`momdiff // Utils`MakeUnknownInputDefinition;
-`fa`momdiff ~ SetAttributes ~ {Protected, Locked};
-
-`fa`pl::usage = "
-@brief Represents left-handed projector: P_L.";
-`fa`pr::usage = "
-@brief Represents right-handed projector: P_R.";
-{`fa`pl, `fa`pr} = Alternatives[
-   FeynArts`NonCommutative@Global`ChiralityProjector@#,
-
-   FeynArts`NonCommutative[
-      Global`DiracMatrix@FeynArts`KI1@3,
-      Global`ChiralityProjector@#
-   ]
-] &/@ {-1, 1};
-{`fa`pl, `fa`pr} ~ SetAttributes ~ {Protected, Locked};
-
-`sarah`metric::usage = "
-@brief Is used to shortly represent SARAH metric tensor.
-@param fields A List for the set of fields.
-@param i1 An Integer for the first index.
-@param i2 An Integer for the second index.
-@returns SARAH metric tensor.
-@todo One can be more specific about fields.";
-`sarah`metric[fields:{__}, i1:_Integer, i2:_Integer] := SARAH`g[
-   LorentzIndex[ fields[[i1]] ],
-   LorentzIndex[ fields[[i2]] ]
-];
-`sarah`metric // Utils`MakeUnknownInputDefinition;
-`sarah`metric ~ SetAttributes ~ {Protected, Locked};
-
-`sarah`momdiff::usage = "
-@brief Is used to shortly represent a SARAH momentum difference between the first
-       and the second entries, while the third one representing the open index.
-       If the third index is omitted, then a different form is used.
-@param fields A List for the set of fields.
-@param i1 An Integer for the first index.
-@param i2 An Integer for the second index.
-@param i3 An Integer for the third index.
-@returns A SARAH momentum difference expression.";
-`sarah`momdiff[fields:{__}, i1:_Integer, i2:_Integer] :=
-   SARAH`Mom@Part[fields, i1] - SARAH`Mom@Part[fields, i2];
-`sarah`momdiff[fields:{__}, i1:_Integer, i2:_Integer, i3:_Integer] :=
-   SARAH`Mom[Part[fields, i1], LorentzIndex@Part[fields, i3]] -
-   SARAH`Mom[Part[fields, i2], LorentzIndex@Part[fields, i3]]
-`sarah`momdiff // Utils`MakeUnknownInputDefinition;
-`sarah`momdiff ~ SetAttributes ~ {Protected, Locked};
-
 getFieldNames::usage = "
 @brief Loads and connects particle definitions for SARAH` and FeynArts`.
-@param fnames Name of file with information about SARAH` and FeynArts` names.
-@param fnamespaces Name of file with information about contexts of SARAH`
-       particles.
 @returns List of Lists, each contains four String entries:
          1) SARAH` context of particle;
          2) SARAH` name of particle;
          3) FeynArts` type of particle;
          4) FeynArts` integer number of particle.";
-getFieldNames[fnames:_String, fnamespaces:_String] :=
-Module[
-   {
+getFieldNames[] :=
+Module[{
       regex = "(\\w+): ([SFVU])\\[(\\d+)\\]",
-      lines = Utils`ReadLinesInFile@fnames,
-      namespaceRules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@fnamespaces,
+      lines = Utils`ReadLinesInFile@getParticleFile[],
+      namespaceRules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@getNamespaceFile[],
       names
    },
-      names = StringCases[lines, RegularExpression@regex :> {"$1","$2","$3"}] ~ Flatten ~ 1;
-      names /. namespaceRules
+   names = StringCases[lines, RegularExpression@regex :> {"$1","$2","$3"}] ~ Flatten ~ 1;
+   names /. namespaceRules
 ];
 getFieldNames // Utils`MakeUnknownInputDefinition;
 getFieldNames ~ SetAttributes ~ {Protected, Locked};
@@ -505,42 +411,63 @@ Module[
 getMassRules // Utils`MakeUnknownInputDefinition;
 getMassRules ~ SetAttributes ~ {Protected, Locked};
 
-getFieldRules::usage = "
+Module[{once, rules},
+
+setFieldRules::errOnce = "The value can be set only once.";
+setFieldRules::usage = "
 @brief Generates field replacement rules for a given set of particles.
 @param fieldNames Set of field names.
 @returns A List of replacements rules for fields.";
-getFieldRules[fieldNames:{{_, _, _, _}..}] :=
+setFieldRules[fieldNames:{{_, _, _, _}..}] :=
 Module[
    {
-      fullNames = Map[ToExpression, {#[[1]] <> #[[2]], #[[3]], #[[4]]} &/@ fieldNames, 2]
+      fullNames = Map[ToExpression, {#[[1]] <> #[[2]], #[[3]], #[[4]]} &/@ fieldNames, 2],
+      bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F
    },
-   Join[
-      # /. {name_,type_,number_}:>Rule[type@number,name],
-      # /. {name_,type_,number_}:>RuleDelayed[type[number,{indices__}],name@{indices}],
+   Utils`AssertOrQuit[Head@once === Symbol, setFieldRules::errOnce];
+   rules = Join[
+      # /. {n_, t_, i_} :> Rule[t@i, n],
+      # /. {n_, t_, i_} :> RuleDelayed[t[i, {ind__}], n@{ind}],
       # /.
       {
-         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name],Susyno`LieGroups`conj@name],
-         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name],SARAH`bar@name]
+         {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n], Susyno`LieGroups`conj@n],
+         {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n], SARAH`bar@n]
       },
       # /.
       {
-         {name_,type:FeynArts`S|FeynArts`V,_}:>RuleDelayed[Times[-1,field:name@{indices__}],Susyno`LieGroups`conj@name@{indices}],
-         {name_,type:FeynArts`U|FeynArts`F,_}:>RuleDelayed[Times[-1,field:name@{indices__}],SARAH`bar@name@{indices}]
+         {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n@{ind__}], Susyno`LieGroups`conj@n@{ind}],
+         {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}], SARAH`bar@n@{ind}]
       },
       {
-         index:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@index],
-         index:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@index],
-         index:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@index])
+         ind:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@ind],
+         ind:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@ind],
+         ind:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@ind])
       },
-      {FeynArts`S->GenericS,FeynArts`F->GenericF,FeynArts`V->GenericV,FeynArts`U->GenericU},
       {
-         Times[-1,field:_GenericS|_GenericV]:>Susyno`LieGroups`conj@field,
-         Times[-1,field:_GenericF|_GenericU]:>SARAH`bar@field
+         FeynArts`S -> GenericS,
+         FeynArts`F -> GenericF,
+         FeynArts`V -> GenericV,
+         FeynArts`U -> GenericU
+      },
+      {
+         Times[-1,field:_GenericS|_GenericV] :> Susyno`LieGroups`conj@field,
+         Times[-1,field:_GenericF|_GenericU] :> SARAH`bar@field
       }
-   ] &@ fullNames
+   ] &@ fullNames;
+   once = {};
 ];
+setFieldRules // Utils`MakeUnknownInputDefinition;
+setFieldRules ~ SetAttributes ~ {Protected, Locked};
+
+getFieldRules::errNotSet = "The value should be set first.";
+getFieldRules[] := (
+   Utils`AssertOrQuit[Head@once =!= Symbol, getFieldRules::errNotSet];
+   rules
+);
 getFieldRules // Utils`MakeUnknownInputDefinition;
 getFieldRules ~ SetAttributes ~ {Protected, Locked};
+
+];
 
 getExternalMomentumRules[option:True|False|OperatorsOnly|ExceptLoops,
    amplitudes:`type`amplitudeSet] :=
@@ -552,7 +479,7 @@ Module[{
          {SARAH`Mom[_Integer,_] :> 0},
       False|OperatorsOnly|ExceptLoops,
          (
-            fsFields = getField[amplitudes, All] //. `rules`fieldNames;
+            fsFields = getField[amplitudes, All] //. getFieldRules[];
             {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}
          )
    ]
@@ -560,9 +487,9 @@ Module[{
 getExternalMomentumRules // Utils`MakeUnknownInputDefinition;
 getExternalMomentumRules ~ SetAttributes ~ {Protected,Locked};
 
-`rules`sum::usage = "
+getSumRules::usage = "
 @brief Sum translation rules from FeynArts/FormCalc to FlexibleSUSY language.";
-`rules`sum = {
+getSumRules[] := {
    FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
    Times[expr:_, FeynArts`SumOver[index:_Symbol, max:_Integer]] :>
       SARAH`sum[index, 1, max, expr],
@@ -573,85 +500,91 @@ getExternalMomentumRules ~ SetAttributes ~ {Protected,Locked};
    SARAH`sum[i:_Symbol, _Integer, max:_Integer, FeynArts`SumOver[_, {min2:_Integer, max2:_Integer}]] :>
       SARAH`sum[i, 1, max, max2-min2]
 };
-`rules`sum ~ SetAttributes ~ {Protected, Locked};
+getSumRules // Utils`MakeUnknownInputDefinition;
+getSumRules ~ SetAttributes ~ {Protected, Locked};
 
-FAFieldQ::usage = "
-@brief Checks whether symbol belongs to FeynArts` field names or not.
-@param Symbol to check.
-@returns True if symbol belongs to FeynArts` field names, False otherwise.";
-FAFieldQ = MatchQ[#,`type`fa`field]&;
-FAFieldQ ~ SetAttributes ~ {Protected, Locked};
-
-`rules`general::usage = "
+getGeneralRules::usage = "
 @brief General translation rules from FeynArts/FormCalc to FlexibleSUSY
        language.
 @note See sec. 4.4. of FormCalc manual for details.";
-`rules`general = {
+getGeneralRules[] := {
    FormCalc`Finite -> 1,
    FormCalc`Den[a:_,b:_] :> 1/(a-b),
    FormCalc`Pair[a:_,b:_] :> SARAH`sum[#, 1, 4, SARAH`g[#, #]*Append[a, #]*Append[b, #]],
-   (f:_)?(FAFieldQ)[FeynArts`Index[Generic, i:_Integer]] :> f@GenericIndex@i,
+   f:`type`FAfieldGeneric :> Head[f][GenericIndex@Last@Last@f],
    FormCalc`k[i:_Integer, pairIndex:___] :> SARAH`Mom[i, pairIndex]
 } &@ Unique@"SARAH`lt";
-`rules`general ~ SetAttributes ~ {Protected, Locked};
+getGeneralRules // Utils`MakeUnknownInputDefinition;
+getGeneralRules ~ SetAttributes ~ {Protected, Locked};
 
-SetFSConventionRules::usage="
-@brief Set the translation rules from FeynArts/FormCalc to FlexibleSUSY
-       language.";
-SetFSConventionRules[] :=
-Module[
-   {
-      pairSumIndex=Unique@"SARAH`lt",
-      fieldNames = getFieldNames[getParticleFile[], getNamespaceFile[]],
-      couplingRules
-   },
-   couplingRules = With[{f=FeynArts`G[_][0][fields__], s=SARAH`Cp[fields]},
+Module[{PL, PR, MT, FV, g, md},
+
+   {PL, PR} = Alternatives[
+      FeynArts`NonCommutative@Global`ChiralityProjector@#,
+
+      FeynArts`NonCommutative[
+         Global`DiracMatrix@FeynArts`KI1@3,
+         Global`ChiralityProjector@#
+      ]
+   ] &/@ {-1, 1};
+
+   Quiet[
+      MT[i1:_Symbol, i2:_Symbol] :=
+         Global`MetricTensor[FeynArts`KI1[i1:_Integer], FeynArts`KI1[i2:_Integer]];
+      If[FormCalc`$FormCalc < 9.7,
+
+         FV[i1:_Symbol, i2:_Symbol, Repeated[_, {0, 1}]] :=
+            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer];,
+
+         FV[i1:_Symbol, i2:_Symbol] := Global`FourVector[
+            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
+            FeynArts`KI1[3]
+         ];
+         FV[i1:_Symbol, i2:_Symbol, i3:_Symbol] := Global`FourVector[
+            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
+            FeynArts`KI1[i3:_Integer]
+         ];
+      ],
+      RuleDelayed::rhs
+   ];
+
+   g[f:{__}, i1:_Integer, i2:_Integer] :=
+      SARAH`g[LorentzIndex@Part[f, i1], LorentzIndex@Part[f, i2]];
+
+   md[fields:{__}, i1:_Integer, i2:_Integer] :=
+      SARAH`Mom@Part[fields, i1] - SARAH`Mom@Part[fields, i2];
+
+   md[fields:{__}, i1:_Integer, i2:_Integer, i3:_Integer] :=
+      SARAH`Mom[Part[fields, i1], LorentzIndex@Part[fields, i3]] -
+      SARAH`Mom[Part[fields, i2], LorentzIndex@Part[fields, i3]];
+
+   getCouplingRules[] :=
+   With[{
+         f = FeynArts`G[_][0][fields__], s = SARAH`Cp[fields]
+      },
       {
          f@1 :> s@1,
+         f@PL :> s@SARAH`PL,
+         f@PR :> s@SARAH`PR,
+         f@MT[i1, i2] :> s@g[{fields}, i1, i2],
+         f@FV[i1, i2] :> s@md[{fields}, i1, i2],
 
-         f@`fa`pl :> s@SARAH`PL,
-
-         f@`fa`pr :> s@SARAH`PR,
-
-         f@`fa`metric[i1, i2] :> s@`sarah`metric[{fields}, i1, i2],
-
-         f@`fa`momdiff[i1-i2] :> s@`sarah`momdiff[{fields}, i1, i2],
-
-         f[`fa`momdiff[i2-i1, i3]*`fa`metric[i1, i2] +
-            `fa`momdiff[i1-i3, i2]*`fa`metric[i1, i3] +
-            `fa`momdiff[i3-i2, i1]*`fa`metric[i2, i3]
+         f[
+            FV[i2, i1, i3] * MT[i1, i2] +
+            FV[i1, i3, i2] * MT[i1, i3] +
+            FV[i3, i2, i1] * MT[i2, i3]
          ] :>
          s[
-            `sarah`momdiff[{fields}, i2, i1, i3] * `sarah`metric[{fields}, i1, i2],
-            `sarah`momdiff[{fields}, i1, i3, i2] * `sarah`metric[{fields}, i1, i3],
-            `sarah`momdiff[{fields}, i3, i2, i1] * `sarah`metric[{fields}, i2, i3]
+            md[{fields}, i2, i1, i3] * g[{fields}, i1, i2],
+            md[{fields}, i1, i3, i2] * g[{fields}, i1, i3],
+            md[{fields}, i3, i2, i1] * g[{fields}, i2, i3]
          ]
       }
    ];
+   getCouplingRules // Utils`MakeUnknownInputDefinition;
+   getCouplingRules ~ SetAttributes ~ {Protected, Locked};
 
-   Unprotect@`rules`fieldNames;
-   `rules`fieldNames = getFieldRules@fieldNames;
-   Protect@`rules`fieldNames;
-
-   Unprotect@`rules`subexpressions;
-   `rules`subexpressions = Join[
-      getMassRules@fieldNames,
-      `rules`fieldNames,
-      couplingRules,
-      `rules`general
-   ];
-   Protect@`rules`subexpressions;
-
-   Unprotect@`rules`amplitudes;
-   `rules`amplitudes = Join[
-      `rules`subexpressions,
-      `rules`sum,
-      {FeynArts`IndexSum -> Sum}
-   ];
-   Protect@`rules`amplitudes;
 ];
-SetFSConventionRules // Utils`MakeUnknownInputDefinition;
-SetFSConventionRules ~ SetAttributes ~ {Protected,Locked};
 
 expandRules::usage = "
 @brief Expands a set of compact rules into the full one.
@@ -740,7 +673,7 @@ Module[{
    {diagrams, amplitudes} = modify[{diagrams, amplitudes}, OptionValue@KeepProcesses];
 
    {
-      {getField[amplitudes, In], getField[amplitudes, Out]} //. `rules`fieldNames,
+      {getField[amplitudes, In], getField[amplitudes, Out]} //. getFieldRules[],
       calculateAmplitudes[
          {diagrams, amplitudes},
          Sequence@@FilterRules[
@@ -750,6 +683,8 @@ Module[{
       ]
    }
 ];
+NPointFunctionFAFC // Utils`MakeUnknownInputDefinition;
+NPointFunctionFAFC ~ SetAttributes ~ {Protected, Locked};
 
 getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on C++ level.
@@ -818,7 +753,7 @@ getRegularizationSettings[
 Module[{
       scheme = Switch[globalScheme, DimensionalReduction, 4, DimensionalRegularization, D],
       replacements,
-      f = (getAmplitudeRules[diagrams, First@#] /. x:_Integer :> Last@#) &
+      f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &
    },
    If[`settings`regularization === {},
       Array[scheme&, getClassAmount@diagrams],
@@ -844,7 +779,7 @@ Topology rules in `.`settings`.`momenta overlap.";
 getMomSettings[diagrams:`type`diagramSet] :=
 Module[{
       replacements,
-      f = (getAmplitudeRules[diagrams, First@#] /. x:_Integer :> Last@#) &
+      f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &
    },
    If[`settings`momenta === {},
       Array[Automatic&, getClassAmount@diagrams],
@@ -920,7 +855,7 @@ removeColours[i:`type`diagramSet|`type`amplitudeSet] :=
 removeColours // Utils`MakeUnknownInputDefinition;
 removeColours ~ SetAttributes ~ {Protected, Locked};
 
-getAmplitudeRules::usage = "
+getAmplitudeNumbers::usage = "
 @brief Gives numbers of amplitudes, accepted by a criterion on topology.
 @param diagrams A set of diagrams.
 @param <one argument function> critFunction Function for topology selection. If
@@ -928,7 +863,7 @@ getAmplitudeRules::usage = "
 @returns {<Rule>} List of rules of the form <boolean>->{<integer>..}. LHS
          stands for the topology, RHS gives numbers of classes (and the numbers
          of amplitudes the same time).";
-getAmplitudeRules[
+getAmplitudeNumbers[
    diagrams:`type`diagramSet,
    critFunction_
 ] :=
@@ -942,8 +877,8 @@ Module[
    takeOrNot = Array[TrueQ@critFunction@Part[topologies,#]&,Length@topologies];
    MapThread[#1->#2&,{takeOrNot,numRegions}]
 ];
-getAmplitudeRules // Utils`MakeUnknownInputDefinition;
-getAmplitudeRules ~ SetAttributes ~ {Protected, Locked};
+getAmplitudeNumbers // Utils`MakeUnknownInputDefinition;
+getAmplitudeNumbers ~ SetAttributes ~ {Protected, Locked};
 
 removeTopologiesWithoutInsertions[diagrams:`type`nullableDiagramSet] :=
    diagrams /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]);
@@ -1055,6 +990,8 @@ Module[
       List @@ genericInsertions /. toGenericIndexConventionRules
    ]
 ];
+FindGenericInsertions // Utils`MakeUnknownInputDefinition;
+FindGenericInsertions ~ SetAttributes ~ {Protected, Locked};
 
 StripParticleIndices::usage="
 @brief Removes particle indices from a given (possibley generic) field.
@@ -1064,6 +1001,8 @@ StripParticleIndices[Times[-1,field_]] :=
    Times[-1, StripParticleIndices[field]];
 StripParticleIndices[genericType_[classIndex_, ___]] :=
    genericType[classIndex];
+StripParticleIndices // Utils`MakeUnknownInputDefinition;
+StripParticleIndices ~ SetAttributes ~ {Protected, Locked};
 
 getColourFactors::usage = "
 @brief Creates colour factors for a given diagram.
@@ -1078,7 +1017,7 @@ getColourFactors::usage = "
 @note External fields always come at first places in adjacency matrix.
 @note This function doesn't know anything about CXXDiagrams`.` context.";
 getColourFactors[ds:`type`diagramSet] :=
-   Flatten[getColourFactors /@ (List @@ ds), 1] //. `rules`fieldNames;
+   Flatten[getColourFactors /@ (List @@ ds), 1] //. getFieldRules[];
 getColourFactors[
    diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
 Module[
@@ -1411,6 +1350,8 @@ Module[{newNonzero, newZeroRules},
 
    ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]
 ];
+ZeroRules // Utils`MakeUnknownInputDefinition;
+ZeroRules ~ SetAttributes ~ {Protected, Locked};
 
 FCAmplitudesToFSConvention::usage=
 "@brief Tranlate a list of FormCalc amplitudes and their abbreviations and
@@ -1423,19 +1364,13 @@ subexpressions into FlexibleSUSY language.
 where all FlexibleSUSY conventions have been applied.";
 FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
 Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
-   fsAmplitudes = amplitudes //. `rules`amplitudes;
-   fsAbbreviations = abbreviations //. `rules`subexpressions //. {FormCalc`DiracChain->NPointFunctions`internal`dc,FormCalc`Spinor->SARAH`DiracSpinor,FormCalc`Lor->SARAH`Lorentz};
-   fsSubexpressions = subexpressions //. `rules`subexpressions;
+   fsAmplitudes = amplitudes //. getAmplitudeRules[];
+   fsAbbreviations = abbreviations //. getSubexpressionRules[] //. {FormCalc`DiracChain->NPointFunctions`internal`dc,FormCalc`Spinor->SARAH`DiracSpinor,FormCalc`Lor->SARAH`Lorentz};
+   fsSubexpressions = subexpressions //. getSubexpressionRules[];
    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
 ];
-
-SetAttributes[
-   {
-   NPointFunctionFAFC,
-   FindGenericInsertions,StripParticleIndices,
-   ZeroRules,FCAmplitudesToFSConvention
-   },
-   {Protected, Locked}];
+FCAmplitudesToFSConvention // Utils`MakeUnknownInputDefinition;
+FCAmplitudesToFSConvention ~ SetAttributes ~ {Protected, Locked};
 
 End[];
 EndPackage[];

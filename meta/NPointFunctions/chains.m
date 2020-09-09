@@ -171,7 +171,7 @@ Module[{id, idf},
    ] :=
    (
       If[Head@id === Symbol,
-         id = foreach[#1->#2&, getField[set, All] //. `rules`fieldNames];
+         id = foreach[#1->#2&, getField[set, All] //. getFieldRules[]];
          With[{
                ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k
             },
