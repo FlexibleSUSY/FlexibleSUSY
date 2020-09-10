@@ -32,34 +32,6 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    const auto betaOS = std::sqrt(1.-4.*xOS);
    const auto betaDR = std::sqrt(1.-4.*xDR);
 
-
-   const double alpha_s = get_alphas(context);
-   const double alpha_s_red = alpha_s/Pi;
-   const double Nf = number_of_active_flavours(mHOS);
-   const double alpha = get_alpha(context);
-   const double alpha_red = alpha/Pi;
-   const double mtpole = qedqcd.displayPoleMt();
-
-   const double deltaqqOS =
-      4./3. * alpha_s_red * calc_DeltaH(betaOS);
-   const double deltaqqDR =
-      2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-      4./3. * alpha_s_red * calc_DeltaH(betaDR) +
-      calc_deltaqq(alpha_s_red, Nf);
-
-   const double deltaqqDRQED =
-      17./4. * alpha_red * Sqr(uq::electric_charge);
-   const double deltaqqOSQED =
-      alpha_red * Sqr(uq::electric_charge) * calc_DeltaH(betaOS);
-
-   // chiral breaking correctios
-   double deltaH2 = 0.;
-   if(!info::is_CP_violating_Higgs_sector) {
-      const double lt = std::log(Sqr(mHOS/mtpole));
-      const double lq = std::log(xDR);
-      deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
-   }
-
    const double flux = 1./(2.*mHOS);
    constexpr double color_factor = 3;
    const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
@@ -83,15 +55,40 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    double result_OS =
       flux * color_factor * phase_spaceOS * amp2OS;
 
-   switch (include_higher_order_corrections) {
-      case SM_higher_order_corrections::enable:
-         result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
-         result_OS *= 1. + deltaqqOS + deltaqqOSQED;
-         break;
-      case SM_higher_order_corrections::disable:
-         break;
-      default:
-         break;
+   if (include_higher_order_corrections == SM_higher_order_corrections::enable) {
+
+      const double alpha_s_red = get_alphas(context)/Pi;
+      const double Nf = number_of_active_flavours(mHOS);
+      const double alpha_red = get_alpha(context)/Pi;
+      const double mtpole = qedqcd.displayPoleMt();
+
+      double deltaqqOS = 0.;
+      double deltaqqDR = 0.;
+      double deltaqqDRQED = 0.;
+      double deltaqqOSQED = 0.;
+      // chirality breaking corrections
+      double deltaH2 = 0.;
+
+      if(!info::is_CP_violating_Higgs_sector) {
+         deltaqqOS =
+            4./3. * alpha_s_red * calc_DeltaH(betaOS);
+         deltaqqDR =
+            2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
+            4./3. * alpha_s_red * calc_DeltaH(betaDR) +
+            calc_deltaqq(alpha_s_red, Nf);
+
+         deltaqqDRQED =
+            17./4. * alpha_red * Sqr(uq::electric_charge);
+         deltaqqOSQED =
+            alpha_red * Sqr(uq::electric_charge) * calc_DeltaH(betaOS);
+
+         const double lt = std::log(Sqr(mHOS/mtpole));
+         const double lq = std::log(xDR);
+         deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+      }
+
+      result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
+      result_OS *= 1. + deltaqqOS + deltaqqOSQED;
    }
 
    return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
