@@ -141,7 +141,7 @@ makeApplication@{
    {
       text:_String,
       topologyQ:_,
-      {Append, (t:`type`fa`field)[n:_Integer] :> e:_Integer}
+      {Append, (t:`type`field)[n:_Integer] :> e:_Integer}
    },
    Append[#, genericMass[t, n] :> (First /@ `get`zeroMassRules[])[[2*e-1]]]&
 };
