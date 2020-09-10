@@ -23,7 +23,7 @@
 *)
 
 (* There is a problem with Global`args which comes from mathematica paclets.*)
-Quiet[Needs["FeynArts`"],{FeynArts`args::shdw}];
+Quiet[Needs["FeynArts`"], {FeynArts`args::shdw}];
 (* Change this to 2 to see more output (if 1 then less). *)
 FeynArts`$FAVerbose = 0;
 
@@ -39,19 +39,18 @@ BeginPackage["NPointFunctions`"];
 
 {SetInitialValues, NPointFunctionFAFC}
 
-Off[General::shdw]
+Off[General::shdw];
+{Irreducible, Triangles} ~ SetAttributes ~ {Protected, Locked};
+On[General::shdw];
+
 {
-   LorentzIndex,GenericSum,GenericIndex,
-   GenericS,GenericF,GenericV,GenericU,
-   LoopLevel,Regularize,ZeroExternalMomenta,OnShellFlag,KeepProcesses,
-
-
-   DimensionalReduction,DimensionalRegularization,OperatorsOnly,ExceptLoops,
-   (*for further details inspect topologyReplacements*)
-   Irreducible,Triangles,FourFermionScalarPenguins,
-   FourFermionMassiveVectorPenguins,FourFermionFlavourChangingBoxes
+   LorentzIndex, GenericSum, GenericIndex,
+   GenericS, GenericF, GenericV, GenericU,
+   LoopLevel, Regularize, ZeroExternalMomenta, OnShellFlag, KeepProcesses,
+   DimensionalReduction, DimensionalRegularization, OperatorsOnly, ExceptLoops,
+   FourFermionScalarPenguins,
+   FourFermionMassiveVectorPenguins, FourFermionFlavourChangingBoxes
 } ~ SetAttributes ~ {Locked,Protected};
-On[General::shdw]
 
 Begin["`internal`"];
 
