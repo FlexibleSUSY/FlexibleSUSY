@@ -39,12 +39,21 @@ Module[{
 getActions // Utils`MakeUnknownInputDefinition;
 getActions ~ SetAttributes ~ {Protected,Locked};
 
+getTruePositions::usage = "
+@brief Converts a list with a boolean variables to the list of positions for
+       all true entries.
+@param list A list of booleans.
+@returns A list of integers (of an empty one)."
+getTruePositions[list:{(True|False)...}] :=
+   Flatten@Position[list, True];
+getTruePositions // Utils`MakeUnknownInputDefinition;
+getTruePositions ~ SetAttributes ~ {Protected, Locked};
+
 applyAction[
    {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
    {topologyQ:_, {name:_, function:_, value:_}, text:_String}
 ] :=
-Module[
-   {
+Module[{
       daPairs = getAmplitudeNumbers[diagrams, topologyQ],
       amplitudeNumbers, saveClassRules, viPairs, insertions, res
    },

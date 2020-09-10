@@ -158,7 +158,7 @@ setSettingsFile[
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
 `type`topology ~ SetAttributes ~ {Protected, Locked};
 
-`type`diagram = Rule[`type`topology,FeynArts`Insertions[Generic][__]];
+`type`diagram = Rule[`type`topology, FeynArts`Insertions[Generic][__]];
 
 getTopology[d:`type`diagram] := First@d;
 getTopology // Utils`MakeUnknownInputDefinition;
@@ -188,11 +188,10 @@ indexGeneric[index:_Integer] :=
 indexGeneric // Utils`MakeUnknownInputDefinition;
 indexGeneric ~ SetAttributes ~ {Protected,Locked};
 
-`type`fa`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
+`type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
+`type`genericField = `type`field[`type`indexGeneric];
 
-`type`FAfieldGeneric = `type`fa`field[`type`indexGeneric];
-
-`type`fc`particle = `type`fa`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
+`type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
 `type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
 `type`fc`external = {`type`fc`particle, FormCalc`k@_Integer, `type`fc`mass, {}};
 `type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
@@ -206,14 +205,14 @@ With[{
       new = Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}]
    },
 
-`type`genericMass = FeynArts`Mass[`type`fa`field[`type`indexGeneric], new];
+`type`genericMass = FeynArts`Mass[`type`field[`type`indexGeneric], new];
 
 genericMass::usage = "
 @note In FeynArts 3.11 the pattern for a generic mass was changed and since it
       contains Loop and Internal as well.";
-genericMass[field:`type`fa`field, index:_Integer] :=
+genericMass[field:`type`field, index:_Integer] :=
    FeynArts`Mass[field@indexGeneric@index, new];
-genericMass[field:`type`fa`field] :=
+genericMass[field:`type`field] :=
    FeynArts`Mass[field@`type`indexGeneric, new];
 genericMass // Utils`MakeUnknownInputDefinition;
 genericMass ~ SetAttributes ~ {Protected, Locked};
@@ -240,16 +239,6 @@ getClassRules[amp:`type`amplitude] :=
 getClassRules // Utils`MakeUnknownInputDefinition;
 getClassRules ~ SetAttributes ~ {Protected, Locked};
 
-getTruePositions::usage = "
-@brief Converts a list with a boolean variables to the list of positions for
-       all `True' entries.
-@param list A `List' of booleans.
-@returns A list of integers (of an empty one)."
-getTruePositions[list:{(True|False)...}] :=
-   Flatten@Position[list, True];
-getTruePositions // Utils`MakeUnknownInputDefinition;
-getTruePositions ~ SetAttributes ~ {Protected, Locked};
-
 getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
 getProcess[set:`type`fc`amplitudeSet] :=
@@ -257,12 +246,12 @@ getProcess[set:`type`fc`amplitudeSet] :=
 getProcess // Utils`MakeUnknownInputDefinition;
 getProcess ~ SetAttributes ~ {Protected,Locked};
 
-`get`masses[set:`type`fc`amplitudeSet] :=
+getExternalMasses[set:`type`fc`amplitudeSet] :=
    Flatten[List@@getProcess@set, 1][[All, 3]];
-`get`masses[set:`type`amplitudeSet] :=
+getExternalMasses[set:`type`amplitudeSet] :=
    FeynArts`Mass[#] &/@ getField[set, All];
-`get`masses // Utils`MakeUnknownInputDefinition;
-`get`masses ~ SetAttributes ~ {Protected, Locked};
+getExternalMasses // Utils`MakeUnknownInputDefinition;
+getExternalMasses ~ SetAttributes ~ {Protected, Locked};
 
 getField[set:`type`diagramSet, number:_Integer] :=
    Flatten[List @@ getProcess[set], 1][[number]] /;
@@ -335,7 +324,7 @@ Module[{
    setGenerationIndices[];
 
    `type`specificMass =
-      FeynArts`Mass[`type`fa`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
+      FeynArts`Mass[`type`field[_Integer, {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
 
    setParticleFile@particleNamesFileS;
    setSubstitutionsFile@substitutionsFileS;
@@ -506,7 +495,7 @@ getGeneralRules[] := {
    FormCalc`Finite -> 1,
    FormCalc`Den[a:_,b:_] :> 1/(a-b),
    FormCalc`Pair[a:_,b:_] :> SARAH`sum[#, 1, 4, SARAH`g[#, #]*Append[a, #]*Append[b, #]],
-   f:`type`FAfieldGeneric :> Head[f][GenericIndex@Last@Last@f],
+   f:`type`genericField :> Head[f][GenericIndex@Last@Last@f],
    FormCalc`k[i:_Integer, pairIndex:___] :> SARAH`Mom[i, pairIndex]
 } &@ Unique@"SARAH`lt";
 getGeneralRules // Utils`MakeUnknownInputDefinition;
@@ -1162,7 +1151,7 @@ Module[{rules},
 @note Explicit names for masses are expected only for external particles.";
 `set`zeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
    (
-      rules = RuleDelayed[#, 0] &/@ Riffle[`get`masses@fa, `get`masses@fc]);
+      rules = RuleDelayed[#, 0] &/@ Riffle[getExternalMasses@fa, getExternalMasses@fc]);
 `set`zeroMassRules // Utils`MakeUnknownInputDefinition;
 `set`zeroMassRules ~ SetAttributes ~ {Protected, Locked};
 
@@ -1300,7 +1289,7 @@ getGenericFields::usage = "
 @param expr An expression, where to search.
 @returns A list of unique sorted generic fields.";
 getGenericFields[expr:_] :=
-   Sort@DeleteDuplicates[Cases[expr, `type`FAfieldGeneric, Infinity]];
+   Sort@DeleteDuplicates[Cases[expr, `type`genericField, Infinity]];
 getGenericFields // Utils`MakeUnknownInputDefinition;
 getGenericFields ~ SetAttributes ~ {Protected, Locked};
 
