@@ -54,6 +54,63 @@ On[General::shdw];
 
 Begin["`internal`"];
 
+createGetSetOnce::usage = "
+@brief Defines safe getter and setter for a given symbol by prepending \"set\"
+       and \"get\" in front of it. This variable can be set only once.
+@param sym A symbol, which serves as a root name for a new functions, i.e. for
+       MySymbol symbol setMySymbol and getMySymbol will be created.
+@param pattern An expression, which will be used for a pattern for a set
+       function, i.e. it will have the form setMySymbol[new:pattern].";
+createGetSetOnce[{sym:_Symbol, pattern:_}] :=
+Module[{
+      set = Symbol["set"<>SymbolName@sym],
+      get = Symbol["get"<>SymbolName@sym],
+      once, value
+   },
+
+   set::errOnce = "The value can be set only once.";
+   set[new:pattern] := (
+      Utils`AssertOrQuit[Head@once === Symbol, set::errOnce];
+      once = {};
+      value = new;
+   );
+   set // Utils`MakeUnknownInputDefinition;
+   Evaluate[set] ~ SetAttributes ~ {Protected, Locked};
+
+   get::errNotSet = "The value should be set first.";
+   get[] := (
+      Utils`AssertOrQuit[Head@once =!= Symbol, get::errNotSet];
+      value
+   );
+   get // Utils`MakeUnknownInputDefinition;
+   Evaluate[get] ~ SetAttributes ~ {Protected, Locked};
+
+];
+createGetSetOnce // Utils`MakeUnknownInputDefinition;
+createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
+
+createGetSetOnce /@ {
+   {InternalDirectory, _String},
+   {ParticleFile, _String},
+   {SubstitutionsFile, _String},
+   {NamespaceFile, _String},
+   {SubexpressionRules, {__}},
+   {AmplitudeRules, {__}},
+   {SettingsFile, {Rule[{__Symbol}, _String]..}}
+};
+
+setInternalDirectory@DirectoryName@FindFile@$Input;
+
+setSettingsFile[
+   {
+      {
+         FourFermionScalarPenguins,
+         FourFermionMassiveVectorPenguins,
+         FourFermionFlavourChangingBoxes
+      } -> #@"LToLConversion"
+   } &@ ( FileNameJoin@{getInternalDirectory[], #, "settings.m"}& )
+];
+
 `settings`topologyReplacements::usage = "
 @brief A set of rules for exclude topologies routines used inside
        FeynArts`CreateTopologies.";
@@ -89,26 +146,8 @@ Begin["`internal`"];
        to compare with, 3) a `String' message to be printed after the rule is
        applied.";
 
-`directory`internal::usage = "
-@brief A `String' variable, containing the directory name of `internal.m' file.";
-`directory`internal = DirectoryName@FindFile@$Input;
-`directory`internal ~ SetAttributes ~ {Protected, Locked};
-
 `type`keepProcesses = {__Symbol};
 `type`keepProcesses ~ SetAttributes ~ {Protected, Locked};
-
-`process`directory::usage = "
-@brief A structure of the pattern {Rule[{__Symbol}, _String]..}, which connects
-       the name of symbols, used for the calculation of some process, with the
-       name of directory/file, where process specific information is stored.";
-`settings`file = {
-   {
-      FourFermionScalarPenguins,
-      FourFermionMassiveVectorPenguins,
-      FourFermionFlavourChangingBoxes
-   } -> #@"LToLConversion"
-} &@ ( FileNameJoin@{`directory`internal, #, "settings.m"}& );
-`settings`file ~ SetAttributes ~ {Protected, Locked};
 
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`vertex ~ SetAttributes ~ {Protected, Locked};
@@ -181,10 +220,10 @@ genericMass ~ SetAttributes ~ {Protected, Locked};
 
 ];
 
-Get@FileNameJoin@{`directory`internal, "actions.m"};
-Get@FileNameJoin@{`directory`internal, "chains.m"};
-Get@FileNameJoin@{`directory`internal, "time.m"};
-Get@FileNameJoin@{`directory`internal, "topologies.m"};
+Get@FileNameJoin@{getInternalDirectory[], "actions.m"};
+Get@FileNameJoin@{getInternalDirectory[], "chains.m"};
+Get@FileNameJoin@{getInternalDirectory[], "time.m"};
+Get@FileNameJoin@{getInternalDirectory[], "topologies.m"};
 
 getClassVariables[amp:`type`amplitude] :=
    amp[[4, 1]];
@@ -267,49 +306,6 @@ setGenerationIndices // Utils`MakeUnknownInputDefinition;
 setGenerationIndices ~ SetAttributes ~ {Protected, Locked};
 
 ];
-
-createGetSetOnce::usage = "
-@brief Defines safe getter and setter for a given symbol by prepending \"set\"
-       and \"get\" in front of it. This variable can be set only once.
-@param sym A symbol, which serves as a root name for a new functions, i.e. for
-       MySymbol symbol setMySymbol and getMySymbol will be created.
-@param pattern An expression, which will be used for a pattern for a set
-       function, i.e. it will have the form setMySymbol[new:pattern].";
-createGetSetOnce[{sym:_Symbol, pattern:_}] :=
-Module[{
-      set = Symbol["set"<>SymbolName@sym],
-      get = Symbol["get"<>SymbolName@sym],
-      once, value
-   },
-
-   set::errOnce = "The value can be set only once.";
-   set[new:pattern] := (
-      Utils`AssertOrQuit[Head@once === Symbol, set::errOnce];
-      once = {};
-      value = new;
-   );
-   set // Utils`MakeUnknownInputDefinition;
-   Evaluate[set] ~ SetAttributes ~ {Protected, Locked};
-
-   get::errNotSet = "The value should be set first.";
-   get[] := (
-      Utils`AssertOrQuit[Head@once =!= Symbol, get::errNotSet];
-      value
-   );
-   get // Utils`MakeUnknownInputDefinition;
-   Evaluate[get] ~ SetAttributes ~ {Protected, Locked};
-
-];
-createGetSetOnce // Utils`MakeUnknownInputDefinition;
-createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
-
-createGetSetOnce /@ {
-   {ParticleFile, _String},
-   {SubstitutionsFile, _String},
-   {NamespaceFile, _String},
-   {SubexpressionRules, {__}},
-   {AmplitudeRules, {__}}
-};
 
 SetInitialValues::usage= "
 @brief Set the FeynArts and FormCalc paths, creates required directories.
@@ -605,7 +601,7 @@ getSettings::usage = "
       ones.";
 getSettings[keepProcesses:`type`keepProcesses] :=
 Module[{
-      rules = expandRules@`settings`file,
+      rules = expandRules@getSettingsFile[],
       file
    },
    file = DeleteDuplicates[keepProcesses /. rules];
