@@ -23,149 +23,128 @@
 BeginPackage["NPointFunctions`"];
 Begin["NPointFunctions`internal`"];
 
-getAdjacencyMatrix[topology:`type`topology] :=
-Module[
-   {
-      propagatorPattern,needNewNumbers,adjacencies,adjacencyMatrix
-   },
+define[getAdjacencyMatrix, {topology:`type`topology} :>
+   Module[{
+         propagatorPattern,needNewNumbers,adjacencies,adjacencyMatrix
+      },
 
-   propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
+      propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
 
-   needNewNumbers = And[
-      Max@@(topology/.propagatorPattern[i_,j_,___]:>Sequence[i,j])>100,
-      MatchQ[List@@topology,{propagatorPattern[_,_]..}]
-   ];
+      needNewNumbers = And[
+         Max@@(topology/.propagatorPattern[i_,j_,___]:>Sequence[i,j])>100,
+         MatchQ[List@@topology,{propagatorPattern[_,_]..}]
+      ];
 
-   adjacencies = Tally[
-      (List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}
-   ] &@ If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
+      adjacencies = Tally[
+         (List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}
+      ] &@ If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
 
-   adjacencyMatrix = Normal@SparseArray@Flatten[
-      {#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies
+      adjacencyMatrix = Normal@SparseArray@Flatten[
+         {#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies
+      ]
    ]
 ];
 
-getAdjacencyMatrix // Utils`MakeUnknownInputDefinition;
-getAdjacencyMatrix ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`pinguinT[topology:`type`topology] :=
-Or[
-   `topologyQ`trianglepinguinT@topology,
-   `topologyQ`self1pinguinT@topology,
-   `topologyQ`self3pinguinT@topology
+define[`topologyQ`pinguinT, {topology:`type`topology} :>
+   Or[
+      `topologyQ`trianglepinguinT@topology,
+      `topologyQ`self1pinguinT@topology,
+      `topologyQ`self3pinguinT@topology
+   ]
 ];
 
-`topologyQ`pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`trianglepinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,1,0,0},
-   {1,0,0,0,0,0,1,1},
-   {0,1,0,1,0,0,0,1},
-   {0,0,1,0,1,0,0,1},
-   {0,0,0,0,1,1,1,0}
-};
-
-`topologyQ`trianglepinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`trianglepinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`self1pinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,1,0,0},
-   {1,0,0,0,0,0,0,2},
-   {0,1,0,1,0,0,1,0},
-   {0,0,1,0,0,1,0,1},
-   {0,0,0,0,2,0,1,0}
-};
-
-`topologyQ`self1pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`self1pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`self3pinguinT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,1,0,0},
-   {1,0,0,0,0,1,0,1},
-   {0,1,0,1,1,0,0,0},
-   {0,0,1,0,0,0,0,2},
-   {0,0,0,0,1,0,2,0}};
-
-`topologyQ`self3pinguinT // Utils`MakeUnknownInputDefinition;
-`topologyQ`self3pinguinT ~ SetAttributes ~ {Protected,Locked};
-
-`topologyQ`box[topology:`type`topology] :=
-Or[
-   `topologyQ`boxS@topology,
-   `topologyQ`boxT@topology,
-   `topologyQ`boxU@topology
+define[`topologyQ`trianglepinguinT, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,1,0,0},
+      {1,0,0,0,0,0,1,1},
+      {0,1,0,1,0,0,0,1},
+      {0,0,1,0,1,0,0,1},
+      {0,0,0,0,1,1,1,0}
+   }
 ];
 
-`topologyQ`box // Utils`MakeUnknownInputDefinition;
-`topologyQ`box ~ SetAttributes ~ {Protected,Locked};
+define[`topologyQ`self1pinguinT, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,1,0,0},
+      {1,0,0,0,0,0,0,2},
+      {0,1,0,1,0,0,1,0},
+      {0,0,1,0,0,1,0,1},
+      {0,0,0,0,2,0,1,0}
+   }
+];
 
-`topologyQ`boxS[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,1,1,0},
-   {0,1,0,0,1,0,0,1},
-   {0,0,1,0,1,0,0,1},
-   {0,0,0,1,0,1,1,0}
-};
+define[`topologyQ`self3pinguinT, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,1,0,0},
+      {1,0,0,0,0,1,0,1},
+      {0,1,0,1,1,0,0,0},
+      {0,0,1,0,0,0,0,2},
+      {0,0,0,0,1,0,2,0}
+   }
+];
 
-`topologyQ`boxS // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxS ~ SetAttributes ~ {Protected,Locked};
+define[`topologyQ`box, {topology:`type`topology} :>
+   Or[
+      `topologyQ`boxS@topology,
+      `topologyQ`boxT@topology,
+      `topologyQ`boxU@topology
+   ]
+];
 
-`topologyQ`boxT[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,1,0,1},
-   {0,1,0,0,1,0,1,0},
-   {0,0,1,0,0,1,0,1},
-   {0,0,0,1,1,0,1,0}
-};
+define[`topologyQ`boxS, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,0,0,1},
+      {1,0,0,0,0,1,1,0},
+      {0,1,0,0,1,0,0,1},
+      {0,0,1,0,1,0,0,1},
+      {0,0,0,1,0,1,1,0}
+   }
+];
 
-`topologyQ`boxT // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxT ~ SetAttributes ~ {Protected,Locked};
+define[`topologyQ`boxT, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,0,0,1},
+      {1,0,0,0,0,1,0,1},
+      {0,1,0,0,1,0,1,0},
+      {0,0,1,0,0,1,0,1},
+      {0,0,0,1,1,0,1,0}
+   }
+];
 
-`topologyQ`boxU[topology:`type`topology] :=
-getAdjacencyMatrix@topology === {
-   {0,0,0,0,1,0,0,0},
-   {0,0,0,0,0,1,0,0},
-   {0,0,0,0,0,0,1,0},
-   {0,0,0,0,0,0,0,1},
-   {1,0,0,0,0,0,1,1},
-   {0,1,0,0,0,0,1,1},
-   {0,0,1,0,1,1,0,0},
-   {0,0,0,1,1,1,0,0}
-};
+define[`topologyQ`boxU, {topology:`type`topology} :>
+   getAdjacencyMatrix@topology === {
+      {0,0,0,0,1,0,0,0},
+      {0,0,0,0,0,1,0,0},
+      {0,0,0,0,0,0,1,0},
+      {0,0,0,0,0,0,0,1},
+      {1,0,0,0,0,0,1,1},
+      {0,1,0,0,0,0,1,1},
+      {0,0,1,0,1,1,0,0},
+      {0,0,0,1,1,1,0,0}
+   }
+];
 
-`topologyQ`boxU // Utils`MakeUnknownInputDefinition;
-`topologyQ`boxU ~ SetAttributes ~ {Protected,Locked};
-
-topologyReplacements::usage = "
-@brief List of topology replacement rules for a processes to keep.
-@note R.h.s. should be pure functions of one argument.";
-topologyReplacements =
-{
-   Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
-   Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&)
-};
-topologyReplacements ~ SetAttributes ~ {Protected, Locked};
+Module[{
+      topologyReplacements = {
+         Irreducible -> (FreeQ[#,FeynArts`Internal]&), (*@todo something weird with this definition*)
+         Triangles -> (FreeQ[FeynArts`ToTree@#,FeynArts`Centre@Except@3]&)
+      }
+   },
 
 getExcludeTopologies::usage =
 "@brief Registers and returns a function, whose outcome - True or everything
@@ -174,19 +153,19 @@ getExcludeTopologies::usage =
 @param keepProcesses Name(s) of processes to hold.
 @returns _Symbol Generated name of topologies to hold.
 @todo Add a catcher for the case 2 or more.";
-getExcludeTopologies[keepProcesses:{__Symbol}] :=
-Module[
-   {
-      excludeTopologyName,
-      rules = Join[topologyReplacements, `settings`topologyReplacements]
-   },
-   FeynArts`$ExcludeTopologies[excludeTopologyName] = Switch[Length@keepProcesses,
-      1,  keepProcesses[[1]] /. rules,
-      _, (Or @@ Through[(keepProcesses /. rules)@#])&
-   ];
-   excludeTopologyName];
-getExcludeTopologies // Utils`MakeUnknownInputDefinition;
-getExcludeTopologies ~ SetAttributes ~ {Protected, Locked};
+define[getExcludeTopologies, {keepProcesses:{__Symbol}} :>
+   Module[{
+         excludeTopologyName,
+         rules = Join[topologyReplacements, `settings`topologyReplacements]
+      },
+      FeynArts`$ExcludeTopologies[excludeTopologyName] = Switch[Length@keepProcesses,
+         1,  keepProcesses[[1]] /. rules,
+         _, (Or @@ Through[(keepProcesses /. rules)@#])&
+      ];
+      excludeTopologyName]
+];
+
+];
 
 End[];
 EndPackage[];
