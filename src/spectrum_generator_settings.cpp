@@ -60,7 +60,8 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_t^3)",
    "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
    "loop library type (0 = Softsusy)",
-   "calculate particle decays"
+   "calculate particle decays",
+   "higher order corrections in decays"
 };
 
 bool is_integer(double value)
@@ -297,6 +298,7 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
  * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
  * | calculate_decays                 | 0 (no) or 1 (yes)                               | 1 (= enabled)   |
+ * | higher_orders_in_decays          | 0 (no) or 1 (yes)                               | 1 (= enabled)   |
  */
 void Spectrum_generator_settings::reset()
 {
@@ -313,7 +315,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_2loop_correction_at_at]     = 1.;
    values[higgs_2loop_correction_atau_atau] = 1.;
    values[force_output]                     = 0;
-   values[calculate_sm_masses]   = 0.; // 0 = false
+   values[calculate_sm_masses]              = 0.; // 0 = false
    values[top_pole_qcd_corrections]         = 1.;
    values[beta_zero_threshold]              = 1.0e-11;
    values[calculate_observables]            = 0;
@@ -334,6 +336,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_4loop_correction_at_as3]    = 1.;
    values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
    values[calculate_decays]                 = 1.;
+   values[higher_orders_in_decays]          = 1.;
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

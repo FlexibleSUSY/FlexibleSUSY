@@ -2560,8 +2560,15 @@ ExampleDecaysIncludes[] :=
 ExampleCalculateDecaysForModel[] :=
 "const bool loop_library_for_decays =
     (Loop_library::get_type() == Loop_library::Library::Collier) ||
-    (Loop_library::get_type() == Loop_library::Library::Looptools);\n" <>
-FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
+    (Loop_library::get_type() == Loop_library::Library::Looptools);
+SM_higher_order_corrections higher_orders_in_decays;
+if (spectrum_generator_settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {
+   higher_orders_in_decays = SM_higher_order_corrections::enable;
+}
+else {
+   higher_orders_in_decays = SM_higher_order_corrections::disable;
+}\n" <>
+FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);
 if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
