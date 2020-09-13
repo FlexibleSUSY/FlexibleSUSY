@@ -2558,18 +2558,7 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"const bool loop_library_for_decays =
-    (Loop_library::get_type() == Loop_library::Library::Collier) ||
-    (Loop_library::get_type() == Loop_library::Library::Looptools);
-SM_higher_order_corrections higher_orders_in_decays;
-if (spectrum_generator_settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {
-   higher_orders_in_decays = SM_higher_order_corrections::enable;
-}
-else {
-   higher_orders_in_decays = SM_higher_order_corrections::disable;
-}\n" <>
-FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);
-if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
    }
@@ -2588,7 +2577,7 @@ if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-FlexibleSUSY`FSModelName <> "_decays " <> "decays;" <>
+FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
    decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
 }";
@@ -2605,7 +2594,7 @@ WriteUserExample[inputParameters_List, files_List] :=
     Module[{parseCmdLineOptions, printCommandLineOptions, inputPars,
             solverIncludes = "", runEnabledSolvers = "", scanEnabledSolvers = "",
             runEnabledCmdLineSolvers = "", defaultSolverType,
-            decaysIncludes = "", calculateDecaysForModel = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
+            decaysIncludes = "", calculateDecaysForModel = "", decaysObject = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
             calculateCmdLineDecays = "", writeCmdLineOutput = "", fillSLHAIO = ""},
            inputPars = {First[#], #[[3]]}& /@ inputParameters;
            parseCmdLineOptions = WriteOut`ParseCmdLineOptions[inputPars];
@@ -2620,6 +2609,22 @@ WriteUserExample[inputParameters_List, files_List] :=
              ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysIncludes = ExampleDecaysIncludes[];
+              decaysObject =
+                  IndentText[
+                     "SM_higher_order_corrections higher_orders_in_decays;\n" <>
+                     "if (spectrum_generator_settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {\n" <>
+                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
+                     "}\n" <>
+                     "else {\n" <>
+                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
+                     "}\n" <>
+                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);\n" <>
+                     "const bool loop_library_for_decays =\n" <>
+                     IndentText[
+                        "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                        "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                     ]
+                  ];
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
@@ -2649,7 +2654,8 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@runEnabledCmdLineSolvers@" -> runEnabledCmdLineSolvers,
                             "@defaultSolverType@" -> defaultSolverType,
                             "@decaysIncludes@" -> decaysIncludes,
-                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
+                            "@decaysObject@" -> decaysObject,
+                            "@calculateDecaysForModel@" -> IndentText@IndentText@IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
