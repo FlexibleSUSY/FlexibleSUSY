@@ -1276,7 +1276,7 @@ were detected.";
 `cxx`changeGenericExpressions[summation:`type`summation, expr:{__}] :=
 Module[
    {
-      code ="
+      code = "
       // The following definitions are repeated in the GenericSum multiple times.
       @defineMasses@
       @defineCouplings@
@@ -1332,49 +1332,49 @@ Module[
       onePoint,
       onePointTemplate =
          {
-            LoopTools`A0@@#2 -> "a"<>#1<>".at(0)",
-            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>".at(0)"
+            LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
+            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"
          }&,
 
       twoPoint,
       twoPointTemplate =
          {
-            LoopTools`B0@@#2 -> "b"<>#1<>".at(0)",
-            LoopTools`B1@@#2 -> "b"<>#1<>".at(1)",
-            LoopTools`B00@@#2 -> "b"<>#1<>".at(2)",
-            LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>".at(0)",
-            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>".at(1)",
-            LoopTools`B0i[LoopTools`bb00,Sequence@@#2] -> "b"<>#1<>".at(2)"
+            LoopTools`B0@@#2 -> "b"<>#1<>"[0]",
+            LoopTools`B1@@#2 -> "b"<>#1<>"[1]",
+            LoopTools`B00@@#2 -> "b"<>#1<>"[2]",
+            LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",
+            LoopTools`B0i[LoopTools`bb1,Sequence@@#2] -> "b"<>#1<>"[1]",
+            LoopTools`B0i[LoopTools`bb00,Sequence@@#2] -> "b"<>#1<>"[2]"
          }&,
 
       threePoint,
       threePointTemplate =
          {
-            LoopTools`C0@@#2 -> "c"<>#1<>".at(0)",
-            LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>".at(0)",
-            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>".at(1)",
-            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>".at(2)",
-            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>".at(3)",
-            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>".at(4)",
-            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>".at(5)",
-            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>".at(6)"
+            LoopTools`C0@@#2 -> "c"<>#1<>"[0]",
+            LoopTools`C0i[LoopTools`cc0,Sequence@@#2] -> "c"<>#1<>"[0]",
+            LoopTools`C0i[LoopTools`cc1,Sequence@@#2] -> "c"<>#1<>"[1]",
+            LoopTools`C0i[LoopTools`cc2,Sequence@@#2] -> "c"<>#1<>"[2]",
+            LoopTools`C0i[LoopTools`cc00,Sequence@@#2] -> "c"<>#1<>"[3]",
+            LoopTools`C0i[LoopTools`cc11,Sequence@@#2] -> "c"<>#1<>"[4]",
+            LoopTools`C0i[LoopTools`cc12,Sequence@@#2] -> "c"<>#1<>"[5]",
+            LoopTools`C0i[LoopTools`cc22,Sequence@@#2] -> "c"<>#1<>"[6]"
          }&,
 
       fourPoint,
       fourPointTemplate =
          {
-            LoopTools`D0@@#2 -> "d"<>#1<>".at(0)",
-            LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>".at(0)",
-            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>".at(1)",
-            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>".at(2)",
-            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>".at(3)",
-            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>".at(4)",
-            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>".at(5)",
-            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>".at(6)",
-            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>".at(7)",
-            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>".at(8)",
-            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>".at(9)",
-            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>".at(10)"
+            LoopTools`D0@@#2 -> "d"<>#1<>"[0]",
+            LoopTools`D0i[LoopTools`dd0,Sequence@@#2] -> "d"<>#1<>"[0]",
+            LoopTools`D0i[LoopTools`dd1,Sequence@@#2] -> "d"<>#1<>"[1]",
+            LoopTools`D0i[LoopTools`dd2,Sequence@@#2] -> "d"<>#1<>"[2]",
+            LoopTools`D0i[LoopTools`dd3,Sequence@@#2] -> "d"<>#1<>"[3]",
+            LoopTools`D0i[LoopTools`dd00,Sequence@@#2] -> "d"<>#1<>"[4]",
+            LoopTools`D0i[LoopTools`dd11,Sequence@@#2] -> "d"<>#1<>"[5]",
+            LoopTools`D0i[LoopTools`dd12,Sequence@@#2] -> "d"<>#1<>"[6]",
+            LoopTools`D0i[LoopTools`dd13,Sequence@@#2] -> "d"<>#1<>"[7]",
+            LoopTools`D0i[LoopTools`dd22,Sequence@@#2] -> "d"<>#1<>"[8]",
+            LoopTools`D0i[LoopTools`dd23,Sequence@@#2] -> "d"<>#1<>"[9]",
+            LoopTools`D0i[LoopTools`dd33,Sequence@@#2] -> "d"<>#1<>"[10]"
          }&,
 
       append,
@@ -1564,7 +1564,7 @@ Module[
    },
    varNames = Array[varName<>ToString@#&,Length@genSumNames];
    initVars = MapThread["const auto "<>#1<>" = "<>#2<>"();"&,{varNames,genSumNames}]~StringRiffle~"\n";
-   sumOfSums = StringRiffle[#<>".at(i)"&/@varNames,"+"];
+   sumOfSums = StringRiffle[#<>"[i]"&/@varNames,"+"];
    replaceTokens["
    std::array<std::complex<double>,@BasisLength@> calculate( void ) {
       std::array<std::complex<double>,@BasisLength@> genericSummation;
@@ -1572,7 +1572,7 @@ Module[
       @InitializeVariablesWhichStoreGenericSumsOutput@
 
       for ( std::size_t i=0; i<coeffsLength; i++ ) {
-         genericSummation.at(i) += @SumOfVariables@;
+         genericSummation[i] += @SumOfVariables@;
       }
       return genericSummation;
    } // End of calculate()",
