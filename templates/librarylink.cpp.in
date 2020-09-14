@@ -384,6 +384,7 @@ void Model_data::put_settings(MLINK link) const
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3)), "higgs4loopCorrectionAtAsAsAs");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::loop_library)), "loopLibrary");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::calculate_decays)), "calculateDecays");
+   MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::calculate_decays)), "higherOrdersInDecays");
    MLPutRuleTo(link, modsel.parameter_output_scale, "parameterOutputScale");
 
    MLEndPacket(link);
