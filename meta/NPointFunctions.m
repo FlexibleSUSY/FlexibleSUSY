@@ -157,7 +157,12 @@ Module[
    `type`fermionField = Alternatives @@ fermionList;
    `type`vectorField = Alternatives @@ vectorList;
    `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList];
-   {`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField} ~ SetAttributes ~ {Locked,Protected};
+   `type`externalField = `type`physicalField /.
+   Verbatim@_Symbol :> _String;
+   `type`explicitFieldName = `type`physicalField /.
+   (s:_Symbol)[{Verbatim@_Symbol}] :> s;
+
+   {`type`externalField,`type`explicitFieldName,`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField} ~ SetAttributes ~ {Locked,Protected};
 ];
 
 `type`wilsonBasis = {Rule[_String,_]..};
@@ -323,15 +328,6 @@ getName[obj:`type`genericField] :=
 Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
 getName // Utils`MakeUnknownInputDefinition;
 getName ~ SetAttributes ~ {Locked,Protected};
-
-cxxName[obj:`type`genericField] :=
-Switch[Head@obj,
-   SARAH`bar,"typename bar<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
-   Susyno`LieGroups`conj,"typename conj<"<>ToString[obj[[1,0]]]<>ToString[obj[[1,1,1]]]<>">::type",
-   _,ToString[obj[[0]]]<>ToString[obj[[1,1]]]
-];
-cxxName // Utils`MakeUnknownInputDefinition;
-cxxName ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`getIndex[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
@@ -980,7 +976,7 @@ Module[
       }; // End of @ClassName@"
    },
    genSumNames = Array["genericSum"<>ToString@#&,Length@genSums];
-   `current`setCxxRules[extIndices,genFields];
+   `cxx`setRules[extIndices,genFields];
 
    replaceTokens[code,{
    "@ClassName@"->`current`helperClassName,
@@ -1002,19 +998,17 @@ Module[
 `cxx`initializeKeyStructs // Utils`MakeUnknownInputDefinition;
 `cxx`initializeKeyStructs ~ SetAttributes ~ {Locked,Protected};
 
-`current`cxxRules = {{}};
-`current`cxxRules ~ SetAttributes ~ {Protected};
+Module[{rules = {{}}},
 
-`current`setCxxRules::usage=
-"@brief Generate a list of rules for translating Mathematica expressions of
-n-point correlation functions to c++ ones.
+`cxx`setRules::usage = "
+@brief Generate a list of rules for translating Mathematica expressions to
+       C++ ones.
 @param extIndices The external indices of an n-point correlation function.
-@param genericFields The generic fields appearing in an n-point correlation function.
-@returns a list of rules for translating Mathematica expressions of n-point
-correlation functions to c++ ones.";
-`current`setCxxRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
-Module[
-   {
+@param genericFields The generic fields appearing in an n-point correlation
+       function.
+@returns A list of rules for translating Mathematica expressions to C++ ones.";
+`cxx`setRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
+Module[{
       externalIndexRules = MapThread[Rule,{extIndices,
          Array["this->external_indices("<>ToString[#-1]<>")"&,Length@extIndices]}],
       AuxVertexType,
@@ -1023,14 +1017,15 @@ Module[
    genericRules=Flatten[Thread@Rule[
       {getConjugated[#],#},
       {
-         cxxName[getConjugated@#][cxxIndex@#],
-         cxxName[#][cxxIndex@#]
+         `cxx`fieldName[getConjugated@#][cxxIndex@#],
+         `cxx`fieldName[#][cxxIndex@#]
       }] &/@ genericFields];
 
    AuxVertexType[fields__]:= StringRiffle[
       If[MatchQ[#,`type`genericField],
-         cxxName@#,
+         `cxx`fieldName@#,
          `cxx`fieldName@#]&/@{fields},", "];
+
    couplingRules = {
       SARAH`Cp[fields__][1] :>
       I*StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
@@ -1079,33 +1074,54 @@ Module[
       "context.mass<fields::"<>ToString@extField<>">(std::array<int,0> {})"
    };
 
-   Unprotect@`current`cxxRules;
-   `current`cxxRules={externalIndexRules,couplingRules,genericRules,massRules};
-   Protect@`current`cxxRules;
+   rules = {externalIndexRules, couplingRules, genericRules, massRules};
 ];
-`current`setCxxRules // Utils`MakeUnknownInputDefinition;
-`current`setCxxRules ~ SetAttributes ~ {Locked,Protected};
+`cxx`setRules // Utils`MakeUnknownInputDefinition;
+`cxx`setRules ~ SetAttributes ~ {Locked,Protected};
 
-`current`applyCxxRules[obj_] :=
+`cxx`applyRules[obj_] :=
 StringReplace[
-   Parameters`ExpressionToString[Fold[ReplaceAll,obj,`current`cxxRules]],
+   Parameters`ExpressionToString[Fold[ReplaceAll, obj, rules]],
    "\"" -> ""
 ];
-`current`applyCxxRules // Utils`MakeUnknownInputDefinition;
-`current`applyCxxRules ~ SetAttributes ~ {Locked,Protected};
+`cxx`applyRules // Utils`MakeUnknownInputDefinition;
+`cxx`applyRules ~ SetAttributes ~ {Locked,Protected};
 
-`cxx`fieldName::usage =
-"@brief Given an explicit field (possibly conjugated), returns its c++ representation.
-@param The given generic field
-@returns String Name of the c++ representation for a field (possibly conjugate).";
-`cxx`fieldName[SARAH`bar[head_]] :=
-   StringJoin["typename bar<",`cxx`fieldName@head,">::type"];
-`cxx`fieldName[Susyno`LieGroups`conj[head_]] :=
-   StringJoin["typename conj<",`cxx`fieldName@head,">::type"]
-`cxx`fieldName[fieldName_Symbol[_?VectorQ] | fieldName_Symbol] :=
-   StringJoin["fields::",SymbolName@fieldName];
+];
+
+Module[{strip, sandwich, naked},
+
+strip = {SARAH`bar -> Identity,
+   Susyno`LieGroups`conj -> Identity
+};
+
+sandwich[f_] = Switch[Head@f,
+   SARAH`bar, "typename bar<" <> # <> ">::type",
+   Susyno`LieGroups`conj, "typename conj<" <> # <> ">::type",
+   _, #
+]&;
+
+`cxx`fieldName::usage = "
+@brief Returns a C++ representation for a field expression or a field name.
+@param f A generic or external field, or an explicit field name.
+@returns A C++ representation for a field.";
+`cxx`fieldName[f:`type`explicitFieldName|`type`externalField|`type`physicalField] := (
+   naked = f /. strip;
+   sandwich[f]["fields::" <> ToString@Switch[naked,
+      _Symbol, naked,
+      _, Head@naked
+   ]]
+);
+
+`cxx`fieldName[f:`type`genericField] := (
+   naked = f /. strip;
+   sandwich[f][ToString@Head@naked <> ToString@Part[naked, 1, 1]]
+);
+
 `cxx`fieldName // Utils`MakeUnknownInputDefinition;
 `cxx`fieldName ~ SetAttributes ~ {Locked,Protected};
+
+];
 
 `cxx`fieldIndices::usage=
 "@brief Return the c++ expression for the given field.
@@ -1312,7 +1328,7 @@ Module[
 
    {loopRules,loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions@modifiedExpr;
 
-   cxxExpr = `current`applyCxxRules/@modifiedExpr;
+   cxxExpr = `cxx`applyRules/@modifiedExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@`current`wilsonBasis, cxxExpr}];
 
    replaceTokens[code,{
@@ -1470,7 +1486,7 @@ Module[
 `cxx`getVariableName ~ SetAttributes ~ {Locked,Protected};
 
 Module[{
-      info = {`cxx`getVariableName@#1, `current`applyCxxRules@#1, #1, #2}&@@#&,
+      info = {`cxx`getVariableName@#1, `cxx`applyRules@#1, #1, #2}&@@#&,
       d = "double " <> StringRiffle[#, ", "] <> ";"&,
       i = #1 <> " = " <> #2 <> "; // " <> ToString@#4 <>" copies.\n"&@@#&,
       r = Rule@@@#[[All, {3, 1}]]&
@@ -1504,7 +1520,7 @@ Module[{
       sort = Sort@couplings, info,
       d = "std::complex<double> " <> StringRiffle[#, ", "] <> ";"&
    },
-   info = {"g"<>ToString@#, `current`applyCxxRules@sort[[#,1]], sort[[#,1]], sort[[#,2]]}&;
+   info = {"g"<>ToString@#, `cxx`applyRules@sort[[#,1]], sort[[#,1]], sort[[#,2]]}&;
 
    {d[First/@#], StringJoin[i/@#], r@#} &@ Array[info, Length@sort]
 ];
@@ -1522,7 +1538,7 @@ Module[{
 `cxx`shortNames[genFields:{`type`genericField..}] :=
    StringRiffle[Apply[
       "using "<>ToString@#1<>" = typename at<GenericFieldMap,"<>ToString@#2<>">::type;"&,
-      {cxxName@#,`cxx`genericFieldKey@#}&/@genFields,
+      {`cxx`fieldName@#,`cxx`genericFieldKey@#}&/@genFields,
       {1}],"\n"];
 `cxx`shortNames // Utils`MakeUnknownInputDefinition;
 `cxx`shortNames ~ SetAttributes ~ {Locked,Protected};
@@ -1535,7 +1551,7 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 `cxx`beginSum[summation:`type`summation]:=
 Module[{beginsOfFor},
    beginsOfFor =
-      "for( const auto &"<>cxxIndex[#[[1]]]<>" : "<>"index_range<"<>cxxName[#[[1]]]<>">() ) {\n"<>
+      "for( const auto &"<>cxxIndex[#[[1]]]<>" : "<>"index_range<"<>`cxx`fieldName[#[[1]]]<>">() ) {\n"<>
       "at_key<"<>`cxx`genericFieldKey@#[[1]]<>">( index_map ) = "<>cxxIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
    StringRiffle[beginsOfFor,"\n"]
 ];
@@ -1544,8 +1560,8 @@ Module[{beginsOfFor},
 
 parseRestrictionRule[{genericField:`type`genericField,rule_}] :=
 Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
-   getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>`current`applyCxxRules@ind<>"}";
-   getIndexOfExternalField[_[{ind_}]] := "std::array<int,1> {"<>`current`applyCxxRules@ind<>"}";
+   getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>`cxx`applyRules@ind<>"}";
+   getIndexOfExternalField[_[{ind_}]] := "std::array<int,1> {"<>`cxx`applyRules@ind<>"}";
    getIndexOfExternalField[_] := "std::array<int,0> {}";
 
    OrTwoDifferent[] := Module[
@@ -1553,7 +1569,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
          type1 = `cxx`fieldName@First@rule,
          type2 = `cxx`fieldName@Last@rule,
          ind = getIndexOfExternalField@First@rule,
-         typeGen = cxxName@genericField,
+         typeGen = `cxx`fieldName@genericField,
          indGen = cxxIndex@genericField
       },
       "\nif( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
