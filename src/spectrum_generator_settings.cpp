@@ -248,6 +248,17 @@ void Spectrum_generator_settings::set(Settings o, double value)
    case higgs_4loop_correction_at_as3: // 30 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
+   case loop_library: // 31 [int >= -1 and <= 3]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, -1, descriptions.at(o).c_str());
+      assert_le(value, 3,  descriptions.at(o).c_str());
+      break;
+   case calculate_decays: // 32 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higher_orders_in_decays: // 33 [int >= 0 and <= 1]
+      assert_integer(value, descriptions.at(o).c_str());
+      break;
    default:
       break;
    }
