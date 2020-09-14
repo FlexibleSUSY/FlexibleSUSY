@@ -139,7 +139,7 @@ Module[
       dimensionfullConverter = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &,
       conjConverter = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &,
       barConverter = Through[Sequence[SARAH`bar,#&][#]] &,
-      scalarList,fermionList,vectorList
+      scalarList,fermionList,vectorList,ghostList
    },
    scalarList = Join[
       dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealScalar],
@@ -153,16 +153,19 @@ Module[
       dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealVector],
       conjConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsComplexVector]
    ];
+   ghostList = barConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsGhost];
+
    `type`scalarField = Alternatives @@ scalarList;
    `type`fermionField = Alternatives @@ fermionList;
    `type`vectorField = Alternatives @@ vectorList;
-   `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList];
+   `type`ghostField = Alternatives @@ ghostList;
+   `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList,ghostList];
    `type`externalField = `type`physicalField /.
-   Verbatim@_Symbol :> _String;
+      Verbatim@_Symbol :> _String;
    `type`explicitFieldName = `type`physicalField /.
-   (s:_Symbol)[{Verbatim@_Symbol}] :> s;
+      (s:_Symbol)[{Verbatim@_Symbol}] :> s;
 
-   {`type`externalField,`type`explicitFieldName,`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField} ~ SetAttributes ~ {Locked,Protected};
+   {`type`externalField,`type`explicitFieldName,`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField, `type`ghostField} ~ SetAttributes ~ {Locked,Protected};
 ];
 
 `type`wilsonBasis = {Rule[_String,_]..};
@@ -1010,7 +1013,7 @@ Module[{rules = {{}}},
 `cxx`setRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
 Module[{
       externalIndexRules = MapThread[Rule,{extIndices,
-         Array["this->external_indices("<>ToString[#-1]<>")"&,Length@extIndices]}],
+         Array["i"<>ToString[#]&,Length@extIndices]}],
       AuxVertexType,
       genericRules,massRules,couplingRules
    },
@@ -1068,10 +1071,10 @@ Module[{
       "context.mass<"<>genField<>">("<>genIndex<>")",
 
       SARAH`Mass[extField_Symbol[{extIndex_String}]] :>
-      "context.mass<fields::"<>ToString@extField<>">(std::array<int,1> {"<>extIndex<>"})",
+      "context.mass<fields::"<>ToString@extField<>">("<>extIndex<>")",
 
       SARAH`Mass[extField_Symbol] :>
-      "context.mass<fields::"<>ToString@extField<>">(std::array<int,0> {})"
+      "context.mass<fields::"<>ToString@extField<>">(i0)"
    };
 
    rules = {externalIndexRules, couplingRules, genericRules, massRules};
@@ -1135,10 +1138,7 @@ sandwich[f_] = Switch[Head@f,
 `cxx`fieldIndices[head_[GenericIndex[index_Integer]]] := `cxx`fieldIndices[head[GenericIndex[index]]] =
    "indices"<>StringTake[SymbolName@head,-1]<>ToString@index;
 `cxx`fieldIndices[field_] := `cxx`fieldIndices[field] =
-If[Length@field === 0,
-   "std::array<int,0>()",
-   "std::array<int,1>{"<>ToString@First@field<>"}"
-];
+   If[Length@field === 0, "i0", field[[1, 1]]];
 `cxx`fieldIndices // Utils`MakeUnknownInputDefinition;
 `cxx`fieldIndices ~ SetAttributes ~ {Locked};
 
@@ -1202,7 +1202,7 @@ getColourFactor ~ SetAttributes ~ {Locked,Protected};
    genSumNames:{__String}
 ] :=
 StringRiffle[MapThread[
-   `cxx`genericSum[##,getSubexpressions@obj]&,
+   `cxx`genericSum[##,getSubexpressions@obj,obj]&,
       {
          getGenericSums@obj,
          getClassFields@obj,
@@ -1218,7 +1218,8 @@ StringRiffle[MapThread[
    combinatorialFactors:`type`classCombinatoricalFactors,
    colourFactors:{__?NumericQ},
    genSumName_String,
-   subexpressions:`type`subexpressions
+   subexpressions:`type`subexpressions,
+   npf:`type`npf
 ] :=
 Module[
    {
@@ -1234,6 +1235,7 @@ Module[
             using boost::fusion::at_key;
             @GenericFieldShortNames@
 
+            @ExternalIndices@
             typename field_index_map<GenericFieldMap>::type index_map;
             const context_with_vertices &context = *this;
             @InitializeOutputVars@
@@ -1269,6 +1271,7 @@ Module[
       {
          "@GenericSum_NAME@"->genSumName,
          "@GenericFieldShortNames@"->`cxx`shortNames@getGenericFields@sum,
+         "@ExternalIndices@"->`cxx`initializeExternalIndices@npf,
          "@InitializeOutputVars@"->StringRiffle["std::complex<double> "<>#<>" = 0.0;"&/@First/@`current`wilsonBasis,"\n"],
          "@SummationOverGenericFields@"->`cxx`changeGenericExpressions[getSummationData@sum,getExpression@sum],
          "@ReturnOutputVars@"->ToString[First/@`current`wilsonBasis],
@@ -1282,6 +1285,24 @@ Module[
 ];
 `cxx`genericSum // Utils`MakeUnknownInputDefinition;
 `cxx`genericSum ~ SetAttributes ~ {Locked,Protected};
+
+`cxx`initializeExternalIndices[npf:`type`npf] :=
+Module[{
+      extIndices = getExternalIndices@npf
+   },
+
+   indices = Array[
+      "std::array<int, 1> i" <> ToString@# <>" {this->external_indices("<>ToString[#-1]<>")};\n"&,
+      Length@extIndices
+   ];
+   If[Length@extIndices < Length[Flatten@getProcess@npf],
+      PrependTo[indices, "std::array<int, 0> i0 {};\n"];
+   ];
+
+   StringJoin@indices
+];
+`cxx`initializeExternalIndices // Utils`MakeUnknownInputDefinition;
+`cxx`initializeExternalIndices ~ SetAttributes ~ {Protected, Locked};
 
 `cxx`changeGenericExpressions::usage =
 "@brief Generates c++ code for output value updating inside generic sum.
@@ -1560,9 +1581,9 @@ Module[{beginsOfFor},
 
 parseRestrictionRule[{genericField:`type`genericField,rule_}] :=
 Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
-   getIndexOfExternalField[_[_[{ind_}]]] := "std::array<int,1> {"<>`cxx`applyRules@ind<>"}";
-   getIndexOfExternalField[_[{ind_}]] := "std::array<int,1> {"<>`cxx`applyRules@ind<>"}";
-   getIndexOfExternalField[_] := "std::array<int,0> {}";
+   getIndexOfExternalField[_[_[{ind_}]]] := `cxx`applyRules@ind;
+   getIndexOfExternalField[_[{ind_}]] := `cxx`applyRules@ind;
+   getIndexOfExternalField[_] := "i0";
 
    OrTwoDifferent[] := Module[
       {
