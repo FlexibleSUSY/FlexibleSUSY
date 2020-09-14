@@ -1087,7 +1087,10 @@ Module[
 `current`setCxxRules ~ SetAttributes ~ {Locked,Protected};
 
 `current`applyCxxRules[obj_] :=
-Parameters`ExpressionToString[Fold[ReplaceAll,obj,`current`cxxRules]];
+StringReplace[
+   Parameters`ExpressionToString[Fold[ReplaceAll,obj,`current`cxxRules]],
+   "\"" -> ""
+];
 `current`applyCxxRules // Utils`MakeUnknownInputDefinition;
 `current`applyCxxRules ~ SetAttributes ~ {Locked,Protected};
 
@@ -1284,6 +1287,7 @@ Module[
 
       // Start of summation over generic fields.
       @BeginSum@
+
          @setMasses@
          @setCouplings@
          @skipZeroAmplitude@
@@ -1296,8 +1300,8 @@ Module[
       loopRules,loopArrayDefine,loopArraySet,
       cxxExpr,updatingVars
    },
-   masses = Tally@Cases[modifiedExpr,_SARAH`Mass,Infinity,Heads->True];
-   {massDefine,codeMass,massRules} = createUniqueDefinitions[masses,{"double","m"}];
+   masses = Tally@Cases[modifiedExpr, _SARAH`Mass, Infinity, Heads->True];
+   {massDefine, codeMass, massRules} = `cxx`nameMasses@masses;
    modifiedExpr = modifiedExpr /. massRules;
 
    couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
@@ -1307,7 +1311,6 @@ Module[
    {loopRules,loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions@modifiedExpr;
 
    cxxExpr = `current`applyCxxRules/@modifiedExpr;
-   cxxExpr = StringReplace[#, "\"" -> ""]&/@cxxExpr;
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@`current`wilsonBasis, cxxExpr}];
 
    replaceTokens[code,{
@@ -1458,13 +1461,34 @@ Module[
 `cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
-`cxx`getVariableName[SARAH`Mass[obj]] =
-Switch[getName@obj,GenericS,"mS",GenericF,"mF",GenericV,"mV",GenericU,"mU"]<>ToString@getIndex@obj;
+   Switch[getName@obj,GenericS,"mS",GenericF,"mF",GenericV,"mV",GenericU,"mU"]<>ToString@getIndex@obj;
 `cxx`getVariableName[SARAH`Mass[obj:`type`physicalField]] :=
-`cxx`getVariableName[SARAH`Mass[obj]] =
-"m"<>ToString@getName@obj<>`cxx`getIndex@obj;
+   "m"<>ToString@getName@obj<>`cxx`getIndex@obj;
 `cxx`getVariableName // Utils`MakeUnknownInputDefinition;
 `cxx`getVariableName ~ SetAttributes ~ {Locked,Protected};
+
+Module[{
+      info = {`cxx`getVariableName@#1, `current`applyCxxRules@#1, #1, #2}&@@#&,
+      d = "double " <> StringRiffle[#, ", "] <> ";"&,
+      i = #1 <> " = " <> #2 <> "; // " <> ToString@#4 <>" copies.\n"&@@#&,
+      r = Rule@@@#[[All, {3, 1}]]&
+   },
+
+`cxx`nameMasses::usage = "
+@brief Generates names for masses to be used inside generic sums and then
+       creates a) C++ code for definition and initialisation for masses,
+       b) Mathematica to C++ rules for generated names of masses.
+@param masses A list of tallies with Mathematica expressions for mass and the
+       number of repetition of these expressions.
+@returns A list of a) a C++ string with definitions, b) a C++ string with
+         initialisations, c) a Mathematica list of rules for mass convertion to
+         C++ code.";
+`cxx`nameMasses[masses:{{_, _Integer}..}] :=
+{d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
+`cxx`nameMasses // Utils`MakeUnknownInputDefinition;
+`cxx`nameMasses ~ SetAttributes ~ {Protected, Locked};
+
+];
 
 createUniqueDefinitions[expr:{{_,_Integer}..},{type_String,name_String}] :=
 Module[{names,namedExpr,code,rules},
