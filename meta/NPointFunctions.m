@@ -1292,11 +1292,13 @@ Module[
          @setCouplings@
          @skipZeroAmplitude@
          @setLoopFunctions@
+
          @ChangeOutputValues@
+
       @EndSum@",
       modifiedExpr = expr,
       masses,massDefine,codeMass,massRules,
-      couplings,couplingDefile,codeCoupling,couplingRules,
+      couplings,couplingDefine,codeCoupling,couplingRules,
       loopRules,loopArrayDefine,loopArraySet,
       cxxExpr,updatingVars
    },
@@ -1305,7 +1307,7 @@ Module[
    modifiedExpr = modifiedExpr /. massRules;
 
    couplings = Tally@Cases[modifiedExpr,SARAH`Cp[__][___],Infinity,Heads->True];
-   {couplingDefile,codeCoupling,couplingRules} = createUniqueDefinitions[couplings,{"std::complex<double>","g"}];
+   {couplingDefine, codeCoupling, couplingRules} = `cxx`nameCouplings@couplings;
    modifiedExpr = modifiedExpr /. couplingRules;
 
    {loopRules,loopArrayDefine,loopArraySet,modifiedExpr} = createLoopFunctions@modifiedExpr;
@@ -1315,7 +1317,7 @@ Module[
 
    replaceTokens[code,{
       "@defineMasses@"->massDefine,
-      "@defineCouplings@"->couplingDefile,
+      "@defineCouplings@"->couplingDefine,
       "@defineLoopFunctions@"->loopArrayDefine,
       "@BeginSum@"->`cxx`beginSum@summation,
       "@setMasses@"->codeMass,
@@ -1479,35 +1481,37 @@ Module[{
        creates a) C++ code for definition and initialisation for masses,
        b) Mathematica to C++ rules for generated names of masses.
 @param masses A list of tallies with Mathematica expressions for mass and the
-       number of repetition of these expressions.
+       number of repetition of it.
 @returns A list of a) a C++ string with definitions, b) a C++ string with
          initialisations, c) a Mathematica list of rules for mass convertion to
          C++ code.";
 `cxx`nameMasses[masses:{{_, _Integer}..}] :=
-{d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
+   {d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
 `cxx`nameMasses // Utils`MakeUnknownInputDefinition;
 `cxx`nameMasses ~ SetAttributes ~ {Protected, Locked};
 
-];
+`cxx`nameCouplings::usage = "
+@brief Generates names for couplings to be used inside generic sums and then
+       creates a) C++ code for definition and initialisation for couplings,
+       b) Mathematica to C++ rules for generated names of couplings.
+@param masses A list of tallies with Mathematica expressions for coupling
+       and the number of repetition of it.
+@returns A list of a) a C++ string with definitions, b) a C++ string with
+         initialisations, c) a Mathematica list of rules for coupling
+         convertion to C++ code.";
+`cxx`nameCouplings[couplings:{{_,_Integer}..}] :=
+Module[{
+      sort = Sort@couplings, info,
+      d = "std::complex<double> " <> StringRiffle[#, ", "] <> ";"&
+   },
+   info = {"g"<>ToString@#, `current`applyCxxRules@sort[[#,1]], sort[[#,1]], sort[[#,2]]}&;
 
-createUniqueDefinitions[expr:{{_,_Integer}..},{type_String,name_String}] :=
-Module[{names,namedExpr,code,rules},
-   namedExpr = Array[
-      {
-         name<>ToString@#,
-         `current`applyCxxRules@expr[[#,1]],
-         expr[[#,1]],
-         expr[[#,2]]
-      }&,
-      Length@expr
-   ];
-   names = type<>" "<>StringRiffle[First/@namedExpr,", "]<>";";
-   code = StringRiffle[#1<>" = "<>#2<>"; // It is repeated "<>ToString@#4<>" times."&@@@namedExpr,"\n"];
-   rules = Rule@@@namedExpr[[All,{3,1}]];
-   {names,StringReplace[code,"\""->""],rules}
+   {d[First/@#], StringJoin[i/@#], r@#} &@ Array[info, Length@sort]
 ];
-createUniqueDefinitions // Utils`MakeUnknownInputDefinition;
-createUniqueDefinitions ~ SetAttributes ~ {Locked,Protected};
+`cxx`nameCouplings // Utils`MakeUnknownInputDefinition;
+`cxx`nameCouplings ~ SetAttributes ~ {Locked,Protected};
+
+];
 
 `cxx`shortNames::usage =
 "@brief Generates c++ code for type abbreviations stored in GenericFieldMap
