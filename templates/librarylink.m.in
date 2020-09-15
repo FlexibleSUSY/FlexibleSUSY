@@ -67,7 +67,7 @@ fsDefaultSettings = {
       higgs4loopCorrectionAtAsAsAs -> 1, (* FlexibleSUSY[30] *)
       loopLibrary -> 0,                  (* FlexibleSUSY[31] *)
       calculateDecays -> 1,              (* FlexibleSUSY[32] *)
-      higherOrdersInDecays -> 1          (* FlexibleSUSY[33] *)
+      higherOrdersInDecays -> 1,         (* FlexibleSUSY[33] *)
       parameterOutputScale -> 0          (* MODSEL[12] *)
 };
 
@@ -158,7 +158,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
                1,
                0
             ],
-            Option[higherOrdersInDecays],
+            OptionValue[higherOrdersInDecays],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
