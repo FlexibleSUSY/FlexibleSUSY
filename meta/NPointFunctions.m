@@ -342,7 +342,7 @@ Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}}
 `cxx`getIndex ~ SetAttributes ~ {Locked,Protected};
 
 cxxIndex[obj:`type`genericField] :=
-"indices"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
+"i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
 cxxIndex // Utils`MakeUnknownInputDefinition;
 cxxIndex ~ SetAttributes ~ {Locked,Protected};
 
@@ -1009,7 +1009,9 @@ Module[{rules = {{}}},
 @param extIndices The external indices of an n-point correlation function.
 @param genericFields The generic fields appearing in an n-point correlation
        function.
-@returns A list of rules for translating Mathematica expressions to C++ ones.";
+@returns A list of rules for translating Mathematica expressions to C++ ones.
+@note All couplings have to be multiplied by I. It is done in
+      `cxx`nameCouplings.";
 `cxx`setRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
 Module[{
       externalIndexRules = MapThread[Rule,{extIndices,
@@ -1031,40 +1033,41 @@ Module[{
 
    couplingRules = {
       SARAH`Cp[fields__][1] :>
-      I*StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
+      StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
          AuxVertexType@fields,
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ],
       SARAH`Cp[fields__][SARAH`PL] :>
-      I*StringTemplate["context.vertex<`1`>(lorentz_left{}, concatenate(`2`))"][
+      StringTemplate["context.vertex<`1`>(lorentz_left{}, concatenate(`2`))"][
          AuxVertexType@fields,
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ],
       SARAH`Cp[fields__][SARAH`PR] :>
-      I*StringTemplate["context.vertex<`1`>(lorentz_right{}, concatenate(`2`))"][
+      StringTemplate["context.vertex<`1`>(lorentz_right{}, concatenate(`2`))"][
          AuxVertexType@fields,
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ],
       SARAH`Cp[fields___][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
-      I*StringTemplate["context.vertex<`1`>(lorentz_momentum_diff{`2`,`3`}, concatenate(`4`))"][
+      StringTemplate["context.vertex<`1`>(lorentz_momentum_diff{`2`,`3`}, concatenate(`4`))"][
          AuxVertexType@fields,
          First@@Position[{fields},f1,{1}]-1,                                    (*@note hope that nobody call particle List*)
          First@@Position[{fields},f2,{1}]-1,                                    (*@note hope that nobody call particle List*)
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ],
       SARAH`Cp[fields__][SARAH`g[_,_]] :>
-      I*StringTemplate["context.vertex<`1`>(lorentz_inverse_metric{}, concatenate(`2`))"][
+      StringTemplate["context.vertex<`1`>(lorentz_inverse_metric{}, concatenate(`2`))"][
          AuxVertexType@fields,
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ],
       SARAH`Cp[fields__][(SARAH`Mom[f2_, _]-SARAH`Mom[f1_, _])*SARAH`g[_,_],
          (SARAH`Mom[f1_,_]-SARAH`Mom[f3_,_])*SARAH`g[_,_],
          (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>
-      I*StringTemplate["context.vertex<`1`>(triple_vector{}, concatenate(`2`))"][
+      StringTemplate["context.vertex<`1`>(triple_vector{}, concatenate(`2`))"][
          AuxVertexType@fields,
          StringRiffle[`cxx`fieldIndices/@{fields},", "]
          ]
    };
+
    massRules =
    {
       SARAH`Mass[genField_String[genIndex_String]] :>
@@ -1092,7 +1095,7 @@ StringReplace[
 
 ];
 
-Module[{strip, sandwich, naked},
+Module[{strip, sandwich, n},
 
 strip = {SARAH`bar -> Identity,
    Susyno`LieGroups`conj -> Identity
@@ -1109,16 +1112,13 @@ sandwich[f_] = Switch[Head@f,
 @param f A generic or external field, or an explicit field name.
 @returns A C++ representation for a field.";
 `cxx`fieldName[f:`type`explicitFieldName|`type`externalField|`type`physicalField] := (
-   naked = f /. strip;
-   sandwich[f]["fields::" <> ToString@Switch[naked,
-      _Symbol, naked,
-      _, Head@naked
-   ]]
+   n = f /. strip;
+   sandwich[f]["fields::" <> ToString@Switch[n, _Symbol, n, _, Head@n]]
 );
 
 `cxx`fieldName[f:`type`genericField] := (
-   naked = f /. strip;
-   sandwich[f][ToString@Head@naked <> ToString@Part[naked, 1, 1]]
+   n = f /. strip;
+   sandwich[f]["g"<>StringTake[ToString@Head@n, -1] <> ToString@Part[n, 1, 1]]
 );
 
 `cxx`fieldName // Utils`MakeUnknownInputDefinition;
@@ -1136,7 +1136,7 @@ sandwich[f_] = Switch[Head@f,
 `cxx`fieldIndices[Susyno`LieGroups`conj[field_]] := `cxx`fieldIndices[Susyno`LieGroups`conj[field]] =
    `cxx`fieldIndices@field;
 `cxx`fieldIndices[head_[GenericIndex[index_Integer]]] := `cxx`fieldIndices[head[GenericIndex[index]]] =
-   "indices"<>StringTake[SymbolName@head,-1]<>ToString@index;
+   "i"<>StringTake[SymbolName@head,-1]<>ToString@index;
 `cxx`fieldIndices[field_] := `cxx`fieldIndices[field] =
    If[Length@field === 0, "i0", field[[1, 1]]];
 `cxx`fieldIndices // Utils`MakeUnknownInputDefinition;
@@ -1500,7 +1500,12 @@ Module[
 `cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected};
 
 `cxx`getVariableName[SARAH`Mass[obj:`type`genericField]] :=
-   Switch[getName@obj,GenericS,"mS",GenericF,"mF",GenericV,"mV",GenericU,"mU"]<>ToString@getIndex@obj;
+   Switch[getName@obj,
+      GenericS, "mS",
+      GenericF, "mF",
+      GenericV, "mV",
+      GenericU, "mU"
+   ]<>ToString@getIndex@obj;
 `cxx`getVariableName[SARAH`Mass[obj:`type`physicalField]] :=
    "m"<>ToString@getName@obj<>`cxx`getIndex@obj;
 `cxx`getVariableName // Utils`MakeUnknownInputDefinition;
@@ -1535,15 +1540,18 @@ Module[{
        and the number of repetition of it.
 @returns A list of a) a C++ string with definitions, b) a C++ string with
          initialisations, c) a Mathematica list of rules for coupling
-         convertion to C++ code.";
+         convertion to C++ code.
+@note All couplings have to be multiplied by I, as it is done in these rule
+      replacements.";
 `cxx`nameCouplings[couplings:{{_,_Integer}..}] :=
 Module[{
       sort = Sort@couplings, info,
-      d = "std::complex<double> " <> StringRiffle[#, ", "] <> ";"&
+      d = "std::complex<double> " <> StringRiffle[#, ", "] <> ";"&,
+      timesI = Rule[#1, I*#2]&@@#&
    },
    info = {"g"<>ToString@#, `cxx`applyRules@sort[[#,1]], sort[[#,1]], sort[[#,2]]}&;
 
-   {d[First/@#], StringJoin[i/@#], r@#} &@ Array[info, Length@sort]
+   {d[First/@#], StringJoin[i/@#], timesI/@r@#} &@ Array[info, Length@sort]
 ];
 `cxx`nameCouplings // Utils`MakeUnknownInputDefinition;
 `cxx`nameCouplings ~ SetAttributes ~ {Locked,Protected};
@@ -1558,7 +1566,7 @@ Module[{
 (Associative Sequence) at Key positions.";
 `cxx`shortNames[genFields:{`type`genericField..}] :=
    StringRiffle[Apply[
-      "using "<>ToString@#1<>" = typename at<GenericFieldMap,"<>ToString@#2<>">::type;"&,
+      "using "<>#1<>" = typename at<GenericFieldMap,"<>ToString@#2<>">::type;"&,
       {`cxx`fieldName@#,`cxx`genericFieldKey@#}&/@genFields,
       {1}],"\n"];
 `cxx`shortNames // Utils`MakeUnknownInputDefinition;
