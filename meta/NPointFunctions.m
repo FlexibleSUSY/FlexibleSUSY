@@ -1014,11 +1014,11 @@ Module[{rules = {{}}},
       `cxx`nameCouplings.";
 `cxx`setRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
 Module[{
-      externalIndexRules = MapThread[Rule,{extIndices,
-         Array["i"<>ToString[#]&,Length@extIndices]}],
-      AuxVertexType,
-      genericRules,massRules,couplingRules
+      externalIndexRules, wrap, index, genericRules, massRules, couplingRules
    },
+   externalIndexRules = MapThread[Rule,{extIndices,
+         Array["i"<>ToString[#]&,Length@extIndices]}];
+
    genericRules=Flatten[Thread@Rule[
       {getConjugated[#],#},
       {
@@ -1026,61 +1026,39 @@ Module[{
          `cxx`fieldName[#][cxxIndex@#]
       }] &/@ genericFields];
 
-   AuxVertexType[fields__]:= StringRiffle[
-      If[MatchQ[#,`type`genericField],
-         `cxx`fieldName@#,
-         `cxx`fieldName@#]&/@{fields},", "];
+   wrap[fields__] := StringRiffle[`cxx`fieldAlias/@{fields},", "];
+   index[fields__] := StringRiffle[`cxx`fieldIndices/@{fields},", "];
 
    couplingRules = {
       SARAH`Cp[fields__][1] :>
-      StringTemplate["context.vertex<`1`>(lorentz_scalar{}, concatenate(`2`))"][
-         AuxVertexType@fields,
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
-         ],
+         ("NPF_S(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][SARAH`PL] :>
-      StringTemplate["context.vertex<`1`>(lorentz_left{}, concatenate(`2`))"][
-         AuxVertexType@fields,
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
-         ],
+         ("NPF_L(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][SARAH`PR] :>
-      StringTemplate["context.vertex<`1`>(lorentz_right{}, concatenate(`2`))"][
-         AuxVertexType@fields,
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
+         ("NPF_R(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
+      (* @todo check this rule *)
+      SARAH`Cp[fields__][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
+      StringTemplate["NPF_MD(`1`) NPF_D(`2`, `3`) NPF_I(`4`)"][
+         wrap@fields,
+         First@@Position[{fields},f1,{1}]-1,
+         First@@Position[{fields},f2,{1}]-1,
+         index@fields
          ],
-      SARAH`Cp[fields___][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
-      StringTemplate["context.vertex<`1`>(lorentz_momentum_diff{`2`,`3`}, concatenate(`4`))"][
-         AuxVertexType@fields,
-         First@@Position[{fields},f1,{1}]-1,                                    (*@note hope that nobody call particle List*)
-         First@@Position[{fields},f2,{1}]-1,                                    (*@note hope that nobody call particle List*)
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
-         ],
-      SARAH`Cp[fields__][SARAH`g[_,_]] :>
-      StringTemplate["context.vertex<`1`>(lorentz_inverse_metric{}, concatenate(`2`))"][
-         AuxVertexType@fields,
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
-         ],
+      SARAH`Cp[fields__][SARAH`g[_, _]] :>
+         ("NPF_G(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][(SARAH`Mom[f2_, _]-SARAH`Mom[f1_, _])*SARAH`g[_,_],
          (SARAH`Mom[f1_,_]-SARAH`Mom[f3_,_])*SARAH`g[_,_],
          (SARAH`Mom[f3_,_]-SARAH`Mom[f2_,_])*SARAH`g[_,_]] :>
-      StringTemplate["context.vertex<`1`>(triple_vector{}, concatenate(`2`))"][
-         AuxVertexType@fields,
-         StringRiffle[`cxx`fieldIndices/@{fields},", "]
-         ]
+         ("NPF_T(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")")
    };
 
    massRules =
    {
-      SARAH`Mass[genField_String[genIndex_String]] :>
-      "context.mass<"<>genField<>">("<>genIndex<>")",
-
-      SARAH`Mass[extField_Symbol[{extIndex_String}]] :>
-      "context.mass<fields::"<>ToString@extField<>">("<>extIndex<>")",
-
-      SARAH`Mass[extField_Symbol] :>
-      "context.mass<fields::"<>ToString@extField<>">(i0)"
+      SARAH`Mass[f_] :>
+      StringJoin["context.mass<",`cxx`fieldAlias@f,">(",`cxx`fieldIndices@f,")"]
    };
 
-   rules = {externalIndexRules, couplingRules, genericRules, massRules};
+   rules = {externalIndexRules, massRules, couplingRules, genericRules};
 ];
 `cxx`setRules // Utils`MakeUnknownInputDefinition;
 `cxx`setRules ~ SetAttributes ~ {Locked,Protected};
@@ -1097,9 +1075,7 @@ StringReplace[
 
 Module[{strip, sandwich, n},
 
-strip = {SARAH`bar -> Identity,
-   Susyno`LieGroups`conj -> Identity
-};
+strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
 sandwich[f_] = Switch[Head@f,
    SARAH`bar, "typename bar<" <> # <> ">::type",
@@ -1112,12 +1088,12 @@ sandwich[f_] = Switch[Head@f,
 @param f A generic or external field, or an explicit field name.
 @returns A C++ representation for a field.";
 `cxx`fieldName[f:`type`explicitFieldName|`type`externalField|`type`physicalField] := (
-   n = f /. strip;
+   n = strip@f;
    sandwich[f]["fields::" <> ToString@Switch[n, _Symbol, n, _, Head@n]]
 );
 
 `cxx`fieldName[f:`type`genericField] := (
-   n = f /. strip;
+   n = strip@f;
    sandwich[f]["g"<>StringTake[ToString@Head@n, -1] <> ToString@Part[n, 1, 1]]
 );
 
@@ -1317,11 +1293,12 @@ were detected.";
 Module[
    {
       code = "
-      // The following definitions are repeated in the GenericSum multiple times.
+      // Shorter aliases for large types
+      @fieldAliases@
+      // These definitions are repeated multiple times.
       @defineMasses@
       @defineCouplings@
       @defineLoopFunctions@
-
       // Start of summation over generic fields.
       @BeginSum@
 
@@ -1353,6 +1330,7 @@ Module[
    updatingVars = MapThread[#1<>" += "<>#2<>";"&, {First/@`current`wilsonBasis, cxxExpr}];
 
    replaceTokens[code,{
+      "@fieldAliases@"->`cxx`setFieldAliases@couplings,
       "@defineMasses@"->massDefine,
       "@defineCouplings@"->couplingDefine,
       "@defineLoopFunctions@"->loopArrayDefine,
@@ -1367,6 +1345,43 @@ Module[
 ];
 `cxx`changeGenericExpressions // Utils`MakeUnknownInputDefinition;
 `cxx`changeGenericExpressions ~ SetAttributes ~ {Locked,Protected};
+
+Module[{func},
+
+func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
+
+`cxx`setFieldAliases::usage = "
+@brief C++ names for fields with bar and conj are cumbersome. In order to
+       improve readaability and simplify checks some aliases are generated.
+@param couplings A list of tuples with couplings.
+@return A string with C++ code of alias definitions.";
+`cxx`setFieldAliases[couplings:{{SARAH`Cp[__][___], _Integer}..}] :=
+Module[{
+      l = Sort@DeleteDuplicates[(Sequence@@Head@First@#&)/@couplings]
+   },
+   StringJoin@MapThread[func, {`cxx`fieldAlias/@l, `cxx`fieldName/@l}]
+];
+`cxx`setFieldAliases // Utils`MakeUnknownInputDefinition;
+`cxx`setFieldAliases ~ SetAttributes ~ {Protected, Locked};
+
+];
+
+Module[{c, name, strip},
+
+c[f_] := Switch[Head@f, SARAH`bar|Susyno`LieGroups`conj, "_"<>#, _, #]&;
+name[f_] := ToString@Switch[f, _Symbol, f, _, Head@f];
+strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
+
+`cxx`fieldAlias::usage = "
+@brief Generates a short C++ name for a field, whether conjugated or not.
+@param f A external or generic field.
+@returns A C++ name for a field.";
+`cxx`fieldAlias[f:`type`externalField|`type`physicalField] := c[f][name@strip@f];
+`cxx`fieldAlias[f:`type`genericField] := c[f][`cxx`fieldName@strip@f];
+`cxx`fieldAlias // Utils`MakeUnknownInputDefinition;
+`cxx`fieldAlias ~ SetAttributes ~ {Protected, Locked};
+
+];
 
 createLoopFunctions[modifiedExpr:{__}] :=
 Module[
@@ -1439,7 +1454,7 @@ Module[
       ];
       AppendTo[loopArraySet,Array[
          Parameters`ExpressionToString[StringJoin["Loop_library::get().",functionName][arrayName<>ToString@#,Sequence@@loopFunctions[[#,1]],"Sqr(context.scale())"]]<>
-         "; // It is repeated "<>ToString@loopFunctions[[#,2]]<>" times."&,
+         "; // "<>ToString@loopFunctions[[#,2]]<>" copies."&,
          Length@loopFunctions]
       ];
       AppendTo[loopRules,Join@@function@@@Array[{ToString@#,loopFunctions[[#,1]]}&,Length@loopFunctions]];
