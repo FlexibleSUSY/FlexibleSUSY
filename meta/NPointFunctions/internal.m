@@ -676,12 +676,24 @@ define[getSumSettings, {diagrams:`type`diagramSet} :>
 collectSame::usage = "
 @brief Finds the same keys in the list of rules and for them collects RHSs
        into one list, i.e.:
-          collectSame@{a->{1}, b->{2}, a->{3}} leads to {a->{1,3}, b->2}.
+          collectSame@{a->{1, 1}, b->{2, 2, 2}, a->{3, 3}} leads to
+          {a->{{1, 3}, {1, 3}}, b->{{2, 2, 2}}}.
 @param list A list of rules.
 @return A list of rules.";
-define[collectSame, {list:{Rule[_, {_}]...}} :>
-   ((#->Cases[list, (#->{el_}):>el, Infinity]) &/@ DeleteDuplicates[First/@list])
+define[collectSame, {list:{Rule[_, {__}]...}} :>
+   Module[{
+         tally = Tally[First /@ list]
+      },
+      If[#2 == 1,
+         {#1/.list},
+         #1 -> Transpose@Cases[list, Rule[#1, el_] :> el]
+      ]&@@#&/@tally
+   ]
 ];
+
+Module[{parse, rules},
+
+parse = If[MatchQ[#2, `type`diagram], foreach[{}&, getInsertions@#2], First@#2]&;
 
 getMasslessSettings::usage = "
 @brief In some topologies field insertions can lead to physically incorrect
@@ -690,18 +702,12 @@ getMasslessSettings::usage = "
 @param diagrams A set of diagrams.
 @returns A set of rules for amplitudes.";
 define[getMasslessSettings, {diagrams:`type`diagramSet} :>
-   Module[{
-        rules = foreach[applyAction[diagrams, #2]&, `settings`massless@diagrams],
-        res
-      },
-      rules = collectSame@rules;
-      res = List@@(diagrams /. rules);
-      res = If[MatchQ[#, `type`diagram],
-         Table[{}, {Length@getInsertions@#}],
-         {First@#}
-      ] &/@ res;
-      Flatten[res, 1]
-   ]
+   (
+      rules = foreach[applyAction[diagrams, #2]&, `settings`massless@diagrams];
+      Flatten[foreach[parse, diagrams /. collectSame@rules], 1]
+   )
+];
+
 ];
 
 getRegularizationSettings::usage = "
@@ -1173,19 +1179,19 @@ define[makeMassesZero,
 ];
 
 foreach::usage = "
-@brief Applies a two-argument function on every element in the list. The first
-       argument is substituted by the number of the element in the list, while
+@brief Applies a two-argument function on every element in the set. The first
+       argument is substituted by the number of the element in the set, while
        the second one is the element itself.
 @param f A two-argument function to apply on serial number and the element
        itself.
-@param list A list of elements.
+@param set A set of elements.
 @returns A list of modified elements";
 Module[{
       i = 0
    },
    define[foreach,
-      {f_, list:{e_, rest___}} :> {f[++i, e], Sequence@@foreach[f, {rest}]},
-      {f_, list:{}} :> (i = 0; {})
+      {f_, set:_[e_, rest___]} :> {f[++i, e], Sequence@@foreach[f, {rest}]},
+      {f_, set:_[]} :> (i = 0; {})
    ];
 ];
 
