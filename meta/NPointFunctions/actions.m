@@ -47,7 +47,7 @@ getTruePositions::usage = "
 @returns A list of integers (of an empty one)."
 define[getTruePositions, {list:{(True|False)...}} :> Flatten@Position[list, True]];
 
-Module[{template},
+Module[{template, func, delete, append, restrict},
 
 define[applyAction,
    {
@@ -89,44 +89,42 @@ define[applyAction,
    ],
 
    {
-      diagrams:`type`diagramSet,
-      {text:_String, topologyQ:_, {n:_Integer, f:_}}
-   } :>
-   Module[{
-         func = template[{text, topologyQ}, {n -> Or[f, -f]}]
-      },
-      Sequence@@(foreach[func, List@@diagrams] /. Null -> Sequence[])
-   ],
+      d:`type`diagramSet,
+      {s:_String, t:_, {n:_Integer, f:_}}
+   } :> Sequence@@foreach[template[s, t, restrict[f, n]], d],
 
    {
-      diagrams:`type`diagramSet,
-      {text:_String, topologyQ:_, {Hold, e:_Integer}}
-   } :>
-   Module[{
-         func = template[{text, topologyQ}, Delete[#, {{2*e}, {2*e-1}}]&]
-      },
-      Sequence@@(foreach[func, List@@diagrams] /. Null -> Sequence[])
-   ],
+      d:`type`diagramSet,
+      {s:_String, t:_, {Hold, e:_Integer}}
+   } :> Sequence@@foreach[template[s, t, delete@e], d],
 
    {
-      diagrams:`type`diagramSet,
-      {text:_String, topologyQ:_, {Append, (t:`type`field)[n:_Integer] :> e:_Integer}}
-   } :>
-   Module[{
-         func = template[{text, topologyQ},
-            Append[#, genericMass[t, n] :> (First /@ getZeroMassRules[])[[2*e-1]]]&
-         ]
-      },
-      Sequence@@(foreach[func, List@@diagrams] /. Null -> Sequence[])
-   ]
+      d:`type`diagramSet,
+      {s:_String, t:_, {Append, (f:`type`field)[n:_Integer] :> e:_Integer}}
+   } :> Sequence@@foreach[template[s, t, append[f, n, e]], d]
 ];
 
-template[{text:_, topologyQ:_}, realization:_] := If[topologyQ@getTopology@#2,
-   Print@text;
-   getTopology@#2 -> Table[realization, {Length@getInsertions@#2}],
+delete[e_] := With[{
+      pos = {{2*e}, {2*e-1}}
+   },
+   Delete[#, pos]&
+];
 
-   Null
+append[field_, number:_, e_] := With[{
+      rhs = (First /@ getZeroMassRules[])[[2*e-1]]
+   },
+   Append[#, genericMass[field, number] :> rhs]&
+];
+
+restrict[field_, number_] := {number -> Or[field, -field]};
+
+template[text:_, topologyQ:_, realization:_] := If[topologyQ@getTopology@#2,
+   Print@text;
+   getTopology@#2 -> foreach[realization&, getInsertions@#2],
+
+   (##&)[]
 ]&;
+
 
 ];
 
