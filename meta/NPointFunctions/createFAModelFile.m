@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["NPointFunctions`", {"SARAH`", "Utils`"}];
+BeginPackage["NPointFunctions`", "SARAH`"];
 
 CreateFAModelFile::usage=
 "@brief Create the FeynArts model file using SARAH`.`MakeFeynArts[].
@@ -37,7 +37,7 @@ CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_,
 (
    SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;
    SARAH`SARAH@SARAH`OutputDirectory = sarahOutputDir;
-   Quiet[Utils`DumpStart@sarahModelName];
+   SARAH`Start@sarahModelName;
    SA`CurrentStates = eigenstates;
    SARAH`InitVertexCalculation[eigenstates, False];
    SARAH`partDefinition = SARAH`ParticleDefinitions@eigenstates;
