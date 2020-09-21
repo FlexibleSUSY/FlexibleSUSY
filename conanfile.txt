@@ -5,7 +5,7 @@ GM2Calc/[>=1.7.0]@conan/stable
 Himalaya/[>=4.0.0]@conan/stable
 LoopTools/2.15@conan/stable
 COLLIER/1.2.3@conan/stable
-TSIL/1.44@conan/stable
+TSIL/[>=1.44]@conan/stable
 
 [options]
 boost:bzip2=False
