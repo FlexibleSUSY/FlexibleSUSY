@@ -443,7 +443,7 @@ CreateVertexExpressions[vertexRules_List, inModelClass_:True] :=
                  Parameters`Private`allPhases = phases;
                  Parameters`Private`extraMassDimensions = mass;
                  get /@ {"LoopMasses", "SelfEnergies"};,
-                 LaunchKernels@4
+                 LaunchKernels@4, DistributedContexts -> None
               ];
            On[Part::pkspec1];
            ];
