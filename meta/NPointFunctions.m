@@ -716,8 +716,7 @@ CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
 GenerateFAModelFileOnKernel::usage="
 @brief Generate the FeynArts model file on a given subkernel.";
 GenerateFAModelFileOnKernel[kernel:_Parallel`Kernels`kernel|_KernelObject] :=
-Module[
-   {
+With[{
       currentPath = $Path,
       currentDir = Directory[],
       fsMetaDir = FlexibleSUSY`$flexiblesusyMetaDir,
@@ -726,8 +725,6 @@ Module[
       SARAHModelName = GetSARAHModelName[],
       eigenstates = FlexibleSUSY`FSEigenstates
    },
-   DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs,
-      sarahOutputDir, SARAHModelName, eigenstates];
 
    Print["Generating FeynArts model file ..."];
    SetSharedFunction[Print];
