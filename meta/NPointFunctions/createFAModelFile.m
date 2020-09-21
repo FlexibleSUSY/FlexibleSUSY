@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["NPointFunctions`", "SARAH`"];
+BeginPackage["NPointFunctions`", {"SARAH`"}];
 
 CreateFAModelFile::usage=
 "@brief Create the FeynArts model file using SARAH`.`MakeFeynArts[].

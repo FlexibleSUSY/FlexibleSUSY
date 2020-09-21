@@ -735,7 +735,7 @@ With[{
       Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "createFAModelFile.m"};
       NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
          SARAHModelName, eigenstates];,
-      kernel];
+      kernel, DistributedContexts -> None];
 
    UnsetShared[Print];
    Print["Generating FeynArts model file ... done"];
