@@ -160,9 +160,9 @@
    FourFermionMassiveVectorPenguins -> {
       {
          {
+            "pinguins: remove tree-like massless vector bosons",
             `topologyQ`pinguinT,
-            {genericMass[FeynArts`V, 5], UnsameQ, 0},
-            "pinguins: remove tree-like massless vector bosons"
+            {UnsameQ, genericMass[FeynArts`V, 5], 0}
          }
       },
       {}

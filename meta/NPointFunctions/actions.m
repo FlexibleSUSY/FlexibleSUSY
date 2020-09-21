@@ -52,7 +52,7 @@ Module[{template, func, delete, append, restrict},
 define[applyAction,
    {
       {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
-      {topologyQ:_, {name:_, function:_, value:_}, text:_String}
+      {text:_String, topologyQ:_, {function:UnsameQ, name:_, value:_}}
    } :>
    Module[{
          daPairs = getAmplitudeNumbers[diagrams, topologyQ],
