@@ -58,27 +58,26 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
          double deltaqqOS = 0.;
-         double deltaqqDR = 0.;
-         double deltaqqDRQED = 0.;
+         const double alpha_s_red = get_alphas(context)/Pi;
+         const double Nf = number_of_active_flavours(mHOS);
+         double deltaqqDR = calc_deltaqq(alpha_s_red, Nf);
+
+         const double alpha_red = get_alpha(context)/Pi;
+         double deltaqqDRQED = 17./4.*Sqr(uq::electric_charge)*alpha_red;
+
          double deltaqqOSQED = 0.;
          // chirality breaking corrections
          double deltaH2 = 0.;
 
          if(!info::is_CP_violating_Higgs_sector) {
-            const double alpha_s_red = get_alphas(context)/Pi;
-            const double Nf = number_of_active_flavours(mHOS);
-            const double alpha_red = get_alpha(context)/Pi;
             const double mtpole = qedqcd.displayPoleMt();
 
             deltaqqOS =
                4./3. * alpha_s_red * calc_DeltaH(betaOS);
-            deltaqqDR =
+            deltaqqDR +=
                2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-               4./3. * alpha_s_red * calc_DeltaH(betaDR) +
-               calc_deltaqq(alpha_s_red, Nf);
+               4./3. * alpha_s_red * calc_DeltaH(betaDR);
 
-            deltaqqDRQED =
-               17./4. * alpha_red * Sqr(uq::electric_charge);
             deltaqqOSQED =
                alpha_red * Sqr(uq::electric_charge) * calc_DeltaH(betaOS);
 
