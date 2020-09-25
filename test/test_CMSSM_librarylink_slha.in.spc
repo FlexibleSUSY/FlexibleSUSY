@@ -32,6 +32,7 @@ Block FlexibleSUSY
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   -1                   # loop library (0 = softsusy)
    32   1                    # calculate decays (1 = enabled)
+   33   1                    # include higher order corrections in decays (0 = no, 1 = yes)
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166370000e-05      # G_Fermi
