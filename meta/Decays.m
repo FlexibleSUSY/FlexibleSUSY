@@ -2247,6 +2247,7 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
              ];
            {declaration, function}
           ];
+
 CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
@@ -2354,6 +2355,15 @@ CreateHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_},
        ];
        {declaration, function}
     ];
+CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectChargedLeptonChargedLeptonFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
 
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
@@ -2372,6 +2382,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
              ];
            specializations
           ];
+
 CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{pseudoscalarHiggsDecays, specializations = {}},
            pseudoscalarHiggsDecays = GetPseudoscalarHiggsBosonDecays[particleDecays];
@@ -2381,7 +2392,8 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
                  {
                      CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName]
+                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[pseudoscalarHiggsDecays, modelName]
                  }
               ];
            specializations
