@@ -2520,7 +2520,10 @@ RunEnabledSpectrumGenerator[solver_] :=
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(\n"
-                  <> IndentText["slha_io, spectrum_generator_settings, slha_output_file,\n"]
+                  <> IndentText[
+                        "slha_io, spectrum_generator_settings, " <>
+                        If[FSCalculateDecays, "flexibledecay_settings, ", ""] <>
+                        "slha_output_file,\n"]
                   <> IndentText["database_output_file, spectrum_file, rgflow_file);\n"]
                   <> "if (!exit_code || solver_type != 0) break;\n";
            result = "case " <> key <> ":\n" <> IndentText[body];
@@ -2552,13 +2555,14 @@ ExampleDecaysIncludes[] :=
        ("#include \"" <> # <> "\"")& /@ {
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays/decays_problems.hpp",
+         "decays/decay_settings.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
          "loop_libraries/loop_library.hpp"},
        "\n"
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+"if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
    }
@@ -2571,7 +2575,7 @@ ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
    spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
 
-if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) && loop_library_for_decays) {
+if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table());
 }";
@@ -2594,7 +2598,9 @@ WriteUserExample[inputParameters_List, files_List] :=
     Module[{parseCmdLineOptions, printCommandLineOptions, inputPars,
             solverIncludes = "", runEnabledSolvers = "", scanEnabledSolvers = "",
             runEnabledCmdLineSolvers = "", defaultSolverType,
-            decaysIncludes = "", calculateDecaysForModel = "", decaysObject = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
+            decaysIncludes = "", calculateDecaysForModel = "",
+            decaysObject = "", decaySettingsObj = "", fillDecaySettings = "",
+            setDecaysSLHAOutput = "", decaySetttingsOverride = "", flexibleDecaySettingsVarInDecl = "", flexibleDecaySettingsVarInDef = "",
             calculateCmdLineDecays = "", writeCmdLineOutput = "", fillSLHAIO = ""},
            inputPars = {First[#], #[[3]]}& /@ inputParameters;
            parseCmdLineOptions = WriteOut`ParseCmdLineOptions[inputPars];
@@ -2612,7 +2618,7 @@ WriteUserExample[inputParameters_List, files_List] :=
               decaysObject =
                   IndentText[
                      "SM_higher_order_corrections higher_orders_in_decays;\n" <>
-                     "if (spectrum_generator_settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {\n" <>
+                     "if (flexibledecay_settings.get(FlexibleDecay_settings::higher_orders_in_decays)) {\n" <>
                         IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
                      "}\n" <>
                      "else {\n" <>
@@ -2625,12 +2631,16 @@ WriteUserExample[inputParameters_List, files_List] :=
                         "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
                      ]
                   ];
+              decaySettingsObj = "FlexibleDecay_settings flexibledecay_settings;\n";
+              fillDecaySettings = "slha_io.fill(flexibledecay_settings);\n";
+              flexibleDecaySettingsVarInDecl = "flexibledecay_settings, ";
+              flexibleDecaySettingsVarInDef = "const flexiblesusy::FlexibleDecay_settings& flexibledecay_settings,";
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
               decaySetttingsOverride =
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+"if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {
    if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
       WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
       spectrum_generator_settings.set(
@@ -2655,6 +2665,10 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@defaultSolverType@" -> defaultSolverType,
                             "@decaysIncludes@" -> decaysIncludes,
                             "@decaysObject@" -> decaysObject,
+                            "@decaySettingsObj@" -> IndentText@decaySettingsObj,
+                            "@fillDecaySettings@" -> IndentText@IndentText@fillDecaySettings,
+                            "@flexibleDecaySettingsVarInDef@" -> flexibleDecaySettingsVarInDef,
+                            "@flexibleDecaySettingsVarInDecl@" -> flexibleDecaySettingsVarInDecl,
                             "@calculateDecaysForModel@" -> IndentText@IndentText@IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],

@@ -564,6 +564,17 @@ void @ModelName@_slha_io::fill(Spectrum_generator_settings& settings) const
    slha_io.fill(settings);
 }
 
+/**
+ * Fill struct of spectrum generator settings from SLHA object
+ * (FlexibleSUSY block)
+ *
+ * @param settings struct of spectrum generator settings to be filled
+ */
+void @ModelName@_slha_io::fill(FlexibleDecay_settings& settings) const
+{
+   slha_io.fill(settings);
+}
+
 void @ModelName@_slha_io::fill_minpar_tuple(@ModelName@_input_parameters& input,
                                                 int key, double value)
 {

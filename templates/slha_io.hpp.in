@@ -39,6 +39,7 @@ struct @ModelName@_physical;
 class @ModelName@_slha;
 class Spectrum_generator_problems;
 class Spectrum_generator_settings;
+class FlexibleDecay_settings;
 
 namespace standard_model {
 class Standard_model;
@@ -64,6 +65,7 @@ public:
    void fill(@ModelName@_slha&) const;
    void fill(Physical_input&) const;
    void fill(Spectrum_generator_settings&) const;
+   void fill(FlexibleDecay_settings&) const;
    double get_parameter_output_scale() const;
    const SLHA_io& get_slha_io() const { return slha_io; }
    void read_from_file(const std::string&);

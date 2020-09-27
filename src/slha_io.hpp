@@ -42,6 +42,7 @@ namespace SLHAea {
 namespace flexiblesusy {
 
    class Spectrum_generator_settings;
+   class FlexibleDecay_settings;
    class Physical_input;
    struct PMNS_parameters;
 
@@ -118,6 +119,7 @@ public:
    // reading functions
    bool block_exists(const std::string&) const;
    void fill(softsusy::QedQcd&) const;
+   void fill(FlexibleDecay_settings&) const;
    void fill(Spectrum_generator_settings&) const;
    void fill(Physical_input&) const;
    const Modsel& get_modsel() const { return modsel; }
