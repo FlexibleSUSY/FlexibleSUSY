@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["EffectiveCouplings`", {"SARAH`", "CConversion`", "Parameters`", "SelfEnergies`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`", "Constraint`"}];
+BeginPackage["EffectiveCouplings`", {"SARAH`", "Cache`", "CConversion`", "Parameters`", "SelfEnergies`", "TreeMasses`", "TextFormatting`", "Utils`", "Vertices`", "Constraint`"}];
 
 InitializeEffectiveCouplings::usage="";
 InitializeMixingFromModelInput::usage="";
@@ -238,7 +238,7 @@ GetTwoBodyDecays[particle_] :=
                                 {i, 1, Length[allParticles]}, {j, 1, Length[allParticles]}];
            combinations = DeleteDuplicates[Flatten[combinations, 1]];
            For[i = 1, i <= Length[combinations], i++,
-               vertex = SARAH`Vertex[combinations[[i]], UseDependences -> True];
+               vertex = Cache`GetVertex@combinations[[i]];
                If[NonZeroVertexQ[vertex],
                   fields = First[vertex];
                   coupling = Rest[vertex];
@@ -270,18 +270,16 @@ GetParticlesCouplingToVectorBoson[vector_] :=
                   (* @note could use defined functions in e.g. TreeMasses, plus check
                      for undefined group factors, but will do it this way for now
                      to ensure consistency with SARAH                                  *)
-                  charge = SARAH`Vertex[{SARAH`AntiField[allParticles[[i]]],
-                                         allParticles[[i]], SARAH`VectorG},
-                                        UseDependences -> True][[2,1]];
+                  charge = Cache`GetVertex[{SARAH`AntiField[allParticles[[i]]],
+                                         allParticles[[i]], SARAH`VectorG}][[2,1]];
                   If[charge =!= 0,
                      particles = Append[particles, allParticles[[i]]];
                     ];,
                   charge = TreeMasses`GetElectricCharge[allParticles[[i]]];
                   If[NumericQ[charge],
                      charge = {charge},
-                     charge = Cases[SARAH`Vertex[{SARAH`AntiField[allParticles[[i]]],
-                                                  allParticles[[i]], SARAH`VectorP},
-                                                 UseDependences -> True][[2,1]], _?NumberQ];
+                     charge = Cases[Cache`GetVertex[{SARAH`AntiField[allParticles[[i]]],
+                                                  allParticles[[i]], SARAH`VectorP}][[2,1]], _?NumberQ];
                     ];
                   If[charge =!= {} && SARAH`AntiField[allParticles[[i]]] =!= allParticles[[i]] &&
                      charge =!= {0},
@@ -502,7 +500,7 @@ CreateEffectiveCouplingPrototype[coupling_] :=
 GetEffectiveVEV[] :=
     Module[{vev, parameters = {}, result = ""},
            If[SARAH`SupersymmetricModel,
-              vev = Simplify[2 Sqrt[-SARAH`Vertex[{SARAH`VectorW, Susyno`LieGroups`conj[SARAH`VectorW]}][[2,1]]
+              vev = Simplify[2 Sqrt[-Cache`GetVertex[{SARAH`VectorW, Susyno`LieGroups`conj[SARAH`VectorW]}][[2,1]]
                            / SARAH`leftCoupling^2] /. SARAH`sum[a_,b_,c_,d_] :> Sum[d,{a,b,c}]];
               vev = Parameters`DecreaseIndexLiterals[vev];
               parameters = Parameters`FindAllParameters[vev];

@@ -99,6 +99,7 @@ TEST_SH := \
 
 TEST_META := \
 		$(DIR)/test_BetaFunction.m \
+		$(DIR)/test_Cache.m \
 		$(DIR)/test_CConversion.m \
 		$(DIR)/test_Constraint.m \
 		$(DIR)/test_EWSB.m \
