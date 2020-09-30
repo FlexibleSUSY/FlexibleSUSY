@@ -176,8 +176,8 @@ Module[{putOnce, defineRules,
    Fermion[{{e1_, LP[g1_, PL]}, {e2_, PR}}] :=
       {{-e2, PL}, {-e1, LP[g1, PR]}};
 
-   Momenta[Plus, {{e_, d:MD}}] = {{e, d}};
-   Momenta[Minus, {{e_, d:MD}}] = {{-e, -d}};
+   Momenta[Plus, {{e_, d:MD}}] := {{e, d}};
+   Momenta[Minus, {{e_, d:MD}}] := {{-e, -d}};
 
    Lorentz[{p_, {e_, d_M}}] :=
    Module[{ind, pos},
