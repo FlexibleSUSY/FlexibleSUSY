@@ -32,7 +32,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
 
    double result = 0.;
 
-   const double color_factor = squared_color_generator<H, bar<uq>::type, uq>();
+   constexpr double color_factor = squared_color_generator<H, bar<uq>::type, uq>();
    const double flux = 1./(2.*mAH);
    const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(muq/mAH), Sqr(muq/mAH)));
 

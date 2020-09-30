@@ -36,7 +36,7 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.4'
+      IMAGE_VERSION: '0.4.6'
       FORMCALC_VERSION: '9.9'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
@@ -110,18 +110,18 @@ jobs:
       # Having a single name entry and a bash loop over integers in the run tag would save a
       # little writing but splitting it into multiple entries makes it easier to see on github which loop
       # library has failed
-      - name: Run compiled and shell script tests with 0
+      - name: Run compiled and shell script (Softsusy)
         # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
         # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
-      - name: Run compiled and shell script tests with 1
+      - name: Run compiled and shell script (Collier)
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
-      - name: Run compiled and shell script tests with 2
+      - name: Run compiled and shell script (LoopTools)
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
-      - name: Run compiled and shell script tests with 3
+      - name: Run compiled and shell script (fflite)
         run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Testing pack-SM-src

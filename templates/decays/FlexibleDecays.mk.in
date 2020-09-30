@@ -17,7 +17,13 @@
 #  ====================================================================
 
 LIB@ModelName@_SRC += \
-@FlexibleDecaysSource@
+		$(DIR)/decays/@ModelName@_decay_table.cpp \
+		$(DIR)/decays/@ModelName@_decays.cpp
 
 LIB@ModelName@_HDR += \
-@FlexibleDecaysHeader@
+		$(DIR)/decays/@ModelName@_decay_table.hpp \
+		$(DIR)/decays/@ModelName@_decays.hpp \
+		$(DIR)/decays/@ModelName@_decay_amplitudes.hpp
+
+EXE@ModelName@_SRC += \
+		$(DIR)/run_decays_@ModelName@.cpp

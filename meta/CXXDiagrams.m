@@ -280,18 +280,18 @@ CreateFields[] :=
               ">;\n" <>
               "static constexpr int numberOfGenerations = " <>
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
-                     "using sm_flags = boost::mpl::vector_c<bool, " <>
-                        If[TreeMasses`GetDimension[#] === 1,
-                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
-                             TreeMasses`IsSMParticleElementwise[#],
-                                               ", "]] <>
-                        ">;\n" <>
-                "static constexpr int numberOfFieldIndices = " <>
+              "using sm_flags = boost::mpl::vector_c<bool, " <>
+                   If[TreeMasses`GetDimension[#] === 1,
+                      CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                      StringJoin @ Riffle[CConversion`CreateCBoolValue /@
+                         TreeMasses`IsSMParticleElementwise[#],
+                         ", "]
+                   ] <> ">;\n" <>
+              "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-                "static constexpr double electric_charge = " <>
+              "static constexpr double electric_charge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
-                "using lorentz_conjugate = " <>
+              "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
@@ -673,9 +673,22 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 
 		If[(Times @@ colorMathExpressions) === 1, 1,
 			ColorMathToSARAHConvention[
-				ColorMath`CSimplify[Times @@ colorMathExpressions]]
+            With[{colorFac = ColorMath`CSimplify[Times @@ colorMathExpressions]},
+               If[!FreeQ[colorFac, Superscript[CMo, {__}]],
+                  (* RemoveFD converts f and d color structures into a sum of ColorMath`o *)
+                  ColorMath`CSimplify[Times @@ colorMathExpressions, RemoveFD -> False],
+                  (* on the other hand, without RemoveFD -> True expression
+                          {ct94450, ct94453}ct94448           {ct94450, ct94453, ct94454}
+                     4 CMt                                 CMf
+                                                   ct94455
+                     is not simplified *)
+                  colorFac
+               ]
+            ]
+         ]
 		]
-	]
+	];
+
 (** \brief Returns the index prefix string for an index of a given type **)
 IndexPrefixForType[SARAH`generation] = "gt";
 IndexPrefixForType[SARAH`lorentz] = "lt";
@@ -1622,6 +1635,11 @@ ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
 ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
 ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
 ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+(* cases for 8->88 amplitudes
+ExtractColourFactor[colourfactor_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
+ExtractColourFactor[colourfactor_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
+ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_} + colourfactor2_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor1]] && NumericQ[colourfactor2]] := ?;
+*)
 ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 

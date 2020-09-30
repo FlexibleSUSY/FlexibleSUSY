@@ -72,6 +72,7 @@ public:
       higgs_4loop_correction_at_as3, ///< [30] Higgs 4-loop correction O(alpha_t alpha_s^3)
       loop_library, ///< [31] Loop library (0 = Softsusy)
       calculate_decays,      ///< [32] calculate particle decays
+      higher_orders_in_decays, ///< [33] include higher order corrections in decays
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 

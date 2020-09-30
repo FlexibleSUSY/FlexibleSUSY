@@ -7,7 +7,7 @@
 #include "test_MRSSM2.hpp"
 #include "MRSSM2_two_scale_model.hpp"
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
-#include "MRSSM2_decays.hpp"
+#include "decays/MRSSM2_decays.hpp"
 #include "MRSSM2_slha_io.hpp"
 
 using namespace flexiblesusy;
@@ -691,36 +691,56 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ tree-level decays ------------
 
    // h -> b bbar
-   // no QED corrections
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
                               0.0018859412659263085, 5e-12);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
+                              9.953578694799394e-05, 4e-14);
    // QED corrections
 //   BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
 //                              2.6059181498481999E-003, 5e-15);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
-                              0.00027722644959993561, 5e-12);
+                              0.00026946060398832237, 5e-12);
    // h -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00082272054306510697, 5e-11);
+                              0.00066154345019159267, 5e-11);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              8.765854811656519e-05, 9e-12);
+                              7.5383132433569488e-05, 9e-12);
 
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020375074486812735, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020682880248722835, 7e-11);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
+   // without 2-loop QCD corrections to squark loop
+   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
+   // with 2-loop QCD corrections to squark loop
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.2177644596191449e-05, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 9.6974720629860577e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.9440628969348722e-06, 5e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
    MRSSM2_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
 
+   // h -> b bbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
+                              0.0015852320624501718, 4e-14);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
+                              8.2876032145842477e-05, 3e-14);
+   // h -> tau+ tau-
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
+                              0.00026660324954596258, 5e-12);
+
+   // ------------ loop-induces decays ------------
+
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 8.5869265018085558e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.1943830812277772e-05, 4e-11);
+
+   // h -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00012423136936565911, 7e-11);
 }

@@ -10,11 +10,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
 {
    // TODO: should we take the off-diagonal case at all?
    //       or should this never happen and we should crash
-   if(!boost::range::equal(indexOut1, indexOut2))
+   if(!boost::range::equal(indexOut1, indexOut2)) {
+      WARNING("Flavour violating decays of H->ddbar currently not implemented!");
       return 0.;
-//    BOOST_ASSERT_MSG(boost::range::equal(indexOut1, indexOut2),
-      // "Template specialization for H -> Fd1 bar[Fd2] is only valid for Fd1 = Fd2"
-//    );
+   }
 
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mdqDR = context.mass<dq>(indexOut1);
@@ -24,46 +23,19 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    }
    const auto xOS = Sqr(mdqOS/mHOS);
    const auto xDR = Sqr(mdqDR/mHOS);
-   const auto betaOS = std::sqrt(1. - 4.*xOS);
-   const auto betaDR = std::sqrt(1. - 4.*xDR);
 
    // TODO: add off-shell decays?
-   if (mHOS < 2.*mdqDR) {
+   if (4.*std::max(xDR, xOS) > 1.) {
       return 0.;
    }
 
-   const double alpha_s = get_alphas(context);
-   const double alpha_s_red = alpha_s/Pi;
-   const double Nf = number_of_active_flavours(mHOS);
-   const double alpha = get_alpha(context);
-   const double alpha_red = alpha/Pi;
-   const double mtpole = qedqcd.displayPoleMt();
-
-   const double deltaqqOS =
-      4./3. * alpha_s_red * calc_DeltaH(betaOS);
-   const double deltaqqDR =
-      2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-      4./3. * alpha_s_red * calc_DeltaH(betaDR) +
-      calc_Deltaqq(alpha_s_red, Nf);
-
-   const double deltaqqDRQED =
-      17./4. * alpha_red * Sqr(dq::electric_charge);
-   const double deltaqqOSQED =
-      alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
-
-   // chiral breaking correctios
-   // TODO: probably shouldn't be applied in case of CP-breaking
-   double deltaH2 = 0.;
-   if(!info::is_CP_violating_Higgs_sector) {
-      const double lt = std::log(Sqr(mHOS/mtpole));
-      const double lq = std::log(Sqr(mdqDR/mHOS));
-      deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
-   }
+   const auto betaOS = std::sqrt(1.-4.*xOS);
+   const auto betaDR = std::sqrt(1.-4.*xDR);
 
    const double flux = 1./(2.*mHOS);
-   const double color_factor = 3;
-   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdqDR/mHOS), Sqr(mdqDR/mHOS)));
-   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdqOS/mHOS), Sqr(mdqOS/mHOS)));
+   constexpr double color_factor = 3;
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
@@ -76,13 +48,53 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto amp2OS = Sqr(mHOS) * Sqr(betaOS) *
                 2.*std::norm(HBBbarVertexDR.left()) * Sqr(mdqOS / mdqDR);
 
-   const double result = flux * color_factor *
-          (
-             // low x limit
-             (1 - 4. * xOS) * phase_spaceDR * amp2DR *
-                (1. + deltaqqDR + deltaqqDRQED +  deltaH2) +
-             // high x limit
-             4 * xOS * phase_spaceOS * amp2OS * (1. + deltaqqOS + deltaqqOSQED));
+   // low x limit
+   double result_DR =
+      flux * color_factor * phase_spaceDR * amp2DR;
+   // high x limit
+   double result_OS =
+      flux * color_factor * phase_spaceOS * amp2OS;
 
-   return result;
+   switch (include_higher_order_corrections) {
+      case SM_higher_order_corrections::enable: {
+         double deltaqqOS = 0.;
+         const double Nf = number_of_active_flavours(mHOS);
+         const double alpha_s_red = get_alphas(context)/Pi;
+         double deltaqqDR = calc_deltaqq(alpha_s_red, Nf);
+
+         const double alpha_red = get_alpha(context)/Pi;
+         const double deltaqqDRQED = 17./4.*Sqr(dq::electric_charge)*alpha_red;
+
+         double deltaqqOSQED = 0.;
+         // chirality breaking corrections
+         double deltaH2 = 0.;
+
+         if(!info::is_CP_violating_Higgs_sector) {
+            const double mtpole = qedqcd.displayPoleMt();
+
+            deltaqqOS =
+               4./3. * alpha_s_red * calc_DeltaH(betaOS);
+            deltaqqDR +=
+               2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
+               4./3.*alpha_s_red*calc_DeltaH(betaDR);
+
+            deltaqqOSQED =
+               alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
+
+            const double lt = std::log(Sqr(mHOS/mtpole));
+            const double lq = std::log(xDR);
+            deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+         }
+
+         result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
+         result_OS *= 1. + deltaqqOS + deltaqqOSQED;
+         break;
+      }
+      case SM_higher_order_corrections::disable:
+         break;
+      default:
+         WARNING("Unhandled option in H->ddbar decay");
+   }
+
+   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 }

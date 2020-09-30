@@ -542,15 +542,10 @@ CheckDecaysOptions[] :=
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
          If[FlexibleSUSY`DecayParticles === All,
             FlexibleSUSY`DecayParticles = TreeMasses`GetParticles[],
-            If[Head[FlexibleSUSY`DecayParticles] =!= List,
-               Print["Warning: FlexibleSUSY`DecayParticles should be set to a ",
-                     "list or Automatic"];
-               FlexibleSUSY`DecayParticles = {},
-               If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles],
-                  Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`DecayParticles, TreeMasses`GetParticles[]],
-                        " which are not part of the model. Removing them."];
-                  FlexibleSUSY`DecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles]
-               ]
+            If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles],
+               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`DecayParticles, TreeMasses`GetParticles[]],
+                     " which are not part of the model. Removing them."];
+               FlexibleSUSY`DecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles]
             ]
          ]
       ]
@@ -1480,6 +1475,7 @@ WriteEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List, ewsbInitial
               Print["Error: There are ", numberOfIndependentEWSBEquations, " independent EWSB ",
                     "equations, but you want to fix ", Length[parametersFixedByEWSB],
                     " parameters: ", parametersFixedByEWSB];
+	      Quit[1];
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
@@ -1540,6 +1536,7 @@ WriteSemiAnalyticEWSBSolverClass[ewsbEquations_List, parametersFixedByEWSB_List,
               Print["Error: There are ", numberOfIndependentEWSBEquations, " independent EWSB ",
                     "equations, but you want to fix ", Length[parametersFixedByEWSB],
                     " parameters: ", parametersFixedByEWSB];
+	      Quit[1];
              ];
            higgsToEWSBEqAssociation     = CreateHiggsToEWSBEqAssociation[];
            calculateOneLoopTadpolesNoStruct = SelfEnergies`FillArrayWithLoopTadpoles[1, higgsToEWSBEqAssociation, "tadpole", "+", "model."];
@@ -1981,17 +1978,6 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
                             "@defaultEWSBSolverCctor@"       -> defaultEWSBSolverCctor,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
-          ];
-
-WriteDecaysMakefileModule[sources_List, headers_List, files_List] :=
-    Module[{source = "", header = ""},
-           source = Utils`StringJoinWithSeparator[("\t\t$(DIR)/" <> #)& /@ sources, " \\\n"];
-           header = Utils`StringJoinWithSeparator[("\t\t$(DIR)/" <> #)& /@ headers, " \\\n"];
-           WriteOut`ReplaceInFiles[files,
-                  { "@FlexibleDecaysSource@" -> source,
-                    "@FlexibleDecaysHeader@" -> header,
-                    Sequence @@ GeneralReplacementRules[]
-                  } ];
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
@@ -2572,11 +2558,7 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"const bool loop_library_for_decays =
-    (Loop_library::get_type() == Loop_library::Library::Collier) ||
-    (Loop_library::get_type() == Loop_library::Library::Looptools);\n" <>
-FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
-if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
    }
@@ -2595,7 +2577,7 @@ if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-FlexibleSUSY`FSModelName <> "_decays " <> "decays;" <>
+FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
    decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
 }";
@@ -2612,7 +2594,7 @@ WriteUserExample[inputParameters_List, files_List] :=
     Module[{parseCmdLineOptions, printCommandLineOptions, inputPars,
             solverIncludes = "", runEnabledSolvers = "", scanEnabledSolvers = "",
             runEnabledCmdLineSolvers = "", defaultSolverType,
-            decaysIncludes = "", calculateDecaysForModel = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
+            decaysIncludes = "", calculateDecaysForModel = "", decaysObject = "", setDecaysSLHAOutput = "", decaySetttingsOverride = "",
             calculateCmdLineDecays = "", writeCmdLineOutput = "", fillSLHAIO = ""},
            inputPars = {First[#], #[[3]]}& /@ inputParameters;
            parseCmdLineOptions = WriteOut`ParseCmdLineOptions[inputPars];
@@ -2627,16 +2609,38 @@ WriteUserExample[inputParameters_List, files_List] :=
              ];
            If[FlexibleSUSY`FSCalculateDecays,
               decaysIncludes = ExampleDecaysIncludes[];
+              decaysObject =
+                  IndentText[
+                     "SM_higher_order_corrections higher_orders_in_decays;\n" <>
+                     "if (spectrum_generator_settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {\n" <>
+                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
+                     "}\n" <>
+                     "else {\n" <>
+                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
+                     "}\n" <>
+                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);\n" <>
+                     "const bool loop_library_for_decays =\n" <>
+                     IndentText[
+                        "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                        "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                     ]
+                  ];
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
               decaySetttingsOverride =
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
-   !spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
-   spectrum_generator_settings.set(
-      Spectrum_generator_settings::calculate_sm_masses, 1.0);
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+   if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
+      WARNING(\"Decay module requires SM pole masses. Setting FlexibleSUSY[3] = 1.\");
+      spectrum_generator_settings.set(
+         Spectrum_generator_settings::calculate_sm_masses, 1.0);
+   }
+   if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_bsm_masses)) {
+      WARNING(\"Decay module requires BSM pole masses. Setting FlexibleSUSY[23] = 1.\");
+      spectrum_generator_settings.set(
+         Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   }
 }",
               fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
              ];
@@ -2650,7 +2654,8 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@runEnabledCmdLineSolvers@" -> runEnabledCmdLineSolvers,
                             "@defaultSolverType@" -> defaultSolverType,
                             "@decaysIncludes@" -> decaysIncludes,
-                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
+                            "@decaysObject@" -> decaysObject,
+                            "@calculateDecaysForModel@" -> IndentText@IndentText@IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
@@ -4804,8 +4809,15 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                     {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decays.cpp.in"}],
                                                      FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]},
                                                     {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_amplitudes.hpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
+                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]},
+                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "run_decays.cpp.in"}],
+                                                     FileNameJoin[{FSOutputDir,  "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
+
                                                    }];
+                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
+                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}},
+                                         {Sequence @@ GeneralReplacementRules[]}
+                 ];
                  ,
                  Print["Skipping calculating decays as no particles to calculate decays for were found."];
                 ];
@@ -4816,11 +4828,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
 
              ]; (* If[FSCalculateDecays] *)
-
-           WriteDecaysMakefileModule[decaysSources, decaysHeaders,
-                                     {{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
-                                          FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}}
-                                    ];
 
            Utils`PrintHeadline["Creating other observables"];
            Print["Creating class for effective couplings ..."];

@@ -42,7 +42,7 @@ template <class T> struct is_complex<std::complex<T> > : public std::true_type{}
 
 /// compares a number for being close to zero
 template <typename T>
-typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+std::enable_if_t<std::is_unsigned<T>::value, bool>
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return a <= prec;
@@ -51,8 +51,8 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 
 /// compares a number for being close to zero
 template <typename T>
-typename std::enable_if<!std::is_unsigned<T>::value &&
-                        !detail::is_complex<T>::value, bool>::type
+std::enable_if_t<!std::is_unsigned<T>::value &&
+                        !detail::is_complex<T>::value, bool>
 is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    return std::abs(a) <= prec;
@@ -61,7 +61,7 @@ is_zero(T a, T prec = std::numeric_limits<T>::epsilon()) noexcept
 
 /// compares a complex number for being close to zero
 template <typename T>
-typename std::enable_if<detail::is_complex<T>::value, bool>::type
+std::enable_if_t<detail::is_complex<T>::value, bool>
 is_zero(T a,
         typename T::value_type prec
         = std::numeric_limits<typename T::value_type>::epsilon()) noexcept
@@ -90,7 +90,7 @@ bool is_equal(std::complex<T> a, std::complex<T> b,
 
 /// compares two numbers for relative equality
 template <typename T>
-typename std::enable_if<!std::is_unsigned<T>::value, bool>::type
+std::enable_if_t<!std::is_unsigned<T>::value, bool>
 is_equal_fraction(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    const T max = std::max(std::abs(a), std::abs(b));
@@ -101,7 +101,7 @@ is_equal_fraction(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 /// compares two numbers for relative equality, treating numbers with
 /// small differences as equal
 template <typename T>
-typename std::enable_if<!std::is_unsigned<T>::value, bool>::type
+std::enable_if_t<!std::is_unsigned<T>::value, bool>
 is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    if (is_equal(a, b, std::numeric_limits<T>::epsilon())) {
@@ -123,7 +123,7 @@ is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 /// compares two numbers for relative equality, treating numbers with
 /// small differences as equal
 template <typename T>
-typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+std::enable_if_t<std::is_unsigned<T>::value, bool>
 is_equal_rel(T a, T b, T prec = std::numeric_limits<T>::epsilon()) noexcept
 {
    using ST = typename std::make_signed<T>::type;

@@ -73,9 +73,6 @@ BASE_TEMPLATES := \
 		$(DIR)/utilities.hpp.in \
 		$(DIR)/utilities.cpp.in
 
-MODULE_MK_TEMPLATES := \
-		$(DIR)/decays/FlexibleDecays.mk.in
-
 TWO_SCALE_TEMPLATES := \
 		$(DIR)/standard_model_two_scale_high_scale_initial_guesser.cpp.in \
 		$(DIR)/standard_model_two_scale_high_scale_initial_guesser.hpp.in \

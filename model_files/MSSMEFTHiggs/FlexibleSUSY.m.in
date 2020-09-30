@@ -180,6 +180,5 @@ ExtraSLHAOutputBlocks = {
             {49, SignedAbsSqrt[md2[3,3]]} } }
 };
 
-(* Disabling decays because hh(1) gives number but
-   hh(2), Hpm(2) and Ah(2) give NaNs *)
-FSCalculateDecays = False;
+FSCalculateDecays = True;
+DecayParticles = {hh, Ah, Hpm, Su, Sd, Se, Sv};

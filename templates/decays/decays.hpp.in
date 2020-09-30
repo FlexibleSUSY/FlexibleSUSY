@@ -22,8 +22,7 @@
  *
  * @brief contains class for calculating particle decays
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_DECAYS_H
@@ -43,7 +42,7 @@
 namespace flexiblesusy {
 
 template <typename Field1, typename Field2>
-constexpr typename std::enable_if<!std::is_same<Field1, Field2>::value, double>::type
+constexpr std::enable_if_t<!std::is_same<Field1, Field2>::value, double>
 final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
@@ -51,7 +50,7 @@ final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Fie
 }
 
 template <typename Field1, typename Field2>
-typename std::enable_if<std::is_same<Field1, Field2>::value, double>::type
+std::enable_if_t<std::is_same<Field1, Field2>::value, double>
 final_state_symmetry_factor(typename @ModelName@_cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename @ModelName@_cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
@@ -138,59 +137,117 @@ double
    return mat_elem.square();
 }
 
-// returns a squared color generator for 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
+// returns a squared color generator for a 3 point amplitude with FieldIn, FieldOut1 and FieldOut2
+// averaged over inital state colors
 // the generator is guessed from color representations of FieldIn, FieldOut1 and FieldOut2
 // This is not a bulletproof solution and might fail in general but is enough for
 // decays of color singlets
+
+// 1 -> 1, 1
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
-double squared_color_generator() {
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldIn> &&
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut2>, double>
+squared_color_generator() {return 1.;}
 
-   double color_factor;
+// 1 -> 3, 3bar
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+   @ModelName@_cxx_diagrams::fields::is_singlet_v<FieldIn>
+   &&
+   (
+   (@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+   @ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+   ||
+   (@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+   @ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+   ), double
+>
+squared_color_generator() {return 3.;}
 
-   if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldIn>::value) {
-      // singlet to single singlet
-      if(@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) {
-         color_factor = 1.;
-      }
-      // singlet to triplet and anti-triplet
-      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
-            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
-         color_factor = 3.;
-      }
-      // singlet to octet octet
-      else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
-         color_factor = 8.;
-      }
-      // singlet to unhandlet color combination
-      else {
-         throw std::runtime_error("Decay of color singlet to unhandled color combination");
-      }
-   }
-   else if(@ModelName@_cxx_diagrams::fields::is_octet<FieldIn>::value) {
-      if(@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) {
-         color_factor = 40./3.;
-      }
-      // octet to triplet and anti-triplet
-      else if((@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut2>::value) ||
-            (@ModelName@_cxx_diagrams::fields::is_triplet<FieldOut2>::value && @ModelName@_cxx_diagrams::fields::is_anti_triplet<FieldOut1>::value)) {
-         color_factor = 4.;
-      }
-      else if((@ModelName@_cxx_diagrams::fields::is_octet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_singlet<FieldOut2>::value) ||
-           (@ModelName@_cxx_diagrams::fields::is_singlet<FieldOut1>::value && @ModelName@_cxx_diagrams::fields::is_octet<FieldOut2>::value) ) {
-         color_factor = 8.;
-      }
-      // octet to unhandlet color combination
-      else {
-         throw std::runtime_error("Decay of color octet to unhandled color combination");
-      }
-   }
-   // decays of color charged particles are currently not supported
-   else {
-      throw std::runtime_error("Color factors for decays of color charged particles are not supported");
-   }
+// 1 -> 8, 8
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldIn> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2>, double>
+squared_color_generator() {return 8.;}
 
-   return color_factor;
-}
+// 3 -> 3, 1; 3bar -> 3bar, 1
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+(
+@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldIn> &&
+((@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut2>))
+)
+||
+(
+@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
+((@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
+)
+, double>
+squared_color_generator() {return 1.;}
+
+// 3 -> 3, 8; 3bar -> 3bar, 8
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+(
+@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldIn> &&
+((@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
+(@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut2>))
+)
+||
+(
+@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
+((@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
+(@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
+)
+, double>
+squared_color_generator() {return 4.;}
+
+// 8 -> 8, 1
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldIn> &&
+((@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(@ModelName@_cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2>))
+, double>
+squared_color_generator() {return 1.;}
+
+// 8 -> 3, 3bar
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+   @ModelName@_cxx_diagrams::fields::is_octet_v<FieldIn>
+   &&
+   (
+   (@ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+   @ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+   ||
+   (@ModelName@_cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+   @ModelName@_cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+   ), double
+>
+squared_color_generator() {return 1./2.;}
 
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
@@ -202,10 +259,16 @@ double @ModelName@_decays::get_partial_width(
    ) const
 {
 
-   // onshell masses
+   // on-shell masses
    const double mIn = context.physical_mass<FieldIn>(indexIn);
    const double mOut1 = context.physical_mass<FieldOut1>(indexOut1);
    const double mOut2 = context.physical_mass<FieldOut2>(indexOut2);
+
+   // is decay kinematically allowed?
+   if(mIn < mOut1 + mOut2) {
+      WARNING("Called kinematically forbidden decay");
+      return 0.;
+   }
 
    // phase space without symmetry factor
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mOut1/mIn), Sqr(mOut2/mIn)));
@@ -215,7 +278,7 @@ double @ModelName@_decays::get_partial_width(
       final_state_symmetry_factor<FieldOut1, FieldOut2>(indexOut1, indexOut2);
 
    // color factor
-   const double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
+   constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
    // matrix element squared
    const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
