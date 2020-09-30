@@ -40,7 +40,7 @@ File `1` does not exist, but required.";
 
 Begin["`internal`"];
 
-With[{AOQ = Utils`AssertOrQuit, NAME = "CachedVertices.m",
+With[{AOQ = Utils`AssertOrQuit, NAME = "CachedVertices.m", COMPLEXITY = 300,
       M = SARAH`Mom, G = SARAH`g, B = SARAH`bar, PL = SARAH`PL, PR = SARAH`PR,
       L1 = SARAH`lt1, L2 = SARAH`lt2, L3 = SARAH`lt3, L4 = SARAH`lt4,
       GT = SARAH`getType, GG = SARAH`g[_, _], LP = SARAH`LorentzProduct,
@@ -166,7 +166,10 @@ Module[{putOnce, defineRules,
       StringReplace[ToString/@{idxs}, DigitCharacter.. :> ToString@ind];
 
    DefineCanonical[v_] := With[{lhs = ClearIndices@Part[v, 1]},
-      impl[lhs] = {CanonicalType@v, v /. SA`subUnitaryCondition};
+      impl[lhs] = {
+         CanonicalType@v,
+         If[LeafCount@Last@v > COMPLEXITY, v, v /. SA`subUnitaryCondition]
+      };
    ];
 
    Fermion[{{e1_, PL}, {e2_, PR}}] :=
