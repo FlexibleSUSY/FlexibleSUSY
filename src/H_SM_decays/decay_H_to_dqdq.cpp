@@ -57,37 +57,39 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
 
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
-         double deltaqqOS = 0.;
+         double deltaqq_QCD_OS = 0.;
          const double Nf = number_of_active_flavours(mHOS);
          const double alpha_s_red = get_alphas(context)/Pi;
-         double deltaqqDR = calc_deltaqq(alpha_s_red, Nf);
+         double deltaqq_QCD_DR = calc_Deltaqq(alpha_s_red, Nf);
 
+         // eq. 21 in FD manual
          const double alpha_red = get_alpha(context)/Pi;
-         const double deltaqqDRQED = 17./4.*Sqr(dq::electric_charge)*alpha_red;
+         const double deltaqq_QED_DR = 17./4.*Sqr(dq::electric_charge)*alpha_red;
 
-         double deltaqqOSQED = 0.;
+         double deltaqq_QED_OS = 0.;
          // chirality breaking corrections
          double deltaH2 = 0.;
 
          if(!info::is_CP_violating_Higgs_sector) {
             const double mtpole = qedqcd.displayPoleMt();
 
-            deltaqqOS =
+            deltaqq_QCD_OS =
                4./3. * alpha_s_red * calc_DeltaH(betaOS);
-            deltaqqDR +=
+            deltaqq_QCD_DR +=
                2.*(1. - 10.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
                4./3.*alpha_s_red*calc_DeltaH(betaDR);
 
-            deltaqqOSQED =
+            deltaqq_QED_OS =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
 
+            // eq. 22  in FD manual
             const double lt = std::log(Sqr(mHOS/mtpole));
             const double lq = std::log(xDR);
             deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
          }
 
-         result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
-         result_OS *= 1. + deltaqqOS + deltaqqOSQED;
+         result_DR *= 1. + deltaqq_QCD_DR + deltaqq_QED_DR + deltaH2;
+         result_OS *= 1. + deltaqq_QCD_OS + deltaqq_QED_OS;
          break;
       }
       case SM_higher_order_corrections::disable:

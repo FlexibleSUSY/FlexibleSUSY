@@ -60,7 +60,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          double deltaqqOS = 0.;
          const double alpha_s_red = get_alphas(context)/Pi;
          const double Nf = number_of_active_flavours(mHOS);
-         double deltaqqDR = calc_deltaqq(alpha_s_red, Nf);
+         double deltaqqDR = calc_Deltaqq(alpha_s_red, Nf);
 
          const double alpha_red = get_alpha(context)/Pi;
          double deltaqqDRQED = 17./4.*Sqr(uq::electric_charge)*alpha_red;

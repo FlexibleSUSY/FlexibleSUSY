@@ -16,8 +16,10 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef DECAY_LOOP_FUNCTIONS_H
-#define DECAY_LOOP_FUNCTIONS_H
+#ifndef DECAY_FUNCTIONS_H
+#define DECAY_FUNCTIONS_H
+
+#include <complex>
 
 namespace flexiblesusy {
 
@@ -32,6 +34,26 @@ double calc_Deltaqq(double alpha_s_red, double Nf) noexcept;
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
 double RT(double x) noexcept;
+
+// eq. 2.5, 2.7 & 2.8 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, double mu) noexcept;
+
+// eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
+std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept;
+
+std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq, double mu) noexcept;
+
+/* 2-loop QCD corrections to H->gamma gamma amplitude through scalar color triplet loop
+ * from hep-ph/0611266 */
+
+/* this functions could be improved to cover all range in r by linking
+ * to CHAPLIN library (https://arxiv.org/abs/1106.5739) */
+std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, double mu) noexcept;
+
+// eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
+std::complex<double> hgg_SM_loop_function(double x) noexcept;
+
+unsigned int number_of_active_flavours(double m) noexcept;
 
 } // namespace flexiblesusy
 
