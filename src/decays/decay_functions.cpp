@@ -76,15 +76,24 @@ double calc_DeltaAH(double b) noexcept
       * std::log((1+b)/(1-b)) + 3./8.*(7 - b2);
 }
 
-/// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
+// higher order corrections to H/A -> qqbar
 double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
+   constexpr double CF = 4./3.;
+   constexpr double CA = 3.;
+   constexpr double T = 1./2.;
+
+   // eq. 2 from hep-ph/9708292v1
+   const double dG1 = 17./4.*CF;
+   const double dG2 =
+      ((893/4. - 62*zeta3)*CA - (65 - 16*zeta3)*T*Nf + (691/4. - 36*zeta3)*CF)*CF/16.
+      - Sqr(Pi)*(11*CA - 4*T*Nf + 18*CF)/48.*CF;
+
    // order alpha_s_red^1 is taken into account with mass dependence somewhere else
    return
-      + alpha_s_red*(0. * 17./3.
-      + alpha_s_red*(35.94 - 1.36*Nf
-      + alpha_s_red*(164.14 + Nf*(-25.77 + 0.259*Nf)
-      + alpha_s_red*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf))))));
+      Sqr(alpha_s_red)*dG2
+      + Cube(alpha_s_red)*(164.14 + Nf*(-25.77 + 0.259*Nf)
+      + Power4(alpha_s_red)*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf))));
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
