@@ -28,7 +28,14 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       return 0.0;
    // mZ < mH < 2*mZ
    // three-body decay
-   } else if(4.0*x > 1.0) {
+   }
+   else if(4.0*x > 1.0) {
+
+      if (check_3body_Vff_decay<BSMForZdecay,Z>(context, mHOS, indexOut1)) {
+         const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn[0]) + ")";
+         WARNING("Warning in H" + index_as_string + "->ZZ decays: Single off-shell decays H->Zff' assume no possible BSM particles in the final state. Turning off.");
+      }
+
       const double sw2 = Sqr(std::sin(context.model.ThetaW()));
       const double deltaV = 7.0/12.0 - 10.0/9.0*sw2 + 40.0/27.0*Sqr(sw2);
 

@@ -38,6 +38,8 @@ GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
+CreateBSMParticleAliasList::usage="";
+
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
 decays of the given particles.";
 CreateDecaysCalculationPrototypes::usage="creates prototypes for convenience
@@ -231,6 +233,19 @@ CreateSMParticleAliases[namespace_:""] :=
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
+
+CreateBSMParticleAliasList[namespace_:""] :=
+   Module[{bsmForZdecay, bsmForWdecay},
+      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      {
+         Join[bsmForZdecay, bsmForWdecay],
+      "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"] <> "\n> BSMForZdecay;\n\n" <>
+      "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"] <> "\n> BSMForWdecay;\n"
+      }
+   ];
 
 GetGenericTypeName[p_?TreeMasses`IsScalar] := GenericScalarName[];
 GetGenericTypeName[p_?TreeMasses`IsVector] := GenericVectorName[];

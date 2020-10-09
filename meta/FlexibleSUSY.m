@@ -2027,6 +2027,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysVertices = Join[decaysVertices, decaysVertices2];
 
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
+           bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];
 
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
@@ -2045,11 +2046,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@initDecayTable@" -> IndentText[WrapLines[initDecayTable]],
                             "@numberOfDecayParticles@" -> ToString[numberOfDecayParticles],
                             "@create_SM_particle_usings@" -> smParticleAliases,
+                            "@create_BSM_particle_list@" -> Last@bsmParticleAliasList,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
-           decaysVertices
+           DeleteDuplicates@Join[decaysVertices, First@bsmParticleAliasList]
           ];
 
 WriteBVPSolverTemplates[files_List] :=
