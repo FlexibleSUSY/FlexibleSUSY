@@ -47,7 +47,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    } else {
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mWOS*mWOS, mWOS*mWOS))/(mHOS*mHOS);
+      const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));
 
       // matrix element squared
       const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(

@@ -24,7 +24,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // 4-body decay not implemented for a moment
    if (x > 1.0) {
       const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn[0]) + ")";
-      WARNING("H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
+      WARNING("Warning in H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
       return 0.0;
    // mZ < mH < 2*mZ
    // three-body decay
@@ -54,10 +54,10 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(1., Sqr(mZOS/mHOS), Sqr(mZOS/mHOS)));
+      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(1., x, x));
 
       // phase space symmetry factor
-      const double ps_symmetry = 1. / 2.;
+      const double ps_symmetry = 1./2.;
 
       // matrix element squared
       const auto mat_elem = calculate_amplitude<H, Z, Z>(

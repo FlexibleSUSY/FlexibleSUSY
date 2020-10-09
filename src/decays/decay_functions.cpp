@@ -30,6 +30,8 @@ namespace flexiblesusy {
 
 namespace {
 
+using namespace std::literals::complex_literals;
+
 /// Eq.(2.31) of hep-ph/0503172
 double RT_general(double x) noexcept
 {
@@ -125,7 +127,6 @@ std::complex<double> f(double tau) noexcept {
       return Sqr(std::asin(std::sqrt(tau)));
    }
    else {
-      using namespace std::literals::complex_literals;
       return -0.25*Sqr(std::log((1.+std::sqrt(1.+1./tau))/(1.+std::sqrt(1.-1./tau))) - 1i*Pi);
    }
 }
@@ -138,7 +139,6 @@ std::complex<double> taum1fprime(double tau) noexcept {
       return (tau-1.)*std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
    }
    else {
-      using namespace std::literals::complex_literals;
       return
 (tau-1.)*(1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
    (-2i*std::sqrt((-1. + tau)*tau) + 
@@ -151,7 +151,6 @@ std::complex<double> fprime(double tau) noexcept {
       return std::asin(std::sqrt(tau))/std::sqrt(tau - Sqr(tau));
    }
    else {
-      using namespace std::literals::complex_literals;
       return
 (1i*std::log(-1. - 1i*Pi + 2.*tau + 2.*std::sqrt((-1. + tau)*tau)))/
    (-2i*std::sqrt((-1. + tau)*tau) + 
@@ -262,13 +261,13 @@ std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq,
 // eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
 std::complex<double> hgg_SM_loop_function(double x) noexcept {
    if(is_zero(1.-x)) {
-      return Sqr(M_PI/2.);
+      return Sqr(Pi/2.);
    }
    else if (x > 1) {
       return Sqr(std::asin(1./std::sqrt(x)));
    }
    else {
-      return -0.25*Sqr(std::log((1.+std::sqrt(1.-x))/(1.-std::sqrt(1.-x))) - M_PI*std::complex<double>(0.,1.));
+      return -0.25*Sqr(std::log((1.+std::sqrt(1.-x))/(1.-std::sqrt(1.-x))) - 1i*Pi);
    }
 }
 
