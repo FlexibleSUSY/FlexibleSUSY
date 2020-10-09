@@ -1508,7 +1508,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    ];
 
    If[globalMinus === -1, "-", ""] <>
-   "1.0i*vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
+   "1.0i*vertex" <> ToString@indices[[pos]] <> "Val." <> res
 ];
 
 (*
@@ -1730,9 +1730,15 @@ If[Length@positions =!= 1, Quit[1]];
                   "// connect internal particles in vertices\n" <>
                   matchInternalFieldIndicesCode <>
 
-                  "\n// internal masses\n" <>
-                  mass <>
-
+                     StringJoin[(
+                        "auto const vertex" <> # <> "Val = " <>
+                        "vertex" <> # <> "::evaluate(index" <>
+                           #  <> ", context);\n"
+                     )& /@ indices] <>
+                  "\nif (" <> StringJoin@Riffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
+                  TextFormatting`IndentText[
+                  "// internal masses\n" <>
+                  mass <> "\n" <>
                   (* in some cases, we apply higher order corrections at the level of amplitude *)
                   If[
                      (* for H/A -> gamma gamma *)
@@ -1741,7 +1747,7 @@ If[Length@positions =!= 1, Quit[1]];
                         !SA`CPViolationHiggsSector &&
                         (* the quark loop amplitude *)
                         Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop],
-                        "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                        "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
                         TextFormatting`IndentText[
                            Module[{pos1, post2, res},
                               StringJoin@Riffle[
@@ -1793,7 +1799,7 @@ If[Length@positions =!= 1, Quit[1]];
                     ] <> "}\n", ampCall <> ";\n"
                     ]
                   ], ampCall <> ";\n"
-                  ]
+                  ]] <> "}\n"
      ];
 
       {verticesForFACp,
