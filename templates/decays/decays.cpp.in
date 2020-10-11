@@ -125,33 +125,33 @@ double get_alpha(context_base const&  context)
 
 @create_BSM_particle_list@
 
-template <typename BSMPairs, typename V>
-bool check_3body_Vff_decay(const context_base& context, double  mHOS, const typename field_indices<V>::type& V_idx)  {
-      bool found_problem = false;
-      const double mVOS {context.physical_mass<V>(V_idx)};
-      boost::mpl::for_each<BSMPairs>(
-         [mHOS, mVOS, &V_idx, &context, &found_problem](auto arg) {
-            using T = decltype(arg);
-            using Field1 = typename boost::mpl::at<T, boost::mpl::int_<0>>::type;
-            using Field2 = typename boost::mpl::at<T, boost::mpl::int_<1>>::type;
-            using vertexId1 = Vertex<V, Field1, Field2>;
-            for (const auto& indexId1: index_range<vertexId1>()) {
-               const auto externalFieldIndicesIn1 = vertexId1::template indices_of_field<0>(indexId1);
-               if (externalFieldIndicesIn1 != V_idx) {
-                  continue;
-               }
-               const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
-               const auto externalFieldIndicesIn3 = vertexId1::template indices_of_field<2>(indexId1);
+template <typename DecayProds, typename V>
+bool check_3body_Vff_decay(const context_base& context, double  mHOS, const typename field_indices<V>::type& idx)  {
+   bool found_problem = false;
+   const double mVOS {context.physical_mass<V>(idx)};
+   boost::mpl::for_each<DecayProds>(
+      [mHOS, mVOS, &idx, &context, &found_problem](auto arg) {
+         using T = decltype(arg);
+         using Field1 = typename boost::mpl::at<T, boost::mpl::int_<0>>::type;
+         using Field2 = typename boost::mpl::at<T, boost::mpl::int_<1>>::type;
+         using vertexId1 = Vertex<V, Field1, Field2>;
+         for (const auto& indexId1: index_range<vertexId1>()) {
+            const auto externalFieldIndicesIn1 = vertexId1::template indices_of_field<0>(indexId1);
+            if (externalFieldIndicesIn1 != idx) {
+               continue;
+            }
+            const auto externalFieldIndicesIn2 = vertexId1::template indices_of_field<1>(indexId1);
+            const auto externalFieldIndicesIn3 = vertexId1::template indices_of_field<2>(indexId1);
 
-               const double mInternal2 {context.physical_mass<Field1>(externalFieldIndicesIn2)};
-               const double mInternal3 {context.physical_mass<Field2>(externalFieldIndicesIn3)};
+            const double mInternal2 {context.physical_mass<Field1>(externalFieldIndicesIn2)};
+            const double mInternal3 {context.physical_mass<Field2>(externalFieldIndicesIn3)};
 
-               if (mHOS-mVOS > mInternal2 + mInternal3
-                   && !Vertex<V, Field1, Field2>::evaluate(indexId1, context).isZero()) {
-                  found_problem = true;
-               }
+            if (mHOS-mVOS > mInternal2 + mInternal3
+                && !Vertex<V, Field1, Field2>::evaluate(indexId1, context).isZero()) {
+               found_problem = true;
             }
          }
+      }
    );
    return found_problem;
 }

@@ -82,10 +82,21 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             deltaqq_QED_OS =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
 
+            // this 2-loop correction from Fig. 1a in hep-ph/9505358
+            // it's proportional to 
+            //    Yd Yt (from couplings)
+            //    * mt * md (from trace of fermion loop)
+            //    / mt^2 (from propagator)
+            // In total Yd Yt * md/mt
             // eq. 22  in FD manual
             const double lt = std::log(Sqr(mHOS/mtpole));
             const double lq = std::log(xDR);
-            deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+            // eq. 28 of hep-ph/9505358
+            const auto Httbar = Vertex<H, bar<uq>::type, uq>::evaluate({2}, context);
+            const auto HttbarV = Httbar.left() + Httbar.right();
+            const auto CSdd = 1.;
+            const auto CStd = 1.;
+            deltaH2 = Sqr(alpha_s_red) * CStd/CSdd * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
          }
 
          result_DR *= 1. + deltaqq_QCD_DR + deltaqq_QED_DR + deltaH2;

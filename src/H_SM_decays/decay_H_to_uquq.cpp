@@ -42,6 +42,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    // both with running and pole masses
    const auto indices = concatenate(indexIn, indexOut1, indexOut2);
    const auto HBBbarVertexDR = Vertex<H, bar<uq>::type, uq>::evaluate(indices, context);
+   const std::complex<double> HBBbarVertexDRV = HBBbarVertexDR.left() + HBBbarVertexDR.right();
 
    const auto amp2DR = Sqr(mHOS) * Sqr(betaDR) *
                2.*std::norm(HBBbarVertexDR.left());
@@ -83,7 +84,12 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
 
             const double lt = std::log(Sqr(mHOS/mtpole));
             const double lq = std::log(xDR);
-            deltaH2 = Sqr(alpha_s_red) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+            // eq. 28 of hep-ph/9505358
+            const auto Httbar = Vertex<H, bar<uq>::type, uq>::evaluate({2}, context);
+            const auto HttbarV = Httbar.left() + Httbar.right();
+            const auto CSuu = 1.;
+            const auto CStu = 1.;
+            deltaH2 = Sqr(alpha_s_red) * CStu/CSuu * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
          }
 
          result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
