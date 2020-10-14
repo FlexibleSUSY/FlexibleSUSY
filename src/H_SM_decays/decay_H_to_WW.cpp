@@ -14,7 +14,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
    // 4-body decay for mH < mW not implemented for a moment
    if (x > 1.0) {
-      const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn[0]) + ")";
+      const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
       WARNING("H" + index_as_string + "->W+W- decays: double off-shell decays currently not implemented.");
       res = 0.0;
    }
@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    else if (4 * x > 1.0) {
 
       if (check_3body_Vff_decay<BSMForWdecay, W>(context, mHOS, indexOut1)) {
-         const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn[0]) + ")";
+         const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
          WARNING("Warning in H" + index_as_string + "->WW decays: Single off-shell decays H->Wff' assume no possible BSM particles in the final state. Turning off.");
          return 0.;
       }
