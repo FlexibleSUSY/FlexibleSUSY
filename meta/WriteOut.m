@@ -1310,7 +1310,7 @@ CreateSetDecaysFunctions[modelName_String] := "\
  */
 std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
    std::vector<Decay> decays_list_as_vector;
-   for (std::pair<std::size_t, Decay> const& el : decays_list) {
+   for (std::pair<const std::size_t, Decay> const& el : decays_list) {
       decays_list_as_vector.push_back(el.second);
    }
    std::sort(
