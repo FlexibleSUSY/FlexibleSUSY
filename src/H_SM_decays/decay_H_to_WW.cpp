@@ -26,7 +26,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
          WARNING("Warning in H" + index_as_string + "->WW decays: Single off-shell decays H->Wff' assume no possible BSM particles in the final state. Turning off.");
          return 0.;
       }
-      res = 1./(768.*Power3(Pi)) * 1./mHOS * RT(x)/x;
+      res = 1./(768.*Power3(Pi)*mHOS) * RT(x)/x;
 
       const auto indices = concatenate(indexOut2, indexOut1, indexIn);
       const auto ghWW =
@@ -34,6 +34,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
       // absolute value of baru d W+ vertex (no CKM and no PL projector)
       const double g2 = context.model.get_g2();
+      // M_SQRT1_2 =	1/sqrt(2)
       const double gWud = g2*M_SQRT1_2;
 
       res *= std::norm(ghWW*gWud);

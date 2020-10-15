@@ -82,16 +82,18 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
             deltaqqOSQED =
                alpha_red * Sqr(uq::electric_charge) * calc_DeltaH(betaOS);
 
-            const double lt = std::log(Sqr(mHOS/mtpole));
-            const double lq = std::log(xDR);
-            // eq. 28 of hep-ph/9505358
-            const auto Httindices = concatenate(indexIn, std::array<int, 1> {2}, std::array<int, 1> {2});
-            const auto Httbar = Vertex<H, bar<uq>::type, uq>::evaluate(Httindices, context);
-            const auto HttbarV = Httbar.left() + Httbar.right();
-            // Yukawa/mass
-            const auto CSuu = HBBbarVertexDRV/muqDR;
-            const auto CStu = HttbarV/context.mass<Fu>({2});
-            deltaH2 = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+            if (indexOut1.at(0) < 2 || indexOut2.at(0) < 2) {
+               const double lt = std::log(Sqr(mHOS/mtpole));
+               const double lq = std::log(xDR);
+               // eq. 28 of hep-ph/9505358
+               const auto Httindices = concatenate(indexIn, std::array<int, 1> {2}, std::array<int, 1> {2});
+               const auto Httbar = Vertex<H, bar<uq>::type, uq>::evaluate(Httindices, context);
+               const auto HttbarV = Httbar.left() + Httbar.right();
+               // Yukawa/mass
+               const auto CSuu = HBBbarVertexDRV/muqDR;
+               const auto CStu = HttbarV/context.mass<Fu>({2});
+               deltaH2 = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+            }
          }
 
          result_DR *= 1. + deltaqqDR + deltaqqDRQED + deltaH2;
