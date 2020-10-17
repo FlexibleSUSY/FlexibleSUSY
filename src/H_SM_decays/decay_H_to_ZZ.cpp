@@ -11,20 +11,33 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
-   const double mZOS = context.physical_mass<Z>(indexOut1);
+   // There might be large differences between mZ from mass block
+   // and one from slha input, especially in the decoupling limit
+   // so we use the latter one. There might be a problem with
+   // models where Z mixes with something else.
+   // const double mZOS = context.physical_mass<Z>(indexOut1);
+   const double mZOS = qedqcd.displayPoleMZ();
    const double x = Sqr(mZOS/mHOS);
    double res;
 
    // mH < mZ
    // 4-body decay not implemented for a moment
    if (x > 1.0) {
-      const std::string index_as_string = (indexIn.size() > 0 ? "(" + std::to_string(indexIn[0]) + ")" : "");
-      WARNING("H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
+      const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
+      WARNING("Warning in H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
       return 0.0;
    // mZ < mH < 2*mZ
    // three-body decay
-   } else if(4.0*x > 1.0) {
-      const double sw2 = Sqr(Sin(model.ThetaW()));
+   }
+   else if(4.0*x > 1.0) {
+
+      if (check_3body_Vff_decay<BSMForZdecay,Z>(context, mHOS, indexOut1)) {
+         const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
+         WARNING("Warning in H" + index_as_string + "->ZZ decays: Single off-shell decays H->Zff' assume no possible BSM particles in the final state. Turning off.");
+         return 0.;
+      }
+
+      const double sw2 = Sqr(std::sin(context.model.ThetaW()));
       const double deltaV = 7.0/12.0 - 10.0/9.0*sw2 + 40.0/27.0*Sqr(sw2);
 
       res = 3./(512.*Power3(Pi)) * 1./mHOS * deltaV * RT(x)/x;
@@ -42,10 +55,10 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mZOS*mZOS, mZOS*mZOS))/(mHOS*mHOS);
+      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(1., x, x));
 
       // phase space symmetry factor
-      const double ps_symmetry = 1. / 2.;
+      const double ps_symmetry = 1./2.;
 
       // matrix element squared
       const auto mat_elem = calculate_amplitude<H, Z, Z>(

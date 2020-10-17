@@ -639,6 +639,16 @@ endif
 ifeq ($(WITH_MSSMCPV),yes)
 TEST_META += \
 		$(DIR)/test_MSSMCPV_TreeMasses.m
+ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_FlexibleDecays.cpp
+endif
+ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
+TEST_SRC += \
+		$(DIR)/test_MSSMCPV_FlexibleDecays.cpp
+endif
+endif
 endif
 
 ifeq ($(WITH_NMSSMCPV),yes)
@@ -1050,6 +1060,8 @@ endif
 endif
 
 $(DIR)/test_MSSM_FlexibleDecays.x: $(LIBMSSM)
+
+$(DIR)/test_MSSMCPV_FlexibleDecays.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 

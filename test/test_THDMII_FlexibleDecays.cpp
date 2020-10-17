@@ -267,7 +267,10 @@ Block UERMIX
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.00078624320962414611, 2e-15);
+                              0.00079317167799701472, 2e-15);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 1, 1),
+                              3.6452502257931033e-07, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.9645091090513334e-05, 1e-15);
@@ -283,7 +286,7 @@ Block UERMIX
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00039877936614530129, 4e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.0130764685108315e-05, 3e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.0143277274464733e-05, 3e-12);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.3818951172675953e-06, 8e-12);
 
@@ -296,7 +299,10 @@ Block UERMIX
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.00078624320962414611, 2e-15);
+                              0.00062168170474045936, 2e-15);
+   // h -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
+                              0.00010014749564849829, 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.8811709644693243e-05, 1e-15);

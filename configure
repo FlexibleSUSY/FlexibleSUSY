@@ -5,7 +5,7 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=5
+FLEXIBLESUSY_MINOR=6
 FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
@@ -3808,7 +3808,7 @@ if test "x${enable_meta}" = "xyes"; then
     add_metaflags
 fi
 
-echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
+echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m
 

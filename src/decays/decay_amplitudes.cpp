@@ -91,7 +91,6 @@ double Decay_amplitude_SVV::square() const
          const double res2 =
             2.*fgSqr + 0.5*Power4(m_decay)*fepsSqr;
          const double WI_violation = std::abs(1. - std::abs(res1/res2));
-         std::cout << m_decay << ' ' << WI_violation << '\n';
          if (WI_violation > 0.1) {
             WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + std::to_string(100.*WI_violation) + "%");
          }

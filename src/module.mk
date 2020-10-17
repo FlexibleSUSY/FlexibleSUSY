@@ -16,6 +16,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/database.cpp \
 		$(DIR)/decays/decay.cpp \
 		$(DIR)/decays/decay_amplitudes.cpp \
+		$(DIR)/decays/decay_functions.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
@@ -75,7 +76,8 @@ LIBFLEXI_HDR := \
 		$(DIR)/database.hpp \
 		$(DIR)/decays/decay.hpp \
 		$(DIR)/decays/decay_amplitudes.hpp \
-		$(DIR)/decays/decays_loop_corrections.hpp \
+		$(DIR)/decays/decays_corrections.hpp \
+		$(DIR)/decays/decay_loop_functions.hpp \
 		$(DIR)/decays/decays_problems.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \

@@ -1,12 +1,21 @@
 // special case for H -> W+ W-
 // TODO: implement higher order corrections
 
-double hWW_4body(double *k, size_t dim, void *params)
+struct my_f_params {double mHOS; double mWOS; double GammaW;};
+
+double hWW_4body(double *q2, size_t dim, void *params)
 {
-  (void)(dim); /* avoid unused parameter warnings */    
-  (void)(params);
-  double A = 1.0 / (M_PI * M_PI * M_PI);
-  return A / (1.0 - cos (k[0]) * cos (k[1]) * cos (k[2]));
+  (void)(dim); /* avoid unused parameter warnings */
+  struct my_f_params * fp = (struct my_f_params *)params;
+  const double mHOS = fp->mHOS;
+  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
+  const double mWOS = fp->mWOS;
+  const double GammaW = fp->GammaW;
+  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
+  return
+     mWOS*GammaW/(Sqr(q2[0] - Sqr(mWOS)) + Sqr(mWOS*GammaW))
+     * mWOS*GammaW/(Sqr(q2[1] - Sqr(mWOS)) + Sqr(mWOS*GammaW))
+     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
 }
 
 template <>
@@ -18,47 +27,55 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mWOS = context.physical_mass<W>(indexOut1);
+   const double mWDR = context.mass<W>(indexOut1);
    const double x = Sqr(mWOS/mHOS);
    double res;
 
    // 4-body decay for mH < mW not implemented for a moment
-   if (x > 1.0) {
+   if (4.*x > 1.0) {
       // working example of multidimensional integration from withing FS
       // to be used for double off-shell decays
-      /*
-      double res, err;
+      double err;
 
-      double xl[3] = { 0, 0, 0 };
-      double xu[3] = { M_PI, M_PI, M_PI };
+      double xl[2] = {0, 0};
+      double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
 
       const gsl_rng_type *T;
       gsl_rng *r;
 
-      gsl_monte_function G = { &hWW_4body, 3, 0 };
+      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto ghWW =
+         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
+      const double GammaW = 3*std::norm(ghWW)/(16.*Pi*mWOS);
+      std::cout << GammaW << ' ' <<  mWOS << ' ' << mWDR << ' ' << mHOS << std::endl;
+      struct my_f_params params = {mHOS, mWOS, GammaW};
+      gsl_monte_function G = { &hWW_4body, 2, &params };
 
-      size_t calls = 500000;
+      size_t calls = 1000000000;
 
       gsl_rng_env_setup ();
 
       T = gsl_rng_default;
       r = gsl_rng_alloc (T);
 
-      gsl_monte_miser_state *s = gsl_monte_miser_alloc (3);
-      gsl_monte_miser_integrate (&G, xl, xu, 3, calls, r, s,
+      gsl_monte_miser_state *s = gsl_monte_miser_alloc (2);
+      gsl_monte_miser_integrate (&G, xl, xu, 2, calls, r, s,
                                 &res, &err);
       gsl_monte_miser_free (s);
 
       gsl_rng_free (r);
-      */
 
-      const std::string index_as_string = (indexIn.size() > 0 ? "(" + std::to_string(indexIn[0]) + ")" : "");
-      WARNING("H" + index_as_string + "->W+W- decays: double off-shell decays currently not implemented.");
-      res = 0.0;
+      res *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
    }
    // three-body decays form mW < mH < 2*mW
    else if (4 * x > 1.0) {
 
-      res = 1./(768.*Power3(Pi)) * 1./mHOS * RT(x)/x;
+      if (check_3body_Vff_decay<BSMForWdecay, W>(context, mHOS, indexOut1)) {
+         const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
+         WARNING("Warning in H" + index_as_string + "->WW decays: Single off-shell decays H->Wff' assume no possible BSM particles in the final state. Turning off.");
+         return 0.;
+      }
+      res = 1./(768.*Power3(Pi)*mHOS) * RT(x)/x;
 
       const auto indices = concatenate(indexOut2, indexOut1, indexIn);
       const auto ghWW =
@@ -66,6 +83,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
       // absolute value of baru d W+ vertex (no CKM and no PL projector)
       const double g2 = context.model.get_g2();
+      // M_SQRT1_2 =	1/sqrt(2)
       const double gWud = g2*M_SQRT1_2;
 
       res *= std::norm(ghWW*gWud);
@@ -80,7 +98,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    } else {
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
-      const double ps = 1. / (8. * Pi) * std::sqrt(KallenLambda(mHOS*mHOS, mWOS*mWOS, mWOS*mWOS))/(mHOS*mHOS);
+      const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));
 
       // matrix element squared
       const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(

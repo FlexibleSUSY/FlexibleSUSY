@@ -38,6 +38,8 @@ GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
+CreateBSMParticleAliasList::usage="";
+
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
 decays of the given particles.";
 CreateDecaysCalculationPrototypes::usage="creates prototypes for convenience
@@ -231,6 +233,31 @@ CreateSMParticleAliases[namespace_:""] :=
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
+
+CreateBSMParticleAliasList[namespace_:""] :=
+   Module[{bsmForZdecay, bsmForWdecay},
+      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      bsmForZdecay =
+         Join[
+            bsmForZdecay,
+            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex]
+         ];
+      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      bsmForWdecay =
+         Join[
+            bsmForWdecay,
+            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex]
+         ];
+      {
+         Join[bsmForZdecay, bsmForWdecay],
+      "// List of potential Z boson decay products excluding pure SM decays\n" <>
+      "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"] <> If[Length@bsmForZdecay > 0, "\n", ""] <> "> BSMForZdecay;\n\n" <>
+      "// List of potential W boson decay products excluding pure SM decays\n" <>
+      "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"] <> If[Length@bsmForWdecay > 0, "\n", ""] <> "> BSMForWdecay;"
+      }
+   ];
 
 GetGenericTypeName[p_?TreeMasses`IsScalar] := GenericScalarName[];
 GetGenericTypeName[p_?TreeMasses`IsVector] := GenericVectorName[];
@@ -1493,7 +1520,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    ];
 
    If[globalMinus === -1, "-", ""] <>
-   "1.0i*vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
+   "1.0i*vertex" <> ToString@indices[[pos]] <> "Val." <> res
 ];
 
 (*
@@ -1715,9 +1742,15 @@ If[Length@positions =!= 1, Quit[1]];
                   "// connect internal particles in vertices\n" <>
                   matchInternalFieldIndicesCode <>
 
-                  "\n// internal masses\n" <>
-                  mass <>
-
+                     StringJoin[(
+                        "auto const vertex" <> # <> "Val = " <>
+                        "vertex" <> # <> "::evaluate(index" <>
+                           #  <> ", context);\n"
+                     )& /@ indices] <>
+                  "\nif (" <> StringJoin@Riffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
+                  TextFormatting`IndentText[
+                  "// internal masses\n" <>
+                  mass <> "\n" <>
                   (* in some cases, we apply higher order corrections at the level of amplitude *)
                   If[
                      (* for H/A -> gamma gamma *)
@@ -1726,7 +1759,7 @@ If[Length@positions =!= 1, Quit[1]];
                         !SA`CPViolationHiggsSector &&
                         (* the quark loop amplitude *)
                         Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop],
-                        "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                        "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
                         TextFormatting`IndentText[
                            Module[{pos1, post2, res},
                               StringJoin@Riffle[
@@ -1769,7 +1802,7 @@ If[Length@positions =!= 1, Quit[1]];
                            T, 4/3,
                            -T, 4/3,
                            O, 3,
-                           _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"];Quit[]
+                           _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"];Quit[1]
                          ], 16] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
                      ] <> "}\n" <>
                     "else {\n" <>
@@ -1778,7 +1811,7 @@ If[Length@positions =!= 1, Quit[1]];
                     ] <> "}\n", ampCall <> ";\n"
                     ]
                   ], ampCall <> ";\n"
-                  ]
+                  ]] <> "}\n"
      ];
 
       {verticesForFACp,
@@ -2247,6 +2280,7 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
              ];
            {declaration, function}
           ];
+
 CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
@@ -2354,6 +2388,15 @@ CreateHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_},
        ];
        {declaration, function}
     ];
+CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectChargedLeptonChargedLeptonFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
 
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
@@ -2372,6 +2415,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
              ];
            specializations
           ];
+
 CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{pseudoscalarHiggsDecays, specializations = {}},
            pseudoscalarHiggsDecays = GetPseudoscalarHiggsBosonDecays[particleDecays];
@@ -2381,7 +2425,8 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
                  {
                      CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
-                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName]
+                     CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[pseudoscalarHiggsDecays, modelName]
                  }
               ];
            specializations

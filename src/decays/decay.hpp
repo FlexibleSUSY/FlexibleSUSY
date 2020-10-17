@@ -58,7 +58,7 @@ std::size_t hash_decay(const Decay& decay);
 
 class Decays_list {
 private:
-   /* map is slower than unordered_map but will preserve order of etries */
+   /* map is slower than unordered_map but will preserve order of entries */
    using List_type = std::map<std::size_t, Decay>;
 public:
    using iterator = List_type::iterator;
