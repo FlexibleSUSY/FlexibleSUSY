@@ -16,37 +16,32 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
 
    // 4-body decay for mH < mW not implemented for a moment
    if (4.*x > 1.0) {
-      // working example of multidimensional integration from withing FS
-      // to be used for double off-shell decays
-      double err;
 
-      double xl[2] = {0, 0};
-      double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
-
-      const gsl_rng_type *T;
-      gsl_rng *r;
-
-      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
-      const auto ghWW =
-         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
+      // integrand
       const double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
-      std::cout << GammaW << ' ' <<  mWOS << ' ' << mWDR << ' ' << mHOS << std::endl;
       struct my_f_params params = {mHOS, mWOS, GammaW};
       gsl_monte_function G = { &hVV_4body, 2, &params };
 
-      size_t calls = 10000000;
-
+      // setup integration
       gsl_rng_env_setup ();
-
-      T = gsl_rng_default;
-      r = gsl_rng_alloc (T);
-
+      double xl[2] = {0, 0};
+      double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
+      constexpr size_t calls = 10000000;
+      double err;
+      const gsl_rng_type *T = gsl_rng_default;
+      gsl_rng *r = gsl_rng_alloc (T);
       gsl_monte_miser_state *s = gsl_monte_miser_alloc (2);
       gsl_monte_miser_integrate (&G, xl, xu, 2, calls, r, s,
-                                &res, &err);
-      gsl_monte_miser_free (s);
+                                 &res, &err);
 
+      // clean-up
+      gsl_monte_miser_free (s);
       gsl_rng_free (r);
+
+      // prefactor
+      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto ghWW =
+         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
 
       res *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
    }
