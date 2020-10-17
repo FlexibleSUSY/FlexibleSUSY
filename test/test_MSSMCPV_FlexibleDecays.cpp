@@ -767,11 +767,15 @@ Block ImMSOFT Q= 2.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695651730241407, 3e-13);
    // h -> W+ W-
+   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 1),
+   //                            4.271655828335071e-05, 2e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 1),
-                              4.271655828335071e-05, 2e-12);
+                              6.0922320317595707e-05, 2e-12);
    // h -> Z Z
+   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 1),
+   //                            1.3778143534859871e-06, 4e-11);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 1),
-                              1.3778143534859871e-06, 4e-11);
+                              5.7306936810694011e-06, 4e-11);
 
    // ------------ loop-induces decays ------------
 
