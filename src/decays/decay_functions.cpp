@@ -86,7 +86,7 @@ double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
    constexpr double T = 1./2.;
 
    // eq. 2 from hep-ph/9708292v1
-   const double dG1 = 17./4.*CF;
+   // const double dG1 = 17./4.*CF;
    const double dG2 =
       ((893/4. - 62*zeta3)*CA - (65 - 16*zeta3)*T*Nf + (691/4. - 36*zeta3)*CF)*CF/16.
       - Sqr(Pi)*(11*CA - 4*T*Nf + 18*CF)/48.*CF;
