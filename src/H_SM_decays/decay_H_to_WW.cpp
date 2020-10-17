@@ -1,23 +1,6 @@
 // special case for H -> W+ W-
 // TODO: implement higher order corrections
 
-struct my_f_params {double mHOS; double mWOS; double GammaW;};
-
-double hWW_4body(double *q2, size_t dim, void *params)
-{
-  (void)(dim); /* avoid unused parameter warnings */
-  struct my_f_params * fp = (struct my_f_params *)params;
-  const double mHOS = fp->mHOS;
-  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
-  const double mWOS = fp->mWOS;
-  const double GammaW = fp->GammaW;
-  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
-  return
-     mWOS*GammaW/(Sqr(q2[0] - Sqr(mWOS)) + Sqr(mWOS*GammaW))
-     * mWOS*GammaW/(Sqr(q2[1] - Sqr(mWOS)) + Sqr(mWOS*GammaW))
-     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
-}
-
 template <>
 double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
@@ -46,12 +29,12 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const auto indices = concatenate(indexOut2, indexOut1, indexIn);
       const auto ghWW =
          Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
-      const double GammaW = 3*std::norm(ghWW)/(16.*Pi*mWOS);
+      const double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
       std::cout << GammaW << ' ' <<  mWOS << ' ' << mWDR << ' ' << mHOS << std::endl;
       struct my_f_params params = {mHOS, mWOS, GammaW};
-      gsl_monte_function G = { &hWW_4body, 2, &params };
+      gsl_monte_function G = { &hVV_4body, 2, &params };
 
-      size_t calls = 1000000000;
+      size_t calls = 10000000;
 
       gsl_rng_env_setup ();
 

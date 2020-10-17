@@ -1,6 +1,23 @@
 // special case for Higgs -> Z Z
 // TODO: implement higher order corrections
 
+struct my_f_params {double mHOS; double mVOS; double GammaV;};
+
+double hVV_4body(double *q2, size_t dim, void *params)
+{
+  (void)(dim); /* avoid unused parameter warnings */
+  struct my_f_params * fp = (struct my_f_params *)params;
+  const double mHOS = fp->mHOS;
+  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
+  const double mVOS = fp->mVOS;
+  const double GammaV = fp->GammaV;
+  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
+  return
+     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
+}
+
 template <>
 double CLASSNAME::get_partial_width<H,Z,Z>(
    const context_base& context,
@@ -22,10 +39,41 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
    // mH < mZ
    // 4-body decay not implemented for a moment
-   if (x > 1.0) {
-      const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
-      WARNING("Warning in H" + index_as_string + "->ZZ decays: double off-shell decays currently not implemented.");
-      return 0.0;
+   if (4.*x > 1.0) {
+      // working example of multidimensional integration from withing FS
+      // to be used for double off-shell decays
+      double err;
+
+      double xl[2] = {0, 0};
+      double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
+
+      const gsl_rng_type *T;
+      gsl_rng *r;
+
+      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto ghZZ =
+         Vertex<Z, Z, H>::evaluate(indices, context).value();
+      const double GammaZ = 2.4952;
+      std::cout << GammaZ << ' ' <<  mZOS << ' ' << ' ' << mHOS << std::endl;
+      struct my_f_params params = {mHOS, mZOS, GammaZ};
+      gsl_monte_function G = { &hVV_4body, 2, &params };
+
+      size_t calls = 10000000;
+
+      gsl_rng_env_setup ();
+
+      T = gsl_rng_default;
+      r = gsl_rng_alloc (T);
+
+      gsl_monte_miser_state *s = gsl_monte_miser_alloc (2);
+      gsl_monte_miser_integrate (&G, xl, xu, 2, calls, r, s,
+                                &res, &err);
+      gsl_monte_miser_free (s);
+
+      gsl_rng_free (r);
+
+      res *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
+      std::cout << res << std::endl;
    // mZ < mH < 2*mZ
    // three-body decay
    }
