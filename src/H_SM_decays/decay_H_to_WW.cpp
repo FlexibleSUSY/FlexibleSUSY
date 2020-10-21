@@ -18,7 +18,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    if (4.*x > 1.0) {
 
       // integrand
-      const double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
+      constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
       struct my_f_params params = {mHOS, mWOS, GammaW};
       gsl_monte_function G = { &hVV_4body, 2, &params };
 

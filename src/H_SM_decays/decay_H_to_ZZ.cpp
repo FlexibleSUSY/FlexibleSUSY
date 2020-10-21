@@ -42,7 +42,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    if (4.*x > 1.0) {
 
       // integrand
-      const double GammaZ = 2.4952;
+      constexpr double GammaZ = 2.4952;
       struct my_f_params params = {mHOS, mZOS, GammaZ};
       gsl_monte_function G = {&hVV_4body, 2, &params};
 
