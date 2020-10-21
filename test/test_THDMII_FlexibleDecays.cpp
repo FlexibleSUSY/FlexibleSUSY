@@ -278,12 +278,12 @@ Block UERMIX
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
    //                            0.0007420072130724369, 1e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00081324389707053922, 1e-14);
+                              0.00081324389707053922, 1e-4);
    // h -> Z Z
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
    //                           8.3396512232490906e-05, 2e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              0.00010470911466556374, 2e-14);
+                              0.00010470911466556374, 1e-4);
 
    // ------------ loop-induces decays ------------
 
