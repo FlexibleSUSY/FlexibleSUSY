@@ -1613,12 +1613,12 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       mass = {}, translation, fieldAssociation,
       externalEdges,
      (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac"
+     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
       If[Length[translation]===7 && translation[[-3]] === {},
-        Return[{{}, ""}]
+        Return[{{}, FinitePart, ""}]
       ];
 
       (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
@@ -1724,7 +1724,7 @@ If[Length@positions =!= 1, Quit[1]];
                   (* renormalization scale *)
                   "ren_scale" <>
                   (* if amplitude is UV divergent, take the finite part *)
-                  If[!Last@translation === True, ",\nFinite", ""] <> ")"
+                  If[!Last@translation === True, FinitePart=True; ",\nFinite", ""] <> ")"
                   ],
             fieldsInLoop = DeleteDuplicates[Map[
             verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]&,
@@ -1814,7 +1814,7 @@ If[Length@positions =!= 1, Quit[1]];
                   ]] <> "}\n"
      ];
 
-      {verticesForFACp,
+      {verticesForFACp, FinitePart,
 
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
@@ -1860,19 +1860,20 @@ If[Length@positions =!= 1, Quit[1]];
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopTopAndInsertion, body = "", vertices = {}},
+    Module[{oneLoopTopAndInsertion, body = "", vertices = {}, FinitePart = False},
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
        With[{ret = WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #]},
          vertices = AppendTo[vertices, ret[[1]]];
-         body = body <> ret[[2]];
-               ]& /@ oneLoopTopAndInsertion;
+         FinitePart = (ret[[2]] || FinitePart);
+         body = body <> ret[[3]];
+       ]& /@ oneLoopTopAndInsertion;
 
        vertices = Flatten[vertices, 1];
 
-       {vertices,
+       {vertices, FinitePart,
          "\n// ----------------- 1-loop contributions to the amplitude -----------------\n" <>
              body
        }
@@ -1925,8 +1926,10 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 AppendTo[vertices, First@res];
-                body = body <> "\n// FormCalc's Finite variable\n";
-                body = body <>"constexpr double Finite {1.};\n";
+                If[res[[2]],
+                  body = body <> "\n// FormCalc's Finite variable\n";
+                  body = body <>"constexpr double Finite {1.};\n"
+                ];
                 body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
