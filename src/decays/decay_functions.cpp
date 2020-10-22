@@ -127,7 +127,7 @@ std::complex<double> f(double tau) noexcept {
       return Sqr(std::asin(std::sqrt(tau)));
    }
    else {
-      return -0.25*Sqr(std::log((1.+std::sqrt(1.+1./tau))/(1.+std::sqrt(1.-1./tau))) - 1i*Pi);
+      return -0.25*Sqr(std::log((1.+std::sqrt(1.-1./tau))/(1.-std::sqrt(1.-1./tau))) - 1i*Pi);
    }
 }
 

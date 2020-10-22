@@ -51,7 +51,7 @@ std::complex<double> delta_AhAA_2loopQCD_for_squark_loop(double mAH, double msq,
 std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, double mu) noexcept;
 
 // eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
-std::complex<double> hgg_SM_loop_function(double x) noexcept;
+std::complex<double> f(double x) noexcept;
 
 unsigned int number_of_active_flavours(double m) noexcept;
 
