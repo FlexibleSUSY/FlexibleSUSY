@@ -297,10 +297,11 @@ double CLASSNAME::get_partial_width<H, G, G>(
          const double deltaNNNLO {467.683620788 + 122.440972222*log_mH2OverMT2 + 10.9409722222*Sqr(log_mH2OverMT2)};
 
          const double alpha_s_red = get_alphas(context)/Pi;
+         const double norm = Sqr(3./(2.*tau)*(1. + (1. - 1./tau)*Sqr(std::asin(std::sqrt(tau)))));
 
          switch (include_higher_order_corrections) {
             case SM_higher_order_corrections::enable:
-               result += Gamma_SM_LO*(deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red));
+               result += Gamma_SM_LO/norm*(deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red) + deltaNNNLO*Cube(alpha_s_red));
                break;
             case SM_higher_order_corrections::disable:
                break;

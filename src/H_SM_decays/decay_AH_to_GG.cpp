@@ -44,7 +44,11 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       // agrees up to a full double precision with autmatically generated one
       const double Gamma_SM_LO = mAh/(32.*Power3(Pi))*std::norm(get_alphas(context)*AHGGVertexVal*Ff);
 
-      const double deltaNLO {97./4. - 7./6.*Nf};
+      const double mu = mAh;
+      const double LH = std::log(Sqr(mu/mAh));
+      const double deltaNLO {
+         97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
+      };
 
       const double log_mAh2OverMT2 {std::log(Sqr(mAh/mtpole))};
       const double deltaNNLO {
