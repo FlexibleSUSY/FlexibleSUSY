@@ -159,6 +159,7 @@ bool check_3body_Vff_decay(const context_base& context, double  mHOS, const type
 
 @partialWidthSpecializationDefs@
 
+/*
 template <>
 double CLASSNAME::get_partial_width<H, A, A>(
       const context_base& context,
@@ -199,6 +200,7 @@ double CLASSNAME::get_partial_width<H, A, Z>(
 
    return res;
 }
+*/
 
 @decaysCalculationFunctions@
 @partialWidthCalculationFunctions@
