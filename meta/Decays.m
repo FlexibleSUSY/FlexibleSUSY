@@ -2279,7 +2279,7 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            If[decay =!= {},
               decay = First[decay];
               declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToGluonGluonPartialWidthFunction[decay, modelName];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
              ];
            {declaration, function}
           ];
@@ -2408,7 +2408,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
               higgsDecays = First[higgsDecays];
               specializations = {CreateHiggsToZZPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
-(*                                 CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],*)
+                                 CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
 (*                                 CreateHiggsToPhotonPhotonPartialWidth[higgsDecays, modelName],*)
 (*                                 CreateHiggsToPhotonZPartialWidth[higgsDecays, modelName],*)
                                  CreateHiggsToHiggsHiggsPartialWidth[higgsDecays, modelName],
