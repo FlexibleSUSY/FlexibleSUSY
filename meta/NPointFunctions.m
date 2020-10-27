@@ -571,7 +571,9 @@ internalNPointFunctionInputCheck ~ SetAttributes ~ {Locked,Protected};
 VerticesForNPointFunction::usage=
 "@brief Return a list of all vertices needed to calculate a given
 n-point correlation function.
-@param nPointFunction the given n-point correlation function
+@param nPointFunction the given n-point correlation function.
+@todo Now we do not have subexpressions, this is a possibility to simplify
+      this punction.
 @returns a list of all vertices needed to calculate a given
 n-point correlation function.temp";
 VerticesForNPointFunction[obj:`type`npf] :=
