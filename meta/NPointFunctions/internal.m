@@ -643,6 +643,11 @@ define[NPointFunctionFAFC, {inFields_, outFields_, options:OptionsPattern[]} :>
       amplitudes = FeynArts`CreateFeynAmp@diagrams;
       {diagrams, amplitudes} = modify[{diagrams, amplitudes}, OptionValue@KeepProcesses];
 
+      debugMakePictures[
+         diagrams,
+         StringJoin[ToString /@ (Join[getField[amplitudes, In],getField[amplitudes, Out]] //. getFieldRules[] /. e_[{_}]:>e)]
+      ];
+
       {
          {getField[amplitudes, In], getField[amplitudes, Out]} //. getFieldRules[],
          calculateAmplitudes[
@@ -883,14 +888,18 @@ define[getClassAmount, {set:`type`diagramSet} :>
 
 define[debugMakePictures, {diagrams:`type`diagramSet, name_String:"classes"} :>
    Module[{
-         directory = FileNameJoin[Most[FileNameSplit@@FeynArts`$Model]]
+         out = {}, directory = FileNameJoin[Most[FileNameSplit@@FeynArts`$Model]]
       },
-      DeleteFile[FileNames[FileNameJoin@{directory, name<>"*"}]];
-      Export[FileNameJoin@{directory,name<>".png"},FeynArts`Paint[diagrams,
-         FeynArts`PaintLevel->{FeynArts`Classes},
-         FeynArts`SheetHeader->name,
-         FeynArts`Numbering->FeynArts`Simple]
-      ];
+
+      FeynArts`Paint[diagrams,
+         FeynArts`PaintLevel -> {Generic},
+         FeynArts`ColumnsXRows -> 1,
+         FeynArts`SheetHeader -> None,
+         FeynArts`Numbering -> FeynArts`Simple,
+         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
+      ]
+
+      Put[out, FileNameJoin@{directory, name<>".m"}];
    ]
 ];
 
