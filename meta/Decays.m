@@ -236,13 +236,13 @@ CreateSMParticleAliases[namespace_:""] :=
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
-      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
       bsmForZdecay =
          Join[
             bsmForZdecay,
             Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
          ];
-      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
+      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
       bsmForWdecay =
          Join[
             bsmForWdecay,
