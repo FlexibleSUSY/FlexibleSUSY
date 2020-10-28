@@ -1556,7 +1556,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
 
          If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldTypes),
 
-            temp[[i]] = temp[[i]] /. If[i==2 || i ==3, concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]], concreteFieldOnEdgeBetweenVerticesLocal[[i]]];
+            temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVerticesLocal[[i]];
             temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
 
             concreteFieldOnEdgeBetweenVerticesLocal[[{i, i+1}]] = concreteFieldOnEdgeBetweenVerticesLocal[[{i+1, i}]];
@@ -1616,7 +1616,8 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       mass = {}, translation, fieldAssociation,
       externalEdges,
      (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False
+     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
+     whereToConj
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
@@ -1638,12 +1639,25 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             translation[[3]],
             translation[[4]],
             diagram,
-             verticesInFieldTypesForFACp
+            verticesInFieldTypesForFACp
           ];
 
       (* vertices in an orientation as required by Cp *)
-(*      vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];*)
       verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+      (* extra conjugations to bring verticesForFACp equal (possibly up to order) with diagram *)
+      Module[
+         {
+            i=1, t,
+            whereToConj = Subsets[Table[i, {i, 1, Length[fieldAssociation]}], {1, Length[fieldAssociation]}]
+         },
+         While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort/@Drop[diagram,3]],
+            t = {#, 2}& /@ (whereToConj[[i]]);
+            fieldAssociation = MapAt[AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
+            verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+            i++;
+            If[i > Length@whereToConj, Print["Error! Could not determine field association list"];Quit[1]];
+         ]
+      ];
 
       (* set of unique indices used in names of vertices and indices *)
       indices = Table["Id"<>ToString@i, {i, Length@verticesForFACp}];
