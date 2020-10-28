@@ -1644,18 +1644,30 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
 
       (* vertices in an orientation as required by Cp *)
       verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
-      (* extra conjugations to bring verticesForFACp equal (possibly up to order) with diagram *)
+      (* extra conjugations to bring verticesForFACp equal (possibly up to order) with vertices in diagram *)
       Module[
          {
             i=1, t,
-            whereToConj = Subsets[Table[i, {i, 1, Length[fieldAssociation]}], {1, Length[fieldAssociation]}]
+            whereToConj =
+               DeleteCases[
+                  Subsets[
+                     Select[
+                        Range[4, Length[fieldAssociation]],
+                        (fieldAssociation[[#,2]] =!= AntiField[fieldAssociation[[#,2]]])&
+                     ]
+                  ],
+                  {}
+               ]
          },
          While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort/@Drop[diagram,3]],
             t = {#, 2}& /@ (whereToConj[[i]]);
             fieldAssociation = MapAt[AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
             verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+            If[i > Length@whereToConj,
+               Print["Error! Could not determine field association list"];
+               Quit[1]
+            ];
             i++;
-            If[i > Length@whereToConj, Print["Error! Could not determine field association list"];Quit[1]];
          ]
       ];
 
