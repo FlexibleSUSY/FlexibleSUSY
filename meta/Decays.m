@@ -240,13 +240,13 @@ CreateBSMParticleAliasList[namespace_:""] :=
       bsmForZdecay =
          Join[
             bsmForZdecay,
-            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex]
+            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
          ];
       bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex];
       bsmForWdecay =
          Join[
             bsmForWdecay,
-            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex]
+            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
          ];
       {
          Join[bsmForZdecay, bsmForWdecay],
@@ -378,19 +378,22 @@ IsSupportedDiagram[diagram_] := ContainsOnlySupportedVertices[diagram];
 GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
 
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
-   Module[{externalFields, diagrams},
-           externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]];
-           diagrams =
-             CXXDiagrams`FeynmanDiagramsOfType[
-               graph,
-               externalFields,
-               (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
+   Module[
+      {
+         externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
+         diagrams
+      },
+      diagrams =
+         CXXDiagrams`FeynmanDiagramsOfType[
+            graph,
+            externalFields,
+            (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
                   With below argument set to True, charged particles are inserted twice in
-                  such bubble - once as particle and once as antiparticle. *)
-               If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
-             ];
-           Select[diagrams, IsPossibleNonZeroDiagram]
-          ];
+               such bubble - once as particle and once as antiparticle. *)
+            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
+         ];
+      Select[diagrams, IsPossibleNonZeroDiagram[#, True]&]
+   ];
 
 (* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
