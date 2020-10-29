@@ -57,8 +57,6 @@ CreateDecayTableInitialization::usage="create C++ initializer for decay table.";
 CreateTotalAmplitudeSpecializations::usage="creates specialized functions for higher-order decays.";
 CreatePartialWidthSpecializations::usage="creates specialized functions for particular decays.";
 
-FieldPositionInVertex::usage = "";
-
 Begin["`Private`"];
 
 FieldPositionInVertex[field_, vertex_] := Module[{pos},
@@ -144,13 +142,12 @@ GetPossibleDecayTopologies[nProducts_, nLoops_] :=
    vertex 2 = outgoing state
    vertex 3 = outgoing state
    vertex 4 = internal vertex *)
-GetPossibleDecayTopologies[2, 0] :=
-    {
-     {{0,0,0,1},
-      {0,0,0,1},
-      {0,0,0,1},
-      {1,1,1,0}}
-    };
+GetPossibleDecayTopologies[2, 0] := {
+   {{0,0,0,1},
+    {0,0,0,1},
+    {0,0,0,1},
+    {1,1,1,0}}
+};
 
 $translationFile = Once[Get["meta/generic_loop_decay_diagram_classes.m"]];
 SetAtrributes[$translationFile, {Protected, Locked}];
@@ -191,7 +188,7 @@ GetDecayTopologyName[t_] :=
           Quit[1];
          ];
 
-CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, SARAH`AntiField[#]& /@ particles]];
+CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, SARAH`AntiField /@ particles]];
 
 GenericScalarName[] := "scalar";
 GenericVectorName[] := "vector";
@@ -236,17 +233,17 @@ CreateSMParticleAliases[namespace_:""] :=
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
-      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
+      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
       bsmForZdecay =
          Join[
             bsmForZdecay,
-            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
+            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
          ];
-      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
+      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
       bsmForWdecay =
          Join[
             bsmForWdecay,
-            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
+            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
          ];
       {
          Join[bsmForZdecay, bsmForWdecay],
@@ -375,8 +372,6 @@ ContainsOnlySupportedVertices[diagram_] :=
 
 IsSupportedDiagram[diagram_] := ContainsOnlySupportedVertices[diagram];
 
-GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
-
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
    Module[
       {
@@ -413,7 +408,7 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
                  0
               ];
            topologies = Join[Table[{i, GetPossibleDecayTopologies[nFinalParticles, i]}, {i, minLoops, maxLoops}]];
-           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, GetFinalStateExternalField /@ finalParticles, #]}& /@ #[[2]]}&
+           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, SARAH`AntiField /@ finalParticles, #]}& /@ #[[2]]}&
                       /@ topologies;
            diagrams = {#[[1]], With[{toposAndDiags = #[[2]]}, Select[toposAndDiags, #[[2]] =!= {}&]]}& /@ diagrams;
            diagrams = DeleteCases[diagrams, {_Integer, {}}];
@@ -1557,7 +1552,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
          If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldTypes),
 
             temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVerticesLocal[[i]];
-            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
+            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> SARAH`AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
 
             concreteFieldOnEdgeBetweenVerticesLocal[[{i, i+1}]] = concreteFieldOnEdgeBetweenVerticesLocal[[{i+1, i}]];
             i=i-1;
@@ -1569,7 +1564,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
 
 (* map topology to FeynArts name *)
 FeynArtsTopologyName[topology_] :=
-    Switch[topology,
+   Switch[topology,
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}, {1, 0, 0,
         0, 1, 1}, {0, 1, 0, 1, 0, 1}, {0, 0, 1, 1, 1, 0}}, "T1",
       {{0, 0, 0, 1, 0}, {0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {1, 1, 0, 0,
@@ -1591,7 +1586,7 @@ FeynArtsTopologyName[topology_] :=
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 1, 0}, {1, 0, 0,
         0, 0, 2}, {0, 1, 1, 0, 0, 1}, {0, 0, 0, 2, 1, 0}}, "T10",
       _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
-    ];
+   ];
 
 WrapCodeInLoop[indices_, code_] :=
    (
@@ -1643,7 +1638,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
           ];
 
       (* vertices in an orientation as required by Cp *)
-      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> SARAH`AntiField[e];
       (* extra conjugations to bring verticesForFACp equal (possibly up to order) with vertices in diagram *)
       Module[
          {
@@ -1653,7 +1648,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                   Subsets[
                      Select[
                         Range[4, Length[fieldAssociation]],
-                        (fieldAssociation[[#,2]] =!= AntiField[fieldAssociation[[#,2]]])&
+                        (fieldAssociation[[#,2]] =!= SARAH`AntiField[fieldAssociation[[#,2]]])&
                      ]
                   ],
                   {}
@@ -1661,8 +1656,8 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
          },
          While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort/@Drop[diagram,3]],
             t = {#, 2}& /@ (whereToConj[[i]]);
-            fieldAssociation = MapAt[AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
-            verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+            fieldAssociation = MapAt[SARAH`AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
+            verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> SARAH`AntiField[e];
             If[i > Length@whereToConj,
                Print["Error! Could not determine field association list"];
                Quit[1]
@@ -1862,7 +1857,7 @@ If[Length@positions =!= 1, Quit[1]];
                 (* weird FA factor *)
                 If[MemberQ[{"T2", "T3", "T4", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
                 If[topoName === "T9" || topoName === "T8",
-                   If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
+                   If[(Field[5] /. fieldAssociation) === (SARAH`AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
                    1
                 ]
                ],16] <>
