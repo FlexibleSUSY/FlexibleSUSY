@@ -103,7 +103,7 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
 
    // SLHA output
    @ModelName@_slha_io slha_io;
-   slha_io.fill(models, qedqcd, scales, observables);
+   slha_io.fill(models, qedqcd, scales, observables, settings);
    slha_io.write_to_stream(std::cout);
 
    return spectrum_generator.get_exit_code();
