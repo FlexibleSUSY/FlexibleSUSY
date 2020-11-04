@@ -4786,6 +4786,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               If[FileExistsQ[f], DeleteFile[f]];
               WriteString[f, "ENABLE_FLEXIBLEDECAY := no"]
            ];
+           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]},
+              If[FileExistsQ[f], DeleteFile[f]]
+           ];
+
            If[FSCalculateDecays,
               PrintHeadline["Creating particle decays"];
 
