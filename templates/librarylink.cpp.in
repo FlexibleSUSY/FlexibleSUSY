@@ -194,6 +194,8 @@ public:
    void set_settings(const Spectrum_generator_settings& s) { settings = s; }
    void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
 
+   const Spectrum_generator_settings& get_settings() const { return settings; }
+
    void put_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
    void put_input_parameters(MLINK link) const;
@@ -1138,6 +1140,9 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
       {
          Redirect_output crd(link);
          data.calculate_model_observables();
+         auto setting = data.get_settings();
+         setting.set(flexiblesusy::Spectrum_generator_settings::calculate_observables, 1.0);
+         data.set_settings(setting);
       }
 
       data.put_observables(link);
