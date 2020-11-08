@@ -378,6 +378,7 @@ GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
          externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
          diagrams
       },
+      (* vertices in diagrams are not SortCp'ed *)
       diagrams =
          CXXDiagrams`FeynmanDiagramsOfType[
             graph,
@@ -1406,14 +1407,29 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
       res
 ];
 
+(* returns vertex needed by FA generated routines, but in terms of SortCp'ed vertex *)
 ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
-   Module[{vertexEdges, res, pos, kk, globalMinus = 1},
+   Module[{vertexEdges, res, pos, globalMinus = 1, vertex, lorSorted, temp},
 
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
-   kk = vertexEdges /. -_[n_] :> n /. _[n_] :> n ;
+   lorSorted =
+      lor /. Index[Generic, n_] :> n /. Mom[-f_[n_]] /; !IsParticle[f] :> Mom[SARAH`AntiField[Field[n] /. fieldAssociation]] /. Mom[f_[n_]] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> Mom[Field[n] /. fieldAssociation];
+   (* SortCp requires that FFV vertex has only PL|PR as lorent structure,
+      not LorentzProduct[gamma[lt], PL|PR] *)
+   lorSorted = lorSorted /. LorentzProduct[gamma[_], lr_:PL|PR] :> lr;
+   vertex =
+      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticle[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
+   temp =
+      SortCp[vertex];
+   SeparateCp[SARAH`Cp[y___][x___]] := {{y}, x};
+   SeparateCp[-SARAH`Cp[y___][x___]] := {{-y}, x};
+   temp = SeparateCp[temp];
+   vertex = First@temp;
+   lorSorted = Last@temp;
+
    res =
-      Replace[lor, {
+      Replace[lorSorted, {
          (* pure only scalar vertices *)
          1 -> "value()",
 
@@ -1425,51 +1441,25 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
 
          (* @todo: rules below need checking! *)
          (* momentum difference vertices *)
-         (Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]]) :> (
+         Mom[f1_] - Mom[f2_] :> (
             "value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-         ),
-         (Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, f[m]]}, ", "] <> ")"
-         ),
-         (Mom[f_[n_]] - Mom[-f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-         ),
-        (Mom[-f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-              StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, -f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-        ),
+               ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f1, vertex] <> ", " <>
+               ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f2, vertex] <>
+            ")"),
 
         (* metric tensor vertices *)
-        (* there's a global - sign in those expression, that's why permutaion with even
+        (* there's a global - sign in those expression, that's why permutation with even
            signature is replaced with odd_permutation *)
-        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[V[Index[Generic, n3_]]]) :>
-               If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-                  "value(TripleVectorVertex::odd_permutation {})",
-                  "value(TripleVectorVertex::even_permutation {})",
-                  Quit[1];
-               ],
-         (* copy of the above expression but with -V[5] and -V[6] *)
-         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[-V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[-V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
-            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-               "value(TripleVectorVertex::odd_permutation {})",
-               "value(TripleVectorVertex::even_permutation {})",
-               Quit[1];
-            ],
-         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
-            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-               "value(TripleVectorVertex::odd_permutation {})",
-               "value(TripleVectorVertex::even_permutation {})",
-               Quit[1];
-            ],
+        g[lt1, lt2] (-Mom[f1_] + Mom[f2_])
+            + g[lt1, lt3] (Mom[f1_] - Mom[f3_])
+            + g[lt2, lt3] (-Mom[f2_] + Mom[f3_]) :> (
+               Switch[FSPermutationSign@FindPermutation[{f1, f2, f3}, vertex],
+                  1, "value(TripleVectorVertex::odd_permutation {})",
+                 -1, "value(TripleVectorVertex::even_permutation {})",
+                 _,  (Print["Can't find TripleVectorVertex permutation"]; Quit[1])
+               ]
+
+        ),
 
          g[l1_, l2_] g[l3_, l4_] :>
             Switch[{l1, l2, l3, l4},
@@ -1485,35 +1475,20 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
          (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             the momentum of non-bared ghost *)
-         Mom[f_[Index[Generic, n_]]] :> (
-           "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[
-             If[
-               Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] === SARAH`bar,
-               globalMinus = 1;
-               If[Length@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&] === 0,
-                 First@Select[{particles}, MatchQ[#, f[Index[Generic, m_/; m =!= n]]]&],
-
-                 First@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&]
-
-               ],
-               f[Index[Generic, n]]
-             ], {particles}] <> ")"
+         Mom[p_] :> (
+            globalMinus = -1;
+            With[{unbarredGhosts = Select[DeleteCases[vertex, p], (IsGhost[#] && Head[#]=!=SARAH`bar)&]},
+               If[Head[p]===SARAH`bar && Length@unbarredGhosts =!= 1,
+                  Print[unbarredGhosts, vertex];
+                  Print["Error! Couldn't identify ghost in vertex"];
+                  Quit[1],
+                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[If[Head[p]=!=SARAH`bar, p, First@unbarredGhosts], vertex] <> ")"
+               ]
+            ]
          ),
-         Mom[-f_[Index[Generic, n_]]] :> (
-          "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[
-            If[
-              Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
-              If[Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&] === {},
-                  Last@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],
-                  First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
-              ],
-               globalMinus = 1;
-              -f[Index[Generic, n]]
-              ], {particles}]) <> ")"
-        ),
 
         (* error *)
-        lor :> (Print["Unhandled lorentz structure " <> ToString@lor]; Quit[1])
+        lorSorted :> (Print["Unhandled lorentz structure " <> ToString@lorSorted]; Quit[1])
       }
    ];
 
@@ -1612,7 +1587,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       externalEdges,
      (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
      verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
-     whereToConj
+     whereToConj, verticesForFACp2
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
@@ -1639,6 +1614,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
 
       (* vertices in an orientation as required by Cp *)
       verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> SARAH`AntiField[e];
+
       (* extra conjugations to bring verticesForFACp equal (possibly up to order) with vertices in diagram *)
       Module[
          {
@@ -1654,25 +1630,32 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                   {}
                ]
          },
-         While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort/@Drop[diagram,3]],
-            t = {#, 2}& /@ (whereToConj[[i]]);
-            fieldAssociation = MapAt[SARAH`AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
-            verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> SARAH`AntiField[e];
+         (* We do a double sort because the order of fields in vertices or the order of
+            vertices doesn't have to be same. *)
+         While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort /@ Drop[diagram, 3]],
             If[i > Length@whereToConj,
                Print["Error! Could not determine field association list"];
                Quit[1]
             ];
+            t = {#, 2}& /@ (whereToConj[[i]]);
+            fieldAssociation = MapAt[SARAH`AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
+            verticesForFACp = verticesInFieldTypesForFACp /. f_[n_Integer] :> Field[n] /. fieldAssociation /. - e_ :> SARAH`AntiField[e];
             i++;
          ]
+      ];
+      If[Sort[SortFieldsInCp /@ verticesForFACp] =!= Sort[SortFieldsInCp /@ Drop[diagram, 3]],
+         Print["Ania"];Quit[1]
       ];
 
       (* set of unique indices used in names of vertices and indices *)
       indices = Table["Id"<>ToString@i, {i, Length@verticesForFACp}];
 
-      (* create using declarations for vertices *)
+      (* create using declarations for SortCp'ed vertices *)
+      verticesForFACp2 = (SortCp[Cp[Sequence@@#]])& /@ verticesForFACp;
+      verticesForFACp2 = If[Length[#] == 2, List@@Last@#, List@@#]& /@ verticesForFACp2;
       cppVertices =
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
-            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp}];
+            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp2}];
 
       (* List of {integer, integer} -> Field[integer] *)
       externalEdges =
@@ -1681,8 +1664,9 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             (MatchQ[#, ({i_Integer, j_Integer} -> Field[_Integer]) /; (First@Sort[{i,j}] >= 1 && First@Sort[{i,j}] <= 3 && Last@Sort[{i,j}] > 3)])&
          ];
 
+      verticesInFieldTypesForFACpCpSorted = MapIndexed[Permute[#1, FindPermutation[verticesForFACp[[First@#2]], verticesForFACp2[[First@#2]]]]&, verticesInFieldTypesForFACp];
         matchExternalFieldIndicesCode = StringJoin@@(With[{
-          positions = Position[verticesInFieldTypesForFACp /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
+          positions = Position[verticesInFieldTypesForFACpCpSorted /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
         },
 If[Length@positions =!= 1, Quit[1]];
                   "const auto externalFieldIndicesIn" <> ToString[#] <>
@@ -1701,24 +1685,25 @@ If[Length@positions =!= 1, Quit[1]];
          hence the -field_->field rule *)
       mass =
          Map[
-            ("const double mInternal" <> ToString[#-3] <> " {context.mass<" <>
-         CXXNameOfField[
-            verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]
-            ] <> ">(" <>
-         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACp/. -field_:>field, _[#]]]] <> "::template indices_of_field<" <>
-         ToString@Utils`MathIndexToCPP[
-            Last@First@Position[verticesInFieldTypesForFACp/. -field_:>field, _[#]]
-         ] <>
-         ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACp/.-field_:>field, _[#]]]] <> "))};\n"
-      )&,
-      Range[4, 3+Length@verticesForFACp]
-      ];
+            (
+               "const double mInternal" <> ToString[#-3] <> " {context.mass<" <>
+               CXXNameOfField[
+                  verticesForFACp2[[  Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]    ]]
+               ] <> ">(" <>
+               "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted/. -field_:>field, _[#]]]] <> "::template indices_of_field<" <>
+               ToString@Utils`MathIndexToCPP[
+                  Last@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_:>field, _[#]]
+               ] <>
+               ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted /.-field_:>field, _[#]]]] <> "))};\n"
+            )&,
+            Range[4, Length@fieldAssociation ]
+         ];
 
       mass = StringJoin@@mass;
 
       With[{
-        positions = Position[verticesInFieldTypesForFACp /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
-      },
+        positions = Position[verticesInFieldTypesForFACpCpSorted/. -f_[n_] :> Field[n] /. f_[n_] :> Field[n], Field[#]]
+         },
         If[Length@positions =!= 2, Quit[1]];
             matchInternalFieldIndicesCode = matchInternalFieldIndicesCode <>
                 "if (vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
@@ -1732,7 +1717,7 @@ If[Length@positions =!= 1, Quit[1]];
                 ToString@Utils`MathIndexToCPP@positions[[2,2]] <>
 
                 ">(index"<> ToString@indices[[positions[[2,1]]]] <> "))\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
-      ]& /@ Range[4, 3 + Length[verticesInFieldTypesForFACp]];
+      ]& /@ Range[4, Length@fieldAssociation];
 
       (* body of nested loops over vertices indices *)
       Block[{ampCall =
@@ -1742,16 +1727,17 @@ If[Length@positions =!= 1, Quit[1]];
                      FillMasses[decay] <> ",\n" <>
                      (* internal masses *)
                      StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n" <>
-                  (* couplings *)
-                         TextFormatting`WrapLines[
-                  StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
-                  (* renormalization scale *)
-                  "ren_scale" <>
-                  (* if amplitude is UV divergent, take the finite part *)
-                  If[!Last@translation === True, FinitePart=True; ",\nFinite", ""] <> ")"
+                     (* couplings *)
+                     TextFormatting`WrapLines[
+                        StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"
+                     ] <>
+                     (* renormalization scale *)
+                     "ren_scale" <>
+                     (* if amplitude is UV divergent, take the finite part *)
+                     If[!Last@translation === True, FinitePart=True; ",\nFinite", ""] <> ")"
                   ],
             fieldsInLoop = DeleteDuplicates[Map[
-            verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]&,
+            verticesForFACp2[[  Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]    ]]&,
       Range[4, 3+Length@verticesForFACp]
       ] /. SARAH`bar|Susyno`LieGroups`conj -> Identity]
 
@@ -1838,7 +1824,7 @@ If[Length@positions =!= 1, Quit[1]];
                   ]] <> "}\n"
      ];
 
-      {verticesForFACp, FinitePart,
+      {verticesForFACp2, FinitePart,
 
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
