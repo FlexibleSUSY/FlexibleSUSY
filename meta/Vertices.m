@@ -155,14 +155,21 @@ SortCp[SARAH`Cp[vectors__][lor_]] /; CpType[SARAH`Cp[vectors]] === VVV := Module
    SARAH`Cp[Sequence@@sortedVectors][lor]
 ];
 
-(* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
 SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
 Module[{
-	sortedVectors
+	sortedVectors, sortedIndices, indices
     },
+    If[!And @@ (AtomQ /@ ({vectors} /. Susyno`LieGroups`conj -> Identity)),
+      indices = {vectors} /. Susyno`LieGroups`conj -> Identity /. _[l_List] :> First@Select[l, SarahLorentzIndexQ];
+      ,
+      indices = {lt1, lt2, lt3, lt4};
+    ];
     sortedVectors = SortFieldsInCp[{vectors}];
-	(SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]
+    sortedIndices = Permute[indices, FindPermutation[{vectors}, sortedVectors]];
+	 (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4] /. Thread[indices -> sortedIndices]]
 ];
+
+(* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
 SortCp[cp : SARAH`Cp[vectors__][lor_Integer]] /; CpType[cp] === VVVV :=
 Module[{
 	vs = StripExtraFieldIndices[{vectors}],
