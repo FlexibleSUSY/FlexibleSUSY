@@ -159,13 +159,14 @@ SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, 
 Module[{
 	sortedVectors, sortedIndices, indices
     },
+    sortedVectors = SortFieldsInCp[{vectors}];
     If[!And @@ (AtomQ /@ ({vectors} /. Susyno`LieGroups`conj -> Identity)),
       indices = {vectors} /. Susyno`LieGroups`conj -> Identity /. _[l_List] :> First@Select[l, SarahLorentzIndexQ];
+      sortedIndices = Permute[indices, FindPermutation[{vectors}, sortedVectors]];
       ,
       indices = {lt1, lt2, lt3, lt4};
+      sortedIndices = Part[indices, #]& /@ (PermutationReplace[#, FindPermutation[{vectors}, sortedVectors]]& /@ {1,2,3,4});
     ];
-    sortedVectors = SortFieldsInCp[{vectors}];
-    sortedIndices = Permute[indices, FindPermutation[{vectors}, sortedVectors]];
 	 (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4] /. Thread[indices -> sortedIndices]]
 ];
 

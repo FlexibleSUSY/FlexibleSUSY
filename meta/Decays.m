@@ -1422,9 +1422,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
       SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticle[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
    temp =
       SortCp[vertex];
-   SeparateCp[SARAH`Cp[y___][x___]] := {{y}, x};
-   SeparateCp[-SARAH`Cp[y___][x___]] := {{-y}, x};
-   temp = SeparateCp[temp];
+   temp = temp /. -SARAH`Cp[y___][x___] :> (globalMinus*=-1;{{y}, x}) /. SARAH`Cp[y___][x___] :> {{y}, x};
    vertex = First@temp;
    lorSorted = Last@temp;
 
@@ -1476,7 +1474,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             the momentum of non-bared ghost *)
          Mom[p_] :> (
-            globalMinus = -1;
+            globalMinus *= -1;
             With[{unbarredGhosts = Select[DeleteCases[vertex, p], (IsGhost[#] && Head[#]=!=SARAH`bar)&]},
                If[Head[p]===SARAH`bar && Length@unbarredGhosts =!= 1,
                   Print[unbarredGhosts, vertex];
