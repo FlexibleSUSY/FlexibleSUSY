@@ -36,7 +36,7 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.6'
+      IMAGE_VERSION: '0.4.7'
       FORMCALC_VERSION: '9.9'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
@@ -94,6 +94,7 @@ jobs:
                   --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
                   --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64
                   --with-optional-modules=test
+                  --with-cxxflags=\"-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe\"
                "
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}

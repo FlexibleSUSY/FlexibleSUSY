@@ -2630,7 +2630,7 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, &decays);";
               decaySetttingsOverride =
 "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
    if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
