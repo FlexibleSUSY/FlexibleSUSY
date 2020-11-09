@@ -33,8 +33,8 @@ double CLASSNAME::get_partial_width<AH, G, G>(
          );
       }
 
-      const auto indices = concatenate(in_idx, std::array<int, 1> {2}, std::array<int, 1> {2});
-      const auto AHGGVertex = Vertex<AH, bar<uq>::type, uq>::evaluate(indices, context);
+      const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
+      const auto AHGGVertex = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
       std::complex<double> const AHGGVertexVal = 0.5*(-AHGGVertex.left() + AHGGVertex.right());
 
       const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));

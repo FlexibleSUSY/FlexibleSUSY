@@ -38,8 +38,8 @@ double CLASSNAME::get_partial_width<H, G, G>(
             throw;
          }
 
-         const auto indices = concatenate(in_idx, std::array<int, 1> {2}, std::array<int, 1> {2});
-         const auto HGGVertex = Vertex<H, bar<uq>::type, uq>::evaluate(indices, context);
+         const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
+         const auto HGGVertex = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
          std::complex<double> const HGGVertexVal = 0.5*(HGGVertex.left() + HGGVertex.right());
 
          // eq. 5 of https://arxiv.org/pdf/1109.5304.pdf

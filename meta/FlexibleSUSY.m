@@ -1981,7 +1981,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, decaysVertices2 = {}, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -2005,7 +2005,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
-           decaysVertices2 = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
+           decaysVertices = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
+           decaysVertices = SortFieldsInCp /@ decaysVertices;
 
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];
@@ -2020,11 +2021,10 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysListGettersFunctions = Decays`CreateDecayTableGetterFunctions[decayParticles, FlexibleSUSY`FSModelName <> "_decay_table"];
            initDecayTable = Decays`CreateDecayTableInitialization[decayParticles];
 
-           {decaysVertices, calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
+           {calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
                = Decays`CreateTotalAmplitudeSpecializations[decaysLists, FlexibleSUSY`FSModelName];
            {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
                = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName];
-           decaysVertices = Join[decaysVertices, decaysVertices2];
 
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
            bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];

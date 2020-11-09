@@ -1212,7 +1212,7 @@ GetTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay] :=
           ];
 
 EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesName_, paramsStruct_, resultName_:"vertex"] :=
-    Module[{vertexFields, templatePars},
+    Module[{vertexFields, templatePars, sortedVertexFields},
            vertexFields = GetTreeLevelTwoBodyDecayVertex[decay];
            If[Length[vertexFields] > 1,
               Print["Error: more than a single vertex in tree-level decays."];
@@ -1220,9 +1220,10 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
              ];
            If[vertexFields =!= {},
               vertexFields = First[vertexFields];
+              sortedVertexFields = SortFieldsInCp[vertexFields];
               templatePars = "<" <>
                               Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#]&
-                                                            /@ vertexFields, ", "] <> " >";
+                                                            /@ sortedVertexFields, ", "] <> " >";
               "const auto " <> resultName <> " =  Vertex" <> templatePars <> "::evaluate(" <>
               indicesName <> ", " <> paramsStruct <> ");\n",
               ""
@@ -1243,9 +1244,13 @@ FillSSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
            fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_left += vertex.left();\n" <>
                          structName <> ".form_factor_right += vertex.right();\n";
@@ -1264,22 +1269,30 @@ FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
           ];
 
 FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
            fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_g += vertex.value();\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
 FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
            fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_left += vertex.left();\n" <>
                          structName <> ".form_factor_right += vertex.right();\n";
@@ -1590,7 +1603,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
 
       translation = GenericTranslationForInsertion[topology, diagram];
       If[Length[translation]===7 && translation[[-3]] === {},
-        Return[{{}, FinitePart, ""}]
+        Return[{FinitePart, ""}]
       ];
 
       (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
@@ -1640,9 +1653,6 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             verticesForFACp = verticesInFieldTypesForFACp /. f_[n_Integer] :> Field[n] /. fieldAssociation /. - e_ :> SARAH`AntiField[e];
             i++;
          ]
-      ];
-      If[Sort[SortFieldsInCp /@ verticesForFACp] =!= Sort[SortFieldsInCp /@ Drop[diagram, 3]],
-         Print["Ania"];Quit[1]
       ];
 
       (* set of unique indices used in names of vertices and indices *)
@@ -1822,7 +1832,7 @@ If[Length@positions =!= 1, Quit[1]];
                   ]] <> "}\n"
      ];
 
-      {verticesForFACp2, FinitePart,
+      {FinitePart,
 
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
@@ -1868,20 +1878,17 @@ If[Length@positions =!= 1, Quit[1]];
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopTopAndInsertion, body = "", vertices = {}, FinitePart = False},
+    Module[{oneLoopTopAndInsertion, body = "", FinitePart = False},
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
        With[{ret = WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #]},
-         vertices = AppendTo[vertices, ret[[1]]];
-         FinitePart = (ret[[2]] || FinitePart);
-         body = body <> ret[[3]];
+         FinitePart = (ret[[1]] || FinitePart);
+         body = body <> ret[[2]];
        ]& /@ oneLoopTopAndInsertion;
 
-       vertices = Flatten[vertices, 1];
-
-       {vertices, FinitePart,
+       {FinitePart,
          "\n// ----------------- 1-loop contributions to the amplitude -----------------\n" <>
              body
        }
@@ -1894,7 +1901,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             fieldsNamespace = "fields",
             returnVar = "result", paramsStruct = "context", returnType = "",
             externalFieldsList, templatePars = "", args = "",
-            body = "", vertices = {}},
+            body = ""},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
            (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
@@ -1933,8 +1940,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
-                AppendTo[vertices, First@res];
-                If[res[[2]],
+                If[res[[1]],
                   body = body <> "\n// FormCalc's Finite variable\n";
                   body = body <>"constexpr double Finite {1.};\n"
                 ];
@@ -1945,10 +1951,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            body = body <> "return " <> returnVar <> ";\n";
 
-           (*Print[" Done."];*)
-           vertices = Flatten[vertices, 1];
-
-           {vertices,
              "// " <> ToString@initialParticle <> " -> " <> ToString@finalState <> "\n" <>
                  "template<>\n" <>
                  returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
@@ -1956,7 +1958,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                  "(\n" <> TextFormatting`IndentText[args <> ") const{\n"] <>
                  TextFormatting`IndentText[body] <>
                  "}\n"
-           }
    ];
 
 GetHiggsBosonDecays[particleDecays_List] :=
@@ -2140,8 +2141,8 @@ CreateHiggsToPhotonZTotalAmplitude[particleDecays_List, modelName_] :=
 CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{decl = "", def = "", vertices = {}},
            decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName];
-           {vertices, def} = CreateTotalAmplitudeSpecializationDef[decay, modelName];
-           {vertices, decl, def}
+           def = CreateTotalAmplitudeSpecializationDef[decay, modelName];
+           {decl, def}
           ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
@@ -2166,10 +2167,8 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
               ];
            Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
            specializations = Last@specializations;
-           vertices = Flatten[First@Transpose[specializations], 1];
-           specializations = Transpose[Drop[Transpose[specializations], 1]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
-           {vertices, Sequence@@(Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations])}
+           Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
           ];
 
 CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=

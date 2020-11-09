@@ -40,8 +40,8 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
-   const auto indices = concatenate(indexIn, indexOut1, indexOut2);
-   const auto HBBbarVertexDR = Vertex<H, bar<uq>::type, uq>::evaluate(indices, context);
+   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
+   const auto HBBbarVertexDR = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
    const std::complex<double> HBBbarVertexDRV = HBBbarVertexDR.left() + HBBbarVertexDR.right();
 
    const auto amp2DR = Sqr(mHOS) * Sqr(betaDR) *
@@ -86,8 +86,8 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
                const double lt = std::log(Sqr(mHOS/mtpole));
                const double lq = std::log(xDR);
                // eq. 28 of hep-ph/9505358
-               const auto Httindices = concatenate(indexIn, std::array<int, 1> {2}, std::array<int, 1> {2});
-               const auto Httbar = Vertex<H, bar<uq>::type, uq>::evaluate(Httindices, context);
+               const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+               const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
                const auto HttbarV = Httbar.left() + Httbar.right();
                // Yukawa/mass
                const auto CSuu = HBBbarVertexDRV/muqDR;

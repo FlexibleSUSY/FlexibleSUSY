@@ -39,9 +39,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       gsl_rng_free (r);
 
       // prefactor
-      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghWW =
-         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
+         Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
 
       res *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
    }
@@ -55,9 +55,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       }
       res = 1./(768.*Power3(Pi)*mHOS) * RT(x)/x;
 
-      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghWW =
-         Vertex<conj<W>::type, W, H>::evaluate(indices, context).value();
+         Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
 
       // absolute value of baru d W+ vertex (no CKM and no PL projector)
       const double g2 = context.model.get_g2();

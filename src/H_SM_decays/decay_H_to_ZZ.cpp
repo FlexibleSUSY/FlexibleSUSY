@@ -63,9 +63,9 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       gsl_rng_free (r);
 
       // prefactor
-      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghZZ =
-         Vertex<Z, Z, H>::evaluate(indices, context).value();
+         Vertex<H, Z, Z>::evaluate(indices, context).value();
       res *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
    // mZ < mH < 2*mZ
    // three-body decay
@@ -83,9 +83,9 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
       res = 3./(512.*Power3(Pi)) * 1./mHOS * deltaV * RT(x)/x;
 
-      const auto indices = concatenate(indexOut2, indexOut1, indexIn);
+      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghZZ =
-         Vertex<Z, Z, H>::evaluate(indices, context).value();
+         Vertex<H, Z, Z>::evaluate(indices, context).value();
 
       const double g2 = context.model.get_g2();
 
