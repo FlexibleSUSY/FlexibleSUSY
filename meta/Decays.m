@@ -2151,20 +2151,34 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            Print[""];
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
-           ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
-           specializations =
-              AbsoluteTiming@ParallelMap[
-                 (
-                    (*If[!MemberQ[listing, GetInitialState[#]],
-                       Print[""];
-                       Print["Creating C++ code for ", GetInitialState[#], " decays..."];
-                       AppendTo[listing, GetInitialState[#]];
-                    ];*)
-                    CreateTotalAmplitudeSpecialization[#, modelName]
-                 )&,
-                 Flatten[Last @@@ particleDecays, 1],
-                 DistributedContexts -> All, Method -> "FinestGrained"
-              ];
+           If[FlexibleSUSY`FSEnableParallelism,
+              ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
+              specializations =
+                 AbsoluteTiming@ParallelMap[
+                    (
+                       (*If[!MemberQ[listing, GetInitialState[#]],
+                          Print[""];
+                          Print["Creating C++ code for ", GetInitialState[#], " decays..."];
+                          AppendTo[listing, GetInitialState[#]];
+                       ];*)
+                       CreateTotalAmplitudeSpecialization[#, modelName]
+                    )&,
+                    Flatten[Last @@@ particleDecays, 1],
+                    DistributedContexts -> All, Method -> "FinestGrained"
+                 ],
+              specializations =
+                 AbsoluteTiming@Map[
+                    (
+                       If[!MemberQ[listing, GetInitialState[#]],
+                          Print["Creating C++ code for ", GetInitialState[#], " decays..."];
+                          AppendTo[listing, GetInitialState[#]];
+                       ];
+                       CreateTotalAmplitudeSpecialization[#, modelName]
+                    )&,
+                    Flatten[Last @@@ particleDecays, 1]
+                 ]
+           ];
+
            Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
