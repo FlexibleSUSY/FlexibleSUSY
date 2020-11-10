@@ -308,7 +308,7 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
                                   (finalStateReps === {T, T}) ||
                                   (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}])
-                                  (* unkoment to enable O -> OO decays once
+                                  (* uncomment to enable O -> OO decays once
                                      the handling of multiple color structures
                                      is introduced
                                   || (finalStateReps === Sort[{O, O}])*));,
