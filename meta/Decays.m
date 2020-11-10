@@ -1427,7 +1427,11 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
    lorSorted =
-      lor /. Index[Generic, n_] :> n /. Mom[-f_[n_]] /; !IsParticle[f] :> Mom[SARAH`AntiField[Field[n] /. fieldAssociation]] /. Mom[f_[n_]] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> Mom[Field[n] /. fieldAssociation];
+      lor /. Index[Generic, n_] :> n;
+   (* we use field position in vertex in Mom and not field itself as there
+      are vertices like {hh, hh, VZ} in the MSSMCPV which would give
+      Mom[hh] - Mom[hh] which is 0 *)
+   lorSorted = lorSorted /. Mom[-f_[n_]] :> Mom[First@First@Position[vertexEdges, -f[n]]] /. Mom[f_[n_]] :> Mom[First@First@Position[vertexEdges, f[n]]];
    (* SortCp requires that FFV vertex has only PL|PR as lorent structure,
       not LorentzProduct[gamma[lt], PL|PR] *)
    lorSorted = lorSorted /. LorentzProduct[gamma[_], lr_:PL|PR] :> lr;
@@ -1452,19 +1456,17 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
 
          (* @todo: rules below need checking! *)
          (* momentum difference vertices *)
-         Mom[f1_] - Mom[f2_] :> (
-            "value(" <>
-               ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f1, vertex] <> ", " <>
-               ToString@Utils`MathIndexToCPP@FieldPositionInVertex[f2, vertex] <>
-            ")"),
+         Mom[i1_Integer] - Mom[i2_Integer] :>
+            "value(" <> ToString[i1-1] <> ", " <> ToString[i2-1] <> ")",
 
         (* metric tensor vertices *)
         (* there's a global - sign in those expression, that's why permutation with even
            signature is replaced with odd_permutation *)
-        g[lt1, lt2] (-Mom[f1_] + Mom[f2_])
-            + g[lt1, lt3] (Mom[f1_] - Mom[f3_])
-            + g[lt2, lt3] (-Mom[f2_] + Mom[f3_]) :> (
-               Switch[FSPermutationSign@FindPermutation[{f1, f2, f3}, vertex],
+        g[lt1, lt2] (-Mom[i1_] + Mom[i2_])
+            + g[lt1, lt3] (Mom[i1_] - Mom[i3_])
+            + g[lt2, lt3] (-Mom[i2_] + Mom[i3_]) :> (
+               Print[lor];
+               Switch[Signature[{i1, i2, i3}],
                   1, "value(TripleVectorVertex::odd_permutation {})",
                  -1, "value(TripleVectorVertex::even_permutation {})",
                  _,  (Print["Can't find TripleVectorVertex permutation"]; Quit[1])
@@ -1486,14 +1488,13 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
          (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             the momentum of non-bared ghost *)
-         Mom[p_] :> (
+         Mom[i_Integer] :> (
             globalMinus *= -1;
-            With[{unbarredGhosts = Select[DeleteCases[vertex, p], (IsGhost[#] && Head[#]=!=SARAH`bar)&]},
-               If[Head[p]===SARAH`bar && Length@unbarredGhosts =!= 1,
-                  Print[unbarredGhosts, vertex];
+            With[{unbarredGhosts = Select[Delete[vertex, i], (IsGhost[#] && Head[#]=!=SARAH`bar)&]},
+               If[Head[vertex[[i]]]===SARAH`bar && Length@unbarredGhosts =!= 1,
                   Print["Error! Couldn't identify ghost in vertex"];
                   Quit[1],
-                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[If[Head[p]=!=SARAH`bar, p, First@unbarredGhosts], vertex] <> ")"
+                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[If[Head[vertex[[i]]]=!=SARAH`bar, vertex[[i]], First@unbarredGhosts], vertex] <> ")"
                ]
             ]
          ),

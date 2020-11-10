@@ -146,13 +146,21 @@ SortCp[SARAH`Cp[fields__]] :=
 
 SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
 
+SortCp[SARAH`Cp[vectors__][Mom[i1_Integer]-Mom[i2_Integer]]] /; CpType[SARAH`Cp[vectors]] === SSV := Module[
+	{sortedVectors = SortFieldsInCp[{vectors}], permutation},
+
+   permutation = FindPermutation[{vectors}, sortedVectors];
+   (SARAH`Cp @@ sortedVectors)[Mom[PermutationReplace[i1, permutation]] - Mom[PermutationReplace[i2, permutation]]]
+];
+
 SortCp[SARAH`Cp[vectors__]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
 	{sortedVectors = SortFieldsInCp[{vectors}]},
 	Utils`FSPermutationSign[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
 ];
 SortCp[SARAH`Cp[vectors__][lor_]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
-	{sortedVectors = SortFieldsInCp[{vectors}]},
-   SARAH`Cp[Sequence@@sortedVectors][lor]
+	{sortedVectors = SortFieldsInCp[{vectors}], permutation},
+   permutation = FindPermutation[{vectors}, sortedVectors];
+   SARAH`Cp[Sequence@@sortedVectors][lor /. Mom[i_Integer] :> Mom[PermutationReplace[i, permutation]]]
 ];
 
 SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
