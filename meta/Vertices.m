@@ -178,6 +178,30 @@ Module[{
 	 (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4] /. Thread[indices -> sortedIndices]]
 ];
 
+(* Sorting the CXXDiagrams version of VVVV vertices.
+   The order is determined by the SortFieldsInCp function.
+   Examples of usage:
+      SortCp[Cp[conj[VWp], VWp, VZ, VP][g[lt1, lt2] g[lt3, lt4]]]
+           = Cp[conj[VWp], VP, VWp, VZ][g[lt1, lt3] g[lt2, lt4]]
+
+      SortCp[Cp[conj[VWp[{lt4}]], VWp[{lt3}], VZ[{lt2}], VP[{lt1}]][g[lt1, lt2] g[lt3, lt4]]]
+           = Cp[conj[VWp[{lt4}]], VP[{lt1}], VWp[{lt3}], VZ[{lt2}]][g[lt1, lt2] g[lt3, lt4]]
+*)
+SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
+   Module[{indices, sortedIndices, sortedVectors},
+      sortedVectors = SortFieldsInCp[{vectors}];
+      If[!And @@ (AtomQ /@ ({vectors} /. Susyno`LieGroups`conj -> Identity)),
+         (* indices are explicit in vectors so we don't sort indices *)
+         (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]
+         ,
+         (* indices are implicit in vectors so we assume {lt1, lt2, lt3, lt4} and after sorting
+            we still want them to be in that order *)
+         indices = {lt1, lt2, lt3, lt4};
+         sortedIndices = Part[indices, #]& /@ (PermutationReplace[#, FindPermutation[{vectors}, sortedVectors]]& /@ {1,2,3,4});
+         (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4] /. Thread[indices -> sortedIndices]]
+      ]
+   ];
+
 (* see OrderVVVV[] in SARAH/Package/SPheno/SPhenoFunc.m *)
 SortCp[cp : SARAH`Cp[vectors__][lor_Integer]] /; CpType[cp] === VVVV :=
 Module[{
@@ -760,7 +784,7 @@ ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[SARAH`Cp[p]][lorentz];
 
 IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
-    Module[{sortedFields, cached, vertex, isNonZero},
+    Module[{sortedFields, cached, vertex},
            sortedFields = SortFieldsInCp[fields];
            If[vertexList =!= {},
               cached = DeleteDuplicates[Select[vertexList, StripFieldIndices[#[[1]]] === sortedFields &, 1]];
