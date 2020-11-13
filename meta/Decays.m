@@ -2202,7 +2202,7 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             declaration = "", includeStatement = ""},
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-           includeStatement = "#include \"H_SM_decays/decay_" <>
+           includeStatement = "#include \"decays/H_SM_decays/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
                               StringJoin[SimplifiedName[# /. SARAH`bar|Susyno`LieGroups`conj -> Identity]& /@ finalState] <>
                               ".cpp\"";

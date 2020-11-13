@@ -50,7 +50,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       gsl_rng_env_setup ();
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
-      constexpr size_t calls = 10000000;
+      constexpr size_t calls = 10000000000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
