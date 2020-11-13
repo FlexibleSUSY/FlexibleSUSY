@@ -2139,7 +2139,7 @@ CreateHiggsToPhotonZTotalAmplitude[particleDecays_List, modelName_] :=
           ];
 
 CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
-    Module[{decl = "", def = "", vertices = {}},
+    Module[{decl = "", def = ""},
            decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName];
            def = CreateTotalAmplitudeSpecializationDef[decay, modelName];
            {decl, def}
@@ -2155,14 +2155,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
               specializations =
                  AbsoluteTiming@ParallelMap[
-                    (
-                       (*If[!MemberQ[listing, GetInitialState[#]],
-                          Print[""];
-                          Print["Creating C++ code for ", GetInitialState[#], " decays..."];
-                          AppendTo[listing, GetInitialState[#]];
-                       ];*)
-                       CreateTotalAmplitudeSpecialization[#, modelName]
-                    )&,
+                    CreateTotalAmplitudeSpecialization[#, modelName]&,
                     Flatten[Last @@@ particleDecays, 1],
                     DistributedContexts -> All, Method -> "FinestGrained"
                  ],
@@ -2178,12 +2171,11 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     Flatten[Last @@@ particleDecays, 1]
                  ]
            ];
-
            Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
            specializations = Last@specializations;
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
-          ];
+   ];
 
 CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],

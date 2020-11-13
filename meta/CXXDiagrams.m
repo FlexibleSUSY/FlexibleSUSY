@@ -1147,54 +1147,62 @@ CreateVertices[
 Module[{cxxVertices, vertexPartition,
         contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
 
-   (* without this CForm includes context in name of symbols
-      such that we get for example SARAH_g1 instead of g1 in
-      generated C++ code *)
-   ParallelEvaluate[
-      (BeginPackage[#];EndPackage[];
-       (* prevent shdw warning with Susyno`LieGroups`M: *)
-       Off[Remove::remal];
-       Remove[Susyno`LieGroups`M];
-       On[Remove::remal];
-      )& /@ contextsToDistribute,
-      DistributedContexts->Automatic
-   ];
-   (* without this CForm converts complex numbers using
-      Complex wrapper *)
-   ParallelEvaluate[
-      Unprotect[Complex];
-      Format[Complex[r_,i_],CForm] :=
-         Format[CreateCType[CConversion`ScalarType[complexScalarCType]] <>
-            "(" <> ToString[CForm[r]] <> "," <> ToString[CForm[i]] <> ")",
-            OutputForm
-         ];
-      Protect[Complex];
-      Unprotect[Power];
-      Format[Power[E,z_],CForm] :=
-         Format["Exp(" <> ToString[CForm[z]] <> ")", OutputForm];
-      Format[Power[b_,2],CForm] :=
-         Format["Sqr(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,0.5 | 1/2],CForm] :=
-         Format["Sqrt(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,1./3 | 1/3],CForm] :=
-         Format["Cbrt(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,1.5 | 3/2],CForm] :=
-         Format["Power3(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
-      Format[Power[b_,0.25 | 1/4],CForm] :=
-         Format["Sqrt(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
-      Format[Power[b_,0.75 | 3/4],CForm] :=
-         Format["Power3(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
-      Format[Power[b_,1.25 | 5/4],CForm] :=
-         Format["Power5(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
-      Protect[Power];
-      ,
-      DistributedContexts->None
-   ];
-   cxxVertices =
-      AbsoluteTiming@ParallelMap[
-         CreateVertex,
-         DeleteDuplicates[vertices], DistributedContexts->All
+   If[FlexibleSUSY`FSEnableParallelism,
+      (* without this CForm includes context in name of symbols
+         such that we get for example SARAH_g1 instead of g1 in
+         generated C++ code *)
+      ParallelEvaluate[
+         (BeginPackage[#];EndPackage[];
+          (* prevent shdw warning with Susyno`LieGroups`M: *)
+          Off[Remove::remal];
+          Remove[Susyno`LieGroups`M];
+          On[Remove::remal];
+         )& /@ contextsToDistribute,
+         DistributedContexts->Automatic
       ];
+      (* without this CForm converts complex numbers using
+         Complex wrapper *)
+      ParallelEvaluate[
+         Unprotect[Complex];
+         Format[Complex[r_,i_],CForm] :=
+            Format[CreateCType[CConversion`ScalarType[complexScalarCType]] <>
+               "(" <> ToString[CForm[r]] <> "," <> ToString[CForm[i]] <> ")",
+               OutputForm
+            ];
+         Protect[Complex];
+         Unprotect[Power];
+         Format[Power[E,z_],CForm] :=
+            Format["Exp(" <> ToString[CForm[z]] <> ")", OutputForm];
+         Format[Power[b_,2],CForm] :=
+            Format["Sqr(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,0.5 | 1/2],CForm] :=
+            Format["Sqrt(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,1./3 | 1/3],CForm] :=
+            Format["Cbrt(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,1.5 | 3/2],CForm] :=
+            Format["Power3(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
+         Format[Power[b_,0.25 | 1/4],CForm] :=
+            Format["Sqrt(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
+         Format[Power[b_,0.75 | 3/4],CForm] :=
+            Format["Power3(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
+         Format[Power[b_,1.25 | 5/4],CForm] :=
+            Format["Power5(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
+         Protect[Power];
+         ,
+         DistributedContexts->None
+      ];
+      cxxVertices =
+         AbsoluteTiming@ParallelMap[
+            CreateVertex,
+            DeleteDuplicates[vertices], DistributedContexts->All
+         ],
+      cxxVertices =
+         AbsoluteTiming@Map[
+            CreateVertex,
+            DeleteDuplicates[vertices]
+         ],
+      Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
+   ];
    Print[""];
    Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
    cxxVertices = Last@cxxVertices;
