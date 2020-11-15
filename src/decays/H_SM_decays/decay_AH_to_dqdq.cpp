@@ -2,10 +2,10 @@
 // specialization for the AH -> Fd Fd case
 
 template<>
-double CLASSNAME::get_partial_width<AH ,bar<dq>::type, dq>(
+double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
-   typename field_indices<dq>::type const& indexOut1,
+   typename field_indices<bar<dq>::type>::type const& indexOut1,
    typename field_indices<dq>::type const& indexOut2
    ) const
 {

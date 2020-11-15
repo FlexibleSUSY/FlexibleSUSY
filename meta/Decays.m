@@ -1223,7 +1223,7 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
               sortedVertexFields = SortFieldsInCp[vertexFields];
               templatePars = "<" <>
                               Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#]&
-                                                            /@ sortedVertexFields, ", "] <> " >";
+                                                            /@ sortedVertexFields, ", "] <> ">";
               "const auto " <> resultName <> " =  Vertex" <> templatePars <> "::evaluate(" <>
               indicesName <> ", " <> paramsStruct <> ");\n",
               ""
@@ -1231,24 +1231,28 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
           ];
 
 FillSSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp@fieldsList;
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor += vertex.value();\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
 FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
                      Utils`StringJoinWithSeparator[
-                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
                         ", "
                      ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
@@ -1258,11 +1262,15 @@ FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
           ];
 
 FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor += vertex.value(0, 1);\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
@@ -1270,12 +1278,12 @@ FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
                      Utils`StringJoinWithSeparator[
-                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
                         ", "
                      ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
@@ -1285,12 +1293,12 @@ FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
                      Utils`StringJoinWithSeparator[
-                        Permute[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], FindPermutation[fieldsList, sortedFieldsList]],
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
                         ", "
                      ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
@@ -1300,11 +1308,15 @@ FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
           ];
 
 FillFFVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_gam_left += vertex.left();\n" <>
                          structName <> ".form_factor_gam_right += vertex.right();\n";
