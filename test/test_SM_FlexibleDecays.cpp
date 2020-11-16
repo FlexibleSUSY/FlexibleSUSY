@@ -64,12 +64,12 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
    //                            0.00088266545237025511, 1e-14);, 1e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.00096256841980060836, 1e-4);
+                              0.00096256841980060836, 1e-3);
    // h -> Z Z
    // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
    //                            8.4959557304996447e-05, 3e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
-                              0.00010568799794141996, 1e-4);
+                              0.00010568799794141996, 1e-3);
 
    // ------------ loop-induces decays_HO ------------
 

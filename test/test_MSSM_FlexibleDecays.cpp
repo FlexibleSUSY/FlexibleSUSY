@@ -663,12 +663,12 @@ Block MSOFT Q= 8.61574711E+02
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
    //                            0.0001976368796373175, 2e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00023570868278330426, 1e-4);
+                              0.00023570868278330426, 1e-3);
    // h -> Z Z
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
    //                            1.4826613977728886e-05, 3e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              2.4985674072908062e-05, 1e-4);
+                              2.4985674072908062e-05, 1e-3);
 
    // ------------ loop-induces decays ------------
 

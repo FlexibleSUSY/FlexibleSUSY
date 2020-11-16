@@ -26,7 +26,8 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       gsl_rng_env_setup ();
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
-      constexpr size_t calls = 10000000000;
+      // this gives relative error < 0.05%
+      constexpr size_t calls = 1'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
