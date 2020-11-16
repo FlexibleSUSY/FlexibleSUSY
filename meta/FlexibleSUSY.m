@@ -2645,7 +2645,7 @@ WriteUserExample[inputParameters_List, files_List] :=
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
    }
 }",
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings);"
              ];
            writeCmdLineOutput = WriteExampleCmdLineOutput[FlexibleSUSY`FSCalculateDecays];
            WriteOut`ReplaceInFiles[files,
