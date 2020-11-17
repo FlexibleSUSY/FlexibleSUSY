@@ -76,8 +76,6 @@ BOOST_AUTO_TEST_CASE( test_alternatives )
 {
    using namespace flexiblesusy::sm_fourloop_as;
 
-   const double eps = 1e-5;
-   const double pi = 3.1415926535897932384626433832795;
    const double mt = 173.34;
    const double alpha_s_SM5 = 0.1187;
 
