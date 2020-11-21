@@ -32,9 +32,7 @@ CreateFAModelFile::usage=
 
 Begin["`internal`"];
 
-CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_,
-   eigenstates_] :=
-(
+CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, eigenstates_] := (
    SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;
    SARAH`SARAH@SARAH`OutputDirectory = sarahOutputDir;
    SARAH`Start@sarahModelName;
