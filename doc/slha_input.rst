@@ -574,17 +574,14 @@ loop Passarino-Veltman integrals via the following command::
 Where ``<desired libraries>`` is a list of comma separated names for desired libraries.
 Currently the following set is available for usage:
 
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
  index   name        library     thread-safety   commentary
-======= =========== =========== ============== =================================
-======= =========== =========== ============== =================================
-
-=======
-  0      softsusy    SOFTSUSY_   yes            default value; always enabled
-  1      collier     COLLIER_    no             optional; see **specific** below
-  2      looptools   LoopTools_  no             optional; see **specific** below
-  3      fflite      FFlite      yes            optional; build in; see **specific** below
-======= =========== =========== ============== =================================
+======= =========== ============ ============== ============================================
+  0      softsusy    SOFTSUSY_    yes            default value; always enabled
+  1      collier     COLLIER_     no             optional; see **specific** below
+  2      looptools   LoopTools_   no             optional; see **specific** below
+  3      fflite      FFlite       yes            optional; build in; see **specific** below
+======= =========== ============ ============== ============================================
 
 If the entry ``FlexibleSUSY[31]`` is absent, the loop functions from
 SOFTSUSY are used.  If the entry ``FlexibleSUSY[31]`` is set to
