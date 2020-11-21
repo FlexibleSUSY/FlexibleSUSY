@@ -1494,21 +1494,29 @@ Module[
 createLoopFunctions // Utils`MakeUnknownInputDefinition;
 createLoopFunctions ~ SetAttributes ~ {Locked,Protected};
 
+`cxx`skipZeroAmplitude::usage = "
+@brief If some combination of couplings in the amplitude is zero, then the full
+       amplitude is zero as well, so that we can skip it.
+@note How this is implemented? Any amplitude has the following form: several
+      couplings times some masses times loop integral. We can get all different
+      combinations of this coupling coefficients and if all of them are zero,
+      then amplitude is zero as well.";
 `cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},massRules:{Rule[_,_]..}] :=
 Module[
    {
       numbersToOne = {_Integer->1,_Rational->1,_Complex->1,Pi->1},
       massesToOne = Rule[#,1] & /@ massRules[[All,2]],
       loopsToOne = Rule[#,1] & /@ loopRules[[All,2]],
-      result
+      result, func = "z[" <> # <> "]"&
    },
    result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
    If[ 1 === Length@result,
-      result = "std::abs"@@result,
-      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@("std::abs"@#&/@{x}))
+      result = func@@result,
+      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@(func@#&/@{x}))
    ];
-   "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" < std::numeric_limits<double>::epsilon() ) continue;"
+   result = "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" == 0 ) continue;";
+   StringReplace[result, RegularExpression["g(\\d+)"]:> ToString[ToExpression@"$1"-1]]
 ];
 `cxx`skipZeroAmplitude // Utils`MakeUnknownInputDefinition;
 `cxx`skipZeroAmplitude ~ SetAttributes ~ {Locked,Protected};
@@ -1559,13 +1567,20 @@ Module[{
       replacements.";
 `cxx`nameCouplings[couplings:{{_,_Integer}..}] :=
 Module[{
-      sort = Sort@couplings, info,
+      sort = Sort@couplings, info, isZero,
       d = "std::complex<double> " <> StringRiffle[#, ", "] <> ";"&,
-      timesI = Rule[#1, I*#2]&@@#&
+      timesI = Rule[#1, I*#2]&@@#&,
+      setZero
    },
+   isZero = "std::array<int, "<> ToString@Length@sort <> "> z{};";
+   setZero = "z[" <> ToString[#-1] <> "] = (std::abs(g" <> ToString@# <> ") < std::numeric_limits<double>::epsilon()) ? 0: 1;\n"&;
    info = {"g"<>ToString@#, `cxx`applyRules@sort[[#,1]], sort[[#,1]], sort[[#,2]]}&;
 
-   {d[First/@#], StringJoin[i/@#], timesI/@r@#} &@ Array[info, Length@sort]
+   {
+      d[First/@#]<>"\n"<>isZero,
+      StringJoin[i/@#]<>"\n"<>StringJoin[setZero/@Range@Length@sort],
+      timesI/@r@#
+   } &@ Array[info, Length@sort]
 ];
 `cxx`nameCouplings // Utils`MakeUnknownInputDefinition;
 `cxx`nameCouplings ~ SetAttributes ~ {Locked,Protected};
