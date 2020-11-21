@@ -399,76 +399,23 @@ ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
     ReplaceUnrotatedFields[Cp[p]][lorentz];
 
 CreateVertexExpressions[vertexRules_List, inModelClass_:True] :=
-    Module[{jobs, elem, coupling, i, l, out, id, res, all},
-           With[{
-                  def = DownValues@getDimParameters,
-                  params = SARAH`parameters,
-                  real = SARAH`RealParameters,
-                  var = SARAH`realVar,
-                  eigen = FlexibleSUSY`FSEigenstates,
-                  input = Parameters`Private`allInputParameters,
-                  output = Parameters`Private`allOutputParameters,
-                  extra =  Parameters`Private`allExtraParameters,
-                  model = Parameters`Private`allModelParameters,
-                  phases = Parameters`Private`allPhases,
-                  mass = Parameters`Private`extraMassDimensions,
-                  chunk = Global`$flexiblesusyCSrcChunkSize
-              },
-              Off[Part::pkspec1];
-              ParallelEvaluate[
-                 SARAH`Cp;
-                 SARAH`Lambda;
-                 SARAH`RealParameters = real;
-                 SARAH`realVar = var;
-                 SARAH`parameters = params;
-                 SetDelayed @@#&/@ (def /. HoldPattern -> Identity);
-
-                 FlexibleSUSY`FSEigenstates = eigen;
-                 Global`$flexiblesusyCSrcChunkSize = chunk;
-                 get[name:_String] :=
-                 (
-                    context = $ContextPath;
-                    BeginPackage[name<>"`"];
-                    $ContextPath = Append[context, name<>"`"];
-                    Block[{BeginPackage},
-                        Get@FileNameJoin@{Directory[], "meta", name<>".m"};
-                    ];
-                 );
-                 $ContextPath = Join[$ContextPath, {"Susyno`LieGroups`", "SARAH`", "Himalaya`", "FlexibleSUSY`"}];
-                 get /@ {"TextFormatting", "Utils", "CConversion", "Phases", "Vertices", "EffectiveCouplings", "Parameters"};
-                 Parameters`Private`allInputParameters = input;
-                 Parameters`Private`allOutputParameters = output;
-                 Parameters`Private`allExtraParameters = extra;
-                 Parameters`Private`allModelParameters = model;
-                 Parameters`Private`allPhases = phases;
-                 Parameters`Private`extraMassDimensions = mass;
-                 get /@ {"LoopMasses", "SelfEnergies"};,
-                 LaunchKernels@4, DistributedContexts -> None
-              ];
-           On[Part::pkspec1];
-           ];
-
-           jobs = Table[ParallelSubmit[{inModelClass, elem},
-               Module[{MakeIndex},
-                  MakeIndex[i_Integer] := MakeUniqueIdx[];
-                  MakeIndex[i_] := i;
-                  coupling = Vertices`ToCp[elem[[1]]] /. p_[{idx__}] :> p[MakeIndex /@ {idx}];
-                  CreateCouplingFunction[coupling, elem[[2]], inModelClass]
-               ]
-           ], {elem, vertexRules}];
-
-           i = 1;
-           l = Length@jobs;
-           Utils`StartProgressBar[Dynamic@i, l];
-           res = WaitAll[jobs];
-           Utils`StopProgressBar@l;
-
-           CloseKernels[];
-           {
-               StringJoin@res[[All, 1]],
-               StringJoin[Riffle[res[[All, 2]], "\n"]],
-               Flatten[res[[All, 3]]]
-           }
+Module[{k, prototypes = "", defs = "", rules, coupling, expr,
+      p, d, r, MakeIndex},
+     MakeIndex[i_Integer] := MakeUniqueIdx[];
+     MakeIndex[i_] := i;
+     rules = Table[0, {Length[vertexRules]}];
+     Utils`StartProgressBar[Dynamic[k], Length[vertexRules]];
+     For[k = 1, k <= Length[vertexRules], k++,
+         coupling = Vertices`ToCp[vertexRules[[k,1]]] /. p_[{idx__}] :> p[MakeIndex /@ {idx}];
+         expr = vertexRules[[k,2]];
+         Utils`UpdateProgressBar[k, Length[vertexRules]];
+         {p,d,r} = CreateCouplingFunction[coupling, expr, inModelClass];
+         prototypes = prototypes <> p;
+         defs = defs <> d <> "\n";
+         rules[[k]] = r;
+        ];
+     Utils`StopProgressBar[Length[vertexRules]];
+     {prototypes, defs, Flatten[rules]}
 ];
 
 ReplaceGhosts[states_:FlexibleSUSY`FSEigenstates] :=
