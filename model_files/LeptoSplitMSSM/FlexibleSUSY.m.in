@@ -203,12 +203,7 @@ UseHiggs4LoopSM = True;
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{1, FlexibleSUSYObservable`aMuon},
-            {2, FlexibleSUSYObservable`aMuonUncertainty} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+            {2, FlexibleSUSYObservable`aMuonUncertainty} } }
 };
 
 
