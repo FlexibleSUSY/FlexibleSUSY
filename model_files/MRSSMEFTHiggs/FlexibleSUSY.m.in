@@ -86,6 +86,18 @@ LowScale = LowEnergyConstant[MZ];
 
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
+(* N.B. LowScaleinput is not used by the EFTHiggs spectrum
+ calculation, but is needed for decoupling scheme used by
+ FlexibleDecay *)
+
+LowScaleInput = {
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic},
+    {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[TanBeta]]},
+    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
+};
+
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
