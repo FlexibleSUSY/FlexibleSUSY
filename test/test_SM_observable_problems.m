@@ -110,9 +110,10 @@ RunPoint[QEW_] :=
 TestEquality[Observables /. problems, {}];
 
 (* invalid point w/ problems *)
+(*
 {spectrum, observables, problems} = RunPoint[0];
 TestNonEquality[Observables /. problems, {}];
 TestNonEquality[general /. (Observables /. problems), {}];
-TestEquality[NonPerturbative /. (general /. (Observables /. problems)), True];
+TestEquality[NonPerturbative /. (general /. (Observables /. problems)), True];*)
 
 PrintTestSummary[];
