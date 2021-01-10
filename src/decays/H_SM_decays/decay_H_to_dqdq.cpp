@@ -33,7 +33,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    const auto betaDR = std::sqrt(1.-4.*xDR);
 
    const double flux = 1./(2.*mHOS);
-   constexpr double color_factor = 3;
+   constexpr double color_factor = squared_color_generator<H,bar<dq>::type,dq>();
    const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
    const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
