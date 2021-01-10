@@ -2005,7 +2005,7 @@ SelectGluonGluonFinalState[decays_List] :=
              ];
            result
           ];
-
+(*
 SelectHiggsHiggsFinalState[decays_List] :=
     Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], result = {}},
            If[higgsSymbol =!= Null,
@@ -2022,13 +2022,14 @@ SelectPhotonPhotonFinalState[decays_List] :=
            result
           ];
 
-SelectHiggsHiggsFinalState[decays_List] :=
+SelectPseudoscalarHiggsHiggsFinalState[decays_List] :=
     Module[{psSymbol = TreeMasses`GetPseudoscalarHiggsBoson[], result = {}},
            If[psSymbol =!= Null,
               result = SelectDecayByFinalState[{psSymbol, psSymbol}, decays];
              ];
            result
           ];
+*)
 
 SelectUpQuarkUpQuarkFinalState[decays_List] :=
     Module[{upQuarkSymbol, result = {}},
@@ -2233,71 +2234,6 @@ CreateHiggsToWWPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            {declaration, function}
           ];
 
-(*
-CreateHiggsToGluonGluonPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body =
-              "const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);\n" <>
-              "const double mH = context.physical_mass<H>(in_idx);\n" <>
-              "constexpr double ps {1./(8.*Pi)};\n" <>
-              "constexpr double ps_symmetry {1./2.};\n" <>
-              "constexpr double color_gen_sqr {8.0};\n" <>
-              "const double flux = 0.5/mH;\n" <>
-              "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-
-CreateHiggsToPhotonPhotonPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body = 
-              "const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);\n" <>
-               "const double mH = context.physical_mass<H>(in_idx);\n" <>
-               "constexpr double ps {1./(8.*Pi)};\n" <>
-               "constexpr double ps_symmetry {1./2.};\n" <>
-               "constexpr double color_gen_sqr {1.0};\n" <>
-               "const double flux = 0.5/mH;\n" <>
-               "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-
-CreateHiggsToPhotonZPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body =
-              "const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out2_idx, out1_idx);\n" <>
-              "const double mH = context.physical_mass<H>(in_idx);\n" <>
-              "constexpr double ps {1./(8.*Pi) * beta(mIn, mOut1, mOut2)};\n" <>
-              "constexpr double ps_symmetry {1.};\n" <>
-              "constexpr double color_gen_sqr {1.0};\n" <>
-              "const double flux = 0.5/mH;\n" <>
-              "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-*)
-
 CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
@@ -2319,56 +2255,6 @@ CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, mod
            {declaration, function}
           ];
 
-CreateHiggsToPhotonPhotonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectPhotonPhotonFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToPhotonPhotonPartialWidthFunction[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToPhotonZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, orderZPhotonFinalState, declaration = "", function = ""},
-           decay = SelectPhotonZFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              orderZPhotonFinalState[finalState_] :=
-                  Module[{zBosonSymbol = TreeMasses`GetZBoson[], photonSymbol = TreeMasses`GetPhoton[]},
-                         If[finalState === {zBosonSymbol, photonSymbol},
-                            finalState,
-                            Reverse[finalState]
-                           ]
-                        ];
-              decay = ReplacePart[decay, {{2}} -> orderZPhotonFinalState[GetFinalState[decay]]];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToPhotonZPartialWidthFunction[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToHiggsHiggsPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectHiggsHiggsFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToPseudoscalarPseudoscalarPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectPseudoscalarPseudoscalarFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
 CreateHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectUpQuarkUpQuarkFinalState[decaysList];
@@ -2378,6 +2264,7 @@ CreateHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_]
              ];
            {declaration, function}
           ];
+
 CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectUpQuarkUpQuarkFinalState[decaysList];
@@ -2434,9 +2321,6 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
               specializations = {CreateHiggsToZZPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
-(*                                 CreateHiggsToPhotonPhotonPartialWidth[higgsDecays, modelName],*)
-(*                                 CreateHiggsToPhotonZPartialWidth[higgsDecays, modelName],*)
-                                 CreateHiggsToHiggsHiggsPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToChargedLeptonChargedLeptonPartialWidth[higgsDecays, modelName]};
