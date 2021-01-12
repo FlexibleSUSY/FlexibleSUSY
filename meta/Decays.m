@@ -318,16 +318,13 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
            result
           ];
 
-(* don't generate decays like Fe3 -> Fe1 VP
-   @todo: should we generate them? *)
-IsSelfDecay[initialParticle_, finalState_List] :=
-   (MemberQ[finalState, initialParticle] && (MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]]));
-
 FinalStateContainsInitialState[initialParticle_, finalState_List] :=
     Module[{containsInitialMultiplet, dim},
-           containsInitialMultiplet = !FreeQ[finalState, initialParticle];
-           dim = TreeMasses`GetDimension[initialParticle];
-           containsInitialMultiplet && dim == 1
+           If[!FreeQ[finalState, initialParticle],
+              TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1 ||
+              MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]],
+              False
+           ]
           ];
 
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
@@ -558,8 +555,7 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState] &&
-                                               !IsSelfDecay[particle, finalState]);
+                                            !FinalStateContainsInitialState[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
