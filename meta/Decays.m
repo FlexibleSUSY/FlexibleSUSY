@@ -188,7 +188,7 @@ GetDecayTopologyName[t_] :=
           Quit[1];
          ];
 
-CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, SARAH`AntiField /@ particles]];
+CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, TreeMasses`FSAntiField /@ particles]];
 
 GenericScalarName[] := "scalar";
 GenericVectorName[] := "vector";
@@ -406,7 +406,7 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
                  0
               ];
            topologies = Join[Table[{i, GetPossibleDecayTopologies[nFinalParticles, i]}, {i, minLoops, maxLoops}]];
-           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, SARAH`AntiField /@ finalParticles, #]}& /@ #[[2]]}&
+           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, TreeMasses`FSAntiField /@ finalParticles, #]}& /@ #[[2]]}&
                       /@ topologies;
            diagrams = {#[[1]], With[{toposAndDiags = #[[2]]}, Select[toposAndDiags, #[[2]] =!= {}&]]}& /@ diagrams;
            diagrams = DeleteCases[diagrams, {_Integer, {}}];
@@ -1228,7 +1228,7 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
 
 FillSSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp@fieldsList;
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1243,7 +1243,7 @@ FillSSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1259,7 +1259,7 @@ FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1274,7 +1274,7 @@ FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1289,7 +1289,7 @@ FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1305,7 +1305,7 @@ FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
 
 FillFFVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
     Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
-           fieldsList = Join[{GetInitialState[decay]}, SARAH`AntiField /@ GetFinalState[decay]];
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
            sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
@@ -1546,7 +1546,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
          If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldTypes),
 
             temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVerticesLocal[[i]];
-            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> SARAH`AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
+            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> TreeMasses`FSAntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
 
             concreteFieldOnEdgeBetweenVerticesLocal[[{i, i+1}]] = concreteFieldOnEdgeBetweenVerticesLocal[[{i+1, i}]];
             i=i-1;
@@ -1632,7 +1632,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
           ];
 
       (* vertices in an orientation as required by Cp *)
-      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> SARAH`AntiField[e];
+      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> TreeMasses`FSAntiField[e];
 
       (* extra conjugations to bring verticesForFACp equal (possibly up to order) with vertices in diagram *)
       Module[
@@ -1643,6 +1643,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                   Subsets[
                      Select[
                         Range[4, Length[fieldAssociation]],
+                        (* this cannot be replaced by FSAntiField *)
                         (fieldAssociation[[#,2]] =!= SARAH`AntiField[fieldAssociation[[#,2]]])&
                      ]
                   ],
@@ -1657,6 +1658,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
                Quit[1]
             ];
             t = {#, 2}& /@ (whereToConj[[i]]);
+            (* this cannot be replaced by FSAntiField *)
             fieldAssociation = MapAt[SARAH`AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
             verticesForFACp = verticesInFieldTypesForFACp /. f_[n_Integer] :> Field[n] /. fieldAssociation /. - e_ :> SARAH`AntiField[e];
             i++;
