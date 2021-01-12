@@ -233,26 +233,54 @@ CreateSMParticleAliases[namespace_:""] :=
 
 CreateBSMParticleAliasList[namespace_:""] :=
    Module[{bsmForZdecay, bsmForWdecay},
-      bsmForZdecay = Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
+      bsmForZdecay =
+         Select[
+            Prepend[#, TreeMasses`GetZBoson[]]& /@
+               DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
+            IsPossibleNonZeroVertex[#, True]&
+         ];
       bsmForZdecay =
          Join[
             bsmForZdecay,
-            Select[Prepend[#, TreeMasses`GetZBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
+            Select[
+               Prepend[#, TreeMasses`GetZBoson[]]& /@
+                  DeleteDuplicates@Sort@Tuples[{
+                     Join[TreeMasses`GetSusyParticles[], TreeMasses`FSAntiField /@ TreeMasses`GetSusyParticles[]],
+                     Join[TreeMasses`GetSMParticles[], TreeMasses`FSAntiField /@ TreeMasses`GetSMParticles[]]
+                  }],
+               IsPossibleNonZeroVertex[#, True]&
+            ]
          ];
-      bsmForWdecay = Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2], IsPossibleNonZeroVertex[#, True]&];
+      bsmForWdecay =
+         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+            DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
+            IsPossibleNonZeroVertex[#, True]&
+         ];
       bsmForWdecay =
          Join[
             bsmForWdecay,
-            Select[Prepend[#, TreeMasses`GetWBoson[]]& /@ DeleteDuplicates@Sort@Tuples[{Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]}], IsPossibleNonZeroVertex[#, True]&]
+            Select[
+               Prepend[#, TreeMasses`GetWBoson[]]& /@
+                  DeleteDuplicates@Sort@Tuples[{
+                     Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
+                     Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
+                  }],
+               IsPossibleNonZeroVertex[#, True]&
+            ]
          ];
+
       {
          Join[bsmForZdecay, bsmForWdecay],
-      "// List of potential Z boson decay products excluding pure SM decays\n" <>
-      "typedef boost::mpl::list<\n" <>
-         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"] <> If[Length@bsmForZdecay > 0, "\n", ""] <> "> BSMForZdecay;\n\n" <>
-      "// List of potential W boson decay products excluding pure SM decays\n" <>
-      "typedef boost::mpl::list<\n" <>
-         TextFormatting`IndentText@StringJoin@Riffle[("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"] <> If[Length@bsmForWdecay > 0, "\n", ""] <> "> BSMForWdecay;"
+         "// List of potential Z boson decay products excluding pure SM decays\n" <>
+         "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[
+            ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"
+         ] <> If[Length@bsmForZdecay > 0, "\n", ""] <> "> BSMForZdecay;\n\n" <>
+         "// List of potential W boson decay products excluding pure SM decays\n" <>
+         "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[
+            ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"
+         ] <> If[Length@bsmForWdecay > 0, "\n", ""] <> "> BSMForWdecay;"
       }
    ];
 
