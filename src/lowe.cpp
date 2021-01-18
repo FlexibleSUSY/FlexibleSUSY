@@ -37,6 +37,11 @@ namespace softsusy {
 
 namespace {
 
+bool is_zero(double x) noexcept
+{
+   return std::abs(x) <= std::numeric_limits<double>::epsilon();
+}
+
 constexpr double sqr(double a) noexcept { return a*a; }
 
 // Given a value of mt, and alphas(MZ), find alphas(mt) to 1 loops in qcd:
@@ -332,7 +337,7 @@ Eigen::Array<double,9,1> QedQcd::massBeta() const {
 /// Supposed to be done at mb(mb) -- MSbar, calculates pole mass
 double QedQcd::extractPoleMb(double alphasMb)
 {
-  if (get_scale() != displayMass(mBottom)) {
+  if (!is_zero(get_scale() - displayMass(mBottom))) {
     throw flexiblesusy::SetupError(
        "QedQcd::extractPoleMb called at scale "
        + flexiblesusy::to_string(get_scale()) + " instead of mb(mb)");

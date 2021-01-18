@@ -163,6 +163,40 @@ BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix)
    BOOST_CHECK_EQUAL(vec1(2), 2);
 }
 
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_abs)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<double,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, -2; // uses abs() of diagonal values
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
+BOOST_AUTO_TEST_CASE(test_reorder_vector_with_matrix_complex)
+{
+   Eigen::Array<double,3,1> vec1;
+   vec1 << 1, 2, 3;
+
+   Eigen::Matrix<std::complex<double>,3,3> matrix;
+   matrix << 3, 0, 0,
+             0, 1, 0,
+             0, 0, 2;
+
+   reorder_vector(vec1, matrix);
+
+   BOOST_CHECK_EQUAL(vec1(0), 3);
+   BOOST_CHECK_EQUAL(vec1(1), 1);
+   BOOST_CHECK_EQUAL(vec1(2), 2);
+}
+
 BOOST_AUTO_TEST_CASE(test_remove_if_equal)
 {
    Eigen::Array<double,5,1> src;

@@ -24,7 +24,6 @@ void setup(CMSSMCKM_input_parameters& input, DoubleVector& input2)
    const double M12 = 100.0;
    const double m0 = 250.0;
    const double a0 = 50.0;
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));
@@ -118,7 +117,6 @@ void setup(CMSSMCKM<Two_scale>& m, FlavourMssmSoftsusy& s)
    const double g1 = sqrt(4 * Pi * alpha1);
    const double g2 = sqrt(4 * Pi * alpha2);
    const double g3 = sqrt(4 * Pi * ALPHASMZ);
-   const double root2 = sqrt(2.0);
    const double vev = 246.0;
    const double tanBeta = 10;
    const double sinBeta = sin(atan(tanBeta));

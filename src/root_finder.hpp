@@ -30,6 +30,7 @@
 #include "logger.hpp"
 #include "error.hpp"
 #include "ewsb_solver.hpp"
+#include "gsl_multiroot_fsolver.hpp"
 #include "gsl_utils.hpp"
 #include "gsl_vector.hpp"
 
@@ -89,7 +90,6 @@ private:
    Function_t function{nullptr};       ///< function to minimize
    Solver_type solver_type{GSLHybrid}; ///< solver type
 
-   void print_state(const gsl_multiroot_fsolver*, std::size_t) const;
    const char* solver_type_name() const;
    const gsl_multiroot_fsolver_type* solver_type_to_gsl_pointer() const;
    static int gsl_function(const gsl_vector*, void*, gsl_vector*);
@@ -139,59 +139,28 @@ int Root_finder<dimension>::find_root(const Vector_t& start)
    std::size_t iter = 0;
    void* parameters = &function;
    gsl_multiroot_function f = {gsl_function, dimension, parameters};
-
-   gsl_multiroot_fsolver* solver
-      = gsl_multiroot_fsolver_alloc(solver_type_to_gsl_pointer(), dimension);
-
-   if (!solver) {
-      throw OutOfMemoryError(std::string("Cannot allocate gsl_multiroot_fsolver ") +
-                             gsl_multiroot_fsolver_name(solver));
-   }
+   GSL_multiroot_fsolver solver(solver_type_to_gsl_pointer(), dimension, &f, to_GSL_vector(start));
 
 #ifndef ENABLE_DEBUG
    gsl_set_error_handler_off();
 #endif
 
-   GSL_vector tmp_root = to_GSL_vector(start);
-
-   gsl_multiroot_fsolver_set(solver, &f, tmp_root.raw());
-
-   print_state(solver, iter);
-
    do {
       iter++;
-      status = gsl_multiroot_fsolver_iterate(solver);
-
-      print_state(solver, iter);
+      status = solver.iterate();
+      solver.print_state(iter);
 
       if (status)   // check if solver is stuck
          break;
 
-      status = gsl_multiroot_test_residual(solver->f, precision);
+      status = solver.test_residual(precision);
    } while (status == GSL_CONTINUE && iter < max_iterations);
 
    VERBOSE_MSG("\t\t\tRoot_finder status = " << gsl_strerror(status));
 
-   root = to_eigen_vector<dimension>(solver->x);
-
-   gsl_multiroot_fsolver_free(solver);
+   root = to_eigen_vector<dimension>(solver.get_root().raw());
 
    return status;
-}
-
-/**
- * Print state of the root finder
- *
- * @param solver solver
- * @param iteration iteration number
- */
-template <std::size_t dimension>
-void Root_finder<dimension>::print_state(const gsl_multiroot_fsolver* solver,
-                                         std::size_t iteration) const
-{
-   VERBOSE_MSG("\t\t\tIteration " << iteration
-               << ": x = " << GSL_vector(solver->x)
-               << ", f(x) = " << GSL_vector(solver->f));
 }
 
 template <std::size_t dimension>

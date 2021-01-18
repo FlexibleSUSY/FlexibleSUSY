@@ -18,8 +18,11 @@ LIBFLEXI_SRC := \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
+		$(DIR)/gsl_multimin_fminimizer.cpp \
+		$(DIR)/gsl_multiroot_fsolver.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/Li4.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/loop_libraries/library_softsusy.cpp \
 		$(DIR)/lowe.cpp \
@@ -82,8 +85,11 @@ LIBFLEXI_HDR := \
 		$(DIR)/global_thread_pool.hpp \
 		$(DIR)/gm2calc_interface.hpp \
 		$(DIR)/gsl.hpp \
+		$(DIR)/gsl_multimin_fminimizer.hpp \
+		$(DIR)/gsl_multiroot_fsolver.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
+		$(DIR)/Li4.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \

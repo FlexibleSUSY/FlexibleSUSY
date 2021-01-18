@@ -16,39 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef FOR_EACH_H
-#define FOR_EACH_H
+#ifndef FS_LI4_H
+#define FS_LI4_H
 
-#include <tuple>
+#include <complex>
 
 namespace flexiblesusy {
 
-namespace detail
-{
-   template<int... Is>
-   struct seq {};
+/// complex polylogarithm with n=4
+std::complex<double> Li4(const std::complex<double>&) noexcept;
 
-   template<int N, int... Is>
-   struct gen_seq : gen_seq<N - 1, N - 1, Is...> {};
-
-   template<int... Is>
-   struct gen_seq<0, Is...> : seq<Is...> {};
-
-   template<typename T, typename F, int... Is>
-   void for_each(T&& t, F f, seq<Is...>)
-   {
-      // @todo: uncomment after the transition to c++17
-      // [[maybe_unused]]
-      auto l = { (f(std::get<Is>(t)), 0)... };
-   }
-} // namespace detail
-
-/// applies f on each element of the tuple
-template<typename... Ts, typename F>
-void for_each_in_tuple(std::tuple<Ts...> const& t, F f)
-{
-   detail::for_each(t, f, detail::gen_seq<sizeof...(Ts)>());
-}
+/// complex polylogarithm with n=4 with long double precision
+std::complex<long double> Li4(const std::complex<long double>&) noexcept;
 
 } // namespace flexiblesusy
 

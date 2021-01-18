@@ -42,7 +42,6 @@ struct Values {
    double p{}, m1{}, m2{}, q{};
 };
 
-constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
 constexpr double sqr(double a) noexcept { return a*a; }
 

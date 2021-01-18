@@ -143,7 +143,7 @@ public:
    virtual void put_model_spectra(MLINK link) const = 0;
 
    virtual const Spectrum_generator_problems& get_problems() const = 0;
-   virtual void fill_slha_io(@ModelName@_slha_io&) const = 0;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&) const = 0;
    virtual double get_model_scale() const = 0;
    virtual const @ModelName@_observables& get_observables() const = 0;
 
@@ -163,7 +163,7 @@ public:
    virtual void put_model_spectra(MLINK link) const override;
 
    virtual const Spectrum_generator_problems& get_problems() const override { return problems; }
-   virtual void fill_slha_io(@ModelName@_slha_io&) const override;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&) const override;
    virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
 
@@ -193,6 +193,8 @@ public:
    void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
    void set_settings(const Spectrum_generator_settings& s) { settings = s; }
    void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
+
+   const Spectrum_generator_settings& get_settings() const { return settings; }
 
    void put_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
@@ -512,7 +514,7 @@ void Model_data::put_warnings(MLINK link) const
    slha_io.set_print_imaginary_parts_of_majorana_mixings(
       settings.get(Spectrum_generator_settings::force_positive_masses));
 
-   spectrum->fill_slha_io(slha_io);
+   spectrum->fill_slha_io(slha_io, settings);
 
    return slha_io;
 }
@@ -660,7 +662,8 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
 /******************************************************************/
 
 template <typename Solver_type>
-void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& slha_io) const
+void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& slha_io,
+       const Spectrum_generator_settings& settings) const
 {
    const auto& problems = std::get<0>(models).get_problems();
    const auto force_output = std::get<0>(models).do_force_output();
@@ -668,7 +671,7 @@ void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& s
    slha_io.set_spinfo(problems);
    if (!problems.have_problem() || force_output) {
       slha_io.set_spectrum(models);
-      slha_io.set_extra(std::get<0>(models), scales, observables);
+      slha_io.set_extra(std::get<0>(models), scales, observables, settings);
    }
 }
 
@@ -1137,6 +1140,9 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
       {
          Redirect_output crd(link);
          data.calculate_model_observables();
+         auto setting = data.get_settings();
+         setting.set(flexiblesusy::Spectrum_generator_settings::calculate_observables, 1.0);
+         data.set_settings(setting);
       }
 
       data.put_observables(link);

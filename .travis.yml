@@ -14,13 +14,13 @@ addons:
       - libsqlite3-dev
   homebrew:
     packages:
-      - gcc
+      - gcc@9
       - gsl
       - sqlite
     update: true
 install:
   - export PATH=$(python -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
-  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" == "g++" ]]; then export CXX="g++-9" CC="gcc-9"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" && "$CXX" == "g++" ]]; then brew install gcc@9 && export CXX="g++-9" CC="gcc-9"; fi
   - pip install --user conan
   - conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
   - conan install . --build=missing

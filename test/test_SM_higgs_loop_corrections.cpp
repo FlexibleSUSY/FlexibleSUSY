@@ -165,8 +165,6 @@ void compare_Mh(int loops)
 
 BOOST_AUTO_TEST_CASE( test_SM_nloop_literature )
 {
-   const double eps = 1e-10;
-
    compare_Mh(0);
    compare_Mh(1);
    compare_Mh(2);

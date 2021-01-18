@@ -35,6 +35,8 @@
 #include "standard_model.hpp"
 #include "loop_corrections.hpp"
 
+#include "loop_libraries/loop_library.hpp"
+
 #include <string>
 #include <tuple>
 
@@ -97,6 +99,7 @@ void @ModelName@_spectrum_generator_interface<T>::set_settings(
    const Spectrum_generator_settings& settings_)
 {
    settings = settings_;
+   Loop_library::set(settings.get(Spectrum_generator_settings::loop_library));
    model.set_pole_mass_loop_order(settings.get(Spectrum_generator_settings::pole_mass_loop_order));
    model.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
    model.set_loop_corrections(settings.get_loop_corrections());

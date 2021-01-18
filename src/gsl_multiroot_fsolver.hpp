@@ -16,39 +16,36 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef FOR_EACH_H
-#define FOR_EACH_H
+#ifndef GSL_MULTIROOT_FSOLVER_H
+#define GSL_MULTIROOT_FSOLVER_H
 
-#include <tuple>
+#include "gsl_vector.hpp"
+#include <gsl/gsl_multiroots.h>
 
 namespace flexiblesusy {
 
-namespace detail
+/**
+ * RAII wrapper for gsl_multiroot_fsolver
+ */
+class GSL_multiroot_fsolver
 {
-   template<int... Is>
-   struct seq {};
+public:
+   GSL_multiroot_fsolver(const gsl_multiroot_fsolver_type* type, std::size_t dim,
+                         gsl_multiroot_function* f, const GSL_vector& start);
+   GSL_multiroot_fsolver(const GSL_multiroot_fsolver&) = delete;
+   GSL_multiroot_fsolver(GSL_multiroot_fsolver&&) = delete;
+   ~GSL_multiroot_fsolver() noexcept;
+   GSL_multiroot_fsolver& operator=(const GSL_multiroot_fsolver&) = delete;
+   GSL_multiroot_fsolver& operator=(GSL_multiroot_fsolver&&) = delete;
 
-   template<int N, int... Is>
-   struct gen_seq : gen_seq<N - 1, N - 1, Is...> {};
+   GSL_vector get_root() const;
+   int iterate();
+   void print_state(std::size_t iteration) const;
+   int test_residual(double precision) const noexcept;
 
-   template<int... Is>
-   struct gen_seq<0, Is...> : seq<Is...> {};
-
-   template<typename T, typename F, int... Is>
-   void for_each(T&& t, F f, seq<Is...>)
-   {
-      // @todo: uncomment after the transition to c++17
-      // [[maybe_unused]]
-      auto l = { (f(std::get<Is>(t)), 0)... };
-   }
-} // namespace detail
-
-/// applies f on each element of the tuple
-template<typename... Ts, typename F>
-void for_each_in_tuple(std::tuple<Ts...> const& t, F f)
-{
-   detail::for_each(t, f, detail::gen_seq<sizeof...(Ts)>());
-}
+private:
+   gsl_multiroot_fsolver* solver = nullptr;
+};
 
 } // namespace flexiblesusy
 

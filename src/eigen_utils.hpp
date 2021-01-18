@@ -236,7 +236,9 @@ void reorder_vector(
 }
 
 /**
- * @brief reorders vector v according to ordering of diagonal elements in mass_matrix
+ * @brief reorders vector v according to ordering of the magitude of
+ * the diagonal elements in matrix
+ *
  * @param v vector with elementes to be reordered
  * @param matrix matrix with diagonal elements with reference ordering
  */
@@ -245,7 +247,7 @@ void reorder_vector(
    Eigen::Array<double,Eigen::MatrixBase<Derived>::RowsAtCompileTime,1>& v,
    const Eigen::MatrixBase<Derived>& matrix)
 {
-   reorder_vector(v, matrix.diagonal().array().eval());
+   reorder_vector(v, matrix.diagonal().array().cwiseAbs().eval());
 }
 
 /// sorts an Eigen array
