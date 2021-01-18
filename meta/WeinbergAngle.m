@@ -949,7 +949,7 @@ GetNeutrinoIndex[] :=
                             GetWPlusBoson[]][SARAH`PL];
            (*follow vertex conventions:*)
            coupl = Vertices`SortCp[coupl];
-           (*omit a possible minus sign:*)   
+           (*omit a possible minus sign:*)
            If[MatchQ[coupl, Times[-1, _]], coupl = -coupl];
            coupl = SelfEnergies`CreateCouplingSymbol[coupl];
            For[k = 0, k <= 2, k++,

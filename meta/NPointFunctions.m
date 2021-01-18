@@ -856,6 +856,7 @@ Module[
    DistributeDefinitions[currentPath, currentDir, fsMetaDir, sarahInputDirs,
       sarahOutputDir, SARAHModelName, eigenstates];
 
+   SetSharedFunction[Print];
    ParallelEvaluate[
       $Path = currentPath;
       SetDirectory@currentDir;
@@ -863,6 +864,7 @@ Module[
       NPointFunctions`CreateFAModelFile[sarahInputDirs,sarahOutputDir,
          SARAHModelName, eigenstates];,
       kernel];
+   UnsetShared[Print];
 ];
 GenerateFAModelFileOnKernel // Utils`MakeUnknownInputDefinition;
 GenerateFAModelFileOnKernel ~ SetAttributes ~ {Locked,Protected};

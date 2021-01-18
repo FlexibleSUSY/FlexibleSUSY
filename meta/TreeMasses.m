@@ -307,11 +307,11 @@ IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
     MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], FSAntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
-	includeColourIndices -> False}]] := 
+	includeColourIndices -> False}]] :=
 	Module[{fieldInfo = Cases[SARAH`Particles[FlexibleSUSY`FSEigenstates],
 		{SARAH`getParticleName @ field, ___}][[1]]},
 		fieldInfo = DeleteCases[fieldInfo, {SARAH`generation, 1}, {2}];
-		
+
 		fieldInfo = If[!OptionValue[includeLorentzIndices],
 			DeleteCases[fieldInfo, {SARAH`lorentz, _}, {2}],
 			fieldInfo];
