@@ -236,7 +236,7 @@ template<typename T>
 std::complex<T> phase(const std::complex<T>& z) noexcept
 {
    T r = std::abs(z);
-   return r == 0 ? 1 : z/r;
+   return is_zero(r) ? 1 : z/r;
 }
 
 void calc_phase_factors
