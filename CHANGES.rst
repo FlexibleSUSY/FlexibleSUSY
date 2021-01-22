@@ -7,6 +7,14 @@ Changes
 * GM2Calc_ is now an external (optional) dependency.  It can be installed
   via Conan_.  FlexibleSUSY requires GM2Calc version 1.7.0 or higher.
 
+Fixed bugs
+----------
+
+* [commit ab8d412c6]: Fix compilation error in CP-violating models
+  where the pole mass of a scalar particle is calculated at
+  ``LowPrecision``.
+
+
 FlexibleSUSY 2.5.0 [June, 20 2020]
 ==================================
 

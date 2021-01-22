@@ -80,7 +80,6 @@ Parameters make_point()
    const double mst1 = 200.0;
    const double mst2 = 300.0;
    const double SX = 0.5;
-   const double s2t = SX / (mst1*mst1 - mst2*mst2);
    const double xt = SX / (2.0 * mt);
 
    pars.g3    = 2.0;

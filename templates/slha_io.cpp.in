@@ -32,6 +32,7 @@
 #include "standard_model.hpp"
 #include "wrappers.hpp"
 #include "config.h"
+#include "spectrum_generator_settings.hpp"
 
 #include <array>
 #include <fstream>
@@ -391,7 +392,8 @@ void @ModelName@_slha_io::set_spectrum(const @ModelName@_slha& model)
 void @ModelName@_slha_io::set_extra(
    const @ModelName@_slha& model,
    const @ModelName@_scales& scales,
-   const @ModelName@_observables& observables)
+   const @ModelName@_observables& observables,
+   const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings)
 {
    const @ModelName@_physical physical(model.get_physical_slha());
 
