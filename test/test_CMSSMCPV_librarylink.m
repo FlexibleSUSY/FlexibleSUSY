@@ -162,8 +162,6 @@ TestCloseRel[BMu + I ImBMu /. slhaData, B[\[Mu]] /. specML, delta];
 
 delta = 1*^-5;
 
-TestCloseRel[{CpHPP1, CpHPP2, CpHPP3} /. slhaData, Abs[FlexibleSUSYObservable`CpHiggsPhotonPhoton /. obsML], delta];
-TestCloseRel[{CpHGG1, CpHGG2, CpHGG3} /. slhaData, Abs[FlexibleSUSYObservable`CpHiggsGluonGluon] /. obsML, delta];
 TestCloseRel[aMuon  /. slhaData, FlexibleSUSYObservable`aMuon /. obsML, delta];
 TestCloseRel[EDM[Fe[1]] /. slhaData, FlexibleSUSYObservable`EDM[Fe[1]] /. obsML, delta];
 TestCloseRel[EDM[Fe[2]] /. slhaData, FlexibleSUSYObservable`EDM[Fe[2]] /. obsML, delta];
