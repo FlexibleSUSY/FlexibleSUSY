@@ -21,8 +21,78 @@ on:
       - 'doc/**'
 
 jobs:
+  no-meta:
+    strategy:
+       matrix:
+          OS: [macos-10.15, ubuntu-20.04]
+          CXXCOMPILER: [g++, clang++]
+    runs-on: ${{ matrix.OS }}
 
-  build:
+    steps:
+      - name: Homebrew 
+        if: runner.os == 'macOS'
+        run: |
+           brew update
+           brew upgrade
+           brew install gsl
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Conan
+        run: |
+          pip3 install --user conan
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
+          conan install . --build=missing
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+
+      - name: Configure
+        run: |
+          ./configure \
+             --with-cxxflags="-std=c++14 -fPIC" \
+             --with-cxx=$CXXCOMPILER \
+             --with-optional-modules=test \
+             --with-loop-libraries=collier,looptools \
+             --with-install-dir=install \
+             --disable-meta
+          make showbuild
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+
+      - name: Make
+        run: make -j2
+
+      - name: Build compiled tests
+        run: make -j2 alltest
+
+      - name: Run compiled and shell script (Softsusy)
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Install
+        run: make install-src
+
+  with-meta:
 
     # Pull requests don't share secrets with a fork so we run tests only on PRs
     # comming from the FlexibleSUSY/FlexibleSUSY repo.
