@@ -116,13 +116,13 @@ setMassless ~ SetAttributes ~ {Protected, Locked};
 
 setClass[] := (
    Unprotect@`cxx`classU;
-   `cxx`classU = "conversion_"<>`cxx`in<>`cxx`up<>"_to_"<>
-         `cxx`out<>`cxx`up<>"_for_"<>`cxx`con<>`cxx`massless;
+   `cxx`classU = StringJoin["conversion_",`cxx`in,`cxx`up,"_to_",
+      `cxx`out,`cxx`up,"_for_",`cxx`con,`cxx`massless];
    Protect@`cxx`classU;
 
    Unprotect@`cxx`classD;
-   `cxx`classD = "conversion_"<>`cxx`in<>`cxx`up<>"_to_"<>
-         `cxx`out<>`cxx`down<>"_for_"<>`cxx`con<>`cxx`massless;
+   `cxx`classD = StringJoin["conversion_",`cxx`in,`cxx`down,"_to_",
+      `cxx`out,`cxx`down,"_for_",`cxx`con,`cxx`massless];
    Protect@`cxx`classD;
 );
 setClass // Utils`MakeUnknownInputDefinition;
