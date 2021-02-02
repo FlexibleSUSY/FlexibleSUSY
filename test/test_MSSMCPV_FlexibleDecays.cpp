@@ -780,7 +780,7 @@ Block ImMSOFT Q= 2.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 6.1972398675528688e-05, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 0.00010150853529104386, 2e-10);
    // h -> gamma gamma
    // without 2L QCD for squark
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);
