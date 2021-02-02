@@ -103,11 +103,12 @@ setMassless[massless:True|False] := (
 setMassless // Utils`MakeUnknownInputDefinition;
 setMassless ~ SetAttributes ~ {Protected, Locked};
 
-{`cxx`up, `cxx`down} := {
+{`cxx`up, `cxx`down, `cxx`photon} := {
    CConversion`ToValidCSymbolString@SARAH`UpQuark,
-   CConversion`ToValidCSymbolString@SARAH`DownQuark
+   CConversion`ToValidCSymbolString@SARAH`DownQuark,
+   CConversion`ToValidCSymbolString@SARAH`Photon
 };
-{`cxx`up, `cxx`down} ~ SetAttributes ~ {Protected, Locked};
+{`cxx`up, `cxx`down, `cxx`photon} ~ SetAttributes ~ {Protected, Locked};
 
 `cxx`classU = "";
 `cxx`classD = "";
@@ -199,10 +200,8 @@ Module[
       model,
       discard_SM_contributions);
 
-   // translate from the convention of Hisano, Moroi & Tobe to Kitano, Koike & Okada
-   // Hisano defines form factors A2 through a matrix element in eq. 14
-   // Kitano uses a lagrangian with F_munu. There is a factor of 2 from translation
-   // because Fmunu = qeps - eps q
+   // translate from eq. (14) of hep-ph/9510309 (as matrix element)
+   // to eq. (3.23) of 1902.06650
    // add one minus here because of descending order from chains
 
    const auto D_L = 0.5 * photon_penguin[2];
@@ -218,19 +217,19 @@ Module[
    // mediator: massless vector
    // construct 4-fermion operators from A1 form factors
    // i q^2 A1 * (- i gmunu/q^2) * (-i Qq e) = GF/sqrt2 * gpV
-   // VP
+   // photon
 
    const auto uL = left<
-      typename fields::Fu::lorentz_conjugate, fields::Fu, typename fields::VP
+      typename fields::"<>`cxx`up<>"::lorentz_conjugate, fields::"<>`cxx`up<>", typename fields::"<>`cxx`photon<>"
    >(model);
    const auto uR = right<
-      typename fields::Fu::lorentz_conjugate, fields::Fu, typename fields::VP
+      typename fields::"<>`cxx`up<>"::lorentz_conjugate, fields::"<>`cxx`up<>", typename fields::"<>`cxx`photon<>"
    >(model);
    const auto dL = left<
-      typename fields::Fd::lorentz_conjugate, fields::Fd, typename fields::VP
+      typename fields::"<>`cxx`down<>"::lorentz_conjugate, fields::"<>`cxx`down<>", typename fields::"<>`cxx`photon<>"
    >(model);
    const auto dR = right<
-      typename fields::Fd::lorentz_conjugate, fields::Fd, typename fields::VP
+      typename fields::"<>`cxx`down<>"::lorentz_conjugate, fields::"<>`cxx`down<>", typename fields::"<>`cxx`photon<>"
    >(model);
    const auto vcU = 0.5 * (uL + uR);
    const auto vcD = 0.5 * (dL + dR);
@@ -351,8 +350,7 @@ Module[
 }
 ",
    {
-      "@photon_penguin_name@"->"calculate_"<>`cxx`in<>"_"<>`cxx`out<>"_"<>
-         CXXDiagrams`CXXNameOfField@SARAH`Photon<>"_form_factors",
+      "@photon_penguin_name@"->"calculate_"<>`cxx`in<>"_"<>`cxx`out<>"_"<>`cxx`photon<>"_form_factors",
       "@namespace_npf@"->FlexibleSUSY`FSModelName<>"_cxx_diagrams::npointfunctions::",
       "@class_U@"->`cxx`classU,
       "@class_D@"->`cxx`classD,
