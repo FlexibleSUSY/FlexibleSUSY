@@ -115,6 +115,154 @@ std::complex<double> right(const @ModelName@_mass_eigenstates& model) {
     return value.right();
 }
 
+typedef std::valarray<std::complex<double>>  (*ffv_function)
+   (int, int, const @ModelName@_mass_eigenstates&, bool);
+
+typedef std::array<std::complex<double>, 10> (*npf_function)
+   (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
+
+template<class Lepton, class Up, class Down, class Photon, ffv_function penguin, npf_function npf_up, npf_function npf_down>
+Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
+   int generationIndex1,
+   int generationIndex2,
+   const @ModelName@_l_to_l_conversion::Nucleus nucleus,
+   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+   // get Fermi constant from Les Houches input file
+   const auto GF = qedqcd.displayFermiConstant();
+   constexpr bool discard_SM_contributions = false;
+   const auto photon_penguin = penguin(generationIndex1, generationIndex2, model, discard_SM_contributions);
+
+   // translate from eq. (14) of hep-ph/9510309 (as matrix element)
+   // to eq. (3.23) of 1902.06650
+   // add one minus here because of descending order from chains
+
+   const auto D_L = 0.5 * photon_penguin[2];
+   const auto D_R = 0.5 * photon_penguin[3];
+
+   const auto A2L = D_L/(4.*GF/sqrt(2.));
+   const auto A2R = D_R/(4.*GF/sqrt(2.));
+
+   // penguins
+   // mediator: photon
+   // construct 4-fermion operators from A1 form factors
+   // i q^2 A1 * (- i gmunu/q^2) * (-i Qq e) = GF/sqrt2 * gpV
+
+   const auto uL =  left<typename Up::lorentz_conjugate, Up, Photon>(model);
+   const auto uR = right<typename Up::lorentz_conjugate, Up, Photon>(model);
+   const auto dL =  left<typename Down::lorentz_conjugate, Down, Photon>(model);
+   const auto dR = right<typename Down::lorentz_conjugate, Down, Photon>(model);
+   const auto vcU = 0.5 * (uL + uR);
+   const auto vcD = 0.5 * (dL + dR);
+
+   // the A1 term if the factor in front of q^2, the photon propagator is -1/q^2, we need only factor -1
+   // one additional minus, because of missing permutation
+   auto gpLV = sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
+   auto gpRV = sqrt(2.0)/GF * photon_penguin[1] * (2.*vcU + vcD);
+   auto gnLV = sqrt(2.0)/GF * photon_penguin[0] * (vcU + 2.*vcD);
+   auto gnRV = sqrt(2.0)/GF * photon_penguin[1] * (vcU + 2.*vcD);
+
+   // all contributions
+
+   auto npfU = npf_up(model,
+      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   auto npfD = npf_down(model,
+      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   auto npfS = npf_down(model,
+      std::array<int,4>{generationIndex1, 1, generationIndex2, 1},
+      std::array<Eigen::Vector4d, 0>{}
+   );
+
+   // PDG 2018 data
+   constexpr double m_p = 0.938272081, m_n = 0.939565413;
+   //data from my notes
+   double m_init = context.mass<Lepton>({generationIndex1});
+   double m_u = context.mass<Up>({0});
+   double m_d = context.mass<Down>({0});
+   double m_s = context.mass<Down>({1});
+
+   double GSpu = 0.021*m_p/m_u, GSpd = 0.041*m_p/m_d, GSps = 0.043*m_p/m_s;
+   double GSnu = 0.019*m_n/m_u, GSnd = 0.045*m_n/m_d, GSns = 0.043*m_n/m_s;
+
+   constexpr double GVpu = 2.,            GVpd = 1.;
+   constexpr double GVnu = 1.,            GVnd = 2.;
+
+   constexpr double GTpu = 0.77,          GTpd = -0.23,         GTps = 0.008;
+   constexpr double GTnu = 0.77,          GTnd = -0.23,         GTns = 0.008;
+
+   auto CSLu = ( npfU.at(0)+npfU.at(1) )/2.;
+   auto CSRu = ( npfU.at(2)+npfU.at(3) )/2.;
+   auto CSLd = ( npfD.at(0)+npfD.at(1) )/2.;
+   auto CSRd = ( npfD.at(2)+npfD.at(3) )/2.;
+   auto CSLs = ( npfS.at(0)+npfS.at(1) )/2.;
+   auto CSRs = ( npfS.at(2)+npfS.at(3) )/2.;
+
+   auto CVLu = ( npfU.at(4)+npfU.at(5) )/2.;
+   auto CVRu = ( npfU.at(6)+npfU.at(7) )/2.;
+   auto CVLd = ( npfD.at(4)+npfD.at(5) )/2.;
+   auto CVRd = ( npfD.at(6)+npfD.at(7) )/2.;
+
+   //minus because of definition of tensor operators
+   auto CTLu = -npfU.at(8);
+   auto CTRu = -npfU.at(9);
+   auto CTLd = -npfD.at(8);
+   auto CTRd = -npfD.at(9);
+   auto CTLs = -npfS.at(8);
+   auto CTRs = -npfS.at(9);
+
+   gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );
+   gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );
+   gnLV += (-sqrt(2.0)/GF)*( GVnu*CVLu + GVnd*CVLd );
+   gnRV += (-sqrt(2.0)/GF)*( GVnu*CVRu + GVnd*CVRd );
+
+   //scalar contribution from scalar coefficients
+   auto gpLS = (-sqrt(2.0)/GF)*( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );
+   auto gpRS = (-sqrt(2.0)/GF)*( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );
+   auto gnLS = (-sqrt(2.0)/GF)*( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );
+   auto gnRS = (-sqrt(2.0)/GF)*( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );
+
+   //scalar contribution from tensor coefficients
+   gpLS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTLu + GTpd*CTLd + GTps*CTLs );
+   gpRS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTRu + GTpd*CTRd + GTps*CTRs );
+   gnLS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTLu + GTnd*CTLd + GTns*CTLs );
+   gnRS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTRu + GTnd*CTRd + GTns*CTRs );
+
+   const auto ff = get_overlap_integrals(nucleus, qedqcd);
+
+   const auto left  = A2R*ff.D + gpLV*ff.Vp + gnLV*ff.Vn + gpRS*ff.Sp + gnRS*ff.Sn;
+   const auto right = A2L*ff.D + gpRV*ff.Vp + gnRV*ff.Vn + gpLS*ff.Sp + gnLS*ff.Sn;
+
+   // eq. 14 of Kitano, Koike and Okada
+   const double conversion_rate = 2.*pow(GF,2)*(std::norm(left) + std::norm(right));
+
+   // normalize to capture
+   const double capture_rate = get_capture_rate(nucleus);
+
+   Eigen::Array<std::complex<double>,13,1> res;
+
+   res << conversion_rate/capture_rate,
+          D_L,
+          D_R,
+          npfU.at(0),
+          npfU.at(1),
+          npfU.at(2),
+          npfU.at(3),
+          npfU.at(4) + photon_penguin[0] * uL,
+          npfU.at(5) + photon_penguin[0] * uR,
+          npfU.at(6) + photon_penguin[1] * uL,
+          npfU.at(7) + photon_penguin[1] * uR,
+         -npfU.at(8),
+         -npfU.at(9);
+   return res;
+}
+
 @calculate_definitions@
 
 } // namespace @ModelName@_l_to_l_conversion
