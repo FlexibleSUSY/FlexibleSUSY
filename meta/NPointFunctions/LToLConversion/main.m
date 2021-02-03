@@ -25,7 +25,7 @@
 BeginPackage@"LToLConversion`";
 
 create::usage =
-"@brief Main entrance point for the canculation.";
+"@brief Main entrance point for the calculation.";
 
 getFLHA::usage =
 "@brief Returns information of Wilson coefficients, calculated by this observable
@@ -162,8 +162,7 @@ setPrototype[obs:`type`observable] := (
    `cxx`prototype =
       CConversion`CreateCType@Observables`GetObservableType@obs <>
       " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>`cxx`massless<>"(\n"<>
-      "   int generationIndex1,\n"<>
-      "   int generationIndex2,\n"<>
+      "   int in, int out,\n"<>
       "   const " <> FlexibleSUSY`FSModelName <>
          "_l_to_l_conversion::Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>
@@ -174,8 +173,7 @@ setPrototype // Utils`MakeUnknownInputDefinition;
 setPrototype ~ SetAttributes ~ {Protected, Locked};
 
 create[obs:`type`observable] :=
-Module[
-   {
+Module[{
       npfVertices, npfHeader, npfDefinition,
       calculatePrototype = getPrototype[lIn->lOut,contribution],
       calculateDefinition
@@ -187,20 +185,20 @@ Module[
    setPrototype@obs;
    setClass[];
 
-   {npfVertices, npfHeader, npfDefinition} = `npf`create[obs];
+   {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
 
    calculateDefinition = `cxx`prototype <> StringReplace[" {
-      return forge_conversion<
-         fields::"<>`cxx`in<>", fields::"<>`cxx`up<>",
-         fields::"<>`cxx`down<>", fields::"<>`cxx`photon<>",
-         @photon_penguin_name@,
-         @namespace_npf@@class_U@,
-         @namespace_npf@@class_D@
-      >(generationIndex1, generationIndex2, nucleus, model, qedqcd);
+   return forge_conversion<
+      fields::"<>`cxx`in<>", fields::"<>`cxx`up<>",
+      fields::"<>`cxx`down<>", fields::"<>`cxx`photon<>",
+      @photon_penguin_name@,
+      @namespace_npf@@class_U@,
+      @namespace_npf@@class_D@
+   >(in, out, nucleus, model, qedqcd);
 }",
    {
       "@photon_penguin_name@"->"calculate_"<>`cxx`in<>"_"<>`cxx`out<>"_"<>`cxx`photon<>"_form_factors",
-      "@namespace_npf@"->FlexibleSUSY`FSModelName<>"_cxx_diagrams::npointfunctions::",
+      "@namespace_npf@"->"npointfunctions::",
       "@class_U@"->`cxx`classU,
       "@class_D@"->`cxx`classD
    }];

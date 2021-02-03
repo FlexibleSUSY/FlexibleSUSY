@@ -121,10 +121,11 @@ typedef std::valarray<std::complex<double>>  (*ffv_function)
 typedef std::array<std::complex<double>, 10> (*npf_function)
    (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
 
-template<class Lepton, class Up, class Down, class Photon, ffv_function penguin, npf_function npf_up, npf_function npf_down>
+template<class Lepton, class Up, class Down, class Photon,
+   ffv_function penguin, npf_function npf_up, npf_function npf_down>
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
-   int generationIndex1,
-   int generationIndex2,
+   int in,
+   int out,
    const @ModelName@_l_to_l_conversion::Nucleus nucleus,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
@@ -132,7 +133,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
    // get Fermi constant from Les Houches input file
    const auto GF = qedqcd.displayFermiConstant();
    constexpr bool discard_SM_contributions = false;
-   const auto photon_penguin = penguin(generationIndex1, generationIndex2, model, discard_SM_contributions);
+   const auto photon_penguin = penguin(in, out, model, discard_SM_contributions);
 
    // translate from eq. (14) of hep-ph/9510309 (as matrix element)
    // to eq. (3.23) of 1902.06650
@@ -166,24 +167,24 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
    // all contributions
 
    auto npfU = npf_up(model,
-      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<int,4>{in, 0, out, 0},
       std::array<Eigen::Vector4d, 0>{}
    );
 
    auto npfD = npf_down(model,
-      std::array<int,4>{generationIndex1, 0, generationIndex2, 0},
+      std::array<int,4>{in, 0, out, 0},
       std::array<Eigen::Vector4d, 0>{}
    );
 
    auto npfS = npf_down(model,
-      std::array<int,4>{generationIndex1, 1, generationIndex2, 1},
+      std::array<int,4>{in, 1, out, 1},
       std::array<Eigen::Vector4d, 0>{}
    );
 
    // PDG 2018 data
    constexpr double m_p = 0.938272081, m_n = 0.939565413;
    //data from my notes
-   double m_init = context.mass<Lepton>({generationIndex1});
+   double m_init = context.mass<Lepton>({in});
    double m_u = context.mass<Up>({0});
    double m_d = context.mass<Down>({0});
    double m_s = context.mass<Down>({1});
@@ -239,7 +240,7 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
    const auto left  = A2R*ff.D + gpLV*ff.Vp + gnLV*ff.Vn + gpRS*ff.Sp + gnRS*ff.Sn;
    const auto right = A2L*ff.D + gpRV*ff.Vp + gnRV*ff.Vn + gpLS*ff.Sp + gnLS*ff.Sn;
 
-   // eq. 14 of Kitano, Koike and Okada
+   // eq. (14) of arXiv:hep-ph/0203110
    const double conversion_rate = 2.*pow(GF,2)*(std::norm(left) + std::norm(right));
 
    // normalize to capture
