@@ -29,11 +29,12 @@ jobs:
     runs-on: ${{ matrix.OS }}
 
     steps:
-      - name: Homebrew 
+      - name: Homebrew
         if: runner.os == 'macOS'
         run: |
            brew update
            brew upgrade
+           brew reinstall gcc
            brew install gsl
 
       - name: Checkout
@@ -106,9 +107,9 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.10'
+      IMAGE_VERSION: '0.4.11'
       FORMCALC_VERSION: '9.9'
-      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMNoFV E6SSM NUHMSSMNoFVHimalaya'
+      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
     steps:
 

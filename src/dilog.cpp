@@ -26,25 +26,26 @@ namespace flexiblesusy {
 
 namespace {
 
-   template <typename T>
-   T horner(T x, const T* c, int len) noexcept
+   template <typename T, int N>
+   T horner(T x, const T (&c)[N]) noexcept
    {
       T p = 0;
-      while (len--)
-         p = p*x + c[len];
+      for (int i = N - 1; i >= 0; --i) {
+         p = p*x + c[i];
+      }
       return p;
    }
 
-   template <int Nstart, int Nend, typename T, int N>
+   template <int Nstart, typename T, int N>
    Complex<T> horner(const Complex<T>& z, const T (&coeffs)[N]) noexcept
    {
-      static_assert(Nstart <= Nend && Nend < N && Nend >= 1, "invalid array bounds");
+      static_assert(0 <= Nstart && Nstart < N && N >= 2, "invalid array bounds");
 
       const T r = z.re + z.re;
       const T s = z.re * z.re + z.im * z.im;
-      T a = coeffs[Nend], b = coeffs[Nend - 1];
+      T a = coeffs[N - 1], b = coeffs[N - 2];
 
-      for (int i = Nend - 2; i >= Nstart; --i) {
+      for (int i = N - 3; i >= Nstart; --i) {
          const T t = a;
          a = b + r * a;
          b = coeffs[i] - s * t;
@@ -183,8 +184,8 @@ double dilog(double x) noexcept
 
    const double z = y - 0.25;
 
-   const double p = horner(z, P, sizeof(P)/sizeof(P[0]));
-   const double q = horner(z, Q, sizeof(Q)/sizeof(Q[0]));
+   const double p = horner(z, P);
+   const double q = horner(z, Q);
 
    return r + s*y*p/q;
 }
@@ -308,8 +309,8 @@ long double dilog(long double x) noexcept
 
    const long double z = y - 0.25L;
 
-   const long double p = horner(z, P, sizeof(P)/sizeof(P[0]));
-   const long double q = horner(z, Q, sizeof(Q)/sizeof(Q[0]));
+   const long double p = horner(z, P);
+   const long double q = horner(z, Q);
 
    return r + s*y*p/q;
 }
@@ -342,8 +343,6 @@ std::complex<double> dilog(const std::complex<double>& z_) noexcept
       + 4.5189800296199182e-16
    };
 
-   const double nz = norm_sqr(z);
-
    // special cases
    if (z.im == 0) {
       if (z.re <= 1) {
@@ -351,41 +350,45 @@ std::complex<double> dilog(const std::complex<double>& z_) noexcept
       }
       // z.re > 1
       return { dilog(z.re), -PI*std::log(z.re) };
-   } else if (nz < std::numeric_limits<double>::epsilon()) {
+   }
+
+   const double nz = norm_sqr(z);
+
+   if (nz < std::numeric_limits<double>::epsilon()) {
       return z_;
    }
 
-   Complex<double> cy(0.0, 0.0), cz(0.0, 0.0);
+   Complex<double> u(0.0, 0.0), rest(0.0, 0.0);
    double sgn = 1;
 
    // transformation to |z|<1, Re(z)<=0.5
    if (z.re <= 0.5) {
       if (nz > 1) {
          const Complex<double> lz = log(-z);
-         cy = -0.5*lz*lz - PI*PI/6;
-         cz = -log(1.0 - 1.0 / z);
+         u = -log(1.0 - 1.0 / z);
+         rest = -0.5*lz*lz - PI*PI/6;
          sgn = -1;
       } else { // nz <= 1
-         cy = 0;
-         cz = -log(1.0 - z);
+         u = -log(1.0 - z);
+         rest = 0;
          sgn = 1;
       }
    } else { // z.re > 0.5
       if (nz <= 2*z.re) {
-         cz = -log(z);
-         cy = cz*log(1.0 - z) + PI*PI/6;
+         u = -log(z);
+         rest = u*log(1.0 - z) + PI*PI/6;
          sgn = -1;
       } else { // nz > 2*z.re
          const Complex<double> lz = log(-z);
-         cy = -0.5*lz*lz - PI*PI/6;
-         cz = -log(1.0 - 1.0 / z);
+         u = -log(1.0 - 1.0 / z);
+         rest = -0.5*lz*lz - PI*PI/6;
          sgn = -1;
       }
    }
 
-   const Complex<double> cz2(cz*cz);
+   const Complex<double> u2(u*u);
 
-   return sgn*(cz + cz2*(bf[0] + cz*horner<1, 9>(cz2, bf))) + cy;
+   return sgn*(u + u2*(bf[0] + u*horner<1>(u2, bf))) + rest;
 }
 
 /**
@@ -431,10 +434,6 @@ std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
 #endif
    };
 
-   constexpr int N = sizeof(bf)/sizeof(bf[0]);
-
-   const long double nz = norm_sqr(z);
-
    // special cases
    if (z.im == 0) {
       if (z.re <= 1) {
@@ -442,41 +441,45 @@ std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
       }
       // z.re > 1
       return { dilog(z.re), -PI*std::log(z.re) };
-   } else if (nz < std::numeric_limits<long double>::epsilon()) {
+   }
+
+   const long double nz = norm_sqr(z);
+
+   if (nz < std::numeric_limits<long double>::epsilon()) {
       return z_;
    }
 
-   Complex<long double> cy(0.0L, 0.0L), cz(0.0L, 0.0L);
+   Complex<long double> u(0.0L, 0.0L), rest(0.0L, 0.0L);
    long double sgn = 1;
 
    // transformation to |z|<1, Re(z)<=0.5
    if (z.re <= 0.5L) {
       if (nz > 1) {
          const Complex<long double> lz = log(-z);
-         cy = -0.5L*lz*lz - PI*PI/6;
-         cz = -log(1.0L - 1.0L/z);
+         u = -log(1.0L - 1.0L/z);
+         rest = -0.5L*lz*lz - PI*PI/6;
          sgn = -1;
       } else { // nz <= 1
-         cy = 0;
-         cz = -log(1.0L - z);
+         u = -log(1.0L - z);
+         rest = 0;
          sgn = 1;
       }
    } else { // z.re > 0.5L
       if (nz <= 2*z.re) {
-         cz = -log(z);
-         cy = cz*log(1.0L - z) + PI*PI/6;
+         u = -log(z);
+         rest = u*log(1.0L - z) + PI*PI/6;
          sgn = -1;
       } else { // nz > 2*z.re
          const Complex<long double> lz = log(-z);
-         cy = -0.5L*lz*lz - PI*PI/6;
-         cz = -log(1.0L - 1.0L/z);
+         u = -log(1.0L - 1.0L/z);
+         rest = -0.5L*lz*lz - PI*PI/6;
          sgn = -1;
       }
    }
 
-   const Complex<long double> cz2(cz*cz);
+   const Complex<long double> u2(u*u);
 
-   return sgn*(cz + cz2*(bf[0] + cz*horner<1, N-1>(cz2, bf))) + cy;
+   return sgn*(u + u2*(bf[0] + u*horner<1>(u2, bf))) + rest;
 }
 
 } // namespace flexiblesusy
