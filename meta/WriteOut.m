@@ -527,8 +527,8 @@ WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment
                                                    Observables`GetObservableDescription[par]],
 
                   FlexibleSUSYObservable`LToLConversion[__],
-                      Needs["LToLConversion`",FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir,
-                         "NPointFunctions", "LToLConversion", "main.m"}];
+                      Get@FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir,
+                         "NPointFunctions", "LToLConversion", "main.m"};
                       result = Switch[blockName,
                           "FlexibleSUSYLowEnergy",
                               WriteSLHABlockEntry[
