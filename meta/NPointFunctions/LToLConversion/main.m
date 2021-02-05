@@ -339,3 +339,13 @@ Module[
 
 End[];
 EndPackage[];
+(* Allows define any name for symbols inside the package if $ContextPath
+   contains only System during the package body.
+ *)
+$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
+(* Allows to separate the body of the package into different files for better
+   readability.
+ *)
+Unprotect@$Packages;
+$Packages = DeleteCases[$Packages, "LToLConversion`"];
+Protect@$Packages;
