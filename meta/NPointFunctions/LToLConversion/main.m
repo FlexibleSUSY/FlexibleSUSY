@@ -22,12 +22,12 @@
 
 *)
 
-BeginPackage@"LToLConversion`";
+BeginPackage@"LToLConversion`";Quiet[
 
-create::usage =
+LToLConversion`create::usage =
 "@brief Main entrance point for the calculation.";
 
-getFLHA::usage =
+LToLConversion`getFLHA::usage =
 "@brief Returns information of Wilson coefficients, calculated by this observable
 in the format specified by [arxiv:1008.0762].
 @param Observable.
@@ -36,101 +36,42 @@ in basis element, orders of perturbative expansion, type of contribution,
 description.
 @note We assume that there is a normal ordering of leptons."
 
-Begin["`internal`"];
+];Begin@"`Private`";
 
-`type`lepton = _Symbol?TreeMasses`IsLepton;
-`type`lepton ~ SetAttributes ~ {Protected, Locked};
-
-`type`contribution = Alternatives[
-   All,
-   NPointFunctions`noScalars,
-   NPointFunctions`Penguins,
-   NPointFunctions`FourFermionScalarPenguins,
-   NPointFunctions`FourFermionMassiveVectorPenguins,
-   NPointFunctions`FourFermionFlavourChangingBoxes
-];
-`type`contribution ~ SetAttributes ~ {Protected, Locked};
-
-`type`observable = FlexibleSUSYObservable`LToLConversion[
-   (lIn:`type`lepton)[iIn:_Integer]->(lOut:`type`lepton)[iOut:_Integer],
-   _Symbol,
-   con:`type`contribution,
-   massless:True|False
-];
+`type`observable = FlexibleSUSYObservable`LToLConversion@
+   arguments[in@iIn, out@iOut, nucleus, con, massless];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
-`cxx`in = "";
-`cxx`in // Protect;
+setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
+   Unprotect@"LToLConversion`Private`cxx`*";
+   `cxx`in = cxx@in;
+   `cxx`out = cxx@out;
 
-setIn[lIn:`type`lepton] := (
-   Unprotect@`cxx`in;
-   `cxx`in = CConversion`ToValidCSymbolString@lIn;
-   Protect@`cxx`in;
-);
-setIn // Utils`MakeUnknownInputDefinition;
-setIn ~ SetAttributes ~ {Protected, Locked};
+   `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
+      {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
 
-`cxx`out = "";
-`cxx`out // Protect;
+   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to_",
+      cxx@out, #, "_for_", cxx@con, cxx@massless]&/@ cxx/@
+         {SARAH`UpQuark, SARAH`DownQuark};
 
-setOut[lOut:`type`lepton] := (
-   Unprotect@`cxx`out;
-   `cxx`out = CConversion`ToValidCSymbolString@lOut;
-   Protect@`cxx`out;
-);
-setOut // Utils`MakeUnknownInputDefinition;
-setOut ~ SetAttributes ~ {Protected, Locked};
+   `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
+      cxx@SARAH`Photon, "_form_factors"];
 
-`cxx`con = "";
-`cxx`con // Protect;
+   (*TODO this code is partially duplicated in CalculateObservable.*)
+   `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
+      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>cxx@con<>cxx@massless<>"(\n"<>
+      "   int in, int out,\n"<>
+      "   const " <> FlexibleSUSY`FSModelName <>
+         "_l_to_l_conversion::Nucleus nucleus,\n" <>
+      "   const " <> FlexibleSUSY`FSModelName <>
+      "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)";
+   Protect@"LToLConversion`Private`cxx`*";
+];
+setCxx // Utils`MakeUnknownInputDefinition;
+setCxx ~ SetAttributes ~ {Protected, Locked};
 
-setCon[con:`type`contribution] := (
-   Unprotect@`cxx`con;
-   `cxx`con = CConversion`ToValidCSymbolString@con;
-   Protect@`cxx`con;
-);
-setCon // Utils`MakeUnknownInputDefinition;
-setCon ~ SetAttributes ~ {Protected, Locked};
-
-`cxx`massless = "";
-`cxx`massless // Protect;
-
-setMassless[massless:True|False] := (
-   Unprotect@`cxx`massless;
-   `cxx`massless = CConversion`ToValidCSymbolString@massless;
-   Protect@`cxx`massless;
-);
-setMassless // Utils`MakeUnknownInputDefinition;
-setMassless ~ SetAttributes ~ {Protected, Locked};
-
-{`cxx`up, `cxx`down, `cxx`photon} := {
-   CConversion`ToValidCSymbolString@SARAH`UpQuark,
-   CConversion`ToValidCSymbolString@SARAH`DownQuark,
-   CConversion`ToValidCSymbolString@SARAH`Photon
-};
-{`cxx`up, `cxx`down, `cxx`photon} ~ SetAttributes ~ {Protected, Locked};
-
-`cxx`classU = "";
-`cxx`classD = "";
-{`cxx`classU, `cxx`classD} ~ SetAttributes ~ {Protected};
-
-setClass[] := (
-   Unprotect@`cxx`classU;
-   `cxx`classU = StringJoin["conversion_",`cxx`in,`cxx`up,"_to_",
-      `cxx`out,`cxx`up,"_for_",`cxx`con,`cxx`massless];
-   Protect@`cxx`classU;
-
-   Unprotect@`cxx`classD;
-   `cxx`classD = StringJoin["conversion_",`cxx`in,`cxx`down,"_to_",
-      `cxx`out,`cxx`down,"_for_",`cxx`con,`cxx`massless];
-   Protect@`cxx`classD;
-);
-setClass // Utils`MakeUnknownInputDefinition;
-setClass ~ SetAttributes ~ {Protected, Locked};
-
-getFLHA[obs:`type`observable] :=
-Module[
-   {
+getFLHA@`type`observable :=
+Module[{
       rules = {0->"11", 1->"13", 2->"15"}, leptons,
       quarksU = "0202", quarksD = "0101"
    },
@@ -148,118 +89,66 @@ Module[
       {#1, "4242", #2, #3, #4, "V_RR "<>#5},
       {#1, "4343", #2, #3, #4, "T_LL "<>#5},
       {#1, "4444", #2, #3, #4, "T_RR "<>#5}
-   } & [leptons<>quarksU, "0", "0", "2", CConversion`ToValidCSymbolString@con]
-];
+   } & [leptons<>quarksU, "0", "0", "2", CConversion`ToValidCSymbolString@con]];
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
 
-`cxx`prototype = "";
-`cxx`prototype // Protect;
-
-(*TODO this code is partially duplicated in observable.*)
-setPrototype[obs:`type`observable] := (
-   Unprotect@`cxx`prototype;
-   `cxx`prototype =
-      CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>`cxx`in<>"_to_"<>`cxx`out<>"_for_"<>`cxx`con<>`cxx`massless<>"(\n"<>
-      "   int in, int out,\n"<>
-      "   const " <> FlexibleSUSY`FSModelName <>
-         "_l_to_l_conversion::Nucleus nucleus,\n" <>
-      "   const " <> FlexibleSUSY`FSModelName <>
-      "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)";
-   Protect@`cxx`prototype;
-);
-setPrototype // Utils`MakeUnknownInputDefinition;
-setPrototype ~ SetAttributes ~ {Protected, Locked};
-
 create[obs:`type`observable] :=
-Module[{
-      npfVertices, npfHeader, npfDefinition,
-      calculatePrototype = getPrototype[lIn->lOut,contribution],
-      calculateDefinition
-   },
-   setIn@lIn;
-   setOut@lOut;
-   setCon@con;
-   setMassless@massless;
-   setPrototype@obs;
-   setClass[];
-
+Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
+   setCxx@obs;
    {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
 
-   calculateDefinition = `cxx`prototype <> StringReplace[" {
+   calculateDefinition = `cxx`prototype <> " {
    return forge_conversion<
-      fields::"<>`cxx`in<>", fields::"<>`cxx`up<>",
-      fields::"<>`cxx`down<>", fields::"<>`cxx`photon<>",
-      @photon_penguin_name@,
-      @namespace_npf@@class_U@,
-      @namespace_npf@@class_D@
-   >(in, out, nucleus, model, qedqcd);
-}",
-   {
-      "@photon_penguin_name@"->"calculate_"<>`cxx`in<>"_"<>`cxx`out<>"_"<>`cxx`photon<>"_form_factors",
-      "@namespace_npf@"->"npointfunctions::",
-      "@class_U@"->`cxx`classU,
-      "@class_D@"->`cxx`classD
-   }];
+      "<>`cxx`fields<>",
+      "<>`cxx`penguin<>",
+      npointfunctions::"<>`cxx`classU<>",
+      npointfunctions::"<>`cxx`classD<>"
+   >(in, out, nucleus, model, qedqcd);\n}";
 
    {
       npfVertices,
-      {npfHeader,npfDefinition},
-      {`cxx`prototype <> ";", calculateDefinition}
-   }
-];
+      {npfHeader, npfDefinition},
+      {`cxx`prototype <> ";", calculateDefinition}}];
 
-create[list:{__}] :=
+create[list:{__}] := {
+   DeleteDuplicates[ Join@@#[[All,1]] ],
    {
-      DeleteDuplicates[ Join@@#[[All,1]] ],
-      {
-         #[[1,2,1]],
-         StringJoin@Riffle[#[[All,2,2]], "\n\n"]
-      },
-      {
-         StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-         StringJoin@Riffle[#[[All,3,2]], "\n\n"]
-      }
-   } & [create /@ list];
-
+      #[[1,2,1]],
+      StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
+   {
+      StringJoin@Riffle[#[[All,3,1]], "\n\n"],
+      StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}& [create /@ list];
 create // Utils`MakeUnknownInputDefinition;
+create ~ SetAttributes ~ {Protected, Locked};
 
-`npf`create[`type`observable] :=
-Module[
-   {
-      parsedCon = Switch[con,
-         All, {
-               NPointFunctions`FourFermionMassiveVectorPenguins,
-               NPointFunctions`FourFermionScalarPenguins,
-               NPointFunctions`FourFermionFlavourChangingBoxes
-            },
-         NPointFunctions`noScalars, {
-               NPointFunctions`FourFermionMassiveVectorPenguins,
-               NPointFunctions`FourFermionFlavourChangingBoxes
-            },
-         NPointFunctions`Penguins, {
-               NPointFunctions`FourFermionScalarPenguins,
-               NPointFunctions`FourFermionMassiveVectorPenguins
-            },
-         _, con
-      ],
-      npfU, npfD, (*@note objects, generated by NPointFunction*)
-
-      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass, (*@note synonyms*)
-      dc = NPointFunctions`internal`dc, (*@note current name for dirac chain*)
-
+`npf`create[`type`observable] := Module[{
+      parsedCon,
+      npfU, npfD,
+      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
+      dc = NPointFunctions`internal`dc,
       fiG, foG, uiG, uoG, diG, doG, (*@note particle | inc/out | generation*)
       regulator, (*@note arbitrary sqr(3-momenta) of quarks*)
       inner, sp, dim6,
+      codeU, codeD},
 
-      codeU,codeD
-   },
+   parsedCon = Switch[con,
+      All, {
+            NPointFunctions`FourFermionMassiveVectorPenguins,
+            NPointFunctions`FourFermionScalarPenguins,
+            NPointFunctions`FourFermionFlavourChangingBoxes},
+      NPointFunctions`noScalars, {
+            NPointFunctions`FourFermionMassiveVectorPenguins,
+            NPointFunctions`FourFermionFlavourChangingBoxes},
+      NPointFunctions`Penguins, {
+            NPointFunctions`FourFermionScalarPenguins,
+            NPointFunctions`FourFermionMassiveVectorPenguins},
+      _, con];
 
    Print["<<npf<< calculation for ",`cxx`in," to ",`cxx`out," conversion started ..."];
 
    {npfU, npfD} = NPointFunctions`NPointFunction[
-      {lIn,#},{lOut,#},
+      {in,#},{out,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> If[massless===True, NPointFunctions`ExceptLoops, NPointFunctions`OperatorsOnly],
@@ -304,8 +193,8 @@ Module[
       "minus_T_LL" -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
       "minus_T_RR" -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
    };
-   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`UpQuark];
-   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[lIn,lOut,SARAH`DownQuark];
+   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`UpQuark];
+   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`DownQuark];
 
    Print[">>npf>> calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
 
@@ -315,13 +204,13 @@ Module[
       npfU,
       `cxx`classU,
       SARAH`Delta,
-      dim6[lIn,lOut,SARAH`UpQuark]
+      dim6[in,out,SARAH`UpQuark]
    ][[2]];
    codeD = NPointFunctions`CreateCXXFunctions[
       npfD,
       `cxx`classD,
       SARAH`Delta,
-      dim6[lIn,lOut,SARAH`DownQuark]
+      dim6[in,out,SARAH`DownQuark]
    ][[2]];
 
    Print[">>npf>> c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
@@ -332,8 +221,7 @@ Module[
       ],
       NPointFunctions`CreateCXXHeaders[],
       codeU<>"\n\n"<>codeD
-   }
-];
+   }];
 `npf`create // Utils`MakeUnknownInputDefinition;
 `npf`create ~ SetAttributes ~ {Locked,Protected};
 

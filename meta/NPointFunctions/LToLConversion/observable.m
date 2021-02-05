@@ -20,50 +20,33 @@
 
 *)
 
+Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
+
 Begin["Observables`Private`"];
+With[{
+   args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
+   obs = FlexibleSUSYObservable`LToLConversion,
+   cxx = CConversion`ToValidCSymbolString
+},
 
-`args`LToLConversion = Sequence[
-   (lIn:_?TreeMasses`IsLepton)[gIn:_Integer] ->
-   (lOut_?TreeMasses`IsLepton)[gOut:_Integer],
-   nucleus:_,
-   contribution:Alternatives[All,
-      NPointFunctions`noScalars,
-      NPointFunctions`Penguins,
-      NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes],
-   massless:True|False
-];
+GetObservableName@obs@args := StringJoin[
+   cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
+   cxx@nucl, "_for_", cxx@proc, cxx@massless];
 
-GetObservableName@FlexibleSUSYObservable`LToLConversion@`args`LToLConversion :=
-   StringJoin[
-      #@lIn, #@gIn, "_to_", #@lOut, #@gOut, "_conversion_in_", #@nucleus,
-      "_for_", #@contribution, #@massless
-   ] &@ CConversion`ToValidCSymbolString;
+GetObservableDescription@obs@args := StringJoin[
+   cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
+   cxx@nucl, " for ",cxx@proc];
 
-GetObservableDescription@FlexibleSUSYObservable`LToLConversion@
-`args`LToLConversion :=
-   StringJoin[
-      #@lIn, "(", #@gIn, ") to ", #@lOut, "(", #@gOut, ") conversion in ",
-      #@nucleus, " for ",#@contribution
-   ] &@ CConversion`ToValidCSymbolString;
-
-GetObservableType@FlexibleSUSYObservable`LToLConversion@`args`LToLConversion :=
+GetObservableType@obs@args :=
    CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
-CalculateObservable[
-   FlexibleSUSYObservable`LToLConversion@`args`LToLConversion,
-   structName:_String
-] :=
-   StringJoin[
-      structName, ".",
-      GetObservableName@FlexibleSUSYObservable`LToLConversion[
-         lIn@gIn->lOut@gOut, nucleus, contribution, massless],
-      " = ", #2, "::calculate_", #1@lIn, "_to_", #1@lOut, "_for_",
-      #1@contribution, #1@massless, "(", #1@gIn, ", ", #1@gOut, ", ", #2, "::Nucleus::",
-      #1@nucleus, ", MODEL, qedqcd);"
-   ] & [CConversion`ToValidCSymbolString,
-      FlexibleSUSY`FSModelName<>"_l_to_l_conversion"
-   ];
+CalculateObservable[obs@args, structName:_String] := StringJoin[
+   structName, ".",
+   GetObservableName@obs[in@inN->out@outN, nucl, proc, massless],
+   " = ", #, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
+   cxx@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ", #, "::Nucleus::",
+   cxx@nucl, ", MODEL, qedqcd);"
+] & [FlexibleSUSY`FSModelName<>"_l_to_l_conversion"];
 
+];
 End[];
