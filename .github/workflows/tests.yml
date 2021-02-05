@@ -107,7 +107,7 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.11'
+      IMAGE_VERSION: '0.4.12'
       FORMCALC_VERSION: '9.9'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
