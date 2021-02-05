@@ -3682,8 +3682,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {},
-            LToLConversion = {}, FFMasslessVVertices = {},
-            LToLConversionVertices = {}, LToLConversionFields = {},
+            FFMasslessVVertices = {},
+            FieldsNPF, VerticesNPF, AllNPFVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -4518,15 +4518,25 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
-         (* OBSERVABLE: l -> l conversion *)
-         Get@FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions", "LToLConversion", "class.m"};
-         {LToLConversionFields, LToLConversionVertices} =
-            WriteLToLConversionClass[extraSLHAOutputBlocks,
-               {
-                  FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
-                  FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
-               } &/@ ("l_to_l_conversion"<># &/@ {".hpp", ".cpp"})
-            ];
+         (* Load and evaluate NPointFunctions write classes for observables *)
+         If[FSFeynArtsAvailable && FSFormCalcAvailable,
+            Module[{files, obs, classes, namespaces},
+               files = FileNames["class.m",
+                  FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions"}, 2];
+               Get/@files;
+               obs = StringSplit[files, $PathnameSeparator][[All, -2]];
+               classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
+               namespaces = ToExpression[#<>"`namespace[]"]&/@obs;
+               files = {FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
+                  FileNameJoin@{FSOutputDir, FSModelName<>"_"<>#}}&/@
+                     {#<>".hpp", #<>".cpp"}&/@ namespaces;
+               Do[With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]]}},
+                     lhs = classes[[i]][extraSLHAOutputBlocks, files[[i]]];];
+                  AllNPFVertices = Join[AllNPFVertices, VerticesNPF@obs[[i]]],
+                  {i, Length@classes}];
+               FieldsNPF[_] = {};
+               VerticesNPF[_] = {};
+               AllNPFVertices = DeleteDuplicates@AllNPFVertices;];];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =
@@ -4550,10 +4560,16 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      QToQGammaFields,
 
                      (* L -> L conversion in nucleus *)
-                     If[LToLConversionFields === {},
+                     If[FieldsNPF@"LToLConversion" === {},
                         {},
-                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@ LToLConversionFields
-                     ]
+                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@
+                           FieldsNPF@"LToLConversion"],
+
+                     (* L -> 3L LVF decay *)
+                     If[FieldsNPF@"BrLTo3L" === {},
+                        {},
+                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@
+                           FieldsNPF@"BrLTo3L"]
                   ],
 
                   {{FileNameJoin[{$flexiblesusyTemplateDir, "FFV_form_factors.hpp.in"}],
@@ -4589,7 +4605,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, LToLConversionVertices],
+              Join[edmVertices, FFMasslessVVertices, AllNPFVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates
