@@ -28,14 +28,6 @@ FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty
                   CpHiggsPhotonPhoton, CpHiggsGluonGluon,
                   CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
                   EDM, BrLToLGamma, bsgamma };
-
-If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-   AppendTo[FSObservables, LToLConversion];
-   Get@FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions",
-      "LToLConversion", "observable.m"
-   };
-];
-
 End[];
 
 GetRequestedObservables::usage="";
@@ -51,6 +43,17 @@ GetObservableDescription::usage="returns description of observable.";
 IsObservable::usage = "Returns true if given symbol is an observable.";
 
 Begin["`Private`"];
+
+If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   Module[{files, observables, symbols},
+      files = FileNames["observable.m",
+         FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
+      observables = StringSplit[files, $PathnameSeparator][[All, -2]];
+      symbols = Symbol["FlexibleSUSYObservable`"<>#]&/@observables;
+      AppendTo[FlexibleSUSYObservable`FSObservables, #]&/@symbols;
+      Get/@files;
+   ];
+];
 
 IsObservable[sym_] :=
     MemberQ[FlexibleSUSYObservable`FSObservables, sym] || \
