@@ -20,12 +20,13 @@
 
 *)
 
+Get@FileNameJoin@{DirectoryName@$Input, "main.m"};
+
 Begin["FlexibleSUSY`Private`"];
 
 WriteLToLConversionClass[
    extraSLHAOutputBlocks:_List,
-   files:{{_?FileExistsQ,_String}..}
-] :=
+   files:{{_?FileExistsQ,_String}..}] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[
@@ -43,13 +44,10 @@ Module[
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the calculation *)
-      masslessNeutralVectorBosons = Select[
-         TreeMasses`GetVectorBosons[],
+      masslessNeutralVectorBosons = Select[TreeMasses`GetVectorBosons[],
          And[TreeMasses`IsMassless@#,
             !TreeMasses`IsElectricallyCharged@#,
-            !TreeMasses`ColorChargedQ@#
-         ]&
-      ];
+            !TreeMasses`ColorChargedQ@#]&];
 
       vertices = Flatten /@ Tuples[
          {

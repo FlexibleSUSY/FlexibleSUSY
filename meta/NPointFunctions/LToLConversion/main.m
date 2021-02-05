@@ -27,20 +27,7 @@ BeginPackage@"LToLConversion`";Quiet[
 LToLConversion`create::usage =
 "@brief Main entrance point for the calculation.";
 
-LToLConversion`getFLHA::usage =
-"@brief Returns information of Wilson coefficients, calculated by this observable
-in the format specified by [arxiv:1008.0762].
-@param Observable.
-@returns List of List of Strings which are: fermions in basis element, operators
-in basis element, orders of perturbative expansion, type of contribution,
-description.
-@note We assume that there is a normal ordering of leptons."
-
 ];Begin@"`Private`";
-
-`type`observable = FlexibleSUSYObservable`LToLConversion@
-   arguments[in@iIn, out@iOut, nucleus, con, massless];
-`type`observable ~ SetAttributes ~ {Protected, Locked};
 
 setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"LToLConversion`Private`cxx`*";
@@ -69,29 +56,6 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 ];
 setCxx // Utils`MakeUnknownInputDefinition;
 setCxx ~ SetAttributes ~ {Protected, Locked};
-
-getFLHA@`type`observable :=
-Module[{
-      rules = {0->"11", 1->"13", 2->"15"}, leptons,
-      quarksU = "0202", quarksD = "0101"
-   },
-   leptons = StringJoin[{iOut, iIn} /. rules];
-   {
-      {leptons, "3122", #2, #3, #4, "D_L"},
-      {leptons, "3122", #2, #3, #4, "D_R"},
-      {#1, "3131", #2, #3, #4, "S_LL "<>#5},
-      {#1, "3132", #2, #3, #4, "S_LR "<>#5},
-      {#1, "3231", #2, #3, #4, "S_RL "<>#5},
-      {#1, "3232", #2, #3, #4, "S_RR "<>#5},
-      {#1, "4141", #2, #3, #4, "V_LL "<>#5},
-      {#1, "4142", #2, #3, #4, "V_LR "<>#5},
-      {#1, "4241", #2, #3, #4, "V_RL "<>#5},
-      {#1, "4242", #2, #3, #4, "V_RR "<>#5},
-      {#1, "4343", #2, #3, #4, "T_LL "<>#5},
-      {#1, "4444", #2, #3, #4, "T_RR "<>#5}
-   } & [leptons<>quarksU, "0", "0", "2", CConversion`ToValidCSymbolString@con]];
-getFLHA // Utils`MakeUnknownInputDefinition;
-getFLHA ~ SetAttributes ~ {Protected, Locked};
 
 create[obs:`type`observable] :=
 Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
