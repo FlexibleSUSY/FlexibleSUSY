@@ -492,9 +492,9 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
            result
           ];
 
-Module[{files, obs, pattern, once},
+Module[{files, obs, pattern = 0, once},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] := (
-   If[TrueQ@once,,
+   If[!TrueQ@once && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
       files = FileNames["write.m",
          FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
       Get/@files;
@@ -686,7 +686,9 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            reformed = ReformeBlocks /@ outputBlocks;
            (
               result = result
-                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                 <> If[Or[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                          First[#[[1]]] === FlexibleSUSY`FWCOEF,
+                          First[#[[1]]] === FlexibleSUSY`IMFWCOEF],
                        "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
                        <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
                        <> "}\n",

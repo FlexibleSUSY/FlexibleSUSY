@@ -18,6 +18,8 @@ BASE_TEMPLATES := \
 		$(DIR)/l_to_lgamma.cpp.in \
       $(DIR)/l_to_l_conversion.hpp.in \
       $(DIR)/l_to_l_conversion.cpp.in \
+      $(DIR)/l_to_3l.hpp.in \
+      $(DIR)/l_to_3l.cpp.in \
 		$(DIR)/b_to_s_gamma.cpp.in \
 		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \

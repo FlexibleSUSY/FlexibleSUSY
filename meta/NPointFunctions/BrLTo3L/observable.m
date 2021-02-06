@@ -24,28 +24,28 @@ Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
 
 Begin@"Observables`Private`";
 With[{
-   args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
-   obs = FlexibleSUSYObservable`LToLConversion,
+   args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc],
+   obs = FlexibleSUSYObservable`BrLTo3L,
    cxx = CConversion`ToValidCSymbolString,
-   namespace = FlexibleSUSY`FSModelName<>"_"<>LToLConversion`namespace[]},
+   namespace = FlexibleSUSY`FSModelName<>"_"<>BrLTo3L`namespace[]},
 
 GetObservableName@obs@args := StringJoin[
-   cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
-   cxx@nucl, "_for_", cxx@proc, cxx@massless];
+   cxx@lep, cxx@nI, "_to_", cxx@lep, cxx@nO, cxx@lep, cxx@nA,
+   cxx@SARAH`bar@lep, cxx@nA, "_for_", cxx@proc];
 
 GetObservableDescription@obs@args := StringJoin[
-   cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
-   cxx@nucl, " for ",cxx@proc];
+   cxx@lep, "(", cxx@nI, ") to ", cxx@lep, "(", cxx@nO, ")",
+   cxx@lep, "(", cxx@nA, ")", cxx@SARAH`bar@lep, "(", cxx@nA, ")", " for ",cxx@proc];
 
 GetObservableType@obs@args :=
    CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
 CalculateObservable[obs@args, structName:_String] := StringJoin[
    structName, ".",
-   GetObservableName@obs[in@inN -> out@outN, nucl, proc, massless], " = ",
-   namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
-   cxx@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
-   namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];
+   GetObservableName@obs[lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA}, proc],
+   " = ", namespace, "::calculate_",
+   cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep, "_for_", cxx@proc, "(",
+   cxx@nI, ", ", cxx@nO, ", ", cxx@nA, ", ", cxx@nA, ", MODEL, qedqcd);"];
 
 ];
 End[];

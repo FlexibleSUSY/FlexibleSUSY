@@ -74,10 +74,7 @@ META_SRC     := \
 		$(DIR)/NPointFunctions/time.m \
 		$(DIR)/NPointFunctions/chains.m \
 		$(DIR)/NPointFunctions/topologies.m \
-		$(DIR)/NPointFunctions/LToLConversion/observable.m \
-		$(DIR)/NPointFunctions/LToLConversion/class.m \
-		$(DIR)/NPointFunctions/LToLConversion/main.m \
-		$(DIR)/NPointFunctions/LToLConversion/settings.m \
+		$(wildcard $(DIR)/NPointFunctions/*/*.m) \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
