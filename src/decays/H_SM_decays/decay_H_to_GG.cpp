@@ -21,14 +21,10 @@ double CLASSNAME::get_partial_width<H, G, G>(
    // the analytic form o corrections is valid for small tau
    if (tau < 0.7) {
       // number of active light flavours
-      unsigned int Nf;
-      if (mH > 5 && mH < mtpole) {
-         Nf = 5;
-      } else if (mH > mtpole) {
-         Nf = 6;
-      } else {
-         throw;
-      }
+      constexpr int Nf = 5;
+      auto qedqcd_ = qedqcd;
+      qedqcd_.to(mH);
+      const double alpha_s = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
       const auto HGGVertex = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
@@ -39,7 +35,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
       // LO width comming only from the top-loop
       // agrees up to a full double precision with automatically generated one
-      const double Gamma_SM_LO_S = mH/(32.*Power3(Pi))*std::norm(get_alphas(context)*HGGVertexSVal*Ff);
+      const double Gamma_SM_LO_S = mH/(32.*Power3(Pi))*std::norm(alpha_s*HGGVertexSVal*Ff);
 
       const double mu = mH;
       const double LH = std::log(Sqr(mu/mH));
@@ -85,7 +81,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       // eq. 4.20 from Adam's thesis
       const double deltaNNNLO_S {467.683620788 + 122.440972222*log_mH2OverMT2 + 10.9409722222*Sqr(log_mH2OverMT2)};
 
-      const double alpha_s_red = get_alphas(context)/Pi;
+      const double alpha_s_red = alpha_s/Pi;
       const double norm = Sqr(3./(2.*tau)*(1. + (1. - 1./tau)*Sqr(std::asin(std::sqrt(tau)))));
 
       switch (include_higher_order_corrections) {

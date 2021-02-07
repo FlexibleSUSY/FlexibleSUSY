@@ -692,10 +692,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0018866791466703291, 5e-12);
+                              0.0019847394682354072, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              9.9580460952386956e-05, 4e-14);
+                              0.00010502608685517936, 4e-14);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
@@ -716,7 +716,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00020733225480953216, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00030420130269631331, 7e-11);
    // h -> gamma gamma
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);

@@ -53,10 +53,10 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              0.0026175638821248786, 2e-15);
+                              0.0025919473296365115, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              9.617426518049035e-06, 1e-16);
+                              9.5135010526434135e-06, 1e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026184531343741851, 1e-15);
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00039489561690073344, 5e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00037101151840550036, 5e-13);
    // h -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.0571803767199578e-05, 2e-13);
    // h -> gamma Z

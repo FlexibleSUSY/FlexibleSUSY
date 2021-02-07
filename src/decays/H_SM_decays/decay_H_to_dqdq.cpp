@@ -59,8 +59,22 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
          double deltaqq_QCD_OS = 0.;
-         const double Nf = number_of_active_flavours(mHOS);
-         const double alpha_s_red = get_alphas(context)/Pi;
+         const int Nf = number_of_active_flavours(mHOS);
+         double alpha_s_red;
+         switch (Nf) {
+            case 5: {
+               auto qedqcd_ = qedqcd;
+               qedqcd_.to(mHOS);
+               alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               break;
+            }
+            case 6:
+               alpha_s_red = get_alphas(context)/Pi;
+               break;
+            default:
+               ERROR("Error in H->ddbar: Cannot determine the number of active flavours");
+               exit(1);
+         }
          double deltaqq_QCD_DR = calc_Deltaqq(alpha_s_red, Nf);
 
          // eq. 21 in FD manual
@@ -72,7 +86,6 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
          double deltaH2 = 0.;
 
          if(!info::is_CP_violating_Higgs_sector) {
-            const double mtpole = qedqcd.displayPoleMt();
 
             deltaqq_QCD_OS =
                4./3. * alpha_s_red * calc_DeltaH(betaOS);
@@ -83,6 +96,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             deltaqq_QED_OS =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaH(betaOS);
 
+            const double mtpole = qedqcd.displayPoleMt();
             const double lt = std::log(Sqr(mHOS/mtpole));
             const double lq = std::log(xDR);
             // eq. 28 of hep-ph/9505358

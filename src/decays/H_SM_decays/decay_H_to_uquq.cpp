@@ -59,8 +59,22 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
          double deltaqqOS = 0.;
-         const double alpha_s_red = get_alphas(context)/Pi;
-         const double Nf = number_of_active_flavours(mHOS);
+         const int Nf = number_of_active_flavours(mHOS);
+         double alpha_s_red;
+         switch (Nf) {
+            case 5: {
+               auto qedqcd_ = qedqcd;
+               qedqcd_.to(mHOS);
+               alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               break;
+            }
+            case 6:
+               alpha_s_red = get_alphas(context)/Pi;
+               break;
+            default:
+               ERROR("Error in H->uubar: Cannot determine the number of active flavours");
+               exit(1);
+         }
          double deltaqqDR = calc_Deltaqq(alpha_s_red, Nf);
 
          const double alpha_red = get_alpha(context)/Pi;

@@ -18,20 +18,18 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    const double mtpole {qedqcd.displayPoleMt()};
    const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
    if (tau < 0.7) {
-
       // number of active light flavours
-      unsigned int Nf;
-      if (mAh > 5 && mAh < mtpole) {
-         Nf = 5;
-      } else if (mAh > mtpole) {
-         Nf = 6;
-      } else {
+      constexpr int Nf = 5;
+      auto qedqcd_ = qedqcd;
+      qedqcd_.to(mAh);
+      const double alpha_s = qedqcd_.displayAlpha(softsusy::ALPHAS);
+      /*
          throw std::runtime_error(
             "Error in "
             + create_process_string<AH, G, G>(in_idx, out1_idx, out2_idx)
             + ": Could not determine the number of active light quark flavours"
          );
-      }
+         */
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
       const auto AHGGVertex = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
