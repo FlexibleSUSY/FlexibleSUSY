@@ -1349,6 +1349,18 @@ check_boost() {
     [ -z "$boost_inc_dir" ] && \
     [ -z "$boost_lib_dir" ] && \
     type pkg-config > /dev/null && \
+    [ -f boost_unit_test_framework.pc ] && \
+    {
+        message -n "Checking boost library using local boost_unit_test_framework.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --libs)
+        message "ok"
+        return
+    }
+
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
     [ -f boost.pc ] && \
     {
         message -n "Checking boost library using local boost.pc ... "
