@@ -8,10 +8,18 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    typename field_indices<uq>::type const& indexOut2
    ) const
 {
+   // get HBBbar vertex
+   // we don't use amplitude_squared here because we need both this vertex
+   // both with running and pole masses
+   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
+   const auto HBBbarVertexDR = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
+
    // TODO: should we take the off-diagonal case at all?
    //       or should this never happen and we should crash
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      WARNING("Flavour violating decays of H->uubar currently not implemented!");
+      if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
+         WARNING("Warning: flavour violating decays of H->uubar currently not implemented!");
+      }
       return 0.;
    }
 
@@ -37,11 +45,6 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
    const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
-   // get HBBbar vertex
-   // we don't use amplitude_squared here because we need both this vertex
-   // both with running and pole masses
-   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HBBbarVertexDR = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
    const std::complex<double> HBBbarVertexDRV = HBBbarVertexDR.left() + HBBbarVertexDR.right();
 
    const auto amp2DR = Sqr(mHOS) * Sqr(betaDR) *

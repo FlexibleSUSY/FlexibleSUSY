@@ -9,10 +9,18 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    typename field_indices<dq>::type const& indexOut2
    ) const
 {
+   // get HBBbar vertex
+   // we don't use amplitude_squared here because we need both this vertex
+   // both with running and pole masses
+   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
+   const auto HBBbarVertexDR = Vertex<bar<dq>::type, dq, AH>::evaluate(indices, context);
+
    // TODO: should we take the off-diagonal case at all?
    //       or should this never happen and we should crash
    if(!boost::range::equal(indexOut1, indexOut2)) {
-      WARNING("Flavour violating decays of Ah->ddbar are currently not implemented");
+      if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
+         WARNING("Warning: flavour violating decays of Ah->ddbar are currently not implemented");
+      }
       return 0.;
    }
 
