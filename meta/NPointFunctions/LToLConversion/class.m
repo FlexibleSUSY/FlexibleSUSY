@@ -20,10 +20,9 @@
 
 *)
 
-Get@FileNameJoin@{DirectoryName@$Input, "main.m"};
-
 Begin["FlexibleSUSY`Private`"];
 
+With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
 WriteLToLConversionClass[
    extraSLHAOutputBlocks:_List,
    files:{{_?FileExistsQ,_String}..}] :=
@@ -41,6 +40,7 @@ Module[
    If[observables =!= {},
       Print["Creating LToLConversion class ..."];
 
+      Get@main;
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the calculation *)
@@ -75,6 +75,7 @@ Module[
       fields,
       DeleteDuplicates@Join[vertices,additionalVertices]
    }
+];
 ];
 WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
 

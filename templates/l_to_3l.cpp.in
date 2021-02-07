@@ -1,0 +1,78 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+/**
+ * @file @ModelName@_l_to_3l.cpp
+ *
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
+ */
+
+#include <valarray>
+#include <complex>
+
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
+
+#include "@ModelName@_l_to_3l.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
+
+#include "wrappers.hpp"
+
+@npf_headers@
+
+namespace flexiblesusy {
+
+namespace @ModelName@_cxx_diagrams {
+namespace npointfunctions {
+
+@npf_definitions@
+
+} // namespace npointfunctions
+} // namespace @ModelName@_cxx_diagrams
+
+using namespace @ModelName@_cxx_diagrams;
+using namespace @ModelName@_FFV_form_factors;
+
+namespace @ModelName@_l_to_3l {
+
+Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
+   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+
+   Eigen::Array<std::complex<double>,13,1> res;
+
+   res << 0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0;
+   return res;
+}
+
+@calc_definitions@
+
+} // namespace @ModelName@_l_to_3l
+} // namespace flexiblesusy

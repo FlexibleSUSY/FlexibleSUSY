@@ -25,6 +25,12 @@ BeginPackage@"BrLTo3L`";Quiet[
 BrLTo3L`namespace::usage = "
 @brief Returns a namespace for C++ code of a given observable";
 
+BrLTo3L`calculate::usage = "
+@brief Creates a C++ calculate call or prototype for the observable.
+@param obs The observable.
+@param . Defines, whether prototype or call should be generated.
+@returns A C++ code for prototype of call of calculate function.";
+
 BrLTo3L`arguments::usage = "
 @brief Generates a named pattern sequence (by inserting given symbols in
        correct places), which is set of arguments for observable.
@@ -63,8 +69,23 @@ arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`BrLTo3L@
-   arguments[lepton, nI -> {nO, nA}, proc];
+   arguments[lep, nI -> {nO, nA}, proc];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
+
+With[{i = TextFormatting`IndentText, m = FlexibleSUSY`FSModelName,
+      cxx = CConversion`ToValidCSymbolString},
+   calculate[obs:`type`observable] := StringJoin[
+      m, "_", namespace[], "::calculate_",
+      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep, "_for_", cxx@proc,
+      "(", cxx@nI, ", ", cxx@nO, ", ", cxx@nA,
+      ", MODEL, qedqcd)"];
+   calculate[obs:`type`observable, Head] := StringJoin["calculate_",
+      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep, "_for_", cxx@proc,
+      "(\n", i@"int nI, int nO, int nA,\n",
+      i@"const ", m, "_mass_eigenstates& model,\n",
+      i@"const softsusy::QedQcd& qedqcd)"];];
+prototype // Utils`MakeUnknownInputDefinition;
+prototype ~ SetAttributes ~ {Protected, Locked};
 
 End[];EndPackage[];
 $ContextPath = DeleteCases[$ContextPath, "BrLTo3L`"];

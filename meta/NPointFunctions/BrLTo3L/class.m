@@ -20,60 +20,44 @@
 
 *)
 
-Begin["FlexibleSUSY`Private`"];
+Begin@"FlexibleSUSY`Private`";
 
-WriteBrLTo3LClass[extraSLHAOutputBlocks:_List,
-   files:{{_?FileExistsQ, _String}..}] :=
-Module[{
-      fields = {}, vertices = {}, additionalVertices = {},
-      prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
-      masslessNeutralVectorBosons
-   },
-   (*observables = DeleteDuplicates@Cases[
-      Observables`GetRequestedObservables@extraSLHAOutputBlocks,
-      FlexibleSUSYObservable`LToLConversion[pIn_[_]->pOut_[_],__]
-   ],
-
-   If[observables =!= {},
-      Print["Creating LToLConversion class ..."];
-
-      fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
-
-      masslessNeutralVectorBosons = Select[
-         TreeMasses`GetVectorBosons[],
-         And[TreeMasses`IsMassless@#,
-            !TreeMasses`IsElectricallyCharged@#,
-            !TreeMasses`ColorChargedQ@#
-         ]&
-      ];
-
-      vertices = Flatten /@ Tuples[
-         {
-            {CXXDiagrams`LorentzConjugate@#, #} &/@ Flatten@Join[
-               TreeMasses`GetSMQuarks[], vertices],
-            masslessNeutralVectorBosons
-         }
-      ];
-
-      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
-         LToLConversion`create@observables;
-   ];
-
-   WriteOut`ReplaceInFiles[
-      files,
-      {
-         "@npf_headers@" -> npfHeaders,
-         "@npf_definitions@" -> npfDefinitions,
-         "@calculate_prototypes@" -> prototypes,
-         "@calculate_definitions@" -> definitions,
-         Sequence@@GeneralReplacementRules[]
-      }
-   ];*)
-   {
-      {},
-      {}
-   }
-];
+WriteBrLTo3LClass::usage = "
+@brief Takes corresponding to the observable .hpp.in and .cpp.in files from
+       template directory. Then inserts parts of code, generated with help of
+       main.m and puts resulting files inside directory of configured model.
+@param blocks A list of extra slha output blocks. It should contain calls for
+       the observable in order to calculate it.
+@param files A list of input-output file names to work with.
+@returns A list with two entries: 1) a list of all external fields of the
+         observable, 2) a list of all vertices, required by the observable.";
+WriteBrLTo3LClass::errPhoton = "
+Existence of only one massless neutral vector boson is assumed.";
+With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
+   WriteBrLTo3LClass[blocks:_List, files:{{_?FileExistsQ, _String}..}] :=
+   Module[{obs, photons,
+         fermions = {}, ffvV = {}, npfV = {},
+         calcProto = "", npfHeaders = "", calcDef = "", npfDefinitions = ""},
+      obs = DeleteDuplicates@Cases[
+         Observables`GetRequestedObservables@blocks,
+         FlexibleSUSYObservable`BrLTo3L[__]];
+      If[obs =!= {},
+         Print@"Creating BrLTo3L class ...";
+         Get@main;
+         fermions = DeleteDuplicates@Cases[obs, {_,f_,bf_}:>{bf, f}, Infinity] /.
+            f_[_Integer]:>f;
+         photons = Select[
+            TreeMasses`GetVectorBosons[],
+            And[TreeMasses`IsMassless@#, !TreeMasses`IsElectricallyCharged@#,
+                !TreeMasses`ColorChargedQ@#]&];
+         Utils`AssertOrQuit[1 === Length@photons, WriteBrLTo3LClass::errPhoton];
+         ffvV = Flatten/@Tuples@{fermions, photons};
+         {npfV, {npfHead, npfDef}, {calcProto, calcDef}} = BrLTo3L`create@obs;];
+      WriteOut`ReplaceInFiles[files,
+         {"@npf_headers@" -> npfHeaders, "@npf_definitions@" -> npfDefinitions,
+           "@calc_prototypes@" -> calcProto, "@calc_definitions@" -> calcDef,
+            Sequence@@GeneralReplacementRules[]}];
+      {fermions, Join[ffvV, npfV]}];];
 WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
 WriteBrLTo3LClass ~ SetAttributes ~ {Protected, Locked};
 
