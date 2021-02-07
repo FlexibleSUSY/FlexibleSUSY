@@ -189,6 +189,10 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
 // eq. 2.17, 2.19 & 2.20 of https://arxiv.org/pdf/hep-ph/0509189.pdf
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept {
    const double tau = Sqr(mAh/(2.*mq));
+   // know threshold singularity at mAh = 2*mq
+   if (is_zero(1 - tau, 1e-6)) {
+      return 0.;
+   }
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
    const std::complex<double> ln = std::log(z);
    const std::complex<double> li2p = dilog(z);
