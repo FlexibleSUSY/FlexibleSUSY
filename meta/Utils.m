@@ -201,8 +201,8 @@ Utils`MakeUnknownInputDefinition[foo];
 or
 Utils`MakeUnknownInputDefinition@foo;
 somewhere in the scope of the package, where foo is defined.
-@param <Symbol> sym Symbol to make definition for.
-@returns None.
+@param sym Symbol to make definition for.
+@returns The input symbol.
 @note UpValues for symbol[args___] are not cleared.";
 
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
@@ -516,7 +516,7 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
    sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
-];
+   sym];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
 
