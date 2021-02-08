@@ -208,8 +208,7 @@ Module[{},
    {
       {
          #1,
-         #3,
-         FlexibleSUSY`$flexiblesusyMetaDir
+         #3
       },
       {
          FileNameJoin@{#2,SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates},
@@ -387,8 +386,8 @@ Options[NPointFunction]={
    UseCache -> True,
    ZeroExternalMomenta -> True,
    OnShellFlag -> True,
-   KeepProcesses -> {}
-};
+   KeepProcesses -> {},
+   Observable -> None};
 NPointFunction::usage=
 "@brief Calculate the n-point correlation function for a List of incoming and
 a List of outgoing fields.
@@ -453,20 +452,14 @@ Currently supported options are:
 NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
 Module[
    {
-      loopLevel = OptionValue[LoopLevel],
-      regularizationScheme = OptionValue[Regularize],
-      zeroExternalMomenta = OptionValue[ZeroExternalMomenta],
-      excludeProcesses = OptionValue[KeepProcesses],                     (*@todo is not checked yet!*)
-      onShellFlag = OptionValue[OnShellFlag],
       nPointFunctionsDir,feynArtsModel,particleNamesFile,
-      particleNamespaceFile,substitutionsFile,formCalcDir,fsMetaDir,
+      particleNamespaceFile,substitutionsFile,formCalcDir,
       subKernel,
-      currentPath, currentDirectory,
-      inFANames,outFANames,
+      currentDirectory,
       nPointFunction
    },
    {
-      {nPointFunctionsDir,formCalcDir,fsMetaDir},
+      {nPointFunctionsDir,formCalcDir},
       {feynArtsModel,particleNamesFile,particleNamespaceFile,substitutionsFile}
    } = getDirectories[];
 
@@ -480,43 +473,44 @@ Module[
 
    If[!FileExistsQ[feynArtsModel <> ".mod"],
       subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
-      GenerateFAModelFileOnKernel@subKernel;                                    (*generates .dat .mod .m files inside FeynArts directory*)
+      GenerateFAModelFileOnKernel@subKernel;
       WriteParticleNamespaceFile@particleNamespaceFile;
-      CloseKernels@subKernel;
-   ];
+      CloseKernels@subKernel;];
 
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
 
-   inFANames = FANamesForFields[inFields, particleNamesFile];
-   outFANames = FANamesForFields[outFields, particleNamesFile];
-
-   currentPath = $Path;
-   currentDirectory = Directory[];
-
-   DistributeDefinitions[currentPath, currentDirectory,
-      fsMetaDir, formCalcDir, feynArtsModel,
-      particleNamesFile, substitutionsFile, particleNamespaceFile,
-      inFANames, outFANames, loopLevel, regularizationScheme,
-      zeroExternalMomenta, excludeProcesses, onShellFlag];
-
    SetSharedFunction[subWrite,Print];
-   nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
-      $Path = currentPath;
-      SetDirectory@currentDirectory;
-      Get@FileNameJoin@{fsMetaDir, "NPointFunctions", "internal.m"};
 
-      NPointFunctions`SetInitialValues[formCalcDir, feynArtsModel,
-         particleNamesFile, substitutionsFile, particleNamespaceFile];
+   With[{obs = OptionValue@Observable, path = $Path, dir = Directory[],
+         FCDir = formCalcDir, FAMod = feynArtsModel,
+         names = particleNamesFile,
+         context = particleNamespaceFile,
+         meta = FlexibleSUSY`$flexiblesusyMetaDir,
+         loopLevel = OptionValue@LoopLevel, keep = OptionValue@KeepProcesses,
+         momenta = OptionValue@ZeroExternalMomenta,
+         onShell = OptionValue@OnShellFlag, scheme = OptionValue@Regularize,
+         in = FANamesForFields[inFields, particleNamesFile],
+         out = FANamesForFields[outFields, particleNamesFile]},
+      nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
+         NPointFunctions`$FCDir = FCDir;
+         NPointFunctions`$FAMod = FAMod;
+         NPointFunctions`$ParticleFile = names;
+         NPointFunctions`$ContextFile = context;
+         NPointFunctions`$Observable = obs;
+         NPointFunctions`$LoopLevel = loopLevel;
+         NPointFunctions`$Processes = keep;
+         NPointFunctions`$ZeroMomenta = momenta;
+         NPointFunctions`$OnShell = onShell;
+         NPointFunctions`$Scheme = scheme;
+         Protect@"NPointFunctions`$*";
 
-      NPointFunctions`NPointFunctionFAFC[
-         ToExpression@inFANames, ToExpression@outFANames,
-         LoopLevel -> loopLevel,
-         Regularize -> regularizationScheme,
-         ZeroExternalMomenta -> zeroExternalMomenta,
-         KeepProcesses -> excludeProcesses,
-         OnShellFlag -> onShellFlag],
-      subKernel
-   ];
+         $Path = path;
+         SetDirectory@dir;
+         Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
+
+         NPointFunctions`SetInitialValues[];
+         NPointFunctions`NPointFunctionFAFC[ToExpression@in, ToExpression@out],
+         subKernel];];
    CloseKernels@subKernel;
    UnsetShared[subWrite,Print];
 
