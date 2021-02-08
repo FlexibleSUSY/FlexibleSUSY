@@ -71,6 +71,7 @@ TEST_SRC := \
 		$(DIR)/test_observable_problems.cpp \
 		$(DIR)/test_pmns.cpp \
 		$(DIR)/test_problems.cpp \
+		$(DIR)/test_pv_fs.cpp \
 		$(DIR)/test_raii.cpp \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
@@ -780,7 +781,7 @@ endif
 
 $(DIR)/test_threshold_loop_functions.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/threshold_loop_functions\""
 
-$(DIR)/test_pv.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/pv\""
+$(DIR)/test_pv_fs.x: CPPFLAGS += -DTEST_DATA_DIR="\"test/data/pv\""
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		clean-$(MODNAME)-dep clean-$(MODNAME)-log \
