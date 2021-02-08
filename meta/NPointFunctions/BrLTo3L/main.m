@@ -50,7 +50,7 @@ create[obs:`type`observable] :=
 Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
       calculateDefinition},
    setCxx@obs;
-   (*{npfVertices, npfHeader, npfDefinition} = `npf`create@obs;*)
+   {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
 
    calculateDefinition = `cxx`proto <> " {
    return forge(nI, nO, nA, model, qedqcd);\n}";
@@ -69,37 +69,42 @@ create[list:{__}] :=
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
 
-`npf`create[`type`observable] := Module[{
-      parsedCon,
-      npfU, npfD,
+`npf`parse@`type`observable := Switch[proc,
+   All, {
+      NPointFunctions`FourFermionMassiveVectorPenguins,
+      NPointFunctions`FourFermionScalarPenguins,
+      NPointFunctions`FourFermionFlavourChangingBoxes},
+   NPointFunctions`noScalars, {
+      NPointFunctions`FourFermionMassiveVectorPenguins,
+      NPointFunctions`FourFermionFlavourChangingBoxes},
+   NPointFunctions`Penguins, {
+      NPointFunctions`FourFermionScalarPenguins,
+      NPointFunctions`FourFermionMassiveVectorPenguins},
+   _List, proc,
+   _, {proc}];
+`npf`parse // Utils`MakeUnknownInputDefinition;
+`npf`parse ~ SetAttributes ~ {Protected, Locked};
+
+`npf`create[obs:`type`observable] := Module[{
+      npf,
+
       l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
       dc = NPointFunctions`internal`dc,
       fiG, foG, uiG, uoG, diG, doG, (*@note particle | inc/out | generation*)
       regulator, (*@note arbitrary sqr(3-momenta) of quarks*)
       inner, sp, dim6,
       codeU, codeD},
-
-   parsedCon = Switch[con,
-      All, {
-            NPointFunctions`FourFermionMassiveVectorPenguins,
-            NPointFunctions`FourFermionScalarPenguins,
-            NPointFunctions`FourFermionFlavourChangingBoxes},
-      NPointFunctions`noScalars, {
-            NPointFunctions`FourFermionMassiveVectorPenguins,
-            NPointFunctions`FourFermionFlavourChangingBoxes},
-      NPointFunctions`Penguins, {
-            NPointFunctions`FourFermionScalarPenguins,
-            NPointFunctions`FourFermionMassiveVectorPenguins},
-      _, con];
-
-   Print["<<npf<< calculation for ",`cxx`in," to ",`cxx`out," conversion started ..."];
-
-   {npfU, npfD} = NPointFunctions`NPointFunction[
-      {in,#},{out,#},
+   Utils`FSFancyLine@"<";
+   Print@StringReplace["Calculating #- #+ to #- #+ amplitudes", "#"->`cxx`lep];
+   npf = NPointFunctions`NPointFunction[
+      {lep, SARAH`bar@lep}, {lep, SARAH`bar@lep},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
-      NPointFunctions`ZeroExternalMomenta -> If[massless===True, NPointFunctions`ExceptLoops, NPointFunctions`OperatorsOnly],
-      NPointFunctions`KeepProcesses -> parsedCon] &/@ {SARAH`UpQuark,SARAH`DownQuark};
+      NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
+      NPointFunctions`KeepProcesses -> `npf`parse@obs,
+      NPointFunctions`Observable -> obs];
+
+   Quit@1;
 
    {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
    {fiG, diG, foG, doG} = Flatten@NPointFunctions`internal`getProcess@npfD;

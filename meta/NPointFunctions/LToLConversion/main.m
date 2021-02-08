@@ -86,7 +86,7 @@ create[list:{__}] := {
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
 
-`npf`create[`type`observable] := Module[{
+`npf`create[obs:`type`observable] := Module[{
       parsedCon,
       npfU, npfD,
       l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
@@ -116,7 +116,8 @@ create ~ SetAttributes ~ {Protected, Locked};
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> If[massless===True, NPointFunctions`ExceptLoops, NPointFunctions`OperatorsOnly],
-      NPointFunctions`KeepProcesses -> parsedCon] &/@ {SARAH`UpQuark,SARAH`DownQuark};
+      NPointFunctions`KeepProcesses -> parsedCon,
+      NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark,SARAH`DownQuark};
 
    {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
    {fiG, diG, foG, doG} = Flatten@NPointFunctions`internal`getProcess@npfD;

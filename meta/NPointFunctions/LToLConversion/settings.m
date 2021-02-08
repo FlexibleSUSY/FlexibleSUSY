@@ -156,7 +156,7 @@
    }
 };
 
-`settings`amplitudes = {
+`settings`amplitudes[ds:`type`diagramSet] := {
    FourFermionMassiveVectorPenguins -> {
       {
          {

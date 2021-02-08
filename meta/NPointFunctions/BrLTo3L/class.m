@@ -44,8 +44,8 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
       If[obs =!= {},
          Print@"Creating BrLTo3L class ...";
          Get@main;
-         fermions = DeleteDuplicates@Cases[obs, {_,f_,bf_}:>{bf, f}, Infinity] /.
-            f_[_Integer]:>f;
+         fermions = DeleteDuplicates@Cases[obs,
+            {_, f_, bf_}:> SARAH`bar /@ {bf, f}, Infinity] /. f_[_Integer]:>f;
          photons = Select[
             TreeMasses`GetVectorBosons[],
             And[TreeMasses`IsMassless@#, !TreeMasses`IsElectricallyCharged@#,

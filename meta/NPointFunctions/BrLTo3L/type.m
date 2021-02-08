@@ -53,17 +53,12 @@ arguments[lepton:_Symbol, (nI:_Symbol) -> {nO:_Symbol, nA:_Symbol},
    contribution:_Symbol] :=
 Sequence[
    (lepton:_Symbol?TreeMasses`IsLepton)[nI:_Integer] ->
-   {
-      (lepton:_)[nO:_Integer],
-      (lepton:_)[nA:_Integer],
+   {(lepton:_)[nO:_Integer], (lepton:_)[nA:_Integer],
       SARAH`bar[(lepton:_)[nA:_Integer]]},
-   contribution:Alternatives[
-      All(*,
-      NPointFunctions`noScalars,
-      NPointFunctions`Penguins,
-      NPointFunctions`FourFermionScalarPenguins,
+   contribution:Alternatives[All, NPointFunctions`noScalars,
+      NPointFunctions`Penguins, NPointFunctions`FourFermionScalarPenguins,
       NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes*)]];
+      NPointFunctions`FourFermionFlavourChangingBoxes]];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
