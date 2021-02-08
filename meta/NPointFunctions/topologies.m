@@ -20,75 +20,72 @@
 
 *)
 
-BeginPackage["NPointFunctions`"];
-Begin["NPointFunctions`internal`"];
+BeginPackage@"NPointFunctions`";
+Begin@"NPointFunctions`internal`";
 
 adjace[topology:`type`topology] :=
-Module[{propagatorPattern, needNewNumbers, adjacencies, matrix},
-
+Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
+   ext = Count[topology, FeynArts`Incoming|FeynArts`Outgoing|FeynArts`External,
+      Infinity, Heads -> True];
    propagatorPattern[i_,j_,f___] := _[_][_[_][i],_[_][j],f];
-
    needNewNumbers = And[
       Max@@(topology/.propagatorPattern[i_,j_,___]:>Sequence[i,j])>100,
-      MatchQ[List@@topology,{propagatorPattern[_,_]..}]
-   ];
-
+      MatchQ[List@@topology,{propagatorPattern[_,_]..}]];
    adjacencies = Tally[
-      (List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}
-   ] &@ If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
-
-   matrix = Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjacencies];
-   Flatten@Table[Drop[#[[i]], i-1], {i, Length@#}]&@matrix
-];
+      (List@@#)/.propagatorPattern[i_,j_,___]:>{{i,j},{j,i}}] &@
+         If[needNewNumbers,FeynArts`TopologySort@#,#] &@ topology;
+   matrix = Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@
+      adjacencies];
+   Flatten@Table[Drop[#[[i]], i-1+Max[ext-i+1, 0]], {i, Length@#}]&@matrix];
 adjace // Utils`MakeUnknownInputDefinition;
 adjace ~ SetAttributes ~ {Protected, Locked};
 
 define[`topologyQ`pinguinT, {t:`type`topology} :>
-   Or[
-      `topologyQ`trianglepinguinT@t,
+   Or[`topologyQ`trianglepinguinT@t,
       `topologyQ`self1pinguinT@t,
-      `topologyQ`self3pinguinT@t
-   ]
-];
+      `topologyQ`self3pinguinT@t]];
 
 define[`topologyQ`trianglepinguinT, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0}];
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0}];
 define[`topologyQ`self1pinguinT, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0}];
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0}];
 define[`topologyQ`self3pinguinT, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
+
+define[`topologyQ`triangle12S, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0,1,0}];
+define[`topologyQ`self1S, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,2,0,1,1,0,0,0}];
+define[`topologyQ`self2S, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,0,2,0,0,0}];
 
 define[`topologyQ`box, {t:`type`topology} :>
    Or[`topologyQ`boxS@t, `topologyQ`boxT@t, `topologyQ`boxU@t]];
 
 define[`topologyQ`boxS, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0}];
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0}];
 define[`topologyQ`boxT, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0}];
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0}];
 define[`topologyQ`boxU, {t:`type`topology} :>
-   adjace@t === {0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
-
-Module[{topologyReplacements},
-
-topologyReplacements = {
-   (*@todo something weird with this definition*)
-   Irreducible -> (FreeQ[#, FeynArts`Internal]&),
-   Triangles   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)};
+   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
 
 getExcludeTopologies::usage = "
 @brief Registers a function, whose outcome (True or everything else) determines
        whether the topology is kept or discarded.
 @param keep A list of processes to keep.
 @returns A name of generated function.";
-getExcludeTopologies[keep:{__Symbol}] :=
-Module[{all, name},
-   all = Join[topologyReplacements, `settings`topologyReplacements];
-   FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[(keep/.all)@#]];
-   name];
+Module[{topologyReplacements},
+   topologyReplacements = {
+      Irreducible -> (FreeQ[#, FeynArts`Internal]&),
+      Triangles   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)};
+   getExcludeTopologies[] :=
+   Module[{all, name},
+      all = Join[topologyReplacements, `settings`topologyReplacements];
+      FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
+         ($Processes/.all)@#]];
+      name];];
 getExcludeTopologies // Utils`MakeUnknownInputDefinition;
 getExcludeTopologies ~ SetAttributes ~ {Protected, Locked};
-
-];
 
 End[];
 EndPackage[];
