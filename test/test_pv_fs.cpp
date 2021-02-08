@@ -117,6 +117,20 @@ BOOST_AUTO_TEST_CASE( test_ReA0_values )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_ReB0xx_values )
+{
+   const auto filename = std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "B0xx.dat";
+   const auto data = read_b0(filename);
+   const double eps = 1e-12;
+
+   for (auto d: data) {
+      const auto b0 = flexiblesusy::b0xx(d.p2, d.m12, d.q2);
+      BOOST_TEST_MESSAGE("expected: " << d);
+      BOOST_TEST_MESSAGE("observed: " << b0);
+      BOOST_CHECK_CLOSE_FRACTION(d.b0, b0, eps);
+   }
+}
+
 BOOST_AUTO_TEST_CASE( test_ReB0_values )
 {
    const auto filename = std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "B0.dat";
