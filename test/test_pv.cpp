@@ -23,6 +23,7 @@
 #include "derivative.hpp"
 #include "numerics.h"
 #include "pv.hpp"
+#include "pv_fs.hpp"
 #include "read_data.hpp"
 #include "stopwatch.hpp"
 #include "wrappers.hpp"

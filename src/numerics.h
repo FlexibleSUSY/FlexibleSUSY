@@ -47,17 +47,4 @@ double d1_b0(double p2, double m2a, double m2b) noexcept;
 
 } // namespace softsusy
 
-namespace flexiblesusy {
-
-/// A0 Passarino-Veltman function (squared arguments)
-double a0(double m2, double q2) noexcept;
-/// B0 Passarino-Veltman function (squared arguments)
-double b0(double p2, double m12, double m22, double q2) noexcept;
-/// B0(s,x,x,q2) Passarino-Veltman function (squared arguments)
-double b0xx(double p2, double m2, double q2) noexcept;
-/// derivative of B0 Passarino-Veltman function w.r.t. p^2, for p^2 = 0
-double d1_b0(double m12, double m22) noexcept;
-
-} // namespace flexiblesusy
-
 #endif

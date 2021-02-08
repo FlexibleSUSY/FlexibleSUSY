@@ -37,6 +37,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/physical_input.cpp \
 		$(DIR)/pmns.cpp \
 		$(DIR)/problems.cpp \
+		$(DIR)/pv_fs.cpp \
 		$(DIR)/rkf_integrator.cpp \
 		$(DIR)/scan.cpp \
 		$(DIR)/slha_format.cpp \
@@ -115,6 +116,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/pp_map.hpp \
 		$(DIR)/problems.hpp \
 		$(DIR)/problems_format_mathlink.hpp \
+		$(DIR)/pv_fs.hpp \
 		$(DIR)/raii.hpp \
 		$(DIR)/rg_flow.hpp \
 		$(DIR)/rk.hpp \
