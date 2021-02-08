@@ -922,9 +922,10 @@ Module[{
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
+   {chains, abbr} = {#, Complement[abbr, #]} &@ getChainRules@abbr;
+
    subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
 
-   {chains, abbr} = {#, Complement[abbr, #]} &@ getChainRules@abbr;
    chains = simplifyChains@chains;
    chains = modifyChains[chains, diagrams, $ZeroMomenta];
    {generic, chains} = makeChainsUnique@{generic /. abbr, chains};

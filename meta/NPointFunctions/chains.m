@@ -108,13 +108,11 @@ getChainRules::usage = "
        and it is given by encoded regular expression.
 @param rules A list of rules.
 @return A list of rules.";
-define[getChainRules, {rules:{Rule[_Symbol, _]...}} :>
-   Module[{
-         regex = RegularExpression@"[F][1-9][\\d]*"
-      },
-      Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]
-   ]
-];
+getChainRules[rules:{Rule[_Symbol, _]...}] :=
+Module[{regex},
+   regex = RegularExpression@"[F][1-9][\\d]*";
+   Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]];
+getChainRules // secure;
 
 makeChainsUnique::usage = "
 @brief After manual simplification of dirac chains one can get duplicates. They
