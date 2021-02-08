@@ -47,4 +47,10 @@ double d1_b0(double p2, double m2a, double m2b) noexcept;
 
 } // namespace softsusy
 
+namespace flexiblesusy {
+
+double a0(double m2, double q2) noexcept;
+
+} // namespace flexiblesusy
+
 #endif

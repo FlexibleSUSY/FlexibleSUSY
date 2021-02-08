@@ -16,13 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include <limits>
 #include <cmath>
+#include <iomanip>
+#include <limits>
+#include <vector>
 #include "derivative.hpp"
-#include "pv.hpp"
-#include "wrappers.hpp"
-#include "stopwatch.hpp"
 #include "numerics.h"
+#include "pv.hpp"
+#include "read_data.hpp"
+#include "stopwatch.hpp"
+#include "wrappers.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE test_pv
@@ -119,6 +122,93 @@ BOOST_AUTO_TEST_CASE( test_ReB0 )
    BOOST_CHECK_EQUAL(ReB0(p2, 0., p2, scale2), ReB0(p2, p2, 0., scale2));
 
    BOOST_CHECK_CLOSE(ReB0(1., 1., 2., 1.), -0.263943507355163, 1.0e-9);
+}
+
+struct A0_data {
+   double m2{}, q2{}, a0{};
+};
+
+struct B0_data {
+   double p2{}, m12{}, m22{}, q2{}, b0{};
+};
+
+struct DB0_data {
+   double m12{}, m22{}, db0{};
+};
+
+std::ostream& operator<<(std::ostream& ostr, const A0_data& a0)
+{
+   ostr << std::setprecision(std::numeric_limits<double>::digits10)
+        << "A0(m2=" << a0.m2 << ", q2=" << a0.q2 << ") = " << a0.a0;
+   return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const B0_data& b0)
+{
+   ostr << std::setprecision(std::numeric_limits<double>::digits10)
+        << "B0(p2=" << b0.p2 << ", m12=" << b0.m12
+        << ", m22=" << b0.m22 << ", q2=" << b0.q2 << ") = " << b0.b0;
+   return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const DB0_data& db0)
+{
+   ostr << std::setprecision(std::numeric_limits<double>::digits10)
+        << "DB0(m12=" << db0.m12 << ", m22=" << db0.m22 << ") = " << db0.db0;
+   return ostr;
+}
+
+/// tranform vector of elements of type A -> B
+template <class B, class A, class F>
+std::vector<B> fmap(F f, const std::vector<A>& in)
+{
+   std::vector<B> out;
+   std::transform(in.cbegin(), in.cend(), std::back_inserter(out), f);
+   return out;
+}
+
+/// read A0 function data
+std::vector<A0_data> read_a0(const std::string& filename)
+{
+   return fmap<A0_data>(
+      [](const auto& d) {
+         return A0_data{d.at(0), d.at(1), d.at(2)};
+      },
+      test::read_from_file<double>(filename));
+}
+
+/// read B0 function data
+std::vector<B0_data> read_b0(const std::string& filename)
+{
+   return fmap<B0_data>(
+      [](const auto& d) {
+         return B0_data{d.at(0), d.at(1), d.at(2), d.at(3), d.at(4)};
+      },
+      test::read_from_file<double>(filename));
+}
+
+/// read DB0 function data
+std::vector<DB0_data> read_db0(const std::string& filename)
+{
+   return fmap<DB0_data>(
+      [](const auto& d) {
+         return DB0_data{d.at(0), d.at(1), d.at(2)};
+      },
+      test::read_from_file<double>(filename));
+}
+
+BOOST_AUTO_TEST_CASE( test_ReA0_values )
+{
+   const auto filename = std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "A0.dat";
+   const auto data = read_a0(filename);
+   const double eps = 1e-12;
+
+   for (auto d: data) {
+      const auto a0 = flexiblesusy::a0(d.m2, d.q2);
+      BOOST_TEST_MESSAGE("expected: " << d);
+      BOOST_TEST_MESSAGE("observed: " << a0);
+      BOOST_CHECK_CLOSE_FRACTION(d.a0, a0, eps);
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_ReD1B0 )

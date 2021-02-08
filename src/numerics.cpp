@@ -489,3 +489,25 @@ double c00(double m1, double m2, double m3, double q) noexcept
 }
 
 } // namespace softsusy
+
+
+namespace flexiblesusy {
+
+namespace {
+
+constexpr double EPSTOL = 1.0e-15; ///< underflow accuracy
+
+} // anonymous namespace
+
+
+double a0(double m2, double q2) noexcept
+{
+   m2 = std::abs(m2);
+
+   if (m2 < EPSTOL)
+      return 0;
+
+   return m2 * (1 - std::log(m2 / q2));
+}
+
+} // namespace flexiblesusy
