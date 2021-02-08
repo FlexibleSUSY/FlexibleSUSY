@@ -35,17 +35,23 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+
+constexpr double dabs(double x) noexcept { return x >= 0. ? x : -x; }
+constexpr double sqr(double x)  noexcept { return x * x; }
+constexpr double pow3(double x) noexcept { return x * x * x; }
+constexpr double pow4(double x) noexcept { return sqr(sqr(x)); }
+constexpr double pow5(double x) noexcept { return pow4(x) * x; }
+constexpr double pow6(double x) noexcept { return sqr(sqr(x) * x); }
+
+} // anonymous namespace
+
 namespace softsusy {
 
 namespace {
 
 constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
-
-constexpr double dabs(double a) noexcept { return a >= 0. ? a : -a; }
-constexpr double sqr(double a) noexcept { return a*a; }
-constexpr double pow3(double a) noexcept { return a*a*a; }
-constexpr double pow6(double a) noexcept { return a*a*a*a*a*a; }
 
 constexpr bool is_zero(double m, double tol) noexcept
 {
@@ -508,6 +514,38 @@ double a0(double m2, double q2) noexcept
       return 0;
 
    return m2 * (1 - std::log(m2 / q2));
+}
+
+/**
+ * Derivative of B0(p^2, m1^2, m2^2, Q^2) w.r.t. p^2, for p^2 = 0.
+ *
+ * @note Implemented only in the p^2 = 0 limit.
+ *
+ * @param m12 squared mass
+ * @param m22 squared mass
+ *
+ * @return derivative of B0 w.r.t. p^2 at p^2 = 0
+ */
+double d1_b0(double m12, double m22) noexcept
+{
+   m12 = std::abs(m12);
+   m22 = std::abs(m22);
+
+   if ((m12 < 1e-14*m22) != (m22 < 1e-14*m12)) {
+      return (m12 - m22) * (m12 + m22) / (2 * pow3(m12 - m22));
+   } else if (m12 < EPSTOL && m22 < EPSTOL) {
+      return 0;
+   } else if (std::abs(m22 - m12) < 5e-2*m12) {
+      return 1 / (6 * m12) +
+             (m12 - m22)     / (12 * sqr(m12)) +
+             sqr(m12 - m22) / (20 * pow3(m12)) +
+             pow3(m12 - m22) / (30 * pow4(m12)) +
+             pow4(m12 - m22) / (42 * pow5(m12)) +
+             pow5(m12 - m22) / (56 * pow6(m12));
+   }
+
+   return ((m12 - m22) * (m12 + m22) + 2 * m12 * m22 * std::log(m22 / m12)) /
+          (2 * pow3(m12 - m22));
 }
 
 } // namespace flexiblesusy
