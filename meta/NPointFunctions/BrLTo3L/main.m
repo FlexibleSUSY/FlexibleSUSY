@@ -54,7 +54,10 @@ Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
    {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
 
    calculateDefinition = `cxx`proto <> " {
-   return forge(nI, nO, nA, model, qedqcd);\n}";
+   return forge<
+      "<>`cxx`penguin<>",
+      npointfunctions::"<>`cxx`name<>"
+   >(nI, nO, nA, model, qedqcd);\n}";
 
    {  npfVertices,
       {npfHeader, npfDefinition},
