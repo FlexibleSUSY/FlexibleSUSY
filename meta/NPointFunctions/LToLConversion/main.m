@@ -75,14 +75,13 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
       {npfHeader, npfDefinition},
       {`cxx`prototype <> ";", calculateDefinition}}];
 
-create[list:{__}] := {
-   DeleteDuplicates[ Join@@#[[All,1]] ],
-   {
-      #[[1,2,1]],
-      StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
-   {
-      StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-      StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}& [create /@ list];
+create[list:{__}] := Module[{unique},
+   unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
+   {  DeleteDuplicates[Join@@#[[All,1]]],
+      {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
+      {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
+         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
+
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
 
@@ -109,7 +108,8 @@ create ~ SetAttributes ~ {Protected, Locked};
             NPointFunctions`FourFermionMassiveVectorPenguins},
       _, con];
 
-   Print["<<npf<< calculation for ",`cxx`in," to ",`cxx`out," conversion started ..."];
+   Utils`FSFancyLine@"<";
+   Print["Calculation of "<>`cxx`in<>"- to "<>`cxx`out<>"- conversion started"];
 
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in,#},{out,#},
@@ -161,10 +161,6 @@ create ~ SetAttributes ~ {Protected, Locked};
    npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`UpQuark];
    npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`DownQuark];
 
-   Print[">>npf>> calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
-
-   Print["<<npf<< c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion started ..."];
-
    codeU = NPointFunctions`CreateCXXFunctions[
       npfU,
       `cxx`classU,
@@ -178,27 +174,20 @@ create ~ SetAttributes ~ {Protected, Locked};
       dim6[in,out,SARAH`DownQuark]
    ][[2]];
 
-   Print[">>npf>> c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
-   {
-      DeleteDuplicates@Join[
+   Print["Calculation of "<>`cxx`in<>"- to "<>`cxx`out<>"- conversion finished"];
+   Utils`FSFancyLine@">";
+
+   {  DeleteDuplicates@Join[
          NPointFunctions`VerticesForNPointFunction@npfU,
-         NPointFunctions`VerticesForNPointFunction@npfD
-      ],
+         NPointFunctions`VerticesForNPointFunction@npfD],
       NPointFunctions`CreateCXXHeaders[],
-      codeU<>"\n\n"<>codeD
-   }];
+      codeU<>"\n\n"<>codeD}];
 `npf`create // Utils`MakeUnknownInputDefinition;
 `npf`create ~ SetAttributes ~ {Locked,Protected};
 
 End[];
 EndPackage[];
-(* Allows define any name for symbols inside the package if $ContextPath
-   contains only System during the package body.
- *)
 $ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-(* Allows to separate the body of the package into different files for better
-   readability.
- *)
 Unprotect@$Packages;
 $Packages = DeleteCases[$Packages, "LToLConversion`"];
 Protect@$Packages;
