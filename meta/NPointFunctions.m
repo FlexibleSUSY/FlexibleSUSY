@@ -204,20 +204,15 @@ Module[
 `cxx`getLength ~ SetAttributes ~ {Locked,Protected};
 
 getDirectories[] :=
-Module[{},
-   {
-      {
-         #1,
-         #3
-      },
-      {
-         FileNameJoin@{#2,SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates},
-         FileNameJoin@{#2,"ParticleNamesFeynArts.dat"},
-         FileNameJoin@{#2,"ParticleNamespaces.m"},
-         FileNameJoin@{#2,StringJoin["Substitutions-",SARAH`ModelName,ToString@FlexibleSUSY`FSEigenstates,".m"]}
-      }
-   }&@@({FileNameJoin@{#,"NPointFunctions"},FileNameJoin@{#,"FeynArts"},FileNameJoin@{#,"FormCalc"}}&[FileNameJoin@{SARAH`$sarahCurrentOutputMainDir,ToString@FlexibleSUSY`FSEigenstates}])
-];
+{  {  #1, #3},
+   {  FileNameJoin@{#2, SARAH`ModelName<>ToString@FlexibleSUSY`FSEigenstates},
+      FileNameJoin@{#2, "ParticleNamesFeynArts.dat"},
+      FileNameJoin@{#2, "ParticleNamespaces.m"}}} &@@
+         ({  FileNameJoin@{#, "NPointFunctions"},
+             FileNameJoin@{#, "FeynArts"},
+             FileNameJoin@{#, "FormCalc"}} &@
+               FileNameJoin@{  SARAH`$sarahCurrentOutputMainDir,
+                               ToString@FlexibleSUSY`FSEigenstates});
 getDirectories // Utils`MakeUnknownInputDefinition;
 getDirectories ~ SetAttributes ~ {Locked,Protected};
 
@@ -450,37 +445,25 @@ NPointFunction::errUnknownOptions=
 Currently supported options are:
 `2`.";
 NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
-Module[
-   {
-      nPointFunctionsDir,feynArtsModel,particleNamesFile,
-      particleNamespaceFile,substitutionsFile,formCalcDir,
-      subKernel,
-      currentDirectory,
-      nPointFunction
-   },
-   {
-      {nPointFunctionsDir,formCalcDir},
-      {feynArtsModel,particleNamesFile,particleNamespaceFile,substitutionsFile}
-   } = getDirectories[];
-
-   If[!DirectoryQ@nPointFunctionsDir,CreateDirectory@nPointFunctionsDir];
+Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
+      particleNamespaceFile, formCalcDir, subKernel, currentDirectory,
+      nPointFunction},
+   {  {nPointFunctionsDir, formCalcDir},
+      {feynArtsModel, particleNamesFile, particleNamespaceFile}} =
+         getDirectories[];
+   If[!DirectoryQ@#, CreateDirectory@#]&@nPointFunctionsDir;
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
          inFields,outFields,nPointFunctionsDir,
          OptionValue[NPointFunction,Options[NPointFunction][[All, 1]]]];
-      If[nPointFunction =!= Null, Return@nPointFunction]
-   ];
-
+      If[nPointFunction =!= Null, Return@nPointFunction];];
    If[!FileExistsQ[feynArtsModel <> ".mod"],
       subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
       GenerateFAModelFileOnKernel@subKernel;
       WriteParticleNamespaceFile@particleNamespaceFile;
       CloseKernels@subKernel;];
-
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
-
    SetSharedFunction[subWrite,Print];
-
    With[{obs = OptionValue@Observable, path = $Path, dir = Directory[],
          FCDir = formCalcDir, FAMod = feynArtsModel,
          names = particleNamesFile,
@@ -518,8 +501,7 @@ Module[
       nPointFunction,nPointFunctionsDir,
    OptionValue[NPointFunction,Options[NPointFunction][[All,1]]]]];
 
-   nPointFunction
-] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
+   nPointFunction] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
 NPointFunction // Utils`MakeUnknownInputDefinition;
 NPointFunction ~ SetAttributes ~ {Locked,Protected};
 
