@@ -45,7 +45,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
       " " <> calculate[obs, Head];
    Protect@"BrLTo3L`Private`cxx`*";];
 setCxx // Utils`MakeUnknownInputDefinition;
-setCxx ~ SetAttributes ~ {Protected, Locked};
+setCxx // Protect;
 
 create[obs:`type`observable] :=
 Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
@@ -71,7 +71,7 @@ create[list:{__}] := Module[{unique},
          StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
 
 create // Utils`MakeUnknownInputDefinition;
-create ~ SetAttributes ~ {Protected, Locked};
+create // Protect;
 
 `npf`parse@`type`observable := Switch[proc,
    All, {
@@ -87,7 +87,7 @@ create ~ SetAttributes ~ {Protected, Locked};
    _List, proc,
    _, {proc}];
 `npf`parse // Utils`MakeUnknownInputDefinition;
-`npf`parse ~ SetAttributes ~ {Protected, Locked};
+`npf`parse // Protect;
 
 `npf`create[obs:`type`observable] := Module[{npf, fields, sp, dc, dim6, code},
    Utils`FSFancyLine@"<";
@@ -99,7 +99,7 @@ create ~ SetAttributes ~ {Protected, Locked};
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> `npf`parse@obs,
       NPointFunctions`Observable -> obs];
-   npf = npf /. SARAH`sum[__] -> 0;
+   npf = npf /. clean[];
    fields = Flatten@NPointFunctions`internal`getProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
    dc[a_, b__, c_] := NPointFunctions`internal`dc[sp@a, b, sp@c];
@@ -123,7 +123,17 @@ create ~ SetAttributes ~ {Protected, Locked};
       NPointFunctions`CreateCXXHeaders[],
       code}];
 `npf`create // Utils`MakeUnknownInputDefinition;
-`npf`create ~ SetAttributes ~ {Locked,Protected};
+`npf`create // Protect;
+
+clean[] :=
+{  SARAH`sum[__] -> 0,
+   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
+      LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :>
+      LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]};
+clean // Utils`MakeUnknownInputDefinition;
+clean // Protect;
 
 End[];
 EndPackage[];
