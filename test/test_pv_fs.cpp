@@ -28,6 +28,14 @@
 #include <limits>
 #include <vector>
 
+
+bool is_close(double a, double b, double eps)
+{
+   const double max = std::max(std::abs(a), std::abs(b));
+   return std::abs(a - b) <= eps*max;
+}
+
+
 using namespace flexiblesusy;
 
 struct A0_data {
@@ -111,9 +119,7 @@ BOOST_AUTO_TEST_CASE( test_ReA0_values )
 
    for (auto d: data) {
       const auto a0 = flexiblesusy::a0(d.m2, d.q2);
-      BOOST_TEST_MESSAGE("expected: " << d);
-      BOOST_TEST_MESSAGE("observed: " << a0);
-      BOOST_CHECK_CLOSE_FRACTION(d.a0, a0, eps);
+      BOOST_CHECK_MESSAGE(is_close(d.a0, a0, eps), "expected: " << d << ", observed: " << a0);
    }
 }
 
@@ -125,9 +131,7 @@ BOOST_AUTO_TEST_CASE( test_ReB0xx_values )
 
    for (auto d: data) {
       const auto b0 = flexiblesusy::b0xx(d.p2, d.m12, d.q2);
-      BOOST_TEST_MESSAGE("expected: " << d);
-      BOOST_TEST_MESSAGE("observed: " << b0);
-      BOOST_CHECK_CLOSE_FRACTION(d.b0, b0, eps);
+      BOOST_CHECK_MESSAGE(is_close(d.b0, b0, eps), "expected: " << d << ", observed: " << b0);
    }
 }
 
@@ -139,9 +143,7 @@ BOOST_AUTO_TEST_CASE( test_ReB0_values )
 
    for (auto d: data) {
       const auto b0 = flexiblesusy::b0(d.p2, d.m12, d.m22, d.q2);
-      BOOST_TEST_MESSAGE("expected: " << d);
-      BOOST_TEST_MESSAGE("observed: " << b0);
-      BOOST_CHECK_CLOSE_FRACTION(d.b0, b0, eps);
+      BOOST_CHECK_MESSAGE(is_close(d.b0, b0, eps), "expected: " << d << ", observed: " << b0);
    }
 }
 
@@ -153,8 +155,6 @@ BOOST_AUTO_TEST_CASE( test_ReD1B0_values )
 
    for (auto d: data) {
       const auto db0 = flexiblesusy::d1_b0(d.m12, d.m22);
-      BOOST_TEST_MESSAGE("expected: " << d);
-      BOOST_TEST_MESSAGE("observed: " << db0);
-      BOOST_CHECK_CLOSE_FRACTION(d.db0, db0, eps);
+      BOOST_CHECK_MESSAGE(is_close(d.db0, db0, eps), "expected: " << d << ", observed: " << db0);
    }
 }
