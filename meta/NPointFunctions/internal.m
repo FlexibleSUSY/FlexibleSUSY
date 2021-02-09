@@ -560,9 +560,7 @@ define[collectSame, {list:{Rule[_, {__}]...}} :>
    ]
 ];
 
-Module[{parse, rules},
 
-parse = If[MatchQ[#2, `type`diagram], foreach[{}&, getInsertions@#2], First@#2]&;
 
 getMasslessSettings::usage = "
 @brief In some topologies field insertions can lead to physically incorrect
@@ -570,14 +568,14 @@ getMasslessSettings::usage = "
        rules in order to prevent this.
 @param diagrams A set of diagrams.
 @returns A set of rules for amplitudes.";
-define[getMasslessSettings, {diagrams:`type`diagramSet} :>
-   (
-      rules = foreach[applyAction[diagrams, #2]&, `settings`massless@diagrams];
-      Flatten[foreach[parse, diagrams /. collectSame@rules], 1]
-   )
-];
-
-];
+getMasslessSettings[diagrams:`type`diagramSet] :=
+Module[{parse, rules},
+   parse = If[MatchQ[#1, `type`diagram],
+      List@@MapIndexed[{}&, getInsertions@#1],
+      First@#1]&;
+   rules = MapIndexed[applyAction[diagrams, #1]&, `settings`massless@diagrams];
+   Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
+getMasslessSettings // secure;
 
 getRegularizationSettings::usage = "
 @brief Some amplitudes are calculated incorrectly in some schemes (like box
@@ -977,10 +975,10 @@ define[makeMassesZero,
       hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
       showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
-      rules = foreach[Composition[Sequence@@funcs[[#1]]]@getZeroMassRules[]&, new];
+      rules = List@@MapIndexed[Composition[Sequence@@funcs[[#2[[1]]]]]@getZeroMassRules[]&, new];
 
       {
-         foreach[#2 //. rules[[#1]] /. showInt&, new /. hideInt /. FormCalc`Pair[_,_] -> 0],
+         List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /. FormCalc`Pair[_,_] -> 0],
          setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
          {}
       }
@@ -1000,23 +998,6 @@ define[makeMassesZero,
 
    {{expr_, chains_, subs_}, diagrams:`type`diagramSet, _} :>
    {expr, chains, subs}
-];
-
-foreach::usage = "
-@brief Applies a two-argument function on every element in the set. The first
-       argument is substituted by the number of the element in the set, while
-       the second one is the element itself.
-@param f A two-argument function to apply on serial number and the element
-       itself.
-@param set A set of elements.
-@returns A list of modified elements";
-Module[{
-      i = 0
-   },
-   define[foreach,
-      {f_, set:_[e_, rest___]} :> {f[++i, e], Sequence@@foreach[f, {rest}]},
-      {f_, set:_[]} :> (i = 0; {})
-   ];
 ];
 
 mapThread::usage = "

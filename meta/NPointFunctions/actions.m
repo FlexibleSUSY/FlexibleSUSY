@@ -107,7 +107,7 @@ Module[{template},
    template[text:_, topologyQ:_, realization:_] :=
    If[topologyQ@getTopology@#,
       Print@text;
-      getTopology@# -> foreach[realization&, getInsertions@#],
+      getTopology@# -> List@@Map[realization&, getInsertions@#],
       (##&)[]]&;
 
    Module[{restrict},
