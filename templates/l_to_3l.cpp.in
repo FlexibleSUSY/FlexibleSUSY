@@ -54,7 +54,7 @@ namespace @ModelName@_l_to_3l {
 typedef std::valarray<std::complex<double>>  (*ffv)(
    int, int, const @ModelName@_mass_eigenstates&, bool);
 
-typedef std::array<std::complex<double>, 10> (*npf)(
+typedef std::array<std::complex<double>,10> (*npf)(
    const @ModelName@_mass_eigenstates&,
    const std::array<int,4>&,
    const std::array<Eigen::Vector4d,0>&);

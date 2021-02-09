@@ -63,11 +63,12 @@ Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
       {npfHeader, npfDefinition},
       {`cxx`proto <> ";", calculateDefinition}}];
 
-create[list:{__}] :=
+create[list:{__}] := Module[{unique},
+   unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
    {  DeleteDuplicates[Join@@#[[All,1]]],
       {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
       {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@list];
+         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
 
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
