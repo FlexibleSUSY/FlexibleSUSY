@@ -5,122 +5,106 @@ Add new observable
 FlexibleSUSY provides a set of observables to be calculated in
 addition to the model spectrum itself.
 
-At some point, to make deeper analysis of a model one would like to
-add some new, or modify existing observables. This file can be used then
-as a reference to see generic stucture of this implementation.
+At some point, to make deeper a analysis of a model one would like to
+add some new, or modify existing observables. This file can be used
+as a reference to see a generic stucture of this implementation.
 
 Mathematica part
 ````````````````
-Open file ``meta/Observables.m`` and do there the following steps:
 
-1) Add a ``Mathematica`` name for new observable to ``FSObservables``.
+We need to specify some FlexibleSUSY-level C++/Mathematica relations for
+a new observable. It can be done with the help of ``NPointFunctions`` module as
+follows.
 
-2) Add new definition for a ``GetObservableName`` and ``GetObservableDescription`` functions.
+There is a file ``meta/Observables.m`` file, which contains some generic
+information about each observable. For the sake of code orthogonality the parts,
+responsible for different observables, can be moved into different files.
+The convention for this separation:
 
- Note: ``GetObservableName`` specifies a c++ name for a function (further
- ``<name_of_observable>`` is used), so it should give a unique valid one.
- There is a convention, that these name on c++ level
- should be underline separated, with usage of small letters.
+  Information is stored in
+  ``meta/NPointFunctions/<NameOfObservable>/observable.m`` files. And it is
+  loaded only if ``FeynArts`` and ``FormCalc`` are allowed to be used at
+  ``configure`` stage. ``<NameOfObservable>`` exactly corresponds to
+  the Mathematica name of an observable and its syntax is represented in by
+  the name (every new word with a large letter - usual Mathematica convention).
 
- ``GetObservableDescription`` should be a ``string`` with
- desription of some useful for user information.
+So the steps are the following:
 
-3) Modify ``GetRequestedObservables`` by imposing some restrictions for
-   a new observable.
+Create a ``meta/NPointFunctions/<NameOfObservable>/type.m`` file.
 
- Note: one possibly would like to move **all** observable restrictions here.
+* **Hint:** one can copy some form existing ones in order to simplify
+  the modification.
 
-4) Add ``GetObservableType`` for a new observable.
+1) This file should contain some "global" static things, such as C++ convention
+   for a namespace of an observable, arguments allowed, etc.
+   See the content of existing files to get inspiration and pay attention to
+   some syntactic sugar of context and package definitions.
 
- Note: available types are given in ``meta/CConversion.m`` file.
+Create a ``meta/NPointFunctions/<NameOfObservable>/observable.m`` file.
 
-5) Add ``CalculateObservable``.
+0) Link it to a corresponding ``type.m`` file, such that it is loaded
+   automatically.
 
- Note: it should return a valid c++ command. On ``Mathematica`` level it
- is usually written in the following way::
+1) Add new definition for a ``GetObservableName`` and ``GetObservableDescription``
+   functions.
 
-   structName <>
-   ".<NameOfObservable><0|1>(<arguments>) = " <>
-   "<ActualCallOfObservable>;"
+   * ``GetObservableName`` specifies a C++ name for a function (further
+     ``<name_of_observable>`` is used), so it should give a *unique* valid one.
+     **Hint:** One should use here *explicit* generation numbers.
+     There is a convention, that these names on C++ level should be underline
+     separated, with usage of small letters (like in the pattern above).
 
- ``<NameOfObservable><0,1>(<arguments>)`` is a c++ preprocessor macro
- which is converted to the name of desired observable ``<name_of_observable>``.
+   * ``GetObservableDescription`` should be a ``string`` with desription of
+     some useful information, related to observable.
 
- * ``<NameOfObservable>`` is a beginning of the this macro (should be unique,
-   see ``templates/observables.cpp`` for actual set of used definitions).
- * ``<0,1>`` is either ``0`` or ``1``. Internally there is a convention, that
-   observable should accept fields with and without generation indices.
-   ``<0,1>`` is replaced by ``1`` for the first case and by ``0`` for the second one.
- * ``<arguments>`` is a comma separated set of macros arguments which specify the
-   name of a observable.
+2) Add ``GetObservableType`` for a new observable.
 
- There is an interesting question: why is it done in this way? Because actually,
- this macros should return **exactly** the same expression as the one by
- ``GetObservableName``. Why not just call this Mathematica function?
+   * **Hint:** Available types are given in ``meta/CConversion.m`` file.
 
- ``<ActualCallOfObservable>`` is a function call which actually calculates an
- observable. Usually, it is called in the following way::
+3) Add ``CalculateObservable``.
 
-  <namespace_of_this_observable>::<calculate_function>(<args>)
+   * **Hint:** It should return a valid C++ command. On ``Mathematica`` level it
+     is usually written in the following way::
 
- where ``<args>`` can differ from ``<arguments>`` of c++ preprocessor macro call.
+         structName <> ".<name_of_observable> = <ActualCallOfObservable>;"
 
-Open file ``meta/FlexibleSUSY.m``
+     where ``<ActualCallOfObservable>`` is a function call which actually calculates an
+     observable. Usually, it is called in the following way::
 
-1) Inside ``BeginPackage`` add ``"<NewMetaFile>`"``. This corresponds to a new
-   file to be created later ``meta/<NewMetaFile>.m``.
+         <model>_<observable_namespace>::<calculate_function>(<args>)
 
-2) Create somewhere (close to analogous definitions) a new function
-   ``Write<NewObservable>Class``, which should (usual input give in the next item):
+Create a ``meta/NPointFunctions/<NameOfObservable>/write.m`` file. It will
+specify the SLHA/FLHA outputs of and observable and will be loaded by ``WriteOut``
+(if ``FeynArts`` and ``FormCalc`` are avaliable).
 
-* convert (modified somehow)
-  ``Observables`GetRequestedObservables[extraSLHAOutputBlocks]``
-  into some c++ code;
+1) It should have the function ``<NameOfObservable>`write`` function with the
+   following arguments::
 
-* read a content of files (to be created later in this
-  manual) ``template/<new_observable>.{hpp.in,cpp.in}``;
+      _String,  (* name of Les Houches block *)
+      _,        (* observable with arguments *)
+      _Integer, (* number of block entry *)
+      _String   (* comment for block entry *)
 
-* replace some tokens;
+   which generates relevant C++ code, which will specify the output (**hint:**
+   see existing files for inspiration).
 
-* save the result to ``models/<ModelName>/<new_observable>.{hpp,cpp}``;
+Create a ``meta/NPointFunctions/<NameOfObservable>/class.m`` file with
+``Write<NewObservable>Class`` function, which should:
 
-* return ``List`` of ``List`` of field names, which represent required by
-  calculation vertices.
+1) Have arguments of the following format (with arbitrary names)
+   ``_List, {{_?FileExistsQ, _String}..}``.
 
+2) Read a content of files (to be created some steps later)
+   ``template/<observable_namespace>.{hpp.in,cpp.in}``, modify them and save
+   into ``models/<model>/<observable_namespace>.{hpp,cpp}``.
 
-3) Inside ``MakeFlexibleSUSY`` function add ``<returnedVertices>`` to a list of
-   local symbols and::
+3) Return two ``List`` with some fields and some vertices.
 
-     (* OBSERVABLE: <some description> *)
-     Print["Creating <> class ..."];
-     <returnedVertices> =
-        Write<NewObservable>Class[
-           <main input>,
-           {
-              FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
-              FileNameJoin@{FSOutputDir,FlexibleSUSY`FSModelName<>"_"<>#}
-           } &/@ ("<new_observable>"<># &/@ {".hpp", ".cpp"})
-     ];
-
-   to the place where other classes are created.
-
-   A little bit further add ``<returnedVertices>`` to a ``Join`` of first argument of
-   ``WriteCXXDiagramClass``.
-
-Create ``meta/<NewMetaFile>.m``
-
-1) It should make some model specific calculation of an observable.
-
-Now FlexibleSUSY knows on meta level how to write ``observables.{hpp,cpp}`` files.
-This is not enough, though. One also need to specify explicitly, how new
-observable should be formatted in ``SHLA`` file.
-
-To do this, open ``meta/WriteOut.m`` file and edit ``WriteSLHABlockEntry``
-function by adding information about new variable.
-
- Note: there are several overload ``WriteSLHABlockEntry`` functions. In the one
- which checks for ``?IsObservable`` one adds generic behavior of this function
- to a specific for an observable.
+**Optional**: Open file ``meta/FlexibleSUSY.m`` and modify ``MakeFlexibleSUSY``
+body in case if some additional actions are required. For example, first
+returned values of ``Write<NewObservable>Class`` are saved in ``FieldsNPF@"<NewObservable>"``.
+The second ones - in ``VerticesNPF@"<NewObservable>"``. They can be used to
+make some additional actions.
 
 Type of observable is not supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,24 +121,18 @@ Open file ``templates/observables.cpp.in``
 
 1) Add include preprocessor command for header of your observable::
 
-     #include "@ModelName@_<new_observable>.hpp"
+     #include "@ModelName@_<observable_namespace>.hpp"
 
-2) Add define preprocessor command in the form (if you decided before to use it)::
-
-     #define  <NameOfObservable><0,1>(<arguments>) <name_of_observable>
-
-   which will generate the name of observable.
-
-3) Create files ``template/<new_observable>.{hpp.in,cpp.in}``, where actual c++
-   calculations are done. The only requirements is that function
-   ``flexiblessusy::<namespace_of_this_observable>::<calculate_function>(<args>)`` exists.
+2) Create files ``template/<observable_namespace>.{hpp.in,cpp.in}``, where actual C++
+   calculations are done. The only requirement is that function
+   ``flexiblessusy::<observable_namespace>::<calculate_function>(<args>)`` exists.
 
 Automatization part
 ```````````````````
 Open file ``templates/module.mk`` and add::
 
-   $(DIR)/<new_observable>.hpp.in \
-   $(DIR)/<new_observable>.cpp.in \
+   $(DIR)/<observable_namespace>.hpp.in \
+   $(DIR)/<observable_namespace>.cpp.in \
 
 to a ``BASE_TEMPLATES`` variable.
 
@@ -167,14 +145,6 @@ to a ``LIB@CLASSNAME@_SRC`` variable. Also add::
    $(DIR)/@CLASSNAME@_<new_observable>.hpp \
 
 to a ``LIB@CLASSNAME@_HDR`` variable.
-
-Open file ``meta/module.mk`` and add::
-
-   $(DIR)/<NewMetaFile>.m \
-
-to ``META_SRC`` variable.
-
- Note: this allows correct code building if ``.m`` file was changed.
 
 Documentation part
 ``````````````````
