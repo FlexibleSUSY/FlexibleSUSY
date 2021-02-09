@@ -216,16 +216,14 @@ define[getProcess,
    Part[Head@Part[set, 1], 1]
 ];
 
-define[getExternalMasses,
-   {set:`type`fc`amplitudeSet} :>
-   Flatten[List@@getProcess@set, 1][[All, 3]],
-
-   {set:`type`amplitudeSet} :>
-   (FeynArts`Mass[#] &/@ getField[set, All])
-];
+getExternalMasses[set:`type`fc`amplitudeSet] :=
+   Flatten[List@@getProcess@set, 1][[All, 3]];
+getExternalMasses[set:`type`amplitudeSet] :=
+   FeynArts`Mass[# /. -1 -> 1] &/@ getField[set, All];
+getExternalMasses // secure;
 
 getField[set:`type`diagramSet, i:_Integer] :=
-   Flatten[List @@ getProcess[set], 1][[i]] /; 0<i<=Plus@@(Length/@getProcess@set);
+   Flatten[List@@getProcess@set, 1][[i]] /; 0<i<=Plus@@(Length/@getProcess@set);
 getField[set:`type`amplitudeSet, In] :=
    First /@ getProcess[set][[1]];
 getField[set:`type`amplitudeSet, Out] :=
@@ -880,14 +878,12 @@ Module[{
 
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
-      numExtParticles,
       feynAmps, generic, chains, subs,
       zeroedRules
    },
-   numExtParticles = Plus@@Length/@proc;
    If[$ZeroMomenta,
       ampsGen = FormCalc`OffShell[ampsGen,
-         Sequence@@Array[#->0&, numExtParticles]]];
+         Sequence@@Array[#->0&, Plus@@Length/@proc]]];
 
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
@@ -906,25 +902,18 @@ Module[{
    {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
 
    setZeroMassRules@{amplitudes, feynAmps};
-   Print@getZeroMassRules[];
-
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs},
       diagrams,
-      $ZeroMomenta
-   ];
+      $ZeroMomenta];
 
    FCAmplitudesToFSConvention[
-      {
-         generic,
+      {  generic,
          genericInsertions,
          combinatorialFactors,
-         getColourFactors@diagrams
-      },
+         getColourFactors@diagrams},
       chains,
-      subs
-   ] /. getExternalMomentumRules[$ZeroMomenta, amplitudes]
-];
+      subs] /. getExternalMomentumRules[$ZeroMomenta, amplitudes]];
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "
@@ -961,43 +950,34 @@ makeMassesZero::usage = "
 @param subs A list of subexpressions.
 @param diagrams A set of diagrams.
 @returns A list with modified expression, chains and empty non-applied subexpressions.";
-define[makeMassesZero,
-   {{generic_, chains_, subs_}, diagrams:`type`diagramSet, ExceptLoops} :>
-   Module[{
-         funcs = getMasslessSettings@diagrams,
-         names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*",
-         pattern, uniqueIntegrals, hideInt, showInt, rules,
-         new = generic //. subs
-      },
-      pattern = Alternatives @@ ( #[__] &/@ names );
-      uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
-      hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
-      showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
-
-      rules = List@@MapIndexed[Composition[Sequence@@funcs[[#2[[1]]]]]@getZeroMassRules[]&, new];
-
-      {
-         List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /. FormCalc`Pair[_,_] -> 0],
-         setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
-         {}
-      }
-   ],
-
-   {{generic_, chains_, subs_}, diagrams:`type`diagramSet, True} :>
-   Module[{
-         zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)], new
-      },
-      {new, zeroedRules} = ZeroRules[subs, zeroedRules];
-      {
-         generic /. zeroedRules,
-         setZeroExternalMomentaInChains@chains,
-         new
-      }
-   ],
-
-   {{expr_, chains_, subs_}, diagrams:`type`diagramSet, _} :>
-   {expr, chains, subs}
-];
+makeMassesZero[
+   {generic_, chains_, subs_}, diagrams:`type`diagramSet, ExceptLoops] :=
+Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
+   funcs = getMasslessSettings@diagrams;
+   names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
+   new = generic //. subs;
+   pattern = Alternatives @@ ( #[__] &/@ names );
+   uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
+   hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
+   showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
+   rules = List@@MapIndexed[Composition[Sequence@@funcs[[#2[[1]]]]]@
+      getZeroMassRules[]&, new];
+   {  List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /.
+         FormCalc`Pair[_,_] -> 0],
+      setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
+      {}}];
+makeMassesZero[{generic_, chains_, subs_}, diagrams:`type`diagramSet, True] :=
+Module[{
+      zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)], new
+   },
+   {new, zeroedRules} = ZeroRules[subs, zeroedRules];
+   {  generic /. zeroedRules,
+      setZeroExternalMomentaInChains@chains,
+      new
+   }];
+makeMassesZero[{expr_, chains_, subs_}, diagrams:`type`diagramSet, _] :=
+   {expr, chains, subs};
+makeMassesZero // secure;
 
 mapThread::usage = "
 @brief Maps a function onto multiple sets of equal length, accompanying it by
