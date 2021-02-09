@@ -38,6 +38,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    `cxx`lep = cxx@lep;
    `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
       {lep, SARAH`Photon}, ", "];
+   `cxx`name = StringReplace["npf_"<>calculate[obs, Head], s_~~"("~~__ :> s];
    `cxx`penguin = StringJoin["calculate_", cxx@lep, "_", cxx@lep, "_",
       cxx@SARAH`Photon, "_form_factors"];
    `cxx`proto = CConversion`CreateCType@Observables`GetObservableType@obs <>
@@ -55,15 +56,14 @@ Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
    calculateDefinition = `cxx`proto <> " {
    return forge(nI, nO, nA, model, qedqcd);\n}";
 
-   {
-      npfVertices,
+   {  npfVertices,
       {npfHeader, npfDefinition},
       {`cxx`proto <> ";", calculateDefinition}}];
 
 create[list:{__}] :=
-   {DeleteDuplicates[Join@@#[[All,1]]],
-      {#[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
-      {StringJoin@Riffle[#[[All,3,1]], "\n\n"],
+   {  DeleteDuplicates[Join@@#[[All,1]]],
+      {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
+      {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
          StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@list];
 
 create // Utils`MakeUnknownInputDefinition;
@@ -85,17 +85,9 @@ create ~ SetAttributes ~ {Protected, Locked};
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse ~ SetAttributes ~ {Protected, Locked};
 
-`npf`create[obs:`type`observable] := Module[{
-      npf,
-
-      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
-      dc = NPointFunctions`internal`dc,
-      fiG, foG, uiG, uoG, diG, doG, (*@note particle | inc/out | generation*)
-      regulator, (*@note arbitrary sqr(3-momenta) of quarks*)
-      inner, sp, dim6,
-      codeU, codeD},
+`npf`create[obs:`type`observable] := Module[{npf, fields, sp, dc, dim6, code},
    Utils`FSFancyLine@"<";
-   Print@StringReplace["Calculating #- #+ to #- #+ amplitudes", "#"->`cxx`lep];
+   Print@StringReplace["Calculation of #-#+ to #-#+ started", "#"->`cxx`lep];
    npf = NPointFunctions`NPointFunction[
       {lep, SARAH`bar@lep}, {lep, SARAH`bar@lep},
       NPointFunctions`OnShellFlag -> True,
@@ -103,77 +95,29 @@ create ~ SetAttributes ~ {Protected, Locked};
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> `npf`parse@obs,
       NPointFunctions`Observable -> obs];
-
-   Quit@1;
-
-   {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
-   {fiG, diG, foG, doG} = Flatten@NPointFunctions`internal`getProcess@npfD;
-   regulator = m@fiG^2;
-
-   inner = SARAH`sum[i_,1,4,SARAH`g[i_,i_]*p[#1,i_]*p[#2,i_]]&;
-   {npfU, npfD} = {npfU, npfD} //. {
-         inner[fiG,foG] :> m@fiG^2,
-         inner[uiG,fiG] :> m@fiG*Sqrt[m@uiG^2+regulator],
-         inner[uoG,fiG] :> inner[uiG,fiG],
-         inner[uoG,foG] :> m@fiG^2/2+inner[uiG,fiG],
-         inner[diG,fiG] :> m@fiG*Sqrt[m@diG^2+regulator],
-         inner[doG,fiG] :> inner[diG,fiG],
-         inner[doG,foG] :> m@fiG^2/2+inner[diG,fiG]
-      };
-
-   (* @note If ZeroExternalMomenta is set to True, replace p and m to zeroes *)
-   sp[particle:_,num:_Integer] := If[massless===True, SARAH`DiracSpinor[#, 0, 0], SARAH`DiracSpinor[#, p@num, m@#]] &@
-      particle@{Symbol["SARAH`gt"<>ToString@num]};
-
-   dim6[i_,o_,q_] := {
-      (*@note 6 means PR, 7 means PL.*)
-      "S_LL" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      "S_LR" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
-      "S_RL" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      "S_RR" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
-      (*@note names are correct, one just need to commute projectors with
-       *Dirac matrices. It changes 6 to 7 or 7 to 6.*)
-      "V_LL" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      "V_LR" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-      "V_RL" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      "V_RR" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-      (*@note Minus, because FormCalc`s -6,Lor[1],Lor[2] is ours
-       *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
-       *taking this twice we get I*I=-1. FC cites [Ni05] for Fierz identities,
-       *where our conventions are used, but in FC manual on the page 20
-       *weird convention for sigma_munu is shown.*)
-      "minus_T_LL" -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
-      "minus_T_RR" -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
-   };
-   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`UpQuark];
-   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`DownQuark];
-
-   Print[">>npf>> calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
-
-   Print["<<npf<< c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion started ..."];
-
-   codeU = NPointFunctions`CreateCXXFunctions[
-      npfU,
-      `cxx`classU,
-      SARAH`Delta,
-      dim6[in,out,SARAH`UpQuark]
-   ][[2]];
-   codeD = NPointFunctions`CreateCXXFunctions[
-      npfD,
-      `cxx`classD,
-      SARAH`Delta,
-      dim6[in,out,SARAH`DownQuark]
-   ][[2]];
-
-   Print[">>npf>> c++ code calculation for ",`cxx`in," to ",`cxx`out," conversion done."];
-   {
-      DeleteDuplicates@Join[
-         NPointFunctions`VerticesForNPointFunction@npfU,
-         NPointFunctions`VerticesForNPointFunction@npfD
-      ],
+   npf = npf /. SARAH`sum[__] -> 0;
+   fields = Flatten@NPointFunctions`internal`getProcess@npf;
+   sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
+   dc[a_, b__, c_] := NPointFunctions`internal`dc[sp@a, b, sp@c];
+   dim6 = With[{l = SARAH`Lorentz, R = 6, L = 7},
+      {  "S_LL" -> dc[3,L,1] dc[4,L,2],
+         "S_LR" -> dc[3,L,1] dc[4,R,2],
+         "S_RL" -> dc[3,R,1] dc[4,L,2],
+         "S_RR" -> dc[3,R,1] dc[4,R,2],
+         "V_LL" -> dc[3,R,l@1,1] dc[4,R,l@1,2],
+         "V_LR" -> dc[3,R,l@1,1] dc[4,L,l@1,2],
+         "V_RL" -> dc[3,L,l@1,1] dc[4,R,l@1,2],
+         "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
+         "minusT_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
+         "minusT_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
+   npf = WilsonCoeffs`InterfaceToMatching[npf, dim6];
+   code = NPointFunctions`CreateCXXFunctions[
+      npf, `cxx`name, Identity, dim6][[2]];
+   Print@StringReplace["Calculation of #-#+ to #-#+ finished", "#"->`cxx`lep];
+   Utils`FSFancyLine@">";
+   {  DeleteDuplicates@NPointFunctions`VerticesForNPointFunction@npf,
       NPointFunctions`CreateCXXHeaders[],
-      codeU<>"\n\n"<>codeD
-   }];
+      code}];
 `npf`create // Utils`MakeUnknownInputDefinition;
 `npf`create ~ SetAttributes ~ {Locked,Protected};
 

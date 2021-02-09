@@ -35,9 +35,9 @@ WriteBrLTo3LClass::errPhoton = "
 Existence of only one massless neutral vector boson is assumed.";
 With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
    WriteBrLTo3LClass[blocks:_List, files:{{_?FileExistsQ, _String}..}] :=
-   Module[{obs, photons,
+   Module[{obs, photons, ffvFields = {},
          fermions = {}, ffvV = {}, npfV = {},
-         calcProto = "", npfHeaders = "", calcDef = "", npfDefinitions = ""},
+         calcProto = "", npfHead = "", calcDef = "", npfDef = ""},
       obs = DeleteDuplicates@Cases[
          Observables`GetRequestedObservables@blocks,
          FlexibleSUSYObservable`BrLTo3L[__]];
@@ -46,6 +46,8 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
          Get@main;
          fermions = DeleteDuplicates@Cases[obs,
             {_, f_, bf_}:> SARAH`bar /@ {bf, f}, Infinity] /. f_[_Integer]:>f;
+         ffvFields = DeleteDuplicates@Cases[obs,
+            Rule[in_, {out, __}] :> {in, out}, Infinity] /. f_[_Integer]:>f;
          photons = Select[
             TreeMasses`GetVectorBosons[],
             And[TreeMasses`IsMassless@#, !TreeMasses`IsElectricallyCharged@#,
@@ -54,10 +56,10 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
          ffvV = Flatten/@Tuples@{fermions, photons};
          {npfV, {npfHead, npfDef}, {calcProto, calcDef}} = BrLTo3L`create@obs;];
       WriteOut`ReplaceInFiles[files,
-         {"@npf_headers@" -> npfHeaders, "@npf_definitions@" -> npfDefinitions,
+         {"@npf_headers@" -> npfHead, "@npf_definitions@" -> npfDef,
            "@calc_prototypes@" -> calcProto, "@calc_definitions@" -> calcDef,
             Sequence@@GeneralReplacementRules[]}];
-      {fermions, Join[ffvV, npfV]}];];
+      {ffvFields, Join[ffvV, npfV]}];];
 WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
 WriteBrLTo3LClass ~ SetAttributes ~ {Protected, Locked};
 

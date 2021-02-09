@@ -4568,7 +4568,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                      (* L -> 3L LVF decay *)
                      If[FieldsNPF@"BrLTo3L" === {},
                         {},
-                        (#[[2]] -> {SARAH`bar[#[[1]]], TreeMasses`GetPhoton[]}) &/@
+                        (#[[1]] -> {#[[2]], TreeMasses`GetPhoton[]}) &/@
                            FieldsNPF@"BrLTo3L"]
                   ],
 
