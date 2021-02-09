@@ -906,6 +906,7 @@ Module[{
    {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
 
    setZeroMassRules@{amplitudes, feynAmps};
+   Print@getZeroMassRules[];
 
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs},
@@ -926,8 +927,6 @@ Module[{
 ];
 calculatedAmplitudes // secure;
 
-Module[{rules},
-
 setZeroMassRules::usage = "
 @brief For a given sets of FeynArts` amd FormCalc` amplitudes creates rules to
        nullify masses of external particles.
@@ -938,21 +937,21 @@ setZeroMassRules::usage = "
       new abbreviations, which mix with FeynArts` ones.
 @note Amplitudes are taken, because they do not have colour structures already.
 @note Explicit names for masses are expected only for external particles.";
-define[setZeroMassRules, {{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}} :>
-   (rules = RuleDelayed[#, 0] &/@ Riffle[getExternalMasses@fa, getExternalMasses@fc])
-];
-
 getZeroMassRules::errNotSet = "
 Call setZeroMassRules to set up rules first.";
 getZeroMassRules::usage = "
 @brief Returns a set of rules to nullify masses of external particles.
 @return A list of rules to nullify masses of external particles.
 @note Rules of external particle #i are under numbers (2*#i) and (2*#i-1).";
-define[getZeroMassRules, {} :>
-   (Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet]; rules)
-];
-
-];
+Module[{rules},
+   setZeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
+      rules = RuleDelayed[#, 0] &/@
+         Riffle[getExternalMasses@fa, getExternalMasses@fc];
+   setZeroMassRules // secure;
+   getZeroMassRules[] := (
+      Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];
+      rules);
+   getZeroMassRules // secure;];
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
