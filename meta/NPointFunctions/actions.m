@@ -89,9 +89,7 @@ Module[{
    res];
 applyAction[diagrams:`type`diagramSet,
    {topologyQ:_, function:_, crit:_, text:_String}] :=
-Module[{
-      d = diagrams
-   },
+Module[{d = diagrams},
    d = If[topologyQ@#[[1]], Part[#,1] -> function[Part[#,2], crit], #] &/@ d;
    d = removeTopologiesWithoutInsertions@d;
    Print@text;

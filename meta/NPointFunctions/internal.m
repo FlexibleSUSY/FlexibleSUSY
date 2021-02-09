@@ -458,17 +458,6 @@ Module[{PL, PR, MT, FV, g, md},
    ];
 ];
 
-expandRules::usage = "
-@brief Expands a set of compact rules into the full one.
-@param rules A set of compact rules to expand.
-@returns A set of rules.";
-define[expandRules,
-   {{}} :> {},
-
-   {rules:{Rule[{__Symbol}, _]..}} :>
-   (rules /. Rule[e:_, s:_] :> Sequence @@ (Rule[#, s] &/@ e))
-];
-
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settings.
@@ -487,8 +476,8 @@ getSettings[] := Module[{file},
    `settings`massless[`type`diagramSet] := {};
    `settings`momenta = {};
    `settings`regularization = {};
-   `settings`order = {};
-   `settings`chains = {};
+   `settings`order = Default;
+   `settings`chains = Default;
    If[FileExistsQ@file, Get@file;];
    Protect@Evaluate[Context[]<>"settings`*"];
    End[];
@@ -871,18 +860,13 @@ define[getColourFactors,
 
 getFermionOrder::usage = "
 @brief Returns the order of fermions for FormCalc`FermionOrder option. Default
-       is a reversed one. Can be overwritten by `settings`order for specific
-       process.
-@param expression A set of amplitudes or diagrams.
-@note The order is cashed.
+       is a reversed one. Can be overwritten by `settings`order.
+@param expression A set of diagrams.
 @returns A list of integers, representing an order of fermions.";
-Module[{result},
-getFermionOrder[expression:`type`amplitudeSet|`type`diagramSet] :=
-   If[Head@result === Symbol,
-      If[# === {},
-         Reverse@Range[Plus@@Length/@getProcess@expression],
-         #] &@ `settings`order,
-      result];];
+getFermionOrder[expression:`type`diagramSet] :=
+Switch[`settings`order,
+   Default, Reverse@Range[Plus@@Length/@getProcess@expression],
+   _, `settings`order];
 getFermionOrder // secure;
 
 calculateAmplitudes::usage = "
@@ -899,7 +883,7 @@ Module[{
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
       numExtParticles,
-      feynAmps, generic, chains, abbr, subs,
+      feynAmps, generic, chains, subs,
       zeroedRules
    },
    numExtParticles = Plus@@Length/@proc;
@@ -921,16 +905,7 @@ Module[{
       "Amplitude calculation"] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
 
-   abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
-   {chains, abbr} = {#, Complement[abbr, #]} &@ getChainRules@abbr;
-
-   subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
-
-   chains = simplifyChains@chains;
-   chains = modifyChains[chains, diagrams, $ZeroMomenta];
-   {generic, chains} = makeChainsUnique@{generic /. abbr, chains};
-   chains = identifySpinors[chains, amplitudes];
-
+   {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
 
    setZeroMassRules@{amplitudes, feynAmps};
 
