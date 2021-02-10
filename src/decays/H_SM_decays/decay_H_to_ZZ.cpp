@@ -68,6 +68,16 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       const auto ghZZ =
          Vertex<H, Z, Z>::evaluate(indices, context).value();
       res *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
+      err *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
+      const double rel_err = err/res;
+      if (rel_err > 1e-3) {
+         std::ostringstream oss;
+         oss <<
+            "Warning: result of H->ZZ is "
+            << res << " +/- " << err << " GeV (" << 1e+2*rel_err
+            << "%). Relative error > 0.1%.\n";
+         WARNING (oss.str());
+      }
    // mZ < mH < 2*mZ
    // three-body decay
    }

@@ -45,6 +45,16 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
          Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
 
       res *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
+      err *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
+      const double rel_err = err/res;
+      if (rel_err > 1e-3) {
+         std::ostringstream oss;
+         oss <<
+            "Warning: result of H->WW is "
+            << res << " +/- " << err << " GeV (" << 1e+2*rel_err
+            << "%). Relative error > 0.1%.\n";
+         WARNING (oss.str());
+      }
    }
    // three-body decays form mW < mH < 2*mW
    else if (4 * x > 1.0) {
