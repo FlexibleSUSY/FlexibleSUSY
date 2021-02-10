@@ -35,9 +35,15 @@ double b0(double p2, double m12, double m22, double q2) noexcept;
 double b0xx(double p2, double m2, double q2) noexcept;
 /// derivative of B0 Passarino-Veltman function w.r.t. p^2, for p^2 = 0
 double d1_b0(double m12, double m22) noexcept;
+/// B22 Passarino-Veltman function
+double b22(double p2, double m12, double m22, double q2) noexcept;
+/// B22-bar Passarino-Veltman function
+double b22bar(double p2, double m12, double m22, double q2) noexcept;
 /// F0 Passarino-Veltman function
 double f0(double p2, double m12, double m22, double q2) noexcept;
-/// F0 Passarino-Veltman function
+/// G0 Passarino-Veltman function
 double g0(double p2, double m12, double m22, double q2) noexcept;
+/// H0 Passarino-Veltman function
+double h0(double pp, double m12, double m22, double q2) noexcept;
 
 } // namespace flexiblesusy

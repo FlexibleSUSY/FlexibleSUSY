@@ -226,6 +226,16 @@ double d1_b0(double m12, double m22) noexcept
           (2 * pow3(m12 - m22));
 }
 
+double b22(double p2, double m12, double m22, double q2) noexcept
+{
+   return 0;
+}
+
+double b22bar(double p2, double m12, double m22, double q2) noexcept
+{
+   return b22(p2, m12, m22, q2) - 0.25 * a0(m12, q2) - 0.25 * a0(m22, q2);
+}
+
 double f0(double p2, double m12, double m22, double q2) noexcept
 {
    return a0(m12, q2) - 2 * a0(m22, q2) -
@@ -235,6 +245,11 @@ double f0(double p2, double m12, double m22, double q2) noexcept
 double g0(double p2, double m12, double m22, double q2) noexcept
 {
    return (p2 - m12 - m22) * b0(p2, m12, m22, q2) - a0(m12, q2) - a0(m22, q2);
+}
+
+double h0(double p2, double m12, double m22, double q2) noexcept
+{
+   return 4 * b22(p2, m12, m22, q2) + g0(p2, m12, m22, q2);
 }
 
 } // namespace flexiblesusy
