@@ -23,7 +23,7 @@ double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2
-   double res = 0.5*ps*amp2/mAHOS;
+   double res = 0.5 * ps * amp2/mAHOS;
 
    // higher order corrections
 

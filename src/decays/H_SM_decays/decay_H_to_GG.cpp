@@ -100,7 +100,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
          const std::complex<double> Ff = -2.*f(tau)/std::sqrt(tau);
          // LO width comming only from the top-loop
-         // agrees up to a full double precision with autmatically generated one
+         // agrees up to a full double precision with automatically generated one
          const double Gamma_SM_LO_P = mH/(32.*Power3(Pi))*std::norm(get_alphas(context)*HGGVertexValP*Ff);
 
          const double deltaNLO_P {

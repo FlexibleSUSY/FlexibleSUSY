@@ -78,8 +78,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
                alpha_s_red = get_alphas(context)/Pi;
                break;
             default:
-               ERROR("Error in H->ddbar: Cannot determine the number of active flavours");
-               exit(1);
+               throw std::runtime_error ("Error in H->ddbar: Cannot determine the number of active flavours");
          }
          double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf);
          double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;
@@ -113,7 +112,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
          double deltaqq_QED_OS_P = 0.;
          double deltaPhi2_P = 0.;
          // don't waste time computing it in models without CPV
-         if(info::is_CP_violating_Higgs_sector) {
+         if (info::is_CP_violating_Higgs_sector) {
 
             deltaqq_QCD_DR_P +=
                2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
@@ -125,10 +124,10 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             deltaqq_QED_OS_P =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
 
-            const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-            const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
             const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
             if (!is_zero(gbHoVEV_P)) {
+               const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
+               const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
                deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
             }
          }

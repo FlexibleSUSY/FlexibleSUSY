@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
       calculate_amplitude<hh, typename bar<lep>::type, lep>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
-   // flux * phase space factor * symmetry factor * matrix element^2
+   // flux * phase space factor * symmetry factor * |matrix element|^2
    double res = 0.5 * ps * amp2/mHOS;
 
    // higher order corrections

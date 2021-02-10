@@ -1584,7 +1584,7 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
       temp
 ];
 
-(* map topology to FeynArts name *)
+(* map topology to FeynArts name, see Fig. 1 in FlexibleDecay paper *)
 FeynArtsTopologyName[topology_] :=
    Switch[topology,
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}, {1, 0, 0,
@@ -1632,9 +1632,11 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{(*vertices, *)indices, cppVertices,
       mass = {}, translation, fieldAssociation,
       externalEdges,
-     (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
-     whereToConj, verticesForFACp2
+      matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
+      verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
+      whereToConj, verticesForFACp2,
+      (* colour triplet fermions *)
+      quarkLike = Select[GetColoredParticles[], IsFermion[#] && (GetColorRepresentation[#] == T || GetColorRepresentation[#] == -T) &]
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
@@ -1730,22 +1732,22 @@ If[Length@positions =!= 1, Quit[1]];
          Position[{{-x}}, x] = {{1, 1, 2}},
          hence the -field_->field rule *)
       mass =
-         Map[
+         StringJoin @@ Map[
             (
                "const double mInternal" <> ToString[#-3] <> " {context.mass<" <>
                CXXNameOfField[
-                  verticesForFACp2[[  Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]    ]]
+                  verticesForFACp2[[Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]]]
                ] <> ">(" <>
-               "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted/. -field_:>field, _[#]]]] <> "::template indices_of_field<" <>
+               "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted/. -field_:>field, _[#]]]] <>
+               "::template indices_of_field<" <>
                ToString@Utils`MathIndexToCPP[
                   Last@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_:>field, _[#]]
                ] <>
-               ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted /.-field_:>field, _[#]]]] <> "))};\n"
+               ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted /.-field_:>field, _[#]]]] <>
+               "))};\n"
             )&,
-            Range[4, Length@fieldAssociation ]
+            Range[4, Length@fieldAssociation]
          ];
-
-      mass = StringJoin@@mass;
 
       With[{
         positions = Position[verticesInFieldTypesForFACpCpSorted/. -f_[n_] :> Field[n] /. f_[n_] :> Field[n], Field[#]]
@@ -1807,13 +1809,13 @@ If[Length@positions =!= 1, Quit[1]];
                   TextFormatting`IndentText[
                   "// internal masses\n" <>
                   mass <> "\n" <>
-                  (* in some cases, we apply higher order corrections at the level of amplitude *)
+                  (* in some cases, we apply higher order corrections at the amplitude level *)
                   If[
-                     (* for H/A -> gamma gamma *)
+                     (* for Phi -> gamma gamma *)
                      (GetHiggsBoson[] === First@diagram || GetPseudoscalarHiggsBoson[] === First@diagram) && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]),
                         If[
                            (* the quark loop amplitude *)
-                           Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop],
+                           Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
                            "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
                            TextFormatting`IndentText[
@@ -1827,9 +1829,7 @@ If[Length@positions =!= 1, Quit[1]];
                                     "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
                                  ])&, verticesForFACp]," &&\n"]
                               ] <>
-                              ") {\n"
-                           ] <>
-                           TextFormatting`IndentText[
+                              ") {\n" <>
                               "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
                               "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
                               "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
@@ -1840,8 +1840,8 @@ If[Length@positions =!= 1, Quit[1]];
                               "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
                            ] <> "}\n" <>
                            "result += temp_result;\n",
-                        (* squark loop *)
-                        If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
+                           (* colored scalar loop *)
+                           If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
                            "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
                            TextFormatting`IndentText[
                              Module[{pos1, post2, res},
@@ -1856,24 +1856,26 @@ If[Length@positions =!= 1, Quit[1]];
                              , " &&\n"
                               ]
                               ] <>
-                              ") {\n"
-                           ] <>
-                           TextFormatting`IndentText[
+                              ") {\n" <>
                            "result += " <> ampCall <> " * (1. + get_alphas(context)/Pi * " <>
-                           ToString@N[Switch[TreeMasses`GetColorRepresentation@First@fieldsInLoop,
-                              T, 4/3,
-                              -T, 4/3,
-                              O, 3,
-                              _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"];Quit[1]
-                            ], 16] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
+                           ToString @ N[
+                              Switch[
+                                 TreeMasses`GetColorRepresentation@First@fieldsInLoop,
+                                 T, 4/3,
+                                 -T, 4/3,
+                                 O, 3,
+                                 _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"]; Quit[1]
+                              ],
+                              16
+                           ] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
                            ] <> "}\n" <>
                            "else {\n" <>
-                           TextFormatting`IndentText[
-                              "result += " <> ampCall <> ";\n"
-                           ] <> "}\n",
+                              TextFormatting`IndentText["result += " <> ampCall <> ";\n"] <>
+                           "}\n",
                            "result += " <> ampCall <> ";\n"
-                        ] (* end of squark *)
-                  ], "result += " <> ampCall <> ";\n"
+                        ] (* end of scalar loop *)
+                  ],
+                  "result += " <> ampCall <> ";\n"
                   ]] <> "}\n"
      ];
 
