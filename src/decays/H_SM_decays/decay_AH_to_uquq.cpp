@@ -1,4 +1,5 @@
-// special case for H -> Fu Fu
+// template specialization for the AH -> Fu Fu case
+
 template<>
 double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    const context_base& context,
@@ -7,73 +8,117 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    typename field_indices<uq>::type const& indexOut2
    ) const
 {
+   // get AHBBbar vertex
+   // we don't use amplitude_squared here because we need both this vertex
+   // both with running and pole masses
+   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
+   const auto AHBBbarVertexDR = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
+
    // TODO: should we take the off-diagonal case at all?
    //       or should this never happen and we should crash
-   if(!boost::range::equal(indexOut1, indexOut2))
-      return 0.;
-//    BOOST_ASSERT_MSG(boost::range::equal(indexOut1, indexOut2), 
-      // "Template specialization for H -> Fu1 bar[Fu2] is only valid for Fu1 = Fu2"
-//    );
-
-   const double mAH = context.mass<H>(indexIn);
-   const double muq = context.mass<uq>(indexOut1);
-
-   // @todo: add off-shell decays?
-   if (mAH < 2.*muq) {
+   if(!boost::range::equal(indexOut1, indexOut2)) {
+      if (!is_zero(AHBBbarVertexDR.left()) || !is_zero(AHBBbarVertexDR.right())) {
+         WARNING("Warning: flavour violating decays of AH->uubar currently not implemented!");
+      }
       return 0.;
    }
 
-   // SM expression + pure BSM 1L corrections
+   const double mAHOS = context.physical_mass<AH>(indexIn);
+   const double muqDR = context.mass<uq>(indexOut1);
+   const double muqOS = context.physical_mass<uq>(indexOut1);
+   if(is_zero(muqDR) || is_zero(muqOS)) {
+      throw std::runtime_error("Error in AH->uubar: down quarks cannot be massless");
+   }
+   const auto xOS = Sqr(muqOS/mAHOS);
+   const auto xDR = Sqr(muqDR/mAHOS);
 
-   const double g3 = context.model.get_g3();
-   const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
-   const double Nf = number_of_active_flavours(qedqcd, mAH);
-   const double mtpole = qedqcd.displayPoleMt();
-
-   double result = 0.;
-
-   constexpr double color_factor = squared_color_generator<H, bar<uq>::type, uq>();
-   const double flux = 1./(2.*mAH);
-   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(muq/mAH), Sqr(muq/mAH)));
-
-   // top-quark needs special treatment
-   const double x = 4.*Sqr(muq/mAH);
-   if(indexOut1[1] == 2) {
-     const double betaT = Sqrt(1 - x); // sqrt(1 - 4*Sqr(mtpole/mass));
-     const double log_ratio {std::log((1 + betaT) / (1 - betaT))};
-     const double Abeta = (1 + Sqr(betaT))
-                        * (4*dilog((1-betaT)/(1+betaT))
-                          + 2*dilog((betaT-1)/(1+betaT))
-                          - 3*log_ratio*std::log(2.0/(1+betaT))
-                          - 2*log_ratio*std::log(betaT))
-                        - 3*betaT*std::log(4.0/(1-Sqr(betaT)))
-                        - 4*betaT*std::log(betaT);
-
-     const double deltaHt = 4.0/3.0 * alpha_s_red * (Abeta/betaT
-                          + (3 + 34*Sqr(betaT) - 13*Power(betaT,4))
-                            * log_ratio / (16*Power(betaT,3))
-                          + 3.0/(8*Sqr(betaT)) * (7*Sqr(betaT) - 1));
-
-     // @todo: check numerical prefactors
-     result =
-        flux * phase_space * color_factor
-        * Power3(betaT)
-        * amplitude_squared<H, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2)
-        // multiplicative 1-loop correction
-        * (1 + deltaHt);
-
-   } else {
-
-   const double deltaqq = calc_Deltaqq(alpha_s_red, Nf);
-   const double lt = std::log(Sqr(mAH/mtpole));
-   const double lq = std::log(Sqr(muq/mAH));
-   const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
-
-   result =
-      flux * phase_space * color_factor
-      * amplitude_squared<AH, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2)
-      * (1 + deltaqq + deltaAH2);
+   // TODO: add off-shell decays?
+   if (4.*std::max(xDR, xOS) > 1.) {
+      return 0.;
    }
 
-   return result;
+   const auto betaOS = std::sqrt(1.-4.*xOS);
+   const auto betaDR = std::sqrt(1.-4.*xDR);
+
+   const double flux = 1./(2.*mAHOS);
+   constexpr double color_factor = squared_color_generator<AH, bar<uq>::type, uq>();
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
+
+   const auto AHBBbarVertexDR_P = 0.5*(AHBBbarVertexDR.right() - AHBBbarVertexDR.left());
+
+   double amp2DR_P = 0;
+   double amp2OS_P = 0;
+   amp2DR_P = Sqr(mAHOS) *
+              2*std::norm(AHBBbarVertexDR_P);
+   amp2OS_P = Sqr(mAHOS) *
+              2*std::norm(AHBBbarVertexDR_P) * Sqr(muqOS / muqDR);
+
+   switch (include_higher_order_corrections) {
+      case SM_higher_order_corrections::enable: {
+         double deltaqqOS = 0.;
+         const int Nf = number_of_active_flavours(qedqcd, mAHOS);
+         double alpha_s_red;
+         switch (Nf) {
+            case 5: {
+               auto qedqcd_ = qedqcd;
+               qedqcd_.to(mAHOS);
+               alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               break;
+            }
+            case 6:
+               alpha_s_red = get_alphas(context)/Pi;
+               break;
+            default:
+               throw std::runtime_error ("Error in AH->uubar: Cannot determine the number of active flavours");
+         }
+         double deltaqq_QCD_DR_P =
+               calc_Deltaqq(alpha_s_red, Nf)
+               + 2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red
+               + 4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+
+         // 1L QED correction - eq. 21 in FD manual
+         const double alpha_red = get_alpha(context)/Pi;
+         const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
+
+         const double deltaqq_QCD_OS_P =
+               4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+
+         const double deltaqq_QED_OS_P =
+               alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
+
+         double deltaPhi2_P = 0.;
+         if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
+            const double mtpole = qedqcd.displayPoleMt();
+            const double lt = std::log(Sqr(mAHOS/mtpole));
+            const double lq = std::log(xDR);
+            // eq. 28 of hep-ph/9505358
+            const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+            const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
+            const auto CSuu = AHBBbarVertexDR_P/context.mass<uq>(indexOut1);
+            if (!is_zero(CSuu)) {
+               const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
+               const auto CStu = AHttbar_P/context.mass<Fu>({2});
+               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+            }
+         }
+
+         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
+         amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
+         break;
+      }
+      case SM_higher_order_corrections::disable:
+         break;
+      default:
+         WARNING("Unhandled option in AH->ddbar decay");
+   }
+
+   // low x limit
+   double result_DR =
+      flux * color_factor * phase_spaceDR * amp2DR_P;
+   // high x limit
+   double result_OS =
+      flux * color_factor * phase_spaceOS * amp2OS_P;
+
+   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 }

@@ -301,7 +301,7 @@ Block UERMIX
                               0.001869360984370458, 2e-15);
    // Ah -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              5.6922638615208778e-05, 2e-16);
+                              9.3591185788565107e-05, 2e-16);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

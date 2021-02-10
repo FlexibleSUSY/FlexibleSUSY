@@ -73,39 +73,33 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
             default:
                throw std::runtime_error("Error in H->ddbar: Cannot determine the number of active flavours");
          }
-         double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf);
-         double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;
+
+         double deltaqq_QCD_DR_P = calc_Deltaqq(alpha_s_red, Nf);
 
          // 1L QED correction - eq. 21 in FD manual
          const double alpha_red = get_alpha(context)/Pi;
          const double deltaqq_QED_DR = 17./4.*Sqr(dq::electric_charge)*alpha_red;
 
-         double deltaqq_QED_OS_P = 0.;
+         deltaqq_QCD_DR_P +=
+            2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
+            4./3.*alpha_s_red*calc_DeltaAH(betaDR);
 
-         // chirality breaking corrections
-         double deltaPhi2_P = 0.;
-
-         double deltaqq_QCD_OS_P = 0.;
-
-            deltaqq_QCD_DR_P +=
-               2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
-               4./3.*alpha_s_red*calc_DeltaAH(betaDR);
-
-            deltaqq_QCD_OS_P =
+         const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
-            deltaqq_QED_OS_P =
+         const double deltaqq_QED_OS_P =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
 
-         const double mtpole = qedqcd.displayPoleMt();
-         const double lt = std::log(Sqr(mAOS/mtpole));
-         const double lq = std::log(xDR);
-         const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-         const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
-         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-         const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
          const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
+         double deltaPhi2_P = 0.;
          if (!is_zero(gbHoVEV_P)) {
+            const double mtpole = qedqcd.displayPoleMt();
+            const double lt = std::log(Sqr(mAOS/mtpole));
+            const double lq = std::log(xDR);
+            const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+            const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
+            const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
+            const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
             deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
          }
          amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
