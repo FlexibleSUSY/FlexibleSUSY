@@ -275,18 +275,15 @@ std::complex<double> hgg_SM_loop_function(double x) noexcept {
    }
 }
 
-unsigned int number_of_active_flavours(double m) noexcept
+unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m) noexcept
 {
-   /*
-   if (m < qedqcd.displayMbMb(){
+   if (m < qedqcd.displayMbMb()) {
       return 4.0;
    } else if (m < qedqcd.displayPoleMt()) {
-      return 5.0;
+      return 5;
    } else {
-      return 6.0;
+      return 6;
    }
-   */
-   return 5;
 }
 
 } // namespace flexiblesusy

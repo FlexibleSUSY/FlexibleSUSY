@@ -20,6 +20,7 @@
 #define DECAY_FUNCTIONS_H
 
 #include <complex>
+#include "src/lowe.h"
 
 namespace flexiblesusy {
 
@@ -53,7 +54,7 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
 // eq. 6 of https://arxiv.org/pdf/1109.5304.pdf
 std::complex<double> f(double x) noexcept;
 
-unsigned int number_of_active_flavours(double m) noexcept;
+unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
 
 } // namespace flexiblesusy
 

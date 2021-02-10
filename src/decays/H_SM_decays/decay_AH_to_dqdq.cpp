@@ -24,33 +24,106 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
       return 0.;
    }
 
-   const double mAH = context.physical_mass<AH>(indexIn);
-   const double mdq = context.physical_mass<dq>(indexOut1);
+   const double mAOS = context.physical_mass<AH>(indexIn);
+   const double mdqDR = context.mass<dq>(indexOut1);
+   const double mdqOS = context.physical_mass<dq>(indexOut1);
+   if(is_zero(mdqDR) || is_zero(mdqOS)) {
+      throw std::runtime_error("Error in H->ddbar: down quarks cannot be massless");
+   }
+   const auto xOS = Sqr(mdqOS/mAOS);
+   const auto xDR = Sqr(mdqDR/mAOS);
 
    // TODO: add off-shell decays?
-   if (mAH < 2.*mdq) {
+   if (4.*std::max(xDR, xOS) > 1.) {
       return 0.;
    }
 
-   const double g3 = context.model.get_g3();
-   const double Nf = number_of_active_flavours(mAH);
-   const double alpha_s_red = Sqr(g3)/(4*Sqr(Pi));
-   const double mtpole = qedqcd.displayPoleMt();
+   const auto betaOS = std::sqrt(1.-4.*xOS);
+   const auto betaDR = std::sqrt(1.-4.*xDR);
 
-   const double deltaqq = calc_Deltaqq(alpha_s_red, Nf);
+   const double flux = 1./(2.*mAOS);
+   constexpr double color_factor = squared_color_generator<H,bar<dq>::type,dq>();
+   const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
+   const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
-   const double lt = std::log(Sqr(mAH/mtpole));
-   const double lq = std::log(Sqr(mdq/mAH));
-   // eq. 2.4 of hep-ph/0503173
-   const double deltaAH2 = Sqr(alpha_s_red) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+   const auto HBBbarVertexDR_P = 0.5*(HBBbarVertexDR.right() - HBBbarVertexDR.left());
 
-   const double flux = 1./(2.*mAH);
-   const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(mdq/mAH), Sqr(mdq/mAH)));
-   constexpr double color_factor = squared_color_generator<AH, bar<dq>::type, dq>();
+   double amp2DR_P = 0;
+   double amp2OS_P = 0;
+      amp2DR_P = Sqr(mAOS) *
+                2*std::norm(HBBbarVertexDR_P);
+      amp2OS_P = Sqr(mAOS) *
+                2*std::norm(HBBbarVertexDR_P) * Sqr(mdqOS / mdqDR);
 
-   const double result = flux * phase_space * color_factor *
-      amplitude_squared<AH, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2) *
-      (1. + deltaqq);
+   switch (include_higher_order_corrections) {
+      case SM_higher_order_corrections::enable: {
+         double deltaqq_QCD_OS = 0.;
+         const int Nf = number_of_active_flavours(qedqcd, mAOS);
+         double alpha_s_red;
+         switch (Nf) {
+            case 5: {
+               auto qedqcd_ = qedqcd;
+               qedqcd_.to(mAOS);
+               alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               break;
+            }
+            case 6:
+               alpha_s_red = get_alphas(context)/Pi;
+               break;
+            default:
+               throw std::runtime_error("Error in H->ddbar: Cannot determine the number of active flavours");
+         }
+         double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf);
+         double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;
 
-   return result;
+         // 1L QED correction - eq. 21 in FD manual
+         const double alpha_red = get_alpha(context)/Pi;
+         const double deltaqq_QED_DR = 17./4.*Sqr(dq::electric_charge)*alpha_red;
+
+         double deltaqq_QED_OS_P = 0.;
+
+         // chirality breaking corrections
+         double deltaPhi2_P = 0.;
+
+         double deltaqq_QCD_OS_P = 0.;
+
+            deltaqq_QCD_DR_P +=
+               2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
+               4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+
+            deltaqq_QCD_OS_P =
+               4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+
+            deltaqq_QED_OS_P =
+               alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
+
+         const double mtpole = qedqcd.displayPoleMt();
+         const double lt = std::log(Sqr(mAOS/mtpole));
+         const double lq = std::log(xDR);
+         const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+         const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
+         const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
+         const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
+         const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
+         if (!is_zero(gbHoVEV_P)) {
+            deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+         }
+         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
+         amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
+         break;
+      }
+      case SM_higher_order_corrections::disable:
+         break;
+      default:
+         throw std::runtime_error("Unhandled option in H->ddbar decay");
+   }
+
+   // low x limit
+   double result_DR =
+      flux * color_factor * phase_spaceDR * amp2DR_P;
+   // high x limit
+   double result_OS =
+      flux * color_factor * phase_spaceOS * amp2OS_P;
+
+   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
 }

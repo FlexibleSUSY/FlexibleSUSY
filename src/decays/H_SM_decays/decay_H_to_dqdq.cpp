@@ -65,7 +65,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
          double deltaqq_QCD_OS = 0.;
-         const int Nf = number_of_active_flavours(mHOS);
+         const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
          switch (Nf) {
             case 5: {
