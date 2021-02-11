@@ -156,7 +156,7 @@ jobs:
       - name: Install FormCalc
         run: |
           docker exec builder bash -c "wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
+          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
       - name: Create models
