@@ -156,7 +156,7 @@ jobs:
       - name: Install FormCalc
         run: |
           docker exec builder bash -c "wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.2/Executables:\$PATH ./compile"
+          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
       - name: Create models
@@ -188,7 +188,7 @@ jobs:
         run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 execute-meta-tests'
 
       - name: Build compiled tests
-        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j3 alltest'
+        run: docker exec builder bash -c 'cd FlexibleSUSY && VERBOSE=1 make -j2 alltest'
 
       # Having a single name entry and a bash loop over integers in the run tag would save a
       # little writing but splitting it into multiple entries makes it easier to see on github which loop
@@ -196,16 +196,16 @@ jobs:
       - name: Run compiled and shell script (Softsusy)
         # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
         # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=0 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script (Collier)
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=1 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script (LoopTools)
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=2 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Run compiled and shell script (fflite)
-        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+        run: docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=3 -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
 
       - name: Testing pack-SM-src
         run: |
@@ -233,7 +233,7 @@ jobs:
           docker exec -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 alltest'
           for i in {0..3}
           do
-            docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=$i -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j3 execute-compiled-tests execute-shell-tests && make clean-test-log'
+            docker exec -e FLEXIBLESUSY_LOOP_LIBRARY=$i -e VERBOSE=1 builder bash -c 'cd FlexibleSUSY && make -j2 execute-compiled-tests execute-shell-tests && make clean-test-log'
           done
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
