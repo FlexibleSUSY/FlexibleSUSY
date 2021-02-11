@@ -1,6 +1,5 @@
 EPS = 10^(-Round[MachinePrecision] - 10);
 digits = 20;
-$MaxExtraPrecision = 500;
 
 $Assumptions = { p2 >= 0, m12 >= 0, m22 >= 0, m2 >= 0, q2 > 0 };
 
@@ -24,22 +23,16 @@ B0[0, 0, m22_, q2_, eps_:EPS] :=
 B0[p2_, 0, m22_, q2_, eps_:EPS] :=
     2 - Log[p2 / q2] + (m22 - p2)/p2 Log[(m22 - p2 - I eps)/m22]
 
-B0[p2_, m12_, 0, q2_, eps_:EPS] :=
-    B0[p2, 0, m12, q2, eps]
-
 B0[0, m2_, m2_, q2_, eps_:EPS] :=
     -Log[m2 / q2]
 
 B0[p2_, m12_, m22_, q2_, eps_:EPS] :=
-    B0[p2, m22, m12, q2, eps] /; m22 > m12
+    B0[p2, m22, m12, q2, eps] /; m12 > m22
 
 B0[p2_, m12_, m22_, q2_, eps_:EPS] :=
-    Module[{x, xp, xm,
-            s = p2 - m22 + m12,
-            imin = m12 - I eps},
-        x  = Sqrt[s^2 - 4 p2 imin];
-        xp = (s + Sign[s] x) / (2 p2);
-        xm = imin / (xp p2);
+    Module[{xp, xm, s = p2 - m22 + m12},
+        xp = (s + Sqrt[s^2 - 4 p2 (m12 - I eps)]) / (2 p2);
+        xm = (s - Sqrt[s^2 - 4 p2 (m12 - I eps)]) / (2 p2);
         -Log[p2/q2] - fB[xp] - fB[xm]
     ]
 
@@ -77,15 +70,15 @@ DB0[m12_, m22_] :=
 (*************************************************************)
 
 B22[p2_, m12_, m22_, q2_, eps_:EPS] :=
-    B22[p2, m22, m12, q2, eps] /; m22 > m12
+    B22[p2, m22, m12, q2, eps] /; m12 > m22
 
-B22[0, m2_, m2_, q2_, eps_:EPS] :=
-    m2/2 (1 - Log[m2/q2])
+B22[_?PossibleZeroQ, m12_, m22_, q2_, eps_:EPS] :=
+    m12/2 (1 - Log[m12/q2]) /; PossibleZeroQ[Abs[m12 - m22]]
 
-B22[0, 0, m22_, q2_, eps_:EPS] :=
+B22[_?PossibleZeroQ, _?PossibleZeroQ, m22_, q2_, eps_:EPS] :=
     3/8 m22 - 1/4 m22 Log[m22/q2]
 
-B22[0, m12_, m22_, q2_, eps_:EPS] :=
+B22[_?PossibleZeroQ, m12_, m22_, q2_, eps_:EPS] :=
     3/8 (m12 + m22) + (m12^2 Log[m12/q2] - m22^2 Log[m22/q2]) / (4 (m22 - m12))
 
 B22[p2_, m12_, m22_, q2_, eps_:EPS] :=
