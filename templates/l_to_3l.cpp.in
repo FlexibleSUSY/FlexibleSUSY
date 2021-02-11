@@ -51,7 +51,7 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace @ModelName@_l_to_3l {
 
-typedef std::valarray<std::complex<double>>  (*ffv)(
+typedef std::valarray<std::complex<double>> (*ffv)(
    int, int, const @ModelName@_mass_eigenstates&, bool);
 
 typedef std::array<std::complex<double>,10> (*npf)(
@@ -63,21 +63,26 @@ template<ffv penguin, npf function>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
+   context_base context {model};
+   auto coeffs = function(model,
+      std::array<int,4>{nI, nO, nA, nA},
+      std::array<Eigen::Vector4d, 0>{});
+
    Eigen::Array<std::complex<double>,13,1> res;
 
    res << 0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0;
+          coeffs[0],
+          coeffs[1],
+          coeffs[2],
+          coeffs[3],
+          coeffs[4],
+          coeffs[5],
+          coeffs[6],
+          coeffs[7],
+          -coeffs[8],
+          -coeffs[9];
    return res;
 }
 

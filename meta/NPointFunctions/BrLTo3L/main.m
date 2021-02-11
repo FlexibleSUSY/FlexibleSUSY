@@ -91,9 +91,9 @@ create // Protect;
 
 `npf`create[obs:`type`observable] := Module[{npf, fields, sp, dc, dim6, code},
    Utils`FSFancyLine@"<";
-   Print@StringReplace["Calculation of #-#+ to #-#+ started", "#"->`cxx`lep];
+   Print@StringReplace["Calculation of #-#- to #-#- started", "#"->`cxx`lep];
    npf = NPointFunctions`NPointFunction[
-      {lep, SARAH`bar@lep}, {lep, SARAH`bar@lep},
+      {lep, lep}, {lep, lep},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
@@ -117,7 +117,7 @@ create // Protect;
    npf = WilsonCoeffs`InterfaceToMatching[npf, dim6];
    code = NPointFunctions`CreateCXXFunctions[
       npf, `cxx`name, Identity, dim6][[2]];
-   Print@StringReplace["Calculation of #-#+ to #-#+ finished", "#"->`cxx`lep];
+   Print@StringReplace["Calculation of #-#- to #-#- finished", "#"->`cxx`lep];
    Utils`FSFancyLine@">";
    {  DeleteDuplicates@NPointFunctions`VerticesForNPointFunction@npf,
       NPointFunctions`CreateCXXHeaders[],

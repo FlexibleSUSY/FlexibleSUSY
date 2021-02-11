@@ -90,7 +90,11 @@
       {  {  {  `topologyQ`box,
                FeynArts`DiagramSelect,
                FreeQ[#, FeynArts`Field[5|6|7|8] -> FeynArts`V]&,
-               "box: remove loops with vector bosons"}},
+               "box: remove loops with vector bosons"},
+            {  `topologyQ`box,
+               removeGenericInsertionsBy,
+               FeynArts`Field[5|6] -> getField[ds,1] /. i:`type`indexGeneration:>Blank[],
+               "box: remove loops with initial lepton"}},
          {}}};
 
 `settings`amplitudes[ds:`type`diagramSet] :=
