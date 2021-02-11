@@ -15,16 +15,23 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
    const auto HBBbarVertexDR = Vertex<bar<dq>::type, dq, AH>::evaluate(indices, context);
 
-   // TODO: should we take the off-diagonal case at all?
-   //       or should this never happen and we should crash
+   const double mAOS = context.physical_mass<AH>(indexIn);
+   const double flux = 1./(2.*mAOS);
+
+   constexpr double color_factor = squared_color_generator<AH, bar<dq>::type, dq>();
+
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
-         WARNING("Warning: flavour violating decays of Ah->ddbar are currently not implemented");
+         const double mdqOS1 = context.physical_mass<dq>(indexOut1);
+         const double mdqOS2 = context.physical_mass<dq>(indexOut2);
+         const auto xOS1 = Sqr(mdqOS1/mAOS);
+         const auto xOS2 = Sqr(mdqOS2/mAOS);
+         const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
+         return flux * phase_space * color_factor * amplitude_squared<AH, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2);
       }
       return 0.;
    }
 
-   const double mAOS = context.physical_mass<AH>(indexIn);
    const double mdqDR = context.mass<dq>(indexOut1);
    const double mdqOS = context.physical_mass<dq>(indexOut1);
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
@@ -41,8 +48,6 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    const auto betaOS = std::sqrt(1.-4.*xOS);
    const auto betaDR = std::sqrt(1.-4.*xDR);
 
-   const double flux = 1./(2.*mAOS);
-   constexpr double color_factor = squared_color_generator<H,bar<dq>::type,dq>();
    const double phase_spaceDR = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xDR, xDR));
    const double phase_spaceOS = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS, xOS));
 
