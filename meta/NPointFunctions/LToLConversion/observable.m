@@ -23,29 +23,27 @@
 Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
 
 Begin@"Observables`Private`";
-With[{
-   args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
-   obs = FlexibleSUSYObservable`LToLConversion,
-   cxx = CConversion`ToValidCSymbolString,
-   namespace = FlexibleSUSY`FSModelName<>"_"<>LToLConversion`namespace[]},
+With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
+      obs = FlexibleSUSYObservable`LToLConversion,
+      cxx = CConversion`ToValidCSymbolString,
+      namespace = FlexibleSUSY`FSModelName<>"_"<>LToLConversion`namespace[]},
 
-GetObservableName@obs@args := StringJoin[
-   cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
-   cxx@nucl, "_for_", cxx@proc, cxx@massless];
+   GetObservableName@obs@args := StringJoin[
+      cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
+      cxx@nucl, "_for_", SymbolName@proc, cxx@massless];
 
-GetObservableDescription@obs@args := StringJoin[
-   cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
-   cxx@nucl, " for ",cxx@proc];
+   GetObservableDescription@obs@args := StringJoin[
+      cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
+      cxx@nucl, " for ", SymbolName@proc];
 
-GetObservableType@obs@args :=
-   CConversion`ArrayType[CConversion`complexScalarCType, 13];
+   GetObservableType@obs@args :=
+      CConversion`ArrayType[CConversion`complexScalarCType, 13];
 
-CalculateObservable[obs@args, structName:_String] := StringJoin[
-   structName, ".",
-   GetObservableName@obs[in@inN -> out@outN, nucl, proc, massless], " = ",
-   namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
-   SymbolName@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
-   namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];
+   CalculateObservable[obs@args, structName:_String] := StringJoin[
+      structName, ".",
+      GetObservableName@obs[in@inN -> out@outN, nucl, proc, massless], " = ",
+      namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
+      SymbolName@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
+      namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];];
 
-];
 End[];

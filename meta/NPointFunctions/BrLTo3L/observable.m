@@ -27,10 +27,11 @@ With[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc],
       cxx = CConversion`ToValidCSymbolString},
    GetObservableName@obs@args := StringJoin[
       cxx@lep, cxx@nI, "_to_", cxx@lep, cxx@nO, cxx@lep, cxx@nA,
-      cxx@SARAH`bar@lep, cxx@nA, "_for_", cxx@proc];
+      cxx@SARAH`bar@lep, cxx@nA, "_for_", SymbolName@proc];
    GetObservableDescription@obs@args := StringJoin[
       cxx@lep, "(", cxx@nI, ") to ", cxx@lep, "(", cxx@nO, ")", cxx@lep, "(",
-      cxx@nA, ")", cxx@SARAH`bar@lep, "(", cxx@nA, ")", " for ",cxx@proc];
+      cxx@nA, ")", cxx@SARAH`bar@lep, "(", cxx@nA, ")",
+      " for ", SymbolName@proc];
    GetObservableType@obs@args :=
       CConversion`ArrayType[CConversion`complexScalarCType, 13];
    CalculateObservable[obs@args, structName:_String] := StringJoin[
