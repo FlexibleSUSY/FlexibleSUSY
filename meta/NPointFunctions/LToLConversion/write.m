@@ -57,7 +57,7 @@ Module[{rules = {0->"11", 1->"13", 2->"15"}, leptons,
       {#1, "4242", #2, #3, #4, "V_RR "<>#5},
       {#1, "4343", #2, #3, #4, "T_LL "<>#5},
       {#1, "4444", #2, #3, #4, "T_RR "<>#5}
-   } & [leptons<>quarksU, "0", "0", "2", CConversion`ToValidCSymbolString@con]];
+   } & [leptons<>quarksU, "0", "0", "2", SymbolName@con]];
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
 

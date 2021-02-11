@@ -46,7 +46,7 @@ getFLHA::usage = "
 getFLHA@`type`observable :=
 Module[{fields, args},
    fields = {0->"11", 1->"13", 2->"15"};
-   args = Sequence[CConversion`ToValidCSymbolString@proc, "0", "0", "2"];
+   args = Sequence[SymbolName@proc, "0", "0", "2"];
    Quiet[{{nO<>nI, "4322", ##2, "D_L"},
           {nO<>nI, "4422", ##2, "D_R"},
           flha[{nO, "31", nI}, {nA, "31", nA}, ##2, "S_LL "<>#],
