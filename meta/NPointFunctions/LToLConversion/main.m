@@ -38,7 +38,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
       {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
 
    {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to_",
-      cxx@out, #, "_for_", cxx@con, cxx@massless]&/@ cxx/@
+      cxx@out, #, "_for_", SymbolName@con, cxx@massless]&/@ cxx/@
          {SARAH`UpQuark, SARAH`DownQuark};
 
    `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
@@ -46,7 +46,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>cxx@con<>cxx@massless<>"(\n"<>
+      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>cxx@massless<>"(\n"<>
       "   int in, int out,\n"<>
       "   const " <> FlexibleSUSY`FSModelName <>
          "_l_to_l_conversion::Nucleus nucleus,\n" <>

@@ -105,6 +105,7 @@ SetAttributes[{
    {Locked,Protected}];
 
 Begin@"`internal`";
+
 (* ============================== Type definitions ========================== *)
 Module[
    {
@@ -1056,18 +1057,16 @@ sandwich[f_] = Switch[Head@f,
 `cxx`fieldIndices // Utils`MakeUnknownInputDefinition;
 `cxx`fieldIndices ~ SetAttributes ~ {Locked};
 
-`cxx`genericFieldKey::usage=
-"@brief Given a generic field(s), determine its key type used in the c++ code to
-uniquely label it.
-@param genericField given generic field.
-@param {genericField..} given generic fields.
-@returns c++ key type of a generic field(s).";
+`cxx`genericFieldKey::usage = "
+@brief Determines C++ key type for a generic field.
+@param genericField Given generic field.
+@returns C++ key type of a generic field(s).";
 `cxx`genericFieldKey[fields:{__}] :=
-   StringRiffle[`cxx`genericFieldKey/@fields,", "];
-`cxx`genericFieldKey[head_[GenericIndex[index_Integer]]] :=
-   ToString@head<>ToString@index<>"Key";
+   Utils`StringJoinWithSeparator[fields, ", ", `cxx`genericFieldKey];
+`cxx`genericFieldKey[head_[GenericIndex[index:_Integer]]] :=
+   SymbolName@head<>ToString@index<>"Key";
 `cxx`genericFieldKey // Utils`MakeUnknownInputDefinition;
-`cxx`genericFieldKey ~ SetAttributes ~ {Locked,Protected};
+`cxx`genericFieldKey // Protect;
 
 getColourFactor::usage=
 "@brief Extracts the colour factor for a given colour structure.";

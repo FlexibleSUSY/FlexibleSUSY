@@ -49,12 +49,13 @@ namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
 Off@RuleDelayed::rhs;
-arguments[lepton:_Symbol, (nI:_Symbol) -> {nO:_Symbol, nA:_Symbol},
-   contribution:_Symbol] :=
+arguments[lepton_Symbol, nI_Symbol -> {nO_Symbol, nA_Symbol},
+   contribution_Symbol] :=
 Sequence[
-   (lepton:_Symbol?TreeMasses`IsLepton)[nI:_Integer] ->
-   {(lepton:_)[nO:_Integer], (lepton:_)[nA:_Integer],
-      SARAH`bar[(lepton:_)[nA:_Integer]]},
+   lepton_Symbol?TreeMasses`IsLepton[nI_Integer] ->
+      {  lepton_[nO_Integer],
+         lepton_[nA_Integer],
+         SARAH`bar[lepton_[nA_Integer]]},
    contribution:Alternatives[All, NPointFunctions`noScalars,
       NPointFunctions`Penguins, NPointFunctions`FourFermionScalarPenguins,
       NPointFunctions`FourFermionMassiveVectorPenguins,
@@ -71,12 +72,12 @@ With[{i = TextFormatting`IndentText, m = FlexibleSUSY`FSModelName,
       cxx = CConversion`ToValidCSymbolString},
    calculate[obs:`type`observable] := StringJoin[
       m, "_", namespace[], "::calculate_",
-      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep, "_for_", cxx@proc,
-      "(", cxx@nI, ", ", cxx@nO, ", ", cxx@nA,
+      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep,
+      "_for_", SymbolName@proc, "(", cxx@nI, ", ", cxx@nO, ", ", cxx@nA,
       ", MODEL, qedqcd)"];
    calculate[obs:`type`observable, Head] := StringJoin["calculate_",
-      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep, "_for_", cxx@proc,
-      "(\n", i@"int nI, int nO, int nA,\n",
+      cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep,
+      "_for_", SymbolName@proc, "(\n", i@"int nI, int nO, int nA,\n",
       i@"const ", m, "_mass_eigenstates& model,\n",
       i@"const softsusy::QedQcd& qedqcd)"];];
 prototype // Utils`MakeUnknownInputDefinition;

@@ -44,7 +44,7 @@ CalculateObservable[obs@args, structName:_String] := StringJoin[
    structName, ".",
    GetObservableName@obs[in@inN -> out@outN, nucl, proc, massless], " = ",
    namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
-   cxx@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
+   SymbolName@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
    namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];
 
 ];
