@@ -24,7 +24,7 @@ jobs:
   no-meta:
     strategy:
        matrix:
-          OS: [macos-latest, ubuntu-latest]
+          OS: [macos-10.15, ubuntu-20.04]
           CXXCOMPILER: [g++, clang++]
     runs-on: ${{ matrix.OS }}
 
@@ -52,7 +52,7 @@ jobs:
           conan profile update settings.compiler.libcxx=libstdc++11 default
         env:
           CXX: ${{ matrix.CXXCOMPILER }}
-        if: ${{ matrix.OS == 'ubuntu-latest' }}
+        if: ${{ runner.os == 'Linux' }}
 
       - name: Install dependencies
         run: |
