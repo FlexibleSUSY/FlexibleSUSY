@@ -36,6 +36,13 @@ bool is_close(double a, double b, double eps)
 }
 
 
+double rel_dev(double a, double b)
+{
+   const double max = std::max(std::abs(a), std::abs(b));
+   return std::abs(a - b)/max;
+}
+
+
 using namespace flexiblesusy;
 
 struct A_data {
@@ -167,6 +174,7 @@ BOOST_AUTO_TEST_CASE( test_ReB22_values )
 
    for (auto d: data) {
       const auto b22 = flexiblesusy::b22(d.p2, d.m12, d.m22, d.q2);
-      BOOST_CHECK_MESSAGE(is_close(d.b0, b22, eps), "expected: " << d << ", observed: " << b22);
+      BOOST_CHECK_MESSAGE(is_close(d.b0, b22, eps), "expected: " << d << ", observed: " << b22
+                          << ", rel. deviation: " << rel_dev(d.b0, b22));
    }
 }
