@@ -238,22 +238,20 @@ double b22(double p2, double m12, double m22, double q2) noexcept
       return 0;
    }
 
-   /// Decides level at which one switches to p=0 limit of calculations
-   const double pTolerance = 1.0e-10;
+   if (m12 > m22) {
+      std::swap(m12, m22);
+   }
 
-   if (p2 < pTolerance * std::max(m12, m22)) {
-      if (std::abs(m12 - m22) < EPSTOL) {
+   if (p2 < 1e-10 * m22) {
+      if (std::abs(m12 - m22) < EPSTOL * m22) {
          return -m12 * 0.5 * std::log(m12/q2) + m12 * 0.5;
       }
-      // p == 0 limit
-      if (m12 > EPSTOL && m22 > EPSTOL) {
-         return 0.375 * (m12 + m22) - 0.25 *
-            (pow2(m22) * std::log(m22/q2) -
-             pow2(m12) * std::log(m12/q2)) / (m22 - m12);
+      if (m12 < EPSTOL * m22) {
+         return 0.375 * m22 - 0.5 * m22 * 0.5 * std::log(m22/q2);
       }
-      return (m12 < EPSTOL)
-         ? 0.375 * m22 - 0.5 * m22 * 0.5 * std::log(m22/q2)
-         : 0.375 * m12 - 0.5 * m12 * 0.5 * std::log(m12/q2);
+      return 0.375 * (m12 + m22) - 0.25 *
+         (pow2(m22) * std::log(m22/q2) -
+          pow2(m12) * std::log(m12/q2)) / (m22 - m12);
    }
 
    const double b0_ = b0(p2, m12, m22, q2);
