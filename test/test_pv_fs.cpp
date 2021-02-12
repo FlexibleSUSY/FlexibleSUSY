@@ -38,34 +38,34 @@ bool is_close(double a, double b, double eps)
 
 using namespace flexiblesusy;
 
-struct A0_data {
+struct A_data {
    double m2{}, q2{}, a0{};
 };
 
-struct B0_data {
+struct B_data {
    double p2{}, m12{}, m22{}, q2{}, b0{};
 };
 
-struct DB0_data {
+struct DB_data {
    double m12{}, m22{}, db0{};
 };
 
-std::ostream& operator<<(std::ostream& ostr, const A0_data& a0)
+std::ostream& operator<<(std::ostream& ostr, const A_data& a0)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
         << "A0(m2=" << a0.m2 << ", q2=" << a0.q2 << ") = " << a0.a0;
    return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const B0_data& b0)
+std::ostream& operator<<(std::ostream& ostr, const B_data& b0)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
-        << "B0(p2=" << b0.p2 << ", m12=" << b0.m12
+        << "B(p2=" << b0.p2 << ", m12=" << b0.m12
         << ", m22=" << b0.m22 << ", q2=" << b0.q2 << ") = " << b0.b0;
    return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const DB0_data& db0)
+std::ostream& operator<<(std::ostream& ostr, const DB_data& db0)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
         << "DB0(m12=" << db0.m12 << ", m22=" << db0.m22 << ") = " << db0.db0;
@@ -81,32 +81,32 @@ std::vector<B> fmap(F f, const std::vector<A>& in)
    return out;
 }
 
-/// read A0 function data
-std::vector<A0_data> read_a0(const std::string& filename)
+/// read A function data
+std::vector<A_data> read_a0(const std::string& filename)
 {
-   return fmap<A0_data>(
+   return fmap<A_data>(
       [](const auto& d) {
-         return A0_data{d.at(0), d.at(1), d.at(2)};
+         return A_data{d.at(0), d.at(1), d.at(2)};
       },
       test::read_from_file<double>(filename));
 }
 
-/// read B0 function data
-std::vector<B0_data> read_b0(const std::string& filename)
+/// read B function data
+std::vector<B_data> read_b0(const std::string& filename)
 {
-   return fmap<B0_data>(
+   return fmap<B_data>(
       [](const auto& d) {
-         return B0_data{d.at(0), d.at(1), d.at(2), d.at(3), d.at(4)};
+         return B_data{d.at(0), d.at(1), d.at(2), d.at(3), d.at(4)};
       },
       test::read_from_file<double>(filename));
 }
 
-/// read DB0 function data
-std::vector<DB0_data> read_db0(const std::string& filename)
+/// read DB function data
+std::vector<DB_data> read_db0(const std::string& filename)
 {
-   return fmap<DB0_data>(
+   return fmap<DB_data>(
       [](const auto& d) {
-         return DB0_data{d.at(0), d.at(1), d.at(2)};
+         return DB_data{d.at(0), d.at(1), d.at(2)};
       },
       test::read_from_file<double>(filename));
 }
@@ -156,5 +156,17 @@ BOOST_AUTO_TEST_CASE( test_ReD1B0_values )
    for (auto d: data) {
       const auto db0 = flexiblesusy::d1_b0(d.m12, d.m22);
       BOOST_CHECK_MESSAGE(is_close(d.db0, db0, eps), "expected: " << d << ", observed: " << db0);
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_ReB22_values )
+{
+   const auto filename = std::string(TEST_DATA_DIR) + test::PATH_SEPARATOR + "B22.dat";
+   const auto data = read_b0(filename);
+   const double eps = 1e-12;
+
+   for (auto d: data) {
+      const auto b22 = flexiblesusy::b22(d.p2, d.m12, d.m22, d.q2);
+      BOOST_CHECK_MESSAGE(is_close(d.b0, b22, eps), "expected: " << d << ", observed: " << b22);
    }
 }
