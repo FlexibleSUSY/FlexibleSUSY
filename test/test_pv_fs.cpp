@@ -46,36 +46,36 @@ double rel_dev(double a, double b)
 using namespace flexiblesusy;
 
 struct A_data {
-   double m2{}, q2{}, a0{};
+   double m2{}, q2{}, a{};
 };
 
 struct B_data {
-   double p2{}, m12{}, m22{}, q2{}, b0{};
+   double p2{}, m12{}, m22{}, q2{}, b{};
 };
 
 struct DB_data {
-   double m12{}, m22{}, db0{};
+   double m12{}, m22{}, db{};
 };
 
-std::ostream& operator<<(std::ostream& ostr, const A_data& a0)
+std::ostream& operator<<(std::ostream& ostr, const A_data& a)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
-        << "A0(m2=" << a0.m2 << ", q2=" << a0.q2 << ") = " << a0.a0;
+        << "A(m2=" << a.m2 << ", q2=" << a.q2 << ") = " << a.a;
    return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const B_data& b0)
+std::ostream& operator<<(std::ostream& ostr, const B_data& b)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
-        << "B(p2=" << b0.p2 << ", m12=" << b0.m12
-        << ", m22=" << b0.m22 << ", q2=" << b0.q2 << ") = " << b0.b0;
+        << "B(p2=" << b.p2 << ", m12=" << b.m12
+        << ", m22=" << b.m22 << ", q2=" << b.q2 << ") = " << b.b;
    return ostr;
 }
 
-std::ostream& operator<<(std::ostream& ostr, const DB_data& db0)
+std::ostream& operator<<(std::ostream& ostr, const DB_data& db)
 {
    ostr << std::setprecision(std::numeric_limits<double>::digits10)
-        << "DB0(m12=" << db0.m12 << ", m22=" << db0.m22 << ") = " << db0.db0;
+        << "DB0(m12=" << db.m12 << ", m22=" << db.m22 << ") = " << db.db;
    return ostr;
 }
 
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( test_ReA0_values )
 
    for (auto d: data) {
       const auto a0 = flexiblesusy::a0(d.m2, d.q2);
-      BOOST_CHECK_MESSAGE(is_close(d.a0, a0, eps), "expected: " << d << ", observed: " << a0);
+      BOOST_CHECK_MESSAGE(is_close(d.a, a0, eps), "expected: " << d << ", observed: " << a0);
    }
 }
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE( test_ReB0xx_values )
 
    for (auto d: data) {
       const auto b0 = flexiblesusy::b0xx(d.p2, d.m12, d.q2);
-      BOOST_CHECK_MESSAGE(is_close(d.b0, b0, eps), "expected: " << d << ", observed: " << b0);
+      BOOST_CHECK_MESSAGE(is_close(d.b, b0, eps), "expected: " << d << ", observed: " << b0);
    }
 }
 
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( test_ReB0_values )
 
    for (auto d: data) {
       const auto b0 = flexiblesusy::b0(d.p2, d.m12, d.m22, d.q2);
-      BOOST_CHECK_MESSAGE(is_close(d.b0, b0, eps), "expected: " << d << ", observed: " << b0);
+      BOOST_CHECK_MESSAGE(is_close(d.b, b0, eps), "expected: " << d << ", observed: " << b0);
    }
 }
 
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( test_ReD1B0_values )
 
    for (auto d: data) {
       const auto db0 = flexiblesusy::d1_b0(d.m12, d.m22);
-      BOOST_CHECK_MESSAGE(is_close(d.db0, db0, eps), "expected: " << d << ", observed: " << db0);
+      BOOST_CHECK_MESSAGE(is_close(d.db, db0, eps), "expected: " << d << ", observed: " << db0);
    }
 }
 
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE( test_ReB22_values )
 
    for (auto d: data) {
       const auto b22 = flexiblesusy::b22(d.p2, d.m12, d.m22, d.q2);
-      BOOST_CHECK_MESSAGE(is_close(d.b0, b22, eps), "expected: " << d << ", observed: " << b22
-                          << ", rel. deviation: " << rel_dev(d.b0, b22));
+      BOOST_CHECK_MESSAGE(is_close(d.b, b22, eps), "expected: " << d << ", observed: " << b22
+                          << ", rel. deviation: " << rel_dev(d.b, b22));
    }
 }
