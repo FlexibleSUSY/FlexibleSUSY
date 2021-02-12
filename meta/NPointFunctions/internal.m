@@ -132,12 +132,11 @@ setInternalDirectory@DirectoryName@$Input;
 `type`propagator ~ SetAttributes ~ {Protected, Locked};
 
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
-`type`topology ~ SetAttributes ~ {Protected, Locked};
+`type`topology // Protect;
 
 `type`diagram = Rule[`type`topology, FeynArts`Insertions[Generic][__]];
 
 `type`diagramSet = FeynArts`TopologyList[_][`type`diagram..];
-`type`nullableDiagramSet = FeynArts`TopologyList[_][Rule[`type`topology,FeynArts`Insertions[Generic][___]]...];
 
 `type`amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
@@ -231,6 +230,13 @@ getField[set:`type`amplitudeSet, Out] :=
 getField[set:`type`amplitudeSet, All] :=
    First /@ Flatten[List @@ getProcess[set], 1];
 getField // secure;
+
+fieldPattern[d:Head@`type`diagramSet, i_Integer] :=
+   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
+      `type`indexGeneration :> Blank[];
+fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
+   fieldPattern[d, #] &/@ a;
+fieldPattern // secure;
 
 SetInitialValues[] :=
 Module[{fieldNames},
@@ -468,8 +474,8 @@ getSettings[] := Module[{file},
    BeginPackage@"NPointFunctions`";
    Begin@"`internal`";
    `settings`topologyReplacements = {};
-   `settings`diagrams@`type`diagramSet := Default;
-   `settings`amplitudes@`type`diagramSet := Default;
+   `settings`diagrams = Default;
+   `settings`amplitudes = Default;
    `settings`sum[`type`diagramSet] := {};
    `settings`massless[`type`diagramSet] := {};
    `settings`momenta = {};
@@ -656,13 +662,11 @@ modify::usage = "
 @returns A modified set of diagrams and amplitudes.";
 modify[diagrams:`type`diagramSet] :=
 Module[{d = diagrams},
-   Do[d = applyAction[d, ac];,
-      {ac, getActions@`settings`diagrams@diagrams}];
+   Do[d = applyAction[d, ac];, {ac, getActions@`settings`diagrams}];
    d];
 modify[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{d = diagrams, a = removeColours@amplitudes},
-   Do[{d, a} = applyAction[{d, a}, ac];,
-      {ac, getActions@`settings`amplitudes@diagrams}];
+   Do[{d, a} = applyAction[{d, a}, ac];, {ac, getActions@`settings`amplitudes}];
    {d, a}];
 modify // secure;
 
@@ -691,31 +695,6 @@ define[getAmplitudeNumbers, {diagrams:`type`diagramSet, critFunction_} :>
    ]
 ];
 
-define[removeTopologiesWithoutInsertions, {diagrams:`type`nullableDiagramSet} :>
-   (diagrams /. (FeynArts`Topology[_][__]->FeynArts`Insertions[Generic][]):>(##&[]))
-];
-
-define[removeClassInsertionsBy, {classInsertions:FeynArts`Insertions[FeynArts`Classes][__],pattern___} :>
-   Module[{i,classList},
-      classList = Cases[classInsertions,Except[FeynArts`FeynmanGraph[_Integer,FeynArts`Classes==_Integer][___,Sequence@@{pattern},___]]];
-      If[classList=!={},
-         classList=Table[classList[[i]]/.Equal[FeynArts`Classes,x_Integer]:>FeynArts`Classes==i,{i,Length@classList}]
-      ];
-      Head[classInsertions]@@classList
-   ]
-];
-
-define[removeGenericInsertionsBy, {genericInsertions:FeynArts`Insertions[Generic][__],pattern___} :>
-   Module[{i,genericList},
-      genericList = Rule[#[[1]],removeClassInsertionsBy[#[[2]],pattern]] &/@ genericInsertions;
-      genericList = genericList /. Rule[FeynArts`FeynmanGraph[_Integer,Generic==_Integer][__],FeynArts`Insertions[FeynArts`Classes][]] :> (##&[]);
-      If[genericList=!=FeynArts`Insertions[Generic][],
-         genericList = Table[genericList[[i]]/.Equal[Generic,x_Integer]:>Generic==i,{i,Length@genericList}]
-      ];
-      Head[genericInsertions]@@genericList
-   ]
-];
-
 define[printDiagramsInfo, {diagrams:`type`diagramSet, where_String:" "} :>
    Module[{
          nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True],
@@ -733,14 +712,14 @@ define[debugMakePictures, {diagrams:`type`diagramSet, name_String:"classes"} :>
    Module[{
          out = {}, directory = FileNameJoin[Most[FileNameSplit@@FeynArts`$Model]]
       },
-
-      FeynArts`Paint[diagrams,
-         FeynArts`PaintLevel -> {Generic},
+      DeleteFile@FileNames@"*class_*.jpg";
+      Export["class.jpg",FeynArts`Paint[diagrams,
+         FeynArts`PaintLevel -> {FeynArts`Classes},
          FeynArts`ColumnsXRows -> 1,
          FeynArts`SheetHeader -> None,
          FeynArts`Numbering -> FeynArts`Simple,
          DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
-      ]
+      ]];
 
       Put[out, FileNameJoin@{directory, name<>".m"}];
    ]

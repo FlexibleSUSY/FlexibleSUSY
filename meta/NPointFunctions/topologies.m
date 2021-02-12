@@ -40,16 +40,16 @@ Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
 adjace // Utils`MakeUnknownInputDefinition;
 adjace ~ SetAttributes ~ {Protected, Locked};
 
-define[`topologyQ`pinguinT, {t:`type`topology} :>
-   Or[`topologyQ`trianglepinguinT@t,
-      `topologyQ`self1pinguinT@t,
-      `topologyQ`self3pinguinT@t]];
+define[`topologyQ`penguinT, {t:`type`topology} :>
+   Or[`topologyQ`trianglepenguinT@t,
+      `topologyQ`self1penguinT@t,
+      `topologyQ`self3penguinT@t]];
 
-define[`topologyQ`trianglepinguinT, {t:`type`topology} :>
+define[`topologyQ`trianglepenguinT, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`self1pinguinT, {t:`type`topology} :>
+define[`topologyQ`self1penguinT, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0}];
-define[`topologyQ`self3pinguinT, {t:`type`topology} :>
+define[`topologyQ`self3penguinT, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
 
 define[`topologyQ`triangle12S, {t:`type`topology} :>
