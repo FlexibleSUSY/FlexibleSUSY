@@ -244,10 +244,10 @@ double b22(double p2, double m12, double m22, double q2) noexcept
 
    if (p2 < 1e-10 * m22) {
       if (std::abs(m12 - m22) < EPSTOL * m22) {
-         return -m12 * 0.5 * std::log(m12/q2) + m12 * 0.5;
+         return 0.5 * m12 * (1 - std::log(m12/q2));
       }
       if (m12 < EPSTOL * m22) {
-         return 0.375 * m22 - 0.5 * m22 * 0.5 * std::log(m22/q2);
+         return m22 * (0.375 - 0.25 * std::log(m22/q2));
       }
       return 0.375 * (m12 + m22) - 0.25 *
          (pow2(m22) * std::log(m22/q2) -
