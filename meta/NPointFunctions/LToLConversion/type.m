@@ -54,9 +54,9 @@ Sequence[
    contribution:Alternatives[All,
       NPointFunctions`noScalars,
       NPointFunctions`Penguins,
-      NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes],
+      NPointFunctions`ScalarPenguins,
+      NPointFunctions`MassiveVectorPenguins,
+      NPointFunctions`FlavourChangingBoxes],
    massless:True|False];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;

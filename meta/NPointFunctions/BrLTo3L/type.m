@@ -57,9 +57,9 @@ Sequence[
          lepton_[nA_Integer],
          SARAH`bar[lepton_[nA_Integer]]},
    contribution:Alternatives[All, NPointFunctions`noScalars,
-      NPointFunctions`Penguins, NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes]];
+      NPointFunctions`Penguins, NPointFunctions`ScalarPenguins,
+      NPointFunctions`MassiveVectorPenguins,
+      NPointFunctions`FlavourChangingBoxes]];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};

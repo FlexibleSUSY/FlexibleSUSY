@@ -60,11 +60,11 @@ Irreducible::usage = "
 @brief Possible value for KeepProcesses. Excludes irreducible topologies.";
 Triangles::usage = "
 @brief Possible value for KeepProcesses. Keeps all triangle topologies.";
-FourFermionScalarPenguins::usage = "
+ScalarPenguins::usage = "
 @brief Possible value for KeepProcesses. Observable-dependent behavior.";
-FourFermionMassiveVectorPenguins::usage = "
+MassiveVectorPenguins::usage = "
 @brief Possible value for KeepProcesses. Observable-dependent behavior.";
-FourFermionFlavourChangingBoxes::usage= "
+FlavourChangingBoxes::usage= "
 @brief Possible value for KeepProcesses. Onservable-dependent behavior.";
 
 Regularize::usage = "
@@ -495,7 +495,7 @@ Module[
       allowedParticles = Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion],(*@todo add |_?TreeMasses`IsVector*)
       definedOptions = Part[Options@NPointFunction,All,1],
       unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
-      allProcesses={Irreducible,FourFermionFlavourChangingBoxes,Triangles,FourFermionScalarPenguins,FourFermionMassiveVectorPenguins,FourFermionFlavourChangingBoxes}
+      allProcesses={Irreducible,FlavourChangingBoxes,Triangles,ScalarPenguins,MassiveVectorPenguins,FlavourChangingBoxes}
    },
    aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
    aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;

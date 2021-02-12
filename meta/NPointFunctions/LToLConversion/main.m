@@ -97,15 +97,15 @@ create ~ SetAttributes ~ {Protected, Locked};
 
    parsedCon = Switch[con,
       All, {
-            NPointFunctions`FourFermionMassiveVectorPenguins,
-            NPointFunctions`FourFermionScalarPenguins,
-            NPointFunctions`FourFermionFlavourChangingBoxes},
+            NPointFunctions`MassiveVectorPenguins,
+            NPointFunctions`ScalarPenguins,
+            NPointFunctions`FlavourChangingBoxes},
       NPointFunctions`noScalars, {
-            NPointFunctions`FourFermionMassiveVectorPenguins,
-            NPointFunctions`FourFermionFlavourChangingBoxes},
+            NPointFunctions`MassiveVectorPenguins,
+            NPointFunctions`FlavourChangingBoxes},
       NPointFunctions`Penguins, {
-            NPointFunctions`FourFermionScalarPenguins,
-            NPointFunctions`FourFermionMassiveVectorPenguins},
+            NPointFunctions`ScalarPenguins,
+            NPointFunctions`MassiveVectorPenguins},
       _, con];
 
    Utils`FSFancyLine@"<";

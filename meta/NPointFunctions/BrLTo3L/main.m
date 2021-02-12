@@ -75,15 +75,15 @@ create // Protect;
 
 `npf`parse@`type`observable := Switch[proc,
    All, {
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes},
+      NPointFunctions`MassiveVectorPenguins,
+      NPointFunctions`ScalarPenguins,
+      NPointFunctions`FlavourChangingBoxes},
    NPointFunctions`noScalars, {
-      NPointFunctions`FourFermionMassiveVectorPenguins,
-      NPointFunctions`FourFermionFlavourChangingBoxes},
+      NPointFunctions`MassiveVectorPenguins,
+      NPointFunctions`FlavourChangingBoxes},
    NPointFunctions`Penguins, {
-      NPointFunctions`FourFermionScalarPenguins,
-      NPointFunctions`FourFermionMassiveVectorPenguins},
+      NPointFunctions`ScalarPenguins,
+      NPointFunctions`MassiveVectorPenguins},
    _List, proc,
    _, {proc}];
 `npf`parse // Utils`MakeUnknownInputDefinition;

@@ -51,8 +51,8 @@ On[General::shdw];
    LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
    DimensionalReduction, DimensionalRegularization, OperatorsOnly, ExceptLoops,
-   FourFermionScalarPenguins,
-   FourFermionMassiveVectorPenguins, FourFermionFlavourChangingBoxes
+   ScalarPenguins,
+   MassiveVectorPenguins, FlavourChangingBoxes
 } ~ SetAttributes ~ {Locked,Protected};
 
 Begin@"`internal`";
