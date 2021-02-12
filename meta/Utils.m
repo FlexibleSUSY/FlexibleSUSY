@@ -515,10 +515,18 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
    sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},",\n", abbreviateLongString]];
    sym];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
-SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
+MakeUnknownInputDefinition // Protect;
+
+abbreviateLongString[expr_] :=
+Module[{str, b},
+   b[s_] := If[!$Notebooks,"\033[1;36m"<>s<>"\033[0m", s];
+   str = ToString@expr;
+   If[StringLength@str > 1000, b["<"]<>StringTake[str, 1000]<>b[">"], str]];
+abbreviateLongString // MakeUnknownInputDefinition;
+abbreviateLongString // Protect;
 
 StringJoinWithReplacement[
    list_List,
