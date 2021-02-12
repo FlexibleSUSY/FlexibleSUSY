@@ -24,29 +24,29 @@
 
 `settings`topologyReplacements =
 {  MassiveVectorPenguins -> (`topologyQ`penguinT@#&),
-   ScalarPenguins -> (`topologyQ`penguinT@#||`topologyQ`penguinU@#&),
+   ScalarPenguins -> (`topologyQ`penguinT@#),
    FlavourChangingBoxes -> (`topologyQ`box@#&)};
 
 `settings`diagrams =
 {  MassiveVectorPenguins ->
       {  {  "penguins: remove external leptons from loops"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
             "penguins: remove vector bosons from loops"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, FeynArts`V]&]},
          {  "penguins: remove tree-like vector bosons"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`TreeFields@##, FeynArts`V]&]}},
    ScalarPenguins ->
       {  {  "penguins: remove external leptons from loops"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
             "penguins: remove vector bosons from loops"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, FeynArts`V]&]},
          {  "penguins: remove tree-like scalar bosons"[
-               `topologyQ`penguinT|`topologyQ`penguinU,
+               `topologyQ`penguinT,
                FreeQ[FeynArts`TreeFields@##, FeynArts`S]&]}},
    FlavourChangingBoxes ->
       {  {  "boxes: remove external leptons from loops"[
@@ -61,9 +61,6 @@
 {  MassiveVectorPenguins ->
       {  {  "penguins: remove tree-like massless vector bosons"[
                `topologyQ`penguinT,
-               {UnsameQ, genericMass[FeynArts`V, 5], 0}],
-            "penguins: remove tree-like massless vector bosons"[
-               `topologyQ`penguinU,
                {UnsameQ, genericMass[FeynArts`V, 5], 0}]},
          {}}};
 
@@ -73,13 +70,7 @@
       {6, getField[ds, 1]}},
    {  "SED T: skip final lepton in sum",
       `topologyQ`self3penguinT,
-      {6, getField[ds, 3]}},
-   {  "SED U: skip initial lepton in sum",
-      `topologyQ`self1penguinU,
-      {6, getField[ds, 1]}},
-   {  "SED U: skip final lepton in sum",
-      `topologyQ`self4penguinU,
-      {6, getField[ds, 4]}}};
+      {6, getField[ds, 3]}}};
 
 `settings`massless[ds:`type`diagramSet] :=
 {  {  "SED T: use explicit final lepton mass",
@@ -87,22 +78,14 @@
       {Append, FeynArts`F[6] :> 3}},
    {  "SED T: keep initial lepton mass untouched",
       `topologyQ`self1penguinT,
-      {Hold, 1}},
-   {  "SED U: use explicit final lepton mass",
-      `topologyQ`self1penguinU,
-      {Append, FeynArts`F[6] :> 4}},
-   {  "SED U: keep initial lepton mass untouched",
-      `topologyQ`self1penguinU,
       {Hold, 1}}};
 
 `settings`momenta =
 {  `topologyQ`penguinT -> 2,
-   `topologyQ`penguinU -> 4,
    `topologyQ`box -> 2};
 
 `settings`regularization =
-{  `topologyQ`penguinU -> D,
-   `topologyQ`box -> D};
+{  `topologyQ`box -> D};
 
 `settings`order = {3, 1, 4, 2};
 
