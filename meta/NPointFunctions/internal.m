@@ -630,30 +630,6 @@ define[getMomSettings, {diagrams:`type`diagramSet} :>
    ]
 ];
 
-define[deleteClasses,
-   {amplitudes:`type`amplitudeSet,topoAmpList:`type`pickTopoAmp,classesToSave:`type`saveAmpClass} :>
-   Module[{i,numbersOfAmplitudes,numAmp,result = amplitudes},
-      numbersOfAmplitudes = Cases[topoAmpList, Rule[True, {e:__}] :> e];
-      Do[
-         numAmp = Part[numbersOfAmplitudes,i];
-         result[[numAmp,4,2]] = result[[numAmp,4,2]][[numAmp/.classesToSave]];
-      ,{i,Length@numbersOfAmplitudes}];
-      result
-   ],
-
-   {diagrams:`type`diagramSet,topoAmpList:`type`pickTopoAmp,classesToSave:`type`saveAmpClass} :>
-   Module[{i,currentClasses,result = diagrams},
-      Do[
-         If[topoAmpList[[i,1]]===True,
-            currentClasses = topoAmpList[[i,2]]/.classesToSave;
-            currentClasses = Array[Rule[{#,2},result[[i,2,#,2]][[Part[currentClasses,#]]]]&,Length@currentClasses];
-            result[[i,2]] = ReplacePart[result[[i,2]],currentClasses];
-         ];
-      ,{i,Length@topoAmpList}];
-      result
-   ]
-];
-
 modify::usage = "
 @brief Changes amplitudes and diagrams according to `settings`diagrams and
        `settings`amplitudes.

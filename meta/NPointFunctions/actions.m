@@ -49,6 +49,26 @@ Module[{positiveRules, negativeRules, discardProcesses, clean},
          clean];
 getActions // secure;
 
+deleteClasses[a:`type`amplitudeSet,
+   topoAmpList:`type`pickTopoAmp, classesToSave:`type`saveAmpClass] :=
+Module[{i, numbersOfAmplitudes, numAmp, res = a},
+   numbersOfAmplitudes = Cases[topoAmpList, Rule[True, {e:__}] :> e];
+   Do[numAmp = Part[numbersOfAmplitudes,i];
+      res[[numAmp,4,2]] = res[[numAmp,4,2]][[numAmp/.classesToSave]];,
+      {i,Length@numbersOfAmplitudes}];
+   res];
+deleteClasses[d:`type`diagramSet,
+   topoAmpList:`type`pickTopoAmp, classesToSave:`type`saveAmpClass] :=
+Module[{i, currentClasses, res = d},
+   Do[If[topoAmpList[[i,1]],
+         currentClasses = topoAmpList[[i,2]]/.classesToSave;
+         currentClasses = Array[Rule[{#,2}, res[[i,2,#,2]][[
+            Part[currentClasses,#]]]]&,Length@currentClasses];
+         res[[i, 2]] = ReplacePart[res[[i, 2]], currentClasses];];,
+      {i,Length@topoAmpList}];
+   res];
+deleteClasses // secure;
+
 getTruePositions::usage = "
 @brief Converts a list with a boolean variables to the list of positions for
        all true entries.
@@ -62,9 +82,9 @@ getTruePositions // secure;
    text_String[topologyQ_, {function:UnsameQ, name_, value_}]];
 
 applyAction@`action`amplitudes :=
-Module[{
-      daPairs = getAmplitudeNumbers[diagrams, topologyQ],
-      amplitudeNumbers, saveClassRules, viPairs, insertions, res},
+Module[{ daPairs, amplitudeNumbers, saveClassRules, viPairs, insertions, res},
+   daPairs = getAmplitudeNumbers[diagrams, topologyQ];
+   If[!Or@@daPairs[[All, 1]], Return@{diagrams, amplitudes}];
    amplitudeNumbers = Cases[daPairs, Rule[True, {e:__}] :> e];
    saveClassRules = Table[
       viPairs = getClassRules@amplitudes[[i]];

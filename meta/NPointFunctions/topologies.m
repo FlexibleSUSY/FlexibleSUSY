@@ -37,8 +37,7 @@ Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
    matrix = Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@
       adjacencies];
    Flatten@Table[Drop[#[[i]], i-1+Max[ext-i+1, 0]], {i, Length@#}]&@matrix];
-adjace // Utils`MakeUnknownInputDefinition;
-adjace ~ SetAttributes ~ {Protected, Locked};
+adjace // secure;
 
 define[`topologyQ`penguinT, {t:`type`topology} :>
    Or[`topologyQ`trianglepenguinT@t,
@@ -52,12 +51,17 @@ define[`topologyQ`self1penguinT, {t:`type`topology} :>
 define[`topologyQ`self3penguinT, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
 
-define[`topologyQ`triangle12S, {t:`type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0,1,0}];
-define[`topologyQ`self1S, {t:`type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,2,0,1,1,0,0,0}];
-define[`topologyQ`self2S, {t:`type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,0,2,0,0,0}];
+define[`topologyQ`penguinU, {t:`type`topology} :>
+   Or[`topologyQ`trianglepenguinU@t,
+      `topologyQ`self1penguinU@t,
+      `topologyQ`self4penguinU@t]];
+
+define[`topologyQ`trianglepenguinU, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,1,0,0,1,0,1,0}];
+define[`topologyQ`self1penguinU, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,2,0,1,0,0,1,0}];
+define[`topologyQ`self4penguinU, {t:`type`topology} :>
+   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,2,0}];
 
 define[`topologyQ`box, {t:`type`topology} :>
    Or[`topologyQ`boxS@t, `topologyQ`boxT@t, `topologyQ`boxU@t]];
