@@ -228,7 +228,43 @@ double d1_b0(double m12, double m22) noexcept
 
 double b22(double p2, double m12, double m22, double q2) noexcept
 {
-   return 0;
+   p2  = std::abs(p2);
+   m12 = std::abs(m12);
+   m22 = std::abs(m22);
+   q2  = std::abs(q2);
+
+   // protect against infrared divergence
+   if (p2 < EPSTOL * q2 && m12 < EPSTOL * q2 && m22 < EPSTOL * q2) {
+      return 0;
+   }
+
+   /// Decides level at which one switches to p=0 limit of calculations
+   const double pTolerance = 1.0e-10;
+
+   if (p2 < pTolerance * std::max(m12, m22)) {
+      if (std::abs(m12 - m22) < EPSTOL) {
+         return -m12 * 0.5 * std::log(m12/q2) + m12 * 0.5;
+      }
+      // p == 0 limit
+      if (m12 > EPSTOL && m22 > EPSTOL) {
+         return 0.375 * (m12 + m22) - 0.25 *
+            (pow2(m22) * std::log(m22/q2) -
+             pow2(m12) * std::log(m12/q2)) / (m22 - m12);
+      }
+      return (m12 < EPSTOL)
+         ? 0.375 * m22 - 0.5 * m22 * 0.5 * std::log(m22/q2)
+         : 0.375 * m12 - 0.5 * m12 * 0.5 * std::log(m12/q2);
+   }
+
+   const double b0_ = b0(p2, m12, m22, q2);
+   const double a01 = a0(m12, q2);
+   const double a02 = a0(m22, q2);
+
+   return 1.0 / 6 *
+      (0.5 * (a01 + a02) + (m12 + m22 - 0.5 * p2)
+       * b0_ + (m22 - m12) / (2 * p2) *
+       (a02 - a01 - (m22 - m12) * b0_) +
+       m12 + m22 - p2 / 3);
 }
 
 double b22bar(double p2, double m12, double m22, double q2) noexcept
