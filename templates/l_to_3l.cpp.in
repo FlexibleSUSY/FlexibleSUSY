@@ -59,6 +59,38 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace @ModelName@_l_to_3l {
 
+/**
+ * @tparam    Lepton type of a lepton field
+ * @tparam    Photon type of a photon field
+ * @param[in] model  mass eigenstates
+ * @param[in] nA     generation index
+ * @return left part of ffv coupling, multiplied by -i
+ */
+template <class Lepton, class Photon>
+std::complex<double> left(const @ModelName@_mass_eigenstates& model, int nA) {
+    context_base context {model};
+    using vertex = Vertex<typename Lepton::lorentz_conjugate, Lepton, Photon>;
+    std::array<int, 2> indices {nA, nA};
+    const auto value =  vertex::evaluate(indices, context);
+    return value.left();
+}
+
+/**
+ * @tparam    Lepton type of a lepton field
+ * @tparam    Photon type of a photon field
+ * @param[in] model  mass eigenstates
+ * @param[in] nA     generation index
+ * @return right part of ffv coupling, multiplied by -i
+ */
+template <class Lepton, class Photon>
+std::complex<double> right(const @ModelName@_mass_eigenstates& model, int nA) {
+    context_base context {model};
+    using vertex = Vertex<typename Lepton::lorentz_conjugate, Lepton, Photon>;
+    std::array<int, 2> indices {nA, nA};
+    const auto value =  vertex::evaluate(indices, context);
+    return value.right();
+}
+
 typedef std::valarray<std::complex<double>> (*ffv)(
    int, int, const @ModelName@_mass_eigenstates&, bool);
 
@@ -66,6 +98,29 @@ typedef std::array<std::complex<double>,10> (*npf)(
    const @ModelName@_mass_eigenstates&,
    const std::array<int,4>&,
    const std::array<Eigen::Vector4d,0>&);
+
+/**
+ * @tparam    A      type of input sets of coefficients
+ * @param[in] photon t-coefficients of all penguins
+ * @param[in] res    t-coefficients of all penguins
+ * @param[in] boxes  coefficients of all boxes
+ * @return Wilson coefficients of four fermion operators
+ */
+template<class A>
+Eigen::Array<std::complex<double>,10,1> same(A photon, A rest, A box) {
+   A sum = photon + rest;
+   sum << sum[0]/2 - 6*sum[8],   sum[1] - 2*sum[5],
+          sum[2] - 2*sum[6],     sum[3]/2 - 6*sum[9],
+          2*sum[4],              sum[5] - sum[1]/2,
+          sum[6] - sum[2]/2,     2*sum[7],
+          1.5*sum[8] - sum[0]/8, 1.5*sum[9] - sum[3]/8;
+   sum = sum + box;
+   A res{};
+   res << 2*sum[0], 0,      0,      2*sum[3],
+          sum[4]/2, sum[5], sum[6], sum[7]/2,
+          0,        0;
+   return res;
+}
 
 /**
  * @tparam    Lepton type of a lepton field
@@ -78,7 +133,7 @@ typedef std::array<std::complex<double>,10> (*npf)(
  * @param[in] nA     generation of lepton and antilepton
  * @param[in] model  mass eigenstates
  * @param[in] qedqcd reference to low-enregy data
- * @returns observable value and Wilson coefficients used to derive it
+ * @return observable value and Wilson coefficients used to derive it
  */
 template<class Lepton, class Photon, ffv photon, npf rest, npf boxes>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
@@ -86,15 +141,43 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
 
    context_base context {model};
 
-   auto coeffs = rest(model,
+   // translate from eq. (14) of hep-ph/9510309 to eq. (3.23) of 1902.06650;
+   // when we calculate it inside 4-fermion amplitude, then we have to convert
+   // to FeynArts conventions, i.e. multiply by -1 because of fermion
+   // permutations.
+   const auto massless = photon(nI, nO, model, false);
+   const auto D_L = 0.5 * massless[2];
+   const auto D_R = 0.5 * massless[3];
+
+   const auto L = left<Lepton, Photon>(model, nA);
+   const auto R = right<Lepton, Photon>(model, nA);
+   Eigen::Array<std::complex<double>,10,1> photon_amp{};
+   photon_amp[4] = massless[0] * L;
+   photon_amp[5] = massless[0] * R;
+   photon_amp[6] = massless[1] * L;
+   photon_amp[7] = massless[1] * R;
+   // need to check what is above @todo
+
+   Eigen::Array<std::complex<double>,10,1> penguin_amp(rest(model,
       std::array<int,4>{nI, nO, nA, nA},
-      std::array<Eigen::Vector4d, 0>{});
+      std::array<Eigen::Vector4d, 0>{}).data());
+   penguin_amp[8] = -penguin_amp[8];
+   penguin_amp[9] = -penguin_amp[9];
+
+   Eigen::Array<std::complex<double>,10,1> box_amp(boxes(model,
+      std::array<int,4>{nI, nO, nA, nA},
+      std::array<Eigen::Vector4d, 0>{}).data());
+   box_amp[8] = -box_amp[8];
+   box_amp[9] = -box_amp[9];
+
+   auto coeffs = (nO == nA) ? same(photon_amp, penguin_amp, box_amp)
+                            : photon_amp + penguin_amp + box_amp;
 
    Eigen::Array<std::complex<double>,13,1> res;
 
    res << 0.0,
-          0.0,
-          0.0,
+          D_L,
+          D_R,
           coeffs[0],
           coeffs[1],
           coeffs[2],
@@ -103,8 +186,9 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
           coeffs[5],
           coeffs[6],
           coeffs[7],
-          -coeffs[8],
-          -coeffs[9];
+          coeffs[8],
+          coeffs[9];
+
    return res;
 }
 

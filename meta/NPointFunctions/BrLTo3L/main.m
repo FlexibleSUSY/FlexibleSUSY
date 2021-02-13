@@ -94,7 +94,7 @@ create // Protect;
 Module[{box = NPointFunctions`FlavourChangingBoxes, res = {{}, ""}},
    If[!FreeQ[`npf`parse/@list, box],
       Utils`FSFancyLine@"<";
-      Print@"Calculation for "<>SymbolName@box<>" started";
+      Print["Calculation for "<>SymbolName@box<>" started"];
       Unprotect@$calculate;
       $calculate = $boxes;
       Protect@$calculate;
