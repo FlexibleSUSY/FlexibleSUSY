@@ -67,12 +67,26 @@ typedef std::array<std::complex<double>,10> (*npf)(
    const std::array<int,4>&,
    const std::array<Eigen::Vector4d,0>&);
 
-template<ffv penguin, npf rest, npf boxes>
+/**
+ * @tparam    Lepton type of a lepton field
+ * @tparam    Photon type of a photon field
+ * @tparam    photon function name for photon t-penguins
+ * @tparam    rest   function name for other t-penguins
+ * @tparam    boxes  function name for all box diagrams
+ * @param[in] nI     generation of decaying lepton
+ * @param[in] nO     generation of lepton, which can be separated from pair
+ * @param[in] nA     generation of lepton and antilepton
+ * @param[in] model  mass eigenstates
+ * @param[in] qedqcd reference to low-enregy data
+ * @returns observable value and Wilson coefficients used to derive it
+ */
+template<class Lepton, class Photon, ffv photon, npf rest, npf boxes>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
-   auto coeffs = boxes(model,
+
+   auto coeffs = rest(model,
       std::array<int,4>{nI, nO, nA, nA},
       std::array<Eigen::Vector4d, 0>{});
 

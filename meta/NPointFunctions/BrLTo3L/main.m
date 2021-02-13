@@ -39,9 +39,9 @@ $boxes // Protect;
 setGlobals[obs:`type`observable] :=
 Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"BrLTo3L`Private`$*";
-   $fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
+   $fields = Utils`StringJoinWithSeparator["fields::"<>#&/@ cxx/@
       {lep, TreeMasses`GetPhoton[]}, ", "];
-   $calculate = StringReplace["npf_"<>calculate[obs, Head], s_~~"("~~__ :> s];
+   $calculate = StringReplace[calculate[obs, Head], s_~~"("~~__ :> s];
    $penguin = StringJoin["calculate_", cxx@lep, "_", cxx@lep, "_",
       cxx@TreeMasses`GetPhoton[], "_form_factors"];
    $prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
@@ -78,6 +78,7 @@ Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
    {{pengVert, pengDef}, boxQ} = `npf`assemble@obs;
    calculateDefinition = $prototype <> " {
    return forge<
+      "<>$fields<>",
       "<>$penguin<>",
       npointfunctions::"<>If[pengDef =!= "", $calculate, "zero"]<>",
       npointfunctions::"<>If[boxQ, $boxes, "zero"]<>"
@@ -125,13 +126,15 @@ Module[{keep, peng, out, boxQ},
    keep = `npf`parse@obs;
    peng = Complement[keep, {NPointFunctions`FlavourChangingBoxes}];
    Utils`FSFancyLine@"<";
-   Print["Calculation for "<>StringJoin[SymbolName/@keep]<>" started"];
+   Print["Calculation for "<>Utils`StringJoinWithSeparator[
+      keep, ",\n                ", SymbolName]<>" started"];
    Switch[peng,
       (* no boxes *) keep,
          out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];
-         boxQ = False;
+         boxQ = False;,
       (* only boxes *) {},
-         out = {{}, ""};
+         Print["Boxes exist already! Skipping."];
+         out = {{}, ""};,
       (* both *) _,
          out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];];
    Utils`FSFancyLine@">";
