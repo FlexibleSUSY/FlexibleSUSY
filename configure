@@ -433,7 +433,7 @@ check_library() {
 
     libs=""
     for i in $lib ; do
-        for ext in .a .lib "" .so .sl .dylib .dll.a ; do
+        for ext in .a .lib "" .so .sl .dylib .dll.a .tbd ; do
             libs="$libs $i$ext"
         done
     done
@@ -1530,10 +1530,10 @@ check_thread_libs() {
 
     # additional search paths by the compiler
     local cc_lib_search_paths=""
-
     case "$cxx_compiler_type" in
 	gnu|clang)
 	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    cc_lib_search_paths=$cc_lib_search_paths$(${CXX} -Xlinker -v 2>&1 | sed -n '/Library search paths:/,/Framework search paths:/p' | sed '/Library search paths:/d; /Framework search paths:/d' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' | tr -s '[:blank:]' ':')
 	    ;;
     esac
 
