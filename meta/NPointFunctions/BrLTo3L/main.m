@@ -33,73 +33,135 @@ BrLTo3L`create::usage = "
 
 ];Begin@"`Private`";
 
-setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
-   Unprotect@"BrLTo3L`Private`cxx`*";
-   `cxx`lep = cxx@lep;
-   `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
-      {lep, SARAH`Photon}, ", "];
-   `cxx`name = StringReplace["npf_"<>calculate[obs, Head], s_~~"("~~__ :> s];
-   `cxx`penguin = StringJoin["calculate_", cxx@lep, "_", cxx@lep, "_",
-      cxx@SARAH`Photon, "_form_factors"];
-   `cxx`proto = CConversion`CreateCType@Observables`GetObservableType@obs <>
+$boxes = "boxes";
+$boxes // Protect;
+
+setGlobals[obs:`type`observable] :=
+Module[{cxx = CConversion`ToValidCSymbolString},
+   Unprotect@"BrLTo3L`Private`$*";
+   $fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
+      {lep, TreeMasses`GetPhoton[]}, ", "];
+   $calculate = StringReplace["npf_"<>calculate[obs, Head], s_~~"("~~__ :> s];
+   $penguin = StringJoin["calculate_", cxx@lep, "_", cxx@lep, "_",
+      cxx@TreeMasses`GetPhoton[], "_form_factors"];
+   $prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " " <> calculate[obs, Head];
-   Protect@"BrLTo3L`Private`cxx`*";];
-setCxx // Utils`MakeUnknownInputDefinition;
-setCxx // Protect;
+   Protect@"BrLTo3L`Private`$*";];
+setGlobals // Utils`MakeUnknownInputDefinition;
+setGlobals // Protect;
 
-create[obs:`type`observable] :=
-Module[{npfVertices = {}, npfHeader = "", npfDefinition = "",
-      calculateDefinition},
-   setCxx@obs;
-   {npfVertices, npfHeader, npfDefinition} = `npf`create@obs;
-
-   calculateDefinition = `cxx`proto <> " {
-   return forge<
-      "<>`cxx`penguin<>",
-      npointfunctions::"<>`cxx`name<>"
-   >(nI, nO, nA, model, qedqcd);\n}";
-
-   {  npfVertices,
-      {npfHeader, npfDefinition},
-      {`cxx`proto <> ";", calculateDefinition}}];
-
-create[list:{__}] := Module[{unique},
+create::usage = "
+@brief Creates ingredients for the C++ code, including all required vertices.
+       Boxes and penguins are treated differently: boxes generate all
+       contributions and penguins will be taken for t-contribution only, because
+       of the simple and predictable structure of the result. It means, that
+       we can reduce the computation time by separating those contributions and
+       using one general function to calculate boxes.
+@param obs An observable definition.
+@param list A list of all requested observables.
+@returns A list of vertices, npf headers string, npf definition string,
+         calculate function prototypes, calculate function definitions.
+@note We assume that generations for leptons are given by integer numbers,
+      rather then different field names.";
+create[list:{__}] :=
+Module[{unique, box, join = Utils`StringJoinWithSeparator},
    unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
-   {  DeleteDuplicates[Join@@#[[All,1]]],
-      {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
-      {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
-
+   box = `npf`box@unique;
+   {  DeleteDuplicates[Join@@Append[#[[All, 1]], box[[1, 1]]]],
+      box[[2]],
+      join[Append[#[[All, 2]], box[[1, 2]]], "\n\n"],
+      join[#[[All, 3]], "\n\n"],
+      join[#[[All, 4]], "\n\n"]}&[create/@unique]];
+create[obs:`type`observable] :=
+Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
+   setGlobals@obs;
+   {{pengVert, pengDef}, boxQ} = `npf`assemble@obs;
+   calculateDefinition = $prototype <> " {
+   return forge<
+      "<>$penguin<>",
+      npointfunctions::"<>If[pengDef =!= "", $calculate, "zero"]<>",
+      npointfunctions::"<>If[boxQ, $boxes, "zero"]<>"
+   >(nI, nO, nA, model, qedqcd);\n}";
+   {  pengVert,
+      pengDef,
+      $prototype <> ";",
+      calculateDefinition}];
 create // Utils`MakeUnknownInputDefinition;
 create // Protect;
 
+`npf`box[list:{__}] :=
+Module[{box = NPointFunctions`FlavourChangingBoxes, res = {{}, ""}},
+   If[!FreeQ[`npf`parse/@list, box],
+      Utils`FSFancyLine@"<";
+      Print@"Calculation of boxes started";
+      Unprotect@$calculate;
+      $calculate = $boxes;
+      Protect@$calculate;
+      res = `npf`code@`npf`match@`npf`clean@`npf`create[list[[1]], {box}];
+      Utils`FSFancyLine@">";];
+   {res, NPointFunctions`CreateCXXHeaders[]}];
+`npf`box // Utils`MakeUnknownInputDefinition;
+`npf`box // Protect;
+
 `npf`parse@`type`observable := Switch[proc,
-   All, {
-      NPointFunctions`MassiveVectorPenguins,
-      NPointFunctions`ScalarPenguins,
-      NPointFunctions`FlavourChangingBoxes},
-   NPointFunctions`noScalars, {
-      NPointFunctions`MassiveVectorPenguins,
-      NPointFunctions`FlavourChangingBoxes},
-   NPointFunctions`Penguins, {
-      NPointFunctions`ScalarPenguins,
-      NPointFunctions`MassiveVectorPenguins},
+   All,
+      {  NPointFunctions`MassiveVectorPenguins,
+         NPointFunctions`ScalarPenguins,
+         NPointFunctions`FlavourChangingBoxes},
+   NPointFunctions`noScalars,
+      {  NPointFunctions`MassiveVectorPenguins,
+         NPointFunctions`FlavourChangingBoxes},
+   NPointFunctions`Penguins,
+      {  NPointFunctions`ScalarPenguins,
+         NPointFunctions`MassiveVectorPenguins},
    _List, proc,
    _, {proc}];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 
-`npf`create[obs:`type`observable] := Module[{npf, fields, sp, dc, dim6, code},
+`npf`assemble[obs:`type`observable] :=
+Module[{keep, peng, out, boxQ},
+   boxQ = True;
+   keep = `npf`parse@obs;
+   peng = Complement[keep, {NPointFunctions`FlavourChangingBoxes}];
    Utils`FSFancyLine@"<";
-   Print@StringReplace["Calculation of #-#- to #-#- started", "#"->`cxx`lep];
-   npf = NPointFunctions`NPointFunction[
-      {lep, lep}, {lep, lep},
-      NPointFunctions`OnShellFlag -> True,
-      NPointFunctions`UseCache -> False,
-      NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
-      NPointFunctions`KeepProcesses -> `npf`parse@obs,
-      NPointFunctions`Observable -> obs];
-   npf = npf /. clean[];
+   Print["Calculation for "<>StringJoin[SymbolName/@keep]<>" started"];
+   Switch[peng,
+      (* no boxes *) keep,
+         out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];
+         boxQ = False;
+      (* only boxes *) {},
+         out = {{}, ""};
+      (* both *) _,
+         out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];];
+   Utils`FSFancyLine@">";
+   {out, boxQ}];
+`npf`assemble // Utils`MakeUnknownInputDefinition;
+`npf`assemble // Protect;
+
+`npf`create[obs:`type`observable, keep:{__}] :=
+NPointFunctions`NPointFunction[{lep, lep}, {lep, lep},
+   NPointFunctions`OnShellFlag -> True,
+   NPointFunctions`UseCache -> False,
+   NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
+   NPointFunctions`KeepProcesses -> keep,
+   NPointFunctions`Observable -> obs];
+`npf`create // Utils`MakeUnknownInputDefinition;
+`npf`create // Protect;
+
+`npf`clean[npf:NPointFunctions`internal`type`npf] :=
+npf /.
+   {  SARAH`sum[__] -> 0,
+      LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+      LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
+         LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+      LoopTools`D0i[i_, Repeated[_, {6}], mm__] :>
+         LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]};
+`npf`clean // Utils`MakeUnknownInputDefinition;
+`npf`clean // Protect;
+
+`npf`match[npf:NPointFunctions`internal`type`npf] :=
+Module[{fields, sp, dc, dim6},
    fields = Flatten@NPointFunctions`internal`getProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
    dc[a_, b__, c_] := NPointFunctions`internal`dc[sp@a, b, sp@c];
@@ -114,26 +176,15 @@ create // Protect;
          "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
          "minusT_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
          "minusT_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
-   npf = WilsonCoeffs`InterfaceToMatching[npf, dim6];
-   code = NPointFunctions`CreateCXXFunctions[
-      npf, `cxx`name, Identity, dim6][[2]];
-   Print@StringReplace["Calculation of #-#- to #-#- finished", "#"->`cxx`lep];
-   Utils`FSFancyLine@">";
-   {  DeleteDuplicates@NPointFunctions`VerticesForNPointFunction@npf,
-      NPointFunctions`CreateCXXHeaders[],
-      code}];
-`npf`create // Utils`MakeUnknownInputDefinition;
-`npf`create // Protect;
+   {WilsonCoeffs`InterfaceToMatching[npf, dim6], dim6}];
+`npf`match // Utils`MakeUnknownInputDefinition;
+`npf`match // Protect;
 
-clean[] :=
-{  SARAH`sum[__] -> 0,
-   LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
-   LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
-      LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
-   LoopTools`D0i[i_, Repeated[_, {6}], mm__] :>
-      LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]};
-clean // Utils`MakeUnknownInputDefinition;
-clean // Protect;
+`npf`code[{npf:NPointFunctions`internal`type`npf, b:{Rule[_String, _]..}}] :=
+{  DeleteDuplicates@NPointFunctions`VerticesForNPointFunction@npf,
+   NPointFunctions`CreateCXXFunctions[npf, $calculate, Identity, b][[2]]};
+`npf`code // Utils`MakeUnknownInputDefinition;
+`npf`code // Protect;
 
 End[];
 EndPackage[];

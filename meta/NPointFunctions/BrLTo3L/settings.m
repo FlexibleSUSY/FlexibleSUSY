@@ -24,7 +24,7 @@
 
 `settings`topologyReplacements =
 {  MassiveVectorPenguins -> (`topologyQ`penguinT@#&),
-   ScalarPenguins -> (`topologyQ`penguinT@#),
+   ScalarPenguins -> (`topologyQ`penguinT@#&),
    FlavourChangingBoxes -> (`topologyQ`box@#&)};
 
 `settings`diagrams =

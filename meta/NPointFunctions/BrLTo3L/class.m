@@ -54,7 +54,7 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
                 !TreeMasses`ColorChargedQ@#]&];
          Utils`AssertOrQuit[1 === Length@photons, WriteBrLTo3LClass::errPhoton];
          ffvV = Flatten/@Tuples@{fermions, photons};
-         {npfV, {npfHead, npfDef}, {calcProto, calcDef}} = BrLTo3L`create@obs;];
+         {npfV, npfHead, npfDef, calcProto, calcDef} = BrLTo3L`create@obs;];
       WriteOut`ReplaceInFiles[files,
          {"@npf_headers@" -> npfHead, "@npf_definitions@" -> npfDef,
            "@calc_prototypes@" -> calcProto, "@calc_definitions@" -> calcDef,

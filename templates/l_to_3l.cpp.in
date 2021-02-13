@@ -43,6 +43,14 @@ namespace npointfunctions {
 
 @npf_definitions@
 
+std::array<std::complex<double>,10> zero(
+   const @ModelName@_mass_eigenstates&,
+   const std::array<int,4>&,
+   const std::array<Eigen::Vector4d,0>&){
+   std::array<std::complex<double>,10> res{};
+   return res;
+}
+
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams
 
@@ -59,12 +67,12 @@ typedef std::array<std::complex<double>,10> (*npf)(
    const std::array<int,4>&,
    const std::array<Eigen::Vector4d,0>&);
 
-template<ffv penguin, npf function>
+template<ffv penguin, npf rest, npf boxes>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
-   auto coeffs = function(model,
+   auto coeffs = boxes(model,
       std::array<int,4>{nI, nO, nA, nA},
       std::array<Eigen::Vector4d, 0>{});
 
