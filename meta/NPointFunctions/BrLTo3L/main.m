@@ -163,6 +163,10 @@ npf /.
 `npf`clean // Utils`MakeUnknownInputDefinition;
 `npf`clean // Protect;
 
+`npf`match::usage = "
+@note String names on the lhs. are representing the final names of coefficients
+      for the C++ code, after applying some relations on the C++ level! Check
+      appropriate file in templates directory to see them.";
 `npf`match[npf:NPointFunctions`internal`type`npf] :=
 Module[{fields, sp, dc, dim6},
    fields = Flatten@NPointFunctions`internal`getProcess@npf;
@@ -177,8 +181,8 @@ Module[{fields, sp, dc, dim6},
          "V_LR" -> dc[3,R,l@1,1] dc[4,L,l@1,2],
          "V_RL" -> dc[3,L,l@1,1] dc[4,R,l@1,2],
          "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
-         "minusT_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
-         "minusT_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
+         "T_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
+         "T_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
    {WilsonCoeffs`InterfaceToMatching[npf, dim6], dim6}];
 `npf`match // Utils`MakeUnknownInputDefinition;
 `npf`match // Protect;

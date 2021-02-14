@@ -34,6 +34,10 @@
 
 #include "wrappers.hpp"
 
+#define NPF(name) name(model, \
+   std::array<int,4>{nI, nO, nA, nA}, \
+   std::array<Eigen::Vector4d, 0>{})
+
 @npf_headers@
 
 namespace flexiblesusy {
@@ -107,7 +111,7 @@ typedef std::array<std::complex<double>,10> (*npf)(
  * @return Wilson coefficients of four fermion operators
  */
 template<class A>
-Eigen::Array<std::complex<double>,10,1> same(A photon, A rest, A box) {
+Eigen::Array<std::complex<double>,10,1> fierz(A photon, A rest, A box) {
    A sum = photon + rest;
    sum << sum[0]/2 - 6*sum[8],   sum[1] - 2*sum[5],
           sum[2] - 2*sum[6],     sum[3]/2 - 6*sum[9],
@@ -141,10 +145,7 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
 
    context_base context {model};
 
-   // translate from eq. (14) of hep-ph/9510309 to eq. (3.23) of 1902.06650;
-   // when we calculate it inside 4-fermion amplitude, then we have to convert
-   // to FeynArts conventions, i.e. multiply by -1 because of fermion
-   // permutations.
+   // @todo check
    const auto massless = photon(nI, nO, model, false);
    const auto D_L = 0.5 * massless[2];
    const auto D_R = 0.5 * massless[3];
@@ -158,19 +159,25 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    photon_amp[7] = massless[1] * R;
    // need to check what is above @todo
 
-   Eigen::Array<std::complex<double>,10,1> penguin_amp(rest(model,
-      std::array<int,4>{nI, nO, nA, nA},
-      std::array<Eigen::Vector4d, 0>{}).data());
+   // Full amplitude is calculated with the following convention (for the case
+   // 4!=3, otherwise Fierz transformations should be used hep-ph/0412245, note
+   // the half for every sigma-sigma summation in eqs. 40 and 42):
+   //    <out:4,3| T exp(i L_full dx) |in:2,1> = i * npf,
+   // which means, that it has to be matched with -1 * C_XY, because
+   //    <out:4,3| T exp(i L_low dx) |in:2,1> = -i * C_XY [3 X 1]*[4 Y 2].
+   Eigen::Array<std::complex<double>,10,1> penguin_amp(NPF(rest).data());
+   Eigen::Array<std::complex<double>,10,1> box_amp(NPF(boxes).data());
+
+   // For coefficients we use sigmas, but in the basis from meta code we have
+   // only anticommutation, so we need to fix it for tensor coefficients.
    penguin_amp[8] = -penguin_amp[8];
    penguin_amp[9] = -penguin_amp[9];
-
-   Eigen::Array<std::complex<double>,10,1> box_amp(boxes(model,
-      std::array<int,4>{nI, nO, nA, nA},
-      std::array<Eigen::Vector4d, 0>{}).data());
    box_amp[8] = -box_amp[8];
    box_amp[9] = -box_amp[9];
 
-   auto coeffs = (nO == nA) ? same(photon_amp, penguin_amp, box_amp)
+   // If final leptons are the same, then we need to add u-penguins as well
+   // not, then we can just sum them (we always calculate all boxes in npf).
+   auto coeffs = (nO == nA) ? fierz(photon_amp, penguin_amp, box_amp)
                             : photon_amp + penguin_amp + box_amp;
 
    Eigen::Array<std::complex<double>,13,1> res;
