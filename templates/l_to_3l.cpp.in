@@ -34,9 +34,8 @@
 
 #include "wrappers.hpp"
 
-#define NPF(name) name(model, \
-   std::array<int,4>{nI, nO, nA, nA}, \
-   std::array<Eigen::Vector4d, 0>{})
+#define NPF(name) fix_tensors_sign<name>(model, nI, nO, nA);
+#define F4F(lepton, g) embed_photon<lepton, Photon>(model, form_factors, g);
 
 @npf_headers@
 
@@ -63,12 +62,48 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace @ModelName@_l_to_3l {
 
+typedef std::valarray<std::complex<double>> (*ffv)(
+   int, int, const @ModelName@_mass_eigenstates&, bool);
+
+typedef std::array<std::complex<double>,10> (*npf)(
+   const @ModelName@_mass_eigenstates&,
+   const std::array<int,4>&,
+   const std::array<Eigen::Vector4d,0>&);
+
+
 /**
- * @tparam    Lepton type of a lepton field
- * @tparam    Photon type of a photon field
- * @param[in] model  mass eigenstates
- * @param[in] nA     generation index
- * @return left part of ffv coupling, multiplied by -i
+ * @tparam    Lepton Type of a lepton field.
+ * @param[in] nI     Generation index of incoming lepton.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return Left part of ffv coupling, multiplied by -i.
+ */
+template <class Lepton>
+double get_total_width(int nI,
+      const @ModelName@_mass_eigenstates& model,
+      const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+
+   const auto InMass = context.mass<Lepton>({nI});
+   const auto OutMass = context.mass<Lepton>({nI-1});
+   const auto r = pow(OutMass/InMass, 2);
+   const auto GF2 = pow(qedqcd.displayFermiConstant(), 2);
+
+   // eq. 10.6 of http://pdg.lbl.gov/2018/reviews/rpp2018-rev-standard-model.pdf
+   return
+      // tree-level (with massless outgoing lepton)
+      GF2*pow(InMass,5)/(192.0*pow(Pi,3))
+      // outgoing lepton mass correction
+      * (1 - 8*r + 8*pow(r,3) - pow(r,4) - 12*r*r*std::log(r));
+}
+
+/**
+ * @tparam    Lepton Type of a lepton field.
+ * @tparam    Photon Type of a photon field.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] nA     Generation index.
+ * @return Left part of ffv coupling, multiplied by -i.
  */
 template <class Lepton, class Photon>
 std::complex<double> left(const @ModelName@_mass_eigenstates& model, int nA) {
@@ -80,11 +115,11 @@ std::complex<double> left(const @ModelName@_mass_eigenstates& model, int nA) {
 }
 
 /**
- * @tparam    Lepton type of a lepton field
- * @tparam    Photon type of a photon field
- * @param[in] model  mass eigenstates
- * @param[in] nA     generation index
- * @return right part of ffv coupling, multiplied by -i
+ * @tparam    Lepton Type of a lepton field.
+ * @tparam    Photon Type of a photon field.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] nA     Generation index.
+ * @return Right part of ffv coupling, multiplied by -i.
  */
 template <class Lepton, class Photon>
 std::complex<double> right(const @ModelName@_mass_eigenstates& model, int nA) {
@@ -95,69 +130,108 @@ std::complex<double> right(const @ModelName@_mass_eigenstates& model, int nA) {
     return value.right();
 }
 
-typedef std::valarray<std::complex<double>> (*ffv)(
-   int, int, const @ModelName@_mass_eigenstates&, bool);
-
-typedef std::array<std::complex<double>,10> (*npf)(
-   const @ModelName@_mass_eigenstates&,
-   const std::array<int,4>&,
-   const std::array<Eigen::Vector4d,0>&);
+/**
+ * @tparam    L     Type of a lepton field.
+ * @tparam    A     Type of a photon field.
+ * @tparam    T     Type of a form factors.
+ * @param[in] model Mass eigenstates.
+ * @param[in] ff    Lepton-photon form factors.
+ * @param[in] g     Generation index for leptons.
+ * @return Set of four-fermion coefficients from photon penguin amplitudes
+ *         (without overall i; with appropriate embedding).
+ */
+template <class L, class A, class T>
+Eigen::Array<std::complex<double>,10,1> embed_photon(
+   const @ModelName@_mass_eigenstates& model, const T& ff, int g) {
+   // Get quark-photon couplings (without i, as everywhere):
+   const auto lL =  left<L, A>(model, g);
+   const auto lR = right<L, A>(model, g);
+   Eigen::Array<std::complex<double>,10,1> res{};
+   // Minus comes from the form_factors embedding into four-fermion amplitude:
+   res[4] = - ff[0] * lL;
+   res[5] = - ff[0] * lR;
+   res[6] = - ff[1] * lL;
+   res[7] = - ff[1] * lR;
+   return res;
+};
 
 /**
- * @tparam    A      type of input sets of coefficients
- * @param[in] photon t-coefficients of all penguins
- * @param[in] res    t-coefficients of all penguins
- * @param[in] boxes  coefficients of all boxes
- * @return Wilson coefficients of four fermion operators
+ * @tparam    Name  Function name for npf function.
+ * @param[in] model Mass eigenstates.
+ * @param[in] nI    Generation index for incoming lepton.
+ * @param[in] nO    Generation index for outgoing lepton.
+ * @param[in] nA    Generation index for lepton pair.
+ * @return Set of four-fermion coefficients for non-photonic amplitudes
+ *         (without overall i; with fixed signs for tensor operators).
+ */
+template <npf Name>
+Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
+   const @ModelName@_mass_eigenstates& model, int nI, int nO, int nA) {
+   const auto npf = Name(model,
+         std::array<int,4>{nI, nA, nO, nA},
+         std::array<Eigen::Vector4d, 0>{});
+   Eigen::Array<std::complex<double>,10,1> res(npf.data());
+   res[8] = - res[8];
+   res[9] = - res[9];
+   return res;
+};
+
+/**
+ * @tparam    A      Type of input sets of coefficients.
+ * @param[in] photon T-coefficients of all penguins.
+ * @param[in] res    T-coefficients of all penguins.
+ * @param[in] boxes  Coefficients of all boxes.
+ * @return Wilson coefficients of four fermion operators.
  */
 template<class A>
 Eigen::Array<std::complex<double>,10,1> fierz(A photon, A rest, A box) {
    A sum = photon + rest;
-   sum << sum[0]/2 - 6*sum[8],   sum[1] - 2*sum[5],
-          sum[2] - 2*sum[6],     sum[3]/2 - 6*sum[9],
-          2*sum[4],              sum[5] - sum[1]/2,
-          sum[6] - sum[2]/2,     2*sum[7],
-          1.5*sum[8] - sum[0]/8, 1.5*sum[9] - sum[3]/8;
+   sum << sum[0]/2 - 6*sum[8],
+          sum[1] - 2*sum[5],
+          sum[2] - 2*sum[6],
+          sum[3]/2 - 6*sum[9],
+          2*sum[4],
+          sum[5] - sum[1]/2,
+          sum[6] - sum[2]/2,
+          2*sum[7],
+          1.5*sum[8] - sum[0]/8,
+          1.5*sum[9] - sum[3]/8;
    sum = sum + box;
    A res{};
-   res << 2*sum[0], 0,      0,      2*sum[3],
-          sum[4]/2, sum[5], sum[6], sum[7]/2,
-          0,        0;
+   res << 2*sum[0],
+          0,
+          0,
+          2*sum[3],
+          sum[4]/2,
+          sum[5],
+          sum[6],
+          sum[7]/2,
+          0,
+          0;
    return res;
 }
 
 /**
- * @tparam    Lepton type of a lepton field
- * @tparam    Photon type of a photon field
- * @tparam    photon function name for photon t-penguins
- * @tparam    rest   function name for other t-penguins
- * @tparam    boxes  function name for all box diagrams
- * @param[in] nI     generation of decaying lepton
- * @param[in] nO     generation of lepton, which can be separated from pair
- * @param[in] nA     generation of lepton and antilepton
- * @param[in] model  mass eigenstates
- * @param[in] qedqcd reference to low-enregy data
- * @return observable value and Wilson coefficients used to derive it
+ * @tparam    Lepton Type of a lepton field.
+ * @tparam    Photon Type of a photon field.
+ * @tparam    Factor Function name for photon t-penguins.
+ * @tparam    Rest   Function name for other t-penguins.
+ * @tparam    Boxes  Function name for all box diagrams.
+ * @param[in] nI     Generation of decaying lepton.
+ * @param[in] nO     Generation of lepton, which can be separated from pair.
+ * @param[in] nA     Generation of lepton and antilepton.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return Observable value and Wilson coefficients used to derive it.
  */
-template<class Lepton, class Photon, ffv photon, npf rest, npf boxes>
+template<class Lepton, class Photon, ffv Factor, npf Rest, npf Boxes>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
 
-   // @todo check
-   const auto form_factors = photon(nI, nO, model, false);
-   const auto D_L = 0.5 * form_factors[2];
-   const auto D_R = 0.5 * form_factors[3];
-
-   const auto L = left<Lepton, Photon>(model, nA);
-   const auto R = right<Lepton, Photon>(model, nA);
-   Eigen::Array<std::complex<double>,10,1> photon_amp{};
-   photon_amp[4] = form_factors[0] * L;
-   photon_amp[5] = form_factors[0] * R;
-   photon_amp[6] = form_factors[1] * L;
-   photon_amp[7] = form_factors[1] * R;
-   // need to check what is above @todo
+   const auto form_factors = Factor(nI, nO, model, false);
+   const auto photon_amp = F4F(Lepton, nA);
 
    // Full amplitude is calculated with the following convention (for the case
    // 4!=3, otherwise Fierz transformations should be used hep-ph/0412245, note
@@ -165,36 +239,37 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    //    <out:4,3| T exp(i L_full dx) |in:2,1> = i * npf,
    // which means, that it has to be matched with -1 * C_XY, because
    //    <out:4,3| T exp(i L_low dx) |in:2,1> = -i * C_XY [3 X 1]*[4 Y 2].
-   Eigen::Array<std::complex<double>,10,1> penguin_amp(NPF(rest).data());
-   Eigen::Array<std::complex<double>,10,1> box_amp(NPF(boxes).data());
+   const auto t_amp = NPF(Rest);
+   const auto box_amp = NPF(Boxes);
 
-   // For coefficients we use sigmas, but in the basis from meta code we have
-   // only anticommutation, so we need to fix it for tensor coefficients.
-   penguin_amp[8] = -penguin_amp[8];
-   penguin_amp[9] = -penguin_amp[9];
-   box_amp[8] = -box_amp[8];
-   box_amp[9] = -box_amp[9];
-
-   // If final leptons are the same, then we need to add u-penguins as well
+   // If final leptons are the same, then we need to add u-penguins as well. If
    // not, then we can just sum them (we always calculate all boxes in npf).
-   auto coeffs = (nO == nA) ? fierz(photon_amp, penguin_amp, box_amp)
-                            : photon_amp + penguin_amp + box_amp;
+   auto CXYl = (nO == nA) ? fierz(photon_amp, t_amp, box_amp)
+                          : photon_amp + t_amp + box_amp;
+   // Matching
+   const auto DL = - 0.5 * form_factors[2];
+   const auto DR = - 0.5 * form_factors[3];
+   CXYl = - CXYl;
 
    Eigen::Array<std::complex<double>,13,1> res;
 
-   res << 0.0,
-          D_L,
-          D_R,
-          coeffs[0],
-          coeffs[1],
-          coeffs[2],
-          coeffs[3],
-          coeffs[4],
-          coeffs[5],
-          coeffs[6],
-          coeffs[7],
-          coeffs[8],
-          coeffs[9];
+   const double total_width = get_total_width<Lepton>(nI, model, qedqcd);
+
+   // @todo Add calculate functions
+
+   res << 0.0/total_width,
+          DL,
+          DR,
+          CXYl[0],
+          CXYl[1],
+          CXYl[2],
+          CXYl[3],
+          CXYl[4],
+          CXYl[5],
+          CXYl[6],
+          CXYl[7],
+          CXYl[8],
+          CXYl[9];
 
    return res;
 }

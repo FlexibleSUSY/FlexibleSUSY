@@ -241,7 +241,7 @@ Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
  * @param[in] in     Generation index for incoming lepton.
  * @param[in] out    Generation index for outgoing lepton.
  * @param[in] model  Mass eigenstates.
- * @param[in] qedqcd Reference to low-enregy data.
+ * @param[in] qedqcd Reference to low-energy data.
  * @return Set of (l to l conversion) process and Wilson coefficients.
  */
 template<class Lepton, class Up, class Down, class Photon,
