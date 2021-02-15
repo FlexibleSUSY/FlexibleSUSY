@@ -146,17 +146,17 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    context_base context {model};
 
    // @todo check
-   const auto massless = photon(nI, nO, model, false);
-   const auto D_L = 0.5 * massless[2];
-   const auto D_R = 0.5 * massless[3];
+   const auto form_factors = photon(nI, nO, model, false);
+   const auto D_L = 0.5 * form_factors[2];
+   const auto D_R = 0.5 * form_factors[3];
 
    const auto L = left<Lepton, Photon>(model, nA);
    const auto R = right<Lepton, Photon>(model, nA);
    Eigen::Array<std::complex<double>,10,1> photon_amp{};
-   photon_amp[4] = massless[0] * L;
-   photon_amp[5] = massless[0] * R;
-   photon_amp[6] = massless[1] * L;
-   photon_amp[7] = massless[1] * R;
+   photon_amp[4] = form_factors[0] * L;
+   photon_amp[5] = form_factors[0] * R;
+   photon_amp[6] = form_factors[1] * L;
+   photon_amp[7] = form_factors[1] * R;
    // need to check what is above @todo
 
    // Full amplitude is calculated with the following convention (for the case
