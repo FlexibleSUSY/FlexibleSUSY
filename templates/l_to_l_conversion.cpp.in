@@ -34,6 +34,9 @@
 
 #include "wrappers.hpp"
 
+#define F4F(quark, g) embed_photon<quark, Photon>(model, form_factors, g);
+#define NPF(name, g) fix_tensors_sign<name>(model, in, out, g);
+
 @npf_headers@
 
 namespace flexiblesusy {
@@ -58,6 +61,30 @@ struct overlap_integrals {
    double Sp;
    double Sn;
 };
+
+struct GV {
+   static constexpr double pu = 2., pd = 1.,
+                           nu = 1., nd = 2.;
+};
+
+struct GT {
+   static constexpr double pu =  0.77, pd = -0.23, ps = 0.008,
+                           nu = -0.23, nd =  0.77, ns = 0.008;
+};
+
+template <class Lepton, class Up, class Down>
+struct Mass {
+   // PDG 2018 data
+   double p = 0.938272081, n = 0.939565413;
+   // Other masses
+   double l, u, d, s;
+   Mass(const context_base& context, int in) {
+      l = context.mass<Lepton>({in});
+      u = context.mass<Up>({0});
+      d = context.mass<Down>({0});
+      s = context.mass<Down>({1});
+   }
+}
 
 overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd& qedqcd) {
    overlap_integrals res;
@@ -97,170 +124,202 @@ double get_capture_rate (const Nucleus N) {
    }
 }
 
-template <class FOutBar, class FIn, class VBar>
-std::complex<double> left(const @ModelName@_mass_eigenstates& model) {
-    context_base context {model};
-    using vertex = Vertex<FOutBar, FIn, VBar>;
-    std::array<int, 2> indices {0, 0};
-    const auto value =  vertex::evaluate(indices, context);
-    return value.left();
-}
-
-template <class FOutBar, class FIn, class VBar>
-std::complex<double> right(const @ModelName@_mass_eigenstates& model) {
-    context_base context {model};
-    using vertex = Vertex<FOutBar, FIn, VBar>;
-    std::array<int, 2> indices {0, 0};
-    const auto value =  vertex::evaluate(indices, context);
-    return value.right();
-}
-
 typedef std::valarray<std::complex<double>>  (*ffv_function)
    (int, int, const @ModelName@_mass_eigenstates&, bool);
 
 typedef std::array<std::complex<double>, 10> (*npf_function)
    (const @ModelName@_mass_eigenstates&, const std::array<int,4>&, const std::array<Eigen::Vector4d,0>&);
 
+/**
+ * @tparam    Q     Type of a quark field.
+ * @tparam    A     Type of a photon field.
+ * @param[in] model Mass eigenstates.
+ * @param[in] g     Generation index for quarks.
+ * @return Left part of qqv coupling, multiplied by -i.
+ */
+template <class Q, class A>
+std::complex<double> left(const @ModelName@_mass_eigenstates& model, int g) {
+    context_base context {model};
+    using vertex = Vertex<typename Q::lorentz_conjugate, Q, A>;
+    std::array<int, 2> indices {g, g};
+    const auto value =  vertex::evaluate(indices, context);
+    return value.left();
+}
+
+/**
+ * @tparam    Q     Type of a quark field.
+ * @tparam    A     Type of a photon field.
+ * @param[in] model Mass eigenstates.
+ * @param[in] g     Generation index for quarks.
+ * @return Right part of qqv coupling, multiplied by -i.
+ */
+template <class Q, class A>
+std::complex<double> right(const @ModelName@_mass_eigenstates& model, int g) {
+    context_base context {model};
+    using vertex = Vertex<typename Q::lorentz_conjugate, Q, A>;
+    std::array<int, 2> indices {g, g};
+    const auto value =  vertex::evaluate(indices, context);
+    return value.right();
+}
+
+/**
+ * @tparam    Q     Type of a quark field.
+ * @tparam    A     Type of a photon field.
+ * @tparam    T     Type of a form factors.
+ * @param[in] model Mass eigenstates.
+ * @param[in] ff    Lepton-photon form factors.
+ * @param[in] g     Generation index for quarks.
+ * @return Set of four-fermion coefficients from photon penguin amplitudes
+ *         (without overall i; with appropriate embedding).
+ */
+template <class Q, class A, class T>
+Eigen::Array<std::complex<double>,10,1> embed_photon(
+   const @ModelName@_mass_eigenstates& model, const T& ff, int g) {
+   // Get quark-photon couplings (without i, as everywhere):
+   const auto qL =  left<Q, A>(model, g);
+   const auto qR = right<Q, A>(model, g);
+   Eigen::Array<std::complex<double>,10,1> res{};
+   // Term from eq. (t.1) will contribute to four-fermion vector coefficients.
+   // Minus comes from the form_factors embedding into four-fermion amplitude:
+   res[4] = - ff[0] * qL;
+   res[5] = - ff[0] * qR;
+   res[6] = - ff[1] * qL;
+   res[7] = - ff[1] * qR;
+   return res;
+};
+
+/**
+ * @tparam    Name  Function name for npf function.
+ * @param[in] model Mass eigenstates.
+ * @param[in] in    Generation index for incoming lepton.
+ * @param[in] out   Generation index for outgoing lepton.
+ * @param[in] g     Generation index for quarks.
+ * @return Set of four-fermion coefficients for non-photonic amplitudes
+ *         (without overall i; with fixed signs for tensor operators).
+ */
+template <npf_function Name>
+Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
+   const @ModelName@_mass_eigenstates& model, int in, int out, int g) {
+   const auto npf = Name(model,
+         std::array<int,4>{in, g, out, g},
+         std::array<Eigen::Vector4d, 0>{});
+   Eigen::Array<std::complex<double>,10,1> res(npf.data());
+   res[8] = - res[8];
+   res[9] = - res[9];
+   return res;
+};
+
+/**
+ * Form factors are defined via the following formula (q = pj - pi > 0; see
+ * eq. (3.4) of 1902.06650 (up to electric charge);
+ * pi - momenta[going from blob] of outgoing lepton,
+ * pj - momenta[going into blob] of incoming lepton):
+ *    <pi, q| T exp(i L_@ModelName@ dx)|pj> =
+ *    i * ubari
+ *          q^2 gamma_mu (A1_X * P_X)                                  (t.1)
+ *          + (zero after embedding term)                              (t.2)
+ *          + i mj sigma_munu q^nu (A2_X * P_X)                        (t.3)
+ *        uj e^*mu
+ * @note Form factors below are ordered as A1_L, A1_R, A2_L, A2_R.
+ * @note NPF function returns such result, that G4 = i * npf.
+ * @note Match to a low energy effective model with the same covariant derivative
+ *       for photon, as in @ModelName@, using eq. (t.3).
+ *       Minus comes from the form_factors embedding into four-fermion
+ *       amplitude, because we use descending ordering for external fermions
+ *          <out:q4,l3| T exp(i L_@ModelName@ dx) |in:q2,l1> =: G4
+ * @note For four fermion coefficient matching minus comes from the G4
+ *       definition, because
+ *          <out:q4,l3| T exp(i L_low dx) |in:q2,l1> = -i * C_XY [3X1]*[4Y2].
+ * @tparam    Lepton   Type of a lepton fields.
+ * @tparam    Up       Type of a up-quark fields.
+ * @tparam    Down     Type of a down-quark fields.
+ * @tparam    Photon   Type of a photon field.
+ * @tparam    photon   Function name for photon form factors.
+ * @tparam    npf_up   Function name for npf function for up-quark contribution.
+ * @tparam    npf_down Function name for npf function for down-quark
+ *                     contribution.
+ * @param[in] in     Generation index for incoming lepton.
+ * @param[in] out    Generation index for outgoing lepton.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] qedqcd Reference to low-enregy data.
+ * @return Set of (l to l conversion) process and Wilson coefficients.
+ */
 template<class Lepton, class Up, class Down, class Photon,
-   ffv_function penguin, npf_function npf_up, npf_function npf_down>
-Eigen::Array<std::complex<double>, 13, 1> forge_conversion(
-   int in,
-   int out,
+   ffv_function photon, npf_function npf_up, npf_function npf_down>
+Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    const @ModelName@_l_to_l_conversion::Nucleus nucleus,
-   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+   const @ModelName@_mass_eigenstates& model,
+   const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
-   // get Fermi constant from Les Houches input file
-   const auto GF = qedqcd.displayFermiConstant();
-   constexpr bool discard_SM_contributions = false;
-   const auto photon_penguin = penguin(in, out, model, discard_SM_contributions);
 
-   // translate from eq. (14) of hep-ph/9510309 (as matrix element)
-   // to eq. (3.23) of 1902.06650
-   // add one minus here because of descending order from chains
+   const auto form_factors = photon(in, out, model, false);
+   const auto photon_u = F4F(Up,   0);
+   const auto photon_d = F4F(Down, 0);
+   const auto photon_s = F4F(Down, 1);
 
-   const auto D_L = 0.5 * photon_penguin[2];
-   const auto D_R = 0.5 * photon_penguin[3];
+   const auto npf_u = NPF(npf_up,   0);
+   const auto npf_d = NPF(npf_down, 0);
+   const auto npf_s = NPF(npf_down, 1);
 
-   const auto A2L = D_L/(4.*GF/sqrt(2.));
-   const auto A2R = D_R/(4.*GF/sqrt(2.));
+   // Matching
+   const auto DL = - 0.5 * form_factors[2];
+   const auto DR = - 0.5 * form_factors[3];
+   const auto CXYu = - photon_u - npf_u;
+   const auto CXYd = - photon_d - npf_d;
+   const auto CXYs = - photon_s - npf_d;
 
-   // penguins
-   // mediator: photon
-   // construct 4-fermion operators from A1 form factors
-   // i q^2 A1 * (- i gmunu/q^2) * (-i Qq e) = GF/sqrt2 * gpV
+   auto CSLu = ( CXYu[0] + CXYu[1] )/2.;
+   auto CSRu = ( CXYu[2] + CXYu[3] )/2.;
+   auto CSLd = ( CXYd[0] + CXYd[1] )/2.;
+   auto CSRd = ( CXYd[2] + CXYd[3] )/2.;
+   auto CSLs = ( CXYs[0] + CXYs[1] )/2.;
+   auto CSRs = ( CXYs[2] + CXYs[3] )/2.;
 
-   const auto uL =  left<typename Up::lorentz_conjugate, Up, Photon>(model);
-   const auto uR = right<typename Up::lorentz_conjugate, Up, Photon>(model);
-   const auto dL =  left<typename Down::lorentz_conjugate, Down, Photon>(model);
-   const auto dR = right<typename Down::lorentz_conjugate, Down, Photon>(model);
-   const auto vcU = 0.5 * (uL + uR);
-   const auto vcD = 0.5 * (dL + dR);
+   auto CVLu = ( CXYu[4] + CXYu[5] )/2.;
+   auto CVRu = ( CXYu[6] + CXYu[7] )/2.;
+   auto CVLd = ( CXYd[4] + CXYd[5] )/2.;
+   auto CVRd = ( CXYd[6] + CXYd[7] )/2.;
 
-   // the A1 term if the factor in front of q^2, the photon propagator is -1/q^2, we need only factor -1
-   // one additional minus, because of missing permutation
-   auto gpLV = sqrt(2.0)/GF * photon_penguin[0] * (2.*vcU + vcD);
-   auto gpRV = sqrt(2.0)/GF * photon_penguin[1] * (2.*vcU + vcD);
-   auto gnLV = sqrt(2.0)/GF * photon_penguin[0] * (vcU + 2.*vcD);
-   auto gnRV = sqrt(2.0)/GF * photon_penguin[1] * (vcU + 2.*vcD);
+   auto CTLu = CXYu[8], CTRu = CXYu[9];
+   auto CTLd = CXYd[8], CTRd = CXYd[9];
+   auto CTLs = CXYs[8], CTRs = CXYs[9];
 
-   // all contributions
+   Mass<Lepton, Up, Down> m(context, in);
+   const double GSpu = 0.021*m.p/m.u, GSpd = 0.041*m.p/m.d, GSps = 0.043*m.p/m.s;
+   const double GSnu = 0.019*m.n/m.u, GSnd = 0.045*m.n/m.d, GSns = 0.043*m.n/m.s;
 
-   auto npfU = npf_up(model,
-      std::array<int,4>{in, 0, out, 0},
-      std::array<Eigen::Vector4d, 0>{}
-   );
+   // Vector contribution.
+   auto gpLV = ( GV::pu*CVLu + GV::pd*CVLd );
+   auto gpRV = ( GV::pu*CVRu + GV::pd*CVRd );
+   auto gnLV = ( GV::nu*CVLu + GV::nd*CVLd );
+   auto gnRV = ( GV::nu*CVRu + GV::nd*CVRd );
 
-   auto npfD = npf_down(model,
-      std::array<int,4>{in, 0, out, 0},
-      std::array<Eigen::Vector4d, 0>{}
-   );
+   // Scalar contribution from scalar coefficients.
+   auto gpLS = ( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );
+   auto gpRS = ( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );
+   auto gnLS = ( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );
+   auto gnRS = ( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );
 
-   auto npfS = npf_down(model,
-      std::array<int,4>{in, 1, out, 1},
-      std::array<Eigen::Vector4d, 0>{}
-   );
-
-   // PDG 2018 data
-   constexpr double m_p = 0.938272081, m_n = 0.939565413;
-   //data from my notes
-   double m_init = context.mass<Lepton>({in});
-   double m_u = context.mass<Up>({0});
-   double m_d = context.mass<Down>({0});
-   double m_s = context.mass<Down>({1});
-
-   double GSpu = 0.021*m_p/m_u, GSpd = 0.041*m_p/m_d, GSps = 0.043*m_p/m_s;
-   double GSnu = 0.019*m_n/m_u, GSnd = 0.045*m_n/m_d, GSns = 0.043*m_n/m_s;
-
-   constexpr double GVpu = 2.,            GVpd = 1.;
-   constexpr double GVnu = 1.,            GVnd = 2.;
-
-   constexpr double GTpu = 0.77,          GTpd = -0.23,         GTps = 0.008;
-   constexpr double GTnu = 0.77,          GTnd = -0.23,         GTns = 0.008;
-
-   auto CSLu = ( npfU.at(0)+npfU.at(1) )/2.;
-   auto CSRu = ( npfU.at(2)+npfU.at(3) )/2.;
-   auto CSLd = ( npfD.at(0)+npfD.at(1) )/2.;
-   auto CSRd = ( npfD.at(2)+npfD.at(3) )/2.;
-   auto CSLs = ( npfS.at(0)+npfS.at(1) )/2.;
-   auto CSRs = ( npfS.at(2)+npfS.at(3) )/2.;
-
-   auto CVLu = ( npfU.at(4)+npfU.at(5) )/2.;
-   auto CVRu = ( npfU.at(6)+npfU.at(7) )/2.;
-   auto CVLd = ( npfD.at(4)+npfD.at(5) )/2.;
-   auto CVRd = ( npfD.at(6)+npfD.at(7) )/2.;
-
-   //minus because of definition of tensor operators
-   auto CTLu = -npfU.at(8);
-   auto CTRu = -npfU.at(9);
-   auto CTLd = -npfD.at(8);
-   auto CTRd = -npfD.at(9);
-   auto CTLs = -npfS.at(8);
-   auto CTRs = -npfS.at(9);
-
-   gpLV += (-sqrt(2.0)/GF)*( GVpu*CVLu + GVpd*CVLd );
-   gpRV += (-sqrt(2.0)/GF)*( GVpu*CVRu + GVpd*CVRd );
-   gnLV += (-sqrt(2.0)/GF)*( GVnu*CVLu + GVnd*CVLd );
-   gnRV += (-sqrt(2.0)/GF)*( GVnu*CVRu + GVnd*CVRd );
-
-   //scalar contribution from scalar coefficients
-   auto gpLS = (-sqrt(2.0)/GF)*( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );
-   auto gpRS = (-sqrt(2.0)/GF)*( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );
-   auto gnLS = (-sqrt(2.0)/GF)*( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );
-   auto gnRS = (-sqrt(2.0)/GF)*( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );
-
-   //scalar contribution from tensor coefficients
-   gpLS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTLu + GTpd*CTLd + GTps*CTLs );
-   gpRS += (-sqrt(2.0)/GF)*(2*m_init/m_p)*( GTpu*CTRu + GTpd*CTRd + GTps*CTRs );
-   gnLS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTLu + GTnd*CTLd + GTns*CTLs );
-   gnRS += (-sqrt(2.0)/GF)*(2*m_init/m_n)*( GTnu*CTRu + GTnd*CTRd + GTns*CTRs );
+   // Scalar contribution from tensor coefficients.
+   gpLS += (2*m.l/m.p)*( GT::pu*CTLu + GT::pd*CTLd + GT::ps*CTLs );
+   gpRS += (2*m.l/m.p)*( GT::pu*CTRu + GT::pd*CTRd + GT::ps*CTRs );
+   gnLS += (2*m.l/m.n)*( GT::nu*CTLu + GT::nd*CTLd + GT::ns*CTLs );
+   gnRS += (2*m.l/m.n)*( GT::nu*CTRu + GT::nd*CTRd + GT::ns*CTRs );
 
    const auto ff = get_overlap_integrals(nucleus, qedqcd);
+   const auto left  = DR*ff.D/4. - gpLV*ff.Vp - gnLV*ff.Vn - gpRS*ff.Sp - gnRS*ff.Sn;
+   const auto right = DL*ff.D/4. - gpRV*ff.Vp - gnRV*ff.Vn - gpLS*ff.Sp - gnLS*ff.Sn;
 
-   const auto left  = A2R*ff.D + gpLV*ff.Vp + gnLV*ff.Vn + gpRS*ff.Sp + gnRS*ff.Sn;
-   const auto right = A2L*ff.D + gpRV*ff.Vp + gnRV*ff.Vn + gpLS*ff.Sp + gnLS*ff.Sn;
-
-   // eq. (14) of arXiv:hep-ph/0203110
-   const double conversion_rate = 2.*pow(GF,2)*(std::norm(left) + std::norm(right));
-
-   // normalize to capture
+   // eq. (3.31) of 1902.06650 (with some coefficient redefinitions)
+   const double conversion_rate = 4*(std::norm(left) + std::norm(right));
    const double capture_rate = get_capture_rate(nucleus);
-
    Eigen::Array<std::complex<double>,13,1> res;
-
    res << conversion_rate/capture_rate,
-          D_L,
-          D_R,
-          npfU.at(0),
-          npfU.at(1),
-          npfU.at(2),
-          npfU.at(3),
-          npfU.at(4) + photon_penguin[0] * uL,
-          npfU.at(5) + photon_penguin[0] * uR,
-          npfU.at(6) + photon_penguin[1] * uL,
-          npfU.at(7) + photon_penguin[1] * uR,
-         -npfU.at(8),
-         -npfU.at(9);
+          DL,      DR,
+          CXYu[0], CXYu[1], CXYu[2], CXYu[3],
+          CXYu[4], CXYu[5], CXYu[6], CXYu[7],
+          CXYu[8], CXYu[9];
    return res;
 }
 
