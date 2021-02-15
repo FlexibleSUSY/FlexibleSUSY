@@ -105,13 +105,16 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
          const double mtpole = qedqcd.displayPoleMt();
          const double lt = std::log(Sqr(mHOS/mtpole));
          const double lq = std::log(xDR);
-         // eq. 28 of hep-ph/9505358
          const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
          const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
-         const auto Httbar_S = 0.5*(Httbar.left() + Httbar.right());
-         const auto gtHoVEV = Httbar_S/context.mass<uq>({2});
-         const auto gbHoVEV = HBBbarVertexDR_S/context.mass<dq>(indexOut1);
-         const double deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+         double deltaPhi2_S = 0.;
+         const auto gbHoVEV = HBBbarVertexDR_S/mdqDR;
+         if (!is_zero(gbHoVEV)) {
+            // eq. 28 of hep-ph/9505358
+            const auto Httbar_S = 0.5*(Httbar.left() + Httbar.right());
+            const auto gtHoVEV = Httbar_S/context.mass<uq>({2});
+            deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+         }
 
          double deltaqq_QCD_OS_P = 0.;
          double deltaqq_QED_OS_P = 0.;
@@ -129,7 +132,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             deltaqq_QED_OS_P =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
 
-            const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
+            const auto gbHoVEV_P = HBBbarVertexDR_P/mdqDR;
             if (!is_zero(gbHoVEV_P)) {
                const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
