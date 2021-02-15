@@ -84,7 +84,7 @@ struct Mass {
       d = context.mass<Down>({0});
       s = context.mass<Down>({1});
    }
-}
+};
 
 overlap_integrals get_overlap_integrals(const Nucleus N, const softsusy::QedQcd& qedqcd) {
    overlap_integrals res;
