@@ -44,27 +44,22 @@ using namespace @ModelName@_FFV_form_factors;
 
 namespace @ModelName@_l_to_lgamma {
 
-template <typename FIn, typename FOut, typename T1, typename T2>
-double lepton_total_decay_width(
-      T1 const& indices1, T2 const& indices2, 
-      const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
-
-   context_base context {model};
-
-   const auto leptonInMass = context.mass<FIn>(indices1);
-   const auto leptonOutMass = context.mass<FOut>(indices2);
-   const auto r = pow(leptonOutMass/leptonInMass, 2);
-   const auto GF2 = pow(qedqcd.displayFermiConstant(), 2);
-   const double Alpha = Sqr(FIn::electric_charge * unit_charge(context))/(4*Pi);
-
-   // eq. 10.6 of http://pdg.lbl.gov/2018/reviews/rpp2018-rev-standard-model.pdf
-   return 
-      // tree-level (with massless outgoing lepton)
-      GF2*pow(leptonInMass,5)/(192.0*pow(Pi,3)) 
-      // outgoing lepton mass correction
-      * (1 - 8*r + 8*pow(r,3) - pow(r,4) - 12*r*r*std::log(r));
-      // higher order correction
-      //* (1.0 + 0.5 * Alpha * (6.25-Sqr(Pi))/Pi)
+/**
+ * @param[in] nI     Generation index of incoming lepton.
+ * @return Total decay width in GeV, according to PDG data.
+ */
+double lepton_total_decay_width(int nI) {
+   // https://pdg.lbl.gov/2020/reviews/rpp2020-rev-phys-constants.pdf
+   constexpr double hbar = 6.582119569e-25, // [GeV*s]
+   // https://pdg.lbl.gov/2020/listings/rpp2020-list-muon.pdf
+                    muon = 2.1969811e-6,    // [s]
+   // https://pdg.lbl.gov/2020/listings/rpp2020-list-tau.pdf
+                    tau  = 290.3e-15;       // [s]
+   switch (nI) {
+      case 1: return hbar/muon;
+      case 2: return hbar/tau;
+      default: throw std::invalid_argument("Unrecognized lepton");
+   }
 }
 
 @LToLGamma_InterfaceDefinitions@
