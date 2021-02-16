@@ -72,30 +72,21 @@ typedef std::array<std::complex<double>,10> (*npf)(
 
 
 /**
- * @tparam    Lepton Type of a lepton field.
  * @param[in] nI     Generation index of incoming lepton.
- * @param[in] model  Mass eigenstates.
- * @param[in] qedqcd Reference to low-energy data.
- * @return Left part of ffv coupling, multiplied by -i.
+ * @return Total decay width in GeV, according to PDG data.
  */
-template <class Lepton>
-double get_total_width(int nI,
-      const @ModelName@_mass_eigenstates& model,
-      const softsusy::QedQcd& qedqcd) {
-
-   context_base context {model};
-
-   const auto InMass = context.mass<Lepton>({nI});
-   const auto OutMass = context.mass<Lepton>({nI-1});
-   const auto r = pow(OutMass/InMass, 2);
-   const auto GF2 = pow(qedqcd.displayFermiConstant(), 2);
-
-   // eq. 10.6 of http://pdg.lbl.gov/2018/reviews/rpp2018-rev-standard-model.pdf
-   return
-      // tree-level (with massless outgoing lepton)
-      GF2*pow(InMass,5)/(192.0*pow(Pi,3))
-      // outgoing lepton mass correction
-      * (1 - 8*r + 8*pow(r,3) - pow(r,4) - 12*r*r*std::log(r));
+double get_total_width(int nI) {
+   // https://pdg.lbl.gov/2020/reviews/rpp2020-rev-phys-constants.pdf
+   constexpr double hbar = 6.582119569e-25, // [GeV*s]
+   // https://pdg.lbl.gov/2020/listings/rpp2020-list-muon.pdf
+                    muon = 2.1969811e-6,    // [s]
+   // https://pdg.lbl.gov/2020/listings/rpp2020-list-tau.pdf
+                    tau  = 290.3e-15;       // [s]
+   switch (nI) {
+      case 1: return hbar/muon;
+      case 2: return hbar/tau;
+      default: throw std::invalid_argument("Unrecognized lepton");
+   }
 }
 
 /**
@@ -253,7 +244,7 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
 
    Eigen::Array<std::complex<double>,13,1> res;
 
-   const double total_width = get_total_width<Lepton>(nI, model, qedqcd);
+   const double total_width = get_total_width(nI);
 
    // @todo Add calculate functions
 
