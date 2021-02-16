@@ -202,6 +202,65 @@ Eigen::Array<std::complex<double>,10,1> fierz(A photon, A rest, A box) {
    return res;
 }
 
+struct LeptonOperators {
+   std::complex<double> SLL, SLR, SRL, SRR,
+                        VLL, VLR, VRL, VRR,
+                        TLL, TRR;
+   template<class T>
+   LeptonOperators(T coeffs) {
+      SLL = coeffs[0];
+      SLR = coeffs[1];
+      SRL = coeffs[2];
+      SRR = coeffs[3];
+      VLL = coeffs[4];
+      VLR = coeffs[5];
+      VRL = coeffs[6];
+      VRR = coeffs[7];
+      TLL = coeffs[8];
+      TRR = coeffs[9];
+   }
+};
+
+/**
+ * @param[in] g Generation index for leptons.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return A mass of a lepton for a given generation number.
+ */
+double get_pole_mass(int g, const softsusy::QedQcd& qedqcd) {
+   switch (g) {
+      case 0: return qedqcd.displayMass(softsusy::mElectron);
+      case 1: return qedqcd.displayMass(softsusy::mMuon);
+      case 2: return qedqcd.displayMass(softsusy::mTau);
+      default: throw std::invalid_argument("Unrecognized lepton");
+   }
+}
+
+template<class T1, class T2>
+double width_same(int nI, int nO, T1 DL, T1 DR, T2 coeffs,
+   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+   const double e = unit_charge(context);
+   const auto mass_heavy = get_pole_mass(nI, qedqcd);
+   const auto mass_light = get_pole_mass(nO, qedqcd);
+   const auto r = mass_heavy / mass_light;
+   const LeptonOperators C(coeffs);
+
+   using std::norm;
+   using std::real;
+   using std::conj;
+   using std::log;
+
+   // Agrees with hep-ph/0004025, hep-ph/9909265, 1702.03020 (different sign
+   // of covariant derivative).
+   double res = e*e * (norm(DL) + norm(DR)) * (-11. + 8.*log(r)) / 192.;
+   res += (norm(C.SLL) + 16.*norm(C.VLL) + 8.*norm(C.VLR)) / 12288.;
+   res += (norm(C.SRR) + 16.*norm(C.VRR) + 8.*norm(C.VRL)) / 12288.;
+   res += e * (2.*real(C.VLL*conj(DR)) + real(C.VLR*conj(DR))) / 192.;
+   res += e * (2.*real(C.VRR*conj(DL)) + real(C.VRL*conj(DL))) / 192.;
+   return res * pow(mass_heavy, 5) / pow(Pi, 3);
+}
+
 /**
  * @tparam    Lepton Type of a lepton field.
  * @tparam    Photon Type of a photon field.
@@ -242,13 +301,16 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    const auto DR = - 0.5 * form_factors[3];
    CXYl = - CXYl;
 
+   // @todo Running of coefficients
+
+   double partial_width;
+   if (nO == nA) {
+      partial_width = width_same(nI, nO, DL, DR, CXYl, model, qedqcd);
+   } else partial_width = 0.0;
+   const double total_width = get_total_width(nI);
    Eigen::Array<std::complex<double>,13,1> res;
 
-   const double total_width = get_total_width(nI);
-
-   // @todo Add calculate functions
-
-   res << 0.0/total_width,
+   res << partial_width/total_width,
           DL,
           DR,
           CXYl[0],
