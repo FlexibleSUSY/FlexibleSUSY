@@ -45,20 +45,33 @@ using namespace @ModelName@_FFV_form_factors;
 namespace @ModelName@_l_to_lgamma {
 
 /**
- * @param[in] g Generation index of decaying lepton.
+ * @param[in] g      Generation index of decaying lepton.
+ * @param[in] qedqcd Reference to low-energy data.
  * @return Total decay width in GeV, according to PDG data.
  */
-double lepton_total_decay_width(int g) {
+double lepton_total_decay_width(int g, const softsusy::QedQcd& qedqcd) {
    // https://pdg.lbl.gov/2020/reviews/rpp2020-rev-phys-constants.pdf
-   constexpr double hbar = 6.582119569e-25, // [GeV*s]
+   constexpr double hbar = 6.582119569e-25,   // [GeV*s]
    // https://pdg.lbl.gov/2020/listings/rpp2020-list-muon.pdf
-                    muon = 2.1969811e-6,    // [s]
+                    mass_muon = 0.1056583745, // [GeV]
+                    time_muon = 2.1969811e-6, // [s]
    // https://pdg.lbl.gov/2020/listings/rpp2020-list-tau.pdf
-                    tau  = 290.3e-15;       // [s]
+                    mass_tau  = 1.77686,      // [GeV]
+                    time_tau  = 290.3e-15;    // [s]
    switch (g) {
       case 0: throw std::invalid_argument("Electron decay is not supported");
-      case 1: return hbar/muon;
-      case 2: return hbar/tau;
+      case 1:
+              auto softMass = qedqcd.displayMass(softsusy::mMuon);
+              if (!is_zero(softMass - mass_muon)) {
+                 WARNING("Difference in low energy muon mass and the one of PDG");
+              }
+              return hbar/time_muon;
+      case 2:
+              auto softMass = qedqcd.displayMass(softsusy::mTau);
+              if (!is_zero(softMass - mass_tau)) {
+                 WARNING("Difference in low energy tau mass and the one of PDG");
+              }
+              return hbar/time_tau;
       default: throw std::invalid_argument("Unrecognized lepton");
    }
 }
