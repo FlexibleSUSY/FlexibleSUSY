@@ -34,7 +34,6 @@ LToLConversion`arguments::usage = "
 @param outN A symbol for outgoing lepton generation.
 @param nucleus A symbol for a nucleus.
 @param contribution A symbol for a desired contribution.
-@param massless A symbols for a massive/massless option.
 @return A sequence with named patterns, which is set of arguments for
         observable.";
 
@@ -46,7 +45,7 @@ namespace ~ SetAttributes ~ {Protected, Locked};
 
 Off@RuleDelayed::rhs;
 arguments[(in:_Symbol)[inN:_Symbol], (out:_Symbol)[outN:_Symbol],
-   nucleus_Symbol, contribution:_Symbol, massless:_Symbol] :=
+   nucleus_Symbol, contribution:_Symbol] :=
 Sequence[
    (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
    (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
@@ -56,14 +55,13 @@ Sequence[
       NPointFunctions`Penguins,
       NPointFunctions`ScalarPenguins,
       NPointFunctions`MassiveVectorPenguins,
-      NPointFunctions`FlavourChangingBoxes],
-   massless:True|False];
+      NPointFunctions`FlavourChangingBoxes]];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`LToLConversion@
-   arguments[in@iIn, out@iOut, nucleus, con, massless];
+   arguments[in@iIn, out@iOut, nucleus, con];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
 End[];EndPackage[];

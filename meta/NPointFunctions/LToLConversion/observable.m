@@ -23,14 +23,14 @@
 Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
 
 Begin@"Observables`Private`";
-With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
+With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
       obs = FlexibleSUSYObservable`LToLConversion,
       cxx = CConversion`ToValidCSymbolString,
       namespace = FlexibleSUSY`FSModelName<>"_"<>LToLConversion`namespace[]},
 
    GetObservableName@obs@args := StringJoin[
       cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
-      cxx@nucl, "_for_", SymbolName@proc, cxx@massless];
+      cxx@nucl, "_for_", SymbolName@proc];
 
    GetObservableDescription@obs@args := StringJoin[
       cxx@in, "(", cxx@inN, ") to ", cxx@out, "(", cxx@outN, ") conversion in ",
@@ -41,9 +41,9 @@ With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, massless],
 
    CalculateObservable[obs@args, structName:_String] := StringJoin[
       structName, ".",
-      GetObservableName@obs[in@inN -> out@outN, nucl, proc, massless], " = ",
+      GetObservableName@obs[in@inN -> out@outN, nucl, proc], " = ",
       namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
-      SymbolName@proc, cxx@massless, "(", cxx@inN, ", ", cxx@outN, ", ",
+      SymbolName@proc, "(", cxx@inN, ", ", cxx@outN, ", ",
       namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];];
 
 End[];

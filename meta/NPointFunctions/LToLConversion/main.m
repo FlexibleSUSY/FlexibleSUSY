@@ -38,7 +38,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
       {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
 
    {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to_",
-      cxx@out, #, "_for_", SymbolName@con, cxx@massless]&/@ cxx/@
+      cxx@out, #, "_for_", SymbolName@con]&/@ cxx/@
          {SARAH`UpQuark, SARAH`DownQuark};
 
    `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
@@ -46,7 +46,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>cxx@massless<>"(\n"<>
+      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>"(\n"<>
       "   int in, int out,\n"<>
       "   const " <> FlexibleSUSY`FSModelName <>
          "_l_to_l_conversion::Nucleus nucleus,\n" <>
@@ -85,14 +85,23 @@ create[list:{__}] := Module[{unique},
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
 
+`npf`clean[npf:NPointFunctions`internal`type`npf] :=
+npf /.
+   {  SARAH`sum[__] -> 0,
+      LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+      LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
+         LoopTools`C0i[i, Sequence@@Array[0&, 3], mm],
+      LoopTools`D0i[i_, Repeated[_, {6}], mm__] :>
+         LoopTools`D0i[i, Sequence@@Array[0&, 6], mm]};
+`npf`clean // Utils`MakeUnknownInputDefinition;
+`npf`clean // Protect;
+
 `npf`create[obs:`type`observable] := Module[{
       parsedCon,
       npfU, npfD,
       l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
-      dc = NPointFunctions`internal`dc,
-      fiG, foG, uiG, uoG, diG, doG, (*@note particle | inc/out | generation*)
-      regulator, (*@note arbitrary sqr(3-momenta) of quarks*)
-      inner, sp, dim6,
+      fields,
+      dim6,
       codeU, codeD},
 
    parsedCon = Switch[con,
@@ -115,64 +124,35 @@ create ~ SetAttributes ~ {Protected, Locked};
       {in,#},{out,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
-      NPointFunctions`ZeroExternalMomenta -> If[massless===True, NPointFunctions`ExceptLoops, NPointFunctions`OperatorsOnly],
+      NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> parsedCon,
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark,SARAH`DownQuark};
+   {npfU, npfD} = `npf`clean/@{npfU, npfD};
 
-   {fiG, uiG, foG, uoG} = Flatten@NPointFunctions`internal`getProcess@npfU;
-   {fiG, diG, foG, doG} = Flatten@NPointFunctions`internal`getProcess@npfD;
-   regulator = m@fiG^2;
+   fields[SARAH`UpQuark] = Flatten@NPointFunctions`internal`getProcess@npfU;
+   fields[SARAH`DownQuark] = Flatten@NPointFunctions`internal`getProcess@npfD;
 
-   inner = SARAH`sum[i_,1,4,SARAH`g[i_,i_]*p[#1,i_]*p[#2,i_]]&;
-   {npfU, npfD} = {npfU, npfD} //. {
-         inner[fiG,foG] :> m@fiG^2,
-         inner[uiG,fiG] :> m@fiG*Sqrt[m@uiG^2+regulator],
-         inner[uoG,fiG] :> inner[uiG,fiG],
-         inner[uoG,foG] :> m@fiG^2/2+inner[uiG,fiG],
-         inner[diG,fiG] :> m@fiG*Sqrt[m@diG^2+regulator],
-         inner[doG,fiG] :> inner[diG,fiG],
-         inner[doG,foG] :> m@fiG^2/2+inner[diG,fiG]
-      };
+   dim6[q_] := Module[{sp, dc, l = SARAH`Lorentz, R = 6, L = 7},
+      sp[f_, n_] := SARAH`DiracSpinor[fields[f][[n]], 0, 0];
+      dc[a_, b__, c_] := NPointFunctions`internal`dc[sp[q, a], b, sp[q, c]];
+      {  "S_LL" -> dc[3,L,1] dc[4,L,2],
+         "S_LR" -> dc[3,L,1] dc[4,R,2],
+         "S_RL" -> dc[3,R,1] dc[4,L,2],
+         "S_RR" -> dc[3,R,1] dc[4,R,2],
+         "V_LL" -> dc[3,R,l@1,1] dc[4,R,l@1,2],
+         "V_LR" -> dc[3,R,l@1,1] dc[4,L,l@1,2],
+         "V_RL" -> dc[3,L,l@1,1] dc[4,R,l@1,2],
+         "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
+         "T_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
+         "T_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
 
-   (* @note If ZeroExternalMomenta is set to True, replace p and m to zeroes *)
-   sp[particle:_,num:_Integer] := If[massless===True, SARAH`DiracSpinor[#, 0, 0], SARAH`DiracSpinor[#, p@num, m@#]] &@
-      particle@{Symbol["SARAH`gt"<>ToString@num]};
-
-   dim6[i_,o_,q_] := {
-      (*@note 6 means PR, 7 means PL.*)
-      "S_LL" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      "S_LR" -> dc[o~sp~3,7,i~sp~1] dc[q~sp~4,6,q~sp~2],
-      "S_RL" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,7,q~sp~2],
-      "S_RR" -> dc[o~sp~3,6,i~sp~1] dc[q~sp~4,6,q~sp~2],
-      (*@note names are correct, one just need to commute projectors with
-       *Dirac matrices. It changes 6 to 7 or 7 to 6.*)
-      "V_LL" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      "V_LR" -> dc[o~sp~3,6,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-      "V_RL" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,6,l@1,q~sp~2],
-      "V_RR" -> dc[o~sp~3,7,l@1,i~sp~1] dc[q~sp~4,7,l@1,q~sp~2],
-      (*@note Minus, because FormCalc`s -6,Lor[1],Lor[2] is ours
-       *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
-       *taking this twice we get I*I=-1. FC cites [Ni05] for Fierz identities,
-       *where our conventions are used, but in FC manual on the page 20
-       *weird convention for sigma_munu is shown.*)
-      "minus_T_LL" -> dc[o~sp~3,-7,l@1,l@2,i~sp~1] dc[q~sp~4,-7,l@1,l@2,q~sp~2],
-      "minus_T_RR" -> dc[o~sp~3,-6,l@1,l@2,i~sp~1] dc[q~sp~4,-6,l@1,l@2,q~sp~2]
-   };
-   npfU = npfU~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`UpQuark];
-   npfD = npfD~WilsonCoeffs`InterfaceToMatching~dim6[in,out,SARAH`DownQuark];
+   npfU = WilsonCoeffs`InterfaceToMatching[npfU, dim6@SARAH`UpQuark];
+   npfD = WilsonCoeffs`InterfaceToMatching[npfD, dim6@SARAH`DownQuark];
 
    codeU = NPointFunctions`CreateCXXFunctions[
-      npfU,
-      `cxx`classU,
-      SARAH`Delta,
-      dim6[in,out,SARAH`UpQuark]
-   ][[2]];
+      npfU, `cxx`classU, SARAH`Delta, dim6@SARAH`UpQuark][[2]];
    codeD = NPointFunctions`CreateCXXFunctions[
-      npfD,
-      `cxx`classD,
-      SARAH`Delta,
-      dim6[in,out,SARAH`DownQuark]
-   ][[2]];
+      npfD, `cxx`classD, SARAH`Delta, dim6@SARAH`DownQuark][[2]];
 
    Print["Calculation of "<>`cxx`in<>"- to "<>`cxx`out<>"- conversion finished"];
    Utils`FSFancyLine@">";
