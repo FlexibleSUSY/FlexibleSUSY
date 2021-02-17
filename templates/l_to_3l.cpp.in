@@ -235,14 +235,23 @@ double get_pole_mass(int g, const softsusy::QedQcd& qedqcd) {
    }
 }
 
+/**
+ * @tparam    T1     Type of a dipole coefficient.
+ * @tparam    T2     Type of a four-lepton coefficients.
+ * @param[in] nI     Generation of decaying lepton.
+ * @param[in] nA     Generation of any lepton in pair.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return Width of decay with leptons of the same generation in the end.
+ */
 template<class T1, class T2>
-double width_same(int nI, int nO, T1 DL, T1 DR, T2 coeffs,
+double width_same(int nI, int nA, T1 DL, T1 DR, T2 coeffs,
    const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
    const double e = unit_charge(context);
    const auto mass_heavy = get_pole_mass(nI, qedqcd);
-   const auto mass_light = get_pole_mass(nO, qedqcd);
+   const auto mass_light = get_pole_mass(nA, qedqcd);
    const auto r = mass_heavy / mass_light;
    const LeptonOperators C(coeffs);
 
@@ -251,13 +260,47 @@ double width_same(int nI, int nO, T1 DL, T1 DR, T2 coeffs,
    using std::conj;
    using std::log;
 
-   // Agrees with hep-ph/0004025, hep-ph/9909265, 1702.03020 (different sign
-   // of covariant derivative).
+   // Agrees with hep-ph/0004025, hep-ph/9909265;
+   // for 1702.03020 different sign of covariant derivative.
    double res = e*e * (norm(DL) + norm(DR)) * (-11. + 8.*log(r)) / 192.;
-   res += (norm(C.SLL) + 16.*norm(C.VLL) + 8.*norm(C.VLR)) / 12288.;
-   res += (norm(C.SRR) + 16.*norm(C.VRR) + 8.*norm(C.VRL)) / 12288.;
    res += e * (2.*real(C.VLL*conj(DR)) + real(C.VLR*conj(DR))) / 192.;
    res += e * (2.*real(C.VRR*conj(DL)) + real(C.VRL*conj(DL))) / 192.;
+   res += (norm(C.SLL) + 16.*norm(C.VLL) + 8.*norm(C.VLR)) / 12288.;
+   res += (norm(C.SRR) + 16.*norm(C.VRR) + 8.*norm(C.VRL)) / 12288.;
+   return res * pow(mass_heavy, 5) / pow(Pi, 3);
+}
+
+/**
+ * @tparam    T1     Type of a dipole coefficient.
+ * @tparam    T2     Type of a four-lepton coefficients.
+ * @param[in] nI     Generation of decaying lepton.
+ * @param[in] nA     Generation of any lepton in pair.
+ * @param[in] model  Mass eigenstates.
+ * @param[in] qedqcd Reference to low-energy data.
+ * @return Width of decay with leptons of different generations in the end.
+ */
+template<class T1, class T2>
+double width_diff(int nI, int nA, T1 DL, T1 DR, T2 coeffs,
+   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+
+   context_base context {model};
+   const double e = unit_charge(context);
+   const auto mass_heavy = get_pole_mass(nI, qedqcd);
+   const auto mass_light = get_pole_mass(nA, qedqcd);
+   const auto r = mass_heavy / mass_light;
+   const LeptonOperators C(coeffs);
+
+   using std::norm;
+   using std::real;
+   using std::conj;
+   using std::log;
+
+   double res = e*e * (norm(DL) + norm(DR)) * (-3. + 2.*log(r)) / 48.;
+   res += e * (real(C.VLL*conj(DR)) + real(C.VLR*conj(DR))) / 192.;
+   res += e * (real(C.VRR*conj(DL)) + real(C.VRL*conj(DL))) / 192.;
+   res += (norm(C.SLL) + norm(C.SLR) + norm(C.SRL) + norm(C.SRR)) / 6144.;
+   res += (norm(C.VLL) + norm(C.VLR) + norm(C.VRL) + norm(C.VRR)) / 1536.;
+   res += (norm(C.TLL) + norm(C.TRR)) / 128.;
    return res * pow(mass_heavy, 5) / pow(Pi, 3);
 }
 
@@ -304,9 +347,9 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
    // @todo Running of coefficients
 
    double partial_width;
-   if (nO == nA) {
-      partial_width = width_same(nI, nO, DL, DR, CXYl, model, qedqcd);
-   } else partial_width = 0.0;
+   if (nO == nA) partial_width = width_same(nI, nA, DL, DR, CXYl, model, qedqcd);
+   else          partial_width = width_diff(nI, nA, DL, DR, CXYl, model, qedqcd);
+
    const double total_width = get_total_width(nI);
    Eigen::Array<std::complex<double>,13,1> res;
 
