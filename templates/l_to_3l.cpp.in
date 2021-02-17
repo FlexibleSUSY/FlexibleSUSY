@@ -261,8 +261,8 @@ double width_same(int nI, int nA, T1 DL, T1 DR, T2 coeffs,
    using std::log;
 
    // 1802.06803: wrong eq. (3.12) for X term;
+   // 1702.03020: wrong X term for their covariant derivative close to eq. (A.1).
    // hep-ph/0004025, hep-ph/9909265: same;
-   // 1702.03020: different sign of covariant derivative.
    double res = e*e * (norm(DL) + norm(DR)) * (-11. + 8.*log(r)) / 192.;
    res += e * (2.*real(C.VLL*conj(DR)) + real(C.VLR*conj(DR))) / 192.;
    res += e * (2.*real(C.VRR*conj(DL)) + real(C.VRL*conj(DL))) / 192.;
