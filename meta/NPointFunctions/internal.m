@@ -462,7 +462,7 @@ getSettings[] := Module[{file},
    `settings`diagrams = Default;
    `settings`amplitudes = Default;
    `settings`sum = Default;
-   `settings`massless[`type`diagramSet] := {};
+   `settings`massless = Default;
    `settings`momenta = {};
    `settings`regularization = {};
    `settings`order = Default;
@@ -550,8 +550,6 @@ define[collectSame, {list:{Rule[_, {__}]...}} :>
    ]
 ];
 
-
-
 getMasslessSettings::usage = "
 @brief In some topologies field insertions can lead to physically incorrect
        simplifications if they are done naively. This function provides
@@ -559,11 +557,12 @@ getMasslessSettings::usage = "
 @param diagrams A set of diagrams.
 @returns A set of rules for amplitudes.";
 getMasslessSettings[diagrams:`type`diagramSet] :=
-Module[{parse, rules},
+Module[{parse, rules, set},
+   set = If[Default===#, {}, #]&@`settings`massless;
    parse = If[MatchQ[#1, `type`diagram],
       List@@MapIndexed[{}&, getInsertions@#1],
       First@#1]&;
-   rules = MapIndexed[applyAction[diagrams, #1]&, `settings`massless@diagrams];
+   rules = MapIndexed[applyAction[diagrams, #1]&, set];
    Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
 getMasslessSettings // secure;
 

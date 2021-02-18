@@ -73,13 +73,13 @@
       `topologyQ`self3penguinT,
       {6, getField[#, 3]&}]};
 
-`settings`massless[ds:`type`diagramSet] :=
-{  {  "initial SED: use explicit final lepton mass",
+`settings`massless =
+{  "initial SED: use explicit final lepton mass"[
       `topologyQ`self1penguinT,
-      {Append, FeynArts`F[6] :> 3}},
-   {  "initial SED: keep initial lepton mass untouched",
+      {Append, FeynArts`F[6] :> 3}],
+   "initial SED: keep initial lepton mass untouched"[
       `topologyQ`self1penguinT,
-      {Hold, 1}}};
+      {Hold, 1}]};
 
 `settings`momenta =
 {  `topologyQ`penguinT -> 2,

@@ -130,9 +130,9 @@ applyAction@`action`diagramsCompact :=
 `action`sum = Sequence[d:`type`diagramSet,
    s_String[t_Symbol, {n_Integer, f:_}]];
 `action`hold = Sequence[d:`type`diagramSet,
-   {s_String, t_Symbol, {Hold, e_Integer}}];
+   s_String[t_Symbol, {Hold, e_Integer}]];
 `action`append = Sequence[d:`type`diagramSet,
-   {s_String, t_Symbol, {Append, (f:`type`field)[n_Integer] :> e_Integer}}];
+   s_String[t_Symbol, {Append, (f:`type`field)[n_Integer] :> e_Integer}]];
 
 Module[{template},
    template[text:_, topologyQ:_, realization:_] :=
