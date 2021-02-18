@@ -448,14 +448,9 @@ Module[{PL, PR, MT, FV, g, md},
 
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
-       file to load, defines default settings.
-@todo Check which settings exist and apply defauld definitions for non-existing
-      ones.
-@todo Define default first, then redefine during load (pure functions?)";
-getSettings[] := Module[{file},
-   file = FileNameJoin@{$InternalDirectory, SymbolName@Head@$Observable,
-      "settings.m"};
-   BeginPackage@"NPointFunctions`";
+       file to load, defines default settings.";
+getSettings[] :=
+(  BeginPackage@"NPointFunctions`";
    Begin@"`internal`";
    `settings`topology = Default;
    `settings`diagrams = Default;
@@ -466,10 +461,11 @@ getSettings[] := Module[{file},
    `settings`regularization = Default;
    `settings`order = Default;
    `settings`chains = Default;
-   If[FileExistsQ@file, Get@file;];
+   If[FileExistsQ@#, Get@#;]&@FileNameJoin@
+      {$InternalDirectory, SymbolName@Head@$Observable, "settings.m"};
    Protect@Evaluate[Context[]<>"settings`*"];
    End[];
-   EndPackage[];];
+   EndPackage[];);
 getSettings // secure;
 
 emptyQ::usage = "
