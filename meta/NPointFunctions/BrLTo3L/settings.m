@@ -22,7 +22,7 @@
 
 *)
 
-`settings`topologyReplacements =
+`settings`topology =
 {  Vectors -> (`topologyQ`penguinT@#&),
    Penguins -> (`topologyQ`penguinT@#&),
    Boxes -> (`topologyQ`box@#&)};

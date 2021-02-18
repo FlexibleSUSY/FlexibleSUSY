@@ -110,10 +110,6 @@ createGetSetOnce /@ {
 
 setInternalDirectory@DirectoryName@$Input;
 
-`settings`topologyReplacements::usage = "
-@brief A set of rules for exclude topologies routines used inside
-       FeynArts`CreateTopologies.";
-
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`vertex ~ SetAttributes ~ {Protected, Locked};
 
@@ -462,7 +458,7 @@ getSettings[] := Module[{file},
       "settings.m"};
    BeginPackage@"NPointFunctions`";
    Begin@"`internal`";
-   `settings`topologyReplacements = {};
+   `settings`topology = Default;
    `settings`diagrams = Default;
    `settings`amplitudes = Default;
    `settings`sum[`type`diagramSet] := {};

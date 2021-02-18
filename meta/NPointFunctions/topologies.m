@@ -84,7 +84,8 @@ Module[{topologyReplacements},
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)};
    getExcludeTopologies[] :=
    Module[{all, name, set},
-      set = Rule[SymbolName@First@#, Last@#]&/@`settings`topologyReplacements;
+      set = If[#===Default, {}, #]&@`settings`topology;
+      set = Rule[SymbolName@First@#, Last@#]&/@set;
       all = Join[topologyReplacements, set];
       FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
          ($Processes/.all)@#]];
