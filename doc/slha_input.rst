@@ -638,7 +638,11 @@ physical input parameters, which are not contained in a SLHA-compliant
 ======= ====================================== ============================== ==================
   0      alpha_em(0) in the Thompson limit      any positive double            1./137.035999074
   1      SM Higgs pole mass                     any positive double            125.09
+  2      Planck constant, reduced               any positive double            6.582119569e-25
+  3      Muon mean life                         any positive double            2.1969811e-6
+  4      Tau mean life                          any positive double            290.3e-15
 ======= ====================================== ============================== ==================
+
 
 
 MODSEL block (MODSEL)

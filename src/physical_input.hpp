@@ -38,6 +38,10 @@ public:
    enum Input : int {
       alpha_em_0,                ///< [0] alpha_em(0), thompson limit
       mh_pole,                   ///< [1] SM Higgs pole mass
+      hbar,                      ///< [2] Planck constant, reduced, [GeV*s]
+      muon_mean_life,            ///< [3] Muon mean life, [s]
+      tau_mean_life,             ///< [4] Tau mean life, [s]
+
       NUMBER_OF_INPUT_PARAMETERS ///< number of possible input parameters
    };
 
