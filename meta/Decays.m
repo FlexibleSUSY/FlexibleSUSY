@@ -1875,8 +1875,42 @@ If[Length@positions =!= 1, Quit[1]];
                            "result += " <> ampCall <> ";\n"
                         ] (* end of scalar loop *)
                   ],
-                  "result += " <> ampCall <> ";\n"
-                  ]] <> "}\n"
+                  If[
+                     GetHiggsBoson[] === First@diagram &&
+                           ( (TreeMasses`IsPhoton[diagram[[2]]] && TreeMasses`IsZBoson[diagram[[3]]]) || (TreeMasses`IsPhoton[diagram[[3]]] && TreeMasses`IsZBoson[diagram[[2]]])),
+                        If[
+                           (* the quark loop amplitude *)
+                           Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
+                           "auto temp_result = " <> ampCall <> ";\n" <>
+                           "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           TextFormatting`IndentText[
+                              Module[{pos1, post2, res},
+                                 StringJoin@Riffle[
+                                 MapIndexed[
+                                 (pos1 = Position[#1, First@fieldsInLoop, 1];
+                                 pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                                 If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                                 ])&, verticesForFACp]," &&\n"] <>
+                                 "\n&& result.m_decay/mInternal1 < 0.8\n"
+                              ] <>
+                              ") {\n" <>
+                              (* eq. 2.57 of hep-ph/0503172 *)
+                              "const double correction_S = 1 - get_alphas(context)/Pi;\n" <>
+                              "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
+                              "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
+                              "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
+                              "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
+                              "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n"
+                              (* correction_P should be 0 in mq->infinity, see eq. 2.30 of hep-ph/0503173 *)
+                           ] <> "}\n" <>
+                           "result += temp_result;\n",
+                           "result += " <> ampCall <> ";\n"
+                        ],
+                        "result += " <> ampCall <> ";\n"
+                  ]
+            ]] <> "}\n"
      ];
 
       {FinitePart,
