@@ -38,10 +38,11 @@ getActions::usage = "
 @returns A set of settings.";
 getActions[settings:Default] := {};
 getActions[settings:{Rule[_, {{___}, {___}}]..}] :=
-Module[{positiveRules, negativeRules, discardProcesses, clean},
-   positiveRules = settings /. Rule[s:_, {p:_, _}] :> Rule[s, p];
-   negativeRules = settings /. Rule[s:_, {_, n:_}] :> Rule[s, n];
-   discardProcesses = Complement[settings[[All, 1]], $Processes];
+Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
+   parsed = Rule[SymbolName@First@#, Last@#]&/@settings;
+   positiveRules = parsed /. Rule[s:_, {p:_, _}] :> Rule[s, p];
+   negativeRules = parsed /. Rule[s:_, {_, n:_}] :> Rule[s, n];
+   discardProcesses = Complement[parsed[[All, 1]], $Processes];
    clean = RuleDelayed[#, Sequence[]] &/@ $Processes;
    DeleteDuplicates@Join[
       DeleteDuplicates@Flatten[$Processes /. positiveRules, 1],
@@ -109,11 +110,17 @@ Module[{ daPairs, amplitudeNumbers, saveClassRules, viPairs, insertions, res},
 `action`diagramsCompact = Sequence[d:`type`diagramSet,
    s_String[t:_@__Symbol, c_Function]];
 
+secureSelect[input_, h_, c_] :=
+Module[{selected},
+   selected = FeynArts`DiagramSelect[h@input, c];
+   If[0 === Length@selected, Return@Null];
+   input[[1]] -> selected[[1, 2]]];
+secureSelect // secure;
+
 applyAction@`action`diagrams :=
 Module[{d = diagrams, h = Head@diagrams},
-   d = If[t@#[[1]], #[[1]] -> FeynArts`DiagramSelect[h@#, c][[1, 2]], #] &/@ d;
-   d = d /. Rule[FeynArts`Topology[_][__], FeynArts`Insertions[Generic][]] :>
-      Sequence[];
+   d = If[t@#[[1]], secureSelect[#, h, c], #] &/@ d;
+   d = d /. Null :> Sequence[];
    Print@s;
    printDiagramsInfo@d;
    d];

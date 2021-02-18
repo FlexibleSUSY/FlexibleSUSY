@@ -23,12 +23,12 @@
 *)
 
 `settings`topologyReplacements =
-{  MassiveVectorPenguins -> (`topologyQ`penguinT@#&),
-   ScalarPenguins -> (`topologyQ`penguinT@#&),
-   FlavourChangingBoxes -> (`topologyQ`box@#&)};
+{  Vectors -> (`topologyQ`penguinT@#&),
+   Scalars -> (`topologyQ`penguinT@#&),
+   Boxes -> (`topologyQ`box@#&)};
 
 `settings`diagrams =
-{  MassiveVectorPenguins ->
+{  Vectors ->
       {  {  "penguins: remove external leptons from loops"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
@@ -38,7 +38,7 @@
          {  "penguins: remove tree-like vector bosons"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`TreeFields@##, FeynArts`V]&]}},
-   ScalarPenguins ->
+   Scalars ->
       {  {  "penguins: remove external leptons from loops"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
@@ -48,7 +48,7 @@
          {  "penguins: remove tree-like scalar bosons"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`TreeFields@##, FeynArts`S]&]}},
-   FlavourChangingBoxes ->
+   Boxes ->
       {  {
             "boxes: remove external leptons from loops"[
                `topologyQ`box,
@@ -59,7 +59,7 @@
          {}}};
 
 `settings`amplitudes =
-{  MassiveVectorPenguins ->
+{  Vectors ->
       {  {  "penguins: remove tree-like massless vector bosons"[
                `topologyQ`penguinT,
                {UnsameQ, genericMass[FeynArts`V, 5], 0}]},

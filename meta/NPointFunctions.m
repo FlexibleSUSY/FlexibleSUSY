@@ -60,12 +60,6 @@ Irreducible::usage = "
 @brief Possible value for KeepProcesses. Excludes irreducible topologies.";
 Triangles::usage = "
 @brief Possible value for KeepProcesses. Keeps all triangle topologies.";
-ScalarPenguins::usage = "
-@brief Possible value for KeepProcesses. Observable-dependent behavior.";
-MassiveVectorPenguins::usage = "
-@brief Possible value for KeepProcesses. Observable-dependent behavior.";
-FlavourChangingBoxes::usage= "
-@brief Possible value for KeepProcesses. Onservable-dependent behavior.";
 
 Regularize::usage = "
 @brief Option for NPointFunctions`NPointFunction[].
@@ -368,8 +362,7 @@ a List of outgoing fields.
 the cache.
 @param ZeroExternalMomenta whether to set the external momenta to zero or leave
 them undetermined.
-@param KeepProcesses a list or single symbol of topologies to keep when
-calculation the n-point correlation function
+@param KeepProcesses A list or single symbol of topologies to keep.
 @returns the corresponding n-point correlation function
 @note only a loop level of 1 is currently supported
 @note the recognized regularization schemes are:
@@ -405,11 +398,6 @@ NPointFunction::errZeroExternalMomenta=
 "ZeroExternalMomenta must be True, False, ExceptLoops, OperatorsOnly.";
 NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
-NPointFunction::errKeepProcesses=
-"KeepProcesses must be sublist of
-{
-   `1`
-}.";
 NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
 "Only external scalars/fermions are supported (@todo FOR NOW).";
 NPointFunction::errUnknownOptions=
@@ -443,7 +431,9 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
          names = particleNamesFile,
          context = particleNamespaceFile,
          meta = FlexibleSUSY`$flexiblesusyMetaDir,
-         loopLevel = OptionValue@LoopLevel, keep = OptionValue@KeepProcesses,
+         loopLevel = OptionValue@LoopLevel,
+         keep = SymbolName/@If[List=!=Head@#, {#}, #]&@
+            OptionValue@KeepProcesses,
          momenta = OptionValue@ZeroExternalMomenta,
          onShell = OptionValue@OnShellFlag, scheme = OptionValue@Regularize,
          in = FANamesForFields[inFields, particleNamesFile],
@@ -494,8 +484,7 @@ Module[
       ip = TreeMasses`IsParticle,
       allowedParticles = Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion],(*@todo add |_?TreeMasses`IsVector*)
       definedOptions = Part[Options@NPointFunction,All,1],
-      unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]],
-      allProcesses={Irreducible,FlavourChangingBoxes,Triangles,ScalarPenguins,MassiveVectorPenguins,FlavourChangingBoxes}
+      unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]]
    },
    aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
    aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;
@@ -512,8 +501,6 @@ Module[
       aoq[MemberQ[{True,False,OperatorsOnly,ExceptLoops},x],NPointFunction::errZeroExternalMomenta]];
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
-   Cases[{opts},Rule[KeepProcesses,x_]:>
-      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errKeepProcesses,StringJoin@Riffle[ToString/@allProcesses,",\n   "]]];
    True
 ];
 internalNPointFunctionInputCheck // Utils`MakeUnknownInputDefinition;

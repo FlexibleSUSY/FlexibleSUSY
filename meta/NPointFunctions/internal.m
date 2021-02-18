@@ -32,8 +32,7 @@ SetOptions[FeynArts`InsertFields,
 
 Needs@"FormCalc`";Print[];
 FormCalc`$FCVerbose = 0;
-If[!DirectoryQ@NPointFunctions`$FCDir, CreateDirectory@NPointFunctions`$FCDir];
-SetDirectory@NPointFunctions`$FCDir;
+(If[!DirectoryQ@#, CreateDirectory@#]; SetDirectory@#;)&@NPointFunctions`$FCDir;
 
 (* Next Format makes some pattern generate mistakes. *)
 Format[FormCalc`DiracChain[FormCalc`Private`s1_FormCalc`Spinor,FormCalc`Private`om_,FormCalc`Private`g___,FormCalc`Private`s2_FormCalc`Spinor]] =.;
@@ -41,19 +40,11 @@ Needs@"Utils`";
 
 BeginPackage@"NPointFunctions`";
 
-{SetInitialValues, NPointFunctionFAFC}
-
-Off[General::shdw];
-{Irreducible, Triangles} ~ SetAttributes ~ {Protected, Locked};
-On[General::shdw];
-
-{
-   LorentzIndex, GenericSum, GenericIndex,
+{  SetInitialValues, NPointFunctionFAFC};
+{  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
-   DimensionalReduction, DimensionalRegularization, OperatorsOnly, ExceptLoops,
-   ScalarPenguins,
-   MassiveVectorPenguins, FlavourChangingBoxes
-} ~ SetAttributes ~ {Locked,Protected};
+   DimensionalReduction, DimensionalRegularization,
+   OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
 
 Begin@"`internal`";
 
@@ -101,15 +92,13 @@ Module[{set, get, once, value},
       Utils`AssertOrQuit[!TrueQ@once, set::errOnce];
       value = new;
       once = True;);
-   set // Utils`MakeUnknownInputDefinition;
-   Evaluate[set] ~ SetAttributes ~ {Protected, Locked};
+   secure@Evaluate@set;
 
    get::errNotSet = "The value should be set first.";
    get[] := (
       Utils`AssertOrQuit[TrueQ@once, get::errNotSet];
       value);
-   get // Utils`MakeUnknownInputDefinition;
-   Evaluate[get] ~ SetAttributes ~ {Protected, Locked};];
+   secure@Evaluate@get];
 createGetSetOnce // Utils`MakeUnknownInputDefinition;
 createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
 
@@ -507,8 +496,8 @@ NPointFunctionFAFC::usage = "
        FormCalc`.
 @returns A structure, representing NPF object.
 @todo If topologies are not generated, then check and return.";
-NPointFunctionFAFC[inFields_, outFields_] := Module[{
-      topologies, diagrams, amplitudes},
+NPointFunctionFAFC[inFields_, outFields_] :=
+Module[{topologies, diagrams, amplitudes},
    getSettings[];
    topologies = emptyQ@FeynArts`CreateTopologies[
       $LoopLevel,

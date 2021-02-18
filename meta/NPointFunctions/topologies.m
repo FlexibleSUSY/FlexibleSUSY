@@ -80,16 +80,16 @@ getExcludeTopologies::usage = "
 @returns A name of generated function.";
 Module[{topologyReplacements},
    topologyReplacements = {
-      Irreducible -> (FreeQ[#, FeynArts`Internal]&),
-      Triangles   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)};
+      "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
+      "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)};
    getExcludeTopologies[] :=
-   Module[{all, name},
-      all = Join[topologyReplacements, `settings`topologyReplacements];
+   Module[{all, name, set},
+      set = Rule[SymbolName@First@#, Last@#]&/@`settings`topologyReplacements;
+      all = Join[topologyReplacements, set];
       FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
          ($Processes/.all)@#]];
-      name];];
-getExcludeTopologies // Utils`MakeUnknownInputDefinition;
-getExcludeTopologies ~ SetAttributes ~ {Protected, Locked};
+      name];
+   getExcludeTopologies // secure;];
 
 End[];
 EndPackage[];

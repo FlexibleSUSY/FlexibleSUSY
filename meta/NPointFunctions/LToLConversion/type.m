@@ -50,12 +50,7 @@ Sequence[
    (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
    (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
    nucleus:_,
-   contribution:Alternatives[All,
-      NPointFunctions`noScalars,
-      NPointFunctions`Penguins,
-      NPointFunctions`ScalarPenguins,
-      NPointFunctions`MassiveVectorPenguins,
-      NPointFunctions`FlavourChangingBoxes]];
+   contribution:_Symbol|{__Symbol}];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};

@@ -96,37 +96,34 @@ npf /.
 `npf`clean // Utils`MakeUnknownInputDefinition;
 `npf`clean // Protect;
 
-`npf`create[obs:`type`observable] := Module[{
-      parsedCon,
-      npfU, npfD,
-      l=SARAH`Lorentz, p=SARAH`Mom, m=SARAH`Mass,
-      fields,
-      dim6,
-      codeU, codeD},
+`npf`parse[obs:`type`observable] :=
+Module[{parsed},
+   parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
+   Switch[parsed,
+      {"All"},
+         {Vectors, Scalars, Boxes},
+      {"NoScalars"},
+         {Vectors, Boxes},
+      {"Penguins"},
+         {Vectors, Scalars},
+      _,
+         Symbol/@parsed]];
+`npf`parse // Utils`MakeUnknownInputDefinition;
+`npf`parse // Protect;
 
-   parsedCon = Switch[con,
-      All, {
-            NPointFunctions`MassiveVectorPenguins,
-            NPointFunctions`ScalarPenguins,
-            NPointFunctions`FlavourChangingBoxes},
-      NPointFunctions`noScalars, {
-            NPointFunctions`MassiveVectorPenguins,
-            NPointFunctions`FlavourChangingBoxes},
-      NPointFunctions`Penguins, {
-            NPointFunctions`ScalarPenguins,
-            NPointFunctions`MassiveVectorPenguins},
-      _, con];
-
+`npf`create[obs:`type`observable] :=
+Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
+   keep = `npf`parse@obs;
    Utils`FSFancyLine@"<";
-   Print["Calculation of "<>`cxx`in<>"- to "<>`cxx`out<>"- conversion started"];
-
+   Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
+      keep, ",\n                ", SymbolName]<>" started"];
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in,#},{out,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
-      NPointFunctions`KeepProcesses -> parsedCon,
-      NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark,SARAH`DownQuark};
+      NPointFunctions`KeepProcesses -> keep,
+      NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
    {npfU, npfD} = `npf`clean/@{npfU, npfD};
 
    fields[SARAH`UpQuark] = Flatten@NPointFunctions`internal`getProcess@npfU;
@@ -153,8 +150,6 @@ npf /.
       npfU, `cxx`classU, SARAH`Delta, dim6@SARAH`UpQuark][[2]];
    codeD = NPointFunctions`CreateCXXFunctions[
       npfD, `cxx`classD, SARAH`Delta, dim6@SARAH`DownQuark][[2]];
-
-   Print["Calculation of "<>`cxx`in<>"- to "<>`cxx`out<>"- conversion finished"];
    Utils`FSFancyLine@">";
 
    {  DeleteDuplicates@Join[

@@ -91,7 +91,7 @@ create // Utils`MakeUnknownInputDefinition;
 create // Protect;
 
 `npf`box[list:{__}] :=
-Module[{box = NPointFunctions`FlavourChangingBoxes, res = {{}, ""}},
+Module[{box = Boxes, res = {{}, ""}},
    If[!FreeQ[`npf`parse/@list, box],
       Utils`FSFancyLine@"<";
       Print["Calculation for "<>SymbolName@box<>" started"];
@@ -104,19 +104,18 @@ Module[{box = NPointFunctions`FlavourChangingBoxes, res = {{}, ""}},
 `npf`box // Utils`MakeUnknownInputDefinition;
 `npf`box // Protect;
 
-`npf`parse@`type`observable := Switch[proc,
-   All,
-      {  NPointFunctions`MassiveVectorPenguins,
-         NPointFunctions`ScalarPenguins,
-         NPointFunctions`FlavourChangingBoxes},
-   NPointFunctions`noScalars,
-      {  NPointFunctions`MassiveVectorPenguins,
-         NPointFunctions`FlavourChangingBoxes},
-   NPointFunctions`Penguins,
-      {  NPointFunctions`ScalarPenguins,
-         NPointFunctions`MassiveVectorPenguins},
-   _List, proc,
-   _, {proc}];
+`npf`parse@`type`observable :=
+Module[{parsed},
+   parsed = SymbolName/@If[Head@# === List, #, {#}]&@proc;
+   Switch[parsed,
+      {"All"},
+         {Vectors, Scalars, Boxes},
+      {"NoScalars"},
+         {Vectors, Boxes},
+      {"Penguins"},
+         {Vectors, Scalars},
+      _,
+         Symbol/@parsed]];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 
@@ -124,9 +123,9 @@ Module[{box = NPointFunctions`FlavourChangingBoxes, res = {{}, ""}},
 Module[{keep, peng, out, boxQ},
    boxQ = True;
    keep = `npf`parse@obs;
-   peng = Complement[keep, {NPointFunctions`FlavourChangingBoxes}];
+   peng = Complement[keep, {Boxes}];
    Utils`FSFancyLine@"<";
-   Print["Calculation for "<>Utils`StringJoinWithSeparator[
+   Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
       keep, ",\n                ", SymbolName]<>" started"];
    Switch[peng,
       (* no boxes *) keep,
