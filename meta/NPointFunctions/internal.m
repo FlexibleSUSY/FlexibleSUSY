@@ -46,6 +46,8 @@ BeginPackage@"NPointFunctions`";
    DimensionalReduction, DimensionalRegularization,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
 
+$InternalDirectory = DirectoryName@$Input;
+
 Begin@"`internal`";
 
 secure[sym:_Symbol] :=
@@ -103,12 +105,9 @@ createGetSetOnce // Utils`MakeUnknownInputDefinition;
 createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
 
 createGetSetOnce /@ {
-   {InternalDirectory, _String},
    {SubexpressionRules, {__}},
    {AmplitudeRules, {__}},
    {SettingsFile, {Rule[{__Symbol}, _String]..}}};
-
-setInternalDirectory@DirectoryName@$Input;
 
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`vertex ~ SetAttributes ~ {Protected, Locked};
@@ -165,10 +164,10 @@ Module[{filter, rules, indices},
    `type`field[_Integer,
       {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
 
-Get@FileNameJoin@{getInternalDirectory[], "actions.m"};
-Get@FileNameJoin@{getInternalDirectory[], "chains.m"};
-Get@FileNameJoin@{getInternalDirectory[], "time.m"};
-Get@FileNameJoin@{getInternalDirectory[], "topologies.m"};
+Get@FileNameJoin@{$InternalDirectory, "actions.m"};
+Get@FileNameJoin@{$InternalDirectory, "chains.m"};
+Get@FileNameJoin@{$InternalDirectory, "time.m"};
+Get@FileNameJoin@{$InternalDirectory, "topologies.m"};
 
 define[getTopology, {d:`type`diagram} :> First@d];
 
@@ -454,7 +453,7 @@ getSettings::usage = "
       ones.
 @todo Define default first, then redefine during load (pure functions?)";
 getSettings[] := Module[{file},
-   file = FileNameJoin@{getInternalDirectory[], SymbolName@Head@$Observable,
+   file = FileNameJoin@{$InternalDirectory, SymbolName@Head@$Observable,
       "settings.m"};
    BeginPackage@"NPointFunctions`";
    Begin@"`internal`";
@@ -463,8 +462,8 @@ getSettings[] := Module[{file},
    `settings`amplitudes = Default;
    `settings`sum = Default;
    `settings`massless = Default;
-   `settings`momenta = {};
-   `settings`regularization = {};
+   `settings`momenta = Default;
+   `settings`regularization = Default;
    `settings`order = Default;
    `settings`chains = Default;
    If[FileExistsQ@file, Get@file;];
@@ -580,7 +579,7 @@ Module[{scheme, replacements, f},
    scheme = Switch[$Scheme, DimensionalReduction, 4,
                             DimensionalRegularization, D];
    f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
-   If[`settings`regularization === {},
+   If[`settings`regularization === Default,
       Array[scheme&, getClassAmount@diagrams],
       replacements = Transpose[f /@ `settings`regularization];
       Flatten[Switch[ Count[First/@#,True],
@@ -602,7 +601,7 @@ define[getMomSettings, {diagrams:`type`diagramSet} :>
          replacements,
          f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &
       },
-      If[`settings`momenta === {},
+      If[`settings`momenta === Default,
          Array[Automatic&, getClassAmount@diagrams],
          replacements = Transpose[f /@ `settings`momenta];
          Flatten[Switch[ Count[First/@#,True],
