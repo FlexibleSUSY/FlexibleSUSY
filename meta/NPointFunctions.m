@@ -455,7 +455,6 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
          SetDirectory@dir;
          Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
 
-         NPointFunctions`SetInitialValues[];
          NPointFunctions`NPointFunctionFAFC[ToExpression@in, ToExpression@out],
          subKernel,
          DistributedContexts -> None];];

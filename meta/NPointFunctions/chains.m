@@ -159,7 +159,7 @@ identifySpinors::usage = "
 @returns Modified rules with inserted fermion names.";
 identifySpinors[rules:{Rule[_Symbol, _]...}, set:`type`amplitudeSet] :=
 Module[{id, idf, ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
-   id = MapIndexed[#2[[1]]->#1&, getField[set, All] //. getFieldRules[]];
+   id = MapIndexed[#2[[1]]->#1&, getField[set, All] //. $FieldRules];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
    rules /. ch:FormCalc`DiracChain[__] :> idf@ch];

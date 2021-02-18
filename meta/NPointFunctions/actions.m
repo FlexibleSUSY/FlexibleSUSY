@@ -82,6 +82,16 @@ getTruePositions // secure;
    {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
    text_String[topologyQ_, {function:UnsameQ, name_, value_}]];
 
+getClassVariables[amp:`type`amplitude] := amp[[4, 1]];
+getClassVariables // secure;
+
+getClassInsertions[amp:`type`amplitude] := amp[[4, 2]];
+getClassInsertions // secure;
+
+getClassRules[amp:`type`amplitude] :=
+   Thread[getClassVariables@amp -> Transpose[List@@getClassInsertions@amp]];
+getClassRules // secure;
+
 applyAction@`action`amplitudes :=
 Module[{ daPairs, amplitudeNumbers, saveClassRules, viPairs, insertions, res},
    daPairs = getAmplitudeNumbers[diagrams, topologyQ];

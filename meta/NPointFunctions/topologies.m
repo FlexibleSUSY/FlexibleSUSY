@@ -23,6 +23,21 @@
 BeginPackage@"NPointFunctions`";
 Begin@"NPointFunctions`internal`";
 
+define::usage = "
+@brief Defines a set of function with a given name in a safe way.
+@param s A symbol, which represent a function name.
+@param e A sequence of delayed rules. On lhs there is a list with pattern for a
+       new function, on rhs there is function body.";
+Module[{impl},
+   impl[s:_Symbol, RuleDelayed[{p:___}, d:_]] := SetDelayed[s[p], d];
+   impl ~ SetAttributes ~ {HoldAllComplete};
+   define[s:_Symbol, e:RuleDelayed[{___},_]..] :=
+   (  impl[s, ##] &@@@ Hold /@ {e};
+      s // Utils`MakeUnknownInputDefinition;
+      Protect@s;);];
+define // Utils`MakeUnknownInputDefinition;
+define ~ SetAttributes ~ {HoldAllComplete, Protected};
+
 adjace[topology:`type`topology] :=
 Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
    ext = Count[topology, FeynArts`Incoming|FeynArts`Outgoing|FeynArts`External,

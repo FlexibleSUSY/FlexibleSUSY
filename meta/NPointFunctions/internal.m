@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 (* :Copyright:
 
    ====================================================================
@@ -40,13 +38,11 @@ Needs@"Utils`";
 
 BeginPackage@"NPointFunctions`";
 
-{  SetInitialValues, NPointFunctionFAFC};
+{  NPointFunctionFAFC};
 {  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
    DimensionalReduction, DimensionalRegularization,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
-
-$InternalDirectory = DirectoryName@$Input;
 
 Begin@"`internal`";
 
@@ -54,150 +50,30 @@ secure[sym:_Symbol] :=
 Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
-Module[{impl},
+$InternalDirectory = DirectoryName@$Input;
+Get@FileNameJoin@{$InternalDirectory, #<>".m"}&/@
+   {"type", "rules", "actions", "chains", "topologies"};
 
-impl[s:_Symbol, RuleDelayed[{p:___}, d:_]] :=
-   SetDelayed[s[p], d];
-impl ~ SetAttributes ~ {HoldAllComplete};
+getTopology[d:`type`diagram] := First@d;
+getTopology // secure;
 
-define::usage = "
-@brief Defines a set of function with a given name in a safe way.
-@param s A symbol, which represent a function name.
-@param e A sequence of delayed rules. On lhs there is a list with pattern for a
-       new function, on rhs there is function body.
-@param a A set of attributes to be applied to a new function. Default is a
-       protected-locked combination.";
-define[s:_Symbol, e:RuleDelayed[{___},_].., a:{__Symbol}:{Protected, Locked}
-] := (
-   impl[s, ##] &@@@ Hold /@ {e};
-   s // Utils`MakeUnknownInputDefinition;
-   s ~ SetAttributes ~ a;
-);
-define // Utils`MakeUnknownInputDefinition;
-define ~ SetAttributes ~ {HoldAllComplete, Protected, Locked};
+getInsertions[d:`type`diagram] := Last@d;
+getInsertions // secure;
 
-];
+indexGeneric[index:_Integer] := FeynArts`Index[Generic, index];
+indexGeneric // secure;
 
-createGetSetOnce::usage = "
-@brief Defines safe getter and setter for a given symbol by prepending \"set\"
-       and \"get\" in front of it. This variable can be set only once.
-@param sym A symbol, which serves as a root name for a new functions, i.e. for
-       MySymbol symbol setMySymbol and getMySymbol will be created.
-@param pattern An expression, which will be used for a pattern for a set
-       function, i.e. it will have the form setMySymbol[new:pattern].";
-createGetSetOnce[{sym:_Symbol, pattern:_}] :=
-Module[{set, get, once, value},
-   set = Symbol["set"<>SymbolName@sym];
-   get = Symbol["get"<>SymbolName@sym];
-   set::errOnce = "The value can be set only once.";
-   set[new:pattern] := (
-      Utils`AssertOrQuit[!TrueQ@once, set::errOnce];
-      value = new;
-      once = True;);
-   secure@Evaluate@set;
+genericMass[field:`type`field, index:_Integer] :=
+   FeynArts`Mass[field@indexGeneric@index, `type`massType];
+genericMass[field:`type`field] :=
+   FeynArts`Mass[field@`type`indexGeneric, `type`massType];
+genericMass // secure;
 
-   get::errNotSet = "The value should be set first.";
-   get[] := (
-      Utils`AssertOrQuit[TrueQ@once, get::errNotSet];
-      value);
-   secure@Evaluate@get];
-createGetSetOnce // Utils`MakeUnknownInputDefinition;
-createGetSetOnce ~ SetAttributes ~ {Protected, Locked};
-
-createGetSetOnce /@ {
-   {SubexpressionRules, {__}},
-   {AmplitudeRules, {__}},
-   {SettingsFile, {Rule[{__Symbol}, _String]..}}};
-
-`type`vertex = FeynArts`Vertex[_Integer][_Integer];
-`type`vertex ~ SetAttributes ~ {Protected, Locked};
-
-`type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][`type`vertex,`type`vertex,Repeated[FeynArts`Field[_Integer],{0,1}]];
-`type`propagator ~ SetAttributes ~ {Protected, Locked};
-
-`type`topology = FeynArts`Topology[_Integer][`type`propagator..];
-`type`topology // Protect;
-
-`type`diagram = Rule[`type`topology, FeynArts`Insertions[Generic][__]];
-
-`type`diagramSet = FeynArts`TopologyList[_][`type`diagram..];
-
-`type`amplitude = FeynArts`FeynAmp[
-   FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
-   Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]],
-   _,
-   {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]
-];
-`type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
-
-`type`indexCol = FeynArts`Index[Global`Colour,_Integer];
-`type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
-`type`indexGeneric = FeynArts`Index[Generic, _Integer];
-Module[{filter, rules, indices},
-   filter = (FeynArts`Indices -> e_) :> e;
-   rules = {  FeynArts`Index -> Identity,
-              Global`Colour :> {},
-              Global`Gluon :> {}};
-   indices = Cases[FeynArts`M$ClassesDescription, filter, Infinity];
-   indices = DeleteDuplicates@Flatten[indices //. rules];
-   `type`indexGeneration = FeynArts`Index[Alternatives@@indices, _Integer];];
-
-`type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
-`type`genericField = `type`field[`type`indexGeneric];
-
-`type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
-`type`fc`external = {`type`fc`particle|-`type`fc`particle,
-   FormCalc`k@_Integer, `type`fc`mass, {}};
-`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
-`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
-`type`fc`amplitudeSet = {`type`fc`amplitude..};
-
-`type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
-`type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
-
-`type`massType = Repeated[Alternatives[FeynArts`Loop, FeynArts`Internal], {0, 1}];
-
-`type`genericMass = FeynArts`Mass[
-   `type`field[`type`indexGeneric], `type`massType];
-`type`specificMass = FeynArts`Mass[
-   `type`field[_Integer,
-      {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
-
-Get@FileNameJoin@{$InternalDirectory, "actions.m"};
-Get@FileNameJoin@{$InternalDirectory, "chains.m"};
-Get@FileNameJoin@{$InternalDirectory, "time.m"};
-Get@FileNameJoin@{$InternalDirectory, "topologies.m"};
-
-define[getTopology, {d:`type`diagram} :> First@d];
-
-define[getInsertions, {d:`type`diagram} :> Last@d];
-
-define[indexGeneric, {index:_Integer} :> FeynArts`Index[Generic, index]];
-
-define[genericMass,
-   {field:`type`field, index:_Integer} :>
-   FeynArts`Mass[field@indexGeneric@index, `type`massType],
-
-   {field:`type`field} :>
-   FeynArts`Mass[field@`type`indexGeneric, `type`massType]
-];
-
-define[getClassVariables, {amp:`type`amplitude} :> amp[[4, 1]]];
-
-define[getClassInsertions, {amp:`type`amplitude} :> amp[[4, 2]]];
-
-define[getClassRules, {amp:`type`amplitude} :>
-   Thread[getClassVariables@amp -> Transpose[List@@getClassInsertions@amp]]
-];
-
-define[getProcess,
-   {set:`type`diagramSet|`type`amplitudeSet} :>
-   Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]],
-
-   {set:`type`fc`amplitudeSet} :>
-   Part[Head@Part[set, 1], 1]
-];
+getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
+   Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
+getProcess[set:`type`fc`amplitudeSet] :=
+   Part[Head@Part[set, 1], 1];
+getProcess // secure;
 
 getExternalMasses[set:`type`fc`amplitudeSet] :=
    Flatten[List@@getProcess@set, 1][[All, 3]];
@@ -222,229 +98,17 @@ fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
    fieldPattern[d, #] &/@ a;
 fieldPattern // secure;
 
-SetInitialValues[] :=
-Module[{fieldNames},
-   fieldNames = getFieldNames[];
-   setFieldRules@fieldNames;
-   setSubexpressionRules@Join[
-      getMassRules@fieldNames,
-      getFieldRules[],
-      getCouplingRules[],
-      getGeneralRules[]];
-   setAmplitudeRules@Join[
-      getSubexpressionRules[],
-      getSumRules[],
-      {FeynArts`IndexSum -> Sum}];];
-SetInitialValues // secure;
-
-getFieldNames::usage = "
-@brief Loads and connects particle definitions for SARAH` and FeynArts`.
-@returns List of Lists, each contains four String entries:
-         1) SARAH` context of particle;
-         2) SARAH` name of particle;
-         3) FeynArts` type of particle;
-         4) FeynArts` integer number of particle.";
-define[getFieldNames, {} :>
-   Module[{
-         regex = "(\\w+): ([SFVU])\\[(\\d+)\\]",
-         lines = Utils`ReadLinesInFile@$ParticleFile,
-         namespaceRules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@$ContextFile,
-         names
-      },
-      names = StringCases[lines, RegularExpression@regex :> {"$1","$2","$3"}] ~ Flatten ~ 1;
-      names /. namespaceRules
-   ]
-];
-
-getMassRules::usage = "
-@brief Generates mass replacement rules for a given set of particles.
-@param fieldNames Set of field names.
-@returns A List of replacements rules for masses.";
-define[getMassRules, {fieldNames:{{_, _, _, _}..}} :>
-   Module[{
-         faMasses = Symbol["Mass" <> #[[2]]] &/@ fieldNames,
-         sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldNames,
-         massRules
-      },
-      massRules = MapThread[
-         {
-            #1[index_] :> SARAH`Mass@#2@{Symbol["SARAH`gt" <> StringTake[SymbolName@index, -1]]},
-            #1[indices__] :> SARAH`Mass@#2@indices,
-            #1 :> SARAH`Mass@#2
-         } &,
-         {faMasses, sarahNames}
-      ];
-      Append[Flatten@massRules,
-         FeynArts`Mass[field_, _ : Null] :> SARAH`Mass[field]
-      ]
-   ]
-];
-
-Module[{once, rules},
-
-setFieldRules::errOnce = "The value can be set only once.";
-setFieldRules::usage = "
-@brief Generates field replacement rules for a given set of particles.
-@param fieldNames Set of field names.
-@returns A List of replacements rules for fields.";
-define[setFieldRules, {fieldNames:{{_, _, _, _}..}} :>
-   Module[{
-         fullNames = Map[ToExpression, {#[[1]] <> #[[2]], #[[3]], #[[4]]} &/@ fieldNames, 2],
-         bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F
-      },
-      Utils`AssertOrQuit[Head@once === Symbol, setFieldRules::errOnce];
-      rules = Join[
-         # /. {n_, t_, i_} :> Rule[t@i, n],
-         # /. {n_, t_, i_} :> RuleDelayed[t[i, {ind__}], n@{ind}],
-         # /.
-         {
-            {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n], Susyno`LieGroups`conj@n],
-            {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n], SARAH`bar@n]
-         },
-         # /.
-         {
-            {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n@{ind__}], Susyno`LieGroups`conj@n@{ind}],
-            {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}], SARAH`bar@n@{ind}]
-         },
-         {
-            ind:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@ind],
-            ind:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@ind],
-            ind:`type`indexGlu :> (Print["Warning: check indexRules of internal.m"];Symbol["SARAH`ct" <> ToString@Last@ind])
-         },
-         {
-            FeynArts`S -> GenericS,
-            FeynArts`F -> GenericF,
-            FeynArts`V -> GenericV,
-            FeynArts`U -> GenericU
-         },
-         {
-            Times[-1,field:_GenericS|_GenericV] :> Susyno`LieGroups`conj@field,
-            Times[-1,field:_GenericF|_GenericU] :> SARAH`bar@field
-         }
-      ] &@ fullNames;
-      once = {};
-   ]
-];
-
-getFieldRules::errNotSet = "The value should be set first.";
-define[getFieldRules, {} :> (
-   Utils`AssertOrQuit[Head@once =!= Symbol, getFieldRules::errNotSet];
-   rules)
-];
-
-];
-
-define[getExternalMomentumRules,
-   {option:True|False|OperatorsOnly|ExceptLoops, amplitudes:`type`amplitudeSet} :>
-   Module[{
-         fsFields
-      },
-      Switch[option,
-         True,
-            {SARAH`Mom[_Integer,_] :> 0},
-         False|OperatorsOnly|ExceptLoops,
-            (
-               fsFields = getField[amplitudes, All] //. getFieldRules[];
-               {SARAH`Mom[i_Integer, lorIndex_] :> SARAH`Mom[fsFields[[i]], lorIndex]}
-            )
-      ]
-   ]
-];
-
-define[getSumRules, {} :>
-   {
-      FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
-      Times[e:_, FeynArts`SumOver[i:_Symbol, max:_Integer]] :>
-         SARAH`sum[i, 1, max, e],
-      Times[expr:_, FeynArts`SumOver[index:_Symbol, {min:_Integer, max:_Integer}]] :>
-         SARAH`sum[index, min, max, expr],
-      SARAH`sum[i:_Symbol, _Integer, max:_Integer, FeynArts`SumOver[_Symbol, max2:_Integer]] :>
-         SARAH`sum[i, 1, max, max2],
-      SARAH`sum[i:_Symbol, _Integer, max:_Integer, FeynArts`SumOver[_, {min2:_Integer, max2:_Integer}]] :>
-         SARAH`sum[i, 1, max, max2-min2]
-   }
-];
-
-getGeneralRules::usage = "
-@brief General translation rules from FeynArts/FormCalc to FlexibleSUSY
-       language.
-@note See sec. 4.4. of FormCalc manual for details.";
-define[getGeneralRules, {} :>
-   ({
-      FormCalc`Finite -> 1,
-      FormCalc`Den[a:_,b:_] :> 1/(a-b),
-      FormCalc`Pair[a:_,b:_] :> SARAH`sum[#, 1, 4, SARAH`g[#, #]*Append[a, #]*Append[b, #]],
-      f:`type`genericField :> Head[f][GenericIndex@Last@Last@f],
-      FormCalc`k[i:_Integer, pairIndex:___] :> SARAH`Mom[i, pairIndex]
-   } &@ Unique@"SARAH`lt")
-];
-
-Module[{PL, PR, MT, FV, g, md},
-
-   {PL, PR} = Alternatives[
-      FeynArts`NonCommutative@Global`ChiralityProjector@#,
-
-      FeynArts`NonCommutative[
-         Global`DiracMatrix@FeynArts`KI1@3,
-         Global`ChiralityProjector@#
-      ]
-   ] &/@ {-1, 1};
-
-   Quiet[
-      MT[i1:_Symbol, i2:_Symbol] :=
-         Global`MetricTensor[FeynArts`KI1[i1:_Integer], FeynArts`KI1[i2:_Integer]];
-      If[FormCalc`$FormCalc < 9.7,
-
-         FV[i1:_Symbol, i2:_Symbol, Repeated[_, {0, 1}]] :=
-            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer];,
-
-         FV[i1:_Symbol, i2:_Symbol] := Global`FourVector[
-            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
-            FeynArts`KI1[3]
-         ];
-         FV[i1:_Symbol, i2:_Symbol, i3:_Symbol] := Global`FourVector[
-            FeynArts`Mom[i1:_Integer] - FeynArts`Mom[i2:_Integer],
-            FeynArts`KI1[i3:_Integer]
-         ];
-      ],
-      RuleDelayed::rhs
-   ];
-
-   g[f:{__}, i1:_Integer, i2:_Integer] :=
-      SARAH`g[LorentzIndex@Part[f, i1], LorentzIndex@Part[f, i2]];
-
-   md[fields:{__}, i1:_Integer, i2:_Integer] :=
-      SARAH`Mom@Part[fields, i1] - SARAH`Mom@Part[fields, i2];
-
-   md[fields:{__}, i1:_Integer, i2:_Integer, i3:_Integer] :=
-      SARAH`Mom[Part[fields, i1], LorentzIndex@Part[fields, i3]] -
-      SARAH`Mom[Part[fields, i2], LorentzIndex@Part[fields, i3]];
-
-   With[{
-         f = FeynArts`G[_][0][fields__], s = SARAH`Cp[fields]
-      },
-      define[getCouplingRules, {} :>
-         {
-            f@1 :> s@1,
-            f@PL :> s@SARAH`PL,
-            f@PR :> s@SARAH`PR,
-            f@MT[i1, i2] :> s@g[{fields}, i1, i2],
-            f@FV[i1, i2] :> s@md[{fields}, i1, i2],
-
-            f[
-               FV[i2, i1, i3] * MT[i1, i2] +
-               FV[i1, i3, i2] * MT[i1, i3] +
-               FV[i3, i2, i1] * MT[i2, i3]
-            ] :>
-            s[
-               md[{fields}, i2, i1, i3] * g[{fields}, i1, i2],
-               md[{fields}, i1, i3, i2] * g[{fields}, i1, i3],
-               md[{fields}, i3, i2, i1] * g[{fields}, i2, i3]
-            ]
-         }
-      ];
-   ];
-];
+getExternalMomentumRules[option:True|False|OperatorsOnly|ExceptLoops,
+   amplitudes:`type`amplitudeSet] :=
+Module[{fsFields},
+   Switch[option,
+      True,
+         {SARAH`Mom[_Integer,_] :> 0},
+      False|OperatorsOnly|ExceptLoops,
+            fsFields = getField[amplitudes, All] //. $FieldRules;
+            {SARAH`Mom[i_Integer, lorIndex_] :>
+               SARAH`Mom[fsFields[[i]], lorIndex]}]];
+getExternalMomentumRules // secure;
 
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
@@ -502,14 +166,12 @@ Module[{topologies, diagrams, amplitudes},
 
    debugMakePictures[
       diagrams,
-      StringJoin[ToString /@ (Join[getField[amplitudes, In],getField[amplitudes, Out]] //. getFieldRules[] /. e_[{_}]:>e)]
+      StringJoin[ToString /@ (Join[getField[amplitudes, In],getField[amplitudes, Out]] //. $FieldRules /. e_[{_}]:>e)]
    ];
 
-   {
-      {getField[amplitudes, In], getField[amplitudes, Out]} //. getFieldRules[],
-      calculateAmplitudes[diagrams, amplitudes]
-   }
-];
+   {  {  getField[amplitudes, In], getField[amplitudes, Out]} //. $FieldRules,
+         calculateAmplitudes[diagrams, amplitudes]}];
+NPointFunctionFAFC // secure;
 
 getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on C++ level.
@@ -534,16 +196,12 @@ collectSame::usage = "
           {a->{{1, 3}, {1, 3}}, b->{{2, 2, 2}}}.
 @param list A list of rules.
 @return A list of rules.";
-define[collectSame, {list:{Rule[_, {__}]...}} :>
-   Module[{
-         tally = Tally[First /@ list]
-      },
-      If[#2 == 1,
-         {#1/.list},
-         #1 -> Transpose@Cases[list, Rule[#1, el_] :> el]
-      ]&@@#&/@tally
-   ]
-];
+collectSame[list:{Rule[_, {__}]...}] :=
+Module[{tally = Tally[First /@ list]},
+   If[#2 == 1,
+      {#1/.list},
+      #1 -> Transpose@Cases[list, Rule[#1, el_] :> el]]&@@#&/@tally];
+collectSame // secure;
 
 getMasslessSettings::usage = "
 @brief In some topologies field insertions can lead to physically incorrect
@@ -592,23 +250,18 @@ getMomSettings::usage = "
          amplitude.";
 getMomSettings::errOverlap = "
 Topology rules in `.`settings`.`momenta overlap.";
-define[getMomSettings, {diagrams:`type`diagramSet} :>
-   Module[{
-         replacements,
-         f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &
-      },
-      If[`settings`momenta === Default,
-         Array[Automatic&, getClassAmount@diagrams],
-         replacements = Transpose[f /@ `settings`momenta];
-         Flatten[Switch[ Count[First/@#,True],
-            0, Array[Automatic&, Length[False /. #]],
-            1, True /. #,
-            _, Utils`AssertOrQuit[False, getMomSettings::errOverlap]
-            ] &/@ replacements
-         ]
-      ]
-   ]
-];
+getMomSettings[diagrams:`type`diagramSet] :=
+Module[{replacements, f},
+   f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
+   If[`settings`momenta === Default,
+      Array[Automatic&, getClassAmount@diagrams],
+      replacements = Transpose[f /@ `settings`momenta];
+      Flatten[Switch[ Count[First/@#,True],
+         0, Array[Automatic&, Length[False /. #]],
+         1, True /. #,
+         _, Utils`AssertOrQuit[False, getMomSettings::errOverlap]
+         ] &/@ replacements]]];
+getMomSettings // secure;
 
 modify::usage = "
 @brief Changes amplitudes and diagrams according to `settings`diagrams and
@@ -638,48 +291,40 @@ getAmplitudeNumbers::usage = "
 @returns {<Rule>} List of rules of the form <boolean>->{<integer>..}. LHS
          stands for the topology, RHS gives numbers of classes (and the numbers
          of amplitudes the same time).";
-define[getAmplitudeNumbers, {diagrams:`type`diagramSet, critFunction_} :>
-   Module[
-      {
-         topologies = List@@First/@diagrams,
-         genNums = Length/@(List@@Last/@diagrams),
-         numRegions,takeOrNot
-      },
-      numRegions = Array[Range[Plus@@genNums[[1;;#-1]]+1,Plus@@genNums[[1;;#]]]&,Length@genNums];
-      takeOrNot = Array[TrueQ@critFunction@Part[topologies,#]&,Length@topologies];
-      MapThread[#1->#2&,{takeOrNot,numRegions}]
-   ]
-];
+getAmplitudeNumbers[diagrams:`type`diagramSet, critFunction_] :=
+Module[{topologies, genNums, numRegions, takeOrNot},
+   topologies = List@@First/@diagrams;
+   genNums = Length/@(List@@Last/@diagrams);
+   numRegions = Array[Range[Plus@@genNums[[1;;#-1]]+1,Plus@@genNums[[1;;#]]]&,Length@genNums];
+   takeOrNot = Array[TrueQ@critFunction@Part[topologies,#]&,Length@topologies];
+   MapThread[#1->#2&,{takeOrNot,numRegions}]];
+getAmplitudeNumbers // secure;
 
-define[printDiagramsInfo, {diagrams:`type`diagramSet, where_String:" "} :>
-   Module[{
-         nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True],
-         nClasses = getClassAmount@diagrams
-      },
-      Print[where,"in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];
-   ]
-];
+printDiagramsInfo[diagrams:`type`diagramSet, where_String:" "] :=
+Module[{nGeneric, nClasses},
+   nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True];
+   nClasses = getClassAmount@diagrams;
+   Print[where,"in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];];
+printDiagramsInfo // secure;
 
-define[getClassAmount, {set:`type`diagramSet} :>
-   Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True]
-];
+getClassAmount[set:`type`diagramSet] :=
+   Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
+getClassAmount // secure;
 
-define[debugMakePictures, {diagrams:`type`diagramSet, name_String:"classes"} :>
-   Module[{
-         out = {}, directory = FileNameJoin[Most[FileNameSplit@@FeynArts`$Model]]
-      },
-      DeleteFile@FileNames@"*class_*.jpg";
-      Export["class.jpg",FeynArts`Paint[diagrams,
-         FeynArts`PaintLevel -> {FeynArts`Classes},
-         FeynArts`ColumnsXRows -> 1,
-         FeynArts`SheetHeader -> None,
-         FeynArts`Numbering -> FeynArts`Simple,
-         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
-      ]];
+debugMakePictures[diagrams:`type`diagramSet, name_String:"classes"] :=
+Module[{out = {}, directory},
+   directory = DirectoryName[FeynArts`$Model<>".mod"];
+   DeleteFile@FileNames@"*class_*.jpg";
+   Export["class.jpg",FeynArts`Paint[diagrams,
+      FeynArts`PaintLevel -> {FeynArts`Classes},
+      FeynArts`ColumnsXRows -> 1,
+      FeynArts`SheetHeader -> None,
+      FeynArts`Numbering -> FeynArts`Simple,
+      DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
+   ]];
 
-      Put[out, FileNameJoin@{directory, name<>".m"}];
-   ]
-];
+   Put[out, FileNameJoin@{directory, name<>".m"}]];
+debugMakePictures // secure;
 
 getFieldInsertions::usage = "
 @brief Applies FindGenericInsertions[] to a set of diagrams or one.
@@ -690,13 +335,11 @@ getFieldInsertions::usage = "
          (for all generic fields) of List (for all class fields) of rules
          {{{x->y,..},..},..}. For a set of diagrams, this construct is further
          transformed.";
-define[getFieldInsertions,
-   {set:`type`diagramSet} :>
-   (Map[Last, #, {3}] &@ Flatten[ getFieldInsertions /@ (List @@ set), 1]),
-
-   {diag:`type`diagram, numQ:True|False:False} :>
-   (FindGenericInsertions[#, numQ] &/@ Apply[List, getInsertions@diag, {0, 1}])
-];
+getFieldInsertions[set:`type`diagramSet] :=
+   Map[Last, #, {3}] &@ Flatten[ getFieldInsertions /@ (List @@ set), 1];
+getFieldInsertions[diag:`type`diagram, numQ:True|False:False] :=
+   FindGenericInsertions[#, numQ] &/@ Apply[List, getInsertions@diag, {0, 1}];
+getFieldInsertions // secure;
 
 FindGenericInsertions::usage = "
 @brief generic FeynmanGraph has rules Field[num]->particleType,
@@ -713,36 +356,29 @@ FindGenericInsertions::usage = "
 @note this function is called by GenericInsertionsForDiagram[].
 @note this function doesn't look at external particles.
 @note all indices in rhs. of rules are removed.";
-define[FindGenericInsertions, {{graphGen_,insertCl_}, keepFieldNum_} :>
-   Module[{
-         toGenericIndexConventionRules = Cases[graphGen,
-            Rule[FeynArts`Field[index_Integer],type_Symbol] :>
-            Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]
-         ],
-         fieldsGen, genericInsertions
-      },
-      fieldsGen = toGenericIndexConventionRules[[All,1]];
-      genericInsertions = Cases[#,
-         Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
-         Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
-      SortBy[#,First]&/@ If[keepFieldNum,
-         List @@ genericInsertions,
-         List @@ genericInsertions /. toGenericIndexConventionRules
-      ]
-   ]
-];
+FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_] :=
+Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
+   toGenericIndexConventionRules = Cases[graphGen,
+      Rule[FeynArts`Field[index_Integer],type_Symbol] :>
+      Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]];
+   fieldsGen = toGenericIndexConventionRules[[All,1]];
+   genericInsertions = Cases[#,
+      Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
+      Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
+   SortBy[#,First]&/@ If[keepFieldNum,
+      List @@ genericInsertions,
+      List @@ genericInsertions /. toGenericIndexConventionRules]];
+FindGenericInsertions // secure;
 
 StripParticleIndices::usage = "
 @brief Removes particle indices from a given (possibley generic) field.
 @param field the given field.
 @returns The given field with all indices removed.";
-define[StripParticleIndices,
-   {Times[-1,field_]} :>
-   Times[-1, StripParticleIndices[field]],
-
-   {genericType_[classIndex_, ___]} :>
-   genericType[classIndex]
-];
+StripParticleIndices[Times[-1,field_]] :=
+   Times[-1, StripParticleIndices[field]];
+StripParticleIndices[genericType_[classIndex_, ___]] :=
+   genericType@classIndex;
+StripParticleIndices // secure;
 
 getColourFactors::usage = "
 @brief Creates colour factors for a given diagram.
@@ -756,38 +392,28 @@ getColourFactors::usage = "
       by FeynArts.
 @note External fields always come at first places in adjacency matrix.
 @note This function doesn't know anything about CXXDiagrams`.` context.";
-define[getColourFactors,
-   {ds:`type`diagramSet} :>
-   (Flatten[getColourFactors /@ (List @@ ds), 1] //. getFieldRules[]),
-
-   {diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])} :>
-   Module[{
-         propPatt,adjacencyMatrix,externalRules,genericDiagram,genericInsertions
-      },
-      propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
-
-      adjacencyMatrix = Module[
-         {adjs = Tally[{seqProp}/.propPatt[i_,j_,_]:>{{i,j},{j,i}}] },
-         Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjs]];
-
-      externalRules = Cases[{rulesFields}, HoldPattern[_[_]->_Symbol[__]]];
-
-      genericDiagram = Module[
-         {fld = Flatten[{seqProp}/.propPatt[i_,j_,f_]:>{{j,i,-f},{i,j,f}}, 1] },
-         GatherBy[SortBy[fld,First],First] /. {_Integer, _Integer, f_} :> f
-         ] /. Join[ {#} -> # &/@ externalRules[[All, 1]]];
-
-      genericInsertions = getFieldInsertions[diagram, True];
-
-      Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
-         CXXDiagrams`IndexDiagramFromGraph[
-            genericDiagram /. externalRules /. #, adjacencyMatrix],
-         adjacencyMatrix] &,
-         genericInsertions,
-         {2}
-      ]
-   ]
-];
+getColourFactors[ds:`type`diagramSet] :=
+   Flatten[getColourFactors /@ (List @@ ds), 1] //. $FieldRules;
+getColourFactors[diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
+Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram,
+      genericInsertions},
+   propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
+   adjacencyMatrix = Module[
+      {adjs = Tally[{seqProp}/.propPatt[i_,j_,_]:>{{i,j},{j,i}}] },
+      Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjs]];
+   externalRules = Cases[{rulesFields}, HoldPattern[_[_]->_Symbol[__]]];
+   genericDiagram = Module[
+      {fld = Flatten[{seqProp}/.propPatt[i_,j_,f_]:>{{j,i,-f},{i,j,f}}, 1] },
+      GatherBy[SortBy[fld,First],First] /. {_Integer, _Integer, f_} :> f
+      ] /. Join[ {#} -> # &/@ externalRules[[All, 1]]];
+   genericInsertions = getFieldInsertions[diagram, True];
+   Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+      CXXDiagrams`IndexDiagramFromGraph[
+         genericDiagram /. externalRules /. #, adjacencyMatrix],
+      adjacencyMatrix] &,
+      genericInsertions,
+      {2}]];
+getColourFactors // secure;
 
 getFermionOrder::usage = "
 @brief Returns the order of fermions for FormCalc`FermionOrder option. Default
@@ -810,16 +436,12 @@ calculateAmplitudes[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{
       proc = getProcess@amplitudes,
       genericInsertions = getFieldInsertions@diagrams,
-
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
-      feynAmps, generic, chains, subs,
-      zeroedRules
-   },
+      feynAmps, generic, chains, subs, zeroedRules},
    If[$ZeroMomenta,
       ampsGen = FormCalc`OffShell[ampsGen,
          Sequence@@Array[#->0&, Plus@@Length/@proc]]];
-
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
@@ -828,20 +450,13 @@ Module[{
          FormCalc`FermionOrder -> getFermionOrder@diagrams,
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #3]&,
-      {  ampsGen,
-         getRegularizationSettings@#,
-         getMomSettings@#} &@ diagrams,
+      {ampsGen, getRegularizationSettings@#, getMomSettings@#} &@ diagrams,
       "Amplitude calculation"] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
-
    {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
-
    setZeroMassRules@{amplitudes, feynAmps};
    {generic, chains, subs} = makeMassesZero[
-      {generic, chains, subs},
-      diagrams,
-      $ZeroMomenta];
-
+      {generic, chains, subs}, diagrams, $ZeroMomenta];
    FCAmplitudesToFSConvention[
       {  generic,
          genericInsertions,
@@ -874,8 +489,8 @@ Module[{rules},
    setZeroMassRules // secure;
    getZeroMassRules[] := (
       Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];
-      rules);
-   getZeroMassRules // secure;];
+      rules);];
+getZeroMassRules // secure;
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
@@ -884,7 +499,8 @@ makeMassesZero::usage = "
 @param chains A lis with fermionic chains.
 @param subs A list of subexpressions.
 @param diagrams A set of diagrams.
-@returns A list with modified expression, chains and empty non-applied subexpressions.";
+@returns A list with modified expression, chains and empty non-applied
+         subexpressions.";
 makeMassesZero[
    {generic_, chains_, subs_}, diagrams:`type`diagramSet, ExceptLoops] :=
 Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
@@ -902,14 +518,12 @@ Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
       setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
       {}}];
 makeMassesZero[{generic_, chains_, subs_}, diagrams:`type`diagramSet, True] :=
-Module[{
-      zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)], new
-   },
+Module[{zeroedRules, new},
+   zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
    {new, zeroedRules} = ZeroRules[subs, zeroedRules];
    {  generic /. zeroedRules,
       setZeroExternalMomentaInChains@chains,
-      new
-   }];
+      new}];
 makeMassesZero[{expr_, chains_, subs_}, diagrams:`type`diagramSet, _] :=
    {expr, chains, subs};
 makeMassesZero // secure;
@@ -921,53 +535,42 @@ mapThread::usage = "
 @param exprs A list of listable sets with data.
 @param text A string to be printed.
 @todo Add check for equality of length for exprs.";
-define[mapThread, {func_, exprs:{__}, text:_String:""} :>
-   Module[{
-         sr, print, percent, init, end, bar, def = 70, dots,
-         tot = Length@First@exprs, result
-      },
-      `time`set[];
-      subWrite["\n"<>text<>" ...\n"];
-
-      sr[str:_String, num:_Integer] := StringJoin@@Array[str&, num];
-
-      print = (
-         percent = #/tot;
-         init = "["<>ToString@now<>"/"<>ToString@tot<>"] [";
-         end = "] "<>ToString@Floor[100*percent]<>"%";
-         bar = def - StringLength[init<>end];
-         dots = Floor[bar*percent];
-         subWrite@StringJoin[init, sr[".", dots], sr[" ", bar-dots],end,"\r"];
-      )&;
-
-      result = Table[(print@now; func@@(#[[now]]&/@ exprs)), {now, tot}];
-
-      subWrite@"\033[K\033[A";
-      subWrite[text<>" ... done in "<>`time`get[]<>" seconds.\n"];
-      result
-   ]
-];
+mapThread[func_, exprs:{__}, text:_String:""] :=
+Module[{sr, print, percent, init, end, bar, def = 70, dots,
+      tot = Length@First@exprs, result},
+   subWrite["\n"<>text<>" ...\n"];
+   sr[str:_String, num:_Integer] := StringJoin@@Array[str&, num];
+   print = (
+      percent = #/tot;
+      init = "["<>ToString@now<>"/"<>ToString@tot<>"] [";
+      end = "] "<>ToString@Floor[100*percent]<>"%";
+      bar = def - StringLength[init<>end];
+      dots = Floor[bar*percent];
+      subWrite@StringJoin[init, sr[".", dots], sr[" ", bar-dots],end,"\r"];)&;
+   result = Table[(print@now; func@@(#[[now]]&/@ exprs)), {now, tot}];
+   subWrite@"\033[K\033[A";
+   subWrite[text<>" ... done\n"];
+   result];
+mapThread // secure;
 
 CombinatorialFactorsForClasses::usage="
 @brief Takes generic amplitude and finds numerical combinatirical factors
        which arise at class level.
 @returns list of combinatorical factors for a given generic amplitude
 @param FeynArts`.`FeynAmp[__]";
-define[CombinatorialFactorsForClasses, {FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]} :>
-   ({classReplacements}[[ All,#[[1,1]] ]] /.
-      {
-         FeynArts`IndexDelta[___] -> 1,
-         FeynArts`SumOver[__] -> 1
-      } &@ Position[rules, FeynArts`RelativeCF])
-];
+CombinatorialFactorsForClasses[FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]] :=
+{classReplacements}[[ All,#[[1,1]] ]] /.
+   {  FeynArts`IndexDelta[___] -> 1,
+      FeynArts`SumOver[__] -> 1} &@ Position[rules, FeynArts`RelativeCF];
+CombinatorialFactorsForClasses // secure;
 
 getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
 @param expr An expression, where to search.
 @returns A list of unique sorted generic fields.";
-define[getGenericFields, {expr:_} :>
-   Sort@DeleteDuplicates[Cases[expr, `type`genericField, Infinity]]
-];
+getGenericFields[expr:_] :=
+   Sort@DeleteDuplicates[Cases[expr, `type`genericField, Infinity]];
+getGenericFields // secure;
 
 getGenericSum::usage= "
 @brief Converts FormCalc`Amp into NPointFunctions`GenericSum object using
@@ -982,8 +585,7 @@ Module[{sort, rules},
    GenericSum[
       List@@amplitude,
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
-getGenericSum // Utils`MakeUnknownInputDefinition;
-getGenericSum // Protect;
+getGenericSum // secure;
 
 ZeroRules::usage = "
 @brief Given a set of rules that map to zero and a set that does
@@ -992,19 +594,15 @@ ZeroRules::usage = "
 @param nonzeroRules The list of nonzero rules.
 @param zeroRules The list of zero rules.
 @returns a list of rules that map the same expressions as the initial rules.";
-define[ZeroRules, {nonzeroRules:{Rule[_,_]...}, zeroRules:{Rule[_,0]...}} :>
-   Module[{newNonzero, newZeroRules},
-      newNonzero = Thread[
-         Rule[nonzeroRules[[All,1]],nonzeroRules[[All,2]] /. zeroRules]];
-
-      If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
-
-      newZeroRules = Cases[newNonzero,HoldPattern[_->0]];
-      newNonzero = Complement[newNonzero, newZeroRules];
-
-      ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]
-   ]
-];
+ZeroRules[nonzeroRules:{Rule[_,_]...}, zeroRules:{Rule[_,0]...}] :=
+Module[{newNonzero, newZeroRules},
+   newNonzero = Thread[
+      Rule[nonzeroRules[[All,1]],nonzeroRules[[All,2]] /. zeroRules]];
+   If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
+   newZeroRules = Cases[newNonzero,HoldPattern[_->0]];
+   newNonzero = Complement[newNonzero, newZeroRules];
+   ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]];
+ZeroRules // secure;
 
 FCAmplitudesToFSConvention::usage=
 "@brief Translate a list of FormCalc amplitudes and their abbreviations and
@@ -1013,20 +611,16 @@ FCAmplitudesToFSConvention::usage=
 @param abbreviations A list of abbreviations
 @param subexpressions A list of subexpressions
 @returns A list of amplitudes and joined abbreviations and subexpressions.";
-define[FCAmplitudesToFSConvention,
-   {amplitudes_, abbreviations_, subexpressions_} :>
-   Module[{
-         fsAmplitudes = amplitudes //. getAmplitudeRules[],
-         fsAbbreviations = abbreviations //. getSubexpressionRules[] //. {
-            FormCalc`DiracChain -> NPointFunctions`internal`dc,
-            FormCalc`Spinor -> SARAH`DiracSpinor,
-            FormCalc`Lor -> SARAH`Lorentz
-         },
-         fsSubexpressions = subexpressions //. getSubexpressionRules[]
-      },
-      {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}
-   ]
-];
+FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
+Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
+   fsSubexpressions = subexpressions //. $SubexpressionRules;
+   fsAmplitudes = amplitudes //. $AmplitudeRules;
+   fsAbbreviations = abbreviations //.  $SubexpressionRules //.
+      {  FormCalc`DiracChain -> NPointFunctions`internal`dc,
+         FormCalc`Spinor -> SARAH`DiracSpinor,
+         FormCalc`Lor -> SARAH`Lorentz};
+   {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}];
+FCAmplitudesToFSConvention // secure;
 
 End[];
 EndPackage[];
