@@ -461,7 +461,7 @@ getSettings[] := Module[{file},
    `settings`topology = Default;
    `settings`diagrams = Default;
    `settings`amplitudes = Default;
-   `settings`sum[`type`diagramSet] := {};
+   `settings`sum = Default;
    `settings`massless[`type`diagramSet] := {};
    `settings`momenta = {};
    `settings`regularization = {};
@@ -523,7 +523,8 @@ getSumSettings::usage = "
 @returns A set of restrictions for generic sums.";
 getSumSettings[ds:`type`diagramSet] :=
 Module[{repl = {}, res},
-   Do[repl = Join[repl, applyAction[ds, ac]];, {ac, `settings`sum@ds}];
+   sum = If[#===Default, {}, #]&@`settings`sum;
+   Do[repl = Join[repl, applyAction[ds, ac]];, {ac, sum}];
    res = List@@(ds /. repl);
    res = If[MatchQ[#, `type`diagram],
             Table[{}, {Length@getInsertions@#}],

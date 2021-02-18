@@ -64,13 +64,13 @@
                {UnsameQ, genericMass[FeynArts`V, 5], 0}]},
          {}}};
 
-`settings`sum[ds:`type`diagramSet] :=
-{  {  "SED T: skip initial lepton in sum",
+`settings`sum :=
+{  "SED T: skip initial lepton in sum"[
       `topologyQ`self1penguinT,
-      {6, getField[ds, 1]}},
-   {  "SED T: skip final lepton in sum",
+      {6, getField[#, 1]&}],
+   "SED T: skip final lepton in sum"[
       `topologyQ`self3penguinT,
-      {6, getField[ds, 3]}}};
+      {6, getField[#, 3]&}]};
 
 `settings`massless[ds:`type`diagramSet] :=
 {  {  "SED T: use explicit final lepton mass",

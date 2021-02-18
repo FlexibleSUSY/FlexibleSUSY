@@ -128,7 +128,7 @@ applyAction@`action`diagramsCompact :=
    applyAction[d, s[Through[(Or@@t)@#]&, c]];
 
 `action`sum = Sequence[d:`type`diagramSet,
-   {s_String, t_Symbol, {n_Integer, f:_}}];
+   s_String[t_Symbol, {n_Integer, f:_}]];
 `action`hold = Sequence[d:`type`diagramSet,
    {s_String, t_Symbol, {Hold, e_Integer}}];
 `action`append = Sequence[d:`type`diagramSet,
@@ -143,18 +143,20 @@ Module[{template},
 
    Module[{restrict},
       restrict[field_, number_] := {number -> Or[field, -field]};
-      applyAction@`action`sum := List@@Map[template[s, t, restrict[f, n]], d];];
+      applyAction@`action`sum :=
+      List@@Map[template[s, t, restrict[f@d, n]], d];];
 
    Module[{delete},
       delete[e_] := With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
-      applyAction@`action`hold := Sequence@@Map[template[s, t, delete@e], d];];
+      applyAction@`action`hold :=
+      Sequence@@Map[template[s, t, delete@e], d];];
 
    Module[{append},
-      append[field_, number:_, e_] := With[{
-            rhs = (First /@ getZeroMassRules[])[[2*e-1]]},
+      append[field_, number:_, e_] :=
+      With[{rhs = (First /@ getZeroMassRules[])[[2*e-1]]},
          Append[#, genericMass[field, number] :> rhs]&];
       applyAction@`action`append :=
-         Sequence@@Map[template[s, t, append[f, n, e]], d];];];
+      Sequence@@Map[template[s, t, append[f, n, e]], d];];];
 applyAction // secure;
 
 End[];
