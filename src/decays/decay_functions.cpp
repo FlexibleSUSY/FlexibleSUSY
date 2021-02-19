@@ -81,21 +81,19 @@ double calc_DeltaAH(double b) noexcept
 // higher order corrections to H/A -> qqbar
 double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
 {
-   constexpr double CF = 4./3.;
-   constexpr double CA = 3.;
-   constexpr double T = 1./2.;
+   constexpr double Pi2 = Sqr(Pi);
 
-   // eq. 2 from hep-ph/9708292v1
-   // const double dG1 = 17./4.*CF;
    const double dG2 =
-      ((893/4. - 62*zeta3)*CA - (65 - 16*zeta3)*T*Nf + (691/4. - 36*zeta3)*CF)*CF/16.
-      - Sqr(Pi)*(11*CA - 4*T*Nf + 18*CF)/48.*CF;
+      10801/144. - 19/12.*Pi2 - 39/2.*zeta3 + (- 65/24. + 1/18.*Pi2 + 2/3.*zeta3)*Nf;
+   const double dG3 =
+      6163613/5184. - 3535/72.*Pi2 - 109735/216.*zeta3 + 815/12.*zeta5
+      + (- 46147/486. + 277/72.*Pi2 + 262/9.*zeta3 - 5/6.*zeta4 - 25/9.*zeta5)*Nf
+      + (15511/11664. - 11/162.*Pi2 - 1/3.*zeta3)*Sqr(Nf);
+   const double dG4 = 39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf));
 
    // order alpha_s_red^1 is taken into account with mass dependence somewhere else
    return
-      Sqr(alpha_s_red)*dG2
-      + Cube(alpha_s_red)*(164.14 + Nf*(-25.77 + 0.259*Nf))
-      + Power4(alpha_s_red)*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)));
+      Sqr(alpha_s_red)*(dG2 + alpha_s_red*(dG3 + alpha_s_red*dG4));
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
