@@ -239,6 +239,7 @@ Block UERMIX
    slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
    THDMII_input_parameters input;
    Spectrum_generator_settings settings;
 
@@ -246,6 +247,7 @@ Block UERMIX
    try {
       slha_io.fill(settings);
       slha_io.fill(qedqcd);
+      slha_io.fill(physical_input);
       slha_io.fill(input);
    } catch (const Error& error) {
       BOOST_TEST_MESSAGE(error.what());
@@ -261,7 +263,7 @@ Block UERMIX
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   THDMII_decays decays_with_HO(m, qedqcd, SM_higher_order_corrections::enable);
+   THDMII_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 
@@ -311,7 +313,7 @@ Block UERMIX
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   THDMII_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
+   THDMII_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
 
    // ------------ tree-level decays ------------
 

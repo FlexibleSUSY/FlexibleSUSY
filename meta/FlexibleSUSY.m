@@ -2582,7 +2582,7 @@ if (show_decays && spectrum_generator_settings.get(Spectrum_generator_settings::
 ExampleCalculateCmdLineDecays[] :=
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
+   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, SM_higher_order_corrections::enable);
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2621,7 +2621,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                      "else {\n" <>
                         IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
                      "}\n" <>
-                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);\n" <>
+                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, physical_input, higher_orders_in_decays);\n" <>
                      "const bool loop_library_for_decays =\n" <>
                      IndentText[
                         "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>

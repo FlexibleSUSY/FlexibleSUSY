@@ -43,11 +43,12 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    }
 
    softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   SM_decays decays_HO = SM_decays(m, qedqcd, SM_higher_order_corrections::enable);
+   SM_decays decays_HO = SM_decays(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 
@@ -83,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   SM_decays decays_no_HO = SM_decays(m, qedqcd, SM_higher_order_corrections::disable);
+   SM_decays decays_no_HO = SM_decays(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
 
    // ------------ tree-level decays ------------
 

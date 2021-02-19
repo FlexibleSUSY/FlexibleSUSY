@@ -664,6 +664,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
    MRSSM2_input_parameters input;
    Spectrum_generator_settings settings;
 
@@ -671,6 +672,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    try {
       slha_io.fill(settings);
       slha_io.fill(qedqcd);
+      slha_io.fill(physical_input);
       slha_io.fill(input);
    } catch (const Error& error) {
       BOOST_TEST_MESSAGE(error.what());
@@ -686,7 +688,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   MRSSM2_decays decays_with_HO(m, qedqcd, SM_higher_order_corrections::enable);
+   MRSSM2_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 
@@ -735,7 +737,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   MRSSM2_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
+   MRSSM2_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),

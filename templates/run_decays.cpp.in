@@ -7,6 +7,8 @@
 #include "decays/@ModelName@_decays.hpp"
 #include "@ModelName@_slha_io.hpp"
 
+#include "physical_input.hpp"
+
 int main(int argc, char* argv[])
 {
    if (argc < 2) {
@@ -52,7 +54,8 @@ int main(int argc, char* argv[])
    @ModelName@_slha m = std::get<0>(spectrum_generator.get_models_slha());
 
    Loop_library::set(1);
-   @ModelName@_decays decays(m, qedqcd, SM_higher_order_corrections::enable);
+   Physical_input physical_input;
+   @ModelName@_decays decays(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
    decays.calculate_decays();
 
    const bool show_decays = !decays.get_problems().have_problem() ||
