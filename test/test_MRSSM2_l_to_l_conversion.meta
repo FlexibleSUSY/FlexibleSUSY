@@ -20,23 +20,13 @@
 
 *)
 
-WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
-Global`time = AbsoluteTime[];
-Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
-Needs["FlexibleSUSY`"];
-
 (*INITIALIZATION***************************************************************)
-workingDirectory = Directory[];
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
-SARAH`SARAH[InputDirectories] =
-{
-   FileNameJoin@{workingDirectory, "sarah"},
-   ToFileName@{$sarahDir, "Models"}
-};
+Global`time = AbsoluteTime[];
+Get@"utils/load-FlexibleSUSY.m";
 
 Start@"MRSSM";
 
-modelFile = FileNameJoin@{workingDirectory, "models", "MRSSM2", "FlexibleSUSY.m"};
+modelFile = FileNameJoin@{Directory[], "models", "MRSSM2", "FlexibleSUSY.m"};
 
 FlexibleSUSY`LoadModelFile@modelFile;
 FlexibleSUSY`Private`PrepareUnrotatedParticles@FSEigenstates;
@@ -46,7 +36,7 @@ allParameters = FlexibleSUSY`SetupModelParameters@@FlexibleSUSY`ReadSARAHBetaFun
 FlexibleSUSY`SetupOutputParameters@massMatrices;
 
 (*FFMassiveVFormFactors********************************************************)
-Needs["FFMassiveVFormFactors`",FileNameJoin@{workingDirectory,"test","FFMassiveVFormFactors.meta"}];
+Needs["FFMassiveVFormFactors`",FileNameJoin@{Directory[],"test","FFMassiveVFormFactors.meta"}];
 
 WriteString[OutputStream["stdout",1],"Calculation of V indices started ..."];
 massiveVIndices = Utils`StringJoinWithSeparator[FFMassiveVFormFactors`MassiveVIndices /@
@@ -89,80 +79,62 @@ Needs@"WilsonCoeffs`";
       nameForUpQuarkClass = "zpinguins_uFeFe_1loop",
       nameForDownQuarkClass  = "zpinguins_dFeFe_1loop",
       header,uNPF,dNPF,
-      dimension6Template,
-      l=SARAH`Lorentz,
-      mom = SARAH`Mom,
-      mass = SARAH`Mass,
-      sp,
+      dim6,fields,
       codeU,codeD,
       dressedU,dressedD,assumptionReplacements
    },
-   header=CreateCXXHeaders[];
+   header=NPointFunctions`CreateCXXHeaders[];
    sp[particle_,num_] := SARAH`DiracSpinor[#,mom@num,mass@#] &@ particle@{Symbol["SARAH`gt"<>ToString@num]};
 
    Print["Analytical calculation for Fe->Fe started ..."];
-   uNPF = NPointFunction[{Fe,Fu},{Fe,Fu},
-      OnShellFlag -> True,
-      UseCache -> False,
-      ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins}];
-   dNPF = NPointFunction[{Fe,Fd},{Fe,Fd},
-      OnShellFlag -> True,
-      UseCache -> False,
-      ZeroExternalMomenta -> OperatorsOnly,
-      KeepProcesses -> {FourFermionMassiveVectorPenguins}];
+   {uNPF, dNPF} = NPointFunctions`NPointFunction[{Fe,#},{Fe,#},
+      NPointFunctions`OnShellFlag -> True,
+      NPointFunctions`UseCache -> False,
+      NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
+      NPointFunctions`KeepProcesses -> {Vectors},
+      NPointFunctions`Observable -> FlexibleSUSYObservable`LToLConversion[]] &/@
+         {Fu, Fd};
    dressedU = Flatten@NPointFunctions`internal`getProcess@uNPF;
    dressedD = Flatten@NPointFunctions`internal`getProcess@dNPF;
    assumptionReplacements =
-     {
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[1]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2,
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[2]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[1]],i_]] :> mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedU[[4]],i_]*mom[dressedU[[3]],i_]] :> mass[dressedU[[1]]]^2/2+mass[dressedU[[1]]]*Sqrt[mass[dressedU[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[2]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[1]],i_]] :> mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2],
-        SARAH`sum[i_,1,4,SARAH`g[i_,i_]*mom[dressedD[[4]],i_]*mom[dressedD[[3]],i_]] :> mass[dressedD[[1]]]^2/2+mass[dressedD[[1]]]*Sqrt[mass[dressedD[[2]]]^2+mass[dressedU[[1]]]^2]
-     };
+      {  SARAH`sum[__] -> 0,
+         LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
+         LoopTools`C0i[i_, Repeated[_, {3}], mm__] :>
+            LoopTools`C0i[i, Sequence@@Array[0&, 3], mm]};
    {uNPF,dNPF} = {uNPF,dNPF} /. assumptionReplacements;
 
    Print["Analytical calculation for Fe->Fe done."];
-   dimension6Template[i_,o_,q_] :=
-      {
-         (*@note 6 means PR, 7 means PL.*)
-         ("S_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,q~sp~2],
-         ("S_LR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,q~sp~2],
-         ("S_RL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,q~sp~2],
-         ("S_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,q~sp~2],
-         (*@note Q: why names of coeffients are not correct? A: they are
-          *correct, one just need to commute projectors with Dirac matrices,
-          *what changes 6 to 7 or 7 to 6.*)
-         ("V_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,l@1,q~sp~2],
-         ("V_LR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,6,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,l@1,q~sp~2],
-         ("V_RL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,6,l@1,q~sp~2],
-         ("V_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,7,l@1,i~sp~1] NPointFunctions`internal`dc[q~sp~4,7,l@1,q~sp~2],
-         (*@note Q: why minus? A: because FormCalc`s -6,Lor[1],Lor[2] is ours
-          *-I*sigma[1,2] (according to FC definition of antisymmetrization), when
-          *taking this twice we get I*I=-1. @todo one really need to check "I conventions"
-          *for FC because it cites [Ni05] for Fierz identities, where our
-          *conventions are used, but in FC manual on the page 20 weird convention for sigma_munu is shown.*)
-         ("minus_T_LL_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,-7,l@1,l@2,i~sp~1] NPointFunctions`internal`dc[q~sp~4,-7,l@1,l@2,q~sp~2],
-         ("minus_T_RR_via_"<>ToString@q) -> NPointFunctions`internal`dc[o~sp~3,-6,l@1,l@2,i~sp~1] NPointFunctions`internal`dc[q~sp~4,-6,l@1,l@2,q~sp~2]
-      };
-   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[Fe,Fe,Fu];
-   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dimension6Template[Fe,Fe,Fd];
+   fields[SARAH`UpQuark] = Flatten@NPointFunctions`internal`getProcess@uNPF;
+   fields[SARAH`DownQuark] = Flatten@NPointFunctions`internal`getProcess@dNPF;
+   dim6[q_] := Module[{sp, dc, l = SARAH`Lorentz, R = 6, L = 7},
+      sp[f_, n_] := SARAH`DiracSpinor[fields[f][[n]], 0, 0];
+      dc[a_, b__, c_] := NPointFunctions`internal`dc[sp[q, a], b, sp[q, c]];
+      {  "S_LL" -> dc[3,L,1] dc[4,L,2],
+         "S_LR" -> dc[3,L,1] dc[4,R,2],
+         "S_RL" -> dc[3,R,1] dc[4,L,2],
+         "S_RR" -> dc[3,R,1] dc[4,R,2],
+         "V_LL" -> dc[3,R,l@1,1] dc[4,R,l@1,2],
+         "V_LR" -> dc[3,R,l@1,1] dc[4,L,l@1,2],
+         "V_RL" -> dc[3,L,l@1,1] dc[4,R,l@1,2],
+         "V_RR" -> dc[3,L,l@1,1] dc[4,L,l@1,2],
+         "T_LL" -> dc[3,-L,l@1,l@2,1] dc[4,-L,l@1,l@2,2],
+         "T_RR" -> dc[3,-R,l@1,l@2,1] dc[4,-R,l@1,l@2,2]}];
+   uNPF = uNPF~WilsonCoeffs`InterfaceToMatching~dim6@Fu;
+   dNPF = dNPF~WilsonCoeffs`InterfaceToMatching~dim6@Fd;
 
    Print["C++ code calculation for Fe->Fe started ..."];
-   codeU = CreateCXXFunctions[uNPF,
+   codeU = NPointFunctions`CreateCXXFunctions[uNPF,
       nameForUpQuarkClass,
       SARAH`Delta,
-      dimension6Template[Fe,Fe,Fu] ][[2]];
-   codeD = CreateCXXFunctions[dNPF,
+      dim6@Fu ][[2]];
+   codeD = NPointFunctions`CreateCXXFunctions[dNPF,
       nameForDownQuarkClass,
       SARAH`Delta,
-      dimension6Template[Fe,Fe,Fd] ][[2]];
+      dim6@Fd ][[2]];
    Print["C++ code calculation for Fe->Fe done."];
    {
-      DeleteDuplicates@Join[VerticesForNPointFunction@uNPF,VerticesForNPointFunction@dNPF],
+      DeleteDuplicates@Join[NPointFunctions`VerticesForNPointFunction@uNPF,
+         NPointFunctions`VerticesForNPointFunction@dNPF],
       header,
       codeU<>"\n\n"<>codeD
    }
@@ -196,8 +168,8 @@ If[newVertices==={},
 WriteOut`ReplaceInFiles[
    {
       {
-         FileNameJoin@{workingDirectory, "test", "test_MRSSM2_FFMassiveV_form_factors.hpp.in"},
-         FileNameJoin@{workingDirectory, "test", "test_MRSSM2_FFMassiveV_form_factors.hpp"}
+         FileNameJoin@{Directory[], "test", "test_MRSSM2_FFMassiveV_form_factors.hpp.in"},
+         FileNameJoin@{Directory[], "test", "test_MRSSM2_FFMassiveV_form_factors.hpp"}
       }
    },
    {
@@ -209,7 +181,7 @@ WriteOut`ReplaceInFiles[
 ];
 
 templateCode = StringJoin@Riffle[Utils`ReadLinesInFile[
-   FileNameJoin@{workingDirectory, "test", "test_MRSSM2_l_to_l_conversion.cpp.in"}],
+   FileNameJoin@{Directory[], "test", "test_MRSSM2_l_to_l_conversion.cpp.in"}],
    "\n"];
 code = StringReplace[templateCode,
    {
@@ -220,7 +192,7 @@ code = StringReplace[templateCode,
    }
 ];
 
-fileHandle = OpenWrite@FileNameJoin@{workingDirectory, "test", "test_MRSSM2_l_to_l_conversion.cpp"};
+fileHandle = OpenWrite@FileNameJoin@{Directory[], "test", "test_MRSSM2_l_to_l_conversion.cpp"};
 fileHandle ~ WriteString ~ code;
 Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[

@@ -131,7 +131,7 @@ std::array<std::complex<double>, 8> calculate_Fe_to_Fe_in_nucleus (int generatio
 
 // test part==========================================================
 BOOST_AUTO_TEST_SUITE(conversion_suite,
-	* boost::unit_test::tolerance(1.2e-5) )
+	* boost::unit_test::tolerance(2e-4) )
 BOOST_AUTO_TEST_CASE( test_MRSSM2_l_to_l_conversion )
 {
    typedef Eigen::DiagonalMatrix<double, 3> DiagonalMatrix3;
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE( test_MRSSM2_l_to_l_conversion )
 
    softsusy::QedQcd qedqcd;
    Loop_library::set(1);
-   MRSSM2_slha<MRSSM2<Two_scale>> m = setup_MRSSM2(input, qedqcd);
+   auto m = setup_MRSSM2(input, qedqcd);
 
    auto point = MRSSM2_l_to_l_conversion::calculate_Fe_to_Fe_in_nucleus(1,0,m,qedqcd);
 

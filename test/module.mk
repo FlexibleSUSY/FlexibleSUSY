@@ -962,11 +962,11 @@ ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
 ifeq ($(WITH_MRSSM2),yes)
 
 $(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
-$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+$(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.meta $(DIR)/test_MRSSM2_FFMassiveV_form_factors.hpp.in $(DIR)/test_MRSSM2_l_to_l_conversion.cpp.in $(META_SRC)
 	@$(MSG)
 	@$(TEST_MSG)
-	@printf "%s" "AppendTo[\$$Path, \"./meta/\"]; Get[\"$<\"]; Quit[0]" | "$(MATH)"
+	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
 endif
 
