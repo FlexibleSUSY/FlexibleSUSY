@@ -94,8 +94,8 @@ double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
    // order alpha_s_red^1 is taken into account with mass dependence somewhere else
    return
       Sqr(alpha_s_red)*dG2
-      + Cube(alpha_s_red)*(164.14 + Nf*(-25.77 + 0.259*Nf)
-      + Power4(alpha_s_red)*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf))));
+      + Cube(alpha_s_red)*(164.14 + Nf*(-25.77 + 0.259*Nf))
+      + Power4(alpha_s_red)*(39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)));
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases

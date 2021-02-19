@@ -269,10 +269,10 @@ Block UERMIX
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.00078365979423136159, 2e-15);
+                              0.00078282435548627258, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00012665063416267194, 2e-16);
+                              0.0001265157789875944, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.9645091090513334e-05, 1e-15);
@@ -305,10 +305,10 @@ Block UERMIX
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
-                              0.001869360984370458, 2e-15);
+                              0.0018669542518162286, 2e-15);
    // Ah -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              9.3591185788565107e-05, 2e-16);
+                              9.3473595265581758e-05, 2e-16);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
