@@ -20,21 +20,12 @@
 
 *)
 
-WriteString[OutputStream["stdout",1],"\r"];(*remove In[1]:=*)
 Global`time = AbsoluteTime[];
-Off[Susyno`LieGroups`dims];(*hide complainings from Susyno`LieGroups`dims*)
-Needs["FlexibleSUSY`"];
+Get@"utils/load-FlexibleSUSY.m";
 
-workingDirectory = Directory[];
-SARAH`SARAH[OutputDirectory] = FileNameJoin[{workingDirectory, "Output"}];
-SARAH`SARAH[InputDirectories] = {
-    FileNameJoin[{workingDirectory, "sarah"}],
-    ToFileName[{$sarahDir, "Models"}]
-};
+Start@"SM";
 
-Start["SM"];
-
-modelFile = FileNameJoin[{workingDirectory, "models", "SM", "FlexibleSUSY.m"}];
+modelFile = FileNameJoin[{Directory[], "models", "SM", "FlexibleSUSY.m"}];
 
 FlexibleSUSY`LoadModelFile[modelFile];
 {susyBetaFunctions, susyBreakingBetaFunctions} = FlexibleSUSY`ReadSARAHBetaFunctions[];
@@ -45,7 +36,7 @@ allParameters = FlexibleSUSY`SetupModelParameters[susyBetaFunctions, susyBreakin
 FlexibleSUSY`SetupOutputParameters[massMatrices];
 
 templateCode = StringJoin @ Riffle[Utils`ReadLinesInFile[
-		FileNameJoin[{workingDirectory, "test", "test_SM_cxxdiagrams.cpp.in"}]],
+		FileNameJoin[{Directory[], "test", "test_SM_cxxdiagrams.cpp.in"}]],
 	"\n"];
 
 VectorToGhost[field_ ? TreeMasses`IsVector] :=
@@ -212,7 +203,7 @@ code = StringReplace[templateCode, {
 	"@CXXDiagrams_VertexDefinitions@" -> verticesCode[[2]]
 }];
 
-fileHandle = OpenWrite[FileNameJoin[{workingDirectory, "test", "test_SM_cxxdiagrams.cpp"}]];
+fileHandle = OpenWrite[FileNameJoin[{Directory[], "test", "test_SM_cxxdiagrams.cpp"}]];
 fileHandle ~ WriteString ~ code;
 Close@fileHandle;
 WriteString[OutputStream["stdout",1],#]&@StringJoin[
