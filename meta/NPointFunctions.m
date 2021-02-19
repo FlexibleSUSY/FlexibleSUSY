@@ -1435,10 +1435,9 @@ Module[
    },
    result=ExpandAll[modifiedExpr]/.numbersToOne/.Plus->List/.massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
-   If[ 1 === Length@result,
+   If[ 2 === LeafCount@result,
       result = func@@result,
-      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@(func@#&/@{x}))
-   ];
+      result = Plus@@(result/.HoldPattern[Times[x__]]:>Times@@(func@#&/@{x}))];
    result = "if( "<>StringReplace[Parameters`ExpressionToString@result,"\""->""]<>" == 0 ) continue;";
    StringReplace[result, RegularExpression["g(\\d+)"]:> ToString[ToExpression@"$1"-1]]
 ];
