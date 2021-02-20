@@ -20,20 +20,19 @@
 
 *)
 
-(* There is a problem with Global`args which comes from mathematica paclets.*)
-Quiet[Needs@"FeynArts`", {FeynArts`args::shdw}];
-FeynArts`$FAVerbose = 0;
-FeynArts`InitializeModel@NPointFunctions`$FAMod;
-SetOptions[FeynArts`InsertFields,
-   FeynArts`Model -> NPointFunctions`$FAMod,
-   FeynArts`InsertionLevel -> FeynArts`Classes];
+Block[{Format},
+   Needs@"FeynArts`";
+   FeynArts`$FAVerbose = 0;
+   FeynArts`InitializeModel@NPointFunctions`$FAMod;
+   SetOptions[FeynArts`InsertFields,
+      FeynArts`Model -> NPointFunctions`$FAMod,
+      FeynArts`InsertionLevel -> FeynArts`Classes];
+   Needs@"FormCalc`";
+   Print[];
+   FormCalc`$FCVerbose = 0;
+   (  If[!DirectoryQ@#, CreateDirectory@#];
+      SetDirectory@#;)&@NPointFunctions`$FCDir;];
 
-Needs@"FormCalc`";Print[];
-FormCalc`$FCVerbose = 0;
-(If[!DirectoryQ@#, CreateDirectory@#]; SetDirectory@#;)&@NPointFunctions`$FCDir;
-
-(* Next Format makes some pattern generate mistakes. *)
-Format[FormCalc`DiracChain[FormCalc`Private`s1_FormCalc`Spinor,FormCalc`Private`om_,FormCalc`Private`g___,FormCalc`Private`s2_FormCalc`Spinor]] =.;
 Needs@"Utils`";
 
 BeginPackage@"NPointFunctions`";
