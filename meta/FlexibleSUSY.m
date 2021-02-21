@@ -68,13 +68,13 @@ $flexiblesusyMetaDir     = DirectoryName[FindFile[$Input]];
 $flexiblesusyConfigDir   = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "config"}];
 $flexiblesusyTemplateDir = FileNameJoin[{ParentDirectory[$flexiblesusyMetaDir], "templates"}];
 
-FS`Version = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"version"}]]];
+FS`Version = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"flexiblesusy-version"}]]];
 FS`GitCommit = StringTrim[FSImportString[FileNameJoin[{$flexiblesusyConfigDir,"git_commit"}]]];
 FS`Authors = {"P. Athron", "M. Bach", "D. Harries", "W. Kotlarski",
               "T. Kwasnitza", "J.-h. Park", "T. Steudtner",
               "D. St\[ODoubleDot]ckinger", "A. Voigt", "J. Ziebell"};
 FS`Contributors = {};
-FS`Years   = "2013-2020";
+FS`Years   = "2013-2021";
 FS`References = Get[FileNameJoin[{$flexiblesusyConfigDir,"references"}]];
 
 Print[""];
@@ -230,6 +230,7 @@ IMMINPAR = {};
 IMEXTPAR = {};
 FSCalculateDecays = False;
 DecayParticles = Automatic;
+FSEnableParallelism = True;
 
 (* Standard Model input parameters (SLHA input parameters) *)
 (* {parameter, {"block", entry}, type}                     *)
@@ -1981,7 +1982,7 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
           ];
 
 WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
-    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, decaysVertices2 = {}, numberOfDecayParticles = 0,
+    Module[{maxFinalStateParticles = 2, decaysLists = {}, decaysVertices, numberOfDecayParticles = 0,
             enableDecaysCalculationThreads,
             callAllDecaysFunctions = "", callAllDecaysFunctionsInThreads = "",
             decaysListGettersPrototypes = "", decaysListGettersFunctions = "",
@@ -2005,7 +2006,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysLists = Last@decaysLists;
 
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
-           decaysVertices2 = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
+           decaysVertices = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
+           decaysVertices = SortFieldsInCp /@ decaysVertices;
 
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];
@@ -2020,13 +2022,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            decaysListGettersFunctions = Decays`CreateDecayTableGetterFunctions[decayParticles, FlexibleSUSY`FSModelName <> "_decay_table"];
            initDecayTable = Decays`CreateDecayTableInitialization[decayParticles];
 
-           {decaysVertices, calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
+           {calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
                = Decays`CreateTotalAmplitudeSpecializations[decaysLists, FlexibleSUSY`FSModelName];
            {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
                = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName];
-           decaysVertices = Join[decaysVertices, decaysVertices2];
 
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
+           bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];
 
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
@@ -2045,11 +2047,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@initDecayTable@" -> IndentText[WrapLines[initDecayTable]],
                             "@numberOfDecayParticles@" -> ToString[numberOfDecayParticles],
                             "@create_SM_particle_usings@" -> smParticleAliases,
+                            "@create_BSM_particle_list@" -> Last@bsmParticleAliasList,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
-           decaysVertices
+           DeleteDuplicates@Join[decaysVertices, First@bsmParticleAliasList]
           ];
 
 WriteBVPSolverTemplates[files_List] :=
@@ -2583,7 +2586,7 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 ExampleCalculateCmdLineDecays[] :=
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, SM_higher_order_corrections::enable);
+   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, SM_higher_order_corrections::enable);
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2624,7 +2627,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                      "else {\n" <>
                         IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
                      "}\n" <>
-                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, higher_orders_in_decays);\n" <>
+                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, physical_input, higher_orders_in_decays);\n" <>
                      "const bool loop_library_for_decays =\n" <>
                      IndentText[
                         "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
@@ -2638,7 +2641,7 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, &decays);";
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, &decays);";
               decaySetttingsOverride =
 "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {
    if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
@@ -2652,7 +2655,7 @@ WriteUserExample[inputParameters_List, files_List] :=
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
    }
 }",
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables);"
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings);"
              ];
            writeCmdLineOutput = WriteExampleCmdLineOutput[FlexibleSUSY`FSCalculateDecays];
            WriteOut`ReplaceInFiles[files,
@@ -4798,6 +4801,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               If[FileExistsQ[f], DeleteFile[f]];
               WriteString[f, "ENABLE_FLEXIBLEDECAY := no"]
            ];
+           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]},
+              If[FileExistsQ[f], DeleteFile[f]]
+           ];
+
            If[FSCalculateDecays,
               PrintHeadline["Creating particle decays"];
 

@@ -75,7 +75,7 @@ public:
    void set_blocks(const std::vector<std::string>& vec, SLHA_io::Position position = SLHA_io::back) { slha_io.set_blocks(vec, position); }
 @setDecaysInfoPrototypes@
 @setDecaysPrototypes@
-   void set_extra(const @ModelName@_slha&, const @ModelName@_scales&, const @ModelName@_observables&);
+   void set_extra(const @ModelName@_slha&, const @ModelName@_scales&, const @ModelName@_observables&, const flexiblesusy::Spectrum_generator_settings&);
    void set_input(const @ModelName@_input_parameters&);
    void set_modsel(const SLHA_io::Modsel&);
    void set_physical_input(const Physical_input&);
@@ -98,9 +98,9 @@ public:
    static void fill_imminpar_tuple(@ModelName@_input_parameters&, int, double);
    static void fill_imextpar_tuple(@ModelName@_input_parameters&, int, double);
 
-   template <class... Ts>
-   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, @ModelName@_decays const * const = nullptr);
 @fillDecaysDataPrototypes@
+   template <class... Ts>
+   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, const Spectrum_generator_settings&, @ModelName@_decays const * const = nullptr);
 
 private:
    SLHA_io slha_io; ///< SLHA io class
@@ -132,6 +132,7 @@ void @ModelName@_slha_io::fill(
    const softsusy::QedQcd& qedqcd,
    const @ModelName@_scales& scales,
    const @ModelName@_observables& observables,
+   const Spectrum_generator_settings& spectrum_generator_settings,
    @ModelName@_decays const * const decays)
 {
    const auto& model = std::get<0>(models);
@@ -142,7 +143,7 @@ void @ModelName@_slha_io::fill(
    set_input(model.get_input());
    if (!problems.have_problem()) {
       set_spectrum(models);
-      set_extra(model, scales, observables);
+      set_extra(model, scales, observables, spectrum_generator_settings);
    }
    if (decays) {
       @useDecaysData@

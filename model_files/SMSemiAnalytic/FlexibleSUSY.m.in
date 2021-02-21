@@ -72,10 +72,7 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{21, FlexibleSUSYObservable`aMuon} } },
    {EWSBOutputs, NoScale,
-           {{1, mu20} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
+           {{1, mu20} } }
 };
 
 SARAH`ParameterDefinitions = Append[

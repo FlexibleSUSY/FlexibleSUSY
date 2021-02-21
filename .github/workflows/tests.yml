@@ -21,8 +21,90 @@ on:
       - 'doc/**'
 
 jobs:
+  no-meta:
+    strategy:
+       matrix:
+          OS: [macos-10.15, ubuntu-20.04]
+          CXXCOMPILER: [g++, clang++]
+    runs-on: ${{ matrix.OS }}
 
-  build:
+    steps:
+      - name: Homebrew
+        if: runner.os == 'macOS'
+        run: |
+           brew update
+           brew upgrade
+           brew reinstall gcc
+           brew install gsl
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install conan
+        run: |
+          pip3 install --user conan
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan profile new default --detect
+
+      - name: Setup conan
+        run: |
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+        env:
+          CXX: ${{ matrix.CXXCOMPILER }}
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Install dependencies
+        run: |
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
+          conan install . --build=missing
+
+      - name: Configure
+        run: |
+          ./configure \
+             --with-cxxflags="-std=c++14 -fPIC" \
+             --with-cxx=$CXXCOMPILER \
+             --with-optional-modules=test \
+             --with-loop-libraries=collier,looptools \
+             --with-install-dir=install \
+             --disable-meta
+          make showbuild
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+
+      - name: Make
+        run: make -j2
+
+      - name: Build compiled tests
+        run: make -j2 alltest
+
+      - name: Run compiled and shell script (Softsusy)
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        run: |
+           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
+           make clean-test-log
+
+      - name: Install
+        run: make install-src
+
+  with-meta:
 
     # Pull requests don't share secrets with a fork so we run tests only on PRs
     # comming from the FlexibleSUSY/FlexibleSUSY repo.
@@ -36,7 +118,7 @@ jobs:
         CXXCOMPILER: [g++, clang++]
 
     env:
-      IMAGE_VERSION: '0.4.6'
+      IMAGE_VERSION: '0.4.12'
       FORMCALC_VERSION: '9.9'
       MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
 
@@ -74,7 +156,7 @@ jobs:
       - name: Install FormCalc
         run: |
           docker exec builder bash -c "wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -"
-          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && PATH=/usr/local/Wolfram/WolframEngine/12.1/Executables:\$PATH ./compile"
+          docker exec builder bash -c "cd FormCalc-$FORMCALC_VERSION && ./compile"
           docker exec builder bash -c "echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m"
 
       - name: Create models
@@ -94,6 +176,7 @@ jobs:
                   --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
                   --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64
                   --with-optional-modules=test
+                  --with-cxxflags=\"-std=c++14 -O2 -fPIC -Wall -Wpedantic -Wfloat-equal -pipe\"
                "
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}

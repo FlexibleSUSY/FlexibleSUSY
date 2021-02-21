@@ -177,12 +177,7 @@ PotentialLSPParticles = {};
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYOutput, NoScale,
            {{1, Hold[SUSYScale]},
-            {2, Hold[LowScale]} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+            {2, Hold[LowScale]} } }
 };
 
 FSCalculateDecays = True;

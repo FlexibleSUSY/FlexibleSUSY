@@ -189,9 +189,4 @@ MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
 };

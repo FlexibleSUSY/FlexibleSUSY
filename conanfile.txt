@@ -1,11 +1,11 @@
 [requires]
-boost/[>=1.37.0]@conan/stable
-eigen/[>=3.1]@conan/stable
+boost/1.75.0
+eigen/[>=3.1]
 GM2Calc/[>=1.7.0]@conan/stable
 Himalaya/[>=4.0.0]@conan/stable
-LoopTools/2.15@conan/stable
-COLLIER/1.2.3@conan/stable
-TSIL/1.44@conan/stable
+LoopTools/[>=2.15]@conan/stable
+COLLIER/[>=1.2.3]@conan/stable
+TSIL/[>=1.44]@conan/stable
 
 [options]
 boost:bzip2=False
@@ -24,14 +24,14 @@ boost:shared=True
 boost:system_no_deprecated=False
 boost:without_atomic=True
 boost:without_chrono=True
-boost:without_container=True
+boost:without_container=False
 boost:without_context=True
 boost:without_contract=True
 boost:without_coroutine=True
 boost:without_date_time=True
-boost:without_exception=True
+boost:without_exception=False
 boost:without_fiber=True
-boost:without_filesystem=True
+boost:without_filesystem=False
 boost:without_graph=True
 boost:without_graph_parallel=True
 boost:without_iostreams=True
@@ -45,7 +45,7 @@ boost:without_random=True
 boost:without_regex=True
 boost:without_serialization=True
 boost:without_stacktrace=True
-boost:without_system=True
+boost:without_system=False
 boost:without_test=False
 boost:without_thread=True
 boost:without_timer=True

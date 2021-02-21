@@ -43,43 +43,48 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    }
 
    softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   SM_decays decays_HO = SM_decays(m, qedqcd, SM_higher_order_corrections::enable);
+   SM_decays decays_HO = SM_decays(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
 
    // ------------ tree-level decays ------------
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              0.0026142076883103791, 2e-15);
+                              0.0025891012695600101, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              9.6052678449395857e-06, 1e-16);
+                              9.5031904698723778e-06, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026184531343741851, 1e-15);
    // h -> W+ W-
+   // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
+   //                            0.00088266545237025511, 1e-14);, 1e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_conjVWpVWp(&m),
-                              0.00088266545237025511, 1e-14);
+                              0.00096256841980060836, 1e-3);
    // h -> Z Z
+   // BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
+   //                            8.4959557304996447e-05, 3e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VZVZ(&m),
-                              8.4959557304996447e-05, 3e-14);
+                              0.00010568799794141996, 1e-3);
 
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.0003937446137366738, 5e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00037101151840550036, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.0581891189186096e-05, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.0571803767199578e-05, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.9031590236381169e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.9327725968051701e-06, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   SM_decays decays_no_HO = SM_decays(m, qedqcd, SM_higher_order_corrections::disable);
+   SM_decays decays_no_HO = SM_decays(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
 
    // ------------ tree-level decays ------------
 

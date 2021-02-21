@@ -36,13 +36,10 @@ using namespace std;
 using namespace flexiblesusy;
 using namespace flexiblesusy::passarino_veltman;
 
-struct Values {
-   Values(double p_, double m1_, double m2_, double q_)
-      : p(p_), m1(m1_), m2(m2_), q(q_) {}
+struct B0_args {
    double p{}, m1{}, m2{}, q{};
 };
 
-constexpr double EPSTOL = 1.0e-11; ///< underflow accuracy
 constexpr double TOL = 1e-4;
 constexpr double sqr(double a) noexcept { return a*a; }
 
@@ -135,12 +132,12 @@ BOOST_AUTO_TEST_CASE( test_ReD1B0 )
 
 BOOST_AUTO_TEST_CASE( test_ReD1B0_numerical )
 {
-   const std::vector<Values> vals = {
-      Values(1e-2, 1., 0., 1. ),
-      Values(1e-2, 1., 1., 1. ),
-      Values(1e-2, 1., 1., 10.),
-      Values(1e-2, 2., 1., 1. ),
-      Values(1e-2, 1., 2., 1. )
+   const std::vector<B0_args> vals = {
+      {1e-2, 1., 0., 1. },
+      {1e-2, 1., 1., 1. },
+      {1e-2, 1., 1., 10.},
+      {1e-2, 2., 1., 1. },
+      {1e-2, 1., 2., 1. }
    };
 
    for (const auto v: vals) {
@@ -164,44 +161,44 @@ BOOST_AUTO_TEST_CASE( test_ReB1 )
 
 BOOST_AUTO_TEST_CASE( test_ReB1_integral )
 {
-   const std::vector<Values> vals = {
-      Values(0.  , 1.  , 0., 1.),
-      Values(1e-1, 1.  , 0., 1.),
-      Values(1e-2, 1.  , 0., 1.),
-      Values(1e-3, 1.  , 0., 1.),
-      Values(1e-4, 1.  , 0., 1.),
-      Values(1e-5, 1.  , 0., 1.),
-      Values(0.  , 1.  , 1e-15, 1.),
-      Values(1e-1, 1.  , 1e-15, 1.),
-      Values(1e-2, 1.  , 1e-15, 1.),
-      Values(1e-3, 1.  , 1e-15, 1.),
-      Values(1e-4, 1.  , 1e-15, 1.),
-      Values(1e-5, 1.  , 1e-15, 1.),
-      Values(0.  , 1e20, 0., 1.),
-      Values(1e-1, 1e20, 0., 1.),
-      Values(1e-2, 1e20, 0., 1.),
-      Values(1e-3, 1e20, 0., 1.),
-      Values(1e-4, 1e20, 0., 1.),
-      Values(1e-5, 1e20, 0., 1.),
-      Values(0.  , 0.  , 1., 1.),
-      Values(1e-1, 0.  , 1., 1.),
-      Values(1e-2, 0.  , 1., 1.),
-      Values(1e-3, 0.  , 1., 1.),
-      Values(1e-4, 0.  , 1., 1.),
-      Values(1e-5, 0.  , 1., 1.),
-      Values(0.  , 1e20, 1., 1.),
-      Values(1e-1, 1e20, 1., 1.),
-      Values(1e-2, 1e20, 1., 1.),
-      Values(1e-3, 1e20, 1., 1.),
-      Values(1e-4, 1e20, 1., 1.),
-      Values(1e-5, 1e20, 1., 1.),
-      Values(0.  , 0., 1e20, 1.),
-      Values(1e-1, 0., 1e20, 1.),
-      Values(1e-2, 0., 1e20, 1.),
-      Values(1e-3, 0., 1e20, 1.),
-      Values(1e-4, 0., 1e20, 1.),
-      Values(1e-5, 0., 1e20, 1.),
-      Values(1.  , 1.  , 1., 1.)
+   const std::vector<B0_args> vals = {
+      {0.  , 1.  , 0., 1.},
+      {1e-1, 1.  , 0., 1.},
+      {1e-2, 1.  , 0., 1.},
+      {1e-3, 1.  , 0., 1.},
+      {1e-4, 1.  , 0., 1.},
+      {1e-5, 1.  , 0., 1.},
+      {0.  , 1.  , 1e-15, 1.},
+      {1e-1, 1.  , 1e-15, 1.},
+      {1e-2, 1.  , 1e-15, 1.},
+      {1e-3, 1.  , 1e-15, 1.},
+      {1e-4, 1.  , 1e-15, 1.},
+      {1e-5, 1.  , 1e-15, 1.},
+      {0.  , 1e20, 0., 1.},
+      {1e-1, 1e20, 0., 1.},
+      {1e-2, 1e20, 0., 1.},
+      {1e-3, 1e20, 0., 1.},
+      {1e-4, 1e20, 0., 1.},
+      {1e-5, 1e20, 0., 1.},
+      {0.  , 0.  , 1., 1.},
+      {1e-1, 0.  , 1., 1.},
+      {1e-2, 0.  , 1., 1.},
+      {1e-3, 0.  , 1., 1.},
+      {1e-4, 0.  , 1., 1.},
+      {1e-5, 0.  , 1., 1.},
+      {0.  , 1e20, 1., 1.},
+      {1e-1, 1e20, 1., 1.},
+      {1e-2, 1e20, 1., 1.},
+      {1e-3, 1e20, 1., 1.},
+      {1e-4, 1e20, 1., 1.},
+      {1e-5, 1e20, 1., 1.},
+      {0.  , 0., 1e20, 1.},
+      {1e-1, 0., 1e20, 1.},
+      {1e-2, 0., 1e20, 1.},
+      {1e-3, 0., 1e20, 1.},
+      {1e-4, 0., 1e20, 1.},
+      {1e-5, 0., 1e20, 1.},
+      {1.  , 1.  , 1., 1.}
    };
 
    for (const auto v: vals) {
@@ -238,12 +235,12 @@ BOOST_AUTO_TEST_CASE( test_ReF0 )
 
 BOOST_AUTO_TEST_CASE( test_ReD1F0_numerical )
 {
-   const std::vector<Values> vals = {
-      Values(1e-2, 1.  , 0., 1. ),
-      Values(1e-2, 1.  , 1., 1. ),
-      Values(1e-2, 1.  , 1., 10.),
-      Values(1e-2, 2.  , 1., 1. ),
-      Values(1e-2, 1.  , 2., 1. )
+   const std::vector<B0_args> vals = {
+      {1e-2, 1.  , 0., 1. },
+      {1e-2, 1.  , 1., 1. },
+      {1e-2, 1.  , 1., 10.},
+      {1e-2, 2.  , 1., 1. },
+      {1e-2, 1.  , 2., 1. }
    };
 
    for (const auto v: vals) {
@@ -262,12 +259,12 @@ BOOST_AUTO_TEST_CASE( test_ReG0 )
 
 BOOST_AUTO_TEST_CASE( test_ReD1G0_numerical )
 {
-   const std::vector<Values> vals = {
-      Values(1e-2, 1.  , 0., 1. ),
-      Values(1e-2, 1.  , 1., 1. ),
-      Values(1e-2, 1.  , 1., 10.),
-      Values(1e-2, 2.  , 1., 1. ),
-      Values(1e-2, 1.  , 2., 1. )
+   const std::vector<B0_args> vals = {
+      {1e-2, 1.  , 0., 1. },
+      {1e-2, 1.  , 1., 1. },
+      {1e-2, 1.  , 1., 10.},
+      {1e-2, 2.  , 1., 1. },
+      {1e-2, 1.  , 2., 1. }
    };
 
    for (const auto v: vals) {

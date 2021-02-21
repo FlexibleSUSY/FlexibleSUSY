@@ -622,6 +622,7 @@ Block MSOFT Q= 8.61574711E+02
    slha_io.read_from_stream(istr);
 
    softsusy::QedQcd qedqcd;
+   Physical_input physical_input;
    MSSM_input_parameters input;
    Spectrum_generator_settings settings;
 
@@ -629,6 +630,7 @@ Block MSOFT Q= 8.61574711E+02
    try {
       slha_io.fill(settings);
       slha_io.fill(qedqcd);
+      slha_io.fill(physical_input);
       slha_io.fill(input);
    } catch (const Error& error) {
       BOOST_TEST_MESSAGE(error.what());
@@ -644,7 +646,7 @@ Block MSOFT Q= 8.61574711E+02
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   MSSM_decays decays_with_HO(m, qedqcd, SM_higher_order_corrections::enable);
+   MSSM_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
 
    // scalar Higgs
 
@@ -652,42 +654,50 @@ Block MSOFT Q= 8.61574711E+02
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0016298093732297074, 3e-13);
+                              0.0017121642442722094, 3e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              9.1568983543341553e-05, 2e-13);
+                              9.646545615291292e-05, 3e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00026234512343534217, 3e-13);
    // h -> W+ W-
+   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
+   //                            0.0001976368796373175, 2e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.0001976368796373175, 2e-12);
+                              0.00023570868278330426, 1e-3);
    // h -> Z Z
+   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
+   //                            1.4826613977728886e-05, 3e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              1.4826613977728886e-05, 3e-12);
+                              2.4985674072908062e-05, 1e-3);
 
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00015775989292413371, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.0002316933382245986, 2e-10);
    // h -> gamma gamma
    // without 2L QCD for squark
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);
    // with 2L QCD for squark
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.6025042775285735e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.5901481884458578e-06, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.4179859979625097e-06, 9e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.4256218799269069e-06, 9e-11);
 
    // pseudoscalar Higgs
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057267440538, 3e-13);
 
    // ------------ tree-level decays ------------
 
    // Ah -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              0.76567862493067118, 4e-13);
+                              0.88651082277705551, 4e-13);
    // Ah -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFeFe(&m, 1, 2, 2),
                               0.14370134306121243, 4e-13);
+   // Ah -> c cbar
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
+                              7.5825786414890104e-05, 3e-13);
    // Ah -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_conjVWmVWm(&m, 1),
                               3.92679593098481e-05, 2e-12);
@@ -700,14 +710,14 @@ Block MSOFT Q= 8.61574711E+02
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057267442186, 3e-13);
    // Ah -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 6.9505423050808961e-06, 4e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.9435156949974454e-06, 4e-12);
    // Ah -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVZ(&m, 1), 1.0128224862285261e-05, 2e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   MSSM_decays decays_without_HO(m, qedqcd, SM_higher_order_corrections::disable);
+   MSSM_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
@@ -723,6 +733,18 @@ Block MSOFT Q= 8.61574711E+02
 
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 9.3812238961023538e-05, 2e-10);
+   // h -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.4179859979625097e-06, 9e-11);
+
+   // Ah -> gluon gluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057267442186, 3e-13);
+   // Ah -> gamma gamma
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVP(&m, 1), 4.8001690139831219e-06, 4e-12);
+   // Ah -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 1.0128224862285261e-05, 2e-11);
+
+   // h -> gamma Z
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.4179859979625097e-06, 9e-11);
 
    // Sd5 -> Chi d
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sd_to_ChiFd(&m, 5, 0, 0),

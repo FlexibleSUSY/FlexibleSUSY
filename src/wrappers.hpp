@@ -53,6 +53,7 @@ static constexpr bool True = true;
 static constexpr double zeta2          = 1.6449340668482264; // Zeta[2]
 static constexpr double zeta3          = 1.2020569031595943; // Zeta[3]
 static constexpr double zeta4          = 1.0823232337111382; // Zeta[4]
+static constexpr double zeta5          = 1.0369277551433699; // Zeta[5]
 
 // Abs /////////////////////////////////////////////////////////////////
 

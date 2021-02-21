@@ -666,8 +666,16 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            ReformeBlocks[{idx_, expr_}]         := {expr, idx};
            ReformeBlocks[{idx1_, idx2_, expr_}] := {expr, idx1, idx2};
            reformed = ReformeBlocks /@ outputBlocks;
-           (result = result <> WriteSLHABlock[#[[1]], #[[2]]])& /@ reformed;
-           Return[result];
+           (
+              result = result
+                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                       "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
+                       <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
+                       <> "}\n",
+                       WriteSLHABlock[#[[1]], #[[2]]]
+                    ]
+           )& /@ reformed;
+           result
           ];
 
 ReadSLHAInputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
@@ -1310,7 +1318,7 @@ CreateSetDecaysFunctions[modelName_String] := "\
  */
 std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
    std::vector<Decay> decays_list_as_vector;
-   for (std::pair<std::size_t, Decay> const& el : decays_list) {
+   for (const auto& el : decays_list) {
       decays_list_as_vector.push_back(el.second);
    }
    std::sort(

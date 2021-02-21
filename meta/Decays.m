@@ -38,6 +38,8 @@ GetDecaysForParticle::usage = "Creates 'objects' FSParticleDecay";
 GetVerticesForDecays::usage="gets required vertices for a list of decays";
 
 CreateSMParticleAliases::usage="creates aliases for SM particles present in model.";
+CreateBSMParticleAliasList::usage="";
+
 CallDecaysCalculationFunctions::usage="creates calls to functions calculating
 decays of the given particles.";
 CreateDecaysCalculationPrototypes::usage="creates prototypes for convenience
@@ -54,8 +56,6 @@ CreateDecayTableGetterFunctions::usage="create getter definitions for C++ decay 
 CreateDecayTableInitialization::usage="create C++ initializer for decay table.";
 CreateTotalAmplitudeSpecializations::usage="creates specialized functions for higher-order decays.";
 CreatePartialWidthSpecializations::usage="creates specialized functions for particular decays.";
-
-FieldPositionInVertex::usage = "";
 
 Begin["`Private`"];
 
@@ -142,13 +142,12 @@ GetPossibleDecayTopologies[nProducts_, nLoops_] :=
    vertex 2 = outgoing state
    vertex 3 = outgoing state
    vertex 4 = internal vertex *)
-GetPossibleDecayTopologies[2, 0] :=
-    {
-     {{0,0,0,1},
-      {0,0,0,1},
-      {0,0,0,1},
-      {1,1,1,0}}
-    };
+GetPossibleDecayTopologies[2, 0] := {
+   {{0,0,0,1},
+    {0,0,0,1},
+    {0,0,0,1},
+    {1,1,1,0}}
+};
 
 $translationFile = Once[Get["meta/generic_loop_decay_diagram_classes.m"]];
 SetAtrributes[$translationFile, {Protected, Locked}];
@@ -189,7 +188,7 @@ GetDecayTopologyName[t_] :=
           Quit[1];
          ];
 
-CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, SARAH`AntiField[#]& /@ particles]];
+CreateCompleteParticleList[particles_List] := DeleteDuplicates[Join[particles, TreeMasses`FSAntiField /@ particles]];
 
 GenericScalarName[] := "scalar";
 GenericVectorName[] := "vector";
@@ -231,6 +230,59 @@ CreateSMParticleAliases[namespace_:""] :=
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
+
+CreateBSMParticleAliasList[namespace_:""] :=
+   Module[{bsmForZdecay, bsmForWdecay},
+      bsmForZdecay =
+         Select[
+            Prepend[#, TreeMasses`GetZBoson[]]& /@
+               DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
+            IsPossibleNonZeroVertex[#, True]&
+         ];
+      bsmForZdecay =
+         Join[
+            bsmForZdecay,
+            Select[
+               Prepend[#, TreeMasses`GetZBoson[]]& /@
+                  DeleteDuplicates@Sort@Tuples[{
+                     Join[TreeMasses`GetSusyParticles[], TreeMasses`FSAntiField /@ TreeMasses`GetSusyParticles[]],
+                     Join[TreeMasses`GetSMParticles[], TreeMasses`FSAntiField /@ TreeMasses`GetSMParticles[]]
+                  }],
+               IsPossibleNonZeroVertex[#, True]&
+            ]
+         ];
+      bsmForWdecay =
+         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+            DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
+            IsPossibleNonZeroVertex[#, True]&
+         ];
+      bsmForWdecay =
+         Join[
+            bsmForWdecay,
+            Select[
+               Prepend[#, TreeMasses`GetWBoson[]]& /@
+                  DeleteDuplicates@Sort@Tuples[{
+                     Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
+                     Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
+                  }],
+               IsPossibleNonZeroVertex[#, True]&
+            ]
+         ];
+
+      {
+         Join[bsmForZdecay, bsmForWdecay],
+         "// List of potential Z boson decay products excluding pure SM decays\n" <>
+         "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[
+            ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"
+         ] <> If[Length@bsmForZdecay > 0, "\n", ""] <> "> BSMForZdecay;\n\n" <>
+         "// List of potential W boson decay products excluding pure SM decays\n" <>
+         "typedef boost::mpl::list<\n" <>
+         TextFormatting`IndentText@StringJoin@Riffle[
+            ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"
+         ] <> If[Length@bsmForWdecay > 0, "\n", ""] <> "> BSMForWdecay;"
+      }
+   ];
 
 GetGenericTypeName[p_?TreeMasses`IsScalar] := GenericScalarName[];
 GetGenericTypeName[p_?TreeMasses`IsVector] := GenericVectorName[];
@@ -284,7 +336,7 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
                                   (finalStateReps === {T, T}) ||
                                   (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}])
-                                  (* unkoment to enable O -> OO decays once
+                                  (* uncomment to enable O -> OO decays once
                                      the handling of multiple color structures
                                      is introduced
                                   || (finalStateReps === Sort[{O, O}])*));,
@@ -294,16 +346,13 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
            result
           ];
 
-(* don't generate decays like Fe3 -> Fe1 VP
-   @todo: should we generate them? *)
-IsSelfDecay[initialParticle_, finalState_List] :=
-   (MemberQ[finalState, initialParticle] && (MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]]));
-
 FinalStateContainsInitialState[initialParticle_, finalState_List] :=
     Module[{containsInitialMultiplet, dim},
-           containsInitialMultiplet = !FreeQ[finalState, initialParticle];
-           dim = TreeMasses`GetDimension[initialParticle];
-           containsInitialMultiplet && dim == 1
+           If[!FreeQ[finalState, initialParticle],
+              TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1 ||
+              MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]],
+              False
+           ]
           ];
 
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
@@ -348,22 +397,24 @@ ContainsOnlySupportedVertices[diagram_] :=
 
 IsSupportedDiagram[diagram_] := ContainsOnlySupportedVertices[diagram];
 
-GetFinalStateExternalField[particle_] := SARAH`AntiField[particle];
-
 GetContributingDiagramsForDecayGraph[initialField_, finalFields_List, graph_] :=
-   Module[{externalFields, diagrams},
-           externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]];
-           diagrams =
-             CXXDiagrams`FeynmanDiagramsOfType[
-               graph,
-               externalFields,
-               (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
+   Module[
+      {
+         externalFields = Join[{1 -> initialField}, MapIndexed[(First[#2] + 1 -> #1)&, finalFields]],
+         diagrams
+      },
+      (* vertices in diagrams are not SortCp'ed *)
+      diagrams =
+         CXXDiagrams`FeynmanDiagramsOfType[
+            graph,
+            externalFields,
+            (* One loop decay topologies T2, T3 & T5 contain an A0 bubble on external leg.
                   With below argument set to True, charged particles are inserted twice in
-                  such bubble - once as particle and once as antiparticle. *)
-               If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
-             ];
-           Select[diagrams, IsPossibleNonZeroDiagram]
-          ];
+               such bubble - once as particle and once as antiparticle. *)
+            If[IsOneLoopDecayTopology[graph], !MemberQ[{"T2","T3","T5"}, FeynArtsTopologyName[graph]], True]
+         ];
+      Select[diagrams, IsPossibleNonZeroDiagram[#, True]&]
+   ];
 
 (* returns list of {{number of loops, {{topology, list of insertions}}}, ...} *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_Integer] :=
@@ -383,7 +434,7 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
                  0
               ];
            topologies = Join[Table[{i, GetPossibleDecayTopologies[nFinalParticles, i]}, {i, minLoops, maxLoops}]];
-           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, GetFinalStateExternalField /@ finalParticles, #]}& /@ #[[2]]}&
+           diagrams = {#[[1]], {#, GetContributingDiagramsForDecayGraph[initialParticle, TreeMasses`FSAntiField /@ finalParticles, #]}& /@ #[[2]]}&
                       /@ topologies;
            diagrams = {#[[1]], With[{toposAndDiags = #[[2]]}, Select[toposAndDiags, #[[2]] =!= {}&]]}& /@ diagrams;
            diagrams = DeleteCases[diagrams, {_Integer, {}}];
@@ -532,8 +583,7 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            isPossibleDecay[finalState_] := (IsPhysicalFinalState[finalState] &&
                                             IsElectricChargeConservingDecay[particle, finalState] &&
                                             IsColorInvariantDecay[particle, finalState] &&
-                                            !FinalStateContainsInitialState[particle, finalState] &&
-                                               !IsSelfDecay[particle, finalState]);
+                                            !FinalStateContainsInitialState[particle, finalState]);
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
@@ -1186,7 +1236,7 @@ GetTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay] :=
           ];
 
 EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesName_, paramsStruct_, resultName_:"vertex"] :=
-    Module[{vertexFields, templatePars},
+    Module[{vertexFields, templatePars, sortedVertexFields},
            vertexFields = GetTreeLevelTwoBodyDecayVertex[decay];
            If[Length[vertexFields] > 1,
               Print["Error: more than a single vertex in tree-level decays."];
@@ -1194,9 +1244,10 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
              ];
            If[vertexFields =!= {},
               vertexFields = First[vertexFields];
+              sortedVertexFields = SortFieldsInCp[vertexFields];
               templatePars = "<" <>
                               Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#]&
-                                                            /@ vertexFields, ", "] <> " >";
+                                                            /@ sortedVertexFields, ", "] <> ">";
               "const auto " <> resultName <> " =  Vertex" <> templatePars <> "::evaluate(" <>
               indicesName <> ", " <> paramsStruct <> ");\n",
               ""
@@ -1204,22 +1255,30 @@ EvaluateTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay, modelName_, indicesNa
           ];
 
 FillSSSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp@fieldsList;
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor += vertex.value();\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
 FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_left += vertex.left();\n" <>
                          structName <> ".form_factor_right += vertex.right();\n";
@@ -1227,33 +1286,45 @@ FillSFFTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
           ];
 
 FillSSVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor += vertex.value(0, 1);\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
 FillSVVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_g += vertex.value();\n";
            "// tree-level amplitude\n" <> indices <> vertex <> "\n" <> assignments
           ];
 
 FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_left += vertex.left();\n" <>
                          structName <> ".form_factor_right += vertex.right();\n";
@@ -1261,11 +1332,15 @@ FillFFSTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, str
           ];
 
 FillFFVTreeLevelDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments},
-           fieldsList = Join[{GetInitialState[decay]}, GetFinalState[decay]];
+    Module[{fieldsList, fieldsNamespace, indices, vertex, assignments, sortedFieldsList},
+           fieldsList = Join[{GetInitialState[decay]}, TreeMasses`FSAntiField /@ GetFinalState[decay]];
+           sortedFieldsList = SortFieldsInCp[fieldsList];
            fieldsNamespace = modelName <> "_cxx_diagrams::fields";
            indices = "const auto indices = concatenate(" <>
-                     Utils`StringJoinWithSeparator[Table["idx_" <> ToString[i], {i, 1, Length[fieldsList]}], ", "] <> ");\n";
+                     Utils`StringJoinWithSeparator[
+                        Permute[("idx_" <> ToString[#])& /@ Range[Length[fieldsList]], FindPermutation[fieldsList, sortedFieldsList]],
+                        ", "
+                     ] <> ");\n";
            vertex = EvaluateTreeLevelTwoBodyDecayVertex[decay, modelName, "indices", paramsStruct];
            assignments = structName <> ".form_factor_gam_left += vertex.left();\n" <>
                          structName <> ".form_factor_gam_right += vertex.right();\n";
@@ -1381,14 +1456,31 @@ InsertionsOnEdgesForDiagram[topology_, insertion_] :=
       res
 ];
 
+(* returns vertex needed by FA generated routines, but in terms of SortCp'ed vertex *)
 ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, vertices_, indices_] :=
-   Module[{vertexEdges, res, pos, kk, globalMinus = 1},
+   Module[{vertexEdges, res, pos, globalMinus = 1, vertex, lorSorted, temp},
 
    vertexEdges = (List[particles] /. Index[Generic, n_] :> n);
    pos = First@First@Position[vertices, vertexEdges];
-   kk = vertexEdges /. -_[n_] :> n /. _[n_] :> n ;
+   lorSorted =
+      lor /. Index[Generic, n_] :> n;
+   (* we use field position in vertex in Mom and not field itself as there
+      are vertices like {hh, hh, VZ} in the MSSMCPV which would give
+      Mom[hh] - Mom[hh] which is 0 *)
+   lorSorted = lorSorted /. Mom[-f_[n_]] :> Mom[First@First@Position[vertexEdges, -f[n]]] /. Mom[f_[n_]] :> Mom[First@First@Position[vertexEdges, f[n]]];
+   (* SortCp requires that FFV vertex has only PL|PR as lorent structure,
+      not LorentzProduct[gamma[lt], PL|PR] *)
+   lorSorted = lorSorted /. LorentzProduct[gamma[_], lr_:PL|PR] :> lr;
+   vertex =
+      SARAH`Cp[Sequence@@(vertexEdges /. -f_[n_] /; !IsParticle[f] :> SARAH`AntiField[Field[n] /. fieldAssociation] /. f_[n_] /; !IsParticle[f] && f =!= Susyno`LieGroups`conj && f =!= SARAH`bar :> (Field[n] /. fieldAssociation))][lorSorted];
+   temp =
+      SortCp[vertex];
+   temp = temp /. -SARAH`Cp[y___][x___] :> (globalMinus*=-1;{{y}, x}) /. SARAH`Cp[y___][x___] :> {{y}, x};
+   vertex = First@temp;
+   lorSorted = Last@temp;
+
    res =
-      Replace[lor, {
+      Replace[lorSorted, {
          (* pure only scalar vertices *)
          1 -> "value()",
 
@@ -1400,51 +1492,22 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
 
          (* @todo: rules below need checking! *)
          (* momentum difference vertices *)
-         (Mom[f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]]) :> (
-            "value(" <>
-            StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-         ),
-         (Mom[f_[Index[Generic, n_]]] - Mom[f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, f[m]]}, ", "] <> ")"
-         ),
-         (Mom[f_[n_]] - Mom[-f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-               StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-         ),
-        (Mom[-f_[Index[Generic, n_]]] - Mom[-f_[Index[Generic, m_]]]) :> (
-           "value(" <>
-              StringJoin@@Riffle[ToString/@Utils`MathIndexToCPP/@First/@First/@{Position[vertexEdges, -f[n]], Position[vertexEdges, -f[m]]}, ", "] <> ")"
-        ),
+         Mom[i1_Integer] - Mom[i2_Integer] :>
+            "value(" <> ToString[i1-1] <> ", " <> ToString[i2-1] <> ")",
 
         (* metric tensor vertices *)
-        (* there's a global - sign in those expression, that's why permutaion with even
+        (* there's a global - sign in those expression, that's why permutation with even
            signature is replaced with odd_permutation *)
-        g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[V[Index[Generic, n3_]]]) :>
-               If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-                  "value(TripleVectorVertex::odd_permutation {})",
-                  "value(TripleVectorVertex::even_permutation {})",
-                  Quit[1];
-               ],
-         (* copy of the above expression but with -V[5] and -V[6] *)
-         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[-V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[-V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
-            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-               "value(TripleVectorVertex::odd_permutation {})",
-               "value(TripleVectorVertex::even_permutation {})",
-               Quit[1];
-            ],
-         g[lt1_, lt2_] (-Mom[V[Index[Generic, n2_]]] + Mom[V[Index[Generic, n1_]]])
-            + g[lt1_, lt3_] (Mom[V[Index[Generic, n2_]]] - Mom[-V[Index[Generic, n3_]]])
-            + g[lt2_, lt3_] (-Mom[V[Index[Generic, n1_]]] + Mom[-V[Index[Generic, n3_]]]) :>
-            If[Signature@FindPermutation[kk, {n1, n2, n3}] == 1,
-               "value(TripleVectorVertex::odd_permutation {})",
-               "value(TripleVectorVertex::even_permutation {})",
-               Quit[1];
-            ],
+        g[lt1, lt2] (-Mom[i1_] + Mom[i2_])
+            + g[lt1, lt3] (Mom[i1_] - Mom[i3_])
+            + g[lt2, lt3] (-Mom[i2_] + Mom[i3_]) :> (
+               Switch[Signature[{i1, i2, i3}],
+                  1, "value(TripleVectorVertex::odd_permutation {})",
+                 -1, "value(TripleVectorVertex::even_permutation {})",
+                 _,  (Print["Can't find TripleVectorVertex permutation"]; Quit[1])
+               ]
+
+        ),
 
          g[l1_, l2_] g[l3_, l4_] :>
             Switch[{l1, l2, l3, l4},
@@ -1460,40 +1523,24 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
          (* apparently FeynArts writes all ghost-ghost-vector vertices as proportional to momentum
             of bared ghost. This is opposite to Sarah where all such vertices are written using
             the momentum of non-bared ghost *)
-         Mom[f_[Index[Generic, n_]]] :> (
-           "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[
-             If[
-               Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] === SARAH`bar,
-               globalMinus = 1;
-               If[Length@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&] === 0,
-                 First@Select[{particles}, MatchQ[#, f[Index[Generic, m_/; m =!= n]]]&],
-
-                 First@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&]
-
-               ],
-               f[Index[Generic, n]]
-             ], {particles}] <> ")"
+         Mom[i_Integer] :> (
+            globalMinus *= -1;
+            With[{unbarredGhosts = Select[Delete[vertex, i], (IsGhost[#] && Head[#]=!=SARAH`bar)&]},
+               If[Head[vertex[[i]]]===SARAH`bar && Length@unbarredGhosts =!= 1,
+                  Print["Error! Couldn't identify ghost in vertex"];
+                  Quit[1],
+                  "value(" <> ToString@Utils`MathIndexToCPP@FieldPositionInVertex[If[Head[vertex[[i]]]=!=SARAH`bar, vertex[[i]], First@unbarredGhosts], vertex] <> ")"
+               ]
+            ]
          ),
-         Mom[-f_[Index[Generic, n_]]] :> (
-          "value(" <> ToString@Utils`MathIndexToCPP@(FieldPositionInVertex[
-            If[
-              Head[Last@First@Select[fieldAssociation, MatchQ[#, Field[n] -> _]&]] =!= SARAH`bar,
-              If[Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&] === {},
-                  Last@Select[{particles}, MatchQ[#, -f[Index[Generic, _]]]&],
-                  First@Select[{particles}, MatchQ[#, f[Index[Generic, _]]]&]
-              ],
-               globalMinus = 1;
-              -f[Index[Generic, n]]
-              ], {particles}]) <> ")"
-        ),
 
         (* error *)
-        lor :> (Print["Unhandled lorentz structure " <> ToString@lor]; Quit[1])
+        lorSorted :> (Print["Unhandled lorentz structure " <> ToString@lorSorted]; Quit[1])
       }
    ];
 
    If[globalMinus === -1, "-", ""] <>
-   "1.0i*vertex" <> ToString@indices[[pos]] <> "::evaluate(index" <> ToString@indices[[pos]] <> ", context)." <> res
+   "1.0i*vertex" <> ToString@indices[[pos]] <> "Val." <> res
 ];
 
 (*
@@ -1526,8 +1573,8 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
 
          If[GetFeynArtsTypeName[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]] === (temp[[i,1]] /. fieldTypes),
 
-            temp[[i]] = temp[[i]] /. If[i==2 || i ==3, concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]], concreteFieldOnEdgeBetweenVerticesLocal[[i]]];
-            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> AntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
+            temp[[i]] = temp[[i]] /. concreteFieldOnEdgeBetweenVerticesLocal[[i]];
+            temp[[i]] = temp[[i]] /. (Reverse@concreteFieldOnEdgeBetweenVerticesLocal[[i,1]] -> TreeMasses`FSAntiField[concreteFieldOnEdgeBetweenVerticesLocal[[i,2]]]),
 
             concreteFieldOnEdgeBetweenVerticesLocal[[{i, i+1}]] = concreteFieldOnEdgeBetweenVerticesLocal[[{i+1, i}]];
             i=i-1;
@@ -1537,9 +1584,9 @@ GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetw
       temp
 ];
 
-(* map topology to FeynArts name *)
+(* map topology to FeynArts name, see Fig. 1 in FlexibleDecay paper *)
 FeynArtsTopologyName[topology_] :=
-    Switch[topology,
+   Switch[topology,
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}, {1, 0, 0,
         0, 1, 1}, {0, 1, 0, 1, 0, 1}, {0, 0, 1, 1, 1, 0}}, "T1",
       {{0, 0, 0, 1, 0}, {0, 0, 0, 1, 0}, {0, 0, 0, 0, 1}, {1, 1, 0, 0,
@@ -1561,7 +1608,7 @@ FeynArtsTopologyName[topology_] :=
       {{0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 1, 0}, {1, 0, 0,
         0, 0, 2}, {0, 1, 1, 0, 0, 1}, {0, 0, 0, 2, 1, 0}}, "T10",
       _, Print["Error: Cannot map topology to FeynArts name"]; Quit[1]
-    ];
+   ];
 
 WrapCodeInLoop[indices_, code_] :=
    (
@@ -1585,13 +1632,16 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
    Module[{(*vertices, *)indices, cppVertices,
       mass = {}, translation, fieldAssociation,
       externalEdges,
-     (*verticesInFieldTypes, *)matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
-     verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac"
+      matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
+      verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
+      whereToConj, verticesForFACp2,
+      (* colour triplet fermions *)
+      quarkLike = Select[GetColoredParticles[], IsFermion[#] && (GetColorRepresentation[#] == T || GetColorRepresentation[#] == -T) &]
    },
 
       translation = GenericTranslationForInsertion[topology, diagram];
       If[Length[translation]===7 && translation[[-3]] === {},
-        Return[{{}, ""}]
+        Return[{FinitePart, ""}]
       ];
 
       (* the vertices positions FACp are not ordered according to numbers in element 2 & 3 of translation *)
@@ -1608,20 +1658,52 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             translation[[3]],
             translation[[4]],
             diagram,
-             verticesInFieldTypesForFACp
+            verticesInFieldTypesForFACp
           ];
 
       (* vertices in an orientation as required by Cp *)
-(*      vertices = verticesInFieldTypes /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];*)
-      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> AntiField[e];
+      verticesForFACp = verticesInFieldTypesForFACp /. (fieldAssociation /. ((#1 -> #2@@#1)& @@@ translation[[4]])) /. - e_ :> TreeMasses`FSAntiField[e];
+
+      (* extra conjugations to bring verticesForFACp equal (possibly up to order) with vertices in diagram *)
+      Module[
+         {
+            i=1, t,
+            whereToConj =
+               DeleteCases[
+                  Subsets[
+                     Select[
+                        Range[4, Length[fieldAssociation]],
+                        (* this cannot be replaced by FSAntiField *)
+                        (fieldAssociation[[#,2]] =!= SARAH`AntiField[fieldAssociation[[#,2]]])&
+                     ]
+                  ],
+                  {}
+               ]
+         },
+         (* We do a double sort because the order of fields in vertices or the order of
+            vertices doesn't have to be same. *)
+         While[Sort[Sort /@ verticesForFACp] =!= Sort[Sort /@ Drop[diagram, 3]],
+            If[i > Length@whereToConj,
+               Print["Error! Could not determine field association list"];
+               Quit[1]
+            ];
+            t = {#, 2}& /@ (whereToConj[[i]]);
+            (* this cannot be replaced by FSAntiField *)
+            fieldAssociation = MapAt[SARAH`AntiField, fieldAssociation, If[Length[t]===1, First@t, t]];
+            verticesForFACp = verticesInFieldTypesForFACp /. f_[n_Integer] :> Field[n] /. fieldAssociation /. - e_ :> SARAH`AntiField[e];
+            i++;
+         ]
+      ];
 
       (* set of unique indices used in names of vertices and indices *)
       indices = Table["Id"<>ToString@i, {i, Length@verticesForFACp}];
 
-      (* create using declarations for vertices *)
+      (* create using declarations for SortCp'ed vertices *)
+      verticesForFACp2 = (SortCp[Cp[Sequence@@#]])& /@ verticesForFACp;
+      verticesForFACp2 = If[Length[#] == 2, List@@Last@#, List@@#]& /@ verticesForFACp2;
       cppVertices =
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
-            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp}];
+            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp2}];
 
       (* List of {integer, integer} -> Field[integer] *)
       externalEdges =
@@ -1630,8 +1712,9 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
             (MatchQ[#, ({i_Integer, j_Integer} -> Field[_Integer]) /; (First@Sort[{i,j}] >= 1 && First@Sort[{i,j}] <= 3 && Last@Sort[{i,j}] > 3)])&
          ];
 
+      verticesInFieldTypesForFACpCpSorted = MapIndexed[Permute[#1, FindPermutation[verticesForFACp[[First@#2]], verticesForFACp2[[First@#2]]]]&, verticesInFieldTypesForFACp];
         matchExternalFieldIndicesCode = StringJoin@@(With[{
-          positions = Position[verticesInFieldTypesForFACp /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
+          positions = Position[verticesInFieldTypesForFACpCpSorted /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
         },
 If[Length@positions =!= 1, Quit[1]];
                   "const auto externalFieldIndicesIn" <> ToString[#] <>
@@ -1649,25 +1732,26 @@ If[Length@positions =!= 1, Quit[1]];
          Position[{{-x}}, x] = {{1, 1, 2}},
          hence the -field_->field rule *)
       mass =
-         Map[
-            ("const double mInternal" <> ToString[#-3] <> " {context.mass<" <>
-         CXXNameOfField[
-            verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]
-            ] <> ">(" <>
-         "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACp/. -field_:>field, _[#]]]] <> "::template indices_of_field<" <>
-         ToString@Utils`MathIndexToCPP[
-            Last@First@Position[verticesInFieldTypesForFACp/. -field_:>field, _[#]]
-         ] <>
-         ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACp/.-field_:>field, _[#]]]] <> "))};\n"
-      )&,
-      Range[4, 3+Length@verticesForFACp]
-      ];
-
-      mass = StringJoin@@mass;
+         StringJoin @@ Map[
+            (
+               "const double mInternal" <> ToString[#-3] <> " {context.mass<" <>
+               CXXNameOfField[
+                  verticesForFACp2[[Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]]]
+               ] <> ">(" <>
+               "vertex" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted/. -field_:>field, _[#]]]] <>
+               "::template indices_of_field<" <>
+               ToString@Utils`MathIndexToCPP[
+                  Last@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_:>field, _[#]]
+               ] <>
+               ">(index" <> ToString@indices[[First@First@Position[verticesInFieldTypesForFACpCpSorted /.-field_:>field, _[#]]]] <>
+               "))};\n"
+            )&,
+            Range[4, Length@fieldAssociation]
+         ];
 
       With[{
-        positions = Position[verticesInFieldTypesForFACp /. -f_[i_] :> f[i], (Field[#] /. translation[[4]])[#]]
-      },
+        positions = Position[verticesInFieldTypesForFACpCpSorted/. -f_[n_] :> Field[n] /. f_[n_] :> Field[n], Field[#]]
+         },
         If[Length@positions =!= 2, Quit[1]];
             matchInternalFieldIndicesCode = matchInternalFieldIndicesCode <>
                 "if (vertex" <> ToString@indices[[positions[[1,1]]]] <> "::template indices_of_field<" <>
@@ -1681,26 +1765,27 @@ If[Length@positions =!= 1, Quit[1]];
                 ToString@Utils`MathIndexToCPP@positions[[2,2]] <>
 
                 ">(index"<> ToString@indices[[positions[[2,1]]]] <> "))\n" <> TextFormatting`IndentText["continue;\n"] <> "\n"
-      ]& /@ Range[4, 3 + Length[verticesInFieldTypesForFACp]];
+      ]& /@ Range[4, Length@fieldAssociation];
 
       (* body of nested loops over vertices indices *)
       Block[{ampCall =
-                  "result += " <> ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
+                  ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
                      FillMasses[decay] <> ",\n" <>
                      (* internal masses *)
                      StringJoin @@ Riffle[("mInternal" <> ToString@#)& /@ Range@CXXDiagrams`NumberOfPropagatorsInTopology[topology], ", "] <> ", " <> "\n" <>
-                  (* couplings *)
-                         TextFormatting`WrapLines[
-                  StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"] <>
-                  (* renormalization scale *)
-                  "ren_scale" <>
-                  (* if amplitude is UV divergent, take the finite part *)
-                  If[!Last@translation === True, ",\nFinite", ""] <> ")"
+                     (* couplings *)
+                     TextFormatting`WrapLines[
+                        StringJoin @@ Riffle[ToString /@ ConvertCouplingToCPP[#, fieldAssociation, verticesInFieldTypesForFACp, indices]& /@ translation[[-3]], ", "] <> ",\n"
+                     ] <>
+                     (* renormalization scale *)
+                     "ren_scale" <>
+                     (* if amplitude is UV divergent, take the finite part *)
+                     If[!Last@translation === True, FinitePart=True; ",\nFinite", ""] <> ")"
                   ],
             fieldsInLoop = DeleteDuplicates[Map[
-            verticesForFACp[[  Sequence@@First@Position[verticesInFieldTypesForFACp /. -field_ :> field, _[#]]    ]]&,
+            verticesForFACp2[[  Sequence@@First@Position[verticesInFieldTypesForFACpCpSorted /. -field_ :> field, _[#]]    ]]&,
       Range[4, 3+Length@verticesForFACp]
       ] /. SARAH`bar|Susyno`LieGroups`conj -> Identity]
 
@@ -1715,73 +1800,120 @@ If[Length@positions =!= 1, Quit[1]];
                   "// connect internal particles in vertices\n" <>
                   matchInternalFieldIndicesCode <>
 
-                  "\n// internal masses\n" <>
-                  mass <>
-
-                  (* in some cases, we apply higher order corrections at the level of amplitude *)
+                     StringJoin[(
+                        "auto const vertex" <> # <> "Val = " <>
+                        "vertex" <> # <> "::evaluate(index" <>
+                           #  <> ", context);\n"
+                     )& /@ indices] <>
+                  "\nif (" <> StringJoin@Riffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
+                  TextFormatting`IndentText[
+                  "// internal masses\n" <>
+                  mass <> "\n" <>
+                  (* in some cases, we apply higher order corrections at the amplitude level *)
                   If[
-                     (* for H/A -> gamma gamma *)
+                     (* for Phi -> gamma gamma *)
                      (GetHiggsBoson[] === First@diagram || GetPseudoscalarHiggsBoson[] === First@diagram) && And @@ (TreeMasses`IsPhoton /@ Take[diagram, {2,3}]),
-                     If[(* CP conserving Higgs sector *)
-                        !SA`CPViolationHiggsSector &&
-                        (* the quark loop amplitude *)
-                        Length[fieldsInLoop] === 1 && ContainsAll[TreeMasses`GetSMQuarks[], fieldsInLoop],
-                        "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
-                        TextFormatting`IndentText[
-                           Module[{pos1, post2, res},
-                              StringJoin@Riffle[
-                              MapIndexed[
-                              (pos1 = Position[#1, First@fieldsInLoop, 1];
-                              pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
-                              If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                        If[
+                           (* the quark loop amplitude *)
+                           Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
+                           "auto temp_result = " <> ampCall <> ";\n" <>
+                           "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           TextFormatting`IndentText[
+                              Module[{pos1, post2, res},
+                                 StringJoin@Riffle[
+                                 MapIndexed[
+                                 (pos1 = Position[#1, First@fieldsInLoop, 1];
+                                 pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                                 If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                                 ])&, verticesForFACp]," &&\n"]
+                              ] <>
+                              ") {\n" <>
+                              "const auto correction_S = 1. + get_alphas(context)/Pi * delta_hAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                              "const auto correction_P = 1. + get_alphas(context)/Pi * delta_AhAA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale);\n" <>
+                              "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
+                              "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
+                              "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
+                              "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
+                              "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n" <>
+                              "temp_result.form_factor_eps = correction_P * temp_result.form_factor_eps;\n"
+                           ] <> "}\n" <>
+                           "result += temp_result;\n",
+                           (* colored scalar loop *)
+                           If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
+                           "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           TextFormatting`IndentText[
+                             Module[{pos1, post2, res},
+                             StringJoin@Riffle[
+                             MapIndexed[
+                                (pos1 = Position[#1, First@fieldsInLoop, 1];
+                             pos2 = Position[#1, Susyno`LieGroups`conj[First@fieldsInLoop], 1];
+                             If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
                                  "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
                                  "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
-                              ])&, verticesForFACp]," &&\n"]
-                           ] <>
-                           ") {\n"
-                        ] <>
-                        TextFormatting`IndentText[
-                           ampCall <> " * (1. + get_alphas(context)/Pi * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_quark_loop(result.m_decay, mInternal1, ren_scale));\n"
-                        ] <> "}\n" <>
-                        "else {\n" <>
-                        TextFormatting`IndentText[
-                           ampCall <> ";\n"
-                        ] <> "}\n",
-                    If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
-                     "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
-                     TextFormatting`IndentText[
-                       Module[{pos1, post2, res},
-                          StringJoin@Riffle[
-                          MapIndexed[
-                             (pos1 = Position[#1, First@fieldsInLoop, 1];
-                          pos2 = Position[#1, Susyno`LieGroups`conj[First@fieldsInLoop], 1];
-                          If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
-                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
-                              "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
-                          ])&, verticesForFACp]
-                          , " &&\n"
-                       ]
-                       ] <>
-                     ") {\n"] <>
-                     TextFormatting`IndentText[
-                        ampCall <> " * (1. + get_alphas(context)/Pi * " <>
-                        ToString@N[Switch[TreeMasses`GetColorRepresentation@First@fieldsInLoop,
-                           T, 4/3,
-                           -T, 4/3,
-                           O, 3,
-                           _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"];Quit[1]
-                         ], 16] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
-                     ] <> "}\n" <>
-                    "else {\n" <>
-                    TextFormatting`IndentText[
-                        ampCall <> ";\n"
-                    ] <> "}\n", ampCall <> ";\n"
-                    ]
-                  ], ampCall <> ";\n"
+                             ])&, verticesForFACp]
+                             , " &&\n"
+                              ]
+                              ] <>
+                              ") {\n" <>
+                           "result += " <> ampCall <> " * (1. + get_alphas(context)/Pi * " <>
+                           ToString @ N[
+                              Switch[
+                                 TreeMasses`GetColorRepresentation@First@fieldsInLoop,
+                                 T, 4/3,
+                                 -T, 4/3,
+                                 O, 3,
+                                 _, Print["Error! Unknown color charge of scalar in 2-loop QCD corrections to H->gamma gamma"]; Quit[1]
+                              ],
+                              16
+                           ] <> " * delta_" <> Switch[First@diagram, GetHiggsBoson[], "h", GetPseudoscalarHiggsBoson[], "Ah"] <> "AA_2loopQCD_for_squark_loop(result.m_decay, mInternal1, ren_scale));\n"
+                           ] <> "}\n" <>
+                           "else {\n" <>
+                              TextFormatting`IndentText["result += " <> ampCall <> ";\n"] <>
+                           "}\n",
+                           "result += " <> ampCall <> ";\n"
+                        ] (* end of scalar loop *)
+                  ],
+                  If[
+                     GetHiggsBoson[] === First@diagram &&
+                           ( (TreeMasses`IsPhoton[diagram[[2]]] && TreeMasses`IsZBoson[diagram[[3]]]) || (TreeMasses`IsPhoton[diagram[[3]]] && TreeMasses`IsZBoson[diagram[[2]]])),
+                        If[
+                           (* the quark loop amplitude *)
+                           Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
+                           "auto temp_result = " <> ampCall <> ";\n" <>
+                           "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           TextFormatting`IndentText[
+                              Module[{pos1, post2, res},
+                                 StringJoin@Riffle[
+                                 MapIndexed[
+                                 (pos1 = Position[#1, First@fieldsInLoop, 1];
+                                 pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
+                                 If[MatchQ[pos1, {{_Integer}}] && MatchQ[pos2, {{_Integer}}],
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
+                                    "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
+                                 ])&, verticesForFACp]," &&\n"] <>
+                                 "\n&& result.m_decay/mInternal1 < 0.8\n"
+                              ] <>
+                              ") {\n" <>
+                              (* eq. 2.57 of hep-ph/0503172 *)
+                              "const double correction_S = 1 - get_alphas(context)/Pi;\n" <>
+                              "temp_result.form_factor_g   = correction_S * temp_result.form_factor_g;\n" <>
+                              "temp_result.form_factor_11  = correction_S * temp_result.form_factor_11;\n" <>
+                              "temp_result.form_factor_12  = correction_S * temp_result.form_factor_12;\n" <>
+                              "temp_result.form_factor_21  = correction_S * temp_result.form_factor_21;\n" <>
+                              "temp_result.form_factor_22  = correction_S * temp_result.form_factor_22;\n"
+                              (* correction_P should be 0 in mq->infinity, see eq. 2.30 of hep-ph/0503173 *)
+                           ] <> "}\n" <>
+                           "result += temp_result;\n",
+                           "result += " <> ampCall <> ";\n"
+                        ],
+                        "result += " <> ampCall <> ";\n"
                   ]
+            ]] <> "}\n"
      ];
 
-      {verticesForFACp,
+      {FinitePart,
 
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
@@ -1800,7 +1932,7 @@ If[Length@positions =!= 1, Quit[1]];
                 (* weird FA factor *)
                 If[MemberQ[{"T2", "T3", "T4", "T5", "T8", "T9", "T10"}, topoName], 2, 1] *
                 If[topoName === "T9" || topoName === "T8",
-                   If[(Field[5] /. fieldAssociation) === (AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
+                   If[(Field[5] /. fieldAssociation) === (SARAH`AntiField[Field[6] /. fieldAssociation]), 1, 1/2],
                    1
                 ]
                ],16] <>
@@ -1827,19 +1959,17 @@ If[Length@positions =!= 1, Quit[1]];
    ];
 
 FillOneLoopDecayAmplitudeFormFactors[decay_FSParticleDecay, modelName_, structName_, paramsStruct_] :=
-    Module[{oneLoopTopAndInsertion, body = "", vertices = {}},
+    Module[{oneLoopTopAndInsertion, body = "", FinitePart = False},
 
        (* list of elements like {topology, insertion (diagram)} *)
        oneLoopTopAndInsertion = Flatten[With[{topo = #[[1]], diags = #[[2]]}, {topo, #}& /@ diags]& /@ GetDecayTopologiesAndDiagramsAtLoopOrder[decay, 1], 1];
 
        With[{ret = WrapCodeInLoopOverInternalVertices[decay, Sequence @@ #]},
-         vertices = AppendTo[vertices, ret[[1]]];
+         FinitePart = (ret[[1]] || FinitePart);
          body = body <> ret[[2]];
-               ]& /@ oneLoopTopAndInsertion;
+       ]& /@ oneLoopTopAndInsertion;
 
-       vertices = Flatten[vertices, 1];
-
-       {vertices,
+       {FinitePart,
          "\n// ----------------- 1-loop contributions to the amplitude -----------------\n" <>
              body
        }
@@ -1852,7 +1982,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             fieldsNamespace = "fields",
             returnVar = "result", paramsStruct = "context", returnType = "",
             externalFieldsList, templatePars = "", args = "",
-            body = "", vertices = {}},
+            body = ""},
 
            (* @todo StringPadRigh was introduced only in 10.1 *)
            (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
@@ -1891,9 +2021,10 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
-                AppendTo[vertices, First@res];
-                body = body <> "\n// FormCalc's Finite variable\n";
-                body = body <>"constexpr double Finite {1.};\n";
+                If[res[[1]],
+                  body = body <> "\n// FormCalc's Finite variable\n";
+                  body = body <>"constexpr double Finite {1.};\n"
+                ];
                 body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
@@ -1901,10 +2032,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
 
            body = body <> "return " <> returnVar <> ";\n";
 
-           (*Print[" Done."];*)
-           vertices = Flatten[vertices, 1];
-
-           {vertices,
              "// " <> ToString@initialParticle <> " -> " <> ToString@finalState <> "\n" <>
                  "template<>\n" <>
                  returnType <> " CLASSNAME::" <> CreateTotalAmplitudeFunctionName[] <>
@@ -1912,7 +2039,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                  "(\n" <> TextFormatting`IndentText[args <> ") const{\n"] <>
                  TextFormatting`IndentText[body] <>
                  "}\n"
-           }
    ];
 
 GetHiggsBosonDecays[particleDecays_List] :=
@@ -1948,7 +2074,7 @@ SelectGluonGluonFinalState[decays_List] :=
              ];
            result
           ];
-
+(*
 SelectHiggsHiggsFinalState[decays_List] :=
     Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], result = {}},
            If[higgsSymbol =!= Null,
@@ -1965,13 +2091,14 @@ SelectPhotonPhotonFinalState[decays_List] :=
            result
           ];
 
-SelectHiggsHiggsFinalState[decays_List] :=
+SelectPseudoscalarHiggsHiggsFinalState[decays_List] :=
     Module[{psSymbol = TreeMasses`GetPseudoscalarHiggsBoson[], result = {}},
            If[psSymbol =!= Null,
               result = SelectDecayByFinalState[{psSymbol, psSymbol}, decays];
              ];
            result
           ];
+*)
 
 SelectUpQuarkUpQuarkFinalState[decays_List] :=
     Module[{upQuarkSymbol, result = {}},
@@ -2094,10 +2221,10 @@ CreateHiggsToPhotonZTotalAmplitude[particleDecays_List, modelName_] :=
           ];
 
 CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
-    Module[{decl = "", def = "", vertices = {}},
+    Module[{decl = "", def = ""},
            decl = CreateTotalAmplitudeSpecializationDecl[decay, modelName];
-           {vertices, def} = CreateTotalAmplitudeSpecializationDef[decay, modelName];
-           {vertices, decl, def}
+           def = CreateTotalAmplitudeSpecializationDef[decay, modelName];
+           {decl, def}
           ];
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
@@ -2106,27 +2233,31 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            Print[""];
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
-           ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
-           specializations =
-              AbsoluteTiming@ParallelMap[
-                 (
-                    (*If[!MemberQ[listing, GetInitialState[#]],
-                       Print[""];
-                       Print["Creating C++ code for ", GetInitialState[#], " decays..."];
-                       AppendTo[listing, GetInitialState[#]];
-                    ];*)
-                    CreateTotalAmplitudeSpecialization[#, modelName]
-                 )&,
-                 Flatten[Last @@@ particleDecays, 1],
-                 DistributedContexts -> All, Method -> "FinestGrained"
-              ];
+           If[FlexibleSUSY`FSEnableParallelism,
+              ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
+              specializations =
+                 AbsoluteTiming@ParallelMap[
+                    CreateTotalAmplitudeSpecialization[#, modelName]&,
+                    Flatten[Last @@@ particleDecays, 1],
+                    DistributedContexts -> All, Method -> "FinestGrained"
+                 ],
+              specializations =
+                 AbsoluteTiming@Map[
+                    (
+                       If[!MemberQ[listing, GetInitialState[#]],
+                          Print["Creating C++ code for ", GetInitialState[#], " decays..."];
+                          AppendTo[listing, GetInitialState[#]];
+                       ];
+                       CreateTotalAmplitudeSpecialization[#, modelName]
+                    )&,
+                    Flatten[Last @@@ particleDecays, 1]
+                 ]
+           ];
            Print["The creation of C++ code for decays took ", Round[First@specializations, 0.1], "s"];
            specializations = Last@specializations;
-           vertices = Flatten[First@Transpose[specializations], 1];
-           specializations = Transpose[Drop[Transpose[specializations], 1]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
-           {vertices, Sequence@@(Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations])}
-          ];
+           Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
+   ];
 
 CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
@@ -2145,7 +2276,7 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             declaration = "", includeStatement = ""},
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-           includeStatement = "#include \"H_SM_decays/decay_" <>
+           includeStatement = "#include \"decays/H_SM_decays/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
                               StringJoin[SimplifiedName[# /. SARAH`bar|Susyno`LieGroups`conj -> Identity]& /@ finalState] <>
                               ".cpp\"";
@@ -2172,78 +2303,13 @@ CreateHiggsToWWPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            {declaration, function}
           ];
 
-(*
-CreateHiggsToGluonGluonPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body =
-              "const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);\n" <>
-              "const double mH = context.physical_mass<H>(in_idx);\n" <>
-              "constexpr double ps {1./(8.*Pi)};\n" <>
-              "constexpr double ps_symmetry {1./2.};\n" <>
-              "constexpr double color_gen_sqr {8.0};\n" <>
-              "const double flux = 0.5/mH;\n" <>
-              "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-
-CreateHiggsToPhotonPhotonPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body = 
-              "const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);\n" <>
-               "const double mH = context.physical_mass<H>(in_idx);\n" <>
-               "constexpr double ps {1./(8.*Pi)};\n" <>
-               "constexpr double ps_symmetry {1./2.};\n" <>
-               "constexpr double color_gen_sqr {1.0};\n" <>
-               "const double flux = 0.5/mH;\n" <>
-               "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-
-CreateHiggsToPhotonZPartialWidthFunction[decay_FSParticleDecay, modelName_] :=
-    Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
-            fieldsList, args, templatePars, body = ""},
-           fieldsList = Join[{initialParticle}, finalState];
-           fieldIndices = {"in_idx", "out1_idx", "out2_idx"};
-           args = "const " <> modelName <> "_cxx_diagrams::context_base& context, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[SimplifiedName[#1]] <> "& " <> #2)& @@@ Transpose[{fieldsList, fieldIndices}], ", "];
-           templatePars = "<" <> Utils`StringJoinWithSeparator[SimplifiedName /@ fieldsList, ", "] <> ">";
-           body =
-              "const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out2_idx, out1_idx);\n" <>
-              "const double mH = context.physical_mass<H>(in_idx);\n" <>
-              "constexpr double ps {1./(8.*Pi) * beta(mIn, mOut1, mOut2)};\n" <>
-              "constexpr double ps_symmetry {1.};\n" <>
-              "constexpr double color_gen_sqr {1.0};\n" <>
-              "const double flux = 0.5/mH;\n" <>
-              "return  flux * color_gen_sqr * ps * ps_symmetry * amp.square();\n";
-           "template <>\ndouble CLASSNAME::" <> CreateGenericGetPartialWidthFunctionName[] <>
-           templatePars <> "(" <> args <> ") const\n{\n" <>
-           TextFormatting`IndentText[body] <> "}"
-          ];
-*)
-
 CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToGluonGluonPartialWidthFunction[decay, modelName];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
              ];
            {declaration, function}
           ];
@@ -2251,56 +2317,6 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
 CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToPhotonPhotonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectPhotonPhotonFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToPhotonPhotonPartialWidthFunction[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToPhotonZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, orderZPhotonFinalState, declaration = "", function = ""},
-           decay = SelectPhotonZFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              orderZPhotonFinalState[finalState_] :=
-                  Module[{zBosonSymbol = TreeMasses`GetZBoson[], photonSymbol = TreeMasses`GetPhoton[]},
-                         If[finalState === {zBosonSymbol, photonSymbol},
-                            finalState,
-                            Reverse[finalState]
-                           ]
-                        ];
-              decay = ReplacePart[decay, {{2}} -> orderZPhotonFinalState[GetFinalState[decay]]];
-              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-              function = CreateHiggsToPhotonZPartialWidthFunction[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToHiggsHiggsPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectHiggsHiggsFinalState[decaysList];
-           If[decay =!= {},
-              decay = First[decay];
-              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
-             ];
-           {declaration, function}
-          ];
-
-CreateHiggsToPseudoscalarPseudoscalarPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
-    Module[{decay, declaration = "", function = ""},
-           decay = SelectPseudoscalarPseudoscalarFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
@@ -2317,6 +2333,7 @@ CreateHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_]
              ];
            {declaration, function}
           ];
+
 CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectUpQuarkUpQuarkFinalState[decaysList];
@@ -2372,10 +2389,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
               higgsDecays = First[higgsDecays];
               specializations = {CreateHiggsToZZPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
-(*                                 CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],*)
-(*                                 CreateHiggsToPhotonPhotonPartialWidth[higgsDecays, modelName],*)
-(*                                 CreateHiggsToPhotonZPartialWidth[higgsDecays, modelName],*)
-                                 CreateHiggsToHiggsHiggsPartialWidth[higgsDecays, modelName],
+                                 CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToChargedLeptonChargedLeptonPartialWidth[higgsDecays, modelName]};
