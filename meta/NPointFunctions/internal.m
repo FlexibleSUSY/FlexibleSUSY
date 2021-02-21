@@ -313,15 +313,13 @@ getClassAmount // secure;
 debugMakePictures[diagrams:`type`diagramSet, name_String:"classes"] :=
 Module[{out = {}, directory},
    directory = DirectoryName[FeynArts`$Model<>".mod"];
-   DeleteFile@FileNames@"*class_*.jpg";
-   Export["class.jpg",FeynArts`Paint[diagrams,
-      FeynArts`PaintLevel -> {FeynArts`Classes},
+   FeynArts`Paint[diagrams,
+      FeynArts`PaintLevel -> {Generic},
       FeynArts`ColumnsXRows -> 1,
+      FeynArts`FieldNumbers -> True,
       FeynArts`SheetHeader -> None,
       FeynArts`Numbering -> FeynArts`Simple,
-      DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)
-   ]];
-
+      DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
    Put[out, FileNameJoin@{directory, name<>".m"}]];
 debugMakePictures // secure;
 
