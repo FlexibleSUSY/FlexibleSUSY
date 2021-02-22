@@ -126,7 +126,7 @@ Module[{keep, peng, out, boxQ},
    peng = Complement[keep, {Boxes}];
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
-      keep, ",\n                ", SymbolName]<>" started"];
+      peng, ",\n                ", SymbolName]<>" started"];
    Switch[peng,
       (* no boxes *) keep,
          out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];

@@ -163,10 +163,7 @@ Module[{topologies, diagrams, amplitudes},
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
    {diagrams, amplitudes} = modify[diagrams, amplitudes];
 
-   debugMakePictures[
-      diagrams,
-      StringJoin[ToString /@ (Join[getField[amplitudes, In],getField[amplitudes, Out]] //. $FieldRules /. e_[{_}]:>e)]
-   ];
+   debugMakePictures[diagrams, amplitudes];
 
    {  {  getField[amplitudes, In], getField[amplitudes, Out]} //. $FieldRules,
          calculateAmplitudes[diagrams, amplitudes]}];
@@ -310,8 +307,10 @@ getClassAmount[set:`type`diagramSet] :=
    Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
 getClassAmount // secure;
 
-debugMakePictures[diagrams:`type`diagramSet, name_String:"classes"] :=
-Module[{out = {}, directory},
+debugMakePictures[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
+Module[{out = {}, directory, name},
+   name = StringJoin[ToString /@ (Join[getField[amplitudes, All],
+      $Processes] //. $FieldRules /. e_[{_}]:>e)];
    directory = DirectoryName[FeynArts`$Model<>".mod"];
    FeynArts`Paint[diagrams,
       FeynArts`PaintLevel -> {Generic},

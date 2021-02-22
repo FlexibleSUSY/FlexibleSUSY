@@ -417,7 +417,7 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
    If[OptionValue@UseCache,
       nPointFunction = CachedNPointFunction[
          inFields,outFields,nPointFunctionsDir,
-         OptionValue[NPointFunction,Options[NPointFunction][[All, 1]]]];
+         {Join[inFields, outFields], OptionValue@KeepProcesses}];
       If[nPointFunction =!= Null, Return@nPointFunction];];
    If[!FileExistsQ[feynArtsModel <> ".mod"],
       subKernel = LaunchSubkernelFor@"creation of FeynArts model file";
@@ -461,9 +461,10 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
    CloseKernels@subKernel;
    UnsetShared[subWrite,Print];
 
-   If[OptionValue@UseCache,CacheNPointFunction[
-      nPointFunction,nPointFunctionsDir,
-   OptionValue[NPointFunction,Options[NPointFunction][[All,1]]]]];
+   If[OptionValue@UseCache,
+      CacheNPointFunction[
+         nPointFunction, nPointFunctionsDir,
+         {Join[inFields, outFields], OptionValue@KeepProcesses}];];
 
    nPointFunction] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
 NPointFunction // Utils`MakeUnknownInputDefinition;
@@ -591,7 +592,7 @@ CacheNameForMeta::usage=
 @returns the name of the cache file for given meta information.
 ";
 CacheNameForMeta[nPointMeta:{__}] :=
-   StringJoin["cache_",Riffle[ToString/@Flatten@nPointMeta, "_"],".m"];
+   Utils`StringJoinWithSeparator[Flatten@nPointMeta, "", SymbolName]<>".m";
 CacheNameForMeta // Utils`MakeUnknownInputDefinition;
 CacheNameForMeta ~ SetAttributes ~ {Locked,Protected};
 
@@ -602,17 +603,12 @@ CacheNPointFunction::usage=
 @param nPointMeta the meta information about the given n-point correlation
 function";
 CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__}] :=
-Module[
-   {
+Module[{
       nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta},
-      fileHandle,
-      nPointFunctions,
-      position
-   },
+      fileHandle, nPointFunctions, position},
    If[FileExistsQ@nPointFunctionsFile,
       nPointFunctions = Get@nPointFunctionsFile,
-      nPointFunctions = {}
-   ];
+      nPointFunctions = {}];
 
    position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
    If[Length@position === 1,

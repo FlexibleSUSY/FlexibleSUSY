@@ -24,7 +24,7 @@
 
 `settings`topology =
 {  Vectors -> (`topologyQ`penguinT@#&),
-   Penguins -> (`topologyQ`penguinT@#&),
+   Scalars -> (`topologyQ`penguinT@#&),
    Boxes -> (`topologyQ`box@#&)};
 
 `settings`diagrams =
@@ -38,7 +38,7 @@
          {  "penguins: remove tree-like vector bosons"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`TreeFields@##, FeynArts`V]&]}},
-   Penguins ->
+   Scalars ->
       {  {  "penguins: remove external leptons from loops"[
                `topologyQ`penguinT,
                FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
