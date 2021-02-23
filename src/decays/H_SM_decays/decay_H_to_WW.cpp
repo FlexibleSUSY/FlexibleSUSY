@@ -14,7 +14,6 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const double x = Sqr(mWOS/mHOS);
    double res;
 
-   // 4-body decay for mH < mW not implemented for a moment
    if (4.*x > 1.0) {
 
       // integrand
