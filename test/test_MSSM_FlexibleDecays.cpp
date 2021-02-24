@@ -654,10 +654,10 @@ Block MSOFT Q= 8.61574711E+02
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0017121642442722094, 3e-13);
+                              0.0017121643201030181, 3e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              9.646545615291292e-05, 3e-13);
+                              9.6465460530477474e-05, 3e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00026234512343534217, 3e-13);
@@ -697,7 +697,7 @@ Block MSOFT Q= 8.61574711E+02
                               0.14370134306121243, 4e-13);
    // Ah -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              7.5825786414890104e-05, 3e-13);
+                              7.5826063125050436e-05, 3e-13);
    // Ah -> W+ W-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_conjVWmVWm(&m, 1),
                               3.92679593098481e-05, 2e-12);

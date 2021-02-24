@@ -105,7 +105,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
             const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
             const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
             const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
-            deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+            deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
          }
          amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;

@@ -104,7 +104,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
             if (!is_zero(CSuu)) {
                const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
                const auto CStu = AHttbar_P/context.mass<Fu>({2});
-               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }
 
