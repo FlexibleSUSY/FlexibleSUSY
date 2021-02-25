@@ -160,23 +160,6 @@ bool check_3body_Vff_decay(const context_base& context, double  mHOS, const type
 @partialWidthSpecializationDefs@
 
 /*
-template <>
-double CLASSNAME::get_partial_width<H, A, A>(
-      const context_base& context,
-      const typename field_indices<H>::type& in_idx,
-      const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<A>::type& out2_idx) const
-{
-   const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);
-   const double mH = context.physical_mass<H>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   constexpr double color_gen_sqr = squared_color_generator<H, A, A>();
-   const double flux = 0.5/mH;
-   const auto res = flux * color_gen_sqr * ps * ps_symmetry * amp.square();
-
-   return res;
-}
 
 template <>
 double CLASSNAME::get_partial_width<H, A, Z>(

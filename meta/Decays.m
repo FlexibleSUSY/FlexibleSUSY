@@ -2074,6 +2074,15 @@ SelectGluonGluonFinalState[decays_List] :=
              ];
            result
           ];
+
+SelectAAFinalState[decays_List] :=
+    Module[{photonSymbol = TreeMasses`GetPhoton[], result = {}},
+           If[photonSymbol =!= Null,
+              result = SelectDecayByFinalState[{photonSymbol, photonSymbol}, decays];
+             ];
+           result
+          ];
+
 (*
 SelectHiggsHiggsFinalState[decays_List] :=
     Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], result = {}},
@@ -2314,9 +2323,30 @@ CreateHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            {declaration, function}
           ];
 
+CreateHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectAAFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
+
 CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
+
+CreatePseudoscalarHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectAAFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
@@ -2390,6 +2420,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
               specializations = {CreateHiggsToZZPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
+                                 CreateHiggsToAAPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToChargedLeptonChargedLeptonPartialWidth[higgsDecays, modelName]};
@@ -2407,6 +2438,7 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
                      CreatePseudoscalarHiggsToDownQuarkDownQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToAAPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[pseudoscalarHiggsDecays, modelName]
                  }
               ];
