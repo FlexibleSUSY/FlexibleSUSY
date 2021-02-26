@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecays
+#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecay
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,7 +15,7 @@ using namespace flexiblesusy;
 /* BMP3 of arXiv:1410.4791
    considered in Adam Buchner's thesis */
 
-BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecay )
 {
 
    char const * const slha_input = R"(

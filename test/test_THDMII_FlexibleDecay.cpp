@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_THDMII_FlexibleDecays
+#define BOOST_TEST_MODULE test_THDMII_FlexibleDecay
 
 #include <boost/test/unit_test.hpp>
 
@@ -11,7 +11,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_THDMII_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_THDMII_FlexibleDecay )
 {
 
   char const * const slha_input = R"(

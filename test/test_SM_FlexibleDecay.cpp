@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_SM_FlexibleDecays
+#define BOOST_TEST_MODULE test_SM_FlexibleDecay
 
 #include <iostream>
 
@@ -19,7 +19,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
 {
 
    Loop_library::set(-1);

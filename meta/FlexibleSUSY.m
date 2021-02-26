@@ -4787,7 +4787,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               If[FileExistsQ[f], DeleteFile[f]];
               WriteString[f, "ENABLE_FLEXIBLEDECAY := no"]
            ];
-           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]},
+           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecay.mk"}]},
               If[FileExistsQ[f], DeleteFile[f]]
            ];
 
@@ -4821,8 +4821,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                      FileNameJoin[{FSOutputDir,  "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
 
                                                    }];
-                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
-                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}},
+                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecay.mk.in"}],
+                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecay.mk"}]}},
                                          {Sequence @@ GeneralReplacementRules[]}
                  ];
                  ,
