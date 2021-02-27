@@ -20,10 +20,9 @@ double CLASSNAME::get_partial_width<H, G, G>(
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
    if (tau < 0.7) {
-      // number of active light flavours
-      constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
+      // 5-flavour SM alpha_s
       const double alpha_s = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
@@ -42,6 +41,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
+      constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =
