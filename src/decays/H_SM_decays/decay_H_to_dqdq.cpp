@@ -113,7 +113,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             // eq. 28 of hep-ph/9505358
             const auto Httbar_S = 0.5*(Httbar.left() + Httbar.right());
             const auto gtHoVEV = Httbar_S/context.mass<uq>({2});
-            deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+            deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
          }
 
          double deltaqq_QCD_OS_P = 0.;
@@ -136,7 +136,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             if (!is_zero(gbHoVEV_P)) {
                const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
-               deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+               deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }
 

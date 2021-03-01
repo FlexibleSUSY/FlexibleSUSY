@@ -32,8 +32,8 @@ LIB@CLASSNAME@_CXXQFT_VERTICES_SRC ?= ''
 @CLASSNAME@_FlexibleEFTHiggs_MK := \
 		$(DIR)/FlexibleEFTHiggs.mk
 
-@CLASSNAME@_FlexibleDecays_MK := \
-		$(DIR)/decays/FlexibleDecays.mk
+@CLASSNAME@_FlexibleDecay_MK := \
+		$(DIR)/decays/FlexibleDecay.mk
 
 @CLASSNAME@_INCLUDE_MK := \
 		$(@CLASSNAME@_SUSY_BETAS_MK) \
@@ -144,7 +144,7 @@ ifneq ($(MAKECMDGOALS),release)
 ifneq ($(MAKECMDGOALS),doc)
 -include $(@CLASSNAME@_SUSY_BETAS_MK)
 -include $(@CLASSNAME@_SOFT_BETAS_MK)
--include $(@CLASSNAME@_FlexibleDecays_MK)
+-include $(@CLASSNAME@_FlexibleDecay_MK)
 -include $(@CLASSNAME@_CXXQFT_VERTICES_MK)
 -include $(@CLASSNAME@_FlexibleEFTHiggs_MK)
 ifneq ($(MAKECMDGOALS),clean)
@@ -158,7 +158,7 @@ $(@CLASSNAME@_SUSY_BETAS_MK): run-metacode-$(MODNAME)
 $(@CLASSNAME@_SOFT_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 
-$(@CLASSNAME@_FlexibleDecays_MK): run-metacode-$(MODNAME)
+$(@CLASSNAME@_FlexibleDecay_MK): run-metacode-$(MODNAME)
 $(@CLASSNAME@_CXXQFT_VERTICES_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 $(@CLASSNAME@_FlexibleEFTHiggs_MK): run-metacode-$(MODNAME)
@@ -295,7 +295,7 @@ pack-$(MODNAME)-src:
 		$(@CLASSNAME@_MK) $(@CLASSNAME@_INCLUDE_MK) $(@CLASSNAME@_CXXQFT_VERTICES_MK) \
 		$(@CLASSNAME@_SLHA_INPUT) $(@CLASSNAME@_REFERENCES) \
 		$(@CLASSNAME@_GNUPLOT) \
-		$(@CLASSNAME@_FlexibleDecays_MK)
+		$(@CLASSNAME@_FlexibleDecay_MK)
 
 $(LIB@CLASSNAME@_SRC) $(LIB@CLASSNAME@_HDR) $(LIB@CLASSNAME@_CXXQFT_HDR) $(EXE@CLASSNAME@_SRC) $(LL@CLASSNAME@_SRC) $(LL@CLASSNAME@_MMA) \
 : run-metacode-$(MODNAME)

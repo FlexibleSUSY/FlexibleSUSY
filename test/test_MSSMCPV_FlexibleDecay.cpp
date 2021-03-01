@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MSSMCPV_FlexibleDecays
+#define BOOST_TEST_MODULE test_MSSMCPV_FlexibleDecay
 
 #include <boost/test/unit_test.hpp>
 
@@ -11,7 +11,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_MSSMCPV_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_MSSMCPV_FlexibleDecay )
 {
 
   char const * const slha_input = R"(
@@ -761,10 +761,10 @@ Block ImMSOFT Q= 2.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 1, 2, 2),
-                              0.0015435164135877419, 3e-13);
+                              0.0015435164852836149, 3e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
-                              8.3735247818986913e-05, 2e-13);
+                              8.3735251701183208e-05, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
                               0.00022695651730241407, 3e-13);
@@ -782,7 +782,7 @@ Block ImMSOFT Q= 2.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 0.00017273843253035504, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 0.00017296000561389487, 2e-10);
    // h -> gamma gamma
    // without 2L QCD for squark
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);

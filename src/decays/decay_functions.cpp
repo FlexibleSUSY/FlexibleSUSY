@@ -275,11 +275,25 @@ std::complex<double> hgg_SM_loop_function(double x) noexcept {
 
 unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m) noexcept
 {
-   if (m < qedqcd.displayMbMb()) {
-      return 4.0;
-   } else if (m < qedqcd.displayPoleMt()) {
+   if (m < qedqcd.displayMass(softsusy::mUp)) {
+      return 0;
+   }
+   else if (m < qedqcd.displayMass(softsusy::mDown)) {
+      return 1;
+   }
+   else if (m < qedqcd.displayMass(softsusy::mStrange)) {
+      return 2;
+   }
+   else if (m < qedqcd.displayMass(softsusy::mCharm)) {
+      return 3;
+   }
+   else if (m < qedqcd.displayMass(softsusy::mBottom)) {
+      return 4;
+   }
+   else if (m < qedqcd.displayMass(softsusy::mTop)) {
       return 5;
-   } else {
+   }
+   else {
       return 6;
    }
 }

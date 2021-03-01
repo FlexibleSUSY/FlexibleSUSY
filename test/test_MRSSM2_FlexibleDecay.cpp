@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecays
+#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecay
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,7 +15,7 @@ using namespace flexiblesusy;
 /* BMP3 of arXiv:1410.4791
    considered in Adam Buchner's thesis */
 
-BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecay )
 {
 
    char const * const slha_input = R"(
@@ -694,10 +694,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0019825591408438319, 5e-12);
+                              0.0019825592296067703, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00010491145635289541, 4e-14);
+                              0.00010491146106657557, 4e-14);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
@@ -718,7 +718,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00030420130269631331, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00030446496393453512, 7e-11);
    // h -> gamma gamma
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
@@ -732,7 +732,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
                               0.0013523917718281525, 5e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              7.430233612225978e-05, 2e-13);
+                              7.4302612257132642e-05, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

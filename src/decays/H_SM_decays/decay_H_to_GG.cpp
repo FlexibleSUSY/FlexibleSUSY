@@ -20,28 +20,33 @@ double CLASSNAME::get_partial_width<H, G, G>(
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
    if (tau < 0.7) {
-      // number of active light flavours
-      constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
-      const double alpha_s = qedqcd_.displayAlpha(softsusy::ALPHAS);
+      // 5-flavour SM alpha_s
+      const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
       const auto HGGVertex = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
       std::complex<double> const HGGVertexSVal = 0.5*(HGGVertex.left() + HGGVertex.right());
 
-      // eq. 5 of https://arxiv.org/pdf/1109.5304.pdf
-      const std::complex<double> Ff = -2.*(1.+(1.-1./tau)*f(tau))/std::sqrt(tau);
+      // eq. 2.46 of 0503172
+      const std::complex<double> A12_H = 2.*(tau + (tau -1)*f(tau))/Sqr(tau);
 
       // LO width comming only from the top-loop
       // agrees up to a full double precision with automatically generated one
-      const double Gamma_SM_LO_S = mH/(32.*Power3(Pi))*std::norm(alpha_s*HGGVertexSVal*Ff);
+      // when compensated for different alpha_s
+      // heavy top limit (tau -> 0)
+      //    3./4.*A12 -> 1
+      //    HGGVertexSVal*std::sqrt(tau) is mt independent
+      const double Gamma_SM_LO_S =
+         mH/(18.*Cube(Pi))*std::norm(alpha_s_5f * HGGVertexSVal*std::sqrt(tau) * 3./4.*A12_H);
 
       const double mu = mH;
       const double LH = std::log(Sqr(mu/mH));
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
+      constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =
@@ -59,7 +64,6 @@ double CLASSNAME::get_partial_width<H, G, G>(
       };
 
       // eq. 9 of 0708.0916
-      const double log_mH2OverMT2 {std::log(Sqr(mH/mtpole))};
       const double hnnlo0 =
          149533./288. - 121./16.*Sqr(Pi) - 495./8.*zeta3 + 3301./16.*LH + 363./16.*Sqr(LH) + 19./8.*Lt
          + Nf*(-4157./72. + 11./12.*Sqr(Pi) + 5./4.*zeta3 - 95./4.*LH - 11./4.*Sqr(LH) + 2./3.*Lt)
@@ -79,14 +83,18 @@ double CLASSNAME::get_partial_width<H, G, G>(
          hnnlo0 + tau*(hnnlo1 + tau*hnnlo2)
       };
       // eq. 4.20 from Adam's thesis
-      const double deltaNNNLO_S {467.683620788 + 122.440972222*log_mH2OverMT2 + 10.9409722222*Sqr(log_mH2OverMT2)};
+      // const double deltaNNNLO_S {467.683620788 + (19./8.+2./3.*Nf)*4/.3 + (122.440972222+(19./8.+2./3.*Nf))*Lt + 10.9409722222*Sqr(Lt)};
+      const double deltaNNNLO_S {467.683620788 + (122.440972222)*Lt + 10.9409722222*Sqr(Lt)};
 
-      const double alpha_s_red = alpha_s/Pi;
-      const double norm = Sqr(3./(2.*tau)*(1. + (1. - 1./tau)*Sqr(std::asin(std::sqrt(tau)))));
+      const double alpha_s_red = alpha_s_5f/Pi;
 
+      const double Gamma0 = std::norm(3./4*A12_H);
       switch (include_higher_order_corrections) {
          case SM_higher_order_corrections::enable:
-            result += Gamma_SM_LO_S/norm*(deltaNLO_S*alpha_s_red + deltaNNLO_S*Sqr(alpha_s_red) + deltaNNNLO_S*Cube(alpha_s_red));
+            result +=
+               //convert LO from 6 to 5 flavour scheme
+               Gamma_SM_LO_S*(/*1. - Sqr(get_alphas(context)/alpha_s_5f)*/
+               + alpha_s_red*(deltaNLO_S + alpha_s_red*(deltaNNLO_S + deltaNNNLO_S*alpha_s_red))/Gamma0);
             break;
          case SM_higher_order_corrections::disable:
             break;
@@ -98,23 +106,22 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
          std::complex<double> const HGGVertexValP = 0.5*(HGGVertex.right()-HGGVertex.left());
 
-         const std::complex<double> Ff = -2.*f(tau)/std::sqrt(tau);
+         const std::complex<double> A12_A = 2.*f(tau)/tau;
          // LO width comming only from the top-loop
          // agrees up to a full double precision with automatically generated one
-         const double Gamma_SM_LO_P = mH/(32.*Power3(Pi))*std::norm(get_alphas(context)*HGGVertexValP*Ff);
+         const double Gamma_SM_LO_P = mH/(18.*Power3(Pi))*std::norm(alpha_s_5f * HGGVertexValP*sqrt(tau) * 3./4*A12_A);
 
          const double deltaNLO_P {
             97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
          };
 
-         const double log_mAh2OverMT2 {std::log(Sqr(mH/mtpole))};
          const double deltaNNLO_P {
-            237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*log_mAh2OverMT2
+            237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*LH
          };
 
          switch (include_higher_order_corrections) {
             case SM_higher_order_corrections::enable:
-               result += Gamma_SM_LO_P*(deltaNLO_P*alpha_s_red + deltaNNLO_P*Sqr(alpha_s_red));
+               result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO_P + deltaNNLO_P*alpha_s_red)/std::norm(0.5*A12_A));
                break;
             case SM_higher_order_corrections::disable:
                break;

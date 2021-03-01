@@ -4,7 +4,7 @@ FlexibleSUSY 2.6.0 [not released yet]
 New features
 ------------
 
-* Added FlexibleDecays.
+* Added FlexibleDecay.
 
   Thanks to ME! And maybe Dylan.
 

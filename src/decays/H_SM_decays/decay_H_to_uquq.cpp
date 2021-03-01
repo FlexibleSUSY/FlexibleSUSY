@@ -118,7 +118,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
             if (!is_zero(gbHoVEV)) {
                const auto Httbar_S = 0.5*(Httbar.left() + Httbar.right());
                const auto gtHoVEV = Httbar_S/context.mass<uq>({2});
-               deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (1.57 - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
+               deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
             }
 
             if (info::is_CP_violating_Higgs_sector) {
