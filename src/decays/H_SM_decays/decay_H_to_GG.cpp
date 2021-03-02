@@ -15,7 +15,6 @@ double CLASSNAME::get_partial_width<H, G, G>(
    // full LO (SM+BSM) result
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
-   const double mtpole {qedqcd.displayPoleMt()};
    const double mt {context.mass<uq>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
@@ -82,9 +81,8 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const double deltaNNLO_S {
          hnnlo0 + tau*(hnnlo1 + tau*hnnlo2)
       };
-      // eq. 4.20 from Adam's thesis
-      // const double deltaNNNLO_S {467.683620788 + (19./8.+2./3.*Nf)*4/.3 + (122.440972222+(19./8.+2./3.*Nf))*Lt + 10.9409722222*Sqr(Lt)};
-      const double deltaNNNLO_S {467.683620788 + (122.440972222)*Lt + 10.9409722222*Sqr(Lt)};
+      // eq. 4.20 from Adam's thesis + conversion to MSbar top mass
+      const double deltaNNNLO_S {467.683620788 - 8/3.*(19/8. + 2/3.*Nf) + (122.440972222 - 2*(19/8. + 2/3.*Nf))*Lt + 10.9409722222*Sqr(Lt)};
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
@@ -93,7 +91,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
          case SM_higher_order_corrections::enable:
             result +=
                //convert LO from 6 to 5 flavour scheme
-               Gamma_SM_LO_S*(/*1. - Sqr(get_alphas(context)/alpha_s_5f)*/
+               Gamma_SM_LO_S*(1. - Sqr(get_alphas(context)/alpha_s_5f)
                + alpha_s_red*(deltaNLO_S + alpha_s_red*(deltaNNLO_S + deltaNNNLO_S*alpha_s_red))/Gamma0);
             break;
          case SM_higher_order_corrections::disable:
