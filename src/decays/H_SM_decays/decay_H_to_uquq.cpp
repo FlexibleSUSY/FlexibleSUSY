@@ -140,7 +140,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
       case SM_higher_order_corrections::disable:
          break;
       default:
-         WARNING("Unhandled option in H->ddbar decay");
+         WARNING("Unhandled option in H->uubar decay");
    }
 
    // low x limit

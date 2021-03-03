@@ -35,7 +35,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    const double mdqDR = context.mass<dq>(indexOut1);
    const double mdqOS = context.physical_mass<dq>(indexOut1);
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
-      throw std::runtime_error("Error in H->ddbar: down quarks cannot be massless");
+      throw std::runtime_error("Error in A->ddbar: down quarks cannot be massless");
    }
    const auto xOS = Sqr(mdqOS/mAOS);
    const auto xDR = Sqr(mdqDR/mAOS);
@@ -76,7 +76,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
                alpha_s_red = get_alphas(context)/Pi;
                break;
             default:
-               throw std::runtime_error("Error in H->ddbar: Cannot determine the number of active flavours");
+               throw std::runtime_error("Error in A->ddbar: Cannot determine the number of active flavours");
          }
 
          double deltaqq_QCD_DR_P = calc_Deltaqq(alpha_s_red, Nf);
@@ -114,7 +114,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
       case SM_higher_order_corrections::disable:
          break;
       default:
-         throw std::runtime_error("Unhandled option in H->ddbar decay");
+         throw std::runtime_error("Unhandled option in A->ddbar decay");
    }
 
    // low x limit
