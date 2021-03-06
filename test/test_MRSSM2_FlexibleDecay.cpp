@@ -694,10 +694,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0019825592296067703, 5e-12);
+                              0.0019827452388874395, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00010491146106657557, 4e-14);
+                              0.00010492124048656306, 4e-14);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
@@ -730,9 +730,9 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029502623532270532, 8e-14);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
-                              0.0013523917718281525, 5e-12);
+                              0.0013525248067423584, 5e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              7.4302612257132642e-05, 2e-13);
+                              7.4309765708965807e-05, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

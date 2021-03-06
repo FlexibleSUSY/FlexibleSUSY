@@ -89,6 +89,9 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
             2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
             4./3.*alpha_s_red*calc_DeltaAH(betaDR);
 
+         const double deltaqq_QCDxQED_DR =
+            (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+
          const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
@@ -107,7 +110,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
             const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
             deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
          }
-         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
+         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P;
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
          break;
       }
