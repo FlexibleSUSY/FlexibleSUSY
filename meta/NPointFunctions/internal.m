@@ -40,7 +40,6 @@ BeginPackage@"NPointFunctions`";
 {  NPointFunctionFAFC};
 {  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
-   DimensionalReduction, DimensionalRegularization,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
 
 Begin@"`internal`";
@@ -226,8 +225,8 @@ getRegularizationSettings::errOverlap = "
 Topology rules in `.`settings`.`regularization overlap.";
 getRegularizationSettings[diagrams:`type`diagramSet] :=
 Module[{scheme, replacements, f},
-   scheme = Switch[$Scheme, DimensionalReduction, 4,
-                            DimensionalRegularization, D];
+   scheme = Switch[$Scheme, FlexibleSUSY`DRbar, 4,
+                            FlexibleSUSY`MSbar, D];
    f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
    If[`settings`regularization === Default,
       Array[scheme&, getClassAmount@diagrams],

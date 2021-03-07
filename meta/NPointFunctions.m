@@ -64,10 +64,6 @@ Triangles::usage = "
 Regularize::usage = "
 @brief Option for NPointFunctions`NPointFunction[].
 Encodes the regularization scheme to be used.";
-DimensionalReduction::usage = "
-@brief Possible value for the Regularize option.";
-DimensionalRegularization::usage = "
-@brief Possible value for the Regularize option.";
 
 GenericS::usage=
 "A symbol that acts as a placeholder for any scalar field.";
@@ -91,7 +87,6 @@ LorentzIndex::usage=
 SetAttributes[{
    LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,
    ExceptLoops,KeepProcesses,
-   DimensionalReduction,DimensionalRegularization,
    Irreducible,Triangles,
    GenericS,GenericF,GenericV,GenericU,
    GenericSum,GenericIndex,LorentzIndex
@@ -107,22 +102,21 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
-(* ============================== Type definitions ========================== *)
-Module[{allParticles, dim, conj, bar, scalar, fermion, vector, ghost},
-   allParticles = TreeMasses`GetParticles[];
+Module[{all, dim, conj, bar, scalar, fermion, vector, ghost},
+   all = TreeMasses`GetParticles[];
    dim = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &;
    conj = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &;
    bar = Through[Sequence[SARAH`bar,#&][#]] &;
    scalar = Join[
-      dim/@ Cases[allParticles, _?TreeMasses`IsRealScalar],
-      conj/@ dim/@ Cases[allParticles, _?TreeMasses`IsComplexScalar]];
+      dim/@ Cases[all, _?TreeMasses`IsRealScalar],
+      conj/@ dim/@ Cases[all, _?TreeMasses`IsComplexScalar]];
    fermion = Join[
-      dim/@ Cases[allParticles, _?TreeMasses`IsMajoranaFermion],
-      bar/@ dim/@ Cases[allParticles, _?TreeMasses`IsDiracFermion]];
+      dim/@ Cases[all, _?TreeMasses`IsMajoranaFermion],
+      bar/@ dim/@ Cases[all, _?TreeMasses`IsDiracFermion]];
    vector = Join[
-      dim/@ Cases[allParticles, _?TreeMasses`IsRealVector],
-      conj/@ dim/@ Cases[allParticles, _?TreeMasses`IsComplexVector]];
-   ghost = bar/@ dim/@ Cases[allParticles, _?TreeMasses`IsGhost];
+      dim/@ Cases[all, _?TreeMasses`IsRealVector],
+      conj/@ dim/@ Cases[all, _?TreeMasses`IsComplexVector]];
+   ghost = bar/@ dim/@ Cases[all, _?TreeMasses`IsGhost];
 
    `type`scalarField = Alternatives@@ scalar;
    `type`fermionField = Alternatives@@ fermion;
@@ -341,72 +335,46 @@ Module[{result},
    result];
 applySubexpressions // secure;
 
-Options[NPointFunction]={
-   LoopLevel -> 1,
-   Regularize -> Switch[FlexibleSUSY`FSRenormalizationScheme,
-      FlexibleSUSY`DRbar, DimensionalReduction,
-      FlexibleSUSY`MSbar, DimensionalRegularization],
-   UseCache -> True,
-   ZeroExternalMomenta -> True,
-   OnShellFlag -> True,
-   KeepProcesses -> {},
-   Observable -> None};
-NPointFunction::usage=
-"@brief Calculate the n-point correlation function for a List of incoming and
-a List of outgoing fields.
-@param inFields a List of incoming fields
-@param outFields a List of outgoing fields
-@param LoopLevel the loop level at which to perform the calculation
-@param Regularize the regularization scheme to apply
-@param UseCache whether to attempt to read and write the result from and to
-the cache.
-@param ZeroExternalMomenta whether to set the external momenta to zero or leave
-them undetermined.
-@param KeepProcesses A list or single symbol of topologies to keep.
-@returns the corresponding n-point correlation function
-@note only a loop level of 1 is currently supported
-@note the recognized regularization schemes are:
- - DimensionalReduction
- - DimensionalRegularization
-@note when not setting the external momenta to zero one should use LoopTools
-for the evaluation of the loop functions.";
-NPointFunction::errinFields=
-"The element '`1`' of inFields is an incorrect one.
-
-inFields should contain only names from the list of `2` particles
-`3`.
-(SARAH`.`bar for fermions and Susyno`.`LieGroups`.`conj for scalars is
-acceptable as well)
-@note now only restricted set is supported";
-NPointFunction::erroutFields=
-"The element '`1`' of outFields is an incorrect one.
-
-outFields should contain only names from the list of `2` particles
-`3`.
-@note now only restricted set is supported";
-NPointFunction::errLoopLevel=
-"Incorrect number of loops.
-
-Only loop level 1 is supported";
-NPointFunction::errRegularize=
-"Unknown regularization scheme `1`.
-
-Currently DimensionalReduction, DimensionalRegularization are supported.";
+NPointFunction::usage = "
+@brief Calculates the n-particle amplitude.
+@param inFields A list of incoming fields.
+@param outFields A list of outgoing fields.
+@param LoopLevel A loop level of calculation.
+@param Regularize the regularization scheme.
+@param UseCache Whether read and write the result from and to the cache.
+@param ZeroExternalMomenta Defines how to treat external momenta.
+@param KeepProcesses A list or a single symbol of topologies to keep.
+@returns the corresponding n-particle amplitude.";
+NPointFunction::errFields = "
+The field '`1`' must belong to (bar or conj can be applied):
+   `2`.";
+NPointFunction::errOptions = "
+Unknown option(s):
+   `1`.
+Currently supported options are:
+   `2`.";
+NPointFunction::errLoopLevel = "
+Currently loop level 1 is supported.";
+NPointFunction::errRegularize = "
+Unknown regularization scheme `1`.
+Supported schemes:
+   FlexibleSUSY`.`DRbar,
+   FlexibleSUSY`.`MSbar.";
 NPointFunction::errUseCache=
 "UseCache must be either True or False.";
 NPointFunction::errZeroExternalMomenta=
 "ZeroExternalMomenta must be True, False, ExceptLoops, OperatorsOnly.";
 NPointFunction::errOnShellFlag=
 "OnShellFlag must be either True or False.";
-NPointFunction::errInputFields=                                                 (* @utodo modify it for usage of bosons also *)
-"Only external scalars/fermions are supported (@todo FOR NOW).";
-NPointFunction::errUnknownOptions=
-"Unknown option(s):
-`1`.
-
-Currently supported options are:
-`2`.";
-NPointFunction[inFields_,outFields_,opts:OptionsPattern[]] :=
+Options[NPointFunction] =
+{  LoopLevel -> 1,
+   Regularize -> FlexibleSUSY`FSRenormalizationScheme,
+   UseCache -> True,
+   ZeroExternalMomenta -> True,
+   OnShellFlag -> True,
+   KeepProcesses -> {},
+   Observable -> None};
+NPointFunction[inFields_, outFields_, opts:OptionsPattern[]] :=
 Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
       particleNamespaceFile, formCalcDir, subKernel, currentDirectory,
       nPointFunction},
@@ -459,50 +427,48 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
          subKernel,
          DistributedContexts -> None];];
    CloseKernels@subKernel;
-   UnsetShared[subWrite,Print];
+   UnsetShared[subWrite, Print];
 
    If[OptionValue@UseCache,
       CacheNPointFunction[
          nPointFunction, nPointFunctionsDir,
          {Join[inFields, outFields], OptionValue@KeepProcesses}];];
-
-   nPointFunction] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
+   nPointFunction] /; inputCheck[inFields,outFields,opts];
 NPointFunction // secure;
 
-subWrite::usage =
-"@brief Prints a string.
-@note SetSharedFunction is not working with Locked or ReadProtected attributes.
+subWrite::usage = "
+@brief Prints a string.
 @note SetSharedFunction does not cause names leaking.";
 subWrite[str_String] := WriteString["stdout"~OutputStream~1,str];
-subWrite ~ SetAttributes ~ {Protected};
+subWrite // secure;
 
-internalNPointFunctionInputCheck[inFields:{__},outFields:{__},opts___] :=
-Module[
-   {
-      aoq = Utils`AssertOrQuit,
-      ip = TreeMasses`IsParticle,
-      allowedParticles = Cases[TreeMasses`GetParticles[],_?TreeMasses`IsScalar|_?TreeMasses`IsFermion],(*@todo add |_?TreeMasses`IsVector*)
-      definedOptions = Part[Options@NPointFunction,All,1],
-      unknownOptions = FilterRules[{opts},Except@Part[Options@NPointFunction,All,1]]
-   },
-   aoq[ip@#,NPointFunction::errinFields,#,GetSARAHModelName[],allowedParticles]&/@inFields;
-   aoq[ip@#,NPointFunction::erroutFields,#,GetSARAHModelName[],allowedParticles]&/@outFields;
-   aoq[TreeMasses`IsScalar@#||TreeMasses`IsFermion@#,NPointFunction::errInputFields]&/@Join[inFields,outFields];(*@todo add vector bosons.*)
-   aoq[unknownOptions === {},NPointFunction::errUnknownOptions,unknownOptions,definedOptions];
+inputCheck[inFields:{__},outFields:{__},opts___] :=
+Module[{aoq, ip, allowedParticles, options, unknown},
+   aoq = Utils`AssertOrQuit;
+   ip = TreeMasses`IsParticle;
+   allowedParticles = Cases[
+      TreeMasses`GetParticles[],
+      _?TreeMasses`IsScalar|_?TreeMasses`IsFermion];(*@todo add |_?TreeMasses`IsVector*)
+   aoq[ip@#, NPointFunction::errFields, #, allowedParticles] &/@ inFields;
+   aoq[ip@#, NPointFunction::errFields, #, allowedParticles] &/@ outFields;
+   options = Options[NPointFunction][[All,1]];
+   unknown = FilterRules[{opts}, Except@options];
+   aoq[unknown === {}, NPointFunction::errOptions, unknown, options];
    (*Now we know that all options are iside allowed list.*)
-   Cases[{opts},Rule[LoopLevel,x_]:>
-      aoq[x===1,NPointFunction::errLoopLevel]];
-   Cases[{opts},Rule[Regularize,x_]:>
-      aoq[MemberQ[{DimensionalReduction,DimensionalRegularization},x],NPointFunction::errRegularize,x]];
-   Cases[{opts},Rule[UseCache,x_]:>
-      aoq[x===True || x===False,NPointFunction::errUseCache]];
-   Cases[{opts},Rule[ZeroExternalMomenta,x_]:>
-      aoq[MemberQ[{True,False,OperatorsOnly,ExceptLoops},x],NPointFunction::errZeroExternalMomenta]];
-   Cases[{opts},Rule[OnShellFlag,x_]:>
-      aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
-   True
-];
-internalNPointFunctionInputCheck // secure;
+   Cases[{opts}, Rule[LoopLevel, x_] :>
+      aoq[x===1, NPointFunction::errLoopLevel]];
+   Cases[{opts}, Rule[Regularize, x_] :>
+      aoq[MemberQ[{FlexibleSUSY`MSbar, FlexibleSUSY`DRbar}, x],
+         NPointFunction::errRegularize, x]];
+   Cases[{opts}, Rule[UseCache, x_] :>
+      aoq[x===True || x===False, NPointFunction::errUseCache]];
+   Cases[{opts}, Rule[ZeroExternalMomenta,x_] :>
+      aoq[MemberQ[{True, False, OperatorsOnly, ExceptLoops}, x],
+         NPointFunction::errZeroExternalMomenta]];
+   Cases[{opts}, Rule[OnShellFlag, x_] :>
+      aoq[x===True || x===False, NPointFunction::errOnShellFlag]];
+   True];
+inputCheck // secure;
 
 VerticesForNPointFunction::usage=
 "@brief Return a list of all vertices needed to calculate a given
