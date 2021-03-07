@@ -108,39 +108,40 @@ secure[sym:_Symbol] :=
 secure // secure;
 
 (* ============================== Type definitions ========================== *)
-Module[{
-      allParticles = TreeMasses`GetParticles[],
-      dimensionfullConverter = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &,
-      conjConverter = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &,
-      barConverter = Through[Sequence[SARAH`bar,#&][#]] &,
-      scalarList,fermionList,vectorList,ghostList
-   },
-   scalarList = Join[
-      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealScalar],
-      conjConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsComplexScalar]
-   ];
-   fermionList = Join[
-      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsMajoranaFermion],
-      barConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsDiracFermion]
-   ];
-   vectorList = Join[
-      dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsRealVector],
-      conjConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsComplexVector]
-   ];
-   ghostList = barConverter /@ dimensionfullConverter /@ Cases[allParticles, _?TreeMasses`IsGhost];
+Module[{allParticles, dim, conj, bar, scalar, fermion, vector, ghost},
+   allParticles = TreeMasses`GetParticles[];
+   dim = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &;
+   conj = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &;
+   bar = Through[Sequence[SARAH`bar,#&][#]] &;
+   scalar = Join[
+      dim/@ Cases[allParticles, _?TreeMasses`IsRealScalar],
+      conj/@ dim/@ Cases[allParticles, _?TreeMasses`IsComplexScalar]];
+   fermion = Join[
+      dim/@ Cases[allParticles, _?TreeMasses`IsMajoranaFermion],
+      bar/@ dim/@ Cases[allParticles, _?TreeMasses`IsDiracFermion]];
+   vector = Join[
+      dim/@ Cases[allParticles, _?TreeMasses`IsRealVector],
+      conj/@ dim/@ Cases[allParticles, _?TreeMasses`IsComplexVector]];
+   ghost = bar/@ dim/@ Cases[allParticles, _?TreeMasses`IsGhost];
 
-   `type`scalarField = Alternatives @@ scalarList;
-   `type`fermionField = Alternatives @@ fermionList;
-   `type`vectorField = Alternatives @@ vectorList;
-   `type`ghostField = Alternatives @@ ghostList;
-   `type`physicalField = Alternatives @@ Join[scalarList,fermionList,vectorList,ghostList];
+   `type`scalarField = Alternatives@@ scalar;
+   `type`fermionField = Alternatives@@ fermion;
+   `type`vectorField = Alternatives@@ vector;
+   `type`ghostField = Alternatives@@ ghost;
+   `type`physicalField = Alternatives@@ Join[scalar, fermion, vector, ghost];
    `type`externalField = `type`physicalField /.
       Verbatim@_Symbol :> _String;
    `type`explicitFieldName = `type`physicalField /.
       (s:_Symbol)[{Verbatim@_Symbol}] :> s;
-
-   {`type`externalField,`type`explicitFieldName,`type`scalarField,`type`fermionField,`type`vectorField,`type`physicalField, `type`ghostField} ~ SetAttributes ~ {Locked,Protected};
-];
+   SetAttributes[
+      {  `type`externalField,
+         `type`explicitFieldName,
+         `type`scalarField,
+         `type`fermionField,
+         `type`vectorField,
+         `type`physicalField,
+         `type`ghostField},
+      {Protected}];];
 
 `type`wilsonBasis = {Rule[_String,_]..};
 `type`colourProjector = Identity|SARAH`Delta;
@@ -157,18 +158,12 @@ Module[{
 `type`classCombinatoricalFactors = {__Integer};
 `type`classColorFactors = {__};
 `type`npf =
-   {
-   `type`process,
-   {
-      {
-         {`type`genericSum..},
+{  `type`process,
+   {  {  {`type`genericSum..},
          {`type`classFields..},
          {`type`classCombinatoricalFactors..},
-         {`type`classColorFactors..}
-      },
-      `type`subexpressions
-   }
-};
+         {`type`classColorFactors..}},
+      `type`subexpressions}};
 
 `type`cxxToken = _String?(StringMatchQ[#,RegularExpression@"@[^@\n]+@"]&);
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
@@ -221,112 +216,129 @@ removeIndent // secure;
 
 replaceTokens[code:_String, rules:`type`cxxReplacementRules] :=
 StringJoin[
-   StringReplace[#,"\n"->StringJoin["\n",getIndent@#]] &/@ StringReplace[StringSplit[removeIndent@code,"\n"],rules]~Riffle~"\n"];
+   StringReplace[#, "\n"->StringJoin["\n", getIndent@#]] &/@
+      StringReplace[StringSplit[removeIndent@code,"\n"],rules]~Riffle~"\n"];
 replaceTokens // secure;
 
-getProcess[obj:`type`npf] := obj[[1]];
+getProcess[obj:`type`npf] :=
+   obj[[1]];
 getProcess // secure;
 
 getExternalMomenta[obj:`type`npf] :=
-DeleteDuplicates@Cases[{getGenericSums@obj,getSubexpressions@obj},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
+   DeleteDuplicates@Cases[{getGenericSums@obj, getSubexpressions@obj},
+      HoldPattern@SARAH`Mom[_Integer,___], Infinity];
 getExternalMomenta // secure;
 
 getExternalIndices[obj:`type`npf] :=
-DeleteDuplicates@Flatten@Level[getProcess@obj,{4,5}];
+   DeleteDuplicates@Flatten@Level[getProcess@obj, {4,5}];
 getExternalIndices // secure;
 
-getGenericSums::errSimpleOnly =
-"Only the case without subexpressions is supported.";
-getGenericSums::errBadIndex =
-"Specified index(es) `1` is (are) outside the allowed region `2`.";
-getGenericSums[obj:`type`npf] := obj[[2,1,1]];
+getGenericSums::errSimpleOnly = "
+Only the case without subexpressions is supported.";
+getGenericSums::errBadIndex = "
+Specified index(es) `1` is (are) outside the allowed region `2`.";
+getGenericSums[obj:`type`npf] :=
+   obj[[2,1,1]];
 getGenericSums[obj:`type`npf, int:{__Integer}] :=
 Module[{unique = DeleteDuplicates@int},
-   {
-      getProcess@obj,
-      {
-         {
-            getGenericSums[obj][[unique]],
+   {  getProcess@obj,
+      {  {  getGenericSums[obj][[unique]],
             getClassFields[obj][[unique]],
             getClassCombinatoricalFactors[obj][[unique]],
-            getClassColorFactors[obj][[unique]]
-         },
-         getSubexpressions@obj
-      }
-   }
-] /; And[
-   Utils`AssertOrQuit[getSubexpressions@obj == {},getGenericSums::errSimpleOnly],
-   Utils`AssertOrQuit[containsQ[#,int],getGenericSums::errBadIndex,int,#]&[getIndexRange[getClassCombinatoricalFactors@obj]]
-];
+            getClassColorFactors[obj][[unique]]},
+         getSubexpressions@obj}}] /; And[
+   Utils`AssertOrQuit[getSubexpressions@obj == {},
+      getGenericSums::errSimpleOnly],
+   Utils`AssertOrQuit[containsQ[#,int],
+      getGenericSums::errBadIndex,int,#] &@
+         getIndexRange[getClassCombinatoricalFactors@obj]];
 getGenericSums // secure;
 
-getIndexRange[obj:{___}] := {1, Length@obj};
+getIndexRange[obj:{___}] :=
+   {1, Length@obj};
 getIndexRange // secure;
 
-containsQ[obj:{_Integer,_Integer}, int:_Integer] := IntervalMemberQ[Interval@obj,int];
-containsQ[obj:{_Integer,_Integer}, int:{__Integer}] := And@@(containsQ[obj,#]&/@int);
+containsQ[obj:{_Integer,_Integer}, int:_Integer] :=
+   IntervalMemberQ[Interval@obj,int];
+containsQ[obj:{_Integer,_Integer}, int:{__Integer}] :=
+   And@@(containsQ[obj,#]&/@int);
 containsQ // secure;
 
-getClassFields[obj:`type`npf] := obj[[2,1,2]];
+getClassFields[obj:`type`npf] :=
+   obj[[2,1,2]];
 getClassFields // secure;
 
-getClassCombinatoricalFactors[obj:`type`npf] := obj[[2,1,3]];
+getClassCombinatoricalFactors[obj:`type`npf] :=
+   obj[[2,1,3]];
 getClassCombinatoricalFactors // secure;
 
-getClassColorFactors[obj:`type`npf] := obj[[2,1,4]];
+getClassColorFactors[obj:`type`npf] :=
+   obj[[2,1,4]];
 getClassColorFactors // secure;
 
-getSubexpressions[obj:`type`npf] := obj[[2,2]];
+getSubexpressions[obj:`type`npf] :=
+   obj[[2,2]];
 getSubexpressions // secure;
 
 getName[obj:`type`physicalField] :=
-Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
+Module[{nakedField},
+   nakedField = obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity};
    Switch[nakedField,
-   _Symbol,nakedField,
-   (_Symbol)[{_Symbol}],Head@nakedField]
-];
+      _Symbol,
+         nakedField,
+      (_Symbol)[{_Symbol}],
+         Head@nakedField]];
 getName[obj:`type`genericField] :=
-Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
+   Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
 getName // secure;
 
+`cxx`getIndex[obj:`type`genericField] :=
+   "i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ conj@obj;
 `cxx`getIndex[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
+   nakedField = obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity};
    Switch[nakedField,
-   _Symbol,"",
-   (_Symbol)[{_Symbol}],StringDrop[ToString[nakedField[[1, 1]]],2]]
-];
-`cxx`getIndex // Utils`MakeUnknownInputDefinition;
-`cxx`getIndex ~ SetAttributes ~ {Locked,Protected};
+   _Symbol,
+      "",
+   (_Symbol)[{_Symbol}],
+      StringDrop[ToString[nakedField[[1, 1]]],2]]];
+`cxx`getIndex // secure;
 
-cxxIndex[obj:`type`genericField] :=
-"i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
-cxxIndex // secure;
-
-getGenericFields[obj:`type`genericSum] := First/@Last[obj];
-getGenericFields[obj:`type`summation] := First/@obj;
-getGenericFields[objs:{`type`genericSum..}] := (First/@Last@#)&/@objs;
+getGenericFields[obj:`type`genericSum] :=
+   First/@Last[obj];
+getGenericFields[obj:`type`summation] :=
+   First/@obj;
+getGenericFields[objs:{`type`genericSum..}] :=
+   (First/@Last@#)&/@objs;
 getGenericFields // secure;
 
-getExpression[obj:`type`genericSum] := First@obj;
+getExpression[obj:`type`genericSum] :=
+   First@obj;
 getExpression // secure;
 
-getSummationData[obj:`type`genericSum] := Last@obj;
+getSummationData[obj:`type`genericSum] :=
+   Last@obj;
 getSummationData // secure;
 
 getClassFieldRules[obj:`type`npf] :=
-MapThread[Function[fields,MapThread[Rule,{#1,fields}]]/@#2&,{getGenericFields@getGenericSums@obj,getClassFields@obj}];
+   MapThread[
+      Function[fields,MapThread[Rule,{#1,fields}]]/@#2&,
+      {getGenericFields@getGenericSums@obj,getClassFields@obj}];
 getClassFieldRules // secure;
 
-setSubexpressions[obj:`type`npf, newsubs:`type`subexpressions] := ReplacePart[obj,{2,2}->newsubs];
+setSubexpressions[obj:`type`npf, newsubs:`type`subexpressions] :=
+   ReplacePart[obj,{2,2}->newsubs];
 setSubexpressions // secure;
 
 applySubexpressions[obj:`type`npf] :=
 Module[{result},
    WriteString["stdout"~OutputStream~1,"Applying subexpressions ... "];
-   result = ReplacePart[obj,{2,1,1}->ReplaceRepeated[getGenericSums@obj,getSubexpressions@obj]]~setSubexpressions~{};
+   result = setSubexpressions[
+      ReplacePart[obj,
+         {2,1,1}->ReplaceRepeated[getGenericSums@obj,getSubexpressions@obj]],
+      {}];
    WriteString["stdout"~OutputStream~1,"done\n"];
-   result
-];
+   result];
 applySubexpressions // secure;
 
 Options[NPointFunction]={
@@ -918,8 +930,8 @@ Module[{
    genericRules=Flatten[Thread@Rule[
       {conj[#],#},
       {
-         `cxx`fieldName[conj@#][cxxIndex@#],
-         `cxx`fieldName[#][cxxIndex@#]
+         `cxx`fieldName[conj@#][`cxx`getIndex@#],
+         `cxx`fieldName[#][`cxx`getIndex@#]
       }] &/@ genericFields];
 
    wrap[fields__] := StringRiffle[`cxx`fieldAlias/@{fields},", "];
@@ -1501,8 +1513,8 @@ restriction rules pares, which, if are true should lead to a skip of summation.
 `cxx`beginSum[summation:`type`summation]:=
 Module[{beginsOfFor},
    beginsOfFor =
-      "for( const auto &"<>cxxIndex[#[[1]]]<>" : "<>"index_range<"<>`cxx`fieldName[#[[1]]]<>">() ) {\n"<>
-      "at_key<"<>`cxx`genericFieldKey@#[[1]]<>">( index_map ) = "<>cxxIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
+      "for( const auto &"<>`cxx`getIndex[#[[1]]]<>" : "<>"index_range<"<>`cxx`fieldName[#[[1]]]<>">() ) {\n"<>
+      "at_key<"<>`cxx`genericFieldKey@#[[1]]<>">( index_map ) = "<>`cxx`getIndex[#[[1]]]<>";"<>parseRestrictionRule[#] &/@summation;
    StringRiffle[beginsOfFor,"\n"]
 ];
 `cxx`beginSum // Utils`MakeUnknownInputDefinition;
@@ -1520,7 +1532,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
          type2 = `cxx`fieldName@Last@rule,
          ind = getIndexOfExternalField@First@rule,
          typeGen = `cxx`fieldName@genericField,
-         indGen = cxxIndex@genericField
+         indGen = `cxx`getIndex@genericField
       },
       "\nif( (boost::core::is_same<"<>typeGen<>","<>type1<>">::value || boost::core::is_same<"<>typeGen<>","<>type2<>">::value) && "<>indGen<>" == "<>ind<>" ) continue;"
    ];
