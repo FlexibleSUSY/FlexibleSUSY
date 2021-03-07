@@ -72,11 +72,13 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
          double deltaqq_QCD_OS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
+         double Y_conversion = 1.;
          switch (Nf) {
             case 5: {
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mHOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               Y_conversion = Sqr(sm_down_quark_masses(qedqcd_, indexOut1.at(0))/mdqDR);
                break;
             }
             case 6:
@@ -143,8 +145,8 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
             }
          }
 
-         amp2DR_S *= 1. + deltaqq_QCD_DR_S + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_S;
-         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P;
+         amp2DR_S *= Y_conversion*(1. + deltaqq_QCD_DR_S + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_S);
+         amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_S *= 1. + deltaqq_QCD_OS_S + deltaqq_QED_OS_S;
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
          break;

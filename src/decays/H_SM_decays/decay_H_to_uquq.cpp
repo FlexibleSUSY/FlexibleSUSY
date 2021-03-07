@@ -72,11 +72,13 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          double deltaqqOS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
+         double Y_conversion = 1.;
          switch (Nf) {
             case 5: {
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mHOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               Y_conversion = Sqr(sm_up_quark_masses(qedqcd_, indexOut1.at(0))/muqDR);
                break;
             }
             case 6:
@@ -105,11 +107,23 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          const double deltaqq_QED_OS_S =
             alpha_red * Sqr(uq::electric_charge) * calc_DeltaH(betaOS);
 
-         // don't waste time computing it in models without CPV
-         double deltaPhi2_S = 0.;
-         double deltaPhi2_P = 0.;
          double deltaqq_QCD_OS_P = 0.;
          double deltaqq_QED_OS_P = 0.;
+         // don't waste time computing it in models without CPV
+         if (info::is_CP_violating_Higgs_sector) {
+            deltaqq_QCD_DR_P +=
+               2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
+               4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+
+            deltaqq_QCD_OS_P =
+               4./3. * alpha_s_red * calc_DeltaAH(betaOS);
+
+            deltaqq_QED_OS_P =
+               alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
+         }
+
+         double deltaPhi2_S = 0.;
+         double deltaPhi2_P = 0.;
          if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
             const double mtpole = qedqcd.displayPoleMt();
             const double lt = std::log(Sqr(mHOS/mtpole));
@@ -123,19 +137,18 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
                const auto gtHoVEV = Httbar_S/context.mass<uq>({2});
                deltaPhi2_S = Sqr(alpha_s_red) * std::real(gtHoVEV/gbHoVEV) * (8/3. - Sqr(Pi/3.) - 2.0/3.0*lt + 1.0/9.0*Sqr(lq));
             }
-
             if (info::is_CP_violating_Higgs_sector) {
                const auto CSuu = HBBbarVertexDR_S/muqDR;
                if (!is_zero(CSuu)) {
                   const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
                   const auto CStu = Httbar_P/context.mass<Fu>({2});
-                  deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+                  deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
                }
             }
          }
 
-         amp2DR_S *= 1. + deltaqq_QCD_DR_S + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_S;
-         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P;
+         amp2DR_S *= Y_conversion*(1. + deltaqq_QCD_DR_S + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_S);
+         amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_S *= 1. + deltaqq_QCD_OS_S + deltaqq_QED_OS_S;
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
          break;
@@ -143,7 +156,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
       case SM_higher_order_corrections::disable:
          break;
       default:
-         WARNING("Unhandled option in H->uubar decay");
+         throw std::runtime_error("Unhandled option in H->uubar decay");
    }
 
    // low x limit
