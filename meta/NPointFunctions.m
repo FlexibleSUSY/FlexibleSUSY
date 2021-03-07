@@ -99,10 +99,16 @@ SetAttributes[{
    {Locked,Protected}];
 
 Begin@"`internal`";
+secure::usage = "
+@brief Makes definition for unexpected call for a function with the given name.
+       Afterwards, protects the symbol from redefinitions.
+@param sym A symbol (name of the functio) to be secured.";
+secure[sym:_Symbol] :=
+   Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
+secure // secure;
 
 (* ============================== Type definitions ========================== *)
-Module[
-   {
+Module[{
       allParticles = TreeMasses`GetParticles[],
       dimensionfullConverter = If[TreeMasses`GetDimension@#>1,#[{_Symbol}],#] &,
       conjConverter = Through[Sequence[Susyno`LieGroups`conj,#&][#]] &,
@@ -168,8 +174,7 @@ Module[
 `type`cxxReplacementRules = {Rule[`type`cxxToken,_String]..};
 
 `cxx`getLength[obj:`type`wilsonBasis] := ToString@Length@obj;
-`cxx`getLength // Utils`MakeUnknownInputDefinition;
-`cxx`getLength ~ SetAttributes ~ {Locked,Protected};
+`cxx`getLength // secure;
 
 getDirectories[] :=
 {  {  #1, #3},
@@ -181,56 +186,54 @@ getDirectories[] :=
              FileNameJoin@{#, "FormCalc"}} &@
                FileNameJoin@{  SARAH`$sarahCurrentOutputMainDir,
                                ToString@FlexibleSUSY`FSEigenstates});
-getDirectories // Utils`MakeUnknownInputDefinition;
-getDirectories ~ SetAttributes ~ {Locked,Protected};
+getDirectories // secure;
 
 getIndent[obj:_String] :=
-First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+   First@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
 getIndent[obj:{__String}] :=
-First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
-getIndent // Utils`MakeUnknownInputDefinition;
-getIndent ~ SetAttributes ~ {Locked,Protected};
+   First/@StringCases[obj,StartOfString~~"\n"...~~indent:" "...:>indent];
+getIndent // secure;
 
-getConjugated[obj:`type`genericField] := Switch[Head@obj,
-   SARAH`bar | Susyno`LieGroups`conj, obj[[1]],
-   GenericS | GenericV, Susyno`LieGroups`conj@obj,
-   GenericF | GenericU, SARAH`bar@obj
-];
-getConjugated[obj:`type`scalarField|`type`vectorField] :=
+conj::usage = "
+@param obj Generic or explicit field.
+@returns Conjugated field";
+conj[obj:`type`genericField] :=
+Switch[Head@obj,
+   SARAH`bar | Susyno`LieGroups`conj,
+      obj[[1]],
+   GenericS | GenericV,
+      Susyno`LieGroups`conj@obj,
+   GenericF | GenericU,
+      SARAH`bar@obj];
+conj[obj:`type`scalarField|`type`vectorField] :=
    Susyno`LieGroups`conj@obj;
-getConjugated[obj:`type`fermionField] :=
+conj[obj:`type`fermionField] :=
    SARAH`bar@obj;
-getConjugated // Utils`MakeUnknownInputDefinition;
-getConjugated ~ SetAttributes ~ {Locked,Protected};
+conj // secure;
 
 getIndex[obj:`type`genericField] :=
-(obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity})[[1,1]];
-getIndex // Utils`MakeUnknownInputDefinition;
-getIndex ~ SetAttributes ~ {Locked,Protected};
+   (obj /. {SARAH`bar->Identity, Susyno`LieGroups`conj->Identity})[[1,1]];
+getIndex // secure;
 
-removeIndent[obj:_String] := StringReplace[obj,StartOfLine~~getIndent[obj]->""];
-removeIndent // Utils`MakeUnknownInputDefinition;
-removeIndent ~ SetAttributes ~ {Locked,Protected};
+removeIndent[obj:_String] :=
+   StringReplace[obj, StartOfLine~~getIndent[obj]->""];
+removeIndent // secure;
 
 replaceTokens[code:_String, rules:`type`cxxReplacementRules] :=
 StringJoin[
    StringReplace[#,"\n"->StringJoin["\n",getIndent@#]] &/@ StringReplace[StringSplit[removeIndent@code,"\n"],rules]~Riffle~"\n"];
-replaceTokens // Utils`MakeUnknownInputDefinition;
-replaceTokens ~ SetAttributes ~ {Locked,Protected};
+replaceTokens // secure;
 
 getProcess[obj:`type`npf] := obj[[1]];
-getProcess // Utils`MakeUnknownInputDefinition;
-getProcess ~ SetAttributes ~ {Locked,Protected};
+getProcess // secure;
 
 getExternalMomenta[obj:`type`npf] :=
 DeleteDuplicates@Cases[{getGenericSums@obj,getSubexpressions@obj},HoldPattern@SARAH`Mom[_Integer,___],Infinity];
-getExternalMomenta // Utils`MakeUnknownInputDefinition;
-getExternalMomenta ~ SetAttributes ~ {Locked,Protected};
+getExternalMomenta // secure;
 
 getExternalIndices[obj:`type`npf] :=
 DeleteDuplicates@Flatten@Level[getProcess@obj,{4,5}];
-getExternalIndices // Utils`MakeUnknownInputDefinition;
-getExternalIndices ~ SetAttributes ~ {Locked,Protected};
+getExternalIndices // secure;
 
 getGenericSums::errSimpleOnly =
 "Only the case without subexpressions is supported.";
@@ -255,33 +258,26 @@ Module[{unique = DeleteDuplicates@int},
    Utils`AssertOrQuit[getSubexpressions@obj == {},getGenericSums::errSimpleOnly],
    Utils`AssertOrQuit[containsQ[#,int],getGenericSums::errBadIndex,int,#]&[getIndexRange[getClassCombinatoricalFactors@obj]]
 ];
-getGenericSums // Utils`MakeUnknownInputDefinition;
-getGenericSums ~ SetAttributes ~ {Locked,Protected};
+getGenericSums // secure;
 
 getIndexRange[obj:{___}] := {1, Length@obj};
-getIndexRange // Utils`MakeUnknownInputDefinition;
-getIndexRange ~ SetAttributes ~ {Locked,Protected};
+getIndexRange // secure;
 
 containsQ[obj:{_Integer,_Integer}, int:_Integer] := IntervalMemberQ[Interval@obj,int];
 containsQ[obj:{_Integer,_Integer}, int:{__Integer}] := And@@(containsQ[obj,#]&/@int);
-containsQ // Utils`MakeUnknownInputDefinition;
-containsQ ~ SetAttributes ~ {Locked,Protected};
+containsQ // secure;
 
 getClassFields[obj:`type`npf] := obj[[2,1,2]];
-getClassFields // Utils`MakeUnknownInputDefinition;
-getClassFields ~ SetAttributes ~ {Locked,Protected};
+getClassFields // secure;
 
 getClassCombinatoricalFactors[obj:`type`npf] := obj[[2,1,3]];
-getClassCombinatoricalFactors // Utils`MakeUnknownInputDefinition;
-getClassCombinatoricalFactors ~ SetAttributes ~ {Locked,Protected};
+getClassCombinatoricalFactors // secure;
 
 getClassColorFactors[obj:`type`npf] := obj[[2,1,4]];
-getClassColorFactors // Utils`MakeUnknownInputDefinition;
-getClassColorFactors ~ SetAttributes ~ {Locked,Protected};
+getClassColorFactors // secure;
 
 getSubexpressions[obj:`type`npf] := obj[[2,2]];
-getSubexpressions // Utils`MakeUnknownInputDefinition;
-getSubexpressions ~ SetAttributes ~ {Locked,Protected};
+getSubexpressions // secure;
 
 getName[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
@@ -291,8 +287,7 @@ Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}}
 ];
 getName[obj:`type`genericField] :=
 Head[obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}];
-getName // Utils`MakeUnknownInputDefinition;
-getName ~ SetAttributes ~ {Locked,Protected};
+getName // secure;
 
 `cxx`getIndex[obj:`type`physicalField] :=
 Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}},
@@ -305,31 +300,25 @@ Module[{nakedField=obj /. {SARAH`bar->Identity,Susyno`LieGroups`conj->Identity}}
 
 cxxIndex[obj:`type`genericField] :=
 "i"<>StringTake[SymbolName[obj[[0]]],-1]<>ToString[obj[[1,1]]] &@ CXXDiagrams`RemoveLorentzConjugation[obj];
-cxxIndex // Utils`MakeUnknownInputDefinition;
-cxxIndex ~ SetAttributes ~ {Locked,Protected};
+cxxIndex // secure;
 
 getGenericFields[obj:`type`genericSum] := First/@Last[obj];
 getGenericFields[obj:`type`summation] := First/@obj;
 getGenericFields[objs:{`type`genericSum..}] := (First/@Last@#)&/@objs;
-getGenericFields // Utils`MakeUnknownInputDefinition;
-getGenericFields ~ SetAttributes ~ {Locked,Protected};
+getGenericFields // secure;
 
 getExpression[obj:`type`genericSum] := First@obj;
-getExpression // Utils`MakeUnknownInputDefinition;
-getExpression ~ SetAttributes ~ {Locked,Protected};
+getExpression // secure;
 
 getSummationData[obj:`type`genericSum] := Last@obj;
-getSummationData // Utils`MakeUnknownInputDefinition;
-getSummationData ~ SetAttributes ~ {Locked,Protected};
+getSummationData // secure;
 
 getClassFieldRules[obj:`type`npf] :=
 MapThread[Function[fields,MapThread[Rule,{#1,fields}]]/@#2&,{getGenericFields@getGenericSums@obj,getClassFields@obj}];
-getClassFieldRules // Utils`MakeUnknownInputDefinition;
-getClassFieldRules ~ SetAttributes ~ {Locked,Protected};
+getClassFieldRules // secure;
 
 setSubexpressions[obj:`type`npf, newsubs:`type`subexpressions] := ReplacePart[obj,{2,2}->newsubs];
-setSubexpressions // Utils`MakeUnknownInputDefinition;
-setSubexpressions ~ SetAttributes ~ {Locked,Protected};
+setSubexpressions // secure;
 
 applySubexpressions[obj:`type`npf] :=
 Module[{result},
@@ -338,8 +327,7 @@ Module[{result},
    WriteString["stdout"~OutputStream~1,"done\n"];
    result
 ];
-applySubexpressions // Utils`MakeUnknownInputDefinition;
-applySubexpressions ~ SetAttributes ~ {Locked,Protected};
+applySubexpressions // secure;
 
 Options[NPointFunction]={
    LoopLevel -> 1,
@@ -467,8 +455,7 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
          {Join[inFields, outFields], OptionValue@KeepProcesses}];];
 
    nPointFunction] /; internalNPointFunctionInputCheck[inFields,outFields,opts];
-NPointFunction // Utils`MakeUnknownInputDefinition;
-NPointFunction ~ SetAttributes ~ {Locked,Protected};
+NPointFunction // secure;
 
 subWrite::usage =
 "@brief Prints a string.
@@ -503,8 +490,7 @@ Module[
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    True
 ];
-internalNPointFunctionInputCheck // Utils`MakeUnknownInputDefinition;
-internalNPointFunctionInputCheck ~ SetAttributes ~ {Locked,Protected};
+internalNPointFunctionInputCheck // secure;
 
 VerticesForNPointFunction::usage=
 "@brief Return a list of all vertices needed to calculate a given
@@ -530,8 +516,7 @@ Module[
       Infinity,Heads -> True] &/@ (genSums/.rulesWithVertices);
    DeleteDuplicates[Vertices`StripFieldIndices/@#&/@Flatten[MapThread[GetVertex,{vertsGen,classRules}],2]]
 ];
-VerticesForNPointFunction // Utils`MakeUnknownInputDefinition;
-VerticesForNPointFunction ~ SetAttributes ~ {Locked,Protected};
+VerticesForNPointFunction // secure;
 
 GetSARAHModelName::usage=
 "@brief Return the SARAH model name as to be passed to SARAH`.`Start[].
@@ -541,8 +526,7 @@ If[SARAH`submodeldir =!= False,
       SARAH`modelDir <> "-" <> SARAH`submodeldir,
       SARAH`modelDir
 ];
-GetSARAHModelName // Utils`MakeUnknownInputDefinition;
-GetSARAHModelName ~ SetAttributes ~ {Locked,Protected};
+GetSARAHModelName // secure;
 
 LaunchSubkernelFor::usage=
 "@brief Tries to launch a subkernel without errors.
@@ -583,8 +567,7 @@ Module[{kernelName},
       LaunchSubkernelFor::errKernelLaunch, message];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
-LaunchSubkernelFor // Utils`MakeUnknownInputDefinition;
-LaunchSubkernelFor ~ SetAttributes ~ {Locked,Protected};
+LaunchSubkernelFor // secure;
 
 CacheNameForMeta::usage=
 "@brief Return the name of the cache file for given meta information
@@ -593,8 +576,7 @@ CacheNameForMeta::usage=
 ";
 CacheNameForMeta[nPointMeta:{__}] :=
    Utils`StringJoinWithSeparator[Flatten@nPointMeta, "", SymbolName]<>".m";
-CacheNameForMeta // Utils`MakeUnknownInputDefinition;
-CacheNameForMeta ~ SetAttributes ~ {Locked,Protected};
+CacheNameForMeta // secure;
 
 CacheNPointFunction::usage=
 "@brief Write a given n-point correlation function to the cache
@@ -620,8 +602,7 @@ Module[{
    Write[fileHandle,nPointFunctions];
    Close@fileHandle;
 ];
-CacheNPointFunction // Utils`MakeUnknownInputDefinition;
-CacheNPointFunction ~ SetAttributes ~ {Locked,Protected};
+CacheNPointFunction // secure;
 
 CachedNPointFunction::usage=
 "@brief Retrieve an n-point correlation function from the cache
@@ -645,8 +626,7 @@ Module[
       {inFields, outFields}];
    If[Length@position == 1,nPointFunctions[[ position[[1,1]] ]],Null]
 ];
-CachedNPointFunction // Utils`MakeUnknownInputDefinition;
-CachedNPointFunction ~ SetAttributes ~ {Locked,Protected};
+CachedNPointFunction // secure;
 
 GenerateFAModelFileOnKernel::usage="
 @brief Generate the FeynArts model file on a given subkernel.";
@@ -675,8 +655,7 @@ With[{
    UnsetShared[Print];
    Print["Generating FeynArts model file ... done"];
 ];
-GenerateFAModelFileOnKernel // Utils`MakeUnknownInputDefinition;
-GenerateFAModelFileOnKernel ~ SetAttributes ~ {Locked,Protected};
+GenerateFAModelFileOnKernel // secure;
 
 WriteParticleNamespaceFile::usage=
 "@brief Write a file containing all field names and the contexts in which they
@@ -687,8 +666,7 @@ Module[{fileHandle = OpenWrite@fileName},
    Write[fileHandle, {ToString@#, Context@#} & /@ TreeMasses`GetParticles[]];
    Close@fileHandle;
 ];
-WriteParticleNamespaceFile // Utils`MakeUnknownInputDefinition;
-WriteParticleNamespaceFile ~ SetAttributes ~ {Locked,Protected};
+WriteParticleNamespaceFile // secure;
 
 FANamesForFields::usage= "
 @brief Translates SARAH-style fields to FeynArts-style fields.
@@ -740,8 +718,7 @@ Module[{poss=Position[sums,GenericSum[{0},{}]]},
       StringRiffle[ToString/@Flatten@poss,", "],"."];
    {fields,{Delete[#,poss]&/@{sums,rules,comb,col},subs}}
 ];
-RemoveEmptyGenSums // Utils`MakeUnknownInputDefinition;
-RemoveEmptyGenSums ~ SetAttributes ~ {Locked,Protected};
+RemoveEmptyGenSums // secure;
 
 CreateCXXHeaders::usage=
 "@brief Create the c++ code for the necessary headers.
@@ -758,8 +735,7 @@ replaceTokens["
       "@ModelName@"->FlexibleSUSY`FSModelName
    }
 ];
-CreateCXXHeaders // Utils`MakeUnknownInputDefinition;
-CreateCXXHeaders ~ SetAttributes ~ {Locked,Protected};
+CreateCXXHeaders // secure;
 
 CreateCXXFunctions::usage=
 "@brief Given a list of n-point correllation functions, a list
@@ -799,8 +775,7 @@ Module[
    {prototype, definition}
 ] /;
 And@@(Utils`AssertOrQuit[Length@wilsonBasis === Length@#,CreateCXXFunctions::errNoMatch]&/@getExpression/@getGenericSums@npf);
-CreateCXXFunctions // Utils`MakeUnknownInputDefinition;
-CreateCXXFunctions ~ SetAttributes ~ {Locked,Protected};
+CreateCXXFunctions // secure;
 
 `cxx`arguments::usage="
 @brief Returns the c++ arguments that the c++ version of the given n-point
@@ -941,9 +916,9 @@ Module[{
          Array["i"<>ToString[#]&,Length@extIndices]}];
 
    genericRules=Flatten[Thread@Rule[
-      {getConjugated[#],#},
+      {conj[#],#},
       {
-         `cxx`fieldName[getConjugated@#][cxxIndex@#],
+         `cxx`fieldName[conj@#][cxxIndex@#],
          `cxx`fieldName[#][cxxIndex@#]
       }] &/@ genericFields];
 
@@ -1081,8 +1056,7 @@ Module[
 
    projectedFactors
 ];
-getColourFactor // Utils`MakeUnknownInputDefinition;
-getColourFactor ~ SetAttributes ~ {Locked,Protected};
+getColourFactor // secure;
 
 `cxx`genericSum::usage=
 "@brief Create the c++ code form of a generic sums.
@@ -1411,8 +1385,7 @@ Module[
       modifiedExpr/.Flatten@loopRules
    }
 ];
-createLoopFunctions // Utils`MakeUnknownInputDefinition;
-createLoopFunctions ~ SetAttributes ~ {Locked,Protected};
+createLoopFunctions // secure;
 
 `cxx`skipZeroAmplitude::usage = "
 @brief If some combination of couplings in the amplitude is zero, then the full
@@ -1557,8 +1530,7 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
       False,"",
       _,"@todo This rule is ununderstandable!";Quit[1]]
 ];
-parseRestrictionRule // Utils`MakeUnknownInputDefinition;
-parseRestrictionRule ~ SetAttributes ~ {Locked,Protected};
+parseRestrictionRule // secure;
 
 `cxx`endSum::usage =
 "@brief Generates c++ code for end of sum over generic fields inside GenericSum.
