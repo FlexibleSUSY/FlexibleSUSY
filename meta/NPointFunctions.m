@@ -844,8 +844,8 @@ Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules}
       SARAH`Cp[fields__][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
       StringReplace["NPF_MD(`1`) NPF_D(`2`, `3`) NPF_I(`4`)",
          {  "`1`"->ToString@wrap@fields,
-            "`2`"->ToString@*First@@Position[{fields},f1,{1}]-1,
-            "`3`"->ToString@*First@@Position[{fields},f2,{1}]-1,
+            "`2`"->ToString[First@@Position[{fields},f1,{1}]-1],
+            "`3`"->ToString[First@@Position[{fields},f2,{1}]-1],
             "`4`"->ToString@index@fields}],
       SARAH`Cp[fields__][SARAH`g[_, _]] :>
          ("NPF_G(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
