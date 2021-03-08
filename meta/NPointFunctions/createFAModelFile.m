@@ -30,7 +30,7 @@ CreateFAModelFile::usage=
 @param eigenstates the option to forward to SARAH`.`MakeFeynArts[]
 @note Effectively Private function hence there are no checks for input";
 
-Begin["`internal`"];
+Begin["`Private`"];
 
 CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, eigenstates_] := (
    SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;

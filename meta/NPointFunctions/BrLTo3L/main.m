@@ -98,6 +98,7 @@ Module[{box = Boxes, res = {{}, ""}},
       Unprotect@$calculate;
       $calculate = $boxes;
       Protect@$calculate;
+      Print[FullForm@`npf`match@`npf`clean@`npf`create[list[[1]], {box}]];
       res = `npf`code@`npf`match@`npf`clean@`npf`create[list[[1]], {box}];
       Utils`FSFancyLine@">";];
    {res, NPointFunctions`CreateCXXHeaders[]}];
@@ -151,7 +152,7 @@ NPointFunctions`NPointFunction[{lep, lep}, {lep, lep},
 `npf`create // Utils`MakeUnknownInputDefinition;
 `npf`create // Protect;
 
-`npf`clean[npf:NPointFunctions`internal`type`npf] :=
+`npf`clean[npf:NPointFunctions`Private`type`npf] :=
 npf /.
    {  SARAH`sum[__] -> 0,
       LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
@@ -166,11 +167,11 @@ npf /.
 @note String names on the lhs. are representing the final names of coefficients
       for the C++ code, after applying some relations on the C++ level! Check
       appropriate file in templates directory to see them.";
-`npf`match[npf:NPointFunctions`internal`type`npf] :=
+`npf`match[npf:NPointFunctions`Private`type`npf] :=
 Module[{fields, sp, dc, dim6},
-   fields = Flatten@NPointFunctions`internal`getProcess@npf;
+   fields = Flatten@NPointFunctions`Private`getProcess@npf;
    sp[i_] := SARAH`DiracSpinor[fields[[i]], 0, 0];
-   dc[a_, b__, c_] := NPointFunctions`internal`dc[sp@a, b, sp@c];
+   dc[a_, b__, c_] := NPointFunctions`DiracChain[sp@a, b, sp@c];
    dim6 = With[{l = SARAH`Lorentz, R = 6, L = 7},
       {  "S_LL" -> dc[3,L,1] dc[4,L,2],
          "S_LR" -> dc[3,L,1] dc[4,R,2],
@@ -186,7 +187,7 @@ Module[{fields, sp, dc, dim6},
 `npf`match // Utils`MakeUnknownInputDefinition;
 `npf`match // Protect;
 
-`npf`code[{npf:NPointFunctions`internal`type`npf, b:{Rule[_String, _]..}}] :=
+`npf`code[{npf:NPointFunctions`Private`type`npf, b:{Rule[_String, _]..}}] :=
 {  DeleteDuplicates@NPointFunctions`VerticesForNPointFunction@npf,
    NPointFunctions`CreateCXXFunctions[npf, $calculate, Identity, b][[2]]};
 `npf`code // Utils`MakeUnknownInputDefinition;

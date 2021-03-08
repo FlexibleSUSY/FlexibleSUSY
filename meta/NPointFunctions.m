@@ -81,19 +81,20 @@ GenericIndex::usage=
 LorentzIndex::usage=
 "Represent a Lorentz index of a generic field.";
 
+DiracChain::usage = "Represents a dirac chain."
+Mat::usage = "A wrapper around dirac chain(s)";
+
 (*functions*)
 {VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions};
 
-SetAttributes[{
-   LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,
-   ExceptLoops,KeepProcesses,
-   Irreducible,Triangles,
-   GenericS,GenericF,GenericV,GenericU,
-   GenericSum,GenericIndex,LorentzIndex
-   },
-   {Locked,Protected}];
+SetAttributes[
+{  LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,
+   ExceptLoops, KeepProcesses, Irreducible, Triangles,
+   GenericS, GenericF, GenericV, GenericU,
+   GenericSum, GenericIndex, LorentzIndex, Mat, DiracChain},
+   {Protected}];
 
-Begin@"`internal`";
+Begin@"`Private`";
 secure::usage = "
 @brief Makes definition for unexpected call for a function with the given name.
        Afterwards, protects the symbol from redefinitions.

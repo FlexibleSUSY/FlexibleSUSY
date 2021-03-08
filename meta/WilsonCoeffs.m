@@ -24,14 +24,14 @@ BeginPackage@"WilsonCoeffs`";
 
 {InterfaceToMatching,neglectBasisElements};
 
-Begin["`internal`"];
-`type`npf = NPointFunctions`internal`type`npf;
-getGenericSums = NPointFunctions`internal`getGenericSums;
-getSubexpressions = NPointFunctions`internal`getSubexpressions;
-getName = NPointFunctions`internal`getName;
+Begin["`Private`"];
+`type`npf = NPointFunctions`Private`type`npf;
+getGenericSums = NPointFunctions`Private`getGenericSums;
+getSubexpressions = NPointFunctions`Private`getSubexpressions;
+getName = NPointFunctions`Private`getName;
 
-neglectBasisElements::usage=
-"@brief Deletes specified basis elements with not anymore used subexpressions.
+neglectBasisElements::usage = "
+@brief Deletes specified basis elements with not anymore used subexpressions.
 @param <npf> npf object to modify.
 @param <{Rule[_String,_]..}> operatorBasis list with
 {string name,fermion chain multiplication} pairs.
@@ -50,54 +50,43 @@ Module[
 ];
 SetAttributes[neglectBasisElements,{Locked,Protected}];
 
-InterfaceToMatching::usage=
-"@brief Transforms GenericSum accordig to a given basis.
-@param NPF NPF object.
-@param operatorBasis list with {string name,fermion chain multiplication} pairs.
-@returns Corresponding GenericSum which matches to a given basis.
-@note the name convention of the chiral basis follows the FormCalc convention.";
-InterfaceToMatching::errUnknownInput =
-"Correct input has the folliwing form:
-InterfaceToMatching@@{ <npf object>, {<string -> basis expression>..} }
-and not
-InterfaceToMatching@@`1`.";
+InterfaceToMatching::usage = "
+@brief Transforms GenericSum accordig to a given basis.
+@param obj np-function object.
+@param operatorBasis list with pairs of string and dirac chain.
+@returns Corresponding GenericSum which matches to a given basis.";
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]}] := obj;
 InterfaceToMatching[obj:`type`npf, operatorBasis:{Rule[_String,_]..}] :=
-Module[{
-      basis = findFermionChains[getSubexpressions@obj, operatorBasis]
-   },
-   removeFermionChains[createNewNPF[obj, basis]]
-];
-InterfaceToMatching[x___] :=
-Utils`AssertOrQuit[False,InterfaceToMatching::errUnknownInput,{x}];
+Module[{basis},
+   basis = findFermionChains[getSubexpressions@obj, operatorBasis];
+   removeFermionChains[createNewNPF[obj, basis]]];
+InterfaceToMatching // Utils`MakeUnknownInputDefinition;
+InterfaceToMatching // Protect;
 
-findFermionChains::usage =
-"@brief Searches the FermionChains in the abbreviations rules.
-@param subs substitution rules of the form {Rule[_,_]..}.
-@param chiralBasis  name basis element rules of the form {Rule[_String,_]..}.
-@returns List of <string chain name>->NPointFunctions`internal`mat[F#] pairs.";
+findFermionChains::usage = "
+@brief Searches the FermionChains in the abbreviations rules.
+@param subs Substitution rules.
+@param chiralBasis Name basis element rules of the form {Rule[_String,_]..}.
+@returns List of <string chain name>->NPointFunctions`Mat[F#] pairs.";
 findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
-Module[
-   {
-      warning = If[!$Notebooks,"\033[1;33mWarning\033[1;0m",Style["Warning",Yellow]],
-      (*@note there is F# <-> chain correspondence*)
-      basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]],
-      i
-   },
+Module[{warning, basisPos},
+   warning = If[!$Notebooks,
+      "\033[1;33mWarning\033[1;0m",
+      Style["Warning",Yellow]];
+   basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]];
    Table[
       If[basisPos[[i]] === {},
          Print[warning,": " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
-         chiralBasis[[i,1]]->NPointFunctions`internal`mat[],
+         chiralBasis[[i,1]]->NPointFunctions`Mat[],
          (*else*)
-         chiralBasis[[i,1]]->NPointFunctions`internal`mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
+         chiralBasis[[i,1]]->NPointFunctions`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
       ],
-      {i,Length@basisPos}]
-];
+      {i,Length@basisPos}]];
 
 createNewNPF::usage =
 "@brief Extracts the coefficients for a given basis and NPF object.";
 createNewNPF[obj:`type`npf,
-   chiralBasis:{Rule[_String,_NPointFunctions`internal`mat]..}
+   chiralBasis:{Rule[_String,_NPointFunctions`Mat]..}
 ] :=
 Module[
    {
@@ -115,7 +104,7 @@ extractCoeffs::errRemainingExpression =
 was not taken into account appropriately.";
 extractCoeffs[
    NPointFunctions`GenericSum[{expr_},sumFields:{__}],
-   operators:{Rule[_String,_NPointFunctions`internal`mat]..}
+   operators:{Rule[_String,_NPointFunctions`Mat]..}
 ] :=
 Module[
    {
@@ -131,7 +120,7 @@ removeFermionChains::usage =
 "@brief Removes DiracChains from the abbreviations rules.";
 removeFermionChains[npointExpression:`type`npf] :=
 Module[{pos},
-   pos = Take[#, 3]& /@ Position[npointExpression, NPointFunctions`internal`dc];
+   pos = Take[#, 3]& /@ Position[npointExpression, NPointFunctions`DiracChain];
    Delete[npointExpression, pos]
 ];
 

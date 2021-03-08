@@ -21,7 +21,7 @@
 *)
 
 BeginPackage@"NPointFunctions`";
-Begin@"NPointFunctions`internal`";
+Begin@"`Private`";
 
 getActions::usage = "
 @brief Converts `settings`diagrams or `settings`amplitudes to actions.

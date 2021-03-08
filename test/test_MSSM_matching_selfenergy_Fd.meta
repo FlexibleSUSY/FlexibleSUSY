@@ -48,9 +48,9 @@ Selfenergy = NPointFunctions`NPointFunction[
 ChiralBasis =
    {
       "value_right"->
-      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
+      NPointFunctions`DiracChain[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 6, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]],
       "value_left"->
-      NPointFunctions`internal`dc[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
+      NPointFunctions`DiracChain[SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt2}], 0, 0], 7, SARAH`DiracSpinor[SARAH`DownQuark[{SARAH`gt1}], 0, 0]]
    };
 
 (*the only purpose of the following is to replace GenericSum[_,_] to GenericSum[{__},_]*)

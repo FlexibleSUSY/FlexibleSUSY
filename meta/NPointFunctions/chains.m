@@ -21,7 +21,7 @@
 *)
 
 BeginPackage@"NPointFunctions`";
-Begin@"`internal`";
+Begin@"`Private`";
 
 proceedChains[d:`type`diagramSet, a:`type`amplitudeSet, g:_] :=
 Module[{abbr, subs, chains, generic},
@@ -63,7 +63,7 @@ modifyChains::usage = "
 modifyChains[expression_, set:`type`diagramSet] :=
 Module[{i = 0, rules, sp, L, reveal},
    If[`settings`chains === Default, Return@expression];
-   Block[{k = FormCalc`k, l = FormCalc`Lor, ch = FormCalc`DiracChain},
+   Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
       sp[mom_] := FormCalc`Spinor[k@mom, _, _];
       L[a_, e___ , b_] := L[ a,
          Switch[{e},
@@ -83,9 +83,9 @@ simplifyChains::usage = "
 @returns A simplified chain.";
 If[$OnShell,
    simplifyChains[expr:_] :=
-      (expr /. ch:FormCalc`DiracChain[__] :> simplifyChains@ch);
-   simplifyChains[chain:_FormCalc`DiracChain] :=
-   Module[{s = 6|7, a = -6|-7, ch = FormCalc`DiracChain, k = FormCalc`k,
+      (expr /. ch:DiracChain[__] :> simplifyChains@ch);
+   simplifyChains[chain:_DiracChain] :=
+   Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k,
          m, pair, sp, flip},
       m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
       pair = FormCalc`Pair[k@#1,k@#2]&;
@@ -131,9 +131,9 @@ makeChainsUnique::usage = "
 @returns A list of expression and rules.";
 makeChainsUnique[list:{expression_, rules:{Rule[_Symbol, _]...}}] :=
 Module[{chains, chain, name, old, zero, rest, unique, erules},
-   chains = Longest@HoldPattern@Times[FormCalc`DiracChain[__]..];
-   chain = FormCalc`DiracChain[__];
-   name = Rule[Symbol["NPointFunctions`internal`dc"<>ToString@#2[[1]]], #1]&;
+   chains = Longest@HoldPattern@Times[DiracChain[__]..];
+   chain = DiracChain[__];
+   name = Rule[Symbol["NPointFunctions`DiracChain"<>ToString@#2[[1]]], #1]&;
    old = getChainRules@rules;
    zero = Cases[old, e:Rule[_, 0] :> e];
    rest = Complement[rules, old];
@@ -143,14 +143,14 @@ Module[{chains, chain, name, old, zero, rest, unique, erules},
       unique = MapIndexed[name, DeleteDuplicates@Cases[old, chain, Infinity]];];
    erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
    {  expression /. zero /. erules,
-      Join[unique, rest]} /. FormCalc`Mat -> NPointFunctions`internal`mat];
+      Join[unique, rest]} /. FormCalc`Mat -> Mat];
 makeChainsUnique // secure;
 
-mat::usage = "
+Mat::usage = "
 @todo Sometimes this is needed, sometimes not. Why?";
-mat[0] = 0;
-mat[HoldPattern@Times[e__]] := Times@@mat/@{e};
-mat[mass:_FeynArts`Mass] := mass;
+Mat[0] = 0;
+Mat[HoldPattern@Times[e__]] := Times@@Mat/@{e};
+Mat[mass:_FeynArts`Mass] := mass;
 
 identifySpinors::usage = "
 @brief Inserts names of fermionic fields inside FormCalc`DicaChain structures.
@@ -158,11 +158,11 @@ identifySpinors::usage = "
 @param set A set of amplitudes.
 @returns Modified rules with inserted fermion names.";
 identifySpinors[rules:{Rule[_Symbol, _]...}, set:`type`amplitudeSet] :=
-Module[{id, idf, ch = FormCalc`DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
+Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    id = MapIndexed[#2[[1]]->#1&, getField[set, All] //. $FieldRules];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
-   rules /. ch:FormCalc`DiracChain[__] :> idf@ch];
+   rules /. ch:DiracChain[__] :> idf@ch];
 identifySpinors // secure;
 
 setZeroExternalMomentaInChains::usage = "
@@ -170,7 +170,7 @@ setZeroExternalMomentaInChains::usage = "
 @param expression Any expression.
 @returns An expression with modified fermionic chains.";
 setZeroExternalMomentaInChains[expression_] :=
-   expression /. e:FormCalc`DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
+   expression /. e:DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
 setZeroExternalMomentaInChains // secure;
 
 End[];

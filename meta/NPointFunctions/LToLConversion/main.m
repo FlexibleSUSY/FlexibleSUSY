@@ -85,7 +85,7 @@ create[list:{__}] := Module[{unique},
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
 
-`npf`clean[npf:NPointFunctions`internal`type`npf] :=
+`npf`clean[npf:NPointFunctions`Private`type`npf] :=
 npf /.
    {  SARAH`sum[__] -> 0,
       LoopTools`B0i[i_, _, mm__] :> LoopTools`B0i[i, 0, mm],
@@ -126,12 +126,12 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
    {npfU, npfD} = `npf`clean/@{npfU, npfD};
 
-   fields[SARAH`UpQuark] = Flatten@NPointFunctions`internal`getProcess@npfU;
-   fields[SARAH`DownQuark] = Flatten@NPointFunctions`internal`getProcess@npfD;
+   fields[SARAH`UpQuark] = Flatten@NPointFunctions`Private`getProcess@npfU;
+   fields[SARAH`DownQuark] = Flatten@NPointFunctions`Private`getProcess@npfD;
 
    dim6[q_] := Module[{sp, dc, l = SARAH`Lorentz, R = 6, L = 7},
       sp[f_, n_] := SARAH`DiracSpinor[fields[f][[n]], 0, 0];
-      dc[a_, b__, c_] := NPointFunctions`internal`dc[sp[q, a], b, sp[q, c]];
+      dc[a_, b__, c_] := NPointFunctions`DiracChain[sp[q, a], b, sp[q, c]];
       {  "S_LL" -> dc[3,L,1] dc[4,L,2],
          "S_LR" -> dc[3,L,1] dc[4,R,2],
          "S_RL" -> dc[3,R,1] dc[4,L,2],

@@ -21,7 +21,7 @@
 *)
 
 BeginPackage@"NPointFunctions`";
-Begin@"NPointFunctions`internal`";
+Begin@"`Private`";
 
 define::usage = "
 @brief Defines a set of function with a given name in a safe way.

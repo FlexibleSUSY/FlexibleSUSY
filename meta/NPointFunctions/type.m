@@ -21,7 +21,7 @@
 *)
 
 BeginPackage@"NPointFunctions`";
-Begin@"`internal`";
+Begin@"`Private`";
 
 `type`vertex = FeynArts`Vertex[_Integer][_Integer];
 `type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|

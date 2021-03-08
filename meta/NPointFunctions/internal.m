@@ -37,12 +37,16 @@ Needs@"Utils`";
 
 BeginPackage@"NPointFunctions`";
 
+Off[General::shdw];
+{  DiracChain, Mat};
+On[General::shdw];
+
 {  NPointFunctionFAFC};
 {  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
 
-Begin@"`internal`";
+Begin@"`Private`";
 
 secure[sym:_Symbol] :=
 Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
@@ -103,9 +107,9 @@ Module[{fsFields},
       True,
          {SARAH`Mom[_Integer,_] :> 0},
       False|OperatorsOnly|ExceptLoops,
-            fsFields = getField[amplitudes, All] //. $FieldRules;
-            {SARAH`Mom[i_Integer, lorIndex_] :>
-               SARAH`Mom[fsFields[[i]], lorIndex]}]];
+         fsFields = getField[amplitudes, All] //. $FieldRules;
+         {SARAH`Mom[i_Integer, lorIndex_] :>
+            SARAH`Mom[fsFields[[i]], lorIndex]}]];
 getExternalMomentumRules // secure;
 
 getSettings::usage = "
@@ -113,7 +117,7 @@ getSettings::usage = "
        file to load, defines default settings.";
 getSettings[] :=
 (  BeginPackage@"NPointFunctions`";
-   Begin@"`internal`";
+   Begin@"`Private`";
    `settings`topology = Default;
    `settings`diagrams = Default;
    `settings`amplitudes = Default;
@@ -611,8 +615,7 @@ Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
    fsSubexpressions = subexpressions //. $SubexpressionRules;
    fsAmplitudes = amplitudes //. $AmplitudeRules;
    fsAbbreviations = abbreviations //.  $SubexpressionRules //.
-      {  FormCalc`DiracChain -> NPointFunctions`internal`dc,
-         FormCalc`Spinor -> SARAH`DiracSpinor,
+      {  FormCalc`Spinor -> SARAH`DiracSpinor,
          FormCalc`Lor -> SARAH`Lorentz};
    {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}];
 FCAmplitudesToFSConvention // secure;

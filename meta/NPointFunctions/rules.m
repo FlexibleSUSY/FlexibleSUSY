@@ -21,7 +21,7 @@
 *)
 
 BeginPackage@"NPointFunctions`";
-Begin@"`internal`";
+Begin@"`Private`";
 
 $FieldNames =
 Module[{regex, lines, rules, names},
