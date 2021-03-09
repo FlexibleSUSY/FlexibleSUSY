@@ -98,7 +98,6 @@ Module[{box = Boxes, res = {{}, ""}},
       Unprotect@$calculate;
       $calculate = $boxes;
       Protect@$calculate;
-      Print[FullForm@`npf`match@`npf`clean@`npf`create[list[[1]], {box}]];
       res = `npf`code@`npf`match@`npf`clean@`npf`create[list[[1]], {box}];
       Utils`FSFancyLine@">";];
    {res, NPointFunctions`CreateCXXHeaders[]}];
