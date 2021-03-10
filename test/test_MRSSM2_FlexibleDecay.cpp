@@ -697,7 +697,7 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
                               0.0025273625096655988, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00012115281603656197, 4e-14);
+                              0.00012115281603656197, 2e-13);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
