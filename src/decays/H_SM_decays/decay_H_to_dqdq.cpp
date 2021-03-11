@@ -154,7 +154,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
       case SM_higher_order_corrections::disable:
          break;
       default:
-         WARNING("Unhandled option in H->ddbar decay");
+         throw std::runtime_error("Unhandled option in H->ddbar decay");
    }
 
    // low x limit
