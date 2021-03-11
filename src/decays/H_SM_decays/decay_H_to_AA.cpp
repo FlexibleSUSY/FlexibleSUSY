@@ -16,7 +16,6 @@ double CLASSNAME::get_partial_width<H, A, A>(
    const double alpha_em_0 = physical_input.get(Physical_input::alpha_em_0);
    const double alpha_em = get_alpha(context);
    res *= Sqr(alpha_em_0/alpha_em);
-   std::cout << Sqr(alpha_em_0/alpha_em) << '\n';
 
    return res;
 }
