@@ -55,6 +55,8 @@ std::complex<double> delta_hAA_2loopQCD_for_squark_loop(double mH, double msq, d
 std::complex<double> f(double x) noexcept;
 
 unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexcept;
+double sm_up_quark_masses(softsusy::QedQcd const&, int);
+double sm_down_quark_masses(softsusy::QedQcd const&, int);
 
 } // namespace flexiblesusy
 
