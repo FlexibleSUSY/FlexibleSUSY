@@ -2083,19 +2083,18 @@ SelectAAFinalState[decays_List] :=
            result
           ];
 
+SelectAZFinalState[decays_List] :=
+    Module[{photonSymbol = TreeMasses`GetPhoton[], zSymbol = TreeMasses`GetZBoson[], result = {}},
+           If[photonSymbol =!= Null,
+              result = SelectDecayByFinalState[{photonSymbol, zSymbol}, decays];
+             ];
+           result
+          ];
 (*
 SelectHiggsHiggsFinalState[decays_List] :=
     Module[{higgsSymbol = TreeMasses`GetHiggsBoson[], result = {}},
            If[higgsSymbol =!= Null,
               result = SelectDecayByFinalState[{higgsSymbol, higgsSymbol}, decays];
-             ];
-           result
-          ];
-
-SelectPhotonPhotonFinalState[decays_List] :=
-    Module[{photonSymbol = TreeMasses`GetPhoton[], result = {}},
-           If[photonSymbol =!= Null,
-              result = SelectDecayByFinalState[{photonSymbol, photonSymbol}, decays];
              ];
            result
           ];
@@ -2334,6 +2333,17 @@ CreateHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
            {declaration, function}
           ];
 
+CreateHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectAZFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
+
 CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectGluonGluonFinalState[decaysList];
@@ -2347,6 +2357,16 @@ CreatePseudoscalarHiggsToGluonGluonPartialWidth[{higgsSymbol_, decaysList_}, mod
 CreatePseudoscalarHiggsToAAPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
            decay = SelectAAFinalState[decaysList];
+           If[decay =!= {},
+              decay = First[decay];
+              {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+             ];
+           {declaration, function}
+          ];
+
+CreatePseudoscalarHiggsToAZPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+           decay = SelectAZFinalState[decaysList];
            If[decay =!= {},
               decay = First[decay];
               {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
@@ -2421,6 +2441,7 @@ CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
                                  CreateHiggsToWWPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToGluonGluonPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToAAPartialWidth[higgsDecays, modelName],
+                                 CreateHiggsToAZPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToUpQuarkUpQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToDownQuarkDownQuarkPartialWidth[higgsDecays, modelName],
                                  CreateHiggsToChargedLeptonChargedLeptonPartialWidth[higgsDecays, modelName]};
@@ -2439,6 +2460,7 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
                      CreatePseudoscalarHiggsToUpQuarkUpQuarkPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToGluonGluonPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToAAPartialWidth[pseudoscalarHiggsDecays, modelName],
+                     CreatePseudoscalarHiggsToAZPartialWidth[pseudoscalarHiggsDecays, modelName],
                      CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[pseudoscalarHiggsDecays, modelName]
                  }
               ];

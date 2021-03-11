@@ -789,7 +789,7 @@ Block ImMSOFT Q= 2.00000000E+03
    // with 2L QCD for squark
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 1), 5.3089300093115946e-06, 4e-10);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.7227729785272779e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.2147958489355905e-07, 7e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -812,5 +812,5 @@ Block ImMSOFT Q= 2.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 1), 6.1972398675528688e-05, 2e-10);
 
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.7059182799004216e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994372434546153e-07, 7e-11);
 }
