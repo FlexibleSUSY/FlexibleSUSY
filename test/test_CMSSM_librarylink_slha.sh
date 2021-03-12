@@ -65,7 +65,7 @@ smInputs = {
     PMNSDelta -> 0,
     PMNSAlpha1 -> 0,
     PMNSAlpha2 -> 0,
-    alphaEm0 -> 1/137.035999074,
+    alphaEm0 -> 0.00729735,
     Mh -> 125.09
 };
 
