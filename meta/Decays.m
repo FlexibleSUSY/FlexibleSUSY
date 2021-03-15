@@ -845,7 +845,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
               MapIndexed[
                  With[{idx = First[#2]},
                     If[
-                       initialState === #1, "if (gI1 == gO" <> ToString[idx] <> ") {\n" <> TextFormatting`IndentText["continue;\n}\n"], ""
+                       initialState === #1, "if (gI1 == gO" <> ToString[idx] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n", ""
                     ]]&, finalState
               ] <>
               If[
