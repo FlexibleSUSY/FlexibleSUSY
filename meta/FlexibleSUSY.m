@@ -481,7 +481,7 @@ ReplaceSymbolsInUserInput[rules_] :=
 
            (* decay calculation require 3- and 4-point loop functions *)
            If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
-              Print["Warning: Decay calculation requires a dedicated loop library. Curretly it's either ",
+              Print["Warning: Decay calculation requires a dedicated loop library. Currently it's either ",
                     "LoopTools or Collier but FlexibleSUSY was only configured with internal libraries. ",
                     "Disabling decays."
               ];
