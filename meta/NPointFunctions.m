@@ -841,7 +841,13 @@ Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules}
          ("NPF_L(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][SARAH`PR] :>
          ("NPF_R(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      (* @todo check this rule *)
+      (* On C++ level this vertex is such, that _D should have 0 and 1.
+       * The first position corresponds to the momenta with + sign.
+       * The second position corresponds to the momenta with - sign.
+       * Example: Cp[S1, S2, V][Mom@S1 - Mom@S2] leads to
+       *          NPF_MD(S1, S2, V) NPF_D(0, 1) <indices>
+       * Example: Cp[S1, S2, V][Mom@S2 - Mom@S1] leads to
+       *          NPF_MD(S1, S2, V) NPF_D(1, 0) <indices>*)
       SARAH`Cp[fields__][SARAH`Mom[f1_] - SARAH`Mom[f2_]] :>
       StringReplace["NPF_MD(`1`) NPF_D(`2`, `3`) NPF_I(`4`)",
          {  "`1`"->ToString@wrap@fields,
