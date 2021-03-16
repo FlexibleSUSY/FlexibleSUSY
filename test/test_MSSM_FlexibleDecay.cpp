@@ -760,4 +760,8 @@ Block MSOFT Q= 8.61574711E+02
    // Se -> Chi Fv
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Se_to_ChiFe(&m, 2, 0, 0),
                               0.055308965195013618, 9e-14);
+
+   // hh(2) -> hh(1) hh(1)
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_hhhh(&m, 1, 0, 0),
+                              0.0055271603983656848, 5e-13);
 }
