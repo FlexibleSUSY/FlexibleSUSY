@@ -1330,6 +1330,7 @@ std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
    );
    return decays_list_as_vector;
 }
+
 /**
  * Stores the branching ratios for a given particle in the SLHA
  * object.
