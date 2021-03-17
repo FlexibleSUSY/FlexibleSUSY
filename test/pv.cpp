@@ -19,6 +19,7 @@
 #include <limits>
 #include <cmath>
 #include <cstdlib>
+#include "config.h"
 #include "derivative.hpp"
 #include "logger.hpp"
 #include "pv.hpp"

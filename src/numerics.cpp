@@ -70,33 +70,47 @@ constexpr bool is_close(double m1, double m2, double tol) noexcept
    return mmax - mmin <= max_tol;
 }
 
-/// returns a/b if a/b is finite, otherwise returns numeric_limits::max()
-template <typename T>
-constexpr T divide_finite(T a, T b) noexcept {
-   T result = a / b;
-   if (!std::isfinite(result))
-      result = std::numeric_limits<T>::max();
-   return result;
-}
-
 double sign(double x) noexcept
 {
    return x >= 0.0 ? 1.0 : -1.0;
 }
 
 // can be made constexpr in C++20
-double fB(const std::complex<double>& a) noexcept
+double fB(const std::complex<double>& x) noexcept
 {
    using flexiblesusy::fast_log;
 
-   const double re = std::real(a);
-   const double im = std::imag(a);
+   const double re = std::real(x);
+   const double im = std::imag(x);
 
    if ((std::abs(re) == 0.0 || std::abs(re) == 1.0) && im == 0.0) {
       return -1.0;
    }
 
-   return std::real(-1.0 + fast_log(1.0 - a) - a*fast_log(1.0 - 1.0/a));
+   return std::real(-1.0 + fast_log(1.0 - x) - x*fast_log(1.0 - 1.0/x));
+}
+
+/// fB(xp) + fB(xm)
+double fB(const std::complex<double>& xp, const std::complex<double>& xm) noexcept
+{
+   using flexiblesusy::fast_log;
+
+   const double rep = std::real(xp);
+   const double imp = std::imag(xp);
+
+   if ((std::abs(rep) == 0.0 || std::abs(rep) == 1.0) && imp == 0.0) {
+      return -1.0 + fB(xm);
+   }
+
+   const double rem = std::real(xm);
+   const double imm = std::imag(xm);
+
+   if ((std::abs(rem) == 0.0 || std::abs(rem) == 1.0) && imm == 0.0) {
+      return -1.0 + fB(xp);
+   }
+
+   return std::real(-2.0 + fast_log((1.0 - xp)*(1.0 - xm))
+      - xp*fast_log(1.0 - 1.0/xp) - xm*fast_log(1.0 - 1.0/xm));
 }
 
 } // anonymous namespace
@@ -165,7 +179,7 @@ double b0(double p, double m1, double m2, double q) noexcept
       const std::complex<double> xp  = (s + sign(s)*x) / (2*p2);
       const std::complex<double> xm = imin / (xp*p2);
 
-      return -2.0*std::log(p/q) - fB(xp) - fB(xm);
+      return -2.0*std::log(p/q) - fB(xp, xm);
    }
 
    if (is_close(m1, m2, EPSTOL)) {
@@ -196,12 +210,11 @@ double b1(double p, double m1, double m2, double q) noexcept
       return 0.0;
 
    const double p2 = sqr(p), m12 = sqr(m1), m22 = sqr(m2), q2 = sqr(q);
-   const double pTest = divide_finite(p2, std::max(m12, m22));
 
    /// Decides level at which one switches to p=0 limit of calculations
    const double pTolerance = 1.0e-4;
 
-   if (pTest > pTolerance) {
+   if (p2 > pTolerance * std::max(m12, m22)) {
       return (a0(m2, q) - a0(m1, q) + (p2 + m12 - m22)
               * b0(p, m1, m2, q)) / (2.0 * p2);
    }
@@ -404,19 +417,19 @@ double c0(double m1, double m2, double m3) noexcept
  */
 double d1_b0(double /* p2 */, double m2a, double m2b) noexcept
 {
-   const double m4a = m2a * m2a;
-   const double m4b = m2b * m2b;
+   m2a = std::abs(m2a);
+   m2b = std::abs(m2b);
 
-   if ((std::abs(m2a) < 0.0001) != (std::abs(m2b) < 0.0001)) {
-      return (m4a - m4b) / (2. * pow3(m2a - m2b));
-   } else if (std::abs(m2a) < 0.0001 && std::abs(m2b) < 0.0001) {
+   if ((m2a < 0.0001) != (m2b < 0.0001)) {
+      return (m2a - m2b) * (m2a + m2b) / (2 * pow3(m2a - m2b));
+   } else if (m2a < 0.0001 && m2b < 0.0001) {
       return 0.;
    } else if (std::abs(m2b - m2a) < 0.001) {
-      return 1./(6. * m2a) + (m2a - m2b)/(12.* m4a);
+      return 1. / (6 * m2a) + (m2a - m2b) / (12 * sqr(m2a));
    }
 
-   return (m4a - m4b + 2. * m2a * m2b * std::log(m2b/m2a))
-      /(2. * pow3(m2a - m2b));
+   return ((m2a - m2b) * (m2a + m2b) + 2 * m2a * m2b * std::log(m2b / m2a)) /
+          (2 * pow3(m2a - m2b));
 }
 
 double c00(double m1, double m2, double m3, double q) noexcept
