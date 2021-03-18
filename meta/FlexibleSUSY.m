@@ -2561,7 +2561,9 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays)) {
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
+     (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
+      !problems.have_problem())) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
    }
@@ -2658,7 +2660,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@defaultSolverType@" -> defaultSolverType,
                             "@decaysIncludes@" -> decaysIncludes,
                             "@decaysObject@" -> decaysObject,
-                            "@calculateDecaysForModel@" -> IndentText@IndentText@IndentText[calculateDecaysForModel],
+                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
