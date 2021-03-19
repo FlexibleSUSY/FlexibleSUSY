@@ -31,3 +31,9 @@ BOOST_AUTO_TEST_CASE( test_QedQcd_toMz )
 
    BOOST_CHECK_LT((q1.get() - ToEigenArray(q2.display())).abs().maxCoeff(), 2e-3);
 }
+
+BOOST_AUTO_TEST_CASE( test_QedQcd_to_above_Mt )
+{
+   QedQcd q;
+   BOOST_REQUIRE_NO_THROW(q.to(1000.));
+}

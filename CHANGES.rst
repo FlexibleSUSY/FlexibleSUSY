@@ -21,6 +21,9 @@ Fixed bugs
   where the pole mass of a scalar particle is calculated at
   ``LowPrecision``.
 
+* [commit 8a93671da]: Fix non-convergence of QedQcd::to(scale)
+  function when scale is greater than the top pole mass.
+
 
 FlexibleSUSY 2.5.0 [June, 20 2020]
 ==================================
