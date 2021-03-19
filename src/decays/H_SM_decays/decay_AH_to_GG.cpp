@@ -15,7 +15,6 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
    // higher order QCD corrections
-   const double mtpole {qedqcd.displayPoleMt()};
    const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
    if (tau < 0.7) {
       // number of active light flavours
@@ -42,8 +41,10 @@ double CLASSNAME::get_partial_width<AH, G, G>(
          97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
       };
 
+      const double mtpole {qedqcd.displayPoleMt()};
+      const double Lt = std::log(Sqr(mu/mtpole));
       const double deltaNNLO {
-         237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*LH
+         237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
       };
 
       const double alpha_s_red = alpha_s_5f/Pi;

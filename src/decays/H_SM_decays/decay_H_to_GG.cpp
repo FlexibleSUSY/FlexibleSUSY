@@ -113,8 +113,10 @@ double CLASSNAME::get_partial_width<H, G, G>(
             97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
          };
 
+         const double mtpole {qedqcd.displayPoleMt()};
+         const double Lt = std::log(Sqr(mu/mtpole));
          const double deltaNNLO_P {
-            237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*LH
+            237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
          };
 
          switch (include_higher_order_corrections) {
