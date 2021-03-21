@@ -198,4 +198,7 @@ ExtraSLHAOutputBlocks = {
             {2, Hold[LowScale]} } }
 };
 
-FSCalculateDecays = True;
+(* decays can be generate and compiled
+   in this model but SM fermions are massles
+   so the code crashes at runtime *)
+FSCalculateDecays = False;
