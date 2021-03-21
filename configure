@@ -2174,15 +2174,19 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        [ -f Himalaya.pc ] && himalaya_name="Himalaya"
+        [ -f himalaya.pc ] && himalaya_name="himalaya"
+
         [ -z "$himalaya_inc_dir" ] && \
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f Himalaya.pc ] && \
+        [ -n ${himalaya_name} ] && \
+        [ -f ${himalaya_name}.pc ] && \
         {
-            message -n "Checking Himalaya using local Himalaya.pc ... "
-            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --cflags)
-            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --libs)
-            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config Himalaya --modversion)
+            message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --libs)
+            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --modversion)
             enable_himalaya=yes
             message "ok"
             return
