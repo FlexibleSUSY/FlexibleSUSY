@@ -500,7 +500,6 @@ endif
 
 ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
-		$(DIR)/test_MSSM_stable_ewsb_failure.sh \
 		$(DIR)/test_standalone.sh
 endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
