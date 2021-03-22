@@ -682,7 +682,7 @@ Block MSOFT Q= 8.61574711E+02
    // with 2L QCD for squark
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 7.271047934944202e-06, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2268180468443525e-06, 9e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2268180468443525e-06, 2e-10);
 
    // pseudoscalar Higgs
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057279629952, 3e-13);
@@ -729,12 +729,12 @@ Block MSOFT Q= 8.61574711E+02
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.0002595600030762401, 3e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 7.1507053618014637e-06, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 7.1507053618014637e-06, 5e-11);
 
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 9.381223898157936e-05, 2e-10);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 9e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 2e-10);
 
    // Ah -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057279629952, 3e-13);
@@ -744,7 +744,7 @@ Block MSOFT Q= 8.61574711E+02
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 8.6877987532066177e-06, 2e-11);
 
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 9e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 2e-10);
 
    // Sd5 -> Chi d
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sd_to_ChiFd(&m, 5, 0, 0),
@@ -755,7 +755,7 @@ Block MSOFT Q= 8.61574711E+02
 
    // Sv -> Chi Fv
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Sv_to_FvChi(&m, 2, 0, 0),
-                              0.21565996349804162, 4e-15);
+                              0.21565996349804162, 7e-15);
 
    // Se -> Chi Fv
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Se_to_ChiFe(&m, 2, 0, 0),
