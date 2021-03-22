@@ -9,7 +9,7 @@ SLHA_OUT="${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
 if [ -e GM2Calc.pc ] ; then
-    eval $(grep '^prefix=' GM2Calc.pc | sed 's,/package/,/build/,')
+    eval $(grep '^prefix=' GM2Calc.pc)
     GM2CALC_EXE="${prefix}/bin/gm2calc.x"
 fi
 

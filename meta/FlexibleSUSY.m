@@ -229,7 +229,7 @@ FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};
 FSCalculateDecays = False;
-DecayParticles = Automatic;
+FSDecayParticles = Automatic;
 FSEnableParallelism = True;
 
 (* Standard Model input parameters (SLHA input parameters) *)
@@ -418,7 +418,7 @@ ReplaceSymbolsInUserInput[rules_] :=
            IMEXTPAR                              = IMEXTPAR                              /. rules;
            FlexibleSUSY`ExtraSLHAOutputBlocks    = FlexibleSUSY`ExtraSLHAOutputBlocks    /. rules;
            FlexibleSUSY`FSCalculateDecays        = FlexibleSUSY`FSCalculateDecays        /. rules;
-           FlexibleSUSY`DecayParticles           = FlexibleSUSY`DecayParticles           /. rules;
+           FlexibleSUSY`FSDecayParticles         = FlexibleSUSY`FSDecayParticles         /. rules;
            FlexibleSUSY`FSExtraInputParameters   = FlexibleSUSY`FSExtraInputParameters   /. rules;
            FlexibleSUSY`FSAuxiliaryParameterInfo = FlexibleSUSY`FSAuxiliaryParameterInfo /. rules;
            FlexibleSUSY`FSLesHouchesList         = FlexibleSUSY`FSLesHouchesList         /. rules;
@@ -481,7 +481,7 @@ ReplaceSymbolsInUserInput[rules_] :=
 
            (* decay calculation require 3- and 4-point loop functions *)
            If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
-              Print["Warning: Decay calculation requires a dedicated loop library. Curretly it's either ",
+              Print["Warning: Decay calculation requires a dedicated loop library. Currently it's either ",
                     "LoopTools or Collier but FlexibleSUSY was only configured with internal libraries. ",
                     "Disabling decays."
               ];
@@ -535,18 +535,18 @@ CheckBVPSolvers[solvers_List] :=
           ];
 
 CheckDecaysOptions[] :=
-   If[FlexibleSUSY`DecayParticles =!= Automatic && FlexibleSUSY`DecayParticles =!= All && !ListQ[FlexibleSUSY`DecayParticles],
-      Print["Warning: Allowed values for DecayParticles are Automatic, All or list of particles. Got ", FlexibleSUSY`DecayParticles, ". Disabling decays. "];
+   If[FlexibleSUSY`FSDecayParticles =!= Automatic && FlexibleSUSY`FSDecayParticles =!= All && !ListQ[FlexibleSUSY`FSDecayParticles],
+      Print["Warning: Allowed values for FSDecayParticles are Automatic, All or list of particles. Got ", FlexibleSUSY`FSDecayParticles, ". Disabling decays. "];
       FlexibleSUSY`FSCalculateDecays = False,
-      If[FlexibleSUSY`DecayParticles === Automatic,
-         FlexibleSUSY`DecayParticles =
+      If[FlexibleSUSY`FSDecayParticles === Automatic,
+         FlexibleSUSY`FSDecayParticles =
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
-         If[FlexibleSUSY`DecayParticles === All,
-            FlexibleSUSY`DecayParticles = TreeMasses`GetParticles[],
-            If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles],
-               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`DecayParticles, TreeMasses`GetParticles[]],
+         If[FlexibleSUSY`FSDecayParticles === All,
+            FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
+            If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
+               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
                      " which are not part of the model. Removing them."];
-               FlexibleSUSY`DecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`DecayParticles]
+               FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
       ]
@@ -2565,7 +2565,9 @@ ExampleDecaysIncludes[] :=
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {
+"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
+     (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
+      !problems.have_problem())) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
    }
@@ -2672,7 +2674,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillDecaySettings@" -> IndentText@IndentText@fillDecaySettings,
                             "@flexibleDecaySettingsVarInDef@" -> flexibleDecaySettingsVarInDef,
                             "@flexibleDecaySettingsVarInDecl@" -> flexibleDecaySettingsVarInDecl,
-                            "@calculateDecaysForModel@" -> IndentText@IndentText@IndentText[calculateDecaysForModel],
+                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
@@ -4375,9 +4377,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* prepare decays calculation *)
            If[FlexibleSUSY`FSCalculateDecays,
 
-              FlexibleSUSY`DecayParticles = Select[FlexibleSUSY`DecayParticles, Decays`IsSupportedDecayParticle];
+              FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
 
-              If[FlexibleSUSY`DecayParticles === {},
+              If[FlexibleSUSY`FSDecayParticles === {},
                  Print["Warning: no supported particles to calculate decays for were found."];
                  Print["   Generation of decays code will be skipped."];
                  FlexibleSUSY`FSCalculateDecays = False;
@@ -4801,7 +4803,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               If[FileExistsQ[f], DeleteFile[f]];
               WriteString[f, "ENABLE_FLEXIBLEDECAY := no"]
            ];
-           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]},
+           With[{f = FileNameJoin[{FSOutputDir, "decays", "FlexibleDecay.mk"}]},
               If[FileExistsQ[f], DeleteFile[f]]
            ];
 
@@ -4810,7 +4812,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
               decaysFinalStateParticles = Decays`CreateCompleteParticleList[Select[TreeMasses`GetParticles[], !TreeMasses`IsGhost[#]&]];
 
-              If[FlexibleSUSY`DecayParticles =!= {},
+              If[FlexibleSUSY`FSDecayParticles =!= {},
                  With[{dir=FileNameJoin[{FSOutputDir, "decays"}]}, If[!DirectoryQ[dir], CreateDirectory[dir]]];
                  decaysSources = Join[decaysSources, {FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_table.cpp"}],
                                                       FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]}
@@ -4820,7 +4822,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                       FileNameJoin[{"decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]}
 
                                                       ];
-                 decaysVertices = WriteDecaysClass[FlexibleSUSY`DecayParticles, decaysFinalStateParticles,
+                 decaysVertices = WriteDecaysClass[FlexibleSUSY`FSDecayParticles, decaysFinalStateParticles,
                                                    {{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_table.hpp.in"}],
                                                      FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_table.hpp"}]},
                                                     {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_table.cpp.in"}],
@@ -4835,8 +4837,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                      FileNameJoin[{FSOutputDir,  "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
 
                                                    }];
-                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecays.mk.in"}],
-                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecays.mk"}]}},
+                 WriteOut`ReplaceInFiles[{{FileNameJoin[{$flexiblesusyTemplateDir, "decays", "FlexibleDecay.mk.in"}],
+                                           FileNameJoin[{FSOutputDir, "decays", "FlexibleDecay.mk"}]}},
                                          {Sequence @@ GeneralReplacementRules[]}
                  ];
                  ,

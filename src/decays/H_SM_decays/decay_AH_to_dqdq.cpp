@@ -35,7 +35,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    const double mdqDR = context.mass<dq>(indexOut1);
    const double mdqOS = context.physical_mass<dq>(indexOut1);
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
-      throw std::runtime_error("Error in H->ddbar: down quarks cannot be massless");
+      throw std::runtime_error("Error in A->ddbar: down quarks cannot be massless");
    }
    const auto xOS = Sqr(mdqOS/mAOS);
    const auto xDR = Sqr(mdqDR/mAOS);
@@ -62,21 +62,22 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
 
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
-         double deltaqq_QCD_OS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mAOS);
          double alpha_s_red;
+         double Y_conversion = 1.;
          switch (Nf) {
             case 5: {
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mAOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               Y_conversion = Sqr(sm_down_quark_masses(qedqcd_, indexOut1.at(0))/mdqDR);
                break;
             }
             case 6:
                alpha_s_red = get_alphas(context)/Pi;
                break;
             default:
-               throw std::runtime_error("Error in H->ddbar: Cannot determine the number of active flavours");
+               throw std::runtime_error("Error in A->ddbar: Cannot determine the number of active flavours");
          }
 
          double deltaqq_QCD_DR_P = calc_Deltaqq(alpha_s_red, Nf);
@@ -88,6 +89,9 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
          deltaqq_QCD_DR_P +=
             2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
             4./3.*alpha_s_red*calc_DeltaAH(betaDR);
+
+         const double deltaqq_QCDxQED_DR =
+            (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
 
          const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
@@ -105,16 +109,16 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
             const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
             const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
             const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
-            deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+            deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
          }
-         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
+         amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
          break;
       }
       case SM_higher_order_corrections::disable:
          break;
       default:
-         throw std::runtime_error("Unhandled option in H->ddbar decay");
+         throw std::runtime_error("Unhandled option in A->ddbar decay");
    }
 
    // low x limit

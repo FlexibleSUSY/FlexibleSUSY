@@ -49,6 +49,7 @@ BOOST_AUTO_TEST_CASE( test_Constants )
    BOOST_CHECK_EQUAL(zeta2         , boost::math::zeta(2));
    BOOST_CHECK_EQUAL(zeta3         , boost::math::zeta(3));
    BOOST_CHECK_EQUAL(zeta4         , boost::math::zeta(4));
+   BOOST_CHECK_EQUAL(zeta5         , boost::math::zeta(5));
 }
 
 BOOST_AUTO_TEST_CASE( test_Abs )

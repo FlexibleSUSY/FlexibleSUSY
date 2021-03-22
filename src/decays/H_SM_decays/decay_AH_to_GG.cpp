@@ -15,21 +15,14 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
    // higher order QCD corrections
-   const double mtpole {qedqcd.displayPoleMt()};
    const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
    if (tau < 0.7) {
       // number of active light flavours
       constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mAh);
-      const double alpha_s = qedqcd_.displayAlpha(softsusy::ALPHAS);
-      /*
-         throw std::runtime_error(
-            "Error in "
-            + create_process_string<AH, G, G>(in_idx, out1_idx, out2_idx)
-            + ": Could not determine the number of active light quark flavours"
-         );
-         */
+      // 5-flavour SM alpha_s
+      const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
       const auto AHGGVertex = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
@@ -37,10 +30,10 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
       const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
 
-      const std::complex<double> Ff = -2.*f(tau)/std::sqrt(tau);
+      const std::complex<double> A12_A = 2.*f(tau)/tau;
       // LO width comming only from the top-loop
       // agrees up to a full double precision with autmatically generated one
-      const double Gamma_SM_LO = mAh/(32.*Power3(Pi))*std::norm(get_alphas(context)*AHGGVertexVal*Ff);
+      const double Gamma_SM_LO_P = mAh/(18.*Power3(Pi))*std::norm(alpha_s_5f * AHGGVertexVal*sqrt(tau) * 3./4*A12_A);
 
       const double mu = mAh;
       const double LH = std::log(Sqr(mu/mAh));
@@ -48,17 +41,17 @@ double CLASSNAME::get_partial_width<AH, G, G>(
          97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
       };
 
-      const double log_mAh2OverMT2 {std::log(Sqr(mAh/mtpole))};
+      const double mtpole {qedqcd.displayPoleMt()};
+      const double Lt = std::log(Sqr(mu/mtpole));
       const double deltaNNLO {
-         237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*log_mAh2OverMT2
+         237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
       };
 
-      const double g3 = context.model.get_g3();
-      const double alpha_s_red = Sqr(g3/(2*Pi));
+      const double alpha_s_red = alpha_s_5f/Pi;
 
       switch (include_higher_order_corrections) {
          case SM_higher_order_corrections::enable:
-            result += Gamma_SM_LO*(deltaNLO*alpha_s_red + deltaNNLO*Sqr(alpha_s_red));
+            result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO + deltaNNLO*alpha_s_red)/std::norm(0.5*A12_A));
             break;
          case SM_higher_order_corrections::disable:
             break;

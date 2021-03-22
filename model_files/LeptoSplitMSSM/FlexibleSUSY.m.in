@@ -373,3 +373,5 @@ g2d1L = 1/(4 Pi)^2 g2 Cos[ArcTan[TanBeta]] (
      (* + (g2^2/6) Log[msl2[2,2]/SCALE^2] *)
      + (g2^2/6) Log[msl2[3,3]/SCALE^2]
 );
+
+FSCalculateDecays = True;

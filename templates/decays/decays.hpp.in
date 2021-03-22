@@ -285,12 +285,11 @@ double @ModelName@_decays::get_partial_width(
    constexpr double color_factor = squared_color_generator<FieldIn, FieldOut1, FieldOut2>();
 
    // matrix element squared
-   const auto mat_elem = calculate_amplitude<FieldIn, FieldOut1, FieldOut2>(
+   const auto mat_elem_sq = amplitude_squared<FieldIn, FieldOut1, FieldOut2>(
       context, indexIn, indexOut1, indexOut2);
-   const auto mat_elem_sq = mat_elem.square();
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2
-   const auto result = 0.5 * ps * ps_symmetry * color_factor * mat_elem_sq / mIn;
+   const auto result = 0.5/mIn * ps * ps_symmetry * color_factor * mat_elem_sq;
 
    return result;
 }

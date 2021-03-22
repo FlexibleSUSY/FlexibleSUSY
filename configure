@@ -2174,15 +2174,19 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        [ -f Himalaya.pc ] && himalaya_name="Himalaya"
+        [ -f himalaya.pc ] && himalaya_name="himalaya"
+
         [ -z "$himalaya_inc_dir" ] && \
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f Himalaya.pc ] && \
+        [ -n ${himalaya_name} ] && \
+        [ -f ${himalaya_name}.pc ] && \
         {
-            message -n "Checking Himalaya using local Himalaya.pc ... "
-            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --cflags)
-            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --libs)
-            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config Himalaya --modversion)
+            message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --libs)
+            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --modversion)
             enable_himalaya=yes
             message "ok"
             return
@@ -2272,7 +2276,7 @@ check_looptools_libs() {
          # assume that the linker will look in the default paths
          LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
       else
-         LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
+         LOOPTOOLSLIBS="-L$looptools_lib_dir -Wl,-rpath,$looptools_lib_dir $LOOPTOOLSLIBS_"
       fi
 
       # check dependency on libquadmath by searching for cabsq in liblooptools
@@ -2356,7 +2360,7 @@ check_collier_libs() {
          # assume that the linker will look in the default paths
          COLLIERLIBS=" $COLLIERLIBS_ "
       else
-         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
       fi
    fi
 }
@@ -2555,7 +2559,7 @@ check_tsil_libs() {
             # assume that the linker will look in the default paths
             TSILLIBS="$TSILLIBS_"
         else
-            TSILLIBS="-L$tsil_lib_dir $TSILLIBS_"
+            TSILLIBS="-L$tsil_lib_dir -Wl,-rpath,$tsil_lib_dir $TSILLIBS_"
         fi
     fi
     return 0

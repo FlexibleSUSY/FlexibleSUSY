@@ -272,11 +272,11 @@ endif
 ifeq ($(WITH_MRSSM2) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecays.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MRSSM2_FlexibleDecays.cpp
+		$(DIR)/test_MRSSM2_FlexibleDecay.cpp
 endif
 endif
 
@@ -340,11 +340,11 @@ endif
 ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_THDMII_FlexibleDecays.cpp
+		$(DIR)/test_THDMII_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_THDMII_FlexibleDecays.cpp
+		$(DIR)/test_THDMII_FlexibleDecay.cpp
 endif
 endif
 
@@ -500,17 +500,16 @@ endif
 
 ifeq ($(WITH_MSSM),yes)
 TEST_SH += \
-		$(DIR)/test_MSSM_stable_ewsb_failure.sh \
 		$(DIR)/test_standalone.sh
 endif
 ifeq ($(WITH_MSSM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecays.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSM_FlexibleDecays.cpp
+		$(DIR)/test_MSSM_FlexibleDecay.cpp
 endif
 endif
 
@@ -562,11 +561,11 @@ endif
 ifeq ($(WITH_SM) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_SM_FlexibleDecays.cpp
+		$(DIR)/test_SM_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_SM_FlexibleDecays.cpp
+		$(DIR)/test_SM_FlexibleDecay.cpp
 endif
 endif
 
@@ -642,11 +641,11 @@ TEST_META += \
 ifeq ($(ENABLE_FLEXIBLEDECAY), yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecays.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_MSSMCPV_FlexibleDecays.cpp
+		$(DIR)/test_MSSMCPV_FlexibleDecay.cpp
 endif
 endif
 endif
@@ -1059,15 +1058,15 @@ $(DIR)/test_MSSM_matching_selfenergy_Fd.cpp : $(DIR)/test_MSSM_matching_selfener
 endif
 endif
 
-$(DIR)/test_MSSM_FlexibleDecays.x: $(LIBMSSM)
+$(DIR)/test_MSSM_FlexibleDecay.x: $(LIBMSSM)
 
-$(DIR)/test_MSSMCPV_FlexibleDecays.x: $(LIBMSSMCPV)
+$(DIR)/test_MSSMCPV_FlexibleDecay.x: $(LIBMSSMCPV)
 
 $(DIR)/test_CMSSM_database.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_gluino.sh: $(RUN_SOFTPOINT_EXE)
 
-$(DIR)/test_MRSSM2_FlexibleDecays.x: $(LIBMRSSM2)
+$(DIR)/test_MRSSM2_FlexibleDecay.x: $(LIBMRSSM2)
 
 $(DIR)/test_MRSSM2_gmm2.x: $(LIBMRSSM2)
 
@@ -1196,7 +1195,7 @@ $(DIR)/test_SM_mass_eigenstates_decoupling_scheme.x: $(LIBSM)
 
 $(DIR)/test_SM_tree_level_spectrum.x: $(LIBSM)
 
-$(DIR)/test_SM_FlexibleDecays.x: $(LIBSM)
+$(DIR)/test_SM_FlexibleDecay.x: $(LIBSM)
 
 $(DIR)/test_SM_one_loop_spectrum.x: $(LIBSM)
 
@@ -1272,7 +1271,7 @@ $(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.x: $(LIBSSMSemiAnalytic)
 
 $(DIR)/test_SSMSemiAnalytic_consistent_solutions.x: $(LIBSSMSemiAnalytic) $(LIBSSM)
 
-$(DIR)/test_THDMII_FlexibleDecays.x: $(LIBTHDMII)
+$(DIR)/test_THDMII_FlexibleDecay.x: $(LIBTHDMII)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 

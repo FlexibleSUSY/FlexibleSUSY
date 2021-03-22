@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecays
+#define BOOST_TEST_MODULE test_MRSSM2_FlexibleDecay
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,7 +15,7 @@ using namespace flexiblesusy;
 /* BMP3 of arXiv:1410.4791
    considered in Adam Buchner's thesis */
 
-BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_MRSSM2_FlexibleDecay )
 {
 
    char const * const slha_input = R"(
@@ -694,10 +694,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0019825591408438319, 5e-12);
+                              0.0025273625096655988, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00010491145635289541, 4e-14);
+                              0.00012115281603656197, 2e-13);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
@@ -718,21 +718,21 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00030420130269631331, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00038305055803087727, 7e-11);
    // h -> gamma gamma
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
    // with 2-loop QCD corrections to squark loop
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.2159638473406977e-05, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.0316485590151162e-05, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.9440628969348722e-06, 5e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.391735378735319e-06, 5e-11);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029502623532270532, 8e-14);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
-                              0.0013523917718281525, 5e-12);
+                              0.0018327846210855049, 5e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              7.430233612225978e-05, 2e-13);
+                              9.139211136105259e-05, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -752,10 +752,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.1943830812277772e-05, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.0133389963488187e-05, 4e-11);
 
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00012423136936565911, 7e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 6.9440628969348722e-06, 5e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 6.391735378735319e-06, 5e-11);
 }

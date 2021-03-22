@@ -18,5 +18,5 @@ List of observables computed by ``FlexibleSUSY``
 
   - :math:`b \to s \gamma`
 
-- `Higgs decays <observables/Higgs_decays.rst>`_ *(in preparation)*
+- `Decays <observables/FlexibleDecay.rst>`_ *(in preparation)*
 

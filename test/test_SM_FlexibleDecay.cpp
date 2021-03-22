@@ -1,6 +1,6 @@
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_SM_FlexibleDecays
+#define BOOST_TEST_MODULE test_SM_FlexibleDecay
 
 #include <iostream>
 
@@ -19,7 +19,7 @@
 
 using namespace flexiblesusy;
 
-BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
+BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
 {
 
    Loop_library::set(-1);
@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFdFd(&m, 2, 2),
-                              0.0025891012695600101, 2e-15);
+                              0.0023811031255194888, 2e-15);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              9.5031904698723778e-06, 2e-16);
+                              0.00011734084746332317, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026184531343741851, 1e-15);
@@ -75,11 +75,11 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // ------------ loop-induces decays_HO ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00037101151840550036, 5e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VGVG(&m), 0.00035462447439152465, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 1.0571803767199578e-05, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVP(&m), 9.2117697375801348e-06, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.9327725968051701e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_VPVZ(&m), 6.3322476114788634e-06, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecays )
    // h -> gluon gluon
    BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VGVG(&m), 0.00019973935357968308, 5e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 1.0385346434891975e-05, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVP(&m), 9.0492996379713826e-06, 2e-13);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.9031590236381169e-06, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_no_HO.partial_width_hh_to_VPVZ(&m), 6.305199201144327e-06, 2e-13);
 }

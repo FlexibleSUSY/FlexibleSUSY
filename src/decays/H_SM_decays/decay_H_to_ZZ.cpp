@@ -38,7 +38,6 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    double res;
 
    // mH < mZ
-   // 4-body decay not implemented for a moment
    if (4.*x > 1.0) {
 
       // integrand

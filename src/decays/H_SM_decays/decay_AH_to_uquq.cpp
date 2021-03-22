@@ -61,14 +61,15 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
 
    switch (include_higher_order_corrections) {
       case SM_higher_order_corrections::enable: {
-         double deltaqqOS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mAHOS);
          double alpha_s_red;
+         double Y_conversion = 1.;
          switch (Nf) {
             case 5: {
                auto qedqcd_ = qedqcd;
                qedqcd_.to(mAHOS);
                alpha_s_red = qedqcd_.displayAlpha(softsusy::ALPHAS)/Pi;
+               Y_conversion = Sqr(sm_up_quark_masses(qedqcd_, indexOut1.at(0))/muqDR);
                break;
             }
             case 6:
@@ -85,6 +86,9 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
          // 1L QED correction - eq. 21 in FD manual
          const double alpha_red = get_alpha(context)/Pi;
          const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
+
+         const double deltaqq_QCDxQED_DR =
+            (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
 
          const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
@@ -104,11 +108,11 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
             if (!is_zero(CSuu)) {
                const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
                const auto CStu = AHttbar_P/context.mass<Fu>({2});
-               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (3.83 - lt + 1.0/6.0*Sqr(lq));
+               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }
 
-         amp2DR_P *= 1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaPhi2_P;
+         amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
          break;
       }

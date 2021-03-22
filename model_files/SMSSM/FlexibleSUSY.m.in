@@ -163,3 +163,6 @@ ExtraSLHAOutputBlocks = {
             {9, B[MS]},
             {10, ms2} } }
 };
+
+FSCalculateDecays = True;
+
