@@ -732,6 +732,7 @@ Block ImMSOFT Q= 2.00000000E+03
    Physical_input physical_input;
    MSSMCPV_input_parameters input;
    Spectrum_generator_settings settings;
+   FlexibleDecay_settings flexibledecay_settings;
 
    // extract the input parameters from spectrum string
    try {
@@ -753,7 +754,7 @@ Block ImMSOFT Q= 2.00000000E+03
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   MSSMCPV_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
+   MSSMCPV_decays decays_with_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // scalar Higgs
 
@@ -794,7 +795,8 @@ Block ImMSOFT Q= 2.00000000E+03
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   MSSMCPV_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
+   flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 0.0);
+   MSSMCPV_decays decays_without_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 1, 2, 2),

@@ -68,7 +68,6 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    }
 
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
-         double deltaqqOS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
          double Y_conversion = 1.;

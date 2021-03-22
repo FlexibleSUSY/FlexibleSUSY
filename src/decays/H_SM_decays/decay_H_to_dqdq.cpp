@@ -67,8 +67,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
                  2*std::norm(HBBbarVertexDR_P) * Sqr(mdqOS / mdqDR);
    }
 
-   if (FlexibleDecay_settings::include_higher_order_corrections) {
-         double deltaqq_QCD_OS = 0.;
+   if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
          const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
          double Y_conversion = 1.;

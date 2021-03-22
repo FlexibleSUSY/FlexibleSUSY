@@ -242,6 +242,7 @@ Block UERMIX
    Physical_input physical_input;
    THDMII_input_parameters input;
    Spectrum_generator_settings settings;
+   FlexibleDecay_settings flexibledecay_settings;
 
    // extract the input parameters from spectrum string
    try {
@@ -263,7 +264,7 @@ Block UERMIX
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   THDMII_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
+   THDMII_decays decays_with_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
 
@@ -313,7 +314,8 @@ Block UERMIX
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   THDMII_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
+   flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 0.0);
+   THDMII_decays decays_without_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
 
