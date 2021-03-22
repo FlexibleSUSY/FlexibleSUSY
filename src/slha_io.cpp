@@ -26,7 +26,7 @@
 #include "pmns.hpp"
 #include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
-#include "decays/decay_settings.hpp"
+#include "FlexibleDecay_settings.hpp"
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 
@@ -179,10 +179,9 @@ void process_flexibledecay_tuple(FlexibleDecay_settings& settings,
                                 int key, double value)
 {
    if (0 <= key && key < static_cast<int>(FlexibleDecay_settings::NUMBER_OF_OPTIONS)) {
-      std::cout << value << '\n';
       settings.set(static_cast<FlexibleDecay_settings::Settings>(key), value);
    } else {
-      WARNING("Unrecognized entry in block FlexibleSUSY: " << key);
+      WARNING("Unrecognized entry in block FlexibleDecay: " << key);
    }
 }
 

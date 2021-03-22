@@ -2558,14 +2558,14 @@ ExampleDecaysIncludes[] :=
        ("#include \"" <> # <> "\"")& /@ {
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays/decays_problems.hpp",
-         "decays/decay_settings.hpp",
+         "FlexibleDecay_settings.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
          "loop_libraries/loop_library.hpp"},
        "\n"
     ];
 
 ExampleCalculateDecaysForModel[] :=
-"if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_decays) &&
+"if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) &&
      (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
       !problems.have_problem())) {
    if (loop_library_for_decays) {

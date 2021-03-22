@@ -29,6 +29,7 @@ public:
    enum Settings : int {
       calculate_decays,      ///< [0] calculate particle decays
       include_higher_order_corrections, ///< [1] include higher order corrections in decays
+      offshell_VV_decays,    ///< [2]
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 

@@ -11,9 +11,10 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mWOS = context.physical_mass<W>(indexOut1);
    const double x = Sqr(mWOS/mHOS);
-   double res;
+   double res = 0;
 
-   if (4.*x > 1.0) {
+   if ((x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) ||
+       (4.*x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) == 2)) {
 
       // integrand
       constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
@@ -55,7 +56,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       }
    }
    // three-body decays form mW < mH < 2*mW
-   else if (4 * x > 1.0) {
+   else if (4 * x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) {
 
       if (check_3body_Vff_decay<BSMForWdecay, W>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
@@ -82,7 +83,8 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       res *= NLF + Nc*NQF;
 
    // two-body decay for mH > 2 mW
-   } else {
+   }
+   else if (4.*x < 1.0) {
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor
       const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));

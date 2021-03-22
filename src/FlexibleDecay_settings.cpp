@@ -29,7 +29,8 @@ namespace flexiblesusy {
 namespace {
 const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descriptions = {
    "calculate particle decays",
-   "higher order corrections in decays"
+   "higher order corrections in decays",
+   "off-shell decays into VV pair"
 };
 
 bool is_integer(double value)
@@ -84,10 +85,13 @@ std::string FlexibleDecay_settings::get_description(Settings o) const
 void FlexibleDecay_settings::set(Settings o, double value)
 {
    switch (o) {
-   case calculate_decays: // 1 [bool]
+   case calculate_decays: // 0 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   case include_higher_order_corrections: // 2 [int >= 0 and <= 1]
+   case include_higher_order_corrections: // 1 [int >= 0 and <= 1]
+      assert_integer(value, descriptions.at(o).c_str());
+      break;
+   case offshell_VV_decays: // 2 [int >= 0 and <= 2]
       assert_integer(value, descriptions.at(o).c_str());
       break;
    default:
@@ -114,6 +118,7 @@ void FlexibleDecay_settings::reset()
 {
    values[calculate_decays]                 = 1.;
    values[include_higher_order_corrections] = 1.;
+   values[offshell_VV_decays]               = 2.;
 }
 bool is_integer(double value)
 {
