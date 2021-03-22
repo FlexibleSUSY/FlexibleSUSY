@@ -284,7 +284,7 @@ FillDecaysSLHAData[] :=
     "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
     TextFormatting`IndentText[
        "slha_io.set_dcinfo(decays_problems);\n" <>
-       "slha_io.set_decays(decays.get_decay_table());\n"
+       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n"
     ] <>
     "}";
 

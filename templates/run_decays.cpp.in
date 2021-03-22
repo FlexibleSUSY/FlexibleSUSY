@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
    if (show_decays) {
       slha_io.set_dcinfo(decays.get_problems());
-      slha_io.set_decays(decays.get_decay_table());
+      slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
    }
 
    slha_io.write_to(argc > 2 ? argv[2] : "-");

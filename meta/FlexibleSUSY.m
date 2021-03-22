@@ -2582,7 +2582,7 @@ const bool show_decays = !decays.get_problems().have_problem() ||
 
 if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
-   slha_io.set_decays(decays.get_decay_table());
+   slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
 }";
 
 ExampleCalculateCmdLineDecays[] :=
@@ -2644,7 +2644,7 @@ WriteUserExample[inputParameters_List, files_List] :=
               calculateDecaysForModel = ExampleCalculateDecaysForModel[];
               setDecaysSLHAOutput = ExampleSetDecaysSLHAOutput[];
               calculateCmdLineDecays = ExampleCalculateCmdLineDecays[];
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, &decays);";
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, flexibledecay_settings, &decays);";
               decaySetttingsOverride =
 "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {
    if (!spectrum_generator_settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
@@ -2936,7 +2936,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
               fillDecaysDataPrototypes = WriteOut`CreateFillDecaysDataPrototypes[FlexibleSUSY`FSModelName];
               fillDecaysDataFunctions = WriteOut`CreateFillDecaysDataFunctions[FlexibleSUSY`FSModelName];
               decaysHeaderIncludes = Utils`StringJoinWithSeparator[("#include \"decays/" <> # <> "\"")& /@ decaysSLHAIncludeFiles, "\n"];
-              useDecaysData = "fill_decays_data(*decays);"
+              useDecaysData = "fill_decays_data(*decays, flexibledecay_settings);"
              ];
            getPDGCodeFromParticleEnumNoIndex = Parameters`CreatePDGCodeFromParticleCases[particles];
            getPDGCodeFromParticleEnumIndex = Parameters`CreatePDGCodeFromParticleIndexedCases[particles];

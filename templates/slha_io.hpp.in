@@ -100,7 +100,7 @@ public:
 
 @fillDecaysDataPrototypes@
    template <class... Ts>
-   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, const Spectrum_generator_settings&, @ModelName@_decays const * const = nullptr);
+   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, const Spectrum_generator_settings&, const FlexibleDecay_settings&, @ModelName@_decays const * const = nullptr);
 
 private:
    SLHA_io slha_io; ///< SLHA io class
@@ -133,6 +133,7 @@ void @ModelName@_slha_io::fill(
    const @ModelName@_scales& scales,
    const @ModelName@_observables& observables,
    const Spectrum_generator_settings& spectrum_generator_settings,
+   const FlexibleDecay_settings& flexibledecay_settings,
    @ModelName@_decays const * const decays)
 {
    const auto& model = std::get<0>(models);

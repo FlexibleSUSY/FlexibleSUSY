@@ -30,7 +30,8 @@ namespace {
 const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descriptions = {
    "calculate particle decays",
    "higher order corrections in decays",
-   "off-shell decays into VV pair"
+   "off-shell decays into VV pair",
+   "min. br to print"
 };
 
 bool is_integer(double value)
@@ -50,6 +51,24 @@ void assert_integer(double value, const char* quantity)
 {
    if (!is_integer(value)) {
       throw SetupError(std::string(quantity) + " must be an integer");
+   }
+}
+
+void assert_ge(double value, double lower_bound, const char* quantity)
+{
+   if (value < lower_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be greater than or equal to " +
+                       flexiblesusy::to_string(lower_bound));
+   }
+}
+
+void assert_le(double value, double upper_bound, const char* quantity)
+{
+   if (value > upper_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be lower than or equal to " +
+                       flexiblesusy::to_string(upper_bound));
    }
 }
 
@@ -93,6 +112,12 @@ void FlexibleDecay_settings::set(Settings o, double value)
       break;
    case offshell_VV_decays: // 2 [int >= 0 and <= 2]
       assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_le(value, 2, descriptions.at(o).c_str());
+      break;
+   case min_br_to_print: // 2 [int >= 0 and <= 2]
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_le(value, 1, descriptions.at(o).c_str());
       break;
    default:
       break;
@@ -119,6 +144,7 @@ void FlexibleDecay_settings::reset()
    values[calculate_decays]                 = 1.;
    values[include_higher_order_corrections] = 1.;
    values[offshell_VV_decays]               = 2.;
+   values[min_br_to_print]                  = 1e-5;
 }
 bool is_integer(double value)
 {

@@ -62,3 +62,4 @@ Block FlexibleDecay
    0   1                    # calculate decays (0 = no, 1 = yes)
    1   1                    # include higher order corrections in decays (0 = no, 1 = yes)
    2   2                    # off-shell decays into VV pair
+   3   1e-5                 # min br. to print
