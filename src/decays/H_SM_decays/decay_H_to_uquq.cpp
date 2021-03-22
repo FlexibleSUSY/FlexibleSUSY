@@ -67,8 +67,8 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
                  2*std::norm(HBBbarVertexDR_P) * Sqr(muqOS / muqDR);
    }
 
-   switch (include_higher_order_corrections) {
-      case SM_higher_order_corrections::enable: {
+   if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
+         double deltaqqOS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mHOS);
          double alpha_s_red;
          double Y_conversion = 1.;
@@ -150,12 +150,6 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_S *= 1. + deltaqq_QCD_OS_S + deltaqq_QED_OS_S;
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
-         break;
-      }
-      case SM_higher_order_corrections::disable:
-         break;
-      default:
-         throw std::runtime_error("Unhandled option in H->uubar decay");
    }
 
    // low x limit

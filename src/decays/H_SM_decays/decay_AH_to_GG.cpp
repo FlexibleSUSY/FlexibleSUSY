@@ -49,14 +49,8 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
-      switch (include_higher_order_corrections) {
-         case SM_higher_order_corrections::enable:
-            result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO + deltaNNLO*alpha_s_red)/std::norm(0.5*A12_A));
-            break;
-         case SM_higher_order_corrections::disable:
-            break;
-         default:
-            break;
+      if (FlexibleDecay_settings::include_higher_order_corrections) {
+         result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO + deltaNNLO*alpha_s_red)/std::norm(0.5*A12_A));
       }
    }
 

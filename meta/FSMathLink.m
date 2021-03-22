@@ -231,13 +231,13 @@ CreateSpectrumDecaysCalculationName[] := "calculate_model_decays";
 CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
 
 CreateSpectrumDecaysInterface[modelName_] :=
-    "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const SM_higher_order_corrections&) = 0;";
+    "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
 
 CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
-                       "(const softsusy::QedQcd&, const Physical_input&, const SM_higher_order_corrections&) override;\n";
-           args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const SM_higher_order_corrections& higher_orders_in_decays";
+                       "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) override;\n";
+           args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const FlexibleDecay_settings& higher_orders_in_decays";
            body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, physical_input, higher_orders_in_decays);\n" <>
                   "decays.calculate_decays();\n";
            function = "template <typename Solver_type>\n" <>
@@ -258,18 +258,11 @@ CreateModelDecaysCalculation[modelName_] :=
                      "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
                      "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
                   ] <>
-                  "SM_higher_order_corrections higher_orders_in_decays;\n" <>
-                  "if (settings.get(Spectrum_generator_settings::higher_orders_in_decays)) {\n" <>
-                     TextFormatting`IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
-                  "}\n" <>
-                  "else {\n" <>
-                     TextFormatting`IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
-                  "}\n" <>
-                  "if (settings.get(Spectrum_generator_settings::calculate_decays)) {\n" <>
+                  "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {\n" <>
                      TextFormatting`IndentText[
                         "if (loop_library_for_decays) {\n" <>
                   TextFormatting`IndentText["spectrum->" <> CreateSpectrumDecaysCalculationName[] <>
-                                            "(qedqcd, physical_input, higher_orders_in_decays);\n"] <> "}\n" <>
+                                            "(qedqcd, physical_input, flexibledecay_settings);\n"] <> "}\n" <>
                         "else if (!loop_library_for_decays) {\n" <>
                            TextFormatting`IndentText[
          "WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");\n"

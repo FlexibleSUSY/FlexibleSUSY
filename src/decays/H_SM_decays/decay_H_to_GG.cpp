@@ -86,18 +86,12 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
-      const double Gamma0 = std::norm(3./4*A12_H);
-      switch (include_higher_order_corrections) {
-         case SM_higher_order_corrections::enable:
-            result +=
-               //convert LO from 6 to 5 flavour scheme
-               Gamma_SM_LO_S*(1. - Sqr(get_alphas(context)/alpha_s_5f)
-               + alpha_s_red*(deltaNLO_S + alpha_s_red*(deltaNNLO_S + deltaNNNLO_S*alpha_s_red))/Gamma0);
-            break;
-         case SM_higher_order_corrections::disable:
-            break;
-         default:
-            break;
+      if (FlexibleDecay_settings::include_higher_order_corrections) {
+         const double Gamma0 = std::norm(3./4*A12_H);
+         result +=
+            //convert LO from 6 to 5 flavour scheme
+            Gamma_SM_LO_S*(1. - Sqr(get_alphas(context)/alpha_s_5f)
+            + alpha_s_red*(deltaNLO_S + alpha_s_red*(deltaNNLO_S + deltaNNNLO_S*alpha_s_red))/Gamma0);
       }
 
       if(info::is_CP_violating_Higgs_sector) {
@@ -119,6 +113,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
             237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
          };
 
+<<<<<<< HEAD
          switch (include_higher_order_corrections) {
             case SM_higher_order_corrections::enable:
                result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO_P + deltaNNLO_P*alpha_s_red)/std::norm(0.5*A12_A));
@@ -127,6 +122,10 @@ double CLASSNAME::get_partial_width<H, G, G>(
                break;
             default:
                break;
+=======
+         if (FlexibleDecay_settings::include_higher_order_corrections) {
+            result += Gamma_SM_LO_P*(deltaNLO_P*alpha_s_red + deltaNNLO_P*Sqr(alpha_s_red));
+>>>>>>> 679b1b4fa (added FlexibleDecay block)
          }
 
       }

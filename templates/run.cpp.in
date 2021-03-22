@@ -94,6 +94,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
          observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
       }
    }
+@calculateDecaysForModel@
 
 @calculateDecaysForModel@
 

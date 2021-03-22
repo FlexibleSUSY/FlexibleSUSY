@@ -27,7 +27,7 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
 
    // higher order corrections
 
-   if (include_higher_order_corrections == SM_higher_order_corrections::enable) {
+   if (FlexibleDecay_settings::include_higher_order_corrections) {
       // 1-loop QED corrections
       res *= 1. + get_alpha(context)/Pi*17./4.;
    }

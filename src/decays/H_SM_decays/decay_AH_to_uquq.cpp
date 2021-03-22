@@ -59,8 +59,8 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    amp2OS_P = Sqr(mAHOS) *
               2*std::norm(AHBBbarVertexDR_P) * Sqr(muqOS / muqDR);
 
-   switch (include_higher_order_corrections) {
-      case SM_higher_order_corrections::enable: {
+   if (FlexibleDecay_settings::include_higher_order_corrections) {
+         double deltaqqOS = 0.;
          const int Nf = number_of_active_flavours(qedqcd, mAHOS);
          double alpha_s_red;
          double Y_conversion = 1.;
@@ -114,12 +114,6 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
 
          amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
-         break;
-      }
-      case SM_higher_order_corrections::disable:
-         break;
-      default:
-         WARNING("Unhandled option in AH->ddbar decay");
    }
 
    // low x limit

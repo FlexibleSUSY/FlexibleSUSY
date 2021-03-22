@@ -221,6 +221,7 @@ private:
    Physical_input physical_input{};          ///< extra non-SLHA physical input
    softsusy::QedQcd qedqcd{};                ///< SLHA physical input
    Spectrum_generator_settings settings{};   ///< spectrum generator settings
+@FDSettings@
    SLHA_io::Modsel modsel{};                 ///< MODSEL input
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr};  ///< spectrum information
 
@@ -385,8 +386,6 @@ void Model_data::put_settings(MLINK link) const
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higgs_3loop_correction_at3)), "higgs3loopCorrectionAtAtAt");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higgs_4loop_correction_at_as3)), "higgs4loopCorrectionAtAsAsAs");
    MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::loop_library)), "loopLibrary");
-   MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::calculate_decays)), "calculateDecays");
-   MLPutRuleTo(link, static_cast<int>(settings.get(Spectrum_generator_settings::higher_orders_in_decays)), "higherOrdersInDecays");
    MLPutRuleTo(link, modsel.parameter_output_scale, "parameterOutputScale");
 
    MLEndPacket(link);
@@ -790,8 +789,6 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    settings.set(Spectrum_generator_settings::higgs_3loop_correction_at3, pars[c++]);
    settings.set(Spectrum_generator_settings::higgs_4loop_correction_at_as3, pars[c++]);
    settings.set(Spectrum_generator_settings::loop_library, pars[c++]);
-   settings.set(Spectrum_generator_settings::calculate_decays, pars[c++]);
-   settings.set(Spectrum_generator_settings::higher_orders_in_decays, pars[c++]);
 
    SLHA_io::Modsel modsel;
    modsel.parameter_output_scale = pars[c++];

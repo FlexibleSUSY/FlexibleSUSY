@@ -2586,9 +2586,10 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 }";
 
 ExampleCalculateCmdLineDecays[] :=
+"FlexibleDecay_settings flexibledecay_settings;" <>
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, SM_higher_order_corrections::enable);
+   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2623,13 +2624,13 @@ WriteUserExample[inputParameters_List, files_List] :=
               decaysObject =
                   IndentText[
                      "SM_higher_order_corrections higher_orders_in_decays;\n" <>
-                     "if (flexibledecay_settings.get(FlexibleDecay_settings::higher_orders_in_decays)) {\n" <>
+                     "if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {\n" <>
                         IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
                      "}\n" <>
                      "else {\n" <>
                         IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
                      "}\n" <>
-                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, physical_input, higher_orders_in_decays);\n" <>
+                     FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);\n" <>
                      "const bool loop_library_for_decays =\n" <>
                      IndentText[
                         "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
@@ -2718,7 +2719,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = ""},
+            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", FDSettings = ""},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2759,7 +2760,8 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
-              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\""
+              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"\n#include \"FlexibleDecay_settings.hpp\"";
+              FDSettings = "FlexibleDecay_settings flexibledecay_settings{};   ///< FlexibleDecay settings\n"
              ];
            WriteOut`ReplaceInFiles[files,
                           { "@numberOfInputParameters@" -> ToString[numberOfInputParameters],
@@ -2792,6 +2794,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
+                            "@FDSettings@" -> FDSettings,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
