@@ -90,7 +90,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       // matrix element squared
       const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(
          context, indexIn, indexOut1, indexOut2);
-      const auto mat_elem_sq =mat_elem.square();
+      const auto mat_elem_sq = mat_elem.square();
 
       // flux * phase space factor * matrix element squared
       res = flux * ps * mat_elem_sq;
