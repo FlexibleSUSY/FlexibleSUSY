@@ -169,6 +169,16 @@ void @ModelName@_slha_io::set_settings(const Spectrum_generator_settings& settin
 }
 
 /**
+ * Stores the settings (FlexibleSUSY block) in the SLHA object.
+ *
+ * @param settings class of settings
+ */
+void @ModelName@_slha_io::set_FlexibleDecay_settings(const FlexibleDecay_settings& settings)
+{
+   slha_io.set_FlexibleDecay_settings(settings);
+}
+
+/**
  * Stores the SMINPUTS input parameters in the SLHA object.
  *
  * @param qedqcd class of Standard Model parameters

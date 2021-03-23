@@ -843,6 +843,19 @@ void SLHA_io::set_settings(const Spectrum_generator_settings& settings)
    set_block(ss);
 }
 
+void SLHA_io::set_FlexibleDecay_settings(const FlexibleDecay_settings& settings)
+{
+   std::ostringstream ss;
+   ss << block_head("FlexibleDecay", 0.0);
+
+   for (int i = 0; i < FlexibleDecay_settings::NUMBER_OF_OPTIONS; i++) {
+      ss << FORMAT_ELEMENT(i, settings.get(static_cast<FlexibleDecay_settings::Settings>(i)),
+                           settings.get_description(static_cast<FlexibleDecay_settings::Settings>(i)));
+   }
+
+   set_block(ss);
+}
+
 void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
 {
    std::ostringstream ss;

@@ -2558,7 +2558,6 @@ ExampleDecaysIncludes[] :=
        ("#include \"" <> # <> "\"")& /@ {
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays/decays_problems.hpp",
-         "FlexibleDecay_settings.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
          "loop_libraries/loop_library.hpp"},
        "\n"
@@ -2586,7 +2585,6 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 }";
 
 ExampleCalculateCmdLineDecays[] :=
-"FlexibleDecay_settings flexibledecay_settings;" <>
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
 "if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
    decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
@@ -2658,7 +2656,7 @@ WriteUserExample[inputParameters_List, files_List] :=
          Spectrum_generator_settings::calculate_bsm_masses, 1.0);
    }
 }",
-              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings);"
+              fillSLHAIO = "slha_io.fill(models, qedqcd, scales, observables, settings, flexibledecay_settings);"
              ];
            writeCmdLineOutput = WriteExampleCmdLineOutput[FlexibleSUSY`FSCalculateDecays];
            WriteOut`ReplaceInFiles[files,
@@ -2719,7 +2717,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", FDSettings = ""},
+            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = ""},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2760,8 +2758,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               calculateDecaysMessages = "\n" <> "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::error = \"`1`\";\n" <>
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
-              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"\n#include \"FlexibleDecay_settings.hpp\"";
-              FDSettings = "FlexibleDecay_settings flexibledecay_settings{};   ///< FlexibleDecay settings\n"
+              decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
              ];
            WriteOut`ReplaceInFiles[files,
                           { "@numberOfInputParameters@" -> ToString[numberOfInputParameters],
@@ -2794,7 +2791,6 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
-                            "@FDSettings@" -> FDSettings,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];

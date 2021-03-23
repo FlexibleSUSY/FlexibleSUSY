@@ -66,8 +66,8 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{21, FlexibleSUSYObservable`aMuon} } }
 };
+
 FSCalculateDecays = True;
-FSDecayParticles = {hh};
 
 SARAH`ParameterDefinitions = Append[
     Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
