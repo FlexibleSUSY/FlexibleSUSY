@@ -26,7 +26,7 @@
 #include "pmns.hpp"
 #include "slhaea.h"
 #include "spectrum_generator_settings.hpp"
-#include "FlexibleDecay_settings.hpp"
+#include "decays/flexibledecay_settings.hpp"
 #include "string_conversion.hpp"
 #include "string_format.hpp"
 

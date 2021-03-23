@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "FlexibleDecay_settings.hpp"
+#include "flexibledecay_settings.hpp"
 #include "error.hpp"
 #include "string_format.hpp"
 
