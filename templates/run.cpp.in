@@ -198,6 +198,13 @@ int main(int argc, char* argv[])
       return EXIT_FAILURE;
    }
 
+   if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables) &&
+       !spectrum_generator_settings.get(Spectrum_generator_settings::calculate_bsm_masses)) {
+         WARNING("Calculate observables (flag FlexibleSUSY[15] = 1) requires BSM pole masses. Setting FlexibleSUSY[23] = 1.");
+         spectrum_generator_settings.set(
+            Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   }
+
    const int exit_code
       = run(slha_io, spectrum_generator_settings, slha_output_file,
             database_output_file, spectrum_file, rgflow_file);
