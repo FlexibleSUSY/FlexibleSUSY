@@ -163,26 +163,28 @@ jobs:
         run: docker exec builder bash -c "cd FlexibleSUSY && for m in $MODELS; do ./createmodel --name=\$m; done"
 
       - name: Configure
-        run: docker exec builder bash -c "
-               cd /FlexibleSUSY &&
-               ./configure
-                  --with-cxx=$CXXCOMPILER
-                  --with-models=$(echo $MODELS| tr ' ' ',')
-                  --with-loop-libraries=collier,looptools
-                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include
-                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64
-                  --with-collier-incdir=/COLLIER/include
-                  --with-collier-libdir=/COLLIER/lib
-                  --enable-himalaya
-                  --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include
-                  --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64
-                  --enable-gm2calc
-                  --with-gm2calc-incdir=/GM2Calc-$CXXCOMPILER/include
-                  --with-gm2calc-libdir=/GM2Calc-$CXXCOMPILER/lib64
-                  --with-optional-modules=test
-                  --enable-librarylink
+        run: |
+           docker exec builder bash -c "
+               cd /FlexibleSUSY && \
+               ./configure \
+                  --with-cxx=$CXXCOMPILER \
+                  --with-models=$(echo $MODELS| tr ' ' ',') \
+                  --with-loop-libraries=collier,looptools \
+                  --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
+                  --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
+                  --with-collier-incdir=/COLLIER/include \
+                  --with-collier-libdir=/COLLIER/lib \
+                  --enable-himalaya \
+                  --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include \
+                  --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64 \
+                  --enable-gm2calc \
+                  --with-gm2calc-incdir=/GM2Calc-$CXXCOMPILER/include \
+                  --with-gm2calc-libdir=/GM2Calc-$CXXCOMPILER/lib64 \
+                  --with-optional-modules=test \
+                  --enable-librarylink \
                   --with-cxxflags=\"-std=c++14 -O2 -fPIC -Wall -Wpedantic -Wfloat-equal -pipe\"
-               "
+           "
+           docker exec builder bash -c "cd /FlexibleSUSY && make showbuild"
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
 
@@ -248,5 +250,7 @@ jobs:
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
-          path: test/test_*.log
+          path: |
+            config.*
+            test/test_*.log
 
