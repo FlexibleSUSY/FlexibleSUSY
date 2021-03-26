@@ -890,15 +890,27 @@ GaugeStructureOfVertexLorentzPart[
 {scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* combine two cases below *)
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
 	Collect[fullExpr, sum[___]],
 	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
      scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
-         MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j1] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
 ] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
 		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
 {scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] + AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Collect[fullExpr, sum[___]],
+	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] -
+     scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j1] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
+{scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] - AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 (* coeff Delta[] Delta[] *)

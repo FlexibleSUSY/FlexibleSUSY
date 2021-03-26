@@ -347,13 +347,10 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
           ];
 
 FinalStateContainsInitialState[initialParticle_, finalState_List] :=
-    Module[{containsInitialMultiplet, dim},
-           If[!FreeQ[finalState, initialParticle],
-              TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1 ||
-              MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]],
-              False
-           ]
-          ];
+         If[!FreeQ[finalState, initialParticle],
+            TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1,
+            False
+         ]
 
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
     Module[{numFields},
