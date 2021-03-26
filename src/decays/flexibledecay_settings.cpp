@@ -29,9 +29,9 @@ namespace flexiblesusy {
 namespace {
 const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descriptions = {
    "calculate particle decays",
-   "min. br to print",
+   "minimum BR to print",
    "include higher order corrections in decays",
-   "Thomson alpha in decays to gamgam and gamZ",
+   "use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ",
    "off-shell decays into VV pair",
 };
 
