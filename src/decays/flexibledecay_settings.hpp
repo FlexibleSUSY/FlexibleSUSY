@@ -28,9 +28,10 @@ public:
    /// FlexibleDecay settings
    enum Settings : int {
       calculate_decays,      ///< [0] calculate particle decays
-      include_higher_order_corrections, ///< [1] include higher order corrections in decays
-      offshell_VV_decays,    ///< [2]
-      min_br_to_print,
+      min_br_to_print,       ///< [1]
+      include_higher_order_corrections, ///< [2] include higher order corrections in decays
+      use_Thomson_alpha_in_Phigamgam_and_PhigamZ, ///< [3]
+      offshell_VV_decays,    ///< [4]
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 

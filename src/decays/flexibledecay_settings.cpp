@@ -29,9 +29,10 @@ namespace flexiblesusy {
 namespace {
 const std::array<std::string, FlexibleDecay_settings::NUMBER_OF_OPTIONS> descriptions = {
    "calculate particle decays",
-   "higher order corrections in decays",
+   "min. br to print",
+   "include higher order corrections in decays",
+   "Thomson alpha in decays to gamgam and gamZ",
    "off-shell decays into VV pair",
-   "min. br to print"
 };
 
 bool is_integer(double value)
@@ -107,17 +108,20 @@ void FlexibleDecay_settings::set(Settings o, double value)
    case calculate_decays: // 0 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   case include_higher_order_corrections: // 1 [int >= 0 and <= 1]
+   case min_br_to_print: // 1 [double >= 0 and <= 1]
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_le(value, 1, descriptions.at(o).c_str());
+      break;
+   case include_higher_order_corrections: // 1 [int >= 0 and <= 4]
       assert_integer(value, descriptions.at(o).c_str());
+      break;
+   case use_Thomson_alpha_in_Phigamgam_and_PhigamZ: // 1 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
       break;
    case offshell_VV_decays: // 2 [int >= 0 and <= 2]
       assert_integer(value, descriptions.at(o).c_str());
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
-      break;
-   case min_br_to_print: // 2 [int >= 0 and <= 2]
-      assert_ge(value, 0, descriptions.at(o).c_str());
-      assert_le(value, 1, descriptions.at(o).c_str());
       break;
    default:
       break;
@@ -141,10 +145,11 @@ void FlexibleDecay_settings::set(const FlexibleDecay_settings::Settings_t& s)
  */
 void FlexibleDecay_settings::reset()
 {
-   values[calculate_decays]                 = 1.;
-   values[include_higher_order_corrections] = 1.;
-   values[offshell_VV_decays]               = 2.;
+   values[calculate_decays]                 = 1.0;
    values[min_br_to_print]                  = 1e-5;
+   values[include_higher_order_corrections] = 1.0;
+   values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
+   values[offshell_VV_decays]               = 2.0;
 }
 bool is_integer(double value)
 {

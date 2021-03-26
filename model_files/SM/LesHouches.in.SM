@@ -60,6 +60,7 @@ Block EXTPAR                 # Input parameters
     1   173.34               # scale QEWSB
 Block FlexibleDecay
    0   1                    # calculate decays (0 = no, 1 = yes)
-   1   1                    # include higher order corrections in decays (0 = no, 1 = yes)
-   2   2                    # off-shell decays into VV pair
-   3   1e-5                 # min br. to print
+   1   1e-5                 # min br. to print
+   2   1                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = NNNLO)
+   3   0                    # use Thomson alpha instead of alpha(m) in decays to gamgam and gamZ
+   4   2                    # off-shell decays into VV pair
