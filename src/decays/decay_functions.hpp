@@ -21,6 +21,7 @@
 
 #include <complex>
 #include "src/lowe.h"
+#include "flexibledecay_settings.hpp"
 
 namespace flexiblesusy {
 
@@ -31,7 +32,7 @@ double calc_DeltaAH(double b) noexcept;
 double calc_DeltaH(double b) noexcept;
 
 /// Eq.(2.11) of hep-ph/0503173, 2-loop and higher order
-double calc_Deltaqq(double alpha_s_red, double Nf) noexcept;
+double calc_Deltaqq(double alpha_s_red, double Nf, FlexibleDecay_settings const&) noexcept;
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases
 double RT(double x) noexcept;

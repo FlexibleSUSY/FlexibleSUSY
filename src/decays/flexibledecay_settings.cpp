@@ -112,13 +112,15 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 1, descriptions.at(o).c_str());
       break;
-   case include_higher_order_corrections: // 1 [int >= 0 and <= 4]
+   case include_higher_order_corrections: // 2 [int >= 0 and <= 4]
       assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_le(value, 4, descriptions.at(o).c_str());
       break;
-   case use_Thomson_alpha_in_Phigamgam_and_PhigamZ: // 1 [bool]
+   case use_Thomson_alpha_in_Phigamgam_and_PhigamZ: // 3 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   case offshell_VV_decays: // 2 [int >= 0 and <= 2]
+   case offshell_VV_decays: // 4 [int >= 0 and <= 2]
       assert_integer(value, descriptions.at(o).c_str());
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
@@ -147,7 +149,7 @@ void FlexibleDecay_settings::reset()
 {
    values[calculate_decays]                 = 1.0;
    values[min_br_to_print]                  = 1e-5;
-   values[include_higher_order_corrections] = 1.0;
+   values[include_higher_order_corrections] = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
    values[offshell_VV_decays]               = 2.0;
 }
