@@ -347,13 +347,10 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
           ];
 
 FinalStateContainsInitialState[initialParticle_, finalState_List] :=
-    Module[{containsInitialMultiplet, dim},
-           If[!FreeQ[finalState, initialParticle],
-              TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1 ||
-              MemberQ[finalState, TreeMasses`GetPhoton[]] || MemberQ[finalState, TreeMasses`GetGluon[]],
-              False
-           ]
-          ];
+         If[!FreeQ[finalState, initialParticle],
+            TreeMasses`GetDimensionWithoutGoldstones[initialParticle] == 1,
+            False
+         ]
 
 IsPossibleNonZeroVertex[fields_List, useDependences_:False] :=
     Module[{numFields},
@@ -1817,7 +1814,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           "if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections) &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, post2, res},
                                  StringJoin@Riffle[
@@ -1842,7 +1839,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "result += temp_result;\n",
                            (* colored scalar loop *)
                            If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
-                           "\nif (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           "\nif (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections) &&\n" <>
                            TextFormatting`IndentText[
                              Module[{pos1, post2, res},
                              StringJoin@Riffle[
@@ -1882,7 +1879,7 @@ If[Length@positions =!= 1, Quit[1]];
                            (* the quark loop amplitude *)
                            Length[fieldsInLoop] === 1 && ContainsAll[quarkLike, fieldsInLoop],
                            "auto temp_result = " <> ampCall <> ";\n" <>
-                           "if (include_higher_order_corrections == SM_higher_order_corrections::enable &&\n" <>
+                           "if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections) &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, post2, res},
                                  StringJoin@Riffle[

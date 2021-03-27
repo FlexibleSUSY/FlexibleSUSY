@@ -79,21 +79,35 @@ double calc_DeltaAH(double b) noexcept
 }
 
 // higher order corrections to H/A -> qqbar
-double calc_Deltaqq(double alpha_s_red, double Nf) noexcept
+double calc_Deltaqq(double alpha_s_red, double Nf, FlexibleDecay_settings const& settings) noexcept
 {
    constexpr double Pi2 = Sqr(Pi);
 
-   const double dG2 =
-      10801/144. - 19/12.*Pi2 - 39/2.*zeta3 + (- 65/24. + 1/18.*Pi2 + 2/3.*zeta3)*Nf;
-   const double dG3 =
-      6163613/5184. - 3535/72.*Pi2 - 109735/216.*zeta3 + 815/12.*zeta5
-      + (- 46147/486. + 277/72.*Pi2 + 262/9.*zeta3 - 5/6.*zeta4 - 25/9.*zeta5)*Nf
-      + (15511/11664. - 11/162.*Pi2 - 1/3.*zeta3)*Sqr(Nf);
-   const double dG4 = 39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf));
+   double result = 0.;
+   switch (static_cast<int>(settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+      case 4:
+         result += alpha_s_red * (39.34 + Nf*(-220.9 + Nf*(9.685 - 0.0205*Nf)));
+      case 3:
+         result +=
+            6163613/5184. - 3535/72.*Pi2 - 109735/216.*zeta3 + 815/12.*zeta5
+            + (- 46147/486. + 277/72.*Pi2 + 262/9.*zeta3 - 5/6.*zeta4 - 25/9.*zeta5)*Nf
+            + (15511/11664. - 11/162.*Pi2 - 1/3.*zeta3)*Sqr(Nf);
+         result *= alpha_s_red;
+      case 2:
+         result +=
+            10801/144. - 19/12.*Pi2 - 39/2.*zeta3 + (- 65/24. + 1/18.*Pi2 + 2/3.*zeta3)*Nf;
+         result *= alpha_s_red;
+      case 1:
+         result *= alpha_s_red;
+      case 0:
+         break;
+      default:
+         WARNING("Unknow correction in calc_Deltaqq");
+         break;
+   }
 
    // order alpha_s_red^1 is taken into account with mass dependence somewhere else
-   return
-      Sqr(alpha_s_red)*(dG2 + alpha_s_red*(dG3 + alpha_s_red*dG4));
+   return result;
 }
 
 /// Eq.(2.31) of hep-ph/0503172, including edge cases

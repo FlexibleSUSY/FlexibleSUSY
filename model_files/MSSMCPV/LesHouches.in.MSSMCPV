@@ -109,3 +109,9 @@ Block IMAEIN
   1  1       0   # Im(Ae(1,1))
   2  2       0   # Im(Ae(2,2))
   3  3       0   # Im(Ae(3,3))
+Block FlexibleDecay
+   0   1                    # calculate decays (0 = no, 1 = yes)
+   1   1e-5                 # min br. to print
+   2   4                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO )
+   3   0                    # use Thomson alpha instead of alpha(m) in decays to gamgam and gamZ
+   4   2                    # off-shell decays into VV pair

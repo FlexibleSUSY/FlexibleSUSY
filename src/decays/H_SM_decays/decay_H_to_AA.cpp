@@ -13,9 +13,11 @@ double CLASSNAME::get_partial_width<H, A, A>(
    auto res = flux * ps * ps_symmetry * amp.square();
 
    // use alpha_em in the Thomson limit
-   const double alpha_em_0 = physical_input.get(Physical_input::alpha_em_0);
-   const double alpha_em = get_alpha(context);
-   res *= Sqr(alpha_em_0/alpha_em);
+   if (flexibledecay_settings.get(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ)) {
+      const double alpha_em_0 = physical_input.get(Physical_input::alpha_em_0);
+      const double alpha_em = get_alpha(context);
+      res *= Sqr(alpha_em_0/alpha_em);
+   }
 
    return res;
 }

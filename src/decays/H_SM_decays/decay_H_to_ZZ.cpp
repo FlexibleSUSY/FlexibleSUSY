@@ -35,10 +35,11 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // const double mZOS = context.physical_mass<Z>(indexOut1);
    const double mZOS = qedqcd.displayPoleMZ();
    const double x = Sqr(mZOS/mHOS);
-   double res;
+   double res = 0;
 
    // mH < mZ
-   if (4.*x > 1.0) {
+   if ((x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) ||
+       (4.*x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) == 2)) {
 
       // integrand
       constexpr double GammaZ = 2.4952;
@@ -80,7 +81,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // mZ < mH < 2*mZ
    // three-body decay
    }
-   else if(4.0*x > 1.0) {
+   else if (4 * x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) {
 
       if (check_3body_Vff_decay<BSMForZdecay,Z>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
@@ -102,7 +103,8 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       res *= std::norm(ghZZ*g2)/(1-sw2);
    // mH > 2mZ
    // two-body decay
-   } else {
+   }
+   else if (4.*x < 1.0) {
 
       const double flux = 1. / (2 * mHOS);
       // phase space without symmetry factor

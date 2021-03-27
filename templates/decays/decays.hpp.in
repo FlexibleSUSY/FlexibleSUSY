@@ -39,6 +39,7 @@
 #include "wrappers.hpp"
 #include "error.hpp"
 #include "physical_input.hpp"
+#include "decays/flexibledecay_settings.hpp"
 
 namespace flexiblesusy {
 
@@ -68,11 +69,11 @@ public:
    @ModelName@_decays() = default;
    @ModelName@_decays(@ModelName@_mass_eigenstates model_, softsusy::QedQcd const& qedqcd_,
          Physical_input const& physical_input_,
-         SM_higher_order_corrections enable_corrections = SM_higher_order_corrections::enable)
+         FlexibleDecay_settings const& flexibledecay_settings_)
       : model(model_)
       , qedqcd(qedqcd_)
       , physical_input(physical_input_)
-      , include_higher_order_corrections(enable_corrections)
+      , flexibledecay_settings(flexibledecay_settings_)
       {}
    @ModelName@_decays(const @ModelName@_decays&) = default;
    @ModelName@_decays(@ModelName@_decays&&) = default;
@@ -98,7 +99,7 @@ private:
    @ModelName@_mass_eigenstates model{};
    softsusy::QedQcd qedqcd{};
    Physical_input physical_input;
-   SM_higher_order_corrections include_higher_order_corrections{SM_higher_order_corrections::enable};
+   FlexibleDecay_settings flexibledecay_settings {};
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    Decays_loop_corrections loop_corrections{};

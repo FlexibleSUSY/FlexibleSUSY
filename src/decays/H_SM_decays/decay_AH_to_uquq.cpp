@@ -59,8 +59,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    amp2OS_P = Sqr(mAHOS) *
               2*std::norm(AHBBbarVertexDR_P) * Sqr(muqOS / muqDR);
 
-   switch (include_higher_order_corrections) {
-      case SM_higher_order_corrections::enable: {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0) {
          const int Nf = number_of_active_flavours(qedqcd, mAHOS);
          double alpha_s_red;
          double Y_conversion = 1.;
@@ -79,7 +78,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
                throw std::runtime_error ("Error in AH->uubar: Cannot determine the number of active flavours");
          }
          double deltaqq_QCD_DR_P =
-               calc_Deltaqq(alpha_s_red, Nf)
+               calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings)
                + 2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red
                + 4./3.*alpha_s_red*calc_DeltaAH(betaDR);
 
@@ -87,39 +86,35 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
          const double alpha_red = get_alpha(context)/Pi;
          const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
 
-         const double deltaqq_QCDxQED_DR =
-            (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
-
          const double deltaqq_QCD_OS_P =
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
          const double deltaqq_QED_OS_P =
                alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
 
+         double deltaqq_QCDxQED_DR = 0.;
          double deltaPhi2_P = 0.;
-         if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
-            const double mtpole = qedqcd.displayPoleMt();
-            const double lt = std::log(Sqr(mAHOS/mtpole));
-            const double lq = std::log(xDR);
-            // eq. 28 of hep-ph/9505358
-            const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-            const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
-            const auto CSuu = AHBBbarVertexDR_P/context.mass<uq>(indexOut1);
-            if (!is_zero(CSuu)) {
-               const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
-               const auto CStu = AHttbar_P/context.mass<Fu>({2});
-               deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
+         if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
+            deltaqq_QCDxQED_DR =
+               (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+            if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
+               const double mtpole = qedqcd.displayPoleMt();
+               const double lt = std::log(Sqr(mAHOS/mtpole));
+               const double lq = std::log(xDR);
+               // eq. 28 of hep-ph/9505358
+               const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
+               const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
+               const auto CSuu = AHBBbarVertexDR_P/context.mass<uq>(indexOut1);
+               if (!is_zero(CSuu)) {
+                  const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
+                  const auto CStu = AHttbar_P/context.mass<Fu>({2});
+                  deltaPhi2_P = Sqr(alpha_s_red) * std::real(CStu/CSuu) * (23/6. - lt + 1.0/6.0*Sqr(lq));
+               }
             }
          }
 
          amp2DR_P *= Y_conversion*(1. + deltaqq_QCD_DR_P + deltaqq_QED_DR + deltaqq_QCDxQED_DR + deltaPhi2_P);
          amp2OS_P *= 1. + deltaqq_QCD_OS_P + deltaqq_QED_OS_P;
-         break;
-      }
-      case SM_higher_order_corrections::disable:
-         break;
-      default:
-         WARNING("Unhandled option in AH->ddbar decay");
    }
 
    // low x limit

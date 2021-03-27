@@ -18,7 +18,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
    const double mt {context.mass<uq>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
-   if (tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mH);
       // 5-flavour SM alpha_s
@@ -86,19 +86,27 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
+      double scalar_corr = 0;
       const double Gamma0 = std::norm(3./4*A12_H);
-      switch (include_higher_order_corrections) {
-         case SM_higher_order_corrections::enable:
-            result +=
-               //convert LO from 6 to 5 flavour scheme
-               Gamma_SM_LO_S*(1. - Sqr(get_alphas(context)/alpha_s_5f)
-               + alpha_s_red*(deltaNLO_S + alpha_s_red*(deltaNNLO_S + deltaNNNLO_S*alpha_s_red))/Gamma0);
-            break;
-         case SM_higher_order_corrections::disable:
+      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+         case 4:
+         case 3:
+            scalar_corr += deltaNNNLO_S*alpha_s_red;
+         case 2:
+            scalar_corr += deltaNNLO_S;
+            scalar_corr *= alpha_s_red;
+         case 1:
+            scalar_corr += deltaNLO_S;
+            scalar_corr *= alpha_s_red/Gamma0;
+            //convert LO from 6 to 5 flavour scheme
+            scalar_corr += 1. - Sqr(get_alphas(context)/alpha_s_5f);
+            scalar_corr *= Gamma_SM_LO_S;
             break;
          default:
-            break;
+            WARNING("Unknow correcion in Phi->gg");
       }
+
+      result += scalar_corr;
 
       if(info::is_CP_violating_Higgs_sector) {
 
@@ -119,18 +127,23 @@ double CLASSNAME::get_partial_width<H, G, G>(
             237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
          };
 
-         switch (include_higher_order_corrections) {
-            case SM_higher_order_corrections::enable:
-               result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO_P + deltaNNLO_P*alpha_s_red)/std::norm(0.5*A12_A));
-               break;
-            case SM_higher_order_corrections::disable:
+         double pseudoscalar_corr = 0.0;
+         switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+            case 4:
+            case 3:
+            case 2:
+               pseudoscalar_corr += deltaNNLO_P*alpha_s_red;
+            case 1:
+               pseudoscalar_corr += deltaNLO_P;
+               pseudoscalar_corr *= alpha_s_red/std::norm(0.5*A12_A);
+               pseudoscalar_corr += 1. - Sqr(get_alphas(context)/alpha_s_5f);
+               pseudoscalar_corr *= Gamma_SM_LO_P;
                break;
             default:
-               break;
+               WARNING("Unknow correcion in Phi->gg");
          }
-
+         result += pseudoscalar_corr;
       }
-
    }
 
    return result;

@@ -16,7 +16,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
    // higher order QCD corrections
    const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
-   if (tau < 0.7) {
+   if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
       // number of active light flavours
       constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
@@ -49,14 +49,20 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
       const double alpha_s_red = alpha_s_5f/Pi;
 
-      switch (include_higher_order_corrections) {
-         case SM_higher_order_corrections::enable:
-            result += Gamma_SM_LO_P*(1. - Sqr(get_alphas(context)/alpha_s_5f) + alpha_s_red*(deltaNLO + deltaNNLO*alpha_s_red)/std::norm(0.5*A12_A));
-            break;
-         case SM_higher_order_corrections::disable:
+      double pseudoscalar_corr = 0.0;
+      switch (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections))) {
+         case 4:
+         case 3:
+         case 2:
+            pseudoscalar_corr += deltaNNLO*alpha_s_red;
+         case 1:
+            pseudoscalar_corr += deltaNLO;
+            pseudoscalar_corr *= alpha_s_red/std::norm(0.5*A12_A);
+            pseudoscalar_corr += 1. - Sqr(get_alphas(context)/alpha_s_5f);
+            pseudoscalar_corr *= Gamma_SM_LO_P;
             break;
          default:
-            break;
+            WARNING("Unknow correcion in Phi->gg");
       }
    }
 

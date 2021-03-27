@@ -39,6 +39,7 @@ struct @ModelName@_physical;
 class @ModelName@_slha;
 class Spectrum_generator_problems;
 class Spectrum_generator_settings;
+class FlexibleDecay_settings;
 
 namespace standard_model {
 class Standard_model;
@@ -64,6 +65,7 @@ public:
    void fill(@ModelName@_slha&) const;
    void fill(Physical_input&) const;
    void fill(Spectrum_generator_settings&) const;
+   void fill(FlexibleDecay_settings&) const;
    double get_parameter_output_scale() const;
    const SLHA_io& get_slha_io() const { return slha_io; }
    void read_from_file(const std::string&);
@@ -78,6 +80,7 @@ public:
    void set_modsel(const SLHA_io::Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
+   void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    template <class... Ts> void set_spectrum(const std::tuple<Ts...>&);
    void set_spectrum(const @ModelName@_slha&);
@@ -98,7 +101,7 @@ public:
 
 @fillDecaysDataPrototypes@
    template <class... Ts>
-   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, const Spectrum_generator_settings&, @ModelName@_decays const * const = nullptr);
+   void fill(const std::tuple<Ts...>&, const softsusy::QedQcd&, const @ModelName@_scales&, const @ModelName@_observables&, const Spectrum_generator_settings&, const FlexibleDecay_settings&, @ModelName@_decays const * const = nullptr);
 
 private:
    SLHA_io slha_io; ///< SLHA io class
@@ -131,6 +134,7 @@ void @ModelName@_slha_io::fill(
    const @ModelName@_scales& scales,
    const @ModelName@_observables& observables,
    const Spectrum_generator_settings& spectrum_generator_settings,
+   const FlexibleDecay_settings& flexibledecay_settings,
    @ModelName@_decays const * const decays)
 {
    const auto& model = std::get<0>(models);

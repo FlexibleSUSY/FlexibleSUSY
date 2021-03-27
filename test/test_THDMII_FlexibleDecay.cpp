@@ -242,6 +242,7 @@ Block UERMIX
    Physical_input physical_input;
    THDMII_input_parameters input;
    Spectrum_generator_settings settings;
+   FlexibleDecay_settings flexibledecay_settings;
 
    // extract the input parameters from spectrum string
    try {
@@ -263,7 +264,7 @@ Block UERMIX
    // -----------------------------------------------------
    // decays with higher-order SM corrections
 
-   THDMII_decays decays_with_HO(m, qedqcd, physical_input, SM_higher_order_corrections::enable);
+   THDMII_decays decays_with_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
 
@@ -277,13 +278,9 @@ Block UERMIX
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.9645091090513334e-05, 1e-15);
    // h -> W+ W-
-   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-   //                            0.0007420072130724369, 1e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
                               0.00081324389707053922, 1e-4);
    // h -> Z Z
-   // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-   //                           8.3396512232490906e-05, 2e-14);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
                               0.00010470911466556374, 1e-4);
 
@@ -313,7 +310,8 @@ Block UERMIX
    // -----------------------------------------------------
    // decays without higher-order SM corrections
 
-   THDMII_decays decays_without_HO(m, qedqcd, physical_input, SM_higher_order_corrections::disable);
+   flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections, 0.0);
+   THDMII_decays decays_without_HO(m, qedqcd, physical_input, flexibledecay_settings);
 
    // ------------ tree-level decays ------------
 
@@ -326,11 +324,6 @@ Block UERMIX
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               7.8811709644693243e-05, 1e-15);
-   // h -> Z Z
-   // BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VZVZ(&m, 0),
-   //                           8.3396512232490906e-05, 2e-14);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              0.00010470911466556374, 1e-3);
 
    // ------------ loop-induces decays ------------
 
