@@ -31,8 +31,6 @@ Block FlexibleSUSY
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
    31   -1                   # loop library (0 = softsusy)
-   32   1                    # calculate decays (1 = enabled)
-   33   1                    # include higher order corrections in decays (0 = no, 1 = yes)
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166370000e-05      # G_Fermi
@@ -63,3 +61,9 @@ Block MINPAR                 # Input parameters
     3   10                   # TanBeta
     4   1                    # SignMu
     5   0                    # Azero
+Block FlexibleDecay
+    0   1                    # calculate decays (0 = no, 1 = yes)
+    1   1e-5                 # minimum BR to print
+    2   4                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO)
+    3   1                    # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
+    4   2                    # off-shell decays into VV pair

@@ -33,8 +33,7 @@ settings = {
     poleMassScale -> 0.,
     thresholdCorrections -> 123111321,
     parameterOutputScale -> 1000,
-    loopLibrary -> -1,
-    calculateDecays -> 1
+    loopLibrary -> -1
 };
 
 smInputs = {
