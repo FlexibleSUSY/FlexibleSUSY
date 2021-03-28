@@ -19,6 +19,7 @@
 #ifndef FLEXIBLEDECAY_SETTINGS_H
 #define FLEXIBLEDECAY_SETTINGS_H
 
+#include <array>
 #include <Eigen/Core>
 
 namespace flexiblesusy {
