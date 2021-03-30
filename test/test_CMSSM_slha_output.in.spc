@@ -47,3 +47,5 @@ Block MINPAR                 # Input parameters
     3   10.                  # TanBeta
     4   1                    # sign(Mu)
     5   0                    # Azero
+Block FlexibleDecay
+    0   0
