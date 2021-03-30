@@ -87,3 +87,5 @@ LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
 };
+
+FSCalculateDecays = True;
