@@ -433,7 +433,7 @@ check_library() {
 
     libs=""
     for i in $lib ; do
-        for ext in .a .lib "" .so .sl .dylib .dll.a ; do
+        for ext in .a .lib "" .so .sl .dylib .dll.a .tbd ; do
             libs="$libs $i$ext"
         done
     done
@@ -1349,6 +1349,18 @@ check_boost() {
     [ -z "$boost_inc_dir" ] && \
     [ -z "$boost_lib_dir" ] && \
     type pkg-config > /dev/null && \
+    [ -f boost_unit_test_framework.pc ] && \
+    {
+        message -n "Checking boost library using local boost_unit_test_framework.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --libs)
+        message "ok"
+        return
+    }
+
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
     [ -f boost.pc ] && \
     {
         message -n "Checking boost library using local boost.pc ... "
@@ -1518,10 +1530,10 @@ check_thread_libs() {
 
     # additional search paths by the compiler
     local cc_lib_search_paths=""
-
     case "$cxx_compiler_type" in
 	gnu|clang)
 	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    cc_lib_search_paths=$cc_lib_search_paths$(${CXX} -Xlinker -v 2>&1 | sed -n '/Library search paths:/,/Framework search paths:/p' | sed '/Library search paths:/d; /Framework search paths:/d' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' | tr -s '[:blank:]' ':')
 	    ;;
     esac
 
@@ -2056,15 +2068,21 @@ check_gm2calc_libs() {
 #_____________________________________________________________________
 check_gm2calc() {
     if test "x$enable_gm2calc" != "xno" ; then
+        local gm2calc_name=""
+
+        [ -f GM2Calc.pc ] && gm2calc_name="GM2Calc"
+        [ -f gm2calc.pc ] && gm2calc_name="gm2calc"
+
         [ -z "$gm2calc_inc_dir" ] && \
         [ -z "$gm2calc_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f GM2Calc.pc ] && \
+        [ -n ${gm2calc_name} ] && \
+        [ -f ${gm2calc_name}.pc ] && \
         {
-            message -n "Checking GM2Calc using local GM2Calc.pc ... "
-            GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config GM2Calc --cflags)
-            GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config GM2Calc --libs)
-            GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config GM2Calc --modversion)
+            message -n "Checking GM2Calc using local ${gm2calc_name}.pc ... "
+            GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
+            GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --libs)
+            GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --modversion)
             enable_gm2calc=yes
             message "ok (version ${GM2CALC_VERSION})"
             version_at_least "$GM2CALC_VERSION" "1.7.0" || {
@@ -2162,15 +2180,21 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        local himalaya_name=""
+
+        [ -f Himalaya.pc ] && himalaya_name="Himalaya"
+        [ -f himalaya.pc ] && himalaya_name="himalaya"
+
         [ -z "$himalaya_inc_dir" ] && \
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f Himalaya.pc ] && \
+        [ -n ${himalaya_name} ] && \
+        [ -f ${himalaya_name}.pc ] && \
         {
-            message -n "Checking Himalaya using local Himalaya.pc ... "
-            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --cflags)
-            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --libs)
-            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config Himalaya --modversion)
+            message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --libs)
+            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --modversion)
             enable_himalaya=yes
             message "ok"
             return
@@ -2260,7 +2284,7 @@ check_looptools_libs() {
          # assume that the linker will look in the default paths
          LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
       else
-         LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
+         LOOPTOOLSLIBS="-L$looptools_lib_dir -Wl,-rpath,$looptools_lib_dir $LOOPTOOLSLIBS_"
       fi
 
       # check dependency on libquadmath by searching for cabsq in liblooptools
@@ -2308,12 +2332,20 @@ check_looptools_incl() {
 
 #_____________________________________________________________________
 check_looptools() {
-   [ -z "$looptools_inc_dir" ] && [ -z "$looptools_lib_dir" ] && \
-   type pkg-config > /dev/null && [ -f LoopTools.pc ] && \
+    local looptools_name=""
+
+    [ -f LoopTools.pc ] && looptools_name="LoopTools"
+    [ -f looptools.pc ] && looptools_name="looptools"
+
+   [ -z "$looptools_inc_dir" ] && \
+   [ -z "$looptools_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n ${looptools_name} ] && \
+   [ -f ${looptools_name}.pc ] && \
    {
-      message -n "Checking LoopTools using local LoopTools.pc ... "
-      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+      message -n "Checking LoopTools using local ${looptools_name}.pc ... "
+      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --cflags)
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --libs)
       enable_looptools=yes
       message "ok"
       return
@@ -2344,7 +2376,7 @@ check_collier_libs() {
          # assume that the linker will look in the default paths
          COLLIERLIBS=" $COLLIERLIBS_ "
       else
-         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
       fi
    fi
 }
@@ -2373,12 +2405,20 @@ check_collier_incl() {
 
 #_____________________________________________________________________
 check_collier() {
-   [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
-   type pkg-config > /dev/null && [ -f COLLIER.pc ] && \
+    local collier_name=""
+
+    [ -f COLLIER.pc ] && collier_name="COLLIER"
+    [ -f collier.pc ] && collier_name="collier"
+
+   [ -z "$collier_inc_dir" ] && \
+   [ -z "$collier_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n ${collier_name} ] && \
+   [ -f ${collier_name}.pc ] && \
    {
-      message -n "Checking COLLIER using local COLLIER.pc ... "
-      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config COLLIER --cflags)
-      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config COLLIER --libs)"
+      message -n "Checking COLLIER using local ${collier_name}.pc ... "
+      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${collier_name} --cflags)
+      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config ${collier_name} --libs)"
       enable_collier=yes
       message "ok"
       return
@@ -2543,7 +2583,7 @@ check_tsil_libs() {
             # assume that the linker will look in the default paths
             TSILLIBS="$TSILLIBS_"
         else
-            TSILLIBS="-L$tsil_lib_dir $TSILLIBS_"
+            TSILLIBS="-L$tsil_lib_dir -Wl,-rpath,$tsil_lib_dir $TSILLIBS_"
         fi
     fi
     return 0
@@ -2587,14 +2627,20 @@ check_tsil_size() {
 check_tsil() {
     [ "x$enable_tsil" = "xno" ] && return
 
+    local tsil_name=""
+
+    [ -f TSIL.pc ] && tsil_name="TSIL"
+    [ -f tsil.pc ] && tsil_name="tsil"
+
     [ -z "$tsil_inc_dir" ] && \
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
-    [ -f TSIL.pc ] && \
+    [ -n ${tsil_name} ] && \
+    [ -f ${tsil_name}.pc ] && \
     {
-        message -n "Checking TSIL using local TSIL.pc ... "
-        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config TSIL --cflags)
-        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config TSIL --libs)
+        message -n "Checking TSIL using local ${tsil_name}.pc ... "
+        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --cflags)
+        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --libs)
         enable_tsil=yes
         message "ok"
         return
@@ -3808,6 +3854,7 @@ if test "x${enable_meta}" = "xyes"; then
     add_metaflags
 fi
 
+rm -f ${CONFIGDIR}/version
 echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m

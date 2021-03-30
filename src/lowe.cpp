@@ -387,8 +387,11 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
    while (!converged && it < max_iterations) {
       // set alpha_i(MZ)
       runto_safe(displayPoleMZ(), running_precision);
-      setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-      setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+      setAlpha(ALPHA, displayAlphaEmInput());
+      setAlpha(ALPHAS, displayAlphaSInput());
+
+      // set mt(MZ)
+      setMass(mTop, getRunMtFromMz(displayPoleMt(), displayAlphaSInput(), displayPoleMZ()));
 
       // set mb(mb)
       runto_safe(displayMbMb(), running_precision);
@@ -423,8 +426,8 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
 
    // set alpha_i(MZ) on last time
    runto_safe(displayPoleMZ(), precision_goal);
-   setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-   setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+   setAlpha(ALPHA, displayAlphaEmInput());
+   setAlpha(ALPHAS, displayAlphaSInput());
 
    runto_safe(scale, precision_goal);
 
