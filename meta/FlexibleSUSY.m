@@ -1991,7 +1991,9 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases},
+            smParticleAliases, solverIncludes = "", solver = ""},
+
+           (solverIncludes = solverIncludes <> EnableSpectrumGenerator[#])& /@ FlexibleSUSY`FSBVPSolvers;
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
@@ -2030,6 +2032,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
            bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];
 
+           solver =
+              Switch[First@FlexibleSUSY`FSBVPSolvers,
+                 TwoScaleSolver, "Two_scale",
+                 SemiAnalyticSolver, "Semi_analytic"
+              ];
+
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
                             "@callAllDecaysFunctionsInThreads@" -> IndentText[callAllDecaysFunctionsInThreads],
@@ -2049,6 +2057,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@create_SM_particle_usings@" -> smParticleAliases,
                             "@create_BSM_particle_list@" -> Last@bsmParticleAliasList,
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
+                            "@solver@" -> solver,
+                            "@solverIncludes@" -> solverIncludes,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 

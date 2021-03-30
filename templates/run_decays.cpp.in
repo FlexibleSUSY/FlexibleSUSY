@@ -2,11 +2,11 @@
 #include <string>
 #include <iostream>
 
-#include "@ModelName@_two_scale_spectrum_generator.hpp"
-#include "@ModelName@_two_scale_model.hpp"
+#include "config.h"
+
 #include "decays/@ModelName@_decays.hpp"
 #include "@ModelName@_slha_io.hpp"
-
+@solverIncludes@
 #include "physical_input.hpp"
 
 int main(int argc, char* argv[])
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
    slha_io.fill(qedqcd);
    slha_io.fill(input);
 
-   @ModelName@_spectrum_generator<Two_scale> spectrum_generator;
+   @ModelName@_spectrum_generator<@solver@> spectrum_generator;
 
    settings.set(Spectrum_generator_settings::calculate_sm_masses, 1.0);
    settings.set(Spectrum_generator_settings::calculate_bsm_masses, 1.0);
