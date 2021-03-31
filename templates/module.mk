@@ -55,6 +55,7 @@ BASE_TEMPLATES := \
 		$(DIR)/run.cpp.in \
 		$(DIR)/run.m.in \
 		$(DIR)/run_cmd_line.cpp.in \
+		$(DIR)/run_decays.cpp.in \
 		$(DIR)/scan.cpp.in \
 		$(DIR)/slha_io.hpp.in \
 		$(DIR)/slha_io.cpp.in \
