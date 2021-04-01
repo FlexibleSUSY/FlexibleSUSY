@@ -22,7 +22,6 @@ Block FlexibleSUSY
    14   1.000000000e-11      # beta-function zero threshold
    15   0                    # calculate observables (a_muon, ...)
    16   0                    # force positive majorana masses
-   32   0                    # calculate decays (0 = no, 1 = yes)
 Block SMINPUTS
      1     1.27934000E+02   # alpha^(-1) SM MSbar(MZ)
      2     1.16637000E-05   # G_Fermi
@@ -737,3 +736,5 @@ Block UURMIX
   3  3     1.00000000E+00   # Re(ZUR(3,3))
 Block GMUONMINUS2
   1  1     2.93759679E-10   # a_muon
+Block FlexibleDecay
+   0   0                    # calculate decays (0 = no, 1 = yes)
