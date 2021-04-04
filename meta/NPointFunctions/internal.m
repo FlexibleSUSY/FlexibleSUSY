@@ -173,8 +173,9 @@ Module[{topologies, diagrams, amplitudes},
 NPointFunctionFAFC // secure;
 
 getSumSettings::usage = "
-@brief Some topologies can lead to physically incorrect summation on C++ level.
-       One can use `settings`sum to specify, which fields to skip.
+@brief Some topologies can lead to physically incorrect summation on
+       C++ level.
+       One can use ``settings`sum`` to specify, which fields to skip.
 @param ds A set of diagrams.
 @returns A set of restrictions for generic sums.";
 getSumSettings[ds:`type`diagramSet] :=
@@ -190,11 +191,15 @@ getSumSettings // secure;
 
 collectSame::usage = "
 @brief Finds the same keys in the list of rules and for them collects RHSs
-       into one list, i.e.:
-          collectSame@{a->{1, 1}, b->{2, 2, 2}, a->{3, 3}} leads to
+       into one list, i.e.::
+
+          collectSame@{a->{1, 1}, b->{2, 2, 2}, a->{3, 3}}
+
+       leads to::
+
           {a->{{1, 3}, {1, 3}}, b->{{2, 2, 2}}}.
 @param list A list of rules.
-@return A list of rules.";
+@returns A list of rules.";
 collectSame[list:{Rule[_, {__}]...}] :=
 Module[{tally = Tally[First /@ list]},
    If[#2 == 1,
@@ -263,8 +268,8 @@ Module[{replacements, f},
 getMomSettings // secure;
 
 modify::usage = "
-@brief Changes amplitudes and diagrams according to `settings`diagrams and
-       `settings`amplitudes.
+@brief Changes amplitudes and diagrams according to ```settings`diagrams``
+       and ```settings`amplitudes``.
 @param diagrams A set of diagrams.
 @param amplitudes A set of amplitudes.
 @returns A modified set of diagrams and amplitudes.";
@@ -285,11 +290,14 @@ removeColours // secure;
 getAmplitudeNumbers::usage = "
 @brief Gives numbers of amplitudes, accepted by a criterion on topology.
 @param diagrams A set of diagrams.
-@param <one argument function> critFunction Function for topology selection. If
-       critFunction[<topology>] gives True, then topology is accepted.
-@returns {<Rule>} List of rules of the form <boolean>->{<integer>..}. LHS
-         stands for the topology, RHS gives numbers of classes (and the numbers
-         of amplitudes the same time).";
+@param critFunction A function of one argumentfor topology selection.
+       If critFunction gives True, then topology is accepted.
+@returns List of rules of the form::
+
+            <boolean> -> {<integer>..}
+
+         LHS stands for the topology, RHS gives numbers of classes
+         (and the numbers of amplitudes the same time).";
 getAmplitudeNumbers[diagrams:`type`diagramSet, critFunction_] :=
 Module[{topologies, genNums, numRegions, takeOrNot},
    topologies = List@@First/@diagrams;
@@ -415,8 +423,8 @@ Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram,
 getColourFactors // secure;
 
 getFermionOrder::usage = "
-@brief Returns the order of fermions for FormCalc`FermionOrder option. Default
-       is a reversed one. Can be overwritten by `settings`order.
+@brief Returns the order of fermions for ``FermionOrder`` option.
+       Default is a reversed one. Can be overwritten by ``settings`order``.
 @param expression A set of diagrams.
 @returns A list of integers, representing an order of fermions.";
 getFermionOrder[expression:`type`diagramSet] :=
@@ -556,8 +564,8 @@ CombinatorialFactorsForClasses::usage="
 @brief Takes generic amplitude and finds numerical combinatirical factors
        which arise at class level.
 @returns list of combinatorical factors for a given generic amplitude
-@param FeynArts`.`FeynAmp[__]";
-CombinatorialFactorsForClasses[FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]] :=
+@param amp FeynArts`.`FeynAmp[__]";
+CombinatorialFactorsForClasses[amp:FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]] :=
 {classReplacements}[[ All,#[[1,1]] ]] /.
    {  FeynArts`IndexDelta[___] -> 1,
       FeynArts`SumOver[__] -> 1} &@ Position[rules, FeynArts`RelativeCF];

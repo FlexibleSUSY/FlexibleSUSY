@@ -24,16 +24,20 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 getActions::usage = "
-@brief Converts `settings`diagrams or `settings`amplitudes to actions.
-       The structure of settings is the following:
+@brief Converts ```settings`diagrams`` or ```settings`amplitudes`` to actions.
+       The structure of settings is the following::
+
           {  <symbol> -> {  {  <if-in-$Processes action>
                                ...},
                             {  <if-not-in-$Processes action>
                                ...}}
              ..}
-       <symbol> Any symbol, which defines the <action> to be done with diagrams,
-                whether <symbol> is present or not in $Processes.
-       <action> Has the syntax of `action`diagrams or `action`amplitudes.
+
+       <symbol>
+         Any symbol, which defines the <action> to be done with diagrams,
+         whether <symbol> is present or not in $Processes.
+       <action>
+         Has the syntax of ``action`` for ``diagrams`` or ``amplitudes``.
 @param settings An entry to define actions.
 @returns A set of settings.";
 getActions[settings:Default] := {};

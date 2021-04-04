@@ -36,22 +36,33 @@ Module[{abbr, subs, chains, generic},
 proceedChains // secure;
 
 modifyChains::usage = "
-@brief Transforms `settings`chains into rules and applies them onto expression.
-       `settings`chains should have the following syntax:
+@brief Transforms ```settings`chains`` into rules and applies them onto
+       expression.
+       ```settings`chains`` should have the following syntax::
+
           {  {  <symbol>..} ->  {  <rule>..}
              ..}
-       <symbol> A symbol, which chooses (based on $ZeroMomenta) set of rules.
-                Put different <symbol> in the same list, if you want to use the
-                same rules for them.
-       <rule> A rule with the following syntax:
-                 <chain>[<something1>, <something2>...] -> 0
-              <chain> A number of chain. Number is defined by `settings`order,
-                      i.e. for {3, 1, 4, 2} the chain 1 is {3, 1} and chain 2
-                      is {4, 2}.
-              <something1> 6, -6, 7, -7, k@<integer>, l@<integer>. In the case
-                           of last two, alternatives of first four is prepended.
-              <something2> k@<integer>, l@<integer>, _, __, ___.
-              <integer> Any integer number.
+
+       <symbol>
+          A symbol, which chooses (based on $ZeroMomenta) set of rules.
+          Put different <symbol> in the same list, if you want to use the
+          same rules for them.
+       <rule>
+          A rule with the following syntax::
+
+             <chain>[<something1>, <something2>...] -> 0
+
+          <chain>
+             A number of chain. Number is defined by ```settings`order``,
+             i.e. for ``{3, 1, 4, 2}`` the chain 1 is ``{3, 1}`` and
+             chain 2 is ``{4, 2}``.
+          <something1>
+             ``6, -6, 7, -7, k@<integer>, l@<integer>``. In the case of last
+             two, alternatives of first four is prepended.
+          <something2>
+             ``k@<integer>, l@<integer>, _, __, ___``.
+          <integer>
+             Any integer number.
 @param expression Any expression to modify.
 @param set A set of diagrams.
 @returns A modified expression.
@@ -116,7 +127,7 @@ getChainRules::usage = "
        is possible, because the naming convention for this abbreviation is fixed
        and it is given by encoded regular expression.
 @param rules A list of rules.
-@return A list of rules.";
+@returns A list of rules.";
 getChainRules[rules:{Rule[_Symbol, _]...}] :=
 Module[{regex},
    regex = RegularExpression@"[F][1-9][\\d]*";

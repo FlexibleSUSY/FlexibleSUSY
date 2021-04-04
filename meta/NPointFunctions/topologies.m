@@ -26,8 +26,8 @@ Begin@"`Private`";
 define::usage = "
 @brief Defines a set of function with a given name in a safe way.
 @param s A symbol, which represent a function name.
-@param e A sequence of delayed rules. On lhs there is a list with pattern for a
-       new function, on rhs there is function body.";
+@param e A sequence of delayed rules. On lhs there is a list with pattern
+       for a new function, on rhs there is function body.";
 Module[{impl},
    impl[s:_Symbol, RuleDelayed[{p:___}, d:_]] := SetDelayed[s[p], d];
    impl ~ SetAttributes ~ {HoldAllComplete};
@@ -89,8 +89,8 @@ define[`topologyQ`boxU, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
 
 getExcludeTopologies::usage = "
-@brief Registers a function, whose outcome (True or everything else) determines
-       whether the topology is kept or discarded.
+@brief Registers a function, whose outcome (True or everything else)
+       determines whether the topology is kept or not.
 @param keep A list of processes to keep.
 @returns A name of generated function.";
 Module[{topologyReplacements},
