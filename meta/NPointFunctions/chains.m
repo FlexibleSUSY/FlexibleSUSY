@@ -123,9 +123,10 @@ expandRules[rules:{Rule[{__Symbol}, _]..}] :=
 expandRules // secure;
 
 getChainRules::usage = "
-@brief Finds a subset of rules inside a List, which represent Dirac chains. It
-       is possible, because the naming convention for this abbreviation is fixed
-       and it is given by encoded regular expression.
+@brief Finds a subset of rules inside a ``List``, which represent Dirac
+       chains.
+@note It is possible, because the naming convention for this abbreviation
+      is fixed and it is given by encoded regular expression.
 @param rules A list of rules.
 @returns A list of rules.";
 getChainRules[rules:{Rule[_Symbol, _]...}] :=
@@ -164,7 +165,8 @@ Mat[HoldPattern@Times[e__]] := Times@@Mat/@{e};
 Mat[mass:_FeynArts`Mass] := mass;
 
 identifySpinors::usage = "
-@brief Inserts names of fermionic fields inside FormCalc`DicaChain structures.
+@brief Inserts names of fermionic fields inside ``FormCalc`DicaChain``
+       structures.
 @param rules List of rules to modify.
 @param set A set of amplitudes.
 @returns Modified rules with inserted fermion names.";
@@ -177,7 +179,7 @@ Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
 identifySpinors // secure;
 
 setZeroExternalMomentaInChains::usage = "
-@brief Sets FormCalc`k[i] to zero inside fermionic chains.
+@brief Sets ``FormCalc`k[i]`` to zero inside fermionic chains.
 @param expression Any expression.
 @returns An expression with modified fermionic chains.";
 setZeroExternalMomentaInChains[expression_] :=

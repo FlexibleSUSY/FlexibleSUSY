@@ -35,7 +35,7 @@ getActions::usage = "
 
        <symbol>
          Any symbol, which defines the <action> to be done with diagrams,
-         whether <symbol> is present or not in $Processes.
+         whether <symbol> is present or not in ``$Processes``.
        <action>
          Has the syntax of ``action`` for ``diagrams`` or ``amplitudes``.
 @param settings An entry to define actions.

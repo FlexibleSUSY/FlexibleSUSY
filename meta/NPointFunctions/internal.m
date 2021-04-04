@@ -149,9 +149,9 @@ emptyQ // Utils`MakeUnknownInputDefinition;
 emptyQ ~ SetAttributes ~ {Protected, HoldFirst};
 
 NPointFunctionFAFC::usage = "
-@brief Applies FeynArts` routines for a given process, preparing it for
-       FormCalc`.
-@returns A structure, representing NPF object.
+@brief Applies ``FeynArts`` routines for a given process, preparing it for
+       ``FormCalc``.
+@returns A structure, representing n-point function object.
 @todo If topologies are not generated, then check and return.";
 NPointFunctionFAFC[inFields_, outFields_] :=
 Module[{topologies, diagrams, amplitudes},
@@ -228,8 +228,8 @@ getRegularizationSettings::usage = "
        diagrams in CDR). For handling this, one can overwrite used scheme for
        some topologies.
 @param diagrams A set of diagrams.
-@returns A set of settings for FormCalc`Dimension.
-@todo Unify with getMomSettings.";
+@returns A set of settings for ``FormCalc`Dimension``.
+@todo Unify with ``getMomSettings``.";
 getRegularizationSettings::errOverlap = "
 Topology rules in `.`settings`.`regularization overlap.";
 getRegularizationSettings[diagrams:`type`diagramSet] :=
@@ -250,7 +250,7 @@ getRegularizationSettings // secure;
 getMomSettings::usage = "
 @brief Uses settings to eliminale specific momenta in specific topologies.
 @param diagrams A set of topologies with class insertions.
-@returns A List of option values for FormCalc`MomElim for every generic
+@returns A List of option values for ``FormCalc`MomElim`` for every generic
          amplitude.";
 getMomSettings::errOverlap = "
 Topology rules in `.`settings`.`momenta overlap.";
@@ -334,14 +334,15 @@ Module[{out = {}, directory, name},
 debugMakePictures // secure;
 
 getFieldInsertions::usage = "
-@brief Applies FindGenericInsertions[] to a set of diagrams or one.
+@brief Applies ``FindGenericInsertions`` to a set of diagrams or one.
 @param set A set of diagrams.
 @param diag A single diagram.
 @param numQ Responsible for the type of output field names.
-@returns For a single diagram returns List (for a given topology) of List
-         (for all generic fields) of List (for all class fields) of rules
-         {{{x->y,..},..},..}. For a set of diagrams, this construct is further
-         transformed.";
+@returns For a single diagram returns ``List`` (for a given topology) of
+         ``List`` (for all generic fields) of ``List``
+         (for all class fields) of rules
+         ``{{{x->y,..},..},..}``. For a set of diagrams, this construct
+         is further transformed.";
 getFieldInsertions[set:`type`diagramSet] :=
    Map[Last, #, {3}] &@ Flatten[ getFieldInsertions /@ (List @@ set), 1];
 getFieldInsertions[diag:`type`diagram, numQ:True|False:False] :=
@@ -349,20 +350,20 @@ getFieldInsertions[diag:`type`diagram, numQ:True|False:False] :=
 getFieldInsertions // secure;
 
 FindGenericInsertions::usage = "
-@brief generic FeynmanGraph has rules Field[num]->particleType,
-        class FeynmanGraph has rules Field[num]->particleClass.
-        This function gives pairs particleType[gen,num]->particleClass, avoiding
-        Field[_] mediator (if keepFieldNum==True then Field[_]->particleClass
-        is given).
-@param 1st argument is of the form
-       {FeynmanGraph[__][__],Insertions[Classes][__]}.
-@param 2nd argument changes the type of output field names
-       True gives Field[_] names, False gives particleClass names.
-@returns list (sorted; for all generic fields) of list (for all class fields)
-         of rules {{x->y,..},..}.
-@note this function is called by GenericInsertionsForDiagram[].
-@note this function doesn't look at external particles.
-@note all indices in rhs. of rules are removed.";
+@brief generic ``FeynmanGraph`` has rules ``Field[num]->particleType``,
+       class ``FeynmanGraph`` has rules ``Field[num]->particleClass``.
+       This function gives pairs ``particleType[gen,num]->particleClass``,
+       avoiding ``Field[_]`` mediator (if ``keepFieldNum==True``, then
+       ``Field[_]->particleClass`` is given).
+@param graphGen ``FeynmanGraph[__][__]``.
+@param insertCl ``Insertions[Classes][__]``.
+@param keepFieldNum Changes the type of output field names.
+       ``True`` gives ``Field[_]`` names, ``False`` gives ``particleClass``
+       names.
+@returns A sorted ``List`` for all generic fields of ``List`` for all
+         class fields of rules ``{{x->y,..},..}``.
+@note This function doesn't look at external particles.
+@note All indices in rhs. of rules are removed.";
 FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_] :=
 Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
    toGenericIndexConventionRules = Cases[graphGen,
@@ -394,11 +395,11 @@ getColourFactors::usage = "
 @returns List (for a given topology) of lists (for all generic fields) of
          colour factors.
 @note During generation of genericDiagram at 1-loop level the ii-type loop
-      propagators have the largest number because of FeynArts.
+      propagators have the largest number because of ``FeynArts``.
 @note In seqProp numbers of the first vertices inside propagators are sorted
-      by FeynArts.
+      by ``FeynArts``.
 @note External fields always come at first places in adjacency matrix.
-@note This function doesn't know anything about CXXDiagrams`.` context.";
+@note This function doesn't know anything about ``CXXDiagrams`` context.";
 getColourFactors[ds:`type`diagramSet] :=
    Flatten[getColourFactors /@ (List @@ ds), 1] //. $FieldRules;
 getColourFactors[diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
@@ -434,11 +435,14 @@ Switch[`settings`order,
 getFermionOrder // secure;
 
 calculateAmplitudes::usage = "
-@brief Applies FormCalc` routines to amplitude set, simplifies the result.
+@brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
 @param diagrams A set of diagrams.
 @param amplitudes A of amplitudes (without colours).
-@returns The main part of NPF object, containing: generic amplitudes,
-         class specific insertions, subexpressions.";
+@returns The main part of n-point function object, containing:
+
+           * generic amplitudes,
+           * class specific insertions,
+           * subexpressions.";
 calculateAmplitudes[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{
       proc = getProcess@amplitudes,
@@ -474,21 +478,18 @@ Module[{
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "
-@brief For a given sets of FeynArts` amd FormCalc` amplitudes creates rules to
-       nullify masses of external particles.
-@param fa A set of FeynArts` amplitudes.
-@param fc A set of FormCalc` amplitudes.
+@brief For a given sets of ``FeynArts`` amd ``FormCalc`` amplitudes creates
+       rules to nullify masses of external particles.
+@param fa A set of ``FeynArts`` amplitudes.
+@param fc A set of ``FormCalc`` amplitudes.
 @returns Null.
-@note Both of sets are required, because, unfortunately, FormCalc` introduces
-      new abbreviations, which mix with FeynArts` ones.
+@note Both of sets are required, because, unfortunately, ``FormCalc``
+      introduces new abbreviations, which mix with ``FeynArts`` ones.
 @note Amplitudes are taken, because they do not have colour structures already.
-@note Explicit names for masses are expected only for external particles.";
-getZeroMassRules::errNotSet = "
-Call setZeroMassRules to set up rules first.";
-getZeroMassRules::usage = "
-@brief Returns a set of rules to nullify masses of external particles.
-@return A list of rules to nullify masses of external particles.
-@note Rules of external particle #i are under numbers (2*#i) and (2*#i-1).";
+@note Explicit names for masses are expected only for external particles.
+@returns A list of rules to nullify masses of external particles.
+@note Rules of external particle ``#i`` are under numbers
+      ``2*#i`` and ``2*#i-1``.";
 Module[{rules},
    setZeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
       rules = RuleDelayed[#, 0] &/@
@@ -497,6 +498,8 @@ Module[{rules},
    getZeroMassRules[] := (
       Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];
       rules);];
+getZeroMassRules::errNotSet = "
+Call setZeroMassRules to set up rules first.";
 getZeroMassRules // secure;
 
 makeMassesZero::usage = "
@@ -563,8 +566,8 @@ mapThread // secure;
 CombinatorialFactorsForClasses::usage="
 @brief Takes generic amplitude and finds numerical combinatirical factors
        which arise at class level.
-@returns list of combinatorical factors for a given generic amplitude
-@param amp FeynArts`.`FeynAmp[__]";
+@returns List of combinatorical factors for a given generic amplitude.
+@param amp ``FeynArts`FeynAmp``.";
 CombinatorialFactorsForClasses[amp:FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]] :=
 {classReplacements}[[ All,#[[1,1]] ]] /.
    {  FeynArts`IndexDelta[___] -> 1,
@@ -580,11 +583,11 @@ getGenericFields[expr:_] :=
 getGenericFields // secure;
 
 getGenericSum::usage= "
-@brief Converts FormCalc`Amp into NPointFunctions`GenericSum object using
-       restriction rules for generic fields.
-@param amplitude FormCalc`Amp expression.
+@brief Converts ``FormCalc`Amp`` into ``NPointFunctions`GenericSum`` object
+       using restriction rules for generic fields.
+@param amplitude ``FormCalc`Amp`` expression.
 @param sumRules A set of rules, restricting the summation.
-@returns A NPointFunctions`GenericSum object.";
+@returns A ``NPointFunctions`GenericSum`` object.";
 getGenericSum[amplitude:`type`fc`amplitude, sumRules:{Rule[_Integer, _]...}] :=
 Module[{sort, rules},
    sort = getGenericFields@amplitude;
@@ -611,12 +614,12 @@ Module[{newNonzero, newZeroRules},
    ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]];
 ZeroRules // secure;
 
-FCAmplitudesToFSConvention::usage=
-"@brief Translate a list of FormCalc amplitudes and their abbreviations and
-        subexpressions into FlexibleSUSY language.
-@param amplitudes The given list of amplitudes
-@param abbreviations A list of abbreviations
-@param subexpressions A list of subexpressions
+FCAmplitudesToFSConvention::usage = "
+@brief Translate a list of ``FormCalc`` amplitudes and their abbreviations and
+       subexpressions into ``FlexibleSUSY`` language.
+@param amplitudes The given list of amplitudes.
+@param abbreviations A list of abbreviations.
+@param subexpressions A list of subexpressions.
 @returns A list of amplitudes and joined abbreviations and subexpressions.";
 FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
 Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},

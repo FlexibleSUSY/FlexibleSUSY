@@ -10,6 +10,10 @@ src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
 
+meta/NPointFunctions.rst
+meta/NPointFunctions/*.rst
+meta/NPointFunctions/*/*.rst
+
 config/config.h
 config/flexiblesusy-version
 config/git_commit

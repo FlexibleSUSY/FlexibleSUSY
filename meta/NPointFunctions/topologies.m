@@ -89,7 +89,7 @@ define[`topologyQ`boxU, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
 
 getExcludeTopologies::usage = "
-@brief Registers a function, whose outcome (True or everything else)
+@brief Registers a function, whose outcome (``True`` or everything else)
        determines whether the topology is kept or not.
 @param keep A list of processes to keep.
 @returns A name of generated function.";
