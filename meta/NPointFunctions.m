@@ -634,7 +634,7 @@ It seems that SARAH`.` has changed conventions for <ParticleNames>.dat file.";
 FANamesForFields // secure;
 
 RemoveEmptyGenSums::usage = "
-@brief Sometimes after ``FeynArts``+``FormCalc`` calculation some generic sums
+@brief Sometimes after ``FeynArts`` + ``FormCalc`` calculation some generic sums
        are empty.
        This means that one can simply remove them (as well as corresponding
        colour/combinatoric factors and field substitution rules).
@@ -711,8 +711,8 @@ CreateCXXFunctions // secure;
        second parameter is ``Default``.
 @param npf The given n-point correlation function
 @param control String that sets up the type of argument string
-@returns the ``C++`` arguments that the ``C++`` version of the given n-point
-        correlation function shall take.";
+@returns The ``C++`` arguments that the ``C++`` version of the given n-point
+         correlation function shall take.";
 `cxx`arguments[npf:`type`npf,control:Null|Default:Null] :=
    "const "<>#1<>" &model,"<>
    " const std::array<int,"<>#2<>"> &indices,"<>
@@ -1264,16 +1264,16 @@ Module[{
 @brief Generates names for masses to be used inside generic sums and then
        creates:
 
-          1. a ``C++`` code for definition and initialisation for masses,
-          2. a ``Mathematica`` to ``C++`` rules for generated names of masses.
+       1. a ``C++`` code for definition and initialisation for masses,
+       2. a ``Mathematica`` to ``C++`` rules for generated names of masses.
 @param masses A list of tallies with Mathematica expressions for mass and the
        number of repetition of it.
 @returns A list of:
 
-            1. a ``C++`` string with definitions,
-            2. a ``C++`` string with initialisations,
-            3. a Mathematica list of rules for mass convertion
-               to ``C++`` code.";
+         1. a ``C++`` string with definitions,
+         2. a ``C++`` string with initialisations,
+         3. a Mathematica list of rules for mass convertion
+            to ``C++`` code.";
 `cxx`nameMasses[masses:{{_, _Integer}..}] :=
    {d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
 `cxx`nameMasses // secure;
@@ -1282,16 +1282,16 @@ Module[{
 @brief Generates names for couplings to be used inside generic sums and then
        creates:
 
-         1. ``C++`` code for definition and initialisation for couplings,
-         2. ``Mathematica`` to ``C++`` rules for generated names of couplings.
+       1. ``C++`` code for definition and initialisation for couplings,
+       2. ``Mathematica`` to ``C++`` rules for generated names of couplings.
 @param masses A list of tallies with Mathematica expressions for coupling
        and the number of repetition of it.
 @returns A list of:
 
-            1. a ``C++`` string with definitions,
-            2. a ``C++`` string with initialisations,
-            3. a ``Mathematica`` list of rules for coupling convertion
-               to ``C++`` code.
+         1. a ``C++`` string with definitions,
+         2. a ``C++`` string with initialisations,
+         3. a ``Mathematica`` list of rules for coupling convertion
+            to ``C++`` code.
 @note All couplings have to be multiplied by ``I``, as it is done in these
       rule replacements.";
 `cxx`nameCouplings[couplings:{{_,_Integer}..}] :=

@@ -25,7 +25,7 @@ Begin@"`Private`";
 
 define::usage = "
 @brief Defines a set of function with a given name in a safe way.
-@param s A symbol, which represent a function name.
+@param s A symbol, which represents a function name.
 @param e A sequence of delayed rules. On lhs there is a list with pattern
        for a new function, on rhs there is function body.";
 Module[{impl},

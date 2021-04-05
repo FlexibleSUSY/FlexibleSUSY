@@ -440,9 +440,9 @@ calculateAmplitudes::usage = "
 @param amplitudes A of amplitudes (without colours).
 @returns The main part of n-point function object, containing:
 
-           * generic amplitudes,
-           * class specific insertions,
-           * subexpressions.";
+         * generic amplitudes,
+         * class specific insertions,
+         * subexpressions.";
 calculateAmplitudes[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{
       proc = getProcess@amplitudes,

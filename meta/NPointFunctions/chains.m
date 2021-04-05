@@ -89,7 +89,8 @@ Module[{i = 0, rules, sp, L, reveal},
 modifyChains // secure;
 
 simplifyChains::usage = "
-@brief Simplifies some chains applying Dirac equation if $OnShell is True.
+@brief Simplifies some chains applying Dirac equation if ``$OnShell`` is
+       ``True``.
 @param chain A chain to simplify.
 @returns A simplified chain.";
 If[$OnShell,
