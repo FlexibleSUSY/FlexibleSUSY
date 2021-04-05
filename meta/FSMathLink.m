@@ -237,8 +237,8 @@ CreateSpectrumDecaysCalculation[modelName_] :=
     Module[{prototype = "", args = "", body = "", function = ""},
            prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
                        "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) override;\n";
-           args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const FlexibleDecay_settings& higher_orders_in_decays";
-           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, physical_input, higher_orders_in_decays);\n" <>
+           args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const FlexibleDecay_settings& flexibledecay_settings";
+           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);\n" <>
                   "decays.calculate_decays();\n";
            function = "template <typename Solver_type>\n" <>
                       "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
@@ -358,6 +358,16 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
 
       {
          Redirect_output crd(link);
+         auto setting = data.get_settings();
+         if (!static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses)) ||
+            !static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses))) {
+            put_message(link,
+               \"FSSMCalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexlibleSUSY[3] = FlexlibleSUSY[23] = 1.\");
+            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
+            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+            data.set_settings(setting);
+            data.calculate_spectrum();
+         }
          data.calculate_model_decays();
       }
 
