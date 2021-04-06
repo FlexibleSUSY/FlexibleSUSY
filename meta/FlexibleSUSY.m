@@ -2773,19 +2773,19 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
               fdDefaultSettings =
 "\nfdDefaultSettings = {
-   minBRtoPrt -> 1*^-5,
-   higherOrderCorr -> 2,
-   useThomsonAlpha -> 1,
-   offShellVVDecays -> 2
+   minBRtoPrint -> 1*^-5,
+   maxHigherOrderCorrections -> 4,
+   alphaThomson -> 1,
+   offShellVV -> 2
 };\n";
                addFDOptions1 = ", Sequence @@ fdDefaultSettings";
                addFDOptions2 = "| fdSettings";
 setFDOptions =
 ",
-OptionValue[minBRtoPrt],
-OptionValue[higherOrderCorr],
-OptionValue[useThomsonAlpha],
-OptionValue[offShellVVDecays]";
+OptionValue[minBRtoPrint],
+OptionValue[maxHigherOrderCorrections],
+OptionValue[alphaThomson],
+OptionValue[alphaThomson]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
 flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
