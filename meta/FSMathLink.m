@@ -302,14 +302,27 @@ PutDecayTableEntry[pidName_, decayName_] :=
 PutDecayTableEntries[modelName_] :=
     Module[{body = ""},
            body = "const auto pid = decays_list.get_particle_id();\n" <>
-                  "const auto n_decays = decays_list.size();\n\n" <>
+                  "int n_decays = 0;\n" <>
+                  "for (const auto& decay : decays_list) {\n" <>
+                  TextFormatting`IndentText[
+                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
+                     TextFormatting`IndentText["continue;\n"] <>
+                     "}\n" <>
+                     "n_decays++;\n"
+                  ] <>
+                  "}\n" <>
                   "MLPutRule(link, " <> modelName <> "_info::get_particle_name_from_pdg(pid), {\"Decays\"});\n" <>
                   "MLPutFunction(link, \"List\", 3);\n" <>
                   "MLPut(link, pid);\n" <>
                   "MLPut(link, decays_list.get_total_width());\n" <>
                   "MLPutFunction(link, \"List\", n_decays);\n\n" <>
                   "for (const auto& decay : decays_list) {\n" <>
-                  TextFormatting`IndentText[PutDecayTableEntry["pid", "decay.second"]] <> "}\n";
+                  TextFormatting`IndentText[
+                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
+                     TextFormatting`IndentText["continue;\n"] <>
+                     "}\n" <>
+                     PutDecayTableEntry["pid", "decay.second"]
+                  ] <> "}\n";
            "for (const auto& decays_list : decay_table) {\n" <>
            TextFormatting`IndentText[body] <> "}\n"
           ];

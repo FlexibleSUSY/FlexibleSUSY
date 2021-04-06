@@ -100,7 +100,7 @@ fsDefaultSMParameters = {
     alphaEm0 -> 1/137.035999074,
     Mh -> 125.09
 };
-
+@fdDefaultSettings@
 fs@ModelName@DefaultInputParameters = {
 @setInputParameterDefaultArguments@
 };
@@ -109,9 +109,10 @@ Options[FS@ModelName@OpenHandle] = {
     Sequence @@ fsDefaultSettings,
     Sequence @@ fsDefaultSMParameters,
     Sequence @@ fs@ModelName@DefaultInputParameters
+    @addFDOptions1@
 };
 
-FS@ModelName@OpenHandle[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+FS@ModelName@OpenHandle[a___, (fsSettings | fsSMParameters | fsModelParameters @addFDOptions2@) -> s_List, r___] :=
     FS@ModelName@OpenHandle[a, Sequence @@ s, r];
 
 FS@ModelName@OpenHandle[OptionsPattern[]] :=
@@ -121,10 +122,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
             OptionValue[precisionGoal],
             OptionValue[maxIterations],
             OptionValue[solver],
-            (*If[OptionValue[calculateDecays] === 1 && MemberQ[{-1,1,2}, OptionValue[loopLibrary]],
-               1,*)
-               OptionValue[calculateStandardModelMasses],
-            (*],*)
+            OptionValue[calculateStandardModelMasses],
             OptionValue[poleMassLoopOrder],
             OptionValue[ewsbLoopOrder],
             OptionValue[betaFunctionLoopOrder],
@@ -151,12 +149,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAs],
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
-            OptionValue[loopLibrary](*,
-            If[MemberQ[{-1,1,2}, OptionValue[loopLibrary]] && OptionValue[calculateDecays] === 1,
-               1,
-               0
-            ]*),
-            (*OptionValue[higherOrdersInDecays],*)
+            OptionValue[loopLibrary],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
@@ -192,6 +185,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
 
             (* @ModelName@ input parameters *)
 @setInputParameterArguments@
+@setFDOptions@
         }
 ];
 
@@ -208,10 +202,7 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
             OptionValue[precisionGoal],
             OptionValue[maxIterations],
             OptionValue[solver],
-            (*If[OptionValue[calculateDecays] === 1 && MemberQ[{-1,1,2}, OptionValue[loopLibrary]],
-               1,*)
-               OptionValue[calculateStandardModelMasses],
-            (*],*)
+            OptionValue[calculateStandardModelMasses],
             OptionValue[poleMassLoopOrder],
             OptionValue[ewsbLoopOrder],
             OptionValue[betaFunctionLoopOrder],
@@ -238,12 +229,7 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAs],
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
-            OptionValue[loopLibrary](*,
-            If[MemberQ[{-1,1,2}, OptionValue[loopLibrary]] && OptionValue[calculateDecays] === 1,
-               1,
-               0
-            ],
-            Options[higherOrdersInDecays]*),
+            OptionValue[loopLibrary],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)

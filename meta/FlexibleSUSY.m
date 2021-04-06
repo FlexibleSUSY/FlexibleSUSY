@@ -2727,7 +2727,9 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             calculateModelDecaysFunction = "", fillDecaysSLHA = "", getDecaysVirtualFunc = "",
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
-            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = ""},
+            calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
+            addFDOptions1 = "", addFDOptions2, setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
+            decayIndex = "const Index_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
            numberOfInputParameterRules = FSMathLink`GetNumberOfInputParameterRules[inputPars];
@@ -2769,6 +2771,30 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                                         "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays::warning = \"`1`\";\n";
               calculateDecaysExample = "decays      = FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays[handle];\n";
               decaysIncludes = "#include \"loop_libraries/loop_library.hpp\"";
+              fdDefaultSettings =
+"\nfdDefaultSettings = {
+   minBRtoPrt -> 1*^-5,
+   higherOrderCorr -> 2,
+   useThomsonAlpha -> 1,
+   offShellVVDecays -> 2
+};\n";
+               addFDOptions1 = ", Sequence @@ fdDefaultSettings";
+               addFDOptions2 = "| fdSettings";
+setFDOptions =
+",
+OptionValue[minBRtoPrt],
+OptionValue[higherOrderCorr],
+OptionValue[useThomsonAlpha],
+OptionValue[offShellVVDecays]";
+setDecayOptions =
+"FlexibleDecay_settings flexibledecay_settings;
+flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::include_higher_order_corrections , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::use_Thomson_alpha_in_Phigamgam_and_PhigamZ , pars[c++]);
+flexibledecay_settings.set(FlexibleDecay_settings::offshell_VV_decays , pars[c++]);
+";
+decayIndex = "const Index_t n_fd_settings = 4;";
+fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
              ];
            WriteOut`ReplaceInFiles[files,
                           { "@numberOfInputParameters@" -> ToString[numberOfInputParameters],
@@ -2801,6 +2827,13 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
                             "@calculateDecaysMessages@" -> calculateDecaysMessages,
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
+                            "@fdDefaultSettings@" -> fdDefaultSettings,
+                            "@addFDOptions1@" -> addFDOptions1,
+                            "@addFDOptions2@" -> addFDOptions2,
+                            "@setFDOptions@" -> IndentText @ IndentText @ IndentText @ IndentText @ setFDOptions,
+                            "@setDecayOptions@" -> IndentText @ setDecayOptions,
+                            "@fillFDSettings@" -> fillFDSettings,
+                            "@decayIndex@" -> decayIndex,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
