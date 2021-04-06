@@ -20,15 +20,14 @@
 
 *)
 
+Needs[# <> "`", FileNameJoin@{DirectoryName@$InputFileName, # <> ".m"}] &/@
+   {"FlexibleSUSY", "Parameters", "TreeMasses", "Utils", "Vertices"};
+
 (*@assumptions:
 1) there are no quartic gluon vertices inside diagrams => one can calculate
 colour factor for diagram separately from Lorentz factor
 2) 4-point vertices are not supported *)
 BeginPackage@"NPointFunctions`";
-
-NPointFunction::errNotDef = "
-Call SARAH`.`Start[\"Model\"] before loading NPointFunctions`.`.";
-Utils`AssertOrQuit[ValueQ@Model`Name, NPointFunction::errNotDef];
 
 LoopLevel::usage = "
 @brief Option for `NPointFunctions`NPointFunction`_.
@@ -81,7 +80,8 @@ Mat::usage = "
 @brief A wrapper around dirac chain(s)";
 
 (*functions*)
-{VerticesForNPointFunction,CreateCXXHeaders,CreateCXXFunctions};
+{  VerticesForNPointFunction, CreateCXXHeaders,
+   CreateCXXFunctions, NPointFunction};
 
 SetAttributes[
 {  LoopLevel,Regularize,UseCache,ZeroExternalMomenta,OnShellFlag,OperatorsOnly,

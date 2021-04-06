@@ -20,7 +20,8 @@
 
 *)
 
-Get@FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"};
+Needs["Utils`",
+   FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"}];
 
 Block[{Format},
    Needs@"FeynArts`";
