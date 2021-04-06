@@ -20,6 +20,8 @@
 
 *)
 
+Get@FileNameJoin@{ParentDirectory@DirectoryName@$InputFileName, "Utils.m"};
+
 Block[{Format},
    Needs@"FeynArts`";
    FeynArts`$FAVerbose = 0;
@@ -32,8 +34,6 @@ Block[{Format},
    FormCalc`$FCVerbose = 0;
    (  If[!DirectoryQ@#, CreateDirectory@#];
       SetDirectory@#;)&@NPointFunctions`$FCDir;];
-
-Needs@"Utils`";
 
 BeginPackage@"NPointFunctions`";
 
