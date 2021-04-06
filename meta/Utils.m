@@ -501,7 +501,12 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    sym[args___] =.;
    On[Unset::norep];
    (* Maybe some useful definitions already exist*)
-   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+   If[MatchQ[sym::usage,_String],
+      usageString = "Usage:\n"<>sym::usage<>"\n\n";
+      sym::usage = sym::usage <>
+         "\n@param args A dummy argument for the case, when the function " <>
+         "is used in a way, which is not defined explicitly.",
+      usageString = ""];
    info = MakeBoxes@Definition@sym;
    If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
       infoString="",
