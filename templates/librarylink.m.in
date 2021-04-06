@@ -109,7 +109,7 @@ Options[FS@ModelName@OpenHandle] = {
     Sequence @@ fsDefaultSettings,
     Sequence @@ fsDefaultSMParameters,
     Sequence @@ fs@ModelName@DefaultInputParameters
-    @addFDOptions1@
+@addFDOptions1@
 };
 
 FS@ModelName@OpenHandle[a___, (fsSettings | fsSMParameters | fsModelParameters @addFDOptions2@) -> s_List, r___] :=

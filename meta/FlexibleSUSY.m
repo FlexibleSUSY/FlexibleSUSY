@@ -2728,7 +2728,7 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
             getSpectrumDecays = "", putDecaysPrototype = "", putDecaysFunction = "",
             mathlinkDecaysCalculationFunction = "", loadCalculateDecaysFunction = "",
             calculateDecaysMessages = "", calculateDecaysExample = "", decaysIncludes = "", fdDefaultSettings = "",
-            addFDOptions1 = "", addFDOptions2, setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
+            addFDOptions1 = "", addFDOptions2 = "", setFDOptions = "", setDecayOptions = "", fillFDSettings = "",
             decayIndex = "const Index_t n_fd_settings = 0;"},
            inputPars = {#[[1]], #[[3]]}& /@ inputParameters;
            numberOfInputParameters = Total[CConversion`CountNumberOfEntries[#[[2]]]& /@ inputPars];
@@ -2785,7 +2785,7 @@ setFDOptions =
 OptionValue[minBRtoPrint],
 OptionValue[maxHigherOrderCorrections],
 OptionValue[alphaThomson],
-OptionValue[alphaThomson]";
+OptionValue[offShellVV]";
 setDecayOptions =
 "FlexibleDecay_settings flexibledecay_settings;
 flexibledecay_settings.set(FlexibleDecay_settings::min_br_to_print, pars[c++]);
@@ -2828,7 +2828,7 @@ fillFDSettings = "data.set_fd_settings(flexibledecay_settings);\n"
                             "@calculateDecaysExample@" -> calculateDecaysExample,
                             "@decaysIncludes@" -> decaysIncludes,
                             "@fdDefaultSettings@" -> fdDefaultSettings,
-                            "@addFDOptions1@" -> addFDOptions1,
+                            "@addFDOptions1@" -> IndentText[addFDOptions1],
                             "@addFDOptions2@" -> addFDOptions2,
                             "@setFDOptions@" -> IndentText @ IndentText @ IndentText @ IndentText @ setFDOptions,
                             "@setDecayOptions@" -> IndentText @ setDecayOptions,
