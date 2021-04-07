@@ -39,15 +39,6 @@ Begin@"`Private`";
 `type`indexCol = FeynArts`Index[Global`Colour,_Integer];
 `type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
 `type`indexGeneric = FeynArts`Index[Generic, _Integer];
-`type`indexGeneration =
-Module[{filter, rules, indices},
-   filter = (FeynArts`Indices -> e_) :> e;
-   rules = {  FeynArts`Index -> Identity,
-              Global`Colour :> {},
-              Global`Gluon :> {}};
-   indices = Cases[FeynArts`M$ClassesDescription, filter, Infinity];
-   indices = DeleteDuplicates@Flatten[indices //. rules];
-   FeynArts`Index[Alternatives@@indices, _Integer]];
 `type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 `type`genericField = `type`field[`type`indexGeneric];
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
@@ -55,9 +46,6 @@ Module[{filter, rules, indices},
 `type`massType = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
 `type`genericMass =
    FeynArts`Mass[`type`field[`type`indexGeneric], `type`massType];
-`type`specificMass = FeynArts`Mass[
-   `type`field[_Integer,
-      {Alternatives[`type`indexCol, `type`indexGlu, `type`indexGeneration]..}]];
 
 `type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
 `type`fc`mass = 0|_Symbol|_Symbol@_Symbol;

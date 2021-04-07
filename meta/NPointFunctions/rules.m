@@ -40,8 +40,19 @@ Module[{once},
    `rules`fields[] := once;
    once := once =
       Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F,
-            data},
+            data, generation},
          data = Map[ToExpression, {#1<>#2, #3, #4}&@@#&/@fieldData[], 2];
+         generation =
+            Module[{filter, rules, indices},
+               filter = (FeynArts`Indices -> e_) :> e;
+               rules = {  FeynArts`Index -> Identity,
+                          Global`Colour :> {},
+                          Global`Gluon :> {}};
+               indices = Cases[FeynArts`M$ClassesDescription,
+                  filter,
+                  Infinity];
+               indices = DeleteDuplicates@Flatten[indices //. rules];
+               FeynArts`Index[Alternatives@@indices, _Integer]];
          Join[
             data /. {n_, t_, i_} :>
                Rule[t@i, n],
@@ -57,7 +68,7 @@ Module[{once},
                   Susyno`LieGroups`conj@n@{ind}],
                {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}],
                   SARAH`bar@n@{ind}]},
-            {  ind:`type`indexGeneration :>
+            {  ind:generation :>
                   Symbol["SARAH`gt" <> ToString@Last@ind],
                ind:`type`indexCol :>
                   Symbol["SARAH`ct" <> ToString@Last@ind],
