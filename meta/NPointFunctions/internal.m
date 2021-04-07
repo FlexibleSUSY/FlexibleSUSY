@@ -131,7 +131,7 @@ Module[{fsFields},
       True,
          {SARAH`Mom[_Integer,_] :> 0},
       False|OperatorsOnly|ExceptLoops,
-         fsFields = getField[amplitudes, All] //. `rules`fields[];
+         fsFields = `rules`fields@getField[amplitudes, All];
          {SARAH`Mom[i_Integer, lorIndex_] :>
             SARAH`Mom[fsFields[[i]], lorIndex]}]];
 getExternalMomentumRules // secure;
@@ -193,8 +193,8 @@ Module[{topologies, diagrams, amplitudes},
 
    debugMakePictures[diagrams, amplitudes];
 
-   {  {  getField[amplitudes, In], getField[amplitudes, Out]} //. `rules`fields[],
-         calculateAmplitudes[diagrams, amplitudes]}];
+   {  `rules`fields@{ getField[amplitudes, In], getField[amplitudes, Out]},
+      calculateAmplitudes[diagrams, amplitudes]}];
 NPointFunctionFAFC // secure;
 
 getSumSettings::usage = "
@@ -344,8 +344,8 @@ getClassAmount // secure;
 
 debugMakePictures[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{out = {}, directory, name},
-   name = StringJoin[ToString /@ (Join[getField[amplitudes, All],
-      `options`processes[]] //. `rules`fields[] /. e_[{_}]:>e)];
+   name = StringJoin[ToString /@ (`rules`fields@Join[getField[amplitudes, All],
+      `options`processes[]] /. e_[{_}]:>e)];
    directory = DirectoryName[FeynArts`$Model<>".mod"];
    FeynArts`Paint[diagrams,
       FeynArts`PaintLevel -> {Generic},
@@ -425,7 +425,7 @@ getColourFactors::usage = "
 @note External fields always come at first places in adjacency matrix.
 @note This function doesn't know anything about ``CXXDiagrams`` context.";
 getColourFactors[ds:`type`diagramSet] :=
-   Flatten[getColourFactors /@ (List @@ ds), 1] //. `rules`fields[];
+   `rules`fields@Flatten[getColourFactors /@ (List @@ ds), 1];
 getColourFactors[diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
 Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram,
       genericInsertions},

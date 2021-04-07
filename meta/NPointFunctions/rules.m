@@ -37,6 +37,7 @@ Module[{once},
 fieldData // secure;
 
 Module[{once},
+   `rules`fields[expression_] := expression //. `rules`fields[];
    `rules`fields[] := once@_;
    once[arg_] := once@arg =
       Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F,
