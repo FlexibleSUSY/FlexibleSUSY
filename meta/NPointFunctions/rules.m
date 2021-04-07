@@ -72,7 +72,7 @@ Module[{faMasses, sarahNames, massRules},
       FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];
 $MassRules // Protect;
 
-$CouplingRules =
+`rules`couplings[] :=
 Module[{PL, PR, MT, FV, g, md, v, i, p},
    v = Global`FourVector;
    p = FeynArts`Mom;
@@ -105,14 +105,14 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
          S[ md[{f}, i2, i1, i3] * g[{f}, i1, i2],
             md[{f}, i1, i3, i2] * g[{f}, i1, i3],
             md[{f}, i3, i2, i1] * g[{f}, i2, i3]]}]];
-$CouplingRules // Protect;
+`rules`couplings // secure;
 
 With[{lt = Unique@"SARAH`lt"},
    `rules`subexpressions[expression_] :=
       expression //. Join[
          $FieldRules,
          $MassRules,
-         $CouplingRules,
+         `rules`couplings[],
          {  FormCalc`Finite -> 1,
             FormCalc`Den[a_, b_] :> 1/(a-b),
             FormCalc`Pair[a_, b_] :> SARAH`sum[lt, 1, 4,
