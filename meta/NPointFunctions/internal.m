@@ -50,7 +50,7 @@ On[General::shdw];
 Begin@"`Private`";
 
 secure[sym:_Symbol] :=
-Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
+   Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
 With[{dir = DirectoryName@$InputFileName},
@@ -116,7 +116,7 @@ getExternalMomentumRules // secure;
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settings.";
-With[{dir = Directory@$InputFileName},
+With[{dir = DirectoryName@$InputFileName},
    getSettings[] :=
    (  BeginPackage@"NPointFunctions`";
       Begin@"`Private`";
@@ -470,7 +470,7 @@ Module[{
    setZeroMassRules@{amplitudes, feynAmps};
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs}, diagrams, $ZeroMomenta];
-   FCAmplitudesToFSConvention[
+   convertToFS[
       {  generic,
          genericInsertions,
          combinatorialFactors,
@@ -616,22 +616,21 @@ Module[{newNonzero, newZeroRules},
    ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]];
 ZeroRules // secure;
 
-FCAmplitudesToFSConvention::usage = "
+convertToFS::usage = "
 @brief Translate a list of ``FormCalc`` amplitudes and their abbreviations and
        subexpressions into ``FlexibleSUSY`` language.
 @param amplitudes The given list of amplitudes.
 @param abbreviations A list of abbreviations.
 @param subexpressions A list of subexpressions.
 @returns A list of amplitudes and joined abbreviations and subexpressions.";
-FCAmplitudesToFSConvention[amplitudes_, abbreviations_, subexpressions_] :=
-Module[{fsAmplitudes, fsAbbreviations, fsSubexpressions},
+convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
+Module[{fsAbbreviations, fsSubexpressions},
    fsSubexpressions = subexpressions //. $SubexpressionRules;
-   fsAmplitudes = amplitudes //. $AmplitudeRules;
    fsAbbreviations = abbreviations //.  $SubexpressionRules //.
       {  FormCalc`Spinor -> SARAH`DiracSpinor,
          FormCalc`Lor -> SARAH`Lorentz};
-   {fsAmplitudes, Join[fsAbbreviations,fsSubexpressions]}];
-FCAmplitudesToFSConvention // secure;
+   {`rules`amplitude@amplitudes, Join[fsAbbreviations,fsSubexpressions]}];
+convertToFS // secure;
 
 End[];
 EndPackage[];
