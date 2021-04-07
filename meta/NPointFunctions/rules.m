@@ -61,19 +61,21 @@ Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F},
          Map[ToExpression, {#[[1]]<>#[[2]], #[[3]], #[[4]]}&/@fieldData[], 2]];
 $FieldRules // Protect;
 
-$MassRules =
-Module[{faMasses, sarahNames, massRules},
-   faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ fieldData[];
-   sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldData[];
-   massRules = MapThread[
-      {  #1[index_] :> SARAH`Mass@#2@{Symbol["SARAH`gt" <>
-            StringTake[SymbolName@index, -1]]},
-         #1[indices__] :> SARAH`Mass@#2@indices,
-         #1 :> SARAH`Mass@#2} &,
-      {faMasses, sarahNames}];
-   Append[Flatten@massRules,
-      FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];
-$MassRules // Protect;
+Module[{once},
+   once := once =
+      Module[{faMasses, sarahNames, massRules},
+         faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ fieldData[];
+         sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldData[];
+         massRules = MapThread[
+            {  #1[index_] :> SARAH`Mass@#2@{Symbol["SARAH`gt" <>
+                  StringTake[SymbolName@index, -1]]},
+               #1[indices__] :> SARAH`Mass@#2@indices,
+               #1 :> SARAH`Mass@#2} &,
+            {faMasses, sarahNames}];
+         Append[Flatten@massRules,
+            FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];
+   `rules`mass[] := once;];
+`rules`mass // secure;
 
 `rules`couplings[] :=
 Module[{PL, PR, MT, FV, g, md, v, i, p},
@@ -114,7 +116,7 @@ With[{lt = Unique@"SARAH`lt"},
    `rules`subexpressions[expression_] :=
       expression //. Join[
          $FieldRules,
-         $MassRules,
+         `rules`mass[],
          `rules`couplings[],
          {  FormCalc`Finite -> 1,
             FormCalc`Den[a_, b_] :> 1/(a-b),
