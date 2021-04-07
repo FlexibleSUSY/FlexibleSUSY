@@ -24,6 +24,7 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 Module[{once},
+   fieldData[] := once;
    once := once =
       Module[{regex, lines, rules, names},
          regex = "(\\w+): ([SFVU])\\[(\\d+)\\]";
@@ -32,36 +33,48 @@ Module[{once},
             Get@`file`contexts[];
          names = StringCases[lines, RegularExpression@regex :>
             {"$1","FeynArts`$2","$3"}];
-         Flatten[names, 1] /. rules];
-   fieldData[] := once;];
+         Flatten[names, 1] /. rules];];
 fieldData // secure;
 
-$FieldRules =
-Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F},
-   Join[
-      # /. {n_, t_, i_} :> Rule[t@i, n],
-      # /. {n_, t_, i_} :> RuleDelayed[t[i, {ind__}], n@{ind}],
-      # /.
-      {  {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n], Susyno`LieGroups`conj@n],
-         {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n], SARAH`bar@n]},
-      # /.
-      {  {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n@{ind__}],
-            Susyno`LieGroups`conj@n@{ind}],
-         {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}],
-            SARAH`bar@n@{ind}]},
-      {  ind:`type`indexGeneration :> Symbol["SARAH`gt" <> ToString@Last@ind],
-         ind:`type`indexCol :> Symbol["SARAH`ct" <> ToString@Last@ind],
-         ind:`type`indexGlu :> Symbol["SARAH`ct" <> ToString@Last@ind]},
-      {  FeynArts`S -> GenericS,
-         FeynArts`F -> GenericF,
-         FeynArts`V -> GenericV,
-         FeynArts`U -> GenericU},
-      {  Times[-1,field:_GenericS|_GenericV] :> Susyno`LieGroups`conj@field,
-         Times[-1,field:_GenericF|_GenericU] :> SARAH`bar@field}]&@
-         Map[ToExpression, {#[[1]]<>#[[2]], #[[3]], #[[4]]}&/@fieldData[], 2]];
-$FieldRules // Protect;
+Module[{once},
+   `rules`fields[] := once;
+   once := once =
+      Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F,
+            data},
+         data = Map[ToExpression, {#1<>#2, #3, #4}&@@#&/@fieldData[], 2];
+         Join[
+            data /. {n_, t_, i_} :>
+               Rule[t@i, n],
+            data /. {n_, t_, i_} :>
+               RuleDelayed[t[i, {ind__}], n@{ind}],
+            data /. {
+               {n_, t:bose,  _} :>
+                  RuleDelayed[Times[-1,f:n], Susyno`LieGroups`conj@n],
+               {n_, t:fermi, _} :>
+                  RuleDelayed[Times[-1,f:n], SARAH`bar@n]},
+            data /.
+            {  {n_, t:bose,  _} :> RuleDelayed[Times[-1,f:n@{ind__}],
+                  Susyno`LieGroups`conj@n@{ind}],
+               {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}],
+                  SARAH`bar@n@{ind}]},
+            {  ind:`type`indexGeneration :>
+                  Symbol["SARAH`gt" <> ToString@Last@ind],
+               ind:`type`indexCol :>
+                  Symbol["SARAH`ct" <> ToString@Last@ind],
+               ind:`type`indexGlu :>
+                  Symbol["SARAH`ct" <> ToString@Last@ind]},
+            {  FeynArts`S -> GenericS,
+               FeynArts`F -> GenericF,
+               FeynArts`V -> GenericV,
+               FeynArts`U -> GenericU},
+            {  Times[-1,field:_GenericS|_GenericV] :>
+                  Susyno`LieGroups`conj@field,
+               Times[-1,field:_GenericF|_GenericU] :>
+                  SARAH`bar@field}]];];
+`rules`fields // secure;
 
 Module[{once},
+   `rules`mass[] := once;
    once := once =
       Module[{faMasses, sarahNames, massRules},
          faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ fieldData[];
@@ -73,8 +86,7 @@ Module[{once},
                #1 :> SARAH`Mass@#2} &,
             {faMasses, sarahNames}];
          Append[Flatten@massRules,
-            FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];
-   `rules`mass[] := once;];
+            FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];];
 `rules`mass // secure;
 
 `rules`couplings[] :=
@@ -115,7 +127,7 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
 With[{lt = Unique@"SARAH`lt"},
    `rules`subexpressions[expression_] :=
       expression //. Join[
-         $FieldRules,
+         `rules`fields[],
          `rules`mass[],
          `rules`couplings[],
          {  FormCalc`Finite -> 1,
