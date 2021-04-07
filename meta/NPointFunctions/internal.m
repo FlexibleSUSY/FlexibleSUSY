@@ -625,10 +625,8 @@ convertToFS::usage = "
 @returns A list of amplitudes and joined abbreviations and subexpressions.";
 convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
 Module[{fsAbbreviations, fsSubexpressions},
-   fsSubexpressions = subexpressions //. $SubexpressionRules;
-   fsAbbreviations = abbreviations //.  $SubexpressionRules //.
-      {  FormCalc`Spinor -> SARAH`DiracSpinor,
-         FormCalc`Lor -> SARAH`Lorentz};
+   fsSubexpressions = `rules`subexpressions@subexpressions;
+   fsAbbreviations = `rules`subexpressions@abbreviations;
    {`rules`amplitude@amplitudes, Join[fsAbbreviations,fsSubexpressions]}];
 convertToFS // secure;
 

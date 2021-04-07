@@ -107,33 +107,34 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
             md[{f}, i3, i2, i1] * g[{f}, i2, i3]]}]];
 $CouplingRules // Protect;
 
-$SubexpressionRules =
-Join[$FieldRules, $MassRules, $CouplingRules,
-   {  FormCalc`Finite -> 1,
-      FormCalc`Den[a:_,b:_] :> 1/(a-b),
-      FormCalc`Pair[a:_,b:_] :> SARAH`sum[#, 1, 4,
-         SARAH`g[#, #]*Append[a, #]*Append[b, #]],
-      f:`type`genericField :> Head[f][GenericIndex@Last@Last@f],
-      FormCalc`k[i:_Integer, pairIndex:___] :> SARAH`Mom[i, pairIndex]} &@
-         Unique@"SARAH`lt"];
-$SubexpressionRules // Protect;
+With[{lt = Unique@"SARAH`lt"},
+   `rules`subexpressions[expression_] :=
+      expression //. Join[
+         $FieldRules,
+         $MassRules,
+         $CouplingRules,
+         {  FormCalc`Finite -> 1,
+            FormCalc`Den[a_, b_] :> 1/(a-b),
+            FormCalc`Pair[a_, b_] :> SARAH`sum[lt, 1, 4,
+               SARAH`g[lt, lt]*Append[a, lt]*Append[b, lt]],
+            f:`type`genericField :> Head[f][GenericIndex@Last@Last@f],
+            FormCalc`k[i_Integer, pairIndex___] :> SARAH`Mom[i, pairIndex]},
+         {  FormCalc`Spinor -> SARAH`DiracSpinor,
+            FormCalc`Lor -> SARAH`Lorentz}];];
+`rules`subexpressions // secure;
 
 `rules`amplitude[expression_] :=
-   expression //. Join[
-      $SubexpressionRules,
-      {  FeynArts`SumOver[_, _, FeynArts`External] :> Sequence[],
-         Times[e_, FeynArts`SumOver[i_Symbol, max_Integer]] :>
-            SARAH`sum[i, 1, max, e],
-         Times[expr_, FeynArts`SumOver[index_Symbol,
-            {min_Integer, max_Integer}]] :>
-               SARAH`sum[index, min, max, expr],
-         SARAH`sum[i_Symbol, _, max_Integer,
-            FeynArts`SumOver[_Symbol, max2_Integer]] :>
-               SARAH`sum[i, 1, max, max2],
-         SARAH`sum[i_Symbol, _, max_Integer,
-            FeynArts`SumOver[_, {min2_Integer, max2_Integer}]] :>
-               SARAH`sum[i, 1, max, max2-min2]},
-      {FeynArts`IndexSum -> Sum}];
+   `rules`subexpressions[expression] //. {
+      FeynArts`SumOver[_, _, FeynArts`External] :> Sequence[],
+      Times[e_, FeynArts`SumOver[i_, max_]] :>
+         SARAH`sum[i, 1, max, e],
+      Times[e_, FeynArts`SumOver[i, {min, max}]] :>
+         SARAH`sum[i, min, max, e],
+      SARAH`sum[i_, min_, max_, FeynArts`SumOver[_, n1_]] :>
+         SARAH`sum[i, min, max, n1],
+      SARAH`sum[i_, min_, max_, FeynArts`SumOver[_, {n1_, n2_}]] :>
+         SARAH`sum[i, min, max, n2-n1],
+      FeynArts`IndexSum -> Sum};
 `rules`amplitude // secure;
 
 End[];
