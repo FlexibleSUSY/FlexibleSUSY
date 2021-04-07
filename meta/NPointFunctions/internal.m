@@ -617,17 +617,15 @@ Module[{newNonzero, newZeroRules},
 ZeroRules // secure;
 
 convertToFS::usage = "
-@brief Translate a list of ``FormCalc`` amplitudes and their abbreviations and
+@brief Translate a list of ``FormCalc`` amplitudes, abbreviations and
        subexpressions into ``FlexibleSUSY`` language.
-@param amplitudes The given list of amplitudes.
-@param abbreviations A list of abbreviations.
-@param subexpressions A list of subexpressions.
+@param amplitudes A ``List`` of amplitudes.
+@param abbreviations A ``List`` of abbreviations.
+@param subexpressions A ``List`` of subexpressions.
 @returns A list of amplitudes and joined abbreviations and subexpressions.";
 convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
-Module[{fsAbbreviations, fsSubexpressions},
-   fsSubexpressions = `rules`subexpressions@subexpressions;
-   fsAbbreviations = `rules`subexpressions@abbreviations;
-   {`rules`amplitude@amplitudes, Join[fsAbbreviations,fsSubexpressions]}];
+   {  `rules`amplitude@amplitudes,
+      `rules`subexpressions/@Join[abbreviations, subexpressions]};
 convertToFS // secure;
 
 End[];
