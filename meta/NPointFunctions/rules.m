@@ -112,7 +112,7 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
          Global`ChiralityProjector@#] &/@ {-1, 1};
    Off@RuleDelayed::rhs;
    MT[i1_, i2_] := Global`MetricTensor[i@i1_Integer, i@i2_Integer];
-   If[And@@MapThread[Less, {FormCalc`$FormCalc, {9, 7}}],
+   If[Head@FormCalc`$FormCalc === Real,
       FV[i1_, i2_, Repeated[_, {0, 1}]] := p@i1_Integer - p@i2_Integer;,
       FV[i1_, i2_] := v[p@i1_Integer - p@i2_Integer, i@3];
       FV[i1_, i2_, i3_] := v[p@i1_Integer - p@i2_Integer, i@i3_Integer];];
