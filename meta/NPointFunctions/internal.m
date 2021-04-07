@@ -53,9 +53,9 @@ secure[sym:_Symbol] :=
 Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
-$InternalDirectory = DirectoryName@$Input;
-Get@FileNameJoin@{$InternalDirectory, #<>".m"}&/@
-   {"type", "rules", "actions", "chains", "topologies"};
+With[{dir = DirectoryName@$InputFileName},
+   Get@FileNameJoin@{dir, #<>".m"}&/@
+      {"type", "rules", "actions", "chains", "topologies"};];
 
 getTopology[d:`type`diagram] := First@d;
 getTopology // secure;
@@ -116,23 +116,24 @@ getExternalMomentumRules // secure;
 getSettings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settings.";
-getSettings[] :=
-(  BeginPackage@"NPointFunctions`";
-   Begin@"`Private`";
-   `settings`topology = Default;
-   `settings`diagrams = Default;
-   `settings`amplitudes = Default;
-   `settings`sum = Default;
-   `settings`massless = Default;
-   `settings`momenta = Default;
-   `settings`regularization = Default;
-   `settings`order = Default;
-   `settings`chains = Default;
-   If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-      {$InternalDirectory, SymbolName@Head@$Observable, "settings.m"};
-   Protect@Evaluate[Context[]<>"settings`*"];
-   End[];
-   EndPackage[];);
+With[{dir = Directory@$InputFileName},
+   getSettings[] :=
+   (  BeginPackage@"NPointFunctions`";
+      Begin@"`Private`";
+      `settings`topology = Default;
+      `settings`diagrams = Default;
+      `settings`amplitudes = Default;
+      `settings`sum = Default;
+      `settings`massless = Default;
+      `settings`momenta = Default;
+      `settings`regularization = Default;
+      `settings`order = Default;
+      `settings`chains = Default;
+      If[FileExistsQ@#, Get@#;]&@FileNameJoin@
+         {dir, SymbolName@Head@$Observable, "settings.m"};
+      Protect@Evaluate[Context[]<>"settings`*"];
+      End[];
+      EndPackage[];);];
 getSettings // secure;
 
 emptyQ::usage = "
