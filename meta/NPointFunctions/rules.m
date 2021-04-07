@@ -24,8 +24,8 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 Module[{once},
-   fieldData[] := once;
-   once := once =
+   fieldData[] := once@_;
+   once[arg_] := once@arg =
       Module[{regex, lines, rules, names},
          regex = "(\\w+): ([SFVU])\\[(\\d+)\\]";
          lines = Utils`ReadLinesInFile@`file`particles[];
@@ -37,8 +37,8 @@ Module[{once},
 fieldData // secure;
 
 Module[{once},
-   `rules`fields[] := once;
-   once := once =
+   `rules`fields[] := once@_;
+   once[arg_] := once@arg =
       Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F,
             data, generation},
          data = Map[ToExpression, {#1<>#2, #3, #4}&@@#&/@fieldData[], 2];
@@ -85,8 +85,8 @@ Module[{once},
 `rules`fields // secure;
 
 Module[{once},
-   `rules`mass[] := once;
-   once := once =
+   `rules`mass[] := once@_;
+   once[arg_] := once@arg =
       Module[{faMasses, sarahNames, massRules},
          faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ fieldData[];
          sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldData[];
