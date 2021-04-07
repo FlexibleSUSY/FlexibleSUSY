@@ -53,6 +53,14 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
+`file`particles[] :=
+   $ParticleFile;
+`file`particles // secure;
+
+`file`contexts[] :=
+   $ContextFile;
+`file`contexts // secure;
+
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
       {"type", "rules", "actions", "chains", "topologies"};];

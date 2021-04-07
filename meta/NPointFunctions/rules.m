@@ -23,15 +23,18 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-$FieldNames =
-Module[{regex, lines, rules, names},
-   regex = "(\\w+): ([SFVU])\\[(\\d+)\\]";
-   lines = Utils`ReadLinesInFile@$ParticleFile;
-   rules = Rule[First@#, Sequence[Last@#, First@#]] &/@ Get@$ContextFile;
-   names = StringCases[lines, RegularExpression@regex :>
-      {"$1","FeynArts`$2","$3"}];
-   Flatten[names, 1] /. rules];
-$FieldNames // Protect;
+Module[{once},
+   once := once =
+      Module[{regex, lines, rules, names},
+         regex = "(\\w+): ([SFVU])\\[(\\d+)\\]";
+         lines = Utils`ReadLinesInFile@`file`particles[];
+         rules = Rule[First@#, Sequence[Last@#, First@#]] &/@
+            Get@`file`contexts[];
+         names = StringCases[lines, RegularExpression@regex :>
+            {"$1","FeynArts`$2","$3"}];
+         Flatten[names, 1] /. rules];
+   fieldData[] := once;];
+fieldData // secure;
 
 $FieldRules =
 Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F},
@@ -55,13 +58,13 @@ Module[{bose = FeynArts`S|FeynArts`V, fermi = FeynArts`U|FeynArts`F},
          FeynArts`U -> GenericU},
       {  Times[-1,field:_GenericS|_GenericV] :> Susyno`LieGroups`conj@field,
          Times[-1,field:_GenericF|_GenericU] :> SARAH`bar@field}]&@
-         Map[ToExpression, {#[[1]]<>#[[2]], #[[3]], #[[4]]}&/@$FieldNames, 2]];
+         Map[ToExpression, {#[[1]]<>#[[2]], #[[3]], #[[4]]}&/@fieldData[], 2]];
 $FieldRules // Protect;
 
 $MassRules =
 Module[{faMasses, sarahNames, massRules},
-   faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ $FieldNames;
-   sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ $FieldNames;
+   faMasses = Symbol["Global`Mass" <> #[[2]]] &/@ fieldData[];
+   sarahNames = Symbol[#[[1]] <> #[[2]]] &/@ fieldData[];
    massRules = MapThread[
       {  #1[index_] :> SARAH`Mass@#2@{Symbol["SARAH`gt" <>
             StringTake[SymbolName@index, -1]]},
