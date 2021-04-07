@@ -118,22 +118,23 @@ Join[$FieldRules, $MassRules, $CouplingRules,
          Unique@"SARAH`lt"];
 $SubexpressionRules // Protect;
 
-$AmplitudeRules = Join[
-   $SubexpressionRules,
-   {  FeynArts`SumOver[_,_,FeynArts`External] :> Sequence[],
-      Times[e:_, FeynArts`SumOver[i:_Symbol, max:_Integer]] :>
-         SARAH`sum[i, 1, max, e],
-      Times[expr:_, FeynArts`SumOver[index:_Symbol,
-         {min:_Integer, max:_Integer}]] :>
-         SARAH`sum[index, min, max, expr],
-      SARAH`sum[i:_Symbol, _Integer, max:_Integer,
-         FeynArts`SumOver[_Symbol, max2:_Integer]] :>
-         SARAH`sum[i, 1, max, max2],
-      SARAH`sum[i:_Symbol, _Integer, max:_Integer,
-         FeynArts`SumOver[_, {min2:_Integer, max2:_Integer}]] :>
-         SARAH`sum[i, 1, max, max2-min2]},
-   {FeynArts`IndexSum -> Sum}];
-$AmplitudeRules // Protect;
+`rules`amplitude[expression_] :=
+   expression //. Join[
+      $SubexpressionRules,
+      {  FeynArts`SumOver[_, _, FeynArts`External] :> Sequence[],
+         Times[e_, FeynArts`SumOver[i_Symbol, max_Integer]] :>
+            SARAH`sum[i, 1, max, e],
+         Times[expr_, FeynArts`SumOver[index_Symbol,
+            {min_Integer, max_Integer}]] :>
+               SARAH`sum[index, min, max, expr],
+         SARAH`sum[i_Symbol, _, max_Integer,
+            FeynArts`SumOver[_Symbol, max2_Integer]] :>
+               SARAH`sum[i, 1, max, max2],
+         SARAH`sum[i_Symbol, _, max_Integer,
+            FeynArts`SumOver[_, {min2_Integer, max2_Integer}]] :>
+               SARAH`sum[i, 1, max, max2-min2]},
+      {FeynArts`IndexSum -> Sum}];
+`rules`amplitude // secure;
 
 End[];
 EndPackage[];
