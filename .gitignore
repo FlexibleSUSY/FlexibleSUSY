@@ -13,6 +13,9 @@ src/libfortran_utils.mod
 meta/NPointFunctions.rst
 meta/NPointFunctions/*.rst
 meta/NPointFunctions/*/*.rst
+meta/NPointFunctions.html
+meta/NPointFunctions/*.html
+meta/NPointFunctions/*/*.html
 
 config/config.h
 config/flexiblesusy-version
