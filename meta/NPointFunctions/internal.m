@@ -25,16 +25,8 @@ Needs["Utils`",
 
 Block[{Format},
    Needs@"FeynArts`";
-   FeynArts`$FAVerbose = 0;
-   FeynArts`InitializeModel@NPointFunctions`$FAMod;
-   SetOptions[FeynArts`InsertFields,
-      FeynArts`Model -> NPointFunctions`$FAMod,
-      FeynArts`InsertionLevel -> FeynArts`Classes];
    Needs@"FormCalc`";
-   Print[];
-   FormCalc`$FCVerbose = 0;
-   (  If[!DirectoryQ@#, CreateDirectory@#];
-      SetDirectory@#;)&@NPointFunctions`$FCDir;];
+   Print[];];
 
 BeginPackage@"NPointFunctions`";
 
@@ -42,7 +34,7 @@ Off[General::shdw];
 {  DiracChain, Mat};
 On[General::shdw];
 
-{  NPointFunctionFAFC};
+{  NPointFunctionFAFC, Init};
 {  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
@@ -53,13 +45,36 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
-`file`particles[] :=
-   $ParticleFile;
-`file`particles // secure;
+`file`particles;
+`file`contexts;
+`options`observable;
+`options`loops;
+`options`processes;
+`options`momenta;
+`options`onShell;
+`options`scheme;
 
-`file`contexts[] :=
-   $ContextFile;
-`file`contexts // secure;
+Init[{formcalc_, model_, particles_, contexts_},
+   {observable_, loops_, processes_, momenta_, onShell_, scheme_}] := (
+   `file`particles[] := particles;
+   `file`contexts[] := contexts;
+   `options`observable[] := SymbolName@Head@observable;
+   `options`loops[] := loops;
+   `options`processes[] := processes;
+   `options`momenta[] := momenta;
+   `options`onShell[] := onShell;
+   `options`scheme[] :=
+      Switch[scheme, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+
+   FeynArts`$FAVerbose = 0;
+   FeynArts`InitializeModel@model;
+   SetOptions[FeynArts`InsertFields,
+      FeynArts`Model -> model,
+      FeynArts`InsertionLevel -> FeynArts`Classes];
+   FormCalc`$FCVerbose = 0;
+   If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
+   SetDirectory@formcalc;);
+init // secure;
 
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
@@ -138,7 +153,7 @@ With[{dir = DirectoryName@$InputFileName},
       `settings`order = Default;
       `settings`chains = Default;
       If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-         {dir, SymbolName@Head@$Observable, "settings.m"};
+         {dir, `options`observable[], "settings.m"};
       Protect@Evaluate[Context[]<>"settings`*"];
       End[];
       EndPackage[];);];
@@ -167,7 +182,7 @@ NPointFunctionFAFC[inFields_, outFields_] :=
 Module[{topologies, diagrams, amplitudes},
    getSettings[];
    topologies = emptyQ@FeynArts`CreateTopologies[
-      $LoopLevel,
+      `options`loops[],
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
    diagrams = emptyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
@@ -244,8 +259,7 @@ getRegularizationSettings::errOverlap = "
 Topology rules in `.`settings`.`regularization overlap.";
 getRegularizationSettings[diagrams:`type`diagramSet] :=
 Module[{scheme, replacements, f},
-   scheme = Switch[$Scheme, FlexibleSUSY`DRbar, 4,
-                            FlexibleSUSY`MSbar, D];
+   scheme = `options`scheme[];
    f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
    If[`settings`regularization === Default,
       Array[scheme&, getClassAmount@diagrams],
@@ -331,7 +345,7 @@ getClassAmount // secure;
 debugMakePictures[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{out = {}, directory, name},
    name = StringJoin[ToString /@ (Join[getField[amplitudes, All],
-      $Processes] //. `rules`fields[] /. e_[{_}]:>e)];
+      `options`processes[]] //. `rules`fields[] /. e_[{_}]:>e)];
    directory = DirectoryName[FeynArts`$Model<>".mod"];
    FeynArts`Paint[diagrams,
       FeynArts`PaintLevel -> {Generic},
@@ -460,13 +474,13 @@ Module[{
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
       feynAmps, generic, chains, subs, zeroedRules},
-   If[$ZeroMomenta,
+   If[`options`momenta[],
       ampsGen = FormCalc`OffShell[ampsGen,
          Sequence@@Array[#->0&, Plus@@Length/@proc]]];
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
-         FormCalc`OnShell -> $OnShell,
+         FormCalc`OnShell -> `options`onShell[],
          FormCalc`FermionChains -> FormCalc`Chiral,
          FormCalc`FermionOrder -> getFermionOrder@diagrams,
          FormCalc`Invariants -> False,
@@ -477,14 +491,14 @@ Module[{
    {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
    setZeroMassRules@{amplitudes, feynAmps};
    {generic, chains, subs} = makeMassesZero[
-      {generic, chains, subs}, diagrams, $ZeroMomenta];
+      {generic, chains, subs}, diagrams, `options`momenta[]];
    convertToFS[
       {  generic,
          genericInsertions,
          combinatorialFactors,
          getColourFactors@diagrams},
       chains,
-      subs] /. getExternalMomentumRules[$ZeroMomenta, amplitudes]];
+      subs] /. getExternalMomentumRules[`options`momenta[], amplitudes]];
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "

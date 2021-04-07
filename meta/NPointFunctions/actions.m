@@ -27,16 +27,19 @@ getActions::usage = "
 @brief Converts ```settings`diagrams`` or ```settings`amplitudes`` to actions.
        The structure of settings is the following::
 
-          {  <symbol> -> {  {  <if-in-$Processes action>
+          {  <symbol> -> {  {  <action-in>
                                ...},
-                            {  <if-not-in-$Processes action>
+                            {  <action-not-in>
                                ...}}
              ..}
 
        <symbol>
-         Any symbol, which defines the <action> to be done with diagrams,
-         whether <symbol> is present or not in ``$Processes``.
-       <action>
+         Any symbol, which defines the <action> to be done with diagrams.
+       <action-in>
+         Is applied, if <symbol> is inside ```options`processes[]``.
+         Has the syntax of ``action`` for ``diagrams`` or ``amplitudes``.
+       <action-not-in>
+         Is applied, if <symbol> is **not** inside ```options`processes[]``.
          Has the syntax of ``action`` for ``diagrams`` or ``amplitudes``.
 @param settings An entry to define actions.
 @returns A set of settings.";
@@ -46,10 +49,10 @@ Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
    parsed = Rule[SymbolName@First@#, Last@#]&/@settings;
    positiveRules = parsed /. Rule[s:_, {p:_, _}] :> Rule[s, p];
    negativeRules = parsed /. Rule[s:_, {_, n:_}] :> Rule[s, n];
-   discardProcesses = Complement[parsed[[All, 1]], $Processes];
-   clean = RuleDelayed[#, Sequence[]] &/@ $Processes;
+   discardProcesses = Complement[parsed[[All, 1]], `options`processes[]];
+   clean = RuleDelayed[#, Sequence[]] &/@ `options`processes[];
    DeleteDuplicates@Join[
-      DeleteDuplicates@Flatten[$Processes /. positiveRules, 1],
+      DeleteDuplicates@Flatten[`options`processes[] /. positiveRules, 1],
       DeleteDuplicates@Flatten[discardProcesses /. negativeRules, 1]] /.
          clean];
 getActions // secure;

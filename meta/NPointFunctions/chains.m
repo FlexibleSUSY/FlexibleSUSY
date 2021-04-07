@@ -44,7 +44,8 @@ modifyChains::usage = "
              ..}
 
        <symbol>
-          A symbol, which chooses (based on $ZeroMomenta) set of rules.
+          A symbol, which chooses (based on ```options`momenta[]``) the set
+          of rules.
           Put different <symbol> in the same list, if you want to use the
           same rules for them.
        <rule>
@@ -84,35 +85,38 @@ Module[{i = 0, rules, sp, L, reveal},
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
       chainRules = reveal@getFermionOrder@set;
-      rules = $ZeroMomenta /. expandRules@`settings`chains /. chainRules;];
+      rules = `options`momenta[] /. expandRules@`settings`chains /. chainRules;];
    Expand@expression //. rules];
 modifyChains // secure;
 
 simplifyChains::usage = "
-@brief Simplifies some chains applying Dirac equation if ``$OnShell`` is
-       ``True``.
+@brief Simplifies some chains applying Dirac equation if
+       ```options`onShell[]`` is ``True``.
 @param chain A chain to simplify.
+@param expr An expression to be modified.
 @returns A simplified chain.";
-If[$OnShell,
-   simplifyChains[expr:_] :=
-      (expr /. ch:DiracChain[__] :> simplifyChains@ch);
-   simplifyChains[chain:_DiracChain] :=
-   Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k,
-         m, pair, sp, flip},
-      m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
-      pair = FormCalc`Pair[k@#1,k@#2]&;
-      sp[mom:_:_] = FormCalc`Spinor[k@mom, _, _];
-      flip[7|-7] = 6;
-      flip[6|-6] = 7;
+simplifyChains[expr:_] :=
+   If[`options`onShell[],
+      expr /. ch:DiracChain[__] :> simplifyChains@ch,
+      expr];
+simplifyChains[chain:_DiracChain] :=
+   If[`options`onShell[],
+      Module[{s = 6|7, a = -6|-7, ch = DiracChain, k = FormCalc`k,
+            m, pair, sp, flip},
+         m[FormCalc`Spinor[_, mass:_, type:_]] = type*mass;
+         pair = FormCalc`Pair[k@#1,k@#2]&;
+         sp[mom:_:_] = FormCalc`Spinor[k@mom, _, _];
+         flip[7|-7] = 6;
+         flip[6|-6] = 7;
 
-      chain //. {
-         ch[l:sp[j_],p:a,k[n_],k[i_],r:sp[n_]] :>
-            pair[i,n]*ch[l,-p,r]-m[r]*ch[l,-p,k[i],r],
-         ch[l:sp[n_],p:a,k[i_],k[n_],r:sp[j_]] :>
-            pair[i,n]*ch[l,-p,r]-m[l]*ch[l,flip@p,k[i],r],
-         ch[l:sp[],p:s,k[n_],r:sp[n_]] :> m[r]*ch[l,p,r],
-         ch[l:sp[n_],p:s,k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]}];,
-   simplifyChains[expr:_] := expr;];
+         chain //. {
+            ch[l:sp[j_],p:a,k[n_],k[i_],r:sp[n_]] :>
+               pair[i,n]*ch[l,-p,r]-m[r]*ch[l,-p,k[i],r],
+            ch[l:sp[n_],p:a,k[i_],k[n_],r:sp[j_]] :>
+               pair[i,n]*ch[l,-p,r]-m[l]*ch[l,flip@p,k[i],r],
+            ch[l:sp[],p:s,k[n_],r:sp[n_]] :> m[r]*ch[l,p,r],
+            ch[l:sp[n_],p:s,k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]}],
+      chain];
 simplifyChains // secure;
 
 expandRules::usage = "
@@ -124,16 +128,16 @@ expandRules[rules:{Rule[{__Symbol}, _]..}] :=
 expandRules // secure;
 
 getChainRules::usage = "
-@brief Finds a subset of rules inside a ``List``, which represent Dirac
+@brief Finds a subset of rules inside a ``List``, which represents Dirac
        chains.
 @note It is possible, because the naming convention for this abbreviation
       is fixed and it is given by encoded regular expression.
 @param rules A list of rules.
 @returns A list of rules.";
 getChainRules[rules:{Rule[_Symbol, _]...}] :=
-Module[{regex},
-   regex = RegularExpression@"[F][1-9][\\d]*";
-   Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]];
+   Module[{regex},
+      regex = RegularExpression@"[F][1-9][\\d]*";
+      Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]];
 getChainRules // secure;
 
 makeChainsUnique::usage = "

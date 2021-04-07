@@ -370,35 +370,23 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
       CloseKernels@subKernel;];
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
    SetSharedFunction[subWrite, Print];
-   With[{obs = OptionValue@Observable, path = $Path, dir = Directory[],
-         FCDir = formCalcDir, FAMod = feynArtsModel,
-         names = particleNamesFile,
-         context = particleNamespaceFile,
+   With[{path = $Path, dir = Directory[],
+         data = {formCalcDir, feynArtsModel, particleNamesFile,
+            particleNamespaceFile},
+         options = {OptionValue@Observable,
+            OptionValue@LoopLevel,
+            SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
+            OptionValue@ZeroExternalMomenta,
+            OptionValue@OnShellFlag,
+            OptionValue@Regularize},
          meta = FlexibleSUSY`$flexiblesusyMetaDir,
-         loopLevel = OptionValue@LoopLevel,
-         keep = SymbolName/@If[List=!=Head@#, {#}, #]&@
-            OptionValue@KeepProcesses,
-         momenta = OptionValue@ZeroExternalMomenta,
-         onShell = OptionValue@OnShellFlag, scheme = OptionValue@Regularize,
          in = FANamesForFields[inFields, particleNamesFile],
          out = FANamesForFields[outFields, particleNamesFile]},
       nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
-         NPointFunctions`$FCDir = FCDir;
-         NPointFunctions`$FAMod = FAMod;
-         NPointFunctions`$ParticleFile = names;
-         NPointFunctions`$ContextFile = context;
-         NPointFunctions`$Observable = obs;
-         NPointFunctions`$LoopLevel = loopLevel;
-         NPointFunctions`$Processes = keep;
-         NPointFunctions`$ZeroMomenta = momenta;
-         NPointFunctions`$OnShell = onShell;
-         NPointFunctions`$Scheme = scheme;
-         Protect@"NPointFunctions`$*";
-
          $Path = path;
          SetDirectory@dir;
          Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
-
+         NPointFunctions`Init[data, options];
          NPointFunctions`NPointFunctionFAFC[ToExpression@in, ToExpression@out],
          subKernel,
          DistributedContexts -> None];];

@@ -103,7 +103,7 @@ Module[{topologyReplacements},
       set = Rule[SymbolName@First@#, Last@#]&/@set;
       all = Join[topologyReplacements, set];
       FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
-         ($Processes/.all)@#]];
+         (`options`processes[]/.all)@#]];
       name];
    getExcludeTopologies // secure;];
 
