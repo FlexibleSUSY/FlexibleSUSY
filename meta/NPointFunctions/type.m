@@ -43,9 +43,9 @@ Begin@"`Private`";
 `type`genericField = `type`field[`type`genericIndex];
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
-`type`massType = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
+`type`mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
 `type`genericMass =
-   FeynArts`Mass[`type`field[`type`genericIndex], `type`massType];
+   FeynArts`Mass[`type`field[`type`genericIndex], `type`mass];
 
 `type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
 `type`fc`mass = 0|_Symbol|_Symbol@_Symbol;

@@ -50,11 +50,6 @@ With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
       {"type", "rules", "actions", "chains", "topologies"};];
 
-(* Reserving names *)
-`file`particles; `file`contexts;
-`options`observable; `options`loops; `options`processes; `options`momenta;
-`options`onShell; `options`scheme;
-
 NPointFunction::usage = "
 @brief The entry point of the calculation.
        Sets files and options up, calculates diagrams and amplitudes using
@@ -84,7 +79,9 @@ NPointFunction::usage = "
 NPointFunction[
    {formcalc_, model_, particles_, contexts_, in_, out_},
    {observable_, loops_, processes_, momenta_, onShell_, scheme_}] :=
-   (  `file`particles[] := particles;
+   (  BeginPackage["NPointFunction`"];
+      Begin["`Private`"];
+      `file`particles[] := particles;
       `file`contexts[] := contexts;
       `options`observable[] := SymbolName@Head@observable;
       `options`loops[] := loops;
@@ -93,6 +90,8 @@ NPointFunction[
       `options`onShell[] := onShell;
       `options`scheme[] :=
          Switch[scheme, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+      End[];
+      EndPackage[];
 
       FeynArts`$FAVerbose = 0;
       FeynArts`InitializeModel@model;
@@ -105,38 +104,38 @@ NPointFunction[
       calculateInputs[ToExpression@in, ToExpression@out]);
 NPointFunction // secure;
 
-getInsertions[d:`type`diagram] := Last@d;
-getInsertions // secure;
+insertions[d:`type`diagram] := Last@d;
+insertions // secure;
 
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
 genericIndex // secure;
 
 genericMass[field:`type`field, index:_Integer] :=
-   FeynArts`Mass[field@genericIndex@index, `type`massType];
+   FeynArts`Mass[field@genericIndex@index, `type`mass];
 genericMass[field:`type`field] :=
-   FeynArts`Mass[field@`type`genericIndex, `type`massType];
+   FeynArts`Mass[field@`type`genericIndex, `type`mass];
 genericMass // secure;
 
-getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
+process[set:`type`diagramSet|`type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
-getProcess[set:`type`fc`amplitudeSet] :=
+process[set:`type`fc`amplitudeSet] :=
    Part[Head@Part[set, 1], 1];
-getProcess // secure;
+process // secure;
 
-getExternalMasses[set:`type`fc`amplitudeSet] :=
-   Flatten[List@@getProcess@set, 1][[All, 3]];
-getExternalMasses[set:`type`amplitudeSet] :=
+externalMasses[set:`type`fc`amplitudeSet] :=
+   Flatten[List@@process@set, 1][[All, 3]];
+externalMasses[set:`type`amplitudeSet] :=
    FeynArts`Mass[# /. -1 -> 1] &/@ getField[set, All];
-getExternalMasses // secure;
+externalMasses // secure;
 
 getField[set:`type`diagramSet, i:_Integer] :=
-   Flatten[List@@getProcess@set, 1][[i]] /; 0<i<=Plus@@(Length/@getProcess@set);
+   Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
 getField[set:`type`amplitudeSet, In] :=
-   First /@ getProcess[set][[1]];
+   First /@ process[set][[1]];
 getField[set:`type`amplitudeSet, Out] :=
-   First /@ getProcess[set][[2]];
+   First /@ process[set][[2]];
 getField[set:`type`amplitudeSet, All] :=
-   First /@ Flatten[List @@ getProcess[set], 1];
+   First /@ Flatten[List@@process@set, 1];
 getField // secure;
 
 fieldPattern[d:Head@`type`diagramSet, i_Integer] :=
@@ -146,54 +145,42 @@ fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
    fieldPattern[d, #] &/@ a;
 fieldPattern // secure;
 
-getExternalMomentumRules[option:True|False|OperatorsOnly|ExceptLoops,
-   amplitudes:`type`amplitudeSet] :=
-Module[{fsFields},
-   Switch[option,
-      True,
-         {SARAH`Mom[_Integer,_] :> 0},
-      False|OperatorsOnly|ExceptLoops,
-         fsFields = `rules`fields@getField[amplitudes, All];
-         {SARAH`Mom[i_Integer, lorIndex_] :>
-            SARAH`Mom[fsFields[[i]], lorIndex]}]];
-getExternalMomentumRules // secure;
-
-getSettings::usage = "
+settings::usage = "
 @brief Loads the file with process-specific settings. If there is no process
        file to load, defines default settings.";
 With[{dir = DirectoryName@$InputFileName},
-   getSettings[] :=
-   (  BeginPackage@"NPointFunctions`";
-      Begin@"`Private`";
-      `settings`topology = Default;
-      `settings`diagrams = Default;
-      `settings`amplitudes = Default;
-      `settings`sum = Default;
-      `settings`massless = Default;
-      `settings`momenta = Default;
-      `settings`regularization = Default;
-      `settings`order = Default;
-      `settings`chains = Default;
-      If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-         {dir, `options`observable[], "settings.m"};
-      Protect@Evaluate[Context[]<>"settings`*"];
-      End[];
-      EndPackage[];);];
-getSettings // secure;
+   settings[] :=
+      (  BeginPackage@"NPointFunctions`";
+         Begin@"`Private`";
+         `settings`topology = Default;
+         `settings`diagrams = Default;
+         `settings`amplitudes = Default;
+         `settings`sum = Default;
+         `settings`massless = Default;
+         `settings`momenta = Default;
+         `settings`regularization = Default;
+         `settings`order = Default;
+         `settings`chains = Default;
+         If[FileExistsQ@#, Get@#;]&@FileNameJoin@
+            {dir, `options`observable[], "settings.m"};
+         Protect@Evaluate[Context[]<>"settings`*"];
+         End[];
+         EndPackage[];);];
+settings // secure;
 
-emptyQ::usage = "
-@brief Checks, whether the lenght of expression is zero or not. In the latter
-       case returns in, otherwise writes an error message and stops
-       the evaluation.
+lengthyQ::usage = "
+@brief Checks, whether the ``Length`` of expression is zero or not.
+       In the latter case returns input, otherwise writes an error message
+       and stops the evaluation.
 @param input Any expression.
-@returns An input in case of non-zero length.";
-emptyQ[input:_] := With[{sym = Head@Unevaluated@input},
+@returns An input in case of non-zero ``Length`` of the input.";
+lengthyQ[input:_] := With[{sym = Head@Unevaluated@input},
    If[Length@input =!= 0,
       input,
-      sym::errEmpty = "The result is empty.";
-      Utils`AssertOrQuit[_, sym::errEmpty];]];
-emptyQ // Utils`MakeUnknownInputDefinition;
-emptyQ ~ SetAttributes ~ {Protected, HoldFirst};
+      sym::length = "The input has a zero lenght.";
+      Utils`AssertOrQuit[_, sym::length];]];
+lengthyQ // Utils`MakeUnknownInputDefinition;
+lengthyQ ~ SetAttributes ~ {Protected, HoldFirst};
 
 calculateInputs::usage = "
 @brief Applies ``FeynArts`` routines for a given process, preparing it for
@@ -204,12 +191,12 @@ calculateInputs::usage = "
 @todo If topologies are not generated, then check and return.";
 calculateInputs[inFields_, outFields_] :=
 Module[{topologies, diagrams, amplitudes},
-   getSettings[];
-   topologies = emptyQ@FeynArts`CreateTopologies[
+   settings[];
+   topologies = lengthyQ@FeynArts`CreateTopologies[
       `options`loops[],
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
-   diagrams = emptyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
+   diagrams = lengthyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
    diagrams = modify@diagrams;
 
    amplitudes = FeynArts`CreateFeynAmp@diagrams;
@@ -233,7 +220,7 @@ Module[{repl = {}, res},
    Do[repl = Join[repl, applyAction[ds, ac]];, {ac, sum}];
    res = List@@(ds /. repl);
    res = If[MatchQ[#, `type`diagram],
-            Table[{}, {Length@getInsertions@#}],
+            Table[{}, {Length@insertions@#}],
             First@#] &/@ res;
    Flatten[res, 1]];
 getSumSettings // secure;
@@ -266,7 +253,7 @@ getMasslessSettings[diagrams:`type`diagramSet] :=
 Module[{parse, rules, set},
    set = If[Default===#, {}, #]&@`settings`massless;
    parse = If[MatchQ[#1, `type`diagram],
-      List@@MapIndexed[{}&, getInsertions@#1],
+      List@@MapIndexed[{}&, insertions@#1],
       First@#1]&;
    rules = MapIndexed[applyAction[diagrams, #1]&, set];
    Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
@@ -394,7 +381,7 @@ getFieldInsertions::usage = "
 getFieldInsertions[set:`type`diagramSet] :=
    Map[Last, #, {3}] &@ Flatten[ getFieldInsertions /@ (List @@ set), 1];
 getFieldInsertions[diag:`type`diagram, numQ:True|False:False] :=
-   FindGenericInsertions[#, numQ] &/@ Apply[List, getInsertions@diag, {0, 1}];
+   FindGenericInsertions[#, numQ] &/@ Apply[List, insertions@diag, {0, 1}];
 getFieldInsertions // secure;
 
 FindGenericInsertions::usage = "
@@ -478,7 +465,7 @@ getFermionOrder::usage = "
 @returns A list of integers, representing an order of fermions.";
 getFermionOrder[expression:`type`diagramSet] :=
 Switch[`settings`order,
-   Default, Reverse@Range[Plus@@Length/@getProcess@expression],
+   Default, Reverse@Range[Plus@@Length/@process@expression],
    _, `settings`order];
 getFermionOrder // secure;
 
@@ -493,7 +480,7 @@ calculateAmplitudes::usage = "
          * subexpressions.";
 calculateAmplitudes[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
 Module[{
-      proc = getProcess@amplitudes,
+      proc = process@amplitudes,
       genericInsertions = getFieldInsertions@diagrams,
       combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
       ampsGen = FeynArts`PickLevel[Generic][amplitudes],
@@ -522,7 +509,7 @@ Module[{
          combinatorialFactors,
          getColourFactors@diagrams},
       chains,
-      subs] /. getExternalMomentumRules[`options`momenta[], amplitudes]];
+      subs] /. `rules`externalMomenta[`options`momenta[], amplitudes]];
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "
@@ -541,7 +528,7 @@ setZeroMassRules::usage = "
 Module[{rules},
    setZeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
       rules = RuleDelayed[#, 0] &/@
-         Riffle[getExternalMasses@fa, getExternalMasses@fc];
+         Riffle[externalMasses@fa, externalMasses@fc];
    setZeroMassRules // secure;
    getZeroMassRules[] := (
       Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];

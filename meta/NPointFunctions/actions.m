@@ -155,7 +155,7 @@ Module[{template},
    template[text:_, topologyQ:_, realization:_] :=
    If[topologyQ@getTopology@#,
       Print@text;
-      getTopology@# -> List@@Map[realization&, getInsertions@#],
+      getTopology@# -> List@@Map[realization&, insertions@#],
       (##&)[]]&;
 
    Module[{restrict},
