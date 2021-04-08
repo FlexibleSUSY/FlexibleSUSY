@@ -38,14 +38,14 @@ Begin@"`Private`";
 `type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
 `type`indexCol = FeynArts`Index[Global`Colour,_Integer];
 `type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
-`type`indexGeneric = FeynArts`Index[Generic, _Integer];
+`type`genericIndex = FeynArts`Index[Generic, _Integer];
 `type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
-`type`genericField = `type`field[`type`indexGeneric];
+`type`genericField = `type`field[`type`genericIndex];
 `type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
 `type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 `type`massType = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
 `type`genericMass =
-   FeynArts`Mass[`type`field[`type`indexGeneric], `type`massType];
+   FeynArts`Mass[`type`field[`type`genericIndex], `type`massType];
 
 `type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
 `type`fc`mass = 0|_Symbol|_Symbol@_Symbol;

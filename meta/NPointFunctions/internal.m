@@ -108,13 +108,13 @@ NPointFunction // secure;
 getInsertions[d:`type`diagram] := Last@d;
 getInsertions // secure;
 
-indexGeneric[index:_Integer] := FeynArts`Index[Generic, index];
-indexGeneric // secure;
+genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
+genericIndex // secure;
 
 genericMass[field:`type`field, index:_Integer] :=
-   FeynArts`Mass[field@indexGeneric@index, `type`massType];
+   FeynArts`Mass[field@genericIndex@index, `type`massType];
 genericMass[field:`type`field] :=
-   FeynArts`Mass[field@`type`indexGeneric, `type`massType];
+   FeynArts`Mass[field@`type`genericIndex, `type`massType];
 genericMass // secure;
 
 getProcess[set:`type`diagramSet|`type`amplitudeSet] :=
