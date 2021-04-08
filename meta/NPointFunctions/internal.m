@@ -34,7 +34,7 @@ Off[General::shdw];
 {  DiracChain, Mat};
 On[General::shdw];
 
-{  NPointFunctionFAFC, Init};
+{  NPointFunction};
 {  LorentzIndex, GenericSum, GenericIndex,
    GenericS, GenericF, GenericV, GenericU,
    OperatorsOnly, ExceptLoops} ~ SetAttributes ~ {Protected};
@@ -45,16 +45,12 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
-`file`particles;
-`file`contexts;
-`options`observable;
-`options`loops;
-`options`processes;
-`options`momenta;
-`options`onShell;
-`options`scheme;
+(* Reserving names *)
+`file`particles; `file`contexts;
+`options`observable; `options`loops; `options`processes; `options`momenta;
+`options`onShell; `options`scheme;
 
-Init[{formcalc_, model_, particles_, contexts_},
+NPointFunction[{formcalc_, model_, particles_, contexts_, in_, out_},
    {observable_, loops_, processes_, momenta_, onShell_, scheme_}] := (
    `file`particles[] := particles;
    `file`contexts[] := contexts;
@@ -73,8 +69,9 @@ Init[{formcalc_, model_, particles_, contexts_},
       FeynArts`InsertionLevel -> FeynArts`Classes];
    FormCalc`$FCVerbose = 0;
    If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
-   SetDirectory@formcalc;);
-init // secure;
+   SetDirectory@formcalc;
+   calculateInputs[ToExpression@in, ToExpression@out]);
+Engage // secure;
 
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
@@ -173,12 +170,12 @@ emptyQ[input:_] := With[{sym = Head@Unevaluated@input},
 emptyQ // Utils`MakeUnknownInputDefinition;
 emptyQ ~ SetAttributes ~ {Protected, HoldFirst};
 
-NPointFunctionFAFC::usage = "
+calculateInputs::usage = "
 @brief Applies ``FeynArts`` routines for a given process, preparing it for
        ``FormCalc``.
 @returns A structure, representing n-point function object.
 @todo If topologies are not generated, then check and return.";
-NPointFunctionFAFC[inFields_, outFields_] :=
+calculateInputs[inFields_, outFields_] :=
 Module[{topologies, diagrams, amplitudes},
    getSettings[];
    topologies = emptyQ@FeynArts`CreateTopologies[
@@ -195,7 +192,7 @@ Module[{topologies, diagrams, amplitudes},
 
    {  `rules`fields@{ getField[amplitudes, In], getField[amplitudes, Out]},
       calculateAmplitudes[diagrams, amplitudes]}];
-NPointFunctionFAFC // secure;
+calculateInputs // secure;
 
 getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on

@@ -370,24 +370,22 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
       CloseKernels@subKernel;];
    subKernel = LaunchSubkernelFor@"FormCalc code generation";
    SetSharedFunction[subWrite, Print];
-   With[{path = $Path, dir = Directory[],
+   With[{path = $Path,
          data = {formCalcDir, feynArtsModel, particleNamesFile,
-            particleNamespaceFile},
+            particleNamespaceFile,
+            FANamesForFields[inFields, particleNamesFile],
+            FANamesForFields[outFields, particleNamesFile]},
          options = {OptionValue@Observable,
             OptionValue@LoopLevel,
             SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
             OptionValue@ZeroExternalMomenta,
             OptionValue@OnShellFlag,
             OptionValue@Regularize},
-         meta = FlexibleSUSY`$flexiblesusyMetaDir,
-         in = FANamesForFields[inFields, particleNamesFile],
-         out = FANamesForFields[outFields, particleNamesFile]},
+         meta = FlexibleSUSY`$flexiblesusyMetaDir},
       nPointFunction = RemoveEmptyGenSums@ParallelEvaluate[
          $Path = path;
-         SetDirectory@dir;
          Get@FileNameJoin@{meta, "NPointFunctions", "internal.m"};
-         NPointFunctions`Init[data, options];
-         NPointFunctions`NPointFunctionFAFC[ToExpression@in, ToExpression@out],
+         NPointFunction[data, options],
          subKernel,
          DistributedContexts -> None];];
    CloseKernels@subKernel;
