@@ -373,8 +373,8 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
    With[{path = $Path,
          data = {formCalcDir, feynArtsModel, particleNamesFile,
             particleNamespaceFile,
-            FANamesForFields[inFields, particleNamesFile],
-            FANamesForFields[outFields, particleNamesFile]},
+            convertFields[inFields, particleNamesFile],
+            convertFields[outFields, particleNamesFile]},
          options = {OptionValue@Observable,
             OptionValue@LoopLevel,
             SymbolName/@If[List=!=Head@#, {#}, #]&@OptionValue@KeepProcesses,
@@ -595,29 +595,25 @@ Module[{fileHandle = OpenWrite@fileName},
    Close@fileHandle;];
 writeNamespaceFile // secure;
 
-FANamesForFields::usage = "
-@brief Translates ``SARAH``-style fields to ``FeynArts``-style fields.
-@param fields List of ``SARAH``-style fields.
-@param particleNamesFile The path to the ``SARAH``-created ``FeynArts``
-       particle names file.
-@returns A list of the ``FeynArts`` names (as strings) for the given
-         ``SARAH-style`` fields.";
-FANamesForFields[fields_,particleNamesFile_String] :=
-Module[{uniqueFields, faFieldNames},
-   uniqueFields = DeleteDuplicates[
-      CXXDiagrams`RemoveLorentzConjugation@# &/@ fields];
-   faFieldNames =
-   Flatten[
-      StringCases[Utils`ReadLinesInFile@particleNamesFile,
-         ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :> "FeynArts`" <> x <> "]"]&/@
-            uniqueFields];
-   Utils`AssertOrQuit[Length@faFieldNames > 0, FANamesForFields::errSARAH];
-   fields /. MapThread[Rule, {uniqueFields, faFieldNames}] /.
-      {  SARAH`bar@field_String :> "-" <> field,
-         Susyno`LieGroups`conj@field_String :> "-" <> field}];
-FANamesForFields::errSARAH = "
-It seems that SARAH`.` has changed conventions for <ParticleNames>.dat file.";
-FANamesForFields // secure;
+convertFields::usage = "
+@brief Changes given ``SARAH`` fields to ``FeynArts`` ones.
+@param fields List of ``SARAH`` fields.
+@param particles A ``String`` name of a file, which is created by ``SARAH``
+       and contains ``FeynArts`` particle names.
+@returns A set of ``FeynArts`` names (each as ``String``) for given ``SARAH``
+         fields.";
+convertFields[fields_, particles_String] :=
+   Module[{unique, faNames},
+      unique = DeleteDuplicates[
+         CXXDiagrams`RemoveLorentzConjugation[#]&/@ fields];
+      faNames = Flatten[
+         StringCases[Utils`ReadLinesInFile@particles,
+            ToString@# ~~ ": " ~~ x__ ~~ "]" ~~ ___ :>
+               "FeynArts`" <> x <> "]"]&/@ unique];
+      fields /. MapThread[Rule, {unique, faNames}] /.
+         {  SARAH`bar@field_String :> "-" <> field,
+            Susyno`LieGroups`conj@field_String :> "-" <> field}];
+convertFields // secure;
 
 RemoveEmptyGenSums::usage = "
 @brief Sometimes after ``FeynArts`` + ``FormCalc`` calculation some generic sums

@@ -88,6 +88,9 @@ define[`topologyQ`boxT, {t:`type`topology} :>
 define[`topologyQ`boxU, {t:`type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
 
+getTopology[d:`type`diagram] := First@d;
+getTopology // secure;
+
 getExcludeTopologies::usage = "
 @brief Registers a function, whose outcome (``True`` or everything else)
        determines whether the topology is kept or not.

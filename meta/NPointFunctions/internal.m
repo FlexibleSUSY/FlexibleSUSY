@@ -30,6 +30,7 @@ Block[{Format},
 
 BeginPackage@"NPointFunctions`";
 
+(* Reserving names *)
 Off[General::shdw];
 {  DiracChain, Mat};
 On[General::shdw];
@@ -45,40 +46,64 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
+With[{dir = DirectoryName@$InputFileName},
+   Get@FileNameJoin@{dir, #<>".m"}&/@
+      {"type", "rules", "actions", "chains", "topologies"};];
+
 (* Reserving names *)
 `file`particles; `file`contexts;
 `options`observable; `options`loops; `options`processes; `options`momenta;
 `options`onShell; `options`scheme;
 
-NPointFunction[{formcalc_, model_, particles_, contexts_, in_, out_},
-   {observable_, loops_, processes_, momenta_, onShell_, scheme_}] := (
-   `file`particles[] := particles;
-   `file`contexts[] := contexts;
-   `options`observable[] := SymbolName@Head@observable;
-   `options`loops[] := loops;
-   `options`processes[] := processes;
-   `options`momenta[] := momenta;
-   `options`onShell[] := onShell;
-   `options`scheme[] :=
-      Switch[scheme, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
+NPointFunction::usage = "
+@brief The entry point of the calculation.
+       Sets files and options up, calculates diagrams and amplitudes using
+       ``FeynArts`` and ``FormCalc``.
+@param formcalc A ``String`` directory of ``FormCalc`` output.
+@param model A ``String`` name of ``FeynArts`` model file.
+@param particles A ``String`` name of a file, which is created by ``SARAH``
+       and contains ``FeynArts`` particle names.
+@param contexts A ``String`` name of a file, which contains information
+       about particle contexts in ``SARAH`` conventions.
+@param in An expression, containing ``FeynArts`` fields (each as ``String``),
+       required to be *incoming* fields for the amplitude.
+@param out An expression, containing ``FeynArts`` fields (each as ``String``),
+       required to be *outgoing* fields for the amplitude.
+@param observable An observable name in the form
+       ``FlexibleSUSYObservable`<Name>[<Arguments>]``.
+@param loops The loop level of calculation (as ``Integer``).
+@param processes A ``List`` of one or many ``Symbol`` of processes
+       to calculate.
+@param momenta A ``Symbol``, which defines how to treat momenta of external
+       particles.
+@param onShell A flag, corresponding to the \"on-shellness\" of external
+       particles.
+@param scheme The main regularization scheme to be used.
+       Can be overriden by ```settings`regularization``.
+@returns An object of the n-point function in ``FlexibleSUSY`` conventions."
+NPointFunction[
+   {formcalc_, model_, particles_, contexts_, in_, out_},
+   {observable_, loops_, processes_, momenta_, onShell_, scheme_}] :=
+   (  `file`particles[] := particles;
+      `file`contexts[] := contexts;
+      `options`observable[] := SymbolName@Head@observable;
+      `options`loops[] := loops;
+      `options`processes[] := processes;
+      `options`momenta[] := momenta;
+      `options`onShell[] := onShell;
+      `options`scheme[] :=
+         Switch[scheme, FlexibleSUSY`DRbar, 4, FlexibleSUSY`MSbar, D];
 
-   FeynArts`$FAVerbose = 0;
-   FeynArts`InitializeModel@model;
-   SetOptions[FeynArts`InsertFields,
-      FeynArts`Model -> model,
-      FeynArts`InsertionLevel -> FeynArts`Classes];
-   FormCalc`$FCVerbose = 0;
-   If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
-   SetDirectory@formcalc;
-   calculateInputs[ToExpression@in, ToExpression@out]);
-Engage // secure;
-
-With[{dir = DirectoryName@$InputFileName},
-   Get@FileNameJoin@{dir, #<>".m"}&/@
-      {"type", "rules", "actions", "chains", "topologies"};];
-
-getTopology[d:`type`diagram] := First@d;
-getTopology // secure;
+      FeynArts`$FAVerbose = 0;
+      FeynArts`InitializeModel@model;
+      SetOptions[FeynArts`InsertFields,
+         FeynArts`Model -> model,
+         FeynArts`InsertionLevel -> FeynArts`Classes];
+      FormCalc`$FCVerbose = 0;
+      If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
+      SetDirectory@formcalc;
+      calculateInputs[ToExpression@in, ToExpression@out]);
+NPointFunction // secure;
 
 getInsertions[d:`type`diagram] := Last@d;
 getInsertions // secure;
@@ -172,8 +197,10 @@ emptyQ ~ SetAttributes ~ {Protected, HoldFirst};
 
 calculateInputs::usage = "
 @brief Applies ``FeynArts`` routines for a given process, preparing it for
-       ``FormCalc``.
-@returns A structure, representing n-point function object.
+       ``FormCalc`` and then calls the latter's routines.
+@param inFields A set of *incoming* fields.
+@param outFields A set of *outgoing* fields.
+@returns An object of the n-point function in ``FlexibleSUSY`` conventions.
 @todo If topologies are not generated, then check and return.";
 calculateInputs[inFields_, outFields_] :=
 Module[{topologies, diagrams, amplitudes},
@@ -649,3 +676,4 @@ convertToFS // secure;
 
 End[];
 EndPackage[];
+$ContextPath = DeleteCases[$ContextPath, "NPointFunctions`"];
