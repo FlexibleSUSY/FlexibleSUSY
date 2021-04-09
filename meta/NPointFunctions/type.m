@@ -28,21 +28,23 @@ Begin@"`Private`";
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
       `type`vertex, `type`vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
 `type`topology = FeynArts`Topology[_Integer][`type`propagator..];
+
 `type`diagram = Rule[`type`topology, FeynArts`Insertions[Generic][__]];
 `type`diagramSet = FeynArts`TopologyList[_][`type`diagram..];
+
 `type`amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
    Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]],
    _,
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
 `type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
+
 `type`indexCol = FeynArts`Index[Global`Colour,_Integer];
 `type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
 `type`genericIndex = FeynArts`Index[Generic, _Integer];
+
 `type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 `type`genericField = `type`field[`type`genericIndex];
-`type`pickTopoAmp = {Rule[True | False,{__Integer}]..};
-`type`saveAmpClass = {Rule[_Integer,{__Integer} | All]..};
 `type`mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
 `type`genericMass =
    FeynArts`Mass[`type`field[`type`genericIndex], `type`mass];
@@ -54,6 +56,18 @@ Begin@"`Private`";
 `type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
 `type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
 `type`fc`amplitudeSet = {`type`fc`amplitude..};
+
+`type`head =
+   {_FeynArts`TopologyList, _FeynArts`FeynAmpList};
+`type`generic =
+   FeynArts`Insertions[Generic][_, _];
+`type`classes =
+   FeynArts`Insertions[FeynArts`Classes][_, {__Rule}];
+`type`tree =
+   node[`type`head,
+      node[`type`topology,
+         node[`type`generic,
+            node[`type`classes]..]..]..];
 
 End[];
 EndPackage[];

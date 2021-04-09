@@ -57,71 +57,15 @@ Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
          clean];
 getActions // secure;
 
-deleteClasses[a:`type`amplitudeSet,
-   topoAmpList:`type`pickTopoAmp, classesToSave:`type`saveAmpClass] :=
-Module[{i, numbersOfAmplitudes, numAmp, res = a},
-   numbersOfAmplitudes = Cases[topoAmpList, Rule[True, {e:__}] :> e];
-   Do[numAmp = Part[numbersOfAmplitudes,i];
-      res[[numAmp,4,2]] = res[[numAmp,4,2]][[numAmp/.classesToSave]];,
-      {i,Length@numbersOfAmplitudes}];
-   res];
-deleteClasses[d:`type`diagramSet,
-   topoAmpList:`type`pickTopoAmp, classesToSave:`type`saveAmpClass] :=
-Module[{i, currentClasses, res = d},
-   Do[If[topoAmpList[[i,1]],
-         currentClasses = topoAmpList[[i,2]]/.classesToSave;
-         currentClasses = Array[Rule[{#,2}, res[[i,2,#,2]][[
-            Part[currentClasses,#]]]]&,Length@currentClasses];
-         res[[i, 2]] = ReplacePart[res[[i, 2]], currentClasses];];,
-      {i,Length@topoAmpList}];
-   res];
-deleteClasses // secure;
-
-getTruePositions::usage = "
-@brief Converts a list with a boolean variables to the list of positions for
-       all true entries.
-@param list A list of booleans.
-@returns A list of integers (or an empty one)."
-getTruePositions[list:{(True|False)...}] := Flatten@Position[list, True];
-getTruePositions // secure;
-
-`action`amplitudes = Sequence[
-   {diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet},
-   text_String[topologyQ_, {function:UnsameQ, name_, value_}]];
-
-getClassVariables[amp:`type`amplitude] := amp[[4, 1]];
-getClassVariables // secure;
-
-getClassInsertions[amp:`type`amplitude] := amp[[4, 2]];
-getClassInsertions // secure;
-
-getClassRules[amp:`type`amplitude] :=
-   Thread[getClassVariables@amp -> Transpose[List@@getClassInsertions@amp]];
-getClassRules // secure;
-
-applyAction@`action`amplitudes :=
-Module[{ daPairs, amplitudeNumbers, saveClassRules, viPairs, insertions, res},
-   daPairs = getAmplitudeNumbers[diagrams, topologyQ];
-   If[!Or@@daPairs[[All, 1]], Return@{diagrams, amplitudes}];
-   amplitudeNumbers = Cases[daPairs, Rule[True, {e:__}] :> e];
-   saveClassRules = Table[
-      viPairs = getClassRules@amplitudes[[i]];
-      insertions = Cases[viPairs, (name -> {e:__}) :> e, Infinity ];
-      i -> getTruePositions[function[#, value] &/@ insertions] /. {} -> All,
-      {i, amplitudeNumbers}];
-   res =
-   {  deleteClasses[diagrams, daPairs, saveClassRules],
-      deleteClasses[amplitudes, daPairs, saveClassRules]};
-   Print@text;
-   printDiagramsInfo@res[[1]];
-   res];
+applyAction[tree:`type`tree, {s_String, tQ_, fun_Function}] :=
+   printDiagramsInfo[s, erase[tree, tQ, fun]];
 
 `action`diagrams = "
 @brief Represents an action, which is supposed to be done with diagrams.
 @param diagrams A set of diagrams.
 @param s A string with comment.
 @param t A topology or a set of topologies, where action should be applied.
-@param c A criterion, which is passed to a FeynArts`DiagramSelect.";
+@param c A criterion, which is passed to a ``FeynArts`DiagramSelect``.";
 `action`diagrams = Sequence[diagrams:`type`diagramSet,
    s_String[t:_Symbol|_Function, c_Function]];
 `action`diagramsCompact = Sequence[d:`type`diagramSet,

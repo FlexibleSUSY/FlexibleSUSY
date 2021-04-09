@@ -60,9 +60,9 @@
 
 `settings`amplitudes =
 {  Vectors ->
-      {  {  "penguins: remove tree-like massless vector bosons"[
+      {  {  {  "penguins: remove tree-like massless vector bosons",
                `topologyQ`penguinT,
-               {UnsameQ, genericMass[FeynArts`V, 5], 0}]},
+               FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&}},
          {}}};
 
 `settings`sum =

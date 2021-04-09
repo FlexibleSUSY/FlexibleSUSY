@@ -1129,7 +1129,8 @@ strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 createLoopFunctions[modifiedExpr:{__}] :=
 Module[{onePoint,
       onePointTemplate =
-         {  LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"}&,
+         {  LoopTools`A0@@#2 -> "a"<>#1<>"[0]",
+            LoopTools`A0i[LoopTools`aa0,Sequence@@#2] -> "a"<>#1<>"[0]"}&,
       twoPoint,
       twoPointTemplate =
          {  LoopTools`B0i[LoopTools`bb0,Sequence@@#2] -> "b"<>#1<>"[0]",

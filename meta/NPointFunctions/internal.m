@@ -48,7 +48,7 @@ secure // secure;
 
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
-      {"type", "rules", "actions", "chains", "topologies"};];
+      {"type", "rules", "actions", "chains", "topologies", "tree"};];
 
 NPointFunction::usage = "
 @brief The entry point of the calculation.
@@ -101,7 +101,7 @@ NPointFunction[
       FormCalc`$FCVerbose = 0;
       If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
       SetDirectory@formcalc;
-      calculateInputs[ToExpression@in, ToExpression@out]);
+      calculateTree[ToExpression@in, ToExpression@out]);
 NPointFunction // secure;
 
 insertions[d:`type`diagram] := Last@d;
@@ -146,8 +146,25 @@ fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
 fieldPattern // secure;
 
 settings::usage = "
-@brief Loads the file with process-specific settings. If there is no process
-       file to load, defines default settings.";
+@brief Defines default settings. Loads all settings from file, corresponding
+       to an observable. Can be used to parse the following settings:
+
+       ```settings`diagrams``
+          Is used to remove diagrams *via* actions.
+       ```settings`amplitudes``
+          Is used to remove diagrams and amplitudes *via* actions.
+       ```settings`regularization``
+          Some amplitudes are calculated incorrectly in CDR.
+          For handling this, one can override used scheme for some topologies.
+          Uses rules one-by-one for replacing if allowed by topology.
+       ```settings`momenta``
+          Eliminate specific momenta in some topologies.
+          Uses rules one-by-one for replacing if allowed by topology.
+@param input An object to work with.
+@param settings A list of data, which specifies replacements for each topology.
+@param default A default value to be used after the ones, given by
+       ``settings``.
+@returns A set of settings for ``FormCalc`Dimension``.";
 With[{dir = DirectoryName@$InputFileName},
    settings[] :=
       (  BeginPackage@"NPointFunctions`";
@@ -166,6 +183,21 @@ With[{dir = DirectoryName@$InputFileName},
          Protect@Evaluate[Context[]<>"settings`*"];
          End[];
          EndPackage[];);];
+settings[input:`type`tree, settings:{__Rule}|Default, default_] :=
+   Module[{res = input},
+      If[settings =!= Default,
+         Set[res, res /.
+            node[t:`type`topology /; #1@t, rest__] :>
+               node[t, rest] /. node[`type`generic, __] -> #2]&@@#&/@
+            settings;];
+      res /.
+         node[`type`generic, __] -> default /.
+         node[`type`topology, rest__] :> rest /.
+         node[`type`head, rest__] :> {rest}];
+settings[input:`type`tree|`type`diagramSet, settings:{__Rule}|Default] :=
+   Module[{res = input},
+      Set[res, applyAction[res, #]]&/@ getActions@settings;
+      res];
 settings // secure;
 
 lengthyQ::usage = "
@@ -182,31 +214,28 @@ lengthyQ[input:_] := With[{sym = Head@Unevaluated@input},
 lengthyQ // Utils`MakeUnknownInputDefinition;
 lengthyQ ~ SetAttributes ~ {Protected, HoldFirst};
 
-calculateInputs::usage = "
+calculateTree::usage = "
 @brief Applies ``FeynArts`` routines for a given process, preparing it for
        ``FormCalc`` and then calls the latter's routines.
 @param inFields A set of *incoming* fields.
 @param outFields A set of *outgoing* fields.
-@returns An object of the n-point function in ``FlexibleSUSY`` conventions.
-@todo If topologies are not generated, then check and return.";
-calculateInputs[inFields_, outFields_] :=
-Module[{topologies, diagrams, amplitudes},
+@returns An object of the n-point function in ``FlexibleSUSY`` conventions.";
+calculateTree[inFields_, outFields_] :=
+Module[{topologies, d, a, tree},
    settings[];
    topologies = lengthyQ@FeynArts`CreateTopologies[
       `options`loops[],
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
-   diagrams = lengthyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
-   diagrams = modify@diagrams;
+   d = lengthyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
+   d = settings[d, `settings`diagrams];
+   tree = settings[plant@d, `settings`amplitudes];
+   picture@tree;
 
-   amplitudes = FeynArts`CreateFeynAmp@diagrams;
-   {diagrams, amplitudes} = modify[diagrams, amplitudes];
-
-   debugMakePictures[diagrams, amplitudes];
-
-   {  `rules`fields@{ getField[amplitudes, In], getField[amplitudes, Out]},
-      calculateAmplitudes[diagrams, amplitudes]}];
-calculateInputs // secure;
+   {  `rules`fields@{  getField[amplitudes@tree, In],
+                       getField[amplitudes@tree, Out]},
+      calculateAmplitudes@tree}];
+calculateTree // secure;
 
 getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on
@@ -259,204 +288,93 @@ Module[{parse, rules, set},
    Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
 getMasslessSettings // secure;
 
-getRegularizationSettings::usage = "
-@brief Some amplitudes are calculated incorrectly in some schemes (like box
-       diagrams in CDR). For handling this, one can overwrite used scheme for
-       some topologies.
-@param diagrams A set of diagrams.
-@returns A set of settings for ``FormCalc`Dimension``.
-@todo Unify with ``getMomSettings``.";
-getRegularizationSettings::errOverlap = "
-Topology rules in `.`settings`.`regularization overlap.";
-getRegularizationSettings[diagrams:`type`diagramSet] :=
-Module[{scheme, replacements, f},
-   scheme = `options`scheme[];
-   f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
-   If[`settings`regularization === Default,
-      Array[scheme&, getClassAmount@diagrams],
-      replacements = Transpose[f /@ `settings`regularization];
-      Flatten[Switch[ Count[First/@#,True],
-         0, Array[scheme&, Length[False /. #]],
-         1, True /. #,
-         _, Utils`AssertOrQuit[False, getRegularizationSettings::errOverlap]
-         ] &/@ replacements]]];
-getRegularizationSettings // secure;
-
-getMomSettings::usage = "
-@brief Uses settings to eliminale specific momenta in specific topologies.
-@param diagrams A set of topologies with class insertions.
-@returns A List of option values for ``FormCalc`MomElim`` for every generic
-         amplitude.";
-getMomSettings::errOverlap = "
-Topology rules in `.`settings`.`momenta overlap.";
-getMomSettings[diagrams:`type`diagramSet] :=
-Module[{replacements, f},
-   f = (getAmplitudeNumbers[diagrams, First@#] /. x:_Integer :> Last@#) &;
-   If[`settings`momenta === Default,
-      Array[Automatic&, getClassAmount@diagrams],
-      replacements = Transpose[f /@ `settings`momenta];
-      Flatten[Switch[ Count[First/@#,True],
-         0, Array[Automatic&, Length[False /. #]],
-         1, True /. #,
-         _, Utils`AssertOrQuit[False, getMomSettings::errOverlap]
-         ] &/@ replacements]]];
-getMomSettings // secure;
-
-modify::usage = "
-@brief Changes amplitudes and diagrams according to ```settings`diagrams``
-       and ```settings`amplitudes``.
-@param diagrams A set of diagrams.
-@param amplitudes A set of amplitudes.
-@returns A modified set of diagrams and amplitudes.";
-modify[diagrams:`type`diagramSet] :=
-Module[{d = diagrams},
-   Do[d = applyAction[d, ac];, {ac, getActions@`settings`diagrams}];
-   d];
-modify[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
-Module[{d = diagrams, a = removeColours@amplitudes},
-   Do[{d, a} = applyAction[{d, a}, ac];, {ac, getActions@`settings`amplitudes}];
-   {d, a}];
-modify // secure;
-
-removeColours[i:`type`amplitudeSet] :=
-Delete[i, Position[i, FeynArts`Index[Global`Colour, _Integer]]];
-removeColours // secure;
-
-getAmplitudeNumbers::usage = "
-@brief Gives numbers of amplitudes, accepted by a criterion on topology.
-@param diagrams A set of diagrams.
-@param critFunction A function of one argumentfor topology selection.
-       If critFunction gives True, then topology is accepted.
-@returns List of rules of the form::
-
-            <boolean> -> {<integer>..}
-
-         LHS stands for the topology, RHS gives numbers of classes
-         (and the numbers of amplitudes the same time).";
-getAmplitudeNumbers[diagrams:`type`diagramSet, critFunction_] :=
-Module[{topologies, genNums, numRegions, takeOrNot},
-   topologies = List@@First/@diagrams;
-   genNums = Length/@(List@@Last/@diagrams);
-   numRegions = Array[Range[Plus@@genNums[[1;;#-1]]+1,Plus@@genNums[[1;;#]]]&,Length@genNums];
-   takeOrNot = Array[TrueQ@critFunction@Part[topologies,#]&,Length@topologies];
-   MapThread[#1->#2&,{takeOrNot,numRegions}]];
-getAmplitudeNumbers // secure;
-
+printDiagramsInfo[s_String, tree:`type`tree, where_String:" "] :=
+   Module[{g, c},
+      g = Length@Cases[tree, `type`generic, Infinity];
+      c = Length@Cases[tree, `type`classes, Infinity];
+      Print@s;
+      Print[where,"in total: ", g," Generic, ", c," Classes insertions"];
+      tree];
 printDiagramsInfo[diagrams:`type`diagramSet, where_String:" "] :=
-Module[{nGeneric, nClasses},
-   nGeneric = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True];
-   nClasses = getClassAmount@diagrams;
-   Print[where,"in total: ",nGeneric," Generic, ",nClasses," Classes insertions"];];
+   Module[{g, c},
+      g = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True];
+      c = getClassAmount@diagrams;
+      Print[where,"in total: ", g," Generic, ", c," Classes insertions"];];
 printDiagramsInfo // secure;
 
 getClassAmount[set:`type`diagramSet] :=
    Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
 getClassAmount // secure;
 
-debugMakePictures[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
-Module[{out = {}, directory, name},
-   name = StringJoin[ToString /@ (`rules`fields@Join[getField[amplitudes, All],
-      `options`processes[]] /. e_[{_}]:>e)];
-   directory = DirectoryName[FeynArts`$Model<>".mod"];
-   FeynArts`Paint[diagrams,
-      FeynArts`PaintLevel -> {Generic},
-      FeynArts`ColumnsXRows -> 1,
-      FeynArts`FieldNumbers -> True,
-      FeynArts`SheetHeader -> None,
-      FeynArts`Numbering -> FeynArts`Simple,
-      DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
-   Put[out, FileNameJoin@{directory, name<>".m"}]];
-debugMakePictures // secure;
+picture[tree:`type`tree] :=
+   Module[{out = {}, directory, name},
+      name = StringJoin[ToString /@ (
+         `rules`fields@Join[getField[amplitudes@tree, All],
+         `options`processes[]] /. e_[{_}]:>e)];
+      directory = DirectoryName[FeynArts`$Model<>".mod"];
+      FeynArts`Paint[diagrams@tree,
+         FeynArts`PaintLevel -> {Generic},
+         FeynArts`ColumnsXRows -> 1,
+         FeynArts`FieldNumbers -> True,
+         FeynArts`SheetHeader -> None,
+         FeynArts`Numbering -> FeynArts`Simple,
+         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
+      Put[out, FileNameJoin@{directory, name<>".m"}]];
+picture // secure;
 
-getFieldInsertions::usage = "
-@brief Applies ``FindGenericInsertions`` to a set of diagrams or one.
-@param set A set of diagrams.
+fieldInsertions::usage = "
+@brief Finds insertions, related to fields.
+@param tree A ``tree`` object.
 @param diag A single diagram.
-@param numQ Responsible for the type of output field names.
-@returns For a single diagram returns ``List`` (for a given topology) of
-         ``List`` (for all generic fields) of ``List``
-         (for all class fields) of rules
-         ``{{{x->y,..},..},..}``. For a set of diagrams, this construct
-         is further transformed.";
-getFieldInsertions[set:`type`diagramSet] :=
-   Map[Last, #, {3}] &@ Flatten[ getFieldInsertions /@ (List @@ set), 1];
-getFieldInsertions[diag:`type`diagram, numQ:True|False:False] :=
-   FindGenericInsertions[#, numQ] &/@ Apply[List, insertions@diag, {0, 1}];
-getFieldInsertions // secure;
+@param graph A ``FeynmanGraph[__][__]`` object.
+@param insert A ``Insertions[Classes][__]`` object.
+@param keepNumQ Responsible for the type of output field names.
+       ``FeynmanGraph`` on a generic level contains
+       ``Field[num] -> <generic particle>``.
+       ``FeynmanGraph`` on a classes level contains
+       ``Field[num] -> <classes particle>``.
 
-FindGenericInsertions::usage = "
-@brief generic ``FeynmanGraph`` has rules ``Field[num]->particleType``,
-       class ``FeynmanGraph`` has rules ``Field[num]->particleClass``.
-       This function gives pairs ``particleType[gen,num]->particleClass``,
-       avoiding ``Field[_]`` mediator (if ``keepFieldNum==True``, then
-       ``Field[_]->particleClass`` is given).
-@param graphGen ``FeynmanGraph[__][__]``.
-@param insertCl ``Insertions[Classes][__]``.
-@param keepFieldNum Changes the type of output field names.
-       ``True`` gives ``Field[_]`` names, ``False`` gives ``particleClass``
-       names.
-@returns A sorted ``List`` for all generic fields of ``List`` for all
-         class fields of rules ``{{x->y,..},..}``.
-@note This function doesn't look at external particles.
+       * ``True``: then ``Field[_] -> <classes particle>`` is created
+         for a diagram.
+       * ``False``: ``<generic particle> -> <classes particle>`` is created
+         for a diagram.
+@returns * For a single diagram returns 1) ``List`` for topology level of
+           2) ``List`` for generic level of 3) ``List`` for classes level of
+           field insertion rules::
+
+              1) 2) 3)
+              {  {  {Rule[<expr>, <class field>]..}..}..}
+
+         * For a set of diagrams only <class field> is taken instead of the
+           whole ``Rule``.
 @note All indices in rhs. of rules are removed.";
-FindGenericInsertions[{graphGen_,insertCl_}, keepFieldNum_] :=
+fieldInsertions[tree:`type`tree] :=
+   Map[Last, #, {3}] &@ Flatten[ fieldInsertions /@ List@@diagrams@tree, 1];
+fieldInsertions[diag:`type`diagram, keepNumQ:True|False:False] :=
+   fieldInsertions[#, keepNumQ] &/@ Apply[List, insertions@diag, {0, 1}];
+fieldInsertions[{graph_, insert_}, keepNumQ_] :=
 Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
-   toGenericIndexConventionRules = Cases[graphGen,
+   toGenericIndexConventionRules = Cases[graph,
       Rule[FeynArts`Field[index_Integer],type_Symbol] :>
       Rule[FeynArts`Field@index, type[FeynArts`Index[Generic,index]]]];
    fieldsGen = toGenericIndexConventionRules[[All,1]];
    genericInsertions = Cases[#,
       Rule[genericField_,classesField_] /; MemberQ[fieldsGen, genericField] :>
-      Rule[genericField, StripParticleIndices@classesField]] &/@ insertCl;
-   SortBy[#,First]&/@ If[keepFieldNum,
+      Rule[genericField, stripIndices@classesField]] &/@ insert;
+   SortBy[#,First]&/@ If[keepNumQ,
       List @@ genericInsertions,
       List @@ genericInsertions /. toGenericIndexConventionRules]];
-FindGenericInsertions // secure;
+fieldInsertions // secure;
 
-StripParticleIndices::usage = "
-@brief Removes particle indices from a given (possibley generic) field.
+stripIndices::usage = "
+@brief Removes particle indices from a given field.
 @param field the given field.
 @returns The given field with all indices removed.";
-StripParticleIndices[Times[-1,field_]] :=
-   Times[-1, StripParticleIndices[field]];
-StripParticleIndices[genericType_[classIndex_, ___]] :=
-   genericType@classIndex;
-StripParticleIndices // secure;
-
-getColourFactors::usage = "
-@brief Creates colour factors for a given diagram.
-@param ds A diagram set.
-@param diagram A diagram to work with.
-@returns List (for a given topology) of lists (for all generic fields) of
-         colour factors.
-@note During generation of genericDiagram at 1-loop level the ii-type loop
-      propagators have the largest number because of ``FeynArts``.
-@note In seqProp numbers of the first vertices inside propagators are sorted
-      by ``FeynArts``.
-@note External fields always come at first places in adjacency matrix.
-@note This function doesn't know anything about ``CXXDiagrams`` context.";
-getColourFactors[ds:`type`diagramSet] :=
-   `rules`fields@Flatten[getColourFactors /@ (List @@ ds), 1];
-getColourFactors[diagram:(_[_][seqProp__]->_[_][_[__][rulesFields__]->_,___])] :=
-Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram,
-      genericInsertions},
-   propPatt[i_, j_, f_] := _[_][_[_][i], _[_][j], f];
-   adjacencyMatrix = Module[
-      {adjs = Tally[{seqProp}/.propPatt[i_,j_,_]:>{{i,j},{j,i}}] },
-      Normal@SparseArray@Flatten[{#[[1,1]]->#[[2]],#[[1,2]]->#[[2]]} &/@ adjs]];
-   externalRules = Cases[{rulesFields}, HoldPattern[_[_]->_Symbol[__]]];
-   genericDiagram = Module[
-      {fld = Flatten[{seqProp}/.propPatt[i_,j_,f_]:>{{j,i,-f},{i,j,f}}, 1] },
-      GatherBy[SortBy[fld,First],First] /. {_Integer, _Integer, f_} :> f
-      ] /. Join[ {#} -> # &/@ externalRules[[All, 1]]];
-   genericInsertions = getFieldInsertions[diagram, True];
-   Map[CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
-      CXXDiagrams`IndexDiagramFromGraph[
-         genericDiagram /. externalRules /. #, adjacencyMatrix],
-      adjacencyMatrix] &,
-      genericInsertions,
-      {2}]];
-getColourFactors // secure;
+stripIndices[Times[-1, field_]] :=
+   -stripIndices@field;
+stripIndices[name_[class_, ___]] :=
+   name@class;
+stripIndices // secure;
 
 getFermionOrder::usage = "
 @brief Returns the order of fermions for ``FermionOrder`` option.
@@ -471,19 +389,16 @@ getFermionOrder // secure;
 
 calculateAmplitudes::usage = "
 @brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
-@param diagrams A set of diagrams.
-@param amplitudes A of amplitudes (without colours).
+@param tree A set of data in the form of a ``tree`` object.
 @returns The main part of n-point function object, containing:
 
          * generic amplitudes,
          * class specific insertions,
          * subexpressions.";
-calculateAmplitudes[diagrams:`type`diagramSet, amplitudes:`type`amplitudeSet] :=
+calculateAmplitudes[tree:`type`tree] :=
 Module[{
-      proc = process@amplitudes,
-      genericInsertions = getFieldInsertions@diagrams,
-      combinatorialFactors = CombinatorialFactorsForClasses /@ List@@amplitudes,
-      ampsGen = FeynArts`PickLevel[Generic][amplitudes],
+      proc = process@amplitudes@tree,
+      ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree],
       feynAmps, generic, chains, subs, zeroedRules},
    If[`options`momenta[],
       ampsGen = FormCalc`OffShell[ampsGen,
@@ -493,23 +408,25 @@ Module[{
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> `options`onShell[],
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> getFermionOrder@diagrams,
+         FormCalc`FermionOrder -> getFermionOrder@diagrams@tree,
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #3]&,
-      {ampsGen, getRegularizationSettings@#, getMomSettings@#} &@ diagrams,
+      {  ampsGen,
+         settings[tree, `settings`regularization, `options`scheme[]],
+         settings[tree, `settings`momenta, Automatic]},
       "Amplitude calculation"] //. FormCalc`GenericList[];
-   generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams}];
-   {generic, chains, subs} = proceedChains[diagrams, amplitudes, generic];
-   setZeroMassRules@{amplitudes, feynAmps};
+   generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams@tree}];
+   {generic, chains, subs} = proceedChains[diagrams@tree, amplitudes@tree, generic];
+   setZeroMassRules@{amplitudes@tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
-      {generic, chains, subs}, diagrams, `options`momenta[]];
+      {generic, chains, subs}, diagrams@tree, `options`momenta[]];
    convertToFS[
       {  generic,
-         genericInsertions,
-         combinatorialFactors,
-         getColourFactors@diagrams},
+         fieldInsertions@tree,
+         combinatoricalFactors@tree,
+         colorFactors@tree},
       chains,
-      subs] /. `rules`externalMomenta[`options`momenta[], amplitudes]];
+      subs] /. `rules`externalMomenta[`options`momenta[], amplitudes@tree]];
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "
@@ -597,17 +514,6 @@ Module[{sr, print, percent, init, end, bar, def = 70, dots,
    subWrite[text<>" ... done\n"];
    result];
 mapThread // secure;
-
-CombinatorialFactorsForClasses::usage="
-@brief Takes generic amplitude and finds numerical combinatirical factors
-       which arise at class level.
-@returns List of combinatorical factors for a given generic amplitude.
-@param amp ``FeynArts`FeynAmp``.";
-CombinatorialFactorsForClasses[amp:FeynArts`FeynAmp[_,_,_,rules_->_[_][classReplacements__]]] :=
-{classReplacements}[[ All,#[[1,1]] ]] /.
-   {  FeynArts`IndexDelta[___] -> 1,
-      FeynArts`SumOver[__] -> 1} &@ Position[rules, FeynArts`RelativeCF];
-CombinatorialFactorsForClasses // secure;
 
 getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
