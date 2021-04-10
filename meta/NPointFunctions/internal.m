@@ -79,7 +79,8 @@ NPointFunction::usage = "
 NPointFunction[
    {formcalc_, model_, particles_, contexts_, in_, out_},
    {observable_, loops_, processes_, momenta_, onShell_, scheme_}] :=
-   (  BeginPackage["NPointFunction`"];
+   Module[{tree},
+      BeginPackage["NPointFunction`"];
       Begin["`Private`"];
       `file`particles[] := particles;
       `file`contexts[] := contexts;
@@ -101,7 +102,12 @@ NPointFunction[
       FormCalc`$FCVerbose = 0;
       If[!DirectoryQ@formcalc, CreateDirectory@formcalc];
       SetDirectory@formcalc;
-      calculateTree[ToExpression@in, ToExpression@out]);
+
+      settings[];
+      tree = cut[plant[in, out], `settings`diagrams];
+      tree = cut[plant@tree, `settings`amplitudes];
+      picture@tree;
+      {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 NPointFunction // secure;
 
 insertions[d:`type`diagram] := Last@d;
@@ -186,40 +192,6 @@ settings[input:`type`tree, settings:{__Rule}|Default, default_] :=
          node[`type`head, rest__] :> {rest}];
 settings // secure;
 
-lengthyQ::usage = "
-@brief Checks, whether the ``Length`` of expression is zero or not.
-       In the latter case returns input, otherwise writes an error message
-       and stops the evaluation.
-@param input Any expression.
-@returns An input in case of non-zero ``Length`` of the input.";
-lengthyQ[input:_] := With[{sym = Head@Unevaluated@input},
-   If[Length@input =!= 0,
-      input,
-      sym::length = "The input has a zero lenght.";
-      Utils`AssertOrQuit[_, sym::length];]];
-lengthyQ // Utils`MakeUnknownInputDefinition;
-lengthyQ ~ SetAttributes ~ {Protected, HoldFirst};
-
-calculateTree::usage = "
-@brief Applies ``FeynArts`` routines for a given process, preparing it for
-       ``FormCalc`` and then calls the latter's routines.
-@param inFields A set of *incoming* fields.
-@param outFields A set of *outgoing* fields.
-@returns An object of the n-point function in ``FlexibleSUSY`` conventions.";
-calculateTree[inFields_, outFields_] :=
-Module[{topologies, d, a, tree},
-   settings[];
-   topologies = lengthyQ@FeynArts`CreateTopologies[
-      `options`loops[],
-      Length@inFields -> Length@outFields,
-      FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
-   d = lengthyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
-   d = erase[d, `settings`diagrams];
-   tree = erase[plant@d, `settings`amplitudes];
-   picture@tree;
-   {`rules`fields@fields@tree, calculateAmplitudes@tree}];
-calculateTree // secure;
-
 getSumSettings::usage = "
 @brief Some topologies can lead to physically incorrect summation on
        C++ level.
@@ -270,20 +242,6 @@ Module[{parse, rules, set},
    rules = MapIndexed[applyAction[diagrams, #1]&, set];
    Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
 getMasslessSettings // secure;
-
-printDiagramsInfo[s_String, tree:`type`tree, where_String:" "] :=
-   Module[{g, c},
-      g = Length@Cases[tree, `type`generic, Infinity];
-      c = Length@Cases[tree, `type`classes, Infinity];
-      Print@s;
-      Print[where,"in total: ", g," Generic, ", c," Classes insertions"];
-      tree];
-printDiagramsInfo[diagrams:`type`diagramSet, where_String:" "] :=
-   Module[{g, c},
-      g = Length@Cases[diagrams,Generic==_Integer:>1,Infinity,Heads -> True];
-      c = getClassAmount@diagrams;
-      Print[where,"in total: ", g," Generic, ", c," Classes insertions"];];
-printDiagramsInfo // secure;
 
 getClassAmount[set:`type`diagramSet] :=
    Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];

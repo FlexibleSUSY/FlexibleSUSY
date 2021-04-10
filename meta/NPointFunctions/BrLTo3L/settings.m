@@ -29,32 +29,32 @@
 
 `settings`diagrams =
 {  Vectors ->
-      {  {  "penguins: remove external leptons from loops"[
+      {  {  {  "penguins: remove external leptons from loops",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
-            "penguins: remove vector bosons from loops"[
+               FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
+            {  "penguins: remove vector bosons from loops",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`LoopFields@##, FeynArts`V]&]},
-         {  "penguins: remove tree-like vector bosons"[
+               FreeQ[LoopFields@##, FeynArts`V]&}},
+         {  {  "penguins: remove tree-like vector bosons",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`TreeFields@##, FeynArts`V]&]}},
+               FreeQ[TreeFields@##, FeynArts`V]&}}},
    Scalars ->
-      {  {  "penguins: remove external leptons from loops"[
+      {  {  {  "penguins: remove external leptons from loops",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|3]]&],
-            "penguins: remove vector bosons from loops"[
+               FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
+            {  "penguins: remove vector bosons from loops",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`LoopFields@##, FeynArts`V]&]},
-         {  "penguins: remove tree-like scalar bosons"[
+               FreeQ[LoopFields@##, FeynArts`V]&}},
+         {  {  "penguins: remove tree-like scalar bosons",
                `topologyQ`penguinT,
-               FreeQ[FeynArts`TreeFields@##, FeynArts`S]&]}},
+               FreeQ[TreeFields@##, FeynArts`S]&}}},
    Boxes ->
-      {  {  "boxes: remove external leptons from loops"[
+      {  {  {  "boxes: remove external leptons from loops",
                `topologyQ`box,
-               FreeQ[FeynArts`LoopFields@##, fieldPattern[#3, 1|2|3|4]]&],
-            "boxes: remove vector bosons from loops"[
+               FreeQ[LoopFields@##, fieldPattern[#3, 1|2|3|4]]&},
+            {  "boxes: remove vector bosons from loops",
                `topologyQ`box,
-               FreeQ[FeynArts`LoopFields@##, FeynArts`V]&]},
+               FreeQ[LoopFields@##, FeynArts`V]&}},
          {}}};
 
 `settings`amplitudes =

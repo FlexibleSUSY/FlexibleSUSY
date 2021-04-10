@@ -57,36 +57,8 @@ Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
          clean];
 getActions // secure;
 
-applyAction[tree:`type`tree, {s_String, tQ_, fun_Function}] :=
-   printDiagramsInfo[s, erase[tree, tQ, fun]];
-
-`action`diagrams = "
-@brief Represents an action, which is supposed to be done with diagrams.
-@param diagrams A set of diagrams.
-@param s A string with comment.
-@param t A topology or a set of topologies, where action should be applied.
-@param c A criterion, which is passed to a ``FeynArts`DiagramSelect``.";
-`action`diagrams = Sequence[diagrams:`type`diagramSet,
-   s_String[t:_Symbol|_Function, c_Function]];
-`action`diagramsCompact = Sequence[d:`type`diagramSet,
-   s_String[t:_@__Symbol, c_Function]];
-
-secureSelect[input_, h_, c_] :=
-Module[{selected},
-   selected = FeynArts`DiagramSelect[h@input, c];
-   If[0 === Length@selected, Return@Null];
-   input[[1]] -> selected[[1, 2]]];
-secureSelect // secure;
-
-applyAction@`action`diagrams :=
-Module[{d = diagrams, h = Head@diagrams},
-   d = If[t@#[[1]], secureSelect[#, h, c], #] &/@ d;
-   d = d /. Null :> Sequence[];
-   Print@s;
-   printDiagramsInfo@d;
-   d];
-applyAction@`action`diagramsCompact :=
-   applyAction[d, s[Through[(Or@@t)@#]&, c]];
+applyAction[tree:`type`tree, {str_String, tQ_, fun_Function}] :=
+   info[cut[tree, tQ, fun], str];
 
 `action`sum = Sequence[d:`type`diagramSet,
    s_String[t_Symbol, {n_Integer, f:_}]];

@@ -27,48 +27,61 @@ removeColors[set:`type`amplitudeSet] :=
    Delete[set, Position[set, FeynArts`Index[Global`Colour, _Integer]]];
 removeColors // secure;
 
+lengthyQ::usage = "
+@brief Checks, whether the ``Length`` of expression is zero or not.
+       In the latter case returns input, otherwise writes an error message
+       and stops the evaluation.
+@param input Any expression.
+@returns An input in case of non-zero ``Length`` of the input.";
+lengthyQ[input:_] := With[{sym = Head@Unevaluated@input},
+   If[Length@input =!= 0,
+      input,
+      sym::length = "The input has a zero lenght.";
+      Utils`AssertOrQuit[_, sym::length];]];
+lengthyQ // Utils`MakeUnknownInputDefinition;
+lengthyQ ~ SetAttributes ~ {Protected, HoldFirst};
+
 plant::usage = "
-@brief Creates analytical form for amplitudes and forms a ``tree`` object
-       from diagram-amplitude data.
-@param d A set of diagrams.
+@brief Creates diagrams and amplitudes, forms a ``tree`` object.
+@param in An expression, containing ``FeynArts`` fields (each as ``String``),
+       required to be *incoming* fields for the amplitude.
+@param out An expression, containing ``FeynArts`` fields (each as ``String``),
+       required to be *outgoing* fields for the amplitude.
+@param tree A ``tree`` object.
 @returns A ``tree`` object.";
-plant[d:`type`diagramSet] :=
-   Module[{diag, ampl, topologies, generic, gN, classes, cN, repl, tree, gray},
-      gray = removeColors@FeynArts`CreateFeynAmp@d;
-      {diag, ampl} = {List@@d, List@@gray} /. _FeynArts`Insertions -> List;
-      topologies = First/@ diag;
-      generic = First/@ #&/@ Last/@ diag;
-      gN = Length/@ generic;
-      classes = Last/@ #&/@ Last/@ diag;
-      cN = Length/@ #&/@ classes;
+plant[in_, out_] :=
+   Module[{topologies, diagrams},
+      topologies = lengthyQ@FeynArts`CreateTopologies[
+         `options`loops[],
+         Length@in -> Length@out,
+         FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
+      diagrams = lengthyQ@FeynArts`InsertFields[topologies,
+         ToExpression@in -> ToExpression@out];
 
-      generic = MapThread[FeynArts`Insertions[Generic][#1, #2]&,
-         {Flatten[generic, 1], Most/@List@@gray}];
-      repl = Thread/@ Flatten[thread/@ Last/@ ampl, 1];
-      classes = MapThread[FeynArts`Insertions[FeynArts`Classes][#1, #2]&,
-         {Flatten[classes, 2], repl}];
-
-      tree = node@{Head@d, Head@gray};
-      Do[tree = grow[tree, topologies[[i]]];
-         Do[tree = grow[tree, generic[[j]], {i}];
-            Do[tree = grow[tree, classes[[k]], {i, j}];,
-               {k, cN[[i, j]]}];
-            classes = Drop[classes, cN[[i, j]]];,
-            {j, gN[[i]]}];
-         generic = Drop[generic, gN[[i]]];,
-         {i, Length@diag}];
-      tree];
+      node[{Head@#}, Sequence@@#]&[diagrams] /.
+         Rule[t:`type`topology, rest_] :> node[t, rest] /.
+         (h:_@Generic)@a__ :> Sequence@@(node@*h@@#&/@{a}) /.
+         (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
+         (h:_@FeynArts`Classes)@a__ :> Sequence@@(node@*h/@{a})];
+plant[tree:`type`tree] :=
+   Module[{amps, generic, classes, i = 1, j = 1},
+      amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
+      generic = Most/@List@@amps;
+      classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :>
+         Sequence@@(Thread[lhs -> #]&/@{rhs});
+      tree /.
+         node[e:`type`head, r__] :> node[Append[e, Head@amps], r] /.
+         node[e:`type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
+         node[e:`type`classes] :> node@Append[e, classes[[j++]]]];
 plant // secure;
 
-grow[expr_node, leaf_] :=
-   Append[expr, node@leaf];
-grow[expr_node, leaf_, pos:{__Integer}] :=
-   Module[{place, elem},
-      place = pos /. i_Integer :> i+1;
-      elem = Extract[expr, place];
-      ReplacePart[expr, place -> grow[elem, leaf]]];
-grow::partw = "Invalid position `1`";
-grow // secure;
+info[tree:`type`tree, str_String] :=
+   (  Print@str;
+      Print[" in total: ",
+         Length@Cases[tree, `type`generic, Infinity], " Generic, ",
+         Length@Cases[tree, `type`classes, Infinity], " Classes insertions"];
+      tree);
+info // secure;
 
 diagrams[tree:`type`tree] :=
    tree /.
@@ -110,10 +123,6 @@ picture[tree:`type`tree] :=
       Put[out, FileNameJoin@{directory, name<>".m"}]];
 picture // secure;
 
-thread[func_[lhs:{__}, rhs:{{__}..}]] :=
-   Thread[func[Array[lhs&, Length@rhs], rhs]];
-thread // secure;
-
 wrap[data:{Rule[_, _]..}..] :=
    Module[{lhs, rhs},
       lhs = First/@First@{data};
@@ -121,67 +130,57 @@ wrap[data:{Rule[_, _]..}..] :=
       lhs -> rhs];
 wrap // secure;
 
-erase::usage = "
-@brief Erases nodes (or diagrams).
-       Can be done *via*:
+cut::usage = "
+@brief Removes nodes. Can be done *via*:
 
-       1. Settings. Can be used to apply the following settings:
+       1. Settings. Use to apply the following settings:
 
           ```settings`diagrams``
-             It is used to remove diagrams *via* actions.
+             Contains settings, specific for diagrams.
           ```settings`amplitudes``
-             It is used to remove diagrams and amplitudes *via* actions.
-
+             Contains settings, specific for diagrams and amplitudes.
        2. Topology
        3. Generic or classes level data
-
-       Usually nodes are removed from the deepest to the highest level.
-
-@param input A ``tree`` object or a set of diagrams (for ``settings``).
-@param settings Data, which specifies replacements for each topology.
-@param tQ A function to select a *topology* ``node[id, ___]`` if::
+       Nodes are removed from the deepest to the highest level.
+@param tree A ``tree`` object.
+@param settings Data, which specifies replacements for topologies.
+@param tQ A function to select a *topology* ``node[id, __]`` if::
 
            In[1]:= tQ[id]
           Out[1]:= True
+@param fun A function to remove *class* or *generic* node if::
 
-@param fun A function to erase *class* or *generic* ``node[id, ___]`` if::
-
-           In[1]:= fun[id]
+           In[1]:= fun[node, info]
           Out[1]:= True
-
-@param n A ``node``, which is checked by ``fun``.
+@param info A ``Sequence`` of topology and topology list.
+@param n A node to check.
 @returns Nodes, cleaned by ``fun``.";
-erase[input:`type`tree|`type`diagramSet, settings:{__Rule}|Default] :=
-   Module[{res = input},
+cut[tree:`type`tree, settings:{__Rule}|Default] :=
+   Module[{res = tree},
       Set[res, applyAction[res, #]]&/@ getActions@settings;
       res];
-erase[input:`type`tree, tQ_, fun_] :=
-   Module[{res = input},
-      res = res /. e:node[t:`type`topology /; tQ@t, __] :> erase[e, fun];
-      If[MatchQ[res, node@`type`head],
-         Utils`AssertOrQuit[_, erase::empty, tQ, fun]];
-      res];
-erase[n:node[`type`topology, __], fun_] :=
-   Module[{res = n},
-      res = res /. e:node[`type`generic, __] :> erase[e, fun];
-      res = res /. e:node@`type`topology :> Sequence[];
-      If[fun@res, res, ##&[]]];
-erase[n:node[`type`generic, __], fun_] :=
-   Module[{res = n},
-      res = res /. e:node@`type`classes :> erase[e, fun];
-      res = res /. e:node@`type`generic :> Sequence[];
-      If[fun@res, res, ##&[]]];
-erase[n:node@`type`classes, fun_] :=
-   If[fun@n, n, ##&[]];
-erase::empty = "
-After the usage of
-tQ: \"`1`\"
-fun: \"`2`\"
-all topologies were erased.";
-erase // secure
+cut[tree:`type`tree, tQ_, fun_] :=
+   tree /.
+      e:node[t:`type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
+cut[n:node[`type`topology, __], fun_, info__] :=
+   n /. e:node[`type`generic, __] :> cut[e, fun, info] /.
+      node@`type`topology :> Sequence[];
+cut[n:node[`type`generic, __], fun_, info__] :=
+   If[fun[#, info], # /. node@`type`generic :> Sequence[], ##&[]]&[
+      n /. e:node@`type`classes :> cut[e, fun, info]];
+cut[n:node@`type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
+cut // secure;
+
+LoopFields[node[id_, ___], info__] :=
+   FeynArts`LoopFields[First@id, info];
+
+TreeFields[node[id_, ___], info__] :=
+   FeynArts`TreeFields[First@id, info];
+
+head[tree:`type`tree] := tree[[1, 1]];
+head // secure;
 
 combinatoricalFactors::usage = "
-@brief Finds combinatirical factors for a given input.
 @param tree A ``tree`` object.
 @returns ``List`` of combinatorical factors for a given ``tree``.";
 combinatoricalFactors[tree:`type`tree] :=
@@ -193,7 +192,6 @@ combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
 combinatoricalFactors // secure;
 
 colorFactors::usage = "
-@brief Finds color factors for a given input.
 @param tree A ``tree`` object.
 @param diagram A diagram to work with.
 @param props A ``Sequence`` of propagators. First numbers of vertices inside

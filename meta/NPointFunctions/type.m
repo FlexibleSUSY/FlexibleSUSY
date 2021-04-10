@@ -58,11 +58,11 @@ Begin@"`Private`";
 `type`fc`amplitudeSet = {`type`fc`amplitude..};
 
 `type`head =
-   {_FeynArts`TopologyList, _FeynArts`FeynAmpList};
+   {_FeynArts`TopologyList, ___};
 `type`generic =
-   FeynArts`Insertions[Generic][_, _];
+   FeynArts`Insertions[Generic]@__;
 `type`classes =
-   FeynArts`Insertions[FeynArts`Classes][_, {__Rule}];
+   FeynArts`Insertions[FeynArts`Classes]@__;
 `type`tree =
    node[`type`head,
       node[`type`topology,
