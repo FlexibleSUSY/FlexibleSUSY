@@ -23,7 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-proceedChains[d:`type`diagramSet, a:`type`amplitudeSet, g:_] :=
+proceedChains[tree:`type`tree, d:`type`diagramSet, a:`type`amplitudeSet, g:_] :=
 Module[{abbr, subs, chains, generic},
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
@@ -31,7 +31,7 @@ Module[{abbr, subs, chains, generic},
    chains = simplifyChains@chains;
    chains = modifyChains[chains, d];
    {generic, chains} = makeChainsUnique@{g /. abbr, chains};
-   chains = identifySpinors[chains, a];
+   chains = identifySpinors[tree, chains];
    {generic, chains, subs}];
 proceedChains // secure;
 
@@ -173,11 +173,11 @@ identifySpinors::usage = "
 @brief Inserts names of fermionic fields inside ``FormCalc`DicaChain``
        structures.
 @param rules List of rules to modify.
-@param set A set of amplitudes.
+@param tree A ``tree`` object.
 @returns Modified rules with inserted fermion names.";
-identifySpinors[rules:{Rule[_Symbol, _]...}, set:`type`amplitudeSet] :=
+identifySpinors[tree:`type`tree, rules:{Rule[_Symbol, _]...}] :=
 Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
-   id = `rules`fields@MapIndexed[#2[[1]]->#1&, getField[set, All]];
+   id = `rules`fields@MapIndexed[#2[[1]]->#1&, fields[tree, Flatten]];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
    rules /. ch:DiracChain[__] :> idf@ch];

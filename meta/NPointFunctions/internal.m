@@ -124,18 +124,12 @@ process // secure;
 
 externalMasses[set:`type`fc`amplitudeSet] :=
    Flatten[List@@process@set, 1][[All, 3]];
-externalMasses[set:`type`amplitudeSet] :=
-   FeynArts`Mass[# /. -1 -> 1] &/@ getField[set, All];
+externalMasses[tree:`type`tree] :=
+   FeynArts`Mass[# /. -1 -> 1] &/@ fields[tree, Flatten];
 externalMasses // secure;
 
 getField[set:`type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
-getField[set:`type`amplitudeSet, In] :=
-   First /@ process[set][[1]];
-getField[set:`type`amplitudeSet, Out] :=
-   First /@ process[set][[2]];
-getField[set:`type`amplitudeSet, All] :=
-   First /@ Flatten[List@@process@set, 1];
 getField // secure;
 
 fieldPattern[d:Head@`type`diagramSet, i_Integer] :=
@@ -149,10 +143,6 @@ settings::usage = "
 @brief Defines default settings. Loads all settings from file, corresponding
        to an observable. Can be used to parse the following settings:
 
-       ```settings`diagrams``
-          Is used to remove diagrams *via* actions.
-       ```settings`amplitudes``
-          Is used to remove diagrams and amplitudes *via* actions.
        ```settings`regularization``
           Some amplitudes are calculated incorrectly in CDR.
           For handling this, one can override used scheme for some topologies.
@@ -194,10 +184,6 @@ settings[input:`type`tree, settings:{__Rule}|Default, default_] :=
          node[`type`generic, __] -> default /.
          node[`type`topology, rest__] :> rest /.
          node[`type`head, rest__] :> {rest}];
-settings[input:`type`tree|`type`diagramSet, settings:{__Rule}|Default] :=
-   Module[{res = input},
-      Set[res, applyAction[res, #]]&/@ getActions@settings;
-      res];
 settings // secure;
 
 lengthyQ::usage = "
@@ -228,13 +214,10 @@ Module[{topologies, d, a, tree},
       Length@inFields -> Length@outFields,
       FeynArts`ExcludeTopologies -> getExcludeTopologies[]];
    d = lengthyQ@FeynArts`InsertFields[topologies, inFields -> outFields];
-   d = settings[d, `settings`diagrams];
-   tree = settings[plant@d, `settings`amplitudes];
+   d = erase[d, `settings`diagrams];
+   tree = erase[plant@d, `settings`amplitudes];
    picture@tree;
-
-   {  `rules`fields@{  getField[amplitudes@tree, In],
-                       getField[amplitudes@tree, Out]},
-      calculateAmplitudes@tree}];
+   {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 calculateTree // secure;
 
 getSumSettings::usage = "
@@ -305,22 +288,6 @@ printDiagramsInfo // secure;
 getClassAmount[set:`type`diagramSet] :=
    Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
 getClassAmount // secure;
-
-picture[tree:`type`tree] :=
-   Module[{out = {}, directory, name},
-      name = StringJoin[ToString /@ (
-         `rules`fields@Join[getField[amplitudes@tree, All],
-         `options`processes[]] /. e_[{_}]:>e)];
-      directory = DirectoryName[FeynArts`$Model<>".mod"];
-      FeynArts`Paint[diagrams@tree,
-         FeynArts`PaintLevel -> {Generic},
-         FeynArts`ColumnsXRows -> 1,
-         FeynArts`FieldNumbers -> True,
-         FeynArts`SheetHeader -> None,
-         FeynArts`Numbering -> FeynArts`Simple,
-         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
-      Put[out, FileNameJoin@{directory, name<>".m"}]];
-picture // secure;
 
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.
@@ -416,8 +383,8 @@ Module[{
          settings[tree, `settings`momenta, Automatic]},
       "Amplitude calculation"] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams@tree}];
-   {generic, chains, subs} = proceedChains[diagrams@tree, amplitudes@tree, generic];
-   setZeroMassRules@{amplitudes@tree, feynAmps};
+   {generic, chains, subs} = proceedChains[tree, diagrams@tree, amplitudes@tree, generic];
+   setZeroMassRules@{tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs}, diagrams@tree, `options`momenta[]];
    convertToFS[
@@ -426,7 +393,7 @@ Module[{
          combinatoricalFactors@tree,
          colorFactors@tree},
       chains,
-      subs] /. `rules`externalMomenta[`options`momenta[], amplitudes@tree]];
+      subs] /. `rules`externalMomenta[tree, `options`momenta[]]];
 calculatedAmplitudes // secure;
 
 setZeroMassRules::usage = "
@@ -443,9 +410,9 @@ setZeroMassRules::usage = "
 @note Rules of external particle ``#i`` are under numbers
       ``2*#i`` and ``2*#i-1``.";
 Module[{rules},
-   setZeroMassRules[{fa:`type`amplitudeSet, fc:`type`fc`amplitudeSet}] :=
+   setZeroMassRules[{tree:`type`tree, fc:`type`fc`amplitudeSet}] :=
       rules = RuleDelayed[#, 0] &/@
-         Riffle[externalMasses@fa, externalMasses@fc];
+         Riffle[externalMasses@tree, externalMasses@fc];
    setZeroMassRules // secure;
    getZeroMassRules[] := (
       Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];

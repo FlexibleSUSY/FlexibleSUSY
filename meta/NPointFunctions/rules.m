@@ -166,14 +166,14 @@ With[{lt = Unique@"SARAH`lt"},
       FeynArts`IndexSum -> Sum};
 `rules`amplitude // secure;
 
-`rules`externalMomenta[option:True|False|OperatorsOnly|ExceptLoops,
-   amplitudes:`type`amplitudeSet] :=
+`rules`externalMomenta[tree:`type`tree,
+   option:True|False|OperatorsOnly|ExceptLoops] :=
 Module[{fsFields},
    Switch[option,
       True,
          {SARAH`Mom[_Integer,_] :> 0},
       False|OperatorsOnly|ExceptLoops,
-         fsFields = `rules`fields@getField[amplitudes, All];
+         fsFields = `rules`fields@fields[tree, Flatten];
          {SARAH`Mom[i_Integer, lorIndex_] :>
             SARAH`Mom[fsFields[[i]], lorIndex]}]];
 `rules`externalMomenta // secure;

@@ -82,11 +82,33 @@ diagrams // secure;
 
 amplitudes[tree:`type`tree] :=
    tree /.
-      node[e:`type`head, rest__] :> Last[e]@rest /.
+      node[e:`type`head, rest__] :> Part[e, 2]@rest /.
       node[e:`type`topology, rest__] :> rest /.
       node[e:`type`classes] :> Last@e /.
-      node[e:`type`generic, rest__] :> Append[Last@e, wrap@rest];
+      node[e:`type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
 amplitudes // secure;
+
+fields[tree:`type`tree, Flatten] :=
+   Flatten[fields@tree, 1];
+fields[tree:`type`tree] :=
+   tree /. node[e:`type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
+fields // secure;
+
+picture[tree:`type`tree] :=
+   Module[{out = {}, directory, name},
+      name = StringJoin[ToString /@ (
+         `rules`fields@Join[fields[tree, Flatten],
+            `options`processes[]] /. e_@{_} :> e)];
+      directory = DirectoryName[FeynArts`$Model<>".mod"];
+      FeynArts`Paint[diagrams@tree,
+         FeynArts`PaintLevel -> {Generic},
+         FeynArts`ColumnsXRows -> 1,
+         FeynArts`FieldNumbers -> True,
+         FeynArts`SheetHeader -> None,
+         FeynArts`Numbering -> FeynArts`Simple,
+         DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
+      Put[out, FileNameJoin@{directory, name<>".m"}]];
+picture // secure;
 
 thread[func_[lhs:{__}, rhs:{{__}..}]] :=
    Thread[func[Array[lhs&, Length@rhs], rhs]];
@@ -100,24 +122,41 @@ wrap[data:{Rule[_, _]..}..] :=
 wrap // secure;
 
 erase::usage = "
-@brief If for ``fun`` and ``node[id, ___]`` we have::
-       then ``node`` erases itself. This operation goes in the following
-       order: classes level, generic level, topology level.
-@param tree A ``tree`` object.
+@brief Erases nodes (or diagrams).
+       Can be done *via*:
+
+       1. Settings. Can be used to apply the following settings:
+
+          ```settings`diagrams``
+             It is used to remove diagrams *via* actions.
+          ```settings`amplitudes``
+             It is used to remove diagrams and amplitudes *via* actions.
+
+       2. Topology
+       3. Generic or classes level data
+
+       Usually nodes are removed from the deepest to the highest level.
+
+@param input A ``tree`` object or a set of diagrams (for ``settings``).
+@param settings Data, which specifies replacements for each topology.
 @param tQ A function to select a *topology* ``node[id, ___]`` if::
 
-          In[1]:  tQ[id]
-          Out[1]: True
+           In[1]:= tQ[id]
+          Out[1]:= True
 
 @param fun A function to erase *class* or *generic* ``node[id, ___]`` if::
 
-          In[1]:  fun[id]
-          Out[1]: True
+           In[1]:= fun[id]
+          Out[1]:= True
 
 @param n A ``node``, which is checked by ``fun``.
 @returns Nodes, cleaned by ``fun``.";
-erase[tree:`type`tree, tQ_, fun_] :=
-   Module[{res = tree},
+erase[input:`type`tree|`type`diagramSet, settings:{__Rule}|Default] :=
+   Module[{res = input},
+      Set[res, applyAction[res, #]]&/@ getActions@settings;
+      res];
+erase[input:`type`tree, tQ_, fun_] :=
+   Module[{res = input},
       res = res /. e:node[t:`type`topology /; tQ@t, __] :> erase[e, fun];
       If[MatchQ[res, node@`type`head],
          Utils`AssertOrQuit[_, erase::empty, tQ, fun]];
