@@ -66,12 +66,12 @@
          {}}};
 
 `settings`sum =
-{  "initial SED: skip initial lepton in sum"[
+{  {  "initial SED: skip initial lepton in sum",
       `topologyQ`self1penguinT,
-      {6, getField[#, 1]&}],
-   "final SED: skip final lepton in sum"[
+      {6, Field[#3, 1]&}},
+   {  "final SED: skip final lepton in sum",
       `topologyQ`self3penguinT,
-      {6, getField[#, 3]&}]};
+      {6, Field[#3, 3]&}}};
 
 `settings`massless =
 {  "initial SED: use explicit final lepton mass"[

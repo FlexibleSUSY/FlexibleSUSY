@@ -60,8 +60,15 @@ getActions // secure;
 applyAction[tree:`type`tree, {str_String, tQ_, fun_Function}] :=
    info[cut[tree, tQ, fun], str];
 
-`action`sum = Sequence[d:`type`diagramSet,
-   s_String[t_Symbol, {n_Integer, f:_}]];
+applyAction[tree:_node, {str_String, tQ_, fun:{_Integer, _}}] :=
+   (  Print@str;
+      tree /. node[t:`type`topology /; tQ@t, rest__] :>
+         (node[t, rest] /. node[g:`type`generic, __] :>
+            restrict[fun, g, t, tree[[1, 1]]]));
+
+restrict[{int_, fun_}, _, _, head_] :=
+   {int -> Or[fun[_, _, head], -fun[_, _, head]]};
+
 `action`hold = Sequence[d:`type`diagramSet,
    s_String[t_Symbol, {Hold, e_Integer}]];
 `action`append = Sequence[d:`type`diagramSet,
@@ -73,11 +80,6 @@ Module[{template},
       Print@text;
       getTopology@# -> List@@Map[realization&, insertions@#],
       (##&)[]]&;
-
-   Module[{restrict},
-      restrict[field_, number_] := {number -> Or[field, -field]};
-      applyAction@`action`sum :=
-      List@@Map[template[s, t, restrict[f@d, n]], d];];
 
    Module[{delete},
       delete[e_] := With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];

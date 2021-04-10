@@ -138,6 +138,10 @@ getField[set:`type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
 getField // secure;
 
+Field[d:Head@`type`diagramSet, i_Integer] :=
+   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
+Field // secure;
+
 fieldPattern[d:Head@`type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
       `type`indexGeneration :> Blank[];
@@ -190,24 +194,16 @@ settings[input:`type`tree, settings:{__Rule}|Default, default_] :=
          node[`type`generic, __] -> default /.
          node[`type`topology, rest__] :> rest /.
          node[`type`head, rest__] :> {rest}];
+settings[input:`type`tree, settings:{__List}|Default, default_] :=
+   Module[{res = input, actions},
+      actions = If[settings === Default, default, settings];
+      Set[res, applyAction[res, #]]& /@ actions;
+      res /.
+         node[`type`generic, __] -> default /.
+         node[`type`topology, rest__] :> rest /.
+         node[`type`head, rest__] :> {rest}
+      ];
 settings // secure;
-
-getSumSettings::usage = "
-@brief Some topologies can lead to physically incorrect summation on
-       C++ level.
-       One can use ``settings`sum`` to specify, which fields to skip.
-@param ds A set of diagrams.
-@returns A set of restrictions for generic sums.";
-getSumSettings[ds:`type`diagramSet] :=
-Module[{repl = {}, res},
-   sum = If[#===Default, {}, #]&@`settings`sum;
-   Do[repl = Join[repl, applyAction[ds, ac]];, {ac, sum}];
-   res = List@@(ds /. repl);
-   res = If[MatchQ[#, `type`diagram],
-            Table[{}, {Length@insertions@#}],
-            First@#] &/@ res;
-   Flatten[res, 1]];
-getSumSettings // secure;
 
 collectSame::usage = "
 @brief Finds the same keys in the list of rules and for them collects RHSs
@@ -340,7 +336,8 @@ Module[{
          settings[tree, `settings`regularization, `options`scheme[]],
          settings[tree, `settings`momenta, Automatic]},
       "Amplitude calculation"] //. FormCalc`GenericList[];
-   generic = MapThread[getGenericSum, {feynAmps, getSumSettings@diagrams@tree}];
+   generic = MapThread[getGenericSum,
+      {feynAmps, settings[tree, `settings`sum, {}]}];
    {generic, chains, subs} = proceedChains[tree, diagrams@tree, amplitudes@tree, generic];
    setZeroMassRules@{tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
