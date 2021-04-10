@@ -107,6 +107,18 @@ fields[tree:`type`tree] :=
    tree /. node[e:`type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
 fields // secure;
 
+fermionOrder::usage = "
+@brief Returns the order of fermions for ``FermionOrder`` option.
+       Default is a reversed one.
+       Is overwritten by ```settings`order``.
+@param tree A ``tree`` object.
+@returns A ``List`` of integers.";
+fermionOrder[tree:`type`tree] :=
+   If[`settings`order === Default,
+      Reverse@Range@Length@fields[tree, Flatten],
+      `settings`order];
+fermionOrder // secure;
+
 picture[tree:`type`tree] :=
    Module[{out = {}, directory, name},
       name = StringJoin[ToString /@ (
@@ -141,6 +153,7 @@ cut::usage = "
              Contains settings, specific for diagrams and amplitudes.
        2. Topology
        3. Generic or classes level data
+
        Nodes are removed from the deepest to the highest level.
 @param tree A ``tree`` object.
 @param settings Data, which specifies replacements for topologies.
@@ -157,7 +170,7 @@ cut::usage = "
 @returns Nodes, cleaned by ``fun``.";
 cut[tree:`type`tree, settings:{__Rule}|Default] :=
    Module[{res = tree},
-      Set[res, applyAction[res, #]]&/@ getActions@settings;
+      Set[res, applySetting[res, #]]&/@ parseSettings@settings;
       res];
 cut[tree:`type`tree, tQ_, fun_] :=
    tree /.

@@ -1,27 +1,3 @@
-(* ::Package:: *)
-
-(* :Copyright:
-
-   ====================================================================
-   This file is part of FlexibleSUSY.
-
-   FlexibleSUSY is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published
-   by the Free Software Foundation, either version 3 of the License,
-   or (at your option) any later version.
-
-   FlexibleSUSY is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with FlexibleSUSY.  If not, see
-   <http://www.gnu.org/licenses/>.
-   ====================================================================
-
-*)
-
 `settings`topology =
 {  Vectors -> (`topologyQ`penguinT@#&),
    Scalars -> (`topologyQ`penguinT@#&),
@@ -49,8 +25,7 @@
                `topologyQ`penguinT,
                FreeQ[TreeFields@##, FeynArts`S]&}}},
    Boxes ->
-      {  {
-            {  "boxes: remove external leptons from loops",
+      {  {  {  "boxes: remove external leptons from loops",
                `topologyQ`box,
                FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
             {  "boxes: remove vector bosons from loops",
@@ -74,12 +49,12 @@
       {6, Field[#3, 3]&}}};
 
 `settings`massless =
-{  "initial SED: use explicit final lepton mass"[
+{  {  "initial SED: use explicit final lepton mass",
       `topologyQ`self1penguinT,
-      {Append, FeynArts`F[6] :> 3}],
-   "initial SED: keep initial lepton mass untouched"[
+      {Append, FeynArts`F[6] :> 3}},
+   {  "initial SED: keep initial lepton mass untouched",
       `topologyQ`self1penguinT,
-      {Hold, 1}]};
+      {Hold, 1}}};
 
 `settings`momenta =
 {  `topologyQ`penguinT -> 2,

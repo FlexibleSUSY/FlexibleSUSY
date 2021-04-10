@@ -48,7 +48,7 @@ secure // secure;
 
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
-      {"type", "rules", "actions", "chains", "topologies", "tree"};];
+      {"type", "rules", "settings", "chains", "topologies", "tree"};];
 
 NPointFunction::usage = "
 @brief The entry point of the calculation.
@@ -110,9 +110,6 @@ NPointFunction[
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 NPointFunction // secure;
 
-insertions[d:`type`diagram] := Last@d;
-insertions // secure;
-
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
 genericIndex // secure;
 
@@ -149,100 +146,6 @@ fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
    fieldPattern[d, #] &/@ a;
 fieldPattern // secure;
 
-settings::usage = "
-@brief Defines default settings. Loads all settings from file, corresponding
-       to an observable. Can be used to parse the following settings:
-
-       ```settings`regularization``
-          Some amplitudes are calculated incorrectly in CDR.
-          For handling this, one can override used scheme for some topologies.
-          Uses rules one-by-one for replacing if allowed by topology.
-       ```settings`momenta``
-          Eliminate specific momenta in some topologies.
-          Uses rules one-by-one for replacing if allowed by topology.
-@param input An object to work with.
-@param settings A list of data, which specifies replacements for each topology.
-@param default A default value to be used after the ones, given by
-       ``settings``.
-@returns A set of settings for ``FormCalc`Dimension``.";
-With[{dir = DirectoryName@$InputFileName},
-   settings[] :=
-      (  BeginPackage@"NPointFunctions`";
-         Begin@"`Private`";
-         `settings`topology = Default;
-         `settings`diagrams = Default;
-         `settings`amplitudes = Default;
-         `settings`sum = Default;
-         `settings`massless = Default;
-         `settings`momenta = Default;
-         `settings`regularization = Default;
-         `settings`order = Default;
-         `settings`chains = Default;
-         If[FileExistsQ@#, Get@#;]&@FileNameJoin@
-            {dir, `options`observable[], "settings.m"};
-         Protect@Evaluate[Context[]<>"settings`*"];
-         End[];
-         EndPackage[];);];
-settings[input:`type`tree, settings:{__Rule}|Default, default_] :=
-   Module[{res = input},
-      If[settings =!= Default,
-         Set[res, res /.
-            node[t:`type`topology /; #1@t, rest__] :>
-               node[t, rest] /. node[`type`generic, __] -> #2]&@@#&/@
-            settings;];
-      res /.
-         node[`type`generic, __] -> default /.
-         node[`type`topology, rest__] :> rest /.
-         node[`type`head, rest__] :> {rest}];
-settings[input:`type`tree, settings:{__List}|Default, default_] :=
-   Module[{res = input, actions},
-      actions = If[settings === Default, default, settings];
-      Set[res, applyAction[res, #]]& /@ actions;
-      res /.
-         node[`type`generic, __] -> default /.
-         node[`type`topology, rest__] :> rest /.
-         node[`type`head, rest__] :> {rest}
-      ];
-settings // secure;
-
-collectSame::usage = "
-@brief Finds the same keys in the list of rules and for them collects RHSs
-       into one list, i.e.::
-
-          collectSame@{a->{1, 1}, b->{2, 2, 2}, a->{3, 3}}
-
-       leads to::
-
-          {a->{{1, 3}, {1, 3}}, b->{{2, 2, 2}}}.
-@param list A list of rules.
-@returns A list of rules.";
-collectSame[list:{Rule[_, {__}]...}] :=
-Module[{tally = Tally[First /@ list]},
-   If[#2 == 1,
-      {#1/.list},
-      #1 -> Transpose@Cases[list, Rule[#1, el_] :> el]]&@@#&/@tally];
-collectSame // secure;
-
-getMasslessSettings::usage = "
-@brief In some topologies field insertions can lead to physically incorrect
-       simplifications if they are done naively. This function provides
-       rules in order to prevent this.
-@param diagrams A set of diagrams.
-@returns A set of rules for amplitudes.";
-getMasslessSettings[diagrams:`type`diagramSet] :=
-Module[{parse, rules, set},
-   set = If[Default===#, {}, #]&@`settings`massless;
-   parse = If[MatchQ[#1, `type`diagram],
-      List@@MapIndexed[{}&, insertions@#1],
-      First@#1]&;
-   rules = MapIndexed[applyAction[diagrams, #1]&, set];
-   Flatten[List@@MapIndexed[parse, diagrams /. collectSame@rules], 1]];
-getMasslessSettings // secure;
-
-getClassAmount[set:`type`diagramSet] :=
-   Length@Cases[set, FeynArts`Classes==_Integer:>1, Infinity, Heads -> True];
-getClassAmount // secure;
-
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.
 @param tree A ``tree`` object.
@@ -272,7 +175,7 @@ fieldInsertions::usage = "
 fieldInsertions[tree:`type`tree] :=
    Map[Last, #, {3}] &@ Flatten[ fieldInsertions /@ List@@diagrams@tree, 1];
 fieldInsertions[diag:`type`diagram, keepNumQ:True|False:False] :=
-   fieldInsertions[#, keepNumQ] &/@ Apply[List, insertions@diag, {0, 1}];
+   fieldInsertions[#, keepNumQ] &/@ Apply[List, Last@diag, {0, 1}];
 fieldInsertions[{graph_, insert_}, keepNumQ_] :=
 Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
    toGenericIndexConventionRules = Cases[graph,
@@ -297,17 +200,6 @@ stripIndices[name_[class_, ___]] :=
    name@class;
 stripIndices // secure;
 
-getFermionOrder::usage = "
-@brief Returns the order of fermions for ``FermionOrder`` option.
-       Default is a reversed one. Can be overwritten by ``settings`order``.
-@param expression A set of diagrams.
-@returns A list of integers, representing an order of fermions.";
-getFermionOrder[expression:`type`diagramSet] :=
-Switch[`settings`order,
-   Default, Reverse@Range[Plus@@Length/@process@expression],
-   _, `settings`order];
-getFermionOrder // secure;
-
 calculateAmplitudes::usage = "
 @brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
 @param tree A set of data in the form of a ``tree`` object.
@@ -329,7 +221,7 @@ Module[{
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> `options`onShell[],
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> getFermionOrder@diagrams@tree,
+         FormCalc`FermionOrder -> fermionOrder@tree,
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #3]&,
       {  ampsGen,
@@ -341,7 +233,7 @@ Module[{
    {generic, chains, subs} = proceedChains[tree, diagrams@tree, amplitudes@tree, generic];
    setZeroMassRules@{tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
-      {generic, chains, subs}, diagrams@tree, `options`momenta[]];
+      {generic, chains, subs}, tree, `options`momenta[]];
    convertToFS[
       {  generic,
          fieldInsertions@tree,
@@ -386,9 +278,9 @@ makeMassesZero::usage = "
 @returns A list with modified expression, chains and empty non-applied
          subexpressions.";
 makeMassesZero[
-   {generic_, chains_, subs_}, diagrams:`type`diagramSet, ExceptLoops] :=
+   {generic_, chains_, subs_}, tree:`type`tree, ExceptLoops] :=
 Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
-   funcs = getMasslessSettings@diagrams;
+   funcs = settings[tree, `settings`massless, {}, Identity];
    names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
    new = generic //. subs;
    pattern = Alternatives @@ ( #[__] &/@ names );
@@ -401,15 +293,14 @@ Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
          FormCalc`Pair[_,_] -> 0],
       setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
       {}}];
-makeMassesZero[{generic_, chains_, subs_}, diagrams:`type`diagramSet, True] :=
+makeMassesZero[{generic_, chains_, subs_}, _, True] :=
 Module[{zeroedRules, new},
    zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
    {new, zeroedRules} = ZeroRules[subs, zeroedRules];
    {  generic /. zeroedRules,
       setZeroExternalMomentaInChains@chains,
       new}];
-makeMassesZero[{expr_, chains_, subs_}, diagrams:`type`diagramSet, _] :=
-   {expr, chains, subs};
+makeMassesZero[e:{_, _, _}, __] := e;
 makeMassesZero // secure;
 
 mapThread::usage = "

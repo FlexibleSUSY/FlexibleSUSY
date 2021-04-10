@@ -29,7 +29,7 @@ Module[{abbr, subs, chains, generic},
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
    subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
    chains = simplifyChains@chains;
-   chains = modifyChains[chains, d];
+   chains = modifyChains[chains, tree];
    {generic, chains} = makeChainsUnique@{g /. abbr, chains};
    chains = identifySpinors[tree, chains];
    {generic, chains, subs}];
@@ -72,7 +72,7 @@ modifyChains::usage = "
       make different reveal functions.
 @todo Write explanations about anticommutation rules in chains and other
       conventions.";
-modifyChains[expression_, set:`type`diagramSet] :=
+modifyChains[expression_, tree:`type`tree] :=
 Module[{i = 0, rules, sp, L, reveal},
    If[`settings`chains === Default, Return@expression];
    Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
@@ -84,7 +84,7 @@ Module[{i = 0, rules, sp, L, reveal},
       L[a_, {e___}, b_] := ch[sp@a, e, sp@b];
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
-      chainRules = reveal@getFermionOrder@set;
+      chainRules = reveal@fermionOrder@tree;
       rules = `options`momenta[] /. expandRules@`settings`chains /. chainRules;];
    Expand@expression //. rules];
 modifyChains // secure;
