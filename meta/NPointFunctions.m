@@ -323,6 +323,7 @@ setSubexpressions // secure;
 
 applySubexpressions[obj:`type`npf] :=
 Module[{result},
+   If[{} === getSubexpressions@obj, Return@obj];
    WriteString["stdout"~OutputStream~1,"Applying subexpressions ... "];
    result = setSubexpressions[
       ReplacePart[obj,

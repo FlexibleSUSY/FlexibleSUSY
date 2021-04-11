@@ -230,7 +230,7 @@ Module[{
       "Amplitude calculation"] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum,
       {feynAmps, settings[tree, `settings`sum, {}]}];
-   {generic, chains, subs} = proceedChains[tree, diagrams@tree, amplitudes@tree, generic];
+   {generic, chains, subs} = proceedChains[tree, generic];
    setZeroMassRules@{tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs}, tree, `options`momenta[]];
@@ -282,7 +282,9 @@ makeMassesZero[
 Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
    funcs = settings[tree, `settings`massless, {}, Identity];
    names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
+   subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
+   subWrite@"done\n";
    pattern = Alternatives @@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
@@ -291,41 +293,35 @@ Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
       getZeroMassRules[]&, new];
    {  List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /.
          FormCalc`Pair[_,_] -> 0],
-      setZeroExternalMomentaInChains@chains /. getZeroMassRules[],
+      zeroMomenta@chains /. getZeroMassRules[],
       {}}];
 makeMassesZero[{generic_, chains_, subs_}, _, True] :=
 Module[{zeroedRules, new},
    zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
    {new, zeroedRules} = ZeroRules[subs, zeroedRules];
    {  generic /. zeroedRules,
-      setZeroExternalMomentaInChains@chains,
+      zeroMomenta@chains,
       new}];
 makeMassesZero[e:{_, _, _}, __] := e;
 makeMassesZero // secure;
 
 mapThread::usage = "
-@brief Maps a function onto multiple sets of equal length, accompanying it by
-       printing a progress bar.
+@brief Behaves like ``MapThread``, but also prints a progress bar.
 @param func A function to apply to set of data.
-@param exprs A list of listable sets with data.
+@param exprs A ``List`` of listable sets with data.
 @param text A string to be printed.
 @todo Add check for equality of length for exprs.";
-mapThread[func_, exprs:{__}, text:_String:""] :=
-Module[{sr, print, percent, init, end, bar, def = 70, dots,
-      tot = Length@First@exprs, result},
-   subWrite["\n"<>text<>" ...\n"];
-   sr[str:_String, num:_Integer] := StringJoin@@Array[str&, num];
-   print = (
-      percent = #/tot;
-      init = "["<>ToString@now<>"/"<>ToString@tot<>"] [";
-      end = "] "<>ToString@Floor[100*percent]<>"%";
-      bar = def - StringLength[init<>end];
-      dots = Floor[bar*percent];
-      subWrite@StringJoin[init, sr[".", dots], sr[" ", bar-dots],end,"\r"];)&;
-   result = Table[(print@now; func@@(#[[now]]&/@ exprs)), {now, tot}];
-   subWrite@"\033[K\033[A";
-   subWrite[text<>" ... done\n"];
-   result];
+mapThread[func_, exprs:{__}, text_String] :=
+   Module[{printed = 0, delta, out, tot, print, def = 70},
+      tot = Length@First@exprs;
+      print[i_] :=
+      (  delta = Floor[(def-StringLength[text]-4)*i/tot] - printed;
+         subWrite[StringJoin@@Array["."&, delta]];
+         printed += delta;);
+      subWrite[text<>": ["];
+      out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
+      subWrite@"]\n";
+      out];
 mapThread // secure;
 
 getGenericFields::usage = "

@@ -23,7 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-proceedChains[tree:`type`tree, d:`type`diagramSet, a:`type`amplitudeSet, g:_] :=
+proceedChains[tree:`type`tree, g:_] :=
 Module[{abbr, subs, chains, generic},
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
@@ -183,13 +183,13 @@ Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    rules /. ch:DiracChain[__] :> idf@ch];
 identifySpinors // secure;
 
-setZeroExternalMomentaInChains::usage = "
+zeroMomenta::usage = "
 @brief Sets ``FormCalc`k[i]`` to zero inside fermionic chains.
 @param expression Any expression.
 @returns An expression with modified fermionic chains.";
-setZeroExternalMomentaInChains[expression_] :=
+zeroMomenta[expression_] :=
    expression /. e:DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
-setZeroExternalMomentaInChains // secure;
+zeroMomenta // secure;
 
 End[];
 EndPackage[];
