@@ -2026,8 +2026,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            {calcAmplitudeSpecializationDecls, calcAmplitudeSpecializationDefs}
                = Decays`CreateTotalAmplitudeSpecializations[decaysLists, FlexibleSUSY`FSModelName];
-           {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
-               = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName];
+           With[{temp = Decays`CreatePartialWidthSpecializations[decaysLists, FlexibleSUSY`FSModelName]},
+              If[temp =!= {},
+                 {partialWidthSpecializationDecls, partialWidthSpecializationDefs}
+                    = temp;
+              ]
+           ];
 
            smParticleAliases = Decays`CreateSMParticleAliases["fields"];
            bsmParticleAliasList = Decays`CreateBSMParticleAliasList["fields"];

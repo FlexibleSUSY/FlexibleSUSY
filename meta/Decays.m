@@ -2469,7 +2469,8 @@ CreatePartialWidthSpecializations[particleDecays_List, modelName_] :=
            specializations = CreateHiggsDecayPartialWidthSpecializations[particleDecays, modelName];
            specializations = Join[specializations, CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays, modelName]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
-           Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]
+           If[specializations =!= {}, specializations = Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]];
+           specializations
           ];
 
 CreateDecaysGetterFunctionName[particle_] :=
