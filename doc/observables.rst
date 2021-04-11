@@ -18,5 +18,9 @@ List of observables computed by ``FlexibleSUSY``
 
   - :math:`b \to s \gamma`
 
-- `Decays <observables/FlexibleDecay.rst>`_ *(in preparation)*
+- `FlexibleDecay <observables/FlexibleDecay.rst>`_
+
+  - SM decays of Higgs scalars with relevant higher order corrections
+  - LO order (tree-level or loop-induced) decays of Higgs scalars into non-SM state
+  - LO order (tree-level or loop-induced) decays of non-Higgs scalars
 
