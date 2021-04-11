@@ -199,6 +199,6 @@ ExtraSLHAOutputBlocks = {
 };
 
 (* decays can be generate and compiled
-   in this model but SM fermions are massles
-   so the code crashes at runtime *)
+   but default input card has too light mA givin
+   "cannot determine the number of active flavours" error *)
 FSCalculateDecays = False;
