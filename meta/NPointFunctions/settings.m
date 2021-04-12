@@ -124,13 +124,16 @@ applySetting[tree:`type`tree, {str_String, tQ_, fun_}] :=
    info[cut[tree, tQ, fun], str];
 
 makeApply[pattern_, function:_Symbol] :=
-   applySetting[tree:`type`tree, pattern] :=
-      Module[{once},
-         once[arg_] := once@arg = If[# =!= {}, Print@@#]&@
-            Cases[pattern, _String, Infinity, Heads -> True];
-         tree /. node[t:`type`topology /; tQ@t, rest__] :>
-            (once@_; node[t, rest] /. node[g:`type`generic, __] :>
-               function[fun, g, t, head@tree])];
+   (  Off@RuleDelayed::rhs;
+      applySetting[tree:`type`tree, pattern] :=
+         Module[{once},
+            once[arg_] := once@arg =
+               If[# =!= {}, Print@@#]&@
+                  Cases[pattern, _String, Infinity, Heads -> True];
+            tree /. node[t:`type`topology /; tQ@t, rest__] :>
+               (once@_; node[t, rest] /. node[g:`type`generic, __] :>
+                  function[fun, g, t, head@tree])];
+      On@RuleDelayed::rhs;);
 
 makeApply[tQ_ -> fun_, value];
 makeApply[{str_String, tQ_, fun:{_Integer, _}}, restrict];
