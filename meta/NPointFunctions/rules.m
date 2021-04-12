@@ -58,11 +58,11 @@ Module[{once},
                   Susyno`LieGroups`conj@n@{ind}],
                {n_, t:fermi, _} :> RuleDelayed[Times[-1,f:n@{ind__}],
                   SARAH`bar@n@{ind}]},
-            {  ind:`type`generationIndex :>
+            {  ind:type`generationIndex :>
                   Symbol["SARAH`gt" <> ToString@Last@ind],
-               ind:`type`colorIndex :>
+               ind:type`colorIndex :>
                   Symbol["SARAH`ct" <> ToString@Last@ind],
-               ind:`type`gluonIndex :>
+               ind:type`gluonIndex :>
                   Symbol["SARAH`ct" <> ToString@Last@ind]},
             {  FeynArts`S -> GenericS,
                FeynArts`F -> GenericF,
@@ -135,7 +135,7 @@ With[{lt = Unique@"SARAH`lt"},
             FormCalc`Den[a_, b_] :> 1/(a-b),
             FormCalc`Pair[a_, b_] :> SARAH`sum[lt, 1, 4,
                SARAH`g[lt, lt]*Append[a, lt]*Append[b, lt]],
-            f:`type`genericField :> Head[f][GenericIndex@Last@Last@f],
+            f:type`genericField :> Head[f][GenericIndex@Last@Last@f],
             FormCalc`k[i_Integer, pairIndex___] :> SARAH`Mom[i, pairIndex]},
          {  FormCalc`Spinor -> SARAH`DiracSpinor,
             FormCalc`Lor -> SARAH`Lorentz}];];
@@ -155,7 +155,7 @@ With[{lt = Unique@"SARAH`lt"},
       FeynArts`IndexSum -> Sum};
 `rules`amplitude // secure;
 
-`rules`externalMomenta[tree:`type`tree,
+`rules`externalMomenta[tree:type`tree,
    option:True|False|OperatorsOnly|ExceptLoops] :=
 Module[{fsFields},
    Switch[option,

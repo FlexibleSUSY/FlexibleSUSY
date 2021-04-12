@@ -63,15 +63,15 @@ With[{dir = DirectoryName@$InputFileName},
          Protect@Evaluate[Context[]<>"settings`*"];
          End[];
          EndPackage[];);];
-settings[tree:`type`tree,
+settings[tree:type`tree,
    settings:{__}|Default, default_, head:_:First] :=
    Module[{res = {tree}},
       If[settings =!= Default,
          AppendTo[res, applySetting[tree, #]]&/@ settings];
       res = res /.
-         node[`type`generic, __] -> default /.
-         node[`type`topology, rest__] :> rest /.
-         node[`type`head, rest__] :> {rest};
+         node[type`generic, __] -> default /.
+         node[type`topology, rest__] :> rest /.
+         node[type`head, rest__] :> {rest};
       DeleteDuplicates/@Transpose@res /.
          {default, rest__} :> head@{rest} /. {default} -> default];
 settings // secure;
@@ -120,18 +120,18 @@ Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
          clean];
 parseSettings // secure;
 
-applySetting[tree:`type`tree, {str_String, tQ_, fun_}] :=
+applySetting[tree:type`tree, {str_String, tQ_, fun_}] :=
    info[cut[tree, tQ, fun], str];
 
 makeApply[pattern_, function:_Symbol] :=
    (  Off@RuleDelayed::rhs;
-      applySetting[tree:`type`tree, pattern] :=
+      applySetting[tree:type`tree, pattern] :=
          Module[{once},
             once[arg_] := once@arg =
                If[# =!= {}, Print@@#]&@
                   Cases[pattern, _String, Infinity, Heads -> True];
-            tree /. node[t:`type`topology /; tQ@t, rest__] :>
-               (once@_; node[t, rest] /. node[g:`type`generic, __] :>
+            tree /. node[t:type`topology /; tQ@t, rest__] :>
+               (once@_; node[t, rest] /. node[g:type`generic, __] :>
                   function[fun, g, t, head@tree])];
       On@RuleDelayed::rhs;);
 
@@ -144,7 +144,7 @@ applySetting // secure;
 value[val_, ___] := val;
 restrict[{int_, fun_}, __, head_] :=
    {int -> Or[fun[_, _, head], -fun[_, _, head]]};
-append[{Append, (f:`type`field)[n_Integer] :> e_Integer}, ___] :=
+append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
    With[{rhs = (First /@ getZeroMassRules[])[[2*e-1]]},
       Append[#, genericMass[f, n] :> rhs]&];
 hold[{Hold, e_}, ___] :=

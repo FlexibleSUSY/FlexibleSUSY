@@ -20,58 +20,58 @@
 
 *)
 
-BeginPackage@"NPointFunctions`";
-Begin@"`Private`";
+BeginPackage@"type`";
 
-`type`vertex = FeynArts`Vertex[_Integer][_Integer];
-`type`propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
+vertex = FeynArts`Vertex[_Integer][_Integer];
+propagator = FeynArts`Propagator[ FeynArts`External|FeynArts`Incoming|
    FeynArts`Outgoing|FeynArts`Internal|FeynArts`Loop[_Integer] ][
-      `type`vertex, `type`vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
-`type`topology = FeynArts`Topology[_Integer][`type`propagator..];
+      vertex, vertex, Repeated[FeynArts`Field[_Integer],{0,1}]];
+topology = FeynArts`Topology[_Integer][propagator..];
 
-`type`diagram = Rule[`type`topology, FeynArts`Insertions[Generic][__]];
-`type`diagramSet = FeynArts`TopologyList[_][`type`diagram..];
+diagram = Rule[topology, FeynArts`Insertions[Generic][__]];
+diagramSet = FeynArts`TopologyList[_][diagram..];
 
-`type`amplitude = FeynArts`FeynAmp[
+amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
    Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]],
    _,
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
-`type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
+amplitudeSet = FeynArts`FeynAmpList[__][amplitude..];
 
-`type`colorIndex = FeynArts`Index[Global`Colour, _Integer];
-`type`gluonIndex = FeynArts`Index[Global`Gluon, _Integer];
-`type`generationIndex =
+colorIndex = FeynArts`Index[Global`Colour, _Integer];
+gluonIndex = FeynArts`Index[Global`Gluon, _Integer];
+generationIndex =
    FeynArts`Index[
-      s_Symbol /; !MatchQ[s, Global`Gluon|Global`Colour],
+      `Private`s_Symbol /; !MatchQ[`Private`s, Global`Gluon|Global`Colour],
       _Integer];
-`type`genericIndex = FeynArts`Index[Generic, _Integer];
+genericIndex = FeynArts`Index[Generic, _Integer];
 
-`type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
-`type`genericField = `type`field[`type`genericIndex];
-`type`mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
-`type`genericMass =
-   FeynArts`Mass[`type`field[`type`genericIndex], `type`mass];
+field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
+genericField = field@genericIndex;
+mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
+genericMass =
+   FeynArts`Mass[field@genericIndex, mass];
 
-`type`fc`particle = `type`field[_Integer, Repeated[{_Symbol}, {0, 1}]];
-`type`fc`mass = 0|_Symbol|_Symbol@_Symbol;
-`type`fc`external = {`type`fc`particle|-`type`fc`particle,
-   FormCalc`k@_Integer, `type`fc`mass, {}};
-`type`fc`process = {`type`fc`external..} -> {`type`fc`external..};
-`type`fc`amplitude = FormCalc`Amp[`type`fc`process][_];
-`type`fc`amplitudeSet = {`type`fc`amplitude..};
+`fc`particle = field[_Integer, Repeated[{_Symbol}, {0, 1}]];
+`fc`mass = 0|_Symbol|_Symbol@_Symbol;
+`fc`external = {`fc`particle|-`fc`particle,
+   FormCalc`k@_Integer, `fc`mass, {}};
+`fc`process = {`fc`external..} -> {`fc`external..};
+`fc`amplitude = FormCalc`Amp[`fc`process][_];
+`fc`amplitudeSet = {`fc`amplitude..};
 
-`type`head =
+head =
    {_FeynArts`TopologyList, ___};
-`type`generic =
+generic =
    FeynArts`Insertions[Generic]@__;
-`type`classes =
+classes =
    FeynArts`Insertions[FeynArts`Classes]@__;
-`type`tree =
-   node[`type`head,
-      node[`type`topology,
-         node[`type`generic,
-            node[`type`classes]..]..]..];
+With[{node = NPointFunctions`Private`node},
+   tree =
+      node[head,
+         node[topology,
+            node[generic,
+               node[classes]..]..]..];];
 
-End[];
 EndPackage[];
+$ContextPath = DeleteCases[$ContextPath, "type`"];

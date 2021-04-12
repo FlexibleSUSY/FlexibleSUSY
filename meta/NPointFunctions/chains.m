@@ -23,7 +23,7 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-proceedChains[tree:`type`tree, g:_] :=
+proceedChains[tree:type`tree, g:_] :=
 Module[{abbr, subs, chains, generic},
    abbr = FormCalc`Abbr[] //. FormCalc`GenericList[];
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
@@ -72,7 +72,7 @@ modifyChains::usage = "
       make different reveal functions.
 @todo Write explanations about anticommutation rules in chains and other
       conventions.";
-modifyChains[expression_, tree:`type`tree] :=
+modifyChains[expression_, tree:type`tree] :=
 Module[{i = 0, rules, sp, L, reveal},
    If[`settings`chains === Default, Return@expression];
    Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
@@ -175,7 +175,7 @@ identifySpinors::usage = "
 @param rules List of rules to modify.
 @param tree A ``tree`` object.
 @returns Modified rules with inserted fermion names.";
-identifySpinors[tree:`type`tree, rules:{Rule[_Symbol, _]...}] :=
+identifySpinors[tree:type`tree, rules:{Rule[_Symbol, _]...}] :=
 Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    id = `rules`fields@MapIndexed[#2[[1]]->#1&, fields[tree, Flatten]];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=

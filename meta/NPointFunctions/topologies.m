@@ -38,7 +38,7 @@ Module[{impl},
 define // Utils`MakeUnknownInputDefinition;
 define ~ SetAttributes ~ {HoldAllComplete, Protected};
 
-adjace[topology:`type`topology] :=
+adjace[topology:type`topology] :=
 Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
    ext = Count[topology, FeynArts`Incoming|FeynArts`Outgoing|FeynArts`External,
       Infinity, Heads -> True];
@@ -54,41 +54,41 @@ Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
    Flatten@Table[Drop[#[[i]], i-1+Max[ext-i+1, 0]], {i, Length@#}]&@matrix];
 adjace // secure;
 
-define[`topologyQ`penguinT, {t:`type`topology} :>
+define[`topologyQ`penguinT, {t:type`topology} :>
    Or[`topologyQ`trianglepenguinT@t,
       `topologyQ`self1penguinT@t,
       `topologyQ`self3penguinT@t]];
 
-define[`topologyQ`trianglepenguinT, {t:`type`topology} :>
+define[`topologyQ`trianglepenguinT, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`self1penguinT, {t:`type`topology} :>
+define[`topologyQ`self1penguinT, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0}];
-define[`topologyQ`self3penguinT, {t:`type`topology} :>
+define[`topologyQ`self3penguinT, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
 
-define[`topologyQ`penguinU, {t:`type`topology} :>
+define[`topologyQ`penguinU, {t:type`topology} :>
    Or[`topologyQ`trianglepenguinU@t,
       `topologyQ`self1penguinU@t,
       `topologyQ`self4penguinU@t]];
 
-define[`topologyQ`trianglepenguinU, {t:`type`topology} :>
+define[`topologyQ`trianglepenguinU, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`self1penguinU, {t:`type`topology} :>
+define[`topologyQ`self1penguinU, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,2,0,1,0,0,1,0}];
-define[`topologyQ`self4penguinU, {t:`type`topology} :>
+define[`topologyQ`self4penguinU, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,2,0}];
 
-define[`topologyQ`box, {t:`type`topology} :>
+define[`topologyQ`box, {t:type`topology} :>
    Or[`topologyQ`boxS@t, `topologyQ`boxT@t, `topologyQ`boxU@t]];
 
-define[`topologyQ`boxS, {t:`type`topology} :>
+define[`topologyQ`boxS, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0}];
-define[`topologyQ`boxT, {t:`type`topology} :>
+define[`topologyQ`boxT, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0}];
-define[`topologyQ`boxU, {t:`type`topology} :>
+define[`topologyQ`boxU, {t:type`topology} :>
    adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
 
-getTopology[d:`type`diagram] := First@d;
+getTopology[d:type`diagram] := First@d;
 getTopology // secure;
 
 getExcludeTopologies::usage = "

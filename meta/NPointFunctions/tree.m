@@ -24,7 +24,7 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 removeColors[expr_] :=
-   Delete[expr, Position[expr, `type`colorIndex]];
+   Delete[expr, Position[expr, type`colorIndex]];
 removeColors // secure;
 
 lengthyQ::usage = "
@@ -59,11 +59,11 @@ plant[in_, out_] :=
          ToExpression@in -> ToExpression@out];
 
       node[{Head@#}, Sequence@@#]&[diagrams] /.
-         Rule[t:`type`topology, rest_] :> node[t, rest] /.
+         Rule[t:type`topology, rest_] :> node[t, rest] /.
          (h:_@Generic)@a__ :> Sequence@@(node@*h@@#&/@{a}) /.
          (h:_@Generic)[a_, rest__] :> Sequence[h@a, rest] /.
          (h:_@FeynArts`Classes)@a__ :> Sequence@@(node@*h/@{a})];
-plant[tree:`type`tree] :=
+plant[tree:type`tree] :=
    Module[{amps, generic, classes, i = 1, j = 1},
       amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
       amps >> "~/amps.temp";
@@ -71,41 +71,41 @@ plant[tree:`type`tree] :=
       classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :>
          Sequence@@(Thread[lhs -> #]&/@{rhs});
       removeColors@tree /.
-         node[e:`type`head, r__] :> node[Append[e, Head@amps], r] /.
-         node[e:`type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
-         node[e:`type`classes] :> node@Append[e, classes[[j++]]]];
+         node[e:type`head, r__] :> node[Append[e, Head@amps], r] /.
+         node[e:type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
+         node[e:type`classes] :> node@Append[e, classes[[j++]]]];
 plant // secure;
 
-info[tree:`type`tree, str_String] :=
+info[tree:type`tree, str_String] :=
    (  Print@str;
       Print[" in total: ",
-         Length@Cases[tree, `type`generic, Infinity], " Generic, ",
-         Length@Cases[tree, `type`classes, Infinity], " Classes insertions"];
+         Length@Cases[tree, type`generic, Infinity], " Generic, ",
+         Length@Cases[tree, type`classes, Infinity], " Classes insertions"];
       tree);
 info // secure;
 
-diagrams[tree:`type`tree] :=
+diagrams[tree:type`tree] :=
    tree /.
-      node[e:`type`head, rest__] :> First[e]@rest /.
-      node[e:`type`topology, rest__] :>
+      node[e:type`head, rest__] :> First[e]@rest /.
+      node[e:type`topology, rest__] :>
          Rule[e, FeynArts`Insertions[Generic][rest]]  /.
-      node[e:`type`generic, rest__] :>
+      node[e:type`generic, rest__] :>
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
-      node[e:`type`classes] :> First@e;
+      node[e:type`classes] :> First@e;
 diagrams // secure;
 
-amplitudes[tree:`type`tree] :=
+amplitudes[tree:type`tree] :=
    tree /.
-      node[e:`type`head, rest__] :> Part[e, 2]@rest /.
-      node[e:`type`topology, rest__] :> rest /.
-      node[e:`type`classes] :> Last@e /.
-      node[e:`type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
+      node[e:type`head, rest__] :> Part[e, 2]@rest /.
+      node[e:type`topology, rest__] :> rest /.
+      node[e:type`classes] :> Last@e /.
+      node[e:type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
 amplitudes // secure;
 
-fields[tree:`type`tree, Flatten] :=
+fields[tree:type`tree, Flatten] :=
    Flatten[fields@tree, 1];
-fields[tree:`type`tree] :=
-   tree /. node[e:`type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
+fields[tree:type`tree] :=
+   tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
 fields // secure;
 
 fermionOrder::usage = "
@@ -114,13 +114,13 @@ fermionOrder::usage = "
        Is overwritten by ```settings`order``.
 @param tree A ``tree`` object.
 @returns A ``List`` of integers.";
-fermionOrder[tree:`type`tree] :=
+fermionOrder[tree:type`tree] :=
    If[`settings`order === Default,
       Reverse@Range@Length@fields[tree, Flatten],
       `settings`order];
 fermionOrder // secure;
 
-picture[tree:`type`tree] :=
+picture[tree:type`tree] :=
    Module[{out = {}, directory, name},
       name = StringJoin[ToString /@ (
          `rules`fields@Join[fields[tree, Flatten],
@@ -169,20 +169,20 @@ cut::usage = "
 @param info A ``Sequence`` of topology and topology list.
 @param n A node to check.
 @returns Nodes, cleaned by ``fun``.";
-cut[tree:`type`tree, settings:{__Rule}|Default] :=
+cut[tree:type`tree, settings:{__Rule}|Default] :=
    Module[{res = tree},
       Set[res, applySetting[res, #]]&/@ parseSettings@settings;
       res];
-cut[tree:`type`tree, tQ_, fun_] :=
+cut[tree:type`tree, tQ_, fun_] :=
    tree /.
-      e:node[t:`type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
-cut[n:node[`type`topology, __], fun_, info__] :=
-   n /. e:node[`type`generic, __] :> cut[e, fun, info] /.
-      node@`type`topology :> Sequence[];
-cut[n:node[`type`generic, __], fun_, info__] :=
-   If[fun[#, info], # /. node@`type`generic :> Sequence[], ##&[]]&[
-      n /. e:node@`type`classes :> cut[e, fun, info]];
-cut[n:node@`type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
+      e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
+cut[n:node[type`topology, __], fun_, info__] :=
+   n /. e:node[type`generic, __] :> cut[e, fun, info] /.
+      node@type`topology :> Sequence[];
+cut[n:node[type`generic, __], fun_, info__] :=
+   If[fun[#, info], # /. node@type`generic :> Sequence[], ##&[]]&[
+      n /. e:node@type`classes :> cut[e, fun, info]];
+cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
 cut // secure;
 
 LoopFields[node[id_, ___], info__] :=
@@ -191,13 +191,13 @@ LoopFields[node[id_, ___], info__] :=
 TreeFields[node[id_, ___], info__] :=
    FeynArts`TreeFields[First@id, info];
 
-head[tree:`type`tree] := tree[[1, 1]];
+head[tree:type`tree] := tree[[1, 1]];
 head // secure;
 
 combinatoricalFactors::usage = "
 @param tree A ``tree`` object.
 @returns ``List`` of combinatorical factors for a given ``tree``.";
-combinatoricalFactors[tree:`type`tree] :=
+combinatoricalFactors[tree:type`tree] :=
    combinatoricalFactors /@ List@@amplitudes@tree;
 combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
    {classes}[[All, #[[1, 1]]]] /.
@@ -214,7 +214,7 @@ colorFactors::usage = "
 @returns ``List`` (for a given topology) of several ``List``
          (for generic fields) of colour factors: ``{{__}..}``.
 @note External fields always come at first places in adjacency matrix.";
-colorFactors[tree:`type`tree] :=
+colorFactors[tree:type`tree] :=
    `rules`fields@Flatten[colorFactors /@ List@@diagrams@tree, 1];
 colorFactors[diagram:Rule[_[_][props__], _[_][_[__][rules__]->_,___]]] :=
 Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},
