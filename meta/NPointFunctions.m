@@ -910,33 +910,29 @@ sandwich[f_] = Switch[Head@f,
 getColourFactor::usage = "
 @brief Extracts the colour factor for a given colour structure.";
 getColourFactor::errMultipleColourStructures = "
-There are different colour projectors inside colour factors:
-   `1`.";
-getColourFactor::errNotNumber = "
-After projection element
+There not all colour factors in
    `1`
-still is not a number."
-getColourFactor::warnTryingIdentity = "
-Warning: There are no colour projectors of the given type.
-Trying to apply Identity."
+have head `2`.";
+getColourFactor::errNotNumber = "
+After not all colour factors in
+   `1`
+are numbers."
 getColourFactor[colourfactors:{`type`classColorFactors..},
    projection:`type`colourProjector] :=
-Module[{projectedFactors,uniqueColourStructs},
-   projectedFactors=
-   If[projection === Identity,
-      colourfactors,
-      uniqueColourStructs = DeleteDuplicates@Cases[colourfactors,
-         projection[__],
-         Infinity];
-      Utils`AssertOrQuit[Length@uniqueColourStructs<=1,
-         getColourFactor::errMultipleColourStructures,
-         uniqueColourStructs];
-      If[Length@uniqueColourStructs===0,
-         Print[getColourFactor::warnTryingIdentity];
+Module[{projectedFactors},
+   projectedFactors =
+      If[projection === Identity,
          colourfactors,
-         colourfactors/.Rule[uniqueColourStructs[[1]],1]]];
-   Utils`AssertOrQuit[NumericQ@#,getColourFactor::errNotNumber,#]&/@
-      Flatten[projectedFactors,2];
+         Utils`AssertOrQuit[
+            And@@Flatten[MatchQ[#, _projection]&/@#&/@ colourfactors],
+            getColourFactor::errMultipleColourStructures,
+            colourfactors,
+            projection];
+         colourfactors /. _projection -> 1];
+   Utils`AssertOrQuit[
+      And@@Flatten[NumericQ[#]&/@#&/@ projectedFactors],
+      getColourFactor::errNotNumber,
+      projectedFactors];
    projectedFactors];
 getColourFactor // secure;
 

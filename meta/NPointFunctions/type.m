@@ -39,8 +39,12 @@ Begin@"`Private`";
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
 `type`amplitudeSet = FeynArts`FeynAmpList[__][`type`amplitude..];
 
-`type`indexCol = FeynArts`Index[Global`Colour,_Integer];
-`type`indexGlu = FeynArts`Index[Global`Gluon,_Integer];
+`type`colorIndex = FeynArts`Index[Global`Colour, _Integer];
+`type`gluonIndex = FeynArts`Index[Global`Gluon, _Integer];
+`type`generationIndex =
+   FeynArts`Index[
+      s_Symbol /; !MatchQ[s, Global`Gluon|Global`Colour],
+      _Integer];
 `type`genericIndex = FeynArts`Index[Generic, _Integer];
 
 `type`field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;

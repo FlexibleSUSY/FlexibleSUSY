@@ -139,12 +139,12 @@ Field[d:Head@`type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
 Field // secure;
 
-fieldPattern[d:Head@`type`diagramSet, i_Integer] :=
+FieldPattern[d:Head@`type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
-      `type`indexGeneration :> Blank[];
-fieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
-   fieldPattern[d, #] &/@ a;
-fieldPattern // secure;
+      `type`generationIndex :> Blank[];
+FieldPattern[d:Head@`type`diagramSet, a:HoldPattern@Alternatives@__] :=
+   FieldPattern[d, #] &/@ a;
+FieldPattern // secure;
 
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.

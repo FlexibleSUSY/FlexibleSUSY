@@ -23,8 +23,8 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-removeColors[set:`type`amplitudeSet] :=
-   Delete[set, Position[set, FeynArts`Index[Global`Colour, _Integer]]];
+removeColors[expr_] :=
+   Delete[expr, Position[expr, `type`colorIndex]];
 removeColors // secure;
 
 lengthyQ::usage = "
@@ -66,10 +66,11 @@ plant[in_, out_] :=
 plant[tree:`type`tree] :=
    Module[{amps, generic, classes, i = 1, j = 1},
       amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
+      amps >> "~/amps.temp";
       generic = Most/@List@@amps;
       classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :>
          Sequence@@(Thread[lhs -> #]&/@{rhs});
-      tree /.
+      removeColors@tree /.
          node[e:`type`head, r__] :> node[Append[e, Head@amps], r] /.
          node[e:`type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
          node[e:`type`classes] :> node@Append[e, classes[[j++]]]];

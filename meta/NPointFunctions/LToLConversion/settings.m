@@ -7,7 +7,7 @@
 {  Vectors ->
       {  {  {  "penguins: remove external leptons from loops",
                `topologyQ`penguinT,
-               FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
+               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
             {  "penguins: remove vector bosons from loops",
                `topologyQ`penguinT,
                FreeQ[LoopFields@##, FeynArts`V]&}},
@@ -17,7 +17,7 @@
    Scalars ->
       {  {  {  "penguins: remove external leptons from loops",
                `topologyQ`penguinT,
-               FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
+               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
             {  "penguins: remove vector bosons from loops",
                `topologyQ`penguinT,
                FreeQ[LoopFields@##, FeynArts`V]&}},
@@ -27,7 +27,7 @@
    Boxes ->
       {  {  {  "boxes: remove external leptons from loops",
                `topologyQ`box,
-               FreeQ[LoopFields@##, fieldPattern[#3, 1|3]]&},
+               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&},
             {  "boxes: remove vector bosons from loops",
                `topologyQ`box,
                FreeQ[LoopFields@##, FeynArts`V]&}},
