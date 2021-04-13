@@ -2635,13 +2635,6 @@ WriteUserExample[inputParameters_List, files_List] :=
               decaysIncludes = ExampleDecaysIncludes[];
               decaysObject =
                   IndentText[
-                     "SM_higher_order_corrections higher_orders_in_decays;\n" <>
-                     "if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {\n" <>
-                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::enable;\n"] <>
-                     "}\n" <>
-                     "else {\n" <>
-                        IndentText["higher_orders_in_decays = SM_higher_order_corrections::disable;\n"] <>
-                     "}\n" <>
                      FlexibleSUSY`FSModelName <> "_decays decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);\n" <>
                      "const bool loop_library_for_decays =\n" <>
                      IndentText[

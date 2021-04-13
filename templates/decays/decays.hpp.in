@@ -33,7 +33,6 @@
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_decay_amplitudes.hpp"
-#include "decays/decays_loop_corrections.hpp"
 #include "decays/decays_problems.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
@@ -81,8 +80,6 @@ public:
    @ModelName@_decays& operator=(const @ModelName@_decays&) = default;
    @ModelName@_decays& operator=(@ModelName@_decays&&) = default;
 
-   void set_loop_corrections(const Decays_loop_corrections&);
-   const Decays_loop_corrections& get_loop_corrections() const;
    const @ModelName@_decay_table& get_decay_table() const;
    const Decays_problems& get_problems() const;
 
@@ -102,7 +99,6 @@ private:
    FlexibleDecay_settings flexibledecay_settings {};
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
-   Decays_loop_corrections loop_corrections{};
    Decays_problems problems{};
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>

@@ -66,16 +66,6 @@ const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
    return decay_table;
 }
 
-void CLASSNAME::set_loop_corrections(const Decays_loop_corrections& loop_corrections_)
-{
-   loop_corrections = loop_corrections_;
-}
-
-const Decays_loop_corrections& CLASSNAME::get_loop_corrections() const
-{
-   return loop_corrections;
-}
-
 const Decays_problems& CLASSNAME::get_problems() const
 {
    return problems;
