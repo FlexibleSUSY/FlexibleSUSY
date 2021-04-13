@@ -392,10 +392,8 @@ Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
    CloseKernels@subKernel;
    UnsetShared[subWrite, Print];
 
-   If[OptionValue@UseCache,
-      CacheNPointFunction[
-         nPointFunction, nPointFunctionsDir,
-         {Join[inFields, outFields], OptionValue@KeepProcesses}];];
+   cache[nPointFunction, nPointFunctionsDir,
+      {Join[inFields, outFields], OptionValue@KeepProcesses}];
    nPointFunction] /; inputCheck[inFields,outFields,opts];
 NPointFunction::errFields = "
 The field '`1`' must belong to (bar or conj can be applied):
@@ -525,25 +523,25 @@ CacheNameForMeta[nPointMeta:{__}] :=
    Utils`StringJoinWithSeparator[Flatten@nPointMeta, "", SymbolName]<>".m";
 CacheNameForMeta // secure;
 
-CacheNPointFunction::usage = "
+cache::usage = "
 @brief Writes a given n-point function to the cache.
-@param nPointFunction The given n-point function.
-@param cacheDir The directory to save cache.
-@param nPointMeta The meta information about the given n-point function.";
-CacheNPointFunction[nPointFunction_,cacheDir_,nPointMeta:{__}] :=
-Module[{nPointFunctionsFile, fileHandle, nPointFunctions, position},
-   nPointFunctionsFile = FileNameJoin@{cacheDir,CacheNameForMeta@nPointMeta};
-   If[FileExistsQ@nPointFunctionsFile,
-      nPointFunctions = Get@nPointFunctionsFile,
-      nPointFunctions = {}];
-   position = Position[nPointFunctions[[All,1]],nPointFunction[[1]]];
+@param new The given n-point function.
+@param dir The directory to save cache.
+@param meta The meta information about the given n-point function.";
+cache[new_, dir_, meta:{__}] :=
+Module[{path, file, npfs, position},
+   path = FileNameJoin@{dir, CacheNameForMeta@meta};
+   If[FileExistsQ@path,
+      npfs = Get@path;,
+      npfs = {};];
+   position = Position[npfs[[All,1]], new[[1]]];
    If[Length@position === 1,
-      nPointFunctions[[position[[1]]]] = nPointFunction,
-      AppendTo[nPointFunctions, nPointFunction]];
-   fileHandle = OpenWrite@nPointFunctionsFile;
-   Write[fileHandle,nPointFunctions];
-   Close@fileHandle;];
-CacheNPointFunction // secure;
+      npfs[[position[[1]]]] = new;,
+      AppendTo[npfs, new];];
+   file = OpenWrite@path;
+   Write[file, npfs];
+   Close@file;];
+cache // secure;
 
 CachedNPointFunction::usage = "
 @brief Retrieve an n-point correlation function from the cache.
