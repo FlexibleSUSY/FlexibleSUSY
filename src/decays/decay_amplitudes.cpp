@@ -116,12 +116,6 @@ double Decay_amplitude_SVV::square() const
       const double fepsSqr = AbsSqr(form_factor_eps);
       const double prefactor = 0.25*Sqr(m_s_sq - m_vec_sq);
 
-      // TODO(Wojciech): remove printout before release
-      // std::cout <<  "massless massive " << m_decay << ' ' << std::setprecision(15) <<
-      //   - 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)) << ' ' << form_factor_21 << ' ' << form_factor_eps << ' ' <<
-      //   "real: " <<   std::real(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::real(form_factor_21) <<
-      //   ", imag: " << std::imag(- 2.*form_factor_g/(Sqr(m_decay)-Sqr(m_vector_2)))/std::imag(form_factor_21) << '\n';
-
       if (!is_zero(form_factor_21) && !is_zero(form_factor_g)) {
          // use Ward identity to eliminate form_factor_g
          const double res1 =
