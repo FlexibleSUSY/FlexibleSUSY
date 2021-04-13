@@ -55,10 +55,10 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
 
    double amp2DR_P = 0;
    double amp2OS_P = 0;
-      amp2DR_P = Sqr(mAOS) *
-                2*std::norm(HBBbarVertexDR_P);
-      amp2OS_P = Sqr(mAOS) *
-                2*std::norm(HBBbarVertexDR_P) * Sqr(mdqOS / mdqDR);
+   amp2DR_P = Sqr(mAOS) *
+              2*std::norm(HBBbarVertexDR_P);
+   amp2OS_P = Sqr(mAOS) *
+              2*std::norm(HBBbarVertexDR_P) * Sqr(mdqOS / mdqDR);
 
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0) {
          const int Nf = number_of_active_flavours(qedqcd, mAOS);
@@ -98,7 +98,6 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
          const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
          double deltaPhi2_P = 0.;
          double deltaqq_QCDxQED_DR = 0.;
-
 
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
