@@ -201,8 +201,8 @@ Utils`MakeUnknownInputDefinition[foo];
 or
 Utils`MakeUnknownInputDefinition@foo;
 somewhere in the scope of the package, where foo is defined.
-@param <Symbol> sym Symbol to make definition for.
-@returns None.
+@param sym Symbol to make definition for.
+@returns The input symbol.
 @note UpValues for symbol[args___] are not cleared.";
 
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
@@ -214,6 +214,13 @@ FSReIm::usage = "FS replacement for the mathematica's function ReIm";
 FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
+
+DumpStart::usage ="
+@brief Used to start the model from existing \"kernel snapshot\", i.e. from
+       the existing copy of kernel definitions after the first initialization
+       of the model via \"normal\" SARAH`Start way.
+@param model The name of the model to work with.
+@returns Null.";
 
 Begin["`Private`"];
 
@@ -494,7 +501,12 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    sym[args___] =.;
    On[Unset::norep];
    (* Maybe some useful definitions already exist*)
-   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
+   If[MatchQ[sym::usage,_String],
+      usageString = "Usage:\n"<>sym::usage<>"\n\n";
+      sym::usage = sym::usage <>
+         "\n@param args A dummy argument for the case, when the function " <>
+         "is used in a way, which is not defined explicitly.",
+      usageString = ""];
    info = MakeBoxes@Definition@sym;
    If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
       infoString="",
@@ -508,10 +520,18 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
    sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
    (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
-];
+   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},",\n", abbreviateLongString]];
+   sym];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
-SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
+MakeUnknownInputDefinition // Protect;
+
+abbreviateLongString[expr_] :=
+Module[{str, b},
+   b[s_] := If[!$Notebooks,"\033[1;36m"<>s<>"\033[0m", s];
+   str = ToString@expr;
+   If[StringLength@str > 1000, b["<"]<>StringTake[str, 1000]<>b[">"], str]];
+abbreviateLongString // MakeUnknownInputDefinition;
+abbreviateLongString // Protect;
 
 StringJoinWithReplacement[
    list_List,
@@ -548,6 +568,76 @@ FSBooleanQ[b_] :=
       BooleanQ[b],
       If[b === True || b === False, True, False]
    ];
+
+DumpStart[model:_String] :=
+Module[
+   {
+      dirOut = FileNameJoin@{
+         SARAH`SARAH[SARAH`OutputDirectory],
+         model,
+         "Dump"
+      },
+      dirSARAH = Append[SARAH`SARAH@SARAH`InputDirectories,
+         FileNameDrop@FindFile@"SARAH`"
+      ],
+      fileDef, fileHash, sarahFiles, create, write = WriteString["stdout",#]&
+   },
+   fileDef = FileNameJoin@{dirOut, "definitions.mx"};
+   fileHash = FileNameJoin@{dirOut, "hash.m"};
+   sarahFiles = Select[
+      DeleteDuplicates@FileNames[All, dirSARAH, Infinity],
+      !(DirectoryQ@#)&
+   ];
+
+   create[] := (
+      If[!DirectoryQ@dirOut,
+         write[dirOut <> " does not exist, creating it ..."];
+         CreateDirectory@dirOut
+         write[" done\n"];
+      ];
+
+      SARAH`Start@model;
+
+      write["Saving definitions to " <> fileDef <> " ..."];
+      If[FileExistsQ@#, DeleteFile@#] &@ fileDef;
+      DumpSave[fileDef,
+         {
+            "Himalaya`", "Model`","Global`", "SA`", "SARAH`", "SPheno`",
+            "Susyno`LieGroups`", "FlexibleSUSY`"
+         }
+      ];
+      write[" done\n"];
+
+      definitionsHash = FileHash@fileDef;
+      sarahHash = Hash[FileHash /@ sarahFiles];
+
+      write["Saving hash to " <> fileHash <> " ..."];
+      If[FileExistsQ@#, DeleteFile@#] &@ fileHash;
+      Save[fileHash, {definitionsHash, sarahHash}];
+      write[" done\n"];
+   );
+
+   If[DirectoryQ@dirOut && FileExistsQ@fileDef && FileExistsQ@fileHash,
+
+      Print["Comparing hash with " <> fileHash <> "."];
+      Get@fileHash;
+
+      If[And[definitionsHash === FileHash@fileDef,
+         sarahHash === Hash[FileHash /@ sarahFiles]],
+
+         Print["Taking definitions from " <> fileDef <> "."];
+         DumpGet@fileDef;
+         ,
+
+         Print["Some files were changed, rerunning SARAH`Start.\n"];
+         create[]
+      ];,
+
+      create[]
+   ];
+];
+DumpStart // MakeUnknownInputDefinition;
+DumpStart ~ SetAttributes ~ {Protected, Locked};
 
 (* MathIndexToCPP *)
 

@@ -492,44 +492,69 @@ WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
            result
           ];
 
-WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
-    Module[{result = ""},
-           Switch[par,
-                  FlexibleSUSYObservable`aMuon,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
-                  FlexibleSUSYObservable`aMuonUncertainty,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_uncertainty", idx}, "Delta(g-2)_muon/2 FlexibleSUSY uncertainty"],
-                  FlexibleSUSYObservable`aMuonGM2Calc,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
-                  FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
-                  FlexibleSUSYObservable`CpHiggsPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpHiggsGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorG],
-                  FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpPseudoScalarGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorG],
-                  FlexibleSUSYObservable`EDM[_],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`BrLToLGamma[__],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`FToFConversionInNucleus[__],
-                      result = WriteSLHABlockEntry[blockName,
-                                                   {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
-                                                   Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`bsgamma,
-                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
-                  _,
-                     result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
-                 ];
-           result
-          ];
+Module[{files, obs, pattern = 0, once},
+WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] := (
+   If[!TrueQ@once && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      files = FileNames["write.m",
+         FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
+      Get/@files;
+      obs = StringSplit[files, $PathnameSeparator][[All, -2]];
+      pattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@obs);
+      once = True;];
+   Switch[par,
+         FlexibleSUSYObservable`aMuon,
+             WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
+         FlexibleSUSYObservable`aMuonUncertainty,
+             WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_uncertainty", idx}, "Delta(g-2)_muon/2 FlexibleSUSY uncertainty"],
+         FlexibleSUSYObservable`aMuonGM2Calc,
+             WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
+         FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
+             WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
+         FlexibleSUSYObservable`CpHiggsPhotonPhoton,
+             WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorP],
+         FlexibleSUSYObservable`CpHiggsGluonGluon,
+             WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorG],
+         FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton,
+             WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorP],
+         FlexibleSUSYObservable`CpPseudoScalarGluonGluon,
+             WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorG],
+         FlexibleSUSYObservable`EDM[_],
+             WriteSLHABlockEntry[blockName,
+                                          {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                          Observables`GetObservableDescription[par]],
+         FlexibleSUSYObservable`BrLToLGamma[__],
+             WriteSLHABlockEntry[blockName,
+                                          {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
+                                          Observables`GetObservableDescription[par]],
+         FlexibleSUSYObservable`bsgamma,
+            WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
+         pattern,
+            (ToExpression[SymbolName@Head[#2]<>"`write"][##])&[blockName, par, idx, comment],
+         _,
+            WriteSLHABlockEntry[blockName, {"", idx}, ""]]);];
+
+WriteSLHABlockEntry::errDiffLength =
+"Length of Eigen::Array should be equal to Length@description+1";
+WriteSLHABlockEntry[
+   blockName:"FWCOEF"|"IMFWCOEF",
+   {
+      observable:_String,
+      CConversion`ArrayType[CConversion`complexScalarCType, num_Integer]
+   },
+   flha:{{Repeated[_String,{6}]}..}
+] :=
+Module[
+   {
+      type = If[blockName === "FWCOEF","Re","Im"], i
+   },
+   Utils`AssertOrQuit[Length@flha+1 === num, WriteSLHABlockEntry::errDiffLength];
+
+   Table["      << FORMAT_WILSON_COEFFICIENTS(" <> flha[[i,1]] <> ", " <>
+      flha[[i,2]] <> ", " <> flha[[i,3]] <> ", " <> flha[[i,4]] <> ", " <>
+      flha[[i,5]] <> ", " <> type <> "(" <> observable <> "(" <> ToString@i <>
+      ")), " <> "\"" <> flha[[i,6]] <> "\")\n",
+      {i, num-1}]
+];
 
 WriteSLHABlockEntry[blockName_, {par_, idx1_?NumberQ, idx2_?NumberQ, idx3_?NumberQ}, comment_String:""] :=
     Module[{parStr, parVal, idx1Str, idx2Str, idx3Str, commentStr},
@@ -661,7 +686,9 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            reformed = ReformeBlocks /@ outputBlocks;
            (
               result = result
-                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                 <> If[Or[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                          First[#[[1]]] === FlexibleSUSY`FWCOEF,
+                          First[#[[1]]] === FlexibleSUSY`IMFWCOEF],
                        "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
                        <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
                        <> "}\n",

@@ -69,12 +69,12 @@ META_SRC     := \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
 		$(DIR)/NPointFunctions.m \
-		$(DIR)/NPointFunctions/internal.m \
+		$(wildcard $(DIR)/NPointFunctions/*.m) \
+		$(wildcard $(DIR)/NPointFunctions/*/*.m) \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
 		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
-		$(DIR)/FToFConversionInNucleus.m \
 		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
 		$(DIR)/EffectiveCouplings.m \

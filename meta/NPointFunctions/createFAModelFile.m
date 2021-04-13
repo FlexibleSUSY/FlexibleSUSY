@@ -32,13 +32,11 @@ CreateFAModelFile::usage=
 
 Begin["`Private`"];
 
-CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, 
-   eigenstates_] :=
-(
+CreateFAModelFile[sarahInputDirs_, sarahOutputDir_, sarahModelName_, eigenstates_] := (
    SARAH`SARAH@SARAH`InputDirectories = sarahInputDirs;
    SARAH`SARAH@SARAH`OutputDirectory = sarahOutputDir;
    SARAH`Start@sarahModelName;
-   SA`CurrentStates = eigenstates; 
+   SA`CurrentStates = eigenstates;
    SARAH`InitVertexCalculation[eigenstates, False];
    SARAH`partDefinition = SARAH`ParticleDefinitions@eigenstates;
    SARAH`Particles@SARAH`Current = SARAH`Particles@eigenstates;

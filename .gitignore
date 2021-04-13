@@ -10,6 +10,13 @@ src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
 
+meta/NPointFunctions.rst
+meta/NPointFunctions/*.rst
+meta/NPointFunctions/*/*.rst
+meta/NPointFunctions.html
+meta/NPointFunctions/*.html
+meta/NPointFunctions/*/*.html
+
 config/config.h
 config/flexiblesusy-version
 config/git_commit
@@ -90,7 +97,7 @@ test/test_MSSM_npointfunctions.cpp
 test/test_MSSM_matching_selfenergy_Fd.cpp
 test/test_SM_cxxdiagrams.cpp
 test/test_MRSSM2_FFMassiveV_form_factors.hpp
-test/test_MRSSM2_f_to_f_conversion.cpp
+test/test_MRSSM2_l_to_l_conversion.cpp
 test/test_looplibrary_*.cpp
 !test/test_looplibrary_environment.cpp
 
@@ -108,3 +115,4 @@ COLLIER.pc
 Himalaya.pc
 LoopTools.pc
 TSIL.pc
+GM2Calc.pc

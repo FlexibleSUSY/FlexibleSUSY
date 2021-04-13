@@ -17,25 +17,26 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_f_to_f_conversion.hpp
+ * @file @ModelName@_l_to_3l.hpp
  *
- * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ * This file was generated at @DateAndTime@ with FlexibleSUSY
+ * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_FToFConversion_H
-#define @ModelName@_FToFConversion_H
+#ifndef @ModelName@_BrLTo3L_H
+#define @ModelName@_BrLTo3L_H
 
-namespace softsusy {
-class QedQcd;
-}
+#include "lowe.h"
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_f_to_f_conversion {
-enum class Nucleus { Au, Al, Ti };
-@FToFConversion_InterfacePrototypes@
-}
+namespace @ModelName@_l_to_3l {
+
+@calc_prototypes@
+
+} // namespace @ModelName@_l_to_3l
+
 } // namespace flexiblesusy
 
 #endif

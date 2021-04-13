@@ -39,6 +39,8 @@ extern const char * const single_element_formatter;
 extern const char * const spinfo_formatter;
 /// SLHA line formatter for the OBSINFO block entries
 extern const char * const obsinfo_formatter;
+/// FLHA line formatter for FWCOEF, IMFCOEF block entries
+extern const char * const wilson_formatter;
 
 namespace {
    /// maximum line length in SLHA output
@@ -139,6 +141,21 @@ namespace {
       const std::string name_ = (name);                                        \
       std::snprintf(buf, SLHA_MAX_LINE_LENGTH, tensor_formatter, i_, j_, k_,   \
                     entry_, name_.c_str());                                    \
+      return std::string(buf);                                                 \
+   }()
+
+#define FORMAT_WILSON_COEFFICIENTS(f, m, x, y, ph, entry, name)                \
+   [&] {                                                                       \
+      char buf[SLHA_MAX_LINE_LENGTH];                                          \
+      const int f_ = (f);                                                      \
+      const int m_ = (m);                                                      \
+      const int x_ = (x);                                                      \
+      const int y_ = (y);                                                      \
+      const int ph_ = (ph);                                                    \
+      const double entry_ = (entry);                                           \
+      const std::string name_ = (name);                                        \
+      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, wilson_formatter, f_, m_, x_,   \
+                    y_, ph_, entry_, name_.c_str());                           \
       return std::string(buf);                                                 \
    }()
 

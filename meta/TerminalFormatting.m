@@ -21,7 +21,7 @@
 *)
 
 BeginPackage["TerminalFormatting`", {"SARAH`", "Utils`"}];
-Begin["`internal`"];
+Begin["`Private`"];
 If[!$Notebooks,
 
 showTerms[info:_Integer, add:_Integer:3, pre:_String:""] :=
