@@ -83,8 +83,6 @@ InitialGuessAtLowScale = {
    {Yv, ZEROMATRIX[3,3]}
 };
 
-FSCalculateDecays = True;
-
 InitialGuessAtHighScale = {};
 
 UseHiggs2LoopNMSSM = True;
