@@ -282,7 +282,7 @@ Block UERMIX
                               0.00081324389707053922, 1e-4);
    // h -> Z Z
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              0.00010470911466556374, 1e-4);
+                              0.00010469488286769175, 1e-4);
 
    // ------------ loop-induces decays ------------
 
