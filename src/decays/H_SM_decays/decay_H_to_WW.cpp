@@ -43,8 +43,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const auto ghWW =
          Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
 
-      res *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
-      err *= 1./(16.*Cube(Pi))* std::norm(ghWW) * 0.25*Cube(mHOS)/Power4(mWOS);
+      const double normalization = 1./(64.*Cube(Pi)) * std::norm(ghWW) * Cube(mHOS)/Power4(mWOS);
+      res *= normalization;
+      err *= normalization;
       const double rel_err = err/res;
       if (rel_err > 1e-3) {
          std::ostringstream oss;

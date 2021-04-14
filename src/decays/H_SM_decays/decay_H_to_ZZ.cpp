@@ -67,8 +67,9 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       const auto indices = concatenate(indexIn, indexOut2, indexOut1);
       const auto ghZZ =
          Vertex<H, Z, Z>::evaluate(indices, context).value();
-      res *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
-      err *= 1./(16.*Cube(Pi))* std::norm(ghZZ) * 0.25*Cube(mHOS)/Power4(mZOS)/2.;
+      const double normalization = 1./(64.*Cube(Pi)) * std::norm(ghZZ) * Cube(mHOS)/Power4(mZOS)/2.;
+      res *= normalization;
+      err *= normalization;
       const double rel_err = err/res;
       if (rel_err > 1e-3) {
          std::ostringstream oss;
