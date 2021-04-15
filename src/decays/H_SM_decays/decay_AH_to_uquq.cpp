@@ -82,7 +82,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
                + 2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red
                + 4./3.*alpha_s_red*calc_DeltaAH(betaDR);
 
-         // 1L QED correction - eq. 21 in FD manual
+         // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
          const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
 

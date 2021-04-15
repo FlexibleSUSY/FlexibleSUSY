@@ -88,7 +88,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          double deltaqq_QCD_DR_S = calc_Deltaqq(alpha_s_red, Nf, flexibledecay_settings);
          double deltaqq_QCD_DR_P = deltaqq_QCD_DR_S;
 
-         // 1L QED correction - eq. 21 in FD manual
+         // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
          const double deltaqq_QED_DR = 17./4.*Sqr(uq::electric_charge)*alpha_red;
 
