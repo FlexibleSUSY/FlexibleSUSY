@@ -182,17 +182,19 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
    const std::complex<double> li3m = trilog(-z);
    const std::complex<double> li4p = Li4(z);
    const std::complex<double> li4m = Li4(-z);
+   const std::complex<double> p41mz = Power4(1.0-z);
+   const std::complex<double> p51mz = Power5(1.0-z);
 
    const std::complex<double> F0H = 3./(2.*Sqr(tau))*(tau+(tau-1.)*f(tau));
 
    const std::complex<double> F0HC1H =
-      -z*(1. + z + Sqr(z) + Cube(z))/Power5(1.-z) * (108.*li4p + 144.*li4m - 64.*li3p*ln
+      -z*(1. + z + Sqr(z) + Cube(z))/p51mz * (108.*li4p + 144.*li4m - 64.*li3p*ln
             - 64.*li3m*ln + 14.*li2p*Sqr(ln) + 8.*li2m*Sqr(ln) + 1./12.*Power4(ln)
             + 4.*zeta2*Sqr(ln) + 16.*zeta3*ln + 18.*zeta4)
-      + z*Sqr(1+z)/Power4(1.-z) * (-32.*li3m + 16.*li2m*ln - 4.*zeta2*ln)
-      - 4.*z*(7.-2*z+7*Sqr(z))/Power4(1.-z)*li3p + 8.*z*(3.-2*z+3*Sqr(z))/Power4(1.-z)*li2p*ln
-      + 2.*z*(5.-6.*z+5.*Sqr(z))/Power4(1.-z)*std::log(1.-z)*Sqr(ln) + z*(3.+25.*z-7.*Sqr(z)+3.*Cube(z))/(3.*Power5(1.-z))*Cube(ln)
-      + 4.*z*(1.-14.*z+Sqr(z))/Power4(1.-z)*zeta3 + 12.*Sqr(z)/Power4(1.-z)*Sqr(ln) - 12.*z*(1.+z)/Power3(1.-z)*ln - 20.*z/Sqr(1.-z);
+      + z*Sqr(1+z)/p41mz * (-32.*li3m + 16.*li2m*ln - 4.*zeta2*ln)
+      - 4.*z*(7.-2*z+7*Sqr(z))/p41mz*li3p + 8.*z*(3.-2*z+3*Sqr(z))/p41mz*li2p*ln
+      + 2.*z*(5.-6.*z+5.*Sqr(z))/p41mz*std::log(1.-z)*Sqr(ln) + z*(3.+25.*z-7.*Sqr(z)+3.*Cube(z))/(3.*p51mz)*Cube(ln)
+      + 4.*z*(1.-14.*z+Sqr(z))/p41mz*zeta3 + 12.*Sqr(z)/p41mz*Sqr(ln) - 12.*z*(1.+z)/Power3(1.-z)*ln - 20.*z/Sqr(1.-z);
    const std::complex<double> F0HC2H = 3./Sqr(tau)*(tau+(tau-2.)*f(tau) - tau*taum1fprime(tau));
 
    return (F0HC1H + F0HC2H*std::log(Sqr(mu/mq)))/F0H;
