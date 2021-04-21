@@ -437,6 +437,18 @@ double OneLoopFunctionN(double r, double s)
    }
 }
 
+double Kallenlambda(double m1, double m2, double m3)
+{
+    return Power2(m1) + Power2(m2) + Power2(m3) - 2.*m1*m2 - 2.*m2*m3 - 2.*m3*m1;
+}
+
+double DiscontinuityB(double m12, double m2, double m3)
+{
+    return std::sqrt(Kallenlambda(m12,Power2(m2),Power2(m3))) 
+	    * std::log((Power2(m2)+Power(m3)-m12+std::sqrt(Kallenlambda(m12,Power2(m2),Power2(m3))))/(2.*m2*m3)) / m12;
+
+}
+
 // emit massless vector boson from the internal scalar line
 template <class Fj, class Fi, class V, class SA, class SB, class F>
 std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
