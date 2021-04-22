@@ -439,7 +439,7 @@ double OneLoopFunctionN(double r, double s)
 }
 
 
-double Kallenlambdadouble(double m1, double m2, double m3)
+double Kallenlambda(double m1, double m2, double m3)
 {
     return Power2(m1) + Power2(m2) + Power2(m3) - 2.*m1*m2 - 2.*m2*m3 - 2.*m3*m1;
 }
@@ -452,7 +452,7 @@ double Kallenlambdasqrt(double m1, double m2, double m3)
 double DiscontinuityB(double m12, double m2, double m3)
 {
     return Kallenlambdasqrt(m12,Power2(m2),Power2(m3)) 
-	    * std::log((Power2(m2)+Power(m3)-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
+	    * std::log((Power2(m2)+Power2(m3)-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
 double signeddilog(double x, double a)
@@ -461,7 +461,7 @@ double signeddilog(double x, double a)
     {
         return -1./2. * Power2(std::log(1./(1.-x))) - dilog(x/(x-1.));
     } else if (a < 0.) {
-        return dilog(x)
+        return dilog(x);
     }
 }
 
@@ -472,41 +472,41 @@ double ScalarC0(double M22, double M32, double m1, double m2, double m3)
         if (is_zero(m1 - m2))
         {
             return (Power2(m1)-M22-Power2(m3)) * DiscontinuityB(M22,m1,m3)
-                    / Kallenlambda(Power2(m1),M22,Power2(m3)) + std::log(m3/m1)/M22;
+                    / Kallenlambda(Power2(m1),M22,Power2(m3)) + std::log(m3/m1) / M22;
         } else {
             return (M22*(DiscontinuityB(M22,m1,m3)-DiscontinuityB(M22,m2,m3)-std::log(m1/m2))
                     + Power2(m3)*std::log(m1/m2) + Power2(m2)*std::log(m2/m3) + Power2(m1)*std::log(m3/m1))
                     / ((m1-m2) * (m1+m2) * M22);
         }
     } else {
-       double dilog1 = signeddilog(2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)(M32-M22)) 
+       double dilog1 = signeddilog(2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(M32-M22)) 
 		       / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
 		       -(M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
-       double dilog2 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.(M22-M32)*(-Power2(m3)+M32)) 
-		       / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32),
+       double dilog2 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.*(M22-M32)*(-Power2(m3)+M32)) 
+		       / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
                        -(M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32)));
        double dilog3 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
 	               / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
-	               (M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32));
-       double dilog4 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.(M22-M32)*(-Power2(m3)+M32)) 
-	               / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2*(m3)+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
+	               (M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
+       double dilog4 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.*(M22-M32)*(-Power2(m3)+M32)) 
+	               / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
 	               (M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32)));
        double dilog5 = signeddilog((2.*Power2(m1)*M22+2.*(M22-Power2(m3))*(M22-M32)-2.*Power2(m2)*M32) 
-	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3)),
+	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
 		       -M22*(M22-M32)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32));
        double dilog6 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
 	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
 	               -M22*(M22-M32)*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
        double dilog7 = signeddilog((2.*Power2(m1)*M22+2.*(M22-Power2(m3))*(M22-M32)-2.*Power2(m2)*M32) 
-	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3)),
+	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
 		       M22*(M22-M32)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32));
        double dilog8 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
-                       / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3),
+                       / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
 		       M22*(M22-M32)*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
        double polylog1 = ((m1-m2)*(m1+m2)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32)) 
                          / (Power4(m1)*M22+Power2(m2)*(M22-M32)*(Power2(m3)-M32)+Power4(m2)*M32+Power2(m1)*((M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)));
        double polylog2 = ((m1-m2)*(m1+m2)*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32))) 
-                         / (Power4(m1)*M22+Power2(m2)*(M22-M32)*(Power2(m3)-M32)+Power4(m2)*M32+POwer2(m1)*((M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)));
+                         / (Power4(m1)*M22+Power2(m2)*(M22-M32)*(Power2(m3)-M32)+Power4(m2)*M32+Power2(m1)*((M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)));
        return (-dilog1+dilog2-dilog3+dilog4-dilog5+dilog6-dilog7+dilog8+polylog1-polylog2) / (M22-M32); 
     }
 }
@@ -849,14 +849,15 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
 	 std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
+	 std::complex<double> A2L, A2R;
          const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.
 	    - mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.;
-	 if is_zero(mi - mj) {
-	 const std::complex<double> A2L =
+	 if (is_zero(mi - mj)) {
+	     A2L =
 	      vertexIn.left() * vertexOut.right() * 
 	        ((8.*mF*Power2(mV)) / Power3(mi) 
-	       + (8.*mF*Power4(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*Kallenlambda(Power2(mV),Power2(mi) Power2(mF)))
-	       + Power4(mV)*(-((8.*mF*(1.+x)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))) - (4.*mF*(x-1.)*std::log(x))/Power5(mi)))
+	       + (8.*mF*Power4(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
+	       + Power4(mV)*(-((8.*mF*(1.+x)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x))/Power5(mi)))
 	    + vertexIn.left() * vertexOut.left() * 
 	        (-((3.*Power2(mV)) / Power2(mi))
 	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
@@ -866,16 +867,16 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 	        (-((3.*Power2(mV)) / Power2(mi)) 
 	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
  	       + (Power4(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))	 
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));	 
          } else {
-	 const std::complex<double> A2L =
+	    A2L =
 	      vertexIn.left() * vertexOut.right() *
 	        ((8.*mF*Power2(mV)*(-DiscontinuityB(Power2(mi),mF,mV) + DiscontinuityB(Power2(mj),mF,mV))) / (Power2(mi)-Power2(mj)) / mi
 	       - (4.*mF*Power4(mV)*(x-1.)*std::log(x)) / (Power3(mi)*Power2(mj)))
 	    + vertexIn.right() * vertexOut.right() * 
-	        ((2.*Power2(mV)*((mi-mj)*(mi+mj)+(2.*Power2(mi)-Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / Power2(Power2(mi)- ower2(mj))
+	        ((2.*Power2(mV)*((mi-mj)*(mi+mj)+(2.*Power2(mi)-Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / Power2(Power2(mi)-Power2(mj))
 	       + (Power6(mV)*Power2(x-1.)*std::log(x)) / (Power4(mi)*Power2(mj))
-	       + (1./(Power2(mi)*Power2(mj)*Power2(Power2(mi) - Power2(mj)))) Power4(mV)*(-2.*Power2(mj)*(-2.Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1)*DiscontinuityB(Power2(mj),mF,mV)+2.*(mi-mj)*(mi+mj)*(Power2(mj)*(x-1)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*xScalarC0(Power2(mi),Power2(mj),mF,mF,mV))))
+	       + Power4(mV)*(-2.*Power2(mj)*(-2.*Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1)*DiscontinuityB(Power2(mj),mF,mV)+2.*(mi-mj)*(mi+mj)*(Power2(mj)*(x-1)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV))) / (Power2(mi)*Power2(mj)*Power2(Power2(mi) - Power2(mj))))
 	    + vertexIn.left() * vertexOut.left() *
 	        ((2.*Power2(mV)*mj*(-Power2(mi)+Power2(mj)+(Power2(mi)-2.*Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / (mi*Power2(Power2(mi) -Power2(mj)))
 	       + (Power6(mV)*Power2(x-1.)*std::log(x)) / (Power3(mi)*Power3(mj))
@@ -889,13 +890,13 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
          const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.
 	    - mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.;
-	 if is_zero(mi - mj) {
-	 const std::complex<double> A2R =
+	 if (is_zero(mi - mj)) {
+	     A2R =
 	      vertexIn.right() * vertexOut.left() *
 	       	((8.*mF*Power2(mV)) / Power3(mi)
 	       + (8.*mF*Power6(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
 	       + Power4(mV)*(-((8.*mF*(x+1.)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x)) / Power5(mi)))
-	    + vertexIn.light() * vertexOut.light() * 
+	    + vertexIn.left() * vertexOut.left() * 
 	        (-((3.*Power2(mV)) / Power2(mi))
 	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))) 
 	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
@@ -904,20 +905,20 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 	         (-((3.*Power2(mV)) / Power2(mi))
 	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
 	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));
          } else {
-	 const std::complex<double> A2R =
+	     A2R =
               vertexIn.left() * vertexOut.right() * 
 	        (8.*mF*Power2(mV)*(DiscontinuityB(Power2(mj),mF,mV)-DiscontinuityB(Power2(mi),mF,mV)) / (mi*mi*mi-mi*mj*mj) 
-	       - 4.*mF*Power4(mV)*(x-1.)std::log(x) / (Power3(mi)*Power2(mj)))
+	       - 4.*mF*Power4(mV)*(x-1.)*std::log(x) / (Power3(mi)*Power2(mj)))
             + vertexIn.left() * vertexOut.left() * 
 	        (2.*Power2(mV)*((mi-mj)*(mi+mj)+(2.*Power2(mi)-Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV))) / Power2(Power2(mi)-Power2(mj))
-	       + Power6(mV)*(x-1.)^2*std:log(x) / (Power4(mi)*Power2(mj))
-	       + Power4(mV)*(-2.*Power2(mj)*(-2.*Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+2.(mi-mj)*(mi+mj)*(Power2(mj)*(x-1.)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)* x ScalarC0(Power2(mi),Power2(mj),mF,mF,mV))) / (Power2(mi)*Power2(mj)*Power2(Power2(mi)-Power2(mj))))
+	       + Power6(mV)*Power2(x-1.)*std::log(x) / (Power4(mi)*Power2(mj))
+	       + Power4(mV)*(-2.*Power2(mj)*(-2.*Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+2.*(mi-mj)*(mi+mj)*(Power2(mj)*(x-1.)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV))) / (Power2(mi)*Power2(mj)*Power2(Power2(mi)-Power2(mj))))
             + vertexIn.right() * vertexOut.right() *
 	      ((2.*Power2(mV)*mj*(-Power2(mi)+Power2(mj)+(Power2(mi)-2.*Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / (mi*Power2(Power2(mi)-Power2(mj)))
-	       + (Power6(mV)*Power2(x-1.)*std:log(x)) / (Power3(mi)*Power3(mj))
-	       - (2.*Power4(mV)*(Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+Power2(mi)*(Power2(mi)-2.*POwer2(mj))*(x-1.)*DiscontinuityB(Power2(mj),mF,mV) + (Power2(mi)-Power2(mj))*(Power2(mi)*(x-1.)+(Power2(mi)+Power2(mj)*(x-1.))*std:log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV)))) / (Power3(mi)*mj*Power2(Power2(mi)-Power2(mj))));
+	       + (Power6(mV)*Power2(x-1.)*std::log(x)) / (Power3(mi)*Power3(mj))
+	       - (2.*Power4(mV)*(Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+Power2(mi)*(Power2(mi)-2.*Power2(mj))*(x-1.)*DiscontinuityB(Power2(mj),mF,mV) + (Power2(mi)-Power2(mj))*(Power2(mi)*(x-1.)+(Power2(mi)+Power2(mj)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV)))) / (Power3(mi)*mj*Power2(Power2(mi)-Power2(mj))));
 	 }
 	 // Simplifies to the below when mV,mF >> mi,mj
          //const std::complex<double> A2R = 
