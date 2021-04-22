@@ -846,17 +846,43 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
          const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.
 	    - mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.;
-         const std::complex<double> A2L = 
-            - 4. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionC(x) / 3. 
-            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3. 
-            + vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3.;
+	 const std::complex<double> A2L =
+	      vertexIn.left() * vertexOut.right() *
+	        ((8.*mF*Power2(mV)*(-DiscontinuityB(Power2(mi),mF,mV) + DiscontinuityB(Power2(mj),mF,mV))) / (Power3(mi)-mi*Power2(mj))
+	       - (4.*mF*Power4(mV)*(x-1.)*std::log(x)) / (Power3(mi)*Power2(mj)))
+	    + vertexIn.right() * vertexOut.right() * 
+	        ((2.*Power2(mV)*((mi-mj)*(mi+mj)+(2.*Power2(mi)-Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / Power2(Power2(mi)- ower2(mj))
+	       + (Power6(mV)*Power2(x-1.)*std::log(x)) / (Power4(mi)*Power2(mj))
+	       + (1./(Power2(mi)*Power2(mj)*Power2(Power2(mi) - Power2(mj)))) Power4(mV)*(-2.*Power2(mj)*(-2.Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1)*DiscontinuityB(Power2(mj),mF,mV)+2.*(mi-mj)*(mi+mj)*(Power2(mj)*(x-1)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*xScalarC0(Power2(mi),Power2(mj),mF,mF,mV))))
+	    + vertexIn.left() * vertexOut.left() *
+	        ((2.*Power2(mV)*mj*(-Power2(mi)+Power2(mj)+(Power2(mi)-2.*Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / (mi*Power2(Power2(mi) -Power2(mj)))
+	       + (Power6(mV)*Power2(x-1.)*std::log(x)) / (Power3(mi)*Power3(mj))
+	       - (2.*Power4(mV)*(Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+Power2(mi)*(Power2(mi)-2.*Power2(mj))*(x-1.)*DiscontinuityB(Power2(mj),mF,mV)+(Power2(mi)-Power2(mj))*(Power2(mi)*(x-1.)+(Power2(mi)+Power2(mj)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV)))) / (Power3(mi)*mj*Power2(Power2(mi)-Power2(mj))));
+	 // Simplifies to the below when mV,mF >> mi,mj
+         // const std::complex<double> A2L = 
+         //    - 4. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionC(x) / 3. 
+         //    + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3. 
+         //    + vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3.;
 
          const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL(x) / 9.
 	    - mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.;
-         const std::complex<double> A2R = 
-            - 4. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionC(x) / 3. 
-            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3. 
-            + vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3.;
+	 const std::complex<double> A2R =
+              vertexIn.left() * vertexOut.right() * 
+	        (8.*mF*Power2(mV)*(DiscontinuityB(Power2(mj),mF,mV)-DiscontinuityB(Power2(mi),mF,mV)) / (mi*mi*mi-mi*mj*mj) 
+	       - 4.*mF*Power4(mV)*(x-1.)std::log(x) / (Power3(mi)*Power2(mj)))
+            + vertexIn.left() * vertexOut.left() * 
+	        (2.*Power2(mV)*((mi-mj)*(mi+mj)+(2*Power2(mi)-Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV))) / Power2(Power2(mi)-Power2(mj))
+	       + Power6(mV)*(x-1.)^2*std:log(x) / (Power4(mi)*Power2(mj))
+	       + Power4(mV)*(-2.*Power2(mj)*(-2.*Power2(mi)+Power2(mj))*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)-2.*Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+2.(mi-mj)*(mi+mj)*(Power2(mj)*(x-1.)+(Power2(mj)+Power2(mi)*(x-1.))*std::log(x)+2.*Power2(mi)*Power2(mj)* x ScalarC0(Power2(mi),Power2(mj),mF,mF,mV))) / (Power2(mi)*Power2(mj)*Power2(Power2(mi)-Power2(mj))))
+            + vertexIn.right() * vertexOut.right() *
+	      ((2.*Power2(mV)*mj*(-Power2(mi)+Power2(mj)+(Power2(mi)-2.*Power2(mj))*(DiscontinuityB(Power2(mi),mF,mV)-DiscontinuityB(Power2(mj),mF,mV)))) / (mi*Power2(Power2(mi)-Power2(mj)))
+	       + (Power6(mV)*Power2(x-1.)*std:log(x)) / (Power3(mi)*Power3(mj))
+	       - (2.*Power4(mV)*(Power2(mi)*Power2(mj)*(x-1.)*DiscontinuityB(Power2(mi),mF,mV)+Power2(mi)*(Power2(mi)-2.*POwer2(mj))*(x-1.)*DiscontinuityB(Power2(mj),mF,mV) + (Power2(mi)-Power2(mj))*(Power2(mi)*(x-1.)+(Power2(mi)+Power2(mj)*(x-1.))*std:log(x)+2.*Power2(mi)*Power2(mj)*x*ScalarC0(Power2(mi),Power2(mj),mF,mF,mV)))) / (Power3(mi)*mj*Power2(Power2(mi)-Power2(mj))));
+	 // Simplifies to the below when mV,mF >> mi,mj
+         //const std::complex<double> A2R = 
+         //   - 4. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionC(x) / 3. 
+         //   + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionM(x) / 3. 
+         //   + vertexIn.left() * vertexOut.left() * OneLoopFunctionM(x) / 3.;
 
 	 std::complex<double> massFactor = 0.0;
          if (std::isinf(x)) {
