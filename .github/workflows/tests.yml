@@ -2,6 +2,8 @@ name: tests
 
 on:
 
+  # branches together with paths-ignore work like 'or', not like 'and'
+  # no idea how to fix it
   push:
     branches:
       - development
