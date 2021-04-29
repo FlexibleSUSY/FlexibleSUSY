@@ -466,7 +466,7 @@ double OneLoopFunctionN(double r, double s)
       } else if (is_zero(1.0 - r)){
          return 2.0 / 3.0;
       } else {
-         return (1.0 - 4.0 * r + 3 * r * r - 2 * r * r * std::log(r)) / Power3(1.0 - r);
+         return (1.0 - 4.0 * r + 3 * r * r - 2 * r * r * std::log(r)) / 2.0 / Power3(1.0 - r);
       }
    } else if (1./s < ratiolimit) {
       // Expand s about 0 to 1st order
