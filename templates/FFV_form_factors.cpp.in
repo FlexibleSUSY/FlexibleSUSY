@@ -494,20 +494,21 @@ double OneLoopFunctionN(double r, double s)
 }
 
 
-double Kallenlambda(double m1, double m2, double m3)
+template<typename T>
+T KallenLambda(T m1, T m2, T m3)
 {
-    return Power2(m1) + Power2(m2) + Power2(m3) - 2.*m1*m2 - 2.*m2*m3 - 2.*m3*m1;
+   return Power2(m1-m2-m3) - 4*m2*m3;
 }
 
-double Kallenlambdasqrt(double m1, double m2, double m3)
+double KallenLambdasqrt(double m1, double m2, double m3)
 {
-    return std::sqrt(Kallenlambda(m1,m2,m3));
+    return std::sqrt(KallenLambda(m1,m2,m3));
 }
 
 double DiscontinuityB(double m12, double m2, double m3)
 {
-    return Kallenlambdasqrt(m12,Power2(m2),Power2(m3)) 
-	    * std::log((m22+m32-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
+    return KallenLambdasqrt(m12,Power2(m2),Power2(m3)) 
+	    * std::log((Power2(m2)+Power2(m3)-m12+KallenLambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
 double signed_dilog(double x, double a)
@@ -532,36 +533,36 @@ double ScalarC0(double M22, double M32, double m1, double m2, double m3)
         if (is_zero(m1 - m2))
         {
             return (m12-M22-m32) * DiscontinuityB(M22,m1,m3)
-                    / Kallenlambda(m12,M22,m32) + std::log(m3/m1) / M22;
+                    / KallenLambda(m12,M22,m32) + std::log(m3/m1) / M22;
         } else {
             return (M22*(DiscontinuityB(M22,m1,m3)-DiscontinuityB(M22,m2,m3)-std::log(m1/m2))
                     + m32*std::log(m1/m2) + m22*std::log(m2/m3) + m12*std::log(m3/m1))
                     / ((m1-m2) * (m1+m2) * M22);
         }
     } else {
-       double dilog1 = signeddilog(2.*(m12*M22-m22*M32+m32*(M32-M22)) 
-		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*Kallenlambdasqrt(m12,m32,M32)),
+       double dilog1 = signed_dilog(2.*(m12*M22-m22*M32+m32*(M32-M22)) 
+		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*KallenLambdasqrt(m12,m32,M32)),
 		       -(M22-M32)*M32*(m12*M22-m22*M32+m32*(-M22+M32)));
-       double dilog2 = signeddilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
-		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*Kallenlambdasqrt(m12,m32,M32)),
+       double dilog2 = signed_dilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
+		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*KallenLambdasqrt(m12,m32,M32)),
                        -(M22-M32)*M32*(m12*M22-m22*M32+(M22-M32)*(-m32+M32)));
-       double dilog3 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
-	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*Kallenlambdasqrt(m12,m32,M32)),
+       double dilog3 = signed_dilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*KallenLambdasqrt(m12,m32,M32)),
 	               (M22-M32)*M32*(m12*M22-m22*M32+m32*(-M22+M32)));
-       double dilog4 = signeddilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
-	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*Kallenlambdasqrt(m12,m32,M32)),
+       double dilog4 = signed_dilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
+	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*KallenLambdasqrt(m12,m32,M32)),
 	               (M22-M32)*M32*(m12*M22-m22*M32+(M22-M32)*(-m32+M32)));
-       double dilog5 = signeddilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
-	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*Kallenlambdasqrt(m22,M22,m32)),
+       double dilog5 = signed_dilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*KallenLambdasqrt(m22,M22,m32)),
 		       -M22*(M22-M32)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32));
-       double dilog6 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
-	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*Kallenlambdasqrt(m22,M22,m32)),
+       double dilog6 = signed_dilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*KallenLambdasqrt(m22,M22,m32)),
 	               -M22*(M22-M32)*(m12*M22-m22*M32+m32*(-M22+M32)));
-       double dilog7 = signeddilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
-	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(m22,M22,m32)),
+       double dilog7 = signed_dilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*KallenLambdasqrt(m22,M22,m32)),
 		       M22*(M22-M32)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32));
-       double dilog8 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
-                       / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(m22,M22,m32)),
+       double dilog8 = signed_dilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+                       / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*KallenLambdasqrt(m22,M22,m32)),
 		       M22*(M22-M32)*(m12*M22-m22*M32+m32*(-M22+M32)));
        double polylog1 = ((m1-m2)*(m1+m2)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32)) 
                          / (Power4(m1)*M22+m22*(M22-M32)*(m32-M32)+Power4(m2)*M32+m12*((M22-m32)*(M22-M32)-m22*(M22+M32)));
@@ -919,18 +920,18 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 	     A2L =
 	      vertexIn.left() * vertexOut.right() * 
 	        ((8.*mF*Power2(mV)) / Power3(mi) 
-	       + (8.*mF*Power4(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
-	       + Power4(mV)*(-((8.*mF*(1.+x)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x))/Power5(mi)))
+	       + (8.*mF*Power4(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF)))
+	       + Power4(mV)*(-((8.*mF*(1.+x)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*KallenLambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x))/Power5(mi)))
 	    + vertexIn.left() * vertexOut.left() * 
 	        (-((3.*Power2(mV)) / Power2(mi))
-	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
-	       + (Power4(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))
+	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF)))
+	       + (Power4(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))
 	    + vertexIn.right() * vertexOut.right() *
 	        (-((3.*Power2(mV)) / Power2(mi)) 
-	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
- 	       + (Power4(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));	 
+	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF)))
+ 	       + (Power4(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));	 
          } else {
 	    A2L =
 	      vertexIn.left() * vertexOut.right() *
@@ -957,18 +958,18 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 	     A2R =
 	      vertexIn.right() * vertexOut.left() *
 	       	((8.*mF*Power2(mV)) / Power3(mi)
-	       + (8.*mF*Power6(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
-	       + Power4(mV)*(-((8.*mF*(x+1.)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x)) / Power5(mi)))
+	       + (8.*mF*Power6(mV)*Power2(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power3(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF)))
+	       + Power4(mV)*(-((8.*mF*(x+1.)*DiscontinuityB(Power2(mi),mF,mV)) / (mi*KallenLambda(Power2(mV),Power2(mi),Power2(mF))))-(4.*mF*(x-1.)*std::log(x)) / Power5(mi)))
 	    + vertexIn.left() * vertexOut.left() * 
 	        (-((3.*Power2(mV)) / Power2(mi))
-	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF))) 
-	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))
+	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF))) 
+	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)))
 	    + vertexIn.right() * vertexOut.right() *
 	         (-((3.*Power2(mV)) / Power2(mi))
-	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*Kallenlambda(Power2(mV),Power2(mi),Power2(mF)))
-	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
-	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / Kallenlambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));
+	       - (2.*Power8(mV)*Power3(x-1.)*DiscontinuityB(Power2(mi),mF,mV)) / (Power4(mi)*KallenLambda(Power2(mV),Power2(mi),Power2(mF)))
+	       + (Power6(mV)*(x-1.)*((6.*Power4(mi)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(x-1.)*std::log(x))) / Power6(mi)
+	       + Power4(mV)*((2.*(2.+x)*DiscontinuityB(Power2(mi),mF,mV)) / KallenLambda(Power2(mV),Power2(mi),Power2(mF))+(2.-2.*x+(x-2.)*std::log(x)) / Power4(mi)));
          } else {
 	     A2R =
               vertexIn.left() * vertexOut.right() * 
