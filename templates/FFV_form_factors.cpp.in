@@ -203,7 +203,7 @@ namespace {
 * as specified in arXiv:0808.1819
 */
 
-const double ratiolimit = 0.0001;
+const double ratiolimit = 0.00001;
 
 // function from eq. 15 of hep-ph/9510309
 double OneLoopFunctionA(double r)
@@ -212,9 +212,12 @@ double OneLoopFunctionA(double r)
       return 1.5;
    } else if (is_zero(r)) {
       return 2.0;
+   } else if (1./r < Power3(ratiolimit)) {
+      // Loop function is about 10^-13, treat as reaching the 0 limit
+      return 0.;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
-      return 0.*r;
+      return r*(-11.-6.*std::log(r));
    } else {
       return (2.0 - 9.0 * r + 18.0 * r * r - 11.0 * r * r * r +
               6.0 * r * r * r * std::log(r)) /
@@ -374,9 +377,12 @@ double OneLoopFunctionH(double r)
       return 5.0;
    } else if (is_zero(1.0 - r)){
       return 0.0;
+   } else if (1./r < Power3(ratiolimit)) {
+      // Loop function is about 10^-13, treat as reaching the 0 limit
+      return 0.;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
-      return 0.*r;
+      return r*(-5.-6.*std::log(r));
    } else {
       return (5.0 - 27.0 * r + 27.0 * r * r - 5.0 * r * r * r + 6.0 * (r - 3.0) * r * r * std::log(r)) /
               Power4(1.0 - r);
@@ -389,9 +395,12 @@ double OneLoopFunctionI(double r)
       return 1.0;
    } else if (is_zero(1.0 - r)){
       return 0.5;
+   } else if (1./r < Power3(ratiolimit)) {
+      // Loop function is about 10^-13, treat as reaching the 0 limit
+      return 0.;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
-      return 0.*r;
+      return r*(-1.-1.*std::log(r));
    } else {
       return (1.0 - r + r * std::log(r)) / Power2(1.0 - r);
    }
@@ -403,9 +412,12 @@ double OneLoopFunctionJ(double r)
       return 7.0;
    } else if (is_zero(1.0 - r)){
       return 5.0;
+   } else if (1./r < Power3(ratiolimit)) {
+      // Loop function is about 10^-13, treat as reaching the 0 limit
+      return 0.;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
-      return 0.*r;
+      return r*(-31.-18.*std::log(r));
    } else {
       return (7.0 - 33.0 * r + 57.0 * r * r - 31.0 * r * r * r + 6.0 * r * r * (3.0 * r - 1.0)
                    * std::log(r)) / Power4(1.0 - r);
@@ -418,9 +430,12 @@ double OneLoopFunctionK(double r)
       return 1.0;
    } else if (is_zero(1.0 - r)){
       return 2.0 / 3.0;
+   } else if (1./r < Power3(ratiolimit)) {
+      // Loop function is about 10^-13, treat as reaching the 0 limit
+      return 0.;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
-      return 0.*r;
+      return r*(-3.-2.*std::log(r));
    } else {   
       return (1.0 - 4.0 * r + 3.0 * r * r - 2 * r * r * std::log(r)) / Power3(1.0 - r);
    }
@@ -447,8 +462,6 @@ double OneLoopFunctionM(double r)
       return 4.0;
    } else if (is_zero(1.0 - r)){
       return 1.5;
-   } else if (std::isinf(r)) {
-      return 0.0;
    } else if (1./r < ratiolimit) {
       // Expand about 0 to 1st order
       return 5.*r;
