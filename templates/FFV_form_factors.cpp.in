@@ -508,7 +508,7 @@ double KallenLambdasqrt(double m1, double m2, double m3)
 double DiscontinuityB(double m12, double m2, double m3)
 {
     return KallenLambdasqrt(m12,Power2(m2),Power2(m3)) 
-	    * std::log((Power2(m2)+Power2(m3)-m12+KallenLambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
+               * std::log((Power2(m2)+Power2(m3)-m12+KallenLambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
 double signed_dilog(double x, double a)
