@@ -506,11 +506,8 @@ double Kallenlambdasqrt(double m1, double m2, double m3)
 
 double DiscontinuityB(double m12, double m2, double m3)
 {
-    double m12 = m12;
-    double m22 = m22;
-    double m32 = m32;
-    return Kallenlambdasqrt(m12,m22,m32) 
-	    * std::log((m22+m32-m12+Kallenlambdasqrt(m12,m22,m32))/(2.*m2*m3)) / m12;
+    return Kallenlambdasqrt(m12,Power2(m2),Power2(m3)) 
+	    * std::log((m22+m32-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
 double signed_dilog(double x, double a)
