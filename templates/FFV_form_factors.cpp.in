@@ -203,6 +203,9 @@ namespace {
 * as specified in arXiv:0808.1819
 */
 
+//  TODO:  Several fixes still needed, 1/r is not helpful when r is infinite, 
+//  may need to just input mF and mS/mV and then calculate the ratios in-house.
+
 const double ratiolimit = 0.00001;
 
 // function from eq. 15 of hep-ph/9510309
@@ -900,6 +903,9 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
          const auto x = Power2(mF/mV);
 
 	 std::complex<double> vector_boson_coupling {vertexEmit.left()};
+
+	 // TODO:  Current issue with the code for the case mV=0, when mi==mF or mi==mj,
+	 // then this contribution diverges.  
 
 	 std::complex<double> A2L, A2R;
          const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL(x) / 9.
