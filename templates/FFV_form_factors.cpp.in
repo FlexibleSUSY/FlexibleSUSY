@@ -520,6 +520,8 @@ double signed_dilog(double x, double a)
     }
 }
 
+// function from eq. 2.9 of hep-ph/1105.4319
+// Standard C0 Passarino-Veltman function with first mass entry set to 0 (note the missing M12)
 double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 {
     double m12 = m12;
