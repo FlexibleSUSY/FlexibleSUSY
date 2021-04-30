@@ -409,6 +409,7 @@ double OneLoopFunctionI(double r)
    }
 }
 
+// function from eq. 78 of hep-ph/2104.03691
 double OneLoopFunctionJ(double r)
 {
    if (is_zero(r)) {
@@ -427,6 +428,7 @@ double OneLoopFunctionJ(double r)
    }
 }
 
+// function from eq. 79 of hep-ph/2104.03691
 double OneLoopFunctionK(double r)
 {
    if (is_zero(r)) {
@@ -459,6 +461,7 @@ double OneLoopFunctionL(double r)
    }
 }
 
+// function from eq. 80 of hep-ph/2104.03691
 double OneLoopFunctionM(double r)
 {
    if (is_zero(r)) {
@@ -474,6 +477,7 @@ double OneLoopFunctionM(double r)
    }
 }
 
+// function from eq. 81 of hep-ph/2104.03691
 double OneLoopFunctionN(double r, double s)
 {
    if (is_zero(r - s)) {
