@@ -510,7 +510,7 @@ double DiscontinuityB(double m12, double m2, double m3)
 	    * std::log((Power2(m2)+Power2(m3)-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
-double signeddilog(double x, double a)
+double signed_dilog(double x, double a)
 {
     if (a > 0.)
     {
