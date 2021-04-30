@@ -525,9 +525,9 @@ double signed_dilog(double x, double a)
 // Standard C0 Passarino-Veltman function with first mass entry set to 0 (note the missing M12)
 double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 {
-    double m12 = m12;
-    double m22 = m22;
-    double m32 = m32;
+    double m12 = Power2(m1);
+    double m22 = Power2(m2);
+    double m32 = Power2(m3);
     if (is_zero(M22 - M32))
     {
         if (is_zero(m1 - m2))
