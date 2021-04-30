@@ -506,8 +506,11 @@ double Kallenlambdasqrt(double m1, double m2, double m3)
 
 double DiscontinuityB(double m12, double m2, double m3)
 {
-    return Kallenlambdasqrt(m12,Power2(m2),Power2(m3)) 
-	    * std::log((Power2(m2)+Power2(m3)-m12+Kallenlambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
+    double m12 = m12;
+    double m22 = m22;
+    double m32 = m32;
+    return Kallenlambdasqrt(m12,m22,m32) 
+	    * std::log((m22+m32-m12+Kallenlambdasqrt(m12,m22,m32))/(2.*m2*m3)) / m12;
 }
 
 double signed_dilog(double x, double a)
@@ -522,46 +525,49 @@ double signed_dilog(double x, double a)
 
 double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 {
+    double m12 = m12;
+    double m22 = m22;
+    double m32 = m32;
     if (is_zero(M22 - M32))
     {
         if (is_zero(m1 - m2))
         {
-            return (Power2(m1)-M22-Power2(m3)) * DiscontinuityB(M22,m1,m3)
-                    / Kallenlambda(Power2(m1),M22,Power2(m3)) + std::log(m3/m1) / M22;
+            return (m12-M22-m32) * DiscontinuityB(M22,m1,m3)
+                    / Kallenlambda(m12,M22,m32) + std::log(m3/m1) / M22;
         } else {
             return (M22*(DiscontinuityB(M22,m1,m3)-DiscontinuityB(M22,m2,m3)-std::log(m1/m2))
-                    + Power2(m3)*std::log(m1/m2) + Power2(m2)*std::log(m2/m3) + Power2(m1)*std::log(m3/m1))
+                    + m32*std::log(m1/m2) + m22*std::log(m2/m3) + m12*std::log(m3/m1))
                     / ((m1-m2) * (m1+m2) * M22);
         }
     } else {
-       double dilog1 = signeddilog(2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(M32-M22)) 
-		       / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
-		       -(M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
-       double dilog2 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.*(M22-M32)*(-Power2(m3)+M32)) 
-		       / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
-                       -(M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32)));
-       double dilog3 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
-	               / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
-	               (M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
-       double dilog4 = signeddilog((2.*Power2(m1)*M22-2.*Power2(m2)*M32+2.*(M22-M32)*(-Power2(m3)+M32)) 
-	               / (-2.*Power2(m2)*M32+Power2(m1)*(M22+M32)+(M22-M32)*(-Power2(m3)+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m1),Power2(m3),M32)),
-	               (M22-M32)*M32*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32)));
-       double dilog5 = signeddilog((2.*Power2(m1)*M22+2.*(M22-Power2(m3))*(M22-M32)-2.*Power2(m2)*M32) 
-	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
-		       -M22*(M22-M32)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32));
-       double dilog6 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
-	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(M22-M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
-	               -M22*(M22-M32)*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
-       double dilog7 = signeddilog((2.*Power2(m1)*M22+2.*(M22-Power2(m3))*(M22-M32)-2.*Power2(m2)*M32) 
-	               / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
-		       M22*(M22-M32)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32));
-       double dilog8 = signeddilog((2.*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32))) 
-                       / (2.*Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(Power2(m2),M22,Power2(m3))),
-		       M22*(M22-M32)*(Power2(m1)*M22-Power2(m2)*M32+Power2(m3)*(-M22+M32)));
-       double polylog1 = ((m1-m2)*(m1+m2)*(Power2(m1)*M22+(M22-Power2(m3))*(M22-M32)-Power2(m2)*M32)) 
-                         / (Power4(m1)*M22+Power2(m2)*(M22-M32)*(Power2(m3)-M32)+Power4(m2)*M32+Power2(m1)*((M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)));
-       double polylog2 = ((m1-m2)*(m1+m2)*(Power2(m1)*M22-Power2(m2)*M32+(M22-M32)*(-Power2(m3)+M32))) 
-                         / (Power4(m1)*M22+Power2(m2)*(M22-M32)*(Power2(m3)-M32)+Power4(m2)*M32+Power2(m1)*((M22-Power2(m3))*(M22-M32)-Power2(m2)*(M22+M32)));
+       double dilog1 = signeddilog(2.*(m12*M22-m22*M32+m32*(M32-M22)) 
+		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*Kallenlambdasqrt(m12,m32,M32)),
+		       -(M22-M32)*M32*(m12*M22-m22*M32+m32*(-M22+M32)));
+       double dilog2 = signeddilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
+		       / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(M22-M32)*Kallenlambdasqrt(m12,m32,M32)),
+                       -(M22-M32)*M32*(m12*M22-m22*M32+(M22-M32)*(-m32+M32)));
+       double dilog3 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*Kallenlambdasqrt(m12,m32,M32)),
+	               (M22-M32)*M32*(m12*M22-m22*M32+m32*(-M22+M32)));
+       double dilog4 = signeddilog((2.*m12*M22-2.*m22*M32+2.*(M22-M32)*(-m32+M32)) 
+	               / (-2.*m22*M32+m12*(M22+M32)+(M22-M32)*(-m32+M32)+(-M22+M32)*Kallenlambdasqrt(m12,m32,M32)),
+	               (M22-M32)*M32*(m12*M22-m22*M32+(M22-M32)*(-m32+M32)));
+       double dilog5 = signeddilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*Kallenlambdasqrt(m22,M22,m32)),
+		       -M22*(M22-M32)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32));
+       double dilog6 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(M22-M32)*Kallenlambdasqrt(m22,M22,m32)),
+	               -M22*(M22-M32)*(m12*M22-m22*M32+m32*(-M22+M32)));
+       double dilog7 = signeddilog((2.*m12*M22+2.*(M22-m32)*(M22-M32)-2.*m22*M32) 
+	               / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(m22,M22,m32)),
+		       M22*(M22-M32)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32));
+       double dilog8 = signeddilog((2.*(m12*M22-m22*M32+m32*(-M22+M32))) 
+                       / (2.*m12*M22+(M22-m32)*(M22-M32)-m22*(M22+M32)+(-M22+M32)*Kallenlambdasqrt(m22,M22,m32)),
+		       M22*(M22-M32)*(m12*M22-m22*M32+m32*(-M22+M32)));
+       double polylog1 = ((m1-m2)*(m1+m2)*(m12*M22+(M22-m32)*(M22-M32)-m22*M32)) 
+                         / (Power4(m1)*M22+m22*(M22-M32)*(m32-M32)+Power4(m2)*M32+m12*((M22-m32)*(M22-M32)-m22*(M22+M32)));
+       double polylog2 = ((m1-m2)*(m1+m2)*(m12*M22-m22*M32+(M22-M32)*(-m32+M32))) 
+                         / (Power4(m1)*M22+m22*(M22-M32)*(m32-M32)+Power4(m2)*M32+m12*((M22-m32)*(M22-M32)-m22*(M22+M32)));
        return (-dilog1+dilog2-dilog3+dilog4-dilog5+dilog6-dilog7+dilog8+polylog1-polylog2) / (M22-M32); 
     }
 }
