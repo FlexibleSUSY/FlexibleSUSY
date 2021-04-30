@@ -206,7 +206,7 @@ namespace {
 //  TODO:  Several fixes still needed, 1/r is not helpful when r is infinite, 
 //  may need to just input mF and mS/mV and then calculate the ratios in-house.
 
-const double ratiolimit = 0.00001;
+const double ratio_limit = 0.00001;
 
 // function from eq. 15 of hep-ph/9510309
 double OneLoopFunctionA(double r)
