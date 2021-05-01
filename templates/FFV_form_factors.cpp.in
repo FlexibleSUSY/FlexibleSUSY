@@ -515,10 +515,11 @@ double DiscontinuityB(double m12, double m2, double m3)
                * std::log((Power2(m2)+Power2(m3)-m12+KallenLambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
-// function follows from Mathematica PackageX, DiLog[]
-// Returns a dilog, but performs the branch cut depending on the sign of a. If x<=1, then 
-// this is just a simple dilog. However if x > 1, then the sign of the branch cut is the 
-// sign of a.
+/* The is the description of the following function, from Mathematica PackageX, DiLog[]
+ * Returns a dilog, but performs the branch cut depending on the sign of a.  If x<=1, then 
+ * this is just a simple dilog.  However if x > 1, then the sign of the branch cut is the 
+ * sign of a.
+ */
 double signed_dilog(double x, double a)
 {
     if (a > 0.)
@@ -530,7 +531,9 @@ double signed_dilog(double x, double a)
 }
 
 // function from eq. 2.9 of hep-ph/1105.4319
-// Standard C0 Passarino-Veltman function with first mass entry set to 0 (note the missing M12)
+/* The following function is a Standard C0 Passarino-Veltman function with first mass entry
+ * set to 0 (note the missing M12).
+ */
 double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 {
     const double m12 = Power2(m1);
