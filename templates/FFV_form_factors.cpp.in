@@ -515,6 +515,10 @@ double DiscontinuityB(double m12, double m2, double m3)
                * std::log((Power2(m2)+Power2(m3)-m12+KallenLambdasqrt(m12,Power2(m2),Power2(m3)))/(2.*m2*m3)) / m12;
 }
 
+// function follows from Mathematica PackageX, DiLog[]
+// Returns a dilog, but performs the branch cut depending on the sign of a. If x<=1, then 
+// this is just a simple dilog. However if x > 1, then the sign of the branch cut is the 
+// sign of a.
 double signed_dilog(double x, double a)
 {
     if (a > 0.)
