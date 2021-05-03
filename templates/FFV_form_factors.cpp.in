@@ -381,7 +381,7 @@ double OneLoopFunctionF(double r)
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_VVF contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.  
 double OneLoopFunctionH(double r)
 {
    if (is_zero(r)) {
@@ -401,7 +401,7 @@ double OneLoopFunctionH(double r)
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_VVF contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.  
 double OneLoopFunctionI(double r)
 {
    if (is_zero(r)) {
@@ -457,7 +457,7 @@ double OneLoopFunctionK(double r)
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_FFV contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_FFV contribution.  
 double OneLoopFunctionL(double r)
 {  
    if (is_zero(r)) {
@@ -607,9 +607,10 @@ double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 * @brief Contributions to the processes Fe_I -> Fe_J gamma at the one-loop level.
 *
 * Diagram contributions are of the form:
-* \Gamma^\mu =   A1L gamma^\mu P_L + A1R gamma^\mu P_R 
-*              + A2L I sigma^\mu\nu (p-pp)_\nu /(2*mj) P_L
-*              + A2R I sigma^\mu\nu (p-pp)_\nu /(2*mj) P_R 
+* \Gamma^\mu = gamma^\mu F1 + I sigma^\mu\nu (p-pp)_\nu / (2*mj) F2
+*                A1L gamma^\mu P_L + A1R gamma^\mu P_R 
+*              + A2L I sigma^\mu\nu (p-pp)_\nu / (2*mj) P_L
+*              + A2R I sigma^\mu\nu (p-pp)_\nu / (2*mj) P_R 
 */
 
 
