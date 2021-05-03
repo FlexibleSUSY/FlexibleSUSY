@@ -206,6 +206,7 @@ namespace {
 //  TODO:  Several fixes still needed, 1/r is not helpful when r is infinite, 
 //  may need to just input mF and mS/mV and then calculate the ratios in-house.
 
+// Cutoff for using simplified one loop functions.  
 const double ratio_limit = 0.00001;
 
 // function from eq. 15 of hep-ph/9510309
@@ -228,6 +229,7 @@ double OneLoopFunctionA(double r)
    }
 }
 
+// function from eq. 16 of hep-ph/9510309
 double OneLoopFunctionB(double r)
 {
    const double y = r - 1.0;
@@ -262,6 +264,7 @@ double OneLoopFunctionB(double r)
    }
 }
 
+// function from eq. 16 of hep-ph/9510309
 double OneLoopFunctionC(double r)
 {
    const double y = r - 1.0;
@@ -295,6 +298,7 @@ double OneLoopFunctionC(double r)
    }
 }
 
+// function from eq. 17 of hep-ph/9510309
 double OneLoopFunctionD(double r)
 {
    if (std::isinf(r)) {
@@ -311,6 +315,7 @@ double OneLoopFunctionD(double r)
    }
 }
 
+// function from eq. 18 of hep-ph/9510309
 double OneLoopFunctionE(double r)
 {
    const double y = r - 1.0;
@@ -344,6 +349,7 @@ double OneLoopFunctionE(double r)
    }
 }
 
+// function from eq. 18 of hep-ph/9510309
 double OneLoopFunctionF(double r)
 {
    const double y = r - 1.0;
@@ -374,6 +380,8 @@ double OneLoopFunctionF(double r)
    }
 }
 
+//  One loop function for the form factor F1 which is the coefficient
+//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_VVF contribution.  
 double OneLoopFunctionH(double r)
 {
    if (is_zero(r)) {
@@ -392,6 +400,8 @@ double OneLoopFunctionH(double r)
    }
 }
 
+//  One loop function for the form factor F1 which is the coefficient
+//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_VVF contribution.  
 double OneLoopFunctionI(double r)
 {
    if (is_zero(r)) {
@@ -446,6 +456,8 @@ double OneLoopFunctionK(double r)
    }
 }
 
+//  One loop function for the form factor F1 which is the coefficient
+//  of ubar(p,mi) \gamma^\mu u(pp,mj), for the FFV_FFV contribution.  
 double OneLoopFunctionL(double r)
 {  
    if (is_zero(r)) {
@@ -516,10 +528,12 @@ double DiscontinuityB(double m12, double m2, double m3)
 }
 
 /**
- * The is the description of the following function, from Mathematica PackageX, DiLog[]
+ * @brief dilog function which performs branch cut using the sign of a if x > 1.
+ *
  * Returns a dilog, but performs the branch cut depending on the sign of a.  If x<=1, then 
  * this is just a simple dilog.  However if x > 1, then the sign of the branch cut is the 
  * sign of a.
+ * From Mathematica PackageX, DiLog[].  
  */
 double signed_dilog(double x, double a)
 {
@@ -532,8 +546,10 @@ double signed_dilog(double x, double a)
 }
 
 // function from eq. 2.9 of hep-ph/1105.4319
-/** 
- * The following function is a Standard C0 Passarino-Veltman function with first mass entry
+/**
+ * @brief C0 Passarino-Veltman function with M12=0.  
+ *
+ * Standard C0 Passarino-Veltman function with first mass entry
  * set to 0 (note the missing M12).
  */
 double ScalarC0(double M22, double M32, double m1, double m2, double m3)
@@ -584,6 +600,17 @@ double ScalarC0(double M22, double M32, double m1, double m2, double m3)
        return (-dilog1+dilog2-dilog3+dilog4-dilog5+dilog6-dilog7+dilog8+polylog1-polylog2) / (M22-M32); 
     }
 }
+
+
+/**
+* @defgroup FFVContributions FFV diagram massless photon contributions
+* @brief Contributions to the processes Fe_I -> Fe_J gamma at the one-loop level.
+*
+* Diagram contributions are of the form:
+* \Gamma^\mu =   A1L gamma^\mu P_L + A1R gamma^\mu P_R 
+*              + A2L I sigma^\mu\nu (p-pp)_\nu /(2*mj) P_L
+*              + A2R I sigma^\mu\nu (p-pp)_\nu /(2*mj) P_R 
+*/
 
 
 // emit massless vector boson from the internal scalar line
