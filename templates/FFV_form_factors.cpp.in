@@ -204,7 +204,7 @@ namespace {
 */
 
 //  TODO:  Several fixes still needed, 1/r is not helpful when r is infinite, 
-//  may need to just input mF and mS/mV and then calculate the ratios in-house.
+//  may need to just input mF and mS\mV and then calculate the ratios in-house.
 
 // Cutoff for using simplified one loop functions.  
 const double ratio_limit = 0.00001;
