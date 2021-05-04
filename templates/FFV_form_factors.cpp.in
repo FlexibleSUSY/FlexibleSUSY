@@ -663,6 +663,7 @@ std::complex<double> FFV_FFS_A1R(double mi, double mj, double mF, double mS, aut
   const double mj3 = Power3(mj);
   const double mj4 = Power4(mj);
   const double mj6 = Power6(mj);
+  const double mj8 = Power8(mj);
   const double mF2 = Power2(mF);
   const double mF4 = Power4(mF);
   const double mS2 = Power2(mS);
