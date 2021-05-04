@@ -602,7 +602,7 @@ double ScalarC0(double M22, double M32, double m1, double m2, double m3)
 }
 
 
-std::complex<double> FFV_FFS_A1L(double mi, double mj, double mF, double mS, auto SFIn, auto SFOut)
+std::complex<double> FFV_FFS_A1L(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
@@ -652,7 +652,7 @@ std::complex<double> FFV_FFS_A1L(double mi, double mj, double mF, double mS, aut
   } 
 }
 
-std::complex<double> FFV_FFS_A1R(double mi, double mj, double mF, double mS, auto SFIn, auto SFOut)
+std::complex<double> FFV_FFS_A1R(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
@@ -703,7 +703,7 @@ std::complex<double> FFV_FFS_A1R(double mi, double mj, double mF, double mS, aut
   }
 }
 
-std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, auto SFIn, auto SFOut)
+std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
@@ -754,7 +754,7 @@ std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, aut
   }
 }
 
-std::complex<double> FFV_FFS_A2R(double mi, double mj, double mF, double mS, auto SFIn, auto SFOut)
+std::complex<double> FFV_FFS_A2R(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
