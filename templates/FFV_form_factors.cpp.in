@@ -622,7 +622,7 @@ std::complex<double> FFV_FFS_A1L(double mi, double mj, double mF, double mS, aut
   if (is_zero(mS)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mF-mi)) {
-        return (5*SFin.right()*SFout.left())/(6.*mi) - (5*SFin.left()*SFout.right())/(6.*mi);
+        return   5*SFin.right()*SFout.left() / (6.*mi) - 5*SFin.left()*SFout.right() / (6.*mi);
       } else { 
 	return   (2*mF2*mi2+3*mi4-2*(mF4+mF2*mi2-2*mi4)*std::log(mF2/(mF2-mi2)))*SFin.right()*SFout.left() / (6.*Power5(mi))
                + (-2*mF2*mi2-3*mi4+2*(mF4+mF2*mi2-2*mi4)*std::log(mF2/(mF2-mi2)))*SFin.left()*SFout.right() / (6.*Power5(mi));
@@ -630,15 +630,15 @@ std::complex<double> FFV_FFS_A1L(double mi, double mj, double mF, double mS, aut
     } else {
       if (is_zero(mF-mi)) {
         return   mi*(-3*mi2*mj2*(pi2-8)-mj4*(24+pi2)+6*(mi4+2*mi2*mj2-3*mj4)*std::log(mi2/(mi2-mj2))-3*mj2*(3*mi2+mj2)*Power2(std::log(mi2/(mi2-mj2)))-6*(3*mi2*mj2+mj4)*dilog(mj2/(-mi2+mj2)))*SFin.left()*SFout.left() / (3.*Power2(-(mi2*mj)+mj3))
-               + mi*(24*mj6+mi4*mj2*(-48+5*pi2)+mi2*mj4*(24+7*pi2)+3*(-mi+mj)*(mi+mj)*(mi4+20*mi2*mj2+3*mj4)*std::log(mi2/(mi2-mj2))+3*mi2*mj2*(5*mi2+7*mj2)*Power2(std::log(mi2/(mi2-mj2)))+6*(5*mi4*mj2+7*mi2*mj4)*dilog(mj2/(-mi2+mj2)))*SFin.right()*SFout.left() / (3.*mj2*Power3(mj2-mi2+mj2))
+               + mi*(24*mj6+mi4*mj2*(-48+5*pi2)+mi2*mj4*(24+7*pi2)+3*(mj-mi)*(mi+mj)*(mi4+20*mi2*mj2+3*mj4)*std::log(mi2/(mi2-mj2))+3*mi2*mj2*(5*mi2+7*mj2)*Power2(std::log(mi2/(mi2-mj2)))+6*(5*mi4*mj2+7*mi2*mj4)*dilog(mj2/(-mi2+mj2)))*SFin.right()*SFout.left() / (3.*mj2*Power3(mj2-mi2+mj2))
                + (-3*mi6*mj2+15*mj8+mi2*mj6*(39+5*pi2)+mi4*mj4*(-51+7*pi2)+3*std::log(mi2/(mi2-mj2))*(mi8-7*mi6*mj2-11*mi4*mj4+15*mi2*mj6+2*mj8+(7*mi4*mj4+5*mi2*mj6)*std::log(mi2/(mi2-mj2)))+6*(7*mi4*mj4+5*mi2*mj6)*dilog(mj2/(-mi2+mj2)))*SFin.left()*SFout.right() / (3.*mj3*Power3(mi2-mj2));
       } else if (is_zero(mF-mj)) {
-        return   mj*(3*mi2*mj2*(pi2-8)+mi4*(24+pi2)+6*(mi-mj)*(mi+mj)*(3*mi2+mj2)*std::log(mj2/(-mi2+mj2))+3*mi2*(mi2+3*mj2)*Power2(std::log(mj2/(-mi2+mj2)))+6*(mi4+3*mi2*mj2)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.left() / (3.*Power2(mi3-mi*mj2))
-               + (15*mi8-3*mi2*mj6+mi6*mj2*(39+5*pi2)+mi4*mj4*(-51+7*pi2)+3*std::log(mj2/(-mi2+mj2))*(2*mi8+15*mi6*mj2-11*mi4*mj4-7*mi2*mj6+mj8+mi4*mj2*(5*mi2+7*mj2)*std::log(mj2/(-mi2+mj2)))+6*(5*mi6*mj2+7*mi4*mj4)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.left() / (3.*Power3(mi3-mi*mj2))
-               - mj*(24*mi6+mi2*mj4*(-48+5*pi2)+mi4*mj2*(24+7*pi2)+3*std::log(mj2/(-mi2+mj2))*((mi-mj)*(mi+mj)*(3*mi4+20*mi2*mj2+mj4)+(7*mi4*mj2+5*mi2*mj4)*std::log(mj2/(-mi2+mj2)))+6*(7*mi4*mj2+5*mi2*mj4)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.right() / (3.*mi2*Power3(mi-mj)*Power3(mi+mj));
+        return   mj*(3*mi2*mj2*(pi2-8)+mi4*(24+pi2)+6*(mi-mj)*(mi+mj)*(3*mi2+mj2)*std::log(mj2/(-mi2+mj2))+3*mi2*(mi2+3*mj2)*Power2(std::log(mj2/(mj2-mi2)))+6*(mi4+3*mi2*mj2)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.left() / (3.*Power2(mi3-mi*mj2))
+               + (15*mi8-3*mi2*mj6+mi6*mj2*(39+5*pi2)+mi4*mj4*(-51+7*pi2)+3*std::log(mj2/(-mi2+mj2))*(2*mi8+15*mi6*mj2-11*mi4*mj4-7*mi2*mj6+mj8+mi4*mj2*(5*mi2+7*mj2)*std::log(mj2/(mj2-mi2)))+6*(5*mi6*mj2+7*mi4*mj4)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.left() / (3.*Power3(mi3-mi*mj2))
+               - mj*(24*mi6+mi2*mj4*(-48+5*pi2)+mi4*mj2*(24+7*pi2)+3*std::log(mj2/(-mi2+mj2))*((mi-mj)*(mi+mj)*(3*mi4+20*mi2*mj2+mj4)+(7*mi4*mj2+5*mi2*mj4)*std::log(mj2/(mj2-mi2)))+6*(7*mi4*mj2+5*mi2*mj4)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.right() / (3.*mi2*Power3(mi-mj)*Power3(mi+mj));
       } else {
-        return   2*mF*(mj2*(4*mi2*(mi-mj)*(mi+mj)+(-mF+mi)*(mF+mi)*(3*mi2+mj2)*std::log(mF2/(mF2-mi2)))+mi2*(mF-mj)*(mF+mj)*(mi2+3*mj2)*std::log(mF2/(mF2-mj2))+mi2*(mi-mj)*mj2*(mi+mj)*(2*mF2+mi2+mj2)*ScalarC0(mi2,mj2,mF,mF,0))*SFin.left()*SFout.left() / (mi2*Power2(mi-mj)*mj2*Power2(mi+mj))
-               + (mj2*(mi2*(-mi+mj)*(mi+mj)*(5*mi4+7*mi2*mj2+mF2*(11*mi2+mj2))+(mF-mi)*(mF+mi)*(mF2*(8*mi4+5*mi2*mj2-mj4)+mi2*(2*mi4+9*mi2*mj2+mj4))*std::log(mF2/(mF2-mi2))) + mi4*(mj-mF)*(mF+mj)*(3*mj2*(3*mi2+mj2)+mF2*(mi2+11*mj2))*std::log(mF2/(mF2-mj2)) - 2*mi4*(mi-mj)*mj2*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(3*mi2+5*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.left() / (mj2*Power3(mi*mj2-mi3))
+        return   2*mF*(mj2*(4*mi2*(mi-mj)*(mi+mj)+(mi-mF)*(mF+mi)*(3*mi2+mj2)*std::log(mF2/(mF2-mi2)))+mi2*(mF-mj)*(mF+mj)*(mi2+3*mj2)*std::log(mF2/(mF2-mj2))+mi2*(mi-mj)*mj2*(mi+mj)*(2*mF2+mi2+mj2)*ScalarC0(mi2,mj2,mF,mF,0))*SFin.left()*SFout.left() / (mi2*Power2(mi-mj)*mj2*Power2(mi+mj))
+               + (mj2*(mi2*(mj-mi)*(mi+mj)*(5*mi4+7*mi2*mj2+mF2*(11*mi2+mj2))+(mF-mi)*(mF+mi)*(mF2*(8*mi4+5*mi2*mj2-mj4)+mi2*(2*mi4+9*mi2*mj2+mj4))*std::log(mF2/(mF2-mi2))) + mi4*(mj-mF)*(mF+mj)*(3*mj2*(3*mi2+mj2)+mF2*(mi2+11*mj2))*std::log(mF2/(mF2-mj2)) - 2*mi4*(mi-mj)*mj2*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(3*mi2+5*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.left() / (mj2*Power3(mi*mj2-mi3))
                + ((mF-mi)*(mF+mi)*mj4*(mF2*(11*mi2+mj2)+3*mi2*(mi2+3*mj2))*std::log(mF2/(mF2-mi2)) + mi2*(mj2*(-mi2+mj2)*(7*mi2*mj2+5*mj4+mF2*(mi2+11*mj2))+(mj-mF)*(mF+mj)*(mj2*(mi4+9*mi2*mj2+2*mj4)+mF2*(-mi4+5*mi2*mj2+8*mj4))*std::log(mF2/(mF2-mj2))) - 2*mi2*(mi-mj)*mj4*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(5*mi2+3*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.left()*SFout.right() / (mi2*Power3(mi-mj)*mj3*Power3(mi+mj));
       }
     }
@@ -674,24 +674,24 @@ std::complex<double> FFV_FFS_A1R(double mi, double mj, double mF, double mS, aut
   if (is_zero(mS)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mF-mi)) {
-        return (-5*SFin.right()*SFout.left()) / (6.*mi) + (5*SFin.left()*SFout.right()) / (6.*mi);
+        return - 5*SFin.right()*SFout.left() / (6.*mi) + 5*SFin.left()*SFout.right() / (6.*mi);
       } else {
-        return  (-2*mF2*mi2-3*mi4+2*(mF4+mF2*mi2-2*mi4)*std::log(mF2/(mF2-mi2)))*SFin.right()*SFout.left() / (6.*Power5(mi))
+        return   (-2*mF2*mi2-3*mi4+2*(mF4+mF2*mi2-2*mi4)*std::log(mF2/(mF2-mi2)))*SFin.right()*SFout.left() / (6.*Power5(mi))
                + (2*mF2*mi2+3*mi4-2*(mF4+mF2*mi2-2*mi4)*std::log(mF2/(mF2-mi2)))*SFin.left()*SFout.right() / (6.*Power5(mi));
       }
     } else {
       if (is_zero(mF-mi)) {
-        return   (-3*mi6*mj2+15*mj8+mi2*mj6*(39+5*pi2)+mi4*mj4*(-51+7*pi2)+3*std::log(mi2/(mi2-mj2))*(mi8-7*mi6*mj2-11*mi4*mj4+15*mi2*mj6+2*mj8+(7*mi4*mj4+5*mi2*mj6)*std::log(mi2/(mi2-mj2)))+6*(7*mi4*mj4+5*mi2*mj6)*dilog(mj2/(-mi2+mj2)))*SFin.right()*SFout.left() / (3.*mj3*Power3(mi2-mj2))
-               + mi*(24*mj6+mi4*mj2*(-48+5*pi2)+mi2*mj4*(24+7*pi2)+3*(-mi+mj)*(mi+mj)*(mi4+20*mi2*mj2+3*mj4)*std::log(mi2/(mi2-mj2))+3*mi2*mj2*(5*mi2+7*mj2)*Power2(std::log(mi2/(mi2-mj2)))+6*(5*mi4*mj2+7*mi2*mj4)*dilog(mj2/(-mi2+mj2)))*SFin.left()*SFout.right() / (3.*mj2*Power3(mj2-mi2))
-               + mi*(-3*mi2*mj2*(-8+pi2)-mj4*(24+pi2)+6*(mi4+2*mi2*mj2-3*mj4)*std::log(mi2/(mi2-mj2))-3*mj2*(3*mi2+mj2)*Power2(std::log(mi2/(mi2-mj2)))-6*(3*mi2*mj2+mj4)*dilog(mj2/(-mi2+mj2)))*SFin.right()*SFout.right() / (3.*Power2(-(mi2*mj)+mj3));
+        return   (-3*mi6*mj2+15*mj8+mi2*mj6*(39+5*pi2)+mi4*mj4*(7*pi2-51)+3*std::log(mi2/(mi2-mj2))*(mi8-7*mi6*mj2-11*mi4*mj4+15*mi2*mj6+2*mj8+(7*mi4*mj4+5*mi2*mj6)*std::log(mi2/(mi2-mj2)))+6*(7*mi4*mj4+5*mi2*mj6)*dilog(mj2/(mj2-mi2)))*SFin.right()*SFout.left() / (3.*mj3*Power3(mi2-mj2))
+               + mi*(24*mj6+mi4*mj2*(5*pi2-48.)+mi2*mj4*(24+7*pi2)+3*(-mi+mj)*(mi+mj)*(mi4+20*mi2*mj2+3*mj4)*std::log(mi2/(mi2-mj2))+3*mi2*mj2*(5*mi2+7*mj2)*Power2(std::log(mi2/(mi2-mj2)))+6*(5*mi4*mj2+7*mi2*mj4)*dilog(mj2/(mj2-mi2)))*SFin.left()*SFout.right() / (3.*mj2*Power3(mj2-mi2))
+               + mi*(-3*mi2*mj2*(-8+pi2)-mj4*(24+pi2)+6*(mi4+2*mi2*mj2-3*mj4)*std::log(mi2/(mi2-mj2))-3*mj2*(3*mi2+mj2)*Power2(std::log(mi2/(mi2-mj2)))-6*(3*mi2*mj2+mj4)*dilog(mj2/(mj2-mi2)))*SFin.right()*SFout.right() / (3.*Power2(mj3-mi2*mj));
       } else if (is_zero(mF-mj)) {
-        return - mj*(24*mi6+mi2*mj4*(-48+5*pi2)+mi4*mj2*(24+7*pi2)+3*std::log(mj2/(-mi2+mj2))*((mi-mj)*(mi+mj)*(3*mi4+20*mi2*mj2+mj4)+(7*mi4*mj2+5*mi2*mj4)*std::log(mj2/(-mi2+mj2)))+6*(7*mi4*mj2+5*mi2*mj4)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.left() / (3.*mi2*Power3(mi-mj)*Power3(mi+mj))
-               + (15*mi8-3*mi2*mj6+mi6*mj2*(39+5*pi2)+mi4*mj4*(-51+7*pi2)+3*std::log(mj2/(-mi2+mj2))*(2*mi8+15*mi6*mj2-11*mi4*mj4-7*mi2*mj6+mj8+mi4*mj2*(5*mi2+7*mj2)*std::log(mj2/(-mi2+mj2)))+6*(5*mi6*mj2+7*mi4*mj4)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.right() / (3.*Power3(mi3-mi*mj2))
-               + mj*(3*mi2*mj2*(pi2-8)+mi4*(24+pi2)+6*(mi-mj)*(mi+mj)*(3*mi2+mj2)*std::log(mj2/(-mi2+mj2))+3*mi2*(mi2+3*mj2)*Power2(std::log(mj2/(-mi2+mj2)))+6*(mi4+3*mi2*mj2)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.right() / (3.*Power2(mi3-mi*mj2));
+        return - mj*(24*mi6+mi2*mj4*(5*pi2-48.)+mi4*mj2*(24+7*pi2)+3*std::log(mj2/(mj2-mi2))*((mi-mj)*(mi+mj)*(3*mi4+20*mi2*mj2+mj4)+(7*mi4*mj2+5*mi2*mj4)*std::log(mj2/(mj2-mi2)))+6*(7*mi4*mj2+5*mi2*mj4)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.left() / (3.*mi2*Power3(mi-mj)*Power3(mi+mj))
+               + (15*mi8-3*mi2*mj6+mi6*mj2*(39+5*pi2)+mi4*mj4*(7*pi2-51)+3*std::log(mj2/(mj2-mi2))*(2*mi8+15*mi6*mj2-11*mi4*mj4-7*mi2*mj6+mj8+mi4*mj2*(5*mi2+7*mj2)*std::log(mj2/(mj2-mi2)))+6*(5*mi6*mj2+7*mi4*mj4)*dilog(mi2/(mi2-mj2)))*SFin.left()*SFout.right() / (3.*Power3(mi3-mi*mj2))
+               + mj*(3*mi2*mj2*(pi2-8)+mi4*(24+pi2)+6*(mi-mj)*(mi+mj)*(3*mi2+mj2)*std::log(mj2/(mj2-mi2))+3*mi2*(mi2+3*mj2)*Power2(std::log(mj2/(mj2-mi2)))+6*(mi4+3*mi2*mj2)*dilog(mi2/(mi2-mj2)))*SFin.right()*SFout.right() / (3.*Power2(mi3-mi*mj2));
       } else {
-        return   ((mF-mi)*(mF+mi)*mj4*(mF2*(11*mi2+mj2)+3*mi2*(mi2+3*mj2))*std::log(mF2/(mF2-mi2))+mi2*(mj2*(-mi2+mj2)*(7*mi2*mj2+5*mj4+mF2*(mi2+11*mj2))+(-mF+mj)*(mF+mj)*(mj2*(mi4+9*mi2*mj2+2*mj4)+mF2*(-mi4+5*mi2*mj2+8*mj4))*std::log(mF2/(mF2-mj2)))-2*mi2*(mi-mj)*mj4*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(5*mi2+3*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.left() / (mi2*Power3(mi-mj)*mj3*Power3(mi+mj))
-               + (mj2*(mi2*(-mi+mj)*(mi+mj)*(5*mi4+7*mi2*mj2+mF2*(11*mi2+mj2))+(mF-mi)*(mF+mi)*(mF2*(8*mi4+5*mi2*mj2-mj4)+mi2*(2*mi4+9*mi2*mj2+mj4))*std::log(mF2/(mF2-mi2)))+mi4*(-mF+mj)*(mF+mj)*(3*mj2*(3*mi2+mj2)+mF2*(mi2+11*mj2))*std::log(mF2/(mF2-mj2))-2*mi4*(mi-mj)*mj2*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(3*mi2+5*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.left()*SFout.right() / (mj2*Power3(-mi3+mi*mj2))
-               + 2*mF*(mj2*(4*mi2*(mi-mj)*(mi+mj)+(-mF+mi)*(mF+mi)*(3*mi2+mj2)*std::log(mF2/(mF2-mi2)))+mi2*(mF-mj)*(mF+mj)*(mi2+3*mj2)*std::log(mF2/(mF2-mj2))+mi2*(mi-mj)*mj2*(mi+mj)*(2*mF2+mi2+mj2)*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.right() / (mi2*Power2(mi-mj)*mj2*Power2(mi+mj));
+        return   ((mF-mi)*(mF+mi)*mj4*(mF2*(11*mi2+mj2)+3*mi2*(mi2+3*mj2))*std::log(mF2/(mF2-mi2))+mi2*(mj2*(mj2-mi2)*(7*mi2*mj2+5*mj4+mF2*(mi2+11*mj2))+(mj-mF)*(mF+mj)*(mj2*(mi4+9*mi2*mj2+2*mj4)+mF2*(-mi4+5*mi2*mj2+8*mj4))*std::log(mF2/(mF2-mj2)))-2*mi2*(mi-mj)*mj4*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(5*mi2+3*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.left() / (mi2*Power3(mi-mj)*mj3*Power3(mi+mj))
+               + (mj2*(mi2*(-mi+mj)*(mi+mj)*(5*mi4+7*mi2*mj2+mF2*(11*mi2+mj2))+(mF-mi)*(mF+mi)*(mF2*(8*mi4+5*mi2*mj2-mj4)+mi2*(2*mi4+9*mi2*mj2+mj4))*std::log(mF2/(mF2-mi2)))+mi4*(mj-mF)*(mF+mj)*(3*mj2*(3*mi2+mj2)+mF2*(mi2+11*mj2))*std::log(mF2/(mF2-mj2))-2*mi4*(mi-mj)*mj2*(mi+mj)*(2*mF4+2*mi2*mj2+mF2*(3*mi2+5*mj2))*ScalarC0(mi2,mj2,mF,mF,0))*SFin.left()*SFout.right() / (mj2*Power3(mi*mj2-mi3))
+               + 2*mF*(mj2*(4*mi2*(mi-mj)*(mi+mj)+(mi-mF)*(mF+mi)*(3*mi2+mj2)*std::log(mF2/(mF2-mi2)))+mi2*(mF-mj)*(mF+mj)*(mi2+3*mj2)*std::log(mF2/(mF2-mj2))+mi2*(mi-mj)*mj2*(mi+mj)*(2*mF2+mi2+mj2)*ScalarC0(mi2,mj2,mF,mF,0))*SFin.right()*SFout.right() / (mi2*Power2(mi-mj)*mj2*Power2(mi+mj));
       } 
     }
   } else {
@@ -722,7 +722,7 @@ std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, aut
   if (is_zero(mS)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mF-mi)) {
-        return   (-2*SFin.left()*SFout.left()) / mi2 - (mS2*SFin.right()*SFout.left()) / (2.*mi2) - (mS2*SFin.left()*SFout.right()) / (2.*mi2);
+        return - 2*SFin.left()*SFout.left() / mi2 - SFin.right()*SFout.left() / (2.*mi2) - SFin.left()*SFout.right() / (2.*mi2);
       } else {
         return   2*mF*(-mi2 + (mF-mi)*(mF+mi)*std::log(mF2/(mF2-mi2)))*SFin.left()*SFout.left() / Power5(mi) 
                + (-2*mF2*mi2 + mi4 + 2*mF2*(mF-mi)*(mF+mi)*std::log(mF2/(mF2-mi2)))*SFin.right()*SFout.left() / (2.*Power6(mi))
@@ -746,9 +746,9 @@ std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, aut
   } else {
     const double r = Power2(mF/mS); 
     if (is_zero(mi-mj)) {
-      return   mF*(-2*mi2 - (2*mi2*(mF4+mi4+mS4-2*mF2*(mi2+mS2))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) - (-mF2+mi2+mS2)*std::log(r))*SFin.left()*SFout.left() / Power5(mi)
-             + (mi2*(-2*mF2+mi2+2*mS2) - (2*mi2*(mF2*Power2(mF2-mi2)+mF2*mS2*(mi2-3*mF2)+(3*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) + (mF4+mS4-mF2*(mi2+2*mS2))*std::log(r))*SFin.right()*SFout.left() / (2.*Power6(mi))
-             + (mi2*(-2*mF2+mi2+2*mS2) - (2*mi2*(mF2*Power2(mF2-mi22)+mF2*mS2*(mi2-3*mF2) + (3*mF2+mi2)*mS4 - Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) + (mF4+mS4-mF2*(mi2+2*mS2))*std::log(r))*SFin.left()*SFout.right() / (2.*Power6(mi));
+      return   mF*(-2*mi2 - (2*mi2*(mF4+mi4+mS4-2*mF2*(mi2+mS2))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) - (mi2+mS2-mF2)*std::log(r))*SFin.left()*SFout.left() / Power5(mi)
+             + (mi2*(mi2+2*mS2-2*mF2) - (2*mi2*(mF2*Power2(mF2-mi2)+mF2*mS2*(mi2-3*mF2)+(3*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) + (mF4+mS4-mF2*(mi2+2*mS2))*std::log(r))*SFin.right()*SFout.left() / (2.*Power6(mi))
+             + (mi2*(mi2+2*mS2-2*mF2) - (2*mi2*(mF2*Power2(mF2-mi22)+mF2*mS2*(mi2-3*mF2) + (3*mF2+mi2)*mS4 - Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2) + (mF4+mS4-mF2*(mi2+2*mS2))*std::log(r))*SFin.left()*SFout.right() / (2.*Power6(mi));
     } else {
       return   mF*(2*mi2*mj2*DiscontinuityB(mi2,mF,mS) - 2*mi2*mj2*DiscontinuityB(mj2,mF,mS) + (mi-mj)*(mi+mj)*((mF-mS)*(mF+mS)*std::log(r) + 2*mi2*mj2*ScalarC0(mi2,mj2,mF,mF,mS)))*SFin.left()*SFout.left() / (mi3*(mi-mj)*mj2*(mi+mj))
 	     + (2*mi2*mj2*(mF2*(2*mi2-mj2) + mj2*mS2 + mi2*(mj2-2*mS2))*DiscontinuityB(mi2,mF,mS) - 2*mi4*mj2*(mF2+mj2-mS2)*DiscontinuityB(mj2,mF,mS) + (mi-mj)*(mi+mj)*(2*mi2*mj2*(mF2+mi2-mS2) + (mF4*(mi-mj)*(mi+mj) + (mi-mj)*(mi+mj)*mS4 + 2*mF2*(mj2*mS2 + mi2*(mj-mS)*(mj+mS)))*std::log(r) + 4*mF2*mi4*mj2*ScalarC0(mi2,mj2,mF,mF,mS)))*SFin.right()*SFout.left() / (2.*mi4*Power2(mi-mj)*mj2*Power2(mi+mj))
@@ -773,7 +773,7 @@ std::complex<double> FFV_FFS_A2R(double mi, double mj, double mF, double mS, aut
   if (is_zero(mS)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mF-mi)) {
-        return - (SFin.right()*SFout.left()) / (2.*mi2) - (mS2*SFin.left()*SFout.right()) / (2.*mi2) - (2*mS2*SFin.right()*SFout.right()) / mi2;
+        return - SFin.right()*SFout.left() / (2.*mi2) - SFin.left()*SFout.right() / (2.*mi2) - 2*SFin.right()*SFout.right() / mi2;
       } else { 
         return   (-2*mF2*mi2 + mi4 + 2*mF2*(mF-mi)*(mF+mi)*std::log(mF2/(mF2-mi2)))*SFin.right()*SFout.left() / (2.*Power6(mi))
                + (-2*mF2*mi2 + mi4 + 2*mF2*(mF-mi)*(mF+mi)*std::log(mF2/(mF2-mi2)))*SFin.left()*SFout.right() / (2.*Power6(mi))
@@ -797,9 +797,9 @@ std::complex<double> FFV_FFS_A2R(double mi, double mj, double mF, double mS, aut
   } else {
     const double r = Power2(mF/mS); 
     if (is_zero(mi-mj)) {
-      return   (mi2*(-2.*mF2+mi2+2.*mS2)-(2.*mi2*(Power2(Power3(mF)-mF*mi2)+mF2*(-3.*mF2+mi2)*mS2+(3.*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)+(mF4+mS4-mF2*(mi2+2.*mS2))*std::log(r))*SFin.right()*SFout.left() / (2.*Power6(mi))
-             + (mi2*(-2.*mF2+mi2+2.*mS2)-(2.*mi2*(Power2(Power3(mF)-mF*mi2)+mF2*(-3.*mF2+mi2)*mS2+(3.*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)+(mF4+mS4-mF2*(mi2+2.*mS2))*std::log(r))*SFin.left()*SFout.right() / (2.*Power6(mi))
-             + mF*(-2.*mi2-(2.*mi2*(mF4+mi4+mS4-2.*mF2*(mi2+mS2))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)-(-mF2+mi2+mS2)*std::log(r))*SFin.right()*SFout.right()/Power5(mi);
+      return   (mi2*(mi2+2.*mS2-2.*mF2)-(2.*mi2*(Power2(Power3(mF)-mF*mi2)+mF2*(-3.*mF2+mi2)*mS2+(3.*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)+(mF4+mS4-mF2*(mi2+2.*mS2))*std::log(r))*SFin.right()*SFout.left() / (2.*Power6(mi))
+             + (mi2*(mi2+2.*mS2-2.*mF2)-(2.*mi2*(Power2(Power3(mF)-mF*mi2)+mF2*(-3.*mF2+mi2)*mS2+(3.*mF2+mi2)*mS4-Power6(mS))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)+(mF4+mS4-mF2*(mi2+2.*mS2))*std::log(r))*SFin.left()*SFout.right() / (2.*Power6(mi))
+             + mF*(-2.*mi2-(2.*mi2*(mF4+mi4+mS4-2.*mF2*(mi2+mS2))*DiscontinuityB(mi2,mF,mS))/KallenLambda(mF2,mi2,mS2)-(-mF2+mi2+mS2)*std::log(r))*SFin.right()*SFout.right() / Power5(mi);
     } else {
       return   (-2*mi2*mj4*(mF2+mi2-mS2)*DiscontinuityB(mi2,mF,mS)+2*mi2*mj2*(-mF2*(mi2-2*mj2)-2*mj2*mS2+mi2*(mj2+mS2))*DiscontinuityB(mj2,mF,mS)-(mi2-mj2)*(2*mi2*mj2*(mF2+mj2-mS2)+(mF4*(-mi2+mj2)+(-mi2+mj2)*mS4+2*mF2*(-mj2*mS2+mi2*(mj2+mS2)))*std::log(r)+4*mF2*mi2*mj4*ScalarC0(mi2,mj2,mF,mF,mS)))*SFin.right()*SFout.left() / (2.*mi3*mj3*Power2(mi2-mj2))
              + (2*mi2*mj2*(mF2*(2*mi2-mj2)+mj2*mS2+mi2*(mj2-2*mS2))*DiscontinuityB(mi2,mF,mS)-2*mi4*mj2*(mF2+mj2-mS2)*DiscontinuityB(mj2,mF,mS)+(mi-mj)*(mi+mj)*(2*mi2*mj2*(mF2+mi2-mS2)+(mF4*(mi-mj)*(mi+mj)+(mi-mj)*(mi+mj)*mS4+2*mF2*(mj2*mS2+mi2*(mj-mS)*(mj+mS)))*std::log(r)+4*mF2*mi4*mj2*ScalarC0(mi2,mj2,mF,mF,mS)))*SFin.left()*SFout.right() / (2.*mi4*Power2(mi-mj)*mj2*Power2(mi+mj))
