@@ -1,0 +1,96 @@
+name: package-models
+
+on:
+  push:
+  release:
+    types: [published]
+
+jobs:
+  package-models:
+    runs-on: ubuntu-20.04
+
+    env:
+      IMAGE_VERSION: '0.4.15'
+      #      FS_TAG: ${{ github.event.release.tag_name }}
+      FS_TAG: '2.6.0'
+
+    steps:
+      # action checks-out our repository directly under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Pull the docker image
+        run: docker pull navir/opensuseleap-for-flexiblesusy:$IMAGE_VERSION
+
+      - name: Run the image
+        # mount $GITHUB_WORKSPACE as /FlexibleSUSY on the container
+        run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/FlexibleSUSY navir/opensuseleap-for-flexiblesusy:$IMAGE_VERSION
+
+      - name: Copy Wolfram Engine license to the image
+        run: |
+          docker exec builder bash -c "mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
+          printf "Checking if wolframscript command is workings... "
+          docker exec builder bash -c 'if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
+          printf "Checking if math command is workings... "
+          docker exec builder bash -c '
+              if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]];
+              then
+                echo OK
+              else
+                echo fail
+                exit 1
+              fi
+            '
+        env:
+          MATHPASS: ${{ secrets.MATHPASS }}
+
+      - name: Generate models and SLHA output
+        run: docker exec builder bash -c "cd FlexibleSUSY && ./release/generate-models.sh --number-of-jobs=2 --directory=release/$FS_TAG && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
+
+      - name: TEST
+        run: |
+           pwd
+           ls $GITHUB_WORKSPACE/release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+           name: models-artifacts
+           path: ${{ github.workspace }}/release/${{ env.FS_TAG }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+           name: slha-output-artifacts
+           path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
+
+  models:
+
+    needs: package-models
+
+    runs-on: ubuntu-20.04
+
+    env:
+       #      FS_TAG: ${{ github.event.release.tag_name }}
+      FS_TAG: '2.6.0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+           repository:  FlexibleSUSY/FlexibleSUSY-generated
+           ref: test
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: models-artifacts
+           path: /tmp/models-artifacts
+
+      - name: TEST
+        run: |
+          for f in /tmp/models-artifacts/*.tar.gz; do tar -xf $f -C .; done
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git add -u
+          git commit -m "new release"
+          git push origin test
