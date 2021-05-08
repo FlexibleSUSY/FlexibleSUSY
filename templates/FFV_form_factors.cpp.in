@@ -1686,7 +1686,7 @@ std::complex<double> FFV_VSF_A1R(double mi, double mj, double mF, double mV, dou
   }
 } 
 
-std::complex<double> FFV_VSF_A2L(double mi, double mj, double mF, double mV, double mG, auto VFin, auto VFout)
+std::complex<double> FFV_VSF_A2L(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
@@ -1765,7 +1765,7 @@ std::complex<double> FFV_VSF_A2L(double mi, double mj, double mF, double mV, dou
   } 
 }
 
-std::complex<double> FFV_VSF_A2R(double mi, double mj, double mF, double mV, double mG, auto VFin, auto VFout)
+std::complex<double> FFV_VSF_A2R(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
 {
   const double mi2 = Power2(mi);
   const double mi3 = Power3(mi);
@@ -1842,6 +1842,30 @@ std::complex<double> FFV_VSF_A2R(double mi, double mj, double mF, double mV, dou
     }
   }
 }
+
+
+std::complex<double> FFV_SVF_A1L(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
+{
+  const double mi2 = Power2(mi);
+  const double mi3 = Power3(mi);
+  const double mi4 = Power4(mi);
+  const double mi6 = Power6(mi);
+  const double mi8 = Power8(mi);
+  const double mj2 = Power2(mj);
+  const double mj3 = Power3(mj);
+  const double mj4 = Power4(mj);
+  const double mj6 = Power6(mj);
+  const double mj8 = Power8(mj);
+  const double mF2 = Power2(mF);
+  const double mF4 = Power4(mF);
+  const double mV2 = Power2(mV);
+  const double mV4 = Power4(mV);
+  const double mG2 = Power2(mG);
+  const double mG4 = Power4(mG);
+  const double pi2 = Power2(M_PI);
+
+} 
+
 
 /**
 * @defgroup FFVContributions FFV diagram massless photon contributions
