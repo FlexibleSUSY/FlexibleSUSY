@@ -47,11 +47,6 @@ jobs:
       - name: Generate models and SLHA output
         run: docker exec builder bash -c "cd FlexibleSUSY && ./release/generate-models.sh --number-of-jobs=2 --directory=release/$FS_TAG && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
 
-      - name: TEST
-        run: |
-           pwd
-           ls $GITHUB_WORKSPACE/release
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -64,7 +59,7 @@ jobs:
            name: slha-output-artifacts
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
 
-  models:
+  upload-models:
 
     needs: package-models
 
@@ -87,13 +82,43 @@ jobs:
            name: models-artifacts
            path: /tmp/models-artifacts
 
-      - name: TEST
+      - name: Commit models
         run: |
           for f in /tmp/models-artifacts/*.tar.gz; do tar -xf $f -C .; done
           git config user.name github-actions
           git config user.email github-actions@github.com
-          # git config user.name "GitHub Actions Bot"
-          # git config user.email "<>"
+          git add -u
+          git commit -m "new release"
+          git push origin test
+
+  upload-slha-outputs:
+
+    needs: [package-models, upload-models]
+
+    runs-on: ubuntu-20.04
+
+    env:
+       #      FS_TAG: ${{ github.event.release.tag_name }}
+      FS_TAG: '2.6.0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+           repository:  FlexibleSUSY/FlexibleSUSY-slha
+           ref: test
+           token: ${{ secrets.PAT }}
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: slha-output-artifacts
+           path: /tmp/slha-output-artifacts
+
+      - name: Commit SLHA outputs
+        run: |
+          cp /tmp/slha-output-artifacts/* .
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add -u
           git commit -m "new release"
           git push origin test
