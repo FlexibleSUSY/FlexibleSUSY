@@ -80,7 +80,7 @@ jobs:
         with:
            repository:  FlexibleSUSY/FlexibleSUSY-generated
            ref: test
-           token: ${{ secrets.PAT }}
+           # token: ${{ secrets.PAT }}
 
       - uses: actions/download-artifact@v2
         with:
