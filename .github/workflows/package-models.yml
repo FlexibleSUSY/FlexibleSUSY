@@ -8,10 +8,13 @@ on:
 env:
   # FS_TAG: ${{ github.event.release.tag_name }}
   FS_TAG: '2.6.0'
+  RUNS_ON: ubuntu-20.04
 
 jobs:
+
   package-models:
-    runs-on: ubuntu-20.04
+
+    runs-on: ${{ env.RUNS_ON }}
 
     steps:
       # action checks-out our repository directly under $GITHUB_WORKSPACE
@@ -62,7 +65,7 @@ jobs:
 
     needs: package-models
 
-    runs-on: ubuntu-20.04
+    runs-on: ${{ env.RUNS_ON }}
 
     steps:
       - name: Checkout
@@ -90,7 +93,7 @@ jobs:
 
     needs: [package-models, upload-models]
 
-    runs-on: ubuntu-20.04
+    runs-on: ${{ env.RUNS_ON }}
 
     steps:
       - name: Checkout
