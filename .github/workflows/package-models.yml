@@ -111,5 +111,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add -u
-          git commit -m "new release"
+          git commit --allow-empty -m "new release"
           git push origin test
