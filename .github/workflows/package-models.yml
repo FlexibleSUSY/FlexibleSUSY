@@ -111,5 +111,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add -u
-          git commit --allow-empty -m "new release"
+          git commit --allow-empty -m "version $FS_TAG" && git tag $FS_TAG
           git push origin test
