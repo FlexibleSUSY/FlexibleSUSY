@@ -44,7 +44,23 @@ jobs:
           MATHPASS: ${{ secrets.MATHPASS }}
 
       - name: Generate models and SLHA output
-        run: docker exec builder bash -c "cd FlexibleSUSY && ./release/generate-models.sh --number-of-jobs=2 --directory=release/$FS_TAG --with-himalaya-incdir=/Himalaya-g++/include --with-himalaya-libdir=/Himalaya-g++/lib64 && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
+        run: |
+           docker exec builder bash -c "
+             cd FlexibleSUSY && \
+             ./release/generate-models.sh \
+                --number-of-jobs=2 \
+                --directory=release/$FS_TAG \
+                --with-himalaya-incdir=/Himalaya-g++/include \
+                --with-himalaya-libdir=/Himalaya-g++/lib64
+                --with-tsil-incdir=/tsil-1.43/include \
+                --with-tsil-libdir=/tsil-1.43/lib64 \
+                --with-loop-libraries=collier,looptools \
+                --with-looptools-incdir=/LoopTools-g++/include \
+                --with-looptools-libdir=/LoopTools-g++/lib64 \
+                --with-collier-incdir=/COLLIER/include \
+                --with-collier-libdir=/COLLIER/lib
+           "
+            docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
