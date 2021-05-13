@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # creates models for public release
 
@@ -98,10 +98,6 @@ BASEDIR=$(dirname $0)
 # creating models
 for m in ${models_space}; do
     ./createmodel --name=${m} --force  --with-math-cmd=${MATH}
-
-    if test "x$?" != "x0"; then
-        exit 1
-    fi
 done
 
 ./configure \
@@ -109,10 +105,6 @@ done
     --with-himalaya-incdir="${himalaya_inc_dir}" \
     --with-models=${models} \
     --with-math-cmd=${MATH}
-
-if test "x$?" != "x0"; then
-    exit 1
-fi
 
 make showbuild
 
