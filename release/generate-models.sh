@@ -2,6 +2,8 @@
 
 # creates models for public release
 
+himalaya_lib_dir=
+himalaya_inc_dir=
 number_of_jobs=1
 directory="release"
 MATH=math
@@ -12,10 +14,12 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 Options:
 
-  --number-of-jobs=    number of parallel makefile jobs
-  --directory=         output directory (default: ${directory})
-  --with-math-cmd=     Mathematic kernel (default: $MATH)
-  --help,-h            Print this help message
+  --with-himalaya-libdir=   Path to search for Himalaya library
+  --with-himalaya-incdir=   Path to search for Himalaya header
+  --number-of-jobs=         Number of parallel makefile jobs
+  --directory=              Output directory (default: ${directory})
+  --with-math-cmd=          Mathematic kernel (default: $MATH)
+  --help,-h                 Print this help message
 EOF
 }
 
@@ -27,10 +31,12 @@ if test $# -gt 0 ; then
         esac
 
         case $1 in
-            --number-of-jobs=*)      number_of_jobs=$optarg ;;
-            --directory=*)           directory=$optarg ;;
-            --with-math-cmd=*)       MATH=$optarg ;;
-            --help|-h)               help; exit 0 ;;
+            --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
+            --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
+            --number-of-jobs=*)       number_of_jobs=$optarg ;;
+            --directory=*)            directory=$optarg ;;
+            --with-math-cmd=*)        MATH=$optarg ;;
+            --help|-h)                help; exit 0 ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit 1 ;;
         esac
         shift
@@ -103,6 +109,8 @@ done
 models_comma=$(echo $models | tr ' ' ',')
 
 ./configure \
+    --with-himalaya-libdir="${himalaya_lib_dir}" \
+    --with-himalaya-incdir="${himalaya_inc_dir}" \
     --with-models=${models_comma} \
     --with-math-cmd=${MATH}
 
