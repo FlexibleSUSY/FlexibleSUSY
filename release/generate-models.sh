@@ -2,8 +2,13 @@
 
 # creates models for public release
 
+collier_lib_dir=
+collier_inc_dir=
 himalaya_lib_dir=
 himalaya_inc_dir=
+loop_libraries=
+looptools_lib_dir=
+looptools_inc_dir=
 models=
 number_of_jobs=1
 directory=.
@@ -20,8 +25,14 @@ Options:
   --directory=              Output directory (default: ${directory})
   --help,-h                 Print this help message
   --number-of-jobs=         Number of parallel makefile jobs (default: ${number_of_jobs})
+  --with-collier-libdir=    Path to search for COLLIER libraries
+  --with-collier-incdir=    Path to search for COLLIER modules
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-loop-libraries=    Comma separated list of loop libraries to be enabled
+                            (for example \`collier', \`looptools', \`fflite')
+  --with-looptools-libdir=  Path to search for LoopTools libraries
+  --with-looptools-incdir=  Path to search for LoopTools headers
   --with-math-cmd=          Mathematic kernel (default: ${MATH})
   --with-models=            Comma separated list of models to be generated
   --with-tsil-libdir=       Path to search for TSIL library
@@ -37,15 +48,20 @@ if test $# -gt 0 ; then
         esac
 
         case $1 in
-            --directory=*)            directory=$optarg ;;
-            --help|-h)                help; exit 0 ;;
-            --number-of-jobs=*)       number_of_jobs=$optarg ;;
-            --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
-            --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
-            --with-math-cmd=*)        MATH=$optarg ;;
-            --with-models=*)          models=$optarg ;;
-            --with-tsil-libdir=*)     tsil_lib_dir=$optarg ;;
-            --with-tsil-incdir=*)     tsil_inc_dir=$optarg ;;
+            --directory=*)             directory=$optarg ;;
+            --help|-h)                 help; exit 0 ;;
+            --number-of-jobs=*)        number_of_jobs=$optarg ;;
+            --with-collier-libdir=*)   collier_lib_dir=$optarg ;;
+            --with-collier-incdir=*)   collier_inc_dir=$optarg ;;
+            --with-himalaya-incdir=*)  himalaya_inc_dir=$optarg ;;
+            --with-himalaya-libdir=*)  himalaya_lib_dir=$optarg ;;
+            --with-loop-libraries=*)   loop_libraries=$optarg ;;
+            --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
+            --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
+            --with-math-cmd=*)         MATH=$optarg ;;
+            --with-models=*)           models=$optarg ;;
+            --with-tsil-libdir=*)      tsil_lib_dir=$optarg ;;
+            --with-tsil-incdir=*)      tsil_inc_dir=$optarg ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit 1 ;;
         esac
         shift
@@ -104,8 +120,13 @@ for m in ${models_space}; do
 done
 
 ./configure \
+    --with-collier-libdir="${collier_lib_dir}" \
+    --with-collier-incdir="${collier_inc_dir}" \
     --with-himalaya-libdir="${himalaya_lib_dir}" \
     --with-himalaya-incdir="${himalaya_inc_dir}" \
+    --with-loop-libraries="${loop_libraries}" \
+    --with-looptools-libdir="${looptools_lib_dir}" \
+    --with-looptools-incdir="${looptools_inc_dir}" \
     --with-models=${models} \
     --with-math-cmd=${MATH} \
     --with-tsil-libdir="${tsil_lib_dir}" \
