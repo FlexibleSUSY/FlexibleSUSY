@@ -8,6 +8,8 @@ models=
 number_of_jobs=1
 directory=.
 MATH=math
+tsil_lib_dir=
+tsil_inc_dir=
 
 #_____________________________________________________________________
 help() {
@@ -22,6 +24,8 @@ Options:
   --with-himalaya-incdir=   Path to search for Himalaya header
   --with-math-cmd=          Mathematic kernel (default: ${MATH})
   --with-models=            Comma separated list of models to be generated
+  --with-tsil-libdir=       Path to search for TSIL library
+  --with-tsil-incdir=       Path to search for TSIL header
 EOF
 }
 
@@ -40,6 +44,8 @@ if test $# -gt 0 ; then
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-math-cmd=*)        MATH=$optarg ;;
             --with-models=*)          models=$optarg ;;
+            --with-tsil-libdir=*)     tsil_lib_dir=$optarg ;;
+            --with-tsil-incdir=*)     tsil_inc_dir=$optarg ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit 1 ;;
         esac
         shift
@@ -101,7 +107,9 @@ done
     --with-himalaya-libdir="${himalaya_lib_dir}" \
     --with-himalaya-incdir="${himalaya_inc_dir}" \
     --with-models=${models} \
-    --with-math-cmd=${MATH}
+    --with-math-cmd=${MATH} \
+    --with-tsil-libdir="${tsil_lib_dir}" \
+    --with-tsil-incdir="${tsil_inc_dir}"
 
 make showbuild
 
