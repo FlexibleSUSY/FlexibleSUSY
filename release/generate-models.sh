@@ -15,13 +15,13 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 Options:
 
+  --directory=              Output directory (default: ${directory})
+  --help,-h                 Print this help message
+  --number-of-jobs=         Number of parallel makefile jobs (default: ${number_of_jobs})
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-math-cmd=          Mathematic kernel (default: ${MATH})
   --with-models=            Comma separated list of models to be generated
-  --number-of-jobs=         Number of parallel makefile jobs
-  --directory=              Output directory (default: ${directory})
-  --with-math-cmd=          Mathematic kernel (default: $MATH)
-  --help,-h                 Print this help message
 EOF
 }
 
@@ -33,13 +33,13 @@ if test $# -gt 0 ; then
         esac
 
         case $1 in
+            --directory=*)            directory=$optarg ;;
+            --help|-h)                help; exit 0 ;;
+            --number-of-jobs=*)       number_of_jobs=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
-            --with-models=*)          models=$optarg ;;
-            --number-of-jobs=*)       number_of_jobs=$optarg ;;
-            --directory=*)            directory=$optarg ;;
             --with-math-cmd=*)        MATH=$optarg ;;
-            --help|-h)                help; exit 0 ;;
+            --with-models=*)          models=$optarg ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit 1 ;;
         esac
         shift
