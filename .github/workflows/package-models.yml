@@ -51,7 +51,7 @@ jobs:
                 --number-of-jobs=2 \
                 --directory=release/$FS_TAG \
                 --with-himalaya-incdir=/Himalaya-g++/include \
-                --with-himalaya-libdir=/Himalaya-g++/lib64
+                --with-himalaya-libdir=/Himalaya-g++/lib64 \
                 --with-tsil-incdir=/tsil-g++ \
                 --with-tsil-libdir=/tsil-g++ \
                 --with-loop-libraries=collier,looptools \
