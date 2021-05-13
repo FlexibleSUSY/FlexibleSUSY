@@ -6,7 +6,7 @@ himalaya_lib_dir=
 himalaya_inc_dir=
 models=
 number_of_jobs=1
-directory="release"
+directory=.
 MATH=math
 
 #_____________________________________________________________________
@@ -92,9 +92,6 @@ echo "Building models: ${models}"
 
 models_space=$(echo $models | tr ',' ' ')
 
-# directory of this script
-BASEDIR=$(dirname $0)
-
 # creating models
 for m in ${models_space}; do
     ./createmodel --name=${m} --force  --with-math-cmd=${MATH}
@@ -117,16 +114,12 @@ for m in ${models_space}; do
 done
 
 # moving models
-if test "x$directory" = "x"; then
-    directory="."
-fi
+[ -z "${directory}" ] && directory=.
 
-if test ! -d "${directory}"; then
-    mkdir -p ${directory}
-fi
+[ ! -d "${directory}" ] && mkdir -p "${directory}"
 
-for m in ${models_space}; do
-    if test "x${directory}" != "x."; then
+if [ "x${directory}" != "x." ]; then
+    for m in ${models_space}; do
         mv ${m}.tar.gz ${directory}/
-    fi
-done
+    done
+fi
