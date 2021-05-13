@@ -4,6 +4,7 @@
 
 himalaya_lib_dir=
 himalaya_inc_dir=
+models=
 number_of_jobs=1
 directory="release"
 MATH=math
@@ -16,6 +17,7 @@ Options:
 
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-models=            Comma separated list of models to be generated
   --number-of-jobs=         Number of parallel makefile jobs
   --directory=              Output directory (default: ${directory})
   --with-math-cmd=          Mathematic kernel (default: $MATH)
@@ -33,6 +35,7 @@ if test $# -gt 0 ; then
         case $1 in
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
+            --with-models=*)          models=$optarg ;;
             --number-of-jobs=*)       number_of_jobs=$optarg ;;
             --directory=*)            directory=$optarg ;;
             --with-math-cmd=*)        MATH=$optarg ;;
@@ -45,52 +48,55 @@ fi
 
 echo "Using $number_of_jobs parallel jobs"
 
-# models
-models="                  \
-   CMSSM                  \
-   CMSSMSemiAnalytic      \
-   MSSM                   \
-   MSSMatMGUT             \
-   MSSMNoFV               \
-   MSSMNoFVatMGUT         \
-   CMSSMNoFV              \
-   NUHMSSM                \
-   lowMSSM                \
-   MSSMRHN                \
-   NMSSM                  \
-   NUTNMSSM               \
-   NUTSMSSM               \
-   lowNMSSM               \
-   lowNMSSMTanBetaAtMZ    \
-   SMSSM                  \
-   UMSSM                  \
-   E6SSM                  \
-   MRSSM                  \
-   TMSSM                  \
-   SM                     \
-   HSSUSY                 \
-   SplitMSSM              \
-   THDMII-II              \
-   THDMIIMSSMBC-II        \
-   HTHDMIIMSSMBC-II       \
-   HGTHDMIIMSSMBC-II      \
-   MSSMEFTHiggs           \
-   NMSSMEFTHiggs          \
-   E6SSMEFTHiggs          \
-   MRSSMEFTHiggs          \
-   CNMSSM                 \
-   CE6SSM                 \
-   MSSMNoFVatMGUTHimalaya \
-   MSSMNoFVHimalaya       \
-   NUHMSSMNoFVHimalaya    \
-"
+# use default models if no models specified
+models="${models:-\
+CMSSM,\
+CMSSMSemiAnalytic,\
+MSSM,\
+MSSMatMGUT,\
+MSSMNoFV,\
+MSSMNoFVatMGUT,\
+CMSSMNoFV,\
+NUHMSSM,\
+lowMSSM,\
+MSSMRHN,\
+NMSSM,\
+NUTNMSSM,\
+NUTSMSSM,\
+lowNMSSM,\
+lowNMSSMTanBetaAtMZ,\
+SMSSM,\
+UMSSM,\
+E6SSM,\
+MRSSM,\
+TMSSM,\
+SM,\
+HSSUSY,\
+SplitMSSM,\
+THDMII-II,\
+THDMIIMSSMBC-II,\
+HTHDMIIMSSMBC-II,\
+HGTHDMIIMSSMBC-II,\
+MSSMEFTHiggs,\
+NMSSMEFTHiggs,\
+E6SSMEFTHiggs,\
+MRSSMEFTHiggs,\
+CNMSSM,\
+CE6SSM,\
+MSSMNoFVatMGUTHimalaya,\
+MSSMNoFVHimalaya,\
+NUHMSSMNoFVHimalaya,\
+}"
+
+echo "Building models: ${models}"
+
+models_space=$(echo $models | tr ',' ' ')
 
 # directory of this script
 BASEDIR=$(dirname $0)
 
 # creating models
-for m in ${models}
-do
+for m in ${models_space}; do
     ./createmodel --name=${m} --force  --with-math-cmd=${MATH}
 
     if test "x$?" != "x0"; then
@@ -98,13 +104,10 @@ do
     fi
 done
 
-# running configure
-models_comma=$(echo $models | tr ' ' ',')
-
 ./configure \
     --with-himalaya-libdir="${himalaya_lib_dir}" \
     --with-himalaya-incdir="${himalaya_inc_dir}" \
-    --with-models=${models_comma} \
+    --with-models=${models} \
     --with-math-cmd=${MATH}
 
 if test "x$?" != "x0"; then
@@ -116,8 +119,7 @@ make showbuild
 make -j${number_of_jobs}
 
 # packing models
-for m in ${models}
-do
+for m in ${models_space}; do
     echo "packing ${m} ..."
     make pack-${m}-src
 done
@@ -131,8 +133,7 @@ if test ! -d "${directory}"; then
     mkdir -p ${directory}
 fi
 
-for m in ${models}
-do
+for m in ${models_space}; do
     if test "x${directory}" != "x."; then
         mv ${m}.tar.gz ${directory}/
     fi
