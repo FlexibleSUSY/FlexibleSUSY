@@ -2059,9 +2059,7 @@ std::complex<double> FFV_FFV_A1L(double mi, double mj, double mF, double mV, aut
   if (is_zero(mV)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mi-mF)) {
-        return ((7 + 6/Eps + 6*std::log(Power2 \
-(Mu)/mi2))*VFin.left()*VFout.left())/(3.*mi) - ((7 + 6/Eps + \
-6*std::log(Power2 (Mu)/mi2))*VFin.right()*VFout.right())/(3.*mi);
+        return ((7 + 6/Eps + 6*std::log(Power2(Mu)/mi2))*VFin.left()*VFout.left())/(3.*mi) - ((7 + 6/Eps + 6*std::log(Power2(Mu)/mi2))*VFin.right()*VFout.right())/(3.*mi);
       } else {
         return ((-2*mF2*mi2 + 9*mi4 + 2*(mF4 - 5*mF2*mi2 - \
 2*mi4)*std::log(mF2/(mF2 - \
@@ -2199,9 +2197,7 @@ std::complex<double> FFV_FFV_A1R(double mi, double mj, double mF, double mV, aut
   if (is_zero(mV)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mi-mF)) {
-        return -((7 + 6/Eps + 6*std::log(Power2 \
-(Mu)/mi2))*VFin.left()*VFout.left())/(3.*mi) + ((7 + 6/Eps + \
-6*std::log(Power2 (Mu)/mi2))*VFin.right()*VFout.right())/(3.*mi);
+        return -((7 + 6/Eps + 6*std::log(Power2(Mu)/mi2))*VFin.left()*VFout.left())/(3.*mi) + ((7 + 6/Eps + 6*std::log(Power2(Mu)/mi2))*VFin.right()*VFout.right())/(3.*mi);
       } else {
         return ((2*mF2*mi2 - 9*mi4 - 2*(mF4 - 5*mF2*mi2 - \
 2*mi4)*std::log(mF2/(mF2 - \
@@ -2341,10 +2337,7 @@ std::complex<double> FFV_FFV_A2L(double mi, double mj, double mF, double mV, aut
   if (is_zero(mV)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mi-mF)) {
-        return -(((5 + 2/Eps + 2*std::log(Power2 \
-(Mu)/mi2))*VFin.left()*VFout.left())/mi2) + (4*(2 + 1/Eps + \
-std::log(Power2 (Mu)/mi2))*VFin.left()*VFout.right())/mi2 - ((5 + 2/Eps + \
-2*std::log(Power2 (Mu)/mi2))*VFin.right()*VFout.right())/mi2;
+        return -(((5 + 2/Eps + 2*std::log(Power2(Mu)/mi2))*VFin.left()*VFout.left())/mi2) + (4*(2 + 1/Eps + std::log(Power2(Mu)/mi2))*VFin.left()*VFout.right())/mi2 - ((5 + 2/Eps + 2*std::log(Power2(Mu)/mi2))*VFin.right()*VFout.right())/mi2;
       } else {
         return ((-2*mF2*mi2 - 3*mi4 + 2*mF2*(mF2 + \
 mi2)*std::log(mF2/(mF2 - mi2)))*VFin.left()*VFout.left())/mi6 + \
@@ -2451,10 +2444,7 @@ std::complex<double> FFV_FFV_A2R(double mi, double mj, double mF, double mV, aut
   if (is_zero(mV)) {
     if (is_zero(mi-mj)) {
       if (is_zero(mi-mF)) {
-        return -(((5 + 2/Eps + 2*std::log(Power2 \
-(Mu)/mi2))*VFin.left()*VFout.left())/mi2) + (4*(2 + 1/Eps + \
-std::log(Power2 (Mu)/mi2))*VFin.right()*VFout.left())/mi2 - ((5 + 2/Eps + \
-2*std::log(Power2 (Mu)/mi2))*VFin.right()*VFout.right())/mi2;
+        return -(((5 + 2/Eps + 2*std::log(Power2(Mu)/mi2))*VFin.left()*VFout.left())/mi2) + (4*(2 + 1/Eps + std::log(Power2(Mu)/mi2))*VFin.right()*VFout.left())/mi2 - ((5 + 2/Eps + 2*std::log(Power2(Mu)/mi2))*VFin.right()*VFout.right())/mi2;
       } else {
         return ((-2*mF2*mi2 - 3*mi4 + 2*mF2*(mF2 + \
 mi2)*std::log(mF2/(mF2 - mi2)))*VFin.left()*VFout.left())/mi6 + \
