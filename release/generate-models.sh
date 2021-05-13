@@ -45,60 +45,53 @@ fi
 
 echo "Using $number_of_jobs parallel jobs"
 
-# models and corresponding SARAH model files
-models_array="             \
-   CMSSM,MSSM              \
-   CMSSMSemiAnalytic,MSSM  \
-   MSSM,MSSM               \
-   MSSMatMGUT,MSSM         \
-   MSSMNoFV,MSSMNoFV       \
-   MSSMNoFVatMGUT,MSSMNoFV \
-   CMSSMNoFV,MSSMNoFV      \
-   NUHMSSM,MSSM            \
-   lowMSSM,MSSM            \
-   MSSMRHN,MSSMRHN         \
-   NMSSM,NMSSM             \
-   NUTNMSSM,NMSSM          \
-   NUTSMSSM,SMSSM          \
-   lowNMSSM,NMSSM          \
-   lowNMSSMTanBetaAtMZ,NMSSM \
-   SMSSM,SMSSM             \
-   UMSSM,UMSSM             \
-   E6SSM,E6SSM             \
-   MRSSM,MRSSM             \
-   TMSSM,TMSSM             \
-   SM,SM                   \
-   HSSUSY,SM               \
-   SplitMSSM,SplitMSSM     \
-   THDMII,THDM-II          \
-   THDMIIMSSMBC,THDM-II    \
-   HTHDMIIMSSMBC,HTHDM-II  \
-   HGTHDMIIMSSMBC,HGTHDM-II \
-   MSSMEFTHiggs,MSSM       \
-   NMSSMEFTHiggs,NMSSM     \
-   E6SSMEFTHiggs,E6SSM     \
-   MRSSMEFTHiggs,MRSSM     \
-   CNMSSM,NMSSM            \
-   CE6SSM,E6SSM            \
-   MSSMNoFVatMGUTHimalaya,MSSMNoFV \
-   MSSMNoFVHimalaya,MSSMNoFV \
-   NUHMSSMNoFVHimalaya,MSSMNoFV \
+# models
+models="                  \
+   CMSSM                  \
+   CMSSMSemiAnalytic      \
+   MSSM                   \
+   MSSMatMGUT             \
+   MSSMNoFV               \
+   MSSMNoFVatMGUT         \
+   CMSSMNoFV              \
+   NUHMSSM                \
+   lowMSSM                \
+   MSSMRHN                \
+   NMSSM                  \
+   NUTNMSSM               \
+   NUTSMSSM               \
+   lowNMSSM               \
+   lowNMSSMTanBetaAtMZ    \
+   SMSSM                  \
+   UMSSM                  \
+   E6SSM                  \
+   MRSSM                  \
+   TMSSM                  \
+   SM                     \
+   HSSUSY                 \
+   SplitMSSM              \
+   THDMII-II              \
+   THDMIIMSSMBC-II        \
+   HTHDMIIMSSMBC-II       \
+   HGTHDMIIMSSMBC-II      \
+   MSSMEFTHiggs           \
+   NMSSMEFTHiggs          \
+   E6SSMEFTHiggs          \
+   MRSSMEFTHiggs          \
+   CNMSSM                 \
+   CE6SSM                 \
+   MSSMNoFVatMGUTHimalaya \
+   MSSMNoFVHimalaya       \
+   NUHMSSMNoFVHimalaya    \
 "
-
-models="`echo $models_array | sed 's/,[a-zA-Z0-9-]*//g'`"
 
 # directory of this script
 BASEDIR=$(dirname $0)
 
 # creating models
-for m in ${models_array}
+for m in ${models}
 do
-    _model_sarah="`echo $m | tr ',' ' '`"
-    _model="`echo $_model_sarah | cut -d\" \" -f1`"
-    _sarah="`echo $_model_sarah | cut -d\" \" -f2`"
-
-    ./createmodel --name=${_model} --sarah-model=${_sarah} --force \
-        --with-math-cmd=${MATH}
+    ./createmodel --name=${m} --force  --with-math-cmd=${MATH}
 
     if test "x$?" != "x0"; then
         exit 1
