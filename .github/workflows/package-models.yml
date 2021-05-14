@@ -11,6 +11,11 @@ env:
 
 jobs:
   package-models:
+    env:
+       MODELS: 'CMSSM CMSSMSemiAnalytic MSSM MSSMatMGUT'
+    strategy:
+       matrix:
+          part: [1, 2]
     runs-on: ubuntu-20.04
 
     steps:
@@ -44,12 +49,22 @@ jobs:
           MATHPASS: ${{ secrets.MATHPASS }}
 
       - name: Generate models and SLHA output
+        env:
+           PART: ${{ matrix.part }}
         run: |
+           mods=($MODELS)
+           echo $PART
+           case $PART in 1) mods2=${mods[@]:0:$((${#mods[@]}/2))};; 2) mods2=${mods[@]:$((${#mods[@]}/2))};; esac
+           echo ${mods2[@]}
+           mods3=$(printf ',%s' $mods2)
+           mods4=${mods3:1}
+           echo $mods4
            docker exec builder bash -c "
              cd FlexibleSUSY && \
              ./release/generate-models.sh \
                 --number-of-jobs=2 \
                 --directory=release/$FS_TAG \
+                --with-models=$mods4 \
                 --with-himalaya-incdir=/Himalaya-g++/include \
                 --with-himalaya-libdir=/Himalaya-g++/lib64 \
                 --with-tsil-incdir=/tsil-g++ \
@@ -65,13 +80,13 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-           name: models-artifacts
+           name: models-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-           name: slha-output-artifacts
+           name: slha-output-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
 
   upload-models:
@@ -90,7 +105,12 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-           name: models-artifacts
+           name: models-artifacts_1
+           path: /tmp/models-artifacts
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: models-artifacts_2
            path: /tmp/models-artifacts
 
       - name: Commit models
@@ -100,6 +120,7 @@ jobs:
           git config user.email github-actions@github.com
           git add -u
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
+          git push origin
           # git push origin v$FS_TAG
 
   upload-slha-outputs:
@@ -118,7 +139,12 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-           name: slha-output-artifacts
+           name: slha-output-artifacts_1
+           path: /tmp/slha-output-artifacts
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: slha-output-artifacts_2
            path: /tmp/slha-output-artifacts
 
       - name: Commit SLHA outputs
@@ -128,4 +154,5 @@ jobs:
           git config user.email github-actions@github.com
           git add -u
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
+          git push origin
           # git push origin v$FS_TAG
