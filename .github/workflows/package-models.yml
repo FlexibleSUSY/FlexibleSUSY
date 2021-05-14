@@ -12,14 +12,13 @@ env:
 jobs:
   package-models:
     env:
-       MODELS: 'CMSSM CMSSMSemiAnalytic MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT CMSSMNoFV NUHMSSM lowMSSM MSSMRHN NMSSM NUTNMSSM NUTSMSSM lowNMSSMTanBetaAtMZ SMSSM UMSSM E6SSM MRSSM2 TMSSM SM HSSUSY SplitMSSM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC MSSMEFTHiggs NMSSMEFTHiggs E6SSMEFTHiggs MRSSMEFTHiggs CNMSSM CE6SSM CE6SSM MSSMNoFVHimalaya NUHMSSMNoFVHimalaya'
+      MODELS: 'CMSSM CMSSMSemiAnalytic MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT CMSSMNoFV NUHMSSM lowMSSM MSSMRHN NMSSM NUTNMSSM NUTSMSSM lowNMSSMTanBetaAtMZ SMSSM UMSSM E6SSM MRSSM2 TMSSM SM HSSUSY SplitMSSM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC MSSMEFTHiggs NMSSMEFTHiggs E6SSMEFTHiggs MRSSMEFTHiggs CNMSSM CE6SSM CE6SSM MSSMNoFVHimalaya NUHMSSMNoFVHimalaya'
     strategy:
        matrix:
           part: [1, 2]
     runs-on: ubuntu-20.04
 
     steps:
-      # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -27,6 +26,7 @@ jobs:
         run: docker pull navir/opensuseleap-for-flexiblesusy
 
       - name: Run the image
+        # action checks-out our repository directly under $GITHUB_WORKSPACE
         # mount $GITHUB_WORKSPACE as /FlexibleSUSY on the container
         run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/FlexibleSUSY navir/opensuseleap-for-flexiblesusy
 
@@ -52,19 +52,20 @@ jobs:
         env:
            PART: ${{ matrix.part }}
         run: |
-           mods=($MODELS)
-           echo $PART
-           case $PART in 1) mods2=${mods[@]:0:$((${#mods[@]}/2))};; 2) mods2=${mods[@]:$((${#mods[@]}/2))};; esac
-           echo ${mods2[@]}
-           mods3=$(printf ',%s' $mods2)
-           mods4=${mods3:1}
-           echo $mods4
+           models_array=($MODELS)
+           # similar models should run on the same job
+           # this is not a full solution as there's no naming scheme, e.g. there's both MSSM and lowMSSM
+           IFS=$'\n' sorted_models=($(sort <<< "${models_array[*]}"))
+           unset IFS
+           case $PART in 1) split_array=${sorted_models[@]:0:$((${#sorted_models[@]}/2))};; 2) split_array=${sorted_models[@]:$((${#sorted_models[@]}/2))};; esac
+           models=$(printf ',%s' $split_array)
+           models=${models:1}
            docker exec builder bash -c "
              cd FlexibleSUSY && \
              ./release/generate-models.sh \
                 --number-of-jobs=2 \
                 --directory=release/$FS_TAG \
-                --with-models=$mods4 \
+                --with-models=$models \
                 --with-himalaya-incdir=/Himalaya-g++/include \
                 --with-himalaya-libdir=/Himalaya-g++/lib64 \
                 --with-tsil-incdir=/tsil-g++ \
@@ -75,7 +76,7 @@ jobs:
                 --with-collier-incdir=/COLLIER/include \
                 --with-collier-libdir=/COLLIER/lib
            "
-           docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
+           docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha || true"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
