@@ -79,6 +79,7 @@ InitialGuessAtLowScale = {
 };
 
 InitialGuessAtHighScale = {};
+FSPerturbativityThreshold = N[4 Pi];
 
 UseHiggs2LoopNMSSM = True;
 EffectiveMu = \[Lambda] vS / Sqrt[2];
