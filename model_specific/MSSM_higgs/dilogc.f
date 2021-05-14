@@ -1,133 +1,203 @@
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C     SPENCE-FUNKTION KOMPLEX, FREI NACH HOLLIK                     C
-C---------------------------------------------------------------------C
-C     20.07.83    LAST CHANGED 10.05.89        ANSGAR DENNER        C
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      
-      FUNCTION pCSPEN(ZZ)
-      
-      COMPLEX*16 pCSPEN,W,SUM,ZZ,Z,U
-      DOUBLE PRECISION RZ,AZ,A1
-      DOUBLE PRECISION B(9)
-C     BEACHTE:                 B(N)=B2N
-C     B(1)=1./6.
-C     B(2)=-1./30.
-C     B(3)=1./42.
-C     B(4)=-1./30.
-C     B(5)=5./66.
-C     B(6)=-691./2730.
-C     B(7)=7./6.
-C     B(8)=-3617./510.
-C     B(9)=43867./798.
-C     PI=3.1415926535897932384
-C     PI*PI/6.=1.6449..., PI*PI/3=3.28986...
-      
-      B(1)=0.1666666666666666666666666667d0
-      B(2)=-0.0333333333333333333333333333d0
-      B(3)=0.0238095238095238095238095238d0
-      B(4)=-0.0333333333333333333333333333d0
-      B(5)=0.0757575757575757575757575758d0
-      B(6)=-0.2531135531135531135531135531d0
-      B(7)=1.1666666666666666666666666667d0
-      B(8)=-7.09215686274509804d0
-      B(9)=54.97117794486215539d0
-      
-c     write(*,*) 'z:',z
-      Z =ZZ*DCMPLX(1D0)
-      RZ=DREAL(Z)
-      AZ=CDABS(Z)
-      A1=CDABS(1D0-Z)
-c     write(*,*)'z, rz, az, a1:',z,rz,az,a1
-C     IF((SNGL(RZ) .EQ. 0.0) .AND. (SNGL(DIMAG(Z)) .EQ. 0.0)) THEN
-C     ---> CHANGED  10.5.89
-      IF(AZ .LT. 1D-20) THEN
-         pCSPEN=-CDLOG(1D0-Z)
-c     write(*,*) 'cspen:', cspen
-         RETURN
-      END IF
-      IF((SNGL(RZ) .EQ. 1.0) .AND. (SNGL(DIMAG(Z)) .EQ. 0.0)) THEN
-         pCSPEN=1.64493406684822643D0
-c     write(*,*) 'cspen:', cspen
-         RETURN
-      END IF
-      IF(RZ.GT.5D-1) GOTO 20
-      IF(AZ.GT.1D0) GOTO 10
-      W=-CDLOG(1D0-Z)
-      SUM=W-0.25D0*W*W
-      U=W
-      IF(CDABS(U).LT.1D-10) GOTO 2
-c     write(*,*) 'u:',u
-c     write(*,*) 'sum:',sum
-      DO 1 K=1,9
-         U=U*W*W/DFLOAT(2*K*(2*K+1))
-         IF(CDABS(U*B(K)/SUM).LT.1D-20) GOTO 2
-         SUM=SUM+U*B(K)
- 1    CONTINUE
- 2    pCSPEN=SUM
-c     write(*,*) 'cspen:', cspen
-      RETURN
- 10   W=-CDLOG(1D0-1D0/Z)
-      SUM=W-0.25D0*W*W
-      U=W
-      IF(CDABS(U).LT.1D-10) GOTO 12
-      
-      DO 11 K=1,9
-         U=U*W*W/DFLOAT(2*K*(2*K+1))
-         IF(CDABS(B(K)*U/SUM).LT.1D-20) GOTO 12
-         SUM=SUM+U*B(K)
- 11   CONTINUE
- 12   pCSPEN=-SUM-1.64493406684822643D0-.5D0*CDLOG(-Z)**2
-c     write(*,*) 'cspen:', cspen
-      RETURN
- 20   IF(A1.GT.1D0) GOTO 30
-      W=-CDLOG(Z)
-      SUM=W-0.25D0*W*W
-      U=W
-      IF(CDABS(U).LT.1D-10) GOTO 22
-      DO 21 K=1,9
-         U=U*W*W/DFLOAT(2*K*(2*K+1))
-         IF(CDABS(U*B(K)/SUM).LT.1D-20) GOTO 22
-         SUM=SUM+U*B(K)
- 21   CONTINUE
- 22   pCSPEN=-SUM+1.64493406684822643D0-CDLOG(Z)*CDLOG(1D0-Z)
-c     write(*,*) 'cspen:', cspen
-      RETURN
- 30   W=CDLOG(1D0-1D0/Z)
-      SUM=W-0.25D0*W*W
-      U=W
-      IF(CDABS(U).LT.1D-10) GOTO 32
-      DO 31 K=1,9
-         U=U*W*W/DFLOAT(2*K*(2*K+1))
-         IF(CDABS(U*B(K)/SUM).LT.1D-20) GOTO 32
-         SUM=SUM+U*B(K)
- 31   CONTINUE
- 32   pCSPEN=SUM+3.28986813369645287D0
-     *     +.5D0*CDLOG(Z-1D0)**2-CDLOG(Z)*CDLOG(1D0-Z)
-c     write(*,*) 'cspen:', cspen
-      END
-
-
-
-!>    @brief Complex dilogarithm.
-!!    Introduced by Ben Allanach to provide a wrapper to C class
-!!    @param a real part of argument
-!!    @param b imag part of argument
-!!    @param c real part of output
-!!    @param d imag part of output
-      subroutine dilogc(a, b, c, d)
-     $ bind(C, name="dilogc_")
-      
+!*********************************************************************
+!> @brief Real dilogarithm \f$\mathrm{Li}_2(x)\f$
+!> @param x real argument
+!> @return \f$\mathrm{Li}_2(x)\f$
+!> @author Alexander Voigt
+!>
+!> Implemented as an economized Pade approximation with a
+!> maximum error of 4.16e-18.
+!*********************************************************************
+      double precision function dli2(x)
       implicit none
-      
-      double precision, intent(in) :: a, b
-      double precision, intent(out) :: c, d
-      complex*16 x, l, pCSPEN
-      
-      x = dcmplx(a, b)
-      l = pCSPEN(x)
-      
-      c = dble(l)
-      d = dimag(l)
-      
-      return
-      end
+      double precision :: x, y, r, s, z, z2, z4, p, q, l
+      double precision, parameter :: PI = 3.14159265358979324D0
+      double precision :: cp(8), cq(8)
+      data cp / 1.0706105563309304277D+0,
+     &         -4.5353562730201404017D+0,
+     &          7.4819657596286408905D+0,
+     &         -6.0516124315132409155D+0,
+     &          2.4733515209909815443D+0,
+     &         -4.6937565143754629578D-1,
+     &          3.1608910440687221695D-2,
+     &         -2.4630612614645039828D-4 /
+      data cq / 1.0000000000000000000D+0,
+     &         -4.5355682121856044935D+0,
+     &          8.1790029773247428573D+0,
+     &         -7.4634190853767468810D+0,
+     &          3.6245392503925290187D+0,
+     &         -8.9936784740041174897D-1,
+     &          9.8554565816757007266D-2,
+     &         -3.2116618742475189569D-3 /
+
+      ! transform to [0, 1/2)
+       if (x .lt. -1) then
+          l = log(1 - x)
+          y = 1/(1 - x)
+          r = -PI**2/6 + l*(0.5D0*l - log(-x))
+          s = 1
+       elseif (x .eq. -1) then
+          dli2 = -PI**2/12
+          return
+       elseif (x .lt. 0) then
+          y = x/(x - 1)
+          r = -0.5D0*log(1 - x)**2
+          s = -1
+       elseif (x .eq. 0) then
+          dli2 = 0
+          return
+       elseif (x .lt. 0.5D0) then
+          y = x
+          r = 0
+          s = 1
+       elseif (x .lt. 1) then
+          y = 1 - x
+          r = PI**2/6 - log(x)*log(1 - x)
+          s = -1
+       elseif (x .eq. 1) then
+          dli2 = PI**2/6
+          return
+       elseif (x .lt. 2) then
+          l = log(x)
+          y = 1 - 1/x
+          r = PI**2/6 - l*(log(1 - 1/x) + 0.5D0*l)
+          s = 1
+       else
+          y = 1/x
+          r = PI**2/3 - 0.5D0*log(x)**2
+          s = -1
+       endif
+
+      z = y - 0.25D0
+      z2 = z*z
+      z4 = z2*z2
+
+      p = cp(1) + z * cp(2) + z2 * (cp(3) + z * cp(4)) +
+     &    z4 * (cp(5) + z * cp(6) + z2 * (cp(7) + z * cp(8)))
+      q = cq(1) + z * cq(2) + z2 * (cq(3) + z * cq(4)) +
+     &    z4 * (cq(5) + z * cq(6) + z2 * (cq(7) + z * cq(8)))
+
+      dli2 = r + s*y*p/q
+
+      end function dli2
+
+
+!*********************************************************************
+!> @brief Complex dilogarithm \f$\mathrm{Li}_2(z)\f$
+!> @param z complex argument
+!> @return \f$\mathrm{Li}_2(z)\f$
+!> @note Implementation adapted from SPheno by Alexander Voigt
+!*********************************************************************
+      double complex function cdli2(z)
+      implicit none
+      double complex :: z, rest, u, u2, u4, sum, fast_cdlog
+      double precision :: rz, iz, nz, sgn, dli2
+      double precision, parameter :: PI = 3.14159265358979324D0
+      double precision :: bf(10)
+      data bf /- 2.5000000000000000D-01,
+     &         + 2.7777777777777778D-02,
+     &         - 2.7777777777777778D-04,
+     &         + 4.7241118669690098D-06,
+     &         - 9.1857730746619636D-08,
+     &         + 1.8978869988970999D-09,
+     &         - 4.0647616451442255D-11,
+     &         + 8.9216910204564526D-13,
+     &         - 1.9939295860721076D-14,
+     &         + 4.5189800296199182D-16 /
+
+      rz = real(z)
+      iz = aimag(z)
+
+      ! special cases
+      if (iz .eq. 0) then
+         if (rz .le. 1) cdli2 = dcmplx(dli2(rz), 0)
+         if (rz .gt. 1) cdli2 = dcmplx(dli2(rz), -PI*log(rz))
+         return
+      endif
+
+      nz = rz**2 + iz**2
+
+      if (nz .lt. EPSILON(1D0)) then
+         cdli2 = z
+         return
+      endif
+
+      ! transformation to |z| < 1, Re(z) <= 0.5
+      if (rz .le. 0.5D0) then
+         if (nz .gt. 1) then
+            u = -fast_cdlog(1 - 1/z)
+            rest = -0.5D0*fast_cdlog(-z)**2 - PI**2/6
+            sgn = -1
+         else ! nz <= 1
+            u = -fast_cdlog(1 - z)
+            rest = 0
+            sgn = 1
+         endif
+      else ! rz > 0.5D0
+         if (nz .le. 2*rz) then
+            u = -fast_cdlog(z)
+            rest = u*fast_cdlog(1 - z) + PI**2/6
+            sgn = -1
+         else ! nz > 2*rz
+            u = -fast_cdlog(1 - 1/z)
+            rest = -0.5D0*fast_cdlog(-z)**2 - PI**2/6
+            sgn = -1
+         endif
+      endif
+
+      u2 = u**2
+      u4 = u2**2
+      sum =
+     &   u +
+     &   u2 * (bf(1) +
+     &   u  * (bf(2) +
+     &   u2 * (
+     &       bf(3) +
+     &       u2*bf(4) +
+     &       u4*(bf(5) + u2*bf(6)) +
+     &       u4*u4*(bf(7) + u2*bf(8) + u4*(bf(9) + u2*bf(10)))
+     &   )))
+
+      cdli2 = sgn*sum + rest
+
+      end function cdli2
+
+
+!*********************************************************************
+!> @brief Fast implementation of complex logarithm
+!> @param z complex argument
+!> @return log(z)
+!*********************************************************************
+      double complex function fast_cdlog(z)
+      implicit none
+      double complex :: z
+      double precision :: re, im
+
+      re = real(z)
+      im = aimag(z)
+      fast_cdlog = dcmplx(0.5D0*log(re**2 + im**2), datan2(im, re))
+
+      end function fast_cdlog
+
+
+!*********************************************************************
+!> @brief C wrapper for complex dilogarithm
+!> @param re_in real part of complex input
+!> @param im_in imaginary part of complex input
+!> @param re_out real part of complex output
+!> @param im_out imagoutary part of complex output
+!> @return log(z)
+!*********************************************************************
+      subroutine dilogc(re_in, im_in, re_out, im_out)
+     & bind(C, name="dilogc_")
+      implicit none
+      double precision, intent(in) :: re_in, im_in
+      double precision, intent(out) :: re_out, im_out
+      double complex z, l, cdli2
+
+      z = dcmplx(re_in, im_in)
+      l = cdli2(z)
+
+      re_out = real(l)
+      im_out = aimag(l)
+
+      end subroutine dilogc

@@ -54,7 +54,6 @@ Quick start
 Install required libraries and packages (if not already done)::
 
     pip install conan
-    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
     conan install . --build=missing
     sudo apt-get install libgsl-dev
     ./install-sarah
@@ -104,11 +103,6 @@ package manager.  If not already installed, Conan can be installed
 with pip::
 
     pip install conan
-
-If Conan is installed, add `conan-hep`_ to the list of remote package
-repositories::
-
-    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
 
 To install the libraries required by FlexibleSUSY, run::
 
@@ -900,7 +894,6 @@ References
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
 .. _Conan: https://conan.io/
-.. _conan-hep: https://bintray.com/expander/conan-hep
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc

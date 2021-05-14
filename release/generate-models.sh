@@ -1,10 +1,20 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # creates models for public release
 
+collier_lib_dir=
+collier_inc_dir=
+himalaya_lib_dir=
+himalaya_inc_dir=
+loop_libraries=
+looptools_lib_dir=
+looptools_inc_dir=
+models=
 number_of_jobs=1
-directory="release"
+directory=.
 MATH=math
+tsil_lib_dir=
+tsil_inc_dir=
 
 #_____________________________________________________________________
 help() {
@@ -12,10 +22,21 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 Options:
 
-  --number-of-jobs=    number of parallel makefile jobs
-  --directory=         output directory (default: ${directory})
-  --with-math-cmd=     Mathematic kernel (default: $MATH)
-  --help,-h            Print this help message
+  --directory=              Output directory (default: ${directory})
+  --help,-h                 Print this help message
+  --number-of-jobs=         Number of parallel makefile jobs (default: ${number_of_jobs})
+  --with-collier-libdir=    Path to search for COLLIER libraries
+  --with-collier-incdir=    Path to search for COLLIER modules
+  --with-himalaya-libdir=   Path to search for Himalaya library
+  --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-loop-libraries=    Comma separated list of loop libraries to be enabled
+                            (for example \`collier', \`looptools', \`fflite')
+  --with-looptools-libdir=  Path to search for LoopTools libraries
+  --with-looptools-incdir=  Path to search for LoopTools headers
+  --with-math-cmd=          Mathematic kernel (default: ${MATH})
+  --with-models=            Comma separated list of models to be generated
+  --with-tsil-libdir=       Path to search for TSIL library
+  --with-tsil-incdir=       Path to search for TSIL header
 EOF
 }
 
@@ -27,10 +48,20 @@ if test $# -gt 0 ; then
         esac
 
         case $1 in
-            --number-of-jobs=*)      number_of_jobs=$optarg ;;
-            --directory=*)           directory=$optarg ;;
-            --with-math-cmd=*)       MATH=$optarg ;;
-            --help|-h)               help; exit 0 ;;
+            --directory=*)             directory=$optarg ;;
+            --help|-h)                 help; exit 0 ;;
+            --number-of-jobs=*)        number_of_jobs=$optarg ;;
+            --with-collier-libdir=*)   collier_lib_dir=$optarg ;;
+            --with-collier-incdir=*)   collier_inc_dir=$optarg ;;
+            --with-himalaya-incdir=*)  himalaya_inc_dir=$optarg ;;
+            --with-himalaya-libdir=*)  himalaya_lib_dir=$optarg ;;
+            --with-loop-libraries=*)   loop_libraries=$optarg ;;
+            --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
+            --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
+            --with-math-cmd=*)         MATH=$optarg ;;
+            --with-models=*)           models=$optarg ;;
+            --with-tsil-libdir=*)      tsil_lib_dir=$optarg ;;
+            --with-tsil-incdir=*)      tsil_inc_dir=$optarg ;;
             *)  echo "Invalid option '$1'. Try $0 --help" ; exit 1 ;;
         esac
         shift
@@ -39,100 +70,85 @@ fi
 
 echo "Using $number_of_jobs parallel jobs"
 
-# models and corresponding SARAH model files
-models_array="             \
-   CMSSM,MSSM              \
-   CMSSMSemiAnalytic,MSSM  \
-   MSSM,MSSM               \
-   MSSMatMGUT,MSSM         \
-   MSSMNoFV,MSSMNoFV       \
-   MSSMNoFVatMGUT,MSSMNoFV \
-   CMSSMNoFV,MSSMNoFV      \
-   NUHMSSM,MSSM            \
-   lowMSSM,MSSM            \
-   MSSMRHN,MSSMRHN         \
-   NMSSM,NMSSM             \
-   NUTNMSSM,NMSSM          \
-   NUTSMSSM,SMSSM          \
-   lowNMSSM,NMSSM          \
-   lowNMSSMTanBetaAtMZ,NMSSM \
-   SMSSM,SMSSM             \
-   UMSSM,UMSSM             \
-   E6SSM,E6SSM             \
-   MRSSM,MRSSM             \
-   TMSSM,TMSSM             \
-   SM,SM                   \
-   HSSUSY,SM               \
-   SplitMSSM,SplitMSSM     \
-   THDMII,THDM-II          \
-   THDMIIMSSMBC,THDM-II    \
-   HTHDMIIMSSMBC,HTHDM-II  \
-   HGTHDMIIMSSMBC,HGTHDM-II \
-   MSSMEFTHiggs,MSSM       \
-   NMSSMEFTHiggs,NMSSM     \
-   E6SSMEFTHiggs,E6SSM     \
-   MRSSMEFTHiggs,MRSSM     \
-   CNMSSM,NMSSM            \
-   CE6SSM,E6SSM            \
-   MSSMNoFVatMGUTHimalaya,MSSMNoFV \
-   MSSMNoFVHimalaya,MSSMNoFV \
-   NUHMSSMNoFVHimalaya,MSSMNoFV \
-"
+# use default models if no models specified
+models="${models:-\
+CMSSM,\
+CMSSMSemiAnalytic,\
+MSSM,\
+MSSMatMGUT,\
+MSSMNoFV,\
+MSSMNoFVatMGUT,\
+CMSSMNoFV,\
+NUHMSSM,\
+lowMSSM,\
+MSSMRHN,\
+NMSSM,\
+NUTNMSSM,\
+NUTSMSSM,\
+lowNMSSM,\
+lowNMSSMTanBetaAtMZ,\
+SMSSM,\
+UMSSM,\
+E6SSM,\
+MRSSM,\
+TMSSM,\
+SM,\
+HSSUSY,\
+SplitMSSM,\
+THDMII,\
+THDMIIMSSMBC,\
+HTHDMIIMSSMBC,\
+HGTHDMIIMSSMBC,\
+MSSMEFTHiggs,\
+NMSSMEFTHiggs,\
+E6SSMEFTHiggs,\
+MRSSMEFTHiggs,\
+CNMSSM,\
+CE6SSM,\
+MSSMNoFVatMGUTHimalaya,\
+MSSMNoFVHimalaya,\
+NUHMSSMNoFVHimalaya,\
+}"
 
-models="`echo $models_array | sed 's/,[a-zA-Z0-9-]*//g'`"
+echo "Building models: ${models}"
 
-# directory of this script
-BASEDIR=$(dirname $0)
+models_space=$(echo $models | tr ',' ' ')
 
 # creating models
-for m in ${models_array}
-do
-    _model_sarah="`echo $m | tr ',' ' '`"
-    _model="`echo $_model_sarah | cut -d\" \" -f1`"
-    _sarah="`echo $_model_sarah | cut -d\" \" -f2`"
-
-    ./createmodel --name=${_model} --sarah-model=${_sarah} --force \
-        --with-math-cmd=${MATH}
-
-    if test "x$?" != "x0"; then
-        exit 1
-    fi
+for m in ${models_space}; do
+    ./createmodel --name=${m} --force  --with-math-cmd=${MATH}
 done
 
-# running configure
-models_comma=$(echo $models | tr ' ' ',')
-
 ./configure \
-    --with-models=${models_comma} \
-    --with-math-cmd=${MATH}
-
-if test "x$?" != "x0"; then
-    exit 1
-fi
+    --with-collier-libdir="${collier_lib_dir}" \
+    --with-collier-incdir="${collier_inc_dir}" \
+    --with-himalaya-libdir="${himalaya_lib_dir}" \
+    --with-himalaya-incdir="${himalaya_inc_dir}" \
+    --with-loop-libraries="${loop_libraries}" \
+    --with-looptools-libdir="${looptools_lib_dir}" \
+    --with-looptools-incdir="${looptools_inc_dir}" \
+    --with-models=${models} \
+    --with-math-cmd=${MATH} \
+    --with-tsil-libdir="${tsil_lib_dir}" \
+    --with-tsil-incdir="${tsil_inc_dir}"
 
 make showbuild
 
 make -j${number_of_jobs}
 
 # packing models
-for m in ${models}
-do
+for m in ${models_space}; do
     echo "packing ${m} ..."
     make pack-${m}-src
 done
 
 # moving models
-if test "x$directory" = "x"; then
-    directory="."
-fi
+[ -z "${directory}" ] && directory=.
 
-if test ! -d "${directory}"; then
-    mkdir -p ${directory}
-fi
+[ ! -d "${directory}" ] && mkdir -p "${directory}"
 
-for m in ${models}
-do
-    if test "x${directory}" != "x."; then
+if [ "x${directory}" != "x." ]; then
+    for m in ${models_space}; do
         mv ${m}.tar.gz ${directory}/
-    fi
-done
+    done
+fi
