@@ -46,42 +46,34 @@ fi
 
 [ ! -d "${directory}" ] && mkdir -p "${directory}"
 
-SGs=$(find $model_file_dir/ -type f -iname LesHouches.in.\* -not -iname \*~ -exec dirname {} \; | awk -F / '{ print $NF }' | uniq)
-
 errors=0
 
-echo "Found default SLHA input files for: $SGs"
+models=$("$FSCONFIG" --models)
 
-for sg in ${SGs}
-do
-    if [ $("$FSCONFIG" --with-${sg}) = no ] ; then
-        continue
-    fi
+echo "Configured models: $models"
 
-    exe="${HOMEDIR}/models/${sg}/run_${sg}.x"
+for model in ${models}; do
+
+    sg=$(echo "${model}" | awk -F / '{ print $NF }')
+    exe="${HOMEDIR}/${model}/run_${sg}.x"
 
     echo "========================"
-    echo "   $sg"
+    echo "   ${sg}"
     echo "========================"
 
-    input_files=$(find $model_file_dir/$sg/ -type f -iname LesHouches.in.\* -not -iname \*~)
+    input_files=$(find "${model}" -type f -iname LesHouches.in.\* -not -iname \*~)
     echo "input files: "
     echo "$input_files"
 
-    for ifile in ${input_files}
-    do
+    for ifile in ${input_files}; do
         ofile=$(echo ${ifile} | sed -e 's/LesHouches\.in\./LesHouches.out./')
-
-        if test ! "x$directory" = "x"; then
-            ofile="${directory}/`basename $ofile`"
-        fi
 
         cmd="${exe} --slha-input-file=${ifile} --slha-output-file=${ofile} > /dev/null 2>&1"
 
         echo ""
-        echo "> running $sg"
-        echo "> input file: `basename ${ifile}`"
-        echo "> output file: `basename ${ofile}`"
+        echo "> running: ${model}"
+        echo "> input file: $(basename ${ifile})"
+        echo "> output file: $(basename ${ofile})"
         echo "> command: ${cmd}"
 
         eval "${cmd}"
