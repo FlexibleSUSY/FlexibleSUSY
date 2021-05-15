@@ -30,10 +30,10 @@ public:
    bool have_problem() const { return false; }
    bool have_warning() const { return false; }
    std::vector<std::string> get_problem_strings() const {
-      return warning_strings;
+      return error_strings;
    }
    std::vector<std::string> get_warning_strings() const {
-      return error_strings;
+      return warning_strings;
    }
    void add_warning(std::string const& warning) {warning_strings.push_back(warning);}
    void add_error(std::string const& error) {error_strings.push_back(error);}
