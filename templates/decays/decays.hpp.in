@@ -33,7 +33,7 @@
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_decay_amplitudes.hpp"
-#include "decays/decays_problems.hpp"
+#include "decays/flexibledecay_problems.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "error.hpp"
@@ -81,7 +81,7 @@ public:
    @ModelName@_decays& operator=(@ModelName@_decays&&) = default;
 
    const @ModelName@_decay_table& get_decay_table() const;
-   const Decays_problems& get_problems() const;
+   const FlexibleDecay_problems& get_problems() const;
 
    void clear();
    void clear_problems();
@@ -99,7 +99,7 @@ private:
    FlexibleDecay_settings flexibledecay_settings {};
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
-   Decays_problems problems{};
+   FlexibleDecay_problems problems{};
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

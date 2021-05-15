@@ -17,6 +17,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/decay.cpp \
 		$(DIR)/decays/decay_amplitudes.cpp \
 		$(DIR)/decays/decay_functions.cpp \
+		$(DIR)/decays/flexibledecay_settings.cpp \
+		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
@@ -34,7 +36,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/model.cpp \
 		$(DIR)/numerics.cpp \
 		$(DIR)/numerics2.cpp \
-		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/observables.cpp \
 		$(DIR)/observable_problems.cpp \
 		$(DIR)/observable_problems_format.cpp \
@@ -47,7 +48,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/slha_io.cpp \
 		$(DIR)/spectrum_generator_problems.cpp \
 		$(DIR)/spectrum_generator_settings.cpp \
-		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/string_conversion.cpp \
 		$(DIR)/string_format.cpp \
 		$(DIR)/string_utils.cpp \
@@ -78,7 +78,9 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/decay.hpp \
 		$(DIR)/decays/decay_amplitudes.hpp \
 		$(DIR)/decays/decay_functions.hpp \
-		$(DIR)/decays/decays_problems.hpp \
+		$(DIR)/decays/decay_problems.hpp \
+		$(DIR)/decays/flexibledecay_settings.hpp \
+		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
 		$(DIR)/effective_couplings.hpp \
@@ -114,7 +116,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/names.hpp \
 		$(DIR)/numerics.h \
 		$(DIR)/numerics2.hpp \
-		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/observables.hpp \
 		$(DIR)/observable_problems.hpp \
 		$(DIR)/observable_problems_format.hpp \
@@ -138,7 +139,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/slha_io.hpp \
 		$(DIR)/spectrum_generator_problems.hpp \
 		$(DIR)/spectrum_generator_settings.hpp \
-		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/string_conversion.hpp \
 		$(DIR)/string_format.hpp \
 		$(DIR)/string_utils.hpp \

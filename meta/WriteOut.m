@@ -1264,7 +1264,7 @@ CreateFormattedSLHABlocks[inputPars_List] :=
           ];
 
 CreateSetDecaysInfoBlockPrototypes[] := "\
-void set_dcinfo(const Decays_problems&);
+void set_dcinfo(const FlexibleDecay_problems&);
 void set_dcinfo(const std::vector<std::string>&, const std::vector<std::string>&);";
 
 CreateSetDecaysInfoBlockFunctions[modelName_String] := "\
@@ -1274,7 +1274,7 @@ CreateSetDecaysInfoBlockFunctions[modelName_String] := "\
  *
  * @param problems struct with decays calculation problems
  */
-void " <> modelName <> "_slha_io::set_dcinfo(const Decays_problems& problems)
+void " <> modelName <> "_slha_io::set_dcinfo(const FlexibleDecay_problems& problems)
 {
    set_dcinfo(problems.get_problem_strings(), problems.get_warning_strings());
 }

@@ -2571,7 +2571,7 @@ ExampleDecaysIncludes[] :=
     Utils`StringJoinWithSeparator[
        ("#include \"" <> # <> "\"")& /@ {
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
-         "decays/decays_problems.hpp",
+         "decays/flexibledecay_problems.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
          "loop_libraries/loop_library.hpp"},
        "\n"
@@ -4423,7 +4423,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  Print["   Generation of decays code will be skipped."];
                  FlexibleSUSY`FSCalculateDecays = False;
                 ,
-                decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp", "decays_problems.hpp"};
+                decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp", "flexibledecay_problems.hpp"};
                 ];
              ]; (* If[FlexibleSUSY`FSCalculateDecays] *)
 
