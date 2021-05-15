@@ -830,7 +830,7 @@ Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
 }
 
 template<typename T>
-T KallenLambda(T x, T y, T z) {
+T KallenLambda(T x, T y, T z) noexcept {
    return Sqr(x-y-z) - 4*y*z;
 }
 
