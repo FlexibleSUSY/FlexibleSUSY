@@ -19,9 +19,7 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 Options:
 
-  --directory=         output directory (default: ${directory})
-                       If empty, the SLHA output file will be written
-                       to the same directory as the input file
+  --directory=         Output directory (default: ${directory})
   --help,-h            Print this help message
 EOF
 }
