@@ -291,27 +291,15 @@ std::complex<double> hgg_SM_loop_function(double x) noexcept {
 
 unsigned int number_of_active_flavours(softsusy::QedQcd const& qedqcd, double m) noexcept
 {
-   if (m < qedqcd.displayMass(softsusy::mUp)) {
-      return 0;
-   }
-   else if (m < qedqcd.displayMass(softsusy::mDown)) {
-      return 1;
-   }
-   else if (m < qedqcd.displayMass(softsusy::mStrange)) {
-      return 2;
-   }
-   else if (m < qedqcd.displayMass(softsusy::mCharm)) {
-      return 3;
-   }
-   else if (m < qedqcd.displayMass(softsusy::mBottom)) {
-      return 4;
-   }
-   else if (m < qedqcd.displayMass(softsusy::mTop)) {
-      return 5;
-   }
-   else {
-      return 6;
-   }
+   unsigned nf = 0;
+   if (m > qedqcd.displayMass(softsusy::mUp)) { nf++; }
+   if (m > qedqcd.displayMass(softsusy::mDown)) { nf++; }
+   if (m > qedqcd.displayMass(softsusy::mStrange)) { nf++; }
+   if (m > qedqcd.displayMass(softsusy::mCharm)) { nf++; }
+   if (m > qedqcd.displayMass(softsusy::mBottom)) { nf++; }
+   if (m > qedqcd.displayMass(softsusy::mTop)) { nf++; }
+
+   return nf;
 }
 
 double sm_up_quark_masses(softsusy::QedQcd const& qedqcd, int n)
