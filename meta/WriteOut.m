@@ -1292,7 +1292,7 @@ void " <> modelName <> "_slha_io::set_dcinfo(
 {
    std::ostringstream dcinfo;
    dcinfo << \"Block DCINFO\\n\"
-          << FORMAT_SPINFO(1, PKGNAME)
+          << FORMAT_SPINFO(1, \"FlexibleDecay\")
           << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
 
    for (const auto& s: warnings)
