@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # creates SLHA output files for all SLHA input files in the directory
 # model_files/ (and sub-directories) that begin with LesHouches.in. .
@@ -90,16 +90,9 @@ errors=0
 models=$("$FSCONFIG" --models)
 
 echo "Configured models: $models"
+echo
 
 for model in ${models}; do
-
-    sg=$(echo "${model}" | awk -F / '{ print $NF }')
-    exe="${HOMEDIR}/${model}/run_${sg}.x"
-
-    echo "========================"
-    echo "   ${sg}"
-    echo "========================"
-
     # collect all input files that belong to the model
     input_files=
     for dif in ${default_input_files}; do
@@ -108,37 +101,14 @@ for model in ${models}; do
         esac
     done
 
-    echo "input files: "
-    echo "$input_files"
-
     for ifile in ${input_files}; do
         ofile=$(echo "${directory}/$(basename ${ifile})" | sed -e 's/\.in\./.out./')
-
+        sg=$(echo "${model}" | awk -F / '{ print $NF }')
+        exe="${HOMEDIR}/${model}/run_${sg}.x"
         cmd="${exe} --slha-input-file=${ifile} --slha-output-file=${ofile} > /dev/null 2>&1"
 
-        echo ""
-        echo "> running: ${sg}"
-        echo "> input file: $(basename ${ifile})"
-        echo "> output file: $(basename ${ofile})"
-        echo "> command: ${cmd}"
-
-        eval "${cmd}"
-        exit_code="$?"
-
-        if test ${exit_code} -eq 0 ; then
-            echo "> OK"
-        else
-            echo "> FAIL"
-            errors=1
-        fi
+        printf "%s" "${cmd}"
+        eval "${cmd}" || { printf " [FAIL]\n"; exit 1; }
+        printf " [OK]\n"
     done
 done
-
-echo ""
-if test ${errors} -ne 0 ; then
-    echo "There were errors!"
-else
-    echo "All output files generated successfully!"
-fi
-
-exit $errors
