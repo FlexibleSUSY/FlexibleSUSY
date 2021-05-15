@@ -126,6 +126,6 @@ std::string strip_field_namespace(std::string const& s) {
    } else {
       return result;
    }
-};
+}
 
 } // namespace flexiblesusy
