@@ -60,23 +60,6 @@ double Decay_amplitude_SVV::square() const
    // eq. B.38 of http://etheses.dur.ac.uk/2301
    if (m_vector_1 <= massless_vector_threshold &&
        m_vector_2 <= massless_vector_threshold) {
-      /*
-      const double m0 = 4. * AbsSqr(form_factor_g);
-
-      const double m2 = Sqr(m_decay) * (
-         //Re(form_factor_g * Conj(form_factor_12))
-          Re(form_factor_g * Conj(form_factor_21)));
-
-      const double m4 = 0.5 * Power4(m_decay) * (
-            //Re(form_factor_11 * Conj(form_factor_22))
-            // + Re(form_factor_12 * Conj(form_factor_21))
-            + AbsSqr(form_factor_eps));
-            */
-
-      // check Ward identity
-      // std::cout <<  "massless massless " << m_decay << ' ' << std::setprecision(15) << - 2.*form_factor_g/pow(m_decay, 2) << ' ' << form_factor_21 << ' ' <<
-      //   "real: " << std::real(- 2.*form_factor_g/pow(m_decay, 2))/std::real(form_factor_21) <<
-      //   ", imag: " << std::imag(- 2.*form_factor_g/pow(m_decay, 2))/std::imag(form_factor_21) << '\n';
 
       const double fgSqr = AbsSqr(form_factor_g);
       const double f21Sqr = AbsSqr(form_factor_21);
