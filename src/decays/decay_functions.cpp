@@ -193,7 +193,7 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
             + 4.*zeta2*Sqr(ln) + 16.*zeta3*ln + 18.*zeta4)
       + z*Sqr(1+z)/p41mz * (-32.*li3m + 16.*li2m*ln - 4.*zeta2*ln)
       - 4.*z*(7.-2*z+7*Sqr(z))/p41mz*li3p + 8.*z*(3.-2*z+3*Sqr(z))/p41mz*li2p*ln
-      + 2.*z*(5.-6.*z+5.*Sqr(z))/p41mz*std::log(1.-z)*Sqr(ln) + z*(3.+25.*z-7.*Sqr(z)+3.*Cube(z))/(3.*p51mz)*Cube(ln)
+      + 2.*z*(5.-6.*z+5.*Sqr(z))/p41mz*std::log1p(-z)*Sqr(ln) + z*(3.+25.*z-7.*Sqr(z)+3.*Cube(z))/(3.*p51mz)*Cube(ln)
       + 4.*z*(1.-14.*z+Sqr(z))/p41mz*zeta3 + 12.*Sqr(z)/p41mz*Sqr(ln) - 12.*z*(1.+z)/Power3(1.-z)*ln - 20.*z/Sqr(1.-z);
    const std::complex<double> F0HC2H = 3./Sqr(tau)*(tau+(tau-2.)*f(tau) - tau*taum1fprime(tau));
 
@@ -223,7 +223,7 @@ std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, d
             + 28./3.*li2p*Sqr(ln) + 16./3.*li2m*Sqr(ln) + 1./18.*Power4(ln)
             + 8./3.*zeta2*Sqr(ln) + 32./3.*zeta3*ln + 12.*zeta4)
       + z/Sqr(1.-z)*(-56./.3*li3p - 64./3.*li3m + 16.*li2p*ln
-            + 32./3*li2m*ln + 20./3.*std::log(1.-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
+            + 32./3*li2m*ln + 20./3.*std::log1p(-z)*Sqr(ln) - 8./3.*zeta2*ln + 8./3.*zeta3)
       + 2.*z*(1.+z)/(3.*Cube(1.-z))*Cube(ln);
    const std::complex<double> F0AC2A = 2./tau*(f(tau) - tau*fprime(tau));
 
