@@ -23,8 +23,11 @@
 @decaysHeaderIncludes@
 
 #include "problems.hpp"
+#include "decays/flexibledecay_problems.hpp"
 #include "slha_io.hpp"
 #include "for_each.hpp"
+#include "decays/decay.hpp"
+#include "decays/flexibledecay_settings.hpp"
 
 #include <Eigen/Core>
 #include <string>
@@ -73,7 +76,9 @@ public:
    void read_from_stream(std::istream&);
    void set_block(const std::string& str, SLHA_io::Position position = SLHA_io::back) { slha_io.set_block(str, position); }
    void set_blocks(const std::vector<std::string>& vec, SLHA_io::Position position = SLHA_io::back) { slha_io.set_blocks(vec, position); }
-@setDecaysInfoPrototypes@
+   void set_decay_block(const Decays_list&, FlexibleDecay_settings const&);
+   void set_dcinfo(const FlexibleDecay_problems&);
+   void set_dcinfo(const std::vector<std::string>&, const std::vector<std::string>&);
 @setDecaysPrototypes@
    void set_extra(const @ModelName@_slha&, const @ModelName@_scales&, const @ModelName@_observables&, const flexiblesusy::Spectrum_generator_settings&);
    void set_input(const @ModelName@_input_parameters&);

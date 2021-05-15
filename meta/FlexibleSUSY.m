@@ -2904,7 +2904,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             gaugeCouplingNormalizationDecls = "",
             gaugeCouplingNormalizationDefs = "",
             numberOfDRbarBlocks, drBarBlockNames,
-            setDecaysInfoPrototypes = "", setDecaysInfoFunctions = "",
             setDecaysPrototypes = "", setDecaysFunctions = "",
             fillDecaysDataPrototypes = "", fillDecaysDataFunctions = "",
             decaysHeaderIncludes = "", useDecaysData = ""
@@ -2965,8 +2964,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
            gaugeCouplingNormalizationDecls = WriteOut`GetGaugeCouplingNormalizationsDecls[SARAH`Gauge];
            gaugeCouplingNormalizationDefs  = WriteOut`GetGaugeCouplingNormalizationsDefs[SARAH`Gauge];
            If[FlexibleSUSY`FSCalculateDecays,
-              setDecaysInfoPrototypes = WriteOut`CreateSetDecaysInfoBlockPrototypes[];
-              setDecaysInfoFunctions = WriteOut`CreateSetDecaysInfoBlockFunctions[FlexibleSUSY`FSModelName];
               setDecaysPrototypes = WriteOut`CreateSetDecaysPrototypes[FlexibleSUSY`FSModelName];
               setDecaysFunctions = WriteOut`CreateSetDecaysFunctions[FlexibleSUSY`FSModelName];
               fillDecaysDataPrototypes = WriteOut`CreateFillDecaysDataPrototypes[FlexibleSUSY`FSModelName];
@@ -3017,8 +3014,6 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@gaugeCouplingNormalizationDefs@" -> IndentText[gaugeCouplingNormalizationDefs],
                             "@numberOfDRbarBlocks@"            -> ToString[numberOfDRbarBlocks],
                             "@decaysHeaderIncludes@"           -> decaysHeaderIncludes,
-                            "@setDecaysInfoPrototypes@"        -> IndentText[setDecaysInfoPrototypes],
-                            "@setDecaysInfoFunctions@"         -> setDecaysInfoFunctions,
                             "@setDecaysPrototypes@"            -> IndentText[setDecaysPrototypes],
                             "@setDecaysFunctions@"             -> setDecaysFunctions,
                             "@fillDecaysDataPrototypes@"       -> IndentText[fillDecaysDataPrototypes],
@@ -4423,7 +4418,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  Print["   Generation of decays code will be skipped."];
                  FlexibleSUSY`FSCalculateDecays = False;
                 ,
-                decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp", "flexibledecay_problems.hpp"};
+                decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp"};
                 ];
              ]; (* If[FlexibleSUSY`FSCalculateDecays] *)
 
