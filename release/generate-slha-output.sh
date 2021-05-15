@@ -85,8 +85,6 @@ models/NUHMSSMNoFVHimalaya/LesHouches.in.NUHMSSMNoFVHimalaya \
 
 [ ! -d "${directory}" ] && mkdir -p "${directory}"
 
-errors=0
-
 models=$("$FSCONFIG" --models)
 
 echo "Configured models: $models"
