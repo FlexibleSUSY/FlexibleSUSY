@@ -42,12 +42,9 @@ if test $# -gt 0 ; then
     done
 fi
 
-[ -n "$directory" ] && directory=.
+[ -z "${directory}" ] && directory=.
 
-if test ! -d "$directory"; then
-    echo "Directory $directory does not exist, creating it"
-    mkdir -p "$directory"
-fi
+[ ! -d "${directory}" ] && mkdir -p "${directory}"
 
 SGs=$(find $model_file_dir/ -type f -iname LesHouches.in.\* -not -iname \*~ -exec dirname {} \; | awk -F / '{ print $NF }' | uniq)
 
