@@ -50,7 +50,11 @@ models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
 models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
 models/NUHMSSM/LesHouches.in.NUHMSSM \
 models/lowMSSM/LesHouches.in.lowMSSM \
+<<<<<<< HEAD
 models/MSSMRHN/LesHouches.in.MSSMRHN \
+=======
+models/MSSMRHN/LesHouches.in.MSSMRHN_generated \
+>>>>>>> 79886a0d6 (adding hard-coded list of runnable SLHA input files)
 models/NMSSM/LesHouches.in.NMSSM \
 models/NUTNMSSM/LesHouches.in.NUTNMSSM \
 models/NUTSMSSM/LesHouches.in.NUTSMSSM \
@@ -59,7 +63,11 @@ models/lowNMSSMTanBetaAtMZ/LesHouches.in.lowNMSSMTanBetaAtMZ \
 models/SMSSM/LesHouches.in.SMSSM \
 models/UMSSM/LesHouches.in.UMSSM \
 models/E6SSM/LesHouches.in.E6SSM \
+<<<<<<< HEAD
 models/MRSSM2/LesHouches.in.MRSSM2 \
+=======
+models/MRSSM/LesHouches.in.MRSSM \
+>>>>>>> 79886a0d6 (adding hard-coded list of runnable SLHA input files)
 models/TMSSM/LesHouches.in.TMSSM \
 models/SM/LesHouches.in.SM \
 models/HSSUSY/LesHouches.in.HSSUSY \
