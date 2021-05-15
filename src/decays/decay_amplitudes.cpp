@@ -22,7 +22,6 @@
 
 #include "decay_amplitudes.hpp"
 #include "wrappers.hpp"
-#include <iomanip> // @todo: remove
 #include "src/numerics2.hpp"
 
 namespace flexiblesusy {
