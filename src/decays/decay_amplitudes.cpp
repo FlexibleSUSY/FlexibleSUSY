@@ -35,8 +35,7 @@ double Decay_amplitude_SSS::square() const
 double Decay_amplitude_SSV::square() const
 {
    if (m_vector <= massless_vector_threshold) {
-      // original from Dylan and  eq. B36
-      // return -2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
+      // eq. B36 of http://etheses.dur.ac.uk/2301 has incorrect oposite sign
       return 2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
    }
 
