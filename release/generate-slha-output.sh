@@ -42,6 +42,45 @@ if test $# -gt 0 ; then
     done
 fi
 
+default_input_files="\
+models/CMSSM/LesHouches.in.CMSSM \
+models/CMSSMSemiAnalytic/LesHouches.in.CMSSMSemiAnalytic \
+models/MSSM/LesHouches.in.MSSM \
+models/MSSMatMGUT/LesHouches.in.MSSMatMGUT \
+models/MSSMNoFV/LesHouches.in.MSSMNoFV \
+models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
+models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
+models/NUHMSSM/LesHouches.in.NUHMSSM \
+models/lowMSSM/LesHouches.in.lowMSSM \
+models/MSSMRHN/LesHouches.in.MSSMRHN_generated \
+models/NMSSM/LesHouches.in.NMSSM \
+models/NUTNMSSM/LesHouches.in.NUTNMSSM \
+models/NUTSMSSM/LesHouches.in.NUTSMSSM \
+models/lowNMSSM/LesHouches.in.lowNMSSM \
+models/lowNMSSMTanBetaAtMZ/LesHouches.in.lowNMSSMTanBetaAtMZ \
+models/SMSSM/LesHouches.in.SMSSM \
+models/UMSSM/LesHouches.in.UMSSM \
+models/E6SSM/LesHouches.in.E6SSM \
+models/MRSSM/LesHouches.in.MRSSM \
+models/TMSSM/LesHouches.in.TMSSM \
+models/SM/LesHouches.in.SM \
+models/HSSUSY/LesHouches.in.HSSUSY \
+models/SplitMSSM/LesHouches.in.SplitMSSM \
+models/THDMII/LesHouches.in.THDMII \
+models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBC \
+models/HTHDMIIMSSMBC/LesHouches.in.HTHDMIIMSSMBC \
+models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBC \
+models/MSSMEFTHiggs/LesHouches.in.MSSMEFTHiggs \
+models/NMSSMEFTHiggs/LesHouches.in.NMSSMEFTHiggs \
+models/E6SSMEFTHiggs/LesHouches.in.E6SSMEFTHiggs \
+models/MRSSMEFTHiggs/LesHouches.in.MRSSMEFTHiggs \
+models/CNMSSM/LesHouches.in.CNMSSM \
+models/CE6SSM/LesHouches.in.CE6SSM \
+models/MSSMNoFVatMGUTHimalaya/LesHouches.in.MSSMNoFVatMGUTHimalaya \
+models/MSSMNoFVHimalaya/LesHouches.in.MSSMNoFVHimalaya \
+models/NUHMSSMNoFVHimalaya/LesHouches.in.NUHMSSMNoFVHimalaya \
+"
+
 [ -z "${directory}" ] && directory=.
 
 [ ! -d "${directory}" ] && mkdir -p "${directory}"
@@ -61,17 +100,24 @@ for model in ${models}; do
     echo "   ${sg}"
     echo "========================"
 
-    input_files=$(find "${model}" -type f -iname LesHouches.in.\* -not -iname \*~)
+    # collect all input files that belong to the model
+    input_files=
+    for dif in ${default_input_files}; do
+        case "${dif}" in
+            ${model}/*) input_files="${input_files} ${HOMEDIR}/${dif}" ;;
+        esac
+    done
+
     echo "input files: "
     echo "$input_files"
 
     for ifile in ${input_files}; do
-        ofile=$(echo ${ifile} | sed -e 's/LesHouches\.in\./LesHouches.out./')
+        ofile=$(echo "${directory}/$(basename ${ifile})" | sed -e 's/\.in\./.out./')
 
         cmd="${exe} --slha-input-file=${ifile} --slha-output-file=${ofile} > /dev/null 2>&1"
 
         echo ""
-        echo "> running: ${model}"
+        echo "> running: ${sg}"
         echo "> input file: $(basename ${ifile})"
         echo "> output file: $(basename ${ofile})"
         echo "> command: ${cmd}"
