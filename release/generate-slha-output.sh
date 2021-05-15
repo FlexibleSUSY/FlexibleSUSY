@@ -11,7 +11,7 @@ BASEDIR=$(dirname $0)
 HOMEDIR=$(readlink -f "${BASEDIR}/../")
 FSCONFIG="${HOMEDIR}/flexiblesusy-config"
 model_file_dir="$BASEDIR/../model_files"
-directory=
+directory=.
 
 #_____________________________________________________________________
 help() {
@@ -41,6 +41,8 @@ if test $# -gt 0 ; then
         shift
     done
 fi
+
+[ -n "$directory" ] && directory=.
 
 if test ! -d "$directory"; then
     echo "Directory $directory does not exist, creating it"
