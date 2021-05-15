@@ -1352,19 +1352,19 @@ void " <> modelName <> "_slha_io::set_decay_block(const Decays_list& decays_list
          << FORMAT_TOTAL_WIDTH(pdg, width, name + \" decays\");
 
    if (!is_zero(width, 1e-100)) {
-      constexpr double NEGATIVE_WIDTH_TOLERANCE = 1e-11;
+      constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
       /* @todo: this should be set by LHA input */
       const double MIN_BR_TO_PRINT = flexibledecay_settings.get(FlexibleDecay_settings::min_br_to_print);
       std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
       for (const auto& channel : sorted_decays_list) {
          auto const partial_width = channel.get_width();
          auto branching_ratio = partial_width / width;
-         if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
+         if (partial_width < 0 && !is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
             std::stringstream ss;
             ss << std::scientific << partial_width;
             throw std::runtime_error(\"Error in \" + channel.get_proc_string() + \": partial width is negative (\" + ss.str() + \" GeV).\");
          }
-         else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_WIDTH_TOLERANCE)) {
+         else if (partial_width < 0 && is_zero(branching_ratio, NEGATIVE_BR_TOLERANCE)) {
             branching_ratio = 0;
          }
          if (branching_ratio < MIN_BR_TO_PRINT) continue;
