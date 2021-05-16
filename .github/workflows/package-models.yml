@@ -12,7 +12,7 @@ env:
 jobs:
   package-models:
     env:
-      MODELS: 'CMSSM CMSSMSemiAnalytic MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT MSSMNoFVatMGUTHimalaya CMSSMNoFV NUHMSSM lowMSSM MSSMRHN lowNMSSM NMSSM NUTNMSSM NUTSMSSM lowNMSSMTanBetaAtMZ SMSSM UMSSM E6SSM MRSSM2 TMSSM SM HSSUSY SplitMSSM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC MSSMEFTHiggs NMSSMEFTHiggs E6SSMEFTHiggs MRSSMEFTHiggs CNMSSM CE6SSM MSSMNoFVHimalaya NUHMSSMNoFVHimalaya'
+      MODELS: 'SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya HSSUSY MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM E6SSM E6SSMEFTHiggs CE6SSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM'
     strategy:
        matrix:
           part: [1, 2]
@@ -53,11 +53,7 @@ jobs:
            PART: ${{ matrix.part }}
         run: |
            models_array=($MODELS)
-           # similar models should run on the same job
-           # this is not a full solution as there's no naming scheme, e.g. there's both MSSM and lowMSSM
-           IFS=$'\n' sorted_models=($(sort <<< "${models_array[*]}"))
-           unset IFS
-           case $PART in 1) split_array=${sorted_models[@]:0:$((${#sorted_models[@]}/2))};; 2) split_array=${sorted_models[@]:$((${#sorted_models[@]}/2))};; esac
+           case $PART in 1) split_array=${models_array[@]:0:$((${#models_array[@]}/2))};; 2) split_array=${models_array[@]:$((${#models_array[@]}/2))};; esac
            models=$(printf ',%s' $split_array)
            models=${models:1}
            docker exec builder bash -c "
