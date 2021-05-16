@@ -76,7 +76,7 @@ jobs:
                 --with-collier-incdir=/COLLIER/include \
                 --with-collier-libdir=/COLLIER/lib
            "
-           docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha || true"
+           docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
