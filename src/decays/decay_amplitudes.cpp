@@ -20,6 +20,8 @@
  * @todo implement formulas for most general forms of amplitudes
  */
 
+#include <iomanip>
+
 #include "decay_amplitudes.hpp"
 #include "wrappers.hpp"
 #include "src/numerics2.hpp"
