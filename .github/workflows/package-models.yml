@@ -116,6 +116,7 @@ jobs:
 
       - name: Commit models
         run: |
+          rm -r *
           for f in /tmp/models-artifacts/*.tar.gz; do tar -xf $f -C .; done
           git config user.name github-actions
           git config user.email github-actions@github.com
