@@ -119,7 +119,8 @@ jobs:
           for f in /tmp/models-artifacts/*.tar.gz; do tar -xf $f -C .; done
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add -u
+          # stages modifications, deletions and new files
+          git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
           # git push origin v$FS_TAG
@@ -150,10 +151,12 @@ jobs:
 
       - name: Commit SLHA outputs
         run: |
+          rm *
           cp /tmp/slha-output-artifacts/* .
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add -u
+          # stages modifications, deletions and new files
+          git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
           # git push origin v$FS_TAG
