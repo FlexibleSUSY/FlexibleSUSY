@@ -89,10 +89,10 @@ double Decay_amplitude_SVV::square() const
          const double res3 = 4.*fgSqr + Sqr(m_decay)*Refgf21 + 0.5*Power4(m_decay)*fepsSqr;
          return res3;
       }
-   } else if (m_vector_1 <= massless_vector_threshold) {
+   } else if (m_vector_1 <= massless_vector_threshold || m_vector_2 <= massless_vector_threshold) {
 
       const double m_s_sq = Sqr(m_decay);
-      const double m_vec_sq = Sqr(m_vector_2);
+      const double m_vec_sq = m_vector_1 <= massless_vector_threshold ? Sqr(m_vector_2) : Sqr(m_vector_1);
 
       const double fgSqr = AbsSqr(form_factor_g);
       const double f21Sqr = AbsSqr(form_factor_21);
@@ -123,24 +123,6 @@ double Decay_amplitude_SVV::square() const
             3.*fgSqr + prefactor*(2.*fepsSqr-f21Sqr);
          return res3;
       }
-   } else if (m_vector_2 <= massless_vector_threshold) {
-      const double m0 = 3. * AbsSqr(form_factor_g);
-
-      const double m_s_sq = Sqr(m_decay);
-      const double m_vec_sq = Sqr(m_vector_1);
-
-      const double m41 = 0.25 * Sqr(m_s_sq - m_vec_sq) * (
-         2.*AbsSqr(form_factor_eps) - AbsSqr(form_factor_21));
-
-      /*
-      const double m42 = -0.5 * Sqr(m_s_sq - m_vec_sq) *
-         Re(form_factor_g * Conj(form_factor_22)) / m_vec_sq;
-
-      const double m43 = -0.25 * Power3(m_s_sq - m_vec_sq) *
-         Re(form_factor_22 * Conj(form_factor_21)) / m_vec_sq;
-         */
-
-      return m0 + m41/* + m42 + m43*/;
    }
 
    const double m_s_sq = Sqr(m_decay);
