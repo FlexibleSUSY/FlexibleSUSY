@@ -198,7 +198,4 @@ ExtraSLHAOutputBlocks = {
             {2, Hold[LowScale]} } }
 };
 
-(* decays can be generate and compiled
-   but default input card has too light mA givin
-   "cannot determine the number of active flavours" error *)
-FSCalculateDecays = False;
+FSCalculateDecays = True;
