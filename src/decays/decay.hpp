@@ -81,13 +81,7 @@ public:
    std::size_t size() const noexcept { return decays.size(); }
 
    void clear();
-   // @todo
-   // the string cannot be taken by const&
-   // if you do this, the printed to the screen total_width of Higgs boson
-   // in the SM is shifted from 4.07 MeV 3.98 MeV
-   // none of this makes any sense
-   // this happend with clang 10.0.0, but not with gcc 9.3.1
-   void set_decay(double width, std::initializer_list<int> products, std::string);
+   void set_decay(double width, std::initializer_list<int> products, std::string const&);
    int get_particle_id() const { return initial_pdg; }
    const Decay& get_decay(std::initializer_list<int> products) const;
    double get_total_width() const { return total_width; }

@@ -73,7 +73,7 @@ void Decays_list::clear()
    total_width = 0.;
 }
 
-void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string proc_string)
+void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, std::string const& proc_string)
 {
    const Decay decay(initial_pdg, pids_out, width, proc_string);
    const auto decay_hash = hash_decay(decay);
