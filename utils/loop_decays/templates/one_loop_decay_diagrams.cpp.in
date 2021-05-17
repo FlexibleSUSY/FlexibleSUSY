@@ -16,15 +16,19 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "@ModelName@_one_loop_decay_diagrams.hpp"
-#include "pv.hpp"
+#include "one_loop_decay_diagrams.hpp"
 #include "wrappers.hpp"
+#include "loop_libraries/loop_library.hpp"
 
 namespace flexiblesusy {
+
+namespace {
 
 inline double Den(double x2, double y2) {
    return 1.0/(x2-y2);
 }
+
+} // anonymous
 
 @genericOneLoopDiagramEvaluatorDefs@
 

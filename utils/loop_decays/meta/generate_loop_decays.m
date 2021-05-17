@@ -449,10 +449,10 @@ CreateLoopFunctionArgumentName[arg_^2 /; IsLoopMass[arg]] :=
 CreateLoopFunctionArgumentName[arg_ /; IsLoopMass[arg]] :=
     CreateLoopMassCString[arg];
 
-CallLoopFunction[fn_[args__], renScale_String, namespace_:"passarino_veltman"] :=
+CallLoopFunction[fn_[args__], renScale_String] :=
     Module[{argsStr},
            argsStr = StringJoin[Riffle[CreateLoopFunctionArgumentName /@ List[args], ", "]];
-           namespace <> "::" <> ToString[fn] <> "(" <> argsStr <> ", " <> renScale <> "*" <> renScale <> ")"
+           "lib." <> ToString[fn] <> "(" <> argsStr <> ", " <> renScale <> "*" <> renScale <> ")"
           ];
 
 SaveLoopIntegrals[diagram_, renScale_String] :=
@@ -497,7 +497,7 @@ CreateOneLoopDiagramDefinition[process_, diagram_] :=
 
            {saveLoopIntegrals, loopIntegralSubs} = SaveLoopIntegrals[diagram, renScale];
 
-           body = body <> saveLoopIntegrals <> "\n";
+           body = body <> "auto& lib = Loop_library::get();\n\n" <> saveLoopIntegrals <> "\n";
 
            formFactorExprs = Last[diagram];
            formFactorValues = {GetFormFactorName[process, #[[1]]], "oneOver16PiSqr*(" <>
@@ -661,11 +661,11 @@ For[i = 1, i <= Length[genericProcesses], i++,
    ];
 
 Print["Writing output files ..."];
-resultsDir = FileNameJoin[{ParentDirectory@ParentDirectory[], "templates"}];
+resultsDir = FileNameJoin[{ParentDirectory@ParentDirectory[], "src", "decays"}];
 decayAmplitudesFiles = {{FileNameJoin[{templatesDir, "one_loop_decay_diagrams.hpp.in"}],
-                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.hpp.in"}]},
+                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.hpp"}]},
                         {FileNameJoin[{templatesDir, "one_loop_decay_diagrams.cpp.in"}],
-                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.cpp.in"}]}};
+                         FileNameJoin[{resultsDir, "one_loop_decay_diagrams.cpp"}]}};
 WriteOut`ReplaceInFiles[decayAmplitudesFiles,
                         { "@genericOneLoopDiagramEvaluatorDecls@" -> TextFormatting`WrapLines[genericOneLoopDiagramEvaluatorDecls],
                           "@genericOneLoopDiagramEvaluatorDefs@"  -> TextFormatting`WrapLines[genericOneLoopDiagramEvaluatorDefs]
