@@ -4883,6 +4883,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                  If[FileExistsQ[f], DeleteFile[f]]
                  WriteString[f, "ENABLE_FLEXIBLEDECAY := yes"]
               ];
+              ,
+              (* create an empty file (release/generate-models.sh requires this file to exist) *)
+              CreateFile[FileNameJoin[{FSOutputDir, "decays", "FlexibleDecay.mk"}]];
 
              ]; (* If[FSCalculateDecays] *)
 
