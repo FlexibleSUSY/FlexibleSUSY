@@ -450,7 +450,6 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
 
    if (!is_zero(width, 1e-100)) {
       constexpr double NEGATIVE_BR_TOLERANCE = 1e-11;
-      /* @todo: this should be set by LHA input */
       const double MIN_BR_TO_PRINT = flexibledecay_settings.get(FlexibleDecay_settings::min_br_to_print);
       std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
       for (const auto& channel : sorted_decays_list) {
