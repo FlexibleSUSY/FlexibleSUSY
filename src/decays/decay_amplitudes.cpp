@@ -231,6 +231,8 @@ double Decay_amplitude_FFS::square() const
          form_factor_left * Conj(form_factor_right));
 }
 
+// This routine is for decays that we currently do not support and is not used
+// Currently in development for future versions
 // @todo handle massless vectors safely
 // @todo check these expressions, they appear not to agree with SARAH/SPheno
 double Decay_amplitude_FFV::square() const
