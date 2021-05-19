@@ -1,13 +1,11 @@
 name: package-models
 
 on:
-  push:
   release:
     types: [published]
 
 env:
-  # FS_TAG: ${{ github.event.release.tag_name }}
-  FS_TAG: '2.6.0'
+  FS_TAG: ${{ github.event.release.tag_name }}
 
 jobs:
   package-models:
@@ -118,7 +116,7 @@ jobs:
           git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
-          # git push origin v$FS_TAG
+          git push origin v$FS_TAG
 
   upload-slha-outputs:
 
@@ -154,4 +152,4 @@ jobs:
           git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
-          # git push origin v$FS_TAG
+          git push origin v$FS_TAG
