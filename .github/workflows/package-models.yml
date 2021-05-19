@@ -52,7 +52,7 @@ jobs:
         env:
            PART: ${{ matrix.part }}
         run: |
-           models=$(ruby -e "puts ARGV.drop(1).each_slice((ARGV.drop(1).length/2.0).to_i).to_a[ARGV[0]].join(',')" -- $PATH $MODELS)
+           models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice((MODELS.length/2.0).to_i).to_a[ARGV[0].to_i-1].join(',')" -- $PATH $MODELS)
            docker exec builder bash -c "
              cd FlexibleSUSY && \
              ./release/generate-models.sh \
