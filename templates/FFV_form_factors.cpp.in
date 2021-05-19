@@ -623,7 +623,7 @@ std::complex<double> FFV_SSF_A1L(double mi, double mj, double mF, double mS, aut
   const double pi2=Power2(M_PI);
   if (is_zero(mF)) {
     const auto r = Power2(mF/mS);
-    if (mS/std::max(mi,mj) > approx_limit) {
+    if (mS > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 (possibly with different sign)
       return - 1./18. * SFout.right() * SFin.left() * OneLoopFunctionA(r) / mS2;
     } else {
@@ -645,7 +645,7 @@ std::complex<double> FFV_SSF_A1L(double mi, double mj, double mF, double mS, aut
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mS,mF)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 (possibly with different sign)
       return - 1./18. * SFout.right() * SFin.left() * OneLoopFunctionA(r) / mS2;
     } else {
@@ -677,7 +677,7 @@ std::complex<double> FFV_SSF_A1R(double mi, double mj, double mF, double mS, aut
   const double pi2=Power2(M_PI);
   if (is_zero(mF)) {
     const auto r = Power2(mF/mS);
-    if (mS/std::max(mi,mj) > approx_limit) {
+    if (mS > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - 1./18. * SFout.left() * SFin.right() * OneLoopFunctionA(r) / mS2;
     } else {
@@ -699,7 +699,7 @@ std::complex<double> FFV_SSF_A1R(double mi, double mj, double mF, double mS, aut
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mS,mF)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - 1./18. * SFout.left() * SFin.right() * OneLoopFunctionA(r) / mS2;
     } else {
@@ -731,7 +731,7 @@ std::complex<double> FFV_SSF_A2L(double mi, double mj, double mF, double mS, aut
   const double pi2=Power2(M_PI);
   if (is_zero(mF)) {
     const auto r = Power2(mF/mS);
-    if (mS/std::max(mi,mj) > approx_limit) {
+    if (mS > approx_limit * std::max(mi,mj)) {
       // eq. 16 of hep-ph/9510309 (possibly with different sign)
       return - SFout.left() * SFin.right() * OneLoopFunctionB(r)/12. / mS2
              - SFout.left() * SFin.left() * mF/mj * OneLoopFunctionC(r)/3. / mS2
@@ -755,7 +755,7 @@ std::complex<double> FFV_SSF_A2L(double mi, double mj, double mF, double mS, aut
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mS,mF)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
       // eq. 16 of hep-ph/9510309 (possibly with different sign)
       return - SFout.left() * SFin.right() * OneLoopFunctionB(r)/12. / mS2
              - SFout.left() * SFin.left() * mF/mj * OneLoopFunctionC(r)/3. / mS2
@@ -789,7 +789,7 @@ std::complex<double> FFV_SSF_A2R(double mi, double mj, double mF, double mS, aut
   const double pi2=Power2(M_PI);
   if (is_zero(mF)) {
     const auto r = Power2(mF/mS);
-    if (mS/std::max(mi,mj) > approx_limit) {
+    if (mS > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - SFout.right() * SFin.left() * OneLoopFunctionB(r)/12. / mS2
              - SFout.right() * SFin.right() * mF/mj * OneLoopFunctionC(r)/3. / mS2
@@ -813,7 +813,7 @@ std::complex<double> FFV_SSF_A2R(double mi, double mj, double mF, double mS, aut
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mS,mF)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
       // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - SFout.right() * SFin.left() * OneLoopFunctionB(r)/12. / mS2
              - SFout.right() * SFin.right() * mF/mj * OneLoopFunctionC(r)/3. / mS2
@@ -915,7 +915,7 @@ mj)*(mj2*(mi4 + 9*mi2*mj2 + 2*mj4) + mF2*(-mi4 + 5*mi2*mj2 + \
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mF,mS)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
       // eq. 18 of hep-ph/9510309 (possibly with different sign)
       return - 1./18. * SFout.right() * SFin.left() * OneLoopFunctionD(r) / mS2;
     } else {
@@ -1049,7 +1049,7 @@ mj)*(mj2*(mi4 + 9*mi2*mj2 + 2*mj4) + mF2*(-mi4 + 5*mi2*mj2 + \
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mF,mS)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
       // eq. 18 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - 1./18. * SFout.left() * SFin.right() * OneLoopFunctionD(r) / mS2;  
     } else {
@@ -1170,7 +1170,7 @@ mi2)*mj2)*std::log(mF2/(mF2 - mj2)))))/(mi3*mj3*Power2(mi2 - mj2));
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mF,mS)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
       // eq. 19 of hep-ph/9510309 (possibly with different sign)
       return - SFout.left() * SFin.right() * OneLoopFunctionE(r)/12.0 / mS2
              - SFout.left() * SFin.left() * mF/mj * OneLoopFunctionF(r) * 2./3. / mS2
@@ -1286,7 +1286,7 @@ mi2)*mj2)*std::log(mF2/(mF2 - mj2)))))/(mi3*mj3*Power2(mi2 - mj2));
     }
   } else {
     const auto r = Power2(mF/mS);
-    if (std::max(mF,mS)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
       // eq. 19 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
       return - SFout.right() * SFin.left() * OneLoopFunctionE(r)/12.0 / mS2 
              - SFout.right() * SFin.right() * mF/mj * OneLoopFunctionF(r) * 2./3. / mS2
@@ -1639,7 +1639,7 @@ mj2)))*VFin.right()*VFout.right())/(mj2*Power3(-mi3 + mi*mj2));
     }
   } else {
     const auto r = Power2(mF/mV);
-    if (std::max(mF,mV)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
       return   VFin.left() * VFout.left() * OneLoopFunctionL(r) / 9. / mV2
              - mi/mj * VFin.right() * VFout.right() * OneLoopFunctionL(r) / 9. / mV2;   
     } else {
@@ -1779,7 +1779,7 @@ mj2))))*VFin.right()*VFout.right())/(mi2*mj3*Power3(mi - mj)*Power3(mi \
     }
   } else {
     const auto r = Power2(mF/mV);
-    if (std::max(mF,mV)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
       return   VFin.right() * VFout.right() * OneLoopFunctionL(r) / 9. / mV2
              - mi/mj * VFin.left() * VFout.left() * OneLoopFunctionL(r) / 9. / mV2;  
     } else {
@@ -1898,7 +1898,7 @@ mj2)))*VFin.right()*VFout.right())/(mi4*mj2*Power2(mi2 - mj2));
     }
   } else {
     const auto r = Power2(mF/mV);
-    if (std::max(mF,mV)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
       return - 4. * mF/mj * VFin.left() * VFout.right() * OneLoopFunctionC(r) / 3. / mV2
              + mi/mj * VFin.left() * VFout.left() * OneLoopFunctionM(r) / 3. / mV2
              + VFin.right() * VFout.right() * OneLoopFunctionM(r) / 3. / mV2; 
@@ -2006,7 +2006,7 @@ mj2))))*VFin.right()*VFout.right())/(mi3*mj3*Power2(mi - mj)*Power2(mi \
     }
   } else {
     const auto r = Power2(mF/mV);
-    if (std::max(mF,mV)/std::max(mi,mj) > approx_limit) {
+    if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
       return - 4. * mF/mj * VFin.right() * VFout.left() * OneLoopFunctionC(r) / 3. / mV2
               + mi/mj * VFin.right() * VFout.right() * OneLoopFunctionM(r) / 3. / mV2
               + VFin.left() * VFout.left() * OneLoopFunctionM(r) / 3. / mV2;
@@ -2097,7 +2097,7 @@ mV2)*std::log(mV2/(-mj2 + mV2))))*VFin.left())/(mi3*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return -1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2167,7 +2167,7 @@ mV2)))*VFin.left())/(mi3*(mG - mV)*(mG + mV)*Power2(mi - mj)*Power2(mi \
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * ) {
         return -1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2244,7 +2244,7 @@ mV2)*std::log(mV2/(-mj2 + mV2))))*VFin.left())/(mi3*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return -1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2314,7 +2314,7 @@ mV2)))*VFin.left())/(mi3*(mG - mV)*(mG + mV)*Power2(mi - mj)*Power2(mi \
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return -1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2391,7 +2391,7 @@ mV2)*std::log(mV2/(-mj2 + mV2))))*VFin.left())/(mi3*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return  1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2461,7 +2461,7 @@ mV2)))*VFin.left())/(mi3*(mG - mV)*(mG + mV)*Power2(mi - mj)*Power2(mi \
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return  1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2538,7 +2538,7 @@ mV2)*std::log(mV2/(-mj2 + mV2))))*VFin.left())/(mi3*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2608,7 +2608,7 @@ mV2)))*VFin.left())/(mi3*(mG - mV)*(mG + mV)*Power2(mi - mj)*Power2(mi \
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2686,7 +2686,7 @@ mV)*std::log(mV2/(-mj2 + mV2)))*VFout.right())/(mi*mj2*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2755,7 +2755,7 @@ mj)*Power2(mi + mj));
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2838,7 +2838,7 @@ mV)*std::log(mV2/(-mj2 + mV2)))*VFout.right())/(mi*mj2*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2907,7 +2907,7 @@ mj)*Power2(mi + mj));
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -2990,7 +2990,7 @@ mV)*std::log(mV2/(-mj2 + mV2)))*VFout.right())/(mi*mj2*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -3059,7 +3059,7 @@ mj)*Power2(mi + mj));
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -3142,7 +3142,7 @@ mV)*std::log(mV2/(-mj2 + mV2)))*VFout.right())/(mi*mj2*Power2(mi2 - mj2));
       }
     } else {
     const auto r = Power2(mF/mV);
-      if (std::max(mV,mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,r) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
@@ -3211,7 +3211,7 @@ mj)*Power2(mi + mj));
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF)/std::max(mi,mj) > approx_limit) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return 1./mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
