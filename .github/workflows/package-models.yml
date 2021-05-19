@@ -52,10 +52,7 @@ jobs:
         env:
            PART: ${{ matrix.part }}
         run: |
-           models_array=($MODELS)
-           case $PART in 1) split_array=${models_array[@]:0:$((${#models_array[@]}/2))};; 2) split_array=${models_array[@]:$((${#models_array[@]}/2))};; esac
-           models=$(printf ',%s' $split_array)
-           models=${models:1}
+           models=$(ruby -e "puts ARGV.drop(1).each_slice((ARGV.drop(1).length/2.0).to_i).to_a[ARGV[0]].join(',')" -- $PATH $MODELS)
            docker exec builder bash -c "
              cd FlexibleSUSY && \
              ./release/generate-models.sh \
