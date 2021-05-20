@@ -59,14 +59,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLF4*mLF4, mLF6*mLF6,
+      mLF5*mLF5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -137,8 +140,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -176,8 +182,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLU4*mLU4, mLU6*mLU6,
+      mLU5*mLU5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -215,14 +224,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -263,14 +275,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS6*mLS6, mLV5*mLV5, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -311,14 +326,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -359,14 +377,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -407,14 +428,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -455,14 +479,17 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS6*mLS6, mLV5*mLV5,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS6*mLS6, mLV5*mLV5, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSS result;
 
@@ -503,8 +530,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -540,7 +570,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -576,7 +609,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -612,7 +648,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -648,7 +687,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -684,8 +726,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS4*mLS4, mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -720,8 +764,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV4*mLV4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -757,7 +803,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -793,7 +842,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -829,8 +881,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g1n19_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLS5*mLS5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS4*mLS4, mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -865,8 +919,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g2n20_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLV4*mLV4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV4*mLV4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -902,8 +958,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g1n21_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS4*mLS4, mLS5*mLS5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS4*mLS4, mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -938,8 +996,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV4*mLV4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV4*mLV4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -980,11 +1040,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1025,8 +1089,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1064,8 +1130,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1104,11 +1172,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1147,8 +1219,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1191,10 +1265,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1235,10 +1310,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1279,10 +1355,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1322,10 +1399,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1366,10 +1444,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1411,11 +1490,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1456,8 +1539,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1495,8 +1580,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1535,11 +1622,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1578,8 +1669,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1622,10 +1715,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1666,10 +1760,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1710,10 +1805,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1753,10 +1849,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1797,10 +1894,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1842,11 +1940,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -1887,8 +1989,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1926,8 +2030,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -1966,11 +2072,15 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2009,8 +2119,10 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSS result;
 
@@ -2053,10 +2165,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2097,10 +2210,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2141,10 +2255,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2184,10 +2299,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2228,10 +2344,11 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSS result;
 
@@ -2279,20 +2396,20 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLF4*mLF4, mLF6*mLF6,
+      mLF5*mLF5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c00tmp3 = C_coeffs.at(3);
+   const auto c1tmp4 = C_coeffs.at(1);
+   const auto c12tmp5 = C_coeffs.at(5);
+   const auto c2tmp6 = C_coeffs.at(2);
+   const auto c22tmp7 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2436,14 +2553,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c00tmp1 = C_coeffs.at(3);
+   const auto c12tmp2 = C_coeffs.at(5);
+   const auto c2tmp3 = C_coeffs.at(2);
+   const auto c22tmp4 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2489,14 +2606,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLU4*mLU4, mLU6*mLU6,
+      mLU5*mLU5, scale*scale);
+
+   const auto c00tmp1 = C_coeffs.at(3);
+   const auto c12tmp2 = C_coeffs.at(5);
+   const auto c2tmp3 = C_coeffs.at(2);
+   const auto c22tmp4 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2542,8 +2659,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -2582,14 +2702,14 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c00tmp1 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c12tmp2 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c22tmp4 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c00tmp1 = C_coeffs.at(3);
+   const auto c12tmp2 = C_coeffs.at(5);
+   const auto c2tmp3 = C_coeffs.at(2);
+   const auto c22tmp4 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2636,18 +2756,16 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c00tmp2 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp4 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp5 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp6 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c00tmp2 = C_coeffs.at(3);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c12tmp4 = C_coeffs.at(5);
+   const auto c2tmp5 = C_coeffs.at(2);
+   const auto c22tmp6 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2700,20 +2818,20 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c00tmp3 = C_coeffs.at(3);
+   const auto c1tmp4 = C_coeffs.at(1);
+   const auto c12tmp5 = C_coeffs.at(5);
+   const auto c2tmp6 = C_coeffs.at(2);
+   const auto c22tmp7 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2765,20 +2883,20 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c00tmp3 = C_coeffs.at(3);
+   const auto c1tmp4 = C_coeffs.at(1);
+   const auto c12tmp5 = C_coeffs.at(5);
+   const auto c2tmp6 = C_coeffs.at(2);
+   const auto c22tmp7 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2831,8 +2949,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -2874,20 +2995,20 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c00tmp3 = C_coeffs.at(3);
+   const auto c1tmp4 = C_coeffs.at(1);
+   const auto c12tmp5 = C_coeffs.at(5);
+   const auto c2tmp6 = C_coeffs.at(2);
+   const auto c22tmp7 = C_coeffs.at(6);
 
    Decay_amplitude_SVV result;
 
@@ -2938,7 +3059,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -2980,7 +3104,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3017,7 +3144,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3059,7 +3189,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3096,8 +3229,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLS5*mLS5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS4*mLS4, mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3138,8 +3273,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV4*mLV4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV4*mLV4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3175,7 +3312,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3211,7 +3351,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3247,8 +3390,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS4*mLS4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3283,8 +3428,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS4*mLS4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3328,13 +3475,16 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext3*mext3, mLF5*mLF5, mLF6*
-      mLF6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3378,8 +3528,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b00tmp1 = lib.B00(mext3*mext3, mLS5*mLS5, mLS6*
-      mLS6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b00tmp1 = B_coeffs.at(2);
 
    Decay_amplitude_SVV result;
 
@@ -3417,8 +3569,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b00tmp1 = lib.B00(mext3*mext3, mLU5*mLU5, mLU6*
-      mLU6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b00tmp1 = B_coeffs.at(2);
 
    Decay_amplitude_SVV result;
 
@@ -3456,8 +3610,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3499,13 +3655,16 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext3*mext3, mLV5*mLV5, mLV6*
-      mLV6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3553,13 +3712,16 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext2*mext2, mLF5*mLF5, mLF6*
-      mLF6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3603,8 +3765,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b00tmp1 = lib.B00(mext2*mext2, mLS5*mLS5, mLS6*
-      mLS6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b00tmp1 = B_coeffs.at(2);
 
    Decay_amplitude_SVV result;
 
@@ -3642,8 +3806,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b00tmp1 = lib.B00(mext2*mext2, mLU5*mLU5, mLU6*
-      mLU6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b00tmp1 = B_coeffs.at(2);
 
    Decay_amplitude_SVV result;
 
@@ -3681,8 +3847,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3724,13 +3892,16 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext2*mext2, mLV5*mLV5, mLV6*
-      mLV6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3774,11 +3945,15 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3819,8 +3994,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3858,8 +4035,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3898,11 +4077,15 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -3941,8 +4124,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SVV result;
 
@@ -3987,10 +4172,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -4033,10 +4219,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -4077,8 +4264,10 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b1tmp1 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -4120,10 +4309,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -4166,10 +4356,11 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SVV result;
 
@@ -4215,14 +4406,17 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLF4*mLF4, mLF6*mLF6, mLF5*mLF5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLF4*mLF4, mLF6*mLF6,
+      mLF5*mLF5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4277,12 +4471,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g2n2_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4320,12 +4515,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g3n3_UUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLU4*mLU4, mLU6*mLU6, mLU5*mLU5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLU4*mLU4, mLU6*mLU6,
+      mLU5*mLU5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4363,12 +4559,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g4n4_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4407,12 +4604,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g5n5_SVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4451,20 +4649,17 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g6n6_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c00tmp2 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c11tmp4 = lib.C11(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c12tmp5 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c2tmp6 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
-   const auto c22tmp7 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c00tmp2 = C_coeffs.at(3);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c11tmp4 = C_coeffs.at(4);
+   const auto c12tmp5 = C_coeffs.at(5);
+   const auto c2tmp6 = C_coeffs.at(2);
+   const auto c22tmp7 = C_coeffs.at(6);
 
    Decay_amplitude_SSV result;
 
@@ -4511,22 +4706,21 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g7n7_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c00tmp3 = lib.C00(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp4 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c11tmp5 = lib.C11(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c12tmp6 = lib.C12(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp7 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c22tmp8 = lib.C22(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLS4*mLS4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLS4*mLS4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c00tmp3 = C_coeffs.at(3);
+   const auto c1tmp4 = C_coeffs.at(1);
+   const auto c11tmp5 = C_coeffs.at(4);
+   const auto c12tmp6 = C_coeffs.at(5);
+   const auto c2tmp7 = C_coeffs.at(2);
+   const auto c22tmp8 = C_coeffs.at(6);
 
    Decay_amplitude_SSV result;
 
@@ -4570,12 +4764,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g8n8_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4613,12 +4808,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g9n9_VVS(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLS6*mLS6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLS6*mLS6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4658,12 +4854,13 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext3*mext3, mext1*
-      mext1, mLV4*mLV4, mLV6*mLV6, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext3*mext3, mext1*mext1, mLV4*mLV4, mLV6*mLV6,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -4699,7 +4896,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4741,7 +4941,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4778,7 +4981,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4814,7 +5020,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4851,10 +5060,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS4*mLS4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -4890,7 +5100,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4926,7 +5139,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -4963,10 +5179,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLS4*mLS4, mLV5*mLV5,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS4*mLS4, mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5011,13 +5228,16 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext3*mext3, mLF5*mLF5, mLF6*
-      mLF6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext3*mext3, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5061,8 +5281,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b00tmp1 = lib.B00(mext3*mext3, mLS5*mLS5, mLS6*
-      mLS6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b00tmp1 = B_coeffs.at(2);
 
    Decay_amplitude_SSV result;
 
@@ -5100,8 +5322,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5143,13 +5367,16 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b00tmp3 = lib.B00(mext3*mext3, mLV5*mLV5, mLV6*
-      mLV6, scale*scale);
-   const auto b1tmp4 = lib.B1(mext3*mext3, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b00tmp3 = B_coeffs.at(2);
+   const auto b1tmp4 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5193,11 +5420,15 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5238,8 +5469,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5277,8 +5510,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5317,11 +5552,15 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5360,8 +5599,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5404,10 +5645,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5448,10 +5690,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5489,8 +5732,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b1tmp1 = lib.B1(mext2*mext2, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b1tmp1 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5529,10 +5774,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5572,10 +5818,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5616,11 +5863,15 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5661,8 +5912,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5700,8 +5953,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5740,11 +5995,15 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5783,8 +6042,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SSV result;
 
@@ -5827,10 +6088,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5871,10 +6133,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5912,8 +6175,10 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b1tmp1 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5952,10 +6217,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -5995,10 +6261,11 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SSV result;
 
@@ -6041,14 +6308,17 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
-   const auto c1tmp3 = lib.C1(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
-   const auto c2tmp4 = lib.C2(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLS6*mLS6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLS6*mLS6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext1*mext1, mext3*mext3, mext2*mext2, mLF4*mLF4, mLF5*mLF5,
+      mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6108,12 +6378,13 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLS5*mLS5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext1*mext1, mext3*mext3, mLF6*mLF6, mLS4*mLS4,
+      mLS5*mLS5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6164,14 +6435,17 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
-   const auto c1tmp3 = lib.C1(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
-   const auto c2tmp4 = lib.C2(mext1*mext1, mext3*mext3, mext2*
-      mext2, mLF4*mLF4, mLF5*mLF5, mLV6*mLV6, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLV6*mLV6, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext1*mext1, mext3*mext3, mext2*mext2, mLF4*mLF4, mLF5*mLF5,
+      mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6231,14 +6505,17 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF6*mLF6, mLV5*mLV5,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLS4*mLS4, mLV5*mLV5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF6*mLF6, mLV5*mLV5, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext1*mext1, mext3*mext3, mLF6*mLF6, mLS4*mLS4,
+      mLV5*mLV5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6294,14 +6571,17 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF6*mLF6, mLS5*mLS5,
-      scale*scale);
-   const auto c0tmp2 = lib.C0(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
-   const auto c1tmp3 = lib.C1(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
-   const auto c2tmp4 = lib.C2(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLS5*mLS5, scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF6*mLF6, mLS5*mLS5, scale*scale);
+
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext1*mext1, mext3*mext3, mLF6*mLF6, mLV4*mLV4,
+      mLS5*mLS5, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto c0tmp2 = C_coeffs.at(0);
+   const auto c1tmp3 = C_coeffs.at(1);
+   const auto c2tmp4 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6362,12 +6642,13 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
 {
    auto& lib = Loop_library::get();
 
-   const auto c0tmp1 = lib.C0(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
-   const auto c1tmp2 = lib.C1(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
-   const auto c2tmp3 = lib.C2(mext2*mext2, mext1*mext1, mext3*
-      mext3, mLF6*mLF6, mLV4*mLV4, mLV5*mLV5, scale*scale);
+   looplibrary::Ccoeff_t C_coeffs;
+   lib.C(C_coeffs, mext2*mext2, mext1*mext1, mext3*mext3, mLF6*mLF6, mLV4*mLV4,
+      mLV5*mLV5, scale*scale);
+
+   const auto c0tmp1 = C_coeffs.at(0);
+   const auto c1tmp2 = C_coeffs.at(1);
+   const auto c2tmp3 = C_coeffs.at(2);
 
    Decay_amplitude_SFF result;
 
@@ -6408,7 +6689,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLS5*mLS5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLS5*mLS5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SFF result;
 
@@ -6447,7 +6731,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV5*mLV5, scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV5*mLV5, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
 
    Decay_amplitude_SFF result;
 
@@ -6492,10 +6779,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6548,10 +6836,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext3*mext3, mLF5*mLF5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext3*mext3, mLF5*mLF5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6602,10 +6891,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6658,10 +6948,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext2*mext2, mLF5*mLF5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext2*mext2, mLF5*mLF5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6712,11 +7003,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLF6*mLF6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLF6*mLF6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6764,8 +7059,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SFF result;
 
@@ -6807,8 +7104,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SFF result;
 
@@ -6851,11 +7150,15 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto a0tmp1 = lib.A0(mLV6*mLV6, scale*scale);
-   const auto b0tmp2 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp3 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Acoeff_t A_coeffs;
+   lib.A(A_coeffs, mLV6*mLV6, scale*scale);
+
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto a0tmp1 = A_coeffs.at(0);
+   const auto b0tmp2 = B_coeffs.at(0);
+   const auto b1tmp3 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -6899,8 +7202,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
 
    Decay_amplitude_SFF result;
 
@@ -6951,10 +7256,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLF5*mLF5, mLF6*mLF6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLF5*mLF5, mLF6*mLF6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -7004,10 +7310,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLS6*mLS6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLS6*mLS6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -7053,8 +7360,10 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
 {
    auto& lib = Loop_library::get();
 
-   const auto b1tmp1 = lib.B1(mext1*mext1, mLU5*mLU5, mLU6*mLU6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLU5*mLU5, mLU6*mLU6, scale*scale);
+
+   const auto b1tmp1 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -7101,10 +7410,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLS5*mLS5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLS5*mLS5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
@@ -7152,10 +7462,11 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
 {
    auto& lib = Loop_library::get();
 
-   const auto b0tmp1 = lib.B0(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
-   const auto b1tmp2 = lib.B1(mext1*mext1, mLV5*mLV5, mLV6*mLV6,
-      scale*scale);
+   looplibrary::Bcoeff_t B_coeffs;
+   lib.B(B_coeffs, mext1*mext1, mLV5*mLV5, mLV6*mLV6, scale*scale);
+
+   const auto b0tmp1 = B_coeffs.at(0);
+   const auto b1tmp2 = B_coeffs.at(1);
 
    Decay_amplitude_SFF result;
 
