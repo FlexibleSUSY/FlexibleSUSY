@@ -359,7 +359,7 @@ std::complex<double> dilog(const std::complex<double>& z_) noexcept
    const double nz = norm_sqr(z);
 
    if (nz < std::numeric_limits<double>::epsilon()) {
-      return z_;
+      return z*(1.0 + 0.25*z);
    }
 
    Complex<double> u(0.0, 0.0), rest(0.0, 0.0);
@@ -450,7 +450,7 @@ std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
    const long double nz = norm_sqr(z);
 
    if (nz < std::numeric_limits<long double>::epsilon()) {
-      return z_;
+      return z*(1.0L + 0.25L*z);
    }
 
    Complex<long double> u(0.0L, 0.0L), rest(0.0L, 0.0L);
