@@ -49,8 +49,11 @@ double Decay_amplitude_SSV::square() const
       * AbsSqr(form_factor) / m_v_sq;
 }
 
-// @todo handle massless vectors safely
-// @todo check expressions correct
+// @todo In future versions handle tricky corner cases where e.g. the photon
+//       mass is obtained from diagonalisation of a mass matrix and is
+//       numerically non-zero. Currently would be treated as a massive vector.
+// @todo Numerically validate decays of generic scalar to two massive on-shell
+//       vectors. So far we have not studied an example like this.
 double Decay_amplitude_SVV::square() const
 {
    if (m_decay < m_vector_1 + m_vector_2) {
