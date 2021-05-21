@@ -223,6 +223,7 @@ jobs:
           make clean-test-log
 
       - name: Testing pack-SM-src
+        if: ${{ matrix.PART }} == 2
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |
