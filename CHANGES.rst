@@ -1,11 +1,11 @@
-FlexibleSUSY 2.6.0 [not released yet]
+FlexibleSUSY 2.6.0 [May, NN 2021]
 =====================================
 
 New features
 ------------
 
 * FlexibleDecay - new calculation of scalar decays with an emphasis on
-  Higgs decays, featuring decoupling behaviour for large BSM masses.
+  Higgs decays and featuring decoupling behaviour for large BSM masses.
 
 Changes
 -------
