@@ -122,10 +122,11 @@ jobs:
     strategy:
       matrix:
         CXXCOMPILER: [g++, clang++]
+        PART:        [1, 2]
 
     env:
       FORMCALC_VERSION: '9.9'
-      MODELS: 'SM THDMII MSSM CMSSM CMSSMCKM MRSSM2 MRSSM2CKM MSSMCPV MSSMNoFV ScalarLeptoquarks LRLR E6SSM NUHMSSMNoFVHimalaya'
+      MODELS: 'MSSM CMSSM CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
 
     steps:
 
@@ -159,10 +160,12 @@ jobs:
       - name: Configure
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          PART:        ${{ matrix.PART }}
         run: |
+          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
           ./configure \
             --with-cxx=$CXXCOMPILER \
-            --with-models=$(echo $MODELS| tr ' ' ',') \
+            --with-models=$models \
             --with-loop-libraries=collier,looptools \
             --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
             --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
