@@ -117,7 +117,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.5.0
+      image: navir/opensuseleap-for-flexiblesusy:0.5.1
 
     strategy:
       matrix:
@@ -155,7 +155,11 @@ jobs:
           echo 'AppendTo[\$Path, \"/FormCalc-$FORMCALC_VERSION\"];' >> /root/.WolframEngine/Kernel/init.m
 
       - name: Create models
-        run: for m in $MODELS; do ./createmodel --name=$m; done
+        env:
+          PART: ${{ matrix.PART }}
+        run: |
+          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(' ')" -- $PART $MODELS)
+          for m in $models; do ./createmodel --name=$m; done
 
       - name: Configure
         env:
