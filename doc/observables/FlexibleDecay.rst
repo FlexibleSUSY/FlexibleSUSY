@@ -9,7 +9,10 @@ The code is documented in
 Prerequisites
 +++++++++++++
 
-FlexibleDecay 
+FlexibleDecay **requires** FlexibleSUSY to be configured with a dedicaded loop library.
+See `here`__ for an instruction on how to do it.
+
+__ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alternative-loop-libraries
 
 Models with decays
 ++++++++++++++++++
@@ -32,3 +35,15 @@ Runtime
      4   2       # off-shell decays into VV pair
 
 The area of a circle is \[ \alpha \]
+
+0. This is the first item
+#. This is the second item
+#. Enumerators are arabic numbers,
+   single letters, or roman numerals
+#. List items should be sequentially
+   numbered, but need not start at 1
+   (although not all formatters will
+   honour the first index).
+#. This item is auto-enumerated
+
+The loop library used by decays is controlled by flag 31 in block FlexibleSUSY
