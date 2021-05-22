@@ -50,7 +50,7 @@ models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
 models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
 models/NUHMSSM/LesHouches.in.NUHMSSM \
 models/lowMSSM/LesHouches.in.lowMSSM \
-models/MSSMRHN/LesHouches.in.MSSMRHN_generated \
+models/MSSMRHN/LesHouches.in.MSSMRHN \
 models/NMSSM/LesHouches.in.NMSSM \
 models/NUTNMSSM/LesHouches.in.NUTNMSSM \
 models/NUTSMSSM/LesHouches.in.NUTSMSSM \
