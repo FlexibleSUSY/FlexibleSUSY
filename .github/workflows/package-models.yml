@@ -11,66 +11,52 @@ env:
 
 jobs:
   package-models:
-    env:
-      MODELS: 'E6SSM E6SSMEFTHiggs CE6SSM CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM HSSUSY NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC'
+
+    runs-on: ubuntu-20.04
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:0.5.1
+
     strategy:
        matrix:
           part: [1, 2]
-    runs-on: ubuntu-20.04
+
+    env:
+      MODELS: 'E6SSM E6SSMEFTHiggs CE6SSM CMSSM CMSSMSemiAnalytic CMSSMNoFV MSSM MSSMatMGUT MSSMNoFV MSSMNoFVatMGUT SplitMSSM MSSMNoFVatMGUTHimalaya MSSMEFTHiggs NUHMSSMNoFVHimalaya MSSMNoFVHimalaya lowMSSM NUHMSSM HSSUSY NMSSM CNMSSM lowNMSSM lowNMSSMTanBetaAtMZ NUTNMSSM NMSSMEFTHiggs NUTSMSSM SMSSM UMSSM MRSSM2 MRSSMEFTHiggs MSSMRHN TMSSM SM THDMII THDMIIMSSMBC HTHDMIIMSSMBC HGTHDMIIMSSMBC'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Pull the docker image
-        run: docker pull navir/opensuseleap-for-flexiblesusy
-
-      - name: Run the image
-        # action checks-out our repository directly under $GITHUB_WORKSPACE
-        # mount $GITHUB_WORKSPACE as /FlexibleSUSY on the container
-        run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/FlexibleSUSY navir/opensuseleap-for-flexiblesusy
-
-      - name: Copy Wolfram Engine license to the image
-        run: |
-          docker exec builder bash -c "mkdir /root/.WolframEngine/Licensing && echo $MATHPASS > /root/.WolframEngine/Licensing/mathpass"
-          printf "Checking if wolframscript command is workings... "
-          docker exec builder bash -c 'if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi'
-          printf "Checking if math command is workings... "
-          docker exec builder bash -c '
-              if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]];
-              then
-                echo OK
-              else
-                echo fail
-                exit 1
-              fi
-            '
+      - name: Activate Wolfram Engine
         env:
-          MATHPASS: ${{ secrets.MATHPASS }}
+          MY_MATH_PASS:    ${{ secrets.MY_MATH_PASS }}
+          MY_MAIL_ADDRESS: ${{ secrets.MY_MAIL_ADDRESS }}
+        run: |
+          wolframscript << EOF
+          $MY_MAIL_ADDRESS
+          $MY_MATH_PASS
+          EOF
+          printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
+          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
 
       - name: Generate models and SLHA output
         env:
            PART: ${{ matrix.part }}
         run: |
            models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
-           echo $models
-           docker exec builder bash -c "
-             cd FlexibleSUSY && \
-             ./release/generate-models.sh \
-                --number-of-jobs=2 \
-                --directory=release/$FS_TAG \
-                --with-models=$models \
-                --with-himalaya-incdir=/Himalaya-g++/include \
-                --with-himalaya-libdir=/Himalaya-g++/lib64 \
-                --with-tsil-incdir=/tsil-g++ \
-                --with-tsil-libdir=/tsil-g++ \
-                --with-loop-libraries=collier,looptools \
-                --with-looptools-incdir=/LoopTools-g++/include \
-                --with-looptools-libdir=/LoopTools-g++/lib64 \
-                --with-collier-incdir=/COLLIER/include \
-                --with-collier-libdir=/COLLIER/lib
-           "
-           docker exec builder bash -c " cd FlexibleSUSY && ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha"
+           ./release/generate-models.sh \
+             --number-of-jobs=2 \
+             --directory=release/$FS_TAG \
+             --with-models=$models \
+             --with-himalaya-incdir=/Himalaya-g++/include \
+             --with-himalaya-libdir=/Himalaya-g++/lib64 \
+             --with-tsil-incdir=/tsil-g++ \
+             --with-tsil-libdir=/tsil-g++ \
+             --with-loop-libraries=collier,looptools \
+             --with-looptools-incdir=/LoopTools-g++/include \
+             --with-looptools-libdir=/LoopTools-g++/lib64 \
+             --with-collier-incdir=/COLLIER/include \
+             --with-collier-libdir=/COLLIER/lib
+           ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
