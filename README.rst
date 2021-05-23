@@ -314,7 +314,9 @@ for each spectrum generator.  The generated library can be found in
 ``models/<model>/<model>_librarylink.so``, where ``<model>`` is the
 model name.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
 
@@ -637,7 +639,9 @@ Example::
        31   0    # loop library (0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFlite)
 
 When the Mathematica interface is used, the loop library to use can be
-selected by setting the value of ``loopLibrary`` appropriately::
+selected by setting the value of ``loopLibrary`` appropriately
+
+.. code-block:: mathematica
 
     FS@ModelName@OpenHandle[
         fsSettings -> {
