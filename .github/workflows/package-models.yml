@@ -1,20 +1,19 @@
-name: package-models
+name: Package models
 
 on:
-  push:
-  release:
-    types: [published]
+   release:
+     types:
+       - published
 
 env:
-  # FS_TAG: ${{ github.event.release.tag_name }}
-  FS_TAG: '2.6.0'
+  FS_TAG: ${{ github.event.release.tag_name }}
 
 jobs:
   package-models:
-
+    name: Create model packages
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.5.1
+      image: navir/opensuseleap-for-flexiblesusy
 
     strategy:
        matrix:
@@ -25,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: Activate Wolfram Engine
         env:
@@ -36,8 +35,10 @@ jobs:
           $MY_MAIL_ADDRESS
           $MY_MATH_PASS
           EOF
-          printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
-          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
+          printf "Checking if wolframscript command is workings... ";
+          if [ $(wolframscript -code 1+2) -eq 3 ]; then echo ok; else echo fail && exit 1; fi
+          printf "Checking if math command is workings... ";
+          if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo ok; else echo fail && exit 1; fi
 
       - name: Generate models and SLHA output
         env:
@@ -72,9 +73,8 @@ jobs:
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
 
   upload-models:
-
+    name: Upload packages to git
     needs: package-models
-
     runs-on: ubuntu-20.04
 
     steps:
@@ -82,7 +82,6 @@ jobs:
         uses: actions/checkout@v2
         with:
            repository:  FlexibleSUSY/FlexibleSUSY-generated
-           ref: test
            token: ${{ secrets.PAT }}
 
       - uses: actions/download-artifact@v2
@@ -105,12 +104,11 @@ jobs:
           git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
-          # git push origin v$FS_TAG
+          git push origin v$FS_TAG
 
   upload-slha-outputs:
-
-    needs: [package-models, upload-models]
-
+    name: Upload SLHA to git
+    needs: package-models
     runs-on: ubuntu-20.04
 
     steps:
@@ -118,7 +116,6 @@ jobs:
         uses: actions/checkout@v2
         with:
            repository:  FlexibleSUSY/FlexibleSUSY-slha
-           ref: test
            token: ${{ secrets.PAT }}
 
       - uses: actions/download-artifact@v2
@@ -141,4 +138,347 @@ jobs:
           git add -A
           git commit --allow-empty -m "version $FS_TAG" && git tag v$FS_TAG
           git push origin
-          # git push origin v$FS_TAG
+          git push origin v$FS_TAG
+
+  upload-release:
+    name: Upload to release
+    needs: package-models
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: models-artifacts_1
+           path: /tmp/models-artifacts
+
+      - uses: actions/download-artifact@v2
+        with:
+           name: models-artifacts_2
+           path: /tmp/models-artifacts
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/SM.tar.gz
+          asset_name: SM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/THDMII.tar.gz
+          asset_name: THDMII.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/E6SSM.tar.gz
+          asset_name: E6SSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/E6SSMEFTHiggs.tar.gz
+          asset_name: E6SSMEFTHiggs.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/CE6SSM.tar.gz
+          asset_name: CE6SSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/CMSSM.tar.gz
+          asset_name: CMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/CMSSMSemiAnalytic.tar.gz
+          asset_name: CMSSMSemiAnalytic.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/CMSSMNoFV.tar.gz
+          asset_name: CMSSMNoFV.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSM.tar.gz
+          asset_name: MSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMatMGUT.tar.gz
+          asset_name: MSSMatMGUT.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMNoFV.tar.gz
+          asset_name: MSSMNoFV.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMNoFVatMGUT.tar.gz
+          asset_name: MSSMNoFVatMGUT.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/SplitMSSM.tar.gz
+          asset_name: SplitMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMNoFVatMGUTHimalaya.tar.gz
+          asset_name: MSSMNoFVatMGUTHimalaya.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMEFTHiggs.tar.gz
+          asset_name: MSSMEFTHiggs.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NUHMSSMNoFVHimalaya.tar.gz
+          asset_name: NUHMSSMNoFVHimalaya.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMNoFVHimalaya.tar.gz
+          asset_name: MSSMNoFVHimalaya.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/lowMSSM.tar.gz
+          asset_name: lowMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NUHMSSM.tar.gz
+          asset_name: NUHMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/HSSUSY.tar.gz
+          asset_name: HSSUSY.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NMSSM.tar.gz
+          asset_name: NMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/CNMSSM.tar.gz
+          asset_name: CNMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/lowNMSSM.tar.gz
+          asset_name: lowNMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/lowNMSSMTanBetaAtMZ.tar.gz
+          asset_name: lowNMSSMTanBetaAtMZ.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NUTNMSSM.tar.gz
+          asset_name: NUTNMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NMSSMEFTHiggs.tar.gz
+          asset_name: NMSSMEFTHiggs.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/NUTSMSSM.tar.gz
+          asset_name: NUTSMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/SMSSM.tar.gz
+          asset_name: SMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/UMSSM.tar.gz
+          asset_name: UMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MRSSM2.tar.gz
+          asset_name: MRSSM2.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MRSSMEFTHiggs.tar.gz
+          asset_name: MRSSMEFTHiggs.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/MSSMRHN.tar.gz
+          asset_name: MSSMRHN.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/TMSSM.tar.gz
+          asset_name: TMSSM.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/THDMIIMSSMBC.tar.gz
+          asset_name: THDMIIMSSMBC.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/HTHDMIIMSSMBC.tar.gz
+          asset_name: HTHDMIIMSSMBC.tar.gz
+          asset_content_type: application/gzip
+
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url  }}
+          asset_path: /tmp/models-artifacts/HGTHDMIIMSSMBC.tar.gz
+          asset_name: HGTHDMIIMSSMBC.tar.gz
+          asset_content_type: application/gzip
