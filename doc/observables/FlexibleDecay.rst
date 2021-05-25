@@ -78,21 +78,21 @@ Example output
 
 .. code-block::
 
-Block DCINFO
-     1   FlexibleSUSY
-     2   2.6.0
-     5   SM
-     9   4.14.3
-DECAY        25     4.01909364E-03   # hh decays
-     5.88154048E-01   2          -5         5  # BR(hh -> barFd(3) Fd(3))
-     2.04644925E-01   2         -24        24  # BR(hh -> conjVWp VWp)
-     8.64458085E-02   2          21        21  # BR(hh -> VG VG)
-     6.21678883E-02   2         -15        15  # BR(hh -> barFe(3) Fe(3))
-     2.84471939E-02   2          -4         4  # BR(hh -> barFu(2) Fu(2))
-     2.59621707E-02   2          23        23  # BR(hh -> VZ VZ)
-     2.25173904E-03   2          22        22  # BR(hh -> VP VP)
-     1.44211112E-03   2          22        23  # BR(hh -> VP VZ)
-     2.63348187E-04   2          -3         3  # BR(hh -> barFd(2) Fd(2))
-     2.20054695E-04   2         -13        13  # BR(hh -> barFe(2) Fe(2))
+    Block DCINFO
+         1   FlexibleSUSY
+        2   2.6.0
+        5   SM
+        9   4.14.3
+    DECAY        25     4.01909364E-03   # hh decays
+         5.88154048E-01   2          -5         5  # BR(hh -> barFd(3) Fd(3))
+        2.04644925E-01   2         -24        24  # BR(hh -> conjVWp VWp)
+        8.64458085E-02   2          21        21  # BR(hh -> VG VG)
+        6.21678883E-02   2         -15        15  # BR(hh -> barFe(3) Fe(3))
+        2.84471939E-02   2          -4         4  # BR(hh -> barFu(2) Fu(2))
+        2.59621707E-02   2          23        23  # BR(hh -> VZ VZ)
+        2.25173904E-03   2          22        22  # BR(hh -> VP VP)
+        1.44211112E-03   2          22        23  # BR(hh -> VP VZ)
+        2.63348187E-04   2          -3         3  # BR(hh -> barFd(2) Fd(2))
+        2.20054695E-04   2         -13        13  # BR(hh -> barFe(2) Fe(2))
      
 The output conforms to the SLHA standard.
