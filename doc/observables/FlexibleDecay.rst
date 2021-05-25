@@ -139,3 +139,32 @@ The output conforms to the SLHA standard.
 
 Mathlink
 ~~~~~~~~
+
+.. code-block:: mathematica
+
+    {
+      SM -> {
+        Decays[hh] -> { 
+          25, 0.00198076, {
+            {25, {-15,15}, 0.000157635}, 
+            {25, {23,23},  3.16863*10^-7}, 
+            {25, {-24,24}, 1.14636*10^-6}, 
+            {25, {-3,3},   7.44681*10^-7},
+            {25, {22,22},  1.8801*10^-6}, 
+            {25, {-13,13}, 5.58985*10^-7}, 
+            {25, {-5,5},   0.00164052}, 
+            {25, {-4,4},   0.0000812031}, 
+            {25, {21,21},  0.0000967487}
+          }
+        }
+      }
+    }
+
+At the top of the block we get a PDG id of particle whose with we are computing as well as its total width.
+The output for every channel, e.g.
+
+.. code-block:: mathematica
+
+    {25, {-15,15}, 0.000157635}
+    
+contains PDG identifiers for in and out particles and a partial width in GeV.
