@@ -79,11 +79,10 @@ For example:
 Matlink interface
 ~~~~~~~~~~~~~~~~~
 
-FlexibleDecay can also be used via the mathlink interface (see `here`__)
+FlexibleDecay can also be used via the mathlink interface (see `here`__).
+The same options as in the case of SLHA input can be passed as (using CMSSM as an example)
 
 __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
-
-The same options as in the case of SLHA input can be passed as (using CMSSM as an example)
 
 .. code-block:: mathematica
 
