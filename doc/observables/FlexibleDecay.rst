@@ -89,7 +89,7 @@ For example:
 
 .. code-block::
 
-   31   1                    # loop library (1 = COLLIER, 2 = LoopTools)
+   31    1    # loop library (1 = COLLIER, 2 = LoopTools)
 
 LibraryLink interface
 ~~~~~~~~~~~~~~~~~
