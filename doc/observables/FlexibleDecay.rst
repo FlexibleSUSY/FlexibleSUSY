@@ -18,15 +18,17 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alt
 Creating model with decays
 ++++++++++++++++++
 
-Whether decaysare created for a model is controled by viariable
+Whether decays are created for a given model is controled by viariable
 
 .. code-block:: mathematica
   
   FSCalculateDecays = True;
 
 in model's ``FlexibleSUSY.m.in`` file.
+
 By defaul this variable is initialized to :mathematica:`False`.
-In models distributed with FlexibleSUSY which support decays we set it explicitly to :mathematica:`True`.
+In models distributed with FlexibleSUSY which support decays we do set it explicitly to :mathematica:`True`.
+
 Which decays are included is controled by :mathematica:`FSDecayParticles` variable.
 By default, it's set to include CP-even and -odd neutral Higgs and charged Higgs.
 For example, in SARAH's THDM-II this is equivalen to 
@@ -60,3 +62,6 @@ The area of a circle is \[ \alpha \]
 #. This item is auto-enumerated
 
 The loop library used by decays is controlled by flag 31 in block FlexibleSUSY
+
+Example output
+++++++++++++++
