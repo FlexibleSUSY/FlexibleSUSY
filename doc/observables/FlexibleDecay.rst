@@ -70,10 +70,10 @@ Runtime options are set in ``FlexibleDecay`` block in the SLHA_ input file
      3   1       # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
      4   2       # off-shell decays into VV pair
 
-The options are
+The options are:
 
-0. turn calculation of decay on/off (default = 1)
-#. minimal branching ratio to print (default = 1e-5)
+0. Turn calculation of decay on/off (default = 1).
+#. Minimal branching ratio to print (default = 1e-5).
 #. Maximal order of included higher order corrections (default = 4). Note that not all such corrections. 
 #. Use α in the Thomson limit instead of a running one in decays to γγ and γZ. This should minimize higher order corrections.
 
