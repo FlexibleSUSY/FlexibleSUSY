@@ -85,8 +85,7 @@ Flag 4 controls treatment of Higgs decay to gauge bosons
 
 Finally, the loop library used by decays is controlled by flag 31 in block FlexibleSUSY.
 For decays the allowed options are 1 and 2.
-
-For example:
+For example to compute decays one could set it as
 
 .. code-block::
 
