@@ -70,7 +70,7 @@ Runtime options are set in ``FlexibleDecay`` block in the SLHA_ input file
      3   1       # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
      4   2       # off-shell decays into VV pair
 
-The options are:
+The flags are:
 
 0. Turn calculation of decay on/off (default = 1).
 #. Minimal branching ratio to print (default = 1e-5).
@@ -83,7 +83,7 @@ Flag 4 controls treatment of Higgs decay to gauge bosons
 1. on-shell decays above the VV threshold, single off-shell decays above the VV* threshold (V = W, Z), double off-shell below it
 2. double off-shell decays also between a VV* and VV thresholds
 
-Options 2, 3 and 4 influnce only the calculation of Higgs decays.
+Flags 2, 3 and 4 influnce only the calculation of Higgs decays.
 
 Finally, the loop library used by decays is controlled by flag 31 in block FlexibleSUSY.
 For decays the allowed vlues are 1 and 2.
