@@ -59,7 +59,13 @@ The options are
 #. Use α in the Thomson limit instead of a running one in decays to γγ and γZ. This should minimize higher order corrections.
 #. This item is auto-enumerated
 
-The loop library used by decays is controlled by flag 31 in block FlexibleSUSY
+Entry 5 controls treatment of Higgs decay to gauge bosons
+
+0. no off-shell decays
+#. single off-shell decay above VV* threshold (V = W, Z), double offshell below it
+#. double off-shell decays also above a VV* threshold
+
+Finally, the loop library used by decays is controlled by flag 31 in block FlexibleSUSY
 
 Example output
 ++++++++++++++
