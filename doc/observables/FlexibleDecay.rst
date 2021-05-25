@@ -83,9 +83,11 @@ Flag 4 controls treatment of Higgs decay to gauge bosons
 1. on-shell decays above the VV threshold, single off-shell decays above the VV* threshold (V = W, Z), double off-shell below it
 2. double off-shell decays also between a VV* and VV thresholds
 
+Options 2, 3 and 4 influnce only the calculation of Higgs decays.
+
 Finally, the loop library used by decays is controlled by flag 31 in block FlexibleSUSY.
-For decays the allowed options are 1 and 2.
-For example to compute decays one could set it as
+For decays the allowed vlues are 1 and 2.
+To compute decays one could set it for example as
 
 .. code-block::
 
