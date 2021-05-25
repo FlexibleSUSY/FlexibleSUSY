@@ -10,7 +10,7 @@ FlexibleDecay
 Prerequisites
 +++++++++++++
 
-FlexibleDecay **requires** FlexibleSUSY to be configured with a dedicaded loop library.
+FlexibleDecay **requires** FlexibleSUSY to be configured with a dedicaded loop library (currently this is COLLIER or LoopTools).
 See `here`__ for an instruction on how to do it.
 
 __ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alternative-loop-libraries
