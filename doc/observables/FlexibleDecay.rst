@@ -18,25 +18,38 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alt
 Creating model with decays
 ++++++++++++++++++
 
-Whether decays are created for a given model is controled by viariable
+Whether decays are created for a given model is controled by the viariable
 
 .. code-block:: mathematica
   
   FSCalculateDecays = True;
 
-in model's ``FlexibleSUSY.m.in`` file.
+in the model's ``FlexibleSUSY.m.in`` file.
 
 By defaul this variable is initialized to :mathematica:`False`.
 In models distributed with FlexibleSUSY which support decays we do set it explicitly to :mathematica:`True`.
 
 Which decays are included is controled by :mathematica:`FSDecayParticles` variable.
-By default, it's set to include CP-even and -odd neutral Higgs and charged Higgs.
-For example, in SARAH's THDM-II this is equivalen to 
+By default, it's set to 
+
+.. code-block:: mathematica
+
+  FSDecayParticles = Automatic;
+
+which means CP-even and -odd neutral Higgs and charged Higgs bosons.
+As an example, in SARAH's THDM-II, :mathematica:`Automatic` is equivalen to setting
 
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm};
   
+One can also add other scalar.
+For example, to add squark decays in the SARAH's MSSM one would write
+
+.. code-block:: mathematica
+
+  FSDecayParticles = {hh, Ah, Hpm, Su, Sd};
+
 Runtime options
 +++++++
 
