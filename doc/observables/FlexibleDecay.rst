@@ -83,7 +83,7 @@ FlexibleDecay can also be used via the mathlink interface (see `here`__)
 
 __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
 
-The same options as in the case of SLHA input can be passed as
+The same options as in the case of SLHA input can be passed as (using CMSSM as an example)
 
 .. code-block:: mathematica
 
@@ -95,20 +95,27 @@ The same options as in the case of SLHA input can be passed as
     fsSettings -> { precisionGoal -> 1.*^-4 },
     fsSMParameters -> { Mt -> 173.3 },
     fsModelParameters -> {
-        m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
+        m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 },
+     fdSettings -> {}
     ];
 
-    (* calculate pole mass spectrum *)
+After computing the spectrum via
+
+.. code-block:: mathematica
+
     FSCMSSMCalculateSpectrum[handle]
 
-    (* calculate observables *)
-    FSCMSSMCalculateObservables[handle]
+Decays can be computed as
 
-    (* close the model handle *)
-    FSCMSSMCloseHandle[handle];
+.. code-block:: mathematica
+
+    FSCMSSMCalculateDecays[handle]
 
 Example output
 ++++++++++++++
+
+SLHA
+~~~~
 
 .. code-block::
 
@@ -130,3 +137,6 @@ Example output
         2.20054695E-04   2         -13        13  # BR(hh -> barFe(2) Fe(2))
      
 The output conforms to the SLHA standard.
+
+Mathlink
+~~~~~~~~
