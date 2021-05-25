@@ -91,7 +91,7 @@ For example:
 
    31   1                    # loop library (1 = COLLIER, 2 = LoopTools)
 
-Matlink interface
+LibraryLink interface
 ~~~~~~~~~~~~~~~~~
 
 FlexibleDecay can also be used via the mathlink interface (see `here`__).
@@ -152,7 +152,7 @@ SLHA
      
 The output conforms to the SLHA standard.
 
-Mathlink
+LibraryLink
 ~~~~~~~~
 
 .. code-block:: mathematica
