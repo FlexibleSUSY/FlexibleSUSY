@@ -1,6 +1,9 @@
 .. role:: raw-latex(raw)
     :format: latex
 
+.. role:: mathematica(code)
+   :language: mathematica
+
 FlexibleDecay
 =============
 
@@ -12,7 +15,7 @@ See `here`__ for an instruction on how to do it.
 
 __ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alternative-loop-libraries
 
-Models with decays
+Creating model with decays
 ++++++++++++++++++
 
 Whether decaysare created for a model is controled by viariable
@@ -22,16 +25,17 @@ Whether decaysare created for a model is controled by viariable
   FSCalculateDecays = True;
 
 in model's ``FlexibleSUSY.m.in`` file.
-By defaul this variable is set to ``False``.
-Which decays are included is controled by ``FSDecayParticles`` variable.
+By defaul this variable is initialized to :mathematica:`False`.
+In models distributed with FlexibleSUSY which support decays we set it explicitly to :mathematica:`True`.
+Which decays are included is controled by :mathematica:`FSDecayParticles` variable.
 By default, it's set to include CP-even and -odd neutral Higgs and charged Higgs.
-For SARAH's THDM-II this is equivalen to 
+For example, in SARAH's THDM-II this is equivalen to 
 
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm};
   
-Runtime
+Runtime options
 +++++++
 
 .. code-block::
