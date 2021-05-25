@@ -106,13 +106,14 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
     (* Create a handle to a model given the input parameters.
        See Options[FSCMSSMOpenHandle] for all default options. *)
     handle = FSCMSSMOpenHandle[
-    fsSettings -> { precisionGoal -> 1.*^-4 },
-    fsSMParameters -> { Mt -> 173.3 },
-    fsModelParameters -> {
-        m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 },
-     fdSettings -> {}
+      fsSettings -> { precisionGoal -> 1.*^-4 },
+      fsSMParameters -> { Mt -> 173.3 },
+      fsModelParameters -> {
+      m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 },
+      fdSettings -> { minBRtoPrint -> 1*^-5, maxHigherOrderCorrections -> 4, alphaThomson -> 1, offShellVV -> 2 }
     ];
 
+The meaning of symbols in :mathematica:`fdSettings` is the same as options in the `FlexibleDecay` block (as explained in the previous section).
 After computing the spectrum via
 
 .. code-block:: mathematica
