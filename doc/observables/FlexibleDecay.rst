@@ -40,6 +40,9 @@ For example, in SARAH's THDM-II this is equivalen to
 Runtime options
 +++++++
 
+SLHA input
+~~~~~~~~~~
+
 Runtime options are set in ``FlexibleDecay`` block in the SLHA file
 
 .. code-block::
@@ -72,6 +75,37 @@ For example:
 .. code-block::
 
    31   1                    # loop library (1 = COLLIER, 2 = LoopTools)
+
+Matlink interface
+~~~~~~~~~~~~~~~~~
+
+FlexibleDecay can also be used via the mathlink interface (see `here`__)
+
+__ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
+
+The same options as in the case of SLHA input can be passed as
+
+.. code-block:: mathematica
+
+    Get["models/CMSSM/CMSSM_librarylink.m"];
+
+    (* Create a handle to a model given the input parameters.
+       See Options[FSCMSSMOpenHandle] for all default options. *)
+    handle = FSCMSSMOpenHandle[
+    fsSettings -> { precisionGoal -> 1.*^-4 },
+    fsSMParameters -> { Mt -> 173.3 },
+    fsModelParameters -> {
+        m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
+    ];
+
+    (* calculate pole mass spectrum *)
+    FSCMSSMCalculateSpectrum[handle]
+
+    (* calculate observables *)
+    FSCMSSMCalculateObservables[handle]
+
+    (* close the model handle *)
+    FSCMSSMCloseHandle[handle];
 
 Example output
 ++++++++++++++
