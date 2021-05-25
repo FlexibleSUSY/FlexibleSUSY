@@ -43,7 +43,9 @@ Runtime options
 SLHA input
 ~~~~~~~~~~
 
-Runtime options are set in ``FlexibleDecay`` block in the SLHA file
+Runtime options are set in ``FlexibleDecay`` block in the SLHA_ input file
+
+.. _SLHA: https://inspirehep.net/record/632863
 
 .. code-block::
 
