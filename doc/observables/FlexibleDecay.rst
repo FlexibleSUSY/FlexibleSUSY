@@ -118,13 +118,13 @@ After computing the spectrum via
 
 .. code-block:: mathematica
 
-    FSCMSSMCalculateSpectrum[handle]
+    FSCMSSMCalculateSpectrum[handle];
 
 Decays can be computed as
 
 .. code-block:: mathematica
 
-    FSCMSSMCalculateDecays[handle]
+    FSCMSSMCalculateDecays[handle];
 
 Example output
 ++++++++++++++
