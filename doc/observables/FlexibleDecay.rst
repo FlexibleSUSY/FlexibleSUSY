@@ -94,7 +94,7 @@ For example:
 LibraryLink interface
 ~~~~~~~~~~~~~~~~~
 
-FlexibleDecay can also be used via the mathlink interface (see `here`__).
+FlexibleDecay can also be used via the LibraryLink interface (see `here`__).
 The same options as in the case of SLHA input can be passed as (using CMSSM as an example)
 
 __ https://github.com/FlexibleSUSY/FlexibleSUSY#mathematica-interface
@@ -134,12 +134,12 @@ SLHA
 .. code-block::
 
     Block DCINFO
-         1   FlexibleSUSY
+        1   FlexibleSUSY
         2   2.6.0
         5   SM
         9   4.14.3
     DECAY        25     4.01909364E-03   # hh decays
-         5.88154048E-01   2          -5         5  # BR(hh -> barFd(3) Fd(3))
+        5.88154048E-01   2          -5         5  # BR(hh -> barFd(3) Fd(3))
         2.04644925E-01   2         -24        24  # BR(hh -> conjVWp VWp)
         8.64458085E-02   2          21        21  # BR(hh -> VG VG)
         6.21678883E-02   2         -15        15  # BR(hh -> barFe(3) Fe(3))
