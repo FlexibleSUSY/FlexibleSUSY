@@ -4,8 +4,6 @@
 FlexibleDecay
 =============
 
-The code is documented in 
-
 Prerequisites
 +++++++++++++
 
@@ -17,9 +15,20 @@ __ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alt
 Models with decays
 ++++++++++++++++++
 
+Whether decaysare created for a model is controled by viariable
+
+.. code-block:: mathematica
+  
+  FSCalculateDecays = True;
+
+in model's ``FlexibleSUSY.m.in`` file.
+By defaul this variable is set to ``False``.
+Which decays are included is controled by ``FSDecayParticles`` variable.
+By default, it's set to include CP-even and -odd neutral Higgs and charged Higgs.
+For SARAH's THDM-II this is equivalen to 
+
 .. code-block:: mathematica
 
-  FSCalculateDecays = True;
   FSDecayParticles = {hh, Ah, Hpm};
   
 Runtime
