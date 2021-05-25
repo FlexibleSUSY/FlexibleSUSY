@@ -22,7 +22,8 @@ By defaul this variable is initialized to :mathematica:`False`.
 In models distributed with FlexibleSUSY which support decays we do set it explicitly to :mathematica:`True`.
 
 Which decays are included is controled by :mathematica:`FSDecayParticles` variable.
-By default, it's set to 
+It's possible values are :mathematica:`Automatic` or a list of scalars present in the model.
+By default it's set to 
 
 .. code-block:: mathematica
 
