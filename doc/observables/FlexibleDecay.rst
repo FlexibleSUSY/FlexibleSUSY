@@ -40,6 +40,8 @@ For example, in SARAH's THDM-II this is equivalen to
 Runtime options
 +++++++
 
+Runtime options are set in ``FlexibleDecay`` block in the SLHA file
+
 .. code-block::
 
   Block FlexibleDecay
@@ -49,16 +51,12 @@ Runtime options
      3   1       # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
      4   2       # off-shell decays into VV pair
 
-The area of a circle is \[ \alpha \]
+The options are
 
-0. This is the first item
-#. This is the second item
-#. Enumerators are arabic numbers,
-   single letters, or roman numerals
-#. List items should be sequentially
-   numbered, but need not start at 1
-   (although not all formatters will
-   honour the first index).
+0. turn calculation of decay on/off (default = 1)
+#. minimal branching ratio to print (default = 1e-5)
+#. Maximal order of included higher order corrections (default = 4). Note that not all such corrections. 
+#. Use α in the Thomson limit instead of a running one in decays to γγ and γZ. This should minimize higher order corrections.
 #. This item is auto-enumerated
 
 The loop library used by decays is controlled by flag 31 in block FlexibleSUSY
