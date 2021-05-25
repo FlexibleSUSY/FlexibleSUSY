@@ -7,14 +7,6 @@
 FlexibleDecay
 =============
 
-Prerequisites
-+++++++++++++
-
-FlexibleDecay **requires** FlexibleSUSY to be configured with a dedicaded loop library (currently this is COLLIER or LoopTools).
-See `here`__ for an instruction on how to do it.
-
-__ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alternative-loop-libraries
-
 Creating model with decays
 ++++++++++++++++++
 
@@ -49,6 +41,14 @@ For example, to add squark decays in the SARAH's MSSM one would write
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm, Su, Sd};
+
+Configuration
++++++++++++++
+
+FlexibleDecay **requires** FlexibleSUSY to be configured with a dedicaded loop library (currently this is COLLIER or LoopTools).
+See `here`__ for an instruction on how to do it.
+
+__ https://github.com/FlexibleSUSY/FlexibleSUSY/tree/development#support-for-alternative-loop-libraries
 
 Runtime options
 +++++++
