@@ -311,7 +311,7 @@ PutDecayTableEntries[modelName_] :=
                      "n_decays++;\n"
                   ] <>
                   "}\n" <>
-                  "auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(pid);\n" <>
+                  "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(pid);\n" <>
                   "if (multiplet_and_index_pair.second) {\n" <>
                      TextFormatting`IndentText[
                         "MLPutFunction(link, \"Rule\", 2);\n" <>
