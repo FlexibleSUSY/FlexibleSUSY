@@ -74,17 +74,23 @@ int get_pdg_code_for_particle(Particles p, int index)
    return pdg_codes[index];
 }
 
-std::string get_particle_name_from_pdg(int pdg)
+std::pair<std::string, boost::optional<unsigned int>> get_multiplet_and_index_from_pdg(int pdg)
 {
-   std::string name;
+   std::pair<std::string, boost::optional<unsigned int>> name;
 
    switch (pdg) {
 
-@setParticleNameFromPDG@
-   default: name = "";
+@setParticleMultipletNameAndIndexFromPDG@
+   default: name = {"", {}};
    }
 
    return name;
+}
+
+std::string get_particle_name_from_pdg(int pdg)
+{
+   std::pair<std::string, boost::optional<unsigned int>> const pair = get_multiplet_and_index_from_pdg(pdg);
+   return pair.first + (pair.second ? "(" + std::to_string(pair.second.get()) + ")" : "");
 }
 
 void print(std::ostream& ostr)
