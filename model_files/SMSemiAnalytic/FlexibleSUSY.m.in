@@ -72,13 +72,12 @@ ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
            {{21, FlexibleSUSYObservable`aMuon} } },
    {EWSBOutputs, NoScale,
-           {{1, mu20} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
+           {{1, mu20} } }
 };
 
 SARAH`ParameterDefinitions = Append[
     Cases[SARAH`ParameterDefinitions, {p_ /; p =!= SARAH`\[Lambda], ___}],
     {SARAH`\[Lambda], { Description -> "SM Higgs Selfcouplings" } }
 ];
+
+FSCalculateDecays = True;

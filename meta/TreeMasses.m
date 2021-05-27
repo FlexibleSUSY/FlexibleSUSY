@@ -182,6 +182,8 @@ IsMassless::usage="";
 IsUnmixed::usage="";
 IsQuark::usage="";
 IsLepton::usage="";
+IsPhoton::usage="";
+IsZBoson::usage="";
 IsSMChargedLepton::usage="";
 IsSMNeutralLepton::usage="";
 IsSMLepton::usage="";
@@ -511,6 +513,16 @@ IsLepton[SARAH`bar[sym_]] := IsLepton[sym];
 IsLepton[sym_[___]] := IsLepton[sym];
 IsLepton[sym_Symbol] :=
     MemberQ[Complement[GetParticles[], GetColoredParticles[]], sym] && IsFermion[sym] && IsSMParticle[sym];
+
+IsPhoton[Susyno`LieGroups`conj[sym_]] := IsPhoton[sym];
+IsPhoton[SARAH`bar[sym_]] := IsPhoton[sym];
+IsPhoton[sym_[___]] := IsPhoton[sym];
+IsPhoton[field_Symbol] := field === GetPhoton[];
+
+IsZBoson[Susyno`LieGroups`conj[sym_]] := IsZBoson[sym];
+IsZBoson[SARAH`bar[sym_]] := IsZBoson[sym];
+IsZBoson[sym_[___]] := IsZBoson[sym];
+IsZBoson[field_Symbol] := field === GetZBoson[];
 
 IsSMChargedLepton[Susyno`LieGroups`conj[sym_]] := IsSMChargedLepton[sym];
 IsSMChargedLepton[SARAH`bar[sym_]] := IsSMChargedLepton[sym];
@@ -1037,10 +1049,9 @@ CreateSLHAPoleMassGetter[massMatrix_TreeMasses`FSMassMatrix] :=
     CreateMassGetter[massMatrix, "_pole_slha", "PHYSICAL_SLHA"];
 
 CreateParticleEnum[particles_List] :=
-    Module[{result},
-           result = Utils`StringJoinWithSeparator[CConversion`ToValidCSymbolString /@ particles, ", "];
-           If[Length[particles] > 0, result = result <> ", ";];
-           "enum Particles : int { " <> result <> "NUMBER_OF_PARTICLES };\n"
+    Module[{entries},
+           entries = Join[particles, {"NUMBER_OF_PARTICLES"}];
+           CConversion`CreateEnum["Particles", entries, 0]
           ];
 
 DecomposeParticle[particle_] :=
@@ -1055,15 +1066,14 @@ CreateParticleMassEnumName[particle_[idx_]] :=
 CreateParticleMassEnumName[particle_] :=
     "M" <> CConversion`ToValidCSymbolString[particle];
 
-CreateParticleMassEnum[particles_List] :=
-    Module[{result},
-           result = Utils`StringJoinWithSeparator[CreateParticleMassEnum /@ particles, ", "];
-           If[Length[particles] > 0, result = result <> ", ";];
-           "enum Masses : int { " <> result <> "NUMBER_OF_MASSES };\n"
-          ];
+CreateParticleMassEnumEntries[particle_] :=
+    CreateParticleMassEnumName /@ DecomposeParticle[particle];
 
-CreateParticleMassEnum[p_] :=
-    Utils`StringJoinWithSeparator[CreateParticleMassEnumName /@ DecomposeParticle[p], ", "];
+CreateParticleMassEnum[particles_List] :=
+    Module[{entries},
+           entries = Flatten[Join[CreateParticleMassEnumEntries /@ particles, {"NUMBER_OF_MASSES"}]];
+           CConversion`CreateEnum["Masses", entries, 0]
+          ];
 
 DecomposeMixingMatrix[mm_List, type_] := { #, type }& /@ mm;
 DecomposeMixingMatrix[mm_    , type_] := {{ mm, type }};
@@ -1075,12 +1085,11 @@ GetMixingMatricesAndTypesFrom[mixings_List] :=
     Join @@ (GetMixingMatrixAndTypeFrom /@ mixings);
 
 CreateParticleMixingEnum[mixings_List] :=
-    Module[{nonNullMixings, result},
+    Module[{nonNullMixings, entries},
            nonNullMixings = Select[mixings, (GetMixingMatrixSymbol[#] =!= Null)&];
-           result = Utils`StringJoinWithSeparator[
-               Parameters`CreateParameterEnums[#[[1]], #[[2]]]& /@ GetMixingMatricesAndTypesFrom[nonNullMixings], ", "];
-           If[Length[nonNullMixings] > 0, result = result <> ", ";];
-           "enum Mixings : int { " <> result <> "NUMBER_OF_MIXINGS };\n"
+           entries = Flatten[Join[Parameters`CreateParameterEnumEntries[#[[1]], #[[2]]]& /@ GetMixingMatricesAndTypesFrom[nonNullMixings],
+                                  {"NUMBER_OF_MIXINGS"}]];
+           CConversion`CreateEnum["Mixings", entries, 0]
           ];
 
 SARAHNameStr[p_] :=

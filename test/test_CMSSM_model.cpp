@@ -1244,7 +1244,6 @@ void test_ewsb_1loop(CMSSM<Two_scale> model, MssmSoftsusy softSusy)
    const double m2sq = -model.get_mHu2();
    const int signMu = Mu >= 0.0 ? 1 : -1;
    const DoubleVector pars(3); // unused
-   const double precision = model.get_ewsb_iteration_precision();
    model.set_mHd2(m1sq);
    model.set_mHu2(m2sq);
    softSusy.setMh1Squared(m1sq);
@@ -1278,7 +1277,6 @@ void test_ewsb_2loop(CMSSM<Two_scale> model, MssmSoftsusy softSusy)
    const double m2sq = -model.get_mHu2();
    const int signMu = Mu >= 0.0 ? 1 : -1;
    const DoubleVector pars(3); // unused
-   const double precision = model.get_ewsb_iteration_precision();
    model.set_mHd2(m1sq);
    model.set_mHu2(m2sq);
    softSusy.setMh1Squared(m1sq);

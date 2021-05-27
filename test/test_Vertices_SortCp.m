@@ -76,6 +76,54 @@ TestEquality[SortCp @ Cp[conj[USd[{gO2}]], Glu[{1}], Fd[{gI2}]][PL],
 TestEquality[SortCp @ Cp[VZ, hh[{gI1}], Ah[{2}]],
 		      Cp[Ah[{2}], hh[{gI1}], VZ]];
 
+(* For vertex for fields get coefficient in front of
+   SARAH`g[idx[[1]], idx[[2]]], SARAH`g[idx[[3]], idx[[4]]] *)
+Get4VectorVertexPart[fields_List, idx_List] :=
+   Module[{result},
+      result =
+         Select[
+            Delete[SARAH`Vertex[fields], 1],
+            MatchQ[
+               Last@#,
+               HoldPattern[Times][SARAH`g[idx[[1]], idx[[2]]], SARAH`g[idx[[3]], idx[[4]]]]
+            ]&
+         ];
+      If[Length@result =!= 1, Print["Error! Couldn't identify requested part of 4-vector vertex"], First@First@result]
+   ];
+
+(* Check if SortCp works correctly for fields, where fields are
+   4-vector bosons *)
+CheckSortCpForFieldList[fieldsIn_] /; Length[fieldsIn]===4 :=
+   Module[{fieldPermuations, indexPermutations, testInputs},
+      fieldPermuations = Permutations[fieldsIn];
+      (* all combinations of {lt1, lt2, lt3, lt4} without
+         elements which can be obtained by interchanging 1 <-> 2
+         and/or 3 <-> 4 *)
+      indexPermutations =
+         DeleteDuplicatesBy[
+            Permutations[{lt1, lt2, lt3, lt4}],
+            Flatten[Sort /@ TakeList[#, {2, 2}]]&
+         ];
+      testInputs = Tuples[{fieldPermuations, indexPermutations}];
+      Module[{fields = #1, sortedFields, indices = #2, sortedIndices},
+         sortedCoupling =
+           SortCp[(Cp @@ fields)[SARAH`g[indices[[1]], indices[[2]]] SARAH`g[indices[[3]], indices[[4]]]]];
+         {sortedFields, sortedIndices} =
+            sortedCoupling /. SARAH`Cp[y___][x___] :> {{y}, x};
+         (* g[] g[] -> {} *)
+         sortedIndices =
+            sortedIndices /. Times[x_, y_] :> Flatten[List @@@ {x, y}, 1];
+         TestEquality[
+            Get4VectorVertexPart[fields,       indices],
+            Get4VectorVertexPart[sortedFields, sortedIndices]
+         ];
+      ] & @@@ testInputs
+   ];
+
+(* this tests takes ~1h will all combinations, so we take every 10th *)
+CheckSortCpForFieldList /@
+   Select[Tuples[{VP, VZ, VWm, conj[VWm]}, 4], IsNonZeroVertex][[;; ;; 10]];
+
 Print["testing Vertices`Private`RestoreBarOnMajorana[] ..."];
 
 RBOM := Vertices`Private`RestoreBarOnMajorana;

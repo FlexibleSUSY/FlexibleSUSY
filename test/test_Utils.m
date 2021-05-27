@@ -190,6 +190,10 @@ is not supported.terminated.\n"
 ];
 `test`out="";
 
+TestEquality[FSPermutationSign[Cycles[{{1,2}}]], -1];
+TestEquality[FSPermutationSign[Cycles[{{1,3,2}}]], 1];
+TestEquality[FSPermutationSign[Cycles[{{1,3,2},{5,6}}]], -1];
+
 Print[StringJoin[">>test>> done in ",ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}]," seconds.\n"]];
 
 PrintTestSummary[];

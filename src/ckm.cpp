@@ -92,7 +92,7 @@ void CKM_parameters::set_from_wolfenstein(double lambdaW, double aCkm,
  * hep-ph/0406184)
  */
 void CKM_parameters::get_wolfenstein(double& lambdaW, double& aCkm,
-                                     double& rhobar, double& etabar)
+                                     double& rhobar, double& etabar) const
 {
    const double sin_12 = std::sin(theta_12);
    const double sin_13 = std::sin(theta_13);
@@ -236,7 +236,7 @@ template<typename T>
 std::complex<T> phase(const std::complex<T>& z) noexcept
 {
    T r = std::abs(z);
-   return r == 0 ? 1 : z/r;
+   return is_zero(r) ? 1 : z/r;
 }
 
 void calc_phase_factors

@@ -24,10 +24,10 @@
 */
 
 #include "lowe.h"
+#include "eigen_utils.hpp"
 #include "error.hpp"
 #include "ew_input.hpp"
 #include "string_format.hpp"
-#include "eigen_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -37,14 +37,18 @@ namespace softsusy {
 
 namespace {
 
+bool is_zero(double x) noexcept
+{
+   return std::abs(x) <= std::numeric_limits<double>::epsilon();
+}
+
 constexpr double sqr(double a) noexcept { return a*a; }
 
 // Given a value of mt, and alphas(MZ), find alphas(mt) to 1 loops in qcd:
 // it's a very good approximation at these scales, better than 10^-3 accuracy
 double getAsmt(double mtop, double alphasMz, double mz) {
-  using std::log;
   return alphasMz /
-      (1.0 - 23.0 * alphasMz / (6.0 * M_PI) * log(mz / mtop));
+      (1.0 - 23.0 * alphasMz / (6.0 * M_PI) * std::log(mz / mtop));
 }
 
 // Input pole mass of top and alphaS(mt), outputs running mass mt(mt)
@@ -251,11 +255,10 @@ double QedQcd::qedBeta() const {
 double QedQcd::qcdBeta() const {
   static const double INVPI = 1.0 / M_PI;
   const int quarkFlavours = flavours(get_scale());
-  double qb0, qb1, qb2;
-  qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
-  qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
-  qb2 = (2.857e3 * 0.5 - (5.033e3 * quarkFlavours) / 18.0  +
-         (3.25e2 * sqr(quarkFlavours) ) / 5.4e1) / 64;
+  const double qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
+  const double qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
+  const double qb2 = (2.857e3 * 0.5 - (5.033e3 * quarkFlavours) / 18.0  +
+                      (3.25e2 * sqr(quarkFlavours) ) / 5.4e1) / 64;
 
   double qa0 = 0., qa1 = 0., qa2 = 0.;
 
@@ -334,7 +337,7 @@ Eigen::Array<double,9,1> QedQcd::massBeta() const {
 /// Supposed to be done at mb(mb) -- MSbar, calculates pole mass
 double QedQcd::extractPoleMb(double alphasMb)
 {
-  if (get_scale() != displayMass(mBottom)) {
+  if (!is_zero(get_scale() - displayMass(mBottom))) {
     throw flexiblesusy::SetupError(
        "QedQcd::extractPoleMb called at scale "
        + flexiblesusy::to_string(get_scale()) + " instead of mb(mb)");
@@ -384,8 +387,11 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
    while (!converged && it < max_iterations) {
       // set alpha_i(MZ)
       runto_safe(displayPoleMZ(), running_precision);
-      setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-      setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+      setAlpha(ALPHA, displayAlphaEmInput());
+      setAlpha(ALPHAS, displayAlphaSInput());
+
+      // set mt(MZ)
+      setMass(mTop, getRunMtFromMz(displayPoleMt(), displayAlphaSInput(), displayPoleMZ()));
 
       // set mb(mb)
       runto_safe(displayMbMb(), running_precision);
@@ -420,8 +426,8 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
 
    // set alpha_i(MZ) on last time
    runto_safe(displayPoleMZ(), precision_goal);
-   setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-   setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+   setAlpha(ALPHA, displayAlphaEmInput());
+   setAlpha(ALPHAS, displayAlphaSInput());
 
    runto_safe(scale, precision_goal);
 

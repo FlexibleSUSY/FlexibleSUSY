@@ -4,13 +4,11 @@
 FlexibleSUSY
 ============
 
-|release| |tests| |travis|
+|release| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
    :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
-.. |travis| image:: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY.svg?branch=development
-   :target: https://travis-ci.org/FlexibleSUSY/FlexibleSUSY
 
 .. image:: doc/images/FS-logo.png
    :align: right
@@ -36,6 +34,9 @@ modification, extension and reuse.
   please cite [1005.5709]_, [1708.05720]_, [1807.03509]_ and
   [1910.03595]_.
 
+  If you use **FlexibleDecay** in your work, please cite
+  [2104.XXXXX]_.
+
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
   along with FlexibleSUSY:
@@ -56,7 +57,6 @@ Quick start
 Install required libraries and packages (if not already done)::
 
     pip install conan
-    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
     conan install . --build=missing
     sudo apt-get install libgsl-dev
     ./install-sarah
@@ -91,6 +91,7 @@ Optional:
 
 * FeynArts_ (version 3.9 or higher)
 * FormCalc_ (version 9.5 or higher)
+* GM2Calc_ (version 1.7.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * COLLIER_
 * Himalaya_
@@ -99,17 +100,12 @@ Optional:
 Installation of required/optional libraries
 -------------------------------------------
 
-The required and optional libraries Boost_, COLLIER_, `Eigen 3`_,
+The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
 LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
 package manager.  If not already installed, Conan can be installed
 with pip::
 
     pip install conan
-
-If Conan is installed, add `conan-hep`_ to the list of remote package
-repositories::
-
-    conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep
 
 To install the libraries required by FlexibleSUSY, run::
 
@@ -318,7 +314,9 @@ for each spectrum generator.  The generated library can be found in
 ``models/<model>/<model>_librarylink.so``, where ``<model>`` is the
 model name.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
 
@@ -641,7 +639,9 @@ Example::
        31   0    # loop library (0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFlite)
 
 When the Mathematica interface is used, the loop library to use can be
-selected by setting the value of ``loopLibrary`` appropriately::
+selected by setting the value of ``loopLibrary`` appropriately
+
+.. code-block:: mathematica
 
     FS@ModelName@OpenHandle[
         fsSettings -> {
@@ -734,8 +734,7 @@ Creating an addon
 
 A FlexibleSUSY addon is a program or library, which uses parts of the
 FlexibleSUSY libraries or the generated models or is integrated into
-FlexibleSUSY.  An example is GM2Calc_, which is included in
-FlexibleSUSY in form of an addon.  An addon can be created via ::
+FlexibleSUSY.  An addon can be created via ::
 
     ./createaddon --name=<addon>
 
@@ -840,7 +839,7 @@ Package content
 In the following all sub-directories within the FlexibleSUSY package
 are listed:
 
-* ``addons/`` contains addons for FlexibleSUSY, such as GM2Calc_
+* ``addons/`` contains addons for FlexibleSUSY
 
 * ``config/`` contains helper scripts and makefile modules for the
   build system
@@ -902,7 +901,6 @@ References
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
 .. _Conan: https://conan.io/
-.. _conan-hep: https://bintray.com/expander/conan-hep
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
@@ -932,3 +930,4 @@ References
 .. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
+.. [2104.XXXXX] `XXX`_ [`arxiv:2104.XXXXX <https://arxiv.org/abs/>`_]

@@ -20,10 +20,12 @@
 
 *)
 
+(* This test fails in 11.2.0. *)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["LoopFunctions`", "LoopFunctions.m"];
 
-assumptions = m > 0 && m1 > 0 && m2 > 0 && p > 0 && Q > 0;
+assumptions = m > 0 && m1 > 0 && m2 > 0 && p > 0 && Q > 0 && m2 != p;
 
 RuleToExpansion[a_ -> b_, order_:0] := {a, b, 0};
 

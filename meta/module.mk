@@ -68,6 +68,7 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
+		$(DIR)/Decays.m \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \

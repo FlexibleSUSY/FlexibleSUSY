@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # creates SLHA output files for all SLHA input files in the directory
 # model_files/ (and sub-directories) that begin with LesHouches.in. .
@@ -11,7 +11,7 @@ BASEDIR=$(dirname $0)
 HOMEDIR=$(readlink -f "${BASEDIR}/../")
 FSCONFIG="${HOMEDIR}/flexiblesusy-config"
 model_file_dir="$BASEDIR/../model_files"
-directory=
+directory=.
 
 #_____________________________________________________________________
 help() {
@@ -19,9 +19,7 @@ cat <<EOF
 Usage: ./`basename $0` [options]
 Options:
 
-  --directory=         output directory (default: ${directory})
-                       If empty, the SLHA output file will be written
-                       to the same directory as the input file
+  --directory=         Output directory (default: ${directory})
   --help,-h            Print this help message
 EOF
 }
@@ -42,66 +40,71 @@ if test $# -gt 0 ; then
     done
 fi
 
-if test ! -d "$directory"; then
-    echo "Directory $directory does not exist, creating it"
-    mkdir -p "$directory"
-fi
+default_input_files="\
+models/CMSSM/LesHouches.in.CMSSM \
+models/CMSSMSemiAnalytic/LesHouches.in.CMSSMSemiAnalytic \
+models/MSSM/LesHouches.in.MSSM \
+models/MSSMatMGUT/LesHouches.in.MSSMatMGUT \
+models/MSSMNoFV/LesHouches.in.MSSMNoFV \
+models/MSSMNoFVatMGUT/LesHouches.in.MSSMNoFVatMGUT \
+models/CMSSMNoFV/LesHouches.in.CMSSMNoFV \
+models/NUHMSSM/LesHouches.in.NUHMSSM \
+models/lowMSSM/LesHouches.in.lowMSSM \
+models/MSSMRHN/LesHouches.in.MSSMRHN \
+models/NMSSM/LesHouches.in.NMSSM \
+models/NUTNMSSM/LesHouches.in.NUTNMSSM \
+models/NUTSMSSM/LesHouches.in.NUTSMSSM \
+models/lowNMSSM/LesHouches.in.lowNMSSM \
+models/lowNMSSMTanBetaAtMZ/LesHouches.in.lowNMSSMTanBetaAtMZ \
+models/SMSSM/LesHouches.in.SMSSM \
+models/UMSSM/LesHouches.in.UMSSM \
+models/E6SSM/LesHouches.in.E6SSM \
+models/MRSSM2/LesHouches.in.MRSSM2 \
+models/TMSSM/LesHouches.in.TMSSM \
+models/SM/LesHouches.in.SM \
+models/HSSUSY/LesHouches.in.HSSUSY \
+models/SplitMSSM/LesHouches.in.SplitMSSM \
+models/THDMII/LesHouches.in.THDMII \
+models/THDMIIMSSMBC/LesHouches.in.THDMIIMSSMBC \
+models/HTHDMIIMSSMBC/LesHouches.in.HTHDMIIMSSMBC \
+models/HGTHDMIIMSSMBC/LesHouches.in.HGTHDMIIMSSMBC \
+models/MSSMEFTHiggs/LesHouches.in.MSSMEFTHiggs \
+models/NMSSMEFTHiggs/LesHouches.in.NMSSMEFTHiggs \
+models/E6SSMEFTHiggs/LesHouches.in.E6SSMEFTHiggs \
+models/MRSSMEFTHiggs/LesHouches.in.MRSSMEFTHiggs \
+models/CNMSSM/LesHouches.in.CNMSSM \
+models/CE6SSM/LesHouches.in.CE6SSM \
+models/MSSMNoFVatMGUTHimalaya/LesHouches.in.MSSMNoFVatMGUTHimalaya \
+models/MSSMNoFVHimalaya/LesHouches.in.MSSMNoFVHimalaya \
+models/NUHMSSMNoFVHimalaya/LesHouches.in.NUHMSSMNoFVHimalaya \
+"
 
-SGs=$(find $model_file_dir/ -type f -iname LesHouches.in.\* -not -iname \*~ -exec dirname {} \; | awk -F / '{ print $NF }' | uniq)
+[ -z "${directory}" ] && directory=.
 
-errors=0
+[ ! -d "${directory}" ] && mkdir -p "${directory}"
 
-echo "Found default SLHA input files for: $SGs"
+models=$("$FSCONFIG" --models)
 
-for sg in ${SGs}
-do
-    if [ $("$FSCONFIG" --with-${sg}) = no ] ; then
-        continue
-    fi
+echo "Configured models: $models"
+echo
 
-    exe="${HOMEDIR}/models/${sg}/run_${sg}.x"
+for model in ${models}; do
+    # collect all input files that belong to the model
+    input_files=
+    for dif in ${default_input_files}; do
+        case "${dif}" in
+            ${model}/*) input_files="${input_files} ${HOMEDIR}/${dif}" ;;
+        esac
+    done
 
-    echo "========================"
-    echo "   $sg"
-    echo "========================"
-
-    input_files=$(find $model_file_dir/$sg/ -type f -iname LesHouches.in.\* -not -iname \*~)
-    echo "input files: "
-    echo "$input_files"
-
-    for ifile in ${input_files}
-    do
-        ofile=$(echo ${ifile} | sed -e 's/LesHouches\.in\./LesHouches.out./')
-
-        if test ! "x$directory" = "x"; then
-            ofile="${directory}/`basename $ofile`"
-        fi
-
+    for ifile in ${input_files}; do
+        ofile=$(echo "${directory}/$(basename ${ifile})" | sed -e 's/\.in\./.out./')
+        sg=$(echo "${model}" | awk -F / '{ print $NF }')
+        exe="${HOMEDIR}/${model}/run_${sg}.x"
         cmd="${exe} --slha-input-file=${ifile} --slha-output-file=${ofile} > /dev/null 2>&1"
 
-        echo ""
-        echo "> running $sg"
-        echo "> input file: `basename ${ifile}`"
-        echo "> output file: `basename ${ofile}`"
-        echo "> command: ${cmd}"
-
-        eval "${cmd}"
-        exit_code="$?"
-
-        if test ${exit_code} -eq 0 ; then
-            echo "> OK"
-        else
-            echo "> FAIL"
-            errors=1
-        fi
+        printf "%s" "${cmd}"
+        eval "${cmd}" || { printf " [FAIL]\n"; exit 1; }
+        printf " [OK]\n"
     done
 done
-
-echo ""
-if test ${errors} -ne 0 ; then
-    echo "There were errors!"
-else
-    echo "All output files generated successfully!"
-fi
-
-exit $errors

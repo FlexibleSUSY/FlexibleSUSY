@@ -67,6 +67,7 @@ UncolouredVertex::usage="A SU(3) invariant vertex";
 KroneckerDeltaColourVertex::usage="A vertex proportional to \\delta( ct1, ct2 )";
 GellMannVertex::usage="A vertex proportional to \\Lambda^t_{a b}";
 AdjointlyColouredVertex::usage="A vertex proportional to f^{a b c}";
+UnsupportedColouredVertex::usage="An usnupported colour vertex";
 
 CreateVertices::usage="Creates c++ code that makes functions available that \
 numerically evaluates any of the given vertices.";
@@ -90,6 +91,9 @@ AtomHead::usage="Repeatedly evaluate Head[] on the argument until it satisfies \
 AtomQ[] and return the result.";
 CreateUnitCharge::usage="Creates the c++ code for a function that returns the \
 numerical value of the electrical charge of the electron.";
+
+NumberOfExternalParticlesInTopology::usage = "";
+NumberOfPropagatorsInTopology::usage = "";
 
 ColorFactorForDiagram::usage = "Given topology and diagram returns the color factors for the diagram";
 ExtractColourFactor::usage = "Drop colour generator from the colour factor";
@@ -276,18 +280,18 @@ CreateFields[] :=
               ">;\n" <>
               "static constexpr int numberOfGenerations = " <>
                    ToString @ TreeMasses`GetDimension[#] <> ";\n" <>
-                     "using sm_flags = boost::mpl::vector_c<bool, " <>
-                        If[TreeMasses`GetDimension[#] === 1,
-                           CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
-                           StringJoin @ Riffle[CConversion`CreateCBoolValue /@
-                             TreeMasses`IsSMParticleElementwise[#],
-                                               ", "]] <>
-                        ">;\n" <>
-                "static constexpr int numberOfFieldIndices = " <>
+              "using sm_flags = boost::mpl::vector_c<bool, " <>
+                   If[TreeMasses`GetDimension[#] === 1,
+                      CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
+                      StringJoin @ Riffle[CConversion`CreateCBoolValue /@
+                         TreeMasses`IsSMParticleElementwise[#],
+                         ", "]
+                   ] <> ">;\n" <>
+              "static constexpr int numberOfFieldIndices = " <>
                    ToString @ NumberOfFieldIndices[#] <> ";\n" <>
-                "static constexpr double electric_charge = " <>
+              "static constexpr double electric_charge = " <>
                    CConversion`RValueToCFormString[TreeMasses`GetElectricCharge[#]] <> ";\n" <>
-                "using lorentz_conjugate = " <>
+              "using lorentz_conjugate = " <>
                    CXXNameOfField[LorentzConjugate[#]] <> ";\n"] <>
               "};" &) /@ fields, "\n\n"] <> "\n\n" <>
 
@@ -387,7 +391,7 @@ ColourIndexOfField[field_ /; TreeMasses`ColorChargedQ[field]]:=
  * a reordering of fields in internal vertices and thus any appearing
  * duplicate diagrams are removed.
  **)
-FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List] :=
+FeynmanDiagramsOfType[adjacencyMatrix_List,externalFields_List, bothLoopOrientations_:False] :=
 	Module[{externalVertices = externalFields[[All,1]],
 			internalVertices,externalRules, internalFieldCouplings,
 			unspecifiedEdgesLess,unspecifiedEdgesEqual,
@@ -422,6 +426,7 @@ not symmetric"];
 	unresolvedFieldCouplings = internalFieldCouplings
 		/. insertFieldRulesLess /. insertFieldRulesGreater /. insertFieldRulesEqual;
 
+   If[bothLoopOrientations && !MemberQ[adjacencyMatrix, el_ /; el > 1, 2], SA`CheckSameVertices = False];
 	resolvedFields = If[fieldsToInsert === {}, {{}},
 		SARAH`InsFields[{C @@@ unresolvedFieldCouplings,
 			fieldsToInsert}][[All,2]]];
@@ -439,17 +444,21 @@ not symmetric"];
 	 * vertices. This is automatically performed by SARAH if
 	 * SA`CheckSameVertices === True, but it is better to not depend on
 	 * some internal SARAH state. *)
-	DeleteDuplicates[diagrams,
-		(And @@ ((Sort[#[[1]]] === Sort[#[[2]]] &) /@
-			Cases[Transpose[{#1, #2}],{{___},{___}}] (* Only check internal vertices *)
-		) &)]
+
+   If[bothLoopOrientations && !MemberQ[adjacencyMatrix, el_ /; el > 1, 2],
+      diagrams,
+	   DeleteDuplicates[diagrams,
+		   (And @@ ((Sort[#[[1]]] === Sort[#[[2]]] &) /@
+			   Cases[Transpose[{#1, #2}],{{___},{___}}] (* Only check internal vertices *)
+		   ) &)]
+   ]
   ]
 
 (** \brief Returns a list of all vertices present in a diagram.
  * \param diagram The given Feynman diagram
  * \returns a list of all vertices present in a diagram.
  **)
-VerticesForDiagram[diagram_] := Select[diagram,Length[#] > 1 &]
+VerticesForDiagram[diagram_] := Select[diagram, Length[#] > 1 &];
 
 (** \brief Returns a list of the positions of the contracted fields in
  * a given diagram in the given vertices.
@@ -548,6 +557,10 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
 ConvertColourStructureToColorMathConvention[fields_List,
    AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
    ColorMath`CMf[cIndex1, cIndex2, cIndex3] * 2 ColorMath`CMt[{cIndex3}, cIndex4, cIndex5];
+
+ConvertColourStructureToColorMathConvention[fields_List,
+   UnsupportedColouredVertex] :=
+   (Print["Error! Cannot convert a colour structure to ColorMath convention for fiedls: ", fields]; Quit[1]);
 
 (* FIXME: Are these correct? *)
 ColorMathToSARAHConvention[expr_] :=
@@ -660,9 +673,22 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 
 		If[(Times @@ colorMathExpressions) === 1, 1,
 			ColorMathToSARAHConvention[
-				ColorMath`CSimplify[Times @@ colorMathExpressions]]
+            With[{colorFac = ColorMath`CSimplify[Times @@ colorMathExpressions]},
+               If[!FreeQ[colorFac, Superscript[CMo, {__}]],
+                  (* RemoveFD converts f and d color structures into a sum of ColorMath`o *)
+                  ColorMath`CSimplify[Times @@ colorMathExpressions, RemoveFD -> False],
+                  (* on the other hand, without RemoveFD -> True expression
+                          {ct94450, ct94453}ct94448           {ct94450, ct94453, ct94454}
+                     4 CMt                                 CMf
+                                                   ct94455
+                     is not simplified *)
+                  colorFac
+               ]
+            ]
+         ]
 		]
-	]
+	];
+
 (** \brief Returns the index prefix string for an index of a given type **)
 IndexPrefixForType[SARAH`generation] = "gt";
 IndexPrefixForType[SARAH`lorentz] = "lt";
@@ -710,7 +736,7 @@ SortedVertex[fields_List, OptionsPattern[{ApplyGUTNormalization -> False}]] :=
 			similarVertexList, similarVertex, fieldReplacementRules,
 			indexReplacementRules},
     LoadVerticesIfNecessary[];
-		sortedFields = Vertices`SortFieldsInCp[fields];
+	 sortedFields = Vertices`SortFieldsInCp[fields];
 
     vertexList = Switch[Length[fields],
 			3, SARAH`VertexList3,
@@ -821,21 +847,32 @@ GaugeStructureOfVertexLorentzPart[{scalar_, lorentzStructure_}] :=
 	{scalar, UncolouredVertex, lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* Delta[] *)
 GaugeStructureOfVertexLorentzPart[
-	{scalar_ * SARAH`Delta[cIndex1_, cIndex2_], lorentzStructure_}] :=
-	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
-	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	  Collect[fullExpr, SARAH`Delta[cIndex1_, cIndex2_]],
+	  scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]] /;
+     (And @@ Vertices`SarahColorIndexQ /@ {cIndex1, cIndex2}) &&
+	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[ct1_, ct2_] (* collecting with respect to SARAH`Delta[_, _] gives wrong result in NMSSMCPV *)] /.
+      scalar_ * SARAH`Delta[cIndex1_ /; Vertices`SarahColorIndexQ[cIndex1], cIndex2_ /; Vertices`SarahColorIndexQ[cIndex2]] :>
+	   {scalar, KroneckerDeltaColourVertex[cIndex1, cIndex2], lorentzStructure} /;
+	   FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* Lam[] *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`Lam[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, GellMannVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* fSU3 *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * SARAH`fSU3[cIndex1_, cIndex2_, cIndex3_], lorentzStructure_}] :=
 	{scalar, AdjointlyColouredVertex[cIndex1, cIndex2, cIndex3], lorentzStructure} /;
 	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
+(* fSU3[] Lam[] *)
 GaugeStructureOfVertexLorentzPart[
 	{scalar_ * sum[j_, 1, 8, SARAH`fSU3[cIndex1_, cIndex3_, j_] SARAH`Lam[j_, cIndex4_, cIndex2_]], lorentzStructure_}
    ] /; Vertices`SarahDummyIndexQ[j] :=
@@ -844,14 +881,49 @@ GaugeStructureOfVertexLorentzPart[
 
 GaugeStructureOfVertexLorentzPart[
 	{fullExpr_, lorentzStructure_}] /; MatchQ[
-	Expand @ fullExpr,
+	Collect[fullExpr, sum[___]],
 	scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
      scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] /;
          MemberQ[{c1}, j1] && MemberQ[{c2}, j2] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
-] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
+] := Collect[fullExpr, sum[___]] /. scalar_ sum[j1_, 1, 3, SARAH`Lam[c1__] SARAH`Lam[c2__]] +
 		scalar_ sum[j2_, 1, 3, SARAH`Lam[c3__] SARAH`Lam[c4__]] :>
 {scalar, GellMannVertex[c1] GellMannVertex[c2] + GellMannVertex[c3] GellMannVertex[c4], lorentzStructure} /;
 		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+(* combine two cases below *)
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Collect[fullExpr, sum[___]],
+	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+     scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j1] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
+{scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] + AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+	Collect[fullExpr, sum[___]],
+	scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] -
+     scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] /;
+         MemberQ[{c1}, j1] && MemberQ[{c2}, j1] && MemberQ[{c3}, j2] && MemberQ[{c4}, j2]
+] := Expand @ fullExpr /. scalar_ sum[j1_, 1, 8, SARAH`fSU3[c1__] SARAH`fSU3[c2__]] +
+		scalar_ sum[j2_, 1, 8, SARAH`fSU3[c3__] SARAH`fSU3[c4__]] :>
+{scalar, AdjointlyColouredVertex[c1] AdjointlyColouredVertex[c2] - AdjointlyColouredVertex[c3] AdjointlyColouredVertex[c4], lorentzStructure} /;
+		FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
+
+(* coeff Delta[] Delta[] *)
+GaugeStructureOfVertexLorentzPart[
+	{fullExpr_, lorentzStructure_}] /; MatchQ[
+      Collect[fullExpr, SARAH`Delta[_, _] SARAH`Delta[_, _]],
+	scalar_ SARAH`Delta[c1_ /; Vertices`SarahColorIndexQ[c1], c4_ /; Vertices`SarahColorIndexQ[c4]]
+           SARAH`Delta[c2_ /; Vertices`SarahColorIndexQ[c2], c3_ /; Vertices`SarahColorIndexQ[c3]]/;
+	FreeQ[scalar, atom_ /; Vertices`SarahColorIndexQ[atom], -1]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[_, _]] /.
+	scalar_ SARAH`Delta[cIndex1_, cIndex4_] SARAH`Delta[cIndex2_, cIndex3_] :>
+	{scalar, KroneckerDeltaColourVertex[cIndex1, cIndex4] KroneckerDeltaColourVertex[cIndex2, cIndex3], lorentzStructure};
 
 (* @todo:
       This case catches vertices with sum of products of 2 Kronecker deltas.
@@ -860,16 +932,17 @@ GaugeStructureOfVertexLorentzPart[
       For the moment therefore we only print a warning message, similar to
       the generic catch all case *)
 GaugeStructureOfVertexLorentzPart[
-	{fullExpr_, lorentzStructure_}] /; MatchQ[
-      Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
-  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}],
-	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
-     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] ] :=
-Collect[ExpandAll@fullExpr, {SARAH`Delta[ct1, ct4] SARAH`Delta[ct2, ct3],
-  SARAH`Delta[ct1, ct3] SARAH`Delta[ct2, ct4]}] /.
-	scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] +
-     scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]  :>
-Parameters`DebugPrint["Vertices with sum of 2 deltas are currently not supported"];
+	{fullExpr_, lorentzStructure_}] /;
+   MatchQ[
+      Collect[fullExpr, SARAH`Delta[__]],
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_]
+         + scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_]
+   ] :=
+   Collect[fullExpr, SARAH`Delta[__]] /.
+	   scalar1_ SARAH`Delta[c1_, c4_] SARAH`Delta[c2_, c3_] + scalar2_ SARAH`Delta[c1_, c3_] SARAH`Delta[c2_, c4_] :>
+      {scalar1, UnsupportedColouredVertex, lorentzStructure} /;
+         (And @@ Vertices`SarahColorIndexQ /@ {c1, c2, c3, c4}) &&
+   	   FreeQ[scalar1, atom_ /; Vertices`SarahColorIndexQ[atom], -1];
 
 GaugeStructureOfVertexLorentzPart[vertexPart_] :=
    (Print["Unknown colour structure in vertex ", vertexPart]; Quit[1]);
@@ -918,7 +991,7 @@ CombineChiralParts[gaugeParts_List] :=
 		If[Length[allParts] === 0 && Length[gaugeParts] =!= 0,
 			allParts = {{{0, 0}, ZeroColouredVertex, ChiralVertex}}];
 		allParts
-	]
+	];
 
 (** \brief Given a list of gauge (colour and Lorentz) structures
  * with `TwoMetricVertex[]` parts with the same set of Lorentz indices,
@@ -1086,54 +1159,62 @@ CreateVertices[
 Module[{cxxVertices, vertexPartition,
         contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
 
-   (* without this CForm includes context in name of symbols
-      such that we get for example SARAH_g1 instead of g1 in
-      generated C++ code *)
-   ParallelEvaluate[
-      (BeginPackage[#];EndPackage[];
-       (* prevent shdw warning with Susyno`LieGroups`M: *)
-       Off[Remove::remal];
-       Remove[Susyno`LieGroups`M];
-       On[Remove::remal];
-      )& /@ contextsToDistribute,
-      DistributedContexts->Automatic
-   ];
-   (* without this CForm converts complex numbers using
-      Complex wrapper *)
-   ParallelEvaluate[
-      Unprotect[Complex];
-      Format[Complex[r_,i_],CForm] :=
-         Format[CreateCType[CConversion`ScalarType[complexScalarCType]] <>
-            "(" <> ToString[CForm[r]] <> "," <> ToString[CForm[i]] <> ")",
-            OutputForm
-         ];
-      Protect[Complex];
-      Unprotect[Power];
-      Format[Power[E,z_],CForm] :=
-         Format["Exp(" <> ToString[CForm[z]] <> ")", OutputForm];
-      Format[Power[b_,2],CForm] :=
-         Format["Sqr(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,0.5 | 1/2],CForm] :=
-         Format["Sqrt(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,1./3 | 1/3],CForm] :=
-         Format["Cbrt(" <> ToString[CForm[b]] <> ")", OutputForm];
-      Format[Power[b_,1.5 | 3/2],CForm] :=
-         Format["Power3(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
-      Format[Power[b_,0.25 | 1/4],CForm] :=
-         Format["Sqrt(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
-      Format[Power[b_,0.75 | 3/4],CForm] :=
-         Format["Power3(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
-      Format[Power[b_,1.25 | 5/4],CForm] :=
-         Format["Power5(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
-      Protect[Power];
-      ,
-      DistributedContexts->None
-   ];
-   cxxVertices =
-      AbsoluteTiming@ParallelMap[
-         CreateVertex,
-         DeleteDuplicates[vertices], DistributedContexts->All
+   If[FlexibleSUSY`FSEnableParallelism,
+      (* without this CForm includes context in name of symbols
+         such that we get for example SARAH_g1 instead of g1 in
+         generated C++ code *)
+      ParallelEvaluate[
+         (BeginPackage[#];EndPackage[];
+          (* prevent shdw warning with Susyno`LieGroups`M: *)
+          Off[Remove::remal];
+          Remove[Susyno`LieGroups`M];
+          On[Remove::remal];
+         )& /@ contextsToDistribute,
+         DistributedContexts->Automatic
       ];
+      (* without this CForm converts complex numbers using
+         Complex wrapper *)
+      ParallelEvaluate[
+         Unprotect[Complex];
+         Format[Complex[r_,i_],CForm] :=
+            Format[CreateCType[CConversion`ScalarType[complexScalarCType]] <>
+               "(" <> ToString[CForm[r]] <> "," <> ToString[CForm[i]] <> ")",
+               OutputForm
+            ];
+         Protect[Complex];
+         Unprotect[Power];
+         Format[Power[E,z_],CForm] :=
+            Format["Exp(" <> ToString[CForm[z]] <> ")", OutputForm];
+         Format[Power[b_,2],CForm] :=
+            Format["Sqr(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,0.5 | 1/2],CForm] :=
+            Format["Sqrt(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,1./3 | 1/3],CForm] :=
+            Format["Cbrt(" <> ToString[CForm[b]] <> ")", OutputForm];
+         Format[Power[b_,1.5 | 3/2],CForm] :=
+            Format["Power3(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
+         Format[Power[b_,0.25 | 1/4],CForm] :=
+            Format["Sqrt(Sqrt(" <> ToString[CForm[b]] <> "))", OutputForm];
+         Format[Power[b_,0.75 | 3/4],CForm] :=
+            Format["Power3(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
+         Format[Power[b_,1.25 | 5/4],CForm] :=
+            Format["Power5(Sqrt(Sqrt(" <> ToString[CForm[b]] <> ")))", OutputForm];
+         Protect[Power];
+         ,
+         DistributedContexts->None
+      ];
+      cxxVertices =
+         AbsoluteTiming@ParallelMap[
+            CreateVertex,
+            DeleteDuplicates[vertices], DistributedContexts->All
+         ],
+      cxxVertices =
+         AbsoluteTiming@Map[
+            CreateVertex,
+            DeleteDuplicates[vertices]
+         ],
+      Print["Error in CXXDiagrams. Variable FSEnableParallelism not defined."]; Quit[1];
+   ];
    Print[""];
    Print["The creation of C++ vertices took ", Round[First@cxxVertices, 0.1], "s"];
    cxxVertices = Last@cxxVertices;
@@ -1186,7 +1267,7 @@ CreateVertex[fields_List] :=
  * \returns the Lorentz structure of a given vertex.
  **)
 VertexTypeForFields[fields_List] :=
-	AtomHead[GaugeStructureOfVertex[SortedVertex[fields]][[3]]]
+	AtomHead[GaugeStructureOfVertex[SortedVertex[fields]][[3]]];
 
 (** \brief Creates the c++ code containing the actual numerical
  * evaluation of a given vertex.
@@ -1285,7 +1366,7 @@ VertexFunctionBodyForFields[fields_List] :=
 
 			_QuadrupleVectorVertex,
 			{lIndex1, lIndex2, lIndex3, lIndex4} = LorentzIndexOfField /@
-				sortedIndexedFields;
+				indexedFields;
 
       vertexRules = {
 				(SARAH`Cp @@ sortedIndexedFields)[
@@ -1302,15 +1383,12 @@ VertexFunctionBodyForFields[fields_List] :=
 					lIndex1, lIndex4, lIndex2, lIndex3]]]
 			};
 
-      expr1 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]] /.
-						indexFields /. vertexRules;
-      expr2 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex3] * SARAH`g[lIndex2, lIndex4]]] /.
-						indexFields /. vertexRules;
-      expr3 = Vertices`SortCp[(SARAH`Cp @@ fields)[
-					SARAH`g[lIndex1, lIndex4] * SARAH`g[lIndex2, lIndex3]]] /. indexFields
-						/. vertexRules;
+			expr1 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4]]] /. vertexRules;
+			expr2 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex3] * SARAH`g[lIndex2, lIndex4]]] /. vertexRules;
+			expr3 = Vertices`SortCp[(SARAH`Cp @@ indexedFields)[
+					SARAH`g[lIndex1, lIndex4] * SARAH`g[lIndex2, lIndex3]]] /. vertexRules;
 
 			DeclareIndices[StripUnbrokenGaugeIndices /@ indexedFields, "indices"] <>
       Parameters`CreateLocalConstRefs[{expr1, expr2, expr3}] <> "\n" <>
@@ -1558,6 +1636,14 @@ StripColourIndices[p_] :=
 			Head[p][remainingIndices]]
 	]
 
+(* Count entries which are up to a permutation equal to {0, ..., 0, 1}.
+	The length of the vector is the length of topology *)
+NumberOfExternalParticlesInTopology[topology_] :=
+	Count[topology, e_ /; Sort[e] === UnitVector[Length[topology], Length[topology]]];
+
+NumberOfPropagatorsInTopology[topology_] :=
+   If[Total[UpperTriangularize[topology], 2] - NumberOfExternalParticlesInTopology[topology] === 3, 3, 2];
+
 ColorFactorForDiagram[topology_, diagram_] :=
    ColourFactorForIndexedDiagramFromGraph[
       CXXDiagrams`IndexDiagramFromGraph[diagram, topology], topology
@@ -1569,6 +1655,11 @@ ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
 ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
 ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
 ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+(* cases for 8->88 amplitudes
+ExtractColourFactor[colourfactor_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
+ExtractColourFactor[colourfactor_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
+ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_} + colourfactor2_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor1]] && NumericQ[colourfactor2]] := ?;
+*)
 ExtractColourFactor[args___] :=
    (Print["Error: ExtractColourFactor cannot convert argument ", args]; Quit[1]);
 

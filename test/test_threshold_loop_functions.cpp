@@ -1427,7 +1427,6 @@ struct XYZ {
 BOOST_AUTO_TEST_CASE(test_phixyz)
 {
    using namespace flexiblesusy::threshold_loop_functions;
-   double x = 0., y = 0., z = 0.;
 
    const XYZ xyz[] = {
       {1, 2, 3},

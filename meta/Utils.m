@@ -213,6 +213,7 @@ Warning: This function may ignore empty lines.";
 FSReIm::usage = "FS replacement for the mathematica's function ReIm";
 FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
+FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
 Begin["`Private`"];
 
@@ -537,7 +538,7 @@ ReadLinesInFile[fileName_String] :=
     lines
 	]
 
-FSReIm[z_] := If[$VersionNumber >= 10.1,
+FSReIm[z_/;NumberQ[z]] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];
@@ -559,6 +560,14 @@ MathIndexToCPP[i_Integer] := AssertOrQuit[False, MathIndexToCPP::wrongInt, Strin
 MathIndexToCPP::nonIntInput =
 "Cannot convert a non integer index \"`1`\".";
 MathIndexToCPP[i___] := AssertOrQuit[False, MathIndexToCPP::nonIntInput, StringJoin@@Riffle[ToString/@{i},", "]];
+
+(* FSPermutationSign *)
+
+(* from https://reference.wolfram.com/language/tutorial/Permutations.html *)
+FSPermutationSign[perm_?PermutationCyclesQ] :=
+    Apply[Times, (-1)^(Length /@ First[perm] - 1)];
+FSPermutationSign[perm___] :=
+    (Print[perm, " is not a permutation in disjoint cyclic form."];Quit[1]);
 
 End[];
 

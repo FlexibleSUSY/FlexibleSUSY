@@ -55,3 +55,6 @@ InitialGuessAtHighScale = {
 
 UseHiggs2LoopMSSM = False;
 EffectiveMu = \[Mu];
+
+(* without Yukawas Higgs decays to SM fermions break *)
+FSCalculateDecays = False;

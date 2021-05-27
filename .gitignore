@@ -3,6 +3,7 @@
 *.a
 *.so
 *.d
+*.pc
 *.x
 *.json
 
@@ -11,7 +12,7 @@ src/loop_libraries/libcollier_wrapper.f90
 src/libfortran_utils.mod
 
 config/config.h
-config/version
+config/flexiblesusy-version
 config/git_commit
 config/required_sarah_version.m
 config/list_sarah_model_files.sh
@@ -89,6 +90,7 @@ test/test_SM_matching_selfenergy_Fd.cpp
 test/test_MSSM_npointfunctions.cpp
 test/test_MSSM_matching_selfenergy_Fd.cpp
 test/test_SM_cxxdiagrams.cpp
+test/FlexibleDecay.mk
 test/test_MRSSM2_FFMassiveV_form_factors.hpp
 test/test_MRSSM2_f_to_f_conversion.cpp
 test/test_looplibrary_*.cpp

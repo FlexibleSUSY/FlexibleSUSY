@@ -5,12 +5,12 @@
 
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
-FLEXIBLESUSY_MINOR=4
-FLEXIBLESUSY_PATCH=2
+FLEXIBLESUSY_MINOR=6
+FLEXIBLESUSY_PATCH=0
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
-GM2CALC_VERSION="1.6.0"
+GM2CALC_VERSION="unknown"
 HIMALAYA_VERSION="unknown"
 
 # directory of this script
@@ -94,6 +94,7 @@ options="                    \
    enable_compiler_warnings  \
    enable_debug              \
    enable_fflite             \
+   enable_gm2calc            \
    enable_himalaya           \
    enable_librarylink        \
    enable_looptools          \
@@ -121,6 +122,7 @@ enable_colors="no"
 enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
+enable_gm2calc="automatic"
 enable_himalaya="automatic"
 enable_librarylink="automatic"
 enable_looptools="no"
@@ -144,6 +146,7 @@ DEFINE_ENABLE_COLORS="#undef ENABLE_COLORS"
 DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
+DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
@@ -342,6 +345,7 @@ log_package_information() {
 #_____________________________________________________________________
 guess_machine_word_size() {
     local chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    exists_in_path getconf && chip="${chip}$(getconf LONG_BIT)"
     case "$chip" in
         *32|i[36]86)
              machine_word_size="32"; return 0 ;;
@@ -429,7 +433,7 @@ check_library() {
 
     libs=""
     for i in $lib ; do
-        for ext in .a .lib "" .so .sl .dylib .dll.a ; do
+        for ext in .a .lib "" .so .sl .dylib .dll.a .tbd ; do
             libs="$libs $i$ext"
         done
     done
@@ -1250,6 +1254,7 @@ check_librarylink() {
     if [ "x$enable_librarylink" = "xyes" ] ; then
         check_librarylink_incl
         check_librarylink_libs
+	[ "x$machine_word_size" = "x32" ] && CPPFLAGS="$CPPFLAGS -DMINT_32"
     fi
 }
 
@@ -1341,6 +1346,18 @@ check_multiarch() {
 
 #_____________________________________________________________________
 check_boost() {
+    [ -z "$boost_inc_dir" ] && \
+    [ -z "$boost_lib_dir" ] && \
+    type pkg-config > /dev/null && \
+    [ -f boost_unit_test_framework.pc ] && \
+    {
+        message -n "Checking boost library using local boost_unit_test_framework.pc ... "
+        BOOSTFLAGS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --cflags)
+        BOOSTTESTLIBS=$(PKG_CONFIG_PATH=. pkg-config boost_unit_test_framework --libs)
+        message "ok"
+        return
+    }
+
     [ -z "$boost_inc_dir" ] && \
     [ -z "$boost_lib_dir" ] && \
     type pkg-config > /dev/null && \
@@ -1513,10 +1530,10 @@ check_thread_libs() {
 
     # additional search paths by the compiler
     local cc_lib_search_paths=""
-
     case "$cxx_compiler_type" in
 	gnu|clang)
 	    cc_lib_search_paths=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+	    cc_lib_search_paths=$cc_lib_search_paths$(${CXX} -Xlinker -v 2>&1 | sed -n '/Library search paths:/,/Framework search paths:/p' | sed '/Library search paths:/d; /Framework search paths:/d' | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/ /g' | tr -s '[:blank:]' ':')
 	    ;;
     esac
 
@@ -1973,11 +1990,122 @@ check_linking() {
 }
 
 #_____________________________________________________________________
+check_gm2calc_version() {
+    checking_msg "GM2Calc version"
+
+    try_compile_run_cpp_program "#include <iostream>
+#include \"gm2calc/gm2_version.h\"
+int main() {
+   std::cout << GM2CALC_VERSION << '\n';
+   return 0;
+}" "$CXX" "${GM2CALCFLAGS}" && [ $cpp_exit = 0 ] || {
+        result "unknown"
+        message "Warning: could not determine GM2Calc version because"
+        message "   compilation or execution of the GM2Calc test program failed."
+	return 1
+    }
+
+    local GM2CALC_VERSION="$cpp_output"
+
+    result "ok (version ${GM2CALC_VERSION})"
+    logmsg "   GM2Calc version found: ${GM2CALC_VERSION}"
+
+    version_at_least "$GM2CALC_VERSION" "1.7.0" || {
+        message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+        message "   Please consider upgrading to version 1.7.0 (or higher)."
+    }
+}
+
+#_____________________________________________________________________
+check_gm2calc_incl() {
+    check_header "gm2calc/gm2_version.h" "$gm2calc_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: GM2Calc's gm2_version.h must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-incdir= option to specify the"
+            message "   location of version.hpp and the other headers."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        # assume that the compiler will look in the default paths
+        if [ -n "$gm2calc_inc_dir" ]; then
+            GM2CALCFLAGS="-I$gm2calc_inc_dir"
+        fi
+
+        check_gm2calc_version
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_gm2calc_libs() {
+    check_library "libgm2calc" "$gm2calc_lib_dir" "$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_gm2calc" = "xyes" ; then
+            message "Error: The GM2Calc library must be installed if you want"
+            message "   to use GM2Calc, see https://github.com/GM2Calc/GM2Calc"
+            message "   You can use the --with-gm2calc-libdir= option to specify the"
+            message "   location of the GM2Calc library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local GM2CALCLIBS_="-lgm2calc"
+        if [ -z "$gm2calc_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            GM2CALCLIBS="$GM2CALCLIBS_"
+        else
+            GM2CALCLIBS="-L$gm2calc_lib_dir -Wl,-rpath,$gm2calc_lib_dir $GM2CALCLIBS_"
+        fi
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_gm2calc() {
+    if test "x$enable_gm2calc" != "xno" ; then
+        local gm2calc_name=""
+
+        [ -f GM2Calc.pc ] && gm2calc_name="GM2Calc"
+        [ -f gm2calc.pc ] && gm2calc_name="gm2calc"
+
+        [ -z "$gm2calc_inc_dir" ] && \
+        [ -z "$gm2calc_lib_dir" ] && \
+        type pkg-config > /dev/null && \
+        [ -n ${gm2calc_name} ] && \
+        [ -f ${gm2calc_name}.pc ] && \
+        {
+            message -n "Checking GM2Calc using local ${gm2calc_name}.pc ... "
+            GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
+            GM2CALCLIBS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --libs)
+            GM2CALC_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --modversion)
+            enable_gm2calc=yes
+            message "ok (version ${GM2CALC_VERSION})"
+            version_at_least "$GM2CALC_VERSION" "1.7.0" || {
+                message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+                message "   Please consider upgrading to version 1.7.0 (or higher)."
+            }
+            return
+        }
+
+        if check_gm2calc_incl && check_gm2calc_libs ; then
+            enable_gm2calc=yes
+        else
+            enable_gm2calc=no
+        fi
+    fi
+}
+
+#_____________________________________________________________________
 check_himalaya_version() {
     checking_msg "Himalaya version"
 
     try_compile_run_cpp_program "#include <iostream>
-#include \"version.hpp\"
+#include \"himalaya/version.hpp\"
 int main() {
    std::cout << Himalaya_VERSION_MAJOR << '.' << Himalaya_VERSION_MINOR << '.' << Himalaya_VERSION_RELEASE << '\n';
    return 0;
@@ -2001,11 +2129,11 @@ int main() {
 
 #_____________________________________________________________________
 check_himalaya_incl() {
-    check_header "version.hpp" "$himalaya_inc_dir"
+    check_header "himalaya/version.hpp" "$himalaya_inc_dir"
     if test "x$found_hdr" = "x" ; then
         if test "x$enable_himalaya" = "xyes" ; then
             message "Error: Himalaya's version.hpp must be installed if you want"
-            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   to use Himalaya, see https://github.com/Himalaya-Library"
             message "   You can use the --with-himalaya-incdir= option to specify the"
             message "   location of version.hpp and the other headers."
             exit 1
@@ -2030,7 +2158,7 @@ check_himalaya_libs() {
     if test "x$found_lib" = "x" ; then
         if test "x$enable_himalaya" = "xyes" ; then
             message "Error: The Himalaya library must be installed if you want"
-            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   to use Himalaya, see https://github.com/Himalaya-Library"
             message "   You can use the --with-himalaya-libdir= option to specify the"
             message "   location of the Himalaya library."
             exit 1
@@ -2052,14 +2180,21 @@ check_himalaya_libs() {
 #_____________________________________________________________________
 check_himalaya() {
     if test "x$enable_himalaya" != "xno" ; then
+        local himalaya_name=""
+
+        [ -f Himalaya.pc ] && himalaya_name="Himalaya"
+        [ -f himalaya.pc ] && himalaya_name="himalaya"
+
         [ -z "$himalaya_inc_dir" ] && \
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -f Himalaya.pc ] && \
+        [ -n ${himalaya_name} ] && \
+        [ -f ${himalaya_name}.pc ] && \
         {
-            message -n "Checking Himalaya using local Himalaya.pc ... "
-            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --cflags)
-            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config Himalaya --libs)
+            message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
+            HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
+            HIMALAYALIBS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --libs)
+            HIMALAYA_VERSION=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --modversion)
             enable_himalaya=yes
             message "ok"
             return
@@ -2086,11 +2221,21 @@ check_required_libs() {
 
             # early continue to skip expensive Mathematica kernel
             # calls, if possible
-            grep 'UseSMYukawa2Loop\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
+            grep 'UseSMYukawa2Loop\|aMuonGM2Calc\|aMuonGM2CalcUncertainty\|UseHiggs3LoopMSSM\|FSHimalayaMh23L' "${model_file}" > /dev/null 2>&1 || continue
 
             mma_symbol_is "${model_file}" "${MATH}" "UseSMYukawa2Loop" "True" && {
                 message "   TSIL is required to build $model_name"
                 enable_tsil=yes
+            }
+
+            mma_symbol_is "${model_file}" "${MATH}" "aMuonGM2Calc" "True" && {
+                message "   GM2Calc is required to build $model_name";
+                enable_gm2calc=yes
+            }
+
+            mma_symbol_is "${model_file}" "${MATH}" "aMuonGM2CalcUncertainty" "True" && {
+                message "   GM2Calc is required to build $model_name";
+                enable_gm2calc=yes
             }
 
             mma_symbol_is "${model_file}" "${MATH}" "UseHiggs3LoopMSSM" "True" && {
@@ -2139,7 +2284,7 @@ check_looptools_libs() {
          # assume that the linker will look in the default paths
          LOOPTOOLSLIBS="$LOOPTOOLSLIBS_"
       else
-         LOOPTOOLSLIBS="-L$looptools_lib_dir $LOOPTOOLSLIBS_"
+         LOOPTOOLSLIBS="-L$looptools_lib_dir -Wl,-rpath,$looptools_lib_dir $LOOPTOOLSLIBS_"
       fi
 
       # check dependency on libquadmath by searching for cabsq in liblooptools
@@ -2187,12 +2332,20 @@ check_looptools_incl() {
 
 #_____________________________________________________________________
 check_looptools() {
-   [ -z "$looptools_inc_dir" ] && [ -z "$looptools_lib_dir" ] && \
-   type pkg-config > /dev/null && [ -f LoopTools.pc ] && \
+    local looptools_name=""
+
+    [ -f LoopTools.pc ] && looptools_name="LoopTools"
+    [ -f looptools.pc ] && looptools_name="looptools"
+
+   [ -z "$looptools_inc_dir" ] && \
+   [ -z "$looptools_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n ${looptools_name} ] && \
+   [ -f ${looptools_name}.pc ] && \
    {
-      message -n "Checking LoopTools using local LoopTools.pc ... "
-      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --cflags)
-      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config LoopTools --libs)
+      message -n "Checking LoopTools using local ${looptools_name}.pc ... "
+      LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --cflags)
+      LOOPTOOLSLIBS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --libs)
       enable_looptools=yes
       message "ok"
       return
@@ -2223,7 +2376,7 @@ check_collier_libs() {
          # assume that the linker will look in the default paths
          COLLIERLIBS=" $COLLIERLIBS_ "
       else
-         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir $COLLIERLIBS_"
+         COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a -L$collier_lib_dir -Wl,-rpath,$collier_lib_dir $COLLIERLIBS_"
       fi
    fi
 }
@@ -2252,12 +2405,20 @@ check_collier_incl() {
 
 #_____________________________________________________________________
 check_collier() {
-   [ -z "$collier_inc_dir" ] && [ -z "$collier_lib_dir" ] && \
-   type pkg-config > /dev/null && [ -f COLLIER.pc ] && \
+    local collier_name=""
+
+    [ -f COLLIER.pc ] && collier_name="COLLIER"
+    [ -f collier.pc ] && collier_name="collier"
+
+   [ -z "$collier_inc_dir" ] && \
+   [ -z "$collier_lib_dir" ] && \
+   type pkg-config > /dev/null && \
+   [ -n ${collier_name} ] && \
+   [ -f ${collier_name}.pc ] && \
    {
-      message -n "Checking COLLIER using local COLLIER.pc ... "
-      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config COLLIER --cflags)
-      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config COLLIER --libs)"
+      message -n "Checking COLLIER using local ${collier_name}.pc ... "
+      COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${collier_name} --cflags)
+      COLLIERLIBS="$ABSBASEDIR/src/loop_libraries/libcollier_wrapper.a $(PKG_CONFIG_PATH=. pkg-config ${collier_name} --libs)"
       enable_collier=yes
       message "ok"
       return
@@ -2422,7 +2583,7 @@ check_tsil_libs() {
             # assume that the linker will look in the default paths
             TSILLIBS="$TSILLIBS_"
         else
-            TSILLIBS="-L$tsil_lib_dir $TSILLIBS_"
+            TSILLIBS="-L$tsil_lib_dir -Wl,-rpath,$tsil_lib_dir $TSILLIBS_"
         fi
     fi
     return 0
@@ -2466,14 +2627,20 @@ check_tsil_size() {
 check_tsil() {
     [ "x$enable_tsil" = "xno" ] && return
 
+    local tsil_name=""
+
+    [ -f TSIL.pc ] && tsil_name="TSIL"
+    [ -f tsil.pc ] && tsil_name="tsil"
+
     [ -z "$tsil_inc_dir" ] && \
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
-    [ -f TSIL.pc ] && \
+    [ -n ${tsil_name} ] && \
+    [ -f ${tsil_name}.pc ] && \
     {
-        message -n "Checking TSIL using local TSIL.pc ... "
-        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config TSIL --cflags)
-        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config TSIL --libs)
+        message -n "Checking TSIL using local ${tsil_name}.pc ... "
+        TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --cflags)
+        TSILLIBS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --libs)
         enable_tsil=yes
         message "ok"
         return
@@ -3026,6 +3193,15 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_FFLITE}"
 
+    if test "x$enable_gm2calc" = "xyes" ; then
+        DEFINE_ENABLE_GM2CALC="#define ENABLE_GM2CALC 1"
+        message "Enabling GM2Calc"
+    else
+        DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
+        message "Disabling GM2Calc"
+    fi
+    logmsg "   ${DEFINE_ENABLE_GM2CALC}"
+
     if test "x$enable_himalaya" = "xyes" ; then
         DEFINE_ENABLE_HIMALAYA="#define ENABLE_HIMALAYA 1"
         message "Enabling Himalaya"
@@ -3245,6 +3421,7 @@ replace_markers() {
 	-e "s|@ENABLE_CHECK_EIGENVALUE_ERROR@|$enable_mass_error_check|" \
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
+	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
@@ -3255,6 +3432,8 @@ replace_markers() {
 	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
+        -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
+        -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
         -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
         -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
@@ -3297,6 +3476,7 @@ enable/disable options, prefix with either --enable- or --disable-
   compiler-warnings Enable compiler warnings (default: $enable_compiler_warnings)
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
+  gm2calc           Enable GM2Calc (default: $enable_gm2calc)
   himalaya          Enable Himalaya (default: $enable_himalaya)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
@@ -3332,6 +3512,8 @@ Package directories, compilation settings and model selection
   --with-fflags=            Fortran compiler flags (default: $FFLAGS)
   --with-flibs=             Fortran libraries (default: $FLIBS)
                             If empty, FLIBS will be determined automatically.
+  --with-gm2calc-libdir=    Path to search for GM2Calc library
+  --with-gm2calc-incdir=    Path to search for GM2Calc header
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
@@ -3454,6 +3636,8 @@ if test $# -gt 0 ; then
             --with-fc=*)             FC=$optarg ;;
             --with-fflags=*)         FFLAGS=$optarg ;;
             --with-flibs=*)          FLIBS=$optarg ;;
+            --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
+            --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
@@ -3540,6 +3724,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_eigen
     check_fortran_libs
     check_gsl_config
+    check_gm2calc
     check_himalaya
     if use_solver "lattice"; then
         check_boost_thread_incl
@@ -3604,6 +3789,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FUTILIBS@|$FUTILIBS|"                     \
     -e "s|@GSLLIBS@|$GSLLIBS|"                       \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
+    -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"               \
+    -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
@@ -3630,6 +3817,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_DEBUG@|$DEFINE_ENABLE_DEBUG|"         \
     -e "s|@DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR@|$DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
+    -e "s|@DEFINE_ENABLE_GM2CALC@|$DEFINE_ENABLE_GM2CALC|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
@@ -3666,7 +3854,8 @@ if test "x${enable_meta}" = "xyes"; then
     add_metaflags
 fi
 
-echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/version
+rm -f ${CONFIGDIR}/version
+echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
 echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
 echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m
 

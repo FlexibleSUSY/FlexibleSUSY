@@ -17,7 +17,7 @@ Get["${MODELDIR}/CMSSM/CMSSM_librarylink.m"];
 settings = {
     precisionGoal -> 0.0001,
     maxIterations -> 0,
-    calculateStandardModelMasses -> 0,
+    calculateStandardModelMasses -> 1,
     poleMassLoopOrder -> 2,
     ewsbLoopOrder -> 2,
     betaFunctionLoopOrder -> 3,
@@ -32,7 +32,8 @@ settings = {
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
     thresholdCorrections -> 123111321,
-    parameterOutputScale -> 1000
+    parameterOutputScale -> 1000,
+    loopLibrary -> -1
 };
 
 smInputs = {
@@ -63,7 +64,7 @@ smInputs = {
     PMNSDelta -> 0,
     PMNSAlpha1 -> 0,
     PMNSAlpha2 -> 0,
-    alphaEm0 -> 1/137.035999074,
+    alphaEm0 -> 0.00729735,
     Mh -> 125.09
 };
 
@@ -76,6 +77,7 @@ handle = FSCMSSMOpenHandle[
 
 FSCMSSMCalculateSpectrum[handle];
 FSCMSSMCalculateObservables[handle];
+FSCMSSMCalculateDecays[handle];
 Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF
@@ -92,6 +94,7 @@ for f in "$outputFile1" "$outputFile2" ; do
     sed -e 's/ *#.*$//' "$f~" | \
         awk -f "${UTILSDIR}"/remove_slha_block -v block=FlexibleSUSY -v entry=15 \
         > "$f"
+    rm "$f~"
 done
 
 numdiff --absolute-tolerance=1.0e-12 \

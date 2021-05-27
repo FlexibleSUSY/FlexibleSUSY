@@ -59,7 +59,7 @@ static constexpr int number_of_random_samples = 25;
 }
 
 BOOST_AUTO_TEST_SUITE(selfenergy_test_suite,
-	* boost::unit_test::tolerance(1.0e-12) )
+	* boost::unit_test::tolerance(3.0e-12) )
 
 BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_MSSM_dataset( number_of_random_samples ),

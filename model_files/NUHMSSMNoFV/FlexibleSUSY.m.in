@@ -181,3 +181,6 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[md2[2,2]]},
             {49, SignedAbsSqrt[md2[3,3]]} } }
 };
+
+FSCalculateDecays = False;
+

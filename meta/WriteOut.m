@@ -51,6 +51,13 @@ PrintCmdLineOptions::usage="";
 GetGaugeCouplingNormalizationsDecls::usage="";
 GetGaugeCouplingNormalizationsDefs::usage="";
 
+CreateSetDecaysInfoBlockPrototypes::usage="";
+CreateSetDecaysInfoBlockFunctions::usage="";
+CreateSetDecaysPrototypes::usage="";
+CreateSetDecaysFunctions::usage="";
+CreateFillDecaysDataPrototypes::usage="";
+CreateFillDecaysDataFunctions::usage="";
+
 CreateSLHAYukawaDefinition::usage="";
 CreateSLHAYukawaGetters::usage="";
 ConvertYukawaCouplingsToSLHA::usage="";
@@ -659,8 +666,16 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            ReformeBlocks[{idx_, expr_}]         := {expr, idx};
            ReformeBlocks[{idx1_, idx2_, expr_}] := {expr, idx1, idx2};
            reformed = ReformeBlocks /@ outputBlocks;
-           (result = result <> WriteSLHABlock[#[[1]], #[[2]]])& /@ reformed;
-           Return[result];
+           (
+              result = result
+                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                       "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
+                       <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
+                       <> "}\n",
+                       WriteSLHABlock[#[[1]], #[[2]]]
+                    ]
+           )& /@ reformed;
+           result
           ];
 
 ReadSLHAInputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
@@ -1247,6 +1262,38 @@ CreateFormattedSLHABlocks[inputPars_List] :=
            sortForBlocks = {#, FindParametersInBlock[inputPars, #]}& /@ blocks;
            StringJoin[CreateFormattedSLHABlock /@ sortForBlocks]
           ];
+
+CreateSetDecaysPrototypes[modelName_String] := "\
+void set_decays(const " <> modelName <> "_decay_table&, FlexibleDecay_settings const&);";
+
+CreateSetDecaysFunctions[modelName_String] := "\
+/**
+ * Stores the particle decay branching ratios in the SLHA object.
+ *
+ * @param decays struct containing decays data
+ */
+void " <> modelName <> "_slha_io::set_decays(const " <> modelName <> "_decay_table& decay_table, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   for (const auto& particle : decay_table) {
+      set_decay_block(particle, flexibledecay_settings);
+   }
+}";
+
+CreateFillDecaysDataPrototypes[modelName_String] := "\
+void fill_decays_data(const " <> modelName <> "_decays&, FlexibleDecay_settings const&);";
+
+CreateFillDecaysDataFunctions[modelName_String] := "\
+void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_decays& decays, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   const auto& decays_problems = decays.get_problems();
+   const bool decays_error = decays_problems.have_problem();
+
+   set_dcinfo(decays_problems);
+
+   if (!decays_error) {
+      set_decays(decays.get_decay_table(), flexibledecay_settings);
+   }
+}";
 
 End[];
 

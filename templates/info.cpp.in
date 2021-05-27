@@ -19,7 +19,10 @@
 
 #include "@ModelName@_info.hpp"
 
+#include "error.hpp"
+
 #include <iostream>
+#include <vector>
 
 namespace flexiblesusy {
 
@@ -33,6 +36,56 @@ namespace @ModelName@_info {
 @inputParameterNames@
 @extraParameterNames@
    const std::string model_name = "@ModelName@";
+
+int get_pdg_code_for_particle(Particles p)
+{
+   if (particle_multiplicities[p] > 1) {
+      throw OutOfBoundsError(particle_names[p] + " must have a generation index");
+   }
+
+   int pdg = 0;
+   switch (p) {
+
+@getPDGCodeFromParticleEnumNoIndex@
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   return pdg;
+}
+
+int get_pdg_code_for_particle(Particles p, int index)
+{
+   if (particle_multiplicities[p] == 1) {
+      throw OutOfBoundsError(particle_names[p] + " does not carry an index");
+   }
+
+   std::vector<int> pdg_codes;
+   switch (p) {
+
+@getPDGCodeFromParticleEnumIndex@
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   const int n_pdgs = pdg_codes.size();
+   if (index < 0 || index >= n_pdgs) {
+      throw OutOfBoundsError("index " + std::to_string(index) + " out of bounds");
+   }
+
+   return pdg_codes[index];
+}
+
+std::string get_particle_name_from_pdg(int pdg)
+{
+   std::string name;
+
+   switch (pdg) {
+
+@setParticleNameFromPDG@
+   default: name = "";
+   }
+
+   return name;
+}
 
 void print(std::ostream& ostr)
 {

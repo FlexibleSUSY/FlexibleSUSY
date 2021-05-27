@@ -2,21 +2,30 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-GM2CALCDIR="${BASEDIR}/../addons/GM2Calc"
 FSCONFIG="$BASEDIR/../flexiblesusy-config"
-GM2CALC_EXE="${BASEDIR}/../addons/GM2Calc/gm2calc.x"
 CMSSMNoFV_EXE="${BASEDIR}/../models/CMSSMNoFV/run_CMSSMNoFV.x"
 SLHA_IN="${BASEDIR}/../models/CMSSMNoFV/LesHouches.in.CMSSMNoFV"
 SLHA_OUT="${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
+
+if [ -e GM2Calc.pc ] ; then
+    eval $(grep '^prefix=' GM2Calc.pc)
+    GM2CALC_EXE="${prefix}/bin/gm2calc.x"
+fi
+
+if [ ! -x "${GM2CALC_EXE}" ] ; then
+    echo "Cannot find GM2Calc executable in ${GM2CALC_EXE}"
+    echo "Skipping test."
+    exit
+fi
 
 [ $("$FSCONFIG" --with-CMSSMNoFV) = yes -a -x ${CMSSMNoFV_EXE} ] || {
     echo "Error: CMSSMNoFV needs to be build!"
     exit 1;
 }
 
-[ $("$FSCONFIG" --with-GM2Calc) = yes -a -x ${GM2CALC_EXE} ] || {
-    echo "Error: GM2Calc needs to be build!"
+[ $("$FSCONFIG" --enable-gm2calc) = yes ] || {
+    echo "Error: FlexibleSUSY must be configured with GM2Calc!"
     exit 1;
 }
 
