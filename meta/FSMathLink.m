@@ -315,13 +315,12 @@ PutDecayTableEntries[modelName_] :=
                   "if (multiplet_and_index_pair.second) {\n" <>
                      TextFormatting`IndentText[
                         "MLPutFunction(link, \"Rule\", 2);\n" <>
-                        "MLPutFunction(link, \"Decays\", 1);\n" <>
                         "MLPutFunction(link, multiplet_and_index_pair.first.c_str(), 1);\n" <>
                         "MLPutInteger(link, multiplet_and_index_pair.second.get());\n"
                      ] <>
                   "}\n" <>
                   "else {\n" <>
-                     TextFormatting`IndentText["MLPutRule(link, multiplet_and_index_pair.first.c_str(), {\"Decays\"});\n"] <>
+                     TextFormatting`IndentText["MLPutRule(link, multiplet_and_index_pair.first.c_str());\n"] <>
                   "}\n" <>
                   "MLPutFunction(link, \"List\", 3);\n" <>
                   "MLPut(link, pid);\n" <>
