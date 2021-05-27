@@ -305,8 +305,8 @@ PutDecayTableEntries[modelName_] :=
                   "int n_decays = 0;\n" <>
                   "for (const auto& decay : decays_list) {\n" <>
                   TextFormatting`IndentText[
-                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
-                     TextFormatting`IndentText["continue;\n"] <>
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
                      "}\n" <>
                      "n_decays++;\n"
                   ] <>
@@ -328,13 +328,21 @@ PutDecayTableEntries[modelName_] :=
                   "MLPutFunction(link, \"List\", n_decays);\n\n" <>
                   "for (const auto& decay : decays_list) {\n" <>
                   TextFormatting`IndentText[
-                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
-                     TextFormatting`IndentText["continue;\n"] <>
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
                      "}\n" <>
                      PutDecayTableEntry["pid", "decay.second"]
                   ] <> "}\n";
-           "for (const auto& decays_list : decay_table) {\n" <>
-           TextFormatting`IndentText[body] <> "}\n"
+
+            "auto is_invalid_decay = [&] (const auto& decays_list, const auto& decay) {\n" <>
+                  TextFormatting`IndentText[
+                     "return !(decays_list.get_total_width() > 0.)\n" <>
+                     TextFormatting`IndentText@TextFormatting`IndentText[" || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width();\n"]
+                  ] <>
+            "};\n\n" <>
+            "for (const auto& decays_list : decay_table) {\n" <>
+               TextFormatting`IndentText[body] <>
+            "}\n"
           ];
 
 PutDecays[modelName_] :=
