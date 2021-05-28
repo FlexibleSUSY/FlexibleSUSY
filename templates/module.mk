@@ -10,6 +10,11 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
 		$(DIR)/a_muon.hpp.in \
 		$(DIR)/a_muon.cpp.in \
+		$(DIR)/decays/decay_table.hpp.in \
+		$(DIR)/decays/decay_table.cpp.in \
+		$(DIR)/decays/decays.hpp.in \
+		$(DIR)/decays/decays.cpp.in \
+		$(DIR)/decays/decay_amplitudes.hpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
@@ -50,6 +55,7 @@ BASE_TEMPLATES := \
 		$(DIR)/run.cpp.in \
 		$(DIR)/run.m.in \
 		$(DIR)/run_cmd_line.cpp.in \
+		$(DIR)/run_decays.cpp.in \
 		$(DIR)/scan.cpp.in \
 		$(DIR)/slha_io.hpp.in \
 		$(DIR)/slha_io.cpp.in \
@@ -135,7 +141,8 @@ SEMI_ANALYTIC_TEMPLATES := \
 TEMPLATES    := \
 		$(BASE_TEMPLATES) \
 		$(TWO_SCALE_TEMPLATES) \
-		$(SEMI_ANALYTIC_TEMPLATES)
+		$(SEMI_ANALYTIC_TEMPLATES) \
+		$(MODULE_MK_TEMPLATES)
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME)
 

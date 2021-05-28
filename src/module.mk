@@ -14,6 +14,11 @@ LIBFLEXI_SRC := \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/coupling_monitor.cpp \
 		$(DIR)/database.cpp \
+		$(DIR)/decays/decay.cpp \
+		$(DIR)/decays/decay_amplitudes.cpp \
+		$(DIR)/decays/decay_functions.cpp \
+		$(DIR)/decays/flexibledecay_settings.cpp \
+		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/dilog.cpp \
 		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
@@ -70,6 +75,12 @@ LIBFLEXI_HDR := \
 		$(DIR)/convergence_tester_drbar.hpp \
 		$(DIR)/coupling_monitor.hpp \
 		$(DIR)/database.hpp \
+		$(DIR)/decays/decay.hpp \
+		$(DIR)/decays/decay_amplitudes.hpp \
+		$(DIR)/decays/decay_functions.hpp \
+		$(DIR)/decays/decay_problems.hpp \
+		$(DIR)/decays/flexibledecay_settings.hpp \
+		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
 		$(DIR)/effective_couplings.hpp \

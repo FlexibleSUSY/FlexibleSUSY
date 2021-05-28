@@ -24,6 +24,7 @@
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
 #include "@ModelName@_utilities.hpp"
+@decaysIncludes@
 
 @solverIncludes@
 #include "physical_input.hpp"
@@ -48,6 +49,7 @@
 template <class solver_type>
 int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
                const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+               @flexibleDecaySettingsVarInDef@
                const std::string& slha_output_file,
                const std::string& database_output_file,
                const std::string& spectrum_file,
@@ -85,12 +87,15 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
    scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
 
    @ModelName@_observables observables;
+@decaysObject@
    if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {
       if (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
          !problems.have_problem()) {
          observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
       }
    }
+
+@calculateDecaysForModel@
 
    const bool show_result = !problems.have_problem() ||
       spectrum_generator_settings.get(Spectrum_generator_settings::force_output);
@@ -105,6 +110,9 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
          slha_io.set_spectrum(models);
          slha_io.set_extra(std::get<0>(models), scales, observables, spectrum_generator_settings);
       }
+
+@setDecaysSLHAOutput@
+
       slha_io.write_to(slha_output_file);
    }
 
@@ -140,6 +148,7 @@ int run_solver(flexiblesusy::@ModelName@_slha_io& slha_io,
 int run(
    flexiblesusy::@ModelName@_slha_io& slha_io,
    const flexiblesusy::Spectrum_generator_settings& spectrum_generator_settings,
+   @flexibleDecaySettingsVarInDef@
    const std::string& slha_output_file,
    const std::string& database_output_file,
    const std::string& spectrum_file,
@@ -183,6 +192,7 @@ int main(int argc, char* argv[])
    const std::string spectrum_file(options.get_spectrum_file());
    @ModelName@_slha_io slha_io;
    Spectrum_generator_settings spectrum_generator_settings;
+@decaySettingsObj@
 
    if (slha_input_source.empty()) {
       ERROR("No SLHA input source given!\n"
@@ -193,6 +203,7 @@ int main(int argc, char* argv[])
    try {
       slha_io.read_from_source(slha_input_source);
       slha_io.fill(spectrum_generator_settings);
+@fillDecaySettings@
    } catch (const Error& error) {
       ERROR(error.what_detailed());
       return EXIT_FAILURE;
@@ -205,8 +216,10 @@ int main(int argc, char* argv[])
             Spectrum_generator_settings::calculate_bsm_masses, 1.0);
    }
 
+@decaySetttingsOverride@
+
    const int exit_code
-      = run(slha_io, spectrum_generator_settings, slha_output_file,
+      = run(slha_io, spectrum_generator_settings, @flexibleDecaySettingsVarInDecl@slha_output_file,
             database_output_file, spectrum_file, rgflow_file);
 
    return exit_code;

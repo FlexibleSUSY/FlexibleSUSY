@@ -117,7 +117,7 @@
       nz = rz**2 + iz**2
 
       if (nz .lt. EPSILON(1D0)) then
-         cdli2 = z
+         cdli2 = z*(1 + 0.25D0*z)
          return
       endif
 

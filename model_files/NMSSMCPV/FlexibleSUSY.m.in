@@ -120,3 +120,5 @@ ExtraSLHAOutputBlocks = {
             {13 , Im[T[\[Lambda]] / \[Lambda]]},
             {14 , Im[T[\[Kappa]] / \[Kappa]] } } }
 };
+
+FSCalculateDecays = True;

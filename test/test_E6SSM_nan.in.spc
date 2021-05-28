@@ -736,3 +736,5 @@ Block UURMIX
   3  3     1.00000000E+00   # Re(ZUR(3,3))
 Block GMUONMINUS2
   1  1     2.93759679E-10   # a_muon
+Block FlexibleDecay
+   0   0                    # calculate decays (0 = no, 1 = yes)

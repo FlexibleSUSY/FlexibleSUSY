@@ -19,6 +19,8 @@
 #ifndef SLHA_FORMAT_H
 #define SLHA_FORMAT_H
 
+#include <string>
+
 namespace flexiblesusy {
 
 /// SLHA line formatter for the MASS block entries
@@ -39,11 +41,30 @@ extern const char * const single_element_formatter;
 extern const char * const spinfo_formatter;
 /// SLHA line formatter for the OBSINFO block entries
 extern const char * const obsinfo_formatter;
+/// SLHA line formatter for the DECAY block
+extern const char * const format_total_width;
 
 namespace {
    /// maximum line length in SLHA output
    constexpr unsigned SLHA_MAX_LINE_LENGTH = 200;
 } // namespace
+
+template <typename Container>
+std::string format_decay(double br, const Container& pids, const std::string& name)
+{
+   const int nda = pids.size();
+   char buf[SLHA_MAX_LINE_LENGTH] = { 0 };
+   int written = 0;
+   written += std::snprintf(buf + written, SLHA_MAX_LINE_LENGTH - written,
+                            "   %16.8E  %2d  ", br, nda);
+   for (int i = 0; i < nda; i++) {
+      written += std::snprintf(buf + written, SLHA_MAX_LINE_LENGTH - written,
+                               " %9d", pids[i]);
+   }
+   written += std::snprintf(buf + written, SLHA_MAX_LINE_LENGTH - written,
+                            "  # %s\n", name.c_str());
+   return std::string(buf);
+}
 
 #define FORMAT_MASS(pdg, mass, name)                                           \
    [&] {                                                                       \
@@ -142,6 +163,18 @@ namespace {
       return std::string(buf);                                                 \
    }()
 
+#define FORMAT_TOTAL_WIDTH(pdg, width, name)                                   \
+   [&] {                                                                       \
+      char buf[SLHA_MAX_LINE_LENGTH];                                          \
+      const int pdg_ = (pdg);                                                  \
+      const double width_ = (width);                                           \
+      const std::string name_ = (name);                                        \
+      std::snprintf(buf, SLHA_MAX_LINE_LENGTH, format_total_width,             \
+                    pdg_, width_, name_.c_str());                              \
+      return std::string(buf);                                                 \
+   }()
+
 } // namespace flexiblesusy
 
 #endif
+

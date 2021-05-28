@@ -42,6 +42,7 @@ namespace flexiblesusy {
 // Constants ///////////////////////////////////////////////////////////
 
 static constexpr double Pi             = 3.141592653589793;
+static constexpr double oneOver16Pi    = 0.019894367886486917; // 1/(16 Pi)
 static constexpr double oneOver16PiSqr = 6.332573977646110963e-03;
 static constexpr double oneLoop        = 6.332573977646110963e-03;
 static constexpr double twoLoop        = 4.010149318236068752e-05;
@@ -49,6 +50,10 @@ static constexpr double threeLoop      = 2.539456721913701978e-07;
 static constexpr double fourLoop       = 1.608129755454920543e-09;
 static constexpr double fiveLoop       = 1.018360064207223307e-11;
 static constexpr bool True = true;
+static constexpr double zeta2          = 1.6449340668482264; // Zeta[2]
+static constexpr double zeta3          = 1.2020569031595943; // Zeta[3]
+static constexpr double zeta4          = 1.0823232337111382; // Zeta[4]
+static constexpr double zeta5          = 1.0369277551433699; // Zeta[5]
 
 // Abs /////////////////////////////////////////////////////////////////
 
@@ -598,13 +603,13 @@ auto SignedAbsSqrt(const Eigen::ArrayBase<Derived>& a) noexcept -> typename Deri
 
 // Sqrt ////////////////////////////////////////////////////////////////
 
-template <class T, typename = typename std::enable_if<std::is_floating_point<T>::value,T>::type>
+template <class T, typename = std::enable_if_t<std::is_floating_point<T>::value,T>>
 T Sqrt(T a) noexcept
 {
    return std::sqrt(a);
 }
 
-template <class T, typename = typename std::enable_if<std::is_integral<T>::value,T>::type>
+template <class T, typename = std::enable_if_t<std::is_integral<T>::value,T>>
 double Sqrt(T a) noexcept
 {
    return std::sqrt(static_cast<double>(a));
@@ -626,7 +631,7 @@ constexpr std::complex<T> Sqr(const std::complex<T>& a) noexcept
    return a * a;
 }
 
-template <typename T, class = typename std::enable_if<std::is_arithmetic<T>::value,T>::type>
+template <typename T, class = std::enable_if_t<std::is_arithmetic<T>::value,T>>
 constexpr T Sqr(T a) noexcept
 {
    return a * a;
@@ -822,6 +827,11 @@ template <typename Derived>
 Derived ZeroSqrt(const Eigen::ArrayBase<Derived>& m) noexcept
 {
    return m.unaryExpr([](double a){ return ZeroSqrt(a); });
+}
+
+template<typename T>
+T KallenLambda(T x, T y, T z) noexcept {
+   return Sqr(x-y-z) - 4*y*z;
 }
 
 } // namespace flexiblesusy

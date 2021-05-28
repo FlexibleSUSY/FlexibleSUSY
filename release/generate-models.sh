@@ -90,7 +90,7 @@ lowNMSSMTanBetaAtMZ,\
 SMSSM,\
 UMSSM,\
 E6SSM,\
-MRSSM,\
+MRSSM2,\
 TMSSM,\
 SM,\
 HSSUSY,\

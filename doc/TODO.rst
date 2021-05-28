@@ -10,12 +10,6 @@ Allow the user to specify full path to the SARAH installation
 in all the scripts (`createmodel`, `configure`, `start.m`).
 
 
-Decays
-------
-
-Comming soon.
-
-
 Parameter output names
 ----------------------
 

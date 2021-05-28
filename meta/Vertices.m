@@ -146,9 +146,36 @@ SortCp[SARAH`Cp[fields__]] :=
 
 SortCp[SARAH`Cp[fields__][lor_]] := SortCp[SARAH`Cp[fields]][lor];
 
+SortCp[SARAH`Cp[vectors__][Mom[i1_Integer]-Mom[i2_Integer]]] /; CpType[SARAH`Cp[vectors]] === SSV := Module[
+	{sortedVectors = SortFieldsInCp[{vectors}], permutation},
+
+   permutation = FindPermutation[{vectors}, sortedVectors];
+   (SARAH`Cp @@ sortedVectors)[Mom[PermutationReplace[i1, permutation]] - Mom[PermutationReplace[i2, permutation]]]
+];
+
 SortCp[SARAH`Cp[vectors__]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
 	{sortedVectors = SortFieldsInCp[{vectors}]},
 	Utils`FSPermutationSign[FindPermutation[{vectors}, sortedVectors]] * SARAH`Cp @@ sortedVectors
+];
+SortCp[SARAH`Cp[vectors__][lor_]] /; CpType[SARAH`Cp[vectors]] === VVV := Module[
+	{sortedVectors = SortFieldsInCp[{vectors}], permutation},
+   permutation = FindPermutation[{vectors}, sortedVectors];
+   SARAH`Cp[Sequence@@sortedVectors][lor /. Mom[i_Integer] :> Mom[PermutationReplace[i, permutation]]]
+];
+
+SortCp[cp : SARAH`Cp[vectors__][SARAH`g[lIndex1_, lIndex2_] * SARAH`g[lIndex3_, lIndex4_]]] /; CpType[cp] === VVVV :=
+Module[{
+	sortedVectors, sortedIndices, indices
+    },
+    sortedVectors = SortFieldsInCp[{vectors}];
+    If[!And @@ (AtomQ /@ ({vectors} /. Susyno`LieGroups`conj -> Identity)),
+      indices = {vectors} /. Susyno`LieGroups`conj -> Identity /. _[l_List] :> First@Select[l, SarahLorentzIndexQ];
+      sortedIndices = Permute[indices, FindPermutation[{vectors}, sortedVectors]];
+      ,
+      indices = {lt1, lt2, lt3, lt4};
+      sortedIndices = Part[indices, #]& /@ (PermutationReplace[#, FindPermutation[{vectors}, sortedVectors]]& /@ {1,2,3,4});
+    ];
+	 (SARAH`Cp @@ sortedVectors)[SARAH`g[lIndex1, lIndex2] * SARAH`g[lIndex3, lIndex4] /. Thread[indices -> sortedIndices]]
 ];
 
 (* Sorting the CXXDiagrams version of VVVV vertices.

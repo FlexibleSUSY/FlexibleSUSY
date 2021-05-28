@@ -23,6 +23,8 @@
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
+#include "decays/flexibledecay_settings.hpp"
+@decaysIncludes@
 
 @solverIncludes@
 #include "array_view.hpp"
@@ -102,9 +104,12 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
    const auto observables = calculate_observables(
       std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
 
+   FlexibleDecay_settings flexibledecay_settings;
+@calculateCmdLineDecays@
+
    // SLHA output
    @ModelName@_slha_io slha_io;
-   slha_io.fill(models, qedqcd, scales, observables, settings);
+   @fillSLHAIO@
    slha_io.write_to_stream(std::cout);
 
    return spectrum_generator.get_exit_code();

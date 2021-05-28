@@ -246,6 +246,11 @@ void Spectrum_generator_settings::set(Settings o, double value)
    case higgs_4loop_correction_at_as3: // 30 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
+   case loop_library: // 31 [int >= -1 and <= 3]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, -1, descriptions.at(o).c_str());
+      assert_le(value, 3,  descriptions.at(o).c_str());
+      break;
    default:
       break;
    }
@@ -311,7 +316,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_2loop_correction_at_at]     = 1.;
    values[higgs_2loop_correction_atau_atau] = 1.;
    values[force_output]                     = 0;
-   values[calculate_sm_masses]   = 0.; // 0 = false
+   values[calculate_sm_masses]              = 0.; // 0 = false
    values[top_pole_qcd_corrections]         = 1.;
    values[beta_zero_threshold]              = 1.0e-11;
    values[calculate_observables]            = 0;

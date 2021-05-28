@@ -17,7 +17,7 @@ Get["${MODELDIR}/CMSSM/CMSSM_librarylink.m"];
 settings = {
     precisionGoal -> 0.0001,
     maxIterations -> 0,
-    calculateStandardModelMasses -> 0,
+    calculateStandardModelMasses -> 1,
     poleMassLoopOrder -> 2,
     ewsbLoopOrder -> 2,
     betaFunctionLoopOrder -> 3,
@@ -32,7 +32,8 @@ settings = {
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
     thresholdCorrections -> 123111321,
-    parameterOutputScale -> 1000
+    parameterOutputScale -> 1000,
+    loopLibrary -> -1
 };
 
 smInputs = {
@@ -76,6 +77,7 @@ handle = FSCMSSMOpenHandle[
 
 FSCMSSMCalculateSpectrum[handle];
 FSCMSSMCalculateObservables[handle];
+FSCMSSMCalculateDecays[handle];
 Export["${outputFile1}", FSCMSSMToSLHA[handle], "String"];
 FSCMSSMCloseHandle[handle];
 EOF

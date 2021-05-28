@@ -2,7 +2,7 @@ Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
     2   1                    # algorithm (1 = two_scale, 2 = semi-analytic)
-    3   0                    # calculate SM pole masses
+    3   1                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
     6   3                    # beta-functions loop order
@@ -30,7 +30,7 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
-   31   0                    # loop library (0 = softsusy)
+   31   -1                   # loop library (0 = softsusy)
 Block SMINPUTS               # Standard Model inputs
     1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
     2   1.166370000e-05      # G_Fermi

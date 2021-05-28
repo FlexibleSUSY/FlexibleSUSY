@@ -36,8 +36,10 @@
 #include "problems_format_mathlink.hpp"
 #include "slha_io.hpp"
 #include "spectrum_generator_settings.hpp"
+#include "decays/flexibledecay_settings.hpp"
 #include "standard_model_two_scale_model.hpp"
 #include "lowe.h"
+@decaysIncludes@
 
 #include <mathlink.h>
 #include "mathlink_utils.hpp"
@@ -143,14 +145,15 @@ public:
    virtual void put_model_spectra(MLINK link) const = 0;
 
    virtual const Spectrum_generator_problems& get_problems() const = 0;
-   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&) const = 0;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const = 0;
    virtual double get_model_scale() const = 0;
    virtual const @ModelName@_observables& get_observables() const = 0;
-
+@getDecaysVirtualFunc@
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) = 0;
    virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) = 0;
+@calculateDecaysVirtualFunc@
 };
 
 template <typename Solver_type>
@@ -163,20 +166,21 @@ public:
    virtual void put_model_spectra(MLINK link) const override;
 
    virtual const Spectrum_generator_problems& get_problems() const override { return problems; }
-   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&) const override;
+   virtual void fill_slha_io(@ModelName@_slha_io&, const Spectrum_generator_settings&, const FlexibleDecay_settings&) const override;
    virtual double get_model_scale() const override { return std::get<0>(models).get_scale(); }
    virtual const @ModelName@_observables& get_observables() const override { return observables; }
-
+@getSpectrumDecays@
    virtual void calculate_spectrum(
       const Spectrum_generator_settings&, const SLHA_io::Modsel&,
       const softsusy::QedQcd&, const @ModelName@_input_parameters&) override;
    virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) override;
-
+@calculateSpectrumDecaysPrototype@
 private:
    std::tuple<@ModelTypes@> models{};        ///< running parameters and pole masses
    Spectrum_generator_problems problems{};   ///< spectrum generator problems
    @ModelName@_scales scales{};              ///< scale information
    @ModelName@_observables observables{};    ///< observables
+@decaysData@
 };
 
 class Model_data {
@@ -192,23 +196,25 @@ public:
    void set_physical_input(const Physical_input& p) { physical_input = p; }
    void set_sm_input_parameters(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
    void set_settings(const Spectrum_generator_settings& s) { settings = s; }
+   void set_fd_settings(const FlexibleDecay_settings& s) { flexibledecay_settings = s; }
    void set_modsel(const SLHA_io::Modsel& m) { modsel = m; }
 
    const Spectrum_generator_settings& get_settings() const { return settings; }
+   const FlexibleDecay_settings& get_fd_settings() const { return flexibledecay_settings; }
 
    void put_settings(MLINK link) const;
    void put_sm_input_parameters(MLINK link) const;
    void put_input_parameters(MLINK link) const;
    void put_observables(MLINK link) const;
    void put_slha(MLINK link) const;
-
+@putDecaysPrototype@
    void put_problems(MLINK link) const;
    void put_warnings(MLINK link) const;
    void put_model_spectra(MLINK link) const;
    void calculate_spectrum();
    void check_spectrum(MLINK link) const;
    void calculate_model_observables();
-
+@calculateModelDecaysPrototype@
    double get_model_scale() const {
       check_spectrum_pointer();
       return spectrum->get_model_scale();
@@ -218,6 +224,7 @@ private:
    Physical_input physical_input{};          ///< extra non-SLHA physical input
    softsusy::QedQcd qedqcd{};                ///< SLHA physical input
    Spectrum_generator_settings settings{};   ///< spectrum generator settings
+   FlexibleDecay_settings flexibledecay_settings {}; ///< FlexibleDecay settings
    SLHA_io::Modsel modsel{};                 ///< MODSEL input
    std::unique_ptr<@ModelName@_spectrum> spectrum{nullptr};  ///< spectrum information
 
@@ -514,7 +521,7 @@ void Model_data::put_warnings(MLINK link) const
    slha_io.set_print_imaginary_parts_of_majorana_mixings(
       settings.get(Spectrum_generator_settings::force_positive_masses));
 
-   spectrum->fill_slha_io(slha_io, settings);
+   spectrum->fill_slha_io(slha_io, settings, flexibledecay_settings);
 
    return slha_io;
 }
@@ -658,12 +665,12 @@ void @ModelName@_spectrum_impl<Solver_type>::calculate_model_observables(
 {
    observables = calculate_observables(std::get<0>(models), qedqcd, physical_input, scales.pole_mass_scale);
 }
-
+@calculateSpectrumDecaysFunction@
 /******************************************************************/
 
 template <typename Solver_type>
 void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& slha_io,
-       const Spectrum_generator_settings& settings) const
+       const Spectrum_generator_settings& settings, const FlexibleDecay_settings& flexibledecay_settings) const
 {
    const auto& problems = std::get<0>(models).get_problems();
    const auto force_output = std::get<0>(models).do_force_output();
@@ -673,6 +680,8 @@ void @ModelName@_spectrum_impl<Solver_type>::fill_slha_io(@ModelName@_slha_io& s
       slha_io.set_spectrum(models);
       slha_io.set_extra(std::get<0>(models), scales, observables, settings);
    }
+
+@fillDecaysSLHA@
 }
 
 /******************************************************************/
@@ -690,7 +699,7 @@ void Model_data::put_observables(MLINK link) const
 
    MLEndPacket(link);
 }
-
+@putDecaysFunction@
 /******************************************************************/
 
 void Model_data::check_spectrum(MLINK link) const
@@ -732,7 +741,7 @@ void Model_data::calculate_model_observables()
    check_spectrum_pointer();
    spectrum->calculate_model_observables(qedqcd, physical_input);
 }
-
+@calculateModelDecaysFunction@
 /******************************************************************/
 
 template <typename Element_t>
@@ -744,7 +753,8 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
       n_sm_parameters = softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
                         + Physical_input::NUMBER_OF_INPUT_PARAMETERS,
       n_input_pars = @numberOfInputParameters@;
-   const Index_t n_total = n_settings + n_sm_parameters + n_input_pars;
+   @decayIndex@
+   const Index_t n_total = n_settings + n_sm_parameters + n_input_pars + n_fd_settings;
 
    if (pars.size() != n_total)
       throw EWrongNumberOfParameters(pars.size(), n_total);
@@ -843,14 +853,14 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
 
    @ModelName@_input_parameters input;
 @setInputParameters@
-
+@setDecayOptions@
    Model_data data;
    data.set_settings(settings);
    data.set_modsel(modsel);
    data.set_sm_input_parameters(qedqcd);
    data.set_physical_input(physical_input);
    data.set_input_parameters(input);
-
+   @fillFDSettings@
    return data;
 }
 
@@ -1153,5 +1163,5 @@ DLLEXPORT int FS@ModelName@CalculateObservables(
 
    return LIBRARY_NO_ERROR;
 }
-
+@mathlinkDecaysCalculationFunction@
 } // extern "C"

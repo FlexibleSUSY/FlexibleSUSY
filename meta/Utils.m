@@ -538,7 +538,7 @@ ReadLinesInFile[fileName_String] :=
     lines
 	]
 
-FSReIm[z_] := If[$VersionNumber >= 10.1,
+FSReIm[z_/;NumberQ[z]] := If[$VersionNumber >= 10.1,
    ReIm[z],
    {Re[z], Im[z]}
 ];

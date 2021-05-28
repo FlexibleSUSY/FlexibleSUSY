@@ -56,6 +56,8 @@ CreateModelParameterSetter::usage="";
 CreateDelegateModelParameterGetter::usage="";
 
 CreateEnumName::usage="Creates enum symbol for given parameter";
+CreateParameterEnumEntries::usage="Creates a list of enum symbols for
+a given parameter";
 DecomposeParameter::usage="decomposes parameter into its real components";
 
 SetParameter::usage="set model parameter";
@@ -203,6 +205,12 @@ given description string.";
 GetParticleFromDescription::usage="Returns particle symbol from a
 given description string.";
 GetPDGCodesForParticle::usage="Returns the PDG codes for a particle."
+CreatePDGCodeFromParticleCases::usage="Create list of switch cases setting PDG code
+for particles with no generation index.";
+CreatePDGCodeFromParticleIndexedCases::usage="Create list of switch cases settings PDG codes
+for particles with generation index.";
+CreateParticleMultipletNameAndIndexFromPDGCases::usage="Create list of switch cases getting particle name
+and optional index from integer PDG code.";
 
 NumberOfIndependentEntriesOfSymmetricMatrix::usage="Returns number of
 independent parameters of a real symmetric nxn matrix";
@@ -1246,6 +1254,9 @@ CreateEnumName[par_[idx__]] :=
 CreateEnumName[par_] :=
     CConversion`ToValidCSymbolString[par];
 
+CreateParameterEnumEntries[name_, type_] :=
+    CreateEnumName /@ DecomposeParameter[name, type];
+
 CreateParameterEnums[name_, type_] :=
     Utils`StringJoinWithSeparator[CreateEnumName /@ DecomposeParameter[name, type], ", "];
 
@@ -1642,6 +1653,51 @@ GetPDGCodesForParticle[particle_] :=
            pdgList
           ];
 
+CreatePDGCodeFromParticleCase[particle_] :=
+    Module[{particleName,
+            pdgs = GetPDGCodesForParticle[particle],
+            dim = TreeMasses`GetDimension[particle], value},
+           particleName = CConversion`ToValidCSymbolString[particle];
+           If[dim != Length[pdgs],
+              Print["Error: number of PDG codes does not match ", particle, " multiplet size."];
+              Quit[1];
+             ];
+           If[dim == 1,
+              value = "pdg = " <> ToString[First[pdgs]];,
+              value = "pdg_codes = {" <> Utils`StringJoinWithSeparator[ToString /@ pdgs, ", "] <> "}";
+             ];
+           "case " <> particleName <> ": " <> value <> "; break;\n"
+          ];
+
+CreatePDGCodeFromParticleCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] == 1)&]];
+
+CreatePDGCodeFromParticleIndexedCases[particles_List] :=
+    StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] > 1)&]];
+
+CreateParticleMultipletNameAndIndexFromPDGCases[particles_List] :=
+    Module[{i, j, dims, starts, pdgCodes, names, result = ""},
+           dims = TreeMasses`GetDimension /@ particles;
+           dimsWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones /@ particles;
+           starts = TreeMasses`GetDimensionStartSkippingGoldstones /@ particles;
+           pdgCodes = GetPDGCodesForParticle /@ particles;
+           For[i = 1, i <= Length[particles], i++,
+               If[dims[[i]] != Length[pdgCodes[[i]]],
+                  Print["Error: number of PDG codes does not match ", particles[[i]], " multiplet size."];
+                  Quit[1];
+                 ];
+               If[dimsWithoutGoldstones[[i]] > 0,
+                  names = If[dims[[i]] > 1,
+                             Table["\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", " <> ToString[j], {j, starts[[i]], dims[[i]]}],
+                             {"\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", {}"}
+                            ];
+                  result = result <> StringJoin[("case " <> ToString[#[[1]]] <> ": name = {" <> #[[2]] <> "}; break;\n")&
+                                                /@ Thread[{#1,#2}& @@ {pdgCodes[[i, starts[[i]] ;;]], names}]];
+                 ];
+              ];
+           result
+          ];
+
 NumberOfIndependentEntriesOfSymmetricMatrix[n_] := (n^2 + n) / 2;
 
 AppendGenerationIndices[expr_List] :=
@@ -1935,6 +1991,11 @@ SetSMParameter[FlexibleSUSY`MDown2GeVInput     , value_String, struct_String] :=
 SetSMParameter[FlexibleSUSY`MUp2GeVInput       , value_String, struct_String] := struct <> ".setMass(softsusy::mUp, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MStrange2GeVInput  , value_String, struct_String] := struct <> ".setMass(softsusy::mStrange, " <> value <> ")";
 SetSMParameter[FlexibleSUSY`MCharmMCharm       , value_String, struct_String] := struct <> ".setMass(softsusy::mCharm, " <> value <> ")";
+
+(*  given a field will return it's indices,
+    e.g. Fd[{a,b}] or bar[Fd[{a,b}] or conj[Sd[{a,b}]] will return {a,b} *)
+GetFieldIndices[field_] :=
+    field /. SARAH`bar | Susyno`LieGroups`conj -> Identity /. _[x_List] :> x;
 
 End[];
 

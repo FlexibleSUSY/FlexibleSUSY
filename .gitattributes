@@ -1,13 +1,11 @@
 .clang-format                   export-ignore
 .gitignore                      export-ignore
 .gitattributes                  export-ignore
-TODO                            export-ignore
-
-addons/test_*                   export-ignore
 
 doc/images/*.xcf                export-ignore
 doc/release                     export-ignore
 doc/FlexibleFuture.txt          export-ignore
+doc/TODO.rst                    export-ignore
 
 examples/lattice_fmssm.cpp                  export-ignore
 examples/lattice_fmssm_fmssmn.cpp           export-ignore
@@ -141,6 +139,8 @@ templates/lattice_susy_scale_constraint.cpp.in           export-ignore
 templates/lattice_susy_scale_constraint.hpp.in           export-ignore
 
 test                            export-ignore
+
+utils/loop_decays               export-ignore
 
 # reclassify language of some files
 *.m linguist-language=Mathematica

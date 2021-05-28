@@ -59,6 +59,18 @@ LowScale = LowEnergyConstant[MZ];
 
 LowScaleFirstGuess = LowEnergyConstant[MZ];
 
+(* N.B. LowScaleinput is not used by the EFTHiggs spectrum
+ calculation, but is needed for decoupling scheme used by
+ FlexibleDecay *)
+
+LowScaleInput = {
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic},
+    {vd, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Cos[ArcTan[vu/vd]]},
+    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[vu/vd]]}
+};
+
 UseHiggs2LoopMSSM = True;
 EffectiveMu = \[Mu];
 UseMSSM3LoopRGEs = False;
@@ -113,3 +125,5 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[md2[2,2]]},
             {49, SignedAbsSqrt[md2[3,3]]} } }
 };
+
+FSCalculateDecays = True;

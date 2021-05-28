@@ -30,6 +30,14 @@ SetInputParameterDefaultArguments::usage = "";
 SetInputParameterArguments::usage = "";
 PutSpectrum::usage = "";
 PutObservables::usage = "";
+CreateSpectrumDecaysGetterInterface::usage="";
+CreateSpectrumDecaysGetter::usage="";
+CreateSpectrumDecaysInterface::usage="";
+CreateSpectrumDecaysCalculation::usage="";
+CreateModelDecaysCalculation::usage="";
+CreateMathLinkDecaysCalculation::usage="";
+FillDecaysSLHAData::usage="";
+PutDecays::usage="";
 
 Begin["`Private`"];
 
@@ -206,6 +214,202 @@ PutObservable[obs_, type_, link_String, heads_:{}] :=
 
 PutObservables[obs_List, link_String] :=
     StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs];
+
+CreateSeparatorLine[len_:66] := Module[{i}, "/" <> StringJoin[Table["*", {i, 1, len}]] <> "/"];
+
+CreateSpectrumDecaysGetterName[] := "get_decays";
+
+CreateSpectrumDecaysGetterInterface[modelName_] :=
+    "virtual const " <> modelName <> "_decays& " <> CreateSpectrumDecaysGetterName[] <> "() const = 0;\n";
+
+CreateSpectrumDecaysGetter[modelName_] :=
+    "virtual const " <> modelName <> "_decays& " <> CreateSpectrumDecaysGetterName[] <>
+    "() const override { return decays; }\n";
+
+CreateSpectrumDecaysCalculationName[] := "calculate_model_decays";
+
+CreateModelDecaysCalculationName[] := CreateSpectrumDecaysCalculationName[];
+
+CreateSpectrumDecaysInterface[modelName_] :=
+    "virtual void " <> CreateSpectrumDecaysCalculationName[] <> "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) = 0;";
+
+CreateSpectrumDecaysCalculation[modelName_] :=
+    Module[{prototype = "", args = "", body = "", function = ""},
+           prototype = "virtual void " <> CreateSpectrumDecaysCalculationName[] <>
+                       "(const softsusy::QedQcd&, const Physical_input&, const FlexibleDecay_settings&) override;\n";
+           args = "const softsusy::QedQcd& qedqcd, const Physical_input& physical_input, const FlexibleDecay_settings& flexibledecay_settings";
+           body = "decays = " <> modelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);\n" <>
+                  "decays.calculate_decays();\n";
+           function = "template <typename Solver_type>\n" <>
+                      "void " <> modelName <> "_spectrum_impl<Solver_type>::" <>
+                      CreateSpectrumDecaysCalculationName[] <> "(\n" <>
+                      TextFormatting`IndentText[args <> ")\n"] <> "{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <> function;
+           {prototype, function}
+          ];
+
+CreateModelDecaysCalculation[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "void " <> CreateModelDecaysCalculationName[] <> "();\n";
+           body = "check_spectrum_pointer();\n" <>
+                  "const bool loop_library_for_decays =\n" <>
+                  TextFormatting`IndentText[
+                     "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+                     "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+                  ] <>
+                  "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays)) {\n" <>
+                     TextFormatting`IndentText[
+                        "if (loop_library_for_decays) {\n" <>
+                  TextFormatting`IndentText["spectrum->" <> CreateSpectrumDecaysCalculationName[] <>
+                                            "(qedqcd, physical_input, flexibledecay_settings);\n"] <> "}\n" <>
+                        "else if (!loop_library_for_decays) {\n" <>
+                           TextFormatting`IndentText[
+         "WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");\n"
+                           ] <> "}\n"
+                        ] <> "}\n";
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "void Model_data::" <> CreateModelDecaysCalculationName[] <> "()\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
+          ];
+
+FillDecaysSLHAData[] :=
+    "const auto& decays_problems = decays.get_problems();\n" <>
+    "const bool loop_library_for_decays =\n" <>
+    TextFormatting`IndentText[
+      "(Loop_library::get_type() == Loop_library::Library::Collier) ||\n" <>
+      "(Loop_library::get_type() == Loop_library::Library::Looptools);\n"
+    ] <>
+    "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
+    TextFormatting`IndentText[
+       "slha_io.set_dcinfo(decays_problems);\n" <>
+       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n"
+    ] <>
+    "}";
+
+PutDecaysFunctionName[] := "put_decays";
+
+PutDecayTableEntry[pidName_, decayName_] :=
+    "const auto& final_states = " <> decayName <> ".get_final_state_particle_ids();\n" <>
+    "MLPutFunction(link, \"List\", 3);\n" <>
+    "MLPut(link, " <> pidName <> ");\n" <>
+    "MLPutFunction(link, \"List\", final_states.size());\n" <>
+    "for (const auto id : final_states) {\n" <>
+    TextFormatting`IndentText["MLPut(link, id);\n"] <> "}\n" <>
+    "MLPut(link, " <> decayName <> ".get_width());\n";
+
+PutDecayTableEntries[modelName_] :=
+    Module[{body = ""},
+           body = "const auto pid = decays_list.get_particle_id();\n" <>
+                  "int n_decays = 0;\n" <>
+                  "for (const auto& decay : decays_list) {\n" <>
+                  TextFormatting`IndentText[
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
+                     "}\n" <>
+                     "n_decays++;\n"
+                  ] <>
+                  "}\n" <>
+                  "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(pid);\n" <>
+                  "if (multiplet_and_index_pair.second) {\n" <>
+                     TextFormatting`IndentText[
+                        "MLPutFunction(link, \"Rule\", 2);\n" <>
+                        "MLPutFunction(link, multiplet_and_index_pair.first.c_str(), 1);\n" <>
+                        "MLPutInteger(link, multiplet_and_index_pair.second.get());\n"
+                     ] <>
+                  "}\n" <>
+                  "else {\n" <>
+                     TextFormatting`IndentText["MLPutRule(link, multiplet_and_index_pair.first.c_str());\n"] <>
+                  "}\n" <>
+                  "MLPutFunction(link, \"List\", 3);\n" <>
+                  "MLPut(link, pid);\n" <>
+                  "MLPut(link, decays_list.get_total_width());\n" <>
+                  "MLPutFunction(link, \"List\", n_decays);\n\n" <>
+                  "for (const auto& decay : decays_list) {\n" <>
+                  TextFormatting`IndentText[
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
+                     "}\n" <>
+                     PutDecayTableEntry["pid", "decay.second"]
+                  ] <> "}\n";
+
+            "auto is_invalid_decay = [&] (const auto& decays_list, const auto& decay) {\n" <>
+                  TextFormatting`IndentText[
+                     "return !(decays_list.get_total_width() > 0.)\n" <>
+                     TextFormatting`IndentText@TextFormatting`IndentText[" || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width();\n"]
+                  ] <>
+            "};\n\n" <>
+            "for (const auto& decays_list : decay_table) {\n" <>
+               TextFormatting`IndentText[body] <>
+            "}\n"
+          ];
+
+PutDecays[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "void " <> PutDecaysFunctionName[] <> "(MLINK link) const;\n";
+
+           body = "check_spectrum_pointer();\n" <>
+                  modelName <> "_decays decays = spectrum->get_decays();\n" <>
+                  "const auto& decay_table = decays.get_decay_table();\n" <>
+                  "const auto number_of_decays = decay_table.size();\n\n" <>
+                  "MLPutFunction(link, \"List\", 1);\n" <>
+                  "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
+                  "MLPutFunction(link, \"List\", number_of_decays);\n\n" <>
+                  PutDecayTableEntries[modelName] <> "\n" <>
+                  "MLEndPacket(link);\n";
+
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "void Model_data::" <> PutDecaysFunctionName[] <> "(MLINK link) const\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
+          ];
+
+CreateMathLinkDecaysCalculation[modelName_] :=
+    "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
+DLLEXPORT int FS" <> modelName <> "CalculateDecays(
+   WolframLibraryData /* libData */, MLINK link)
+{
+   using namespace flexiblesusy::" <> modelName <> "_librarylink;
+
+   if (!check_number_of_args(link, 1, \"FS" <> modelName <> "CalculateDecays\"))
+      return LIBRARY_TYPE_ERROR;
+
+   const auto hid = get_handle_from(link);
+
+   try {
+      auto& data = find_data(hid);
+
+      if (data.get_model_scale() == 0.) {
+         put_message(link,
+            \"FS" <> modelName <> "CalculateDecays\", \"warning\",
+            \"Renormalization scale is 0.  Did you run \"
+            \"FS" <> modelName <> "CalculateSpectrum[]?\");
+      }
+
+      {
+         Redirect_output crd(link);
+         auto setting = data.get_settings();
+         if (!static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses)) ||
+            !static_cast<bool>(setting.get(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses))) {
+            put_message(link,
+               \"FSSMCalculateDecays\", \"warning\", \"Need SM and BSM masses. Setting flags FlexlibleSUSY[3] = FlexlibleSUSY[23] = 1.\");
+            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_sm_masses, 1.0);
+            setting.set(flexiblesusy::Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+            data.set_settings(setting);
+            data.calculate_spectrum();
+         }
+         data.calculate_model_decays();
+      }
+
+      data.put_decays(link);
+   } catch (const flexiblesusy::Error& e) {
+      put_message(link, \"FS" <> modelName <> "CalculateDecays\", \"error\", e.what());
+      put_error_output(link);
+   }
+
+   return LIBRARY_NO_ERROR;
+}\n";
 
 End[];
 
