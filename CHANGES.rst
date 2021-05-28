@@ -1,3 +1,19 @@
+FlexibleSUSY 2.6.1 [not released yet]
+=====================================
+
+New features
+------------
+
+Changes
+-------
+
+* Further parallelization of FlexibleDecay
+  [`arXiv:2106.XXXX <https://arxiv.org/abs/2106.XXXX>`_].
+
+Fixed bugs
+----------
+
+
 FlexibleSUSY 2.6.0 [not released yet]
 =====================================
 

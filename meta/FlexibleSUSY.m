@@ -1991,19 +1991,32 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases, solverIncludes = "", solver = ""},
+            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path},
 
            (solverIncludes = solverIncludes <> EnableSpectrumGenerator[#])& /@ FlexibleSUSY`FSBVPSolvers;
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
+           If[FlexibleSUSY`FSEnableParallelism,
+              DistributeDefinitions[contentOfPath];
+              ParallelEvaluate[
+                 (* subkernel have different $Path variable then main kernel
+                    https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
+                 $Path = contentOfPath;
+                 (* don't pollute terminal with SARAH initialization message *)
+                 Block[{Print},
+                    << SARAH`;
+                 ];
+              ];
+           ];
+           Print[""];
            (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
            decaysLists =
               AbsoluteTiming@Map[
                  {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
                  decayParticles
               ];
-           Print[""];
+           If[FlexibleSUSY`FSEnableParallelism, Print[""];];
            Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
            decaysLists = Last@decaysLists;
 

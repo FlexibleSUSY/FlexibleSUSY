@@ -566,7 +566,7 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay/; GetDecayTopologiesAndD
 (* outputs list of FSParticleDecay objects *)
 GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
     Module[{genericFinalStates,
-            isPossibleDecay, concreteFinalStates, decays, temp},
+            isPossibleDecay, concreteFinalStates, decays, temp, contextsToDistribute},
 
            Utils`AssertWithMessage[exactNumberOfProducts === 2,
               "decays with " <> ToString@exactNumberOfProducts <>
@@ -584,22 +584,29 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
-           Print[""];
            Print["Creating amplitudes for ", particle, " decays..."];
-           (*ParallelEvaluate[Get["/home/wojciech/HEP-software/mathematica/SARAH-4.14.3/SARAH.m"]]
-           ParallelEvaluate[Start["MSSM"]];*)
-           decays =
-              Map[
-                 (
-                    (* @todo StringPadRigh was introduced only in 10.1 *)
-                    WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
-                    temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                    Print[" Done."];
-                    temp
-                 )&,
-                 concreteFinalStates(*,
-                 DistributedContexts -> All*)
+
+           If[FlexibleSUSY`FSEnableParallelism,
+              decays =
+                 ParallelMap[
+                    FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]]&,
+                    concreteFinalStates,
+                    DistributedContexts -> All,
+                    Method -> "FinestGrained"
+                 ];
+              ,
+              decays = Map[
+                  (
+                     (* @todo StringPadRigh was introduced only in 10.1 *)
+                     WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                     temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
+                     Print[" Done."];
+                     temp
+                  )&,
+                  concreteFinalStates
               ];
+              Print[""];
+           ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
