@@ -2167,7 +2167,7 @@ mV2)))*VFin.left())/(mi3*(mG - mV)*(mG + mV)*Power2(mi - mj)*Power2(mi \
     } else {
     const auto r = Power2(mF/mV);
     const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF) > approx_limit * ) {
+      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
         return -1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
       } else {
         if (is_zero(mi-mj)) {
