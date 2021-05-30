@@ -2016,7 +2016,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
                  decayParticles
               ];
-           If[FlexibleSUSY`FSEnableParallelism, Print[""];];
+           If[
+              FlexibleSUSY`FSEnableParallelism, Print[""];
+              Needs["Parallel`Developer`"];
+              Parallel`Developer`ClearKernels[];
+              CloseKernels[];
+           ];
            Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
            decaysLists = Last@decaysLists;
 

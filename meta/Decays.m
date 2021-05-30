@@ -2244,6 +2244,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
             contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
            Print[""];
            FSFancyLine[];
+           If[FlexibleSUSY`FSEnableParallelism, LaunchKernels[]];
            Print["Creating a C++ code for decay amplitudes..."];
            If[FlexibleSUSY`FSEnableParallelism,
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
