@@ -305,26 +305,44 @@ PutDecayTableEntries[modelName_] :=
                   "int n_decays = 0;\n" <>
                   "for (const auto& decay : decays_list) {\n" <>
                   TextFormatting`IndentText[
-                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
-                     TextFormatting`IndentText["continue;\n"] <>
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
                      "}\n" <>
                      "n_decays++;\n"
                   ] <>
                   "}\n" <>
-                  "MLPutRule(link, " <> modelName <> "_info::get_particle_name_from_pdg(pid), {\"Decays\"});\n" <>
+                  "const auto multiplet_and_index_pair = " <> modelName <> "_info::get_multiplet_and_index_from_pdg(pid);\n" <>
+                  "if (multiplet_and_index_pair.second) {\n" <>
+                     TextFormatting`IndentText[
+                        "MLPutFunction(link, \"Rule\", 2);\n" <>
+                        "MLPutFunction(link, multiplet_and_index_pair.first.c_str(), 1);\n" <>
+                        "MLPutInteger(link, multiplet_and_index_pair.second.get());\n"
+                     ] <>
+                  "}\n" <>
+                  "else {\n" <>
+                     TextFormatting`IndentText["MLPutRule(link, multiplet_and_index_pair.first.c_str());\n"] <>
+                  "}\n" <>
                   "MLPutFunction(link, \"List\", 3);\n" <>
                   "MLPut(link, pid);\n" <>
                   "MLPut(link, decays_list.get_total_width());\n" <>
                   "MLPutFunction(link, \"List\", n_decays);\n\n" <>
                   "for (const auto& decay : decays_list) {\n" <>
                   TextFormatting`IndentText[
-                     "if (!(decays_list.get_total_width() > 0.) || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width()) {\n" <>
-                     TextFormatting`IndentText["continue;\n"] <>
+                     "if (is_invalid_decay(decays_list, decay)) {\n" <>
+                        TextFormatting`IndentText["continue;\n"] <>
                      "}\n" <>
                      PutDecayTableEntry["pid", "decay.second"]
                   ] <> "}\n";
-           "for (const auto& decays_list : decay_table) {\n" <>
-           TextFormatting`IndentText[body] <> "}\n"
+
+            "auto is_invalid_decay = [&] (const auto& decays_list, const auto& decay) {\n" <>
+                  TextFormatting`IndentText[
+                     "return !(decays_list.get_total_width() > 0.)\n" <>
+                     TextFormatting`IndentText@TextFormatting`IndentText[" || this->get_fd_settings().get(FlexibleDecay_settings::min_br_to_print) > decay.second.get_width()/decays_list.get_total_width();\n"]
+                  ] <>
+            "};\n\n" <>
+            "for (const auto& decays_list : decay_table) {\n" <>
+               TextFormatting`IndentText[body] <>
+            "}\n"
           ];
 
 PutDecays[modelName_] :=

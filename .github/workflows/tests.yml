@@ -6,6 +6,7 @@ on:
   # no idea how to fix it
   push:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'
@@ -15,6 +16,7 @@ on:
 
   pull_request:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'

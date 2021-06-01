@@ -643,7 +643,8 @@ CheckModelFileSettings[] :=
            If[MemberQ[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}],
               Print["Warning: Effective coupling module has been disabled since v2.6.0."];
               Print["         Please use FlexibleDecay instead."];
-                 FlexibleSUSY`ExtraSLHAOutputBlocks = DeleteCases[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}];
+              FlexibleSUSY`ExtraSLHAOutputBlocks =
+                 DeleteCases[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}];
            ];
            If[Head[FlexibleSUSY`EWSBOutputParameters] =!= List,
               Print["Error: EWSBOutputParameters has to be set to a list",
@@ -2832,7 +2833,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             isSupersymmetricModel = "false",
             isFlexibleEFTHiggs = "false",
             getPDGCodeFromParticleEnumNoIndex = "", getPDGCodeFromParticleEnumIndex = "", 
-            setParticleNameFromPDG = "", 
+            setParticleMultipletNameAndIndexFromPDG = "",
             fillInputParametersFromMINPAR = "", fillInputParametersFromEXTPAR = "",
             fillInputParametersFromIMMINPAR = "",
             fillInputParametersFromIMEXTPAR = "",
@@ -2915,7 +2916,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
              ];
            getPDGCodeFromParticleEnumNoIndex = Parameters`CreatePDGCodeFromParticleCases[particles];
            getPDGCodeFromParticleEnumIndex = Parameters`CreatePDGCodeFromParticleIndexedCases[particles];
-           setParticleNameFromPDG = Parameters`CreateParticleNameFromPDGCases[DeleteDuplicates[Join[particles, SARAH`AntiField /@ particles]]];
+           setParticleMultipletNameAndIndexFromPDG = Parameters`CreateParticleMultipletNameAndIndexFromPDGCases[DeleteDuplicates[Join[particles, SARAH`AntiField /@ particles]]];
            WriteOut`ReplaceInFiles[files,
                           { "@fillSpectrumVectorWithSusyParticles@" -> IndentText[fillSpectrumVectorWithSusyParticles],
                             "@fillSpectrumVectorWithSMParticles@"   -> IndentText[IndentText[fillSpectrumVectorWithSMParticles]],
@@ -2963,7 +2964,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@drBarBlockNames@"                -> WrapLines[drBarBlockNames],
                             "@getPDGCodeFromParticleEnumNoIndex@" -> IndentText[getPDGCodeFromParticleEnumNoIndex],
                             "@getPDGCodeFromParticleEnumIndex@" -> IndentText[getPDGCodeFromParticleEnumIndex],
-                            "@setParticleNameFromPDG@" -> IndentText[setParticleNameFromPDG],
+                            "@setParticleMultipletNameAndIndexFromPDG@" -> IndentText[setParticleMultipletNameAndIndexFromPDG],
                             "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             "@useDecaysData@"                   -> useDecaysData,
                             Sequence @@ GeneralReplacementRules[]
@@ -4364,9 +4365,9 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[NeedToCalculateVertices[FSEigenstates],
               Put[vertexRules =
                       Vertices`VertexRules[Join[nPointFunctions,
-                                                                       extraVertices, deltaVBwave,
-                                                deltaVBvertex, deltaVBbox], Lat$massMatrices],
-                  vertexRuleFileName],
+                                                deltaVBwave, deltaVBvertex, deltaVBbox],
+                                           Lat$massMatrices],
+                                           vertexRuleFileName],
               vertexRules = Get[vertexRuleFileName];
            ];
 
