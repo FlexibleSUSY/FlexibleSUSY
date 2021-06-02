@@ -25,7 +25,7 @@
 #include "Li4.hpp"
 #include "numerics2.hpp"
 #include "wrappers.hpp"
-
+#include "map"
 namespace flexiblesusy {
 
 namespace {
@@ -324,4 +324,76 @@ double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
          throw std::runtime_error("Unknown quark mass");
    }
 }
+
+const std::map<double,std::complex<double> >& get_scalar_fermion_loop_data()
+{
+   static const std::map<double,std::complex<double> > data = {
+      {0.000000, std::complex<double>(-1.000000, 0.000000)},
+      {2.500000e-02, std::complex<double>(-9.274410e-01, 0.000000)}
+   };
+}
+
+std::complex<double> linear_interpolation(
+   double x, const std::map<double,std::complex<double> >& data)
+{
+   auto right = data.upper_bound(x);
+
+   if (right == data.begin()) {
+      ++right;
+   } else if (right == data.end()) {
+      --right;
+   }
+
+   auto left = right;
+   --left;
+
+   const double x_left = (x - right->first) / (left->first - right->first);
+   const double x_right = (x - left->first) / (right->first - left->first);
+
+   return left->second * x_left + right->second * x_right;
+}
+
+std::complex<double> quadratic_interpolation(
+   double x, const std::map<double,std::complex<double> >& data)
+{
+   auto right = data.upper_bound(x);
+   auto begin = data.begin();
+
+   if (right == begin) {
+      ++right;
+      ++right;
+   } else if (right == ++begin) {
+      ++right;
+   } else if (right == data.end()) {
+      --right;
+   }
+
+   auto center = right;
+   --center;
+   auto left = center;
+   --left;
+
+   const double x_left = (x - center->first) * (x - right->first)
+      / ((left->first - center->first) * (left->first - right->first));
+   const double x_center = (x - left->first) * (x - right->first)
+      / ((center->first - left->first) * (center->first - right->first));
+   const double x_right = (x - left->first) * (x - center->first)
+      / ((right->first - left->first) * (right->first - center->first));
+
+   return left->second * x_left + center->second * x_center
+      + right->second * x_right;
+}
+
+/* example usage
+
+   const auto& data = get_scalar_fermion_loop_data();
+
+   std::complex<double> result;
+   const bool do_linear_interp = false;
+     if (do_linear_interp) {
+        result = linear_interpolation(tau, data);
+     } else {
+         result = quadratic_interpolation(tau, data);
+     }
+ */
 } // namespace flexiblesusy
