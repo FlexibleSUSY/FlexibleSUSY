@@ -496,6 +496,13 @@ SaveLoopIntegrals[diagram_, renScale_String] :=
            formFactors = Last[diagram];
            loopFunctions = Sort[DeleteDuplicates[Cases[formFactors, fn_[args__] /; IsSARAHLoopFunction[fn], {0, Infinity}]]];
            tmpVars = MapIndexed[(CreateSavedLoopFunctionName[#1] <> ToString[First[#2]])&, loopFunctions];
+           If[Max[{
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "A"&]],
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "B"&]],
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "C"&]]
+              }] > 1,
+              Print["Not all loop functions of the same type (e.g. C*) are called with the same arguments"]; Quit[1]
+           ];
            savedValues = StringJoin[DeleteDuplicates[CallLoopFunction[#, renScale]& /@ loopFunctions]];
            savedValues = savedValues <> MapThread[("const auto " <> #1 <> " = " <> GetLoopFunctionFromCoefficient[#2] <> ";\n")&, {tmpVars, loopFunctions}];
            savedValues = StringJoin[savedValues];
