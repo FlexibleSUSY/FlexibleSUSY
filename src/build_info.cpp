@@ -79,6 +79,8 @@ void print_build_info(std::ostream& ostr)
       "C++ compiler (CXX):                     " CXX "\n"
       "C++ compiler flags (CXXFLAGS):          " CXXFLAGS "\n"
       "C preprocessor flags (CPPFLAGS):        " CPPFLAGS "\n"
+      "COLLIER flags (COLLIERFLAGS):           " COLLIERFLAGS "\n"
+      "COLLIER libraries (COLLIERLIBS):        " COLLIERLIBS "\n"
       "Fortran compiler (FC):                  " FC "\n"
       "Fortran compiler flags (FFLAGS):        " FFLAGS "\n"
       "Fortran libraries (FLIBS):              " FLIBS "\n"
@@ -152,6 +154,13 @@ void print_build_info(std::ostream& ostr)
       "\n"
       "Use FFlite:                             "
 #ifdef ENABLE_FFLITE
+      "yes"
+#else
+      "no"
+#endif
+      "\n"
+      "Use COLLIER:                            "
+#ifdef ENABLE_COLLIER
       "yes"
 #else
       "no"

@@ -6,6 +6,7 @@ on:
   # no idea how to fix it
   push:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'
@@ -15,6 +16,7 @@ on:
 
   pull_request:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'
@@ -117,7 +119,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.5.1
+      image: navir/opensuseleap-for-flexiblesusy:0.6.1
 
     strategy:
       matrix:
@@ -223,7 +225,7 @@ jobs:
           make clean-test-log
 
       - name: Testing pack-SM-src
-        if: ${{ matrix.PART }} == 2
+        if: ${{ matrix.PART == 2 }}
         env:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
         run: |

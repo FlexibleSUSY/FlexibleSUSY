@@ -39,7 +39,6 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
 
    // mH < mZ
    const int offshell_VV_decays = flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays);
-   std::cout << offshell_VV_decays << '\n';
    if ((x > 1.0 && offshell_VV_decays != 0) ||
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
