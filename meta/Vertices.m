@@ -793,7 +793,10 @@ IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
                 ];
              ];
            vertex = SARAH`Vertex[sortedFields, UseDependences -> useDependences];
-           AddToCachedVertices[vertex, useDependences];
+           CriticalSection[
+              {sarahlock},
+              AddToCachedVertices[vertex, useDependences];
+           ];
            MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
           ];
 
