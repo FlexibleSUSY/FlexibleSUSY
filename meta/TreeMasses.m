@@ -409,7 +409,7 @@ IsChargino[p_] :=
 
 IsElectricallyCharged[par_] := GetElectricCharge[par] != 0;
 
-IsChargedUnder[field_, vector_] := Block[{},
+IsChargedUnder[field_, vector_] := 
   (*First of all, make sure we have been passed a vector*)
   If[IsVector[vector],
     (*Check 2 special cases first which are quicker*)
@@ -420,8 +420,7 @@ IsChargedUnder[field_, vector_] := Block[{},
      True, Return[SARAH`Vertex[{SARAH`AntiField[field], field, 
             vector}, UseDependences -> True][[2, 1]] =!= 0];],
     Return[None];
-    ];
-  ]
+  ];
 
 ContainsGoldstone[sym_] := MemberQ[GetGoldstoneBosons[] /. a_[{idx__}] :> a, sym];
 
