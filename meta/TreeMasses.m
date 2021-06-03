@@ -196,7 +196,8 @@ IsSMParticleElementwise::usage=
 the element is a SM-like field or not.  The function assumes that BSM
 fields are always heavier than the SM fields.";
 
-IsElectricallyCharged::usage="";
+IsChargedUnder::usage="Returns whether or not a field is charged under a given vectors gauge";
+IsElectricallyCharged::usage="Returns whether or not a field has Electric Charge";
 ContainsGoldstone::usage="";
 
 FSAntiField::usage = "Returns the anti-field of a given field";
@@ -408,6 +409,20 @@ IsChargino[p_] :=
 
 IsElectricallyCharged[par_] := GetElectricCharge[par] != 0;
 
+IsChargedUnder[field_, vector_] := Block[{},
+  (*First of all, make sure we have been passed a vector*)
+  If[IsVector[vector],
+    (*Check 2 special cases first which are quicker*)
+    Which[IsPhoton[vector], Return[IsElectricallyCharged[field]];,
+     IsGluon[vector], Return[ColorChargedQ[field]];,
+     (*Else check that this field coupled with its anti-field can emit this vector*)
+     (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
+     True, Return[-I SARAH`Vertex[{SARAH`AntiField[field], field, 
+            vector}, UseDependences -> True][[2, 1]] =!= 0];],
+    Return[None];
+    ];
+  ]
+
 ContainsGoldstone[sym_] := MemberQ[GetGoldstoneBosons[] /. a_[{idx__}] :> a, sym];
 
 ContainsGoldstone[sym_[__]] := MemberQ[GetGoldstoneBosons[] /. a_[{idx__}] :> a, sym];
@@ -523,6 +538,11 @@ IsZBoson[Susyno`LieGroups`conj[sym_]] := IsZBoson[sym];
 IsZBoson[SARAH`bar[sym_]] := IsZBoson[sym];
 IsZBoson[sym_[___]] := IsZBoson[sym];
 IsZBoson[field_Symbol] := field === GetZBoson[];
+
+IsGluon[Susyno`LieGroups`conj[sym_]] := IsGluon[sym];
+IsGluon[SARAH`bar[sym_]] := IsGluon[sym];
+IsGluon[sym_[___]] := IsGluon[sym];
+IsGluon[field_Symbol] := field === GetGluon[];
 
 IsSMChargedLepton[Susyno`LieGroups`conj[sym_]] := IsSMChargedLepton[sym];
 IsSMChargedLepton[SARAH`bar[sym_]] := IsSMChargedLepton[sym];

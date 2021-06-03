@@ -51,6 +51,7 @@ FFVGraphs[] := contributingGraphs;
 EmitterL[diagram_] := diagram[[3,2]];
 EmitterR[diagram_] := diagram[[2,2]];
 Spectator[diagram_] := diagram[[2,3]];
+EmittedV[diagram_] := diagram[[3,3]];
 
 FFVContributingDiagramsForGraph[graph_, Fj_ -> {Fi_, V_}] :=
    Module[{diagrams},
@@ -65,19 +66,28 @@ FFVContributingDiagramsForGraph[graph_, Fj_ -> {Fi_, V_}] :=
    ];
 
 IsDiagramSupported[graph_, diagram_] :=
-   Module[{photonEmitter, exchangeParticle, photonEmitterAfter},
+   Module[{vectorEmitter, exchangeParticle, vectorEmitterAfter, vectorBoson},
 
-      photonEmitter = diagram[[3,2]]; (* Edge between vertices ? and ? (3rd edge of vertex 4) *)
-      photonEmitterAfter = diagram[[2,2]];
-      exchangeParticle = diagram[[2,3]]; (* Edge between vertices ? and ? (2nd edge of vertex 4) *)
+      vectorEmitter = EmitterL[diagram]; (* Edge between vertices ? and ? (3rd edge of vertex 4) *)
+      vectorEmitterAfter = EmitterR[diagram];
+      exchangeParticle = Spectator[diagram]; (* Edge between vertices ? and ? (2nd edge of vertex 4) *)
+      vectorBoson = EmittedV[diagram];
 
-      If[TreeMasses`IsFermion[photonEmitter] &&
-         TreeMasses`IsFermion[photonEmitterAfter]
-         && TreeMasses`IsScalar[exchangeParticle],
+      If[Not[TreeMasses`IsChargedUnder[vectorEmitter,vectorBoson] && TreeMasses`IsChargedUnder[vectorEmitterAfter,vectorBoson]],
+         Print["Warning: Diagram with emitting particles ",
+         {EmitterL[diagram], EmitterR[diagram]}];
+         Print["         is currently not supported due to the emitters"];
+         Print["         not having the charge of ",vectorBoson];
+         Print["         Discarding diagram with particles ",
+         {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, "."];
+         Return[False];
+      ];
+
+      If[TreeMasses`IsFermion[vectorEmitter] && TreeMasses`IsFermion[vectorEmitterAfter] && TreeMasses`IsScalar[exchangeParticle],
          Return[True]
       ];
 
-      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[photonEmitter] &&TreeMasses`IsScalar[photonEmitterAfter],
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[vectorEmitter] &&TreeMasses`IsScalar[vectorEmitterAfter],
          Return[True]
       ];
 
