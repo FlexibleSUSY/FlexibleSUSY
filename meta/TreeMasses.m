@@ -417,7 +417,7 @@ IsChargedUnder[field_, vector_] := Block[{},
      IsGluon[vector], Return[ColorChargedQ[field]];,
      (*Else check that this field coupled with its anti-field can emit this vector*)
      (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
-     True, Return[-I SARAH`Vertex[{SARAH`AntiField[field], field, 
+     True, Return[SARAH`Vertex[{SARAH`AntiField[field], field, 
             vector}, UseDependences -> True][[2, 1]] =!= 0];],
     Return[None];
     ];
