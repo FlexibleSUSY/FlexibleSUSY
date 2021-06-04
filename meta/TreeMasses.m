@@ -416,7 +416,7 @@ IsChargedUnder[field_, vector_?IsVector] :=
     (*Else check that this field coupled with its anti-field can emit this vector*)
     (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
     True, SARAH`Vertex[{SARAH`AntiField[field], field, 
-        vector}, UseDependences -> True][[2, 1]] =!= 0;
+        vector}, UseDependences -> True][[2, 1]] =!= 0
   ]
 
 ContainsGoldstone[sym_] := MemberQ[GetGoldstoneBosons[] /. a_[{idx__}] :> a, sym];
