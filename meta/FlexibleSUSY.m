@@ -28,6 +28,7 @@ BeginPackage["FlexibleSUSY`",
               "BetaFunction`",
               "Parameters`",
               "TextFormatting`",
+              "Cache`",
               "CConversion`",
               "TreeMasses`",
               "EWSB`",
@@ -4110,6 +4111,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            nPointFunctions = Vertices`EnforceCpColorStructures @
            					 Vertices`SortCps @
              				 Join[PrepareSelfEnergies[FSEigenstates], PrepareTadpoles[FSEigenstates]];
+           Get[Cache`GetVertex];
            PrepareUnrotatedParticles[FSEigenstates];
 
            DebugPrint["particles (mass eigenstates): ", TreeMasses`GetParticles[]];
@@ -5071,7 +5073,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                               {{FileNameJoin[{$flexiblesusyTemplateDir, "LesHouches.in"}],
                                 FileNameJoin[{FSOutputDir, "LesHouches.in." <> FlexibleSUSY`FSModelName <> "_generated"}]}}
                              ];
-
+           Put[Cache`GetVertex];
            Utils`PrintHeadline["FlexibleSUSY has finished"];
           ];
 

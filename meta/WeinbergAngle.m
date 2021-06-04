@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["WeinbergAngle`", {"SARAH`", "CConversion`", "Parameters`", "SelfEnergies`",
+BeginPackage["WeinbergAngle`", {"SARAH`", "Cache`", "CConversion`", "Parameters`", "SelfEnergies`",
                                 "TextFormatting`", "ThresholdCorrections`", "TreeMasses`",
                                 "Utils`", "Vertices`"}];
 
@@ -315,7 +315,7 @@ HiggsTopVertices[higgsName_] :=
                                Length[indexRange] - 1];
            topQuark = Level[TreeMasses`GetUpQuark[{3}], {Boole[ListQ[TreeMasses`GetUpQuark[{3}]]]}][[1]];
            higgsVertices =
-              Vertices`StripGroupStructure[SARAH`Vertex[{bar[topQuark], topQuark, higgsName[#]}] & /@
+              Vertices`StripGroupStructure[Cache`GetVertex[{bar[topQuark], topQuark, higgsName[#]}] & /@
                                               indexList, SARAH`ctNr /@ Range[4]];
            higgsVertices = Cases[higgsVertices,
                                  {{__, higgsField_}, {coeffPL_, SARAH`PL}, {coeffPR_, SARAH`PR}} /;
@@ -949,7 +949,7 @@ GetNeutrinoIndex[] :=
                             GetWPlusBoson[]][SARAH`PL];
            (*follow vertex conventions:*)
            coupl = Vertices`SortCp[coupl];
-           (*omit a possible minus sign:*)   
+           (*omit a possible minus sign:*)
            If[MatchQ[coupl, Times[-1, _]], coupl = -coupl];
            coupl = SelfEnergies`CreateCouplingSymbol[coupl];
            For[k = 0, k <= 2, k++,

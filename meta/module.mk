@@ -64,6 +64,7 @@ META_SRC     := \
 		$(DIR)/AMuon.m \
 		$(DIR)/AnomalousDimension.m \
 		$(DIR)/BetaFunction.m \
+		$(DIR)/Cache.m \
 		$(DIR)/CConversion.m \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \

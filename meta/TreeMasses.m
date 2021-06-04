@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["TreeMasses`", {"SARAH`", "TextFormatting`", "CConversion`", "Parameters`", "Utils`"}];
+BeginPackage["TreeMasses`", {"SARAH`", "TextFormatting`", "Cache`", "CConversion`", "Parameters`", "Utils`"}];
 
 FSMassMatrix::usage="Head of a mass matrix";
 
@@ -309,11 +309,11 @@ IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
     MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], FSAntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
-	includeColourIndices -> False}]] := 
+	includeColourIndices -> False}]] :=
 	Module[{fieldInfo = Cases[SARAH`Particles[FlexibleSUSY`FSEigenstates],
 		{SARAH`getParticleName @ field, ___}][[1]]},
 		fieldInfo = DeleteCases[fieldInfo, {SARAH`generation, 1}, {2}];
-		
+
 		fieldInfo = If[!OptionValue[includeLorentzIndices],
 			DeleteCases[fieldInfo, {SARAH`lorentz, _}, {2}],
 			fieldInfo];
@@ -644,8 +644,7 @@ GetElectricCharge[p_] :=
               charge = 0;,
               charge = SARAH`getElectricCharge[p];
               If[!NumericQ[charge],
-                 charge = Cases[-I SARAH`Vertex[{SARAH`AntiField[p], p, SARAH`VectorP},
-                                                UseDependences -> True][[2,1]], _?NumberQ];
+                 charge = Cases[-I Cache`GetVertex[{SARAH`AntiField[p], p, SARAH`VectorP}][[2,1]], _?NumberQ];
                  If[charge === {},
                     charge = 0;,
                     charge = First[charge];
