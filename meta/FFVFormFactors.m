@@ -34,7 +34,9 @@ AdjacencyGraph[FFVFormFactors`FFVGraphs[][[1]], VertexLabels -> \"Name\"]
 why such a weird numbering?
 because some procedure uses this order for fermion number flow.";
 FFVContributingDiagramsForGraph::usage = "";
-
+IsDiagramSupported::usage = "For the input FFV graph, determines whether 
+the input diagram is valid, by checking whether the internal structure is
+supported and the emitting fields can in fact emit the vector."
 Begin["Private`"];
 
 vertexCorrectionGraph = {
