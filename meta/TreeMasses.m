@@ -411,8 +411,8 @@ IsElectricallyCharged[par_] := GetElectricCharge[par] != 0;
 
 IsChargedUnder[field_, vector_?IsVector] := 
   Which[(*Check 2 special cases first which are quicker*)
-    IsPhoton[vector], IsElectricallyCharged[field];,
-    IsGluon[vector], ColorChargedQ[field];,
+    IsPhoton[vector], IsElectricallyCharged[field],
+    IsGluon[vector], ColorChargedQ[field],
     (*Else check that this field coupled with its anti-field can emit this vector*)
     (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
     True, SARAH`Vertex[{SARAH`AntiField[field], field, 
