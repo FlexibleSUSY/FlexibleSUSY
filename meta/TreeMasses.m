@@ -157,7 +157,7 @@ FindHyperchargeGaugeCoupling::usage="returns symbol of hypercharge gauge couplin
 CreateDependencePrototypes::usage="";
 CreateDependenceFunctions::usage="";
 
-ColorChargedQ::usage="";
+ColorChargedQ::usage="Checks whether or not input field has color property";
 
 FieldInfo::usage="";
 includeLorentzIndices::usage="";
@@ -183,7 +183,7 @@ IsUnmixed::usage="";
 IsQuark::usage="";
 IsLepton::usage="";
 IsPhoton::usage="Checks whether input field is a Photon";
-IsZBoson::usage="Checks whether input field is a SM Z Boson";
+IsZBoson::usage="";
 IsGluon::usage="Checks whether input field is a Gluon";
 IsSMChargedLepton::usage="";
 IsSMNeutralLepton::usage="";
