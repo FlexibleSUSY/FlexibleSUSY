@@ -78,12 +78,6 @@ IsDiagramSupported[graph_, diagram_] :=
       vectorBoson = EmittedV[diagram];
 
       If[Not[IsChargedUnder[vectorEmitter,vectorBoson] && IsChargedUnder[vectorEmitterAfter,vectorBoson]],
-         Print["Warning: Diagram with emitting particles ",
-         {EmitterL[diagram], EmitterR[diagram]}];
-         Print["         is not supported due to the emitters"];
-         Print["         not having the charge of ",vectorBoson];
-         Print["         Discarding diagram with particles ",
-         {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, "."];
          Return[False];
       ];
 
