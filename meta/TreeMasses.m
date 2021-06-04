@@ -197,7 +197,6 @@ IsSMParticleElementwise::usage=
 the element is a SM-like field or not.  The function assumes that BSM
 fields are always heavier than the SM fields.";
 
-IsChargedUnder::usage="Returns whether or not a field is charged under a given vectors gauge";
 IsElectricallyCharged::usage="Returns whether or not a field has Electric Charge";
 ContainsGoldstone::usage="";
 
@@ -409,16 +408,6 @@ IsChargino[p_] :=
     p === Parameters`GetParticleFromDescription["Charginos"];
 
 IsElectricallyCharged[par_] := GetElectricCharge[par] != 0;
-
-IsChargedUnder[field_, vector_?IsVector] := 
-  Which[(*Check 2 special cases first which are quicker*)
-    IsPhoton[vector], IsElectricallyCharged[field],
-    IsGluon[vector], ColorChargedQ[field],
-    (*Else check that this field coupled with its anti-field can emit this vector*)
-    (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
-    True, SARAH`Vertex[{SARAH`AntiField[field], field, 
-        vector}, UseDependences -> True][[2, 1]] =!= 0
-  ]
 
 ContainsGoldstone[sym_] := MemberQ[GetGoldstoneBosons[] /. a_[{idx__}] :> a, sym];
 

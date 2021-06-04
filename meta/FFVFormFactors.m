@@ -37,6 +37,8 @@ FFVContributingDiagramsForGraph::usage = "";
 IsDiagramSupported::usage = "For the input FFV graph, determines whether 
 the input diagram is valid, by checking whether the internal structure is
 supported and the emitting fields can in fact emit the vector."
+IsChargedUnder::usage="Returns whether or not a field is charged under a given vectors gauge";
+
 Begin["Private`"];
 
 vertexCorrectionGraph = {
@@ -75,7 +77,7 @@ IsDiagramSupported[graph_, diagram_] :=
       exchangeParticle = Spectator[diagram]; (* Edge between vertices ? and ? (2nd edge of vertex 4) *)
       vectorBoson = EmittedV[diagram];
 
-      If[Not[TreeMasses`IsChargedUnder[vectorEmitter,vectorBoson] && TreeMasses`IsChargedUnder[vectorEmitterAfter,vectorBoson]],
+      If[Not[IsChargedUnder[vectorEmitter,vectorBoson] && IsChargedUnder[vectorEmitterAfter,vectorBoson]],
          Print["Warning: Diagram with emitting particles ",
          {EmitterL[diagram], EmitterR[diagram]}];
          Print["         is not supported due to the emitters"];
@@ -100,6 +102,16 @@ IsDiagramSupported[graph_, diagram_] :=
          {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, "."];
       Return[False];
    ];
+
+IsChargedUnder[field_, vector_?IsVector] := 
+  Which[(*Check 2 special cases first which are quicker*)
+    TreeMasses`IsPhoton[vector], TreeMasses`IsElectricallyCharged[field],
+    TreeMasses`IsGluon[vector],  TreeMasses`ColorChargedQ[field],
+    (*Else check that this field coupled with its anti-field can emit this vector*)
+    (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
+    True, SARAH`Vertex[{SARAH`AntiField[field], field, 
+        vector}, UseDependences -> True][[2, 1]] =!= 0
+  ]
 
 FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] :=
    Module[{prototype, definition,
