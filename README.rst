@@ -35,7 +35,7 @@ modification, extension and reuse.
   [1910.03595]_.
 
   If you use **FlexibleDecay** in your work, please cite
-  [2104.XXXXX]_.
+  [2106.05038]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -926,4 +926,4 @@ References
 .. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
 .. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
-.. [2106.XXXXX] `CPC XXX (2021) XXX-XXX <https://inspirehep.net/record/>`_ [`arxiv:2106.XXXXX <https://arxiv.org/abs/>`_]
+.. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
