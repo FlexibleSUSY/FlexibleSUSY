@@ -167,9 +167,9 @@ jobs:
         env:
           compiler: ${{ matrix.CXXCOMPILER }}
         run: |
-          case "${compiler}" in
+          case "$compiler" in
             "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
-            "clang")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
