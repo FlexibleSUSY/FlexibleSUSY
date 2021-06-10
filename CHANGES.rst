@@ -1,11 +1,24 @@
+FlexibleSUSY 2.6.1 [?, ?? 202?]
+==================================
+
+Changes
+-------
+
+* Removed code computing Higgs effective couplings. This code has been
+  superseded by FlexibleDecay.
+
+Fixed bugs
+----------
+
 FlexibleSUSY 2.6.0 [June, 10 2021]
 ==================================
 
 New features
 ------------
 
-* FlexibleDecay [`arXiv:2106.05038 <https://arxiv.org/abs/2106.05038>`_] - calculation of scalar decays with an emphasis on
-  Higgs decays and featuring decoupling behaviour for large BSM masses.
+* FlexibleDecay [`arXiv:2106.05038 <https://arxiv.org/abs/2106.05038>`_]
+  - calculation of scalar decays with an emphasis on Higgs decays and
+  featuring decoupling behaviour for large BSM masses.
 
 Changes
 -------
