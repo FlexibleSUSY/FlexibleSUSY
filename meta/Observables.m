@@ -25,8 +25,6 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 (* observables *)
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
-                  CpHiggsPhotonPhoton, CpHiggsGluonGluon,
-                  CpPseudoScalarPhotonPhoton, CpPseudoScalarGluonGluon,
                   EDM, BrLToLGamma, bsgamma };
 
 If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
@@ -56,30 +54,7 @@ IsObservable[sym_] :=
 GetRequestedObservables[blocks_] :=
     Module[{observables, dim, test},
            observables = DeleteDuplicates[Cases[blocks, a_?IsObservable :> a, {0, Infinity}]];
-           If[MemberQ[observables, FlexibleSUSYObservable`CpHiggsPhotonPhoton] ||
-              MemberQ[observables, FlexibleSUSYObservable`CpHiggsGluonGluon],
-              dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson]
-              If[FreeQ[TreeMasses`GetParticles[], SARAH`HiggsBoson] ||
-                 TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson] == 0,
-                 Print["Warning: no physical Higgs boson found."];
-                 Print["         Effective couplings for Higgs boson will not"];
-                 Print["         be calculated."];
-                 observables = DeleteCases[observables, a_ /; (a === FlexibleSUSYObservable`CpHiggsPhotonPhoton ||
-                                                               a === FlexibleSUSYObservable`CpHiggsGluonGluon)];
-                ];
-             ];
-           If[MemberQ[observables, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton] ||
-              MemberQ[observables, FlexibleSUSYObservable`CpPseudoScalarGluonGluon],
-              If[FreeQ[TreeMasses`GetParticles[], SARAH`PseudoScalar] ||
-                 TreeMasses`GetDimensionWithoutGoldstones[SARAH`PseudoScalar] == 0,
-                 Print["Warning: no physical pseudoscalar boson found."];
-                 Print["         Effective couplings for pseudoscalar boson will not"];
-                 Print["         be calculated."];
-                 observables = DeleteCases[observables, a_ /; (a === FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton ||
-                                                               a === FlexibleSUSYObservable`CpPseudoScalarGluonGluon)];
-                ];
-             ];
-test =       Complement[
+           test = Complement[
               Cases[observables, _FlexibleSUSYObservable`BrLToLGamma],
               Cases[observables, FlexibleSUSYObservable`BrLToLGamma[fin_?IsLepton -> {fout_?IsLepton, vout_ /; vout === GetPhoton[]}]]
                  ];
@@ -96,10 +71,6 @@ GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muon";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := "a_muon_uncertainty";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muon_gm2calc";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "a_muon_gm2calc_uncertainty";
-GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton] := "eff_cp_higgs_photon_photon";
-GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpHiggsGluonGluon] := "eff_cp_higgs_gluon_gluon";
-GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton] := "eff_cp_pseudoscalar_photon_photon";
-GetObservableName[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon] := "eff_cp_pseudoscalar_gluon_gluon";
 GetObservableName[FlexibleSUSYObservable`EDM[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`EDM[p]] <> "_" <> ToString[idx];
 GetObservableName[FlexibleSUSYObservable`EDM[p_]]       := "edm_" <> CConversion`ToValidCSymbolString[p];
 GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_[_] -> {pOut_[_], spectator_}]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_" <> CConversion`ToValidCSymbolString[spectator];
@@ -111,10 +82,6 @@ GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muo
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := "uncertainty of a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muon = (g-2)/2 of the muon (calculated with GM2Calc)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "uncertainty of (g-2)/2 of the muon (calculated with GM2Calc)";
-GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton] := "effective H-Photon-Photon coupling";
-GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpHiggsGluonGluon] := "effective H-Gluon-Gluon coupling";
-GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton] := "effective A-Photon-Photon coupling";
-GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon] := "effective A-Gluon-Gluon coupling";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_[idx_]]] := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> "(" <> ToString[idx] <> ") [1/GeV]";
 GetObservableDescription[FlexibleSUSYObservable`EDM[p_]]       := "electric dipole moment of " <> CConversion`ToValidCSymbolString[p] <> " [1/GeV]";
 GetObservableDescription[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] :=
@@ -143,46 +110,6 @@ GetObservableType[FlexibleSUSYObservable`EDM[p_]] := CConversion`ScalarType[CCon
 GetObservableType[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, _}]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], _]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := CConversion`ScalarType[CConversion`realScalarCType];
-
-GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton] :=
-    Module[{dim, type},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson];
-           If[dim == 1,
-              type = CConversion`ScalarType[CConversion`complexScalarCType],
-              type = CConversion`ArrayType[CConversion`complexScalarCType, dim]
-             ];
-           type
-          ];
-
-GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpHiggsGluonGluon] :=
-    Module[{dim, type},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson];
-           If[dim == 1,
-              type = CConversion`ScalarType[CConversion`complexScalarCType],
-              type = CConversion`ArrayType[CConversion`complexScalarCType, dim]
-             ];
-           type
-          ];
-
-GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton] :=
-    Module[{dim, type},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`PseudoScalar];
-           If[dim == 1,
-              type = CConversion`ScalarType[CConversion`complexScalarCType],
-              type = CConversion`ArrayType[CConversion`complexScalarCType, dim]
-             ];
-           type
-          ];
-
-GetObservableType[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon] :=
-    Module[{dim, type},
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`PseudoScalar];
-           If[dim == 1,
-              type = CConversion`ScalarType[CConversion`complexScalarCType],
-              type = CConversion`ArrayType[CConversion`complexScalarCType, dim]
-             ];
-           type
-          ];
 
 CountNumberOfObservables[observables_List] :=
     Module[{i, number = 0},
@@ -287,130 +214,6 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertain
     "#ifdef ENABLE_GM2CALC\n" <>
     structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);\n" <>
     "#endif";
-
-CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`CpHiggsPhotonPhoton, structName_String] :=
-    Module[{i, type, dim, start, result = ""},
-           type = GetObservableType[obs];
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson];
-           If[dim != 1,
-              start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`HiggsBoson] - 1;
-              For[i = 1, i <= dim, i++,
-                  result = result <> structName <> ".EFFCPHIGGSPHOTONPHOTON("
-                           <> ToString[i-1] <> ") = effective_couplings.get_eff_Cp"
-                           <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "("
-                           <> ToString[start+i-1] <> If[i != dim, ");\n", ");"];
-                 ];,
-              dim = TreeMasses`GetDimension[SARAH`HiggsBoson];
-              If[dim == 1,
-                 result = structName <> ".EFFCPHIGGSPHOTONPHOTON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "();",
-                 start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`HiggsBoson] - 1;
-                 result = structName <> ".EFFCPHIGGSPHOTONPHOTON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "("
-                          <> ToString[start] <> ");"
-                ];
-             ];
-           result
-          ];
-
-CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`CpHiggsGluonGluon, structName_String] :=
-    Module[{i, type, dim, start, result = ""},
-           type = GetObservableType[obs];
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`HiggsBoson];
-           If[dim != 1,
-              start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`HiggsBoson] - 1;
-              For[i = 1, i <= dim, i++,
-                  result = result <> structName <> ".EFFCPHIGGSGLUONGLUON("
-                           <> ToString[i-1] <> ") = effective_couplings.get_eff_Cp"
-                           <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "("
-                           <> ToString[start+i-1] <> If[i != dim, ");\n", ");"];
-                 ];,
-              dim = TreeMasses`GetDimension[SARAH`HiggsBoson];
-              If[dim == 1,
-                 result = structName <> ".EFFCPHIGGSGLUONGLUON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "();",
-                 start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`HiggsBoson] - 1;
-                 result = structName <> ".EFFCPHIGGSGLUONGLUON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`HiggsBoson]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "("
-                          <> ToString[start] <> ");"
-                ];
-             ];
-           result
-          ];
-
-CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton, structName_String] :=
-    Module[{i, type, dim, start, result = ""},
-           type = GetObservableType[obs];
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`PseudoScalar];
-           If[dim != 1,
-              start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar] - 1;
-              For[i = 1, i <= dim, i++,
-                  result = result <> structName <> ".EFFCPPSEUDOSCALARPHOTONPHOTON("
-                           <> ToString[i-1] <> ") = effective_couplings.get_eff_Cp"
-                           <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "("
-                           <> ToString[start+i-1] <> If[i != dim, ");\n", ");"];
-                 ];,
-              dim = TreeMasses`GetDimension[SARAH`PseudoScalar];
-              If[dim == 1,
-                 result = structName <> ".EFFCPPSEUDOSCALARPHOTONPHOTON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "();",
-                 start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar] - 1;
-                 result = structName <> ".EFFCPPSEUDOSCALARPHOTONPHOTON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorP] <> "("
-                          <> ToString[start] <> ");"
-                ];
-             ];
-           result
-          ];
-
-CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`CpPseudoScalarGluonGluon, structName_String] :=
-    Module[{i, type, dim, start, result = ""},
-           type = GetObservableType[obs];
-           dim = TreeMasses`GetDimensionWithoutGoldstones[SARAH`PseudoScalar];
-           If[dim != 1,
-              start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar] - 1;
-              For[i = 1, i <= dim, i++,
-                  result = result <> structName <> ".EFFCPPSEUDOSCALARGLUONGLUON("
-                           <> ToString[i-1] <> ") = effective_couplings.get_eff_Cp"
-                           <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                           <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "("
-                           <> ToString[start+i-1] <> If[i != dim, ");\n", ");"];
-                 ];,
-              dim = TreeMasses`GetDimension[SARAH`PseudoScalar];
-              If[dim == 1,
-                 result = structName <> ".EFFCPPSEUDOSCALARGLUONGLUON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "();",
-                 start = TreeMasses`GetDimensionStartSkippingGoldstones[SARAH`PseudoScalar] - 1;
-                 result = structName <> ".EFFCPPSEUDOSCALARGLUONGLUON = effective_couplings.get_eff_Cp"
-                          <> CConversion`ToValidCSymbolString[SARAH`PseudoScalar]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG]
-                          <> CConversion`ToValidCSymbolString[SARAH`VectorG] <> "("
-                          <> ToString[start] <> ");"
-                ];
-             ];
-           result
-          ];
 
 CalculateObservable[FlexibleSUSYObservable`EDM[p_], structName_String] :=
     Module[{pStr = CConversion`ToValidCSymbolString[p]},
@@ -544,12 +347,6 @@ FillGM2CalcInterfaceData[struct_String] :=
            "#endif\n\n"
           ];
 
-FillEffectiveCouplingsInterfaceData[struct_String] :=
-    Module[{result},
-           result = FlexibleSUSY`FSModelName <> "_effective_couplings " <> struct <> "(model, qedqcd, physical_input);\n";
-           result = result <> "effective_couplings.calculate_effective_couplings();\n"
-          ];
-
 FillInterfaceData[{}] := "";
 
 FillInterfaceData[obs_List] :=
@@ -557,12 +354,6 @@ FillInterfaceData[obs_List] :=
            If[MemberQ[obs,FlexibleSUSYObservable`aMuonGM2Calc] ||
               MemberQ[obs,FlexibleSUSYObservable`aMuonGM2CalcUncertainty],
               filled = filled <> FillGM2CalcInterfaceData["gm2calc_data"];
-             ];
-           If[MemberQ[obs,FlexibleSUSYObservable`CpHiggsPhotonPhoton]         ||
-              MemberQ[obs,FlexibleSUSYObservable`CpHiggsGluonGluon]           ||
-              MemberQ[obs, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton] ||
-              MemberQ[obs, FlexibleSUSYObservable`CpPseudoScalarGluonGluon],
-              filled = filled <> FillEffectiveCouplingsInterfaceData["effective_couplings"];
              ];
            filled
           ];

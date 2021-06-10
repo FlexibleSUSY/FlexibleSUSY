@@ -28,8 +28,6 @@ BASE_TEMPLATES := \
 		$(DIR)/convergence_tester.hpp.in \
 		$(DIR)/ewsb_solver.hpp.in \
 		$(DIR)/ewsb_solver_interface.hpp.in \
-		$(DIR)/effective_couplings.hpp.in \
-		$(DIR)/effective_couplings.cpp.in \
 		$(DIR)/high_scale_constraint.hpp.in \
 		$(DIR)/info.hpp.in \
 		$(DIR)/info.cpp.in \
