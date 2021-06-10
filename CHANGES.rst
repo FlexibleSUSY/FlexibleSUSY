@@ -10,6 +10,9 @@ Changes
 Fixed bugs
 ----------
 
+* [commit ]: Fix error in FFV form factors module cased by models where
+  SARAH generates non zero photon (gluon) couplings to QED (QCD) singlets.
+
 FlexibleSUSY 2.6.0 [June, 10 2021]
 ==================================
 
