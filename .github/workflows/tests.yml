@@ -164,6 +164,8 @@ jobs:
           for m in $models; do ./createmodel --name=$m; done
 
       - name: "Set FS dependency directory"
+        env:
+          compiler: ${{ matrix.CXXCOMPILER }}
         run: |
           case "$compiler" in
             "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
