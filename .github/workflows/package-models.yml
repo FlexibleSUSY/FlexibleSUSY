@@ -45,11 +45,7 @@ jobs:
            PART: ${{ matrix.part }}
         run: |
            models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
-          case "$compiler" in
-            "g++")    FS_DEPENDENCIES_DIR="/fs_dependencies/gcc"  ;;
-            "clang")  FS_DEPENDENCIES_DIR="/fs_dependencies/clang" ;;
-            *) exit 1 ;;
-          esac
+           FS_DEPENDENCIES_DIR="/fs_dependencies/gcc"
            ./release/generate-models.sh \
              --number-of-jobs=2 \
              --directory=release/$FS_TAG \
@@ -61,8 +57,8 @@ jobs:
              --with-loop-libraries=collier,looptools \
              --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
              --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
-             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
-             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib
+             --with-collier-incdir=$FS_DEPENDENCIES_DIR/COLLIER/include \
+             --with-collier-libdir=$FS_DEPENDENCIES_DIR/COLLIER/lib
            ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
