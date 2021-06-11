@@ -1,4 +1,4 @@
-name: Package models
+name: package models
 
 on:
    release:
@@ -45,19 +45,20 @@ jobs:
            PART: ${{ matrix.part }}
         run: |
            models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
+           FS_DEPENDENCIES_DIR="/fs_dependencies/gcc"
            ./release/generate-models.sh \
              --number-of-jobs=2 \
              --directory=release/$FS_TAG \
              --with-models=$models \
-             --with-himalaya-incdir=/Himalaya-g++/include \
-             --with-himalaya-libdir=/Himalaya-g++/lib64 \
-             --with-tsil-incdir=/tsil-g++ \
-             --with-tsil-libdir=/tsil-g++ \
+             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
+             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
+             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
+             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
              --with-loop-libraries=collier,looptools \
-             --with-looptools-incdir=/LoopTools-g++/include \
-             --with-looptools-libdir=/LoopTools-g++/lib64 \
-             --with-collier-incdir=/COLLIER/include \
-             --with-collier-libdir=/COLLIER/lib
+             --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+             --with-collier-incdir=$FS_DEPENDENCIES_DIR/COLLIER/include \
+             --with-collier-libdir=$FS_DEPENDENCIES_DIR/COLLIER/lib
            ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
