@@ -154,7 +154,7 @@ jobs:
           wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
           ./compile
-          echo 'AppendTo[$Path, "/fs_dependencies/gcc/FormCalc-\$FORMCALC_VERSION"];' >> /root/.WolframEngine/Kernel/init.m
+          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
       - name: Create models
         env:
