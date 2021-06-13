@@ -89,19 +89,19 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
-      If[TreeMasses`IsFermion[photonEmitter] && TreeMasses`IsFermion[photonEmitterAfter] && TreeMasses`IsVector[exchangeParticle],
+      If[TreeMasses`IsFermion[vectorEmitter] && TreeMasses`IsFermion[vectorEmitterAfter] && TreeMasses`IsVector[exchangeParticle],
          Return[True]
       ];
 
-      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[vectorEmitter] && TreeMasses`IsVector[vectorEmitterAfter],
          Return[True]
       ];
 
-      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[photonEmitter] && TreeMasses`IsScalar[photonEmitterAfter],
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsVector[vectorEmitter] && TreeMasses`IsScalar[vectorEmitterAfter],
          Return[True]
       ];
 
-      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[photonEmitter] && TreeMasses`IsVector[photonEmitterAfter],
+      If[TreeMasses`IsFermion[exchangeParticle] && TreeMasses`IsScalar[vectorEmitter] && TreeMasses`IsVector[vectorEmitterAfter],
          Return[True]
       ];
 
