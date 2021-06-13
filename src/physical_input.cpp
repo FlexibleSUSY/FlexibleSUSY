@@ -51,7 +51,10 @@ const std::array<std::string, Physical_input::NUMBER_OF_INPUT_PARAMETERS>& Physi
 {
    static const std::array<std::string, NUMBER_OF_INPUT_PARAMETERS> names = {
       "alpha_em(0)",
-      "mh_pole"
+      "mh_pole",
+      "hbar",
+      "muon_mean_life",
+      "tau_mean_life"
    };
    return names;
 }
@@ -76,11 +79,17 @@ void Physical_input::set(const Eigen::ArrayXd& vec)
  * |----------------------------------|------------------------------|-----------------|
  * | alpha_em_0                       | any positive double          | 1/137.035999074 |
  * | mh_pole                          | any positive double          | 125.09          |
+ * | hbar                             | any positive double          | 6.582119569e-25 |
+ * | muon_mean_life                   | any positive double          | 2.1969811e-6    |
+ * | tau_mean_life                    | any positive double          | 290.3e-15       |
  */
 void Physical_input::reset()
 {
    values[alpha_em_0] = 1./137.035999074;
    values[mh_pole] = 125.09;
+   values[hbar] = 6.582119569e-25;
+   values[muon_mean_life] = 2.1969811e-6;
+   values[tau_mean_life] = 290.3e-15;
 }
 
 } // namespace flexiblesusy
