@@ -53,7 +53,6 @@ TEST_SRC := \
 		$(DIR)/test_ckm.cpp \
 		$(DIR)/test_logger.cpp \
 		$(DIR)/test_derivative.cpp \
-		$(DIR)/test_effective_couplings.cpp \
 		$(DIR)/test_eigen_utils.cpp \
 		$(DIR)/test_ewsb_solver.cpp \
 		$(DIR)/test_error.cpp \
@@ -440,11 +439,6 @@ TEST_SRC += \
 		$(DIR)/test_CMSSM_NMSSM_linking.cpp
 endif
 
-ifeq ($(WITH_CMSSM),yes)
-TEST_SRC += \
-		$(DIR)/test_CMSSM_effective_couplings.cpp
-endif
-
 ifeq ($(WITH_CMSSMNoFV),yes)
 TEST_SH += \
 		$(DIR)/test_CMSSMNoFV_profile.sh
@@ -539,7 +533,6 @@ endif
 ifeq ($(WITH_SM),yes)
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
-		$(DIR)/test_SM_effective_couplings.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
 		$(DIR)/test_SM_low_scale_constraint.cpp \
 		$(DIR)/test_SM_mass_eigenstates_interface.cpp \
@@ -1117,8 +1110,6 @@ $(DIR)/test_CMSSMCKM_tree_level_spectrum.x: \
 
 $(DIR)/test_CMSSMCKM_spectrum.sh: $(RUN_SOFTPOINT_EXE)
 
-$(DIR)/test_CMSSM_effective_couplings.x: $(LIBCMSSM)
-
 $(DIR)/test_CMSSM_weinberg_angle.x: $(LIBCMSSM)
 
 $(DIR)/test_CMSSM_weinberg_angle_meta.x: $(LIBCMSSM)
@@ -1181,8 +1172,6 @@ $(DIR)/test_CMSSMNoFV_two_loop_spectrum.x: $(LIBCMSSMNoFV)
 $(DIR)/test_CMSSMNoFV_low_scale_constraint.x: $(LIBCMSSM) $(LIBCMSSMNoFV)
 
 $(DIR)/test_SM_beta_functions.x: $(LIBSM)
-
-$(DIR)/test_SM_effective_couplings.x: $(LIBSM)
 
 $(DIR)/test_SM_gmm2.x: $(LIBSM)
 

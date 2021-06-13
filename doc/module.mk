@@ -27,6 +27,7 @@ INDEX_PAGE      := $(HTML_OUTPUT_DIR)/index.html
 MAN_PAGE        := $(MAN_OUTPUT_DIR)/index.html
 DOXYFILE        := $(DIR)/Doxyfile
 DOXYGEN_MAINPAGE:= $(DIR)/mainpage.dox
+DOXYGEN         ?= doxygen
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		$(INDEX_PAGE) $(MAN_PAGE) doc doc-html doc-man doc-pdf
@@ -63,7 +64,7 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 $(INDEX_PAGE):
-		( cat $(DOXYFILE) ; \
+		$(Q)( cat $(DOXYFILE) ; \
 		  echo "INPUT = $(MODULES) $(README_FILE)" ; \
 		  echo "OUTPUT_DIRECTORY = $(HTML_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
@@ -71,10 +72,10 @@ $(INDEX_PAGE):
 		  echo "EXCLUDE_PATTERNS = */meta/* */test/*"; \
 		  echo "IMAGE_PATH = $(IMAGE_DIR)"; \
 		  echo "INCLUDE_PATH = $(MODULES)"; \
-		) | doxygen -
+		) | $(DOXYGEN) -
 
 $(MAN_PAGE):
-		( cat $(DOXYFILE) ; \
+		$(Q)( cat $(DOXYFILE) ; \
 		  echo "INPUT = $(MODULES) $(README_FILE)" ; \
 		  echo "OUTPUT_DIRECTORY = $(MAN_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
@@ -84,4 +85,4 @@ $(MAN_PAGE):
 		  echo "INCLUDE_PATH = $(MODULES)"; \
 		  echo "GENERATE_MAN = YES"; \
 		  echo "GENERATE_HTML = NO"; \
-		) | doxygen -
+		) | $(DOXYGEN) -

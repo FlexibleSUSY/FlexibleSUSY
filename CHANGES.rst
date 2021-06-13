@@ -1,12 +1,27 @@
-FlexibleSUSY 2.6.0 [not released yet]
-=====================================
+FlexibleSUSY 2.6.1 [?, ?? 202?]
+==================================
+
+Changes
+-------
+
+* Removed code computing Higgs effective couplings. This code has been
+  superseded by FlexibleDecay.
+
+Fixed bugs
+----------
+
+* [commit ]: Fix error in FFV form factors module cased by models where
+  SARAH generates non zero photon (gluon) couplings to QED (QCD) singlets.
+
+FlexibleSUSY 2.6.0 [June, 10 2021]
+==================================
 
 New features
 ------------
 
-* Added FlexibleDecay.
-
-  Thanks to ME! And maybe Dylan.
+* FlexibleDecay [`arXiv:2106.05038 <https://arxiv.org/abs/2106.05038>`_]
+  - calculation of scalar decays with an emphasis on Higgs decays and
+  featuring decoupling behaviour for large BSM masses.
 
 Changes
 -------

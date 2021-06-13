@@ -6,6 +6,7 @@ on:
   # no idea how to fix it
   push:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'
@@ -15,6 +16,7 @@ on:
 
   pull_request:
     branches:
+      - master
       - development
     paths-ignore:
       - '*.rst'
@@ -117,7 +119,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.5.1
+      image: navir/opensuseleap-for-flexiblesusy:0.9.0
 
     strategy:
       matrix:
@@ -148,11 +150,11 @@ jobs:
 
       - name: Install FormCalc
         run: |
-          cd /
+          cd /fs_dependencies/gcc
           wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
           cd FormCalc-$FORMCALC_VERSION
           ./compile
-          echo 'AppendTo[$Path, "/FormCalc-$FORMCALC_VERSION"];' >> /root/.WolframEngine/Kernel/init.m
+          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
 
       - name: Create models
         env:
@@ -160,6 +162,16 @@ jobs:
         run: |
           models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(' ')" -- $PART $MODELS)
           for m in $models; do ./createmodel --name=$m; done
+
+      - name: "Set FS dependency directory"
+        env:
+          compiler: ${{ matrix.CXXCOMPILER }}
+        run: |
+          case "$compiler" in
+            "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
+            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+            *) exit 1 ;;
+          esac
 
       - name: Configure
         env:
@@ -171,18 +183,18 @@ jobs:
             --with-cxx=$CXXCOMPILER \
             --with-models=$models \
             --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
-            --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
-            --with-collier-incdir=/COLLIER/include \
-            --with-collier-libdir=/COLLIER/lib \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
             --enable-himalaya \
-            --with-himalaya-incdir=/Himalaya-$CXXCOMPILER/include \
-            --with-himalaya-libdir=/Himalaya-$CXXCOMPILER/lib64 \
+            --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
+            --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
             --enable-gm2calc \
-            --with-gm2calc-incdir=/GM2Calc-$CXXCOMPILER/include \
-            --with-gm2calc-libdir=/GM2Calc-$CXXCOMPILER/lib64 \
-            --with-tsil-incdir=/tsil-$CXXCOMPILER \
-            --with-tsil-libdir=/tsil-$CXXCOMPILER \
+            --with-gm2calc-incdir=$FS_DEPENDENCIES_DIR/GM2Calc/include \
+            --with-gm2calc-libdir=$FS_DEPENDENCIES_DIR/GM2Calc/lib64 \
+            --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
             --enable-librarylink \
             --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
@@ -234,10 +246,10 @@ jobs:
             --with-cxx=$CXXCOMPILER \
             --with-models=SM \
             --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=/LoopTools-$CXXCOMPILER/include \
-            --with-looptools-libdir=/LoopTools-$CXXCOMPILER/lib64 \
-            --with-collier-incdir=/COLLIER/include \
-            --with-collier-libdir=/COLLIER/lib \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
             --disable-meta \
             --with-optional-modules=test
           make -j2
