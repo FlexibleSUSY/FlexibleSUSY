@@ -245,7 +245,7 @@ required_icpc_compiler_version="17.0.0"
 required_boost_version="1.37.0"
 
 # required Mathematica version
-required_mathematica_version="10"
+required_mathematica_version="10.1"
 
 # required SARAH version
 required_sarah_major="4"
