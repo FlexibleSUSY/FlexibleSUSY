@@ -13,6 +13,10 @@ Fixed bugs
 * [commit ]: Fix error in FFV form factors module cased by models where
   SARAH generates non zero photon (gluon) couplings to QED (QCD) singlets.
 
+* [commit a0bbda569]: Correcting check for required Mathematica version
+  10.1, needed by FlexibleDecay.
+
+
 FlexibleSUSY 2.6.0 [June, 10 2021]
 ==================================
 
