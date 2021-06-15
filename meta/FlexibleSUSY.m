@@ -3176,6 +3176,10 @@ FSCheckFlags[] :=
               References`AddReference["Athron:2016fuq"];
              ];
 
+           If[FlexibleSUSY`FSCalculateDecays,
+              References`AddReference["Athron:2021kve"];
+             ];
+
            If[FlexibleSUSY`UseYukawa3LoopQCD || FlexibleSUSY`FlexibleEFTHiggs,
               Print["Adding 3-loop SM QCD corrections to yt from ",
                     "[arxiv:hep-ph/9911434, arxiv:hep-ph/9912391]"];
