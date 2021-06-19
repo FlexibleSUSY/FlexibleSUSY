@@ -81,7 +81,7 @@ Requirements
 
 * C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
-* Mathematica (version 10.1 or higher)
+* Mathematica (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
 * Boost_ (version 1.37.0 or higher)
 * `Eigen 3`_ (version 3.1 or higher)
