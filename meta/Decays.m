@@ -1942,7 +1942,7 @@ If[Length@positions =!= 1, Quit[1]];
             If[Head[cf] === Complex,
                (* complex colour factor *)
                "std::complex<double> " <> ToString@colorFac <> " " <>
-                  ToString[N[#, 16]& /@ FSReIm @ cf],
+                  ToString[N[#, 16]& /@ ReIm @ cf],
 
                (* real color factor *)
                "double " <> ToString@colorFac <> " {" <>
