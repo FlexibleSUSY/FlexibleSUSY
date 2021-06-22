@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE(test_F5_data)
 {
    using namespace flexiblesusy::threshold_loop_functions;
 
-   test_1("F5", [] (double x) { return F5(x); }, 1e-11);
+   test_1("F5", [] (double x) { return F5(x); }, 2e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_F6)

@@ -44,7 +44,7 @@ jobs:
         env:
            PART: ${{ matrix.part }}
         run: |
-           models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
+           models=$(ruby -e "puts ARGV.each_slice(ARGV.length/2).to_a[$PART-1].join(',')" -- $MODELS)
            FS_DEPENDENCIES_DIR="/fs_dependencies/gcc"
            ./release/generate-models.sh \
              --number-of-jobs=2 \

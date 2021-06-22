@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(zero_test_four_loop_D00) {
 BOOST_AUTO_TEST_CASE(test_three_loop_Cij) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C0(1, 2, 7, 40, 50, 60, 50).real(), -0.0102393301312332, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C1(1, 2, 7, 40, 50, 60, 50).real(), 0.00339093073306662, 9e-13 );
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C2(1, 2, 7, 40, 50, 60, 50).real(), 0.00325189753369775, 5e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C2(1, 2, 7, 40, 50, 60, 50).real(), 0.00325189753369775, 6e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C00(1, 2, 7, 40, 50, 60, 50).real(), 0.00505602406221806, 3e-12 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C11(1, 2, 7, 40, 50, 60, 50).real(), -0.00168913532593899, 4e-11 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().C12(1, 2, 7, 40, 50, 60, 50).real(), -0.000816899186005851, 4e-11 );
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_C) {
    Loop_library::get().C(c, 1, 2, 7, 40, 50, 60, 50);
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c0].real(), -0.0102393301312332, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c1].real(), 0.00339093073306662, 9e-13 );
-   BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c2].real(), 0.00325189753369775, 5e-13 );
+   BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c2].real(), 0.00325189753369775, 6e-13 );
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c00].real(), 0.00505602406221806, 3e-12 );
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c11].real(), -0.00168913532593899, 4e-11 );
    BOOST_CHECK_CLOSE_FRACTION( c[looplibrary::c12].real(), -0.000816899186005851, 4e-11 );
@@ -147,14 +147,14 @@ BOOST_AUTO_TEST_CASE(test_three_loop_Dij) {
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D0(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.13242728302472e-07, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D1(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.67874509586995e-07, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D2(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -4.65985813303812e-08, 3e-14 );
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D3(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.2628661716426e-07, 6e-15 );
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 8.05187632193884e-05, 3e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D3(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 1.2628661716426e-07, 9e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D00(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 8.05187632193884e-05, 4e-14 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D11(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -9.75814300466367e-08, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D12(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -8.63221516142818e-10, 6e-12 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D13(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -2.8583621711861e-08, 2e-13 );
    BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D22(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), 4.5244174519793e-08, 7e-14 );
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D23(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -3.62793572133793e-09, 9e-13 );
-   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D33(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -5.64568234854199e-08, 9e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D23(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -3.62793572133793e-09, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( Loop_library::get().D33(1e3, 2e3, 3e3, 1e2, 1e4, -3e3, 1e2, 2e2, 3e2, 3e2, 50).real(), -5.64568234854199e-08, 2e-13 );
 }
 
 BOOST_AUTO_TEST_CASE(test_D) {
@@ -163,14 +163,14 @@ BOOST_AUTO_TEST_CASE(test_D) {
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d0].real(), -4.13242728302472e-07, 2e-15 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d1].real(), 1.67874509586995e-07, 4e-15 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d2].real(), -4.65985813303812e-08, 3e-14 );
-   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d3].real(), 1.2628661716426e-07, 7e-15 );
-   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d00].real(), 8.05187632193884e-05, 3e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d3].real(), 1.2628661716426e-07, 9e-15 );
+   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d00].real(), 8.05187632193884e-05, 4e-14 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d11].real(), -9.75814300466367e-08, 6e-14 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d12].real(), -8.63221516142818e-10, 6e-12 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d13].real(), -2.8583621711861e-08, 2e-13 );
    BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d22].real(), 4.5244174519793e-08, 7e-14 );
-   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d23].real(), -3.62793572133793e-09, 9e-13 );
-   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d33].real(), -5.64568234854199e-08, 9e-14 );
+   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d23].real(), -3.62793572133793e-09, 2e-12 );
+   BOOST_CHECK_CLOSE_FRACTION( d[looplibrary::d33].real(), -5.64568234854199e-08, 2e-13 );
 }
 
 #endif

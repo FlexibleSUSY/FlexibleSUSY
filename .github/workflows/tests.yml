@@ -2,8 +2,6 @@ name: tests
 
 on:
 
-  # branches together with paths-ignore work like 'or', not like 'and'
-  # no idea how to fix it
   push:
     branches:
       - master
@@ -121,12 +119,12 @@ jobs:
 
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.9.0
+      image: navir/opensuseleap-for-flexiblesusy:0.9.1
 
     strategy:
       matrix:
-        CXXCOMPILER: [g++, clang++]
-        PART:        [1, 2]
+        COMPILER: [gcc, clang, intel]
+        PART:     [1, 2]
 
     env:
       FORMCALC_VERSION: '9.9'
@@ -162,54 +160,65 @@ jobs:
         env:
           PART: ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(' ')" -- $PART $MODELS)
+          models=$(ruby -e "puts ARGV.each_slice(ARGV.length/2).to_a[$PART-1].join(' ')" -- $MODELS)
           for m in $models; do ./createmodel --name=$m; done
 
-      - name: "Set FS dependency directory"
+      - name: Set C++ environment
         env:
-          compiler: ${{ matrix.CXXCOMPILER }}
+          COMPILER: ${{ matrix.COMPILER }}
         run: |
-          case "$compiler" in
-            "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
-            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+          # icpc doesn't support -Wpedantic
+          case "$COMPILER" in
+            "gcc")    echo "CXX=g++"     >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe" >> $GITHUB_ENV ;;
+            "clang")  echo "CXX=clang++" >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe" >> $GITHUB_ENV ;;
+            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -pipe"            >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
       - name: Configure
         env:
-          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          COMPILER: ${{ matrix.COMPILER }}
           PART:        ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
+          models=$(ruby -e "puts ARGV.each_slice(ARGV.length/2).to_a[$PART-1].join(',')" -- $MODELS)
+          [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
-            --with-cxx=$CXXCOMPILER \
+            --with-cxx=$CXX \
+            --with-fc=$FC \
             --with-models=$models \
             --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
-            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
-            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
-            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --with-looptools-incdir=/fs_dependencies/$COMPILER/LoopTools/include \
+            --with-looptools-libdir=/fs_dependencies/$COMPILER/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
             --enable-himalaya \
-            --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
-            --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
+            --with-himalaya-incdir=/fs_dependencies/$COMPILER/Himalaya/include \
+            --with-himalaya-libdir=/fs_dependencies/$COMPILER/Himalaya/lib64 \
             --enable-gm2calc \
-            --with-gm2calc-incdir=$FS_DEPENDENCIES_DIR/GM2Calc/include \
-            --with-gm2calc-libdir=$FS_DEPENDENCIES_DIR/GM2Calc/lib64 \
-            --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
-            --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-gm2calc-incdir=/fs_dependencies/$COMPILER/GM2Calc/include \
+            --with-gm2calc-libdir=/fs_dependencies/$COMPILER/GM2Calc/lib64 \
+            --with-tsil-incdir=/fs_dependencies/$COMPILER/tsil \
+            --with-tsil-libdir=/fs_dependencies/$COMPILER/tsil \
             --with-optional-modules=test \
             --enable-librarylink \
-            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
+            --with-cxxflags="$CXXFLAGS"
           make showbuild
 
       - name: Make
-        run: make -j2
+        run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
+          make -j2
 
       - name: Run Mathematica tests
-        run: make -j2 execute-meta-tests
+        run: |
+          # some mathematica tests do compile something
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
+          make -j2 execute-meta-tests
 
       - name: Build compiled tests
-        run: make -j2 alltest
+        run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
+          make -j2 alltest
 
       # Having a single name entry and a bash loop over integers in the run tag would save a
       # little writing but splitting it into multiple entries makes it easier to see on github which loop
@@ -218,42 +227,49 @@ jobs:
         # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
         # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
         run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
           FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (Collier)
         run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
           FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (LoopTools)
         run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
           FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Run compiled and shell script (fflite)
         run: |
+          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
           FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
           make clean-test-log
 
       - name: Testing pack-SM-src
         if: ${{ matrix.PART == 2 }}
         env:
-          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          COMPILER: ${{ matrix.COMPILER }}
         run: |
           make pack-SM-src
           rm -rf models/SM
           tar -xf SM.tar.gz
+          [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
-            --with-cxx=$CXXCOMPILER \
+            --with-cxx=$CXX \
+            --with-fc=$FC \
             --with-models=SM \
             --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
-            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
-            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
-            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --with-looptools-incdir=/fs_dependencies/$COMPILER/LoopTools/include \
+            --with-looptools-libdir=/fs_dependencies/$COMPILER/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
             --disable-meta \
-            --with-optional-modules=test
+            --with-optional-modules=test \
+            --with-cxxflags="$CXXFLAGS"
           make -j2
           make -j2 execute-meta-tests
           make -j2 alltest
@@ -267,7 +283,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          name: ${{matrix.COMPILER}}_test-logs
           path: |
             config.*
             test/test_*.log
