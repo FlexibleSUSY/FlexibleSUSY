@@ -214,7 +214,7 @@ jobs:
         run: |
           # some mathematica tests do compile something
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          make -j2 execute-meta-tests
+          # make -j2 execute-meta-tests
 
       - name: Build compiled tests
         run: |
