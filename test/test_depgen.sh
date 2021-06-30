@@ -25,8 +25,8 @@ run_depgens() {
 
     rm -f ${OUTPUT}.1 ${OUTPUT}.2
 
-    $cmd1 $file | awk "${awk_join_lines}" | sed 's/ */ /g' > ${OUTPUT}.1
-    $cmd2 $file | awk "${awk_join_lines}" | sed 's/ */ /g' > ${OUTPUT}.2
+    $cmd1 $file | awk "${awk_join_lines}" | sed '/^\/.*/d' | sed '$!N; /^\(.*\)\n\1$/!P; D' | sed 's/ */ /g' > ${OUTPUT}.1
+    $cmd2 $file | awk "${awk_join_lines}" | sed '/^\/.*/d' | sed '$!N; /^\(.*\)\n\1$/!P; D' | sed 's/ */ /g' > ${OUTPUT}.2
 
     diff=$(diff -u ${OUTPUT}.1 ${OUTPUT}.2)
 
