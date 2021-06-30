@@ -123,7 +123,7 @@ jobs:
 
     strategy:
       matrix:
-        COMPILER: [gcc, clang, intel]
+        COMPILER: [intel]
         PART:     [1, 2]
 
     env:
