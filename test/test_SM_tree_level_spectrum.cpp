@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( test_SM_tree_level_Higgs_masses )
 
    // check Goldstone boson masses
    BOOST_CHECK_EQUAL(m.get_MHp(), m.get_MVWp());
-   BOOST_CHECK_EQUAL(m.get_MAh(), m.get_MVZ());
+   BOOST_CHECK_CLOSE(m.get_MAh(), m.get_MVZ(), 2e-14);
 }
 
 #define CHECK_CLOSE_1(mass,eps)                                         \
@@ -65,13 +65,13 @@ BOOST_AUTO_TEST_CASE( test_SM_tree_level_masses )
    m.calculate_DRbar_masses();
    sm.calculate_DRbar_masses();
 
-   const double eps = 1e-15;
+   constexpr double eps = 1e-15;
 
    CHECK_CLOSE_1(MVP, eps);
    CHECK_CLOSE_1(MVG, eps);
    CHECK_CLOSE_1(MVZ, eps);
    CHECK_CLOSE_1(MVWp, eps);
-   CHECK_CLOSE_1(MAh, eps);
+   CHECK_CLOSE_1(MAh, 2e-14);
    CHECK_CLOSE_1(MHp, eps);
    CHECK_CLOSE_1(Mhh, eps);
    CHECK_CLOSE_N(MFv, eps, 3);
