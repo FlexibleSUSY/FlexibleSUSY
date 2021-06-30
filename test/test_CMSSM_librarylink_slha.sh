@@ -97,8 +97,8 @@ for f in "$outputFile1" "$outputFile2" ; do
     rm "$f~"
 done
 
-numdiff --absolute-tolerance=1.0e-12 \
-        --relative-tolerance=5.0e-7 \
+numdiff --absolute-tolerance=1.0e-4 \
+        --relative-tolerance=1.0e-3 \
         "$outputFile1" "$outputFile2"
 
 errors="$?"
