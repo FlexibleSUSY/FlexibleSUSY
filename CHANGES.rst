@@ -6,11 +6,13 @@ Changes
 
 * Removed code computing Higgs effective couplings. This code has been
   superseded by FlexibleDecay.
+* FlexibleDecay: 2-loop QCD corrections to `$\Phi \to \Gamma Z$` applied
+  only if `$m_Z/m_\Phi < 0.75$`.
 
 Fixed bugs
 ----------
 
-* [commit ]: Fix error in FFV form factors module cased by models where
+* [commit 21ed4cc6b]: Fix error in FFV form factors module cased by models where
   SARAH generates non zero photon (gluon) couplings to QED (QCD) singlets.
 
 * [commit a0bbda569]: Correcting check for required Mathematica version
