@@ -90,7 +90,7 @@ Requirements
 
 * C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
-* Mathematica (version 11.0 or higher)
+* `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
 * Boost_ (version 1.37.0 or higher)
 * `Eigen 3`_ (version 3.1 or higher)
@@ -1005,11 +1005,12 @@ References
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
-.. _GNU scientific library: http://www.gnu.org/software/gsl/
-.. _LoopTools: http://www.feynarts.de/looptools/
-.. _COLLIER: https://collier.hepforge.org/
+.. _GNU scientific library: http://www.gnu.org/software/gsl
+.. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
+.. _LoopTools: http://www.feynarts.de/looptools
+.. _COLLIER: https://collier.hepforge.org
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
-.. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _TSIL: https://www.niu.edu/spmartin/tsil
 
 .. _`FlexibleSUSY model file`: doc/model_file.rst
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
