@@ -28,7 +28,7 @@ jobs:
   no-meta:
     strategy:
       matrix:
-        OS: [macos-10.15, ubuntu-20.04]
+        OS: [macos-10.15, ubuntu-latest]
         CXXCOMPILER: [g++, clang++]
     runs-on: ${{ matrix.OS }}
     if: false
@@ -117,7 +117,7 @@ jobs:
     # forks FS github doesn't try to run tests on their code.
     if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
       image: navir/opensuseleap-for-flexiblesusy:0.9.1
 
