@@ -1,4 +1,4 @@
-FlexibleSUSY 2.6.1 [?, ?? 202?]
+FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
 Changes
