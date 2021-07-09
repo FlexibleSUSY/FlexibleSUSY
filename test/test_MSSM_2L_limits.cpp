@@ -225,8 +225,8 @@ BOOST_AUTO_TEST_CASE( MSSM_tadpole_at_at_st_0_mst1_eq_mst2 )
    BOOST_CHECK_EQUAL(tad_ps(0), tad_fs_close(0));
    BOOST_CHECK_EQUAL(tad_ps(1), tad_fs_close(1));
 
-   BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 5e-5);
-   BOOST_CHECK_CLOSE(tad_ps(1), tad_fs_exact(1), 1e-5);
+   BOOST_CHECK_CLOSE(tad_ps(0), tad_fs_exact(0), 4e-3);
+   BOOST_CHECK_CLOSE(tad_ps(1), tad_fs_exact(1), 2e-5);
 
    BOOST_TEST_MESSAGE("Pietro Slavich                : " << tad_ps.transpose());
    BOOST_TEST_MESSAGE("Limit st -> 0 and mst1 -> mst2: " << tad_fs_exact.transpose());
@@ -331,9 +331,9 @@ BOOST_AUTO_TEST_CASE( MSSM_dMh_at_at_st_0_mst1_eq_mst2 )
    BOOST_CHECK_CLOSE(dMh_ps(1,1), dMh_fs_close(1,1), 2e-3);
 
    // BOOST_CHECK_CLOSE(dMh_ps(0,0), dMh_fs_exact(0,0), 1e-3); // FAILS
-   BOOST_CHECK_CLOSE(dMh_ps(0,1), dMh_fs_exact(0,1), 15);
-   BOOST_CHECK_CLOSE(dMh_ps(1,0), dMh_fs_exact(1,0), 15);
-   BOOST_CHECK_CLOSE(dMh_ps(1,1), dMh_fs_exact(1,1), 0.007);
+   BOOST_CHECK_CLOSE(dMh_ps(0,1), dMh_fs_exact(0,1), 52);
+   BOOST_CHECK_CLOSE(dMh_ps(1,0), dMh_fs_exact(1,0), 52);
+   BOOST_CHECK_CLOSE(dMh_ps(1,1), dMh_fs_exact(1,1), 0.03);
 
    BOOST_TEST_MESSAGE("Pietro Slavich                 :\n" << dMh_ps);
    BOOST_TEST_MESSAGE("Limit st -> 0 and mst1 -> mst2 :\n" << dMh_fs_exact);

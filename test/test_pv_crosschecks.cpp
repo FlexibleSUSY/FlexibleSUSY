@@ -263,11 +263,11 @@ BOOST_AUTO_TEST_CASE(fflite_generate_points)
 
 BOOST_AUTO_TEST_CASE(looptools_check_points)
 {
-    string line;
-    while (getline(cin, line))
-	check_point(rrfuncs, line, 1e-15) ||
-	check_point(rcfuncs, line, 1e-15) ||
-	check_point(ccfuncs, line, 1e-15);
+   string line;
+   while (getline(cin, line))
+	check_point(rrfuncs, line, 4e-9) ||
+	check_point(rcfuncs, line, 4e-9) ||
+	check_point(ccfuncs, line, 4e-9);
 }
 
 #else
