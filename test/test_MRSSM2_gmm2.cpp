@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE( test_amu )
    MRSSM2_slha m = setup_MRSSM2(input, qedqcd);
 
    auto amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
-   BOOST_CHECK_CLOSE_FRACTION(amu, -8.1719200196512154e-11, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, -5.3881952366028327e-11, 1e-7);
 
    // neutralino dominance
    input.ml2Input = DiagonalMatrix3(Sqr(8000), Sqr(8000), Sqr(8000));
    m = setup_MRSSM2(input, qedqcd);
 
    amu = MRSSM2_a_muon::calculate_a_muon(m, qedqcd);
-   BOOST_CHECK_CLOSE_FRACTION(amu, 6.265022288260675e-12, 1e-7);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 3.4292347036938742e-11, 1e-7);
 }
