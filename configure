@@ -1865,9 +1865,16 @@ check_gsl_config() {
         message "  use $0 --with-gsl-config=<path to gsl-config>"
         exit 1
     else
-        result "found $cmd"
+        local GSL_VERSION=$($cmd --version)
+        result "found $cmd (version ${GSL_VERSION})"
         GSLFLAGS=$($cmd --cflags)
         GSLLIBS=$($cmd --libs)
+
+        version_at_least "$GSL_VERSION" "2.0.0" || {
+            message "Error: An old version of GSL has been detected ($GSL_VERSION)."
+            message "   Please upgrade to version 2.0.0 (or higher)."
+            exit 1
+        }
     fi
 }
 
