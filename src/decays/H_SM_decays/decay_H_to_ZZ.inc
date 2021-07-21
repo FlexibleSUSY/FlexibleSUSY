@@ -52,16 +52,16 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
       // this gives relative error < 0.05%
-      constexpr size_t calls = 1'000'000;
+      constexpr size_t calls = 60'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
-      gsl_monte_miser_state *s = gsl_monte_miser_alloc (2);
-      gsl_monte_miser_integrate (&G, xl, xu, 2, calls, r, s,
+      gsl_monte_plain_state *s = gsl_monte_plain_alloc (2);
+      gsl_monte_plain_integrate (&G, xl, xu, 2, calls, r, s,
                                  &res, &err);
 
       // clean-up
-      gsl_monte_miser_free (s);
+      gsl_monte_plain_free (s);
       gsl_rng_free (r);
 
       // prefactor
