@@ -1890,7 +1890,10 @@ If[Length@positions =!= 1, Quit[1]];
                                     "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
                                     "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
                                  ])&, verticesForFACp]," &&\n"] <>
-                                 "\n&& result.m_decay/mInternal1 < 0.8\n"
+                                 (* mPhi/mq < 0.8 *)
+                                 "\n&& result.m_decay/mInternal1 < 0.8" <>
+                                 (* mZ/mPhi < 0.75 *)
+                                 " && " <> If[TreeMasses`IsZBoson[diagram[[2]]], "result.m_vector_1", "result.m_vector_2"] <> "/result.m_decay < 0.75\n"
                               ] <>
                               ") {\n" <>
                               (* eq. 2.57 of hep-ph/0503172 *)

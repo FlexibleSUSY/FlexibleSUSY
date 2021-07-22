@@ -34,6 +34,9 @@ modification, extension and reuse.
   please cite [1005.5709]_, [1708.05720]_, [1807.03509]_ and
   [1910.03595]_.
 
+  If you use **FlexibleSUSY+GM2Calc** in your work, please cite
+  [1510.08071]_.
+
   If you use **FlexibleDecay** in your work, please cite
   [2106.05038]_.
 
@@ -87,7 +90,7 @@ Requirements
 
 * C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
-* Mathematica (version 11.0 or higher)
+* `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
 * Boost_ (version 1.37.0 or higher)
 * `Eigen 3`_ (version 3.1 or higher)
@@ -994,7 +997,7 @@ References
 ==========
 
 .. _slhaea: https://github.com/fthomas/slhaea
-.. _GM2Calc: https://arxiv.org/abs/1510.08071
+.. _GM2Calc: https://github.com/GM2Calc/GM2Calc
 .. _SARAH: http://sarah.hepforge.org
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
@@ -1002,11 +1005,12 @@ References
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
-.. _GNU scientific library: http://www.gnu.org/software/gsl/
-.. _LoopTools: http://www.feynarts.de/looptools/
-.. _COLLIER: https://collier.hepforge.org/
+.. _GNU scientific library: http://www.gnu.org/software/gsl
+.. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
+.. _LoopTools: http://www.feynarts.de/looptools
+.. _COLLIER: https://collier.hepforge.org
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
-.. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _TSIL: https://www.niu.edu/spmartin/tsil
 
 .. _`FlexibleSUSY model file`: doc/model_file.rst
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
@@ -1022,10 +1026,11 @@ References
 .. [1309.7223] `CPC 185 (2014) 1773-1790 <https://inspirehep.net/record/1255845>`_ [`arxiv:1309.7223 <http://arxiv.org/abs/1309.7223>`_]
 .. [1311.7659] `CPC 185 (2014) 2322 <https://inspirehep.net/record/1266808>`_  [`arxiv:1311.7659 <http://arxiv.org/abs/1311.7659>`_]
 .. [1406.2319] `CPC 190 (2015) 139-172 <https://inspirehep.net/record/1299998>`_ [`arxiv:1406.2319 <https://arxiv.org/abs/1406.2319>`_]
+.. [1510.08071] `Eur. Phys. J. C76 (2016) no. 2, 62 <https://inspirehep.net/literature/1401235>`_ [`arXiv:1510.08071 <https://arxiv.org/abs/1510.08071>`_]
 .. [1609.00371] `JHEP 1701 (2017) 079 <https://inspirehep.net/record/1484857>`_ [`arxiv:1609.00371 <https://arxiv.org/abs/1609.00371>`_]
-.. [1708.05720] `Eur.Phys.J. C77 (2017) no.12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
+.. [1708.05720] `Eur. Phys. J. C77 (2017) no. 12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
-.. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
-.. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
-.. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
+.. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
+.. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
+.. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
 .. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]

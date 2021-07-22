@@ -3178,6 +3178,7 @@ FSCheckFlags[] :=
 
            If[FlexibleSUSY`FSCalculateDecays,
               References`AddReference["Athron:2021kve"];
+              References`AddReference["Sjodahl:2012nk"];
              ];
 
            If[FlexibleSUSY`UseYukawa3LoopQCD || FlexibleSUSY`FlexibleEFTHiggs,

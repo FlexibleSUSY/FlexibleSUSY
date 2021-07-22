@@ -683,7 +683,7 @@ Block MSOFT Q= 8.61574711E+02
    // with 2L QCD for squark
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 7.271047934944202e-06, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2268180468443525e-06, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 2e-10);
 
    // pseudoscalar Higgs
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057279629952, 4e-13);
