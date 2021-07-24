@@ -1,3 +1,13 @@
+FlexibleSUSY 2.X.X [XXX]
+==================================
+
+New features
+------------
+
+* Added calculation of Barr-Zee type contributions to g-2.
+
+  Thanks to Felix Reichenbach.
+
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
