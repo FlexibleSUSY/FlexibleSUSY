@@ -332,7 +332,7 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
    VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
 
    context_base context{ model };
-   
+
    using namespace @ModelName@_cxx_diagrams::fields;
 
 @AMuon_Calculation@
@@ -342,13 +342,13 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double val = 
+   double val =
       // vector form factor
       1./2.*(form_factors[2] + form_factors[3]).real()
-      // reinstate the mass that was factored out in definition of form factor 
-      * context.mass<Muon>({@AMuon_MuonIndex@}) 
+      // reinstate the mass that was factored out in definition of form factor
+      * context.mass<Muon>({@AMuon_MuonIndex@})
       // factor out e/(2*muon pole mass)
-      / (unit_charge(context_base{model})/(2.*muonPhysicalMass(qedqcd))) 
+      / (unit_charge(context_base{model})/(2.*muonPhysicalMass(qedqcd)))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
@@ -483,7 +483,7 @@ Fermion, Scalar
                       typename Muon::lorentz_conjugate,
                       Muon
                       >;
-   
+
    using FermionVertex = Vertex<
                          Scalar,
                          Fermion,
@@ -554,19 +554,19 @@ Fermion, Scalar
                       typename Muon::lorentz_conjugate,
                       Muon
                       >;
-   
+
    using MuonZVertex = Vertex<
                       VZ,
                       Muon,
                       typename Muon::lorentz_conjugate
                       >;
-   
+
    using FermionVertex = Vertex<
                          Scalar,
                          Fermion,
                          typename Fermion::lorentz_conjugate
                          >;
-   
+
    using FermionZVertex = Vertex<
                          VZ,
                          typename Fermion::lorentz_conjugate,
@@ -664,7 +664,7 @@ ChargedScalar, NeutralScalar
                       typename Muon::lorentz_conjugate,
                       Muon
                       >;
-   
+
    using ScalarVertex = Vertex<
                          NeutralScalar,
                          ChargedScalar,
