@@ -50,7 +50,6 @@ double BarZeeLoopFPS(double);
 double BarZeeLoopFS(double);
 double BarZeeLoopS(double);
 double BarZeeLoopV(double);
-double getAngle(double, double);
 
 /**
  * @class AMuonBarZeeFermionLoop
@@ -144,24 +143,6 @@ struct AMuonBarZeeVectorLoop {
                        const softsusy::QedQcd& qedqcd);
 };
 
-double getAngle(double real, double imag)
-{
-    if (real > 0)
-        return atan(imag/real);
-    else if (real < 0) {
-        if (imag >= 0)
-            return atan(imag/real) + M_PI;
-        else
-            return atan(imag/real) - M_PI;
-    } else {
-        if (imag > 0)
-            return M_PI_2;
-        else if (imag < 0)
-            return -M_PI_2;
-    }
-    return 0;
-}
-
 /**
     Loop function needed for the calculation of the BarZeeDiagram with
     fermion loop. (arXiv:1502.04199 Equation 26)
@@ -206,8 +187,8 @@ double BarZeeLoopFPS(double m)
         r1 = 1.0;
         r2 = 1.0;
 
-        theta1 = getAngle(real, y/(2*m));
-        theta2 = getAngle(real, -y/(2*m));
+        theta1 = std::atan2(y/(2*m), real);
+        theta2 = std::atan2(-y/(2*m), real);
 
         return m / y * (dilog(std::polar(r1, theta1)).imag() - dilog(std::polar(r2, theta2)).imag());
     }
@@ -261,13 +242,13 @@ double BarZeeLoopV(const double m)
    {
       double y = std::sqrt(1.0-4.0*m);
       r1 = 2 / (1-y);
-      theta1 = getAngle(r1, 0);
-      r1 = abs(r1);
+      theta1 = std::atan2(0, r1);
+      r1 = std::abs(r1);
       r2 = 2 / (1+y);
-      theta2 = getAngle(r2, 0);
-      r2 = abs(r2);
+      theta2 = std::atan2(0, r2);
+      r2 = std::abs(r2);
 
-      j = 1/y * ( log(abs(y-1) / (y+1)) * log(m) + dilog(std::polar(r1, theta1)).real() - dilog(std::polar(r2, theta2)).real());
+      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(m) + dilog(std::polar(r1, theta1)).real() - dilog(std::polar(r2, theta2)).real());
    } else
    {
       double y = std::sqrt(-1.0+4.0*m);
@@ -275,9 +256,9 @@ double BarZeeLoopV(const double m)
       r2 = std::sqrt(1/m);
       const double real = 1/(2*m);
       const double imag = y/(2*m);
-      theta1 = getAngle(real, imag);
-      theta2 = getAngle(real, -imag);
-      j = 1/y * ( (getAngle(-1, y) - getAngle(1, y)) * log(m) + dilog(std::polar(r1, theta1)).imag() - dilog(std::polar(r2, theta2)).imag());
+      theta1 = std::atan2(imag, real);
+      theta2 = std::atan2(-imag, real);
+      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + dilog(std::polar(r1, theta1)).imag() - dilog(std::polar(r2, theta2)).imag());
    }
 
    return BarZeeLoopS(m) + 15.0/2.0 * m * (2.0 + log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarZeeLoopFPS(m);
