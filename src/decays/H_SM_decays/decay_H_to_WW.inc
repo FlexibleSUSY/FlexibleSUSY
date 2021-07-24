@@ -13,8 +13,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const double x = Sqr(mWOS/mHOS);
    double res = 0;
 
-   if ((x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) ||
-       (4.*x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) == 2)) {
+   const int offshell_VV_decays = flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays);
+   if ((x > 1.0 && offshell_VV_decays != 0) ||
+       (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
       constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
@@ -57,7 +58,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       }
    }
    // three-body decays form mW < mH < 2*mW
-   else if (4 * x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) {
+   else if (4 * x > 1.0 && offshell_VV_decays != 0) {
 
       if (check_3body_Vff_decay<BSMForWdecay, W>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";

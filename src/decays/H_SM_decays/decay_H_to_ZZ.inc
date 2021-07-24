@@ -38,8 +38,9 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    double res = 0;
 
    // mH < mZ
-   if ((x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) ||
-       (4.*x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) == 2)) {
+   const int offshell_VV_decays = flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays);
+   if ((x > 1.0 && offshell_VV_decays != 0) ||
+       (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
       constexpr double GammaZ = 2.4952;
@@ -82,7 +83,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    // mZ < mH < 2*mZ
    // three-body decay
    }
-   else if (4 * x > 1.0 && flexibledecay_settings.get(FlexibleDecay_settings::offshell_VV_decays) != 0) {
+   else if (4 * x > 1.0 && offshell_VV_decays != 0) {
 
       if (check_3body_Vff_decay<BSMForZdecay,Z>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";

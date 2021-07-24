@@ -1,13 +1,11 @@
 .clang-format                   export-ignore
 .gitignore                      export-ignore
 .gitattributes                  export-ignore
-TODO                            export-ignore
-
-addons/test_*                   export-ignore
 
 doc/images/*.xcf                export-ignore
 doc/release                     export-ignore
 doc/FlexibleFuture.txt          export-ignore
+doc/TODO.rst                    export-ignore
 
 examples/lattice_fmssm.cpp                  export-ignore
 examples/lattice_fmssm_fmssmn.cpp           export-ignore

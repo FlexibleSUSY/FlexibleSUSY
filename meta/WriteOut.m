@@ -448,57 +448,6 @@ WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
-WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
-    Module[{i, dim, dimWithoutGoldstones, start, particlePDG, vectorPDG,
-            struct, comment, value, result = ""},
-           vectorPDG = Parameters`GetPDGCodesForParticle[vectorBoson][[1]];
-           particlePDG = Parameters`GetPDGCodesForParticle[particle];
-           dim = TreeMasses`GetDimension[particle];
-           dimWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones[particle];
-           If[Length[particlePDG] != dim,
-              Print["Warning: length of PDG number list != dimension of particle ", particle];
-              Print["       PDG number list = ", particlePDG];
-              Print["       dimension of particle ", particle, " = ", dim];
-             ];
-           If[Length[particlePDG] < dim,
-              Return[""];
-             ];
-           start = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
-           Which[particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_higgs_photon_photon";
-                 comment = "Abs(effective H-Photon-Photon coupling)";,
-                 particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_higgs_gluon_gluon";
-                 comment = "Abs(effective H-Gluon-Gluon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_photon_photon";
-                 comment = "Abs(effective A-Photon-Photon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_gluon_gluon";
-                 comment = "Abs(effective A-Gluon-Gluon coupling)";,
-                 True,
-                 Print["Error: unsupported effective coupling ",
-                       particle, "-", vectorBoson, "-", vectorBoson,
-                       "requested!"];
-                 Quit[1]
-                ];
-           If[dimWithoutGoldstones == 1 || start == dim,
-              value = "Abs(" <> struct <> ")";
-              result = result
-                        <> WriteSLHABlockEntry[blockName,
-                                               {value, particlePDG[[start]], vectorPDG, vectorPDG},
-                                               comment];,
-              For[i = start, i <= Length[particlePDG], i++,
-                  value = "Abs(" <> struct <> "(" <> ToString[i-start] <> "))";
-                  result = result
-                           <> WriteSLHABlockEntry[blockName,
-                                                  {value, particlePDG[[i]], vectorPDG, vectorPDG},
-                                                  comment];
-                 ];
-             ];
-           result
-          ];
-
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
     Module[{result = ""},
            Switch[par,
@@ -510,14 +459,6 @@ WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
                   FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
-                  FlexibleSUSYObservable`CpHiggsPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpHiggsGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorG],
-                  FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpPseudoScalarGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorG],
                   FlexibleSUSYObservable`EDM[_],
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},

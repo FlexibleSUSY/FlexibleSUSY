@@ -265,6 +265,7 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
 
             (* @ModelName@ input parameters *)
 @setInputParameterArguments@
+@setFDOptions@
         }] /. HoldPattern[OptionValue[param_]] :> param /.
         { p } /.
         FS@ModelName@GetSettings[handle] /.

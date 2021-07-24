@@ -209,8 +209,8 @@ CreatePDGCodeFromParticleCases::usage="Create list of switch cases setting PDG c
 for particles with no generation index.";
 CreatePDGCodeFromParticleIndexedCases::usage="Create list of switch cases settings PDG codes
 for particles with generation index.";
-CreateParticleNameFromPDGCases::usage="Create list of switch cases setting particle name
-from integer PDG code.";
+CreateParticleMultipletNameAndIndexFromPDGCases::usage="Create list of switch cases getting particle name
+and optional index from integer PDG code.";
 
 NumberOfIndependentEntriesOfSymmetricMatrix::usage="Returns number of
 independent parameters of a real symmetric nxn matrix";
@@ -1675,7 +1675,7 @@ CreatePDGCodeFromParticleCases[particles_List] :=
 CreatePDGCodeFromParticleIndexedCases[particles_List] :=
     StringJoin[CreatePDGCodeFromParticleCase /@ Select[particles, (TreeMasses`GetDimension[#] > 1)&]];
 
-CreateParticleNameFromPDGCases[particles_List] :=
+CreateParticleMultipletNameAndIndexFromPDGCases[particles_List] :=
     Module[{i, j, dims, starts, pdgCodes, names, result = ""},
            dims = TreeMasses`GetDimension /@ particles;
            dimsWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones /@ particles;
@@ -1688,10 +1688,10 @@ CreateParticleNameFromPDGCases[particles_List] :=
                  ];
                If[dimsWithoutGoldstones[[i]] > 0,
                   names = If[dims[[i]] > 1,
-                             Table[CConversion`ToValidCSymbolString[particles[[i]]] <> "(" <> ToString[j] <> ")", {j, starts[[i]], dims[[i]]}],
-                             {CConversion`ToValidCSymbolString[particles[[i]]]}
+                             Table["\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", " <> ToString[j], {j, starts[[i]], dims[[i]]}],
+                             {"\"" <> CConversion`ToValidCSymbolString[particles[[i]]] <> "\", {}"}
                             ];
-                  result = result <> StringJoin[("case " <> ToString[#[[1]]] <> ": name = \"" <> #[[2]] <> "\"; break;\n")&
+                  result = result <> StringJoin[("case " <> ToString[#[[1]]] <> ": name = {" <> #[[2]] <> "}; break;\n")&
                                                 /@ Thread[{#1,#2}& @@ {pdgCodes[[i, starts[[i]] ;;]], names}]];
                  ];
               ];

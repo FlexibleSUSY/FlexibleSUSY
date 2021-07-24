@@ -78,7 +78,6 @@ META_SRC     := \
 		$(DIR)/FToFConversionInNucleus.m \
 		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
-		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
 		$(DIR)/FlexibleSUSY.m \

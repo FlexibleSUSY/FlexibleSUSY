@@ -10,10 +10,12 @@ Quick start
 -----------
 
 The following example calculates the pole mass spectrum and the
-observables in the CMSSM for a given parameter point::
+observables in the CMSSM for a given parameter point
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
-    
+
     (* Create a handle to a model given the input parameters.
        See Options[FSCMSSMOpenHandle] for all default options. *)
     handle = FSCMSSMOpenHandle[
@@ -22,13 +24,13 @@ observables in the CMSSM for a given parameter point::
       fsModelParameters -> {
           m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
     ];
-    
+
     (* calculate pole mass spectrum *)
     FSCMSSMCalculateSpectrum[handle]
-    
+
     (* calculate further observables *)
     FSCMSSMCalculateObservables[handle]
-    
+
     (* close the model handle *)
     FSCMSSMCloseHandle[handle];
 
@@ -50,10 +52,11 @@ function of :math:`X_t / M_S` for :math:`\tan\beta = 5` and different
 values of the SUSY scale.  The example also illustrates how
 parallelization can be used to exploit the performance of multi-core
 systems.
-::
+
+.. code-block:: mathematica
 
     Get["models/HSSUSY/HSSUSY_librarylink.m"];
-    
+
     CalcMh[TB_, Xtt_, MS_] := Module[{handle, spec},
         handle = FSHSSUSYOpenHandle[
             fsSettings -> {
@@ -95,21 +98,21 @@ systems.
         FSHSSUSYCloseHandle[handle];
         If[spec =!= $Failed, Pole[M[hh]] /. spec, 0]
     ];
-    
+
     LaunchKernels[];
     DistributeDefinitions[CalcMh];
-    
+
     data = {
         ParallelMap[{#, CalcMh[5, #, 1000 ]}&, Range[-3.5, 3.5, 0.1]],
         ParallelMap[{#, CalcMh[5, #, 2000 ]}&, Range[-3.5, 3.5, 0.1]],
         ParallelMap[{#, CalcMh[5, #, 10000]}&, Range[-3.5, 3.5, 0.1]]
     };
-    
+
     plot = ListPlot[data,
                     PlotLegends -> {"MS = 1 TeV", "MS = 2 TeV", "MS = 10 TeV"},
                     Axes -> False, Frame -> True,
                     FrameLabel -> {"Xt / MS", "Mh / GeV"}];
-    
+
     Export["HSSUSY_Mh_Xt.png", plot, ImageSize -> 1000];
 
 
@@ -138,7 +141,9 @@ name.  In order to use FlexibleSUSY's generated ``<model>`` spectrum
 generator at the Mathematica level, the library functions must be
 loaded using the ``models/<model>/<model>_librarylink.m`` script.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
 
@@ -152,7 +157,9 @@ First, a handle to the model must be created using the
 - the Standard Model input parameters via the ``fsSMParameters`` variable
 - the model input parameters via the ``fsModelParameters`` variable
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -168,7 +175,9 @@ Example::
 The ``FS<model>OpenHandle[]`` fixes all settings and input parameters at
 once.  Unspecified parameters are set to their default values.  The
 default values are stored in the variables ``fsDefaultSettings``,
-``fsDefaultSMParameters`` and ``fs<model>DefaultInputParameters``::
+``fsDefaultSMParameters`` and ``fs<model>DefaultInputParameters``
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     Print[fsDefaultSettings];
@@ -180,7 +189,9 @@ The settings associated to a ``handle`` can be listed using the
 `FlexibleSUSY run-time configuration`_ for more information on the
 spectrum generator settings.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -188,7 +199,9 @@ Example::
     ];
     FSCMSSMGetSettings[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     { precisionGoal -> 0.00001,
       maxIterations -> 0,
@@ -211,7 +224,9 @@ Output::
 The Standard Model input parameters associated to a ``handle`` can be
 listed using the ``FS<model>GetSMInputParameters[]`` function.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -219,7 +234,9 @@ Example::
     ];
     FSCMSSMGetSMInputParameters[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     { alphaEmMZ -> 0.00781763, (* alpha_em(MZ) in the SM(5), MS-bar *)
       GF -> 0.000011663787,    (* Fermi constant *)
@@ -244,7 +261,9 @@ Output::
 The model input parameters associated to a ``handle`` can be listed
 using the ``FS<model>GetInputParameters[]`` function.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -252,7 +271,9 @@ Example::
     ];
     FSCMSSMGetInputParameters[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     { m0 -> 125.,
       m12 -> 500.,
@@ -268,7 +289,9 @@ associated to a certain handle can be modified.  The ``FS<model>Set[]``
 function takes first as argument the handle, and as second argument
 the replacement list of new parameters / settings.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -277,17 +300,19 @@ Example::
       fsModelParameters -> {
           m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1, Azero -> 0 }
     ];
-    
-    FSCMSSMGetInputParameters[handle]
-    
-    FSCMSSMSet[handle, TanBeta -> 20];
-    
+
     FSCMSSMGetInputParameters[handle]
 
-Output::
+    FSCMSSMSet[handle, TanBeta -> 20];
+
+    FSCMSSMGetInputParameters[handle]
+
+Output
+
+.. code-block:: mathematica
 
     {m0 -> 125., m12 -> 500., TanBeta -> 10., SignMu -> 1, Azero -> 0.}
-    
+
     {m0 -> 125., m12 -> 500., TanBeta -> 20., SignMu -> 1, Azero -> 0.}
 
 FS<model>CalculateSpectrum
@@ -307,7 +332,8 @@ list with the symbol ``SCALE``.  The calculated pole masses are denoted
 by ``Pole[M[p]]``, respectively.  The mixing matrices which correspond
 to the pole masses are denoted by ``Pole[Z]``, where Z is the name of
 the mixing matrix.
-::
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -315,7 +341,9 @@ the mixing matrix.
     ];
     FSCMSSMCalculateSpectrum[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     {CMSSM ->
        {M[VG] -> 0., M[Glu] -> 1117.18, M[Fv] -> {0., 0., 0.},
@@ -441,7 +469,8 @@ for a list of all available observables.
 Note: The ``FS<model>CalculateObservables[handle]`` function assumes,
 that the pole mass spectrum has been calculated before, using the
 ``FS<model>CalculateSpectrum[handle]`` function.
-::
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -450,7 +479,9 @@ that the pole mass spectrum has been calculated before, using the
     FSCMSSMCalculateSpectrum[handle]
     FSCMSSMCalculateObservables[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     {CMSSM ->
        { FlexibleSUSYObservable``CpHiggsPhotonPhoton ->
@@ -471,7 +502,8 @@ or warnings.  They can be obtained for a given handle using the
 ``FS<model>GetProblems[handle]`` and ``FS<model>GetWarnings[handle]``
 functions, respectively.  These functions return the empty list if no
 problems / warnings occurred.
-::
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -480,7 +512,9 @@ problems / warnings occurred.
     FSCMSSMCalculateSpectrum[handle];
     FSCMSSMGetProblems[handle]
 
-Output::
+Output
+
+.. code-block:: mathematica
 
     {CMSSM ->
       { Tachyons -> {M[Sd], M[Su]},
@@ -505,7 +539,9 @@ function.  The function returns a string formatted according to
 .. _SLHA1: https://inspirehep.net/record/632863
 .. _SLHA2: https://inspirehep.net/record/777216
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
     handle = FSCMSSMOpenHandle[
@@ -962,33 +998,38 @@ is the model name.
 
 By default, no more than three messages of the same type are witten to
 the notebook.  In order to write all messages to the notebook, set
-::
+
+.. code-block:: mathematica
 
     Off[General::stop];
 
 The function, which writes the messages is called
 ``FS<model>Message`` and is defined as
-::
+
+.. code-block:: mathematica
 
     FS<model>Message[s_] := Message[FS<model>::info, s]
 
 where ``s`` is the message string.  If one would like to write the
 messages to a file, the function can be re-defined to
-::
+
+.. code-block:: mathematica
 
     FS<model>Message[s_] := WriteString["info.txt", s <> "\n"];
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
-    
+
     handle = FSCMSSMOpenHandle[
       fsModelParameters -> { m0 -> 125, m12 -> 500, TanBeta -> 10, SignMu -> 1 }
     ];
-    
+
     (* write all messages to "info.txt" *)
     FSCMSSMMessage[s_] := WriteString["info.txt", s <> "\n"];
-    
+
     FSCMSSMCalculateSpectrum[handle]
 
 .. _HSSUSY: hssusy.rst

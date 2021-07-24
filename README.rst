@@ -34,8 +34,11 @@ modification, extension and reuse.
   please cite [1005.5709]_, [1708.05720]_, [1807.03509]_ and
   [1910.03595]_.
 
+  If you use **FlexibleSUSY+GM2Calc** in your work, please cite
+  [1510.08071]_.
+
   If you use **FlexibleDecay** in your work, please cite
-  [2104.XXXXX]_.
+  [2106.05038]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -54,7 +57,9 @@ modification, extension and reuse.
 Quick start
 ===========
 
-Install required libraries and packages (if not already done)::
+Install required libraries and packages (if not already done)
+
+.. code-block:: shell
 
     pip install conan
     conan install . --build=missing
@@ -62,13 +67,17 @@ Install required libraries and packages (if not already done)::
     ./install-sarah
 
 Build a spectrum generator (here: HSSUSY [1710.03760]_
-[1804.09410]_)::
+[1804.09410]_)
+
+.. code-block:: shell
 
     ./createmodel --name=HSSUSY
     ./configure --with-models=HSSUSY
     make -j4
 
-Run the spectrum generator::
+Run the spectrum generator
+
+.. code-block:: shell
 
     ./models/HSSUSY/run_HSSUSY.x --slha-input-file=model_files/HSSUSY/LesHouches.in.HSSUSY
 
@@ -81,7 +90,7 @@ Requirements
 
 * C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
-* Mathematica (version 7.0 or higher)
+* `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
 * Boost_ (version 1.37.0 or higher)
 * `Eigen 3`_ (version 3.1 or higher)
@@ -103,17 +112,23 @@ Installation of required/optional libraries
 The required and optional libraries Boost_, `Eigen 3`_, GM2Calc_,
 LoopTools_, Himalaya_ and TSIL_ can be installed using the Conan_
 package manager.  If not already installed, Conan can be installed
-with pip::
+with pip
+
+.. code-block:: shell
 
     pip install conan
 
-To install the libraries required by FlexibleSUSY, run::
+To install the libraries required by FlexibleSUSY, run
+
+.. code-block:: shell
 
     conan install . --build=missing
 
 The `GNU scientific library`_ can currently not be installed via
 Conan_.  One may use the package manager of the operating system to
-install it.  On Debian/Ubuntu one may run for example::
+install it.  On Debian/Ubuntu one may run for example
+
+.. code-block:: shell
 
     sudo apt-get install libgsl-dev
 
@@ -126,9 +141,11 @@ Installation of SARAH
 
 FlexibleSUSY requires SARAH to be installed and to be loadable with
 the ``Needs["SARAH`"]`` command from inside Mathematica.  We recommend
-the following setup::
+the following setup
 
-    SARAH_VERSION=4.14.3
+.. code-block:: shell
+
+    SARAH_VERSION=4.14.5
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
@@ -138,7 +155,9 @@ the following setup::
     echo "AppendTo[\$Path, \"${HOME}/.Mathematica/Applications/SARAH/\"];" >> init.m
 
 All the above steps can be executed at once with the ``install-sarah``
-script::
+script
+
+.. code-block:: shell
 
     ./install-sarah
 
@@ -151,7 +170,9 @@ If you want FlexibleSUSY to use FeynArts_ or FormCalc_ you will need
 to install these packages first.  Also — as with SARAH — they need to
 be loadable with the ``Needs[]`` command from inside Mathematica.  We
 recommend using the installation script ``FeynInstall`` provided on
-the FeynArts web page. e.g.::
+the FeynArts web page. e.g.
+
+.. code-block:: shell
 
     cd ~/.local
     wget http://www.feynarts.de/FeynInstall
@@ -175,7 +196,9 @@ Building a FlexibleSUSY model
    already plenty of pre-installed model files in FlexibleSUSY's and
    SARAH's model directories that can be used.
 
-1. Create a new or re-initialize an existing FlexibleSUSY model::
+1. Create a new or re-initialize an existing FlexibleSUSY model
+
+   .. code-block:: shell
 
        ./createmodel --name=<model>
 
@@ -193,7 +216,9 @@ Building a FlexibleSUSY model
    documentation of the `FlexibleSUSY model file`_ and
    `FlexibleEFTHiggs`_.
 
-2. Create the Makefile and register your model(s)::
+2. Create the Makefile and register your model(s)
+
+   .. code-block:: shell
 
        ./configure --with-models=<model>
 
@@ -214,7 +239,9 @@ Building a FlexibleSUSY model
    * ``models/<model>/run_<model>.x``: command line spectrum generator
    * ``models/<model>/run_<model>.m``: Mathematica interface
 
-Example::
+Example
+
+.. code-block:: shell
 
     ./createmodel --name=HSSUSY
     ./configure --with-models=HSSUSY
@@ -252,13 +279,17 @@ Command line
 For each model FlexibleSUSY creates an executable
 ``models/<model>/run_<model>.x`` that can be run from the command
 line.  The executable accepts the input in the SLHA format, for
-example in form of a file::
+example in form of a file
+
+.. code-block:: shell
 
     ./models/MSSM/run_MSSM.x \
        --slha-input-file=models/MSSM/LesHouches.in.MSSM \
        --slha-output-file=LesHouches.out.MSSM
 
-or as a stream::
+or as a stream
+
+.. code-block:: shell
 
     cat models/MSSM/LesHouches.in.MSSM \
        | ./models/MSSM/run_MSSM.x --slha-input-file=- --slha-output-file=LesHouches.out.MSSM
@@ -267,7 +298,9 @@ For a documentation of FlexibleSUSY-specific switches in the SLHA
 input see the section on `SLHA input parameters`_.
 
 By default the executable writes the output in SLHA format to stdout.
-The output can also be appended to an SQLite database::
+The output can also be appended to an SQLite database
+
+.. code-block:: shell
 
     ./models/MSSM/run_MSSM.x \
        --slha-input-file=models/MSSM/LesHouches.in.MSSM \
@@ -282,7 +315,9 @@ Mass spectrum and renormalization group running
 
 The pole mass spectrum and the RG flow can be written to text files
 for easy plotting.  In the MSSM for example these text files can be
-generated via::
+generated via
+
+.. code-block:: shell
 
     ./models/MSSM/run_MSSM.x \
        --slha-input-file=model_files/MSSM/LesHouches.in.MSSM \
@@ -291,7 +326,9 @@ generated via::
 
 The generated files ``MSSM_rgflow.dat`` and ``MSSM_spectrum.dat`` can
 be plotted for example with the gnuplot scripts in the model
-directory::
+directory
+
+.. code-block:: shell
 
     gnuplot -persist -e "filename='MSSM_spectrum.dat'" \
        models/MSSM/MSSM_plot_spectrum.gnuplot
@@ -314,7 +351,9 @@ for each spectrum generator.  The generated library can be found in
 ``models/<model>/<model>_librarylink.so``, where ``<model>`` is the
 model name.
 
-Example::
+Example
+
+.. code-block:: mathematica
 
     Get["models/CMSSM/CMSSM_librarylink.m"];
 
@@ -339,7 +378,9 @@ Example::
 For each model, FlexibleSUSY creates an example Mathematica script
 which illustrates the use of the Mathematica interface.  The generated
 example can be found in ``models/<model>/run_<model>.m`` which can be
-run for example as::
+run for example as
+
+.. code-block:: shell
 
     math -run "<< \"models/<model>/run_<model>.m\""
 
@@ -373,7 +414,9 @@ Examples:
 To perform a scan over :math:`\tan\beta(M_Z)` in the CMSSM (given in
 the SLHA input file in the ``MINPAR[3]`` field) and print out the the
 values of :math:`\tan\beta(M_Z)`, :math:`M_h` (``MASS[25]``) and
-:math:`y_t(M_{\text{SUSY}})` (``YU[2,2]``) run::
+:math:`y_t(M_{\text{SUSY}})` (``YU[2,2]``) run
+
+.. code-block:: shell
 
      utils/scan-slha.sh \
         --spectrum-generator=models/CMSSM/run_CMSSM.x \
@@ -382,7 +425,8 @@ values of :math:`\tan\beta(M_Z)`, :math:`M_h` (``MASS[25]``) and
         --output=MINPAR[3],MASS[25],YU[2:2]
 
 Alternatively, the SLHA input can be piped into the script as
-::
+
+.. code-block:: shell
 
     cat model_files/CMSSM/LesHouches.in.CMSSM \
        | utils/scan-slha.sh \
@@ -393,7 +437,9 @@ Alternatively, the SLHA input can be piped into the script as
 The spectrum generator executable is specified using the
 ``--spectrum-generator=`` option.  The parameter to be scanned over as
 well as the scan range and the number of steps must be specified using
-the ``--scan-range=`` option.  The syntax is::
+the ``--scan-range=`` option.  The syntax is
+
+.. code-block:: shell
 
     --scan-range=<block>[<field>]=<start>~<stop>:<number_of_steps>
 
@@ -405,7 +451,9 @@ size is linear.  Alternatively, a logarithmic step size can be chosen
 by passing ``--step-size=log`` to the script.  See also
 ``utils/scan-slha.sh --help``.  The parameters to print to the output
 stream must be defined using the ``--output=`` option.  The syntax
-is::
+is
+
+.. code-block:: shell
 
     --output=<block>[<fields>]
 
@@ -421,7 +469,9 @@ Database output
 As an alternative, all parameters calculated during a scan can be
 written to a SQLite database using the ``scan-database.sh`` script.
 
-Examples::
+Examples
+
+.. code-block:: shell
 
     utils/scan-database.sh \
        --spectrum-generator=models/CMSSM/run_CMSSM.x \
@@ -429,7 +479,9 @@ Examples::
        --scan-range=MINPAR[3]=1~30:10 \
        --database-output-file=scan.db
 
-or::
+or
+
+.. code-block:: shell
 
     cat model_files/CMSSM/LesHouches.in.CMSSM \
        | ./utils/scan-database.sh \
@@ -449,7 +501,9 @@ file (``FlexibleSUSY.m.in``).  The conversion is not perfect, because
 it is usually not unique.  Therefore one should check the generated
 ``FlexibleSUSY.m.in`` file.
 
-Example::
+Example
+
+.. code-block:: shell
 
     cat << EOF | math -noprompt > FlexibleSUSY.m.in
     sphenoFile = "~/.Mathematica/Applications/SARAH/Models/MSSM/SPheno.m";
@@ -465,7 +519,9 @@ Generating source code files only (no compilation)
 
 If you want to only create the C++ source files for your model, but do
 not want to compile the code, you can use the ``--disable-compile``
-configure option::
+configure option
+
+.. code-block:: shell
 
     ./configure --with-models=MSSM --disable-compile
     make
@@ -480,7 +536,9 @@ Compile only (don't generate source code)
 -----------------------------------------
 
 If you want to only compile already created the C++ source files for
-your model, you can use the ``--disable-meta`` configure option::
+your model, you can use the ``--disable-meta`` configure option
+
+.. code-block:: shell
 
     ./configure --with-models=MSSM --disable-meta
     make
@@ -506,12 +564,15 @@ code for the specified model(s) (but without the Mathematica meta
 code), can be exported to a new directory.  The exported source code
 is a complete standalone package, with it's own build system.  To
 export the code, one has to set the target directory during
-configuration via the ``--with-install-dir=`` option.  For example::
+configuration via the ``--with-install-dir=`` option.  For example
+
+.. code-block:: shell
 
     ./configure --with-models=<models> --with-install-dir=/path/to/export/directory
 
 Afterwards
-::
+
+.. code-block:: shell
 
     make install-src
 
@@ -519,7 +580,9 @@ must be executed, which will copy the generated C++ source code for
 all ``<models>`` to ``/path/to/export/directory``, together with the
 non-model specific source code from ``config/``, ``doc/``, ``slhaea/``
 and ``src/``.  Afterwards, the standalone package can be build like
-this::
+this
+
+.. code-block:: shell
 
     cd /path/to/export/directory
     ./configure
@@ -530,7 +593,8 @@ the generated source code for a given model, but does not contain the
 whole FlexibleSUSY build system.  This is useful when the source code
 for a model should be generated on one computer and later transferred
 to another one to be compiled.  To create such a "model package" run
-::
+
+.. code-block:: shell
 
     make pack-<model>-src
 
@@ -548,7 +612,9 @@ libraries, which is the default) you need to pass the
 name extension for the shared libraries as well as the command to
 build them can be overwritten using the ``--with-shared-lib-ext=``
 ``--with-shared-lib-cmd=``.  parameters.  For example, when Intel
-compilers should be used, replace gcc by icc or icpc::
+compilers should be used, replace gcc by icc or icpc
+
+.. code-block:: shell
 
     ./configure --with-models=CMSSM,NMSSM \
        --enable-shared-libs \
@@ -562,7 +628,8 @@ This means that, if you for example move the FlexibleSUSY directory to
 another location, the executables will no longer find the libraries.
 To make the executables find the libraries again, you have to relink
 them via
-::
+
+.. code-block:: shell
 
     make clean-executables
     make allexec
@@ -576,12 +643,16 @@ executables by passing ``--enable-static`` to configure.  This is
 useful when the executable should be transferred to another computer,
 where some libraries are not available.
 
-Example::
+Example
+
+.. code-block:: shell
 
     ./configure --with-models=CMSSM --enable-static
 
 If ``--enable-static`` is used, the following linker flags and
-additional libraries will be used::
+additional libraries will be used
+
+.. code-block:: shell
 
     LDFLAGS = -static
     LDLIBS  = -ldl
@@ -590,7 +661,9 @@ These linker-specific flags and additional libraries can be
 overwritten using ``--with-static-ldflags=`` and
 ``--with-static-ldlibs=``
 
-Example::
+Example
+
+.. code-block:: shell
 
     ./configure --with-models=CMSSM \
        --enable-static \
@@ -615,14 +688,18 @@ functions can be used:
 * FFlite (a thread-safe variant of LoopTools_, shipped with FlexibleSUSY)
 
 The loop function libraries can be enabled by passing
-``--with-loop-libraries=`` to the ``configure`` script::
+``--with-loop-libraries=`` to the ``configure`` script
+
+.. code-block:: shell
 
     ./configure --with-loop-libraries=<libraries>
 
 where ``<libraries>`` can be any (or a combination) of ``collier``,
 ``looptools`` or ``fflite``.
 
-Example::
+Example
+
+.. code-block:: shell
 
     ./configure --with-loop-libraries=collier,looptools
 
@@ -637,7 +714,9 @@ Example::
        31   0    # loop library (0 = SOFTSUSY, 1 = COLLIER, 2 = LoopTools, 3 = FFlite)
 
 When the Mathematica interface is used, the loop library to use can be
-selected by setting the value of ``loopLibrary`` appropriately::
+selected by setting the value of ``loopLibrary`` appropriately
+
+.. code-block:: mathematica
 
     FS@ModelName@OpenHandle[
         fsSettings -> {
@@ -653,11 +732,15 @@ LoopTools support
 
 It is possible to use LoopTools_ for calculating the loop functions,
 instead of using SOFTSUSY's loop functions.  To enable LoopTools,
-configure FlexibleSUSY via ::
+configure FlexibleSUSY via
+
+.. code-block:: shell
 
     ./configure --enable-looptools
 
-or::
+or
+
+.. code-block:: shell
 
     ./configure --with-loop-libraries=looptools
 
@@ -666,7 +749,8 @@ automatically find the paths to the LoopTools library.
 
 To use the LoopTools library and header files from a specific
 directory, run ``configure`` via
-::
+
+.. code-block:: shell
 
     LOOPTOOL_DIR=/path/to/looptools/build
 
@@ -677,7 +761,8 @@ directory, run ``configure`` via
 Note: LoopTools 2.8 or higher is required.
 Also, if FlexibleSUSY is compiled with LibraryLink (default) then LoopTools has to be compiled with ``-fPIC`` option.
 This is achieved by setting the ``FFLAGS`` variable during LoopTools configuration as
-::
+
+.. code-block:: shell
 
     FFLAGS=-fPIC ./configure
 
@@ -686,12 +771,16 @@ COLLIER support
 
 It is possible to use COLLIER_ for calculating the loop functions,
 instead of using SOFTSUSY's loop functions.  To enable COLLIER
-configure FlexibleSUSY via ::
+configure FlexibleSUSY via
+
+.. code-block:: shell
 
    ./configure --with-loop-libraries=collier
 
 To use the COLLIER library and header files from a specific
-directory configure via ::
+directory configure via
+
+.. code-block:: shell
 
     COLLIER_DIR=/path/to/COLLIER-x.y.z
 
@@ -711,7 +800,9 @@ such models are activated (via ``./configure --with-models=<model>``),
 FlexibleSUSY requires TSIL to be available.  If TSIL is installed in a
 system directory or installed via Conan_, FlexibleSUSY will find the
 TSIL automatically.  To use TSIL from a a non-standard directory,
-configure FlexibleSUSY like this::
+configure FlexibleSUSY like this
+
+.. code-block:: shell
 
     $TSIL_DIR=/path/to/tsil
 
@@ -720,7 +811,9 @@ configure FlexibleSUSY like this::
        --with-tsil-libdir=$TSIL_DIR
 
 Note also that TSIL must be compiled with ``-fPIC``, which can be
-achieved by setting in the TSIL ``Makefile``::
+achieved by setting in the TSIL ``Makefile``
+
+.. code-block:: shell
 
     TSIL_OPT = -O3 -funroll-loops -fPIC
 
@@ -730,7 +823,9 @@ Creating an addon
 
 A FlexibleSUSY addon is a program or library, which uses parts of the
 FlexibleSUSY libraries or the generated models or is integrated into
-FlexibleSUSY.  An addon can be created via ::
+FlexibleSUSY.  An addon can be created via
+
+.. code-block:: shell
 
     ./createaddon --name=<addon>
 
@@ -740,20 +835,24 @@ module ``addons/<addon>/module.mk``.  If an addon has been created with
 the above script, the user may edit the makefile module
 (``addons/<addon>/module.mk``) to add source files in to the three
 variables
-::
+
+.. code-block:: shell
 
     LIB@ADDON@_SRC  # list of source files to be included in library
     EXE@ADDON@_SRC  # list of source files with a main()
     LIB@ADDON@_HDR  # list of header files
 
-Example::
+Example
+
+.. code-block:: shell
 
     LIB@ADDON@_SRC := $(DIR)/file1.cpp
     EXE@ADDON@_SRC := $(DIR)/run.cpp
     LIB@ADDON@_HDR := $(DIR)/file1.hpp
 
 To configure and compile the addon run
-::
+
+.. code-block:: shell
 
     ./configure --with-addons=<addon>
     make
@@ -769,23 +868,29 @@ Creating the source code documentation
 
 FlexibleSUSY's source code documentation (including the generated
 source code files) can be generated with Doxygen in HTML or man
-format.  To generate the HTML documentation please run::
+format.  To generate the HTML documentation please run
+
+.. code-block:: shell
 
     make doc-html
 
 The generated HTML index file can then be found in
 ``doc/html/index.html`` and can be viewed with any HTML browser, e.g.
-::
+
+.. code-block:: shell
 
     firefox doc/html/index.html
 
-To generate the man documentation please run::
+To generate the man documentation please run
+
+.. code-block:: shell
 
     make doc-man
 
 The generated man pages can then be found in ``doc/man/man3/`` and can
 be viewed as
-::
+
+.. code-block:: shell
 
     man doc/man/man3/model_file_options.3
 
@@ -892,7 +997,7 @@ References
 ==========
 
 .. _slhaea: https://github.com/fthomas/slhaea
-.. _GM2Calc: https://arxiv.org/abs/1510.08071
+.. _GM2Calc: https://github.com/GM2Calc/GM2Calc
 .. _SARAH: http://sarah.hepforge.org
 .. _SOFTSUSY: http://softsusy.hepforge.org
 .. _Boost: http://www.boost.org
@@ -900,11 +1005,12 @@ References
 .. _Eigen 3: http://eigen.tuxfamily.org
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
-.. _GNU scientific library: http://www.gnu.org/software/gsl/
-.. _LoopTools: http://www.feynarts.de/looptools/
-.. _COLLIER: https://collier.hepforge.org/
+.. _GNU scientific library: http://www.gnu.org/software/gsl
+.. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
+.. _LoopTools: http://www.feynarts.de/looptools
+.. _COLLIER: https://collier.hepforge.org
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
-.. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _TSIL: https://www.niu.edu/spmartin/tsil
 
 .. _`FlexibleSUSY model file`: doc/model_file.rst
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
@@ -920,10 +1026,11 @@ References
 .. [1309.7223] `CPC 185 (2014) 1773-1790 <https://inspirehep.net/record/1255845>`_ [`arxiv:1309.7223 <http://arxiv.org/abs/1309.7223>`_]
 .. [1311.7659] `CPC 185 (2014) 2322 <https://inspirehep.net/record/1266808>`_  [`arxiv:1311.7659 <http://arxiv.org/abs/1311.7659>`_]
 .. [1406.2319] `CPC 190 (2015) 139-172 <https://inspirehep.net/record/1299998>`_ [`arxiv:1406.2319 <https://arxiv.org/abs/1406.2319>`_]
+.. [1510.08071] `Eur. Phys. J. C76 (2016) no. 2, 62 <https://inspirehep.net/literature/1401235>`_ [`arXiv:1510.08071 <https://arxiv.org/abs/1510.08071>`_]
 .. [1609.00371] `JHEP 1701 (2017) 079 <https://inspirehep.net/record/1484857>`_ [`arxiv:1609.00371 <https://arxiv.org/abs/1609.00371>`_]
-.. [1708.05720] `Eur.Phys.J. C77 (2017) no.12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
+.. [1708.05720] `Eur. Phys. J. C77 (2017) no. 12, 814 <https://inspirehep.net/record/1617767>`_ [`arxiv:1708.05720 <https://arxiv.org/abs/1708.05720>`_]
 .. [1710.03760] `CPC 230 (2018) 145-217 <https://inspirehep.net/record/1629978>`_ [`arXiv:1710.03760 <https://arxiv.org/abs/1710.03760>`_]
-.. [1804.09410] `Eur.Phys.J. C78 (2018) no.7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
-.. [1807.03509] `Eur.Phys.J. C78 (2018) no.10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
-.. [1910.03595] `Eur.Phys.J. <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
-.. [2104.XXXXX] `XXX`_ [`arxiv:2104.XXXXX <https://arxiv.org/abs/>`_]
+.. [1804.09410] `Eur. Phys. J. C78 (2018) no. 7, 573 <https://inspirehep.net/record/1670032>`_ [`arxiv:1804.09410 <https://arxiv.org/abs/1804.09410>`_]
+.. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
+.. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
+.. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]

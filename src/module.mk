@@ -20,7 +20,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/dilog.cpp \
-		$(DIR)/effective_couplings.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
@@ -83,7 +82,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
 		$(DIR)/dilog.hpp \
-		$(DIR)/effective_couplings.hpp \
 		$(DIR)/eigen_utils.hpp \
 		$(DIR)/eigen_tensor.hpp \
 		$(DIR)/error.hpp \
