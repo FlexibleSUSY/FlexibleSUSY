@@ -630,9 +630,10 @@ Fermion, Scalar
                const auto ThetaW = DERIVEDPARAMETER(ThetaW);
                const double cw = Cos(ThetaW);
                const double sw = Sin(ThetaW);
-               
-               if (zMass == scalarMass)
+
+               if (is_zero(zMass - scalarMass, 3e-13)) {
                   continue;
+               }
 
                const double fermionChargeCount =
                   Fermion::electric_charge / Muon::electric_charge;
