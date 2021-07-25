@@ -512,7 +512,7 @@ Fermion, Scalar
          const double part1 = coeffA.real() * BarZeeLoopFS(massRatioSquared);
          const double part2 = coeffB.real() * BarZeeLoopFPS(massRatioSquared);
 
-         const double preFactor = pow(Muon::electric_charge * unit_charge(context),2)/(64*pow(Pi,4)) * fermionChargeCount * fermionChargeCount
+         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
             * muonPhysicalMass(qedqcd) / fermionMass;
 
          res += preFactor * (part1 + part2);
@@ -620,7 +620,7 @@ Fermion, Scalar
                const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFS(massRatioSquared) - BarZeeLoopFS(Sqr(fermionMass / zMass)));
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFPS(massRatioSquared) - BarZeeLoopFPS(Sqr(fermionMass / zMass)));
 
-               const double preFactor = - pow(Muon::electric_charge * unit_charge(context),2)/(64*pow(Pi,4)) * fermionChargeCount * gvm * gvf
+               const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
                   * muonPhysicalMass(qedqcd) / fermionMass;
 
                res += preFactor * (part1 + part2);
@@ -690,7 +690,7 @@ ChargedScalar, NeutralScalar
 
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
-         const double preFactor = pow(Muon::electric_charge * unit_charge(context),2)/(64*pow(Pi,4)) * scalarChargeCount * scalarChargeCount
+         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
             * muonPhysicalMass(qedqcd) / (neutralScalarMass * neutralScalarMass);
 
          res += preFactor * coeff.real() * BarZeeLoopS(massRatioSquared);
@@ -757,7 +757,7 @@ Vector, Scalar
 
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
-         const double preFactor = - pow(Muon::electric_charge * unit_charge(context),2)/(128*pow(Pi,4)) * vectorChargeCount * vectorChargeCount
+         const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
             * muonPhysicalMass(qedqcd) / (vectorMass * vectorMass);
 
          res += preFactor * coeff.real() * BarZeeLoopV(massRatioSquared);
