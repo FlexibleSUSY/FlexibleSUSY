@@ -156,7 +156,7 @@ double BarZeeLoopFPS(double m) {
    }
 
    if (m == 0.25) {
-      return std::log(2.0);
+      return ln2;
    }
 
    double r1, theta1, r2, theta2;
@@ -169,14 +169,14 @@ double BarZeeLoopFPS(double m) {
       }
       else {
          r1 *= -1;
-         theta1 = M_PI;
+         theta1 = Pi;
       }
       if (r2 > 0) {
          theta2 = 0.0;
       }
       else {
          r2 *= -1;
-         theta2 = M_PI;
+         theta2 = Pi;
       }
       return m / y * (dilog(std::polar(r1, theta1)).real() - dilog(std::polar(r2, theta2)).real());
    }
