@@ -28,6 +28,7 @@
 #include "error.hpp"
 #include "ew_input.hpp"
 #include "string_format.hpp"
+#include "wrappers.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -48,13 +49,13 @@ constexpr double sqr(double a) noexcept { return a*a; }
 // it's a very good approximation at these scales, better than 10^-3 accuracy
 double getAsmt(double mtop, double alphasMz, double mz) {
   return alphasMz /
-      (1.0 - 23.0 * alphasMz / (6.0 * M_PI) * std::log(mz / mtop));
+      (1.0 - 23.0 * alphasMz / (6.0 * flexiblesusy::Pi) * std::log(mz / mtop));
 }
 
 // Input pole mass of top and alphaS(mt), outputs running mass mt(mt)
 // including one-loop standard model correction only
 double getRunMt(double poleMt, double asmt) {
-  return poleMt / (1.0 + (4.0 / (3.0 * M_PI)) * asmt);
+  return poleMt / (1.0 + (4.0 / (3.0 * flexiblesusy::Pi)) * asmt);
 }
 
 // Given pole mass and alphaS(MZ), returns running top mass -- one loop qcd
@@ -246,14 +247,14 @@ double QedQcd::qedBeta() const {
   if (get_scale() > mf(mTau - 1)) { x += 2.0 / 3.0; }
   if (get_scale() > displayPoleMW()) { x += -7.0 / 2.0; }
 
-  return (x * sqr(a(ALPHA - 1)) / M_PI);
+  return (x * sqr(a(ALPHA - 1)) / flexiblesusy::Pi);
 }
 
 /// Returns QCD beta function to 3 loops in QCD for the SM(5). Note
 /// that if quark masses are running, the number of active quarks will
 /// be taken into account.
 double QedQcd::qcdBeta() const {
-  static const double INVPI = 1.0 / M_PI;
+  static const double INVPI = 1.0 / flexiblesusy::Pi;
   const int quarkFlavours = flavours(get_scale());
   const double qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
   const double qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
@@ -283,7 +284,7 @@ double QedQcd::qcdBeta() const {
 
 /// returns fermion mass beta functions
 Eigen::Array<double,9,1> QedQcd::massBeta() const {
-  static const double INVPI = 1.0 / M_PI, ZETA3 = 1.202056903159594;
+  static const double INVPI = 1.0 / flexiblesusy::Pi;
 
   // qcd bits: 1,2,3 loop resp.
   double qg1 = 0., qg2 = 0., qg3 = 0.;
@@ -297,7 +298,7 @@ Eigen::Array<double,9,1> QedQcd::massBeta() const {
   }
   if (get_loops() > 2) {
      qg3 = (1.249e3 - ((2.216e3 * quarkFlavours) / 27.0e0 +
-                       1.6e2 * ZETA3 * quarkFlavours / 3.0e0) -
+                       1.6e2 * flexiblesusy::zeta3 * quarkFlavours / 3.0e0) -
             140.0e0 * quarkFlavours * quarkFlavours / 81.0e0) * sqr(INVPI) *
         INVPI / 64.0;
   }
@@ -347,15 +348,15 @@ double QedQcd::extractPoleMb(double alphasMb)
   double delta = 0.0;
 
   if (get_loops() > 0) {
-     delta = delta + 4.0 / 3.0 * alphasMb / M_PI;
+     delta = delta + 4.0 / 3.0 * alphasMb / flexiblesusy::Pi;
   }
   if (get_loops() > 1) {
-     delta = delta + sqr(alphasMb / M_PI) *
+     delta = delta + sqr(alphasMb / flexiblesusy::Pi) *
         (9.2778 + (displayMass(mUp) + displayMass(mDown) + displayMass(mCharm) +
                    displayMass(mStrange)) / mbPole);
   }
   if (get_loops() > 2) {
-     delta = delta + 94.4182 * alphasMb / M_PI * sqr(alphasMb / M_PI);
+     delta = delta + 94.4182 * alphasMb / flexiblesusy::Pi * sqr(alphasMb / flexiblesusy::Pi);
   }
 
   const double mbPole = displayMass(mBottom) * (1.0 + delta);
