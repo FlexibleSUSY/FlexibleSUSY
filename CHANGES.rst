@@ -1,13 +1,3 @@
-FlexibleSUSY 2.X.X [XXX]
-==================================
-
-New features
-------------
-
-* Added calculation of Barr-Zee type contributions to g-2 of the muon.
-
-  Thanks to Felix Reichenbach.
-
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 

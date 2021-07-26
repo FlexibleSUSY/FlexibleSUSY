@@ -339,7 +339,7 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
       ERROR("Error in the g-2 calculation! Form factor F2 should be real");
       return std::numeric_limits<double>::quiet_NaN();
    } else {
-      val += valBarZee.real();
+      // val += valBarZee.real();
    }
 
    return val;
