@@ -183,8 +183,7 @@ double BarZeeLoopFPS(double m) {
    else {
       const double y = std::sqrt(-1.0+4.0*m);
       const double real = 1 - 1/(2*m);
-      r1 = 1.0;
-      r2 = 1.0;
+      r1 = r2 = 1.0;
 
       theta1 = std::atan2(y/(2*m), real);
       theta2 = std::atan2(-y/(2*m), real);
@@ -249,8 +248,7 @@ double BarZeeLoopV(const double m) {
    }
    else {
       const double y = std::sqrt(-1.0+4.0*m);
-      r1 = std::sqrt(1/m);
-      r2 = std::sqrt(1/m);
+      r1 = r2 = std::sqrt(1/m);
       const double real = 1/(2*m);
       const double imag = y/(2*m);
       theta1 = std::atan2(imag, real);
