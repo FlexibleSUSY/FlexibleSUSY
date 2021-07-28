@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( test_QedQcd_to )
    q1.to(91.);
    q2.to(91.);
 
-   BOOST_CHECK_LT((Eigen::ArrayXd::Constant(q1.get().size(), 1.0) - q1.get() / ToEigenArray(q2.display())).abs().maxCoeff(), 3e-16);
+   BOOST_CHECK_LT((Eigen::ArrayXd::Constant(q1.get().size(), 1.0) - q1.get() / ToEigenArray(q2.display())).abs().maxCoeff(), 3e-13);
 }
 
 BOOST_AUTO_TEST_CASE( test_QedQcd_toMz )
