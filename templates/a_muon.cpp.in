@@ -151,6 +151,7 @@ struct AMuonBarZeeVectorLoop {
 */
 
 double BarZeeLoopFPS(double m) {
+   // @todo(alex): check stability for small values
    if (m == 0) {
       return 0;
    }
@@ -201,8 +202,9 @@ double BarZeeLoopFPS(double m) {
 
 double BarZeeLoopFS(double m)
 {
-    if (m == 0)
+    if (m == 0) {
         return 0;
+    }
 
     return (2*m - 1) * BarZeeLoopFPS(m) - m * (2 + std::log(m));
 }
