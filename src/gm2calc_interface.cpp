@@ -32,18 +32,18 @@
 #include "gm2calc/gm2_uncertainty.hpp"
 #include "gm2calc/MSSMNoFV_onshell.hpp"
 #include "logger.hpp"
-#include <cmath>
+#include "wrappers.hpp"
 
 namespace flexiblesusy {
 
 namespace {
 
 double calculate_e(double alpha) {
-   return std::sqrt(4. * M_PI * alpha);
+   return std::sqrt(4. * Pi * alpha);
 }
 
 double calculate_alpha(double e) {
-   return e * e / (4. * M_PI);
+   return e * e / (4. * Pi);
 }
 
 gm2calc::MSSMNoFV_onshell setup(const GM2Calc_data& data)
