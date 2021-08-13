@@ -55,7 +55,7 @@ namespace npointfunctions
 
 namespace
 {
-static constexpr int number_of_random_samples = 80;
+static constexpr int number_of_random_samples = 70;
 }
 
 BOOST_AUTO_TEST_SUITE(selfenergy_test_suite,
