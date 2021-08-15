@@ -205,12 +205,15 @@ void check_close_fraction(T a, T b, double tol, double scl=1);
 template<>
 void check_close_fraction<double>(double a, double b, double tol, double scl)
 {
-    if      (a == 0)
-	BOOST_CHECK_SMALL(b / scl, tol);
-    else if (b == 0)
-	BOOST_CHECK_SMALL(a / scl, tol);
-    else
-	BOOST_CHECK_CLOSE_FRACTION(a, b, tol);
+   if (a == 0) {
+	   BOOST_CHECK_SMALL(b / scl, tol);
+   }
+   else if (b == 0) {
+      BOOST_CHECK_SMALL(a / scl, tol);
+   }
+   else {
+      BOOST_CHECK_CLOSE_FRACTION(a, b, tol);
+   }
 }
 
 template<>
@@ -235,7 +238,7 @@ bool check_point(map<string, LoopFunc<T, U>*>& funcs, string& line, double tol)
 
     vector<T> args(f->second->nargs);
     for (size_t i = 0; i < args.size(); i++)
-	if (!(ls >> args[i])) return false;
+      if (!(ls >> args[i])) return false;
     double s2;
     U value_from_line;
     if (!(ls >> s2 >> value_from_line)) return false;

@@ -96,10 +96,10 @@ BOOST_AUTO_TEST_CASE(test_real_parts)
     BOOST_CHECK_CLOSE_FRACTION(ReB00(2,3,4, 1), -0.24981786818504056, 1e-14);
 }
 
-const double scale  = 100;
-const double scale2 = Sqr(scale);
-const double p  = 91.0;
-const double p2 = Sqr(p);
+constexpr double scale  = 100;
+constexpr double scale2 = Sqr(scale);
+constexpr double p  = 91.0;
+constexpr double p2 = Sqr(p);
 
 BOOST_AUTO_TEST_CASE( test_ReA0 )
 {
