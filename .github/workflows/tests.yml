@@ -172,7 +172,7 @@ jobs:
           case "$COMPILER" in
             "gcc")    echo "CXX=g++"     >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
             "clang")  echo "CXX=clang++" >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
-            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -pipe -fp-model precise -fp-model consistent" >> $GITHUB_ENV ;;
+            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O1 -fPIC -Wall -pipe"                      >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
