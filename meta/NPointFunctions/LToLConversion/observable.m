@@ -44,6 +44,7 @@ With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
       GetObservableName@obs[in@inN -> out@outN, nucl, proc], " = ",
       namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
       SymbolName@proc, "(", cxx@inN, ", ", cxx@outN, ", ",
-      namespace, "::Nucleus::", cxx@nucl, ", MODEL, qedqcd);"];];
+      namespace, "::Nucleus::", cxx@nucl, ", MODEL, ",
+      "ltolconversion_settings, qedqcd);"];];
 
 End[];

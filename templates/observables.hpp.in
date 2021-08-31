@@ -33,6 +33,7 @@ namespace flexiblesusy {
 
 class @ModelName@_mass_eigenstates;
 class Physical_input;
+@LToLConversion_class_declaration@
 
 struct @ModelName@_observables {
    static const int NUMBER_OF_OBSERVABLES = @numberOfObservables@;
@@ -48,12 +49,17 @@ struct @ModelName@_observables {
 };
 
 @ModelName@_observables calculate_observables(
-   const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&,
+   const @ModelName@_mass_eigenstates&,
+   const softsusy::QedQcd&,
+   @LToLConversion_named_argument@
    const Physical_input&);
 
 @ModelName@_observables calculate_observables(
-   const @ModelName@_mass_eigenstates&, const softsusy::QedQcd&,
-   const Physical_input&, double scale);
+   const @ModelName@_mass_eigenstates&,
+   const softsusy::QedQcd&,
+   @LToLConversion_named_argument@
+   const Physical_input&,
+   double scale);
 
 } // namespace flexiblesusy
 

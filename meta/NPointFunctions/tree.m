@@ -66,7 +66,6 @@ plant[in_, out_] :=
 plant[tree:type`tree] :=
    Module[{amps, generic, classes, i = 1, j = 1},
       amps = removeColors@FeynArts`CreateFeynAmp@diagrams@tree;
-      amps >> "~/amps.temp";
       generic = Most/@List@@amps;
       classes = (Last/@List@@amps) /. (lhs_ -> _@rhs__) :>
          Sequence@@(Thread[lhs -> #]&/@{rhs});

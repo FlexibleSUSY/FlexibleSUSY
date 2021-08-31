@@ -30,6 +30,7 @@
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
+class LToLConversion_settings;
 
 namespace @ModelName@_l_to_l_conversion {
 

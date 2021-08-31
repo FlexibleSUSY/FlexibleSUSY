@@ -51,7 +51,9 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
       "   const " <> FlexibleSUSY`FSModelName <>
          "_l_to_l_conversion::Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>
-      "_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)";
+      "_mass_eigenstates& model, "<>
+      "const LToLConversion_settings& parameters, "<>
+      "const softsusy::QedQcd& qedqcd)";
    Protect@"LToLConversion`Private`cxx`*";
 ];
 setCxx // Utils`MakeUnknownInputDefinition;
@@ -68,7 +70,7 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
       "<>`cxx`penguin<>",
       npointfunctions::"<>`cxx`classU<>",
       npointfunctions::"<>`cxx`classD<>"
-   >(in, out, nucleus, model, qedqcd);\n}";
+   >(in, out, nucleus, model, parameters, qedqcd);\n}";
 
    {
       npfVertices,

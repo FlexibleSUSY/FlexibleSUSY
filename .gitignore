@@ -5,6 +5,7 @@
 *.d
 *.x
 *.json
+**/.*.swp
 
 src/loop_libraries/libcollier_wrapper.mod
 src/loop_libraries/libcollier_wrapper.f90

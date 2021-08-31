@@ -59,7 +59,7 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
          {"@npf_headers@" -> npfHead, "@npf_definitions@" -> npfDef,
            "@calc_prototypes@" -> calcProto, "@calc_definitions@" -> calcDef,
             Sequence@@GeneralReplacementRules[]}];
-      {ffvFields, Join[ffvV, npfV]}];];
+      {ffvFields, Join[ffvV, npfV], {}}];];
 WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
 WriteBrLTo3LClass ~ SetAttributes ~ {Protected, Locked};
 

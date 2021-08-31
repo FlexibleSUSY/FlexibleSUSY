@@ -1,5 +1,4 @@
 (* :Copyright:
-
    ====================================================================
    This file is part of FlexibleSUSY.
 
@@ -34,32 +33,42 @@ Module[
       ],
       fields = {}, vertices = {}, additionalVertices = {},
       prototypes = "", npfHeaders = "", definitions = "", npfDefinitions = "",
-      masslessNeutralVectorBosons
+      masslessNeutralVectorBosons, newRules
    },
+
+   newRules = {
+      "@LToLConversion_fill@" -> "slha_io.fill(ltolconversion_settings);",
+      "@LToLConversion_init@" -> "LToLConversion_settings ltolconversion_settings;",
+      "@LToLConversion_class_name@" -> "ltolconversion_settings,",
+      "@LToLConversion_class_declaration@" -> "class LToLConversion_settings;",
+      "@LToLConversion_named_argument@" -> "const LToLConversion_settings& ltolconversion_settings,",
+      (* Live inside librarylink. *)
+      "@LToLConversion_private@" -> "LToLConversion_settings ltolconversion_settings{}; ///< LToLConversion settings",
+      "@LToLConversion_setter@" -> "void set_ltolconversion_settings(const LToLConversion_settings& s) { ltolconversion_settings = s; }",
+      "@LToLConversion_set_data@" -> "data.set_ltolconversion_settings(ltolconversion_settings);",
+      "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
+      "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
+   If[observable === {}, newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
 
    If[observables =!= {},
       Print["Creating LToLConversion class ..."];
-
       Get@main;
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the calculation *)
-      masslessNeutralVectorBosons = Select[TreeMasses`GetVectorBosons[],
-         And[TreeMasses`IsMassless@#,
-            !TreeMasses`IsElectricallyCharged@#,
-            !TreeMasses`ColorChargedQ@#]&];
+      masslessNeutralVectorBosons =
+         Select[TreeMasses`GetVectorBosons[],
+            And[TreeMasses`IsMassless@#,
+               !TreeMasses`IsElectricallyCharged@#,
+               !TreeMasses`ColorChargedQ@#]&];
 
-      vertices = Flatten /@ Tuples[
-         {
-            {CXXDiagrams`LorentzConjugate@#, #} &/@ Flatten@Join[
-               TreeMasses`GetSMQuarks[], vertices],
-            masslessNeutralVectorBosons
-         }
-      ];
+      vertices = Flatten/@ Tuples[
+         {  {CXXDiagrams`LorentzConjugate@#, #}&/@
+               Flatten@Join[TreeMasses`GetSMQuarks[], vertices],
+            masslessNeutralVectorBosons}];
 
       {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
-         LToLConversion`create@observables;
-   ];
+         LToLConversion`create@observables;];
 
    WriteOut`ReplaceInFiles[
       files,
@@ -73,7 +82,8 @@ Module[
    ];
    {
       fields,
-      DeleteDuplicates@Join[vertices,additionalVertices]
+      DeleteDuplicates@Join[vertices,additionalVertices],
+      newRules
    }
 ];
 ];

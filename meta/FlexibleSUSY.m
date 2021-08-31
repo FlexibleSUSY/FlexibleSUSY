@@ -870,12 +870,12 @@ WriteInputParameterClass[inputParameters_List, files_List] :=
                            "@printInputParameters@"       -> IndentText[printInputParameters],
                            "@get@"                        -> IndentText[get],
                            "@set@"                        -> IndentText[set],
-                           Sequence @@ GeneralReplacementRules[]
-                         } ];
-          ];
+                        Sequence @@ GeneralReplacementRules[]
+                      } ];
+       ];
 
 WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
-                     {minimumScale_, maximumScale_}, files_List] :=
+                  {minimumScale_, maximumScale_}, files_List] :=
    Module[{applyConstraint = "", calculateScale, scaleGuess,
            restrictScale,
            initialSetting,
@@ -3683,7 +3683,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             QToQGammaFields = {},
             LToLGammaFields = {},
             FFMasslessVVertices = {},
-            FieldsNPF, VerticesNPF, AllNPFVertices = {},
+            FieldsNPF, VerticesNPF, RulesNPF, AllNPFVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
             cxxQFTVerticesTemplate, cxxQFTVerticesMakefileTemplates,
             susyBetaFunctions, susyBreakingBetaFunctions,
@@ -3754,8 +3754,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            (* load additional packages if prerequisites are met *)
            If[FSFeynArtsAvailable && FSFormCalcAvailable,
                Needs@"NPointFunctions`";
-               Needs@"WilsonCoeffs`";
-           ];
+               Needs@"WilsonCoeffs`";];
 
            Print["Converting SARAH beta functions ..."];
            {susyBetaFunctions, susyBreakingBetaFunctions} =
@@ -4460,13 +4459,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                      FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_effective_couplings.cpp"}]}
                                    }];
 
-           Print["Creating class for observables ..."];
-           WriteObservables[extraSLHAOutputBlocks,
-                            {{FileNameJoin[{$flexiblesusyTemplateDir, "observables.hpp.in"}],
-                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
-                             {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
-                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
-
            Print["Creating EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
@@ -4520,22 +4512,33 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
          (* Load and evaluate NPointFunctions write classes for observables *)
          If[FSFeynArtsAvailable && FSFormCalcAvailable,
-            Module[{files, obs, classes, namespaces},
+            Module[{files, obs, classes, namespaces, newRules = {}, down},
                files = FileNames["class.m",
                   FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions"}, 2];
                Get/@files;
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
                classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
                namespaces = ToExpression[#<>"`namespace[]"]&/@obs;
-               files = {FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
+               files = {
+                  FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
                   FileNameJoin@{FSOutputDir, FSModelName<>"_"<>#}}&/@
                      {#<>".hpp", #<>".cpp"}&/@ namespaces;
-               Do[With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]]}},
+
+               (* Evaluate write classes *)
+               Do[With[{lhs = {FieldsNPF@obs[[i]], VerticesNPF@obs[[i]], RulesNPF@obs[[i]]}},
                      lhs = classes[[i]][extraSLHAOutputBlocks, files[[i]]];];
-                  AllNPFVertices = Join[AllNPFVertices, VerticesNPF@obs[[i]]],
+                  AllNPFVertices = Join[AllNPFVertices, VerticesNPF@obs[[i]]];
+                  newRules = Join[newRules, RulesNPF@obs[[i]]];,
                   {i, Length@classes}];
+
                FieldsNPF[_] = {};
                VerticesNPF[_] = {};
+
+               (* Inserting new rules before default ones *)
+               down = DownValues@GeneralReplacementRules;
+               down = Insert[down, newRules, {1,2,-1}];
+               DownValues@GeneralReplacementRules = down;
+
                AllNPFVertices = DeleteDuplicates@AllNPFVertices;];];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
@@ -4584,6 +4587,13 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.cpp"}]}}];
+
+           Print["Creating class for observables ..."];
+           WriteObservables[extraSLHAOutputBlocks,
+                            {{FileNameJoin[{$flexiblesusyTemplateDir, "observables.hpp.in"}],
+                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.hpp"}]},
+                             {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
+                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];

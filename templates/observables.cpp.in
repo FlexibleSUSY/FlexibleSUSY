@@ -24,6 +24,7 @@
 #include "@ModelName@_l_to_lgamma.hpp"
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "@ModelName@_l_to_l_conversion.hpp"
+#include "npointfunctions/l_to_l_conversion/settings.hpp"
 #include "@ModelName@_l_to_3l.hpp"
 #include "@ModelName@_effective_couplings.hpp"
 #include "config.h"
@@ -93,6 +94,7 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
 
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
+                                              @LToLConversion_named_argument@
                                               const Physical_input& physical_input,
                                               double scale)
 {
@@ -116,11 +118,15 @@ void @ModelName@_observables::set(const Eigen::ArrayXd& vec)
       }
    }
 
-   return calculate_observables(model_at_scale, qedqcd, physical_input);
+   return calculate_observables(model_at_scale,
+                                qedqcd,
+                                @LToLConversion_class_name@
+                                physical_input);
 }
 
 @ModelName@_observables calculate_observables(const @ModelName@_mass_eigenstates& model,
                                               const softsusy::QedQcd& qedqcd,
+                                              @LToLConversion_named_argument@
                                               const Physical_input& physical_input)
 {
    @ModelName@_observables observables;
