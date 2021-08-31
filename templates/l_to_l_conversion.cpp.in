@@ -30,6 +30,7 @@
 #include "cxx_qft/@ModelName@_qft.hpp"
 
 #include "@ModelName@_l_to_l_conversion.hpp"
+#include "npointfunctions/l_to_l_conversion/settings.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
@@ -241,6 +242,7 @@ Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
  * @param[in] in     Generation index for incoming lepton.
  * @param[in] out    Generation index for outgoing lepton.
  * @param[in] model  Mass eigenstates.
+ * @param[in] parameters Parameters for the observable calculation.
  * @param[in] qedqcd Reference to low-energy data.
  * @return Set of (l to l conversion) process and Wilson coefficients.
  */
@@ -249,6 +251,7 @@ template<class Lepton, class Up, class Down, class Photon,
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    const @ModelName@_l_to_l_conversion::Nucleus nucleus,
    const @ModelName@_mass_eigenstates& model,
+   const LToLConversion_settings& parameters,
    const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};

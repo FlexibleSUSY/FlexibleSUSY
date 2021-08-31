@@ -23,6 +23,7 @@
 #include "problems.hpp"
 #include "slha_io.hpp"
 #include "for_each.hpp"
+#include "npointfunctions/l_to_l_conversion/settings.hpp"
 
 #include <Eigen/Core>
 #include <string>
@@ -60,6 +61,7 @@ public:
    void fill(@ModelName@_slha&) const;
    void fill(Physical_input&) const;
    void fill(Spectrum_generator_settings&) const;
+   void fill(LToLConversion_settings&) const;
    double get_parameter_output_scale() const;
    const SLHA_io& get_slha_io() const { return slha_io; }
    void read_from_file(const std::string&);
@@ -72,6 +74,7 @@ public:
    void set_modsel(const SLHA_io::Modsel&);
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
+   void set_LToLConversion_settings(const LToLConversion_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    template <class... Ts> void set_spectrum(const std::tuple<Ts...>&);
    void set_spectrum(const @ModelName@_slha&);
