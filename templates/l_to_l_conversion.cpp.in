@@ -35,8 +35,11 @@
 
 #include "wrappers.hpp"
 
-#define F4F(quark, g) embed_photon<quark, Photon>(model, form_factors, g);
-#define NPF(name, g) fix_tensors_sign<name>(model, in, out, g);
+#define F4F(quark, g) embed_photon<quark, Photon>(model, form_factors, g)
+#define NPF(name, g) fix_tensors_sign<name>(model, in, out, g)
+#define GS(N,Q) parameters.get(LToLConversion_settings::scalar_##N##Q)*m.N/m.Q
+#define GV(N,Q) parameters.get(LToLConversion_settings::vector_##N##Q)
+#define GT(N,Q) parameters.get(LToLConversion_settings::tensor_##N##Q)
 
 @npf_headers@
 
@@ -63,27 +66,19 @@ struct overlap_integrals {
    double Sn;
 };
 
-struct GV {
-   static constexpr double pu = 2., pd = 1.,
-                           nu = 1., nd = 2.;
-};
-
-struct GT {
-   static constexpr double pu =  0.77, pd = -0.23, ps = 0.008,
-                           nu = -0.23, nd =  0.77, ns = 0.008;
-};
-
 template <class Lepton, class Up, class Down>
 struct Mass {
    // PDG 2018 data
    double p = 0.938272081, n = 0.939565413;
    // Other masses
-   double l, u, d, s;
+   double l, u, c, d, s, b;
    Mass(const context_base& context, int in) {
       l = context.mass<Lepton>({in});
       u = context.mass<Up>({0});
+      c = context.mass<Up>({1});
       d = context.mass<Down>({0});
       s = context.mass<Down>({1});
+      b = context.mass<Down>({2});
    }
 };
 
@@ -288,27 +283,49 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    auto CTLd = CXYd[8], CTRd = CXYd[9];
    auto CTLs = CXYs[8], CTRs = CXYs[9];
 
-   Mass<Lepton, Up, Down> m(context, in);
-   const double GSpu = 0.021*m.p/m.u, GSpd = 0.041*m.p/m.d, GSps = 0.043*m.p/m.s;
-   const double GSnu = 0.019*m.n/m.u, GSnd = 0.045*m.n/m.d, GSns = 0.043*m.n/m.s;
-
    // Vector contribution.
-   auto gpLV = ( GV::pu*CVLu + GV::pd*CVLd );
-   auto gpRV = ( GV::pu*CVRu + GV::pd*CVRd );
-   auto gnLV = ( GV::nu*CVLu + GV::nd*CVLd );
-   auto gnRV = ( GV::nu*CVRu + GV::nd*CVRd );
+   auto gpLV = ( GV(p,u)*CVLu + GV(p,d)*CVLd );
+   auto gpRV = ( GV(p,u)*CVRu + GV(p,d)*CVRd );
+   auto gnLV = ( GV(n,u)*CVLu + GV(n,d)*CVLd );
+   auto gnRV = ( GV(n,u)*CVRu + GV(n,d)*CVRd );
 
    // Scalar contribution from scalar coefficients.
-   auto gpLS = ( GSpu*CSLu + GSpd*CSLd + GSps*CSLs );
-   auto gpRS = ( GSpu*CSRu + GSpd*CSRd + GSps*CSRs );
-   auto gnLS = ( GSnu*CSLu + GSnd*CSLd + GSns*CSLs );
-   auto gnRS = ( GSnu*CSRu + GSnd*CSRd + GSns*CSRs );
+   Mass<Lepton, Up, Down> m(context, in);
+   auto gpLS = ( GS(p,u)*CSLu + GS(p,d)*CSLd + GS(p,s)*CSLs );
+   auto gpRS = ( GS(p,u)*CSRu + GS(p,d)*CSRd + GS(p,s)*CSRs );
+   auto gnLS = ( GS(n,u)*CSLu + GS(n,d)*CSLd + GS(n,s)*CSLs );
+   auto gnRS = ( GS(n,u)*CSRu + GS(n,d)*CSRd + GS(n,s)*CSRs );
 
-   // Scalar contribution from tensor coefficients.
-   gpLS += (2*m.l/m.p)*( GT::pu*CTLu + GT::pd*CTLd + GT::ps*CTLs );
-   gpRS += (2*m.l/m.p)*( GT::pu*CTRu + GT::pd*CTRd + GT::ps*CTRs );
-   gnLS += (2*m.l/m.n)*( GT::nu*CTLu + GT::nd*CTLd + GT::ns*CTLs );
-   gnRS += (2*m.l/m.n)*( GT::nu*CTRu + GT::nd*CTRd + GT::ns*CTRs );
+   if (parameters.get(LToLConversion_settings::include_tensor_contribution)) {
+      gpLS += (m.l/m.p)*(GT(p,u)*CTLu + GT(p,d)*CTLd + GT(p,s)*CTLs);
+      gpRS += (m.l/m.p)*(GT(p,u)*CTRu + GT(p,d)*CTRd + GT(p,s)*CTRs);
+      gnLS += (m.l/m.n)*(GT(n,u)*CTLu + GT(n,d)*CTLd + GT(n,s)*CTLs);
+      gnRS += (m.l/m.n)*(GT(n,u)*CTRu + GT(n,d)*CTRd + GT(n,s)*CTRs);
+   }
+
+   if (parameters.get(LToLConversion_settings::include_gluonic_contribution)) {
+      // Only scalar contributions is needed - no photon; minus from matching.
+      const auto CXYc = - NPF(npf_up,   1);
+      const auto CXYb = - NPF(npf_down, 2);
+
+      auto CSLc = ( CXYc[0] + CXYc[1] )/2.;
+      auto CSRc = ( CXYc[2] + CXYc[3] )/2.;
+      auto CSLb = ( CXYb[0] + CXYb[1] )/2.;
+      auto CSRb = ( CXYb[2] + CXYb[3] )/2.;
+
+      const double Ggp = - 8.*Pi/9 * (1 - m.u/m.p * GS(p,u)
+                                        - m.d/m.p * GS(p,d)
+                                        - m.s/m.p * GS(p,s));
+      const double Ggn = - 8.*Pi/9 * (1 - m.u/m.n * GS(n,u)
+                                        - m.d/m.n * GS(n,d)
+                                        - m.s/m.n * GS(n,s));
+
+      // Scalar contribution from gluonic coefficients.
+      gpLS += - 1./(12*Pi) * m.p*Ggp*(CSLc/m.c + CSLb/m.b);
+      gpRS += - 1./(12*Pi) * m.p*Ggp*(CSRc/m.c + CSRb/m.b);
+      gnLS += - 1./(12*Pi) * m.n*Ggn*(CSLc/m.c + CSLb/m.b);
+      gnRS += - 1./(12*Pi) * m.n*Ggn*(CSRc/m.c + CSRb/m.b);
+   }
 
    const auto ff = get_overlap_integrals(nucleus, qedqcd);
    const auto left  = DR*ff.D/4. - gpLV*ff.Vp - gnLV*ff.Vn - gpRS*ff.Sp - gnRS*ff.Sn;

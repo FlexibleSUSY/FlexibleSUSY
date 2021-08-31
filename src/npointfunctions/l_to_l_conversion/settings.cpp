@@ -30,43 +30,28 @@ namespace {
 const std::array<std::string, LToLConversion_settings::NUMBER_OF_OPTIONS> descriptions = {
    "include tensor contribution",
    "include gluonic contribution",
+   "scalar form factor G^S_{p,u} without masses",
+   "scalar form factor G^S_{n,u} without masses",
+   "scalar form factor G^S_{p,d} without masses",
+   "scalar form factor G^S_{n,d} without masses",
+   "scalar form factor G^S_{p,s} without masses",
+   "scalar form factor G^T_{n,s} without masses",
+   "vector form factor G^V_{p,u}",
+   "vector form factor G^V_{n,u}",
+   "vector form factor G^V_{p,d}",
+   "vector form factor G^V_{n,d}",
+   "tensor form factor G^T_{p,u}",
+   "tensor form factor G^T_{n,u}",
+   "tensor form factor G^T_{p,d}",
+   "tensor form factor G^T_{n,d}",
+   "tensor form factor G^T_{p,s}",
+   "tensor form factor G^T_{n,s}"
 };
-
-bool is_integer(double value)
-{
-   double intpart;
-   return std::modf(value, &intpart) == 0.0;
-}
 
 void assert_bool(double value, const char* quantity)
 {
    if (value != 0.0 && value != 1.0) {
-      throw SetupError(std::string(quantity) + " must either 0 or 1");
-   }
-}
-
-void assert_integer(double value, const char* quantity)
-{
-   if (!is_integer(value)) {
-      throw SetupError(std::string(quantity) + " must be an integer");
-   }
-}
-
-void assert_ge(double value, double lower_bound, const char* quantity)
-{
-   if (value < lower_bound) {
-      throw SetupError(std::string(quantity) +
-                       " must be greater than or equal to " +
-                       flexiblesusy::to_string(lower_bound));
-   }
-}
-
-void assert_le(double value, double upper_bound, const char* quantity)
-{
-   if (value > upper_bound) {
-      throw SetupError(std::string(quantity) +
-                       " must be lower than or equal to " +
-                       flexiblesusy::to_string(upper_bound));
+      throw SetupError(std::string(quantity) + " must be either 0 or 1");
    }
 }
 
@@ -102,16 +87,12 @@ std::string LToLConversion_settings::get_description(Settings o) const
 void LToLConversion_settings::set(Settings o, double value)
 {
    switch (o) {
-   case include_tensor_contribution: // 0 [bool]
+   case include_tensor_contribution: // [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   case include_gluonic_contribution: // 1 [bool]
+   case include_gluonic_contribution: // [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
-   /*case min_br_to_print: // 1 [double >= 0 and <= 1]
-      assert_ge(value, 0, descriptions.at(o).c_str());
-      assert_le(value, 1, descriptions.at(o).c_str());
-      break;*/
    default:
       break;
    }
@@ -125,22 +106,34 @@ void LToLConversion_settings::set(const LToLConversion_settings::Settings_t& s)
 }
 
 /**
- * Resets all spectrum generator settings to their defaults.
+ * Resets all settings to their defaults.
  *
- * | enum                             | possible values   | default value   |
- * |----------------------------------|-------------------|-----------------|
- * | include_tensor_contribution      | 0 (no) or 1 (yes) | 1 (= enabled)   |
- * | include_gluonic_contribution     | 0 (no) or 1 (yes) | 1 (= enabled)   |
+ * | enum                             | possible values   | default value     |
+ * |----------------------------------|-------------------|-------------------|
+ * | include_tensor_contribution      | 0 (no) or 1 (yes) | 1 (= enabled)     |
+ * | include_gluonic_contribution     | 0 (no) or 1 (yes) | 1 (= enabled)     |
+ * | other coefficients               | any double        | see function body |
  */
 void LToLConversion_settings::reset()
 {
    values[include_tensor_contribution]  = 1.0;
    values[include_gluonic_contribution] = 1.0;
-}
-bool is_integer(double value)
-{
-   double intpart;
-   return std::modf(value, &intpart) == 0.0;
+   values[scalar_pu] = 0.021;
+   values[scalar_nu] = 0.019;
+   values[scalar_pd] = 0.041;
+   values[scalar_nd] = 0.045;
+   values[scalar_ps] = 0.043;
+   values[scalar_ns] = 0.043;
+   values[vector_pu] = 2.0;
+   values[vector_nu] = 1.0;
+   values[vector_pd] = 1.0;
+   values[vector_nd] = 2.0;
+   values[tensor_pu] = 0.77;
+   values[tensor_nu] = -0.23;
+   values[tensor_pd] = -0.23;
+   values[tensor_nd] = 0.77;
+   values[tensor_ps] = 0.008;
+   values[tensor_ns] = 0.008;
 }
 
-}
+} // namespace flexiblesusy

@@ -28,9 +28,17 @@ class LToLConversion_settings {
 public:
    /// LToLConversion settings
    enum Settings : int {
-      include_tensor_contribution,   ///< [0]
-      include_gluonic_contribution,   ///< [1]
-      NUMBER_OF_OPTIONS   ///< number of possible options
+      include_tensor_contribution,
+      include_gluonic_contribution,
+      scalar_pu, scalar_nu,
+      scalar_pd, scalar_nd,
+      scalar_ps, scalar_ns,
+      vector_pu, vector_nu,
+      vector_pd, vector_nd,
+      tensor_pu, tensor_nu,
+      tensor_pd, tensor_nd,
+      tensor_ps, tensor_ns,
+      NUMBER_OF_OPTIONS ///< number of possible options
    };
 
    using Settings_t = Eigen::Array<double,NUMBER_OF_OPTIONS,1>;
@@ -39,11 +47,10 @@ public:
 
    double get(Settings) const; ///< get value of setting
    Settings_t get() const;     ///< get all settings
-   std::string get_description(Settings) const; ///< get description setting
+   std::string get_description(Settings) const; ///< get description
    void set(Settings, double); ///< set value of setting
    void set(const Settings_t&);///< set all settings
-   void reset();               ///< resets all settings to their defaults
-   double tensor() const { return get(include_tensor_contribution); }
+   void reset();               ///< resets all settings to defaults
 
 private:
    std::array<double, NUMBER_OF_OPTIONS> values; ///< settings
