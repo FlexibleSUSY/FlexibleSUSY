@@ -324,23 +324,16 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
               finalStateReps = Sort[TreeMasses`GetColorRepresentation /@ finalState];
               Switch[initialStateRep,
                      S, result = ((finalStateReps === {S, S}) ||
-                                  (finalStateReps === {T, T}) ||
-                                  (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}]) ||
                                   (finalStateReps === {O, O}));,
-                     T|-T, result = ((finalStateReps === Sort[{T, S}]) ||
-                                     (finalStateReps === Sort[{-T, S}]) ||
+                     T|-T, result = ((finalStateReps === Sort[{initialStateRep, S}]) ||
                                      (finalStateReps === Sort[{O, T}]) ||
                                      (finalStateReps === Sort[{O, -T}]));,
                      O, result = ((finalStateReps === Sort[{O, S}]) ||
-                                  (finalStateReps === {T, T}) ||
-                                  (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}])
-                                  (* uncomment to enable O -> OO decays once
-                                     the handling of multiple color structures
-                                     is introduced
-                                  || (finalStateReps === Sort[{O, O}])*));,
-                     _, result = True; (* unhandled case *)
+                                  (* for now we only handle octet decays to symmetric final state *)
+                                  || (finalStateReps === {O, O} && SameQ@@finalState));,
+                     _, result = False; (* unhandled case *)
                     ];
              ];
            result
