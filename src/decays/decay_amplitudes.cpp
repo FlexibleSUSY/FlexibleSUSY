@@ -28,12 +28,14 @@
 
 namespace flexiblesusy {
 
-double Decay_amplitude_SSS::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_SSS<colIn, colOut1, colOu2>::square() const
 {
    return AbsSqr(form_factor);
 }
 
-double Decay_amplitude_SSV::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_SSV<colIn, colOut1, colOu2>::square() const
 {
    if (m_vector <= massless_vector_threshold) {
       // eq. B36 of http://etheses.dur.ac.uk/2301 has incorrect oposite sign
@@ -54,7 +56,8 @@ double Decay_amplitude_SSV::square() const
 //       numerically non-zero. Currently would be treated as a massive vector.
 // @todo Numerically validate decays of generic scalar to two massive on-shell
 //       vectors. So far we have not studied an example like this.
-double Decay_amplitude_SVV::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_SVV<colIn, colOut1, colOu2>::square() const
 {
    if (m_decay < m_vector_1 + m_vector_2) {
       WARNING("Warning in Decay_amplitude_SVV::square(): decaying particle mass smaller than sum of product masses. Returning 0.");
@@ -155,32 +158,37 @@ double Decay_amplitude_SVV::square() const
    return mgg + m33 + mepseps + mg3;
 }
 
-Decay_amplitude_SSS operator*(std::complex<double> factor, Decay_amplitude_SSS const& amp2) {
-   Decay_amplitude_SSS amp;
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSS<colIn, colOut1, colOu2> operator*(std::complex<double> factor, Decay_amplitude_SSS<colIn, colOut1, colOu2> const& amp2) {
+   Decay_amplitude_SSS<colIn, colOut1, colOu2> amp;
    amp.m_decay = amp2.m_decay;
    amp.m_scalar_1 = amp2.m_scalar_1;
    amp.m_scalar_2 = amp2.m_scalar_2;
    amp.form_factor = factor * amp2.form_factor;
    return amp;
 }
-Decay_amplitude_SSS operator*(Decay_amplitude_SSS const& amp2, std::complex<double> factor) {
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSS<colIn, colOut1, colOu2> operator*(Decay_amplitude_SSS<colIn, colOut1, colOu2> const& amp2, std::complex<double> factor) {
    return operator*(factor, amp2);
 }
 
-Decay_amplitude_SSV operator*(std::complex<double> factor, Decay_amplitude_SSV const& amp2) {
-   Decay_amplitude_SSV amp;
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSV<colIn, colOut1, colOu2> operator*(std::complex<double> factor, Decay_amplitude_SSV<colIn, colOut1, colOu2> const& amp2) {
+   Decay_amplitude_SSV<colIn, colOut1, colOu2> amp;
    amp.m_decay = amp2.m_decay;
    amp.m_scalar = amp2.m_scalar;
    amp.m_vector = amp2.m_vector;
    amp.form_factor = factor * amp2.form_factor;
    return amp;
 }
-Decay_amplitude_SSV operator*(Decay_amplitude_SSV const& amp2, std::complex<double> factor) {
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSV<colIn, colOut1, colOu2> operator*(Decay_amplitude_SSV<colIn, colOut1, colOu2> const& amp2, std::complex<double> factor) {
    return operator*(factor, amp2);
 }
 
-Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV const& amp2) {
-   Decay_amplitude_SVV amp;
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SVV<colIn, colOut1, colOu2> operator* (std::complex<double> factor, Decay_amplitude_SVV<colIn, colOut1, colOu2> const& amp2) {
+   Decay_amplitude_SVV<colIn, colOut1, colOu2> amp;
    amp.m_decay = amp2.m_decay;
    amp.m_vector_1 = amp2.m_vector_1;
    amp.m_vector_2 = amp2.m_vector_2;
@@ -193,12 +201,14 @@ Decay_amplitude_SVV operator* (std::complex<double> factor, Decay_amplitude_SVV 
    amp.form_factor_eps = factor * amp2.form_factor_eps;
    return amp;
 }
-Decay_amplitude_SVV operator*(Decay_amplitude_SVV const& amp2, std::complex<double> factors) {
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SVV<colIn, colOut1, colOu2> operator*(Decay_amplitude_SVV<colIn, colOut1, colOu2> const& amp2, std::complex<double> factors) {
    return operator*(factors, amp2);
 }
 
-Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF const& amp2) {
-   Decay_amplitude_SFF amp;
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SFF<colIn, colOut1, colOu2> operator*(std::complex<double> factor, Decay_amplitude_SFF<colIn, colOut1, colOu2> const& amp2) {
+   Decay_amplitude_SFF<colIn, colOut1, colOu2> amp;
    amp.m_decay = amp2.m_decay;
    amp.m_fermion_1 = amp2.m_fermion_1;
    amp.m_fermion_2 = amp2.m_fermion_2;
@@ -206,11 +216,13 @@ Decay_amplitude_SFF operator*(std::complex<double> factor, Decay_amplitude_SFF c
    amp.form_factor_right = factor * amp2.form_factor_right;
    return amp;
 }
-Decay_amplitude_SFF operator*(Decay_amplitude_SFF const& amp, std::complex<double> factor) {
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SFF<colIn, colOut1, colOu2> operator*(Decay_amplitude_SFF<colIn, colOut1, colOu2> const& amp, std::complex<double> factor) {
    return operator*(factor, amp);
 }
 
-double Decay_amplitude_SFF::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_SFF<colIn, colOut1, colOu2>::square() const
 {
    const double m_in_sq = Sqr(m_decay);
    const double m_1_sq = Sqr(m_fermion_1);
@@ -222,7 +234,8 @@ double Decay_amplitude_SFF::square() const
          form_factor_left * Conj(form_factor_right));
 }
 
-double Decay_amplitude_FFS::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_FFS<colIn, colOut1, colOu2>::square() const
 {
    const double m_in_sq = Sqr(m_decay);
    const double m_f_sq = Sqr(m_fermion);
@@ -238,7 +251,8 @@ double Decay_amplitude_FFS::square() const
 // Currently in development for future versions
 // @todo handle massless vectors safely
 // @todo check these expressions, they appear not to agree with SARAH/SPheno
-double Decay_amplitude_FFV::square() const
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+double Decay_amplitude_FFV<colIn, colOut1, colOu2>::square() const
 {
    const double m_in_sq = Sqr(m_decay);
    const double m_f_sq = Sqr(m_fermion);

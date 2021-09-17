@@ -22,12 +22,15 @@
 #include <complex>
 #include <limits>
 
+#include "cxx_qft/fields.hpp"
+
 namespace flexiblesusy {
 
 /**
  * @class Decay_amplitude_SSS
  * @brief generic amplitude for the decay of a scalar into two scalars
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_SSS {
    double m_decay {0.};
    double m_scalar_1 {0.};
@@ -35,18 +38,22 @@ struct Decay_amplitude_SSS {
    std::complex<double> form_factor {0.};
 
    double square() const;
-   Decay_amplitude_SSS operator+=(Decay_amplitude_SSS const& amp) {
+   Decay_amplitude_SSS<colIn, colOut1, colOu2> operator+=(Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor += amp.form_factor;
       return *this;
    }
 };
-Decay_amplitude_SSS operator*(std::complex<double>, Decay_amplitude_SSS const&);
-Decay_amplitude_SSS operator*(Decay_amplitude_SSS const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSS<colIn, colOut1, colOu2>
+operator*(std::complex<double>, Decay_amplitude_SSS<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSS<colIn, colOut1, colOu2> operator*(Decay_amplitude_SSS<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 /**
  * @class Decay_amplitude_SSV
  * @brief generic amplitude for the decay of a scalar into a scalar and vector
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_SSV {
    double m_decay {0.};
    double m_scalar {0.};
@@ -55,18 +62,21 @@ struct Decay_amplitude_SSV {
    std::complex<double> form_factor {0.};
 
    double square() const;
-   Decay_amplitude_SSV operator+=(Decay_amplitude_SSV const& amp) {
+   Decay_amplitude_SSV<colIn, colOut1, colOu2> operator+=(Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor += amp.form_factor;
       return *this;
    }
 };
-Decay_amplitude_SSV operator*(std::complex<double>, Decay_amplitude_SSV const&);
-Decay_amplitude_SSV operator*(Decay_amplitude_SSV const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSV<colIn, colOut1, colOu2> operator*(std::complex<double>, Decay_amplitude_SSV<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSV<colIn, colOut1, colOu2> operator*(Decay_amplitude_SSV<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 /**
  * @class Decay_amplitude_SVV
  * @brief generic amplitude for the decay of a scalar into two vectors
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_SVV {
    double m_decay {0.};
    double m_vector_1 {0.};
@@ -80,7 +90,7 @@ struct Decay_amplitude_SVV {
    std::complex<double> form_factor_eps {0.};
 
    double square() const;
-   Decay_amplitude_SVV operator+=(Decay_amplitude_SVV const& amp) {
+   Decay_amplitude_SVV<colIn, colOut1, colOu2> operator+=(Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor_g += amp.form_factor_g;
       form_factor_11 += amp.form_factor_11;
       form_factor_12 += amp.form_factor_12;
@@ -90,13 +100,16 @@ struct Decay_amplitude_SVV {
       return *this;
    }
 };
-Decay_amplitude_SVV operator*(std::complex<double>, Decay_amplitude_SVV const&);
-Decay_amplitude_SVV operator*(Decay_amplitude_SVV const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SVV<colIn, colOut1, colOu2> operator*(std::complex<double>, Decay_amplitude_SVV<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SVV<colIn, colOut1, colOu2> operator*(Decay_amplitude_SVV<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 /**
  * @class Decay_amplitude_SFF
  * @brief generic amplitude for the decay of a scalar into two fermions
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_SFF {
    double m_decay {0.};
    double m_fermion_1 {0.};
@@ -105,19 +118,22 @@ struct Decay_amplitude_SFF {
    std::complex<double> form_factor_right {0.};
 
    double square() const;
-   Decay_amplitude_SFF operator+=(Decay_amplitude_SFF const& amp) {
+   Decay_amplitude_SFF<colIn, colOut1, colOu2> operator+=(Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor_left += amp.form_factor_left;
       form_factor_right += amp.form_factor_right;
       return *this;
    }
 };
-Decay_amplitude_SFF operator*(std::complex<double>, Decay_amplitude_SFF const&);
-Decay_amplitude_SFF operator*(Decay_amplitude_SFF const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SFF<colIn, colOut1, colOu2> operator*(std::complex<double>, Decay_amplitude_SFF<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SFF<colIn, colOut1, colOu2> operator*(Decay_amplitude_SFF<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 /**
  * @class Decay_amplitude_FFS
  * @brief generic amplitude for the decay of a fermion into a fermion and scalar
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_FFS {
    double m_decay {0.};
    double m_fermion {0.};
@@ -126,19 +142,22 @@ struct Decay_amplitude_FFS {
    std::complex<double> form_factor_right {0.};
 
    double square() const;
-   Decay_amplitude_FFS operator+=(Decay_amplitude_FFS const& amp) {
+   Decay_amplitude_FFS<colIn, colOut1, colOu2> operator+=(Decay_amplitude_FFS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor_left += amp.form_factor_left;
       form_factor_right += amp.form_factor_right;
       return *this;
    }
 };
-Decay_amplitude_FFS operator*(std::complex<double>, Decay_amplitude_FFS const&);
-Decay_amplitude_FFS operator*(Decay_amplitude_FFS const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_FFS<colIn, colOut1, colOu2> operator*(std::complex<double>, Decay_amplitude_FFS<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_FFS<colIn, colOut1, colOu2> operator*(Decay_amplitude_FFS<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 /**
  * @class Decay_amplitude_FFV
  * @brief generic amplitude for the decay of a fermion into a fermion and vector
  */
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
 struct Decay_amplitude_FFV {
    double m_decay {0.};
    double m_fermion {0.};
@@ -150,7 +169,7 @@ struct Decay_amplitude_FFV {
    std::complex<double> form_factor_p_2 {0.};
 
    double square() const;
-   Decay_amplitude_FFV operator+=(Decay_amplitude_FFV const& amp) {
+   Decay_amplitude_FFV<colIn, colOut1, colOu2> operator+=(Decay_amplitude_FFV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> const& amp) {
       form_factor_gam_left += amp.form_factor_gam_left;
       form_factor_gam_right += amp.form_factor_gam_right;
       form_factor_p_1 += amp.form_factor_p_1;
@@ -158,8 +177,10 @@ struct Decay_amplitude_FFV {
       return *this;
    }
 };
-Decay_amplitude_FFV operator*(std::complex<double>, Decay_amplitude_FFV const&);
-Decay_amplitude_FFV operator*(Decay_amplitude_FFV const&, std::complex<double>);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_FFV<colIn, colOut1, colOu2> operator*(std::complex<double>, Decay_amplitude_FFV<colIn, colOut1, colOu2> const&);
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_FFV<colIn, colOut1, colOu2> operator*(Decay_amplitude_FFV<colIn, colOut1, colOu2> const&, std::complex<double>);
 
 template <typename Amplitude>
 double square_amplitude(const Amplitude& a)

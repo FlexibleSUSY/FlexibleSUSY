@@ -26,6 +26,8 @@
 #ifndef @ModelName@_CXXQFT_FIELDS_H
 #define @ModelName@_CXXQFT_FIELDS_H
 
+#include "cxx_qft/fields.hpp"
+
 #include <array> /**< Only for field_indices and isSMField*/
 
 #include <boost/array.hpp>
@@ -134,14 +136,6 @@ namespace @ModelName@_cxx_diagrams {
    };
    template<typename Field>
    constexpr bool is_massless_v = is_massless<Field>::value;
-
-   enum class ParticleColorRep {
-      singlet,
-      triplet,
-      anti_triplet,
-      sextet,
-      octet
-   };
 
    template<typename Field>
    struct is_singlet {

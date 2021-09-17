@@ -48,7 +48,8 @@ inline double Den(double x2, double y2) {
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
+template<ParticleColorRep colIn, ParticleColorRep colOut1, ParticleColorRep colOu2>
+Decay_amplitude_SSS<colIn, colOut1, colOu2> calculate_diagram_SSS_t1g1n1_FFF(
    double mext1, double mext2, double mext3,
    double mLF4, double mLF5, double mLF6,
    const std::complex<double>& CpcF4cF5S1PL, const std::complex<double>&
@@ -71,7 +72,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<colIn, colOut1, colOu2> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -131,7 +132,8 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g1n1_FFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
+template <>
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g2n2_SSS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -146,7 +148,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
 
    const auto c0tmp1 = C_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -173,7 +175,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g2n2_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g3n3_UUU(
    double mext1, double mext2, double mext3,
    double mLU4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU4cU5, const std::complex<double>&
@@ -188,7 +190,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
 
    const auto c0tmp1 = C_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -215,7 +217,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g3n3_UUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g4n4_SSV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -236,7 +238,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -266,7 +268,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g4n4_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g5n5_SVS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -287,7 +289,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -317,7 +319,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g5n5_SVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g6n6_VSS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>&
@@ -338,7 +340,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -368,7 +370,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g6n6_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g7n7_SVV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -389,7 +391,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -419,7 +421,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g7n7_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g8n8_VSV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>&
@@ -440,7 +442,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -470,7 +472,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g8n8_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g9n9_VVS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -491,7 +493,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -521,7 +523,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g9n9_VVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t1g10n10_VVV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -536,7 +538,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
 
    const auto c0tmp1 = C_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -561,7 +563,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t1g10n10_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t2g1n11_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -575,7 +577,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -600,7 +602,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g1n11_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t2g2n12_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -614,7 +616,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -639,7 +641,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t2g2n12_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t3g1n13_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -653,7 +655,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -678,7 +680,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g1n13_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t3g2n14_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -692,7 +694,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -717,7 +719,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t3g2n14_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t4g1n15_SS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -731,7 +733,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -755,7 +757,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g1n15_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t4g2n16_VV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -769,7 +771,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -794,7 +796,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t4g2n16_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t5g1n17_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpS2S3cS4, const std::complex<double>&
@@ -808,7 +810,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -833,7 +835,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g1n17_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t5g2n18_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpS2S3cS4, const std::complex<double>&
@@ -847,7 +849,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -872,7 +874,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t5g2n18_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t6g1n19_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t6g1n19_SS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5,
    const std::complex<double>& CpS2cS4cS5, const std::complex<double>&
@@ -886,7 +888,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g1n19_SS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -910,7 +912,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g1n19_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t6g2n20_VV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t6g2n20_VV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5,
    const std::complex<double>& CpS2cV4cV5, const std::complex<double>&
@@ -924,7 +926,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g2n20_VV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -949,7 +951,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t6g2n20_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t7g1n21_SS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t7g1n21_SS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5,
    const std::complex<double>& CpS3cS4cS5, const std::complex<double>&
@@ -963,7 +965,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g1n21_SS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -987,7 +989,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g1n21_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t7g2n22_VV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5,
    const std::complex<double>& CpS3cV4cV5, const std::complex<double>&
@@ -1001,7 +1003,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1030,7 +1032,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t7g2n22_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g1n23_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -1050,7 +1052,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1080,7 +1082,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g1n23_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g2n24_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -1094,7 +1096,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1121,7 +1123,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g2n24_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g3n25_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -1135,7 +1137,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1163,7 +1165,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g3n25_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g4n26_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -1182,7 +1184,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1210,7 +1212,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g4n26_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g5n27_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cS4, const std::complex<double>&
@@ -1224,7 +1226,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1255,7 +1257,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g5n27_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g6n28_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -1271,7 +1273,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1301,7 +1303,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g6n28_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g7n29_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -1316,7 +1318,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1345,7 +1347,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g7n29_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g8n30_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -1361,7 +1363,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1390,7 +1392,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g8n30_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g9n31_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -1405,7 +1407,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1435,7 +1437,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g9n31_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t8g10n32_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -1450,7 +1452,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1480,7 +1482,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t8g10n32_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g1n33_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -1500,7 +1502,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1530,7 +1532,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g1n33_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g2n34_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -1544,7 +1546,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1571,7 +1573,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g2n34_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g3n35_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -1585,7 +1587,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1613,7 +1615,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g3n35_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g4n36_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -1632,7 +1634,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1660,7 +1662,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g4n36_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g5n37_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S3cS4, const std::complex<double>&
@@ -1674,7 +1676,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1705,7 +1707,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g5n37_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g6n38_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -1721,7 +1723,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1751,7 +1753,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g6n38_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g7n39_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
@@ -1766,7 +1768,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1795,7 +1797,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g7n39_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g8n40_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
@@ -1811,7 +1813,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1840,7 +1842,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g8n40_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g9n41_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
@@ -1855,7 +1857,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1885,7 +1887,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g9n41_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t9g10n42_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S3cV4, const std::complex<double>&
@@ -1900,7 +1902,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1930,7 +1932,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t9g10n42_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g1n43_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -1950,7 +1952,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -1980,7 +1982,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g1n43_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g2n44_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
@@ -1994,7 +1996,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2021,7 +2023,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g2n44_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g3n45_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
@@ -2035,7 +2037,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2063,7 +2065,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g3n45_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g4n46_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
@@ -2082,7 +2084,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2110,7 +2112,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g4n46_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g5n47_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -2124,7 +2126,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2155,7 +2157,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g5n47_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g6n48_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -2171,7 +2173,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2201,7 +2203,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g6n48_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g7n49_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
@@ -2216,7 +2218,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2245,7 +2247,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g7n49_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g8n50_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
@@ -2261,7 +2263,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2290,7 +2292,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g8n50_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g9n51_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
@@ -2305,7 +2307,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2335,7 +2337,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g9n51_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
+Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSS_t10g10n52_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -2350,7 +2352,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSS result;
+   Decay_amplitude_SSS<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar_1 = mext2;
@@ -2385,7 +2387,7 @@ Decay_amplitude_SSS calculate_diagram_SSS_t10g10n52_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g1n1_FFF(
    double mext1, double mext2, double mext3,
    double mLF4, double mLF5, double mLF6,
    const std::complex<double>& CpcF4cF5S1PL, const std::complex<double>&
@@ -2411,7 +2413,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
    const auto c2tmp6 = C_coeffs.at(2);
    const auto c22tmp7 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2544,7 +2546,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g1n1_FFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g2n2_SSS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -2562,7 +2564,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
    const auto c2tmp3 = C_coeffs.at(2);
    const auto c22tmp4 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2597,7 +2599,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g2n2_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g3n3_UUU(
    double mext1, double mext2, double mext3,
    double mLU4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU4cU5, const std::complex<double>& CpU5U6V3
@@ -2615,7 +2617,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
    const auto c2tmp3 = C_coeffs.at(2);
    const auto c22tmp4 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2650,7 +2652,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g3n3_UUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g4n4_SSV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -2665,7 +2667,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
 
    const auto c0tmp1 = C_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2693,7 +2695,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g4n4_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g5n5_SVS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -2711,7 +2713,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
    const auto c2tmp3 = C_coeffs.at(2);
    const auto c22tmp4 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2747,7 +2749,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g5n5_SVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g6n6_VSS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>& CpS5S6V3
@@ -2767,7 +2769,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
    const auto c2tmp5 = C_coeffs.at(2);
    const auto c22tmp6 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2809,7 +2811,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g6n6_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g7n7_SVV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -2833,7 +2835,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
    const auto c2tmp6 = C_coeffs.at(2);
    const auto c22tmp7 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2874,7 +2876,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g7n7_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g8n8_VSV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>& CpS5V3V6
@@ -2898,7 +2900,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
    const auto c2tmp6 = C_coeffs.at(2);
    const auto c22tmp7 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2940,7 +2942,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g8n8_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g9n9_VVS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -2955,7 +2957,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
 
    const auto c0tmp1 = C_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -2986,7 +2988,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g9n9_VVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t1g10n10_VVV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -3010,7 +3012,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
    const auto c2tmp6 = C_coeffs.at(2);
    const auto c22tmp7 = C_coeffs.at(6);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3050,7 +3052,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t1g10n10_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t2g1n11_VS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
@@ -3064,7 +3066,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3094,7 +3096,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g1n11_VS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t2g2n12_VV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
@@ -3109,7 +3111,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3135,7 +3137,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t2g2n12_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t3g1n13_VS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -3149,7 +3151,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3179,7 +3181,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g1n13_VS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t3g2n14_VV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -3194,7 +3196,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3220,7 +3222,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t3g2n14_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t4g1n15_SS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -3234,7 +3236,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3263,7 +3265,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g1n15_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t4g2n16_VV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -3278,7 +3280,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3303,7 +3305,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t4g2n16_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t5g1n17_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpcS4V2V3, const std::complex<double>&
@@ -3317,7 +3319,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3342,7 +3344,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g1n17_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t5g2n18_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpcS4V2V3, const std::complex<double>&
@@ -3356,7 +3358,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3381,7 +3383,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t5g2n18_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t6g1n19_SV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5,
    const std::complex<double>& CpcS4V2cV5, const std::complex<double>&
@@ -3395,7 +3397,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3419,7 +3421,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t6g1n19_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t7g1n20_SV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5,
    const std::complex<double>& CpcS4V3cV5, const std::complex<double>&
@@ -3433,7 +3435,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3465,7 +3467,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t7g1n20_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t8g6n26_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
@@ -3486,7 +3488,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3519,7 +3521,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g6n26_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t8g7n27_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
@@ -3533,7 +3535,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
 
    const auto b00tmp1 = B_coeffs.at(2);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3560,7 +3562,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g7n27_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t8g8n28_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>& CpU5U6V4,
@@ -3574,7 +3576,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
 
    const auto b00tmp1 = B_coeffs.at(2);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3601,7 +3603,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g8n28_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t8g9n29_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
@@ -3615,7 +3617,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3646,7 +3648,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g9n29_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t8g10n30_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V2cV4, const std::complex<double>&
@@ -3666,7 +3668,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3702,7 +3704,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t8g10n30_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t9g6n36_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
@@ -3723,7 +3725,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3756,7 +3758,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g6n36_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t9g7n37_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -3770,7 +3772,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
 
    const auto b00tmp1 = B_coeffs.at(2);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3797,7 +3799,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g7n37_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t9g8n38_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>& CpU5U6V4,
@@ -3811,7 +3813,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
 
    const auto b00tmp1 = B_coeffs.at(2);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3838,7 +3840,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g8n38_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t9g9n39_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -3852,7 +3854,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3883,7 +3885,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g9n39_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t9g10n40_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -3903,7 +3905,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3935,7 +3937,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t9g10n40_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g1n41_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -3955,7 +3957,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -3985,7 +3987,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g1n41_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g2n42_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
@@ -3999,7 +4001,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4026,7 +4028,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g2n42_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g3n43_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
@@ -4040,7 +4042,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4068,7 +4070,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g3n43_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g4n44_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
@@ -4087,7 +4089,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4115,7 +4117,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g4n44_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g5n45_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -4129,7 +4131,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4162,7 +4164,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g5n45_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g6n46_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -4178,7 +4180,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4210,7 +4212,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g6n46_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g7n47_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>& CpS5S6V4
@@ -4225,7 +4227,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4255,7 +4257,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g7n47_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g8n48_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>& CpU5U6V4
@@ -4269,7 +4271,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
 
    const auto b1tmp1 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4300,7 +4302,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g8n48_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g9n49_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>& CpS5V4V6
@@ -4315,7 +4317,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4347,7 +4349,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g9n49_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
+Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SVV_t10g10n50_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -4362,7 +4364,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SVV result;
+   Decay_amplitude_SVV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_vector_1 = mext2;
@@ -4395,7 +4397,7 @@ Decay_amplitude_SVV calculate_diagram_SVV_t10g10n50_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g1n1_FFF(
    double mext1, double mext2, double mext3,
    double mLF4, double mLF5, double mLF6,
    const std::complex<double>& CpcF4cF5S1PL, const std::complex<double>&
@@ -4418,7 +4420,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4462,7 +4464,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g1n1_FFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g2n2_SSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g2n2_SSS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -4479,7 +4481,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g2n2_SSS(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4506,7 +4508,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g2n2_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g3n3_UUU(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g3n3_UUU(
    double mext1, double mext2, double mext3,
    double mLU4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU4cU5, const std::complex<double>&
@@ -4523,7 +4525,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g3n3_UUU(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4550,7 +4552,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g3n3_UUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g4n4_SSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g4n4_SSV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS4cS5, const std::complex<double>&
@@ -4567,7 +4569,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g4n4_SSV(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4595,7 +4597,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g4n4_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g5n5_SVS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g5n5_SVS(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -4612,7 +4614,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g5n5_SVS(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4640,7 +4642,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g5n5_SVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g6n6_VSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g6n6_VSS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>&
@@ -4661,7 +4663,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g6n6_VSS(
    const auto c2tmp6 = C_coeffs.at(2);
    const auto c22tmp7 = C_coeffs.at(6);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4697,7 +4699,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g6n6_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g7n7_SVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g7n7_SVV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -4722,7 +4724,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g7n7_SVV(
    const auto c2tmp7 = C_coeffs.at(2);
    const auto c22tmp8 = C_coeffs.at(6);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4755,7 +4757,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g7n7_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g8n8_VSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g8n8_VSV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV4, const std::complex<double>&
@@ -4772,7 +4774,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g8n8_VSV(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4799,7 +4801,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g8n8_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g9n9_VVS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g9n9_VVS(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLS6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -4816,7 +4818,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g9n9_VVS(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4845,7 +4847,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g9n9_VVS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t1g10n10_VVV(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV4cV5, const std::complex<double>&
@@ -4862,7 +4864,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4887,7 +4889,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t1g10n10_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t2g1n11_VS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -4901,7 +4903,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4931,7 +4933,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g1n11_VS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t2g2n12_VV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -4946,7 +4948,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -4972,7 +4974,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t2g2n12_VV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t3g1n13_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -4986,7 +4988,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5011,7 +5013,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g1n13_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t3g2n14_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -5025,7 +5027,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5051,7 +5053,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t3g2n14_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t4g1n15_SV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5,
    const std::complex<double>& CpS1cS4cV5, const std::complex<double>&
@@ -5066,7 +5068,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5091,7 +5093,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t4g1n15_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t5g1n16_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpS2cS4V3, const std::complex<double>&
@@ -5105,7 +5107,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5130,7 +5132,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g1n16_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t5g2n17_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpS2cS4V3, const std::complex<double>&
@@ -5144,7 +5146,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5170,7 +5172,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t5g2n17_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t6g1n18_SV(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5,
    const std::complex<double>& CpS2cS4cV5, const std::complex<double>&
@@ -5185,7 +5187,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5218,7 +5220,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t6g1n18_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t8g6n26_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PL, const std::complex<double>&
@@ -5239,7 +5241,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5272,7 +5274,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g6n26_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t8g7n27_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -5286,7 +5288,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
 
    const auto b00tmp1 = B_coeffs.at(2);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5313,7 +5315,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g7n27_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t8g9n29_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -5327,7 +5329,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5358,7 +5360,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g9n29_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t8g10n30_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1S2cV4, const std::complex<double>&
@@ -5378,7 +5380,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
    const auto b00tmp3 = B_coeffs.at(2);
    const auto b1tmp4 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5410,7 +5412,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t8g10n30_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g1n31_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -5430,7 +5432,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5460,7 +5462,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g1n31_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g2n32_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -5474,7 +5476,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5501,7 +5503,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g2n32_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g3n33_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -5515,7 +5517,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5543,7 +5545,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g3n33_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g4n34_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -5562,7 +5564,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5590,7 +5592,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g4n34_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g5n35_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cS4V3, const std::complex<double>&
@@ -5604,7 +5606,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5635,7 +5637,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g5n35_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g6n36_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -5651,7 +5653,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5681,7 +5683,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g6n36_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g7n37_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -5696,7 +5698,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5723,7 +5725,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g7n37_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g8n38_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -5737,7 +5739,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
 
    const auto b1tmp1 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5765,7 +5767,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g8n38_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g9n39_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -5780,7 +5782,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5809,7 +5811,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g9n39_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t9g10n40_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1V3cV4, const std::complex<double>&
@@ -5824,7 +5826,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5853,7 +5855,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t9g10n40_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g1n41_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6S4PL, const std::complex<double>&
@@ -5873,7 +5875,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5903,7 +5905,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g1n41_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g2n42_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
@@ -5917,7 +5919,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5944,7 +5946,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g2n42_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g3n43_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
@@ -5958,7 +5960,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -5986,7 +5988,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g3n43_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g4n44_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
@@ -6005,7 +6007,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6033,7 +6035,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g4n44_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g5n45_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -6047,7 +6049,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6078,7 +6080,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g5n45_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g6n46_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF5F6V4PR, const std::complex<double>&
@@ -6094,7 +6096,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6124,7 +6126,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g6n46_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g7n47_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpS1cS5cS6, const std::complex<double>&
@@ -6139,7 +6141,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6166,7 +6168,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g7n47_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g8n48_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpS1cU6cU5, const std::complex<double>&
@@ -6180,7 +6182,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
 
    const auto b1tmp1 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6208,7 +6210,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g8n48_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g9n49_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpS1cS5cV6, const std::complex<double>&
@@ -6223,7 +6225,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6252,7 +6254,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g9n49_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
+Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SSV_t10g10n50_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpS1cV5cV6, const std::complex<double>&
@@ -6267,7 +6269,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SSV result;
+   Decay_amplitude_SSV<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_scalar = mext2;
@@ -6297,7 +6299,7 @@ Decay_amplitude_SSV calculate_diagram_SSV_t10g10n50_VVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g1n1_FFS(
    double mext1, double mext2, double mext3,
    double mLF4, double mLF5, double mLS6,
    const std::complex<double>& CpF2F4cS6PL, const std::complex<double>&
@@ -6320,7 +6322,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6368,7 +6370,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g1n1_FFS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g2n2_SSF(
    double mext1, double mext2, double mext3,
    double mLS4, double mLS5, double mLF6,
    const std::complex<double>& CpF2cF6S4PL, const std::complex<double>&
@@ -6386,7 +6388,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6424,7 +6426,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g2n2_SSF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g3n3_FFV(
    double mext1, double mext2, double mext3,
    double mLF4, double mLF5, double mLV6,
    const std::complex<double>& CpF2F4cV6PR, const std::complex<double>&
@@ -6447,7 +6449,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6495,7 +6497,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g3n3_FFV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g4n4_SVF(
    double mext1, double mext2, double mext3,
    double mLS4, double mLV5, double mLF6,
    const std::complex<double>& CpF2cF6S4PL, const std::complex<double>&
@@ -6517,7 +6519,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6561,7 +6563,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g4n4_SVF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g5n5_VSF(
    double mext1, double mext2, double mext3,
    double mLV4, double mLS5, double mLF6,
    const std::complex<double>& CpF2cF6V4PR, const std::complex<double>&
@@ -6583,7 +6585,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
    const auto c1tmp3 = C_coeffs.at(1);
    const auto c2tmp4 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6632,7 +6634,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g5n5_VSF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t1g6n6_VVF(
    double mext1, double mext2, double mext3,
    double mLV4, double mLV5, double mLF6,
    const std::complex<double>& CpF2cF6V4PL, const std::complex<double>&
@@ -6650,7 +6652,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
    const auto c1tmp2 = C_coeffs.at(1);
    const auto c2tmp3 = C_coeffs.at(2);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6680,7 +6682,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t1g6n6_VVF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t2g1n7_SS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -6694,7 +6696,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6722,7 +6724,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g1n7_SS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t2g2n8_SV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -6736,7 +6738,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
 
    const auto a0tmp1 = A_coeffs.at(0);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6768,7 +6770,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t2g2n8_SV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t3g1n9_FFS(
    double mext1, double mext2, double mext3,
    double mIF4, double mLF5, double mLS6,
    const std::complex<double>& CpF2cF4S1PL, const std::complex<double>&
@@ -6785,7 +6787,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6825,7 +6827,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g1n9_FFS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t3g2n10_FFV(
    double mext1, double mext2, double mext3,
    double mIF4, double mLF5, double mLV6,
    const std::complex<double>& CpF2cF4S1PL, const std::complex<double>&
@@ -6842,7 +6844,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6880,7 +6882,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t3g2n10_FFV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t4g1n11_FFS(
    double mext1, double mext2, double mext3,
    double mIF4, double mLF5, double mLS6,
    const std::complex<double>& CpcF4F3S1PL, const std::complex<double>&
@@ -6897,7 +6899,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6937,7 +6939,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g1n11_FFS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t4g2n12_FFV(
    double mext1, double mext2, double mext3,
    double mIF4, double mLF5, double mLV6,
    const std::complex<double>& CpcF4F3S1PL, const std::complex<double>&
@@ -6954,7 +6956,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -6992,7 +6994,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t4g2n12_FFV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g1n13_SFF(
    double mext1, double mext2, double mext3,
    double mIS4, double mLF5, double mLF6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -7013,7 +7015,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7049,7 +7051,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g1n13_SFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g2n14_SSS(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLS6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -7064,7 +7066,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7094,7 +7096,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g2n14_SSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g3n15_SUU(
    double mext1, double mext2, double mext3,
    double mIS4, double mLU5, double mLU6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -7109,7 +7111,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7140,7 +7142,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g3n15_SUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g4n16_SSV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLS5, double mLV6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -7160,7 +7162,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
    const auto b0tmp2 = B_coeffs.at(0);
    const auto b1tmp3 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7192,7 +7194,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g4n16_SSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g5n17_SVV(
    double mext1, double mext2, double mext3,
    double mIS4, double mLV5, double mLV6,
    const std::complex<double>& CpF2F3cS4PL, const std::complex<double>&
@@ -7207,7 +7209,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
 
    const auto b0tmp1 = B_coeffs.at(0);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7245,7 +7247,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g5n17_SVV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g6n18_VFF(
    double mext1, double mext2, double mext3,
    double mIV4, double mLF5, double mLF6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
@@ -7262,7 +7264,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7300,7 +7302,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g6n18_VFF(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g7n19_VSS(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLS6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
@@ -7316,7 +7318,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7350,7 +7352,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g7n19_VSS(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g8n20_VUU(
    double mext1, double mext2, double mext3,
    double mIV4, double mLU5, double mLU6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
@@ -7365,7 +7367,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
 
    const auto b1tmp1 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7400,7 +7402,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g8n20_VUU(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g9n21_VSV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLS5, double mLV6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
@@ -7416,7 +7418,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;
@@ -7452,7 +7454,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g9n21_VSV(
  *
  * @return value of the one-loop diagram
  */
-Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
+Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> calculate_diagram_SFF_t5g10n22_VVV(
    double mext1, double mext2, double mext3,
    double mIV4, double mLV5, double mLV6,
    const std::complex<double>& CpF2F3cV4PL, const std::complex<double>&
@@ -7468,7 +7470,7 @@ Decay_amplitude_SFF calculate_diagram_SFF_t5g10n22_VVV(
    const auto b0tmp1 = B_coeffs.at(0);
    const auto b1tmp2 = B_coeffs.at(1);
 
-   Decay_amplitude_SFF result;
+   Decay_amplitude_SFF<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet> result;
 
    result.m_decay = mext1;
    result.m_fermion_1 = mext2;

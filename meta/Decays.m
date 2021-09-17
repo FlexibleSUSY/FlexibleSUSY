@@ -1047,6 +1047,18 @@ CreateFieldIndices[particle_, fieldsNamespace_] :=
 
 CreateTotalAmplitudeFunctionName[] := "calculate_amplitude";
 
+CXXColorOfField[p_, _, OptionsPattern[{prefixNamespace -> False}]] :=
+  If[StringQ[OptionValue[prefixNamespace]],
+     OptionValue[prefixNamespace] <> "::",
+     ""] <> SymbolName[p] <> "::color_rep";
+CXXColorOfField[SARAH`bar[p_], modelName_, OptionsPattern[{prefixNamespace -> False}]] :=
+  modelName <> "_cxx_diagrams::fields::color_conj<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
+  ">()";
+CXXColorOfField[Susyno`LieGroups`conj[p_], modelName_,
+               OptionsPattern[{prefixNamespace -> False}]] :=
+  modelName <> "_cxx_diagrams::fields::color_conj<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> OptionValue[prefixNamespace]] <>
+  ">()";
+
 CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             returnType = "", fieldsNamespace, fieldsList, templatePars = "", args = ""},
@@ -1055,9 +1067,11 @@ CreateTotalAmplitudeSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            fieldsList = Join[{initialParticle}, finalState];
            templatePars = "<" <> Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#, prefixNamespace -> modelName <> "_cxx_diagrams::fields"]& /@
                                                                fieldsList, ", "] <> ">";
+           templateCols = "<" <> Utils`StringJoinWithSeparator[(CXXColorOfField[#, modelName, prefixNamespace -> modelName <> "_cxx_diagrams::fields"])& /@
+                                                               fieldsList, ", "] <> ">";
            args = "const " <> modelName <> "_cxx_diagrams::context_base&, " <>
                   Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[#, fieldsNamespace] <> "&")& /@ fieldsList, ", "];
-           "template<>\n" <> returnType <> " " <> modelName <> "_decays::" <>
+           "template<>\n" <> returnType <> templateCols <> " " <> modelName <> "_decays::" <>
            CreateTotalAmplitudeFunctionName[] <> templatePars <> "(" <> args <> ") const;\n"
           ];
 
@@ -1759,7 +1773,7 @@ If[Length@positions =!= 1, Quit[1]];
 
       (* body of nested loops over vertices indices *)
       Block[{ampCall =
-                  ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "(\n" <>
+                  ToString@symmetryFac <> " * " <> ToString@colorFac <> " * calculate_" <> translation[[1]] <> "<ParticleColorRep::singlet, ParticleColorRep::singlet, ParticleColorRep::singlet>(\n" <>
                   TextFormatting`IndentText[
                      (* external masses *)
                      FillMasses[decay] <> ",\n" <>
@@ -1980,13 +1994,16 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            (* @todo StringPadRigh was introduced only in 10.1 *)
            (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
 
-           (* decay amplitude type, e.g. Decay_amplitude_FSS *)
-           returnType = GetDecayAmplitudeType[decay];
-
            (* template arguments *)
            externalFieldsList = Join[{initialParticle}, finalState];
            templatePars = "<" <> Utils`StringJoinWithSeparator[
               CXXDiagrams`CXXNameOfField[#]& /@ externalFieldsList, ", "] <> ">";
+
+           templateCols = "<" <> Utils`StringJoinWithSeparator[(CXXColorOfField[#, modelName, prefixNamespace -> modelName <> "_cxx_diagrams::fields"])& /@
+                                                               externalFieldsList, ", "] <> ">";
+
+           (* decay amplitude type, e.g. Decay_amplitude_FSS *)
+           returnType = GetDecayAmplitudeType[decay] <> templateCols;
 
            (* function arguments *)
            args =
