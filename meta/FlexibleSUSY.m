@@ -2565,8 +2565,12 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 
 ExampleCalculateCmdLineDecays[] :=
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
-"if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+"decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+const bool loop_library_for_decays =
+   (Loop_library::get_type() == Loop_library::Library::Collier) ||
+   (Loop_library::get_type() == Loop_library::Library::Looptools);
+if (spectrum_generator.get_exit_code() == 0 && loop_library_for_decays) {
+   decays.calculate_decays();
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
