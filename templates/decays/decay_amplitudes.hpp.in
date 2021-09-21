@@ -36,7 +36,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_scalar<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
-   using type = Decay_amplitude_SSS;
+   using type = Decay_amplitude_SSS<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -45,7 +45,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_scalar<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
-   using type = Decay_amplitude_SSV;
+   using type = Decay_amplitude_SSV<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -54,7 +54,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_scalar<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
-   using type = Decay_amplitude_SSV;
+   using type = Decay_amplitude_SSV<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -63,7 +63,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_scalar<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
-   using type = Decay_amplitude_SVV;
+   using type = Decay_amplitude_SVV<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -72,7 +72,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_scalar<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
-   using type = Decay_amplitude_SFF;
+   using type = Decay_amplitude_SFF<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -81,7 +81,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_fermion<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_2>::value>> {
-   using type = Decay_amplitude_FFS;
+   using type = Decay_amplitude_FFS<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -90,7 +90,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_fermion<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_scalar<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
-   using type = Decay_amplitude_FFS;
+   using type = Decay_amplitude_FFS<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -99,7 +99,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_fermion<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_2>::value>> {
-   using type = Decay_amplitude_FFV;
+   using type = Decay_amplitude_FFV<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 template <class Field_in, class Field_out_1, class Field_out_2>
@@ -108,7 +108,7 @@ struct Two_body_decay_amplitude_type<
    std::enable_if_t<@ModelName@_cxx_diagrams::fields::is_fermion<Field_in>::value &&
                            @ModelName@_cxx_diagrams::fields::is_vector<Field_out_1>::value &&
                            @ModelName@_cxx_diagrams::fields::is_fermion<Field_out_2>::value>> {
-   using type = Decay_amplitude_FFV;
+   using type = Decay_amplitude_FFV<Field_in::color_rep, Field_out_1::color_rep, Field_out_2::color_rep>;
 };
 
 } // namespace detail

@@ -87,6 +87,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/error.hpp \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
+		$(DIR)/fields.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
