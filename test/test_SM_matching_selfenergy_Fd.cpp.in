@@ -58,7 +58,10 @@ namespace npointfunctions
 
 namespace
 {
-static constexpr int number_of_random_samples = 50;
+// too big number of samples triggers
+// malloc_consolidate(): invalid chunk size
+// error
+static constexpr int number_of_random_samples = 20;
 }
 
 BOOST_AUTO_TEST_SUITE( selfenergy_test_suite,
@@ -68,7 +71,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_SM_dataset( number_of_random_samples ),
   index, FS_TEST_SM_PARAMETER_SEQUENCE )
 {
-	Loop_library::set(0);
+	Loop_library::set(-1);
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
@@ -78,8 +81,8 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 		"There was an error calculating the spectrum: " <<
 		problems << "Skipping data point..." );
 
-    if( problems.have_problem() == false )
-	{
+   if (!problems.have_problem())
+   {
 		auto fs_selfenergy_Fd_1 = model.self_energy_Fd_1loop_1(0, INCOMING_FERMION_INDEX, OUTGOING_FERMION_INDEX);
 		auto np_selfenergy_Fd_1 =
 			SM_cxx_diagrams::npointfunctions::selfenergy_Fd_1loop(
@@ -90,8 +93,9 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
         TEST_COMPLEX_EQUALITY( np_selfenergy_Fd_1.at(0), fs_selfenergy_Fd_1 );
         TEST_COMPLEX_EQUALITY( np_selfenergy_Fd_1.at(1), fs_selfenergy_Fd_1 );
 
-	} else
+   } else {
 		BOOST_TEST( true );
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

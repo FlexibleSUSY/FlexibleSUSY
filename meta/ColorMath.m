@@ -22,6 +22,8 @@ CMdelta::usage = "";
 CMDelta::usage = "";
 CMo::usage = "";
 CMd::usage = "";
+ContainsO::usage = "";
+SortIndices::usage = "";
 
 Begin["Private`"];
 Unprotect[Conjugate];
@@ -135,9 +137,9 @@ CM\[CapitalDelta][G1$_, G2$_] := Superscript[CM\[CapitalDelta], {G1$, G2$}]
  
 CMf[G1$_, G2$_, G3$_] := Superscript[CMf, {G1$, G2$, G3$}]
  
-d[G1$_, G2$_, G3$_] := Superscript[CMd, {G1$, G2$, G3$}]
+CMd[G1$_, G2$_, G3$_] := Superscript[CMd, {G1$, G2$, G3$}]
  
-o[Gs$_] := Superscript[CMo, Gs$]
+CMo[Gs$_] := Superscript[CMo, Gs$]
  
 AllPairs[CMExpr$_] := Select[FindSymbols[CMExpr$], 
      Count[FindSymbols[CMExpr$], #1] == 2 & ]
