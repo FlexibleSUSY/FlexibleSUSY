@@ -185,7 +185,7 @@ jobs:
           [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
             --with-cxx=$CXX \
-            --with-shared-lib-cmd="$CXX -O1 -fp-model strict -shared -o" \
+            --with-shared-lib-cmd="$CXX -std=c++14 -O1 -fp-model strict -shared -o" \
             --with-fc=$FC \
             --with-models=$models \
             --with-loop-libraries=collier,looptools \
