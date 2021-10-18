@@ -483,14 +483,31 @@ void diagonalize_symmetric_errbd
  Real *s_errbd = 0,
  Eigen::Array<Real, N, 1> *u_errbd = 0)
 {
-    if (!u) {
-	svd_errbd(m, s, u, u, s_errbd, u_errbd);
-	return;
-    }
-    Eigen::Matrix<std::complex<Real>, N, N> vh;
-    svd_errbd(m, s, u, &vh, s_errbd, u_errbd);
-    // see Eq. (5) of https://doi.org/10.1016/j.amc.2014.01.170
-    *u *= (u->adjoint() * vh.transpose()).sqrt().eval();
+   if (!u) {
+      svd_errbd(m, s, u, u, s_errbd, u_errbd);
+      return;
+   }
+   Eigen::Matrix<std::complex<Real>, N, N> vh;
+   svd_errbd(m, s, u, &vh, s_errbd, u_errbd);
+   // see Eq. (5) of https://doi.org/10.1016/j.amc.2014.01.170
+   Eigen::Matrix<std::complex<Real>, N, N> const Z = u->adjoint() * vh.transpose();
+   Eigen::Matrix<std::complex<Real>, N, N> Zsqrt = Z.sqrt().eval();
+   if (!Zsqrt.isUnitary()) {
+      // The formula assumes that sqrt of a unitary matrix is also unitary.
+      // This is not always true when using Eigen's build in sqrt function
+      // so we use a more generic matrixFunction in those cases.
+      // n-th derivative of sqrt(x)
+      auto sqrtfn =
+         [](std::complex<double> x, int n) {
+            static constexpr double Pi = 3.141592653589793;
+            return std::sqrt(Pi*x)/(2.*std::tgamma(1.5-n)*std::pow(x, n));
+         };
+      Zsqrt = Z.matrixFunction(sqrtfn).eval();
+      if (!Zsqrt.isUnitary()) {
+         std::runtime_error("Zsqrt matrix must be unitary");
+      }
+   }
+   *u *= Zsqrt;
 }
 
 /**
