@@ -498,8 +498,8 @@ void diagonalize_symmetric_errbd
       // so we use a more generic matrixFunction in those cases.
       // n-th derivative of sqrt(x)
       auto sqrtfn =
-         [](std::complex<double> x, int n) {
-            static constexpr double Pi = 3.141592653589793;
+         [](std::complex<Real> x, int n) {
+            static constexpr Real Pi = 3.141592653589793;
             return std::sqrt(Pi*x)/(2.*std::tgamma(1.5-n)*std::pow(x, n));
          };
       Zsqrt = Z.matrixFunction(sqrtfn).eval();
