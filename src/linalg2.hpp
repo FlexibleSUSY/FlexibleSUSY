@@ -497,7 +497,7 @@ void diagonalize_symmetric_errbd
       // This is not always true when using Eigen's build in sqrt function
       // so we use a more generic matrixFunction in those cases.
       // n-th derivative of sqrt(x)
-      auto sqrtfn =
+      const auto sqrtfn =
          [](std::complex<Real> x, int n) {
             static constexpr Real Pi = 3.141592653589793;
             return std::sqrt(Pi*x)/(2.*std::tgamma(1.5-n)*std::pow(x, n));
