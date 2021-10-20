@@ -838,7 +838,7 @@ public:
       {
         if (++def_count > 1)
         {
-          is.seekg(-line_str.length()-1, std::ios_base::cur);
+          is.seekg(-static_cast<std::ptrdiff_t>(line_str.length() + 1), std::ios_base::cur);
           break;
         }
         if (nameless)

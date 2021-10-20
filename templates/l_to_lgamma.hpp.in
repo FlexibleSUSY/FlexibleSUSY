@@ -18,7 +18,7 @@
 
 
 /**
- * @file @ModelName@_edm.hpp
+ * @file @ModelName@_l_to_lgamma.hpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
