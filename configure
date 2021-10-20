@@ -3635,7 +3635,10 @@ if test $# -gt 0 ; then
             --with-boost-libdir=*)   boost_lib_dir=$optarg ;;
             --with-boost-incdir=*)   boost_inc_dir=$optarg ;;
             --with-cppflags=*)       CPPFLAGS=$optarg ;;
-            --with-cxx=*)            CXX=$optarg ;;
+            --with-cxx=*)            CXX=$optarg
+                                     SHARED_LIB_CMD="$CXX -shared -o"
+                                     LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+                                     ;;
             --with-cxxflags=*)       CXXFLAGS=$optarg ;;
             --with-collier-libdir=*) collier_lib_dir=$optarg ;;
             --with-collier-incdir=*) collier_inc_dir=$optarg ;;
