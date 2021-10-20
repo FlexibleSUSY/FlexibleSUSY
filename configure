@@ -3387,12 +3387,12 @@ add_metaflags() {
 #_____________________________________________________________________
 replace_markers() {
 	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
-   -e "s|@OPERATING_SYSTEM@|$operating_system|"     \
+	-e "s|@OPERATING_SYSTEM@|$operating_system|"     \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
 	-e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
 	-e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
 	-e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-   -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
+	-e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
 	-e "s|@PKGNAME@|$PROGRAM_NAME|"    \
 	-e "s|@ABSBASEDIR@|$ABSBASEDIR|"   \
 	-e "s|@ADDONS@|$ADDONS|"           \
@@ -3412,16 +3412,16 @@ replace_markers() {
 	-e "s|@FFLAGS@|$FFLAGS|"           \
 	-e "s|@FLIBS@|$FLIBS|"             \
 	-e "s|@FUTILIBS@|$FUTILIBS|"       \
-   -e "s|@FMOD@|$FMOD|"               \
-   -e "s|@FSTD@|$FSTD|"   \
+	-e "s|@FMOD@|$FMOD|"               \
+	-e "s|@FSTD@|$FSTD|"   \
 	-e "s|@FSCONFIG@|$FSCONFIG|"       \
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
 	-e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-		-e "s|@LDFLAGS@|$LDFLAGS|"         \
-		-e "s|@LDLIBS@|$LDLIBS|"           \
-		-e "s|@LLFLAGS@|$LLFLAGS|"         \
-		-e "s|@LLLIBS@|$LLLIBS|"           \
+	-e "s|@LDFLAGS@|$LDFLAGS|"         \
+	-e "s|@LDLIBS@|$LDLIBS|"           \
+	-e "s|@LLFLAGS@|$LLFLAGS|"         \
+	-e "s|@LLLIBS@|$LLLIBS|"           \
 	-e "s|@ENABLE_COLORS@|$enable_colors|" \
 	-e "s|@ENABLE_COMPILE@|$enable_compile|" \
 	-e "s|@ENABLE_COMPILER_WARNINGS@|$enable_compiler_warnings|" \
