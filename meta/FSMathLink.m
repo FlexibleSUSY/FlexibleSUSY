@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Utils`"}];
+BeginPackage["FSMathLink`", {"CConversion`", "Parameters`", "Utils`", "TreeMasses`"}];
 
 GetNumberOfInputParameterRules::usage = "";
 GetNumberOfSpectrumEntries::usage = "";
@@ -204,8 +204,28 @@ PutObservable[obs_, type_, link_String, heads_:{}] :=
     Observables`GetObservableName[Composition[Sequence @@ heads][obs]] <>
     "), " <> ObsToStr[obs] <> HeadsToStr[heads] <> ");\n";
 
-PutObservables[obs_List, link_String] :=
-    StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs];
+PutObservable[FlexibleSUSYObservable`BrLToLGamma[p1_[idx1_Integer]->{p2_[idx2_Integer], V_}], type_, link_String, heads_:{}] /; V === TreeMasses`GetPhoton[] := "
+MLPutFunction(link, \"Rule\", 2);
+MLPutFunction(link, \"FlexibleSUSYObservable`BrLToLGamma\", 1);
+MLPutFunction(link, \"Rule\", 2);
+MLPutFunction(link, \"" <> ToString[p1] <> "\", 1);
+MLPutInteger(link, " <> ToString[idx1] <> ");
+MLPutFunction(link, \"List\", 2);
+MLPutFunction(link, \"" <> ToString[p2] <> "\", 1);
+MLPutInteger(link, " <> ToString[idx2] <> ");
+MLPutSymbol(link, \"" <> ToString[V] <> "\");
+MLPutReal(link, OBSERVABLE(" <> ToString[p1] <> ToString[idx1] <> "_to_" <> ToString[p2] <> ToString[idx2] <> "_" <> ToString[V] <> "));"
+
+PutObservables[obs_List, link_String] := (
+   If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+      Module[{files},
+         files = FileNames["librarylink.m",
+            FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
+         Get/@files;
+      ];
+   ];
+   StringJoin[PutObservable[#, Observables`GetObservableType[#], link]& /@ obs]
+);
 
 End[];
 
