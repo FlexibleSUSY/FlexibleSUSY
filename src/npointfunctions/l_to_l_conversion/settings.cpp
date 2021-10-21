@@ -110,14 +110,14 @@ void LToLConversion_settings::set(const LToLConversion_settings::Settings_t& s)
  *
  * | enum                             | possible values   | default value     |
  * |----------------------------------|-------------------|-------------------|
- * | include_tensor_contribution      | 0 (no) or 1 (yes) | 1 (= enabled)     |
- * | include_gluonic_contribution     | 0 (no) or 1 (yes) | 1 (= enabled)     |
+ * | include_tensor_contribution      | 0 (no) or 1 (yes) | 0 (= disabled)    |
+ * | include_gluonic_contribution     | 0 (no) or 1 (yes) | 0 (= disabled)    |
  * | other coefficients               | any double        | see function body |
  */
 void LToLConversion_settings::reset()
 {
-   values[include_tensor_contribution]  = 1.0;
-   values[include_gluonic_contribution] = 1.0;
+   values[include_tensor_contribution]  = 0.0;
+   values[include_gluonic_contribution] = 0.0;
    values[scalar_pu] = 0.021;
    values[scalar_nu] = 0.019;
    values[scalar_pd] = 0.041;
