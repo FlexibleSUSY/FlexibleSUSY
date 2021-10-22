@@ -100,3 +100,5 @@ ExtraSLHAOutputBlocks = {
       }
    }
 };
+
+FSCalculateDecays = True;

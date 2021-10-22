@@ -17,9 +17,9 @@ using namespace flexiblesusy;
 
 void setup_CMSSM(CMSSM_mass_eigenstates& m, const CMSSM_input_parameters& input)
 {
-   const double ALPHASMZ = 0.1176;
+   constexpr double ALPHASMZ = 0.1176;
    const double ALPHAMZ = 1.0 / 127.918;
-   const double sinthWsq = 0.23122;
+   constexpr double sinthWsq = 0.23122;
    const double alpha1 = 5 * ALPHAMZ / (3 * (1 - sinthWsq));
    const double alpha2 = ALPHAMZ / sinthWsq;
    const double g1 = sqrt(4 * Pi * alpha1);
@@ -32,7 +32,7 @@ void setup_CMSSM(CMSSM_mass_eigenstates& m, const CMSSM_input_parameters& input)
    const double m0 = input.m0;
    const double a0 = input.Azero;
    const double root2 = sqrt(2.0);
-   const double vev = 246.0;
+   constexpr double vev = 246.0;
    const double vu = vev * sinBeta;
    const double vd = vev * cosBeta;
    const double susyMu = input.SignMu * 120.0;
@@ -181,12 +181,6 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_read_write )
 {
    CMSSM_observables obs1, obs2;
    obs1.a_muon = 2e-9;
-   obs1.eff_cp_higgs_photon_photon(0)     = std::complex<double>(1.,7.);
-   obs1.eff_cp_higgs_photon_photon(1)     = std::complex<double>(2.,8.);
-   obs1.eff_cp_higgs_gluon_gluon(0)       = std::complex<double>(3.,9.);
-   obs1.eff_cp_higgs_gluon_gluon(1)       = std::complex<double>(4.,10.);
-   obs1.eff_cp_pseudoscalar_photon_photon = std::complex<double>(5.,11.);
-   obs1.eff_cp_pseudoscalar_gluon_gluon   = std::complex<double>(6.,12.);
    Physical_input physical_input1, physical_input2;
    physical_input1.set(Physical_input::alpha_em_0, 0.1);
    softsusy::QedQcd qedqcd1, qedqcd2;
@@ -211,7 +205,7 @@ BOOST_AUTO_TEST_CASE( test_CMSSM_read_write )
    BOOST_TEST_MESSAGE("reading from database " << db_file);
    const CMSSM_mass_eigenstates tmp(CMSSM_database::from_database(db_file, -1, &qedqcd2, &physical_input2, &obs2));
 
-   const double eps = 1e-10;
+   constexpr double eps = 1e-10;
 
    gErrors = 0;
    test_parameter_equality(model, tmp, eps);

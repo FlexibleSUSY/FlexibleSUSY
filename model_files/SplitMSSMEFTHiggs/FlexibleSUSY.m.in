@@ -81,6 +81,22 @@ LowScale = LowEnergyConstant[MT];
 
 LowScaleFirstGuess = LowEnergyConstant[MT];
 
+(* N.B. LowScaleinput is not used by the EFTHiggs spectrum
+ calculation, but is needed for decoupling scheme used by
+ FlexibleDecay *)
+
+
+LowScaleInput = {
+   {\[Mu] , MuInput},
+   {MassB , M1Input},
+   {MassWB, M2Input},
+   {MassG , M3Input},
+   {v, Sqrt[2] MZMSbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2]},
+   {Yu, Automatic},
+   {Yd, Automatic},
+   {Ye, Automatic}
+};
+
 MatchingScaleInput = {
     {v, VEV / Sqrt[2]}
 };
@@ -262,3 +278,6 @@ g2d1L = 1/(4 Pi)^2 g2 Cos[ArcTan[TanBeta]] (
      + (g2^2/6) Log[msl2[2,2]/SCALE^2]
      + (g2^2/6) Log[msl2[3,3]/SCALE^2]
 );
+
+FSCalculateDecays = True;
+

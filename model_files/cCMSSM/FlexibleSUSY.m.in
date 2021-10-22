@@ -159,5 +159,10 @@ ExtraSLHAOutputBlocks = {
             {46, SignedAbsSqrt[Im[mu2[3,3]]]},
             {47, SignedAbsSqrt[Im[md2[1,1]]]},
             {48, SignedAbsSqrt[Im[md2[2,2]]]},
-            {49, SignedAbsSqrt[Im[md2[3,3]]]} } }
+            {49, SignedAbsSqrt[Im[md2[3,3]]]} } },
+   {FlexibleSUSYLowEnergy,
+           {{21, FlexibleSUSYObservable`aMuon}}
+   }
 };
+
+FSCalculateDecays = False;

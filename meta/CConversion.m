@@ -134,6 +134,9 @@ using the default constructor";
 CreateConstExternDecl::usage="";
 CreateConstDef::usage="";
 
+CreateEnum::usage="creates a C/C++ enum using a given list of
+member names.";
+
 SetToDefault::usage="set parameter to default value";
 
 MakeUnique::usage="create a unique symbol from a string";
@@ -555,6 +558,20 @@ CreateConstDef[parameter_String, type_, value_] :=
 
 CreateConstDef[parameter_, type_, value_] :=
     CreateConstDef[ToValidCSymbolString[parameter], type, value];
+
+CreateEnum[enumName_String, enumEntries_List] :=
+    Module[{result},
+           result = Utils`StringJoinWithSeparator[ToValidCSymbolString /@ enumEntries, ", "];
+           "enum " <> enumName <> " : int { " <> result <> " };\n"
+          ];
+
+CreateEnum[enumName_String, enumEntries_List, start_Integer] :=
+    Module[{entries = enumEntries},
+           If[Length[entries] > 0,
+              entries[[1]] = ToValidCSymbolString[entries[[1]]] <> " = " <> ToString[start];
+             ];
+           CreateEnum[enumName, entries]
+          ];
 
 MakeUnique[name_String] :=
     Module[{appendix = ""},

@@ -210,8 +210,6 @@ Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
 Warning: This function may ignore empty lines.";
 
-FSReIm::usage = "FS replacement for the mathematica's function ReIm";
-FSBooleanQ::usage = "FS replacement for the mathematica's function BooleanQ";
 MathIndexToCPP::usage = "Converts integer-literal index from mathematica to c/c++ convention";
 FSPermutationSign::usage = "Returns the sign of a permutation given in a Cycles form";
 
@@ -557,87 +555,6 @@ ReadLinesInFile[fileName_String] :=
     Close[fileHandle];
     lines
 	]
-
-FSReIm[z_] := If[$VersionNumber >= 10.1,
-   ReIm[z],
-   {Re[z], Im[z]}
-];
-
-FSBooleanQ[b_] :=
-   If[$VersionNumber >= 10.0,
-      BooleanQ[b],
-      If[b === True || b === False, True, False]
-   ];
-
-DumpStart[model:_String] :=
-Module[
-   {
-      dirOut = FileNameJoin@{
-         SARAH`SARAH[SARAH`OutputDirectory],
-         model,
-         "Dump"
-      },
-      dirSARAH = Append[SARAH`SARAH@SARAH`InputDirectories,
-         FileNameDrop@FindFile@"SARAH`"
-      ],
-      fileDef, fileHash, sarahFiles, create, write = WriteString["stdout",#]&
-   },
-   fileDef = FileNameJoin@{dirOut, "definitions.mx"};
-   fileHash = FileNameJoin@{dirOut, "hash.m"};
-   sarahFiles = Select[
-      DeleteDuplicates@FileNames[All, dirSARAH, Infinity],
-      !(DirectoryQ@#)&
-   ];
-
-   create[] := (
-      If[!DirectoryQ@dirOut,
-         write[dirOut <> " does not exist, creating it ..."];
-         CreateDirectory@dirOut
-         write[" done\n"];
-      ];
-
-      SARAH`Start@model;
-
-      write["Saving definitions to " <> fileDef <> " ..."];
-      If[FileExistsQ@#, DeleteFile@#] &@ fileDef;
-      DumpSave[fileDef,
-         {
-            "Himalaya`", "Model`","Global`", "SA`", "SARAH`", "SPheno`",
-            "Susyno`LieGroups`", "FlexibleSUSY`"
-         }
-      ];
-      write[" done\n"];
-
-      definitionsHash = FileHash@fileDef;
-      sarahHash = Hash[FileHash /@ sarahFiles];
-
-      write["Saving hash to " <> fileHash <> " ..."];
-      If[FileExistsQ@#, DeleteFile@#] &@ fileHash;
-      Save[fileHash, {definitionsHash, sarahHash}];
-      write[" done\n"];
-   );
-
-   If[DirectoryQ@dirOut && FileExistsQ@fileDef && FileExistsQ@fileHash,
-
-      Print["Comparing hash with " <> fileHash <> "."];
-      Get@fileHash;
-
-      If[And[definitionsHash === FileHash@fileDef,
-         sarahHash === Hash[FileHash /@ sarahFiles]],
-
-         Print["Taking definitions from " <> fileDef <> "."];
-         DumpGet@fileDef;
-         ,
-
-         Print["Some files were changed, rerunning SARAH`Start.\n"];
-         create[]
-      ];,
-
-      create[]
-   ];
-];
-DumpStart // MakeUnknownInputDefinition;
-DumpStart ~ SetAttributes ~ {Protected, Locked};
 
 (* MathIndexToCPP *)
 

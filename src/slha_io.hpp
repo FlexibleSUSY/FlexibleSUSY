@@ -43,6 +43,7 @@ namespace flexiblesusy {
 
    class Spectrum_generator_settings;
    class LToLConversion_settings;
+   class FlexibleDecay_settings;
    class Physical_input;
    struct PMNS_parameters;
 
@@ -119,6 +120,7 @@ public:
    // reading functions
    bool block_exists(const std::string&) const;
    void fill(softsusy::QedQcd&) const;
+   void fill(FlexibleDecay_settings&) const;
    void fill(Spectrum_generator_settings&) const;
    void fill(LToLConversion_settings&) const;
    void fill(Physical_input&) const;
@@ -148,6 +150,7 @@ public:
    void set_physical_input(const Physical_input&);
    void set_settings(const Spectrum_generator_settings&);
    void set_LToLConversion_settings(const LToLConversion_settings&);
+   void set_FlexibleDecay_settings(const FlexibleDecay_settings&);
    void set_sminputs(const softsusy::QedQcd&);
    void write_to_file(const std::string&) const;
    void write_to_stream() const;

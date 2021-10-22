@@ -20,6 +20,8 @@
 
 *)
 
+(* This test fails in 11.2.0. *)
+
 Needs["TestSuite`", "TestSuite.m"];
 Needs["LoopFunctions`", "LoopFunctions.m"];
 

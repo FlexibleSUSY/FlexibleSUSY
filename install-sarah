@@ -13,7 +13,7 @@ ABSBASEDIR=$(cd $BASEDIR; pwd)
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.14.3"
+sarah_version="4.14.5"
 
 # determine Mathematica user directory
 case "$operating_system" in

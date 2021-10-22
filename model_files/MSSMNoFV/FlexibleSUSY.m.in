@@ -205,3 +205,6 @@ ExtraSLHAOutputBlocks = {
             {     13, Pole[M[Fm]]     },
             {     15, Pole[M[Ftau]]   } } }
 };
+
+FSCalculateDecays = False;
+

@@ -19,6 +19,8 @@
 #ifndef ELECTROWEAK_INPUT_H
 #define ELECTROWEAK_INPUT_H
 
+#include "wrappers.hpp"
+
 #include <cmath>
 
 namespace flexiblesusy {
@@ -63,10 +65,10 @@ namespace Electroweak_constants {
       constexpr double alpha1 = 5.0 * aem / (3.0 * (1.0 - sinThetaW2));
       constexpr double alpha2 = aem / sinThetaW2;
       constexpr double alpha3 = 0.1184; // at MZ from PDG
-      const double e  = sqrt(4.0 * M_PI * aem);
-      const double g1 = sqrt(4.0 * M_PI * alpha1);
-      const double g2 = sqrt(4.0 * M_PI * alpha2);
-      const double g3 = sqrt(4.0 * M_PI * alpha3);
+      const double e  = sqrt(4.0 * Pi * aem);
+      const double g1 = sqrt(4.0 * Pi * alpha1);
+      const double g2 = sqrt(4.0 * Pi * alpha2);
+      const double g3 = sqrt(4.0 * Pi * alpha3);
       constexpr double gYSM = 3.57232027E-01;     ///< gY MS-bar in the SM at Q = MZ
       const double g1SM = sqrt(5./3.) * gYSM; ///< g1 MS-bar in the SM at Q = MZ
       constexpr double g2SM = 6.51103848E-01;     ///< g2 MS-bar in the SM at Q = MZ

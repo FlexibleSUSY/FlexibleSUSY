@@ -23,6 +23,8 @@
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_slha_io.hpp"
 #include "@ModelName@_spectrum_generator.hpp"
+#include "decays/flexibledecay_settings.hpp"
+@decaysIncludes@
 
 @solverIncludes@
 #include "array_view.hpp"
@@ -86,6 +88,7 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
    settings.set(Spectrum_generator_settings::precision, 1.0e-4);
    settings.set(Spectrum_generator_settings::loop_library, loop_library);
    settings.set(Spectrum_generator_settings::calculate_bsm_masses, 1.0);
+   settings.set(Spectrum_generator_settings::calculate_sm_masses, 1.0);
 
    @LToLConversion_init@
 
@@ -106,9 +109,12 @@ int run_solver(int loop_library, const @ModelName@_input_parameters& input)
       @LToLConversion_class_name@
       physical_input, scales.pole_mass_scale);
 
+   FlexibleDecay_settings flexibledecay_settings;
+@calculateCmdLineDecays@
+
    // SLHA output
    @ModelName@_slha_io slha_io;
-   slha_io.fill(models, qedqcd, scales, observables, settings);
+   @fillSLHAIO@
    @LToLConversion_fill@
    slha_io.write_to_stream(std::cout);
 

@@ -16,31 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef EFFECTIVE_COUPLINGS_H
-#define EFFECTIVE_COUPLINGS_H
+#ifndef ONE_LOOP_DECAY_DIAGRAMS_H
+#define ONE_LOOP_DECAY_DIAGRAMS_H
+
+#include "decay_amplitudes.hpp"
 
 #include <complex>
 
 namespace flexiblesusy {
 
-namespace effective_couplings {
-
-// loop functions of hep-ph/9504378, Eq. (53)
-std::complex<double> scaling_function(double tau);
-std::complex<double> AS0(double tau);
-std::complex<double> AS12(double tau);
-std::complex<double> AS1(double tau);
-std::complex<double> AP12(double tau);
-
-/// QCD corrections to the diphoton decay width
-/// for scalars and pseudoscalars, at the scale
-/// m_decay / 2
-std::complex<double> scalar_diphoton_fermion_loop(
-   double m_decay, double m_loop);
-std::complex<double> pseudoscalar_diphoton_fermion_loop(
-   double m_decay, double m_loop);
-
-} // namespace effective_couplings
+@genericOneLoopDiagramEvaluatorDecls@
 
 } // namespace flexiblesusy
 

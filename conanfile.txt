@@ -1,11 +1,11 @@
 [requires]
 boost/1.75.0
 eigen/[>=3.1]
-GM2Calc/[>=1.7.0]@conan/stable
-Himalaya/[>=4.0.0]@conan/stable
-LoopTools/[>=2.15]@conan/stable
-COLLIER/[>=1.2.3]@conan/stable
-TSIL/[>=1.44]@conan/stable
+gm2calc/[>=1.7.0]
+himalaya/[>=4.0.0]
+looptools/[>=2.15]
+collier/[>=1.2.3]
+tsil/[>=1.44]
 
 [options]
 boost:bzip2=False
@@ -54,16 +54,16 @@ boost:without_wave=True
 boost:zlib=False
 boost:zstd=False
 
-GM2Calc:fPIC=True
+gm2calc:fPIC=True
 
-Himalaya:fPIC=True
+himalaya:fPIC=True
 
-LoopTools:fPIC=True
+looptools:fPIC=True
 
-COLLIER:shared=False
-COLLIER:fPIC=True
+collier:shared=False
+collier:fPIC=True
 
-TSIL:fPIC=True
+tsil:fPIC=True
 
 [generators]
 cmake

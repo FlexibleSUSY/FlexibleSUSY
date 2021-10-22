@@ -84,3 +84,6 @@ FSConvergenceCheck = {
     M[VZ], M[VWm], M[VG], M[VP],
     g1, g2, g3, Yu, Yd[3,3], Ye, B[\[Mu]], \[Mu]
 };
+
+FSCalculateDecays = True;
+

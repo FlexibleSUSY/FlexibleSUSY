@@ -3,6 +3,7 @@
 *.a
 *.so
 *.d
+*.pc
 *.x
 *.json
 **/.*.swp
@@ -97,6 +98,7 @@ test/test_SM_matching_selfenergy_Fd.cpp
 test/test_MSSM_npointfunctions.cpp
 test/test_MSSM_matching_selfenergy_Fd.cpp
 test/test_SM_cxxdiagrams.cpp
+test/FlexibleDecay.mk
 test/test_MRSSM2_FFMassiveV_form_factors.hpp
 test/test_MRSSM2_l_to_l_conversion.cpp
 test/test_looplibrary_*.cpp

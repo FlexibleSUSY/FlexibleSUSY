@@ -88,12 +88,13 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{0, FlexibleSUSYObservable`aMuon} } },
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
-            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
-            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } },
+           {{21, FlexibleSUSYObservable`aMuon},
+            {23, FlexibleSUSYObservable`EDM[Fe[1]]},
+            {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]},
+            {26, FlexibleSUSYObservable`BrLToLGamma[Fe[2] -> {Fe[1], VP}]}
+           }
+   },
    {NMSSMRUN,
            {{1, \[Lambda]},
             {2, \[Kappa]},
@@ -102,3 +103,6 @@ ExtraSLHAOutputBlocks = {
             {5, \[Lambda] vS / Sqrt[2]},
             {10, ms2} } }
 };
+
+FSCalculateDecays = True;
+

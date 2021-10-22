@@ -40,5 +40,7 @@ const char * const spinfo_formatter = " %5d   %s\n";
 const char * const obsinfo_formatter = " %5d %5d   %s\n";
 /// FLHA line formatter for FWCOEF, IMFCOEF block entries
 const char * const wilson_formatter = " %8d %4d   %1d%1d   %1d   %16.8E   # %s\n";
+/// SLHA line formatter for the DECAY block
+const char * const format_total_width = "%9d   %16.8E   # %s\n";
 
 } // namespace flexiblesusy

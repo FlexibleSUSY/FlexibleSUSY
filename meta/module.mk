@@ -68,6 +68,7 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
+		$(DIR)/Decays.m \
 		$(DIR)/NPointFunctions.m \
 		$(wildcard $(DIR)/NPointFunctions/*.m) \
 		$(wildcard $(DIR)/NPointFunctions/*/*.m) \
@@ -77,7 +78,6 @@ META_SRC     := \
 		$(DIR)/FFVFormFactors.m \
 		$(DIR)/BrLToLGamma.m \
 		$(DIR)/BtoSGamma.m \
-		$(DIR)/EffectiveCouplings.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
 		$(DIR)/FlexibleSUSY.m \

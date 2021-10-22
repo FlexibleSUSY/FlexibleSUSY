@@ -25,6 +25,8 @@
 #include <array>
 #include <iosfwd>
 #include <string>
+#include <utility>
+#include <boost/optional.hpp>
 
 namespace flexiblesusy {
 
@@ -36,6 +38,7 @@ namespace @ModelName@_info {
 @inputParameterEnum@
 @extraParameterEnum@
 @gaugeCouplingNormalizationDecls@
+
    extern const std::array<int, NUMBER_OF_PARTICLES> particle_multiplicities;
    extern const std::array<std::string, NUMBER_OF_PARTICLES> particle_names;
    extern const std::array<std::string, NUMBER_OF_PARTICLES> particle_latex_names;
@@ -49,6 +52,11 @@ namespace @ModelName@_info {
    constexpr bool is_FlexibleEFTHiggs = @isFlexibleEFTHiggs@;
    constexpr bool is_CP_violating_Higgs_sector {@isCPViolatingHiggsSector@};
 
+   int get_pdg_code_for_particle(Particles);
+   int get_pdg_code_for_particle(Particles, int);
+   std::string get_particle_name_from_pdg(int);
+   // @todo: replace with std::optional when we move to C++17
+   std::pair<std::string, boost::optional<unsigned int>> get_multiplet_and_index_from_pdg(int);
    void print(std::ostream&);
 
    class @ModelName@_particle_names : public Names {
