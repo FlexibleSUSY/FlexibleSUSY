@@ -2231,13 +2231,15 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
            If[FlexibleSUSY`FSEnableParallelism,
+              LaunchKernels[];
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
               specializations =
                  AbsoluteTiming@ParallelMap[
                     CreateTotalAmplitudeSpecialization[#, modelName]&,
                     Flatten[Last @@@ particleDecays, 1],
                     DistributedContexts -> All, Method -> "FinestGrained"
-                 ],
+                 ];
+              CloseKernels[],
               specializations =
                  AbsoluteTiming@Map[
                     (
