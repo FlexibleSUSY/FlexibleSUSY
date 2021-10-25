@@ -2243,7 +2243,11 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     Flatten[Last @@@ particleDecays, 1],
                     DistributedContexts -> All, Method -> "FinestGrained"
                  ];
-              CloseKernels[],
+              Needs["Parallel`Developer`"];
+              (*Parallel`Developer`ClearDistributedDefinitions[];*)
+              Parallel`Developer`ClearKernels[];
+              CloseKernels[]
+              ,
               specializations =
                  AbsoluteTiming@Map[
                     (
