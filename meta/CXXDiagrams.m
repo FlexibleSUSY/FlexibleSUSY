@@ -1206,7 +1206,11 @@ Module[{cxxVertices, vertexPartition,
             CreateVertex,
             DeleteDuplicates[vertices], DistributedContexts->All
          ];
-      CloseKernels[];,
+      Needs["Parallel`Developer`"];
+      Parallel`Developer`ClearDistributedDefinitions[];
+      Parallel`Developer`ClearKernels[];
+      CloseKernels[]
+      ,
       cxxVertices =
          AbsoluteTiming@Map[
             CreateVertex,
