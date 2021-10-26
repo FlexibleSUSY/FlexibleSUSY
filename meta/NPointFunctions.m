@@ -908,7 +908,7 @@ sandwich[f_] = Switch[Head@f,
 getColourFactor::usage = "
 @brief Extracts the colour factor for a given colour structure.";
 getColourFactor::errMultipleColourStructures = "
-There not all colour factors in
+Not all colour factors in
    `1`
 have head `2`.";
 getColourFactor::errNotNumber = "
