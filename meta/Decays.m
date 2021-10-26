@@ -2244,7 +2244,7 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
                     DistributedContexts -> All, Method -> "FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
-              (*Parallel`Developer`ClearDistributedDefinitions[];*)
+              Parallel`Developer`ClearDistributedDefinitions[];
               Parallel`Developer`ClearKernels[];
               CloseKernels[]
               ,
