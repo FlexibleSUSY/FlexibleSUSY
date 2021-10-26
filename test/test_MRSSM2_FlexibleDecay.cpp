@@ -760,4 +760,12 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00012423136936565911, 7e-11);
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 6.391735378735319e-06, 5e-11);
+
+   // scalar sgluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_VGVG(&m), 7.5701751945543629e-09, 3e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_barFuFu(&m, 2, 2), 2.2040853636396876e-05, 2e-12);
+
+   // pseudoscalar sgluon
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 2.1375623871457065e-11, 8e-12);
 }

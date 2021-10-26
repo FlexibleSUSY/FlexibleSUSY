@@ -1,6 +1,7 @@
 #ifndef mathdefs_hpp
 #define mathdefs_hpp
 
+#include "wrappers.hpp"
 
 #include <cmath>
 #include <complex>
@@ -12,8 +13,8 @@ using Real = double;
 using Comp = std::complex<Real>;
 
 
-const double pi = M_PI;
-const double r2 = M_SQRT2;
+constexpr double pi = Pi;
+constexpr double r2 = 1.4142135623730950;
 const Real epsilon = std::numeric_limits<Real>::epsilon();
 
 

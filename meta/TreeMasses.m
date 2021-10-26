@@ -157,7 +157,7 @@ FindHyperchargeGaugeCoupling::usage="returns symbol of hypercharge gauge couplin
 CreateDependencePrototypes::usage="";
 CreateDependenceFunctions::usage="";
 
-ColorChargedQ::usage="";
+ColorChargedQ::usage="Checks whether or not input field has color property";
 
 FieldInfo::usage="";
 includeLorentzIndices::usage="";
@@ -182,8 +182,9 @@ IsMassless::usage="";
 IsUnmixed::usage="";
 IsQuark::usage="";
 IsLepton::usage="";
-IsPhoton::usage="";
+IsPhoton::usage="Checks whether input field is a Photon";
 IsZBoson::usage="";
+IsGluon::usage="Checks whether input field is a Gluon";
 IsSMChargedLepton::usage="";
 IsSMNeutralLepton::usage="";
 IsSMLepton::usage="";
@@ -196,7 +197,7 @@ IsSMParticleElementwise::usage=
 the element is a SM-like field or not.  The function assumes that BSM
 fields are always heavier than the SM fields.";
 
-IsElectricallyCharged::usage="";
+IsElectricallyCharged::usage="Returns whether or not a field has Electric Charge";
 ContainsGoldstone::usage="";
 
 FSAntiField::usage = "Returns the anti-field of a given field";
@@ -523,6 +524,11 @@ IsZBoson[Susyno`LieGroups`conj[sym_]] := IsZBoson[sym];
 IsZBoson[SARAH`bar[sym_]] := IsZBoson[sym];
 IsZBoson[sym_[___]] := IsZBoson[sym];
 IsZBoson[field_Symbol] := field === GetZBoson[];
+
+IsGluon[Susyno`LieGroups`conj[sym_]] := IsGluon[sym];
+IsGluon[SARAH`bar[sym_]] := IsGluon[sym];
+IsGluon[sym_[___]] := IsGluon[sym];
+IsGluon[field_Symbol] := field === GetGluon[];
 
 IsSMChargedLepton[Susyno`LieGroups`conj[sym_]] := IsSMChargedLepton[sym];
 IsSMChargedLepton[SARAH`bar[sym_]] := IsSMChargedLepton[sym];

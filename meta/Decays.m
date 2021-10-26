@@ -324,23 +324,16 @@ IsColorInvariantDecay[initialParticle_, finalState_List] :=
               finalStateReps = Sort[TreeMasses`GetColorRepresentation /@ finalState];
               Switch[initialStateRep,
                      S, result = ((finalStateReps === {S, S}) ||
-                                  (finalStateReps === {T, T}) ||
-                                  (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}]) ||
                                   (finalStateReps === {O, O}));,
-                     T|-T, result = ((finalStateReps === Sort[{T, S}]) ||
-                                     (finalStateReps === Sort[{-T, S}]) ||
+                     T|-T, result = ((finalStateReps === Sort[{initialStateRep, S}]) ||
                                      (finalStateReps === Sort[{O, T}]) ||
                                      (finalStateReps === Sort[{O, -T}]));,
                      O, result = ((finalStateReps === Sort[{O, S}]) ||
-                                  (finalStateReps === {T, T}) ||
-                                  (finalStateReps === {-T, -T}) ||
                                   (finalStateReps === Sort[{-T, T}])
-                                  (* uncomment to enable O -> OO decays once
-                                     the handling of multiple color structures
-                                     is introduced
-                                  || (finalStateReps === Sort[{O, O}])*));,
-                     _, result = True; (* unhandled case *)
+                                  (* for now we only handle octet decays to symmetric final state *)
+                                  || (finalStateReps === {O, O} && SameQ@@finalState));,
+                     _, result = False; (* unhandled case *)
                     ];
              ];
            result
@@ -597,7 +590,6 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
               ,
               decays = Map[
                   (
-                     (* @todo StringPadRigh was introduced only in 10.1 *)
                      WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
                      temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
                      Print[" Done."];
@@ -1897,7 +1889,10 @@ If[Length@positions =!= 1, Quit[1]];
                                     "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos1 <> ">(indexId" <> ToString@First@#2 <> ") == " <>
                                     "vertexId" <> ToString@First@#2 <> "::template indices_of_field<" <> ToString@Utils`MathIndexToCPP@First@First@pos2 <> ">(indexId" <> ToString@First@#2 <> ")"
                                  ])&, verticesForFACp]," &&\n"] <>
-                                 "\n&& result.m_decay/mInternal1 < 0.8\n"
+                                 (* mPhi/mq < 0.8 *)
+                                 "\n&& result.m_decay/mInternal1 < 0.8" <>
+                                 (* mZ/mPhi < 0.75 *)
+                                 " && " <> If[TreeMasses`IsZBoson[diagram[[2]]], "result.m_vector_1", "result.m_vector_2"] <> "/result.m_decay < 0.75\n"
                               ] <>
                               ") {\n" <>
                               (* eq. 2.57 of hep-ph/0503172 *)
@@ -1949,7 +1944,7 @@ If[Length@positions =!= 1, Quit[1]];
             If[Head[cf] === Complex,
                (* complex colour factor *)
                "std::complex<double> " <> ToString@colorFac <> " " <>
-                  ToString[N[#, 16]& /@ FSReIm @ cf],
+                  ToString[N[#, 16]& /@ ReIm @ cf],
 
                (* real color factor *)
                "double " <> ToString@colorFac <> " {" <>
@@ -1987,9 +1982,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             returnVar = "result", paramsStruct = "context", returnType = "",
             externalFieldsList, templatePars = "", args = "",
             body = ""},
-
-           (* @todo StringPadRigh was introduced only in 10.1 *)
-           (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];

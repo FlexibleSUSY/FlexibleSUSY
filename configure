@@ -6,7 +6,7 @@
 PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
 FLEXIBLESUSY_MINOR=6
-FLEXIBLESUSY_PATCH=0
+FLEXIBLESUSY_PATCH=1
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
@@ -245,7 +245,7 @@ required_icpc_compiler_version="17.0.0"
 required_boost_version="1.37.0"
 
 # required Mathematica version
-required_mathematica_version="7"
+required_mathematica_version="11.0"
 
 # required SARAH version
 required_sarah_major="4"
@@ -1865,9 +1865,16 @@ check_gsl_config() {
         message "  use $0 --with-gsl-config=<path to gsl-config>"
         exit 1
     else
-        result "found $cmd"
+        local GSL_VERSION=$($cmd --version)
+        result "found $cmd (version ${GSL_VERSION})"
         GSLFLAGS=$($cmd --cflags)
         GSLLIBS=$($cmd --libs)
+
+        version_at_least "$GSL_VERSION" "2.0.0" || {
+            message "Error: An old version of GSL has been detected ($GSL_VERSION)."
+            message "   Please upgrade to version 2.0.0 (or higher)."
+            exit 1
+        }
     fi
 }
 
@@ -3380,12 +3387,12 @@ add_metaflags() {
 #_____________________________________________________________________
 replace_markers() {
 	sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
-   -e "s|@OPERATING_SYSTEM@|$operating_system|"     \
+	-e "s|@OPERATING_SYSTEM@|$operating_system|"     \
 	-e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
 	-e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
 	-e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
 	-e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-   -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
+	-e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
 	-e "s|@PKGNAME@|$PROGRAM_NAME|"    \
 	-e "s|@ABSBASEDIR@|$ABSBASEDIR|"   \
 	-e "s|@ADDONS@|$ADDONS|"           \
@@ -3405,16 +3412,16 @@ replace_markers() {
 	-e "s|@FFLAGS@|$FFLAGS|"           \
 	-e "s|@FLIBS@|$FLIBS|"             \
 	-e "s|@FUTILIBS@|$FUTILIBS|"       \
-   -e "s|@FMOD@|$FMOD|"               \
-   -e "s|@FSTD@|$FSTD|"   \
+	-e "s|@FMOD@|$FMOD|"               \
+	-e "s|@FSTD@|$FSTD|"   \
 	-e "s|@FSCONFIG@|$FSCONFIG|"       \
 	-e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
 	-e "s|@GSLLIBS@|$GSLLIBS|"         \
 	-e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-		-e "s|@LDFLAGS@|$LDFLAGS|"         \
-		-e "s|@LDLIBS@|$LDLIBS|"           \
-		-e "s|@LLFLAGS@|$LLFLAGS|"         \
-		-e "s|@LLLIBS@|$LLLIBS|"           \
+	-e "s|@LDFLAGS@|$LDFLAGS|"         \
+	-e "s|@LDLIBS@|$LDLIBS|"           \
+	-e "s|@LLFLAGS@|$LLFLAGS|"         \
+	-e "s|@LLLIBS@|$LLLIBS|"           \
 	-e "s|@ENABLE_COLORS@|$enable_colors|" \
 	-e "s|@ENABLE_COMPILE@|$enable_compile|" \
 	-e "s|@ENABLE_COMPILER_WARNINGS@|$enable_compiler_warnings|" \
@@ -3628,7 +3635,10 @@ if test $# -gt 0 ; then
             --with-boost-libdir=*)   boost_lib_dir=$optarg ;;
             --with-boost-incdir=*)   boost_inc_dir=$optarg ;;
             --with-cppflags=*)       CPPFLAGS=$optarg ;;
-            --with-cxx=*)            CXX=$optarg ;;
+            --with-cxx=*)            CXX=$optarg
+                                     SHARED_LIB_CMD="$CXX -shared -o"
+                                     LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+                                     ;;
             --with-cxxflags=*)       CXXFLAGS=$optarg ;;
             --with-collier-libdir=*) collier_lib_dir=$optarg ;;
             --with-collier-incdir=*) collier_inc_dir=$optarg ;;

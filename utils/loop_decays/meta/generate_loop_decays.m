@@ -450,17 +450,61 @@ CreateLoopFunctionArgumentName[arg_ /; IsLoopMass[arg]] :=
     CreateLoopMassCString[arg];
 
 CallLoopFunction[fn_[args__], renScale_String] :=
-    Module[{argsStr},
+    Module[{argsStr, funcType = First@Characters@ToString[fn], returnType},
            argsStr = StringJoin[Riffle[CreateLoopFunctionArgumentName /@ List[args], ", "]];
-           "lib." <> ToString[fn] <> "(" <> argsStr <> ", " <> renScale <> "*" <> renScale <> ")"
+           returnType = "looplibrary::" <> funcType <> "coeff_t";
+           returnType <> " "  <> funcType <> "_coeffs;\n" <>
+           "lib." <> funcType <> "(" <> funcType <> "_coeffs, " <> argsStr <> ", " <> renScale <> "*" <> renScale <> ");\n\n"
           ];
+
+GetLoopFunctionFromCoefficient[fn_[args__]] :=
+   Module[{funcType = First@Characters@ToString[fn], coeffIndexAsStr, coeffIndexAsInt},
+      coeffIndexAsStr = StringJoin@Drop[Characters@ToString[fn], 1];
+      coeffIndexAsInt =
+         Switch[funcType,
+            "A",
+               Switch[coeffIndexAsStr,
+                  "0", 0,
+                  _, Print[coeffIndexAsStr <> "is and unknown type of A function"]; Quit[1];
+               ],
+            "B",
+               Switch[coeffIndexAsStr,
+                   "0", 0,
+                   "1", 1,
+                  "00", 2,
+                  _, Print[coeffIndexAsStr <> "is an unknown type of B function"]; Quit[1];
+               ],
+            "C",
+               Switch[coeffIndexAsStr,
+                  "0", 0,
+                  "1", 1,
+                  "2", 2,
+                  "00", 3,
+                  "11", 4,
+                  "12", 5,
+                  "22", 6,
+                  _, Print[coeffIndexAsStr <> "is an unknown type of C function"]; Quit[1];
+               ],
+            _, Print["Unknown loop function"]; Quit[1];
+         ];
+      funcType <> "_coeffs.at(" <> ToString@coeffIndexAsInt <> ")"
+   ];
+
 
 SaveLoopIntegrals[diagram_, renScale_String] :=
     Module[{formFactors, loopFunctions, tmpVars, savedValues, subs},
            formFactors = Last[diagram];
            loopFunctions = Sort[DeleteDuplicates[Cases[formFactors, fn_[args__] /; IsSARAHLoopFunction[fn], {0, Infinity}]]];
            tmpVars = MapIndexed[(CreateSavedLoopFunctionName[#1] <> ToString[First[#2]])&, loopFunctions];
-           savedValues = MapThread[("const auto " <> #1 <> " = " <> CallLoopFunction[#2, renScale] <> ";\n")&, {tmpVars, loopFunctions}];
+           If[Max[{
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "A"&]],
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "B"&]],
+                  CountDistinct[List @@@ Select[loopFunctions, First@Characters@ToString@Head[#] == "C"&]]
+              }] > 1,
+              Print["Not all loop functions of the same type (e.g. C*) are called with the same arguments"]; Quit[1]
+           ];
+           savedValues = StringJoin[DeleteDuplicates[CallLoopFunction[#, renScale]& /@ loopFunctions]];
+           savedValues = savedValues <> MapThread[("const auto " <> #1 <> " = " <> GetLoopFunctionFromCoefficient[#2] <> ";\n")&, {tmpVars, loopFunctions}];
            savedValues = StringJoin[savedValues];
            subs = MapThread[Rule[#1, Symbol[#2]]&, {loopFunctions, tmpVars}];
            {savedValues, subs}
