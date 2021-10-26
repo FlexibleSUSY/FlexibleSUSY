@@ -417,7 +417,7 @@ If[!$Notebooks,
       Quit[1];
    ];
 ];
-SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll,Locked,Protected}];
+SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll,Protected}];
 
 EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
 EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;
@@ -490,7 +490,7 @@ Module[{nStrokes,controlSubstrings},
    internalAssertOrQuit[TrueQ[Max@controlSubstrings<=Length@{insertions}],
       func::errInsertions,{insertions},Max@checkedControl,message]
 ];
-SetAttributes[internalOrQuitInputCheck,{HoldFirst,Locked,Protected}];
+SetAttributes[internalOrQuitInputCheck,{HoldFirst,Protected}];
 
 MakeUnknownInputDefinition[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString,symbolAsString},
