@@ -1,3 +1,15 @@
+FlexibleSUSY 2.6.2 [July, 08 2021]
+==================================
+
+Changes
+-------
+
+Fixed bugs
+----------
+
+* [commit ]: Branching ratio of L'->LGamma was breaking printing of
+  observables via the mathlink interface.
+
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
