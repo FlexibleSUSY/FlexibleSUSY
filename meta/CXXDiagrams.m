@@ -1157,6 +1157,7 @@ Module[{cxxVertices, vertexPartition,
         contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
 
    If[FlexibleSUSY`FSEnableParallelism,
+      LaunchKernels[];
       (* without this CForm includes context in name of symbols
          such that we get for example SARAH_g1 instead of g1 in
          generated C++ code *)
@@ -1204,7 +1205,12 @@ Module[{cxxVertices, vertexPartition,
          AbsoluteTiming@ParallelMap[
             CreateVertex,
             DeleteDuplicates[vertices], DistributedContexts->All
-         ],
+         ];
+      Needs["Parallel`Developer`"];
+      Parallel`Developer`ClearDistributedDefinitions[];
+      Parallel`Developer`ClearKernels[];
+      CloseKernels[]
+      ,
       cxxVertices =
          AbsoluteTiming@Map[
             CreateVertex,
