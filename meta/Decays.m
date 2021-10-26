@@ -584,7 +584,6 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            decays =
               Map[
                  (
-                    (* @todo StringPadRigh was introduced only in 10.1 *)
                     WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
                     temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
                     Print[" Done."];
@@ -1976,9 +1975,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             returnVar = "result", paramsStruct = "context", returnType = "",
             externalFieldsList, templatePars = "", args = "",
             body = ""},
-
-           (* @todo StringPadRigh was introduced only in 10.1 *)
-           (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
 
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
