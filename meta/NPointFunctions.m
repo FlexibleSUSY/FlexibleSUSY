@@ -905,42 +905,46 @@ sandwich[f_] = Switch[Head@f,
    SymbolName@head<>ToString@index<>"Key";
 `cxx`genericFieldKey // secure;
 
-getColourFactor::usage = "
+removeNumbers[expr_] :=
+   expr /. {_Integer-> 1, _Rational-> 1, _Complex-> 1, Pi-> 1};
+removeNumbers // secure;
+
+colorFactor::usage = "
 @brief Extracts the colour factor for a given colour structure.";
-getColourFactor::errMultipleColourStructures = "
+colorFactor[colourfactors:{`type`classColorFactors..},
+            projection:`type`colourProjector] :=
+Module[{projectedFactors},
+   projectedFactors =
+      Switch[projection,
+         Identity,
+            colourfactors,
+         _,
+            Utils`AssertOrQuit[
+               And@@Flatten[MatchQ[#, _projection]&/@#&/@ removeNumbers@colourfactors],
+               colorFactor::errMultipleColourStructures,
+               colourfactors,
+               projection];
+            colourfactors /. _projection -> 1];
+   Utils`AssertOrQuit[
+      And@@Flatten[NumericQ[#]&/@#&/@ projectedFactors],
+      colorFactor::errNotNumber,
+      projectedFactors];
+   projectedFactors];
+colorFactor // secure;
+colorFactor::errMultipleColourStructures = "
 Not all colour factors in
    `1`
 have head `2`.";
-getColourFactor::errNotNumber = "
-After not all colour factors in
+colorFactor::errNotNumber = "
+Not all colour factors in
    `1`
-are numbers."
-getColourFactor[colourfactors:{`type`classColorFactors..},
-   projection:`type`colourProjector] :=
-Module[{projectedFactors},
-   projectedFactors =
-      If[projection === Identity,
-         colourfactors,
-         Utils`AssertOrQuit[
-            And@@Flatten[MatchQ[#, _projection]&/@#&/@ colourfactors],
-            getColourFactor::errMultipleColourStructures,
-            colourfactors,
-            projection];
-         colourfactors /. _projection -> 1];
-   Utils`AssertOrQuit[
-      And@@Flatten[NumericQ[#]&/@#&/@ projectedFactors],
-      getColourFactor::errNotNumber,
-      projectedFactors];
-   projectedFactors];
-getColourFactor // secure;
+are numbers.";
 
 `cxx`genericSum::usage = "
 @brief Create the ``C++`` code form of a generic sums.
 @param obj n-point function object.
 @param colourProjector An expression, representing the projector.
 @param genSumNames Set of names for generic sums.";
-`cxx`genericSum::errColours = "
-Colour factor is not a number after projection: `1`";
 `cxx`genericSum[obj:`type`npf, colourProjector:`type`colourProjector,
    genSumNames:{__String}] :=
 Utils`StringJoinWithSeparator[
@@ -949,7 +953,7 @@ Utils`StringJoinWithSeparator[
       {  getGenericSums@obj,
          getClassFields@obj,
          getClassCombinatoricalFactors@obj,
-         getColourFactor[getClassColorFactors@obj,colourProjector],
+         colorFactor[getClassColorFactors@obj,colourProjector],
          genSumNames}],
    "\n\n"];
 `cxx`genericSum[
@@ -1017,6 +1021,8 @@ replaceTokens["
       "@ColorFactors@"->`cxx`insertColours@colourFactors,
       "@WilsonBasisLength@"->`cxx`getLength@$basis}];
 `cxx`genericSum // secure;
+`cxx`genericSum::errColours = "
+Colour factor is not a number after projection: `1`";
 
 `cxx`initializeExternalIndices[npf:`type`npf] :=
 Module[{extIndices = getExternalIndices@npf},
@@ -1205,11 +1211,10 @@ createLoopFunctions // secure;
       then amplitude is zero as well.";
 `cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},
    massRules:{Rule[_,_]..}] :=
-Module[{numbersToOne = {_Integer->1,_Rational->1,_Complex->1,Pi->1},
-      massesToOne = Rule[#,1] & /@ massRules[[All,2]],
+Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
       loopsToOne = Rule[#,1] & /@ loopRules[[All,2]],
       result, func = "z[" <> # <> "]"&},
-   result = ExpandAll[modifiedExpr] /.numbersToOne /.Plus->List/.
+   result = removeNumbers[ExpandAll[modifiedExpr]] /.Plus->List/.
       massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
    If[ 2 === LeafCount@result,
