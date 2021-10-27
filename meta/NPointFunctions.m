@@ -479,48 +479,24 @@ GetSARAHModelName // secure;
 
 LaunchSubkernelFor::usage = "
 @brief Tries to launch a subkernel without errors.
-       If it fails, tries to explain the reason using message.
-@param message String, which contains description of activity for which this
-       subkernel is launched for.
-@returns A subkernels name.
-@note ``Mathematica 7`` returns ``KernelObject[__]``, ``Mathematica 11.3``
-      returns ``{KernelObject[__]}``.
-@note For ``Mathematica 7`` some functions have the same names as in
-      ``SARAH``";
+@param message String with a reason to launch a subkernel.
+@returns A subkernels name.";
 LaunchSubkernelFor::errKernelLaunch = "
-Unable to launch subkernel(s) during calculations for
+Unable to launch a subkernel for
    `1`.";
-LaunchSubkernelFor[message_String] /; $VersionNumber===7.0 :=
-Module[{kernelName},
-   Off[Parallel`Preferences`add::shdw,
-      Parallel`Preferences`set::shdw,
-      Parallel`Preferences`list::shdw,
-      Parallel`Preferences`tr::shdw,
-      Parallel`Protected`processes::shdw,
-      SubKernels`Description::shdw];
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
-   On[Parallel`Preferences`add::shdw,
-      Parallel`Preferences`set::shdw,
-      Parallel`Preferences`list::shdw,
-      Parallel`Preferences`tr::shdw,
-      Parallel`Protected`processes::shdw,
-      SubKernels`Description::shdw];
-   kernelName];
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
    kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
+      LaunchKernels@1,
       LaunchSubkernelFor::errKernelLaunch, message];
    If[Head@kernelName === List, kernelName[[1]], kernelName]];
 LaunchSubkernelFor // secure;
 
 CacheNameForMeta::usage = "
-@param nPointMeta the given meta information.
+@param meta The given meta information.
 @returns The name of the cache file for given meta information.";
-CacheNameForMeta[nPointMeta:{__}] :=
-   Utils`StringJoinWithSeparator[Flatten@nPointMeta, "", SymbolName]<>".m";
+CacheNameForMeta[meta:{__}] :=
+   Utils`StringJoinWithSeparator[Flatten@meta, "", SymbolName]<>".m";
 CacheNameForMeta // secure;
 
 cache::usage = "
@@ -597,10 +573,8 @@ writeNamespaceFile // secure;
 convertFields::usage = "
 @brief Changes given ``SARAH`` fields to ``FeynArts`` ones.
 @param fields List of ``SARAH`` fields.
-@param particles A ``String`` name of a file, which is created by ``SARAH``
-       and contains ``FeynArts`` particle names.
-@returns A set of ``FeynArts`` names (each as ``String``) for given ``SARAH``
-         fields.";
+@param particles A name of a file, which contains ``FeynArts`` particle names.
+@returns A set of ``FeynArts`` names for a given ``SARAH`` fields.";
 convertFields[fields_, particles_String] :=
    Module[{unique, faNames},
       unique = DeleteDuplicates[
@@ -615,11 +589,7 @@ convertFields[fields_, particles_String] :=
 convertFields // secure;
 
 RemoveEmptyGenSums::usage = "
-@brief Sometimes after ``FeynArts`` + ``FormCalc`` calculation some generic sums
-       are empty.
-       This means that one can simply remove them (as well as corresponding
-       colour/combinatoric factors and field substitution rules).
-       This work is done by this function.
+@brief Somehing went wrong in a subkernel. Most likely, it is dead.
 @param npfObject n-point function object to clean.
 @returns Cleaned from empty GenericSums npfObject.";
 RemoveEmptyGenSums[npfObject:`type`npf]:=npfObject;
@@ -637,8 +607,8 @@ Module[{poss=Position[sums,GenericSum[{0},{}]]},
 RemoveEmptyGenSums // secure;
 
 CreateCXXHeaders::usage = "
-@brief Create the ``C++`` code for the necessary headers.
-@returns The ``C++`` code for the necessary headers.";
+@brief Create the C++ code for the necessary headers.
+@returns The C++ code for the necessary headers.";
 CreateCXXHeaders[] :=
 replaceTokens["
    #include \"loop_libraries/loop_library.hpp\"
@@ -651,17 +621,12 @@ replaceTokens["
 CreateCXXHeaders // secure;
 
 CreateCXXFunctions::usage = "
-@brief Given a list of n-point correllation functions, a list
-       of ``C++`` function names and a list of colour factor projections
-       create the ``C++`` code for the numerical evaluation of the
-       n-point correllation functions.
+@brief Creates a C++ code for the n-point correllation functions.
 @param npf n-point correlation function object.
 @param name function name
-@param colourProjector Colour projection function that represents color
-       structure of ampitudes.
+@param colourProjector A function that represents color structure of ampitudes.
 @param wilsonBasis Basis for matching.
-@returns A list of the form ``{prototypes, definitions}`` containing
-         the corresponding ``C++`` code.";
+@returns A list with C++ prototypes and definitions.";
 CreateCXXFunctions[
    npf:`type`npf,
    name:_String,
@@ -686,13 +651,13 @@ Length of basis and the given n-point function one does not match."
 CreateCXXFunctions // secure;
 
 `cxx`arguments::usage = "
-@brief Returns the ``C++`` arguments that the ``C++`` version of the given n-point
+@brief Returns the C++ arguments that the C++ version of the given n-point
        correlation function shall take.
        ``Default`` value of zero for all external momenta is chosen if the
        second parameter is ``Default``.
 @param npf The given n-point correlation function
 @param control String that sets up the type of argument string
-@returns The ``C++`` arguments that the ``C++`` version of the given n-point
+@returns The C++ arguments that the C++ version of the given n-point
          correlation function shall take.";
 `cxx`arguments[npf:`type`npf,control:Null|Default:Null] :=
    "const "<>#1<>" &model,"<>
@@ -719,7 +684,7 @@ $helperClassName = "";
 $helperClassName ~ SetAttributes ~ {Protected};
 
 setHelperClassName::usage = "
-@brief Sets the ``C++`` name for the helper class of a n-point function.
+@brief Sets the C++ name for the helper class of a n-point function.
 @param obj n-point function object.";
 setHelperClassName[obj:`type`npf] :=
 Module[{fieldNames = Vertices`StripFieldIndices/@Join@@getProcess[obj]},
@@ -734,7 +699,7 @@ setHelperClassName // secure;
 @param npf The given n-point correlation function.
 @param projCol The colour factor projection to be applied for the
        given n-point correlation function.
-@returns The ``C++`` code for the helper class of n-point function.";
+@returns The C++ code for the helper class of n-point function.";
 `cxx`npfClass[npf:`type`npf, projCol:`type`colourProjector] :=
 Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
    genSums = getGenericSums@npf;
@@ -782,9 +747,9 @@ Module[{genSums, extIndices, numberOfMomenta, genFields, genSumNames},
 `cxx`npfClass // secure;
 
 `cxx`initializeKeyStructs::usage = "
-@brief Generates required ``C++`` code for key structs initialization.
+@brief Generates required C++ code for key structs initialization.
 @param fields List of generic fields.
-@returns ``C++`` code for subexpression if generic fields present there.";
+@returns C++ code for subexpression if generic fields present there.";
 `cxx`initializeKeyStructs[fields:{`type`genericField..}]:=
    Utils`StringJoinWithSeparator[
       "struct "<>#<>" {};"&/@`cxx`genericFieldKey/@fields,
@@ -795,11 +760,11 @@ Module[{rules = {{}}},
 
 `cxx`setRules::usage = "
 @brief Generate a list of rules for translating Mathematica expressions to
-       ``C++`` ones.
+       C++ ones.
 @param extIndices The external indices of an n-point correlation function.
 @param genericFields The generic fields appearing in an n-point correlation
        function.
-@returns A list of rules for translating Mathematica expressions to ``C++`` ones.
+@returns A list of rules for translating Mathematica expressions to C++ ones.
 @note All couplings have to be multiplied by ``I``.";
 `cxx`setRules[extIndices:{___Symbol},genericFields:{`type`genericField..}] :=
 Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules},
@@ -820,7 +785,7 @@ Module[{externalIndexRules, wrap, index, genericRules, massRules, couplingRules}
          ("NPF_L(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
       SARAH`Cp[fields__][SARAH`PR] :>
          ("NPF_R(" <> wrap@fields <>") NPF_I(" <> index@fields <> ")"),
-      (* On ``C++`` level this vertex is such, that _D should have 0 and 1.
+      (* On C++ level this vertex is such, that _D should have 0 and 1.
        * The first position corresponds to the momenta with + sign.
        * The second position corresponds to the momenta with - sign.
        * Example: Cp[S1, S2, V][Mom@S1 - Mom@S2] leads to
@@ -863,9 +828,9 @@ sandwich[f_] = Switch[Head@f,
    _, #]&;
 
 `cxx`fieldName::usage = "
-@brief Returns a ``C++`` representation for a field expression or a field name.
+@brief Returns a C++ representation for a field expression or a field name.
 @param f A generic or external field, or an explicit field name.
-@returns A ``C++`` representation for a field.";
+@returns A C++ representation for a field.";
 `cxx`fieldName[
    f:`type`explicitFieldName|`type`externalField|`type`physicalField] :=
 (  n = strip@f;
@@ -878,9 +843,9 @@ sandwich[f_] = Switch[Head@f,
 `cxx`fieldName // secure;];
 
 `cxx`fieldIndices::usage = "
-@brief Return the ``C++`` expression for the given field.
+@brief Return the C++ expression for the given field.
 @param field The given field.
-@returns The ``C++`` expression for the given field.
+@returns The C++ expression for the given field.
 @note Saves its previous calls to improve the speed.";
 `cxx`fieldIndices[SARAH`bar[field_]] := `cxx`fieldIndices[SARAH`bar[field]] =
    `cxx`fieldIndices@field;
@@ -896,9 +861,9 @@ sandwich[f_] = Switch[Head@f,
 `cxx`fieldIndices ~ SetAttributes ~ {Locked};
 
 `cxx`genericFieldKey::usage = "
-@brief Determines ``C++`` key type for a generic field.
+@brief Determines C++ key type for a generic field.
 @param genericField Given generic field.
-@returns ``C++`` key type of a generic field(s).";
+@returns C++ key type of a generic field(s).";
 `cxx`genericFieldKey[fields:{__}] :=
    Utils`StringJoinWithSeparator[fields, ", ", `cxx`genericFieldKey];
 `cxx`genericFieldKey[head_[GenericIndex[index:_Integer]]] :=
@@ -941,7 +906,7 @@ Not all colour factors in
 are numbers.";
 
 `cxx`genericSum::usage = "
-@brief Create the ``C++`` code form of a generic sums.
+@brief Create the C++ code form of a generic sums.
 @param obj n-point function object.
 @param colourProjector An expression, representing the projector.
 @param genSumNames Set of names for generic sums.";
@@ -1036,10 +1001,10 @@ Module[{extIndices = getExternalIndices@npf},
 `cxx`initializeExternalIndices // secure;
 
 `cxx`changeGenericExpressions::usage = "
-@brief Generates ``C++`` code for output value updating inside generic sum.
+@brief Generates C++ code for output value updating inside generic sum.
 @param summation Summation structure of generic index.
-@param expr List of expressions to be converted into ``C++`` code.
-@returns ``C++`` code for output value initializations inside generic sum.";
+@param expr List of expressions to be converted into C++ code.
+@returns C++ code for output value initializations inside generic sum.";
 `cxx`changeGenericExpressions::errUnimplementedLoops =
 "Unsupported loop functions
    `1`
@@ -1104,10 +1069,10 @@ Module[{func},
 func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
 
 `cxx`setFieldAliases::usage = "
-@brief ``C++`` names for fields with bar and conj are cumbersome. In order to
+@brief C++ names for fields with bar and conj are cumbersome. In order to
        improve readaability and simplify checks some aliases are generated.
 @param couplings A list of tuples with couplings.
-@returns A string with ``C++`` code of alias definitions.";
+@returns A string with C++ code of alias definitions.";
 `cxx`setFieldAliases[couplings:{{SARAH`Cp[__][___], _Integer}..}] :=
 Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@First@#&)/@couplings]},
    StringJoin@MapThread[func, {`cxx`fieldAlias/@l, `cxx`fieldName/@l}]];
@@ -1120,9 +1085,9 @@ name[f_] := ToString@Switch[f, _Symbol, f, _, Head@f];
 strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
 `cxx`fieldAlias::usage = "
-@brief Generates a short ``C++`` name for a field, whether conjugated or not.
+@brief Generates a short C++ name for a field, whether conjugated or not.
 @param f A external or generic field.
-@returns A ``C++`` name for a field.";
+@returns A C++ name for a field.";
 `cxx`fieldAlias[f:`type`externalField|`type`physicalField] := c[f][name@strip@f];
 `cxx`fieldAlias[f:`type`genericField] := c[f][`cxx`fieldName@strip@f];
 `cxx`fieldAlias // secure;];
@@ -1247,16 +1212,16 @@ Module[{
 @brief Generates names for masses to be used inside generic sums and then
        creates:
 
-       1. a ``C++`` code for definition and initialisation for masses,
-       2. a ``Mathematica`` to ``C++`` rules for generated names of masses.
+       1. a C++ code for definition and initialisation for masses,
+       2. a ``Mathematica`` to C++ rules for generated names of masses.
 @param masses A list of tallies with Mathematica expressions for mass and the
        number of repetition of it.
 @returns A list of:
 
-         1. a ``C++`` string with definitions,
-         2. a ``C++`` string with initialisations,
+         1. a C++ string with definitions,
+         2. a C++ string with initialisations,
          3. a Mathematica list of rules for mass convertion
-            to ``C++`` code.";
+            to C++ code.";
 `cxx`nameMasses[masses:{{_, _Integer}..}] :=
    {d[First/@#], StringJoin[i/@#], r@#} &@ Table[info@m, {m, Sort@masses}];
 `cxx`nameMasses // secure;
@@ -1265,16 +1230,16 @@ Module[{
 @brief Generates names for couplings to be used inside generic sums and then
        creates:
 
-       1. ``C++`` code for definition and initialisation for couplings,
-       2. ``Mathematica`` to ``C++`` rules for generated names of couplings.
+       1. C++ code for definition and initialisation for couplings,
+       2. ``Mathematica`` to C++ rules for generated names of couplings.
 @param masses A list of tallies with Mathematica expressions for coupling
        and the number of repetition of it.
 @returns A list of:
 
-         1. a ``C++`` string with definitions,
-         2. a ``C++`` string with initialisations,
+         1. a C++ string with definitions,
+         2. a C++ string with initialisations,
          3. a ``Mathematica`` list of rules for coupling convertion
-            to ``C++`` code.
+            to C++ code.
 @note All couplings have to be multiplied by ``I``, as it is done in these
       rule replacements.";
 `cxx`nameCouplings[couplings:{{_,_Integer}..}] :=
@@ -1295,10 +1260,10 @@ Module[{
 `cxx`nameCouplings // secure;];
 
 `cxx`shortNames::usage = "
-@brief Generates ``C++`` code for type abbreviations stored in
+@brief Generates C++ code for type abbreviations stored in
        ``GenericFieldMap`` (Associative Sequence) at ``Key`` positions.
 @param genFields List of generic fields.
-@returns String ``C++`` code for type abbreviations stored in GenericFieldMap
+@returns String C++ code for type abbreviations stored in GenericFieldMap
          (Associative Sequence) at Key positions.";
 `cxx`shortNames[genFields:{`type`genericField..}] :=
    Utils`StringJoinWithSeparator[Apply[
@@ -1308,10 +1273,10 @@ Module[{
 `cxx`shortNames // secure;
 
 `cxx`beginSum::usage = "
-@brief Generates ``C++`` code for sum beginning used inside GenericSum.
+@brief Generates C++ code for sum beginning used inside GenericSum.
 @param summation List of generic index restriction rules pares, which,
        if are true should lead to a skip of summation.
-@returns String ``C++`` code for sum beginning used inside generic sums.";
+@returns String C++ code for sum beginning used inside generic sums.";
 `cxx`beginSum[summation:`type`summation]:=
 Module[{beginsOfFor},
    beginsOfFor = "for( const auto &"<>`cxx`getIndex[#[[1]]]<>" : "<>
@@ -1345,10 +1310,10 @@ Module[{f1,f2,getIndexOfExternalField,OrTwoDifferent},
 parseRestrictionRule // secure;
 
 `cxx`endSum::usage = "
-@brief Generates ``C++`` code for end of sum over generic fields inside
+@brief Generates C++ code for end of sum over generic fields inside
        GenericSum.
 @param genFields List of generic fields.
-@returns String ``C++`` code for end of sum over generic fields inside
+@returns String C++ code for end of sum over generic fields inside
          GenericSum.";
 `cxx`endSum[genFields:{`type`genericField..}] :=
    StringJoin[
@@ -1357,14 +1322,14 @@ parseRestrictionRule // secure;
 `cxx`endSum // secure;
 
 `cxx`calculateFunction::usage = "
-@brief Generates ``C++`` code for functions which return result of generic sum
+@brief Generates C++ code for functions which return result of generic sum
        calculation.
 @param genSumNames list of strings with names of generic sums.
-@returns Generates ``C++`` code for functions which return result of
+@returns Generates C++ code for functions which return result of
          generic sum calculation.";
 `cxx`calculateFunction[genSumNames:{__String}] :=
 Module[{
-      varName = "genericsum" (* Feel free to change me to another ``C++`` name *),
+      varName = "genericsum" (* Feel free to change me to another C++ name *),
       varNames,initVars,sumOfSums},
    varNames = Array[varName<>ToString@#&,Length@genSumNames];
    initVars = Utils`StringJoinWithSeparator[
@@ -1388,9 +1353,9 @@ Module[{
 `cxx`calculateFunction // secure;
 
 `cxx`insertFields::usage = "
-@brief Generates ``C++`` code for class insertions inside GenericSum.
+@brief Generates C++ code for class insertions inside GenericSum.
 @param genInsertions list of list with SARAH particle names.
-@returns String ``C++`` code for class insertions inside GenericSum.";
+@returns String C++ code for class insertions inside GenericSum.";
 `cxx`insertFields[genInsertions:`type`classFields] :=
    Utils`StringJoinWithSeparator["boost::mpl::vector<"<>
       Utils`StringJoinWithSeparator[`cxx`fieldName@#&/@#,", "]<>
@@ -1398,18 +1363,18 @@ Module[{
 `cxx`insertFields // secure;
 
 `cxx`insertFactors::usage = "
-@brief Generates ``C++`` code for combinatorical factor insertions inside GenericSum.
+@brief Generates C++ code for combinatorical factor insertions inside GenericSum.
 @param combinatorialFactors List of integers.
-@returns String ``C++`` code for combinatorical factor insertions inside GenericSum.";
+@returns String C++ code for combinatorical factor insertions inside GenericSum.";
 `cxx`insertFactors[combinatorialFactors:`type`classCombinatoricalFactors] :=
    Utils`StringJoinWithSeparator["boost::mpl::int_<"<>ToString@#<>
       ">"&/@combinatorialFactors,",\n"];
 `cxx`insertFactors // secure;
 
 `cxx`insertColours::usage = "
-@brief Generates ``C++`` code for colour factor insertions inside GenericSum.
+@brief Generates C++ code for colour factor insertions inside GenericSum.
 @param colourFactors list of numbers.
-@returns String ``C++`` code for colour factor insertions inside GenericSum.";
+@returns String C++ code for colour factor insertions inside GenericSum.";
 `cxx`insertColours[colourFactors:{__?NumberQ}] :=
 Module[{
       ReRatioColourFactors = {Numerator@#,Denominator@#} &/@ Re@colourFactors,
