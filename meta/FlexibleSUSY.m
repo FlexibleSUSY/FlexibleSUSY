@@ -1993,6 +1993,20 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
            If[FlexibleSUSY`FSEnableParallelism,
+              If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
+                 SA`CurrentStates = FlexibleSUSY`FSEigenstates;
+                 SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
+                 SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
+                 SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
+                 SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
+                 SARAH`MakeCouplingLists;
+              ];
+              LaunchKernels[];
+              ParallelEvaluate[
+                 (BeginPackage[#];EndPackage[];)& /@ {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"},
+                 DistributedContexts->All
+              ];
+              DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
               DistributeDefinitions[contentOfPath];
               ParallelEvaluate[
                  (* subkernel have different $Path variable then main kernel
@@ -2011,11 +2025,12 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
                  decayParticles
               ];
-           If[
-              FlexibleSUSY`FSEnableParallelism, Print[""];
+           If[FlexibleSUSY`FSEnableParallelism,
               Needs["Parallel`Developer`"];
+              Parallel`Developer`ClearDistributedDefinitions[];
               Parallel`Developer`ClearKernels[];
               CloseKernels[];
+              Print[""];
            ];
            Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
            decaysLists = Last@decaysLists;
