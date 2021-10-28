@@ -61,6 +61,9 @@ SortFieldsInCp::usage="";
 
 Begin["`Private`"]
 
+FSVertex[sortedFields_, UseDependences_:False] := FSVertex[sortedFields, UseDependences] =
+   SARAH`Vertex[sortedFields, UseDependences -> useDependences];
+
 (* cached 3-point vertices, with and without dependencies imposed *)
 cachedVertices[3, False] = {};
 cacjedVertices[3, True] = {};
@@ -68,6 +71,7 @@ cacjedVertices[3, True] = {};
 cachedVertices[4, False] = {};
 cachedVertices[4, True] = {};
 cachedVertices[numFields_, useDependences_] := {};
+If[FlexibleSUSY`FSEnableParallelism, SetSharedFunction[cachedVertices,IsNonZeroVertex,FSVertex]];
 
 SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
 
@@ -792,11 +796,8 @@ IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
                  Return[Or @@ (MemberQ[#[[2 ;;]][[All, 1]], Except[0]]& /@ cached)];
                 ];
              ];
-           vertex = SARAH`Vertex[sortedFields, UseDependences -> useDependences];
-           CriticalSection[
-              {sarahlock},
-              AddToCachedVertices[vertex, useDependences];
-           ];
+           vertex = FSVertex[sortedFields, UseDependences -> useDependences];
+           AddToCachedVertices[vertex, useDependences];
            MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
           ];
 

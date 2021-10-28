@@ -559,7 +559,7 @@ DeleteDiagramsVanishingDueToColor[decay_FSParticleDecay/; GetDecayTopologiesAndD
 (* outputs list of FSParticleDecay objects *)
 GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalStateParticles_List] :=
     Module[{genericFinalStates,
-            isPossibleDecay, concreteFinalStates, decays, temp, contextsToDistribute},
+            isPossibleDecay, concreteFinalStates, decays, temp},
 
            Utils`AssertWithMessage[exactNumberOfProducts === 2,
               "decays with " <> ToString@exactNumberOfProducts <>
@@ -577,28 +577,22 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
-           Print["Creating amplitudes for ", particle, " decays..."];
-
-           If[FlexibleSUSY`FSEnableParallelism,
-              decays =
-                 ParallelMap[
-                    FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]]&,
-                    concreteFinalStates,
-                    DistributedContexts -> All,
-                    Method -> "EvaluationsPerKernel"-> 1
-                 ];
-              ,
-              decays = Map[
-                  (
-                     WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
-                     temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                     Print[" Done."];
-                     temp
-                  )&,
-                  concreteFinalStates
-              ];
-              Print[""];
+           If[!FlexibleSUSY`FSEnableParallelism,
+              Print["\nCreating amplitudes for ", particle, " decays..."];
            ];
+           decays =
+              Map[
+                 (
+                    If[!FlexibleSUSY`FSEnableParallelism,
+                       WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    ];
+                    temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
+                    If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
+                    temp
+                 )&,
+                 concreteFinalStates(*,
+                 DistributedContexts -> All*)
+              ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
