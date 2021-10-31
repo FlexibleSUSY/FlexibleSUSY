@@ -2003,12 +2003,10 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SARAH`MakeCouplingLists;
               ];
               LaunchKernels[];
-              (*
               ParallelEvaluate[
                  (BeginPackage[#];EndPackage[];)& /@ {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"},
                  DistributedContexts->All
               ];
-              *)
               DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4, contentOfPath];
               ParallelEvaluate[
                  (* subkernels have different $Path variable than the main kernel
@@ -2018,14 +2016,14 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  Block[{Print},
                     << SARAH`;
                  ];
-                 (*Remove[Susyno`LieGroups`M];*)
+                 Remove[Susyno`LieGroups`M];
               ];
               decaysLists =
                  AbsoluteTiming @ ParallelMap[
                     {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
                     decayParticles,
-                    (*DistributedContexts -> All,*)
-                    Method ->"FinestGrained"
+                    DistributedContexts -> All,
+                    Method -> "FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
               Parallel`Developer`ClearDistributedDefinitions[];
