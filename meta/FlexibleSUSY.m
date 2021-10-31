@@ -2003,27 +2003,29 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SARAH`MakeCouplingLists;
               ];
               LaunchKernels[];
+              (*
               ParallelEvaluate[
                  (BeginPackage[#];EndPackage[];)& /@ {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"},
                  DistributedContexts->All
               ];
+              *)
               DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4, contentOfPath];
               ParallelEvaluate[
-                 (* subkernel have different $Path variable then main kernel
+                 (* subkernels have different $Path variable than the main kernel
                     https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
                  $Path = contentOfPath;
                  (* don't pollute terminal with SARAH initialization message *)
                  Block[{Print},
                     << SARAH`;
                  ];
-                 Remove[Susyno`LieGroups`M];
+                 (*Remove[Susyno`LieGroups`M];*)
               ];
               decaysLists =
                  AbsoluteTiming @ ParallelMap[
                     {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
                     decayParticles,
-                    DistributedContexts -> All,
-                    Method -> Automatic
+                    (*DistributedContexts -> All,*)
+                    Method ->"FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
               Parallel`Developer`ClearDistributedDefinitions[];

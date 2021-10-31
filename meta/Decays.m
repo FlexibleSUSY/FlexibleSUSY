@@ -590,9 +590,9 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                     If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
                     temp
                  )&,
-                 concreteFinalStates(*,
-                 DistributedContexts -> All*)
+                 concreteFinalStates
               ];
+              Print[""];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
@@ -2237,7 +2237,8 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
               specializations =
                  AbsoluteTiming@ParallelMap[
                     CreateTotalAmplitudeSpecialization[#, modelName]&,
-                    Flatten[Last @@@ particleDecays, 1], Method -> "FinestGrained"
+                    Flatten[Last @@@ particleDecays, 1],
+                    DistributedContexts -> All, Method -> "FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
               Parallel`Developer`ClearDistributedDefinitions[];
