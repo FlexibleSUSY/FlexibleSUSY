@@ -62,7 +62,22 @@ SortFieldsInCp::usage="";
 Begin["`Private`"]
 
 FSVertex[sortedFields_, UseDependences_:False] := FSVertex[sortedFields, UseDependences] =
-   SARAH`Vertex[sortedFields, UseDependences -> useDependences];
+Module[{vertexList, vertex},
+
+   vertexList =
+      Switch[Length[sortedFields],
+		   3, SARAH`VertexList3,
+			4, SARAH`VertexList4,
+			_, Print["Only three- and four-point vertices are supported"]; Quit[1]
+      ];
+
+   vertex = Select[vertexList, Vertices`StripFieldIndices[#[[1]]] === sortedFields &, 1];
+
+   If[vertex =!= {},
+      First@vertex,
+      SARAH`Vertex[sortedFields, UseDependences -> useDependences]
+   ]
+];
 
 (* cached 3-point vertices, with and without dependencies imposed *)
 cachedVertices[3, False] = {};
