@@ -1986,7 +1986,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path},
+            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path, modelName},
+
+            modelName =
+               If[SARAH`submodeldir =!= False,
+                  SARAH`modelDir <> "/" <> SARAH`submodeldir,
+                  SARAH`modelDir
+               ];
 
            (solverIncludes = solverIncludes <> EnableSpectrumGenerator[#])& /@ FlexibleSUSY`FSBVPSolvers;
 
@@ -2003,7 +2009,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SARAH`MakeCouplingLists;
               ];
               LaunchKernels[];
-              DistributeDefinitions[contentOfPath];
+              DistributeDefinitions[contentOfPath, modelName];
               ParallelEvaluate[
                  (* subkernels have different $Path variable than the main kernel
                     https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
@@ -2011,7 +2017,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  (* don't pollute terminal with SARAH initialization message *)
                  Block[{Print},
                     << SARAH`;
-                    Start["MSSM"];
+                    Start@modelName;
                  ];,
                  DistributedContexts -> None
               ];
