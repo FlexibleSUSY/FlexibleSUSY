@@ -20,24 +20,22 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`arguments::shdw, LToLConversion`namespace::shdw];
+BeginPackage["LToLConversion`"];
 
-LToLConversion`namespace::usage = "
-@brief Returns a namespace for C++ code of a given observable";
+namespace::usage = "
+@brief Returns a namespace for C++ code of a given observable.";
 
-LToLConversion`arguments::usage = "
-@brief Generates a named pattern sequence (by inserting given symbols in
-       correct places), which is set of arguments for observable.
+arguments::usage = "
 @param in A symbol for incoming lepton.
 @param inN A symbol for incoming lepton generation.
 @param out A symbol for outgoing lepton.
 @param outN A symbol for outgoing lepton generation.
 @param nucleus A symbol for a nucleus.
 @param contribution A symbol for a desired contribution.
-@return A sequence with named patterns, which is set of arguments for
-        observable.";
+@return A sequence of arguments for the observable.";
 
-];Begin@"`Private`";
+Begin["`Private`"];
 
 namespace[] := "l_to_l_conversion";
 namespace // Utils`MakeUnknownInputDefinition;
@@ -59,8 +57,5 @@ arguments ~ SetAttributes ~ {Protected, Locked};
    arguments[in@iIn, out@iOut, nucleus, con];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
-End[];EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+End[];
+Block[{$ContextPath}, EndPackage[]];
