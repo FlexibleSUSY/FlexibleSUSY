@@ -48,8 +48,7 @@ Module[
       "@LToLConversion_set_data@" -> "data.set_ltolconversion_settings(ltolconversion_settings);",
       "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
       "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
-   If[observable === {}, newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
-
+   If[observables === {}, newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
    If[observables =!= {},
       Print["Creating LToLConversion class ..."];
       Get@main;
