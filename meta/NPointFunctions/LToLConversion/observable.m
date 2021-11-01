@@ -23,7 +23,7 @@
 Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
 
 Begin@"Observables`Private`";
-With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
+With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],
       obs = FlexibleSUSYObservable`LToLConversion,
       cxx = CConversion`ToValidCSymbolString,
       namespace = LToLConversion`namespace@C},
@@ -41,7 +41,7 @@ With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
 
    CalculateObservable[obs@args, structName:_String] := StringJoin[
       structName, ".",
-      GetObservableName@obs[in@inN -> out@outN, nucl, proc], " = ",
+      GetObservableName@obs[in@inN -> out@outN, nucl, proc, loopN], " = ",
       namespace, "calculate_", cxx@in, "_to_", cxx@out, "_for_",
       SymbolName@proc, "(", cxx@inN, ", ", cxx@outN, ", ",
       namespace, "Nucleus::", cxx@nucl, ", MODEL, ",

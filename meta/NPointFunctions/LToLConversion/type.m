@@ -47,18 +47,20 @@ Off@RuleDelayed::rhs;
 arguments[in_Symbol[inN_Symbol],
           out_Symbol[outN_Symbol],
           nucleus_Symbol,
-          contribution_Symbol] :=
+          contribution_Symbol,
+          loopN_Symbol] :=
    Sequence[
-      (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
-      (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
-      nucleus:_,
-      contribution:_Symbol|{__Symbol}];
+      (in_Symbol?TreeMasses`IsLepton)[inN_Integer] ->
+      (out_Symbol?TreeMasses`IsLepton)[outN_Integer],
+      nucleus_Symbol,
+      contribution_Symbol,
+      loopN:0|1];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`LToLConversion@
-   arguments[in@iIn, out@iOut, nucleus, con];
+   arguments[in@iIn, out@iOut, nucleus, con, loopN];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
 End[];
