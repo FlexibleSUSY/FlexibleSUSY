@@ -48,8 +48,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>"(\n"<>
       "   int in, int out,\n"<>
-      "   const " <> FlexibleSUSY`FSModelName <>
-         "_l_to_l_conversion::Nucleus nucleus,\n" <>
+      "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>
       "_mass_eigenstates& model, "<>
       "const LToLConversion_settings& parameters, "<>

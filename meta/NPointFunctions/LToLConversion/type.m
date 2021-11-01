@@ -20,11 +20,12 @@
 
 *)
 
-Off[LToLConversion`arguments::shdw, LToLConversion`namespace::shdw];
+Off[LToLConversion`arguments::shdw];
 BeginPackage["LToLConversion`"];
 
 namespace::usage = "
-@brief Returns a namespace for C++ code of a given observable.";
+@brief Returns a namespace for C++ code of a given observable.
+@note Convention: the name of a corresponding C++ file without ``.cpp``.";
 
 arguments::usage = "
 @param in A symbol for incoming lepton.
@@ -37,18 +38,21 @@ arguments::usage = "
 
 Begin["`Private`"];
 
-namespace[] := "l_to_l_conversion";
+namespace[File] := "l_to_l_conversion";
+namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
 Off@RuleDelayed::rhs;
-arguments[(in:_Symbol)[inN:_Symbol], (out:_Symbol)[outN:_Symbol],
-   nucleus_Symbol, contribution:_Symbol] :=
-Sequence[
-   (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
-   (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
-   nucleus:_,
-   contribution:_Symbol|{__Symbol}];
+arguments[in_Symbol[inN_Symbol],
+          out_Symbol[outN_Symbol],
+          nucleus_Symbol,
+          contribution_Symbol] :=
+   Sequence[
+      (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
+      (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
+      nucleus:_,
+      contribution:_Symbol|{__Symbol}];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};

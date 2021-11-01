@@ -44,7 +44,8 @@ BrLTo3L`arguments::usage = "
 
 ];Begin@"`Private`";
 
-namespace[] := "l_to_3l";
+namespace[File] := "l_to_3l";
+namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
@@ -68,7 +69,7 @@ arguments ~ SetAttributes ~ {Protected, Locked};
 With[{i = TextFormatting`IndentText, m = FlexibleSUSY`FSModelName,
       cxx = CConversion`ToValidCSymbolString},
    calculate[obs:`type`observable] := StringJoin[
-      m, "_", namespace[], "::calculate_",
+      namespace[C], "calculate_",
       cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep,
       "_for_", SymbolName@proc, "(", cxx@nI, ", ", cxx@nO, ", ", cxx@nA,
       ", MODEL, qedqcd)"];

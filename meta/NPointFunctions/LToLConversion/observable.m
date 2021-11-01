@@ -26,7 +26,7 @@ Begin@"Observables`Private`";
 With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
       obs = FlexibleSUSYObservable`LToLConversion,
       cxx = CConversion`ToValidCSymbolString,
-      namespace = FlexibleSUSY`FSModelName<>"_"<>LToLConversion`namespace[]},
+      namespace = LToLConversion`namespace@C},
 
    GetObservableName@obs@args := StringJoin[
       cxx@in, cxx@inN, "_to_", cxx@out, cxx@outN, "_conversion_in_",
@@ -42,9 +42,9 @@ With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc],
    CalculateObservable[obs@args, structName:_String] := StringJoin[
       structName, ".",
       GetObservableName@obs[in@inN -> out@outN, nucl, proc], " = ",
-      namespace, "::calculate_", cxx@in, "_to_", cxx@out, "_for_",
+      namespace, "calculate_", cxx@in, "_to_", cxx@out, "_for_",
       SymbolName@proc, "(", cxx@inN, ", ", cxx@outN, ", ",
-      namespace, "::Nucleus::", cxx@nucl, ", MODEL, ",
+      namespace, "Nucleus::", cxx@nucl, ", MODEL, ",
       "ltolconversion_settings, qedqcd);"];];
 
 End[];

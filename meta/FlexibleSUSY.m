@@ -4864,7 +4864,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                Get/@files;
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
                classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
-               namespaces = ToExpression[#<>"`namespace[]"]&/@obs;
+               namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
                files = {
                   FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
                   FileNameJoin@{FSOutputDir, FSModelName<>"_"<>#}}&/@
