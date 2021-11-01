@@ -46,7 +46,8 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>"(\n"<>
+      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>
+      "_"<>cxx[loopN+0]<>"loop(\n"<>
       "   int in, int out,\n"<>
       "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>

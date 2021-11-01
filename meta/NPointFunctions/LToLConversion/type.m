@@ -49,12 +49,11 @@ arguments[in_Symbol[inN_Symbol],
           nucleus_Symbol,
           contribution_Symbol,
           loopN_Symbol] :=
-   Sequence[
-      (in_Symbol?TreeMasses`IsLepton)[inN_Integer] ->
-      (out_Symbol?TreeMasses`IsLepton)[outN_Integer],
-      nucleus_Symbol,
-      contribution_Symbol,
-      loopN:0|1];
+   Sequence[Rule[(in_Symbol?TreeMasses`IsLepton)[inN_Integer],
+                 (out_Symbol?TreeMasses`IsLepton)[outN_Integer]],
+            nucleus_Symbol,
+            contribution_Symbol,
+            loopN:0|1];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
