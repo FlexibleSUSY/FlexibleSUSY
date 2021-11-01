@@ -1998,47 +1998,52 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
-           (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
-           If[FlexibleSUSY`FSEnableParallelism,
-              If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
-                 SA`CurrentStates = FlexibleSUSY`FSEigenstates;
-                 SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
-                 SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
-                 SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
-                 SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
-                 SARAH`MakeCouplingLists;
-              ];
-              LaunchKernels[];
-              DistributeDefinitions[contentOfPath, modelName];
-              ParallelEvaluate[
-                 (* subkernels have different $Path variable than the main kernel
-                    https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
-                 $Path = contentOfPath;
-                 (* don't pollute terminal with SARAH initialization message *)
-                 Block[{Print},
-                    << SARAH`;
-                    Start@modelName;
-                 ];,
-                 DistributedContexts -> None
-              ];
-              DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
-              decaysLists =
-                 AbsoluteTiming @ ParallelMap[
-                    {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                    decayParticles,
-                    DistributedContexts -> All,
-                    Method -> "FinestGrained"
+           (* in parallel model decay of every particle is computed in a separate theread
+              but if we have only one particle then turning parallelism on only introduces
+              an overhead with no speed up *)
+           Block[{FlexibleSUSY`FSEnableParallelism = If[Length[decayParticles] < 2, False, FlexibleSUSY`FSEnableParallelism]},
+              (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
+              If[FlexibleSUSY`FSEnableParallelism,
+                 If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
+                    SA`CurrentStates = FlexibleSUSY`FSEigenstates;
+                    SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
+                    SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
+                    SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
+                    SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
+                    SARAH`MakeCouplingLists;
                  ];
-              Needs["Parallel`Developer`"];
-              Parallel`Developer`ClearDistributedDefinitions[];
-              Parallel`Developer`ClearKernels[];
-              CloseKernels[];
-              ,
-              decaysLists =
-                 AbsoluteTiming @ Map[
-                    {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                    decayParticles
+                 LaunchKernels[];
+                 DistributeDefinitions[contentOfPath, modelName];
+                 ParallelEvaluate[
+                    (* subkernels have different $Path variable than the main kernel
+                       https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
+                    $Path = contentOfPath;
+                    (* don't pollute terminal with SARAH initialization message *)
+                    Block[{Print},
+                       << SARAH`;
+                       Start@modelName;
+                    ];,
+                    DistributedContexts -> None
                  ];
+                 DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
+                 decaysLists =
+                    AbsoluteTiming @ ParallelMap[
+                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
+                       decayParticles,
+                       DistributedContexts -> All,
+                       Method -> "FinestGrained"
+                    ];
+                 Needs["Parallel`Developer`"];
+                 Parallel`Developer`ClearDistributedDefinitions[];
+                 Parallel`Developer`ClearKernels[];
+                 CloseKernels[];
+                 ,
+                 decaysLists =
+                    AbsoluteTiming @ Map[
+                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
+                       decayParticles
+                    ];
+              ]
            ];
            Print[""];
            Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];

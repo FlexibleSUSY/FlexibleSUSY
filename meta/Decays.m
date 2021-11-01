@@ -593,7 +593,6 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
                  )&,
                  concreteFinalStates
               ];
-           If[!FlexibleSUSY`FSEnableParallelism, Print[""]];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
            DeleteDiagramsVanishingDueToColor /@ decays
