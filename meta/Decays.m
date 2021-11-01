@@ -578,7 +578,8 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
            If[!FlexibleSUSY`FSEnableParallelism,
-              Print["\nCreating amplitudes for ", particle, " decays..."];
+              Print[""];
+              Print["Creating amplitudes for ", particle, " decays..."];
            ];
            decays =
               Map[

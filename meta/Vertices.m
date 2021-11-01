@@ -86,7 +86,7 @@ cacjedVertices[3, True] = {};
 cachedVertices[4, False] = {};
 cachedVertices[4, True] = {};
 cachedVertices[numFields_, useDependences_] := {};
-If[FlexibleSUSY`FSEnableParallelism, SetSharedFunction[cachedVertices,IsNonZeroVertex,FSVertex]];
+If[FlexibleSUSY`FSEnableParallelism, SetSharedFunction[FSVertex]];
 
 SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
 
@@ -805,14 +805,7 @@ ReplaceUnrotatedFields[SARAH`Cp[p__][lorentz_]] :=
 IsNonZeroVertex[fields_List, vertexList_:{}, useDependences_:False] :=
     Module[{sortedFields, cached, vertex},
            sortedFields = SortFieldsInCp[fields];
-           If[vertexList =!= {},
-              cached = DeleteDuplicates[Select[vertexList, StripFieldIndices[#[[1]]] === sortedFields &, 1]];
-              If[cached =!= {},
-                 Return[Or @@ (MemberQ[#[[2 ;;]][[All, 1]], Except[0]]& /@ cached)];
-                ];
-             ];
            vertex = FSVertex[sortedFields, UseDependences -> useDependences];
-           AddToCachedVertices[vertex, useDependences];
            MemberQ[vertex[[2 ;;]][[All, 1]], Except[0]]
           ];
 
