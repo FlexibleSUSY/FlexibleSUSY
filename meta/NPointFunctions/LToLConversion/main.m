@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 (* :Copyright:
 
    ====================================================================
@@ -22,12 +20,13 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`create::shdw];
+BeginPackage@"LToLConversion`";
 
 LToLConversion`create::usage =
 "@brief Main entrance point for the calculation.";
 
-];Begin@"`Private`";
+Begin@"`Private`";
 
 setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"LToLConversion`Private`cxx`*";
@@ -37,8 +36,8 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
       {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
 
-   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to_",
-      cxx@out, #, "_for_", SymbolName@con]&/@ cxx/@
+   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to",
+      cxx@out, #, "_for", SymbolName@con, "_", cxx[loopN+0], "loop"]&/@ cxx/@
          {SARAH`UpQuark, SARAH`DownQuark};
 
    `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
@@ -46,7 +45,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>
+      " calculate_"<>cxx@in<>cxx@out<>"_for"<>SymbolName@con<>
       "_"<>cxx[loopN+0]<>"loop(\n"<>
       "   int in, int out,\n"<>
       "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
@@ -58,6 +57,14 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 ];
 setCxx // Utils`MakeUnknownInputDefinition;
 setCxx ~ SetAttributes ~ {Protected, Locked};
+
+create[list:{__}] := Module[{unique, clearGenerations},
+   clearGenerations[_[a_, rest__]] := {a/. _Integer:> Sequence, rest};
+   unique = DeleteDuplicates[list, SameQ@@(clearGenerations/@{##})&];
+   {  DeleteDuplicates[Join@@#[[All,1]]],
+      {  #[[1,2,1]], StringRiffle[#[[All,2,2]], "\n\n"]},
+      {  StringRiffle[#[[All,3,1]], "\n\n"],
+         StringRiffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
 
 create[obs:`type`observable] :=
 Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
@@ -76,13 +83,6 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
       npfVertices,
       {npfHeader, npfDefinition},
       {`cxx`prototype <> ";", calculateDefinition}}];
-
-create[list:{__}] := Module[{unique},
-   unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
-   {  DeleteDuplicates[Join@@#[[All,1]]],
-      {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
-      {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
 
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
@@ -163,8 +163,4 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
 `npf`create ~ SetAttributes ~ {Locked,Protected};
 
 End[];
-EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+Block[{$ContextPath}, EndPackage[]];

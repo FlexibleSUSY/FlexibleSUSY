@@ -20,7 +20,8 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`write::shdw];
+BeginPackage["LToLConversion`"];
 
 LToLConversion`write::usage = "
 @brief Returns an expression to be printed in the C++ output for observable.
@@ -30,7 +31,7 @@ LToLConversion`write::usage = "
 @param comment A string comment.
 @returns A C++ code for observable output.";
 
-];Begin@"`Private`";
+Begin["`Private`"];
 
 getFLHA::usage = "
 @brief Returns information of Wilson coefficients, calculated by this observable
@@ -80,8 +81,5 @@ Switch[block,
 write // Utils`MakeUnknownInputDefinition;
 write ~ SetAttributes ~ {Protected, Locked};
 
-End[];EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+End[];
+Block[{$ContextPath}, EndPackage[]];

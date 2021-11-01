@@ -48,13 +48,14 @@ Module[
       "@LToLConversion_set_data@" -> "data.set_ltolconversion_settings(ltolconversion_settings);",
       "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
       "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
+
    If[observables === {}, newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
    If[observables =!= {},
       Print["Creating LToLConversion class ..."];
       Get@main;
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
-      (* additional vertices needed for the calculation *)
+      (* additional vertices needed for the 1 loop calculation *)
       masslessNeutralVectorBosons =
          Select[TreeMasses`GetVectorBosons[],
             And[TreeMasses`IsMassless@#,
@@ -66,8 +67,9 @@ Module[
                Flatten@Join[TreeMasses`GetSMQuarks[], vertices],
             masslessNeutralVectorBosons}];
 
-      {additionalVertices,{npfHeaders,npfDefinitions},{prototypes,definitions}} =
-         LToLConversion`create@observables;];
+      {additionalVertices,
+         {npfHeaders, npfDefinitions},
+         {prototypes, definitions}} = LToLConversion`create@observables;];
 
    WriteOut`ReplaceInFiles[
       files,
@@ -81,7 +83,7 @@ Module[
    ];
    {
       fields,
-      DeleteDuplicates@Join[vertices,additionalVertices],
+      DeleteDuplicates@Join[vertices, additionalVertices],
       newRules
    }
 ];

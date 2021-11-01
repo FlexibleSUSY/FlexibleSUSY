@@ -42,7 +42,7 @@ With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],
    CalculateObservable[obs@args, structName:_String] := StringJoin[
       structName, ".",
       GetObservableName@obs[in@inN -> out@outN, nucl, proc, loopN], " = ",
-      namespace, "calculate_", cxx@in, "_to_", cxx@out, "_for_",
+      namespace, "calculate_", cxx@in, cxx@out, "_for",
       SymbolName@proc, "_", cxx[loopN+0], "loop(", cxx@inN, ", ", cxx@outN, ", ",
       namespace, "Nucleus::", cxx@nucl, ", MODEL, ",
       "ltolconversion_settings, qedqcd);"];];
