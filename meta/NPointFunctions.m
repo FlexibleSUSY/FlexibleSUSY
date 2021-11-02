@@ -1175,11 +1175,16 @@ createLoopFunctions // secure;
       couplings times some masses times loop integral. We can get all different
       combinations of this coupling coefficients and if all of them are zero,
       then amplitude is zero as well.";
-`cxx`skipZeroAmplitude[modifiedExpr:{__},loopRules:{Rule[_,_]..},
+`cxx`skipZeroAmplitude[
+   modifiedExpr:{__},
+   loopRules:{Rule[_,_]...},
    massRules:{Rule[_,_]..}] :=
 Module[{massesToOne = Rule[#,1] & /@ massRules[[All,2]],
-      loopsToOne = Rule[#,1] & /@ loopRules[[All,2]],
+      loopsToOne = {},
       result, func = "z[" <> # <> "]"&},
+   If[0 < Length@loopRules,
+      loopsToOne = Rule[#,1] & /@ loopRules[[All,2]]
+   ];
    result = removeNumbers[ExpandAll[modifiedExpr]] /.Plus->List/.
       massesToOne/.loopsToOne;
    result = DeleteDuplicates[Flatten@DeleteCases[result,1]];
