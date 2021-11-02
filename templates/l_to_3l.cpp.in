@@ -46,6 +46,15 @@ namespace npointfunctions {
 
 @npf_definitions@
 
+std::valarray<std::complex<double>> zero(
+   int generationIndex1,
+   int generationIndex2,
+   const @ModelName@_mass_eigenstates&,
+   bool){
+   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
+   return res;
+}
+
 std::array<std::complex<double>,10> zero(
    const @ModelName@_mass_eigenstates&,
    const std::array<int,4>&,

@@ -81,7 +81,7 @@ Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
    calculateDefinition = $prototype <> " {
    return forge<
       "<>$fields<>",
-      "<>$penguin<>",
+      "<>If[loopN === 0, "npointfunctions::zero", $penguin]<>",
       npointfunctions::"<>If[pengDef =!= "", $calculate, "zero"]<>",
       npointfunctions::"<>If[boxQ, $boxes, "zero"]<>"
    >(nI, nO, nA, model, qedqcd);\n}";
@@ -113,7 +113,7 @@ Module[{box = Boxes, res = {{}, ""}, amps, rules, num},
 `npf`parse@`type`observable :=
 Module[{parsed},
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@proc;
-   Switch[loopN,
+   Sort@Switch[loopN,
       0,
          Switch[parsed,
             {"All"}, {Vectors, Scalars},
