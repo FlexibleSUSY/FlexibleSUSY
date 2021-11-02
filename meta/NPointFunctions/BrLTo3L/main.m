@@ -80,10 +80,10 @@ Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
    {{pengVert, pengDef}, boxQ} = `npf`assemble@obs;
    calculateDefinition = $prototype <> " {
    return forge<
-      "<>$fields<>",
-      "<>If[loopN === 0, "npointfunctions::zero", $penguin]<>",
-      npointfunctions::"<>If[pengDef =!= "", $calculate, "zero"]<>",
-      npointfunctions::"<>If[boxQ, $boxes, "zero"]<>"
+      "<>$fields<>",\n      "<>
+      If[loopN === 1, "npointfunctions::"<>$penguin, "zero"]<>",\n      "<>
+      If[pengDef =!= "", "npointfunctions::"<>$calculate, "zero"]<>",\n      "<>
+      If[boxQ, $boxes, "zero"]<>"
    >(nI, nO, nA, model, qedqcd);\n}";
    {  pengVert,
       pengDef,

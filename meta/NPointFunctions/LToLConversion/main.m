@@ -28,7 +28,8 @@ LToLConversion`create::usage =
 
 Begin@"`Private`";
 
-setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
+setCxx[obs:`type`observable] :=
+Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"LToLConversion`Private`cxx`*";
    `cxx`in = cxx@in;
    `cxx`out = cxx@out;
@@ -46,7 +47,7 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
       " calculate_"<>cxx@in<>cxx@out<>"_for"<>SymbolName@con<>
-      "_"<>cxx[loopN+0]<>"loop(\n"<>
+      "_"<> ToString[loopN]<>"loop(\n"<>
       "   int in, int out,\n"<>
       "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>
@@ -74,7 +75,7 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
    calculateDefinition = `cxx`prototype <> " {
    return forge_conversion<
       "<>`cxx`fields<>",
-      "<>`cxx`penguin<>",
+      "<>If[loopN === 0, "zero", `cxx`penguin]<>",
       npointfunctions::"<>`cxx`classU<>",
       npointfunctions::"<>`cxx`classD<>"
    >(in, out, nucleus, model, parameters, qedqcd);\n}";
