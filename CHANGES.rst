@@ -4,8 +4,9 @@ FlexibleSUSY 2.6.2 [July, 08 2021]
 Changes
 -------
 
-* Parallelize calculation of decay amplitudes during the mathematica phase.
+* Parallelized calculation of decay amplitudes during the mathematica phase.
   Example speedup:
+
   .. list-table::
    :widths: 25 25 50
    :header-rows: 1
@@ -13,19 +14,16 @@ Changes
    * - model
      - sequential
      - parallel
-   * - `SM`
-     -
-     -
    * - `MSSM`
-     -
-     -
+     - 190s
+     - 140s
    * - `MRSSM2`
+     - 555s
+     - 395s
 
 Fixed bugs
 ----------
 
-* Further parallelization of FlexibleDecay
-  [`arXiv:2106.XXXX <https://arxiv.org/abs/2106.XXXX>`_].
 * [commit ]: Branching ratio of L'->LGamma was breaking printing of
   observables via the mathlink interface.
 
