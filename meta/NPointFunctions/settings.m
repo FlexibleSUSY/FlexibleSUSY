@@ -63,6 +63,7 @@ With[{dir = DirectoryName@$InputFileName},
          Protect@Evaluate[Context[]<>"settings`*"];
          End[];
          EndPackage[];);];
+
 settings[tree:type`tree,
    settings:{__}|Default, default_, head:_:First] :=
    Module[{res = {tree}},
@@ -79,7 +80,7 @@ settings // secure;
 parseSettings::usage = "
 @brief Converts ```settings`diagrams`` or ```settings`amplitudes`` to a set
        of operations, which define what to remove from the ``tree`` object.
-       The structure of these settings is the following::
+       The structure of these settings for each loop level is the following::
 
           {  anySymbol -> {  {  inProcesses...},
                              {  notInProcesses...}}..}
@@ -107,9 +108,12 @@ parseSettings::usage = "
 @param settings An entry to define actions.
 @returns A set of settings.";
 parseSettings[settings:Default] := {};
-parseSettings[settings:{Rule[_, {{___}, {___}}]..}] :=
+parseSettings[settings:{Rule[_Integer, {Rule[_, {{___}, {___}}]..}]..}] :=
 Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
-   parsed = Rule[SymbolName@First@#, Last@#]&/@settings;
+   parsed = If[MatchQ[#, _Integer],
+      Return@parseSettings@Default,
+      #]&[`options`loops[]/. settings];
+   parsed = Rule[SymbolName@First@#, Last@#]&/@parsed;
    positiveRules = parsed /. Rule[s:_, {p:_, _}] :> Rule[s, p];
    negativeRules = parsed /. Rule[s:_, {_, n:_}] :> Rule[s, n];
    discardProcesses = Complement[parsed[[All, 1]], `options`processes[]];

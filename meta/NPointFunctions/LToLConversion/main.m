@@ -101,15 +101,20 @@ npf /.
 `npf`parse[obs:`type`observable] :=
 Module[{parsed},
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
-   Switch[parsed,
-      {"All"},
-         {Vectors, Scalars, Boxes},
-      {"NoScalars"},
-         {Vectors, Boxes},
-      {"Penguins"},
-         {Vectors, Scalars},
-      _,
-         Symbol/@parsed]];
+   Switch[loopN,
+      0,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars},
+            {"NoScalars"}, {Vectors},
+            _, Symbol/@parsed],
+      1,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars, Boxes},
+            {"NoScalars"}, {Vectors, Boxes},
+            {"Penguins"}, {Vectors, Scalars},
+            _, Symbol/@parsed]
+      ]
+   ];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 
@@ -118,13 +123,15 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
    keep = `npf`parse@obs;
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
-      keep, ",\n                ", SymbolName]<>" started"];
+      keep, ",\n                ", SymbolName]<>" started."];
+   Print["Case of "<>ToString@loopN<>" loop(s) is considered."];
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in,#},{out,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> keep,
+      NPointFunctions`LoopLevel -> loopN,
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
    {npfU, npfD} = `npf`clean/@{npfU, npfD};
 
