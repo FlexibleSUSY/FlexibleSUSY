@@ -1,10 +1,10 @@
 Begin@"FSMathLink`Private`";
-Module[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc],
+Module[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
       obs = FlexibleSUSYObservable`BrLTo3L,
       cxx = CConversion`ToValidCSymbolString},
       PutObservable[obs@args, type_, link_String, heads_:{}] := StringJoin[
       "MLPutFunction(link, \"Rule\", 2);",
-         "MLPutFunction(link, ", ObsToStr@obs, ", 2);",
+         "MLPutFunction(link, ", ObsToStr@obs, ", 3);",
             "MLPutFunction(link, \"Rule\", 2);",
                "MLPutFunction(link, \"", cxx@lep, "\", 1);",
                   "MLPutInteger(link, ", ObsToStr@nI, ");",
@@ -17,6 +17,9 @@ Module[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc],
                      "MLPutFunction(link, \"", cxx@lep, "\", 1);",
                         "MLPutInteger(link, ", ObsToStr@nA, ");",
             "MLPutSymbol(link, \"", SymbolName@proc, "\");",
+            "MLPutInteger(link, ", ObsToStr@loopN, ");",
          "MLPutReal(link, Re(OBSERVABLE(", GetObservableName@obs@##&[
-            lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA}, proc], ")(0)));"];];
+            lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA},
+            proc,
+            loopN], ")(0)));"];];
 End[];

@@ -113,8 +113,8 @@ Module[{parsed},
             {"NoScalars"}, {Vectors, Boxes},
             {"Penguins"}, {Vectors, Scalars},
             _, Symbol/@parsed]
-      ]
-   ];
+   ]
+];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 

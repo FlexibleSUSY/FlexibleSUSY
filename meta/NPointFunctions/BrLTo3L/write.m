@@ -46,19 +46,19 @@ getFLHA::usage = "
 getFLHA@`type`observable :=
 Module[{fields, args},
    fields = {0->"11", 1->"13", 2->"15"};
-   args = Sequence[SymbolName@proc, "0", "0", "2"];
-   Quiet[{{nO<>nI, "4322", ##2, "D_L"},
-          {nO<>nI, "4422", ##2, "D_R"},
-          flha[{nO, "31", nI}, {nA, "31", nA}, ##2, "S_LL "<>#],
-          flha[{nO, "31", nI}, {nA, "32", nA}, ##2, "S_LR "<>#],
-          flha[{nO, "32", nI}, {nA, "31", nA}, ##2, "S_RL "<>#],
-          flha[{nO, "32", nI}, {nA, "32", nA}, ##2, "S_RR "<>#],
-          flha[{nO, "41", nI}, {nA, "41", nA}, ##2, "V_LL "<>#],
-          flha[{nO, "41", nI}, {nA, "42", nA}, ##2, "V_LR "<>#],
-          flha[{nO, "42", nI}, {nA, "41", nA}, ##2, "V_RL "<>#],
-          flha[{nO, "42", nI}, {nA, "42", nA}, ##2, "V_RR "<>#],
-          flha[{nO, "43", nI}, {nA, "43", nA}, ##2, "T_LL "<>#],
-          flha[{nO, "44", nI}, {nA, "44", nA}, ##2, "T_RR "<>#]}&@args,
+   args = Sequence[ToString@loopN, SymbolName@proc, "0", "0", "2"];
+   Quiet[{{nO<>nI, "4322", ##3, "D_L"},
+          {nO<>nI, "4422", ##3, "D_R"},
+          flha[{nO, "31", nI}, {nA, "31", nA}, ##3, "S_LL_"<>#1<>"loop "<>#2],
+          flha[{nO, "31", nI}, {nA, "32", nA}, ##3, "S_LR_"<>#1<>"loop "<>#2],
+          flha[{nO, "32", nI}, {nA, "31", nA}, ##3, "S_RL_"<>#1<>"loop "<>#2],
+          flha[{nO, "32", nI}, {nA, "32", nA}, ##3, "S_RR_"<>#1<>"loop "<>#2],
+          flha[{nO, "41", nI}, {nA, "41", nA}, ##3, "V_LL_"<>#1<>"loop "<>#2],
+          flha[{nO, "41", nI}, {nA, "42", nA}, ##3, "V_LR_"<>#1<>"loop "<>#2],
+          flha[{nO, "42", nI}, {nA, "41", nA}, ##3, "V_RL_"<>#1<>"loop "<>#2],
+          flha[{nO, "42", nI}, {nA, "42", nA}, ##3, "V_RR_"<>#1<>"loop "<>#2],
+          flha[{nO, "43", nI}, {nA, "43", nA}, ##3, "T_LL_"<>#1<>"loop "<>#2],
+          flha[{nO, "44", nI}, {nA, "44", nA}, ##3, "T_RR_"<>#1<>"loop "<>#2]}&@args,
          StringJoin::string] /. fields];
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
