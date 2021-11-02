@@ -107,7 +107,6 @@ NPointFunction[
       settings[];
       tree = cut[plant[in, out], `settings`diagrams];
       tree = cut[plant@tree, `settings`amplitudes];
-      Print["here"];
       picture@tree;
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 NPointFunction // secure;

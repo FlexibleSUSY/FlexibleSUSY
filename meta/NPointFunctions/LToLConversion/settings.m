@@ -95,6 +95,18 @@
 };
 
 `settings`amplitudes = {
+   0 -> {
+      Vectors -> {
+         List[
+            {
+               "remove photon contribution",
+               `topologyQ`tree22,
+               FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
+            }
+         ],
+         List[]
+      }
+   },
    1 -> {
       Vectors -> {
          List[
