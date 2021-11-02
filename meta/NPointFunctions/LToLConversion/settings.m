@@ -16,7 +16,7 @@
          List[],
          List[
             {
-               "remove tree-like vector bosons",
+               "remove vector bosons",
                `topologyQ`tree22,
                FreeQ[TreeFields@##, FeynArts`V]&
             }
@@ -26,7 +26,7 @@
          List[],
          List[
             {
-               "remove tree-like scalar bosons",
+               "remove scalar bosons",
                `topologyQ`tree22,
                FreeQ[TreeFields@##, FeynArts`S]&
             }
@@ -99,7 +99,7 @@
       Vectors -> {
          List[
             {
-               "remove photon contribution",
+               "remove photons",
                `topologyQ`tree22,
                FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
             }
@@ -111,7 +111,7 @@
       Vectors -> {
          List[
             {
-               "penguins: remove tree-like massless vector bosons",
+               "penguins: remove tree photons",
                `topologyQ`penguinT,
                FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
             }

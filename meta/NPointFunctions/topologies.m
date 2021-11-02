@@ -117,7 +117,10 @@ Module[{all, name, set, topologyReplacements},
       "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)
    };
-   set = If[#===Default, {}, `options`loops[]/.#]&@`settings`topology;
+   If[MatchQ[`options`loops[]/.`settings`topology, _Integer],
+      `settings`topology = Default;
+   ];
+   set = If[# === Default, {}, `options`loops[]/. #]&@`settings`topology;
    set = Rule[SymbolName@First@#, Last@#]&/@set;
    all = Join[topologyReplacements, set];
    FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
