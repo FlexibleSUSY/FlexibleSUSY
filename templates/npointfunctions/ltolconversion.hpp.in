@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_l_conversion.hpp
+ * @file @ModelName@_ltolconversion.hpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
@@ -32,13 +32,13 @@ namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 class LToLConversion_settings;
 
-namespace @ModelName@_l_to_l_conversion {
+namespace @ModelName@_ltolconversion {
 
 enum class Nucleus { Au, Al, Ti };
 
 @calculate_prototypes@
 
-} // namespace @ModelName@_l_to_l_conversion
+} // namespace @ModelName@_ltolconversion
 
 } // namespace flexiblesusy
 

@@ -38,7 +38,7 @@ arguments::usage = "
 
 Begin["`Private`"];
 
-namespace[File] := "l_to_l_conversion";
+namespace[File] := "ltolconversion";
 namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
