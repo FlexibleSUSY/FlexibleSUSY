@@ -21,10 +21,8 @@ BASE_TEMPLATES := \
 		$(DIR)/FFV_form_factors.cpp.in \
 		$(DIR)/l_to_lgamma.hpp.in \
 		$(DIR)/l_to_lgamma.cpp.in \
-      $(DIR)/l_to_l_conversion.hpp.in \
-      $(DIR)/l_to_l_conversion.cpp.in \
-      $(DIR)/lto3l.hpp.in \
-      $(DIR)/lto3l.cpp.in \
+		$(wildcard $(DIR)/npointfunctions/*.hpp.in) \
+		$(wildcard $(DIR)/npointfunctions/*.cpp.in) \
 		$(DIR)/b_to_s_gamma.cpp.in \
 		$(DIR)/b_to_s_gamma.hpp.in \
 		$(DIR)/convergence_tester.hpp.in \

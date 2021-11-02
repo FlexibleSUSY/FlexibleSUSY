@@ -4857,6 +4857,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
          (* Load and evaluate NPointFunctions write classes for observables *)
+         If[!DirectoryQ@#,
+            CreateDirectory@#]&@ FileNameJoin@{FSOutputDir, "npointfunctions"};
          If[FSFeynArtsAvailable && FSFormCalcAvailable,
             Module[{files, obs, classes, namespaces, newRules = {}, down},
                files = FileNames["class.m",
@@ -4866,8 +4868,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
                namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
                files = {
-                  FileNameJoin@{$flexiblesusyTemplateDir, #<>".in"},
-                  FileNameJoin@{FSOutputDir, FSModelName<>"_"<>#}}&/@
+                  FileNameJoin@{$flexiblesusyTemplateDir, "npointfunctions", #<>".in"},
+                  FileNameJoin@{FSOutputDir, "npointfunctions", FSModelName<>"_"<>#}}&/@
                      {#<>".hpp", #<>".cpp"}&/@ namespaces;
 
                (* Evaluate write classes *)
