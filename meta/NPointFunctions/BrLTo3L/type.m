@@ -45,7 +45,7 @@ BrLTo3L`arguments::usage = "
 
 Begin["`Private`"];
 
-namespace[File] := "l_to_3l";
+namespace[File] := "lto3l";
 namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};

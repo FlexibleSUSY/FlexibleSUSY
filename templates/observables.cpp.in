@@ -25,7 +25,7 @@
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "@ModelName@_l_to_l_conversion.hpp"
 #include "npointfunctions/l_to_l_conversion/settings.hpp"
-#include "@ModelName@_l_to_3l.hpp"
+#include "@ModelName@_lto3l.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
 #include "numerics2.hpp"

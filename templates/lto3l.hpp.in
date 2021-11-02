@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_3l.hpp
+ * @file @ModelName@_lto3l.hpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
@@ -31,11 +31,11 @@
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
 
-namespace @ModelName@_l_to_3l {
+namespace @ModelName@_lto3l {
 
 @calc_prototypes@
 
-} // namespace @ModelName@_l_to_3l
+} // namespace @ModelName@_lto3l
 
 } // namespace flexiblesusy
 
