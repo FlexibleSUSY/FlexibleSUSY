@@ -81,9 +81,9 @@ Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
    calculateDefinition = $prototype <> " {
    return forge<
       "<>$fields<>",\n      "<>
-      If[loopN === 1, "npointfunctions::"<>$penguin, "zero"]<>",\n      "<>
+      If[loopN === 1, $penguin, "zero"]<>",\n      "<>
       If[pengDef =!= "", "npointfunctions::"<>$calculate, "zero"]<>",\n      "<>
-      If[boxQ, $boxes, "zero"]<>"
+      If[boxQ, "npointfunctions::"<>$boxes, "zero"]<>"
    >(nI, nO, nA, model, qedqcd);\n}";
    {  pengVert,
       pengDef,
