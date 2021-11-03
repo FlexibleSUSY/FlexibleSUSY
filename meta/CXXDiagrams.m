@@ -1154,7 +1154,7 @@ CreateVertices[
    vertices:{{__}...},
    OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
 Module[{cxxVertices, vertexPartition,
-        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
+        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
 
    If[FlexibleSUSY`FSEnableParallelism,
       LaunchKernels[];
