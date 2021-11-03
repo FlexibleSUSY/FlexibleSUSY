@@ -2226,7 +2226,7 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {},
-            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
+            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
            Print[""];
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
