@@ -86,7 +86,6 @@ cacjedVertices[3, True] = {};
 cachedVertices[4, False] = {};
 cachedVertices[4, True] = {};
 cachedVertices[numFields_, useDependences_] := {};
-If[FlexibleSUSY`FSEnableParallelism, SetSharedFunction[FSVertex]];
 
 SetCachedVertices[numFields_Integer, vertices_List, useDependences_:False] := cachedVertices[numFields, useDependences] = vertices;
 
