@@ -66,9 +66,9 @@ Module[{vertexList, vertex},
 
    vertexList =
       Switch[Length[sortedFields],
-		   3, SARAH`VertexList3,
-			4, SARAH`VertexList4,
-			_, Print["Only three- and four-point vertices are supported"]; Quit[1]
+         3, SARAH`VertexList3,
+         4, SARAH`VertexList4,
+         _, Print["Only three- and four-point vertices are supported"]; Quit[1]
       ];
 
    vertex = Select[vertexList, Vertices`StripFieldIndices[#[[1]]] === sortedFields &, 1];
