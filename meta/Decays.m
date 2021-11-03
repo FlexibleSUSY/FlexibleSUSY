@@ -577,20 +577,21 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
-           Print[""];
-           Print["Creating amplitudes for ", particle, " decays..."];
-           (*ParallelEvaluate[Get["/home/wojciech/HEP-software/mathematica/SARAH-4.14.3/SARAH.m"]]
-           ParallelEvaluate[Start["MSSM"]];*)
+           If[!FlexibleSUSY`FSEnableParallelism,
+              Print[""];
+              Print["Creating amplitudes for ", particle, " decays..."];
+           ];
            decays =
               Map[
                  (
-                    WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    If[!FlexibleSUSY`FSEnableParallelism,
+                       WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    ];
                     temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                    Print[" Done."];
+                    If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
                     temp
                  )&,
-                 concreteFinalStates(*,
-                 DistributedContexts -> All*)
+                 concreteFinalStates
               ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
