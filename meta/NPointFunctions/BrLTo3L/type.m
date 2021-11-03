@@ -20,7 +20,8 @@
 
 *)
 
-BeginPackage@"BrLTo3L`";Quiet[
+Off[BrLTo3L`arguments::shdw];
+BeginPackage["BrLTo3L`"];
 
 BrLTo3L`namespace::usage = "
 @brief Returns a namespace for C++ code of a given observable";
@@ -42,46 +43,49 @@ BrLTo3L`arguments::usage = "
 @return A sequence with named patterns, which is set of arguments for
         observable.";
 
-];Begin@"`Private`";
+Begin["`Private`"];
 
-namespace[] := "l_to_3l";
+namespace[File] := "lto3l";
+namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
 Off@RuleDelayed::rhs;
-arguments[lepton_Symbol, nI_Symbol -> {nO_Symbol, nA_Symbol},
-   contribution_Symbol] :=
-Sequence[
-   lepton_Symbol?TreeMasses`IsLepton[nI_Integer] ->
-      {  lepton_[nO_Integer],
-         lepton_[nA_Integer],
-         SARAH`bar[lepton_[nA_Integer]]},
-   contribution:_Symbol|{__Symbol}];
+arguments[lepton_Symbol,
+          nI_Symbol -> {nO_Symbol, nA_Symbol},
+          contribution_Symbol,
+          loopN_Symbol] :=
+Sequence[Rule[lepton_Symbol?TreeMasses`IsLepton[nI_Integer],
+              {  lepton_[nO_Integer],
+                 lepton_[nA_Integer],
+                 SARAH`bar[lepton_[nA_Integer]]}
+         ],
+         contribution:_Symbol|{__Symbol},
+         loopN:0|1];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`BrLTo3L@
-   arguments[lep, nI -> {nO, nA}, proc];
+   arguments[lep, nI -> {nO, nA}, proc, loopN];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
-With[{i = TextFormatting`IndentText, m = FlexibleSUSY`FSModelName,
+With[{i = TextFormatting`IndentText,
+      m = FlexibleSUSY`FSModelName,
       cxx = CConversion`ToValidCSymbolString},
    calculate[obs:`type`observable] := StringJoin[
-      m, "_", namespace[], "::calculate_",
+      namespace[C], "calculate_",
       cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep,
-      "_for_", SymbolName@proc, "(", cxx@nI, ", ", cxx@nO, ", ", cxx@nA,
-      ", MODEL, qedqcd)"];
+      "_for_", SymbolName@proc, "_", cxx[loopN+0], "loop(",
+      cxx@nI, ", ", cxx@nO, ", ", cxx@nA, ", MODEL, qedqcd)"];
    calculate[obs:`type`observable, Head] := StringJoin["calculate_",
       cxx@lep, "_to_", cxx@lep, cxx@lep, cxx@SARAH`bar@lep,
-      "_for_", SymbolName@proc, "(\n", i@"int nI, int nO, int nA,\n",
+      "_for_", SymbolName@proc, "_", cxx[loopN+0], "loop(\n",
+      i@"int nI, int nO, int nA,\n",
       i@"const ", m, "_mass_eigenstates& model,\n",
       i@"const softsusy::QedQcd& qedqcd)"];];
 prototype // Utils`MakeUnknownInputDefinition;
 prototype ~ SetAttributes ~ {Protected, Locked};
 
-End[];EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "BrLTo3L`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "BrLTo3L`"];
-Protect@$Packages;
+End[];
+Block[{$ContextPath}, EndPackage[]];

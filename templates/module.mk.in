@@ -58,8 +58,7 @@ LIB@CLASSNAME@_SRC := \
 		$(DIR)/@CLASSNAME@_edm.cpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.cpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.cpp \
-      $(DIR)/@CLASSNAME@_l_to_l_conversion.cpp \
-      $(DIR)/@CLASSNAME@_l_to_3l.cpp \
+		$(wildcard $(DIR)/npointfunctions/@CLASSNAME@*.cpp) \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.cpp \
 		$(DIR)/@CLASSNAME@_info.cpp \
 		$(DIR)/@CLASSNAME@_input_parameters.cpp \
@@ -95,8 +94,7 @@ LIB@CLASSNAME@_HDR := \
 		$(DIR)/@CLASSNAME@_edm.hpp \
 		$(DIR)/@CLASSNAME@_FFV_form_factors.hpp \
 		$(DIR)/@CLASSNAME@_l_to_lgamma.hpp \
-      $(DIR)/@CLASSNAME@_l_to_l_conversion.hpp \
-		$(DIR)/@CLASSNAME@_l_to_3l.hpp \
+		$(wildcard $(DIR)/npointfunctions/@CLASSNAME@*.hpp) \
 		$(DIR)/@CLASSNAME@_b_to_s_gamma.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver.hpp \
 		$(DIR)/@CLASSNAME@_ewsb_solver_interface.hpp \

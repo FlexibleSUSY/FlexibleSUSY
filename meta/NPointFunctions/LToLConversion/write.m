@@ -20,7 +20,8 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`write::shdw];
+BeginPackage["LToLConversion`"];
 
 LToLConversion`write::usage = "
 @brief Returns an expression to be printed in the C++ output for observable.
@@ -30,7 +31,7 @@ LToLConversion`write::usage = "
 @param comment A string comment.
 @returns A C++ code for observable output.";
 
-];Begin@"`Private`";
+Begin["`Private`"];
 
 getFLHA::usage = "
 @brief Returns information of Wilson coefficients, calculated by this observable
@@ -47,17 +48,17 @@ Module[{rules = {0->"11", 1->"13", 2->"15"}, leptons,
    {
       {leptons, "4322", #2, #3, #4, "D_L"},
       {leptons, "4422", #2, #3, #4, "D_R"},
-      {#1, "3131", #2, #3, #4, "S_LL "<>#5},
-      {#1, "3132", #2, #3, #4, "S_LR "<>#5},
-      {#1, "3231", #2, #3, #4, "S_RL "<>#5},
-      {#1, "3232", #2, #3, #4, "S_RR "<>#5},
-      {#1, "4141", #2, #3, #4, "V_LL "<>#5},
-      {#1, "4142", #2, #3, #4, "V_LR "<>#5},
-      {#1, "4241", #2, #3, #4, "V_RL "<>#5},
-      {#1, "4242", #2, #3, #4, "V_RR "<>#5},
-      {#1, "4343", #2, #3, #4, "T_LL "<>#5},
-      {#1, "4444", #2, #3, #4, "T_RR "<>#5}
-   } & [leptons<>quarksU, "0", "0", "2", SymbolName@con]];
+      {#1, "3131", #2, #3, #4, "S_LL_"<>#5<>"loop "<>#6},
+      {#1, "3132", #2, #3, #4, "S_LR_"<>#5<>"loop "<>#6},
+      {#1, "3231", #2, #3, #4, "S_RL_"<>#5<>"loop "<>#6},
+      {#1, "3232", #2, #3, #4, "S_RR_"<>#5<>"loop "<>#6},
+      {#1, "4141", #2, #3, #4, "V_LL_"<>#5<>"loop "<>#6},
+      {#1, "4142", #2, #3, #4, "V_LR_"<>#5<>"loop "<>#6},
+      {#1, "4241", #2, #3, #4, "V_RL_"<>#5<>"loop "<>#6},
+      {#1, "4242", #2, #3, #4, "V_RR_"<>#5<>"loop "<>#6},
+      {#1, "4343", #2, #3, #4, "T_LL_"<>#5<>"loop "<>#6},
+      {#1, "4444", #2, #3, #4, "T_RR_"<>#5<>"loop "<>#6}
+   } & [leptons<>quarksU, "0", "0", "2", ToString@loopN, SymbolName@con]];
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
 
@@ -80,8 +81,5 @@ Switch[block,
 write // Utils`MakeUnknownInputDefinition;
 write ~ SetAttributes ~ {Protected, Locked};
 
-End[];EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+End[];
+Block[{$ContextPath}, EndPackage[]];

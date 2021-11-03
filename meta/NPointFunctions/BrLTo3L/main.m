@@ -33,7 +33,7 @@ BrLTo3L`create::usage = "
 
 ];Begin@"`Private`";
 
-$boxes = "boxes";
+$boxes = "boxes_1loop";
 $boxes // Protect;
 
 setGlobals[obs:`type`observable] :=
@@ -64,24 +64,26 @@ create::usage = "
 @note We assume that generations for leptons are given by integer numbers,
       rather then different field names.";
 create[list:{__}] :=
-Module[{unique, box, join = Utils`StringJoinWithSeparator},
-   unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
+Module[{unique, box, join = Utils`StringJoinWithSeparator, clearGenerations},
+   clearGenerations[_[a_, rest__]] := {a/. _Integer:> Sequence, rest};
+   unique = DeleteDuplicates[list, SameQ@@(clearGenerations/@{##})&];
    box = `npf`box@unique;
    {  DeleteDuplicates[Join@@Append[#[[All, 1]], box[[1, 1]]]],
       box[[2]],
       join[Append[#[[All, 2]], box[[1, 2]]], "\n\n"],
       join[#[[All, 3]], "\n\n"],
       join[#[[All, 4]], "\n\n"]}&[create/@unique]];
+
 create[obs:`type`observable] :=
 Module[{pengVert = {}, pengDef = "", boxQ, calculateDefinition},
    setGlobals@obs;
    {{pengVert, pengDef}, boxQ} = `npf`assemble@obs;
    calculateDefinition = $prototype <> " {
    return forge<
-      "<>$fields<>",
-      "<>$penguin<>",
-      npointfunctions::"<>If[pengDef =!= "", $calculate, "zero"]<>",
-      npointfunctions::"<>If[boxQ, $boxes, "zero"]<>"
+      "<>$fields<>",\n      "<>
+      If[loopN === 1, $penguin, "zero"]<>",\n      "<>
+      If[pengDef =!= "", "npointfunctions::"<>$calculate, "zero"]<>",\n      "<>
+      If[boxQ, "npointfunctions::"<>$boxes, "zero"]<>"
    >(nI, nO, nA, model, qedqcd);\n}";
    {  pengVert,
       pengDef,
@@ -91,14 +93,18 @@ create // Utils`MakeUnknownInputDefinition;
 create // Protect;
 
 `npf`box[list:{__}] :=
-Module[{box = Boxes, res = {{}, ""}},
-   If[!FreeQ[`npf`parse/@list, box],
+Module[{box = Boxes, res = {{}, ""}, amps, rules, num},
+   amps = `npf`parse/@list;
+   rules = MapIndexed[FreeQ[#, box]-> #2[[1]]&, amps];
+   num = False/. rules;
+   If[MatchQ[num, _Integer],
       Utils`FSFancyLine@"<";
       Print["Calculation for "<>SymbolName@box<>" started"];
+      Print["Case of 1 loop(s) is considered."];
       Unprotect@$calculate;
       $calculate = $boxes;
       Protect@$calculate;
-      res = `npf`code@`npf`match@`npf`clean@`npf`create[list[[1]], {box}];
+      res = `npf`code@`npf`match@`npf`clean@`npf`create[list[[num]], {box}];
       Utils`FSFancyLine@">";];
    {res, NPointFunctions`CreateCXXHeaders[]}];
 `npf`box // Utils`MakeUnknownInputDefinition;
@@ -107,15 +113,20 @@ Module[{box = Boxes, res = {{}, ""}},
 `npf`parse@`type`observable :=
 Module[{parsed},
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@proc;
-   Switch[parsed,
-      {"All"},
-         {Vectors, Scalars, Boxes},
-      {"NoScalars"},
-         {Vectors, Boxes},
-      {"Penguins"},
-         {Vectors, Scalars},
-      _,
-         Symbol/@parsed]];
+   Sort@Switch[loopN,
+      0,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars},
+            {"NoScalars"}, {Vectors},
+            _, Symbol/@parsed],
+      1,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars, Boxes},
+            {"NoScalars"}, {Vectors, Boxes},
+            {"Penguins"}, {Vectors, Scalars},
+            _, Symbol/@parsed]
+   ]
+];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 
@@ -127,6 +138,7 @@ Module[{keep, peng, out, boxQ},
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
       peng, ",\n                ", SymbolName]<>" started"];
+   Print["Case of "<>ToString@loopN<>" loop(s) is considered."];
    Switch[peng,
       (* no boxes *) keep,
          out = `npf`code@`npf`match@`npf`clean@`npf`create[obs, peng];
@@ -147,6 +159,7 @@ NPointFunctions`NPointFunction[{lep, lep}, {lep, lep},
    NPointFunctions`UseCache -> False,
    NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
    NPointFunctions`KeepProcesses -> keep,
+   NPointFunctions`LoopLevel -> loopN,
    NPointFunctions`Observable -> obs];
 `npf`create // Utils`MakeUnknownInputDefinition;
 `npf`create // Protect;

@@ -46,6 +46,7 @@ secure[sym:_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
 secure // secure;
 
+(* TODO: load all files in this directory by one call. *)
 With[{dir = DirectoryName@$InputFileName},
    Get@FileNameJoin@{dir, #<>".m"}&/@
       {"type", "rules", "settings", "chains", "topologies", "tree"};];

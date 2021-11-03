@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_3l.cpp
+ * @file @ModelName@_lto3l.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
@@ -29,7 +29,7 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-#include "@ModelName@_l_to_3l.hpp"
+#include "@ModelName@_lto3l.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
@@ -46,6 +46,20 @@ namespace npointfunctions {
 
 @npf_definitions@
 
+} // namespace npointfunctions
+} // namespace @ModelName@_cxx_diagrams
+
+namespace {
+
+std::valarray<std::complex<double>> zero(
+   int generationIndex1,
+   int generationIndex2,
+   const @ModelName@_mass_eigenstates&,
+   bool){
+   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
+   return res;
+}
+
 std::array<std::complex<double>,10> zero(
    const @ModelName@_mass_eigenstates&,
    const std::array<int,4>&,
@@ -54,13 +68,12 @@ std::array<std::complex<double>,10> zero(
    return res;
 }
 
-} // namespace npointfunctions
-} // namespace @ModelName@_cxx_diagrams
+} // anonymous namespace
 
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_l_to_3l {
+namespace @ModelName@_lto3l {
 
 typedef std::valarray<std::complex<double>> (*ffv)(
    int, int, const @ModelName@_mass_eigenstates&, bool);
@@ -377,5 +390,5 @@ Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
 
 @calc_definitions@
 
-} // namespace @ModelName@_l_to_3l
+} // namespace @ModelName@_lto3l
 } // namespace flexiblesusy

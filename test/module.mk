@@ -1004,7 +1004,9 @@ $(DIR)/test_SM_cxxdiagrams.cpp : $(DIR)/test_SM_cxxdiagrams.meta $(DIR)/test_SM_
 endif
 
 ifeq ($(ENABLE_FEYNARTS) $(ENABLE_FORMCALC),yes yes)
+
 ifeq ($(WITH_MRSSM2),yes)
+ifeq ($(ENABLE_COLLIER),yes)
 
 $(DIR)/test_MRSSM2_l_to_l_conversion.o $(DIR)/test_MRSSM2_l_to_l_conversion.d: CPPFLAGS += $(MODtest_INC) $(BOOSTFLAGS) $(EIGENFLAGS)
 $(DIR)/test_MRSSM2_l_to_l_conversion.x: $(LIBMRSSM2) $(LIBSOFTSUSY) $(MODtest_LIB) $(LIBTEST) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS)) $(FUTILIBS)
@@ -1013,6 +1015,7 @@ $(DIR)/test_MRSSM2_l_to_l_conversion.cpp : $(DIR)/test_MRSSM2_l_to_l_conversion.
 	@$(TEST_MSG)
 	@printf "%s" "Get[\"$<\"]; Quit[0]" | "$(MATH)"
 
+endif
 endif
 
 ifeq ($(WITH_SM),yes)

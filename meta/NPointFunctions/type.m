@@ -33,7 +33,8 @@ diagramSet = FeynArts`TopologyList[_][diagram..];
 
 amplitude = FeynArts`FeynAmp[
    FeynArts`GraphID[FeynArts`Topology==_Integer,Generic==_Integer],
-   Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]],
+   (* For 1loop. *)Integral[FeynArts`FourMomentum[FeynArts`Internal,_Integer]]|
+   (* For 0loop. *)Integral[],
    _,
    {__}->FeynArts`Insertions[FeynArts`Classes][{__}..]];
 amplitudeSet = FeynArts`FeynAmpList[__][amplitude..];

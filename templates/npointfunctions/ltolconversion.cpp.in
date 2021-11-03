@@ -17,7 +17,7 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_l_conversion.cpp
+ * @file @ModelName@_ltolconversion.cpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@
@@ -29,8 +29,8 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-#include "@ModelName@_l_to_l_conversion.hpp"
-#include "npointfunctions/l_to_l_conversion/settings.hpp"
+#include "@ModelName@_ltolconversion.hpp"
+#include "npointfunctions/ltolconversion/settings.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
 #include "wrappers.hpp"
@@ -53,10 +53,23 @@ namespace npointfunctions {
 } // namespace npointfunctions
 } // namespace @ModelName@_cxx_diagrams
 
+namespace {
+
+std::valarray<std::complex<double>> zero(
+   int generationIndex1,
+   int generationIndex2,
+   const @ModelName@_mass_eigenstates&,
+   bool){
+   std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
+   return res;
+}
+
+} // anonymous namespace
+
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_FFV_form_factors;
 
-namespace @ModelName@_l_to_l_conversion {
+namespace @ModelName@_ltolconversion {
 
 struct overlap_integrals {
    double D;
@@ -244,7 +257,7 @@ Eigen::Array<std::complex<double>,10,1> fix_tensors_sign(
 template<class Lepton, class Up, class Down, class Photon,
    ffv_function photon, npf_function npf_up, npf_function npf_down>
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
-   const @ModelName@_l_to_l_conversion::Nucleus nucleus,
+   const @ModelName@_ltolconversion::Nucleus nucleus,
    const @ModelName@_mass_eigenstates& model,
    const LToLConversion_settings& parameters,
    const softsusy::QedQcd& qedqcd) {
@@ -345,5 +358,5 @@ Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
 
 @calculate_definitions@
 
-} // namespace @ModelName@_l_to_l_conversion
+} // namespace @ModelName@_ltolconversion
 } // namespace flexiblesusy

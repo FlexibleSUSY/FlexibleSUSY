@@ -20,47 +20,47 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`arguments::shdw];
+BeginPackage["LToLConversion`"];
 
-LToLConversion`namespace::usage = "
-@brief Returns a namespace for C++ code of a given observable";
+namespace::usage = "
+@brief Returns a namespace for C++ code of a given observable.
+@note Convention: the name of a corresponding C++ file without ``.cpp``.";
 
-LToLConversion`arguments::usage = "
-@brief Generates a named pattern sequence (by inserting given symbols in
-       correct places), which is set of arguments for observable.
+arguments::usage = "
 @param in A symbol for incoming lepton.
 @param inN A symbol for incoming lepton generation.
 @param out A symbol for outgoing lepton.
 @param outN A symbol for outgoing lepton generation.
 @param nucleus A symbol for a nucleus.
 @param contribution A symbol for a desired contribution.
-@return A sequence with named patterns, which is set of arguments for
-        observable.";
+@return A sequence of arguments for the observable.";
 
-];Begin@"`Private`";
+Begin["`Private`"];
 
-namespace[] := "l_to_l_conversion";
+namespace[File] := "ltolconversion";
+namespace[C] := FlexibleSUSY`FSModelName<>"_"<>namespace[File]<>"::";
 namespace // Utils`MakeUnknownInputDefinition;
 namespace ~ SetAttributes ~ {Protected, Locked};
 
 Off@RuleDelayed::rhs;
-arguments[(in:_Symbol)[inN:_Symbol], (out:_Symbol)[outN:_Symbol],
-   nucleus_Symbol, contribution:_Symbol] :=
-Sequence[
-   (in: _Symbol?TreeMasses`IsLepton)[inN: _Integer] ->
-   (out:_Symbol?TreeMasses`IsLepton)[outN:_Integer],
-   nucleus:_,
-   contribution:_Symbol|{__Symbol}];
+arguments[in_Symbol[inN_Symbol],
+          out_Symbol[outN_Symbol],
+          nucleus_Symbol,
+          contribution_Symbol,
+          loopN_Symbol] :=
+   Sequence[Rule[(in_Symbol?TreeMasses`IsLepton)[inN_Integer],
+                 (out_Symbol?TreeMasses`IsLepton)[outN_Integer]],
+            nucleus_Symbol,
+            contribution:_Symbol|{__Symbol},
+            loopN:0|1];
 On@RuleDelayed::rhs;
 arguments // Utils`MakeUnknownInputDefinition;
 arguments ~ SetAttributes ~ {Protected, Locked};
 
 `type`observable = FlexibleSUSYObservable`LToLConversion@
-   arguments[in@iIn, out@iOut, nucleus, con];
+   arguments[in@iIn, out@iOut, nucleus, con, loopN];
 `type`observable ~ SetAttributes ~ {Protected, Locked};
 
-End[];EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+End[];
+Block[{$ContextPath}, EndPackage[]];

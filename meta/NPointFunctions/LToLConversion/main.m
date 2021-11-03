@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 (* :Copyright:
 
    ====================================================================
@@ -22,14 +20,16 @@
 
 *)
 
-BeginPackage@"LToLConversion`";Quiet[
+Off[LToLConversion`create::shdw];
+BeginPackage@"LToLConversion`";
 
 LToLConversion`create::usage =
 "@brief Main entrance point for the calculation.";
 
-];Begin@"`Private`";
+Begin@"`Private`";
 
-setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
+setCxx[obs:`type`observable] :=
+Module[{cxx = CConversion`ToValidCSymbolString},
    Unprotect@"LToLConversion`Private`cxx`*";
    `cxx`in = cxx@in;
    `cxx`out = cxx@out;
@@ -37,8 +37,8 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
    `cxx`fields = StringJoin@@Riffle["fields::"<>#&/@ cxx/@
       {in, SARAH`UpQuark, SARAH`DownQuark, SARAH`Photon}, ", "];
 
-   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to_",
-      cxx@out, #, "_for_", SymbolName@con]&/@ cxx/@
+   {`cxx`classU, `cxx`classD} = StringJoin["conversion_", cxx@in, #, "_to",
+      cxx@out, #, "_for", SymbolName@con, "_", cxx[loopN+0], "loop"]&/@ cxx/@
          {SARAH`UpQuark, SARAH`DownQuark};
 
    `cxx`penguin = StringJoin["calculate_", cxx@in, "_", cxx@out, "_",
@@ -46,10 +46,10 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 
    (*TODO this code is partially duplicated in CalculateObservable.*)
    `cxx`prototype = CConversion`CreateCType@Observables`GetObservableType@obs <>
-      " calculate_"<>cxx@in<>"_to_"<>cxx@out<>"_for_"<>SymbolName@con<>"(\n"<>
+      " calculate_"<>cxx@in<>cxx@out<>"_for"<>SymbolName@con<>
+      "_"<> ToString[loopN]<>"loop(\n"<>
       "   int in, int out,\n"<>
-      "   const " <> FlexibleSUSY`FSModelName <>
-         "_l_to_l_conversion::Nucleus nucleus,\n" <>
+      "   const " <> namespace@C <> "Nucleus nucleus,\n" <>
       "   const " <> FlexibleSUSY`FSModelName <>
       "_mass_eigenstates& model, "<>
       "const LToLConversion_settings& parameters, "<>
@@ -59,6 +59,14 @@ setCxx[obs:`type`observable] := Module[{cxx = CConversion`ToValidCSymbolString},
 setCxx // Utils`MakeUnknownInputDefinition;
 setCxx ~ SetAttributes ~ {Protected, Locked};
 
+create[list:{__}] := Module[{unique, clearGenerations},
+   clearGenerations[_[a_, rest__]] := {a/. _Integer:> Sequence, rest};
+   unique = DeleteDuplicates[list, SameQ@@(clearGenerations/@{##})&];
+   {  DeleteDuplicates[Join@@#[[All,1]]],
+      {  #[[1,2,1]], StringRiffle[#[[All,2,2]], "\n\n"]},
+      {  StringRiffle[#[[All,3,1]], "\n\n"],
+         StringRiffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
+
 create[obs:`type`observable] :=
 Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
    setCxx@obs;
@@ -67,7 +75,7 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
    calculateDefinition = `cxx`prototype <> " {
    return forge_conversion<
       "<>`cxx`fields<>",
-      "<>`cxx`penguin<>",
+      "<>If[loopN === 0, "zero", `cxx`penguin]<>",
       npointfunctions::"<>`cxx`classU<>",
       npointfunctions::"<>`cxx`classD<>"
    >(in, out, nucleus, model, parameters, qedqcd);\n}";
@@ -76,13 +84,6 @@ Module[{npfVertices, npfHeader, npfDefinition, calculateDefinition},
       npfVertices,
       {npfHeader, npfDefinition},
       {`cxx`prototype <> ";", calculateDefinition}}];
-
-create[list:{__}] := Module[{unique},
-   unique = DeleteDuplicates[list, SameQ@@({##} /. _Integer :> Sequence)&];
-   {  DeleteDuplicates[Join@@#[[All,1]]],
-      {  #[[1,2,1]], StringJoin@Riffle[#[[All,2,2]], "\n\n"]},
-      {  StringJoin@Riffle[#[[All,3,1]], "\n\n"],
-         StringJoin@Riffle[#[[All,3,2]], "\n\n"]}}&[create/@unique]];
 
 create // Utils`MakeUnknownInputDefinition;
 create ~ SetAttributes ~ {Protected, Locked};
@@ -101,15 +102,20 @@ npf /.
 `npf`parse[obs:`type`observable] :=
 Module[{parsed},
    parsed = SymbolName/@If[Head@# === List, #, {#}]&@con;
-   Switch[parsed,
-      {"All"},
-         {Vectors, Scalars, Boxes},
-      {"NoScalars"},
-         {Vectors, Boxes},
-      {"Penguins"},
-         {Vectors, Scalars},
-      _,
-         Symbol/@parsed]];
+   Switch[loopN,
+      0,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars},
+            {"NoScalars"}, {Vectors},
+            _, Symbol/@parsed],
+      1,
+         Switch[parsed,
+            {"All"}, {Vectors, Scalars, Boxes},
+            {"NoScalars"}, {Vectors, Boxes},
+            {"Penguins"}, {Vectors, Scalars},
+            _, Symbol/@parsed]
+   ]
+];
 `npf`parse // Utils`MakeUnknownInputDefinition;
 `npf`parse // Protect;
 
@@ -118,13 +124,15 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
    keep = `npf`parse@obs;
    Utils`FSFancyLine@"<";
    Print[      "Calculation for "<>Utils`StringJoinWithSeparator[
-      keep, ",\n                ", SymbolName]<>" started"];
+      keep, ",\n                ", SymbolName]<>" started."];
+   Print["Case of "<>ToString@loopN<>" loop(s) is considered."];
    {npfU, npfD} = NPointFunctions`NPointFunction[
       {in,#},{out,#},
       NPointFunctions`OnShellFlag -> True,
       NPointFunctions`UseCache -> False,
       NPointFunctions`ZeroExternalMomenta -> NPointFunctions`ExceptLoops,
       NPointFunctions`KeepProcesses -> keep,
+      NPointFunctions`LoopLevel -> loopN,
       NPointFunctions`Observable -> obs] &/@ {SARAH`UpQuark, SARAH`DownQuark};
    {npfU, npfD} = `npf`clean/@{npfU, npfD};
 
@@ -163,8 +171,4 @@ Module[{npfU, npfD, fields, keep, dim6, codeU, codeD},
 `npf`create ~ SetAttributes ~ {Locked,Protected};
 
 End[];
-EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "LToLConversion`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "LToLConversion`"];
-Protect@$Packages;
+Block[{$ContextPath}, EndPackage[]];

@@ -17,25 +17,28 @@
 // ====================================================================
 
 /**
- * @file @ModelName@_l_to_3l.hpp
+ * @file @ModelName@_ltolconversion.hpp
  *
  * This file was generated at @DateAndTime@ with FlexibleSUSY
  * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#ifndef @ModelName@_BrLTo3L_H
-#define @ModelName@_BrLTo3L_H
+#ifndef @ModelName@_LToLConversion_H
+#define @ModelName@_LToLConversion_H
 
 #include "lowe.h"
 
 namespace flexiblesusy {
 class @ModelName@_mass_eigenstates;
+class LToLConversion_settings;
 
-namespace @ModelName@_l_to_3l {
+namespace @ModelName@_ltolconversion {
 
-@calc_prototypes@
+enum class Nucleus { Au, Al, Ti };
 
-} // namespace @ModelName@_l_to_3l
+@calculate_prototypes@
+
+} // namespace @ModelName@_ltolconversion
 
 } // namespace flexiblesusy
 
