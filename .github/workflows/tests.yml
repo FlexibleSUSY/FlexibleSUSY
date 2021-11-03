@@ -121,7 +121,7 @@ jobs:
 
     runs-on: ubuntu-20.04
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.9.2
+      image: navir/opensuseleap-for-flexiblesusy:0.9.7
 
     strategy:
       matrix:
@@ -130,7 +130,7 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.9'
-      MODELS: 'MSSM CMSSM CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
+      MODELS: 'MSSM CMSSM CMSSMNoFV CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
 
     steps:
 
