@@ -1154,7 +1154,7 @@ CreateVertices[
    vertices:{{__}...},
    OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
 Module[{cxxVertices, vertexPartition,
-        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
+        contextsToDistribute = {"Susyno`LieGroups`", "SARAH`", "Himalaya`", "FlexibleSUSY`", "CConversion`"}},
 
    If[FlexibleSUSY`FSEnableParallelism,
       LaunchKernels[];
@@ -1204,7 +1204,8 @@ Module[{cxxVertices, vertexPartition,
       cxxVertices =
          AbsoluteTiming@ParallelMap[
             CreateVertex,
-            DeleteDuplicates[vertices], DistributedContexts->All
+            DeleteDuplicates[vertices],
+            DistributedContexts-> None
          ];
       Needs["Parallel`Developer`"];
       Parallel`Developer`ClearDistributedDefinitions[];

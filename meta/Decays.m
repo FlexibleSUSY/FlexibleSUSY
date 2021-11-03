@@ -2226,7 +2226,7 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {},
-            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
+            contextsToDistribute = {"Susyno`LieGroups`", "SARAH`", "Himalaya`", "FlexibleSUSY`", "CConversion`", "Decays`"}},
            Print[""];
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
@@ -2236,7 +2236,9 @@ CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
               specializations =
                  AbsoluteTiming@ParallelMap[
                     CreateTotalAmplitudeSpecialization[#, modelName]&,
-                    Flatten[Last @@@ particleDecays, 1], Method -> "FinestGrained"
+                    Flatten[Last @@@ particleDecays, 1],
+                    DistributedContexts -> None,
+                    Method -> "FinestGrained"
                  ];
               Needs["Parallel`Developer`"];
               Parallel`Developer`ClearDistributedDefinitions[];
