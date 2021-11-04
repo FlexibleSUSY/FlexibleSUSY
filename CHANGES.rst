@@ -4,6 +4,23 @@ FlexibleSUSY 2.6.2 [July, 08 2021]
 Changes
 -------
 
+* Parallelized calculation of decay amplitudes during the mathematica phase.
+  Example speedup:
+
+  .. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - model
+     - sequential
+     - parallel
+   * - `MSSM`
+     - 190s
+     - 140s
+   * - `MRSSM2`
+     - 555s
+     - 395s
+
 Fixed bugs
 ----------
 

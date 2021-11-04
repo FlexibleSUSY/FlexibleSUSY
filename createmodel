@@ -218,7 +218,7 @@ check_model_name() {
 
     local _model="$1"
 
-    if [ -z $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ]; then 
+    if [ -z $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ]; then
         printf "Error: invalid model name ${_model}. "
         if [ -n "$(echo "${_model}" | grep -E -o "^[0-9]")" ]; then
             printf "Model name must start with a letter. "
@@ -504,7 +504,7 @@ if test ! -d "$targetdir" ; then
     message "done"
 fi
 
-set -- $(find $model_file_dir -type f -iname LesHouches.in\* -not -iname \*~ -exec basename {} \; | tr '\n' ' ')
+set -- $(find -L $model_file_dir -type f -iname LesHouches.in\* -not -iname \*~ -exec basename {} \; | tr '\n' ' ')
 SLHA_input_files="$*"
 
 SLHA_input_files_in_mk=$(echo "$SLHA_input_files" |

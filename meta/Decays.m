@@ -577,21 +577,21 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            concreteFinalStates = Join @@ (GetParticleCombinationsOfType[#, allowedFinalStateParticles, isPossibleDecay]& /@ genericFinalStates);
            concreteFinalStates = OrderFinalState[particle, #] & /@ concreteFinalStates;
 
-           Print[""];
-           Print["Creating amplitudes for ", particle, " decays..."];
-           (*ParallelEvaluate[Get["/home/wojciech/HEP-software/mathematica/SARAH-4.14.3/SARAH.m"]]
-           ParallelEvaluate[Start["MSSM"]];*)
+           If[!FlexibleSUSY`FSEnableParallelism,
+              Print[""];
+              Print["Creating amplitudes for ", particle, " decays..."];
+           ];
            decays =
               Map[
                  (
-                    (* @todo StringPadRigh was introduced only in 10.1 *)
-                    WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    If[!FlexibleSUSY`FSEnableParallelism,
+                       WriteString["stdout", StringPadRight["   - Creating amplitude for " <> ToString@particle <> " -> " <> ToString@#, 64, "."]];
+                    ];
                     temp = FSParticleDecay[particle, #, GetContributingGraphsForDecay[particle, #]];
-                    Print[" Done."];
+                    If[!FlexibleSUSY`FSEnableParallelism, Print[" Done."]];
                     temp
                  )&,
-                 concreteFinalStates(*,
-                 DistributedContexts -> All*)
+                 concreteFinalStates
               ];
 
            decays = Select[decays, GetDecayTopologiesAndDiagrams[#] =!= {}&];
@@ -1977,9 +1977,6 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
             externalFieldsList, templatePars = "", args = "",
             body = ""},
 
-           (* @todo StringPadRigh was introduced only in 10.1 *)
-           (*WriteString["stdout", StringPadRight["   - Creating code for " <> ToString@initialParticle <> " -> " <> ToString@finalState, 64, "."]];*)
-
            (* decay amplitude type, e.g. Decay_amplitude_FSS *)
            returnType = GetDecayAmplitudeType[decay];
 
@@ -2230,18 +2227,24 @@ CreateTotalAmplitudeSpecialization[decay_FSParticleDecay, modelName_] :=
 
 CreateTotalAmplitudeSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations, vertices = {}, listing = {},
-            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
+            contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
            Print[""];
            FSFancyLine[];
            Print["Creating a C++ code for decay amplitudes..."];
            If[FlexibleSUSY`FSEnableParallelism,
+              LaunchKernels[];
               ParallelEvaluate[(BeginPackage[#];EndPackage[];)& /@ contextsToDistribute, DistributedContexts->All];
               specializations =
                  AbsoluteTiming@ParallelMap[
                     CreateTotalAmplitudeSpecialization[#, modelName]&,
                     Flatten[Last @@@ particleDecays, 1],
                     DistributedContexts -> All, Method -> "FinestGrained"
-                 ],
+                 ];
+              Needs["Parallel`Developer`"];
+              Parallel`Developer`ClearDistributedDefinitions[];
+              Parallel`Developer`ClearKernels[];
+              CloseKernels[]
+              ,
               specializations =
                  AbsoluteTiming@Map[
                     (
