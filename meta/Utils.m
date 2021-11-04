@@ -417,7 +417,7 @@ If[!$Notebooks,
       Quit[1];
    ];
 ];
-SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll,Protected}];
+SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
 
 EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
 EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;
@@ -468,7 +468,7 @@ Module[
    );
    Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
 ];
-SetAttributes[{EvaluateOrQuit,internalEvaluateOrQuit},{HoldAll,Locked,Protected}];
+SetAttributes[{EvaluateOrQuit,internalEvaluateOrQuit},{HoldAll, Protected}];
 
 internalOrQuitInputCheck[func_,message_,insertions___] :=
 Module[{nStrokes,controlSubstrings},
@@ -490,7 +490,7 @@ Module[{nStrokes,controlSubstrings},
    internalAssertOrQuit[TrueQ[Max@controlSubstrings<=Length@{insertions}],
       func::errInsertions,{insertions},Max@checkedControl,message]
 ];
-SetAttributes[internalOrQuitInputCheck,{HoldFirst,Protected}];
+SetAttributes[internalOrQuitInputCheck,{HoldFirst, Protected}];
 
 MakeUnknownInputDefinition[sym_Symbol] :=
 Module[{usageString,info,parsedInfo,infoString,symbolAsString},
