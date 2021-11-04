@@ -2935,19 +2935,21 @@ EOF
    # Removing NPointFunctions, FormCalc, FeynArts output folders
    [ "${enable_feynarts}" = "yes" ] && {
       [ "${FEYNARTS_VERSION}" = "${oldVersion}" ] || {
-         local models="$(echo $MODELS | tr ',' ' ')"
-         for m in ${models}; do
-            local eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
                        | sed 's/ //g' \
                        | sed 's/.*`\(.*\);/\1/')
-            local output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
+            local output=$(grep -m1 'OutputDirectory' "$m/start.m" \
                         | sed 's/ //g' \
                         | sed 's/.*\"\(.*\)\".*/\1/')
-            local dir="${output}/$m/${eigenstate}/FeynArts"
+            output=$(echo $m | sed "s/models/${output}/")
+            local dir="${output}/${eigenstate}/FeynArts"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
-            dir="${output}/$m/${eigenstate}/FormCalc"
+            dir="${output}/${eigenstate}/FormCalc"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
-            dir="${output}/$m/${eigenstate}/NPointFunctions"
+            dir="${output}/${eigenstate}/NPointFunctions"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
          done
       }
@@ -3009,14 +3011,16 @@ EOF
 
    [ "${enable_formcalc}" = "yes" ] && {
       [ "${FORMCALC_VERSION}" = "${oldVersion}" ] || {
-         local models="$(echo $MODELS | tr ',' ' ')"
-         for m in ${models}; do
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
             local eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
                                | sed 's/ //g' \
                                | sed 's/.*`\(.*\);/\1/')
             local output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
                            | sed 's/ //g' \
                            | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
             local dir="${output}/$m/${eigenstate}/FormCalc"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
             dir="${output}/$m/${eigenstate}/NPointFunctions"
