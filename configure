@@ -2885,6 +2885,8 @@ check_feynarts() {
     if test "x$enable_feynarts" = "xno"; then return; fi
 
     checking_msg "FeynArts installation"
+    local oldVersion=""
+    [ -f "${feynartsconfig}" ] && oldVersion=$(cat "${feynartsconfig}")
     rm -f ${feynartsconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
@@ -2929,6 +2931,29 @@ EOF
         message "   Please make sure Needs[\"FeynArts\`\"] works correctly."
         exit 1
     fi
+
+   # Removing NPointFunctions, FormCalc, FeynArts output folders
+   [ "${enable_feynarts}" = "yes" ] && {
+      [ "${FEYNARTS_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
+                       | sed 's/ //g' \
+                       | sed 's/.*`\(.*\);/\1/')
+            local output=$(grep -m1 'OutputDirectory' "$m/start.m" \
+                        | sed 's/ //g' \
+                        | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            local dir="${output}/${eigenstate}/FeynArts"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
 }
 
 #_____________________________________________________________________
@@ -2936,6 +2961,8 @@ check_formcalc() {
     if test "x$enable_formcalc" = "xno"; then return; fi
 
     checking_msg "FormCalc installation"
+    local oldVersion=""
+    [ -f "${formcalcconfig}" ] && oldVersion=$(cat "${formcalcconfig}")
     rm -f ${formcalcconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FormCalc\`"];
@@ -2979,6 +3006,28 @@ EOF
         message "   Please make sure Needs[\"FormCalc\`\"] works correctly."
         exit 1
     fi
+
+   # Removing NPointFunctions, FormCalc output folders
+
+   [ "${enable_formcalc}" = "yes" ] && {
+      [ "${FORMCALC_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
+                               | sed 's/ //g' \
+                               | sed 's/.*`\(.*\);/\1/')
+            local output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
+                           | sed 's/ //g' \
+                           | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            local dir="${output}/$m/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/$m/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
 
     if test "x$enable_formcalc" != "xno"; then
         checking_msg "working FormCalc"
