@@ -2867,7 +2867,7 @@ WriteString["stderr", \$sarahModelDir];
 EOF
              )
 
-    if [ -z "$SARAH_MODEL_DIR" ] ; then
+    [ -z "$SARAH_MODEL_DIR" -o \( ! -z "$SARAH_MODEL_DIR" -a ! -d "$SARAH_MODEL_DIR" \) ] && {
         message "Error: Could not determine the SARAH model directory."
         message "   Please check that Mathematica and SARAH are installed correctly."
         message "   To do that, you may run \`${MATH}' and then copy and paste:\n"
@@ -2877,7 +2877,7 @@ If[Needs[\"SARAH\`\"] === \$Failed,
    Print[\"SARAH successfully loaded.\"]; Quit[0]
   ];"
         exit 1
-    fi
+    }
 }
 
 #_____________________________________________________________________
