@@ -19,7 +19,10 @@
 
 *)
 
-Begin["FlexibleSUSY`Private`"];
+With[{dir = DirectoryName@$Input},
+   Once@Get@FileNameJoin@{dir, "type.m"};];
+
+Begin@"FlexibleSUSY`Private`";
 
 With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
 WriteLToLConversionClass[
@@ -49,8 +52,13 @@ Module[
       "@LToLConversion_set_slha@" -> "slha_io.set_LToLConversion_settings(ltolconversion_settings);",
       "@LToLConversion_reset@" -> "ltolconversion_settings.reset();"};
 
-   If[observables === {}, newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
-   If[observables =!= {},
+   If[Or[observables === {},
+         Not@FlexibleSUSY`FSFeynArtsAvailable,
+         Not@FlexibleSUSY`FSFormCalcAvailable],
+      newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
+   If[And[observables =!= {},
+         FlexibleSUSY`FSFeynArtsAvailable,
+         FlexibleSUSY`FSFormCalcAvailable],
       Print["Creating LToLConversion class ..."];
       Get@main;
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];

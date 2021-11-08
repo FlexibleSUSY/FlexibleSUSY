@@ -20,7 +20,9 @@
 
 *)
 
-Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
+With[{dir = DirectoryName@$Input},
+   Once@Get@FileNameJoin@{dir, "type.m"};];
+
 Begin@"Observables`Private`";
 With[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
       obs = FlexibleSUSYObservable`BrLTo3L,

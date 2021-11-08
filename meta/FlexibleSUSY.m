@@ -4906,7 +4906,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
          (* Load and evaluate NPointFunctions write classes for observables *)
          If[!DirectoryQ@#,
             CreateDirectory@#]&@ FileNameJoin@{FSOutputDir, "npointfunctions"};
-         If[FSFeynArtsAvailable && FSFormCalcAvailable,
+
             Module[{files, obs, classes, namespaces, newRules = {}, down},
                files = FileNames["class.m",
                   FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions"}, 2];
@@ -4934,7 +4934,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                down = Insert[down, newRules, {1,2,-1}];
                DownValues@GeneralReplacementRules = down;
 
-               AllNPFVertices = DeleteDuplicates@AllNPFVertices;];];
+               AllNPFVertices = DeleteDuplicates@AllNPFVertices;];
 
            Print["Creating FFMasslessV form factor class for other observables ..."];
            FFMasslessVVertices =

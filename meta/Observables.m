@@ -42,15 +42,13 @@ IsObservable::usage = "Returns true if given symbol is an observable.";
 
 Begin["`Private`"];
 
-If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
-   Module[{files, observables, symbols},
-      files = FileNames["observable.m",
-         FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
-      observables = StringSplit[files, $PathnameSeparator][[All, -2]];
-      symbols = Symbol["FlexibleSUSYObservable`"<>#]&/@observables;
-      AppendTo[FlexibleSUSYObservable`FSObservables, #]&/@symbols;
-      Get/@files;
-   ];
+Module[{files, observables, symbols},
+   files = FileNames["observable.m",
+      FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
+   observables = StringSplit[files, $PathnameSeparator][[All, -2]];
+   symbols = Symbol["FlexibleSUSYObservable`"<>#]&/@observables;
+   AppendTo[FlexibleSUSYObservable`FSObservables, #]&/@symbols;
+   Get/@files;
 ];
 
 IsObservable[sym_] :=

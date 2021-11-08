@@ -450,7 +450,7 @@ ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
 Module[{files, obs, pattern = 0, once},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] := (
-   If[!TrueQ@once && FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
+   If[!TrueQ@once,
       files = FileNames["write.m",
          FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
       Get/@files;

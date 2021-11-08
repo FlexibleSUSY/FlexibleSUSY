@@ -64,20 +64,34 @@ getFLHA ~ SetAttributes ~ {Protected, Locked};
 
 FlexibleSUSYObservable`LToLConversion::errBlock = "
 Observable can be called from: FlexibleSUSYLowEnergy, FWCOEF, IMFWCOEF only.";
+FlexibleSUSYObservable`LToLConversion::errConfigured = "
+FeynArts and/or FormCalc are not installed, but the observable
+is included in the corresponding file:
+   `1`/FlexibleSUSY.m
+Please, either remove it from there, or install FeynArts and FormCalc.";
 write[block:_String, obs:`type`observable, idx:_Integer, comment:_String] :=
-Switch[block,
-   "FlexibleSUSYLowEnergy",
-      WriteOut`Private`WriteSLHABlockEntry[block,
-         {"Re(OBSERVABLES."<>Observables`GetObservableName@obs<>"(0))",
-            idx},
-         Observables`GetObservableDescription@obs],
-   "FWCOEF"|"IMFWCOEF",
-      WriteOut`Private`WriteSLHABlockEntry[block,
-         {"OBSERVABLES."<>Observables`GetObservableName@obs,
-            Observables`GetObservableType@obs},
-         getFLHA@obs],
-   _,
-      Utils`AssertOrQuit[_, FlexibleSUSYObservable`LToLConversion::errBlock]];
+Module[{configured},
+   configured = And[FlexibleSUSY`FSFeynArtsAvailable,
+                    FlexibleSUSY`FSFormCalcAvailable];
+   Utils`AssertOrQuit[configured,
+      FlexibleSUSYObservable`LToLConversion::errConfigured,
+      FlexibleSUSY`FSOutputDir
+   ];
+   Switch[block,
+      "FlexibleSUSYLowEnergy",
+         WriteOut`Private`WriteSLHABlockEntry[block,
+            {"Re(OBSERVABLES."<>Observables`GetObservableName@obs<>"(0))",
+               idx},
+            Observables`GetObservableDescription@obs],
+      "FWCOEF"|"IMFWCOEF",
+         WriteOut`Private`WriteSLHABlockEntry[block,
+            {"OBSERVABLES."<>Observables`GetObservableName@obs,
+               Observables`GetObservableType@obs},
+            getFLHA@obs],
+      _,
+         Utils`AssertOrQuit[_, FlexibleSUSYObservable`LToLConversion::errBlock]
+   ]
+];
 write // Utils`MakeUnknownInputDefinition;
 write ~ SetAttributes ~ {Protected, Locked};
 

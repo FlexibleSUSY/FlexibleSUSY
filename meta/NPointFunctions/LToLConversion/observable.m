@@ -20,7 +20,8 @@
 
 *)
 
-Get@FileNameJoin@{DirectoryName@$Input, "type.m"};
+With[{dir = DirectoryName@$Input},
+   Once@Get@FileNameJoin@{dir, "type.m"};];
 
 Begin@"Observables`Private`";
 With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],

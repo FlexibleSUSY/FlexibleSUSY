@@ -20,6 +20,9 @@
 
 *)
 
+With[{dir = DirectoryName@$Input},
+   Once@Get@FileNameJoin@{dir, "type.m"};];
+
 Begin@"FlexibleSUSY`Private`";
 
 WriteBrLTo3LClass::usage = "
@@ -41,7 +44,9 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
       obs = DeleteDuplicates@Cases[
          Observables`GetRequestedObservables@blocks,
          FlexibleSUSYObservable`BrLTo3L[__]];
-      If[obs =!= {},
+      If[And[obs =!= {},
+            FlexibleSUSY`FSFeynArtsAvailable,
+            FlexibleSUSY`FSFormCalcAvailable],
          Print@"Creating BrLTo3L class ...";
          Get@main;
          fermions = DeleteDuplicates@Cases[obs, {_, f_, bf_} :> {bf, f},
