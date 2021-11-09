@@ -135,6 +135,8 @@ FSFancyPrint::usage = "Print text in fancy headline style";
 
 FSFancyLine::usage = "Print separator line in command line mode";
 
+FSFancyWarning::usage = "Print a warning with a style."
+
 PrintHeadline::usage = "Print fancy head line";
 
 PrintAndReturn::usage = "Print result and return it";
@@ -411,6 +413,17 @@ If[!$Notebooks,
    ];
 ];
 SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
+
+FSFancyWarning[string_String, len_Integer:70] :=
+Module[{warning, chopped},
+   warning = If[!$Notebooks,
+      "\033[1;33mWarning\033[1;0m: ",
+      Style["Warning: ", Yellow]
+   ];
+   chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
+   chopped = StringReplace[chopped, "\n"-> "\n         "];
+   WriteString["stdout", warning <> chopped <> "\n"]
+];
 
 EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
 EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;
