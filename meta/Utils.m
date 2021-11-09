@@ -205,6 +205,11 @@ somewhere in the scope of the package, where foo is defined.
 @returns The input symbol.
 @note UpValues for symbol[args___] are not cleared.";
 
+StaticInclude::usage = "
+@brief Once gets a file, which is defined relative to the directory of
+       the calling file.
+@param file A name of a file to load.";
+
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
 Read the entire contents of the file given by fileName and return it
 as a list of Strings representing the lines in the file.
@@ -522,6 +527,12 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
    sym];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 MakeUnknownInputDefinition // Protect;
+
+StaticInclude[file_String] :=
+   With[{dir = DirectoryName@$Input, inserted=file},
+      Once@Get@FileNameJoin@{dir, inserted};];
+StaticInclude // MakeUnknownInputDefinition;
+StaticInclude // Protect;
 
 abbreviateLongString[expr_] :=
 Module[{str, b},

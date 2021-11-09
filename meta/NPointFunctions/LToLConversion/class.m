@@ -19,8 +19,7 @@
 
 *)
 
-With[{dir = DirectoryName@$Input},
-   Once@Get@FileNameJoin@{dir, "type.m"};];
+Utils`StaticInclude@"type.m";
 
 Begin@"FlexibleSUSY`Private`";
 

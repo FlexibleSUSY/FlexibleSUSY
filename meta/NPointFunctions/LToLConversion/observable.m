@@ -20,8 +20,7 @@
 
 *)
 
-With[{dir = DirectoryName@$Input},
-   Once@Get@FileNameJoin@{dir, "type.m"};];
+Utils`StaticInclude@"type.m";
 
 Begin@"Observables`Private`";
 With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],

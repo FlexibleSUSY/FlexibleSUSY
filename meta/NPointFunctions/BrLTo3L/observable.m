@@ -20,8 +20,7 @@
 
 *)
 
-With[{dir = DirectoryName@$Input},
-   Once@Get@FileNameJoin@{dir, "type.m"};];
+Utils`StaticInclude@"type.m";
 
 Begin@"Observables`Private`";
 With[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
