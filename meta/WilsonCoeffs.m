@@ -69,19 +69,20 @@ findFermionChains::usage = "
 @param chiralBasis Name basis element rules of the form {Rule[_String,_]..}.
 @returns List of <string chain name>->NPointFunctions`Mat[F#] pairs.";
 findFermionChains[subs:{Rule[_,_]..}, chiralBasis:{Rule[_String,_]..}] :=
-Module[{warning, basisPos},
-   warning = If[!$Notebooks,
-      "\033[1;33mWarning\033[1;0m",
-      Style["Warning",Yellow]];
+Module[{basisPos},
    basisPos = Position[subs, #]& /@ chiralBasis[[All, 2]];
    Table[
       If[basisPos[[i]] === {},
-         Print[warning,": " <> chiralBasis[[i,1]] <> " is absent in GenericSums."];
+         Utils`FSFancyWarning[chiralBasis[[i,1]] <> " is zero. "<>
+               "It might be expected or accidential. "<>
+               "You might want to check it."];
          chiralBasis[[i,1]]->NPointFunctions`Mat[],
          (*else*)
          chiralBasis[[i,1]]->NPointFunctions`Mat[Extract[subs,{basisPos[[i,1,1]],basisPos[[i,1,2]]-1}]]
       ],
-      {i,Length@basisPos}]];
+      {i,Length@basisPos}
+   ]
+];
 
 createNewNPF::usage =
 "@brief Extracts the coefficients for a given basis and NPF object.";
