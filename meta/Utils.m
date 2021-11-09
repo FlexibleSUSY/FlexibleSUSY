@@ -366,8 +366,8 @@ PrintHeadline[text__] :=
 FSFancyWarning[string_String, len_Integer:70] :=
 Module[{warning, chopped},
    warning = If[!$Notebooks,
-      "\033[1;33mWarning\033[1;0m: ",
-      Style["Warning: ", Yellow]
+      "\033[1;36mWarning\033[1;0m: ",
+      Style["Warning: ", Cyan]
    ];
    chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
    chopped = StringReplace[chopped, "\n"-> "\n         "];
