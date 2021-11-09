@@ -19,7 +19,7 @@
 
 *)
 
-Utils`StaticInclude@"type.m";
+Utils`DynamicInclude@"type.m";
 
 Begin@"FlexibleSUSY`Private`";
 

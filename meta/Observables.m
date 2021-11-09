@@ -26,6 +26,9 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 Begin["FlexibleSUSYObservable`"];
 FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   EDM, BrLToLGamma, bsgamma };
+
+Utils`DynamicInclude@FileNameJoin@{
+   FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions", "*", "observable.m"};
 End[];
 
 GetRequestedObservables::usage="";
@@ -41,15 +44,6 @@ GetObservableDescription::usage="returns description of observable.";
 IsObservable::usage = "Returns true if given symbol is an observable.";
 
 Begin["`Private`"];
-
-Module[{files, observables, symbols},
-   files = FileNames["observable.m",
-      FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
-   observables = StringSplit[files, $PathnameSeparator][[All, -2]];
-   symbols = Symbol["FlexibleSUSYObservable`"<>#]&/@observables;
-   AppendTo[FlexibleSUSYObservable`FSObservables, #]&/@symbols;
-   Get/@files;
-];
 
 IsObservable[sym_] :=
     MemberQ[FlexibleSUSYObservable`FSObservables, sym] || \

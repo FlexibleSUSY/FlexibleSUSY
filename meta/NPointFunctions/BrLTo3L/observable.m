@@ -20,23 +20,25 @@
 
 *)
 
-Utils`StaticInclude@"type.m";
+Utils`DynamicInclude@"type.m";
 
 Begin@"Observables`Private`";
 With[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
       obs = FlexibleSUSYObservable`BrLTo3L,
       cxx = CConversion`ToValidCSymbolString},
 
+   AppendTo[FlexibleSUSYObservable`FSObservables, obs];
+
    GetObservableName@obs@args := StringJoin[
       cxx@lep, cxx@nI, "_to_", cxx@lep, cxx@nO, cxx@lep, cxx@nA,
       cxx@SARAH`bar@lep, cxx@nA, "_for_", SymbolName@proc,
-      "_", cxx[loopN+0], "loop"];
+      "_", ToString@loopN, "loop"];
 
    GetObservableDescription@obs@args := StringJoin[
       cxx@lep, "(", cxx@nI, ") to ", cxx@lep, "(", cxx@nO, ")", cxx@lep, "(",
       cxx@nA, ")", cxx@SARAH`bar@lep, "(", cxx@nA, ")",
       " for ", SymbolName@proc,
-      " ", cxx[loopN+0], " loop"];
+      " ", ToString@loopN, " loop"];
 
    GetObservableType@obs@args :=
       CConversion`ArrayType[CConversion`complexScalarCType, 13];
@@ -44,5 +46,6 @@ With[{args = BrLTo3L`arguments[lep, nI -> {nO, nA}, proc, loopN],
    CalculateObservable[obs@args, structName:_String] := StringJoin[
       structName, ".", GetObservableName@obs@##, " = ",
       BrLTo3L`calculate@obs@##, ";"]&
-         [lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA}, proc, loopN];];
+         [lep@nI -> {lep@nO, lep@nA, SARAH`bar@lep@nA}, proc, loopN];
+];
 End[];

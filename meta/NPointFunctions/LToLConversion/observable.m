@@ -20,13 +20,15 @@
 
 *)
 
-Utils`StaticInclude@"type.m";
+Utils`DynamicInclude@"type.m";
 
 Begin@"Observables`Private`";
 With[{args = LToLConversion`arguments[in@inN, out@outN, nucl, proc, loopN],
       obs = FlexibleSUSYObservable`LToLConversion,
       cxx = CConversion`ToValidCSymbolString,
       namespace = LToLConversion`namespace@C},
+
+   AppendTo[FlexibleSUSYObservable`FSObservables, obs];
 
    GetObservableName@obs@args := StringJoin[
       cxx@in, cxx@inN, "to", cxx@out, cxx@outN, "conversion_in",

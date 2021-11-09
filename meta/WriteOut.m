@@ -451,9 +451,8 @@ ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 Module[{files, obs, pattern = 0, once},
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] := (
    If[!TrueQ@once,
-      files = FileNames["write.m",
-         FileNameJoin@{FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions"}, 2];
-      Get/@files;
+      files = Utils`DynamicInclude@FileNameJoin@{
+         FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions", "*", "write.m"};
       obs = StringSplit[files, $PathnameSeparator][[All, -2]];
       pattern = Alternatives@@(ToExpression["_FlexibleSUSYObservable`"<>#]&/@obs);
       once = True;];

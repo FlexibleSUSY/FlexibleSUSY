@@ -205,9 +205,8 @@ somewhere in the scope of the package, where foo is defined.
 @returns The input symbol.
 @note UpValues for symbol[args___] are not cleared.";
 
-StaticInclude::usage = "
-@brief Once gets a file, which is defined relative to the directory of
-       the calling file.
+DynamicInclude::usage = "
+@brief Once gets a file(s), specified by the input string.
 @param file A name of a file to load.";
 
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
@@ -528,11 +527,39 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 MakeUnknownInputDefinition // Protect;
 
-StaticInclude[file_String] :=
-   With[{dir = DirectoryName@$Input, inserted=file},
-      Once@Get@FileNameJoin@{dir, inserted};];
-StaticInclude // MakeUnknownInputDefinition;
-StaticInclude // Protect;
+DynamicInclude[path_String] :=
+Module[{separatedQ, wildQ, files},
+   separatedQ = StringContainsQ[path, $PathnameSeparator];
+   wildQ = StringContainsQ[path, "*"];
+
+   Switch[{wildQ, separatedQ},
+      {False, False},
+         Return@singleInclude@FileNameJoin@{DirectoryName@$Input, path};,
+      {False, True},
+         Return@singleInclude@path;,
+      {True, False},
+         files = FileNames@FileNameJoin@{DirectoryName@$Input, path};
+         Return[singleInclude/@files];,
+      {True, True},
+         Return[singleInclude/@FileNames@path];
+   ];
+];
+DynamicInclude // MakeUnknownInputDefinition;
+DynamicInclude // Protect;
+
+singleInclude[path_String] :=
+With[{inserted = path},
+   AssertOrQuit[And[FileExistsQ@path, Not@DirectoryQ@path],
+      DynamicInclude::errNoFile,
+      path
+   ];
+   Once@Get@inserted;
+   Return@inserted;
+];
+singleInclude // MakeUnknownInputDefinition;
+singleInclude // Protect;
+
+DynamicInclude::errNoFile = "\nFile\n`1`\ndoes not exist and can't be loaded!";
 
 abbreviateLongString[expr_] :=
 Module[{str, b},

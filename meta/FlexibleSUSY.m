@@ -4903,14 +4903,14 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                             {FileNameJoin[{$flexiblesusyTemplateDir, "b_to_s_gamma.cpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_b_to_s_gamma.cpp"}]}}];
 
-         (* Load and evaluate NPointFunctions write classes for observables *)
-         If[!DirectoryQ@#,
-            CreateDirectory@#]&@ FileNameJoin@{FSOutputDir, "npointfunctions"};
+            (* Load and evaluate NPointFunctions write classes for observables *)
+            Module[{files, obs, classes, namespaces, newRules = {}, down, dir},
+               dir = FileNameJoin@{FSOutputDir, "npointfunctions"};
+               If[!DirectoryQ@dir, CreateDirectory@dir];
+               files = Utils`DynamicInclude@FileNameJoin@{
+                  FlexibleSUSY`$flexiblesusyMetaDir, "NPointFunctions",
+                  "*", "class.m"};
 
-            Module[{files, obs, classes, namespaces, newRules = {}, down},
-               files = FileNames["class.m",
-                  FileNameJoin@{$flexiblesusyMetaDir, "NPointFunctions"}, 2];
-               Get/@files;
                obs = StringSplit[files, $PathnameSeparator][[All, -2]];
                classes = Symbol["FlexibleSUSY`Private`Write"<>#<>"Class"]&/@obs;
                namespaces = ToExpression[#<>"`namespace[File]"]&/@obs;
