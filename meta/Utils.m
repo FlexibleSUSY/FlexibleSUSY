@@ -384,9 +384,12 @@ AssertOrQuit[x___] :=
 If[!$Notebooks,
    internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
    Module[{RedString,WriteOut,MultilineToDummy,replacedMessage},
-      If[assertion === True,Return@True];
+      If[TrueQ@assertion, Return@True];
+      If[TrueQ@FlexibleSUSY`FSColorsAvailable,
+         RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";,
+         RedString[str_] := str;
+      ];
 
-      RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";
       WriteOut[str__] := WriteString["stdout"~OutputStream~1,StringJoin@str];
       MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
       replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
@@ -417,7 +420,10 @@ SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
 FSFancyWarning[string_String, len_Integer:70] :=
 Module[{warning, chopped},
    warning = If[!$Notebooks,
-      "\033[1;36mWarning\033[1;0m: ",
+      If[TrueQ@FlexibleSUSY`FSColorsAvailable,
+         "\033[1;36mWarning\033[1;0m: ",
+         "Warning: "
+      ],
       Style["Warning: ", Cyan]
    ];
    chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];

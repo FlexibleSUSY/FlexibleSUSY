@@ -3408,6 +3408,9 @@ add_metaflags() {
    local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
+   local tcol_='FSColorsAvailable = '
+   local col_="${tcol_}$(test $enable_colors = 'yes' && echo 'True' || echo 'False');"
+
    local c_=''
    local fs_=''
    for m in ${MODELS}; do
@@ -3428,6 +3431,13 @@ add_metaflags() {
       c_=$(grep "$tfc_" $fs_)
       if [ "$c_" != "$fc_" ]; then
          [ "$c_" != '' ] && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      fi
+
+      c_=$(grep "$tcol_" $fs_)
+      if [ "$c_" != "$col_" ]; then
+         [ "$c_" != '' ] && \
+            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
+            echo "$col_" >> $fs_
       fi
 
    done
