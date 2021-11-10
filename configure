@@ -3408,7 +3408,7 @@ add_metaflags() {
    local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_='FSColorsAvailable = '
+   local tcol_='FSEnableColors = '
    local col_="${tcol_}$(test $enable_colors = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''

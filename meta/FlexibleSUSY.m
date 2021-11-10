@@ -366,7 +366,7 @@ FSLoopLibraries = { FSSOFTSUSY };
 
 FSFeynArtsAvailable = False;
 FSFormCalcAvailable = False;
-FSColorsAvailable = False;
+FSEnableColors = False;
 
 Begin["`Private`"];
 

@@ -385,7 +385,7 @@ If[!$Notebooks,
    internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
    Module[{RedString,WriteOut,MultilineToDummy,replacedMessage},
       If[TrueQ@assertion, Return@True];
-      If[TrueQ@FlexibleSUSY`FSColorsAvailable,
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
          RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";,
          RedString[str_] := str;
       ];
@@ -420,7 +420,7 @@ SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
 FSFancyWarning[string_String, len_Integer:70] :=
 Module[{warning, chopped},
    warning = If[!$Notebooks,
-      If[TrueQ@FlexibleSUSY`FSColorsAvailable,
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
          "\033[1;36mWarning\033[1;0m: ",
          "Warning: "
       ],
