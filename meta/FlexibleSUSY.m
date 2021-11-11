@@ -4888,7 +4888,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                 ];
 
               With[{f = FileNameJoin[{"test", "FlexibleDecay.mk"}]},
-                 If[FileExistsQ[f], DeleteFile[f]]
+                 If[FileExistsQ[f], DeleteFile[f]];
                  WriteString[f, "ENABLE_FLEXIBLEDECAY := yes"]
               ];
               ,
