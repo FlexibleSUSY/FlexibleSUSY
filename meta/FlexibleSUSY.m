@@ -368,7 +368,7 @@ FSLoopLibraries = { FSSOFTSUSY };
 
 FSFeynArtsAvailable = False;
 FSFormCalcAvailable = False;
-FSColorsAvailable = False;
+FSEnableColors = False;
 
 Begin["`Private`"];
 
@@ -4844,7 +4844,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                 ];
 
               With[{f = FileNameJoin[{"test", "FlexibleDecay.mk"}]},
-                 If[FileExistsQ[f], DeleteFile[f]]
+                 If[FileExistsQ[f], DeleteFile[f]];
                  WriteString[f, "ENABLE_FLEXIBLEDECAY := yes"]
               ];
               ,

@@ -366,7 +366,7 @@ PrintHeadline[text__] :=
 FSFancyWarning[string_String, len_Integer:70] :=
 Module[{warning, chopped},
    warning = If[!$Notebooks,
-      If[FlexibleSUSY`FSColorsAvailable,
+      If[FlexibleSUSY`FSEnableColors,
          "\033[1;36mWarning\033[1;0m: ",
          "Warning: "
       ],
@@ -413,8 +413,8 @@ AssertOrQuit[x___] :=
 If[!$Notebooks,
    internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
    Module[{RedString,WriteOut,MultilineToDummy,replacedMessage},
-      If[assertion === True,Return@True];
-      If[FlexibleSUSY`FSColorsAvailable,
+      If[TrueQ@assertion, Return@True];
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
          RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";,
          RedString[str_] := str;
       ];
@@ -445,6 +445,23 @@ If[!$Notebooks,
    ];
 ];
 SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
+
+FSFancyWarning[string_String, len_Integer:70] :=
+Module[{warning, chopped},
+   warning = If[!$Notebooks,
+      If[TrueQ@FlexibleSUSY`FSEnableColors,
+         "\033[1;36mWarning\033[1;0m: ",
+         "Warning: "
+      ],
+      Style["Warning: ", Cyan]
+   ];
+   chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
+   chopped = StringReplace[chopped, "\n"-> "\n         "];
+   If[!$Notebooks,
+      WriteString["stdout", warning <> chopped <> "\n"];,
+      Print[warning, chopped];
+   ];
+];
 
 EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
 EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;

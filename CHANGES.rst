@@ -1,7 +1,7 @@
-FlexibleSUSY 2.6.2 [July, 08 2021]
+FlexibleSUSY 2.?.? [?, ? 202?]
 ==================================
 
-Changes
+New features
 -------
 
 * Parallelized calculation of decay amplitudes during the mathematica phase.
@@ -21,10 +21,16 @@ Changes
      - 555s
      - 395s
 
+Changes
+-------
+
+* [commit ae1eae8e4d373eec531d6e5774977da2f12e88c8]: Mathematica-style indexing (starting from 1) of
+  leptons in L'->LGamma via the mathlink interface.
+
 Fixed bugs
 ----------
 
-* [commit ]: Branching ratio of L'->LGamma was breaking printing of
+* [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of L'->LGamma was breaking printing of
   observables via the mathlink interface.
 
 FlexibleSUSY 2.6.1 [July, 08 2021]
