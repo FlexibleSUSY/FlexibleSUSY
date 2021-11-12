@@ -1020,7 +1020,7 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsScalar, finalState_List] :=
                   ChiralVertex, "Decay_amplitude_SFF",
                   MomentumDifferenceVertex, "Decay_amplitude_SSV",
                   InverseMetricVertex, "Decay_amplitude_SVV",
-                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState <> " is not supported."];
+                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState] <> " is not supported."];
                      "Unknown_amplitude_type"
                  ]
           ];
@@ -1031,7 +1031,7 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsFermion, finalState_List] :=
            Switch[{vertexType, GetFeynArtsTypeName@Last@finalState},
                   {ChiralVertex, S}, "Decay_amplitude_FFS",
                   {ChiralVertex, V}, "Decay_amplitude_FFV",
-                  _, Utils`FSFancyWarning["decay ", initialParticle, " -> ", finalState, " is not supported."];
+                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState] <> " is not supported."];
                      "Unknown_amplitude_type"
                  ]
           ];
