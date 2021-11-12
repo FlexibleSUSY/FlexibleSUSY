@@ -1,0 +1,28 @@
+name: static analysis
+
+on:
+  push:
+    branches:
+      - master
+      - development
+        #    paths:
+      #      - 'configure'
+
+  pull_request:
+    #    paths:
+    # - 'configure'
+
+jobs:
+  check-scripts:
+    runs-on: ubuntu-20.04
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:0.10.0
+
+    steps:
+
+      # action checks-out our repository directly under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check scripts
+        run: shellcheck -S error configure
