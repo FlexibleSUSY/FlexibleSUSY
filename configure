@@ -3141,22 +3141,33 @@ get_model_specific_corrections() {
         return 1
     }
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs4LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS3Loop" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS4Loop" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "FlexibleEFTHiggs" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True"   && ho="${ho} SM_thresholds"
+    grep -q 'UseSMYukawa2Loop' "${model_file}"   && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True" && \
+        ho="${ho} SM_thresholds"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && ho="${ho} MSSM_thresholds"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && ho="${ho} MSSM_thresholds"
+    grep -q 'UseHiggs2LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && ho="${ho} MSSM_higgs NMSSM_higgs"
+    grep -q 'UseHiggs3LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && ho="${ho} SplitMSSM"
+    grep -q 'UseMSSMAlphaS2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseMSSMYukawa2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseHiggs2LoopNMSSM' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
+    grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && \
+        ho="${ho} SplitMSSM"
 
     ho=$(make_unique "${ho}")
     ho=$(string_trim "${ho}")
