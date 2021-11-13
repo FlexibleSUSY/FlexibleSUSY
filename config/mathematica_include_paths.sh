@@ -23,12 +23,8 @@ find_math_dirs() {
 get_librarylink_incpath() {
     find_math_dirs
 
-    for p in \
-        "$topdir/SystemFiles/IncludeFiles/C" ; do
-        test -d "$p" && break
-    done
-
-    echo "$p"
+    [ -d "${topdir}/SystemFiles/IncludeFiles/C" ] && \
+        echo "${topdir}/SystemFiles/IncludeFiles/C"
 }
 
 get_mathlink_incpath() {

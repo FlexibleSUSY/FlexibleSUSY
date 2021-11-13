@@ -1792,7 +1792,7 @@ check_eigen_incl() {
 
     [ -z "$eigen_inc_dir" ] && \
     type pkg-config > /dev/null && \
-    [ -n ${eigen_name} ] && \
+    [ -n "${eigen_name}" ] && \
     [ -f ${eigen_name}.pc ] && \
     {
         message -n "Checking for Eigen library using local ${eigen_name}.pc ... "
@@ -2083,7 +2083,7 @@ check_gm2calc() {
         [ -z "$gm2calc_inc_dir" ] && \
         [ -z "$gm2calc_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -n ${gm2calc_name} ] && \
+        [ -n "${gm2calc_name}" ] && \
         [ -f ${gm2calc_name}.pc ] && \
         {
             message -n "Checking GM2Calc using local ${gm2calc_name}.pc ... "
@@ -2195,7 +2195,7 @@ check_himalaya() {
         [ -z "$himalaya_inc_dir" ] && \
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
-        [ -n ${himalaya_name} ] && \
+        [ -n "${himalaya_name}" ] && \
         [ -f ${himalaya_name}.pc ] && \
         {
             message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
@@ -2347,7 +2347,7 @@ check_looptools() {
    [ -z "$looptools_inc_dir" ] && \
    [ -z "$looptools_lib_dir" ] && \
    type pkg-config > /dev/null && \
-   [ -n ${looptools_name} ] && \
+   [ -n "${looptools_name}" ] && \
    [ -f ${looptools_name}.pc ] && \
    {
       message -n "Checking LoopTools using local ${looptools_name}.pc ... "
@@ -2420,7 +2420,7 @@ check_collier() {
    [ -z "$collier_inc_dir" ] && \
    [ -z "$collier_lib_dir" ] && \
    type pkg-config > /dev/null && \
-   [ -n ${collier_name} ] && \
+   [ -n "${collier_name}" ] && \
    [ -f ${collier_name}.pc ] && \
    {
       message -n "Checking COLLIER using local ${collier_name}.pc ... "
@@ -2642,7 +2642,7 @@ check_tsil() {
     [ -z "$tsil_inc_dir" ] && \
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
-    [ -n ${tsil_name} ] && \
+    [ -n "${tsil_name}" ] && \
     [ -f ${tsil_name}.pc ] && \
     {
         message -n "Checking TSIL using local ${tsil_name}.pc ... "
@@ -3141,22 +3141,33 @@ get_model_specific_corrections() {
         return 1
     }
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs4LoopSM" "True"    && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS3Loop" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMAlphaS4Loop" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "FlexibleEFTHiggs" "True"   && ho="${ho} SM"
-    mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True"   && ho="${ho} SM_thresholds"
+    grep -q 'UseSMYukawa2Loop' "${model_file}"   && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseSMYukawa2Loop" "True" && \
+        ho="${ho} SM_thresholds"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True"  && ho="${ho} MSSM_higgs"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && ho="${ho} MSSM_thresholds"
-    mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && ho="${ho} MSSM_thresholds"
+    grep -q 'UseHiggs2LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && ho="${ho} MSSM_higgs NMSSM_higgs"
+    grep -q 'UseHiggs3LoopMSSM' "${model_file}"  && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopMSSM" "True" && \
+        ho="${ho} MSSM_higgs"
 
-    mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && ho="${ho} SplitMSSM"
+    grep -q 'UseMSSMAlphaS2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMAlphaS2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseMSSMYukawa2Loop' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseMSSMYukawa2Loop" "True" && \
+        ho="${ho} MSSM_thresholds"
+
+    grep -q 'UseHiggs2LoopNMSSM' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs2LoopNMSSM" "True" && \
+        ho="${ho} MSSM_higgs NMSSM_higgs"
+
+    grep -q 'UseHiggs3LoopSplit' "${model_file}" && \
+        mma_symbol_is "$model_file" "$math_cmd" "UseHiggs3LoopSplit" "True" && \
+        ho="${ho} SplitMSSM"
 
     ho=$(make_unique "${ho}")
     ho=$(string_trim "${ho}")
