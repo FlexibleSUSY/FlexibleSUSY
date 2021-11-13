@@ -2867,7 +2867,7 @@ WriteString["stderr", \$sarahModelDir];
 EOF
              )
 
-    if [ -z "$SARAH_MODEL_DIR" ] ; then
+    [ -z "$SARAH_MODEL_DIR" -o \( ! -z "$SARAH_MODEL_DIR" -a ! -d "$SARAH_MODEL_DIR" \) ] && {
         message "Error: Could not determine the SARAH model directory."
         message "   Please check that Mathematica and SARAH are installed correctly."
         message "   To do that, you may run \`${MATH}' and then copy and paste:\n"
@@ -2877,7 +2877,7 @@ If[Needs[\"SARAH\`\"] === \$Failed,
    Print[\"SARAH successfully loaded.\"]; Quit[0]
   ];"
         exit 1
-    fi
+    }
 }
 
 #_____________________________________________________________________
@@ -2885,6 +2885,8 @@ check_feynarts() {
     if test "x$enable_feynarts" = "xno"; then return; fi
 
     checking_msg "FeynArts installation"
+    local oldVersion=""
+    [ -f "${feynartsconfig}" ] && oldVersion=$(cat "${feynartsconfig}")
     rm -f ${feynartsconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FeynArts\`"];
@@ -2929,6 +2931,29 @@ EOF
         message "   Please make sure Needs[\"FeynArts\`\"] works correctly."
         exit 1
     fi
+
+   # Removing NPointFunctions, FormCalc, FeynArts output folders
+   [ "${enable_feynarts}" = "yes" ] && {
+      [ "${FEYNARTS_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
+                       | sed 's/ //g' \
+                       | sed 's/.*`\(.*\);/\1/')
+            local output=$(grep -m1 'OutputDirectory' "$m/start.m" \
+                        | sed 's/ //g' \
+                        | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            local dir="${output}/${eigenstate}/FeynArts"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
 }
 
 #_____________________________________________________________________
@@ -2936,6 +2961,8 @@ check_formcalc() {
     if test "x$enable_formcalc" = "xno"; then return; fi
 
     checking_msg "FormCalc installation"
+    local oldVersion=""
+    [ -f "${formcalcconfig}" ] && oldVersion=$(cat "${formcalcconfig}")
     rm -f ${formcalcconfig}
     "$MATH" <<EOF > /dev/null
 Needs["FormCalc\`"];
@@ -2979,6 +3006,28 @@ EOF
         message "   Please make sure Needs[\"FormCalc\`\"] works correctly."
         exit 1
     fi
+
+   # Removing NPointFunctions, FormCalc output folders
+
+   [ "${enable_formcalc}" = "yes" ] && {
+      [ "${FORMCALC_VERSION}" = "${oldVersion}" ] || {
+         for m in "models"/*; do
+            [ -e "$m/FlexibleSUSY.m" ] || continue
+            [ -e "$m/start.m" ] || continue
+            local eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
+                               | sed 's/ //g' \
+                               | sed 's/.*`\(.*\);/\1/')
+            local output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
+                           | sed 's/ //g' \
+                           | sed 's/.*\"\(.*\)\".*/\1/')
+            output=$(echo $m | sed "s/models/${output}/")
+            local dir="${output}/$m/${eigenstate}/FormCalc"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+            dir="${output}/$m/${eigenstate}/NPointFunctions"
+            [ -d "${dir}" ] && { rm -rf ${dir}; }
+         done
+      }
+   }
 
     if test "x$enable_formcalc" != "xno"; then
         checking_msg "working FormCalc"
@@ -3359,6 +3408,9 @@ add_metaflags() {
    local tfc_='FSFormCalcAvailable = '
    local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
 
+   local tcol_='FSEnableColors = '
+   local col_="${tcol_}$(test $enable_colors = 'yes' && echo 'True' || echo 'False');"
+
    local c_=''
    local fs_=''
    for m in ${MODELS}; do
@@ -3379,6 +3431,13 @@ add_metaflags() {
       c_=$(grep "$tfc_" $fs_)
       if [ "$c_" != "$fc_" ]; then
          [ "$c_" != '' ] && sed -i "s/${tfc_}.*/${fc_}/g" $fs_ || echo "$fc_" >> $fs_
+      fi
+
+      c_=$(grep "$tcol_" $fs_)
+      if [ "$c_" != "$col_" ]; then
+         [ "$c_" != '' ] && \
+            sed -i "s/${tcol_}.*/${col_}/g" $fs_ || \
+            echo "$col_" >> $fs_
       fi
 
    done

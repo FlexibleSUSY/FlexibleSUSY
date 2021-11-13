@@ -39,7 +39,7 @@ the input diagram is valid, by checking whether the internal structure is
 supported and the emitting fields can in fact emit the vector."
 IsChargedUnder::usage="Returns whether or not a field is charged under a given vectors gauge";
 
-Begin["Private`"];
+Begin["`Private`"];
 
 vertexCorrectionGraph = {
    {0, 1, 0, 0, 0, 0},
@@ -89,7 +89,7 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
-      Print["Warning: Diagram with internal particles of type ",
+      Utils`FSFancyWarning["Diagram with internal particles of type " <>
          StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]})];
       Print["         is currently not supported."];
       Print["         Discarding diagram with particles ",
