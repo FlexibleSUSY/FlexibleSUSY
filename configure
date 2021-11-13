@@ -1793,7 +1793,7 @@ check_eigen_incl() {
     [ -z "$eigen_inc_dir" ] && \
     type pkg-config > /dev/null && \
     [ -n "${eigen_name}" ] && \
-    [ -f "${eigen_name}.pc" ] && \
+    [ -f ${eigen_name}.pc ] && \
     {
         message -n "Checking for Eigen library using local ${eigen_name}.pc ... "
         EIGENFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${eigen_name} --cflags)
@@ -2084,7 +2084,7 @@ check_gm2calc() {
         [ -z "$gm2calc_lib_dir" ] && \
         type pkg-config > /dev/null && \
         [ -n "${gm2calc_name}" ] && \
-        [ -f "${gm2calc_name}.pc" ] && \
+        [ -f ${gm2calc_name}.pc ] && \
         {
             message -n "Checking GM2Calc using local ${gm2calc_name}.pc ... "
             GM2CALCFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${gm2calc_name} --cflags)
@@ -2196,7 +2196,7 @@ check_himalaya() {
         [ -z "$himalaya_lib_dir" ] && \
         type pkg-config > /dev/null && \
         [ -n "${himalaya_name}" ] && \
-        [ -f "${himalaya_name}.pc" ] && \
+        [ -f ${himalaya_name}.pc ] && \
         {
             message -n "Checking Himalaya using local ${himalaya_name}.pc ... "
             HIMALAYAFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${himalaya_name} --cflags)
@@ -2348,7 +2348,7 @@ check_looptools() {
    [ -z "$looptools_lib_dir" ] && \
    type pkg-config > /dev/null && \
    [ -n "${looptools_name}" ] && \
-   [ -f "${looptools_name}.pc" ] && \
+   [ -f ${looptools_name}.pc ] && \
    {
       message -n "Checking LoopTools using local ${looptools_name}.pc ... "
       LOOPTOOLSFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${looptools_name} --cflags)
@@ -2421,7 +2421,7 @@ check_collier() {
    [ -z "$collier_lib_dir" ] && \
    type pkg-config > /dev/null && \
    [ -n "${collier_name}" ] && \
-   [ -f "${collier_name}.pc" ] && \
+   [ -f ${collier_name}.pc ] && \
    {
       message -n "Checking COLLIER using local ${collier_name}.pc ... "
       COLLIERFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${collier_name} --cflags)
@@ -2643,7 +2643,7 @@ check_tsil() {
     [ -z "$tsil_lib_dir" ] && \
     type pkg-config > /dev/null && \
     [ -n "${tsil_name}" ] && \
-    [ -f "${tsil_name}.pc" ] && \
+    [ -f ${tsil_name}.pc ] && \
     {
         message -n "Checking TSIL using local ${tsil_name}.pc ... "
         TSILFLAGS=$(PKG_CONFIG_PATH=. pkg-config ${tsil_name} --cflags)
@@ -3655,9 +3655,10 @@ if test $# -gt 0 ; then
                 if test "x${prev}" = "xyes"; then
                     echo "INFO: $1: already enabled by default."
                 fi
-                echo "${deprecated_options}" | grep -q "${f}" && \
+                if test ! "x$(echo ${deprecated_options} | grep ${f})" = "x"; then
                     echo "WARNING: option $1 is deprecated and ignored"'!'
-                eval "${f}"=yes
+                fi
+                eval ${f}=yes
                 for c in $options ; do
                     if test "x$c" = "x$f" ; then
                         f=""
@@ -3678,7 +3679,7 @@ if test $# -gt 0 ; then
                 if test "x${prev}" = "xno"; then
                     echo "INFO: $1: already disabled by default."
                 fi
-                eval "${f}"=no
+                eval ${f}=no
                 for c in $options ; do
                     if test "x$c" = "x$f" ; then
                         f=""
@@ -3748,7 +3749,7 @@ check_install_dir
 
 # check for Mathematica if meta code generation is enabled or we
 # compile with LibraryLink
-if [ "${enable_meta}" = yes ] || [ \( "$enable_compile" = yes -a "$enable_librarylink" != no \) ]; then
+if [ "$enable_meta" = yes -o \( "$enable_compile" = yes -a "$enable_librarylink" != no \) ]; then
     check_math_cmd
     check_mathematica_info
 else
@@ -3812,23 +3813,23 @@ fi
 enable_defines
 
 replace_markers \
-    < "${MAKEFILE_TMPL}" > "${MAKEFILE}"
+    < $MAKEFILE_TMPL > $MAKEFILE
 
 # BEGIN: NOT EXPORTED ##########################################
 
 replace_markers \
-    < "${STANDALONE_MAKEFILE_TMPL}" | tee "${STANDALONE_MAKEFILES}" > /dev/null
+    < $STANDALONE_MAKEFILE_TMPL | tee $STANDALONE_MAKEFILES > /dev/null
 
 replace_markers \
-    < "${TOWER_MAKEFILE_TMPL}" | tee "${TOWER_MAKEFILES}" > /dev/null
+    < $TOWER_MAKEFILE_TMPL | tee $TOWER_MAKEFILES > /dev/null
 
 replace_markers \
-    < "${CUSTOMBETAS_MAKEFILE_TMPL}" | tee "${CUSTOMBETAS_MAKEFILES}" > /dev/null
+    < $CUSTOMBETAS_MAKEFILE_TMPL | tee $CUSTOMBETAS_MAKEFILES > /dev/null
 
 # END:   NOT EXPORTED ##########################################
 
 replace_markers \
-    < "${FSCONFIG_TMPL}" > "${FSCONFIG}"
+    < $FSCONFIG_TMPL > $FSCONFIG
 
 sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
@@ -3903,7 +3904,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
     -e 's|@n@|\
 |g' \
-    < "${CONFIGHDR_TMPL}" > "${CONFIGHDR}"
+    < $CONFIGHDR_TMPL > $CONFIGHDR
 
 sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
@@ -3912,20 +3913,20 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
     -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
     -e "s|@PKGNAME@|$PROGRAM_NAME|"    \
-    < "${DOC_MAINPAGE_TMPL}" > "${DOC_MAINPAGE}"
+    < $DOC_MAINPAGE_TMPL > $DOC_MAINPAGE
 
 sed -e "s|@MATH@|$MATH|" \
     -e "s|@OPERATING_SYSTEM@|$operating_system|" \
-    < "${SARAH_DEP_GEN_TMPL}" > "${SARAH_DEP_GEN}"
+    < $SARAH_DEP_GEN_TMPL > $SARAH_DEP_GEN
 
 if test "x${enable_meta}" = "xyes"; then
     add_metaflags
 fi
 
-rm -f "${CONFIGDIR}/version"
-echo "$FLEXIBLESUSY_VERSION" > "${CONFIGDIR}/flexiblesusy-version"
-echo "$GIT_COMMIT" > "${CONFIGDIR}/git_commit"
-echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > "${CONFIGDIR}/required_sarah_version.m"
+rm -f ${CONFIGDIR}/version
+echo "$FLEXIBLESUSY_VERSION" > ${CONFIGDIR}/flexiblesusy-version
+echo "$GIT_COMMIT" > ${CONFIGDIR}/git_commit
+echo "{${required_sarah_major}, ${required_sarah_minor}, ${required_sarah_patch}}" > ${CONFIGDIR}/required_sarah_version.m
 
-chmod a+x "${FSCONFIG}"
-chmod a+x "${SARAH_DEP_GEN}"
+chmod a+x $FSCONFIG
+chmod a+x $SARAH_DEP_GEN
