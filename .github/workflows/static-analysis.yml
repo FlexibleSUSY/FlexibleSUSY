@@ -23,13 +23,12 @@ on:
 
 jobs:
   check-scripts:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.10.0
+      image: navir/opensuseleap-for-flexiblesusy:latest
 
     steps:
 
-      # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
 
