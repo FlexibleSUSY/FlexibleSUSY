@@ -25,4 +25,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check scripts
-        run: shellcheck -S error configure
+        run: shellcheck -S error configure createmodel install-sarah createaddon
