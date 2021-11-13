@@ -10,6 +10,8 @@ on:
       - development
     paths-ignore:
       - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
       - 'AUTHORS'
       - 'COPYING'
       - 'doc/**'
@@ -21,6 +23,8 @@ on:
       - development
     paths-ignore:
       - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
       - 'AUTHORS'
       - 'COPYING'
       - 'doc/**'
