@@ -20,3 +20,4 @@ Checks: >
     -readability-else-after-return,
     -readability-implicit-bool-conversion,
     -readability-isolate-declaration,
+    -llvm-include-order
