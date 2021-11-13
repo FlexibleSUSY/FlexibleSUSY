@@ -2,15 +2,24 @@ name: static analysis
 
 on:
   push:
-    branches:
-      - master
-      - development
-        #    paths:
-      #      - 'configure'
+    paths:
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
 
   pull_request:
-    #    paths:
-    # - 'configure'
+    paths:
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
 
 jobs:
   check-scripts:
