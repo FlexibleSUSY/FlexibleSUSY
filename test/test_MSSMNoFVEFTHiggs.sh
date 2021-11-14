@@ -8,6 +8,7 @@ TB=5
 Xt=0
 Xb=0
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block

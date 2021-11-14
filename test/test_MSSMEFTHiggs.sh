@@ -13,6 +13,7 @@ Xt=0
 output="MASS-25"
 scan_data="$BASEDIR/test_MSSMEFTHiggs.dat"
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block

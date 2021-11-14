@@ -3,6 +3,7 @@
 BASEDIR="$(dirname $0)"
 MODELDIR="${BASEDIR}/../models"
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block
