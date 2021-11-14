@@ -6,22 +6,6 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-# absolute path to this script
-ABSBASEDIR=$(cd $BASEDIR && pwd)
-
-# operating system
-operating_system="`(uname -s) 2>/dev/null || echo unknown`"
-
-# determine Mathematica user directory
-case "$operating_system" in
-    Darwin)     mathematica_dir="${HOME}/Library/Mathematica" ;;
-    CYGWIN_NT*) mathematica_dir="${USERPROFILE}/AppData/Roaming/Mathematica" ;;
-    # Linux, *BSD
-    *)          mathematica_dir="${HOME}/.Mathematica" ;;
-esac
-
-mathematica_applications_dir="${mathematica_dir}/Applications"
-sarah_default_dir="${mathematica_applications_dir}/SARAH"
 flexiblesusy_sarah_dir="${BASEDIR}/sarah"
 mathematica_kernel="math"
 
@@ -179,6 +163,7 @@ is_executable () {
         return 1
     fi
 
+    # shellcheck disable=SC2034
     cmd=$(command -v -- "$1")
 }
 

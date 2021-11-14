@@ -886,7 +886,11 @@ is_empty_dir() {
         return 1
     fi
 
-    find "$1" -maxdepth 0 -empty | read v
+    if [ -n "$(ls -A "$1")" ]; then
+       return 1
+    else
+       return 0
+    fi
 }
 
 #_____________________________________________________________________
@@ -2683,29 +2687,27 @@ find_symbol_using_pkgconfig() {
     local symbol pkg ldpaths libnames pkg_flags
     pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
     pkg="$1"
-    linker_flags=""
     type pkg-config > /dev/null 2>&1 || {
-	logmsg "pkg-config not found"
-	return 1
+        logmsg "pkg-config not found"
+        return 1
     }
     pkg-config --exists "$pkg" || {
-	logmsg "pkg-config does not manage $pkg"
-	return 1
+        logmsg "pkg-config does not manage $pkg"
+        return 1
     }
     ldpaths=$(pkg-config ${pkg_flags} --libs-only-L "$pkg")
     libnames=$(pkg-config ${pkg_flags} --libs-only-l "$pkg")
     shift
     for symbol; do
-	for dopt in $default_lib_paths $ldpaths; do
-	    for lopt in $libnames; do
-		if check_symbol "$symbol" "$lopt" "$dopt"; then
-		    logmsg "found $symbol in $dopt $lopt"
-		    linker_flags=$(pkg-config ${pkg_flags} --libs "$pkg")
-		    continue 3
-		fi
-	    done
-	done
-	return 1
+        for dopt in $default_lib_paths $ldpaths; do
+            for lopt in $libnames; do
+                if check_symbol "$symbol" "$lopt" "$dopt"; then
+                  logmsg "found $symbol in $dopt $lopt"
+                  continue 3
+                fi
+            done
+        done
+        return 1
     done
     return 0
 }

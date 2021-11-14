@@ -3,12 +3,6 @@
 # SARAH installation script
 # Author: Alexander Voigt
 
-# directory of this script
-BASEDIR=$(dirname $0)
-
-# absolute path to this script
-ABSBASEDIR=$(cd $BASEDIR && pwd)
-
 # operating system
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
