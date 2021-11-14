@@ -1344,6 +1344,7 @@ check_multiarch() {
 
     if test "x$linuxdist" = "xmultiarch"; then
         if type dpkg-architecture > /dev/null 2>&1 ; then
+            # shellcheck disable=SC2091
             if $(dpkg-architecture -qDEB_HOST_MULTIARCH > /dev/null 2>&1) ; then
                 checking_msg "dpkg-architecture"
                 debmultiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2> /dev/null)
