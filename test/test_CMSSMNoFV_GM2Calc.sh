@@ -10,6 +10,7 @@ print_block="$BASEDIR/../utils/print_slha_block.awk"
 
 if [ -e GM2Calc.pc ] ; then
     eval $(grep '^prefix=' GM2Calc.pc)
+    # shellcheck disable=SC2154
     GM2CALC_EXE="${prefix}/bin/gm2calc.x"
 fi
 

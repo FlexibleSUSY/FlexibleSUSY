@@ -631,12 +631,7 @@ check_symbol() {
     # Check if we got a specific argument as to where the library
     # is to be found
     symbolfile=$symbollib
-    exts=".so .lib .dylib"
-    if test ! "x$shared" = "xno" ; then
-        exts="$exts .a"
-    else
-        exts=".a $exts"
-    fi
+    exts=".so .lib .dylib .a"
 
     usrlib="/usr/lib"
     if test "x$machine_word_size" = "x32" ; then
@@ -1134,11 +1129,13 @@ check_optional_modules() {
 
 #_____________________________________________________________________
 check_librarylink_incl() {
+    # sysid is defined in config/mathematica_include_paths.sh
+    # shellcheck disable=SC2154
     local default_llincdir="\
 ${MATH_INSTDIR}/SystemFiles/IncludeFiles/C:\
 ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/${MATH_SYSTEMID}/CompilerAdditions:\
 ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions:\
-${MATH_INSTDIR}/AddOns/MathLink/DeveloperKit/$sysid/CompilerAdditions"
+${MATH_INSTDIR}/AddOns/MathLink/DeveloperKit/${sysid}/CompilerAdditions"
 
     check_header "WolframLibrary.h" "$default_llincdir" \
                  "$default_inc_paths"
@@ -1571,14 +1568,11 @@ check_cxx_compiler_type() {
 
     case "$cxx_compiler_type" in
     gnu)   result "GNU"
-	   required_cxx_compiler_version="$required_gpp_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_gpp_version" ;;
+	   required_cxx_compiler_version="$required_gpp_compiler_version" ;;
     clang) result "Clang"
-	   required_cxx_compiler_version="$required_clang_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_clang_version" ;;
+	   required_cxx_compiler_version="$required_clang_compiler_version" ;;
     intel) result "Intel"
-	   required_cxx_compiler_version="$required_icpc_compiler_version"
-	   std_cxx11_compiler_version="$std_cxx11_icpc_version" ;;
+	   required_cxx_compiler_version="$required_icpc_compiler_version" ;;
     *)     result "unknown" ;;
     esac
 
@@ -3691,6 +3685,7 @@ if test $# -gt 0 ; then
             --enable-*)
                 f=$(echo "$1" | sed -e 's/--//' -e 's/-/_/g')
                 eval prev='$'$(echo "${f}")
+                # shellcheck disable=SC2154
                 if test "x${prev}" = "xyes"; then
                     echo "INFO: $1: already enabled by default."
                 fi

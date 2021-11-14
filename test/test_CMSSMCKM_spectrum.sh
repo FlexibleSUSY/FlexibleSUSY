@@ -73,7 +73,7 @@ diff_without_comments=`echo $diff | $sed_cmd -e '/^ *#/d' | $sed_cmd -e '/^+++/d
 exit_code=0
 
 if [ -n "$diff_without_comments" ]; then
-    echo "Error: difference between $semi_analytic_output and  $two_scale_output larger than $rel_error"
+    echo "Error: difference between ${FS_out} and  ${SS_out} larger than ${rel_error}"
     echo "$diff"
     echo ""
     echo "Test result: FAIL"

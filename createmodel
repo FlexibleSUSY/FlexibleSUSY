@@ -389,23 +389,24 @@ if test $# -gt 0 ; then
             --enable-*)
                 f=`echo $1 | sed -e 's/--//' -e 's/-/_/g'`
                 eval prev='$'`echo ${f}`
+                # shellcheck disable=SC2154
                 if test "x${prev}" = "xyes"; then
                     message "INFO: $1: already enabled by default."
                 fi
-                if test ! "x`message ${deprecated_options} | grep ${f}`" = "x"; then
-                    message "WARNING: option $1 is deprecated and ignored"'!'
-                fi
+                #if test ! "x`message ${deprecated_options} | grep ${f}`" = "x"; then
+                #    message "WARNING: option $1 is deprecated and ignored"'!'
+                #fi
                 eval ${f}=yes
                 for c in $options ; do
                     if test "x$c" = "x$f" ; then
                         f=""
                     fi
                 done
-                for c in $deprecated_options ; do
-                    if test "x$c" = "x$f" ; then
-                        f=""
-                    fi
-                done
+                #for c in $deprecated_options ; do
+                #    if test "x$c" = "x$f" ; then
+                #        f=""
+                #    fi
+                #done
                 if test "x$f" != "x" ; then
                     message "Invalid option '$1'. Try $0 --help" ; exit 1 ;
                 fi
