@@ -8,7 +8,7 @@
 #
 #   cat input.slha | slha_sort_blocks.sh
 
-[ $# -ge 1 -a -f "$1" ] && input="$1" || input="-"
+[ $# -ge 1 ] && [ -f "$1" ] && input="$1" || input="-"
 
 input=$(cat ${input})
 

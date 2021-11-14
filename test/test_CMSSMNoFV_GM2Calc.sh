@@ -21,7 +21,7 @@ if [ ! -x "${GM2CALC_EXE}" ] ; then
     exit
 fi
 
-[ "$("$FSCONFIG" --with-CMSSMNoFV)" = yes -a -x "${CMSSMNoFV_EXE}" ] || {
+[ "$("$FSCONFIG" --with-CMSSMNoFV)" = yes ] && [ -x "${CMSSMNoFV_EXE}" ] || {
     echo "Error: CMSSMNoFV needs to be build!"
     exit 1;
 }

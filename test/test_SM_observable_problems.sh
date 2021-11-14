@@ -8,7 +8,7 @@ SLHA_IN="${BASEDIR}/../models/SM/LesHouches.in.SM"
 SLHA_OUT="${BASEDIR}/test_SM_observable_problems.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
-[ "$("$FSCONFIG" --with-SM)" = yes -a -x ${SM_EXE} ] || {
+[ "$("$FSCONFIG" --with-SM)" = yes ] && [ -x "${SM_EXE}" ] || {
     echo "Error: SM needs to be build!"
     exit 1;
 }

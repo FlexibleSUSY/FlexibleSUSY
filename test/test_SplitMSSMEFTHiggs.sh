@@ -175,7 +175,7 @@ EOF
 		 awk -v block="SMSM" "$print_slha_block_awk" |
 		 awk -v keys="2" "$print_block_entry_awk" |
 		 tail -n 1)
-    if [ -z "$lambdaFull" -o -z "$lambdaEFT" ]; then
+    if [ -z "$lambdaFull" ] || [ -z "$lambdaEFT" ]; then
        lambdaFull=0
        lambdaEFT=1
     fi

@@ -777,7 +777,7 @@ try_compile_run_cpp_program() {
     # output through stdout and stderr is stored in cpp_output
     # and whose exit code is stored in cpp_exit.
 
-    if [ $# -lt 1 -o $# -gt 3 ]; then
+    if [ $# -lt 1 ] || [ $# -gt 3 ]; then
         echo "try_compile_run_cpp_program: 1, 2, or 3 arguments required!"
         exit 1
     fi
@@ -1617,7 +1617,7 @@ check_icpc_features() {
 
     # disable multi-threading for versions < 14.0.0
     if ! major_minor_patch_at_least $major $minor $patch "14" "0" "0" &&
-       [ "$enable_threads" = "yes" -o "$enable_threads" = "automatic" ]; then
+       { [ "$enable_threads" = "yes" ] || [ "$enable_threads" = "automatic" ] ;} ; then
 	message ""
 	message "   Warning: multi-threading support requires $compiler 14.0.0 or newer."
 	enable_threads="no"
@@ -1770,7 +1770,7 @@ check_cxxflags() {
         fi
     fi
 
-    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
         # check if -fPIC is in CXXFLAGS
         case "${CXX}" in
             g++*|clang++*|icpc*)
@@ -1945,7 +1945,7 @@ check_fflags() {
     esac
 
     # check if -fPIC is in FFLAGS
-    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
+    if [ "x$enable_shared_libs" = "xyes" ] || [ "x$enable_librarylink" = "xyes" ] ; then
         case "${FC}" in
             gfortran*|ifort*)
                 if contains_not "${FFLAGS}" "-fPIC" ; then
@@ -2227,7 +2227,7 @@ check_himalaya() {
 
 #_____________________________________________________________________
 check_required_libs() {
-    if [ "$enable_meta" = yes -a -n "${MATH}" ] ; then
+    if [ "$enable_meta" = yes ] && [ -n "${MATH}" ] ; then
         message "Checking model files for required third party libraries"
 
         for m in ${MODELS}; do
@@ -2750,8 +2750,10 @@ check_math_cmd() {
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
         result "not found"
-	MATH=""
-	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+        MATH=""
+        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+            return
+        fi
 
         message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
@@ -2804,13 +2806,15 @@ EOF
     if $_ok; then
         result "ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
     else
-	if [ "$_exit_status" = 2 ]; then
-	    result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
-	else
-	    result "not ok"
-	fi
-	MATH=""
-	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+        if [ "$_exit_status" = 2 ]; then
+            result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+        else
+            result "not ok"
+        fi
+        MATH=""
+        if [ ! "${enable_meta}" = "yes" ] || [ ! "$enable_librarylink" = "yes" ]; then
+            return
+        fi
 
         message "Error: Mathematica ${required_mathematica_version} or higher needs to be installed!"
         exit 1
@@ -2878,7 +2882,8 @@ WriteString["stderr", \$sarahModelDir];
 EOF
              )
 
-    [ -z "$SARAH_MODEL_DIR" -o \( ! -z "$SARAH_MODEL_DIR" -a ! -d "$SARAH_MODEL_DIR" \) ] && {
+    if [ -z "$SARAH_MODEL_DIR" ] || \
+       { [ ! -z "$SARAH_MODEL_DIR" ] && [ ! -d "$SARAH_MODEL_DIR" ] ;} ;then
         message "Error: Could not determine the SARAH model directory."
         message "   Please check that Mathematica and SARAH are installed correctly."
         message "   To do that, you may run \`${MATH}' and then copy and paste:\n"
@@ -2888,7 +2893,7 @@ If[Needs[\"SARAH\`\"] === \$Failed,
    Print[\"SARAH successfully loaded.\"]; Quit[0]
   ];"
         exit 1
-    }
+    fi
 }
 
 #_____________________________________________________________________
@@ -3213,7 +3218,9 @@ update_module_mk() {
 update_model_makefiles() {
     # If Mathematica is disabled, dependences on model-specific
     # modules should have been already resolved.
-    [ "$enable_meta" != yes -o -z "${MATH}" ] && return
+    if [ "$enable_meta" != yes ] || [ -z "${MATH}" ]; then
+       return
+    fi
 
     message "Checking model makefiles"
 
@@ -3784,7 +3791,8 @@ check_install_dir
 
 # check for Mathematica if meta code generation is enabled or we
 # compile with LibraryLink
-if [ "$enable_meta" = yes -o \( "$enable_compile" = yes -a "$enable_librarylink" != no \) ]; then
+if [ "$enable_meta" = yes ] || \
+   { [ "$enable_compile" = yes ] && [ "$enable_librarylink" != no ] ;} ; then
     check_math_cmd
     check_mathematica_info
 else
