@@ -5,6 +5,8 @@
 # the same.
 
 BASEDIR=$(dirname $0)
+UTILSDIR=${BASEDIR}/../utils
+remove_block="$UTILSDIR/remove_slha_block.awk"
 
 semi_analytic_model="SMSemiAnalytic"
 two_scale_model="SM"
