@@ -172,7 +172,7 @@ Block AEIN
   3  3     ${Ab} # Ad(3,3)
 "
 
-    echo $(run_sg "$SG" "$slha_input" "MASS-25")
+    echo "$(run_sg "$SG" "$slha_input" "MASS-25")"
 }
 
 run_MSSMNoFVEFTHiggs() {
@@ -217,7 +217,7 @@ Block EXTPAR
    49   ${MS}
 "
 
-    echo $(run_sg "$SG" "$slha_input" "MASS-25")
+    echo "$(run_sg "$SG" "$slha_input" "MASS-25")"
 }
 
 scan() {

@@ -187,12 +187,14 @@ error=0
 
 # check equality of lambdas in full theory and EFT at matching scale
 
+# shellcheck disable=SC2046
 set -- $(run_sg "$MODELDIR/SplitMSSMEFTHiggs/run_SplitMSSMEFTHiggs.x" 0)
 CHECK_EQUAL_FRACTION "$1" "$2" "0.0001" || error=$(expr $error + 1)
 
 # check approximate equality of lambdas in full theory and EFT at matching scale
 # this would fail if difference between vev normalizations
 # in full theory and SM were ignored, see commit e5473865150da98e1426f2282baf31d54541169a
+# shellcheck disable=SC2046
 set -- $(run_sg "$MODELDIR/SplitMSSMEFTHiggs/run_SplitMSSMEFTHiggs.x" 1)
 CHECK_EQUAL_FRACTION "$1" "$2" "0.03" || error=$(expr $error + 1)
 

@@ -9,6 +9,7 @@ SLHA_OUT="${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
 if [ -e GM2Calc.pc ] ; then
+    # shellcheck disable=SC2046
     eval $(grep '^prefix=' GM2Calc.pc)
     # shellcheck disable=SC2154
     GM2CALC_EXE="${prefix}/bin/gm2calc.x"
@@ -20,12 +21,12 @@ if [ ! -x "${GM2CALC_EXE}" ] ; then
     exit
 fi
 
-[ $("$FSCONFIG" --with-CMSSMNoFV) = yes -a -x ${CMSSMNoFV_EXE} ] || {
+[ "$("$FSCONFIG" --with-CMSSMNoFV)" = yes -a -x "${CMSSMNoFV_EXE}" ] || {
     echo "Error: CMSSMNoFV needs to be build!"
     exit 1;
 }
 
-[ $("$FSCONFIG" --enable-gm2calc) = yes ] || {
+[ "$("$FSCONFIG" --enable-gm2calc)" = yes ] || {
     echo "Error: FlexibleSUSY must be configured with GM2Calc!"
     exit 1;
 }

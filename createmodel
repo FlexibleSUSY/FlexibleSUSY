@@ -218,7 +218,7 @@ check_model_name() {
 
     local _model="$1"
 
-    if [ -z $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ]; then
+    if [ -z "$(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$")" ]; then
         printf "Error: invalid model name ${_model}. "
         if [ -n "$(echo "${_model}" | grep -E -o "^[0-9]")" ]; then
             printf "Model name must start with a letter. "
@@ -388,7 +388,7 @@ if test $# -gt 0 ; then
         case $1 in
             --enable-*)
                 f=`echo $1 | sed -e 's/--//' -e 's/-/_/g'`
-                eval prev='$'`echo ${f}`
+                eval prev='$'"$(echo "${f}")"
                 # shellcheck disable=SC2154
                 if test "x${prev}" = "xyes"; then
                     message "INFO: $1: already enabled by default."
@@ -413,7 +413,7 @@ if test $# -gt 0 ; then
                 ;;
             --disable-*)
                 f=`echo $1 | sed -e 's/--disable/enable/' -e 's/-/_/g'`
-                eval prev='$'`echo ${f}`
+                eval prev='$'"$(echo "${f}")"
                 if test "x${prev}" = "xno"; then
                     message "INFO: $1: already disabled by default."
                 fi
@@ -505,6 +505,7 @@ if test ! -d "$targetdir" ; then
     message "done"
 fi
 
+# shellcheck disable=SC2046
 set -- $(find -L $model_file_dir -type f -iname LesHouches.in\* -not -iname \*~ -exec basename {} \; | tr '\n' ' ')
 SLHA_input_files="$*"
 
