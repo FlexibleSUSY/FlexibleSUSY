@@ -17,7 +17,7 @@ HIMALAYA_VERSION="unknown"
 BASEDIR=$(dirname $0)
 
 # absolute path to this script
-ABSBASEDIR=$(cd "$BASEDIR"; pwd | sed 's/ /\\\\ /g')
+ABSBASEDIR=$(cd "$BASEDIR" && pwd | sed 's/ /\\\\ /g')
 
 # config directory
 CONFIGDIR="${BASEDIR}/config"

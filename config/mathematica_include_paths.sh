@@ -17,7 +17,7 @@ find_math_dirs() {
         ${DLLTOOL:-dlltool} --help | grep x86-64 > /dev/null || sysid=Windows
     }
 
-    topdir=`cd "$topdir" ; echo $PWD`
+    topdir=`cd "$topdir" && echo $PWD`
 }
 
 get_librarylink_incpath() {
