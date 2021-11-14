@@ -3182,12 +3182,15 @@ update_module_mk() {
     local math_cmd="${4:-math}"
 
     [ -e "$model_file" ] || return
-    { find "$mkfile" -newer "$model_file" | grep ^; } > /dev/null 2>&1 &&
-	return
+    if [ ! "${mkfile}" -nt "${model_file}" ] && \
+       [ ! "${mkfile}" -ot "${model_file}" ]; then
+       return
+    fi
 
     message -n "   Updating model-specific modules in $mkfile ... "
     local ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
     sed -i -e "s|^\(MOD${name}_MOD[[:space:]]*:=\).*$|\1 $ho|" "$mkfile"
+    touch "${mkfile}" "${model_file}"
     message "($ho)"
     logmsg "   Depends on model-specific modules: ${ho}"
 }
