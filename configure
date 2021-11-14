@@ -344,7 +344,8 @@ log_package_information() {
 
 #_____________________________________________________________________
 guess_machine_word_size() {
-    local chip="$(uname -m | tr '[A-Z]' '[a-z]')"
+    local chip
+    chip="$(uname -m | tr '[A-Z]' '[a-z]')"
     exists_in_path getconf && chip="${chip}$(getconf LONG_BIT)"
     case "$chip" in
         *32|i[36]86)
@@ -960,7 +961,8 @@ check_solvers() {
     fi
 
     checking_msg "RGE solvers"
-    local algs="$(echo $SOLVERS | tr ',' ' ')"
+    local algs
+    algs="$(echo $SOLVERS | tr ',' ' ')"
     SOLVERS=""
     for a in ${algs}; do
         case "$a" in
@@ -992,7 +994,8 @@ check_models() {
     fi
 
     checking_msg "models"
-    local models="$(echo $MODELS | tr ',' ' ')"
+    local models
+    models="$(echo $MODELS | tr ',' ' ')"
     MODELS=""
     for a in ${models}; do
         case "$a" in
@@ -1036,7 +1039,8 @@ check_models() {
         fi
     done
 
-    local model_names="$(echo ${MODELS} | sed -e 's|models/||g' -e 's/^ *//' -e 's/ *$//')"
+    local model_names
+    model_names="$(echo ${MODELS} | sed -e 's|models/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${model_names})"
     logmsg "   Models: ${MODELS}"
@@ -1050,7 +1054,8 @@ check_addons() {
     fi
 
     checking_msg "addons"
-    local addons="$(echo $ADDONS | tr ',' ' ')"
+    local addons
+    addons="$(echo $ADDONS | tr ',' ' ')"
     ADDONS=""
     for a in ${addons}; do
         case "$a" in
@@ -1080,7 +1085,8 @@ check_addons() {
         fi
     done
 
-    local addon_names="$(echo ${ADDONS} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
+    local addon_names
+    addon_names="$(echo ${ADDONS} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${addon_names})"
     logmsg "   Addons: ${ADDONS}"
@@ -1094,7 +1100,8 @@ check_optional_modules() {
     fi
 
     checking_msg "optional modules"
-    local optional_modules="$(echo $OPTIONAL_MODULES | tr ',' ' ')"
+    local optional_modules
+    optional_modules="$(echo $OPTIONAL_MODULES | tr ',' ' ')"
     OPTIONAL_MODULES=""
     for a in ${optional_modules}; do
         if test -d "$BASEDIR/$a" ; then
@@ -1118,7 +1125,8 @@ check_optional_modules() {
         fi
     done
 
-    local module_names="$(echo ${OPTIONAL_MODULES} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
+    local module_names
+    module_names="$(echo ${OPTIONAL_MODULES} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
 
     result "ok (${module_names})"
     logmsg "   Optional modules: ${OPTIONAL_MODULES}"
@@ -1229,7 +1237,8 @@ ${MATH_INSTDIR}/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions"
                     exit 1
                 fi
 
-                local mathlink_lib=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+                local mathlink_lib
+    mathlink_lib=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
                 mathlink_lib_flags="-L${found_dir} ${mathlink_lib} -lc++ -framework Foundation"
                 ;;
         esac
@@ -1311,7 +1320,8 @@ check_platform() {
 
 #_____________________________________________________________________
 reset_default_static_linker_cmd() {
-   local os_=$( (uname -s) 2>/dev/null || echo unknown)
+   local os_
+    os_=$( (uname -s) 2>/dev/null || echo unknown)
    case "$os_" in
       Linux)
          STATIC_LIB_CMD="ar cruU";;
@@ -1431,7 +1441,8 @@ check_boost_test_libs() {
         message "Warning: libboost_unit_test_framework(-mt) must be installed"
         message "  to compile and run the tests, see http://www.boost.org"
     else
-        local BOOSTTESTLIBS_=-l$(
+        local BOOSTTESTLIBS_
+    BOOSTTESTLIBS_=-l$(
 	    echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
         if [ -z "$boost_lib_dir" ]; then
             # assume that the linker will look in the default paths
@@ -1462,7 +1473,8 @@ check_boost_thread_libs() {
         message "  You can disable the lattice method with the --with-solvers= flag."
         exit 1
     fi
-    local BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+    local BOOSTTHREADLIBS_
+    BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
 
     check_library "libboost_system libboost_system-mt" \
 	"$boost_lib_dir" "$default_lib_paths"
@@ -1668,14 +1680,17 @@ get_gpp_version() {
     output=$($compiler -dM -E -x c++ /dev/null) || {
         message "Warning: could not determine $compiler version because"
         message "   execution of $compiler failed."
-	return 1
+    return 1
     }
-    local major=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local minor=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC_MINOR__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local patch=$(printf "%s" "$output" |
-	sed 's/^.*__GNUC_PATCHLEVEL__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local major
+    major=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local minor
+    minor=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC_MINOR__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local patch
+    patch=$(printf "%s" "$output" |
+    sed 's/^.*__GNUC_PATCHLEVEL__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
 
     eval "$ret_var=\"$major.$minor.$patch\""
 }
@@ -1694,10 +1709,11 @@ get_icpc_version() {
     output=$($compiler -dM -E -x c++ /dev/null) || {
         message "Warning: could not determine $compiler version because"
         message "   execution of $compiler failed."
-	return 1
+        return 1
     }
-    local version=$(printf "%s" "$output" |
-	sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
+    local version
+    version=$(printf "%s" "$output" |
+        sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
 
     eval "$ret_var=\"$version\""
 }
@@ -1725,12 +1741,13 @@ get_clang_version() {
         message "   execution of $compiler failed."
 	return 1
     }
-    local major=$(printf "%s" "$output" |
-	sed 's/^.*__clang_major__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local minor=$(printf "%s" "$output" |
-	sed 's/^.*__clang_minor__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
-    local patch=$(printf "%s" "$output" |
-	sed 's/^.*__clang_patchlevel__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    local major minor patch
+    major=$(printf "%s" "$output" |
+        sed 's/^.*__clang_major__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    minor=$(printf "%s" "$output" |
+        sed 's/^.*__clang_minor__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
+    patch=$(printf "%s" "$output" |
+        sed 's/^.*__clang_patchlevel__[[:space:]]*\([[:digit:]]*\).*$/\1/p;d')
 
     eval "$ret_var=\"$major.$minor.$patch\""
 }
@@ -1865,7 +1882,8 @@ check_gsl_config() {
         message "  use $0 --with-gsl-config=<path to gsl-config>"
         exit 1
     else
-        local GSL_VERSION=$($cmd --version)
+        local GSL_VERSION
+    GSL_VERSION=$($cmd --version)
         result "found $cmd (version ${GSL_VERSION})"
         GSLFLAGS=$($cmd --cflags)
         GSLLIBS=$($cmd --libs)
@@ -2221,7 +2239,8 @@ check_required_libs() {
         message "Checking model files for required third party libraries"
 
         for m in ${MODELS}; do
-            local model_name=$(echo ${m} | sed -e 's|models/||')
+            local model_name
+            model_name=$(echo ${m} | sed -e 's|models/||')
             local model_file="models/${model_name}/FlexibleSUSY.m"
 
             [ -e "${model_file}" ] || continue
@@ -2302,7 +2321,8 @@ check_looptools_libs() {
    fi
    case "$operating_system" in
       Darwin)
-         local gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
+         local gcc_
+         gcc_=$(${CXX} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
          check_library "libgcc" "$gcc_" "$default_lib_paths"
          if test "x$found_lib" = "x" ; then
             message "Error: libgcc not found in $gcc_ $default_lib_paths"
@@ -2613,11 +2633,13 @@ check_tsil_incl() {
 
 #_____________________________________________________________________
 check_tsil_size() {
-    local tsil_dir=$([ -n "$tsil_inc_dir" ] && echo "$tsil_inc_dir" || echo "$tsil_lib_dir")
+    local tsil_dir
+    tsil_dir=$([ -n "$tsil_inc_dir" ] && echo "$tsil_inc_dir" || echo "$tsil_lib_dir")
 
     if [ -f "${tsil_dir}/Makefile" ] ; then
-        local tsil_makefile="${tsil_dir}/Makefile"
-        local tsil_size=$({ echo "first: ; @echo \$(TSIL_SIZE)"
+        local tsil_makefile tsil_size
+        tsil_makefile="${tsil_dir}/Makefile"
+        tsil_size=$({ echo "first: ; @echo \$(TSIL_SIZE)"
                             cat "$tsil_makefile"
                           } | make -f - first
               )
@@ -2666,11 +2688,8 @@ check_tsil() {
 
 #_____________________________________________________________________
 find_symbol_using_pkgconfig() {
-    local symbol
-    local pkg
-    local ldpaths
-    local libnames
-    local pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
+    local symbol pkg ldpaths libnames pkg_flags
+    pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
     pkg="$1"
     linker_flags=""
     type pkg-config > /dev/null 2>&1 || {
@@ -2938,14 +2957,15 @@ EOF
          for m in "models"/*; do
             [ -e "$m/FlexibleSUSY.m" ] || continue
             [ -e "$m/start.m" ] || continue
-            local eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
+            local eigenstate output dir
+            eigenstate=$(grep 'FSEigenstates' "$m/FlexibleSUSY.m" \
                        | sed 's/ //g' \
                        | sed 's/.*`\(.*\);/\1/')
-            local output=$(grep -m1 'OutputDirectory' "$m/start.m" \
+            output=$(grep -m1 'OutputDirectory' "$m/start.m" \
                         | sed 's/ //g' \
                         | sed 's/.*\"\(.*\)\".*/\1/')
             output=$(echo $m | sed "s/models/${output}/")
-            local dir="${output}/${eigenstate}/FeynArts"
+            dir="${output}/${eigenstate}/FeynArts"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
             dir="${output}/${eigenstate}/FormCalc"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
@@ -3014,14 +3034,15 @@ EOF
          for m in "models"/*; do
             [ -e "$m/FlexibleSUSY.m" ] || continue
             [ -e "$m/start.m" ] || continue
-            local eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
+            local eigenstate output dir
+            eigenstate=$(grep 'FSEigenstates' "models/$m/FlexibleSUSY.m" \
                                | sed 's/ //g' \
                                | sed 's/.*`\(.*\);/\1/')
-            local output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
+            output=$(grep -m1 'OutputDirectory' "models/$m/start.m" \
                            | sed 's/ //g' \
                            | sed 's/.*\"\(.*\)\".*/\1/')
             output=$(echo $m | sed "s/models/${output}/")
-            local dir="${output}/$m/${eigenstate}/FormCalc"
+            dir="${output}/$m/${eigenstate}/FormCalc"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
             dir="${output}/$m/${eigenstate}/NPointFunctions"
             [ -d "${dir}" ] && { rm -rf ${dir}; }
@@ -3188,7 +3209,8 @@ update_module_mk() {
     fi
 
     message -n "   Updating model-specific modules in $mkfile ... "
-    local ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
+    local ho
+    ho="$(get_model_specific_corrections "$model_file" "$math_cmd")"
     sed -i -e "s|^\(MOD${name}_MOD[[:space:]]*:=\).*$|\1 $ho|" "$mkfile"
     touch "${mkfile}" "${model_file}"
     message "($ho)"
@@ -3204,11 +3226,12 @@ update_model_makefiles() {
     message "Checking model makefiles"
 
     for m in ${MODELS}; do
-        local model_name=$(echo ${m} | sed -e 's|models/||')
+        local model_name
+        model_name=$(echo ${m} | sed -e 's|models/||')
         local model_file="${m}/FlexibleSUSY.m"
-	local mkfile="$m/module.mk"
+        local mkfile="$m/module.mk"
 
-	update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
+        update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
     done
 }
 
@@ -3402,28 +3425,33 @@ enable_defines() {
     done
 
     for a in ${ADDONS}; do
-        local addon_name="$(basename ${a})"
+        local addon_name
+        addon_name="$(basename ${a})"
         DEFINE_ENABLE_ADDONS="${DEFINE_ENABLE_ADDONS}@n@#define ENABLE_${addon_name} 1"
     done
 }
 
 #_____________________________________________________________________
 add_metaflags() {
-   local tlib_='FSLoopLibraries = { FSSOFTSUSY'
-   local lib_="$tlib_"
-   test $enable_looptools = 'yes' && lib_="${lib_}, FSLoopTools"
-   test $enable_fflite = 'yes' && lib_="${lib_}, FSFFlite"
-   test $enable_collier = 'yes' && lib_="${lib_}, FSCOLLIER"
+   local tlib_ lib_
+   tlib_='FSLoopLibraries = { FSSOFTSUSY'
+   lib_="${tlib_}"
+   test ${enable_looptools} = 'yes' && lib_="${lib_}, FSLoopTools"
+   test ${enable_fflite} = 'yes' && lib_="${lib_}, FSFFlite"
+   test ${enable_collier} = 'yes' && lib_="${lib_}, FSCOLLIER"
    lib_="${lib_} };"
 
-   local tfa_='FSFeynArtsAvailable = '
-   local fa_="${tfa_}$(test $enable_feynarts = 'yes' && echo 'True' || echo 'False');"
+   local tfa_ fa_
+   tfa_='FSFeynArtsAvailable = '
+   fa_="${tfa_}$(test ${enable_feynarts} = 'yes' && echo 'True' || echo 'False');"
 
-   local tfc_='FSFormCalcAvailable = '
-   local fc_="${tfc_}$(test $enable_formcalc = 'yes' && echo 'True' || echo 'False');"
+   local tfc_ fc_
+   tfc_='FSFormCalcAvailable = '
+   fc_="${tfc_}$(test ${enable_formcalc} = 'yes' && echo 'True' || echo 'False');"
 
-   local tcol_='FSEnableColors = '
-   local col_="${tcol_}$(test $enable_colors = 'yes' && echo 'True' || echo 'False');"
+   local tcol_ col_
+   tcol_='FSEnableColors = '
+   col_="${tcol_}$(test ${enable_colors} = 'yes' && echo 'True' || echo 'False');"
 
    local c_=''
    local fs_=''
