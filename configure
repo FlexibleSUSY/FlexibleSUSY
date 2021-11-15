@@ -3182,8 +3182,13 @@ update_module_mk() {
     local math_cmd="${4:-math}"
 
     [ -e "$model_file" ] || return
-    if [ ! "${mkfile}" -nt "${model_file}" ] && \
-       [ ! "${mkfile}" -ot "${model_file}" ]; then
+
+    local mk_date model_date date_tolerance
+    mk_date="$(date -r "${mkfile}" +%s)"
+    model_date="$(date -r "${model_file}" +%s)"
+    date_tolerance="5" # Seconds
+    if [ "0" = "$(( $mk_date + $date_tolerance < $model_date ))" ] && \
+       [ "0" = "$(( $model_date < $mk_date - $date_tolerance ))" ]; then
        return
     fi
 
@@ -3203,12 +3208,12 @@ update_model_makefiles() {
 
     message "Checking model makefiles"
 
+    local model_name model_file mkfile
     for m in ${MODELS}; do
-        local model_name=$(echo ${m} | sed -e 's|models/||')
-        local model_file="${m}/FlexibleSUSY.m"
-	local mkfile="$m/module.mk"
-
-	update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
+        model_name="$(echo ${m} | sed -e 's|models/||')"
+        model_file="${m}/FlexibleSUSY.m"
+        mkfile="$m/module.mk"
+        update_module_mk "$model_name" "$mkfile" "$model_file" "$MATH"
     done
 }
 
