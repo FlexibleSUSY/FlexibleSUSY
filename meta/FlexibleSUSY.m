@@ -60,6 +60,7 @@ BeginPackage["FlexibleSUSY`",
               "FSMathLink`",
               "FlexibleTower`",
               "WeinbergAngle`",
+              "Wrappers`",
               "Himalaya`"
 }];
 

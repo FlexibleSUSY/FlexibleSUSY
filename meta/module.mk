@@ -114,6 +114,7 @@ META_SRC     := \
 		$(DIR)/Utils.m \
 		$(DIR)/Vertices.m \
 		$(DIR)/WeinbergAngle.m \
+		$(DIR)/Wrappers.m \
 		$(DIR)/WriteOut.m \
 		$(DIR)/writeRGE.m \
 		$(DIR)/writeNRGE.m \
