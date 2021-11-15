@@ -390,7 +390,7 @@ If[!$Notebooks,
          RedString[str_] := str;
       ];
 
-      WriteOut[str__] := WriteString["stdout"~OutputStream~1,StringJoin@str];
+      WriteOut[str__] := WriteString[$Output, StringJoin@str];
       MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
       replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
 
@@ -429,7 +429,7 @@ Module[{warning, chopped},
    chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
    chopped = StringReplace[chopped, "\n"-> "\n         "];
    If[!$Notebooks,
-      WriteString["stdout", warning <> chopped <> "\n"];,
+      WriteString[$Output, warning <> chopped <> "\n"];,
       Print[warning, chopped];
    ];
 ];
@@ -461,7 +461,7 @@ Module[
          TextFormatting`WrapLines[#,70,""]&,#&],
       WriteOut,WriteColourless,Filter
    },
-   WriteOut[string__] := WriteString[OutputStream["stdout",1],StringJoin@string];
+   WriteOut[string__] := WriteString[$Output, StringJoin@string];
    WriteColourless[string__] := WriteOut@CutString@StringJoin@string;
    Filter[
       System`Dump`str_,

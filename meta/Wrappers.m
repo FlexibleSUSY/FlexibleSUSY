@@ -26,6 +26,12 @@ Needs["TreeMasses`"];
 BeginPackage["Wrappers`"];
 Begin["`Private`"];
 
+warnVVVV[fields:{_, _, _, _}, vertex:{__}] :=
+   "Input fields "<> ToString@fields<> " lead to the following combination "<>
+   "of Lorentz indices in the vertex "<> ToString@First@vertex<> ". "<>
+   "They should be equal to {lt1, lt2, lt3, lt4} up to any permutation! "<>
+   "Most likely the vertex is wrong. Please, cross-check the input!";
+
 Module[{status = True, res},
    SARAH`Vertex[fields:{Repeated[_?TreeMasses`IsVector, {4}]},
                 opts___]/; status :=
@@ -34,12 +40,7 @@ Module[{status = True, res},
       res = SARAH`Vertex[fields, opts];
       naked = Sort@Cases[First@res, {___, lt_}:> lt, Infinity];
       If[Not@MatchQ[naked, {SARAH`lt1, SARAH`lt2, SARAH`lt3, SARAH`lt4}],
-         Utils`FSFancyWarning["Input fields are "<>ToString@fields<>
-            ". It leads to the combination of Lorentz indices in the vertex "<>
-            ToString@First@res<>", which is not equal to {lt1, lt2, lt3, lt4}"<>
-            " up to a permutation. Most likely, it will give an incorrect form"<>
-            " of the vertex. Please, cross-check the input!"
-         ];
+         Utils`FSFancyWarning@warnVVVV[fields, res];
       ];
       status = True;
       res
