@@ -310,11 +310,11 @@ IsParticle[p_, states_:FlexibleSUSY`FSEigenstates] :=
     MemberQ[GetParticles[states], p] || MemberQ[GetParticles[states], FSAntiField[p]];
 
 FieldInfo[field_, OptionsPattern[{includeLorentzIndices -> False,
-	includeColourIndices -> False}]] := 
+	includeColourIndices -> False}]] :=
 	Module[{fieldInfo = Cases[SARAH`Particles[FlexibleSUSY`FSEigenstates],
 		{SARAH`getParticleName @ field, ___}][[1]]},
 		fieldInfo = DeleteCases[fieldInfo, {SARAH`generation, 1}, {2}];
-		
+
 		fieldInfo = If[!OptionValue[includeLorentzIndices],
 			DeleteCases[fieldInfo, {SARAH`lorentz, _}, {2}],
 			fieldInfo];
@@ -357,27 +357,27 @@ IsSMParticleElementwise[sym_, OptionsPattern[]] :=
 
 IsScalar[Susyno`LieGroups`conj[sym_]] := IsScalar[sym];
 IsScalar[SARAH`bar[sym_]] := IsScalar[sym];
-IsScalar[sym_] := IsOfType[sym, S];
+IsScalar[sym_] := IsScalar[sym] = IsOfType[sym, S];
 IsScalar[sym_List] := And @@ (IsScalar /@ sym);
 
 IsFermion[Susyno`LieGroups`conj[sym_]] := IsFermion[sym];
 IsFermion[SARAH`bar[sym_]] := IsFermion[sym];
-IsFermion[sym_] := IsOfType[sym, F];
+IsFermion[sym_] := IsFermion[sym] = IsOfType[sym, F];
 IsFermion[sym_List] := And @@ (IsFermion /@ sym);
 
 IsVector[Susyno`LieGroups`conj[sym_]] := IsVector[sym];
 IsVector[SARAH`bar[sym_]] := IsVector[sym];
-IsVector[sym_] := IsOfType[sym, V];
+IsVector[sym_] := IsVector[sym] = IsOfType[sym, V];
 IsVector[sym_List] := And @@ (IsVector /@ sym);
 
 IsGhost[Susyno`LieGroups`conj[sym_]] := IsGhost[sym];
 IsGhost[SARAH`bar[sym_]] := IsGhost[sym];
-IsGhost[sym_] := IsOfType[sym, G];
+IsGhost[sym_] := IsGhost[sym] = IsOfType[sym, G];
 IsGhost[sym_List] := And @@ (IsGhost /@ sym);
 
 IsGoldstone[Susyno`LieGroups`conj[sym_]] := IsGoldstone[sym];
 IsGoldstone[SARAH`bar[sym_]] := IsGoldstone[sym];
-IsGoldstone[sym_] := MemberQ[
+IsGoldstone[sym_] := IsGoldstone[sym] = MemberQ[
     Join[GetGoldstoneBosons[],
          GetGoldstoneBosons[] /. a_[{idx__}] :> a[idx]],
     sym
