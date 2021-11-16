@@ -1226,7 +1226,7 @@ WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List]
           ];
 
 FindVEV[gauge_] :=
-    Module[{result, vev},
+    Module[{vev},
            vev = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs],
                        {_,{v_,_},{gauge,_},{p_,_},___} | {_,{v_,_},{s_,_},{gauge,_},___} :> v];
            If[vev === {},
@@ -1238,7 +1238,7 @@ FindVEV[gauge_] :=
 
 (* returns VEV normalization w.r.t. the corresponding gauge eigenstate *)
 FindVEVNormalization[gauge_] :=
-    Module[{result, vev},
+    Module[{vev},
            vev = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs],
                        {_,{v_,n_},{gauge,m_},{p_,_},___} | {_,{v_,n_},{s_,_},{gauge,m_},___} :> Abs[n/m]];
            If[vev === {},
@@ -1608,7 +1608,6 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             slhaPoleMassGetters = "", slhaPoleMixingMatrixGetters = "",
             higgsMassGetters = "", higgsToEWSBEqAssociation,
             tadpoleEqPrototypes = "", tadpoleEqFunctions = "",
-            numberOfEWSBEquations = Length[ewsbEquations],
             calculateTreeLevelTadpoles = "", divideTadpoleByVEV = "",
             calculateOneLoopTadpoles = "", calculateTwoLoopTadpoles = "",
             physicalMassesDef = "", mixingMatricesDef = "",
@@ -2212,8 +2211,7 @@ WriteSemiAnalyticSpectrumGeneratorClass[files_List] :=
 WriteObservables[extraSLHAOutputBlocks_, files_List] :=
     Module[{requestedObservables, numberOfObservables, observablesDef,
             observablesInit, getObservables, getObservablesNames,
-            clearObservables, setObservables, calculateObservables,
-            loopCouplingsPrototypes, loopCouplingsFunctions},
+            clearObservables, setObservables, calculateObservables},
            requestedObservables = Observables`GetRequestedObservables[extraSLHAOutputBlocks];
            numberOfObservables = Observables`CountNumberOfObservables[requestedObservables];
            observablesDef = Observables`CreateObservablesDefinitions[requestedObservables];
@@ -2547,7 +2545,7 @@ EnableSpectrumGenerator[solver_] :=
           ];
 
 RunEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(\n"
@@ -2562,7 +2560,7 @@ RunEnabledSpectrumGenerator[solver_] :=
           ];
 
 ScanEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
@@ -2572,7 +2570,7 @@ ScanEnabledSpectrumGenerator[solver_] :=
           ];
 
 RunCmdLineEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
@@ -4063,7 +4061,7 @@ Options[MakeFlexibleSUSY] :=
     };
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
-    Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
+    Module[{nPointFunctions, initialGuesserInputFile,
             aMuonVertices, edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
@@ -4085,7 +4083,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             extraSLHAOutputBlocks,
             deltaVBwave, deltaVBvertex, deltaVBbox,
             vertexRules, vertexRuleFileName,
-            Lat$massMatrices, spectrumGeneratorFiles = {}, spectrumGeneratorInputFile,
+            Lat$massMatrices, spectrumGeneratorInputFile,
             semiAnalyticBCs, semiAnalyticSolns,
             semiAnalyticHighScaleFiles, semiAnalyticSUSYScaleFiles, semiAnalyticLowScaleFiles,
             semiAnalyticSolnsOutputFile, semiAnalyticEWSBSubstitutions = {}, semiAnalyticInputScale = "",
