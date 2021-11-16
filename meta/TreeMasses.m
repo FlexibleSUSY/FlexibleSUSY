@@ -430,6 +430,7 @@ Module[{cache, result},
       If[TrueQ[result],
          Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
             " is a) interpreted as a 'ghost' and b) is wrapped in 'conj'!"<>
+            " You should never see this message, because conj@'ghost' is 'ghost'!"<>
             " You might want to check it."];
       ];
       result

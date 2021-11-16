@@ -531,7 +531,8 @@ endif
 
 ifeq ($(WITH_SM),yes)
 TEST_META += \
-		$(DIR)/test_SM_vvvv.m
+		$(DIR)/test_SM_vvvv.m \
+		$(DIR)/test_SM_tree_is_particle.m
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_gmm2.cpp \
