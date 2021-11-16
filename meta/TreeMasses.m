@@ -355,7 +355,19 @@ IsSMParticleElementwise[sym_, OptionsPattern[]] :=
               Table[sym[i], {i, GetDimension[sym]}]
     ];
 
-IsScalar[SARAH`bar[sym_]] := IsScalar[sym];
+Module[{cache, result},
+   IsScalar[SARAH`bar[sym_]] := cache[sym];
+
+   cache[sym_] := cache[sym] = (
+      result = IsScalar[sym];
+      If[TrueQ[result],
+         Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
+            " is a) interpreted as a 'scalar' and b) is wrapped in 'bar'!"<>
+            " You might want to check it."];
+      ];
+      result
+   );
+];
 Module[{cache},
    IsScalar[Susyno`LieGroups`conj[sym_]] := cache[sym];
    IsScalar[sym_] := cache[sym];
@@ -365,7 +377,20 @@ Module[{cache},
 IsScalar[sym_List] := And @@ (IsScalar /@ sym);
 IsScalar // Utils`MakeUnknownInputDefinition;
 
-IsFermion[Susyno`LieGroups`conj[sym_]] := IsFermion[sym];
+Module[{cache, result},
+   IsFermion[Susyno`LieGroups`conj[sym_]] := cache[sym];
+
+   cache[sym_] := cache[sym] = (
+      result = IsFermion[sym];
+      If[TrueQ[result],
+         Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
+            " is a) interpreted as a 'fermion' and b) is wrapped in 'conj'!"<>
+            " We work with bispinors, which should exclude this usage."<>
+            " You might want to check it."];
+      ];
+      result
+   );
+];
 Module[{cache},
    IsFermion[SARAH`bar[sym_]] := cache[sym];
    IsFermion[sym_] := cache[sym];
@@ -375,7 +400,19 @@ Module[{cache},
 IsFermion[sym_List] := And @@ (IsFermion /@ sym);
 IsFermion // Utils`MakeUnknownInputDefinition;
 
-IsVector[SARAH`bar[sym_]] := IsVector[sym];
+Module[{cache, result},
+   IsVector[SARAH`bar[sym_]] := cache[sym];
+
+   cache[sym_] := cache[sym] = (
+      result = IsVector[sym];
+      If[TrueQ[result],
+         Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
+            " is a) interpreted as a 'vector' and b) is wrapped in 'bar'!"<>
+            " You might want to check it."];
+      ];
+      result
+   );
+];
 Module[{cache},
    IsVector[Susyno`LieGroups`conj[sym_]] := cache[sym];
    IsVector[sym_] := cache[sym];
@@ -385,7 +422,19 @@ Module[{cache},
 IsVector[sym_List] := And @@ (IsVector /@ sym);
 IsVector // Utils`MakeUnknownInputDefinition;
 
-IsGhost[Susyno`LieGroups`conj[sym_]] := IsGhost[sym];
+Module[{cache, result},
+   IsGhost[Susyno`LieGroups`conj[sym_]] := cache[sym];
+
+   cache[sym_] := cache[sym] = (
+      result = IsGhost[sym];
+      If[TrueQ[result],
+         Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
+            " is a) interpreted as a 'ghost' and b) is wrapped in 'conj'!"<>
+            " You might want to check it."];
+      ];
+      result
+   );
+];
 Module[{cache},
    IsGhost[SARAH`bar[sym_]] := cache[sym];
    IsGhost[sym_] := cache[sym];
@@ -394,7 +443,19 @@ Module[{cache},
 ];
 IsGhost[sym_List] := And @@ (IsGhost /@ sym);
 
-IsGoldstone[SARAH`bar[sym_]] := IsGoldstone[sym];
+Module[{cache, result},
+   IsGoldstone[SARAH`bar[sym_]] := cache[sym];
+
+   cache[sym_] := cache[sym] = (
+      result = IsGoldstone[sym];
+      If[TrueQ[result],
+         Utils`FSFancyWarning["'"<>ToString@sym<>"'"<>
+            " is a) interpreted as a 'goldstone' and b) is wrapped in 'bar'!"<>
+            " You might want to check it."];
+      ];
+      result
+   );
+];
 Module[{cache},
    IsGoldstone[sym_] := cache[sym];
    IsGoldstone[Susyno`LieGroups`conj[sym_]] := cache[sym];
