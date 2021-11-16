@@ -357,32 +357,51 @@ IsSMParticleElementwise[sym_, OptionsPattern[]] :=
 
 IsScalar[Susyno`LieGroups`conj[sym_]] := IsScalar[sym];
 IsScalar[SARAH`bar[sym_]] := IsScalar[sym];
-IsScalar[sym_] := IsScalar[sym] = IsOfType[sym, S];
+Module[{cache},
+   IsScalar[sym_] := cache[sym];
+   cache[sym_] := cache[sym] = IsOfType[sym, S];
+];
 IsScalar[sym_List] := And @@ (IsScalar /@ sym);
+IsScalar // Utils`MakeUnknownInputDefinition;
 
 IsFermion[Susyno`LieGroups`conj[sym_]] := IsFermion[sym];
 IsFermion[SARAH`bar[sym_]] := IsFermion[sym];
-IsFermion[sym_] := IsFermion[sym] = IsOfType[sym, F];
+Module[{cache},
+   IsFermion[sym_] := cache[sym];
+   cache[sym_] := cache[sym] = IsOfType[sym, F];
+];
 IsFermion[sym_List] := And @@ (IsFermion /@ sym);
+IsFermion // Utils`MakeUnknownInputDefinition;
 
 IsVector[Susyno`LieGroups`conj[sym_]] := IsVector[sym];
 IsVector[SARAH`bar[sym_]] := IsVector[sym];
-IsVector[sym_] := IsVector[sym] = IsOfType[sym, V];
+Module[{cache},
+   IsVector[sym_] := cache[sym];
+   cache[sym_] := cache[sym] = IsOfType[sym, V];
+];
 IsVector[sym_List] := And @@ (IsVector /@ sym);
+IsVector // Utils`MakeUnknownInputDefinition;
 
 IsGhost[Susyno`LieGroups`conj[sym_]] := IsGhost[sym];
 IsGhost[SARAH`bar[sym_]] := IsGhost[sym];
-IsGhost[sym_] := IsGhost[sym] = IsOfType[sym, G];
+Module[{cache},
+   IsGhost[sym_] := cache[sym];
+   cache[sym_] := cache[sym] = IsOfType[sym, G];
+];
 IsGhost[sym_List] := And @@ (IsGhost /@ sym);
 
 IsGoldstone[Susyno`LieGroups`conj[sym_]] := IsGoldstone[sym];
 IsGoldstone[SARAH`bar[sym_]] := IsGoldstone[sym];
-IsGoldstone[sym_] := IsGoldstone[sym] = MemberQ[
-    Join[GetGoldstoneBosons[],
-         GetGoldstoneBosons[] /. a_[{idx__}] :> a[idx]],
-    sym
+Module[{cache},
+   IsGoldstone[sym_] := cache[sym];
+   cache[sym_] := cache[sym] = MemberQ[
+       Join[GetGoldstoneBosons[],
+            GetGoldstoneBosons[] /. a_[{idx__}] :> a[idx]],
+       sym
+   ];
 ];
 IsGoldstone[sym_List] := And @@ (IsGoldstone /@ sym);
+IsGoldstone // Utils`MakeUnknownInputDefinition;
 
 GetSMGoldstones[] :=
     Cases[SARAH`GoldstoneGhost /. a_[{idx__}] :> a[idx], {v_?IsSMParticle, goldstone_} :> goldstone];
