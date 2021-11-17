@@ -360,22 +360,29 @@ Module[{warning, chopped, string},
 ];
 
 MakeUnknownInputDefinition[sym_Symbol] :=
-Module[{usageString,info,parsedInfo,infoString},
-   (* Clean existing definitions if they exist for required pattern.. *)
+Module[{up, down, all, usageString, infoString, simplify},
    Off[Unset::norep];
-   sym[args___] =.;
+      sym[args___] =.;
    On[Unset::norep];
-   (* Maybe some useful definitions already exist*)
-   If[MatchQ[sym::usage,_String],usageString="Usage:\n"<>sym::usage<>"\n\n",usageString=""];
-   info = MakeBoxes@Definition@sym;
-   If[MatchQ[info,InterpretationBox["Null",__]],(* True - No, there is no definitions. *)
-      infoString="",
-      parsedInfo = Flatten@# &/@ (Cases[info[[1,1]],GridBox[{x:{_}..},__]:>Cases[{x},{_RowBox},1],2]~Flatten~2 //. {RowBox[x_]:>x,StyleBox[x_,_]:>x});
-      parsedInfo = MapThread[parsedInfo[[##]]&,{Range@Length@#,First/@#}] &@ (Range@(First@#-1) &@ Position[#,"="|":="|"^="|"^:="] &/@ parsedInfo);
-      parsedInfo = DeleteCases[DeleteDuplicates@parsedInfo,{"Options",__}|{"Attributes",__}];
-      parsedInfo = Array[Join[{ToString@#,") "},parsedInfo[[#]]]&,Length@parsedInfo];
-      infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
-      infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
+
+   If[MatchQ[sym::usage, _String],
+      usageString = StringJoin["Usage:\n", sym::usage, "\n\n"];,
+      usageString = "";
+   ];
+
+   simplify[expr_] := StringReplace[ToString@expr,
+      StartOfString ~~ "HoldPattern[" ~~ x___ ~~ "]" ~~ EndOfString :> x];
+
+   up = simplify/@ First/@ UpValues@ sym;
+   down = simplify/@ First/@ DownValues@ sym;
+   all = Join[up, down];
+
+   If[all === {},
+      infoString = "",
+      infoString = Array[(ToString[#]<>") "<>all[[#]])&, Length@all];
+      infoString = StringRiffle[infoString, "\n"];
+      infoString = "The behavior for case(s):\n"<>infoString<>
+         "\nis defined only.\n\n";
    ];
 
    With[{name = ToString@sym},
