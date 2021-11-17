@@ -1265,8 +1265,8 @@ getColourFactor::errNotNumber=
 "After projection element
 `1`
 still is not a number."
-getColourFactor::warnTryingIdentity=
-"Warning: There are no colour projectors of the given type. Trying to apply Identity."
+getColourFactor::warnTryingIdentity =
+"There are no colour projectors of the given type. Trying to apply Identity."
 getColourFactor[colourfactors:{`type`classColorFactors..}, projection:`type`colourProjector] :=
 Module[
    {
@@ -1278,7 +1278,7 @@ Module[
       uniqueColourStructs=DeleteDuplicates@Cases[colourfactors,projection[__],Infinity];
       Utils`AssertOrQuit[Length@uniqueColourStructs<=1,getColourFactor::errMultipleColourStructures,uniqueColourStructs];
       If[Length@uniqueColourStructs===0,
-         Print[getColourFactor::warnTryingIdentity];
+         Utils`FSFancyWarning[getColourFactor::warnTryingIdentity];
          colourfactors,
          colourfactors/.Rule[uniqueColourStructs[[1]],1]
          ]

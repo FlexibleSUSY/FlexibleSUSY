@@ -269,7 +269,7 @@ FSGetOption[opts_List, opt_] :=
                   0, Print["Error: option ", opt, " not found"];
                      Null,
                   1, values[[1]],
-                  _, Print["Warning: option ", opt, " not unique"];
+                  _, FSFancyWarning["Option ", opt, " is not unique"];
                      values[[1]]
                  ]
           ];
@@ -417,16 +417,21 @@ If[!$Notebooks,
 ];
 SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
 
-FSFancyWarning[string_String, len_Integer:70] :=
-Module[{warning, chopped},
+Options[FSFancyWarning] = {
+   PageWidth-> 70
+};
+
+FSFancyWarning[input__, OptionsPattern[]] :=
+Module[{warning, chopped, string},
+   string = StringReplace[StringJoin[ToString/@ {input}], "\n"-> " "];
    warning = If[!$Notebooks,
       If[TrueQ@FlexibleSUSY`FSEnableColors,
-         "\033[1;36mWarning\033[1;0m: ",
+         "\033[1;36mWarning:\033[1;0m ",
          "Warning: "
       ],
       Style["Warning: ", Cyan]
    ];
-   chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
+   chopped = InsertLinebreaks[string, OptionValue[PageWidth]-9];
    chopped = StringReplace[chopped, "\n"-> "\n         "];
    If[!$Notebooks,
       WriteString[$Output, warning <> chopped <> "\n"];,

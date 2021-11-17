@@ -518,7 +518,7 @@ CalculateThetaWFromMW[expr_] :=
            If[weinbergAngle === None || weinbergAngle === Null,
               weinbergAngle = expr /. subst;
               If[weinbergAngle === None || weinbergAngle === Null,
-                 Print["Warning: No expression for the Weinberg angle defined, setting it to 0."];
+                 Utils`FSFancyWarning["No expression for the Weinberg angle defined, setting it to 0."];
                  weinbergAngle = 0;
                 ];
              ];

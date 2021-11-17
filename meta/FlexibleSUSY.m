@@ -463,8 +463,12 @@ ReplaceSymbolsInUserInput[rules_] :=
            SetAttributes[CheckParticleInPrecision, HoldFirst];
            CheckParticleInPrecision[precision_] :=
               If[!SubsetQ[TreeMasses`GetParticles[], precision],
-                 Print["Warning: Particle(s) ", Complement[precision, TreeMasses`GetParticles[]],
-                 " cannot be used in ", Unevaluated@precision, " as it is not part of ", FSModelName, ". Removing it/them."];
+                 Utils`FSFancyWarning["Particle(s) ",
+                    Complement[precision, TreeMasses`GetParticles[]],
+                    " cannot be used in ", Unevaluated@precision,
+                    " as it is not part of ", ToString@FSModelName,
+                    ". Removing it/them."
+                 ];
                  precision = Intersection[precision, TreeMasses`GetParticles[]]
               ];
            CheckParticleInPrecision /@
@@ -472,9 +476,11 @@ ReplaceSymbolsInUserInput[rules_] :=
 
            (* decay calculation require 3- and 4-point loop functions *)
            If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
-              Print["Warning: Decay calculation requires a dedicated loop library. Currently it's either ",
-                    "LoopTools or Collier but FlexibleSUSY was only configured with internal libraries. ",
-                    "Disabling decays."
+              Utils`FSFancyWarning[
+                 "Decay calculation requires a dedicated loop library.",
+                 " Currently it's either LoopTools or Collier but",
+                 " FlexibleSUSY was only configured with internal libraries.",
+                 " Disabling decays."
               ];
               FlexibleSUSY`FSCalculateDecays = False
            ];
@@ -527,7 +533,11 @@ CheckBVPSolvers[solvers_List] :=
 
 CheckDecaysOptions[] :=
    If[FlexibleSUSY`FSDecayParticles =!= Automatic && FlexibleSUSY`FSDecayParticles =!= All && !ListQ[FlexibleSUSY`FSDecayParticles],
-      Print["Warning: Allowed values for FSDecayParticles are Automatic, All or list of particles. Got ", FlexibleSUSY`FSDecayParticles, ". Disabling decays. "];
+      Utils`FSFancyWarning[
+         "Allowed values for FSDecayParticles are Automatic, All or",
+         " list of particles. Got ", FlexibleSUSY`FSDecayParticles,
+         ". Disabling decays."
+      ];
       FlexibleSUSY`FSCalculateDecays = False,
       If[FlexibleSUSY`FSDecayParticles === Automatic,
          FlexibleSUSY`FSDecayParticles =
@@ -535,8 +545,10 @@ CheckDecaysOptions[] :=
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
             If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
-               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
-                     " which are not part of the model. Removing them."];
+               Utils`FSFancyWarning[
+                  "Requested decay of particles ",
+                  Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
+                  " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
@@ -553,8 +565,10 @@ CheckModelFileSettings[] :=
     Module[{},
            (* FlexibleSUSY model name *)
            If[!ValueQ[FlexibleSUSY`FSModelName] || Head[FlexibleSUSY`FSModelName] =!= String,
-              Print["Warning: FlexibleSUSY`FSModelName not defined!",
-                    " I'm using Model`Name from SARAH: ", Model`Name];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`FSModelName not defined!",
+                 " I'm using Model`Name from SARAH: ", Model`Name
+              ];
               FlexibleSUSY`FSModelName = Model`Name;
              ];
            (* Set OnlyLowEnergyFlexibleSUSY to False by default *)
@@ -575,16 +589,18 @@ CheckModelFileSettings[] :=
            (* HighScale *)
            If[!ValueQ[FlexibleSUSY`HighScale],
               If[!FlexibleSUSY`OnlyLowEnergyFlexibleSUSY,
-                 Print["Warning: FlexibleSUSY`HighScale should be",
-                       " set in the model file!"];
-                ];
+                 Utils`FSFancyWarning[
+                    "FlexibleSUSY`HighScale should be set in the model file!"
+                 ];
+              ];
               FlexibleSUSY`HighScale := 2 10^16;
              ];
            If[!ValueQ[FlexibleSUSY`HighScaleFirstGuess],
               If[!FlexibleSUSY`OnlyLowEnergyFlexibleSUSY,
-                 Print["Warning: FlexibleSUSY`HighScaleFirstGuess should be",
-                       " set in the model file!"];
-                ];
+                 Utils`FSFancyWarning[
+                    "FlexibleSUSY`HighScaleFirstGuess should be set in the model file!"
+                 ];
+              ];
               FlexibleSUSY`HighScaleFirstGuess = 2.0 10^16;
              ];
            If[Head[FlexibleSUSY`HighScaleInput] =!= List,
@@ -592,13 +608,15 @@ CheckModelFileSettings[] :=
              ];
            (* LowScale *)
            If[!ValueQ[FlexibleSUSY`LowScale],
-              Print["Warning: FlexibleSUSY`LowScale should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`LowScale should be set in the model file!"
+              ];
               FlexibleSUSY`LowScale := LowEnergyConstant[MZ];
              ];
            If[!ValueQ[FlexibleSUSY`LowScaleFirstGuess],
-              Print["Warning: FlexibleSUSY`LowScaleFirstGuess should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`LowScaleFirstGuess should be set in the model file!"
+              ];
               FlexibleSUSY`LowScaleFirstGuess = LowEnergyConstant[MZ];
              ];
            If[Head[FlexibleSUSY`LowScaleInput] =!= List,
@@ -606,13 +624,15 @@ CheckModelFileSettings[] :=
              ];
            (* SUSYScale *)
            If[!ValueQ[FlexibleSUSY`SUSYScale],
-              Print["Warning: FlexibleSUSY`SUSYScale should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`SUSYScale should be set in the model file!"
+              ];
               FlexibleSUSY`SUSYScale := 1000;
              ];
            If[!ValueQ[FlexibleSUSY`SUSYScaleFirstGuess],
-              Print["Warning: FlexibleSUSY`SUSYScaleFirstGuess should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`SUSYScaleFirstGuess should be set in the model file!"
+              ];
               FlexibleSUSY`SUSYScaleFirstGuess = 1000;
              ];
            If[Head[FlexibleSUSY`SUSYScaleInput] =!= List,
@@ -620,7 +640,9 @@ CheckModelFileSettings[] :=
              ];
            If[Head[FlexibleSUSY`SUSYScaleMatching] === List &&
               Head[FlexibleSUSY`MatchingScaleInput] =!= List,
-              Print["Warning: SUSYScaleMatching is deprecated.  Please use MatchingScaleInput instead!"];
+              Utils`FSFancyWarning[
+                 "SUSYScaleMatching is deprecated. Please use MatchingScaleInput instead!"
+              ];
               FlexibleSUSY`MatchingScaleInput = FlexibleSUSY`SUSYScaleMatching;
              ];
 
@@ -643,8 +665,10 @@ CheckModelFileSettings[] :=
               FlexibleSUSY`ExtraSLHAOutputBlocks = {};
              ];
            If[MemberQ[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}],
-              Print["Warning: Effective coupling module has been disabled since v2.6.0."];
-              Print["         Please use FlexibleDecay instead."];
+              Utils`FSFancyWarning[
+                 "Effective coupling module has been disabled since v2.6.0.",
+                 " Please use FlexibleDecay instead."
+              ];
               FlexibleSUSY`ExtraSLHAOutputBlocks =
                  DeleteCases[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}];
            ];
@@ -692,9 +716,10 @@ CheckExtraParametersUsage[parameters_List, boundaryConditions_List] :=
            usedCases = Function[par, !FreeQ[#, par]& /@ boundaryConditions] /@ parameters;
            multiplyUsedPars = Position[Count[#, True]& /@ usedCases, n_ /; n > 1];
            If[multiplyUsedPars =!= {},
-              Print["Warning: the following auxiliary parameters appear at"];
-              Print["   multiple scales, but do not run:"];
-              Print["  ", Extract[parameters, multiplyUsedPars]];
+              Utils`FSFancyWarning[
+                 "The following auxiliary parameters appear at multiple",
+                 " scales, but do not run: ", Extract[parameters, multiplyUsedPars]
+              ];
              ];
           ];
 
@@ -3526,15 +3551,19 @@ SelectValidEWSBSolvers[solverSolutions_, ewsbSolvers_] :=
                If[solution === {},
                   (* Fixed-point iteration can only be used if an analytic EWSB solution exists *)
                   If[MemberQ[validSolvers, FlexibleSUSY`FPIRelative],
-                     Print["Warning: FPIRelative was selected, but no analytic"];
-                     Print["   solution to the EWSB eqs. is provided."];
-                     Print["   FPIRelative will be removed from the list of EWSB solvers."];
+                     Utils`FSFancyWarning[
+                        "FPIRelative was selected, but no analytic solution",
+                        " to the EWSB eqs. is provided. FPIRelative will be",
+                        " removed from the list of EWSB solvers."
+                     ];
                      validSolvers = Cases[validSolvers, Except[FlexibleSUSY`FPIRelative]];
                     ];
                   If[MemberQ[validSolvers, FlexibleSUSY`FPIAbsolute],
-                     Print["Warning: FPIAbsolute was selected, but no analytic"];
-                     Print["   solution to the EWSB eqs. is provided."];
-                     Print["   FPIAbsolute will be removed from the list of EWSB solvers."];
+                     Utils`FSFancyWarning[
+                        "FPIAbsolute was selected, but no analytic solution",
+                        " to the EWSB eqs. is provided. FPIAbsolute will be",
+                        " removed from the list of EWSB solvers."
+                     ];
                      validSolvers = Cases[validSolvers, Except[FlexibleSUSY`FPIAbsolute]];
                     ];
                  ];
@@ -4174,8 +4203,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            If[FlexibleSUSY`FSUnfixedParameters =!= {} &&
               FlexibleSUSY`AutomaticInputAtMSUSY =!= True,
-              Print["Warning: the following parameters are not fixed by any constraint:"];
-              Print["  ", FlexibleSUSY`FSUnfixedParameters];
+              Utils`FSFancyWarning[
+                 "The following parameters are not fixed by any constraint: ",
+                 FlexibleSUSY`FSUnfixedParameters
+              ];
              ];
 
            (* add the unfixed parameters to the susy scale constraint *)
@@ -4430,8 +4461,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
 
               If[FlexibleSUSY`FSDecayParticles === {},
-                 Print["Warning: no supported particles to calculate decays for were found."];
-                 Print["   Generation of decays code will be skipped."];
+                 Utils`FSFancyWarning[
+                    "No supported particles to calculate decays for were found.",
+                    " Generation of decays code will be skipped."
+                 ];
                  FlexibleSUSY`FSCalculateDecays = False;
                 ,
                 decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp"};
@@ -4929,9 +4962,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
               wrongFields = Complement[LToLGammaFields, properStates];
               If[wrongFields =!= {},
-                 Print[
-                    "Warning: BrLToLGamma function works only for leptons and a photon. Removing requested process(es): " <>
-                     StringJoin@Riffle[ToString /@ wrongFields, ", "]
+                 Utils`FSFancyWarning[
+                    "BrLToLGamma function works only for leptons and a photon.",
+                    " Removing requested process(es): "
+                    Riffle[ToString/@ wrongFields, ", "]
                  ];
                  LToLGammaFields = properStates;
               ];
