@@ -417,10 +417,12 @@ SetExtraParameterSLHABlock[par_, block_] :=
 
 ProcessParameterInfo[{parameter_ /; (IsModelParameter[parameter] || IsOutputParameter[parameter]), {__}}] :=
     Block[{},
-          Print["Warning: the properties of ", parameter, " are set"];
-          Print["   in the SARAH model files and cannot be overridden."];
-          Print["   Ignoring property settings for ", parameter];
-         ];
+       Utils`FSFancyWarning[
+          "The properties of ", parameter, " are set",
+          " in the SARAH model files and cannot be overridden.",
+          " Ignoring property settings for ", parameter
+       ];
+    ];
 
 ProcessParameterInfo[{parameter_?IsInputParameter, properties_List}] :=
     Module[{i, inputBlock, ignored = {}, validProperties = properties, property, setting},
@@ -434,10 +436,14 @@ ProcessParameterInfo[{parameter_?IsInputParameter, properties_List}] :=
                      AddMassDimensionInfo[parameter, setting],
                      property === SARAH`LesHouches,
                      SetInputParameterSLHABlock[parameter, setting],
-                     True, Print["Warning: unrecognized property for parameter ", parameter, ": ", property]
-                    ];
-              ];
-          ];
+                     True,
+                     Utils`FSFancyWarning[
+                        "Unrecognized property for parameter",
+                        " ", parameter,  ": ", property
+                     ];
+               ];
+           ];
+    ];
 
 ProcessParameterInfo[{parameter_?IsExtraParameter, properties_List}] :=
     Module[{i, property, setting},
@@ -454,10 +460,14 @@ ProcessParameterInfo[{parameter_?IsExtraParameter, properties_List}] :=
                      Print["Error: ", parameter, " is defined as an input parameter"];
                      Print["   but is being treated as an extra parameter."];
                      Quit[1];,
-                     True, Print["Warning: unrecognized property for parameter ", parameter, ": ", property]
-                    ];
-              ];
-          ];
+                     True,
+                     Utils`FSFancyWarning[
+                        "Unrecognized property for parameter",
+                        " ", parameter, ": ", property
+                     ];
+               ];
+           ];
+   ];
 
 ProcessParameterInfo[{parameter_, properties_List}] :=
     Block[{inputOptions, isInput = False},
@@ -552,10 +562,10 @@ FindSymbolDef[sym_, opt_:DependenceNum] :=
               Return[0];
              ];
            If[Length[symDef] > 1,
-              Print["Warning: ", sym, " defined multiple times"];
-             ];
+              Utils`FSFancyWarning[sym, " defined multiple times"];
+           ];
            symDef[[1]]
-          ];
+    ];
 
 FindAllParametersFromList[expr_, parameters_List] :=
     Module[{symbols, compactExpr},
@@ -1607,9 +1617,10 @@ GetParameterFromDescription[description_String] :=
               Return[Null];
              ];
            If[Length[parameter] > 1,
-              Print["Warning: Parameter with description \"", description,
-                    "\" not unique."];
-             ];
+              Utils`FSFancyWarning[
+                 "Parameter with description \"", description, "\" not unique."
+              ];
+           ];
            parameter[[1]]
           ];
 
@@ -1625,9 +1636,10 @@ GetParticleFromDescription[description_String, eigenstates_:FlexibleSUSY`FSEigen
               Return[Null];
              ];
            If[Length[particle] > 1,
-              Print["Warning: Particle with description \"", description,
-                    "\" not unique."];
-             ];
+              Utils`FSFancyWarning[
+                 "Particle with description \"", description, "\" not unique."
+              ];
+           ];
            particle[[1]]
           ];
 
@@ -1834,7 +1846,11 @@ AreLinearDependent[{eq1_, eq2_}, parameters_List] :=
 GetThirdGeneration[par_] :=
     Which[IsScalar[par], par,
           IsMatrix[par], par[2,2],
-          True, Print["Warning: GetThirdGeneration[",par,"]: unknown type"]; par
+          True,
+             Utils`FSFancyWarning[
+                "GetThirdGeneration[", par, "]: unknown type"
+             ];
+             par
          ];
 
 GetSARAHParameters[] :=

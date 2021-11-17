@@ -184,17 +184,21 @@ CreateEWSBEqFunction[higgs_, equation_List] :=
            type = CConversion`ScalarType[CConversion`realScalarCType];
            ctype = CConversion`CreateCType[type];
            If[dim < dimEq,
-              Print["Warning: number of Higgs bosons (", dim,
-                    ") < number of EWSB eqs. (",dimEq,")."
-                    "The EWSB eqs. ", dim, "...", dimEq,
-                    " will be ignored"];
-             ];
+              Utils`FSFancyWarning[
+                 "Number of Higgs bosons (", dim,
+                 ") < number of EWSB eqs. (", dimEq, ").",
+                 " The EWSB eqs. ", dim, "...", dimEq,
+                 " will be ignored"
+              ];
+           ];
            If[dim > dimEq,
-              Print["Warning: number of physical Higgs bosons (", dim,
-                    ") > number of EWSB eqs. (",dimEq,").",
-                    "The EWSB eqs. for the fields ", higgs, "(n), n >= ",
-                    dimEq, ", will be set to zero."];
-             ];
+              Utils`FSFancyWarning[
+                 "Number of physical Higgs bosons (", dim,
+                 ") > number of EWSB eqs. (", dimEq, ").",
+                 " The EWSB eqs. for the fields ", higgs,
+                 "(n), n >= ", dimEq, ", will be set to zero."
+              ];
+           ];
            For[i = 1, i <= dim, i++,
                result = result <>
                         ctype <> " CLASSNAME::get_ewsb_eq_" <>
@@ -249,9 +253,11 @@ GetValidEWSBInitialGuesses[initialGuess_List] :=
     Module[{i},
            For[i = 1, i <= Length[initialGuess], i++,
                If[!MatchQ[initialGuess[[i]], {_,_}],
-                  Print["Warning: ignoring invalid initial guess: ", initialGuess[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Ignoring invalid initial guess: ", initialGuess[[i]]
+                  ];
+               ];
+           ];
            Cases[initialGuess, {_,_}]
           ];
 
@@ -259,9 +265,11 @@ GetValidEWSBSubstitutions[substitutions_List] :=
     Module[{i},
            For[i = 1, i <= Length[substitutions], i++,
                If[!MatchQ[substitutions[[i]], {_,_}],
-                  Print["Warning: ignoring invalid EWSB substitution: ", substitutions[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Ignoring invalid EWSB substitution: ", substitutions[[i]]
+                  ];
+               ];
+           ];
            Cases[substitutions, {_,_}]
           ];
 
@@ -271,10 +279,12 @@ InitialGuessFor[par_, initialGuesses_List:{}] :=
               If[Parameters`IsRealParameter[par], guess = par, guess = Abs[par]];,
               guess = Cases[initialGuesses, {p_ /; p === par, val_} :> val];
               If[Length[guess] > 1,
-                 Print["Warning: multiple initial guesses given for ", par];
-                ];
+                 Utils`FSFancyWarning[
+                    "Multiple initial guesses given for ", par
+                 ];
+              ];
               guess = First[guess];
-             ];
+           ];
            guess
           ];
 
@@ -663,8 +673,10 @@ ReduceTwoSolutions[sol1_, sol2_] :=
               Return[{sol1}];
              ];
            If[!PossibleZeroQ[sol1[[2]] + sol2[[2]]],
-              Print["Warning: cannot reduce solution for ", par];
-              Print["   because the two solutions are not related by a global sign."];
+              Utils`FSFancyWarning[
+                 "Cannot reduce solution for ", par,
+                 " because the two solutions are not related by a global sign."
+              ];
               Return[{}];
              ];
            DebugPrint["The two solutions for ", par,
@@ -692,7 +704,7 @@ ReduceSolution[{sol1_, sol2_}] :=
                      ];
               ];
            If[Length[reducedSolution] != Length[sol1],
-              Print["Warning: analytic reduction of EWSB solutions failed."];
+              Utils`FSFancyWarning["Analytic reduction of EWSB solutions failed."];
               Return[{{},{}}];
              ];
            Return[{reducedSolution, freePhases}];

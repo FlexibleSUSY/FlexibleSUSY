@@ -912,9 +912,10 @@ CreateLoopMassFunction[particle_Symbol, precision_Symbol, tadpole_] :=
 (* return pole mass of a singlet as a function of p *)
 Create1DimPoleMassPrototype[particle_Symbol] :=
     If[GetDimension[particle] > 1,
-       Print["Warning: cannot generate extra pole mass"
-             " calculation function for ", particle, ", because"
-             " it has more than 1 generation"];
+       Utils`FSFancyWarning[
+          "Cannot generate extra pole mass calculation function for",
+          " ", particle, ", because it has more than 1 generation"
+       ];
        "",
        "double " <> CreateLoopMassFunctionName[particle] <> "(double);\n"
       ];
@@ -923,9 +924,10 @@ Create1DimPoleMassPrototype[particle_Symbol] :=
 Create1DimPoleMassFunction[particle_Symbol] :=
     Module[{result, body = "", particleName, massName, mTree},
            If[GetDimension[particle] > 1,
-              Print["Warning: cannot generate extra pole mass"
-                    " calculation function for ", particle, ", because"
-                    " it has more than 1 generation"];
+              Utils`FSFancyWarning[
+                 "Cannot generate extra pole mass calculation function for",
+                 " ", particle, ", because it has more than 1 generation"
+              ];
               Return[""];
              ];
            If[!(IsUnmixed[particle] && GetMassOfUnmixedParticle[particle] === 0),
@@ -1228,13 +1230,19 @@ CreateRunningDRbarMassFunction[particle_ /; particle === TreeMasses`GetSMTopQuar
                 ];
               If[FlexibleSUSY`UseYukawa3LoopQCD === True &&
                  FlexibleSUSY`FSRenormalizationScheme =!= FlexibleSUSY`MSbar,
-                 Print["Warning: UseYukawa3LoopQCD == True, but the renormalization scheme is not MSbar!"];
-                 Print["  The 3-loop QCD corrections to the top Yukawa coupling will be disabled."];
-                ];
+                 Utils`FSFancyWarning[
+                    "UseYukawa3LoopQCD == True, but the",
+                    " renormalization scheme is not MSbar! The 3-loop QCD",
+                    " corrections to the top Yukawa coupling will be disabled."
+                 ];
+              ];
               If[FlexibleSUSY`UseYukawa4LoopQCD === True &&
                  FlexibleSUSY`FSRenormalizationScheme =!= FlexibleSUSY`MSbar,
-                 Print["Warning: UseYukawa4LoopQCD == True, but the renormalization scheme is not MSbar!"];
-                 Print["  The 4-loop QCD corrections to the top Yukawa coupling will be disabled."];
+                 Utils`FSFancyWarning[
+                    "UseYukawa4LoopQCD == True, but the renormalization",
+                    " scheme is not MSbar! The 4-loop QCD corrections to the",
+                    " top Yukawa coupling will be disabled."
+                 ];
                 ];
               If[FlexibleSUSY`UseYukawa3LoopQCD === True ||
                  FlexibleSUSY`UseYukawa3LoopQCD === Automatic,

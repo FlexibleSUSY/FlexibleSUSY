@@ -416,11 +416,11 @@ WaveResult[diagr_List, includeGoldstones_] :=
            intparticles = ({SARAH`Internal[1], SARAH`Internal[2]} /. diagr[[2]]) /.
                              {SARAH`bar[p_] :> p, Susyno`LieGroups`conj[p_] :> p};
            If[Select[intparticles, TreeMasses`IsFermion] === {},
-              Print["Warning: no internal fermion in wave function diagram"];
+              Utils`FSFancyWarning["No internal fermion in wave function diagram"];
               Return[0]];
            intfermion = Select[intparticles, TreeMasses`IsFermion][[1]];
            If[Select[intparticles, TreeMasses`IsScalar] === {},
-              Print["Warning: no internal scalar in wave function diagram"];
+              Utils`FSFancyWarning["No internal scalar in wave function diagram"];
               Return[0]];
            intscalar = Select[intparticles, TreeMasses`IsScalar][[1]];
            result = -coupl Susyno`LieGroups`conj[coupl] *
@@ -548,7 +548,7 @@ VertexResultFSS[diagr_List, includeGoldstones_] :=
               factor = 1,
               If[scalarsoutin === {inscalar, outscalar},
                  factor = -1,
-                 Print["Warning: scalar direction could not be determined"];
+                 Utils`FSFancyWarning["Scalar direction could not be determined"];
                  Return[0]]];
            couplSSV = factor couplSSV;
            couplFFSout = (diagr[[1, extoutindex]] /. C[a__] -> SARAH`Cp[a])[SARAH`PR];
@@ -640,7 +640,8 @@ VertexResult[diagr_List, includeGoldstones_] :=
            Switch[{nFermions, nScalars},
                   {1, 2}, VertexResultFSS[diagr, includeGoldstones],
                   {2, 1}, VertexResultFFS[diagr, includeGoldstones],
-                  _, Print["Warning: vertex diagram type not supported"]; 0]
+                  _, Utils`FSFancyWarning["Vertex diagram type not supported"];
+                     0]
           ];
 
 (*calculates tree-level vertex result for normalization of one-loop results*)
@@ -766,10 +767,10 @@ BoxResult[diagr_List, includeGoldstones_] :=
                             SARAH`Internal[3], SARAH`Internal[4]} /. diagr[[2]]) /.
                              {SARAH`bar[p_] :> p, Susyno`LieGroups`conj[p_] :> p};
            If[Length[Select[intparticles, TreeMasses`IsFermion]] != 2,
-              Print["Warning: not 2 internal fermions in box diagram"];
+              Utils`FSFancyWarning["Not 2 internal fermions in box diagram"];
               Return[0]];
            If[Length[Select[intparticles, TreeMasses`IsScalar]] != 2,
-              Print["Warning: not 2 internal scalars in box diagram"];
+              Utils`FSFancyWarning["Not 2 internal scalars in box diagram"];
               Return[0]];
            intfermions = Select[intparticles, TreeMasses`IsFermion];
            toponr = WeinbergAngle`topoNr /. diagr[[2]];
@@ -949,7 +950,7 @@ GetNeutrinoIndex[] :=
                             GetWPlusBoson[]][SARAH`PL];
            (*follow vertex conventions:*)
            coupl = Vertices`SortCp[coupl];
-           (*omit a possible minus sign:*)   
+           (*omit a possible minus sign:*)
            If[MatchQ[coupl, Times[-1, _]], coupl = -coupl];
            coupl = SelfEnergies`CreateCouplingSymbol[coupl];
            For[k = 0, k <= 2, k++,
@@ -995,7 +996,7 @@ CreateContributionCall[0] := "0."; (*needed in case of an error*)
 CreateDeltaVBCalculation[deltaVBcontris_List] :=
     Module[{type, result = "", boxcontri, vertexcontris, wavecontris},
            If[!(TreeMasses`FindMixingMatrixSymbolFor[TreeMasses`GetSMNeutralLeptons[][[1]]] === Null),
-              Print["Warning: neutrino mixing is not considered in muon decay"]];
+              Utils`FSFancyWarning["Neutrino mixing is not considered in muon decay"]];
            type = CConversion`CreateCType[CConversion`ScalarType[CConversion`complexScalarCType]];
            boxcontri = Cases[deltaVBcontris, WeinbergAngle`DeltaVB[{WeinbergAngle`fsbox, __}, _]];
            If[boxcontri === {},

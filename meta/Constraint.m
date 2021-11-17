@@ -396,10 +396,13 @@ CheckSetting[patt:{parameter_, value_}, constraintName_String, isInitial_] :=
            If[isInitial,
               modelPars = Parameters`FSModelParameters /. Parameters`FindAllParametersClassified[value];
               If[Intersection[modelPars, Parameters`GetModelParameters[]] =!= {},
-                 Print["Warning: In constraint ", constraintName, ": ", InputForm[patt]];
-                 Print["   ", modelPars, " on the r.h.s. are model parameters, which may initially be zero!"];
-                ];
-             ];
+                 Utils`FSFancyWarning[
+                    "In constraint ", constraintName, ": ", InputForm[patt],
+                    " ", ToString@modelPars,
+                    " on the r.h.s. are model parameters, which may initially be zero!"
+                 ];
+              ];
+           ];
            True
           ];
 
@@ -436,12 +439,12 @@ SanityCheck[settings_List, constraintName_String:""] :=
            For[y = 1, y <= Length[yukawas], y++,
                If[(ValueQ /@ yukawas)[[y]] &&
                   FreeQ[setParameters, yukawas[[y]]],
-                  Print["Warning: Yukawa coupling ", yukawas[[y]],
-                        " not set",
-                        If[constraintName != "", " in the " <> constraintName, ""],
-                        "."];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Yukawa coupling ", yukawas[[y]],
+                     " not set"<> If[constraintName != ""," in the " <> constraintName, ""]
+                  ];
+               ];
+           ];
           ];
 
 CalculateScale[Null, _] := "";
