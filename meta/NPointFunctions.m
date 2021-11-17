@@ -740,10 +740,6 @@ subkernel is launched for.
 @returns subkernel name.
 @note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}
 @note for Mathematica 7 some functions have the same names as in SARAH`.`";
-LaunchSubkernelFor::errKernelLaunch=
-"Unable to launch subkernel(s) during calculations for
-`1`
-because of error:";
 LaunchSubkernelFor[message_String] /; $VersionNumber===7.0 :=
 Module[{kernelName},
    Off[Parallel`Preferences`add::shdw,
@@ -752,9 +748,7 @@ Module[{kernelName},
       Parallel`Preferences`tr::shdw,
       Parallel`Protected`processes::shdw,
       SubKernels`Description::shdw];
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
+   kernelName = LaunchKernels[1];
    On[Parallel`Preferences`add::shdw,
       Parallel`Preferences`set::shdw,
       Parallel`Preferences`list::shdw,
@@ -765,9 +759,7 @@ Module[{kernelName},
 ];
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
+   kernelName = LaunchKernels[1];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
 LaunchSubkernelFor // Utils`MakeUnknownInputDefinition;

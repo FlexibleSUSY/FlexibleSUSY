@@ -144,67 +144,21 @@ PrintAndReturn::usage = "Print result and return it";
 AssertWithMessage::usage = "AssertWithMessage[assertion_, message_String]:
 If assertion does not evaluate to True, print message and Quit[1].";
 
-AssertOrQuit::usage =
-"@brief AssertOrQuit[assertion, sym::tag, insertions...]:
-If assertion evaluate to True, returns True.
-If assertion evaluate to False, print message with sequence of insertions
-and Quit[1].
-@param assertion Some expression which one want to check being True or something
-else.
-@param sym::tag Controlling MessageName String. It is assumed that symbol \"\"
-appears only as controllling one, i.e. in the form \"1\", \"25\" etc.
-@param insertions... None or more expressions which are inserted inside sym::tag
-controlling String. Its length should be equal or more then the maximal
-controlling number in sym::tag.
-@note First check controlling sym::tag.
-@note __~~\"Private\"~~str__:>str is done because Mathematica prints the names
-of Private` variables in a quite weird way.
-@note \"\\n->\"dummy_new_line\" because Mathematica's StringForm incorrectly
-parses \\n symbol.
-@note hard-coded width of output colourless text is 70.";
+AssertOrQuit::usage = "
+@brief If assertion === True, True is returned.
+       If assertion =!= True, an error message is printed and kernel is killed.
+@param assertion Any expression.
+@param sym::tag A message string.
+@param insertions Expressions inserted into the message via StringTemplate.";
 
-EvaluateOrQuit::usage =
-"@brief EvaluateOrQuit[expression, sym::tag, insertions...]:
-Evaluates expression and returns the result if Wolfram messages aren't
-generated.
-If any Message is generated it
-   stops evaluation,
-   prints message with sequence of insertions,
-   prints content of Message and
-   Quit[1].
-@param expression Some expression which one want to evaluate without Wolfram
-messages.
-@param sym::tag Controlling MessageName String. It is assumed that symbol \"`\"
-appears only as controllling one, i.e. in the form \"`1`\", \"`25`\" etc.
-@param insertions... None or more expressions which are inserted inside sym::tag
-controlling String. Its length should be equal or more then the maximal
-controlling number in sym::tag.
-@note First check controlling sym::tag.
-@note hard-coded width of output colourless text is 70.
-@note It seems that function is not working for messages generated in subkernels
-if they are running inside expression.
-@note __~~\"Private`\"~~str__:>str is done because Mathematica prints the names
-of Private` variables in a quite weird way.
-@note \"\\n->\"dummy_new_line\" because Mathematica's StringForm incorrectly
-parses \\n symbol.
-@note Internal`HandlerBlock is not documented, this is why System`Dump` prefix
-is used for function arguments to avoid any unexpected behavior.";
+MakeUnknownInputDefinition::usage = "
+@brief After the definition of any function use it like:
 
-MakeUnknownInputDefinition::usage =
-"@brief Creates definition for a given symbol for a case when input is not defined
-explicitly, i.e. creates definition for the pattern symbol[args___].
-@example Step 1) Make all desired definitions for a function (here: foo), like
-foo[a_Integer] := Module[{<...>},<...>];
-foo[c:{__Integer}] := Module[{<...>},<...>];
-Step 2) Secure the usage of foo for specified above cases simply by writing
-foo // Utils`MakeUnknownInputDefinition;
-or
-Utils`MakeUnknownInputDefinition[foo];
-or
-Utils`MakeUnknownInputDefinition@foo;
-somewhere in the scope of the package, where foo is defined.
-@param <Symbol> sym Symbol to make definition for.
-@returns None.
+          Utils`MakeUnknownInputDefinition[function];
+
+       It creates a new definition function[args___], which prints an error and
+       kills the kernel if used in the code.
+@param sym A name of a function.
 @note UpValues for symbol[args___] are not cleared.";
 
 ReadLinesInFile::usage = "ReadLinesInFile[fileName_String]:
@@ -357,65 +311,31 @@ PrintAndReturn[e___] := (Print[e]; e)
 AssertWithMessage[assertion_, message_String] :=
 	If[assertion =!= True, Print[message]; Quit[1]];
 
-AssertOrQuit::errNotDefined =
-"Error message \"`1`\" is not defined in the code.";
-AssertOrQuit::errStrokes =
-"Even number of `.` symbols in sym::tag should be given in:
-\"`1`\"";
-AssertOrQuit::errControl =
-"Only control symbols \"`.`int Number`.`\" and \"`.`.`.`\" are allowed in:
-\"`1`\"";
-AssertOrQuit::errInsertions =
-"The length of insertions
-`1`
-should large or equal to the max control number `2` in:
-\"`3`\"";
-AssertOrQuit::errInput =
-"Input should be of the following form:
-AssertOrQuit[assertion, sym::tag, insertions...] and not
-AssertOrQuit@@`1`.
-
-Read AssertOrQuit::usage for more information.";
-AssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   internalAssertOrQuit[assertion,MessageName[sym,tag],insertions] /;
-   internalOrQuitInputCheck[AssertOrQuit,MessageName[sym,tag],insertions];
-AssertOrQuit[x___] :=
-   AssertOrQuit[False,AssertOrQuit::errInput,{x}];
-If[!$Notebooks,
-   internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   Module[{RedString,WriteOut,MultilineToDummy,replacedMessage},
-      If[TrueQ@assertion, Return@True];
+AssertOrQuit[assertion_,
+             HoldPattern@MessageName[sym_, tag_],
+             insertions___] :=
+Module[{RedString, WriteOut},
+   If[TrueQ@assertion, Return@True];
+   RedString[str_] := If[$Notebooks,
+      Style[str, Red],
       If[TrueQ@FlexibleSUSY`FSEnableColors,
-         RedString[str_] := "\033[1;31m"<>str<>"\033[1;0m";,
-         RedString[str_] := str;
-      ];
-
-      WriteOut[str__] := WriteString[$Output, StringJoin@str];
-      MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
-      replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
-
-      Utils`FSFancyLine[];
-      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],": ",RedString@tag,":\n"];
-      WriteOut@StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"];
-      WriteOut["\nWolfram Language kernel session ",RedString@"terminated",".\n"];
-      Utils`FSFancyLine[];
-      Quit[1];
-   ];,
-   (* Else *)
-   internalAssertOrQuit[assertion_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   Module[{WriteColourless,MultilineToDummy,replacedMessage},
-      If[assertion === True,Return@True];
-
-      MultilineToDummy[args___] := Sequence@@(StringReplace[ToString@#,"\n"->"dummy_n"]&/@{args});
-      replacedMessage = StringReplace[sym~MessageName~tag,"\n"->"dummy_n"];
-
-      Print[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],": ",Style[tag,Red],":\n",
-         StringReplace[ToString@StringForm[replacedMessage,MultilineToDummy@insertions],"dummy_n"->"\n"],
-         "\nWolfram Language kernel session ","terminated"~Style~Red,"."];
-      Quit[1];
+         "\033[1;31m"<>str<>"\033[1;0m",
+         str
+      ]
    ];
+   WriteOut[str__] := If[$Notebooks,
+      Print[str],
+      WriteString[$Output, StringJoin[str]<>"\n"]
+   ];
+   WriteOut[Context@sym, SymbolName@sym, ": ", RedString@tag, ":"];
+   WriteOut@StringTemplate[MessageName[sym, tag]][insertions];
+   WriteOut["Wolfram Language kernel session ", RedString@"terminated", "."];
+   Quit[1];
 ];
-SetAttributes[{AssertOrQuit,internalAssertOrQuit},{HoldAll, Protected}];
+
+AssertOrQuit[x___] := AssertOrQuit[False, AssertOrQuit::errInput, {x}];
+AssertOrQuit ~ SetAttributes ~ {HoldAll, Protected};
+AssertOrQuit::errInput = "Input '`1`' is not supported.";
 
 Options[FSFancyWarning] = {
    PageWidth-> 70
@@ -439,81 +359,8 @@ Module[{warning, chopped, string},
    ];
 ];
 
-EvaluateOrQuit::errNotDefined = AssertOrQuit::errNotDefined;
-EvaluateOrQuit::errStrokes = AssertOrQuit::errStrokes;
-EvaluateOrQuit::errControl = AssertOrQuit::errControl;
-EvaluateOrQuit::errInsertions = AssertOrQuit::errInsertions;
-EvaluateOrQuit::errInput =
-"Input should be of the following form:
-EvaluateOrQuit[expression, sym::tag, insertions...] and not
-EvaluateOrQuit@@`1`.
-Read EvaluateOrQuit::usage for more information.";
-EvaluateOrQuit[expression_,HoldPattern@MessageName[sym_, tag_],insertions___] :=
-   internalEvaluateOrQuit[expression,MessageName[sym,tag],insertions] /;
-   internalOrQuitInputCheck[EvaluateOrQuit,MessageName[sym,tag],insertions];
-EvaluateOrQuit[x___] :=
-   AssertOrQuit[False,EvaluateOrQuit::errInput,{x}];
-internalEvaluateOrQuit[
-   expression_,
-   HoldPattern@MessageName[sym_, tag_],
-   insertions___
-] :=
-Module[
-   {
-      ctrlRed=If[!$Notebooks,"\033[1;31m",""],
-      ctrlBack=If[!$Notebooks,"\033[1;0m",""],
-      CutString=If[(!$Notebooks)&&MemberQ[$Packages,"TextFormatting`"],
-         TextFormatting`WrapLines[#,70,""]&,#&],
-      WriteOut,WriteColourless,Filter
-   },
-   WriteOut[string__] := WriteString[$Output, StringJoin@string];
-   WriteColourless[string__] := WriteOut@CutString@StringJoin@string;
-   Filter[
-      System`Dump`str_,
-      Hold[MessageName[System`Dump`s_, System`Dump`t_]],
-      Hold[Message[_, System`Dump`args___]]
-   ] :=
-   (
-      Utils`FSFancyLine[];
-      WriteOut[Context@sym,StringReplace[ToString@sym,__~~"`"~~str__:>str],
-         ": ",ctrlRed,tag,ctrlBack,":\n"];
-      WriteColourless[#,"\n"]&/@StringSplit[ToString@StringForm[
-         StringReplace[MessageName[sym, tag],"\n"->"dummy_n"],insertions],
-         "dummy_n"];
-      WriteColourless[ToString@System`Dump`s,"::",System`Dump`t," ",
-         ToString@StringForm[System`Dump`str,System`Dump`args]];
-      WriteOut["\nWolfram Language kernel session ",ctrlRed,"terminated",ctrlBack,".\n"];
-      Utils`FSFancyLine[];
-      Quit[1]
-   );
-   Internal`HandlerBlock[{"MessageTextFilter", Filter}, expression]
-];
-SetAttributes[{EvaluateOrQuit,internalEvaluateOrQuit},{HoldAll, Protected}];
-
-internalOrQuitInputCheck[func_,message_,insertions___] :=
-Module[{nStrokes,controlSubstrings},
-   internalAssertOrQuit[StringQ@message,
-      func::errNotDefined,message];
-   nStrokes = StringCount[message,"`"];
-   internalAssertOrQuit[EvenQ@nStrokes,
-      func::errStrokes,message];
-
-   If[nStrokes===0,Return@True];
-
-   controlSubstrings=DeleteDuplicates@StringCases[message,{
-      "`.`":>0,(* Ok *)
-      "`"~~num:DigitCharacter..~~"`":>FromDigits@num,(* Ok *)
-      "`"~~___~~"`":>-1(* Something bad *)
-      }];
-   internalAssertOrQuit[FreeQ[controlSubstrings,-1],
-      func::errControl,message];
-   internalAssertOrQuit[TrueQ[Max@controlSubstrings<=Length@{insertions}],
-      func::errInsertions,{insertions},Max@checkedControl,message]
-];
-SetAttributes[internalOrQuitInputCheck,{HoldFirst, Protected}];
-
 MakeUnknownInputDefinition[sym_Symbol] :=
-Module[{usageString,info,parsedInfo,infoString,symbolAsString},
+Module[{usageString,info,parsedInfo,infoString},
    (* Clean existing definitions if they exist for required pattern.. *)
    Off[Unset::norep];
    sym[args___] =.;
@@ -530,10 +377,17 @@ Module[{usageString,info,parsedInfo,infoString,symbolAsString},
       infoString = StringJoin@Riffle[StringJoin @@ # & /@ parsedInfo, "\n"];
       infoString = "The behavior for case"<>If[Length@parsedInfo===1,"\n","s\n"]<>infoString<>"\nis defined only.\n\n";
    ];
-   symbolAsString=StringReplace[ToString@sym,"`"->"`.`"];
-   sym::errUnknownInput = "`1``2`Call\n"<>symbolAsString<>"[`3`]\nis not supported.";
-   (* Define a new pattern. *)
-   sym[args___] := AssertOrQuit[False,sym::errUnknownInput,usageString,infoString,StringJoinWithSeparator[{args},", "]];
+
+   With[{name = ToString@sym},
+      sym::errUnknownInput = "`1``2`Call\n`3`[`4`]\nis not supported.";
+      sym[args___] := AssertOrQuit[False,
+         sym::errUnknownInput,
+         usageString,
+         infoString,
+         name,
+         StringJoinWithSeparator[{args},", "]
+      ];
+   ];
 ];
 MakeUnknownInputDefinition@MakeUnknownInputDefinition;
 SetAttributes[MakeUnknownInputDefinition,{Locked,Protected}];
