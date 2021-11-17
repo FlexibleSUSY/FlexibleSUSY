@@ -23,7 +23,7 @@
 Needs["TestSuite`", "TestSuite.m"];
 Block[{Print}, (* We do not test SARAH, so let us reduce output. *)
    Needs["SARAH`"];
-   Start@"SM";
+   Start@"MSSM";
 ];
 
 FlexibleSUSY`FSEnableColors = False; (* Desired by Utils`FSFancyWarning *)
@@ -42,6 +42,11 @@ Module[{typeQ, message, stream},
    {typeQ, MatchQ[message, _String]}
 ];
 
+greaterQ[lhs_, rhs_] := (
+   Print["lhs: ", lhs, " rhs: ", rhs];
+   TestGreaterThan[lhs, rhs];
+);
+
 Module[{BAR = SARAH`bar, CONJ = Susyno`LieGroups`conj, time},
    Utils`FSFancyLine[];
    TestEquality[{True, True}, check[TreeMasses`IsScalar, BAR@SARAH`hh]];
@@ -50,34 +55,43 @@ Module[{BAR = SARAH`bar, CONJ = Susyno`LieGroups`conj, time},
    time = $time;
    TestEquality[{True, False}, check[TreeMasses`IsScalar, BAR@SARAH`hh]];
 (*                     ^~~~ No warning second time                           *)
-   TestGreaterThan[time, $time];
+   greaterQ[time, $time];
    TestEquality[{True, False}, check[TreeMasses`IsScalar, CONJ@SARAH`hh]];
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsScalar, CONJ@SARAH`hh]];
+   greaterQ[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsScalar, SARAH`hh]];
    TestEquality[{True, False}, check[TreeMasses`IsScalar, SARAH`hh]];
 
    TestEquality[{True, True}, check[TreeMasses`IsFermion, CONJ@Global`Fe]];
    time = $time;
    TestEquality[{True, False}, check[TreeMasses`IsFermion, CONJ@Global`Fe]];
-   TestGreaterThan[time, $time];
+   greaterQ[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsFermion, BAR@Global`Fe]];
    TestEquality[{True, False}, check[TreeMasses`IsFermion, BAR@Global`Fe]];
    TestEquality[{True, False}, check[TreeMasses`IsFermion, Global`Fe]];
 
    TestEquality[{True, True}, check[TreeMasses`IsVector, BAR@SARAH`VP]];
    time = $time;
    TestEquality[{True, False}, check[TreeMasses`IsVector, BAR@SARAH`VP]];
-   TestGreaterThan[time, $time];
+   greaterQ[time, $time];
    TestEquality[{True, False}, check[TreeMasses`IsVector, CONJ@SARAH`VP]];
+   TestEquality[{True, False}, check[TreeMasses`IsVector, SARAH`VP]];
    TestEquality[{True, False}, check[TreeMasses`IsVector, SARAH`VP]];
 
    TestEquality[{True, False}, check[TreeMasses`IsGhost, CONJ@Global`gG]];
    TestEquality[{True, False}, check[TreeMasses`IsGhost, BAR@Global`gG]];
    TestEquality[{True, False}, check[TreeMasses`IsGhost, Global`gG]];
 
-   TestEquality[{True, True}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah]];
+   TestEquality[{True, True}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah@1]];
    time = $time;
-   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah]];
-   TestGreaterThan[time, $time];
-   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, CONJ@SARAH`Ah]];
-   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, SARAH`Ah]];
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah@1]];
+   greaterQ[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, CONJ@SARAH`Ah@1]];
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, CONJ@SARAH`Ah@1]];
+   greaterQ[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, SARAH`Ah@1]];
 ];
 
 PrintTestSummary[];

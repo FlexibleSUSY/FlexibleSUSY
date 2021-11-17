@@ -572,6 +572,8 @@ TEST_SRC += \
 		$(DIR)/test_SM_matching_selfenergy_Fd.cpp
 endif
 ifeq ($(WITH_MSSM),yes)
+TEST_META += \
+		$(DIR)/test_MSSM_tree_is_particle.m
 TEST_SRC += \
 		$(DIR)/test_MSSM_npointfunctions.cpp \
 		$(DIR)/test_MSSM_matching_selfenergy_Fd.cpp
