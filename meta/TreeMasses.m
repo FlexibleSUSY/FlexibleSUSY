@@ -376,6 +376,7 @@ Module[{cache},
 ];
 IsScalar[sym_List] := And @@ (IsScalar /@ sym);
 IsScalar // Utils`MakeUnknownInputDefinition;
+IsScalar // Protected;
 
 Module[{cache, result},
    IsFermion[Susyno`LieGroups`conj[sym_]] := cache[sym];
@@ -399,6 +400,7 @@ Module[{cache},
 ];
 IsFermion[sym_List] := And @@ (IsFermion /@ sym);
 IsFermion // Utils`MakeUnknownInputDefinition;
+IsFermion // Protected;
 
 Module[{cache, result},
    IsVector[SARAH`bar[sym_]] := cache[sym];
@@ -421,6 +423,7 @@ Module[{cache},
 ];
 IsVector[sym_List] := And @@ (IsVector /@ sym);
 IsVector // Utils`MakeUnknownInputDefinition;
+IsVector // Protected;
 
 Module[{cache, result},
    IsGhost[Susyno`LieGroups`conj[sym_]] := cache[sym];
@@ -443,6 +446,8 @@ Module[{cache},
    cache[sym_] := cache[sym] = IsOfType[sym, G];
 ];
 IsGhost[sym_List] := And @@ (IsGhost /@ sym);
+IsGhost // Utils`MakeUnknownInputDefinition;
+IsGhost // Protected;
 
 Module[{cache, result},
    IsGoldstone[SARAH`bar[sym_]] := cache[sym];
@@ -469,6 +474,7 @@ Module[{cache},
 ];
 IsGoldstone[sym_List] := And @@ (IsGoldstone /@ sym);
 IsGoldstone // Utils`MakeUnknownInputDefinition;
+IsGoldstone // Protected;
 
 GetSMGoldstones[] :=
     Cases[SARAH`GoldstoneGhost /. a_[{idx__}] :> a[idx], {v_?IsSMParticle, goldstone_} :> goldstone];
