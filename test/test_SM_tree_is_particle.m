@@ -35,28 +35,40 @@ Module[{typeQ, message, stream},
    Print["\ncheck"];
    stream = OpenWrite[];
    AppendTo[$Output, stream];
-      typeQ = function@particle;
+      {$time, typeQ} = Timing@function@particle;
    $Output = Most@$Output;
       message = ReadString[stream[[1]]];
    Close[stream];
    {typeQ, MatchQ[message, _String]}
 ];
 
-With[{BAR = SARAH`bar, CONJ = Susyno`LieGroups`conj},
+Module[{BAR = SARAH`bar, CONJ = Susyno`LieGroups`conj, time},
    Utils`FSFancyLine[];
    TestEquality[{True, True}, check[TreeMasses`IsScalar, BAR@SARAH`hh]];
-   (*            ^~~~ Is it a scalar?
-    *                  ^~~~ Should a warning be created?
-    *)
+(*               ^~~~ Is it a scalar?                                        *
+ *                     ^~~~ Should a warning be created?                     *)
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsScalar, BAR@SARAH`hh]];
+(*                     ^~~~ No warning second time                           *)
+   TestGreaterThan[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsScalar, CONJ@SARAH`hh]];
    TestEquality[{True, False}, check[TreeMasses`IsScalar, CONJ@SARAH`hh]];
    TestEquality[{True, False}, check[TreeMasses`IsScalar, SARAH`hh]];
 
    TestEquality[{True, True}, check[TreeMasses`IsFermion, CONJ@Global`Fe]];
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsFermion, CONJ@Global`Fe]];
+   TestGreaterThan[time, $time];
+   TestEquality[{True, False}, check[TreeMasses`IsFermion, BAR@Global`Fe]];
    TestEquality[{True, False}, check[TreeMasses`IsFermion, BAR@Global`Fe]];
    TestEquality[{True, False}, check[TreeMasses`IsFermion, Global`Fe]];
 
    TestEquality[{True, True}, check[TreeMasses`IsVector, BAR@SARAH`VP]];
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsVector, BAR@SARAH`VP]];
+   TestGreaterThan[time, $time];
    TestEquality[{True, False}, check[TreeMasses`IsVector, CONJ@SARAH`VP]];
+   TestEquality[{True, False}, check[TreeMasses`IsVector, SARAH`VP]];
    TestEquality[{True, False}, check[TreeMasses`IsVector, SARAH`VP]];
 
    TestEquality[{True, False}, check[TreeMasses`IsGhost, CONJ@Global`gG]];
@@ -64,7 +76,12 @@ With[{BAR = SARAH`bar, CONJ = Susyno`LieGroups`conj},
    TestEquality[{True, False}, check[TreeMasses`IsGhost, Global`gG]];
 
    TestEquality[{True, True}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah]];
+   time = $time;
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, BAR@SARAH`Ah]];
+   TestGreaterThan[time, $time];
    TestEquality[{True, False}, check[TreeMasses`IsGoldstone, CONJ@SARAH`Ah]];
+   TestEquality[{True, False}, check[TreeMasses`IsGoldstone, CONJ@SARAH`Ah]];
+   TestGreaterThan[time, $time];
    TestEquality[{True, False}, check[TreeMasses`IsGoldstone, SARAH`Ah]];
 ];
 
