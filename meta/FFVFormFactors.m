@@ -89,7 +89,7 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
-      Print["Warning: Diagram with internal particles of type ",
+      Utils`FSFancyWarning["Diagram with internal particles of type " <>
          StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]})];
       Print["         is currently not supported."];
       Print["         Discarding diagram with particles ",

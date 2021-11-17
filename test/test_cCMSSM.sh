@@ -57,7 +57,7 @@ apply_abs() {
                     # convert scientific notation to bc friendly input
                     bc_friendly=$(echo "${entry}" | $sed_cmd -e 's/[eE]/\*10\^/' | $sed_cmd -e 's/\^+/\^/')
                     # apply abs
-                    printf "%s " $(echo  "scale=15; abs(${bc_friendly})" | bc $BASEDIR/abs.bc)
+                    printf "%s " "$(echo  "scale=15; abs(${bc_friendly})" | bc "${BASEDIR}/abs.bc")"
                 done
                 printf "\n"
                 continue ;;

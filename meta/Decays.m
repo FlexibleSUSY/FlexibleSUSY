@@ -378,7 +378,7 @@ ContainsOnlySupportedVertices[diagram_] :=
            unsupportedVertices = Complement[vertexTypes, CXXDiagrams`VertexTypes[]];
            If[unsupportedVertices =!= {},
               MapIndexed[(If[!MemberQ[CXXDiagrams`VertexTypes[], vertexTypes[[First[#2]]]],
-                             Print["Warning: vertex with fields ", #1, " is not currently supported."];
+                             Utils`FSFancyWarning["vertex with fields " <> ToString[#1] <> " is not currently supported."];
                              Print["    Diagrams involving this vertex will be discarded."];
                             ];)&, vertices];
              ];
@@ -766,7 +766,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
                       If[numIndices == 0 || dim <= 1,
                          result = result <> " {};\n";,
                          result = result <> " {{" <> ToString[indexVal] <>
-                                  StringJoin[Table[", 0", {i, 1, numIndices - 1}]] <> "}};\n";
+                                  StringJoin[ConstantArray[", 0", numIndices - 1]] <> "}};\n";
                         ];
                       result
                      ];
@@ -1020,7 +1020,7 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsScalar, finalState_List] :=
                   ChiralVertex, "Decay_amplitude_SFF",
                   MomentumDifferenceVertex, "Decay_amplitude_SSV",
                   InverseMetricVertex, "Decay_amplitude_SVV",
-                  _, Print["Warning: decay ", initialParticle, " -> ", finalState, " is not supported."];
+                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState] <> " is not supported."];
                      "Unknown_amplitude_type"
                  ]
           ];
@@ -1031,7 +1031,7 @@ GetDecayAmplitudeType[initialParticle_?TreeMasses`IsFermion, finalState_List] :=
            Switch[{vertexType, GetFeynArtsTypeName@Last@finalState},
                   {ChiralVertex, S}, "Decay_amplitude_FFS",
                   {ChiralVertex, V}, "Decay_amplitude_FFV",
-                  _, Print["Warning: decay ", initialParticle, " -> ", finalState, " is not supported."];
+                  _, Utils`FSFancyWarning["decay " <> ToString[initialParticle] <> " -> " <> ToString[finalState] <> " is not supported."];
                      "Unknown_amplitude_type"
                  ]
           ];
@@ -1554,7 +1554,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
    @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
 *)
 GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
-   Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal, verticesForFACp, temp2},
+   Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
 
       concreteFieldOnEdgeBetweenVerticesLocal = concreteFieldOnEdgeBetweenVertices;
       temp = SortBy[Reverse /@ fieldNumberOnEdgeBetweenVertices, Last];
@@ -1624,7 +1624,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       externalEdges,
       matchExternalFieldIndicesCode, matchInternalFieldIndicesCode = "", functionBody = "",
       verticesInFieldTypesForFACp, verticesForFACp, colorFac = "colorFac", symmetryFac = "symmetryFac", FinitePart = False,
-      whereToConj, verticesForFACp2,
+      verticesForFACp2,
       (* colour triplet fermions *)
       quarkLike = Select[GetColoredParticles[], IsFermion[#] && (GetColorRepresentation[#] == T || GetColorRepresentation[#] == -T) &]
    },
@@ -1809,7 +1809,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "auto temp_result = " <> ampCall <> ";\n" <>
                            "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
-                              Module[{pos1, post2, res},
+                              Module[{pos1, pos2},
                                  StringJoin@Riffle[
                                  MapIndexed[
                                  (pos1 = Position[#1, First@fieldsInLoop, 1];
@@ -1834,7 +1834,7 @@ If[Length@positions =!= 1, Quit[1]];
                            If[!SA`CPViolationHiggsSector && Length[fieldsInLoop] === 1 && And@@Join[TreeMasses`IsScalar /@ fieldsInLoop, TreeMasses`ColorChargedQ /@ fieldsInLoop],
                            "\nif (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
-                             Module[{pos1, post2, res},
+                             Module[{pos1, pos2},
                              StringJoin@Riffle[
                              MapIndexed[
                                 (pos1 = Position[#1, First@fieldsInLoop, 1];
@@ -1874,7 +1874,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "auto temp_result = " <> ampCall <> ";\n" <>
                            "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
-                              Module[{pos1, post2, res},
+                              Module[{pos1, pos2},
                                  StringJoin@Riffle[
                                  MapIndexed[
                                  (pos1 = Position[#1, First@fieldsInLoop, 1];

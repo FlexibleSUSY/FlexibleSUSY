@@ -3,8 +3,6 @@
 BASEDIR=$(dirname $0)
 UTILSDIR=${BASEDIR}/../utils
 print_block="$UTILSDIR/print_slha_block.awk"
-print_block_entry="$UTILSDIR/print_slha_block_entry.awk"
-remove_block="$UTILSDIR/remove_slha_block.awk"
 
 slha_in="$BASEDIR/test_CMSSMCKM_spectrum.spc.in"
 FS_out="$BASEDIR/test_CMSSMCKM_spectrum.spc.out.FS"
@@ -73,7 +71,7 @@ diff_without_comments=`echo $diff | $sed_cmd -e '/^ *#/d' | $sed_cmd -e '/^+++/d
 exit_code=0
 
 if [ -n "$diff_without_comments" ]; then
-    echo "Error: difference between $semi_analytic_output and  $two_scale_output larger than $rel_error"
+    echo "Error: difference between ${FS_out} and  ${SS_out} larger than ${rel_error}"
     echo "$diff"
     echo ""
     echo "Test result: FAIL"

@@ -26,7 +26,7 @@ for m in ${MODELS} ; do
     source="${BASEDIR}/../models/${m}"
     dest="${BASEDIR}/${m}"
 
-    [ $("$FSCONFIG" --with-${m}) = no ] && { echo "Warning: ${m} is not configured" ; continue; }
+    [ "$("$FSCONFIG" --with-${m})" = no ] && { echo "Warning: ${m} is not configured" ; continue; }
 
     echo "> copying ${source} -> ${dest}"
 

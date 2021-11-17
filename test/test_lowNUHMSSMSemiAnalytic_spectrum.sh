@@ -79,7 +79,8 @@ remove_mixing_and_input_blocks() {
 }
 
 sign() {
-    local a=$(echo "$1" | sed -e 's/[eE]+*/*10^/')
+    local a
+    a=$(echo "$1" | sed -e 's/[eE]+*/*10^/')
     cat <<EOF | bc -l
 define sign(i) {
     if (i >= 0) return(1)
