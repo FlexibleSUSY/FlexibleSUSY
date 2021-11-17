@@ -19,6 +19,8 @@ Block MINPAR                 # Input parameters
 EOF
    )
 
+exit_code="1"
+
 if [ -n "$CMSSM_STD_OUTPUT" ] ; then
     echo "Error: output was written to cout:"
     echo ""

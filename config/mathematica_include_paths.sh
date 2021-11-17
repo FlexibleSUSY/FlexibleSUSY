@@ -7,17 +7,18 @@
 math_cmd=math
 
 find_math_dirs() {
-    eval eval `printf "%s" '
+    # shellcheck disable=SC2046
+    eval eval $(printf "%s" '
        Print["sysid=\"", $SystemID, "\""];
        Print["topdir=\"", $TopDirectory, "\""];
-       Exit[]' | "${math_cmd}" -noprompt | tr '\r' ' ' | tail -2`
+       Exit[]' | "${math_cmd}" -noprompt | tr '\r' ' ' | tail -2)
 
     # check whether Cygwin's dlltool can handle 64-bit DLLs
     test "$sysid" = Windows-x86-64 && {
         ${DLLTOOL:-dlltool} --help | grep x86-64 > /dev/null || sysid=Windows
     }
 
-    topdir=`cd "$topdir" ; echo $PWD`
+    topdir=`cd "$topdir" && echo $PWD`
 }
 
 get_librarylink_incpath() {

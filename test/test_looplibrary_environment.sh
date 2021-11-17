@@ -8,7 +8,7 @@ body_test () {
    [ $TEST_LOOPLIBRARY = "lib<$2>" ] || exit_code=1
 }
 
-cd test
+cd test || exit 1
 
 body_test '0' 'Softsusy'
 body_test 'not an integer' 'Softsusy'

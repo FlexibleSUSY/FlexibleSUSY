@@ -33,4 +33,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check scripts
-        run: shellcheck -S error configure createmodel install-sarah createaddon config/*.sh utils/*.sh test/test_*.sh
+        run: |
+           echo "We assume, that shell understands 'local' command!"
+           shellcheck -e SC2039 -S warning configure createmodel install-sarah createaddon config/*.sh utils/*.sh test/test_*.sh
