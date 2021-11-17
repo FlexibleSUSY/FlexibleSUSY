@@ -97,13 +97,13 @@ IsDiagramSupported[graph_, diagram_] :=
       Return[False];
    ];
 
-IsChargedUnder[field_, vector_?IsVector] := 
+IsChargedUnder[field_, vector_?IsVector] :=
   Which[(*Check 2 special cases first which are quicker*)
     TreeMasses`IsPhoton[vector], TreeMasses`IsElectricallyCharged[field],
     TreeMasses`IsGluon[vector],  TreeMasses`ColorChargedQ[field],
     (*Else check that this field coupled with its anti-field can emit this vector*)
     (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
-    True, SARAH`Vertex[{SARAH`AntiField[field], field, 
+    True, SARAH`Vertex[{SARAH`AntiField[field], field,
         vector}, UseDependences -> True][[2, 1]] =!= 0
   ]
 
@@ -111,7 +111,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
    Module[{prototype, definition,
            numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[Fj],
            numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[Fi],
-           numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[V], temp = {}},
+           temp = {}},
 
       Utils`AssertWithMessage[Length[topologies] === Length[diagrams],
          "Length of diagrams should be the same as length of topologies"];

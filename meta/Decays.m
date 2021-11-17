@@ -70,9 +70,9 @@ FieldPositionInVertex[field_, vertex_] := Module[{pos},
    pos /. {{n_}} :> n
 ];
 
-GetInitialState[FSParticleDecay[particle_, finalState_List, diagrams_List]] := particle;
+GetInitialState[FSParticleDecay[particle_, _List, _List]] := particle;
 
-GetFinalState[FSParticleDecay[particle_, finalState_List, diagrams_List]] := finalState;
+GetFinalState[FSParticleDecay[_, finalState_List, _List]] := finalState;
 
 (*
   Returns a list of the form
@@ -83,7 +83,7 @@ GetFinalState[FSParticleDecay[particle_, finalState_List, diagrams_List]] := fin
   where each sublist contains the topologies and corresponding diagrams contributing
   to the decay at that particular loop order.
 *)
-GetDecayTopologiesAndDiagrams[FSParticleDecay[particle_, finalState_List, diagrams_List]] := diagrams;
+GetDecayTopologiesAndDiagrams[FSParticleDecay[_, _List, diagrams_List]] := diagrams;
 
 (*
   Returns a list of the form
@@ -94,7 +94,7 @@ GetDecayTopologiesAndDiagrams[FSParticleDecay[particle_, finalState_List, diagra
   where each sublist contains the diagrams contributing to the decay at that
   particular loop-order.
 *)
-GetDecayDiagramsOnly[FSParticleDecay[particle_, finalState_List, diagrams_List]] :=
+GetDecayDiagramsOnly[FSParticleDecay[_, _List, diagrams_List]] :=
     {#[[1]], Flatten[Last /@ #[[2]], 1]}& /@ diagrams;
 
 (*
@@ -483,31 +483,31 @@ OrderFinalState[initialParticle_, finalParticles_List] :=
            Drop[orderedFinalState, First[Position[orderedFinalState, initialParticle]]]
           ];
 
-GetDecaysForParticle[particle_, Infinity, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, Infinity, _List] :=
     (
      Print["Error: number of final state particles must be finite."];
      Quit[1];
     );
 
-GetDecaysForParticle[particle_, {Infinity}, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, {Infinity}, _List] :=
     (
      Print["Error: number of final state particles must be finite."];
      Quit[1];
     );
 
-GetDecaysForParticle[particle_, {n_, Infinity}, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, {_, Infinity}, _List] :=
     (
      Print["Error: number of final state particles must be finite."];
      Quit[1];
     );
 
-GetDecaysForParticle[particle_, {Infinity, n_}, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, {Infinity, _}, _List] :=
     (
      Print["Error: number of final state particles must be finite."];
      Quit[1];
     );
 
-GetDecaysForParticle[particle_, {Infinity, Infinity}, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, {Infinity, Infinity}, _List] :=
     (
      Print["Error: number of final state particles must be finite."];
      Quit[1];
@@ -598,7 +598,7 @@ GetDecaysForParticle[particle_, {exactNumberOfProducts_Integer}, allowedFinalSta
            DeleteDiagramsVanishingDueToColor /@ decays
     ];
 
-GetDecaysForParticle[particle_, n_, allowedFinalStateParticles_List] :=
+GetDecaysForParticle[_, n_, _List] :=
     (
      Print["Error: invalid number of final state particles: ", n];
      Quit[1];
@@ -625,7 +625,7 @@ GetClassifiedParticleLists[particles_List] :=
            classified
           ];
 
-BaseMulticombination[k_] := Table[1, {i, 1, k}];
+BaseMulticombination[k_] := ConstantArray[1, k];
 
 (* see, e.g., http://www.martinbroadhurst.com/multicombinations.html *)
 NextMulticombination[n_, combination_] :=
@@ -635,7 +635,7 @@ NextMulticombination[n_, combination_] :=
               {},
               pos = First[Last[incrementable]];
               val = combination[[pos]] + 1;
-              Join[Take[combination, pos - 1], {val}, Table[val, {i, 1, k - pos}]]
+              Join[Take[combination, pos - 1], {val}, ConstantArray[val, k - pos]]
              ]
           ];
 
@@ -1553,7 +1553,7 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
 
    @todo: There is an ambiguity whether Field[n] -> somefield or Field[n] -> AntiField[somefield]
 *)
-GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_, diagram_, verticesInFieldTypesForFACp_] :=
+GetFieldsAssociations[concreteFieldOnEdgeBetweenVertices_, fieldNumberOnEdgeBetweenVertices_, fieldTypes_] :=
    Module[{temp = {}, concreteFieldOnEdgeBetweenVerticesLocal},
 
       concreteFieldOnEdgeBetweenVerticesLocal = concreteFieldOnEdgeBetweenVertices;
@@ -1646,9 +1646,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
           GetFieldsAssociations[
             InsertionsOnEdgesForDiagram[topology, diagram],
             translation[[3]],
-            translation[[4]],
-            diagram,
-            verticesInFieldTypesForFACp
+            translation[[4]]
           ];
 
       (* vertices in an orientation as required by Cp *)
