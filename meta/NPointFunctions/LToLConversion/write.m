@@ -24,12 +24,12 @@ Off[LToLConversion`write::shdw];
 BeginPackage["LToLConversion`"];
 
 LToLConversion`write::usage = "
-@brief Returns an expression to be printed in the C++ output for observable.
-@param block A string with a name of Les Houshes block.
+@brief Write observable in the C++ Les Houshes block.
+       Please, don't change write interface.
+@param block A Les Houshes block name.
 @param obs An observable to parse.
 @param idx An index, corresponding to the block.
-@param comment A string comment.
-@returns A C++ code for observable output.";
+@param comment A comment.";
 
 Begin["`Private`"];
 
@@ -62,38 +62,53 @@ Module[{rules = {0->"11", 1->"13", 2->"15"}, leptons,
 getFLHA // Utils`MakeUnknownInputDefinition;
 getFLHA ~ SetAttributes ~ {Protected, Locked};
 
-FlexibleSUSYObservable`LToLConversion::errBlock = "
-Observable can be called from: FlexibleSUSYLowEnergy, FWCOEF, IMFWCOEF only.";
-FlexibleSUSYObservable`LToLConversion::errConfigured = "
-FeynArts and/or FormCalc are not installed, but the observable
-is included in the corresponding file:
-   `1`/FlexibleSUSY.m
-Please, either remove it from there, or install FeynArts and FormCalc.";
 write[block:_String, obs:`type`observable, idx:_Integer, comment:_String] :=
 Module[{configured},
    configured = And[FlexibleSUSY`FSFeynArtsAvailable,
                     FlexibleSUSY`FSFormCalcAvailable];
    Utils`AssertOrQuit[configured,
       FlexibleSUSYObservable`LToLConversion::errConfigured,
+      obs,
       FlexibleSUSY`FSOutputDir
    ];
    Switch[block,
       "FlexibleSUSYLowEnergy",
          WriteOut`Private`WriteSLHABlockEntry[block,
-            {"Re(OBSERVABLES."<>Observables`GetObservableName@obs<>"(0))",
-               idx},
-            Observables`GetObservableDescription@obs],
+            {"Re(OBSERVABLES."<>Observables`GetObservableName@obs<>"(0))", idx},
+            Observables`GetObservableDescription@obs
+         ],
       "FWCOEF"|"IMFWCOEF",
          WriteOut`Private`WriteSLHABlockEntry[block,
             {"OBSERVABLES."<>Observables`GetObservableName@obs,
                Observables`GetObservableType@obs},
-            getFLHA@obs],
+            getFLHA@obs
+         ],
       _,
-         Utils`AssertOrQuit[_, FlexibleSUSYObservable`LToLConversion::errBlock]
+         Utils`AssertOrQuit[_,
+            FlexibleSUSYObservable`LToLConversion::errBlock,
+            obs,
+            block,
+            FlexibleSUSY`FSOutputDir,
+            {"FlexibleSUSYLowEnergy", "FWCOEF", "IMFWCOEF"}
+         ];
    ]
 ];
+
+FlexibleSUSYObservable`LToLConversion::errConfigured = "
+FeynArts and/or FormCalc are not installed.
+Solutions:
+1) Remove an observable:\n      `1`
+   from the file:\n      `2`/FlexibleSUSY.m
+2) Install FeynArts and FormCalc.";
+
+FlexibleSUSYObservable`LToLConversion::errBlock = "
+An observable:\n   `1`
+from the file:\n   `3`/FlexibleSUSY.m
+is mentioned in Les Houches block:\n   `2`,
+but should only be used inside block(s):\n   `4`";
+
 write // Utils`MakeUnknownInputDefinition;
-write ~ SetAttributes ~ {Protected, Locked};
+write // Protected;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

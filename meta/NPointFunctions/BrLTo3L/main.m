@@ -206,8 +206,4 @@ Module[{fields, sp, dc, dim6},
 `npf`code // Protect;
 
 End[];
-EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "BrLTo3L`"];
-Unprotect@$Packages;
-$Packages = DeleteCases[$Packages, "BrLTo3L`"];
-Protect@$Packages;
+Block[{$ContextPath}, EndPackage[]];
