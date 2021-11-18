@@ -1,12 +1,12 @@
 topologies[0] = {
-   Vectors -> (treeAll@#&),
-   Scalars -> (treeAll@#&)
+   Vectors -> treeAll,
+   Scalars -> treeAll
 };
 
 topologies[1] = {
-   Vectors -> (penguinT@#&),
-   Scalars -> (penguinT@#&),
-   Boxes -> (boxAll@#&)
+   Vectors -> penguinT,
+   Scalars -> penguinT,
+   Boxes -> boxAll
 };
 
 `settings`diagrams = {
