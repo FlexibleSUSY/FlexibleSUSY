@@ -323,12 +323,12 @@ setSubexpressions // secure;
 applySubexpressions[obj:`type`npf] :=
 Module[{result},
    If[{} === getSubexpressions@obj, Return@obj];
-   WriteString["stdout"~OutputStream~1,"Applying subexpressions ... "];
+   WriteString[$Output, "Applying subexpressions ... "];
    result = setSubexpressions[
       ReplacePart[obj,
          {2,1,1}->ReplaceRepeated[getGenericSums@obj,getSubexpressions@obj]],
       {}];
-   WriteString["stdout"~OutputStream~1,"done\n"];
+   WriteString[$Output, "done\n"];
    result];
 applySubexpressions // secure;
 
@@ -422,7 +422,7 @@ NPointFunction // secure;
 subWrite::usage = "
 @brief Prints a string.
 @note ``SetSharedFunction`` does not cause names leaking.";
-subWrite[str_String] := WriteString["stdout"~OutputStream~1,str];
+subWrite[str_String] := WriteString[$Output, str];
 subWrite // secure;
 
 inputCheck[inFields:{__},outFields:{__},opts___] :=
