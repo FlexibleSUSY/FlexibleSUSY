@@ -57,9 +57,10 @@ GetRequestedObservables[blocks_] :=
               Cases[observables, FlexibleSUSYObservable`BrLToLGamma[fin_?IsLepton -> {fout_?IsLepton, vout_ /; vout === GetPhoton[]}]]
                  ];
            If[test =!= {},
-              Print["Warning: BrLToLGamma function works only for leptons and a photon."];
-              Print["         Removing requested process(es):"];
-              Print["        " <> ToString@test];
+              Utils`FSFancyWarning[
+                 "BrLToLGamma function works only for leptons and a photon.",
+                 " Removing requested process(es): ", test
+              ];
               observables = Complement[observables, test];
            ];
            observables
@@ -107,11 +108,11 @@ CountNumberOfObservables[observables_List] :=
            For[i = 1, i <= Length[observables], i++,
                If[IsObservable[observables[[i]]],
                   number += BetaFunction`CountNumberOfParameters[GetObservableType[observables[[i]]]];,
-                  Print["Warning: ignoring invalid observable ", observables[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning["Ignoring invalid observable ", observables[[i]]];
+               ];
+           ];
            number
-          ];
+    ];
 
 CreateObservablesDefinitions[observables_List] :=
     Module[{i, type, name, description, definitions = ""},
@@ -121,11 +122,11 @@ CreateObservablesDefinitions[observables_List] :=
                   description = GetObservableDescription[observables[[i]]];
                   type = CConversion`CreateCType[GetObservableType[observables[[i]]]];
                   definitions = definitions <> type <> " " <> name <> "; ///< " <> description <> "\n";,
-                  Print["Warning: ignoring invalid observable ", observables[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning["Ignoring invalid observable ", observables[[i]]];
+               ];
+           ];
            definitions
-          ];
+    ];
 
 CreateObservablesInitialization[observables_List] :=
     Module[{i, name, type, init = ""},
@@ -137,11 +138,11 @@ CreateObservablesInitialization[observables_List] :=
                      init = ": " <> CConversion`CreateDefaultConstructor[name, type] <> "\n";,
                      init = init <> ", " <> CConversion`CreateDefaultConstructor[name, type] <> "\n";
                     ];,
-                  Print["Warning: ignoring invalid observable ", observables[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning["Ignoring invalid observable ", observables[[i]]];
+               ];
+           ];
            init
-          ];
+   ];
 
 CreateSetAndDisplayObservablesFunctions[observables_List] :=
     Module[{numObservables, i, name, type, paramCount = 0, nAssignments, assignment,
@@ -166,9 +167,9 @@ CreateSetAndDisplayObservablesFunctions[observables_List] :=
                      {assignment, nAssignments} = Parameters`CreateStdVectorNamesAssignment[name, paramCount, type];
                      displayNames = displayNames <> assignment;
                      paramCount += nAssignments;,
-                     Print["Warning: ignoring invalid observable ", observables[[i]]];
-                    ];
-                 ];,
+                     Utils`FSFancyWarning["Ignoring invalid observable ", observables[[i]]];
+                  ];
+               ];,
                display = "Eigen::ArrayXd vec(1);\n\nvec(0) = 0.;\n";
                set = "";
                displayNames = "std::vector<std::string> names(1);\n\n"
@@ -184,9 +185,9 @@ CreateClearObservablesFunction[observables_List] :=
                   name = GetObservableName[observables[[i]]];
                   type = GetObservableType[observables[[i]]];
                   result = result <> CConversion`SetToDefault[name, type];,
-                  Print["Warning: ignoring invalid observable ", observables[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning["Ignoring invalid observable ", observables[[i]]];
+               ];
+           ];
            result
           ];
 

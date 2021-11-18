@@ -482,14 +482,9 @@ LaunchSubkernelFor::usage = "
 @brief Tries to launch a subkernel without errors.
 @param message String with a reason to launch a subkernel.
 @returns A subkernels name.";
-LaunchSubkernelFor::errKernelLaunch = "
-Unable to launch a subkernel for
-   `1`.";
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels@1,
-      LaunchSubkernelFor::errKernelLaunch, message];
+   kernelName = LaunchKernels@1;
    If[Head@kernelName === List, kernelName[[1]], kernelName]];
 LaunchSubkernelFor // secure;
 

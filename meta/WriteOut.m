@@ -335,10 +335,12 @@ WriteSLHAMatrix[{mixingMatrix_, lesHouchesName_}, head_String, scale_String, set
     Module[{str, strSLHA, lhs, wrapper},
            If[SARAH`getDimParameters[mixingMatrix] === {} ||
               SARAH`getDimParameters[mixingMatrix] === {1},
-              Print["Warning: You are trying to create a SLHA matrix block for"];
-              Print["   ", mixingMatrix, ", which is not a matrix!"];
-              Print["   Please specify a Les Houches index in the SARAH model file."];
-             ];
+              Utils`FSFancyWarning[
+                 "You are trying to create a SLHA matrix block for ",
+                 mixingMatrix, ", which is not a matrix! Please specify ",
+                 "a Les Houches index in the SARAH model file."
+              ];
+           ];
            str = CConversion`ToValidCSymbolString[mixingMatrix];
            (* use SLHA compliant yukawas, trilinears, soft-squared masses *)
            strSLHA = If[mixingMatrix === SARAH`UpYukawa ||
@@ -710,8 +712,10 @@ ReadSLHAOutputBlock[{parameter_, {blockName_Symbol, pdg_?NumberQ}}] :=
 
 ReadSLHAOutputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
     Block[{},
-          Print["Warning: SLHA block name is not a symbol: ", blockName];
-          Print["   I'm using: ", CConversion`RValueToCFormString[blockName]];
+          Utils`FSFancyWarning[
+             "SLHA block name is not a symbol: ", blockName,
+             " I'm using: ", CConversion`RValueToCFormString[blockName]
+          ];
           ReadSLHAOutputBlock[{parameter, {CConversion`RValueToCFormString[blockName], pdg}}]
          ];
 
@@ -964,9 +968,11 @@ ConvertYukawaCouplingsToSLHA[] :=
                                       CreateSLHAFermionMixingMatrixName[vR] <> ", " <>
                                       CreateSLHAFermionMixingMatrixName[vL] <> ");\n";
                      ,
-                     Print["Warning: Cannot convert Yukawa coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Yukawa coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHAYukawaName[#] <> " = MODELPARAMETER(" <>
                               CConversion`ToValidCSymbolString[#] <> ").diagonal().real();\n";
@@ -1016,9 +1022,11 @@ ConvertTrilinearCouplingsToSLHA[] :=
                                   GetSLHATrilinearCouplingType[#]
                               ] <> ";\n";
                      ,
-                     Print["Warning: Cannot convert Trilinear coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Trilinear coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHATrilinearCouplingName[#] <> " = " <>
                               CConversion`CastTo[
@@ -1088,9 +1096,11 @@ ConvertSoftSquaredMassesToSLHA[] :=
                                  ] <> ";\n";
                        ];
                      ,
-                     Print["Warning: Cannot convert soft squared mass ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert soft squared mass ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHASoftSquaredMassName[#] <> " = " <>
                               CConversion`CastTo[

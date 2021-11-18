@@ -34,7 +34,7 @@ AdjacencyGraph[FFVFormFactors`FFVGraphs[][[1]], VertexLabels -> \"Name\"]
 why such a weird numbering?
 because some procedure uses this order for fermion number flow.";
 FFVContributingDiagramsForGraph::usage = "";
-IsDiagramSupported::usage = "For the input FFV graph, determines whether 
+IsDiagramSupported::usage = "For the input FFV graph, determines whether
 the input diagram is valid, by checking whether the internal structure is
 supported and the emitting fields can in fact emit the vector."
 IsChargedUnder::usage="Returns whether or not a field is charged under a given vectors gauge";
@@ -89,21 +89,23 @@ IsDiagramSupported[graph_, diagram_] :=
          Return[True]
       ];
 
-      Utils`FSFancyWarning["Diagram with internal particles of type " <>
-         StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]})];
-      Print["         is currently not supported."];
-      Print["         Discarding diagram with particles ",
-         {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, "."];
+      Utils`FSFancyWarning[
+         "Diagram with internal particles of type ",
+         StringJoin[ToString/@ SARAH`getType/@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}],
+         " is currently not supported. Discarding diagram with particles ",
+         ToString@{EmitterL[diagram], EmitterR[diagram], Spectator[diagram]},
+         "."
+      ];
       Return[False];
    ];
 
-IsChargedUnder[field_, vector_?IsVector] := 
+IsChargedUnder[field_, vector_?IsVector] :=
   Which[(*Check 2 special cases first which are quicker*)
     TreeMasses`IsPhoton[vector], TreeMasses`IsElectricallyCharged[field],
     TreeMasses`IsGluon[vector],  TreeMasses`ColorChargedQ[field],
     (*Else check that this field coupled with its anti-field can emit this vector*)
     (*Note this will not work for vectors that couple to two different fields, e.g. W-bosons*)
-    True, SARAH`Vertex[{SARAH`AntiField[field], field, 
+    True, SARAH`Vertex[{SARAH`AntiField[field], field,
         vector}, UseDependences -> True][[2, 1]] =!= 0
   ]
 
