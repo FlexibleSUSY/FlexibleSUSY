@@ -96,7 +96,7 @@ getExcludeTopologies::usage = "
        determines whether the topology is kept or not.
 @returns A name of generated function.";
 getExcludeTopologies[] :=
-Module[{all, name, set, default},
+Once@Module[{all, name, set, default},
    default = {
       "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)
@@ -106,7 +106,8 @@ Module[{all, name, set, default},
    all = Join[default, set];
    FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
       (`options`processes[]/.all)@#]];
-   name];
+   name
+];
 getExcludeTopologies // secure;
 
 End[];
