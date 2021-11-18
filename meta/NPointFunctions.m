@@ -350,7 +350,7 @@ Options[NPointFunction] =
    OnShellFlag -> True,
    KeepProcesses -> {},
    Observable -> None};
-NPointFunction[inFields_, outFields_, opts:OptionsPattern[]] :=
+NPointFunction[inFields_List, outFields_List, opts:OptionsPattern[]] :=
 Module[{ nPointFunctionsDir, feynArtsModel, particleNamesFile,
       particleNamespaceFile, formCalcDir, subKernel, currentDirectory,
       nPointFunction},

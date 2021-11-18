@@ -76,7 +76,7 @@ NPointFunction::usage = "
        Can be overriden by ```settings`regularization``.
 @returns An object of the n-point function in ``FlexibleSUSY`` conventions."
 NPointFunction[
-   {formcalc_, model_, particles_, contexts_, in_, out_},
+   {formcalc_, model_, particles_, contexts_, in_List, out_List},
    {observable_, loops_, processes_, momenta_, onShell_, scheme_}] :=
    Module[{tree},
       BeginPackage["NPointFunction`"];
@@ -84,6 +84,7 @@ NPointFunction[
       `file`particles[] := particles;
       `file`contexts[] := contexts;
       `options`observable[] := SymbolName@Head@observable;
+      `options`observable[Outer] := {Length@in, Length@out};
       `options`loops[] := loops;
       `options`processes[] := processes;
       `options`momenta[] := momenta;

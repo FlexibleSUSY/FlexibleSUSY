@@ -23,20 +23,20 @@
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
-define::usage = "
-@brief Defines a set of function with a given name in a safe way.
-@param s A symbol, which represents a function name.
-@param e A sequence of delayed rules. On lhs there is a list with pattern
-       for a new function, on rhs there is function body.";
-Module[{impl},
-   impl[s:_Symbol, RuleDelayed[{p:___}, d:_]] := SetDelayed[s[p], d];
-   impl ~ SetAttributes ~ {HoldAllComplete};
-   define[s:_Symbol, e:RuleDelayed[{___},_]..] :=
-   (  impl[s, ##] &@@@ Hold /@ {e};
-      s // Utils`MakeUnknownInputDefinition;
-      Protect@s;);];
-define // Utils`MakeUnknownInputDefinition;
-define ~ SetAttributes ~ {HoldAllComplete, Protected};
+topologies[{2, 2}] = {
+   treeS -> {1,0,1,0,0,1,0,1,0,1,0},
+   treeT -> {1,0,0,1,1,0,0,1,0,1,0},
+   treeU -> {1,0,0,1,0,1,1,0,0,1,0},
+   treeAll -> {treeS, treeT, treeU},
+   triangleT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0},
+   inSelfT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0},
+   outSelfT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0},
+   penguinT -> {triangleT, inSelfT, outSelfT},
+   boxS -> {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0},
+   boxT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0},
+   boxU -> {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0},
+   boxAll -> {boxS, boxT, boxU}
+};
 
 adjace::usage = "
 @brief In order to generate new topology, please apply this function onto
@@ -57,51 +57,29 @@ Module[{propagatorPattern, needNewNumbers, adjacencies, matrix, ext},
    Flatten@Table[Drop[#[[i]], i-1+Max[ext-i+1, 0]], {i, Length@#}]&@matrix];
 adjace // secure;
 
-define[`topologyQ`tree22, {t:type`topology} :>
-   Or[`topologyQ`tree22s@t,
-      `topologyQ`tree22t@t,
-      `topologyQ`tree22u@t]];
+define[topologies] :=
+Module[{all, single, combined},
+   all = topologies@`options`observable@Outer;
+   If[Head@all =!= List, Return[]];
+   combined = Select[all, FreeQ[#, _Integer]&];
+   single = Complement[all, combined];
+   If[single =!= {}, defineSingle/@ single];
+   If[combined =!= {}, defineCombined/@ combined];
+];
 
-define[`topologyQ`tree22s, {t:type`topology} :>
-   adjace@t === {1,0,1,0,0,1,0,1,0,1,0}];
-define[`topologyQ`tree22t, {t:type`topology} :>
-   adjace@t === {1,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`tree22u, {t:type`topology} :>
-   adjace@t === {1,0,0,1,0,1,1,0,0,1,0}];
+defineSingle[name_Symbol -> adjacencyVector:{__Integer}] :=
+With[{function = name, vector = adjacencyVector},
+   function[t:type`topology] := adjace@t === vector;
+   function // secure;
+];
+defineSingle // secure;
 
-define[`topologyQ`penguinT, {t:type`topology} :>
-   Or[`topologyQ`trianglepenguinT@t,
-      `topologyQ`self1penguinT@t,
-      `topologyQ`self3penguinT@t]];
-
-define[`topologyQ`trianglepenguinT, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`self1penguinT, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0}];
-define[`topologyQ`self3penguinT, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,2,0}];
-
-define[`topologyQ`penguinU, {t:type`topology} :>
-   Or[`topologyQ`trianglepenguinU@t,
-      `topologyQ`self1penguinU@t,
-      `topologyQ`self4penguinU@t]];
-
-define[`topologyQ`trianglepenguinU, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,1,0,0,1,0,1,0}];
-define[`topologyQ`self1penguinU, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,2,0,1,0,0,1,0}];
-define[`topologyQ`self4penguinU, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0,0,2,0}];
-
-define[`topologyQ`box, {t:type`topology} :>
-   Or[`topologyQ`boxS@t, `topologyQ`boxT@t, `topologyQ`boxU@t]];
-
-define[`topologyQ`boxS, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0}];
-define[`topologyQ`boxT, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0}];
-define[`topologyQ`boxU, {t:type`topology} :>
-   adjace@t === {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0}];
+defineCombined[name_Symbol -> singleTopologies:{__Symbol}] :=
+With[{function = name, list = singleTopologies},
+   function[t:type`topology] := Or@@ Through@list@t;
+   function // secure;
+];
+defineCombined // secure;
 
 getTopology[d:type`diagram] := First@d;
 getTopology // secure;
@@ -117,13 +95,8 @@ Module[{all, name, set, topologyReplacements},
       "Irreducible" -> (FreeQ[#, FeynArts`Internal]&),
       "Triangles"   -> (FreeQ[FeynArts`ToTree@#, FeynArts`Centre@Except@3]&)
    };
-   If[`settings`topology =!= Default,
-      If[MatchQ[`options`loops[]/.`settings`topology, _Integer],
-         `settings`topology = Default;
-      ];
-   ];
-   set = If[# === Default, {}, `options`loops[]/. #]&@`settings`topology;
-   set = Rule[SymbolName@First@#, Last@#]&/@set;
+   set = If[MatchQ[#, {__}], #, {}]&[topologies@`options`loops[]];
+   set = Rule[SymbolName@First@#, Last@#]&/@ set;
    all = Join[topologyReplacements, set];
    FeynArts`$ExcludeTopologies[name] = Function[Or@@Through[
       (`options`processes[]/.all)@#]];

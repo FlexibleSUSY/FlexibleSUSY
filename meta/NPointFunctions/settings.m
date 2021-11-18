@@ -49,7 +49,7 @@ With[{dir = DirectoryName@$InputFileName},
    settings[] :=
       (  BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
-         `settings`topology = Default;
+         define[topologies];
          `settings`diagrams = Default;
          `settings`amplitudes = Default;
          `settings`sum = Default;
@@ -69,7 +69,7 @@ settings[tree:type`tree,
    Module[{res = {tree}},
       If[settings =!= Default,
          AppendTo[res, applySetting[tree, #]]&/@ settings];
-      res = res /.
+      res = res/.
          node[type`generic, __] -> default /.
          node[type`topology, rest__] :> rest /.
          node[type`head, rest__] :> {rest};
