@@ -328,9 +328,9 @@ Module[{warning, chopped},
    ];
    chopped = InsertLinebreaks[StringReplace[string, "\n"-> " "], len-9];
    chopped = StringReplace[chopped, "\n"-> "\n         "];
-   WriteString["stdout", warning <> chopped <> "\n"]
+   WriteString[$Output, warning <> chopped <> "\n"]
    If[!$Notebooks,
-      WriteString["stdout", warning <> chopped <> "\n"];,
+      WriteString[$Output, warning <> chopped <> "\n"];,
       Print[warning, chopped];
    ];
 ];
