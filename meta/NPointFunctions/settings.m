@@ -82,8 +82,7 @@ settings[tree:type`tree, settings:regularization|momenta|sum|massless] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@`options`loops[] === List,
       AppendTo[res, applySetting[tree, #]]&/@
-(*       v-----------------------v TODO: apply tools`unzip.                  *)
-         settings@`options`loops[];
+         tools`unzipRule@settings@`options`loops[];
    ];
    default = Switch[settings,
       regularization, `options`scheme[],
@@ -109,31 +108,35 @@ applySetting[tree:type`tree, {str_String, tQ_, fun_}] :=
    info[cut[tree, tQ, fun], str];
 
 makeApply[pattern_, function:_Symbol] :=
-   (  Off@RuleDelayed::rhs;
-      applySetting[tree:type`tree, pattern] :=
-         Module[{once},
-            once[arg_] := once@arg =
-               If[# =!= {}, Print@@#]&@
-                  Cases[pattern, _String, Infinity, Heads -> True];
-            tree /. node[t:type`topology /; tQ@t, rest__] :>
-               (once@_; node[t, rest] /. node[g:type`generic, __] :>
-                  function[fun, g, t, head@tree])];
-      On@RuleDelayed::rhs;);
+(  Off@RuleDelayed::rhs;
+   applySetting[tree:type`tree, pattern] :=
+      Module[{once},
+         once[arg_] := once@arg =
+            If[# =!= {}, Print@@#]&@
+               Cases[pattern, _String, Infinity, Heads -> True];
+         tree /. node[t:type`topology /; tQ@t, rest__] :>
+            (once@_; node[t, rest] /. node[g:type`generic, __] :>
+               function[fun, g, t, head@tree])];
+   On@RuleDelayed::rhs;
+);
 
 makeApply[tQ_ -> fun_, value];
-makeApply[{str_String, tQ_, fun:{_Integer, _}}, restrict];
-makeApply[{str_String, tQ_, fun:{Append, _}}, append];
-makeApply[{str_String, tQ_, fun:{Hold, _}}, hold];
-applySetting // tools`secure;
-
 value[val_, ___] := val;
+
+makeApply[tQ_ -> {str_String, fun:{_Integer, _}}, restrict];
 restrict[{int_, fun_}, __, head_] :=
    {int -> Or[fun[_, _, head], -fun[_, _, head]]};
+
+makeApply[tQ_ -> {str_String, fun:{Append, _}}, append];
 append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
    With[{rhs = (First /@ getZeroMassRules[])[[2*e-1]]},
       Append[#, genericMass[f, n] :> rhs]&];
+
+makeApply[tQ_ -> {str_String, fun:{Hold, _}}, hold];
 hold[{Hold, e_}, ___] :=
    With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
+
+applySetting // tools`secure;
 
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];

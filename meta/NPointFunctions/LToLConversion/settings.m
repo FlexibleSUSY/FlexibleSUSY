@@ -75,22 +75,11 @@ amplitudes[1, Plus] = {
    }
 };
 
-sum[1] = {
-   {"initial SED: skip initial lepton in sum",
-      inSelfT,
-      {6, Field[#3, 1]&}},
-   {"final SED: skip final lepton in sum",
-      outSelfT,
-      {6, Field[#3, 3]&}}
-};
+order[] = {3, 1, 4, 2};
 
-massless[1] = {
-   {"initial SED: use explicit final lepton mass",
-      inSelfT,
-      {Append, FeynArts`F[6] :> 3}},
-   {"initial SED: keep initial lepton mass untouched",
-      inSelfT,
-      {Hold, 1}}
+regularization[1] = {
+   boxS -> D,
+   boxU -> D
 };
 
 momenta[1] = {
@@ -99,13 +88,16 @@ momenta[1] = {
    boxU -> 2
 };
 
-regularization[1] = {
-   boxS -> D,
-   boxU -> D
+sum[1] = {
+   inSelfT -> {"in sed: skip initial lepton", {6, Field[#3, 1]&}},
+   outSelfT -> {"out sed: skip final lepton", {6, Field[#3, 3]&}}
 };
-
-order[] = {3, 1, 4, 2};
 
 chains[1] = {
    {ExceptLoops, OperatorsOnly} -> {1[k[4], ___] -> 0, 2[k[1], ___] -> 0}
+};
+
+massless[1] = {
+   inSelfT -> {"in sed: use explicit final lepton mass", {Append, FeynArts`F[6] :> 3}},
+   inSelfT -> {"in sed: keep initial lepton mass untouched", {Hold, 1}}
 };
