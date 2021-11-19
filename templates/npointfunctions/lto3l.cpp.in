@@ -68,6 +68,45 @@ std::array<std::complex<double>,10> zero(
    return res;
 }
 
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+{
+@get_MSUSY@
+}
+
+void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+{
+   const double precision_goal = model.get_precision();
+   const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
+   int it = 0;
+   double precision = 0.;
+   double MSUSY_old = 0., MSUSY_new = 0.;
+
+   VERBOSE_MSG("@ModelName@_lto3l: iterate to run to MSUSY ...");
+
+   do {
+      MSUSY_new = get_MSUSY(model);
+
+      if (MSUSY_new <= 0.)
+         return;
+
+      VERBOSE_MSG("@ModelName@_lto3l:    running to new MSUSY = " << MSUSY_new);
+
+      model.run_to(MSUSY_new);
+      model.calculate_DRbar_masses();
+
+      precision = MaxRelDiff(MSUSY_old, MSUSY_new);
+      MSUSY_old = MSUSY_new;
+   } while (precision > precision_goal && ++it < Nmax);
+
+   VERBOSE_MSG("@ModelName@_lto3l: iteration finished. MSUSY = " << MSUSY_new);
+
+   if (precision > precision_goal) {
+      WARNING("@ModelName@_lto3l: run_to_MSUSY(): "
+              "Iteration did not converge after " << Nmax
+              << " iterations (precision goal: " << precision_goal << ")");
+   }
+}
+
 } // anonymous namespace
 
 using namespace @ModelName@_cxx_diagrams;
@@ -82,7 +121,6 @@ typedef std::array<std::complex<double>,10> (*npf)(
    const @ModelName@_mass_eigenstates&,
    const std::array<int,4>&,
    const std::array<Eigen::Vector4d,0>&);
-
 
 /**
  * @param[in] nI     Generation index of incoming lepton.
@@ -337,7 +375,17 @@ double width_diff(int nI, int nA, T1 DL, T1 DR, T2 coeffs,
  */
 template<class Lepton, class Photon, ffv Factor, npf Rest, npf Boxes>
 Eigen::Array<std::complex<double>,13,1> forge(int nI, int nO, int nA,
-   const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
+   const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd) {
+
+   @ModelName@_mass_eigenstates model(model_);
+   try {
+      run_to_MSUSY(model);
+      model.get_physical().clear();
+      model.solve_ewsb();
+   } catch (const Error& e) {
+      ERROR("@ModelName@_lto3l:" << e.what_detailed());
+      return std::numeric_limits<Eigen::Array<std::complex<double>,13,1>>::quiet_NaN();
+   }
 
    context_base context {model};
 

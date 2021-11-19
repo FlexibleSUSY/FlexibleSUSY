@@ -60,11 +60,18 @@ With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
          ffvV = Flatten/@Tuples@{fermions, photons};
          {npfV, npfHead, npfDef, calcProto, calcDef} = BrLTo3L`create@obs;];
       WriteOut`ReplaceInFiles[files,
-         {"@npf_headers@" -> npfHead, "@npf_definitions@" -> npfDef,
-           "@calc_prototypes@" -> calcProto, "@calc_definitions@" -> calcDef,
-            Sequence@@GeneralReplacementRules[]}];
+         {
+            "@npf_headers@" -> npfHead,
+            "@npf_definitions@" -> npfDef,
+            "@calc_prototypes@" -> calcProto,
+            "@calc_definitions@" -> calcDef,
+            "@get_MSUSY@" -> TextFormatting`IndentText@
+               TextFormatting`WrapLines@AMuon`AMuonGetMSUSY[],
+            Sequence@@GeneralReplacementRules[]
+         }
+      ];
       {ffvFields, Join[ffvV, npfV], {}}];];
 WriteBrLTo3LClass // Utils`MakeUnknownInputDefinition;
-WriteBrLTo3LClass ~ SetAttributes ~ {Protected, Locked};
+WriteBrLTo3LClass // Protect;
 
 End[];

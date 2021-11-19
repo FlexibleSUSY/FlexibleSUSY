@@ -64,6 +64,45 @@ std::valarray<std::complex<double>> zero(
    return res;
 }
 
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+{
+@get_MSUSY@
+}
+
+void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+{
+   const double precision_goal = model.get_precision();
+   const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
+   int it = 0;
+   double precision = 0.;
+   double MSUSY_old = 0., MSUSY_new = 0.;
+
+   VERBOSE_MSG("@ModelName@_ltolconversion: iterate to run to MSUSY ...");
+
+   do {
+      MSUSY_new = get_MSUSY(model);
+
+      if (MSUSY_new <= 0.)
+         return;
+
+      VERBOSE_MSG("@ModelName@_ltolconversion:    running to new MSUSY = " << MSUSY_new);
+
+      model.run_to(MSUSY_new);
+      model.calculate_DRbar_masses();
+
+      precision = MaxRelDiff(MSUSY_old, MSUSY_new);
+      MSUSY_old = MSUSY_new;
+   } while (precision > precision_goal && ++it < Nmax);
+
+   VERBOSE_MSG("@ModelName@_ltolconversion: iteration finished. MSUSY = " << MSUSY_new);
+
+   if (precision > precision_goal) {
+      WARNING("@ModelName@_ltolconversion: run_to_MSUSY(): "
+              "Iteration did not converge after " << Nmax
+              << " iterations (precision goal: " << precision_goal << ")");
+   }
+}
+
 } // anonymous namespace
 
 using namespace @ModelName@_cxx_diagrams;
@@ -258,9 +297,19 @@ template<class Lepton, class Up, class Down, class Photon,
    ffv_function photon, npf_function npf_up, npf_function npf_down>
 Eigen::Array<std::complex<double>, 13, 1> forge_conversion(int in, int out,
    const @ModelName@_ltolconversion::Nucleus nucleus,
-   const @ModelName@_mass_eigenstates& model,
+   const @ModelName@_mass_eigenstates& model_,
    const LToLConversion_settings& parameters,
    const softsusy::QedQcd& qedqcd) {
+
+   @ModelName@_mass_eigenstates model(model_);
+   try {
+      run_to_MSUSY(model);
+      model.get_physical().clear();
+      model.solve_ewsb();
+   } catch (const Error& e) {
+      ERROR("@ModelName@_ltolconversion:" << e.what_detailed());
+      return std::numeric_limits<Eigen::Array<std::complex<double>,13,1>>::quiet_NaN();
+   }
 
    context_base context {model};
 

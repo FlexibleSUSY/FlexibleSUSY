@@ -85,6 +85,8 @@ Module[
          "@npf_definitions@" -> npfDefinitions,
          "@calculate_prototypes@" -> prototypes,
          "@calculate_definitions@" -> definitions,
+         "@get_MSUSY@" -> TextFormatting`IndentText@
+            TextFormatting`WrapLines@AMuon`AMuonGetMSUSY[],
          Sequence@@GeneralReplacementRules[]
       }
    ];
@@ -96,5 +98,6 @@ Module[
 ];
 ];
 WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
+WriteLToLConversionClass // Protect;
 
 End[];
