@@ -24,37 +24,28 @@ BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
 settings::usage = "
-@brief Defines default settings. Loads all settings from file, corresponding
-       to an observable. Can be used to parse the following settings:
+@brief Loads default topologies from topologies.m file.
+       Loads data from OBSERVABLE/settings.m file.
+       Parses the following settings:
 
-       ```settings`regularization``
-          Some amplitudes are calculated incorrectly in CDR.
-          For handling this, one can override used scheme for some topologies.
-          Uses rules one-by-one for replacing if allowed by topology.
-       ```settings`momenta``
+       diagrams[LOOPLEVEL, Plus] | diagrams[LOOPLEVEL, Minus]
+       amplitudes[LOOPLEVEL, Plus] | amplitudes[LOOPLEVEL, Minus]
+       regularization[LOOPLEVEL]
+          Amplitudes for some topologies are calculated with bugs in CDR.
+          One can override used scheme for desired topologies.
+       momenta[LOOPLEVEL]
           Eliminate specific momenta in some topologies.
-          Uses rules one-by-one for replacing if allowed by topology.
-       ```settings`sum``
+       sum[LOOPLEVEL]
           Skip summation over some indices of particles.
-       ```settings`massless``
+       massless[LOOPLEVEL]
           Do not put some masses to zero.
-@param tree An object to work with.
-@param settings A list of data, which specifies replacements for each topology.
-@param default A default value to be used after the ones, given by
-       ``settings``.
-@param head Several settings can act on the same topology. All results are
-       wrapped by this function. Default is ``First``.
-@returns A set of settings for ``FormCalc`Dimension``.";
+       order[]
+          Overrides default fermion order.";
 With[{dir = DirectoryName@$InputFileName},
    settings[] :=
       (  BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
          define[topologies];
-         `settings`sum = Default;
-         `settings`massless = Default;
-         `settings`momenta = Default;
-         `settings`regularization = Default;
-         `settings`order = Default;
          `settings`chains = Default;
          If[FileExistsQ@#, Get@#;]&@FileNameJoin@
             {dir, `options`observable[], "settings.m"};
@@ -81,11 +72,28 @@ Module[{doPresent, doAbsent, absent, todos},
    Select[todos, Head@# === List&]
 ];
 
-settings[tree:type`tree, settings:{__}|Default, default_, head:_:First] :=
-Module[{res = {tree}},
-   If[settings =!= Default,
-      AppendTo[res, applySetting[tree, #]]&/@ settings];
-   res = res/.
+settings[order] :=
+If[Head@order[] === List,
+   order[],
+   Reverse@Range@Tr@`options`observable@Outer
+];
+
+settings[tree:type`tree, settings:regularization|momenta|sum|massless] :=
+Module[{res = {tree}, default, head},
+   If[Head@settings@`options`loops[] === List,
+      AppendTo[res, applySetting[tree, #]]&/@ settings@`options`loops[];
+   ];
+   default = Switch[settings,
+      regularization, `options`scheme[],
+      momenta, Automatic,
+      sum, {},
+      massless, {}
+   ];
+   head = Switch[settings,
+      regularization|momenta|sum, First,
+      massless, Identity
+   ];
+   res = res /.
       node[type`generic, __] -> default /.
       node[type`topology, rest__] :> rest /.
       node[type`head, rest__] :> {rest};

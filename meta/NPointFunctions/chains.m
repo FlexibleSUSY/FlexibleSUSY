@@ -84,7 +84,7 @@ Module[{i = 0, rules, sp, L, reveal},
       L[a_, {e___}, b_] := ch[sp@a, e, sp@b];
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
-      chainRules = reveal@fermionOrder@tree;
+      chainRules = reveal@settings@order;
       rules = `options`momenta[] /. expandRules@`settings`chains /. chainRules;];
    Expand@expression //. rules];
 modifyChains // secure;

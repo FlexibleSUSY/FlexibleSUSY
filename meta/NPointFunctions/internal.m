@@ -213,15 +213,14 @@ Module[{
          FormCalc`Dimension -> #2,
          FormCalc`OnShell -> `options`onShell[],
          FormCalc`FermionChains -> FormCalc`Chiral,
-         FormCalc`FermionOrder -> fermionOrder@tree,
+         FormCalc`FermionOrder -> settings@order,
          FormCalc`Invariants -> False,
          FormCalc`MomElim -> #3]&,
-      {  ampsGen,
-         settings[tree, `settings`regularization, `options`scheme[]],
-         settings[tree, `settings`momenta, Automatic]},
-      "Amplitude calculation"] //. FormCalc`GenericList[];
+      {ampsGen, settings[tree, regularization], settings[tree, momenta]},
+      "Amplitude calculation"
+   ] //. FormCalc`GenericList[];
    generic = MapThread[getGenericSum,
-      {feynAmps, settings[tree, `settings`sum, {}]}];
+      {feynAmps, settings[tree, sum]}];
    {generic, chains, subs} = proceedChains[tree, generic];
    setZeroMassRules@{tree, feynAmps};
    {generic, chains, subs} = makeMassesZero[
@@ -272,7 +271,7 @@ makeMassesZero::usage = "
 makeMassesZero[
    {generic_, chains_, subs_}, tree:type`tree, ExceptLoops] :=
 Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
-   funcs = settings[tree, `settings`massless, {}, Identity];
+   funcs = settings[tree, massless];
    names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
    subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
