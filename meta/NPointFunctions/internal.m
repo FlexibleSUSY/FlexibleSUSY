@@ -42,10 +42,6 @@ On[General::shdw];
 
 Begin@"`Private`";
 
-secure[sym:_Symbol] :=
-   Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
-secure // secure;
-
 Utils`DynamicInclude/@
    {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m", "tree.m"};
 
@@ -107,36 +103,36 @@ NPointFunction[
       tree = cut[plant@tree, amplitudes];
       picture@tree;
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
-NPointFunction // secure;
+NPointFunction // tools`secure;
 
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
-genericIndex // secure;
+genericIndex // tools`secure;
 
 genericMass[field:type`field, index:_Integer] :=
    FeynArts`Mass[field@genericIndex@index, type`mass];
 genericMass[field:type`field] :=
    FeynArts`Mass[field@type`genericIndex, type`mass];
-genericMass // secure;
+genericMass // tools`secure;
 
 process[set:type`diagramSet|type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
 process[set:type`fc`amplitudeSet] :=
    Part[Head@Part[set, 1], 1];
-process // secure;
+process // tools`secure;
 
 externalMasses[set:type`fc`amplitudeSet] :=
    Flatten[List@@process@set, 1][[All, 3]];
 externalMasses[tree:type`tree] :=
    FeynArts`Mass[# /. -1 -> 1] &/@ fields[tree, Flatten];
-externalMasses // secure;
+externalMasses // tools`secure;
 
 getField[set:type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
-getField // secure;
+getField // tools`secure;
 
 Field[d:Head@type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
-Field // secure;
+Field // tools`secure;
 
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.
@@ -180,7 +176,7 @@ Module[{toGenericIndexConventionRules, fieldsGen, genericInsertions},
    SortBy[#,First]&/@ If[keepNumQ,
       List @@ genericInsertions,
       List @@ genericInsertions /. toGenericIndexConventionRules]];
-fieldInsertions // secure;
+fieldInsertions // tools`secure;
 
 stripIndices::usage = "
 @brief Removes particle indices from a given field.
@@ -190,7 +186,7 @@ stripIndices[Times[-1, field_]] :=
    -stripIndices@field;
 stripIndices[name_[class_, ___]] :=
    name@class;
-stripIndices // secure;
+stripIndices // tools`secure;
 
 calculateAmplitudes::usage = "
 @brief Applies ``FormCalc`` routines to amplitude set, simplifies the result.
@@ -232,7 +228,7 @@ Module[{
          colorFactors@tree},
       chains,
       subs] /. `rules`externalMomenta[tree, `options`momenta[]]];
-calculatedAmplitudes // secure;
+calculatedAmplitudes // tools`secure;
 
 setZeroMassRules::usage = "
 @brief For a given sets of ``FeynArts`` amd ``FormCalc`` amplitudes creates
@@ -251,13 +247,13 @@ Module[{rules},
    setZeroMassRules[{tree:type`tree, fc:type`fc`amplitudeSet}] :=
       rules = RuleDelayed[#, 0] &/@
          Riffle[externalMasses@tree, externalMasses@fc];
-   setZeroMassRules // secure;
+   setZeroMassRules // tools`secure;
    getZeroMassRules[] := (
       Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];
       rules);];
 getZeroMassRules::errNotSet = "
 Call setZeroMassRules to set up rules first.";
-getZeroMassRules // secure;
+getZeroMassRules // tools`secure;
 
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
@@ -294,7 +290,7 @@ Module[{zeroedRules, new},
       zeroMomenta@chains,
       new}];
 makeMassesZero[e:{_, _, _}, __] := e;
-makeMassesZero // secure;
+makeMassesZero // tools`secure;
 
 mapThread::usage = "
 @brief Behaves like ``MapThread``, but also prints a progress bar.
@@ -313,7 +309,7 @@ mapThread[func_, exprs:{__}, text_String] :=
       out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
       subWrite@"]\n";
       out];
-mapThread // secure;
+mapThread // tools`secure;
 
 getGenericFields::usage = "
 @brief Generates a list of unique sorted generic fields in expression.
@@ -321,7 +317,7 @@ getGenericFields::usage = "
 @returns A list of unique sorted generic fields.";
 getGenericFields[expr:_] :=
    Sort@DeleteDuplicates[Cases[expr, type`genericField, Infinity]];
-getGenericFields // secure;
+getGenericFields // tools`secure;
 
 getGenericSum::usage= "
 @brief Converts ``FormCalc`Amp`` into ``NPointFunctions`GenericSum`` object
@@ -336,7 +332,7 @@ Module[{sort, rules},
    GenericSum[
       List@@amplitude,
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
-getGenericSum // secure;
+getGenericSum // tools`secure;
 
 ZeroRules::usage = "
 @brief Given a set of rules that map to zero and a set that does
@@ -353,7 +349,7 @@ Module[{newNonzero, newZeroRules},
    newZeroRules = Cases[newNonzero,HoldPattern[_->0]];
    newNonzero = Complement[newNonzero, newZeroRules];
    ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]];
-ZeroRules // secure;
+ZeroRules // tools`secure;
 
 convertToFS::usage = "
 @brief Translate a list of ``FormCalc`` amplitudes, abbreviations and
@@ -365,7 +361,7 @@ convertToFS::usage = "
 convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
    {  `rules`amplitude@amplitudes,
       `rules`subexpressions/@Join[abbreviations, subexpressions]};
-convertToFS // secure;
+convertToFS // tools`secure;
 
 End[];
 EndPackage[];

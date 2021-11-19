@@ -33,7 +33,7 @@ Module[{abbr, subs, chains, generic},
    {generic, chains} = makeChainsUnique@{g /. abbr, chains};
    chains = identifySpinors[tree, chains];
    {generic, chains, subs}];
-proceedChains // secure;
+proceedChains // tools`secure;
 
 modifyChains::usage = "
 @brief Transforms chains[LOOPLEVEL] into replacements rules.
@@ -89,7 +89,7 @@ Module[{i = 0, rules, sp, L, reveal},
       rules = `options`momenta[] /. tools`unzipRule@chains@`options`loops[] /. chainRules;
    ];
    Expand@expression //. rules];
-modifyChains // secure;
+modifyChains // tools`secure;
 
 simplifyChains::usage = "
 @brief Simplifies some chains applying Dirac equation if
@@ -119,7 +119,7 @@ simplifyChains[chain:_DiracChain] :=
             ch[l:sp[],p:s,k[n_],r:sp[n_]] :> m[r]*ch[l,p,r],
             ch[l:sp[n_],p:s,k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]}],
       chain];
-simplifyChains // secure;
+simplifyChains // tools`secure;
 
 getChainRules::usage = "
 @brief Finds a subset of rules inside a ``List``, which represents Dirac
@@ -132,7 +132,7 @@ getChainRules[rules:{Rule[_Symbol, _]...}] :=
    Module[{regex},
       regex = RegularExpression@"[F][1-9][\\d]*";
       Cases[rules, e:Rule[_?(StringMatchQ[ToString@#, regex]&), _] :> e]];
-getChainRules // secure;
+getChainRules // tools`secure;
 
 makeChainsUnique::usage = "
 @brief After manual simplification of dirac chains one can get duplicates. They
@@ -155,7 +155,7 @@ Module[{chains, chain, name, old, zero, rest, unique, erules},
    erules = (old /. (unique /. Rule[x_, y_] :> Rule[y, x]));
    {  expression /. zero /. erules,
       Join[unique, rest]} /. FormCalc`Mat -> Mat];
-makeChainsUnique // secure;
+makeChainsUnique // tools`secure;
 
 Mat::usage = "
 @todo Sometimes this is needed, sometimes not. Why?";
@@ -175,7 +175,7 @@ Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
    rules /. ch:DiracChain[__] :> idf@ch];
-identifySpinors // secure;
+identifySpinors // tools`secure;
 
 zeroMomenta::usage = "
 @brief Sets ``FormCalc`k[i]`` to zero inside fermionic chains.
@@ -183,7 +183,7 @@ zeroMomenta::usage = "
 @returns An expression with modified fermionic chains.";
 zeroMomenta[expression_] :=
    expression /. e:DiracChain[__] :> (e /. FormCalc`k[_] :> 0);
-zeroMomenta // secure;
+zeroMomenta // tools`secure;
 
 End[];
 EndPackage[];

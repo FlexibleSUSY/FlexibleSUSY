@@ -25,7 +25,7 @@ Begin@"`Private`";
 
 removeColors[expr_] :=
    Delete[expr, Position[expr, type`colorIndex]];
-removeColors // secure;
+removeColors // tools`secure;
 
 lengthyQ::usage = "
 @brief Checks, whether the ``Length`` of expression is zero or not.
@@ -73,7 +73,7 @@ plant[tree:type`tree] :=
          node[e:type`head, r__] :> node[Append[e, Head@amps], r] /.
          node[e:type`generic, r__] :> node[Append[e, generic[[i++]]], r] /.
          node[e:type`classes] :> node@Append[e, classes[[j++]]]];
-plant // secure;
+plant // tools`secure;
 
 info[tree:type`tree, str_String] :=
    (  Print@str;
@@ -81,7 +81,7 @@ info[tree:type`tree, str_String] :=
          Length@Cases[tree, type`generic, Infinity], " Generic, ",
          Length@Cases[tree, type`classes, Infinity], " Classes insertions"];
       tree);
-info // secure;
+info // tools`secure;
 
 diagrams[tree:type`tree] :=
    tree /.
@@ -103,7 +103,7 @@ fields[tree:type`tree, Flatten] :=
    Flatten[fields@tree, 1];
 fields[tree:type`tree] :=
    tree /. node[e:type`head, __] :> List@@(FeynArts`Process /. List@@First@e);
-fields // secure;
+fields // tools`secure;
 
 picture[tree:type`tree] :=
    Module[{out = {}, directory, name},
@@ -119,14 +119,14 @@ picture[tree:type`tree] :=
          FeynArts`Numbering -> FeynArts`Simple,
          DisplayFunction :> (AppendTo[out, #] &/@ Render[##, "JPG"] &)];
       Put[out, FileNameJoin@{directory, name<>".m"}]];
-picture // secure;
+picture // tools`secure;
 
 wrap[data:{Rule[_, _]..}..] :=
    Module[{lhs, rhs},
       lhs = First/@First@{data};
       rhs = FeynArts`Insertions[FeynArts`Classes]@@(Last/@#&/@{data});
       lhs -> rhs];
-wrap // secure;
+wrap // tools`secure;
 
 cut::usage = "
 @brief Removes nodes. Can be done *via*:
@@ -170,10 +170,10 @@ cut[n:node[type`generic, __], fun_, info__] :=
    If[fun[#, info], # /. node@type`generic :> Sequence[], ##&[]]&[
       n /. e:node@type`classes :> cut[e, fun, info]];
 cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
-cut // secure;
+cut // tools`secure;
 
 head[tree:type`tree] := tree[[1, 1]];
-head // secure;
+head // tools`secure;
 
 combinatoricalFactors::usage = "
 @param tree A ``tree`` object.
@@ -184,7 +184,7 @@ combinatoricalFactors[_[_,_,_, generic_ -> _[_][classes__]]] :=
    {classes}[[All, #[[1, 1]]]] /.
       {FeynArts`IndexDelta[___] -> 1, FeynArts`SumOver[__] -> 1} &@
          Position[generic, FeynArts`RelativeCF];
-combinatoricalFactors // secure;
+combinatoricalFactors // tools`secure;
 
 colorFactors::usage = "
 @param tree A ``tree`` object.
@@ -220,7 +220,7 @@ Module[{propPatt, adjacencyMatrix, externalRules, genericDiagram},
          adjacencyMatrix]&,
       fieldInsertions[diagram, True],
       {2}]];
-colorFactors // secure;
+colorFactors // tools`secure;
 
 End[];
 EndPackage[];

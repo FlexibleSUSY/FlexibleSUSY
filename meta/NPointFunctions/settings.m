@@ -60,7 +60,8 @@ settings::usage = "
 settings[settings:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
-      tools`unzipRule@settings[`options`loops[], #]&/@ {Plus, Minus};
+      settings[`options`loops[], #]&/@ {Plus, Minus};
+   {doPresent, doAbsent} = tools`unzipRule/@ {doPresent, doAbsent};
    {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
       {doPresent, doAbsent};
    absent = Complement[First/@doAbsent, `options`processes[]];
@@ -102,7 +103,7 @@ Module[{res = {tree}, default, head},
       {default, rest__} :> head@{rest} /. {default} -> default
 ];
 
-settings // secure;
+settings // tools`secure;
 
 applySetting[tree:type`tree, {str_String, tQ_, fun_}] :=
    info[cut[tree, tQ, fun], str];
@@ -123,7 +124,7 @@ makeApply[tQ_ -> fun_, value];
 makeApply[{str_String, tQ_, fun:{_Integer, _}}, restrict];
 makeApply[{str_String, tQ_, fun:{Append, _}}, append];
 makeApply[{str_String, tQ_, fun:{Hold, _}}, hold];
-applySetting // secure;
+applySetting // tools`secure;
 
 value[val_, ___] := val;
 restrict[{int_, fun_}, __, head_] :=
@@ -136,18 +137,18 @@ hold[{Hold, e_}, ___] :=
 
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];
-LoopFields // secure;
+LoopFields // tools`secure;
 
 TreeFields[node[id_, ___], info__] :=
    FeynArts`TreeFields[First@id, info];
-TreeFields // secure;
+TreeFields // tools`secure;
 
 FieldPattern[d:Head@type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
       type`generationIndex :> Blank[];
 FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
-FieldPattern // secure;
+FieldPattern // tools`secure;
 
 End[];
 EndPackage[];

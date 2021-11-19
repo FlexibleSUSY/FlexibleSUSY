@@ -34,7 +34,7 @@ Module[{once},
          names = StringCases[lines, RegularExpression@regex :>
             {"$1","FeynArts`$2","$3"}];
          Flatten[names, 1] /. rules];];
-fieldData // secure;
+fieldData // tools`secure;
 
 Module[{once},
    `rules`fields[expression_] := expression //. `rules`fields[];
@@ -72,7 +72,7 @@ Module[{once},
                   Susyno`LieGroups`conj@field,
                Times[-1,field:_GenericF|_GenericU] :>
                   SARAH`bar@field}]];];
-`rules`fields // secure;
+`rules`fields // tools`secure;
 
 Module[{once},
    `rules`mass[] := once@_;
@@ -88,7 +88,7 @@ Module[{once},
             {faMasses, sarahNames}];
          Append[Flatten@massRules,
             FeynArts`Mass[field_, _ : Null] :> SARAH`Mass@field]];];
-`rules`mass // secure;
+`rules`mass // tools`secure;
 
 `rules`couplings[] :=
 Module[{PL, PR, MT, FV, g, md, v, i, p},
@@ -123,7 +123,7 @@ Module[{PL, PR, MT, FV, g, md, v, i, p},
          S[ md[{f}, i2, i1, i3] * g[{f}, i1, i2],
             md[{f}, i1, i3, i2] * g[{f}, i1, i3],
             md[{f}, i3, i2, i1] * g[{f}, i2, i3]]}]];
-`rules`couplings // secure;
+`rules`couplings // tools`secure;
 
 With[{lt = Unique@"SARAH`lt"},
    `rules`subexpressions[expression_] :=
@@ -139,7 +139,7 @@ With[{lt = Unique@"SARAH`lt"},
             FormCalc`k[i_Integer, pairIndex___] :> SARAH`Mom[i, pairIndex]},
          {  FormCalc`Spinor -> SARAH`DiracSpinor,
             FormCalc`Lor -> SARAH`Lorentz}];];
-`rules`subexpressions // secure;
+`rules`subexpressions // tools`secure;
 
 `rules`amplitude[expression_] :=
    `rules`subexpressions[expression] //. {
@@ -153,7 +153,7 @@ With[{lt = Unique@"SARAH`lt"},
       SARAH`sum[i_, min_, max_, FeynArts`SumOver[_, {n1_, n2_}]] :>
          SARAH`sum[i, min, max, n2-n1],
       FeynArts`IndexSum -> Sum};
-`rules`amplitude // secure;
+`rules`amplitude // tools`secure;
 
 `rules`externalMomenta[tree:type`tree,
    option:True|False|OperatorsOnly|ExceptLoops] :=
@@ -165,7 +165,7 @@ Module[{fsFields},
          fsFields = `rules`fields@fields[tree, Flatten];
          {SARAH`Mom[i_Integer, lorIndex_] :>
             SARAH`Mom[fsFields[[i]], lorIndex]}]];
-`rules`externalMomenta // secure;
+`rules`externalMomenta // tools`secure;
 
 End[];
 EndPackage[];
