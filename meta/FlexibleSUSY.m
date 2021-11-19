@@ -2405,6 +2405,8 @@ WriteLToLGammaClass[decays_List, files_List] :=
       WriteOut`ReplaceInFiles[files, {
             "@LToLGamma_InterfacePrototypes@"  -> interfacePrototypes,
             "@LToLGamma_InterfaceDefinitions@" -> interfaceDefinitions,
+            "@get_MSUSY@" -> TextFormatting`IndentText@
+               TextFormatting`WrapLines@AMuon`AMuonGetMSUSY[],
             Sequence @@ GeneralReplacementRules[]
          }
       ];

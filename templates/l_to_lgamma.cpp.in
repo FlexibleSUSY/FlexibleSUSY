@@ -36,6 +36,49 @@
 #include "physical_input.hpp"
 #include "wrappers.hpp"
 
+namespace {
+
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
+{
+@get_MSUSY@
+}
+
+void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
+{
+   const double precision_goal = model.get_precision();
+   const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
+   int it = 0;
+   double precision = 0.;
+   double MSUSY_old = 0., MSUSY_new = 0.;
+
+   VERBOSE_MSG("@ModelName@_l_to_lgamma: iterate to run to MSUSY ...");
+
+   do {
+      MSUSY_new = get_MSUSY(model);
+
+      if (MSUSY_new <= 0.)
+         return;
+
+      VERBOSE_MSG("@ModelName@_l_to_lgamma:    running to new MSUSY = " << MSUSY_new);
+
+      model.run_to(MSUSY_new);
+      model.calculate_DRbar_masses();
+
+      precision = MaxRelDiff(MSUSY_old, MSUSY_new);
+      MSUSY_old = MSUSY_new;
+   } while (precision > precision_goal && ++it < Nmax);
+
+   VERBOSE_MSG("@ModelName@_l_to_lgamma: iteration finished. MSUSY = " << MSUSY_new);
+
+   if (precision > precision_goal) {
+      WARNING("@ModelName@_l_to_lgamma: run_to_MSUSY(): "
+              "Iteration did not converge after " << Nmax
+              << " iterations (precision goal: " << precision_goal << ")");
+   }
+}
+
+} // anonymous namespace
+
 namespace flexiblesusy {
 
 using namespace @ModelName@_cxx_diagrams;
@@ -46,7 +89,7 @@ namespace @ModelName@_l_to_lgamma {
 
 template <typename FIn, typename FOut, typename T1, typename T2>
 double lepton_total_decay_width(
-      T1 const& indices1, T2 const& indices2, 
+      T1 const& indices1, T2 const& indices2,
       const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd) {
 
    context_base context {model};
