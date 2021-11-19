@@ -47,7 +47,7 @@ secure[sym:_Symbol] :=
 secure // secure;
 
 Utils`DynamicInclude/@
-   {"type.m", "rules.m", "settings.m", "chains.m", "topologies.m", "tree.m"};
+   {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m", "tree.m"};
 
 NPointFunction::usage = "
 @brief The entry point of the calculation.

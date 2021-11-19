@@ -29,16 +29,16 @@ Module[{abbr, subs, chains, generic},
    {chains, abbr} = {#, Complement[abbr, #]}&@ getChainRules@abbr;
    subs = FormCalc`Subexpr[] //. FormCalc`GenericList[] //. abbr;
    chains = simplifyChains@chains;
-   chains = modifyChains[chains, tree];
+   chains = modifyChains@chains;
    {generic, chains} = makeChainsUnique@{g /. abbr, chains};
    chains = identifySpinors[tree, chains];
    {generic, chains, subs}];
 proceedChains // secure;
 
 modifyChains::usage = "
-@brief Transforms ```settings`chains`` into rules and applies them onto
-       expression.
-       ```settings`chains`` should have the following syntax::
+@brief Transforms chains[LOOPLEVEL] into replacements rules.
+       Applies them onto expression.
+       chains[LOOPLEVEL] should have the following syntax::
 
           {  {  <symbol>..} ->  {  <rule>..}
              ..}
@@ -54,7 +54,7 @@ modifyChains::usage = "
              <chain>[<something1>, <something2>...] -> 0
 
           <chain>
-             A number of chain. Number is defined by ```settings`order``,
+             A number of chain. Number is defined by order[] settings,
              i.e. for ``{3, 1, 4, 2}`` the chain 1 is ``{3, 1}`` and
              chain 2 is ``{4, 2}``.
           <something1>
@@ -72,9 +72,10 @@ modifyChains::usage = "
       make different reveal functions.
 @todo Write explanations about anticommutation rules in chains and other
       conventions.";
-modifyChains[expression_, tree:type`tree] :=
+modifyChains[expression_] :=
 Module[{i = 0, rules, sp, L, reveal},
-   If[`settings`chains === Default, Return@expression];
+   If[Head@chains@`options`loops[] =!= List, Return@expression];
+
    Block[{k = FormCalc`k, l = FormCalc`Lor, ch = DiracChain},
       sp[mom_] := FormCalc`Spinor[k@mom, _, _];
       L[a_, e___ , b_] := L[ a,
@@ -85,7 +86,8 @@ Module[{i = 0, rules, sp, L, reveal},
       reveal@{a_, b_, c___} := Flatten@{i++; i[e:___] :> L[a, e, b], reveal@{c}};
       reveal@{} := Sequence[];
       chainRules = reveal@settings@order;
-      rules = `options`momenta[] /. expandRules@`settings`chains /. chainRules;];
+      rules = `options`momenta[] /. tools`unzipRule@chains@`options`loops[] /. chainRules;
+   ];
    Expand@expression //. rules];
 modifyChains // secure;
 
@@ -118,14 +120,6 @@ simplifyChains[chain:_DiracChain] :=
             ch[l:sp[n_],p:s,k[n_],r:sp[]] :> m[l]*ch[l,flip@p,r]}],
       chain];
 simplifyChains // secure;
-
-expandRules::usage = "
-@brief Expands a set of compact rules into the full one.
-@param rules A set of compact rules to expand.
-@returns A set of rules.";
-expandRules[rules:{Rule[{__Symbol}, _]..}] :=
-   rules /. Rule[e:_, s:_] :> Sequence @@ (Rule[#, s] &/@ e);
-expandRules // secure;
 
 getChainRules::usage = "
 @brief Finds a subset of rules inside a ``List``, which represents Dirac

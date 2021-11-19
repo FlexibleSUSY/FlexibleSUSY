@@ -43,13 +43,12 @@ settings::usage = "
           Overrides default fermion order.";
 With[{dir = DirectoryName@$InputFileName},
    settings[] :=
-      (  BeginPackage@"NPointFunctions`";
+      (
+         define@topologies;
+         BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
-         define[topologies];
-         `settings`chains = Default;
          If[FileExistsQ@#, Get@#;]&@FileNameJoin@
             {dir, `options`observable[], "settings.m"};
-         Protect@Evaluate[Context[]<>"settings`*"];
          End[];
          EndPackage[];);];
 
@@ -61,7 +60,7 @@ settings::usage = "
 settings[settings:diagrams|amplitudes] :=
 Module[{doPresent, doAbsent, absent, todos},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
-      settings[`options`loops[], #]&/@ {Plus, Minus};
+      tools`unzipRule@settings[`options`loops[], #]&/@ {Plus, Minus};
    {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
       {doPresent, doAbsent};
    absent = Complement[First/@doAbsent, `options`processes[]];
@@ -81,7 +80,9 @@ If[Head@order[] === List,
 settings[tree:type`tree, settings:regularization|momenta|sum|massless] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@`options`loops[] === List,
-      AppendTo[res, applySetting[tree, #]]&/@ settings@`options`loops[];
+      AppendTo[res, applySetting[tree, #]]&/@
+(*       v-----------------------v TODO: apply tools`unzip.                  *)
+         settings@`options`loops[];
    ];
    default = Switch[settings,
       regularization, `options`scheme[],

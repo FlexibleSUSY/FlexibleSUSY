@@ -103,6 +103,6 @@ regularization[1] = {
 
 order[] = {3, 1, 4, 2};
 
-`settings`chains =
-{  {  ExceptLoops} ->
-      {  1[k[4|2], ___] -> 0, 2[k[3|1], ___] -> 0}};
+chains[1] = {
+   {ExceptLoops} -> {1[k[4|2], ___] -> 0, 2[k[3|1], ___] -> 0}
+};

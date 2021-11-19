@@ -106,6 +106,6 @@ regularization[1] = {
 
 order[] = {3, 1, 4, 2};
 
-`settings`chains =
-{  {ExceptLoops, OperatorsOnly} ->
-      {  1[k@4, ___] -> 0, 2[k@1, ___] -> 0}};
+chains[1] = {
+   {ExceptLoops, OperatorsOnly} -> {1[k[4], ___] -> 0, 2[k[1], ___] -> 0}
+};
