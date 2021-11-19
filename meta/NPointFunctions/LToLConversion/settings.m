@@ -9,113 +9,68 @@ topologies[1] = {
    Boxes -> boxAll
 };
 
-`settings`diagrams = {
-   0 -> {
-      Vectors -> {
-         List[],
-         List[
-            {
-               "remove vector bosons",
-               treeAll,
-               FreeQ[TreeFields@##, FeynArts`V]&
-            }
-         ]
+diagrams[0, Minus] = {
+   Vectors -> {
+      {"remove vector bosons", treeAll, FreeQ[TreeFields@##, FeynArts`V]&}
+   },
+   Scalars -> {
+      {"remove scalar bosons", treeAll, FreeQ[TreeFields@##, FeynArts`S]&}
+   }
+};
+
+diagrams[1, Plus] = {
+   Vectors -> {
+      {"penguins: remove external leptons",
+         penguinT,
+         FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&
       },
-      Scalars -> {
-         List[],
-         List[
-            {
-               "remove scalar bosons",
-               treeAll,
-               FreeQ[TreeFields@##, FeynArts`S]&
-            }
-         ]
+      {"penguins: remove loop vectors",
+         penguinT,
+         FreeQ[LoopFields@##, FeynArts`V]&
       }
    },
-   1 -> {
-      Vectors -> {
-         List[
-            {
-               "penguins: remove external leptons from loops",
-               penguinT,
-               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&
-            },
-            {
-               "penguins: remove vector bosons from loops",
-               penguinT,
-               FreeQ[LoopFields@##, FeynArts`V]&
-            }
-         ],
-         List[
-            {
-               "penguins: remove tree-like vector bosons",
-               penguinT,
-               FreeQ[TreeFields@##, FeynArts`V]&
-            }
-         ]
+   Scalars -> {
+      {"penguins: remove external leptons",
+         penguinT,
+         FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&
       },
-      Scalars -> {
-         List[
-            {
-               "penguins: remove external leptons from loops",
-               penguinT,
-               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&
-            },
-            {
-               "penguins: remove vector bosons from loops",
-               penguinT,
-               FreeQ[LoopFields@##, FeynArts`V]&
-            }
-         ],
-         List[
-            {
-               "penguins: remove tree-like scalar bosons",
-               penguinT,
-               FreeQ[TreeFields@##, FeynArts`S]&
-            }
-         ]
-      },
-      Boxes -> {
-         List[
-            {
-               "boxes: remove external leptons from loops",
-               boxAll,
-               FreeQ[LoopFields@##, FieldPattern[#3, 1|3]]&
-            },
-            {
-               "boxes: remove vector bosons from loops",
-               boxAll,
-               FreeQ[LoopFields@##, FeynArts`V]&
-            }
-         ],
-         List[]
+      {"penguins: remove loop vectors",
+         penguinT,
+         FreeQ[LoopFields@##, FeynArts`V]&
+      }
+   },
+   Boxes -> {
+      {"boxes: remove external leptons",
+         boxAll,
+         FreeQ[LoopFields@##, FieldPattern[#3, 1|2|3|4]]&}
+      ,
+      {"boxes: remove vector bosons from loops",
+         boxAll,
+         FreeQ[LoopFields@##, FeynArts`V]&
       }
    }
 };
 
-`settings`amplitudes = {
-   0 -> {
-      Vectors -> {
-         List[
-            {
-               "remove photons",
-               treeAll,
-               FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
-            }
-         ],
-         List[]
-      }
+diagrams[1, Minus] = {
+   Vectors -> {
+      {"penguins: remove tree vectors", penguinT, FreeQ[TreeFields@##, FeynArts`V]&}
    },
-   1 -> {
-      Vectors -> {
-         List[
-            {
-               "penguins: remove tree photons",
-               penguinT,
-               FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
-            }
-         ],
-         List[]
+   Scalars -> {
+      {"penguins: remove tree scalars", penguinT, FreeQ[TreeFields@##, FeynArts`S]&}
+   }
+};
+
+amplitudes[0, Plus] = {
+   Vectors -> {
+      {"remove photons", treeAll, FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&}
+   }
+};
+
+amplitudes[1, Plus] = {
+   Vectors -> {
+      {"penguins: remove tree photons",
+         penguinT,
+         FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&
       }
    }
 };

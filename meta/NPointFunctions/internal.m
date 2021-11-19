@@ -66,8 +66,7 @@ NPointFunction::usage = "
 @param observable An observable name in the form
        ``FlexibleSUSYObservable`<Name>[<Arguments>]``.
 @param loops The loop level of calculation (as ``Integer``).
-@param processes A ``List`` of one or many ``Symbol`` of processes
-       to calculate.
+@param processes A list of processes to calculate.
 @param momenta A ``Symbol``, which defines how to treat momenta of external
        particles.
 @param onShell A flag, corresponding to the \"on-shellness\" of external
@@ -77,7 +76,7 @@ NPointFunction::usage = "
 @returns An object of the n-point function in ``FlexibleSUSY`` conventions."
 NPointFunction[
    {formcalc_, model_, particles_, contexts_, in_List, out_List},
-   {observable_, loops_, processes_, momenta_, onShell_, scheme_}] :=
+   {observable_, loops_, processes:{___String}, momenta_, onShell_, scheme_}] :=
    Module[{tree},
       BeginPackage["NPointFunction`"];
       Begin["`Private`"];
@@ -104,8 +103,8 @@ NPointFunction[
       SetDirectory@formcalc;
 
       settings[];
-      tree = cut[plant[in, out], `settings`diagrams];
-      tree = cut[plant@tree, `settings`amplitudes];
+      tree = cut[plant[in, out], diagrams];
+      tree = cut[plant@tree, amplitudes];
       picture@tree;
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 NPointFunction // secure;
@@ -138,13 +137,6 @@ getField // secure;
 Field[d:Head@type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
 Field // secure;
-
-FieldPattern[d:Head@type`diagramSet, i_Integer] :=
-   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
-      type`generationIndex :> Blank[];
-FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
-   FieldPattern[d, #] &/@ a;
-FieldPattern // secure;
 
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.

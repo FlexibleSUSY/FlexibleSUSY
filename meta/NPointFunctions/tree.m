@@ -91,7 +91,6 @@ diagrams[tree:type`tree] :=
       node[e:type`generic, rest__] :>
          First[e] -> FeynArts`Insertions[FeynArts`Classes]@rest /.
       node[e:type`classes] :> First@e;
-diagrams // secure;
 
 amplitudes[tree:type`tree] :=
    tree /.
@@ -99,7 +98,6 @@ amplitudes[tree:type`tree] :=
       node[e:type`topology, rest__] :> rest /.
       node[e:type`classes] :> Last@e /.
       node[e:type`generic, rest__] :> Append[Part[e, 2], wrap@rest];
-amplitudes // secure;
 
 fields[tree:type`tree, Flatten] :=
    Flatten[fields@tree, 1];
@@ -147,9 +145,9 @@ cut::usage = "
 
        1. Settings. Use to apply the following settings:
 
-          ```settings`diagrams``
+          ``diagrams``
              Contains settings, specific for diagrams.
-          ```settings`amplitudes``
+          ``amplitudes``
              Contains settings, specific for diagrams and amplitudes.
        2. Topology
        3. Generic or classes level data
@@ -168,10 +166,12 @@ cut::usage = "
 @param info A ``Sequence`` of topology and topology list.
 @param n A node to check.
 @returns Nodes, cleaned by ``fun``.";
-cut[tree:type`tree, settings:{__Rule}|Default] :=
-   Module[{res = tree},
-      Set[res, applySetting[res, #]]&/@ parseSettings@settings;
-      res];
+cut[tree:type`tree, kind:diagrams|amplitudes] :=
+Module[{res = tree},
+   Set[res, applySetting[res, #]]&/@ settings@kind;
+   res
+];
+
 cut[tree:type`tree, tQ_, fun_] :=
    tree /.
       e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
@@ -183,12 +183,6 @@ cut[n:node[type`generic, __], fun_, info__] :=
       n /. e:node@type`classes :> cut[e, fun, info]];
 cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
 cut // secure;
-
-LoopFields[node[id_, ___], info__] :=
-   FeynArts`LoopFields[First@id, info];
-
-TreeFields[node[id_, ___], info__] :=
-   FeynArts`TreeFields[First@id, info];
 
 head[tree:type`tree] := tree[[1, 1]];
 head // secure;

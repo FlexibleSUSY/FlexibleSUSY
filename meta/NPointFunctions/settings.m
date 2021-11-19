@@ -50,8 +50,6 @@ With[{dir = DirectoryName@$InputFileName},
       (  BeginPackage@"NPointFunctions`";
          Begin@"`Private`";
          define[topologies];
-         `settings`diagrams = Default;
-         `settings`amplitudes = Default;
          `settings`sum = Default;
          `settings`massless = Default;
          `settings`momenta = Default;
@@ -64,65 +62,38 @@ With[{dir = DirectoryName@$InputFileName},
          End[];
          EndPackage[];);];
 
-settings[tree:type`tree,
-   settings:{__}|Default, default_, head:_:First] :=
-   Module[{res = {tree}},
-      If[settings =!= Default,
-         AppendTo[res, applySetting[tree, #]]&/@ settings];
-      res = res/.
-         node[type`generic, __] -> default /.
-         node[type`topology, rest__] :> rest /.
-         node[type`head, rest__] :> {rest};
-      DeleteDuplicates/@Transpose@res /.
-         {default, rest__} :> head@{rest} /. {default} -> default];
+settings::usage = "
+@brief Converts `diagrams[_, _]` and `amplitudes[_, _]` from
+       OBSERVABLE/settings.m files into operations, which remove diagrams
+       with requested properties.
+@returns A set of operations.";
+settings[settings:diagrams|amplitudes] :=
+Module[{doPresent, doAbsent, absent, todos},
+   {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
+      settings[`options`loops[], #]&/@ {Plus, Minus};
+   {doPresent, doAbsent} = Rule[SymbolName@First@#, Last@#]&/@ #&/@
+      {doPresent, doAbsent};
+   absent = Complement[First/@doAbsent, `options`processes[]];
+   todos = DeleteDuplicates@Flatten[
+      Join[`options`processes[] /. doPresent, absent /. doAbsent],
+      1
+   ];
+   Select[todos, Head@# === List&]
+];
+
+settings[tree:type`tree, settings:{__}|Default, default_, head:_:First] :=
+Module[{res = {tree}},
+   If[settings =!= Default,
+      AppendTo[res, applySetting[tree, #]]&/@ settings];
+   res = res/.
+      node[type`generic, __] -> default /.
+      node[type`topology, rest__] :> rest /.
+      node[type`head, rest__] :> {rest};
+   DeleteDuplicates/@Transpose@res /.
+      {default, rest__} :> head@{rest} /. {default} -> default
+];
+
 settings // secure;
-
-parseSettings::usage = "
-@brief Converts ```settings`diagrams`` or ```settings`amplitudes`` to a set
-       of operations, which define what to remove from the ``tree`` object.
-       The structure of these settings for each loop level is the following::
-
-          {  anySymbol -> {  {  inProcesses...},
-                             {  notInProcesses...}}..}
-
-       anySymbol
-          Any ``Symbol``, which defines the action to do with the ``tree``.
-       inProcesses
-          Is applied, if ``anySymbol`` is inside ```options`processes[]``.
-          Has the syntax, which obeys the pattern::
-
-             {  str, tQ, fun}
-       notInProcesses
-          Is applied, if ``anySymbol`` is **not** inside
-          ```options`processes[]``. See the syntax above.
-       str
-          Any ``String``, which is printed, if the action is applied.
-       tQ
-          A criterion, which decides, whether to apply action or not.
-          It is applied if ``tQ[topology]`` returns ``True``.
-       fun
-          A function, which is used to remove generic or classes levels.
-          It is applied to 3 arguments: 1)current expression (any node at
-          classes or generic level), 2) topology, 3) and the head of diagram
-          set. If it returns ``True``, then the node is kept.
-@param settings An entry to define actions.
-@returns A set of settings.";
-parseSettings[settings:Default] := {};
-parseSettings[settings:{Rule[_Integer, {Rule[_, {{___}, {___}}]..}]..}] :=
-Module[{positiveRules, negativeRules, discardProcesses, clean, parsed},
-   parsed = If[MatchQ[#, _Integer],
-      Return@parseSettings@Default,
-      #]&[`options`loops[]/. settings];
-   parsed = Rule[SymbolName@First@#, Last@#]&/@parsed;
-   positiveRules = parsed /. Rule[s:_, {p:_, _}] :> Rule[s, p];
-   negativeRules = parsed /. Rule[s:_, {_, n:_}] :> Rule[s, n];
-   discardProcesses = Complement[parsed[[All, 1]], `options`processes[]];
-   clean = RuleDelayed[#, Sequence[]] &/@ `options`processes[];
-   DeleteDuplicates@Join[
-      DeleteDuplicates@Flatten[`options`processes[] /. positiveRules, 1],
-      DeleteDuplicates@Flatten[discardProcesses /. negativeRules, 1]] /.
-         clean];
-parseSettings // secure;
 
 applySetting[tree:type`tree, {str_String, tQ_, fun_}] :=
    info[cut[tree, tQ, fun], str];
@@ -153,6 +124,21 @@ append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
       Append[#, genericMass[f, n] :> rhs]&];
 hold[{Hold, e_}, ___] :=
    With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
+
+LoopFields[node[id_, ___], info__] :=
+   FeynArts`LoopFields[First@id, info];
+LoopFields // secure;
+
+TreeFields[node[id_, ___], info__] :=
+   FeynArts`TreeFields[First@id, info];
+TreeFields // secure;
+
+FieldPattern[d:Head@type`diagramSet, i_Integer] :=
+   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
+      type`generationIndex :> Blank[];
+FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
+   FieldPattern[d, #] &/@ a;
+FieldPattern // secure;
 
 End[];
 EndPackage[];
