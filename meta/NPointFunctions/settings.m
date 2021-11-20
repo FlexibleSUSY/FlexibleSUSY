@@ -66,10 +66,9 @@ Module[{doPresent, doAbsent, absent, todos},
       {doPresent, doAbsent};
    absent = Complement[First/@doAbsent, `options`processes[]];
    todos = DeleteDuplicates@Flatten[
-      Join[`options`processes[] /. doPresent, absent /. doAbsent],
-      1
+      Join[`options`processes[] /. doPresent, absent /. doAbsent]
    ];
-   Select[todos, Head@# === List&]
+   Select[todos, Head@# === Rule&]
 ];
 
 settings[order] :=
@@ -104,9 +103,11 @@ Module[{res = {tree}, default, head},
 
 settings // tools`secure;
 
-applySetting[tree:type`tree, {str_String, tQ_, fun_}] :=
+(* --------v For 'diagrams' and 'amplitudes'.                                *)
+applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
    info[cut[tree, tQ, fun], str];
 
+(* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
 (  Off@RuleDelayed::rhs;
    applySetting[tree:type`tree, pattern] :=

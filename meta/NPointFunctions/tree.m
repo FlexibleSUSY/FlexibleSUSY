@@ -145,12 +145,12 @@ cut::usage = "
 @param settings Data, which specifies replacements for topologies.
 @param tQ A function to select a *topology* ``node[id, __]`` if::
 
-           In[1]:= tQ[id]
-          Out[1]:= True
+          In[1]:= tQ[id]
+          Out[1]= True
 @param fun A function to remove *class* or *generic* node if::
 
-           In[1]:= fun[node, info]
-          Out[1]:= True
+          In[1]:= fun[node, info]
+          Out[1]= True
 @param info A ``Sequence`` of topology and topology list.
 @param n A node to check.
 @returns Nodes, cleaned by ``fun``.";
