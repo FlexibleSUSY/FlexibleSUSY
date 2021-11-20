@@ -109,12 +109,6 @@ NPointFunction // tools`secure;
 genericIndex[index:_Integer] := FeynArts`Index[Generic, index];
 genericIndex // tools`secure;
 
-genericMass[field:type`field, index:_Integer] :=
-   FeynArts`Mass[field@genericIndex@index, type`mass];
-genericMass[field:type`field] :=
-   FeynArts`Mass[field@type`genericIndex, type`mass];
-genericMass // tools`secure;
-
 process[set:type`diagramSet|type`amplitudeSet] :=
    Cases[Head@set, (FeynArts`Process -> e:_) :> e][[1]];
 process[set:type`fc`amplitudeSet] :=

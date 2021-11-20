@@ -148,7 +148,7 @@ tree /. node[t:type`topology/; tQ@t, rest__] :> (
 (* --v Acts on the list, returned by mass`rules[].                           *)
 append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
 With[{rhs = (First/@ Flatten@mass`rules[])[[2*e-1]]},
-   Append[#, genericMass[f, n] :> rhs]&
+   Append[#, InternalMass[f, n] :> rhs]&
 ];
 (* ^ Because rhs should be evaluated, but it is used with :>.                 *)
 
@@ -170,9 +170,13 @@ FieldPattern[d:Head@type`diagramSet, i_Integer] :=
 FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
 
+InternalMass[f:type`field, index:_Integer] :=
+   FeynArts`Mass[f@type`genericIndex@index, type`mass];
+
 applySetting // tools`secure;
 LoopFields // tools`secure;
 TreeFields // tools`secure;
 FieldPattern // tools`secure;
+InternalMass // tools`secure;
 End[];
 EndPackage[];

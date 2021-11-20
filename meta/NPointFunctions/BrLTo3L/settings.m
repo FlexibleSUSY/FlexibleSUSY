@@ -48,13 +48,13 @@ diagrams[1, Minus] = {
 amplitudes[0, Plus] = {
    Vectors -> {
       treeAll -> {"remove photons",
-         FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&}}
+         FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}
 };
 
 amplitudes[1, Plus] = {
    Vectors -> {
       penguinT -> {"penguins: remove tree photons",
-         FreeQ[#, genericMass[FeynArts`V, 5] -> 0]&}}
+         FreeQ[#, InternalMass[FeynArts`V, 5] -> 0]&}}
 };
 
 order[] = {3, 1, 4, 2};
