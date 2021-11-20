@@ -36,6 +36,8 @@
 #include "physical_input.hpp"
 #include "wrappers.hpp"
 
+namespace flexiblesusy {
+
 namespace {
 
 double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
@@ -78,8 +80,6 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 }
 
 } // anonymous namespace
-
-namespace flexiblesusy {
 
 using namespace @ModelName@_cxx_diagrams;
 using namespace @ModelName@_cxx_diagrams::fields;
