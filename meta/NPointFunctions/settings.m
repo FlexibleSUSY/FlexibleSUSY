@@ -52,13 +52,10 @@ With[{dir = DirectoryName@$InputFileName},
          End[];
          EndPackage[];);];
 
-settings::usage = "
-@brief Converts `diagrams[_, _]` and `amplitudes[_, _]` from
-       OBSERVABLE/settings.m files into operations, which remove diagrams
-       with requested properties.
-@returns A set of operations.";
-settings[settings:diagrams|amplitudes] :=
-Module[{doPresent, doAbsent, absent, todos},
+settings[tree:type`tree, settings:diagrams|amplitudes] :=
+(*       ^--^ This object is modified and returned.                          *)
+(*                       ^------^ Are defined in OBSERVABLE/settings.m file. *)
+Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
       settings[`options`loops[], #]&/@ {Plus, Minus};
    {doPresent, doAbsent} = tools`unzipRule/@ {doPresent, doAbsent};
@@ -68,8 +65,14 @@ Module[{doPresent, doAbsent, absent, todos},
    todos = DeleteDuplicates@Flatten[
       Join[`options`processes[] /. doPresent, absent /. doAbsent]
    ];
-   Select[todos, Head@# === Rule&]
+   todos = Select[todos, Head@# === Rule&];
+   Set[res, applySetting[res, #]]&/@ todos;
+   res
 ];
+
+applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
+(* --------^ For diagrams and amplitudes.                                    *)
+   info[cut[tree, tQ, fun], str];
 
 settings[order] :=
 If[Head@order[] === List,
@@ -103,12 +106,9 @@ Module[{res = {tree}, default, head},
 
 settings // tools`secure;
 
-(* --------v For 'diagrams' and 'amplitudes'.                                *)
-applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
-   info[cut[tree, tQ, fun], str];
 
-(* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
+(* -----^ This is a generator function for 'applySetting'.                   *)
 (  Off@RuleDelayed::rhs;
    applySetting[tree:type`tree, pattern] :=
       Module[{once},
@@ -137,22 +137,21 @@ makeApply[tQ_ -> {str_String, fun:{Hold, _}}, hold];
 hold[{Hold, e_}, ___] :=
    With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
 
-applySetting // tools`secure;
-
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];
-LoopFields // tools`secure;
 
 TreeFields[node[id_, ___], info__] :=
    FeynArts`TreeFields[First@id, info];
-TreeFields // tools`secure;
 
 FieldPattern[d:Head@type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
       type`generationIndex :> Blank[];
 FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
-FieldPattern // tools`secure;
 
+applySetting // tools`secure;
+LoopFields // tools`secure;
+TreeFields // tools`secure;
+FieldPattern // tools`secure;
 End[];
 EndPackage[];

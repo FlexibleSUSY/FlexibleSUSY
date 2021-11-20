@@ -129,37 +129,15 @@ wrap[data:{Rule[_, _]..}..] :=
 wrap // tools`secure;
 
 cut::usage = "
-@brief Removes nodes. Can be done *via*:
-
-       1. Settings. Use to apply the following settings:
-
-          ``diagrams``
-             Contains settings, specific for diagrams.
-          ``amplitudes``
-             Contains settings, specific for diagrams and amplitudes.
-       2. Topology
-       3. Generic or classes level data
-
-       Nodes are removed from the deepest to the highest level.
-@param tree A ``tree`` object.
-@param settings Data, which specifies replacements for topologies.
-@param tQ A function to select a *topology* ``node[id, __]`` if::
-
-          In[1]:= tQ[id]
-          Out[1]= True
-@param fun A function to remove *class* or *generic* node if::
-
-          In[1]:= fun[node, info]
-          Out[1]= True
-@param info A ``Sequence`` of topology and topology list.
-@param n A node to check.
-@returns Nodes, cleaned by ``fun``.";
-cut[tree:type`tree, kind:diagrams|amplitudes] :=
-Module[{res = tree},
-   Set[res, applySetting[res, #]]&/@ settings@kind;
-   res
-];
-
+@brief Removes nodes of a given tree from the deepest to the highest level.
+@param tQ A function to select a *topology* if:
+             In[1]:= tQ[id]
+             Out[1]= True
+@param fun A function to remove *class* or *generic* node if:
+             In[1]:= fun[node, info]
+             Out[1]= True
+@param info A Sequence of topology and topology list.
+@returns Nodes, cleaned by *fun*.";
 cut[tree:type`tree, tQ_, fun_] :=
    tree /.
       e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];

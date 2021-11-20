@@ -99,8 +99,8 @@ NPointFunction[
       SetDirectory@formcalc;
 
       settings[];
-      tree = cut[plant[in, out], diagrams];
-      tree = cut[plant@tree, amplitudes];
+      tree = settings[plant[in, out], diagrams];
+      tree = settings[plant@tree, amplitudes];
       picture@tree;
       {`rules`fields@fields@tree, calculateAmplitudes@tree}];
 NPointFunction // tools`secure;
