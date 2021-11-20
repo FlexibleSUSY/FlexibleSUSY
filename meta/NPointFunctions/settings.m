@@ -20,6 +20,9 @@
 
 *)
 
+Utils`DynamicInclude@"type.m";
+Utils`DynamicInclude@"mass.m";
+
 BeginPackage@"NPointFunctions`";
 Begin@"`Private`";
 
@@ -115,6 +118,7 @@ makeApply[pattern_, function:_Symbol] :=
          once[arg_] := once@arg =
             If[# =!= {}, Print@@#]&@
                Cases[pattern, _String, Infinity, Heads -> True];
+
          tree /. node[t:type`topology /; tQ@t, rest__] :>
             (once@_; node[t, rest] /. node[g:type`generic, __] :>
                function[fun, g, t, head@tree])];
@@ -128,14 +132,31 @@ makeApply[tQ_ -> {str_String, fun:{_Integer, _}}, restrict];
 restrict[{int_, fun_}, __, head_] :=
    {int -> Or[fun[_, _, head], -fun[_, _, head]]};
 
-makeApply[tQ_ -> {str_String, fun:{Append, _}}, append];
+(*                           v- Selects on which topology RHS is applied.    *)
+(*                                   v-- Will be printed during evaluation.  *)
+(*                                             v---------v Use in settings.m.*)
+applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Append, _}}] :=
+tree /. node[t:type`topology/; tQ@t, rest__] :> (
+   Print@str;
+   node[t, rest] /. node[g:type`generic, __] :>
+   append[fun, g, t, head@tree]
+);
+(*                             ^--^ For topology nodes, allowed by tQ.       *)
+(*                       ^------------^ For all generic nodes.               *)
+(* ^----^ Apply this function.                                               *)
+
+(* --v Acts on the list, returned by mass`rules[].                           *)
 append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
-   With[{rhs = (First /@ getZeroMassRules[])[[2*e-1]]},
-      Append[#, genericMass[f, n] :> rhs]&];
+With[{rhs = (First/@ Flatten@mass`rules[])[[2*e-1]]},
+   Append[#, genericMass[f, n] :> rhs]&
+];
+(* ^ Because rhs should be evaluated, but it is used with :>.                 *)
 
 makeApply[tQ_ -> {str_String, fun:{Hold, _}}, hold];
 hold[{Hold, e_}, ___] :=
    With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
+
+(* Functions below are supposed to be used in OBSERVABLE/settings.m          *)
 
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];

@@ -141,13 +141,17 @@ cut::usage = "
 cut[tree:type`tree, tQ_, fun_] :=
    tree /.
       e:node[t:type`topology /; tQ@t, __] :> cut[e, fun, t, head@tree];
+
 cut[n:node[type`topology, __], fun_, info__] :=
    n /. e:node[type`generic, __] :> cut[e, fun, info] /.
       node@type`topology :> Sequence[];
+
 cut[n:node[type`generic, __], fun_, info__] :=
    If[fun[#, info], # /. node@type`generic :> Sequence[], ##&[]]&[
       n /. e:node@type`classes :> cut[e, fun, info]];
+
 cut[n:node@type`classes, fun_, info__] := If[fun[n, info], n, ##&[]];
+
 cut // tools`secure;
 
 head[tree:type`tree] := tree[[1, 1]];

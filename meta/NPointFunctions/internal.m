@@ -43,7 +43,8 @@ On[General::shdw];
 Begin@"`Private`";
 
 Utils`DynamicInclude/@
-   {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m", "tree.m"};
+   {"tools.m", "type.m", "rules.m", "settings.m", "chains.m", "topologies.m",
+    "tree.m", "mass.m"};
 
 NPointFunction::usage = "
 @brief The entry point of the calculation.
@@ -119,12 +120,6 @@ process[set:type`diagramSet|type`amplitudeSet] :=
 process[set:type`fc`amplitudeSet] :=
    Part[Head@Part[set, 1], 1];
 process // tools`secure;
-
-externalMasses[set:type`fc`amplitudeSet] :=
-   Flatten[List@@process@set, 1][[All, 3]];
-externalMasses[tree:type`tree] :=
-   FeynArts`Mass[# /. -1 -> 1] &/@ fields[tree, Flatten];
-externalMasses // tools`secure;
 
 getField[set:type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
@@ -218,7 +213,7 @@ Module[{
    generic = MapThread[getGenericSum,
       {feynAmps, settings[tree, sum]}];
    {generic, chains, subs} = proceedChains[tree, generic];
-   setZeroMassRules@{tree, feynAmps};
+   mass`rules[tree, feynAmps];
    {generic, chains, subs} = makeMassesZero[
       {generic, chains, subs}, tree, `options`momenta[]];
    convertToFS[
@@ -230,31 +225,6 @@ Module[{
       subs] /. `rules`externalMomenta[tree, `options`momenta[]]];
 calculatedAmplitudes // tools`secure;
 
-setZeroMassRules::usage = "
-@brief For a given sets of ``FeynArts`` amd ``FormCalc`` amplitudes creates
-       rules to nullify masses of external particles.
-@param fa A set of ``FeynArts`` amplitudes.
-@param fc A set of ``FormCalc`` amplitudes.
-@returns Null.
-@note Both of sets are required, because, unfortunately, ``FormCalc``
-      introduces new abbreviations, which mix with ``FeynArts`` ones.
-@note Amplitudes are taken, because they do not have colour structures already.
-@note Explicit names for masses are expected only for external particles.
-@returns A list of rules to nullify masses of external particles.
-@note Rules of external particle ``#i`` are under numbers
-      ``2*#i`` and ``2*#i-1``.";
-Module[{rules},
-   setZeroMassRules[{tree:type`tree, fc:type`fc`amplitudeSet}] :=
-      rules = RuleDelayed[#, 0] &/@
-         Riffle[externalMasses@tree, externalMasses@fc];
-   setZeroMassRules // tools`secure;
-   getZeroMassRules[] := (
-      Utils`AssertOrQuit[Head@rules =!= Symbol, getZeroMassRules::errNotSet];
-      rules);];
-getZeroMassRules::errNotSet = "
-Call setZeroMassRules to set up rules first.";
-getZeroMassRules // tools`secure;
-
 makeMassesZero::usage = "
 @brief Sets the masses of external particles to zero everywhere, except loop
        integrals, applies subexpressions.
@@ -264,24 +234,28 @@ makeMassesZero::usage = "
 @param diagrams A set of diagrams.
 @returns A list with modified expression, chains and empty non-applied
          subexpressions.";
-makeMassesZero[
-   {generic_, chains_, subs_}, tree:type`tree, ExceptLoops] :=
+makeMassesZero[{generic_, chains_, subs_}, tree:type`tree, ExceptLoops] :=
 Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
-   funcs = settings[tree, massless];
-   names = ToExpression/@Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
    subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
    subWrite@"done\n";
-   pattern = Alternatives @@ ( #[__] &/@ names );
+   funcs = settings[tree, massless];
+
+   names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
+   pattern = Alternatives@@ ( #[__] &/@ names );
    uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
+
    rules = List@@MapIndexed[Composition[Sequence@@funcs[[#2[[1]]]]]@
-      getZeroMassRules[]&, new];
+      Flatten@mass`rules[]&, new];
+
    {  List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /.
          FormCalc`Pair[_,_] -> 0],
-      zeroMomenta@chains /. getZeroMassRules[],
-      {}}];
+      zeroMomenta@chains /. Flatten@mass`rules[],
+      {}}
+];
+
 makeMassesZero[{generic_, chains_, subs_}, _, True] :=
 Module[{zeroedRules, new},
    zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
@@ -364,5 +338,4 @@ convertToFS[amplitudes_, abbreviations_, subexpressions_] :=
 convertToFS // tools`secure;
 
 End[];
-EndPackage[];
-$ContextPath = DeleteCases[$ContextPath, "NPointFunctions`"];
+Block[{$ContextPath}, EndPackage[]];
