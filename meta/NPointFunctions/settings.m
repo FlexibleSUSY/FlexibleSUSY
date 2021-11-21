@@ -173,6 +173,9 @@ LoopFields[node[id_, ___], info__] :=
 TreeFields[node[id_, ___], info__] :=
    FeynArts`TreeFields[First@id, info];
 
+Field[d:Head@type`diagramSet, i_Integer] :=
+   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
+
 FieldPattern[d:Head@type`diagramSet, i_Integer] :=
    Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]] /.
       type`generationIndex :> Blank[];
@@ -187,6 +190,7 @@ ExternalMass[index:_Integer] := {index};
 
 LoopFields // tools`secure;
 TreeFields // tools`secure;
+Field // tools`secure;
 FieldPattern // tools`secure;
 InternalMass // tools`secure;
 ExternalMass // tools`secure;

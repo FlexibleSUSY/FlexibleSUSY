@@ -119,10 +119,6 @@ getField[set:type`diagramSet, i:_Integer] :=
    Flatten[List@@process@set, 1][[i]] /; 0<i<=Plus@@(Length/@process@set);
 getField // tools`secure;
 
-Field[d:Head@type`diagramSet, i_Integer] :=
-   Flatten[List@@(FeynArts`Process /. List@@d), 1][[i]];
-Field // tools`secure;
-
 fieldInsertions::usage = "
 @brief Finds insertions, related to fields.
 @param tree A ``tree`` object.
