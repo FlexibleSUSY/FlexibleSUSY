@@ -57,7 +57,7 @@ With[{dir = DirectoryName@$InputFileName},
 
 settings[tree:type`tree, settings:diagrams|amplitudes] :=
 (*       ^--^ This object is modified and returned.                          *)
-(*                       ^------^ Are defined in OBSERVABLE/settings.m file. *)
+(*                       ^------^ Are defined in [OBSERVABLE/settings.m].    *)
 Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
       settings[`options`loops[], #]&/@ {Plus, Minus};
@@ -101,17 +101,16 @@ Module[{res = {tree}, default, head},
    ];
    res = res /.
       node[type`generic, __] -> default /.
-      node[type`topology, rest__] :> rest /.
-      node[type`head, rest__] :> {rest};
+         node[type`topology, rest__] :> rest /.
+            node[type`head, rest__] :> {rest};
    DeleteDuplicates/@Transpose@res /.
       {default, rest__} :> head@{rest} /. {default} -> default
 ];
 
 settings // tools`secure;
 
-
+(* -----v This is a generator function for 'applySetting'.                   *)
 makeApply[pattern_, function:_Symbol] :=
-(* -----^ This is a generator function for 'applySetting'.                   *)
 (  Off@RuleDelayed::rhs;
    applySetting[tree:type`tree, pattern] :=
       Module[{once},
@@ -134,29 +133,39 @@ restrict[{int_, fun_}, __, head_] :=
 
 (*                           v- Selects on which topology RHS is applied.    *)
 (*                                   v-- Will be printed during evaluation.  *)
-(*                                             v---------v Use in settings.m.*)
 applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Append, _}}] :=
 tree /. node[t:type`topology/; tQ@t, rest__] :> (
    Print@str;
    node[t, rest] /. node[g:type`generic, __] :>
-   append[fun, g, t, head@tree]
+   append[fun]
 );
 (*                             ^--^ For topology nodes, allowed by tQ.       *)
 (*                       ^------------^ For all generic nodes.               *)
 (* ^----^ Apply this function.                                               *)
 
-(* --v Acts on the list, returned by mass`rules[].                           *)
-append[{Append, (f:type`field)[n_Integer] :> e_Integer}, ___] :=
-With[{rhs = (First/@ Flatten@mass`rules[])[[2*e-1]]},
-   Append[#, InternalMass[f, n] :> rhs]&
-];
-(* ^ Because rhs should be evaluated, but it is used with :>.                 *)
+(* --v Append the result to the list of all mass rules [mass.m].             *)
+(*                   v-----------v Head of expanded InternalMass.            *)
+append[{Append, mass_FeynArts`Mass :> ExternalMass[i_Integer]}, ___] :=
+With[{rhs = mass`rules[][[i, 1, 1]]}, Append[#, mass :> rhs]&];
+append // tools`secure;
 
-makeApply[tQ_ -> {str_String, fun:{Hold, _}}, hold];
-hold[{Hold, e_}, ___] :=
-   With[{pos = {{2*e}, {2*e-1}}}, Delete[#, pos]&];
+applySetting[tree:type`tree, tQ_ -> {str_String, fun:{Hold, _}}] :=
+tree /. node[t:type`topology/; tQ@t, rest__] :> (
+   Print@str;
+   node[t, rest] /. node[g:type`generic, __] :>
+   hold[fun]
+);
 
-(* Functions below are supposed to be used in OBSERVABLE/settings.m          *)
+(*          v---------v Number of ext. particle.                             *)
+(*          v---------v TODO(uukhas): replace.                               *)
+hold[{Hold, {i_Integer}}, ___] :=
+With[{pos = i}, ReplacePart[#, pos -> {}]&];
+(*              ^---------^ First positions are for ext. particles [mass.m]. *)
+hold // tools`secure;
+
+applySetting // tools`secure;
+
+(* Functions below are supposed to be used in [OBSERVABLE/settings.m].       *)
 
 LoopFields[node[id_, ___], info__] :=
    FeynArts`LoopFields[First@id, info];
@@ -171,12 +180,15 @@ FieldPattern[d:Head@type`diagramSet, a:HoldPattern@Alternatives@__] :=
    FieldPattern[d, #] &/@ a;
 
 InternalMass[f:type`field, index:_Integer] :=
-   FeynArts`Mass[f@type`genericIndex@index, type`mass];
+   FeynArts`Mass[f@genericIndex@index, type`mass];
 
-applySetting // tools`secure;
+ExternalMass[index:_Integer] := {index};
+(*                              ^-----^ TODO(uukhas): replace.               *)
+
 LoopFields // tools`secure;
 TreeFields // tools`secure;
 FieldPattern // tools`secure;
 InternalMass // tools`secure;
+ExternalMass // tools`secure;
 End[];
 EndPackage[];

@@ -71,9 +71,9 @@ momenta[1] = {
 };
 
 sum[1] = {
-   inSelfT -> {"in sed: skip initial lepton",
+   inSelfT -> {"in-sed: skip initial lepton",
       {6, Field[#3, 1]&}},
-   outSelfT -> {"out sed: skip final lepton",
+   outSelfT -> {"out-sed: skip final lepton",
       {6, Field[#3, 3]&}}
 };
 
@@ -82,8 +82,8 @@ chains[1] = {
 };
 
 massless[1] = {
-   inSelfT -> {"in sed: use explicit final lepton mass",
-      {Append, FeynArts`F[6] :> 3}},
-   inSelfT -> {"in sed: keep initial lepton mass untouched",
-      {Hold, 1}}
+   inSelfT -> {"in-sed: use explicit final lepton mass",
+      {Append, InternalMass[FeynArts`F, 6] :> ExternalMass[3]}},
+   inSelfT -> {"in-sed: keep initial lepton mass untouched",
+      {Hold, ExternalMass[1]}}
 };

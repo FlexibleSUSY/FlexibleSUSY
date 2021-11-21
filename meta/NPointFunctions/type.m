@@ -50,8 +50,6 @@ genericIndex = FeynArts`Index[Generic, _Integer];
 field = FeynArts`S|FeynArts`F|FeynArts`V|FeynArts`U;
 genericField = field@genericIndex;
 mass = Repeated[FeynArts`Loop|FeynArts`Internal, {0, 1}];
-genericMass =
-   FeynArts`Mass[field@genericIndex, mass];
 
 `fc`particle = field[_Integer, Repeated[{_Symbol}, {0, 1}]];
 `fc`mass = 0|_Symbol|_Symbol@_Symbol;

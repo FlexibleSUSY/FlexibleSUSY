@@ -26,12 +26,9 @@ Begin@"`Private`";
 (*          v-- Number of incoming particles.                                *)
 (*             v-- Number of outgoing particles.                             *)
 topologies[{2, 2}] = {
-(* v---v Use these names in the 'settings.m' files for observables.          *)
-(*           v-------------------v Use 'adjace' for a single topology.       *)
    treeS -> {1,0,1,0,0,1,0,1,0,1,0},
    treeT -> {1,0,0,1,1,0,0,1,0,1,0},
    treeU -> {1,0,0,1,0,1,1,0,0,1,0},
-(*             v---v Use symbols from lhs. for a combination of topologies.  *)
    treeAll -> {treeS, treeT, treeU},
    triangleT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,1,0,0,1,0,1,0},
    inSelfT -> {1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,2,0,1,0,0,1,0},
@@ -42,6 +39,9 @@ topologies[{2, 2}] = {
    boxU -> {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0},
    boxAll -> {boxS, boxT, boxU}
 };
+(* ^----^ Use these names in the 'settings.m' files for observables.         *)
+(*          ^---------------------^ Use 'adjace' for a single topology.      *)
+(*            ^--^ Use symbols from lhs. for a combination of topologies.    *)
 
 adjace::usage = "
 @brief Archivates the adjacency matrix of a given topology. Example:

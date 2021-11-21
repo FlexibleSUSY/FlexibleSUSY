@@ -25,18 +25,9 @@ Utils`DynamicInclude@"type.m";
 BeginPackage@"mass`";
 
 rules::usage = "
-@brief For a given sets of ``FeynArts`` amd ``FormCalc`` amplitudes creates
-       rules to nullify masses of external particles.
-@param fa A set of ``FeynArts`` amplitudes.
-@param fc A set of ``FormCalc`` amplitudes.
-@returns Null.
-@note Both of sets are required, because, unfortunately, ``FormCalc``
-      introduces new abbreviations, which mix with ``FeynArts`` ones.
+@brief Sets or gets a set of rules to nullify masses of external particles.
 @note Amplitudes are taken, because they do not have colour structures already.
-@note Explicit names for masses are expected only for external particles.
-@returns A list of rules to nullify masses of external particles.
-@note Rules of external particle ``#i`` are under numbers
-      ``2*#i`` and ``2*#i-1``.";
+@returns A list of list of rules to nullify masses of external particles.";
 
 Begin@"`Private`";
 
@@ -48,7 +39,7 @@ externalMasses[tree:type`tree] :=
 (*                                ^----------------------------^ TODO(uukhas)*)
 externalMasses // tools`secure;
 
-(*       v----------------v FormCalc creates new masses - we also need them. *)
+(*       v--v            v- FormCalc creates new masses - we also need them. *)
 Module[{data},
    rules[tree:type`tree, fc:type`fc`amplitudeSet] :=
    data = Partition[

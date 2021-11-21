@@ -229,11 +229,10 @@ makeMassesZero::usage = "
 @returns A list with modified expression, chains and empty non-applied
          subexpressions.";
 makeMassesZero[{generic_, chains_, subs_}, tree:type`tree, ExceptLoops] :=
-Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
+Module[{names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
    subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
    subWrite@"done\n";
-   funcs = settings[tree, massless];
 
    names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
    pattern = Alternatives@@ ( #[__] &/@ names );
@@ -241,13 +240,16 @@ Module[{funcs, names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
-   rules = List@@MapIndexed[Composition[Sequence@@funcs[[#2[[1]]]]]@
-      Flatten@mass`rules[]&, new];
+   rules = Through[(Composition@@ #&/@ settings[tree, massless])@mass`rules[]];
 
-   {  List@@MapIndexed[#1 //. rules[[#2[[1]]]] /. showInt&, new /. hideInt /.
-         FormCalc`Pair[_,_] -> 0],
+   {
+      List@@MapThread[
+         (#1//. Flatten@#2/. showInt)&,
+         {new/. hideInt/. FormCalc`Pair[_, _]-> 0, rules}
+      ],
       zeroMomenta@chains /. Flatten@mass`rules[],
-      {}}
+      {}
+   }
 ];
 
 makeMassesZero[{generic_, chains_, subs_}, _, True] :=
