@@ -55,9 +55,9 @@ With[{dir = DirectoryName@$InputFileName},
          End[];
          EndPackage[];);];
 
+(*       v--v This object is modified and returned.                          *)
+(*                       v------v Are defined in [OBSERVABLE/settings.m].    *)
 settings[tree:type`tree, settings:diagrams|amplitudes] :=
-(*       ^--^ This object is modified and returned.                          *)
-(*                       ^------^ Are defined in [OBSERVABLE/settings.m].    *)
 Module[{doPresent, doAbsent, absent, todos, res = tree},
    {doPresent, doAbsent} = If[Head@# === List, #, {}]&@
       settings[`options`loops[], #]&/@ {Plus, Minus};
@@ -73,8 +73,8 @@ Module[{doPresent, doAbsent, absent, todos, res = tree},
    res
 ];
 
+(* --------v For diagrams and amplitudes.                                    *)
 applySetting[tree:type`tree, tQ_ -> {str_String, fun_}] :=
-(* --------^ For diagrams and amplitudes.                                    *)
    info[cut[tree, tQ, fun], str];
 
 settings[order] :=

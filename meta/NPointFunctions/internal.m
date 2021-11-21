@@ -208,8 +208,10 @@ Module[{
       {feynAmps, settings[tree, sum]}];
    {generic, chains, subs} = proceedChains[tree, generic];
    mass`rules[tree, feynAmps];
-   {generic, chains, subs} = makeMassesZero[
-      {generic, chains, subs}, tree, `options`momenta[]];
+   {generic, chains, subs} = mass`modify[{generic, chains, subs},
+      tree,
+      `options`momenta[]
+   ];
    convertToFS[
       {  generic,
          fieldInsertions@tree,
@@ -218,49 +220,6 @@ Module[{
       chains,
       subs] /. `rules`externalMomenta[tree, `options`momenta[]]];
 calculatedAmplitudes // tools`secure;
-
-makeMassesZero::usage = "
-@brief Sets the masses of external particles to zero everywhere, except loop
-       integrals, applies subexpressions.
-@param generic An expression to modify.
-@param chains A lis with fermionic chains.
-@param subs A list of subexpressions.
-@param diagrams A set of diagrams.
-@returns A list with modified expression, chains and empty non-applied
-         subexpressions.";
-makeMassesZero[{generic_, chains_, subs_}, tree:type`tree, ExceptLoops] :=
-Module[{names, pattern, uniqueIntegrals, hideInt, showInt, rules, new},
-   subWrite@"Applying subexpressions ... ";
-   new = generic //. subs;
-   subWrite@"done\n";
-
-   names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
-   pattern = Alternatives@@ ( #[__] &/@ names );
-   uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
-   hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
-   showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
-
-   rules = Through[(Composition@@ #&/@ settings[tree, massless])@mass`rules[]];
-
-   {
-      List@@MapThread[
-         (#1//. Flatten@#2/. showInt)&,
-         {new/. hideInt/. FormCalc`Pair[_, _]-> 0, rules}
-      ],
-      zeroMomenta@chains /. Flatten@mass`rules[],
-      {}
-   }
-];
-
-makeMassesZero[{generic_, chains_, subs_}, _, True] :=
-Module[{zeroedRules, new},
-   zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
-   {new, zeroedRules} = ZeroRules[subs, zeroedRules];
-   {  generic /. zeroedRules,
-      zeroMomenta@chains,
-      new}];
-makeMassesZero[e:{_, _, _}, __] := e;
-makeMassesZero // tools`secure;
 
 mapThread::usage = "
 @brief Behaves like ``MapThread``, but also prints a progress bar.
@@ -273,11 +232,11 @@ mapThread[func_, exprs:{__}, text_String] :=
       tot = Length@First@exprs;
       print[i_] :=
       (  delta = Floor[(def-StringLength[text]-4)*i/tot] - printed;
-         subWrite[StringJoin@@Array["."&, delta]];
+         tools`subWrite[StringJoin@@Array["."&, delta]];
          printed += delta;);
-      subWrite[text<>": ["];
+      tools`subWrite[text<>": ["];
       out = Table[print@i; func@@exprs[[All, i]], {i, tot}];
-      subWrite@"]\n";
+      tools`subWrite@"]\n";
       out];
 mapThread // tools`secure;
 
@@ -303,23 +262,6 @@ Module[{sort, rules},
       List@@amplitude,
       sort /. f_[_[_,i_]] :> {f@GenericIndex@i, i /. rules}]];
 getGenericSum // tools`secure;
-
-ZeroRules::usage = "
-@brief Given a set of rules that map to zero and a set that does
-       not map to zero, apply the zero rules to the non-zero ones
-       recursively until the non-zero rules do not change anymore.
-@param nonzeroRules The list of nonzero rules.
-@param zeroRules The list of zero rules.
-@returns a list of rules that map the same expressions as the initial rules.";
-ZeroRules[nonzeroRules:{Rule[_,_]...}, zeroRules:{Rule[_,0]...}] :=
-Module[{newNonzero, newZeroRules},
-   newNonzero = Thread[
-      Rule[nonzeroRules[[All,1]],nonzeroRules[[All,2]] /. zeroRules]];
-   If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
-   newZeroRules = Cases[newNonzero,HoldPattern[_->0]];
-   newNonzero = Complement[newNonzero, newZeroRules];
-   ZeroRules[newNonzero, Join[zeroRules,newZeroRules]]];
-ZeroRules // tools`secure;
 
 convertToFS::usage = "
 @brief Translate a list of ``FormCalc`` amplitudes, abbreviations and

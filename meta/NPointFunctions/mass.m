@@ -20,6 +20,7 @@
 
 *)
 
+Utils`DynamicInclude@"tools.m";
 Utils`DynamicInclude@"type.m";
 
 BeginPackage@"mass`";
@@ -29,14 +30,18 @@ rules::usage = "
 @note Amplitudes are taken, because they do not have colour structures already.
 @returns A list of list of rules to nullify masses of external particles.";
 
+modify::usage = "
+@brief Sets the masses of external particles to zero according to
+       `options`momenta[].";
+
 Begin@"`Private`";
 
 externalMasses[set:type`fc`amplitudeSet] :=
    Flatten[List@@NPointFunctions`Private`process@set, 1][[All, 3]];
-(*               ^-----------------------------^ TODO(uukhas)                *)
+
 externalMasses[tree:type`tree] :=
    FeynArts`Mass[# /. -1 -> 1]&/@ NPointFunctions`Private`fields[tree, Flatten];
-(*                                ^----------------------------^ TODO(uukhas)*)
+
 externalMasses // tools`secure;
 
 (*       v--v            v- FormCalc creates new masses - we also need them. *)
@@ -51,9 +56,48 @@ Module[{data},
       Utils`AssertOrQuit[Head@data =!= Symbol, rules::errNotSet];
       data);
 ];
+rules // tools`secure;
 rules::errNotSet = "Call mass`rules[...] first.";
 
-rules // tools`secure;
+modify[{generic_, chains_, subs_}, tree:type`tree, NPointFunctions`ExceptLoops] :=
+Module[{names, pattern, uniqueIntegrals, hideInt, showInt, massRules, new},
+   tools`subWrite@"Applying subexpressions ... ";
+   new = generic //. subs;
+   tools`subWrite@"done\n";
+
+   names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
+   pattern = Alternatives@@ ( #[__] &/@ names );
+   uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
+   hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
+   showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
+
+   massRules = Through[(Composition@@ #&/@
+      NPointFunctions`Private`settings[tree, NPointFunctions`Private`massless])@rules[]];
+
+   {
+      MapThread[
+         (#1//. Flatten@#2/. showInt)&,
+         {new/. hideInt/. FormCalc`Pair[_, _]-> 0, massRules}
+      ],
+      NPointFunctions`Private`zeroMomenta@chains /. Flatten@rules[],
+      {}
+   }
+];
+
+modify[{generic_, chains_, subs_}, _, True] :=
+Module[{zeroedRules, new},
+   zeroedRules = Cases[subs, Rule[_, pair:FormCalc`Pair[_, _]] :> (pair->0)];
+   {new, zeroedRules} = tools`zeroRules[subs, zeroedRules];
+   {
+      generic /. zeroedRules,
+      NPointFunctions`Private`zeroMomenta@chains,
+      new
+   }
+];
+
+modify[e:{_, _, _}, __] := e;
+
+modify // tools`secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];

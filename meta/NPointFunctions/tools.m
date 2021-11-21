@@ -36,7 +36,17 @@ secure::usage = "
        In[1]:= a[1] := b;
                a // tools`secure;";
 
+zeroRules::usage = "
+@brief Given a set of rules that map to zero and a set that does
+       not map to zero, apply the zero-rules to the non-zero ones
+       recursively until the non-zero rules do not change anymore.";
+
+subWrite::usage = "";
+
 Begin@"`Private`";
+
+subWrite = NPointFunctions`Private`subWrite;
+subWrite // Protect;
 
 secure[sym_Symbol] :=
    Protect@Evaluate@Utils`MakeUnknownInputDefinition@sym;
@@ -45,6 +55,17 @@ secure // secure;
 unzipRule[rules:{Rule[_|{__}, _]...}] :=
    rules /. Rule[lhs:{__}, rhs_] :> Sequence@@ (Rule[#, rhs]&/@ lhs);
 unzipRule // secure;
+
+zeroRules[nonzeroRules:{Rule[_, _]...}, zeroRules:{Rule[_, 0]...}] :=
+Module[{newNonzero, newZeroRules},
+   newNonzero = Thread[
+      Rule[nonzeroRules[[All,1]], nonzeroRules[[All,2]]/. zeroRules]];
+   If[newNonzero === nonzeroRules, Return[{nonzeroRules, zeroRules}]];
+   newZeroRules = Cases[newNonzero, HoldPattern[_-> 0]];
+   newNonzero = Complement[newNonzero, newZeroRules];
+   zeroRules[newNonzero, Join[zeroRules, newZeroRules]]
+];
+zeroRules // tools`secure;
 
 End[];
 Block[{$ContextPath}, EndPackage[]];
