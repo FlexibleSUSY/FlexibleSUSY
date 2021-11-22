@@ -81,7 +81,7 @@ chains[1] = {
    {ExceptLoops, OperatorsOnly} -> {1[k[4], ___] -> 0, 2[k[1], ___] -> 0}
 };
 
-massless[1] = {
+mass[1] = {
    inSelfT -> {"in-sed: use explicit final lepton mass",
       {Append, InternalMass[FeynArts`F, 6] :> ExternalMass[3]}},
    inSelfT -> {"in-sed: keep initial lepton mass untouched",

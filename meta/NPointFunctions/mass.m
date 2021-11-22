@@ -72,7 +72,7 @@ Module[{names, pattern, uniqueIntegrals, hideInt, showInt, massRules, new},
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
    massRules = Through[(Composition@@ #&/@
-      NPointFunctions`Private`settings[tree, NPointFunctions`Private`massless])@rules[]];
+      NPointFunctions`Private`settings[tree, NPointFunctions`Private`mass])@rules[]];
 
    {
       MapThread[

@@ -40,7 +40,7 @@ settings::usage = "
           Eliminate specific momenta in some topologies.
        sum[LOOPLEVEL]
           Skip summation over some indices of particles.
-       massless[LOOPLEVEL]
+       mass[LOOPLEVEL]
           Do not put some masses to zero.
        order[]
           Overrides default fermion order.";
@@ -83,7 +83,7 @@ If[Head@order[] === List,
    Reverse@Range@Tr@`options`observable@Outer
 ];
 
-settings[tree:type`tree, settings:regularization|momenta|sum|massless] :=
+settings[tree:type`tree, settings:regularization|momenta|sum|mass] :=
 Module[{res = {tree}, default, head},
    If[Head@settings@`options`loops[] === List,
       AppendTo[res, applySetting[tree, #]]&/@
@@ -93,11 +93,11 @@ Module[{res = {tree}, default, head},
       regularization, `options`scheme[],
       momenta, Automatic,
       sum, {},
-      massless, {}
+      mass, {}
    ];
    head = Switch[settings,
       regularization|momenta|sum, First,
-      massless, Identity
+      mass, Identity
    ];
    res = res /.
       node[type`generic, __] -> default /.
