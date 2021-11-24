@@ -88,7 +88,8 @@ Module[{i = 0, rules, sp, L, reveal},
       chainRules = reveal@settings@order;
       rules = `options`momenta[] /. tools`unzipRule@chains@`options`loops[] /. chainRules;
    ];
-   Expand@expression //. rules];
+   Expand@expression //. rules
+];
 modifyChains // tools`secure;
 
 simplifyChains::usage = "
@@ -125,9 +126,7 @@ getChainRules::usage = "
 @brief Finds a subset of rules inside a ``List``, which represents Dirac
        chains.
 @note It is possible, because the naming convention for this abbreviation
-      is fixed and it is given by encoded regular expression.
-@param rules A list of rules.
-@returns A list of rules.";
+      is fixed and it is given by encoded regular expression.";
 getChainRules[rules:{Rule[_Symbol, _]...}] :=
    Module[{regex},
       regex = RegularExpression@"[F][1-9][\\d]*";
@@ -174,7 +173,8 @@ Module[{id, idf, ch = DiracChain, s = FormCalc`Spinor, k = FormCalc`k},
    id = `rules`fields@MapIndexed[#2[[1]]->#1&, fields[tree, Flatten]];
    idf[ch[s[k[i1_], m1_, _], e___, s[k[i2_], m2_, _]]] :=
       ch[s[i1 /. id, k[i1], m1], e, s[i2 /. id, k[i2], m2]];
-   rules /. ch:DiracChain[__] :> idf@ch];
+   rules /. ch:DiracChain[__] :> idf@ch
+];
 identifySpinors // tools`secure;
 
 zeroMomenta::usage = "

@@ -182,13 +182,14 @@ calculateAmplitudes::usage = "
          * class specific insertions,
          * subexpressions.";
 calculateAmplitudes[tree:type`tree] :=
-Module[{
-      proc = process@amplitudes@tree,
-      ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree],
-      feynAmps, generic, chains, subs, zeroedRules},
+Module[{proc, ampsGen, feynAmps, generic, chains, subs, zeroedRules},
+   proc = process@amplitudes@tree;
+   ampsGen = FeynArts`PickLevel[Generic][amplitudes@tree];
    If[`options`momenta[],
       ampsGen = FormCalc`OffShell[ampsGen,
-         Sequence@@Array[#->0&, Plus@@Length/@proc]]];
+         Sequence@@Array[#->0&, Plus@@Length/@proc]
+      ]
+   ];
    feynAmps = mapThread[
       FormCalc`CalcFeynAmp[Head[ampsGen][#1],
          FormCalc`Dimension -> #2,
@@ -200,14 +201,18 @@ Module[{
       {ampsGen, settings[tree, regularization], settings[tree, momenta]},
       "Amplitude calculation"
    ] //. FormCalc`GenericList[];
-   generic = MapThread[getGenericSum,
-      {feynAmps, settings[tree, sum]}];
+
+(* v-------v TODO(uukhas): make a normalê generic call.                      *)
+   generic = MapThread[getGenericSum, {feynAmps, settings[tree, sum]}];
+
    {generic, chains, subs} = proceedChains[tree, generic];
+
    mass`rules[tree, feynAmps];
    {generic, chains, subs} = mass`modify[{generic, chains, subs},
       tree,
       `options`momenta[]
    ];
+
    convertToFS[
       {  generic,
          fieldInsertions@tree,

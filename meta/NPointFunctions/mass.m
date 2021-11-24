@@ -44,7 +44,7 @@ externalMasses[tree:type`tree] :=
 
 externalMasses // tools`secure;
 
-(*       v--v            v- FormCalc creates new masses - we also need them. *)
+(*                       v- FormCalc creates new masses - we also need them. *)
 Module[{data},
    rules[tree:type`tree, fc:type`fc`amplitudeSet] :=
    data = Partition[
@@ -60,14 +60,14 @@ rules // tools`secure;
 rules::errNotSet = "Call mass`rules[...] first.";
 
 modify[{generic_, chains_, subs_}, tree:type`tree, NPointFunctions`ExceptLoops] :=
-Module[{names, pattern, uniqueIntegrals, hideInt, showInt, massRules, new},
+Module[{names, loops, uniqueIntegrals, hideInt, showInt, massRules, new},
    tools`subWrite@"Applying subexpressions ... ";
    new = generic //. subs;
    tools`subWrite@"done\n";
 
    names = ToExpression/@ Names@RegularExpression@"LoopTools`[ABCD]\\d+i*";
-   pattern = Alternatives@@ ( #[__] &/@ names );
-   uniqueIntegrals = DeleteDuplicates@Cases[new, pattern, Infinity];
+   loops = Alternatives@@ ( #[__] &/@ names );
+   uniqueIntegrals = DeleteDuplicates@Cases[new, loops, Infinity];
    hideInt = Rule[#, Unique@"loopIntegral"] &/@ uniqueIntegrals;
    showInt = hideInt /. Rule[x_, y_] -> Rule[y, x];
 
