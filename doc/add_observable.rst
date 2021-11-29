@@ -121,30 +121,23 @@ Open file ``templates/observables.cpp.in``
 
 1) Add include preprocessor command for header of your observable::
 
-     #include "@ModelName@_<observable_namespace>.hpp"
+      #include "npointfunctions/@ModelName@_<observable_namespace>.hpp"
 
-2) Create files ``template/<observable_namespace>.{hpp.in,cpp.in}``, where actual C++
-   calculations are done. The only requirement is that function
+2) Create files ``template/npointfunctions/<observable_namespace>.{hpp.in,cpp.in}``.
+   There some calculations relevant for the new observable should be done.
+   The only requirement is that function
    ``flexiblessusy::<observable_namespace>::<calculate_function>(<args>)`` exists.
 
 Automatization part
 ```````````````````
-Open file ``templates/module.mk`` and add::
 
-   $(DIR)/<observable_namespace>.hpp.in \
-   $(DIR)/<observable_namespace>.cpp.in \
+Created templates will be automatically copied to the corresponding ``model`` directory.
+So that there is no more need to modify::
 
-to a ``BASE_TEMPLATES`` variable.
+   templates/module.mk
+   templates/module.mk.in
 
-Open file ``templates/module.mk.in`` and add::
-
-   $(DIR)/@CLASSNAME@_<new_observable>.cpp \
-
-to a ``LIB@CLASSNAME@_SRC`` variable. Also add::
-
-   $(DIR)/@CLASSNAME@_<new_observable>.hpp \
-
-to a ``LIB@CLASSNAME@_HDR`` variable.
+files.
 
 Documentation part
 ``````````````````
