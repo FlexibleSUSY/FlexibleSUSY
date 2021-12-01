@@ -35,7 +35,7 @@
 
 #include "lowe.h"
 #include "wrappers.hpp"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 
 
 #define MODELPARAMETER(p) context.model.get_##p()

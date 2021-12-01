@@ -109,7 +109,7 @@ create_model_specific_modules_list() {
 }
 
 create_module_list() {
-    echo "config src fflite slhaea doc $models $addons $model_specific_modules $optional_modules"
+    echo "config src fflite slhaea doc nlohmann $models $addons $model_specific_modules $optional_modules"
 }
 
 create_include_directives_for_FS_modules() {
