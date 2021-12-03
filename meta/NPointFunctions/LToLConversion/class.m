@@ -20,13 +20,11 @@
 *)
 
 Utils`DynamicInclude@"type.m";
+Utils`DynamicInclude@"main.m";
 
 Begin@"FlexibleSUSY`Private`";
 
-With[{main = FileNameJoin@{DirectoryName@$Input, "main.m"}},
-WriteLToLConversionClass[
-   extraSLHAOutputBlocks:_List,
-   files:{{_?FileExistsQ,_String}..}] :=
+WriteLToLConversionClass[extraSLHAOutputBlocks:_List, files:{{_?FileExistsQ,_String}..}] :=
 Module[
    {
       observables = DeleteDuplicates@Cases[
@@ -54,12 +52,13 @@ Module[
    If[Or[observables === {},
          Not@FlexibleSUSY`FSFeynArtsAvailable,
          Not@FlexibleSUSY`FSFormCalcAvailable],
-      newRules = newRules /. Rule[x_, _]:> Rule[x, ""];];
+      newRules = newRules /. Rule[x_, _]:> Rule[x, ""];
+   ];
+
    If[And[observables =!= {},
          FlexibleSUSY`FSFeynArtsAvailable,
          FlexibleSUSY`FSFormCalcAvailable],
       Print["Creating LToLConversion class ..."];
-      Get@main;
       fields = DeleteDuplicates[Head/@#&/@observables[[All,1]]/.Rule->List];
 
       (* additional vertices needed for the 1 loop calculation *)
@@ -95,7 +94,6 @@ Module[
       DeleteDuplicates@Join[vertices, additionalVertices],
       newRules
    }
-];
 ];
 WriteLToLConversionClass // Utils`MakeUnknownInputDefinition;
 WriteLToLConversionClass // Protect;
