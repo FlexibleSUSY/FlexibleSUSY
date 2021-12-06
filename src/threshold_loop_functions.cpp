@@ -22,6 +22,7 @@
 #include "logger.hpp"
 #include "numerics.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -90,6 +91,13 @@ namespace {
       }
 
       return x * std::log(x);
+   }
+
+   void sort(double& x, double& y, double& z) noexcept
+   {
+      if (x > y) { std::swap(x, y); }
+      if (y > z) { std::swap(y, z); }
+      if (x > y) { std::swap(x, y); }
    }
 
 } // anonymous namespace
@@ -1830,107 +1838,99 @@ double D2F7(double x) noexcept
 
 namespace {
 
-/// I2abc(a,a,a), squared arguments, a != 0
-double I2aaa(double a, double b, double c) noexcept {
-   const double ba = b - a;
-   const double ca = c - a;
-   const double a2 = sqr(a);
-   const double a3 = a2*a;
+/// Ixy(0,y), squared arguments, y != 0
+double I0y(double y) noexcept {
+   if (is_close(y, 1, 10*std::numeric_limits<double>::epsilon())) {
+      const double d = y - 1;
+      return 1 + d*(-0.5 + d/3);
+   }
 
-   return 0.5/a + (-ba - ca)/(6.0*a2) + (sqr(ba) + ba*ca + sqr(ca))/(12.0*a3);
+   return std::log(y)/(y - 1);
 }
 
-/// I2abc(a,a,c), squared arguments, a != c
-double I2aac(double a, double b, double c) noexcept {
-   const double ba = b - a;
-   const double ac = a - c;
-   const double a2 = sqr(a);
-   const double a3 = a2*a;
-   const double c2 = sqr(c);
-   const double c3 = c2*c;
-   const double ac2 = sqr(ac);
-   const double ac3 = ac2*ac;
-   const double ac4 = ac2*ac2;
-   const double lac = std::log(a/c);
+/// I(x,y), squared arguments, x == 1, y != 0
+double I1y(double x, double y) noexcept {
+   const double dy = y - 1;
+   const double dy2 = sqr(dy);
+   const double dx = (x - 1)/dy2;
+   const double y2 = sqr(y);
+   const double yly = y*std::log(y);
 
-   return (ac - c*lac)/ac2
-      + ba*(-a2 + c2 + 2*a*c*lac)/(2.0*a*ac3)
-      + sqr(ba)*((2*a3 + 3*a2*c - 6*a*c2 + c3 - 6*a2*c*lac)/(6.*a2*ac4));
+   return (1 - y + yly)/dy2
+      + dx*(0.5 - y2/2 + yly)/dy
+      + sqr(dx)*(1./3 + y/2 + yly + y2*(y/6 - 1));
 }
 
-/// I2abc(a,a,0), squared arguments, a != 0
-double I2aa0(double a, double b) noexcept {
-   const double a2 = sqr(a);
-   const double a3 = a2*a;
-   const double ba = b - a;
-   const double ba2 = sqr(ba);
+/// I(x,y), squared arguments, x == y, x != 0, y != 0
+double Ixx(double x, double y) noexcept {
+   const double eps_eq = 0.001;
 
-   return 1.0/a - ba/(2.0*a2) + ba2/(3.0*a3);
+   if (is_close(y, 1, eps_eq)) {
+      const double dx = x - 1;
+      const double dy = y - 1;
+      const double dy2 = sqr(dy);
+
+      return 0.5 + dx*(-1./6 + dy/12 - dy2/20)
+         + sqr(dx)*(1./12 - dy/20 + dy2/30)
+         - dy/6 + dy2/12;
+   }
+
+   const double y2 = sqr(y);
+   const double dy = y - 1;
+   const double dy2 = sqr(dy);
+   const double dxy = (x - y)/dy2;
+   const double ly = std::log(y);
+
+   return (dy - ly)/dy2
+      + dxy*(0.5 - y2/2 + y*ly)/(dy*y)
+      + sqr(dxy)*(1./6 - y + y2*(0.5 + y/3 - ly))/y2;
 }
 
-/// I2abc(0,b,c), squared arguments, b != c
-double I20bc(double b, double c) noexcept {
-   return std::log(b/c)/(b - c);
+/// I(x,y), x < y, x and y are squared arguments
+double Ixy(double x, double y) noexcept {
+   const double eps_eq = 0.001;
+
+   if (is_zero(y, 10*std::numeric_limits<double>::epsilon())) {
+      return 0;
+   }
+
+   if (is_zero(x, 10*std::numeric_limits<double>::epsilon())) {
+      return I0y(y);
+   }
+
+   if (is_close(x/y, 1, eps_eq)) {
+      return Ixx(x, y);
+   }
+
+   if (is_close(x, 1, eps_eq)) {
+      return I1y(x, y);
+   }
+
+   if (is_close(y, 1, eps_eq)) {
+      return I1y(y, x);
+   }
+
+   const double lx = std::log(x);
+   const double ly = std::log(y);
+
+   return (x*(y - 1)*lx - y*(x - 1)*ly)/((x - 1)*(x - y)*(y - 1));
+}
+
+/// I(x,y,z), x, y and z are squared arguments
+double Ixyz(double x, double y, double z) noexcept {
+   sort(x, y, z);
+
+   if (is_zero(z, 10*std::numeric_limits<double>::epsilon())) {
+      return 0;
+   }
+
+   return Ixy(x/z, y/z)/z;
 }
 
 } // anonymous namespace
 
 double Iabc(double a, double b, double c) noexcept {
-   const double eps = 10.0*std::numeric_limits<double>::epsilon();
-
-   if ((is_zero(a, eps) && is_zero(b, eps) && is_zero(c, eps)) ||
-       (is_zero(a, eps) && is_zero(b, eps)) ||
-       (is_zero(a, eps) && is_zero(c, eps)) ||
-       (is_zero(b, eps) && is_zero(c, eps))) {
-      return 0.0;
-   }
-
-   const double a2 = sqr(a);
-   const double b2 = sqr(b);
-   const double c2 = sqr(c);
-   const double eps_eq = 0.001;
-
-   if (is_close(a2, b2, eps_eq) && is_close(a2, c2, eps_eq)) {
-      return I2aaa(a2, b2, c2);
-   }
-
-   if (is_close(a2, b2, eps_eq)) {
-      if (is_zero(c, eps)) {
-         return I2aa0(a2, b2);
-      }
-      return I2aac(a2, b2, c2);
-   }
-
-   if (is_close(b2, c2, eps_eq)) {
-      if (is_zero(a, eps)) {
-         return I2aa0(b2, c2);
-      }
-      return I2aac(b2, c2, a2);
-   }
-
-   if (is_close(a2, c2, eps_eq)) {
-      if (is_zero(b, eps)) {
-         return I2aa0(a2, c2);
-      }
-      return I2aac(a2, c2, b2);
-   }
-
-   if (is_zero(a, eps)) {
-      return I20bc(b2, c2);
-   }
-
-   if (is_zero(b, eps)) {
-      return I20bc(c2, a2);
-   }
-
-   if (is_zero(c, eps)) {
-      return I20bc(a2, b2);
-   }
-
-   return (+ a2 * b2 * std::log(a2/b2)
-           + b2 * c2 * std::log(b2/c2)
-           + c2 * a2 * std::log(c2/a2))
-           / ((a2 - b2) * (b2 - c2) * (a2 - c2));
+   return Ixyz(sqr(a), sqr(b), sqr(c));
 }
 
 /// Delta function from hep-ph/0907.47682v1
