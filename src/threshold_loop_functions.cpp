@@ -30,14 +30,15 @@ namespace flexiblesusy {
 namespace threshold_loop_functions {
 
 namespace {
-   template <typename T> T sqr(T x) noexcept { return x*x; }
-   template <typename T> T cube(T x) noexcept { return x*x*x; }
-   template <typename T> T quad(T x) noexcept { return x*x*x*x; }
-   template <typename T> T pow5(T x) noexcept { return x*x*x*x*x; }
-   template <typename T> T pow6(T x) noexcept { return x*x*x*x*x*x; }
-   template <typename T> T pow7(T x) noexcept { return x*x*x*x*x*x*x; }
-   template <typename T> T pow8(T x) noexcept { return x*x*x*x*x*x*x*x; }
-   template <typename T> T pow9(T x) noexcept { return x*x*x*x*x*x*x*x*x; }
+   template <typename T> constexpr T sqr(T x) noexcept { return x*x; }
+   template <typename T> constexpr T cube(T x) noexcept { return x*x*x; }
+   template <typename T> constexpr T quad(T x) noexcept { return sqr(sqr(x)); }
+   template <typename T> constexpr T pow5(T x) noexcept { return x*quad(x); }
+   template <typename T> constexpr T pow6(T x) noexcept { return sqr(cube(x)); }
+   template <typename T> constexpr T pow7(T x) noexcept { return x*pow6(x); }
+   template <typename T> constexpr T pow8(T x) noexcept { return sqr(quad(x)); }
+   template <typename T> constexpr T pow9(T x) noexcept { return x*pow8(x); }
+
 
    template <typename T>
    bool is_zero(T a, T prec) noexcept
