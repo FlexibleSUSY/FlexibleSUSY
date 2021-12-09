@@ -8,6 +8,7 @@ TB=5
 Xt=0
 Xb=0
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block
@@ -103,8 +104,10 @@ run_sg() {
     local SG="$1"
     local slha_input="$2"
     local output="$3"
-    local output_block=$(echo "${output}" | cut -d'-' -f1)
-    local output_entry=$(echo "${output}" | cut -d'-' -f2)
+    local output_block
+    output_block=$(echo "${output}" | cut -d'-' -f1)
+    local output_entry
+    output_entry=$(echo "${output}" | cut -d'-' -f2)
     local slha_output=
     local block=
     local value=
@@ -122,9 +125,10 @@ run_sg() {
 
 run_MSSMEFTHiggs() {
     local SG="$1"
-    local MS2=$(echo "scale=5; ${MS}^2" | bc)
-    local At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
-    local Ab=$(echo "scale=10; (${TB} + ${Xb}) * ${MS}" | bc)
+    local MS2 At Ab
+    MS2=$(echo "scale=5; ${MS}^2" | bc)
+    At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
+    Ab=$(echo "scale=10; (${TB} + ${Xb}) * ${MS}" | bc)
     local slha_input="\
 ${slha_tmpl}
 Block EXTPAR                 # Input parameters
@@ -169,14 +173,15 @@ Block AEIN
   3  3     ${Ab} # Ad(3,3)
 "
 
-    echo $(run_sg "$SG" "$slha_input" "MASS-25")
+    echo "$(run_sg "$SG" "$slha_input" "MASS-25")"
 }
 
 run_MSSMNoFVEFTHiggs() {
     local SG="$1"
-    local MS2=$(echo "scale=5; ${MS}^2" | bc)
-    local At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
-    local Ab=$(echo "scale=10; (${TB} + ${Xb}) * ${MS}" | bc)
+    local MS2 At Ab
+    MS2=$(echo "scale=5; ${MS}^2" | bc)
+    At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
+    Ab=$(echo "scale=10; (${TB} + ${Xb}) * ${MS}" | bc)
     local slha_input="\
 ${slha_tmpl}
 Block EXTPAR
@@ -213,7 +218,7 @@ Block EXTPAR
    49   ${MS}
 "
 
-    echo $(run_sg "$SG" "$slha_input" "MASS-25")
+    echo "$(run_sg "$SG" "$slha_input" "MASS-25")"
 }
 
 scan() {

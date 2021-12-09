@@ -10,7 +10,7 @@ standalone_dirs="standalone-model standalone-rge"
 for dir in ${standalone_dirs}
 do
     echo "> cleaning: rm -rf ${BASEDIR}/${dir}"
-    rm -rf ${BASEDIR}/${dir}
+    rm -rf ${BASEDIR:?}/${dir}
 
     echo "> copying: cp -r ${examples_dir}/${dir}/ ${BASEDIR}"
     cp -r ${examples_dir}/${dir}/ ${BASEDIR}
@@ -34,7 +34,7 @@ do
     fi
 
     echo "> cleaning: rm -rf ${BASEDIR}/${dir}"
-    rm -rf ${BASEDIR}/${dir}/
+    rm -rf ${BASEDIR:?}/${dir}/
 done
 
 exit ${exit_code}

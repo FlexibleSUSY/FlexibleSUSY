@@ -4,11 +4,13 @@
 FlexibleSUSY
 ============
 
-|release| |tests|
+|release| |static-analysis| |tests|
 
 .. |release| image:: https://img.shields.io/github/v/release/FlexibleSUSY/FlexibleSUSY
+.. |static-analysis| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/static%20analysis/badge.svg?branch=development
+   :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/static-analysis.yml
 .. |tests| image:: https://github.com/FlexibleSUSY/FlexibleSUSY/workflows/tests/badge.svg?branch=development
-   :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions
+   :target: https://github.com/FlexibleSUSY/FlexibleSUSY/actions/workflows/tests.yml
 
 .. image:: doc/images/FS-logo.png
    :align: right

@@ -740,10 +740,6 @@ subkernel is launched for.
 @returns subkernel name.
 @note Mathematica 7 returns KernelObject[__], 11.3 returns {KernelObject[__]}
 @note for Mathematica 7 some functions have the same names as in SARAH`.`";
-LaunchSubkernelFor::errKernelLaunch=
-"Unable to launch subkernel(s) during calculations for
-`1`
-because of error:";
 LaunchSubkernelFor[message_String] /; $VersionNumber===7.0 :=
 Module[{kernelName},
    Off[Parallel`Preferences`add::shdw,
@@ -752,9 +748,7 @@ Module[{kernelName},
       Parallel`Preferences`tr::shdw,
       Parallel`Protected`processes::shdw,
       SubKernels`Description::shdw];
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
+   kernelName = LaunchKernels[1];
    On[Parallel`Preferences`add::shdw,
       Parallel`Preferences`set::shdw,
       Parallel`Preferences`list::shdw,
@@ -765,9 +759,7 @@ Module[{kernelName},
 ];
 LaunchSubkernelFor[message_String] :=
 Module[{kernelName},
-   kernelName = Utils`EvaluateOrQuit[
-      LaunchKernels[1],
-      LaunchSubkernelFor::errKernelLaunch, message];
+   kernelName = LaunchKernels[1];
    If[Head@kernelName === List, kernelName[[1]], kernelName]
 ];
 LaunchSubkernelFor // Utils`MakeUnknownInputDefinition;
@@ -1265,8 +1257,8 @@ getColourFactor::errNotNumber=
 "After projection element
 `1`
 still is not a number."
-getColourFactor::warnTryingIdentity=
-"Warning: There are no colour projectors of the given type. Trying to apply Identity."
+getColourFactor::warnTryingIdentity =
+"There are no colour projectors of the given type. Trying to apply Identity."
 getColourFactor[colourfactors:{`type`classColorFactors..}, projection:`type`colourProjector] :=
 Module[
    {
@@ -1278,7 +1270,7 @@ Module[
       uniqueColourStructs=DeleteDuplicates@Cases[colourfactors,projection[__],Infinity];
       Utils`AssertOrQuit[Length@uniqueColourStructs<=1,getColourFactor::errMultipleColourStructures,uniqueColourStructs];
       If[Length@uniqueColourStructs===0,
-         Print[getColourFactor::warnTryingIdentity];
+         Utils`FSFancyWarning[getColourFactor::warnTryingIdentity];
          colourfactors,
          colourfactors/.Rule[uniqueColourStructs[[1]],1]
          ]

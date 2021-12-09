@@ -149,6 +149,7 @@ EOF
     esac
 
     # run the spectrum generator
+    # shellcheck disable=SC2034
     slha_output=$(
     { echo "$slha_input" ; \
       cat <<EOF

@@ -140,7 +140,7 @@ do
 
     echo "== $model ===================================="
 
-    if [ $("$FSCONFIG" --with-${model}) = no ] ; then
+    if [ "$("$FSCONFIG" --with-${model})" = no ] ; then
         echo "> skipping, because the model is not configured"
         continue
     fi

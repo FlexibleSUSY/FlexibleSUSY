@@ -5,6 +5,7 @@ UTILSDIR=${BASEDIR}/../utils
 MODELSDIR=${BASEDIR}/../models
 MATH=${MATH_CMD:-math}
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 slha_input="

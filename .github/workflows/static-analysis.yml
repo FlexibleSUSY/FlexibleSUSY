@@ -1,0 +1,38 @@
+name: static analysis
+
+on:
+  push:
+    paths:
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
+
+  pull_request:
+    paths:
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
+
+jobs:
+  check-scripts:
+    runs-on: ubuntu-latest
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check scripts
+        run: |
+           echo "We assume, that shell understands 'local' command!"
+           shellcheck -e SC2039 -S warning configure createmodel install-sarah createaddon config/*.sh utils/*.sh test/test_*.sh

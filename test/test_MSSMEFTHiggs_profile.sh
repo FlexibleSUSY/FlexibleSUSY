@@ -3,7 +3,6 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-FSCONFIG="$BASEDIR/../flexiblesusy-config"
 VALGRIND="`command -v valgrind`"
 MSSMEFTHiggs_EXE="$BASEDIR/../models/MSSMEFTHiggs/run_MSSMEFTHiggs.x"
 MSSMEFTHiggs_INPUT="$BASEDIR/../model_files/MSSMEFTHiggs/LesHouches.in.MSSMEFTHiggs"

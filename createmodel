@@ -6,22 +6,6 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-# absolute path to this script
-ABSBASEDIR=$(cd $BASEDIR; pwd)
-
-# operating system
-operating_system="`(uname -s) 2>/dev/null || echo unknown`"
-
-# determine Mathematica user directory
-case "$operating_system" in
-    Darwin)     mathematica_dir="${HOME}/Library/Mathematica" ;;
-    CYGWIN_NT*) mathematica_dir="${USERPROFILE}/AppData/Roaming/Mathematica" ;;
-    # Linux, *BSD
-    *)          mathematica_dir="${HOME}/.Mathematica" ;;
-esac
-
-mathematica_applications_dir="${mathematica_dir}/Applications"
-sarah_default_dir="${mathematica_applications_dir}/SARAH"
 flexiblesusy_sarah_dir="${BASEDIR}/sarah"
 mathematica_kernel="math"
 
@@ -179,6 +163,7 @@ is_executable () {
         return 1
     fi
 
+    # shellcheck disable=SC2034
     cmd=$(command -v -- "$1")
 }
 
@@ -218,7 +203,7 @@ check_model_name() {
 
     local _model="$1"
 
-    if [ -z $(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$") ]; then
+    if [ -z "$(echo "${_model}" | grep -E "^[a-zA-Z][0-9a-zA-Z_]*$")" ]; then
         printf "Error: invalid model name ${_model}. "
         if [ -n "$(echo "${_model}" | grep -E -o "^[0-9]")" ]; then
             printf "Model name must start with a letter. "
@@ -388,31 +373,32 @@ if test $# -gt 0 ; then
         case $1 in
             --enable-*)
                 f=`echo $1 | sed -e 's/--//' -e 's/-/_/g'`
-                eval prev='$'`echo ${f}`
+                eval prev='$'"$(echo "${f}")"
+                # shellcheck disable=SC2154
                 if test "x${prev}" = "xyes"; then
                     message "INFO: $1: already enabled by default."
                 fi
-                if test ! "x`message ${deprecated_options} | grep ${f}`" = "x"; then
-                    message "WARNING: option $1 is deprecated and ignored"'!'
-                fi
+                #if test ! "x`message ${deprecated_options} | grep ${f}`" = "x"; then
+                #    message "WARNING: option $1 is deprecated and ignored"'!'
+                #fi
                 eval ${f}=yes
                 for c in $options ; do
                     if test "x$c" = "x$f" ; then
                         f=""
                     fi
                 done
-                for c in $deprecated_options ; do
-                    if test "x$c" = "x$f" ; then
-                        f=""
-                    fi
-                done
+                #for c in $deprecated_options ; do
+                #    if test "x$c" = "x$f" ; then
+                #        f=""
+                #    fi
+                #done
                 if test "x$f" != "x" ; then
                     message "Invalid option '$1'. Try $0 --help" ; exit 1 ;
                 fi
                 ;;
             --disable-*)
                 f=`echo $1 | sed -e 's/--disable/enable/' -e 's/-/_/g'`
-                eval prev='$'`echo ${f}`
+                eval prev='$'"$(echo "${f}")"
                 if test "x${prev}" = "xno"; then
                     message "INFO: $1: already disabled by default."
                 fi
@@ -504,6 +490,7 @@ if test ! -d "$targetdir" ; then
     message "done"
 fi
 
+# shellcheck disable=SC2046
 set -- $(find -L $model_file_dir -type f -iname LesHouches.in\* -not -iname \*~ -exec basename {} \; | tr '\n' ' ')
 SLHA_input_files="$*"
 
@@ -539,6 +526,7 @@ sed -e "s|@DIR@|$targetdir|g"               \
     -e "s|@CLASSNAME@|$name|g"              \
     -e "s|FSModelName\([[:blank:]]*=[[:blank:]]*\)[^;][^;]*|FSModelName\1\"$name\"|g" \
     < $model_file_dir/FlexibleSUSY.m.in > $targetdir/FlexibleSUSY.m
+touch -d "1 min ago" "${targetdir}/FlexibleSUSY.m"
 message "done"
 
 for slha_in in $SLHA_input_files; do
