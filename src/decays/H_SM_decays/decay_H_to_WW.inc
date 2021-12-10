@@ -4,7 +4,8 @@ template <>
 double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
    typename field_indices<conj<W>::type>::type const& indexOut1,
-   typename field_indices<W>::type const& indexOut2) const
+   typename field_indices<W>::type const& indexOut2,
+   boost::optional<Decay_amplitude_SVV> optional_amp) const
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
@@ -91,8 +92,10 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(
-         context, indexIn, indexOut1, indexOut2);
+      const auto mat_elem =
+         optional_amp ?
+         optional_amp.get() :
+         calculate_amplitude<H, conj<W>::type, W>(context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 
       // flux * phase space factor * matrix element squared

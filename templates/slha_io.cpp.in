@@ -478,6 +478,20 @@ void @ModelName@_slha_io::set_decay_block(const Decays_list& decays_list, Flexib
    slha_io.set_block(decay);
 }
 
+void @ModelName@_slha_io::set_effectivecouplings_block(const Decays_list& decays_list, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   const auto pdg = decays_list.get_particle_id();
+   std::ostringstream decay;
+   decay << "Block EFFHIGGSCOUPLINGS\n";
+   std::vector<Decay> sorted_decays_list = sort_decays_list(decays_list);
+   for (const auto& channel : sorted_decays_list) {
+      const auto final_state = channel.get_final_state_particle_ids();
+      auto const partial_width = channel.get_width();
+      decay << FORMAT_EFFECTIVECOUPLINGS(pdg, final_state[0], final_state[1], partial_width, "");
+   }
+   slha_io.set_block(decay);
+}
+
 @setDecaysFunctions@
 @fillDecaysDataFunctions@
 

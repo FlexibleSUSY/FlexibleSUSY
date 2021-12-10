@@ -3,9 +3,10 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       const context_base& context,
       const typename field_indices<AH>::type& in_idx,
       const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx) const
+      const typename field_indices<G>::type& out2_idx,
+      boost::optional<Decay_amplitude_SVV> optional_amp) const
 {
-   const auto amp = calculate_amplitude<AH, G, G>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = optional_amp ? optional_amp.get() : calculate_amplitude<AH, G, G>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<AH>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};

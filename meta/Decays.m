@@ -2269,7 +2269,8 @@ CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            fieldsList = Join[{initialParticle}, finalState];
            fieldsNamespace = If[modelName != "", modelName <> "_cxx_diagrams::fields", False];
            args = "const " <> modelName <> "_cxx_diagrams::context_base&, " <>
-                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[#, fieldsNamespace] <> "&")& /@ fieldsList, ", "];
+                  Utils`StringJoinWithSeparator[("const " <> CreateFieldIndices[#, fieldsNamespace] <> "&")& /@ fieldsList, ", "] <> ", " <>
+                  "boost::optional<typename Decay_amplitude_type<" <> Utils`StringJoinWithSeparator[CXXDiagrams`CXXNameOfField[#, prefixNamespace->fieldsNamespace]& /@ fieldsList, ", "] <> ">::type>";
            "template <>\n" <>
            "double " <> modelName <> "_decays::" <>
            CreateSpecializedPartialWidthCalculationName[initialParticle, finalState, fieldsNamespace] <>

@@ -1225,8 +1225,20 @@ CreateSetDecaysFunctions[modelName_String] := "\
  */
 void " <> modelName <> "_slha_io::set_decays(const " <> modelName <> "_decay_table& decay_table, FlexibleDecay_settings const& flexibledecay_settings)
 {
+   auto is_higgs =
+      [](int id) {
+         bool is_whatever_higgs = false;
+         for (auto candidate : {25, 35, 37}) {
+            is_whatever_higgs = is_whatever_higgs || (id < candidate ? false : (id - candidate) % 10 == 0);
+         }
+         return is_whatever_higgs;
+      };
    for (const auto& particle : decay_table) {
       set_decay_block(particle, flexibledecay_settings);
+      const int id = particle.get_particle_id();
+      if (is_higgs(id)) {
+         set_effectivecouplings_block(particle, flexibledecay_settings);
+      }
    }
 }";
 

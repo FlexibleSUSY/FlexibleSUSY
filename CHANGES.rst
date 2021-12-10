@@ -21,6 +21,8 @@ New features
      - 555s
      - 395s
 
+* SLHA output now contains the `EFFHIGGSCOUPLINGS` block that can be used by a SARAH generated UFO model.
+
 Changes
 -------
 

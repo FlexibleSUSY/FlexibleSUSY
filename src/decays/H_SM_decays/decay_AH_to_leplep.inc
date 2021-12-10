@@ -5,7 +5,8 @@ double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<bar<lep>::type>::type const& indexOut1,
-   typename field_indices<lep>::type const& indexOut2) const
+   typename field_indices<lep>::type const& indexOut2,
+   boost::optional<Decay_amplitude_SFF> optional_amp) const
 {
 
    const double mAHOS = context.physical_mass<AH>(indexIn);
@@ -19,6 +20,8 @@ double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
 
    // matrix element squared
    const auto amp =
+      optional_amp ?
+      optional_amp.get() :
       calculate_amplitude<AH, typename bar<lep>::type, lep>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 

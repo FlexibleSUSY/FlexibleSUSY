@@ -77,6 +77,7 @@ public:
    void set_block(const std::string& str, SLHA_io::Position position = SLHA_io::back) { slha_io.set_block(str, position); }
    void set_blocks(const std::vector<std::string>& vec, SLHA_io::Position position = SLHA_io::back) { slha_io.set_blocks(vec, position); }
    void set_decay_block(const Decays_list&, FlexibleDecay_settings const&);
+   void set_effectivecouplings_block(const Decays_list&, FlexibleDecay_settings const&);
    void set_dcinfo(const FlexibleDecay_problems&);
    void set_dcinfo(const std::vector<std::string>&, const std::vector<std::string>&);
 @setDecaysPrototypes@

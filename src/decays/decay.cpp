@@ -90,7 +90,7 @@ void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, s
    // we later check if for channels with width < 0
    // |width/total_width| < threshold
    // for that it makes more sense to calculate total_width
-   // form sum of |width|
+   // as the sum of |width|
    total_width += std::abs(width);
 }
 

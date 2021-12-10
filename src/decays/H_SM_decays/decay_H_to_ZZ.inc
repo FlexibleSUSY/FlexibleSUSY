@@ -22,7 +22,8 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
    const context_base& context,
    typename field_indices<H>::type const& indexIn,
    typename field_indices<Z>::type const& indexOut1,
-   typename field_indices<Z>::type const& indexOut2
+   typename field_indices<Z>::type const& indexOut2,
+   boost::optional<Decay_amplitude_SVV> optional_amp
    ) const
 {
 
@@ -115,8 +116,10 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       const double ps_symmetry = 1./2.;
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<H, Z, Z>(
-         context, indexIn, indexOut1, indexOut2);
+      const auto mat_elem =
+         optional_amp ?
+         optional_amp.get() :
+         calculate_amplitude<H, Z, Z>(context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 
       // flux * phase space factor * matrix element squared

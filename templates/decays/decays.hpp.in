@@ -28,6 +28,8 @@
 #ifndef @ModelName@_DECAYS_H
 #define @ModelName@_DECAYS_H
 
+#include "boost/optional.hpp"
+
 #include "@ModelName@_decay_table.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
@@ -81,6 +83,7 @@ public:
    @ModelName@_decays& operator=(@ModelName@_decays&&) = default;
 
    const @ModelName@_decay_table& get_decay_table() const;
+   const std::vector<EffectiveCoupling>& get_effective_couplings_table() const;
    const FlexibleDecay_problems& get_problems() const;
 
    void clear();
@@ -99,6 +102,7 @@ private:
    FlexibleDecay_settings flexibledecay_settings {};
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
+   std::vector<EffectiveCoupling> effective_couplings {};
    FlexibleDecay_problems problems{};
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
@@ -120,7 +124,8 @@ private:
       const @ModelName@_cxx_diagrams::context_base&,
       typename @ModelName@_cxx_diagrams::field_indices<FieldIn>::type const&,
       typename @ModelName@_cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+      typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const&,
+      boost::optional<typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type> = boost::none) const;
 };
 
 @calcAmplitudeSpecializationDecls@
@@ -283,7 +288,8 @@ double @ModelName@_decays::get_partial_width(
    const @ModelName@_cxx_diagrams::context_base& context,
    typename @ModelName@_cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
    typename @ModelName@_cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
-   typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
+   typename @ModelName@_cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2,
+   boost::optional<typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type> none
    ) const
 {
 

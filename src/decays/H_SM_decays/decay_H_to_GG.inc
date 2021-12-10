@@ -3,9 +3,10 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
       const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx) const
+      const typename field_indices<G>::type& out2_idx,
+      boost::optional<Decay_amplitude_SVV> optional_amp) const
 {
-   const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = optional_amp ? optional_amp.get() : calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
    constexpr double ps {1./(8.*Pi)};
    constexpr double ps_symmetry {1./2.};
@@ -45,7 +46,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
-      constexpr int Nf = 5;
+      static constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =

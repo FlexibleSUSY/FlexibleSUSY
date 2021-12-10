@@ -54,6 +54,24 @@ private:
    std::string proc_string;
 };
 
+class EffectiveCoupling {
+public:
+   EffectiveCoupling(std::initializer_list<int>, double, std::string const&);
+   ~EffectiveCoupling() = default;
+   EffectiveCoupling(const EffectiveCoupling&) = default;
+   EffectiveCoupling(EffectiveCoupling&&) = default;
+   EffectiveCoupling& operator=(const EffectiveCoupling&) = default;
+   EffectiveCoupling& operator=(EffectiveCoupling&&) = default;
+
+   double get_width() const { return width; }
+   std::string get_proc_string() const { return proc_string; }
+
+private:
+   std::vector<int> pids {};
+   double width {0.};
+   std::string proc_string;
+};
+
 std::size_t hash_decay(const Decay& decay);
 
 class Decays_list {

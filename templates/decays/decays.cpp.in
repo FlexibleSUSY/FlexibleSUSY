@@ -66,6 +66,11 @@ const @ModelName@_decay_table& CLASSNAME::get_decay_table() const
    return decay_table;
 }
 
+const std::vector<EffectiveCoupling>& CLASSNAME::get_effective_couplings_table() const
+{
+   return effective_couplings;
+}
+
 const FlexibleDecay_problems& CLASSNAME::get_problems() const
 {
    return problems;

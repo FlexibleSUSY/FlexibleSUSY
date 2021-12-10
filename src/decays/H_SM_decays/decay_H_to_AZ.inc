@@ -3,9 +3,10 @@ double CLASSNAME::get_partial_width<H, A, Z>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
       const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<Z>::type& out2_idx) const
+      const typename field_indices<Z>::type& out2_idx,
+      boost::optional<Decay_amplitude_SVV> optional_amp) const
 {
-   const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = optional_amp ? optional_amp.get() : calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mH)));

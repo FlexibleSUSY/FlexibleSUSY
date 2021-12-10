@@ -5,7 +5,8 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    const context_base& context,
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<uq>::type const& indexOut1,
-   typename field_indices<uq>::type const& indexOut2
+   typename field_indices<uq>::type const& indexOut2,
+   boost::optional<Decay_amplitude_SFF> optional_amp
    ) const
 {
    // get AHBBbar vertex
