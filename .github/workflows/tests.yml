@@ -125,7 +125,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.10.0
+      image: navir/opensuseleap-for-flexiblesusy:0.11.0
 
     strategy:
       matrix:
