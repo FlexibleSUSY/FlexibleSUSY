@@ -1,3 +1,17 @@
+FlexibleSUSY 2.?.? [?, ? 202?]
+==================================
+
+New features
+-------
+
+Changes
+-------
+
+Fixed bugs
+----------
+
+* [commit ]: Fixed wrong calculation of $A \to Z \gamma$.
+
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
