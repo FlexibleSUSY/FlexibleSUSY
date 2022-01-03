@@ -22,6 +22,7 @@
 #include "logger.hpp"
 #include "numerics.h"
 #include "numerics2.hpp"
+#include "wrappers.hpp"
 
 #include <cmath>
 #include <complex>
@@ -40,10 +41,6 @@
 namespace flexiblesusy {
 
 namespace {
-
-constexpr double Pi = 3.141592653589793;
-
-constexpr double oneOver16PiSqr = 1.0/(16.0*Pi*Pi);
 
 double sqr(double x) noexcept { return x*x; }
 

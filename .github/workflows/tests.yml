@@ -10,6 +10,8 @@ on:
       - development
     paths-ignore:
       - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
       - 'AUTHORS'
       - 'COPYING'
       - 'doc/**'
@@ -21,6 +23,8 @@ on:
       - development
     paths-ignore:
       - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
       - 'AUTHORS'
       - 'COPYING'
       - 'doc/**'
@@ -119,9 +123,9 @@ jobs:
     # forks FS github doesn't try to run tests on their code.
     if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.9.0
+      image: navir/opensuseleap-for-flexiblesusy:0.11.0
 
     strategy:
       matrix:
@@ -130,7 +134,7 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.9'
-      MODELS: 'MSSM CMSSM CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
+      MODELS: 'MSSM CMSSM CMSSMNoFV CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
 
     steps:
 

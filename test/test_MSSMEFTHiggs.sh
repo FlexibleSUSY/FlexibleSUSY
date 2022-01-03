@@ -13,6 +13,7 @@ Xt=0
 output="MASS-25"
 scan_data="$BASEDIR/test_MSSMEFTHiggs.dat"
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block
@@ -125,22 +126,25 @@ Block EXTPAR
 run_sg() {
     local SG="$1"
     local type="$2"
-    local calcBSM=$(test "x$type" = xtower ; echo $?)
-    local loops=$(if [ "x$type" = xtower ] ; then echo 1; else echo 2; fi)
+    local calcBSM loops
+    calcBSM=$(test "x$type" = xtower ; echo $?)
+    loops=$(if [ "x$type" = xtower ] ; then echo 1; else echo 2; fi)
     # set loops=2 to have perfect agreement at large MS
     # (but this spoils agreement at MS < Mt)
     loops=2
-    local MS2=$(echo "scale=5; ${MS}^2" | bc)
-    local At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
-    local Au=$(echo "scale=10; (1./${TB} + 0) * ${MS}" | bc)
-    local Ad=$(echo "scale=10; (${TB} + 0) * ${MS}" | bc)
+    local MS2 At Au Ad
+    MS2=$(echo "scale=5; ${MS}^2" | bc)
+    At=$(echo "scale=10; (1./${TB} + ${Xt}) * ${MS}" | bc)
+    Au=$(echo "scale=10; (1./${TB} + 0) * ${MS}" | bc)
+    Ad=$(echo "scale=10; (${TB} + 0) * ${MS}" | bc)
     local Ae="$Ad"
     local slha_output=
     local block=
     local value=
     local slha_input=
-    local output_block=$(echo "${output}" | cut -d'-' -f1)
-    local output_entry=$(echo "${output}" | cut -d'-' -f2)
+    local output_block output_entry
+    output_block=$(echo "${output}" | cut -d'-' -f1)
+    output_entry=$(echo "${output}" | cut -d'-' -f2)
 
     slha_input=$(
     { echo "$slha_tmpl" ; \

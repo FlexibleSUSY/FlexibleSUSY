@@ -674,14 +674,11 @@ ColourFactorForIndexedDiagramFromGraph[indexedDiagram_, graph_] :=
 		If[(Times @@ colorMathExpressions) === 1, 1,
 			ColorMathToSARAHConvention[
             With[{colorFac = ColorMath`CSimplify[Times @@ colorMathExpressions]},
-               If[!FreeQ[colorFac, Superscript[CMo, {__}]],
-                  (* RemoveFD converts f and d color structures into a sum of ColorMath`o *)
-                  ColorMath`CSimplify[Times @@ colorMathExpressions, RemoveFD -> False],
-                  (* on the other hand, without RemoveFD -> True expression
-                          {ct94450, ct94453}ct94448           {ct94450, ct94453, ct94454}
-                     4 CMt                                 CMf
-                                                   ct94455
-                     is not simplified *)
+               If[ColorMath`ContainsO[colorFac],
+                  ColorMath`SortIndices[
+                     colorFac /.
+                        Superscript[ColorMath`CMo, idx_List] /; Length[idx]===3 :> ColorMath`TR/2 (0 I Superscript[ColorMath`CMf, idx] + Superscript[ColorMath`CMd, idx])
+                  ],
                   colorFac
                ]
             ]
@@ -1157,19 +1154,15 @@ CreateVertices[
    vertices:{{__}...},
    OptionsPattern[{MaximumVerticesLimit -> 500}]] :=
 Module[{cxxVertices, vertexPartition,
-        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`", "Himalaya`"}},
+        contextsToDistribute = {"SARAH`", "Susyno`LieGroups`", "FlexibleSUSY`", "CConversion`"}},
 
    If[FlexibleSUSY`FSEnableParallelism,
+      LaunchKernels[];
       (* without this CForm includes context in name of symbols
          such that we get for example SARAH_g1 instead of g1 in
          generated C++ code *)
       ParallelEvaluate[
-         (BeginPackage[#];EndPackage[];
-          (* prevent shdw warning with Susyno`LieGroups`M: *)
-          Off[Remove::remal];
-          Remove[Susyno`LieGroups`M];
-          On[Remove::remal];
-         )& /@ contextsToDistribute,
+         (BeginPackage[#];EndPackage[];)& /@ contextsToDistribute,
          DistributedContexts->Automatic
       ];
       (* without this CForm converts complex numbers using
@@ -1206,8 +1199,13 @@ Module[{cxxVertices, vertexPartition,
       cxxVertices =
          AbsoluteTiming@ParallelMap[
             CreateVertex,
-            DeleteDuplicates[vertices], DistributedContexts->All
-         ],
+            DeleteDuplicates[vertices]
+         ];
+      Needs["Parallel`Developer`"];
+      Parallel`Developer`ClearDistributedDefinitions[];
+      Parallel`Developer`ClearKernels[];
+      CloseKernels[]
+      ,
       cxxVertices =
          AbsoluteTiming@Map[
             CreateVertex,
@@ -1655,9 +1653,10 @@ ExtractColourFactor[SARAH`Lam[ctIndex1_, ctIndex2_, ctIndex3_]] := 2;
 ExtractColourFactor[colourfactor_ * SARAH`Delta[ctIndex1_, ctIndex2_] /; NumericQ[colourfactor]] := colourfactor;
 ExtractColourFactor[SARAH`Delta[ctIndex1_, ctIndex2_]] := 1;
 ExtractColourFactor[colourfactor_ /; NumericQ[colourfactor]] := colourfactor;
+(* currently from 8->88 we only handle symmetric structure (i.e d, not f) *)
+(* ExtractColourFactor[colourfactor_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := colourfactor; *)
+ExtractColourFactor[colourfactor_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := colourfactor;
 (* cases for 8->88 amplitudes
-ExtractColourFactor[colourfactor_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
-ExtractColourFactor[colourfactor_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor]] := ?;
 ExtractColourFactor[colourfactor1_ * Superscript[CMf, {ctIndex1_, ctIndex2_, ctIndex3_} + colourfactor2_ * Superscript[CMd, {ctIndex1_, ctIndex2_, ctIndex3_}] /; NumericQ[colourfactor1]] && NumericQ[colourfactor2]] := ?;
 *)
 ExtractColourFactor[args___] :=

@@ -67,8 +67,6 @@ SUSYScaleInput = {
     {mq2[1,1], mq1Input^2},
     {mq2[2,2], mq2Input^2},
     {mq2[3,3], mq3Input^2},
-    {me2[1,1], me1Input^2},
-    {me2[2,2], me2Input^2},
     {T[Yu][3,3], AtInput Yu[3,3]},
     {T[Yd][3,3], AbInput Yd[3,3]},
     {T[Ye][3,3], ATauInput Ye[3,3]}
@@ -161,3 +159,5 @@ ExtraSLHAOutputBlocks = {
             {5, \[Lambda] vS / Sqrt[2]},
             {10, ms2} } }
 };
+
+FSCalculateDecays = True;

@@ -770,4 +770,21 @@ BOOST_AUTO_TEST_CASE(test_calculate_dirac_singlet_mass)
    BOOST_CHECK_CLOSE(std::arg(phase), Pi/4., 1e-13);
 }
 
+BOOST_AUTO_TEST_CASE(test_diagonalize_symmetric_errbd)
+{
+   Matrix<complex<double>, 4, 4> m;
+   m <<
+      0. , 0., 0., complex<double>(-4.4299349683288838e-06,7.0893778912230837e-06),
+      0. , 0., 0., 4.1620179585196247e-05,
+      0. , 0., 0., 3.7871449517912927e-05,
+      complex<double>(-4.4299349683288838e-06,7.0893778912230837e-06), 4.1620179585196247e-05, 3.7871449517912927e-05, 90.229999999964136;
+
+   Array<double, 4, 1> s;
+   Matrix<complex<double>, 4, 4> u;
+   double s_errbd = 0;
+   Array<double, 4, 1> u_errbd;
+   fs_diagonalize_symmetric_errbd(m, s, &u, &s_errbd, &u_errbd);
+   BOOST_CHECK(u.isUnitary());
+}
+
 #endif // TEST_LINALG2_PART8

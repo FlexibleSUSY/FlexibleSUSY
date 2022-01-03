@@ -49,11 +49,12 @@ static constexpr double twoLoop        = 4.010149318236068752e-05;
 static constexpr double threeLoop      = 2.539456721913701978e-07;
 static constexpr double fourLoop       = 1.608129755454920543e-09;
 static constexpr double fiveLoop       = 1.018360064207223307e-11;
-static constexpr bool True = true;
+static constexpr bool   True           = true;
 static constexpr double zeta2          = 1.6449340668482264; // Zeta[2]
 static constexpr double zeta3          = 1.2020569031595943; // Zeta[3]
 static constexpr double zeta4          = 1.0823232337111382; // Zeta[4]
 static constexpr double zeta5          = 1.0369277551433699; // Zeta[5]
+static constexpr double ln2            = 0.69314718055994531;
 
 // Abs /////////////////////////////////////////////////////////////////
 
