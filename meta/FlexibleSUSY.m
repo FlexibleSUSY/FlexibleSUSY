@@ -2633,6 +2633,7 @@ const bool show_decays = !decays.get_problems().have_problem() ||
 if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) && loop_library_for_decays) {
    slha_io.set_dcinfo(decays.get_problems());
    slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);
+   slha_io.set_effectivecouplings_block(decays.get_effective_couplings_table());
 }";
 
 ExampleCalculateCmdLineDecays[] :=

@@ -23,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <complex>
 
 #include <boost/core/demangle.hpp>
 
@@ -56,19 +57,20 @@ private:
 
 class EffectiveCoupling {
 public:
-   EffectiveCoupling(std::initializer_list<int>, double, std::string const&);
+   EffectiveCoupling(std::initializer_list<int>, std::complex<double>, std::string const&);
    ~EffectiveCoupling() = default;
    EffectiveCoupling(const EffectiveCoupling&) = default;
    EffectiveCoupling(EffectiveCoupling&&) = default;
    EffectiveCoupling& operator=(const EffectiveCoupling&) = default;
    EffectiveCoupling& operator=(EffectiveCoupling&&) = default;
 
-   double get_width() const { return width; }
+   std::complex<double> get_coupling() const { return coupling; }
    std::string get_proc_string() const { return proc_string; }
+   std::vector<int> get_pids() const { return pids; }
 
 private:
    std::vector<int> pids {};
-   double width {0.};
+   std::complex<double> coupling {0.};
    std::string proc_string;
 };
 

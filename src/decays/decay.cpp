@@ -62,6 +62,12 @@ Decay::Decay(
    std::sort(pids_out.begin(), pids_out.end());
 }
 
+EffectiveCoupling::EffectiveCoupling(
+   std::initializer_list<int> pids_, std::complex<double> coupling_, std::string const& proc_string_)
+   : pids(pids_)
+   , coupling(coupling_)
+   , proc_string(proc_string_) {}
+
 Decays_list::Decays_list(int initial_pdg_)
    : initial_pdg(initial_pdg_)
 {
