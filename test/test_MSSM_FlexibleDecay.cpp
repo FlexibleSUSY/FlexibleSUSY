@@ -712,8 +712,6 @@ Block MSOFT Q= 8.61574711E+02
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00043378057279629952, 4e-13);
    // Ah -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 4.1843910938310874e-06, 4e-12);
-   // Ah -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVZ(&m, 1), 8.9472411012847983e-06, 2e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -743,7 +741,7 @@ Block MSOFT Q= 8.61574711E+02
    // Ah -> gamma gamma
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVP(&m, 1), 4.0630566804965507e-06, 4e-12);
    // Ah -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 8.6877987532066177e-06, 2e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_Ah_to_VPVZ(&m, 1), 9.3179924792926659e-06, 2e-11);
 
    // h -> gamma Z
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 2.2198080013381038e-06, 2e-10);

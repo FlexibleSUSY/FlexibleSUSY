@@ -33,6 +33,8 @@ Fixed bugs
 * [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of L'->LGamma was breaking printing of
   observables via the mathlink interface.
 
+* [commit ]: Fixed wrong calculation of $A \to Z \gamma$.
+
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
@@ -52,7 +54,6 @@ Fixed bugs
 
 * [commit a0bbda569]: Correcting check for required Mathematica version
   11.0, needed by FlexibleDecay.
-
 
 FlexibleSUSY 2.6.0 [June, 10 2021]
 ==================================
