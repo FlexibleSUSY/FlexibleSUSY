@@ -887,14 +887,14 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                            _, Print["Unknow final state in effective_couplings"]; Quit[1]
                         ] <>
                         "* 0.5*(std::norm(amp.form_factor_21)+std::norm(amp.form_factor_eps))/(16.*Pi*mX)*" <> If[MemberQ[finalState, TreeMasses`GetZBoson[]], "Sqr(Sqr(mX) - Sqr(mZ2))", "Power4(mX)"]  <>  "));\n" <>
-                        "std::cout << correction << std::endl;\n" <>
+                        "std::cout << 1 - correction << std::endl;\n" <>
                         "effective_couplings.push_back(EffectiveCoupling({" <>
-                        "get_pdg_code_for_particle(SM_info::" <> CXXNameOfField[initialState] <>
+                        "get_pdg_code_for_particle(" <> FlexibleSUSY`FSModelName <> "_info::" <> CXXNameOfField[initialState] <>
                         If[initialStateDim > 1, ", gI1", ""] <> ")," <>
 StringRiffle[
                   MapIndexed[
                      With[{idx = First[#2]},
-                        "get_pdg_code_for_particle(SM_info::" <> CXXNameOfField[#1] <> If[finalStateDims[[idx]] > 1, ", gO" <> ToString[idx], ""] <> ")"
+                        "get_pdg_code_for_particle(" <> FlexibleSUSY`FSModelName <> "_info::" <> CXXNameOfField[#1] <> If[finalStateDims[[idx]] > 1, ", gO" <> ToString[idx], ""] <> ")"
                      ]&,
                      finalState
                   ], ", "] <> "}, amp.form_factor_21 * correction, \"\"));\n",
