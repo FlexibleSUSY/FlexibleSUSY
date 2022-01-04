@@ -855,7 +855,8 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
               ] <> ") {\n" <> TextFormatting`IndentText["continue;\n"] <> "}\n"
                 ];
            (* call decay *)
-                      body = If[
+                      body = "const double width = " <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> optionalAmp <> ");\n" <>
+                      If[
                         MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, initialState] &&
                         (Complement[finalState, {TreeMasses`GetZBoson[], TreeMasses`GetPhoton[], TreeMasses`GetGluon[]}] === {} && finalState =!= {TreeMasses`GetZBoson[], TreeMasses`GetZBoson[]}),
                         optionalAmp = ", amp";
@@ -870,6 +871,23 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                   ], ","] <>
                   ")" <>
                         ";\n" <>
+                        "const double mX = context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "});\n" <>
+                        With[{pos =Position[finalState, TreeMasses`GetZBoson[]]},
+                           If[pos === {},
+                              "",
+                              "const double mZ1 = qedqcd.displayPoleMZ();\n" <>
+                              "const double mZ2 = context.physical_mass<" <> CXXNameOfField[finalState[[ pos[[1,1]] ]] ] <> ">(std::array<int, " <> If[finalStateDims[[ pos[[1,1]] ]] > 1, "1", "0"] <> "> {" <> If[finalStateDims[[ pos[[1,1]] ]] > 1, ", gO" <> ToString[ pos[[1,1]]  ], ""] <> "});\n"
+                           ]
+                        ] <>
+                        "const double correction = std::sqrt(width/(" <>
+                        Switch[Sort@finalState,
+                           {TreeMasses`GetGluon[], TreeMasses`GetGluon[]}, "4.",
+                           {TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}, "1/2.",
+                           Sort@{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}, "std::sqrt(KallenLambda(1., 0., Sqr(mZ1/mX)))",
+                           _, Print["Unknow final state in effective_couplings"]; Quit[1]
+                        ] <>
+                        "* 0.5*(std::norm(amp.form_factor_21)+std::norm(amp.form_factor_eps))/(16.*Pi*mX)*" <> If[MemberQ[finalState, TreeMasses`GetZBoson[]], "Sqr(Sqr(mX) - Sqr(mZ2))", "Power4(mX)"]  <>  "));\n" <>
+                        "std::cout << correction << std::endl;\n" <>
                         "effective_couplings.push_back(EffectiveCoupling({" <>
                         "get_pdg_code_for_particle(SM_info::" <> CXXNameOfField[initialState] <>
                         If[initialStateDim > 1, ", gI1", ""] <> ")," <>
@@ -879,10 +897,10 @@ StringRiffle[
                         "get_pdg_code_for_particle(SM_info::" <> CXXNameOfField[#1] <> If[finalStateDims[[idx]] > 1, ", gO" <> ToString[idx], ""] <> ")"
                      ]&,
                      finalState
-                  ], ", "] <> "}, amp.form_factor_21, \"\"));\n",
+                  ], ", "] <> "}, amp.form_factor_21 * correction, \"\"));\n",
                         ""
                       ] <>
-                      "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> optionalAmp <> "), " <> pdgsList <>
+                      "decays.set_decay(width, " <> pdgsList <>
                ", create_process_string<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
                   If[initialStateDim > 1, "{gI1}", "{}"] <> "," <>
                   StringJoin @ Riffle[
@@ -905,7 +923,7 @@ StringRiffle[
               body = LoopOverIndexCollection[skip <> body, loopIndices],
              body = If[
                CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]],
-               "",
+               "{\n",
 
 
 
@@ -921,7 +939,7 @@ StringRiffle[
                     ], " + "
                  ] <> ") {\n"] <> TextFormatting`IndentText[body] <>
                  If[CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]],
-                   "",
+                   "}\n",
 
                  "}\n"
                    ]
