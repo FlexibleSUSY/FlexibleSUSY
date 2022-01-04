@@ -879,7 +879,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                               "const double mZ2 = context.physical_mass<" <> CXXNameOfField[finalState[[ pos[[1,1]] ]] ] <> ">(std::array<int, " <> If[finalStateDims[[ pos[[1,1]] ]] > 1, "1", "0"] <> "> {" <> If[finalStateDims[[ pos[[1,1]] ]] > 1, ", gO" <> ToString[ pos[[1,1]]  ], ""] <> "});\n"
                            ]
                         ] <>
-                        "const double correction = std::sqrt(width/(" <>
+                        "const double correction = is_zero(width, 1e-16) ? 1. : std::sqrt(width/(" <>
                         Switch[Sort@finalState,
                            {TreeMasses`GetGluon[], TreeMasses`GetGluon[]}, "4.",
                            {TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}, "1/2.",
@@ -887,7 +887,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                            _, Print["Unknow final state in effective_couplings"]; Quit[1]
                         ] <>
                         "* 0.5*(std::norm(amp.form_factor_21)+std::norm(amp.form_factor_eps))/(16.*Pi*mX)*" <> If[MemberQ[finalState, TreeMasses`GetZBoson[]], "Sqr(Sqr(mX) - Sqr(mZ2))", "Power4(mX)"]  <>  "));\n" <>
-                        "std::cout << 1 - correction << std::endl;\n" <>
+                        "std::cout << width << \" \" << 1 - correction << std::endl;\n" <>
                         "effective_couplings.push_back(EffectiveCoupling({" <>
                         "get_pdg_code_for_particle(" <> FlexibleSUSY`FSModelName <> "_info::" <> CXXNameOfField[initialState] <>
                         If[initialStateDim > 1, ", gI1", ""] <> ")," <>
