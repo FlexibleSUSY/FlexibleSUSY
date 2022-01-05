@@ -897,7 +897,7 @@ StringRiffle[
                         "get_pdg_code_for_particle(" <> FlexibleSUSY`FSModelName <> "_info::" <> CXXNameOfField[#1] <> If[finalStateDims[[idx]] > 1, ", gO" <> ToString[idx], ""] <> ")"
                      ]&,
                      finalState
-                  ], ", "] <> "}, amp.form_factor_21 * correction, \"\"));\n",
+                  ], ", "] <> "}, amp.form_factor_21 * correction, \"" <> StringRiffle[MapAt[(# <> If[initialStateDim > 1, "(\"+std::to_string(gI1+1)+\")", ""])&,  CXXNameOfField /@ Prepend[finalState, initialState], 1], "-"] <> "\"));\n",
                         ""
                       ] <>
                       "decays.set_decay(width, " <> pdgsList <>
