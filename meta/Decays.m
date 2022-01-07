@@ -887,7 +887,6 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                            _, Print["Unknow final state in effective_couplings"]; Quit[1]
                         ] <>
                         "* 0.5*(std::norm(amp.form_factor_21)+std::norm(amp.form_factor_eps))/(16.*Pi*mX)*" <> If[MemberQ[finalState, TreeMasses`GetZBoson[]], "Sqr(Sqr(mX) - Sqr(mZ2))", "Power4(mX)"]  <>  "));\n" <>
-                        "std::cout << width << \" \" << 1 - correction << std::endl;\n" <>
                         "effective_couplings.push_back(EffectiveCoupling({" <>
                         "get_pdg_code_for_particle(" <> FlexibleSUSY`FSModelName <> "_info::" <> CXXNameOfField[initialState] <>
                         If[initialStateDim > 1, ", gI1", ""] <> ")," <>
