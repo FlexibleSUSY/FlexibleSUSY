@@ -2801,7 +2801,10 @@ WriteMathLink[inputParameters_List, extraSLHAOutputBlocks_List, files_List] :=
               {calculateModelDecaysPrototype, calculateModelDecaysFunction} =
                   FSMathLink`CreateModelDecaysCalculation[FlexibleSUSY`FSModelName];
               fillDecaysSLHA = FSMathLink`FillDecaysSLHAData[];
-              {putDecaysPrototype, putDecaysFunction} = FSMathLink`PutDecays[FlexibleSUSY`FSModelName];
+              {putDecaysPrototype, putDecaysFunction} =
+                 StringJoin @@@ Transpose[
+                                   {FSMathLink`PutDecays[FlexibleSUSY`FSModelName], FSMathLink`PutEffectiveCouplings[FlexibleSUSY`FSModelName]}
+                                ];
               mathlinkDecaysCalculationFunction = FSMathLink`CreateMathLinkDecaysCalculation[FlexibleSUSY`FSModelName];
               loadCalculateDecaysFunction = "FS" <> FlexibleSUSY`FSModelName <> "CalculateDecays = LibraryFunctionLoad[lib" <>
                                             FlexibleSUSY`FSModelName <> ", \"FS" <> FlexibleSUSY`FSModelName <>

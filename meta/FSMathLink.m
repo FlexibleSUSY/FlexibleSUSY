@@ -38,6 +38,7 @@ CreateModelDecaysCalculation::usage="";
 CreateMathLinkDecaysCalculation::usage="";
 FillDecaysSLHAData::usage="";
 PutDecays::usage="";
+PutEffectiveCouplings::usage="";
 
 Begin["`Private`"];
 
@@ -377,6 +378,25 @@ PutDecays[modelName_] :=
            {prototype, function}
           ];
 
+PutEffectiveCouplingsFunctionName[] := "put_effective_couplings";
+PutEffectiveCouplings[modelName_] :=
+    Module[{prototype = "", body = "", function = ""},
+           prototype = "void " <> PutEffectiveCouplingsFunctionName[] <> "(MLINK link) const;\n";
+
+           body = "check_spectrum_pointer();\n" <>
+                  modelName <> "_decays decays = spectrum->get_decays();\n" <>
+                  "const auto& coupling_table = decays.get_effective_couplings_table();\n" <>
+                  "const auto number_of_couplings = coupling_table.size();\n\n" <>
+                  "MLPutFunction(link, \"List\", 1);\n" <>
+                  "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
+                  "MLPutFunction(link, \"List\", number_of_couplings);\n\n"
+
+           function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
+                      "void Model_data::" <> PutEffectiveCouplingsFunctionName[] <> "(MLINK link) const\n{\n" <>
+                      TextFormatting`IndentText[body] <> "}\n";
+           {prototype, function}
+          ];
+
 CreateMathLinkDecaysCalculation[modelName_] :=
     "\n" <> CreateSeparatorLine[] <> "\n\n" <> "\
 DLLEXPORT int FS" <> modelName <> "CalculateDecays(
@@ -414,7 +434,8 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
          data.calculate_model_decays();
       }
 
-      data.put_decays(link);
+      data." <> PutDecaysFunctionName[] <> "(link);
+      data." <> PutEffectiveCouplingsFunctionName[] <> "(link);
    } catch (const flexiblesusy::Error& e) {
       put_message(link, \"FS" <> modelName <> "CalculateDecays\", \"error\", e.what());
       put_error_output(link);
