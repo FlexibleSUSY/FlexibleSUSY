@@ -297,7 +297,8 @@ FillDecaysSLHAData[] :=
     "if ((!decays_problems.have_problem() && loop_library_for_decays) || force_output) {\n" <>
     TextFormatting`IndentText[
        "slha_io.set_dcinfo(decays_problems);\n" <>
-       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n"
+       "slha_io.set_decays(decays.get_decay_table(), flexibledecay_settings);\n" <>
+       "slha_io.set_effectivecouplings_block(decays.get_effective_couplings_table());\n"
     ] <>
     "}";
 
@@ -369,8 +370,7 @@ PutDecays[modelName_] :=
                   "MLPutFunction(link, \"List\", 1);\n" <>
                   "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
                   "MLPutFunction(link, \"List\", number_of_decays);\n\n" <>
-                  PutDecayTableEntries[modelName] <> "\n" <>
-                  "MLEndPacket(link);\n";
+                  PutDecayTableEntries[modelName];
 
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> PutDecaysFunctionName[] <> "(MLINK link) const\n{\n" <>
@@ -389,7 +389,20 @@ PutEffectiveCouplings[modelName_] :=
                   "const auto number_of_couplings = coupling_table.size();\n\n" <>
                   "MLPutFunction(link, \"List\", 1);\n" <>
                   "MLPutRule(link, " <> modelName <> "_info::model_name);\n" <>
-                  "MLPutFunction(link, \"List\", number_of_couplings);\n\n"
+                  "MLPutFunction(link, \"List\", number_of_couplings);\n\n" <>
+                  "for (const auto& coupling : coupling_table) {\n" <>
+                     TextFormatting`IndentText[
+                        "MLPutFunction(link, \"List\", 2);\n" <>
+                        "MLPutFunction(link, \"List\", coupling.get_pids().size());\n" <>
+                        "for (int pid : coupling.get_pids()) {\n" <>
+                           TextFormatting`IndentText[
+                               "MLPut(link, pid);\n"
+                           ] <>
+                        "}\n" <>
+                        "MLPut(link, coupling.get_coupling());\n"
+                     ] <>
+                  "}\n" <>
+                  "MLEndPacket(link);\n";
 
            function = "\n" <> CreateSeparatorLine[] <> "\n\n" <>
                       "void Model_data::" <> PutEffectiveCouplingsFunctionName[] <> "(MLINK link) const\n{\n" <>
@@ -434,6 +447,7 @@ DLLEXPORT int FS" <> modelName <> "CalculateDecays(
          data.calculate_model_decays();
       }
 
+      MLPutFunction(link, \"List\", 2);
       data." <> PutDecaysFunctionName[] <> "(link);
       data." <> PutEffectiveCouplingsFunctionName[] <> "(link);
    } catch (const flexiblesusy::Error& e) {
