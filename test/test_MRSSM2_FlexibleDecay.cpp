@@ -743,10 +743,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0015852320624501718, 4e-14);
+                              0.0015852320624501718, 2e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              8.2876032145842477e-05, 3e-14);
+                              8.2876032145842477e-05, 1e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
                               0.00026660324954596258, 5e-12);
