@@ -204,7 +204,8 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
 std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, double mu) noexcept {
    const double tau = Sqr(mAh/(2.*mq));
    // know threshold singularity at mAh = 2*mq
-   if (is_zero(1 - tau, 1e-6)) {
+   if (is_zero(1 - tau, 1e-2)) {
+      WARNING("2-loop QCD corrections to A→γγ are disable in the threshold region: τ = " << std::to_string(tau));
       return 0.;
    }
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
