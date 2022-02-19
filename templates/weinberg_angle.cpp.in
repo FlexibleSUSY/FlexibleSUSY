@@ -29,7 +29,6 @@
 #include "loop_libraries/loop_library.hpp"
 #include "standard_model.hpp"
 #include "sm_mw.hpp"
-#include "ew_input.hpp"
 
 #include <limits>
 #include <cmath>
@@ -655,7 +654,11 @@ double CLASSNAME::calculate_mw_pole(double sinThetaW) const
       calculate_delta_alpha_hat_bsm(alphaDRbar);
    const double delta_rho_hat_tree = calculate_rho_hat_tree() - 1.0;
 
-   const double mwSM = Electroweak_constants::MWSM;
+   const auto sm_mw_dmw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit(
+      sm_parameters.mh_pole, sm_parameters.mt_pole,
+      sm_parameters.alpha_s_mz, sm_parameters.dalpha_s_5_had);
+
+   const double mwSM = sm_mw_dmw.first;
 
    return mwSM * Sqrt(1.0 + sinThetaW2 / (cosThetaW2 - sinThetaW2) *
                     (cosThetaW2 / sinThetaW2 *

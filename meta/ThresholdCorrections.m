@@ -484,7 +484,10 @@ sm_pars.fermi_constant = qedqcd.displayFermiConstant();
 sm_pars.mw_pole = qedqcd.displayPoleMW();
 sm_pars.mz_pole = qedqcd.displayPoleMZ();
 sm_pars.mt_pole = qedqcd.displayPoleMt();
+sm_pars.mh_pole = Electroweak_constants::MH;
 sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
+sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
+sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
 sm_pars.higgs_index = higgs_idx;
 
 const int number_of_iterations =
