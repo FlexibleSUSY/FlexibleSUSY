@@ -54,7 +54,9 @@ namespace flexiblesusy {
 #define PIZZTMZ pizzt_MZ
 
 namespace {
-const double ROOT2 = Sqrt(2.0);
+
+constexpr double ROOT2 = 1.4142135623730950;
+
 } // anonymous namespace
 
 /**
