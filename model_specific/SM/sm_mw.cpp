@@ -46,9 +46,10 @@ constexpr double sqr(double x) noexcept { return x*x; }
  * as = 0.1184
  * da5had = 0.02750
  *
- * @return W boson pole mass as predicted in the Standard Model
+ * @return W boson pole mass as predicted in the Standard Model (first
+ * entry) and corresponding uncertainty (second entry)
  */
-double calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept
+std::pair<double, double> calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept
 {
    // Table 3, 2nd column, 124.42 <= mh <= 125.87
    const double p[8] = {
@@ -66,16 +67,17 @@ double calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) 
    const double dt = sqr(mt/173.34) - 1;  // defined below Eq.(41)
 
    const double* w = (124.42 <= mh && mh <= 125.87) ? p : q;
+   const double dmw = (124.42 <= mh && mh <= 125.87) ? 0.11e-3 : 0.5e-3; // below Eq.(45)
 
    // Eq.(45)
-   const double mw2 = w[0] + w[1]*dH + w[2]*dH*dH + w[3]*dh + w[4]*dt
+   const double mw = w[0] + w[1]*dH + w[2]*dH*dH + w[3]*dh + w[4]*dt
       + w[5]*dH*dt + w[6]*das + w[7]*da5;
 
-   if (mw2 < 0) {
-      WARNING("calculate_mw_pole_SM_fit: Standard Model MW^2 " << mw2 << " < 0");
+   if (mw < 0) {
+      WARNING("calculate_mw_pole_SM_fit: Standard Model MW " << mw << " < 0");
    }
 
-   return std::sqrt(std::abs(mw2));
+   return std::make_pair(std::abs(mw), dmw);
 }
 
 } // namespace sm_mw

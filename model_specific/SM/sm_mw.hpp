@@ -19,11 +19,13 @@
 #ifndef SM_MW_H
 #define SM_MW_H
 
+#include <utility>
+
 namespace flexiblesusy {
 namespace sm_mw {
 
-/// calculate W pole mass in the SM
-double calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept;
+/// returns calculate W pole mass in the SM and corresponding uncertainty
+std::pair<double, double> calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept;
 
 } // namespace sm_mw
 } // namespace flexiblesusy
