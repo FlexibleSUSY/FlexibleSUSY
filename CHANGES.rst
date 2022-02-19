@@ -1,4 +1,4 @@
-FlexibleSUSY 2.?.? [?, ? 202?]
+FlexibleSUSY 2.6.2 [February, ? 2022]
 ==================================
 
 New features
@@ -25,15 +25,15 @@ Changes
 -------
 
 * [commit ae1eae8e4d373eec531d6e5774977da2f12e88c8]: Mathematica-style indexing (starting from 1) of
-  leptons in L'->LGamma via the mathlink interface.
+  leptons in `$L' \to L \gamma$` via the mathlink interface.
 
 Fixed bugs
 ----------
 
-* [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of L'->LGamma was breaking printing of
+* [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of `$L' \to L \gamma$` was breaking printing of
   observables via the mathlink interface.
 
-* [commit ]: Fixed wrong calculation of $A \to Z \gamma$.
+* [commit fd8d59dda8fc90182fdfb2255189326341dd8f57]: Fixed wrong calculation of `$A \to Z \gamma$`.
 
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
