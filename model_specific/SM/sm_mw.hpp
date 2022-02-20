@@ -24,8 +24,8 @@
 namespace flexiblesusy {
 namespace sm_mw {
 
-/// returns calculate W pole mass in the SM and corresponding uncertainty
-std::pair<double, double> calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept;
+/// returns W pole mass in the SM and corresponding uncertainty, using fit formula (MS-bar scheme)
+std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(double mh, double mt, double as, double da5had) noexcept;
 
 } // namespace sm_mw
 } // namespace flexiblesusy

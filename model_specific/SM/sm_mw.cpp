@@ -31,14 +31,15 @@ constexpr double sqr(double x) noexcept { return x*x; }
 
 /** 
  * Calculates the prediction for the W boson mass in the Standard
- * Model, using the fit formula Eq (45) from arXiv:1411.7040.
+ * Model, using the fit formula Eq (45) from arXiv:1411.7040 (MS-bar
+ * calculation).
  * 
  * @param mh SM Higgs boson pole mass
  * @param mt SM top quark pole mass
  * @param as MS-bar alpha_s(MZ) in the SM with 5 quark flavours
  * @param da5had hadronic contributison Delta alpha_{had}^{(5)}(MZ^2)
  *
- * The authors of arXiv:1411.7040 recommend used (Table 1):
+ * The authors of arXiv:1411.7040 used the following input values (Table 1):
  *
  * mz = 91.1876 GeV (Z boson pole mass)
  * mh = 125.15 GeV (SM Higgs boson pole mass)
@@ -49,7 +50,7 @@ constexpr double sqr(double x) noexcept { return x*x; }
  * @return W boson pole mass as predicted in the Standard Model (first
  * entry) and corresponding uncertainty (second entry)
  */
-std::pair<double, double> calculate_mw_pole_SM_fit(double mh, double mt, double as, double da5had) noexcept
+std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(double mh, double mt, double as, double da5had) noexcept
 {
    // Table 3, 2nd column, 124.42 <= mh <= 125.87
    const double p[8] = {
@@ -74,7 +75,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit(double mh, double mt, double 
       + w[5]*dH*dt + w[6]*das + w[7]*da5;
 
    if (mw < 0) {
-      WARNING("calculate_mw_pole_SM_fit: Standard Model MW " << mw << " < 0");
+      WARNING("calculate_mw_pole_SM_fit_MSbar: Standard Model MW " << mw << " < 0");
    }
 
    return std::make_pair(std::abs(mw), dmw);

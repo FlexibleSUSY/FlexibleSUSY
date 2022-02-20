@@ -6,7 +6,7 @@
 
 BOOST_AUTO_TEST_CASE( test_sm_mw_fit )
 {
-   using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit;
+   using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar;
 
    const double mz = 91.1876; // GeV (Z boson pole mass)
    const double mh = 125.15; // GeV (SM Higgs boson pole mass)
@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE( test_sm_mw_fit )
    const double as = 0.1184;
    const double da5had = 0.02750;
 
-   const auto res = calculate_mw_pole_SM_fit(mh, mt, as, da5had);
+   const auto res = calculate_mw_pole_SM_fit_MSbar(mh, mt, as, da5had);
    const double mw = res.first;
    const double dmw = res.second;
 
