@@ -68,7 +68,9 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(double mh, double mt, d
    const double dt = sqr(mt/173.34) - 1;  // defined below Eq.(41)
 
    const double* w = (124.42 <= mh && mh <= 125.87) ? p : q;
-   const double dmw = (124.42 <= mh && mh <= 125.87) ? 0.11e-3 : 0.5e-3; // below Eq.(45)
+   const double dmw_fit = (124.42 <= mh && mh <= 125.87) ? 0.11e-3 : 0.5e-3; // below Eq.(45)
+   const double dmw_theo = (124.42 <= mh && mh <= 125.87) ? 1e-3 : 3e-3; // below Eq.(45);
+   const double dmw = dmw_theo + dmw_fit;
 
    // Eq.(45)
    const double mw = w[0] + w[1]*dH + w[2]*dH*dH + w[3]*dh + w[4]*dt
