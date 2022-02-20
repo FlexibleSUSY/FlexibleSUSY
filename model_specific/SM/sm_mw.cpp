@@ -50,7 +50,8 @@ constexpr double sqr(double x) noexcept { return x*x; }
  * @return W boson pole mass as predicted in the Standard Model (first
  * entry) and corresponding uncertainty (second entry)
  */
-std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(double mh, double mt, double as, double da5had) noexcept
+std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
+   double mh, double mt, double as, double da5had) noexcept
 {
    // Table 3, 2nd column, 124.42 <= mh <= 125.87
    const double p[8] = {
