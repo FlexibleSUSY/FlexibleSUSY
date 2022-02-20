@@ -10,6 +10,7 @@
 #include "MRSSM2_input_parameters.hpp"
 #include "MRSSM2_two_scale_spectrum_generator.hpp"
 #include "ew_input.hpp"
+#include "sm_mw.hpp"
 
 using namespace flexiblesusy;
 
@@ -52,6 +53,20 @@ MRSSM2<Two_scale> run_MRSSM2(double MS)
    return spectrum_generator.get_model();
 }
 
+double calc_mw_SM()
+{
+   using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar;
+   softsusy::QedQcd qedqcd;
+
+   const auto res = calculate_mw_pole_SM_fit_MSbar(
+      Electroweak_constants::MH,
+      qedqcd.displayPoleMt(),
+      qedqcd.displayAlphaSInput(),
+      Electroweak_constants::delta_alpha_s_5_had);
+
+   return res.first;
+}
+
 BOOST_AUTO_TEST_CASE( test_decoupling )
 {
    double mw1, mw2, mw5, mw10;
@@ -61,7 +76,7 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
    BOOST_REQUIRE_NO_THROW(mw5 = run_MRSSM2(5000.).get_physical().MVWm);
    BOOST_REQUIRE_NO_THROW(mw10 = run_MRSSM2(10000.).get_physical().MVWm);
 
-   const double mwSM = Electroweak_constants::MWSM;
+   const double mwSM = calc_mw_SM();
 
    BOOST_CHECK_GT(std::abs(mw1 / mwSM - 1.), 5.0e-4);
    BOOST_CHECK_CLOSE_FRACTION(mw1, mw2, 1.0e-3);
