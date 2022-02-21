@@ -48,7 +48,7 @@ constexpr double sqr(double x) noexcept { return x*x; }
  * da5had = 0.02750
  *
  * @return W boson pole mass as predicted in the Standard Model (first
- * entry) and corresponding uncertainty (second entry)
+ * entry) and corresponding theory uncertainty (second entry)
  */
 std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
    double mh, double mt, double as, double da5had) noexcept
@@ -104,7 +104,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
  * Da = 0.05907 = 0.0314977 + 0.027572
  *
  * @return W boson pole mass as predicted in the Standard Model (first
- * entry) and corresponding uncertainty (second entry)
+ * entry) and corresponding theory uncertainty (second entry)
  */
 std::pair<double, double> calculate_mw_pole_SM_fit_OS(
    double mz, double mh, double mt, double as, double Da) noexcept
