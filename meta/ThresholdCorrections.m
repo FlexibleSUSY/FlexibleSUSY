@@ -477,14 +477,33 @@ GetParameter[par_, factor_:1] :=
     MultiplyBy[factor];
 
 CalculateThetaWFromFermiConstant[] :=
-    Module[{},
+    Module[{
+        mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]],
+        callStr = If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] > 1, "(higgs_idx)", ""],
+        },
     "\
+const auto calculate_mh_pole = [&] () {
+   double mh_pole = Electroweak_constants::MH;
+   try {
+      auto tmp = *MODEL;
+      tmp.solve_ewsb();
+      tmp.calculate_" <> mhStr <> "_pole();
+      mh_pole = tmp.get_physical()." <> mhStr <> callStr <> ";
+   } catch (const std::exception& error) {
+      WARNING(\"Higgs pole mass calculation at low-energy scale \"
+              \"failed with the following error message:\");
+      WARNING(error.what());
+      WARNING(\"-> using SM value \" << mh_pole << \" GeV instead.\");
+   }
+   return mh_pole;
+};
+
 " <> FlexibleSUSY`FSModelName <> "_weinberg_angle::Sm_parameters sm_pars;
 sm_pars.fermi_constant = qedqcd.displayFermiConstant();
 sm_pars.mw_pole = qedqcd.displayPoleMW();
 sm_pars.mz_pole = qedqcd.displayPoleMZ();
 sm_pars.mt_pole = qedqcd.displayPoleMt();
-sm_pars.mh_pole = Electroweak_constants::MH;
+sm_pars.mh_pole = calculate_mh_pole();
 sm_pars.alpha_s = calculate_alpha_s_SM5_at(qedqcd, qedqcd.displayPoleMt());
 sm_pars.alpha_s_mz = qedqcd.displayAlphaSInput();
 sm_pars.dalpha_s_5_had = Electroweak_constants::delta_alpha_s_5_had;
