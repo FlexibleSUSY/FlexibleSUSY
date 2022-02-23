@@ -72,6 +72,7 @@ void @ModelName@_susy_scale_constraint<Semi_analytic>::apply()
 
    // apply user-defined susy scale constraints
 @applyConstraint@
+@calculateSMHiggsPoleMass@
 @saveBoundaryValueParameters@
 @temporaryResetting@
 }

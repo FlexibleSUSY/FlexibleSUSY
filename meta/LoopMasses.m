@@ -35,6 +35,8 @@ CallPoleMassFunction::usage="";
 CallThreadedPoleMassFunction::usage="";
 CreateLoopMassFunctionName::usage="";
 
+CalculateSMHiggsPoleMass::usage="Calculates SM Higgs pole mass on a model";
+
 GetLoopCorrectedParticles::usage="Returns list of all particles that
 get loop corrected masses.  These are all particles, except for
 ghosts.";
@@ -42,6 +44,24 @@ ghosts.";
 CreateLSPFunctions::usage="";
 
 Begin["`Private`"];
+
+CalculateSMHiggsPoleMass[FlexibleSUSY`FSMassW] := "";
+
+CalculateSMHiggsPoleMass[FlexibleSUSY`FSFermiConstant] :=
+    Module[{mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]]},
+    "\
+// calculate SM-like Higgs pole mass
+// for usage in MW calculation at low-energy scale
+{
+   auto tmp = *MODEL;
+   tmp.solve_ewsb();
+   " <> CallPoleMassFunction[TreeMasses`GetHiggsBoson[], "tmp."] <> "\
+   MODEL->get_physical()." <> mhStr <> " = tmp.get_physical()." <> mhStr <> ";
+}
+"
+    ];
+
+CalculateSMHiggsPoleMass[_] := "";
 
 GetLoopCorrectedParticles[states_] :=
     Module[{particles},
