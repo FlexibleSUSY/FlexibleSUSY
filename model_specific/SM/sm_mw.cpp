@@ -77,6 +77,18 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
    const double mw = w[0] + w[1]*dH + w[2]*dH*dH + w[3]*dh + w[4]*dt
       + w[5]*dH*dt + w[6]*das + w[7]*da5;
 
+   if (mh <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mh " << mh << " <= 0");
+   }
+   if (mt <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mt " << mt << " <= 0");
+   }
+   if (as <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: alpha_s " << as << " <= 0");
+   }
+   if (da5had <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: Delta alpha_{had}^{(5)} " << da5had << " <= 0");
+   }
    if (mw < 0) {
       WARNING("calculate_mw_pole_SM_fit_MSbar: Standard Model MW " << mw << " < 0");
    }
@@ -131,6 +143,21 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
       + c[4]*(dh - 1) - c[5]*da + c[6]*dt - c[7]*dt*dt - c[8]*dH*dt
       + c[9]*dh*dt - c[10]*das + c[11]*dZ;
 
+   if (mz <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mz " << mz << " <= 0");
+   }
+   if (mh <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mh " << mh << " <= 0");
+   }
+   if (mt <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mt " << mt << " <= 0");
+   }
+   if (as <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: alpha_s " << as << " <= 0");
+   }
+   if (Da <= 0) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: Delta alpha " << Da << " <= 0");
+   }
    if (mw < 0) {
       WARNING("calculate_mw_pole_SM_fit_OS: Standard Model MW " << mw << " < 0");
    }
