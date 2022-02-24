@@ -64,21 +64,22 @@ BOOST_AUTO_TEST_CASE( test_decoupling )
    input.m0  = 1000.;
    input.m12 = 1000.;
    std::tie(mw1, mh1) = calc_mw_mh_CMSSM(input);
-   BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-4);
-   BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 1.0e-5);
 
    input.m0  = 2000.;
    input.m12 = 2000.;
    std::tie(mw2, mh2) = calc_mw_mh_CMSSM(input);
-   BOOST_CHECK_CLOSE_FRACTION(mw2, calc_mw_SM(mh2), 1.0e-4);
 
    input.m0  = 5000.;
    input.m12 = 5000.;
    std::tie(mw5, mh5) = calc_mw_mh_CMSSM(input);
-   BOOST_CHECK_CLOSE_FRACTION(mw5, calc_mw_SM(mh5), 1.0e-5);
 
    input.m0  = 10000.;
    input.m12 = 10000.;
    std::tie(mw10, mh10) = calc_mw_mh_CMSSM(input);
+
+   BOOST_CHECK_GT(std::abs(mw1/calc_mw_SM(mh1) - 1), 1.0e-5);
+   BOOST_CHECK_CLOSE_FRACTION(mw1, calc_mw_SM(mh1), 1.0e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw2, calc_mw_SM(mh2), 1.0e-4);
+   BOOST_CHECK_CLOSE_FRACTION(mw5, calc_mw_SM(mh5), 1.0e-5);
    BOOST_CHECK_CLOSE_FRACTION(mw10, calc_mw_SM(mh10), 1.0e-6);
 }
