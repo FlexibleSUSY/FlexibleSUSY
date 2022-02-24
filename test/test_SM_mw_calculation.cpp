@@ -29,13 +29,13 @@ SM<Two_scale> run_SM(const SM_input_parameters& input)
    return spectrum_generator.get_model();
 }
 
-double calc_mw_SM()
+double calc_mw_SM(double mh)
 {
    using flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar;
    softsusy::QedQcd qedqcd;
 
    const auto res = calculate_mw_pole_SM_fit_MSbar(
-      Electroweak_constants::MH,
+      mh,
       qedqcd.displayPoleMt(),
       qedqcd.displayAlphaSInput(),
       Electroweak_constants::delta_alpha_s_5_had);
@@ -50,8 +50,9 @@ BOOST_AUTO_TEST_CASE( test_consistency )
    input.Qin      = 91.1876;
    input.QEWSB    = 173.34;
 
-   double mw;
-   BOOST_REQUIRE_NO_THROW(mw = run_SM(input).get_physical().MVWp);
-   const double mwSM = calc_mw_SM();
+   const auto sm = run_SM(input);
+   const double mw = sm.get_physical().MVWp;
+   const double mh = sm.get_physical().Mhh;
+   const double mwSM = calc_mw_SM(mh);
    BOOST_CHECK_CLOSE_FRACTION(mw, mwSM, 1.0e-10);
 }
