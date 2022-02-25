@@ -80,6 +80,12 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
    if (mh <= 0) {
       WARNING("calculate_mw_pole_SM_fit_MSbar: mh " << mh << " <= 0");
    }
+   if (mh < 50) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " < 50 GeV is outside the fit range");
+   }
+   if (mh > 540) {
+      WARNING("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " > 450 GeV is outside the fit range");
+   }
    if (mt <= 0) {
       WARNING("calculate_mw_pole_SM_fit_MSbar: mt " << mt << " <= 0");
    }
@@ -98,8 +104,8 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
 
 /**
  * Calculates the prediction for the W boson mass in the Standard
- * Model, using the fit formula Eq (6) from hep-ph/0311148 (on-shell
- * calculation).
+ * Model, using the fit formulae Eqs (6)-(9) from hep-ph/0311148
+ * (on-shell calculation).
  *
  * @param mz Z boson pole mass
  * @param mh SM Higgs boson pole mass
@@ -121,10 +127,15 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
 std::pair<double, double> calculate_mw_pole_SM_fit_OS(
    double mz, double mh, double mt, double as, double Da) noexcept
 {
-   // Eq.(8)
-   const double c[12] = {
+   // Eq.(8), 10 GeV <= mh <= 1000 GeV
+   const double p[12] = {
       80.3779, 0.05427, 0.008931, 0.0000882, 0.000161, 1.070,
       0.5237, 0.0679, 0.00179, 0.0000664, 0.0795, 114.9
+   };
+   // Eq.(9), 100 GeV <= mh <= 1000 GeV
+   const double q[12] = {
+      80.3779, 0.05263, 0.010239, 0.000954, -0.000054, 1.077,
+      0.5252, 0.0700, 0.004102, 0.000111, 0.0774, 115.0
    };
 
    // Eq.(7)
@@ -135,8 +146,10 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
    const double da = Da/0.05907 - 1;
    const double das = as/0.119 - 1;
 
-   // sum of fit uncertainty and theory uncertainty
-   const double dmw = 0.5e-3 + 4e-3; // below Eq.(8) and Eq.(10)
+   const double* c = (mh < 100) ? p : q;
+   const double dmh_fit = (mh < 100) ? 0.5e-3 : 0.25e-3; // fit uncertainty, below Eqs.(8) and (9)
+   const double dmh_theo = 4e-3; // theory uncertainty Eq.(10)
+   const double dmw = dmh_fit + dmh_theo;
 
    // Eq.(6)
    const double mw = c[0] - c[1]*dH - c[2]*dH*dH + c[3]*dH*dH*dH*dH
@@ -144,19 +157,25 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
       + c[9]*dh*dt - c[10]*das + c[11]*dZ;
 
    if (mz <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mz " << mz << " <= 0");
+      WARNING("calculate_mw_pole_SM_fit_OS: mz " << mz << " <= 0");
    }
    if (mh <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mh " << mh << " <= 0");
+      WARNING("calculate_mw_pole_SM_fit_OS: mh " << mh << " <= 0");
+   }
+   if (mh < 10) {
+      WARNING("calculate_mw_pole_SM_fit_OS: mh = " << mh << " < 10 GeV is outside the fit range");
+   }
+   if (mh > 1000) {
+      WARNING("calculate_mw_pole_SM_fit_OS: mh = " << mh << " > 1000 GeV is outside the fit range");
    }
    if (mt <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mt " << mt << " <= 0");
+      WARNING("calculate_mw_pole_SM_fit_OS: mt " << mt << " <= 0");
    }
    if (as <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: alpha_s " << as << " <= 0");
+      WARNING("calculate_mw_pole_SM_fit_OS: alpha_s " << as << " <= 0");
    }
    if (Da <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: Delta alpha " << Da << " <= 0");
+      WARNING("calculate_mw_pole_SM_fit_OS: Delta alpha " << Da << " <= 0");
    }
    if (mw < 0) {
       WARNING("calculate_mw_pole_SM_fit_OS: Standard Model MW " << mw << " < 0");
