@@ -19,13 +19,18 @@
 #ifndef TEST_COMPLEX_EQUALITY_H
 #define TEST_COMPLEX_EQUALITY_H
 
+#include <boost/test/unit_test.hpp>
 #include <complex>
 
-void TEST_COMPLEX_EQUALITY( std::complex<double> a,
-	std::complex<double> b )
+void TEST_COMPLEX_EQUALITY(std::complex<double> a, std::complex<double> b)
 {
-	BOOST_TEST( std::real( a ) == std::real( b ) );
-	BOOST_TEST( std::imag( a ) == std::imag( b ) );
+   BOOST_TEST(std::real(a) == std::real(b));
+   BOOST_TEST(std::imag(a) == std::imag(b));
 }
+
+#define TEST_COMPLEX_CLOSE_FRACTION(a, b, eps) do {                     \
+      BOOST_CHECK_CLOSE_FRACTION(std::real(a), std::real(b), eps);      \
+      BOOST_CHECK_CLOSE_FRACTION(std::imag(a), std::imag(b), eps);      \
+   } while (false)
 
 #endif
