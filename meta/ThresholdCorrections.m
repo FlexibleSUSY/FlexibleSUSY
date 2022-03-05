@@ -479,7 +479,7 @@ GetParameter[par_, factor_:1] :=
 CalculateThetaWFromFermiConstant[] :=
     Module[{
         mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]],
-        callStr = If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] > 1, "(higgs_idx)", ""],
+        callStr = If[TreeMasses`GetDimension[TreeMasses`GetHiggsBoson[]] > 1, "(higgs_idx)", ""]
         },
     "\
 const auto get_mh_pole = [&] () {
