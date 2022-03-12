@@ -299,11 +299,11 @@ Block UERMIX
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VPVP(&m, 1), 3.5731537311554876e-06, 3e-12);
 
    // Ah -> b bbar
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
-                              0.0018671335954316421, 2e-15);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
+                              1.0248504778252014, 2e-15);
    // Ah -> c cbar
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              9.3482696650389066e-05, 2e-16);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
+                              5.1682891794454512e-06, 2e-16);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections

@@ -7,6 +7,9 @@ double CLASSNAME::get_partial_width<AH, bar<lep>::type, lep>(
    typename field_indices<bar<lep>::type>::type const& indexOut1,
    typename field_indices<lep>::type const& indexOut2) const
 {
+   if (indexIn.at(0) < info::number_of_neutral_goldstones) {
+      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<lep>::type, lep>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+   }
 
    const double mAHOS = context.physical_mass<AH>(indexIn);
    const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
