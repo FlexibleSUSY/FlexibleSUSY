@@ -9,6 +9,10 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    typename field_indices<dq>::type const& indexOut2
    ) const
 {
+   if (indexIn.at(0) < info::number_of_neutral_goldstones) {
+      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+   }
+
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses

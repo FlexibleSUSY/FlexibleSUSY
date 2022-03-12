@@ -730,10 +730,10 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029502623532270532, 8e-14);
 
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 0, 2, 2),
-                              0.0018327846210855049, 5e-12);
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 0, 1, 1),
-                              9.139211136105259e-05, 2e-13);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
+                              27.558400433360585, 5e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
+                              6.5403200582277049e-07, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
