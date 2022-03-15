@@ -46,6 +46,8 @@ void Standard_model_low_scale_constraint<Two_scale>::apply()
 
    qedqcd.run_to(scale, 1.0e-5);
    model->calculate_DRbar_masses();
+   model->solve_ewsb();
+   model->calculate_Mhh_pole();
 
    const double alpha_em = qedqcd.displayAlpha(softsusy::ALPHA);
    const double alpha_s  = qedqcd.displayAlpha(softsusy::ALPHAS);
@@ -67,7 +69,9 @@ void Standard_model_low_scale_constraint<Two_scale>::apply()
    const double g2 = model->get_g2();
    const double mZ = model->get_thresholds() && model->get_threshold_corrections().mz > 0 ?
       model->calculate_MVZ_DRbar(mz_pole) : mz_pole;
-   const double theta_w = model->calculate_theta_w(qedqcd, alpha_em_drbar);
+   const auto theta_w_mw_pole = model->calculate_theta_w(qedqcd, alpha_em_drbar);
+   const double theta_w = theta_w_mw_pole.first;
+   const double mw_pole = theta_w_mw_pole.second;
 
    double new_g1 = 1.2909944487358056*e_drbar*Sec(theta_w);
    double new_g2 = e_drbar*Csc(theta_w);
@@ -96,8 +100,9 @@ void Standard_model_low_scale_constraint<Two_scale>::apply()
    model->set_g2(new_g2);
    model->set_g3(3.5449077018110318*Sqrt(alpha_s_drbar));
 
-   if (model->get_thresholds() && model->get_threshold_corrections().sin_theta_w > 0)
-      qedqcd.setPoleMW(model->recalculate_mw_pole(qedqcd.displayPoleMW()));
+   if (model->get_thresholds() && model->get_threshold_corrections().sin_theta_w > 0) {
+      qedqcd.setPoleMW(mw_pole);
+   }
 }
 
 double Standard_model_low_scale_constraint<Two_scale>::get_scale() const

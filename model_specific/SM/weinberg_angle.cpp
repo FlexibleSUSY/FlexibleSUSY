@@ -22,6 +22,7 @@
 #include "logger.hpp"
 #include "numerics.h"
 #include "numerics2.hpp"
+#include "sm_mw.hpp"
 #include "wrappers.hpp"
 
 #include <cmath>
@@ -53,6 +54,8 @@ using namespace softsusy;
 Weinberg_angle::Data::Data()
    : scale(0.)
    , alpha_em_drbar(0.)
+   , alpha_s_mz(0.)
+   , dalpha_s_5_had(Electroweak_constants::delta_alpha_s_5_had)
    , fermi_contant(0.)
    , self_energy_z_at_mz(0.)
    , self_energy_w_at_0(0.)
@@ -61,6 +64,7 @@ Weinberg_angle::Data::Data()
    , mz_pole(0.)
    , mt_pole(0.)
    , mh_drbar(0.)
+   , mh_pole(0.)
    , hmix_12(0.)
    , msel_drbar(0.)
    , msmul_drbar(0.)
@@ -99,6 +103,7 @@ Weinberg_angle::Weinberg_angle()
    , precision_goal(1.0e-8)
    , rho_hat(0.)
    , sin_theta(0.)
+   , mw_pole(0.)
    , data()
    , susy_contributions(true)
 {
@@ -142,6 +147,11 @@ double Weinberg_angle::get_rho_hat() const
 double Weinberg_angle::get_sin_theta() const
 {
    return sin_theta;
+}
+
+double Weinberg_angle::get_mw_pole() const
+{
+   return mw_pole;
 }
 
 /**
@@ -237,6 +247,7 @@ int Weinberg_angle::calculate(double rho_start, double sin_start)
 
    rho_hat = rho_new;
    sin_theta = sin_new;
+   mw_pole = calculate_mw_pole();
 
    const int no_convergence_error = iteration == number_of_iterations;
 
@@ -833,6 +844,21 @@ double Weinberg_angle::replace_mtop_in_self_energy_z(
       = self_energy_z - self_energy_z_mt_drbar + self_energy_z_mt_pole;
 
    return self_energy_z_with_mt_pole;
+}
+
+/**
+ * Calculates the W boson pole mass.
+ *
+ * @note Currently includes only the SM contributions, i.e. no BSM contributions.
+ *
+ * @return W boson pole mass
+ */
+double Weinberg_angle::calculate_mw_pole() const
+{
+   const auto sm_mw = flexiblesusy::sm_mw::calculate_mw_pole_SM_fit_MSbar(
+      data.mh_pole, data.mt_pole, data.alpha_s_mz, data.dalpha_s_5_had);
+
+   return sm_mw.first;
 }
 
 } // namespace weinberg_angle
