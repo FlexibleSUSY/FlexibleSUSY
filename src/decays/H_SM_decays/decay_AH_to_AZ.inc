@@ -6,7 +6,13 @@ double CLASSNAME::get_partial_width<AH, A, Z>(
       const typename field_indices<Z>::type& out2_idx,
       boost::optional<Decay_amplitude_SVV> optional_amp) const
 {
+
+   if (in_idx.at(0) < info::number_of_neutral_goldstones) {
+      throw OutOfBoundsError("Error in " + create_process_string<AH,A,Z>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
+   }
+
    const auto amp = optional_amp ? optional_amp.get() : calculate_amplitude<AH, A, Z>(context, in_idx, out1_idx, out2_idx);
+
    const double mH = context.physical_mass<AH>(in_idx);
    const double mZ = qedqcd.displayPoleMZ();
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., 0., Sqr(mZ/mH)));

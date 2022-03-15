@@ -22,6 +22,7 @@
 #include <complex>
 #include "src/lowe.h"
 #include "flexibledecay_settings.hpp"
+#include "src/wrappers.hpp"
 
 namespace flexiblesusy {
 
@@ -59,6 +60,7 @@ unsigned int number_of_active_flavours(softsusy::QedQcd const&, double m) noexce
 double sm_up_quark_masses(softsusy::QedQcd const&, int);
 double sm_down_quark_masses(softsusy::QedQcd const&, int);
 
+static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
 } // namespace flexiblesusy
 
 #endif

@@ -111,7 +111,7 @@ double CLASSNAME::get_partial_width<H,bar<dq>::type,dq>(
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
 
             deltaqq_QCDxQED_DR =
-               (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
 
             const double mtpole = qedqcd.displayPoleMt();
             const double lt = std::log(Sqr(mHOS/mtpole));
