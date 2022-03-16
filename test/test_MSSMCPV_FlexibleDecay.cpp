@@ -810,6 +810,7 @@ Block ImMSOFT Q= 2.00000000E+03
    MSSMCPV_slha m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
+   m.reorder_DRbar_masses();
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections

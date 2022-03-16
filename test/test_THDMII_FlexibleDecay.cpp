@@ -258,6 +258,7 @@ Block UERMIX
    THDMII_slha m(input);
    slha_io.fill(m);
    m.calculate_DRbar_masses();
+   m.reorder_DRbar_masses();
 
    // -----------------------------------------------------
    // decays with higher-order SM corrections
