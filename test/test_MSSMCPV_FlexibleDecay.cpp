@@ -823,13 +823,13 @@ Block ImMSOFT Q= 2.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 1, 2, 2),
-                              0.0021079024633380125, 6e-13);
+                              0.0021707237775801919, 6e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
-                              0.00010447088544366981, 2e-13);
+                              0.00010604105374890464, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
-                              0.00022563024219708657, 3e-13);
+                              0.00022695659608435093, 3e-13);
    // h -> W+ W-
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 1),
    //                            4.271655828335071e-05, 2e-12);
@@ -844,14 +844,14 @@ Block ImMSOFT Q= 2.00000000E+03
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 0.0002318886239533966, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 1), 0.00023188864634816065, 2e-10);
    // h -> gamma gamma
    // without 2L QCD for squark
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 6.3284545616000571e-06, 4e-11);
    // with 2L QCD for squark
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 1), 5.3089300093115946e-06, 7e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 1), 5.3089524775640594e-06, 7e-10);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994372474535712e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994529676800549e-07, 7e-11);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -861,19 +861,19 @@ Block ImMSOFT Q= 2.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 1, 2, 2),
-                              0.0012241960498053724, 2e-13);
+                              0.0012302551007035709, 2e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 1, 1, 1),
-                              6.5917338328992629e-05, 2e-13);
+                              6.5889190180543533e-05, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 1, 2, 2),
-                              0.00022323499746669591, 3e-13);
+                              0.0002245472712886441, 3e-13);
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 1), 5.2382389517397406e-06, 7e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 1), 5.2382612693789171e-06, 7e-10);
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 1), 6.1972398675528688e-05, 2e-10);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 1), 6.1972425811286929e-05, 2e-10);
 
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994372474535712e-07, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 1), 5.1994529676800549e-07, 7e-11);
 }
