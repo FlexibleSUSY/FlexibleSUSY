@@ -106,11 +106,11 @@ Block HMIXIN
    201     4.00000000E+02   # MuDInput
    202     4.00000000E+02   # MuUInput
 Block MSD2IN
-  1  1     6.25000000E+06   # md2Input(1,1)
+  1  1     1.00000000E+06   # md2Input(1,1)
   1  2     0.00000000E+00   # md2Input(1,2)
   1  3     0.00000000E+00   # md2Input(1,3)
   2  1     0.00000000E+00   # md2Input(2,1)
-  2  2     6.25000000E+06   # md2Input(2,2)
+  2  2     1.00000000E+06   # md2Input(2,2)
   2  3     0.00000000E+00   # md2Input(2,3)
   3  1     0.00000000E+00   # md2Input(3,1)
   3  2     0.00000000E+00   # md2Input(3,2)
@@ -134,33 +134,33 @@ Block MSE2IN
   3  2     0.00000000E+00   # me2Input(3,2)
   3  3     1.00000000E+06   # me2Input(3,3)
 Block MSL2IN
-  1  1     1.00000000E+06   # ml2Input(1,1)
+  1  1     4.00000000E+06   # ml2Input(1,1)
   1  2     0.00000000E+00   # ml2Input(1,2)
   1  3     0.00000000E+00   # ml2Input(1,3)
   2  1     0.00000000E+00   # ml2Input(2,1)
-  2  2     1.00000000E+06   # ml2Input(2,2)
+  2  2     4.00000000E+06   # ml2Input(2,2)
   2  3     0.00000000E+00   # ml2Input(2,3)
   3  1     0.00000000E+00   # ml2Input(3,1)
   3  2     0.00000000E+00   # ml2Input(3,2)
-  3  3     1.00000000E+06   # ml2Input(3,3)
+  3  3     4.00000000E+06   # ml2Input(3,3)
 Block MSQ2IN
-  1  1     6.25000000E+06   # mq2Input(1,1)
+  1  1     4.00000000E+06   # mq2Input(1,1)
   1  2     0.00000000E+00   # mq2Input(1,2)
   1  3     0.00000000E+00   # mq2Input(1,3)
   2  1     0.00000000E+00   # mq2Input(2,1)
-  2  2     6.25000000E+06   # mq2Input(2,2)
+  2  2     4.00000000E+06   # mq2Input(2,2)
   2  3     0.00000000E+00   # mq2Input(2,3)
   3  1     0.00000000E+00   # mq2Input(3,1)
   3  2     0.00000000E+00   # mq2Input(3,2)
-  3  3     1.00000000E+06   # mq2Input(3,3)
+  3  3     4.00000000E+06   # mq2Input(3,3)
 Block NMSSMRUNIN
     10     4.00000000E+06   # mS2Input
 Block MSU2IN
-  1  1     6.25000000E+06   # mu2Input(1,1)
+  1  1     1.00000000E+06   # mu2Input(1,1)
   1  2     0.00000000E+00   # mu2Input(1,2)
   1  3     0.00000000E+00   # mu2Input(1,3)
   2  1     0.00000000E+00   # mu2Input(2,1)
-  2  2     6.25000000E+06   # mu2Input(2,2)
+  2  2     1.00000000E+06   # mu2Input(2,2)
   2  3     0.00000000E+00   # mu2Input(2,3)
   3  1     0.00000000E+00   # mu2Input(3,1)
   3  2     0.00000000E+00   # mu2Input(3,2)
@@ -695,45 +695,45 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0025273625096655988, 5e-12);
+                              0.0025634108347145032, 5e-12);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              0.00012115281603656197, 2e-13);
+                              0.00012285838147242436, 2e-13);
    // QED corrections
    // BOOST_CHECK_CLOSE_FRACTION(decays.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
    //                            2.6059181498481999E-003, 5e-15);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
-                              0.00026946060398832237, 5e-12);
+                              0.00027545151828801864, 5e-12);
    // h -> W+ W-
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
    //                           0.00066154345019159267, 5e-11);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_conjVWmVWm(&m, 0),
-                              0.00073836837044127768, 1e-3);
+                              0.00094083425095728521, 1e-3);
    // h -> Z Z
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
    //                            7.5383132433569488e-05, 9e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VZVZ(&m, 0),
-                              9.638232014475222e-05, 1e-3);
+                              0.00012722814312214181, 1e-3);
 
    // ------------ loop-induces decays ------------
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00038305055803087727, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VGVG(&m, 0), 0.00040230167812046075, 7e-11);
    // h -> gamma gamma
    // without 2-loop QCD corrections to squark loop
    // BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 8.3519576334971031e-06, 4e-11);
    // with 2-loop QCD corrections to squark loop
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.0316485590151162e-05, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVP(&m, 0), 1.1323516448739387e-05, 4e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 6.391735378735319e-06, 5e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_hh_to_VPVZ(&m, 0), 7.8803489809960472e-06, 5e-11);
 
-   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029502623532270532, 8e-14);
+   BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_VGVG(&m, 1), 0.00029585461520717076, 2e-13);
 
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFdFd(&m, 1, 2, 2),
-                              27.558400433360585, 5e-12);
+                              27.422426060823373, 5e-12);
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Ah_to_barFuFu(&m, 1, 1, 1),
-                              6.5403200582277049e-07, 2e-13);
+                              6.535918222486397e-07, 2e-13);
 
    // -----------------------------------------------------
    // decays without higher-order SM corrections
@@ -743,29 +743,29 @@ Block FlexibleSUSYLowEnergy Q= 1.00000000E+03
 
    // h -> b bbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFdFd(&m, 0, 2, 2),
-                              0.0015852320624501718, 2e-13);
+                              0.0016025829212124214, 2e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFuFu(&m, 0, 1, 1),
-                              8.2876032145842477e-05, 1e-13);
+                              8.4238942917635169e-05, 2e-13);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_barFeFe(&m, 0, 2, 2),
-                              0.00026660324954596258, 5e-12);
+                              0.00027252978259241349, 5e-12);
 
    // ------------ loop-induces decays ------------
 
    // h -> gamma gamma
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.0133389963488187e-05, 4e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVP(&m, 0), 1.1149675854277999e-05, 4e-11);
 
    // h -> gluon gluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00012423136936565911, 7e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VGVG(&m, 0), 0.00013277226722491827, 7e-11);
    // h -> gamma Z
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 6.391735378735319e-06, 5e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_hh_to_VPVZ(&m, 0), 7.8803489809960472e-06, 5e-11);
 
    // scalar sgluon
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_VGVG(&m), 7.5701751945543629e-09, 3e-11);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_barFuFu(&m, 2, 2), 2.2040853636396876e-05, 2e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_VGVG(&m), 0.057227805663593985, 3e-11);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_phiO_to_barFuFu(&m, 2, 2), 2.3214926991726654e-05, 2e-12);
 
    // pseudoscalar sgluon
    BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_VGVG(&m), 0, 1e-16);
-   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 2.1375623871457065e-11, 8e-12);
+   BOOST_CHECK_CLOSE_FRACTION(decays_without_HO.partial_width_sigmaO_to_barFuFu(&m, 2, 2), 2.2644027655336339e-05, 8e-12);
 }
