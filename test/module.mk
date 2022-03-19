@@ -446,7 +446,6 @@ endif
 
 ifeq ($(WITH_SOFTSUSY) $(WITH_CMSSMNoFV),yes yes)
 TEST_SRC += \
-		$(DIR)/test_CMSSMNoFV_benchmark.cpp \
 		$(DIR)/test_CMSSMNoFV_two_loop_spectrum.cpp
 endif
 
