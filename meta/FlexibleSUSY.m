@@ -4973,7 +4973,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
            ];
 
-           Print["Creating l->l'A class ..."];
+           Print["Creating l→l'γ class ..."];
            WriteLToLGammaClass[LToLGammaFields,
                            {{FileNameJoin[{$flexiblesusyTemplateDir, "l_to_lgamma.hpp.in"}],
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_l_to_lgamma.hpp"}]},
@@ -4982,7 +4982,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            (* b -> s gamma *)
            If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`bsgamma],
-             Print["Creating b->s'A class ..."];
+             Print["Creating b→sγ class ..."];
              QToQGammaFields = Join[{BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetPhoton[]}},
                {BtoSGamma`GetBottomQuark[] -> {BtoSGamma`GetStrangeQuark[], TreeMasses`GetGluon[]}}],
              QToQGammaFields = {}];
