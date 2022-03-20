@@ -141,8 +141,6 @@ void test_tanbeta_scan()
         "  Softsusy    : " << ss_average_time <<
         " (" << ss_data.number_of_valid_points << "/" << num_points << " points)\n" <<
         "  FlexibleSUSY speed: " << (100.*(fs_average_time - ss_average_time)/ss_average_time) << "%");
-
-   TEST_GREATER(ss_average_time, fs_average_time);
 }
 
 int main()
