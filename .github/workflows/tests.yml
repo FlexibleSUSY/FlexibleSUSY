@@ -134,7 +134,8 @@ jobs:
 
     env:
       FORMCALC_VERSION: '9.9'
-      MODELS: 'MSSM CMSSM CMSSMNoFV CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
 
     steps:
 
@@ -166,7 +167,10 @@ jobs:
         env:
           PART: ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(' ')" -- $PART $MODELS)
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
           for m in $models; do ./createmodel --name=$m; done
 
       - name: "Set FS dependency directory"
@@ -184,7 +188,11 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
           PART:        ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
+          models=$(ruby -e "puts ARGV.join(',')" -- $models)
           ./configure \
             --with-cxx=$CXXCOMPILER \
             --with-models=$models \
