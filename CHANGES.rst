@@ -1,4 +1,12 @@
-FlexibleSUSY 2.6.2 [February, ? 2022]
+FlexibleSUSY 2.7.0 [April, ? 2022]
+==================================
+
+New features
+-------
+
+* W-boson mass prediction with decoupling property.
+
+FlexibleSUSY 2.6.2 [April, ? 2022]
 ==================================
 
 New features
