@@ -49,7 +49,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install conan
         run: |
@@ -141,7 +141,7 @@ jobs:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Activate Wolfram Engine
         env:
@@ -276,7 +276,7 @@ jobs:
           done
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
