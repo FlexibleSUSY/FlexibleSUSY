@@ -69,6 +69,8 @@ void Problems::clear()
    std::fill(pole_tachyons.begin(), pole_tachyons.end(), 0);
    std::fill(failed_pole_mass_convergence.begin(), failed_pole_mass_convergence.end(), 0);
    non_pert_pars.clear();
+   failed_minimum.clear();
+   failed_root.clear();
    exception_msg = "";
    failed_ewsb = false;
    failed_ewsb_tree_level = false;
@@ -86,6 +88,8 @@ void Problems::add(const Problems& other)
    vector_or(pole_tachyons, other.pole_tachyons);
    vector_or(failed_pole_mass_convergence, other.failed_pole_mass_convergence);
    map_or(non_pert_pars, other.non_pert_pars);
+   map_or(failed_minimum, other.failed_minimum);
+   map_or(failed_root, other.failed_root);
 
    if (exception_msg.empty() && !other.exception_msg.empty())
       exception_msg = other.exception_msg;
@@ -109,6 +113,8 @@ unsigned Problems::number_of_problems() const
    if (failed_ewsb_tree_level) count++;
    if (non_perturbative || have_non_perturbative_parameter()) count++;
    if (failed_sinThetaW_convergence) count++;
+   if (no_minimum()) count++;
+   if (no_root()) count++;
    if (have_thrown()) count++;
    if (have_failed_pole_mass_convergence()) count++;
    return count;
@@ -181,6 +187,14 @@ std::vector<std::string> Problems::get_problem_strings() const
                 ") = " + flexiblesusy::to_string(par.second.value) + "]";
       }
       strings.emplace_back(str);
+   }
+
+   for (const auto& m: failed_minimum) {
+      strings.emplace_back(std::string("no minimum for parameters ") + m.first);
+   }
+
+   for (const auto& m: failed_root) {
+      strings.emplace_back(std::string("no root for parameters ") + m.first);
    }
 
    strings.shrink_to_fit();
@@ -311,6 +325,16 @@ void Problems::flag_no_sinThetaW_convergence()
    failed_sinThetaW_convergence = true;
 }
 
+void Problems::flag_no_minimum(const std::string& msg, int status)
+{
+   failed_minimum[msg] = status;
+}
+
+void Problems::flag_no_root(const std::string& msg, int status)
+{
+   failed_root[msg] = status;
+}
+
 void Problems::unflag_bad_mass(int particle)
 {
    bad_masses.at(particle) = false;
@@ -375,6 +399,16 @@ void Problems::unflag_all_non_perturbative_parameters()
 void Problems::unflag_no_sinThetaW_convergence()
 {
    failed_sinThetaW_convergence = false;
+}
+
+void Problems::unflag_no_minimum(const std::string& msg)
+{
+   failed_minimum.erase(msg);
+}
+
+void Problems::unflag_no_root(const std::string& msg)
+{
+   failed_root.erase(msg);
 }
 
 bool Problems::is_bad_mass(int particle) const
@@ -450,6 +484,16 @@ bool Problems::no_perturbative() const
 bool Problems::no_sinThetaW_convergence() const
 {
    return failed_sinThetaW_convergence;
+}
+
+bool Problems::no_minimum() const
+{
+   return !failed_minimum.empty();
+}
+
+bool Problems::no_root() const
+{
+   return !failed_root.empty();
 }
 
 std::vector<int> Problems::get_bad_masses() const
