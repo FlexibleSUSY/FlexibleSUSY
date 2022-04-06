@@ -49,7 +49,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install conan
         run: |
@@ -125,7 +125,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.11.3
+      image: navir/opensuseleap-for-flexiblesusy:0.11.4
 
     strategy:
       matrix:
@@ -133,14 +133,15 @@ jobs:
         PART:        [1, 2]
 
     env:
-      FORMCALC_VERSION: '9.9'
-      MODELS: 'MSSM CMSSM CMSSMNoFV CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
+      FORMCALC_VERSION: '9.10'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
 
     steps:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Activate Wolfram Engine
         env:
@@ -166,7 +167,10 @@ jobs:
         env:
           PART: ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(' ')" -- $PART $MODELS)
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
           for m in $models; do ./createmodel --name=$m; done
 
       - name: "Set FS dependency directory"
@@ -184,7 +188,11 @@ jobs:
           CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
           PART:        ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "MODELS=ARGV.drop(1); puts MODELS.each_slice(MODELS.length/2).to_a[ARGV[0].to_i-1].join(',')" -- $PART $MODELS)
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
+          models=$(ruby -e "puts ARGV.join(',')" -- $models)
           ./configure \
             --with-cxx=$CXXCOMPILER \
             --with-models=$models \
@@ -268,7 +276,7 @@ jobs:
           done
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs

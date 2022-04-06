@@ -150,12 +150,22 @@ ApplyConstraint[FlexibleSUSY`FSMinimize[parameters_List, function_], modelPrefix
            functionWrapper = CreateMinimizationFunctionWrapper[functionName,dim,parameters,
                                                                Parameters`DecreaseIndexLiterals[function],
                                                                modelPrefix];
-           callMinimizer = functionWrapper <> "\n" <> startPoint <>
-                           "Minimizer<" <> dimStr <>
-                           "> minimizer(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = minimizer.minimize(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));\n";
-           "\n{" <> TextFormatting`IndentText[callMinimizer] <> "}\n"
+           callMinimizer = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_minimum(par_str);
+
+" <> startPoint <>
+"Minimizer<" <> dimStr <> "> minimizer(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+
+const int status = minimizer.minimize(start_point);
+
+VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_minimum(par_str, status);
+}
+";
+           "\n{\n" <> TextFormatting`IndentText[callMinimizer] <> "}\n\n"
           ];
 
 CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List, modelPrefix_String] :=
@@ -181,11 +191,20 @@ ApplyConstraint[FlexibleSUSY`FSFindRoot[parameters_List, function_List], modelPr
            functionWrapper = CreateRootFinderFunctionWrapper[functionName,dim,parameters,
                                                              Parameters`DecreaseIndexLiterals[function],
                                                              modelPrefix];
-           callRootFinder = functionWrapper <> "\n" <> startPoint <>
-                           "Root_finder<" <> dimStr <>
-                           "> root_finder(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = root_finder.find_root(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));\n";
+           callRootFinder = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_root(par_str);
+
+" <> startPoint <>
+"Root_finder<" <> dimStr <> "> root_finder(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+const int status = root_finder.find_root(start_point);
+
+VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_root(par_str, status);
+}
+";
            "\n{\n" <> TextFormatting`IndentText[callRootFinder] <> "}\n\n"
           ];
 
