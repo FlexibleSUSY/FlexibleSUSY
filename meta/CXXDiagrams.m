@@ -536,7 +536,9 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
     Utils`AssertWithMessage[colourRep1 == colourRep2,
 			"CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
 			"Two colour indices in Kronecker delta that come from fields " <>
-			"of incompatible representations."];
+			"of incompatible representations: Field1 = " <>
+                        ToString[{colouredField1, colourRep1}] <> ", Field2 = " <>
+                        ToString[{colouredField2, colourRep2}]];
 
 		(* FIXME: Are these orderings correct? *)
 		Switch[{colourRep1},
