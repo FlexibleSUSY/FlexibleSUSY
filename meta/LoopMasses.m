@@ -54,6 +54,7 @@ CalculateSMHiggsPoleMass[FlexibleSUSY`FSFermiConstant] :=
 // for usage in MW calculation at low-energy scale
 {
    auto tmp = *MODEL;
+   tmp.do_force_output(true); // enforce calculation of pole masses
    tmp.solve_ewsb();
    " <> CallPoleMassFunction[TreeMasses`GetHiggsBoson[], "tmp."] <> "\
    MODEL->get_physical()." <> mhStr <> " = tmp.get_physical()." <> mhStr <> ";
