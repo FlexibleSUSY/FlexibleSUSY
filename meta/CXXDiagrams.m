@@ -517,7 +517,7 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
-	Module[{colouredField1, colouredField2, colourRep1, colourRep2},
+	Module[{colouredField1, colouredField2, colourRep1, colourRep2, errorMessage},
 		(* If the result has a color Delta, we need to find out if it's adj. or fundamental
 			because they are represented by different symbols in ColorMath.
 			Also, in ColorMath the order of indices matters. As stated in  ColorMath tutorial notebook:
@@ -533,28 +533,65 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
     colourRep1 = SARAH`getColorRep[colouredField1];
     colourRep2 = SARAH`getColorRep[colouredField2];
 
-    Utils`AssertWithMessage[colourRep1 == colourRep2,
-			"CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
-			"Two colour indices in Kronecker delta that come from fields " <>
-			"of incompatible representations: Field1 = " <>
-                        ToString[{colouredField1, colourRep1}] <> ", Field2 = " <>
-                        ToString[{colouredField2, colourRep2}]];
+    errorMessage = "CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
+                   "Two colour indices in Kronecker delta that come from fields " <>
+                   "of incompatible representations: Field1 = " <>
+                      ToString[{colouredField1, colourRep1}] <> ", Field2 = " <>
+                      ToString[{colouredField2, colourRep2}];
 
-		(* FIXME: Are these orderings correct? *)
-		Switch[{colourRep1},
-			{SARAH`T}, If[RemoveLorentzConjugation[colouredField1] === colouredField1,
-				ColorMath`CMdelta[cIndex2, cIndex1],
-				ColorMath`CMdelta[cIndex1, cIndex2]
-			],
-			{O}, ColorMath`CMDelta[cIndex2, cIndex1],
-			_,
-			Print["CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
-				"Two colour indices in Kronecker delta that come from fields " <>
-				"or representations we cannot handle: " <>
-				ToString[{colourRep1, colourRep2}]];
-			Quit[1];
-		]
-	];
+    (* FIXME: Are these orderings correct? *)
+    Switch[{colourRep1, colourRep2},
+       {SARAH`T, SARAH`T},
+          (* 2 is conjugated, 1 is not *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+             ColorMath`CMdelta[cIndex2, cIndex1],
+             (* 1 is conjugated, 2 is not *)
+             If[RemoveLorentzConjugation[colouredField2] === colouredField2 && RemoveLorentzConjugation[colouredField1] =!= colouredField1,
+                ColorMath`CMdelta[cIndex1, cIndex2],
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {-SARAH`T, -SARAH`T},
+          (* 2 is conjugated, 1 is not *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+             ColorMath`CMdelta[cIndex1, cIndex2],
+             (* 1 is conjugated, 2 is not *)
+             If[RemoveLorentzConjugation[colouredField2] === colouredField2 && RemoveLorentzConjugation[colouredField1] =!= colouredField1,
+                ColorMath`CMdelta[cIndex2, cIndex1],
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {SARAH`T, -SARAH`T},
+          (* none is conjugated *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] === colouredField2,
+             ColorMath`CMdelta[cIndex2, cIndex1],
+             (* both are conjugated *)
+             If[RemoveLorentzConjugation[colouredField1] =!= colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+                ColorMath`CMdelta[cIndex1, cIndex2],
+                (* error if only one is conjugated *)
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {-SARAH`T, SARAH`T},
+          (* none is conjugated *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] === colouredField2,
+             ColorMath`CMdelta[cIndex1, cIndex2],
+             (* both are conjugated *)
+             If[RemoveLorentzConjugation[colouredField1] =!= colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+                ColorMath`CMdelta[cIndex2, cIndex1],
+                (* error if only one is conjugated *)
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {O, O}, ColorMath`CMDelta[cIndex2, cIndex1],
+       _,
+         Print["CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
+               "Two colour indices in Kronecker delta that come from fields " <>
+               "or representations we cannot handle: " <>
+               ToString[{colourRep1, colourRep2}]];
+         Quit[1];
+    ]
+];
 
 ConvertColourStructureToColorMathConvention[fields_List,
    AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
