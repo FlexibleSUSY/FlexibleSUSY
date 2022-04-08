@@ -129,6 +129,8 @@ CreateMinimizationFunctionWrapper[functionName_String, dim_Integer, parameters_L
            type  = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
            stype = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
 "auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
@@ -168,10 +170,18 @@ if (status != GSL_SUCCESS) {
            "\n{\n" <> TextFormatting`IndentText[callMinimizer] <> "}\n\n"
           ];
 
+CreateTemporaryForceOutputRAII[modelPrefix_String] := "\
+// temporarily enforce calculation of pole masses
+const bool force_output = " <> modelPrefix <> "do_force_output();
+const auto tmp_force_output = make_raii_guard([&] { " <> modelPrefix <> "do_force_output(force_output); });
+" <> modelPrefix <> "do_force_output(true);";
+
 CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List, modelPrefix_String] :=
     Module[{type},
            type = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
 "auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
