@@ -65,7 +65,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
    const double das = as/0.1184 - 1;      // Eq.(20)
    const double da5 = da5had/0.02750 - 1; // defined below Eq.(44)
    const double dh = sqr(mh/125.15) - 1;  // defined below Eq.(45)
-   const double dH = std::log(mh/125.15); // Eq.(20)
+   const double dH = std::log(std::abs(mh)/125.15); // Eq.(20)
    const double dt = sqr(mt/173.34) - 1;  // defined below Eq.(41)
 
    const double* w = (124.42 <= mh && mh <= 125.87) ? p : q;
@@ -139,7 +139,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
    };
 
    // Eq.(7)
-   const double dH = std::log(mh/100);
+   const double dH = std::log(std::abs(mh)/100);
    const double dh = sqr(mh/100);
    const double dt = sqr(mt/173.3) - 1;
    const double dZ = mz/91.1875 - 1;
