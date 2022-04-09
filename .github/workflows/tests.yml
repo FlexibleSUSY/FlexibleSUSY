@@ -47,7 +47,7 @@ jobs:
           brew install gsl
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install conan
         run: |
@@ -131,15 +131,15 @@ jobs:
         PART:     [1, 2]
 
     env:
-      FORMCALC_VERSION: '9.9'
-      MODELS: 'CMSSM SM'
-      # 'MSSM CMSSM CMSSMNoFV CMSSMCKM MSSMCPV MSSMNoFV NUHMSSMNoFVHimalaya ScalarLeptoquarks LRLR E6SSM SM THDMII MRSSM2 MRSSM2CKM'
+      FORMCALC_VERSION: '9.10'
+      MODELS1: 'SM'
+      MODELS2: 'CMSSM'
 
     steps:
 
       # action checks-out our repository directly under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Activate Wolfram Engine
         env:
@@ -165,7 +165,10 @@ jobs:
         env:
           PART: ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "puts ARGV.each_slice(ARGV.length/2).to_a[$PART-1].join(' ')" -- $MODELS)
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
           for m in $models; do ./createmodel --name=$m; done
 
       - name: Set C++ environment
@@ -185,8 +188,11 @@ jobs:
           COMPILER: ${{ matrix.COMPILER }}
           PART:        ${{ matrix.PART }}
         run: |
-          models=$(ruby -e "puts ARGV.each_slice(ARGV.length/2).to_a[$PART-1].join(',')" -- $MODELS)
-          [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
+          models=$(ruby -e "puts ARGV.join(',')" -- $models)
           ./configure \
             --with-cxx=$CXX \
             --with-shared-lib-cmd="$CXX -std=c++14 -O2 -fPIC -Wall -pipe -fp-model strict -shared -o" \
@@ -286,7 +292,7 @@ jobs:
           done
 
       - name: (Optional) Save logs in case of an error
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: ${{matrix.COMPILER}}_test-logs

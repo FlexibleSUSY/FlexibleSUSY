@@ -9,6 +9,10 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    typename field_indices<dq>::type const& indexOut2
    ) const
 {
+   if (indexIn.at(0) < info::number_of_neutral_goldstones) {
+      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+   }
+
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
@@ -101,7 +105,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
 
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
-               (691/24. - 6*zeta3 - Sqr(Pi))*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
             if (!is_zero(gbHoVEV_P)) {
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));

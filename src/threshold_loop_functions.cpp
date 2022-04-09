@@ -1956,28 +1956,33 @@ namespace {
          return 2.343907238689459;
       }
 
-      const double Pi = 3.141592653589793;
+      const double pi23 = 3.2898681336964529; // Pi^2/3
       const auto lambda = std::sqrt(lambda_2(u,v));
 
       if (is_equal(u, v, eps)) {
-         return (-(sqr(std::log(u)))
-                 + 2*sqr(std::log((1 - lambda)/2.))
-                 - 4*dilog((1 - lambda)/2.)
-                 + sqr(Pi)/3.)/lambda;
+         return (- sqr(std::log(u))
+                 + 2*sqr(std::log(0.5*(1 - lambda)))
+                 - 4*dilog(0.5*(1 - lambda))
+                 + pi23)/lambda;
       }
 
-      return (-(std::log(u)*std::log(v))
-              + 2*std::log((1 - lambda + u - v)/2.)*std::log((1 - lambda - u + v)/2.)
-              - 2*dilog((1 - lambda + u - v)/2.)
-              - 2*dilog((1 - lambda - u + v)/2.)
-              + sqr(Pi)/3.)/lambda;
+      return (- std::log(u)*std::log(v)
+              + 2*std::log(0.5*(1 - lambda + u - v))*std::log(0.5*(1 - lambda - u + v))
+              - 2*dilog(0.5*(1 - lambda + u - v))
+              - 2*dilog(0.5*(1 - lambda - u + v))
+              + pi23)/lambda;
+   }
+
+   /// clausen_2(2*acos(x))
+   double cl2acos(double x) noexcept
+   {
+      return clausen_2(2*std::acos(x));
    }
 
    /// lambda^2(u,v) < 0, u = 1
-   double phi_neg_1v(double v, double lambda) noexcept
+   double phi_neg_1v(double v) noexcept
    {
-      return 2*(+ clausen_2(2*std::acos((2 - v)/2))
-                + 2*clausen_2(2*std::acos(0.5*std::sqrt(v))))/lambda;
+      return 2*(cl2acos(1 - 0.5*v) + 2*cl2acos(0.5*std::sqrt(v)));
    }
 
    /// lambda^2(u,v) < 0; note: phi_neg(u,v) = phi_neg(v,u)
@@ -1986,27 +1991,30 @@ namespace {
       const double eps = 1.0e-7;
 
       if (is_equal(u, 1.0, eps) && is_equal(v, 1.0, eps)) {
+         // -I/9 (Pi^2 - 36 PolyLog[2, (1 - I Sqrt[3])/2])/Sqrt[3]
          return 2.343907238689459;
       }
 
       const auto lambda = std::sqrt(-lambda_2(u,v));
 
+      if (is_equal(u, v, eps)) {
+         return 4*clausen_2(2*std::asin(std::sqrt(0.25/u)))/lambda;
+      }
+
       if (is_equal(u, 1.0, eps)) {
-         return phi_neg_1v(v, lambda);
+         return phi_neg_1v(v)/lambda;
       }
 
       if (is_equal(v, 1.0, eps)) {
-         return phi_neg_1v(u, lambda);
+         return phi_neg_1v(u)/lambda;
       }
 
-      if (is_equal(u, v, eps)) {
-         return 2*(2*clausen_2(2*std::acos(1/(2.*std::sqrt(u))))
-                   + clausen_2(2*std::acos((-1 + 2*u)/(2.*std::abs(u)))))/lambda;
-      }
+      const auto sqrtu = std::sqrt(u);
+      const auto sqrtv = std::sqrt(v);
 
-      return 2*(+ clausen_2(2*std::acos((1 + u - v)/(2.*std::sqrt(u))))
-                + clausen_2(2*std::acos((1 - u + v)/(2.*std::sqrt(v))))
-                + clausen_2(2*std::acos((-1 + u + v)/(2.*std::sqrt(u*v)))))/lambda;
+      return 2*(+ cl2acos(0.5*(1 + u - v)/sqrtu)
+                + cl2acos(0.5*(1 - u + v)/sqrtv)
+                + cl2acos(0.5*(-1 + u + v)/(sqrtu*sqrtv)))/lambda;
    }
 
    /**
@@ -2019,7 +2027,7 @@ namespace {
    {
       const auto lambda = lambda_2(u,v);
 
-      if (is_zero(lambda, std::numeric_limits<double>::epsilon())) {
+      if (is_zero(lambda, 1e-11)) {
          // phi_uv is always multiplied by lambda.  So, in order to
          // avoid nans if lambda == 0, we simply return 0
          return 0.0;
@@ -2029,11 +2037,14 @@ namespace {
          if (u <= 1 && v <= 1) {
             return phi_pos(u,v);
          }
-         if (u >= 1 && v/u <= 1) {
-            return phi_pos(1./u,v/u)/u;
+         const auto oou = 1/u;
+         const auto vou = v/u;
+         if (u >= 1 && vou <= 1) {
+            return phi_pos(oou,vou)*oou;
          }
          // v >= 1 && u/v <= 1
-         return phi_pos(1./v,u/v)/v;
+         const auto oov = 1/v;
+         return phi_pos(oov,1/vou)*oov;
       }
 
       return phi_neg(u,v);
