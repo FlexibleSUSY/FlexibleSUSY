@@ -96,7 +96,7 @@ namespace Electroweak_constants {
       constexpr double mu2SM = 7.67488232E+03; ///< mu^2 MS-bar in the SM at Q = MZ
       constexpr double lamSM = 2.79613357E-01; ///< lambda MS-bar in the SM at Q = MZ
       constexpr double vSM = 2.48997424E+02;   ///< VEV MS-bar in the SM at Q = MZ
-      constexpr double delta_alpha_s_5_had = 0.02750; ///< hadronic 5-flavour corrections
+      constexpr double delta_alpha_s_5_had = 0.02766; ///< hadronic 5-flavour corrections
    } // namespace
 } // namespace Electroweak_constants
 
