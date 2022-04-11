@@ -78,25 +78,25 @@ std::pair<double, double> calculate_mw_pole_SM_fit_MSbar(
       + w[5]*dH*dt + w[6]*das + w[7]*da5;
 
    if (mh <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " <= 0");
    }
    if (mh < 50) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " < 50 GeV is outside the fit range");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " < 50 GeV is outside the fit range");
    }
    if (mh > 540) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " > 450 GeV is outside the fit range");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mh = " << mh << " > 450 GeV is outside the fit range");
    }
    if (mt <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: mt = " << mt << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: mt = " << mt << " <= 0");
    }
    if (as <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: alpha_s = " << as << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: alpha_s = " << as << " <= 0");
    }
    if (da5had <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: Delta alpha_{had}^{(5)} = " << da5had << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: Delta alpha_{had}^{(5)} = " << da5had << " <= 0");
    }
    if (mw < 0) {
-      WARNING("calculate_mw_pole_SM_fit_MSbar: Standard Model MW = " << mw << " < 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_MSbar: Standard Model MW = " << mw << " < 0");
    }
 
    return std::make_pair(std::abs(mw), dmw);
@@ -157,28 +157,28 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
       + c[9]*dh*dt - c[10]*das + c[11]*dZ;
 
    if (mz <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: mz " << mz << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: mz " << mz << " <= 0");
    }
    if (mh <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: mh " << mh << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: mh " << mh << " <= 0");
    }
    if (mh < 10) {
-      WARNING("calculate_mw_pole_SM_fit_OS: mh = " << mh << " < 10 GeV is outside the fit range");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: mh = " << mh << " < 10 GeV is outside the fit range");
    }
    if (mh > 1000) {
-      WARNING("calculate_mw_pole_SM_fit_OS: mh = " << mh << " > 1000 GeV is outside the fit range");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: mh = " << mh << " > 1000 GeV is outside the fit range");
    }
    if (mt <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: mt " << mt << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: mt " << mt << " <= 0");
    }
    if (as <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: alpha_s " << as << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: alpha_s " << as << " <= 0");
    }
    if (Da <= 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: Delta alpha " << Da << " <= 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: Delta alpha " << Da << " <= 0");
    }
    if (mw < 0) {
-      WARNING("calculate_mw_pole_SM_fit_OS: Standard Model MW " << mw << " < 0");
+      VERBOSE_MSG("calculate_mw_pole_SM_fit_OS: Standard Model MW " << mw << " < 0");
    }
 
    return std::make_pair(std::abs(mw), dmw);
