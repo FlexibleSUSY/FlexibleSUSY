@@ -11,7 +11,7 @@ env:
 jobs:
   package-models:
     name: Create model packages
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
       image: navir/opensuseleap-for-flexiblesusy
 
@@ -76,7 +76,7 @@ jobs:
   upload-models:
     name: Upload packages to git
     needs: package-models
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -110,7 +110,7 @@ jobs:
   upload-slha-outputs:
     name: Upload SLHA to git
     needs: package-models
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -144,7 +144,7 @@ jobs:
   upload-release:
     name: Upload to release
     needs: package-models
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
