@@ -1,5 +1,4 @@
 // special case for Higgs -> Z Z
-// TODO: implement higher order corrections
 
 struct my_f_params {double mHOS; double mVOS; double GammaV;};
 

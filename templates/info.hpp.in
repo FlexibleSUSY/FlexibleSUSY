@@ -38,6 +38,8 @@ namespace @ModelName@_info {
 @inputParameterEnum@
 @extraParameterEnum@
 @gaugeCouplingNormalizationDecls@
+@numberOfNeutralGoldstones@
+@numberOfChargedGoldstones@
 
    extern const std::array<int, NUMBER_OF_PARTICLES> particle_multiplicities;
    extern const std::array<std::string, NUMBER_OF_PARTICLES> particle_names;

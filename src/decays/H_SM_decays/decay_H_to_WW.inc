@@ -1,5 +1,4 @@
 // special case for H -> W+ W-
-// TODO: implement higher order corrections
 
 template <>
 double CLASSNAME::get_partial_width<H, conj<W>::type, W>(

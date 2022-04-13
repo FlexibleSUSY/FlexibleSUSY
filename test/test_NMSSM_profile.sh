@@ -3,7 +3,6 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-FSCONFIG="$BASEDIR/../flexiblesusy-config"
 VALGRIND="`command -v valgrind`"
 NMSSM_EXE="$BASEDIR/../models/NMSSM/run_NMSSM.x"
 NMSSM_INPUT="$BASEDIR/../model_files/NMSSM/LesHouches.in.NMSSM"

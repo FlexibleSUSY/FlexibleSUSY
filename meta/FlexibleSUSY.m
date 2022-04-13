@@ -60,6 +60,7 @@ BeginPackage["FlexibleSUSY`",
               "FSMathLink`",
               "FlexibleTower`",
               "WeinbergAngle`",
+              "Wrappers`",
               "Himalaya`"
 }];
 
@@ -366,6 +367,7 @@ FSLoopLibraries = { FSSOFTSUSY };
 
 FSFeynArtsAvailable = False;
 FSFormCalcAvailable = False;
+FSEnableColors = False;
 
 Begin["`Private`"];
 
@@ -461,8 +463,12 @@ ReplaceSymbolsInUserInput[rules_] :=
            SetAttributes[CheckParticleInPrecision, HoldFirst];
            CheckParticleInPrecision[precision_] :=
               If[!SubsetQ[TreeMasses`GetParticles[], precision],
-                 Print["Warning: Particle(s) ", Complement[precision, TreeMasses`GetParticles[]],
-                 " cannot be used in ", Unevaluated@precision, " as it is not part of ", FSModelName, ". Removing it/them."];
+                 Utils`FSFancyWarning["Particle(s) ",
+                    Complement[precision, TreeMasses`GetParticles[]],
+                    " cannot be used in ", Unevaluated@precision,
+                    " as it is not part of ", ToString@FSModelName,
+                    ". Removing it/them."
+                 ];
                  precision = Intersection[precision, TreeMasses`GetParticles[]]
               ];
            CheckParticleInPrecision /@
@@ -470,9 +476,11 @@ ReplaceSymbolsInUserInput[rules_] :=
 
            (* decay calculation require 3- and 4-point loop functions *)
            If[FlexibleSUSY`FSCalculateDecays && DisjointQ[FSLoopLibraries, {FSLoopTools, FSCOLLIER}],
-              Print["Warning: Decay calculation requires a dedicated loop library. Currently it's either ",
-                    "LoopTools or Collier but FlexibleSUSY was only configured with internal libraries. ",
-                    "Disabling decays."
+              Utils`FSFancyWarning[
+                 "Decay calculation requires a dedicated loop library.",
+                 " Currently it's either LoopTools or Collier but",
+                 " FlexibleSUSY was only configured with internal libraries.",
+                 " Disabling decays."
               ];
               FlexibleSUSY`FSCalculateDecays = False
            ];
@@ -525,7 +533,11 @@ CheckBVPSolvers[solvers_List] :=
 
 CheckDecaysOptions[] :=
    If[FlexibleSUSY`FSDecayParticles =!= Automatic && FlexibleSUSY`FSDecayParticles =!= All && !ListQ[FlexibleSUSY`FSDecayParticles],
-      Print["Warning: Allowed values for FSDecayParticles are Automatic, All or list of particles. Got ", FlexibleSUSY`FSDecayParticles, ". Disabling decays. "];
+      Utils`FSFancyWarning[
+         "Allowed values for FSDecayParticles are Automatic, All or",
+         " list of particles. Got ", FlexibleSUSY`FSDecayParticles,
+         ". Disabling decays."
+      ];
       FlexibleSUSY`FSCalculateDecays = False,
       If[FlexibleSUSY`FSDecayParticles === Automatic,
          FlexibleSUSY`FSDecayParticles =
@@ -533,8 +545,10 @@ CheckDecaysOptions[] :=
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
             If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
-               Print["Warning: Requested decay of particles ", Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
-                     " which are not part of the model. Removing them."];
+               Utils`FSFancyWarning[
+                  "Requested decay of particles ",
+                  Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
+                  " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ]
          ]
@@ -551,8 +565,10 @@ CheckModelFileSettings[] :=
     Module[{},
            (* FlexibleSUSY model name *)
            If[!ValueQ[FlexibleSUSY`FSModelName] || Head[FlexibleSUSY`FSModelName] =!= String,
-              Print["Warning: FlexibleSUSY`FSModelName not defined!",
-                    " I'm using Model`Name from SARAH: ", Model`Name];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`FSModelName not defined!",
+                 " I'm using Model`Name from SARAH: ", Model`Name
+              ];
               FlexibleSUSY`FSModelName = Model`Name;
              ];
            (* Set OnlyLowEnergyFlexibleSUSY to False by default *)
@@ -573,16 +589,18 @@ CheckModelFileSettings[] :=
            (* HighScale *)
            If[!ValueQ[FlexibleSUSY`HighScale],
               If[!FlexibleSUSY`OnlyLowEnergyFlexibleSUSY,
-                 Print["Warning: FlexibleSUSY`HighScale should be",
-                       " set in the model file!"];
-                ];
+                 Utils`FSFancyWarning[
+                    "FlexibleSUSY`HighScale should be set in the model file!"
+                 ];
+              ];
               FlexibleSUSY`HighScale := 2 10^16;
              ];
            If[!ValueQ[FlexibleSUSY`HighScaleFirstGuess],
               If[!FlexibleSUSY`OnlyLowEnergyFlexibleSUSY,
-                 Print["Warning: FlexibleSUSY`HighScaleFirstGuess should be",
-                       " set in the model file!"];
-                ];
+                 Utils`FSFancyWarning[
+                    "FlexibleSUSY`HighScaleFirstGuess should be set in the model file!"
+                 ];
+              ];
               FlexibleSUSY`HighScaleFirstGuess = 2.0 10^16;
              ];
            If[Head[FlexibleSUSY`HighScaleInput] =!= List,
@@ -590,13 +608,15 @@ CheckModelFileSettings[] :=
              ];
            (* LowScale *)
            If[!ValueQ[FlexibleSUSY`LowScale],
-              Print["Warning: FlexibleSUSY`LowScale should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`LowScale should be set in the model file!"
+              ];
               FlexibleSUSY`LowScale := LowEnergyConstant[MZ];
              ];
            If[!ValueQ[FlexibleSUSY`LowScaleFirstGuess],
-              Print["Warning: FlexibleSUSY`LowScaleFirstGuess should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`LowScaleFirstGuess should be set in the model file!"
+              ];
               FlexibleSUSY`LowScaleFirstGuess = LowEnergyConstant[MZ];
              ];
            If[Head[FlexibleSUSY`LowScaleInput] =!= List,
@@ -604,13 +624,15 @@ CheckModelFileSettings[] :=
              ];
            (* SUSYScale *)
            If[!ValueQ[FlexibleSUSY`SUSYScale],
-              Print["Warning: FlexibleSUSY`SUSYScale should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`SUSYScale should be set in the model file!"
+              ];
               FlexibleSUSY`SUSYScale := 1000;
              ];
            If[!ValueQ[FlexibleSUSY`SUSYScaleFirstGuess],
-              Print["Warning: FlexibleSUSY`SUSYScaleFirstGuess should be",
-                    " set in the model file!"];
+              Utils`FSFancyWarning[
+                 "FlexibleSUSY`SUSYScaleFirstGuess should be set in the model file!"
+              ];
               FlexibleSUSY`SUSYScaleFirstGuess = 1000;
              ];
            If[Head[FlexibleSUSY`SUSYScaleInput] =!= List,
@@ -618,7 +640,9 @@ CheckModelFileSettings[] :=
              ];
            If[Head[FlexibleSUSY`SUSYScaleMatching] === List &&
               Head[FlexibleSUSY`MatchingScaleInput] =!= List,
-              Print["Warning: SUSYScaleMatching is deprecated.  Please use MatchingScaleInput instead!"];
+              Utils`FSFancyWarning[
+                 "SUSYScaleMatching is deprecated. Please use MatchingScaleInput instead!"
+              ];
               FlexibleSUSY`MatchingScaleInput = FlexibleSUSY`SUSYScaleMatching;
              ];
 
@@ -641,8 +665,10 @@ CheckModelFileSettings[] :=
               FlexibleSUSY`ExtraSLHAOutputBlocks = {};
              ];
            If[MemberQ[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}],
-              Print["Warning: Effective coupling module has been disabled since v2.6.0."];
-              Print["         Please use FlexibleDecay instead."];
+              Utils`FSFancyWarning[
+                 "Effective coupling module has been disabled since v2.6.0.",
+                 " Please use FlexibleDecay instead."
+              ];
               FlexibleSUSY`ExtraSLHAOutputBlocks =
                  DeleteCases[FlexibleSUSY`ExtraSLHAOutputBlocks, {FlexibleSUSY`EFFHIGGSCOUPLINGS, __}];
            ];
@@ -690,9 +716,10 @@ CheckExtraParametersUsage[parameters_List, boundaryConditions_List] :=
            usedCases = Function[par, !FreeQ[#, par]& /@ boundaryConditions] /@ parameters;
            multiplyUsedPars = Position[Count[#, True]& /@ usedCases, n_ /; n > 1];
            If[multiplyUsedPars =!= {},
-              Print["Warning: the following auxiliary parameters appear at"];
-              Print["   multiple scales, but do not run:"];
-              Print["  ", Extract[parameters, multiplyUsedPars]];
+              Utils`FSFancyWarning[
+                 "The following auxiliary parameters appear at multiple",
+                 " scales, but do not run: ", Extract[parameters, multiplyUsedPars]
+              ];
              ];
           ];
 
@@ -1224,7 +1251,7 @@ WriteWeinbergAngleClass[deltaVBcontributions_List, vertexRules_List, files_List]
           ];
 
 FindVEV[gauge_] :=
-    Module[{result, vev},
+    Module[{vev},
            vev = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs],
                        {_,{v_,_},{gauge,_},{p_,_},___} | {_,{v_,_},{s_,_},{gauge,_},___} :> v];
            If[vev === {},
@@ -1236,7 +1263,7 @@ FindVEV[gauge_] :=
 
 (* returns VEV normalization w.r.t. the corresponding gauge eigenstate *)
 FindVEVNormalization[gauge_] :=
-    Module[{result, vev},
+    Module[{vev},
            vev = Cases[SARAH`DEFINITION[FlexibleSUSY`FSEigenstates][SARAH`VEVs],
                        {_,{v_,n_},{gauge,m_},{p_,_},___} | {_,{v_,n_},{s_,_},{gauge,m_},___} :> Abs[n/m]];
            If[vev === {},
@@ -1606,7 +1633,6 @@ WriteModelClass[massMatrices_List, ewsbEquations_List,
             slhaPoleMassGetters = "", slhaPoleMixingMatrixGetters = "",
             higgsMassGetters = "", higgsToEWSBEqAssociation,
             tadpoleEqPrototypes = "", tadpoleEqFunctions = "",
-            numberOfEWSBEquations = Length[ewsbEquations],
             calculateTreeLevelTadpoles = "", divideTadpoleByVEV = "",
             calculateOneLoopTadpoles = "", calculateTwoLoopTadpoles = "",
             physicalMassesDef = "", mixingMatricesDef = "",
@@ -1986,18 +2012,65 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases, solverIncludes = "", solver = ""},
+            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path, modelName},
+
+            modelName =
+               If[SARAH`submodeldir =!= False,
+                  SARAH`modelDir <> "/" <> SARAH`submodeldir,
+                  SARAH`modelDir
+               ];
 
            (solverIncludes = solverIncludes <> EnableSpectrumGenerator[#])& /@ FlexibleSUSY`FSBVPSolvers;
 
            numberOfDecayParticles = Plus @@ (TreeMasses`GetDimensionWithoutGoldstones /@ decayParticles);
 
-           (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
-           decaysLists =
-              AbsoluteTiming@Map[
-                 {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
-                 decayParticles
-              ];
+           (* in parallel model decay of every particle is computed in a separate theread
+              but if we have only one particle then turning parallelism on only introduces
+              an overhead with no speed up *)
+           Block[{FlexibleSUSY`FSEnableParallelism = If[Length[decayParticles] < 2, False, FlexibleSUSY`FSEnableParallelism]},
+              (* create list containing elements {field, {FSParticleDecay 'objects'}} *)
+              If[FlexibleSUSY`FSEnableParallelism,
+                 If[Head[SARAH`VertexList3] === Symbol || Length[SARAH`VertexList3] === 0,
+                    SA`CurrentStates = FlexibleSUSY`FSEigenstates;
+                    SARAH`InitVertexCalculation[FlexibleSUSY`FSEigenstates, False];
+                    SARAH`partDefinition = ParticleDefinitions[FlexibleSUSY`FSEigenstates];
+                    SARAH`Particles[SARAH`Current] = SARAH`Particles[FlexibleSUSY`FSEigenstates];
+                    SARAH`ReadVertexList[FlexibleSUSY`FSEigenstates, False, False, True];
+                    SARAH`MakeCouplingLists;
+                 ];
+                 LaunchKernels[];
+                 DistributeDefinitions[contentOfPath, modelName];
+                 ParallelEvaluate[
+                    (* subkernels have different $Path variable than the main kernel
+                       https://mathematica.stackexchange.com/questions/11595/package-found-with-needs-but-not-with-parallelneeds *)
+                    $Path = contentOfPath;
+                    (* don't pollute terminal with SARAH initialization message *)
+                    Block[{Print},
+                       << SARAH`;
+                       Start@modelName;
+                    ];,
+                    DistributedContexts -> None
+                 ];
+                 DistributeDefinitions[SARAH`VertexList3, SARAH`VertexList4];
+                 decaysLists =
+                    AbsoluteTiming @ ParallelMap[
+                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
+                       decayParticles,
+                       DistributedContexts -> All,
+                       Method -> "FinestGrained"
+                    ];
+                 Needs["Parallel`Developer`"];
+                 Parallel`Developer`ClearDistributedDefinitions[];
+                 Parallel`Developer`ClearKernels[];
+                 CloseKernels[];
+                 ,
+                 decaysLists =
+                    AbsoluteTiming @ Map[
+                       {#, Decays`GetDecaysForParticle[#, maxFinalStateParticles, finalStateParticles]}&,
+                       decayParticles
+                    ];
+              ]
+           ];
            Print[""];
            Print["Creation of decay amplitudes took ", Round[First@decaysLists, 0.1], "s"];
            decaysLists = Last@decaysLists;
@@ -2163,8 +2236,7 @@ WriteSemiAnalyticSpectrumGeneratorClass[files_List] :=
 WriteObservables[extraSLHAOutputBlocks_, files_List] :=
     Module[{requestedObservables, numberOfObservables, observablesDef,
             observablesInit, getObservables, getObservablesNames,
-            clearObservables, setObservables, calculateObservables,
-            loopCouplingsPrototypes, loopCouplingsFunctions},
+            clearObservables, setObservables, calculateObservables},
            requestedObservables = Observables`GetRequestedObservables[extraSLHAOutputBlocks];
            numberOfObservables = Observables`CountNumberOfObservables[requestedObservables];
            observablesDef = Observables`CreateObservablesDefinitions[requestedObservables];
@@ -2404,7 +2476,8 @@ WriteAMuonClass[calcAMu_, files_List] :=
                otherwise we assume it's the second particle in the lepton multiplet *)
             muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
-            discardSMcontributions = CConversion`CreateCBoolValue[True]},
+            discardSMcontributions = CConversion`CreateCBoolValue[True],
+            graphs, diagrams, vertices, barZee = ""},
 
       calculation =
          If[calcAMu,
@@ -2419,14 +2492,35 @@ WriteAMuonClass[calcAMu_, files_List] :=
 
       getMSUSY = AMuon`AMuonGetMSUSY[];
 
+      graphs = AMuon`AMuonContributingGraphs[];
+      diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
+
+      vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
+
+      For[i = 1, i <= Length[graphs], i++,
+         For[j = 1, j <= Length[diagrams[[i]]], j++,
+            barZee = barZee <>
+               "valBarZee += std::complex<double> " <> ToString @ N[
+                  ReIm @ CXXDiagrams`ColourFactorForIndexedDiagramFromGraph[
+               CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
+                  graphs[[i]]
+                ], 16] <> " * " <>
+                ToString @ AMuon`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
+                "::value({" <> muonIndex <> "}, context, qedqcd);\n"
+         ];
+      ];
+
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
+         "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
          "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@AMuon_MuonIndex@" -> muonIndex,
+         "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          Sequence @@ GeneralReplacementRules[]
         }];
 
+        vertices
       ];
 
 GetBVPSolverHeaderName[solver_] :=
@@ -2476,7 +2570,7 @@ EnableSpectrumGenerator[solver_] :=
           ];
 
 RunEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(\n"
@@ -2491,7 +2585,7 @@ RunEnabledSpectrumGenerator[solver_] :=
           ];
 
 ScanEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "result = run_parameter_point<" <> class <> ">(loop_library, qedqcd, input);\n"
@@ -2501,7 +2595,7 @@ ScanEnabledSpectrumGenerator[solver_] :=
           ];
 
 RunCmdLineEnabledSpectrumGenerator[solver_] :=
-    Module[{key = "", class = "", macro = "", body = "", result = ""},
+    Module[{key = "", class = "", body = "", result = ""},
            key = GetBVPSolverSLHAOptionKey[solver];
            class = GetBVPSolverTemplateParameter[solver];
            body = "exit_code = run_solver<" <> class <> ">(loop_library,input);\n"
@@ -2543,8 +2637,12 @@ if (show_decays && flexibledecay_settings.get(FlexibleDecay_settings::calculate_
 
 ExampleCalculateCmdLineDecays[] :=
 FlexibleSUSY`FSModelName <> "_decays decays;" <>
-"if (settings.get(Spectrum_generator_settings::calculate_sm_masses)) {
-   decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+"decays = " <> FlexibleSUSY`FSModelName <> "_decays(std::get<0>(models), qedqcd, physical_input, flexibledecay_settings);
+const bool loop_library_for_decays =
+   (Loop_library::get_type() == Loop_library::Library::Collier) ||
+   (Loop_library::get_type() == Loop_library::Library::Looptools);
+if (spectrum_generator.get_exit_code() == 0 && loop_library_for_decays) {
+   decays.calculate_decays();
 }";
 
 WriteExampleCmdLineOutput[enableDecays_] :=
@@ -2817,7 +2915,7 @@ WriteBVPSolverMakefile[files_List] :=
           ];
 
 WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extraParameters_List,
-                    lesHouchesParameters_List, extraSLHAOutputBlocks_List, 
+                    lesHouchesParameters_List, extraSLHAOutputBlocks_List,
                     decaysSLHAIncludeFiles_List, files_List] :=
     Module[{k, particles, susyParticles, smParticles,
             minpar, extpar, imminpar, imextpar, extraSLHAInputParameters,
@@ -2832,7 +2930,7 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
             isLowEnergyModel = "false",
             isSupersymmetricModel = "false",
             isFlexibleEFTHiggs = "false",
-            getPDGCodeFromParticleEnumNoIndex = "", getPDGCodeFromParticleEnumIndex = "", 
+            getPDGCodeFromParticleEnumNoIndex = "", getPDGCodeFromParticleEnumIndex = "",
             setParticleMultipletNameAndIndexFromPDG = "",
             fillInputParametersFromMINPAR = "", fillInputParametersFromEXTPAR = "",
             fillInputParametersFromIMMINPAR = "",
@@ -2967,6 +3065,8 @@ WriteUtilitiesClass[massMatrices_List, betaFun_List, inputParameters_List, extra
                             "@setParticleMultipletNameAndIndexFromPDG@" -> IndentText[setParticleMultipletNameAndIndexFromPDG],
                             "@isCPViolatingHiggsSector@"       -> CreateCBoolValue @ SA`CPViolationHiggsSector,
                             "@useDecaysData@"                   -> useDecaysData,
+                            "@numberOfNeutralGoldstones@"       -> IndentText["static constexpr int number_of_neutral_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetPseudoscalarHiggsBoson[]]-1] <> ";"],
+                            "@numberOfChargedGoldstones@"       -> IndentText["static constexpr int number_of_charged_goldstones = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> ";"],
                             Sequence @@ GeneralReplacementRules[]
                           } ];
           ];
@@ -3174,6 +3274,11 @@ FSCheckFlags[] :=
 
            If[FlexibleSUSY`FlexibleEFTHiggs,
               References`AddReference["Athron:2016fuq"];
+             ];
+
+           If[FlexibleSUSY`FSCalculateDecays,
+              References`AddReference["Athron:2021kve"];
+              References`AddReference["Sjodahl:2012nk"];
              ];
 
            If[FlexibleSUSY`UseYukawa3LoopQCD || FlexibleSUSY`FlexibleEFTHiggs,
@@ -3448,15 +3553,19 @@ SelectValidEWSBSolvers[solverSolutions_, ewsbSolvers_] :=
                If[solution === {},
                   (* Fixed-point iteration can only be used if an analytic EWSB solution exists *)
                   If[MemberQ[validSolvers, FlexibleSUSY`FPIRelative],
-                     Print["Warning: FPIRelative was selected, but no analytic"];
-                     Print["   solution to the EWSB eqs. is provided."];
-                     Print["   FPIRelative will be removed from the list of EWSB solvers."];
+                     Utils`FSFancyWarning[
+                        "FPIRelative was selected, but no analytic solution",
+                        " to the EWSB eqs. is provided. FPIRelative will be",
+                        " removed from the list of EWSB solvers."
+                     ];
                      validSolvers = Cases[validSolvers, Except[FlexibleSUSY`FPIRelative]];
                     ];
                   If[MemberQ[validSolvers, FlexibleSUSY`FPIAbsolute],
-                     Print["Warning: FPIAbsolute was selected, but no analytic"];
-                     Print["   solution to the EWSB eqs. is provided."];
-                     Print["   FPIAbsolute will be removed from the list of EWSB solvers."];
+                     Utils`FSFancyWarning[
+                        "FPIAbsolute was selected, but no analytic solution",
+                        " to the EWSB eqs. is provided. FPIAbsolute will be",
+                        " removed from the list of EWSB solvers."
+                     ];
                      validSolvers = Cases[validSolvers, Except[FlexibleSUSY`FPIAbsolute]];
                     ];
                  ];
@@ -3983,8 +4092,8 @@ Options[MakeFlexibleSUSY] :=
     };
 
 MakeFlexibleSUSY[OptionsPattern[]] :=
-    Module[{nPointFunctions, runInputFile, initialGuesserInputFile,
-            edmVertices, edmFields,
+    Module[{nPointFunctions, initialGuesserInputFile,
+            aMuonVertices, edmVertices, edmFields,
             QToQGammaFields = {},
             LToLGammaFields = {}, LToLConversionFields = {}, FFMasslessVVertices = {}, conversionVertices = {},
             cxxQFTTemplateDir, cxxQFTOutputDir, cxxQFTFiles,
@@ -4005,7 +4114,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
             extraSLHAOutputBlocks,
             deltaVBwave, deltaVBvertex, deltaVBbox,
             vertexRules, vertexRuleFileName,
-            Lat$massMatrices, spectrumGeneratorFiles = {}, spectrumGeneratorInputFile,
+            Lat$massMatrices, spectrumGeneratorInputFile,
             semiAnalyticBCs, semiAnalyticSolns,
             semiAnalyticHighScaleFiles, semiAnalyticSUSYScaleFiles, semiAnalyticLowScaleFiles,
             semiAnalyticSolnsOutputFile, semiAnalyticEWSBSubstitutions = {}, semiAnalyticInputScale = "",
@@ -4096,8 +4205,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            If[FlexibleSUSY`FSUnfixedParameters =!= {} &&
               FlexibleSUSY`AutomaticInputAtMSUSY =!= True,
-              Print["Warning: the following parameters are not fixed by any constraint:"];
-              Print["  ", FlexibleSUSY`FSUnfixedParameters];
+              Utils`FSFancyWarning[
+                 "The following parameters are not fixed by any constraint: ",
+                 FlexibleSUSY`FSUnfixedParameters
+              ];
              ];
 
            (* add the unfixed parameters to the susy scale constraint *)
@@ -4352,8 +4463,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               FlexibleSUSY`FSDecayParticles = Select[FlexibleSUSY`FSDecayParticles, Decays`IsSupportedDecayParticle];
 
               If[FlexibleSUSY`FSDecayParticles === {},
-                 Print["Warning: no supported particles to calculate decays for were found."];
-                 Print["   Generation of decays code will be skipped."];
+                 Utils`FSFancyWarning[
+                    "No supported particles to calculate decays for were found.",
+                    " Generation of decays code will be skipped."
+                 ];
                  FlexibleSUSY`FSCalculateDecays = False;
                 ,
                 decaysSLHAIncludeFiles = {FlexibleSUSY`FSModelName <> "_decays.hpp"};
@@ -4810,7 +4923,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                 ];
 
               With[{f = FileNameJoin[{"test", "FlexibleDecay.mk"}]},
-                 If[FileExistsQ[f], DeleteFile[f]]
+                 If[FileExistsQ[f], DeleteFile[f]];
                  WriteString[f, "ENABLE_FLEXIBLEDECAY := yes"]
               ];
               ,
@@ -4851,9 +4964,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
               ];
               wrongFields = Complement[LToLGammaFields, properStates];
               If[wrongFields =!= {},
-                 Print[
-                    "Warning: BrLToLGamma function works only for leptons and a photon. Removing requested process(es): " <>
-                     StringJoin@Riffle[ToString /@ wrongFields, ", "]
+                 Utils`FSFancyWarning[
+                    "BrLToLGamma function works only for leptons and a photon.",
+                    " Removing requested process(es): "
+                    Riffle[ToString/@ wrongFields, ", "]
                  ];
                  LToLGammaFields = properStates;
               ];
@@ -4930,7 +5044,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                ];
 
            Print["Creating AMuon class ..."];
-           WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+           aMuonVertices = WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
@@ -4957,7 +5071,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            If[DirectoryQ[cxxQFTOutputDir] === False,
               CreateDirectory[cxxQFTOutputDir]];
            WriteCXXDiagramClass[
-              Join[edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
+              Join[aMuonVertices, edmVertices, FFMasslessVVertices, conversionVertices, decaysVertices],
               cxxQFTFiles,
               cxxQFTVerticesTemplate, cxxQFTOutputDir,
               cxxQFTVerticesMakefileTemplates

@@ -3,7 +3,6 @@
 # directory of this script
 BASEDIR=$(dirname $0)
 
-FSCONFIG="$BASEDIR/../flexiblesusy-config"
 VALGRIND="`command -v valgrind`"
 CMSSM_EXE="$BASEDIR/../models/CMSSM/run_CMSSM.x"
 CMSSM_INPUT="$BASEDIR/../model_files/CMSSM/LesHouches.in.CMSSM"

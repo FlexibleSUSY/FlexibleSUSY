@@ -129,6 +129,8 @@ CreateMinimizationFunctionWrapper[functionName_String, dim_Integer, parameters_L
            type  = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
            stype = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
 "auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
@@ -150,18 +152,36 @@ ApplyConstraint[FlexibleSUSY`FSMinimize[parameters_List, function_], modelPrefix
            functionWrapper = CreateMinimizationFunctionWrapper[functionName,dim,parameters,
                                                                Parameters`DecreaseIndexLiterals[function],
                                                                modelPrefix];
-           callMinimizer = functionWrapper <> "\n" <> startPoint <>
-                           "Minimizer<" <> dimStr <>
-                           "> minimizer(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = minimizer.minimize(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));\n";
-           "\n{" <> TextFormatting`IndentText[callMinimizer] <> "}\n"
+           callMinimizer = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_minimum(par_str);
+
+" <> startPoint <>
+"Minimizer<" <> dimStr <> "> minimizer(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+
+const int status = minimizer.minimize(start_point);
+
+VERBOSE_MSG(\"\\tminimizer status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_minimum(par_str, status);
+}
+";
+           "\n{\n" <> TextFormatting`IndentText[callMinimizer] <> "}\n\n"
           ];
+
+CreateTemporaryForceOutputRAII[modelPrefix_String] := "\
+// temporarily enforce calculation of pole masses
+const bool force_output = " <> modelPrefix <> "do_force_output();
+const auto tmp_force_output = make_raii_guard([&] { " <> modelPrefix <> "do_force_output(force_output); });
+" <> modelPrefix <> "do_force_output(true);";
 
 CreateRootFinderFunctionWrapper[functionName_String, dim_Integer, parameters_List, function_List, modelPrefix_String] :=
     Module[{type},
            type = CConversion`CreateCType[CConversion`MatrixType[CConversion`realScalarCType, dim, 1]];
 "auto " <> functionName <> " = [&](const "<> type <> "& x) {
+" <> TextFormatting`IndentText[CreateTemporaryForceOutputRAII[modelPrefix]] <> "
+
 " <> TextFormatting`IndentText[SetModelParametersFromVector[modelPrefix,"x",parameters]] <> "
    " <> modelPrefix <> "calculate_DRbar_masses();
 " <> TextFormatting`IndentText[Parameters`CreateLocalConstRefs[function]] <> "
@@ -181,11 +201,20 @@ ApplyConstraint[FlexibleSUSY`FSFindRoot[parameters_List, function_List], modelPr
            functionWrapper = CreateRootFinderFunctionWrapper[functionName,dim,parameters,
                                                              Parameters`DecreaseIndexLiterals[function],
                                                              modelPrefix];
-           callRootFinder = functionWrapper <> "\n" <> startPoint <>
-                           "Root_finder<" <> dimStr <>
-                           "> root_finder(" <> functionName <> ", 100, 1.0e-2);\n" <>
-                           "const int status = root_finder.find_root(start_point);\n" <>
-                           "VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));\n";
+           callRootFinder = functionWrapper <> "
+const char* par_str = \"" <> ToString[CConversion`ToValidCSymbol /@ parameters] <> "\";
+MODEL->get_problems().unflag_no_root(par_str);
+
+" <> startPoint <>
+"Root_finder<" <> dimStr <> "> root_finder(" <> functionName <> ", 100, " <> modelPrefix <> "get_precision());
+const int status = root_finder.find_root(start_point);
+
+VERBOSE_MSG(\"\\troot finder status: \" << gsl_strerror(status));
+
+if (status != GSL_SUCCESS) {
+    MODEL->get_problems().flag_no_root(par_str, status);
+}
+";
            "\n{\n" <> TextFormatting`IndentText[callRootFinder] <> "}\n\n"
           ];
 
@@ -396,10 +425,13 @@ CheckSetting[patt:{parameter_, value_}, constraintName_String, isInitial_] :=
            If[isInitial,
               modelPars = Parameters`FSModelParameters /. Parameters`FindAllParametersClassified[value];
               If[Intersection[modelPars, Parameters`GetModelParameters[]] =!= {},
-                 Print["Warning: In constraint ", constraintName, ": ", InputForm[patt]];
-                 Print["   ", modelPars, " on the r.h.s. are model parameters, which may initially be zero!"];
-                ];
-             ];
+                 Utils`FSFancyWarning[
+                    "In constraint ", constraintName, ": ", InputForm[patt],
+                    " ", ToString@modelPars,
+                    " on the r.h.s. are model parameters, which may initially be zero!"
+                 ];
+              ];
+           ];
            True
           ];
 
@@ -436,12 +468,12 @@ SanityCheck[settings_List, constraintName_String:""] :=
            For[y = 1, y <= Length[yukawas], y++,
                If[(ValueQ /@ yukawas)[[y]] &&
                   FreeQ[setParameters, yukawas[[y]]],
-                  Print["Warning: Yukawa coupling ", yukawas[[y]],
-                        " not set",
-                        If[constraintName != "", " in the " <> constraintName, ""],
-                        "."];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Yukawa coupling ", yukawas[[y]],
+                     " not set"<> If[constraintName != ""," in the " <> constraintName, ""]
+                  ];
+               ];
+           ];
           ];
 
 CalculateScale[Null, _] := "";

@@ -61,7 +61,7 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
           outFermion = GetStrangeQuark[],
           dimensionInFermion = TreeMasses`GetDimension[TreeMasses`GetSMBottomQuarkMultiplet[]],
           dimensionOutFermion = TreeMasses`GetDimension[TreeMasses`GetSMStrangeQuarkMultiplet[]]},
-    Utils`AssertWithMessage[Utils`FSBooleanQ[matchingOn],
+    Utils`AssertWithMessage[BooleanQ[matchingOn],
       "BtoSGamma`CreateInterfaceBtoSGamma[]: Error, argument must be either True or False."];
 
     If[matchingOn,
@@ -73,8 +73,10 @@ CreateInterfaceBtoSGamma[matchingOn_] :=
         ""] <>
         "const auto mW = context.mass<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetWBoson[]] <> ">(" <>
         If[TreeMasses`GetDimension[TreeMasses`GetWBoson[]] =!= 1,
-          Print["Warning: b->s gamma module does not work reliable with multiple W bosons.\n" <>
-              "We assume the first element is SM W boson"];
+           Utils`FSFancyWarning[
+              "b->s gamma module does not work reliable with multiple W bosons.",
+              " We assume the first element is SM W boson"
+           ];
           "{0}",
           "{}"] <> ");\n" <>
 	"constexpr bool discard_SM_contribution = true;\n" <>

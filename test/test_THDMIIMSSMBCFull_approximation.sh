@@ -1,3 +1,4 @@
+#!/bin/sh
 BASEDIR=$(dirname $0)
 HOMEDIR="${BASEDIR}/.."
 

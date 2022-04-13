@@ -1,4 +1,41 @@
-FlexibleSUSY 2.6.1 [?, ?? 202?]
+FlexibleSUSY 2.6.2 [February, ? 2022]
+==================================
+
+New features
+-------
+
+* Parallelized calculation of decay amplitudes during the mathematica phase.
+  Example speedup:
+
+  .. list-table::
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - model
+     - sequential
+     - parallel
+   * - `MSSM`
+     - 190s
+     - 140s
+   * - `MRSSM2`
+     - 555s
+     - 395s
+
+Changes
+-------
+
+* [commit ae1eae8e4d373eec531d6e5774977da2f12e88c8]: Mathematica-style indexing (starting from 1) of
+  leptons in `$L' \to L \gamma$` via the mathlink interface.
+
+Fixed bugs
+----------
+
+* [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of `$L' \to L \gamma$` was breaking printing of
+  observables via the mathlink interface.
+
+* [commit fd8d59dda8fc90182fdfb2255189326341dd8f57]: Fixed wrong calculation of `$A \to Z \gamma$`.
+
+FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
 
 Changes
@@ -6,12 +43,17 @@ Changes
 
 * Removed code computing Higgs effective couplings. This code has been
   superseded by FlexibleDecay.
+* FlexibleDecay: 2-loop QCD corrections to `$\Phi \to \Gamma Z$` applied
+  only if `$m_Z/m_\Phi < 0.75$`.
 
 Fixed bugs
 ----------
 
-* [commit ]: Fix error in FFV form factors module cased by models where
+* [commit 21ed4cc6b]: Fix error in FFV form factors module cased by models where
   SARAH generates non zero photon (gluon) couplings to QED (QCD) singlets.
+
+* [commit a0bbda569]: Correcting check for required Mathematica version
+  11.0, needed by FlexibleDecay.
 
 FlexibleSUSY 2.6.0 [June, 10 2021]
 ==================================

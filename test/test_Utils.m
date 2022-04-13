@@ -20,180 +20,142 @@
 
 *)
 
-Global`time = AbsoluteTime[];
-
-(* THERE IS A NEED TO CHANGE BEHAVIOR OF LOCKED FILE **************************)
-fileName = FileNameJoin@{Directory[],"test","test_Utils.temp"};
-Off[Syntax::sntufn];
-subKernel = LaunchKernels[1];
-DistributeDefinitions[fileName];
-ParallelEvaluate[
-   Needs["Utils`",FileNameJoin@{Directory[],"meta","Utils.m"}];
-   Put[Definition@Utils`Private`internalAssertOrQuit,fileName];
-   code = StringJoin@Riffle[Drop[Utils`ReadLinesInFile@fileName,2],"\n"];
-   code=StringReplace[code,
-      {
-         "\\[Raw"~~Shortest@__~~"m"->"",
-         "Quit[1];"->"","FSFancyLine[];"->"",
-         "WriteString"~~__~~x:"StringJoin[Utils`Private`str]"~~"]":>
-            "(`test`out = `test`out<>"<>x<>")",
-         "\\nWolfram Language kernel session "->""
-      }
-   ];
-   fileHandle = OpenWrite@fileName;
-   fileHandle ~ WriteString ~ code;
-   Close@fileHandle;
-];
-CloseKernels@subKernel;
-On[Syntax::sntufn];
-(* LOAD TEST DEFINITIONS ******************************************************)
-`test`out="";
-Get@fileName;
-Attributes[Utils`Private`internalAssertOrQuit] = {HoldAll,Protected,Locked};
-DeleteFile@fileName;
-
-Off[SetDelayed::write,Attributes::locked];
 Needs["TestSuite`", "TestSuite.m"];
 Needs["Utils`", "Utils.m"];
-On[SetDelayed::write,Attributes::locked];
 
-(* TEST MULTIDIMENSIONAL CONTEXT***********************************************)
+evaluate[call_] :=
+Block[{Quit, $Output = {OpenWrite[]}, out},
+   call;
+   out = ReadString[$Output[[1, 1]]];
+   Close[$Output[[1]]];
+   out
+];
+evaluate ~ SetAttributes ~ {HoldAll};
+
 a;
-a//Utils`MakeUnknownInputDefinition;
-a[1];
-TestEquality[`test`out,
+a // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@a[1],
 "Global`a: errUnknownInput:
 Call
 a[1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 `subcontext`b;
-`subcontext`b//Utils`MakeUnknownInputDefinition;
-`subcontext`b[1];
-TestEquality[`test`out,
+`subcontext`b // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@`subcontext`b[1],
 "Global`subcontext`b: errUnknownInput:
 Call
 Global`subcontext`b[1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 `subcontext`subcontext`c;
-`subcontext`subcontext`c//Utils`MakeUnknownInputDefinition;
-`subcontext`subcontext`c[1];
-TestEquality[`test`out,
+`subcontext`subcontext`c // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@`subcontext`subcontext`c[1],
 "Global`subcontext`subcontext`c: errUnknownInput:
 Call
 Global`subcontext`subcontext`c[1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 d; d::usage="some text";
-d//Utils`MakeUnknownInputDefinition;
-d[1];
-TestEquality[`test`out,
+d // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@d[1],
 "Global`d: errUnknownInput:
 Usage:
 some text
 
 Call
 d[1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
-
-(* TEST INPUT TYPES ***********************************************************)
 
 e[x_,y_] = 3;
-e//Utils`MakeUnknownInputDefinition;
-e[1];
-TestEquality[`test`out,
+e // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@e[1],
 "Global`e: errUnknownInput:
-The behavior for case
-1) e[x_,y_]
+The behavior for case(s):
+1) e[x_, y_]
 is defined only.
 
 Call
 e[1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 f[x_Integer,y:{_String}:"`"] := Sin[345*x];
-f//Utils`MakeUnknownInputDefinition;
-f[];
-TestEquality[`test`out,
+f // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@f[],
 "Global`f: errUnknownInput:
-The behavior for case
-1) f[x_Integer,y:{_String}:\"`\"]
+The behavior for case(s):
+1) f[x_Integer, y:{_String}:`]
 is defined only.
 
 Call
 f[]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 g[a_,3] := g[a,3] = 17;
-g//Utils`MakeUnknownInputDefinition;
-g["monkey"];
-TestEquality[`test`out,
+g // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@g["monkey"],
 "Global`g: errUnknownInput:
-The behavior for case
-1) g[a_,3]
+The behavior for case(s):
+1) g[a_, 3]
 is defined only.
 
 Call
 g[monkey]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 h /: Dot[h[2,x_,t:String:"34"], somethingelse] = "works";
-h//Utils`MakeUnknownInputDefinition;
-h[1,4];
-TestEquality[`test`out,
+h // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@h[1, 4],
 "Global`h: errUnknownInput:
-The behavior for case
-1) h/:h[2,x_,t:String:\"34\"].somethingelse
+The behavior for case(s):
+1) h[2, x_, t:String:34] . somethingelse
 is defined only.
 
 Call
 h[1, 4]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
-i /: Print[i[n_], i[m_]] := "";
-i//Utils`MakeUnknownInputDefinition;
-Print[i[n_], i[m_,1]];
-TestEquality[`test`out,
+i /: FUN[i[n_], i[m_]] := "";
+i // Utils`MakeUnknownInputDefinition;
+TestEquality[evaluate@FUN[i[n_], i[m_,1]],
 "Global`i: errUnknownInput:
-The behavior for case
-1) Print[i[n_],i[m_]]
+The behavior for case(s):
+1) FUN[i[n_], i[m_]]
 is defined only.
 
 Call
 i[n_]
-is not supported.terminated.
+is not supported.
+Wolfram Language kernel session terminated.
 Global`i: errUnknownInput:
-The behavior for case
-1) Print[i[n_],i[m_]]
+The behavior for case(s):
+1) FUN[i[n_], i[m_]]
 is defined only.
 
 Call
 i[m_, 1]
-is not supported.terminated.\n"
+is not supported.
+Wolfram Language kernel session terminated.\n"
 ];
-`test`out="";
 
 TestEquality[FSPermutationSign[Cycles[{{1,2}}]], -1];
 TestEquality[FSPermutationSign[Cycles[{{1,3,2}}]], 1];
 TestEquality[FSPermutationSign[Cycles[{{1,3,2},{5,6}}]], -1];
-
-Print[StringJoin[">>test>> done in ",ToString@N[AbsoluteTime[]-Global`time,{Infinity,3}]," seconds.\n"]];
 
 PrintTestSummary[];

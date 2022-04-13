@@ -13,7 +13,7 @@ Creating model with decays
 Whether decays are created for a given model is controled by the viariable
 
 .. code-block:: mathematica
-  
+
   FSCalculateDecays = True;
 
 in the model's ``FlexibleSUSY.m.in`` file.
@@ -23,7 +23,7 @@ In models distributed with FlexibleSUSY which support decays we do set it explic
 
 Which decays are included is controled by :mathematica:`FSDecayParticles` variable.
 It's possible values are :mathematica:`Automatic` or a list of scalars present in the model.
-By default it's set to 
+By default it's set to
 
 .. code-block:: mathematica
 
@@ -35,7 +35,7 @@ As an example, in SARAH's THDM-II, :mathematica:`Automatic` is equivalen to sett
 .. code-block:: mathematica
 
   FSDecayParticles = {hh, Ah, Hpm};
-  
+
 One can also add other scalar.
 For example, to add squark decays in the SARAH's MSSM one would write
 
@@ -74,7 +74,7 @@ The flags are:
 
 0. Turn calculation of decay on/off (default = 1).
 #. Minimal branching ratio to print (default = 1e-5).
-#. Maximal order of included higher order corrections (default = 4). Note that not all such corrections. 
+#. Maximal order of included higher order corrections (default = 4). Note that corrections up to a given order are not avaliable for all processes.
 #. Use α in the Thomson limit instead of a running one in decays to γγ and γZ. This should minimize higher order corrections.
 
 Flag 4 controls treatment of Higgs decay to gauge bosons
@@ -152,7 +152,7 @@ SLHA
         1.44211112E-03   2          22        23  # BR(hh -> VP VZ)
         2.63348187E-04   2          -3         3  # BR(hh -> barFd(2) Fd(2))
         2.20054695E-04   2         -13        13  # BR(hh -> barFe(2) Fe(2))
-     
+
 The output conforms to the SLHA standard.
 
 LibraryLink
@@ -162,16 +162,16 @@ LibraryLink
 
     {
       SM -> {
-        hh -> { 
+        hh -> {
           25, 0.00198076, {
-            {25, {-15,15}, 0.000157635}, 
-            {25, {23,23},  3.16863*10^-7}, 
-            {25, {-24,24}, 1.14636*10^-6}, 
+            {25, {-15,15}, 0.000157635},
+            {25, {23,23},  3.16863*10^-7},
+            {25, {-24,24}, 1.14636*10^-6},
             {25, {-3,3},   7.44681*10^-7},
-            {25, {22,22},  1.8801*10^-6}, 
-            {25, {-13,13}, 5.58985*10^-7}, 
-            {25, {-5,5},   0.00164052}, 
-            {25, {-4,4},   0.0000812031}, 
+            {25, {22,22},  1.8801*10^-6},
+            {25, {-13,13}, 5.58985*10^-7},
+            {25, {-5,5},   0.00164052},
+            {25, {-4,4},   0.0000812031},
             {25, {21,21},  0.0000967487}
           }
         }
@@ -184,5 +184,5 @@ The output for every channel, e.g.
 .. code-block:: mathematica
 
     {25, {-15,15}, 0.000157635}
-    
+
 contains PDG identifiers for in and out particles and a partial width in GeV.

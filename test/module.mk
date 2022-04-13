@@ -531,6 +531,8 @@ TEST_SH += \
 endif
 
 ifeq ($(WITH_SM),yes)
+TEST_META += \
+		$(DIR)/test_SM_vvvv.m
 TEST_SRC += \
 		$(DIR)/test_SM_beta_functions.cpp \
 		$(DIR)/test_SM_gmm2.cpp \

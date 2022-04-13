@@ -250,6 +250,33 @@ std::enable_if_t<
 >
 squared_color_generator() {return 1./2.;}
 
+// 8 -> 8, 8 with identical particles in the final state
+// because of symmetry of the final state it must be proportional to d^2
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldIn> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2> &&
+std::is_same<FieldOut1, FieldOut2>::value
+, double>
+// color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
+// average: 1/8
+squared_color_generator() {return 40/24.;}
+
+// 8 -> 8, 8 with differnt particles in the final state
+template<typename FieldIn, typename FieldOut1, typename FieldOut2>
+constexpr
+std::enable_if_t<
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldIn> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+@ModelName@_cxx_diagrams::fields::is_octet_v<FieldOut2> &&
+!std::is_same<FieldOut1, FieldOut2>::value
+, double>
+// color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
+// average: 1/8
+squared_color_generator() {return 3.;}
+
 // generic decay of FieldIn -> FieldOut1 FieldOut2
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 double @ModelName@_decays::get_partial_width(

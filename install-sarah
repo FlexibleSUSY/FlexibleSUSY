@@ -3,17 +3,15 @@
 # SARAH installation script
 # Author: Alexander Voigt
 
-# directory of this script
-BASEDIR=$(dirname $0)
-
-# absolute path to this script
-ABSBASEDIR=$(cd $BASEDIR; pwd)
-
 # operating system
 operating_system="`(uname -s) 2>/dev/null || echo unknown`"
 
 # default SARAH version
-sarah_version="4.14.3"
+sarah_version="4.14.5"
+
+# exit codes
+exit_ok="0"
+exit_syntax_error="1"
 
 # determine Mathematica user directory
 case "$operating_system" in
