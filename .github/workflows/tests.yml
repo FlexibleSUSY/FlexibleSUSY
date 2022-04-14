@@ -128,6 +128,7 @@ jobs:
       image: navir/opensuseleap-for-flexiblesusy:0.12.0
 
     strategy:
+      fail-fast: false
       matrix:
         CXXCOMPILER: [g++, clang++]
         PART:        [1, 2]
