@@ -13,7 +13,7 @@ jobs:
     name: Create model packages
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy
+      image: navir/opensuseleap-for-flexiblesusy:latest
 
     strategy:
        matrix:
