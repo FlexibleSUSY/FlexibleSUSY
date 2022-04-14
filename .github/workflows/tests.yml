@@ -128,7 +128,7 @@ jobs:
     strategy:
       matrix:
         COMPILER: [intel]
-        PART:     [1, 2]
+        PART:     [2]
 
     env:
       FORMCALC_VERSION: '9.10'
@@ -222,75 +222,10 @@ jobs:
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
           make -j2
 
-      - name: Run Mathematica tests
-        run: |
-          # some mathematica tests do compile something
-          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          # make -j2 execute-meta-tests
-
       - name: Build compiled tests
         run: |
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          make -j2 alltest
-
-      # Having a single name entry and a bash loop over integers in the run tag would save a
-      # little writing but splitting it into multiple entries makes it easier to see on github which loop
-      # library has failed
-      - name: Run compiled and shell script (Softsusy)
-        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
-        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
-        run: |
-          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
-          make clean-test-log
-
-      - name: Run compiled and shell script (Collier)
-        run: |
-          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
-          make clean-test-log
-
-      - name: Run compiled and shell script (LoopTools)
-        run: |
-          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
-          make clean-test-log
-
-      - name: Run compiled and shell script (fflite)
-        run: |
-          [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
-          make clean-test-log
-
-      - name: Testing pack-SM-src
-        if: ${{ matrix.PART == 2 }}
-        env:
-          COMPILER: ${{ matrix.COMPILER }}
-        run: |
-          make pack-SM-src
-          rm -rf models/SM
-          tar -xf SM.tar.gz
-          [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
-          ./configure \
-            --with-cxx=$CXX \
-            --with-fc=$FC \
-            --with-models=SM \
-            --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=/fs_dependencies/$COMPILER/LoopTools/include \
-            --with-looptools-libdir=/fs_dependencies/$COMPILER/LoopTools/lib64 \
-            --with-collier-incdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/include \
-            --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
-            --disable-meta \
-            --with-optional-modules=test \
-            --with-cxxflags="$CXXFLAGS"
-          make -j2
-          make -j2 execute-meta-tests
-          make -j2 alltest
-          for i in {0..3}
-          do
-            FLEXIBLESUSY_LOOP_LIBRARY=$i make -j2 execute-compiled-tests execute-shell-tests
-            make clean-test-log
-          done
+          test/test_CMSSM_librarylink_slha.sh
 
       - name: (Optional) Save logs in case of an error
         uses: actions/upload-artifact@v3
