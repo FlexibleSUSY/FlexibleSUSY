@@ -214,7 +214,8 @@ jobs:
             --with-tsil-libdir=/fs_dependencies/$COMPILER/tsil \
             --with-optional-modules=test \
             --enable-librarylink \
-            --with-cxxflags="$CXXFLAGS"
+            --with-cxxflags="$CXXFLAGS" \
+            --enable-shared-libs
           make showbuild
 
       - name: Make
