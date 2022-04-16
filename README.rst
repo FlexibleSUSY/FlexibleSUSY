@@ -968,6 +968,8 @@ are listed:
 * ``models/`` This is the output directory where the generated C++
   code for the spectrum generators will be stored.
 
+* ``nlohmann/`` contains the nlohmann_ JSON library
+
 * ``Output/`` contains SARAHs model-specific output files
 
 * ``sarah/`` contains SARAH model files shipped with FlexibleSUSY
@@ -1013,6 +1015,7 @@ References
 .. _COLLIER: https://collier.hepforge.org
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
 .. _TSIL: https://www.niu.edu/spmartin/tsil
+.. _nlohmann: https://github.com/nlohmann/json
 
 .. _`FlexibleSUSY model file`: doc/model_file.rst
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
