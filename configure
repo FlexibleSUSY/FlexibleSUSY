@@ -1708,6 +1708,7 @@ get_icpc_version() {
         message "   execution of $compiler failed."
         return 1
     }
+    echo $output
     local version
     version=$(printf "%s" "$output" |
         sed 's/^.*__INTEL_COMPILER[[:space:]]*\([[:digit:]]*\)\([[:digit:]]\)\([[:digit:]]\).*$/\1.\2.\3/p;d')
