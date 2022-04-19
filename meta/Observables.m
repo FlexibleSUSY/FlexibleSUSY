@@ -24,7 +24,7 @@ BeginPackage["Observables`", {"FlexibleSUSY`", "SARAH`", "BetaFunction`", "Param
 
 (* observables *)
 Begin["FlexibleSUSYObservable`"];
-FSObservables = { aMuon, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
+FSObservables = { a, aMuonUncertainty, aMuonGM2Calc, aMuonGM2CalcUncertainty,
                   EDM, BrLToLGamma, bsgamma };
 
 If[FlexibleSUSY`FSFeynArtsAvailable && FlexibleSUSY`FSFormCalcAvailable,
@@ -68,7 +68,8 @@ GetRequestedObservables[blocks_] :=
            observables
           ];
 
-GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muon";
+GetObservableName[FlexibleSUSYObservable`a[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`a[p]] <> "_" <> ToString[idx];
+GetObservableName[FlexibleSUSYObservable`a[p_]] := "a_" <> CConversion`ToValidCSymbolString[p];
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := "a_muon_uncertainty";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muon_gm2calc";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "a_muon_gm2calc_uncertainty";
@@ -79,7 +80,8 @@ GetObservableName[FlexibleSUSYObservable`BrLToLGamma[pIn_ -> {pOut_, spectator_}
 GetObservableName[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] -> pOut_[idxOut_], nucleus_]] := CConversion`ToValidCSymbolString[pIn] <> "_to_" <> CConversion`ToValidCSymbolString[pOut] <> "_in_" <> ToString@nucleus;
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "b_to_s_gamma";
 
-GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuon] := "a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
+GetObservableDescription[FlexibleSUSYObservable`a[p_[idx_]]] := "Delta(g-2)/2 of " <> CConversion`ToValidCSymbolString[p] <> "(" <> ToString[idx] <> ") (calculated with FlexibleSUSY)";
+GetObservableDescription[FlexibleSUSYObservable`a[p_]] := "Delta(g-2)/2 of " <> CConversion`ToValidCSymbolString[p] <> " (calculated with FlexibleSUSY)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := "uncertainty of a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muon = (g-2)/2 of the muon (calculated with GM2Calc)";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "uncertainty of (g-2)/2 of the muon (calculated with GM2Calc)";
@@ -103,7 +105,7 @@ GetObservableDescription[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idx
       ToString[nuc] <> ")/capture rate";
 GetObservableDescription[obs_ /; obs === FlexibleSUSYObservable`bsgamma] := "calculates the Wilson coefficients C7 and C8 for b -> s gamma";
 
-GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuon] := CConversion`ScalarType[CConversion`realScalarCType];
+GetObservableType[obs_ /; MatchQ[obs, FlexibleSUSYObservable`a[_]]] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := CConversion`ScalarType[CConversion`realScalarCType];
 GetObservableType[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := CConversion`ScalarType[CConversion`realScalarCType];
@@ -200,8 +202,11 @@ CreateClearObservablesFunction[observables_List] :=
            result
           ];
 
-CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuon, structName_String] :=
-    structName <> ".AMU = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL, qedqcd);";
+CalculateObservable[FlexibleSUSYObservable`a[p_], structName_String] :=
+    structName <> ".LeptonAMM0 = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL, qedqcd);";
+
+CalculateObservable[FlexibleSUSYObservable`a[p_[idx_]], structName_String] :=
+    structName <> ".LeptonAMM1(" <> CConversion`ToValidCSymbolString[p] <> ", " <> ToString[idx] <> ") = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon(MODEL, qedqcd, " <> ToString[idx] <> ");";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, structName_String] :=
     structName <> ".AMUUNCERTAINTY = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon_uncertainty(MODEL, qedqcd);";

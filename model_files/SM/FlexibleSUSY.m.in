@@ -64,7 +64,9 @@ LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } }
+           {{20, FlexibleSUSYObservable`a[Fe[1]]},
+            {21, FlexibleSUSYObservable`a[Fe[2]]},
+            {22, FlexibleSUSYObservable`a[Fe[3]]} } }
 };
 
 FSCalculateDecays = True;

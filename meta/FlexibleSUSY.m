@@ -211,7 +211,7 @@ ExtraSLHAOutputBlocks = {
     {
     	FlexibleSUSYLowEnergy,
         {
-        	{1, FlexibleSUSYObservable`aMuon}
+           {1, FlexibleSUSYObservable`a[Fe[2]]}
         }
     }
 };
@@ -2474,7 +2474,7 @@ WriteAMuonClass[calcAMu_, files_List] :=
     Module[{calculation, getMSUSY,
             (* in models without flavour violation (no FV models) muon does not have an index,
                otherwise we assume it's the second particle in the lepton multiplet *)
-            muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "1", ""],
+            muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "idx", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = ""},
@@ -5016,7 +5016,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   DeleteDuplicates @ Join[
 
                      (* muon g-2 *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`a[_]],
                            Block[{muon = TreeMasses`GetSMMuonLepton[], muonWithoutIndex},
                               muonWithoutIndex = If[AtomQ[muon], TreeMasses`GetSMMuonLepton[], Head@muon];
                               {muonWithoutIndex -> {muonWithoutIndex, TreeMasses`GetPhoton[]}}
@@ -5044,7 +5044,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                ];
 
            Print["Creating AMuon class ..."];
-           aMuonVertices = WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`aMuon],
+           aMuonVertices = WriteAMuonClass[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`a[_]],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],

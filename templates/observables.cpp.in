@@ -36,7 +36,8 @@
 #endif
 
 #define MODEL model
-#define AMU a_muon
+#define LeptonAMM0(p) a_ ## p
+#define LeptonAMM1(p,idx) a_ ## p ## _ ## idx
 #define AMUUNCERTAINTY a_muon_uncertainty
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty

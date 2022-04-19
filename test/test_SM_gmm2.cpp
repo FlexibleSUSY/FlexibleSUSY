@@ -42,7 +42,11 @@ BOOST_AUTO_TEST_CASE( test_zero )
 
    softsusy::QedQcd qedqcd;
 
-   const double amu = SM_a_muon::calculate_a_muon(sm, qedqcd);
+   const double ae = SM_a_muon::calculate_a_muon(sm, qedqcd, 0);
+   const double amu = SM_a_muon::calculate_a_muon(sm, qedqcd, 1);
+   const double atau = SM_a_muon::calculate_a_muon(sm, qedqcd, 2);
 
+   BOOST_CHECK_SMALL(ae, 1e-15);
    BOOST_CHECK_SMALL(amu, 1e-15);
+   BOOST_CHECK_SMALL(atau, 1e-15);
 }

@@ -128,9 +128,13 @@ Block YVIN
 
    munuSSM_slha m = setup_munuSSM(input, qedqcd, settings);
 
-   constexpr double reference_value = 2.1176299646121334e-09;
+   const double ae = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 0);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -9.2090345233704915e-15, 1e-6);
 
-   double amu = munuSSM_a_muon::calculate_a_muon(m, qedqcd);
+   const double amu = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 1);
+   BOOST_CHECK_CLOSE_FRACTION(amu, 2.1176299646121334e-09, 1e-6);
 
-   BOOST_CHECK_CLOSE_FRACTION(amu, reference_value, 1e-6);
+   const double atau = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 2);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.6954949374309524e-05, 1e-6);
+
 }

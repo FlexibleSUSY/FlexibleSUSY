@@ -305,7 +305,7 @@ double muonPhysicalMass(const softsusy::QedQcd& qedqcd)
    return qedqcd.displayPoleMmuon();
 }
 
-double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, int idx)
 {
    VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
 
@@ -320,13 +320,20 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
       return std::numeric_limits<double>::quiet_NaN();
    }
 
+   double lepton_physical_mass = 0;
+      switch(idx) {
+         case 0: lepton_physical_mass = qedqcd.displayPoleMel(); break;
+         case 1: lepton_physical_mass = qedqcd.displayPoleMmuon(); break;
+         case 2: lepton_physical_mass = qedqcd.displayPoleMtau(); break;
+      }
+
    double val =
       // vector form factor
       1./2.*(form_factors[2] + form_factors[3]).real()
       // reinstate the mass that was factored out in definition of form factor
       * context.mass<Muon>({@AMuon_MuonIndex@})
       // factor out e/(2*muon pole mass)
-      / (unit_charge(context_base{model})/(2.*muonPhysicalMass(qedqcd)))
+      / (unit_charge(context_base{model})/(2.*lepton_physical_mass))
       // definition of photon momentum flow for g-2 is opposite than for form factors
       * (-1.);
 
@@ -368,12 +375,12 @@ std::array<double,N> generate_scales(double mean, double factor)
 }
 
 /// returns minimum and maximum a_mu when scale is varied by a factor 2
-std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
+std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd, int idx)
 {
    auto scales = generate_scales<7>(model.get_scale(), 2.);
 
    std::transform(scales.begin(), scales.end(), scales.begin(),
-                  [&model,&qedqcd] (double scale) {
+                  [&model,&qedqcd,idx] (double scale) {
                      double amu = 0.;
                      try {
                         auto m = model;
@@ -382,7 +389,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         m.calculate_DRbar_masses();
                         m.solve_ewsb();
                         m.calculate_M@AMuon_MuonField@_pole();
-                        amu = calculate_a_muon_impl(m, qedqcd);
+                        amu = calculate_a_muon_impl(m, qedqcd, idx);
                      }
                      catch(const Error& e) {
                         ERROR("@ModelName@_a_muon: scale variation: " << e.what_detailed());
@@ -397,7 +404,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 
 } // anonymous namespace
 
-double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd)
+double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, int idx)
 {
    @ModelName@_mass_eigenstates model(model_);
 
@@ -418,10 +425,10 @@ double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& 
       model.calculate_M@AMuon_MuonField@_pole();
    }
 
-   return calculate_a_muon_impl(model, qedqcd);
+   return calculate_a_muon_impl(model, qedqcd, idx);
 }
 
-double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd)
+double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd, int idx)
 {
    @ModelName@_mass_eigenstates model(model_);
 
@@ -435,7 +442,7 @@ double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_e
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   const auto delta_amu_scale_minmax = vary_scale(model, qedqcd);
+   const auto delta_amu_scale_minmax = vary_scale(model, qedqcd, idx);
    const auto delta_amu_scale = std::abs(delta_amu_scale_minmax.second - delta_amu_scale_minmax.first);
 
    return delta_amu_scale;
