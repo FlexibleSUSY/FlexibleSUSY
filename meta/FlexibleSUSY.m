@@ -2307,7 +2307,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@defineFieldTraits@"                 -> defineFieldTraits,
                              "@CXXDiagrams_VertexPrototypes@"  ->
-                                StringJoin[Riffle[cxxVerticesParts[[All, 1]], "\n\n"]],
+                                StringRiffle[cxxVerticesParts[[All, 1]], "\n\n"],
                              Sequence @@ GeneralReplacementRules[]
                             }];
 
@@ -2325,7 +2325,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
             }] & /@ Transpose[{cxxQFTVerticesFiles, cxxVerticesParts}];
         WriteOut`ReplaceInFiles[cxxQFTVerticesMakefileTemplates,
             {"@generatedCXXVerticesFiles@" ->
-                "\t" <> StringJoin[Riffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"]],
+                "\t" <> StringRiffle[cxxQFTVerticesFiles[[All, 2]], " \\\n\t"],
             Sequence @@ GeneralReplacementRules[]
             }];
     ];

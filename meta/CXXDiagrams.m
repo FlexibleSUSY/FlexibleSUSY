@@ -178,9 +178,9 @@ CXXNameOfField[Susyno`LieGroups`conj[p_],
  * \returns the name of the c++ type corresponding to a
  * given vertex.
  **)
-CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
+CXXNameOfVertex[fields_List] := "Vertex<" <> StringRiffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
-	", "]] <> ">"
+	", "] <> ">"
 
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
@@ -264,7 +264,7 @@ CreateFields[] :=
        vectors = Select[fields, TreeMasses`IsVector];
        ghosts = Select[fields, TreeMasses`IsGhost];
 
-       StringJoin @ Riffle[
+       StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
               "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
@@ -283,7 +283,7 @@ CreateFields[] :=
               "using sm_flags = boost::mpl::vector_c<bool, " <>
                    If[TreeMasses`GetDimension[#] === 1,
                       CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
-                      StringJoin @ Riffle[CConversion`CreateCBoolValue /@
+                      StringRiffle[CConversion`CreateCBoolValue /@
                          TreeMasses`IsSMParticleElementwise[#],
                          ", "]
                    ] <> ">;\n" <>
@@ -300,20 +300,20 @@ CreateFields[] :=
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
 
        "// Fields that are their own Lorentz conjugates.\n" <>
-       StringJoin @ Riffle[
+       StringRiffle[
          ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#] <> ">" <>
             " { using type = " <> CXXNameOfField[#] <> "; };"
             &) /@ Select[fields, (# == LorentzConjugate[#] &)],
           "\n"] <> "\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ scalars, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ scalars, ", "] <> ">;\n" <>
        "using fermions = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ fermions, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ fermions, ", "] <> ">;\n" <>
        "using vectors = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ vectors, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ ghosts, ", "]] <> ">;"
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;"
   ]
 
 (** \brief Get the lorentz index of a given indexed field
@@ -1265,7 +1265,7 @@ Module[{cxxVertices, vertexPartition,
 
    Utils`AssertOrQuit[Sort[cxxVertices] === Sort[Join@@vertexPartition],CreateVertices::errLostVertices];
 
-   Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
+   Map[StringRiffle[#, "\n\n"] &, Transpose /@ vertexPartition, {2}]
 ] /; Utils`AssertOrQuit[And[IntegerQ@OptionValue@MaximumVerticesLimit, OptionValue@MaximumVerticesLimit>0],CreateVertices::errMaximumVerticesLimit];
 Utils`MakeUnknownInputDefinition@CreateVertices;
 (** \brief Creates c++ code that makes a function available that
@@ -1276,7 +1276,7 @@ Utils`MakeUnknownInputDefinition@CreateVertices;
  **)
 CreateVertex[fields_List] :=
   Module[{fieldSequence},
-		fieldSequence = StringJoin @ Riffle[
+		fieldSequence = StringRiffle[
 			CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields, ", "];
 
 		{
@@ -1514,7 +1514,7 @@ CreateMassFunctions[] :=
           ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
     massiveFields = TreeMasses`GetParticles[];
 
-    StringJoin @ Riffle[
+    StringRiffle[
       Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
              numberOfIndices = Length @ fieldInfo[[5]];
 
@@ -1537,7 +1537,7 @@ CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
           ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
     massiveFields = TreeMasses`GetParticles[];
 
-    StringJoin @ Riffle[
+    StringRiffle[
       Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
              numberOfIndices = Length @ fieldInfo[[5]];
 
@@ -1575,7 +1575,7 @@ CreateUnitCharge[] :=
                     StringJoin @ Table[", 0", {numberOfElectronIndices-1}],
                     ""] <> " ",
                  If[numberOfElectronIndices =!= 0,
-                    StringJoin @ Riffle[Table[" 0", {numberOfElectronIndices}], ","] <> " ",
+                    StringRiffle[Table[" 0", {numberOfElectronIndices}], ","] <> " ",
                     ""]
                 ] <>
             "};\n") <>
@@ -1587,7 +1587,7 @@ CreateUnitCharge[] :=
                     StringJoin @ Table[", 0", {numberOfPhotonIndices-1}],
                     ""] <> " ",
                  If[numberOfPhotonIndices =!= 0,
-                    StringJoin @ Riffle[Table[" 0", {numberOfPhotonIndices}], ","] <> " ",
+                    StringRiffle[Table[" 0", {numberOfPhotonIndices}], ","] <> " ",
                     ""]
                 ] <>
             "};\n") <>
