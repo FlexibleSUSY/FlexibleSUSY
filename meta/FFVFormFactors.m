@@ -110,10 +110,11 @@ IsChargedUnder[field_, vector_?IsVector] :=
   ]
 
 FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] :=
-   Module[{prototype, definition,
+   Module[{prototype, definition, templateWrapperDecl, templateWrapperDef,
            numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[Fj],
            numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[Fi],
-           numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[V], temp = {}},
+           numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[V], temp = {},
+           defPrefix = FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"},
 
       Utils`AssertWithMessage[Length[topologies] === Length[diagrams],
          "Length of diagrams should be the same as length of topologies"];
@@ -123,6 +124,73 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                  temp = temp <> CreateCall[Fj, Fi, V, topologies[[i]], diagrams[[i,j]]];
             ];
          ];
+
+      templateWrapperDecl =
+         "template <typename Fj, typename Fi, typename V>\n" <>
+         "std::enable_if_t<\n" <>
+            IndentText[
+               "std::is_same<Fj, " <> CXXNameOfField[Fj, prefixNamespace->defPrefix] <> ">::value && std::is_same<Fi, " <> CXXNameOfField[Fi, prefixNamespace->defPrefix] <> ">::value && std::is_same<V, " <> CXXNameOfField[V, prefixNamespace->defPrefix] <> ">::value,\n" <>
+               "std::valarray<std::complex<double>>\n"
+            ] <> ">\n" <>
+            "calculate_form_factors(" <>
+            IndentText[
+               If[TreeMasses`GetDimension[Fj] =!= 1,
+                  "int, ",
+                  " "
+               ] <>
+               If[TreeMasses`GetDimension[Fi] =!= 1,
+                  "int,\n",
+                  " "
+               ]
+            ] <>
+            "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, bool);";
+
+      templateWrapperDef =
+         "template <typename Fj, typename Fi, typename V>\n" <>
+         "std::enable_if_t<\n" <>
+            IndentText[
+               "std::is_same<Fj, " <> CXXNameOfField[Fj] <> ">::value && std::is_same<Fi, " <> CXXNameOfField[Fi] <> ">::value && std::is_same<V, " <> CXXNameOfField[V] <> ">::value,\n" <>
+               "std::valarray<std::complex<double>>\n"
+            ] <> ">\n" <>
+            "calculate_form_factors(" <>
+            IndentText[
+               If[TreeMasses`GetDimension[Fj] =!= 1,
+                  "int generationIndex1, ",
+                  " "
+               ] <>
+               If[TreeMasses`GetDimension[Fi] =!= 1,
+                  "int generationIndex2,\n",
+                  " "
+               ] <>
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates& model, bool discard_SM_contributions) {\n"
+            ] <>
+            "return calculate_" <> CXXNameOfField[Fj] <>
+            "_" <> CXXNameOfField[Fi] <> "_" <> CXXNameOfField[V] <> "_form_factors(" <>
+            IndentText[
+               If[TreeMasses`GetDimension[Fj] =!= 1,
+                  "generationIndex1, ",
+                  " "
+               ] <>
+               If[TreeMasses`GetDimension[Fi] =!= 1,
+                  "generationIndex2,\n",
+                  " "
+               ] <>
+               "model, discard_SM_contributions);"
+            ] <> "\n}\n" <>
+         "template std::valarray<std::complex<double>> calculate_form_factors<" <>
+         StringRiffle[CXXNameOfField /@ {Fj, Fi, V}, ","] <> ">(" <>
+            IndentText[
+               If[TreeMasses`GetDimension[Fj] =!= 1,
+                  "int, ",
+                  " "
+               ] <>
+               If[TreeMasses`GetDimension[Fi] =!= 1,
+                  "int,\n",
+                  " "
+               ] <>
+               "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, bool);"
+            ];
+
       prototype =
          "std::valarray<std::complex<double>> calculate_" <> CXXNameOfField[Fj] <>
             "_" <> CXXNameOfField[Fi] <> "_" <> CXXNameOfField[V] <> "_form_factors (\n" <>
@@ -173,7 +241,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
 
             ] <> "\n}\n\n";
 
-      {prototype <> ";", definition}
+      {prototype <> ";", definition, templateWrapperDecl, templateWrapperDef}
    ];
 
 CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
@@ -182,6 +250,10 @@ CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
       StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}) <> "<" <>
          StringJoin @ Riffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V, EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ","]  <>
                      ">::value(indices1, indices2, context, discard_SM_contributions);\n";
+
+CalculateFormFactorsForwardDeclaration[Fj_, Fi_, V_] :=
+"template calculate_form_factors<" <> StringRiffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V}, ","] <> ">(" <>
+"int, int, const " <> FlexibleSUSY`FSModelName <> " _mass_eigenstates&, bool);"
 
 End[];
 EndPackage[];

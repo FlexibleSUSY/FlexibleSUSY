@@ -24,6 +24,7 @@
 #include "@ModelName@_l_to_lgamma.hpp"
 #include "@ModelName@_b_to_s_gamma.hpp"
 #include "@ModelName@_f_to_f_conversion.hpp"
+#include "cxx_qft/@ModelName@_qft.hpp"
 #include "config.h"
 #include "eigen_utils.hpp"
 #include "numerics2.hpp"

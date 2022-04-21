@@ -27,6 +27,7 @@ AMuonGetMSUSY::usage="";
 AMuonContributingGraphs::usage="";
 AMuonContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
+CalculateForwardDeclaration::usage = "";
 
 Begin["`Private`"];
 
@@ -102,22 +103,22 @@ CXXEvaluatorForDiagramFromGraph[diagram_, barZeeGraph] :=
   ];
 
 CXXEvaluatorBZFL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeFermionLoop<" <>
+  "AMuonBarZeeFermionLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZFLZ[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeFermionLoopZ<" <>
+  "AMuonBarZeeFermionLoopZ<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZSL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeScalarLoop<" <>
+  "AMuonBarZeeScalarLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
 CXXEvaluatorBZVL[photonEmitter_,exchangeParticle_] :=
-  "AMuonBarZeeVectorLoop<" <>
+  "AMuonBarZeeVectorLoop<Lepton," <>
   CXXDiagrams`CXXNameOfField[photonEmitter] <> ", " <>
   CXXDiagrams`CXXNameOfField[exchangeParticle] <> ">";
 
@@ -142,6 +143,12 @@ AMuonGetMSUSY[] :=
               ");"
              ]
           ];
+
+CalculateForwardDeclaration[field_] :=
+"template double " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon<" <>
+   CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
+   ">(" <>
+   "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"
 
 End[];
 EndPackage[];
