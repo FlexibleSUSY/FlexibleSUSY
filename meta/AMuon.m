@@ -27,7 +27,7 @@ AMuonGetMSUSY::usage="";
 AMuonContributingGraphs::usage="";
 AMuonContributingDiagramsForGraph::usage="";
 CXXEvaluatorForDiagramFromGraph::usage="";
-CalculateForwardDeclaration::usage = "";
+ForwardDeclaration::usage = "";
 
 Begin["`Private`"];
 
@@ -144,8 +144,8 @@ AMuonGetMSUSY[] :=
              ]
           ];
 
-CalculateForwardDeclaration[field_] :=
-"template double " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_a_muon<" <>
+ForwardDeclaration[field_Symbol, functionName_String] :=
+"template double " <> FlexibleSUSY`FSModelName <> "_a_muon::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>
    "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"

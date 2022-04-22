@@ -39,7 +39,8 @@
 #define MODEL model
 #define LeptonAMM0(p) a_ ## p
 #define LeptonAMM1(p,idx) a_ ## p ## _ ## idx
-#define AMUUNCERTAINTY a_muon_uncertainty
+#define AUNCERTAINTY0(p) a_uncertainty_ ## p
+#define AUNCERTAINTY1(p,idx) a_uncertainty_ ## p ## _ ## idx
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
 #define EDM0(p) edm_ ## p

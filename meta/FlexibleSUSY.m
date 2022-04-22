@@ -2479,7 +2479,7 @@ WriteAMuonClass[fields_List, files_List] :=
             muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "idx", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
-            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration = ""},
+            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2498,7 +2498,8 @@ WriteAMuonClass[fields_List, files_List] :=
       diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
-      calculateForwadDeclaration = StringRiffle[CalculateForwardDeclaration /@ fields, "\n"];
+      calculateForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_a_muon"]& /@ fields, "\n"];
+      uncertaintyForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_a_muon_uncertainty"]& /@ fields, "\n"];
 
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
@@ -2520,6 +2521,7 @@ WriteAMuonClass[fields_List, files_List] :=
          "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
          "@AMuon_MuonIndex@" -> muonIndex,
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
+         "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[TreeMasses`GetDimension[Fe] =!= 1, ", int idx", ""],
          "@extraIdxUsage@" -> If[TreeMasses`GetDimension[Fe] =!= 1, ", idx", ""],
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],

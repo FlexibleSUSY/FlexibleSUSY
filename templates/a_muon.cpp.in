@@ -437,7 +437,7 @@ double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& 
 
    return calculate_a_muon_impl<Lepton>(model, qedqcd@extraIdxUsage@);
 }
-// spliting templated function declaration and definition
+// spliting templated function into header and cpp
 // https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
 @calculateAForwardDeclaration@
 
@@ -461,6 +461,9 @@ double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_e
 
    return delta_amu_scale;
 }
+// spliting templated function into header and cpp
+// https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
+@calculateAUncertaintyForwardDeclaration@
 
 namespace {
 double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd, double m_muon)

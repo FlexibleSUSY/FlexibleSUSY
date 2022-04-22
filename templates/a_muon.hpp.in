@@ -43,8 +43,9 @@ double calculate_a_muon(const @ModelName@_mass_eigenstates& model, const softsus
 
 /**
 * @fn calculate_a_muon_uncertainty
-* @brief Calculates \f$\Delta a_\mu\f$ of the muon.
+* @brief Calculates \f$\Delta a\f$ of the lepton.
 */
+template <typename Lepton>
 double calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@);
 } // namespace @ModelName@_a_muon
 } // namespace flexiblesusy
