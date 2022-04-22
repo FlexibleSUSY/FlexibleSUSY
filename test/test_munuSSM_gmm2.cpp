@@ -29,6 +29,7 @@
 #include "wrappers.hpp"
 #include "munuSSM_a_muon.hpp"
 #include "munuSSM_slha_io.hpp"
+#include "cxx_qft/munuSSM_qft.hpp"
 
 using namespace flexiblesusy;
 
@@ -128,13 +129,15 @@ Block YVIN
 
    munuSSM_slha m = setup_munuSSM(input, qedqcd, settings);
 
-   const double ae = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 0);
+   using munuSSM_cxx_diagrams::fields::Cha;
+
+   const double ae = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, -9.2090345233704915e-15, 1e-6);
 
-   const double amu = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 1);
+   const double amu = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 2.1176299646121334e-09, 1e-6);
 
-   const double atau = munuSSM_a_muon::calculate_a_muon(m, qedqcd, 2);
+   const double atau = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, 1.6954949374309524e-05, 1e-6);
 
 }
