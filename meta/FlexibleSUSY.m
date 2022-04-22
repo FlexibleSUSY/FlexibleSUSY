@@ -2514,8 +2514,8 @@ WriteAMuonClass[fields_List, files_List] :=
          "@AMuon_MuonIndex@" -> muonIndex,
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
-         "@extraIdxDecl@" -> If[TreeMasses`GetDimension[Fe] =!= 1, ", int idx", ""],
-         "@extraIdxUsage@" -> If[TreeMasses`GetDimension[Fe] =!= 1, ", idx", ""],
+         "@extraIdxDecl@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", int idx", ""],
+         "@extraIdxUsage@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", idx", ""],
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          Sequence @@ GeneralReplacementRules[]
         }];
