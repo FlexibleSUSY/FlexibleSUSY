@@ -333,8 +333,6 @@ double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const so
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double lepton_physical_mass = 0;
-
    double val =
       // vector form factor
       1./2.*(form_factors[2] + form_factors[3]).real()
