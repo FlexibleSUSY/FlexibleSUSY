@@ -139,7 +139,7 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`aMuon} } },
+           {{21, FlexibleSUSYObservable`a[Fe[2]]} } },
    {ALPHA, {{ArcSin[Pole[ZH[2,2]]]}}},
    {HMIX , {{2, vu / vd},
             {3, Sqrt[vu^2 + vd^2]},

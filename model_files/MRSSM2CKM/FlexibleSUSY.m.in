@@ -89,7 +89,7 @@ InitialGuessAtLowScale = {
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy, {
-         {21, FlexibleSUSYObservable`aMuon},
+         {21, FlexibleSUSYObservable`a[Fe[2]]},
          {23, FlexibleSUSYObservable`EDM[Fe[1]]},
          {24, FlexibleSUSYObservable`EDM[Fe[2]]},
          {25, FlexibleSUSYObservable`EDM[Fe[3]]},
