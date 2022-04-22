@@ -132,12 +132,12 @@ Block YVIN
    using munuSSM_cxx_diagrams::fields::Cha;
 
    const double ae = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 0);
-   BOOST_CHECK_CLOSE_FRACTION(ae, -9.2090345233704915e-15, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(ae, -8.6946652200557549e-15, 1e-6);
 
    const double amu = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 2.1176299646121334e-09, 1e-6);
 
    const double atau = munuSSM_a_muon::calculate_a_muon<Cha>(m, qedqcd, 2);
-   BOOST_CHECK_CLOSE_FRACTION(atau, 1.6954949374309524e-05, 1e-6);
+   BOOST_CHECK_CLOSE_FRACTION(atau, 1.7456286046141143e-05, 1e-6);
 
 }
