@@ -207,14 +207,6 @@ ExtraSLHAOutputBlocks::usage = "@note
 this List is rewritten during the runnig of start.m script
 in the directory FlexibleSUSY/models/@CLASSNAME@ by
 the Get[FlexibleSUSY.m] inside FlexibleSUSY`MakeFlexibleSUSY[ ... ]";
-ExtraSLHAOutputBlocks = {
-    {
-    	FlexibleSUSYLowEnergy,
-        {
-           {1, FlexibleSUSYObservable`a[Fe[2]]}
-        }
-    }
-};
 FSAuxiliaryParameterInfo = {};
 IMMINPAR = {};
 IMEXTPAR = {};

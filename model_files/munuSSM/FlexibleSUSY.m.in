@@ -95,4 +95,11 @@ HighPoleMassPrecision    = {hh, Ah, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy, {
+         {21, FlexibleSUSYObservable`a[Cha[2]]}
+      }
+   }
+};
+
 FSCalculateDecays = True;
