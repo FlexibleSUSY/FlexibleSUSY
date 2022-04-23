@@ -8,8 +8,8 @@ BASE_TEMPLATES := \
 		$(DIR)/cxx_qft/vertices_.cpp.in \
 		$(DIR)/cxx_qft/context_base.hpp.in \
 		$(DIR)/cxx_qft/npointfunctions_wilsoncoeffs.hpp.in \
-		$(DIR)/a_muon.hpp.in \
-		$(DIR)/a_muon.cpp.in \
+		$(DIR)/amm.hpp.in \
+		$(DIR)/amm.cpp.in \
 		$(DIR)/decays/decay_table.hpp.in \
 		$(DIR)/decays/decay_table.cpp.in \
 		$(DIR)/decays/decays.hpp.in \

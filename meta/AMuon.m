@@ -145,7 +145,7 @@ AMuonGetMSUSY[] :=
           ];
 
 ForwardDeclaration[field_Symbol, functionName_String] :=
-"template double " <> FlexibleSUSY`FSModelName <> "_a_muon::" <> functionName <> "<" <>
+"template double " <> FlexibleSUSY`FSModelName <> "_amm::" <> functionName <> "<" <>
    CXXDiagrams`CXXNameOfField[field, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <>
    ">(" <>
    "const " <> FlexibleSUSY`FSModelName <> "_mass_eigenstates&, const softsusy::QedQcd&" <> If[TreeMasses`GetDimension[field] =!= 1, ", int", ""] <> ");"

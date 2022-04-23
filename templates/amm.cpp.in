@@ -18,12 +18,12 @@
 
 
 /**
- * @file @ModelName@_a_muon.cpp
+ * @file @ModelName@_amm.cpp
  *
  * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
-#include "@ModelName@_a_muon.hpp"
+#include "@ModelName@_amm.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
@@ -274,7 +274,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    double precision = 0.;
    double MSUSY_old = 0., MSUSY_new = 0.;
 
-   VERBOSE_MSG("@ModelName@_a_muon: iterate to run to MSUSY ...");
+   VERBOSE_MSG("@ModelName@_amm: iterate to run to MSUSY ...");
 
    do {
       MSUSY_new = get_MSUSY(model);
@@ -282,7 +282,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       if (MSUSY_new <= 0.)
          return;
 
-      VERBOSE_MSG("@ModelName@_a_muon:    running to new MSUSY = " << MSUSY_new);
+      VERBOSE_MSG("@ModelName@_amm:    running to new MSUSY = " << MSUSY_new);
 
       model.run_to(MSUSY_new);
       model.calculate_DRbar_masses();
@@ -291,10 +291,10 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
       MSUSY_old = MSUSY_new;
    } while (precision > precision_goal && ++it < Nmax);
 
-   VERBOSE_MSG("@ModelName@_a_muon: iteration finished. MSUSY = " << MSUSY_new);
+   VERBOSE_MSG("@ModelName@_amm: iteration finished. MSUSY = " << MSUSY_new);
 
    if (precision > precision_goal) {
-      WARNING("@ModelName@_a_muon: run_to_MSUSY(): "
+      WARNING("@ModelName@_amm: run_to_MSUSY(): "
               "Iteration did not converge after " << Nmax
               << " iterations (precision goal: " << precision_goal << ")");
    }
@@ -305,7 +305,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 template <typename Lepton>
 double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
-   VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
+   VERBOSE_MSG("@ModelName@_amm: calculating a_mu at Q = " << model.get_scale());
 
    context_base context{ model };
 
@@ -384,7 +384,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         amu = calculate_amm_impl<Lepton>(m, qedqcd@extraIdxUsage@);
                      }
                      catch(const Error& e) {
-                        ERROR("@ModelName@_a_muon: scale variation: " << e.what_detailed());
+                        ERROR("@ModelName@_amm: scale variation: " << e.what_detailed());
                      }
                      return amu;
                   });
@@ -397,17 +397,17 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 } // anonymous namespace
 
 template <typename Lepton>
-double @ModelName@_a_muon::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
-   VERBOSE_MSG("@ModelName@_a_muon: starting calculation of a_mu ...");
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu ...");
 
    try {
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon:" << e.what_detailed());
+      ERROR("@ModelName@_amm:" << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 
@@ -425,17 +425,17 @@ double @ModelName@_a_muon::calculate_amm(const @ModelName@_mass_eigenstates& mod
 @calculateAForwardDeclaration@
 
 template <typename Lepton>
-double @ModelName@_a_muon::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_amm::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
-   VERBOSE_MSG("@ModelName@_a_muon: starting calculation of a_mu uncertainty ...");
+   VERBOSE_MSG("@ModelName@_amm: starting calculation of a_mu uncertainty ...");
 
    try {
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon uncertainty: " << e.what_detailed());
+      ERROR("@ModelName@_amm uncertainty: " << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 

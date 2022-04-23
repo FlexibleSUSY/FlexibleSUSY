@@ -19,7 +19,7 @@
 
 #include "@ModelName@_observables.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
-#include "@ModelName@_a_muon.hpp"
+#include "@ModelName@_amm.hpp"
 #include "@ModelName@_edm.hpp"
 #include "@ModelName@_l_to_lgamma.hpp"
 #include "@ModelName@_b_to_s_gamma.hpp"

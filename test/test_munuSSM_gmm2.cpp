@@ -27,7 +27,7 @@
 #include "test_munuSSM.hpp"
 
 #include "wrappers.hpp"
-#include "munuSSM_a_muon.hpp"
+#include "munuSSM_amm.hpp"
 #include "munuSSM_slha_io.hpp"
 #include "cxx_qft/munuSSM_qft.hpp"
 
@@ -131,13 +131,13 @@ Block YVIN
 
    using munuSSM_cxx_diagrams::fields::Cha;
 
-   const double ae = munuSSM_a_muon::calculate_amm<Cha>(m, qedqcd, 0);
+   const double ae = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 0);
    BOOST_CHECK_CLOSE_FRACTION(ae, -8.6946652200557549e-15, 1e-6);
 
-   const double amu = munuSSM_a_muon::calculate_amm<Cha>(m, qedqcd, 1);
+   const double amu = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 1);
    BOOST_CHECK_CLOSE_FRACTION(amu, 2.1176299646121334e-09, 1e-6);
 
-   const double atau = munuSSM_a_muon::calculate_amm<Cha>(m, qedqcd, 2);
+   const double atau = munuSSM_amm::calculate_amm<Cha>(m, qedqcd, 2);
    BOOST_CHECK_CLOSE_FRACTION(atau, 1.7456286046141143e-05, 1e-6);
 
 }

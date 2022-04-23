@@ -206,14 +206,14 @@ CreateClearObservablesFunction[observables_List] :=
 
 CalculateObservable[FlexibleSUSYObservable`AMM[p_], structName_String] :=
     structName <> ".LeptonAMM0(" <> CConversion`ToValidCSymbolString[p] <> ") = " <>
-      FlexibleSUSY`FSModelName <> "_a_muon::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);";
+      FlexibleSUSY`FSModelName <> "_amm::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);";
 
 CalculateObservable[FlexibleSUSYObservable`AMM[p_[idx_]], structName_String] :=
     structName <> ".LeptonAMM1(" <> CConversion`ToValidCSymbolString[p] <> ", " <> ToString[idx] <> ") = " <>
-      FlexibleSUSY`FSModelName <> "_a_muon::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd, " <> ToString[idx] <> ");";
+      FlexibleSUSY`FSModelName <> "_amm::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd, " <> ToString[idx] <> ");";
 
 CalculateObservable[FlexibleSUSYObservable`AMMUncertainty[p_], structName_String] :=
-    structName <> ".AUNCERTAINTY0(" <> CConversion`ToValidCSymbolString[p] <> ") = " <> FlexibleSUSY`FSModelName <> "_a_muon::calculate_amm_uncertainty<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);";
+    structName <> ".AUNCERTAINTY0(" <> CConversion`ToValidCSymbolString[p] <> ") = " <> FlexibleSUSY`FSModelName <> "_amm::calculate_amm_uncertainty<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
     "#ifdef ENABLE_GM2CALC\n" <>

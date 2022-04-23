@@ -5082,10 +5082,10 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
            Print["Creating AMuon class ..."];
            aMuonVertices = WriteAMuonClass[
               DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
-              {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
-                              {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],
-                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.cpp"}]}}];
+              {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
+                              {FileNameJoin[{$flexiblesusyTemplateDir, "amm.cpp.in"}],
+                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.cpp"}]}}];
 
            Print["Creating C++ QFT class..."];
            cxxQFTTemplateDir = FileNameJoin[{$flexiblesusyTemplateDir, "cxx_qft"}];
