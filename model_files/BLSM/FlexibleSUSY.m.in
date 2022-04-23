@@ -62,7 +62,7 @@ PotentialLSPParticles = {};
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-               {{21, FlexibleSUSYObservable`a[Fe[2]]} } },
+               {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {FlexibleSUSYOutput,
            {{1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } }

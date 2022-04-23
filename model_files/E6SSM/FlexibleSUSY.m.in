@@ -115,7 +115,7 @@ ExtraSLHAOutputBlocks = {
                 {1, Hold[SUSYScale]},
                 {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-               {{21, FlexibleSUSYObservable`a[Fe[2]]} } },
+               {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {Au,        {{1, 1, T[Yu][1,1] / Yu[1,1]},
                 {2, 2, T[Yu][2,2] / Yu[2,2]},
                 {3, 3, T[Yu][3,3] / Yu[3,3]} } },

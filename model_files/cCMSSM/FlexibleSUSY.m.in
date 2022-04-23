@@ -161,7 +161,7 @@ ExtraSLHAOutputBlocks = {
             {48, SignedAbsSqrt[Im[md2[2,2]]]},
             {49, SignedAbsSqrt[Im[md2[3,3]]]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`a[Fe[2]]}}
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]}}
    }
 };
 

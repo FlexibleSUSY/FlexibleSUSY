@@ -70,7 +70,7 @@ ExtraSLHAOutputBlocks = {
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
    {FlexibleSUSYLowEnergy,
-           {{21, FlexibleSUSYObservable`a[Fe[2]]} } },
+           {{21, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {EWSBOutputs, NoScale,
            {{1, mu20} } }
 };

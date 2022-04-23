@@ -453,9 +453,9 @@ ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
     Module[{result = ""},
            Switch[par,
-                  FlexibleSUSYObservable`a[_],
+                  FlexibleSUSYObservable`AMM[_],
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES." <> Observables`GetObservableName[par], idx}, Observables`GetObservableDescription[par]],
-                  FlexibleSUSYObservable`aUncertainty[_],
+                  FlexibleSUSYObservable`AMMUncertainty[_],
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES." <> Observables`GetObservableName[par], idx}, Observables`GetObservableDescription[par]],
                   FlexibleSUSYObservable`aMuonGM2Calc,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],

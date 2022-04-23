@@ -5016,7 +5016,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                   DeleteDuplicates @ Join[
 
                      (* muon g-2 *)
-                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`a[_]],
+                     If[MemberQ[Observables`GetRequestedObservables[extraSLHAOutputBlocks], FlexibleSUSYObservable`AMM[_]],
                            Block[{muon = TreeMasses`GetSMMuonLepton[], muonWithoutIndex},
                               muonWithoutIndex = If[AtomQ[muon], TreeMasses`GetSMMuonLepton[], Head@muon];
                               {muonWithoutIndex -> {muonWithoutIndex, TreeMasses`GetPhoton[]}}
@@ -5045,7 +5045,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
 
            Print["Creating AMuon class ..."];
            aMuonVertices = WriteAMuonClass[
-              DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`a[_]]&] /. FlexibleSUSYObservable`a[f_[_]] -> f /. FlexibleSUSYObservable`a[f_] -> f],
+              DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_a_muon.hpp"}]},
                               {FileNameJoin[{$flexiblesusyTemplateDir, "a_muon.cpp.in"}],

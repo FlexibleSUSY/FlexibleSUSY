@@ -104,7 +104,7 @@ ExtraSLHAOutputBlocks = {
             {2, vS},
             {3, m0Sq} } },
    {FlexibleSUSYLowEnergy,
-           {{0, FlexibleSUSYObservable`a[Fe[2]]} } },
+           {{0, FlexibleSUSYObservable`AMM[Fe[2]]} } },
    {NMSSMRUN,
            {{1, \[Lambda]},
             {2, \[Kappa]},

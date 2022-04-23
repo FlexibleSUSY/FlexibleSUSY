@@ -202,8 +202,8 @@ UseHiggs4LoopSM = True;
 
 ExtraSLHAOutputBlocks = {
    {FlexibleSUSYLowEnergy,
-           {{1, FlexibleSUSYObservable`a[Fe[2]]},
-            {2, FlexibleSUSYObservable`aUncertainty[Fe[2]]} } }
+           {{1, FlexibleSUSYObservable`AMM[Fe[2]]},
+            {2, FlexibleSUSYObservable`AMMUncertainty[Fe[2]]} } }
 };
 
 
