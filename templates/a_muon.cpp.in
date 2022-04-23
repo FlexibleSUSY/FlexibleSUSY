@@ -300,22 +300,7 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    }
 }
 
-template <typename Lepton>
-double leptonPhysicalMass(const softsusy::QedQcd& qedqcd, int idx)
-{
-   double lepton_physical_mass;
-   switch(idx) {
-      case 0: lepton_physical_mass = qedqcd.displayPoleMel(); break;
-      case 1: lepton_physical_mass = qedqcd.displayPoleMmuon(); break;
-      case 2: lepton_physical_mass = qedqcd.displayPoleMtau(); break;
-   }
-   return lepton_physical_mass;
-}
-template <typename Lepton>
-double leptonPhysicalMass(const softsusy::QedQcd& qedqcd)
-{
-   return qedqcd.displayPoleMel();
-}
+@leptonPhysicalMass@
 
 template <typename Lepton>
 double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
@@ -426,7 +411,7 @@ double @ModelName@_a_muon::calculate_amm(const @ModelName@_mass_eigenstates& mod
       return std::numeric_limits<double>::quiet_NaN();
    }
 
-   double m_muon_pole = leptonPhysicalMass<Lepton>(qedqcd);
+   double m_muon_pole = leptonPhysicalMass<Lepton>(qedqcd@extraIdxUsage@);
 
    if (m_muon_pole == 0.0) {
       model.solve_ewsb();
@@ -535,7 +520,7 @@ Lepton, Fermion, Scalar
          const double part2 = coeffB.real() * BarZeeLoopFPS(massRatioSquared);
 
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
-            * leptonPhysicalMass<Lepton>(qedqcd) / fermionMass;
+            * leptonPhysicalMass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
          res += preFactor * (part1 + part2);
       }
@@ -643,7 +628,7 @@ Lepton, Fermion, Scalar
                const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFPS(massRatioSquared) - BarZeeLoopFPS(Sqr(fermionMass / zMass)));
 
                const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
-                  * leptonPhysicalMass<Lepton>(qedqcd) / fermionMass;
+                  * leptonPhysicalMass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / fermionMass;
 
                res += preFactor * (part1 + part2);
             }
@@ -713,7 +698,7 @@ Lepton, ChargedScalar, NeutralScalar
          const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
 
          const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
-            * leptonPhysicalMass<Lepton>(qedqcd) / (neutralScalarMass * neutralScalarMass);
+            * leptonPhysicalMass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (neutralScalarMass * neutralScalarMass);
 
          res += preFactor * coeff.real() * BarZeeLoopS(massRatioSquared);
       }
@@ -780,7 +765,7 @@ Lepton, Vector, Scalar
          const double massRatioSquared = Sqr(vectorMass / scalarMass);
 
          const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
-            * leptonPhysicalMass<Lepton>(qedqcd) / (vectorMass * vectorMass);
+            * leptonPhysicalMass<Lepton>(qedqcd@BarrZeeLeptonIdx@) / (vectorMass * vectorMass);
 
          res += preFactor * coeff.real() * BarZeeLoopV(massRatioSquared);
       }

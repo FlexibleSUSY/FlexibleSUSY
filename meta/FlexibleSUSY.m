@@ -2471,7 +2471,8 @@ WriteAMuonClass[fields_List, files_List] :=
             muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "idx", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
-            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration},
+            graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPhysicalMass,
+            BarrZeeLeptonIdx},
 
       calculation =
          If[Length[fields] =!= 0,
@@ -2506,6 +2507,39 @@ WriteAMuonClass[fields_List, files_List] :=
          ];
       ];
 
+      leptonPhysicalMass =
+         If[Length[fields] === 1,
+"template <typename Lepton>
+double leptonPhysicalMass(const softsusy::QedQcd& qedqcd, int idx)
+{
+   double lepton_physical_mass;
+   switch(idx) {
+      case 0: lepton_physical_mass = qedqcd.displayPoleMel(); break;
+      case 1: lepton_physical_mass = qedqcd.displayPoleMmuon(); break;
+      case 2: lepton_physical_mass = qedqcd.displayPoleMtau(); break;
+   }
+   return lepton_physical_mass;
+}",
+StringRiffle[
+(
+"template <typename Lepton>
+std::enable_if_t<std::is_same<Lepton, " <> CXXDiagrams`CXXNameOfField[#, prefixNamespace-> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">::value, double>
+leptonPhysicalMass(const softsusy::QedQcd& qedqcd)
+{\n" <>
+TextFormatting`IndentText[
+   Switch[#,
+      GetParticleFromDescription["Electron"], "return qedqcd.displayPoleMel()",
+      GetParticleFromDescription["Muon"],     "return qedqcd.displayPoleMmuon()",
+      GetParticleFromDescription["Tau"],      "return qedqcd.displayPoleMtau()"
+   ] <> ";\n"
+] <>
+"}")& /@ fields,
+"\n\n"
+]
+         ];
+
+      BarrZeeLeptonIdx = If[Length[fields] === 1, ",indices.at(0)", ""];
+
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
          "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
@@ -2516,6 +2550,8 @@ WriteAMuonClass[fields_List, files_List] :=
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
          "@extraIdxDecl@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", int idx", ""],
          "@extraIdxUsage@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", idx", ""],
+         "@leptonPhysicalMass@" -> leptonPhysicalMass,
+         "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
          Sequence @@ GeneralReplacementRules[]
         }];
