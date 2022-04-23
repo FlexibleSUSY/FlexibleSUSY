@@ -2490,8 +2490,8 @@ WriteAMuonClass[fields_List, files_List] :=
       diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
-      calculateForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_a_muon"]& /@ fields, "\n"];
-      uncertaintyForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_a_muon_uncertainty"]& /@ fields, "\n"];
+      calculateForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
+      uncertaintyForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
 
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,

@@ -318,7 +318,7 @@ double leptonPhysicalMass(const softsusy::QedQcd& qedqcd)
 }
 
 template <typename Lepton>
-double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double calculate_amm_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
 
@@ -396,7 +396,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         m.calculate_DRbar_masses();
                         m.solve_ewsb();
                         m.calculate_M@AMuon_MuonField@_pole();
-                        amu = calculate_a_muon_impl<Lepton>(m, qedqcd@extraIdxUsage@);
+                        amu = calculate_amm_impl<Lepton>(m, qedqcd@extraIdxUsage@);
                      }
                      catch(const Error& e) {
                         ERROR("@ModelName@_a_muon: scale variation: " << e.what_detailed());
@@ -412,7 +412,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
 } // anonymous namespace
 
 template <typename Lepton>
-double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_a_muon::calculate_amm(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 
@@ -433,14 +433,14 @@ double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& 
       model.calculate_M@AMuon_MuonField@_pole();
    }
 
-   return calculate_a_muon_impl<Lepton>(model, qedqcd@extraIdxUsage@);
+   return calculate_amm_impl<Lepton>(model, qedqcd@extraIdxUsage@);
 }
 // spliting templated function into header and cpp
 // https://isocpp.org/wiki/faq/templates#separate-template-fn-defn-from-decl
 @calculateAForwardDeclaration@
 
 template <typename Lepton>
-double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
+double @ModelName@_a_muon::calculate_amm_uncertainty(const @ModelName@_mass_eigenstates& model_, const softsusy::QedQcd& qedqcd@extraIdxDecl@)
 {
    @ModelName@_mass_eigenstates model(model_);
 

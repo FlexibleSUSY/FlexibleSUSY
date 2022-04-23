@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE( test_zero )
 
    using SM_cxx_diagrams::fields::Fe;
 
-   const double ae = SM_a_muon::calculate_a_muon<Fe>(sm, qedqcd, 0);
-   const double amu = SM_a_muon::calculate_a_muon<Fe>(sm, qedqcd, 1);
-   const double atau = SM_a_muon::calculate_a_muon<Fe>(sm, qedqcd, 2);
+   const double ae = SM_a_muon::calculate_amm<Fe>(sm, qedqcd, 0);
+   const double amu = SM_a_muon::calculate_amm<Fe>(sm, qedqcd, 1);
+   const double atau = SM_a_muon::calculate_amm<Fe>(sm, qedqcd, 2);
 
    BOOST_CHECK_SMALL(ae, 1e-15);
    BOOST_CHECK_SMALL(amu, 1e-15);
