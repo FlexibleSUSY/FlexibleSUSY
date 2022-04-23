@@ -211,11 +211,12 @@ jobs:
             --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
-            --enable-librarylink
+            --enable-librarylink \
+            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
           make showbuild
 
       - name: Make
-        run: make -j1
+        run: make -j2
 
       - name: Run Mathematica tests
         run: make -j2 execute-meta-tests
