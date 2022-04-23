@@ -2508,7 +2508,7 @@ WriteAMuonClass[fields_List, files_List] :=
       ];
 
       leptonPhysicalMass =
-         If[Length[fields] === 1,
+         If[GetParticleFromDescription["Leptons"] =!= Null,
 "template <typename Lepton>
 double leptonPhysicalMass(const softsusy::QedQcd& qedqcd, int idx)
 {
