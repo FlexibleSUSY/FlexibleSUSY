@@ -37,7 +37,7 @@ modification, extension and reuse.
   [1910.03595]_.
 
   If you use **FlexibleSUSY+GM2Calc** in your work, please cite
-  [1510.08071]_.
+  [1510.08071]_ and (if appropriate) [2110.13238]_.
 
   If you use **FlexibleDecay** in your work, please cite
   [2106.05038]_.
@@ -1039,3 +1039,4 @@ References
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
 .. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
+.. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
