@@ -69,8 +69,8 @@ GetRequestedObservables[blocks_] :=
           ];
 
 GetObservableName[FlexibleSUSYObservable`AMM[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`AMM[p]] <> "_" <> ToString[idx];
-GetObservableName[FlexibleSUSYObservable`AMM[p_]] := "a_" <> CConversion`ToValidCSymbolString[p];
-GetObservableName[FlexibleSUSYObservable`AMMUncertainty[p_]] := "a_uncertainty_" <> CConversion`ToValidCSymbolString[p];
+GetObservableName[FlexibleSUSYObservable`AMM[p_]] := "amm_" <> CConversion`ToValidCSymbolString[p];
+GetObservableName[FlexibleSUSYObservable`AMMUncertainty[p_]] := "amm_uncertainty_" <> CConversion`ToValidCSymbolString[p];
 GetObservableName[FlexibleSUSYObservable`AMMUncertainty[p_[idx_]]] := GetObservableName[FlexibleSUSYObservable`AMMUncertainty[p]] <> "_" <> ToString[idx];
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc] := "a_muon_gm2calc";
 GetObservableName[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty] := "a_muon_gm2calc_uncertainty";
@@ -205,11 +205,11 @@ CreateClearObservablesFunction[observables_List] :=
           ];
 
 CalculateObservable[FlexibleSUSYObservable`AMM[p_], structName_String] :=
-    structName <> ".LeptonAMM0(" <> CConversion`ToValidCSymbolString[p] <> ") = " <>
+    structName <> ".AMM0(" <> CConversion`ToValidCSymbolString[p] <> ") = " <>
       FlexibleSUSY`FSModelName <> "_amm::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd);";
 
 CalculateObservable[FlexibleSUSYObservable`AMM[p_[idx_]], structName_String] :=
-    structName <> ".LeptonAMM1(" <> CConversion`ToValidCSymbolString[p] <> ", " <> ToString[idx] <> ") = " <>
+    structName <> ".AMM1(" <> CConversion`ToValidCSymbolString[p] <> ", " <> ToString[idx] <> ") = " <>
       FlexibleSUSY`FSModelName <> "_amm::calculate_amm<" <> CXXDiagrams`CXXNameOfField[p, prefixNamespace -> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"] <> ">(MODEL, qedqcd, " <> ToString[idx] <> ");";
 
 CalculateObservable[FlexibleSUSYObservable`AMMUncertainty[p_], structName_String] :=
