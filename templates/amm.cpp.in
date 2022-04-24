@@ -34,9 +34,6 @@
 #include "numerics2.hpp"
 #include "logger.hpp"
 #include "dilog.hpp"
-#include "decays/decay.hpp"
-
-#include <boost/core/demangle.hpp>
 
 #define DERIVEDPARAMETER(p) context.model.p()
 

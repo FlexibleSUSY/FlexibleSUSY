@@ -2517,7 +2517,7 @@ double leptonPhysicalMass(const softsusy::QedQcd& qedqcd, int idx)
       case 0: lepton_physical_mass = qedqcd.displayPoleMel(); break;
       case 1: lepton_physical_mass = qedqcd.displayPoleMmuon(); break;
       case 2: lepton_physical_mass = qedqcd.displayPoleMtau(); break;
-      default: throw OutOfBoundsError(\"Cannot compute anomalous magnetic moment of \" + strip_field_namespace(boost::core::demangle(typeid(Lepton).name())) + \"(\" + std::to_string(idx+1) + \")\");
+      default: throw OutOfBoundsError(\"Cannot compute anomalous magnetic moment of " <> CXXDiagrams`CXXNameOfField[GetParticleFromDescription["Leptons"]] <>  "(\" + std::to_string(idx+1) + \")\");
    }
    return lepton_physical_mass;
 }",
