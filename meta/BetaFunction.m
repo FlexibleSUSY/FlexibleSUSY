@@ -184,7 +184,7 @@ ConvertExprToC[expr_, type_, target_String] :=
               ];
               result = StringJoin[result] <> "\n" <>
                        target <> " = " <>
-                       StringJoin[Riffle[MapIndexed[(target <> "_" <> ToString[#2[[1]]])&, splitExpr], " + "]] <>
+                       StringRiffle[MapIndexed[(target <> "_" <> ToString[#2[[1]]])&, splitExpr], " + "] <>
                        ";\n";
               ,
               result = target <> " = " <> CastTo[RValueToCFormString[expr], type] <> ";\n";
