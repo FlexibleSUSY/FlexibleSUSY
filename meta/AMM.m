@@ -20,7 +20,7 @@
 
 *)
 
-BeginPackage["AMuon`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
+BeginPackage["AMM`", {"SARAH`", "CXXDiagrams`", "TextFormatting`", "TreeMasses`", "LoopMasses`"}];
 
 AMuonGetMuon::usage="";
 AMuonGetMSUSY::usage="";

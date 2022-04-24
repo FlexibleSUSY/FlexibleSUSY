@@ -61,7 +61,7 @@ META_THDM_SRC:= \
 		$(DIR)/THDM/Thresholds_1L_full.m
 
 META_SRC     := \
-		$(DIR)/AMuon.m \
+		$(DIR)/AMM.m \
 		$(DIR)/AnomalousDimension.m \
 		$(DIR)/BetaFunction.m \
 		$(DIR)/CConversion.m \

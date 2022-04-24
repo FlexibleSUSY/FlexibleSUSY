@@ -49,7 +49,7 @@ BeginPackage["FlexibleSUSY`",
               "TerminalFormatting`",
               "ThreeLoopMSSM`",
               "CXXDiagrams`",
-              "AMuon`",
+              "AMM`",
               "Decays`",
               "EDM`",
               "FFVFormFactors`",
@@ -2463,12 +2463,12 @@ WriteFToFConversionInNucleusClass[leptonPairs:{{_->_,_}...}, files_List] :=
       DeleteDuplicates@Join[vertices,npfVertices]
    ];
 
-(* Write the AMuon c++ files *)
-WriteAMuonClass[fields_List, files_List] :=
+(* Write the AMM c++ files *)
+WriteAMMClass[fields_List, files_List] :=
     Module[{calculation, getMSUSY,
             (* in models without flavour violation (no FV models) muon does not have an index,
                otherwise we assume it's the second particle in the lepton multiplet *)
-            muonIndex = If[TreeMasses`GetDimension[AMuon`AMuonGetMuon[]] =!= 1, "idx", ""],
+            muonIndex = If[TreeMasses`GetDimension[AMM`AMuonGetMuon[]] =!= 1, "idx", ""],
             (* we want to calculate an offset of g-2 compared to the SM *)
             discardSMcontributions = CConversion`CreateCBoolValue[True],
             graphs, diagrams, vertices, barZee = "", calculateForwadDeclaration, uncertaintyForwadDeclaration, leptonPhysicalMass,
@@ -2477,22 +2477,22 @@ WriteAMuonClass[fields_List, files_List] :=
       calculation =
          If[Length[fields] =!= 0,
             "const auto form_factors = " <>
-            FSModelName <> "_FFV_form_factors::calculate_form_factors<" <> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "," <>
-            CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]] <> "," <> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
+            FSModelName <> "_FFV_form_factors::calculate_form_factors<" <> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]] <> "," <>
+            CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]] <> "," <> CXXDiagrams`CXXNameOfField[TreeMasses`GetPhoton[]] <> ">(" <>
             muonIndex <> If[muonIndex === "", "", ", "] <>
             muonIndex <> If[muonIndex === "", "", ", "] <>
             "model, " <> discardSMcontributions <> ");",
             "const std::valarray<std::complex<double>> form_factors {0., 0., 0., 0.};"
          ];
 
-      getMSUSY = AMuon`AMuonGetMSUSY[];
+      getMSUSY = AMM`AMuonGetMSUSY[];
 
-      graphs = AMuon`AMuonContributingGraphs[];
-      diagrams = Outer[AMuon`AMuonContributingDiagramsForGraph, graphs, 1];
+      graphs = AMM`AMuonContributingGraphs[];
+      diagrams = Outer[AMM`AMuonContributingDiagramsForGraph, graphs, 1];
 
       vertices = Flatten[CXXDiagrams`VerticesForDiagram /@ Flatten[diagrams, 1], 1];
-      calculateForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
-      uncertaintyForwadDeclaration = StringRiffle[AMuon`ForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
+      calculateForwadDeclaration = StringRiffle[AMM`ForwardDeclaration[#, "calculate_amm"]& /@ fields, "\n"];
+      uncertaintyForwadDeclaration = StringRiffle[AMM`ForwardDeclaration[#, "calculate_amm_uncertainty"]& /@ fields, "\n"];
 
       For[i = 1, i <= Length[graphs], i++,
          For[j = 1, j <= Length[diagrams[[i]]], j++,
@@ -2502,7 +2502,7 @@ WriteAMuonClass[fields_List, files_List] :=
                CXXDiagrams`IndexDiagramFromGraph[diagrams[[i,j]], graphs[[i]]],
                   graphs[[i]]
                 ], 16] <> " * " <>
-                ToString @ AMuon`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
+                ToString @ AMM`CXXEvaluatorForDiagramFromGraph[diagrams[[i,j]], graphs[[i]]] <>
                 "::value({" <> muonIndex <> "}, context, qedqcd);\n"
          ];
       ];
@@ -2541,7 +2541,7 @@ TextFormatting`IndentText[
       BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
       WriteOut`ReplaceInFiles[files,
-        {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
+        {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMM`AMuonGetMuon[]],
          "@AMuon_ZBosonField@"      -> CXXDiagrams`CXXNameOfField[TreeMasses`GetZBoson[]],
          "@AMuon_Calculation@"    -> TextFormatting`IndentText[calculation],
          "@AMuon_GetMSUSY@"       -> TextFormatting`IndentText[WrapLines[getMSUSY]],
@@ -4976,7 +4976,7 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              {FileNameJoin[{$flexiblesusyTemplateDir, "observables.cpp.in"}],
                               FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_observables.cpp"}]}}];
 
-           Print["Creating EDM class ..."];
+           Print["Creating lepton EDM class ..."];
            edmFields = DeleteDuplicates @ Cases[Observables`GetRequestedObservables[extraSLHAOutputBlocks],
                                                 FlexibleSUSYObservable`EDM[p_[__]|p_] :> p];
            edmVertices =
@@ -5079,8 +5079,8 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                              FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_FFV_form_factors.cpp"}]}}
                ];
 
-           Print["Creating AMuon class ..."];
-           aMuonVertices = WriteAMuonClass[
+           Print["Creating lepton AMM class ..."];
+           aMuonVertices = WriteAMMClass[
               DeleteDuplicates[Select[Observables`GetRequestedObservables[extraSLHAOutputBlocks], MatchQ[#, FlexibleSUSYObservable`AMM[_]]&] /. FlexibleSUSYObservable`AMM[f_[_]] -> f /. FlexibleSUSYObservable`AMM[f_] -> f],
               {{FileNameJoin[{$flexiblesusyTemplateDir, "amm.hpp.in"}],
                                FileNameJoin[{FSOutputDir, FlexibleSUSY`FSModelName <> "_amm.hpp"}]},
