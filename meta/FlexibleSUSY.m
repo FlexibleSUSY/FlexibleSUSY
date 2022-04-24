@@ -2538,7 +2538,7 @@ TextFormatting`IndentText[
 ]
          ];
 
-      BarrZeeLeptonIdx = If[Length[fields] === 1, ",indices.at(0)", ""];
+      BarrZeeLeptonIdx = If[GetParticleFromDescription["Leptons"] =!= Null, ",indices.at(0)", ""];
 
       WriteOut`ReplaceInFiles[files,
         {"@AMuon_MuonField@"      -> CXXDiagrams`CXXNameOfField[AMuon`AMuonGetMuon[]],
@@ -2548,8 +2548,8 @@ TextFormatting`IndentText[
          "@AMuon_MuonIndex@" -> muonIndex,
          "@calculateAForwardDeclaration@" -> calculateForwadDeclaration,
          "@calculateAUncertaintyForwardDeclaration@" -> uncertaintyForwadDeclaration,
-         "@extraIdxDecl@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", int idx", ""],
-         "@extraIdxUsage@" -> If[TreeMasses`GetDimension[fields[[1]]] =!= 1, ", idx", ""],
+         "@extraIdxDecl@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", int idx", ""],
+         "@extraIdxUsage@" -> If[GetParticleFromDescription["Leptons"] =!= Null, ", idx", ""],
          "@leptonPhysicalMass@" -> leptonPhysicalMass,
          "@BarrZeeLeptonIdx@" -> BarrZeeLeptonIdx,
          "@AMuon_BarZeeCalculation@" -> TextFormatting`IndentText[barZee],
