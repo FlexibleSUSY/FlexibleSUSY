@@ -141,7 +141,7 @@ std::pair<double, double> calculate_mw_pole_SM_fit_OS(
    // Eq.(7)
    const double dH = std::log(std::abs(mh)/100);
    const double dh = sqr(mh/100);
-   const double dt = sqr(mt/173.3) - 1;
+   const double dt = sqr(mt/174.3) - 1;
    const double dZ = mz/91.1875 - 1;
    const double da = Da/0.05907 - 1;
    const double das = as/0.119 - 1;
