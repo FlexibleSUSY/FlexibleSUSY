@@ -62,13 +62,13 @@ jobs:
            ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
            name: models-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
            name: slha-output-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
