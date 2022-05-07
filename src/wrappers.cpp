@@ -143,6 +143,14 @@ double MaxRelDiff(const std::complex<double>& a, const std::complex<double>& b) 
 
 double PolyLog(int n, double z) noexcept
 {
+   switch (n) {
+   case 1: return -std::log(1.0 - z);
+   case 2: return dilog(z);
+   case 3: return trilog(z);
+   case 4: return Li4(z);
+   default: break;
+   }
+
    return std::real(PolyLog(n, std::complex<double>(z, 0.0)));
 }
 

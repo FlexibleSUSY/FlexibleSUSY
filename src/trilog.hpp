@@ -23,6 +23,9 @@
 
 namespace flexiblesusy {
 
+/// real trilogarithm
+double trilog(double) noexcept;
+
 /// complex trilogarithm
 std::complex<double> trilog(const std::complex<double>&) noexcept;
 
