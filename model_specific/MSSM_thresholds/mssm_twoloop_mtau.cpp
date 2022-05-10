@@ -20,7 +20,7 @@
 // with the script "tau_to_cpp.m".
 
 #include "mssm_twoloop_mtau.hpp"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -92,7 +92,7 @@ namespace {
 
       return (6*(mm1*log1u + mm2*log2u) +
          (-mm1 - mm2)*(7 + power2(Pi)/6) +
-         (mm1 - mm2)*(2*dilog(1 - mm1/mm2) +
+         (mm1 - mm2)*(2*Li2(1 - mm1/mm2) +
             power2(log12)/2) +
          ((mm1 + mm2)*power2(log12))/2 -
          2*(mm1*power2(log1u) + mm2*power2(log2u)))/2;
@@ -108,7 +108,7 @@ namespace {
    {
       const std::complex<Real> img(0.0l, 1.0l);
 
-      return std::imag(dilog(std::exp(img*x)));
+      return std::imag(Li2(std::exp(img*x)));
    }
 
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
@@ -118,8 +118,8 @@ namespace {
 
       return (-(std::log(x)*std::log(y))
               + 2*std::log((1 - lambda + x - y)/2)*std::log((1 - lambda - x + y)/2)
-              - 2*dilog((1 - lambda + x - y)/2)
-              - 2*dilog((1 - lambda - x + y)/2)
+              - 2*Li2((1 - lambda + x - y)/2)
+              - 2*Li2((1 - lambda - x + y)/2)
               + power2(Pi)/3)/lambda;
    }
 

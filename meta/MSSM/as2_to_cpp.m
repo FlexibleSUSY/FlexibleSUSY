@@ -238,7 +238,7 @@ impl = "\
 // with the script \"as2_to_cpp.m\".
 
 #include \"" <> headerName <> "\"
-#include \"dilog.hpp\"
+#include \"Li2.hpp\"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -303,7 +303,7 @@ namespace {
    {
       const std::complex<Real> img(0.0l, 1.0l);
 
-      return std::imag(dilog(std::exp(img*x)));
+      return std::imag(Li2(std::exp(img*x)));
    }
 
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
@@ -313,8 +313,8 @@ namespace {
 
       return (-(std::log(x)*std::log(y))
               + 2*std::log((1 - lambda + x - y)/2)*std::log((1 - lambda - x + y)/2)
-              - 2*dilog((1 - lambda + x - y)/2)
-              - 2*dilog((1 - lambda - x + y)/2)
+              - 2*Li2((1 - lambda + x - y)/2)
+              - 2*Li2((1 - lambda - x + y)/2)
               + power2(Pi)/3)/lambda;
    }
 

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include "complex.hpp"
 #include <cfloat>
 #include <cmath>
@@ -63,7 +63,7 @@ namespace {
  * @author Alexander Voigt
  * @note Implemented as economized Padé approximation.
  */
-double clausen_2(double x) noexcept
+double Cl2(double x) noexcept
 {
    const double PI = 3.14159265358979324;
    const double PI2 = 2*PI, PIH = PI/2, PI28 = PI*PI/8;
@@ -143,7 +143,7 @@ double clausen_2(double x) noexcept
  * error of approximately 3.26e-41 (for long double and quadruple
  * precision).
  */
-long double clausen_2(long double x) noexcept
+long double Cl2(long double x) noexcept
 {
    const long double PI = 3.14159265358979323846264338327950288L;
    const long double PI2 = 2*PI, PIH = PI/2, PI28 = PI*PI/8;
@@ -263,7 +263,7 @@ long double clausen_2(long double x) noexcept
  * Implemented as an economized Pade approximation with a
  * maximum error of 4.16e-18.
  */
-double dilog(double x) noexcept
+double Li2(double x) noexcept
 {
    const double PI = 3.1415926535897932;
    const double P[] = {
@@ -348,7 +348,7 @@ double dilog(double x) noexcept
  * error of 2.13e-20 (long double precision) and 1.03e-38 (quadruple
  * precision), respectively.
  */
-long double dilog(long double x) noexcept
+long double Li2(long double x) noexcept
 {
    const long double PI  = 3.14159265358979323846264338327950288L;
 
@@ -471,7 +471,7 @@ long double dilog(long double x) noexcept
  * @author Werner Porod
  * @note translated to C++ by Alexander Voigt
  */
-std::complex<double> dilog(const std::complex<double>& z_) noexcept
+std::complex<double> Li2(const std::complex<double>& z_) noexcept
 {
    const double PI = 3.1415926535897932;
    const Complex<double> z = { std::real(z_), std::imag(z_) };
@@ -494,10 +494,10 @@ std::complex<double> dilog(const std::complex<double>& z_) noexcept
    // special cases
    if (z.im == 0) {
       if (z.re <= 1) {
-         return dilog(z.re);
+         return Li2(z.re);
       }
       // z.re > 1
-      return { dilog(z.re), -PI*std::log(z.re) };
+      return { Li2(z.re), -PI*std::log(z.re) };
    }
 
    const double nz = norm_sqr(z);
@@ -547,7 +547,7 @@ std::complex<double> dilog(const std::complex<double>& z_) noexcept
  * @author Werner Porod
  * @note translated to C++ and extended to long double precision by Alexander Voigt
  */
-std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
+std::complex<long double> Li2(const std::complex<long double>& z_) noexcept
 {
    const long double PI = 3.14159265358979323846264338327950288L;
    const Complex<long double> z = { std::real(z_), std::imag(z_) };
@@ -585,10 +585,10 @@ std::complex<long double> dilog(const std::complex<long double>& z_) noexcept
    // special cases
    if (z.im == 0) {
       if (z.re <= 1) {
-         return dilog(z.re);
+         return Li2(z.re);
       }
       // z.re > 1
-      return { dilog(z.re), -PI*std::log(z.re) };
+      return { Li2(z.re), -PI*std::log(z.re) };
    }
 
    const long double nz = norm_sqr(z);

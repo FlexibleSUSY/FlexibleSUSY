@@ -17,7 +17,7 @@
 // ====================================================================
 
 #include "threshold_loop_functions.hpp"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "logger.hpp"
 #include "numerics.h"
@@ -1306,7 +1306,7 @@ double fth3(double y) noexcept
       const double ly = std::log(y2);
 
       return (-1. + 2*y2 + 2*y4)
-         *(-z2 - y2*ly + ly*std::log(1. - y2) + dilog(y2))
+         *(-z2 - y2*ly + ly*std::log(1. - y2) + Li2(y2))
          / sqr(1 - y2);
    }
 
@@ -1962,21 +1962,21 @@ namespace {
       if (is_equal(u, v, eps)) {
          return (- sqr(std::log(u))
                  + 2*sqr(std::log(0.5*(1 - lambda)))
-                 - 4*dilog(0.5*(1 - lambda))
+                 - 4*Li2(0.5*(1 - lambda))
                  + pi23)/lambda;
       }
 
       return (- std::log(u)*std::log(v)
               + 2*std::log(0.5*(1 - lambda + u - v))*std::log(0.5*(1 - lambda - u + v))
-              - 2*dilog(0.5*(1 - lambda + u - v))
-              - 2*dilog(0.5*(1 - lambda - u + v))
+              - 2*Li2(0.5*(1 - lambda + u - v))
+              - 2*Li2(0.5*(1 - lambda - u + v))
               + pi23)/lambda;
    }
 
-   /// clausen_2(2*acos(x))
+   /// Cl2(2*acos(x))
    double cl2acos(double x) noexcept
    {
-      return clausen_2(2*std::acos(x));
+      return Cl2(2*std::acos(x));
    }
 
    /// lambda^2(u,v) < 0, u = 1
@@ -1998,7 +1998,7 @@ namespace {
       const auto lambda = std::sqrt(-lambda_2(u,v));
 
       if (is_equal(u, v, eps)) {
-         return 4*clausen_2(2*std::asin(std::sqrt(0.25/u)))/lambda;
+         return 4*Cl2(2*std::asin(std::sqrt(0.25/u)))/lambda;
       }
 
       if (is_equal(u, 1.0, eps)) {

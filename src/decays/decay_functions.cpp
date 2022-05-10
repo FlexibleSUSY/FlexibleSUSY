@@ -20,8 +20,8 @@
 #include <limits>
 
 #include "decay_functions.hpp"
-#include "dilog.hpp"
-#include "trilog.hpp"
+#include "Li2.hpp"
+#include "Li3.hpp"
 #include "Li4.hpp"
 #include "numerics2.hpp"
 #include "wrappers.hpp"
@@ -51,7 +51,7 @@ double calc_A(double b) noexcept
    const double log_ratio {std::log((1 + b) / (1 - b))};
 
    return (1 + b * b) *
-             (4. * dilog((1 - b) / (1 + b)) + 2. * dilog(-(1 - b) / (1 + b)) -
+             (4. * Li2((1 - b) / (1 + b)) + 2. * Li2(-(1 - b) / (1 + b)) -
               3. * log_ratio * std::log(2 / (1 + b)) -
               2. * log_ratio * log_b) -
           3. * b * std::log(4. / (1 - b * b)) - 4. * b * log_b;
@@ -176,10 +176,10 @@ std::complex<double> delta_hAA_2loopQCD_for_quark_loop(double mH, double mq, dou
    const double tau = Sqr(mH/(2.*mq));
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
    const std::complex<double> ln = std::log(z);
-   const std::complex<double> li2p = dilog(z);
-   const std::complex<double> li2m = dilog(-z);
-   const std::complex<double> li3p = trilog(z);
-   const std::complex<double> li3m = trilog(-z);
+   const std::complex<double> li2p = Li2(z);
+   const std::complex<double> li2m = Li2(-z);
+   const std::complex<double> li3p = Li3(z);
+   const std::complex<double> li3m = Li3(-z);
    const std::complex<double> li4p = Li4(z);
    const std::complex<double> li4m = Li4(-z);
    const std::complex<double> p41mz = Power4(1.0-z);
@@ -210,10 +210,10 @@ std::complex<double> delta_AhAA_2loopQCD_for_quark_loop(double mAh, double mq, d
    }
    const std::complex<double> z = is_zero(tau) ? 1. : (std::sqrt(std::complex<double>(1. - 1./tau))-1.)/(std::sqrt(std::complex<double>(1.-1./tau))+1.);
    const std::complex<double> ln = std::log(z);
-   const std::complex<double> li2p = dilog(z);
-   const std::complex<double> li2m = dilog(-z);
-   const std::complex<double> li3p = trilog(z);
-   const std::complex<double> li3m = trilog(-z);
+   const std::complex<double> li2p = Li2(z);
+   const std::complex<double> li2m = Li2(-z);
+   const std::complex<double> li3p = Li3(z);
+   const std::complex<double> li3m = Li3(-z);
    const std::complex<double> li4p = Li4(z);
    const std::complex<double> li4m = Li4(-z);
 

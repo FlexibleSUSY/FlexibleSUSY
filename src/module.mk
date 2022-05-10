@@ -19,13 +19,14 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/decay_functions.cpp \
 		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
-		$(DIR)/dilog.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
 		$(DIR)/gsl_multiroot_fsolver.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/Li2.cpp \
+		$(DIR)/Li3.cpp \
 		$(DIR)/Li4.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/loop_libraries/library_softsusy.cpp \
@@ -52,7 +53,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
-		$(DIR)/trilog.cpp \
 		$(DIR)/wrappers.cpp
 
 LIBFLEXI_HDR := \
@@ -81,7 +81,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
-		$(DIR)/dilog.hpp \
 		$(DIR)/eigen_utils.hpp \
 		$(DIR)/eigen_tensor.hpp \
 		$(DIR)/error.hpp \
@@ -98,10 +97,12 @@ LIBFLEXI_HDR := \
 		$(DIR)/gsl_multiroot_fsolver.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
-		$(DIR)/Li4.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \
+		$(DIR)/Li2.hpp \
+		$(DIR)/Li3.hpp \
+		$(DIR)/Li4.hpp \
 		$(DIR)/linalg2.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
@@ -144,7 +145,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
-		$(DIR)/trilog.hpp \
 		$(DIR)/which.hpp \
 		$(DIR)/wrappers.hpp
 

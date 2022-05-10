@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "trilog.hpp"
+#include "Li3.hpp"
 #include "complex.hpp"
 #include <cfloat>
 #include <cmath>
@@ -101,7 +101,7 @@ namespace {
  * @return \f$\operatorname{Li}_3(x)\f$
  * @author Alexander Voigt
  */
-double trilog(double x) noexcept
+double Li3(double x) noexcept
 {
    const double zeta2 = 1.6449340668482264;
    const double zeta3 = 1.2020569031595943;
@@ -161,7 +161,7 @@ double trilog(double x) noexcept
  * @return \f$\operatorname{Li}_3(z)\f$
  * @author Alexander Voigt
  */
-std::complex<double> trilog(const std::complex<double>& z_) noexcept
+std::complex<double> Li3(const std::complex<double>& z_) noexcept
 {
    const double PI    = 3.1415926535897932;
    const double zeta2 = 1.6449340668482264;
@@ -182,10 +182,10 @@ std::complex<double> trilog(const std::complex<double>& z_) noexcept
 
    if (z.im == 0) {
       if (z.re <= 1) {
-         return trilog(z.re);
+         return Li3(z.re);
       } else {
          const double l = std::log(z.re);
-         return std::complex<double>(trilog(z.re), -0.5*PI*l*l);
+         return std::complex<double>(Li3(z.re), -0.5*PI*l*l);
       }
    }
 
@@ -247,7 +247,7 @@ std::complex<double> trilog(const std::complex<double>& z_) noexcept
  * @return \f$\mathrm{Li}_3(z)\f$
  * @author Alexander Voigt
  */
-std::complex<long double> trilog(const std::complex<long double>& z_) noexcept
+std::complex<long double> Li3(const std::complex<long double>& z_) noexcept
 {
    const long double PI    = 3.14159265358979323846264338327950288L;
    const long double zeta2 = 1.64493406684822643647241516664602519L;
