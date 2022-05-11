@@ -20,6 +20,7 @@
 #include "Li2.hpp"
 #include "Li3.hpp"
 #include "Li4.hpp"
+#include "Li.hpp"
 #include "numerics2.hpp"
 #include "string_format.hpp"
 
@@ -156,17 +157,7 @@ double PolyLog(int n, double z) noexcept
 
 std::complex<double> PolyLog(int n, const std::complex<double>& z) noexcept
 {
-   switch (n) {
-   case 1: return -std::log(1.0 - z);
-   case 2: return Li2(z);
-   case 3: return Li3(z);
-   case 4: return Li4(z);
-   default: break;
-   }
-
-   ERROR("PolyLog(n != 1|2|3|4) not implemented");
-
-   return { 0.0, 0.0 };
+   return Li(n, z);
 }
 
 double Re(double x) noexcept
