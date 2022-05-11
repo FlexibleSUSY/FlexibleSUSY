@@ -10,6 +10,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
 		$(DIR)/ckm.cpp \
+		$(DIR)/Cl2.cpp \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/coupling_monitor.cpp \
@@ -64,6 +65,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/bvp_solver_problems_format_mathlink.hpp \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
+		$(DIR)/Cl2.hpp \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \

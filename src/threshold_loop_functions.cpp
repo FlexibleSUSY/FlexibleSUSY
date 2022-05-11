@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "threshold_loop_functions.hpp"
+#include "Cl2.hpp"
 #include "Li2.hpp"
 #include "loop_libraries/loop_library.hpp"
 #include "logger.hpp"

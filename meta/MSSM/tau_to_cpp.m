@@ -204,11 +204,11 @@ impl = "\
 // with the script \"tau_to_cpp.m\".
 
 #include \"" <> headerName <> "\"
+#include \"Cl2.hpp\"
 #include \"Li2.hpp\"
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <complex>
 #include <limits>
 #include <ostream>
 
@@ -287,14 +287,6 @@ namespace {
       return power2(1 - x - y) - 4*x*y;
    }
 
-   /// ClausenCl[2,x]
-   Real ClausenCl2(Real x) noexcept
-   {
-      const std::complex<Real> img(0.0l, 1.0l);
-
-      return std::imag(Li2(std::exp(img*x)));
-   }
-
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
    Real PhiPos(Real x, Real y) noexcept
    {
@@ -312,9 +304,9 @@ namespace {
    {
       const Real lambda = std::sqrt(-LambdaSquared(x,y));
 
-      return 2*(+ ClausenCl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
-                + ClausenCl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
-                + ClausenCl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
+      return 2*(+ Cl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
+                + Cl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
+                + Cl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
    }
 
    Real Phi(Real x, Real y) noexcept

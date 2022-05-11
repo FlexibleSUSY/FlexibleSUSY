@@ -20,11 +20,11 @@
 // with the script "bquark_to_cpp.m".
 
 #include "mssm_twoloop_mb.hpp"
+#include "Cl2.hpp"
 #include "Li2.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <complex>
 #include <limits>
 
 namespace flexiblesusy {
@@ -82,14 +82,6 @@ namespace {
       return pow2(1 - x - y) - 4*x*y;
    }
 
-   /// ClausenCl[2,x]
-   double ClausenCl2(double x) noexcept
-   {
-      const std::complex<double> img(0.0, 1.0);
-
-      return std::imag(Li2(std::exp(img*x)));
-   }
-
    /// x < 1 && y < 1, LambdaSquared(x,y) > 0
    double PhiPos(double x, double y) noexcept
    {
@@ -107,9 +99,9 @@ namespace {
    {
       const double lambda = std::sqrt(-LambdaSquared(x,y));
 
-      return 2*(+ ClausenCl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
-                + ClausenCl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
-                + ClausenCl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
+      return 2*(+ Cl2(2*std::acos((1 + x - y)/(2*std::sqrt(x))))
+                + Cl2(2*std::acos((1 - x + y)/(2*std::sqrt(y))))
+                + Cl2(2*std::acos((-1 + x + y)/(2*std::sqrt(x*y)))))/lambda;
    }
 
    double Phi(double x, double y) noexcept
