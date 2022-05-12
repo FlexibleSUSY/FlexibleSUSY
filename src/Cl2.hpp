@@ -16,21 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef TRILOG_H
-#define TRILOG_H
-
-#include <complex>
+#ifndef CL2_H
+#define CL2_H
 
 namespace flexiblesusy {
 
-/// real trilogarithm
-double trilog(double) noexcept;
+/// Clausen function Cl_2(x)
+double Cl2(double) noexcept;
 
-/// complex trilogarithm
-std::complex<double> trilog(const std::complex<double>&) noexcept;
-
-/// complex trilogarithm (long double precision)
-std::complex<long double> trilog(const std::complex<long double>&) noexcept;
+/// Clausen function Cl_2(x)
+long double Cl2(long double) noexcept;
 
 } // namespace flexiblesusy
 
