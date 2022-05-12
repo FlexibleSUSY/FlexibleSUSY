@@ -369,10 +369,10 @@ Example
     ];
 
     (* calculate pole mass spectrum *)
-    FSCMSSMCalculateSpectrum[handle]
+    FSCMSSMCalculateSpectrum[handle];
 
     (* calculate observables *)
-    FSCMSSMCalculateObservables[handle]
+    FSCMSSMCalculateObservables[handle];
 
     (* close the model handle *)
     FSCMSSMCloseHandle[handle];
