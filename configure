@@ -2029,13 +2029,14 @@ int main() {
 
     local GM2CALC_VERSION="$cpp_output"
 
+    version_at_least "$GM2CALC_VERSION" "2.1.0" || {
+        message "Error: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
+        message "   Please upgrade to version 2.1.0 (or higher)."
+        exit 1
+    }
+
     result "ok (version ${GM2CALC_VERSION})"
     logmsg "   GM2Calc version found: ${GM2CALC_VERSION}"
-
-    version_at_least "$GM2CALC_VERSION" "1.7.0" || {
-        message "Warning: An old version of GM2Calc has been detected ($GM2CALC_VERSION)."
-        message "   Please consider upgrading to version 1.7.0 (or higher)."
-    }
 }
 
 #_____________________________________________________________________
