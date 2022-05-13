@@ -138,7 +138,7 @@ AMuonGetMSUSY[] :=
            If[susyParticles === {},
               "return 0.;",
               "return Min(" <>
-                 StringJoin[Riffle[GetMinMass /@ susyParticles, ", "]] <>
+                 StringRiffle[GetMinMass /@ susyParticles, ", "] <>
               ");"
              ]
           ];

@@ -178,9 +178,9 @@ CXXNameOfField[Susyno`LieGroups`conj[p_],
  * \returns the name of the c++ type corresponding to a
  * given vertex.
  **)
-CXXNameOfVertex[fields_List] := "Vertex<" <> StringJoin[Riffle[
+CXXNameOfVertex[fields_List] := "Vertex<" <> StringRiffle[
 		CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields,
-	", "]] <> ">"
+	", "] <> ">"
 
 (** \brief Returns the appropriate c++ typename to conjugate a
  * given field as it would be used by ``SARAH`AntiField[]``.
@@ -264,7 +264,7 @@ CreateFields[] :=
        vectors = Select[fields, TreeMasses`IsVector];
        ghosts = Select[fields, TreeMasses`IsGhost];
 
-       StringJoin @ Riffle[
+       StringRiffle[
          ("struct " <> CXXNameOfField[#] <> " {\n" <>
             TextFormatting`IndentText[
               "static constexpr auto particle_type = ParticleType::" <> ParticleTypeAsString[#] <> ";\n" <>
@@ -283,7 +283,7 @@ CreateFields[] :=
               "using sm_flags = boost::mpl::vector_c<bool, " <>
                    If[TreeMasses`GetDimension[#] === 1,
                       CConversion`CreateCBoolValue @ TreeMasses`IsSMParticle[#],
-                      StringJoin @ Riffle[CConversion`CreateCBoolValue /@
+                      StringRiffle[CConversion`CreateCBoolValue /@
                          TreeMasses`IsSMParticleElementwise[#],
                          ", "]
                    ] <> ">;\n" <>
@@ -300,20 +300,20 @@ CreateFields[] :=
        "using Electron = " <> CXXNameOfField[AtomHead @ TreeMasses`GetSMElectronLepton[]] <> ";\n\n" <>
 
        "// Fields that are their own Lorentz conjugates.\n" <>
-       StringJoin @ Riffle[
+       StringRiffle[
          ("template<> struct " <> LorentzConjugateOperation[#] <> "<" <> CXXNameOfField[#] <> ">" <>
             " { using type = " <> CXXNameOfField[#] <> "; };"
             &) /@ Select[fields, (# == LorentzConjugate[#] &)],
           "\n"] <> "\n\n" <>
 
        "using scalars = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ scalars, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ scalars, ", "] <> ">;\n" <>
        "using fermions = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ fermions, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ fermions, ", "] <> ">;\n" <>
        "using vectors = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ vectors, ", "]] <> ">;\n" <>
+         StringRiffle[CXXNameOfField /@ vectors, ", "] <> ">;\n" <>
        "using ghosts = boost::mpl::vector<" <>
-         StringJoin[Riffle[CXXNameOfField /@ ghosts, ", "]] <> ">;"
+         StringRiffle[CXXNameOfField /@ ghosts, ", "] <> ">;"
   ]
 
 (** \brief Get the lorentz index of a given indexed field
@@ -517,7 +517,7 @@ ConvertColourStructureToColorMathConvention[fields_List,
 
 ConvertColourStructureToColorMathConvention[indexedFields_List,
 	KroneckerDeltaColourVertex[cIndex1_, cIndex2_]] :=
-	Module[{colouredField1, colouredField2, colourRep1, colourRep2},
+	Module[{colouredField1, colouredField2, colourRep1, colourRep2, errorMessage},
 		(* If the result has a color Delta, we need to find out if it's adj. or fundamental
 			because they are represented by different symbols in ColorMath.
 			Also, in ColorMath the order of indices matters. As stated in  ColorMath tutorial notebook:
@@ -533,28 +533,65 @@ ConvertColourStructureToColorMathConvention[indexedFields_List,
     colourRep1 = SARAH`getColorRep[colouredField1];
     colourRep2 = SARAH`getColorRep[colouredField2];
 
-    Utils`AssertWithMessage[colourRep1 == colourRep2,
-			"CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
-			"Two colour indices in Kronecker delta that come from fields " <>
-			"of incompatible representations: Field1 = " <>
-                        ToString[{colouredField1, colourRep1}] <> ", Field2 = " <>
-                        ToString[{colouredField2, colourRep2}]];
+    errorMessage = "CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
+                   "Two colour indices in Kronecker delta that come from fields " <>
+                   "of incompatible representations: Field1 = " <>
+                      ToString[{colouredField1, colourRep1}] <> ", Field2 = " <>
+                      ToString[{colouredField2, colourRep2}];
 
-		(* FIXME: Are these orderings correct? *)
-		Switch[{colourRep1},
-			{SARAH`T}, If[RemoveLorentzConjugation[colouredField1] === colouredField1,
-				ColorMath`CMdelta[cIndex2, cIndex1],
-				ColorMath`CMdelta[cIndex1, cIndex2]
-			],
-			{O}, ColorMath`CMDelta[cIndex2, cIndex1],
-			_,
-			Print["CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
-				"Two colour indices in Kronecker delta that come from fields " <>
-				"or representations we cannot handle: " <>
-				ToString[{colourRep1, colourRep2}]];
-			Quit[1];
-		]
-	];
+    (* FIXME: Are these orderings correct? *)
+    Switch[{colourRep1, colourRep2},
+       {SARAH`T, SARAH`T},
+          (* 2 is conjugated, 1 is not *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+             ColorMath`CMdelta[cIndex2, cIndex1],
+             (* 1 is conjugated, 2 is not *)
+             If[RemoveLorentzConjugation[colouredField2] === colouredField2 && RemoveLorentzConjugation[colouredField1] =!= colouredField1,
+                ColorMath`CMdelta[cIndex1, cIndex2],
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {-SARAH`T, -SARAH`T},
+          (* 2 is conjugated, 1 is not *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+             ColorMath`CMdelta[cIndex1, cIndex2],
+             (* 1 is conjugated, 2 is not *)
+             If[RemoveLorentzConjugation[colouredField2] === colouredField2 && RemoveLorentzConjugation[colouredField1] =!= colouredField1,
+                ColorMath`CMdelta[cIndex2, cIndex1],
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {SARAH`T, -SARAH`T},
+          (* none is conjugated *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] === colouredField2,
+             ColorMath`CMdelta[cIndex2, cIndex1],
+             (* both are conjugated *)
+             If[RemoveLorentzConjugation[colouredField1] =!= colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+                ColorMath`CMdelta[cIndex1, cIndex2],
+                (* error if only one is conjugated *)
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {-SARAH`T, SARAH`T},
+          (* none is conjugated *)
+          If[RemoveLorentzConjugation[colouredField1] === colouredField1 && RemoveLorentzConjugation[colouredField2] === colouredField2,
+             ColorMath`CMdelta[cIndex1, cIndex2],
+             (* both are conjugated *)
+             If[RemoveLorentzConjugation[colouredField1] =!= colouredField1 && RemoveLorentzConjugation[colouredField2] =!= colouredField2,
+                ColorMath`CMdelta[cIndex2, cIndex1],
+                (* error if only one is conjugated *)
+                Utils`AssertWithMessage[False, errorMessage]
+             ]
+          ],
+       {O, O}, ColorMath`CMDelta[cIndex2, cIndex1],
+       _,
+         Print["CXXDiagrams`ConvertColourStructureToColorMathConvention[]: " <>
+               "Two colour indices in Kronecker delta that come from fields " <>
+               "or representations we cannot handle: " <>
+               ToString[{colourRep1, colourRep2}]];
+         Quit[1];
+    ]
+];
 
 ConvertColourStructureToColorMathConvention[fields_List,
    AdjointlyColouredVertex[cIndex1_, cIndex2_, cIndex3_]  GellMannVertex[cIndex3_, cIndex4_, cIndex5_]] :=
@@ -1228,7 +1265,7 @@ Module[{cxxVertices, vertexPartition,
 
    Utils`AssertOrQuit[Sort[cxxVertices] === Sort[Join@@vertexPartition],CreateVertices::errLostVertices];
 
-   Map[StringJoin[Riffle[#, "\n\n"]] &, Transpose /@ vertexPartition, {2}]
+   Map[StringRiffle[#, "\n\n"] &, Transpose /@ vertexPartition, {2}]
 ] /; Utils`AssertOrQuit[And[IntegerQ@OptionValue@MaximumVerticesLimit, OptionValue@MaximumVerticesLimit>0],CreateVertices::errMaximumVerticesLimit];
 Utils`MakeUnknownInputDefinition@CreateVertices;
 (** \brief Creates c++ code that makes a function available that
@@ -1239,7 +1276,7 @@ Utils`MakeUnknownInputDefinition@CreateVertices;
  **)
 CreateVertex[fields_List] :=
   Module[{fieldSequence},
-		fieldSequence = StringJoin @ Riffle[
+		fieldSequence = StringRiffle[
 			CXXNameOfField[#, prefixNamespace -> "fields"] & /@ fields, ", "];
 
 		{
@@ -1477,7 +1514,7 @@ CreateMassFunctions[] :=
           ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
     massiveFields = TreeMasses`GetParticles[];
 
-    StringJoin @ Riffle[
+    StringRiffle[
       Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
              numberOfIndices = Length @ fieldInfo[[5]];
 
@@ -1500,7 +1537,7 @@ CreatePhysicalMassFunctions[fieldsNamespace_:""] :=
           ghostMappings = SelfEnergies`ReplaceGhosts[FlexibleSUSY`FSEigenstates]},
     massiveFields = TreeMasses`GetParticles[];
 
-    StringJoin @ Riffle[
+    StringRiffle[
       Module[{fieldInfo = TreeMasses`FieldInfo[#], numberOfIndices},
              numberOfIndices = Length @ fieldInfo[[5]];
 
@@ -1538,7 +1575,7 @@ CreateUnitCharge[] :=
                     StringJoin @ Table[", 0", {numberOfElectronIndices-1}],
                     ""] <> " ",
                  If[numberOfElectronIndices =!= 0,
-                    StringJoin @ Riffle[Table[" 0", {numberOfElectronIndices}], ","] <> " ",
+                    StringRiffle[Table[" 0", {numberOfElectronIndices}], ","] <> " ",
                     ""]
                 ] <>
             "};\n") <>
@@ -1550,7 +1587,7 @@ CreateUnitCharge[] :=
                     StringJoin @ Table[", 0", {numberOfPhotonIndices-1}],
                     ""] <> " ",
                  If[numberOfPhotonIndices =!= 0,
-                    StringJoin @ Riffle[Table[" 0", {numberOfPhotonIndices}], ","] <> " ",
+                    StringRiffle[Table[" 0", {numberOfPhotonIndices}], ","] <> " ",
                     ""]
                 ] <>
             "};\n") <>

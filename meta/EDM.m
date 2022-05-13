@@ -93,7 +93,7 @@ EDMCreateInterfaceFunctionForField[field_,gTaggedDiagrams_List] :=
 							StringJoin @ Table[", 0", {numberOfIndices-1}],
 							""] <> " ",
 						If[numberOfIndices =!= 0,
-							StringJoin @ Riffle[Table[" 0", {numberOfIndices}], ","] <> " ",
+							StringRiffle[Table[" 0", {numberOfIndices}], ","] <> " ",
 							""]
 					] <> "};\n\n" <>
 
@@ -101,8 +101,8 @@ EDMCreateInterfaceFunctionForField[field_,gTaggedDiagrams_List] :=
 
 				"using namespace " <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields;\n\n" <>
 
-				StringJoin @ Riffle[Module[{graph = #[[1]], diagrams = #[[2]]},
-					StringJoin @ Riffle[Module[{diagram = #, indexedDiagram},
+				StringRiffle[Module[{graph = #[[1]], diagrams = #[[2]]},
+					StringRiffle[Module[{diagram = #, indexedDiagram},
 						indexedDiagram = CXXDiagrams`IndexDiagramFromGraph[diagram, graph];
 						
 						"val += " <> 

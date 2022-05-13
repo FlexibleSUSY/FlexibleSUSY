@@ -63,9 +63,6 @@ BOOST_AUTO_TEST_CASE( test_l_to_lgamma )
 
    MRSSM2_slha m = setup_MRSSM2(input, qedqcd);
 
-   using MRSSM2_cxx_diagrams::fields::Fe;
-   auto width = MRSSM2_l_to_lgamma::lepton_total_decay_width<Fe,Fe>(std::array<int,1> {1}, std::array<int,1> {0}, m, qedqcd);
-
    Physical_input physical_inputs;
 
    auto brMuEGamma = MRSSM2_l_to_lgamma::calculate_Fe_to_Fe_VP(1, 0, m, qedqcd, physical_inputs);

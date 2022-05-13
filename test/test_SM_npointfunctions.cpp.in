@@ -65,7 +65,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 	random_SM_dataset( number_of_random_samples ),
   index, FS_TEST_SM_PARAMETER_SEQUENCE )
 {
-	Loop_library::set(0);
+	Loop_library::set(-1);
 	auto input_parameters = wrap_SM_parameters(
 		FS_TEST_SM_PARAMETER_SEQUENCE );
 	auto model = calculate_spectrum( input_parameters );
@@ -75,7 +75,7 @@ BOOST_DATA_TEST_CASE( test_selfenergies,
 		"There was an error calculating the spectrum: " <<
 		problems << "Skipping data point..." );
 
-	if( problems.have_problem() == false )
+	if (!problems.have_problem())
 	{
 		auto fs_selfenergy_hh = model.self_energy_hh_1loop( 0 );
 		auto np_selfenergy_hh =

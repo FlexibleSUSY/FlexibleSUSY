@@ -7,7 +7,7 @@
 */
 
 #include "numerics_legacy.h"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include "utils.h"
 #include <cmath>
 #include <exception>
@@ -92,11 +92,11 @@ double findMinimum(double ax, double bx, double cx, double (*f)(double),
 }
 
 double dilog(double x) {
-  return flexiblesusy::dilog(x);
+  return flexiblesusy::Li2(x);
 }
 
 Complex dilog(const Complex& x) {
-  return flexiblesusy::dilog(x);
+  return flexiblesusy::Li2(x);
 }
 
 double fps(double z) {

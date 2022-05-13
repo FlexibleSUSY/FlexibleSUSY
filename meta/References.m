@@ -38,7 +38,7 @@ AddReference[r__] := AddReference /@ { r };
 CreateCitation[{}] := "";
 
 CreateCitation[refs_List] :=
-    "\\cite{" <> StringJoin[Riffle[refs, ","]] <> "}";
+    "\\cite{" <> StringRiffle[refs, ","] <> "}";
 
 CreateCitation[] := CreateCitation[fsreferences];
 

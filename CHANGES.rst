@@ -2,17 +2,20 @@ FlexibleSUSY 2.7.0 [April, ? 2022]
 ==================================
 
 New features
--------
+------------
 
-* W-boson mass prediction with decoupling property.
+* Improved W boson pole mass prediction with decoupling property, see
+  [`2204.05285 <https://arxiv.org/abs/2204.05285>`_]
 
-FlexibleSUSY 2.6.2 [April, ? 2022]
-==================================
+
+FlexibleSUSY 2.6.2 [April, 29 2022]
+======================================
 
 New features
--------
+------------
 
 * Parallelized calculation of decay amplitudes during the mathematica phase.
+
   Example speedup:
 
   .. list-table::
@@ -32,16 +35,28 @@ New features
 Changes
 -------
 
-* [commit ae1eae8e4d373eec531d6e5774977da2f12e88c8]: Mathematica-style indexing (starting from 1) of
-  leptons in `$L' \to L \gamma$` via the mathlink interface.
+* [commit ae1eae8e4d]: Mathematica-style indexing (starting from 1) of
+  leptons in :math:`$L' \to L \gamma$` via the mathlink interface.
 
 Fixed bugs
 ----------
 
-* [commit 26f5262ad3a8936ae6297305d2ee92a71b17da09]: Branching ratio of `$L' \to L \gamma$` was breaking printing of
-  observables via the mathlink interface.
+* [commit 26f5262ad3]: Branching ratio of :math:`$L' \to L \gamma$`
+  was breaking printing of observables via the mathlink interface.
 
-* [commit fd8d59dda8fc90182fdfb2255189326341dd8f57]: Fixed wrong calculation of `$A \to Z \gamma$`.
+* [commit fd8d59dda8]: Fixed wrong calculation of :math:`$A \to Z \gamma$`.
+
+* [commit b82d0d2123]: Set SSV decay amplitude to zero if vector boson
+  is massless.
+
+* [commit 768c092dff]: Handle colour deltas in models where there are
+  fundamental (i.e. unconjugated) fields in 3 and -3 representations.
+
+* [commit 102ae79f0f]: Temporarily enforce calculation of pole masses
+  in ``FSFindRoot`` and ``FSMinimize``.
+
+* [commit d16a9b68f1]: Use user-provided precision goal in
+  ``FSFindRoot`` and ``FSMinimize``.
 
 FlexibleSUSY 2.6.1 [July, 08 2021]
 ==================================
@@ -51,8 +66,8 @@ Changes
 
 * Removed code computing Higgs effective couplings. This code has been
   superseded by FlexibleDecay.
-* FlexibleDecay: 2-loop QCD corrections to `$\Phi \to \Gamma Z$` applied
-  only if `$m_Z/m_\Phi < 0.75$`.
+* FlexibleDecay: 2-loop QCD corrections to :math:`$\Phi \to \Gamma Z$` applied
+  only if :math:`$m_Z/m_\Phi < 0.75$`.
 
 Fixed bugs
 ----------
