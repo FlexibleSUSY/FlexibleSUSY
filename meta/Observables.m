@@ -307,10 +307,10 @@ FillGM2CalcInterfaceData[struct_String] :=
            filling = \
            struct <> ".alpha_s_MZ = ALPHA_S_MZ;\n" <>
            struct <> ".MZ    = MZPole;\n" <>
-           "if (!is_zero(" <> mwStr <> "))\n" <>
+           "if (!is_zero(" <> mwStr <> ")) {\n" <>
               TextFormatting`IndentText[struct <> ".MW = " <> mwStr <> ";"] <> "\n" <>
-           "else if (!is_zero(MWPole))\n" <>
-              TextFormatting`IndentText[struct <> ".MW = MWPole;"] <> "\n" <>
+           "} else if (!is_zero(MWPole)) {\n" <>
+              TextFormatting`IndentText[struct <> ".MW = MWPole;"] <> "\n}\n" <>
            struct <> ".mb_mb = MBMB;\n" <>
            struct <> ".MT    = MTPole;\n" <>
            struct <> ".MTau  = MTauPole;\n" <>
