@@ -344,7 +344,7 @@ FillGM2CalcInterfaceData[struct_String] :=
            struct <> ".Ae    = div_safe(MODEL.get_" <> CConversion`RValueToCFormString[te] <>
                                "(), MODEL.get_" <> CConversion`RValueToCFormString[ye] <> "());";
            "#ifdef ENABLE_GM2CALC\n" <>
-           "GM2Calc_data " <> struct <> ";\n" <> filling <> "\n" <>
+           "GM2Calc_MSSMNoFV_data " <> struct <> ";\n" <> filling <> "\n" <>
            "#endif\n\n"
           ];
 

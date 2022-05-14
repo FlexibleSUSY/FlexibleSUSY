@@ -29,11 +29,11 @@
 namespace flexiblesusy {
 
 /**
- * @class GM2Calc_data
+ * @class GM2Calc_MSSMNoFV_data
  * @brief data to be passed to GM2Calc
  */
-struct GM2Calc_data {
-   GM2Calc_data();                ///< initializes members to GM2Calc default values
+struct GM2Calc_MSSMNoFV_data {
+   GM2Calc_MSSMNoFV_data();                ///< initializes members to GM2Calc default values
    void initialize();             ///< initializes members to GM2Calc default values
 
    double scale{0.0};             ///< renormalization scale
@@ -67,10 +67,10 @@ struct GM2Calc_data {
 };
 
 /// calculates amu using GM2Calc
-double gm2calc_calculate_amu(const GM2Calc_data&);
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&);
 
 /// calculates uncertainty of amu using GM2Calc
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data&);
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data&);
 
 } // namespace flexiblesusy
 

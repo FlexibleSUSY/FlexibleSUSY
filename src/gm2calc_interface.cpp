@@ -46,7 +46,7 @@ double calculate_alpha(double e) {
    return e * e / (4. * Pi);
 }
 
-gm2calc::MSSMNoFV_onshell setup(const GM2Calc_data& data)
+gm2calc::MSSMNoFV_onshell setup(const GM2Calc_MSSMNoFV_data& data)
 {
    gm2calc::MSSMNoFV_onshell model;
 
@@ -92,7 +92,7 @@ gm2calc::MSSMNoFV_onshell setup(const GM2Calc_data& data)
 
 } // anonymous namespace
 
-GM2Calc_data::GM2Calc_data()
+GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data()
 {
    initialize();
 }
@@ -100,7 +100,7 @@ GM2Calc_data::GM2Calc_data()
 /**
  * Initializes data members to the GM2Calc default values
  */
-void GM2Calc_data::initialize()
+void GM2Calc_MSSMNoFV_data::initialize()
 {
    const gm2calc::MSSMNoFV_onshell model;
 
@@ -126,7 +126,7 @@ void GM2Calc_data::initialize()
  *
  * @return \f$a_\mu\f$ up to the 2-loop level w/ tan(beta) resummation
  */
-double gm2calc_calculate_amu(const GM2Calc_data& data)
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data& data)
 {
    double amu = 0.;
 
@@ -154,7 +154,7 @@ double gm2calc_calculate_amu(const GM2Calc_data& data)
  *
  * @return \f$\delta a_\mu\f$ at the 2-loop level
  */
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data& data)
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data& data)
 {
    double uncertainty = 0.;
 
@@ -174,15 +174,15 @@ double gm2calc_calculate_amu_uncertainty(const GM2Calc_data& data)
 
 namespace flexiblesusy {
 
-GM2Calc_data::GM2Calc_data() {}
-void GM2Calc_data::initialize() {}
+GM2Calc_MSSMNoFV_data::GM2Calc_MSSMNoFV_data() {}
+void GM2Calc_MSSMNoFV_data::initialize() {}
 
-double gm2calc_calculate_amu(const GM2Calc_data&)
+double gm2calc_calculate_amu(const GM2Calc_MSSMNoFV_data&)
 {
    return 0.;
 }
 
-double gm2calc_calculate_amu_uncertainty(const GM2Calc_data&)
+double gm2calc_calculate_amu_uncertainty(const GM2Calc_MSSMNoFV_data&)
 {
    return 0.;
 }
