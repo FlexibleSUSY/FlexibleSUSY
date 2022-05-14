@@ -269,7 +269,7 @@ CalculateObservable[FlexibleSUSYObservable`FToFConversionInNucleus[pIn_[idxIn_] 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`bsgamma, structName_String] :=
     structName <> ".BSGAMMA = Re(" <> FlexibleSUSY`FSModelName <> "_b_to_s_gamma::calculate_b_to_s_gamma(MODEL, qedqcd)[0]);";
 
-FillGM2CalcInterfaceData[struct_String] :=
+FillGM2CalcMSSMNoFVInterfaceData[struct_String] :=
     Module[{filling, mwStr,
             w, pseudoscalar, smuon, muonsneutrino, chargino, neutralino,
             mu, m1, m2, m3, mq2, mu2, md2, ml2, me2, tu, td, te, yu, yd, ye},
@@ -354,7 +354,7 @@ FillInterfaceData[obs_List] :=
     Module[{filled = ""},
            If[MemberQ[obs,FlexibleSUSYObservable`aMuonGM2Calc] ||
               MemberQ[obs,FlexibleSUSYObservable`aMuonGM2CalcUncertainty],
-              filled = filled <> FillGM2CalcInterfaceData["gm2calc_mssmnofv_data"];
+              filled = filled <> FillGM2CalcMSSMNoFVInterfaceData["gm2calc_mssmnofv_data"];
              ];
            filled
           ];
