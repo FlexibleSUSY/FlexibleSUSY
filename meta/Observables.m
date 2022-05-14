@@ -208,12 +208,12 @@ CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonUncertainty, str
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2Calc, structName_String] :=
     "#ifdef ENABLE_GM2CALC\n" <>
-    structName <> ".AMUGM2CALC = gm2calc_calculate_amu(gm2calc_mssmnofv_data);\n" <>
+    structName <> ".AMUGM2CALC = gm2calc_calculate_amu(gm2calc_data);\n" <>
     "#endif";
 
 CalculateObservable[obs_ /; obs === FlexibleSUSYObservable`aMuonGM2CalcUncertainty, structName_String] :=
     "#ifdef ENABLE_GM2CALC\n" <>
-    structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_mssmnofv_data);\n" <>
+    structName <> ".AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);\n" <>
     "#endif";
 
 CalculateObservable[FlexibleSUSYObservable`EDM[p_], structName_String] :=
@@ -354,7 +354,7 @@ FillInterfaceData[obs_List] :=
     Module[{filled = ""},
            If[MemberQ[obs,FlexibleSUSYObservable`aMuonGM2Calc] ||
               MemberQ[obs,FlexibleSUSYObservable`aMuonGM2CalcUncertainty],
-              filled = filled <> FillGM2CalcMSSMNoFVInterfaceData["gm2calc_mssmnofv_data"];
+              filled = filled <> FillGM2CalcMSSMNoFVInterfaceData["gm2calc_data"];
              ];
            filled
           ];
