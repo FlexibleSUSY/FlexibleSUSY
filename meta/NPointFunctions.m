@@ -689,7 +689,7 @@ Module[
    Cases[{opts},Rule[OnShellFlag,x_]:>
       aoq[x===True || x===False,NPointFunction::errOnShellFlag]];
    Cases[{opts},Rule[KeepProcesses,x_]:>
-      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errKeepProcesses,StringJoin@Riffle[ToString/@allProcesses,",\n   "]]];
+      aoq[And@@Map[MemberQ[allProcesses~Append~Null,#]&,If[Head@x===List,x,{x}]],NPointFunction::errKeepProcesses,StringRiffle[ToString/@allProcesses,",\n   "]]];
    True
 ];
 internalNPointFunctionInputCheck // Utils`MakeUnknownInputDefinition;
@@ -1778,9 +1778,9 @@ StringRiffle::usage=
 It works only for [{___String},_String] input.";
 StringRiffle::err="`1`";
 StringRiffle[strs:{___String},sep_String] :=
-   StringJoin@Riffle[strs,sep];
+   StringRiffle[strs,sep];
 StringRiffle[strs:{___String},{in_String,sep_String,fin_String}] :=
-   in<>StringJoin@Riffle[strs,sep]<>fin;
+   in<>StringRiffle[strs,sep]<>fin;
 StringRiffle[x___] :=
    Utils`AssertOrQuit[False,StringRiffle::err,{x}];
 

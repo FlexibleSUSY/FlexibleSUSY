@@ -1525,7 +1525,7 @@ public:
   { std::for_each(begin(), end(), MEM_FN(&value_type::uncomment)); }
 
   /** Unary predicate that checks if a provided key matches a Line. */
-  struct key_matches : public std::unary_function<value_type, bool>
+  struct key_matches
   {
     explicit
     key_matches(const key_type& key) : key_(key) {}
@@ -2351,7 +2351,7 @@ public:
    * Unary predicate that checks if a provided name matches the name
    * of a Block.
    */
-  struct key_matches : public std::unary_function<value_type, bool>
+  struct key_matches
   {
     explicit
     key_matches(const key_type& blockName) : name_(blockName) {}
@@ -2372,7 +2372,7 @@ public:
    * Unary predicate that checks if a provided key matches the block
    * definition of a Block.
    */
-  struct key_matches_block_def : public std::unary_function<value_type, bool>
+  struct key_matches_block_def
   {
     explicit
     key_matches_block_def(const value_type::key_type& key)

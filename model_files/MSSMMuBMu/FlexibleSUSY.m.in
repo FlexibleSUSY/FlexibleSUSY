@@ -3,10 +3,6 @@ FSEigenstates = SARAH`EWSB;
 FSDefaultSARAHModel = MSSM;
 OnlyLowEnergyFlexibleSUSY = True;
 
-MINPAR = {
-    {4, Sign[\[Mu]]}
-};
-
 EXTPAR = {
     {0, MSUSY},
     {1, M1Input},
