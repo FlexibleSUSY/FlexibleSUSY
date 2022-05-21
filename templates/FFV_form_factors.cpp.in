@@ -527,29 +527,29 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
          const auto mS = context.mass<SA>(scalarFieldIndicesIn);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mS);
-         const auto oneLoopFunctionA = OneLoopFunctionA(x);
-         const auto oneLoopFunctionB = OneLoopFunctionB(x);
-         const auto oneLoopFunctionC = OneLoopFunctionC(x);
+         const auto LoopFunctionA = OneLoopFunctionA(x);
+         const auto LoopFunctionB = OneLoopFunctionB(x);
+         const auto LoopFunctionC = OneLoopFunctionC(x);
 
          // TODO: check the sign convention of this coupling
          std::complex<double> vector_boson_coupling {-vertexEmit.value(1,0)};
 
          // eq. 15 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =
-            - 1./18. * vertexOut.right() * vertexIn.left() * OneLoopFunctionA(x);
+            - 1./18. * vertexOut.right() * vertexIn.left() * LoopFunctionA;
          // eq. 16 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A2L =
-            - vertexOut.left() * vertexIn.right() * OneLoopFunctionB/12.
-            - vertexOut.left()* vertexIn.left() * mF/mj * OneLoopFunctionC/3.
-            - mi/mj * vertexOut.right() * vertexIn.left() * OneLoopFunctionB/12.;
+            - vertexOut.left() * vertexIn.right() * LoopFunctionB/12.
+            - vertexOut.left()* vertexIn.left() * mF/mj * LoopFunctionC/3.
+            - mi/mj * vertexOut.right() * vertexIn.left() * LoopFunctionB/12.;
 
          // eq. 15 & 16 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
          const std::complex<double> A1R =
-            - 1./18. * vertexOut.left() * vertexIn.right() * OneLoopFunctionA;
+            - 1./18. * vertexOut.left() * vertexIn.right() * LoopFunctionA;
          const std::complex<double> A2R =
-            - vertexOut.right() * vertexIn.left() * OneLoopFunctionB/12.
-            - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionC/3.
-            - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionB/12.;
+            - vertexOut.right() * vertexIn.left() * LoopFunctionB/12.
+            - vertexOut.right()* vertexIn.right() * mF/mj * LoopFunctionC/3.
+            - mi/mj * vertexOut.left() * vertexIn.right() * LoopFunctionB/12.;
 
          const std::complex<double> massFactor = Power2(1.0/mS);
 
@@ -620,28 +620,28 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
          const auto mF = context.mass<FA>(fermionFieldIndicesIn);
          const auto mS = context.mass<S>(scalarFieldIndicesIn);
          const auto x = Power2(mF/mS);
-         const auto oneLoopFunctionD = OneLoopFunctionD(x);
-         const auto oneLoopFunctionE = OneLoopFunctionE(x);
-         const auto oneLoopFunctionF = OneLoopFunctionF(x);
+         const auto LoopFunctionD = OneLoopFunctionD(x);
+         const auto LoopFunctionE = OneLoopFunctionE(x);
+         const auto LoopFunctionF = OneLoopFunctionF(x);
 
          std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
          // eq. 18 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =
-            - 1./18. * vertexOut.right() * vertexIn.left() * OneLoopFunctionD;
+            - 1./18. * vertexOut.right() * vertexIn.left() * LoopFunctionD;
          // eq. 19 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A2L =
-            - vertexOut.left() * vertexIn.right() * OneLoopFunctionE/12.0
-            - vertexOut.left()* vertexIn.left() * mF/mj * OneLoopFunctionF * 2./3.
-            - mi/mj * vertexOut.right() * vertexIn.left() * OneLoopFunctionE/12.0;
+            - vertexOut.left() * vertexIn.right() * LoopFunctionE/12.0
+            - vertexOut.left()* vertexIn.left() * mF/mj * LoopFunctionF * 2./3.
+            - mi/mj * vertexOut.right() * vertexIn.left() * LoopFunctionE/12.0;
 
          // eq. 18 & 18 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
          const std::complex<double> A1R =
-            - 1./18. * vertexOut.left() * vertexIn.right() * OneLoopFunctionD;
+            - 1./18. * vertexOut.left() * vertexIn.right() * LoopFunctionD;
          const std::complex<double> A2R =
-            - vertexOut.right() * vertexIn.left() * OneLoopFunctionE/12.0
-            - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionF * 2./3.
-            - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionE/12.0;
+            - vertexOut.right() * vertexIn.left() * LoopFunctionE/12.0
+            - vertexOut.right()* vertexIn.right() * mF/mj * LoopFunctionF * 2./3.
+            - mi/mj * vertexOut.left() * vertexIn.right() * LoopFunctionE/12.0;
 
          const std::complex<double> massFactor = Power2(1.0/mS);
 
@@ -720,30 +720,30 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
          const auto mV = context.mass<VA>(vectorFieldIndicesIn);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
-         const auto oneLoopFunctionH = OneLoopFunctionH(x);
-         const auto oneLoopFunctionI = OneLoopFunctionI(x);
-         const auto oneLoopFunctionJ = OneLoopFunctionJ(x);
-         const auto oneLoopFunctionK = OneLoopFunctionK(x);
+         const auto LoopFunctionH = OneLoopFunctionH(x);
+         const auto LoopFunctionI = OneLoopFunctionI(x);
+         const auto LoopFunctionJ = OneLoopFunctionJ(x);
+         const auto LoopFunctionK = OneLoopFunctionK(x);
 
          // triple gauge boson vertex
          // need to check that the sign and function call are correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value( TripleVectorVertex::even_permutation{} )};
 
          const std::complex<double> A1L =
-            - 8. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionI
-            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionH / 18.;
+            - 8. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionI
+            + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionH / 18.;
          const std::complex<double> A2L =
-            3. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionK
-            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionJ / 6.
-            + vertexIn.right() * vertexOut.right() * OneLoopFunctionJ / 6.;
+            3. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionK
+            + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionJ / 6.
+            + vertexIn.right() * vertexOut.right() * LoopFunctionJ / 6.;
          
          const std::complex<double> A1R = 
-            - 8. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionI
-            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionH / 18.;
+            - 8. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionI
+            + mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionH / 18.;
          const std::complex<double> A2R = 
-            3. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionK
-            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionJ / 6.
-            + vertexIn.left() * vertexOut.left() * OneLoopFunctionJ / 6.;
+            3. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionK
+            + mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionJ / 6.
+            + vertexIn.left() * vertexOut.left() * LoopFunctionJ / 6.;
 
          const std::complex<double> massFactor = Power2(1.0/mV);
 
@@ -818,25 +818,25 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
          const auto mV = context.mass<V>(vectorFieldIndicesIn);
          const auto mF = context.mass<FA>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
-         const auto oneLoopFunctionC = OneLoopFunctionC(x);
-         const auto oneLoopFunctionL = OneLoopFunctionL(x);
-         const auto oneLoopFunctionM = OneLoopFunctionM(x);
+         const auto LoopFunctionC = OneLoopFunctionC(x);
+         const auto LoopFunctionL = OneLoopFunctionL(x);
+         const auto LoopFunctionM = OneLoopFunctionM(x);
 
 	     std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
-         const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL / 9.
-	    - mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionL / 9.;
+         const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * LoopFunctionL / 9.
+	    - mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionL / 9.;
          const std::complex<double> A2L =
-            - 4. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionC / 3.
-            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionM / 3.
-            + vertexIn.right() * vertexOut.right() * OneLoopFunctionM / 3.;
+            - 4. * mF/mj * vertexIn.left() * vertexOut.right() * LoopFunctionC / 3.
+            + mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionM / 3.
+            + vertexIn.right() * vertexOut.right() * LoopFunctionM / 3.;
 
-         const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL / 9.
-	    - mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionL / 9.;
+         const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * LoopFunctionL / 9.
+	    - mi/mj * vertexIn.left() * vertexOut.left() * LoopFunctionL / 9.;
          const std::complex<double> A2R =
-            - 4. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionC / 3.
-            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionM / 3.
-            + vertexIn.left() * vertexOut.left() * OneLoopFunctionM / 3.;
+            - 4. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionC / 3.
+            + mi/mj * vertexIn.right() * vertexOut.right() * LoopFunctionM / 3.
+            + vertexIn.left() * vertexOut.left() * LoopFunctionM / 3.;
 
 	     std::complex<double> massFactor = 0.0;
          if (std::isinf(x)) {
@@ -919,17 +919,17 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
          const auto y = Power2(mF/mG);
-         const auto oneLoopFunctionN = OneLoopFunctionN(x,y);
+         const auto LoopFunctionN = OneLoopFunctionN(x,y);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value()};
 
-         const std::complex<double> A1L = -1./mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionN;
-         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionN;
+         const std::complex<double> A1L = -1./mj * vertexIn.right() * vertexOut.right() * LoopFunctionN;
+         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.left() * LoopFunctionN;
       
-         const std::complex<double> A1R = -1./mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionN;
-         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionN;
+         const std::complex<double> A1R = -1./mj * vertexIn.left() * vertexOut.left() * LoopFunctionN;
+         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * LoopFunctionN;
 
          const std::complex<double> massFactor = Power2(1.0/mV);
           
@@ -1007,17 +1007,17 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mV);
          const auto y = Power2(mF/mG);
-         const auto oneLoopFunctionN = OneLoopFunctionN(x,y);
+         const auto LoopFunctionN = OneLoopFunctionN(x,y);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value()};
 
-         const std::complex<double> A1L = 1./mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionN;
-         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionN;
+         const std::complex<double> A1L = 1./mj * vertexIn.right() * vertexOut.left() * LoopFunctionN;
+         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.right() * LoopFunctionN;
       
-         const std::complex<double> A1R = 1./mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionN;
-         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionN;
+         const std::complex<double> A1R = 1./mj * vertexIn.left() * vertexOut.right() * LoopFunctionN;
+         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * LoopFunctionN;
 
          const std::complex<double> massFactor = 1.0/mV;
           
