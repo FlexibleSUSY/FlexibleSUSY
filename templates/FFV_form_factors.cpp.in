@@ -29,11 +29,6 @@
 #include "concatenate.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
 
-// Allow use of general Passarino-Veltmann functions if FlexibleSUSY has been 
-// configured with a loop library
-#include "loop_libraries/loop_library.hpp"  
-
-#include "dilog.hpp"
 #include "wrappers.hpp"
 
 using namespace flexiblesusy;
@@ -207,14 +202,6 @@ namespace {
 * as specified in arXiv:0808.1819
 */
 
-//  TODO:  Several fixes still needed, 1/r is not helpful when r is infinite, 
-//  may need to just input mF and mS\mV and then calculate the ratios in-house.
-
-// Cutoff for standard literature one loop functions.  
-const double approx_limit = 100.;
-// Cutoff for using simplified one loop functions.  
-const double ratio_limit = 0.00001;
-
 // function from eq. 15 of hep-ph/9510309
 double OneLoopFunctionA(double r)
 {
@@ -222,12 +209,6 @@ double OneLoopFunctionA(double r)
       return 1.5;
    } else if (is_zero(r)) {
       return 2.0;
-   } else if (1./r < Power3(ratio_limit)) {
-      // Loop function is about 10^-13, treat as reaching the 0 limit
-      return 0.;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return (-11.-6.*std::log(1./r)) / r;
    } else {
       return (2.0 - 9.0 * r + 18.0 * r * r - 11.0 * r * r * r +
               6.0 * r * r * r * std::log(r)) /
@@ -259,9 +240,6 @@ double OneLoopFunctionB(double r)
               0.0058823529411764706  * y * y * y * y * y * y * y * y * y * y * y * y * y +
               0.0049019607843137255  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
               0.0041279669762641899  * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 4. / r;
    } else {
       return 2. *
              (1.0 - 6.0 * r + 3.0 * r * r + 2.0 * r * r * r -
@@ -296,9 +274,6 @@ double OneLoopFunctionC(double r)
               0.02500000000000000000 * y * y * y * y * y * y * y * y * y * y * y * y * y +
               0.0220588235294117647  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
               0.0196078431372549020  * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 3. / r;
    } else {
       return 3. * (1.0 - r * r + 2.0 * r * std::log(r)) / Power3(1.0 - r);
    }
@@ -311,9 +286,6 @@ double OneLoopFunctionD(double r)
       return 0.0;
    } else if (is_zero(1.0 - r)) {
       return -4.5;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return -7. / r;
    } else {
       return (16.0 - 45.0 * r + 36.0 * r * r - 7.0 * r * r * r +
               6.0 * (2.0 - 3.0 * r) * std::log(r)) /
@@ -345,9 +317,6 @@ double OneLoopFunctionE(double r)
               0.044117647058823529412 * y * y * y * y * y * y * y * y * y * y * y * y * y +
               0.039215686274509803922 * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
               0.035087719298245614035 * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 2. / r;
    } else {
       return 2. *
              (2.0 + 3.0 * r - 6.0 * r * r + r * r * r + 6.0 * r * std::log(r)) /
@@ -377,9 +346,6 @@ double OneLoopFunctionF(double r)
               0.1875000000000000000  * y * y * y * y * y * y * y * y * y * y * y * y * y +
               0.1764705882352941176  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
               0.16666666666666666667 * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 1.5 / r;
    } else {
       return 3. / 2. * (-3.0 + 4.0 * r - r * r - 2.0 * std::log(r)) /
              Power3(1.0 - r);
@@ -387,19 +353,13 @@ double OneLoopFunctionF(double r)
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.
 double OneLoopFunctionH(double r)
 {
    if (is_zero(r)) {
       return 5.0;
    } else if (is_zero(1.0 - r)){
       return 0.0;
-   } else if (1./r < Power3(ratio_limit)) {
-      // Loop function is about 10^-13, treat as reaching the 0 limit
-      return 0.;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return (-5.-6.*std::log(1./r)) / r;
    } else {
       return (41.0 - 207.0 * r + 279.0 * r * r - 113.0 * r * r * r + 6.0 * r * r * (-15.0 + 13.0 * r)
               * std::log(r)) / Power4(1.0 - r);
@@ -409,19 +369,13 @@ double OneLoopFunctionH(double r)
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_VVF contribution.
 double OneLoopFunctionI(double r)
 {
    if (is_zero(r)) {
       return 1.0;
    } else if (is_zero(1.0 - r)){
       return 0.5;
-   } else if (1./r < Power3(ratio_limit)) {
-      // Loop function is about 10^-13, treat as reaching the 0 limit
-      return 0.;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return (-1.-1.*std::log(1./r)) / r;
    } else {
       return (1.0 - r + r * std::log(r)) / Power2(1.0 - r);
    }
@@ -434,12 +388,6 @@ double OneLoopFunctionJ(double r)
       return 7.0;
    } else if (is_zero(1.0 - r)){
       return 5.0;
-   } else if (1./r < Power3(ratio_limit)) {
-      // Loop function is about 10^-13, treat as reaching the 0 limit
-      return 0.;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return (-31.-18.*std::log(1./r)) / r;
    } else {
       return (7.0 - 33.0 * r + 57.0 * r * r - 31.0 * r * r * r + 6.0 * r * r * (3.0 * r - 1.0)
                    * std::log(r)) / Power4(1.0 - r);
@@ -453,28 +401,21 @@ double OneLoopFunctionK(double r)
       return 1.0;
    } else if (is_zero(1.0 - r)){
       return 2.0 / 3.0;
-   } else if (1./r < Power3(ratio_limit)) {
-      // Loop function is about 10^-13, treat as reaching the 0 limit
-      return 0.;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return (-3.-2.*std::log(1./r)) / r;
    } else {   
       return (1.0 - 4.0 * r + 3.0 * r * r - 2 * r * r * std::log(r)) / Power3(1.0 - r);
    }
 }
 
 //  One loop function for the form factor F1 which is the coefficient
-//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_FFV contribution.  
+//  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_FFV contribution.
 double OneLoopFunctionL(double r)
 {  
    if (is_zero(r)) {
       return -10.0;
    } else if (is_zero(1.0 - r)){
       return 10.5;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 25. / r;
+   } else if (std::isinf(r)) {
+      return 0.0;
    } else {
       return (2.0 + 27.0 * r - 54.0 * r * r + 25.0 * r * r * r - 6.0 * (2.0 - 9.0 * r + 6.0 * r * r)
                  * std::log(r)) / Power4(1.0 - r);
@@ -488,9 +429,8 @@ double OneLoopFunctionM(double r)
       return 4.0;
    } else if (is_zero(1.0 - r)){
       return 1.5;
-   } else if (1./r < ratio_limit) {
-      // Expand about 0 to 1st order
-      return 5. / r;
+   } else if (std::isinf(r)) {
+      return 0.0;
    } else {
       return (4.0 - 9.0 * r + 5.0 * r * r * r + 6.0 * (1.0 - 2.0 * r) * r * std::log(r)) / 
               Power4(1.0 - r);
@@ -508,369 +448,11 @@ double OneLoopFunctionN(double r, double s)
       } else {
          return (1.0 - 4.0 * r + 3 * r * r - 2 * r * r * std::log(r)) / 2.0 / Power3(1.0 - r);
       }
-   } else if (1./s < ratio_limit) {
-      // Expand s about 0 to 1st order
-      return (1.0 - r * r / s + r * (1.0 / s - 1.0) + r * (1.0 / s + 1.0) * std::log(r)) / Power2(r - 1.0);
    } else {
       return s * (r * Power2(r - s) * std::log(r) + (r - 1.0) * ((r - s) * (s - 1.0) - (r - 1.0)
-                              * std::log(r/s))) / Power2(1.0 - r) / Power2(r - s) / (s - 1.0);
+                              * r * std::log(r/s))) / Power2(1.0 - r) / Power2(r - s) / (s - 1.0);
    }
 }
-
-
-std::complex<double> FFV_SSF_A2L(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
-{
-  // Massless emitter (in this case mS==0, mi==mj==mF) will fail
-  // Massless mediator (in this case mF==0) case can be calculated
-  if (mi==mj and mi==mS and mF==0) {
-    return -0.5*Power2(mS)*(SFin.right()*SFout.left() + SFin.left()*SFout.right()) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>, C_N> c{};
-    Loop_library::get().C(c, Power2(mj), 0., Power2(mi), Power2(mF), Power2(mS), Power2(mS), Power2(mS));  
-    return -2. * Power2(mS) / mj * (
-           - mF*(c[looplibrary::c0] + c[looplibrary::c1] + c[looplibrary::c2])*SFin.left()*SFout.left() 
-           + mj*(c[looplibrary::c1] + c[looplibrary::c11] + c[looplibrary::c12])*SFin.right()*SFout.left() 
-           + mi*(c[looplibrary::c12] + c[looplibrary::c2] + c[looplibrary::c22])*SFin.left()*SFout.right());
-  } else {
-    const auto r = Power2(mF/mS);
-    //if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
-      // eq. 16 of hep-ph/9510309 (possibly with different sign)
-      return - SFout.left() * SFin.right() * OneLoopFunctionB(r)/12.
-             - SFout.left() * SFin.left() * mF/mj * OneLoopFunctionC(r)/3.
-             - mi/mj * SFout.right() * SFin.left() * OneLoopFunctionB(r)/12.; 
-    //}
-  }
-}
-
-  
-std::complex<double> FFV_SSF_A2R(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
-{
-  // Massless emitter (in this case mS==0, mi==mj==mF) will fail
-  // Massless mediator (in this case mF==0) case can be calculated
-  if (mi==mj and mi==mS and mF==0) {
-    return -0.5*Power2(mS)*(SFin.right()*SFout.left() + SFin.left()*SFout.right()) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>, C_N> c{};
-    Loop_library::get().C(c, Power2(mj), 0., Power2(mi), Power2(mF), Power2(mS), Power2(mS), Power2(mS)); 
-    return -2. * Power2(mS) / mj * (
-             mi*(c[looplibrary::c12] + c[looplibrary::c2] + c[looplibrary::c22])*SFin.right()*SFout.left() 
-           + mj*(c[looplibrary::c1] + c[looplibrary::c11] + c[looplibrary::c12])*SFin.left()*SFout.right() 
-           - mF*(c[looplibrary::c0] + c[looplibrary::c1] + c[looplibrary::c2])*SFin.right()*SFout.right());
-  } else {
-    const auto r = Power2(mF/mS);
-    //if (std::max(mS,mF) > approx_limit * std::max(mi,mj)) {
-      // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
-      return - SFout.right() * SFin.left() * OneLoopFunctionB(r)/12.
-             - SFout.right() * SFin.right() * mF/mj * OneLoopFunctionC(r)/3.
-             - mi/mj * SFout.left() * SFin.right() * OneLoopFunctionB(r)/12.; 
-    //}
-  }
-}
-
-
-std::complex<double> FFV_FFS_A2L(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
-{
-  // Massless emitter (in this case mF==0) will fail
-  // Massless mediator (in this case mS==0) case can be calculated
-  if (mi==mj and mi==mF and mS==0) {
-    return -0.5*Power2(mS)*(SFin.right()*SFout.left() + SFin.left()*(4.*SFout.left() + SFout.right())) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mS),Power2(mF),Power2(mF),Power2(mF));
-    return -2. * Power2(mS) / mj * (
-             mF*(c[looplibrary::c1] + c[looplibrary::c2])*SFin.left()*SFout.left() 
-           + mj*(c[looplibrary::c1] + c[looplibrary::c11] + c[looplibrary::c12])*SFin.right()*SFout.left() 
-           + mi*(c[looplibrary::c12] + c[looplibrary::c2] + c[looplibrary::c22])*SFin.left()*SFout.right());
-  } else {
-    const auto r = Power2(mF/mS);
-    //if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
-      // eq. 19 of hep-ph/9510309 (possibly with different sign)
-      return - SFout.left() * SFin.right() * OneLoopFunctionE(r)/12.
-             - SFout.left() * SFin.left() * mF/mj * OneLoopFunctionF(r) * 2./3.
-             - mi/mj * SFout.right() * SFin.left() * OneLoopFunctionE(r)/12.; 
-    //}
-  }
-}
-
-std::complex<double> FFV_FFS_A2R(double mi, double mj, double mF, double mS, auto SFin, auto SFout)
-{
-  // Massless emitter (in this case mF==0) will fail
-  // Massless mediator (in this case mS==0) case can be calculated
-  if (mi==mj and mi==mS and mF==0) {
-    return -0.5*Power2(mS)*(SFin.left()*SFout.right() + SFin.right()*(SFout.left() + 4.*SFout.right())) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mS),Power2(mF),Power2(mF),Power2(mF));
-    return -2. * Power2(mS) / mj * (
-             mi*(c[looplibrary::c12] + c[looplibrary::c2] + c[looplibrary::c22])*SFin.right()*SFout.left() 
-           + mj*(c[looplibrary::c1] + c[looplibrary::c11] + c[looplibrary::c12])*SFin.left()*SFout.right() 
-           + mF*(c[looplibrary::c1] + c[looplibrary::c2])*SFin.right()*SFout.right());
-  } else {
-    const auto r = Power2(mF/mS);
-    //if (std::max(mF,mS) > approx_limit * std::max(mi,mj)) {
-      // eq. 19 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
-      return - SFout.right() * SFin.left() * OneLoopFunctionE(r)/12. 
-             - SFout.right() * SFin.right() * mF/mj * OneLoopFunctionF(r) * 2./3. 
-             - mi/mj * SFout.left() * SFin.right() * OneLoopFunctionE(r)/12.; 
-    //}
-  }
-}
-
-
-std::complex<double> FFV_VVF_A1L(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-    const auto r = Power2(mF/mV);
-    //if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-        return 8. * mF/mi * VFin.left() * VFout.right() * OneLoopFunctionI(r) 
-               + VFin.left() * VFout.left() * OneLoopFunctionH(r) / 18.;
-    //}
-}  
-
-std::complex<double> FFV_VVF_A1R(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-    const auto r = Power2(mF/mV);
-    //if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-      return 8. * mF/mi * VFin.right() * VFout.left() * OneLoopFunctionI(r)
-             + VFin.right() * VFout.right() * OneLoopFunctionH(r) / 18.;
-    //}
-}  
-
-std::complex<double> FFV_VVF_A2L(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-  const double Dim = 4.;
-  // Massless emitter (in this case mV==0, mi==mj==mF) will fail
-  // Massless mediator (in this case mF==0) case can be calculated
-  if (mi==mj and mi==mV and mF==0) {
-    return 2.*Power2(mV)*(VFin.left()*VFout.left() + VFin.right()*VFout.right()) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mF),Power2(mV),Power2(mV),Power2(mV));
-    return -2. * Power2(mV) / mj * (
-             mi*(-c[looplibrary::c1] + (Dim-2.)*c[looplibrary::c12] + (Dim-4.)*c[looplibrary::c2] + (Dim-2.)*c[looplibrary::c22])*VFin.left()*VFout.left() 
-           + mF*(-((Dim-4.)*c[looplibrary::c0]) - (Dim-1.)*(c[looplibrary::c1] + c[looplibrary::c2]))*VFin.left()*VFout.right() 
-           + mj*((Dim-4.)*c[looplibrary::c1] + (Dim-2.)*(c[looplibrary::c11] + c[looplibrary::c12]) - c[looplibrary::c2])*VFin.right()*VFout.right());
-  } else {
-    const auto r = Power2(mF/mV);
-    //if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-      return 3. * mF/mj * VFin.left() * VFout.right() * OneLoopFunctionK(r)
-             + mi/mj * VFin.left() * VFout.left() * OneLoopFunctionJ(r) / 6.
-             + VFin.right() * VFout.right() * OneLoopFunctionJ(r) / 6.;  
-    //}
-  }          
-}  
-
-
-std::complex<double> FFV_VVF_A2R(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-  const double Dim = 4.;
-  // Massless emitter (in this case mV==0, mi==mj==mF) will fail
-  // Massless mediator (in this case mF==0) case can be calculated
-  if (mi==mj and mi==mV and mF==0) {
-    return 2.*Power2(mV)*(VFin.left()*VFout.left() + VFin.right()*VFout.right()) / Power2(mi);
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mF),Power2(mV),Power2(mV),Power2(mV));
-    return 2. * Power2(mV) / mj * (
-             mj*(c[looplibrary::c2] - (Dim-4.)*c[looplibrary::c1] - (Dim-2.)*(c[looplibrary::c11]+c[looplibrary::c12]))*VFin.left()*VFout.left()
-           + mF*((Dim-4.)*c[looplibrary::c0] + (Dim-1.)*(c[looplibrary::c1] + c[looplibrary::c2]))*VFin.right()*VFout.left()
-           + mi*(c[looplibrary::c1] - (Dim-4.)*c[looplibrary::c2] - (Dim-2.)*(c[looplibrary::c12]+c[looplibrary::c22]))*VFin.right()*VFout.right());
-  } else {
-    const auto r = Power2(mF/mV);
-    //if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-      return 3. * mF/mj * VFin.right() * VFout.left() * OneLoopFunctionK(r)
-             + mi/mj * VFin.right() * VFout.right() * OneLoopFunctionJ(r) / 6.
-             + VFin.left() * VFout.left() * OneLoopFunctionJ(r) / 6.;   
-    //}
-  }
-}
-
-
-std::complex<double> FFV_FFV_A1L(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-    const auto r = Power2(mF/mV);
-    //if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
-    return   VFin.left() * VFout.left() * OneLoopFunctionL(r) / 9. 
-           - mi/mj * VFin.right() * VFout.right() * OneLoopFunctionL(r) / 9.;   
-    //}
-}
-
-std::complex<double> FFV_FFV_A1R(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-    const auto r = Power2(mF/mV);
-    return   VFin.right() * VFout.right() * OneLoopFunctionL(r) / 9.
-           - mi/mj * VFin.left() * VFout.left() * OneLoopFunctionL(r) / 9.;  
-}
-
-std::complex<double> FFV_FFV_A2L(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-  const double Dim = 4.;
-  if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mV),Power2(mF),Power2(mF),Power2(mF));
-    return -2. * Power2(mV) / mj * (
-             mi*(2*c[looplibrary::c0] + 2*c[looplibrary::c1] + (Dim-2.)*c[looplibrary::c12] + Dim*c[looplibrary::c2] + (Dim-2.)*c[looplibrary::c22])*VFin.left()*VFout.left() 
-           - mF*(4*c[looplibrary::c0] + Dim*(c[looplibrary::c1] + c[looplibrary::c2]))*VFin.left()*VFout.right() + 
-             mj*(2*c[looplibrary::c0] + Dim*c[looplibrary::c1] + (Dim-2.)*c[looplibrary::c11] + (Dim-2.)*c[looplibrary::c12] + 2*c[looplibrary::c2])*VFin.right()*VFout.right());
-  } else {
-    const auto r = Power2(mF/mV);
-    //if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
-      return - 4. * mF/mj * VFin.left() * VFout.right() * OneLoopFunctionC(r) / 3.
-             + mi/mj * VFin.left() * VFout.left() * OneLoopFunctionM(r) / 3.
-             + VFin.right() * VFout.right() * OneLoopFunctionM(r) / 3.; 
-    //}
-  }
-}
-
-std::complex<double> FFV_FFV_A2R(double mi, double mj, double mF, double mV, auto VFin, auto VFout)
-{
-  const double Dim = 4.;
-  if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mi),0.,Power2(mj),Power2(mV),Power2(mF),Power2(mF),Power2(mF));
-    return -2. * Power2(mV) / mj * (
-             mj*(2*c[looplibrary::c0] + Dim*c[looplibrary::c1] + (Dim-2.)*c[looplibrary::c11] + (Dim-2.)*c[looplibrary::c12] + 2*c[looplibrary::c2])*VFin.left()*VFout.left() 
-           - mF*(4*c[looplibrary::c0] + Dim*(c[looplibrary::c1] + c[looplibrary::c2]))*VFin.right()*VFout.left() 
-           + mi*(2*c[looplibrary::c0] + 2*c[looplibrary::c1] +(Dim-2.)*c[looplibrary::c12] + Dim*c[looplibrary::c2] + (Dim-2.)*c[looplibrary::c22])*VFin.right()*VFout.right());
-  } else {
-    const auto r = Power2(mF/mV);
-    //if (std::max(mF,mV) > approx_limit * std::max(mi,mj)) {
-      return - 4. * mF/mj * VFin.right() * VFout.left() * OneLoopFunctionC(r) / 3.
-             + mi/mj * VFin.right() * VFout.right() * OneLoopFunctionM(r) / 3.
-             + VFin.left() * VFout.left() * OneLoopFunctionM(r) / 3.;
-    //}
-  }
-}
-
-
-std::complex<double> FFV_VSF_A1L(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
-{
-  if (is_zero(-mG + mV)) {
-    const auto r = Power2(mF/mV);
-      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-        return -1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,r) / mV;
-    } 
-    } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return -1./mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,s) / mV;
-      }
-  }        
-}
-
-std::complex<double> FFV_VSF_A1R(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
-{
-  if (is_zero(-mG + mV)) {
-    const auto r = Power2(mF/mV);
-      if (std::max(mV,mF) > approx_limit * std::max(mi,mj)) {
-        return -1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,r) / mV;
-        }
-    } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return -1./mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,s) / mV;
-      } 
-  }        
-} 
-
-std::complex<double> FFV_VSF_A2L(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
-{
-  if ((mi == mj) and (mi == mF) and (mV == 0) and (mG == 0)) {
-    return mV*mV;
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mF),Power2(mV),Power2(mG),std::max(Power2(mG),Power2(mV)));
-    return 2. * Power2(mV) / mj * (c[looplibrary::c1] * SFout.left() * VFin.left());
-  } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-    //if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-      return  1. / mj * VFin.left() * SFout.left() * OneLoopFunctionN(r,s);
-    //}
-  }
-}
-
-std::complex<double> FFV_VSF_A2R(double mi, double mj, double mF, double mV, double mG, auto VFin, auto SFout)
-{
-  if ((mi == mj) and (mi == mF) and (mV == 0) and (mG == 0)) {
-    return mV*mV; 
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mj),0.,Power2(mi),Power2(mF),Power2(mV),Power2(mG),std::max(Power2(mG),Power2(mV)));
-    return 2. * Power2(mV) / mj * (c[looplibrary::c1] * SFout.right() * VFin.right());
-  } else {  
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-    //if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-      return 1. / mj * VFin.right() * SFout.right() * OneLoopFunctionN(r,s);
-    //}
-  }
-}
-
-std::complex<double> FFV_SVF_A1L(double mi, double mj, double mF, double mV, double mG, auto SFin, auto VFout)
-{
-  if (is_zero(-mG + mV)) {
-  } else {
-    if (is_zero(mF)) {
-    } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return 1./mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,s) / mV;// / 2.;
-      }
-    }
-  }
-} 
-
-std::complex<double> FFV_SVF_A1R(double mi, double mj, double mF, double mV, double mG, auto SFin, auto VFout)
-{
-  if (is_zero(-mG + mV)) {
-  } else {
-    if (is_zero(mF)) {
-    } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-      if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return 1./mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,s) / mV;// / 2.;
-      }
-    }
-  }        
-} 
-
-std::complex<double> FFV_SVF_A2L(double mi, double mj, double mF, double mV, double mG, auto SFin, auto VFout)
-{
-  if ((mi == mj) and (mi == mF) and (mV == 0) and (mG == 0)) {
-    return mV*mV;
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mi),0.,Power2(mj),Power2(mF),Power2(mG),Power2(mV),std::max(Power2(mG),Power2(mV)));
-    return 2. * Power2(mV) / mj * (c[looplibrary::c2]*SFin.left()*VFout.right());
-  } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-    //if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return 1. / mj * SFin.left() * VFout.right() * OneLoopFunctionN(r,s);
-    //}
-  }
-} 
-
-std::complex<double> FFV_SVF_A2R(double mi, double mj, double mF, double mV, double mG, auto SFin, auto VFout)
-{
-  if ((mi == mj) and (mi == mF) and (mV == 0) and (mG == 0)) {
-    return mV*mV; 
-  } else if (not(Loop_library::get_type() == Loop_library::Library::Softsusy)) {
-    std::array<std::complex<double>,C_N>c{};
-    Loop_library::get().C(c,Power2(mi),0.,Power2(mj),Power2(mF),Power2(mG),Power2(mV),std::max(Power2(mG),Power2(mV)));
-    return 2. * Power2(mV) / mj * (c[looplibrary::c2]*SFin.right()*VFout.left());
-  } else {
-    const auto r = Power2(mF/mV);
-    const auto s = Power2(mF/mG);
-    //if (std::max(std::max(mV,mG),mF) > approx_limit * std::max(mi,mj)) {
-        return 1. / mj * SFin.right() * VFout.left() * OneLoopFunctionN(r,s);
-    //}
-  }
-} 
 
 
 /**
@@ -879,9 +461,9 @@ std::complex<double> FFV_SVF_A2R(double mi, double mj, double mF, double mV, dou
 *
 * Diagram contributions are of the form:
 * \Gamma^\mu = gamma^\mu F1 + I sigma^\mu\nu (p-pp)_\nu / (2*mj) F2
-*                A1L gamma^\mu P_L + A1R gamma^\mu P_R 
+*                A1L gamma^\mu P_L + A1R gamma^\mu P_R
 *              + A2L I sigma^\mu\nu (p-pp)_\nu / (2*mj) P_L
-*              + A2R I sigma^\mu\nu (p-pp)_\nu / (2*mj) P_R 
+*              + A2R I sigma^\mu\nu (p-pp)_\nu / (2*mj) P_R
 */
 
 
@@ -946,22 +528,34 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
          const auto x = Power2(mF/mS);
          const auto oneLoopFunctionA = OneLoopFunctionA(x);
+         const auto oneLoopFunctionB = OneLoopFunctionB(x);
+         const auto oneLoopFunctionC = OneLoopFunctionC(x);
 
          // TODO: check the sign convention of this coupling
-         std::complex<double> vector_boson_coupling {-vertexEmit.value(1,0)}; 
+         std::complex<double> vector_boson_coupling {-vertexEmit.value(1,0)};
 
          // eq. 15 of hep-ph/9510309 (possibly with different sign)
-         const std::complex<double> A1L = - 1./18. * vertexOut.right() * vertexIn.left() * oneLoopFunctionA;
-         const std::complex<double> A2L = FFV_SSF_A2L(mi, mj, mF, mS, vertexIn, vertexOut);
+         const std::complex<double> A1L =
+            - 1./18. * vertexOut.right() * vertexIn.left() * OneLoopFunctionA(x);
+         // eq. 16 of hep-ph/9510309 (possibly with different sign)
+         const std::complex<double> A2L =
+            - vertexOut.left() * vertexIn.right() * OneLoopFunctionB/12.
+            - vertexOut.left()* vertexIn.left() * mF/mj * OneLoopFunctionC/3.
+            - mi/mj * vertexOut.right() * vertexIn.left() * OneLoopFunctionB/12.;
 
-         // eq. 15 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
-         const std::complex<double> A1R = - 1./18. * vertexOut.left() * vertexIn.right() * oneLoopFunctionA;
-         const std::complex<double> A2R = FFV_SSF_A2R(mi, mj, mF, mS, vertexIn, vertexOut);
+         // eq. 15 & 16 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
+         const std::complex<double> A1R =
+            - 1./18. * vertexOut.left() * vertexIn.right() * OneLoopFunctionA;
+         const std::complex<double> A2R =
+            - vertexOut.right() * vertexIn.left() * OneLoopFunctionB/12.
+            - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionC/3.
+            - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionB/12.;
 
-         const std::complex<double> massFactor = 1.0/Power2(mS);
+         const std::complex<double> massFactor = Power2(1.0/mS);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
+	 
       }
    }
 
@@ -1034,25 +628,26 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
 
          // eq. 18 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A1L =
-            - 1./18. * vertexOut.right() * vertexIn.left() * oneLoopFunctionD;
+            - 1./18. * vertexOut.right() * vertexIn.left() * OneLoopFunctionD;
          // eq. 19 of hep-ph/9510309 (possibly with different sign)
          const std::complex<double> A2L =
-            - vertexOut.left() * vertexIn.right() * oneLoopFunctionE/12.0
-            - vertexOut.left()* vertexIn.left() * mF/mj * oneLoopFunctionF * 2./3.
-            - mi/mj * vertexOut.right() * vertexIn.left() * oneLoopFunctionE/12.0;
+            - vertexOut.left() * vertexIn.right() * OneLoopFunctionE/12.0
+            - vertexOut.left()* vertexIn.left() * mF/mj * OneLoopFunctionF * 2./3.
+            - mi/mj * vertexOut.right() * vertexIn.left() * OneLoopFunctionE/12.0;
 
          // eq. 18 & 18 of hep-ph/9510309 after replacement L <-> R (possibly with different sign)
          const std::complex<double> A1R =
-            - 1./18. * vertexOut.left() * vertexIn.right() * oneLoopFunctionD;
+            - 1./18. * vertexOut.left() * vertexIn.right() * OneLoopFunctionD;
          const std::complex<double> A2R =
-            - vertexOut.right() * vertexIn.left() * oneLoopFunctionE/12.0
-            - vertexOut.right()* vertexIn.right() * mF/mj * oneLoopFunctionF * 2./3.
-            - mi/mj * vertexOut.left() * vertexIn.right() * oneLoopFunctionE/12.0;
+            - vertexOut.right() * vertexIn.left() * OneLoopFunctionE/12.0
+            - vertexOut.right()* vertexIn.right() * mF/mj * OneLoopFunctionF * 2./3.
+            - mi/mj * vertexOut.left() * vertexIn.right() * OneLoopFunctionE/12.0;
 
-         const std::complex<double> massFactor = 1.0/Power2(mS);
+         const std::complex<double> massFactor = Power2(1.0/mS);
 
          res += oneOver32PiSqr * vector_boson_coupling * massFactor
             * std::valarray<std::complex<double>> {A1L, A1R, A2L, A2R};
+
       }
    }
 
@@ -1081,6 +676,10 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    // masses of external fermions
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
+
+   // counting increment and extra block string
+   int flavnum = 0;
+   char flavstr[10];
 
    // loop over all possible particle generations attached to both vertices
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
@@ -1120,20 +719,36 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
          const auto mV = context.mass<VA>(vectorFieldIndicesIn);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
+         const auto x = Power2(mF/mV);
+         const auto oneLoopFunctionH = OneLoopFunctionH(x);
+         const auto oneLoopFunctionI = OneLoopFunctionI(x);
+         const auto oneLoopFunctionJ = OneLoopFunctionJ(x);
+         const auto oneLoopFunctionK = OneLoopFunctionK(x);
 
          // triple gauge boson vertex
          // need to check that the sign and function call are correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value( TripleVectorVertex::even_permutation{} )};
 
-         const std::complex<double> A1L = FFV_VVF_A1L(mi, mj, mF, mV, vertexIn, vertexOut);
-         const std::complex<double> A2L = FFV_VVF_A2L(mi, mj, mF, mV, vertexIn, vertexOut);
+         const std::complex<double> A1L =
+            - 8. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionI
+            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionH / 18.;
+         const std::complex<double> A2L =
+            3. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionK
+            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionJ / 6.
+            + vertexIn.right() * vertexOut.right() * OneLoopFunctionJ / 6.;
          
-         const std::complex<double> A1R = FFV_VVF_A1R(mi, mj, mF, mV, vertexIn, vertexOut);
-         const std::complex<double> A2R = FFV_VVF_A2R(mi, mj, mF, mV, vertexIn, vertexOut);
+         const std::complex<double> A1R = 
+            - 8. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionI
+            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionH / 18.;
+         const std::complex<double> A2R = 
+            3. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionK
+            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionJ / 6.
+            + vertexIn.left() * vertexOut.left() * OneLoopFunctionJ / 6.;
 
-         const std::complex<double> massFactor = 1.0/Power2(mV);
+         const std::complex<double> massFactor = Power2(1.0/mV);
 
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
       }
    }
 
@@ -1202,18 +817,36 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
          const auto mV = context.mass<V>(vectorFieldIndicesIn);
          const auto mF = context.mass<FA>(fermionFieldIndicesIn);
+         const auto x = Power2(mF/mV);
+         const auto oneLoopFunctionC = OneLoopFunctionC(x);
+         const auto oneLoopFunctionL = OneLoopFunctionL(x);
+         const auto oneLoopFunctionM = OneLoopFunctionM(x);
 
-         std::complex<double> vector_boson_coupling {vertexEmit.left()};
+	     std::complex<double> vector_boson_coupling {vertexEmit.left()};
 
-         const std::complex<double> A1L = FFV_FFV_A1L(mi, mj, mF, mV, vertexIn, vertexOut);
-         const std::complex<double> A2L = FFV_FFV_A2L(mi, mj, mF, mV, vertexIn, vertexOut);
+         const std::complex<double> A1L = vertexIn.left() * vertexOut.left() * OneLoopFunctionL / 9.
+	    - mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionL / 9.;
+         const std::complex<double> A2L =
+            - 4. * mF/mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionC / 3.
+            + mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionM / 3.
+            + vertexIn.right() * vertexOut.right() * OneLoopFunctionM / 3.;
 
-         const std::complex<double> A1R = FFV_FFV_A1R(mi, mj, mF, mV, vertexIn, vertexOut);
-         const std::complex<double> A2R = FFV_FFV_A2R(mi, mj, mF, mV, vertexIn, vertexOut);
+         const std::complex<double> A1R = vertexIn.right() * vertexOut.right() * OneLoopFunctionL / 9.
+	    - mi/mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionL / 9.;
+         const std::complex<double> A2R =
+            - 4. * mF/mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionC / 3.
+            + mi/mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionM / 3.
+            + vertexIn.left() * vertexOut.left() * OneLoopFunctionM / 3.;
 
-         std::complex<double> massFactor = 1.0/Power2(mV);
+	     std::complex<double> massFactor = 0.0;
+         if (std::isinf(x)) {
+            massFactor = Power2(1.0/mF);
+         } else {
+            massFactor = Power2(1.0/mV);
+         }
 
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
       }
    }
 
@@ -1284,20 +917,24 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
          const auto mV = context.mass<VA>(vectorFieldIndicesIn);
          const auto mG = context.mass<GB>(goldstoneFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
+         const auto x = Power2(mF/mV);
+         const auto y = Power2(mF/mG);
+         const auto oneLoopFunctionN = OneLoopFunctionN(x,y);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value()};
 
-         const std::complex<double> A1L = FFV_VSF_A1L(mi, mj, mF, mV, mG, vertexIn, vertexOut);
-         const std::complex<double> A2L = FFV_VSF_A2L(mi, mj, mF, mV, mG, vertexIn, vertexOut);
+         const std::complex<double> A1L = -1./mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionN;
+         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionN;
       
-         const std::complex<double> A1R = FFV_VSF_A1R(mi, mj, mF, mV, mG, vertexIn, vertexOut);
-         const std::complex<double> A2R = FFV_VSF_A2R(mi, mj, mF, mV, mG, vertexIn, vertexOut);
+         const std::complex<double> A1R = -1./mj * vertexIn.left() * vertexOut.left() * OneLoopFunctionN;
+         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.right() * OneLoopFunctionN;
 
-         const std::complex<double> massFactor = 1.0/mV;
+         const std::complex<double> massFactor = Power2(1.0/mV);
           
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
       }
    }
 
@@ -1368,20 +1005,24 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
          const auto mV = context.mass<GA>(goldstoneFieldIndicesIn);
          const auto mG = context.mass<VB>(vectorFieldIndicesOut);
          const auto mF = context.mass<F>(fermionFieldIndicesIn);
+         const auto x = Power2(mF/mV);
+         const auto y = Power2(mF/mG);
+         const auto oneLoopFunctionN = OneLoopFunctionN(x,y);
 
          // scalar-vector-vector vertex
          // check that definition and sign is correct
          std::complex<double> vector_boson_coupling {-vertexEmit.value()};
 
-         const std::complex<double> A1L = FFV_SVF_A1L(mi, mj, mF, mV, mG, vertexIn, vertexOut);
-         const std::complex<double> A2L = FFV_SVF_A2L(mi, mj, mF, mV, mG, vertexIn, vertexOut);
+         const std::complex<double> A1L = 1./mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionN;
+         const std::complex<double> A2L = 1./mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionN;
       
-         const std::complex<double> A1R = FFV_SVF_A1R(mi, mj, mF, mV, mG, vertexIn, vertexOut);
-         const std::complex<double> A2R = FFV_SVF_A2R(mi, mj, mF, mV, mG, vertexIn, vertexOut);
+         const std::complex<double> A1R = 1./mj * vertexIn.left() * vertexOut.right() * OneLoopFunctionN;
+         const std::complex<double> A2R = 1./mj * vertexIn.right() * vertexOut.left() * OneLoopFunctionN;
 
          const std::complex<double> massFactor = 1.0/mV;
           
-         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A1R,A2L,A2R};
+         res += oneOver32PiSqr * vector_boson_coupling * massFactor * std::valarray<std::complex<double>> {A1L,A2R,A2L,A2R};
+
       }
    }
 
