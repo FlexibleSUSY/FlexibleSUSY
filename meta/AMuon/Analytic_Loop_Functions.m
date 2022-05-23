@@ -22,6 +22,86 @@
 
 *)
 
+(*One Loop Functions*)
+OneLoopA[x_] :=
+ If[x == 0, 2,
+  If[x == 1, 3/2.,
+   If[x == Infinity, 0,
+    (2 - 9*x + 18*x^2 - 11*x^3 + 6*x^3*Log[x])/(1 - x)^4]]]
+
+OneLoopB[x_] :=
+ If[x == 0, 2,
+  If[x == 1, 1,
+   If[x == Infinity, 0,
+    (2 (1 - 6 x + 3 x^2 + 2 x^3 - 6 x^2 Log[x]))/(1 - x)^4]]]
+
+OneLoopC[x_] :=
+ If[x == 0, 3,
+  If[x == 1, 1,
+   If[x == Infinity, 0,
+    (3 (1 - x^2 + 2 x Log[x]))/(1 - x)^3]]]
+
+OneLoopD[x_] :=
+ If[x == 0, -Infinity,
+  If[x == 1, -(9/2.),
+   If[x == Infinity, 0,
+    (16 - 45 x + 36 x^2 - 7 x^3 + 6 (2 - 3 x)*Log[x])/(1 - x)^4]]]
+
+OneLoopE[x_] :=
+ If[x == 0, 4,
+  If[x == 1, 1,
+   If[x == Infinity, 0,
+    (2 (2 + 3 x - 6 x^2 + x^3 + 6 x Log[x]))/(1 - x)^4]]]
+
+OneLoopF[x_] :=
+ If[x == 0, Infinity,
+  If[x == 1, 1,
+   If[x == Infinity, 0,
+    (3 (-3 + 4 x - x^2 - 2 Log[x]))/(2 (1 - x)^3)]]]
+
+OneLoopH[x_] :=
+ If[x == 0, 5,
+  If[x == 1, 3,
+   If[x == Infinity, 0,
+    (5 - 27*x + 27*x^2 - 5*x^3 + 6*(x - 3)*x^2*Log[x])/(1 - x)^4]]]
+
+OneLoopI[x_] :=
+ If[x == 0, 1,
+  If[x == 1, 1/2.,
+   If[x == Infinity, 0,
+    (1 - x + x*Log[x])/(1 - x)^2]]]
+
+OneLoopJ[x_] :=
+ If[x == 0, 7,
+  If[x == 1, 5,
+   If[x == Infinity, 0,
+    (7 - 33 x + 57 x^2 - 31 x^3 + 6 x^2 (3 x - 1) Log[x])/(1 - x)^4]]]
+
+OneLoopK[x_] :=
+ If[x == 0, 1,
+  If[x == 1, 2/3.,
+   If[x == Infinity, 0,
+    (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/(1 - x)^3]]]
+
+OneLoopL[x_] :=
+ If[x == 0, Infinity,
+  If[x == 1, 21/2.,
+   If[x == Infinity, 0,
+    (2 + 27*x - 54*x^2 + 25*x^3 - 6*(2 - 9*x + 6*x^2)*Log[x])/(1 - x)^4]]]
+
+OneLoopM[x_] :=
+ If[x == 0, 4,
+  If[x == 1, 3/2.,
+   If[x == Infinity, 0,
+    (4 - 9 x + 5 x^3 + 6 (1 - 2 x) x Log[x])/(1 - x)^4]]]
+
+OneLoopN[x_, y_] :=
+ If[x == y,
+  If[x == 0, 1/2.,
+   If[x == 1, 1/3.,
+    (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/ ((1 - x)^3)]],
+  y/(y - 1) (x (x - y)^2 Log[x] + (x - 1) ((x - y) (y - 1) - x (x - 1) Log[x/y]))/((1 - x)^2 (x - y)^2)]
+
 (*SSF Diagram
   - mi mass of the outgoing fermion
   - mj mass of the incoming fermion
