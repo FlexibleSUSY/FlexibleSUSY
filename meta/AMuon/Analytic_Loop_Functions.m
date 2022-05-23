@@ -22,7 +22,17 @@
 
 *)
 
-(*SSF Diagram*)
+(*SSF Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mS mass of the scalar in the loop
+  - SFinleft left-chirality of the incoming fermion-fermion-scalar vertex
+  - SFinright right-chirality of the incoming fermion-fermion-scalar vertex
+  - SFoutleft left-chirality of the outcoming fermion-fermion-scalar vertex
+  - SFoutright right-chirality of the outcoming fermion-fermion-scalar vertex
+  - r ratio of loop masses which we expand over in the simplified case
+  *)
 
 SSFA2L[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
   r=Power[mF/mS,2];
@@ -54,7 +64,17 @@ SSFA2RPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r
   ]
 ]
 
-(*FFS Diagram*)
+(*FFS Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mS mass of the scalar in the loop
+  - SFinleft left-chirality of the incoming fermion-fermion-scalar vertex
+  - SFinright right-chirality of the incoming fermion-fermion-scalar vertex
+  - SFoutleft left-chirality of the outcoming fermion-fermion-scalar vertex
+  - SFoutright right-chirality of the outcoming fermion-fermion-scalar vertex
+  - r ratio of loop masses which we expand over in the simplified case
+  *)
 
 FSA2L[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
   r=Power[mF/mS,2];
@@ -86,19 +106,30 @@ FFSA2RPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r
   ]
 ]
 
-(*VVF Diagram*)
+(*VVF Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mV mass of the vector in the loop
+  - VFinleft left-chirality of the incoming fermion-fermion-vector vertex
+  - VFinright right-chirality of the incoming fermion-fermion-vector vertex
+  - VFoutleft left-chirality of the outcoming fermion-fermion-vector vertex
+  - VFoutright right-chirality of the outcoming fermion-fermion-vector vertex
+  - r ratio of loop masses which we expand over in the simplified case
+  - dim the number of spacetime dimensions, used for dimensional regularization, equivalent to dim = 4 - 2 Eps
+  *)
 
 VVFA2L[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   r=Power[mF/mV,2];
-  Return[3.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionK[r]+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.+VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.]
+  Return/3.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionK[r]+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.+VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.]
 ]
-VVFA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+VVFA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
   (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
   (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     2.*mV2*(VFinleft[]*VFoutleft[]+VFinright[]*VFoutright[])/Power[mi,2],
-  Return[2 mV2/mj (mi (-(-4+\[ScriptD]) PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-2+\[ScriptD]) PVC[0,0,2,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]+2 PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]-\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]) VFinleft[] VFoutleft[]+mF ((-4+\[ScriptD]) PVC[0,0,0,mj^2,0,mi^2,mF,mV,mV]+(-1+\[ScriptD]) (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV])) VFinleft[] VFoutright[]+mj (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-4+\[ScriptD]) PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]-(-2+\[ScriptD]) (PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,2,0,mj^2,0,mi^2,mF,mV,mV])) VFinright[] VFoutright[])]
+  Return[2 mV2/mj (mi (-(-4+dim) PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-2+dim) PVC[0,0,2,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]+2 PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]-dim PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]) VFinleft[] VFoutleft[]+mF ((-4+dim) PVC[0,0,0,mj^2,0,mi^2,mF,mV,mV]+(-1+dim) (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV])) VFinleft[] VFoutright[]+mj (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-4+dim) PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]-(-2+dim) (PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,2,0,mj^2,0,mi^2,mF,mV,mV])) VFinright[] VFoutright[])]
   ]
 ]
 
@@ -106,44 +137,67 @@ VVFA2R[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   r=Power[mF/mV,2];
   Return[3.*mF/mj*VFinright[]*VFoutleft[]*OneLoopFunctionK[r]+mi/mj*VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.+VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.]
 ]
-VVFA2RPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+VVFA2RPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
   (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
   (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     2.*mV2*(VFinleft[]*VFoutleft[]+VFinright[]*VFoutright[])/Power[mi,2],
-    Return[2 mV2/mj (mj (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-4+\[ScriptD]) PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]-(-2+\[ScriptD]) (PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,2,0,mj^2,0,mi^2,mF,mV,mV])) VFinleft[] VFoutleft[]+mF ((-4+\[ScriptD]) PVC[0,0,0,mj^2,0,mi^2,mF,mV,mV]+(-1+\[ScriptD]) (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV])) VFinright[] VFoutleft[]+mi (-(-4+\[ScriptD]) PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-2+\[ScriptD]) PVC[0,0,2,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]+2 PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]-\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]) VFinright[] VFoutright[])]
+    Return[2 mV2/mj (mj (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-4+dim) PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]-(-2+dim) (PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,2,0,mj^2,0,mi^2,mF,mV,mV])) VFinleft[] VFoutleft[]+mF ((-4+dim) PVC[0,0,0,mj^2,0,mi^2,mF,mV,mV]+(-1+dim) (PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV])) VFinright[] VFoutleft[]+mi (-(-4+dim) PVC[0,0,1,mj^2,0,mi^2,mF,mV,mV]-(-2+dim) PVC[0,0,2,mj^2,0,mi^2,mF,mV,mV]+PVC[0,1,0,mj^2,0,mi^2,mF,mV,mV]+2 PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]- dim PVC[0,1,1,mj^2,0,mi^2,mF,mV,mV]) VFinright[] VFoutright[])]
   ]
 ]
 
-(*FFV Diagram*)
+(*FFV Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mV mass of the vector in the loop
+  - VFinleft left-chirality of the incoming fermion-fermion-vector vertex
+  - VFinright right-chirality of the incoming fermion-fermion-vector vertex
+  - VFoutleft left-chirality of the outcoming fermion-fermion-vector vertex
+  - VFoutright right-chirality of the outcoming fermion-fermion-vector vertex
+  - r ratio of loop masses which we expand over in the simplified case
+  - dim the number of spacetime dimensions, used for dimensional regularization, equivalent to dim = 4 - 2 Eps
+*)
 
 FFVA2L[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   r=Power[mF/mV,2];
   Return[-4.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionC[r]/3.+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionM[r]/3.+VFinright[]*VFoutright[]*OneLoopFunctionM[r]/3.]
 ]
-FFVA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+FFVA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
   mV2=Power[mV,2];
-  Return[2 mV2/mj (-mi (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]) VFinleft[] VFoutleft[]+mF (4 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] (PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF])) VFinleft[] VFoutright[]-mj (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]) VFinright[] VFoutright[])]
+  Return[2 mV2/mj (-mi (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]) VFinleft[] VFoutleft[]+mF (4 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+dim (PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF])) VFinleft[] VFoutright[]-mj (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]) VFinright[] VFoutright[])]
 ]
 
 FFVA2R[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   r=Power[mF/mV,2];
   Return[-4.*mF/mj*VFinright[]*VFoutleft[]*OneLoopFunctionC[r]/3.+mi/mj*VFinright[]*VFoutright[]*OneLoopFunctionM[r]/3.+VFinleft[]*VFoutleft[]*OneLoopFunctionM[r]/3.]
 ]
-FFVA2RPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+FFVA2RPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
   mV2=Power[mV,2];
-  Return[2 mV2/mj (-mj (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]) VFinleft[] VFoutleft[]+mF (4 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] (PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF])) VFinright[] VFoutleft[]-mi (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+\[ScriptD] PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]) VFinright[] VFoutright[])]
+  Return[2 mV2/mj (-mj (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,2,0,mj^2,0,mi^2,mV,mF,mF]) VFinleft[] VFoutleft[]+mF (4 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+dim (PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]+PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF])) VFinright[] VFoutleft[]-mi (2 PVC[0,0,0,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,0,1,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,0,2,mj^2,0,mi^2,mV,mF,mF]+2 PVC[0,1,0,mj^2,0,mi^2,mV,mF,mF]-2 PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]+dim PVC[0,1,1,mj^2,0,mi^2,mV,mF,mF]) VFinright[] VFoutright[])]
 ]
 
-(*VSF Diagram*)
+(*VSF Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mV mass of the vector in the loop
+  - mG mass of the Goldstone boson (corresponding to the vector) in the loop
+  - VFinleft left-chirality of the incoming fermion-fermion-vector vertex
+  - VFinright right-chirality of the incoming fermion-fermion-vector vertex
+  - SFoutleft left-chirality of the outcoming fermion-fermion-scalar vertex
+  - SFoutright right-chirality of the outcoming fermion-fermion-scalar vertex
+  - r ratio of loop masses mF and mV which we expand over in the simplified case
+  - s ratio of loop masses mF and mG which we expand over in the simplified case
+  *)
 
 VSFA2L[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[{r,s},
   r=Power[mF/mV,2];
   s=Power[mF/mG,2];
   Return[1./mj*VFinleft[]*SFoutleft[]*OneLoopFunctionN[r,s]]
 ]
-VSFA2LPV[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[{r,mV2,\[ScriptD]},
+VSFA2LPV[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[{r,mV2},
   mV2=Power[mV,2];
   If[mi==mj&&mi==mF&&mV==0&&mG==0,
     mV2,
@@ -156,7 +210,7 @@ VSFA2R[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[
   s=Power[mF/mG,2];
   Return[1./mj*VFinright[]*SFoutright[]*OneLoopFunctionN[r,s]]
 ]
-VSFA2RPV[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[{r,mV2,\[ScriptD]},
+VSFA2RPV[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Module[{r,mV2},
   mV2=Power[mV,2];
   If[mi==mj&&mi==mF&&mV==0&&mG==0,
     mV2,
@@ -164,14 +218,26 @@ VSFA2RPV[mi_,mj_,mF_,mV_,mG_,VFinleft_,SFoutleft_,VFinright_,SFoutright_]:=Modul
   ]
 ]
 
-(*SVF Diagram*)
+(*SVF Diagram
+  - mi mass of the outgoing fermion
+  - mj mass of the incoming fermion
+  - mF mass of the fermion in the loop
+  - mV mass of the vector in the loop
+  - mG mass of the Goldstone boson (corresponding to the vector) in the loop
+  - SFinleft left-chirality of the incoming fermion-fermion-scalar vertex
+  - SFinright right-chirality of the incoming fermion-fermion-scalar vertex
+  - VFoutleft left-chirality of the outcoming fermion-fermion-vector vertex
+  - VFoutright right-chirality of the outcoming fermion-fermion-vector vertex
+  - r ratio of loop masses mF and mV which we expand over in the simplified case
+  - s ratio of loop masses mF and mG which we expand over in the simplified case
+  *)
 
 SVFA2L[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,s},
   r=Power[mF/mV,2];
   s=Power[mF/mG,2];
   Return[1./mj*SFinleft[]*VFoutright[]*OneLoopFunctionN[r,s]]
 ]
-SVFA2LPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+SVFA2LPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2},
   (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
   (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
   mV2=Power[mV,2];
@@ -186,7 +252,7 @@ SVFA2R[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[
   s=Power[mF/mG,2];
   Return[1./mj*SFinright[]*VFoutleft[]*OneLoopFunctionN[r,s]]
 ]
-SVFA2RPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2,\[ScriptD]},
+SVFA2RPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2},
   (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
   (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
   mV2=Power[mV,2];
