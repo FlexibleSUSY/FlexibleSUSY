@@ -51,7 +51,7 @@ SSFA2LPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r
 
 SSFA2R[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
   r=Power[mF/mS,2];
-  (*eq.15 of hep-ph/9510309 after replacement L\[TwoWayRule]R (possibly with different sign) *)
+  (*eq.15 of hep-ph/9510309 after replacement L<->R (possibly with different sign) *)
   Return[-SFoutright[]*SFinleft[]*OneLoopFunctionB[r]/12.-SFoutright[]*SFinright[]*mF/mj*OneLoopFunctionC[r]/3.-mi/mj*SFoutleft[]*SFinright[]*OneLoopFunctionB[r]/12.]
 ]
 SSFA2RPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r,mS2},
@@ -82,8 +82,8 @@ FSA2L[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
   Return[-SFoutleft[]*SFinright[]*OneLoopFunctionE[r]/12.-SFoutleft[]*SFinleft[]*mF/mj*OneLoopFunctionF[r]*2./3.-mi/mj*SFoutright[]*SFinleft[]*OneLoopFunctionE[r]/12.]
 ]
 FFSA2LPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r,mS2},
-  (*Massless emitter (in this case mF\[Equal]0) will fail*)
-  (*Massless mediator (in this case mS\[Equal]0) case can be calculated*)*
+  (*Massless emitter (in this case mF==0) will fail*)
+  (*Massless mediator (in this case mS==0) case can be calculated*)*
   mS2=Power[mS,2];
   If[mi==mj&&mi==mF&&mS==0,
     Return[-0.5*mS2*(SFinright[]*SFoutleft[]+SFinleft[]*(4.*SFoutleft[]+SFoutright[]))/Power[mi,2]],
@@ -93,12 +93,12 @@ FFSA2LPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r
 
 FFSA2R[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
   r=Power[mF/mS,2];
-  (*eq.19 of hep-ph/9510309after replacement L\[TwoWayRule]R (possibly with different sign) *)
+  (*eq.19 of hep-ph/9510309after replacement L<->R (possibly with different sign) *)
   Return[-SFoutright[]*SFinleft[]*OneLoopFunctionE[r]/12.-SFoutright[]*SFinright[]*mF/mj*OneLoopFunctionF[r]*2./3.-mi/mj*SFoutleft[]*SFinright[]*OneLoopFunctionE[r]/12.]
 ]
 FFSA2RPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r,mS2},
-  (*Massless emitter (in this case mF\[Equal]0) will fail*)
-  (*Massless mediator (in this case mS\[Equal]0) case can be calculated*)
+  (*Massless emitter (in this case mF==0) will fail*)
+  (*Massless mediator (in this case mS==0) case can be calculated*)
   mS2=Power[mS,2];
   If[mi==mj&&mi==mF&&mS==0,
     Return[-0.5*mS2*(SFinleft[]*SFoutright[]+SFinright[]*(SFoutleft[]+4.*SFoutright[]))/Power[mi,2]],
@@ -124,8 +124,8 @@ VVFA2L[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   Return/3.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionK[r]+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.+VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.]
 ]
 VVFA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
-  (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
-  (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
+  (*Massless emitter (in this case mV==0,mi==mj==mF) will fail*)
+  (*Massless mediator (in this case mF==0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     2.*mV2*(VFinleft[]*VFoutleft[]+VFinright[]*VFoutright[])/Power[mi,2],
@@ -138,8 +138,8 @@ VVFA2R[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   Return[3.*mF/mj*VFinright[]*VFoutleft[]*OneLoopFunctionK[r]+mi/mj*VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.+VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.]
 ]
 VVFA2RPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
-  (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
-  (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
+  (*Massless emitter (in this case mV==0,mi==mj==mF) will fail*)
+  (*Massless mediator (in this case mF==0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     2.*mV2*(VFinleft[]*VFoutleft[]+VFinright[]*VFoutright[])/Power[mi,2],
@@ -238,8 +238,8 @@ SVFA2L[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[
   Return[1./mj*SFinleft[]*VFoutright[]*OneLoopFunctionN[r,s]]
 ]
 SVFA2LPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2},
-  (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
-  (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
+  (*Massless emitter (in this case mV==0,mi==mj==mF) will fail*)
+  (*Massless mediator (in this case mF==0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     mV2,
@@ -253,8 +253,8 @@ SVFA2R[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[
   Return[1./mj*SFinright[]*VFoutleft[]*OneLoopFunctionN[r,s]]
 ]
 SVFA2RPV[mi_,mj_,mF_,mV_,mG_,SFinleft_,VFoutleft_,SFinright_,VFoutright_]:=Module[{r,mV2},
-  (*Massless emitter (in this case mV\[Equal]0,mi\[Equal]mj\[Equal]mF) will fail*)
-  (*Massless mediator (in this case mF\[Equal]0) case can be calculated*)
+  (*Massless emitter (in this case mV==0,mi==mj==mF) will fail*)
+  (*Massless mediator (in this case mF==0) case can be calculated*)
   mV2=Power[mV,2];
   If[mi==mj&&mi==mV&&mF==0,
     mV2,
