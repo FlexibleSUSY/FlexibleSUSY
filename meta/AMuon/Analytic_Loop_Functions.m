@@ -23,84 +23,72 @@
 *)
 
 (*One Loop Functions*)
-OneLoopFunctionA[x_] :=
- If[x == 0, 2,
-  If[x == 1, 3/2.,
-   If[x == Infinity, 0,
-    (2 - 9*x + 18*x^2 - 11*x^3 + 6*x^3*Log[x])/(1 - x)^4]]]
+OneLoopFunctionA[0]  := 2
+OneLoopFunctionA[1]  := 3/2.
+OneLoopFunctionA[Infinity] := 0
+OneLoopFunctionA[x_] := (2 - 9*x + 18*x^2 - 11*x^3 + 6*x^3*Log[x])/(1 - x)^4
 
-OneLoopFunctionB[x_] :=
- If[x == 0, 2,
-  If[x == 1, 1,
-   If[x == Infinity, 0,
-    (2 (1 - 6 x + 3 x^2 + 2 x^3 - 6 x^2 Log[x]))/(1 - x)^4]]]
+OneLoopFunctionB[0]  := 2
+OneLoopFunctionB[1]  := 1
+OneLoopFunctionB[Infinity] := 0
+OneLoopFunctionB[x_] := (2 (1 - 6 x + 3 x^2 + 2 x^3 - 6 x^2 Log[x]))/(1 - x)^4
 
-OneLoopFunctionC[x_] :=
- If[x == 0, 3,
-  If[x == 1, 1,
-   If[x == Infinity, 0,
-    (3 (1 - x^2 + 2 x Log[x]))/(1 - x)^3]]]
+OneLoopFunctionC[0]  := 3
+OneLoopFunctionC[1]  := 1
+OneLoopFunctionC[Infinity] := 0
+OneLoopFunctionC[x_] := (3 (1 - x^2 + 2 x Log[x]))/(1 - x)^3
 
-OneLoopFunctionD[x_] :=
- If[x == 0, -Infinity,
-  If[x == 1, -(9/2.),
-   If[x == Infinity, 0,
-    (16 - 45 x + 36 x^2 - 7 x^3 + 6 (2 - 3 x)*Log[x])/(1 - x)^4]]]
+OneLoopFunctionD[0]  := -Infinity
+OneLoopFunctionD[1]  := -(9/2.)
+OneLoopFunctionD[Infinity] := 0
+OneLoopFunctionD[x_] := (16 - 45 x + 36 x^2 - 7 x^3 + 6 (2 - 3 x)*Log[x])/(1 - x)^4
 
-OneLoopFunctionE[x_] :=
- If[x == 0, 4,
-  If[x == 1, 1,
-   If[x == Infinity, 0,
-    (2 (2 + 3 x - 6 x^2 + x^3 + 6 x Log[x]))/(1 - x)^4]]]
+OneLoopFunctionE[0]  := 4
+OneLoopFunctionE[1]  := 1
+OneLoopFunctionE[Infinity] := 0
+OneLoopFunctionE[x_] := (2 (2 + 3 x - 6 x^2 + x^3 + 6 x Log[x]))/(1 - x)^4
 
-OneLoopFunctionF[x_] :=
- If[x == 0, Infinity,
-  If[x == 1, 1,
-   If[x == Infinity, 0,
-    (3 (-3 + 4 x - x^2 - 2 Log[x]))/(2 (1 - x)^3)]]]
+OneLoopFunctionF[0]  := Infinity
+OneLoopFunctionF[1]  := 1
+OneLoopFunctionF[Infinity] := 0
+OneLoopFunctionF[x_] := (3 (-3 + 4 x - x^2 - 2 Log[x]))/(2 (1 - x)^3)
 
-OneLoopFunctionH[x_] :=
- If[x == 0, 5,
-  If[x == 1, 3,
-   If[x == Infinity, 0,
-    (5 - 27*x + 27*x^2 - 5*x^3 + 6*(x - 3)*x^2*Log[x])/(1 - x)^4]]]
+OneLoopFunctionH[0]  := 5
+OneLoopFunctionH[1]  := 3
+OneLoopFunctionH[Infinity] := 0
+OneLoopFunctionH[x_] := (5 - 27*x + 27*x^2 - 5*x^3 + 6*(x - 3)*x^2*Log[x])/(1 - x)^4
 
-OneLoopFunctionI[x_] :=
- If[x == 0, 1,
-  If[x == 1, 1/2.,
-   If[x == Infinity, 0,
-    (1 - x + x*Log[x])/(1 - x)^2]]]
+OneLoopFunctionI[0]  := 1
+OneLoopFunctionI[1]  := 1/2.
+OneLoopFunctionI[Infinity] := 0
+OneLoopFunctionI[x_] := (1 - x + x*Log[x])/(1 - x)^2
 
-OneLoopFunctionJ[x_] :=
- If[x == 0, 7,
-  If[x == 1, 5,
-   If[x == Infinity, 0,
-    (7 - 33 x + 57 x^2 - 31 x^3 + 6 x^2 (3 x - 1) Log[x])/(1 - x)^4]]]
+OneLoopFunctionJ[0]  := 7
+OneLoopFunctionJ[1]  := 5
+OneLoopFunctionJ[Infinity] := 0
+OneLoopFunctionJ[x_] := (7 - 33 x + 57 x^2 - 31 x^3 + 6 x^2 (3 x - 1) Log[x])/(1 - x)^4
 
-OneLoopFunctionK[x_] :=
- If[x == 0, 1,
-  If[x == 1, 2/3.,
-   If[x == Infinity, 0,
-    (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/(1 - x)^3]]]
+OneLoopFunctionK[0]  := 1
+OneLoopFunctionK[1]  := 2/3.
+OneLoopFunctionK[Infinity] := 0
+OneLoopFunctionK[x_] := (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/(1 - x)^3
 
-OneLoopFunctionL[x_] :=
- If[x == 0, Infinity,
-  If[x == 1, 21/2.,
-   If[x == Infinity, 0,
-    (2 + 27*x - 54*x^2 + 25*x^3 - 6*(2 - 9*x + 6*x^2)*Log[x])/(1 - x)^4]]]
+OneLoopFunctionL[0]  := Infinity
+OneLoopFunctionL[1]  := 21/2.
+OneLoopFunctionL[Infinity] := 0
+OneLoopFunctionL[x_] := (2 + 27*x - 54*x^2 + 25*x^3 - 6*(2 - 9*x + 6*x^2)*Log[x])/(1 - x)^4
 
-OneLoopFunctionM[x_] :=
- If[x == 0, 4,
-  If[x == 1, 3/2.,
-   If[x == Infinity, 0,
-    (4 - 9 x + 5 x^3 + 6 (1 - 2 x) x Log[x])/(1 - x)^4]]]
+OneLoopFunctionD[0]  := 4
+OneLoopFunctionD[1]  := 3/2.
+OneLoopFunctionD[Infinity] := 0
+OneLoopFunctionM[x_] := (4 - 9 x + 5 x^3 + 6 (1 - 2 x) x Log[x])/(1 - x)^4
 
+OneLoopFunctionN[0,0] := 1/2.
+OneLoopFunctionN[1,1] := 1/3.
 OneLoopFunctionN[x_, y_] :=
  If[x == y,
-  If[x == 0, 1/2.,
-   If[x == 1, 1/3.,
-    (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/ ((1 - x)^3)]],
-  y/(y - 1) (x (x - y)^2 Log[x] + (x - 1) ((x - y) (y - 1) - x (x - 1) Log[x/y]))/((1 - x)^2 (x - y)^2)]
+   (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/ ((1 - x)^3)]],
+   y/(y - 1) (x (x - y)^2 Log[x] + (x - 1) ((x - y) (y - 1) - x (x - 1) Log[x/y]))/((1 - x)^2 (x - y)^2)]
 
 (*SSF Diagram
   - mi mass of the outgoing fermion
