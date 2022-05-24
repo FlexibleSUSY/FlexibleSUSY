@@ -87,7 +87,7 @@ OneLoopFunctionN[0,0] := 1/2.
 OneLoopFunctionN[1,1] := 1/3.
 OneLoopFunctionN[x_, y_] :=
  If[x == y,
-   (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/ ((1 - x)^3)]],
+   (1 - 4 x + 3 x^2 - 2 x^2 Log[x])/ ((1 - x)^3),
    y/(y - 1) (x (x - y)^2 Log[x] + (x - 1) ((x - y) (y - 1) - x (x - 1) Log[x/y]))/((1 - x)^2 (x - y)^2)]
 
 (*SSF Diagram
@@ -151,7 +151,7 @@ FSA2L[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r},
 ]
 FFSA2LPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r,mS2},
   (*Massless emitter (in this case mF==0) will fail*)
-  (*Massless mediator (in this case mS==0) case can be calculated*)*
+  (*Massless mediator (in this case mS==0) case can be calculated*)
   mS2=Power[mS,2];
   If[mi==mj&&mi==mF&&mS==0,
     Return[-0.5*mS2*(SFinright[]*SFoutleft[]+SFinleft[]*(4.*SFoutleft[]+SFoutright[]))/Power[mi,2]],
@@ -189,7 +189,7 @@ FFSA2RPV[mi_,mj_,mF_,mS_,SFinleft_,SFoutleft_,SFinright_,SFoutright_]:=Module[{r
 
 VVFA2L[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r},
   r=Power[mF/mV,2];
-  Return/3.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionK[r]+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.+VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.]
+  Return[3.*mF/mj*VFinleft[]*VFoutright[]*OneLoopFunctionK[r]+mi/mj*VFinleft[]*VFoutleft[]*OneLoopFunctionJ[r]/6.+VFinright[]*VFoutright[]*OneLoopFunctionJ[r]/6.]
 ]
 VVFA2LPV[mi_,mj_,mF_,mV_,VFinleft_,VFoutleft_,VFinright_,VFoutright_]:=Module[{r,mV2,dim},
   (*Massless emitter (in this case mV==0,mi==mj==mF) will fail*)
