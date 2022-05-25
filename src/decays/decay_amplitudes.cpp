@@ -82,7 +82,7 @@ double Decay_amplitude_SVV::square() const
          if (WI_violation > 0.1) {
             std::stringstream ss;
             ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "%");
+            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined
@@ -116,7 +116,7 @@ double Decay_amplitude_SVV::square() const
          if (WI_violation > 0.1) {
             std::stringstream ss;
             ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "%");
+            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined

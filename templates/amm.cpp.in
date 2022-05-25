@@ -29,11 +29,11 @@
 #include "cxx_qft/@ModelName@_qft.hpp"
 #include "@ModelName@_FFV_form_factors.hpp"
 
+#include "Li2.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "logger.hpp"
-#include "dilog.hpp"
 
 #define DERIVEDPARAMETER(p) context.model.p()
 
@@ -179,7 +179,7 @@ double BarZeeLoopFPS(double m) {
          r2 *= -1;
          theta2 = Pi;
       }
-      return m / y * (dilog(std::polar(r1, theta1)).real() - dilog(std::polar(r2, theta2)).real());
+      return m / y * (Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
    }
    else {
       const double y = std::sqrt(-1.0+4.0*m);
@@ -189,7 +189,7 @@ double BarZeeLoopFPS(double m) {
       theta1 = std::atan2(y/(2*m), real);
       theta2 = std::atan2(-y/(2*m), real);
 
-      return m / y * (dilog(std::polar(r1, theta1)).imag() - dilog(std::polar(r2, theta2)).imag());
+      return m / y * (Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
    }
 }
 
@@ -246,7 +246,7 @@ double BarZeeLoopV(const double m) {
       theta2 = std::atan2(0, r2);
       r2 = std::abs(r2);
 
-      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(m) + dilog(std::polar(r1, theta1)).real() - dilog(std::polar(r2, theta2)).real());
+      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(m) + Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
    }
    else {
       const double y = std::sqrt(-1.0+4.0*m);
@@ -255,7 +255,7 @@ double BarZeeLoopV(const double m) {
       const double imag = y/(2*m);
       theta1 = std::atan2(imag, real);
       theta2 = std::atan2(-imag, real);
-      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + dilog(std::polar(r1, theta1)).imag() - dilog(std::polar(r2, theta2)).imag());
+      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
    }
 
    return BarZeeLoopS(m) + 15.0/2.0 * m * (2.0 + std::log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarZeeLoopFPS(m);
