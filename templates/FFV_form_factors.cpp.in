@@ -677,10 +677,6 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
    const auto mj = context.mass<Fj>(indices_in);
    const auto mi = context.mass<Fi>(indices_out);
 
-   // counting increment and extra block string
-   int flavnum = 0;
-   char flavstr[10];
-
    // loop over all possible particle generations attached to both vertices
    std::valarray<std::complex<double>> res {0.0, 0.0, 0.0, 0.0};
    for (const auto& indexIn: index_range<VertexFBarFjVBar>()) {
