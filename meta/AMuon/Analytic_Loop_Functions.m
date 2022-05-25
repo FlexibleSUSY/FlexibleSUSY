@@ -78,9 +78,9 @@ OneLoopFunctionL[1]  = 21/2
 OneLoopFunctionL[Infinity] = 0
 OneLoopFunctionL[x_] := (2 + 27*x - 54*x^2 + 25*x^3 - 6*(2 - 9*x + 6*x^2)*Log[x])/(1 - x)^4
 
-OneLoopFunctionD[0]  = 4
-OneLoopFunctionD[1]  = 3/2
-OneLoopFunctionD[Infinity] = 0
+OneLoopFunctionM[0]  = 4
+OneLoopFunctionM[1]  = 3/2
+OneLoopFunctionM[Infinity] = 0
 OneLoopFunctionM[x_] := (4 - 9 x + 5 x^3 + 6 (1 - 2 x) x Log[x])/(1 - x)^4
 
 OneLoopFunctionN[0,0] = 1/2
