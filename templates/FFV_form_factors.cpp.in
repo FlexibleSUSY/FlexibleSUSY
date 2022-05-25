@@ -255,7 +255,7 @@ double OneLoopFunctionC(double r)
    if (is_zero(r)) {
       return 3.0;
    } else if (std::isinf(r)) {
-      return 3.0;
+      return 0.0;
    } else if (std::abs(y) < 0.185) {
       // error around x=1 is <= 10^-13 on an intel i7
       return (1.0000000000000000000 -
@@ -298,7 +298,7 @@ double OneLoopFunctionE(double r)
 {
    const double y = r - 1.0;
    if (is_zero(r)) {
-      return 12.0;
+      return 4.0;
    } else if (std::abs(y) < 0.21) {
       // error around x=1 is <= 10^-12 on an intel i7
       return (1.0000000000000000000 -
@@ -410,9 +410,7 @@ double OneLoopFunctionK(double r)
 //  of ubar(pp,mj) \gamma^\mu u(p,mi), for the FFV_FFV contribution.
 double OneLoopFunctionL(double r)
 {  
-   if (is_zero(r)) {
-      return -10.0;
-   } else if (is_zero(1.0 - r)){
+   if (is_zero(1.0 - r)){
       return 10.5;
    } else if (std::isinf(r)) {
       return 0.0;
