@@ -250,6 +250,7 @@ public:
 
       throw std::invalid_argument(
          "MomentumDifferenceVertex: Wrong index combination");
+      // suppress compiler warning
       return 0.0;
    }
 

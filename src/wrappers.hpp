@@ -716,6 +716,7 @@ void Symmetrize(Eigen::PlainObjectBase<Derived>& m)
 inline double FSThrow(const std::string& s)
 {
    throw PhysicalError(s);
+   // suppress compiler warning
    return 0.;
 }
 
