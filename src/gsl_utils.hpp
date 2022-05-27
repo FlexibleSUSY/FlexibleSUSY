@@ -36,7 +36,7 @@ GSL_vector to_GSL_vector(const Eigen::DenseBase<Derived>& v)
    using Index_t = typename Derived::Index;
    GSL_vector v2(v.rows());
 
-   for (Index_t i = 0; i < v.rows(); i++) {
+   for (Index_t i = 0; i < v.rows(); ++i) {
       v2[i] = v(i);
    }
 
@@ -54,7 +54,7 @@ Eigen::Matrix<double,Size,1> to_eigen_vector(const gsl_vector* v)
    using Index_t = typename Result_t::Index;
    Result_t result;
 
-   for (Index_t i = 0; i < Size; i++) {
+   for (Index_t i = 0; i < Size; ++i) {
       result(i) = gsl_vector_get(v, i);
    }
 

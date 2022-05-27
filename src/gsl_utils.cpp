@@ -31,7 +31,7 @@ namespace flexiblesusy {
  */
 bool is_finite(const gsl_vector* x)
 {
-   for (std::size_t i = 0; i < x->size; i++) {
+   for (std::size_t i = 0; i < x->size; ++i) {
       if (!std::isfinite(gsl_vector_get(x, i))) {
          return false;
       }
