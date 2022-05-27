@@ -16,18 +16,15 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
+#include <numeric>
+
 #include "string_utils.hpp"
 
 namespace flexiblesusy {
 
 std::string concat(const std::vector<std::string>& strings)
 {
-   std::string result;
-
-   for (const auto& s: strings)
-      result += s;
-
-   return result;
+   return std::accumulate(strings.cbegin(), strings.cend(), std::string(""));
 }
 
 
