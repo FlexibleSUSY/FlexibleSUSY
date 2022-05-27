@@ -716,6 +716,7 @@ void Symmetrize(Eigen::PlainObjectBase<Derived>& m)
 inline double FSThrow(const std::string& s)
 {
    throw PhysicalError(s);
+   return 0.;
 }
 
 template<class Scalar, int M>
