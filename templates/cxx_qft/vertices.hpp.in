@@ -250,7 +250,6 @@ public:
 
       throw std::invalid_argument(
          "MomentumDifferenceVertex: Wrong index combination");
-      return 0.0;
    }
 
    int incoming_index() const { return minuendIndex; }
