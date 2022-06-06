@@ -1,4 +1,4 @@
-FlexibleSUSY 2.7.0 [April, ? 2022]
+FlexibleSUSY 2.7.0 [June, 06 2022]
 ==================================
 
 New features
