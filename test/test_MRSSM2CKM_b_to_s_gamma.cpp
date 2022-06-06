@@ -204,8 +204,8 @@ Block MSOFTIN
    constexpr std::complex<double> C8NP {-0.17125493908345221, -0.00312854511269766};
    constexpr std::complex<double> C8pNP {-0.0037973614617843958, -6.9371527069492648e-05};
 
-   TEST_COMPLEX_EQUALITY(C7NP,  calculated_value[0]);
-   TEST_COMPLEX_EQUALITY(C7pNP, calculated_value[1]);
-   TEST_COMPLEX_EQUALITY(C8NP,  calculated_value[2]);
-   TEST_COMPLEX_EQUALITY(C8pNP, calculated_value[3]);
+   TEST_COMPLEX_CLOSE_FRACTION(C7NP,  calculated_value[0], 1e-6);
+   TEST_COMPLEX_CLOSE_FRACTION(C7pNP, calculated_value[1], 1e-6);
+   TEST_COMPLEX_CLOSE_FRACTION(C8NP,  calculated_value[2], 1e-5);
+   TEST_COMPLEX_CLOSE_FRACTION(C8pNP, calculated_value[3], 1e-5);
 }

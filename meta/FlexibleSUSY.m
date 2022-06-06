@@ -988,6 +988,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
                ];
             ];
           calculateThetaW   = ThresholdCorrections`CalculateThetaW[FlexibleSUSY`FSWeakMixingAngleInput];
+          calculateSMHiggsPoleMass = LoopMasses`CalculateSMHiggsPoleMass[FlexibleSUSY`FSWeakMixingAngleInput];
           fillHimalayaInput = Himalaya`FillHimalayaInput[FSHimalayaInput];
           twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
           WriteOut`ReplaceInFiles[files,
@@ -1000,6 +1001,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
                    "@calculateDeltaAlphaEm@" -> IndentText[WrapLines[calculateDeltaAlphaEm]],
                    "@calculateDeltaAlphaS@"  -> IndentText[WrapLines[calculateDeltaAlphaS]],
                    "@calculateThetaW@"       -> IndentText[WrapLines[calculateThetaW]],
+                   "@calculateSMHiggsPoleMass@" -> IndentText[WrapLines[calculateSMHiggsPoleMass]],
                    "@calculateDRbarMassUp@"      -> IndentText[IndentText[calculateDRbarMasses[[1]]]],
                    "@calculateDRbarMassCharm@"   -> IndentText[IndentText[calculateDRbarMasses[[2]]]],
                    "@calculateDRbarMassTop@"     -> IndentText[IndentText[calculateDRbarMasses[[3]]]],
@@ -1134,6 +1136,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
                    "@calculateDeltaAlphaEm@" -> IndentText[WrapLines[calculateDeltaAlphaEm]],
                    "@calculateDeltaAlphaS@"  -> IndentText[WrapLines[calculateDeltaAlphaS]],
                    "@calculateThetaW@"       -> IndentText[WrapLines[calculateThetaW]],
+                   "@calculateSMHiggsPoleMass@" -> IndentText[WrapLines[calculateSMHiggsPoleMass]],
                    "@calculateDRbarMassUp@"      -> IndentText[IndentText[calculateDRbarMasses[[1]]]],
                    "@calculateDRbarMassCharm@"   -> IndentText[IndentText[calculateDRbarMasses[[2]]]],
                    "@calculateDRbarMassTop@"     -> IndentText[IndentText[calculateDRbarMasses[[3]]]],
