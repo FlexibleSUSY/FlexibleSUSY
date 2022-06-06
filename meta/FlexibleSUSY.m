@@ -936,7 +936,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
            calculateDRbarMasses,
            calculateDeltaAlphaEm, calculateDeltaAlphaS,
            calculateGaugeCouplings,
-           calculateThetaW,
+           calculateThetaW, calculateSMHiggsPoleMass,
            fillHimalayaInput,
            checkPerturbativityForDimensionlessParameters = "",
            twoLoopThresholdHeaders = "" },
@@ -1035,7 +1035,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
            calculateDRbarMasses,
            calculateDeltaAlphaEm, calculateDeltaAlphaS,
            calculateGaugeCouplings,
-           calculateThetaW,
+           calculateThetaW, calculateSMHiggsPoleMass,
            checkPerturbativityForDimensionlessParameters = "",
            saveBoundaryValueParameters = "",
            usingSemiAnalyticScaleGetter = "",
@@ -1105,6 +1105,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
                ];
             ];
           calculateThetaW   = ThresholdCorrections`CalculateThetaW[FlexibleSUSY`FSWeakMixingAngleInput];
+          calculateSMHiggsPoleMass = LoopMasses`CalculateSMHiggsPoleMass[FlexibleSUSY`FSWeakMixingAngleInput];
           If[isBoundaryConstraint,
              saveBoundaryValueParameters = SemiAnalytic`SaveBoundaryValueParameters[semiAnalyticSolns];
             ];
