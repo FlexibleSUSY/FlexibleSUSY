@@ -10,6 +10,7 @@ LIBFLEXI_SRC := \
 		$(DIR)/build_info.cpp \
 		$(DIR)/bvp_solver_problems.cpp \
 		$(DIR)/ckm.cpp \
+		$(DIR)/Cl2.cpp \
 		$(DIR)/command_line_options.cpp \
 		$(DIR)/composite_convergence_tester.cpp \
 		$(DIR)/coupling_monitor.cpp \
@@ -19,14 +20,21 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/decay_functions.cpp \
 		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
-		$(DIR)/dilog.cpp \
+		$(DIR)/eta.cpp \
+		$(DIR)/factorial.cpp \
 		$(DIR)/global_thread_pool.cpp \
 		$(DIR)/gm2calc_interface.cpp \
 		$(DIR)/gsl_multimin_fminimizer.cpp \
 		$(DIR)/gsl_multiroot_fsolver.cpp \
 		$(DIR)/gsl_utils.cpp \
 		$(DIR)/gsl_vector.cpp \
+		$(DIR)/harmonic.cpp \
+		$(DIR)/Li.cpp \
+		$(DIR)/Li2.cpp \
+		$(DIR)/Li3.cpp \
 		$(DIR)/Li4.cpp \
+		$(DIR)/Li5.cpp \
+		$(DIR)/Li6.cpp \
 		$(DIR)/logger.cpp \
 		$(DIR)/loop_libraries/library_softsusy.cpp \
 		$(DIR)/lowe.cpp \
@@ -52,8 +60,8 @@ LIBFLEXI_SRC := \
 		$(DIR)/string_utils.cpp \
 		$(DIR)/threshold_corrections.cpp \
 		$(DIR)/threshold_loop_functions.cpp \
-		$(DIR)/trilog.cpp \
-		$(DIR)/wrappers.cpp
+		$(DIR)/wrappers.cpp \
+		$(DIR)/zeta.cpp
 
 LIBFLEXI_HDR := \
 		$(DIR)/array_view.hpp \
@@ -64,6 +72,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/bvp_solver_problems_format_mathlink.hpp \
 		$(DIR)/cextensions.hpp \
 		$(DIR)/ckm.hpp \
+		$(DIR)/Cl2.hpp \
 		$(DIR)/command_line_options.hpp \
 		$(DIR)/complex.hpp \
 		$(DIR)/composite_convergence_tester.hpp \
@@ -81,12 +90,13 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
-		$(DIR)/dilog.hpp \
 		$(DIR)/eigen_utils.hpp \
 		$(DIR)/eigen_tensor.hpp \
 		$(DIR)/error.hpp \
+		$(DIR)/eta.hpp \
 		$(DIR)/ew_input.hpp \
 		$(DIR)/ewsb_solver.hpp \
+		$(DIR)/factorial.hpp \
 		$(DIR)/find_if.hpp \
 		$(DIR)/fixed_point_iterator.hpp \
 		$(DIR)/for_each.hpp \
@@ -98,10 +108,16 @@ LIBFLEXI_HDR := \
 		$(DIR)/gsl_multiroot_fsolver.hpp \
 		$(DIR)/gsl_utils.hpp \
 		$(DIR)/gsl_vector.hpp \
-		$(DIR)/Li4.hpp \
+		$(DIR)/harmonic.hpp \
 		$(DIR)/loop_corrections.hpp \
 		$(DIR)/if.hpp \
 		$(DIR)/initial_guesser.hpp \
+		$(DIR)/Li.hpp \
+		$(DIR)/Li2.hpp \
+		$(DIR)/Li3.hpp \
+		$(DIR)/Li4.hpp \
+		$(DIR)/Li5.hpp \
+		$(DIR)/Li6.hpp \
 		$(DIR)/linalg2.hpp \
 		$(DIR)/logger.hpp \
 		$(DIR)/lowe.h \
@@ -144,9 +160,9 @@ LIBFLEXI_HDR := \
 		$(DIR)/thread_pool.hpp \
 		$(DIR)/threshold_corrections.hpp \
 		$(DIR)/threshold_loop_functions.hpp \
-		$(DIR)/trilog.hpp \
 		$(DIR)/which.hpp \
-		$(DIR)/wrappers.hpp
+		$(DIR)/wrappers.hpp \
+		$(DIR)/zeta.hpp
 
 ifneq ($(findstring two_scale,$(SOLVERS)),)
 LIBFLEXI_SRC += \

@@ -20,7 +20,7 @@
 // with the script "tquark_to_cpp.m".
 
 #include "mssm_twoloop_mt.hpp"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include <cmath>
 #include <limits>
 
@@ -85,7 +85,7 @@ namespace {
 
       return (6*(mm1*log1u + mm2*log2u) +
          (-mm1 - mm2)*(7 + pow2(Pi)/6.) +
-         (mm1 - mm2)*(2*dilog(1 - mm1/mm2) + pow2(log12)/2.) +
+         (mm1 - mm2)*(2*Li2(1 - mm1/mm2) + pow2(log12)/2.) +
          ((mm1 + mm2)*pow2(log12))/2. -
          2*(mm1*pow2(log1u) + mm2*pow2(log2u)))/2.;
    }

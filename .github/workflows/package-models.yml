@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Activate Wolfram Engine
         env:
@@ -62,13 +62,13 @@ jobs:
            ./release/generate-slha-output.sh --directory=release/${FS_TAG}-slha
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
            name: models-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
            name: slha-output-artifacts_${{ matrix.part }}
            path: ${{ github.workspace }}/release/${{ env.FS_TAG }}-slha
@@ -80,17 +80,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
            repository:  FlexibleSUSY/FlexibleSUSY-generated
            token: ${{ secrets.PAT }}
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: models-artifacts_1
            path: /tmp/models-artifacts
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: models-artifacts_2
            path: /tmp/models-artifacts
@@ -114,17 +114,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
            repository:  FlexibleSUSY/FlexibleSUSY-slha
            token: ${{ secrets.PAT }}
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: slha-output-artifacts_1
            path: /tmp/slha-output-artifacts
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: slha-output-artifacts_2
            path: /tmp/slha-output-artifacts
@@ -148,14 +148,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: models-artifacts_1
            path: /tmp/models-artifacts
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
            name: models-artifacts_2
            path: /tmp/models-artifacts

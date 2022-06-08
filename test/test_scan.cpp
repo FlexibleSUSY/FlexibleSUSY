@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <algorithm>
 #include <random>
+#include <array>
 
 /**
  * @file scan.hpp

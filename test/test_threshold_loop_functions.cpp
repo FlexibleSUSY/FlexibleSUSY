@@ -24,7 +24,7 @@
 #include "config.h"
 #include "threshold_loop_functions.hpp"
 #include "numerics.h"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include "logger.hpp"
 #include "benchmark.hpp"
 
@@ -1264,7 +1264,7 @@ double phixyz(double x, double y, double z)
       return std::real(fac * 1. / lambda_c *
                        (2. * std::log(xplus_c) * std::log(xminus_c) -
                         std::log(u) * std::log(v) -
-                        2. * (dilog(xplus_c) + dilog(xminus_c)) +
+                        2. * (Li2(xplus_c) + Li2(xminus_c)) +
                         sqr(PI) / 3.));
    }
 
@@ -1289,7 +1289,7 @@ double phixyz(double x, double y, double z)
               2. * sqr(std::log(0.5 -
                                 0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
               sqr(std::log(my_x / my_z)) -
-              4. * dilog(0.5 *
+              4. * Li2(0.5 *
                          (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                             4. * sqr(my_x) / (sqr(my_z)))))));
       }
@@ -1312,10 +1312,10 @@ double phixyz(double x, double y, double z)
                  std::log(1. - my_x / (2. * my_z) -
                           0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                              sqr(my_z))) -
-             6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                  4. * my_x / my_z) -
                                my_x / my_z)) -
-             6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                              4. * my_x / my_z) +
                                my_x / my_z))));
       }
@@ -1337,7 +1337,7 @@ double phixyz(double x, double y, double z)
               2. * sqr(std::log(0.5 -
                                 0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
               sqr(std::log(my_x / my_z)) -
-              4. * dilog(0.5 *
+              4. * Li2(0.5 *
                          (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                             4. * sqr(my_x) / (sqr(my_z)))))));
       }
@@ -1359,10 +1359,10 @@ double phixyz(double x, double y, double z)
                  std::log(1. - my_x / (2. * my_z) -
                           0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                              sqr(my_z))) -
-             6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                  4. * my_x / my_z) -
                                my_x / my_z)) -
-             6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                              4. * my_x / my_z) +
                                my_x / my_z))));
       }
@@ -1388,10 +1388,10 @@ double phixyz(double x, double y, double z)
                   std::log(1. - my_x / (2. * my_z) -
                            0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                               sqr(my_z))) -
-              6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+              6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                   4. * my_x / my_z) -
                                 my_x / my_z)) -
-              6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+              6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                               4. * my_x / my_z) +
                                 my_x / my_z))));
       }
@@ -1408,7 +1408,7 @@ double phixyz(double x, double y, double z)
              2. * sqr(std::log(0.5 -
                                0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
              sqr(std::log(my_x / my_z)) -
-             4. * dilog(0.5 *
+             4. * Li2(0.5 *
                         (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                            4. * sqr(my_x) / (sqr(my_z)))))));
       }

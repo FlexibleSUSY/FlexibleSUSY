@@ -70,6 +70,7 @@ void @ModelName@_susy_scale_constraint<Two_scale>::apply()
 
    // apply user-defined susy scale constraints
 @applyConstraint@
+@calculateSMHiggsPoleMass@
 }
 
 double @ModelName@_susy_scale_constraint<Two_scale>::get_scale() const

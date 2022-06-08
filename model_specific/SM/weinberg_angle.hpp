@@ -44,6 +44,8 @@ public:
 
       double scale;                  ///< renormalization scale
       double alpha_em_drbar;         ///< alpha_em(MZ, DR-bar, SUSY)
+      double alpha_s_mz;             ///< alpha_s(MZ, MS-bar, SM)
+      double dalpha_s_5_had;         ///< 5-flavour hadronic contributions
       double fermi_contant;          ///< Fermi constant
       double self_energy_z_at_mz;    ///< self-energy Z at p = MZ, mt = mt_pole
       double self_energy_w_at_0;     ///< self-energy W at p = 0, mt = mt_pole
@@ -52,6 +54,7 @@ public:
       double mz_pole;                ///< Z pole mass
       double mt_pole;                ///< top quark pole mass
       double mh_drbar;               ///< lightest CP-even Higgs DR-bar mass
+      double mh_pole;                ///< SM-like Higgs pole mass
       double hmix_12;                ///< CP-even Higgs mixing Cos(alpha)
       double msel_drbar;             ///< left-handed selectron DR-bar mass
       double msmul_drbar;            ///< left-handed smuon DR-bar mass
@@ -89,6 +92,7 @@ public:
    void set_precision_goal(double);  ///< set precision goal
    double get_rho_hat() const;       ///< returns the rho parameter
    double get_sin_theta() const;     ///< returns sin(theta_w)
+   double get_mw_pole() const;       ///< returns (re-calculated) W pole mass
 
    /// calculates the sinus of the Weinberg angle
    int calculate(double rho_start = 1.0, double sin_start = 0.48);
@@ -102,8 +106,11 @@ private:
    double precision_goal;         ///< precision goal
    double rho_hat;                ///< output rho-hat parameter
    double sin_theta;              ///< output sin(theta)
+   double mw_pole;                ///< output W pole mass
    Data data;
    bool susy_contributions;       ///< model type
+
+   double calculate_mw_pole() const;
 
    static double calculate_delta_r(double, double, const Data&, bool add_susy_contributions = true, int number_of_loops = 2);
    static double calculate_delta_rho(double, double, const Data&, bool add_susy_contributions = true, int number_of_loops = 2);
