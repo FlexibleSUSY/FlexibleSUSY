@@ -1492,8 +1492,8 @@ ConvertCouplingToCPP[Decays`Private`FACp[particles__][lor_], fieldAssociation_, 
             + g[lt1, lt3] (Mom[i1_] - Mom[i3_])
             + g[lt2, lt3] (-Mom[i2_] + Mom[i3_]) :> (
                Switch[Signature[{i1, i2, i3}],
-                  1, "value(TripleVectorVertex::odd_permutation {})",
-                 -1, "value(TripleVectorVertex::even_permutation {})",
+                  1, "value(cxx_diagrams::TripleVectorVertex::odd_permutation {})",
+                 -1, "value(cxx_diagrams::TripleVectorVertex::even_permutation {})",
                  _,  (Print["Can't find TripleVectorVertex permutation"]; Quit[1])
                ]
 

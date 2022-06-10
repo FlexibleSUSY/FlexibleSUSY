@@ -2272,14 +2272,14 @@ WriteCXXDiagramClass[vertices_List, files_List,
             defineFieldTraits,
             sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
             outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
-            cxxQFTVerticesFiles},
+            cxxQFTVerticesFiles, realFieldsconjtraits},
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
-        fields = CXXDiagrams`CreateFields[];
+        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[];
         defineFieldTraits =
            CXXDiagrams`CreateFieldTraitsDefinitions[
-              TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
+              TreeMasses`GetParticles[], "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
            ];
 
         If[vertices =!= {},
@@ -2307,6 +2307,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
 
         WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"                -> fields,
+                             "@CXXDiagrams_realFields@"            -> realFieldsconjtraits,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@defineFieldTraits@"                 -> defineFieldTraits,

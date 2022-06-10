@@ -32,6 +32,8 @@
 namespace flexiblesusy {
 namespace @ModelName@_cxx_diagrams {
 
+using flexiblesusy::cxx_diagrams::field_indices;
+
    struct context_base {
       @ModelName@_mass_eigenstates_interface const& model; ///< The model object.
 
@@ -39,14 +41,14 @@ namespace @ModelName@_cxx_diagrams {
       double mass(const typename field_indices<Field>::type& indices) const
       {
          using CleanField =
-            typename fields::remove_lorentz_conjugation<Field>::type;
+            typename flexiblesusy::cxx_diagrams::fields::remove_lorentz_conjugation<Field>::type;
          return mass_impl<CleanField>(indices);
       }
       template<class Field>
       double physical_mass(const typename field_indices<Field>::type& indices) const
       {
          using CleanField =
-            typename fields::remove_lorentz_conjugation<Field>::type;
+            typename flexiblesusy::cxx_diagrams::fields::remove_lorentz_conjugation<Field>::type;
          return physical_mass_impl<CleanField>(indices);
       }
 
