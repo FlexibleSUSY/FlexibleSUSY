@@ -22,7 +22,7 @@
 #include <complex>
 #include <limits>
 
-#include "src/cxx_qft/fields.hpp"
+#include "cxx_qft/fields.hpp"
 
 namespace flexiblesusy {
 
