@@ -1040,7 +1040,7 @@ GetDecayAmplitudeType[decay_FSParticleDecay] :=
     GetDecayAmplitudeType[GetInitialState[decay], GetFinalState[decay]];
 
 CreateFieldIndices[particle_String] :=
-    "typename " <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::field_indices<" <> particle <> " >::type";
+    "typename cxx_diagrams::field_indices<" <> particle <> " >::type";
 
 CreateFieldIndices[particle_, fieldsNamespace_] :=
     CreateFieldIndices[CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> fieldsNamespace]];
