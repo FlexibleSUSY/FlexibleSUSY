@@ -2149,6 +2149,22 @@ int main() {
     }
 }
 
+check_higgstools_incl() {
+    check_header "Higgs/HiggsTools_export.h" "$higgstools_inc_dir"
+}
+
+check_higgstools_libs() {
+    check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
+}
+
+check_higgstools() {
+        if check_higgstools_incl && check_higgstools_libs ; then
+            enable_higgstools=yes
+         else
+            enable_higgstools=no
+        fi
+}
+
 #_____________________________________________________________________
 check_himalaya_incl() {
     check_header "himalaya/version.hpp" "$himalaya_inc_dir"
@@ -3757,6 +3773,8 @@ if test $# -gt 0 ; then
             --with-gm2calc-incdir=*) gm2calc_inc_dir=$optarg ;;
             --with-gm2calc-libdir=*) gm2calc_lib_dir=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
+            --with-higgstools-incdir=*) higgstools_inc_dir=$optarg ;;
+            --with-higgstools-libdir=*) higgstools_lib_dir=$optarg ;;
             --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
             --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
@@ -3845,6 +3863,7 @@ if test "x${enable_compile}" = "xyes"; then
     check_gsl_config
     check_gm2calc
     check_himalaya
+    check_higgstools
     if use_solver "lattice"; then
         check_boost_thread_incl
         check_boost_thread_libs

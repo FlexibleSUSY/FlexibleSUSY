@@ -87,6 +87,7 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/decay_amplitudes.hpp \
 		$(DIR)/decays/decay_functions.hpp \
 		$(DIR)/decays/decay_problems.hpp \
+		$(DIR)/decays/HiggsTools_interface.hpp \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \

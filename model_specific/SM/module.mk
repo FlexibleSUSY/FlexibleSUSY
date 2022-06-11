@@ -33,6 +33,12 @@ LIB_model_specific_SM_HDR := \
 		$(DIR)/standard_model_two_scale_model.hpp \
 		$(DIR)/weinberg_angle.hpp
 
+LIBSM_CXXQFT_HDR := \
+		$(DIR)/cxx_qft/standard_model_qft.hpp \
+		$(DIR)/cxx_qft/standard_model_fields.hpp \
+		$(DIR)/cxx_qft/standard_model_vertices.hpp \
+		$(DIR)/cxx_qft/standard_model_context_base.hpp
+
 LIB_model_specific_SM_OBJ := \
 		$(patsubst %.cpp, %.o, $(filter %.cpp, $(LIB_model_specific_SM_SRC)))
 

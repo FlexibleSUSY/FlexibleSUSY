@@ -2615,7 +2615,8 @@ ExampleDecaysIncludes[] :=
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays/flexibledecay_problems.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
-         "loop_libraries/loop_library.hpp"},
+         "loop_libraries/loop_library.hpp",
+         "decays/HiggsTools_interface.hpp"},
        "\n"
     ];
 
@@ -2625,6 +2626,7 @@ ExampleCalculateDecaysForModel[] :=
       !problems.have_problem())) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
+      call_HiggsTools(decays.get_decay_table(), physical_input, qedqcd, flexibledecay_settings);
    }
    else if (!loop_library_for_decays) {
       WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
