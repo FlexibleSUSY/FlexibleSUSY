@@ -6,6 +6,8 @@ LIB_model_specific_SM_MK  := \
 		$(DIR)/module.mk
 
 LIB_model_specific_SM_SRC := \
+		$(DIR)/decays/standard_model_decays.cpp \
+		$(DIR)/decays/standard_model_decay_table.cpp \
 		$(DIR)/sm_fourloophiggs.cpp \
 		$(DIR)/sm_fourloop_as.cpp \
 		$(DIR)/sm_mw.cpp \
@@ -19,6 +21,8 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/weinberg_angle.cpp
 
 LIB_model_specific_SM_HDR := \
+		$(DIR)/decays/standard_model_decays.hpp \
+		$(DIR)/decays/standard_model_decay_table.hpp \
 		$(DIR)/sm_fourloophiggs.hpp \
 		$(DIR)/sm_fourloop_as.hpp \
 		$(DIR)/sm_mw.hpp \

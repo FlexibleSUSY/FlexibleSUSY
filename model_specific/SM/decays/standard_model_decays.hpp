@@ -35,10 +35,10 @@
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/flexibledecay_problems.hpp"
 
-#include "standard_model.hpp"
-#include "cxx_qft/standard_model_qft.hpp"
-#include "SM_decay_amplitudes.hpp"
-#include "SM_decay_table.hpp"
+#include "../standard_model.hpp"
+#include "../cxx_qft/standard_model_qft.hpp"
+#include "decays/decay_amplitudes.hpp"
+#include "standard_model_decay_table.hpp"
 
 namespace flexiblesusy {
 
@@ -70,17 +70,16 @@ public:
       }
    void calculate_hh_decays();
 
-   /*
-double partial_width_hh_to_VGVG(SM_mass_eigenstates_interface*) const;
-double partial_width_hh_to_VPVP(SM_mass_eigenstates_interface*) const;
-double partial_width_hh_to_VPVZ(SM_mass_eigenstates_interface*) const;
-double partial_width_hh_to_VZVZ(SM_mass_eigenstates_interface*) const;
-double partial_width_hh_to_conjVWpVWp(SM_mass_eigenstates_interface*) const;
-double partial_width_hh_to_barFvFv(SM_mass_eigenstates_interface*, int, int) const;
-double partial_width_hh_to_barFdFd(SM_mass_eigenstates_interface*, int, int) const;
-double partial_width_hh_to_barFuFu(SM_mass_eigenstates_interface*, int, int) const;
-double partial_width_hh_to_barFeFe(SM_mass_eigenstates_interface*, int, int) const;
-*/
+double partial_width_hh_to_VGVG(standard_model::Standard_model) const;
+double partial_width_hh_to_VPVP(standard_model::Standard_model) const;
+double partial_width_hh_to_VPVZ(standard_model::Standard_model) const;
+double partial_width_hh_to_VZVZ(standard_model::Standard_model) const;
+double partial_width_hh_to_conjVWpVWp(standard_model::Standard_model) const;
+double partial_width_hh_to_barFvFv(standard_model::Standard_model, int, int) const;
+double partial_width_hh_to_barFdFd(standard_model::Standard_model, int, int) const;
+double partial_width_hh_to_barFuFu(standard_model::Standard_model, int, int) const;
+double partial_width_hh_to_barFeFe(standard_model::Standard_model, int, int) const;
+
 private:
    standard_model::Standard_model model{};
    softsusy::QedQcd qedqcd{};

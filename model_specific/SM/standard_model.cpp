@@ -103,6 +103,53 @@ namespace standard_model_info {
 
    const std::string model_name = "SM";
 
+int get_pdg_code_for_particle(Particles p)
+{
+   if (particle_multiplicities[p] > 1) {
+      throw OutOfBoundsError(particle_names[p] + " must have a generation index");
+   }
+
+   int pdg = 0;
+   switch (p) {
+
+   case VG: pdg = 21; break;
+   case Hp: pdg = 0; break;
+   case Ah: pdg = 0; break;
+   case hh: pdg = 25; break;
+   case VWp: pdg = 24; break;
+   case VP: pdg = 22; break;
+   case VZ: pdg = 23; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   return pdg;
+}
+
+int get_pdg_code_for_particle(Particles p, int index)
+{
+   if (particle_multiplicities[p] == 1) {
+      throw OutOfBoundsError(particle_names[p] + " does not carry an index");
+   }
+
+   std::vector<int> pdg_codes;
+   switch (p) {
+
+   case Fv: pdg_codes = {12, 14, 16}; break;
+   case Fd: pdg_codes = {1, 3, 5}; break;
+   case Fu: pdg_codes = {2, 4, 6}; break;
+   case Fe: pdg_codes = {11, 13, 15}; break;
+
+   default: throw OutOfBoundsError("invalid particle " + std::to_string(p));
+   }
+
+   if (index < 0 || index >= pdg_codes.size()) {
+      throw OutOfBoundsError("index " + std::to_string(index) + " out of bounds");
+   }
+
+   return pdg_codes[index];
+}
+
 void print(std::ostream& ostr)
 {
    ostr
