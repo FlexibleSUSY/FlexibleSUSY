@@ -32,13 +32,13 @@
 #include "@ModelName@_mass_eigenstates.hpp"
 #include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
 #include "cxx_qft/@ModelName@_qft.hpp"
-#include "@ModelName@_decay_amplitudes.hpp"
 #include "decays/flexibledecay_problems.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "error.hpp"
 #include "physical_input.hpp"
 #include "decays/flexibledecay_settings.hpp"
+#include "decays/decay_amplitudes.hpp"
 
 namespace flexiblesusy {
 
