@@ -64,7 +64,7 @@ struct Vertex {
       >
    >::type;
    using indices_type = std::array<int,
-      flexiblesusy::cxx_diagrams::detail::total_number_of_field_indices<
+      cxx_diagrams::detail::total_number_of_field_indices<
          boost::mpl::vector<Fields...>
       >::value
    >;
@@ -96,7 +96,7 @@ struct Vertex {
       >::type;
 
       constexpr int offset =
-         flexiblesusy::cxx_diagrams::detail::total_number_of_field_indices<preceeding_fields>::value;
+         cxx_diagrams::detail::total_number_of_field_indices<preceeding_fields>::value;
       constexpr int length = std::tuple_size<result_type>::value;
 
       result_type result_indices;

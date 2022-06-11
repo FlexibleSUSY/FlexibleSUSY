@@ -133,23 +133,23 @@ std::string create_process_string(
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldIn> &&
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut2>, double>
+cxx_diagrams::fields::is_singlet_v<FieldIn> &&
+cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+cxx_diagrams::fields::is_singlet_v<FieldOut2>, double>
 squared_color_generator() {return 1.;}
 
 // 1 -> 3, 3bar
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-   flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldIn>
+   cxx_diagrams::fields::is_singlet_v<FieldIn>
    &&
    (
-   (flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-   flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+   (cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+   cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
    ||
-   (flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-   flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+   (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+   cxx_diagrams::fields::is_triplet_v<FieldOut2>)
    ), double
 >
 squared_color_generator() {return 3.;}
@@ -158,9 +158,9 @@ squared_color_generator() {return 3.;}
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldIn> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2>, double>
+cxx_diagrams::fields::is_singlet_v<FieldIn> &&
+cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2>, double>
 squared_color_generator() {return 8.;}
 
 // 3 -> 3, 1; 3bar -> 3bar, 1
@@ -168,19 +168,19 @@ template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
 (
-flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldIn> &&
-((flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut2>))
+cxx_diagrams::fields::is_triplet_v<FieldIn> &&
+((cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+cxx_diagrams::fields::is_triplet_v<FieldOut2>))
 )
 ||
 (
-flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
-((flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
+cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
+((cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
 )
 , double>
 squared_color_generator() {return 1.;}
@@ -190,19 +190,19 @@ template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
 (
-flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldIn> &&
-((flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
-(flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut2>))
+cxx_diagrams::fields::is_triplet_v<FieldIn> &&
+((cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
+(cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_triplet_v<FieldOut2>))
 )
 ||
 (
-flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
-((flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
-(flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
+cxx_diagrams::fields::is_anti_triplet_v<FieldIn> &&
+((cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2>) ||
+(cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>))
 )
 , double>
 squared_color_generator() {return 4.;}
@@ -211,11 +211,11 @@ squared_color_generator() {return 4.;}
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldIn> &&
-((flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
-(flexiblesusy::cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2>))
+cxx_diagrams::fields::is_octet_v<FieldIn> &&
+((cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_singlet_v<FieldOut2>) ||
+(cxx_diagrams::fields::is_singlet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2>))
 , double>
 squared_color_generator() {return 1.;}
 
@@ -223,14 +223,14 @@ squared_color_generator() {return 1.;}
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-   flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldIn>
+   cxx_diagrams::fields::is_octet_v<FieldIn>
    &&
    (
-   (flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
-   flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
+   (cxx_diagrams::fields::is_triplet_v<FieldOut1> &&
+   cxx_diagrams::fields::is_anti_triplet_v<FieldOut2>)
    ||
-   (flexiblesusy::cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
-   flexiblesusy::cxx_diagrams::fields::is_triplet_v<FieldOut2>)
+   (cxx_diagrams::fields::is_anti_triplet_v<FieldOut1> &&
+   cxx_diagrams::fields::is_triplet_v<FieldOut2>)
    ), double
 >
 squared_color_generator() {return 1./2.;}
@@ -240,9 +240,9 @@ squared_color_generator() {return 1./2.;}
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldIn> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2> &&
+cxx_diagrams::fields::is_octet_v<FieldIn> &&
+cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2> &&
 std::is_same<FieldOut1, FieldOut2>::value
 , double>
 // color:   d^2 = (2 (4 - 5 Nc^2 + Nc^4) TR)/Nc = 40/3
@@ -253,9 +253,9 @@ squared_color_generator() {return 40/24.;}
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 constexpr
 std::enable_if_t<
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldIn> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut1> &&
-flexiblesusy::cxx_diagrams::fields::is_octet_v<FieldOut2> &&
+cxx_diagrams::fields::is_octet_v<FieldIn> &&
+cxx_diagrams::fields::is_octet_v<FieldOut1> &&
+cxx_diagrams::fields::is_octet_v<FieldOut2> &&
 !std::is_same<FieldOut1, FieldOut2>::value
 , double>
 // color:   f^2 = 2 Nc (-1 + Nc^2) TR = 24
