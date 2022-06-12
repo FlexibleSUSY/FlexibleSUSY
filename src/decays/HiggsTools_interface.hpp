@@ -26,12 +26,35 @@
 #ifndef HIGGSTOOLS_INTERFACE_H
 #define HIGGSTOOLS_INTERFACE_H
 
+#include <array>
+#include <algorithm>
+#include <iostream>
+
 #include "model_specific/SM/decays/standard_model_decays.hpp"
 // #include "Higgs/Predictions.hpp"
 // #include "Higgs/Bounds.hpp"
 // #include "Higgs/Signals.hpp"
 
 namespace flexiblesusy {
+
+template <typename T>
+double get_width_from_table(T const& decay_table, int inPDG, std::array<int, 2> const& outPDGs) {
+   for (const auto& particle: decay_table) {
+      const int pdg = particle.get_particle_id();
+      if (pdg != inPDG) continue;
+      for (const auto& decay: particle) {
+         std::vector<int> final_state = decay.second.get_final_state_particle_ids();
+         //if (decay.second.get_final_state_particle_ids()[0] != outPDGs.at(0) || decay.second.get_final_state_particle_ids()[1] != outPDGs.at(1)) continue;
+         std::array<int, 2> sorted_outPDGs = outPDGs;
+         std::sort(sorted_outPDGs.begin(), sorted_outPDGs.end(), std::greater<int>());
+         std::sort(final_state.begin(), final_state.end(), std::greater<int>());
+         if (std::equal(sorted_outPDGs.begin(), sorted_outPDGs.end(), final_state.begin())) {
+            return decay.second.get_width();
+         }
+      }
+   }
+   return 0.;
+}
 
 template <typename Decay_table>
 void call_HiggsTools(
@@ -42,22 +65,18 @@ void call_HiggsTools(
 
    standard_model::Standard_model sm {};
    sm.initialise_from_input(qedqcd);
+   sm.solve_ewsb_tree_level();
+   sm.calculate_DRbar_masses();
+   sm.calculate_pole_masses();
+
    flexiblesusy::SM_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
    sm_decays.calculate_decays();
 
-   /*
    const auto sm_decay_table = sm_decays.get_decay_table();
-
-   for (const auto& particle: sm_decay_table) {
-      const auto pdg = particle.get_particle_id();
-      for (const auto& decay: particle) {
-         const auto& final_state = decay.second.get_final_state_particle_ids();
-         std::cout << pdg << " -> " << ", " <<
-            decay.second.get_final_state_particle_ids()[0] << ' ' <<
-           decay.second.get_final_state_particle_ids()[1] << std::endl;
-      }
+   for (const auto& fs: {std::array<int, 2>{21, 21}, {5,-5}, {22,22}, {15,-15}}) {
+      std::cout << "{" << fs.at(0) << "," << fs.at(1) << "}: " << std::sqrt(get_width_from_table(decay_table, 25, fs)/get_width_from_table(sm_decay_table, 25, fs)) << std::endl;
    }
-   */
+
 
    // auto bounds = Higgs::Bounds{"/path/to/HBDataSet"};
    // auto pred = Higgs::Predictions{};
