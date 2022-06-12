@@ -3572,6 +3572,8 @@ replace_markers() {
         -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
         -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
         -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
+        -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
+        -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \

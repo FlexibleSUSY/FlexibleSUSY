@@ -295,6 +295,8 @@ while test $# -gt 0; do
         --gsllibs)               out="$out $gsllibs" ;;
         --himalayaflags)         out="$out $himalayaflags" ;;
         --himalayalibs)          out="$out $himalayalibs" ;;
+        --higgstoolsflags)       out="$out $higgstoolsflags" ;;
+        --higgstoolslibs)        out="$out $higgstoolslibs" ;;
         --ldflags)               out="$out $ldflags" ;;
         --ldlibs)                out="$out $ldlibs" ;;
         --libs)                  out="$out $libs" ;;
