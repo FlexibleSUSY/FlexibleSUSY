@@ -26,6 +26,8 @@ gslflags="@GSLFLAGS@"
 gsllibs="@GSLLIBS@"
 himalayaflags="@HIMALAYAFLAGS@"
 himalayalibs="@HIMALAYALIBS@"
+higgstoolsflags="@HIGGSTOOLSFLAGS@"
+higgstoolslibs="@HIGGSTOOLSLIBS@"
 ldflags="@LDFLAGS@"
 ldlibs="@LDLIBS@"
 llflags="@LLFLAGS@"
@@ -131,6 +133,9 @@ create_include_directives_for_external_modules() {
     [ "x@ENABLE_HIMALAYA@" = xyes ] && \
         incl="$incl $himalayaflags"
 
+    [ "x@ENABLE_HIGGSTOOLS@" = xyes ] && \
+        incl="$incl $higgstoolsflags"
+
     [ "x@ENABLE_TSIL@" = xyes ] && \
         incl="$incl $tsilflags"
 
@@ -232,6 +237,8 @@ Options:
   --gsllibs             Print GSL libraries, GSLLIBS
   --himalayaflags       Print compiler flags for Himalaya, HIMALAYAFLAGS
   --himalayalibs        Print Himalaya library, HIMALAYALIBS
+  --higgstoolsflags     Print compiler flags for HiggsTools, HIGGSTOOLSFLAGS
+  --higgstoolslibs      Print HiggsTools library, HIGGSTOOLSLIBS
   --ldflags             Print flags for optional libraries, LDFLAGS
   --ldlibs              Print optional libraries, LDLIBS
   --libs                Print all libraries linked to an executable

@@ -124,6 +124,7 @@ enable_mass_error_check="no"
 enable_fflite="no"
 enable_gm2calc="automatic"
 enable_himalaya="automatic"
+enable_higgstools="no"
 enable_librarylink="automatic"
 enable_looptools="no"
 enable_collier="no"
@@ -213,6 +214,8 @@ LLFLAGS=""
 LLLIBS=""
 himalaya_lib_dir=""
 himalaya_inc_dir=""
+higgstools_inc_dir=""
+higgstools_lib_dir=""
 sqlite_lib_dir=""
 sqlite_inc_dir=""
 tsil_lib_dir=""
@@ -2151,10 +2154,12 @@ int main() {
 
 check_higgstools_incl() {
     check_header "Higgs/HiggsTools_export.h" "$higgstools_inc_dir"
+    HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
 }
 
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
+    HIGGSTOOLSLIBS="-lHiggsTools"
 }
 
 check_higgstools() {
@@ -3553,6 +3558,7 @@ replace_markers() {
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
 	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
 	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
+	-e "s|@ENABLE_HIGGSTOOLS@|$enable_higgstools|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
@@ -3647,6 +3653,8 @@ Package directories, compilation settings and model selection
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
   --with-himalaya-libdir=   Path to search for Himalaya library
   --with-himalaya-incdir=   Path to search for Himalaya header
+  --with-higgstools-libdir= Path to search for HiggsTools library
+  --with-higgstools-incdir= Path to search for HiggsTools header
   --with-install-dir=       Path to source code installation directory
   --with-llflags=           Preprocessor flags for compiling with LibraryLink (default: $LLFLAGS)
   --with-lllibs=            Linker flags for linking LibraryLink libraries (default: $LLLIBS)
@@ -3931,6 +3939,8 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
     -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
     -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
+    -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"         \
+    -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"       \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
     -e "s|@LDLIBS@|$LDLIBS|"                         \
     -e "s|@LLFLAGS@|$LLFLAGS|"                       \

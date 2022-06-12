@@ -45,6 +45,8 @@
 #define GM2CALCLIBS           "@GM2CALCLIBS@"
 #define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
 #define HIMALAYALIBS          "@HIMALAYALIBS@"
+#define HIGGSTOOLSFLAGS       "@HIGGSTOOLSFLAGS@"
+#define HIGGSTOOLSLIBS        "@HIGGSTOOLSLIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
 #define GSLLIBS               "@GSLLIBS@"
 #define LDFLAGS               "@LDFLAGS@"
