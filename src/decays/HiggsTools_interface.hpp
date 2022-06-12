@@ -44,11 +44,7 @@ double get_width_from_table(T const& decay_table, int inPDG, std::array<int, 2> 
       if (pdg != inPDG) continue;
       for (const auto& decay: particle) {
          std::vector<int> final_state = decay.second.get_final_state_particle_ids();
-         //if (decay.second.get_final_state_particle_ids()[0] != outPDGs.at(0) || decay.second.get_final_state_particle_ids()[1] != outPDGs.at(1)) continue;
-         std::array<int, 2> sorted_outPDGs = outPDGs;
-         std::sort(sorted_outPDGs.begin(), sorted_outPDGs.end(), std::greater<int>());
-         std::sort(final_state.begin(), final_state.end(), std::greater<int>());
-         if (std::equal(sorted_outPDGs.begin(), sorted_outPDGs.end(), final_state.begin())) {
+         if (std::is_permutation(outPDGs.begin(), outPDGs.end(), final_state.begin(), final_state.end())) {
             return decay.second.get_width();
          }
       }
@@ -73,7 +69,7 @@ void call_HiggsTools(
    sm_decays.calculate_decays();
 
    const auto sm_decay_table = sm_decays.get_decay_table();
-   for (const auto& fs: {std::array<int, 2>{21, 21}, {5,-5}, {22,22}, {15,-15}}) {
+   for (const auto& fs: {std::array<int, 2>{21, 21}, {5,-5}, {22,22}, {15,-15}, {24, -24}, {23, 23}, {22, 22}, {22, 23}}) {
       std::cout << "{" << fs.at(0) << "," << fs.at(1) << "}: " << std::sqrt(get_width_from_table(decay_table, 25, fs)/get_width_from_table(sm_decay_table, 25, fs)) << std::endl;
    }
 
