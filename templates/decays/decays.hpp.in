@@ -100,6 +100,8 @@ private:
       typename cxx_diagrams::field_indices<FieldIn>::type const&,
       typename cxx_diagrams::field_indices<FieldOut1>::type const&,
       typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+   double get_alphas(@ModelName@_cxx_diagrams::context_base const&) const;
+   double get_alpha(@ModelName@_cxx_diagrams::context_base const&) const;
 };
 
 @calcAmplitudeSpecializationDecls@

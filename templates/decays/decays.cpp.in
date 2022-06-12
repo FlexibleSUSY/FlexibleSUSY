@@ -93,12 +93,12 @@ catch (std::exception& e) {
 }
 }
 
-double get_alphas(context_base const&  context)
+double CLASSNAME::get_alphas(@ModelName@_cxx_diagrams::context_base const&  context) const
 {
    return Sqr(context.model.get_@gs_name@())/(4.*Pi);
 }
 
-double get_alpha(context_base const&  context)
+double CLASSNAME::get_alpha(@ModelName@_cxx_diagrams::context_base const&  context) const
 {
    return Sqr(unit_charge(context))/(4.*Pi);
 }

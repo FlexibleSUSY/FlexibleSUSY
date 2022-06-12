@@ -46,6 +46,7 @@
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
 #include <gsl/gsl_monte_miser.h>
+#include "../cxx_qft/standard_model_vertices.hpp"
 
 namespace flexiblesusy {
 
@@ -96,12 +97,12 @@ catch (std::exception& e) {
 }
 }
 
-double get_alphas(context_base const&  context)
+double CLASSNAME::get_alphas(standard_model_cxx_diagrams::context_base const& context) const
 {
    return Sqr(context.model.get_g3())/(4.*Pi);
 }
 
-double get_alpha(context_base const&  context)
+double CLASSNAME::get_alpha(standard_model_cxx_diagrams::context_base const& context) const
 {
    return Sqr(unit_charge(context))/(4.*Pi);
 }

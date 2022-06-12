@@ -43,8 +43,9 @@ void call_HiggsTools(
    standard_model::Standard_model sm {};
    sm.initialise_from_input(qedqcd);
    flexiblesusy::SM_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
-   /*
+   sm_decays.calculate_decays();
 
+   /*
    const auto sm_decay_table = sm_decays.get_decay_table();
 
    for (const auto& particle: sm_decay_table) {

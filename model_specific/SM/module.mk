@@ -5,6 +5,12 @@ WITH_$(MODNAME) := yes
 LIB_model_specific_SM_MK  := \
 		$(DIR)/module.mk
 
+SM_CXXQFT_VERTICES_MK := \
+		$(DIR)/cxx_qft/vertices.mk
+
+-include $(SM_CXXQFT_VERTICES_MK)
+LIBSM_CXXQFT_VERTICES_SRC ?= ''
+
 LIB_model_specific_SM_SRC := \
 		$(DIR)/decays/standard_model_decays.cpp \
 		$(DIR)/decays/standard_model_decay_table.cpp \
@@ -19,6 +25,8 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/standard_model_two_scale_low_scale_constraint.cpp \
 		$(DIR)/standard_model_two_scale_model.cpp \
 		$(DIR)/weinberg_angle.cpp
+
+LIB_model_specific_SM_SRC += $(LIBSM_CXXQFT_VERTICES_SRC)
 
 LIB_model_specific_SM_HDR := \
 		$(DIR)/decays/standard_model_decays.hpp \
@@ -62,8 +70,9 @@ ifneq ($(INSTALL_DIR),)
 install-src::
 		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIBSM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
 endif
 
 clean-$(MODNAME)-dep:

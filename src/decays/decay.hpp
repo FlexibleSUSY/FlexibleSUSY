@@ -23,11 +23,15 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cmath>
+
+#include "wrappers.hpp"
 
 #include <boost/core/demangle.hpp>
 #include <boost/range/algorithm/equal.hpp>
 
 #include "cxx_qft/fields.hpp"
+#include "cxx_qft/vertices.hpp"
 
 namespace flexiblesusy {
 
@@ -282,6 +286,9 @@ final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type c
       return 1.;
    }
 }
+
+struct my_f_params {double mHOS; double mVOS; double GammaV;};
+double hVV_4body(double *q2, size_t dim, void *params);
 
 } // namespace flexiblesusy
 

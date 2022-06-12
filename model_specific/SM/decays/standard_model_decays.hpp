@@ -109,6 +109,8 @@ private:
       typename cxx_diagrams::field_indices<FieldIn>::type const&,
       typename cxx_diagrams::field_indices<FieldOut1>::type const&,
       typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+   double get_alphas(standard_model_cxx_diagrams::context_base const&) const;
+   double get_alpha(standard_model_cxx_diagrams::context_base const&) const;
 };
 
 template<>

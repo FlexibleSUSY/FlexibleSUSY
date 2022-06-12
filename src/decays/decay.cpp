@@ -128,4 +128,19 @@ std::string strip_field_namespace(std::string const& s) {
    }
 }
 
+double hVV_4body(double *q2, size_t dim, void *params)
+{
+  (void)(dim); /* avoid unused parameter warnings */
+  struct my_f_params * fp = (struct my_f_params *)params;
+  const double mHOS = fp->mHOS;
+  if (q2[1] > Sqr(mHOS - std::sqrt(q2[0]))) return 0.;
+  const double mVOS = fp->mVOS;
+  const double GammaV = fp->GammaV;
+  const double kl = KallenLambda(1., q2[0]/Sqr(mHOS), q2[1]/Sqr(mHOS));
+  return
+     mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
+     * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
+}
+
 } // namespace flexiblesusy
