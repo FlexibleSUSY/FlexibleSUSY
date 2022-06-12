@@ -18,7 +18,7 @@
 
 
 /**
- * @file SM_decays.cpp
+ * @file standard_model_decays.cpp
  * @brief implementation of particle decays in the SM
  *
  * Contains the definition of SM decays class methods,
@@ -50,7 +50,7 @@
 
 namespace flexiblesusy {
 
-#define CLASSNAME SM_decays
+#define CLASSNAME Standard_model_decays
 #define PHYSICAL(parameter) model.get_physical().parameter
 
 using namespace standard_model_cxx_diagrams;

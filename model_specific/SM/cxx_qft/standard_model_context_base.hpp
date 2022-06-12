@@ -23,8 +23,8 @@
  * This file was generated with FlexibleSUSY 2.7.1 and SARAH 4.14.5 .
  */
 
-#ifndef SM_CXXQFT_CONTEXT_BASE_H
-#define SM_CXXQFT_CONTEXT_BASE_H
+#ifndef STANDARDMODEL_CXXQFT_CONTEXT_BASE_H
+#define STANDARDMODEL_CXXQFT_CONTEXT_BASE_H
 
 #include "standard_model_fields.hpp"
 #include "../standard_model.hpp"

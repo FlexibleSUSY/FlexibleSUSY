@@ -69,7 +69,7 @@ void call_HiggsTools(
    sm.calculate_DRbar_masses();
    sm.calculate_pole_masses();
 
-   flexiblesusy::SM_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
+   flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
    sm_decays.calculate_decays();
 
    const auto sm_decay_table = sm_decays.get_decay_table();
