@@ -125,7 +125,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: navir/opensuseleap-for-flexiblesusy:0.13.0
+      image: navir/opensuseleap-for-flexiblesusy:0.14.0
 
     strategy:
       fail-fast: false
@@ -202,6 +202,9 @@ jobs:
             --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-higgstools \
+            --with-higgstools-incdir=$FS_DEPENDENCIES_DIR/HiggsTools/include \
+            --with-higgstools-libdir=$FS_DEPENDENCIES_DIR/HiggsTools/lib64 \
             --enable-himalaya \
             --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
             --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
@@ -212,7 +215,7 @@ jobs:
             --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
             --with-optional-modules=test \
             --enable-librarylink \
-            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
+            --with-cxxflags="-std=c++17 -O2 -fPIC -Wall -Wpedantic -pipe"
           make showbuild
 
       - name: Make

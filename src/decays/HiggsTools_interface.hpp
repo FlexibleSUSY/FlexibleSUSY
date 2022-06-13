@@ -29,11 +29,6 @@
 #include "Higgs/Predictions.hpp"
 #include "Higgs/Bounds.hpp"
 #include "Higgs/Signals.hpp"
-#include "Higgs/predictions/EffectiveCouplings.hpp"
-#include "Higgs/predictions/Basics.hpp"
-#include "Higgs/predictions/Channels.hpp"
-#include "Higgs/predictions/Particle.hpp"
-#include "Higgs/predictions/ReferenceModels.hpp"
 
 #include <array>
 #include <algorithm>
@@ -79,7 +74,6 @@ void call_HiggsTools(
       std::cout << "{" << fs.at(0) << "," << fs.at(1) << "}: " << std::sqrt(get_width_from_table(decay_table, 25, fs)/get_width_from_table(sm_decay_table, 25, fs)) << std::endl;
    }
 
-
    auto pred = Higgs::Predictions{};
    // set model predictions on pred
    auto s = Higgs::predictions::BsmParticle("h1", Higgs::predictions::ECharge::neutral);
@@ -108,7 +102,6 @@ void call_HiggsTools(
    auto resultHS = signals(pred);
    std::cout << "\n HiggsSignals chisq: " << resultHS << " from "
               << signals.observableCount() << " observables" << std::endl;
-
 }
 
 } // flexiblesusy
