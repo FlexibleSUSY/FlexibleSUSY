@@ -43,10 +43,10 @@
 #define FUTILIBS              "@FUTILIBS@"
 #define GM2CALCFLAGS          "@GM2CALCFLAGS@"
 #define GM2CALCLIBS           "@GM2CALCLIBS@"
-#define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
-#define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define HIGGSTOOLSFLAGS       "@HIGGSTOOLSFLAGS@"
 #define HIGGSTOOLSLIBS        "@HIGGSTOOLSLIBS@"
+#define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
+#define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
 #define GSLLIBS               "@GSLLIBS@"
 #define LDFLAGS               "@LDFLAGS@"
@@ -85,6 +85,9 @@
 
 /* Enable GM2Calc */
 @DEFINE_ENABLE_GM2CALC@
+
+/* Enable HiggsTools */
+@DEFINE_ENABLE_HIGGSTOOLS@
 
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@

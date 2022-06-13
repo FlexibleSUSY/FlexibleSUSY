@@ -95,6 +95,7 @@ options="                    \
    enable_debug              \
    enable_fflite             \
    enable_gm2calc            \
+   enable_higgstools         \
    enable_himalaya           \
    enable_librarylink        \
    enable_looptools          \
@@ -123,8 +124,8 @@ enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
 enable_gm2calc="automatic"
+enable_higgstools="automatic"
 enable_himalaya="automatic"
-enable_higgstools="no"
 enable_librarylink="automatic"
 enable_looptools="no"
 enable_collier="no"
@@ -149,6 +150,7 @@ DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
 DEFINE_ENABLE_GM2CALC="#undef ENABLE_GM2CALC"
 DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
+DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
 DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
 DEFINE_ENABLE_COLLIER="#undef ENABLE_COLLIER"
@@ -212,10 +214,10 @@ LDFLAGS="$SHARED_LDFLAGS"
 LDLIBS="$SHARED_LDLIBS"
 LLFLAGS=""
 LLLIBS=""
-himalaya_lib_dir=""
-himalaya_inc_dir=""
 higgstools_inc_dir=""
 higgstools_lib_dir=""
+himalaya_lib_dir=""
+himalaya_inc_dir=""
 sqlite_lib_dir=""
 sqlite_inc_dir=""
 tsil_lib_dir=""
@@ -3331,6 +3333,15 @@ enable_defines() {
     fi
     logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
 
+    if test "x$enable_higgstools" = "xyes" ; then
+        DEFINE_ENABLE_HIGGSTOOLS="#define ENABLE_HIGGSTOOLS 1"
+        message "Enabling HiggsTools"
+    else
+        DEFINE_ENABLE_HIGGSTOOLS="#undef ENABLE_HIGGSTOOLS"
+        message "Disabling HiggsTools"
+    fi
+    logmsg "   ${DEFINE_ENABLE_HIGGSTOOLS}"
+
     if test "x$enable_librarylink" = "xyes" ; then
         DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
         logmsg "Enabling LibraryLink"
@@ -3557,8 +3568,8 @@ replace_markers() {
 	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
 	-e "s|@ENABLE_GM2CALC@|$enable_gm2calc|" \
-	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
 	-e "s|@ENABLE_HIGGSTOOLS@|$enable_higgstools|" \
+	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
 	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_FEYNARTS@|$enable_feynarts|"        \
 	-e "s|@ENABLE_FORMCALC@|$enable_formcalc|"        \
@@ -3570,10 +3581,10 @@ replace_markers() {
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
         -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"        \
         -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"      \
-        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
-        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
         -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"      \
         -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"    \
+        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
+        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
 	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
 	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
@@ -3615,6 +3626,7 @@ enable/disable options, prefix with either --enable- or --disable-
   debug             Debug messages and assertions (no default)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
   gm2calc           Enable GM2Calc (default: $enable_gm2calc)
+  higgstools        Enable HiggsTools (default: $enable_higgstools)
   himalaya          Enable Himalaya (default: $enable_himalaya)
   librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
@@ -3939,10 +3951,10 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
     -e "s|@GM2CALCLIBS@|$GM2CALCLIBS|"               \
     -e "s|@GM2CALCFLAGS@|$GM2CALCFLAGS|"             \
-    -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
-    -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@HIGGSTOOLSLIBS@|$HIGGSTOOLSLIBS|"         \
     -e "s|@HIGGSTOOLSFLAGS@|$HIGGSTOOLSFLAGS|"       \
+    -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
+    -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LDFLAGS@|$LDFLAGS|"                       \
     -e "s|@LDLIBS@|$LDLIBS|"                         \
     -e "s|@LLFLAGS@|$LLFLAGS|"                       \
@@ -3969,6 +3981,7 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
     -e "s|@DEFINE_ENABLE_GM2CALC@|$DEFINE_ENABLE_GM2CALC|" \
     -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
+    -e "s|@DEFINE_ENABLE_HIGGSTOOLS@|$DEFINE_ENABLE_HIGGSTOOLS|" \
     -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_COLLIER@|$DEFINE_ENABLE_COLLIER|" \
