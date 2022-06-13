@@ -26,14 +26,20 @@
 #ifndef HIGGSTOOLS_INTERFACE_H
 #define HIGGSTOOLS_INTERFACE_H
 
+#include "Higgs/Predictions.hpp"
+#include "Higgs/Bounds.hpp"
+#include "Higgs/Signals.hpp"
+#include "Higgs/predictions/EffectiveCouplings.hpp"
+#include "Higgs/predictions/Basics.hpp"
+#include "Higgs/predictions/Channels.hpp"
+#include "Higgs/predictions/Particle.hpp"
+#include "Higgs/predictions/ReferenceModels.hpp"
+
 #include <array>
 #include <algorithm>
 #include <iostream>
 
 #include "model_specific/SM/decays/standard_model_decays.hpp"
-// #include "Higgs/Predictions.hpp"
-// #include "Higgs/Bounds.hpp"
-// #include "Higgs/Signals.hpp"
 
 namespace flexiblesusy {
 
@@ -74,12 +80,35 @@ void call_HiggsTools(
    }
 
 
-   // auto bounds = Higgs::Bounds{"/path/to/HBDataSet"};
-   // auto pred = Higgs::Predictions{};
+   auto pred = Higgs::Predictions{};
    // set model predictions on pred
+   auto s = Higgs::predictions::BsmParticle("h1", Higgs::predictions::ECharge::neutral);
+   s.setMass(125);
+   auto effc = Higgs::predictions::NeutralEffectiveCouplings{
+            2., 10., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.};
+   effectiveCouplingInput(s, effc);
 
-   // auto hbResult = bounds(pred);
-   // std::cout << hbResult << std::endl;
+   auto s2 = Higgs::predictions::BsmParticle("h2", Higgs::predictions::ECharge::neutral);
+   s.setMass(255);
+   auto effc2 = Higgs::predictions::NeutralEffectiveCouplings{
+            20., 10., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.};
+   effectiveCouplingInput(s2, effc2);
+
+   auto bounds = Higgs::Bounds {"/run/media/scratch/Pobrane/hbdataset-master"};
+   auto hbResult = bounds(pred);
+   std::cout << hbResult << std::endl;
+   std::cout << "All applied limits: obsRatio (expRatio)\n";
+   for (const auto &al : hbResult.appliedLimits) {
+      std::cout << al.limit()->id() << " " << al.limit()->processDesc()
+                << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
+                << std::endl;
+   }
+
+   const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
+   auto resultHS = signals(pred);
+   std::cout << "\n HiggsSignals chisq: " << resultHS << " from "
+              << signals.observableCount() << " observables" << std::endl;
+
 }
 
 } // flexiblesusy
