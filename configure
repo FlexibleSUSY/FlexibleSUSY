@@ -2161,7 +2161,14 @@ check_higgstools_incl() {
 
 check_higgstools_libs() {
     check_library "libHiggsTools" "$higgstools_lib_dir" "$default_lib_paths"
-    HIGGSTOOLSLIBS="-lHiggsTools"
+        local HIGGSTOOLSLIBS_="-lHiggsTools"
+        if [ -z "$higgstools_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
+        else
+            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+        fi
+        retrun 0
 }
 
 check_higgstools() {
