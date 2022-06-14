@@ -76,7 +76,8 @@ void call_HiggsTools(
 
    auto pred = Higgs::Predictions{};
    // set model predictions on pred
-   auto s = Higgs::predictions::BsmParticle("h1", Higgs::predictions::ECharge::neutral);
+   namespace HP = Higgs::predictions;
+   auto s = HP::BsmParticle("h1", HP::ECharge::neutral);
    s.setMass(125);
 
    // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
@@ -86,15 +87,15 @@ void call_HiggsTools(
    // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
    static constexpr bool calcHgamgam = false;
 
-   auto effc = Higgs::predictions::NeutralEffectiveCouplings{
+   auto effc = HP::NeutralEffectiveCouplings{
             2., 10., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.};
-   effectiveCouplingInput(s, effc, Higgs::predictions::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+   effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
 
-   auto s2 = Higgs::predictions::BsmParticle("h2", Higgs::predictions::ECharge::neutral);
+   auto s2 = HP::BsmParticle("h2", HP::ECharge::neutral);
    s.setMass(255);
-   auto effc2 = Higgs::predictions::NeutralEffectiveCouplings{
+   auto effc2 = HP::NeutralEffectiveCouplings{
             20., 10., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.};
-   effectiveCouplingInput(s2, effc2, Higgs::predictions::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+   effectiveCouplingInput(s2, effc2, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
 
    auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};
    auto hbResult = bounds(pred);
