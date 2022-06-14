@@ -200,7 +200,7 @@ struct context_with_vertices : context_base {
    std::complex<double> vertex(triple_vector,
       const typename Vertex<Fields...>::indices_type &indices ) const {
       // FIXME: hardcoded odd permutation to agree with SPheno
-      return Vertex<Fields...>::evaluate( indices, model ).value( TripleVectorVertex::odd_permutation{} );
+      return Vertex<Fields...>::evaluate( indices, model ).value( cxx_diagrams::TripleVectorVertex::odd_permutation{} );
    }
 
    double scale( void ) const {

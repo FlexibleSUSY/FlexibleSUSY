@@ -291,7 +291,7 @@ std::valarray<std::complex<double>> FFV_SSF<Fj, Fi, V, SA, SB, F>::value(
             continue;
 
          if (discard_SM_contributions) {
-            if (isSMField<SA>(scalarFieldIndicesIn) && isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<SA>(scalarFieldIndicesIn) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -394,7 +394,7 @@ std::valarray<std::complex<double>> FFV_FFS<Fj, Fi, V, FA, FB, S>::value(
             continue;
 
          if (discard_SM_contributions) {
-            if (isSMField<S>(scalarFieldIndicesIn) && isSMField<FA>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<S>(scalarFieldIndicesIn) && cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn)) {
                continue;
             }
          }
