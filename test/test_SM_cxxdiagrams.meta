@@ -52,30 +52,30 @@ VectorToGhost[field_ ? TreeMasses`IsVector] :=
 	Symbol[StringReplace[SymbolName[field], "V" ~~ name_ :> "g" <> name]];
 
 CXXVertexFromFSVertexCalls[ScalarVertex, {fsCall_String}] :=
-	"return ScalarVertex{ " <> fsCall <> "( model_and_indices ) };"
+	"return cxx_diagrams::ScalarVertex{ " <> fsCall <> "( model_and_indices ) };"
 
 CXXVertexFromFSVertexCalls[ChiralVertex,
 		{fsCallPL_String, fsCallPR_String}] :=
-	"return ChiralVertex{ " <> fsCallPL <> "( model_and_indices ), " <>
+	"return cxx_diagrams::ChiralVertex{ " <> fsCallPL <> "( model_and_indices ), " <>
 		fsCallPR <> "( model_and_indices ) };"
 
 (* FIXME: The momentum index is hardcoded *)
 CXXVertexFromFSVertexCalls[MomentumVertex, {fsCall_String}] :=
-	"return MomentumVertex{ " <> fsCall <> "( model_and_indices ), 1 };"
+	"return cxx_diagrams::MomentumVertex{ " <> fsCall <> "( model_and_indices ), 1 };"
 
 (* FIXME: The permutation is hardcoded *)
 CXXVertexFromFSVertexCalls[TripleVectorVertex, {fsCall_String}] :=
-	"return TripleVectorVertex{ " <> fsCall <> "( model_and_indices ), "<>
-		"TripleVectorVertex::odd_permutation{} };"
+	"return cxx_diagrams::TripleVectorVertex{ " <> fsCall <> "( model_and_indices ), "<>
+		"cxx_diagrams::TripleVectorVertex::odd_permutation{} };"
 
 CXXVertexFromFSVertexCalls[QuadrupleVectorVertex,
 		{fsCall1_String, fsCall2_String, fsCall3_String}] :=
-	"return QuadrupleVectorVertex{ " <> fsCall1 <> "( model_and_indices ), " <>
+	"return cxx_diagrams::QuadrupleVectorVertex{ " <> fsCall1 <> "( model_and_indices ), " <>
 		fsCall2 <> "( model_and_indices ), " <>
 		fsCall3 <> "( model_and_indices ) };"
 
 CXXVertexFromFSVertexCalls[InverseMetricVertex, {fsCall_String}] :=
-	"return InverseMetricVertex{ " <> fsCall <> "( model_and_indices ) };"
+	"return cxx_diagrams::InverseMetricVertex{ " <> fsCall <> "( model_and_indices ) };"
 
 (* Zero vertices are handled differently by CXXDiagrams. Hence we test
  * them separately.

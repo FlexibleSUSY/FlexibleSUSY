@@ -14,7 +14,6 @@ BASE_TEMPLATES := \
 		$(DIR)/decays/decay_table.cpp.in \
 		$(DIR)/decays/decays.hpp.in \
 		$(DIR)/decays/decays.cpp.in \
-		$(DIR)/decays/decay_amplitudes.hpp.in \
 		$(DIR)/edm.hpp.in \
 		$(DIR)/edm.cpp.in \
 		$(DIR)/FFV_form_factors.hpp.in \
