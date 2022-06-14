@@ -819,8 +819,8 @@ Module[{strip, sandwich, n},
 strip[f_] := f /. {SARAH`bar -> Identity, Susyno`LieGroups`conj -> Identity};
 
 sandwich[f_] = Switch[Head@f,
-   SARAH`bar, "typename bar<" <> # <> ">::type",
-   Susyno`LieGroups`conj, "typename conj<" <> # <> ">::type",
+   SARAH`bar, "typename cxx_diagrams::bar<" <> # <> ">::type",
+   Susyno`LieGroups`conj, "typename cxx_diagrams::conj<" <> # <> ">::type",
    _, #]&;
 
 `cxx`fieldName::usage = "
@@ -1072,7 +1072,9 @@ func = If[#1 =!= #2, "using " <> #1 <> " = " <> #2 <> ";\n", ""]&;
 `cxx`setFieldAliases[couplings:{{SARAH`Cp[__][___], _Integer}..}] :=
 Module[{l = Sort@DeleteDuplicates[(Sequence@@Head@First@#&)/@couplings]},
    StringJoin@MapThread[func, {`cxx`fieldAlias/@l, `cxx`fieldName/@l}]];
-`cxx`setFieldAliases // secure;];
+`cxx`setFieldAliases // secure;
+
+];
 
 Module[{c, name, strip},
 
