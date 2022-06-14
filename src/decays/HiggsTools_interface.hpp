@@ -78,30 +78,38 @@ void call_HiggsTools(
    // set model predictions on pred
    auto s = Higgs::predictions::BsmParticle("h1", Higgs::predictions::ECharge::neutral);
    s.setMass(125);
+
+   // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
+   // or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
+   static constexpr bool calcggH = false;
+   // whether to calculate the H->gaga decay width in terms of the effective couplings
+   // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
+   static constexpr bool calcHgamgam = false;
+
    auto effc = Higgs::predictions::NeutralEffectiveCouplings{
             2., 10., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.};
-   effectiveCouplingInput(s, effc);
+   effectiveCouplingInput(s, effc, Higgs::predictions::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
 
    auto s2 = Higgs::predictions::BsmParticle("h2", Higgs::predictions::ECharge::neutral);
    s.setMass(255);
    auto effc2 = Higgs::predictions::NeutralEffectiveCouplings{
             20., 10., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.};
-   effectiveCouplingInput(s2, effc2);
+   effectiveCouplingInput(s2, effc2, Higgs::predictions::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
 
-   auto bounds = Higgs::Bounds {"/run/media/scratch/Pobrane/hbdataset-master"};
+   auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};
    auto hbResult = bounds(pred);
-   std::cout << hbResult << std::endl;
-   std::cout << "All applied limits: obsRatio (expRatio)\n";
-   for (const auto &al : hbResult.appliedLimits) {
-      std::cout << al.limit()->id() << " " << al.limit()->processDesc()
-                << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
-                << std::endl;
-   }
+   // std::cout << hbResult << std::endl;
+   // std::cout << "All applied limits: obsRatio (expRatio)\n";
+   // for (const auto &al : hbResult.appliedLimits) {
+   //   std::cout << al.limit()->id() << " " << al.limit()->processDesc()
+   //             << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
+   //             << std::endl;
+   //}
 
-   const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
+   const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
    auto resultHS = signals(pred);
-   std::cout << "\n HiggsSignals chisq: " << resultHS << " from "
-              << signals.observableCount() << " observables" << std::endl;
+   //std::cout << "\n HiggsSignals chisq: " << resultHS << " from "
+   //           << signals.observableCount() << " observables" << std::endl;
 }
 
 } // flexiblesusy
