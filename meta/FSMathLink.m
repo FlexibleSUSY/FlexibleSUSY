@@ -202,7 +202,7 @@ ObsToStr[obs_] := "\"" <> ToString[obs] <> "\"";
 
 HeadToStr[sym_]    := "\"" <> ToString[sym] <> "\"";
 HeadsToStr[{}]     := "";
-HeadsToStr[l_List] := ", {" <> StringJoin[Riffle[HeadToStr /@ l, ", "]] <> "}";
+HeadsToStr[l_List] := ", {" <> StringRiffle[HeadToStr /@ l, ", "] <> "}";
 
 PutObservable[FlexibleSUSYObservable`BrLToLGamma[p1_[idx1_Integer]->{p2_[idx2_Integer], V_}], type_, link_String, heads_:{}] /; V === TreeMasses`GetPhoton[] := "
 MLPutFunction(link, \"Rule\", 2);

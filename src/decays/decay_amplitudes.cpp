@@ -36,8 +36,10 @@ double Decay_amplitude_SSS::square() const
 double Decay_amplitude_SSV::square() const
 {
    if (m_vector <= massless_vector_threshold) {
-      // eq. B36 of http://etheses.dur.ac.uk/2301 has incorrect oposite sign
-      return 2. * AbsSqr(form_factor) * (Sqr(m_decay) + Sqr(m_scalar));
+      // eq. B36 of http://etheses.dur.ac.uk/2301 is incorrect
+      // if the amplitude fullfils the Ward indentity & the vector is physical (i.e. transversal)
+      //    then the amplitude is identically 0
+      return 0.;
    }
 
    const double m_in_sq = Sqr(m_decay);
@@ -80,7 +82,7 @@ double Decay_amplitude_SVV::square() const
          if (WI_violation > 0.1) {
             std::stringstream ss;
             ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "%");
+            WARNING("Warning: Ward identity violated in decay of scalar to massless vectors by " + ss.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined
@@ -114,7 +116,7 @@ double Decay_amplitude_SVV::square() const
          if (WI_violation > 0.1) {
             std::stringstream ss;
             ss << std::setprecision(2) << 100.*WI_violation;
-            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "%");
+            WARNING("Warning: Ward identity violated in decay of scalar to massless and massive vector by " + ss.str() + "% due to higher order effects");
          }
          // use res1 since form_factor_21 is not sensitive to the renormalization
          // scheme in which the Higgs mass is defined

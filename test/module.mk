@@ -75,6 +75,7 @@ TEST_SRC := \
 		$(DIR)/test_root_finder.cpp \
 		$(DIR)/test_scan.cpp \
 		$(DIR)/test_sm_fourloop_as.cpp \
+		$(DIR)/test_sm_mw.cpp \
 		$(DIR)/test_sminput.cpp \
 		$(DIR)/test_slha_io.cpp \
 		$(DIR)/test_string_conversion.cpp \

@@ -33,18 +33,18 @@ namespace flexiblesusy {
 namespace Electroweak_constants {
    namespace {
       constexpr double vev = 246.22;
-      const double root2 = sqrt(2.0);
+      constexpr double root2 = 1.4142135623730950;
       constexpr double mtoprun = 165;
       constexpr double mbrun = 2.9;
       constexpr double mtau = 1.77699;
-      const double yt = mtoprun * root2 / vev;
-      const double yb = mbrun * root2 / vev;
-      const double ytau = mtau * root2 / vev;
+      constexpr double yt = mtoprun * root2 / vev;
+      constexpr double yb = mbrun * root2 / vev;
+      constexpr double ytau = mtau * root2 / vev;
       constexpr double MZ = 91.1876;
       constexpr double Error_MZ = 0.0021; ///< uncertainty on MZ from PDG
       constexpr double MW = 80.385;
       constexpr double MWSM = 80.357; ///< SM prediction from arXiv:1411.7040
-      constexpr double MH = 125.09; ///< Higgs mass from PDG (CMS and ATLAS combination)
+      constexpr double MH = 125.25; ///< Higgs mass from PDG 2022 update
       constexpr double Error_MH = 0.24; ///< uncertainty on MH from PDG - 0.11 (sys) and 0.21 stat combined in quadrature.
       constexpr double MUP = 2.4e-3; ///< default running quark mass from PDG
       constexpr double MDOWN = 4.75e-3; ///< default running quark mass from PDG
@@ -59,27 +59,27 @@ namespace Electroweak_constants {
       constexpr double PMBOTTOM = 4.9; ///< default pole mass from PDG
       constexpr double aem = 1.0 / 127.916; // at MZ
       constexpr double sinThetaW2 = 0.23122;
-      const double sinThetaW = sqrt(sinThetaW2);
+      const double sinThetaW = std::sqrt(sinThetaW2);
       constexpr double cosThetaW2 = 1 - sinThetaW2;
-      const double cosThetaW = sqrt(cosThetaW2);
+      const double cosThetaW = std::sqrt(cosThetaW2);
       constexpr double alpha1 = 5.0 * aem / (3.0 * (1.0 - sinThetaW2));
       constexpr double alpha2 = aem / sinThetaW2;
       constexpr double alpha3 = 0.1184; // at MZ from PDG
-      const double e  = sqrt(4.0 * Pi * aem);
-      const double g1 = sqrt(4.0 * Pi * alpha1);
-      const double g2 = sqrt(4.0 * Pi * alpha2);
-      const double g3 = sqrt(4.0 * Pi * alpha3);
+      const double e  = std::sqrt(4.0 * Pi * aem);
+      const double g1 = std::sqrt(4.0 * Pi * alpha1);
+      const double g2 = std::sqrt(4.0 * Pi * alpha2);
+      const double g3 = std::sqrt(4.0 * Pi * alpha3);
       constexpr double gYSM = 3.57232027E-01;     ///< gY MS-bar in the SM at Q = MZ
-      const double g1SM = sqrt(5./3.) * gYSM; ///< g1 MS-bar in the SM at Q = MZ
+      const double g1SM = std::sqrt(5./3.) * gYSM; ///< g1 MS-bar in the SM at Q = MZ
       constexpr double g2SM = 6.51103848E-01;     ///< g2 MS-bar in the SM at Q = MZ
       constexpr double g3SM = 1.21087245E+00;     ///< g3 MS-bar in the SM at Q = MZ
       constexpr double CKM_THETA12 = 0.229206; ///< From Vus/Vud in global CKM fit, PDG
       constexpr double CKM_THETA13 = 0.003960; ///< From Vub in global CKM fit, PDG
       constexpr double CKM_THETA23 = 0.042223; ///< From Vcb/Vtb in global CKM fit, PDG
       constexpr double CKM_DELTA   = 0.;
-      const double PMNS_THETA12 = 0.5 * asin(sqrt(0.846));
-      const double PMNS_THETA13 = 0.5 * asin(sqrt(0.093));
-      const double PMNS_THETA23 = 0.5 * asin(sqrt(0.999));
+      const double PMNS_THETA12 = 0.5 * std::asin(std::sqrt(0.846));
+      const double PMNS_THETA13 = 0.5 * std::asin(std::sqrt(0.093));
+      const double PMNS_THETA23 = 0.5 * std::asin(std::sqrt(0.999));
       constexpr double PMNS_DELTA   = 0.;
       constexpr double PMNS_ALPHA1  = 0.;
       constexpr double PMNS_ALPHA2  = 0.;
@@ -96,6 +96,7 @@ namespace Electroweak_constants {
       constexpr double mu2SM = 7.67488232E+03; ///< mu^2 MS-bar in the SM at Q = MZ
       constexpr double lamSM = 2.79613357E-01; ///< lambda MS-bar in the SM at Q = MZ
       constexpr double vSM = 2.48997424E+02;   ///< VEV MS-bar in the SM at Q = MZ
+      constexpr double delta_alpha_s_5_had = 0.02766; ///< hadronic 5-flavour corrections
    } // namespace
 } // namespace Electroweak_constants
 

@@ -19,7 +19,7 @@
 #include "mssm_twoloophiggs.hpp"
 #include "mssm_twoloophiggs.h"
 #include "config.h"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include <cmath>
 #include <limits>
 #include <utility>
@@ -55,7 +55,7 @@ double phi(double x, double y, double z)
    const double xm = 0.5 * (1 - (u - v) - lambda);
 
    return 1./lambda * (2*logabs(xp)*logabs(xm) - logabs(u)*logabs(v) -
-                       2*(dilog(xp) + dilog(xm)) + M_PI*M_PI/3.);
+                       2*(Li2(xp) + Li2(xm)) + M_PI*M_PI/3.);
 }
 
 /// First derivative of phi[t,T,g] w.r.t. T
@@ -71,8 +71,8 @@ double dphi_010(double t, double T, double g)
    const double abbr = (-4*t*T)/g2 + sqr(1 - t/g - T/g);
    const double rabbr = sqrtabs(abbr);
 
-   return ((g + t - T)*(Pi2 - 6*dilog((g - rabbr*g + t - T)/(2.*g)) -
-      6*dilog((g - rabbr*g - t + T)/(2.*g)) -
+   return ((g + t - T)*(Pi2 - 6*Li2((g - rabbr*g + t - T)/(2.*g)) -
+      6*Li2((g - rabbr*g - t + T)/(2.*g)) -
       3*logabs(t/g)*logabs(T/g) + 6*logabs((g - rabbr*g + t -
       T)/(2.*g))*logabs((g - rabbr*g - t + T)/(2.*g))) + (3*rabbr*g* (
       rabbr*g*((-1 + rabbr)*g + t - T)*logabs(t/g) +
@@ -104,8 +104,8 @@ double dphi_001(double g, double t, double T)
    const double lxmyp = logabs(0.5*(1 - x + yp));
    const double lxpym = logabs(0.5*(1 + x + ym));
    const double lxpyp = logabs(0.5*(1 + x + yp));
-   const double li2xym = dilog(0.5*(1 - x + ym));
-   const double li2xyp = dilog(0.5*(1 - x + yp));
+   const double li2xym = Li2(0.5*(1 - x + ym));
+   const double li2xyp = Li2(0.5*(1 - x + yp));
 
    return ((t*(t - T) - g*(2*t + T) + sqr(g))*
        (-6*li2xym - 6*li2xyp - 3*lgT*ltT + 6*lxmym*lxmyp + Pi2)

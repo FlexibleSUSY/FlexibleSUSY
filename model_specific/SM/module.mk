@@ -8,6 +8,7 @@ LIB_model_specific_SM_MK  := \
 LIB_model_specific_SM_SRC := \
 		$(DIR)/sm_fourloophiggs.cpp \
 		$(DIR)/sm_fourloop_as.cpp \
+		$(DIR)/sm_mw.cpp \
 		$(DIR)/sm_threeloophiggs.cpp \
 		$(DIR)/sm_twoloophiggs.cpp \
 		$(DIR)/standard_model.cpp \
@@ -20,6 +21,7 @@ LIB_model_specific_SM_SRC := \
 LIB_model_specific_SM_HDR := \
 		$(DIR)/sm_fourloophiggs.hpp \
 		$(DIR)/sm_fourloop_as.hpp \
+		$(DIR)/sm_mw.hpp \
 		$(DIR)/sm_threeloophiggs.hpp \
 		$(DIR)/sm_twoloophiggs.hpp \
 		$(DIR)/standard_model.hpp \

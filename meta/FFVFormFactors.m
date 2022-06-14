@@ -149,7 +149,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                              StringJoin @ Table[", 0", {numberOfIndices1-1}],
                              ""] <> " ",
                           If[numberOfIndices1 =!= 0,
-                             StringJoin @ Riffle[Table[" 0", {numberOfIndices1}], ", "],
+                             StringRiffle[Table[" 0", {numberOfIndices1}], ", "],
                              ""]
                          ] <> "};\n" <>
                    "std::array<int, " <> ToString @ numberOfIndices2 <>
@@ -160,7 +160,7 @@ FFVFormFactorsCreateInterfaceFunction[Fj_ -> {Fi_, V_}, topologies_, diagrams_] 
                              StringJoin @ Table[", 0", {numberOfIndices2-1}],
                              ""] <> " ",
                           If[numberOfIndices2 =!= 0,
-                             StringJoin @ Riffle[Table[" 0", {numberOfIndices2}], ", "] <> " ",
+                             StringRiffle[Table[" 0", {numberOfIndices2}], ", "] <> " ",
                              ""]
                          ] <> "};\n\n" <>
 
@@ -180,7 +180,7 @@ CreateCall[Fj_, Fi_, V_, topology_, diagram_] :=
    "val += std::complex<double> " <>
       ToString @ N @ ReIm @ CXXDiagrams`ExtractColourFactor @ CXXDiagrams`ColorFactorForDiagram[topology, diagram] <> " * FFV_" <>
       StringJoin @@ (ToString /@ SARAH`getType /@ {EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}) <> "<" <>
-         StringJoin @ Riffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V, EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ","]  <>
+         StringRiffle[CXXDiagrams`CXXNameOfField /@ {Fj, Fi, V, EmitterL[diagram], EmitterR[diagram], Spectator[diagram]}, ","]  <>
                      ">::value(indices1, indices2, context, discard_SM_contributions);\n";
 
 End[];

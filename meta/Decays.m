@@ -273,12 +273,12 @@ CreateBSMParticleAliasList[namespace_:""] :=
          Join[bsmForZdecay, bsmForWdecay],
          "// List of potential Z boson decay products excluding pure SM decays\n" <>
          "typedef boost::mpl::list<\n" <>
-         TextFormatting`IndentText@StringJoin@Riffle[
+         TextFormatting`IndentText@StringRiffle[
             ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForZdecay), ",\n"
          ] <> If[Length@bsmForZdecay > 0, "\n", ""] <> "> BSMForZdecay;\n\n" <>
          "// List of potential W boson decay products excluding pure SM decays\n" <>
          "typedef boost::mpl::list<\n" <>
-         TextFormatting`IndentText@StringJoin@Riffle[
+         TextFormatting`IndentText@StringRiffle[
             ("boost::mpl::list<" <> CXXDiagrams`CXXNameOfField[#1, prefixNamespace -> namespace] <> ", " <> CXXDiagrams`CXXNameOfField[#2, prefixNamespace -> namespace] <> ">")& @@@ (Drop[#, {1}]& /@ bsmForWdecay), ",\n"
          ] <> If[Length@bsmForWdecay > 0, "\n", ""] <> "> BSMForWdecay;"
       }
@@ -842,7 +842,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                 CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetWBoson[]] || CheckOffShellDecay[TreeMasses`GetHiggsBoson[], TreeMasses`GetZBoson[]], "",
 
               "if (context.physical_mass<" <> CXXNameOfField[initialState] <> ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) < " <>
-               StringJoin @ Riffle[
+               StringRiffle[
                   MapIndexed[
                      With[{idx = First[#2]},
                         "context.physical_mass<" <> CXXNameOfField[#1] <> ">(" <>
@@ -856,7 +856,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
                       body = "decays.set_decay(" <> CreatePartialWidthCalculationName[decay] <> "(" <> functionArgs <> "), " <> pdgsList <>
                ", create_process_string<" <> CXXNameOfField[initialState] <> ", " <> StringRiffle[CXXNameOfField/@finalState, ", "] <> ">(" <>
                   If[initialStateDim > 1, "{gI1}", "{}"] <> "," <>
-                  StringJoin @ Riffle[
+                  StringRiffle[
                   MapIndexed[
                      With[{idx = First[#2]},
                         If[finalStateDims[[idx]] > 1, "{gO" <> ToString[idx] <> "}", "{}"]
@@ -882,7 +882,7 @@ CallPartialWidthCalculation[decay_FSParticleDecay] :=
 
                "\nif (context.physical_mass<" <> CXXNameOfField[initialState] <>
                  ">(std::array<int, " <> If[initialStateDim > 1, "1", "0"] <> ">{" <> If[initialStateDim > 1, "gI1", ""] <> "}) > " <>
-                 StringJoin @ Riffle[
+                 StringRiffle[
                     MapIndexed[
                        With[{idx = First[#2]},
                           "context.physical_mass<" <> CXXNameOfField[#1] <> ">(" <>
@@ -1693,7 +1693,7 @@ WrapCodeInLoopOverInternalVertices[decay_, topology_, diagram_] :=
       verticesForFACp2 = If[Length[#] == 2, List@@Last@#, List@@#]& /@ verticesForFACp2;
       cppVertices =
          "using vertex" <> ToString@#1 <> " = Vertex<" <>
-            (StringJoin@Riffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp2}];
+            (StringRiffle[CXXDiagrams`CXXNameOfField /@ #2  ,", "] <> ">;\n")& @@@ Transpose[{indices, verticesForFACp2}];
 
       (* List of {integer, integer} -> Field[integer] *)
       externalEdges =
@@ -1795,7 +1795,7 @@ If[Length@positions =!= 1, Quit[1]];
                         "vertex" <> # <> "::evaluate(index" <>
                            #  <> ", context);\n"
                      )& /@ indices] <>
-                  "\nif (" <> StringJoin@Riffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
+                  "\nif (" <> StringRiffle[("!vertex" <> # <> "Val.isZero()")& /@ indices, " && "] <> ") {\n" <>
                   TextFormatting`IndentText[
                   "// internal masses\n" <>
                   mass <> "\n" <>
@@ -1810,7 +1810,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
-                                 StringJoin@Riffle[
+                                 StringRiffle[
                                  MapIndexed[
                                  (pos1 = Position[#1, First@fieldsInLoop, 1];
                                  pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
@@ -1835,7 +1835,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "\nif (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
                              Module[{pos1, pos2},
-                             StringJoin@Riffle[
+                             StringRiffle[
                              MapIndexed[
                                 (pos1 = Position[#1, First@fieldsInLoop, 1];
                              pos2 = Position[#1, Susyno`LieGroups`conj[First@fieldsInLoop], 1];
@@ -1875,7 +1875,7 @@ If[Length@positions =!= 1, Quit[1]];
                            "if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 0 &&\n" <>
                            TextFormatting`IndentText[
                               Module[{pos1, pos2},
-                                 StringJoin@Riffle[
+                                 StringRiffle[
                                  MapIndexed[
                                  (pos1 = Position[#1, First@fieldsInLoop, 1];
                                  pos2 = Position[#1, SARAH`bar[First@fieldsInLoop], 1];
@@ -1910,7 +1910,7 @@ If[Length@positions =!= 1, Quit[1]];
 
          (* diagram information *)
          "\n// topology " <> FeynArtsTopologyName[topology] <>
-            "\n// internal particles in the diagram: " <>  StringJoin[Riffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "]] <> "\n" <>
+            "\n// internal particles in the diagram: " <>  StringRiffle[ToString@Part[#, 2]& /@Drop[fieldAssociation, 3], ", "] <> "\n" <>
             "{\n" <>
                TextFormatting`IndentText[
 

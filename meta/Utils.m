@@ -204,7 +204,7 @@ ApplyAndConcatenate[Func_, l_] := Evaluate[Func[l]];
 SetAttributes[ApplyAndConcatenate, HoldFirst];
 
 StringJoinWithSeparator[list_List, separator_String, transformer_:ToString] :=
-    StringJoin[Riffle[transformer /@ list, separator]];
+    StringRiffle[transformer /@ list, separator];
 
 Zip[list1_List, list2_List] :=
     MapThread[List, {list1, list2}];

@@ -46,6 +46,8 @@ public:
    void flag_no_pole_mass_convergence(int particle);
    void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.);
    void flag_no_sinThetaW_convergence();
+   void flag_no_minimum(const std::string& msg, int status);
+   void flag_no_root(const std::string& msg, int status);
 
    void unflag_bad_mass(int particle);
    void unflag_all_bad_masses();
@@ -60,6 +62,8 @@ public:
    void unflag_non_perturbative_parameter(int parameter);
    void unflag_all_non_perturbative_parameters();
    void unflag_no_sinThetaW_convergence();
+   void unflag_no_minimum(const std::string& msg);
+   void unflag_no_root(const std::string& msg);
 
    bool is_bad_mass(int particle) const;
    bool is_running_tachyon(int particle) const;
@@ -75,6 +79,8 @@ public:
    bool no_ewsb_tree_level() const;
    bool no_perturbative() const;
    bool no_sinThetaW_convergence() const;
+   bool no_minimum() const;
+   bool no_root() const;
 
    void add(const Problems&);         ///< add problems from other class
    void clear();                      ///< clear all problems
@@ -115,6 +121,8 @@ private:
    std::vector<int> pole_tachyons;     ///< tachyonic particles (pole mass)
    std::vector<int> failed_pole_mass_convergence; ///< no convergence during pole mass calculation
    std::map<int, NonPerturbativeValue> non_pert_pars; ///< non-perturbative parmeters
+   std::map<std::string, int> failed_minimum; ///< no minimum found (message, status code)
+   std::map<std::string, int> failed_root; ///< no root found (message, status code)
    std::string exception_msg;          ///< exception message
    bool failed_ewsb{false};            ///< no EWSB
    bool failed_ewsb_tree_level{false}; ///< no tree-level EWSB

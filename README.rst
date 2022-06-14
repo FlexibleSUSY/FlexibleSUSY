@@ -24,7 +24,7 @@ modification, extension and reuse.
 * Mailing list:            flexiblesusy@projects.hepforge.org
 * Source code repository:  https://github.com/FlexibleSUSY
 * Bug reports:             https://github.com/FlexibleSUSY/FlexibleSUSY/issues
-* References: [1406.2319]_, [1609.00371]_, [1710.03760]_
+* References: [1406.2319]_, [1609.00371]_, [1710.03760]_, [2204.05285]_
 
   If you use **FlexibleSUSY** in your work please cite [1406.2319]_
   and [1710.03760]_.
@@ -37,10 +37,13 @@ modification, extension and reuse.
   [1910.03595]_.
 
   If you use **FlexibleSUSY+GM2Calc** in your work, please cite
-  [1510.08071]_.
+  [1510.08071]_ and (if appropriate) [2110.13238]_.
 
   If you use **FlexibleDecay** in your work, please cite
   [2106.05038]_.
+
+  If you use the W boson pole mass prediction in FlexibleSUSY 2.7.0
+  (or later), please cite [2204.05285]_.
 
   FlexibleSUSY depends on SARAH_ and contains components from
   SOFTSUSY_. Therefore, please also cite the following publications
@@ -369,10 +372,10 @@ Example
     ];
 
     (* calculate pole mass spectrum *)
-    FSCMSSMCalculateSpectrum[handle]
+    FSCMSSMCalculateSpectrum[handle];
 
     (* calculate observables *)
-    FSCMSSMCalculateObservables[handle]
+    FSCMSSMCalculateObservables[handle];
 
     (* close the model handle *)
     FSCMSSMCloseHandle[handle];
@@ -968,6 +971,8 @@ are listed:
 * ``models/`` This is the output directory where the generated C++
   code for the spectrum generators will be stored.
 
+* ``nlohmann/`` contains the nlohmann_ JSON library
+
 * ``Output/`` contains SARAHs model-specific output files
 
 * ``sarah/`` contains SARAH model files shipped with FlexibleSUSY
@@ -1013,6 +1018,7 @@ References
 .. _COLLIER: https://collier.hepforge.org
 .. _Himalaya: https://github.com/Himalaya-Library/Himalaya
 .. _TSIL: https://www.niu.edu/spmartin/tsil
+.. _nlohmann: https://github.com/nlohmann/json
 
 .. _`FlexibleSUSY model file`: doc/model_file.rst
 .. _`FlexibleEFTHiggs`: doc/FlexibleEFTHiggs.rst
@@ -1036,3 +1042,5 @@ References
 .. [1807.03509] `Eur. Phys. J. C78 (2018) no. 10, 874 <https://inspirehep.net/record/1681658>`_ [`arxiv:1807.03509 <https://arxiv.org/abs/1807.03509>`_]
 .. [1910.03595] `Eur. Phys. J. C80 (2020) no. 3, 186 <https://inspirehep.net/record/1758261>`_ [`arxiv:1910.03595 <https://arxiv.org/abs/1910.03595>`_]
 .. [2106.05038] [`arxiv:2106.05038 <http://arxiv.org/abs/2106.05038>`_]
+.. [2110.13238] `Eur. Phys. J. C82 (2022) no. 3, 229 <https://inspirehep.net/literature/1952331>`_ [`arxiv:2110.13238 <https://arxiv.org/abs/2110.13238>`_]
+.. [2204.05285] [`arxiv:2204.05285 <https://arxiv.org/abs/2204.05285>`_]

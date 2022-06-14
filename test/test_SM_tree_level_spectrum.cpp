@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_SM_tree_level_masses )
    m.calculate_DRbar_masses();
    sm.calculate_DRbar_masses();
 
-   const double eps = 1e-15;
+   static constexpr double eps = 1e-15;
 
    CHECK_CLOSE_1(MVP, eps);
    CHECK_CLOSE_1(MVG, eps);
