@@ -77,8 +77,9 @@ void call_HiggsTools(
    auto pred = Higgs::Predictions{};
    // set model predictions on pred
    namespace HP = Higgs::predictions;
-   auto s = HP::BsmParticle("h1", HP::ECharge::neutral);
+   auto& s = pred.addParticle(HP::BsmParticle("h1", HP::ECharge::neutral));
    s.setMass(125);
+
 
    // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
    // or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
@@ -91,7 +92,7 @@ void call_HiggsTools(
             2., 10., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.};
    effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
 
-   auto s2 = HP::BsmParticle("h2", HP::ECharge::neutral);
+   auto& s2 = pred.addParticle(HP::BsmParticle("h2", HP::ECharge::neutral));
    s.setMass(255);
    auto effc2 = HP::NeutralEffectiveCouplings{
             20., 10., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.};
