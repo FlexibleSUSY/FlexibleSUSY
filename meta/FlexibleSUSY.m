@@ -2626,7 +2626,9 @@ ExampleCalculateDecaysForModel[] :=
       !problems.have_problem())) {
    if (loop_library_for_decays) {
       decays.calculate_decays();
-      call_HiggsTools(decays.get_decay_table(), physical_input, qedqcd, flexibledecay_settings);
+      if (flexibledecay_settings.get(FlexibleDecay_settings::call_HiggsTools)) {
+         call_HiggsTools(decays.get_decay_table(), physical_input, qedqcd, flexibledecay_settings);
+      }
    }
    else if (!loop_library_for_decays) {
       WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
