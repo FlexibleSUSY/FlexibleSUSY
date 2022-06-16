@@ -2155,13 +2155,13 @@ int main() {
 }
 
 check_higgstools_incl() {
-    check_header "Higgs/HiggsTools_export.h" "$higgstools_inc_dir"
+    check_header "Higgs/Predictions.hpp" "$higgstools_inc_dir"
     if test "x$found_hdr" = "x" ; then
         if test "x$enable_higgstools" = "xyes" ; then
-            message "Error: HiggsTools's HiggsTools_export.h must be installed if you want"
+            message "Error: HiggsTools's Predictions.hpp must be installed if you want"
             message "   to use HiggsTools, see https://gitlab.com/higgsbounds/higgstools"
             message "   You can use the --with-higgstools-incdir= option to specify the"
-            message "   location of HiggsTools_export.h and the other headers."
+            message "   location of Higgs/Predictions.hpp and the other headers."
             exit 1
         else
             return 1
@@ -2181,7 +2181,7 @@ check_higgstools_libs() {
         else
             HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
         fi
-        retrun 0
+        return 0
 }
 
 check_higgstools() {

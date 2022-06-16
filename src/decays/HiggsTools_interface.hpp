@@ -75,7 +75,6 @@ void call_HiggsTools(
    }
 
    auto pred = Higgs::Predictions{};
-   // set model predictions on pred
    namespace HP = Higgs::predictions;
    auto& s = pred.addParticle(HP::BsmParticle("h1", HP::ECharge::neutral));
    s.setMass(125);
