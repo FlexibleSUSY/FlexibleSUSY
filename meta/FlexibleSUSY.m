@@ -2615,25 +2615,35 @@ ExampleDecaysIncludes[] :=
          "decays/" <> FlexibleSUSY`FSModelName <> "_decays.hpp",
          "decays/flexibledecay_problems.hpp",
          FlexibleSUSY`FSModelName <> "_mass_eigenstates_decoupling_scheme.hpp",
-         "loop_libraries/loop_library.hpp",
-         "decays/HiggsTools_interface.hpp"},
+         "loop_libraries/loop_library.hpp"},
        "\n"
-    ];
+    ] <>
+"\n#ifdef ENABLE_HIGGSTOOLS
+#include \"decays/HiggsTools_interface.hpp\"
+#endif";
 
 ExampleCalculateDecaysForModel[] :=
+IndentText[
 "if (flexibledecay_settings.get(FlexibleDecay_settings::calculate_decays) &&
      (spectrum_generator_settings.get(Spectrum_generator_settings::force_output) ||
       !problems.have_problem())) {
    if (loop_library_for_decays) {
-      decays.calculate_decays();
-      if (flexibledecay_settings.get(FlexibleDecay_settings::call_HiggsTools)) {
-         call_HiggsTools(decays.get_decay_table(), physical_input, qedqcd, flexibledecay_settings);
-      }
-   }
-   else if (!loop_library_for_decays) {
-      WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
-   }
-}";
+      decays.calculate_decays();\n"
+] <>
+"#ifdef ENABLE_HIGGSTOOLS\n" <>
+IndentText@IndentText@IndentText[
+"if (flexibledecay_settings.get(FlexibleDecay_settings::call_HiggsTools)) {
+   call_HiggsTools(decays.get_decay_table(), physical_input, qedqcd, flexibledecay_settings);
+}\n"
+] <>
+"#endif\n" <>
+IndentText[IndentText[
+"}
+else if (!loop_library_for_decays) {
+   WARNING(\"Decay module requires a dedicated loop library. Configure FlexibleSUSY with Collier or LoopTools and set appropriately flag 31 in Block FlexibleSUSY of the LesHouches input.\");
+}"
+] <> "\n}"
+];
 
 ExampleSetDecaysSLHAOutput[] := "\
 const bool show_decays = !decays.get_problems().have_problem() ||
@@ -2730,7 +2740,7 @@ WriteUserExample[inputParameters_List, files_List] :=
                             "@fillDecaySettings@" -> IndentText@IndentText@fillDecaySettings,
                             "@flexibleDecaySettingsVarInDef@" -> flexibleDecaySettingsVarInDef,
                             "@flexibleDecaySettingsVarInDecl@" -> flexibleDecaySettingsVarInDecl,
-                            "@calculateDecaysForModel@" -> IndentText[calculateDecaysForModel],
+                            "@calculateDecaysForModel@" -> calculateDecaysForModel,
                             "@setDecaysSLHAOutput@" -> IndentText[IndentText[setDecaysSLHAOutput]],
                             "@calculateCmdLineDecays@" -> IndentText[calculateCmdLineDecays],
                             "@writeCmdLineOutput@" -> IndentText[writeCmdLineOutput],
