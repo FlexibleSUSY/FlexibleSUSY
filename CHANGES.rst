@@ -1,3 +1,23 @@
+FlexibleSUSY 2.7.1 [June, 07 2022]
+==================================
+
+Fixed bugs
+----------
+
+* [commit b80d8821e]: Fixed compilation error in models with
+  semi-analytic RGE solver.
+
+
+FlexibleSUSY 2.7.0 [June, 06 2022]
+==================================
+
+New features
+------------
+
+* Improved W boson pole mass prediction with decoupling property, see
+  [`2204.05285 <https://arxiv.org/abs/2204.05285>`_]
+
+
 FlexibleSUSY 2.6.2 [April, 29 2022]
 ======================================
 

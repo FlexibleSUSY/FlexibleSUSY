@@ -936,7 +936,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
            calculateDRbarMasses,
            calculateDeltaAlphaEm, calculateDeltaAlphaS,
            calculateGaugeCouplings,
-           calculateThetaW,
+           calculateThetaW, calculateSMHiggsPoleMass,
            fillHimalayaInput,
            checkPerturbativityForDimensionlessParameters = "",
            twoLoopThresholdHeaders = "" },
@@ -988,6 +988,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
                ];
             ];
           calculateThetaW   = ThresholdCorrections`CalculateThetaW[FlexibleSUSY`FSWeakMixingAngleInput];
+          calculateSMHiggsPoleMass = LoopMasses`CalculateSMHiggsPoleMass[FlexibleSUSY`FSWeakMixingAngleInput];
           fillHimalayaInput = Himalaya`FillHimalayaInput[FSHimalayaInput];
           twoLoopThresholdHeaders = ThresholdCorrections`GetTwoLoopThresholdHeaders[];
           WriteOut`ReplaceInFiles[files,
@@ -1000,6 +1001,7 @@ WriteConstraintClass[condition_, settings_List, scaleFirstGuess_,
                    "@calculateDeltaAlphaEm@" -> IndentText[WrapLines[calculateDeltaAlphaEm]],
                    "@calculateDeltaAlphaS@"  -> IndentText[WrapLines[calculateDeltaAlphaS]],
                    "@calculateThetaW@"       -> IndentText[WrapLines[calculateThetaW]],
+                   "@calculateSMHiggsPoleMass@" -> IndentText[WrapLines[calculateSMHiggsPoleMass]],
                    "@calculateDRbarMassUp@"      -> IndentText[IndentText[calculateDRbarMasses[[1]]]],
                    "@calculateDRbarMassCharm@"   -> IndentText[IndentText[calculateDRbarMasses[[2]]]],
                    "@calculateDRbarMassTop@"     -> IndentText[IndentText[calculateDRbarMasses[[3]]]],
@@ -1033,7 +1035,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
            calculateDRbarMasses,
            calculateDeltaAlphaEm, calculateDeltaAlphaS,
            calculateGaugeCouplings,
-           calculateThetaW,
+           calculateThetaW, calculateSMHiggsPoleMass,
            checkPerturbativityForDimensionlessParameters = "",
            saveBoundaryValueParameters = "",
            usingSemiAnalyticScaleGetter = "",
@@ -1103,6 +1105,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
                ];
             ];
           calculateThetaW   = ThresholdCorrections`CalculateThetaW[FlexibleSUSY`FSWeakMixingAngleInput];
+          calculateSMHiggsPoleMass = LoopMasses`CalculateSMHiggsPoleMass[FlexibleSUSY`FSWeakMixingAngleInput];
           If[isBoundaryConstraint,
              saveBoundaryValueParameters = SemiAnalytic`SaveBoundaryValueParameters[semiAnalyticSolns];
             ];
@@ -1134,6 +1137,7 @@ WriteSemiAnalyticConstraintClass[condition_, settings_List, initialGuessSettings
                    "@calculateDeltaAlphaEm@" -> IndentText[WrapLines[calculateDeltaAlphaEm]],
                    "@calculateDeltaAlphaS@"  -> IndentText[WrapLines[calculateDeltaAlphaS]],
                    "@calculateThetaW@"       -> IndentText[WrapLines[calculateThetaW]],
+                   "@calculateSMHiggsPoleMass@" -> IndentText[WrapLines[calculateSMHiggsPoleMass]],
                    "@calculateDRbarMassUp@"      -> IndentText[IndentText[calculateDRbarMasses[[1]]]],
                    "@calculateDRbarMassCharm@"   -> IndentText[IndentText[calculateDRbarMasses[[2]]]],
                    "@calculateDRbarMassTop@"     -> IndentText[IndentText[calculateDRbarMasses[[3]]]],
@@ -2268,14 +2272,14 @@ WriteCXXDiagramClass[vertices_List, files_List,
             defineFieldTraits,
             sarahOutputDir = SARAH`$sarahCurrentOutputMainDir,
             outputDir, cxxDiagramsDir, createdVerticesFile, fileHandle,
-            cxxQFTVerticesFiles},
+            cxxQFTVerticesFiles, realFieldsconjtraits},
 
         massFunctions = CXXDiagrams`CreateMassFunctions[];
         physicalMassFunctions = CXXDiagrams`CreatePhysicalMassFunctions[];
-        fields = CXXDiagrams`CreateFields[];
+        {fields, realFieldsconjtraits} = CXXDiagrams`CreateFields[];
         defineFieldTraits =
            CXXDiagrams`CreateFieldTraitsDefinitions[
-              TreeMasses`GetParticles[], FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
+              TreeMasses`GetParticles[], "flexiblesusy::" <> FlexibleSUSY`FSModelName <> "_cxx_diagrams::fields"
            ];
 
         If[vertices =!= {},
@@ -2303,6 +2307,7 @@ WriteCXXDiagramClass[vertices_List, files_List,
 
         WriteOut`ReplaceInFiles[files,
                             {"@CXXDiagrams_Fields@"                -> fields,
+                             "@CXXDiagrams_realFields@"            -> realFieldsconjtraits,
                              "@CXXDiagrams_MassFunctions@"         -> massFunctions,
                              "@CXXDiagrams_PhysicalMassFunctions@" -> physicalMassFunctions,
                              "@defineFieldTraits@"                 -> defineFieldTraits,
@@ -4908,8 +4913,6 @@ MakeFlexibleSUSY[OptionsPattern[]] :=
                                                      FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decays.hpp"}]},
                                                     {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decays.cpp.in"}],
                                                      FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decays.cpp"}]},
-                                                    {FileNameJoin[{$flexiblesusyTemplateDir, "decays", "decay_amplitudes.hpp.in"}],
-                                                     FileNameJoin[{FSOutputDir, "decays", FlexibleSUSY`FSModelName <> "_decay_amplitudes.hpp"}]},
                                                     {FileNameJoin[{$flexiblesusyTemplateDir, "run_decays.cpp.in"}],
                                                      FileNameJoin[{FSOutputDir,  "run_decays_" <> FlexibleSUSY`FSModelName <> ".cpp"}]}
 
