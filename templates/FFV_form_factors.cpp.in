@@ -721,7 +721,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
          // triple gauge boson vertex
          // need to check that the sign and function call are correct
-         std::complex<double> vector_boson_coupling {-vertexEmit.value( TripleVectorVertex::even_permutation{} )};
+         std::complex<double> vector_boson_coupling {-vertexEmit.value( cxx_diagrams::TripleVectorVertex::even_permutation{} )};
 
          const std::complex<double> A1L =
             - 8. * mF/mj * vertexIn.right() * vertexOut.left() * LoopFunctionI
