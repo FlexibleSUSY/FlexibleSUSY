@@ -19,17 +19,15 @@
 #ifndef DECAY_H
 #define DECAY_H
 
+#include <algorithm>
 #include <initializer_list>
 #include <map>
-#include <vector>
 #include <string>
-#include <cmath>
-
-#include "wrappers.hpp"
+#include <vector>
 
 #include <boost/core/demangle.hpp>
-#include <boost/range/algorithm/equal.hpp>
 
+#include "wrappers.hpp"
 #include "cxx_qft/fields.hpp"
 #include "cxx_qft/vertices.hpp"
 
@@ -279,7 +277,7 @@ std::enable_if_t<std::is_same<Field1, Field2>::value, double>
 final_state_symmetry_factor(typename cxx_diagrams::field_indices<Field1>::type const& idx1,
                             typename cxx_diagrams::field_indices<Field2>::type const& idx2)
 {
-   if (boost::range::equal(idx1, idx2)) {
+   if (std::equal(idx1.begin(), idx1.end(), idx2.begin(), idx2.end())) {
       return 0.5;
    }
    else {
