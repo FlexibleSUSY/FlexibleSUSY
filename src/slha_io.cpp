@@ -773,9 +773,9 @@ void SLHA_io::set_block(const std::string& lines, Position position)
    data->erase(block.name());
 
    if (position == front) {
-      data->push_front(block);
+      data->push_front(std::move(block));
    } else {
-      data->push_back(block);
+      data->push_back(std::move(block));
    }
 }
 
