@@ -700,7 +700,7 @@ std::valarray<std::complex<double>> FFV_VVF<Fj, Fi, P, VA, VB, F>::value(
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (isSMField<VA>(vectorFieldIndicesIn) && isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -798,7 +798,7 @@ std::valarray<std::complex<double>> FFV_FFV<Fj, Fi, P, FA, FB, V>::value(
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (isSMField<FA>(fermionFieldIndicesIn) && isSMField<V>(vectorFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<FA>(fermionFieldIndicesIn) && cxx_diagrams::isSMField<V>(vectorFieldIndicesIn)) {
                continue;
             }
          }
@@ -897,7 +897,7 @@ std::valarray<std::complex<double>> FFV_VSF<Fj, Fi, P, VA, GB, F>::value(
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (isSMField<VA>(vectorFieldIndicesIn) && isSMField<GB>(goldstoneFieldIndicesOut) && isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<VA>(vectorFieldIndicesIn) && cxx_diagrams::isSMField<GB>(goldstoneFieldIndicesOut) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
@@ -985,7 +985,7 @@ std::valarray<std::complex<double>> FFV_SVF<Fj, Fi, P, GA, VB, F>::value(
 
          // ignore contribution if both vector and fermion are SM particles
          if (discard_SM_contributions) {
-            if (isSMField<GA>(goldstoneFieldIndicesIn) && isSMField<VB>(vectorFieldIndicesOut) && isSMField<F>(fermionFieldIndicesIn)) {
+            if (cxx_diagrams::isSMField<GA>(goldstoneFieldIndicesIn) && cxx_diagrams::isSMField<VB>(vectorFieldIndicesOut) && cxx_diagrams::isSMField<F>(fermionFieldIndicesIn)) {
                continue;
             }
          }
