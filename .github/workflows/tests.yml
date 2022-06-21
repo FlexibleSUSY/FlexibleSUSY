@@ -283,7 +283,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: ${{matrix.CXXCOMPILER}}-${{matrix.LOOPLIBRARY}}_test-logs
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
           path: |
             config.*
             test/test_*.log
