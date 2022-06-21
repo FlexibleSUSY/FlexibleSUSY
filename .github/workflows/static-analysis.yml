@@ -23,7 +23,7 @@ on:
 
 jobs:
   check-scripts:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
 
