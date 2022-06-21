@@ -24,10 +24,13 @@ on:
 jobs:
   check-scripts:
     runs-on: ubuntu-latest
-    container:
-      image: navir/opensuseleap-for-flexiblesusy:latest
 
     steps:
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
 
       - name: Checkout
         uses: actions/checkout@v3
