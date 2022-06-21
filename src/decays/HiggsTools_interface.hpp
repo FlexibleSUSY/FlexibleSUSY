@@ -45,7 +45,7 @@ std::complex<double> get_width_from_table(std::vector<std::tuple<std::string, in
       for (const auto& decay: decay_table) {
          std::vector<int> final_state = {std::get<1>(decay), std::get<2>(decay)};
          if (std::is_permutation(outPDGs.begin(), outPDGs.end(), final_state.begin(), final_state.end())) {
-            return std::get<3>(decay);
+            return std::get<4>(decay);
          }
       }
    return 0.;
@@ -109,18 +109,19 @@ void call_HiggsTools(
 
       auto effc = HP::NeutralEffectiveCouplings {};
       auto f = [&sm_input, &bsm_input](std::array<int, 2> const& a) {
-         return std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a) : 0.;
+         std::cout << "coup  " << a.at(0) << a.at(1) << ' ' << (std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a) : 0.) << std::endl;
+         return std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a).real() : 0.;
       };
       // quarks
-      effc.uu = f({-2, 2});
       effc.dd = f({-1, 1});
-      effc.cc = f({-4, 4});
+      effc.uu = f({-2, 2});
       effc.ss = f({-3, 3});
-      effc.tt = f({-6, 6});
+      effc.cc = f({-4, 4});
       effc.bb = f({-5, 5});
+      effc.tt = f({-6, 6});
       // leptons
-      effc.ee = f({-11, 11});
-      effc.mumu = f({-13, 13});
+      effc.ee =     f({-11, 11});
+      effc.mumu =   f({-13, 13});
       effc.tautau = f({-15, 15});
       // gauge bosons
       effc.WW = f({-24, 24}).real();
