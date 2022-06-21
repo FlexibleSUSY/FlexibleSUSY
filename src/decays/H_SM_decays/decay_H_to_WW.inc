@@ -99,7 +99,11 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       res = flux * ps * mat_elem_sq;
    }
 
-   higgstools_input.push_back(std::make_tuple(field_as_string<H>(indexIn), 22, 23, mHOS, std::sqrt(res)));
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      higgstools_input.push_back(std::make_tuple(field_as_string<H>(indexIn), -24, 24, mHOS, std::sqrt(res)));
+   }
+#endif
 
    return res;
 }

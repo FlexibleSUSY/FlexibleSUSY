@@ -126,7 +126,7 @@ void FlexibleDecay_settings::set(Settings o, double value)
       assert_ge(value, 0, descriptions.at(o).c_str());
       assert_le(value, 2, descriptions.at(o).c_str());
       break;
-   case call_HiggsTools: // 5 [bool]
+   case call_higgstools: // 5 [bool]
       assert_bool(value, descriptions.at(o).c_str());
       break;
    default:
@@ -156,7 +156,7 @@ void FlexibleDecay_settings::reset()
    values[include_higher_order_corrections] = 4.0;
    values[use_Thomson_alpha_in_Phigamgam_and_PhigamZ] = 1.0;
    values[offshell_VV_decays]               = 2.0;
-   values[call_HiggsTools]                  = 1.0;
+   values[call_higgstools]                  = 1.0;
 }
 bool is_integer(double value)
 {

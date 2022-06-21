@@ -147,7 +147,7 @@ void call_HiggsTools(
 
    const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
    const double hs_chisq = signals(pred);
-   std::cout << "\n HiggsSignals chisq: " << hs_chisq << " from "
+   std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "
               << signals.observableCount() << " observables" << std::endl;
 }
 

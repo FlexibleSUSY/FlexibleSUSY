@@ -129,16 +129,20 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
       flux * color_factor * phase_spaceOS * amp2OS_P;
 
    const double result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
-   const std::array<int, 3> dquark_pdgs = {2, 4, 6};
 
-   higgstools_input.push_back(
-      std::make_tuple(
-         field_as_string<AH>(indexIn),
-         dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0)),
-         mAHOS,
-         1i*std::sqrt(result)
-      )
-   );
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      const std::array<int, 3> uquark_pdgs = {2, 4, 6};
+      higgstools_input.push_back(
+         std::make_tuple(
+            field_as_string<AH>(indexIn),
+            uquark_pdgs.at(indexOut1.at(0)), -uquark_pdgs.at(indexOut2.at(0)),
+            mAHOS,
+            1i*std::sqrt(result)
+         )
+      );
+   }
+#endif
 
    return result;
 }

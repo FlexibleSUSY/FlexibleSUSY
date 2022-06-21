@@ -2632,7 +2632,7 @@ IndentText[
 ] <>
 "#ifdef ENABLE_HIGGSTOOLS\n" <>
 IndentText@IndentText@IndentText[
-"if (flexibledecay_settings.get(FlexibleDecay_settings::call_HiggsTools)) {
+"if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
    call_HiggsTools(decays.get_higgstools_input(), physical_input, qedqcd, flexibledecay_settings);
 }\n"
 ] <>

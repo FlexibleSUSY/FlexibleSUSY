@@ -146,7 +146,11 @@ double CLASSNAME::get_partial_width<H, G, G>(
       }
    }
 
-   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mH, std::sqrt(result)));
+#ifdef ENABLE_HIGGSTOOLS
+   if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
+      higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mH, std::sqrt(result)));
+   }
+#endif
 
    return result;
 }
