@@ -37,6 +37,7 @@
 #include <tuple>
 
 #include "model_specific/SM/decays/standard_model_decays.hpp"
+#include "minimizer.hpp"
 
 namespace flexiblesusy {
 
@@ -82,9 +83,24 @@ void call_HiggsTools(
 
       standard_model::Standard_model sm {};
       sm.initialise_from_input(qedqcd);
-      sm.solve_ewsb_tree_level();
-      sm.calculate_DRbar_masses();
-      sm.calculate_pole_masses();
+      auto match_Higgs_mass = [&sm, mass](Eigen::Matrix<double,1,1> const& x) {
+         sm.set_Lambdax(x[0]);
+         sm.solve_ewsb_tree_level();
+         sm.calculate_DRbar_masses();
+         sm.calculate_pole_masses();
+         return std::abs(sm.get_physical().Mhh - mass);
+      };
+      Minimizer<1> minimizer(match_Higgs_mass, 100, 1.0e-5);
+      Eigen::Matrix<double,1,1> start;
+      start << 10;
+      const int status = minimizer.minimize(start);
+      const auto minimum_point = minimizer.get_solution();
+      std::cout << "matched masses: " << sm.get_physical().Mhh << ' ' << mass << std::endl;
+    
+   //BOOST_CHECK_EQUAL(status, GSL_SUCCESS);    
+   //BOOST_CHECK_SMALL(minimizer.get_minimum_value(), 1.0e-5);    
+   //BOOST_CHECK_CLOSE_FRACTION(minimum_point(0), 5.0, 1.0e-5);    
+   //BOOST_CHECK_CLOSE_FRACTION(minimum_point(1), 1.0, 1.0e-5);
 
       flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
       sm_decays.calculate_decays();
