@@ -4,7 +4,7 @@ template <>
 double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
    typename field_indices<conj<W>::type>::type const& indexOut1,
-   typename field_indices<W>::type const& indexOut2) const
+   typename field_indices<W>::type const& indexOut2)
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
@@ -98,6 +98,8 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       // flux * phase space factor * matrix element squared
       res = flux * ps * mat_elem_sq;
    }
+
+   higgstools_input.push_back(std::make_tuple(field_as_string<H>(indexIn), 22, 23, mHOS, std::sqrt(res)));
 
    return res;
 }

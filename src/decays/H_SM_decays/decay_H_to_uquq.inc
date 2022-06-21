@@ -6,7 +6,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    typename field_indices<H>::type const& indexIn,
    typename field_indices<uq>::type const& indexOut1,
    typename field_indices<uq>::type const& indexOut2
-   ) const
+   )
 {
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
@@ -154,11 +154,29 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
    }
 
    // low x limit
-   double result_DR =
-      flux * color_factor * phase_spaceDR * (amp2DR_S + amp2DR_P);
+   const double result_DR_S =
+      flux * color_factor * phase_spaceDR * amp2DR_S;
+   const double result_DR_P =
+      flux * color_factor * phase_spaceDR * amp2DR_P;
    // high x limit
-   double result_OS =
-      flux * color_factor * phase_spaceOS * (amp2OS_S + amp2OS_P);
+   const double result_OS_S =
+      flux * color_factor * phase_spaceOS * amp2OS_S;
+   const double result_OS_P =
+      flux * color_factor * phase_spaceOS * amp2OS_P;
 
-   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   const double result_S = (1-4.*xOS)*result_DR_S + 4*xOS*result_OS_S;
+   const double result_P = (1-4.*xOS)*result_DR_P + 4*xOS*result_OS_P;
+
+   const std::array<int, 3> dquark_pdgs = {2, 4, 6};
+
+   higgstools_input.push_back(
+      std::make_tuple(
+         field_as_string<H>(indexIn),
+         dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0)),
+         mHOS,
+         result_S + result_P*1i
+      )
+   );
+
+   return result_S + result_P;
 }

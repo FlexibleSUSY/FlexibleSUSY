@@ -7,7 +7,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    typename field_indices<AH>::type const& indexIn,
    typename field_indices<bar<dq>::type>::type const& indexOut1,
    typename field_indices<dq>::type const& indexOut2
-   ) const
+   )
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<AH,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");

@@ -99,6 +99,21 @@ private:
 
 std::string strip_field_namespace(std::string const&);
 
+template<typename Field>
+std::string field_as_string(std::array<int, Field::numberOfFieldIndices> const& idx) {
+   auto vector_to_idx = [](auto v) {
+      if (v.empty()) {
+         return std::string();
+      }
+      else {
+         return "(" + std::to_string(v[0]) + ")";
+      }
+   };
+
+   using boost::core::demangle;
+   return strip_field_namespace(demangle(typeid(Field).name())) + vector_to_idx(idx);
+}
+
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 std::string create_process_string(
       std::array<int, FieldIn::numberOfFieldIndices> const in,

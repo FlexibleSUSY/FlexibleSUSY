@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<H, A, Z>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
       const typename field_indices<A>::type& out1_idx,
-      const typename field_indices<Z>::type& out2_idx) const
+      const typename field_indices<Z>::type& out2_idx)
 {
    const auto amp = calculate_amplitude<H, A, Z>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
@@ -18,6 +18,8 @@ double CLASSNAME::get_partial_width<H, A, Z>(
       const double alpha_em = get_alpha(context);
       res *= alpha_em_0/alpha_em;
    }
+
+   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 22, 23, mH, std::sqrt(res)));
 
    return res;
 }

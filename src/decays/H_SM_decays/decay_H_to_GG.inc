@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
       const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx) const
+      const typename field_indices<G>::type& out2_idx)
 {
    const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
@@ -145,6 +145,8 @@ double CLASSNAME::get_partial_width<H, G, G>(
          result += pseudoscalar_corr;
       }
    }
+
+   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mH, std::sqrt(result)));
 
    return result;
 }

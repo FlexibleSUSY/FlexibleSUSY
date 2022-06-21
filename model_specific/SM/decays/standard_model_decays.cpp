@@ -5921,7 +5921,7 @@ void CLASSNAME::calculate_hh_decays()
 
 }
 
-double CLASSNAME::partial_width_hh_to_VGVG(Standard_model model) const
+double CLASSNAME::partial_width_hh_to_VGVG(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5931,7 +5931,7 @@ double CLASSNAME::partial_width_hh_to_VGVG(Standard_model model) const
    return get_partial_width<hh, VG, VG>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_VPVP(Standard_model model) const
+double CLASSNAME::partial_width_hh_to_VPVP(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5941,7 +5941,7 @@ double CLASSNAME::partial_width_hh_to_VPVP(Standard_model model) const
    return get_partial_width<hh, VP, VP>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_VPVZ(Standard_model model) const
+double CLASSNAME::partial_width_hh_to_VPVZ(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5951,7 +5951,7 @@ double CLASSNAME::partial_width_hh_to_VPVZ(Standard_model model) const
    return get_partial_width<hh, VP, VZ>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_VZVZ(Standard_model model) const
+double CLASSNAME::partial_width_hh_to_VZVZ(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5961,7 +5961,7 @@ double CLASSNAME::partial_width_hh_to_VZVZ(Standard_model model) const
    return get_partial_width<hh, VZ, VZ>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_conjVWpVWp(Standard_model model) const
+double CLASSNAME::partial_width_hh_to_conjVWpVWp(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5971,7 +5971,7 @@ double CLASSNAME::partial_width_hh_to_conjVWpVWp(Standard_model model) const
    return get_partial_width<hh, typename conj<VWp>::type, VWp>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_barFvFv(Standard_model model, int gO1, int gO2) const
+double CLASSNAME::partial_width_hh_to_barFvFv(Standard_model model, int gO1, int gO2)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5981,7 +5981,7 @@ double CLASSNAME::partial_width_hh_to_barFvFv(Standard_model model, int gO1, int
    return get_partial_width<hh, typename bar<Fv>::type, Fv>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_barFdFd(Standard_model model, int gO1, int gO2) const
+double CLASSNAME::partial_width_hh_to_barFdFd(Standard_model model, int gO1, int gO2)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -5991,7 +5991,7 @@ double CLASSNAME::partial_width_hh_to_barFdFd(Standard_model model, int gO1, int
    return get_partial_width<hh, typename bar<Fd>::type, Fd>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_barFuFu(Standard_model model, int gO1, int gO2) const
+double CLASSNAME::partial_width_hh_to_barFuFu(Standard_model model, int gO1, int gO2)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
@@ -6001,7 +6001,7 @@ double CLASSNAME::partial_width_hh_to_barFuFu(Standard_model model, int gO1, int
    return get_partial_width<hh, typename bar<Fu>::type, Fu>(context, in_indices, out_1_indices, out_2_indices);
 }
 
-double CLASSNAME::partial_width_hh_to_barFeFe(Standard_model model, int gO1, int gO2) const
+double CLASSNAME::partial_width_hh_to_barFeFe(Standard_model model, int gO1, int gO2)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};

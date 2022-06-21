@@ -33,53 +33,36 @@
 #include <array>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <tuple>
 
 #include "model_specific/SM/decays/standard_model_decays.hpp"
 
 namespace flexiblesusy {
 
-template <typename T>
-double get_width_from_table(T const& decay_table, int inPDG, std::array<int, 2> const& outPDGs) {
-   for (const auto& particle: decay_table) {
-      const int pdg = particle.get_particle_id();
-      if (pdg != inPDG) continue;
-      for (const auto& decay: particle) {
-         std::vector<int> final_state = decay.second.get_final_state_particle_ids();
+std::complex<double> get_width_from_table(std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> const& decay_table, std::array<int, 2> const& outPDGs) {
+      for (const auto& decay: decay_table) {
+         std::vector<int> final_state = {std::get<1>(decay), std::get<2>(decay)};
          if (std::is_permutation(outPDGs.begin(), outPDGs.end(), final_state.begin(), final_state.end())) {
-            return decay.second.get_width();
+            return std::get<3>(decay);
          }
       }
-   }
    return 0.;
 }
 
-template <typename Decay_table>
 void call_HiggsTools(
-   Decay_table const& decay_table,
+   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> const& bsm_input,
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
    FlexibleDecay_settings const& flexibledecay_settings) {
 
-   standard_model::Standard_model sm {};
-   sm.initialise_from_input(qedqcd);
-   sm.solve_ewsb_tree_level();
-   sm.calculate_DRbar_masses();
-   sm.calculate_pole_masses();
-
-   flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
-   sm_decays.calculate_decays();
-
-   const auto sm_decay_table = sm_decays.get_decay_table();
-   for (const auto& fs: {std::array<int, 2>{21, 21}, {5,-5}, {22,22}, {15,-15}, {24, -24}, {23, 23}, {22, 22}, {22, 23}}) {
-      std::cout << "{" << fs.at(0) << "," << fs.at(1) << "}: " << std::sqrt(get_width_from_table(decay_table, 25, fs)/get_width_from_table(sm_decay_table, 25, fs)) << std::endl;
+   std::set<std::string> Higgses;
+   for (const auto& el : bsm_input) {
+      Higgses.insert(std::get<0>(el));
    }
 
-   auto pred = Higgs::Predictions{};
+   auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
-   auto& s = pred.addParticle(HP::BsmParticle("h1", HP::ECharge::neutral));
-   s.setMass(125);
-
-
    // whether to calculate the ggH cross-section in terms of the effective top and bottom Yukawa couplings
    // or by rescaling the SM-like ggH XS by the squared of the effective gg coupling (no effects from colored BSM particles are taken into account)
    static constexpr bool calcggH = false;
@@ -87,30 +70,69 @@ void call_HiggsTools(
    // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
    static constexpr bool calcHgamgam = false;
 
-   auto effc = HP::NeutralEffectiveCouplings{
-            2., 10., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2., 2.};
-   effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+   for (auto& el : Higgses) {
 
-   auto& s2 = pred.addParticle(HP::BsmParticle("h2", HP::ECharge::neutral));
-   s.setMass(255);
-   auto effc2 = HP::NeutralEffectiveCouplings{
-            20., 10., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20., 20.};
-   effectiveCouplingInput(s2, effc2, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+      auto predicate = [&el](auto x) {return std::get<0>(x) == el;};
+      std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> data;
+      std::copy_if(bsm_input.begin(), bsm_input.end(), std::back_inserter(data), predicate);
 
-   auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};
+      auto& s = pred.addParticle(HP::BsmParticle(el, HP::ECharge::neutral));
+      const double mass = std::get<3>(data.at(0));
+      s.setMass(mass);
+
+      standard_model::Standard_model sm {};
+      sm.initialise_from_input(qedqcd);
+      sm.solve_ewsb_tree_level();
+      sm.calculate_DRbar_masses();
+      sm.calculate_pole_masses();
+
+      flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
+      sm_decays.calculate_decays();
+
+      const auto sm_input = sm_decays.get_higgstools_input();
+
+      auto effc = HP::NeutralEffectiveCouplings {};
+      auto f = [&sm_input, &bsm_input](std::array<int, 2> const& a) {
+         return std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a) : 0.;
+      };
+      // quarks
+      effc.uu = f({-2, 2});
+      effc.dd = f({-1, 1});
+      effc.cc = f({-4, 4});
+      effc.ss = f({-3, 3});
+      effc.tt = f({-6, 6});
+      effc.bb = f({-5, 5});
+      // leptons
+      effc.ee = f({-11, 11});
+      effc.mumu = f({-13, 13});
+      effc.tautau = f({-15, 15});
+      // gauge bosons
+      effc.WW = f({-24, 24}).real();
+      effc.ZZ = f({ 23, 23}).real();
+      effc.Zgam = f({ 23, 22}).real();
+      effc.gamgam = f({ 22, 22}).real();
+      effc.gg = f({ 21, 21}).real();
+
+      effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+   }
+
+   auto bounds = Higgs::Bounds {"/run/media/scratch/Pobrane/hbdataset-master"};
    auto hbResult = bounds(pred);
-   // std::cout << hbResult << std::endl;
-   // std::cout << "All applied limits: obsRatio (expRatio)\n";
-   // for (const auto &al : hbResult.appliedLimits) {
-   //   std::cout << al.limit()->id() << " " << al.limit()->processDesc()
-   //             << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
-   //             << std::endl;
-   //}
+   std::ofstream hb_output;
+   hb_output.open("HiggsBounds.out");
+   hb_output << hbResult;
+   hb_output.close();
+   std::cout << "All applied limits: obsRatio (expRatio)\n";
+   for (const auto &al : hbResult.appliedLimits) {
+      std::cout << al.limit()->id() << " " << al.limit()->processDesc()
+                << ": " << al.obsRatio() << " (" << al.expRatio() << ")"
+                << std::endl;
+   }
 
-   const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
-   auto resultHS = signals(pred);
-   //std::cout << "\n HiggsSignals chisq: " << resultHS << " from "
-   //           << signals.observableCount() << " observables" << std::endl;
+   const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
+   const double hs_chisq = signals(pred);
+   std::cout << "\n HiggsSignals chisq: " << hs_chisq << " from "
+              << signals.observableCount() << " observables" << std::endl;
 }
 
 } // flexiblesusy

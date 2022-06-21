@@ -40,6 +40,12 @@
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/decay_amplitudes.hpp"
 
+#include <cmath>
+#include <complex>
+#include <string>
+#include <tuple>
+#include <vector>
+
 namespace flexiblesusy {
 
 class @ModelName@_decays {
@@ -65,6 +71,7 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> get_higgstools_input() const {return higgstools_input;};
 
 @decaysGetters@
 @decaysCalculationPrototypes@
@@ -79,6 +86,7 @@ private:
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
+   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> higgstools_input;
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type
@@ -99,7 +107,7 @@ private:
       const @ModelName@_cxx_diagrams::context_base&,
       typename cxx_diagrams::field_indices<FieldIn>::type const&,
       typename cxx_diagrams::field_indices<FieldOut1>::type const&,
-      typename cxx_diagrams::field_indices<FieldOut2>::type const&) const;
+      typename cxx_diagrams::field_indices<FieldOut2>::type const&);
    double get_alphas(@ModelName@_cxx_diagrams::context_base const&) const;
    double get_alpha(@ModelName@_cxx_diagrams::context_base const&) const;
 };
@@ -126,7 +134,7 @@ double @ModelName@_decays::get_partial_width(
    typename cxx_diagrams::field_indices<FieldIn>::type const& indexIn,
    typename cxx_diagrams::field_indices<FieldOut1>::type const& indexOut1,
    typename cxx_diagrams::field_indices<FieldOut2>::type const& indexOut2
-   ) const
+   )
 {
 
    // on-shell masses

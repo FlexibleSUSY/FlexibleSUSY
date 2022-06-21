@@ -3,7 +3,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       const context_base& context,
       const typename field_indices<AH>::type& in_idx,
       const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx) const
+      const typename field_indices<G>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
       throw OutOfBoundsError("Error in " + create_process_string<AH,G,G>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
@@ -69,6 +69,8 @@ double CLASSNAME::get_partial_width<AH, G, G>(
             WARNING("Unknow correcion in Phi->gg");
       }
    }
+
+   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mAh, std::sqrt(result)));
 
    return result;
 }

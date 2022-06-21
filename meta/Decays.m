@@ -744,7 +744,7 @@ CreatePartialWidthCalculationPrototype[decay_FSParticleDecay] :=
                           StringJoin[If[# > 1, ", int", ""]& /@ finalStateDims];
            functionName = CreatePartialWidthCalculationName[decay];
            returnType = CConversion`CreateCType[CConversion`ScalarType[CConversion`realScalarCType]];
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const;"
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ");"
           ];
 
 CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :=
@@ -777,7 +777,7 @@ CreatePartialWidthCalculationFunction[decay_FSParticleDecay, fieldsNamespace_] :
                                                   If[finalStateDims[[First[#2]]] > 1, "gO" <> ToString[First[#2]], ""]}&, finalState]]];
            body = body <> "\nreturn " <> CreateSpecializedPartialWidthCalculationName[initialState, finalState] <>
                   "(context, in_indices" <> StringJoin[Table[", out_" <> ToString[i] <> "_indices", {i, 1, Length[finalState]}]] <> ");\n";
-           returnType <> " " <> functionName <> "(" <> functionArgs <> ") const\n{\n" <>
+           returnType <> " " <> functionName <> "(" <> functionArgs <> ")\n{\n" <>
                   TextFormatting`IndentText[body] <> "}\n"
           ];
 
@@ -2273,7 +2273,7 @@ CreatePartialWidthSpecializationDecl[decay_FSParticleDecay, modelName_] :=
            "template <>\n" <>
            "double " <> modelName <> "_decays::" <>
            CreateSpecializedPartialWidthCalculationName[initialParticle, finalState, fieldsNamespace] <>
-           "(" <> args <> ") const;"
+           "(" <> args <> ");"
           ];
 
 CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
