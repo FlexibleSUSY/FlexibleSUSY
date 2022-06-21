@@ -5,11 +5,11 @@ WITH_$(MODNAME) := yes
 LIB_model_specific_SM_MK  := \
 		$(DIR)/module.mk
 
-SM_CXXQFT_VERTICES_MK := \
+model_specific_SM_CXXQFT_VERTICES_MK := \
 		$(DIR)/cxx_qft/vertices.mk
 
--include $(SM_CXXQFT_VERTICES_MK)
-LIBSM_CXXQFT_VERTICES_SRC ?= ''
+-include $(model_specific_SM_CXXQFT_VERTICES_MK)
+LIB_model_specific_SM_CXXQFT_VERTICES_SRC ?= ''
 
 LIB_model_specific_SM_SRC := \
 		$(DIR)/decays/standard_model_decays.cpp \
@@ -26,7 +26,7 @@ LIB_model_specific_SM_SRC := \
 		$(DIR)/standard_model_two_scale_model.cpp \
 		$(DIR)/weinberg_angle.cpp
 
-LIB_model_specific_SM_SRC += $(LIBSM_CXXQFT_VERTICES_SRC)
+LIB_model_specific_SM_SRC += $(LIB_model_specific_SM_CXXQFT_VERTICES_SRC)
 
 LIB_model_specific_SM_HDR := \
 		$(DIR)/decays/standard_model_decays.hpp \
@@ -45,7 +45,7 @@ LIB_model_specific_SM_HDR := \
 		$(DIR)/standard_model_two_scale_model.hpp \
 		$(DIR)/weinberg_angle.hpp
 
-LIBSM_CXXQFT_HDR := \
+LIB_model_specific_SM_CXXQFT_HDR := \
 		$(DIR)/cxx_qft/standard_model_qft.hpp \
 		$(DIR)/cxx_qft/standard_model_fields.hpp \
 		$(DIR)/cxx_qft/standard_model_vertices.hpp \
@@ -70,9 +70,9 @@ ifneq ($(INSTALL_DIR),)
 install-src::
 		$(Q)install -d $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_SRC) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIBSM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_HDR) $(LIB_model_specific_SM_CXXQFT_HDR) $(LIB_model_specific_SM_INSTALL_DIR)
 		$(Q)install -m u=rw,g=r,o=r $(LIB_model_specific_SM_MK) $(LIB_model_specific_SM_INSTALL_DIR)
-		$(Q)install -m u=rw,g=r,o=r $(SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(model_specific_SM_CXXQFT_VERTICES_MK) $(SM_INSTALL_CXXQFT_DIR)
 endif
 
 clean-$(MODNAME)-dep:
