@@ -174,7 +174,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
          field_as_string<H>(indexIn),
          dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0)),
          mHOS,
-         result_S + result_P*1i
+         std::sqrt(result_S) + std::sqrt(result_P)*1i
       )
    );
 

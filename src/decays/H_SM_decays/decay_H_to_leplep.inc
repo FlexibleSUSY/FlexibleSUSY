@@ -32,5 +32,14 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
       res *= 1. + get_alpha(context)/Pi*17./4.;
    }
 
+   const std::array<int, 3> clep_pdgs = {11, 13, 15};
+   higgstools_input.push_back(
+      std::make_tuple(
+         field_as_string<H>(indexIn),
+         clep_pdgs.at(indexOut1.at(0)), -clep_pdgs.at(indexOut2.at(0)),
+         mHOS,
+         std::sqrt(res)
+      )
+   );
    return res;
 }
