@@ -36,7 +36,7 @@
 #include <fstream>
 #include <tuple>
 
-#include "model_specific/SM/decays/standard_model_decays.hpp"
+#include "decays/standard_model_decays.hpp"
 #include "minimizer.hpp"
 
 namespace flexiblesusy {
