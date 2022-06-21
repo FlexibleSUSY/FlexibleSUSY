@@ -129,5 +129,16 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
    double result_OS =
       flux * color_factor * phase_spaceOS * amp2OS_P;
 
-   return (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   const double result = (1-4.*xOS)*result_DR + 4*xOS*result_OS;
+   const std::array<int, 3> dquark_pdgs = {1, 3, 5};
+
+   higgstools_input.push_back(
+      std::make_tuple(
+         field_as_string<AH>(indexIn),
+         dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0)),
+         mAOS,
+         1i*std::sqrt(result)
+      )
+   );
+   return result;
 }

@@ -23,7 +23,7 @@ double CLASSNAME::get_partial_width<AH, A, A>(
       res *= Sqr(alpha_em_0/alpha_em);
    }
 
-   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 22, 22, mAH, std::sqrt(res)));
+   higgstools_input.push_back(std::make_tuple(field_as_string<AH>(in_idx), 22, 22, mAH, std::sqrt(res)));
 
    return res;
 }

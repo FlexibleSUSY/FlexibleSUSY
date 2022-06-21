@@ -70,7 +70,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       }
    }
 
-   higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mAh, std::sqrt(result)));
+   higgstools_input.push_back(std::make_tuple(field_as_string<AH>(in_idx), 21, 21, mAh, std::sqrt(result)));
 
    return result;
 }
