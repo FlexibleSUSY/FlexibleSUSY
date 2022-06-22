@@ -37,6 +37,7 @@
 #include <tuple>
 
 #include "decays/standard_model_decays.hpp"
+#include "spectrum_generator_settings.hpp"
 #include "minimizer.hpp"
 
 namespace flexiblesusy {
@@ -55,6 +56,7 @@ void call_HiggsTools(
    std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> const& bsm_input,
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
+   Spectrum_generator_settings const& spectrum_generator_settings,
    FlexibleDecay_settings const& flexibledecay_settings) {
 
    std::set<std::string> Higgses;
@@ -73,9 +75,11 @@ void call_HiggsTools(
 
    for (auto& el : Higgses) {
 
-      auto predicate = [&el](auto x) {return std::get<0>(x) == el;};
       std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> data;
-      std::copy_if(bsm_input.begin(), bsm_input.end(), std::back_inserter(data), predicate);
+      std::copy_if(
+         bsm_input.begin(), bsm_input.end(), std::back_inserter(data),
+         [&el](auto x) {return std::get<0>(x) == el;}
+      );
 
       auto& s = pred.addParticle(HP::BsmParticle(el, HP::ECharge::neutral));
       const double mass = std::get<3>(data.at(0));
@@ -83,11 +87,16 @@ void call_HiggsTools(
 
       standard_model::Standard_model sm {};
       sm.initialise_from_input(qedqcd);
+      sm.set_physical_input(physical_input);
+      sm.set_pole_mass_loop_order(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order));
+      sm.set_ewsb_loop_order(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order));
+      sm.set_precision(spectrum_generator_settings.get(Spectrum_generator_settings::precision));
+      sm.set_thresholds(spectrum_generator_settings.get(Spectrum_generator_settings::threshold_corrections_loop_order));
       auto match_Higgs_mass = [&sm, mass](Eigen::Matrix<double,1,1> const& x) {
          sm.set_Lambdax(x[0]);
-         sm.solve_ewsb_tree_level();
-         sm.calculate_DRbar_masses();
-         sm.calculate_pole_masses();
+         sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
+         sm.solve_ewsb();
+         sm.calculate_Mhh_pole();
          return std::abs(sm.get_physical().Mhh - mass);
       };
       Minimizer<1> minimizer(match_Higgs_mass, 100, 1.0e-5);
@@ -95,23 +104,21 @@ void call_HiggsTools(
       start << 10;
       const int status = minimizer.minimize(start);
       const auto minimum_point = minimizer.get_solution();
-      std::cout << "matched masses: " << sm.get_physical().Mhh << ' ' << mass << std::endl;
-    
-   //BOOST_CHECK_EQUAL(status, GSL_SUCCESS);    
-   //BOOST_CHECK_SMALL(minimizer.get_minimum_value(), 1.0e-5);    
-   //BOOST_CHECK_CLOSE_FRACTION(minimum_point(0), 5.0, 1.0e-5);    
-   //BOOST_CHECK_CLOSE_FRACTION(minimum_point(1), 1.0, 1.0e-5);
+      std::cout << el << " matched masses: " << sm.get_physical().Mhh << ' ' << mass << ' ' << minimum_point[0] << ' '<< sm.get_physical().MVWp << std::endl;
+
+      sm.calculate_pole_masses();
 
       flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
       sm_decays.calculate_decays();
 
       const auto sm_input = sm_decays.get_higgstools_input();
 
-      auto effc = HP::NeutralEffectiveCouplings {};
       auto f = [&sm_input, &bsm_input](std::array<int, 2> const& a) {
          std::cout << "coup  " << a.at(0) << a.at(1) << ' ' << (std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a) : 0.) << std::endl;
          return std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a).real() : 0.;
       };
+
+      auto effc = HP::NeutralEffectiveCouplings {};
       // quarks
       effc.dd = f({-1, 1});
       effc.uu = f({-2, 2});
@@ -124,19 +131,22 @@ void call_HiggsTools(
       effc.mumu =   f({-13, 13});
       effc.tautau = f({-15, 15});
       // gauge bosons
-      effc.WW = f({-24, 24}).real();
-      effc.ZZ = f({ 23, 23}).real();
-      effc.Zgam = f({ 23, 22}).real();
+      effc.WW =     f({-24, 24}).real();
+      effc.ZZ =     f({ 23, 23}).real();
+      effc.Zgam =   f({ 23, 22}).real();
       effc.gamgam = f({ 22, 22}).real();
-      effc.gg = f({ 21, 21}).real();
+      effc.gg =     f({ 21, 21}).real();
 
-      effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggs, calcggH, calcHgamgam);
+      effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggsEW, calcggH, calcHgamgam);
+      // @todo: set total width to the one computed by FD as HiggsTools doesn't calculate
+      // BSM decays of Higgs, e.g. H -> Ah Z
+      // s.setTotalWidth(2.);
    }
 
+   // HiggsBounds
    auto bounds = Higgs::Bounds {"/run/media/scratch/Pobrane/hbdataset-master"};
    auto hbResult = bounds(pred);
-   std::ofstream hb_output;
-   hb_output.open("HiggsBounds.out");
+   std::ofstream hb_output("HiggsBounds.out");
    hb_output << hbResult;
    hb_output.close();
    std::cout << "All applied limits: obsRatio (expRatio)\n";
@@ -146,6 +156,7 @@ void call_HiggsTools(
                 << std::endl;
    }
 
+   // HiggsSignals
    const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
    const double hs_chisq = signals(pred);
    std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "

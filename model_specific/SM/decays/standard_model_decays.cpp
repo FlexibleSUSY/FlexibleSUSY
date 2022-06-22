@@ -5812,7 +5812,7 @@ void CLASSNAME::calculate_hh_decays()
       auto decay_mass = PHYSICAL(Mhh);
       if (decay_mass > qedqcd.displayPoleMZ()) {
          model.run_to(decay_mass);
-         model.solve_ewsb();
+         model.calculate_DRbar_masses();
       }
    }
 
