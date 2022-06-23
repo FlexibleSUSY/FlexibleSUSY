@@ -88,11 +88,12 @@ void call_HiggsTools(
       standard_model::Standard_model sm {};
       sm.initialise_from_input(qedqcd);
       sm.set_physical_input(physical_input);
-      sm.set_pole_mass_loop_order(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order));
-      sm.set_ewsb_loop_order(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order));
+      sm.set_pole_mass_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::pole_mass_loop_order)));
+      sm.set_ewsb_loop_order(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::ewsb_loop_order)));
       sm.set_precision(spectrum_generator_settings.get(Spectrum_generator_settings::precision));
       sm.set_threshold_corrections(spectrum_generator_settings.get_threshold_corrections());
       sm.set_loop_corrections(spectrum_generator_settings.get_loop_corrections());
+      sm.set_loops(static_cast<int>(spectrum_generator_settings.get(Spectrum_generator_settings::beta_loop_order)));
       auto match_Higgs_mass = [&sm, mass](Eigen::Matrix<double,1,1> const& x) {
          sm.set_Lambdax(x[0]);
          sm.calculate_DRbar_masses(); // internaly calls solve_ewsb_tree_level()
