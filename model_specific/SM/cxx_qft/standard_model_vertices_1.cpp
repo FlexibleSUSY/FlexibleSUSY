@@ -144,7 +144,7 @@ cxx_diagrams::ChiralVertex VertexImpl<standard_model_cxx_diagrams::fields::Ah, t
 {
    const int gt1 = indices[0];
    const int gt2 = indices[1];
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Vu = MODELPARAMETER(Vu);
    const auto Uu = MODELPARAMETER(Uu);
 
@@ -351,7 +351,7 @@ cxx_diagrams::ChiralVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, t
 {
    const int gt1 = indices[0];
    const int gt2 = indices[1];
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Vu = MODELPARAMETER(Vu);
    const auto Uu = MODELPARAMETER(Uu);
 
@@ -729,7 +729,7 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
    const int gt1 = indices[0];
    const int gt2 = indices[1];
    const auto Yd = MODELPARAMETER(Yd);
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Vu = MODELPARAMETER(Vu);
    const auto Ud = MODELPARAMETER(Ud);
    const auto Uu = MODELPARAMETER(Uu);
@@ -872,7 +872,7 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
 {
    const int gt1 = indices[0];
    const int gt2 = indices[1];
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Yd = MODELPARAMETER(Yd);
    const auto Vd = MODELPARAMETER(Vd);
    const auto Uu = MODELPARAMETER(Uu);
@@ -907,7 +907,7 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
 {
    const int gt1 = indices[0];
    const int gt2 = indices[1];
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Vu = MODELPARAMETER(Vu);
    const auto Uu = MODELPARAMETER(Uu);
 
@@ -923,7 +923,7 @@ cxx_diagrams::ChiralVertex VertexImpl<typename standard_model_cxx_diagrams::fiel
 {
    const int gt1 = indices[0];
    const int gt2 = indices[1];
-   const auto Yu = MODELPARAMETER(Yu);
+   const auto Yu = -MODELPARAMETER(Yu);
    const auto Vu = MODELPARAMETER(Vu);
    const auto Uu = MODELPARAMETER(Uu);
 
