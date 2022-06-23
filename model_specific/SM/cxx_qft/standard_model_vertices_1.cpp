@@ -29,10 +29,8 @@
 #include "concatenate.hpp"
 #include "wrappers.hpp"
 
-#define INPUTPARAMETER(p) context.model.get_input_parameters().p
 #define MODELPARAMETER(p) context.model.get_##p()
 #define DERIVEDPARAMETER(p) context.model.p()
-#define PHASE(p) context.model.get_##p()
 
 namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {
