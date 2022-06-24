@@ -163,7 +163,7 @@ do
         continue
     fi
 
-    cmd="${sg} --slha-input-file=${input} --slha-output-file=${TMP_FILE} > /dev/null 2>&1"
+    cmd="${sg} --slha-input-file=${input} --slha-output-file=${TMP_FILE}"
 
     echo "> running spectrum generator for $model"
     echo "> input file: ${input}"
