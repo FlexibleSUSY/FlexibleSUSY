@@ -85,6 +85,7 @@ void call_HiggsTools(
       const double mass = std::get<3>(data.at(0));
       s.setMass(mass);
 
+      // create a SM equivalent to the BSM model, with mhSM == mass
       standard_model::Standard_model sm {};
       sm.initialise_from_input(qedqcd);
       sm.set_physical_input(physical_input);
@@ -106,13 +107,15 @@ void call_HiggsTools(
       start << 10;
       const int status = minimizer.minimize(start);
       const auto minimum_point = minimizer.get_solution();
-      std::cout << el << " matched masses: " << sm.get_physical().Mhh << ' ' << mass << ' ' << minimum_point[0] << ' '<< sm.get_physical().MVWp << std::endl;
-
+      // finally, after fixing lambda to a value giving mhSM == mass,
+      // compute all the other masses
       sm.calculate_pole_masses();
 
+      std::cout << el << " matched masses: " << sm.get_physical().Mhh << ' ' << mass << ' ' << minimum_point[0] << ' '<< sm.get_physical().MVWp << std::endl;
+
+      // calculate decays in the SM equivalent
       flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
       sm_decays.calculate_decays();
-
       const auto sm_input = sm_decays.get_higgstools_input();
 
       auto f = [&sm_input, &bsm_input](std::array<int, 2> const& a) {
