@@ -149,7 +149,7 @@ void call_HiggsTools(
    }
 
    // HiggsBounds
-   auto bounds = Higgs::Bounds {"/run/media/scratch/Pobrane/hbdataset-master"};
+   auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};
    auto hbResult = bounds(pred);
    std::ofstream hb_output("HiggsBounds.out");
    hb_output << hbResult;
@@ -162,7 +162,7 @@ void call_HiggsTools(
    }
 
    // HiggsSignals
-   const auto signals = Higgs::Signals {"/run/media/scratch/Pobrane/hsdataset-main"};
+   const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
    const double hs_chisq = signals(pred);
    std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "
               << signals.observableCount() << " observables" << std::endl;
