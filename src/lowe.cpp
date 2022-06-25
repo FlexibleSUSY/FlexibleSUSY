@@ -254,7 +254,7 @@ double QedQcd::qedBeta() const {
 /// that if quark masses are running, the number of active quarks will
 /// be taken into account.
 double QedQcd::qcdBeta() const {
-  static const double INVPI = 1.0 / flexiblesusy::Pi;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
   const int quarkFlavours = flavours(get_scale());
   const double qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
   const double qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
@@ -284,7 +284,7 @@ double QedQcd::qcdBeta() const {
 
 /// returns fermion mass beta functions
 Eigen::Array<double,9,1> QedQcd::massBeta() const {
-  static const double INVPI = 1.0 / flexiblesusy::Pi;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
 
   // qcd bits: 1,2,3 loop resp.
   double qg1 = 0., qg2 = 0., qg3 = 0.;

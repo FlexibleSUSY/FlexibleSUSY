@@ -65,7 +65,7 @@ protected:
    @ModelName@_input_parameters input{};
 
 private:
-   static const int numberOfParameters = @numberOfParameters@;
+   static constexpr int numberOfParameters = @numberOfParameters@;
 
    struct Susy_traces {
 @traceDefs@
