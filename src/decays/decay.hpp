@@ -59,6 +59,145 @@ private:
    std::string proc_string;
 };
 
+struct NeutralHiggsEffectiveCouplings {
+   std::string particle = "";
+   double mass = 0.;
+   double width = 0.;
+   std::complex<double> dd = 0.;
+   std::complex<double> uu = 0.;
+   std::complex<double> ss = 0.;
+   std::complex<double> cc = 0.;
+   std::complex<double> bb = 0.;
+   std::complex<double> tt = 0.;
+   std::complex<double> ee = 0.;
+   std::complex<double> mumu = 0.;
+   std::complex<double> tautau = 0.;
+   double WW = 0.;
+   double ZZ = 0.;
+   double Zgam = 0.;
+   double gamgam = 0.;
+   double gg = 0.;
+};
+
+class EffectiveCoupling_list {
+public:
+   EffectiveCoupling_list() = default;
+   ~EffectiveCoupling_list() = default;
+   EffectiveCoupling_list(const EffectiveCoupling_list&) = default;
+   EffectiveCoupling_list(EffectiveCoupling_list&&) = default;
+   EffectiveCoupling_list& operator=(const EffectiveCoupling_list&) = default;
+   EffectiveCoupling_list& operator=(EffectiveCoupling_list&&) = default;
+
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator begin() noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator begin() const noexcept { return effective_coupling_list.begin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cbegin() const noexcept { return effective_coupling_list.cbegin(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::iterator end() noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator end() const noexcept { return effective_coupling_list.end(); }
+   std::vector<NeutralHiggsEffectiveCouplings>::const_iterator cend() const noexcept { return effective_coupling_list.end(); }
+   NeutralHiggsEffectiveCouplings const& operator[](int index) const {
+      return effective_coupling_list[index];
+   }
+
+   void add_coupling(std::string p, std::array<int, 2> fs, double c) {
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());};
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         if (are_the_same(fs, {21, 21})) {
+            effC.gg = c;
+         }
+         else if (are_the_same(fs, {22, 22})) {
+            effC.gamgam = c;
+         }
+         else if (are_the_same(fs, {23, 23})) {
+            effC.ZZ = c;
+         }
+         else if (are_the_same(fs, {-24, 24})) {
+            effC.WW = c;
+         }
+         else if (are_the_same(fs, {22, 23})) {
+            effC.Zgam = c;
+         }
+         effective_coupling_list.push_back(effC);
+      }
+      else {
+         if (are_the_same(fs, {21, 21})) {
+            found->gg = c;
+         }
+         else if (are_the_same(fs, {22, 22})) {
+            found->gamgam = c;
+         }
+         else if (are_the_same(fs, {23, 23})) {
+            found->ZZ = c;
+         }
+         else if (are_the_same(fs, {-24, 24})) {
+            found->WW = c;
+         }
+         else if (are_the_same(fs, {22, 23})) {
+            found->Zgam = c;
+         }
+      }
+   }
+   void add_coupling(std::string p, std::array<int, 2> fs, std::complex<double> c) {
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());};
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         if (are_the_same(fs, {-1, 1})) {
+            effC.dd = c;
+         }
+         else if (are_the_same(fs, {-2, 2})) {
+            effC.uu = c;
+         }
+         else if (are_the_same(fs, {-3, 3})) {
+            effC.ss = c;
+         }
+         else if (are_the_same(fs, {-4, 4})) {
+            effC.cc = c;
+         }
+         else if (are_the_same(fs, {-5, 5})) {
+            effC.bb = c;
+         }
+         else if (are_the_same(fs, {-6, 6})) {
+            effC.tt = c;
+         }
+         effective_coupling_list.push_back(effC);
+      }
+      else {
+
+         if (are_the_same(fs, {-1, 1})) {
+            found->dd = c;
+         }
+         else if (are_the_same(fs, {-2, 2})) {
+            found->uu = c;
+         }
+         else if (are_the_same(fs, {-3, 3})) {
+            found->ss = c;
+         }
+         else if (are_the_same(fs, {-4, 4})) {
+            found->cc = c;
+         }
+         else if (are_the_same(fs, {-5, 5})) {
+            found->bb = c;
+         }
+         else if (are_the_same(fs, {-6, 6})) {
+            found->tt = c;
+         }
+      }
+   }
+   std::size_t size() const noexcept { return effective_coupling_list.size(); }
+private:
+   std::vector<NeutralHiggsEffectiveCouplings> effective_coupling_list {};
+};
+
 std::size_t hash_decay(const Decay& decay);
 
 class Decays_list {

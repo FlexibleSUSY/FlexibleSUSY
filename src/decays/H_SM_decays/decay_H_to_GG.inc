@@ -148,7 +148,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
 
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.push_back(std::make_tuple(field_as_string<H>(in_idx), 21, 21, mH, std::sqrt(result)));
+      higgstools_input.add_coupling(field_as_string<H>(in_idx), {21, 21}, std::sqrt(result));
    }
 #endif
 

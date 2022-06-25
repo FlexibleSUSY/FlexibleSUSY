@@ -5811,7 +5811,12 @@ void CLASSNAME::calculate_hh_decays()
    if (run_to_decay_particle_scale) {
       auto decay_mass = PHYSICAL(Mhh);
       if (decay_mass > qedqcd.displayPoleMZ()) {
-         model.run_to(decay_mass);
+         try {
+            model.run_to(decay_mass);
+         }
+         catch (const std::exception& e) {
+            std::cout << e.what() << '\n';
+         }
          model.calculate_DRbar_masses();
       }
    }
@@ -5918,6 +5923,11 @@ void CLASSNAME::calculate_hh_decays()
 
       }
    }
+   auto found = std::find_if(std::begin(higgstools_input), std::end(
+      higgstools_input), [](NeutralHiggsEffectiveCouplings const& effC) {
+      return effC.particle == field_as_string<hh>({});});
+   found->width = decays.get_total_width();
+   found->mass = context.physical_mass<hh>({});
 
 }
 

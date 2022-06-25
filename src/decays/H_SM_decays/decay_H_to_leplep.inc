@@ -35,14 +35,9 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       const std::array<int, 3> clep_pdgs = {11, 13, 15};
-      higgstools_input.push_back(
-         std::make_tuple(
-            field_as_string<H>(indexIn),
-            clep_pdgs.at(indexOut1.at(0)), -clep_pdgs.at(indexOut2.at(0)),
-            mHOS,
+      higgstools_input.add_coupling(field_as_string<H>(indexIn), {clep_pdgs.at(indexOut1.at(0)), -clep_pdgs.at(indexOut2.at(0))},
             // @TODO: fix
             std::sqrt(res)
-         )
       );
    }
 #endif

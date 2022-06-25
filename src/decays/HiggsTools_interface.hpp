@@ -42,27 +42,12 @@
 
 namespace flexiblesusy {
 
-std::complex<double> get_width_from_table(std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> const& decay_table, std::array<int, 2> const& outPDGs) {
-      for (const auto& decay: decay_table) {
-         std::vector<int> final_state = {std::get<1>(decay), std::get<2>(decay)};
-         if (std::is_permutation(outPDGs.begin(), outPDGs.end(), final_state.begin(), final_state.end())) {
-            return std::get<4>(decay);
-         }
-      }
-   return 0.;
-}
-
 void call_HiggsTools(
-   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> const& bsm_input,
+   EffectiveCoupling_list const& bsm_input,
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
    Spectrum_generator_settings const& spectrum_generator_settings,
    FlexibleDecay_settings const& flexibledecay_settings) {
-
-   std::set<std::string> Higgses;
-   for (const auto& el : bsm_input) {
-      Higgses.insert(std::get<0>(el));
-   }
 
    auto pred = Higgs::Predictions();
    namespace HP = Higgs::predictions;
@@ -73,16 +58,10 @@ void call_HiggsTools(
    // or by rescaling the SM-like H->gaga decay by the squared of the effective gamgam coupling (no effects from charged BSM particles are taken into account).
    static constexpr bool calcHgamgam = false;
 
-   for (auto& el : Higgses) {
+   for (auto const& el : bsm_input) {
 
-      std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> data;
-      std::copy_if(
-         bsm_input.begin(), bsm_input.end(), std::back_inserter(data),
-         [&el](auto x) {return std::get<0>(x) == el;}
-      );
-
-      auto& s = pred.addParticle(HP::BsmParticle(el, HP::ECharge::neutral));
-      const double mass = std::get<3>(data.at(0));
+      auto& s = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::neutral));
+      const double mass = el.mass;
       s.setMass(mass);
 
       // create a SM equivalent to the BSM model, with mhSM == mass
@@ -110,42 +89,38 @@ void call_HiggsTools(
       // finally, after fixing lambda to a value giving mhSM == mass,
       // compute all the other masses
       sm.calculate_pole_masses();
+      std::cout << mass << ' ' << sm.get_physical().Mhh << '\n';
 
-      std::cout << el << " matched masses: " << sm.get_physical().Mhh << ' ' << mass << ' ' << minimum_point[0] << ' '<< sm.get_physical().MVWp << std::endl;
+      if (sm.get_physical().Mhh > 0) {
+         // calculate decays in the SM equivalent
+         flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
+         sm_decays.calculate_decays();
+         const auto sm_input = sm_decays.get_higgstools_input();
 
-      // calculate decays in the SM equivalent
-      flexiblesusy::Standard_model_decays sm_decays(sm, qedqcd, physical_input, flexibledecay_settings);
-      sm_decays.calculate_decays();
-      const auto sm_input = sm_decays.get_higgstools_input();
+         auto effc = HP::NeutralEffectiveCouplings {};
+         // quarks
+         effc.dd = std::abs(sm_input[0].dd) > 0 ? el.dd/sm_input[0].dd.real() : 0.;
+         effc.uu = std::abs(sm_input[0].uu) > 0 ? el.uu/sm_input[0].uu.real() : 0.;
+         effc.ss = std::abs(sm_input[0].ss) > 0 ? el.ss/sm_input[0].ss.real() : 0.;
+         effc.cc = std::abs(sm_input[0].cc) > 0 ? el.cc/sm_input[0].cc.real() : 0.;
+         effc.bb = std::abs(sm_input[0].bb) > 0 ? el.bb/sm_input[0].bb.real() : 0.;
+         effc.tt = std::abs(sm_input[0].tt) > 0 ? el.tt/sm_input[0].tt.real() : 0.;
+         // leptons
+         effc.ee = std::abs(sm_input[0].ee) > 0 ? el.ee/sm_input[0].ee.real() : 0.;
+         effc.mumu = std::abs(sm_input[0].mumu) > 0 ? el.mumu/sm_input[0].mumu.real() : 0.;
+         effc.tautau = std::abs(sm_input[0].tautau) > 0 ? el.tautau/sm_input[0].tautau.real() : 0.;
+         // gauge bosons
+         effc.WW = std::abs(sm_input[0].WW) > 0 ? el.WW/sm_input[0].WW : 0.;
+         effc.ZZ = std::abs(sm_input[0].ZZ) > 0 ? el.ZZ/sm_input[0].ZZ : 0.;
+         effc.gamgam = std::abs(sm_input[0].gamgam) > 0 ? el.gamgam/sm_input[0].gamgam : 0.;
+         effc.Zgam = std::abs(sm_input[0].Zgam) > 0 ? el.Zgam/sm_input[0].Zgam : 0.;
+         effc.gg = std::abs(sm_input[0].gg) > 0 ? el.gg/sm_input[0].gg : 0.;
 
-      auto f = [&sm_input, &bsm_input](std::array<int, 2> const& a) {
-         std::cout << "coup  " << a.at(0) << a.at(1) << ' ' << (std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a) : 0.) << std::endl;
-         return std::abs(get_width_from_table(sm_input, a)) > 0 ? get_width_from_table(bsm_input, a)/get_width_from_table(sm_input, a).real() : 0.;
-      };
-
-      auto effc = HP::NeutralEffectiveCouplings {};
-      // quarks
-      effc.dd = f({-1, 1});
-      effc.uu = f({-2, 2});
-      effc.ss = f({-3, 3});
-      effc.cc = f({-4, 4});
-      effc.bb = f({-5, 5});
-      effc.tt = f({-6, 6});
-      // leptons
-      effc.ee =     f({-11, 11});
-      effc.mumu =   f({-13, 13});
-      effc.tautau = f({-15, 15});
-      // gauge bosons
-      effc.WW =     f({-24, 24}).real();
-      effc.ZZ =     f({ 23, 23}).real();
-      effc.Zgam =   f({ 23, 22}).real();
-      effc.gamgam = f({ 22, 22}).real();
-      effc.gg =     f({ 21, 21}).real();
-
-      effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggsEW, calcggH, calcHgamgam);
-      // @todo: set total width to the one computed by FD as HiggsTools doesn't calculate
-      // BSM decays of Higgs, e.g. H -> Ah Z
-      // s.setTotalWidth(2.);
+         effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggsEW, calcggH, calcHgamgam);
+         // set total width to the one computed by FD as HiggsTools doesn't calculate
+         // BSM decays of Higgs, e.g. H -> Ah Z
+         s.setTotalWidth(el.width);
+      }
    }
 
    // HiggsBounds

@@ -70,7 +70,7 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
-   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> get_higgstools_input() const {return higgstools_input;};
+   EffectiveCoupling_list get_higgstools_input() const {return higgstools_input;};
 
    const Decays_list& get_hh_decays() const { return decay_table.get_hh_decays();
       }
@@ -94,7 +94,7 @@ private:
    bool run_to_decay_particle_scale {true};
    SM_decay_table decay_table{};
    FlexibleDecay_problems problems{};
-   std::vector<std::tuple<std::string, int, int, double, std::complex<double>>> higgstools_input;
+   EffectiveCoupling_list higgstools_input;
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

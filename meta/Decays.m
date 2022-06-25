@@ -980,7 +980,14 @@ CreateDecaysCalculationFunction[decaysList_] :=
               body;
 
            body = "\nif (run_to_decay_particle_scale) {\n" <>
-                  TextFormatting`IndentText[runToScale] <> "}\n\n" <> body;
+                  TextFormatting`IndentText[runToScale] <> "}\n\n" <> body <>
+                  If[MemberQ[Join[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}], particle],
+                  "auto found = std::find_if(std::begin(higgstools_input), std::end(higgstools_input), [" <> If[particleDim > 1, "&gI1", ""] <> "](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == field_as_string<" <> ToString@particle <> ">({" <>
+                  If[particleDim > 1, "gI1", ""] <> "});});\n" <>
+                  "found->width = decays.get_total_width();\n" <>
+                  "found->mass = context.physical_mass<" <> ToString@particle <> ">({" <> If[particleDim > 1, "gI1", ""] <> "});",
+                  ""
+                  ];
            If[particleDim > 1,
               body = LoopOverIndexCollection[body, {{"gI1", Utils`MathIndexToCPP@particleStart, particleDim}}] <> "\n";
              ];
