@@ -18,7 +18,6 @@ LIBFLEXI_SRC := \
 		$(DIR)/decays/decay.cpp \
 		$(DIR)/decays/decay_amplitudes.cpp \
 		$(DIR)/decays/decay_functions.cpp \
-		$(DIR)/decays/HiggsTools_interface.cpp \
 		$(DIR)/decays/flexibledecay_settings.cpp \
 		$(DIR)/decays/one_loop_decay_diagrams.cpp \
 		$(DIR)/eta.cpp \
@@ -90,7 +89,6 @@ LIBFLEXI_HDR := \
 		$(DIR)/decays/decay_amplitudes.hpp \
 		$(DIR)/decays/decay_functions.hpp \
 		$(DIR)/decays/decay_problems.hpp \
-		$(DIR)/decays/HiggsTools_interface.hpp \
 		$(DIR)/decays/flexibledecay_settings.hpp \
 		$(DIR)/decays/one_loop_decay_diagrams.hpp \
 		$(DIR)/derivative.hpp \
@@ -188,6 +186,14 @@ LIBFLEXI_HDR += \
 		$(DIR)/semi_analytic_solver.hpp \
 		$(DIR)/two_scale_running_precision.hpp \
 		$(DIR)/two_scale_solver.hpp
+endif
+
+ifeq ($(ENABLE_HIGGSTOOLS),yes)
+LIBFLEXI_SRC += \
+		$(DIR)/decays/HiggsTools_interface.cpp
+
+LIBFLEXI_HDR += \
+		$(DIR)/decays/HiggsTools_interface.hpp
 endif
 
 # remove duplicates in case multiple solvers are used

@@ -83,10 +83,6 @@ class EffectiveCoupling_list {
 public:
    EffectiveCoupling_list() = default;
    ~EffectiveCoupling_list() = default;
-   EffectiveCoupling_list(const EffectiveCoupling_list&) = default;
-   EffectiveCoupling_list(EffectiveCoupling_list&&) = default;
-   EffectiveCoupling_list& operator=(const EffectiveCoupling_list&) = default;
-   EffectiveCoupling_list& operator=(EffectiveCoupling_list&&) = default;
 
    std::vector<NeutralHiggsEffectiveCouplings>::iterator begin() noexcept { return effective_coupling_list.begin(); }
    std::vector<NeutralHiggsEffectiveCouplings>::const_iterator begin() const noexcept { return effective_coupling_list.begin(); }
@@ -98,7 +94,7 @@ public:
       return effective_coupling_list[index];
    }
 
-   void add_coupling(std::string p, std::array<int, 2> fs, double c) {
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),
          [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
@@ -142,7 +138,7 @@ public:
          }
       }
    }
-   void add_coupling(std::string p, std::array<int, 2> fs, std::complex<double> c) {
+   void add_coupling(std::string const& p, std::array<int, 2> const& fs, std::complex<double> c) {
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),
          [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
