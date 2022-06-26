@@ -122,7 +122,7 @@ public:
          else if (are_the_same(fs, {22, 23})) {
             effC.Zgam = c;
          }
-         effective_coupling_list.push_back(effC);
+         effective_coupling_list.push_back(std::move(effC));
       }
       else {
          if (are_the_same(fs, {21, 21})) {
@@ -169,7 +169,7 @@ public:
          else if (are_the_same(fs, {-6, 6})) {
             effC.tt = c;
          }
-         effective_coupling_list.push_back(effC);
+         effective_coupling_list.push_back(std::move(effC));
       }
       else {
 
