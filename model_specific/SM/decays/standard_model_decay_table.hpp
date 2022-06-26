@@ -17,11 +17,10 @@
 // ====================================================================
 
 
-#ifndef SM_DECAY_TABLE_H
-#define SM_DECAY_TABLE_H
+#ifndef STANDARDMODEL_DECAY_TABLE_H
+#define STANDARDMODEL_DECAY_TABLE_H
 
-#include "../standard_model.hpp"
-
+#include "standard_model.hpp"
 #include "decays/decay.hpp"
 
 #include <array>
@@ -29,20 +28,20 @@
 
 namespace flexiblesusy {
 
-class SM_decay_table {
+class standard_model_decay_table {
 private:
-   static const int number_of_decay_particles = 1;
+   static constexpr int number_of_decay_particles = 1;
    using Table_type = std::array<Decays_list, number_of_decay_particles>;
 public:
    using iterator = Table_type::iterator;
    using const_iterator = Table_type::const_iterator;
 
-   SM_decay_table();
-   ~SM_decay_table() = default;
-   SM_decay_table(const SM_decay_table&) = default;
-   SM_decay_table(SM_decay_table&&) = default;
-   SM_decay_table& operator=(const SM_decay_table&) = default;
-   SM_decay_table& operator=(SM_decay_table&&) = default;
+   standard_model_decay_table();
+   ~standard_model_decay_table() = default;
+   standard_model_decay_table(const standard_model_decay_table&) = default;
+   standard_model_decay_table(standard_model_decay_table&&) = default;
+   standard_model_decay_table& operator=(const standard_model_decay_table&) = default;
+   standard_model_decay_table& operator=(standard_model_decay_table&&) = default;
 
    iterator begin() noexcept { return decay_table.begin(); }
    const_iterator begin() const noexcept { return decay_table.begin(); }
@@ -62,7 +61,7 @@ private:
    Table_type decay_table;
 };
 
-std::ostream& operator<<(std::ostream&, const SM_decay_table&);
+std::ostream& operator<<(std::ostream&, const standard_model_decay_table&);
 
 } // namespace flexiblesusy
 

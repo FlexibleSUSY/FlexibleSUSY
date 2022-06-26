@@ -35,8 +35,8 @@
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/flexibledecay_problems.hpp"
 
-#include "../standard_model.hpp"
-#include "../cxx_qft/standard_model_qft.hpp"
+#include "standard_model.hpp"
+#include "cxx_qft/standard_model_qft.hpp"
 #include "decays/decay_amplitudes.hpp"
 #include "standard_model_decay_table.hpp"
 
@@ -64,7 +64,7 @@ public:
    Standard_model_decays& operator=(const Standard_model_decays&) = default;
    Standard_model_decays& operator=(Standard_model_decays&&) = default;
 
-   const SM_decay_table& get_decay_table() const;
+   const standard_model_decay_table& get_decay_table() const;
    const FlexibleDecay_problems& get_problems() const;
 
    void clear();
@@ -92,7 +92,7 @@ private:
    Physical_input physical_input;
    FlexibleDecay_settings flexibledecay_settings {};
    bool run_to_decay_particle_scale {true};
-   SM_decay_table decay_table{};
+   standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
    EffectiveCoupling_list higgstools_input;
 

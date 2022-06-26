@@ -27,7 +27,7 @@
 #define STANDARDMODEL_CXXQFT_CONTEXT_BASE_H
 
 #include "standard_model_fields.hpp"
-#include "../standard_model.hpp"
+#include "standard_model.hpp"
 
 namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {

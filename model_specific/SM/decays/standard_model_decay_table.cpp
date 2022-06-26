@@ -26,12 +26,12 @@
 
 namespace flexiblesusy {
 
-SM_decay_table::SM_decay_table()
+standard_model_decay_table::standard_model_decay_table()
    : decay_table({Decays_list(25)})
 {
 }
 
-void SM_decay_table::clear()
+void standard_model_decay_table::clear()
 {
    for (auto& particle: decay_table) {
       particle.clear();
@@ -68,12 +68,12 @@ std::ostream& operator<<(std::ostream& ostr,
 }
 */
 
-Decays_list& SM_decay_table::get_hh_decays()
+Decays_list& standard_model_decay_table::get_hh_decays()
 {
    return decay_table[0];
 }
 
-const Decays_list& SM_decay_table::get_hh_decays() const
+const Decays_list& standard_model_decay_table::get_hh_decays() const
 {
    return decay_table[0];
 }

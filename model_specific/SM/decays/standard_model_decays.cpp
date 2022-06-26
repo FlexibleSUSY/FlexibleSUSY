@@ -36,17 +36,18 @@
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/list.hpp>
+#include <gsl/gsl_monte_miser.h>
 
 #include "standard_model_decays.hpp"
-#include "../standard_model.hpp"
+#include "standard_model.hpp"
 #include "decays/one_loop_decay_diagrams.hpp"
 #include "concatenate.hpp"
 #include "decays/decay_functions.hpp"
 #include "config.h"
 #include "thread_pool.hpp"
 #include "wrappers.hpp"
-#include <gsl/gsl_monte_miser.h>
-#include "../cxx_qft/standard_model_vertices.hpp"
+#include "cxx_qft/standard_model_vertices.hpp"
+#include "error.hpp"
 
 namespace flexiblesusy {
 
@@ -58,7 +59,7 @@ using namespace standard_model_cxx_diagrams::fields;
 namespace info = standard_model_info;
 using namespace std::complex_literals;
 
-const SM_decay_table& CLASSNAME::get_decay_table() const
+const standard_model_decay_table& CLASSNAME::get_decay_table() const
 {
    return decay_table;
 }
@@ -5814,8 +5815,9 @@ void CLASSNAME::calculate_hh_decays()
          try {
             model.run_to(decay_mass);
          }
-         catch (const std::exception& e) {
+         catch (const NonPerturbativeRunningError& e) {
             std::cout << e.what() << '\n';
+            std::cout << "λ(μ=" << decay_mass << " GeV) = " << model.get_Lambdax() << '\n';
          }
          model.calculate_DRbar_masses();
       }

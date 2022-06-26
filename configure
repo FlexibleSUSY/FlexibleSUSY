@@ -2167,7 +2167,7 @@ check_higgstools_incl() {
             return 1
         fi
     else
-      HIGGSTOOLSFLAGS="-I$higgstools_inc_dir"
+      HIGGSTOOLSFLAGS="-Imodel_specific/SM -I$higgstools_inc_dir"
     fi
     return 0
 }
@@ -2179,7 +2179,7 @@ check_higgstools_libs() {
             # assume that the linker will look in the default paths
             HIGGSTOOLSLIBS="$HIGGSTOOLSLIBS_"
         else
-            HIGGSTOOLSLIBS="-L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
+            HIGGSTOOLSLIBS="model_specific/SM/libmodel_specific_SM.a -L$higgstools_lib_dir -Wl,-rpath,$higgstools_lib_dir $HIGGSTOOLSLIBS_"
         fi
         return 0
 }

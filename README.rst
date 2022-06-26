@@ -108,6 +108,7 @@ Optional:
 * GM2Calc_ (version 1.7.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * COLLIER_
+* HiggsTools_
 * Himalaya_
 * TSIL_
 
@@ -1013,6 +1014,7 @@ References
 .. _FeynArts: http://www.feynarts.de
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _GNU scientific library: http://www.gnu.org/software/gsl
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
 .. _`Mathematica/Wolfram Engine`: https://www.wolfram.com
 .. _LoopTools: http://www.feynarts.de/looptools
 .. _COLLIER: https://collier.hepforge.org
