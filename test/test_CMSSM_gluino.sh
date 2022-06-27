@@ -24,7 +24,7 @@ if test ! -x "$softsusy_exe"; then
 fi
 
 echo -n "running CMSSM point ... "
-$mssm_exe --slha-input-file=$input --slha-output-file=$output
+$mssm_exe --slha-input-file=$input --slha-output-file=$output > /dev/null 2>&1
 [ $? -ne 0 ] && { echo "\nError: $mssm_exe quitted unexpectedly"; exit 1; }
 echo "done"
 echo "CMSSM SLHA input file:  $input"
