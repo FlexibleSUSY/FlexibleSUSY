@@ -39,6 +39,7 @@
 #include "physical_input.hpp"
 #include "decays/flexibledecay_settings.hpp"
 #include "decays/decay_amplitudes.hpp"
+#include "config.h"
 
 #include <cmath>
 #include <complex>
@@ -71,7 +72,9 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+#ifdef ENABLE_HIGGSTOOLS
    EffectiveCoupling_list get_higgstools_input() const {return higgstools_input;};
+#endif
 
 @decaysGetters@
 @decaysCalculationPrototypes@
@@ -86,7 +89,9 @@ private:
    bool run_to_decay_particle_scale {true};
    @ModelName@_decay_table decay_table{};
    FlexibleDecay_problems problems{};
-   EffectiveCoupling_list higgstools_input;
+#ifdef ENABLE_HIGGSTOOLS
+   EffectiveCoupling_list higgstools_input {};
+#endif
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

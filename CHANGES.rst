@@ -1,3 +1,13 @@
+FlexibleSUSY 2.8.0 []
+==================================
+
+New features
+------------
+
+* Option to validate a Higgs sector of the model by linking FlexibleSUSY with
+  HiggsTools_. Enabling the interface reguire a C++17 compliant compiler
+  (g++>=8.0.0 or clang++>=5.0.0).
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
@@ -2357,3 +2367,4 @@ FlexibleSUSY-0.5 [November 18, 2013]
 .. _FormCalc: http://www.feynarts.de/formcalc
 .. _LoopTools: http://www.feynarts.de/looptools/
 .. _TSIL: https://www.niu.edu/spmartin/tsil/
+.. _HiggsTools: https://gitlab.com/higgsbounds/higgstools
