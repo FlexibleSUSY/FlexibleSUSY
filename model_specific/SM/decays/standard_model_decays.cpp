@@ -5715,37 +5715,6 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
    return result;
 }
 
-// hh -> {bar[Fe], Fe}
-template<>
-Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fe>::type, Fe>(
-   const context_base& context,
-   typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<typename fields::bar<fields::Fe>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::Fe >::type const& idx_3) const{
-   
-   // amplitude type
-   Decay_amplitude_SFF result;
-
-   // external particles' masses
-   result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_fermion_1 = context.physical_mass<typename bar<Fe>::type>(idx_2);
-   result.m_fermion_2 = context.physical_mass<Fe>(idx_3);
-
-   // set the initial value of an amplitude to 0
-   result.form_factor_left = std::complex<double>(0., 0.);
-   result.form_factor_right = std::complex<double>(0., 0.);
-   // @todo correct prefactors
-   // tree-level amplitude
-   const auto indices = concatenate(idx_3, idx_2, idx_1);
-   const auto vertex =  Vertex<typename bar<Fe>::type, Fe, hh>::evaluate(indices, context);
-
-   result.form_factor_left += vertex.left();
-   result.form_factor_right += vertex.right();
-
-   return result;
-}
-
-
 // -------- specializations for decays needing higher order SM corrections --------
 
 using H = fields::hh;

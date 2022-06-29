@@ -144,9 +144,6 @@ Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cx
 template<>
 Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type, standard_model_cxx_diagrams::fields::Fu>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fu>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fu >::type&) const;
 
-template<>
-Decay_amplitude_SFF Standard_model_decays::calculate_amplitude<standard_model_cxx_diagrams::fields::hh, typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fe>::type, standard_model_cxx_diagrams::fields::Fe>(const standard_model_cxx_diagrams::context_base&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::hh >::type&, const typename cxx_diagrams::field_indices<typename standard_model_cxx_diagrams::fields::bar<standard_model_cxx_diagrams::fields::Fe>::type >::type&, const typename cxx_diagrams::field_indices<standard_model_cxx_diagrams::fields::Fe >::type&) const;
-
 
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
 double
