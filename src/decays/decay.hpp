@@ -72,6 +72,9 @@ struct NeutralHiggsEffectiveCouplings {
    std::complex<double> ee = 0.;
    std::complex<double> mumu = 0.;
    std::complex<double> tautau = 0.;
+   std::complex<double> emu = 0.;
+   std::complex<double> etau = 0.;
+   std::complex<double> mutau = 0.;
    double WW = 0.;
    double ZZ = 0.;
    double Zgam = 0.;
@@ -165,6 +168,24 @@ public:
          else if (are_the_same(fs, {-6, 6})) {
             effC.tt = c;
          }
+         else if (are_the_same(fs, {-11, 11})) {
+            effC.ee = c;
+         }
+         else if (are_the_same(fs, {-13, 13})) {
+            effC.mumu = c;
+         }
+         else if (are_the_same(fs, {-15, 15})) {
+            effC.tautau = c;
+         }
+         else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+            effC.emu += c;
+         }
+         else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+            effC.etau += c;
+         }
+         else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+            effC.mutau += c;
+         }
          effective_coupling_list.push_back(std::move(effC));
       }
       else {
@@ -186,6 +207,24 @@ public:
          }
          else if (are_the_same(fs, {-6, 6})) {
             found->tt = c;
+         }
+         else if (are_the_same(fs, {-11, 11})) {
+            found->ee = c;
+         }
+         else if (are_the_same(fs, {-13, 13})) {
+            found->mumu = c;
+         }
+         else if (are_the_same(fs, {-15, 15})) {
+            found->tautau = c;
+         }
+         else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+            found->emu += c;
+         }
+         else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+            found->etau += c;
+         }
+         else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+            found->mutau += c;
          }
       }
    }

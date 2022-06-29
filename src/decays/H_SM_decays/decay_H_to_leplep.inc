@@ -8,6 +8,15 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    typename field_indices<lep>::type const& indexOut2)
 {
 
+   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
+   const auto HLLbarVertexDR = Vertex<bar<lep>::type, lep, H>::evaluate(indices, context);
+   const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
+   const auto HLLbarVertexDR_P = 0.5*(HLLbarVertexDR.right() - HLLbarVertexDR.left());
+
+   if (is_zero(HLLbarVertexDR_S) && is_zero(HLLbarVertexDR_S)) {
+      return 0.;
+   }
+
    const double mHOS = context.physical_mass<H>(indexIn);
    const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
    const double mL2OS = context.physical_mass<lep>(indexOut2);
@@ -17,11 +26,6 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    const auto xOS2 = Sqr(mL2OS/mHOS);
    const auto betaOS2 = 1.0 - Sqr((mL1OS + mL2OS)/mHOS);
    const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., xOS1, xOS2));
-
-   const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HLLbarVertexDR = Vertex<bar<lep>::type, lep, H>::evaluate(indices, context);
-   const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
-   const auto HLLbarVertexDR_P = 0.5*(HLLbarVertexDR.right() - HLLbarVertexDR.left());
 
    const double amp2_S = Sqr(mHOS) * betaOS2 * 2*std::norm(HLLbarVertexDR_S);
 
@@ -33,7 +37,6 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    double res_P = 0.5 * ps * amp2_P/mHOS;
 
    // higher order corrections
-
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
       // 1-loop QED corrections
       res_S *= 1. + get_alpha(context)/Pi*17./4.;

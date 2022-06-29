@@ -113,8 +113,13 @@ void call_HiggsTools(
          effc.gg = std::abs(sm_input[0].gg) > 0 ? el.gg/sm_input[0].gg : 0.;
 
          effectiveCouplingInput(s, effc, HP::ReferenceModel::SMHiggsEW, calcggH, calcHgamgam);
+         // effective coupligs are defined as sqrt(Gamma CP-even) + I sqrt(Gamma CP-odd)
+         // so taking a norm gives a total partial width
+         s.setDecayWidth(HP::Decay::emu,   std::norm(el.emu));
+         s.setDecayWidth(HP::Decay::etau,  std::norm(el.etau));
+         s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
          // set total width to the one computed by FD as HiggsTools doesn't calculate
-         // BSM decays of Higgs, e.g. H -> Ah Z
+         // some decays of Higgs at all, e.g. H -> Ah Z
          s.setTotalWidth(el.width);
       }
    }
