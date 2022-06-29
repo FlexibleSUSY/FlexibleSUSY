@@ -83,7 +83,7 @@ void Decays_list::set_decay(double width, std::initializer_list<int> pids_out, s
       total_width -= pos->second.get_width();
       pos->second.set_width(width);
    } else {
-      decays.insert(pos, std::make_pair(decay_hash, decay));
+      decays.insert(pos, std::make_pair(decay_hash, std::move(decay)));
    }
 
    // some channels give small negative withs
@@ -141,6 +141,144 @@ double hVV_4body(double *q2, size_t dim, void *params)
      mVOS*GammaV/(Sqr(q2[0] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
      * mVOS*GammaV/(Sqr(q2[1] - Sqr(mVOS)) + Sqr(mVOS*GammaV))
      * std::sqrt(kl)*(kl + 12.*q2[0]*q2[1]/Power4(mHOS));
+}
+
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
+      std::cout << "double: " << fs.at(0) << ' ' << fs.at(1) << std::endl;
+      auto found = std::find_if(
+         std::begin(effective_coupling_list), std::end(effective_coupling_list),
+         [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+      );
+      auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());};
+      if (found == std::end(effective_coupling_list)) {
+         auto effC = NeutralHiggsEffectiveCouplings {};
+         effC.particle = p;
+         if (are_the_same(fs, {21, 21})) {
+            effC.gg = c;
+         }
+         else if (are_the_same(fs, {22, 22})) {
+            effC.gamgam = c;
+         }
+         else if (are_the_same(fs, {23, 23})) {
+            effC.ZZ = c;
+         }
+         else if (are_the_same(fs, {-24, 24})) {
+            effC.WW = c;
+         }
+         else if (are_the_same(fs, {22, 23})) {
+            effC.Zgam = c;
+         }
+         effective_coupling_list.push_back(std::move(effC));
+      }
+      else {
+         if (are_the_same(fs, {21, 21})) {
+            found->gg = c;
+         }
+         else if (are_the_same(fs, {22, 22})) {
+            found->gamgam = c;
+         }
+         else if (are_the_same(fs, {23, 23})) {
+            found->ZZ = c;
+         }
+         else if (are_the_same(fs, {-24, 24})) {
+            found->WW = c;
+         }
+         else if (are_the_same(fs, {22, 23})) {
+            found->Zgam = c;
+         }
+      }
+   }
+void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::complex<double> c) {
+   std::cout << "complex: " << fs.at(0) << ' ' << fs.at(1) << std::endl;
+
+   auto found = std::find_if(
+      std::begin(effective_coupling_list), std::end(effective_coupling_list),
+      [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
+   );
+
+   auto are_the_same = [](std::array<int, 2> const& a1, std::array<int, 2> const& a2) {
+         return std::is_permutation(a1.begin(), a1.end(), a2.begin(), a2.end());
+   };
+
+   if (found == std::end(effective_coupling_list)) {
+      auto effC = NeutralHiggsEffectiveCouplings {};
+      effC.particle = p;
+      if (are_the_same(fs, {-1, 1})) {
+         effC.dd = c;
+      }
+      else if (are_the_same(fs, {-2, 2})) {
+         effC.uu = c;
+      }
+      else if (are_the_same(fs, {-3, 3})) {
+         effC.ss = c;
+      }
+      else if (are_the_same(fs, {-4, 4})) {
+         effC.cc = c;
+      }
+      else if (are_the_same(fs, {-5, 5})) {
+         effC.bb = c;
+      }
+      else if (are_the_same(fs, {-6, 6})) {
+         effC.tt = c;
+      }
+      else if (are_the_same(fs, {-11, 11})) {
+         effC.ee = c;
+      }
+      else if (are_the_same(fs, {-13, 13})) {
+         effC.mumu = c;
+      }
+      else if (are_the_same(fs, {-15, 15})) {
+         effC.tautau = c;
+      }
+      else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+         effC.emu += c;
+      }
+      else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+         effC.etau += c;
+      }
+      else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+         effC.mutau += c;
+      }
+      effective_coupling_list.push_back(std::move(effC));
+   }
+   else {
+      if (are_the_same(fs, {-1, 1})) {
+         found->dd = c;
+      }
+      else if (are_the_same(fs, {-2, 2})) {
+         found->uu = c;
+      }
+      else if (are_the_same(fs, {-3, 3})) {
+         found->ss = c;
+      }
+      else if (are_the_same(fs, {-4, 4})) {
+         found->cc = c;
+      }
+      else if (are_the_same(fs, {-5, 5})) {
+         found->bb = c;
+      }
+      else if (are_the_same(fs, {-6, 6})) {
+         found->tt = c;
+      }
+      else if (are_the_same(fs, {-11, 11})) {
+         found->ee = c;
+      }
+      else if (are_the_same(fs, {-13, 13})) {
+         found->mumu = c;
+      }
+      else if (are_the_same(fs, {-15, 15})) {
+         found->tautau = c;
+      }
+      else if (are_the_same(fs, {-11, 13}) || are_the_same(fs, {11, -13})) {
+         found->emu += c;
+      }
+      else if (are_the_same(fs, {-11, 15}) || are_the_same(fs, {11, -15})) {
+         found->etau += c;
+      }
+      else if (are_the_same(fs, {-13, 15}) || are_the_same(fs, {13, -15})) {
+         found->mutau += c;
+      }
+   }
 }
 
 } // namespace flexiblesusy
