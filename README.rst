@@ -93,7 +93,7 @@ Building FlexibleSUSY
 Requirements
 ------------
 
-* C++ compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
+* C++14 compiler (g++ >= 5.0.0 or clang++ >= 3.8.1 or icpc >= 17.0.0)
 * Fortran compiler (gfortran, ifort)
 * `Mathematica/Wolfram Engine`_ (version 11.0 or higher)
 * SARAH_ (version 4.11.0 or higher)
@@ -108,7 +108,7 @@ Optional:
 * GM2Calc_ (version 1.7.0 or higher)
 * LoopTools_ (version 2.8 or higher)
 * COLLIER_
-* HiggsTools_
+* HiggsTools_ (requires compiling FlexibleSUSY with a C++17 compiler: g++ >= 8.0.0 or clang++ >= 5.0.0 or icpc >= 18.0.0)
 * Himalaya_
 * TSIL_
 
