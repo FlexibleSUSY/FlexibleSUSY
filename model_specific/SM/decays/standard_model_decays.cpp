@@ -5894,12 +5894,14 @@ void CLASSNAME::calculate_hh_decays()
 
       }
    }
+
+#ifdef ENABLE_HIGGSTOOLS
    auto found = std::find_if(std::begin(higgstools_input), std::end(
       higgstools_input), [](NeutralHiggsEffectiveCouplings const& effC) {
       return effC.particle == field_as_string<hh>({});});
    found->width = decays.get_total_width();
    found->mass = context.physical_mass<hh>({});
-
+#endif
 }
 
 double CLASSNAME::partial_width_hh_to_VGVG(Standard_model model)

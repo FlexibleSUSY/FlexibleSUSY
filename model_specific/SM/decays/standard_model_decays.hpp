@@ -39,6 +39,7 @@
 #include "cxx_qft/standard_model_qft.hpp"
 #include "decays/decay_amplitudes.hpp"
 #include "standard_model_decay_table.hpp"
+#include "config.h"
 
 #include <cmath>
 #include <string>
@@ -70,7 +71,9 @@ public:
    void clear();
    void clear_problems();
    void calculate_decays();
+#ifdef ENABLE_HIGGSTOOLS
    EffectiveCoupling_list get_higgstools_input() const {return higgstools_input;};
+#endif
 
    const Decays_list& get_hh_decays() const { return decay_table.get_hh_decays();
       }
@@ -94,7 +97,9 @@ private:
    bool run_to_decay_particle_scale {true};
    standard_model_decay_table decay_table{};
    FlexibleDecay_problems problems{};
-   EffectiveCoupling_list higgstools_input;
+#ifdef ENABLE_HIGGSTOOLS
+   EffectiveCoupling_list higgstools_input {};
+#endif
 
    template<typename FieldIn, typename FieldOut1, typename FieldOut2>
    typename Decay_amplitude_type<FieldIn, FieldOut1, FieldOut2>::type

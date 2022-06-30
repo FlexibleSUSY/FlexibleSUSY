@@ -29,10 +29,8 @@
 #include "concatenate.hpp"
 #include "wrappers.hpp"
 
-#define INPUTPARAMETER(p) context.model.get_input_parameters().p
 #define MODELPARAMETER(p) context.model.get_##p()
 #define DERIVEDPARAMETER(p) context.model.p()
-#define PHASE(p) context.model.get_##p()
 
 namespace flexiblesusy {
 namespace standard_model_cxx_diagrams {
@@ -44,7 +42,7 @@ cxx_diagrams::ChiralVertex unit_charge(const context_base& context)
    std::array<int, 0> photon_indices = {};
    std::array<int, 2> indices = concatenate(photon_indices, electron_indices, electron_indices);
 
-      const int gt1 = indices[0];
+   const int gt1 = indices[0];
    const int gt2 = indices[1];
    const auto g1 = MODELPARAMETER(g1);
    const auto g2 = MODELPARAMETER(g2);

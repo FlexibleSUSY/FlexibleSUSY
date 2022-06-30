@@ -144,7 +144,6 @@ double hVV_4body(double *q2, size_t dim, void *params)
 }
 
 void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, double c) {
-      std::cout << "double: " << fs.at(0) << ' ' << fs.at(1) << std::endl;
       auto found = std::find_if(
          std::begin(effective_coupling_list), std::end(effective_coupling_list),
          [&p](NeutralHiggsEffectiveCouplings const& effC) {return effC.particle == p;}
@@ -189,7 +188,6 @@ void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 
       }
    }
 void EffectiveCoupling_list::add_coupling(std::string const& p, std::array<int, 2> const& fs, std::complex<double> c) {
-   std::cout << "complex: " << fs.at(0) << ' ' << fs.at(1) << std::endl;
 
    auto found = std::find_if(
       std::begin(effective_coupling_list), std::end(effective_coupling_list),
