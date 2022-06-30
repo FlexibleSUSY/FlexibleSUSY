@@ -120,7 +120,10 @@ void call_HiggsTools(
          s.setDecayWidth(HP::Decay::mutau, std::norm(el.mutau));
          // set total width to the one computed by FD as HiggsTools doesn't calculate
          // some decays of Higgs at all, e.g. H -> Ah Z
-         s.setTotalWidth(el.width);
+         std::cout << "HT totalWidth/FS width " << s.totalWidth()/el.width << '\n';
+         if (el.width > s.totalWidth()) {
+            s.setDecayWidth("NP", "NP", el.width - s.totalWidth());
+         }
       }
    }
 
