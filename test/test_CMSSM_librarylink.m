@@ -45,7 +45,7 @@ settings = {
     forcePositiveMasses -> 0,
     poleMassScale -> 0.,
     parameterOutputScale -> 0.
-    loopLibrary -> 1
+    loopLibrary -> -1
 };
 
 smInputs = {

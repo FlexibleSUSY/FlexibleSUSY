@@ -227,7 +227,7 @@ jobs:
       - name: Build compiled tests
         run: |
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          test/test_CMSSM_librarylink_slha.sh
+          FLEXIBLESUSY_LOOP_LIBRARY=1 test/test_CMSSM_librarylink_slha.sh
 
       - name: (Optional) Save logs in case of an error
         uses: actions/upload-artifact@v3
