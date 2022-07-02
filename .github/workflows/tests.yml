@@ -180,7 +180,7 @@ jobs:
           case "$COMPILER" in
             "gcc")    echo "CXX=g++"     >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
             "clang")  echo "CXX=clang++" >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
-            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -Wall -pipe -fp-model precise -fp-model source"    >> $GITHUB_ENV ;;
+            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -fp-model consistent"    >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
@@ -227,7 +227,7 @@ jobs:
       - name: Build compiled tests
         run: |
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          FLEXIBLESUSY_LOOP_LIBRARY=1 test/test_CMSSM_librarylink_slha.sh
+          FLEXIBLESUSY_LOOP_LIBRARY=0 test/test_CMSSM_librarylink_slha.sh
 
       - name: (Optional) Save logs in case of an error
         uses: actions/upload-artifact@v3
