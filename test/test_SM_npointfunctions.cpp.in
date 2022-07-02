@@ -48,6 +48,8 @@ namespace detail
 
 namespace npointfunctions
 {
+using cxx_diagrams::bar;
+using cxx_diagrams::conj;
 @NPointFunctions_Selfenergy_hh_1loop@
 }
 }
