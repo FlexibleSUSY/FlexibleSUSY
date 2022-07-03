@@ -172,7 +172,7 @@ jobs:
           case "$COMPILER" in
             "gcc")    echo "CXX=g++"     >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
             "clang")  echo "CXX=clang++" >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
-            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent"    >> $GITHUB_ENV ;;
+            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent -fimf-use-svml"    >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
@@ -189,7 +189,7 @@ jobs:
           [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
             --with-cxx=$CXX \
-            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent -shared -o" \
+            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent -fimf-use-svml -shared -o" \
             --with-fc=$FC \
             --with-models=$models \
             --with-optional-modules=test \
@@ -215,4 +215,5 @@ jobs:
           path: |
             test/test_CMSSM_librarylink_slha.out1.spc
             test/test_CMSSM_librarylink_slha.out2.spc
+            test/test_CMSSM_librarylink_slha.in.m
 
