@@ -154,14 +154,6 @@ jobs:
           printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
           printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
 
-      - name: Install FormCalc
-        run: |
-          cd /fs_dependencies/gcc
-          wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
-          cd FormCalc-$FORMCALC_VERSION
-          ./compile
-          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
-
       - name: Create models
         env:
           PART: ${{ matrix.PART }}
@@ -197,22 +189,11 @@ jobs:
           [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
             --with-cxx=$CXX \
-            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -pipe -fp-model consistent -shared -o" \
+            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model consistent -shared -o" \
             --with-fc=$FC \
             --with-models=$models \
-            --with-loop-libraries=collier,looptools \
-            --with-looptools-incdir=/fs_dependencies/$COMPILER/LoopTools/include \
-            --with-looptools-libdir=/fs_dependencies/$COMPILER/LoopTools/lib64 \
             --with-collier-incdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/include \
             --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
-            --enable-himalaya \
-            --with-himalaya-incdir=/fs_dependencies/$COMPILER/Himalaya/include \
-            --with-himalaya-libdir=/fs_dependencies/$COMPILER/Himalaya/lib64 \
-            --enable-gm2calc \
-            --with-gm2calc-incdir=/fs_dependencies/$COMPILER/GM2Calc/include \
-            --with-gm2calc-libdir=/fs_dependencies/$COMPILER/GM2Calc/lib64 \
-            --with-tsil-incdir=/fs_dependencies/$COMPILER/tsil \
-            --with-tsil-libdir=/fs_dependencies/$COMPILER/tsil \
             --with-optional-modules=test \
             --enable-librarylink \
             --with-cxxflags="$CXXFLAGS" \
