@@ -213,6 +213,6 @@ jobs:
         with:
           name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
           path: |
-            config.*
-            test/test_*.log
+            test/test_CMSSM_librarylink_slha.out1.spc
+            test/test_CMSSM_librarylink_slha.out2.spc
 
