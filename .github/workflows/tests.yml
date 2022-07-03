@@ -172,7 +172,7 @@ jobs:
           case "$COMPILER" in
             "gcc")    echo "CXX=g++"     >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
             "clang")  echo "CXX=clang++" >> $GITHUB_ENV; echo "FC=gfortran" >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"           >> $GITHUB_ENV ;;
-            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -fp-model consistent"    >> $GITHUB_ENV ;;
+            "intel")  echo "CXX=icpc"    >> $GITHUB_ENV; echo "FC=ifort"    >> $GITHUB_ENV; echo "CXXFLAGS=-std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent"    >> $GITHUB_ENV ;;
             *) exit 1 ;;
           esac
 
@@ -189,11 +189,9 @@ jobs:
           [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
             --with-cxx=$CXX \
-            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model consistent -shared -o" \
+            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent -shared -o" \
             --with-fc=$FC \
             --with-models=$models \
-            --with-collier-incdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/include \
-            --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
             --with-optional-modules=test \
             --enable-librarylink \
             --with-cxxflags="$CXXFLAGS"
@@ -202,7 +200,7 @@ jobs:
       - name: Make
         run: |
           [[ "$CXX" = "icpc" ]] && source /opt/intel/oneapi/setvars.sh
-          make -j2
+          make -j3
 
       - name: Build compiled tests
         run: |
