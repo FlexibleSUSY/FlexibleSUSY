@@ -196,8 +196,7 @@ jobs:
             --with-collier-libdir=/fs_dependencies/$([ "$COMPILER" = "clang" ] && echo "gcc" || echo "$COMPILER")/COLLIER/lib \
             --with-optional-modules=test \
             --enable-librarylink \
-            --with-cxxflags="$CXXFLAGS" \
-            --enable-shared-libs
+            --with-cxxflags="$CXXFLAGS"
           make showbuild
 
       - name: Make
