@@ -189,7 +189,7 @@ jobs:
           [[ "$COMPILER" = "intel" ]] && source /opt/intel/oneapi/setvars.sh
           ./configure \
             --with-cxx=$CXX \
-            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fPIC -fp-model precise -fp-model source -fp-model consistent -fimf-use-svml -no-fma -fimf-arch-consistency=true  -qno-simd-honor-fp-model -mp1 -fimf-precision=high -fprotect-parens -shared -o" \
+            --with-shared-lib-cmd="$CXX -std=c++14 -O0 -fp-model precise -fp-model source -fp-model consistent -fimf-use-svml -no-fma -fimf-arch-consistency=true  -qno-simd-honor-fp-model -mp1 -fimf-precision=high -fprotect-parens -shared -o" \
             --with-fc=$FC \
             --with-models=$models \
             --with-optional-modules=test \
