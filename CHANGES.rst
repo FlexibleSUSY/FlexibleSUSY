@@ -4,9 +4,9 @@ FlexibleSUSY 2.8.0 []
 New features
 ------------
 
-* Option to validate a Higgs sector of the model by linking FlexibleSUSY with
-  HiggsTools_. Enabling the interface reguire a C++17 compliant compiler
-  (g++>=8.0.0 or clang++>=5.0.0).
+* Option to validate a neutral Higgs sector of the model by linking
+  FlexibleSUSY with HiggsTools_. Enabling the interface reguires a C++17
+  compliant compiler (g++>=8.0.0 or clang++>=5.0.0 or icpc>=18.0.0).
 
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================

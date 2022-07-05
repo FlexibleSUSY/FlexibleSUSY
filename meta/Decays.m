@@ -2028,7 +2028,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
                 body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
              ]
-             ];
+           ];
 
            body = body <> "return " <> returnVar <> ";\n";
 

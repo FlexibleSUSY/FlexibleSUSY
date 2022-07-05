@@ -144,7 +144,7 @@ void call_HiggsTools(
    const auto signals = Higgs::Signals {"/fs_dependencies/hsdataset"};
    const double hs_chisq = signals(pred);
    std::cout << "\nHiggsSignals chisq: " << hs_chisq << " from "
-              << signals.observableCount() << " observables" << std::endl;
+              << signals.observableCount() << " observables" << ' ' << "(χ^2/ndf=" << hs_chisq/signals.observableCount() << ")" << std::endl;
 }
 
 } // flexiblesusy
