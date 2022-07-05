@@ -11,9 +11,9 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
    const auto amp = calculate_amplitude<AH, G, G>(context, in_idx, out1_idx, out2_idx);
    const double mAh = context.physical_mass<AH>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
-   constexpr double color_fact = squared_color_generator<AH, G, G>();
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {1./2.};
+   static constexpr double color_fact = squared_color_generator<AH, G, G>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
    const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
       // number of active light flavours
-      constexpr int Nf = 5;
+      static constexpr int Nf = 5;
       auto qedqcd_ = qedqcd;
       qedqcd_.to(mAh);
       // 5-flavour SM alpha_s

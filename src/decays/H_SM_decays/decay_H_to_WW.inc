@@ -17,7 +17,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
-      constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
+      static constexpr double GammaW = 2.085; //3*std::norm(ghWW)/(16.*Pi*mWOS);
       struct my_f_params params = {mHOS, mWOS, GammaW};
       gsl_monte_function G = { &hVV_4body, 2, &params };
 
@@ -26,7 +26,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
       // this gives relative error < 0.05%
-      constexpr size_t calls = 1'000'000;
+      static constexpr size_t calls = 1'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);
@@ -78,9 +78,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       res *= std::norm(ghWW*gWud);
 
       // multiply by number of final states
-      constexpr double NLF = 3;  // number of lepton flavours
-      constexpr double Nc = 3;   // number of colors
-      constexpr double NQF = 2;  // number of quark flavours
+      static constexpr double NLF = 3;  // number of lepton flavours
+      static constexpr double Nc = 3;   // number of colors
+      static constexpr double NQF = 2;  // number of quark flavours
       res *= NLF + Nc*NQF;
 
    // two-body decay for mH > 2 mW

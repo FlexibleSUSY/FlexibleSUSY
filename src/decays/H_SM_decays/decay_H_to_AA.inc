@@ -7,8 +7,8 @@ double CLASSNAME::get_partial_width<H, A, A>(
 {
    const auto amp = calculate_amplitude<H, A, A>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
-   constexpr double ps {1./(8.*Pi)};
-   constexpr double ps_symmetry {1./2.};
+   static constexpr double ps {1./(8.*Pi)};
+   static constexpr double ps_symmetry {1./2.};
    const double flux = 0.5/mH;
    auto res = flux * ps * ps_symmetry * amp.square();
 

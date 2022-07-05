@@ -25,7 +25,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
        (4.*x > 1.0 && offshell_VV_decays == 2)) {
 
       // integrand
-      constexpr double GammaZ = 2.4952;
+      static constexpr double GammaZ = 2.4952;
       struct my_f_params params = {mHOS, mZOS, GammaZ};
       gsl_monte_function G = {&hVV_4body, 2, &params};
 
@@ -34,7 +34,7 @@ double CLASSNAME::get_partial_width<H,Z,Z>(
       double xl[2] = {0, 0};
       double xu[2] = {Sqr(mHOS), Sqr(mHOS)};
       // this gives relative error < 0.05%
-      constexpr size_t calls = 1'000'000;
+      static constexpr size_t calls = 1'000'000;
       double err;
       const gsl_rng_type *T = gsl_rng_default;
       gsl_rng *r = gsl_rng_alloc (T);

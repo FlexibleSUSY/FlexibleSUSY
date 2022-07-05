@@ -21,7 +21,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
    const double mAHOS = context.physical_mass<AH>(indexIn);
    const double flux = 1./(2.*mAHOS);
 
-   constexpr double color_factor = squared_color_generator<AH, bar<uq>::type, uq>();
+   static constexpr double color_factor = squared_color_generator<AH, bar<uq>::type, uq>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(AHBBbarVertexDR.left()) || !is_zero(AHBBbarVertexDR.right())) {
