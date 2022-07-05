@@ -1,15 +1,15 @@
 template <>
-double CLASSNAME::get_partial_width<H, G, G>(
+double CLASSNAME::get_partial_width<H, g, g>(
       const context_base& context,
       const typename field_indices<H>::type& in_idx,
-      const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx)
+      const typename field_indices<g>::type& out1_idx,
+      const typename field_indices<g>::type& out2_idx)
 {
-   const auto amp = calculate_amplitude<H, G, G>(context, in_idx, out1_idx, out2_idx);
+   const auto amp = calculate_amplitude<H, g, g>(context, in_idx, out1_idx, out2_idx);
    const double mH = context.physical_mass<H>(in_idx);
    static constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {1./2.};
-   static constexpr double color_fact = squared_color_generator<H, G, G>();
+   static constexpr double color_fact = squared_color_generator<H, g, g>();
    const double flux = 0.5/mH;
 
    // full LO (SM+BSM) result

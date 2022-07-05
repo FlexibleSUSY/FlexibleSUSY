@@ -5718,10 +5718,10 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
 // -------- specializations for decays needing higher order SM corrections --------
 
 using H = fields::hh;
-using AH = fields::Ah;
+using Ah = fields::Ah;
 using W = fields::VWp;
 using Z = fields::VZ;
-using G = fields::VG;
+using g = fields::VG;
 using A = fields::VP;
 using lep = fields::Fe;
 using uq = fields::Fu;
@@ -5766,14 +5766,14 @@ bool check_3body_Vff_decay(const context_base& context, double  mHOS, const type
    return found_problem;
 }
 
-#include "decays/H_SM_decays/decay_H_to_ZZ.inc"
-#include "decays/H_SM_decays/decay_H_to_WW.inc"
-#include "decays/H_SM_decays/decay_H_to_GG.inc"
-#include "decays/H_SM_decays/decay_H_to_AA.inc"
-#include "decays/H_SM_decays/decay_H_to_AZ.inc"
-#include "decays/H_SM_decays/decay_H_to_uquq.inc"
-#include "decays/H_SM_decays/decay_H_to_dqdq.inc"
-#include "decays/H_SM_decays/decay_H_to_leplep.inc"
+#include "decays/specializations/H/decay_H_to_ZZ.inc"
+#include "decays/specializations/H/decay_H_to_WW.inc"
+#include "decays/specializations/H/decay_H_to_gg.inc"
+#include "decays/specializations/H/decay_H_to_AA.inc"
+#include "decays/specializations/H/decay_H_to_AZ.inc"
+#include "decays/specializations/H/decay_H_to_uquq.inc"
+#include "decays/specializations/H/decay_H_to_dqdq.inc"
+#include "decays/specializations/H/decay_H_to_leplep.inc"
 
 void CLASSNAME::calculate_hh_decays()
 {

@@ -1,19 +1,19 @@
 template <>
-double CLASSNAME::get_partial_width<AH, G, G>(
+double CLASSNAME::get_partial_width<Ah, g, g>(
       const context_base& context,
-      const typename field_indices<AH>::type& in_idx,
-      const typename field_indices<G>::type& out1_idx,
-      const typename field_indices<G>::type& out2_idx)
+      const typename field_indices<Ah>::type& in_idx,
+      const typename field_indices<g>::type& out1_idx,
+      const typename field_indices<g>::type& out2_idx)
 {
    if (in_idx.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,G,G>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<Ah,g,g>(in_idx, out1_idx, out2_idx) + " decay. Decaying particle is a Goldstone.");
    }
 
-   const auto amp = calculate_amplitude<AH, G, G>(context, in_idx, out1_idx, out2_idx);
-   const double mAh = context.physical_mass<AH>(in_idx);
+   const auto amp = calculate_amplitude<Ah, g, g>(context, in_idx, out1_idx, out2_idx);
+   const double mAh = context.physical_mass<Ah>(in_idx);
    static constexpr double ps {1./(8.*Pi)};
    static constexpr double ps_symmetry {1./2.};
-   static constexpr double color_fact = squared_color_generator<AH, G, G>();
+   static constexpr double color_fact = squared_color_generator<Ah, g, g>();
    const double flux = 0.5/mAh;
 
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
@@ -29,7 +29,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto AHGGVertex = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
+      const auto AHGGVertex = Vertex<bar<uq>::type, uq, Ah>::evaluate(indices, context);
       std::complex<double> const AHGGVertexVal = 0.5*(-AHGGVertex.left() + AHGGVertex.right());
 
       const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
@@ -72,7 +72,7 @@ double CLASSNAME::get_partial_width<AH, G, G>(
 
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      higgstools_input.add_coupling(field_as_string<AH>(in_idx), {21, 21}, std::sqrt(result));
+      higgstools_input.add_coupling(field_as_string<Ah>(in_idx), {21, 21}, std::sqrt(result));
    }
 #endif
 

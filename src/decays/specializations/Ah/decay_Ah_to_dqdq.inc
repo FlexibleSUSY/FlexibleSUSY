@@ -1,28 +1,28 @@
 
-// specialization for the AH -> Fd Fd case
+// specialization for the Ah -> Fd Fd case
 
 template<>
-double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
+double CLASSNAME::get_partial_width<Ah, bar<dq>::type, dq>(
    const context_base& context,
-   typename field_indices<AH>::type const& indexIn,
+   typename field_indices<Ah>::type const& indexIn,
    typename field_indices<bar<dq>::type>::type const& indexOut1,
    typename field_indices<dq>::type const& indexOut2
    )
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HBBbarVertexDR = Vertex<bar<dq>::type, dq, AH>::evaluate(indices, context);
+   const auto HBBbarVertexDR = Vertex<bar<dq>::type, dq, Ah>::evaluate(indices, context);
 
-   const double mAOS = context.physical_mass<AH>(indexIn);
+   const double mAOS = context.physical_mass<Ah>(indexIn);
    const double flux = 1./(2.*mAOS);
 
-   static constexpr double color_factor = squared_color_generator<AH, bar<dq>::type, dq>();
+   static constexpr double color_factor = squared_color_generator<Ah, bar<dq>::type, dq>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
@@ -31,7 +31,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
          const auto xOS1 = Sqr(mdqOS1/mAOS);
          const auto xOS2 = Sqr(mdqOS2/mAOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<AH, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amplitude_squared<Ah, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2);
       }
       return 0.;
    }
@@ -134,7 +134,7 @@ double CLASSNAME::get_partial_width<AH, bar<dq>::type, dq>(
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       const std::array<int, 3> dquark_pdgs = {1, 3, 5};
-      higgstools_input.add_coupling(field_as_string<AH>(indexIn),
+      higgstools_input.add_coupling(field_as_string<Ah>(indexIn),
          {dquark_pdgs.at(indexOut1.at(0)), -dquark_pdgs.at(indexOut2.at(0))},
          1i*std::sqrt(result)
       );

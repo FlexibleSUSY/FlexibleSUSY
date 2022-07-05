@@ -1,27 +1,27 @@
 // template specialization for the AH -> Fu Fu case
 
 template<>
-double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
+double CLASSNAME::get_partial_width<Ah, bar<uq>::type, uq>(
    const context_base& context,
-   typename field_indices<AH>::type const& indexIn,
+   typename field_indices<Ah>::type const& indexIn,
    typename field_indices<uq>::type const& indexOut1,
    typename field_indices<uq>::type const& indexOut2
    )
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<AH,bar<uq>::type, uq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<uq>::type, uq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
    // get AHBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto AHBBbarVertexDR = Vertex<bar<uq>::type, uq, AH>::evaluate(indices, context);
+   const auto AHBBbarVertexDR = Vertex<bar<uq>::type, uq, Ah>::evaluate(indices, context);
 
-   const double mAHOS = context.physical_mass<AH>(indexIn);
+   const double mAHOS = context.physical_mass<Ah>(indexIn);
    const double flux = 1./(2.*mAHOS);
 
-   static constexpr double color_factor = squared_color_generator<AH, bar<uq>::type, uq>();
+   static constexpr double color_factor = squared_color_generator<Ah, bar<uq>::type, uq>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(AHBBbarVertexDR.left()) || !is_zero(AHBBbarVertexDR.right())) {
@@ -30,7 +30,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
          const auto xOS1 = Sqr(muqOS1/mAHOS);
          const auto xOS2 = Sqr(muqOS2/mAHOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<AH, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amplitude_squared<Ah, bar<uq>::type, uq>(context, indexIn, indexOut1, indexOut2);
       }
       return 0.;
    }
@@ -107,7 +107,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
                const double lq = std::log(xDR);
                // eq. 28 of hep-ph/9505358
                const auto AHttindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto AHttbar = Vertex<bar<uq>::type, uq, AH>::evaluate(AHttindices, context);
+               const auto AHttbar = Vertex<bar<uq>::type, uq, Ah>::evaluate(AHttindices, context);
                const auto CSuu = AHBBbarVertexDR_P/context.mass<uq>(indexOut1);
                if (!is_zero(CSuu)) {
                   const auto AHttbar_P = 0.5*(AHttbar.right() - AHttbar.left());
@@ -133,7 +133,7 @@ double CLASSNAME::get_partial_width<AH, bar<uq>::type, uq>(
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
       const std::array<int, 3> uquark_pdgs = {2, 4, 6};
-      higgstools_input.add_coupling(field_as_string<AH>(indexIn),
+      higgstools_input.add_coupling(field_as_string<Ah>(indexIn),
          {uquark_pdgs.at(indexOut1.at(0)), -uquark_pdgs.at(indexOut2.at(0))},
             1i*std::sqrt(result)
          );

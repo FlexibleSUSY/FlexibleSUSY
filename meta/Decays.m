@@ -204,11 +204,11 @@ SimplifiedName[particle_?TreeMasses`IsSMLepton] := "lep";
 SimplifiedName[particle_?TreeMasses`IsSMDownQuark] := "dq";
 SimplifiedName[particle_?TreeMasses`IsSMUpQuark] := "uq";
 SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "H";
-SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "AH";
+SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "Ah";
 SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === TreeMasses`GetWBoson[]] := "W";
 SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
-SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "G";
+SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "g";
 SimplifiedName[particle_] := particle;
 
 CreateParticleAlias[particle_, namespace_String] :=
@@ -2290,7 +2290,7 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
     Module[{initialParticle = GetInitialState[decay], finalState = GetFinalState[decay],
             declaration = "", includeStatement = ""},
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
-           includeStatement = "#include \"decays/H_SM_decays/decay_" <>
+           includeStatement = "#include \"decays/specializations/" <> SimplifiedName[initialParticle] <> "/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
                               StringJoin[SimplifiedName[# /. SARAH`bar|Susyno`LieGroups`conj -> Identity]& /@ finalState] <>
                               ".inc\"";
