@@ -45,7 +45,7 @@ double CLASSNAME::get_partial_width<H, G, G>(
       const double Lt = std::log(Sqr(mu/mt));
 
       // eq. 5 of 0708.0916
-      constexpr int Nf = 5;
+      static constexpr int Nf = 5;
       const double hnlo0 =
          95./4. - 7./6.*Nf + (33 - 2*Nf)/6.*LH;
       const double hnlo1 =
@@ -121,10 +121,13 @@ double CLASSNAME::get_partial_width<H, G, G>(
             97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
          };
 
-         const double mtpole {qedqcd.displayPoleMt()};
-         const double Lt = std::log(Sqr(mu/mtpole));
+         const double mt {context.mass<uq>({2})};
+         const double Lt = std::log(Sqr(mu/mt));
+         // eq. D10 of 2207.01032 and 23 of 9807241
          const double deltaNNLO_P {
-            237311./864. - 529./24.*zeta2 - 445./8.*zeta3 + 5.*Lt
+            51959/96. - 363/8.*zeta2 - 495/8.*zeta3 + Nf*(-473/8. + 11/2.*zeta2 + 5/4.*zeta3 + Lt) + Sqr(Nf)*(251/216. - 1/6.*zeta2)
+            + (3405/16. - 73/3*Nf + 7/12.*Sqr(Nf))*LH
+            + (363/16. - 11/4.*Nf + 1/12.*Sqr(Nf))*Sqr(LH)
          };
 
          double pseudoscalar_corr = 0.0;
