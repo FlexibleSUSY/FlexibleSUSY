@@ -2114,10 +2114,13 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SemiAnalyticSolver, "Semi_analytic"
               ];
 
-Print[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], " ", TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]];
-           higgstoolsChargedInputDecl = If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <>
+           higgstoolsChargedInputDecl = If[
+              TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]],
+              "std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <>
               FlexibleSUSY`FSModelName <> "_mass_eigenstates const&, " <>
-              FlexibleSUSY`FSModelName <> "_decays const&);", ""];
+              FlexibleSUSY`FSModelName <> "_decays const&);",
+              ""
+           ];
 
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
@@ -2646,7 +2649,7 @@ IndentText[
       "get_charged_higgstools_input(std::get<0>(models), decays)",
       "{}"
    ] <> ";\n" <>
-   "call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, std::get<0>(models).get_scale());\n"
+   "call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);\n"
 ] <>
 "}\n"
 ] <>

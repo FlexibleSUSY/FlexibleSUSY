@@ -131,7 +131,10 @@ void call_HiggsTools(
    for (auto const& el : bsm_input2) {
       std::cout << "kupa " << el.mass <<  ' ' << el.width << ' ' << el.brtaunu << std::endl;
       auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
+      // set mass
       Hpm.setMass(el.mass);
+
+      // set H± decays
       Hpm.setTotalWidth(el.width);
       Hpm.setBr(HP::Decay::enu, el.brenu);
       Hpm.setBr(HP::Decay::munu, el.brmunu);
@@ -141,8 +144,9 @@ void call_HiggsTools(
       Hpm.setBr(HP::Decay::WZ, el.brWZ);
       Hpm.setBr(HP::Decay::Wgam, el.brWgam);
 
+      // production
       // pp->ttbar, t(tbar)->Hp b
-      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, 0.9 /*brtHpb*/);
+      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, 0.);
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
 
