@@ -32,10 +32,13 @@
 #include "spectrum_generator_settings.hpp"
 #include "decays/flexibledecay_settings.hpp"
 
+#include <vector>
+
 namespace flexiblesusy {
 
 void call_HiggsTools(
    EffectiveCoupling_list const&,
+   std::vector<SingleChargedHiggsInput> const&,
    Physical_input const&,
    softsusy::QedQcd const&,
    Spectrum_generator_settings const&,

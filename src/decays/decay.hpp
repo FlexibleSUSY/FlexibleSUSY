@@ -82,6 +82,33 @@ struct NeutralHiggsEffectiveCouplings {
    double gg = 0.;
 };
 
+struct SingleChargedHiggsInput {
+   std::string particle = "";
+
+   // mass
+   double mass = 0.;
+
+   // decays
+   double width = 0.;
+   double brud = 0.;
+   double brus = 0.;
+   double brub = 0.;
+   double brcd = 0.;
+   double brcs = 0.;
+   double brcb = 0.;
+   double brtb = 0.;
+   double brenu = 0.;
+   double brmunu = 0.;
+   double brtaunu = 0.;
+   double brWZ = 0.;
+   double brWgam = 0.;
+
+   // production
+   double cHpmtbR = 0.;
+   double cHpmtbL = 0.;
+   double brtHpb = 0.;
+};
+
 class EffectiveCoupling_list {
 public:
    EffectiveCoupling_list() = default;

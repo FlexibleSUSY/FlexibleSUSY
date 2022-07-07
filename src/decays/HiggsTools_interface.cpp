@@ -39,6 +39,7 @@ namespace flexiblesusy {
 
 void call_HiggsTools(
    EffectiveCoupling_list const& bsm_input,
+   std::vector<SingleChargedHiggsInput> const& bsm_input2,
    Physical_input const& physical_input,
    softsusy::QedQcd const& qedqcd,
    Spectrum_generator_settings const& spectrum_generator_settings,
@@ -126,6 +127,26 @@ void call_HiggsTools(
          }
       }
    }
+
+   for (auto const& el : bsm_input2) {
+      std::cout << "kupa " << el.mass <<  ' ' << el.width << ' ' << el.brtaunu << std::endl;
+      auto& Hpm = pred.addParticle(HP::BsmParticle(el.particle, HP::ECharge::single));
+      Hpm.setMass(el.mass);
+      Hpm.setTotalWidth(el.width);
+      Hpm.setBr(HP::Decay::enu, el.brenu);
+      Hpm.setBr(HP::Decay::munu, el.brmunu);
+      Hpm.setBr(HP::Decay::taunu, el.brtaunu);
+      Hpm.setBr(HP::Decay::tb, el.brtb);
+      Hpm.setBr(HP::Decay::cs, el.brcs);
+      Hpm.setBr(HP::Decay::WZ, el.brWZ);
+      Hpm.setBr(HP::Decay::Wgam, el.brWgam);
+
+      // pp->ttbar, t(tbar)->Hp b
+      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, 0.9 /*brtHpb*/);
+      Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
+   }
+
+
 
    // HiggsBounds
    auto bounds = Higgs::Bounds {"/fs_dependencies/hbdataset"};

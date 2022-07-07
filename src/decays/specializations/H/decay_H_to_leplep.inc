@@ -1,5 +1,3 @@
-// CP-even Higgs to charged leptons
-
 template <>
 double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    const context_base& context,

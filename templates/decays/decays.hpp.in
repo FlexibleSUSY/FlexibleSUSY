@@ -175,6 +175,7 @@ double @ModelName@_decays::get_partial_width(
 
 @partialWidthSpecializationDecls@
 
+@higgstoolsChargedInputDecl@
 } // namespace flexiblesusy
 
 #endif

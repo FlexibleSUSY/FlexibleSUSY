@@ -2016,7 +2016,7 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
             partialWidthCalculationPrototypes = "", partialWidthCalculationFunctions = "",
             calcAmplitudeSpecializationDecls = "", calcAmplitudeSpecializationDefs = "",
             partialWidthSpecializationDecls = "", partialWidthSpecializationDefs = "",
-            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path, modelName},
+            smParticleAliases, solverIncludes = "", solver = "", contentOfPath = $Path, modelName, higgstoolsChargedInputDecl},
 
             modelName =
                If[SARAH`submodeldir =!= False,
@@ -2114,6 +2114,11 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                  SemiAnalyticSolver, "Semi_analytic"
               ];
 
+Print[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], " ", TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]];
+           higgstoolsChargedInputDecl = If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] <= TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <>
+              FlexibleSUSY`FSModelName <> "_mass_eigenstates const&, " <>
+              FlexibleSUSY`FSModelName <> "_decays const&);", ""];
+
            WriteOut`ReplaceInFiles[files,
                           { "@callAllDecaysFunctions@" -> IndentText[callAllDecaysFunctions],
                             "@callAllDecaysFunctionsInThreads@" -> IndentText[callAllDecaysFunctionsInThreads],
@@ -2135,6 +2140,8 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
                             "@gs_name@" -> ToString[TreeMasses`GetStrongCoupling[]],
                             "@solver@" -> solver,
                             "@solverIncludes@" -> solverIncludes,
+                            "@higgstoolsChargedInputDef@" -> CreateHiggsToolsChargedInput[],
+                            "@higgstoolsChargedInputDecl@" -> higgstoolsChargedInputDecl,
                             Sequence @@ GeneralReplacementRules[]
                           } ];
 
@@ -2632,9 +2639,16 @@ IndentText[
 ] <>
 "#ifdef ENABLE_HIGGSTOOLS\n" <>
 IndentText@IndentText@IndentText[
-"if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {
-   call_HiggsTools(decays.get_higgstools_input(), physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings);
-}\n"
+"if (flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools)) {\n" <>
+IndentText[
+   "std::vector<SingleChargedHiggsInput> higgstools_charged_input = " <>
+   If[TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] >= TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]],
+      "get_charged_higgstools_input(std::get<0>(models), decays)",
+      "{}"
+   ] <> ";\n" <>
+   "call_HiggsTools(decays.get_higgstools_input(), higgstools_charged_input, physical_input, qedqcd, spectrum_generator_settings, flexibledecay_settings, std::get<0>(models).get_scale());\n"
+] <>
+"}\n"
 ] <>
 "#endif\n" <>
 IndentText[IndentText[
@@ -2663,6 +2677,56 @@ const bool loop_library_for_decays =
 if (spectrum_generator.get_exit_code() == 0 && loop_library_for_decays) {
    decays.calculate_decays();
 }";
+
+CreateHiggsToolsChargedInput[] := If[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]] > TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]], "", "\
+std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleSUSY`FSModelName <> "_mass_eigenstates const& m, " <> FlexibleSUSY`FSModelName <> "_decays const& decays) {
+   std::vector<SingleChargedHiggsInput> v {};
+   static constexpr int chargeSign = " <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "::electric_charge > 0 ? 1 : -1;
+   context_base context {m};
+   for (int i = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> "; i<" <> ToString@TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] <> "; i++) {
+      SingleChargedHiggsInput input;
+      input.mass = context.physical_mass<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> ">({i});
+      auto const& decay_table = decays.get_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "_decays(i);
+      input.width = decay_table.get_total_width();
+      input.particle = " <> FlexibleSUSY`FSModelName <> "_info::get_particle_name_from_pdg(decay_table.get_particle_id());
+      for (auto const& el: decay_table) {
+         const auto& ids = el.second.get_final_state_particle_ids();
+         if (ids.size() != 2) continue;
+         if (std::abs(ids.at(0)) == 12 || std::abs(ids.at(0)) == 14 || std::abs(ids.at(0)) == 16 || std::abs(ids.at(1)) == 12 || std::abs(ids.at(1)) == 14 || std::abs(ids.at(1)) == 16) {
+            if (ids.at(0) == chargeSign*(-11) || ids.at(1) == chargeSign*(-11)) {
+               input.brenu += el.second.get_width()/decay_table.get_total_width();
+            }
+            if (ids.at(0) == chargeSign*(-13) || ids.at(1) == chargeSign*(-13)) {
+               input.brmunu += el.second.get_width()/decay_table.get_total_width();
+            }
+            if (ids.at(0) == chargeSign*(-15) || ids.at(1) == chargeSign*(-15)) {
+               input.brtaunu += el.second.get_width()/decay_table.get_total_width();
+            }
+         }
+         if ((ids.at(0) == chargeSign*6 || ids.at(1) == chargeSign*6) && (ids.at(0) == chargeSign*(-5) || ids.at(1) == chargeSign*(-5))) {
+            input.brtb = el.second.get_width()/decay_table.get_total_width();
+         }
+         if ((ids.at(0) == chargeSign*4 || ids.at(1) == chargeSign*4) && (ids.at(0) == chargeSign*(-3) || ids.at(1) == chargeSign*(-3))) {
+            input.brcs = el.second.get_width()/decay_table.get_total_width();
+         }
+         if ((ids.at(0) == chargeSign*24 || ids.at(1) == chargeSign*24) && (ids.at(0) == 23 || ids.at(1) == 23)) {
+            input.brWZ = el.second.get_width()/decay_table.get_total_width();
+         }
+         if ((ids.at(0) == chargeSign*24 || ids.at(1) == chargeSign*24) && (ids.at(0) == 22 || ids.at(1) == 22)) {
+            input.brWgam = el.second.get_width()/decay_table.get_total_width();
+         }
+      }
+      const auto indices = concatenate(cxx_diagrams::field_indices<fields::Fu>::type {2}, cxx_diagrams::field_indices<fields::Fd>::type {2}, cxx_diagrams::field_indices<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> ">::type {i});
+      auto cHpmtb = Vertex<bar<" <> CXXDiagrams`CXXNameOfField[First@GetSMDownQuarks[]] <> ">, " <> CXXDiagrams`CXXNameOfField[First@GetSMUpQuarks[]] <> ", " <> CXXDiagrams`CXXNameOfField[If[TreeMasses`GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], conj[TreeMasses`GetChargedHiggsBoson[]]]] <> ">::evaluate(indices, context);
+      input.cHpmtbR = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<Fu>({2})/246.));
+      input.cHpmtbL = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<Fd>({2})/246.));
+      v.push_back(std::move(input));
+   }
+
+   return v;
+}
+"
+];
 
 WriteExampleCmdLineOutput[enableDecays_] :=
     If[enableDecays,
