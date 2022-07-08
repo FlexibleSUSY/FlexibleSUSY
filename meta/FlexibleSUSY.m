@@ -2698,31 +2698,46 @@ std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleS
          if (std::abs(ids.at(0)) == 12 || std::abs(ids.at(0)) == 14 || std::abs(ids.at(0)) == 16 || std::abs(ids.at(1)) == 12 || std::abs(ids.at(1)) == 14 || std::abs(ids.at(1)) == 16) {
             if (ids.at(0) == chargeSign*(-11) || ids.at(1) == chargeSign*(-11)) {
                input.brenu += el.second.get_width()/decay_table.get_total_width();
+               continue;
             }
             if (ids.at(0) == chargeSign*(-13) || ids.at(1) == chargeSign*(-13)) {
                input.brmunu += el.second.get_width()/decay_table.get_total_width();
+               continue;
             }
             if (ids.at(0) == chargeSign*(-15) || ids.at(1) == chargeSign*(-15)) {
                input.brtaunu += el.second.get_width()/decay_table.get_total_width();
+               continue;
             }
          }
          if ((ids.at(0) == chargeSign*6 || ids.at(1) == chargeSign*6) && (ids.at(0) == chargeSign*(-5) || ids.at(1) == chargeSign*(-5))) {
             input.brtb = el.second.get_width()/decay_table.get_total_width();
+            continue;
          }
          if ((ids.at(0) == chargeSign*4 || ids.at(1) == chargeSign*4) && (ids.at(0) == chargeSign*(-3) || ids.at(1) == chargeSign*(-3))) {
             input.brcs = el.second.get_width()/decay_table.get_total_width();
+            continue;
          }
          if ((ids.at(0) == chargeSign*24 || ids.at(1) == chargeSign*24) && (ids.at(0) == 23 || ids.at(1) == 23)) {
             input.brWZ = el.second.get_width()/decay_table.get_total_width();
+            continue;
          }
          if ((ids.at(0) == chargeSign*24 || ids.at(1) == chargeSign*24) && (ids.at(0) == 22 || ids.at(1) == 22)) {
             input.brWgam = el.second.get_width()/decay_table.get_total_width();
+            continue;
          }
       }
       const auto indices = concatenate(cxx_diagrams::field_indices<fields::Fu>::type {2}, cxx_diagrams::field_indices<fields::Fd>::type {2}, cxx_diagrams::field_indices<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> ">::type {i});
       auto cHpmtb = Vertex<bar<" <> CXXDiagrams`CXXNameOfField[First@GetSMDownQuarks[]] <> ">, " <> CXXDiagrams`CXXNameOfField[First@GetSMUpQuarks[]] <> ", " <> CXXDiagrams`CXXNameOfField[If[TreeMasses`GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], conj[TreeMasses`GetChargedHiggsBoson[]]]] <> ">::evaluate(indices, context);
-      input.cHpmtbR = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<Fu>({2})/246.));
-      input.cHpmtbL = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<Fd>({2})/246.));
+      input.cHpmtbR = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<" <> CXXDiagrams`CXXNameOfField[First@GetSMUpQuarks[]] <> ">({2})/246.));
+      input.cHpmtbL = real(cHpmtb.right()/(sqrt(2.)*context.physical_mass<" <> CXXDiagrams`CXXNameOfField[First@GetSMDownQuarks[]] <> ">({2})/246.));" <>
+      If[MemberQ[FlexibleSUSY`FSDecayParticles, First@GetSMUpQuarks[]], "
+      const auto& top_decay_table = decays.get_" <> CXXDiagrams`CXXNameOfField[First@GetSMUpQuarks[]] <> "_decays(2);
+      try {
+         input.brtHpb = top_decay_table.get_decay({5, chargeSign*decay_table.get_particle_id()}).get_width()/top_decay_table.get_total_width();
+      }
+      catch (OutOfBoundsError const& e) {}",
+      Print["Warning: HiggsTools requires computation of t→bH+ branching ratio. Consider adding " <> ToString@First@GetSMUpQuarks[] <> " to the FSDecayParticles list."];""
+      ] <> "
       v.push_back(std::move(input));
    }
 
