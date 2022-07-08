@@ -170,7 +170,7 @@ double CLASSNAME::get_partial_width<H, bar<uq>::type, uq>(
 
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      const std::array<int, 3> uquark_pdgs = {2, 4, 6};
+      static constexpr std::array<int, 3> uquark_pdgs = {2, 4, 6};
       higgstools_input.add_coupling(field_as_string<H>(indexIn),
          {uquark_pdgs.at(indexOut1.at(0)), -uquark_pdgs.at(indexOut2.at(0))}, std::sqrt(result_S) + std::sqrt(result_P)*1i);
    }
