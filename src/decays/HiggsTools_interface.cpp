@@ -135,18 +135,20 @@ void call_HiggsTools(
       Hpm.setMass(el.mass);
 
       // set H± decays
-      Hpm.setTotalWidth(el.width);
-      Hpm.setBr(HP::Decay::enu, el.brenu);
-      Hpm.setBr(HP::Decay::munu, el.brmunu);
-      Hpm.setBr(HP::Decay::taunu, el.brtaunu);
-      Hpm.setBr(HP::Decay::tb, el.brtb);
-      Hpm.setBr(HP::Decay::cs, el.brcs);
-      Hpm.setBr(HP::Decay::WZ, el.brWZ);
-      Hpm.setBr(HP::Decay::Wgam, el.brWgam);
+      if (el.width > 0) {
+         Hpm.setTotalWidth(el.width);
+         Hpm.setBr(HP::Decay::enu, el.brenu);
+         Hpm.setBr(HP::Decay::munu, el.brmunu);
+         Hpm.setBr(HP::Decay::taunu, el.brtaunu);
+         Hpm.setBr(HP::Decay::tb, el.brtb);
+         Hpm.setBr(HP::Decay::cs, el.brcs);
+         Hpm.setBr(HP::Decay::WZ, el.brWZ);
+         Hpm.setBr(HP::Decay::Wgam, el.brWgam);
+      }
 
       // production
       // pp->ttbar, t(tbar)->Hp b
-      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, 0.);
+      double ppHpmtb_xsec = HP::EffectiveCouplingCxns::ppHpmtb(HP::Collider::LHC13, el.mass, el.cHpmtbR, el.cHpmtbL, el.brtHpb);
       Hpm.setCxn(HP::Collider::LHC13, HP::Production::Hpmtb, ppHpmtb_xsec);
    }
 
