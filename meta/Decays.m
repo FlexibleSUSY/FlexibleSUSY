@@ -1897,7 +1897,7 @@ If[Length@positions =!= 1, Quit[1]];
          cppVertices <>
 
          (* diagram symmetry factor *)
-          "\nconstexpr double " <> ToString@symmetryFac <> " {" <>
+          "\nstatic constexpr double " <> ToString@symmetryFac <> " {" <>
              ToString @
                N[With[{topoName = FeynArtsTopologyName[topology]},
 
@@ -1911,7 +1911,7 @@ If[Length@positions =!= 1, Quit[1]];
          "};\n" <>
 
          (* color factor *)
-         "\nconstexpr " <>
+         "\nstatic constexpr " <>
          With[{cf = CXXDiagrams`ExtractColourFactor @
                 CXXDiagrams`ColorFactorForDiagram[topology, diagram]},
             If[Head[cf] === Complex,
@@ -1988,7 +1988,7 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
              With[{res = FillOneLoopDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct]},
                 If[res[[1]],
                   body = body <> "\n// FormCalc's Finite variable\n";
-                  body = body <>"constexpr double Finite {1.};\n"
+                  body = body <>"static constexpr double Finite {1.};\n"
                 ];
                 body = body <>"\nconst double ren_scale {result.m_decay};\n";
                 body = body <> Last@res <> "\n";
