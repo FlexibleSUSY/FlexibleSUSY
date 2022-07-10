@@ -544,12 +544,17 @@ CheckDecaysOptions[] :=
             DeleteCases[{TreeMasses`GetHiggsBoson[], TreeMasses`GetChargedHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson[]}, Null],
          If[FlexibleSUSY`FSDecayParticles === All,
             FlexibleSUSY`FSDecayParticles = TreeMasses`GetParticles[],
+            FlexibleSUSY`FSDecayParticles = FlexibleSUSY`FSDecayParticles /. SARAH`bar|Susyno`LieGroups`conj -> Identity;
             If[!SubsetQ[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles],
                Utils`FSFancyWarning[
                   "Requested decay of particles ",
                   Complement[FlexibleSUSY`FSDecayParticles, TreeMasses`GetParticles[]],
                   " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
+            ];
+            If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0 && False,
+               FlexibleSUSY`FSDecayParticles = DeleteCases[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]];
+               AppendTo[FlexibleSUSY`FSDecayParticles, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
             ]
          ]
       ]

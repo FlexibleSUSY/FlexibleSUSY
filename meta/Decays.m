@@ -208,6 +208,8 @@ SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[G
 SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
 SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "g";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] := "Hm";
+SimplifiedName[particle_ /; TreeMasses`GetChargedHiggsBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]], TreeMasses`GetChargedHiggsBoson[]]] := "Hp";
 SimplifiedName[particle_] := particle;
 
 CreateParticleAlias[particle_, namespace_String] :=
@@ -221,11 +223,13 @@ CreateSMParticleAliases[namespace_:""] :=
     Module[{smParticlesToAlias},
            smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
                                         TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetZBoson[],
+                                        TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]],
+                                        TreeMasses`GetZBoson[],
                                         TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
                                         TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
                                         TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
-                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field
+                                        TreeMasses`GetDownQuark[1] /.field_[generation_] :> field,
+                                        TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]
                                        }, (# =!= Null)&];
            CreateParticleAliases[smParticlesToAlias, namespace]
           ];
@@ -2010,6 +2014,8 @@ GetHiggsBosonDecays[particleDecays_List] :=
     If[TreeMasses`GetHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetHiggsBoson[])&], {}];
 GetPseudoscalarHiggsBosonDecays[particleDecays_List] :=
     If[TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null, Select[particleDecays, (First[#] === TreeMasses`GetPseudoscalarHiggsBoson[])&], {}];
+GetUpQuarkDecays[particleDecays_List] :=
+    Select[particleDecays, (First[#] === First@TreeMasses`GetSMUpQuarks[])&];
 
 SelectDecayByFinalState[finalState_List, decays_List] :=
     Select[decays, (Sort[GetFinalState[#]] === Sort[finalState])&];
@@ -2029,6 +2035,14 @@ SelectChargedLeptonChargedLeptonFinalState[decays_List] :=
        If[chargedLeptonSymbol =!= Null,
           result = SelectDecayByFinalState[{chargedLeptonSymbol, SARAH`AntiField[chargedLeptonSymbol]}, decays];
        ];
+       result
+    ];
+
+SelectChargedHiggsDownQuarkFinalState[decays_List] :=
+    Module[{downQuarkSymbol, chargedHiggsSymbol, result = {}},
+       downQuarkSymbol = First@TreeMasses`GetSMDownQuarks[];
+       chargedHiggsSymbol = If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] > 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
+       result = SelectDecayByFinalState[{downQuarkSymbol, chargedHiggsSymbol}, decays];
        result
     ];
 
@@ -2403,6 +2417,18 @@ CreatePseudoscalarHiggsToChargedLeptonChargedLeptonPartialWidth[{higgsSymbol_, d
        {declaration, function}
     ];
 
+CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectChargedHiggsDownQuarkFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
+
+
+
 CreateHiggsDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
     Module[{higgsDecays, specializations = {}},
            higgsDecays = GetHiggsBosonDecays[particleDecays];
@@ -2438,10 +2464,21 @@ CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays_, modelNa
            specializations
           ];
 
+CreateUpQuarkDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
+    Module[{upQuarkDecays, specializations = {}},
+           upQuarkDecays = GetUpQuarkDecays[particleDecays];
+           If[upQuarkDecays =!= {},
+              upQuarkDecays = First@upQuarkDecays;
+              specializations = {CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[upQuarkDecays, modelName]}
+           ];
+           specializations
+          ];
+
 CreatePartialWidthSpecializations[particleDecays_List, modelName_] :=
     Module[{specializations},
            specializations = CreateHiggsDecayPartialWidthSpecializations[particleDecays, modelName];
            specializations = Join[specializations, CreatePseudoscalarHiggsDecayPartialWidthSpecializations[particleDecays, modelName]];
+           specializations = Join[specializations, CreateUpQuarkDecayPartialWidthSpecializations[particleDecays, modelName]];
            specializations = Select[specializations, (# =!= {} && # =!= {"", ""})&];
            If[specializations =!= {}, specializations = Utils`StringJoinWithSeparator[#, "\n"]& /@ Transpose[specializations]];
            specializations

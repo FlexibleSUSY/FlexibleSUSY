@@ -325,4 +325,11 @@ double sm_down_quark_masses(softsusy::QedQcd const& qedqcd, int n)
          throw std::runtime_error("Unknown quark mass");
    }
 }
+
+double Delta_t(double z) noexcept {
+   const double lnz = std::log(z);
+   const double ln1mz = std::log(1.-z);
+   // eq. 2.5 of 2201.08139
+   return -2.*Li2(z) + z/(z-1.)*lnz + (1./z - 2.5)*ln1mz - lnz*ln1mz - 2.*zeta2 + 2.25;
+}
 } // namespace flexiblesusy
