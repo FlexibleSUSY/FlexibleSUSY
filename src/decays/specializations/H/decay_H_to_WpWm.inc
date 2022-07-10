@@ -1,14 +1,14 @@
 // special case for H -> W+ W-
-
 template <>
-double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
+double CLASSNAME::get_partial_width<H, Wp, Wm>(
    const context_base& context, typename field_indices<H>::type const& indexIn,
-   typename field_indices<conj<W>::type>::type const& indexOut1,
-   typename field_indices<W>::type const& indexOut2)
+   typename field_indices<Wp>::type const& indexOut1,
+   typename field_indices<Wm>::type const& indexOut2
+   )
 {
 
    const double mHOS = context.physical_mass<H>(indexIn);
-   const double mWOS = context.physical_mass<W>(indexOut1);
+   const double mWOS = context.physical_mass<Wm>(indexOut1);
    const double x = Sqr(mWOS/mHOS);
    double res = 0;
 
@@ -39,9 +39,9 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       gsl_rng_free (r);
 
       // prefactor
-      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
+      const auto indices = concatenate(indexIn, indexOut1, indexOut2);
       const auto ghWW =
-         Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
+         Vertex<H, Wp, Wm>::evaluate(indices, context).value();
 
       const double normalization = 1./(64.*Cube(Pi)) * std::norm(ghWW) * Cube(mHOS)/Power4(mWOS);
       res *= normalization;
@@ -59,16 +59,16 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
    // three-body decays form mW < mH < 2*mW
    else if (4 * x > 1.0 && offshell_VV_decays != 0) {
 
-      if (check_3body_Vff_decay<BSMForWdecay, W>(context, mHOS, indexOut1)) {
+      if (check_3body_Vff_decay<BSMForWdecay, Wm>(context, mHOS, indexOut1)) {
          const std::string index_as_string = indexIn.size() == 0 ? "" : "(" + std::to_string(indexIn.at(0)) + ")";
          WARNING("Warning in H" + index_as_string + "->WW decays: Single off-shell decays H->Wff' assume no possible BSM particles in the final state. Turning off.");
          return 0.;
       }
       res = 1./(768.*Power3(Pi)*mHOS) * RT(x)/x;
 
-      const auto indices = concatenate(indexIn, indexOut2, indexOut1);
+      const auto indices = concatenate(indexIn, indexOut1, indexOut2);
       const auto ghWW =
-         Vertex<H, conj<W>::type, W>::evaluate(indices, context).value();
+         Vertex<H, Wp, Wm>::evaluate(indices, context).value();
 
       // absolute value of baru d W+ vertex (no CKM and no PL projector)
       const double g2 = context.model.get_g2();
@@ -91,7 +91,7 @@ double CLASSNAME::get_partial_width<H, conj<W>::type, W>(
       const double ps = 1./(8.*Pi)*std::sqrt(KallenLambda(1., x, x));
 
       // matrix element squared
-      const auto mat_elem = calculate_amplitude<H, conj<W>::type, W>(
+      const auto mat_elem = calculate_amplitude<H, Wp, Wm>(
          context, indexIn, indexOut1, indexOut2);
       const auto mat_elem_sq = mat_elem.square();
 

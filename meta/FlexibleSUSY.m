@@ -2082,6 +2082,9 @@ WriteDecaysClass[decayParticles_List, finalStateParticles_List, files_List] :=
            (* get from generated FSParticleDecay 'objects' vertices needed in decay calculation *)
            decaysVertices = DeleteDuplicates[Flatten[Decays`GetVerticesForDecays[Last[#]]& /@ decaysLists, 1]];
            decaysVertices = SortFieldsInCp /@ decaysVertices;
+           With[{Wm = If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]},
+              AppendTo[decaysVertices, {TreeMasses`GetHiggsBoson[], Susyno`LieGroups`conj[Wm], Wm}]
+           ];
 
            enableDecaysCalculationThreads = False;
            callAllDecaysFunctions = Decays`CallDecaysCalculationFunctions[decayParticles, enableDecaysCalculationThreads];

@@ -223,6 +223,12 @@ template<> struct VertexImpl<standard_model_cxx_diagrams::fields::hh, standard_m
    static cxx_diagrams::MomentumDifferenceVertex evaluate(const std::array<int, 0>& indices, const context_base& context);
 };
 
+
+template<> struct VertexImpl<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VWp, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type>
+{
+   static cxx_diagrams::InverseMetricVertex evaluate(const std::array<int, 0>& indices, const context_base& context);
+};
+
 template<> struct VertexImpl<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VZ, standard_model_cxx_diagrams::fields::VZ>
 {
    static cxx_diagrams::InverseMetricVertex evaluate(const std::array<int, 0>& indices, const context_base& context);

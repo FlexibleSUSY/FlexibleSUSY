@@ -4689,21 +4689,22 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VZ, VZ>(
    return result;
 }
 
-// hh -> {conj[VWp], VWp}
+// hh -> {VWp, conj[VWp]}
 template<>
-Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, typename conj<VWp>::type, VWp>(
+Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, VWp, typename conj<VWp>::type>(
    const context_base& context,
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
-   typename cxx_diagrams::field_indices<typename fields::conj<fields::VWp>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::VWp >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::VWp >::type const& idx_2,
+   typename cxx_diagrams::field_indices<typename fields::conj<fields::VWp>::type >::type const& idx_3
+) const{
    
    // amplitude type
    Decay_amplitude_SVV result;
 
    // external particles' masses
    result.m_decay = context.physical_mass<hh>(idx_1);
-   result.m_vector_1 = context.physical_mass<typename conj<VWp>::type>(idx_2);
-   result.m_vector_2 = context.physical_mass<VWp>(idx_3);
+   result.m_vector_2 = context.physical_mass<VWp>(idx_2);
+   result.m_vector_1 = context.physical_mass<typename conj<VWp>::type>(idx_3);
 
    // set the initial value of an amplitude to 0
    result.form_factor_g = std::complex<double>(0., 0.);
@@ -4714,8 +4715,8 @@ Decay_amplitude_SVV CLASSNAME::calculate_amplitude<hh, typename conj<VWp>::type,
    result.form_factor_eps = std::complex<double>(0., 0.);
    // @todo correct prefactors
    // tree-level amplitude
-   const auto indices = concatenate(idx_1, idx_3, idx_2);
-   const auto vertex =  Vertex<hh, typename conj<VWp>::type, VWp>::evaluate(indices, context);
+   const auto indices = concatenate(idx_1, idx_2, idx_3);
+   const auto vertex =  Vertex<hh, VWp, typename conj<VWp>::type>::evaluate(indices, context);
 
    result.form_factor_g += vertex.value();
 
@@ -4728,7 +4729,7 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fv>::type, F
    const context_base& context,
    typename cxx_diagrams::field_indices<fields::hh >::type const& idx_1,
    typename cxx_diagrams::field_indices<typename fields::bar<fields::Fv>::type >::type const& idx_2,
-   typename cxx_diagrams::field_indices<fields::Fv >::type const& idx_3) const{
+   typename cxx_diagrams::field_indices<fields::Fv >::type const& idx_3) const {
    
    // amplitude type
    Decay_amplitude_SFF result;
@@ -5719,7 +5720,8 @@ Decay_amplitude_SFF CLASSNAME::calculate_amplitude<hh, typename bar<Fu>::type, F
 
 using H = fields::hh;
 using Ah = fields::Ah;
-using W = fields::VWp;
+using Wm = typename fields::conj<fields::VWp>;
+using Wp = fields::VWp;
 using Z = fields::VZ;
 using g = fields::VG;
 using A = fields::VP;
@@ -5767,7 +5769,7 @@ bool check_3body_Vff_decay(const context_base& context, double  mHOS, const type
 }
 
 #include "decays/specializations/H/decay_H_to_ZZ.inc"
-#include "decays/specializations/H/decay_H_to_WW.inc"
+#include "decays/specializations/H/decay_H_to_WpWm.inc"
 #include "decays/specializations/H/decay_H_to_gg.inc"
 #include "decays/specializations/H/decay_H_to_AA.inc"
 #include "decays/specializations/H/decay_H_to_AZ.inc"
@@ -5948,10 +5950,10 @@ double CLASSNAME::partial_width_hh_to_conjVWpVWp(Standard_model model)
 {
    context_base context {model};
    const typename field_indices<hh>::type in_indices {};
-   const typename field_indices<typename conj<VWp>::type>::type out_1_indices {};
-   const typename field_indices<VWp>::type out_2_indices {};
+   const typename field_indices<VWp>::type out_1_indices {};
+   const typename field_indices<typename conj<VWp>::type>::type out_2_indices {};
 
-   return get_partial_width<hh, typename conj<VWp>::type, VWp>(context, in_indices, out_1_indices, out_2_indices);
+   return get_partial_width<hh, VWp, typename conj<VWp>::type>(context, in_indices, out_1_indices, out_2_indices);
 }
 
 double CLASSNAME::partial_width_hh_to_barFvFv(Standard_model model, int gO1, int gO2)

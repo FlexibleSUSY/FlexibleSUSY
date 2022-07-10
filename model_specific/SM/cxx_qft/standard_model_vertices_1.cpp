@@ -301,6 +301,17 @@ cxx_diagrams::MomentumDifferenceVertex VertexImpl<standard_model_cxx_diagrams::f
    return {result, minuend_index, subtrahend_index};
 }
 
+cxx_diagrams::InverseMetricVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VWp, typename standard_model_cxx_diagrams::fields::conj<standard_model_cxx_diagrams::fields::VWp>::type>::evaluate(
+   const std::array<int, 0>& indices, const context_base& context)
+{
+   const auto g2 = MODELPARAMETER(g2);
+   const auto v = MODELPARAMETER(v);
+
+   const std::complex<double> result = 0.5*v*Sqr(g2);
+
+   return {result};
+}
+
 cxx_diagrams::InverseMetricVertex VertexImpl<standard_model_cxx_diagrams::fields::hh, standard_model_cxx_diagrams::fields::VZ, standard_model_cxx_diagrams::fields::VZ>::evaluate(
    const std::array<int, 0>& indices, const context_base& context)
 {

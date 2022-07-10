@@ -195,8 +195,6 @@ GenericVectorName[] := "vector";
 GenericFermionName[] := "fermion";
 GenericGhostName[] := "ghost";
 
-SimplifiedName[Susyno`LieGroups`conj[particle_]] :=
-    Susyno`LieGroups`conj[SimplifiedName[particle]];
 SimplifiedName[SARAH`bar[particle_]] :=
     SARAH`bar[SimplifiedName[particle]];
 
@@ -205,7 +203,8 @@ SimplifiedName[particle_?TreeMasses`IsSMDownQuark] := "dq";
 SimplifiedName[particle_?TreeMasses`IsSMUpQuark] := "uq";
 SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "H";
 SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "Ah";
-SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === TreeMasses`GetWBoson[]] := "W";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]] := "Wm";
+SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] := "Wp";
 SimplifiedName[particle_ /; TreeMasses`GetZBoson[] =!= Null && particle === TreeMasses`GetZBoson[]] := "Z";
 SimplifiedName[particle_ /; TreeMasses`GetPhoton[] =!= Null && particle === TreeMasses`GetPhoton[]] := "A";
 SimplifiedName[particle_ /; TreeMasses`GetGluon[] =!= Null && particle === TreeMasses`GetGluon[]] := "g";
@@ -222,7 +221,7 @@ CreateSMParticleAliases[namespace_:""] :=
     Module[{smParticlesToAlias},
            smParticlesToAlias = Select[{TreeMasses`GetHiggsBoson[],
                                         TreeMasses`GetPseudoscalarHiggsBoson[],
-                                        TreeMasses`GetWBoson[], TreeMasses`GetZBoson[],
+                                        TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetZBoson[],
                                         TreeMasses`GetGluon[], TreeMasses`GetPhoton[],
                                         TreeMasses`GetDownLepton[1] /. field_[generation_] :> field,
                                         TreeMasses`GetUpQuark[1] /. field_[generation_] :> field,
@@ -453,7 +452,11 @@ OrderFinalState[initialParticle_?TreeMasses`IsScalar, finalParticles_List] :=
                 ];
               If[TreeMasses`IsVector[orderedFinalState[[1]]] && TreeMasses`IsVector[orderedFinalState[[2]]],
                  If[Head[orderedFinalState[[2]]] === Susyno`LieGroups`conj && !Head[orderedFinalState[[1]]] === Susyno`LieGroups`conj,
+                    If[
+                     {If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]],
+                        Susyno`LieGroups`conj[If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]} =!= orderedFinalState,
                     orderedFinalState = Reverse[orderedFinalState];
+                    ]
                  ];
               ];
            ];
@@ -2254,7 +2257,7 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
            includeStatement = "#include \"decays/specializations/" <> SimplifiedName[initialParticle] <> "/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
-                              StringJoin[SimplifiedName[# /. SARAH`bar|Susyno`LieGroups`conj -> Identity]& /@ finalState] <>
+                              StringJoin[SimplifiedName[# /. SARAH`bar->Identity]& /@ finalState] <>
                               ".inc\"";
            {declaration, includeStatement}
           ];
