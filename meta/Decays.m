@@ -251,7 +251,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
             ]
          ];
       bsmForWdecay =
-         Select[Prepend[#, TreeMasses`GetWBoson[]]& /@
+         Select[Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]] & /@
             DeleteDuplicates@Sort@Tuples[Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]], 2],
             IsPossibleNonZeroVertex[#, True]&
          ];
@@ -259,7 +259,7 @@ CreateBSMParticleAliasList[namespace_:""] :=
          Join[
             bsmForWdecay,
             Select[
-               Prepend[#, TreeMasses`GetWBoson[]]& /@
+               Prepend[#, If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, Susyno`LieGroups`conj[TreeMasses`GetWBoson[]], TreeMasses`GetWBoson[]]]& /@
                   DeleteDuplicates@Sort@Tuples[{
                      Join[TreeMasses`GetSusyParticles[], SARAH`AntiField /@ TreeMasses`GetSusyParticles[]],
                      Join[TreeMasses`GetSMParticles[], SARAH`AntiField /@ TreeMasses`GetSMParticles[]]
