@@ -340,11 +340,13 @@ endif
 ifeq ($(WITH_THDMII) $(ENABLE_FLEXIBLEDECAY), yes yes)
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 1)
 TEST_SRC += \
-		$(DIR)/test_THDMII_FlexibleDecay.cpp
+		$(DIR)/test_THDMII_FlexibleDecay.cpp \
+		$(DIR)/test_THDMII_FlexibleDecay_Fu.cpp
 endif
 ifeq ($(FLEXIBLESUSY_LOOP_LIBRARY), 2)
 TEST_SRC += \
-		$(DIR)/test_THDMII_FlexibleDecay.cpp
+		$(DIR)/test_THDMII_FlexibleDecay.cpp \
+		$(DIR)/test_THDMII_FlexibleDecay_Fu.cpp
 endif
 endif
 
@@ -1264,6 +1266,7 @@ $(DIR)/test_SSMSemiAnalytic_semi_analytic_solutions.x: $(LIBSSMSemiAnalytic)
 $(DIR)/test_SSMSemiAnalytic_consistent_solutions.x: $(LIBSSMSemiAnalytic) $(LIBSSM)
 
 $(DIR)/test_THDMII_FlexibleDecay.x: $(LIBTHDMII)
+$(DIR)/test_THDMII_FlexibleDecay_Fu.x: $(LIBTHDMII)
 
 $(DIR)/test_THDMIIEWSBAtMZSemiAnalytic_ewsb.x: $(LIBTHDMIIEWSBAtMZSemiAnalytic)
 
