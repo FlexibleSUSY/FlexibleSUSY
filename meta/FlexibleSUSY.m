@@ -552,8 +552,8 @@ CheckDecaysOptions[] :=
                   " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ];
-            If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0 && False,
-               FlexibleSUSY`FSDecayParticles = DeleteCases[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]];
+            If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0,
+               FlexibleSUSY`FSDecayParticles = DeleteCases[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]];
                AppendTo[FlexibleSUSY`FSDecayParticles, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
             ]
          ]
@@ -2696,8 +2696,8 @@ std::vector<SingleChargedHiggsInput> get_charged_higgstools_input(" <> FlexibleS
    context_base context {m};
    for (int i = " <> ToString[TreeMasses`GetDimensionStartSkippingGoldstones[TreeMasses`GetChargedHiggsBoson[]]-1] <> "; i<" <> ToString@TreeMasses`GetDimension[TreeMasses`GetChargedHiggsBoson[]] <> "; i++) {
       SingleChargedHiggsInput input;
-      input.mass = context.physical_mass<" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> ">({i});
-      auto const& decay_table = decays.get_" <> CXXDiagrams`CXXNameOfField[TreeMasses`GetChargedHiggsBoson[]] <> "_decays(i);
+      input.mass = context.physical_mass<" <> CXXDiagrams`CXXNameOfField[If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] > 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]]] <> ">({i});
+      auto const& decay_table = decays.get_" <> CConversion`ToValidCSymbolString@If[GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] > 0, TreeMasses`GetChargedHiggsBoson[], Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]] <> "_decays(i);
       input.width = decay_table.get_total_width();
       input.particle = " <> FlexibleSUSY`FSModelName <> "_info::get_particle_name_from_pdg(decay_table.get_particle_id());
       for (auto const& el: decay_table) {

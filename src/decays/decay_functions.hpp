@@ -63,6 +63,7 @@ double sm_down_quark_masses(softsusy::QedQcd const&, int);
 static constexpr double deltaqq_QCDxQED = 691/24. - 6*zeta3 - Sqr(Pi);
 
 double Delta_t(double) noexcept;
+double Delta_Hp(double) noexcept;
 } // namespace flexiblesusy
 
 #endif
