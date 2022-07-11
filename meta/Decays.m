@@ -2048,6 +2048,14 @@ SelectChargedHiggsDownQuarkFinalState[decays_List] :=
        result
     ];
 
+SelectWBosonDownQuarkFinalState[decays_List] :=
+    Module[{downQuarkSymbol, wBosonSymbol, result = {}},
+       downQuarkSymbol = First@TreeMasses`GetSMDownQuarks[];
+       wBosonSymbol = If[GetElectricCharge[TreeMasses`GetWBoson[]] > 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]];
+       result = SelectDecayByFinalState[{downQuarkSymbol, wBosonSymbol}, decays];
+       result
+    ];
+
 SelectGluonGluonFinalState[decays_List] :=
     Module[{gluonSymbol = TreeMasses`GetGluon[], result = {}},
            If[gluonSymbol =!= Null,
@@ -2439,6 +2447,16 @@ CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, mo
        {declaration, function}
     ];
 
+CreateUpQuarkToWBosonDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
+    Module[{decay, declaration = "", function = ""},
+       decay = SelectWBosonDownQuarkFinalState[decaysList];
+       If[decay =!= {},
+          decay = First[decay];
+          {declaration, function} = CreateIncludedPartialWidthSpecialization[decay, modelName];
+       ];
+       {declaration, function}
+    ];
+
 CreateChargedHiggsToUpQuarkDownQuarkPartialWidth[{higgsSymbol_, decaysList_}, modelName_] :=
     Module[{decay, declaration = "", function = ""},
        decay = SelectUpQuarkDownQuarkFinalState[decaysList];
@@ -2502,7 +2520,9 @@ CreateUpQuarkDecayPartialWidthSpecializations[particleDecays_, modelName_] :=
            upQuarkDecays = GetUpQuarkDecays[particleDecays];
            If[upQuarkDecays =!= {},
               upQuarkDecays = First@upQuarkDecays;
-              specializations = {CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[upQuarkDecays, modelName]}
+              specializations = {CreateUpQuarkToChargedHiggsDownQuarkPartialWidth[upQuarkDecays, modelName],
+                                 CreateUpQuarkToWBosonDownQuarkPartialWidth[upQuarkDecays, modelName]
+                                 }
            ];
            specializations
           ];

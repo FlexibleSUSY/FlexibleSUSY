@@ -339,4 +339,13 @@ double Delta_Hp(double z) noexcept {
    // eq. 2.5 of 2201.08139
    return 2.*Li2(z) + lnz*ln1mz + (z-2.5)*(ln1mz-lnz) + 1./(z-1.)*lnz + 2.25;
 }
+
+// eq. 56 of 0906.3474
+double Delta_tW(double y) noexcept {
+   const double lny = std::log(y);
+   const double ln1my = std::log(1-y);
+   return y/(Sqr(1.-y)*(1+2.*y))*(0.5*(1-y)*(5+9*y-6*Sqr(y))/y - 2./3.*Sqr(1-y)*(1+2*y)*Sqr(Pi)/y - Sqr(1-y)*(5+4*y)/y*ln1my - 4.*Sqr(1-y)*(1+2*y)/y*lny*ln1my - 4.*(1+y)*(1-2.*y)*lny - 4.*Sqr(1-y)*(1+2.*y)/y*Li2(y));
+}
+
+
 } // namespace flexiblesusy

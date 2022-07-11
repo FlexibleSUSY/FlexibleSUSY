@@ -272,7 +272,7 @@ Block UERMIX
 
    // t -> b W+
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Fu_to_FdconjVWm(&m, 2, 2),
-                              1.4497611564261081, 1e-15);
+                              1.3126680510713284, 1e-15);
    // t -> b H+
    BOOST_CHECK_CLOSE_FRACTION(decays_with_HO.partial_width_Fu_to_FdconjHm(&m, 2, 2, 1),
                               0.00038547298395277878, 1e-15);

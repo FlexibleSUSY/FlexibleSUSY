@@ -552,11 +552,12 @@ CheckDecaysOptions[] :=
                   " which are not part of the model. Removing them."];
                FlexibleSUSY`FSDecayParticles = Intersection[TreeMasses`GetParticles[], FlexibleSUSY`FSDecayParticles]
             ];
-            If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0,
-               FlexibleSUSY`FSDecayParticles = DeleteCases[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]];
-               AppendTo[FlexibleSUSY`FSDecayParticles, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
-            ]
          ]
+      ];
+      (* if present, replace H- with H+ since specializations are only for H+ *)
+      If[MemberQ[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]] && GetElectricCharge[TreeMasses`GetChargedHiggsBoson[]] < 0,
+         FlexibleSUSY`FSDecayParticles = DeleteCases[FlexibleSUSY`FSDecayParticles, TreeMasses`GetChargedHiggsBoson[]];
+         AppendTo[FlexibleSUSY`FSDecayParticles, Susyno`LieGroups`conj[TreeMasses`GetChargedHiggsBoson[]]];
       ]
    ];
 
