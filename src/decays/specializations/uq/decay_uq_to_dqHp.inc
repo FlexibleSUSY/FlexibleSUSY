@@ -24,7 +24,8 @@ double CLASSNAME::get_partial_width<uq, dq, Hp>(
       // t -> b H^+
       if(indexIn.at(0) == 2 && indexOut1.at(0) == 2) {
          const double z = Sqr(mHp/mu);
-         result *= 1. + 16./3.*get_alphas(context)*Delta_t(z);
+         static constexpr double CF = 4./3.;
+         result *= 1. + CF*get_alphas(context)/Pi*Delta_t(z);
       }
    }
 

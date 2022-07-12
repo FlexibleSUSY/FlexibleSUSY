@@ -23,10 +23,15 @@ double CLASSNAME::get_partial_width<Hp, bar<dq>::type, uq>(
 
    // higher order corrections
    if (flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) {
-      // H+ -> t bbar 
+      // H+ -> t bbar
       if(indexOut1.at(0) == 2 && indexOut2.at(0) == 2) {
          const double z = Sqr(mu/mHp);
-         result *= 1. + 16./3.*get_alphas(context)*Delta_Hp(z);
+         static constexpr double CF = 4./3.;
+         const double corr = 1. + CF*get_alphas(context)/Pi*Delta_Hp(z);
+         // Delta_Hp has logarithmic singularity for z->0
+         if (corr > 0) {
+            result *= corr;
+         }
       }
    }
 
