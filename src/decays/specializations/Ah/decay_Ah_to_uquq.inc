@@ -94,13 +94,13 @@ double CLASSNAME::get_partial_width<Ah, bar<uq>::type, uq>(
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
          const double deltaqq_QED_OS_P =
-               alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
+               alpha_red * Sqr(uq::electric_charge) * calc_DeltaAH(betaOS);
 
          double deltaqq_QCDxQED_DR = 0.;
          double deltaPhi2_P = 0.;
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
-               deltaqq_QCDxQED*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(uq::electric_charge)*alpha_red*alpha_s_red;
             if ((indexOut1.at(0) < 2 || indexOut2.at(0) < 2)) {
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAHOS/mtpole));

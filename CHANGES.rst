@@ -12,6 +12,14 @@ New features
 
 * Possibility to compute in selected models 2-body top quark decays, including one-loop SM QCD corrections to :math:`$t \to b W^+$` and :math:`$t \to b W^+`
 
+FlexibleSUSY 2.X.X [X, X X]
+==================================
+
+Fixed bugs
+----------
+
+* [commit ]: Fixed incorect quark charge in some higher order QED corrections to :math:`$H \to u\bar{u}$` and :math:`$A \to u\bar{u}$`
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
