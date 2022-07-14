@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_SM_FlexibleDecay )
                               0.0023811031255194888, 3e-13);
    // h -> c cbar
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFuFu(&m, 1, 1),
-                              0.00011734084746332317, 2e-14);
+                              0.00011737301687946969, 2e-16);
    // h -> tau+ tau-
    BOOST_CHECK_CLOSE_FRACTION(decays_HO.partial_width_hh_to_barFeFe(&m, 2, 2),
                               0.00026184531343741851, 1e-15);

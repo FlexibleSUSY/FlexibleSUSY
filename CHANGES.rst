@@ -1,3 +1,11 @@
+FlexibleSUSY 2.X.X [X, X X]
+==================================
+
+Fixed bugs
+----------
+
+* [commit ]: Fixed incorect quark charge in some higher order QED corrections to :math:`$H \to u\bar{u}$` and :math:`$A \to u\bar{u}$`
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
