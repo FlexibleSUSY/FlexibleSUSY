@@ -1,19 +1,19 @@
 template <>
-double CLASSNAME::get_partial_width<uq, dq, Hp>(
+double CLASSNAME::get_partial_width<u, d, Hp>(
    const context_base& context,
-   typename field_indices<uq>::type const& indexIn,
-   typename field_indices<dq>::type const& indexOut1,
+   typename field_indices<u>::type const& indexIn,
+   typename field_indices<d>::type const& indexOut1,
    typename field_indices<Hp>::type const& indexOut2)
 {
-   const double mu = context.physical_mass<uq>(indexIn);
-   const double md = context.physical_mass<dq>(indexOut1);
+   const double mu = context.physical_mass<u>(indexIn);
+   const double md = context.physical_mass<d>(indexOut1);
    const double mHp = context.physical_mass<Hp>(indexOut2);
 
 
    const double ps = 1./(8.*Pi) * std::sqrt(KallenLambda(1., Sqr(md/mu), Sqr(mHp/mu)));
 
    // matrix element squared
-   const auto mat_elem_sq = amplitude_squared<uq, dq, Hp>(
+   const auto mat_elem_sq = amplitude_squared<u, d, Hp>(
       context, indexIn, indexOut1, indexOut2);
 
    // flux * phase space factor * symmetry factor * color factor * |matrix element|^2

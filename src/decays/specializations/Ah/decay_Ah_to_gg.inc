@@ -19,7 +19,7 @@ double CLASSNAME::get_partial_width<Ah, g, g>(
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
    // higher order QCD corrections
-   const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
+   const double tau = Sqr(mAh/(2.*context.mass<u>({2})));
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
       // number of active light flavours
       static constexpr int Nf = 5;
@@ -29,10 +29,10 @@ double CLASSNAME::get_partial_width<Ah, g, g>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto AHGGVertex = Vertex<bar<uq>::type, uq, Ah>::evaluate(indices, context);
+      const auto AHGGVertex = Vertex<bar<u>::type, u, Ah>::evaluate(indices, context);
       std::complex<double> const AHGGVertexVal = 0.5*(-AHGGVertex.left() + AHGGVertex.right());
 
-      const double tau = Sqr(mAh/(2.*context.mass<uq>({2})));
+      const double tau = Sqr(mAh/(2.*context.mass<u>({2})));
 
       const std::complex<double> A12_A = 2.*f(tau)/tau;
       // LO width comming only from the top-loop
@@ -45,7 +45,7 @@ double CLASSNAME::get_partial_width<Ah, g, g>(
          97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
       };
 
-      const double mt {context.mass<uq>({2})};
+      const double mt {context.mass<u>({2})};
       const double Lt = std::log(Sqr(mu/mt));
       // eq. D10 of 2207.01032 and 23 of 9807241
       const double deltaNNLO {

@@ -5725,9 +5725,9 @@ using Wp = fields::VWp;
 using Z = fields::VZ;
 using g = fields::VG;
 using A = fields::VP;
-using lep = fields::Fe;
-using uq = fields::Fu;
-using dq = fields::Fd;
+using l = fields::Fe;
+using u = fields::Fu;
+using d = fields::Fd;
 
 // List of potential Z boson decay products excluding pure SM decays
 typedef boost::mpl::list<
@@ -5773,9 +5773,9 @@ bool check_3body_Vff_decay(const context_base& context, double  mHOS, const type
 #include "decays/specializations/H/decay_H_to_gg.inc"
 #include "decays/specializations/H/decay_H_to_AA.inc"
 #include "decays/specializations/H/decay_H_to_AZ.inc"
-#include "decays/specializations/H/decay_H_to_uquq.inc"
-#include "decays/specializations/H/decay_H_to_dqdq.inc"
-#include "decays/specializations/H/decay_H_to_leplep.inc"
+#include "decays/specializations/H/decay_H_to_ubaru.inc"
+#include "decays/specializations/H/decay_H_to_dbard.inc"
+#include "decays/specializations/H/decay_H_to_lbarl.inc"
 
 void CLASSNAME::calculate_hh_decays()
 {

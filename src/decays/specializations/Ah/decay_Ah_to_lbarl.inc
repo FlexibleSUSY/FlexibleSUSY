@@ -1,19 +1,19 @@
 // CP-odd Higgs to charged leptons
 
 template <>
-double CLASSNAME::get_partial_width<Ah, bar<lep>::type, lep>(
+double CLASSNAME::get_partial_width<Ah, bar<l>::type, l>(
    const context_base& context,
    typename field_indices<Ah>::type const& indexIn,
-   typename field_indices<bar<lep>::type>::type const& indexOut1,
-   typename field_indices<lep>::type const& indexOut2)
+   typename field_indices<bar<l>::type>::type const& indexOut1,
+   typename field_indices<l>::type const& indexOut2)
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<lep>::type, lep>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<l>::type, l>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
    const double mAHOS = context.physical_mass<Ah>(indexIn);
-   const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<lep>(indexOut2);
+   const double mL1OS = context.physical_mass<bar<l>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<l>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mAHOS);
@@ -22,7 +22,7 @@ double CLASSNAME::get_partial_width<Ah, bar<lep>::type, lep>(
 
    // matrix element squared
    const auto amp =
-      calculate_amplitude<Ah, typename bar<lep>::type, lep>(context, indexIn, indexOut1, indexOut2);
+      calculate_amplitude<Ah, typename bar<l>::type, l>(context, indexIn, indexOut1, indexOut2);
    const auto amp2 = amp.square();
 
    // flux * phase space factor * symmetry factor * |matrix element|^2
@@ -37,7 +37,7 @@ double CLASSNAME::get_partial_width<Ah, bar<lep>::type, lep>(
 
 #ifdef ENABLE_HIGGSTOOLS
    if (static_cast<bool>(flexibledecay_settings.get(FlexibleDecay_settings::call_higgstools))) {
-      const std::array<int, 3> clep_pdgs = {11, 13, 15};
+      static constexpr std::array<int, 3> clep_pdgs = {11, 13, 15};
       higgstools_input.add_coupling(
             field_as_string<Ah>(indexIn),
             {-clep_pdgs.at(indexOut1.at(0)), clep_pdgs.at(indexOut2.at(0))},

@@ -15,7 +15,7 @@ double CLASSNAME::get_partial_width<H, g, g>(
    // full LO (SM+BSM) result
    double result = flux * color_fact * ps * ps_symmetry * amp.square();
 
-   const double mt {context.mass<uq>({2})};
+   const double mt {context.mass<u>({2})};
    const double tau = Sqr(mH/(2.*mt));
    // the analytic form o corrections is valid for small tau
    if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) && tau < 0.7) {
@@ -25,7 +25,7 @@ double CLASSNAME::get_partial_width<H, g, g>(
       const double alpha_s_5f = qedqcd_.displayAlpha(softsusy::ALPHAS);
 
       const auto indices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, in_idx);
-      const auto HGGVertex = Vertex<bar<uq>::type, uq, H>::evaluate(indices, context);
+      const auto HGGVertex = Vertex<bar<u>::type, u, H>::evaluate(indices, context);
       std::complex<double> const HGGVertexSVal = 0.5*(HGGVertex.left() + HGGVertex.right());
 
       // eq. 2.46 of 0503172
@@ -121,7 +121,7 @@ double CLASSNAME::get_partial_width<H, g, g>(
             97./4. - 7./6.*Nf + (33.-2*Nf)/6*LH
          };
 
-         const double mt {context.mass<uq>({2})};
+         const double mt {context.mass<u>({2})};
          const double Lt = std::log(Sqr(mu/mt));
          // eq. D10 of 2207.01032 and 23 of 9807241
          const double deltaNNLO_P {

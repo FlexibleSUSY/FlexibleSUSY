@@ -2,42 +2,42 @@
 // specialization for the Ah -> Fd Fd case
 
 template<>
-double CLASSNAME::get_partial_width<Ah, bar<dq>::type, dq>(
+double CLASSNAME::get_partial_width<Ah, bar<d>::type, d>(
    const context_base& context,
    typename field_indices<Ah>::type const& indexIn,
-   typename field_indices<bar<dq>::type>::type const& indexOut1,
-   typename field_indices<dq>::type const& indexOut2
+   typename field_indices<bar<d>::type>::type const& indexOut1,
+   typename field_indices<d>::type const& indexOut2
    )
 {
    if (indexIn.at(0) < info::number_of_neutral_goldstones) {
-      throw OutOfBoundsError("Error in " + create_process_string<Ah,bar<dq>::type, dq>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
+      throw OutOfBoundsError("Error in " + create_process_string<Ah, bar<d>::type, d>(indexIn, indexOut1, indexOut2) + " decay. Decaying particle is a Goldstone.");
    }
 
    // get HBBbar vertex
    // we don't use amplitude_squared here because we need both this vertex
    // both with running and pole masses
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HBBbarVertexDR = Vertex<bar<dq>::type, dq, Ah>::evaluate(indices, context);
+   const auto HBBbarVertexDR = Vertex<bar<d>::type, d, Ah>::evaluate(indices, context);
 
    const double mAOS = context.physical_mass<Ah>(indexIn);
    const double flux = 1./(2.*mAOS);
 
-   static constexpr double color_factor = squared_color_generator<Ah, bar<dq>::type, dq>();
+   static constexpr double color_factor = squared_color_generator<Ah, bar<d>::type, d>();
 
    if(!boost::range::equal(indexOut1, indexOut2)) {
       if (!is_zero(HBBbarVertexDR.left()) || !is_zero(HBBbarVertexDR.right())) {
-         const double mdqOS1 = context.physical_mass<dq>(indexOut1);
-         const double mdqOS2 = context.physical_mass<dq>(indexOut2);
+         const double mdqOS1 = context.physical_mass<d>(indexOut1);
+         const double mdqOS2 = context.physical_mass<d>(indexOut2);
          const auto xOS1 = Sqr(mdqOS1/mAOS);
          const auto xOS2 = Sqr(mdqOS2/mAOS);
          const double phase_space = 1./(8.*Pi) * std::sqrt(KallenLambda(1., xOS1, xOS2));
-         return flux * phase_space * color_factor * amplitude_squared<Ah, bar<dq>::type, dq>(context, indexIn, indexOut1, indexOut2);
+         return flux * phase_space * color_factor * amplitude_squared<Ah, bar<d>::type, d>(context, indexIn, indexOut1, indexOut2);
       }
       return 0.;
    }
 
-   const double mdqDR = context.mass<dq>(indexOut1);
-   const double mdqOS = context.physical_mass<dq>(indexOut1);
+   const double mdqDR = context.mass<d>(indexOut1);
+   const double mdqOS = context.physical_mass<d>(indexOut1);
    if(is_zero(mdqDR) || is_zero(mdqOS)) {
       throw std::runtime_error("Error in A->ddbar: down quarks cannot be massless");
    }
@@ -87,7 +87,7 @@ double CLASSNAME::get_partial_width<Ah, bar<dq>::type, dq>(
 
          // 1L QED correction - eq. 17 in FD paper
          const double alpha_red = get_alpha(context)/Pi;
-         const double deltaqq_QED_DR = 17./4.*Sqr(dq::electric_charge)*alpha_red;
+         const double deltaqq_QED_DR = 17./4.*Sqr(d::electric_charge)*alpha_red;
 
          deltaqq_QCD_DR_P +=
             2.*(1. - 6.*xDR)/(1-4.*xDR)*(4./3. - std::log(xDR))*alpha_s_red +
@@ -97,23 +97,23 @@ double CLASSNAME::get_partial_width<Ah, bar<dq>::type, dq>(
                4./3. * alpha_s_red * calc_DeltaAH(betaOS);
 
          const double deltaqq_QED_OS_P =
-               alpha_red * Sqr(dq::electric_charge) * calc_DeltaAH(betaOS);
+               alpha_red * Sqr(d::electric_charge) * calc_DeltaAH(betaOS);
 
-         const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<dq>(indexOut1);
+         const auto gbHoVEV_P = HBBbarVertexDR_P/context.mass<d>(indexOut1);
          double deltaPhi2_P = 0.;
          double deltaqq_QCDxQED_DR = 0.;
 
          if (static_cast<int>(flexibledecay_settings.get(FlexibleDecay_settings::include_higher_order_corrections)) > 1) {
             deltaqq_QCDxQED_DR =
-               deltaqq_QCDxQED*Sqr(dq::electric_charge)*alpha_red*alpha_s_red;
+               deltaqq_QCDxQED*Sqr(d::electric_charge)*alpha_red*alpha_s_red;
             if (!is_zero(gbHoVEV_P)) {
                const double mtpole = qedqcd.displayPoleMt();
                const double lt = std::log(Sqr(mAOS/mtpole));
                const double lq = std::log(xDR);
                const auto Httindices = concatenate(std::array<int, 1> {2}, std::array<int, 1> {2}, indexIn);
-               const auto Httbar = Vertex<bar<uq>::type, uq, H>::evaluate(Httindices, context);
+               const auto Httbar = Vertex<bar<u>::type, u, H>::evaluate(Httindices, context);
                const auto Httbar_P = 0.5*(Httbar.right() - Httbar.left());
-               const auto gtHoVEV_P = Httbar_P/context.mass<uq>({2});
+               const auto gtHoVEV_P = Httbar_P/context.mass<u>({2});
                deltaPhi2_P = Sqr(alpha_s_red) * std::real(gtHoVEV_P/gbHoVEV_P) * (23/6. - lt + 1.0/6.0*Sqr(lq));
             }
          }

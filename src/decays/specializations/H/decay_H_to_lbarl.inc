@@ -1,13 +1,13 @@
 template <>
-double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
+double CLASSNAME::get_partial_width<H, bar<l>::type, l>(
    const context_base& context,
    typename field_indices<H>::type const& indexIn,
-   typename field_indices<bar<lep>::type>::type const& indexOut1,
-   typename field_indices<lep>::type const& indexOut2)
+   typename field_indices<bar<l>::type>::type const& indexOut1,
+   typename field_indices<l>::type const& indexOut2)
 {
 
    const auto indices = concatenate(indexOut1, indexOut2, indexIn);
-   const auto HLLbarVertexDR = Vertex<bar<lep>::type, lep, H>::evaluate(indices, context);
+   const auto HLLbarVertexDR = Vertex<bar<l>::type, l, H>::evaluate(indices, context);
    const auto HLLbarVertexDR_S = 0.5*(HLLbarVertexDR.left() + HLLbarVertexDR.right());
    const auto HLLbarVertexDR_P = 0.5*(HLLbarVertexDR.right() - HLLbarVertexDR.left());
 
@@ -16,8 +16,8 @@ double CLASSNAME::get_partial_width<H, bar<lep>::type, lep>(
    }
 
    const double mHOS = context.physical_mass<H>(indexIn);
-   const double mL1OS = context.physical_mass<bar<lep>::type>(indexOut1);
-   const double mL2OS = context.physical_mass<lep>(indexOut2);
+   const double mL1OS = context.physical_mass<bar<l>::type>(indexOut1);
+   const double mL2OS = context.physical_mass<l>(indexOut2);
 
    // phase space without symmetry factor
    const auto xOS1 = Sqr(mL1OS/mHOS);

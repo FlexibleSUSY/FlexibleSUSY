@@ -195,12 +195,12 @@ GenericVectorName[] := "vector";
 GenericFermionName[] := "fermion";
 GenericGhostName[] := "ghost";
 
-SimplifiedName[SARAH`bar[particle_]] :=
-    SARAH`bar[SimplifiedName[particle]];
-
-SimplifiedName[particle_?TreeMasses`IsSMLepton] := "lep";
-SimplifiedName[particle_?TreeMasses`IsSMDownQuark] := "dq";
-SimplifiedName[particle_?TreeMasses`IsSMUpQuark] := "uq";
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] =!= SARAH`bar] := "l";
+SimplifiedName[particle_ /; TreeMasses`IsSMLepton[particle] && Head[particle] === SARAH`bar] := "lbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] =!= SARAH`bar] := "d";
+SimplifiedName[particle_ /; TreeMasses`IsSMDownQuark[particle] && Head[particle] === SARAH`bar] := "dbar";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] =!= SARAH`bar] := "u";
+SimplifiedName[particle_ /; TreeMasses`IsSMUpQuark[particle] && Head[particle] === SARAH`bar] := "ubar";
 SimplifiedName[particle_ /; TreeMasses`GetHiggsBoson[] =!= Null && particle === TreeMasses`GetHiggsBoson[]] := "H";
 SimplifiedName[particle_ /; TreeMasses`GetPseudoscalarHiggsBoson[] =!= Null && particle === TreeMasses`GetPseudoscalarHiggsBoson[]] := "Ah";
 SimplifiedName[particle_ /; TreeMasses`GetWBoson[] =!= Null && particle === If[GetElectricCharge[TreeMasses`GetWBoson[]] < 0, TreeMasses`GetWBoson[], Susyno`LieGroups`conj[TreeMasses`GetWBoson[]]]] := "Wm";
@@ -2291,7 +2291,7 @@ CreateIncludedPartialWidthSpecialization[decay_FSParticleDecay, modelName_] :=
            declaration = CreatePartialWidthSpecializationDecl[decay, modelName];
            includeStatement = "#include \"decays/specializations/" <> SimplifiedName[initialParticle] <> "/decay_" <>
                               SimplifiedName[initialParticle] <> "_to_" <>
-                              StringJoin[SimplifiedName[# /. SARAH`bar->Identity]& /@ finalState] <>
+                              StringJoin[SimplifiedName[#]& /@ finalState] <>
                               ".inc\"";
            {declaration, includeStatement}
           ];
