@@ -417,9 +417,13 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
               is such a coupling, it must be 0. So for those processes
               we start generating amplitudes from the 1-loop level. *)
            minLoops =
-              If[MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
                  (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
-                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]),
+                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 ||
+                 (* a photon or a gluon always couples diagonally at the tree-level - e.g. no γXY coupling when X =! Y *)
+                 (MemberQ[finalParticles, TreeMasses`GetPhoton[]] && !MemberQ[finalParticles, initialParticle]) ||
+                 (MemberQ[finalParticles, TreeMasses`GetGluon[]] && !MemberQ[finalParticles, initialParticle]),
                  1,
                  0
               ];
