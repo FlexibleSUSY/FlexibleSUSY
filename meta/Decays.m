@@ -417,9 +417,13 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
               is such a coupling, it must be 0. So for those processes
               we start generating amplitudes from the 1-loop level. *)
            minLoops =
-              If[MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
+              If[(MemberQ[{TreeMasses`GetHiggsBoson[], TreeMasses`GetPseudoscalarHiggsBoson}, initialParticle] &&
                  (Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetPhoton[]}] ||
-                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]),
+                 Sort@finalParticles === Sort[{TreeMasses`GetPhoton[], TreeMasses`GetZBoson[]}]))
+                 ||
+                 (* a photon or a gluon always couples diagonally at the tree-level - e.g. no γXY coupling when X =! Y *)
+                 (MemberQ[finalParticles, TreeMasses`GetPhoton[]] && !MemberQ[finalParticles, initialParticle]) ||
+                 (MemberQ[finalParticles, TreeMasses`GetGluon[]] && !MemberQ[finalParticles, initialParticle]),
                  1,
                  0
               ];
@@ -431,8 +435,11 @@ GetContributingGraphsForDecay[initialParticle_, finalParticles_List, maxLoops_In
            {#[[1]], With[{toposAndDiags = #[[2]]}, {#[[1]], Select[#[[2]], IsSupportedDiagram]}& /@ toposAndDiags]}& /@ diagrams
           ];
 
+(* in the MRSSM this 1-loop decay amplitude for Fu crashes the code
+   {Fu, bar[Fd], conj[SRdp], {Fu, Chi, conj[Su]}, {bar[Fd], bar[Chi], Sd}, {conj[SRdp], Su, conj[Sd]}}
+   Temporarily disable 1-loop Fu decay *)
 GetContributingGraphsForDecay[initialParticle_, finalParticles_List] :=
-    GetContributingGraphsForDecay[initialParticle, finalParticles, 1];
+    GetContributingGraphsForDecay[initialParticle, finalParticles, If[initialParticle === First@TreeMasses`GetSMUpQuarks[], 0, 1]];
 
 (* defines a fixed ordering for final state particles  *)
 (* @todo decide on what this ordering actually will be *)
@@ -1040,7 +1047,7 @@ GetDecayAmplitudeType[decay_FSParticleDecay] :=
     GetDecayAmplitudeType[GetInitialState[decay], GetFinalState[decay]];
 
 CreateFieldIndices[particle_String] :=
-    "typename cxx_diagrams::field_indices<" <> particle <> " >::type";
+    "typename cxx_diagrams::field_indices<" <> particle <> ">::type";
 
 CreateFieldIndices[particle_, fieldsNamespace_] :=
     CreateFieldIndices[CXXDiagrams`CXXNameOfField[particle, prefixNamespace -> fieldsNamespace]];
@@ -1181,40 +1188,6 @@ FillMasses[decay_FSParticleDecay] :=
       "Decay_amplitude_FFV", "result.m_decay, result.m_fermion, result.m_vector",
       _, ""
    ];
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SSS",
-                              structName_] :=
-    structName <> ".form_factor = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SSV",
-                              structName_] :=
-    structName <> ".form_factor = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SVV",
-                              structName_] :=
-    structName <> ".form_factor_g = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_11 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_12 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_21 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_22 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_eps = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_SFF",
-                              structName_] :=
-    structName <> ".form_factor_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_right = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_FFS",
-                              structName_] :=
-    structName <> ".form_factor_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_right = std::complex<double>(0., 0.);\n";
-
-ZeroDecayAmplitudeFormFactors[decay_FSParticleDecay /; GetDecayAmplitudeType[decay] == "Decay_amplitude_FFV",
-                              structName_] :=
-    structName <> ".form_factor_gam_left = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_gam_right = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_p_1 = std::complex<double>(0., 0.);\n" <>
-    structName <> ".form_factor_p_2 = std::complex<double>(0., 0.);\n";
 
 GetTreeLevelTwoBodyDecayVertex[decay_FSParticleDecay] :=
     Module[{treeLevelDiags, vertices = {}},
@@ -2001,12 +1974,8 @@ CreateTotalAmplitudeSpecializationDef[decay_FSParticleDecay, modelName_] :=
            body = body <> "\n// external particles' masses\n";
            body = body <> FillDecayAmplitudeMasses[decay, modelName, returnVar, paramsStruct];
 
-           (* @todo: it might be less verbose to by default initialize amplitude to 0 *)
-           body = body <> "\n// set the initial value of an amplitude to 0\n";
-           body = body <> ZeroDecayAmplitudeFormFactors[decay, returnVar];
-
            If[IsPossibleTreeLevelDecay[decay, True],
-              body = body <> "// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
+              body = body <> "\n// @todo correct prefactors\n" <> FillTreeLevelDecayAmplitudeFormFactors[decay, modelName, returnVar, paramsStruct] <> "\n";
              ];
 
            If[!IsPossibleTreeLevelDecay[decay, True] && IsPossibleOneLoopDecay[decay],

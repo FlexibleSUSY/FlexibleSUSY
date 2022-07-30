@@ -1,3 +1,11 @@
+FlexibleSUSY 2.X.X [X, X X]
+==================================
+
+Fixed bugs
+----------
+
+* [commit ]: Fixed incorect quark charge in some higher order QED corrections to :math:`$H \to u\bar{u}$` and :math:`$A \to u\bar{u}$`
+
 FlexibleSUSY 2.7.1 [June, 07 2022]
 ==================================
 
@@ -46,12 +54,12 @@ Changes
 -------
 
 * [commit ae1eae8e4d]: Mathematica-style indexing (starting from 1) of
-  leptons in :math:`$L' \to L \gamma$` via the mathlink interface.
+  leptons in :math:`$l' \to l \gamma$` via the mathlink interface.
 
 Fixed bugs
 ----------
 
-* [commit 26f5262ad3]: Branching ratio of :math:`$L' \to L \gamma$`
+* [commit 26f5262ad3]: Branching ratio of :math:`$l' \to l \gamma$`
   was breaking printing of observables via the mathlink interface.
 
 * [commit fd8d59dda8]: Fixed wrong calculation of :math:`$A \to Z \gamma$`.
@@ -76,7 +84,7 @@ Changes
 
 * Removed code computing Higgs effective couplings. This code has been
   superseded by FlexibleDecay.
-* FlexibleDecay: 2-loop QCD corrections to :math:`$\Phi \to \Gamma Z$` applied
+* FlexibleDecay: 2-loop QCD corrections to :math:`$\Phi \to \gamma Z$` applied
   only if :math:`$m_Z/m_\Phi < 0.75$`.
 
 Fixed bugs

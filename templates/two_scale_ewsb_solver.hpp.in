@@ -61,7 +61,7 @@ public:
 
    virtual int solve(@ModelName@_mass_eigenstates&) override;
 private:
-   static const int number_of_ewsb_equations = @numberOfEWSBEquations@;
+   static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
    using EWSB_vector_t = Eigen::Matrix<double,number_of_ewsb_equations,1>;
 
    class EEWSBStepFailed : public Error {

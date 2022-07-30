@@ -31,7 +31,7 @@ namespace flexiblesusy {
 
 class @ModelName@_decay_table {
 private:
-   static const int number_of_decay_particles = @numberOfDecayParticles@;
+   static constexpr int number_of_decay_particles = @numberOfDecayParticles@;
    using Table_type = std::array<Decays_list, number_of_decay_particles>;
 public:
    using iterator = Table_type::iterator;
