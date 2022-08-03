@@ -68,6 +68,7 @@ Block FlexibleSUSY
    28   1
    29   1
    30   1
+   31   0
 Block SMINPUTS
     1   1.279340000e+02
     2   1.166378700e-05
