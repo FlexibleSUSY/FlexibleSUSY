@@ -357,9 +357,9 @@ double OneLoopFunctionF(double r)
 double OneLoopFunctionH(double r)
 {
    if (is_zero(r)) {
-      return 5.0;
+      return 41.0;
    } else if (is_zero(1.0 - r)){
-      return 0.0;
+      return 27.0;
    } else {
       return (41.0 - 207.0 * r + 279.0 * r * r - 113.0 * r * r * r + 6.0 * r * r * (-15.0 + 13.0 * r)
               * std::log(r)) / Power4(1.0 - r);
