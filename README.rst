@@ -150,7 +150,7 @@ the following setup
 
 .. code-block:: shell
 
-    SARAH_VERSION=4.14.5
+    SARAH_VERSION=4.15.0
     cd ~/.Mathematica/Applications/
     wget https://sarah.hepforge.org/downloads/SARAH-${SARAH_VERSION}.tar.gz
     tar -xf SARAH-${SARAH_VERSION}.tar.gz
