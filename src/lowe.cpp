@@ -24,8 +24,10 @@
 */
 
 #include "lowe.h"
-#include "ew_input.hpp"
+#include "eigen_utils.hpp"
 #include "error.hpp"
+#include "ew_input.hpp"
+#include "string_format.hpp"
 #include "wrappers.hpp"
 
 #include <algorithm>
@@ -36,20 +38,24 @@ namespace softsusy {
 
 namespace {
 
+bool is_zero(double x) noexcept
+{
+   return std::abs(x) <= std::numeric_limits<double>::epsilon();
+}
+
 constexpr double sqr(double a) noexcept { return a*a; }
 
 // Given a value of mt, and alphas(MZ), find alphas(mt) to 1 loops in qcd:
 // it's a very good approximation at these scales, better than 10^-3 accuracy
 double getAsmt(double mtop, double alphasMz, double mz) {
-  using std::log;
   return alphasMz /
-      (1.0 - 23.0 * alphasMz / (6.0 * M_PI) * log(mz / mtop));
+      (1.0 - 23.0 * alphasMz / (6.0 * flexiblesusy::Pi) * std::log(mz / mtop));
 }
 
 // Input pole mass of top and alphaS(mt), outputs running mass mt(mt)
 // including one-loop standard model correction only
 double getRunMt(double poleMt, double asmt) {
-  return poleMt / (1.0 + (4.0 / (3.0 * M_PI)) * asmt);
+  return poleMt / (1.0 + (4.0 / (3.0 * flexiblesusy::Pi)) * asmt);
 }
 
 // Given pole mass and alphaS(MZ), returns running top mass -- one loop qcd
@@ -113,8 +119,9 @@ Eigen::ArrayXd QedQcd::get() const
    Eigen::ArrayXd y(a.size() + mf.size());
    y(0) = a(0);
    y(1) = a(1);
-   for (int i = 0; i < mf.size(); i++)
+   for (int i = 0; i < mf.size(); i++) {
       y(i + 2) = mf(i);
+   }
    return y;
 }
 
@@ -122,8 +129,9 @@ void QedQcd::set(const Eigen::ArrayXd& y)
 {
    a(0) = y(0);
    a(1) = y(1);
-   for (int i = 0; i < mf.size(); i++)
+   for (int i = 0; i < mf.size(); i++) {
       mf(i) = y(i + 2);
+   }
 }
 
 Eigen::ArrayXd QedQcd::beta() const
@@ -132,8 +140,9 @@ Eigen::ArrayXd QedQcd::beta() const
    dydx(0) = qedBeta();
    dydx(1) = qcdBeta();
    const auto y = massBeta();
-   for (int i = 0; i < y.size(); i++)
+   for (int i = 0; i < y.size(); i++) {
       dydx(i + 2) = y(i);
+   }
    return dydx;
 }
 
@@ -144,7 +153,7 @@ void QedQcd::runto_safe(double scale, double eps)
    } catch (...) {
       throw flexiblesusy::NonPerturbativeRunningQedQcdError(
          "Non-perturbative running to Q = "
-         + flexiblesusy::ToString(scale)
+         + flexiblesusy::to_string(scale)
          + " during determination of the SM(5) parameters.");
    }
 }
@@ -153,11 +162,11 @@ void QedQcd::runto_safe(double scale, double eps)
 int QedQcd::flavours(double mu) const {
   int k = 0;
   // if (mu > mf(mTop - 1)) k++;
-  if (mu > mf(mCharm - 1)) k++;
-  if (mu > mf(mUp - 1)) k++;
-  if (mu > mf(mDown - 1)) k++;
-  if (mu > mf(mBottom - 1)) k++;
-  if (mu > mf(mStrange - 1)) k++;
+  if (mu > mf(mCharm - 1)) { k++; }
+  if (mu > mf(mUp - 1)) { k++; }
+  if (mu > mf(mDown - 1)) { k++; }
+  if (mu > mf(mBottom - 1)) { k++; }
+  if (mu > mf(mStrange - 1)) { k++; }
   return k;
 }
 
@@ -230,58 +239,69 @@ std::ostream& operator<<(std::ostream &left, const QedQcd &m) {
 
 /// returns QED beta function in SM(5) (without the top quark)
 double QedQcd::qedBeta() const {
-  double x;
-  x = 24.0 / 9.0;
-  if (get_scale() > mf(mCharm - 1)) x += 8.0 / 9.0;
-  // if (get_scale() > mf(mTop - 1)) x += 8.0 / 9.0;
-  if (get_scale() > mf(mBottom - 1)) x += 2.0 / 9.0;
-  if (get_scale() > mf(mTau - 1)) x += 2.0 / 3.0;
-  if (get_scale() > displayPoleMW()) x += -7.0 / 2.0;
+  double x = 24.0 / 9.0;
 
-  return (x * sqr(a(ALPHA - 1)) / M_PI);
+  if (get_scale() > mf(mCharm - 1)) { x += 8.0 / 9.0; }
+  // if (get_scale() > mf(mTop - 1)) { x += 8.0 / 9.0; }
+  if (get_scale() > mf(mBottom - 1)) { x += 2.0 / 9.0; }
+  if (get_scale() > mf(mTau - 1)) { x += 2.0 / 3.0; }
+  if (get_scale() > displayPoleMW()) { x += -7.0 / 2.0; }
+
+  return (x * sqr(a(ALPHA - 1)) / flexiblesusy::Pi);
 }
 
 /// Returns QCD beta function to 3 loops in QCD for the SM(5). Note
 /// that if quark masses are running, the number of active quarks will
 /// be taken into account.
 double QedQcd::qcdBeta() const {
-  static const double INVPI = 1.0 / M_PI;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
   const int quarkFlavours = flavours(get_scale());
-  double qb0, qb1, qb2;
-  qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
-  qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
-  qb2 = (2.857e3 * 0.5 - (5.033e3 * quarkFlavours) / 18.0  +
-         (3.25e2 * sqr(quarkFlavours) ) / 5.4e1) / 64;
+  const double qb0 = (11.0e0 - (2.0e0 / 3.0e0 * quarkFlavours)) / 4.0;
+  const double qb1 = (102.0e0 - (38.0e0 * quarkFlavours) / 3.0e0) / 16.0;
+  const double qb2 = (2.857e3 * 0.5 - (5.033e3 * quarkFlavours) / 18.0  +
+                      (3.25e2 * sqr(quarkFlavours) ) / 5.4e1) / 64;
 
   double qa0 = 0., qa1 = 0., qa2 = 0.;
 
-  if (get_loops() > 0) qa0 = qb0 * INVPI;
-  if (get_loops() > 1) qa1 = qb1 * sqr(INVPI);
-  if (get_loops() > 2) qa2 = qb2 * sqr(INVPI) * INVPI;
+  if (get_loops() > 0) {
+     qa0 = qb0 * INVPI;
+  }
+  if (get_loops() > 1) {
+     qa1 = qb1 * sqr(INVPI);
+  }
+  if (get_loops() > 2) {
+     qa2 = qb2 * sqr(INVPI) * INVPI;
+  }
 
   // add contributions of the one, two and three loop constributions resp.
-  double beta;
-  beta = -2.0 * sqr(displayAlpha(ALPHAS)) *
+  const double beta =
+    -2.0 * sqr(displayAlpha(ALPHAS)) *
     (qa0 + qa1 * displayAlpha(ALPHAS) + qa2 *
      sqr(displayAlpha(ALPHAS)));
+
   return beta;
 }
 
 /// returns fermion mass beta functions
 Eigen::Array<double,9,1> QedQcd::massBeta() const {
-  static const double INVPI = 1.0 / M_PI, ZETA3 = 1.202056903159594;
+  static constexpr double INVPI = 1.0 / flexiblesusy::Pi;
 
   // qcd bits: 1,2,3 loop resp.
   double qg1 = 0., qg2 = 0., qg3 = 0.;
   const int quarkFlavours = flavours(get_scale());
-  if (get_loops() > 0) qg1 = INVPI;
-  if (get_loops() > 1)
-    qg2 = (202.0 / 3.0 - (20.0e0 * quarkFlavours) / 9.0) * sqr(INVPI) / 16.0;
-  if (get_loops() > 2)
-    qg3 = (1.249e3 - ((2.216e3 * quarkFlavours) / 27.0e0 +
-                      1.6e2 * ZETA3 * quarkFlavours / 3.0e0) -
-           140.0e0 * quarkFlavours * quarkFlavours / 81.0e0) * sqr(INVPI) *
-      INVPI / 64.0;
+
+  if (get_loops() > 0) {
+     qg1 = INVPI;
+  }
+  if (get_loops() > 1) {
+     qg2 = (202.0 / 3.0 - (20.0e0 * quarkFlavours) / 9.0) * sqr(INVPI) / 16.0;
+  }
+  if (get_loops() > 2) {
+     qg3 = (1.249e3 - ((2.216e3 * quarkFlavours) / 27.0e0 +
+                       1.6e2 * flexiblesusy::zeta3 * quarkFlavours / 3.0e0) -
+            140.0e0 * quarkFlavours * quarkFlavours / 81.0e0) * sqr(INVPI) *
+        INVPI / 64.0;
+  }
 
   const double qcd = -2.0 * a(ALPHAS - 1) * (
      qg1  + qg2 * a(ALPHAS - 1) + qg3 * sqr(a(ALPHAS - 1)));
@@ -289,22 +309,28 @@ Eigen::Array<double,9,1> QedQcd::massBeta() const {
 
   Eigen::Array<double,9,1> x(Eigen::Array<double,9,1>::Zero());
 
-  for (int i = 0; i < 3; i++)   // up quarks
-    x(i) = (qcd + 4.0 * qed / 3.0) * mf(i);
-  for (int i = 3; i < 6; i++)   // down quarks
-    x(i) = (qcd + qed / 3.0) * mf(i);
-  for (int i = 6; i < 9; i++)   // leptons
-    x(i) = 3.0 * qed * mf(i);
+  for (int i = 0; i < 3; i++) {   // up quarks
+     x(i) = (qcd + 4.0 * qed / 3.0) * mf(i);
+  }
+  for (int i = 3; i < 6; i++) {   // down quarks
+     x(i) = (qcd + qed / 3.0) * mf(i);
+  }
+  for (int i = 6; i < 9; i++) {   // leptons
+     x(i) = 3.0 * qed * mf(i);
+  }
 
   // switch off relevant beta functions
-  if (get_thresholds() > 0)
-    for(int i = 0; i < x.size(); i++) {
-      if (get_scale() < mf(i))
-         x(i) = 0.0;
-    }
+  if (get_thresholds() > 0) {
+     for(int i = 0; i < x.size(); i++) {
+        if (get_scale() < mf(i)) {
+           x(i) = 0.0;
+        }
+     }
+  }
   // nowadays, u,d,s masses defined at 2 GeV: don't run them below that
-  if (get_scale() < 2.0)
+  if (get_scale() < 2.0) {
      x(mUp - 1) = x(mDown - 1) = x(mStrange - 1) = 0.0;
+  }
 
   return x;
 }
@@ -312,20 +338,26 @@ Eigen::Array<double,9,1> QedQcd::massBeta() const {
 /// Supposed to be done at mb(mb) -- MSbar, calculates pole mass
 double QedQcd::extractPoleMb(double alphasMb)
 {
-  if (get_scale() != displayMass(mBottom)) {
+  if (!is_zero(get_scale() - displayMass(mBottom))) {
     throw flexiblesusy::SetupError(
        "QedQcd::extractPoleMb called at scale "
-       + flexiblesusy::ToString(get_scale()) + " instead of mb(mb)");
+       + flexiblesusy::to_string(get_scale()) + " instead of mb(mb)");
   }
 
   // Following is the MSbar correction from QCD, hep-ph/9912391
   double delta = 0.0;
-  if (get_loops() > 0) delta = delta + 4.0 / 3.0 * alphasMb / M_PI;
-  if (get_loops() > 1) delta = delta + sqr(alphasMb / M_PI) *
-    (9.2778 + (displayMass(mUp) + displayMass(mDown) + displayMass(mCharm) +
-               displayMass(mStrange)) / mbPole);
-  if (get_loops() > 2)
-    delta = delta + 94.4182 * alphasMb / M_PI * sqr(alphasMb / M_PI);
+
+  if (get_loops() > 0) {
+     delta = delta + 4.0 / 3.0 * alphasMb / flexiblesusy::Pi;
+  }
+  if (get_loops() > 1) {
+     delta = delta + sqr(alphasMb / flexiblesusy::Pi) *
+        (9.2778 + (displayMass(mUp) + displayMass(mDown) + displayMass(mCharm) +
+                   displayMass(mStrange)) / mbPole);
+  }
+  if (get_loops() > 2) {
+     delta = delta + 94.4182 * alphasMb / flexiblesusy::Pi * sqr(alphasMb / flexiblesusy::Pi);
+  }
 
   const double mbPole = displayMass(mBottom) * (1.0 + delta);
 
@@ -356,8 +388,11 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
    while (!converged && it < max_iterations) {
       // set alpha_i(MZ)
       runto_safe(displayPoleMZ(), running_precision);
-      setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-      setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+      setAlpha(ALPHA, displayAlphaEmInput());
+      setAlpha(ALPHAS, displayAlphaSInput());
+
+      // set mt(MZ)
+      setMass(mTop, getRunMtFromMz(displayPoleMt(), displayAlphaSInput(), displayPoleMZ()));
 
       // set mb(mb)
       runto_safe(displayMbMb(), running_precision);
@@ -383,7 +418,7 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
       runto_safe(scale, running_precision);
       qedqcd_new = get();
 
-      converged = flexiblesusy::MaxRelDiff(qedqcd_old, qedqcd_new) < precision_goal;
+      converged = flexiblesusy::is_equal_rel(qedqcd_old, qedqcd_new, precision_goal);
 
       qedqcd_old = qedqcd_new;
 
@@ -392,8 +427,8 @@ void QedQcd::to(double scale, double precision_goal, int max_iterations) {
 
    // set alpha_i(MZ) on last time
    runto_safe(displayPoleMZ(), precision_goal);
-   setAlpha(ALPHA, input(alpha_em_MSbar_at_MZ));
-   setAlpha(ALPHAS, input(alpha_s_MSbar_at_MZ));
+   setAlpha(ALPHA, displayAlphaEmInput());
+   setAlpha(ALPHAS, displayAlphaSInput());
 
    runto_safe(scale, precision_goal);
 

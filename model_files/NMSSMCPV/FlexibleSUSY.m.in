@@ -94,7 +94,7 @@ InitialGuessAtHighScale = {};
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 
 DefaultPoleMassPrecision = MediumPrecision;
-HighPoleMassPrecision    = {hh, Ah, Hpm};
+HighPoleMassPrecision    = {hh, Hpm};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
@@ -120,3 +120,5 @@ ExtraSLHAOutputBlocks = {
             {13 , Im[T[\[Lambda]] / \[Lambda]]},
             {14 , Im[T[\[Kappa]] / \[Kappa]] } } }
 };
+
+FSCalculateDecays = True;

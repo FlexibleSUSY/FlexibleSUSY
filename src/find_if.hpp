@@ -16,8 +16,8 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#ifndef H_FS_FIND_IF
-#define H_FS_FIND_IF
+#ifndef FS_FIND_IF_H
+#define FS_FIND_IF_H
 
 #include <type_traits>
 #include <utility>

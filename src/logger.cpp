@@ -24,54 +24,38 @@ namespace flexiblesusy {
 
 namespace {
 
-struct Print_green {
-   Print_green() {
-      std::cerr << "\033[0;32m";
+struct Print_colored {
+   Print_colored(char const * const code) {
+      std::cerr << code;
    }
-   ~Print_green() {
+   ~Print_colored() {
       std::cerr << "\033[0m";
    }
 };
 
-struct Print_blue {
-   Print_blue() {
-      std::cerr << "\033[0;34m";
-   }
-   ~Print_blue() {
-      std::cerr << "\033[0m";
-   }
+struct Print_green : Print_colored {
+   Print_green() : Print_colored("\033[0;32m") {}
 };
 
-struct Print_red {
-   Print_red() {
-      std::cerr << "\033[0;31m";
-   }
-   ~Print_red() {
-      std::cerr << "\033[0m";
-   }
+struct Print_blue : Print_colored {
+   Print_blue() : Print_colored("\033[0;34m") {}
 };
 
-struct Print_red_bold {
-   Print_red_bold() {
-      std::cerr << "\033[1;31m";
-   }
-   ~Print_red_bold() {
-      std::cerr << "\033[0m";
-   }
+struct Print_red : Print_colored {
+   Print_red() : Print_colored("\033[0;31m") {}
 };
 
-struct Print_red_background {
-   Print_red_background() {
-      std::cerr << "\033[41;1;37m";
-   }
-   ~Print_red_background() {
-      std::cerr << "\033[0m";
-   }
+struct Print_red_bold : Print_colored {
+   Print_red_bold() : Print_colored("\033[1;31m") {}
+};
+
+struct Print_red_background : Print_colored {
+   Print_red_background() : Print_colored("\033[41;1;37m") {}
 };
 
 struct Append_endl {
    ~Append_endl() {
-      std::cerr << std::endl;;
+      std::cerr << std::endl;
    }
 };
 
@@ -89,7 +73,7 @@ void print_fatal(std::function<void()>&&, const char*, int) {}
 #else
 
 #ifdef ENABLE_VERBOSE
-void print_verbose(std::function<void()>&& f, const char* filename, int line)
+void print_verbose(std::function<void()>&& f, const char* /* filename */, int /* line */ )
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -102,7 +86,7 @@ void print_verbose(std::function<void()>&&, const char*, int) {}
 #endif
 
 #ifdef ENABLE_DEBUG
-void print_debug(std::function<void()>&& f, const char* filename, int line)
+void print_debug(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -114,13 +98,13 @@ void print_debug(std::function<void()>&& f, const char* filename, int line)
 void print_debug(std::function<void()>&&, const char*, int) {}
 #endif
 
-void print_info(std::function<void()>&& f, const char* filename, int line)
+void print_info(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
    f();
 }
 
-void print_warning(std::function<void()>&& f, const char* filename, int line)
+void print_warning(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS
@@ -129,7 +113,7 @@ void print_warning(std::function<void()>&& f, const char* filename, int line)
    f();
 }
 
-void print_error(std::function<void()>&& f, const char* filename, int line)
+void print_error(std::function<void()>&& f, const char* /* filename */, int /* line */)
 {
    const auto en = Append_endl();
 #ifdef ENABLE_COLORS

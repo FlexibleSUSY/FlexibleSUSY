@@ -7,27 +7,10 @@
 */
 
 #include "numerics_legacy.h"
-#include "dilog.hpp"
-#include "error.hpp"
+#include "Li2.hpp"
 #include "utils.h"
 #include <cmath>
-
-namespace flexiblesusy {
-
-class SoftsusyNumericsError : public Error {
-public:
-   explicit SoftsusyNumericsError(std::string msg_)
-      : msg(msg_)
-      {}
-   virtual ~SoftsusyNumericsError() {}
-   virtual std::string what() const {
-      return msg;
-   }
-private:
-   std::string msg;
-};
-
-} // namespace flexiblesusy
+#include <exception>
 
 namespace softsusy {
 
@@ -47,7 +30,7 @@ double calcDerivative(double (*func)(double), double x, double h, double
   int i, j;
   double errt, fac, hh, ans = 0.0;
   
-  if (h == 0.0) throw flexiblesusy::SoftsusyNumericsError("h must be nonzero in numerics.cpp:calcDerivative");
+  if (h == 0.0) throw std::runtime_error("h must be nonzero in numerics.cpp:calcDerivative");
 
 
   DoubleMatrix a(NTAB, NTAB);
@@ -109,11 +92,11 @@ double findMinimum(double ax, double bx, double cx, double (*f)(double),
 }
 
 double dilog(double x) {
-  return flexiblesusy::dilog(x);
+  return flexiblesusy::Li2(x);
 }
 
 Complex dilog(const Complex& x) {
-  return flexiblesusy::dilog(x);
+  return flexiblesusy::Li2(x);
 }
 
 double fps(double z) {
@@ -131,7 +114,7 @@ double fps(double z) {
      dilog(1.0 - (1.0 + y) / (2.0 * zz)));
 
   /// answer should always be real
-  if (ans.imag() > EPSTOL) throw flexiblesusy::SoftsusyNumericsError("Error in fps");
+  if (ans.imag() > EPSTOL) throw std::runtime_error("Error in fps");
   return ans.real();
 }
 

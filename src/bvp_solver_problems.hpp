@@ -30,12 +30,16 @@ public:
    void clear();                      ///< clear all problems
    bool have_problem() const;         ///< problems which yield invalid spectrum
    bool have_warning() const;         ///< warnings
+   unsigned number_of_problems() const; ///< returns number of problems
+   unsigned number_of_warnings() const; ///< returns number of warnings
    std::vector<std::string> get_problem_strings() const;
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string() const;
    std::string get_warning_string() const;
-   void print_problems(std::ostream& = std::cerr) const;
-   void print_warnings(std::ostream& = std::cerr) const;
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
    const std::string& get_solver_name() const;
 
    void flag_no_convergence();

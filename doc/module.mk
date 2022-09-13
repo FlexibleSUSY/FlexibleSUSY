@@ -27,6 +27,7 @@ INDEX_PAGE      := $(HTML_OUTPUT_DIR)/index.html
 MAN_PAGE        := $(MAN_OUTPUT_DIR)/index.html
 DOXYFILE        := $(DIR)/Doxyfile
 DOXYGEN_MAINPAGE:= $(DIR)/mainpage.dox
+DOXYGEN         ?= doxygen
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
 		$(INDEX_PAGE) $(MAN_PAGE) doc doc-html doc-man doc-pdf
@@ -44,26 +45,26 @@ all-$(MODNAME): doc-html doc-man doc-pdf
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_TMPL) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MK) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOXYFILE) $(DOC_INSTALL_DIR)
-		install -d $(INSTALL_DIR)/$(IMAGE_DIR)
-		install -m u=rw,g=r,o=r $(IMAGES) $(INSTALL_DIR)/$(IMAGE_DIR)
+		$(Q)install -d $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_TMPL) $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MK) $(DOC_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOXYFILE) $(DOC_INSTALL_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(IMAGE_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(IMAGES) $(INSTALL_DIR)/$(IMAGE_DIR)
 endif
 
 clean-$(MODNAME): clean-doc-manuals
 
 distclean-$(MODNAME): clean-$(MODNAME) distclean-doc-manuals
-		-rm -rf $(HTML_OUTPUT_DIR)
-		-rm -f $(DOXYGEN_MAINPAGE)
+		$(Q)-rm -rf $(HTML_OUTPUT_DIR)
+		$(Q)-rm -f $(DOXYGEN_MAINPAGE)
 
 clean::         clean-$(MODNAME)
 
 distclean::     distclean-$(MODNAME)
 
 $(INDEX_PAGE):
-		( cat $(DOXYFILE) ; \
+		$(Q)( cat $(DOXYFILE) ; \
 		  echo "INPUT = $(MODULES) $(README_FILE)" ; \
 		  echo "OUTPUT_DIRECTORY = $(HTML_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
@@ -71,10 +72,10 @@ $(INDEX_PAGE):
 		  echo "EXCLUDE_PATTERNS = */meta/* */test/*"; \
 		  echo "IMAGE_PATH = $(IMAGE_DIR)"; \
 		  echo "INCLUDE_PATH = $(MODULES)"; \
-		) | doxygen -
+		) | $(DOXYGEN) -
 
 $(MAN_PAGE):
-		( cat $(DOXYFILE) ; \
+		$(Q)( cat $(DOXYFILE) ; \
 		  echo "INPUT = $(MODULES) $(README_FILE)" ; \
 		  echo "OUTPUT_DIRECTORY = $(MAN_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
@@ -84,4 +85,4 @@ $(MAN_PAGE):
 		  echo "INCLUDE_PATH = $(MODULES)"; \
 		  echo "GENERATE_MAN = YES"; \
 		  echo "GENERATE_HTML = NO"; \
-		) | doxygen -
+		) | $(DOXYGEN) -

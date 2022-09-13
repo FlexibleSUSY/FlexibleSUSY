@@ -16,33 +16,31 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file cxx_qft/@ModelName@_vertices.cpp
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
- 
+
 #include "@ModelName@_context_base.hpp"
+#include "@ModelName@_input_parameters.hpp"
 #include "@ModelName@_vertices.hpp"
 
 #include "concatenate.hpp"
 #include "wrappers.hpp"
 
-#define INPUTPARAMETER(p) context.model.get_input().p
+#define INPUTPARAMETER(p) context.model.get_input_parameters().p
 #define MODELPARAMETER(p) context.model.get_##p()
 #define DERIVEDPARAMETER(p) context.model.p()
 #define PHASE(p) context.model.get_##p()
 
-namespace flexiblesusy
-{
-namespace @ModelName@_cxx_diagrams
-{
-namespace detail
-{
+namespace flexiblesusy {
+namespace @ModelName@_cxx_diagrams {
+namespace detail {
+
 @CXXDiagrams_VertexDefinitions@
-}
-}
-}
+
+} // namespace detail
+} // namespace @ModelName@_cxx_diagrams
+} // namespace flexiblesusy

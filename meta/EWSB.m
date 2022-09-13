@@ -184,17 +184,21 @@ CreateEWSBEqFunction[higgs_, equation_List] :=
            type = CConversion`ScalarType[CConversion`realScalarCType];
            ctype = CConversion`CreateCType[type];
            If[dim < dimEq,
-              Print["Warning: number of Higgs bosons (", dim,
-                    ") < number of EWSB eqs. (",dimEq,")."
-                    "The EWSB eqs. ", dim, "...", dimEq,
-                    " will be ignored"];
-             ];
+              Utils`FSFancyWarning[
+                 "Number of Higgs bosons (", dim,
+                 ") < number of EWSB eqs. (", dimEq, ").",
+                 " The EWSB eqs. ", dim, "...", dimEq,
+                 " will be ignored"
+              ];
+           ];
            If[dim > dimEq,
-              Print["Warning: number of physical Higgs bosons (", dim,
-                    ") > number of EWSB eqs. (",dimEq,").",
-                    "The EWSB eqs. for the fields ", higgs, "(n), n >= ",
-                    dimEq, ", will be set to zero."];
-             ];
+              Utils`FSFancyWarning[
+                 "Number of physical Higgs bosons (", dim,
+                 ") > number of EWSB eqs. (", dimEq, ").",
+                 " The EWSB eqs. for the fields ", higgs,
+                 "(n), n >= ", dimEq, ", will be set to zero."
+              ];
+           ];
            For[i = 1, i <= dim, i++,
                result = result <>
                         ctype <> " CLASSNAME::get_ewsb_eq_" <>
@@ -249,9 +253,11 @@ GetValidEWSBInitialGuesses[initialGuess_List] :=
     Module[{i},
            For[i = 1, i <= Length[initialGuess], i++,
                If[!MatchQ[initialGuess[[i]], {_,_}],
-                  Print["Warning: ignoring invalid initial guess: ", initialGuess[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Ignoring invalid initial guess: ", initialGuess[[i]]
+                  ];
+               ];
+           ];
            Cases[initialGuess, {_,_}]
           ];
 
@@ -259,9 +265,11 @@ GetValidEWSBSubstitutions[substitutions_List] :=
     Module[{i},
            For[i = 1, i <= Length[substitutions], i++,
                If[!MatchQ[substitutions[[i]], {_,_}],
-                  Print["Warning: ignoring invalid EWSB substitution: ", substitutions[[i]]];
-                 ];
-              ];
+                  Utils`FSFancyWarning[
+                     "Ignoring invalid EWSB substitution: ", substitutions[[i]]
+                  ];
+               ];
+           ];
            Cases[substitutions, {_,_}]
           ];
 
@@ -271,10 +279,12 @@ InitialGuessFor[par_, initialGuesses_List:{}] :=
               If[Parameters`IsRealParameter[par], guess = par, guess = Abs[par]];,
               guess = Cases[initialGuesses, {p_ /; p === par, val_} :> val];
               If[Length[guess] > 1,
-                 Print["Warning: multiple initial guesses given for ", par];
-                ];
+                 Utils`FSFancyWarning[
+                    "Multiple initial guesses given for ", par
+                 ];
+              ];
               guess = First[guess];
-             ];
+           ];
            guess
           ];
 
@@ -369,6 +379,23 @@ SimplifyEwsbEqs[equations_List, parametersFixedByEWSB_List] :=
 
 FindIndependentSubset[equations_List, {}] := {};
 
+FindIndependentSubset[{}, parameters_List] := {};
+
+FindIndependentSubset[equations_List, parameters_List] /; Length[parameters] > Length[equations] :=
+    Module[{subsets = Subsets[parameters, {Length[equations]}], res},
+           (* find independent subsets for all parameter combinations *)
+           res = Select[FindIndependentSubset[equations, #]& /@ subsets, (# =!= {})&];
+           (* select the largest one *)
+           res = Sort[res, Length[First[#1]] > Length[First[#2]]&];
+           If[res === {}, {}, First[res]]
+          ];
+
+FindIndependentSubset[{eq_}, {par_}] :=
+    If[FreeQ[eq, par],
+       {},
+       {{ {eq}, {par} }}
+      ];
+
 FindIndependentSubset[equations_List, parameters_List] :=
     Module[{equationSubsets, numberOfEquations, parameterSubsets,
             numberOfParameters, e, p, result = {}, isFreeOf},
@@ -439,7 +466,7 @@ TimeConstrainedSolve[eq_, par_] :=
            result
           ];
 
-EliminateOneParameter[{}, {}] := {};
+EliminateOneParameter[{}, _List] := {};
 
 EliminateOneParameter[{eq_}, {p_}] :=
     Block[{},
@@ -646,8 +673,10 @@ ReduceTwoSolutions[sol1_, sol2_] :=
               Return[{sol1}];
              ];
            If[!PossibleZeroQ[sol1[[2]] + sol2[[2]]],
-              Print["Warning: cannot reduce solution for ", par];
-              Print["   because the two solutions are not related by a global sign."];
+              Utils`FSFancyWarning[
+                 "Cannot reduce solution for ", par,
+                 " because the two solutions are not related by a global sign."
+              ];
               Return[{}];
              ];
            DebugPrint["The two solutions for ", par,
@@ -675,7 +704,7 @@ ReduceSolution[{sol1_, sol2_}] :=
                      ];
               ];
            If[Length[reducedSolution] != Length[sol1],
-              Print["Warning: analytic reduction of EWSB solutions failed."];
+              Utils`FSFancyWarning["Analytic reduction of EWSB solutions failed."];
               Return[{{},{}}];
              ];
            Return[{reducedSolution, freePhases}];
@@ -898,10 +927,10 @@ CreateNewEWSBRootFinder[] :=
     "new Root_finder<number_of_ewsb_equations>(tadpole_stepper, number_of_iterations, precision, ";
 
 CreateEWSBRootFinder[rootFinder_ /; rootFinder === FlexibleSUSY`FPIRelative] :=
-    "new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_relative>(ewsb_stepper, number_of_iterations, fixed_point_iterator::Convergence_tester_relative(precision))";
+    "new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_relative<number_of_ewsb_equations> >(ewsb_stepper, number_of_iterations, fixed_point_iterator::Convergence_tester_relative<number_of_ewsb_equations>(precision))";
 
 CreateEWSBRootFinder[rootFinder_ /; rootFinder === FlexibleSUSY`FPIAbsolute] :=
-    "new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_absolute>(ewsb_stepper, number_of_iterations, fixed_point_iterator::Convergence_tester_absolute(precision))";
+    "new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_absolute<number_of_ewsb_equations> >(ewsb_stepper, number_of_iterations, fixed_point_iterator::Convergence_tester_absolute<number_of_ewsb_equations>(precision))";
 
 CreateEWSBRootFinder[rootFinder_ /; rootFinder === FlexibleSUSY`FPITadpole] :=
     "new Fixed_point_iterator<number_of_ewsb_equations, fixed_point_iterator::Convergence_tester_tadpole<number_of_ewsb_equations> >(ewsb_stepper, number_of_iterations, fixed_point_iterator::Convergence_tester_tadpole<number_of_ewsb_equations>(precision, tadpole_stepper))";

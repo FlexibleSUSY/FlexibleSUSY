@@ -17,9 +17,12 @@
 #include "standard_model_two_scale_model.hpp"
 #include "standard_model_two_scale_low_scale_constraint.hpp"
 
-#define SARAH_VERSION_AT_LEAST(x,y,z) (SARAH_MAJOR > x || (SARAH_MAJOR >= x && \
-                                      (SARAH_MINOR > y || (SARAH_MINOR >= y && \
-                                                           SARAH_PATCH >= z))))
+#define SARAH_VERSION_AT_LEAST(x,y,z) (                                 \
+      (SARAH_MAJOR == 0 && SARAH_MINOR == 0 && SARAH_PATCH == 0) ||     \
+      (SARAH_MAJOR > x || (SARAH_MAJOR >= x &&                          \
+                           (SARAH_MINOR > y || (SARAH_MINOR >= y &&     \
+                                                SARAH_PATCH >= z))))    \
+      )
 
 using namespace flexiblesusy;
 using namespace softsusy;
@@ -116,6 +119,11 @@ BOOST_AUTO_TEST_CASE( test_low_scale_constraint )
    sm.calculate_DRbar_masses();
 
    SM_low_scale_constraint<Two_scale> c_m(&m, qedqcd);
+   // The hard-coded SM class solves EWSB eqs. at loop level at the
+   // low-energy scale, because it calculates the Higgs pole mass
+   // temporarily at that scale, which is needed for the SM part of
+   // the MW calculation in the decoupling scheme.
+   m.solve_ewsb();
    c_m.apply();
    standard_model::Standard_model_low_scale_constraint<Two_scale> c_sm(&sm, qedqcd);
    c_sm.apply();

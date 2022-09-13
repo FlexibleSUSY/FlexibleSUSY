@@ -23,7 +23,7 @@
 *)
 
 BeginPackage["BrLToLGamma`", 
-   {"SARAH`", "TextFormatting`", "TreeMasses`", "CXXDiagrams`"}
+   {"SARAH`", "TextFormatting`", "TreeMasses`", "CXXDiagrams`", "CConversion`"}
 ];
 
 CreateInterfaceFunctionForBrLToLGamma::usage = "";
@@ -34,7 +34,9 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
     Module[{prototype, definition,
             numberOfIndices1 = CXXDiagrams`NumberOfFieldIndices[inFermion],
             numberOfIndices2 = CXXDiagrams`NumberOfFieldIndices[outFermion],
-            numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[spectator]},
+            numberOfIndices3 = CXXDiagrams`NumberOfFieldIndices[spectator],
+            (* don't remove potential SM contributions to l -> l gamma *)
+            discardSMcontributions = CConversion`CreateCBoolValue[False]},
 
         prototype =
             "double calculate_" <> CXXNameOfField[inFermion] <> "_to_" <>
@@ -69,7 +71,7 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                              StringJoin @ Table[", 0", {numberOfIndices1-1}],
                              ""] <> " ",
                           If[numberOfIndices1 =!= 0,
-                             StringJoin @ Riffle[Table[" 0", {numberOfIndices1}], ","] <> " ",
+                             StringRiffle[Table[" 0", {numberOfIndices1}], ","] <> " ",
                              ""]
                          ] <> "};\n" <>
                    "std::array<int, " <> ToString @ numberOfIndices2 <>
@@ -80,7 +82,7 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                              StringJoin @ Table[", 0", {numberOfIndices2-1}],
                              ""] <> " ",
                           If[numberOfIndices2 =!= 0,
-                             StringJoin @ Riffle[Table[" 0", {numberOfIndices2}], ","] <> " ",
+                             StringRiffle[Table[" 0", {numberOfIndices2}], ","] <> " ",
                              ""]
                          ] <> "};\n\n" <>
                     "const auto form_factors = calculate_" <> CXXNameOfField[inFermion] <> "_"
@@ -91,7 +93,7 @@ CreateInterfaceFunctionForBrLToLGamma[inFermion_ -> {outFermion_, spectator_}] :
                          If[TreeMasses`GetDimension[outFermion] =!= 1,
                             "generationIndex2, ",
                             ""] <>
-                  "model);\n" <>
+                  "model, " <> discardSMcontributions <> ");\n" <>
                   (* Dominik suggest that the phase space prefactor should use pole masses  so we get them from the input file *)
                   "double leptonInMassOS;\n" <>
                   "switch (generationIndex1) {\n" <> 

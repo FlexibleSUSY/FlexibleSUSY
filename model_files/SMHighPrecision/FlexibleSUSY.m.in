@@ -53,6 +53,7 @@ UseHiggs2LoopSM = True;
 UseHiggs3LoopSM = True;
 UseHiggs4LoopSM = True;
 UseSMAlphaS3Loop = True;
+UseSMAlphaS4Loop = True;
 
 DefaultPoleMassPrecision = HighPrecision;
 HighPoleMassPrecision    = {hh};
@@ -60,9 +61,6 @@ MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
 ExtraSLHAOutputBlocks = {
-   {EFFHIGGSCOUPLINGS, NoScale,
-           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
-            {2, FlexibleSUSYObservable`CpHiggsGluonGluon} } }
 };
 
 SARAH`ParameterDefinitions = Append[

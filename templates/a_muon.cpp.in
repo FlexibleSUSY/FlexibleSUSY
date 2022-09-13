@@ -16,212 +16,252 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_a_muon.cpp
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #include "@ModelName@_a_muon.hpp"
 #include "@ModelName@_mass_eigenstates.hpp"
 
 #include "cxx_qft/@ModelName@_qft.hpp"
+#include "@ModelName@_FFV_form_factors.hpp"
 
+#include "Li2.hpp"
 #include "lowe.h"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
+#include "logger.hpp"
 
-#define INPUTPARAMETER(p) context.model.get_input().p
-#define MODELPARAMETER(p) context.model.get_##p()
 #define DERIVEDPARAMETER(p) context.model.p()
-#define PHASE(p) context.model.get_##p()
 
 using namespace flexiblesusy;
 using namespace @ModelName@_cxx_diagrams;
 
 using Muon = fields::@AMuon_MuonField@;
+using VZ = fields::@AMuon_ZBosonField@;
 
 namespace {
-static constexpr double oneOver16PiSquared = 0.0063325739776461107152;
-
-double OneLoopFunctionF1C(double);
-double OneLoopFunctionF2C(double);
-double OneLoopFunctionF1N(double);
-double OneLoopFunctionF2N(double);
 
 double get_QED_2L(context_base&, const softsusy::QedQcd&);
+double BarZeeLoopFPS(double);
+double BarZeeLoopFS(double);
+double BarZeeLoopS(double);
+double BarZeeLoopV(double);
 
 /**
- * @class AMuonVertexCorrectionSF
+ * @class AMuonBarZeeFermionLoop
  * @brief A template that calculate contributions to the
- *        anomalous dipole moment of a given particle in
- *        a one loop diagram specified by a photon emitter
- *        and an exchange particle.
+ *        anomalous magnetic dipole moment of a given particle in
+ *        a BarZee diagram with a fermion loop and scalar/Photon exchange
+ *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (1))
  * @tparam Args Specifies in order the field of which to
- *              calculate the electric dipole moment,
+ *              calculate the electric magnetic moment,
  *              the photon emitter and the exchange particle
- *              in a one-loop diagram where the photon emitter
- *              is a scalar and the exchange particle a fermion.
+ *              in a BarZee diagram where the photon emitter
+ *              is a Fermion and the exchange particle a scalar particle.
  *
- * This template evaluates the contribution to the electric
- * dipole moment of a one loop diagram with fields given by
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
 template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonVertexCorrectionSF {
+struct AMuonBarZeeFermionLoop {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd&);
+                       const softsusy::QedQcd& qedqcd);
 };
 
 /**
- * @class AMuonVertexCorrectionFS
+ * @class AMuonBarZeeFermionZLoop
  * @brief A template that calculate contributions to the
- *        anomalous dipole moment of a given particle in
- *        a one loop diagram specified by a photon emitter
- *        and an exchange particle.
+ *        anomalous magnetic dipole moment of a given particle in
+ *        a BarZee diagram with a fermion loop and scalar/Z-boson exchange
+ *        particle.
  * @tparam Args Specifies in order the field of which to
- *              calculate the electric dipole moment,
+ *              calculate the electric magnetic moment,
  *              the photon emitter and the exchange particle
- *              in a one-loop diagram where the photon emitter
- *              is a fermion and the exchange particle a scalar.
+ *              in a BarZee diagram where the photon emitter
+ *              is a Fermion and the exchange particle a scalar particle.
  *
- * This template evaluates the contribution to the electric
- * dipole moment of a one loop diagram with fields given by
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a BarZee diagram with fields given by
  * \a Args.
  */
 template<class PhotonEmitter, class ExchangeParticle>
-struct AMuonVertexCorrectionFS {
+struct AMuonBarZeeFermionLoopZ {
    static double value(const typename field_indices<Muon>::type& indices,
                        const context_base& context,
-                       const softsusy::QedQcd&);
+                       const softsusy::QedQcd& qedqcd);
 };
 
 /**
-* @defgroup LoopFunctions Loop functions
-* @brief The loop functions necessary for \f$a_\mu\f$ one-loop calculations.
-*
-* These are OneLoopFunctionF1C(), OneLoopFunctionF2C(),
-* OneLoopFunctionF1N() and OneLoopFunctionF2N()
-* as specified in arXiv:1311.1775
+ * @class AMuonBarZeeScalarLoop
+ * @brief A template that calculate contributions to the
+ *        anomalous dipole moment of a given particle in
+ *        a BarZee diagram with a scalar loop and scalar exchange
+ *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (2))
+ * @tparam Args Specifies in order the field of which to
+ *              calculate the magnetic dipole moment,
+ *              the photon emitter and the exchange particle
+ *              in a BarZee diagram where the photon emitter
+ *              is a scalar particle and the exchange particle a scalar particle.
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a BarZee diagram with fields given by
+ * \a Args.
+ */
+template<class PhotonEmitter, class ExchangeParticle>
+struct AMuonBarZeeScalarLoop {
+   static double value(const typename field_indices<Muon>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+/**
+ * @class AMuonBarZeeVectorLoop
+ * @brief A template that calculate contributions to the
+ *        anomalous dipole moment of a given particle in
+ *        a BarZee diagram with a scalar loop and scalar exchange
+ *        particle. (for diagram type see arXiv:1502.04199 Figure 2, (3))
+ * @tparam Args Specifies in order the field of which to
+ *              calculate the magnetic dipole moment,
+ *              the photon emitter and the exchange particle
+ *              in a BarZee diagram where the photon emitter
+ *              is a scalar particle and the exchange particle a scalar particle.
+ *
+ * This template evaluates the contribution to the magnetic
+ * dipole moment of a BarZee diagram with fields given by
+ * \a Args.
+ */
+template<class PhotonEmitter, class ExchangeParticle>
+struct AMuonBarZeeVectorLoop {
+   static double value(const typename field_indices<Muon>::type& indices,
+                       const context_base& context,
+                       const softsusy::QedQcd& qedqcd);
+};
+
+/**
+    Loop function needed for the calculation of the BarZeeDiagram with
+    fermion loop. (arXiv:1502.04199 Equation 26)
+
+    @param respective squared mass ratio.
 */
 
-double OneLoopFunctionF1C(double x)
-{
-   if (is_zero(x))
-      return 4.0;
-
-   // error around x=1 is <= 10^-12 on an intel i7
-   const double y = x - 1.0;
-
-   if (std::abs(y) < 0.21) {
-      return (1.0000000000000000000 -
-              0.60000000000000000000  * y +
-              0.40000000000000000000  * y * y -
-              0.28571428571428571429  * y * y * y +
-              0.21428571428571428571  * y * y * y * y -
-              0.16666666666666666667  * y * y * y * y * y +
-              0.13333333333333333333  * y * y * y * y * y * y -
-              0.10909090909090909091  * y * y * y * y * y * y * y +
-              0.090909090909090909091 * y * y * y * y * y * y * y * y -
-              0.076923076923076923077 * y * y * y * y * y * y * y * y * y +
-              0.065934065934065934066 * y * y * y * y * y * y * y * y * y * y -
-              0.057142857142857142857 * y * y * y * y * y * y * y * y * y * y * y +
-              0.050000000000000000000 * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.044117647058823529412 * y * y * y * y * y * y * y * y * y * y * y * y * y +
-              0.039215686274509803922 * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.035087719298245614035 * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
+double BarZeeLoopFPS(double m) {
+   // @todo(alex): check stability for small values
+   if (m == 0) {
+      return 0;
    }
 
-   return 2.0 / (y * y * y * y) * (2.0 + 3.0 * x - 6.0 * x * x + x * x * x + 6.0 * x * std::log(x));
+   if (m == 0.25) {
+      return ln2;
+   }
+
+   double r1, theta1, r2, theta2;
+   if (m <= 0.25) {
+      const double y = std::sqrt(1.0-4.0*m);
+      r1 = 1.0 - (1.0 - y)/(2*m);
+      r2 = 1.0 - (1.0 + y)/(2*m);
+      if (r1 > 0) {
+         theta1 = 0.0;
+      }
+      else {
+         r1 *= -1;
+         theta1 = Pi;
+      }
+      if (r2 > 0) {
+         theta2 = 0.0;
+      }
+      else {
+         r2 *= -1;
+         theta2 = Pi;
+      }
+      return m / y * (Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
+   }
+   else {
+      const double y = std::sqrt(-1.0+4.0*m);
+      const double real = 1 - 1/(2*m);
+      r1 = r2 = 1.0;
+
+      theta1 = std::atan2(y/(2*m), real);
+      theta2 = std::atan2(-y/(2*m), real);
+
+      return m / y * (Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
+   }
 }
 
-double OneLoopFunctionF2C(double x)
+/**
+    Loop function needed for the calculation of the BarZeeDiagram with
+    fermion loop. (arXiv:1502.04199 Equation 25)
+
+    @param respective squared mass ratio.
+*/
+
+double BarZeeLoopFS(double m)
 {
-   // error around x=1 is <= 10^-13 on an intel i7
-   const double y = x - 1.0;
+    if (m == 0) {
+        return 0;
+    }
 
-   if (std::abs(y) < 0.155)
-      return (1.0 - 0.75 * y + 0.6 * y * y -
-              0.50000000000000000000 * y * y * y +
-              0.4285714285714285714  * y * y * y * y -
-              0.37500000000000000000 * y * y * y * y * y +
-              0.33333333333333333333 * y * y * y * y * y * y -
-              0.3000000000000000000  * y * y * y * y * y * y * y +
-              0.2727272727272727273  * y * y * y * y * y * y * y * y -
-              0.2500000000000000000  * y * y * y * y * y * y * y * y * y +
-              0.23076923076923076923 * y * y * y * y * y * y * y * y * y * y -
-              0.21428571428571428571 * y * y * y * y * y * y * y * y * y * y * y +
-              0.2000000000000000000  * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.1875000000000000000  * y * y * y * y * y * y * y * y * y * y * y * y * y +
-              0.1764705882352941176  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.16666666666666666667 * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-
-   return -3.0 / (2.0 * y * y * y) * (-3.0 + 4.0 * x - x * x - 2.0 * std::log(x));
+    return (2*m - 1) * BarZeeLoopFPS(m) - m * (2 + std::log(m));
 }
 
-double OneLoopFunctionF1N(double x)
+/**
+    Loop function needed for the calculation of the BarZeeDiagram with
+    fermion loop. (arXiv:1502.04199 Equation 27)
+
+    @param respective squared mass ratio.
+*/
+
+double BarZeeLoopS(const double m)
 {
-   if (is_zero(x))
-      return 2.0;
-
-   // error around x=1 is <= 10^-12 on an intel i7
-   const double y = x - 1.0;
-
-   if (std::abs(y) < 0.23)
-      return (1.0000000000000000000 -
-              0.4000000000000000000  * y +
-              0.2000000000000000000  * y * y -
-              0.11428571428571428571 * y * y * y +
-              0.07142857142857142857 * y * y * y * y -
-              0.04761904761904761905 * y * y * y * y * y +
-              0.03333333333333333333 * y * y * y * y * y * y -
-              0.02424242424242424242 * y * y * y * y * y * y * y +
-              0.0181818181818181818  * y * y * y * y * y * y * y * y -
-              0.01398601398601398601 * y * y * y * y * y * y * y * y * y +
-              0.01098901098901098901 * y * y * y * y * y * y * y * y * y * y -
-              0.0087912087912087912  * y * y * y * y * y * y * y * y * y * y * y +
-              0.00714285714285714286 * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.0058823529411764706  * y * y * y * y * y * y * y * y * y * y * y * y * y +
-              0.0049019607843137255  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.0041279669762641899  * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
-
-   return 2.0 / (y * y * y * y) * (1.0 - 6.0 * x + 3.0 * x * x + 2.0 * x * x * x - 6.0 * x * x * std::log(x));
+   return 1 + std::log(m)/2 - BarZeeLoopFPS(m);
 }
 
-double OneLoopFunctionF2N(double x)
-{
-   if (is_zero(x))
-      return 3.0;
+/**
+    Loop function needed for the calculation of the BarZeeDiagram with
+    fermion loop. (arXiv:1502.04199 Equation 28)
 
-   // error around x=1 is <= 10^-13 on an intel i7
-   const double y = x - 1.0;
+    @param respective squared mass ratio.
+*/
 
-   if (std::abs(y) < 0.185)
-      return (1.0000000000000000000 -
-              0.50000000000000000000 * y +
-              0.30000000000000000000 * y * y -
-              0.2000000000000000000  * y * y * y +
-              0.14285714285714285714 * y * y * y * y -
-              0.10714285714285714286 * y * y * y * y * y +
-              0.08333333333333333333 * y * y * y * y * y * y -
-              0.06666666666666666667 * y * y * y * y * y * y * y +
-              0.05454545454545454545 * y * y * y * y * y * y * y * y -
-              0.0454545454545454545  * y * y * y * y * y * y * y * y * y +
-              0.0384615384615384615  * y * y * y * y * y * y * y * y * y * y -
-              0.03296703296703296703 * y * y * y * y * y * y * y * y * y * y * y +
-              0.0285714285714285714  * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.02500000000000000000 * y * y * y * y * y * y * y * y * y * y * y * y * y +
-              0.0220588235294117647  * y * y * y * y * y * y * y * y * y * y * y * y * y * y -
-              0.0196078431372549020  * y * y * y * y * y * y * y * y * y * y * y * y * y * y * y);
+double BarZeeLoopV(const double m) {
+   if (m == 0.25) {
+      return 4.75;
+   }
 
-   return -3.0 / (y * y * y) * (1.0 - x * x + 2.0 * x * std::log(x));
+   double j;
+
+   double r1, theta1, r2, theta2;
+
+   if (m < 0.25) {
+      const double y = std::sqrt(1.0-4.0*m);
+      r1 = 2 / (1-y);
+      theta1 = std::atan2(0, r1);
+      r1 = std::abs(r1);
+      r2 = 2 / (1+y);
+      theta2 = std::atan2(0, r2);
+      r2 = std::abs(r2);
+
+      j = 1/y * (std::log(std::abs(y-1) / (y+1)) * std::log(m) + Li2(std::polar(r1, theta1)).real() - Li2(std::polar(r2, theta2)).real());
+   }
+   else {
+      const double y = std::sqrt(-1.0+4.0*m);
+      r1 = r2 = std::sqrt(1/m);
+      const double real = 1/(2*m);
+      const double imag = y/(2*m);
+      theta1 = std::atan2(imag, real);
+      theta2 = std::atan2(-imag, real);
+      j = 1/y * ( (std::atan2(y, -1) - std::atan2(y, 1)) * std::log(m) + Li2(std::polar(r1, theta1)).imag() - Li2(std::polar(r2, theta2)).imag());
+   }
+
+   return BarZeeLoopS(m) + 15.0/2.0 * m * (2.0 + std::log(m)) + m/2 * (19 - 12*m) * j - 9*m * BarZeeLoopFPS(m);
 }
 
-double get_MSUSY(const @ModelName@_mass_eigenstates& model)
+double get_MSUSY(const @ModelName@_mass_eigenstates_interface& model)
 {
 @AMuon_GetMSUSY@
 }
@@ -229,7 +269,7 @@ double get_MSUSY(const @ModelName@_mass_eigenstates& model)
 void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
 {
    const double precision_goal = model.get_precision();
-   const int Nmax = static_cast<int>(-log10(precision_goal) * 10);
+   const int Nmax = static_cast<int>(-std::log10(precision_goal) * 10);
    int it = 0;
    double precision = 0.;
    double MSUSY_old = 0., MSUSY_new = 0.;
@@ -260,19 +300,50 @@ void run_to_MSUSY(@ModelName@_mass_eigenstates& model)
    }
 }
 
+double muonPhysicalMass(const softsusy::QedQcd& qedqcd)
+{
+   return qedqcd.displayPoleMmuon();
+}
+
 double calculate_a_muon_impl(const @ModelName@_mass_eigenstates& model, const softsusy::QedQcd& qedqcd)
 {
    VERBOSE_MSG("@ModelName@_a_muon: calculating a_mu at Q = " << model.get_scale());
 
    context_base context{ model };
-   double val = 0.0;
-   
+
    using namespace @ModelName@_cxx_diagrams::fields;
 
 @AMuon_Calculation@
 
+   if (!is_zero((form_factors[2] + form_factors[3]).imag())) {
+      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
+      return std::numeric_limits<double>::quiet_NaN();
+   }
+
+   double val =
+      // vector form factor
+      1./2.*(form_factors[2] + form_factors[3]).real()
+      // reinstate the mass that was factored out in definition of form factor
+      * context.mass<Muon>({@AMuon_MuonIndex@})
+      // factor out e/(2*muon pole mass)
+      / (unit_charge(context_base{model})/(2.*muonPhysicalMass(qedqcd)))
+      // definition of photon momentum flow for g-2 is opposite than for form factors
+      * (-1.);
+
    // add 2-loop QED logarithms
    val *= 1. + get_QED_2L(context, qedqcd);
+
+   std::complex<double> valBarZee {0., 0.};
+
+@AMuon_BarZeeCalculation@
+
+   if (!is_zero(valBarZee.imag())) {
+      ERROR("Error in the g-2 calculation! Form factor F2 should be real");
+      return std::numeric_limits<double>::quiet_NaN();
+   } else {
+      // @todo: enable once the calculation of Barr-Zee contributions is validated
+      // val += valBarZee.real();
+   }
 
    return val;
 }
@@ -314,7 +385,7 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
                         amu = calculate_a_muon_impl(m, qedqcd);
                      }
                      catch(const Error& e) {
-                        ERROR("@ModelName@_a_muon: scale variation: " << e.what());
+                        ERROR("@ModelName@_a_muon: scale variation: " << e.what_detailed());
                      }
                      return amu;
                   });
@@ -322,11 +393,6 @@ std::pair<double,double> vary_scale(const @ModelName@_mass_eigenstates& model, c
    const auto minmax = std::minmax_element(scales.cbegin(), scales.cend());
 
    return std::make_pair(*(minmax.first), *(minmax.second));
-}
-
-double muonPhysicalMass(const softsusy::QedQcd& qedqcd)
-{
-   return qedqcd.displayPoleMmuon();
 }
 
 } // anonymous namespace
@@ -341,7 +407,7 @@ double @ModelName@_a_muon::calculate_a_muon(const @ModelName@_mass_eigenstates& 
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon:" << e.what());
+      ERROR("@ModelName@_a_muon:" << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 
@@ -365,7 +431,7 @@ double @ModelName@_a_muon::calculate_a_muon_uncertainty(const @ModelName@_mass_e
       run_to_MSUSY(model);
       model.get_physical().clear();
    } catch (const Error& e) {
-      ERROR("@ModelName@_a_muon uncertainty: " << e.what());
+      ERROR("@ModelName@_a_muon uncertainty: " << e.what_detailed());
       return std::numeric_limits<double>::quiet_NaN();
    }
 
@@ -386,114 +452,317 @@ double get_QED_2L(context_base& context, const softsusy::QedQcd& qedqcd)
    return qed_2L;
 }
 
-template<class PhotonEmitter, class ExchangeField>
-double AMuonVertexCorrectionFS<
-PhotonEmitter, ExchangeField
+template<class Fermion, class Scalar>
+double AMuonBarZeeFermionLoop<
+Fermion, Scalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   double res = 0.0;
-
    using MuonVertex = Vertex<
-                      Muon,
-                      ExchangeField,
-                      PhotonEmitter
+                      Scalar,
+                      typename Muon::lorentz_conjugate,
+                      Muon
                       >;
 
-   for (const auto& index: index_range<MuonVertex>()) {
-      const auto muonIndices = MuonVertex::template indices_of_field<0>(index);
+   using FermionVertex = Vertex<
+                         Scalar,
+                         Fermion,
+                         typename Fermion::lorentz_conjugate
+                         >;
 
-      if (muonIndices != indices)
-         continue;
+   double res = 0.0;
+   for (const auto& index1: index_range<MuonVertex>()) {
+      for (const auto& index2: index_range<FermionVertex>()) {
+          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
 
-      const auto photonEmitterIndices = MuonVertex::template indices_of_field<2>(index);
-      const auto exchangeFieldIndices = MuonVertex::template indices_of_field<1>(index);
+         if (muonIndices != indices)
+            continue;
 
-      if (isSMField<PhotonEmitter>(photonEmitterIndices) &&
-          isSMField<ExchangeField>(exchangeFieldIndices))
-         continue;
+         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
-      auto muonVertex = MuonVertex::evaluate(index, context);
+         if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices))
+               continue;
 
-      const auto photonEmitterMass = context.mass<PhotonEmitter>(photonEmitterIndices);
-      const auto exchangeFieldMass = context.mass<ExchangeField>(exchangeFieldIndices);
-      const auto muonMass = context.mass<Muon>(muonIndices);
+         if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
+            continue;
 
-      const double photonEmitterChargeCount =
-         - PhotonEmitter::electric_charge / Muon::electric_charge;
+         if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
+            continue;
 
-      const std::complex<double> zL = muonVertex.left();
-      const std::complex<double> zR = muonVertex.right();
+         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto fermionVertex = FermionVertex::evaluate(index2, context);
 
-      const double coeffA = std::norm(zL) + std::norm(zR);
-      const double coeffB = (zL * std::conj(zR) + zR * std::conj(zL)).real();
+         const auto fermionMass = context.mass<Fermion>(fermionIndices);
+         const auto scalarMass = context.mass<Scalar>(scalarIndices);
+         const auto muonMass = context.mass<Muon>(muonIndices);
 
-      const double massRatioSquared = Sqr(photonEmitterMass / exchangeFieldMass);
+         const double fermionChargeCount =
+            Fermion::electric_charge / Muon::electric_charge;
 
-      const double part1 = muonMass / 12.0 * coeffA * OneLoopFunctionF1C(massRatioSquared);
+         const std::complex<double> zrm = muonVertex.right();
+         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zrf = fermionVertex.right();
+         const std::complex<double> zlf = fermionVertex.left();
 
-      const double part2 =
-         is_zero(massRatioSquared) ? 0. :
-         photonEmitterMass / 3.0 * coeffB * OneLoopFunctionF2C(massRatioSquared);
+         const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
+         const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
 
-      const double preFactor = oneOver16PiSqr * photonEmitterChargeCount
-         * muonPhysicalMass(qedqcd) / (exchangeFieldMass * exchangeFieldMass);
+         const double massRatioSquared = Sqr(fermionMass / scalarMass);
 
-      res += preFactor * (part1 + part2);
+         const double part1 = coeffA.real() * BarZeeLoopFS(massRatioSquared);
+         const double part2 = coeffB.real() * BarZeeLoopFPS(massRatioSquared);
+
+         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * fermionChargeCount
+            * muonPhysicalMass(qedqcd) / fermionMass;
+
+         res += preFactor * (part1 + part2);
+      }
    }
 
    return res;
 }
 
-template<class PhotonEmitter, class ExchangeField>
-double AMuonVertexCorrectionSF<
-PhotonEmitter, ExchangeField
+template<class Fermion, class Scalar>
+double AMuonBarZeeFermionLoopZ<
+Fermion, Scalar
 >::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
 {
-   double res = 0.0;
-
    using MuonVertex = Vertex<
-                      Muon,
-                      ExchangeField,
-                      PhotonEmitter
+                      Scalar,
+                      typename Muon::lorentz_conjugate,
+                      Muon
                       >;
 
-   for (const auto& index: index_range<MuonVertex>()) {
-      const auto muonIndices = MuonVertex::template indices_of_field<0>(index);
+   using MuonZVertex = Vertex<
+                      VZ,
+                      Muon,
+                      typename Muon::lorentz_conjugate
+                      >;
 
-      if (muonIndices != indices)
-         continue;
+   using FermionVertex = Vertex<
+                         Scalar,
+                         Fermion,
+                         typename Fermion::lorentz_conjugate
+                         >;
 
-      const auto photonEmitterIndices = MuonVertex::template indices_of_field<2>(index);
-      const auto exchangeFieldIndices = MuonVertex::template indices_of_field<1>(index);
+   using FermionZVertex = Vertex<
+                         VZ,
+                         typename Fermion::lorentz_conjugate,
+                         Fermion
+                         >;
 
-      if (isSMField<PhotonEmitter>(photonEmitterIndices) &&
-          isSMField<ExchangeField>(exchangeFieldIndices))
-         continue;
+   double res = 0.0;
+   for (const auto& index1: index_range<MuonVertex>()) {
+      for (const auto& index2: index_range<FermionVertex>()) {
+         for (const auto& indexMuonZ: index_range<MuonZVertex>()) {
+            for (const auto& indexFermionZ: index_range<FermionZVertex>()) {
 
-      const auto muonVertex = MuonVertex::evaluate(index, context);
+               const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
 
-      const auto photonEmitterMass = context.mass<PhotonEmitter>(photonEmitterIndices);
-      const auto exchangeFieldMass = context.mass<ExchangeField>(exchangeFieldIndices);
-      const auto muonMass = context.mass<Muon>(muonIndices);
+               if (muonIndices != indices)
+                  continue;
 
-      const double photonEmitterChargeCount =
-         - PhotonEmitter::electric_charge / Muon::electric_charge;
+               if ((muonIndices != MuonZVertex::template indices_of_field<2>(indexMuonZ)) ||
+                   (muonIndices != MuonZVertex::template indices_of_field<1>(indexMuonZ)))
+                  continue;
 
-      const std::complex<double> zL = muonVertex.left();
-      const std::complex<double> zR = muonVertex.right();
+               const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+               const auto fermionIndices = FermionVertex::template indices_of_field<1>(index2);
 
-      const double coeffA = std::norm(zL) + std::norm(zR);
-      const double coeffB = (zL * std::conj(zR) + zR * std::conj(zL)).real();
+               if (cxx_diagrams::isSMField<Fermion>(fermionIndices) &&
+                   cxx_diagrams::isSMField<Scalar>(scalarIndices))
+                  continue;
 
-      const double massRatioSquared = Sqr(exchangeFieldMass / photonEmitterMass);
+               if (scalarIndices != FermionVertex::template indices_of_field<0>(index2))
+                  continue;
 
-      const double part1 = 1.0 / 12.0 * coeffA * OneLoopFunctionF1N(massRatioSquared);
-      const double part2 = exchangeFieldMass / (6.0 * muonMass) * coeffB * OneLoopFunctionF2N(massRatioSquared);
+               if (fermionIndices != FermionVertex::template indices_of_field<2>(index2))
+                  continue;
 
-      const double preFactor = - oneOver16PiSqr * photonEmitterChargeCount
-         * muonPhysicalMass(qedqcd) * muonMass / (photonEmitterMass * photonEmitterMass);
+               if ((fermionIndices != FermionZVertex::template indices_of_field<2>(indexFermionZ)) ||
+                   (fermionIndices != FermionZVertex::template indices_of_field<1>(indexFermionZ)))
+                  continue;
 
-      res += preFactor * (part1 + part2);
+               const auto muonVertex = MuonVertex::evaluate(index1, context);
+               const auto fermionVertex = FermionVertex::evaluate(index2, context);
+               const auto muonZVertex = MuonZVertex::evaluate(indexMuonZ, context);
+               const auto fermionZVertex = FermionZVertex::evaluate(indexFermionZ, context);
+
+               const auto fermionMass = context.mass<Fermion>(fermionIndices);
+               const auto scalarMass = context.mass<Scalar>(scalarIndices);
+               const auto muonMass = context.mass<Muon>(muonIndices);
+               const auto zMass = context.mass<VZ>({ });
+               const auto ThetaW = DERIVEDPARAMETER(ThetaW);
+               const double cw = Cos(ThetaW);
+               const double sw = Sin(ThetaW);
+
+               if (is_zero(zMass - scalarMass, 3e-13)) {
+                  continue;
+               }
+
+               const double fermionChargeCount =
+                  Fermion::electric_charge / Muon::electric_charge;
+
+               const std::complex<double> zrm = muonVertex.right();
+               const std::complex<double> zlm = muonVertex.left();
+               const std::complex<double> zrf = fermionVertex.right();
+               const std::complex<double> zlf = fermionVertex.left();
+               const std::complex<double> zmzr = muonZVertex.right();
+               const std::complex<double> zfzr = fermionZVertex.right();
+
+               const double gvm = (0.5) * (zmzr.real()/unit_charge(context) + sw/cw);
+               const double gvf = (0.5) * (zfzr.real()/unit_charge(context) - fermionChargeCount*sw/cw);
+               const std::complex<double> coeffA = (zrf + zlf) * (zrm + zlm);
+               const std::complex<double> coeffB = (zlf - zrf) * (zrm - zlm);
+
+               const double massRatioSquared = Sqr(fermionMass / scalarMass);
+
+               const double part1 = coeffA.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFS(massRatioSquared) - BarZeeLoopFS(Sqr(fermionMass / zMass)));
+               const double part2 = coeffB.real() * Sqr(scalarMass) / (Sqr(scalarMass) - Sqr(zMass)) * (BarZeeLoopFPS(massRatioSquared) - BarZeeLoopFPS(Sqr(fermionMass / zMass)));
+
+               const double preFactor = - Sqr(unit_charge(context))/(64*Power4(Pi)) * fermionChargeCount * gvm * gvf
+                  * muonPhysicalMass(qedqcd) / fermionMass;
+
+               res += preFactor * (part1 + part2);
+            }
+         }
+      }
+   }
+
+   return res;
+}
+
+template<class ChargedScalar, class NeutralScalar>
+double AMuonBarZeeScalarLoop<
+ChargedScalar, NeutralScalar
+>::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+   using MuonVertex = Vertex<
+                      NeutralScalar,
+                      typename Muon::lorentz_conjugate,
+                      Muon
+                      >;
+
+   using ScalarVertex = Vertex<
+                         NeutralScalar,
+                         ChargedScalar,
+                         typename ChargedScalar::lorentz_conjugate
+                         >;
+
+   double res = 0.0;
+   for (const auto& index1: index_range<MuonVertex>()) {
+      for (const auto& index2: index_range<ScalarVertex>()) {
+          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+
+         if (muonIndices != indices)
+            continue;
+
+         const auto neutralScalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto chargedScalarIndices = ScalarVertex::template indices_of_field<1>(index2);
+
+         if (cxx_diagrams::isSMField<ChargedScalar>(chargedScalarIndices) &&
+             cxx_diagrams::isSMField<NeutralScalar>(neutralScalarIndices))
+            {
+               continue;
+            }
+
+         if (neutralScalarIndices != ScalarVertex::template indices_of_field<0>(index2))
+            continue;
+
+         if (chargedScalarIndices != ScalarVertex::template indices_of_field<2>(index2))
+            continue;
+
+         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto scalarVertex = ScalarVertex::evaluate(index2, context);
+
+         const auto chargedScalarMass = context.mass<ChargedScalar>(chargedScalarIndices);
+         const auto neutralScalarMass = context.mass<NeutralScalar>(neutralScalarIndices);
+         const auto muonMass = context.mass<Muon>(muonIndices);
+
+         const double scalarChargeCount =
+            ChargedScalar::electric_charge / Muon::electric_charge;
+
+         const std::complex<double> zrm = muonVertex.right();
+         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zss = scalarVertex.value();
+
+         const std::complex<double> coeff = (zrm + zlm) * zss;
+
+         const double massRatioSquared = Sqr(chargedScalarMass / neutralScalarMass);
+
+         const double preFactor = Sqr(unit_charge(context))/(64*Power4(Pi)) * scalarChargeCount * scalarChargeCount
+            * muonPhysicalMass(qedqcd) / (neutralScalarMass * neutralScalarMass);
+
+         res += preFactor * coeff.real() * BarZeeLoopS(massRatioSquared);
+      }
+   }
+
+   return res;
+}
+
+template<class Vector, class Scalar>
+double AMuonBarZeeVectorLoop<
+Vector, Scalar
+>::value(const typename field_indices<Muon>::type& indices, const context_base& context, const softsusy::QedQcd& qedqcd)
+{
+
+   using MuonVertex = Vertex<
+                      Scalar,
+                      typename Muon::lorentz_conjugate,
+                      Muon
+                      >;
+
+   using VectorVertex = Vertex<
+                         Scalar,
+                         Vector,
+                         typename Vector::lorentz_conjugate
+                         >;
+
+   double res = 0.0;
+   for (const auto& index1: index_range<MuonVertex>()) {
+      for (const auto& index2: index_range<VectorVertex>()) {
+          const auto muonIndices = MuonVertex::template indices_of_field<2>(index1);
+
+         if (muonIndices != indices)
+            continue;
+
+         const auto scalarIndices = MuonVertex::template indices_of_field<0>(index1);
+         const auto vectorIndices = VectorVertex::template indices_of_field<1>(index2);
+
+         if (cxx_diagrams::isSMField<Vector>(vectorIndices) &&
+             cxx_diagrams::isSMField<Scalar>(scalarIndices))
+               continue;
+
+         if (scalarIndices != VectorVertex::template indices_of_field<0>(index2))
+            continue;
+
+         if (vectorIndices != VectorVertex::template indices_of_field<2>(index2))
+            continue;
+
+         const auto muonVertex = MuonVertex::evaluate(index1, context);
+         const auto vectorVertex = VectorVertex::evaluate(index2, context);
+
+         const auto vectorMass = context.mass<Vector>(vectorIndices);
+         const auto scalarMass = context.mass<Scalar>(scalarIndices);
+         const auto muonMass = context.mass<Muon>(muonIndices);
+
+         const double vectorChargeCount =
+            Vector::electric_charge / Muon::electric_charge;
+
+         const std::complex<double> zrm = muonVertex.right();
+         const std::complex<double> zlm = muonVertex.left();
+         const std::complex<double> zsv = vectorVertex.value();
+
+         const std::complex<double> coeff = (zrm + zlm) * zsv;
+
+         const double massRatioSquared = Sqr(vectorMass / scalarMass);
+
+         const double preFactor = - Sqr(unit_charge(context))/(128*Power4(Pi)) * vectorChargeCount * vectorChargeCount
+            * muonPhysicalMass(qedqcd) / (vectorMass * vectorMass);
+
+         res += preFactor * coeff.real() * BarZeeLoopV(massRatioSquared);
+      }
    }
 
    return res;

@@ -16,15 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 /**
  * @file @ModelName@_two_scale_ewsb_solver.hpp
  *
  * @brief contains class for solving EWSB when two-scale algorithm is used
  *
- * This file was generated at @DateAndTime@ with FlexibleSUSY
- * @FlexibleSUSYVersion@ (git commit: @FlexibleSUSYGitCommit@) and SARAH @SARAHVersion@ .
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
  */
 
 #ifndef @ModelName@_TWO_SCALE_EWSB_SOLVER_H
@@ -63,13 +61,13 @@ public:
 
    virtual int solve(@ModelName@_mass_eigenstates&) override;
 private:
-   static const int number_of_ewsb_equations = @numberOfEWSBEquations@;
+   static constexpr int number_of_ewsb_equations = @numberOfEWSBEquations@;
    using EWSB_vector_t = Eigen::Matrix<double,number_of_ewsb_equations,1>;
 
    class EEWSBStepFailed : public Error {
    public:
-      virtual ~EEWSBStepFailed() {}
-      virtual std::string what() const { return "Could not perform EWSB step."; }
+      EEWSBStepFailed() : Error("Could not perform EWSB step") {}
+      virtual ~EEWSBStepFailed() = default;
    };
 
    int number_of_iterations{100}; ///< maximum number of iterations

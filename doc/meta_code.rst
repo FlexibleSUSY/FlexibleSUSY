@@ -21,6 +21,24 @@ Passarino-Veltman 1-loop functions :math:`A_0`, :math:`B_0`,
 :math:`B_1`, :math:`B_{00}`, :math:`B_{11}`, etc.
 
 
+Passarino-Veltman loop functions for zero external momenta
+``````````````````````````````````````````````````````````
+
+``meta/LoopFunctionsZeroMomentum.m`` contains an implementation of the
+Passarino-Veltman 1-loop functions :math:`A_0`, :math:`B_0`,
+:math:`\frac{\partial B_0}{\partial p^2}`, :math:`C_0`, :math:`D_0`,
+:math:`E_0` and :math:`F_0` for zero external momenta.
+
+Example::
+
+    Get["meta/LoopFunctionsZeroMomentum.m"];
+    F0[x,x,x,x,x,x,q] //. loopFunctionsZeroMomentum
+
+yields::
+
+    1/(20*x^4)
+
+
 Renormalization group equation integrator
 `````````````````````````````````````````
 
@@ -225,7 +243,8 @@ Output::
 
 ``meta/SM/mt_4loop_qcd.m`` contains the 4-loop QCD relation between
 the top quark pole mass and the corresponding running
-:math:`\overline{\text{MS}}` mass from [1604.01134]_.
+:math:`\overline{\text{MS}}` mass from [1604.01134]_, [1502.01030]_,
+[1606.06754]_.
 
 Example::
 
@@ -251,6 +270,21 @@ the top quark pole mass and the corresponding running
 limit.  Contributions of :math:`O(\alpha_s^2, \alpha_s\alpha_t,
 \alpha_t^2, \alpha_t\lambda^n)` are included.  The relation is
 gauge-independent.
+
+------
+
+``meta/SM/as_4loop_qcd.m`` contains the 4-loop QCD relation between
+the strong coupling :math:`\alpha_s^{n_f}` with :math:`n_f` flavours
+and :math:`\alpha_s^{n_l}` with :math:`n_l = n_f - 1` flavours in the
+:math:`\overline{\text{MS}}` scheme [hep-ph:0512060]_.
+
+Example::
+
+    nl = 5;
+
+    L = Log[Q^2/mf[Q]^2];
+
+    alphaS = Get["meta/SM/as_4loop_qcd.m"];
 
 
 2HDM
@@ -362,6 +396,7 @@ References
 .. [hep-ph:0308231] `Phys.Lett. B579 (2004) 180-188 <https://inspirehep.net/record/626390>`_ [`arXiv:hep-ph/0308231 <https://arxiv.org/abs/hep-ph/0308231>`_]
 .. [hep-ph:0507139] `Phys.Atom.Nucl. 71 (2008) 343-350 <https://inspirehep.net/record/687205>`_ [`arXiv:hep-ph/0507139 <https://arxiv.org/abs/hep-ph/0507139>`_]
 .. [hep-ph:0509048] `Phys.Rev. D72 (2005) 095009 <https://inspirehep.net/record/691479>`_ [`arXiv:hep-ph/0509048 <https://arxiv.org/abs/hep-ph/0509048>`_]
+.. [hep-ph:0512060] `Nucl.Phys. B744 (2006) 121-135 <https://inspirehep.net/record/699609>`_ [`arXiv:hep-ph/0512060 <https://arxiv.org/abs/hep-ph/0512060>`_]
 .. [0707.0650] `Int.J.Mod.Phys. A22 (2007) 5245-5277 <https://inspirehep.net/record/755029>`_ [`arXiv:0707.0650 <https://arxiv.org/abs/0707.0650>`_]
 .. [0810.5101] `JHEP 0902 (2009) 037 <https://inspirehep.net/record/800842>`_ [`arXiv:0810.5101 <https://arxiv.org/abs/0810.5101>`_]
 .. [0901.2065] `Phys.Rev. D84 (2011) 034030 <https://inspirehep.net/record/811006>`_ [`arXiv:0901.2065 <https://arxiv.org/abs/0901.2065>`_]
@@ -372,4 +407,6 @@ References
 .. [1508.02680] `Phys.Lett. B762 (2016) 151-156 <https://inspirehep.net/record/1387530>`_ [`arXiv:1508.02680 <https://arxiv.org/abs/1508.02680>`_]
 .. [1604.00853] `JHEP 1606 (2016) 175 <https://inspirehep.net/record/1441223>`_ [`arXiv:1604.00853 <https://arxiv.org/abs/1604.00853>`_]
 .. [1604.01134] `Phys.Rev. D93 (2016) no.9, 094017 <https://inspirehep.net/record/1442368>`_ [`arXiv:1604.01134 <https://arxiv.org/abs/1604.01134>`_]
+.. [1502.01030] `Phys.Rev.Lett. 114 (2015) 14, 142002 <https://inspirehep.net/literature/1342942>`_ [`arXiv:1502.01030 <https://arxiv.org/abs/1502.01030>`_]
+.. [1606.06754] `Phys.Rev.D 94 (2016) 7, 074025 <https://inspirehep.net/literature/1471728>`_ [`arXiv:1606.06754 <https://arxiv.org/abs/1606.06754>`_]
 .. [1606.08659] `Phys.Rev.Lett. 118 (2017) no.8, 082002 <https://inspirehep.net/record/1472834>`_ [`arXiv:1606.08659 <https://arxiv.org/abs/1606.08659>`_]

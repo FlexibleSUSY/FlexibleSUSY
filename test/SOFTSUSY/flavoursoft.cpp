@@ -669,14 +669,14 @@ void FlavourMssmSoftsusy::msoftSLHA(std::ostream & out) {
 	printRow(out, teSckm(i, j));
 	out << "    # (T_e)_{" << i << j << "}" << endl;
       }
-  DoubleMatrix vCkm(Vu.transpose() * Vd);
+    DoubleMatrix vCkm(Vu.transpose() * Vd);
 
-  out << "Block VCKM Q= " << displayMu() << " # DRbar CKM mixing matrix\n";
-  for (i=1; i<=3; i++)
-    for (j=1; j<=3; j++) {
-      out << "  " << i << "  " << j << "    "; printRow(out, vCkm(i, j));
-      out << "    # CKM_{" << i << j << "} matrix element" << endl;
-    }
+    out << "Block VCKM Q= " << displayMu() << " # DRbar CKM mixing matrix\n";
+    for (i=1; i<=3; i++)
+       for (j=1; j<=3; j++) {
+          out << "  " << i << "  " << j << "    "; printRow(out, vCkm(i, j));
+          out << "    # CKM_{" << i << j << "} matrix element" << endl;
+       }
     
     out << "Block msoft Q= " << displayMu() 
 	 << " # MSSM DRbar SUSY breaking parameters\n"; 

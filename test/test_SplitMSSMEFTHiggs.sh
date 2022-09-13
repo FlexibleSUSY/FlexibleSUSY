@@ -3,6 +3,7 @@
 BASEDIR="$(dirname $0)"
 MODELDIR="${BASEDIR}/../models"
 
+# shellcheck source=test.sh
 . "$BASEDIR/test.sh"
 
 # prints SLHA block
@@ -175,7 +176,7 @@ EOF
 		 awk -v block="SMSM" "$print_slha_block_awk" |
 		 awk -v keys="2" "$print_block_entry_awk" |
 		 tail -n 1)
-    if [ -z "$lambdaFull" -o -z "$lambdaEFT" ]; then
+    if [ -z "$lambdaFull" ] || [ -z "$lambdaEFT" ]; then
        lambdaFull=0
        lambdaEFT=1
     fi
@@ -187,12 +188,14 @@ error=0
 
 # check equality of lambdas in full theory and EFT at matching scale
 
+# shellcheck disable=SC2046
 set -- $(run_sg "$MODELDIR/SplitMSSMEFTHiggs/run_SplitMSSMEFTHiggs.x" 0)
 CHECK_EQUAL_FRACTION "$1" "$2" "0.0001" || error=$(expr $error + 1)
 
 # check approximate equality of lambdas in full theory and EFT at matching scale
 # this would fail if difference between vev normalizations
 # in full theory and SM were ignored, see commit e5473865150da98e1426f2282baf31d54541169a
+# shellcheck disable=SC2046
 set -- $(run_sg "$MODELDIR/SplitMSSMEFTHiggs/run_SplitMSSMEFTHiggs.x" 1)
 CHECK_EQUAL_FRACTION "$1" "$2" "0.03" || error=$(expr $error + 1)
 

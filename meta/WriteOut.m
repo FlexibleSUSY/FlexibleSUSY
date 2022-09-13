@@ -22,7 +22,7 @@
 
 BeginPackage["WriteOut`", {"SARAH`", "TextFormatting`", "CConversion`",
                            "Parameters`", "TreeMasses`",
-                           "Utils`", "Observables`"}];
+                           "Utils`"}];
 
 ReplaceInFiles::usage="Replaces tokens in files.";
 PrintParameters::usage="Creates parameter printout statements";
@@ -50,6 +50,13 @@ ParseCmdLineOptions::usage="";
 PrintCmdLineOptions::usage="";
 GetGaugeCouplingNormalizationsDecls::usage="";
 GetGaugeCouplingNormalizationsDefs::usage="";
+
+CreateSetDecaysInfoBlockPrototypes::usage="";
+CreateSetDecaysInfoBlockFunctions::usage="";
+CreateSetDecaysPrototypes::usage="";
+CreateSetDecaysFunctions::usage="";
+CreateFillDecaysDataPrototypes::usage="";
+CreateFillDecaysDataFunctions::usage="";
 
 CreateSLHAYukawaDefinition::usage="";
 CreateSLHAYukawaGetters::usage="";
@@ -328,10 +335,12 @@ WriteSLHAMatrix[{mixingMatrix_, lesHouchesName_}, head_String, scale_String, set
     Module[{str, strSLHA, lhs, wrapper},
            If[SARAH`getDimParameters[mixingMatrix] === {} ||
               SARAH`getDimParameters[mixingMatrix] === {1},
-              Print["Warning: You are trying to create a SLHA matrix block for"];
-              Print["   ", mixingMatrix, ", which is not a matrix!"];
-              Print["   Please specify a Les Houches index in the SARAH model file."];
-             ];
+              Utils`FSFancyWarning[
+                 "You are trying to create a SLHA matrix block for ",
+                 mixingMatrix, ", which is not a matrix! Please specify ",
+                 "a Les Houches index in the SARAH model file."
+              ];
+           ];
            str = CConversion`ToValidCSymbolString[mixingMatrix];
            (* use SLHA compliant yukawas, trilinears, soft-squared masses *)
            strSLHA = If[mixingMatrix === SARAH`UpYukawa ||
@@ -441,59 +450,8 @@ WriteSLHABlockEntry[blockName_, {Hold[par_], idx___}, comment_String:""] :=
 
 ClearAttributes[WriteSLHABlockEntry, HoldFirst];
 
-WriteEffectiveCouplingsSLHABlockEntry[blockName_, particle_, vectorBoson_] :=
-    Module[{i, dim, dimWithoutGoldstones, start, particlePDG, vectorPDG,
-            struct, comment, value, result = ""},
-           vectorPDG = Parameters`GetPDGCodesForParticle[vectorBoson][[1]];
-           particlePDG = Parameters`GetPDGCodesForParticle[particle];
-           dim = TreeMasses`GetDimension[particle];
-           dimWithoutGoldstones = TreeMasses`GetDimensionWithoutGoldstones[particle];
-           If[Length[particlePDG] != dim,
-              Print["Warning: length of PDG number list != dimension of particle ", particle];
-              Print["       PDG number list = ", particlePDG];
-              Print["       dimension of particle ", particle, " = ", dim];
-             ];
-           If[Length[particlePDG] < dim,
-              Return[""];
-             ];
-           start = TreeMasses`GetDimensionStartSkippingGoldstones[particle];
-           Which[particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_higgs_photon_photon";
-                 comment = "Abs(effective H-Photon-Photon coupling)";,
-                 particle === SARAH`HiggsBoson && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_higgs_gluon_gluon";
-                 comment = "Abs(effective H-Gluon-Gluon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorP,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_photon_photon";
-                 comment = "Abs(effective A-Photon-Photon coupling)";,
-                 particle === SARAH`PseudoScalar && vectorBoson === SARAH`VectorG,
-                 struct = "OBSERVABLES.eff_cp_pseudoscalar_gluon_gluon";
-                 comment = "Abs(effective A-Gluon-Gluon coupling)";,
-                 True,
-                 Print["Error: unsupported effective coupling ",
-                       particle, "-", vectorBoson, "-", vectorBoson,
-                       "requested!"];
-                 Quit[1]
-                ];
-           If[dimWithoutGoldstones == 1 || start == dim,
-              value = "Abs(" <> struct <> ")";
-              result = result
-                        <> WriteSLHABlockEntry[blockName,
-                                               {value, particlePDG[[start]], vectorPDG, vectorPDG},
-                                               comment];,
-              For[i = start, i <= Length[particlePDG], i++,
-                  value = "Abs(" <> struct <> "(" <> ToString[i-start] <> "))";
-                  result = result
-                           <> WriteSLHABlockEntry[blockName,
-                                                  {value, particlePDG[[i]], vectorPDG, vectorPDG},
-                                                  comment];
-                 ];
-             ];
-           result
-          ];
-
-WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] :=
-    Module[{i, dim, scalarPDG, vectorPDG, result = ""},
+WriteSLHABlockEntry[blockName_, {par_?Observables`IsObservable, idx___}, comment_String:""] :=
+    Module[{result = ""},
            Switch[par,
                   FlexibleSUSYObservable`aMuon,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon", idx}, "Delta(g-2)_muon/2 FlexibleSUSY"],
@@ -503,14 +461,6 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc", idx}, "Delta(g-2)_muon/2 GM2Calc"],
                   FlexibleSUSYObservable`aMuonGM2CalcUncertainty,
                       result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.a_muon_gm2calc_uncertainty", idx}, "Delta(g-2)_muon/2 GM2Calc uncertainty"],
-                  FlexibleSUSYObservable`CpHiggsPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpHiggsGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`HiggsBoson, SARAH`VectorG],
-                  FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorP],
-                  FlexibleSUSYObservable`CpPseudoScalarGluonGluon,
-                      result = WriteEffectiveCouplingsSLHABlockEntry[blockName, SARAH`PseudoScalar, SARAH`VectorG],
                   FlexibleSUSYObservable`EDM[_],
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
@@ -523,6 +473,8 @@ WriteSLHABlockEntry[blockName_, {par_?IsObservable, idx___}, comment_String:""] 
                       result = WriteSLHABlockEntry[blockName,
                                                    {"OBSERVABLES." <> Observables`GetObservableName[par], idx},
                                                    Observables`GetObservableDescription[par]],
+                  FlexibleSUSYObservable`bsgamma,
+                      result = WriteSLHABlockEntry[blockName, {"OBSERVABLES.b_to_s_gamma", idx}, "Re(C7) for b -> s gamma"],
                   _,
                      result = WriteSLHABlockEntry[blockName, {"", idx}, ""]
                  ];
@@ -657,8 +609,16 @@ WriteExtraSLHAOutputBlock[outputBlocks_List] :=
            ReformeBlocks[{idx_, expr_}]         := {expr, idx};
            ReformeBlocks[{idx1_, idx2_, expr_}] := {expr, idx1, idx2};
            reformed = ReformeBlocks /@ outputBlocks;
-           (result = result <> WriteSLHABlock[#[[1]], #[[2]]])& /@ reformed;
-           Return[result];
+           (
+              result = result
+                 <> If[First[#[[1]]] === FlexibleSUSY`FlexibleSUSYLowEnergy,
+                       "if (spectrum_generator_settings.get(Spectrum_generator_settings::calculate_observables)) {\n"
+                       <> TextFormatting`IndentText[WriteSLHABlock[#[[1]], #[[2]]]]
+                       <> "}\n",
+                       WriteSLHABlock[#[[1]], #[[2]]]
+                    ]
+           )& /@ reformed;
+           result
           ];
 
 ReadSLHAInputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
@@ -716,8 +676,10 @@ ReadSLHAOutputBlock[{parameter_, {blockName_Symbol, pdg_?NumberQ}}] :=
 
 ReadSLHAOutputBlock[{parameter_, {blockName_, pdg_?NumberQ}}] :=
     Block[{},
-          Print["Warning: SLHA block name is not a symbol: ", blockName];
-          Print["   I'm using: ", CConversion`RValueToCFormString[blockName]];
+          Utils`FSFancyWarning[
+             "SLHA block name is not a symbol: ", blockName,
+             " I'm using: ", CConversion`RValueToCFormString[blockName]
+          ];
           ReadSLHAOutputBlock[{parameter, {CConversion`RValueToCFormString[blockName], pdg}}]
          ];
 
@@ -830,7 +792,7 @@ ConvertMixingsToConvention[massMatrices_List, convention_String] :=
                   eigenstateNameStr  = CConversion`ToValidCSymbolString[FlexibleSUSY`M[eigenstateName]];
                   mixingMatrixSymStr = CConversion`ToValidCSymbolString[mixingMatrixSym];
                   result = result <>
-                           "SLHA_io::convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>
+                           "convert_symmetric_fermion_mixings_to_" <> convention <> "(LOCALPHYSICAL(" <>
                            eigenstateNameStr <> "), LOCALPHYSICAL(" <>
                            mixingMatrixSymStr <> "));\n";
                  ];
@@ -970,9 +932,11 @@ ConvertYukawaCouplingsToSLHA[] :=
                                       CreateSLHAFermionMixingMatrixName[vR] <> ", " <>
                                       CreateSLHAFermionMixingMatrixName[vL] <> ");\n";
                      ,
-                     Print["Warning: Cannot convert Yukawa coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Yukawa coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHAYukawaName[#] <> " = MODELPARAMETER(" <>
                               CConversion`ToValidCSymbolString[#] <> ").diagonal().real();\n";
@@ -1022,9 +986,11 @@ ConvertTrilinearCouplingsToSLHA[] :=
                                   GetSLHATrilinearCouplingType[#]
                               ] <> ";\n";
                      ,
-                     Print["Warning: Cannot convert Trilinear coupling ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert Trilinear coupling ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHATrilinearCouplingName[#] <> " = " <>
                               CConversion`CastTo[
@@ -1094,9 +1060,11 @@ ConvertSoftSquaredMassesToSLHA[] :=
                                  ] <> ";\n";
                        ];
                      ,
-                     Print["Warning: Cannot convert soft squared mass ", #,
-                           " to SLHA, because ", {vL,vR}, " are not defined",
-                           " or have incompatible dimension."];
+                     Utils`FSFancyWarning[
+                        "Cannot convert soft squared mass ", #,
+                        " to SLHA, because ", {vL,vR}, " are not",
+                        " defined or have incompatible dimension."
+                     ];
                      result = result <>
                               CreateSLHASoftSquaredMassName[#] <> " = " <>
                               CConversion`CastTo[
@@ -1245,6 +1213,38 @@ CreateFormattedSLHABlocks[inputPars_List] :=
            sortForBlocks = {#, FindParametersInBlock[inputPars, #]}& /@ blocks;
            StringJoin[CreateFormattedSLHABlock /@ sortForBlocks]
           ];
+
+CreateSetDecaysPrototypes[modelName_String] := "\
+void set_decays(const " <> modelName <> "_decay_table&, FlexibleDecay_settings const&);";
+
+CreateSetDecaysFunctions[modelName_String] := "\
+/**
+ * Stores the particle decay branching ratios in the SLHA object.
+ *
+ * @param decays struct containing decays data
+ */
+void " <> modelName <> "_slha_io::set_decays(const " <> modelName <> "_decay_table& decay_table, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   for (const auto& particle : decay_table) {
+      set_decay_block(particle, flexibledecay_settings);
+   }
+}";
+
+CreateFillDecaysDataPrototypes[modelName_String] := "\
+void fill_decays_data(const " <> modelName <> "_decays&, FlexibleDecay_settings const&);";
+
+CreateFillDecaysDataFunctions[modelName_String] := "\
+void " <> modelName <> "_slha_io::fill_decays_data(const " <> modelName <> "_decays& decays, FlexibleDecay_settings const& flexibledecay_settings)
+{
+   const auto& decays_problems = decays.get_problems();
+   const bool decays_error = decays_problems.have_problem();
+
+   set_dcinfo(decays_problems);
+
+   if (!decays_error) {
+      set_decays(decays.get_decay_table(), flexibledecay_settings);
+   }
+}";
 
 End[];
 

@@ -53,7 +53,10 @@ InitialGuessAtLowScale = {
    {\[Lambda]2, Lambda2Input},
    {\[Lambda]3, Lambda3Input},
    {\[Lambda]4, Lambda4Input},
-   {\[Lambda]5, Lambda5Input} 
+   {\[Lambda]5, Lambda5Input}
 };
 
 OnlyLowEnergyFlexibleSUSY = True;
+
+FSCalculateDecays = True;
+

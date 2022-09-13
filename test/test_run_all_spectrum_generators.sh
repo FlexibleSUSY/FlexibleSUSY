@@ -2,7 +2,7 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-HOMEDIR=$(readlink -f "${BASEDIR}/../")
+HOMEDIR="${BASEDIR}/.."
 FSCONFIG="${HOMEDIR}/flexiblesusy-config"
 
 DEFAULT_CMSSM_INPUT="${HOMEDIR}/model_files/CMSSM/LesHouches.in.CMSSM"
@@ -101,6 +101,7 @@ SMSSM,_DEFAULT_,0
 SplitMSSM,_DEFAULT_,0
 SMRules,${DEFAULT_SM_INPUT},0
 SSM,_DEFAULT_,0
+SSMMhInput,_DEFAULT_,0
 SMThrow,${DEFAULT_SM_INPUT},0
 SMThrow,${HOMEDIR}/model_files/SMThrow/LesHouches.in.SMThrow_large_lambda,1
 HSSUSY,_DEFAULT_,0
@@ -139,7 +140,7 @@ do
 
     echo "== $model ===================================="
 
-    if [ $("$FSCONFIG" --with-${model}) = no ] ; then
+    if [ "$("$FSCONFIG" --with-${model})" = no ] ; then
         echo "> skipping, because the model is not configured"
         continue
     fi

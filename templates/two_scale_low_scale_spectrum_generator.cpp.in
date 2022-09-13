@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_spectrum_generator.hpp"
 #include "@ModelName@_input_parameters.hpp"
@@ -88,6 +87,9 @@ void @ModelName@_spectrum_generator<Two_scale>::run_except(const softsusy::QedQc
 
    susy_scale_constraint.initialize();
    low_scale_constraint .initialize();
+
+   low_scale_constraint.set_SM_like_Higgs_index(
+      settings.get(Spectrum_generator_settings::eft_higgs_index));
 
    @ModelName@_convergence_tester<Two_scale> convergence_tester(
       &model, settings.get(Spectrum_generator_settings::precision));

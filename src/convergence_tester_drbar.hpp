@@ -23,8 +23,8 @@
 #include "error.hpp"
 #include "logger.hpp"
 #include "numerics2.hpp"
+#include "wrappers.hpp"
 
-#include <cmath>
 #include <functional>
 #include <limits>
 
@@ -97,7 +97,7 @@ bool Convergence_tester_DRbar<Model>::accuracy_goal_reached()
 
    if (it_count > 0) {
       run_to_scale();
-      const double scale_accuracy_goal = accuracy_goal * 16*M_PI*M_PI;
+      const double scale_accuracy_goal = accuracy_goal * 16*Sqr(Pi);
       if (rel_scale_difference() < scale_accuracy_goal) {
          current_accuracy = max_rel_diff();
          precision_reached = current_accuracy < accuracy_goal;

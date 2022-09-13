@@ -19,6 +19,7 @@
 #ifndef MSSMCBS_SPECTRUM_GENERATOR_H
 #define MSSMCBS_SPECTRUM_GENERATOR_H
 
+#include "CMSSM_info.hpp"
 #include "MSSMcbs_two_scale_model.hpp"
 #include "CMSSM_two_scale_ewsb_solver.hpp"
 #include "CMSSM_two_scale_high_scale_constraint.hpp"
@@ -187,10 +188,17 @@ void MSSMcbs_spectrum_generator<T>::write_running_couplings(const std::string& f
    MSSMcbs<T> tmp_model(model);
    tmp_model.run_to(low_scale);
 
-   CMSSM_parameter_getter parameter_getter;
-   Coupling_monitor<MSSMcbs<T>, CMSSM_parameter_getter>
-      coupling_monitor(tmp_model, parameter_getter);
+   // returns parameters at given scale
+   auto data_getter = [&tmp_model](double scale) {
+      tmp_model.run_to(scale);
+      return CMSSM_parameter_getter::get_parameters(tmp_model);
+   };
 
+   std::vector<std::string> parameter_names(
+      std::cbegin(CMSSM_info::parameter_names),
+      std::cend(CMSSM_info::parameter_names));
+
+   Coupling_monitor coupling_monitor(data_getter, parameter_names);
    coupling_monitor.run(low_scale, high_scale, 100, true);
    coupling_monitor.write_to_file(filename);
 }

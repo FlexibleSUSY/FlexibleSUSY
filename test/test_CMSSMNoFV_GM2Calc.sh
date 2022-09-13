@@ -2,21 +2,32 @@
 
 # directory of this script
 BASEDIR=$(dirname $0)
-GM2CALCDIR=$(readlink -f "${BASEDIR}/../addons/GM2Calc")
 FSCONFIG="$BASEDIR/../flexiblesusy-config"
-GM2CALC_EXE=$(readlink -f "${BASEDIR}/../addons/GM2Calc/gm2calc.x")
-CMSSMNoFV_EXE=$(readlink -f "${BASEDIR}/../models/CMSSMNoFV/run_CMSSMNoFV.x")
-SLHA_IN=$(readlink -f "${BASEDIR}/../models/CMSSMNoFV/LesHouches.in.CMSSMNoFV")
-SLHA_OUT=$(readlink -f "${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc")
+CMSSMNoFV_EXE="${BASEDIR}/../models/CMSSMNoFV/run_CMSSMNoFV.x"
+SLHA_IN="${BASEDIR}/../models/CMSSMNoFV/LesHouches.in.CMSSMNoFV"
+SLHA_OUT="${BASEDIR}/test_CMSSMNoFV_GM2Calc.out.spc"
 print_block="$BASEDIR/../utils/print_slha_block.awk"
 
-[ $("$FSCONFIG" --with-CMSSMNoFV) = yes -a -x ${CMSSMNoFV_EXE} ] || {
+if [ -e GM2Calc.pc ] ; then
+    # shellcheck disable=SC2046
+    eval $(grep '^prefix=' GM2Calc.pc)
+    # shellcheck disable=SC2154
+    GM2CALC_EXE="${prefix}/bin/gm2calc.x"
+fi
+
+if [ ! -x "${GM2CALC_EXE}" ] ; then
+    echo "Cannot find GM2Calc executable in ${GM2CALC_EXE}"
+    echo "Skipping test."
+    exit
+fi
+
+[ "$("$FSCONFIG" --with-CMSSMNoFV)" = yes ] && [ -x "${CMSSMNoFV_EXE}" ] || {
     echo "Error: CMSSMNoFV needs to be build!"
     exit 1;
 }
 
-[ $("$FSCONFIG" --with-GM2Calc) = yes -a -x ${GM2CALC_EXE} ] || {
-    echo "Error: GM2Calc needs to be build!"
+[ "$("$FSCONFIG" --enable-gm2calc)" = yes ] || {
+    echo "Error: FlexibleSUSY must be configured with GM2Calc!"
     exit 1;
 }
 

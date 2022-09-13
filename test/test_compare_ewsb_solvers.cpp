@@ -64,11 +64,11 @@ SLHAea::Coll create_point(Point point, const std::string& input_file)
 
    const std::string str(
       "Block MINPAR\n"
-      "   1   " + boost::lexical_cast<std::string>(point.m0)      + "   # m0\n"
-      "   2   " + boost::lexical_cast<std::string>(point.m12)     + "   # m12\n"
-      "   3   " + boost::lexical_cast<std::string>(point.tanBeta) + "   # TanBeta\n"
-      "   4   " + boost::lexical_cast<std::string>(point.signMu)  + "   # sign(Mu)\n"
-      "   5   " + boost::lexical_cast<std::string>(point.a0)      + "   # A0\n");
+      "   1   " + std::to_string(point.m0)      + "   # m0\n"
+      "   2   " + std::to_string(point.m12)     + "   # m12\n"
+      "   3   " + std::to_string(point.tanBeta) + "   # TanBeta\n"
+      "   4   " + std::to_string(point.signMu)  + "   # sign(Mu)\n"
+      "   5   " + std::to_string(point.a0)      + "   # A0\n");
 
    minpar.str(str);
    coll.push_back(minpar);

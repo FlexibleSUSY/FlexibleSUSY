@@ -19,15 +19,14 @@
 #ifndef MINIMIZER_H
 #define MINIMIZER_H
 
-#include <iostream>
 #include <utility>
 #include <Eigen/Core>
 #include <gsl/gsl_vector.h>
-#include <gsl/gsl_multimin.h>
 
 #include "error.hpp"
 #include "ewsb_solver.hpp"
 #include "logger.hpp"
+#include "gsl_multimin_fminimizer.hpp"
 #include "gsl_utils.hpp"
 #include "gsl_vector.hpp"
 
@@ -65,6 +64,7 @@ public:
    template <typename F>
    Minimizer(F&&, std::size_t, double, Solver_type solver_type_ = GSLSimplex2);
    virtual ~Minimizer() = default;
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
    double get_minimum_value() const { return minimum_value; }
    template <typename F>
@@ -87,7 +87,6 @@ private:
    Function_t function{nullptr};        ///< function to minimize
    Solver_type solver_type{GSLSimplex2};///< solver type
 
-   void print_state(gsl_multimin_fminimizer*, std::size_t) const;
    static double gsl_function(const gsl_vector*, void*);
    const gsl_multimin_fminimizer_type* solver_type_to_gsl_pointer() const;
 };
@@ -128,65 +127,42 @@ int Minimizer<dimension>::minimize(const Vector_t& start)
    if (!function)
       throw SetupError("Minimizer: function not callable");
 
-   gsl_multimin_fminimizer *minimizer;
-   gsl_multimin_function minex_func;
-
    GSL_vector min_point = to_GSL_vector(start);
 
    // Set initial step sizes
    GSL_vector step_size(dimension);
    step_size.set_all(1.0);
 
-   // Initialize method and iterate
-   minex_func.n = dimension;
-   minex_func.f = gsl_function;
-   minex_func.params = &function;
+   // initialize function
+   gsl_multimin_function func;
+   func.n = dimension;
+   func.f = gsl_function;
+   func.params = &function;
 
-   minimizer = gsl_multimin_fminimizer_alloc(solver_type_to_gsl_pointer(), dimension);
-   gsl_multimin_fminimizer_set(minimizer, &minex_func, min_point.raw(), step_size.raw());
+   GSL_multimin_fminimizer minimizer(solver_type_to_gsl_pointer(), dimension,
+                                     &func, min_point, step_size);
 
    size_t iter = 0;
    int status;
 
    do {
       iter++;
-      status = gsl_multimin_fminimizer_iterate(minimizer);
+      status = minimizer.iterate();
 
       if (status)
          break;
 
-      const double size = gsl_multimin_fminimizer_size(minimizer);
-      status = gsl_multimin_test_size(size, precision);
-
-#ifdef ENABLE_VERBOSE
-      print_state(minimizer, iter);
-#endif
+      status = minimizer.test_residual(precision);
+      minimizer.print_state(iter);
    } while (status == GSL_CONTINUE && iter < max_iterations);
 
    VERBOSE_MSG("\t\t\tMinimization status = " << gsl_strerror(status));
 
    // save minimum point and function value
-   minimum_point = to_eigen_vector_fixed<dimension>(minimizer->x);
-   minimum_value = minimizer->fval;
-
-   gsl_multimin_fminimizer_free(minimizer);
+   minimum_point = to_eigen_vector<dimension>(minimizer.get_minimum_point().raw());
+   minimum_value = minimizer.get_minimum_value();
 
    return status;
-}
-
-/**
- * Print state of the minimizer
- *
- * @param minimizer minimizer
- * @param iteration iteration number
- */
-template <std::size_t dimension>
-void Minimizer<dimension>::print_state(gsl_multimin_fminimizer* minimizer,
-                                               std::size_t iteration) const
-{
-   VERBOSE_MSG("\t\t\tIteration " << iteration
-               << ": x = " << GSL_vector(minimizer->x)
-               << ", f(x) = " << minimizer->fval);
 }
 
 template <std::size_t dimension>
@@ -203,7 +179,7 @@ double Minimizer<dimension>::gsl_function(const gsl_vector* x, void* params)
       return std::numeric_limits<double>::max();
 
    Function_t* fun = static_cast<Function_t*>(params);
-   const Vector_t arg(to_eigen_vector_fixed<dimension>(x));
+   const Vector_t arg(to_eigen_vector<dimension>(x));
    double result = std::numeric_limits<double>::max();
 
    try {

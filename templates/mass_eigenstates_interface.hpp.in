@@ -1,0 +1,89 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_interface.hpp
+ *
+ * @brief Contains the mass eigenstates interface class definition
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#ifndef @ModelName@_MASS_EIGENSTATES_INTERFACE_H
+#define @ModelName@_MASS_EIGENSTATES_INTERFACE_H
+
+#include "@ModelName@_physical.hpp"
+
+#include <memory>
+
+#include <Eigen/Core>
+
+namespace flexiblesusy {
+
+class Problems;
+struct @ModelName@_input_parameters;
+
+/**
+ * @class @ModelName@_mass_eigenstates_interface
+ * @brief Interface definition for model parameters, masses and mixings
+ */
+class @ModelName@_mass_eigenstates_interface {
+public:
+   virtual ~@ModelName@_mass_eigenstates_interface() {}
+
+   virtual std::unique_ptr<@ModelName@_mass_eigenstates_interface> clone() const = 0;
+
+   virtual void calculate_tree_level_mass_spectrum() = 0;
+   virtual void calculate_pole_mass_spectrum() = 0;
+   virtual void calculate_mass_spectrum() = 0;
+
+   virtual int solve_ewsb_equations_tree_level() = 0;
+   virtual int solve_ewsb_equations() = 0;
+
+   virtual Eigen::ArrayXd get_tree_level_masses() const = 0;
+   virtual Eigen::ArrayXd get_tree_level_masses_and_mixings() const = 0;
+   virtual const @ModelName@_input_parameters& get_input_parameters() const = 0;
+   virtual @ModelName@_input_parameters& get_input_parameters() = 0;
+   virtual Eigen::ArrayXd get_extra_parameters() const = 0;
+   virtual const @ModelName@_physical& get_physical() const = 0;
+   virtual @ModelName@_physical& get_physical() = 0;
+   virtual const Problems& get_problems() const = 0;
+   virtual Problems& get_problems() = 0;
+   virtual void set_tree_level_masses(const Eigen::ArrayXd&) = 0;
+   virtual void set_tree_level_masses_and_mixings(const Eigen::ArrayXd&) = 0;
+   virtual void set_extra_parameters(const Eigen::ArrayXd&) = 0;
+   virtual void set_physical(const @ModelName@_physical&) = 0;
+   virtual void clear_problems() = 0;
+
+@[abstract]parameterGetters@
+@[abstract]parameterSetters@
+@[abstract]massGetters@
+@[abstract]higgsMassGetterPrototypes@
+@[abstract]mixingMatrixGetters@
+@[abstract]phasesGetterSetters@
+@[abstract]extraParameterSetters@
+@[abstract]extraParameterGetters@
+@[abstract]massCalculationPrototypes@
+@[abstract]tadpoleEqPrototypes@
+@[abstract]dependencePrototypes@
+};
+
+} // namespace flexiblesusy
+
+#endif

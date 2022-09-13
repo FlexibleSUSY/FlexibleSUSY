@@ -20,7 +20,7 @@
 #include "logger.hpp"
 #include "threshold_loop_functions.hpp"
 #include "numerics2.hpp"
-#include "wrappers.hpp"
+#include <cmath>
 
 #define ASSERT_NON_ZERO(p,fun)                  \
    do {                                         \
@@ -30,6 +30,19 @@
 
 namespace flexiblesusy {
 namespace splitmssm_thresholds {
+
+namespace {
+
+constexpr double Pi      = 3.141592653589793;
+constexpr double oneLoop = 6.332573977646110963e-03; // 1/(4 Pi)^2
+
+double sqr(double x) noexcept { return x*x; }
+double pow3(double x) noexcept { return x*x*x; }
+double pow4(double x) noexcept { return sqr(sqr(x)); }
+double pow5(double x) noexcept { return pow4(x)*x; }
+double abs_sqrt(double x) noexcept { return std::sqrt(std::abs(x)); }
+
+} // anonymous namespace
 
 std::ostream& operator<<(std::ostream& ostr, const Parameters& parameters)
 {
@@ -77,9 +90,9 @@ double lambda_tree_level(const Parameters& parameters)
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_2beta = Cos(2*beta);
-   const double lambda = 0.25 * (Sqr(g2) + 0.6*Sqr(g1)) * Sqr(cos_2beta);
+   const double beta = std::atan(tan_beta);
+   const double cos_2beta = std::cos(2*beta);
+   const double lambda = 0.25 * (sqr(g2) + 0.6*sqr(g1)) * sqr(cos_2beta);
 
    return lambda;
 }
@@ -96,8 +109,8 @@ double gYu_tree_level(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double sin_beta = Sin(beta);
+   const double beta = std::atan(tan_beta);
+   const double sin_beta = std::sin(beta);
    const double gYu = sqrt(0.6) * g1 * sin_beta;
 
    return gYu;
@@ -115,8 +128,8 @@ double gYd_tree_level(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_beta = Cos(beta);
+   const double beta = std::atan(tan_beta);
+   const double cos_beta = std::cos(beta);
    const double gYd = sqrt(0.6) * g1 * cos_beta;
 
    return gYd;
@@ -134,8 +147,8 @@ double g2u_tree_level(const Parameters& parameters)
 {
    const double g2 = parameters.g2;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double sin_beta = Sin(beta);
+   const double beta = std::atan(tan_beta);
+   const double sin_beta = std::sin(beta);
    const double g2u = g2 * sin_beta;
 
    return g2u;
@@ -153,8 +166,8 @@ double g2d_tree_level(const Parameters& parameters)
 {
    const double g2 = parameters.g2;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_beta = Cos(beta);
+   const double beta = std::atan(tan_beta);
+   const double cos_beta = std::cos(beta);
    const double g2d = g2 * cos_beta;
 
    return g2d;
@@ -174,14 +187,14 @@ double delta_lambda_1loop_reg(const Parameters& parameters)
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_2beta = Cos(2*beta);
+   const double beta = std::atan(tan_beta);
+   const double cos_2beta = std::cos(2*beta);
 
    const double delta_lambda_1loop_reg
-      = - 0.09*Power(g1,4) - 0.3*Sqr(g1)*Sqr(g2)
-      - (0.75 - Sqr(cos_2beta)/6.) * Power(g2,4);
+      = - 0.09*pow4(g1) - 0.3*sqr(g1)*sqr(g2)
+      - (0.75 - sqr(cos_2beta)/6.) * pow4(g2);
 
-   return delta_lambda_1loop_reg * oneOver16PiSqr;
+   return delta_lambda_1loop_reg * oneLoop;
 }
 
 /**
@@ -199,32 +212,32 @@ double delta_lambda_1loop_phi(const Parameters& parameters)
 
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
-   const double g12 = Sqr(g1);
-   const double g22 = Sqr(g2);
-   const double g14 = Sqr(g12);
-   const double g24 = Sqr(g22);
+   const double g12 = sqr(g1);
+   const double g22 = sqr(g2);
+   const double g14 = sqr(g12);
+   const double g24 = sqr(g22);
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_2beta = Cos(2*beta);
-   const double cos2_2beta = Sqr(cos_2beta);
-   const double cos_4beta = Cos(4*beta);
-   const double cos_8beta = Cos(8*beta);
-   const double sin_4beta = Sin(4*beta);
+   const double beta = std::atan(tan_beta);
+   const double cos_2beta = std::cos(2*beta);
+   const double cos2_2beta = sqr(cos_2beta);
+   const double cos_4beta = std::cos(4*beta);
+   const double cos_8beta = std::cos(8*beta);
+   const double sin_4beta = std::sin(4*beta);
    const double gt = parameters.gt;
-   const double gt2 = Sqr(gt);
-   const double gt4 = Sqr(gt2);
-   const double scale2 = Sqr(parameters.scale);
+   const double gt2 = sqr(gt);
+   const double gt4 = sqr(gt2);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> mu2(parameters.mu2);
    const Eigen::Matrix<double,3,3> md2(parameters.md2);
    const Eigen::Matrix<double,3,3> ml2(parameters.ml2);
    const Eigen::Matrix<double,3,3> me2(parameters.me2);
-   const double xQU = AbsSqrt(mq2(2,2)/mu2(2,2));
+   const double xQU = abs_sqrt(mq2(2,2)/mu2(2,2));
    const double At = parameters.At;
    const double mu = parameters.mu;
    const double xt = At - mu/tan_beta;
-   const double xtt = Sqr(xt)/AbsSqrt(mq2(2,2)*mu2(2,2));
-   const double mA2 = Sqr(parameters.mA);
+   const double xtt = sqr(xt)/abs_sqrt(mq2(2,2)*mu2(2,2));
+   const double mA2 = sqr(parameters.mA);
 
    ASSERT_NON_ZERO(mq2(0,0), delta_lambda_1loop_phi);
    ASSERT_NON_ZERO(mq2(1,1), delta_lambda_1loop_phi);
@@ -246,44 +259,44 @@ double delta_lambda_1loop_phi(const Parameters& parameters)
    ASSERT_NON_ZERO(scale2  , delta_lambda_1loop_phi);
 
    const double delta_lambda_1loop_phi =
-      3*gt2*(gt2+0.5*(g22-g12/5.)*cos_2beta)*Log(mq2(2,2)/scale2)
-      +3*gt2*(gt2+0.4*g12*cos_2beta)*Log(mu2(2,2)/scale2)
+      3*gt2*(gt2+0.5*(g22-g12/5.)*cos_2beta)*std::log(mq2(2,2)/scale2)
+      +3*gt2*(gt2+0.4*g12*cos_2beta)*std::log(mu2(2,2)/scale2)
       +cos2_2beta/300*(
          3*(g14+25*g24)*(
-            +Log(mq2(0,0)/scale2)
-            +Log(mq2(1,1)/scale2)
-            +Log(mq2(2,2)/scale2)
+            +std::log(mq2(0,0)/scale2)
+            +std::log(mq2(1,1)/scale2)
+            +std::log(mq2(2,2)/scale2)
          )
          +24*g14*(
-            +Log(mu2(0,0)/scale2)
-            +Log(mu2(1,1)/scale2)
-            +Log(mu2(2,2)/scale2)
+            +std::log(mu2(0,0)/scale2)
+            +std::log(mu2(1,1)/scale2)
+            +std::log(mu2(2,2)/scale2)
          )
          +6*g14*(
-            +Log(md2(0,0)/scale2)
-            +Log(md2(1,1)/scale2)
-            +Log(md2(2,2)/scale2)
+            +std::log(md2(0,0)/scale2)
+            +std::log(md2(1,1)/scale2)
+            +std::log(md2(2,2)/scale2)
          )
          +(9*g14+25*g24)*(
-            +Log(ml2(0,0)/scale2)
-            +Log(ml2(1,1)/scale2)
-            +Log(ml2(2,2)/scale2)
+            +std::log(ml2(0,0)/scale2)
+            +std::log(ml2(1,1)/scale2)
+            +std::log(ml2(2,2)/scale2)
          )
          +18*g14*(
-            +Log(me2(0,0)/scale2)
-            +Log(me2(1,1)/scale2)
-            +Log(me2(2,2)/scale2)
+            +std::log(me2(0,0)/scale2)
+            +std::log(me2(1,1)/scale2)
+            +std::log(me2(2,2)/scale2)
          )
       )
       +1./4800.*(261*g14+630*g12*g22+1325*g24
                  -4*cos_4beta*(9*g14+90*g12*g22+175*g24)
-                 -9*cos_8beta*Sqr(3*g12+5*g22))*Log(mA2/scale2)
-      -3./16.*Sqr(3./5.*g12+g22)*Sqr(sin_4beta)
+                 -9*cos_8beta*sqr(3*g12+5*g22))*std::log(mA2/scale2)
+      -3./16.*sqr(3./5.*g12+g22)*sqr(sin_4beta)
       +6*gt4*xtt*(F1(xQU)-xtt/12*F2(xQU))
       +3./4.*gt2*xtt*cos_2beta*(3./5.*g12*F3(xQU)+g22*F4(xQU))
       -0.25*gt2*xtt*cos2_2beta*(3./5.*g12+g22)*F5(xQU);
 
-   return delta_lambda_1loop_phi * oneOver16PiSqr;
+   return delta_lambda_1loop_phi * oneLoop;
 }
 
 namespace {
@@ -293,14 +306,14 @@ namespace {
     */
    double beta_lambda(double lambda, double gYu, double gYd, double g2u, double g2d)
    {
-      const double gYu2 = Sqr(gYu);
-      const double gYd2 = Sqr(gYd);
-      const double g2u2 = Sqr(g2u);
-      const double g2d2 = Sqr(g2d);
-      const double gYu4 = Sqr(gYu2);
-      const double gYd4 = Sqr(gYd2);
-      const double g2u4 = Sqr(g2u2);
-      const double g2d4 = Sqr(g2d2);
+      const double gYu2 = sqr(gYu);
+      const double gYd2 = sqr(gYd);
+      const double g2u2 = sqr(g2u);
+      const double g2d2 = sqr(g2d);
+      const double gYu4 = sqr(gYu2);
+      const double gYd4 = sqr(gYd2);
+      const double g2u4 = sqr(g2u2);
+      const double g2d4 = sqr(g2d2);
 
       const double beta =
          2*lambda*(gYd2 + gYu2 + 3*g2d2 + 3*g2u2)
@@ -378,18 +391,18 @@ double delta_lambda_1loop_chi_1(
 {
    using namespace threshold_loop_functions;
 
-   const double gYu2 = Sqr(gYu);
-   const double gYd2 = Sqr(gYd);
-   const double g2u2 = Sqr(g2u);
-   const double g2d2 = Sqr(g2d);
-   const double gYu4 = Sqr(gYu2);
-   const double gYd4 = Sqr(gYd2);
-   const double g2u4 = Sqr(g2u2);
-   const double g2d4 = Sqr(g2d2);
+   const double gYu2 = sqr(gYu);
+   const double gYd2 = sqr(gYd);
+   const double g2u2 = sqr(g2u);
+   const double g2d2 = sqr(g2d);
+   const double gYu4 = sqr(gYu2);
+   const double gYd4 = sqr(gYd2);
+   const double g2u4 = sqr(g2u2);
+   const double g2d4 = sqr(g2d2);
    const double r1 = m1 / mu;
    const double r2 = m2 / mu;
-   const double mu2 = Sqr(mu);
-   const double scale2 = Sqr(scale);
+   const double mu2 = sqr(mu);
+   const double scale2 = sqr(scale);
 
    ASSERT_NON_ZERO(scale, delta_lambda_1loop_chi_1);
    ASSERT_NON_ZERO(mu   , delta_lambda_1loop_chi_1);
@@ -397,7 +410,7 @@ double delta_lambda_1loop_chi_1(
    ASSERT_NON_ZERO(m2   , delta_lambda_1loop_chi_1);
 
    const double delta_lambda =
-      0.5*beta_lambda(lambda,gYu,gYd,g2u,g2d)*Log(mu2/scale2)
+      0.5*beta_lambda(lambda,gYu,gYd,g2u,g2d)*std::log(mu2/scale2)
       -7./12.*f1(r1)*(gYd4+gYu4)
       -9./4.*f2(r2)*(g2d4+g2u4)
       -3./2.*f3(r1)*gYd2*gYu2
@@ -411,7 +424,7 @@ double delta_lambda_1loop_chi_1(
       +1./3.*g(r1)*lambda*(gYd2+gYu2)
       +g(r2)*lambda*(g2d2+g2u2);
 
-   return oneOver16PiSqr * delta_lambda;
+   return oneLoop * delta_lambda;
 }
 
 /**
@@ -459,13 +472,13 @@ double delta_lambda_1loop_chi_2(
    double g2,
    double tan_beta)
 {
-   const double scale2 = Sqr(scale);
-   const double mu2 = Sqr(mu);
-   const double m22 = Sqr(m2);
-   const double g14 = Power(g1,4);
-   const double g24 = Power(g2,4);
-   const double beta = ArcTan(tan_beta);
-   const double cos2_2beta = Sqr(Cos(2*beta));
+   const double scale2 = sqr(scale);
+   const double mu2 = sqr(mu);
+   const double m22 = sqr(m2);
+   const double g14 = pow4(g1);
+   const double g24 = pow4(g2);
+   const double beta = std::atan(tan_beta);
+   const double cos2_2beta = sqr(std::cos(2*beta));
 
    ASSERT_NON_ZERO(scale, delta_lambda_1loop_chi_2);
    ASSERT_NON_ZERO(mu   , delta_lambda_1loop_chi_2);
@@ -473,11 +486,11 @@ double delta_lambda_1loop_chi_2(
 
    const double delta_lambda =
       -1./6. * cos2_2beta * (
-         +2.*g24*Log(m22/scale2)
-         +(9./25.*g14 + g24)*Log(mu2/scale2)
+         +2.*g24*std::log(m22/scale2)
+         +(9./25.*g14 + g24)*std::log(mu2/scale2)
          );
 
-   return oneOver16PiSqr * delta_lambda;
+   return oneLoop * delta_lambda;
 }
 
 /**
@@ -491,21 +504,21 @@ double delta_lambda_1loop_chi_2(
  */
 double delta_lambda_2loop_phi(const Parameters& parameters)
 {
-   const double Pi4 = Power(Pi,4);
+   const double Pi4 = pow4(Pi);
    const double g3 = parameters.g3;
-   const double g32 = Sqr(g3);
+   const double g32 = sqr(g3);
    const double gt = parameters.gt;
-   const double gt4 = Power(gt,4);
-   const double scale2 = Sqr(parameters.scale);
+   const double gt4 = pow4(gt);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> mu2(parameters.mu2);
-   const double xQU = AbsSqrt(mq2(2,2)/mu2(2,2));
-   const double xQU2 = Sqr(xQU);
+   const double xQU = abs_sqrt(mq2(2,2)/mu2(2,2));
+   const double xQU2 = sqr(xQU);
    const double At = parameters.At;
    const double mu = parameters.mu;
    const double tan_beta = parameters.tan_beta;
    const double xt = At - mu/tan_beta;
-   const double xtt = Sqr(xt)/AbsSqrt(mq2(2,2)*mu2(2,2));
+   const double xtt = sqr(xt)/abs_sqrt(mq2(2,2)*mu2(2,2));
 
    ASSERT_NON_ZERO(mq2(2,2), delta_lambda_2loop_phi);
    ASSERT_NON_ZERO(mu2(2,2), delta_lambda_2loop_phi);
@@ -516,23 +529,23 @@ double delta_lambda_2loop_phi(const Parameters& parameters)
 
    if (is_equal(xQU, 1.)) {
       delta_lambda_2loop_phi =
-         3. - 2*xtt + Sqr(xtt)/6.;
+         3. - 2*xtt + sqr(xtt)/6.;
    } else {
       delta_lambda_2loop_phi =
          3.
-         +4*Log(xQU)
-         +8*Sqr(Log(xQU))
-         +6*Sqr(Log(mq2(2,2)/scale2))
-         -4*(1+3*Log(xQU))*Log(mq2(2,2)/scale2)
+         +4*std::log(xQU)
+         +8*sqr(std::log(xQU))
+         +6*sqr(std::log(mq2(2,2)/scale2))
+         -4*(1+3*std::log(xQU))*std::log(mq2(2,2)/scale2)
          +xtt*(
-            +(12*xQU*Log(xQU))/(xQU2-1)*(2*Log(mq2(2,2)/scale2)-1)
-            -(16*xQU*(xQU2-2)*Sqr(Log(xQU)))/Sqr(xQU2-1)
+            +(12*xQU*std::log(xQU))/(xQU2-1)*(2*std::log(mq2(2,2)/scale2)-1)
+            -(16*xQU*(xQU2-2)*sqr(std::log(xQU)))/sqr(xQU2-1)
          )
-         +Sqr(xtt)*(
-            +(6*xQU2*(5+xQU2)*Log(xQU))/Power(xQU2-1,3)
-            +(4*xQU2*(Power(xQU,4)-4*xQU2-5)*Sqr(Log(xQU)))/Power(xQU2-1,4)
-            -(10*xQU2)/Sqr(xQU2-1)
-            +(12*xQU2)/Sqr(xQU2-1)*(1-(xQU2+1)/(xQU2-1)*Log(xQU))*Log(mq2(2,2)/scale2)
+         +sqr(xtt)*(
+            +(6*xQU2*(5+xQU2)*std::log(xQU))/pow3(xQU2-1)
+            +(4*xQU2*(pow4(xQU)-4*xQU2-5)*sqr(std::log(xQU)))/pow4(xQU2-1)
+            -(10*xQU2)/sqr(xQU2-1)
+            +(12*xQU2)/sqr(xQU2-1)*(1-(xQU2+1)/(xQU2-1)*std::log(xQU))*std::log(mq2(2,2)/scale2)
          );
    }
 
@@ -551,9 +564,9 @@ double delta_lambda_2loop_phi(const Parameters& parameters)
  */
 double delta_lambda_2loop_phi_HSS(const Parameters& parameters)
 {
-   const double Pi4 = Power(Pi,4);
-   const double g32 = Sqr(parameters.g3);
-   const double gt4 = Power(parameters.gt,4);
+   const double Pi4 = pow4(Pi);
+   const double g32 = sqr(parameters.g3);
+   const double gt4 = pow4(parameters.gt);
    const double scale = parameters.scale;
    const double At = parameters.At;
    const double mu = parameters.mu;
@@ -565,7 +578,7 @@ double delta_lambda_2loop_phi_HSS(const Parameters& parameters)
    ASSERT_NON_ZERO(tan_beta, delta_lambda_2loop_phi_HSS);
 
    const double delta_lambda_2loop_phi_HSS =
-      -12.*r - 6.*Sqr(r) + 14.*Power(r,3) + 0.5*Power(r,4) - Power(r,5);
+      -12.*r - 6.*sqr(r) + 14.*pow3(r) + 0.5*pow4(r) - pow5(r);
 
    return (g32*gt4)/(96.*Pi4) * delta_lambda_2loop_phi_HSS;
 }
@@ -582,22 +595,22 @@ double delta_gYu_1loop(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
-   const double g12 = Sqr(g1);
-   const double g22 = Sqr(g2);
+   const double g12 = sqr(g1);
+   const double g22 = sqr(g2);
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos2_beta = Sqr(Cos(beta));
-   const double sin_beta = Sin(beta);
-   const double sin2_beta = Sqr(sin_beta);
+   const double beta = std::atan(tan_beta);
+   const double cos2_beta = sqr(std::cos(beta));
+   const double sin_beta = std::sin(beta);
+   const double sin2_beta = sqr(sin_beta);
    const double gt = parameters.gt;
-   const double gt2 = Sqr(gt);
-   const double scale2 = Sqr(parameters.scale);
+   const double gt2 = sqr(gt);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> mu2(parameters.mu2);
    const Eigen::Matrix<double,3,3> md2(parameters.md2);
    const Eigen::Matrix<double,3,3> ml2(parameters.ml2);
    const Eigen::Matrix<double,3,3> me2(parameters.me2);
-   const double mA2 = Sqr(parameters.mA);
+   const double mA2 = sqr(parameters.mA);
 
    ASSERT_NON_ZERO(mq2(0,0), delta_gYu_1loop);
    ASSERT_NON_ZERO(mq2(1,1), delta_gYu_1loop);
@@ -622,19 +635,19 @@ double delta_gYu_1loop(const Parameters& parameters)
       (3*g22/16)*(-2+7*cos2_beta)
       +(3*g12/80)*(-44+7*cos2_beta)
       +(9*gt2)/(4*sin2_beta)
-      +(4*g12-9*(g12+5*g22)*cos2_beta)/40*Log(mA2/scale2)
+      +(4*g12-9*(g12+5*g22)*cos2_beta)/40*std::log(mA2/scale2)
       +(g12/10)*(
-         +Log(ml2(0,0)/scale2)+Log(ml2(1,1)/scale2)+Log(ml2(2,2)/scale2)
-         +2*Log(me2(0,0)/scale2)+2*Log(me2(1,1)/scale2)+2*Log(me2(2,2)/scale2)
+         +std::log(ml2(0,0)/scale2)+std::log(ml2(1,1)/scale2)+std::log(ml2(2,2)/scale2)
+         +2*std::log(me2(0,0)/scale2)+2*std::log(me2(1,1)/scale2)+2*std::log(me2(2,2)/scale2)
       )
       +(g12/30)*(
-         +Log(mq2(0,0)/scale2)+Log(mq2(1,1)/scale2)+Log(mq2(2,2)/scale2)
-         +8*Log(mu2(0,0)/scale2)+8*Log(mu2(1,1)/scale2)+8*Log(mu2(2,2)/scale2)
-         +2*Log(md2(0,0)/scale2)+2*Log(md2(1,1)/scale2)+2*Log(md2(2,2)/scale2)
+         +std::log(mq2(0,0)/scale2)+std::log(mq2(1,1)/scale2)+std::log(mq2(2,2)/scale2)
+         +8*std::log(mu2(0,0)/scale2)+8*std::log(mu2(1,1)/scale2)+8*std::log(mu2(2,2)/scale2)
+         +2*std::log(md2(0,0)/scale2)+2*std::log(md2(1,1)/scale2)+2*std::log(md2(2,2)/scale2)
       )
-      +gt2/(4*sin2_beta)*(7*Log(mq2(2,2)/scale2)-13*Log(mu2(2,2)/scale2));
+      +gt2/(4*sin2_beta)*(7*std::log(mq2(2,2)/scale2)-13*std::log(mu2(2,2)/scale2));
 
-   return delta_gYu_1loop * oneOver16PiSqr * g1 * Sqrt(0.6) * sin_beta;
+   return delta_gYu_1loop * oneLoop * g1 * std::sqrt(0.6) * sin_beta;
 }
 
 /**
@@ -649,20 +662,20 @@ double delta_gYd_1loop(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
-   const double g12 = Sqr(g1);
-   const double g22 = Sqr(g2);
+   const double g12 = sqr(g1);
+   const double g22 = sqr(g2);
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_beta = Cos(beta);
-   const double sin_beta = Sin(beta);
-   const double sin2_beta = Sqr(sin_beta);
-   const double scale2 = Sqr(parameters.scale);
+   const double beta = std::atan(tan_beta);
+   const double cos_beta = std::cos(beta);
+   const double sin_beta = std::sin(beta);
+   const double sin2_beta = sqr(sin_beta);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> mu2(parameters.mu2);
    const Eigen::Matrix<double,3,3> md2(parameters.md2);
    const Eigen::Matrix<double,3,3> ml2(parameters.ml2);
    const Eigen::Matrix<double,3,3> me2(parameters.me2);
-   const double mA2 = Sqr(parameters.mA);
+   const double mA2 = sqr(parameters.mA);
 
    ASSERT_NON_ZERO(mq2(0,0), delta_gYd_1loop);
    ASSERT_NON_ZERO(mq2(1,1), delta_gYd_1loop);
@@ -686,18 +699,18 @@ double delta_gYd_1loop(const Parameters& parameters)
    const double delta_gYd_1loop =
       (3*g22/16)*(-2+7*sin2_beta)
       +(3*g12/80)*(-44+7*sin2_beta)
-      +(4*g12-9*(g12+5*g22)*sin2_beta)/40*Log(mA2/scale2)
+      +(4*g12-9*(g12+5*g22)*sin2_beta)/40*std::log(mA2/scale2)
       +(g12/10)*(
-         +Log(ml2(0,0)/scale2)+Log(ml2(1,1)/scale2)+Log(ml2(2,2)/scale2)
-         +2*Log(me2(0,0)/scale2)+2*Log(me2(1,1)/scale2)+2*Log(me2(2,2)/scale2)
+         +std::log(ml2(0,0)/scale2)+std::log(ml2(1,1)/scale2)+std::log(ml2(2,2)/scale2)
+         +2*std::log(me2(0,0)/scale2)+2*std::log(me2(1,1)/scale2)+2*std::log(me2(2,2)/scale2)
       )
       +(g12/30)*(
-         +Log(mq2(0,0)/scale2)+Log(mq2(1,1)/scale2)+Log(mq2(2,2)/scale2)
-         +8*Log(mu2(0,0)/scale2)+8*Log(mu2(1,1)/scale2)+8*Log(mu2(2,2)/scale2)
-         +2*Log(md2(0,0)/scale2)+2*Log(md2(1,1)/scale2)+2*Log(md2(2,2)/scale2)
+         +std::log(mq2(0,0)/scale2)+std::log(mq2(1,1)/scale2)+std::log(mq2(2,2)/scale2)
+         +8*std::log(mu2(0,0)/scale2)+8*std::log(mu2(1,1)/scale2)+8*std::log(mu2(2,2)/scale2)
+         +2*std::log(md2(0,0)/scale2)+2*std::log(md2(1,1)/scale2)+2*std::log(md2(2,2)/scale2)
       );
 
-   return delta_gYd_1loop * oneOver16PiSqr * g1 * Sqrt(0.6) * cos_beta;
+   return delta_gYd_1loop * oneLoop * g1 * std::sqrt(0.6) * cos_beta;
 }
 
 /**
@@ -712,20 +725,20 @@ double delta_g2u_1loop(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
-   const double g12 = Sqr(g1);
-   const double g22 = Sqr(g2);
+   const double g12 = sqr(g1);
+   const double g22 = sqr(g2);
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos2_beta = Sqr(Cos(beta));
-   const double sin_beta = Sin(beta);
-   const double sin2_beta = Sqr(sin_beta);
+   const double beta = std::atan(tan_beta);
+   const double cos2_beta = sqr(std::cos(beta));
+   const double sin_beta = std::sin(beta);
+   const double sin2_beta = sqr(sin_beta);
    const double gt = parameters.gt;
-   const double gt2 = Sqr(gt);
-   const double scale2 = Sqr(parameters.scale);
+   const double gt2 = sqr(gt);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> mu2(parameters.mu2);
    const Eigen::Matrix<double,3,3> ml2(parameters.ml2);
-   const double mA2 = Sqr(parameters.mA);
+   const double mA2 = sqr(parameters.mA);
 
    ASSERT_NON_ZERO(mq2(0,0), delta_g2u_1loop);
    ASSERT_NON_ZERO(mq2(1,1), delta_g2u_1loop);
@@ -744,20 +757,20 @@ double delta_g2u_1loop(const Parameters& parameters)
       -g22*(2./3.+11./16.*cos2_beta)
       +3*g12/80*(-2+7*cos2_beta)
       +9*gt2/(4*sin2_beta)
-      +(20*g22+3*(-9*g12+35*g22)*cos2_beta)/120*Log(mA2/scale2)
+      +(20*g22+3*(-9*g12+35*g22)*cos2_beta)/120*std::log(mA2/scale2)
       +g22/6*(
-         +Log(ml2(0,0)/scale2)
-         +Log(ml2(1,1)/scale2)
-         +Log(ml2(2,2)/scale2)
+         +std::log(ml2(0,0)/scale2)
+         +std::log(ml2(1,1)/scale2)
+         +std::log(ml2(2,2)/scale2)
       )
       +g22/2*(
-         +Log(mq2(0,0)/scale2)
-         +Log(mq2(1,1)/scale2)
-         +Log(mq2(2,2)/scale2)
+         +std::log(mq2(0,0)/scale2)
+         +std::log(mq2(1,1)/scale2)
+         +std::log(mq2(2,2)/scale2)
       )
-      -0.75*gt2/sin2_beta*(3*Log(mq2(2,2)/scale2)-Log(mu2(2,2)/scale2));
+      -0.75*gt2/sin2_beta*(3*std::log(mq2(2,2)/scale2)-std::log(mu2(2,2)/scale2));
 
-   return delta_g2u_1loop * oneOver16PiSqr * g2 * sin_beta;
+   return delta_g2u_1loop * oneLoop * g2 * sin_beta;
 }
 
 /**
@@ -772,17 +785,17 @@ double delta_g2d_1loop(const Parameters& parameters)
 {
    const double g1 = parameters.g1;
    const double g2 = parameters.g2;
-   const double g12 = Sqr(g1);
-   const double g22 = Sqr(g2);
+   const double g12 = sqr(g1);
+   const double g22 = sqr(g2);
    const double tan_beta = parameters.tan_beta;
-   const double beta = ArcTan(tan_beta);
-   const double cos_beta = Cos(beta);
-   const double sin_beta = Sin(beta);
-   const double sin2_beta = Sqr(sin_beta);
-   const double scale2 = Sqr(parameters.scale);
+   const double beta = std::atan(tan_beta);
+   const double cos_beta = std::cos(beta);
+   const double sin_beta = std::sin(beta);
+   const double sin2_beta = sqr(sin_beta);
+   const double scale2 = sqr(parameters.scale);
    const Eigen::Matrix<double,3,3> mq2(parameters.mq2);
    const Eigen::Matrix<double,3,3> ml2(parameters.ml2);
-   const double mA2 = Sqr(parameters.mA);
+   const double mA2 = sqr(parameters.mA);
 
    ASSERT_NON_ZERO(mq2(0,0), delta_g2d_1loop);
    ASSERT_NON_ZERO(mq2(1,1), delta_g2d_1loop);
@@ -797,15 +810,15 @@ double delta_g2d_1loop(const Parameters& parameters)
    const double delta_g2d_1loop =
       -g22*(2./3.+11./16.*sin2_beta)
       +(3*g12/80)*(-2+7*sin2_beta)
-      +(g22/2)*Log(mq2(0,0)/scale2)
-      +(g22/2)*Log(mq2(1,1)/scale2)
-      +(g22/2)*Log(mq2(2,2)/scale2)
-      +(20*g22+3*(-9*g12+35*g22)*sin2_beta)/120*Log(mA2/scale2)
-      +(g22/6)*Log(ml2(0,0)/scale2)
-      +(g22/6)*Log(ml2(1,1)/scale2)
-      +(g22/6)*Log(ml2(2,2)/scale2);
+      +(g22/2)*std::log(mq2(0,0)/scale2)
+      +(g22/2)*std::log(mq2(1,1)/scale2)
+      +(g22/2)*std::log(mq2(2,2)/scale2)
+      +(20*g22+3*(-9*g12+35*g22)*sin2_beta)/120*std::log(mA2/scale2)
+      +(g22/6)*std::log(ml2(0,0)/scale2)
+      +(g22/6)*std::log(ml2(1,1)/scale2)
+      +(g22/6)*std::log(ml2(2,2)/scale2);
 
-   return delta_g2d_1loop * oneOver16PiSqr * g2 * cos_beta;
+   return delta_g2d_1loop * oneLoop * g2 * cos_beta;
 }
 
 /**
@@ -830,14 +843,14 @@ double delta_gt_1loop_chi(
 {
    using namespace threshold_loop_functions;
 
-   const double gYu2 = Sqr(gYu);
-   const double gYd2 = Sqr(gYd);
-   const double g2u2 = Sqr(g2u);
-   const double g2d2 = Sqr(g2d);
+   const double gYu2 = sqr(gYu);
+   const double gYd2 = sqr(gYd);
+   const double g2u2 = sqr(g2u);
+   const double g2d2 = sqr(g2d);
    const double r1 = m1 / mu;
    const double r2 = m2 / mu;
-   const double mu2 = Sqr(mu);
-   const double scale2 = Sqr(scale);
+   const double mu2 = sqr(mu);
+   const double scale2 = sqr(scale);
 
    ASSERT_NON_ZERO(scale, delta_gt_1loop_chi);
    ASSERT_NON_ZERO(mu   , delta_gt_1loop_chi);
@@ -846,11 +859,11 @@ double delta_gt_1loop_chi(
 
    const double delta_gt_chi =
       -1./6.*gYu*gYd*f(r1)
-      -1./12.*(gYu2+gYd2)*(g(r1)+3*Log(mu2/scale2))
+      -1./12.*(gYu2+gYd2)*(g(r1)+3*std::log(mu2/scale2))
       -0.5*g2u*g2d*f(r2)
-      -0.25*(g2u2+g2d2)*(g(r2)+3*Log(mu2/scale2));
+      -0.25*(g2u2+g2d2)*(g(r2)+3*std::log(mu2/scale2));
 
-   return oneOver16PiSqr * delta_gt_chi;
+   return oneLoop * delta_gt_chi;
 }
 
 namespace {
@@ -862,7 +875,7 @@ namespace {
 
       ASSERT_NON_ZERO(q2, G);
 
-      return x2 * (Log(x2/q2) - 1.);
+      return x2 * (std::log(x2/q2) - 1.);
    }
 
    /// arXiv:1502.06525, Eq. (A8)
@@ -872,7 +885,7 @@ namespace {
 
       if (is_equal(m12, m22)) {
          ASSERT_NON_ZERO(m12, G1);
-         return Log(m12/q2);
+         return std::log(m12/q2);
       }
 
       return (G(m12,q2) - G(m22,q2)) / (m12 - m22);
@@ -885,7 +898,7 @@ namespace {
 
       if (is_equal(m12, m22)) {
          ASSERT_NON_ZERO(m12, G2);
-         return 2*m12*Log(m12/q2) - m12;
+         return 2*m12*std::log(m12/q2) - m12;
       }
 
       return (m12*G(m12,q2) - m22*G(m22,q2)) / (m12 - m22);
@@ -907,17 +920,17 @@ namespace {
 double delta_m2_1loop_chi(const Parameters& parameters)
 {
    const double g2 = parameters.g2;
-   const double gY = parameters.g1 * Sqrt(0.6);
+   const double gY = parameters.g1 * std::sqrt(0.6);
    const double m1 = parameters.m1;
    const double m2 = parameters.m2;
    const double mu = parameters.mu;
    const double scale = parameters.scale;
-   const double g22 = Sqr(g2);
-   const double gY2 = Sqr(gY);
-   const double m12 = Sqr(m1);
-   const double m22 = Sqr(m2);
-   const double mu2 = Sqr(mu);
-   const double scale2 = Sqr(scale);
+   const double g22 = sqr(g2);
+   const double gY2 = sqr(gY);
+   const double m12 = sqr(m1);
+   const double m22 = sqr(m2);
+   const double mu2 = sqr(mu);
+   const double scale2 = sqr(scale);
 
    const double minus_delta_m2 =
       - 6*g22*G2(m22,mu2,scale2)
@@ -925,7 +938,7 @@ double delta_m2_1loop_chi(const Parameters& parameters)
       - 12*g22*m2*mu*G1(m22,mu2,scale2)
       - 4*gY2*m1*mu*G1(m12,mu2,scale2);
 
-   return - minus_delta_m2 * 0.5 * oneOver16PiSqr;
+   return - minus_delta_m2 * 0.5 * oneLoop;
 }
 
 } // namespace splitmssm_thresholds

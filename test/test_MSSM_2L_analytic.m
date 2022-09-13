@@ -74,7 +74,7 @@ CalculatePointFromAnalyticExpr[point_] :=
           ];
 
 CalculatePointNumerical[point_] :=
-    Module[{progr, exec},
+    Module[{progr, exec, fortComp},
            progr = "
 #include <stdio.h>
 #include <math.h>
@@ -129,6 +129,16 @@ int main(){
    return 0;
 }
 ";
+           fortComp =
+              Select[
+                 StringSplit@Import[File["flexiblesusy-config"]],
+                 StringMatchQ[#, "fc=" ~~ __] &
+              ];
+           If[Length[fortComp]===1,
+              fortComp = Last@StringSplit[First@fortComp, "="],
+              Print["Could not identify a Fortran compiler"]; Quit[1];
+           ];
+           fortComp = StringReplace[fortComp, "\"" -> ""];
            exec = CreateExecutable[
                progr, "exec",
                "CompileOptions" -> StringJoin[Riffle[
@@ -137,7 +147,11 @@ int main(){
                    " "]],
                "Libraries" -> {FileNameJoin[{Directory[], "model_specific", "MSSM_higgs", "libmodel_specific_MSSM_higgs.a"}],
                                FileNameJoin[{Directory[], "src", "libflexisusy.a"}],
-                               "gfortran"}
+                               Switch[fortComp,
+                                  "gfortran", "gfortran",
+                                  "ifort",    "imf",
+                                  _, Print["Unknown Fortran compiler " <> fortComp]; Quit[1]
+                               ]}
                (* , "ShellOutputFunction"->Print, "ShellCommandFunction"->Print *)
            ];
            If[exec === $Failed,

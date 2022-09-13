@@ -35,7 +35,7 @@ CreateGetters::usage="";
 CreateParameterDefinitions::usage="";
 CreateCCtorInitialization::usage="";
 CreateCCtorParameterList::usage="";
-CreateParameterList::usage="";
+FSCreateParameterList::usage="";
 ClearParameters::usage="";
 
 CreateParameterEnum::usage="";
@@ -146,18 +146,6 @@ ToList[expr_, head_] :=
              ]
           ];
 
-FactorOutLoopFactor[expr_] :=
-    Module[{i, prefactors = {CConversion`oneOver16PiSqr, CConversion`twoLoop,
-                             CConversion`threeLoop, CConversion`oneOver16PiSqr^4,
-                             CConversion`oneOver16PiSqr^5}},
-           For[i = 1, i <= Length[prefactors], i++,
-               If[Coefficient[expr, prefactors[[i]]] =!= 0,
-                  Return[TimeConstrainedSimplify[prefactors[[i]] Expand[expr / prefactors[[i]]]]];
-                 ];
-              ];
-           expr
-          ];
-
 TimeConstrainedSimplify[expr_] :=
     TimeConstrained[Factor[expr], FlexibleSUSY`FSSimplifyBetaFunctionsTimeConstraint, expr];
 
@@ -168,7 +156,7 @@ CollectMatMul[expr_] :=
 
 (* split expression into sub-expressions of given maximum size *)
 SplitExpression[expr_, size_Integer] :=
-    CollectMatMul[FactorOutLoopFactor /@ (Plus @@@ Utils`SplitList[ToList[expr, Plus], size])];
+    CollectMatMul[Plus @@@ Utils`SplitList[ToList[expr, Plus], size]];
 
 NeedToSplitExpression[expr_, threshold_Integer] :=
     Length[ToList[expr, Plus]] > threshold;
@@ -196,7 +184,7 @@ ConvertExprToC[expr_, type_, target_String] :=
               ];
               result = StringJoin[result] <> "\n" <>
                        target <> " = " <>
-                       StringJoin[Riffle[MapIndexed[(target <> "_" <> ToString[#2[[1]]])&, splitExpr], " + "]] <>
+                       StringRiffle[MapIndexed[(target <> "_" <> ToString[#2[[1]]])&, splitExpr], " + "] <>
                        ";\n";
               ,
               result = target <> " = " <> CastTo[RValueToCFormString[expr], type] <> ";\n";
@@ -209,12 +197,7 @@ ConvertExprToC[expr_, type_, target_String] :=
  *)
 CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_List] :=
      Module[{beta, betaName, name, betaStr,
-             type = ErrorType, localDecl, traceRules, expr, loopFactor},
-            Switch[loopOrder,
-                   1, loopFactor = CConversion`oneOver16PiSqr;,
-                   2, loopFactor = CConversion`twoLoop;,
-                   3, loopFactor = CConversion`threeLoop;,
-                   _, loopFactor = CConversion`oneOver16PiSqr^loopOrder];
+             type = ErrorType, localDecl, traceRules, expr},
             name      = ToValidCSymbolString[GetName[betaFunction]];
             betaName  = "beta_" <> name;
             type = GetType[betaFunction];
@@ -226,7 +209,7 @@ CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_Lis
               ];
             expr       = expr[[loopOrder]];
             (* convert beta function expressions to C form *)
-            beta       = (loopFactor * expr) /.
+            beta       = expr /.
                             { Kronecker[Susyno`LieGroups`i1,SARAH`i2] :> CreateUnitMatrix[type],
                               a_[Susyno`LieGroups`i1] :> a,
                               a_[Susyno`LieGroups`i1,SARAH`i2] :> a,
@@ -238,7 +221,7 @@ CreateBetaFunction[betaFunction_BetaFunction, loopOrder_Integer, sarahTraces_Lis
             traceRules = Rule[#,ToValidCSymbol[#]]& /@ (Traces`FindSARAHTraces[expr, sarahTraces]);
             beta = beta /. traceRules;
             (* collecting complicated matrix multiplications *)
-            beta = loopFactor CollectMatMul[beta / loopFactor];
+            beta = CollectMatMul[beta];
             (* declare SARAH traces locally *)
             localDecl  = localDecl <> Traces`CreateLocalCopiesOfSARAHTraces[expr, sarahTraces, "TRACE_STRUCT"];
             If[beta == 0,
@@ -271,54 +254,16 @@ CreateBetaFunctionCallSequential[betaFunction_BetaFunction, loopOrder_Integer] :
            result
           ];
 
-CreateBetaFunctionCallsSequential[betaFunctions_List, loopOrder_Integer] :=
-    StringJoin[CreateBetaFunctionCallSequential[#,loopOrder]& /@ betaFunctions];
-
-CreateBetaFunctionCallParallel[betaFunction_BetaFunction, loopOrder_Integer] :=
-    Module[{name, betaName, result = ""},
-           If[Length[GetAllBetaFunctions[betaFunction]] >= loopOrder,
-              name = ToValidCSymbolString[GetName[betaFunction]];
-              betaName = "beta_" <> name;
-              result = "auto fut_" <> name <>
-                       " = global_thread_pool().run_packaged_task([this, &TRACE_STRUCT](){ return calc_" <>
-                       betaName <> "_" <> ToString[loopOrder] <> "_loop(TRACE_STRUCT); });\n";
-             ];
-           result
-          ];
-
-CollectBetaFunctionFutures[betaFunction_BetaFunction, loopOrder_Integer] :=
-    Module[{name, betaName, result = ""},
-           If[Length[GetAllBetaFunctions[betaFunction]] >= loopOrder,
-              name = ToValidCSymbolString[GetName[betaFunction]];
-              betaName = "beta_" <> name;
-              result = betaName <> " += fut_" <> name <> ".get();\n";
-             ];
-           result
-          ];
-
-CreateBetaFunctionCallsParallel[betaFunctions_List, loopOrder_Integer] :=
-    "{\n" <>
-    TextFormatting`IndentText[
-        StringJoin[CreateBetaFunctionCallParallel[#,loopOrder]& /@ betaFunctions] <> "\n" <>
-        StringJoin[CollectBetaFunctionFutures[#,loopOrder]& /@ betaFunctions]
-    ] <>
-    "\n}\n";
-
-CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer, parallel_:False] :=
-    If[parallel,
-       CreateBetaFunctionCallsParallel[betaFunctions, loopOrder],
-       CreateBetaFunctionCallsSequential[betaFunctions, loopOrder]
-      ];
+CreateBetaFunctionCalls[betaFunctions_List, loopOrder_Integer] :=
+    StringJoin[CreateBetaFunctionCallSequential[#,loopOrder]& /@ betaFunctions]
 
 CreateBetaFunction[betaFunctions_List] :=
-    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta3LParallel, allBeta4L, allBeta5L},
+    Module[{allBeta1L, allBeta2L, allBeta3L, allBeta4L, allBeta5L},
            allBeta1L = CreateBetaFunctionCalls[betaFunctions,1];
            allBeta2L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,2];
            allBeta3L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3];
            allBeta4L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,4];
            allBeta5L = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,5];
-           (* only parallelization of 3L betas leads to a speed-up *)
-           allBeta3LParallel = TextFormatting`IndentText @ CreateBetaFunctionCalls[betaFunctions,3,True];
            StringJoin[DeclareBetaFunction /@ betaFunctions] <> "\n" <>
            "if (loops > 0) {\n" <>
            TextFormatting`IndentText[
@@ -328,11 +273,7 @@ CreateBetaFunction[betaFunctions_List] :=
                allBeta2L <> "\n" <>
                TextFormatting`IndentText[
                    "if (loops > 2) {\n" <>
-                   "#ifdef ENABLE_THREADS\n" <>
-                   allBeta3LParallel <>
-                   "#else\n" <>
                    allBeta3L <>
-                   "#endif\n" <>
                    "\n" <>
                    TextFormatting`IndentText[
                        "if (loops > 3) {\n" <>
@@ -511,11 +452,11 @@ CreateCCtorParameterList[betaFunctions_List] :=
     StringJoin[CreateCCtorParameterList /@ betaFunctions];
 
 (* create parameter list *)
-CreateParameterList[betaFunction_BetaFunction, prefix_] :=
+FSCreateParameterList[betaFunction_BetaFunction, prefix_] :=
     prefix <> ToValidCSymbolString[GetName[betaFunction]];
 
-CreateParameterList[betaFunctions_List, prefix_:""] :=
-    Utils`StringJoinWithSeparator[CreateParameterList[#, prefix]& /@ betaFunctions, ", "];
+FSCreateParameterList[betaFunctions_List, prefix_:""] :=
+    Utils`StringJoinWithSeparator[FSCreateParameterList[#, prefix]& /@ betaFunctions, ", "];
 
 ClearParameter[betaFunction_BetaFunction] :=
     CConversion`SetToDefault[ToValidCSymbolString[GetName[betaFunction]],

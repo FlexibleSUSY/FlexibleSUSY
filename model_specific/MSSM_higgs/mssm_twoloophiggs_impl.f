@@ -5243,11 +5243,11 @@ c     phi function from eq. (A4)
       
       COMPLEX*16 FUNCTION CLI2(Z)
       
-c     just call the pCSPEN routine
+c     just call the cdli2 routine
       
-      COMPLEX*16 Z,pCSPEN
+      COMPLEX*16 Z,cdli2
       
-      CLI2 = pCSPEN(Z)
+      CLI2 = cdli2(Z)
       
       return
       end

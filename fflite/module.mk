@@ -51,20 +51,20 @@ all-$(MODNAME): $(LIBFFLITE)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(LIBFFLITE_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFFLITE_SRC) $(LIBFFLITE_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFFLITE_HDR) $(LIBFFLITE_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(LIBFFLITE_MK) $(LIBFFLITE_INSTALL_DIR)
+		$(Q)install -d $(LIBFFLITE_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFFLITE_SRC) $(LIBFFLITE_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFFLITE_HDR) $(LIBFFLITE_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(LIBFFLITE_MK) $(LIBFFLITE_INSTALL_DIR)
 endif
 
 clean-$(MODNAME)-dep:
-		-rm -f $(LIBFFLITE_DEP)
+		$(Q)-rm -f $(LIBFFLITE_DEP)
 
 clean-$(MODNAME)-lib:
-		-rm -f $(LIBFFLITE)
+		$(Q)-rm -f $(LIBFFLITE)
 
 clean-$(MODNAME)-obj:
-		-rm -f $(LIBFFLITE_OBJ)
+		$(Q)-rm -f $(LIBFFLITE_OBJ)
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		@true
@@ -78,7 +78,8 @@ clean::         clean-$(MODNAME)
 distclean::     distclean-$(MODNAME)
 
 $(LIBFFLITE): $(LIBFFLITE_OBJ)
-		$(MODULE_MAKE_LIB_CMD) $@ $^
+		@$(MSG)
+		$(Q)$(MODULE_MAKE_LIB_CMD) $@ $^
 
 ifeq ($(ENABLE_FFLITE),yes)
 ALLDEP += $(LIBFFLITE_DEP)

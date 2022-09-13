@@ -68,22 +68,27 @@ META_SRC     := \
 		$(DIR)/Constraint.m \
 		$(DIR)/ConvergenceTester.m \
 		$(DIR)/CXXDiagrams.m \
+		$(DIR)/Decays.m \
 		$(DIR)/NPointFunctions.m \
 		$(DIR)/NPointFunctions/internal.m \
 		$(DIR)/NPointFunctions/createFAModelFile.m \
+		$(DIR)/WilsonCoeffs.m \
 		$(DIR)/EDM.m \
 		$(DIR)/FFVFormFactors.m \
+		$(DIR)/FToFConversionInNucleus.m \
 		$(DIR)/BrLToLGamma.m \
-		$(DIR)/EffectiveCouplings.m \
+		$(DIR)/BtoSGamma.m \
 		$(DIR)/EWSB.m \
 		$(DIR)/FlexibleEFTHiggsMatching.m \
 		$(DIR)/FlexibleSUSY.m \
 		$(DIR)/FlexibleTower.m \
 		$(DIR)/Format.m \
 		$(DIR)/FSMathLink.m \
+		$(DIR)/FunctionModifiers.m \
 		$(DIR)/Himalaya.m \
 		$(DIR)/LatticeUtils.m \
 		$(DIR)/LoopFunctions.m \
+		$(DIR)/LoopFunctionsZeroMomentum.m \
 		$(DIR)/LoopMasses.m \
 		$(DIR)/Observables.m \
 		$(DIR)/Parameters.m \
@@ -95,6 +100,7 @@ META_SRC     := \
 		$(DIR)/SemiAnalytic.m \
 		$(DIR)/TestSuite.m \
 		$(DIR)/TextFormatting.m \
+		$(DIR)/TerminalFormatting.m \
 		$(DIR)/ThreeLoopMSSM.m \
 		$(DIR)/ThreeLoopQCD.m \
 		$(DIR)/ThreeLoopSM.m \
@@ -108,6 +114,7 @@ META_SRC     := \
 		$(DIR)/Utils.m \
 		$(DIR)/Vertices.m \
 		$(DIR)/WeinbergAngle.m \
+		$(DIR)/Wrappers.m \
 		$(DIR)/WriteOut.m \
 		$(DIR)/writeRGE.m \
 		$(DIR)/writeNRGE.m \

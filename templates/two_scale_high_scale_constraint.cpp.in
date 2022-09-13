@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_two_scale_high_scale_constraint.hpp"
 #include "@ModelName@_two_scale_model.hpp"
@@ -26,7 +25,6 @@
 #include "logger.hpp"
 #include "ew_input.hpp"
 #include "error.hpp"
-#include "gsl_utils.hpp"
 #include "minimizer.hpp"
 #include "raii.hpp"
 #include "root_finder.hpp"
@@ -34,8 +32,8 @@
 #include "numerics2.hpp"
 
 #ifdef ENABLE_HIMALAYA
-#include "HierarchyCalculator.hpp"
-#include "version.hpp"
+#include "himalaya/HierarchyCalculator.hpp"
+#include "himalaya/version.hpp"
 #endif
 
 #include <cmath>

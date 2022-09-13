@@ -1,0 +1,409 @@
+// ====================================================================
+// This file is part of FlexibleSUSY.
+//
+// FlexibleSUSY is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+//
+// FlexibleSUSY is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with FlexibleSUSY.  If not, see
+// <http://www.gnu.org/licenses/>.
+// ====================================================================
+
+
+/**
+ * @file @ModelName@_mass_eigenstates_decoupling_scheme.cpp
+ * @brief implementation of the @ModelName@ model class in the decoupling scheme
+ *
+ * Contains the definition of the @ModelName@ model class methods
+ * which solve EWSB and calculate masses and mixings from @RenScheme@
+ * parameters.
+ *
+ * This file was generated with FlexibleSUSY @FlexibleSUSYVersion@ and SARAH @SARAHVersion@ .
+ */
+
+#include "@ModelName@_mass_eigenstates_decoupling_scheme.hpp"
+#include "@ModelName@_mass_eigenstates.hpp"
+#include "@ModelName@_info.hpp"
+#include "config.h"
+#include "eigen_utils.hpp"
+#include "error.hpp"
+#include "ewsb_solver.hpp"
+#include "ew_input.hpp"
+#include "functors.hpp"
+#include "linalg2.hpp"
+#include "logger.hpp"
+#include "numerics2.hpp"
+#include "raii.hpp"
+#include "standard_model.hpp"
+#include "wrappers.hpp"
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <complex>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+
+namespace flexiblesusy {
+
+#define CLASSNAME @ModelName@_mass_eigenstates_decoupling_scheme
+
+#define DERIVEDPARAMETER(p) model.p()
+#define EXTRAPARAMETER(parameter) model.get_##parameter()
+#define INPUT(parameter) model.get_input().parameter
+#define INPUTPARAMETER(parameter) model.get_input().parameter
+#define LOCALINPUT(parameter) input.parameter
+#define LowEnergyGaugeCoupling(i) new_g##i
+#define LowEnergyConstant(p) Electroweak_constants::p
+#define MODELPARAMETER(parameter) model.get_##parameter()
+#define PHASE(p) model.get_##p()
+#define PHYSICAL(parameter) physical.parameter
+
+CLASSNAME::CLASSNAME(const @ModelName@_input_parameters& input_)
+   : @ModelName@_soft_parameters(input_)
+{
+}
+
+CLASSNAME::CLASSNAME(const @ModelName@_mass_eigenstates& model)
+{
+   fill_from(model);
+}
+
+std::unique_ptr<@ModelName@_mass_eigenstates_interface> CLASSNAME::clone() const
+{
+   return std::make_unique<@ModelName@_mass_eigenstates_decoupling_scheme>(*this);
+}
+
+void CLASSNAME::do_force_output(bool flag)
+{
+   force_output = flag;
+}
+
+bool CLASSNAME::do_force_output() const
+{
+   return force_output;
+}
+
+double CLASSNAME::get_precision() const
+{
+   return precision;
+}
+
+void CLASSNAME::set_precision(double precision_)
+{
+   precision = precision_;
+}
+
+void CLASSNAME::fill_from(const standard_model::Standard_model& sm_input)
+{
+   using RM33 = Eigen::Matrix<double, 3, 3>;
+   using CM33 = Eigen::Matrix<std::complex<double>, 3, 3>;
+
+   // make a local copy and ensure that the tree-level masses are calculated
+   auto sm = sm_input;
+   sm.calculate_DRbar_masses();
+
+   const auto sm_gY = sm.get_g1()*standard_model_info::normalization_g1;
+   const auto sm_g2 = sm.get_g2()*standard_model_info::normalization_g2;
+   const auto sm_g3 = sm.get_g3()*standard_model_info::normalization_g3;
+   const auto VEV   = sm.get_v();
+
+   // SM interface parameters for the low-scale constraint
+   const CM33 CKM = sm.get_Vu().adjoint() * sm.get_Vd();
+   const double MZMSbar = sm.get_MVZ();
+   const double MZDRbar = sm.get_MVZ();
+   const double MWMSbar = sm.get_MVWp();
+   const double MWDRbar = sm.get_MVWp();
+   const double EDRbar = sm_gY * sm_g2 / std::sqrt(sm_gY*sm_gY + sm_g2*sm_g2);
+   const double EMSbar = EDRbar;
+   const double THETAW = sm.ThetaW();
+   const double ThetaWDRbar = THETAW;
+   const double AlphaS = sm_g3*sm_g3*0.07957747154594767; // g3^2/(4 Pi)
+
+   RM33 upQuarksDRbar(RM33::Zero());
+   RM33 downQuarksDRbar(RM33::Zero());
+   RM33 downLeptonsDRbar(RM33::Zero());
+
+   upQuarksDRbar.diagonal()    = sm.get_MFu();
+   downQuarksDRbar.diagonal()  = sm.get_MFd();
+   downLeptonsDRbar.diagonal() = sm.get_MFe();
+
+   // new gauge couplings
+   double new_g1 = 0., new_g2 = 0., new_g3 = 0.;
+
+   // calculate new gauge couplings
+   {
+      auto model = this;
+
+@calculateDecouplingGaugeCouplings@
+   }
+
+   // set new gauge couplings
+   {
+      auto& model = *this;
+      auto MODEL = this;
+@setDecouplingGaugeCouplings@
+   }
+
+   // apply user-defined low-energy constraint for the VEV(s)
+   {
+      auto& model = *this;
+      auto MODEL = this;
+@setDecouplingVEV@
+   }
+
+   // apply user-defined low-energy constraint for the Yukawa couplings
+   {
+      auto& model = *this;
+      auto MODEL = this;
+@setDecouplingYukawaUpQuarks@
+   }
+   {
+      auto& model = *this;
+      auto MODEL = this;
+@setDecouplingYukawaDownQuarks@
+   }
+   {
+      auto& model = *this;
+      auto MODEL = this;
+@setDecouplingYukawaDownLeptons@
+   }
+
+   solve_ewsb_equations_tree_level();
+   calculate_tree_level_mass_spectrum();
+}
+
+void CLASSNAME::fill_from(const @ModelName@_mass_eigenstates& model)
+{
+   set(model.get());
+   set_scale(model.get_scale());
+   set_loops(model.get_loops());
+   set_thresholds(model.get_thresholds());
+   set_zero_threshold(model.get_zero_threshold());
+   set_input_parameters(model.get_input());
+   force_output = model.do_force_output();
+   precision = model.get_precision();
+   physical = model.get_physical();
+
+#define OTHER(p) model.get_##p()
+@copyRunningBSMMassesToDecouplingMasses@
+#undef OTHER
+}
+
+const @ModelName@_physical& CLASSNAME::get_physical() const
+{
+   return physical;
+}
+
+@ModelName@_physical& CLASSNAME::get_physical()
+{
+   return physical;
+}
+
+void CLASSNAME::set_physical(const @ModelName@_physical& physical_)
+{
+   physical = physical_;
+}
+
+const Problems& CLASSNAME::get_problems() const
+{
+   return problems;
+}
+
+Problems& CLASSNAME::get_problems()
+{
+   return problems;
+}
+
+int CLASSNAME::solve_ewsb_equations_tree_level()
+{
+   int error = EWSB_solver::SUCCESS;
+
+@solveTreeLevelEWSBviaSoftHiggsMasses@
+
+   return error;
+}
+
+int CLASSNAME::solve_ewsb_equations()
+{
+   return solve_ewsb_equations_tree_level();
+}
+
+void CLASSNAME::print(std::ostream& ostr) const
+{
+   ostr << "========================================\n"
+           "@ModelName@\n"
+           "========================================\n";
+   @ModelName@_soft_parameters::print(ostr);
+   ostr << "----------------------------------------\n"
+           "tree-level @RenScheme@ masses:\n"
+           "----------------------------------------\n";
+@printMasses@
+   ostr << "----------------------------------------\n"
+           "tree-level @RenScheme@ mixing matrices:\n"
+           "----------------------------------------\n";
+@printMixingMatrices@
+   physical.print(ostr);
+}
+
+/**
+ * routine which finds the @RenScheme@ mass eigenstates and mixings.
+ */
+void CLASSNAME::calculate_tree_level_mass_spectrum()
+{
+@saveEWSBOutputParameters@
+   solve_ewsb_equations_tree_level();
+
+@calculateAllMasses@
+}
+
+/**
+ * routine which finds the pole mass eigenstates and mixings.
+ *
+ * @note Does currently nothing, because it is not clear how to
+ * calculate the pole masses in this scheme.
+ */
+void CLASSNAME::calculate_pole_mass_spectrum()
+{
+   calculate_tree_level_mass_spectrum();
+   // move goldstone bosons to the front
+   reorder_tree_level_masses();
+   copy_tree_level_masses_to_pole_masses();
+   check_pole_masses_for_tachyons();
+}
+
+void CLASSNAME::copy_tree_level_masses_to_pole_masses()
+{
+@copyDRbarMassesToPoleMasses@
+}
+
+/**
+ * reorders @RenScheme@ masses so that golstones are placed at the index
+ * specified in the model files definition of the associated
+ * gauge boson (see Z-boson definition in default particles.m file
+ * in the Models directory of your SARAH distribution for example)
+ */
+void CLASSNAME::reorder_tree_level_masses()
+{
+@reorderDRbarMasses@
+}
+
+/**
+ * reorders pole masses so that golstones are placed at the index
+ * specified in the model files definition of the associated
+ * gauge boson (see Z-boson definition in default particles.m file
+ * in the Models directory of your SARAH distribution for example)
+ */
+void CLASSNAME::reorder_pole_masses()
+{
+@reorderPoleMasses@
+}
+
+/**
+ * Checks the pole masses for tachyons
+ */
+void CLASSNAME::check_pole_masses_for_tachyons()
+{
+@checkPoleMassesForTachyons@
+}
+
+/**
+ * calculates spectrum for model once the @RenScheme@ parameters at
+ * at low energies are known
+ */
+void CLASSNAME::calculate_mass_spectrum()
+{
+   calculate_tree_level_mass_spectrum();
+   calculate_pole_mass_spectrum();
+}
+
+void CLASSNAME::clear_tree_level_parameters()
+{
+@clearOutputParameters@
+@clearPhases@
+@clearExtraParameters@
+}
+
+void CLASSNAME::clear_problems()
+{
+   problems.clear();
+}
+
+void CLASSNAME::clear()
+{
+   @ModelName@_soft_parameters::clear();
+   clear_tree_level_parameters();
+   physical.clear();
+   problems.clear();
+}
+
+void CLASSNAME::set_tree_level_masses(const Eigen::ArrayXd& pars)
+{
+@setMasses@
+}
+
+const @ModelName@_input_parameters& CLASSNAME::get_input_parameters() const
+{
+   return get_input();
+}
+
+@ModelName@_input_parameters& CLASSNAME::get_input_parameters()
+{
+   return get_input();
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses() const
+{
+@getMasses@
+}
+
+void CLASSNAME::set_tree_level_masses_and_mixings(const Eigen::ArrayXd& pars)
+{
+   set_tree_level_masses(pars);
+
+@setMixings@
+}
+
+Eigen::ArrayXd CLASSNAME::get_tree_level_masses_and_mixings() const
+{
+   Eigen::ArrayXd pars(get_tree_level_masses());
+
+@getMixings@
+
+   return pars;
+}
+
+void CLASSNAME::set_extra_parameters(const Eigen::ArrayXd& pars)
+{
+@setExtraParameters@
+}
+
+Eigen::ArrayXd CLASSNAME::get_extra_parameters() const
+{
+@getExtraParameters@
+}
+
+@higgsMassGetters@
+
+@massCalculationFunctions@
+
+@tadpoleEqFunctions@
+
+@dependenceFunctions@
+
+std::ostream& operator<<(std::ostream& ostr, const @ModelName@_mass_eigenstates_decoupling_scheme& model)
+{
+   model.print(ostr);
+   return ostr;
+}
+
+} // namespace flexiblesusy

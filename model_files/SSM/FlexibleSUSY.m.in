@@ -65,3 +65,4 @@ HighPoleMassPrecision    = {hh};
 MediumPoleMassPrecision  = {};
 LowPoleMassPrecision     = {};
 
+FSCalculateDecays = True;

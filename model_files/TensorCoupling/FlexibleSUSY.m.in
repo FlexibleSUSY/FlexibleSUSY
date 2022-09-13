@@ -77,5 +77,8 @@ InitialGuessAtLowScale = {
    {Ye, Automatic}
 };
 
-
 InitialGuessAtHighScale = {};
+
+(* decays contain unsupported colour vertex *)
+FSCalculateDecays = False;
+

@@ -19,19 +19,14 @@
 #ifndef PROBLEMS_H
 #define PROBLEMS_H
 
-#include <iostream>
+#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace flexiblesusy {
 
-class Names {
-public:
-   virtual ~Names() = default;
-   virtual const std::string& get(int) const = 0;
-   virtual int size() const = 0;
-};
+class Names;
 
 /**
  * @class Problems
@@ -52,6 +47,8 @@ public:
    void flag_non_perturbative_parameter(int parameter, double value, double scale, double threshold = 0.);
    void flag_no_sinThetaW_convergence();
    void flag_no_G_fermi_convergence();
+   void flag_no_minimum(const std::string& msg, int status);
+   void flag_no_root(const std::string& msg, int status);
 
    void unflag_bad_mass(int particle);
    void unflag_all_bad_masses();
@@ -67,6 +64,8 @@ public:
    void unflag_all_non_perturbative_parameters();
    void unflag_no_sinThetaW_convergence();
    void unflag_no_G_fermi_convergence();
+   void unflag_no_minimum(const std::string& msg);
+   void unflag_no_root(const std::string& msg);
 
    bool is_bad_mass(int particle) const;
    bool is_running_tachyon(int particle) const;
@@ -83,17 +82,25 @@ public:
    bool no_perturbative() const;
    bool no_sinThetaW_convergence() const;
    bool no_G_fermi_convergence() const;
+   bool no_minimum() const;
+   bool no_root() const;
 
    void add(const Problems&);         ///< add problems from other class
    void clear();                      ///< clear all problems
    bool have_problem() const;         ///< problems which yield invalid spectrum
    bool have_warning() const;         ///< warnings
+   unsigned number_of_problems() const; ///< returns number of problems
+   unsigned number_of_warnings() const; ///< returns number of warnings
    std::vector<std::string> get_problem_strings() const;
    std::vector<std::string> get_warning_strings() const;
    std::string get_problem_string(const std::string& sep = "\n") const;
    std::string get_warning_string(const std::string& sep = "\n") const;
-   void print_problems(std::ostream& = std::cerr) const;
-   void print_warnings(std::ostream& = std::cerr) const;
+   std::string get_particle_name(int) const;  ///< returns particle name
+   std::string get_parameter_name(int) const; ///< returns parameter name
+   void print_problems() const;
+   void print_problems(std::ostream&) const;
+   void print_warnings() const;
+   void print_warnings(std::ostream&) const;
    const std::string& get_model_name() const;
 
    std::vector<int> get_bad_masses() const;
@@ -117,14 +124,14 @@ private:
    std::vector<int> pole_tachyons;     ///< tachyonic particles (pole mass)
    std::vector<int> failed_pole_mass_convergence; ///< no convergence during pole mass calculation
    std::map<int, NonPerturbativeValue> non_pert_pars; ///< non-perturbative parmeters
+   std::map<std::string, int> failed_minimum; ///< no minimum found (message, status code)
+   std::map<std::string, int> failed_root; ///< no root found (message, status code)
    std::string exception_msg;          ///< exception message
    bool failed_ewsb{false};            ///< no EWSB
    bool failed_ewsb_tree_level{false}; ///< no tree-level EWSB
    bool non_perturbative{false};       ///< non-perturbative running
    bool failed_sinThetaW_convergence{false}; ///< sinThetaW-parameter not converged
    bool failed_GF_convergence{false};  ///< GF calculation did not converge
-
-   std::string get_parameter_name(int) const; ///< returns parameter name
 };
 
 std::ostream& operator<<(std::ostream&, const Problems&);

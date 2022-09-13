@@ -28,7 +28,6 @@
 #define KERNEL_VERSION        "@KERNEL_VERSION@"
 
 /* Build variables */
-#define BLASLIBS              "@BLASLIBS@"
 #define BOOSTFLAGS            "@BOOSTFLAGS@"
 #define BOOSTTESTLIBS         "@BOOSTTESTLIBS@"
 #define BOOSTTHREADLIBS       "@BOOSTTHREADLIBS@"
@@ -39,15 +38,21 @@
 #define FC                    "@FC@"
 #define FFLAGS                "@FFLAGS@"
 #define FLIBS                 "@FLIBS@"
+#define FMOD                  "@FMOD@"
+#define FSTD                  "@FSTD@"
+#define FUTILIBS              "@FUTILIBS@"
+#define GM2CALCFLAGS          "@GM2CALCFLAGS@"
+#define GM2CALCLIBS           "@GM2CALCLIBS@"
 #define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
 #define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
 #define GSLLIBS               "@GSLLIBS@"
-#define LAPACKLIBS            "@LAPACKLIBS@"
 #define LDFLAGS               "@LDFLAGS@"
 #define LDLIBS                "@LDLIBS@"
 #define LLFLAGS               "@LLFLAGS@"
 #define LLLIBS                "@LLLIBS@"
+#define COLLIERFLAGS          "@COLLIERFLAGS@"
+#define COLLIERLIBS           "@COLLIERLIBS@"
 #define LOOPFUNCFLAGS         "@LOOPFUNCFLAGS@"
 #define LOOPFUNCLIBS          "@LOOPFUNCLIBS@"
 #define SQLITELIBS            "@SQLITELIBS@"
@@ -76,20 +81,20 @@
 /* Enable fflite */
 @DEFINE_ENABLE_FFLITE@
 
+/* Enable GM2Calc */
+@DEFINE_ENABLE_GM2CALC@
+
 /* Enable Himalaya */
 @DEFINE_ENABLE_HIMALAYA@
-
-/* Enable LAPACK */
-@DEFINE_ENABLE_LAPACK@
 
 /* Enable LibraryLink */
 @DEFINE_ENABLE_LIBRARYLINK@
 
-/* Enable MKL ILP64 workaround */
-@DEFINE_ENABLE_ILP64MKL_WORKAROUND@
-
 /* Enable LoopTools */
 @DEFINE_ENABLE_LOOPTOOLS@
+
+/* Enable COLLIER */
+@DEFINE_ENABLE_COLLIER@
 
 /* Enable odeint */
 @DEFINE_ENABLE_ODEINT@

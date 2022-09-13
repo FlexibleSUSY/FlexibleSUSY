@@ -120,10 +120,10 @@ LATEX_TMP       := \
 		$(MODNAME)-pdf
 
 clean-$(MODNAME):
-		-rm -f $(LATEX_TMP)
+		$(Q)-rm -f $(LATEX_TMP)
 
 distclean-$(MODNAME): clean-$(MODNAME)
-		-rm -f $(PAPER_PDF)
+		$(Q)-rm -f $(PAPER_PDF)
 
 clean::         clean-$(MODNAME)
 
@@ -131,78 +131,78 @@ distclean::     distclean-$(MODNAME)
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(MANUALS_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(MANUALS_MK) $(MANUALS_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(PAPER_SRC) $(MANUALS_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(PAPER_STY) $(MANUALS_INSTALL_DIR)
-		install -d $(INSTALL_DIR)/$(MANUALS_EXAMPLES_DIR)
-		install -m u=rw,g=r,o=r $(MANUALS_EXAMPLES) $(INSTALL_DIR)/$(MANUALS_EXAMPLES_DIR)
+		$(Q)install -d $(MANUALS_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_MK) $(MANUALS_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(PAPER_SRC) $(MANUALS_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(PAPER_STY) $(MANUALS_INSTALL_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_EXAMPLES_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_EXAMPLES) $(INSTALL_DIR)/$(MANUALS_EXAMPLES_DIR)
 
-		install -d $(INSTALL_DIR)/$(MANUALS_FEYNMAN_DIR)
-		install -m u=rw,g=r,o=r $(MANUALS_FEYNMAN) $(INSTALL_DIR)/$(MANUALS_FEYNMAN_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_FEYNMAN_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_FEYNMAN) $(INSTALL_DIR)/$(MANUALS_FEYNMAN_DIR)
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/THDMIIMSSMBC
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_THDMIIMSSMBC) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/THDMIIMSSMBC
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/THDMIIMSSMBC
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_THDMIIMSSMBC) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/THDMIIMSSMBC
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/HSSUSY
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_HSSUSY) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/HSSUSY
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/HSSUSY
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_HSSUSY) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/HSSUSY
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleMW
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_FlexibleMW) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleMW
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleMW
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_FlexibleMW) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleMW
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_multiple_solutions
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSM_multiple_solutions) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_multiple_solutions
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_multiple_solutions
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSM_multiple_solutions) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_multiple_solutions
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CE6SSM
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CE6SSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CE6SSM
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CE6SSM
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CE6SSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CE6SSM
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CSE6SSM
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CSE6SSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CSE6SSM
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CSE6SSM
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CSE6SSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CSE6SSM
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CNMSSM
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CNMSSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CNMSSM
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CNMSSM
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CNMSSM) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CNMSSM
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_benchmark
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_semi_analytic_benchmark) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_benchmark
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_benchmark
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_semi_analytic_benchmark) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_benchmark
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/Himalaya
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_Himalaya) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/Himalaya
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/Himalaya
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_Himalaya) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/Himalaya
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSMCPV
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSMCPV) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSMCPV
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSMCPV
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSMCPV) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSMCPV
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleEFTHiggs
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_FlexibleEFTHiggs) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleEFTHiggs
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleEFTHiggs
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_FlexibleEFTHiggs) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/FlexibleEFTHiggs
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_solution_regions
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSM_solution_regions) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_solution_regions
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_solution_regions
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_CMSSM_solution_regions) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/CMSSM_solution_regions
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_rel_errs
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_semi_analytic_rel_errs) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_rel_errs
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_rel_errs
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_semi_analytic_rel_errs) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/semi_analytic_rel_errs
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMMuBMu
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_MSSMMuBMu) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMMuBMu
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMMuBMu
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_MSSMMuBMu) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMMuBMu
 
-		install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMCPV
-		install -m u=rw,g=r,o=r $(MANUALS_PLOTS_MSSMCPV) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMCPV
+		$(Q)install -d $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMCPV
+		$(Q)install -m u=rw,g=r,o=r $(MANUALS_PLOTS_MSSMCPV) $(INSTALL_DIR)/$(MANUALS_PLOTS_DIR)/MSSMCPV
 
 endif
 
 $(MODNAME)-pdf: $(PAPER_PDF)
 
 $(PAPER_PDF_1): $(PAPER_SRC_1) $(PAPER_STY)
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-1.0.tex
 
 $(PAPER_PDF_2): $(PAPER_SRC_2) $(PAPER_STY)
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
-		cd $(MANUALS_DIR) && bibtex flexiblesusy-2.0
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
+		$(Q)cd $(MANUALS_DIR) && bibtex flexiblesusy-2.0
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-2.0.tex
 
 $(PAPER_PDF_3): $(PAPER_SRC_3) $(PAPER_STY)
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex
-		cd $(MANUALS_DIR) && bibtex flexiblesusy-new_features
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex
-		cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex
+		$(Q)cd $(MANUALS_DIR) && bibtex flexiblesusy-new_features
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex
+		$(Q)cd $(MANUALS_DIR) && pdflatex flexiblesusy-new_features.tex

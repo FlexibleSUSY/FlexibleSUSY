@@ -32,7 +32,6 @@
 #define BOOST_TEST_MODULE test_pv_crosschecks
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
 using namespace boost::unit_test;
 
 using namespace std;
@@ -206,12 +205,15 @@ void check_close_fraction(T a, T b, double tol, double scl=1);
 template<>
 void check_close_fraction<double>(double a, double b, double tol, double scl)
 {
-    if      (a == 0)
-	BOOST_CHECK_SMALL(b / scl, tol);
-    else if (b == 0)
-	BOOST_CHECK_SMALL(a / scl, tol);
-    else
-	BOOST_CHECK_CLOSE_FRACTION(a, b, tol);
+   if (a == 0) {
+      BOOST_CHECK_SMALL(b / scl, tol);
+   }
+   else if (b == 0) {
+      BOOST_CHECK_SMALL(a / scl, tol);
+   }
+   else {
+      BOOST_CHECK_CLOSE_FRACTION(a, b, tol);
+   }
 }
 
 template<>
@@ -235,8 +237,9 @@ bool check_point(map<string, LoopFunc<T, U>*>& funcs, string& line, double tol)
     if (f == funcs.end()) return false;
 
     vector<T> args(f->second->nargs);
-    for (size_t i = 0; i < args.size(); i++)
-	if (!(ls >> args[i])) return false;
+    for (size_t i = 0; i < args.size(); i++) {
+       if (!(ls >> args[i])) return false;
+    }
     double s2;
     U value_from_line;
     if (!(ls >> s2 >> value_from_line)) return false;
@@ -254,7 +257,7 @@ bool check_point(map<string, LoopFunc<T, U>*>& funcs, string& line, double tol)
 BOOST_AUTO_TEST_CASE(fflite_generate_points)
 {
     cout << scientific << setprecision(17);
-    const size_t n = 10000;
+    static constexpr size_t n = 10000;
     generate_points<complex<double>, complex<double> >(ccfuncs, n);
     generate_points<        double , complex<double> >(rcfuncs, n);
     generate_points<        double ,         double  >(rrfuncs, n);
@@ -264,11 +267,11 @@ BOOST_AUTO_TEST_CASE(fflite_generate_points)
 
 BOOST_AUTO_TEST_CASE(looptools_check_points)
 {
-    string line;
-    while (getline(cin, line))
-	check_point(rrfuncs, line, 1e-15) ||
-	check_point(rcfuncs, line, 1e-15) ||
-	check_point(ccfuncs, line, 1e-15);
+   string line;
+   while (getline(cin, line))
+      check_point(rrfuncs, line, 1e-15) ||
+      check_point(rcfuncs, line, 1e-15) ||
+      check_point(ccfuncs, line, 1e-15);
 }
 
 #else

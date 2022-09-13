@@ -1,0 +1,43 @@
+name: static analysis
+
+on:
+  push:
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
+
+  pull_request:
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - 'configure'
+      - 'createmodel'
+      - 'install-sarah'
+      - 'createaddon'
+      - 'config/*.sh'
+      - 'utils/*.sh'
+      - 'test/test_*.sh'
+
+jobs:
+  check-scripts:
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check scripts
+        run: |
+           echo "We assume, that shell understands 'local' command!"
+           shellcheck -e SC3037 -e SC3043 -S warning configure createmodel install-sarah createaddon config/*.sh utils/*.sh test/test_*.sh

@@ -31,11 +31,11 @@ DOC_MODELS_EXAMPLES := \
 
 ifneq ($(INSTALL_DIR),)
 install-src::
-		install -d $(DOC_MODELS_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MODELS_MK) $(DOC_MODELS_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MODELS_RST) $(DOC_MODELS_INSTALL_DIR)
-		install -d $(INSTALL_DIR)/$(DOC_MODELS_IMAGE_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MODELS_IMAGES) $(INSTALL_DIR)/$(DOC_MODELS_IMAGE_DIR)
-		install -d $(INSTALL_DIR)/$(DOC_MODELS_EXAMPLE_DIR)
-		install -m u=rw,g=r,o=r $(DOC_MODELS_EXAMPLES) $(INSTALL_DIR)/$(DOC_MODELS_EXAMPLE_DIR)
+		$(Q)install -d $(DOC_MODELS_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MODELS_MK) $(DOC_MODELS_INSTALL_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MODELS_RST) $(DOC_MODELS_INSTALL_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(DOC_MODELS_IMAGE_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MODELS_IMAGES) $(INSTALL_DIR)/$(DOC_MODELS_IMAGE_DIR)
+		$(Q)install -d $(INSTALL_DIR)/$(DOC_MODELS_EXAMPLE_DIR)
+		$(Q)install -m u=rw,g=r,o=r $(DOC_MODELS_EXAMPLES) $(INSTALL_DIR)/$(DOC_MODELS_EXAMPLE_DIR)
 endif

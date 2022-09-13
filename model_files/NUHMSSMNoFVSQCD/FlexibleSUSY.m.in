@@ -198,3 +198,6 @@ FSVertexRules = {
     T[(Ye|Yd)][__] -> 0,
     (Ye|Yd)[__] -> 0
 };
+
+FSCalculateDecays = False;
+

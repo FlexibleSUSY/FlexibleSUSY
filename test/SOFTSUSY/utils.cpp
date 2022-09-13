@@ -13,7 +13,7 @@ double frexp(const softsusy::Complex & c, int * i) {
   int a, b;
   frexp(c.real(), &a);
   frexp(c.imag(), &b);
-  if (fabs(a) > fabs(b)) return *i = a; 
+  if (std::abs(a) > std::abs(b)) return *i = a;
   *i = b;
   return 0.;
 }

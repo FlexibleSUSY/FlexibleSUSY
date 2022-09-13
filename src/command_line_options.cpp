@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "command_line_options.hpp"
+#include "array_view.hpp"
 #include "build_info.hpp"
 #include "logger.hpp"
 
@@ -53,8 +54,6 @@ void Command_line_options::parse(const Dynamic_array_view<char*>& args)
       const std::string option(args[i]);
       if (starts_with(option,"--slha-input-file=")) {
          slha_input_file = option.substr(18);
-         if (slha_input_file.empty())
-            WARNING("no SLHA input file name given");
       } else if (starts_with(option,"--slha-output-file=")) {
          slha_output_file = option.substr(19);
       } else if (starts_with(option,"--spectrum-output-file=")) {
@@ -156,7 +155,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                double& parameter)
 {
    if (starts_with(str, prefix)) {
-      parameter = stod(str.substr(prefix.length()));
+      parameter = std::stod(str.substr(prefix.length()));
       return true;
    }
    return false;
@@ -177,7 +176,7 @@ bool Command_line_options::get_parameter_value(const std::string& str,
                                                int& parameter)
 {
    if (starts_with(str, prefix)) {
-      parameter = stoi(str.substr(prefix.length()));
+      parameter = std::stoi(str.substr(prefix.length()));
       return true;
    }
    return false;

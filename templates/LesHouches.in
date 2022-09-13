@@ -25,7 +25,7 @@ Block FlexibleSUSY
    21   1                    # EFT loop order for downwards matching
    22   0                    # EFT index of SM-like Higgs in the BSM model
    23   1                    # calculate BSM pole masses
-   24   124111321            # individual threshold correction loop orders
+   24   124111421            # individual threshold correction loop orders
    25   0                    # ren. scheme for Higgs 3L corrections (0 = DR', 1 = MDR', 2 = H3m)
    26   1                    # Higgs 3-loop corrections O(alpha_t alpha_s^2)
    27   1                    # Higgs 3-loop corrections O(alpha_b alpha_s^2)
@@ -35,6 +35,7 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
    30   1                    # Higgs 4-loop corrections O(alpha_t alpha_s^3)
+   31   0                    # loop library (0 = softsusy)
 Block FlexibleSUSYInput
     0   0.00729735           # alpha_em(0)
     1   125.09               # Mh pole
@@ -56,4 +57,10 @@ Block SMINPUTS               # Standard Model inputs
    22   2.400000000e-03      # mu(2 GeV) MS-bar
    23   1.040000000e-01      # ms(2 GeV) MS-bar
    24   1.270000000e+00      # mc(mc) MS-bar
+Block FlexibleDecay
+    0   1                    # calculate decays (0 = no, 1 = yes)
+    1   1e-5                 # minimum BR to print
+    2   4                    # include higher order corrections in decays (0 = LO, 1 = NLO, 2 = NNLO, 3 = N^3LO, 4 = N^4LO)
+    3   1                    # use Thomson alpha(0) instead of alpha(m) in decays to γγ and γZ
+    4   2                    # off-shell decays into VV pair
 @formattedSLHAInputBlocks@

@@ -17,8 +17,12 @@
 // ====================================================================
 
 #include "spectrum_generator_settings.hpp"
+#include "error.hpp"
+#include "string_format.hpp"
 
+#include <cmath>
 #include <iostream>
+#include <string>
 
 namespace flexiblesusy {
 
@@ -54,8 +58,56 @@ const std::array<std::string, Spectrum_generator_settings::NUMBER_OF_OPTIONS> de
    "Higgs 3-loop corrections O(alpha_b alpha_s^2)",
    "Higgs 3-loop corrections O(alpha_t^2 alpha_s)",
    "Higgs 3-loop corrections O(alpha_t^3)",
-   "Higgs 4-loop corrections O(alpha_t alpha_s^3)"
+   "Higgs 4-loop corrections O(alpha_t alpha_s^3)",
+   "loop library type (0 = Softsusy)"
 };
+
+bool is_integer(double value)
+{
+   double intpart;
+   return std::modf(value, &intpart) == 0.0;
+}
+
+void assert_bool(double value, const char* quantity)
+{
+   if (value != 0.0 && value != 1.0) {
+      throw SetupError(std::string(quantity) + " must either 0 or 1");
+   }
+}
+
+void assert_integer(double value, const char* quantity)
+{
+   if (!is_integer(value)) {
+      throw SetupError(std::string(quantity) + " must be an integer");
+   }
+}
+
+void assert_ge(double value, double lower_bound, const char* quantity)
+{
+   if (value < lower_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be greater than or equal to " +
+                       flexiblesusy::to_string(lower_bound));
+   }
+}
+
+void assert_gt(double value, double lower_bound, const char* quantity)
+{
+   if (value <= lower_bound) {
+      throw SetupError(std::string(quantity) + " must be greater than " +
+                       flexiblesusy::to_string(lower_bound));
+   }
+}
+
+void assert_le(double value, double upper_bound, const char* quantity)
+{
+   if (value > upper_bound) {
+      throw SetupError(std::string(quantity) +
+                       " must be lower than or equal to " +
+                       flexiblesusy::to_string(upper_bound));
+   }
+}
+
 } // anonymous namespace
 
 /**
@@ -87,6 +139,122 @@ std::string Spectrum_generator_settings::get_description(Settings o) const
 
 void Spectrum_generator_settings::set(Settings o, double value)
 {
+   switch (o) {
+   case precision: // 0 [double > 0]
+      assert_gt(value, 0.0, descriptions.at(o).c_str());
+      break;
+   case max_iterations: // 1 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case solver: // 2 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case calculate_sm_masses: // 3 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case pole_mass_loop_order: // 4 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case ewsb_loop_order: // 5 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case beta_loop_order: // 6 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case threshold_corrections_loop_order: // 7 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case higgs_2loop_correction_at_as: // 8 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_2loop_correction_ab_as: // 9 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_2loop_correction_at_at: // 10 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_2loop_correction_atau_atau: // 11 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case force_output: // 12 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case top_pole_qcd_corrections: // 13 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case beta_zero_threshold: // 14 [double > 0]
+      assert_ge(value, 0.0, descriptions.at(o).c_str());
+      break;
+   case calculate_observables: // 15 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case force_positive_masses: // 16 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case pole_mass_scale: // 17 [double >= 0]
+      assert_ge(value, 0.0, descriptions.at(o).c_str());
+      break;
+   case eft_pole_mass_scale: // 18 [double >= 0]
+      assert_ge(value, 0.0, descriptions.at(o).c_str());
+      break;
+   case eft_matching_scale: // 19 [double >= 0]
+      assert_ge(value, 0.0, descriptions.at(o).c_str());
+      break;
+   case eft_matching_loop_order_up: // 20 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case eft_matching_loop_order_down: // 21 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case eft_higgs_index: // 22 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case calculate_bsm_masses: // 23 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case threshold_corrections: // 24 [int >= 0]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      break;
+   case higgs_3loop_ren_scheme_atb_as2: // 25 [int >= 0 and <= 2]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, 0, descriptions.at(o).c_str());
+      assert_le(value, 2, descriptions.at(o).c_str());
+      break;
+   case higgs_3loop_correction_at_as2: // 26 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_3loop_correction_ab_as2: // 27 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_3loop_correction_at2_as: // 28 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_3loop_correction_at3: // 29 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case higgs_4loop_correction_at_as3: // 30 [bool]
+      assert_bool(value, descriptions.at(o).c_str());
+      break;
+   case loop_library: // 31 [int >= -1 and <= 3]
+      assert_integer(value, descriptions.at(o).c_str());
+      assert_ge(value, -1, descriptions.at(o).c_str());
+      assert_le(value, 3,  descriptions.at(o).c_str());
+      break;
+   default:
+      break;
+   }
+
    values.at(o) = value;
 }
 
@@ -124,13 +292,14 @@ void Spectrum_generator_settings::set(const Spectrum_generator_settings::Setting
  * | eft_matching_loop_order_down     | 0, 1                                            | 1 (= 1-loop)    |
  * | eft_higgs_index                  | any integer >= 0                                | 0 (= lightest)  |
  * | calculate_bsm_masses             | 0 (no) or 1 (yes)                               | 1 (= yes)       |
- * | threshold_corrections            | positive integer                                | 124111321       |
+ * | threshold_corrections            | positive integer                                | 124111421       |
  * | higgs_3loop_ren_scheme_atb_as2   | 0 (DR'), 1 (MDR'), 2 (H3m)                      | 0 (= DR')       |
  * | higgs_3loop_correction_at_as2    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_ab_as2    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at2_as    | 0, 1                                            | 1 (= enabled)   |
  * | higgs_3loop_correction_at3       | 0, 1                                            | 1 (= enabled)   |
  * | higgs_4loop_correction_at_as3    | 0, 1                                            | 1 (= enabled)   |
+ * | loop_library                     | 0(Softsusy),1(Collier),2(Looptools),3(fflite)   | 0 (= Softsusy)  |
  */
 void Spectrum_generator_settings::reset()
 {
@@ -147,7 +316,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_2loop_correction_at_at]     = 1.;
    values[higgs_2loop_correction_atau_atau] = 1.;
    values[force_output]                     = 0;
-   values[calculate_sm_masses]   = 0.; // 0 = false
+   values[calculate_sm_masses]              = 0.; // 0 = false
    values[top_pole_qcd_corrections]         = 1.;
    values[beta_zero_threshold]              = 1.0e-11;
    values[calculate_observables]            = 0;
@@ -166,6 +335,7 @@ void Spectrum_generator_settings::reset()
    values[higgs_3loop_correction_at2_as]    = 1.;
    values[higgs_3loop_correction_at3]       = 1.;
    values[higgs_4loop_correction_at_as3]    = 1.;
+   values[loop_library]                     = -1.; // -1 = (set via environment FLEXIBLESUSY_LOOP_LIBRARY)
 }
 
 Loop_corrections Spectrum_generator_settings::get_loop_corrections() const

@@ -1,0 +1,287 @@
+name: tests
+
+on:
+
+  # branches together with paths-ignore work like 'or', not like 'and'
+  # no idea how to fix it
+  push:
+    branches:
+      - master
+      - development
+    paths-ignore:
+      - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
+      - 'AUTHORS'
+      - 'COPYING'
+      - 'doc/**'
+      - 'install-sarah'
+
+  pull_request:
+    branches:
+      - master
+      - development
+    paths-ignore:
+      - '*.rst'
+      - '.clang-tidy'
+      - '.clang-format'
+      - 'AUTHORS'
+      - 'COPYING'
+      - 'doc/**'
+      - 'install-sarah'
+
+jobs:
+  no-meta:
+    strategy:
+      matrix:
+        OS: [macos-10.15, ubuntu-20.04]
+        CXXCOMPILER: [g++, clang++]
+    runs-on: ${{ matrix.OS }}
+    if: false
+
+    steps:
+      - name: Homebrew
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew upgrade
+          brew reinstall gcc
+          brew install gsl
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install conan
+        run: |
+          pip3 install --user conan
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan profile new default --detect
+
+      - name: Setup conan
+        run: |
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+        env:
+          CXX: ${{ matrix.CXXCOMPILER }}
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Install dependencies
+        run: |
+          export PATH=$(python3 -c 'import site; print(site.USER_BASE + "/bin")'):$PATH
+          conan remote add conan-hep https://api.bintray.com/conan/expander/conan-hep --force
+          conan install . --build=missing
+
+      - name: Configure
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+        run: |
+          ./configure \
+            --with-cxxflags="-std=c++14 -fPIC" \
+            --with-cxx=$CXXCOMPILER \
+            --with-optional-modules=test \
+            --with-loop-libraries=collier,looptools \
+            --with-install-dir=install \
+            --disable-meta
+          make showbuild
+
+      - name: Make
+        run: make -j2
+
+      - name: Build compiled tests
+        run: make -j2 alltest
+
+      - name: Run compiled and shell script (Softsusy)
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Install
+        run: make install-src
+
+  with-meta:
+
+    # Pull requests don't share secrets with a fork so we run tests only on PRs
+    # comming from the FlexibleSUSY/FlexibleSUSY repo.
+    # For non PR triggers we check for the name of the repo so that if someone
+    # forks FS github doesn't try to run tests on their code.
+    if: (!github.event.pull_request && github.repository == 'FlexibleSUSY/FlexibleSUSY') || github.event.pull_request.head.repo.url == 'https://api.github.com/repos/FlexibleSUSY/FlexibleSUSY'
+
+    runs-on: ubuntu-latest
+    container:
+      image: navir/opensuseleap-for-flexiblesusy:0.14.4
+
+    strategy:
+      fail-fast: false
+      matrix:
+        CXXCOMPILER: [g++, clang++]
+        PART:        [1, 2]
+
+    env:
+      FORMCALC_VERSION: '9.10'
+      MODELS1: 'MSSM THDMII ScalarLeptoquarks MSSMCPV CMSSM E6SSM CMSSMNoFV CMSSMCKM MSSMNoFV NUHMSSMNoFVHimalaya CMSSMSemiAnalytic'
+      MODELS2: 'MRSSM2 LRLR SM MRSSM2CKM'
+
+    steps:
+
+      # action checks-out our repository directly under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Activate Wolfram Engine
+        env:
+          MY_MATH_PASS:    ${{ secrets.MY_MATH_PASS }}
+          MY_MAIL_ADDRESS: ${{ secrets.MY_MAIL_ADDRESS }}
+        run: |
+          wolframscript << EOF
+          $MY_MAIL_ADDRESS
+          $MY_MATH_PASS
+          EOF
+          printf "Checking if wolframscript command is workings... "; if [ $(wolframscript -code 1+2) -eq 3 ]; then echo OK; else echo fail && exit 1; fi
+          printf "Checking if math command is workings... "; if [[ $(math -run "Print[7 673, $SystemID]; Exit[]" < /dev/null) =~ 4711([^$"\r\n"]*) ]]; then echo OK; else echo fail && exit 1; fi
+
+      - name: Install FormCalc
+        run: |
+          cd /fs_dependencies/gcc
+          wget -q -O - http://www.feynarts.de/formcalc/FormCalc-$FORMCALC_VERSION.tar.gz | tar xzf -
+          cd FormCalc-$FORMCALC_VERSION
+          ./compile
+          echo "AppendTo[\$Path, \"/fs_dependencies/gcc/FormCalc-$FORMCALC_VERSION\"];" >> /root/.WolframEngine/Kernel/init.m
+
+      - name: Create models
+        env:
+          PART: ${{ matrix.PART }}
+        run: |
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
+          for m in $models; do ./createmodel --name=$m; done
+
+      - name: "Set FS dependency directory"
+        env:
+          compiler: ${{ matrix.CXXCOMPILER }}
+        run: |
+          case "$compiler" in
+            "g++")    echo "FS_DEPENDENCIES_DIR=/fs_dependencies/gcc" >> $GITHUB_ENV ;;
+            "clang++")  echo "FS_DEPENDENCIES_DIR=/fs_dependencies/clang" >> $GITHUB_ENV ;;
+            *) exit 1 ;;
+          esac
+
+      - name: Configure
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+          PART:        ${{ matrix.PART }}
+        run: |
+          case "$PART" in
+            "1") models=${MODELS1} ;;
+            "2") models=${MODELS2} ;;
+          esac
+          models=$(ruby -e "puts ARGV.join(',')" -- $models)
+          ./configure \
+            --with-cxx=$CXXCOMPILER \
+            --with-models=$models \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --enable-himalaya \
+            --with-himalaya-incdir=$FS_DEPENDENCIES_DIR/Himalaya/include \
+            --with-himalaya-libdir=$FS_DEPENDENCIES_DIR/Himalaya/lib64 \
+            --enable-gm2calc \
+            --with-gm2calc-incdir=$FS_DEPENDENCIES_DIR/GM2Calc/include \
+            --with-gm2calc-libdir=$FS_DEPENDENCIES_DIR/GM2Calc/lib64 \
+            --with-tsil-incdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-tsil-libdir=$FS_DEPENDENCIES_DIR/tsil \
+            --with-optional-modules=test \
+            --enable-librarylink \
+            --with-cxxflags="-std=c++14 -O2 -fPIC -Wall -Wpedantic -pipe"
+          make showbuild
+
+      - name: Make
+        run: make -j2
+
+      - name: Run Mathematica tests
+        run: make -j2 execute-meta-tests
+
+      - name: Build compiled tests
+        run: make -j2 alltest
+
+      # Having a single name entry and a bash loop over integers in the run tag would save a
+      # little writing but splitting it into multiple entries makes it easier to see on github which loop
+      # library has failed
+      - name: Run compiled and shell script (Softsusy)
+        # Makefile doesn't know about FLEXIBLESUSY_LOOP_LIBRARY flag so tests are not
+        # re-run on FLEXIBLESUSY_LOOP_LIBRARY change. Every run must clean logs after itself.
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=0 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (Collier)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=1 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (LoopTools)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=2 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Run compiled and shell script (fflite)
+        run: |
+          FLEXIBLESUSY_LOOP_LIBRARY=3 make -j2 execute-compiled-tests execute-shell-tests
+          make clean-test-log
+
+      - name: Testing pack-SM-src
+        if: ${{ matrix.PART == 2 }}
+        env:
+          CXXCOMPILER: ${{ matrix.CXXCOMPILER }}
+        run: |
+          make pack-SM-src
+          rm -rf models/SM
+          tar -xf SM.tar.gz
+          ./configure \
+            --with-cxx=$CXXCOMPILER \
+            --with-models=SM \
+            --with-loop-libraries=collier,looptools \
+            --with-looptools-incdir=$FS_DEPENDENCIES_DIR/LoopTools/include \
+            --with-looptools-libdir=$FS_DEPENDENCIES_DIR/LoopTools/lib64 \
+            --with-collier-incdir=/fs_dependencies/gcc/COLLIER/include \
+            --with-collier-libdir=/fs_dependencies/gcc/COLLIER/lib \
+            --disable-meta \
+            --with-optional-modules=test
+          make -j2
+          make -j2 execute-meta-tests
+          make -j2 alltest
+          for i in {0..3}
+          do
+            FLEXIBLESUSY_LOOP_LIBRARY=$i make -j2 execute-compiled-tests execute-shell-tests
+            make clean-test-log
+          done
+
+      - name: (Optional) Save logs in case of an error
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: ${{matrix.CXXCOMPILER}}-${{matrix.PART}}_test-logs
+          path: |
+            config.*
+            test/test_*.log
+

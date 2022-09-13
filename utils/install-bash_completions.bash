@@ -118,7 +118,6 @@ _configure()
 --enable-debug
 --enable-fflite
 --enable-himalaya
---enable-lapack
 --enable-librarylink
 --enable-looptools
 --enable-mass-error-check
@@ -137,7 +136,6 @@ _configure()
 --disable-debug
 --disable-fflite
 --disable-himalaya
---disable-lapack
 --disable-librarylink
 --disable-looptools
 --disable-mass-error-check
@@ -151,8 +149,6 @@ _configure()
 --disable-verbose
 
 --with-addons=
---with-blas-libdir=
---with-blas-libs=
 --with-boost-libdir=
 --with-boost-incdir=
 --with-cxx=
@@ -165,8 +161,6 @@ _configure()
 --with-himalaya-libdir=
 --with-himalaya-incdir=
 --with-install-dir=
---with-lapack-libdir=
---with-lapack-libs=
 --with-looptools-libdir=
 --with-looptools-incdir=
 --with-math-cmd=

@@ -17,15 +17,31 @@
 // ====================================================================
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE test_wrappers
+#define BOOST_TEST_MODULE test_threshold_loop_functions
 
 #include <boost/test/unit_test.hpp>
+
+#include "config.h"
 #include "threshold_loop_functions.hpp"
 #include "numerics.h"
-#include "dilog.hpp"
+#include "Li2.hpp"
 #include "logger.hpp"
+#include "benchmark.hpp"
 
 #include <cmath>
+#include <fstream>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
+
+const char PATH_SEPARATOR =
+#ifdef _WIN32
+   '\\';
+#else
+   '/';
+#endif
 
 using namespace flexiblesusy;
 
@@ -51,7 +67,7 @@ BOOST_AUTO_TEST_CASE( test_C0 )
       {1, 2, 3}
    };
 
-   for (int i = 0; i < sizeof(value)/sizeof(value[0]); i++) {
+   for (unsigned i = 0; i < sizeof(value)/sizeof(value[0]); i++) {
       BOOST_TEST_MESSAGE("> m1 = " << value[i].m1
                     << ", m2 = " << value[i].m2
                     << ", m3 = " << value[i].m3);
@@ -66,12 +82,95 @@ namespace {
    template <typename T> T cube(T x) { return x*x*x; }
    template <typename T> T quad(T x) { return x*x*x*x; }
    template <typename T> T pow5(T x) { return x*x*x*x*x; }
-   template <typename T> T pow6(T x) { return x*x*x*x*x*x; }
-   template <typename T> T pow7(T x) { return x*x*x*x*x*x*x; }
-   template <typename T> T pow8(T x) { return x*x*x*x*x*x*x*x; }
-   template <typename T> T pow9(T x) { return x*x*x*x*x*x*x*x*x; }
-   template <typename T> T pow10(T x) { return x*x*x*x*x*x*x*x*x*x; }
-}
+
+   const auto pass_all_1 = [] (double, double) -> bool { return true; };
+   const auto pass_all_2 = [] (double, double, double) -> bool { return true; };
+
+   /// tests mono-variate `func' against values from file
+   template <typename T>
+   void test_1(const char* func_name, T func, double eps,
+               std::function<bool(double, double)> filter = pass_all_1)
+   {
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
+                                 func_name + ".txt");
+      BOOST_TEST_MESSAGE("reading file " << filename);
+
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
+         if (v.size() < 2) {
+            continue;
+         }
+
+         const auto x          = v.at(0);
+         const auto f_expected = v.at(1);
+
+         if (!filter(x, f_expected)) {
+            continue;
+         }
+
+         const auto f_fs = func(x);
+
+         BOOST_TEST_MESSAGE("x = " << x << ", " << func_name
+                                   << "(expected) = " << f_expected << ", "
+                                   << func_name << "(FS) = " << f_fs);
+
+         BOOST_CHECK_CLOSE_FRACTION(f_expected, f_fs, eps);
+      }
+   }
+
+   /// tests bi-variate `func' against values from file
+   template <typename T>
+   void test_2(const char* func_name, T func, double eps,
+               std::function<bool(double, double, double)> filter = pass_all_2)
+   {
+      const std::string filename(std::string(TEST_DATA_DIR) + PATH_SEPARATOR +
+                                 func_name + ".txt");
+      BOOST_TEST_MESSAGE("reading file " << filename);
+
+      std::ifstream fstr(filename);
+      std::string line;
+      std::istringstream iss;
+      std::vector<double> v(2, 0.0);
+
+      while (std::getline(fstr, line)) {
+         iss.clear();
+         iss.str(line);
+
+         v.assign(std::istream_iterator<double>(iss),
+                  std::istream_iterator<double>());
+
+         if (v.size() < 3) {
+            continue;
+         }
+
+         const auto x          = v.at(0);
+         const auto y          = v.at(1);
+         const auto f_expected = v.at(2);
+
+         if (!filter(x, y, f_expected)) {
+            continue;
+         }
+
+         const auto f_fs = func(x, y);
+
+         BOOST_TEST_MESSAGE("x = " << x << ", y = " << y << ", " << func_name
+                                   << "(expected) = " << f_expected << ", "
+                                   << func_name << "(FS) = " << f_fs);
+
+         BOOST_CHECK_CLOSE_FRACTION(f_expected, f_fs, eps);
+      }
+   }
+} // anonymous namespace
 
 double F1_bare(double x)
 {
@@ -252,6 +351,13 @@ BOOST_AUTO_TEST_CASE(test_F1)
    BOOST_CHECK(!std::isnan(F1(1)));
 }
 
+BOOST_AUTO_TEST_CASE(test_F1_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F1", [] (double x) { return F1(x); }, 1e-14);
+}
+
 BOOST_AUTO_TEST_CASE(test_F2)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -273,6 +379,13 @@ BOOST_AUTO_TEST_CASE(test_F2)
 
    BOOST_CHECK(!std::isnan(F2(0)));
    BOOST_CHECK(!std::isnan(F2(1)));
+}
+
+BOOST_AUTO_TEST_CASE(test_F2_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F2", [] (double x) { return F2(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_F3)
@@ -298,6 +411,13 @@ BOOST_AUTO_TEST_CASE(test_F3)
    BOOST_CHECK(!std::isnan(F3(1)));
 }
 
+BOOST_AUTO_TEST_CASE(test_F3_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F3", [] (double x) { return F3(x); }, 1e-13);
+}
+
 BOOST_AUTO_TEST_CASE(test_F4)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -319,6 +439,13 @@ BOOST_AUTO_TEST_CASE(test_F4)
 
    BOOST_CHECK(!std::isnan(F4(0)));
    BOOST_CHECK(!std::isnan(F4(1)));
+}
+
+BOOST_AUTO_TEST_CASE(test_F4_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F4", [] (double x) { return F4(x); }, 1e-14);
 }
 
 BOOST_AUTO_TEST_CASE(test_F5)
@@ -351,6 +478,13 @@ BOOST_AUTO_TEST_CASE(test_F5)
    BOOST_CHECK(!std::isnan(F5(-1)));
 }
 
+BOOST_AUTO_TEST_CASE(test_F5_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F5", [] (double x) { return F5(x); }, 1e-11);
+}
+
 BOOST_AUTO_TEST_CASE(test_F6)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -381,6 +515,17 @@ BOOST_AUTO_TEST_CASE(test_F6)
    BOOST_CHECK(!std::isnan(F6(-1)));
 }
 
+BOOST_AUTO_TEST_CASE(test_F6_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   auto filter_small = [](double x, double f) {
+      return std::abs(x - 1.0) > 1e-3 && std::abs(f) > 0.01;
+   };
+
+   test_1("F6", [] (double x) { return F6(x); }, 1e-14, filter_small);
+}
+
 BOOST_AUTO_TEST_CASE(test_F7)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -409,6 +554,13 @@ BOOST_AUTO_TEST_CASE(test_F7)
    BOOST_CHECK(!std::isnan(F7(0)));
    BOOST_CHECK(!std::isnan(F7(1)));
    BOOST_CHECK(!std::isnan(F7(-1)));
+}
+
+BOOST_AUTO_TEST_CASE(test_F7_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("F7", [] (double x) { return F7(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_F8)
@@ -472,6 +624,23 @@ BOOST_AUTO_TEST_CASE(test_F8)
    BOOST_CHECK(!std::isnan(F8(1,0)));
    BOOST_CHECK(!std::isnan(F8(1,1)));
    BOOST_CHECK(!std::isnan(F8(2,2)));
+
+   BOOST_CHECK_CLOSE_FRACTION(F8(-1,0), F8(1,0), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(0,-1), F8(0,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(-1,-1), F8(1,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(-2,0), F8(2,0), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(0,-2), F8(0,2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(-2,1), F8(2,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(1,-2), F8(1,2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(-2,2), F8(2,-2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F8(-2,-2), F8(2,2), 1e-15);
+}
+
+BOOST_AUTO_TEST_CASE(test_F8_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_2("F8", [] (double x, double y) { return F8(x, y); }, 1e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_F9)
@@ -537,6 +706,23 @@ BOOST_AUTO_TEST_CASE(test_F9)
    BOOST_CHECK(!std::isnan(F9(1,1)));
    BOOST_CHECK(!std::isnan(F9(-1,-1)));
    BOOST_CHECK(!std::isnan(F9(2,2)));
+
+   BOOST_CHECK_CLOSE_FRACTION(F9(-1,0), F9(1,0), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(0,-1), F9(0,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(-1,-1), F9(1,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(-2,0), F9(2,0), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(0,-2), F9(0,2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(-2,1), F9(2,1), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(1,-2), F9(1,2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(-2,2), F9(2,-2), 1e-15);
+   BOOST_CHECK_CLOSE_FRACTION(F9(-2,-2), F9(2,2), 1e-15);
+}
+
+BOOST_AUTO_TEST_CASE(test_F9_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_2("F9", [] (double x, double y) { return F9(x, y); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f1)
@@ -564,6 +750,17 @@ BOOST_AUTO_TEST_CASE(test_f1)
    x = 0.0001;  BOOST_CHECK_SMALL(f1(x) - f1_bare(x), 1e-5);
 
    BOOST_CHECK(!std::isnan(f1(0.)));
+}
+
+BOOST_AUTO_TEST_CASE(test_f1_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   auto filter_small = [](double x, double f) {
+      return std::abs(f) > 1e-5;
+   };
+
+   test_1("f1_", [] (double x) { return f1(x); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f2)
@@ -595,6 +792,17 @@ BOOST_AUTO_TEST_CASE(test_f2)
    BOOST_CHECK(!std::isnan(f2(0.)));
 }
 
+BOOST_AUTO_TEST_CASE(test_f2_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   auto filter_small = [](double x, double f) {
+      return std::abs(f) > 1e-5;
+   };
+
+   test_1("f2_", [] (double x) { return f2(x); }, 1e-11, filter_small);
+}
+
 BOOST_AUTO_TEST_CASE(test_f3)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -624,6 +832,13 @@ BOOST_AUTO_TEST_CASE(test_f3)
    BOOST_CHECK(!std::isnan(f3(0.)));
 }
 
+BOOST_AUTO_TEST_CASE(test_f3_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("f3_", [] (double x) { return f3(x); }, 1e-11);
+}
+
 BOOST_AUTO_TEST_CASE(test_f4)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -651,6 +866,13 @@ BOOST_AUTO_TEST_CASE(test_f4)
    x = 1e-8;    BOOST_CHECK_SMALL(f4(x) - f4_bare(x), 1e-5);
 
    BOOST_CHECK(!std::isnan(f4(0.)));
+}
+
+BOOST_AUTO_TEST_CASE(test_f4_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_1("f4_", [] (double x) { return f4(x); }, 1e-11);
 }
 
 BOOST_AUTO_TEST_CASE(test_f5)
@@ -722,6 +944,13 @@ BOOST_AUTO_TEST_CASE(test_f5)
    BOOST_CHECK(!std::isnan(f5(2,2)));
 }
 
+BOOST_AUTO_TEST_CASE(test_f5_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_2("f5_", [] (double x, double y) { return f5(x, y); }, 3e-10);
+}
+
 BOOST_AUTO_TEST_CASE(test_f6)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -789,6 +1018,17 @@ BOOST_AUTO_TEST_CASE(test_f6)
    BOOST_CHECK(!std::isnan(f6(1,0)));
    BOOST_CHECK(!std::isnan(f6(1,1)));
    BOOST_CHECK(!std::isnan(f6(2,2)));
+}
+
+BOOST_AUTO_TEST_CASE(test_f6_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   auto filter_small = [](double x, double y, double f) {
+      return std::abs(f) > 1e-9;
+   };
+
+   test_2("f6_", [] (double x, double y) { return f6(x, y); }, 1e-11, filter_small);
 }
 
 BOOST_AUTO_TEST_CASE(test_f7)
@@ -860,6 +1100,13 @@ BOOST_AUTO_TEST_CASE(test_f7)
    BOOST_CHECK(!std::isnan(f7(2,2)));
 }
 
+BOOST_AUTO_TEST_CASE(test_f7_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   test_2("f7_", [] (double x, double y) { return f7(x, y); }, 5e-10);
+}
+
 BOOST_AUTO_TEST_CASE(test_f8)
 {
    using namespace flexiblesusy::threshold_loop_functions;
@@ -929,6 +1176,17 @@ BOOST_AUTO_TEST_CASE(test_f8)
    BOOST_CHECK(!std::isnan(f8(2,2)));
 }
 
+BOOST_AUTO_TEST_CASE(test_f8_data)
+{
+   using namespace flexiblesusy::threshold_loop_functions;
+
+   auto filter_small = [](double x, double y, double f) {
+      return std::abs(f) > 1e-10;
+   };
+
+   test_2("f8_", [] (double x, double y) { return f8(x, y); }, 3e-10, filter_small);
+}
+
 namespace {
 
    std::complex<double> complex_sqrt(double x) {
@@ -941,8 +1199,12 @@ double phixyz(double x, double y, double z)
    const double u = x/z, v = y/z, m = x/y;
    double fac = 0., my_x = 0., my_y = 0., my_z = 0.;
    const double devu = std::fabs(u-1), devv = std::fabs(v-1), devm = std::fabs(m-1);
-   const double eps = 0.000001;
+   const double eps = 0.0000001;
    const double PI = M_PI;
+
+   if (std::abs(sqr(1 - u - v) - 4*u*v) <= std::numeric_limits<double>::epsilon()) {
+      return 0.0;
+   }
 
    // The defintion that we implement is valid when x/z < 1 and y/z < 1.
    // We have to reshuffle the arguments to obtain the other branches
@@ -1002,7 +1264,7 @@ double phixyz(double x, double y, double z)
       return std::real(fac * 1. / lambda_c *
                        (2. * std::log(xplus_c) * std::log(xminus_c) -
                         std::log(u) * std::log(v) -
-                        2. * (dilog(xplus_c) + dilog(xminus_c)) +
+                        2. * (Li2(xplus_c) + Li2(xminus_c)) +
                         sqr(PI) / 3.));
    }
 
@@ -1027,7 +1289,7 @@ double phixyz(double x, double y, double z)
               2. * sqr(std::log(0.5 -
                                 0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
               sqr(std::log(my_x / my_z)) -
-              4. * dilog(0.5 *
+              4. * Li2(0.5 *
                          (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                             4. * sqr(my_x) / (sqr(my_z)))))));
       }
@@ -1050,10 +1312,10 @@ double phixyz(double x, double y, double z)
                  std::log(1. - my_x / (2. * my_z) -
                           0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                              sqr(my_z))) -
-             6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                  4. * my_x / my_z) -
                                my_x / my_z)) -
-             6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                              4. * my_x / my_z) +
                                my_x / my_z))));
       }
@@ -1075,7 +1337,7 @@ double phixyz(double x, double y, double z)
               2. * sqr(std::log(0.5 -
                                 0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
               sqr(std::log(my_x / my_z)) -
-              4. * dilog(0.5 *
+              4. * Li2(0.5 *
                          (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                             4. * sqr(my_x) / (sqr(my_z)))))));
       }
@@ -1097,10 +1359,10 @@ double phixyz(double x, double y, double z)
                  std::log(1. - my_x / (2. * my_z) -
                           0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                              sqr(my_z))) -
-             6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                  4. * my_x / my_z) -
                                my_x / my_z)) -
-             6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+             6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                              4. * my_x / my_z) +
                                my_x / my_z))));
       }
@@ -1126,10 +1388,10 @@ double phixyz(double x, double y, double z)
                   std::log(1. - my_x / (2. * my_z) -
                            0.5 * complex_sqrt((sqr(my_x) - 4. * my_x * my_z) /
                                               sqr(my_z))) -
-              6. * dilog(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
+              6. * Li2(0.5 * (2. - complex_sqrt(sqr(my_x) / sqr(my_z) -
                                                   4. * my_x / my_z) -
                                 my_x / my_z)) -
-              6. * dilog(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
+              6. * Li2(0.5 * (-complex_sqrt(sqr(my_x) / sqr(my_z) -
                                               4. * my_x / my_z) +
                                 my_x / my_z))));
       }
@@ -1146,51 +1408,61 @@ double phixyz(double x, double y, double z)
              2. * sqr(std::log(0.5 -
                                0.5 * complex_sqrt(1. - 4. * my_x / my_z))) -
              sqr(std::log(my_x / my_z)) -
-             4. * dilog(0.5 *
+             4. * Li2(0.5 *
                         (1. - complex_sqrt(sqr(1 - 2. * my_x / my_z) -
                                            4. * sqr(my_x) / (sqr(my_z)))))));
       }
    }
 
    FATAL("unhandled case in phixyz function!");
+
+   return std::numeric_limits<double>::quiet_NaN();
 }
 } // anonymous namespace
 
 struct XYZ {
-   XYZ(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
    double x{}, y{}, z{};
 };
 
 BOOST_AUTO_TEST_CASE(test_phixyz)
 {
    using namespace flexiblesusy::threshold_loop_functions;
-   double x = 0., y = 0., z = 0.;
 
    const XYZ xyz[] = {
-      XYZ(1, 2, 3),
-      XYZ(2, 3, 1),
-      XYZ(3, 1, 2),
-      XYZ(2, 1, 3),
-      XYZ(1, 3, 2),
-      XYZ(3, 2, 1),
+      {1, 2, 3},
+      {2, 3, 1},
+      {3, 1, 2},
+      {2, 1, 3},
+      {1, 3, 2},
+      {3, 2, 1},
 
-      XYZ(1, 1, 2),
-      XYZ(1, 2, 1),
-      XYZ(2, 1, 1),
+      {1, 1, 2},
+      {1, 2, 1},
+      {2, 1, 1},
 
-      XYZ(1, 1, 10),
-      XYZ(1, 10, 1),
-      XYZ(10, 1, 1),
+      {1, 1, 10},
+      {1, 10, 1},
+      {10, 1, 1},
 
-      XYZ(1, 10, 20),
-      XYZ(10, 20, 1),
-      XYZ(20, 1, 10),
+      {1, 10, 20},
+      {10, 20, 1},
+      {20, 1, 10},
 
-      XYZ(1, 2, 2),
-      XYZ(2, 2, 1),
-      XYZ(2, 1, 2),
+      {1, 2, 2},
+      {2, 2, 1},
+      {2, 1, 2},
 
-      XYZ(1, 1, 1)
+      {862.132647151542, 862.132267190459, 684.729637476883},
+
+      // lambda = 0
+      {1, 0, 1},
+      {4, 1, 1},
+
+      // lambda ~ 0
+      // {4, 1 + 1e-5, 1},
+      // {200.220790830763, 599.56612604427, 106.834963457636},
+
+      {1, 1, 1}
    };
 
    for (const auto s: xyz) {
@@ -1212,3 +1484,81 @@ BOOST_AUTO_TEST_CASE(test_phixyz)
       BOOST_CHECK_CLOSE_FRACTION(phixyz(x,y,z), phi_xyz(x,y,z), prec);
    }
 }
+
+#ifdef ENABLE_RANDOM
+
+template <class T>
+std::vector<XYZ> generate_random_triples(
+   unsigned n, T start, T stop)
+{
+   const auto x = generate_random_data<T>(n, start, stop);
+   const auto y = generate_random_data<T>(n, start, stop);
+   const auto z = generate_random_data<T>(n, start, stop);
+
+   std::vector<XYZ> v(5*n);
+
+   for (unsigned i = 0; i < n; i++) {
+      v[i] = {x[i], y[i], z[i]};
+   }
+
+   for (unsigned i = 0; i < n; i++) {
+      v[n + i] = {x[i], x[i], y[i]};
+   }
+
+   for (unsigned i = 0; i < n; i++) {
+      v[2*n + i] = {x[i], y[i], x[i]};
+   }
+
+   for (unsigned i = 0; i < n; i++) {
+      v[3*n + i] = {y[i], x[i], x[i]};
+   }
+
+   for (unsigned i = 0; i < n; i++) {
+      v[4*n + i] = {x[i], x[i], x[i]};
+   }
+
+   return v;
+}
+
+BOOST_AUTO_TEST_CASE(test_phi_random)
+{
+   const unsigned N = 10000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   // low testing precision since phi_xyz becomes unstable when lambda ~ 0
+   const double prec = 1e-7;
+
+   for (const auto t: triples) {
+      BOOST_CHECK_CLOSE_FRACTION(phi_fs(t), phi_eb(t), prec);
+   }
+}
+
+BOOST_AUTO_TEST_CASE(bench_phi)
+{
+   const unsigned N = 10000;
+   const auto triples = generate_random_triples(N, 1.0, 1000.0);
+
+   auto phi_fs = [](const XYZ& t) {
+      return flexiblesusy::threshold_loop_functions::phi_xyz(t.x, t.y, t.z);
+   };
+
+   auto phi_eb = [](const XYZ& t) {
+      return phixyz(t.x, t.y, t.z);
+   };
+
+   const auto time_phi_fs_in_s = time_in_seconds(phi_fs, triples)/N;
+   const auto time_phi_eb_in_s = time_in_seconds(phi_eb, triples)/N;
+
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [FS]: " << time_phi_fs_in_s << " s");
+   BOOST_TEST_MESSAGE("average run-time for phi_xyz [EB]: " << time_phi_eb_in_s << " s");
+}
+
+#endif

@@ -20,13 +20,13 @@ FS@ModelName@SetLib = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@Set", {I
 
 FS@ModelName@CalculateSpectrum = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@CalculateSpectrum", LinkObject, LinkObject];
 FS@ModelName@CalculateObservables = LibraryFunctionLoad[lib@ModelName@, "FS@ModelName@CalculateObservables", LinkObject, LinkObject];
-
+@loadCalculateDecaysFunction@
 FS@ModelName@CalculateSpectrum::error = "`1`";
 FS@ModelName@CalculateSpectrum::warning = "`1`";
 
 FS@ModelName@CalculateObservables::error = "`1`";
 FS@ModelName@CalculateObservables::warning = "`1`";
-
+@calculateDecaysMessages@
 FS@ModelName@::info = "`1`";
 FS@ModelName@::nonum = "Error: `1` is not a numeric input value!";
 FS@ModelName@Message[s_] := Message[FS@ModelName@::info, s];
@@ -58,13 +58,14 @@ fsDefaultSettings = {
       eftMatchingLoopOrderDown -> 1,     (* FlexibleSUSY[21] *)
       eftHiggsIndex -> 0,                (* FlexibleSUSY[22] *)
       calculateBSMMasses -> 1,           (* FlexibleSUSY[23] *)
-      thresholdCorrections -> 124111321, (* FlexibleSUSY[24] *)
+      thresholdCorrections -> 124111421, (* FlexibleSUSY[24] *)
       higgs3loopCorrectionRenScheme -> 0,(* FlexibleSUSY[25] *)
       higgs3loopCorrectionAtAsAs -> 1,   (* FlexibleSUSY[26] *)
       higgs3loopCorrectionAbAsAs -> 1,   (* FlexibleSUSY[27] *)
       higgs3loopCorrectionAtAtAs -> 1,   (* FlexibleSUSY[28] *)
       higgs3loopCorrectionAtAtAt -> 1,   (* FlexibleSUSY[29] *)
       higgs4loopCorrectionAtAsAsAs -> 1, (* FlexibleSUSY[30] *)
+      loopLibrary -> 0,                  (* FlexibleSUSY[31] *)
       parameterOutputScale -> 0          (* MODSEL[12] *)
 };
 
@@ -99,7 +100,7 @@ fsDefaultSMParameters = {
     alphaEm0 -> 1/137.035999074,
     Mh -> 125.09
 };
-
+@fdDefaultSettings@
 fs@ModelName@DefaultInputParameters = {
 @setInputParameterDefaultArguments@
 };
@@ -108,9 +109,10 @@ Options[FS@ModelName@OpenHandle] = {
     Sequence @@ fsDefaultSettings,
     Sequence @@ fsDefaultSMParameters,
     Sequence @@ fs@ModelName@DefaultInputParameters
+@addFDOptions1@
 };
 
-FS@ModelName@OpenHandle[a___, (fsSettings | fsSMParameters | fsModelParameters) -> s_List, r___] :=
+FS@ModelName@OpenHandle[a___, (fsSettings | fsSMParameters | fsModelParameters @addFDOptions2@) -> s_List, r___] :=
     FS@ModelName@OpenHandle[a, Sequence @@ s, r];
 
 FS@ModelName@OpenHandle[OptionsPattern[]] :=
@@ -147,6 +149,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAs],
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
+            OptionValue[loopLibrary],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
@@ -182,6 +185,7 @@ FS@ModelName@OpenHandle[OptionsPattern[]] :=
 
             (* @ModelName@ input parameters *)
 @setInputParameterArguments@
+@setFDOptions@
         }
 ];
 
@@ -225,6 +229,7 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
             OptionValue[higgs3loopCorrectionAtAtAs],
             OptionValue[higgs3loopCorrectionAtAtAt],
             OptionValue[higgs4loopCorrectionAtAsAsAs],
+            OptionValue[loopLibrary],
             OptionValue[parameterOutputScale],
 
             (* Standard Model input parameters *)
@@ -260,6 +265,7 @@ FS@ModelName@Set[handle_Integer, p:OptionsPattern[]] :=
 
             (* @ModelName@ input parameters *)
 @setInputParameterArguments@
+@setFDOptions@
         }] /. HoldPattern[OptionValue[param_]] :> param /.
         { p } /.
         FS@ModelName@GetSettings[handle] /.

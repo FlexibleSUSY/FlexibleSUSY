@@ -16,7 +16,6 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at @DateAndTime@
 
 #include "@ModelName@_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -39,7 +38,7 @@ namespace flexiblesusy {
 
 @betaOneLoop@
 
-   return beta_@parameterName@;
+   return oneLoop * beta_@parameterName@;
 }
 
 /**
@@ -55,7 +54,7 @@ namespace flexiblesusy {
 
 @betaTwoLoop@
 
-   return beta_@parameterName@;
+   return twoLoop * beta_@parameterName@;
 }
 
 /**
@@ -73,7 +72,7 @@ namespace flexiblesusy {
 
 @betaThreeLoop@
 
-   return beta_@parameterName@;
+   return threeLoop * beta_@parameterName@;
 }
 
 /**
@@ -91,7 +90,7 @@ namespace flexiblesusy {
 
 @betaFourLoop@
 
-   return beta_@parameterName@;
+   return fourLoop * beta_@parameterName@;
 }
 
 /**
@@ -109,7 +108,7 @@ namespace flexiblesusy {
 
 @betaFiveLoop@
 
-   return beta_@parameterName@;
+   return fiveLoop * beta_@parameterName@;
 }
 
 } // namespace flexiblesusy

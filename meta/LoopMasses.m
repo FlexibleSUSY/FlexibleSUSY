@@ -35,6 +35,8 @@ CallPoleMassFunction::usage="";
 CallThreadedPoleMassFunction::usage="";
 CreateLoopMassFunctionName::usage="";
 
+CalculateSMHiggsPoleMass::usage="Calculates SM Higgs pole mass on a model";
+
 GetLoopCorrectedParticles::usage="Returns list of all particles that
 get loop corrected masses.  These are all particles, except for
 ghosts.";
@@ -42,6 +44,25 @@ ghosts.";
 CreateLSPFunctions::usage="";
 
 Begin["`Private`"];
+
+CalculateSMHiggsPoleMass[FlexibleSUSY`FSMassW] := "";
+
+CalculateSMHiggsPoleMass[FlexibleSUSY`FSFermiConstant] :=
+    Module[{mhStr = CConversion`ToValidCSymbolString[FlexibleSUSY`M[TreeMasses`GetHiggsBoson[]]]},
+    "\
+// calculate SM-like Higgs pole mass
+// for usage in MW calculation at low-energy scale
+{
+   auto tmp = *MODEL;
+   tmp.do_force_output(true); // enforce calculation of pole masses
+   tmp.solve_ewsb();
+   " <> CallPoleMassFunction[TreeMasses`GetHiggsBoson[], "tmp."] <> "\
+   MODEL->get_physical()." <> mhStr <> " = tmp.get_physical()." <> mhStr <> ";
+}
+"
+    ];
+
+CalculateSMHiggsPoleMass[_] := "";
 
 GetLoopCorrectedParticles[states_] :=
     Module[{particles},
@@ -303,8 +324,8 @@ Do1DimVector[particleName_String, massName_String, massMatrixName_String,
     "const double p = " <> momentum <> ";\n" <>
     "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
     "const double mass_sqr = " <> massMatrixName <> " - self_energy;\n\n" <>
-    "if (mass_sqr < 0.)\n" <>
-    IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n" <>
+    "if (mass_sqr < 0.) {\n" <>
+    IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n}\n\n" <>
     "PHYSICAL(" <> massName <> ") = AbsSqrt(mass_sqr);\n";
 
 
@@ -824,7 +845,7 @@ try {
    if (pole_mass_loop_order > 2)
    " <> IndentText["self_energy_3l = self_energy_" <> CConversion`ToValidCSymbolString[particle] <> "_3loop();"] <> "
 } catch (const flexiblesusy::Error& e) {
-   WARNING(\"3-loop Higgs mass calculation failed: \" << e.what());
+   WARNING(\"3-loop Higgs mass calculation failed: \" << e.what_detailed());
    problems.flag_bad_mass(" <> FlexibleSUSY`FSModelName <> "_info::" <> CConversion`ToValidCSymbolString[particle] <> ");
 }
 "
@@ -912,9 +933,10 @@ CreateLoopMassFunction[particle_Symbol, precision_Symbol, tadpole_] :=
 (* return pole mass of a singlet as a function of p *)
 Create1DimPoleMassPrototype[particle_Symbol] :=
     If[GetDimension[particle] > 1,
-       Print["Warning: cannot generate extra pole mass"
-             " calculation function for ", particle, ", because"
-             " it has more than 1 generation"];
+       Utils`FSFancyWarning[
+          "Cannot generate extra pole mass calculation function for",
+          " ", particle, ", because it has more than 1 generation"
+       ];
        "",
        "double " <> CreateLoopMassFunctionName[particle] <> "(double);\n"
       ];
@@ -923,9 +945,10 @@ Create1DimPoleMassPrototype[particle_Symbol] :=
 Create1DimPoleMassFunction[particle_Symbol] :=
     Module[{result, body = "", particleName, massName, mTree},
            If[GetDimension[particle] > 1,
-              Print["Warning: cannot generate extra pole mass"
-                    " calculation function for ", particle, ", because"
-                    " it has more than 1 generation"];
+              Utils`FSFancyWarning[
+                 "Cannot generate extra pole mass calculation function for",
+                 " ", particle, ", because it has more than 1 generation"
+              ];
               Return[""];
              ];
            If[!(IsUnmixed[particle] && GetMassOfUnmixedParticle[particle] === 0),
@@ -947,8 +970,8 @@ Create1DimPoleMassFunction[particle_Symbol] :=
                body = body <>
                       "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
                       "const double mass_sqr = " <> mTree <> " - self_energy;\n\n" <>
-                      "if (mass_sqr < 0.)\n" <>
-                      IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n" <>
+                      "if (mass_sqr < 0.) {\n" <>
+                      IndentText[TreeMasses`FlagPoleTachyon[particleName]] <> "\n}\n\n" <>
                       "return AbsSqrt(mass_sqr);\n";
               ,
               body = "return 0.;\n";
@@ -1076,7 +1099,7 @@ CreateRunningDRbarMassPrototype[particle_ /; IsFermion[particle]] :=
 
 CreateRunningDRbarMassPrototype[particle_] :=
     "double calculate_" <> ToValidCSymbolString[FlexibleSUSY`M[particle]] <>
-    "_DRbar(double);\n";
+    "_DRbar(double) const;\n";
 
 CreateRunningDRbarMassPrototypes[] :=
     Module[{result = "", particles},
@@ -1228,13 +1251,19 @@ CreateRunningDRbarMassFunction[particle_ /; particle === TreeMasses`GetSMTopQuar
                 ];
               If[FlexibleSUSY`UseYukawa3LoopQCD === True &&
                  FlexibleSUSY`FSRenormalizationScheme =!= FlexibleSUSY`MSbar,
-                 Print["Warning: UseYukawa3LoopQCD == True, but the renormalization scheme is not MSbar!"];
-                 Print["  The 3-loop QCD corrections to the top Yukawa coupling will be disabled."];
-                ];
+                 Utils`FSFancyWarning[
+                    "UseYukawa3LoopQCD == True, but the",
+                    " renormalization scheme is not MSbar! The 3-loop QCD",
+                    " corrections to the top Yukawa coupling will be disabled."
+                 ];
+              ];
               If[FlexibleSUSY`UseYukawa4LoopQCD === True &&
                  FlexibleSUSY`FSRenormalizationScheme =!= FlexibleSUSY`MSbar,
-                 Print["Warning: UseYukawa4LoopQCD == True, but the renormalization scheme is not MSbar!"];
-                 Print["  The 4-loop QCD corrections to the top Yukawa coupling will be disabled."];
+                 Utils`FSFancyWarning[
+                    "UseYukawa4LoopQCD == True, but the renormalization",
+                    " scheme is not MSbar! The 4-loop QCD corrections to the",
+                    " top Yukawa coupling will be disabled."
+                 ];
                 ];
               If[FlexibleSUSY`UseYukawa3LoopQCD === True ||
                  FlexibleSUSY`UseYukawa3LoopQCD === Automatic,
@@ -1352,10 +1381,10 @@ CreateRunningDRbarMassFunction[particle_, _] :=
            particleName = ToValidCSymbolString[particle];
            name = ToValidCSymbolString[FlexibleSUSY`M[particle]];
            If[IsMassless[particle],
-              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double)\n{\n";
+              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double) const\n{\n";
               body = "return 0.0;\n";
               ,
-              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double m_pole)\n{\n";
+              result = "double CLASSNAME::calculate_" <> name <> "_DRbar(double m_pole) const\n{\n";
               body = "const double p = m_pole;\n" <>
               "const double self_energy = Re(" <> selfEnergyFunction <> "(p));\n" <>
               "const double mass_sqr = Sqr(m_pole) + self_energy;\n\n" <>
