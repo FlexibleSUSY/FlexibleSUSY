@@ -83,14 +83,14 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    sm_ytau.set_Yu(zero_mat);
    sm_ytau.set_Yd(zero_mat);
 
-   for(int i = 0; i<3;i++){
-      for(int k = 0; k<3;k++){
-         if (i==2 && k==2) {
+   for (int i = 0; i < 3; i++) {
+      for (int k = 0; k < 3; k++) {
+         if (i == 2 && k == 2) {
             continue;
          }
-         sm_yt.set_Yu(i,k,.0);
-         sm_yb.set_Yd(i,k,.0);
-         sm_ytau.set_Ye(i,k,.0);
+         sm_yt.set_Yu(i, k, 0.);
+         sm_yb.set_Yd(i, k, 0.);
+         sm_ytau.set_Ye(i, k, 0.);
       }
    }
 
