@@ -216,7 +216,7 @@ double Weinberg_angle::calculate_rho_hat(
 /**
  * Calculates the Fermi constant \f$\sin\hat{\theta}_W\f$ as
  * defined in Eq. (C.3) from hep-ph/9606211 given theta,
- * the Z-boson pole mass and the DR-bar electromagnetic coupling 
+ * the Z-boson pole mass and the DR-bar electromagnetic coupling
  *
  * @return value != 0 if an error has occured
  */
@@ -239,10 +239,10 @@ int Weinberg_angle::calculate_G_fermi()
              (ROOT2 * Sqr(mz_pole) * sin_2_cos_2 * (1.0 - delta_rhat));
       return 0;
    }
-       
+
    int iteration = 0;
    bool not_converged = true;
-  
+
    double rhohat_1l = calculate_rho_hat(sin_theta, data, susy_contributions, 1);
    double delta_r_hat_1l
          = calculate_delta_r(rhohat_1l, sin_theta, data, susy_contributions,1);
@@ -253,7 +253,7 @@ int Weinberg_angle::calculate_G_fermi()
    data.fermi_contant = gfermi_1l;
    double gfermi_old = gfermi_1l;
    double gfermi_new = gfermi_1l;
- 
+
       while (not_converged && iteration < number_of_iterations) {
 
          rhohat = calculate_rho_hat(sin_theta, data, susy_contributions,
@@ -266,17 +266,17 @@ int Weinberg_angle::calculate_G_fermi()
 
          const double precision
             = Abs(gfermi_old / gfermi_new - 1.0);
-        
+
    	 not_converged = precision >= precision_goal;
 
          data.fermi_contant = gfermi_new;
 	 gfermi_old = gfermi_new;
          iteration++;
       }
- 
+
    rho_hat = rhohat;
    g_fermi = gfermi_new;
- 
+
    const int no_convergence_error = iteration == number_of_iterations;
 
    return no_convergence_error;
