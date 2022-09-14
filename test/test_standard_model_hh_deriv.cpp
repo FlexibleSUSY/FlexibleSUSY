@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    auto fpt1 = [&](double p2) { return one_loop_coorection(sm_yt, yt, v, Sqrt(p2), top);};
    auto fpt2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm(Sqrt(p2), Q, yt*v*over_sqrt2, yt);};
    auto dfpt = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(AbsSqrt(p2), Q, yt*v*over_sqrt2, yt);};
-   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt1,p, 1e-5), dfpt(p), 1e-4);
+   BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt1,p, 1e-5), dfpt(p), 2e-4);
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt2,p, 1e-5), dfpt(p), 1e-4);
 
    ///  O( ab )
