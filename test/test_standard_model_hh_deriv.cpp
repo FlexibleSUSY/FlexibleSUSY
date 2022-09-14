@@ -13,6 +13,13 @@
 
 using namespace flexiblesusy;
 
+namespace {
+
+/// flavour integers
+constexpr int top    = 0;
+constexpr int bottom = 1;
+constexpr int tau    = 2;
+
 /**
  * Function returns 1-loop correction to Higgs mass at:
  *
@@ -24,13 +31,13 @@ double one_loop_correction(standard_model::Standard_model& sm, double y,
                            double v, double p, int flavour)
 {
    switch (flavour) {
-   case 0:
+   case top:
       sm.set_Yu(2, 2, y);
       break;
-   case 1:
+   case bottom:
       sm.set_Yd(2, 2, y);
       break;
-   case 2:
+   case tau:
       sm.set_Ye(2, 2, y);
       break;
    }
@@ -42,6 +49,8 @@ double one_loop_correction(standard_model::Standard_model& sm, double y,
    const double tadpole = Re(sm.tadpole_hh_1loop() / v);
    return -self_energy + tadpole;
 }
+
+} // anonymous namespace
 
 /**
  * Test for routines which return the derivatives w.r.t. x, x \in { y_{t,b,\tau}, v, p^2 }
@@ -96,12 +105,6 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    const double ytau       = sm.get_Ye(2,2);
    const double p          =  0.;
    const double Q          = sm.get_scale();
-
-   /// flavour integers
-   const int top    = 0;
-   const int bottom = 1;
-   const int tau    = 2;
-
 
    /*
     * Test for derivatives of the higgs 1-loop corrrection w.r.t. Yukawa couplings y_{t,b,tau}.
