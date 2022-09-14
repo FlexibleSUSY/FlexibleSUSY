@@ -95,6 +95,9 @@ private:
    double total_width{0.};
 };
 
+/// sort decays w.r.t. their width
+std::vector<Decay> sort_decays_list(const Decays_list&);
+
 std::string strip_field_namespace(std::string const&);
 
 template<typename FieldIn, typename FieldOut1, typename FieldOut2>
