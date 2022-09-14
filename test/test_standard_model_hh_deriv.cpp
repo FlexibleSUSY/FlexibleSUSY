@@ -23,7 +23,7 @@ using namespace flexiblesusy;
  *
  */
 
-double one_loop_coorection(standard_model::Standard_model& sm, 
+double one_loop_correction(standard_model::Standard_model& sm, 
       double y, double v, double p, int flavour){
 
    switch( flavour ){
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
     */
 
    ///  O( at )
-   auto fyt1 = [&](double yt) { return one_loop_coorection(sm_yt, yt, v, p, top);                                };
+   auto fyt1 = [&](double yt) { return one_loop_correction(sm_yt, yt, v, p, top);                                };
    auto fyt2 = [&](double yt) { return sm_twoloophiggs::delta_mh_1loop_at_sm(p, Q, yt*v*over_sqrt2, yt);         };
    auto dfyt = [&](double yt) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_yt(p, Q, yt*v*over_sqrt2, yt);};
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fyt2,yt), dfyt(yt), 1e-6);
    
    ///  O( ab )
-   auto fyb1 = [&](double yb) { return one_loop_coorection(sm_yb, yb, v, p, bottom);                             };
+   auto fyb1 = [&](double yb) { return one_loop_correction(sm_yb, yb, v, p, bottom);                             };
    auto fyb2 = [&](double yb) { return sm_twoloophiggs::delta_mh_1loop_ab_sm(p, Q, yb*v*over_sqrt2, yb);         };
    auto dfyb = [&](double yb) { return sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_yb(p, Q, yb*v*over_sqrt2, yb);};
 
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fyb2,yb), dfyb(yb), 1e-6);
 
    ///  O( atau )
-   auto fytau1 = [&](double ytau) { return one_loop_coorection(sm_ytau, ytau, v, p, tau);                          };
+   auto fytau1 = [&](double ytau) { return one_loop_correction(sm_ytau, ytau, v, p, tau);                          };
    auto fytau2 = [&](double ytau) { return sm_twoloophiggs::delta_mh_1loop_atau_sm(p, Q, ytau*v*over_sqrt2, ytau); };
    auto dfytau = [&](double ytau) { return sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_ytau(p, Q, ytau*v*over_sqrt2, ytau);};
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
     */
 
    ///  O( at )
-   auto fytv1 = [&](double v) { return one_loop_coorection(sm_yt, yt, v, p, top);                               };
+   auto fytv1 = [&](double v) { return one_loop_correction(sm_yt, yt, v, p, top);                               };
    auto fytv2 = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_at_sm(p, Q, yt*v*over_sqrt2, yt);        };
    auto dfytv = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_v(p, Q, yt*v*over_sqrt2, yt);};
 
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fytv2,v), dfytv(v), 1e-6);
 
    ///  O( ab)
-   auto fybv1 = [&](double v) { return one_loop_coorection(sm_yb, yb, v, p, bottom);                            };
+   auto fybv1 = [&](double v) { return one_loop_correction(sm_yb, yb, v, p, bottom);                            };
    auto fybv2 = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_ab_sm(p, Q, yb*v*over_sqrt2, yb);        };
    auto dfybv = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_v(p, Q, yb*v*over_sqrt2, yb);};
 
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    BOOST_CHECK_CLOSE_FRACTION(derivative_forward<7>(fybv2,v), dfybv(v), 1e-6);
  
    ///  O( atau)
-   auto fytauv1 = [&](double v) { return one_loop_coorection(sm_ytau, ytau, v, p, tau);                                 };
+   auto fytauv1 = [&](double v) { return one_loop_correction(sm_ytau, ytau, v, p, tau);                                 };
    auto fytauv2 = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_atau_sm(p, Q, ytau*v*over_sqrt2, ytau);        };
    auto dfytauv = [&](double v) { return sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_v(p, Q, ytau*v*over_sqrt2, ytau);};
 
@@ -180,14 +180,14 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
     */
 
    ///  O( at )
-   auto fpt1 = [&](double p2) { return one_loop_coorection(sm_yt, yt, v, Sqrt(p2), top);};
+   auto fpt1 = [&](double p2) { return one_loop_correction(sm_yt, yt, v, Sqrt(p2), top);};
    auto fpt2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm(Sqrt(p2), Q, yt*v*over_sqrt2, yt);};
    auto dfpt = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_at_sm_deriv_p2(AbsSqrt(p2), Q, yt*v*over_sqrt2, yt);};
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt1,p, 1e-5), dfpt(p), 2e-4);
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpt2,p, 1e-5), dfpt(p), 1e-4);
 
    ///  O( ab )
-   auto fpb1 = [&](double p2) { return one_loop_coorection(sm_yb, yb, v, Sqrt(p2), bottom);};
+   auto fpb1 = [&](double p2) { return one_loop_correction(sm_yb, yb, v, Sqrt(p2), bottom);};
    auto fpb2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_ab_sm(Sqrt(p2), Q, yb*v*over_sqrt2, yb);};
    auto dfpb = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_ab_sm_deriv_p2(AbsSqrt(p2), Q, yb*v*over_sqrt2, yb);};
    
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( test_yuk_derivative )
    BOOST_CHECK_CLOSE_FRACTION(derivative_backward<7>(fpb2,p, 1e-5), dfpb(p), 1e-4);
 
    ///  O( atau )
-   auto fptau1 = [&](double p2) { return one_loop_coorection(sm_ytau, ytau, v, Sqrt(p2), tau);};
+   auto fptau1 = [&](double p2) { return one_loop_correction(sm_ytau, ytau, v, Sqrt(p2), tau);};
    auto fptau2 = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_atau_sm(Sqrt(p2), Q, ytau*v*over_sqrt2, ytau);};
    auto dfptau = [&](double p2) { return sm_twoloophiggs::delta_mh_1loop_atau_sm_deriv_p2(AbsSqrt(p2), Q, ytau*v*over_sqrt2, ytau);};
 
