@@ -15,9 +15,13 @@ using namespace flexiblesusy;
 
 BOOST_AUTO_TEST_CASE( test_G_fermi )
 {
+   Threshold_corrections tc;
+   tc.sin_theta_w = 0; // no loop corrections to sin(theta_W)
+
    standard_model::Standard_model sm;
    sm.set_pole_mass_loop_order(0);
    sm.set_ewsb_loop_order(0);
+   sm.set_threshold_corrections(tc);
 
    softsusy::QedQcd qedqcd;
    sm.initialise_from_input(qedqcd);
@@ -38,6 +42,10 @@ BOOST_AUTO_TEST_CASE( test_G_fermi )
    const double Pi                  = 3.1415926535897932;
 
    const double G_fermi_0l = Pi * alpha_em_drbar / (AbsSqr(sin_theta*cos_theta) * sqrt2 * MZ2pole);
+
+   BOOST_TEST_MESSAGE("G_fermi_input = " << G_fermi_input);
+   BOOST_TEST_MESSAGE("G_fermi_0l = " << G_fermi_0l);
+   BOOST_TEST_MESSAGE("G_fermi_pred = " << G_fermi_pred);
 
    BOOST_CHECK_CLOSE_FRACTION(G_fermi_input, G_fermi_0l, 1.0e-2);
 
