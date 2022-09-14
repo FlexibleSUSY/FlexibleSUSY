@@ -56,32 +56,6 @@
 
 namespace flexiblesusy {
 
-namespace {
-
-/**
- * Sort decays of every particle according to their width
- *
- */
-std::vector<Decay> sort_decays_list(const Decays_list& decays_list) {
-   std::vector<Decay> decays_list_as_vector;
-   decays_list_as_vector.reserve(decays_list.size());
-   for (const auto& el : decays_list) {
-      decays_list_as_vector.push_back(el.second);
-   }
-
-   std::sort(
-      decays_list_as_vector.begin(),
-      decays_list_as_vector.end(),
-      [](const auto& d1, const auto& d2) {
-         return d1.get_width() > d2.get_width();
-      }
-   );
-
-   return decays_list_as_vector;
-}
-
-} // anonymous namespace
-
 @ModelName@_slha_io::@ModelName@_slha_io()
    : slha_io()
    , print_imaginary_parts_of_majorana_mixings(false)
