@@ -20,13 +20,14 @@ Building the NUHMSSMNoFVHimalaya
 --------------------------------
 
 In order to use the 3-loop contributions to the light CP-even Higgs
-mass from the `Himalaya library`_, the NUHMSSMNoFVHimalaya must be
-configured with the ``--enable-himalaya`` flag::
+mass from the `Himalaya library`_ version 4.0.0 (or higher), the
+NUHMSSMNoFVHimalaya must be configured with the ``--enable-himalaya``
+flag::
 
     ./createmodel --name=NUHMSSMNoFVHimalaya
     ./configure --with-models=NUHMSSMNoFVHimalaya \
         --enable-himalaya \
-        --with-himalaya-incdir=${HIMALAYA_DIR}/source/include \
+        --with-himalaya-incdir=${HIMALAYA_DIR}/include \
         --with-himalaya-libdir=${HIMALAYA_DIR}/build
     make
 
